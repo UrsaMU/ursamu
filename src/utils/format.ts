@@ -39,9 +39,9 @@ export const rjust = (string = "", length: number, filler = " ") => {
     string
   );
 };
-
 export const ljust = (string = "", length: number, filler = " ") => {
-  return string + repeatString(filler, length - string.length);
+  const len = length - string.length;
+  return string + repeatString(filler, len > 0 ? len : 0);
 };
 
 export const center = (string = "", length: number, filler = " ") => {
