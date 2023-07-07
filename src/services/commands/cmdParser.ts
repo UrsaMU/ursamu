@@ -4,6 +4,7 @@ import { flags } from "../flags/flags";
 import { getCharacter } from "../characters/character";
 import { send } from "../broadcast";
 import { dbojs } from "../Database";
+import { matchExits } from "./movement";
 
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
@@ -16,7 +17,7 @@ cmdParser.use(async (ctx, next) => {
 
   const { msg } = ctx;
   for (const cmd of cmds) {
-    const match = msg?.match(cmd.pattern);
+    const match = msg?.trim().match(cmd.pattern);
     if (flags.check(char?.flags || "", cmd.lock || "")) {
       if (match) {
         if (char) {
@@ -29,7 +30,11 @@ cmdParser.use(async (ctx, next) => {
       }
     }
   }
+  await next();
+});
 
+cmdParser.use(async (ctx, next) => {
+  if (await matchExits(ctx)) return;
   await next();
 });
 

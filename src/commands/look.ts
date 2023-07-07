@@ -2,7 +2,7 @@ import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { dbojs } from "../services/Database";
 import { displayName } from "../utils/displayName";
-import { center, ljust, repeatString, rjust } from "../utils/format";
+import { center, columns, ljust, repeatString, rjust } from "../utils/format";
 import { idle } from "../utils/idle";
 import { isAdmin } from "../utils/isAdmin";
 import { target } from "../utils/target";
@@ -35,8 +35,23 @@ export default () =>
         (c) => c.flags.includes("player") && c.flags.includes("connected")
       );
 
+      const exits = (
+        await dbojs.find({
+          $where: function () {
+            return this.flags.includes("exit") && this.location === tar.id;
+          },
+        })
+      ).map((e) => {
+        if (!e.data?.name) return "";
+
+        const parts = e.data.name?.split(";") || [];
+        return parts?.length > 1
+          ? `<%cy${parts[1].toLocaleUpperCase()}%cn> ${parts[0]}`
+          : `${parts[0]}`;
+      });
+
       if (players.length) {
-        output += center("%cy[%cn %chCharacters%cn %cy]%cn", 78, "%cr-%cn");
+        output += center(" %chCharacters%cn ", 78, "%cr-%cn");
         output += "\n";
 
         players.forEach((p) => {
@@ -48,11 +63,17 @@ export default () =>
               p.data?.shortdesc ||
               "%b%b%ch%cxUse '+shortdesc <desc>' to set this.%cn"
             }`,
-            40
+            44
           );
           output += "\n";
         });
       }
+
+      if (exits.length) {
+        output += center(" %chExits%cn ", 78, "%cr-%cn");
+        output += columns(exits, 80, 3);
+      }
+
       output += repeatString("%cr=%cn", 78);
       send([ctx.socket.id], output, {});
     },

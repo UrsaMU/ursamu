@@ -40,7 +40,7 @@ export const rjust = (string = "", length: number, filler = " ") => {
   );
 };
 export const ljust = (string = "", length: number, filler = " ") => {
-  const len = length - string.length;
+  const len = length - parser.stripSubs("telnet", string).length;
   return string + repeatString(filler, len > 0 ? len : 0);
 };
 
@@ -62,12 +62,12 @@ export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
 
   let cell = Math.floor(width / cols);
   let counter = 0;
-  let output = "%r";
+  let output = "%r%b";
   for (const item of list) {
     if (counter < cols) {
       output += truncate(item, cell, fill);
     } else {
-      output += "%r" + truncate(item, cell, fill);
+      output += "%r%b" + truncate(item, cell, fill);
       counter = 0;
     }
     counter++;

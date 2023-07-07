@@ -14,9 +14,15 @@ export const flags = new Tags(
     lock: "superuser",
   },
   {
-    name: "Storyteller",
+    name: "storyteller",
     code: "st",
     lvl: 8,
+    lock: "admin",
+  },
+  {
+    name: "builder",
+    code: "b",
+    lvl: 7,
     lock: "admin",
   },
   {
@@ -26,13 +32,32 @@ export const flags = new Tags(
     lock: "superuser",
   },
   {
+    name: "safe",
+    code: "s",
+  },
+  {
+    name: "void",
+    code: "v",
+    lock: "superuser",
+  },
+  {
+    name: "dark",
+    code: "d",
+  },
+  {
     name: "guest",
     code: "g",
     lock: "superuser",
   },
   {
-    name: "Room",
+    name: "room",
     code: "r",
+    lvl: 1,
+    lock: "superuser",
+  },
+  {
+    name: "exit",
+    code: "e",
     lvl: 1,
     lock: "superuser",
   },

@@ -1,12 +1,12 @@
 import { IDBOBJ } from "../@types/IDBObj";
+import { flags } from "../services/flags/flags";
 import { canEdit } from "./canEdit";
-
-export const name = (en: IDBOBJ) => en.data?.moniker || en.data?.name;
+import { moniker } from "./moniker";
 
 export const displayName = (en: IDBOBJ, tar: IDBOBJ) => {
   if (canEdit(en, tar)) {
-    return `${tar.data?.moniker || tar.data?.name}(#${tar.id})`;
+    return `${moniker(tar)}(#${tar.id}${flags.codes(tar.flags)})`;
   } else {
-    return tar.data?.moniker || tar.data?.name;
+    return moniker(tar);
   }
 };

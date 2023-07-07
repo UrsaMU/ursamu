@@ -6,7 +6,7 @@ import { target } from "../utils/target";
 
 export default () =>
   addCmd({
-    name: "desc",
+    name: "@describe",
     pattern: /^[@\+]?desc(?:ribe)?(?:\s+(.*)\s*=\s*(.*))?/i,
     lock: "connected",
     exec: async (ctx, args) => {

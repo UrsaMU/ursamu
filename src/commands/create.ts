@@ -1,9 +1,9 @@
 import { hash } from "bcryptjs";
 import { send } from "../services/broadcast/";
-import { createCharacter } from "../services/characters/character";
 import { addCmd, force } from "../services/commands";
 import { dbojs } from "../services/Database";
 import config from "../ursamu.config";
+import { getNextId } from "../utils/getNextId";
 
 export default () =>
   addCmd({
@@ -11,7 +11,11 @@ export default () =>
     pattern: /^create\s+(.*)/i,
     exec: async (ctx, args) => {
       const [name, password] = args[0].split(" ");
-
+      const players = await dbojs.find({
+        $where: function () {
+          return this.flags.includes("player");
+        },
+      });
       const taken = await dbojs.find({
         $where: function () {
           return (
@@ -28,9 +32,12 @@ export default () =>
         return;
       }
 
+      const flags =
+        players.length > 0 ? "player connected" : "player connected superuser";
+      const id = await getNextId("objid");
       const player = await dbojs.insert({
-        id: (await dbojs.count({})) + 1,
-        flags: "player connected",
+        id,
+        flags,
         location: config.game.playerStart,
         data: {
           name,

@@ -6,6 +6,7 @@ const config: IConfig = {
     ws: 4202,
     http: 4203,
     db: "data/ursamu.db",
+    counters: "data/counters.db",
   },
   game: {
     name: "Ursamu",

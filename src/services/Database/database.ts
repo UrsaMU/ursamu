@@ -26,7 +26,10 @@ export class DBO<T> {
   }
 
   async update(query: any, data: any) {
-    return await this.db.update<T>(query, data, { upsert: true });
+    return await this.db.update<T>(query, data, {
+      upsert: true,
+      returnUpdatedDocs: true,
+    });
   }
 
   async remove(query: any) {
@@ -37,5 +40,12 @@ export class DBO<T> {
     return await this.db.count(query);
   }
 }
+
+export interface ICounters {
+  _id: string;
+  seq: number;
+}
+
+export const counters = new DBO<ICounters>(config.server.counters);
 
 export const dbojs = new DBO<IDBOBJ>(config.server.db);
