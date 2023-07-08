@@ -5,6 +5,7 @@ import { getCharacter } from "../characters/character";
 import { send } from "../broadcast";
 import { dbojs } from "../Database";
 import { matchExits } from "./movement";
+import { matchChannel } from "./channels";
 
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
@@ -35,6 +36,11 @@ cmdParser.use(async (ctx, next) => {
 
 cmdParser.use(async (ctx, next) => {
   if (await matchExits(ctx)) return;
+  await next();
+});
+
+cmdParser.use(async (ctx, next) => {
+  if (await matchChannel(ctx)) return;
   await next();
 });
 

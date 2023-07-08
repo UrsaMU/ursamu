@@ -5,6 +5,7 @@ export interface IConfig {
     http: number;
     db: string;
     counters: string;
+    chans: string;
   };
   game: {
     name: string;

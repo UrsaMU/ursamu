@@ -1,6 +1,7 @@
 import Datastore from "nedb-promises";
 import { IDBOBJ } from "../../@types/IDBObj";
 import config from "../../ursamu.config";
+import { IChannel } from "../../@types/Channels";
 
 export class DBO<T> {
   db: Datastore<T>;
@@ -49,3 +50,4 @@ export interface ICounters {
 export const counters = new DBO<ICounters>(config.server.counters);
 
 export const dbojs = new DBO<IDBOBJ>(config.server.db);
+export const chans = new DBO<IChannel>(config.server.chans);

@@ -3,6 +3,7 @@ import { send } from "../services/broadcast";
 import { addCmd, force } from "../services/commands";
 import { dbojs } from "../services/Database";
 import { setFlags } from "../utils/setFlags";
+import { joinChans } from "../utils/joinChans";
 
 export default () =>
   addCmd({
@@ -43,7 +44,7 @@ export default () =>
       send([ctx.socket.id], `Welcome to the game, ${found.data?.name}!`, {
         cid: found.id,
       });
-
+      await joinChans(ctx);
       await force(ctx, "look");
     },
   });

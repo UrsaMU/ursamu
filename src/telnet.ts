@@ -13,6 +13,9 @@ const server = createServer((socket) => {
 
   sock.on("message", (data) => {
     if (data.data.cid) cid = data.data.cid;
+
+    if (data.quit) return socket.end();
+
     socket.write(data.msg + "\r\n");
   });
 
