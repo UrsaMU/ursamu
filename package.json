@@ -12,7 +12,8 @@
     "pm2:telnet": "pm2 start dist/telnet.js --name telnet",
     "start": "npm run build && npm run pm2:server && npm run pm2:telnet",
     "restart": "pm2 restart ursamu && pm2 restart telnet",
-    "stop": "pm2 delete ursamu && pm2 delete telnet"
+    "stop": "pm2 delete ursamu && pm2 delete telnet",
+    "dev": "concurrently \"npm run server\" \"npm run telnet\""
   },
   "keywords": [
     "MUSH",
