@@ -49,11 +49,11 @@ export default () =>
 
       ctx.socket.join(`#${player.id}`);
       ctx.socket.join(`#${player.location}`);
-      joinChans(ctx);
       ctx.socket.cid = player.id;
       player.data ||= {};
       player.data.lastCommand = Date.now();
       await dbojs.update({ id: player.id }, player);
+      await joinChans(ctx);
       send([ctx.socket.id], `Welcome to the game, ${player.data?.name}!`, {
         cid: player.id,
       });
