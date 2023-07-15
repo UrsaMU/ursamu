@@ -28,7 +28,7 @@ export class DBO<T> {
 
   async update(query: any, data: any) {
     return await this.db.update<T>(query, data, {
-      upsert: true,
+      upsert: false,
       returnUpdatedDocs: true,
     });
   }

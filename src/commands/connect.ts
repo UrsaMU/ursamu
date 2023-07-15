@@ -4,6 +4,7 @@ import { addCmd, force } from "../services/commands";
 import { dbojs } from "../services/Database";
 import { setFlags } from "../utils/setFlags";
 import { joinChans } from "../utils/joinChans";
+import { moniker } from "../utils/moniker";
 
 export default () =>
   addCmd({
@@ -41,9 +42,10 @@ export default () =>
       found.data ||= {};
       found.data.lastCommand = Date.now();
       await dbojs.update({ id: found.id }, found);
-      send([ctx.socket.id], `Welcome to the game, ${found.data?.name}!`, {
+      send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
         cid: found.id,
       });
+      send([`#${found.location}`], `${moniker(found)} has connected.`, {});
       await joinChans(ctx);
       await force(ctx, "look");
     },

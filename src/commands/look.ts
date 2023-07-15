@@ -13,6 +13,7 @@ export default () =>
     pattern: /^l(?:ook)?(?:\s+(.*))?/i,
     lock: "connected",
     exec: async (ctx, args) => {
+      console.log(ctx.socket.cid);
       const en = await dbojs.findOne({ id: ctx.socket.cid });
       if (!en) return;
       const tar = await target(en, args[0]);
@@ -50,12 +51,13 @@ export default () =>
           : `${parts[0]}`;
       });
 
+      console.log(en);
       if (players.length) {
         output += center(" %chCharacters%cn ", 78, "%cr-%cn");
         output += "\n";
 
         players.forEach((p) => {
-          output += isAdmin(p) ? "%ch%cc *%cn  " : "   ";
+          output += isAdmin(p) ? "%ch%cc *%cn  " : "    ";
           output += ljust(`${displayName(en, p)}`, 25);
           output += rjust(idle(p.data?.lastCommand || 0), 5);
           output += ljust(

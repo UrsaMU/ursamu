@@ -3,6 +3,7 @@ import { IContext } from "../../@types/IContext";
 import { moniker } from "../../utils/moniker";
 import { chans, dbojs } from "../Database";
 import { send } from "../broadcast";
+import { flags } from "../flags/flags";
 import { force } from "./force";
 
 export const matchChannel = async (ctx: IContext) => {
@@ -19,6 +20,12 @@ export const matchChannel = async (ctx: IContext) => {
     const channel = await chans.findOne({ name: chan?.channel });
 
     if (match) {
+      console.log(
+        flags.check(en.flags || "", channel?.lock || ""),
+        en.flags,
+        channel?.lock
+      );
+      if (!flags.check(en.flags || "", channel?.lock || "")) return false;
       if (match[1] === ":") {
         msg = `${chan?.title || ""}${chan?.mask ? chan.mask : moniker(en)} ${
           match[2]

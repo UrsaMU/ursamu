@@ -4,6 +4,7 @@ import { addCmd, force } from "../services/commands";
 import { dbojs } from "../services/Database";
 import config from "../ursamu.config";
 import { getNextId } from "../utils/getNextId";
+import { moniker } from "../utils/moniker";
 
 export default () =>
   addCmd({
@@ -55,6 +56,7 @@ export default () =>
       send([ctx.socket.id], `Welcome to the game, ${player.data?.name}!`, {
         cid: player.id,
       });
+      send([`#${player.location}`], `${moniker(player)} has connected.`, {});
       force(ctx, "look");
     },
   });

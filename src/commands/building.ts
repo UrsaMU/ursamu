@@ -139,7 +139,7 @@ export default () => {
       const en = await dbojs.findOne({ id: ctx.socket.cid });
       if (!en) return;
 
-      const obj = await target(en, name);
+      const obj = await target(en, name, true);
       console.log(obj);
 
       if (!obj || !canEdit(en, obj))

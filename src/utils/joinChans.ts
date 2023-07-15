@@ -9,6 +9,9 @@ export const joinChans = async (ctx: IContext) => {
   const player = await dbojs.findOne({ id: ctx.socket.cid });
   if (!player) return;
   const channels = await chans.find({});
+  console.log("JOined!");
+  ctx.socket.join(`#${player.location}`);
+  ctx.socket.join(`#${player.id}`);
 
   for (const channel of channels) {
     if (channel.alias && flags.check(player.flags || "", channel.lock || "")) {
@@ -25,7 +28,7 @@ export const joinChans = async (ctx: IContext) => {
           alias: channel.alias,
           active: true,
         });
-        console.log(player.data?.channels);
+
         ctx.socket.join(channel.name);
         await dbojs.update({ id: player.id }, player);
         await force(ctx, `${channel.alias} :has joined the channel.`);

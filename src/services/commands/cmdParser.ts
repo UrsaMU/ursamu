@@ -26,7 +26,14 @@ cmdParser.use(async (ctx, next) => {
           char.data.lastCommand = Date.now();
           await dbojs.update({ id: char.id }, char);
         }
-        await cmd.exec(ctx, match.slice(1));
+        await cmd.exec(ctx, match.slice(1))?.catch((e) => {
+          console.error(e);
+          send(
+            [ctx.socket.id],
+            `Uh oh! You've run into an error! please contact staff wit hthe following info!%r%r%chError:%cn ${e}`,
+            { error: true }
+          );
+        });
         return;
       }
     }
