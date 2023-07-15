@@ -6,7 +6,13 @@
   "scripts": {
     "test": "jest",
     "telnet": "ts-node-dev src/telnet.ts",
-    "server": "ts-node-dev --rs src/main.ts"
+    "server": "ts-node-dev --rs src/main.ts",
+    "build": "tsc -p  tsconfig.json",
+    "pm2:server": "pm2 start dist/main.js --name ursamu --watch /dist/main.js",
+    "pm2:telnet": "pm2 start dist/telnet.js --name telnet",
+    "start": "npm run build && npm run pm2:server && npm run pm2:telnet",
+    "restart": "pm2 restart ursamu && pm2 restart telnet",
+    "stop": "pm2 delete ursamu && pm2 delete telnet"
   },
   "keywords": [
     "MUSH",

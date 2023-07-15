@@ -16,35 +16,37 @@ export default () =>
       const found = (
         await dbojs.find({
           $where: function () {
-            return this.data.name.toLowerCase() === name.toLowerCase();
+            return (
+              this.data.name.toLowerCase() === name.toLowerCase() ||
+              this.data.alias?.toLowerCase() === name.toLowerCase()
+            );
           },
         })
       )[0];
       if (!found) {
-        send([ctx.socket.id], "Not found!", {
+        send([ctx.socket.id], "I can't find a character by that name!", {
           error: true,
         });
         return;
       }
 
       if (!(await compare(password, found.data?.password || ""))) {
-        send([ctx.socket.id], "Permisson denied.", {
+        send([ctx.socket.id], "I csn't find a character by that name!", {
           error: true,
         });
         return;
       }
 
       ctx.socket.cid = found.id;
-      console.log(ctx.socket.cid);
       ctx.socket.join(`#${found.id}`);
       ctx.socket.join(`#${found.location}`);
       await setFlags(found, "connected");
       found.data ||= {};
-      found.data.lastCommand = Date.now();
       await dbojs.update({ id: found.id }, found);
       send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
         cid: found.id,
       });
+
       send([`#${found.location}`], `${moniker(found)} has connected.`, {});
       await joinChans(ctx);
       await force(ctx, "look");

@@ -5,6 +5,7 @@ import { dbojs } from "../services/Database";
 import config from "../ursamu.config";
 import { getNextId } from "../utils/getNextId";
 import { moniker } from "../utils/moniker";
+import { joinChans } from "../utils/joinChans";
 
 export default () =>
   addCmd({
@@ -48,7 +49,7 @@ export default () =>
 
       ctx.socket.join(`#${player.id}`);
       ctx.socket.join(`#${player.location}`);
-
+      joinChans(ctx);
       ctx.socket.cid = player.id;
       player.data ||= {};
       player.data.lastCommand = Date.now();

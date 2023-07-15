@@ -2,8 +2,6 @@ import { IDBOBJ } from "../@types/IDBObj";
 import { dbojs } from "../services/Database";
 
 export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
-  console.log(tar);
-
   if (!tar) {
     return await dbojs.findOne({ id: en.location });
   }

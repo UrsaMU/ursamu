@@ -11,7 +11,6 @@ export default () => {
     lock: "connected",
     exec: async (ctx, args) => {
       const [obj, msg, reply] = args;
-      console.log(obj, msg, reply);
       const en = await dbojs.findOne({ id: ctx.socket.cid });
       if (!en) return;
 
@@ -74,7 +73,6 @@ export default () => {
       if (en.data?.lastpage && reply) {
         if (!targets.filter((ob) => ob.id === en.id).length)
           send([ctx.socket.id], sendermsg, {});
-        console.log("sending to lastpage", targetIds);
         return send(
           targetIds.map((t) => `#${t}`),
           tempmsg,

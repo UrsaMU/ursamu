@@ -2,13 +2,15 @@ import path from "path";
 import { server } from "./app";
 import { plugins } from "./utils/loadDIr";
 import { loadTxtDir } from "./utils/loadTxtDir";
-
 import { createObj } from "./services/DBObjs";
 import { chans, counters, dbojs } from "./services/Database";
+import config from "./ursamu.config";
+import { setFlags } from "./utils/setFlags";
+import { broadcast } from "./services/broadcast";
 
 plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
-server.listen(4202, async () => {
+server.listen(config.server.ws, async () => {
   const rooms = await dbojs.find({
     $where: function () {
       return this.flags.includes("room");
@@ -45,6 +47,17 @@ server.listen(4202, async () => {
       alias: "ad",
       lock: "admin+",
     });
+  }
+  console.log(`Server started on port ${config.server.ws}.`);
+});
+
+process.on("SIGINT", async () => {
+  const players = (await dbojs.find({})).filter((p) =>
+    p.flags.includes("connected")
+  );
+
+  for (const player of players) {
+    await setFlags(player, "!connected");
   }
 });
 

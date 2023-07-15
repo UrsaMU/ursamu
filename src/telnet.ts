@@ -3,6 +3,7 @@ import { Socket, createServer } from "net";
 import { join } from "path";
 import { io } from "socket.io-client";
 import config from "./ursamu.config";
+import parser from "./services/parser/parser";
 
 interface ITelnetSocket extends Socket {
   cid?: number;
@@ -20,11 +21,25 @@ const server = createServer((socket: ITelnetSocket) => {
     if (data.data.quit) return socket.end();
   });
 
+  sock.io.on("reconnect", () => {
+    socket.write(
+      parser.substitute("telnet", "%chGame:%cn Restart Complete to server.\r\n")
+    );
+    sock.emit("message", {
+      msg: "",
+      data: {
+        cid: socket.cid,
+        reconnect: true,
+      },
+    });
+  });
+
   sock.io.on("reconnect_attempt", () => {
     sock.emit("message", {
       msg: "",
       data: {
         cid: socket.cid,
+        reconnect: true,
       },
     });
   });

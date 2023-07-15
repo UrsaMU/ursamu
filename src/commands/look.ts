@@ -50,7 +50,6 @@ export default () =>
           : `${parts[0]}`;
       });
 
-      console.log(en);
       if (players.length) {
         output += center(" %chCharacters%cn ", 78, "%cr-%cn");
         output += "\n";
@@ -60,11 +59,11 @@ export default () =>
           output += ljust(`${displayName(en, p)}`, 25);
           output += rjust(idle(p.data?.lastCommand || 0), 5);
           output += ljust(
-            `${
+            `  ${
               p.data?.shortdesc ||
-              "%b%b%ch%cxUse '+shortdesc <desc>' to set this.%cn"
+              "%ch%cxUse '+shortdesc <desc>' to set this.%cn"
             }`,
-            44
+            42
           );
           output += "\n";
         });
