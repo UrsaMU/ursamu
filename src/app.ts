@@ -32,7 +32,7 @@ io.on("connection", (socket: IMSocket) => {
   socket.on("disconnect", async () => {
     const en = await dbojs.findOne({ id: socket.cid });
     if (!en) return;
-
+    setFlags(en, "!connected");
     await send([`#${en.location}`], `${moniker(en)} has disconnected.`, {});
   });
 });
