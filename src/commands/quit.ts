@@ -18,7 +18,6 @@ export default () =>
 
       user.flags = tags;
       user.data = data;
-      console.log(user.id);
       await dbojs.update({ id: user.id }, user);
 
       send([ctx.socket.id], "See You, Space Cowboy...", { quit: true });

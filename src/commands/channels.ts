@@ -141,7 +141,6 @@ export default () => {
       const chan = await chans.findOne({ name: RegExp(args[0], "i") });
 
       if (chan) {
-        console.log("chan", chan);
         const en = await dbojs.findOne({ id: ctx.socket.cid });
         if (!en) return;
         if (!flags.check(en.flags || "", chan.lock || "")) {

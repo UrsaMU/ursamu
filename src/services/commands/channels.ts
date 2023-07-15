@@ -20,11 +20,6 @@ export const matchChannel = async (ctx: IContext) => {
     const channel = await chans.findOne({ name: chan?.channel });
 
     if (match) {
-      console.log(
-        flags.check(en.flags || "", channel?.lock || ""),
-        en.flags,
-        channel?.lock
-      );
       if (!flags.check(en.flags || "", channel?.lock || "")) return false;
       if (match[1] === ":") {
         msg = `${chan?.title || ""}${chan?.mask ? chan.mask : moniker(en)} ${
@@ -37,7 +32,6 @@ export const matchChannel = async (ctx: IContext) => {
       } else if (msg.toLowerCase() === "on" && chan?.active === false) {
         chan.active = true;
         ctx.socket.join(chan.channel);
-        console.log(chan.channel);
         await dbojs.update({ id: en.id }, en);
         force(ctx, `${chan.alias} :has joined the channel.`);
         send([ctx.socket.id], `You have joined channel ${chan.channel}.`, {});

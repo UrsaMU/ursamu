@@ -23,8 +23,6 @@ export default async () => {
     text.set(`${file.name.replace(".md", "").replace(".txt", "")}`, textFile);
   }
 
-  console.log(text);
-
   addCmd({
     name: "help",
     pattern: /^[/+@]?help$/i,

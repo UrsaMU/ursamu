@@ -140,7 +140,6 @@ export default () => {
       if (!en) return;
 
       const obj = await target(en, name, true);
-      console.log(obj);
 
       if (!obj || !canEdit(en, obj))
         return send([ctx.socket.id], "You can't destroy that.", {});

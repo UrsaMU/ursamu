@@ -13,7 +13,6 @@ export default () =>
     pattern: /^l(?:ook)?(?:\s+(.*))?/i,
     lock: "connected",
     exec: async (ctx, args) => {
-      console.log(ctx.socket.cid);
       const en = await dbojs.findOne({ id: ctx.socket.cid });
       if (!en) return;
       const tar = await target(en, args[0]);

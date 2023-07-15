@@ -21,7 +21,6 @@ const server = createServer((socket: ITelnetSocket) => {
   });
 
   sock.io.on("reconnect_attempt", () => {
-    console.log("Reconnecting...");
     sock.emit("message", {
       msg: "",
       data: {

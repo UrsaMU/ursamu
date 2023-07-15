@@ -6,7 +6,5 @@ export const setFlags = async (dbo: IDBOBJ, flgs: string) => {
   const { data, tags } = flags.set(dbo.flags, dbo.data || {}, flgs);
   dbo.flags = tags;
   dbo.data = data;
-  const res = await dbojs.update({ id: dbo.id }, dbo);
-  if (res) console.log(res);
-  return dbo;
+  return await dbojs.update({ id: dbo.id }, dbo);
 };

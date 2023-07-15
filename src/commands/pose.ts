@@ -9,7 +9,6 @@ export default () =>
     lock: "connected",
     exec: async (ctx, args) => {
       const player = await dbojs.findOne({ id: ctx.socket.cid });
-      console.log(args);
       if (!player) return;
       const name = player.data?.moniker || player.data?.name;
       const msg =

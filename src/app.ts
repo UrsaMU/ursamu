@@ -21,7 +21,6 @@ app.use(express.urlencoded({ extended: true }));
 
 io.on("connection", (socket: IMSocket) => {
   socket.on("message", async (message) => {
-    console.log(message.data.cid);
     if (message.data.cid) socket.cid = message.data.cid;
     const player = await dbojs.findOne({ id: socket.cid });
     if (player) socket.join(`#${player.location}`);

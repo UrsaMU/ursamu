@@ -9,7 +9,6 @@ export const joinChans = async (ctx: IContext) => {
   const player = await dbojs.findOne({ id: ctx.socket.cid });
   if (!player) return;
   const channels = await chans.find({});
-  console.log("JOined!");
   ctx.socket.join(`#${player.location}`);
   ctx.socket.join(`#${player.id}`);
 

@@ -13,7 +13,6 @@ export default () =>
       const player = await dbojs.findOne({ id: ctx.socket.cid });
       if (!player) return;
       const tar = await target(player, args[0]);
-      console.log(args);
       if (!tar) {
         send([`#${player.location}`], "I can't find that player.", {});
         return;
