@@ -29,6 +29,13 @@ io.on("connection", (socket: IMSocket) => {
     if (message.msg) cmdParser.run(ctx);
   });
 
+  socket.on("disconnect", async () => {
+    const en = await dbojs.findOne({ id: socket.cid });
+    if (!en) return;
+    setFlags(en, "!connected");
+    await send([`#${en.location}`], `${moniker(en)} has disconnected.`, {});
+  });
+
   socket.on("disconnecting", async () => {
     const en = await dbojs.findOne({ id: socket.cid });
     if (!en) return;
