@@ -22,6 +22,7 @@ const server = createServer((socket: ITelnetSocket) => {
   });
 
   socket.on("disconnect", () => sock.close());
+  socket.on("error", () => sock.close());
 
   sock.io.on("reconnect", () => {
     socket.write(

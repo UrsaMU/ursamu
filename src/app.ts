@@ -4,7 +4,6 @@ import { IMSocket } from "./@types/IMSocket";
 import { cmdParser } from "./services/commands";
 import { Server } from "socket.io";
 import { dbojs } from "./services/Database";
-import { flags } from "./services/flags/flags";
 import { send } from "./services/broadcast";
 import { moniker } from "./utils/moniker";
 import { joinChans } from "./utils/joinChans";
@@ -24,6 +23,12 @@ io.on("connection", (socket: IMSocket) => {
     if (message.data.cid) socket.cid = message.data.cid;
     const player = await dbojs.findOne({ id: socket.cid });
     if (player) socket.join(`#${player.location}`);
+
+    if (message.data.disconnect) {
+      socket.disconnect();
+      return;
+    }
+
     const ctx: IContext = { socket, msg: message.msg };
     joinChans(ctx);
     if (message.msg) cmdParser.run(ctx);
