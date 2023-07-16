@@ -222,7 +222,7 @@ export default () => {
 
   addCmd({
     name: "comtitle",
-    pattern: /^comtitle\s+(.*)\s*=\s*(.*)/i,
+    pattern: /^comtitle\s+(.*)\s*=\s*(.*)$/i,
     lock: "connected",
     hidden: true,
     exec: async (ctx, args) => {
@@ -234,7 +234,8 @@ export default () => {
       en.dbobj.data.channels ||= [];
       en.dbobj.data.channels.forEach(async (c: IChanEntry) => {
         if (c.alias !== args[0]) return;
-        c.title = args[1];
+        c.title = args[1].trim();
+        if (c.title === "") delete c.title;
         await en.save();
         send([ctx.socket.id], `Channel ${c.channel} title updated.`);
       });
