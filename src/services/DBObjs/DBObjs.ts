@@ -1,5 +1,6 @@
 import { IDBOBJ } from "../../@types/IDBObj";
 import { getNextId } from "../../utils/getNextId";
+import { moniker } from "../../utils/moniker";
 import { target } from "../../utils/target";
 import { dbojs } from "../Database";
 import { flags } from "../flags/flags";
@@ -17,7 +18,7 @@ export const createObj = async (flgs: string, datas: any) => {
 };
 
 export class Obj {
-  private obj: IDBOBJ | undefined | null = undefined;
+  private obj: IDBOBJ = {} as IDBOBJ;
 
   constructor(obj?: IDBOBJ) {
     if (obj) {
@@ -51,7 +52,6 @@ export class Obj {
   }
 
   get dbobj() {
-    if (!this.obj) return {} as IDBOBJ;
     return this.obj;
   }
 
@@ -60,27 +60,28 @@ export class Obj {
   }
 
   get name() {
-    return this.obj?.data?.name;
+    if (!this.obj) return "";
+    return moniker(this.obj);
   }
 
   get flags() {
-    return this.obj?.flags;
+    return this.obj.flags;
   }
 
   get dbref() {
-    return `#${this.obj?.id}`;
+    return `#${this.obj.id}`;
   }
 
   get data() {
-    return this.obj?.data;
+    return this.obj.data;
   }
 
   get location() {
-    return this.obj?.location;
+    return this.obj.location;
   }
 
   get description() {
-    return this.obj?.description;
+    return this.obj.description;
   }
 
   async exits() {

@@ -29,7 +29,7 @@ export default () => {
         tar.data ||= {};
         if (tar.data.owner) output += `%chOwner:%cn ${tar.data.owner}\n`;
         if (tar.data.lock) output += `%chLock:%cn ${tar.data.lock}\n`;
-        output += `%DATA:%cn ${JSON.stringify(tar.data, null, 4)}`;
+        output += `%chDATA:%cn ${JSON.stringify(tar.data, null, 4)}`;
         return send([ctx.socket.id], output);
       }
       send([ctx.socket.id], "You can't examine that.");

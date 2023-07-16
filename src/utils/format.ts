@@ -34,14 +34,22 @@ export const repeatString = (string = " ", length: number) => {
 };
 
 export const rjust = (string = "", length: number, filler = " ") => {
-  return (
-    repeatString(filler, length - parser.stripSubs("telnet", string).length) +
-    string
-  );
+  const len = length - parser.stripSubs("telnet", string).length;
+
+  if (len < 0) {
+    return string.substring(0, length - 3) + "...";
+  } else {
+    return repeatString(filler, len) + string;
+  }
 };
 export const ljust = (string = "", length: number, filler = " ") => {
   const len = length - parser.stripSubs("telnet", string).length;
-  return string + repeatString(filler, len > 0 ? len : 0);
+
+  if (len < 0) {
+    return string.substring(0, length - 3) + "...";
+  } else {
+    return string + repeatString(filler, len);
+  }
 };
 
 export const center = (string = "", length: number, filler = " ") => {
@@ -74,4 +82,8 @@ export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
   }
 
   return output;
+};
+
+export const header = (string = "", filler = "%cr=%cn", width = 78) => {
+  return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler) + "\n";
 };
