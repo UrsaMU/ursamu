@@ -15,11 +15,13 @@ const server = createServer((socket: ITelnetSocket) => {
   socket.write(welcome + "\r\n");
 
   sock.on("message", (data) => {
-    if (data.data.cid) socket.cid = data.data.cid;
+    if (data.data?.cid) socket.cid = data.data.cid;
     socket.write(data.msg + "\r\n");
 
-    if (data.data.quit) return socket.end();
+    if (data.data?.quit) return socket.end();
   });
+
+  socket.on("disconnect", () => sock.close());
 
   sock.io.on("reconnect", () => {
     socket.write(
