@@ -1,8 +1,10 @@
 import { IChanEntry } from "../@types/Channels";
+import { Obj } from "../services/DBObjs";
 import { chans, dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd, force } from "../services/commands";
 import { flags } from "../services/flags/flags";
+import { ljust } from "../utils/format";
 
 export default () => {
   addCmd({
@@ -189,6 +191,80 @@ export default () => {
         await force(ctx, `${args[0]} :leaves the channel.`);
         ctx.socket.leave(c.channel);
         await dbojs.update({ _id: en._id }, en);
+      });
+    },
+  });
+
+  addCmd({
+    name: "comlist",
+    pattern: /^comlist/i,
+    lock: "connected",
+    hidden: true,
+    exec: async (ctx, args) => {
+      const en = await Obj.get(ctx.socket.cid!);
+      if (!en) return;
+      en.dbobj.data ||= {};
+      en.dbobj.data.channels ||= [];
+      let msg = "Your channels:%r";
+      msg +=
+        "%ch%cr==============================================================================%cn%r";
+      msg += ` ALIAS         CHANNEL        STATUS    TITLE           MASK             %r`;
+      msg +=
+        "%ch%cr==============================================================================%cn";
+      en.dbobj.data.channels.forEach((c: IChanEntry) => {
+        msg += `\n ${ljust(c.alias, 14)}`;
+        msg += `${ljust(c.channel, 14)}`;
+      });
+
+      send([en.dbref], msg);
+    },
+  });
+
+  addCmd({
+    name: "comtitle",
+    pattern: /^comtitle\s+(.*)\s*=\s*(.*)/i,
+    lock: "connected",
+    hidden: true,
+    exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
+      const en = await Obj.get(ctx.socket.cid);
+      if (!en) return;
+
+      en.dbobj.data ||= {};
+      en.dbobj.data.channels ||= [];
+      en.dbobj.data.channels.forEach(async (c: IChanEntry) => {
+        if (c.alias !== args[0]) return;
+        c.title = args[1];
+        await en.save();
+        send([ctx.socket.id], `Channel ${c.channel} title updated.`);
+      });
+    },
+  });
+
+  addCmd({
+    name: "commask",
+    pattern: /^commask\s+(.*)\s*=\s*(.*)/i,
+    lock: "connected",
+    hidden: true,
+    exec: async (ctx, args) => {
+      const en = await Obj.get(ctx.socket.cid!);
+      if (!en) return;
+
+      en.dbobj.data ||= {};
+      en.dbobj.data.channels ||= [];
+      const chans = en.dbobj.data.channels.filter(
+        (c: IChanEntry) => c.alias === args[1]
+      );
+
+      if (chans.length === 0) {
+        send([ctx.socket.id], `Channel ${args[0]} not found.`);
+        return;
+      }
+
+      chans.forEach(async (c: IChanEntry) => {
+        c.mask = args[1];
+        await en.save();
+        send([ctx.socket.id], `Channel ${c.channel} mask updated.`);
       });
     },
   });

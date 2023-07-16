@@ -59,6 +59,9 @@ process.on("SIGINT", async () => {
   for (const player of players) {
     await setFlags(player, "!connected");
   }
+
+  await broadcast("Server shutting down.");
+  process.exit(0);
 });
 
 process.on("unhandledRejection", (reason, p) => {

@@ -60,8 +60,7 @@ export default () =>
           output += rjust(idle(p.data?.lastCommand || 0), 5);
           output += ljust(
             `  ${
-              p.data?.shortdesc ||
-              "%ch%cxUse '+shortdesc <desc>' to set this.%cn"
+              p.data?.shortdesc || "%ch%cxUse '+short <desc>' to set this.%cn"
             }`,
             42
           );
