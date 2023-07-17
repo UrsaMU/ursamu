@@ -8,6 +8,7 @@ const config: IConfig = {
     db: "data/ursamu.db",
     counters: "data/counters.db",
     chans: "data/chans.db",
+    mail: "data/mail.db",
   },
   game: {
     name: "Ursamu",

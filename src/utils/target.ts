@@ -29,7 +29,7 @@ export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
       await dbojs.find({
         $where: function () {
           return (
-            RegExp(this.data.name.replace(";", "|"), "i").test(tar) ||
+            RegExp(this.data.name.replace(";", "|"), "ig").test(tar) ||
             this.id === +tar.slice(1) ||
             this.id === tar ||
             this.data.alias?.toLowerCase() === tar.toLowerCase()
@@ -37,6 +37,7 @@ export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
         },
       })
     )[0];
+    console.log(found);
     if (!found) {
       return;
     }

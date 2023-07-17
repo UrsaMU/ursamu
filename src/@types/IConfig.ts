@@ -6,6 +6,8 @@ export interface IConfig {
     db: string;
     counters: string;
     chans: string;
+    mail: string;
+    wiki?: string;
   };
   game: {
     name: string;
