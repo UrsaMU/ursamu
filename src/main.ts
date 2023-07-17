@@ -52,9 +52,7 @@ server.listen(config.server.ws, async () => {
 });
 
 process.on("SIGINT", async () => {
-  const players = (await dbojs.find({})).filter((p) =>
-    p.flags.includes("connected")
-  );
+  const players = await dbojs.find({ flags: /connected/i });
 
   for (const player of players) {
     await setFlags(player, "!connected");

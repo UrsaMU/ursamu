@@ -84,6 +84,31 @@ export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
   return output;
 };
 
+export const threeColumn = (...lists: string[]) => {
+  // create columns based on the number of lists.  Then find the longest list.
+  // print i from each list, then increment i and repeat until all lists are
+  // exhausted.  If the list is shorter than the longest list, pad it with empty
+  // strings.
+
+  const truncate = (input: any, size: any, fill: any) => {
+    let length = parser.stripSubs("telnet", input).length;
+    return length > size - 3
+      ? `${input.substring(0, size - 3)}...`
+      : input + fill.repeat(size - length);
+  };
+
+  const cols = lists.length;
+  const cell = Math.floor(78 / cols);
+  const longest = Math.max(...lists.map((list) => list.length));
+  let output = "%r%b";
+  for (let i = 0; i < longest; i++) {
+    for (let j = 0; j < cols; j++) {
+      output += truncate(lists[j][i] || "", cell, " ");
+    }
+    output += "%r%b";
+  }
+};
+
 export const header = (string = "", filler = "%cr=%cn", width = 78) => {
   return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler) + "\n";
 };
