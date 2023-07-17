@@ -37,6 +37,33 @@ export const joinChans = async (ctx: IContext) => {
           {}
         );
       }
+    } else if (
+      channel.alias &&
+      !flags.check(player.flags || "", channel.lock || "")
+    ) {
+      // remove channels that are locked from the player.
+      const chan = player.data?.channels?.filter(
+        (ch: IChanEntry) => ch.channel === channel.name
+      );
+
+      if (chan?.length) {
+        player.data ||= {};
+        player.data.channels ||= [];
+
+        player.data?.channels?.splice(
+          player.data?.channels?.indexOf(chan[0]),
+          1
+        );
+
+        ctx.socket.leave(channel.name);
+        await dbojs.update({ id: player.id }, player);
+        await force(ctx, `${channel.alias} :has left the channel.`);
+        send(
+          [ctx.socket.id],
+          `You have left ${channel.name} with the alias '${channel.alias}'.`,
+          {}
+        );
+      }
     }
   }
 
