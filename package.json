@@ -25,11 +25,13 @@
   "dependencies": {
     "@digibear/tags": "^1.0.0",
     "@types/express-ws": "^3.0.1",
+    "@types/lodash": "^4.14.195",
     "@types/ws": "^8.5.5",
     "@ursamu/parser": "^1.2.4",
     "bcryptjs": "^2.4.3",
     "concurrently": "^8.2.0",
     "cors": "^2.8.5",
+    "lodash": "^4.17.21",
     "nedb": "^1.8.0",
     "nedb-promises": "^6.2.1",
     "prettier": "^2.8.8",
