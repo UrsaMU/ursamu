@@ -37,7 +37,6 @@ export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
         },
       })
     )[0];
-    console.log(found);
     if (!found) {
       return;
     }

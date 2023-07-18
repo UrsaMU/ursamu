@@ -11,11 +11,12 @@ export const setFlags = async (dbo: IDBOBJ, flgs: string) => {
   dbo.data = data;
 
   const socket = await getSocket(dbo.id);
+  const done = await dbojs.update({ id: dbo.id }, dbo);
 
   if (socket) {
-    const ctx: IContext = { socket, msg: "", data: {} };
+    const ctx: IContext = { socket, msg: "l", data: {} };
     await joinChans(ctx);
   }
 
-  return await dbojs.update({ id: dbo.id }, dbo);
+  return done;
 };

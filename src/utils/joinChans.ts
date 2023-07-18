@@ -33,8 +33,7 @@ export const joinChans = async (ctx: IContext) => {
         await force(ctx, `${channel.alias} :has joined the channel.`);
         send(
           [ctx.socket.id],
-          `You have joined ${channel.name} with the alias '${channel.alias}'.`,
-          {}
+          `You have joined ${channel.name} with the alias '${channel.alias}'.`
         );
       }
     } else if (
@@ -49,19 +48,16 @@ export const joinChans = async (ctx: IContext) => {
       if (chan?.length) {
         player.data ||= {};
         player.data.channels ||= [];
-
-        player.data?.channels?.splice(
-          player.data?.channels?.indexOf(chan[0]),
-          1
+        player.data.channels = player.data.channels.filter(
+          (c: IChanEntry) => c.channel !== channel.name
         );
 
+        console.log("Flag change!");
         ctx.socket.leave(channel.name);
         await dbojs.update({ id: player.id }, player);
-        await force(ctx, `${channel.alias} :has left the channel.`);
-        send(
+        await send(
           [ctx.socket.id],
-          `You have left ${channel.name} with the alias '${channel.alias}'.`,
-          {}
+          `You have left ${channel.name} with the alias '${channel.alias}'.`
         );
       }
     }

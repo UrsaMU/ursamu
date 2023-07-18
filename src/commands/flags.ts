@@ -3,6 +3,7 @@ import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { flags } from "../services/flags/flags";
 import { displayName } from "../utils/displayName";
+import { setFlags } from "../utils/setFlags";
 import { target } from "../utils/target";
 
 export default () =>
@@ -21,13 +22,7 @@ export default () =>
         return;
       }
 
-      obj.data ||= {};
-
-      const { tags, data } = flags.set(obj.flags, obj.data, flgs);
-      obj.flags = tags;
-      obj.data = data;
-
-      await dbojs.update({ _id: obj._id }, obj);
+      await setFlags(obj, flgs);
       send([ctx.socket.id], `Flags set on %ch${displayName(en, obj)}%cn.`, {});
     },
   });

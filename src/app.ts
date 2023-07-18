@@ -31,7 +31,7 @@ io.on("connection", (socket: IMSocket) => {
 
     const ctx: IContext = { socket, msg: message.msg };
     joinChans(ctx);
-    if (message.msg) cmdParser.run(ctx);
+    if (message.msg.trim()) cmdParser.run(ctx);
   });
 
   socket.on("disconnect", async () => {

@@ -9,8 +9,10 @@ export const getSocket = async (id: number) => {
   if (!dbo) return;
 
   const sockets = io.sockets.sockets;
+
   for (const [id, sock] of sockets.entries()) {
     const socket = sock as IMSocket;
+
     if (socket.cid === dbo.id) {
       return socket;
     }
