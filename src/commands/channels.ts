@@ -125,6 +125,10 @@ export default () => {
           chan.lock = val;
           await chans.update({ _id: chan._id }, chan);
           send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
+        } else if (key === "masking") {
+          chan.masking = val.toLocaleLowerCase() === "true" ? true : false;
+          await chans.update({ _id: chan._id }, chan);
+          send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
         } else {
           send([ctx.socket.id], `Invalid setting ${key}.`, {});
         }
@@ -253,16 +257,26 @@ export default () => {
 
       en.dbobj.data ||= {};
       en.dbobj.data.channels ||= [];
-      const chans = en.dbobj.data.channels.filter(
-        (c: IChanEntry) => c.alias === args[1]
+      const chansList = en.dbobj.data.channels.filter(
+        (c: IChanEntry) => c.alias === args[0]
       );
 
-      if (chans.length === 0) {
-        send([ctx.socket.id], `Channel ${args[0]} not found.`);
+      if (chansList.length === 0) {
+        send([ctx.socket.id], `Channel %ch${args[0]}%cn not found.`);
         return;
       }
 
-      chans.forEach(async (c: IChanEntry) => {
+      chansList.forEach(async (c: IChanEntry) => {
+        const channel = await chans.findOne({ name: c.channel });
+        if (!channel)
+          return send([ctx.socket.id], `Channel ${c.channel} not found.`);
+
+        if (!channel.masking)
+          return send(
+            [ctx.socket.id],
+            `Channel %ch${c.channel}%cn does not allow masking.`
+          );
+
         c.mask = args[1];
         await en.save();
         send([ctx.socket.id], `Channel ${c.channel} mask updated.`);
