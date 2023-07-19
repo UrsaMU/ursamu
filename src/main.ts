@@ -12,7 +12,7 @@ plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
 
 export const start = async () => {
-  server.listen(config.server.ws, async () => {
+  server.listen(config.server?.ws, async () => {
     const rooms = await dbojs.find({
       $where: function () {
         return this.flags.includes("room");
@@ -50,7 +50,7 @@ export const start = async () => {
         lock: "admin+",
       });
     }
-    console.log(`Server started on port ${config.server.ws}.`);
+    console.log(`Server started on port ${config.server?.ws}.`);
   });
 
   process.on("SIGINT", async () => {

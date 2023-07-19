@@ -6,3 +6,5 @@ export * from "./IDBObj";
 export * from "./IMail";
 export * from "./IMiddlewareFunction";
 export * from "./IMSocket";
+export * from "./IWiki";
+export * from "./IMError";

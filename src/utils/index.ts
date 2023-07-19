@@ -10,3 +10,4 @@ export * from "./loadTxtDir";
 export * from "./moniker";
 export * from "./setFlags";
 export * from "./target";
+export * from "./checkFlags";

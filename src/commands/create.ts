@@ -40,10 +40,10 @@ export default () =>
       const player = await dbojs.insert({
         id,
         flags,
-        location: config.game.playerStart,
+        location: config.game?.playerStart,
         data: {
           name,
-          home: config.game.playerStart,
+          home: config.game?.playerStart,
           password: await hash(password, 10),
         },
       });

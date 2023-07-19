@@ -9,6 +9,7 @@ import { moniker } from "./utils/moniker";
 import { joinChans } from "./utils/joinChans";
 import { IContext } from "./@types/IContext";
 import { setFlags } from "./utils/setFlags";
+import { authRouter, dbObjRouter } from "./routes";
 
 export const app = express();
 export const server = createServer(app);
@@ -17,6 +18,9 @@ export const io = new Server(server);
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use("/api/v1/auth/", authRouter);
+app.use("/api/v1/dbobj/", dbObjRouter);
 
 io.on("connection", (socket: IMSocket) => {
   socket.on("message", async (message) => {
@@ -37,7 +41,20 @@ io.on("connection", (socket: IMSocket) => {
   socket.on("disconnect", async () => {
     const en = await dbojs.findOne({ id: socket.cid });
     if (!en) return;
-    setFlags(en, "!connected");
+
+    const socks: IMSocket[] = [];
+    for (const [id, sock] of io.sockets.sockets.entries()) {
+      const s = sock as IMSocket;
+      if (s.cid && s.cid === en.id) {
+        socks.push(s);
+      }
+    }
+    console.log(socks.length);
+    if (socks.length < 1) await setFlags(en, "!connected");
     await send([`#${en.location}`], `${moniker(en)} has disconnected.`, {});
+  });
+
+  socket.on("error", () => {
+    socket.disconnect();
   });
 });

@@ -11,7 +11,7 @@ interface ITelnetSocket extends Socket {
 
 const welcome = readFileSync(join(__dirname, "../text/connect.txt"), "utf8");
 const server = createServer((socket: ITelnetSocket) => {
-  const sock = io(`http://localhost:${config.server.ws}`);
+  const sock = io(`http://localhost:${config.server?.ws}`);
   socket.write(welcome + "\r\n");
 
   sock.on("message", (data) => {
@@ -47,6 +47,9 @@ const server = createServer((socket: ITelnetSocket) => {
     });
   });
 
+  // sock.on("disconnect", () => socket.end());
+  sock.on("error", () => socket.end());
+
   socket.on("data", (data) => {
     sock.emit("message", { msg: data.toString(), data: { cid: socket.cid } });
   });
@@ -60,6 +63,6 @@ const server = createServer((socket: ITelnetSocket) => {
   });
 });
 
-server.listen(config.server.telnet, () =>
-  console.log(`Telnet server listening on port ${config.server.telnet}`)
+server.listen(config.server?.telnet, () =>
+  console.log(`Telnet server listening on port ${config.server?.telnet}`)
 );

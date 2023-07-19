@@ -3,6 +3,7 @@ import { IDBOBJ } from "../../@types/IDBObj";
 import config from "../../ursamu.config";
 import { IChannel } from "../../@types/Channels";
 import { IMail } from "../../@types/IMail";
+import { IArticle } from "../../@types";
 
 export class DBO<T> {
   db: Datastore<T>;
@@ -48,8 +49,9 @@ export interface ICounters {
   seq: number;
 }
 
-export const counters = new DBO<ICounters>(config.server.counters);
+export const counters = new DBO<ICounters>(`${config.server?.counters}`);
 
-export const dbojs = new DBO<IDBOBJ>(config.server.db);
-export const chans = new DBO<IChannel>(config.server.chans);
-export const mail = new DBO<IMail>(config.server.mail);
+export const dbojs = new DBO<IDBOBJ>(`${config.server?.db}`);
+export const chans = new DBO<IChannel>(`${config.server?.chans}`);
+export const mail = new DBO<IMail>(`${config.server?.mail}`);
+export const wiki = new DBO<IArticle>(`${config.server?.wiki}`);
