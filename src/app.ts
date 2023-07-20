@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { createServer } from "http";
 import { IMSocket } from "./@types/IMSocket";
 import { cmdParser } from "./services/commands";
@@ -10,6 +10,8 @@ import { joinChans } from "./utils/joinChans";
 import { IContext } from "./@types/IContext";
 import { setFlags } from "./utils/setFlags";
 import { authRouter, dbObjRouter } from "./routes";
+import authMiddleware from "./middleware/authMiddleware";
+import { IMError } from "./@types";
 
 export const app = express();
 export const server = createServer(app);
@@ -20,7 +22,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/auth/", authRouter);
-app.use("/api/v1/dbobj/", dbObjRouter);
+app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
+
+app.use(
+  (error: IMError, req: Request, res: Response, next: NextFunction): void => {
+    // Handle error here
+    console.error(error);
+    res
+      .status(error.status || 500)
+      .json({ error: true, status: error.status, message: error.message });
+  }
+);
 
 io.on("connection", (socket: IMSocket) => {
   socket.on("message", async (message) => {

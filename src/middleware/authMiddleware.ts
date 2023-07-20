@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IMError } from "../@types";
+import { IMError, IPayload } from "../@types";
 import { verify } from "../services/jwt";
 
 export default async (req: Request, res: Response, next: NextFunction) => {
@@ -10,14 +10,19 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     return next(err);
   }
 
-  const id = await verify(token);
-  if (!id) {
+  try {
+    const decoded = (await verify(token)) as IPayload;
+    if (!decoded) {
+      const err: IMError = new Error("Unauthorized");
+      err.status = 401;
+      return next(err);
+    }
+    req.body.id = decoded.id;
+  } catch {
     const err: IMError = new Error("Unauthorized");
     err.status = 401;
     return next(err);
   }
-
-  req.body.id = id;
 
   next();
 };

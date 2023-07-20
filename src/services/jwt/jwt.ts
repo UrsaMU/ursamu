@@ -13,7 +13,7 @@ export const sign = (payload: any): Promise<string | void> =>
     );
   });
 
-export const verify = (token: string) =>
+export const verify = (token: string): Promise<jwt.JwtPayload | unknown> =>
   new Promise((resolve, reject) => {
     jwt.verify(
       token,

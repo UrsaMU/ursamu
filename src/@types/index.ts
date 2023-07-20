@@ -8,3 +8,4 @@ export * from "./IMiddlewareFunction";
 export * from "./IMSocket";
 export * from "./IWiki";
 export * from "./IMError";
+export * from "./IPayload";
