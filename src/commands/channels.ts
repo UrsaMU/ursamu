@@ -1,9 +1,12 @@
+import { IMSocket } from "../@types";
 import { IChanEntry } from "../@types/Channels";
+import { io } from "../app";
 import { Obj } from "../services/DBObjs";
 import { chans, dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd, force } from "../services/commands";
 import { flags } from "../services/flags/flags";
+import { joinChans } from "../utils";
 import { ljust } from "../utils/format";
 
 export default () => {
@@ -50,6 +53,16 @@ export default () => {
             `You have joined ${name} with the alias '${alias}'.`,
             {}
           );
+
+          // Force the connected sockets (players) to cycle their channels
+          // and join the new ones.
+          const sockets = Array.from(io.sockets.sockets.entries()).map(
+            (s) => s[1] as IMSocket
+          );
+
+          for (const socket of sockets) {
+            await joinChans({ socket });
+          }
         }
       } else {
         send(
@@ -134,6 +147,16 @@ export default () => {
         }
       } else {
         send([ctx.socket.id], `Channel %ch${args[0]}%cn not found.`, {});
+      }
+
+      // Force the connected sockets (players) to cycle their channels
+      // and join the new ones.
+      const sockets = Array.from(io.sockets.sockets.entries()).map(
+        (s) => s[1] as IMSocket
+      );
+
+      for (const socket of sockets) {
+        await joinChans({ socket });
       }
     },
   });

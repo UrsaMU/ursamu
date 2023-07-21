@@ -12,19 +12,23 @@ export default () =>
     name: "create",
     pattern: /^create\s+(.*)/i,
     exec: async (ctx, args) => {
-      const [name, password] = args[0].split(" ");
-      const players = await dbojs.find({
-        $where: function () {
-          return this.flags.includes("player");
-        },
-      });
+      // if there are only two args, then it's name and password, but
+      // if there are three, then it's a two or three word, etc name
+      // with a password at the end.
+
+      let name = "";
+      let password = "";
+      const pieces = args[0].split(" ");
+      if (pieces.length < 2) {
+        [name, password] = pieces;
+      } else {
+        password = pieces.pop() || "";
+        name = pieces.join(" ");
+      }
+
+      const players = await dbojs.find({ flags: /player/i });
       const taken = await dbojs.find({
-        $where: function () {
-          return (
-            this.data.name.toLowerCase() === name.toLowerCase() ||
-            this.data?.alias?.toLowerCase() === name.toLowerCase()
-          );
-        },
+        $or: [{ "data.name": name }, { "data.alias": name }],
       });
 
       if (taken.length > 0) {
@@ -53,11 +57,14 @@ export default () =>
       ctx.socket.cid = player.id;
       player.data ||= {};
       player.data.lastCommand = Date.now();
+
       await dbojs.update({ id: player.id }, player);
       await joinChans(ctx);
+
       send([ctx.socket.id], `Welcome to the game, ${player.data?.name}!`, {
         cid: player.id,
       });
+
       send([`#${player.location}`], `${moniker(player)} has connected.`, {});
       force(ctx, "look");
     },

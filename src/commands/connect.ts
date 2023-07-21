@@ -12,7 +12,16 @@ export default () =>
     pattern: /^connect\s+(.*)/i,
     lock: "!connected",
     exec: async (ctx, args) => {
-      const [name, password] = args[0].split(" ");
+      const pieces = args[0].split(" ");
+      let name = "";
+      let password = "";
+      if (pieces.length === 2) {
+        [name, password] = pieces;
+      } else {
+        password = pieces.pop() || "";
+        name = pieces.join(" ");
+      }
+
       const found = (
         await dbojs.find({
           $where: function () {
