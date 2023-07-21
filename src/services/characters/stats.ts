@@ -1,103 +1,83 @@
 import { flags } from "../flags";
 
-interface IMStat {
+export interface IMStat {
   name: string;
   values: any[];
   type: string;
   splat?: string;
-  flags?: string;
   lock?: string;
+  default?: any;
   data?: any;
 }
 
-interface IMStatEntry {
+export interface IMStatEntry {
   name: string;
   value: any;
   temp?: any;
   splat?: string;
 }
 
-interface character {
+export interface character {
   name: string;
   attributes: IMStatEntry[];
   skills: IMStatEntry[];
   bio: IMStatEntry[];
 }
 
-// add splat flags
-flags.add(
-  {
-    name: "mortal",
-    code: "[m]",
-    lock: "builder+",
-  },
-  {
-    name: "ghoul",
-    code: "[g]",
-    lock: "builder+",
-  },
-  {
-    name: "vampire",
-    code: "[v]",
-    lock: "builder+",
-  },
-  {
-    name: "werewolf",
-    code: "[w]",
-    lock: "builder+",
-  },
-  {
-    name: "kinfolk",
-    code: "[k]",
-    lock: "builder+",
-  }
-);
-
 export const attributes: IMStat[] = [
   {
     name: "strength",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
   {
     name: "dexterity",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
   {
     name: "stamina",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
   {
     name: "charisma",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
   {
     name: "manipulation",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
   {
     name: "composure",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
   {
     name: "intelligence",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
   {
     name: "wits",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
   {
     name: "resolve",
     values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     type: "attribute",
+    default: 1,
   },
 ];
 

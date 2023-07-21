@@ -65,5 +65,30 @@ export const flags = new Tags(
     name: "connected",
     code: "c",
     lock: "superuser",
+  },
+  {
+    name: "mortal",
+    code: "[m]",
+    lock: "builder+",
+  },
+  {
+    name: "ghoul",
+    code: "[g]",
+    lock: "builder+",
+  },
+  {
+    name: "vampire",
+    code: "[v]",
+    lock: "builder+",
+  },
+  {
+    name: "werewolf",
+    code: "[w]",
+    lock: "builder+",
+  },
+  {
+    name: "kinfolk",
+    code: "[k]",
+    lock: "builder+",
   }
 );

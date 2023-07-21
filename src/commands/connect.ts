@@ -26,8 +26,8 @@ export default () =>
         await dbojs.find({
           $where: function () {
             return (
-              this.data.name.toLowerCase() === name.toLowerCase() ||
-              this.data.alias?.toLowerCase() === name.toLowerCase()
+              this.data.name?.toLowerCase() === name?.toLowerCase() ||
+              this.data.alias?.toLowerCase() === name?.toLowerCase()
             );
           },
         })
