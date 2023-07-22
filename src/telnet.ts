@@ -26,7 +26,7 @@ const server = createServer((socket: ITelnetSocket) => {
 
   sock.io.on("reconnect", () => {
     socket.write(
-      parser.substitute("telnet", "%chGame:%cn Restart Complete to server.\r\n")
+      parser.substitute("telnet", "%chGame>%cn @reboot Complete.\r\n")
     );
     sock.emit("message", {
       msg: "",

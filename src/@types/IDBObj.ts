@@ -1,3 +1,5 @@
+import { IMStatEntry } from "../services";
+
 export interface IDBOBJ {
   _id?: string;
   id: number;
@@ -8,6 +10,7 @@ export interface IDBOBJ {
     name?: string;
     password?: string;
     moniker?: string;
+    stats?: IMStatEntry[];
     [key: string]: any;
   };
 }

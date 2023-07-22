@@ -52,7 +52,6 @@ export const joinChans = async (ctx: IContext) => {
           (c: IChanEntry) => c.channel !== channel.name
         );
 
-        console.log("Flag change!");
         ctx.socket.leave(channel.name);
         await dbojs.update({ id: player.id }, player);
         await send(

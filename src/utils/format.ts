@@ -84,7 +84,7 @@ export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
   return output;
 };
 
-export const threeColumn = (...lists: string[]) => {
+export const threeColumn = (...lists: string[][]) => {
   // create columns based on the number of lists.  Then find the longest list.
   // print i from each list, then increment i and repeat until all lists are
   // exhausted.  If the list is shorter than the longest list, pad it with empty
@@ -107,8 +107,13 @@ export const threeColumn = (...lists: string[]) => {
     }
     output += "%r%b";
   }
+  return output;
 };
 
 export const header = (string = "", filler = "%cr=%cn", width = 78) => {
-  return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler) + "\n";
+  return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler);
+};
+
+export const divider = (string = "", filler = "%cr-%cn", width = 78) => {
+  return center(` %ch${string}%cn `, width, filler) + "\n";
 };

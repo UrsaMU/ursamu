@@ -61,9 +61,19 @@ io.on("connection", (socket: IMSocket) => {
         socks.push(s);
       }
     }
-    console.log(socks.length);
-    if (socks.length < 1) await setFlags(en, "!connected");
-    await send([`#${en.location}`], `${moniker(en)} has disconnected.`, {});
+
+    if (socks.length < 1) {
+      await setFlags(en, "!connected");
+      return await send(
+        [`#${en.location}`],
+        `${moniker(en)} has disconnected.`
+      );
+    }
+
+    return await send(
+      [`#${en.location}`],
+      `${moniker(en)} has partially disconnected.`
+    );
   });
 
   socket.on("error", () => {
