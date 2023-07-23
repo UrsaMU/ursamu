@@ -1,85 +1,146 @@
 import { IDBOBJ } from "../../@types";
 import { dbojs } from "../Database";
-import { flags } from "../flags";
-import { IMStat, IMStatEntry, allStats } from "./stats";
+import { IMStatEntry, allStats } from "./stats";
 
 export const setStat = async (
   character: IDBOBJ,
   stat: string,
   value: any,
-  type?: string
+  temp?: boolean
 ) => {
-  for (const tempStat of allStats as IMStat[]) {
-    if (tempStat.name.toLowerCase() === stat.toLowerCase()) {
-      // see if value is a number. if not, try to convert it to a number,
-      // and if that fails, it's a string and leave it alone.
-      let tempvalue = parseInt(value as any);
-      if (!isNaN(tempvalue)) value = tempvalue;
+  let tar, val;
+  let specialty = "";
+  let instance = "";
 
-      if (
-        !tempStat.values.includes(value) &&
-        value &&
-        tempStat.values.length > 0
-      ) {
-        throw new Error(
-          `Invalid value for ${stat}. Valid values are: ${tempStat.values
-            .map((v) => `%ch${v}%cn`)
-            .join(", ")}`
-        );
-      }
+  const parts = stat.split("/");
+  if (parts.length > 1) {
+    tar = parts[0].trim().toLowerCase();
+    stat = parts[1].trim().toLowerCase();
+  }
 
-      if (!flags.check(character.flags || "", tempStat.lock || "")) {
-        throw new Error(`You do not have permission to set ${stat}.`);
-      }
+  // Either use the target or the enactor if no target exists.
+  character.data ||= {};
+  character.data.stats ||= [];
 
-      character.data ||= {};
-      character.data.stats ||= [];
+  // check to see if stat has an instance to it.
+  console.log(stat.trim().match(/\((.*)\)/g));
+  const instanced = stat.trim().match(/\((.*)\)/g);
 
-      if (!value) {
-        character.data.stats = character.data.stat.filter(
-          (s: IMStatEntry) => s.name.toLowerCase() !== stat.toLowerCase()
-        );
-        await dbojs.update({ id: character.id }, character);
-        return character;
-      }
+  if (instanced) {
+    stat = stat.replace(/\((.*)\)/g, "").trim();
 
-      const statIndex = character.data.stats.findIndex(
-        (s: IMStatEntry) => s.name.toLowerCase() === stat.toLowerCase()
-      );
+    instance = instanced[0];
+  }
 
-      if (statIndex > -1) {
-        character.data.stats[statIndex].temp = value;
-        character.data.stats[statIndex].value = value;
-      } else {
-        character.data.stats.push({
-          name: stat,
-          value,
-          temp: value,
-          type,
-        });
-      }
+  // get the full stat name from the partial name.
+  const fullStat = allStats.find((s) =>
+    s.name.toLowerCase().startsWith(stat!.toLowerCase().trim())
+  );
 
-      await dbojs.update({ id: character.id }, character);
-      return character;
+  if (!fullStat) throw new Error("Invalid stat.");
+
+  // check to see  if the stat us even inatnaced.
+  if (instance && !fullStat.hasInstance) throw new Error("Invalid instance().");
+
+  if (instance && fullStat.hasInstance && fullStat.instances?.length) {
+    const inst = fullStat.instances?.find(
+      (i) => i.toLowerCase() === instance.toLowerCase()
+    );
+    if (!inst) throw new Error("Invalid instance().");
+  }
+
+  if (fullStat.hasInstance && !instance) throw new Error("Missing instance().");
+
+  // check to see if the instance is valid.
+
+  // Check for specialities.
+  // --------------------------------------------------------------------
+  // ie.  when the value has a / in it.
+  // ex:  +stats me/academics=1/library research
+  if (value?.includes("/")) {
+    const [value1, value2] = value.split("/");
+    value = value1.trim();
+    specialty = value2.trim().toLowerCase();
+  }
+
+  // if the stat has specialties, make sure the specialty is valid.
+  if (fullStat.hasSpecialties && specialty) {
+    const specObj = fullStat.specialties?.find((s) => s.name === specialty);
+
+    if (!specObj && fullStat.specialties?.length) {
+      throw new Error("Invalid specialty.");
+    }
+
+    if (specObj && specObj.values && !specObj.values.includes(value)) {
+      throw new Error("Invalid specialty value.");
     }
   }
-};
 
-export const getStat = (character: IDBOBJ, stat: string) => {
-  for (const tempStat of allStats as IMStat[]) {
-    if (tempStat.name.toLowerCase() === stat.toLowerCase()) {
-      character.data ||= {};
-      character.data.stats ||= [];
+  if (!isNaN(+value)) value = +value;
 
-      const statIndex = character.data.stats.findIndex(
-        (s: IMStatEntry) => s.name.toLowerCase() === stat.toLowerCase()
-      );
-
-      if (statIndex > -1) {
-        return character.data.stats[statIndex].value;
-      } else {
-        return tempStat.default;
-      }
-    }
+  // Check the value
+  if (!fullStat.values.includes(value) && fullStat.values && value) {
+    throw new Error(`Invalid value for ${fullStat.name.toUpperCase()}.`);
   }
+
+  // Set the stats (or specialty!)!
+  // --------------------------------------------------------------------
+  if (instance) {
+    stat = fullStat.name + instance;
+  } else {
+    stat = fullStat.name;
+  }
+
+  const name = specialty || stat;
+  const type = specialty ? fullStat.name : fullStat.type;
+
+  if (!value && !temp) {
+    character.data.stats = character.data.stats.filter(
+      (s: IMStatEntry) => s.name.toLowerCase() !== name
+    );
+
+    // remove any specialties that exist for this stat.
+    if (fullStat.hasSpecialties) {
+      character.data.stats = character.data.stats.filter(
+        (s: IMStatEntry) => s.type !== fullStat.name
+      );
+    }
+
+    await dbojs.update({ id: character.id }, character);
+    return name;
+  } else if (!value && temp) {
+    character.data.stats = character.data.stats.map((s: IMStatEntry) => {
+      if (s.name.toLowerCase() === name) {
+        s.temp = s.value;
+      }
+      return s;
+    });
+
+    await dbojs.update({ id: character.id }, character);
+    return name;
+  }
+
+  // does the user already have an instance of the stat?
+  const statEntry = character.data.stats.find((s) => s.name === name);
+
+  if (statEntry) {
+    if (!temp) {
+      statEntry.value = value;
+      statEntry.temp = value;
+    } else {
+      statEntry.temp = value;
+    }
+  } else {
+    character.data.stats.push({
+      name,
+      value,
+      temp: value,
+      type,
+      category: fullStat.category,
+    });
+  }
+
+  await dbojs.update({ id: character.id }, character);
+
+  return name;
 };

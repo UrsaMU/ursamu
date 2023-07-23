@@ -1,7 +1,14 @@
-import { format } from "path";
-import { Obj, addCmd, allStats, flags, send } from "../services";
-import { divider, formatStat, header, moniker, target } from "../utils";
-import { getStat } from "../utils/getStats";
+import { Obj, addCmd, allStats, send } from "../services";
+import {
+  center,
+  divider,
+  footer,
+  formatStat,
+  header,
+  moniker,
+  target,
+} from "../utils";
+import { getStat } from "../services/characters/getStats";
 
 const bio = (obj: Obj) => {
   const splat = getStat(obj.dbobj, "splat");
@@ -29,26 +36,30 @@ const bio = (obj: Obj) => {
 
 const attributes = (obj: Obj) => {
   const physical = [
+    center("Physical", 24, " "),
     formatStat("strength", getStat(obj.dbobj, "strength")),
     formatStat("dexterity", getStat(obj.dbobj, "dexterity")),
     formatStat("stamina", getStat(obj.dbobj, "stamina")),
   ];
 
   const social = [
+    center("Social", 24, " "),
+
     formatStat("charisma", getStat(obj.dbobj, "charisma")),
     formatStat("manipulation", getStat(obj.dbobj, "manipulation")),
     formatStat("composure", getStat(obj.dbobj, "composure")),
   ];
 
   const mental = [
+    center("Mental", 24, " "),
     formatStat("intelligence", getStat(obj.dbobj, "intelligence")),
     formatStat("wits", getStat(obj.dbobj, "wits")),
     formatStat("resolve", getStat(obj.dbobj, "resolve")),
   ];
 
-  let output = divider("Attributes");
+  let output = divider("Attributes") + "%r";
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     output += ` ${physical[i]}  ${social[i]}  ${mental[i]}\n`;
   }
 
@@ -123,11 +134,54 @@ const skills = (obj: Obj) => {
     ...Array(total - totalSocial.length).fill("                      ")
   );
 
-  let output = divider("Skills");
+  let output = divider("Skills") + "%r";
   for (let i = 0; i < total; i++) {
     output += ` ${totalPhysical[i] || ""}  ${totalSocial[i] || ""}  ${
       totalMental[i] || ""
     }\n`;
+  }
+
+  return output;
+};
+
+const advantages = (obj: Obj) => {
+  let output = `${divider("Backgrounds", "%cr-%cn", 26)}${divider(
+    "Merits",
+    "%cr-%cn",
+    26
+  )}${divider("Flaws", "%cr-%cn", 26)}\n`;
+
+  const backgrounds =
+    obj.data?.stats
+      ?.filter((s) => s.type === "background")
+      .map((s) => formatStat(s.name, getStat(obj.dbobj, s.name))) || [];
+
+  const merits =
+    obj.data?.stats
+      ?.filter((s) => s.type === "merit")
+      .map((s) => formatStat(s.name, getStat(obj.dbobj, s.name))) || [];
+  const flaws =
+    obj.data?.stats
+      ?.filter((s) => s.type === "flaw")
+      .map((s) => formatStat(s.name, getStat(obj.dbobj, s.name))) || [];
+
+  const max = Math.max(backgrounds.length, merits.length, flaws.length);
+  const totalBackgrounds = [];
+  const totalMerits = [];
+  const totalFlaws = [];
+
+  totalBackgrounds.push(
+    ...backgrounds,
+    ...Array(max - backgrounds.length).fill(" ".repeat(24))
+  );
+  totalMerits.push(
+    ...merits,
+    ...Array(max - merits.length).fill(" ".repeat(24))
+  );
+  totalFlaws.push(...flaws, ...Array(max - flaws.length).fill(" ".repeat(24)));
+
+  for (let i = 0; i < max; i++) {
+    output += ` ${totalBackgrounds[i]}  ${totalMerits[i]}  ${totalFlaws[i]}\n`;
   }
 
   return output;
@@ -157,6 +211,8 @@ export default () => {
       output += bio(tarObj);
       output += attributes(tarObj);
       output += skills(tarObj);
+      output += advantages(tarObj);
+      output += footer();
       send([ctx.socket.id], output);
     },
   });

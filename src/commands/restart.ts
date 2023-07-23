@@ -12,7 +12,7 @@ export default () =>
       const player = await dbojs.findOne({ id: ctx.socket.cid });
       if (!player) return;
       broadcast(
-        `%chGAME>%cn Server @reboot initiated by ${player.data?.name}...`,
+        `%chGame>%cn Server @reboot initiated by ${player.data?.name}...`,
         {}
       );
 

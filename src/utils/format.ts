@@ -1,3 +1,4 @@
+import { repeat } from "lodash";
 import parser from "../services/parser/parser";
 
 export const repeatString = (string = " ", length: number) => {
@@ -115,5 +116,13 @@ export const header = (string = "", filler = "%cr=%cn", width = 78) => {
 };
 
 export const divider = (string = "", filler = "%cr-%cn", width = 78) => {
-  return center(` %ch${string}%cn `, width, filler) + "\n";
+  return center(` %ch${string}%cn `, width, filler);
+};
+
+export const footer = (string = "", filler = "%cr=%cn", width = 78) => {
+  if (string) {
+    return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler);
+  }
+
+  return repeatString(filler, width);
 };
