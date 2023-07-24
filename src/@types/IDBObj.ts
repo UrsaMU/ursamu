@@ -1,4 +1,4 @@
-import { IMStatEntry } from "../services";
+import { IMStatEntry } from "./IMStatEntry";
 
 export interface IDBOBJ {
   _id?: string;
