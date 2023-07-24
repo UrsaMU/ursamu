@@ -183,8 +183,11 @@ const advantages = (obj: Obj) => {
   for (let i = 0; i < max; i++) {
     output += ` ${totalBackgrounds[i]}  ${totalMerits[i]}  ${totalFlaws[i]}\n`;
   }
+  if (max) {
+    return output;
+  }
 
-  return output;
+  return "";
 };
 
 export default () => {

@@ -1,6 +1,5 @@
 import { IDBOBJ } from "../../@types";
-import { Obj } from "../DBObjs";
-import { IMStatEntry } from "./stats";
+import { IMStatEntry } from "../../@types";
 
 export const formatValue = (obj: IDBOBJ, stat: string): string => {
   const statEntry = obj.data?.stats?.find((s: IMStatEntry) =>

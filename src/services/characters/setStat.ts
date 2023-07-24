@@ -1,6 +1,6 @@
-import { IDBOBJ } from "../../@types";
+import { IDBOBJ, IMStatEntry } from "../../@types";
 import { dbojs } from "../Database";
-import { IMStatEntry, allStats } from "./stats";
+import { allStats } from "./index";
 
 export const setStat = async (
   character: IDBOBJ,
@@ -23,7 +23,6 @@ export const setStat = async (
   character.data.stats ||= [];
 
   // check to see if stat has an instance to it.
-  console.log(stat.trim().match(/\((.*)\)/g));
   const instanced = stat.trim().match(/\((.*)\)/g);
 
   if (instanced) {

@@ -9,3 +9,5 @@ export * from "./IMSocket";
 export * from "./IWiki";
 export * from "./IMError";
 export * from "./IPayload";
+export * from "./IMStat";
+export * from "./IMStatEntry";

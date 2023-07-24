@@ -1,0 +1,163 @@
+import { IMStat } from "../../@types";
+
+export const flaws: IMStat[] = [
+  {
+    name: "illiterate",
+    values: [2],
+    type: "flaw",
+  },
+  {
+    name: "repulsive",
+    values: [2],
+    type: "flaw",
+  },
+  {
+    name: "ugly",
+    values: [1],
+    type: "flaw",
+  },
+  {
+    name: "hopeless addiction",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "addiction",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "archaic",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "living in the past",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "bondslave",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "bond junkie",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "long bond",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "famer",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "organovore",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "methuselah's thirst",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "prey exclusion",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "stake bait",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "folkoric bane",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "folkloric block",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "stigmata",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "dark secret",
+    values: [1, 2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "dispised",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "disliked",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "no haven",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "haven: compromised",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "haven: creepy",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "haven: haunted",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "known blankbody",
+    values: [2],
+    type: "flaw",
+    category: "vampire",
+  },
+  {
+    name: "known corpse",
+    values: [1],
+    type: "flaw",
+    category: "vampire",
+  },
+];
