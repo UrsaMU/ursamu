@@ -1,6 +1,8 @@
 # UrsaMU
 
-The Modern MUSH-Like Server
+### The Modern MUSH-Like Server
+
+![ursamu header](ursamu_github_banner.png)
 
 ## What is UrsaMU?
 
