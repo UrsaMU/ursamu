@@ -1,5 +1,4 @@
-import { IMStat } from "../../@types";
-
+import { IMStat } from "../../../@types";
 export const backgrounds: IMStat[] = [
   {
     name: "allies",
@@ -34,25 +33,25 @@ export const backgrounds: IMStat[] = [
     name: "herd",
     values: [1, 2, 3, 4, 5],
     type: "background",
-    category: "vampire",
+    splat: ["vampire"],
   },
   {
     name: "mask",
     values: [1, 2],
     type: "background",
-    category: "vampire",
+    splat: ["vampire"],
   },
   {
     name: "mwala",
     values: [1, 2, 3, 4, 5],
     type: "background",
-    category: "vampire",
+    splat: ["vampire"],
   },
   {
     name: "adversary",
     values: [1, 2, 3, 4, 5],
     type: "background",
-    category: "vampire",
+    splat: ["vampire"],
   },
   {
     name: "resources",
@@ -64,13 +63,13 @@ export const backgrounds: IMStat[] = [
     values: [1, 2, 3],
     type: "background",
     hasInstance: true,
-    category: "vampire",
+    splat: ["vampire"],
   },
   {
     name: "status",
     values: [1, 2, 3, 4, 5],
     type: "background",
-    category: "vampire",
+    splat: ["vampire"],
     hasInstance: true,
   },
 ];

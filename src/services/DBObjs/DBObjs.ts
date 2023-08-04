@@ -75,12 +75,20 @@ export class Obj {
     return this.obj.data;
   }
 
+  get splat() {
+    return this.obj.data?.stats?.find((s) => s.name === "splat")?.value;
+  }
+
   get location() {
     return this.obj.location;
   }
 
   get description() {
     return this.obj.description;
+  }
+
+  get stats() {
+    return this.obj.data?.stats;
   }
 
   async exits() {

@@ -1,3 +1,4 @@
+import { IAttribute } from "./IAttribute";
 import { IMStatEntry } from "./IMStatEntry";
 
 export interface IDBOBJ {
@@ -7,6 +8,7 @@ export interface IDBOBJ {
   location?: number;
   flags: string;
   data?: {
+    attributes?: IAttribute[];
     name?: string;
     password?: string;
     moniker?: string;

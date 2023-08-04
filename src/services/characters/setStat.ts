@@ -1,4 +1,5 @@
 import { IDBOBJ, IMStatEntry } from "../../@types";
+import { Obj } from "../DBObjs";
 import { dbojs } from "../Database";
 import { allStats } from "./index";
 
@@ -56,30 +57,50 @@ export const setStat = async (
   // --------------------------------------------------------------------
   // ie.  when the value has a / in it.
   // ex:  +stats me/academics=1/library research
+  const charObj = await Obj.get(character.id);
+  if (!charObj) throw new Error("Invalid character.");
+
   if (value?.includes("/")) {
     const [value1, value2] = value.split("/");
     value = value1.trim();
     specialty = value2.trim().toLowerCase();
-  }
 
-  // if the stat has specialties, make sure the specialty is valid.
-  if (fullStat.hasSpecialties && specialty) {
-    const specObj = fullStat.specialties?.find((s) => s.name === specialty);
+    //  convert value if needed.
+    if (!isNaN(+value)) value = +value;
 
-    if (!specObj && fullStat.specialties?.length) {
-      throw new Error("Invalid specialty.");
+    //  if there's a check on the specialty, see if it passes.
+    if (fullStat.specialties) {
+      const specObj = fullStat.specialties?.find((s) => s.name === specialty);
+
+      if (!specObj && fullStat.specialties?.length) {
+        throw new Error("Invalid specialty.");
+      }
+
+      if (specObj && specObj.values && !specObj.values.includes(value)) {
+        throw new Error("Invalid specialty value.");
+      }
+
+      if (specObj && specObj.check && !specObj.check(charObj)) {
+        throw new Error(specObj.error || "Permission denied.");
+      }
     }
-
-    if (specObj && specObj.values && !specObj.values.includes(value)) {
-      throw new Error("Invalid specialty value.");
-    }
   }
-
+  //  convert value if needed.
   if (!isNaN(+value)) value = +value;
 
   // Check the value
   if (!fullStat.values.includes(value) && fullStat.values && value) {
     throw new Error(`Invalid value for ${fullStat.name.toUpperCase()}.`);
+  }
+  console.log(charObj);
+  // Check the splat
+  if (fullStat.splat && !fullStat.splat.includes(charObj.splat)) {
+    throw new Error(fullStat.error || "Permission denied.");
+  }
+
+  // if there's a check on the stat, see if it passes.
+  if (fullStat.check && !fullStat.check(charObj)) {
+    throw new Error(fullStat.error || "Permission denied.");
   }
 
   // Set the stats (or specialty!)!
