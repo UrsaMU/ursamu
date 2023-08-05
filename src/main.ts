@@ -4,15 +4,35 @@ import { plugins } from "./utils/loadDIr";
 import { loadTxtDir } from "./utils/loadTxtDir";
 import { createObj } from "./services/DBObjs";
 import { chans, counters, dbojs } from "./services/Database";
-import config from "./ursamu.config";
+import defaultConfig from "./ursamu.config";
 import { setFlags } from "./utils/setFlags";
 import { broadcast } from "./services/broadcast";
+import { Config, IConfig, IPlugin } from "./@types";
 
 plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
 
-export const start = async () => {
+export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
+  const config = new Config({ ...defaultConfig, ...cfg });
+
   server.listen(config.server?.ws, async () => {
+    // load plugins
+    if (plugins) {
+      for (const plugin of plugins) {
+        try {
+          if (plugin.init) {
+            const res = await plugin.init();
+            if (res) {
+              config.setConfig({ ...defaultConfig, ...plugin.config });
+              console.log(`Plugin ${plugin.name} loaded.`);
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+
     const rooms = await dbojs.find({
       $where: function () {
         return this.flags.includes("room");
@@ -69,4 +89,4 @@ export const start = async () => {
   });
 };
 
-if (require.main === module) start();
+if (require.main === module) mu();
