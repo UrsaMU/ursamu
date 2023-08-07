@@ -11,3 +11,5 @@ export * from "./IMError";
 export * from "./IPayload";
 export * from "./IMStat";
 export * from "./IMStatEntry";
+export * from "./IAttribute";
+export * from "./IPlugin";

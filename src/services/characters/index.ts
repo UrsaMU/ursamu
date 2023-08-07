@@ -1,10 +1,12 @@
-import { attributes } from "./attributes";
-import { backgrounds } from "./backgrounds";
-import { bio } from "./bio";
-import { flaws } from "./flaws";
-import { merits } from "./merits";
-import { skills } from "./skills";
+import { attributes } from "./stats/attributes";
+import { backgrounds } from "./stats/backgrounds";
+import { bio } from "./stats/bio";
+import { flaws } from "./stats/flaws";
+import { merits } from "./stats/merits";
+import { skills } from "./stats/skills";
+import { disciplines } from "./stats/disciplines";
 
+export * from "./attributes";
 export * from "./setStat";
 export * from "./getStats";
 export * from "./formatValue";
@@ -15,4 +17,5 @@ export const allStats = [
   ...merits,
   ...flaws,
   ...backgrounds,
+  ...disciplines,
 ];

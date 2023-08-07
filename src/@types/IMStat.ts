@@ -1,10 +1,11 @@
 import { IDBOBJ } from ".";
+import { Obj } from "../services";
 
 export interface IMStat {
   name: string;
   values: any[];
   type: string;
-  splat?: string;
+  splat?: string[];
   lock?: string;
   category?: string;
   default?: any;
@@ -13,5 +14,6 @@ export interface IMStat {
   instances?: string[];
   hasSpecialties?: boolean;
   specialties?: IMStat[];
-  check?: (obj?: IDBOBJ) => boolean;
+  error?: string;
+  check?: (obj: Obj) => boolean;
 }

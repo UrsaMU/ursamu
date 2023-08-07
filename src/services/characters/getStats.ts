@@ -1,7 +1,7 @@
 import { IDBOBJ } from "../../@types";
-import { allStats } from "..";
+import { Obj, allStats } from "..";
 
-export const getStat = (character: IDBOBJ, stat: string) => {
+export const getStat = (character: IDBOBJ | Obj, stat: string) => {
   // first we need to see if the player has the stat in their data.
   const statEntry = character.data?.stats?.find((s) =>
     s.name.toLowerCase().startsWith(stat.toLowerCase())

@@ -16,3 +16,21 @@ export interface IConfig {
     playerStart?: number;
   };
 }
+
+export class Config {
+  constructor(public config: IConfig) {
+    this.config = config;
+  }
+
+  get server() {
+    return this.config.server;
+  }
+
+  get game() {
+    return this.config.game;
+  }
+
+  setConfig = (config: IConfig) => {
+    this.config = config;
+  };
+}
