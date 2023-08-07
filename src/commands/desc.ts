@@ -9,6 +9,7 @@ export default () =>
     name: "@describe",
     pattern: /^[@\+]?desc(?:ribe)?(?:\s+(.*)\s*=\s*(.*))?/i,
     lock: "connected",
+    help: "Set a description",
     exec: async (ctx, args) => {
       const en = await dbojs.findOne({ id: ctx.socket.cid });
       if (!en) return;

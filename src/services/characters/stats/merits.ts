@@ -20,7 +20,6 @@ export const merits: IMStat[] = [
     name: "bond resistance",
     values: [1],
     type: "merit",
-    splat: ["vampire"],
   },
   {
     name: "short bond",

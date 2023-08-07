@@ -72,4 +72,9 @@ export const backgrounds: IMStat[] = [
     splat: ["vampire"],
     hasInstance: true,
   },
+  {
+    name: "linguistics",
+    values: [1, 2, 3, 4, 5],
+    type: "background",
+  },
 ];

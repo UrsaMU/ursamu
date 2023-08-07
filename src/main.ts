@@ -11,11 +11,12 @@ import { Config, IConfig, IPlugin } from "./@types";
 
 plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
+export const gameConfig = new Config(defaultConfig);
 
 export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
-  const config = new Config({ ...defaultConfig, ...cfg });
+  gameConfig.setConfig({ ...defaultConfig, ...cfg });
 
-  server.listen(config.server?.ws, async () => {
+  server.listen(gameConfig.server?.ws, async () => {
     // load plugins
     if (plugins) {
       for (const plugin of plugins) {
@@ -23,7 +24,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
           if (plugin.init) {
             const res = await plugin.init();
             if (res) {
-              config.setConfig({ ...defaultConfig, ...plugin.config });
+              gameConfig.setConfig({ ...defaultConfig, ...plugin.config });
               console.log(`Plugin ${plugin.name} loaded.`);
             }
           }
@@ -70,7 +71,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
         lock: "admin+",
       });
     }
-    console.log(`Server started on port ${config.server?.ws}.`);
+    console.log(`Server started on port ${gameConfig.server?.ws}.`);
   });
 
   process.on("SIGINT", async () => {

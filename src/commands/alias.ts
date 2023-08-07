@@ -8,6 +8,7 @@ export default () => {
     name: "@alias",
     pattern: /^[@/+]?alias\s+(.*)\s*=\s*(.+)/i,
     lock: "connected",
+    help: "Set an alias",
     exec: async (ctx, args) => {
       const [name, alias] = args;
       const en = await dbojs.findOne({ id: ctx.socket.cid });

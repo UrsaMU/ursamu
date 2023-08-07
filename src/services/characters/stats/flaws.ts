@@ -50,13 +50,11 @@ export const flaws: IMStat[] = [
     name: "bond junkie",
     values: [1],
     type: "flaw",
-    splat: ["vampire"],
   },
   {
     name: "long bond",
     values: [1],
     type: "flaw",
-    splat: ["vampire"],
   },
   {
     name: "famer",

@@ -13,6 +13,8 @@ export default () => {
     name: "@dig",
     pattern: /^[@/+]?dig(\/.*)?\s+([^=]+)(?:\s*=\s*([^,]+))?(?:,\s*(.*))?/i,
     lock: "connected builder+",
+    help: "Dig a room",
+    category: "building",
     exec: async (ctx, args) => {
       const [swtch, room, to, from] = args;
       const en = await dbojs.findOne({ id: ctx.socket.cid });
@@ -85,6 +87,8 @@ export default () => {
 
   addCmd({
     name: "@teleport",
+    category: "building",
+    help: "Teleport an object",
     pattern:
       /^[@/+]?t(?:e|el|ele|elep|elepo|elepor|eleport)?\s+(.*)\s*=\s*(.*)/i,
     lock: "connected builder+",
@@ -133,6 +137,8 @@ export default () => {
     name: "@destroy",
     pattern: /^[@/+]?destroy(?:\/(.*))?\s+(.*)/i,
     lock: "connected builder+",
+    help: "Destroy an object",
+    category: "building",
     exec: async (ctx, args) => {
       const [swtch, name] = args;
 
@@ -190,6 +196,8 @@ export default () => {
 
   addCmd({
     name: "@open",
+    category: "building",
+    help: "Open an exit",
     pattern: /^[@/+]?open\s+(.*)\s*=\s*(.*)/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
