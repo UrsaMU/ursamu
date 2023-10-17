@@ -8,6 +8,7 @@ export interface IConfig {
     chans?: string;
     mail?: string;
     wiki?: string;
+    bboard?: string;
   };
   game?: {
     name?: string;

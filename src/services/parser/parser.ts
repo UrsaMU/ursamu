@@ -1,4 +1,5 @@
 import { Parser } from "@ursamu/parser";
+import { ljust } from "../../utils";
 
 const parser = new Parser();
 

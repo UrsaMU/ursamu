@@ -1,4 +1,4 @@
-import { Obj, addCmd, send } from "../services";
+import { Obj, addCmd, flags, send } from "../services";
 import { allStats, formatValue, setStat } from "../services/characters";
 import { canEdit, capString, moniker, target } from "../utils";
 import { IMStatEntry } from "../@types";
@@ -9,16 +9,43 @@ export default () => {
   addCmd({
     name: "splat",
     pattern: /^[@\+]?splat\s+(.*)/i,
-    lock: "connected !approved|admin+",
-    hidden: true,
+    lock: "connected !approved|storyteller+",
+    category: "chargen",
+
     exec: async (ctx, args) => {
+      let tar = "me",
+        splat = "";
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
+
+      // if args[0] contains an =, then we need to split it up.
+      if (args[0].includes("=")) {
+        const parts = args[0].split("=");
+
+        // if parts[0] does not equal me, then we need to check if the enactor is an admin.
+        // if not, end the command and tell the enactor 'Permssion denied'
+        if (
+          parts[0].trim().toLowerCase() !== "me" &&
+          !flags.check(en.flags, "storyteller+")
+        ) {
+          return send([ctx.socket.id], "%chGame>%cn Permission denied.");
+        }
+
+        if (parts.length > 1) {
+          tar = parts[0].trim().toLowerCase();
+          splat = parts[1].trim().toLowerCase();
+        }
+      } else {
+        splat = args[0].trim().toLowerCase();
+      }
+
+      const targ = await target(en.dbobj, tar);
+      if (!targ) return send([ctx.socket.id], "%chGame>%cn Invalid target.");
 
       const fullStat = allStats.find((s) => s.name === "splat");
       if (!fullStat) return send([ctx.socket.id], "%chGame>%cn Invalid stat.");
 
-      if (!fullStat.values.includes(args[0].trim().toLowerCase())) {
+      if (!fullStat.values.includes(splat)) {
         return send(
           [ctx.socket.id],
           `%chGame>%cn Invalid splat. Must be one of: ${fullStat.values
@@ -27,55 +54,84 @@ export default () => {
         );
       }
 
-      if (en.dbobj.data?.stats?.find((s: IMStatEntry) => s.name === "splat")) {
+      if (targ.data?.stats?.find((s: IMStatEntry) => s.name === "splat")) {
         return send(
           [ctx.socket.id],
           `%chGame>%cn ${moniker(
-            en.dbobj
-          )} already has a splat set. To reset your character, use '%ch+stats/reset%cn' to start chargen over.`
+            targ
+          )} already has a splat set. See: '%chhelp +stats/reset%cn'.`
         );
       }
 
       try {
-        const name = await setStat(en.dbobj, "splat", args[0].trim());
+        const name = await setStat(targ, "splat", splat.trim());
         return await send(
           [ctx.socket.id],
-          `%chGame>%cn ${moniker(en.dbobj)}'s splat set to: %ch${args[0]
+          `%chGame>%cn ${moniker(targ)}'s splat set to: %ch${splat
             .trim()
             ?.toUpperCase()}%cn.`
         );
       } catch (error: any) {
-        return send([ctx.socket.id], `%chGame>%cn ${error.message}`);
+        return send([ctx.socket.id], `%ch%crERROR>%cn ${error.message}`);
       }
     },
   });
 
   addCmd({
-    name: "stats/reset",
-    pattern: /^[@\+]?stats\/reset$/i,
+    name: "reset",
+    pattern: /^[@\+]?reset(?:\s+(.*))?$/i,
     lock: "connected !approved|admin+",
-    hidden: true,
-    exec: async (ctx) =>
-      send(
+    category: "chargen",
+    exec: async (ctx, [tar]) => {
+      const en = await Obj.get(ctx.socket.cid);
+      if (!en) return;
+
+      if (!tar) tar = "me";
+      const targ = await target(en.dbobj, tar);
+      if (!targ) return send([ctx.socket.id], "%chGame>%cn Invalid target.");
+
+      if (!canEdit(en.dbobj, targ)) {
+        return send([ctx.socket.id], "%chGame>%cn permission denied.");
+      }
+
+      if (!targ.data?.stats?.find((s: IMStatEntry) => s.name === "splat")) {
+        return send(
+          [ctx.socket.id],
+          `%chGame>%cn ${moniker(
+            targ
+          )} has no splat set. See: '%chhelp +splat%cn'.`
+        );
+      }
+
+      await send(
         [ctx.socket.id],
-        "%chGame>%cn To confirm reset, type '%ch+stats/reset me=confirm%cn'"
-      ),
+        "%chGame>%cn To confirm reset, type '%chreset/confirm <target>%cn'"
+      );
+    },
   });
 
   addCmd({
     name: "stats/reset/confirm",
-    pattern: /^[@\+]?stats\/reset\s+me\s*=\s*confirm$/i,
+    pattern: /^[@\+]?stats\/reset\/confirm\s+(.*)$/i,
     lock: "connected !approved|admin+",
     hidden: true,
-    exec: async (ctx) => {
+    exec: async (ctx, [tar]) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
+
+      if (!tar) tar = "me";
+      const targ = await target(en.dbobj, tar);
+      if (!targ) return send([ctx.socket.id], "%chGame>%cn Invalid target.");
+
+      if (!canEdit(en.dbobj, targ)) {
+        return send([ctx.socket.id], "%chGame>%cn permission denied.");
+      }
 
       delete en.dbobj.data?.stats;
       await en.save();
       return send(
         [ctx.socket.id],
-        "%chGame>%cn Your character has been reset.  Please re-do your character."
+        `%chGame>%cn ${moniker(targ)} has been reset.`
       );
     },
   });
@@ -83,7 +139,7 @@ export default () => {
   addCmd({
     name: "stats",
     pattern: /^[@\+]?stat[s]?(?:\/(.*))?\s+(.*)\s*=\s*(.*)?$/i,
-    hidden: true,
+    category: "chargen",
     lock: "connected !approved|admin+",
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);

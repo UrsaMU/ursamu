@@ -13,3 +13,4 @@ export * from "./target";
 export * from "./checkFlags";
 export * from "./formatStat";
 export * from "./capString";
+export * from "./formatString";

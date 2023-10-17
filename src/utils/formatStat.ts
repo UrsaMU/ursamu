@@ -9,15 +9,20 @@ export const formatStat = (
 ) => {
   if (typeof value === "number") value = value.toString();
   if (!value) value = "";
+  const hasVal = !!+value ? "" : `%ch%cx`;
   const val = +value !== 0 ? `%ch${value}%cn` : `%ch%cx0%cn`;
   if (!right) {
     return (
-      ljust(`${capString(stat)}`, width - (value?.length || 0), "%ch%cx.%cn") +
-      val
+      ljust(
+        `${hasVal}${capString(stat)}`,
+        width - (value?.length || 0),
+        "%ch%cx.%cn"
+      ) + val
     );
   }
 
   return (
-    ljust(`${capString(stat)}:`, 12) + ljust(`%ch${capString(value)}%cn`, 25)
+    ljust(`${value.length > 0 ? "" : "%ch%cx"}${capString(stat)}:`, 12) +
+    ljust(`%ch${capString(value)}%cn`, 25)
   );
 };

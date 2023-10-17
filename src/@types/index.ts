@@ -13,3 +13,5 @@ export * from "./IMStat";
 export * from "./IMStatEntry";
 export * from "./IAttribute";
 export * from "./IPlugin";
+export * from "./IHelp";
+export * from "./Boards";

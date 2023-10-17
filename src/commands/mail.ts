@@ -330,7 +330,6 @@ export default () => {
     name: "@mail",
     pattern: /^[@/+]?mail$/i,
     lock: "connected",
-    hidden: true,
     exec: async (ctx, args) => {
       const targets = args[1];
       const en = await Obj.get(ctx.socket.cid);

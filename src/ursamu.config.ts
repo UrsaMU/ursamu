@@ -9,6 +9,7 @@ const config: IConfig = {
     counters: "data/counters.db",
     chans: "data/chans.db",
     mail: "data/mail.db",
+    bboard: "data/bboard.db",
   },
   game: {
     name: "Ursamu",

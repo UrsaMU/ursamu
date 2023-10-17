@@ -7,15 +7,18 @@ import parser from "../services/parser/parser";
 import { center, columns, ljust, repeatString } from "../utils/format";
 import { send } from "../services/broadcast";
 import { gameConfig } from "../main";
+import { ICmd, IHelp } from "../@types";
 
 export default async () => {
   const text = new Map<string, string>();
   const dirent = await readdir(join(__dirname, "../../help"), {
     withFileTypes: true,
   });
+
   const files = dirent.filter(
     (dirent) => dirent.isFile() && dirent.name.endsWith(".md")
   );
+
   for (const file of files) {
     const textFile = await readFile(
       join(__dirname, `../../help/${file.name}`),
@@ -34,50 +37,33 @@ export default async () => {
 
       let cats: Set<string> = new Set();
       let commands: any = [];
-      text.forEach(
-        (_, key) =>
-          key.match(/^topic_/) && commands.push(key.replace(/^topic_/, ""))
-      );
+      let localCmds = [...cmds];
+      commands = localCmds
+        .filter((cmd) => !cmd.hidden)
+        .filter((cmd) => flags.check(flgs, cmd.lock || ""))
+        .map((cmd) => {
+          let name = "";
+          if (text.has(`help_${cmd.name}`)) {
+            name = cmd.name.toUpperCase();
+          } else {
+            name = `%cr${cmd.name.toUpperCase()}*%cn`;
+            // cmd.name = cmd.name.toUpperCase();
+          }
 
-      cmds.forEach((cmd) => {
-        if (cmd.category) {
-          cats.add(cmd.category);
-        }
-      });
+          if (cmd.category) {
+            cats.add(cmd.category);
+          } else {
+            cats.add("General");
+            cmd.category = "General";
+          }
 
-      const catagories = Array.from(
-        [...cats].sort((a, b) => a.localeCompare(b))
-      );
-
-      commands = [
-        ...commands,
-        ...cmds
-          .filter((cmd) => !cmd.hidden)
-          .filter((cmd) => flags.check(flgs, cmd.lock || ""))
-          .map(
-            (cmd) =>
-              ljust(
-                text.has(`help_${cmd.name}`)
-                  ? cmd.name.toUpperCase()
-                  : `%cr${cmd.name.toUpperCase()}*%cn`,
-                15,
-                "%ch%cx.%cn"
-              ) +
-              " " +
-              // if the stirng is longer than 20 chars, we need to cut it off.
-              ljust(
-                (cmd.help?.length || 0) <= 20
-                  ? cmd.help
-                  : cmd.help?.substring(0, 17) + "...",
-                20,
-                "%ch%cx.%cn"
-              )
-          ),
-      ].sort((a, b) =>
-        parser
-          .stripSubs("telnet", a)
-          .localeCompare(parser.stripSubs("telnet", b))
-      );
+          return { name, category: cmd.category };
+        })
+        .sort((a, b) =>
+          parser
+            .stripSubs("telnet", a.name.toLowerCase())
+            .localeCompare(parser.stripSubs("telnet", b.name.toLowerCase()))
+        );
 
       let output =
         center(
@@ -87,30 +73,31 @@ export default async () => {
           78,
           "%cr=%cn"
         ) + "\n";
-      for (const cat of catagories) {
+
+      for (const cat of Array.from(cats).sort((a, b) => a.localeCompare(b))) {
         output +=
           center(`%cy[%cn %ch${cat.toUpperCase()}%cn %cy]%cn`, 78, "%cr-%cn") +
           "\n";
         output +=
           columns(
-            commands.filter(
-              (c: any) => c.category?.toLowerCase() === cat?.toLowerCase()
-            ),
+            commands
+              .filter((c: any) => {
+                if (c.category?.toLowerCase() === cat?.toLowerCase()) {
+                  return true;
+                }
+              })
+              .map((c: any) => c.name),
             78,
-            2,
+            4,
             " "
           ) + "\n\n";
       }
 
-      const leftovers = commands.filter((c: any) => !c.category);
-      if (leftovers.length) {
-        output += center("%cy[%cn %chGENERAL%cn %cy]%cn", 78, "%cr-%cn");
-        output += columns(leftovers, 78, 2, " ") + "\n\n";
-      }
       output +=
         "Type '%chhelp <command>%cn' for more information on a command.\n";
       output += repeatString("%cr=%cn", 78);
-      send([ctx.socket.id], output, {});
+      await send([ctx.socket.id], output, {});
+      localCmds = [];
     },
   });
 

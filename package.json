@@ -37,7 +37,8 @@
     "nedb-promises": "^6.2.1",
     "socket.io": "^4.7.1",
     "socket.io-client": "^4.7.1",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "vm2": "^3.9.19"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
