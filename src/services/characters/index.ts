@@ -10,6 +10,8 @@ export * from "./attributes";
 export * from "./setStat";
 export * from "./getStats";
 export * from "./formatValue";
+export * from "./statObj";
+
 export const allStats = [
   ...bio,
   ...attributes,

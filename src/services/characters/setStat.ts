@@ -89,10 +89,10 @@ export const setStat = async (
   if (!isNaN(+value)) value = +value;
 
   // Check the value
-  if (!fullStat.values.includes(value) && fullStat.values && value) {
+  if (!fullStat.values.includes(value) && fullStat.values.length > 0 && value) {
     throw new Error(`Invalid value for ${fullStat.name.toUpperCase()}.`);
   }
-  console.log(charObj);
+
   // Check the splat
   if (fullStat.splat && !fullStat.splat.includes(charObj.splat)) {
     throw new Error(fullStat.error || "Permission denied.");

@@ -27,7 +27,7 @@ export const bio: IMStat[] = [
     name: "auspice",
     values: ["ahroun, galliard, philodox, theurge, ragabash"],
     type: "bio",
-    category: "werewolf",
+    splat: ["werewolf"],
   },
   {
     name: "tribe",
@@ -45,7 +45,7 @@ export const bio: IMStat[] = [
       "ghost council",
     ],
     type: "bio",
-    category: "werewolf",
+    splat: ["werewolf"],
   },
   {
     name: "ambition",
@@ -61,18 +61,18 @@ export const bio: IMStat[] = [
     name: "Predator",
     values: [],
     type: "bio",
-    category: "vampire",
+    splat: ["vampire"],
   },
   {
     name: "clan",
     values: [],
     type: "bio",
-    category: "vampire",
+    splat: ["vampire"],
   },
   {
     name: "generation",
     values: [],
     type: "bio",
-    category: "vampire",
+    splat: ["vampire"],
   },
 ];

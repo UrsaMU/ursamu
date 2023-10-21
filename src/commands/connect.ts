@@ -52,11 +52,16 @@ export default () =>
       await setFlags(found, "connected");
       found.data ||= {};
       await dbojs.update({ id: found.id }, found);
-      send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
+      await send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
         cid: found.id,
       });
 
-      send([`#${found.location}`], `${moniker(found)} has connected.`, {});
+      await send(
+        [`#${found.location}`],
+        `${moniker(found)} has connected.`,
+        {}
+      );
+      await force(ctx, "@mail/notify");
       await joinChans(ctx);
       await force(ctx, "look");
     },

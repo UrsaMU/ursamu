@@ -8,8 +8,7 @@ import {
   moniker,
   target,
 } from "../utils";
-import { getStat, getTempStat } from "../services/characters/getStats";
-import { repeat } from "lodash";
+import { getStat } from "../services/characters/getStats";
 
 const bio = (obj: Obj) => {
   const splat = getStat(obj.dbobj, "splat");
@@ -18,7 +17,7 @@ const bio = (obj: Obj) => {
     allStats
       .filter(
         (stat) =>
-          stat.type === "bio" && (!stat.category || stat.category === splat)
+          stat.type === "bio" && (!stat.splat || stat.splat.includes(splat))
       )
       .map((stat) =>
         formatStat(stat.name, getStat(obj.dbobj, stat.name), 28, true)
