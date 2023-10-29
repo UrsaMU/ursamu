@@ -1,6 +1,5 @@
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
-import { getCharacter } from "../services/characters/character";
 import { addCmd } from "../services/commands";
 
 export default () =>
@@ -9,7 +8,7 @@ export default () =>
     lock: "connected",
     pattern: /^[@\+]?short\s+(.*)/i,
     exec: async (ctx, args) => {
-      const en = await getCharacter(ctx.socket.cid);
+      const en = await dbojs.findOne({ id: ctx.socket.cid });
       if (!en) return;
 
       en.data ||= {};

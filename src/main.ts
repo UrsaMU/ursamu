@@ -9,36 +9,16 @@ import { setFlags } from "./utils/setFlags";
 import { broadcast } from "./services/broadcast";
 import { Config, IConfig, IPlugin } from "./@types";
 
-plugins(path.join(__dirname, "./commands"));
-loadTxtDir(path.join(__dirname, "../text"));
 export const gameConfig = new Config(defaultConfig);
 
-export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
+export const mu = async (cfg?: IConfig) => {
   gameConfig.setConfig({ ...defaultConfig, ...cfg });
 
-  server.listen(gameConfig.server?.ws, async () => {
-    // load plugins
-    if (plugins) {
-      for (const plugin of plugins) {
-        try {
-          if (plugin.init) {
-            const res = await plugin.init();
-            if (res) {
-              gameConfig.setConfig({ ...defaultConfig, ...plugin.config });
-              console.log(`Plugin ${plugin.name} loaded.`);
-            }
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      }
-    }
+  plugins(path.join(__dirname, gameConfig.server?.commands || "./commands"));
+  loadTxtDir(path.join(__dirname, gameConfig.server?.text || "../text"));
 
-    const rooms = await dbojs.find({
-      $where: function () {
-        return this.flags.includes("room");
-      },
-    });
+  server.listen(gameConfig.server?.ws, async () => {
+    const rooms = await dbojs.find({ flags: /room/i });
 
     const counter = {
       _id: "objid",

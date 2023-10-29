@@ -1,6 +1,4 @@
-import fs from "fs";
 import { readdir } from "fs/promises";
-import path from "path";
 
 export const plugins = async (dir: string) => {
   const dirent = await readdir(dir);

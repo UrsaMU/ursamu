@@ -9,7 +9,7 @@ import { moniker } from "./utils/moniker";
 import { joinChans } from "./utils/joinChans";
 import { IContext } from "./@types/IContext";
 import { setFlags } from "./utils/setFlags";
-import { authRouter, dbObjRouter } from "./routes";
+import { authRouter, dbObjRouter, wikiRouter } from "./routes";
 import authMiddleware from "./middleware/authMiddleware";
 import { IMError } from "./@types";
 
@@ -23,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/auth/", authRouter);
 app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
+app.use("/api/v1/wiki/", wikiRouter);
 
 app.use(
   (error: IMError, req: Request, res: Response, next: NextFunction): void => {

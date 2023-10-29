@@ -10,6 +10,7 @@ const config: IConfig = {
     chans: "data/chans.db",
     mail: "data/mail.db",
     bboard: "data/bboard.db",
+    wiki: "data/wiki.db",
   },
   game: {
     name: "Ursamu",

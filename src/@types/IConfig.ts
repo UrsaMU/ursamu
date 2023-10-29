@@ -1,3 +1,5 @@
+import { IPlugin } from "./IPlugin";
+
 export interface IConfig {
   server?: {
     telnet?: number;
@@ -9,7 +11,12 @@ export interface IConfig {
     mail?: string;
     wiki?: string;
     bboard?: string;
+    commands?: string;
+    services?: string;
+    text?: string;
+    pluginsDir?: string;
   };
+
   game?: {
     name?: string;
     description?: string;

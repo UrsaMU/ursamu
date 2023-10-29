@@ -1,6 +1,8 @@
 export interface IArticle {
   _id?: number;
   featuredImage?: string;
+  featuredImageVertical?: string;
+  lock?: string;
   category: string;
   featured?: boolean;
   title: string;
