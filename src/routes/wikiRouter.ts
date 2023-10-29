@@ -71,4 +71,66 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+router.put("/:id", authMiddleware, async (req, res, next) => {
+  try {
+    const en = await Obj.get(req.body.id);
+    const entry = await wiki.findOne({
+      $or: [{ id: req.params.id }, { slug: req.params.id.toLowerCase() }],
+    });
+
+    if (!entry) {
+      const err: IMError = new Error("Not Found");
+      err.status = 404;
+      return next(err);
+    }
+
+    if (!flags.check(en?.flags || "", entry.lock || "")) {
+      const err: IMError = new Error("Not Found");
+      err.status = 404;
+      return next(err);
+    }
+
+    delete req.body.id;
+    const updatedEntry = await wiki.update(
+      { _id: entry._id },
+      {
+        ...req.body,
+        updatedBy: en?.dbref,
+        updatedAt: new Date(),
+      }
+    );
+
+    res.status(200).json(updatedEntry);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/:id", authMiddleware, async (req, res, next) => {
+  try {
+    const en = await Obj.get(req.body.id);
+    const entry = await wiki.findOne({
+      $or: [{ id: req.params.id }, { slug: req.params.id.toLowerCase() }],
+    });
+
+    if (!entry) {
+      const err: IMError = new Error("Not Found");
+      err.status = 404;
+      return next(err);
+    }
+
+    if (!flags.check(en?.flags || "", entry.lock || "")) {
+      const err: IMError = new Error("Not Found");
+      err.status = 404;
+      return next(err);
+    }
+
+    await wiki.remove({ _id: entry._id });
+
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
+
 export { router as wikiRouter };
