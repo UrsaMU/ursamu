@@ -3,6 +3,7 @@ export interface IArticle {
   featuredImage?: string;
   category: string;
   featured?: boolean;
+  lock?: string;
   title: string;
   slug: string;
   content: string;
