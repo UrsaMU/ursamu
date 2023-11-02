@@ -3,7 +3,7 @@ import { IDBOBJ } from "../../@types/IDBObj";
 import config from "../../ursamu.config";
 import { IChannel } from "../../@types/Channels";
 import { IMail } from "../../@types/IMail";
-import { IArticle, IBoard } from "../../@types";
+import { IArticle, IBoard, IMStat } from "../../@types";
 
 export class DBO<T> {
   db: Datastore<T>;
@@ -55,3 +55,4 @@ export const dbojs = new DBO<IDBOBJ>(`${config.server?.db}`);
 export const chans = new DBO<IChannel>(`${config.server?.chans}`);
 export const mail = new DBO<IMail>(`${config.server?.mail}`);
 export const wiki = new DBO<IArticle>(`${config.server?.wiki}`);
+export const stats = new DBO<IMStat>(`${config.server?.stats}`);

@@ -11,6 +11,7 @@ export interface IConfig {
     mail?: string;
     wiki?: string;
     bboard?: string;
+    stats?: string;
     commands?: string;
     services?: string;
     text?: string;

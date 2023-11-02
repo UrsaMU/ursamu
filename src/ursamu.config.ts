@@ -11,6 +11,7 @@ const config: IConfig = {
     mail: "data/mail.db",
     bboard: "data/bboard.db",
     wiki: "data/wiki.db",
+    stats: "data/stats.db",
   },
   game: {
     name: "Ursamu",
