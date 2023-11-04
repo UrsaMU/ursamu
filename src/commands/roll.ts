@@ -41,25 +41,27 @@ export default () => {
         .replace(/\s\+\s/g, " +")
         .replace(/\s\-\s/g, " -")
         .split(" ")
-        .map((item: string) => {
+        .map(async (item: string) => {
           if (!item.includes("+") && !item.includes("-")) {
-            const stat = getStat(en, item);
+            const stat = await getStat(en, item);
             if (stat) return getStat(en, item);
             if (!isNaN(+item)) return item;
             return 0;
           }
 
           const [, sign, stat] = item.split(/(\+|\-)/);
-          const statVal = getStat(en, stat);
+          const statVal = await getStat(en, stat);
           if (statVal) return `${sign}${statVal}`;
           if (!isNaN(+stat)) return `${sign}${stat}`;
           return 0;
-        })
+        });
+
+      const pools = (await Promise.all(poolNum))
         .map((item: string) => +item)
         .reduce((a: number, b: number) => a + b);
 
       let critical = false;
-      const dice = roll(poolNum);
+      const dice = roll(pools);
       const diceColor = dice
         .sort((a, b) => a - b)
         .map((d) => {

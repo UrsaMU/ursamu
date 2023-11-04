@@ -15,7 +15,7 @@ export const formatStat = (
     return (
       ljust(
         `${hasVal}${capString(stat)}`,
-        width - (value?.length || 0),
+        width - (value?.length || 1),
         "%ch%cx.%cn"
       ) + val
     );

@@ -1,7 +1,7 @@
 import { IDBOBJ } from "../../@types";
 import { Obj, allStats } from "..";
 
-export const getStat = (character: IDBOBJ | Obj, stat: string) => {
+export const getStat = async (character: IDBOBJ | Obj, stat: string) => {
   // first we need to see if the player has the stat in their data.
   const statEntry = character.data?.stats?.find((s) =>
     s.name.toLowerCase().startsWith(stat.toLowerCase())
@@ -19,6 +19,11 @@ export const getStat = (character: IDBOBJ | Obj, stat: string) => {
 
   // if it is, we'll return the default value.
   if (statObj) {
+    // if there's a calculated value, we'll return that.
+    if (statObj.calcValue) {
+      return statObj.calcValue(character);
+    }
+
     return statObj.default;
   }
 

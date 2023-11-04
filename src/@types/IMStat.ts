@@ -4,6 +4,7 @@ import { Obj } from "../services";
 export interface IMStat {
   name: string;
   values: any[];
+  calcValue?: (obj: IDBOBJ) => Promise<any>;
   type: string;
   splat?: string[];
   lock?: string;
@@ -15,5 +16,6 @@ export interface IMStat {
   hasSpecialties?: boolean;
   specialties?: IMStat[];
   error?: string;
-  check?: (obj: Obj) => boolean;
+  check?: (obj: Obj) => boolean | Promise<boolean>;
+  callback?: (obj: Obj) => Promise<void>;
 }

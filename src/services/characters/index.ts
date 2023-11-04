@@ -5,6 +5,7 @@ import { flaws } from "./stats/flaws";
 import { merits } from "./stats/merits";
 import { skills } from "./stats/skills";
 import { disciplines } from "./stats/disciplines";
+import { other } from "./stats/other";
 
 export * from "./attributes";
 export * from "./setStat";
@@ -20,4 +21,5 @@ export const allStats = [
   ...flaws,
   ...backgrounds,
   ...disciplines,
+  ...other,
 ];

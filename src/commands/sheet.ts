@@ -1,4 +1,6 @@
-import { Obj, addCmd, allStats, send } from "../services";
+import { get } from "lodash";
+import { IDBOBJ } from "../@types";
+import { Obj, addCmd, allStats, send, getStat } from "../services";
 import {
   center,
   divider,
@@ -8,53 +10,54 @@ import {
   moniker,
   target,
 } from "../utils";
-import { getStat } from "../services/characters/getStats";
 
-const bio = (obj: Obj) => {
-  const splat = getStat(obj.dbobj, "splat");
+const bio = async (obj: Obj) => {
+  const splat = await getStat(obj.dbobj, "splat");
 
-  const bioList =
+  let bioList =
     allStats
       .filter(
         (stat) =>
           stat.type === "bio" && (!stat.splat || stat.splat.includes(splat))
       )
-      .map((stat) =>
-        formatStat(stat.name, getStat(obj.dbobj, stat.name), 28, true)
+      .map(async (stat) =>
+        formatStat(stat.name, await getStat(obj.dbobj, stat.name), 28, true)
       ) || [];
 
+  const bio = await Promise.all(bioList);
+
   let output = "";
-  for (let i = 0; i < bioList.length; i++) {
+  for (let i = 0; i < bio.length; i++) {
     if (i % 2 === 0) {
       output += "%r%b";
     }
-    output += bioList[i] + "  ";
+    output += bio[i] + "  ";
   }
 
   return output + "%r";
 };
 
-const attributes = (obj: Obj) => {
+const attributes = async (obj: Obj) => {
   const physical = [
     center("Physical", 24, " "),
-    formatStat("strength", getStat(obj.dbobj, "strength")),
-    formatStat("dexterity", getStat(obj.dbobj, "dexterity")),
-    formatStat("stamina", getStat(obj.dbobj, "stamina")),
+    formatStat("strength", await getStat(obj.dbobj, "strength")),
+    formatStat("dexterity", await getStat(obj.dbobj, "dexterity")),
+    formatStat("stamina", await getStat(obj.dbobj, "stamina")),
   ];
 
   const social = [
     center("Social", 24, " "),
 
-    formatStat("charisma", getStat(obj.dbobj, "charisma")),
-    formatStat("manipulation", getStat(obj.dbobj, "manipulation")),
-    formatStat("composure", getStat(obj.dbobj, "composure")),
+    formatStat("charisma", await getStat(obj.dbobj, "charisma")),
+    formatStat("manipulation", await getStat(obj.dbobj, "manipulation")),
+    formatStat("composure", await getStat(obj.dbobj, "composure")),
   ];
 
   const mental = [
     center("Mental", 24, " "),
-    formatStat("intelligence", getStat(obj.dbobj, "intelligence")),
-    formatStat("wits", getStat(obj.dbobj, "wits")),
-    formatStat("resolve", getStat(obj.dbobj, "resolve")),
+    formatStat("intelligence", await getStat(obj.dbobj, "intelligence")),
+    formatStat("wits", await getStat(obj.dbobj, "wits")),
+    formatStat("resolve", await getStat(obj.dbobj, "resolve")),
   ];
 
   let output = divider("Attributes") + "%r";
@@ -66,7 +69,7 @@ const attributes = (obj: Obj) => {
   return output;
 };
 
-const skills = (obj: Obj) => {
+const skills = async (obj: Obj) => {
   const physical = allStats.filter(
     (stat) => stat.type === "skill" && stat.category === "physical"
   );
@@ -74,13 +77,15 @@ const skills = (obj: Obj) => {
   const totalPhysical = [];
 
   for (const stat of physical) {
-    totalPhysical.push(formatStat(stat.name, getStat(obj.dbobj, stat.name)));
+    totalPhysical.push(
+      formatStat(stat.name, await getStat(obj.dbobj, stat.name))
+    );
 
     obj.data?.stats?.filter((s) => s.type === stat.name);
     for (const s of obj.data?.stats?.filter((s) => s.type === stat.name) ||
       []) {
       totalPhysical.push(
-        "   " + formatStat(s.name, getStat(obj.dbobj, s.name), 21)
+        "   " + formatStat(s.name, await getStat(obj.dbobj, s.name), 21)
       );
     }
   }
@@ -92,12 +97,14 @@ const skills = (obj: Obj) => {
   const totalSocial = [];
 
   for (const stat of social) {
-    totalSocial.push(formatStat(stat.name, getStat(obj.dbobj, stat.name)));
+    totalSocial.push(
+      formatStat(stat.name, await getStat(obj.dbobj, stat.name))
+    );
 
     obj.data?.stats
       ?.filter((s) => s.type === stat.name)
-      .forEach((s) => {
-        totalSocial.push(formatStat(s.name, getStat(obj.dbobj, s.name)));
+      .forEach(async (s) => {
+        totalSocial.push(formatStat(s.name, await getStat(obj.dbobj, s.name)));
       });
   }
 
@@ -108,12 +115,14 @@ const skills = (obj: Obj) => {
   const totalMental = [];
 
   for (const stat of mental) {
-    totalMental.push(formatStat(stat.name, getStat(obj.dbobj, stat.name)));
+    totalMental.push(
+      formatStat(stat.name, await getStat(obj.dbobj, stat.name))
+    );
 
     obj.data?.stats
       ?.filter((s) => s.type === stat.name)
-      .forEach((s) => {
-        totalMental.push(formatStat(s.name, getStat(obj.dbobj, s.name)));
+      .forEach(async (s) => {
+        totalMental.push(formatStat(s.name, await getStat(obj.dbobj, s.name)));
       });
   }
 
@@ -146,7 +155,7 @@ const skills = (obj: Obj) => {
 
 const advantages = (obj: Obj) => {
   let output = `${divider("Backgrounds", "%cr-%cn", 26)}${divider(
-    "Merits",
+    "Advantages",
     "%cr-%cn",
     26
   )}${divider("Flaws", "%cr-%cn", 26)}\n`;
@@ -154,16 +163,19 @@ const advantages = (obj: Obj) => {
   const backgrounds =
     obj.data?.stats
       ?.filter((s) => s.type === "background")
-      .map((s) => formatStat(s.name, getStat(obj.dbobj, s.name))) || [];
+      .map(async (s) => formatStat(s.name, await getStat(obj.dbobj, s.name))) ||
+    [];
 
   const merits =
     obj.data?.stats
       ?.filter((s) => s.type === "merit")
-      .map((s) => formatStat(s.name, getStat(obj.dbobj, s.name))) || [];
+      .map(async (s) => formatStat(s.name, await getStat(obj.dbobj, s.name))) ||
+    [];
   const flaws =
     obj.data?.stats
       ?.filter((s) => s.type === "flaw")
-      .map((s) => formatStat(s.name, getStat(obj.dbobj, s.name))) || [];
+      .map(async (s) => formatStat(s.name, await getStat(obj.dbobj, s.name))) ||
+    [];
 
   const max = Math.max(backgrounds.length, merits.length, flaws.length);
   const totalBackgrounds = [];
@@ -190,8 +202,8 @@ const advantages = (obj: Obj) => {
   return "";
 };
 
-const disciplines = (obj: Obj) => {
-  const splat = getStat(obj.dbobj, "splat");
+const disciplines = async (obj: Obj) => {
+  const splat = await getStat(obj.dbobj, "splat");
 
   const totalDisciplines: any[] = [];
 
@@ -214,14 +226,14 @@ const disciplines = (obj: Obj) => {
     const colDisciplines = [];
     for (const stat of col) {
       colDisciplines.push(
-        formatStat(stat.name, getStat(obj.dbobj, stat.name), 37)
+        formatStat(stat.name, await getStat(obj.dbobj, stat.name), 37)
       );
 
       for (const s of obj.data?.stats
         ?.filter((s) => s.type === stat.name)
         .sort((a, b) => a.value - b.value) || []) {
         colDisciplines.push(
-          "   " + formatStat(s.name, getStat(obj.dbobj, s.name), 34)
+          "   " + formatStat(s.name, await getStat(obj.dbobj, s.name), 34)
         );
       }
 
@@ -248,6 +260,161 @@ const disciplines = (obj: Obj) => {
   return output + "%r";
 };
 
+const other = async (obj: Obj) => {
+  const splat = await getStat(obj.dbobj, "splat");
+  let output = "";
+
+  const other = allStats.filter(
+    (stat) =>
+      stat.type === "other" && (stat.splat?.includes(splat) || !stat.splat)
+  );
+
+  let totalOther = [];
+
+  for (const stat of other) {
+    totalOther.push(formatStat(stat.name, await getStat(obj.dbobj, stat.name)));
+  }
+  totalOther = totalOther.sort((a, b) => a.localeCompare(b));
+  output += divider("Other");
+
+  for (let i = 0; i < totalOther.length; i++) {
+    if (i % 3 === 0) {
+      output += "%r%b";
+    }
+    output += totalOther[i] + "  ";
+  }
+
+  return output + "%r";
+};
+
+const calculateDamage = (
+  superficial: number,
+  aggravated: number,
+  maxBoxes: number,
+  characterType: string // Assuming characterType can be "mortal", "ghoul", or others
+) => {
+  let damageBoxes = Array(maxBoxes).fill("[ ]");
+  let status = "";
+
+  // Apply Aggravated damage
+  for (let i = 0; i < aggravated && i < maxBoxes; i++) {
+    damageBoxes[i] = "[X]";
+  }
+
+  // Apply Superficial damage in remaining boxes if available
+  for (let i = 0; i < maxBoxes; i++) {
+    if (damageBoxes[i] === "[ ]" && superficial > 0) {
+      damageBoxes[i] = "[/]";
+      superficial--;
+    }
+  }
+
+  // Upgrade Superficial to Aggravated if needed
+  if (superficial > 0) {
+    for (let i = 0; i < maxBoxes && superficial > 0; i++) {
+      if (damageBoxes[i] === "[/]") {
+        damageBoxes[i] = "[X]";
+        superficial--;
+      }
+    }
+  }
+
+  // Check for Impaired or Incapacitated status
+  const filledBoxes = damageBoxes.reduce(
+    (acc, val) => acc + (val !== "[ ]" ? 1 : 0),
+    0
+  );
+
+  if (filledBoxes >= maxBoxes) {
+    // Special rule for mortal and ghoul characters when they reach impaired
+    if (
+      (characterType === "mortal" || characterType === "ghoul") &&
+      aggravated < maxBoxes
+    ) {
+      status = "Incapacitated";
+    } else if (aggravated === maxBoxes || superficial > 0) {
+      // All boxes are aggravated or track is overflowing
+      status = "Incapacitated";
+    } else {
+      status = "Impaired";
+    }
+  }
+
+  return { damageBoxes, status };
+};
+
+const displayDamageTrack = async (obj: IDBOBJ, type: string) => {
+  let output = "";
+  let splat = await getStat(obj, "splat");
+  const superficial = parseInt(obj.data?.damage[type].superficial || 0);
+  const aggravated = parseInt(obj.data?.damage[type].aggravated || 0);
+  let maxBoxes;
+
+  if (type === "physical") {
+    maxBoxes = (await getStat(obj, "stamina")) + 3;
+  } else if (type === "mental") {
+    const composure = await getStat(obj, "composure");
+    const resolve = await getStat(obj, "resolve");
+    maxBoxes = composure + resolve;
+  } else {
+    throw new Error("Invalid damage type");
+  }
+
+  const { damageBoxes, status } = calculateDamage(
+    superficial,
+    aggravated,
+    maxBoxes,
+    splat
+  );
+  let trackLabel = type === "physical" ? "Health:    " : "Willpower: ";
+
+  if (status) {
+    output += ` ${trackLabel}%ch%cr${damageBoxes.join("")}%cn`;
+    output += ` %ch%cr(${status})%cn`;
+  } else {
+    output += ` ${trackLabel}${damageBoxes.join("")} `;
+  }
+
+  return output;
+};
+
+const health = async (obj: IDBOBJ) => {
+  let output = divider("Character Status") + "\n";
+
+  output += await displayDamageTrack(obj, "physical");
+  output += "%r";
+  output += await displayDamageTrack(obj, "mental");
+  output += "%r"; // Include additional tracks or information as needed
+
+  return output;
+};
+/*sheet
+ ===========================[  Sheet for: Kumakun  ]===========================
+ Full Name:                             Concept:                               
+ Birth Date:                            Splat:                                 
+ Ambition:                              Desire:                                
+--------------------------------- Attributes ---------------------------------
+         Physical                   Social                    Mental         
+ Strength...............1  Charisma...............1  Intelligence...........1
+ Dexterity..............1  Manipulation...........1  Wits...................1
+ Stamina................1  Composure..............1  Resolve................1
+----------------------------------- Skills -----------------------------------
+ Athletics..............0  Animal Ken.............0  Academics..............0
+ Brawl..................0  Etiquette..............0  Awareness..............0
+ Craft..................0  Insight................0  Finance................0
+ Driving................0  Intimidation...........0  Investigation..........0
+ Firearms...............0  Leadership.............0  Medicine...............0
+ Larceny................0  Performance............0  Occult.................0
+ Melee..................0  Persuasion.............0  Politics...............0
+ Stealth................0  Streetwise.............0  Science................0
+ Survival...............0  Subterfuge.............0  Technology.............0
+----------------------------------- Health -----------------------------------
+ Health: [ ][ ][ ][ ][ ][ ][ ][ ]
+------------------------------------------------------------------------------ 
+ Health.................0  Willpower..............0  Humanity...............0 
+ Blood Potency..........1  Blood Pool.............0  Experience.............0
+============================================================================== 
+ */
 export default () => {
   addCmd({
     name: "sheet",
@@ -269,13 +436,27 @@ export default () => {
       if (!tarObj)
         return send([ctx.socket.id], "%chGame>%cn Target not found.");
       let output = header(` Sheet for: %ch${moniker(tarObj.dbobj)}%cn `);
-      output += bio(tarObj);
-      output += attributes(tarObj);
-      output += skills(tarObj);
-      output += advantages(tarObj);
-      output += disciplines(tarObj);
+      output += await bio(tarObj);
+      output += await attributes(tarObj);
+      output += await skills(tarObj);
+      output += await advantages(tarObj);
+      output += await disciplines(tarObj);
+      output += await other(tarObj);
+      output += await health(tarObj);
       output += footer();
-      send([ctx.socket.id], output);
+
+      if (await getStat(tarObj.dbobj, "splat")) {
+        send([ctx.socket.id], output);
+      } else {
+        if (tarObj.dbref === en.dbref) {
+          send(
+            [ctx.socket.id],
+            "%chGame>%cn You have no splat set. See: %ch+help splat%cn"
+          );
+        } else {
+          send([ctx.socket.id], "%chGame>%cn That character has no splat set.");
+        }
+      }
     },
   });
 };

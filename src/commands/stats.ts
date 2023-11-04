@@ -78,8 +78,8 @@ export default () => {
   });
 
   addCmd({
-    name: "reset",
-    pattern: /^[@\+]?reset(?:\s+(.*))?$/i,
+    name: "stats/reset",
+    pattern: /^[@\+]?stats\/reset(?:\s+(.*))?$/i,
     lock: "connected !approved|admin+",
     category: "chargen",
     exec: async (ctx, [tar]) => {
@@ -105,7 +105,7 @@ export default () => {
 
       await send(
         [ctx.socket.id],
-        "%chGame>%cn To confirm reset, type '%chreset/confirm <target>%cn'"
+        "%chGame>%cn To confirm reset, type '%chstats/reset/confirm <target>%cn'"
       );
     },
   });
@@ -127,7 +127,15 @@ export default () => {
         return send([ctx.socket.id], "%chGame>%cn permission denied.");
       }
 
-      delete en.dbobj.data?.stats;
+      en.dbobj.data = {
+        ...en.dbobj.data,
+        stats: [],
+        damage: {
+          physical: { superficial: 0, aggravated: 0 },
+          mental: { superficial: 0, aggravated: 0 },
+        },
+      };
+
       await en.save();
       return send(
         [ctx.socket.id],
