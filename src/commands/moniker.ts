@@ -30,7 +30,7 @@ export default () =>
       tar.data.moniker = args[1];
       await dbojs.update({ id: tar.id }, tar);
       send(
-        [`#${player.location}`],
+        [ctx.socket.id],
         `You have set ${tar.data.name}'s moniker to ${args[1]}.`,
         {}
       );

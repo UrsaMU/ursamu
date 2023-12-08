@@ -8,7 +8,7 @@ export default () => {
     // +heal <target>/<physical|mental>=<value><type>
     pattern: /^[@\+]?heal\s+(.*)/i,
     lock: "connected approved|storyteller+",
-    category: "chargen",
+    category: "rp",
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
@@ -127,7 +127,7 @@ export default () => {
     // +damage <target>/<physical|mental>=<value><type>
     pattern: /^[@\+]?damage\s+(.*)/i,
     lock: "connected approved|storyteller+",
-    category: "chargen",
+    category: "rp",
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;

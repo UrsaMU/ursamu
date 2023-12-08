@@ -2,6 +2,7 @@ import { Obj } from "../services/DBObjs";
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
+import { idle, moniker } from "../utils";
 import { center, header, ljust, repeatString } from "../utils/format";
 
 export default () => {
@@ -10,6 +11,15 @@ export default () => {
     pattern: /^[\+@]?who$/i,
     lock: "connected",
     exec: async (ctx, args) => {
+      // ============================== Online Players ===============================
+      // Player                 Alias    Type    Idle  Doing  (Type: @doing <txt>)
+      // -----------------------------------------------------------------------------
+      // Player1                P1       Player  12m   Some stuff
+      // Player2                foob     Player  0     Some other stuff
+      // Player3                P3       Player  0     Saving the world.
+      // -----------------------------------------------------------------------------
+      // 3 players online
+
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
@@ -25,22 +35,33 @@ export default () => {
           return aName.localeCompare(bName);
         });
 
-      let output = header("Who's Online");
+      let output = header("Who's Online") + "\n";
       output +=
-        "%ch NAME                 ALIAS      DOING%cn(@doing <doing>)\n";
-      output += repeatString("%cr-%cn", 78);
+        "%ch Player                  Alias    Type       Idle  Doing  (Type: @doing <txt>)%cn\n";
+      output += repeatString("%cr-%cn", 78) + "\n";
       for (const pl of players) {
         const obj = await Obj.get(pl.id);
         if (!obj) continue;
-        output += "\n " + ljust(`${obj.name}`, 20) + " ";
-        output += ljust(`${obj.dbobj.data?.alias || ""}`, 10) + " ";
-        output += ljust(`${obj.dbobj.data?.doing || ""}`, 45);
+        output += " " + ljust(moniker(obj), 23) + " ";
+        output += ljust(obj.data?.alias || "", 8) + " ";
+        if (obj.flags.includes("storyteller")) {
+          output += ljust("%ch%cgStoryteller%cn", 10) + " ";
+        } else if (obj.flags.includes("admin")) {
+          output += ljust("%ch%cyAdmin%cn", 10) + " ";
+        } else if (obj.flags.includes("superuser")) {
+          output += ljust("%ch%ccDev%cn", 10) + " ";
+        } else {
+          output += ljust("Player", 10) + " ";
+        }
+
+        output += ljust(idle(obj.data?.lastCommand || 0), 6);
+        output += ljust(obj.data?.doing || "", 23) + "\n";
       }
 
-      output += "\n" + repeatString("%cr-%cn", 78);
+      output += repeatString("%cr-%cn", 78) + "\n";
       output +=
-        "\n" + center(`%ch${players.length}%cn players online`, 78) + "\n";
-      output += repeatString("%cr=%cn", 78) + "\n";
+        " " + ljust(`%ch${players.length}%cn players online`, 78) + "\n";
+      output += repeatString("%cr=%cn", 78);
       send([ctx.socket.id], output);
     },
   });
