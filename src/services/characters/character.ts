@@ -1,5 +1,5 @@
 import { createObj } from "../DBObjs/DBObjs.ts";
-import { hash } from "bcryptjs";
+import { hash } from "../../../deps.ts";
 import { dbojs } from "../Database/index.ts";
 
 type data = {
