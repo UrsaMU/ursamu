@@ -6,6 +6,7 @@ export interface IPlugin {
   description?: string;
   version: string;
   config?: IConfig;
+
   init?: () => boolean | Promise<boolean>;
   remove?: () => void | Promise<void>;
 }
