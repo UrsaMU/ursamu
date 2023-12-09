@@ -4,11 +4,13 @@ import { join } from "node:path";
 import { io } from "../deps.ts";
 import config from "./ursamu.config.ts";
 import parser from "./services/parser/parser.ts";
+import * as path from "https://deno.land/std@0.188.0/path/mod.ts";
 
 interface ITelnetSocket extends Socket {
   cid?: number;
 }
 
+const __dirname = path.dirname(path.fromFileUrl(import.meta.url))
 let welcome = "";
 try {
   welcome = readFileSync(join(__dirname, "../text/connect.txt"), "utf8");
