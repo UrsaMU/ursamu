@@ -1,4 +1,4 @@
-import { Socket } from "socket.io";
+import { Socket } from "../../deps.ts";
 
 export interface IMSocket extends Socket {
   id: string;

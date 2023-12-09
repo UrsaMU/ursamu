@@ -1,8 +1,8 @@
-import { Request, Response, Router } from "express";
+import { Request, Response, Router } from "../../deps.ts";
 import { Obj, dbojs } from "../services";
-import { compare } from "bcryptjs";
+import { compare } from "../../deps.ts";
 import { sign } from "../services/jwt";
-import { config } from "dotenv";
+import { config } from "../../deps.ts";
 
 config();
 

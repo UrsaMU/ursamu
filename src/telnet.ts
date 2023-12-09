@@ -1,7 +1,7 @@
-import { readFileSync } from "fs";
-import { Socket, createServer } from "net";
-import { join } from "path";
-import { io } from "socket.io-client";
+import { readFileSync } from "node:fs";
+import { Socket, createServer } from "node:net";
+import { join } from "node:path";
+import { io } from "../deps.ts";
 import config from "./ursamu.config.ts";
 import parser from "./services/parser/parser.ts";
 

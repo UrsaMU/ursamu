@@ -3,7 +3,7 @@ import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { canEdit } from "../utils/canEdit.ts";
 import { target } from "../utils/target.ts";
-import { set } from "lodash";
+import { set } from "../../deps.ts";
 
 export default () => {
   addCmd({

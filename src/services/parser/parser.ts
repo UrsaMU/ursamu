@@ -1,4 +1,4 @@
-import { Parser } from "@ursamu/parser";
+import { Parser } from "../../../deps.ts";
 import { ljust } from "../../utils";
 
 const parser = new Parser();

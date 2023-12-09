@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from "../../deps.ts";
 import { Obj, flags, wiki } from "../services";
 import { IMError } from "../@types";
 import authMiddleware from "../middleware/authMiddleware.ts";

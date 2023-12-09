@@ -1,4 +1,4 @@
-import { join } from "path";
+import { join } from "node:path";
 import { broadcast } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { dbojs } from "../services/Database";

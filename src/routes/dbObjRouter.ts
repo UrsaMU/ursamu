@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from "../../deps.ts";
 import { Obj, dbojs, flags } from "../services";
 import { IMError } from "../@types";
 import { canEdit } from "../utils";

@@ -1,4 +1,4 @@
-import { isNumber } from "lodash";
+import { isNumber } from "../../deps.ts";
 import { Obj, addCmd, getStat, roll, send, statObj } from "../services";
 import { moniker } from "../utils";
 

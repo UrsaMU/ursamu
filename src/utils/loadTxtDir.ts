@@ -1,5 +1,5 @@
-import fs, { readFileSync } from "fs";
-import path from "path";
+import fs, { readFileSync } from "node:fs";
+import path from "node:path";
 import { txtFiles } from "../services/commands";
 
 export const loadTxtDir = async (dir: string) => {

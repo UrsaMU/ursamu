@@ -1,7 +1,7 @@
-import { existsSync } from "fs";
+import { existsSync } from "node:fs";
 import { Obj, addCmd } from "../services";
-import { join } from "path";
-import { cwd } from "process";
+import { join } from "node:path";
+import { cwd } from "node:process";
 
 export default () => {
   // @cgdata/insert <type>/<name>=<value>[!<value>..|<value N>]

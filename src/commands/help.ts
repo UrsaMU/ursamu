@@ -1,5 +1,5 @@
-import { readFile, readdir } from "fs/promises";
-import { join } from "path";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
 import { addCmd, cmds } from "../services/commands";
 import { dbojs } from "../services/Database";
 import { flags } from "../services/flags/flags.ts";

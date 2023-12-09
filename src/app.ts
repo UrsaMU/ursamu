@@ -1,8 +1,8 @@
-import express, { NextFunction, Request, Response } from "express";
-import { createServer } from "http";
+import express, { NextFunction, Request, Response } from "../deps.ts";
+import { createServer } from "node:http";
 import { IMSocket } from "./@types/IMSocket.ts";
 import { cmdParser } from "./services/commands";
-import { Server } from "socket.io";
+import { Server } from "deps.ts";
 import { dbojs } from "./services/Database";
 import { send } from "./services/broadcast";
 import { moniker } from "./utils/moniker.ts";

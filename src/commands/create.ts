@@ -1,4 +1,4 @@
-import { hash } from "bcryptjs";
+import { hash } from "../../deps.ts";
 import { send } from "../services/broadcast/";
 import { addCmd, force } from "../services/commands";
 import { dbojs } from "../services/Database";

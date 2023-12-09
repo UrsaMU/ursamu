@@ -1,4 +1,4 @@
-import path from "path";
+import path from "node:path";
 import { server } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";

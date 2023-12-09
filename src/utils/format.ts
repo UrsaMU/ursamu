@@ -1,4 +1,4 @@
-import { repeat } from "lodash";
+import { repeat } from "../../deps.ts";
 import parser from "../services/parser/parser.ts";
 
 export const repeatString = (string = " ", length: number) => {

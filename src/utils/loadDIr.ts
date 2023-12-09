@@ -1,6 +1,6 @@
-import fs from "fs";
-import { readdir } from "fs/promises";
-import path from "path";
+import fs from "node:fs";
+import { readdir } from "node:fs/promises";
+import path from "node:path";
 
 export const plugins = async (dir: string) => {
   const dirent = await readdir(dir);

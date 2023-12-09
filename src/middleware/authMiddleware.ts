@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "../../deps.ts";
 import { IMError, IPayload } from "../@types";
 import { verify } from "../services/jwt";
 
