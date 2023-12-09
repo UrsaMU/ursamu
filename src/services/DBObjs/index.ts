@@ -1,1 +1,1 @@
-export * from "./DBObjs";
+export * from "./DBObjs.ts";

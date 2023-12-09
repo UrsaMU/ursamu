@@ -7,11 +7,11 @@ import { skills } from "./stats/skills.ts";
 import { disciplines } from "./stats/disciplines.ts";
 import { other } from "./stats/other.ts";
 
-export * from "./attributes";
-export * from "./setStat";
-export * from "./getStats";
-export * from "./formatValue";
-export * from "./statObj";
+export * from "./attributes.ts";
+export * from "./setStat.ts";
+export * from "./getStats.ts";
+export * from "./formatValue.ts";
+export * from "./statObj.ts";
 
 export const allStats = [
   ...bio,
