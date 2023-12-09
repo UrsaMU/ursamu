@@ -8,7 +8,10 @@ export { io } from "npm:socket.io-client@4.7.1"
 export { VM } from "npm:vm2@3.9.19"
 
 // @deno-types="npm:@types/express@4.17.21"
-export { Router, Request, Response, express } from "npm:express@4.18.2"
+export { Router } from "npm:express@4.18.2"
+export * as express from "npm:express@4.18.2"
+export interface Request {}
+export interface Response {}
 export type { RequestHandler } from "npm:express@4.18.2"
 
 import bcrypt from "npm:bcryptjs@2.4.3"
