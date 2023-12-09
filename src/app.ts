@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from "../deps.ts";
 import { createServer } from "node:http";
 import { IMSocket } from "./@types/IMSocket.ts";
 import { cmdParser } from "./services/commands/index.ts";
-import { Server } from "deps.ts";
+import { Server } from "../deps.ts";
 import { dbojs } from "./services/Database/index.ts";
 import { send } from "./services/broadcast/index.ts";
 import { moniker } from "./utils/moniker.ts";
