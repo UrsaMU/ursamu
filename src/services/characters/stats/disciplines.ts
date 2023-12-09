@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import { get } from "../../../deps.ts";
 import { IDBOBJ, IMStat } from "../../../@types/index.ts";
 import { Obj } from "../../DBObjs/index.ts";
 import { getStat } from "../getStats.ts";
