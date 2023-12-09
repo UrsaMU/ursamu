@@ -2,8 +2,8 @@ import { Obj } from "../services/DBObjs";
 import { dbojs, mail } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd, force } from "../services/commands";
-import { center } from "../utils/format";
-import { target } from "../utils/target";
+import { center } from "../utils/format.ts";
+import { target } from "../utils/target.ts";
 
 export default () => {
   addCmd({

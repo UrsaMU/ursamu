@@ -1,10 +1,10 @@
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
-import { flags } from "../services/flags/flags";
-import { displayName } from "../utils/displayName";
-import { setFlags } from "../utils/setFlags";
-import { target } from "../utils/target";
+import { flags } from "../services/flags/flags.ts";
+import { displayName } from "../utils/displayName.ts";
+import { setFlags } from "../utils/setFlags.ts";
+import { target } from "../utils/target.ts";
 
 export default () =>
   addCmd({

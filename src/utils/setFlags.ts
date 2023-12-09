@@ -1,9 +1,9 @@
-import { IDBOBJ } from "../@types/IDBObj";
-import { flags } from "../services/flags/flags";
+import { IDBOBJ } from "../@types/IDBObj.ts";
+import { flags } from "../services/flags/flags.ts";
 import { dbojs } from "../services/Database";
-import { IContext } from "../@types/IContext";
-import { joinChans } from "./joinChans";
-import { getSocket } from "./getSocket";
+import { IContext } from "../@types/IContext.ts";
+import { joinChans } from "./joinChans.ts";
+import { getSocket } from "./getSocket.ts";
 
 export const setFlags = async (dbo: IDBOBJ, flgs: string) => {
   const { data, tags } = flags.set(dbo.flags, dbo.data || {}, flgs);

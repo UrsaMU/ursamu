@@ -1,7 +1,7 @@
 import { IDBOBJ, IMStatEntry } from "../../@types";
 import { Obj } from "../DBObjs";
 import { dbojs } from "../Database";
-import { allStats } from "./index";
+import { allStats } from "./index.ts";
 
 export const setStat = async (
   character: IDBOBJ,

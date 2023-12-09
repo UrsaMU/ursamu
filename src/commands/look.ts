@@ -1,11 +1,11 @@
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { dbojs } from "../services/Database";
-import { displayName } from "../utils/displayName";
-import { center, columns, ljust, repeatString, rjust } from "../utils/format";
-import { idle } from "../utils/idle";
-import { isAdmin } from "../utils/isAdmin";
-import { target } from "../utils/target";
+import { displayName } from "../utils/displayName.ts";
+import { center, columns, ljust, repeatString, rjust } from "../utils/format.ts";
+import { idle } from "../utils/idle.ts";
+import { isAdmin } from "../utils/isAdmin.ts";
+import { target } from "../utils/target.ts";
 
 export default () =>
   addCmd({

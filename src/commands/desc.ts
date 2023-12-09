@@ -1,8 +1,8 @@
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { dbojs } from "../services/Database";
-import { displayName } from "../utils/displayName";
-import { target } from "../utils/target";
+import { displayName } from "../utils/displayName.ts";
+import { target } from "../utils/target.ts";
 
 export default () =>
   addCmd({

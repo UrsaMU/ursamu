@@ -1,5 +1,5 @@
-import { IDBOBJ } from "../@types/IDBObj";
-import { flags } from "../services/flags/flags";
+import { IDBOBJ } from "../@types/IDBObj.ts";
+import { flags } from "../services/flags/flags.ts";
 
 export const isAdmin = (en: IDBOBJ) => {
   return (flags.lvl(en.flags) || 0) >= 8;

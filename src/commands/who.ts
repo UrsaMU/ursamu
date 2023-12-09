@@ -3,7 +3,7 @@ import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { idle, moniker } from "../utils";
-import { center, header, ljust, repeatString } from "../utils/format";
+import { center, header, ljust, repeatString } from "../utils/format.ts";
 
 export default () => {
   addCmd({

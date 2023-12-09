@@ -1,16 +1,16 @@
 import express, { NextFunction, Request, Response } from "express";
 import { createServer } from "http";
-import { IMSocket } from "./@types/IMSocket";
+import { IMSocket } from "./@types/IMSocket.ts";
 import { cmdParser } from "./services/commands";
 import { Server } from "socket.io";
 import { dbojs } from "./services/Database";
 import { send } from "./services/broadcast";
-import { moniker } from "./utils/moniker";
-import { joinChans } from "./utils/joinChans";
-import { IContext } from "./@types/IContext";
-import { setFlags } from "./utils/setFlags";
+import { moniker } from "./utils/moniker.ts";
+import { joinChans } from "./utils/joinChans.ts";
+import { IContext } from "./@types/IContext.ts";
+import { setFlags } from "./utils/setFlags.ts";
 import { authRouter, dbObjRouter } from "./routes";
-import authMiddleware from "./middleware/authMiddleware";
+import authMiddleware from "./middleware/authMiddleware.ts";
 import { IMError } from "./@types";
 
 export const app = express();

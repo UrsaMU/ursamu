@@ -1,12 +1,12 @@
-import { IDBOBJ } from "../@types/IDBObj";
+import { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd, force } from "../services/commands";
-import { target } from "../utils/target";
-import { moniker } from "../utils/moniker";
-import { canEdit } from "../utils/canEdit";
-import { displayName } from "../utils/displayName";
-import { getNextId } from "../utils/getNextId";
+import { target } from "../utils/target.ts";
+import { moniker } from "../utils/moniker.ts";
+import { canEdit } from "../utils/canEdit.ts";
+import { displayName } from "../utils/displayName.ts";
+import { getNextId } from "../utils/getNextId.ts";
 
 export default () => {
   addCmd({

@@ -1,8 +1,8 @@
 import Datastore from "nedb-promises";
-import { IDBOBJ } from "../../@types/IDBObj";
-import config from "../../ursamu.config";
-import { IChannel } from "../../@types/Channels";
-import { IMail } from "../../@types/IMail";
+import { IDBOBJ } from "../../@types/IDBObj.ts";
+import config from "../../ursamu.config.ts";
+import { IChannel } from "../../@types/Channels.ts";
+import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types";
 
 export class DBO<T> {

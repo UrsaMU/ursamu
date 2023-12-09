@@ -1,11 +1,11 @@
 import path from "path";
-import { server } from "./app";
-import { plugins } from "./utils/loadDIr";
-import { loadTxtDir } from "./utils/loadTxtDir";
+import { server } from "./app.ts";
+import { plugins } from "./utils/loadDIr.ts";
+import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { createObj } from "./services/DBObjs";
 import { chans, counters, dbojs } from "./services/Database";
-import defaultConfig from "./ursamu.config";
-import { setFlags } from "./utils/setFlags";
+import defaultConfig from "./ursamu.config.ts";
+import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast";
 import { Config, IConfig, IPlugin } from "./@types";
 

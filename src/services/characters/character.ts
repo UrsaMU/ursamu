@@ -1,4 +1,4 @@
-import { createObj } from "../DBObjs/DBObjs";
+import { createObj } from "../DBObjs/DBObjs.ts";
 import { hash } from "bcryptjs";
 import { dbojs } from "../Database";
 

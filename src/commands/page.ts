@@ -1,8 +1,8 @@
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
-import { moniker } from "../utils/moniker";
-import { target } from "../utils/target";
+import { moniker } from "../utils/moniker.ts";
+import { target } from "../utils/target.ts";
 
 export default () => {
   addCmd({

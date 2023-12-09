@@ -1,13 +1,13 @@
 import { IMSocket } from "../@types";
-import { IChanEntry } from "../@types/Channels";
-import { io } from "../app";
+import { IChanEntry } from "../@types/Channels.ts";
+import { io } from "../app.ts";
 import { Obj } from "../services/DBObjs";
 import { chans, dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd, force } from "../services/commands";
-import { flags } from "../services/flags/flags";
+import { flags } from "../services/flags/flags.ts";
 import { joinChans } from "../utils";
-import { ljust } from "../utils/format";
+import { ljust } from "../utils/format.ts";
 
 export default () => {
   addCmd({

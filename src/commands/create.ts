@@ -2,10 +2,10 @@ import { hash } from "bcryptjs";
 import { send } from "../services/broadcast/";
 import { addCmd, force } from "../services/commands";
 import { dbojs } from "../services/Database";
-import config from "../ursamu.config";
-import { getNextId } from "../utils/getNextId";
-import { moniker } from "../utils/moniker";
-import { joinChans } from "../utils/joinChans";
+import config from "../ursamu.config.ts";
+import { getNextId } from "../utils/getNextId.ts";
+import { moniker } from "../utils/moniker.ts";
+import { joinChans } from "../utils/joinChans.ts";
 
 export default () =>
   addCmd({

@@ -1,8 +1,8 @@
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { dbojs } from "../services/Database";
-import parser from "../services/parser/parser";
-import { target } from "../utils/target";
+import parser from "../services/parser/parser.ts";
+import { target } from "../utils/target.ts";
 
 export default () =>
   addCmd({

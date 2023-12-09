@@ -1,10 +1,10 @@
-import { IChanEntry } from "../../@types/Channels";
-import { IContext } from "../../@types/IContext";
-import { moniker } from "../../utils/moniker";
+import { IChanEntry } from "../../@types/Channels.ts";
+import { IContext } from "../../@types/IContext.ts";
+import { moniker } from "../../utils/moniker.ts";
 import { chans, dbojs } from "../Database";
 import { send } from "../broadcast";
-import { flags } from "../flags/flags";
-import { force } from "./force";
+import { flags } from "../flags/flags.ts";
+import { force } from "./force.ts";
 
 export const matchChannel = async (ctx: IContext) => {
   if (ctx.socket.cid) {

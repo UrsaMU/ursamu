@@ -1,5 +1,5 @@
 import { repeat } from "lodash";
-import parser from "../services/parser/parser";
+import parser from "../services/parser/parser.ts";
 
 export const repeatString = (string = " ", length: number) => {
   // check how many spaces are left after the filler string is rendered. We will need

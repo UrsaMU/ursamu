@@ -1,10 +1,10 @@
-import { IContext } from "../../@types/IContext";
-import { displayName } from "../../utils/displayName";
-import { moniker } from "../../utils/moniker";
+import { IContext } from "../../@types/IContext.ts";
+import { displayName } from "../../utils/displayName.ts";
+import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database";
 import { send } from "../broadcast";
-import { flags } from "../flags/flags";
-import { force } from "./force";
+import { flags } from "../flags/flags.ts";
+import { force } from "./force.ts";
 
 export const matchExits = async (ctx: IContext) => {
   if (ctx.socket.cid) {

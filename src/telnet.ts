@@ -2,8 +2,8 @@ import { readFileSync } from "fs";
 import { Socket, createServer } from "net";
 import { join } from "path";
 import { io } from "socket.io-client";
-import config from "./ursamu.config";
-import parser from "./services/parser/parser";
+import config from "./ursamu.config.ts";
+import parser from "./services/parser/parser.ts";
 
 interface ITelnetSocket extends Socket {
   cid?: number;

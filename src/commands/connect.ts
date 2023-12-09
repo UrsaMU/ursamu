@@ -2,9 +2,9 @@ import { compare, hash } from "bcryptjs";
 import { send } from "../services/broadcast";
 import { addCmd, force } from "../services/commands";
 import { dbojs } from "../services/Database";
-import { setFlags } from "../utils/setFlags";
-import { joinChans } from "../utils/joinChans";
-import { moniker } from "../utils/moniker";
+import { setFlags } from "../utils/setFlags.ts";
+import { joinChans } from "../utils/joinChans.ts";
+import { moniker } from "../utils/moniker.ts";
 
 export default () =>
   addCmd({

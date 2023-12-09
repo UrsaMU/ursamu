@@ -1,8 +1,8 @@
-import { IDBOBJ } from "../../@types/IDBObj";
-import { getNextId } from "../../utils/getNextId";
-import { moniker } from "../../utils/moniker";
+import { IDBOBJ } from "../../@types/IDBObj.ts";
+import { getNextId } from "../../utils/getNextId.ts";
+import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database";
-import { flags } from "../flags/flags";
+import { flags } from "../flags/flags.ts";
 
 export const createObj = async (flgs: string, datas: any) => {
   const id = await getNextId("objid");

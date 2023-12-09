@@ -2,11 +2,11 @@ import { readFile, readdir } from "fs/promises";
 import { join } from "path";
 import { addCmd, cmds } from "../services/commands";
 import { dbojs } from "../services/Database";
-import { flags } from "../services/flags/flags";
-import parser from "../services/parser/parser";
-import { center, columns, ljust, repeatString } from "../utils/format";
+import { flags } from "../services/flags/flags.ts";
+import parser from "../services/parser/parser.ts";
+import { center, columns, ljust, repeatString } from "../utils/format.ts";
 import { send } from "../services/broadcast";
-import { gameConfig } from "../main";
+import { gameConfig } from "../main.ts";
 import { ICmd, IHelp } from "../@types";
 
 export default async () => {

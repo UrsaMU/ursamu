@@ -1,5 +1,5 @@
-import { io } from "../../app";
-import parser from "../parser/parser";
+import { io } from "../../app.ts";
+import parser from "../parser/parser.ts";
 type data = { [key: string]: any };
 export const send = async (targets: any[], msg: string, data?: data) => {
   io.to(targets).emit("message", {

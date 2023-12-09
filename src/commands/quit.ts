@@ -1,4 +1,4 @@
-import { io } from "../app";
+import { io } from "../app.ts";
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";

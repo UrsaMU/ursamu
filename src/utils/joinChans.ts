@@ -1,9 +1,9 @@
-import { IChanEntry } from "../@types/Channels";
-import { IContext } from "../@types/IContext";
+import { IChanEntry } from "../@types/Channels.ts";
+import { IContext } from "../@types/IContext.ts";
 import { chans, dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { force } from "../services/commands";
-import { flags } from "../services/flags/flags";
+import { flags } from "../services/flags/flags.ts";
 
 export const joinChans = async (ctx: IContext) => {
   const player = await dbojs.findOne({ id: ctx.socket.cid });
