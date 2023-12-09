@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from "../deps.ts";
+import express, { RequestHandler, Request, Response } from "../deps.ts";
 import { createServer } from "node:http";
 import { IMSocket } from "./@types/IMSocket.ts";
 import { cmdParser } from "./services/commands/index.ts";
@@ -25,7 +25,7 @@ app.use("/api/v1/auth/", authRouter);
 app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
 
 app.use(
-  (error: IMError, req: Request, res: Response, next: NextFunction): void => {
+  (error: IMError, req: Request, res: Response, next: RequestHandler): void => {
     // Handle error here
     console.error(error);
     res
