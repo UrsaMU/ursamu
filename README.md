@@ -21,9 +21,17 @@ A MUSH-like is a server that is similar to a MUSH, but is not a MUSH. UrsaMU is 
 To start the server in 'production' mode, make sure you have node installed, I suggest NVM, and then from the `ursamu` folder run:
 
 ```bash
+git clone https://github.com/ursamu/ursamu.git
+cd ursamu
 npm i -g pm2
 npm i
 npm run start
+```
+
+To start the Ursamu server, you can use the following command:
+
+```bash
+npm start
 ```
 
 To start the server in 'development' mode, make sure you have node installed, I suggest NVM, and then from the `ursamu` folder run:
@@ -31,3 +39,17 @@ To start the server in 'development' mode, make sure you have node installed, I 
 ```bash
 npm run dev
 ```
+
+To stop the Ursamu server, you can use the following command:
+
+```bash
+npm run stop
+```
+
+## License
+
+Ursamu is licensed under the MIT License.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

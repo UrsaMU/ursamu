@@ -15,6 +15,9 @@ const config: IConfig = {
     name: "Ursamu",
     description: "A Modern MUSH-Like engine written in Typescript.",
     version: "0.0.1",
+    text: {
+      connect: "../text/default_connect.txt",
+    },
     playerStart: 1,
   },
 };

@@ -9,15 +9,11 @@ interface ITelnetSocket extends Socket {
   cid?: number;
 }
 
-let welcome = "";
-try {
-  welcome = readFileSync(join(__dirname, "../text/connect.txt"), "utf8");
-} catch {
-  welcome = readFileSync(
-    join(__dirname, "../text/default_connect.txt"),
-    "utf8"
-  );
-}
+const welcome = readFileSync(
+  join(__dirname, config.game?.text.connect || "../text/connect_default.txt"),
+  "utf8"
+);
+
 const server = createServer((socket: ITelnetSocket) => {
   const sock = io(`http://localhost:${config.server?.ws}`);
   socket.write(welcome + "\r\n");
