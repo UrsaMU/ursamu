@@ -1,4 +1,4 @@
-import { addCmd } from "../services/commands";
+import { addCmd } from "../services/commands/index.ts";
 
 export default () =>
   addCmd({

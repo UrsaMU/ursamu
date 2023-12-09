@@ -1,6 +1,6 @@
 import { get } from "lodash";
-import { IDBOBJ, IMStat } from "../../../@types";
-import { Obj } from "../../DBObjs";
+import { IDBOBJ, IMStat } from "../../../@types/index.ts";
+import { Obj } from "../../DBObjs/index.ts";
 import { getStat } from "../getStats.ts";
 
 export const disciplines: IMStat[] = [

@@ -1,5 +1,5 @@
-import { addCmd, bboard, dbojs, flags, send } from "../services";
-import { formatString, getNextId } from "../utils";
+import { addCmd, bboard, dbojs, flags, send } from "../services/index.ts";
+import { formatString, getNextId } from "../utils/index.ts";
 
 export default () => {
   // Board Management Commands

@@ -2,8 +2,8 @@ import { MiddlewareStack } from "./middleware.ts";
 import { ICmd } from "../../@types/ICmd.ts";
 import { flags } from "../flags/flags.ts";
 import { getCharacter } from "../characters/character.ts";
-import { send } from "../broadcast";
-import { dbojs } from "../Database";
+import { send } from "../broadcast/index.ts";
+import { dbojs } from "../Database/index.ts";
 import { matchExits } from "./movement.ts";
 import { matchChannel } from "./channels.ts";
 

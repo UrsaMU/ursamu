@@ -1,7 +1,7 @@
-import { Obj } from "../services/DBObjs";
-import { dbojs, mail } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd, force } from "../services/commands";
+import { Obj } from "../services/DBObjs/index.ts";
+import { dbojs, mail } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd, force } from "../services/commands/index.ts";
 import { center } from "../utils/format.ts";
 import { target } from "../utils/target.ts";
 

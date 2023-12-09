@@ -1,13 +1,13 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
-import { addCmd, cmds } from "../services/commands";
-import { dbojs } from "../services/Database";
+import { addCmd, cmds } from "../services/commands/index.ts";
+import { dbojs } from "../services/Database/index.ts";
 import { flags } from "../services/flags/flags.ts";
 import parser from "../services/parser/parser.ts";
 import { center, columns, ljust, repeatString } from "../utils/format.ts";
-import { send } from "../services/broadcast";
+import { send } from "../services/broadcast/index.ts";
 import { gameConfig } from "../main.ts";
-import { ICmd, IHelp } from "../@types";
+import { ICmd, IHelp } from "../@types/index.ts";
 
 export default async () => {
   const text = new Map<string, string>();

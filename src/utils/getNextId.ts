@@ -1,4 +1,4 @@
-import { counters } from "../services/Database";
+import { counters } from "../services/Database/index.ts";
 
 export async function getNextId(name: string) {
   await counters.update({ _id: name }, { $inc: { seq: 1 } });

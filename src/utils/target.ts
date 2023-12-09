@@ -1,5 +1,5 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
-import { dbojs } from "../services/Database";
+import { dbojs } from "../services/Database/index.ts";
 
 export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
   if (!tar) {

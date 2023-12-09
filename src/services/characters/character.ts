@@ -1,6 +1,6 @@
 import { createObj } from "../DBObjs/DBObjs.ts";
 import { hash } from "bcryptjs";
-import { dbojs } from "../Database";
+import { dbojs } from "../Database/index.ts";
 
 type data = {
   [key: string]: any;

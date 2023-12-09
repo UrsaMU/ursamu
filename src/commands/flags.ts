@@ -1,6 +1,6 @@
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
 import { flags } from "../services/flags/flags.ts";
 import { displayName } from "../utils/displayName.ts";
 import { setFlags } from "../utils/setFlags.ts";

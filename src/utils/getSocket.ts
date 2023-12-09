@@ -1,7 +1,7 @@
 import { IContext } from "../@types/IContext.ts";
 import { IMSocket } from "../@types/IMSocket.ts";
 import { io } from "../app.ts";
-import { Obj } from "../services/DBObjs";
+import { Obj } from "../services/DBObjs/index.ts";
 import { joinChans } from "./joinChans.ts";
 
 export const getSocket = async (id: number) => {

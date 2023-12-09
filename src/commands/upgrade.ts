@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
-import { addCmd, force } from "../services/commands";
-import { send } from "../services/broadcast";
+import { addCmd, force } from "../services/commands/index.ts";
+import { send } from "../services/broadcast/index.ts";
 
 export default () => {
   addCmd({

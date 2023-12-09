@@ -1,7 +1,7 @@
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
 import { getCharacter } from "../services/characters/character.ts";
-import { addCmd } from "../services/commands";
+import { addCmd } from "../services/commands/index.ts";
 
 export default () =>
   addCmd({

@@ -1,8 +1,8 @@
 import { IContext } from "../../@types/IContext.ts";
 import { displayName } from "../../utils/displayName.ts";
 import { moniker } from "../../utils/moniker.ts";
-import { dbojs } from "../Database";
-import { send } from "../broadcast";
+import { dbojs } from "../Database/index.ts";
+import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
 

@@ -1,5 +1,5 @@
-import { Obj, addCmd, send } from "../services";
-import { canEdit, target } from "../utils";
+import { Obj, addCmd, send } from "../services/index.ts";
+import { canEdit, target } from "../utils/index.ts";
 
 export default () => {
   addCmd({

@@ -1,8 +1,8 @@
-import { Obj } from "../services/DBObjs";
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
-import { idle, moniker } from "../utils";
+import { Obj } from "../services/DBObjs/index.ts";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { idle, moniker } from "../utils/index.ts";
 import { center, header, ljust, repeatString } from "../utils/format.ts";
 
 export default () => {

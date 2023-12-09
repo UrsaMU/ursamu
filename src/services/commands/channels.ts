@@ -1,8 +1,8 @@
 import { IChanEntry } from "../../@types/Channels.ts";
 import { IContext } from "../../@types/IContext.ts";
 import { moniker } from "../../utils/moniker.ts";
-import { chans, dbojs } from "../Database";
-import { send } from "../broadcast";
+import { chans, dbojs } from "../Database/index.ts";
+import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
 

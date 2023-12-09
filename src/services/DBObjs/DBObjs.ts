@@ -1,7 +1,7 @@
 import { IDBOBJ } from "../../@types/IDBObj.ts";
 import { getNextId } from "../../utils/getNextId.ts";
 import { moniker } from "../../utils/moniker.ts";
-import { dbojs } from "../Database";
+import { dbojs } from "../Database/index.ts";
 import { flags } from "../flags/flags.ts";
 
 export const createObj = async (flgs: string, datas: any) => {

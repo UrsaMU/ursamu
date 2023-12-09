@@ -1,6 +1,6 @@
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
-import { dbojs } from "../services/Database";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { dbojs } from "../services/Database/index.ts";
 import parser from "../services/parser/parser.ts";
 import { target } from "../utils/target.ts";
 

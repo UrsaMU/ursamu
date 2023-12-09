@@ -1,7 +1,7 @@
 import { compare, hash } from "../../deps.ts";
-import { send } from "../services/broadcast";
-import { addCmd, force } from "../services/commands";
-import { dbojs } from "../services/Database";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd, force } from "../services/commands/index.ts";
+import { dbojs } from "../services/Database/index.ts";
 import { setFlags } from "../utils/setFlags.ts";
 import { joinChans } from "../utils/joinChans.ts";
 import { moniker } from "../utils/moniker.ts";

@@ -1,8 +1,8 @@
 import { IChanEntry } from "../@types/Channels.ts";
 import { IContext } from "../@types/IContext.ts";
-import { chans, dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { force } from "../services/commands";
+import { chans, dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { force } from "../services/commands/index.ts";
 import { flags } from "../services/flags/flags.ts";
 
 export const joinChans = async (ctx: IContext) => {

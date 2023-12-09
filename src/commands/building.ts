@@ -1,7 +1,7 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd, force } from "../services/commands";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd, force } from "../services/commands/index.ts";
 import { target } from "../utils/target.ts";
 import { moniker } from "../utils/moniker.ts";
 import { canEdit } from "../utils/canEdit.ts";

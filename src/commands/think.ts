@@ -1,5 +1,5 @@
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
 
 export default () =>
   addCmd({

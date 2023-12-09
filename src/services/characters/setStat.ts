@@ -1,6 +1,6 @@
-import { IDBOBJ, IMStatEntry } from "../../@types";
-import { Obj } from "../DBObjs";
-import { dbojs } from "../Database";
+import { IDBOBJ, IMStatEntry } from "../../@types/index.ts";
+import { Obj } from "../DBObjs/index.ts";
+import { dbojs } from "../Database/index.ts";
 import { allStats } from "./index.ts";
 
 export const setStat = async (

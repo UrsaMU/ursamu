@@ -1,6 +1,6 @@
-import { Obj } from "../services/DBObjs";
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
+import { Obj } from "../services/DBObjs/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
 import { canEdit } from "../utils/canEdit.ts";
 import { target } from "../utils/target.ts";
 import { set } from "../../deps.ts";

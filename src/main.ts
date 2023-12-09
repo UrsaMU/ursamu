@@ -2,12 +2,12 @@ import path from "node:path";
 import { server } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
-import { createObj } from "./services/DBObjs";
-import { chans, counters, dbojs } from "./services/Database";
+import { createObj } from "./services/DBObjs/index.ts";
+import { chans, counters, dbojs } from "./services/Database/index.ts";
 import defaultConfig from "./ursamu.config.ts";
 import { setFlags } from "./utils/setFlags.ts";
-import { broadcast } from "./services/broadcast";
-import { Config, IConfig, IPlugin } from "./@types";
+import { broadcast } from "./services/broadcast/index.ts";
+import { Config, IConfig, IPlugin } from "./@types/index.ts";
 
 plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));

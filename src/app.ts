@@ -1,17 +1,17 @@
 import express, { NextFunction, Request, Response } from "../deps.ts";
 import { createServer } from "node:http";
 import { IMSocket } from "./@types/IMSocket.ts";
-import { cmdParser } from "./services/commands";
+import { cmdParser } from "./services/commands/index.ts";
 import { Server } from "deps.ts";
-import { dbojs } from "./services/Database";
-import { send } from "./services/broadcast";
+import { dbojs } from "./services/Database/index.ts";
+import { send } from "./services/broadcast/index.ts";
 import { moniker } from "./utils/moniker.ts";
 import { joinChans } from "./utils/joinChans.ts";
 import { IContext } from "./@types/IContext.ts";
 import { setFlags } from "./utils/setFlags.ts";
-import { authRouter, dbObjRouter } from "./routes";
+import { authRouter, dbObjRouter } from "./routes/index.ts";
 import authMiddleware from "./middleware/authMiddleware.ts";
-import { IMError } from "./@types";
+import { IMError } from "./@types/index.ts";
 
 export const app = express();
 export const server = createServer(app);

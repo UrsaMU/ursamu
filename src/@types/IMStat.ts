@@ -1,5 +1,5 @@
-import { IDBOBJ } from ".";
-import { Obj } from "../services";
+import { IDBOBJ } from "./index.ts";
+import { Obj } from "../services/index.ts";
 
 export interface IMStat {
   name: string;
