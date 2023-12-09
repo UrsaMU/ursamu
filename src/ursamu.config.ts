@@ -1,6 +1,22 @@
 import { IConfig } from "./@types/IConfig";
 
-const config: IConfig = {
+class Config {
+  private _config: IConfig;
+
+  constructor(config: IConfig) {
+    this._config = config;
+  }
+
+  setConfig(config: Partial<IConfig>) {
+    this._config = { ...this._config, ...config };
+  }
+
+  get config() {
+    return this._config;
+  }
+}
+
+const cfg = new Config({
   server: {
     telnet: 4201,
     ws: 4202,
@@ -20,6 +36,6 @@ const config: IConfig = {
     },
     playerStart: 1,
   },
-};
+});
 
-export default config;
+export default cfg;

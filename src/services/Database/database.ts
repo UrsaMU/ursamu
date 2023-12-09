@@ -1,9 +1,9 @@
 import Datastore from "nedb-promises";
 import { IDBOBJ } from "../../@types/IDBObj";
-import config from "../../ursamu.config";
 import { IChannel } from "../../@types/Channels";
 import { IMail } from "../../@types/IMail";
 import { IArticle, IBoard } from "../../@types";
+import cfg from "../../ursamu.config";
 
 export class DBO<T> {
   db: Datastore<T>;
@@ -49,9 +49,9 @@ export interface ICounters {
   seq: number;
 }
 
-export const counters = new DBO<ICounters>(`${config.server?.counters}`);
-export const bboard = new DBO<IBoard>(`${config.server?.bboard}`);
-export const dbojs = new DBO<IDBOBJ>(`${config.server?.db}`);
-export const chans = new DBO<IChannel>(`${config.server?.chans}`);
-export const mail = new DBO<IMail>(`${config.server?.mail}`);
-export const wiki = new DBO<IArticle>(`${config.server?.wiki}`);
+export const counters = new DBO<ICounters>(`${cfg.config.server?.counters}`);
+export const bboard = new DBO<IBoard>(`${cfg.config.server?.bboard}`);
+export const dbojs = new DBO<IDBOBJ>(`${cfg.config.server?.db}`);
+export const chans = new DBO<IChannel>(`${cfg.config.server?.chans}`);
+export const mail = new DBO<IMail>(`${cfg.config.server?.mail}`);
+export const wiki = new DBO<IArticle>(`${cfg.config.server?.wiki}`);

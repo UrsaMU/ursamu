@@ -6,8 +6,7 @@ import { flags } from "../services/flags/flags";
 import parser from "../services/parser/parser";
 import { center, columns, ljust, repeatString } from "../utils/format";
 import { send } from "../services/broadcast";
-import { gameConfig } from "../main";
-import { ICmd, IHelp } from "../@types";
+import cfg from "../ursamu.config";
 
 export default async () => {
   const text = new Map<string, string>();
@@ -68,7 +67,7 @@ export default async () => {
       let output =
         center(
           `%cy[%cn %ch%cc${
-            gameConfig.game?.name ? gameConfig.game.name + " " : ""
+            cfg.config.game?.name ? cfg.config.game.name + " " : ""
           }%cn%chHelp%cn System %cy]%cn`,
           78,
           "%cr=%cn"

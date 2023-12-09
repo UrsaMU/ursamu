@@ -2,10 +2,10 @@ import { hash } from "bcryptjs";
 import { send } from "../services/broadcast/";
 import { addCmd, force } from "../services/commands";
 import { dbojs } from "../services/Database";
-import config from "../ursamu.config";
 import { getNextId } from "../utils/getNextId";
 import { moniker } from "../utils/moniker";
 import { joinChans } from "../utils/joinChans";
+import cfg from "../ursamu.config";
 
 export default () =>
   addCmd({
@@ -44,10 +44,10 @@ export default () =>
       const player = await dbojs.insert({
         id,
         flags,
-        location: config.game?.playerStart,
+        location: cfg.config.game?.playerStart,
         data: {
           name,
-          home: config.game?.playerStart,
+          home: cfg.config.game?.playerStart,
           password: await hash(password, 10),
         },
       });

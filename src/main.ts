@@ -4,19 +4,16 @@ import { plugins } from "./utils/loadDIr";
 import { loadTxtDir } from "./utils/loadTxtDir";
 import { createObj } from "./services/DBObjs";
 import { chans, counters, dbojs } from "./services/Database";
-import defaultConfig from "./ursamu.config";
 import { setFlags } from "./utils/setFlags";
 import { broadcast } from "./services/broadcast";
-import { Config, IConfig, IPlugin } from "./@types";
+import { IPlugin } from "./@types";
+import cfg from "./ursamu.config";
 
 plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
-export const gameConfig = new Config(defaultConfig);
 
-export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
-  gameConfig.setConfig({ ...defaultConfig, ...cfg });
-
-  server.listen(gameConfig.server?.ws, async () => {
+export const mu = async (plugins?: IPlugin[]) => {
+  server.listen(cfg.config.server?.ws, async () => {
     // load plugins
     if (plugins) {
       for (const plugin of plugins) {
@@ -24,7 +21,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
           if (plugin.init) {
             const res = await plugin.init();
             if (res) {
-              gameConfig.setConfig({ ...defaultConfig, ...plugin.config });
+              if (plugin.config) cfg.setConfig(plugin.config);
               console.log(`Plugin ${plugin.name} loaded.`);
             }
           }
@@ -71,7 +68,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
         lock: "admin+",
       });
     }
-    console.log(`Server started on port ${gameConfig.server?.ws}.`);
+    console.log(`Server started on port ${cfg.config.server?.ws}.`);
   });
 
   process.on("SIGINT", async () => {
