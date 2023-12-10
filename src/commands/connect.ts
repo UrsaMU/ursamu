@@ -40,7 +40,7 @@ export default () =>
       }
 
       if (!(await compare(password, found.data?.password || ""))) {
-        send([ctx.socket.id], "I csn't find a character by that name!", {
+        send([ctx.socket.id], "I can't find a character by that name!", {
           error: true,
         });
         return;

@@ -15,6 +15,9 @@ export interface IConfig {
     description?: string;
     version?: string;
     playerStart?: number;
+    text: {
+      connect: string;
+    };
   };
 }
 

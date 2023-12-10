@@ -468,7 +468,7 @@ export default () => {
       en.dbobj.data ||= {};
       en.dbobj.data.mailread ||= [];
 
-      send(
+      await send(
         [ctx.socket.id],
         `%chMAIL:%cn You have %ch${
           mails.filter((m) => !en.dbobj.data?.mailread?.includes(m._id!)).length
