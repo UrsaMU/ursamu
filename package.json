@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@digibear/tags": "^1.0.0",
-    "@ursamu/parser": "^1.2.4",
+    "@ursamu/parser": "^1.2.7",
     "bcryptjs": "^2.4.3",
     "concurrently": "^8.2.0",
     "cors": "^2.8.5",

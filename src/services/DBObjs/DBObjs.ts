@@ -1,3 +1,4 @@
+import { IAttribute } from "../../@types";
 import { IDBOBJ } from "../../@types/IDBObj";
 import { getNextId } from "../../utils/getNextId";
 import { moniker } from "../../utils/moniker";
@@ -71,12 +72,12 @@ export class Obj {
     return `#${this.obj.id}`;
   }
 
-  get data() {
+  get data(): IDBOBJ["data"] {
     return this.obj.data;
   }
 
-  get splat() {
-    return this.obj.data?.stats?.find((s) => s.name === "splat")?.value;
+  set data(data: IDBOBJ["data"]) {
+    this.obj.data = data;
   }
 
   get location() {
@@ -85,10 +86,6 @@ export class Obj {
 
   get description() {
     return this.obj.description;
-  }
-
-  get stats() {
-    return this.obj.data?.stats;
   }
 
   async exits() {
@@ -107,5 +104,22 @@ export class Obj {
     if (!this.obj) return;
     this.obj = { ...this.obj, ...obj };
     this.save();
+  }
+
+  get attributes(): IAttribute[] {
+    return this.obj.data?.attributes || [];
+  }
+
+  set attributes(attributes: IAttribute[]) {
+    this.obj.data ||= {};
+    this.obj.data.attributes = attributes;
+  }
+
+  get splat() {
+    return this.obj.data?.splat;
+  }
+
+  async attribute(name: string): Promise<IAttribute | void> {
+    return this.attributes.find((a) => a.name === name);
   }
 }

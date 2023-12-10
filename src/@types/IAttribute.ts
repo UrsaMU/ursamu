@@ -4,4 +4,7 @@ export interface IAttribute {
   type?: string;
   setter: string;
   hidden?: boolean;
+  data?: {
+    [key: string]: any;
+  };
 }

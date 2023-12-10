@@ -9,26 +9,28 @@ export default () => {
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      console.log(args);
+
       const tar = await target(en, args[1]);
       if (!tar) return send([ctx.socket.id], "%chGame>%cn Target not found.");
 
       const tarObj = await Obj.get(tar.id);
-      if (!tarObj)
+      if (!tarObj) {
         return send([ctx.socket.id], "%chGame>%cn Target not found.");
+      }
 
       if (!canEdit(en, tar)) {
-        return send([ctx.socket.id], "%chGame>%cn You can't edit that.");
+        return send([ctx.socket.id], "%chGame>%cn Permission denied.");
       }
-      if (!tarObj.data) tarObj.dbobj.data = { attributes: [] };
 
-      const attr = tarObj.data?.attributes?.find((a) =>
+      tarObj.data ||= { attributes: [] };
+
+      const attr = tarObj.data.attributes?.find((a) =>
         a.name.toLowerCase().startsWith(args[0].toLowerCase())
       );
 
-      if (attr && tarObj && tarObj.data) {
+      if (attr) {
         if (!args[2]) {
-          tarObj.data.attributes = tar.data?.attributes?.filter(
+          tarObj.data.attributes = tarObj.data.attributes?.filter(
             (a) => a.name !== attr.name
           );
           await tarObj.save();
@@ -49,14 +51,15 @@ export default () => {
             }'s attribute %ch${attr.name.toUpperCase()}%cn set.`
           );
         }
-      } else if (!attr && tarObj && tarObj.data) {
+      } else {
         tarObj.data.attributes ||= [];
 
-        tarObj.dbobj.data?.attributes?.push({
+        tarObj.data.attributes?.push({
           name: args[0],
           value: args[2],
           setter: en.dbref,
           type: "attribute",
+          data: {},
         });
 
         await tarObj.save();
@@ -65,11 +68,6 @@ export default () => {
           `%chGame>%cn  ${
             tarObj.name
           }'s attribute %ch${args[0].toUpperCase()}%cn set.`
-        );
-      } else {
-        return await send(
-          [ctx.socket.id],
-          "%chGame>%cn  Something went wrong."
         );
       }
     },

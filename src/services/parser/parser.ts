@@ -1,5 +1,7 @@
 import { Parser } from "@ursamu/parser";
-import { ljust } from "../../utils";
+import { ljust, target } from "../../utils";
+import { Obj } from "../DBObjs";
+import { IDBOBJ } from "../../@types";
 
 const parser = new Parser();
 
@@ -54,5 +56,26 @@ parser.addSubs(
   { before: /%[cx]i/g, after: "<i>", strip: "" },
   { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" }
 );
+
+parser.add("add", (args) => args.reduce((a: string, b: string) => +a + +b, 0));
+parser.add("sub", (args) => args.reduce((a: string, b: string) => +a - +b, 0));
+parser.add("rand", (args) => {
+  const min = +args[0];
+  const max = +args[1];
+  return Math.floor(Math.random() * (max - min + 1) + min);
+});
+
+parser.add("u", async (args, data) => {
+  let dbref;
+  let funName;
+  const [fun, ...funArgs] = args;
+  if (fun.includes("/")) {
+    [dbref = "me", funName] = fun.split("/");
+  }
+
+  console.log(data);
+
+  return "foooo";
+});
 
 export default parser;
