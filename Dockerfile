@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM deno:alpine
 
 RUN apk update && apk add alpine-sdk bash
 RUN mkdir /ursamu
@@ -12,12 +12,9 @@ ADD text/ /ursamu/text/
 RUN npm ci
 RUN mkdir /ursamu/data
 
-RUN npm install -g pm2
-RUN npm run build
-
 VOLUME /ursamu/data
 
-CMD ["-c", "pm2-runtime ursamu.config.js"]
+CMD ["-c", "./pup"]
 ENTRYPOINT ["/bin/bash"]
 
 # telnet, ws, http
