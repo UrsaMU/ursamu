@@ -21,7 +21,7 @@ export default () => {
       if (!en) return;
 
       // Dig the room.
-      let id = await getNextId("objid");
+      let id = await getNextId();
       let obj: IDBOBJ = {
         id,
         data: {
@@ -38,7 +38,7 @@ export default () => {
 
       // If to exit exits, dig it.
       if (to) {
-        id = await getNextId("objid");
+        id = await getNextId();
         obj = {
           id,
           location: en.location,
@@ -59,7 +59,7 @@ export default () => {
 
       // from exit exits, dig it.
       if (from) {
-        id = await getNextId("objid");
+        id = await getNextId();
         obj = {
           id,
           location: roomObj.id,
@@ -211,7 +211,7 @@ export default () => {
         return send([ctx.socket.id], `Could not find %ch${room}%cn.`, {});
       }
 
-      const id = await getNextId("objid");
+      const id = await getNextId();
 
       const exit = await dbojs.insert({
         id,

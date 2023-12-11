@@ -26,6 +26,8 @@
 Y88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P 
  "Y88888P"  888   T88b  "Y8888P" d88P     888 888       888  "Y88888P"  
 
+ v0.0.1 ALPHA 
+
 >> A Next Generation MU*. https://ursamu.io
 
 Use 'create <name> <password>' to create a new character. 

@@ -86,41 +86,15 @@ io.on("connection", (socket: IMSocket) => {
 export class UrsaMU {
   private plugins: IPlugin[] = [];
 
-  constructor(plugins?: IPlugin[]) {
-    if (plugins) this.plugins = plugins;
-  }
+  constructor() {}
 
   public async start() {
     server.listen(cfg.config.server?.ws, async () => {
-      // load plugins
-      if (this.plugins) {
-        for (const plugin of this.plugins) {
-          try {
-            if (plugin.init) {
-              if (plugin.config) cfg.setConfig(plugin.config);
-              await plugin.init();
-              console.log(`${plugin.name} loaded.`);
-            }
-          } catch (error) {
-            console.log(error);
-          }
-        }
-      }
-
       const rooms = await dbojs.find({
         $where: function () {
           return this.flags.includes("room");
         },
       });
-
-      const counter = {
-        _id: "objid",
-        seq: 0,
-      };
-
-      if (!(await counters.findOne({ _id: "objid" }))) {
-        await counters.insert(counter);
-      }
 
       if (!rooms.length) {
         const room = await createObj("room safe void", { name: "The Void" });
@@ -149,14 +123,6 @@ export class UrsaMU {
   }
 
   public async stop() {
-    for (const plugin of this.plugins) {
-      try {
-        if (plugin.remove) await plugin.remove();
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
     server.close();
   }
 }

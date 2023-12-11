@@ -40,7 +40,7 @@ export default () =>
 
       const flags =
         players.length > 0 ? "player connected" : "player connected superuser";
-      const id = await getNextId("objid");
+      const id = await getNextId();
       const player = await dbojs.insert({
         id,
         flags,

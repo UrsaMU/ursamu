@@ -16,7 +16,7 @@ export default () => {
       const en = await dbojs.findOne({ id: socket.cid });
       if (!en) return;
 
-      const id = await getNextId("boardId");
+      const id = await getNextId();
       if (!id) return send([socket.id], "%chGAME>%cn No board ID generated.");
 
       const taken = await bboard.findOne({ name });
