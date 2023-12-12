@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 import { Command } from "commander";
 import { resolve } from "path";
-import { startAll } from "./scripts/startup"; // Import your startup script
+import { startAll } from "./scripts/startup";
 import { stopAll } from "./scripts/shutdown";
 import { restartAll } from "./scripts/restart";
 
@@ -30,8 +30,8 @@ program
       directoryPath = resolve(process.cwd(), options.dir);
     }
 
-    console.log(`Starting with directory: ${directoryPath}`);
-    startAll(directoryPath); // Pass the absolute path to your startup function
+    if (directoryPath) console.log(`Starting with directory: ${directoryPath}`);
+    startAll(directoryPath);
   });
 
 program.parse(process.argv);

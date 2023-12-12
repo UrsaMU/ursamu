@@ -3,7 +3,7 @@ import { createServer } from "http";
 import { IMSocket } from "./@types/IMSocket";
 import { cmdParser } from "./services/commands";
 import { Server } from "socket.io";
-import { counters, dbojs } from "./services/Database";
+import { dbojs } from "./services/Database";
 import { send } from "./services/broadcast";
 import { moniker } from "./utils/moniker";
 import { joinChans } from "./utils/joinChans";
