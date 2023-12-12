@@ -1,5 +1,5 @@
 export * as dpath from "https://deno.land/std@0.208.0/path/mod.ts";
-import * as dfs from "https://deno.land/std@0.208.0/fs/mod.ts";
+export * as dfs from "https://deno.land/std@0.208.0/fs/mod.ts";
 
 export { Tags } from "npm:@digibear/tags@1.0.0"
 export { Parser } from "npm:@ursamu/parser@1.2.4"
