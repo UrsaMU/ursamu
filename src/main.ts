@@ -86,10 +86,6 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     await broadcast("Server shutting down.");
     process.exit(0);
   });
-
-  process.on("unhandledRejection", (reason, p) => {
-    console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
-  });
 };
 
 if (import.meta.main) mu();
