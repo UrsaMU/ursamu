@@ -6,13 +6,12 @@ WORKDIR /ursamu
 ADD LICENSE README.md pup pup.jsonc ursamu_github_banner.png /ursamu/
 ADD help/ /ursamu/help/
 ADD src/ /ursamu/src/
-RUN npm ci
 RUN mkdir /ursamu/data
 
 VOLUME /ursamu/data
 VOLUME /ursamu/text
 
-CMD ["-c", "./pup run"]
+CMD ["-c", "./pup"]
 ENTRYPOINT ["/bin/bash"]
 
 # telnet, ws, http
