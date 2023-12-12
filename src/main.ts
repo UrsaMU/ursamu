@@ -7,8 +7,14 @@ import { setFlags } from "./utils/setFlags";
 import { broadcast } from "./services/broadcast";
 import { lstatSync } from "fs";
 
+const args = process.argv.slice(2);
+const dirArg = args.find((arg) => arg.startsWith("--dir="));
+const directory = dirArg ? dirArg.split("=")[1] : null;
+
 loadDir(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
+
+console.log("Starting with directory:", directory);
 
 // load custom data.
 try {

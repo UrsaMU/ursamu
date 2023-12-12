@@ -1,55 +1,67 @@
-# UrsaMU
+# UrsaMU: The Modern MUSH-Like Server
 
-### The Modern MUSH-Like Server
+![UrsaMU](ursamu_githug.banner.png)
 
-![ursamu header](ursamu_github_banner.png)
+## Welcome to UrsaMU!
 
-## What is UrsaMU?
+UrsaMU is an innovative, Typescript-based server, echoing the classic MUSH (Multi-User Shared Hallucination) experience with a modern twist. Designed for flexibility and extendability, it's an ideal platform for creating immersive, text-based virtual worlds.
 
-UrsaMU is a MUSH-like server written in Typescript. It is designed to be a modern, and extensible MUSH-like server.
+## What's a MUSH?
 
-## What is a MUSH?
+MUSH, a text-driven, multi-user environment, is rooted in the legacy of MUDs (Multi-User Dungeons) - the early ancestors of today's MMORPGs. These platforms are renowned for their customizability, serving as fertile grounds for role-playing adventures and vibrant social hubs.
 
-A MUSH is a text-based, multi-user, real-time virtual environment. It is a descendant of MUDs, which were the precursors to modern MMORPGs. MUSHes are designed to be highly extensible, and are often used for role-playing games, or social environments.
+## And a MUSH-Like?
 
-## What is a MUSH-like?
+UrsaMU stands as a MUSH-like server - embodying the essence of MUSH but with distinct features and enhancements, offering a unique twist on traditional text-based online environments.
 
-A MUSH-like is a server that is similar to a MUSH, but is not a MUSH. UrsaMU is a MUSH-like because it is not a MUSH, but it is similar to a MUSH.
+## Getting Started with UrsaMU
 
-## Starting the server
+Embark on your UrsaMU journey with these simple setup instructions.
 
-To start the server in 'production' mode, make sure you have node installed, I suggest NVM, and then from the `ursamu` folder run:
+### Prerequisites
+
+- Node.js (NVM recommended for installation)
+
+### Installation & Running UrsaMU
+
+Clone and Install:
 
 ```bash
 git clone https://github.com/ursamu/ursamu.git
 cd ursamu
-npm i -g pm2
+npm i -g pm2 ts-node
 npm i
-npm run start
+
 ```
 
-To start the Ursamu server, you can use the following command:
+### Starting the Server:
+
+Production Mode:
 
 ```bash
-npm start
+npm run start  # Launch UrsaMU in production mode
 ```
 
-To start the server in 'development' mode, make sure you have node installed, I suggest NVM, and then from the `ursamu` folder run:
+Development Mode:
 
 ```bash
-npm run dev
+npm run dev  # Launch UrsaMU in development mode
 ```
 
-To stop the Ursamu server, you can use the following command:
+Stopping the Server:
 
 ```bash
-npm run stop
+npm run stop  # Gracefully stop UrsaMU
 ```
+
+### Contributing
+
+Your contributions are what make UrsaMU better! Feel free to fork, send pull requests, or open issues for discussion on enhancements or bug fixes. For significant changes, we recommend opening an issue first to discuss your ideas.
 
 ## License
 
-Ursamu is licensed under the MIT License.
+UrsaMU is open-sourced under the MIT License. Embrace the freedom to use, modify, and distribute it as you see fit.
 
-## Contributing
+---
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Happy MUSHing with UrsaMU! 🌟
