@@ -1,3 +1,5 @@
+export * as dpath from "https://deno.land/std@0.188.0/path/mod.ts";
+
 export { Tags } from "npm:@digibear/tags@1.0.0"
 export { Parser } from "npm:@ursamu/parser@1.2.4"
 export { config } from "npm:dotenv@16.3.1"

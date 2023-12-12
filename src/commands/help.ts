@@ -8,8 +8,9 @@ import { center, columns, ljust, repeatString } from "../utils/format.ts";
 import { send } from "../services/broadcast/index.ts";
 import { gameConfig } from "../main.ts";
 import { ICmd, IHelp } from "../@types/index.ts";
+import { dpath } from "../../deps.ts";
 
-const __dirname = path.dirname(path.fromFileUrl(import.meta.url))
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 export default async () => {
   const text = new Map<string, string>();
   const dirent = await readdir(join(__dirname, "../../help"), {

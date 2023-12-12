@@ -1,16 +1,15 @@
 import { readFileSync } from "node:fs";
 import { Socket, createServer } from "node:net";
 import { join } from "node:path";
-import { io } from "../deps.ts";
+import { dpath, io } from "../deps.ts";
 import config from "./ursamu.config.ts";
 import parser from "./services/parser/parser.ts";
-import * as path from "https://deno.land/std@0.188.0/path/mod.ts";
 
 interface ITelnetSocket extends Socket {
   cid?: number;
 }
 
-const __dirname = path.dirname(path.fromFileUrl(import.meta.url))
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 const welcome = readFileSync(
   join(__dirname, config.game?.text.connect || "../text/connect_default.txt"),
   "utf8"

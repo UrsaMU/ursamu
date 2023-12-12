@@ -8,8 +8,9 @@ import defaultConfig from "./ursamu.config.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { Config, IConfig, IPlugin } from "./@types/index.ts";
+import { dpath } from "../deps.ts";
 
-const __dirname = path.dirname(path.fromFileUrl(import.meta.url))
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
 export const gameConfig = new Config(defaultConfig);
