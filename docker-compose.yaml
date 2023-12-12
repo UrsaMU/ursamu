@@ -13,5 +13,6 @@ services:
       - "80:4203"
     volumes:
      - "./data:/ursamu/data"
+     - "./text:/ursamu/text"
     container_name: ursamu
     hostname: ursamu
