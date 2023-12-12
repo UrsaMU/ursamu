@@ -9,7 +9,7 @@ export { VM } from "npm:vm2@3.9.19"
 
 // @deno-types="npm:@types/express@4.17.21"
 export { Router } from "npm:express@4.18.2"
-export * as express from "npm:express@4.18.2"
+export { default as express } from "npm:express@4.18.2"
 export interface Request {}
 export interface Response {}
 export type { RequestHandler } from "npm:express@4.18.2"
