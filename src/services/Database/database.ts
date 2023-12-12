@@ -1,4 +1,4 @@
-import Datastore from "../../../deps.ts";
+import { Datastore } from "../../../deps.ts";
 import { IDBOBJ } from "../../@types/IDBObj.ts";
 import config from "../../ursamu.config.ts";
 import { IChannel } from "../../@types/Channels.ts";
