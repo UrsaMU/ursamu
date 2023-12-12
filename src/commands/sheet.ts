@@ -8,6 +8,7 @@ import {
   formatStat,
   header,
   moniker,
+  repeatString,
   target,
 } from "../utils";
 
@@ -275,7 +276,7 @@ const other = async (obj: Obj) => {
     totalOther.push(formatStat(stat.name, await getStat(obj.dbobj, stat.name)));
   }
   totalOther = totalOther.sort((a, b) => a.localeCompare(b));
-  output += divider("Other");
+  output += "%cr-%cn".repeat(78);
 
   for (let i = 0; i < totalOther.length; i++) {
     if (i % 3 === 0) {
@@ -346,8 +347,22 @@ const calculateDamage = (
 const displayDamageTrack = async (obj: IDBOBJ, type: string) => {
   let output = "";
   let splat = await getStat(obj, "splat");
-  const superficial = parseInt(obj.data?.damage[type].superficial || 0);
-  const aggravated = parseInt(obj.data?.damage[type].aggravated || 0);
+  obj.data ||= {};
+  obj.data.damage ||= {
+    damage: {
+      physical: {
+        superficial: 0,
+        aggravated: 0,
+      },
+      mental: {
+        superficial: 0,
+        aggravated: 0,
+      },
+    },
+  };
+
+  const superficial = parseInt(obj.data?.damage[type]?.superficial || 0);
+  const aggravated = parseInt(obj.data?.damage[type]?.aggravated || 0);
   let maxBoxes;
 
   if (type === "physical") {
@@ -379,7 +394,7 @@ const displayDamageTrack = async (obj: IDBOBJ, type: string) => {
 };
 
 const health = async (obj: IDBOBJ) => {
-  let output = divider("Character Status") + "\n";
+  let output = divider("Health") + "\n";
 
   output += await displayDamageTrack(obj, "physical");
   output += "%r";
@@ -441,8 +456,8 @@ export default () => {
       output += await skills(tarObj);
       output += await advantages(tarObj);
       output += await disciplines(tarObj);
-      output += await other(tarObj);
       output += await health(tarObj);
+      output += await other(tarObj);
       output += footer();
 
       if (await getStat(tarObj.dbobj, "splat")) {
