@@ -12,9 +12,8 @@ RUN mkdir /ursamu/data
 VOLUME /ursamu/data
 VOLUME /ursamu/text
 
-CMD ["-c", "./pup"]
+CMD ["-c", "./pup run"]
 ENTRYPOINT ["/bin/bash"]
 
 # telnet, ws, http
 EXPOSE 4201 4202 4203
-
