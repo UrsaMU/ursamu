@@ -1,2 +1,3 @@
 #! /bin/bash
-deno run -A https://deno.land/x/pup/pup.ts "%@"
+deno run -A https://deno.land/x/pup/pup.ts "$@"
+
