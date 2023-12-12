@@ -1,4 +1,4 @@
-import express, { RequestHandler, Request, Response } from "../deps.ts";
+import { express, RequestHandler, Request, Response } from "../deps.ts";
 import { createServer } from "node:http";
 import { IMSocket } from "./@types/IMSocket.ts";
 import { cmdParser } from "./services/commands/index.ts";
