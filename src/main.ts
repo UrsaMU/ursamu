@@ -92,4 +92,4 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
   });
 };
 
-if (require.main === module) mu();
+if (import.meta.main) mu();
