@@ -9,6 +9,7 @@ import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { Config, IConfig, IPlugin } from "./@types/index.ts";
 
+const __dirname = path.dirname(path.fromFileUrl(import.meta.url))
 plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
 export const gameConfig = new Config(defaultConfig);
