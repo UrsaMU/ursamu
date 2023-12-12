@@ -76,7 +76,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     console.log(`Server started on port ${gameConfig.server?.ws}.`);
   });
 
-  process.on("SIGINT", async () => {
+  Deno.addSignalHandler("SIGINT", async () => {
     const players = await dbojs.find({ flags: /connected/i });
 
     for (const player of players) {
