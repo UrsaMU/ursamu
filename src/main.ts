@@ -9,12 +9,26 @@ import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { Config, IConfig, IPlugin } from "./@types/index.ts";
 
-plugins(path.join(__dirname, "./commands"));
-loadTxtDir(path.join(__dirname, "../text"));
+const __dirname = path.dirname(path.fromFileUrl(import.meta.url))
+const __data = path.join(__dirname, "..", "data")
+export const dataConfig = await (async () => {
+  try {
+    const raw = await Deno.readTextFile(path.join(__data, "config.json"))
+    return JSON.parse(raw)
+  } catch(e) {
+    console.log("Unable to load data configuration, using defaults!", e)
+    return {}
+  }
+})()
+
 export const gameConfig = new Config(defaultConfig);
 
 export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
   gameConfig.setConfig({ ...defaultConfig, ...cfg });
+
+  const pluginsList = gameConfig.plugins || path.join(__dirname, "./commands")
+  plugins(pluginsList);
+  loadTxtDir(path.join(__dirname, "../text"));
 
   server.listen(gameConfig.server?.ws, async () => {
     // load plugins
@@ -24,7 +38,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
           if (plugin.init) {
             const res = await plugin.init();
             if (res) {
-              gameConfig.setConfig({ ...defaultConfig, ...plugin.config });
+              gameConfig.setConfig({ ...gameConfig, ...plugin.config });
               console.log(`Plugin ${plugin.name} loaded.`);
             }
           }
@@ -90,4 +104,4 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
   });
 };
 
-if (require.main === module) mu();
+if (require.main === module) mu(dataConfig);
