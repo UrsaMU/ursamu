@@ -1,4 +1,4 @@
-FROM deno:alpine
+FROM denoland/deno:alpine
 
 RUN apk update && apk add alpine-sdk bash
 RUN mkdir /ursamu
