@@ -16,34 +16,34 @@ export class DBO<T> {
   }
 
   async insert(data: T) {
-    return await this.client.db(space).insert(data);
+    return await this.client.db(this.space).insert(data);
   }
 
   async find(query?: any) {
-    return await this.client.db(space).find(query);
+    return await this.client.db(this.space).find(query);
   }
 
   async findAll() {
-    return await this.client.db(space).find({});
+    return await this.client.db(this.space).find({});
   }
 
   async findOne(query: any) {
-    return await this.client.db(space).findOne(query);
+    return await this.client.db(this.space).findOne(query);
   }
 
   async update(query: any, data: any) {
-    await this.client.db(space).updateOne(query, data, {
+    await this.client.db(this.space).updateOne(query, data, {
       upsert: true,
     });
     return this.find(query);
   }
 
   async remove(query: any) {
-    return await this.client.db(space).deleteMany(query);
+    return await this.client.db(this.space).deleteMany(query);
   }
 
   async count(query: any) {
-    return await this.client.db(space).count(query);
+    return await this.client.db(this.space).count(query);
   }
 }
 
