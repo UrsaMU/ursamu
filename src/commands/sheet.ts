@@ -9,7 +9,7 @@ import {
   header,
   moniker,
   target,
-} from "../utils.ts";
+} from "../utils/index.ts";
 
 const bio = async (obj: Obj) => {
   const splat = await getStat(obj.dbobj, "splat");
