@@ -9,7 +9,7 @@ export class DBO<T> {
   db: any;
 
   constructor(path: string) {
-    const uri = `mongodb+srv://root:root@mongo/${path}?retryWrites=true&w=majority`;
+    const uri = `mongodb://root:root@mongo/${path}`;
     this.db = new MongoClient(uri);
     this.db.connect()
   }
