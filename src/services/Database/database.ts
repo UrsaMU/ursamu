@@ -9,41 +9,41 @@ export class DBO<T> {
   db: any;
 
   constructor(path: string) {
-    this.space = path.replace('.','_');
+    this.collection = path.replace('.','_');
     const uri = `mongodb://root:root@mongo/`;
     this.client = new MongoClient(uri);
     this.client.connect();
   }
 
   async insert(data: T) {
-    return await this.client.db(this.space).insert(data);
+    return await this.client.collection(this.space).insert(data);
   }
 
   async find(query?: any) {
-    return await this.client.db(this.space).find(query);
+    return await this.client.collection(this.space).find(query);
   }
 
   async findAll() {
-    return await this.client.db(this.space).find({});
+    return await this.client.collection(this.space).find({});
   }
 
   async findOne(query: any) {
-    return await this.client.db(this.space).findOne(query);
+    return await this.client.collection(this.space).findOne(query);
   }
 
   async update(query: any, data: any) {
-    await this.client.db(this.space).updateOne(query, data, {
+    await this.client.collection(this.space).updateOne(query, data, {
       upsert: true,
     });
     return this.find(query);
   }
 
   async remove(query: any) {
-    return await this.client.db(this.space).deleteMany(query);
+    return await this.client.collection(this.space).deleteMany(query);
   }
 
   async count(query: any) {
-    return await this.client.db(this.space).count(query);
+    return await this.client.collection(this.space).count(query);
   }
 }
 
