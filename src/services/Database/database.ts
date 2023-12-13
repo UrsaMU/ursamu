@@ -9,7 +9,7 @@ export class DBO<T> {
   db: any;
 
   constructor(path: string) {
-    this.space = path;
+    this.space = path.replace('.','_');
     const uri = `mongodb://root:root@mongo/`;
     this.client = new MongoClient(uri);
     this.client.connect();
