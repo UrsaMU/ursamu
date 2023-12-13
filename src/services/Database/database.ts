@@ -13,37 +13,42 @@ export class DBO<T> {
     const uri = `mongodb://root:root@mongo/`;
     this.client = new MongoClient(uri);
     this.client.connect();
+    this.db = this.client.db()
+  }
+
+  coll() {
+    return this.client.db().collection(this.space)
   }
 
   async insert(data: T) {
-    return await this.client.collection(this.space).insert(data);
+    return await this.coll().insert(data);
   }
 
   async find(query?: any) {
-    return await this.client.collection(this.space).find(query);
+    return await this.coll().find(query);
   }
 
   async findAll() {
-    return await this.client.collection(this.space).find({});
+    return await this.coll().find({});
   }
 
   async findOne(query: any) {
-    return await this.client.collection(this.space).findOne(query);
+    return await this.coll().findOne(query);
   }
 
   async update(query: any, data: any) {
-    await this.client.collection(this.space).updateOne(query, data, {
+    await this.coll().updateOne(query, data, {
       upsert: true,
     });
     return this.find(query);
   }
 
   async remove(query: any) {
-    return await this.client.collection(this.space).deleteMany(query);
+    return await this.coll().deleteMany(query);
   }
 
   async count(query: any) {
-    return await this.client.collection(this.space).count(query);
+    return await this.coll().count(query);
   }
 }
 
