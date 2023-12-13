@@ -1,14 +1,16 @@
+import path from "path";
 import { IConfig } from "./@types/IConfig";
+import { deepMerge } from "./utils/deepMerge";
 
 class Config {
   private _config: IConfig;
 
-  constructor(config: IConfig) {
-    this._config = config;
+  constructor(cfg: IConfig) {
+    this._config = cfg;
   }
 
   setConfig(config: Partial<IConfig>) {
-    this._config = { ...this._config, ...config };
+    this._config = deepMerge(this._config, config);
   }
 
   get config() {
@@ -21,19 +23,17 @@ const cfg = new Config({
     telnet: 4201,
     ws: 4202,
     http: 4203,
-    db: "data/ursamu.db",
-    counters: "data/counters.db",
-    chans: "data/chans.db",
-    mail: "data/mail.db",
-    bboard: "data/bboard.db",
+    db: path.join(process.cwd(), "./data/ursamu.db"),
+    counters: path.join(process.cwd(), "./data/counters.db"),
+    chans: path.join(process.cwd(), "./data/chans.db"),
+    mail: path.join(process.cwd(), "./data/mail.db"),
+    bboard: path.join(process.cwd(), "./data/bboard.db"),
   },
   game: {
     name: "Ursamu",
     description: "A Modern MUSH-Like engine written in Typescript.",
     version: "0.0.1",
-    text: {
-      connect: "../text/default_connect.txt",
-    },
+
     playerStart: 1,
   },
 });

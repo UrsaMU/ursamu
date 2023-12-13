@@ -30,7 +30,7 @@ function startProcess(
 export async function startAll(directory?: string) {
   try {
     await startProcess("../main.ts", "MainProcess", directory); // Pass directory
-    await startProcess("../telnet.ts", "TelnetProcess");
+    await startProcess("../telnet.ts", "TelnetProcess", directory); // Pass directory
   } catch (err) {
     console.error("Error starting processes:", err);
   } finally {

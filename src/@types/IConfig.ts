@@ -1,4 +1,10 @@
+import { directory } from "../main";
+import { deepMerge } from "../utils/deepMerge";
+
 export interface IConfig {
+  engine?: {
+    main: string;
+  };
   server?: {
     telnet?: number;
     ws?: number;
@@ -15,7 +21,7 @@ export interface IConfig {
     description?: string;
     version?: string;
     playerStart?: number;
-    text: {
+    text?: {
       connect: string;
     };
   };
@@ -23,6 +29,15 @@ export interface IConfig {
 
 export class Config {
   constructor(public config: IConfig) {
+    if (directory) {
+      this.config = deepMerge(
+        config,
+        require(`${directory}/ursamu.config.json`) as IConfig
+      );
+    } else {
+      this.config = config;
+    }
+
     this.config = config;
   }
 
@@ -32,6 +47,10 @@ export class Config {
 
   get game() {
     return this.config.game;
+  }
+
+  get engine() {
+    return this.config.engine;
   }
 
   setConfig = (config: IConfig) => {

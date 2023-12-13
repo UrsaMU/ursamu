@@ -14,10 +14,13 @@ import authMiddleware from "./middleware/authMiddleware";
 import { IMError, IPlugin } from "./@types";
 import cfg from "./ursamu.config";
 import { chans, createObj } from "./services";
+import { loadDir, loadPLugin, loadTxtDir } from "./utils";
+import { join } from "path";
 
 export const app = express();
 export const server = createServer(app);
 export const io = new Server(server);
+export { cfg };
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -78,6 +81,10 @@ io.on("connection", (socket: IMSocket) => {
     );
   });
 
+  socket.on("disconnect", () => {
+    socket.disconnect();
+  });
+
   socket.on("error", () => {
     socket.disconnect();
   });
@@ -86,7 +93,11 @@ io.on("connection", (socket: IMSocket) => {
 export class UrsaMU {
   private plugins: IPlugin[] = [];
 
-  constructor() {}
+  constructor(directory = "") {
+    loadDir(join(__dirname, "./commands"));
+    loadTxtDir(join(__dirname, "../text"));
+    loadPLugin(directory);
+  }
 
   public async start() {
     server.listen(cfg.config.server?.ws, async () => {

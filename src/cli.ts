@@ -30,7 +30,6 @@ program
       directoryPath = resolve(process.cwd(), options.dir);
     }
 
-    if (directoryPath) console.log(`Starting with directory: ${directoryPath}`);
     startAll(directoryPath);
   });
 
