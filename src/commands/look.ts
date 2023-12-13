@@ -38,8 +38,8 @@ export default () =>
       const exits = (
         await dbojs.find({
           "$where": { "$and": [
-            flags: /player/i,
-            flags: /connected/i
+            { flags: /player/i },
+            { flags: /connected/i }
           ]}
         })
       ).map((e) => {
