@@ -25,11 +25,11 @@ export class DBO<T> {
   }
 
   async find(query?: any) {
-    return await this.coll().find(query);
+    return (await this.coll().find(query)).toArray();
   }
 
   async findAll() {
-    return await this.coll().find({});
+    return (await this.coll().find({})).toArray();
   }
 
   async findOne(query: any) {
@@ -37,9 +37,18 @@ export class DBO<T> {
   }
 
   async update(query: any, data: any) {
-    await this.coll().updateOne(query, data, {
-      upsert: true,
-    });
+    try {
+      await this.coll().update(query, data, {
+        upsert: true,
+      });
+    } catch(e) {
+      if(e.type == "MongoInvalidArgumentError") {
+        await this.coll().replaceOne(query, data, {
+          upsert: true,
+        });
+      }
+    }
+
     return this.find(query);
   }
 
