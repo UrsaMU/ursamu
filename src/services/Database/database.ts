@@ -13,15 +13,15 @@ export class DBO<T> {
     const uri = `mongodb://root:root@mongo/`;
     this.client = new MongoClient(uri);
     this.client.connect();
-    this.db = this.client.db()
   }
 
   coll() {
-    return this.client.db().collection(this.space)
+    return this.client.db().collection(this.collection)
   }
 
   async insert(data: T) {
-    return await this.coll().insert(data);
+    await this.coll().insertOne(data);
+    return this.find(data)
   }
 
   async find(query?: any) {
