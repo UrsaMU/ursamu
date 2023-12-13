@@ -36,11 +36,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
       }
     }
 
-    const rooms = await dbojs.find({
-      $where: function () {
-        return this.flags.includes("room");
-      },
-    });
+    const rooms = await dbojs.find({ flags: /room/i });
 
     const counter = {
       _id: "objid",

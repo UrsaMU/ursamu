@@ -24,12 +24,10 @@ export default () =>
 
       const found = (
         await dbojs.find({
-          $where: function () {
-            return (
-              this.data.name?.toLowerCase() === name?.toLowerCase() ||
-              this.data.alias?.toLowerCase() === name?.toLowerCase()
-            );
-          },
+          $where: { "$or": [
+              { name: { "$regex": `/${name}/i`} },
+              { alias: { "$regex": `/${alias}/i` } }
+          ]}
         })
       )[0];
       if (!found) {
