@@ -1,6 +1,6 @@
-FROM denoland/deno:alpine
+FROM denoland/deno:ubuntu
 
-RUN apk update && apk add alpine-sdk bash
+RUN apt-get -y update && apt-get -y install build-essential bash
 RUN mkdir /ursamu
 WORKDIR /ursamu
 ADD deps.ts LICENSE README.md pup pup.jsonc ursamu_github_banner.png /ursamu/
