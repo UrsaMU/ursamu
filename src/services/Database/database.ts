@@ -1,4 +1,4 @@
-import { Datastore } from "../../../deps.ts";
+import { MongoClient } from "../../../deps.ts";
 import { IDBOBJ } from "../../@types/IDBObj.ts";
 import config from "../../ursamu.config.ts";
 import { IChannel } from "../../@types/Channels.ts";
@@ -6,10 +6,12 @@ import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types/index.ts";
 
 export class DBO<T> {
-  db: Datastore<T>;
+  db: any;
 
   constructor(path: string) {
-    this.db = Datastore.create(path);
+    const uri = `mongodb+srv://root:root@mongo/${path}?retryWrites=true&w=majority`;
+    this.db = new MongoClient(uri);
+    this.db.connect()
   }
 
   async insert(data: T) {
@@ -17,26 +19,26 @@ export class DBO<T> {
   }
 
   async find(query?: any) {
-    return await this.db.find<T>(query);
+    return await this.db.find(query);
   }
 
   async findAll() {
-    return await this.db.find<T>({});
+    return await this.db.find({});
   }
 
   async findOne(query: any) {
-    return await this.db.findOne<T>(query);
+    return await this.db.findOne(query);
   }
 
   async update(query: any, data: any) {
-    return await this.db.update<T>(query, data, {
+    await this.db.updateOne(query, data, {
       upsert: true,
-      returnUpdatedDocs: true,
     });
+    return this.find(query);
   }
 
   async remove(query: any) {
-    return await this.db.remove(query, { multi: true });
+    return await this.db.deleteMany(query);
   }
 
   async count(query: any) {

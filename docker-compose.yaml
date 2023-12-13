@@ -2,6 +2,7 @@ version: '3.1'
 
 services:
   ursamu:
+    hostname: ursamu
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -15,4 +16,20 @@ services:
      - "./data:/ursamu/data"
      - "./text:/ursamu/text"
     container_name: ursamu
-    hostname: ursamu
+    depends_on:
+      mongo:
+        condition: service_healthy
+  mongo:
+    hostname: mongo
+    image: mongo:7-jammy
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+     - "./db:/data/db"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok | mongo mongo:27010/test --quiet'
+      interval: 30s
+      timeout: 10s
+      retries: 3
