@@ -60,7 +60,7 @@ export class DBO<T> {
     d("[database update] gets", query, data)
     try {
       d("[database update] tries update")
-      const r = await this.coll().update(query, data, {
+      const r = await this.coll().updateOne(query, data, {
         upsert: true,
       });
       d("[database update] update response", r)

@@ -37,10 +37,10 @@ export default () =>
 
       const exits = (
         await dbojs.find({
-          "$where": { "$and": [
+          "$and": [
             { flags: /player/i },
             { flags: /connected/i }
-          ]}
+          ]
         })
       ).map((e) => {
         if (!e.data?.name) return "";
