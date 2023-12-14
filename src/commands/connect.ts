@@ -26,7 +26,7 @@ export default () =>
         await dbojs.find({
           $where: { "$or": [
               { name: { "$regex": `/${name}/i`} },
-              { alias: { "$regex": `/${alias}/i` } }
+              { alias: { "$regex": `/${name}/i` } }
           ]}
         })
       )[0];
