@@ -26,57 +26,62 @@ export class DBO<T> {
   }
 
   async insert(data: T) {
+    d("[database insert] gets", data);
     await this.coll().insertOne(data);
     const ret = await this.find(data);
-    d("[database insert]", data, ret);
+    d("[database insert] returns", ret);
     return ret;
   }
 
   async find(query?: any) {
+    d("[database find] gets", query);
     const ret = await (await this.coll().find(query)).toArray();
-    d("[database find]", query, ret);
+    d("[database find] returns", query, ret);
     return ret;
   }
 
   async findAll() {
     const ret = await (await this.coll().find({})).toArray();
-    d("[database findAll]", ret);
+    d("[database findAll] returns", ret);
     return ret;
   }
 
   async findOne(query: any) {
+    d("[database findOne] gets", query);
     const ret = await this.coll().findOne(query);
-    d("[database findOne]", query, ret);
+    d("[database findOne] returns", ret);
     return ret;
   }
 
   async update(query: any, data: any) {
+    d("[database update] gets", query, data)
     try {
-      d("[database update]", query, data)
+      d("[database update] tries update")
       await this.coll().update(query, data, {
         upsert: true,
       });
     } catch(e) {
       if(e.type == "MongoInvalidArgumentError") {
-        d("[database update replaceOne]", query, data)
+        d("[database update replaceOne] tries replaceOne")
         await this.coll().replaceOne(query, data, {
           upsert: true,
         });
       }
     }
     const ret = await this.find(data);
-    d("[database update]", ret);
+    d("[database update] returns", ret);
     return ret;
   }
 
   async remove(query: any) {
+    d("[database remove] gets", query);
     await this.coll().deleteMany(query);
-    d("[database remove]", query);
   }
 
   async count(query: any) {
+    d("[database count] gets", query);
     const ret = await this.coll().count(query);
-    d("[database count]", query, ret);
+    d("[database count] returns", ret);
     return ret;
   }
 }
