@@ -70,6 +70,8 @@ export class DBO<T> {
         await this.coll().replaceOne(query, data, {
           upsert: true,
         });
+      } else {
+        d("[database update] failed", e)
       }
     }
     const ret = await this.find(query);
