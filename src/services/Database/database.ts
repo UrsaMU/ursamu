@@ -40,10 +40,7 @@ export class DBO<T> {
     d("[database find] gets", query);
     const ret = await (await this.coll().find(query)).toArray();
     d("[database find] returns", ret);
-    if(!("length" in ret) || !ret.length) {
-      return ret
-    }
-    return ret[0];
+    return ret;
   }
 
   async findAll() {
