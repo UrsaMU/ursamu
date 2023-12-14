@@ -28,7 +28,7 @@ export default () =>
 
       const players = await dbojs.find({ flags: /player/i });
       const taken = await dbojs.find({
-        $or: [{ "data.name": name }, { "data.alias": name }],
+        $or: [{ "name": name }, { "alias": name }],
       });
 
       if (taken.length > 0) {
