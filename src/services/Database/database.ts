@@ -7,7 +7,7 @@ import { IArticle, IBoard } from "../../@types/index.ts";
 
 function d(...args) {
   const e = new Error();
-  const level = e.stack.split("\n")[3];
+  const level = e.stack.split("\n")[2];
   console.log(...args, level);
 }
 
@@ -27,7 +27,7 @@ export class DBO<T> {
 
   async insert(data: T) {
     await this.coll().insertOne(data);
-    const ret = this.find(data);
+    const ret = await this.find(data);
     d("[database insert]", data, ret);
     return ret;
   }
@@ -64,7 +64,7 @@ export class DBO<T> {
         });
       }
     }
-    const ret = this.find(query);
+    const ret = await this.find(query);
     d("[database update]", ret);
     return ret;
   }
