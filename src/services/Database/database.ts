@@ -60,9 +60,10 @@ export class DBO<T> {
     d("[database update] gets", query, data)
     try {
       d("[database update] tries update")
-      await this.coll().update(query, data, {
+      const r = await this.coll().update(query, data, {
         upsert: true,
       });
+      d("[database update] update response", r)
     } catch(e) {
       if(e.type == "MongoInvalidArgumentError") {
         d("[database update replaceOne] tries replaceOne")
