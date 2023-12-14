@@ -30,13 +30,16 @@ export class DBO<T> {
     await this.coll().insertOne(data);
     const ret = await this.find(data);
     d("[database insert] returns", ret);
-    return ret;
+    if(!("length" in ret) || !ret.length) {
+      return ret
+    }
+    return ret[0]
   }
 
   async find(query?: any) {
     d("[database find] gets", query);
     const ret = await (await this.coll().find(query)).toArray();
-    d("[database find] returns", query, ret);
+    d("[database find] returns", ret);
     return ret;
   }
 
@@ -68,7 +71,7 @@ export class DBO<T> {
         });
       }
     }
-    const ret = await this.find(data);
+    const ret = await this.find(query);
     d("[database update] returns", ret);
     return ret;
   }
