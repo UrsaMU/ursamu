@@ -7,7 +7,7 @@ import { IArticle, IBoard } from "../../@types/index.ts";
 
 function d(...args) {
   const e = new Error();
-  const level = e.stack.split("\n");
+  const level = e.stack.split("\n").slice(3, 5);
   console.log(...args, level);
 }
 
@@ -40,7 +40,10 @@ export class DBO<T> {
     d("[database find] gets", query);
     const ret = await (await this.coll().find(query)).toArray();
     d("[database find] returns", ret);
-    return ret;
+    if(!("length" in ret) || !ret.length) {
+      return ret
+    }
+    return ret[0];
   }
 
   async findAll() {
