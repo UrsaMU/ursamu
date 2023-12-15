@@ -37,9 +37,10 @@ export default () =>
 
       const exits = (
         await dbojs.find({
-          $where: function () {
-            return this.flags.includes("exit") && this.location === tar.id;
-          },
+          "$and": [
+            { flags: /player/i },
+            { flags: /connected/i }
+          ]
         })
       ).map((e) => {
         if (!e.data?.name) return "";
