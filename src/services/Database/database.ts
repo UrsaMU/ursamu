@@ -25,6 +25,10 @@ export class DBO<T> {
     return this.client.db().collection(this.collection);
   }
 
+  async create(data: T) {
+  }
+
+  /* 
   async insert(data: T) {
     d("[database insert] gets", data);
     await this.coll().insertOne(data);
@@ -36,6 +40,12 @@ export class DBO<T> {
     return ret[0]
   }
 
+  */
+
+  async query(query?: any) {
+  }
+
+  /*
   async find(query?: any) {
     d("[database find] gets", query);
     const ret = await (await this.coll().find(query)).toArray();
@@ -43,19 +53,24 @@ export class DBO<T> {
     return ret;
   }
 
+  */
+
+  async all() {
+  }
+
+  /*
   async findAll() {
     const ret = await (await this.coll().find({})).toArray();
     d("[database findAll] returns", ret);
     return ret;
   }
 
-  async findOne(query: any) {
-    d("[database findOne] gets", query);
-    const ret = await this.coll().findOne(query);
-    d("[database findOne] returns", ret);
-    return ret;
+  */
+
+  async modify(query: any, data: any) {
   }
 
+  /*
   async update(query: any, data: any) {
     d("[database update] gets", query, data)
     try {
@@ -79,17 +94,29 @@ export class DBO<T> {
     return ret;
   }
 
+  */
+
+  async delete(query: any) {
+  }
+
+  /*
   async remove(query: any) {
     d("[database remove] gets", query);
     await this.coll().deleteMany(query);
   }
+  */
 
+  async length(query: any) {
+  }
+
+  /*
   async count(query: any) {
     d("[database count] gets", query);
     const ret = await this.coll().count(query);
     d("[database count] returns", ret);
     return ret;
   }
+  */
 }
 
 export interface ICounters {
