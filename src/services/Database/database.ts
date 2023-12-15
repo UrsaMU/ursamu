@@ -53,7 +53,7 @@ export class DBO<T> {
   }
 
   async modify(query: any, operator: string, data: any) {
-    const body = {}
+    var body = {}
     body[operator] = data
     const ret = await this.coll().updateMany(query, body)
     return await this.query(query)
