@@ -43,58 +43,21 @@ export class DBO<T> {
   */
 
   async query(query?: any) {
+    const ret = await this.coll().find(query);
+    return await ret.toArray();
   }
-
-  /*
-  async find(query?: any) {
-    d("[database find] gets", query);
-    const ret = await (await this.coll().find(query)).toArray();
-    d("[database find] returns", ret);
-    return ret;
-  }
-
-  */
 
   async all() {
+    const ret = await this.coll().find({});
+    return await ret.toArray();
   }
 
-  /*
-  async findAll() {
-    const ret = await (await this.coll().find({})).toArray();
-    d("[database findAll] returns", ret);
-    return ret;
+  async modify(query: any, operator: string, data: any) {
+    const body = {}
+    body[operator] = data
+    const ret = await this.coll().updateMany(query, body)
+    return await this.query(query)
   }
-
-  */
-
-  async modify(query: any, data: any) {
-  }
-
-  /*
-  async update(query: any, data: any) {
-    d("[database update] gets", query, data)
-    try {
-      d("[database update] tries update")
-      const r = await this.coll().updateOne(query, data, {
-        upsert: true,
-      });
-      d("[database update] update response", r)
-    } catch(e) {
-      if(e.type == "MongoInvalidArgumentError") {
-        d("[database update replaceOne] tries replaceOne")
-        await this.coll().replaceOne(query, data, {
-          upsert: true,
-        });
-      } else {
-        d("[database update] failed", e)
-      }
-    }
-    const ret = await this.find(query);
-    d("[database update] returns", ret);
-    return ret;
-  }
-
-  */
 
   async delete(query: any) {
   }

@@ -36,14 +36,14 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
       }
     }
 
-    const rooms = await dbojs.find({ flags: /room/i });
+    const rooms = await dbojs.query({ flags: /room/i });
 
     const counter = {
       _id: "objid",
       seq: 0,
     };
 
-    if (!(await counters.findOne({ _id: "objid" }))) {
+    if (!(await counters.query({ _id: "objid" })).length) {
       await counters.insert(counter);
     }
 
@@ -53,7 +53,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     }
 
     // create the default channels
-    const channels = await chans.find({});
+    const channels = await chans.all();
     if (!channels.length) {
       console.log("No channels found, creating some!");
       await chans.insert({
@@ -73,14 +73,14 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
   });
 
   Deno.addSignalListener("SIGINT", async () => {
-    const players = await dbojs.find({ flags: /connected/i });
+    const players = await dbojs.query({ flags: /connected/i });
 
     for (const player of players) {
       await setFlags(player, "!connected");
     }
 
     await broadcast("Server shutting down.");
-    process.exit(0);
+    Deno.exit(0);
   });
 };
 
