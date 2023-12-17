@@ -4,7 +4,7 @@ import { chans, dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { force } from "../services/commands/index.ts";
 import { flags } from "../services/flags/flags.ts";
-import { playerForSocket } from "./utils/playerForSocket.ts";
+import { playerForSocket } from "./playerForSocket.ts";
 
 export const joinChans = async (ctx: IContext) => {
   const player = await playerforSocket(ctx.socket);
