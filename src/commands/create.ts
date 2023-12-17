@@ -41,16 +41,26 @@ export default () =>
       const flags =
         players.length > 0 ? "player connected" : "player connected superuser";
       const id = await getNextId("objid");
-      const player = await dbojs.create({
-        id,
-        flags,
-        location: config.game?.playerStart,
-        data: {
-          name,
-          home: config.game?.playerStart,
-          password: await hash(password, 10),
-        },
-      });
+      const player = await(async() => {
+        await dbojs.create({
+          id,
+          flags,
+          location: config.game?.playerStart,
+          data: {
+            name,
+            home: config.game?.playerStart,
+            password: await hash(password, 10),
+          },
+        });
+        const ret = dbojs.query({id});
+        return ret.length ? ret : false;
+      })());
+      if(!player) {
+        send([ctx.socket.id], "Unable to create player!.", {
+          error: true,
+        });
+        return;
+      }
 
       ctx.socket.join(`#${player.id}`);
       ctx.socket.join(`#${player.location}`);
@@ -58,7 +68,7 @@ export default () =>
       player.data ||= {};
       player.data.lastCommand = Date.now();
 
-      await dbojs.modify({ id: player.id }, player);
+      await dbojs.modify({ id: player.id }, "$set", player);
       await joinChans(ctx);
 
       send([ctx.socket.id], `Welcome to the game, ${player.data?.name}!`, {
