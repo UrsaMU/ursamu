@@ -9,7 +9,7 @@ ADD help/ /ursamu/help/
 ADD src/ /ursamu/src/
 RUN mkdir /ursamu/data
 RUN deno run -A deps.ts
-RUN deno run -A docker-deps.ts
+RUN deno run -A docker-deps.ts || true
 
 VOLUME /ursamu/data
 VOLUME /ursamu/text
