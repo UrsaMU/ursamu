@@ -7,7 +7,7 @@ import { flags } from "../services/flags/flags.ts";
 import { playerForSocket } from "./playerForSocket.ts";
 
 export const joinChans = async (ctx: IContext) => {
-  const player = await playerforSocket(ctx.socket);
+  const player = await playerForSocket(ctx.socket);
   if (!player) return;
   const channels = await chans.find({});
   ctx.socket.join(`#${player.location}`);

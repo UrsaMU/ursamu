@@ -22,14 +22,13 @@ export default () =>
         name = pieces.join(" ");
       }
 
-      const found = (
-        await dbojs.find({
-          $where: { "$or": [
-              { name: { "$regex": `/${name}/i`} },
-              { alias: { "$regex": `/${name}/i` } }
-          ]}
-        })
-      )[0];
+      const found = await ( async () => {
+        const ret = await dbojs.query( { "$or": [
+          { name: { "$regex": `/${name}/i`} },
+          { alias: { "$regex": `/${name}/i` } }
+        ] } );
+        return ret.length
+      })();
       if (!found) {
         send([ctx.socket.id], "I can't find a character by that name!", {
           error: true,
@@ -49,7 +48,7 @@ export default () =>
       ctx.socket.join(`#${found.location}`);
       await setFlags(found, "connected");
       found.data ||= {};
-      await dbojs.update({ id: found.id }, found);
+      await dbojs.modify({ id: found.id }, "$set", found);
       await send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
         cid: found.id,
       });
