@@ -8,6 +8,8 @@ ADD deps.ts LICENSE README.md pup pup.jsonc ursamu_github_banner.png /ursamu/
 ADD help/ /ursamu/help/
 ADD src/ /ursamu/src/
 RUN mkdir /ursamu/data
+RUN deno run -A deps.ts
+RUN deno run -A docker-deps.ts
 
 VOLUME /ursamu/data
 VOLUME /ursamu/text
