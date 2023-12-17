@@ -26,8 +26,8 @@ export default () =>
         name = pieces.join(" ");
       }
 
-      const players = await dbojs.find({ flags: /player/i });
-      const taken = await dbojs.find({
+      const players = await dbojs.query({ flags: /player/i });
+      const taken = await dbojs.query({
         $or: [{ "name": name }, { "alias": name }],
       });
 
@@ -41,7 +41,7 @@ export default () =>
       const flags =
         players.length > 0 ? "player connected" : "player connected superuser";
       const id = await getNextId("objid");
-      const player = await dbojs.insert({
+      const player = await dbojs.create({
         id,
         flags,
         location: config.game?.playerStart,
@@ -58,7 +58,7 @@ export default () =>
       player.data ||= {};
       player.data.lastCommand = Date.now();
 
-      await dbojs.update({ id: player.id }, player);
+      await dbojs.modify({ id: player.id }, player);
       await joinChans(ctx);
 
       send([ctx.socket.id], `Welcome to the game, ${player.data?.name}!`, {
