@@ -14,3 +14,4 @@ export * from "./checkFlags.ts";
 export * from "./formatStat.ts";
 export * from "./capString.ts";
 export * from "./formatString.ts";
+export * from "./playerForSocket.ts";
