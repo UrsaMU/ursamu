@@ -13,7 +13,12 @@ export const createObj = async (flgs: string, datas: any) => {
     data,
   };
 
-  return await dbojs.insert(obj);
+  const ret = await dbojs.create(obj);
+  if(ret.length) {
+    return ret[0]
+  } else {
+    return false
+  }
 };
 
 export class Obj {
