@@ -26,21 +26,9 @@ export class DBO<T> {
   }
 
   async create(data: T) {
-  }
-
-  /* 
-  async insert(data: T) {
-    d("[database insert] gets", data);
     await this.coll().insertOne(data);
-    const ret = await this.find(data);
-    d("[database insert] returns", ret);
-    if(!("length" in ret) || !ret.length) {
-      return ret
-    }
-    return ret[0]
+    return await this.query(data)
   }
-
-  */
 
   async query(query?: any) {
     const ret = await this.coll().find(query);

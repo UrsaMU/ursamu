@@ -44,7 +44,7 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     };
 
     if (!(await counters.query({ _id: "objid" })).length) {
-      await counters.insert(counter);
+      await counters.create(counter);
     }
 
     if (!rooms.length) {
@@ -56,13 +56,13 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     const channels = await chans.all();
     if (!channels.length) {
       console.log("No channels found, creating some!");
-      await chans.insert({
+      await chans.create({
         name: "Public",
         header: "%ch%cc[Public]%cn",
         alias: "pub",
       });
 
-      await chans.insert({
+      await chans.create({
         name: "Admin",
         header: "%ch%cy[Admin]%cn",
         alias: "ad",
