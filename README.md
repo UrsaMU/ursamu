@@ -50,6 +50,21 @@ sudo docker-compose up -d
 
 The game database will be exported to the `data/` directory on the host filesystem, for easy backups.
 
+## Development on ARM macOS
+
+Deno on ARM can be finicky right now. Here's a workaround:
+
+```bash
+git clone https://github.com/LukeChannings/deno-arm64.git deno-arm
+cd deno-arm
+sudo docker build -t deno-arm
+cd ..
+git clone https://github.com/ursamu/ursamu.git
+cd ursamu
+echo "BASE=deno-arm" > .env
+sudo docker-compose up -d
+```
+
 ## License
 
 Ursamu is licensed under the MIT License.

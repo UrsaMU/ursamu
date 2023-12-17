@@ -1,4 +1,5 @@
-FROM denoland/deno:ubuntu
+ARG BASE=denoland/deno:ubuntu
+FROM $BASE
 
 RUN apt-get -y update && apt-get -y install build-essential bash
 RUN mkdir /ursamu
