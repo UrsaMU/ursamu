@@ -24,8 +24,8 @@ export default () =>
 
       const found = await ( async () => {
         const ret = await dbojs.query( { "$or": [
-          { name: { "$regex": `/${name}/i`} },
-          { alias: { "$regex": `/${name}/i` } }
+          { "data.name": new RegExp(name, "i") },
+          { "data.alias": new RegExp(name, "i") } }
         ] } );
         return ret.length
       })();
