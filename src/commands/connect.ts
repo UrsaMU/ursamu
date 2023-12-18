@@ -23,11 +23,11 @@ export default () =>
       }
 
       const found = await ( async () => {
-        const ret = await dbojs.query( { "$or": [
+        const ret = await dbojs.query({ "$or": [
           { "data.name": new RegExp(name, "i") },
-          { "data.alias": new RegExp(name, "i") } }
-        ] } );
-        return ret.length
+          { "data.alias": new RegExp(name, "i") }
+        ] });
+        return ret.length ? ret[0] : false;
       })();
       if (!found) {
         send([ctx.socket.id], "I can't find a character by that name!", {

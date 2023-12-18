@@ -28,7 +28,7 @@ export default () =>
 
       const players = await dbojs.query({ flags: /player/i });
       const taken = await dbojs.query({
-        $or: [{ "name": name }, { "alias": name }],
+        $or: [{ "data.name": name }, { "data.alias": name }],
       });
 
       if (taken.length > 0) {
