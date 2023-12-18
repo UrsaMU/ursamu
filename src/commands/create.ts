@@ -54,7 +54,7 @@ export default () =>
         });
         const ret = dbojs.query({id});
         return ret.length ? ret : false;
-      })());
+      })();
       if(!player) {
         send([ctx.socket.id], "Unable to create player!.", {
           error: true,
