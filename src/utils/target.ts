@@ -13,7 +13,7 @@ export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
   }
 
   if (tar.toLowerCase() === "here") {
-    const ret = await dbojs.findOne({ id: en.location });
+    const ret = await dbojs.query({ id: en.location });
     return ret.length ? ret[0] : undefined;
   }
 
@@ -26,7 +26,7 @@ export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
   }
 
   if (tar.toLowerCase() === "room") {
-    const ret = await dbojs.findOne({ id: en.location });
+    const ret = await dbojs.query({ id: en.location });
     return ret.length ? ret[0] : undefined;
   } else {
     const found = await (async () => {
