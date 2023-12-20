@@ -3,15 +3,18 @@ import { dbojs } from "../services/Database/index.ts";
 
 export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
   if (!tar) {
-    return await dbojs.findOne({ id: en.location });
+    const ret = await dbojs.query({ id: en.location });
+    return ret.length ? ret[0] : undefined;
   }
 
   if (+tar) {
-    return await dbojs.findOne({ id: +tar });
+    const ret = await dbojs.query({ id: +tar });
+    return ret.length ? ret[0] : undefined;
   }
 
   if (tar.toLowerCase() === "here") {
-    return await dbojs.findOne({ id: en.location });
+    const ret = await dbojs.findOne({ id: en.location });
+    return ret.length ? ret[0] : undefined;
   }
 
   if (tar.toLowerCase() === "me") {
@@ -23,10 +26,11 @@ export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
   }
 
   if (tar.toLowerCase() === "room") {
-    return await dbojs.findOne({ id: en.location });
+    const ret = await dbojs.findOne({ id: en.location });
+    return ret.length ? ret[0] : undefined;
   } else {
-    const found = (
-      await dbojs.find({
+    const found = await (async () => {
+      const ret = await dbojs.query({
         $where: function () {
           return (
             RegExp(this.data.name.replace(";", "|"), "ig").test(tar) ||
@@ -35,8 +39,9 @@ export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
             this.data.alias?.toLowerCase() === tar.toLowerCase()
           );
         },
-      })
-    )[0];
+      });
+      return ret.length ? ret[0] : undefined;
+    })();
     if (!found) {
       return;
     }

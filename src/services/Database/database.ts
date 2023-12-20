@@ -47,26 +47,11 @@ export class DBO<T> {
   }
 
   async delete(query: any) {
+    return await this.coll().deleteMany(query);
   }
-
-  /*
-  async remove(query: any) {
-    d("[database remove] gets", query);
-    await this.coll().deleteMany(query);
-  }
-  */
 
   async length(query: any) {
   }
-
-  /*
-  async count(query: any) {
-    d("[database count] gets", query);
-    const ret = await this.coll().count(query);
-    d("[database count] returns", ret);
-    return ret;
-  }
-  */
 }
 
 export interface ICounters {
