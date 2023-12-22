@@ -16,6 +16,9 @@ export const matchChannel = async (ctx: IContext) => {
     let msg = parts.slice(1).join(" ").trim();
     const match = msg?.match(/^(:|;)?(.*)$/i);
 
+    if(!en.data?.channels?.queryOne) {
+      return false;
+    }
     const chan = en.data?.channels?.queryOne((c: IChanEntry) => c.alias === trig)
     if(!chan) {
       return false;
