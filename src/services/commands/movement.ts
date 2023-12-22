@@ -8,11 +8,14 @@ import { force } from "./force.ts";
 
 export const matchExits = async (ctx: IContext) => {
   if (ctx.socket.cid) {
-    const en = await dbojs.findOne({ id: ctx.socket.cid });
+    const en = await (async () => {
+      const ret = await dbojs.query({ id: ctx.socket.cid });
+      return ret.length ? ret[0] : undefined;
+    })();
     if (!en) return false;
 
     en.data ||= {};
-    const exits = await dbojs.find({
+    const exits = await dbojs.query({
       $and: [{ flags: /exit/i }, { location: en.location }],
     });
 
@@ -20,7 +23,7 @@ export const matchExits = async (ctx: IContext) => {
       const reg = new RegExp(`^${exit.data?.name?.replace(/;/g, "|")}$`, "i");
       const match = ctx.msg?.trim().match(reg);
 
-      const players = await dbojs.find({
+      const players = await dbojs.query({
         $and: [
           { location: en.location },
           { flags: /player/i },
@@ -30,8 +33,14 @@ export const matchExits = async (ctx: IContext) => {
       });
 
       if (match) {
-        const room = await dbojs.findOne({ id: en.location });
-        const dest = await dbojs.findOne({ id: exit.data?.destination });
+        const room = await (async () => {
+          const ret = await dbojs.query({ id: en.location });
+          return ret.length ? ret[0] : undefined;
+        })();
+        const dest = await (async () => {
+          const ret = await dbojs.query({ id: exit.data?.destination });
+          return ret.length ? ret[0] : undefined;
+        })();
 
         if (dest && flags.check(en.flags, exit?.data?.lock || "")) {
           if (!en.flags.includes("dark")) {
@@ -44,7 +53,7 @@ export const matchExits = async (ctx: IContext) => {
           }
 
           en.location = dest?.id;
-          await dbojs.update({ id: en.id }, en);
+          await dbojs.modify({ id: en.id }, "$set", en);
           ctx.socket.join(`#${en.location}`);
 
           if (!en.flags.includes("dark")) {
