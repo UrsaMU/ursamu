@@ -52,7 +52,7 @@ export default () =>
             password: await hash(password, 10),
           },
         });
-        const ret = dbojs.query({id});
+        const ret = await dbojs.query({id});
         return ret.length ? ret : false;
       })();
       if(!player) {
