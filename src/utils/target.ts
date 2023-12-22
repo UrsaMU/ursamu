@@ -1,8 +1,8 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs } from "../services/Database/index.ts";
 
-export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
-  if (!tar) {
+export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
+  if (!tar || ["here", "room"].includes(tar.toLowerCase())) {
     const ret = await dbojs.query({ id: en.location });
     return ret.length ? ret[0] : undefined;
   }
@@ -12,48 +12,31 @@ export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
     return ret.length ? ret[0] : undefined;
   }
 
-  if (tar.toLowerCase() === "here") {
-    const ret = await dbojs.query({ id: en.location });
-    return ret.length ? ret[0] : undefined;
-  }
-
-  if (tar.toLowerCase() === "me") {
+  if (["me", "self"].includes(tar.toLowerCase())) {
     return en;
   }
 
-  if (tar.toLowerCase() === "self") {
-    return en;
-  }
-
-  if (tar.toLowerCase() === "room") {
-    const ret = await dbojs.query({ id: en.location });
+  const found = await (async () => {
+    const ret = await dbojs.query({
+      $where: function () {
+        const target = `${tar}`;
+        return (
+          RegExp(this.data.name.replace(";", "|"), "ig").test(target) ||
+          this.id === +target.slice(1) ||
+          this.id === target ||
+          this.data.alias?.toLowerCase() === target.toLowerCase()
+        );
+      },
+    });
     return ret.length ? ret[0] : undefined;
-  } else {
-    const found = await (async () => {
-      const ret = await dbojs.query({
-        $where: function () {
-          return (
-            RegExp(this.data.name.replace(";", "|"), "ig").test(tar) ||
-            this.id === +tar.slice(1) ||
-            this.id === tar ||
-            this.data.alias?.toLowerCase() === tar.toLowerCase()
-          );
-        },
-      });
-      return ret.length ? ret[0] : undefined;
-    })();
-    if (!found) {
-      return;
-    }
+  })();
 
-    if (global) {
-      return found;
-    } else {
-      if (found.location === en.location || found.id === en.location) {
-        return found;
-      } else {
-        return;
-      }
-    }
+  if (!found) {
+    return;
   }
+
+  if (found && (global || [found.location, found.id].includes(en.location))) {
+    return found;
+  }
+
 };
