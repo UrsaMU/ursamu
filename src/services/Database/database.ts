@@ -34,6 +34,11 @@ export class DBO<T> {
     return await ret.toArray();
   }
 
+  async queryOne(query?: any) {
+    const ret = await this.query(query);
+    return ret.length ? ret[0] : false;
+  }
+
   async all() {
     const ret = await this.coll().find({});
     return await ret.toArray();

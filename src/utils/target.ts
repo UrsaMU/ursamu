@@ -3,13 +3,11 @@ import { dbojs } from "../services/Database/index.ts";
 
 export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
   if (!tar || ["here", "room"].includes(tar.toLowerCase())) {
-    const ret = await dbojs.query({ id: en.location });
-    return ret.length ? ret[0] : undefined;
+    return await dbojs.queryOne({ id: en.location });
   }
 
   if (+tar) {
-    const ret = await dbojs.query({ id: +tar });
-    return ret.length ? ret[0] : undefined;
+    return await dbojs.queryOne({ id: +tar });
   }
 
   if (["me", "self"].includes(tar.toLowerCase())) {
@@ -17,7 +15,7 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
   }
 
   const found = await (async () => {
-    const ret = await dbojs.query({
+    return await dbojs.queryOne({
       $where: function () {
         const target = `${tar}`;
         return (
@@ -28,7 +26,6 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
         );
       },
     });
-    return ret.length ? ret[0] : undefined;
   })();
 
   if (!found) {

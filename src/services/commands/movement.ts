@@ -8,10 +8,7 @@ import { force } from "./force.ts";
 
 export const matchExits = async (ctx: IContext) => {
   if (ctx.socket.cid) {
-    const en = await (async () => {
-      const ret = await dbojs.query({ id: ctx.socket.cid });
-      return ret.length ? ret[0] : undefined;
-    })();
+    const en = await dbojs.queryOne({ id: ctx.socket.cid });
     if (!en) return false;
 
     en.data ||= {};
@@ -33,14 +30,8 @@ export const matchExits = async (ctx: IContext) => {
       });
 
       if (match) {
-        const room = await (async () => {
-          const ret = await dbojs.query({ id: en.location });
-          return ret.length ? ret[0] : undefined;
-        })();
-        const dest = await (async () => {
-          const ret = await dbojs.query({ id: exit.data?.destination });
-          return ret.length ? ret[0] : undefined;
-        })();
+        const room = await dbojs.queryOne({ id: en.location });
+        const dest = await dbojs.queryOne({ id: exit.data?.destination });
 
         if (dest && flags.check(en.flags, exit?.data?.lock || "")) {
           if (!en.flags.includes("dark")) {

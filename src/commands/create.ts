@@ -52,8 +52,7 @@ export default () =>
             password: await hash(password, 10),
           },
         });
-        const ret = await dbojs.query({id});
-        return ret.length ? ret[0] : false;
+        return await dbojs.queryOne({id});
       })();
       if(!player) {
         send([ctx.socket.id], "Unable to create player!.", {

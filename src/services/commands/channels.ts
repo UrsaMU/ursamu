@@ -8,7 +8,7 @@ import { force } from "./force.ts";
 
 export const matchChannel = async (ctx: IContext) => {
   if (ctx.socket.cid) {
-    const en = await dbojs.findOne({ id: ctx.socket.cid });
+    const en = await dbojs.queryOne({ id: ctx.socket.cid });
 
     if (!en) return;
     const parts = ctx.msg?.split(" ") || [];
@@ -16,8 +16,11 @@ export const matchChannel = async (ctx: IContext) => {
     let msg = parts.slice(1).join(" ").trim();
     const match = msg?.match(/^(:|;)?(.*)$/i);
 
-    const chan = en.data?.channels?.find((c: IChanEntry) => c.alias === trig);
-    const channel = await chans.findOne({ name: chan?.channel });
+    const chan = en.data?.channels?.queryOne((c: IChanEntry) => c.alias === trig)
+    if(!chan) {
+      return false;
+    }
+    const channel = await chans.queryOne({ name: chan.channel });
 
     if (match) {
       if (!flags.check(en.flags || "", channel?.lock || "")) return false;
