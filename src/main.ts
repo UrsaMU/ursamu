@@ -31,7 +31,7 @@ export const mu = async (cfg?: IConfig, plugs?: IPlugin[] = []) => {
   for(const plugin of plugs) {
     pluginsList.append(plugin)
   }
-  loadPlugins(pluginsList);
+  plugins(pluginsList);
   loadTxtDir(path.join(__dirname, "../text"));
 
   server.listen(gameConfig.server?.ws, async () => {
