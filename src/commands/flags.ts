@@ -13,7 +13,7 @@ export default () =>
     lock: "connected admin+",
     exec: async (ctx, args) => {
       const [tar, flgs] = args;
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
       const obj = await target(en, tar, true);

@@ -22,6 +22,6 @@ export const createCharacter = async (
 };
 
 export const getCharacter = async (id?: number) => {
-  let character = await dbojs.findOne({ id });
-  return character;
+  let character = await dbojs.query({ id });
+  return character.length ? character[0] : false;
 };

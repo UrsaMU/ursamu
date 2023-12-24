@@ -1,5 +1,5 @@
 import { hash } from "../../deps.ts";
-import { send } from "../services/broadcast//index.ts";
+import { send } from "../services/broadcast/index.ts";
 import { addCmd, force } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import config from "../ursamu.config.ts";
@@ -26,8 +26,8 @@ export default () =>
         name = pieces.join(" ");
       }
 
-      const players = await dbojs.find({ flags: /player/i });
-      const taken = await dbojs.find({
+      const players = await dbojs.query({ flags: /player/i });
+      const taken = await dbojs.query({
         $or: [{ "data.name": name }, { "data.alias": name }],
       });
 
@@ -41,16 +41,25 @@ export default () =>
       const flags =
         players.length > 0 ? "player connected" : "player connected superuser";
       const id = await getNextId("objid");
-      const player = await dbojs.insert({
-        id,
-        flags,
-        location: config.game?.playerStart,
-        data: {
-          name,
-          home: config.game?.playerStart,
-          password: await hash(password, 10),
-        },
-      });
+      const player = await(async() => {
+        await dbojs.create({
+          id,
+          flags,
+          location: config.game?.playerStart,
+          data: {
+            name,
+            home: config.game?.playerStart,
+            password: await hash(password, 10),
+          },
+        });
+        return await dbojs.queryOne({id});
+      })();
+      if(!player) {
+        send([ctx.socket.id], "Unable to create player!.", {
+          error: true,
+        });
+        return;
+      }
 
       ctx.socket.join(`#${player.id}`);
       ctx.socket.join(`#${player.location}`);
@@ -58,7 +67,7 @@ export default () =>
       player.data ||= {};
       player.data.lastCommand = Date.now();
 
-      await dbojs.update({ id: player.id }, player);
+      await dbojs.modify({ id: player.id }, "$set", player);
       await joinChans(ctx);
 
       send([ctx.socket.id], `Welcome to the game, ${player.data?.name}!`, {

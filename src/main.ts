@@ -8,8 +8,9 @@ import defaultConfig from "./ursamu.config.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { Config, IConfig, IPlugin } from "./@types/index.ts";
+import { dpath } from "../deps.ts";
 
-const __dirname = path.dirname(path.fromFileUrl(import.meta.url))
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 const __data = path.join(__dirname, "..", "data")
 export const dataConfig = await (async () => {
   try {
@@ -23,44 +24,41 @@ export const dataConfig = await (async () => {
 
 export const gameConfig = new Config(defaultConfig);
 
-export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
+export const mu = async (cfg?: IConfig, plugs?: IPlugin[] = []) => {
   gameConfig.setConfig({ ...defaultConfig, ...cfg });
 
-  const pluginsList = gameConfig.plugins || path.join(__dirname, "./commands")
-  plugins(pluginsList);
+  const pluginsList = gameConfig.plugins || path.join(__dirname, "./commands");
+  for(const plugin of plugs) {
+    pluginsList.append(plugin)
+  }
+  loadPlugins(pluginsList);
   loadTxtDir(path.join(__dirname, "../text"));
 
   server.listen(gameConfig.server?.ws, async () => {
     // load plugins
-    if (plugins) {
-      for (const plugin of plugins) {
-        try {
-          if (plugin.init) {
-            const res = await plugin.init();
-            if (res) {
-              gameConfig.setConfig({ ...gameConfig, ...plugin.config });
-              console.log(`Plugin ${plugin.name} loaded.`);
-            }
+    for (const plugin of pluginsList) {
+      try {
+        if (plugin.init) {
+          const res = await plugin.init();
+          if (res) {
+            gameConfig.setConfig({ ...gameConfig, ...plugin.config });
+            console.log(`Plugin ${plugin.name} loaded.`);
           }
-        } catch (error) {
-          console.log(error);
         }
+      } catch (error) {
+      console.log(error);
       }
     }
 
-    const rooms = await dbojs.find({
-      $where: function () {
-        return this.flags.includes("room");
-      },
-    });
+    const rooms = await dbojs.query({ flags: /room/i });
 
     const counter = {
       _id: "objid",
       seq: 0,
     };
 
-    if (!(await counters.findOne({ _id: "objid" }))) {
-      await counters.insert(counter);
+    if (!(await counters.query({ _id: "objid" })).length) {
+      await counters.create(counter);
     }
 
     if (!rooms.length) {
@@ -69,16 +67,16 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     }
 
     // create the default channels
-    const channels = await chans.find({});
+    const channels = await chans.all();
     if (!channels.length) {
       console.log("No channels found, creating some!");
-      await chans.insert({
+      await chans.create({
         name: "Public",
         header: "%ch%cc[Public]%cn",
         alias: "pub",
       });
 
-      await chans.insert({
+      await chans.create({
         name: "Admin",
         header: "%ch%cy[Admin]%cn",
         alias: "ad",
@@ -88,20 +86,16 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     console.log(`Server started on port ${gameConfig.server?.ws}.`);
   });
 
-  process.on("SIGINT", async () => {
-    const players = await dbojs.find({ flags: /connected/i });
+  Deno.addSignalListener("SIGINT", async () => {
+    const players = await dbojs.query({ flags: /connected/i });
 
     for (const player of players) {
       await setFlags(player, "!connected");
     }
 
     await broadcast("Server shutting down.");
-    process.exit(0);
-  });
-
-  process.on("unhandledRejection", (reason, p) => {
-    console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
+    Deno.exit(0);
   });
 };
 
-if (require.main === module) mu(dataConfig);
+if (import.meta.main) mu(dataConfig);

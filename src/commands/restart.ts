@@ -9,7 +9,7 @@ export default () =>
     pattern: /^@reboot|^@restart/g,
     lock: "connected admin+",
     exec: async (ctx) => {
-      const player = await dbojs.findOne({ id: ctx.socket.cid });
+      const player = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!player) return;
       broadcast(
         `%chGame>%cn Server @reboot initiated by ${player.data?.name}...`,

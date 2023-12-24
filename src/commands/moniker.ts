@@ -10,7 +10,7 @@ export default () =>
     pattern: /^[@\+]?moniker\s+(.*)\s*=\s*(.*)/i,
     lock: "connected admin+",
     exec: async (ctx, args) => {
-      const player = await dbojs.findOne({ id: ctx.socket.cid });
+      const player = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!player) return;
       const tar = await target(player, args[0]);
       if (!tar) {
@@ -28,7 +28,7 @@ export default () =>
         return;
       }
       tar.data.moniker = args[1];
-      await dbojs.update({ id: tar.id }, tar);
+      await dbojs.modify({ id: tar.id }, "$set", tar);
       send(
         [ctx.socket.id],
         `You have set ${tar.data.name}'s moniker to ${args[1]}.`,

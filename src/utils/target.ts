@@ -1,54 +1,39 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs } from "../services/Database/index.ts";
 
-export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
-  if (!tar) {
-    return await dbojs.findOne({ id: en.location });
+export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
+  if (!tar || ["here", "room"].includes(tar.toLowerCase())) {
+    return await dbojs.queryOne({ id: en.location });
   }
 
   if (+tar) {
-    return await dbojs.findOne({ id: +tar });
+    return await dbojs.queryOne({ id: +tar });
   }
 
-  if (tar.toLowerCase() === "here") {
-    return await dbojs.findOne({ id: en.location });
-  }
-
-  if (tar.toLowerCase() === "me") {
+  if (["me", "self"].includes(tar.toLowerCase())) {
     return en;
   }
 
-  if (tar.toLowerCase() === "self") {
-    return en;
+  const found = await (async () => {
+    return await dbojs.queryOne({
+      $where: function () {
+        const target = `${tar}`;
+        return (
+          RegExp(this.data.name.replace(";", "|"), "ig").test(target) ||
+          this.id === +target.slice(1) ||
+          this.id === target ||
+          this.data.alias?.toLowerCase() === target.toLowerCase()
+        );
+      },
+    });
+  })();
+
+  if (!found) {
+    return;
   }
 
-  if (tar.toLowerCase() === "room") {
-    return await dbojs.findOne({ id: en.location });
-  } else {
-    const found = (
-      await dbojs.find({
-        $where: function () {
-          return (
-            RegExp(this.data.name.replace(";", "|"), "ig").test(tar) ||
-            this.id === +tar.slice(1) ||
-            this.id === tar ||
-            this.data.alias?.toLowerCase() === tar.toLowerCase()
-          );
-        },
-      })
-    )[0];
-    if (!found) {
-      return;
-    }
-
-    if (global) {
-      return found;
-    } else {
-      if (found.location === en.location || found.id === en.location) {
-        return found;
-      } else {
-        return;
-      }
-    }
+  if (found && (global || [found.location, found.id].includes(en.location))) {
+    return found;
   }
+
 };

@@ -13,8 +13,9 @@ export default () =>
     pattern: /^l(?:ook)?(?:\s+(.*))?/i,
     lock: "connected",
     exec: async (ctx, args) => {
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
-      if (!en) return;
+      const query = await dbojs.query({ id: ctx.socket.cid });
+      if (!query.length) return;
+      const en = query[0];
       const tar = await target(en, args[0]);
 
       if (!tar) {
@@ -30,24 +31,25 @@ export default () =>
 
       output += `\n${tar.description || "You see nothing special."}\n`;
 
-      const contents = await dbojs.find({ location: tar.id });
+      const contents = await dbojs.query({ location: tar.id });
       const players = contents.filter(
         (c) => c.flags.includes("player") && c.flags.includes("connected")
       );
 
       const exits = (
-        await dbojs.find({
-          $where: function () {
-            return this.flags.includes("exit") && this.location === tar.id;
-          },
+        await dbojs.query({
+          "$and": [
+            { flags: /exit/i },
+            { location: tar.id }
+          ]
         })
       ).map((e) => {
         if (!e.data?.name) return "";
 
         const parts = e.data.name?.split(";") || [];
         return parts?.length > 1
-          ? `<%cy${parts[1].toLocaleUpperCase()}%cn> ${parts[0]}`
-          : `${parts[0]}`;
+          ? `<%cy${parts[1].toLocaleUpperCase()}%cn> ${parts[0]}\n`
+          : `${parts[0]}\n`;
       });
 
       if (players.length) {

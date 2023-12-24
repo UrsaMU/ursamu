@@ -13,7 +13,8 @@ export const createObj = async (flgs: string, datas: any) => {
     data,
   };
 
-  return await dbojs.insert(obj);
+  await dbojs.create(obj);
+  return await dbojs.query({id});
 };
 
 export class Obj {
@@ -32,20 +33,20 @@ export class Obj {
 
   static async get(obj: string | number | undefined, en?: Obj) {
     if (typeof obj === "string") {
-      let returnObj;
+      let returnObj = [];
 
       if (obj.startsWith("#")) {
-        returnObj = await dbojs.findOne({ id: +obj.slice(1) });
+        returnObj = await dbojs.query({ id: +obj.slice(1) });
       } else {
-        returnObj = await dbojs.findOne({ "data.name": new RegExp(obj, "i") });
+        returnObj = await dbojs.query({ "data.name": new RegExp(obj, "i") });
       }
-      if (returnObj) {
-        return new Obj().load(returnObj);
+      if (returnObj.length) {
+        return new Obj().load(returnObj[0]);
       }
     } else if (typeof obj === "number") {
-      const returnObj = await dbojs.findOne({ id: obj });
-      if (returnObj) {
-        return new Obj().load(returnObj);
+      const returnObj = await dbojs.query({ id: obj });
+      if (returnObj.length) {
+        return new Obj().load(returnObj[0]);
       }
     }
   }
@@ -92,15 +93,15 @@ export class Obj {
   }
 
   async exits() {
-    return await dbojs.find({ location: this.id, flags: "exit" });
+    return await dbojs.query({ location: this.id, flags: "exit" });
   }
 
   async contents() {
-    return await dbojs.find({ location: this.id });
+    return await dbojs.query({ location: this.id });
   }
 
   async save() {
-    await dbojs.update({ id: this.id }, this.obj);
+    await dbojs.modify({ id: this.id }, "$set", this.obj);
   }
 
   set dbobj(obj: IDBOBJ) {

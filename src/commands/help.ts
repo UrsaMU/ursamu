@@ -8,7 +8,9 @@ import { center, columns, ljust, repeatString } from "../utils/format.ts";
 import { send } from "../services/broadcast/index.ts";
 import { gameConfig } from "../main.ts";
 import { ICmd, IHelp } from "../@types/index.ts";
+import { dpath } from "../../deps.ts";
 
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 export default async () => {
   const text = new Map<string, string>();
   const dirent = await readdir(join(__dirname, "../../help"), {
@@ -32,7 +34,7 @@ export default async () => {
     pattern: /^[/+@]?help$/i,
     hidden: true,
     exec: async (ctx) => {
-      const player = await dbojs.findOne({ id: ctx.socket.cid });
+      const player = await dbojs.queryOne({ id: ctx.socket.cid });
       const flgs = player?.flags || "";
 
       let cats: Set<string> = new Set();

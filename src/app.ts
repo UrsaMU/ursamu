@@ -1,4 +1,4 @@
-import express, { RequestHandler, Request, Response } from "../deps.ts";
+import { express, RequestHandler, Request, Response } from "../deps.ts";
 import { createServer } from "node:http";
 import { IMSocket } from "./@types/IMSocket.ts";
 import { cmdParser } from "./services/commands/index.ts";
@@ -12,6 +12,7 @@ import { setFlags } from "./utils/setFlags.ts";
 import { authRouter, dbObjRouter } from "./routes/index.ts";
 import authMiddleware from "./middleware/authMiddleware.ts";
 import { IMError } from "./@types/index.ts";
+import { playerForSocket } from "./utils/playerForSocket.ts";
 
 export const app = express();
 export const server = createServer(app);
@@ -37,7 +38,7 @@ app.use(
 io.on("connection", (socket: IMSocket) => {
   socket.on("message", async (message) => {
     if (message.data.cid) socket.cid = message.data.cid;
-    const player = await dbojs.findOne({ id: socket.cid });
+    const player = await playerForSocket(socket);
     if (player) socket.join(`#${player.location}`);
 
     if (message.data.disconnect) {
@@ -51,7 +52,7 @@ io.on("connection", (socket: IMSocket) => {
   });
 
   socket.on("disconnect", async () => {
-    const en = await dbojs.findOne({ id: socket.cid });
+    const en = await playerForSocket(socket);
     if (!en) return;
 
     const socks: IMSocket[] = [];

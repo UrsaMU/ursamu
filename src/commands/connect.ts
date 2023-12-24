@@ -22,16 +22,10 @@ export default () =>
         name = pieces.join(" ");
       }
 
-      const found = (
-        await dbojs.find({
-          $where: function () {
-            return (
-              this.data.name?.toLowerCase() === name?.toLowerCase() ||
-              this.data.alias?.toLowerCase() === name?.toLowerCase()
-            );
-          },
-        })
-      )[0];
+      const found = await dbojs.queryOne({ "$or": [
+        { "data.name": new RegExp(name, "i") },
+        { "data.alias": new RegExp(name, "i") }
+      ] });
       if (!found) {
         send([ctx.socket.id], "I can't find a character by that name!", {
           error: true,
@@ -51,7 +45,7 @@ export default () =>
       ctx.socket.join(`#${found.location}`);
       await setFlags(found, "connected");
       found.data ||= {};
-      await dbojs.update({ id: found.id }, found);
+      await dbojs.modify({ id: found.id }, "$set", found);
       await send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
         cid: found.id,
       });

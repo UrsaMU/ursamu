@@ -11,7 +11,7 @@ export default () => {
     lock: "connected",
     exec: async (ctx, args) => {
       const [obj, msg, reply] = args;
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
       const tars = obj?.split(" ") || en.data?.lastpage || [];
@@ -95,7 +95,7 @@ export default () => {
         send([ctx.socket.id], sendermsg, {});
       en.data ||= {};
       en.data.lastpage = targts;
-      await dbojs.update({ _id: en._id }, en);
+      await dbojs.modify({ _id: en._id }, "$set", en);
     },
   });
 };

@@ -9,7 +9,7 @@ import {
   header,
   moniker,
   target,
-} from "../utils";
+} from "../utils/index.ts";
 
 const bio = async (obj: Obj) => {
   const splat = await getStat(obj.dbobj, "splat");
@@ -275,7 +275,7 @@ const other = async (obj: Obj) => {
     totalOther.push(formatStat(stat.name, await getStat(obj.dbobj, stat.name)));
   }
   totalOther = totalOther.sort((a, b) => a.localeCompare(b));
-  output += divider("Other");
+  output += "%cr-%cn".repeat(78);
 
   for (let i = 0; i < totalOther.length; i++) {
     if (i % 3 === 0) {
@@ -441,8 +441,8 @@ export default () => {
       output += await skills(tarObj);
       output += await advantages(tarObj);
       output += await disciplines(tarObj);
-      output += await other(tarObj);
       output += await health(tarObj);
+      output += await other(tarObj);
       output += footer();
 
       if (await getStat(tarObj.dbobj, "splat")) {
