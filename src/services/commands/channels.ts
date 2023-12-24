@@ -63,6 +63,6 @@ export const matchChannel = async (ctx: IContext) => {
     return false;
   }
 
-  send([channel.name], `${channel.header} ${msg}`, {});
+  send([chan.name], `${chan.header} ${msg}`, {});
   return true;
 };
