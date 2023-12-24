@@ -1,8 +1,8 @@
-import { IContext } from "../@types/IContext";
-import { IMSocket } from "../@types/IMSocket";
-import { io } from "../app";
-import { Obj } from "../services/DBObjs";
-import { joinChans } from "./joinChans";
+import { IContext } from "../@types/IContext.ts";
+import { IMSocket } from "../@types/IMSocket.ts";
+import { io } from "../app.ts";
+import { Obj } from "../services/DBObjs/index.ts";
+import { joinChans } from "./joinChans.ts";
 
 export const getSocket = async (id: number) => {
   const dbo = await Obj.get(id);

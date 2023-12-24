@@ -1,7 +1,7 @@
-import { IDBOBJ } from "../@types/IDBObj";
-import { flags } from "../services/flags/flags";
-import { canEdit } from "./canEdit";
-import { moniker } from "./moniker";
+import { IDBOBJ } from "../@types/IDBObj.ts";
+import { flags } from "../services/flags/flags.ts";
+import { canEdit } from "./canEdit.ts";
+import { moniker } from "./moniker.ts";
 
 export const displayName = (en: IDBOBJ, tar: IDBOBJ) => {
   if (canEdit(en, tar)) {

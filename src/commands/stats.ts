@@ -1,7 +1,7 @@
-import { Obj, addCmd, flags, send } from "../services";
-import { allStats, formatValue, setStat } from "../services/characters";
-import { canEdit, capString, moniker, target } from "../utils";
-import { IMStatEntry } from "../@types";
+import { Obj, addCmd, flags, send } from "../services/index.ts";
+import { allStats, formatValue, setStat } from "../services/characters/index.ts";
+import { canEdit, capString, moniker, target } from "../utils/index.ts";
+import { IMStatEntry } from "../@types/index.ts";
 
 // +stats <stat> = <value>
 

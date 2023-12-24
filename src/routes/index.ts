@@ -1,2 +1,2 @@
-export * from "./authRouter";
-export * from "./dbObjRouter";
+export * from "./authRouter.ts";
+export * from "./dbObjRouter.ts";

@@ -1,14 +1,15 @@
-import { readFileSync } from "fs";
-import { Socket, createServer } from "net";
-import { join } from "path";
-import { io } from "socket.io-client";
-import config from "./ursamu.config";
-import parser from "./services/parser/parser";
+import { readFileSync } from "node:fs";
+import { Socket, createServer } from "node:net";
+import { join } from "node:path";
+import { dpath, io } from "../deps.ts";
+import config from "./ursamu.config.ts";
+import parser from "./services/parser/parser.ts";
 
 interface ITelnetSocket extends Socket {
   cid?: number;
 }
 
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 const welcome = readFileSync(
   join(__dirname, config.game?.text.connect || "../text/connect_default.txt"),
   "utf8"

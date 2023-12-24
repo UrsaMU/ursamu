@@ -1,8 +1,8 @@
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
-import { moniker } from "../utils/moniker";
-import { target } from "../utils/target";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { moniker } from "../utils/moniker.ts";
+import { target } from "../utils/target.ts";
 
 export default () => {
   addCmd({
@@ -11,7 +11,7 @@ export default () => {
     lock: "connected",
     exec: async (ctx, args) => {
       const [obj, msg, reply] = args;
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
       const tars = obj?.split(" ") || en.data?.lastpage || [];
@@ -95,7 +95,7 @@ export default () => {
         send([ctx.socket.id], sendermsg, {});
       en.data ||= {};
       en.data.lastpage = targts;
-      await dbojs.update({ _id: en._id }, en);
+      await dbojs.modify({ _id: en._id }, "$set", en);
     },
   });
 };

@@ -1,10 +1,10 @@
-import { compare, hash } from "bcryptjs";
-import { send } from "../services/broadcast";
-import { addCmd, force } from "../services/commands";
-import { dbojs } from "../services/Database";
-import { setFlags } from "../utils/setFlags";
-import { joinChans } from "../utils/joinChans";
-import { moniker } from "../utils/moniker";
+import { compare, hash } from "../../deps.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd, force } from "../services/commands/index.ts";
+import { dbojs } from "../services/Database/index.ts";
+import { setFlags } from "../utils/setFlags.ts";
+import { joinChans } from "../utils/joinChans.ts";
+import { moniker } from "../utils/moniker.ts";
 
 export default () =>
   addCmd({
@@ -22,16 +22,10 @@ export default () =>
         name = pieces.join(" ");
       }
 
-      const found = (
-        await dbojs.find({
-          $where: function () {
-            return (
-              this.data.name?.toLowerCase() === name?.toLowerCase() ||
-              this.data.alias?.toLowerCase() === name?.toLowerCase()
-            );
-          },
-        })
-      )[0];
+      const found = await dbojs.queryOne({ "$or": [
+        { "data.name": new RegExp(name, "i") },
+        { "data.alias": new RegExp(name, "i") }
+      ] });
       if (!found) {
         send([ctx.socket.id], "I can't find a character by that name!", {
           error: true,
@@ -51,7 +45,7 @@ export default () =>
       ctx.socket.join(`#${found.location}`);
       await setFlags(found, "connected");
       found.data ||= {};
-      await dbojs.update({ id: found.id }, found);
+      await dbojs.modify({ id: found.id }, "$set", found);
       await send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
         cid: found.id,
       });

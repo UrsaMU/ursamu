@@ -1,14 +1,15 @@
-import { IChanEntry } from "../@types/Channels";
-import { IContext } from "../@types/IContext";
-import { chans, dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { force } from "../services/commands";
-import { flags } from "../services/flags/flags";
+import { IChanEntry } from "../@types/Channels.ts";
+import { IContext } from "../@types/IContext.ts";
+import { chans, dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { force } from "../services/commands/index.ts";
+import { flags } from "../services/flags/flags.ts";
+import { playerForSocket } from "./playerForSocket.ts";
 
 export const joinChans = async (ctx: IContext) => {
-  const player = await dbojs.findOne({ id: ctx.socket.cid });
+  const player = await playerForSocket(ctx.socket);
   if (!player) return;
-  const channels = await chans.find({});
+  const channels = await chans.query({});
   ctx.socket.join(`#${player.location}`);
   ctx.socket.join(`#${player.id}`);
 
@@ -29,7 +30,7 @@ export const joinChans = async (ctx: IContext) => {
         });
 
         ctx.socket.join(channel.name);
-        await dbojs.update({ id: player.id }, player);
+        await dbojs.modify({ id: player.id }, "$set", player);
         await force(ctx, `${channel.alias} :has joined the channel.`);
         send(
           [ctx.socket.id],
@@ -53,7 +54,7 @@ export const joinChans = async (ctx: IContext) => {
         );
 
         ctx.socket.leave(channel.name);
-        await dbojs.update({ id: player.id }, player);
+        await dbojs.modify({ id: player.id }, "$set", player);
         await send(
           [ctx.socket.id],
           `You have left ${channel.name} with the alias '${channel.alias}'.`

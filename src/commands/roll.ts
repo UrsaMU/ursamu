@@ -1,6 +1,6 @@
-import { isNumber } from "lodash";
-import { Obj, addCmd, getStat, roll, send, statObj } from "../services";
-import { moniker } from "../utils";
+import { isNumber } from "../../deps.ts";
+import { Obj, addCmd, getStat, roll, send, statObj } from "../services/index.ts";
+import { moniker } from "../utils/index.ts";
 
 export default () => {
   addCmd({

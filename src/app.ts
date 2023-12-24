@@ -1,17 +1,18 @@
-import express, { NextFunction, Request, Response } from "express";
-import { createServer } from "http";
-import { IMSocket } from "./@types/IMSocket";
-import { cmdParser } from "./services/commands";
-import { Server } from "socket.io";
-import { dbojs } from "./services/Database";
-import { send } from "./services/broadcast";
-import { moniker } from "./utils/moniker";
-import { joinChans } from "./utils/joinChans";
-import { IContext } from "./@types/IContext";
-import { setFlags } from "./utils/setFlags";
-import { authRouter, dbObjRouter } from "./routes";
-import authMiddleware from "./middleware/authMiddleware";
-import { IMError } from "./@types";
+import { express, RequestHandler, Request, Response } from "../deps.ts";
+import { createServer } from "node:http";
+import { IMSocket } from "./@types/IMSocket.ts";
+import { cmdParser } from "./services/commands/index.ts";
+import { Server } from "../deps.ts";
+import { dbojs } from "./services/Database/index.ts";
+import { send } from "./services/broadcast/index.ts";
+import { moniker } from "./utils/moniker.ts";
+import { joinChans } from "./utils/joinChans.ts";
+import { IContext } from "./@types/IContext.ts";
+import { setFlags } from "./utils/setFlags.ts";
+import { authRouter, dbObjRouter } from "./routes/index.ts";
+import authMiddleware from "./middleware/authMiddleware.ts";
+import { IMError } from "./@types/index.ts";
+import { playerForSocket } from "./utils/playerForSocket.ts";
 
 export const app = express();
 export const server = createServer(app);
@@ -25,7 +26,7 @@ app.use("/api/v1/auth/", authRouter);
 app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
 
 app.use(
-  (error: IMError, req: Request, res: Response, next: NextFunction): void => {
+  (error: IMError, req: Request, res: Response, next: RequestHandler): void => {
     // Handle error here
     console.error(error);
     res
@@ -37,7 +38,7 @@ app.use(
 io.on("connection", (socket: IMSocket) => {
   socket.on("message", async (message) => {
     if (message.data.cid) socket.cid = message.data.cid;
-    const player = await dbojs.findOne({ id: socket.cid });
+    const player = await playerForSocket(socket);
     if (player) socket.join(`#${player.location}`);
 
     if (message.data.disconnect) {
@@ -51,7 +52,7 @@ io.on("connection", (socket: IMSocket) => {
   });
 
   socket.on("disconnect", async () => {
-    const en = await dbojs.findOne({ id: socket.cid });
+    const en = await playerForSocket(socket);
     if (!en) return;
 
     const socks: IMSocket[] = [];

@@ -1,14 +1,16 @@
-import { readFile, readdir } from "fs/promises";
-import { join } from "path";
-import { addCmd, cmds } from "../services/commands";
-import { dbojs } from "../services/Database";
-import { flags } from "../services/flags/flags";
-import parser from "../services/parser/parser";
-import { center, columns, ljust, repeatString } from "../utils/format";
-import { send } from "../services/broadcast";
-import { gameConfig } from "../main";
-import { ICmd, IHelp } from "../@types";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { addCmd, cmds } from "../services/commands/index.ts";
+import { dbojs } from "../services/Database/index.ts";
+import { flags } from "../services/flags/flags.ts";
+import parser from "../services/parser/parser.ts";
+import { center, columns, ljust, repeatString } from "../utils/format.ts";
+import { send } from "../services/broadcast/index.ts";
+import { gameConfig } from "../main.ts";
+import { ICmd, IHelp } from "../@types/index.ts";
+import { dpath } from "../../deps.ts";
 
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 export default async () => {
   const text = new Map<string, string>();
   const dirent = await readdir(join(__dirname, "../../help"), {
@@ -32,7 +34,7 @@ export default async () => {
     pattern: /^[/+@]?help$/i,
     hidden: true,
     exec: async (ctx) => {
-      const player = await dbojs.findOne({ id: ctx.socket.cid });
+      const player = await dbojs.queryOne({ id: ctx.socket.cid });
       const flgs = player?.flags || "";
 
       let cats: Set<string> = new Set();

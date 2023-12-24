@@ -1,46 +1,61 @@
-import Datastore from "nedb-promises";
-import { IDBOBJ } from "../../@types/IDBObj";
-import config from "../../ursamu.config";
-import { IChannel } from "../../@types/Channels";
-import { IMail } from "../../@types/IMail";
-import { IArticle, IBoard } from "../../@types";
+import { MongoClient } from "../../../deps.ts";
+import { IDBOBJ } from "../../@types/IDBObj.ts";
+import config from "../../ursamu.config.ts";
+import { IChannel } from "../../@types/Channels.ts";
+import { IMail } from "../../@types/IMail.ts";
+import { IArticle, IBoard } from "../../@types/index.ts";
+
+function d(...args) {
+  const e = new Error();
+  const level = e.stack.split("\n").slice(3, 5);
+  console.log(...args, level);
+}
 
 export class DBO<T> {
-  db: Datastore<T>;
+  db: any;
 
   constructor(path: string) {
-    this.db = Datastore.create(path);
+    this.collection = path.replace('.','_');
+    const uri = `mongodb://root:root@mongo/`;
+    this.client = new MongoClient(uri);
+    this.client.connect();
   }
 
-  async insert(data: T) {
-    return await this.db.insert(data);
+  coll() {
+    return this.client.db().collection(this.collection);
   }
 
-  async find(query?: any) {
-    return await this.db.find<T>(query);
+  async create(data: T) {
+    return await this.coll().insertOne(data);
   }
 
-  async findAll() {
-    return await this.db.find<T>({});
+  async query(query?: any) {
+    const ret = await this.coll().find(query);
+    return await ret.toArray();
   }
 
-  async findOne(query: any) {
-    return await this.db.findOne<T>(query);
+  async queryOne(query?: any) {
+    const ret = await this.query(query);
+    return ret.length ? ret[0] : false;
   }
 
-  async update(query: any, data: any) {
-    return await this.db.update<T>(query, data, {
-      upsert: true,
-      returnUpdatedDocs: true,
-    });
+  async all() {
+    const ret = await this.coll().find({});
+    return await ret.toArray();
   }
 
-  async remove(query: any) {
-    return await this.db.remove(query, { multi: true });
+  async modify(query: any, operator: string, data: any) {
+    var body = {}
+    body[operator] = data
+    const ret = await this.coll().updateMany(query, body)
+    return await this.query(query)
   }
 
-  async count(query: any) {
-    return await this.db.count(query);
+  async delete(query: any) {
+    return await this.coll().deleteMany(query);
+  }
+
+  async length(query: any) {
   }
 }
 

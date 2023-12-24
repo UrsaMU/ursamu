@@ -1,13 +1,13 @@
-import { IMSocket } from "../@types";
-import { IChanEntry } from "../@types/Channels";
-import { io } from "../app";
-import { Obj } from "../services/DBObjs";
-import { chans, dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd, force } from "../services/commands";
-import { flags } from "../services/flags/flags";
-import { joinChans } from "../utils";
-import { ljust } from "../utils/format";
+import { IMSocket } from "../@types/index.ts";
+import { IChanEntry } from "../@types/Channels.ts";
+import { io } from "../app.ts";
+import { Obj } from "../services/DBObjs/index.ts";
+import { chans, dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd, force } from "../services/commands/index.ts";
+import { flags } from "../services/flags/flags.ts";
+import { joinChans } from "../utils/index.ts";
+import { ljust } from "../utils/format.ts";
 
 export default () => {
   addCmd({
@@ -16,11 +16,11 @@ export default () => {
     lock: "connected admin+",
     hidden: true,
     exec: async (ctx, args) => {
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
-      const channel = await chans.findOne({
-        name: RegExp(args[0].split("=")[0], "i"),
+      const channel = await chans.queryOne({
+        name: new RegExp(args[0].split("=")[0], "i"),
       });
 
       if (!channel) {
@@ -28,7 +28,7 @@ export default () => {
         const name = parts[0];
         const alias = parts[1];
 
-        const chan = chans.insert({
+        const chan = chans.create({
           name,
           header: `%ch[${name}]%cn`,
           hidden: false,
@@ -45,7 +45,7 @@ export default () => {
             alias,
             active: true,
           });
-          await dbojs.update({ _id: en._id }, en);
+          await dbojs.modify({ _id: en._id }, "$set", en);
           ctx.socket.join(name);
           await force(ctx, `${alias} :joins the channel.`);
           send(
@@ -80,18 +80,18 @@ export default () => {
     lock: "connected admin+",
     hidden: true,
     exec: async (ctx, args) => {
-      const chan = await chans.findOne({ name: RegExp(args[0], "i") });
+      const chan = await chans.queryOne({ name: new RegExp(args[0], "i") });
 
       if (chan) {
-        const players = await dbojs.find({ flags: /player/ });
+        const players = await dbojs.query({ flags: /player/ });
         for (const plyr of players) {
           plyr.data ||= {};
           plyr.data.channels = plyr.data.channels?.filter(
             (c: IChanEntry) => c.channel !== chan.name
           );
-          await dbojs.update({ id: plyr.id }, plyr);
+          await dbojs.modify({ id: plyr.id }, "$set", plyr);
         }
-        await chans.remove({ _id: chan._id });
+        await chans.delete({ _id: chan._id });
         send([ctx.socket.id], `Channel %ch${chan.name}%cn deleted.`, {});
       } else {
         send([ctx.socket.id], `Channel ${args[0]} not found.`, {});
@@ -105,42 +105,42 @@ export default () => {
     lock: "connected admin+",
     hidden: true,
     exec: async (ctx, args) => {
-      const chan = await chans.findOne({ name: RegExp(args[0], "i") });
+      const chan = await chans.queryOne({ name: new RegExp(args[0], "i") });
       if (chan) {
         const key = args[1].toLowerCase();
         const val = args[2];
         if (key === "alias") {
           chan.alias = val;
-          await chans.update({ _id: chan._id }, chan);
+          await chans.modify({ _id: chan._id }, "$set", chan);
           send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
         } else if (key === "header") {
           chan.header = val;
-          await chans.update({ _id: chan._id }, chan);
+          await chans.modify({ _id: chan._id }, "$set", chan);
           send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
         } else if (key === "hidden") {
           chan.hidden = !!val;
-          await chans.update({ _id: chan._id }, chan);
+          await chans.modify({ _id: chan._id }, "$set", chan);
           send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
         } else if (key === "name") {
-          const taken = await chans.findOne({ name: RegExp(val, "i") });
+          const taken = await chans.queryOne({ name: new RegExp(val, "i") });
           if (!taken) {
             chan.name = val;
-            await chans.update({ _id: chan._id }, chan);
+            await chans.modify({ _id: chan._id }, "$set", chan);
             send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
           } else {
             send([ctx.socket.id], `Channel ${val} already exists.`, {});
           }
         } else if (key === "alias") {
           chan.alias = val;
-          await chans.update({ _id: chan._id }, chan);
+          await chans.modify({ _id: chan._id }, "$set", chan);
           send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
         } else if (key === "lock") {
           chan.lock = val;
-          await chans.update({ _id: chan._id }, chan);
+          await chans.modify({ _id: chan._id }, "$set", chan);
           send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
         } else if (key === "masking") {
           chan.masking = val.toLocaleLowerCase() === "true" ? true : false;
-          await chans.update({ _id: chan._id }, chan);
+          await chans.modify({ _id: chan._id }, "$set", chan);
           send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
         } else {
           send([ctx.socket.id], `Invalid setting ${key}.`, {});
@@ -167,10 +167,10 @@ export default () => {
     lock: "connected",
     hidden: true,
     exec: async (ctx, args) => {
-      const chan = await chans.findOne({ name: RegExp(args[0], "i") });
+      const chan = await chans.queryOne({ name: new RegExp(args[0], "i") });
 
       if (chan) {
-        const en = await dbojs.findOne({ id: ctx.socket.cid });
+        const en = await dbojs.queryOne({ id: ctx.socket.cid });
         if (!en) return;
         if (!flags.check(en.flags || "", chan.lock || "")) {
           send([ctx.socket.id], "Permission denied.", {});
@@ -184,7 +184,7 @@ export default () => {
           active: true,
         });
 
-        await dbojs.update({ _id: en._id }, en);
+        await dbojs.modify({ _id: en._id }, "$set", en);
         send([ctx.socket.id], `You join channel ${chan.name}.`, {});
         ctx.socket.join(chan.name);
         await force(ctx, `${chan.alias} :joins the channel.`);
@@ -205,7 +205,7 @@ export default () => {
     lock: "connected",
     hidden: true,
     exec: async (ctx, args) => {
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
       en.data ||= {};
       en.data.channels ||= [];
@@ -217,7 +217,7 @@ export default () => {
         send([ctx.socket.id], `You leave channel ${c.channel}.`, {});
         await force(ctx, `${args[0]} :leaves the channel.`);
         ctx.socket.leave(c.channel);
-        await dbojs.update({ _id: en._id }, en);
+        await dbojs.modify({ _id: en._id }, "$set", en);
       });
     },
   });
@@ -290,7 +290,7 @@ export default () => {
       }
 
       chansList.forEach(async (c: IChanEntry) => {
-        const channel = await chans.findOne({ name: c.channel });
+        const channel = await chans.queryOne({ name: c.channel });
         if (!channel)
           return send([ctx.socket.id], `Channel ${c.channel} not found.`);
 

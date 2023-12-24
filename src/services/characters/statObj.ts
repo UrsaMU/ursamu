@@ -1,4 +1,4 @@
-import { allStats } from ".";
+import { allStats } from "./index.ts";
 
 export const statObj = (stat: string) => {
   return allStats.find((s) =>

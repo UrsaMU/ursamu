@@ -1,17 +1,17 @@
-import { attributes } from "./stats/attributes";
-import { backgrounds } from "./stats/backgrounds";
-import { bio } from "./stats/bio";
-import { flaws } from "./stats/flaws";
-import { merits } from "./stats/merits";
-import { skills } from "./stats/skills";
-import { disciplines } from "./stats/disciplines";
-import { other } from "./stats/other";
+import { attributes } from "./stats/attributes.ts";
+import { backgrounds } from "./stats/backgrounds.ts";
+import { bio } from "./stats/bio.ts";
+import { flaws } from "./stats/flaws.ts";
+import { merits } from "./stats/merits.ts";
+import { skills } from "./stats/skills.ts";
+import { disciplines } from "./stats/disciplines.ts";
+import { other } from "./stats/other.ts";
 
-export * from "./attributes";
-export * from "./setStat";
-export * from "./getStats";
-export * from "./formatValue";
-export * from "./statObj";
+export * from "./attributes.ts";
+export * from "./setStat.ts";
+export * from "./getStats.ts";
+export * from "./formatValue.ts";
+export * from "./statObj.ts";
 
 export const allStats = [
   ...bio,

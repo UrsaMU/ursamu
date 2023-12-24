@@ -1,5 +1,5 @@
-import { addCmd, bboard, dbojs, flags, send } from "../services";
-import { formatString, getNextId } from "../utils";
+import { addCmd, bboard, dbojs, flags, send } from "../services/index.ts";
+import { formatString, getNextId } from "../utils/index.ts";
 
 export default () => {
   // Board Management Commands
@@ -13,13 +13,13 @@ export default () => {
     pattern: /^[+@]?bboard\/create\s+(.*)(?:\s*=\s*(.*))?/i,
     lock: "connected admin+",
     exec: async ({ socket }, [name, desc]) => {
-      const en = await dbojs.findOne({ id: socket.cid });
+      const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
       const id = await getNextId("boardId");
       if (!id) return send([socket.id], "%chGAME>%cn No board ID generated.");
 
-      const taken = await bboard.findOne({ name });
+      const taken = await bboard.queryOne({ name });
       if (taken) {
         return send(
           [socket.id],
@@ -27,7 +27,7 @@ export default () => {
         );
       }
 
-      await bboard.insert({
+      await bboard.create({
         name,
         description: desc || "",
         category: "General",
@@ -50,10 +50,10 @@ export default () => {
     pattern: /^[+@]?bboard\/delete\s+(.*)/i,
     lock: "connected admin+",
     exec: async ({ socket }, [name]) => {
-      const en = await dbojs.findOne({ id: socket.cid });
+      const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const tar = await bboard.findOne({ $or: [{ name }, { boardId: +name }] });
+      const tar = await bboard.queryOne({ $or: [{ name }, { boardId: +name }] });
       if (!tar) {
         return send([socket.id], "%chGAME>%cn Board not found.");
       }
@@ -74,10 +74,10 @@ export default () => {
     pattern: /^[+@]?bboard\/name\s+(.*)=(.*)/i,
     lock: "connected admin+",
     exec: async ({ socket }, [oldName, newName]) => {
-      const en = await dbojs.findOne({ id: socket.cid });
+      const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const tar = await bboard.findOne({
+      const tar = await bboard.queryOne({
         $or: [{ name: oldName }, { boardId: +oldName }],
       });
 
@@ -85,7 +85,7 @@ export default () => {
         return send([socket.id], "%chGAME>%cn Board not found.");
       }
 
-      await bboard.update({ name: tar.name }, { $set: { name: newName } });
+      await bboard.modify({ name: tar.name }, "$set", { name: newName });
       send(
         [socket.id],
         `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn renamed to %ch${newName.toUpperCase()}%cn.`
@@ -100,15 +100,15 @@ export default () => {
     pattern: /^[+@]?bboard\/desc\s+(.*)=(.*)/i,
     lock: "connected admin+",
     exec: async ({ socket }, [name, desc]) => {
-      const en = await dbojs.findOne({ id: socket.cid });
+      const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const tar = await bboard.findOne({ $or: [{ name }, { boardId: +name }] });
+      const tar = await bboard.queryOne({ $or: [{ name }, { boardId: +name }] });
       if (!tar) {
         return send([socket.id], "%chGAME>%cn Board not found.");
       }
 
-      await bboard.update({ name: tar.name }, { $set: { description: desc } });
+      await bboard.modify({ name: tar.name }, "$set", { description: desc });
       send(
         [socket.id],
         `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn description updated.`
@@ -140,10 +140,10 @@ export default () => {
     pattern: /^[+@]?bbread/i,
     lock: "connected",
     exec: async ({ socket }) => {
-      const en = await dbojs.findOne({ id: socket.cid });
+      const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const boards = await bboard.findAll();
+      const boards = await bboard.query({});
 
       if (!boards.length) {
         return send([socket.id], "%chGAME>%cn No boards found.");

@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
-import { IMError, IPayload } from "../@types";
-import { verify } from "../services/jwt";
+import { RequestHandler, Request, Response } from "../../deps.ts";
+import { IMError, IPayload } from "../@types/index.ts";
+import { verify } from "../services/jwt/index.ts";
 
-export default async (req: Request, res: Response, next: NextFunction) => {
+export default async (req: Request, res: Response, next: RequestHandler) => {
   const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     const err: IMError = new Error("Unauthorized");

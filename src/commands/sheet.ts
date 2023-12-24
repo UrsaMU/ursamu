@@ -1,6 +1,6 @@
-import { get } from "lodash";
-import { IDBOBJ } from "../@types";
-import { Obj, addCmd, allStats, send, getStat } from "../services";
+import { get } from "../../deps.ts";
+import { IDBOBJ } from "../@types/index.ts";
+import { Obj, addCmd, allStats, send, getStat } from "../services/index.ts";
 import {
   center,
   divider,
@@ -9,7 +9,7 @@ import {
   header,
   moniker,
   target,
-} from "../utils";
+} from "../utils/index.ts";
 
 const bio = async (obj: Obj) => {
   const splat = await getStat(obj.dbobj, "splat");

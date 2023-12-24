@@ -1,5 +1,5 @@
-import { ICmd } from "./ICmd";
-import { IConfig } from "./IConfig";
+import { ICmd } from "./ICmd.ts";
+import { IConfig } from "./IConfig.ts";
 
 export interface IPlugin {
   name: string;

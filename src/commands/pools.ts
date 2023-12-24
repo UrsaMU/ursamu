@@ -1,6 +1,6 @@
-import { IMStatEntry } from "../@types";
-import { Obj, addCmd, dbojs, flags, getStat, send } from "../services";
-import { moniker, target } from "../utils";
+import { IMStatEntry } from "../@types/index.ts";
+import { Obj, addCmd, dbojs, flags, getStat, send } from "../services/index.ts";
+import { moniker, target } from "../utils/index.ts";
 
 export default () => {
   addCmd({
@@ -118,7 +118,7 @@ export default () => {
       );
 
       // update the target.
-      await dbojs.update({ _id: targ._id }, targ);
+      await dbojs.modify({ _id: targ._id }, "$set", targ);
     },
   });
 

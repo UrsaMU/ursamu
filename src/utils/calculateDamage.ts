@@ -1,5 +1,5 @@
-import { IDBOBJ } from "../@types";
-import { getStat } from "../services";
+import { IDBOBJ } from "../@types/index.ts";
+import { getStat } from "../services/index.ts";
 
 const calculateDamage = async (
   obj: IDBOBJ,

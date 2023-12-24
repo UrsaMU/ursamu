@@ -1,7 +1,7 @@
-import { Router } from "express";
-import { Obj, flags, wiki } from "../services";
-import { IMError } from "../@types";
-import authMiddleware from "../middleware/authMiddleware";
+import { Router } from "../../deps.ts";
+import { Obj, flags, wiki } from "../services/index.ts";
+import { IMError } from "../@types/index.ts";
+import authMiddleware from "../middleware/authMiddleware.ts";
 
 const router = Router();
 

@@ -1,6 +1,6 @@
-import { VM } from "vm2";
-import { addCmd, send } from "../services";
-import { ljust, rjust, center } from "../utils/format";
+import { VM } from "../../deps.ts";
+import { addCmd, send } from "../services/index.ts";
+import { ljust, rjust, center } from "../utils/format.ts";
 export default () =>
   addCmd({
     name: "js",

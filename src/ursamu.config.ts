@@ -1,4 +1,4 @@
-import { IConfig } from "./@types/IConfig";
+import { IConfig } from "./@types/IConfig.ts";
 
 const config: IConfig = {
   server: {

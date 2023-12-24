@@ -1,11 +1,10 @@
-import { counters } from "../services/Database";
+import { counters } from "../services/Database/index.ts";
 
 export async function getNextId(name: string) {
-  await counters.update({ _id: name }, { $inc: { seq: 1 } });
-  const ret = await counters.findOne({ _id: name });
+  const ret = await counters.modify({ _id: name }, "$inc", { seq: 1 });
 
-  if (ret) {
-    return ret.seq;
+  if (ret.length) {
+    return ret[0].seq;
   } else {
     throw new Error("No ID generated.");
   }

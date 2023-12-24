@@ -1,9 +1,9 @@
-import { Obj } from "../services/DBObjs";
-import { dbojs, mail } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd, force } from "../services/commands";
-import { center } from "../utils/format";
-import { target } from "../utils/target";
+import { Obj } from "../services/DBObjs/index.ts";
+import { dbojs, mail } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd, force } from "../services/commands/index.ts";
+import { center } from "../utils/format.ts";
+import { target } from "../utils/target.ts";
 
 export default () => {
   addCmd({
@@ -39,7 +39,7 @@ export default () => {
         date: Date.now(),
       };
 
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       await send(
         [ctx.socket.id],
         "Enter your message with '-<text>'. Use @mail/send to send it."
@@ -70,7 +70,7 @@ export default () => {
         en.dbobj.data.tempMail.message += message + " ";
       }
 
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       send([ctx.socket.id], "%chMAIL:%cn Message updated.");
     },
   });
@@ -93,14 +93,14 @@ export default () => {
           [ctx.socket.id],
           "%chMAIL:%cn No message entered. Use '-' to enter a message."
         );
-      await mail.insert(message);
+      await mail.create(message);
       send([ctx.socket.id], "%chMAIL:%cn Message sent.");
       send(
         en.dbobj.data.tempMail.to,
         `%chMAIL:%cn You have a new message from ${en.name}`
       );
       delete en.dbobj.data.tempMail;
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
     },
   });
 
@@ -132,7 +132,7 @@ export default () => {
           date: Date.now(),
         };
 
-        await mail.insert(ml);
+        await mail.create(ml);
         send([ctx.socket.id], "%chMAIL:%cn Message sent.");
         send(ids, `%chMAIL:%cn You have a new message from ${en.name}`);
       }
@@ -214,7 +214,7 @@ export default () => {
         after
       );
 
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       send([ctx.socket.id], "%chMAIL:%cn Message updated.");
     },
   });
@@ -232,7 +232,7 @@ export default () => {
         return send([ctx.socket.id], "%chMAIL:%cn No message started.");
 
       delete en.dbobj.data.tempMail;
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       send([ctx.socket.id], "%chMAIL:%cn Message aborted.");
     },
   });
@@ -257,7 +257,7 @@ export default () => {
         if (`#${t.id}`) en.dbobj.data.tempMail.cc.push(`#${t.id}`);
       }
 
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       send([ctx.socket.id], "%chMAIL:%cn CC updated.");
     },
   });
@@ -282,7 +282,7 @@ export default () => {
         if (`#${t.id}`) en.dbobj.data.tempMail.bcc.push(`#${t.id}`);
       }
 
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       send([ctx.socket.id], "%chMAIL:%cn BCC updated.");
     },
   });
@@ -295,7 +295,7 @@ export default () => {
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      const mails = (await mail.find({ to: { $in: [en.dbref] } })).sort(
+      const mails = (await mail.query({ to: { $in: [en.dbref] } })).sort(
         (a, b) => a.date - b.date
       );
       const num = +args[0];
@@ -322,7 +322,7 @@ export default () => {
       en.dbobj.data ||= {};
       en.dbobj.data.mailread ||= [];
       en.dbobj.data.mailread.push(m._id!);
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
     },
   });
 
@@ -334,7 +334,7 @@ export default () => {
       const targets = args[1];
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      const mails = (await mail.find({ to: { $in: [en.dbref] } })).sort(
+      const mails = (await mail.query({ to: { $in: [en.dbref] } })).sort(
         (a, b) => a.date - b.date
       );
       let output = center(`%b%chMAIL: ${mails.length}%cn%b`, 78, "=") + "\n";
@@ -364,7 +364,7 @@ export default () => {
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      const mails = await mail.find({ to: { $in: [en.dbref] } });
+      const mails = await mail.query({ to: { $in: [en.dbref] } });
       const num = parseInt(args[1]);
       if (num > mails.length || num < 1)
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
@@ -390,7 +390,7 @@ export default () => {
       en.dbobj.data.mailread ||= [];
       if (!en.dbobj.data.mailread.includes(m._id!)) {
         en.dbobj.data.mailread.push(m._id!);
-        await dbojs.update({ id: en.id }, en.dbobj);
+        await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       }
     },
   });
@@ -403,19 +403,19 @@ export default () => {
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      const mails = await mail.find({ to: { $in: [en.dbref] } });
+      const mails = await mail.query({ to: { $in: [en.dbref] } });
       const num = parseInt(args[0]);
       if (num > mails.length || num < 1)
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
       const m = mails[num - 1];
-      const readers = await dbojs.find({ "data.mailread": { $in: [m._id] } });
+      const readers = await dbojs.query({ "data.mailread": { $in: [m._id] } });
       if (readers.length)
         return send(
           [ctx.socket.id],
           "%chMAIL:%cn Message has been read, cannot delete."
         );
 
-      await mail.remove({ _id: m._id });
+      await mail.delete({ _id: m._id });
       send([ctx.socket.id], "%chMAIL:%cn Message deleted.");
     },
   });
@@ -428,7 +428,7 @@ export default () => {
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      const mails = await mail.find({ to: { $in: [en.dbref] } });
+      const mails = await mail.query({ to: { $in: [en.dbref] } });
       const num = parseInt(args[0]);
       if (num > mails.length || num < 1)
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
@@ -444,7 +444,7 @@ export default () => {
         date: Date.now(),
       };
 
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       send([ctx.socket.id], "%chMAIL:%cn Reply started.");
     },
   });
@@ -457,7 +457,7 @@ export default () => {
     exec: async (ctx) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      const mails = await mail.find({
+      const mails = await mail.query({
         $or: [
           { to: { $in: [en.dbref] } },
           { cc: { $in: [en.dbref] } },
@@ -485,7 +485,7 @@ export default () => {
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      const mails = await mail.find({ to: { $in: [en.dbref] } });
+      const mails = await mail.query({ to: { $in: [en.dbref] } });
       const num = parseInt(args[1]);
       if (num > mails.length || num < 1)
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
@@ -506,7 +506,7 @@ export default () => {
       if (to) en.dbobj.data.tempMail.to.push(...to.map((p) => p?.dbref));
       if (cc) en.dbobj.data.tempMail.to.push(...cc.map((p) => p?.dbref));
 
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       send([ctx.socket.id], "%chMAIL:%cn Reply started.");
     },
   });
@@ -519,7 +519,7 @@ export default () => {
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      const mails = await mail.find({ to: { $in: [en.dbref] } });
+      const mails = await mail.query({ to: { $in: [en.dbref] } });
       const num = +args[0];
       if (num > mails.length || num < 1)
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
@@ -539,7 +539,7 @@ export default () => {
         };
       }
 
-      await dbojs.update({ id: en.id }, en.dbobj);
+      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       send([ctx.socket.id], "%chMAIL:%cn Forward started.");
     },
   });

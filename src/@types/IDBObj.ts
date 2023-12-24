@@ -1,5 +1,5 @@
-import { IAttribute } from "./IAttribute";
-import { IMStatEntry } from "./IMStatEntry";
+import { IAttribute } from "./IAttribute.ts";
+import { IMStatEntry } from "./IMStatEntry.ts";
 
 export interface IDBOBJ {
   _id?: string;

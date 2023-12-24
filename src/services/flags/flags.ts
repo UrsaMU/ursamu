@@ -1,4 +1,4 @@
-import { Tags } from "@digibear/tags";
+import { Tags } from "../../../deps.ts";
 
 export const flags = new Tags(
   {

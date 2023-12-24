@@ -1,0 +1,3 @@
+#! /bin/bash
+deno run --unstable-kv -A https://deno.land/x/pup/pup.ts "$@"
+

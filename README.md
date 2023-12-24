@@ -23,27 +23,46 @@ To start the server in 'production' mode, make sure you have node installed, I s
 ```bash
 git clone https://github.com/ursamu/ursamu.git
 cd ursamu
-npm i -g pm2
-npm i
-npm run start
+./pup
 ```
 
 To start the Ursamu server, you can use the following command:
 
 ```bash
-npm start
-```
-
-To start the server in 'development' mode, make sure you have node installed, I suggest NVM, and then from the `ursamu` folder run:
-
-```bash
-npm run dev
+./pup
 ```
 
 To stop the Ursamu server, you can use the following command:
 
 ```bash
-npm run stop
+./pup terminate
+```
+
+## Docker
+
+It is easy to run the game under docker:
+
+```bash
+git clone https://github.com/ursamu/ursamu.git
+cd ursamu
+sudo docker-compose up -d
+```
+
+The game database will be exported to the `data/` directory on the host filesystem, for easy backups.
+
+## Development on ARM macOS
+
+Deno on ARM can be finicky right now. Here's a workaround:
+
+```bash
+git clone https://github.com/LukeChannings/deno-arm64.git deno-arm
+cd deno-arm
+sudo docker build -t deno-arm
+cd ..
+git clone https://github.com/ursamu/ursamu.git
+cd ursamu
+echo "BASE=deno-arm" > .env
+sudo docker-compose up -d
 ```
 
 ## License

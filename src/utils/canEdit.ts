@@ -1,5 +1,5 @@
-import { IDBOBJ } from "../@types/IDBObj";
-import { flags } from "../services/flags/flags";
+import { IDBOBJ } from "../@types/IDBObj.ts";
+import { flags } from "../services/flags/flags.ts";
 
 export const canEdit = (en: IDBOBJ, tar: IDBOBJ) => {
   return (

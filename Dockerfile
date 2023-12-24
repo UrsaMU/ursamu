@@ -1,23 +1,20 @@
-FROM node:lts-alpine
+ARG BASE=denoland/deno:ubuntu
+FROM $BASE
 
-RUN apk update && apk add alpine-sdk bash
+RUN apt-get -y update && apt-get -y install build-essential bash
 RUN mkdir /ursamu
 WORKDIR /ursamu
-ADD LICENSE package-lock.json package.json \
-    README.md tsconfig.json ursamu.config.js ursamu_github_banner.png \
-    /ursamu/
+ADD deps.ts LICENSE README.md pup pup.jsonc ursamu_github_banner.png /ursamu/
 ADD help/ /ursamu/help/
 ADD src/ /ursamu/src/
-ADD text/ /ursamu/text/
-RUN npm ci
 RUN mkdir /ursamu/data
-
-RUN npm install -g pm2
-RUN npm run build
+RUN deno run -A deps.ts
+RUN deno run -A docker-deps.ts || true
 
 VOLUME /ursamu/data
+VOLUME /ursamu/text
 
-CMD ["-c", "pm2-runtime ursamu.config.js"]
+CMD ["-c", "./pup run"]
 ENTRYPOINT ["/bin/bash"]
 
 # telnet, ws, http

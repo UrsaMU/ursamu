@@ -1,14 +1,16 @@
-import path from "path";
-import { server } from "./app";
-import { plugins } from "./utils/loadDIr";
-import { loadTxtDir } from "./utils/loadTxtDir";
-import { createObj } from "./services/DBObjs";
-import { chans, counters, dbojs } from "./services/Database";
-import defaultConfig from "./ursamu.config";
-import { setFlags } from "./utils/setFlags";
-import { broadcast } from "./services/broadcast";
-import { Config, IConfig, IPlugin } from "./@types";
+import path from "node:path";
+import { server } from "./app.ts";
+import { plugins } from "./utils/loadDIr.ts";
+import { loadTxtDir } from "./utils/loadTxtDir.ts";
+import { createObj } from "./services/DBObjs/index.ts";
+import { chans, counters, dbojs } from "./services/Database/index.ts";
+import defaultConfig from "./ursamu.config.ts";
+import { setFlags } from "./utils/setFlags.ts";
+import { broadcast } from "./services/broadcast/index.ts";
+import { Config, IConfig, IPlugin } from "./@types/index.ts";
+import { dpath } from "../deps.ts";
 
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 plugins(path.join(__dirname, "./commands"));
 loadTxtDir(path.join(__dirname, "../text"));
 export const gameConfig = new Config(defaultConfig);
@@ -34,19 +36,15 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
       }
     }
 
-    const rooms = await dbojs.find({
-      $where: function () {
-        return this.flags.includes("room");
-      },
-    });
+    const rooms = await dbojs.query({ flags: /room/i });
 
     const counter = {
       _id: "objid",
       seq: 0,
     };
 
-    if (!(await counters.findOne({ _id: "objid" }))) {
-      await counters.insert(counter);
+    if (!(await counters.query({ _id: "objid" })).length) {
+      await counters.create(counter);
     }
 
     if (!rooms.length) {
@@ -55,16 +53,16 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     }
 
     // create the default channels
-    const channels = await chans.find({});
+    const channels = await chans.all();
     if (!channels.length) {
       console.log("No channels found, creating some!");
-      await chans.insert({
+      await chans.create({
         name: "Public",
         header: "%ch%cc[Public]%cn",
         alias: "pub",
       });
 
-      await chans.insert({
+      await chans.create({
         name: "Admin",
         header: "%ch%cy[Admin]%cn",
         alias: "ad",
@@ -74,20 +72,16 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
     console.log(`Server started on port ${gameConfig.server?.ws}.`);
   });
 
-  process.on("SIGINT", async () => {
-    const players = await dbojs.find({ flags: /connected/i });
+  Deno.addSignalListener("SIGINT", async () => {
+    const players = await dbojs.query({ flags: /connected/i });
 
     for (const player of players) {
       await setFlags(player, "!connected");
     }
 
     await broadcast("Server shutting down.");
-    process.exit(0);
-  });
-
-  process.on("unhandledRejection", (reason, p) => {
-    console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
+    Deno.exit(0);
   });
 };
 
-if (require.main === module) mu();
+if (import.meta.main) mu();

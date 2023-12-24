@@ -1,10 +1,10 @@
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { getCharacter } from "../services/characters/character";
-import { addCmd } from "../services/commands";
-import { canEdit } from "../utils/canEdit";
-import { displayName } from "../utils/displayName";
-import { target } from "../utils/target";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { getCharacter } from "../services/characters/character.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { canEdit } from "../utils/canEdit.ts";
+import { displayName } from "../utils/displayName.ts";
+import { target } from "../utils/target.ts";
 
 export default () => {
   addCmd({
@@ -16,7 +16,7 @@ export default () => {
       if (!en) return;
 
       const tar = await target(en, args[0]);
-      const loc = await dbojs.findOne({ id: tar?.location });
+      const loc = await dbojs.queryOne({ id: tar?.location });
       if (en && tar && canEdit(en, tar)) {
         delete tar.data?.password;
         let output = `%chName:%cn ${tar.data?.name}${

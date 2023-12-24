@@ -1,15 +1,13 @@
-import fs from "fs";
-import { readdir } from "fs/promises";
-import path from "path";
+import { dfs, dpath } from "../../deps.ts";
 
-export const plugins = async (dir: string) => {
-  const dirent = await readdir(dir);
-  const files = dirent.filter(
-    (file) => file.endsWith(".ts") || file.endsWith(".js")
-  );
-
-  files.forEach((file) => {
-    delete require.cache[require.resolve(`${dir}/${file}`)];
-    require(`${dir}/${file}`).default();
-  });
-};
+export async function plugins(dir: string) {
+  const entries = dfs.walk(dir, { match: [/\.ts$/, /\.js$/], maxDepth: 1 })
+  for await (const entry of entries) {
+    if (entry.isFile) {
+      // Dynamically import the module
+      const module = await import(dpath.toFileUrl(entry.path));
+      // If the module has a default export function, call it
+      module.default?.();
+    }
+  }
+}
