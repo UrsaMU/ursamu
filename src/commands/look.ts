@@ -39,8 +39,8 @@ export default () =>
       const exits = (
         await dbojs.query({
           "$and": [
-            { flags: /player/i },
-            { flags: /connected/i }
+            { flags: /exit/i },
+            { location: tar.id }
           ]
         })
       ).map((e) => {
@@ -48,8 +48,8 @@ export default () =>
 
         const parts = e.data.name?.split(";") || [];
         return parts?.length > 1
-          ? `<%cy${parts[1].toLocaleUpperCase()}%cn> ${parts[0]}`
-          : `${parts[0]}`;
+          ? `<%cy${parts[1].toLocaleUpperCase()}%cn> ${parts[0]}\n`
+          : `${parts[0]}\n`;
       });
 
       if (players.length) {
