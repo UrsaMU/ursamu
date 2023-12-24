@@ -415,7 +415,7 @@ export default () => {
           "%chMAIL:%cn Message has been read, cannot delete."
         );
 
-      await mail.remove({ _id: m._id });
+      await mail.delete({ _id: m._id });
       send([ctx.socket.id], "%chMAIL:%cn Message deleted.");
     },
   });

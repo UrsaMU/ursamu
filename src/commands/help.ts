@@ -34,7 +34,7 @@ export default async () => {
     pattern: /^[/+@]?help$/i,
     hidden: true,
     exec: async (ctx) => {
-      const player = await dbojs.findOne({ id: ctx.socket.cid });
+      const player = await dbojs.queryOne({ id: ctx.socket.cid });
       const flgs = player?.flags || "";
 
       let cats: Set<string> = new Set();

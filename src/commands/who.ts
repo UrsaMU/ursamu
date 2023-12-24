@@ -23,7 +23,7 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
-      const playersRaw = await dbojs.find({
+      const playersRaw = await dbojs.query({
         $and: [{ flags: /player/ }, { flags: /connected/ }],
       });
 

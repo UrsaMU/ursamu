@@ -11,7 +11,7 @@ export default () =>
     lock: "connected",
     help: "Set a description",
     exec: async (ctx, args) => {
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
       const tar = await target(en, args[0]);
 
@@ -22,7 +22,7 @@ export default () =>
 
       if (args[1]) {
         tar.description = args[1];
-        await dbojs.update({ id: tar.id }, tar);
+        await dbojs.modify({ id: tar.id }, "$set", tar);
         send(
           [ctx.socket.id],
           `Description for %ch${displayName(en, tar)}%cn set!`,

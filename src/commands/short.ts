@@ -14,7 +14,7 @@ export default () =>
 
       en.data ||= {};
       en.data.shortdesc = args[0].trim();
-      await dbojs.update({ id: en.id }, en);
+      await dbojs.modify({ id: en.id }, "$set", en);
       send([ctx.socket.id], `Your short description has been updated.`, {});
     },
   });

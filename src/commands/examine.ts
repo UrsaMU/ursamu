@@ -16,7 +16,7 @@ export default () => {
       if (!en) return;
 
       const tar = await target(en, args[0]);
-      const loc = await dbojs.findOne({ id: tar?.location });
+      const loc = await dbojs.queryOne({ id: tar?.location });
       if (en && tar && canEdit(en, tar)) {
         delete tar.data?.password;
         let output = `%chName:%cn ${tar.data?.name}${
