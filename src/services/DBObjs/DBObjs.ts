@@ -93,15 +93,15 @@ export class Obj {
   }
 
   async exits() {
-    return await dbojs.find({ location: this.id, flags: "exit" });
+    return await dbojs.query({ location: this.id, flags: "exit" });
   }
 
   async contents() {
-    return await dbojs.find({ location: this.id });
+    return await dbojs.query({ location: this.id });
   }
 
   async save() {
-    await dbojs.update({ id: this.id }, this.obj);
+    await dbojs.modify({ id: this.id }, "$set", this.obj);
   }
 
   set dbobj(obj: IDBOBJ) {

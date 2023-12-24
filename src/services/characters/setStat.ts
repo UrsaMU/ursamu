@@ -126,7 +126,7 @@ export const setStat = async (
       );
     }
 
-    await dbojs.update({ id: character.id }, character);
+    await dbojs.modify({ id: character.id }, "$set", character);
     return name;
   } else if (!value && temp) {
     character.data.stats = character.data.stats.map((s: IMStatEntry) => {
@@ -136,7 +136,7 @@ export const setStat = async (
       return s;
     });
 
-    await dbojs.update({ id: character.id }, character);
+    await dbojs.modify({ id: character.id }, "$set", character);
     return name;
   }
 
@@ -160,7 +160,7 @@ export const setStat = async (
     });
   }
 
-  await dbojs.update({ id: character.id }, character);
+  await dbojs.modify({ id: character.id }, "$set", character);
 
   return name;
 };
