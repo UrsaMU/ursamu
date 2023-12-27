@@ -1,5 +1,5 @@
 import { Router } from "../../deps.ts";
-import { Obj, dbojs, flags } from "../services/index.ts";
+import { dbojs, flags, Obj } from "../services/index.ts";
 import { IMError } from "../@types/index.ts";
 import { canEdit } from "../utils/index.ts";
 

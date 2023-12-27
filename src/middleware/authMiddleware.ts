@@ -1,4 +1,4 @@
-import { RequestHandler, Request, Response } from "../../deps.ts";
+import { Request, RequestHandler, Response } from "../../deps.ts";
 import { IMError, IPayload } from "../@types/index.ts";
 import { verify } from "../services/jwt/index.ts";
 

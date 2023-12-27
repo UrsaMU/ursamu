@@ -27,11 +27,10 @@ export default () => {
 
       const targetIds = targets
         .filter((t) => (t.id && t.flags.includes("connected") ? true : false))
-
         .filter(Boolean)
         .map((t) => t.id);
       const targetNames = targets.map(
-        (t) => `${moniker(t)}${t.data?.alias ? "(" + t.data.alias + ")" : ""}`
+        (t) => `${moniker(t)}${t.data?.alias ? "(" + t.data.alias + ")" : ""}`,
       );
 
       // now we can send the page message to the targets
@@ -39,8 +38,9 @@ export default () => {
       let tempmsg = "";
       let sendermsg = "";
       let senderHeader = `To (${targetNames.join(", ")}),`;
-      let header =
-        targetIds.length > 1 ? `To (${targetNames.join(", ")}),` : "From afar,";
+      let header = targetIds.length > 1
+        ? `To (${targetNames.join(", ")}),`
+        : "From afar,";
       switch (true) {
         case msgOrReply?.trim().startsWith(";"):
           tempmsg = `${header} ${moniker(en)}${
@@ -71,12 +71,13 @@ export default () => {
       }
 
       if (en.data?.lastpage && reply) {
-        if (!targets.filter((ob) => ob.id === en.id).length)
+        if (!targets.filter((ob) => ob.id === en.id).length) {
           send([ctx.socket.id], sendermsg, {});
+        }
         return send(
           targetIds.map((t) => `#${t}`),
           tempmsg,
-          {}
+          {},
         );
       }
 
@@ -89,10 +90,11 @@ export default () => {
       send(
         targts.map((t) => `#${t}`),
         tempmsg,
-        {}
+        {},
       );
-      if (!targets.filter((ob) => ob._id === en._id).length)
+      if (!targets.filter((ob) => ob._id === en._id).length) {
         send([ctx.socket.id], sendermsg, {});
+      }
       en.data ||= {};
       en.data.lastpage = targts;
       await dbojs.modify({ _id: en._id }, "$set", en);

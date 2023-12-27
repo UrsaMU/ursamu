@@ -22,10 +22,12 @@ export default () =>
         name = pieces.join(" ");
       }
 
-      const found = await dbojs.queryOne({ "$or": [
-        { "data.name": new RegExp(name, "i") },
-        { "data.alias": new RegExp(name, "i") }
-      ] });
+      const found = await dbojs.queryOne({
+        "$or": [
+          { "data.name": new RegExp(name, "i") },
+          { "data.alias": new RegExp(name, "i") },
+        ],
+      });
       if (!found) {
         send([ctx.socket.id], "I can't find a character by that name!", {
           error: true,
@@ -53,7 +55,7 @@ export default () =>
       await send(
         [`#${found.location}`],
         `${moniker(found)} has connected.`,
-        {}
+        {},
       );
       await force(ctx, "@mail/notify");
       await joinChans(ctx);

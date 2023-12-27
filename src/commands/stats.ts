@@ -1,5 +1,9 @@
-import { Obj, addCmd, flags, send } from "../services/index.ts";
-import { allStats, formatValue, setStat } from "../services/characters/index.ts";
+import { addCmd, flags, Obj, send } from "../services/index.ts";
+import {
+  allStats,
+  formatValue,
+  setStat,
+} from "../services/characters/index.ts";
 import { canEdit, capString, moniker, target } from "../utils/index.ts";
 import { IMStatEntry } from "../@types/index.ts";
 
@@ -48,18 +52,22 @@ export default () => {
       if (!fullStat.values.includes(splat)) {
         return send(
           [ctx.socket.id],
-          `%chGame>%cn Invalid splat. Must be one of: ${fullStat.values
-            .map((s) => `%ch${capString(s)}%cn`)
-            .join(", ")}`
+          `%chGame>%cn Invalid splat. Must be one of: ${
+            fullStat.values
+              .map((s) => `%ch${capString(s)}%cn`)
+              .join(", ")
+          }`,
         );
       }
 
       if (targ.data?.stats?.find((s: IMStatEntry) => s.name === "splat")) {
         return send(
           [ctx.socket.id],
-          `%chGame>%cn ${moniker(
-            targ
-          )} already has a splat set. See: '%chhelp +stats/reset%cn'.`
+          `%chGame>%cn ${
+            moniker(
+              targ,
+            )
+          } already has a splat set. See: '%chhelp +stats/reset%cn'.`,
         );
       }
 
@@ -67,9 +75,9 @@ export default () => {
         const name = await setStat(targ, "splat", splat.trim());
         return await send(
           [ctx.socket.id],
-          `%chGame>%cn ${moniker(targ)}'s splat set to: %ch${splat
-            .trim()
-            ?.toUpperCase()}%cn.`
+          `%chGame>%cn ${
+            moniker(targ)
+          }'s splat set to: %ch${splat.trim()?.toUpperCase()}%cn.`,
         );
       } catch (error: any) {
         return send([ctx.socket.id], `%ch%crERROR>%cn ${error.message}`);
@@ -97,15 +105,17 @@ export default () => {
       if (!targ.data?.stats?.find((s: IMStatEntry) => s.name === "splat")) {
         return send(
           [ctx.socket.id],
-          `%chGame>%cn ${moniker(
-            targ
-          )} has no splat set. See: '%chhelp +splat%cn'.`
+          `%chGame>%cn ${
+            moniker(
+              targ,
+            )
+          } has no splat set. See: '%chhelp +splat%cn'.`,
         );
       }
 
       await send(
         [ctx.socket.id],
-        "%chGame>%cn To confirm reset, type '%chstats/reset/confirm <target>%cn'"
+        "%chGame>%cn To confirm reset, type '%chstats/reset/confirm <target>%cn'",
       );
     },
   });
@@ -139,7 +149,7 @@ export default () => {
       await en.save();
       return send(
         [ctx.socket.id],
-        `%chGame>%cn ${moniker(targ)} has been reset.`
+        `%chGame>%cn ${moniker(targ)} has been reset.`,
       );
     },
   });
@@ -178,7 +188,7 @@ export default () => {
       ) {
         return send(
           [ctx.socket.id],
-          `%chGame>%cn ${moniker(tarObj)} has no splat.`
+          `%chGame>%cn ${moniker(tarObj)} has no splat.`,
         );
       }
 
@@ -186,7 +196,7 @@ export default () => {
       if (temp && temp.toLowerCase() !== "temp") {
         return send(
           [ctx.socket.id],
-          `%chGame>%cn Invalid temp value.  Must be 'temp'.`
+          `%chGame>%cn Invalid temp value.  Must be 'temp'.`,
         );
       }
 
@@ -199,7 +209,7 @@ export default () => {
             temp ? "TEMP-" : ""
           }${name?.toUpperCase()}%cn set to: %ch${
             value ? formatValue(tarObj, name) : "%chremoved%cn"
-          }%cn`
+          }%cn`,
         );
       } catch (error: any) {
         return send([ctx.socket.id], `%chGame>%cn ${error.message}`);

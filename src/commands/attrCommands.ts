@@ -1,4 +1,4 @@
-import { Obj, addCmd, send } from "../services/index.ts";
+import { addCmd, Obj, send } from "../services/index.ts";
 import { canEdit, target } from "../utils/index.ts";
 
 export default () => {
@@ -14,8 +14,9 @@ export default () => {
       if (!tar) return send([ctx.socket.id], "%chGame>%cn Target not found.");
 
       const tarObj = await Obj.get(tar.id);
-      if (!tarObj)
+      if (!tarObj) {
         return send([ctx.socket.id], "%chGame>%cn Target not found.");
+      }
 
       if (!canEdit(en, tar)) {
         return send([ctx.socket.id], "%chGame>%cn You can't edit that.");
@@ -29,14 +30,12 @@ export default () => {
       if (attr && tarObj && tarObj.data) {
         if (!args[2]) {
           tarObj.data.attributes = tar.data?.attributes?.filter(
-            (a) => a.name !== attr.name
+            (a) => a.name !== attr.name,
           );
           await tarObj.save();
           return await send(
             [ctx.socket.id],
-            `%chGame>%cn  ${
-              tarObj.name
-            }'s attribute %ch${attr.name.toUpperCase()}%cn removed.`
+            `%chGame>%cn  ${tarObj.name}'s attribute %ch${attr.name.toUpperCase()}%cn removed.`,
           );
         } else {
           attr.value = args[2];
@@ -44,9 +43,7 @@ export default () => {
           await tarObj.save();
           return await send(
             [ctx.socket.id],
-            `%chGame>%cn  ${
-              tarObj.name
-            }'s attribute %ch${attr.name.toUpperCase()}%cn set.`
+            `%chGame>%cn  ${tarObj.name}'s attribute %ch${attr.name.toUpperCase()}%cn set.`,
           );
         }
       } else if (!attr && tarObj && tarObj.data) {
@@ -62,14 +59,14 @@ export default () => {
         await tarObj.save();
         return await send(
           [ctx.socket.id],
-          `%chGame>%cn  ${
-            tarObj.name
-          }'s attribute %ch${args[0].toUpperCase()}%cn set.`
+          `%chGame>%cn  ${tarObj.name}'s attribute %ch${
+            args[0].toUpperCase()
+          }%cn set.`,
         );
       } else {
         return await send(
           [ctx.socket.id],
-          "%chGame>%cn  Something went wrong."
+          "%chGame>%cn  Something went wrong.",
         );
       }
     },

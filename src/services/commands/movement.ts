@@ -39,7 +39,7 @@ export const matchExits = async (ctx: IContext) => {
             send(
               [`#${en.location}`],
               `${moniker(en)} leaves for ${dest.data?.name}.`,
-              {}
+              {},
             );
           }
 
@@ -51,7 +51,7 @@ export const matchExits = async (ctx: IContext) => {
             send(
               [`#${en.location}`],
               `${en.data.name} arrives from ${room?.data?.name}.`,
-              {}
+              {},
             );
           }
 
@@ -63,7 +63,7 @@ export const matchExits = async (ctx: IContext) => {
           if (players.length > 0) {
             send(
               players.map((p) => `#${p.id}`),
-              `${moniker(en)} tries to go ${exit.data?.name}, but fails.`
+              `${moniker(en)} tries to go ${exit.data?.name}, but fails.`,
             );
           }
           return true;

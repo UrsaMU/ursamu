@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "../../deps.ts";
-import { Obj, dbojs } from "../services/index.ts";
+import { dbojs, Obj } from "../services/index.ts";
 import { compare } from "../../deps.ts";
 import { sign } from "../services/jwt/index.ts";
 import { config } from "../../deps.ts";

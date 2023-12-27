@@ -7,7 +7,7 @@ export const setStat = async (
   character: IDBOBJ,
   stat: string,
   value: any,
-  temp?: boolean
+  temp?: boolean,
 ) => {
   let tar, val;
   let specialty = "";
@@ -44,7 +44,7 @@ export const setStat = async (
 
   if (instance && fullStat.hasInstance && fullStat.instances?.length) {
     const inst = fullStat.instances?.find(
-      (i) => i.toLowerCase() === instance.toLowerCase()
+      (i) => i.toLowerCase() === instance.toLowerCase(),
     );
     if (!inst) throw new Error("Invalid instance().");
   }
@@ -116,13 +116,13 @@ export const setStat = async (
 
   if (!value && !temp) {
     character.data.stats = character.data.stats.filter(
-      (s: IMStatEntry) => s.name.toLowerCase() !== name
+      (s: IMStatEntry) => s.name.toLowerCase() !== name,
     );
 
     // remove any specialties that exist for this stat.
     if (fullStat.hasSpecialties) {
       character.data.stats = character.data.stats.filter(
-        (s: IMStatEntry) => s.type !== fullStat.name
+        (s: IMStatEntry) => s.type !== fullStat.name,
       );
     }
 

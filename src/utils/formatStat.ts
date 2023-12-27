@@ -5,7 +5,7 @@ export const formatStat = (
   stat: string,
   value: any,
   width = 24,
-  right = false
+  right = false,
 ) => {
   if (typeof value === "number") value = value.toString();
   if (!value) value = "";
@@ -16,7 +16,7 @@ export const formatStat = (
       ljust(
         `${hasVal}${capString(stat)}`,
         width - (value?.length || 1),
-        "%ch%cx.%cn"
+        "%ch%cx.%cn",
       ) + val
     );
   }

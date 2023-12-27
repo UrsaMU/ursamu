@@ -13,7 +13,7 @@ export default () =>
       if (!player) return;
       broadcast(
         `%chGame>%cn Server @reboot initiated by ${player.data?.name}...`,
-        {}
+        {},
       );
 
       process.exit(0);

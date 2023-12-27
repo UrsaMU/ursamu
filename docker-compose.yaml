@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
       args:
-        BASE: ${BASE:-denoland/deno:ubuntu}
+        BASE: ${BASE:-lukechannings/deno}
     stdin_open: true
     tty: true
     ports:

@@ -9,7 +9,7 @@ export const sign = (payload: any): Promise<string | void> =>
       (err, token) => {
         if (err) reject(err);
         resolve(token);
-      }
+      },
     );
   });
 
@@ -21,6 +21,6 @@ export const verify = (token: string): Promise<jwt.JwtPayload | unknown> =>
       (err, decoded) => {
         if (err) reject(err);
         resolve(decoded);
-      }
+      },
     );
   });

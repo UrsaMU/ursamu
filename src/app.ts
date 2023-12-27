@@ -1,4 +1,4 @@
-import { express, RequestHandler, Request, Response } from "../deps.ts";
+import { express, Request, RequestHandler, Response } from "../deps.ts";
 import { createServer } from "node:http";
 import { IMSocket } from "./@types/IMSocket.ts";
 import { cmdParser } from "./services/commands/index.ts";
@@ -32,7 +32,7 @@ app.use(
     res
       .status(error.status || 500)
       .json({ error: true, status: error.status, message: error.message });
-  }
+  },
 );
 
 io.on("connection", (socket: IMSocket) => {
@@ -67,13 +67,13 @@ io.on("connection", (socket: IMSocket) => {
       await setFlags(en, "!connected");
       return await send(
         [`#${en.location}`],
-        `${moniker(en)} has disconnected.`
+        `${moniker(en)} has disconnected.`,
       );
     }
 
     return await send(
       [`#${en.location}`],
-      `${moniker(en)} has partially disconnected.`
+      `${moniker(en)} has partially disconnected.`,
     );
   });
 

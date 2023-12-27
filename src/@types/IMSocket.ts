@@ -4,4 +4,5 @@ export interface IMSocket extends Socket {
   id: string;
   cid?: number;
   channels?: Set<string>;
+  [key: string]: any;
 }

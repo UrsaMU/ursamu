@@ -16,7 +16,7 @@ export const joinChans = async (ctx: IContext) => {
   for (const channel of channels) {
     if (channel.alias && flags.check(player.flags || "", channel.lock || "")) {
       const chan = player.data?.channels?.filter(
-        (ch: IChanEntry) => ch.channel === channel.name
+        (ch: IChanEntry) => ch.channel === channel.name,
       );
 
       if (!chan?.length) {
@@ -34,7 +34,7 @@ export const joinChans = async (ctx: IContext) => {
         await force(ctx, `${channel.alias} :has joined the channel.`);
         send(
           [ctx.socket.id],
-          `You have joined ${channel.name} with the alias '${channel.alias}'.`
+          `You have joined ${channel.name} with the alias '${channel.alias}'.`,
         );
       }
     } else if (
@@ -43,27 +43,27 @@ export const joinChans = async (ctx: IContext) => {
     ) {
       // remove channels that are locked from the player.
       const chan = player.data?.channels?.filter(
-        (ch: IChanEntry) => ch.channel === channel.name
+        (ch: IChanEntry) => ch.channel === channel.name,
       );
 
       if (chan?.length) {
         player.data ||= {};
         player.data.channels ||= [];
         player.data.channels = player.data.channels.filter(
-          (c: IChanEntry) => c.channel !== channel.name
+          (c: IChanEntry) => c.channel !== channel.name,
         );
 
         ctx.socket.leave(channel.name);
         await dbojs.modify({ id: player.id }, "$set", player);
         await send(
           [ctx.socket.id],
-          `You have left ${channel.name} with the alias '${channel.alias}'.`
+          `You have left ${channel.name} with the alias '${channel.alias}'.`,
         );
       }
     }
   }
 
   player.data?.channels?.forEach(
-    (channel: IChanEntry) => channel.active && ctx.socket.join(channel.channel)
+    (channel: IChanEntry) => channel.active && ctx.socket.join(channel.channel),
   );
 };

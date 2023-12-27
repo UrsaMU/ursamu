@@ -7,15 +7,17 @@ import { IArticle, IBoard } from "../../@types/index.ts";
 
 function d(...args) {
   const e = new Error();
-  const level = e.stack.split("\n").slice(3, 5);
+  const level = e.stack?.split("\n").slice(3, 5);
   console.log(...args, level);
 }
 
 export class DBO<T> {
   db: any;
+  collection: string;
+  client: MongoClient;
 
   constructor(path: string) {
-    this.collection = path.replace('.','_');
+    this.collection = path.replace(".", "_");
     const uri = `mongodb://root:root@mongo/`;
     this.client = new MongoClient(uri);
     this.client.connect();
@@ -45,10 +47,10 @@ export class DBO<T> {
   }
 
   async modify(query: any, operator: string, data: any) {
-    var body = {}
-    body[operator] = data
-    const ret = await this.coll().updateMany(query, body)
-    return await this.query(query)
+    var body = {};
+    body[operator] = data;
+    const ret = await this.coll().updateMany(query, body);
+    return await this.query(query);
   }
 
   async delete(query: any) {
