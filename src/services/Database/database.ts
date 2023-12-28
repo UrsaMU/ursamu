@@ -18,8 +18,7 @@ export class DBO<T> {
 
   constructor(path: string) {
     this.collection = path.replace('.','_');
-    const uri = `mongodb://root:root@mongo/`;
-    this.client = new MongoClient(uri);
+    this.client = new MongoClient(config.server.db);
     this.client.connect();
   }
 
