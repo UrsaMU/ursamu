@@ -5,7 +5,7 @@ const config: IConfig = {
     telnet: 4201,
     ws: 4202,
     http: 4203,
-    db: "data/ursamu.db",
+    db: "mongodb://root:root@mongo/",
     counters: "data/counters.db",
     chans: "data/chans.db",
     mail: "data/mail.db",
