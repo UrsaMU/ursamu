@@ -27,7 +27,7 @@ export const gameConfig = new Config(defaultConfig);
 export const mu = async (cfg?: IConfig, plugs?: IPlugin[] = []) => {
   gameConfig.setConfig({ ...defaultConfig, ...cfg });
 
-  const pluginsList = gameConfig.plugins || path.join(__dirname, "./commands");
+  const pluginsList = gameConfig.server.plugins || path.join(__dirname, "./commands");
   for(const plugin of plugs) {
     pluginsList.append(plugin)
   }

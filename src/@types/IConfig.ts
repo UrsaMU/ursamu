@@ -9,6 +9,7 @@ export interface IConfig {
     mail?: string;
     wiki?: string;
     bboard?: string;
+    plugins?: string[];
   };
   game?: {
     name?: string;
