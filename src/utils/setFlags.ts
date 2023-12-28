@@ -9,6 +9,7 @@ export const setFlags = async (dbo: IDBOBJ, flgs: string) => {
   const { data, tags } = flags.set(dbo.flags, dbo.data || {}, flgs);
   dbo.flags = tags;
   dbo.data = data;
+  delete dbo._id;
 
   const socket = await getSocket(dbo.id);
   const done = await dbojs.modify({ id: dbo.id }, "$set", dbo);
