@@ -26,7 +26,8 @@ export class DBO<T> {
   }
 
   async create(data: T) {
-    return await this.coll().insertOne(data);
+    await this.coll().insertOne(data);
+    return await queryOne({id: data.id})
   }
 
   async query(query?: any) {
