@@ -11,28 +11,42 @@ import { Config, IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
-plugins(path.join(__dirname, "./commands"));
-loadTxtDir(path.join(__dirname, "../text"));
+const __data = path.join(__dirname, "..", "data")
+export const dataConfig = await (async () => {
+  try {
+    const raw = await Deno.readTextFile(path.join(__data, "config.json"))
+    return JSON.parse(raw)
+  } catch(e) {
+    console.log("Unable to load data configuration, using defaults!", e)
+    return {}
+  }
+})()
+
 export const gameConfig = new Config(defaultConfig);
 
-export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
+export const mu = async (cfg?: IConfig, plugs?: IPlugin[] = []) => {
   gameConfig.setConfig({ ...defaultConfig, ...cfg });
+
+  const pluginsList = gameConfig.server.plugins || path.join(__dirname, "./commands");
+  for(const plugin of plugs) {
+    pluginsList.append(plugin)
+  }
+  plugins(pluginsList);
+  loadTxtDir(path.join(__dirname, "../text"));
 
   server.listen(gameConfig.server?.ws, async () => {
     // load plugins
-    if (plugins) {
-      for (const plugin of plugins) {
-        try {
-          if (plugin.init) {
-            const res = await plugin.init();
-            if (res) {
-              gameConfig.setConfig({ ...defaultConfig, ...plugin.config });
-              console.log(`Plugin ${plugin.name} loaded.`);
-            }
+    for (const plugin of pluginsList) {
+      try {
+        if (plugin.init) {
+          const res = await plugin.init();
+          if (res) {
+            gameConfig.setConfig({ ...gameConfig, ...plugin.config });
+            console.log(`Plugin ${plugin.name} loaded.`);
           }
-        } catch (error) {
-          console.log(error);
         }
+      } catch (error) {
+      console.log(error);
       }
     }
 
@@ -84,4 +98,4 @@ export const mu = async (cfg?: IConfig, plugins?: IPlugin[]) => {
   });
 };
 
-if (import.meta.main) mu();
+if (import.meta.main) mu(dataConfig);
