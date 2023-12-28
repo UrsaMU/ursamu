@@ -5,14 +5,16 @@ import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types/index.ts";
 
-function d(...args) {
+function d(...args:any) {
   const e = new Error();
-  const level = e.stack.split("\n").slice(3, 5);
+  const level = e.stack?.split("\n").slice(3, 5);
   console.log(...args, level);
 }
 
 export class DBO<T> {
   db: any;
+  collection: string;
+  client: MongoClient;
 
   constructor(path: string) {
     this.collection = path.replace('.','_');
@@ -25,9 +27,9 @@ export class DBO<T> {
     return this.client.db().collection(this.collection);
   }
 
-  async create(data: T) {
+  async create(data: any) {
     await this.coll().insertOne(data);
-    return await queryOne({id: data.id})
+    return await this.queryOne({id: data.id})
   }
 
   async query(query?: any) {
@@ -46,7 +48,8 @@ export class DBO<T> {
   }
 
   async modify(query: any, operator: string, data: any) {
-    var body = {}
+    var body = {} as any; 
+    if (data._id) delete data._id;
     body[operator] = data
     const ret = await this.coll().updateMany(query, body)
     return await this.query(query)

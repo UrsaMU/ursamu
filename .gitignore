@@ -3,5 +3,6 @@ data
 dist
 WIP
 db
-db
 .pup.*
+.env
+.vscode
