@@ -37,7 +37,7 @@ router.post("/auth", async (ctx: Context) => {
     });
 
     if (!isMatch) {
-      ctx.response.status = 401;
+      ctx.response.status = 403;
       ctx.response.body = { error: "Invalid username or password." };
       return;
     }

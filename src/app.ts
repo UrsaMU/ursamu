@@ -6,7 +6,6 @@ import { joinChans } from "./utils/joinChans.ts";
 import { IContext } from "./@types/IContext.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { authRouter, dbObjRouter } from "./routes/index.ts";
-import authMiddleware from "./middleware/authMiddleware.ts";
 import { playerForSocket } from "./utils/playerForSocket.ts";
 import { Server } from "https://deno.land/x/socket_io@0.2.0/mod.ts";
 import { Application } from "https://deno.land/x/oak@v12.6.1/mod.ts";
@@ -18,7 +17,12 @@ export const app = new Application();
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 
- app.use( authRouter.routes());
+app.use( authRouter.routes());
+app.use( authRouter.allowedMethods());
+
+app.use( dbObjRouter.routes());
+app.use( dbObjRouter.allowedMethods());
+
  // app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
 
 // app.use(
@@ -30,7 +34,6 @@ export const app = new Application();
 //       .json({ error: true, status: error.status, message: error.message });
 //   }
 // );
-
 
 export const io = new Server();
 
