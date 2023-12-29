@@ -69,9 +69,9 @@ export interface ICounters {
   seq: number;
 }
 
-export const counters = new DBO<ICounters>(`${config.server?.counters}`);
-export const bboard = new DBO<IBoard>(`${config.server?.bboard}`);
-export const dbojs = new DBO<IDBOBJ>(`${config.server?.db}`);
-export const chans = new DBO<IChannel>(`${config.server?.chans}`);
-export const mail = new DBO<IMail>(`${config.server?.mail}`);
-export const wiki = new DBO<IArticle>(`${config.server?.wiki}`);
+export const counters = new DBO<ICounters>(`counters`);
+export const bboard = new DBO<IBoard>(`bboards`);
+export const dbojs = new DBO<IDBOBJ>(`dbojs`);
+export const chans = new DBO<IChannel>(`chans`);
+export const mail = new DBO<IMail>(`mail`);
+export const wiki = new DBO<IArticle>(`wiki`);

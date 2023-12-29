@@ -2,15 +2,15 @@
   "processes": [
     {
       "id": "telnet",
-      "cmd": "deno run -A ./src/telnet.ts --watch",
+      "cmd": "deno run  -A ./src/telnet.ts",
       "autostart": true,
       "restart": "always"
     },
     {
       "id": "ursamu",
-      "cmd": "deno run -A ./src/main.ts --watch",
+      "cmd": "deno run -A ./src/main.ts",
       "autostart": true,
-      "restart": "always"
+      "restart": "always",
     }
   ]
 }

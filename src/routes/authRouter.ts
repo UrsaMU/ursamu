@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "../../deps.ts";
+import { Context, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts"
 import { Obj, dbojs } from "../services/index.ts";
 import { compare } from "../../deps.ts";
 import { sign } from "../services/jwt/index.ts";
@@ -6,35 +6,54 @@ import { config } from "../../deps.ts";
 
 config();
 
-const router = Router();
+const router = new Router();
 
-router.post("/", async (req: Request, res: Response, next) => {
-  const { username, password } = req.body;
-  const ob = await dbojs.findOne({
-    $or: [
-      { "data.alias": new RegExp(username, "i") },
-      { "data.name": new RegExp(username, "i") },
-    ],
-  });
+router.post("/auth", async (ctx: Context) => {
+  try {
+    const { username, password } = await ctx.request.body().value;
+    const ob = await dbojs.queryOne({
+      $or: [
+        { "data.alias": new RegExp(username, "i") },
+        { "data.name": new RegExp(username, "i") },
+      ],
+    });
 
-  if (!ob) return next(new Error("Invalid username or password."));
+    if (!ob) {
+      ctx.response.status = 401;
+      ctx.response.body = { error: "Invalid username or password." };
+      return;
+    }
 
-  const obj = new Obj().load(ob);
+    const obj = new Obj().load(ob);
+    obj.dbobj.data ||= {};
+    obj.dbobj.data.password ||= "";
 
-  obj.dbobj.data ||= {};
-  obj.dbobj.data.password ||= "";
+    // Using promises with compare function
+    const isMatch = await new Promise((resolve, reject) => {
+      compare(password, obj.data?.password, (err: any, match: any) => {
+        if (err) reject(err);
+        resolve(match);
+      });
+    });
 
-  compare(password, obj.dbobj.data.password, async (err, isMatch) => {
-    if (err) return res.status(500).send("Internal server error.");
-    if (!isMatch) return res.status(400).send("Invalid username or password.");
+    if (!isMatch) {
+      ctx.response.status = 401;
+      ctx.response.body = { error: "Invalid username or password." };
+      return;
+    }
 
     const token = await sign({ id: obj.dbobj.id });
     if (token) {
-      res.status(200).json({ token });
+      ctx.response.status = 200;
+      ctx.response.body = { token };
     } else {
-      next(err);
+      ctx.response.status = 500;
+      ctx.response.body = { error: "Unable to generate token." };
     }
-  });
+  } catch (err) {
+    ctx.response.status = 500;
+    ctx.response.body = { error: err.message };
+  }
 });
 
-export const authRouter = router;
+export { router as authRouter}

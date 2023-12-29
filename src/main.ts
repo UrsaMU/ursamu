@@ -1,5 +1,6 @@
-import path from "node:path";
-import { server } from "./app.ts";
+import { join } from "../deps.ts";
+import { serve } from "https://deno.land/std@0.166.0/http/server.ts";
+import { io, app } from './app.ts';
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { createObj } from "./services/DBObjs/index.ts";
@@ -11,10 +12,10 @@ import { Config, IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
-const __data = path.join(__dirname, "..", "data");
+const __data = join(__dirname, "..", "data");
 export const dataConfig = await (async () => {
   try {
-    const raw = await Deno.readTextFile(path.join(__data, "config.json"));
+    const raw = await Deno.readTextFile(join(__data, "config.json"));
     return JSON.parse(raw);
   } catch (e) {
     console.log("Unable to load data configuration, using defaults!", e);
@@ -24,38 +25,31 @@ export const dataConfig = await (async () => {
 
 export const gameConfig = new Config(defaultConfig);
 
-export const mu = async (cfg?: IConfig, ...plugs: IPlugin[]) => {
+export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
   gameConfig.setConfig({ ...defaultConfig, ...cfg });
 
-  const pluginsList =
-    gameConfig.server?.plugins || path.join(__dirname, "./commands");
-  for (const plugin of plugs) {
-    pluginsList.push(plugin);
+  const pluginsList = gameConfig.server?.plugins || [];
+  
+  plugins(join(__dirname, "./commands"));
+  for (const plug of plugs) {
+    plugins(join(__dirname, plug));
   }
-  plugins(pluginsList);
-  loadTxtDir(path.join(__dirname, "../text"));
-  console.log(gameConfig);
+  
+  loadTxtDir(join(__dirname, "../text"));
+  
 
   dbojs.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
   counters.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
   chans.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
   mail.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
 
-  server.listen(gameConfig.server?.ws, async () => {
-    // load plugins
-    for (const plugin of pluginsList) {
-      try {
-        if (plugin.init) {
-          const res = await plugin.init();
-          if (res) {
-            gameConfig.setConfig({ ...gameConfig, ...plugin.config });
-            console.log(`Plugin ${plugin.name} loaded.`);
-          }
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
+  const handler = io.handler(async (req: any ) => {
+    return await app.handle(req) || new Response("Not found.", { status: 404 });
+  })
+
+
+
+  serve(handler, {port: gameConfig.server?.ws});
 
     const rooms = await dbojs.query({ flags: /room/i });
 
@@ -91,7 +85,9 @@ export const mu = async (cfg?: IConfig, ...plugs: IPlugin[]) => {
       });
     }
     console.log(`Server started on port ${gameConfig.server?.ws}.`);
-  });
+ 
+
+
 
   Deno.addSignalListener("SIGINT", async () => {
     const players = await dbojs.query({ flags: /connected/i });
