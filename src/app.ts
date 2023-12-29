@@ -12,27 +12,11 @@ import { Application } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 
 export const app = new Application();
 
-// app.use(express.static("public"));
-// app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
-
 app.use(authRouter.routes());
 app.use(authRouter.allowedMethods());
 
 app.use(dbObjRouter.routes());
 app.use(dbObjRouter.allowedMethods());
-
-// app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
-
-// app.use(
-//   (error: IMError, req: Request, res: Response, next: RequestHandler): void => {
-//     // Handle error here
-//     console.error(error);
-//     res
-//       .status(error.status || 500)
-//       .json({ error: true, status: error.status, message: error.message });
-//   }
-// );
 
 export const io = new Server();
 
