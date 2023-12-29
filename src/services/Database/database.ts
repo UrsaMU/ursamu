@@ -5,7 +5,7 @@ import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types/index.ts";
 
-function d(...args:any) {
+function d(...args: any) {
   const e = new Error();
   const level = e.stack?.split("\n").slice(3, 5);
   console.log(...args, level);
@@ -14,26 +14,24 @@ function d(...args:any) {
 export class DBO<T> {
   db: any;
   collection: string;
-  client: MongoClient;
+  client: MongoClient | undefined;
 
   constructor(path: string) {
-    this.collection = path.replace('.','_');
-    this.client = new MongoClient(config.server.db);
-    this.client.connect();
+    this.collection = path.replace(".", "_");
   }
 
   coll() {
-    return this.client.db().collection(this.collection);
+    return this.client?.db().collection(this.collection);
   }
 
   async create(data: any) {
-    await this.coll().insertOne(data);
-    return await this.queryOne({id: data.id})
+    await this.coll()?.insertOne(data);
+    return await this.queryOne({ id: data.id });
   }
 
   async query(query?: any) {
-    const ret = await this.coll().find(query);
-    return await ret.toArray();
+    const ret = await this.coll()?.find(query);
+    return (await ret?.toArray()) as T[];
   }
 
   async queryOne(query?: any) {
@@ -42,23 +40,27 @@ export class DBO<T> {
   }
 
   async all() {
-    const ret = await this.coll().find({});
-    return await ret.toArray();
+    const ret = await this.coll()?.find({});
+    return (await ret?.toArray()) as T[];
   }
 
   async modify(query: any, operator: string, data: any) {
-    var body = {} as any; 
+    var body = {} as any;
     if (data._id) delete data._id;
-    body[operator] = data
-    const ret = await this.coll().updateMany(query, body)
-    return await this.query(query)
+    body[operator] = data;
+    const ret = await this.coll()?.updateMany(query, body);
+    return await this.query(query);
   }
 
   async delete(query: any) {
-    return await this.coll().deleteMany(query);
+    return await this.coll()?.deleteMany(query);
   }
 
-  async length(query: any) {
+  async length(query: any) {}
+
+  async init(connector: string) {
+    this.client = new MongoClient(connector);
+    this.client.connect();
   }
 }
 

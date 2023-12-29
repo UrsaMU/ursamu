@@ -3,36 +3,43 @@ import { server } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { createObj } from "./services/DBObjs/index.ts";
-import { chans, counters, dbojs } from "./services/Database/index.ts";
+import { chans, counters, dbojs, mail } from "./services/Database/index.ts";
 import defaultConfig from "./ursamu.config.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { Config, IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 
-const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
-const __data = path.join(__dirname, "..", "data")
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+const __data = path.join(__dirname, "..", "data");
 export const dataConfig = await (async () => {
   try {
-    const raw = await Deno.readTextFile(path.join(__data, "config.json"))
-    return JSON.parse(raw)
-  } catch(e) {
-    console.log("Unable to load data configuration, using defaults!", e)
-    return {}
+    const raw = await Deno.readTextFile(path.join(__data, "config.json"));
+    return JSON.parse(raw);
+  } catch (e) {
+    console.log("Unable to load data configuration, using defaults!", e);
+    return {};
   }
-})()
+})();
 
 export const gameConfig = new Config(defaultConfig);
 
-export const mu = async (cfg?: IConfig, plugs?: IPlugin[] = []) => {
+export const mu = async (cfg?: IConfig, ...plugs: IPlugin[]) => {
   gameConfig.setConfig({ ...defaultConfig, ...cfg });
 
-  const pluginsList = gameConfig.server.plugins || path.join(__dirname, "./commands");
-  for(const plugin of plugs) {
-    pluginsList.append(plugin)
+  const pluginsList =
+    gameConfig.server?.plugins || path.join(__dirname, "./commands");
+  for (const plugin of plugs) {
+    pluginsList.push(plugin);
   }
   plugins(pluginsList);
   loadTxtDir(path.join(__dirname, "../text"));
+  console.log(gameConfig);
+
+  dbojs.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
+  counters.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
+  chans.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
+  mail.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
 
   server.listen(gameConfig.server?.ws, async () => {
     // load plugins
@@ -46,7 +53,7 @@ export const mu = async (cfg?: IConfig, plugs?: IPlugin[] = []) => {
           }
         }
       } catch (error) {
-      console.log(error);
+        console.log(error);
       }
     }
 
@@ -98,4 +105,6 @@ export const mu = async (cfg?: IConfig, plugs?: IPlugin[] = []) => {
   });
 };
 
-if (import.meta.main) mu(dataConfig);
+if (import.meta.main) {
+  mu(dataConfig);
+}

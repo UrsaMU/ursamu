@@ -16,6 +16,6 @@ export default () =>
         {}
       );
 
-      process.exit(0);
+      Deno.exit(0);
     },
   });
