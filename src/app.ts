@@ -12,18 +12,17 @@ import { Application } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 
 export const app = new Application();
 
-
 // app.use(express.static("public"));
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 
-app.use( authRouter.routes());
-app.use( authRouter.allowedMethods());
+app.use(authRouter.routes());
+app.use(authRouter.allowedMethods());
 
-app.use( dbObjRouter.routes());
-app.use( dbObjRouter.allowedMethods());
+app.use(dbObjRouter.routes());
+app.use(dbObjRouter.allowedMethods());
 
- // app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
+// app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
 
 // app.use(
 //   (error: IMError, req: Request, res: Response, next: RequestHandler): void => {
@@ -37,10 +36,8 @@ app.use( dbObjRouter.allowedMethods());
 
 export const io = new Server();
 
-
-
 io.on("connection", (socket: any) => {
-  socket.on("message", async (message:IContext) => {
+  socket.on("message", async (message: IContext) => {
     if (message.data?.cid) socket.cid = message.data.cid;
     const player = await playerForSocket(socket);
     if (player) socket.join(`#${player.location}`);
@@ -71,13 +68,13 @@ io.on("connection", (socket: any) => {
       await setFlags(en, "!connected");
       return await send(
         [`#${en.location}`],
-        `${moniker(en)} has disconnected.`
+        `${moniker(en)} has disconnected.`,
       );
     }
 
     return await send(
       [`#${en.location}`],
-      `${moniker(en)} has partially disconnected.`
+      `${moniker(en)} has partially disconnected.`,
     );
   });
 

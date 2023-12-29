@@ -1,4 +1,4 @@
-import { Router, Context, Next } from "../../deps.ts";
+import { Context, Next, Router } from "../../deps.ts";
 import { IMError, IPayload } from "../@types/index.ts";
 import { verify } from "../services/jwt/index.ts";
 
@@ -8,7 +8,7 @@ export default async (ctx: Context, next: Next) => {
     ctx.response.status = 401;
     ctx.response.body = { error: "Unauthorized" };
     return;
-     }
+  }
 
   try {
     const decoded = (await verify(token)) as IPayload;
@@ -17,13 +17,12 @@ export default async (ctx: Context, next: Next) => {
       ctx.response.status = 401;
       ctx.response.body = { error: "Unauthorized" };
       return;
-      
     }
     ctx.state.id = decoded.id;
   } catch {
     const err: IMError = new Error("Unauthorized");
     err.status = 401;
-    return
+    return;
   }
 
   await next();

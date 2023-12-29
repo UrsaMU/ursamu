@@ -1,5 +1,5 @@
 import { IDBOBJ } from "../../@types/index.ts";
-import { Obj, allStats } from "../index.ts";
+import { allStats, Obj } from "../index.ts";
 
 export const getStat = async (character: IDBOBJ | Obj, stat: string) => {
   // first we need to see if the player has the stat in their data.

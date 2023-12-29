@@ -10,7 +10,7 @@
       "id": "ursamu",
       "cmd": "deno run -A ./src/main.ts",
       "autostart": true,
-      "restart": "always",
+      "restart": "always"
     }
   ]
 }

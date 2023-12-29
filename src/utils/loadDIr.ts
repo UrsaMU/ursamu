@@ -7,7 +7,10 @@ export async function plugins(source: string) {
     module.default?.();
   } else {
     // Handle local directory logic
-    const entries = dfs.walk(source, { match: [/\.ts$/, /\.js$/], maxDepth: 1 });
+    const entries = dfs.walk(source, {
+      match: [/\.ts$/, /\.js$/],
+      maxDepth: 1,
+    });
     for await (const entry of entries) {
       if (entry.isFile) {
         const module = await import(dpath.toFileUrl(entry.path).toString());

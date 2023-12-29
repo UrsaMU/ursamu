@@ -1,5 +1,5 @@
 import { IMStatEntry } from "../@types/index.ts";
-import { Obj, addCmd, dbojs, flags, getStat, send } from "../services/index.ts";
+import { addCmd, dbojs, flags, getStat, Obj, send } from "../services/index.ts";
 import { moniker, target } from "../utils/index.ts";
 
 export default () => {
@@ -43,8 +43,9 @@ export default () => {
       }
 
       const targ = await target(en.dbobj, tar);
-      if (!targ || !targ.data)
+      if (!targ || !targ.data) {
         return send([ctx.socket.id], "%ch%cgHeal>%cn Invalid target.");
+      }
 
       // if the type is not 'physical' or 'mental', then end the command and tell the enactor 'Invalid type. Must be one of: physical, mental'
       if (
@@ -53,7 +54,7 @@ export default () => {
       ) {
         return send(
           [ctx.socket.id],
-          `%ch%crHeal>%cn Invalid type. Must be one of: physical, mental`
+          `%ch%crHeal>%cn Invalid type. Must be one of: physical, mental`,
         );
       }
 
@@ -64,7 +65,7 @@ export default () => {
       } else {
         return send(
           [ctx.socket.id],
-          `%ch%crHeal>%cn Invalid type. Must be one of: physical, mental`
+          `%ch%crHeal>%cn Invalid type. Must be one of: physical, mental`,
         );
       }
 
@@ -83,7 +84,7 @@ export default () => {
       ) {
         return send(
           [ctx.socket.id],
-          `%ch%crHeal>%cn Invalid damage type. Must be one of: superficial, aggravated`
+          `%ch%crHeal>%cn Invalid damage type. Must be one of: superficial, aggravated`,
         );
       }
 
@@ -112,9 +113,11 @@ export default () => {
       // send a message to the targets location.  Heal> <target> has healed <value> <type> <damageType>. enactor or not.
       send(
         [`#${targ.location}`],
-        `%ch%cgHeal>%cn ${moniker(
-          targ
-        )} has healed %ch%cg${healed}%cn %ch${damName}%cn damage(${type}).`
+        `%ch%cgHeal>%cn ${
+          moniker(
+            targ,
+          )
+        } has healed %ch%cg${healed}%cn %ch${damName}%cn damage(${type}).`,
       );
 
       // update the target.
@@ -162,8 +165,9 @@ export default () => {
       }
 
       const targ = await target(en.dbobj, tar);
-      if (!targ || !targ.data)
+      if (!targ || !targ.data) {
         return send([ctx.socket.id], "%ch%cgDamage>%cn Invalid target.");
+      }
 
       // if the type is not 'physical' or 'mental', then end the command and tell the enactor 'Invalid type. Must be one of: physical, mental
       if ("mental".includes(type.toLowerCase())) {
@@ -173,7 +177,7 @@ export default () => {
       } else {
         return send(
           [ctx.socket.id],
-          `%ch%crDamage>%cn Invalid type. Must be one of: physical, mental`
+          `%ch%crDamage>%cn Invalid type. Must be one of: physical, mental`,
         );
       }
 
@@ -192,7 +196,7 @@ export default () => {
       } else {
         return send(
           [ctx.socket.id],
-          `%ch%crDamage>%cn Invalid damage type. Must be one of: superficial, aggravated`
+          `%ch%crDamage>%cn Invalid damage type. Must be one of: superficial, aggravated`,
         );
       }
 
@@ -204,9 +208,11 @@ export default () => {
       // emit a message to the targets location.  Damage> <target> has taken <value> <type> damage(<damageType>). enactor or not.
       send(
         [`#${targ.location}`],
-        `%ch%crDamage>%cn ${moniker(
-          targ
-        )} has taken %ch%cr${damaged}%cn %ch${damName}%cn damage(${type}).`
+        `%ch%crDamage>%cn ${
+          moniker(
+            targ,
+          )
+        } has taken %ch%cr${damaged}%cn %ch${damName}%cn damage(${type}).`,
       );
     },
   });

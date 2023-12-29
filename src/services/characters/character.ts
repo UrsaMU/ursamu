@@ -10,7 +10,7 @@ export const createCharacter = async (
   name: string,
   password: string,
   flags: string,
-  data?: data
+  data?: data,
 ) => {
   const character = await createObj(flags, {
     name,

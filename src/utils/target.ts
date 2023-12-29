@@ -35,5 +35,4 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
   if (found && (global || [found.location, found.id].includes(en.location))) {
     return found;
   }
-
 };

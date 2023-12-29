@@ -1,5 +1,5 @@
-import { Context, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts"
-import { Obj, dbojs } from "../services/index.ts";
+import { Context, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+import { dbojs, Obj } from "../services/index.ts";
 import { compare } from "../../deps.ts";
 import { sign } from "../services/jwt/index.ts";
 import { config } from "../../deps.ts";
@@ -56,4 +56,4 @@ router.post("/auth", async (ctx: Context) => {
   }
 });
 
-export { router as authRouter}
+export { router as authRouter };

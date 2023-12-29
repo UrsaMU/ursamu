@@ -12,7 +12,7 @@ export default () =>
       if (!player) return;
       broadcast(
         `%chGame>%cn Server @reboot initiated by ${player.data?.name}...`,
-        {}
+        {},
       );
       setTimeout(() => {
         Deno.exit(0);

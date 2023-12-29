@@ -1,7 +1,6 @@
 import { io } from "../app.ts";
 import { Obj } from "../services/DBObjs/index.ts";
 
-
 export const getSocket = async (id: number) => {
   const dbo = await Obj.get(id);
   if (!dbo) return;

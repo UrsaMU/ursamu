@@ -1,5 +1,5 @@
 import { Router } from "../../deps.ts";
-import { Obj, flags, wiki } from "../services/index.ts";
+import { flags, Obj, wiki } from "../services/index.ts";
 import { IMError } from "../@types/index.ts";
 import authMiddleware from "../middleware/authMiddleware.ts";
 
@@ -97,7 +97,7 @@ router.put("/:id", authMiddleware, async (req, res, next) => {
         ...req.body,
         updatedBy: en?.dbref,
         updatedAt: new Date(),
-      }
+      },
     );
 
     res.status(200).json(updatedEntry);

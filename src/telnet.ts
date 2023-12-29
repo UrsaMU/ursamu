@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { Socket, createServer } from "node:net";
+import { createServer, Socket } from "node:net";
 import { join } from "node:path";
 import { dpath, io } from "../deps.ts";
 import config from "./ursamu.config.ts";
@@ -9,10 +9,10 @@ interface ITelnetSocket extends Socket {
   cid?: number;
 }
 
-const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 const welcome = readFileSync(
   join(__dirname, config.game?.text.connect || "../text/connect_default.txt"),
-  "utf8"
+  "utf8",
 );
 
 const server = createServer((socket: ITelnetSocket) => {
@@ -31,7 +31,7 @@ const server = createServer((socket: ITelnetSocket) => {
 
   sock.io.on("reconnect", () => {
     socket.write(
-      parser.substitute("telnet", "%chGame>%cn @reboot Complete.\r\n")
+      parser.substitute("telnet", "%chGame>%cn @reboot Complete.\r\n"),
     );
     sock.emit("message", {
       msg: "",
@@ -68,6 +68,7 @@ const server = createServer((socket: ITelnetSocket) => {
   });
 });
 
-server.listen(config.server?.telnet, () =>
-  console.log(`Telnet server listening on port ${config.server?.telnet}`)
+server.listen(
+  config.server?.telnet,
+  () => console.log(`Telnet server listening on port ${config.server?.telnet}`),
 );

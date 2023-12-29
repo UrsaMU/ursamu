@@ -18,8 +18,9 @@ export default () => {
       const tar = await target(en, t, true);
       if (!tar) return send([ctx.socket.id], "I don't see that here.");
       const tarObj = await Obj.get(tar.id);
-      if (!tarObj?.dbobj)
+      if (!tarObj?.dbobj) {
         return send([ctx.socket.id], "I don't see that here.");
+      }
 
       if (canEdit(en, tarObj.dbobj)) {
         tarObj.dbobj.data ||= {};
@@ -29,7 +30,7 @@ export default () => {
           await tarObj.save();
           return send(
             [ctx.socket.id],
-            `%chGame>%cn Deleted %ch${k}%cn on ${tarObj.name}.`
+            `%chGame>%cn Deleted %ch${k}%cn on ${tarObj.name}.`,
           );
         }
 
@@ -37,7 +38,7 @@ export default () => {
         await tarObj.save();
         send(
           [ctx.socket.id],
-          `%chGame>%cn Set %ch${k}%cn to %ch${v}%cn on ${tarObj.name}.`
+          `%chGame>%cn Set %ch${k}%cn to %ch${v}%cn on ${tarObj.name}.`,
         );
       }
     },

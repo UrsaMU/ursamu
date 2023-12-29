@@ -14,7 +14,7 @@ export const createObj = async (flgs: string, datas: any) => {
   };
 
   await dbojs.create(obj);
-  return await dbojs.query({id});
+  return await dbojs.query({ id });
 };
 
 export class Obj {
