@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { Obj, addCmd } from "../services/index.ts";
+import { addCmd, Obj } from "../services/index.ts";
 import { join } from "node:path";
 import { cwd } from "node:process";
 

@@ -18,16 +18,16 @@ export const matchChannel = async (ctx: IContext) => {
   let msg = parts.slice(1).join(" ").trim();
   const match = msg?.match(/^(:|;)?(.*)$/i);
 
-  if(!en.data?.channels) {
+  if (!en.data?.channels) {
     return false;
   }
-  const channel = en.data?.channels?.find((c: IChanEntry) => c.alias === trig)
-  if(!channel) {
+  const channel = en.data?.channels?.find((c: IChanEntry) => c.alias === trig);
+  if (!channel) {
     return false;
   }
   const chan = await chans.queryOne({ name: channel.channel });
 
-  if(!chan) {
+  if (!chan) {
     return false;
   }
   if (!flags.check(en.flags || "", channel?.lock || "")) return false;

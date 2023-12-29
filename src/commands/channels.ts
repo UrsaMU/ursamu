@@ -51,13 +51,13 @@ export default () => {
           send(
             [ctx.socket.id],
             `You have joined ${name} with the alias '${alias}'.`,
-            {}
+            {},
           );
 
           // Force the connected sockets (players) to cycle their channels
           // and join the new ones.
           const sockets = Array.from(io.sockets.sockets.entries()).map(
-            (s) => s[1] as IMSocket
+            (s) => s[1] as IMSocket,
           );
 
           for (const socket of sockets) {
@@ -68,7 +68,7 @@ export default () => {
         send(
           [ctx.socket.id],
           `Channel ${args[1].split("=")[0]} already exists.`,
-          {}
+          {},
         );
       }
     },
@@ -87,7 +87,7 @@ export default () => {
         for (const plyr of players) {
           plyr.data ||= {};
           plyr.data.channels = plyr.data.channels?.filter(
-            (c: IChanEntry) => c.channel !== chan.name
+            (c: IChanEntry) => c.channel !== chan.name,
           );
           await dbojs.modify({ id: plyr.id }, "$set", plyr);
         }
@@ -152,7 +152,7 @@ export default () => {
       // Force the connected sockets (players) to cycle their channels
       // and join the new ones.
       const sockets = Array.from(io.sockets.sockets.entries()).map(
-        (s) => s[1] as IMSocket
+        (s) => s[1] as IMSocket,
       );
 
       for (const socket of sockets) {
@@ -191,7 +191,7 @@ export default () => {
         send(
           [ctx.socket.id],
           `You have joined ${chan.name} with the alias '%ch${args[1]}%cn'.`,
-          {}
+          {},
         );
       } else {
         send([ctx.socket.id], `Channel ${args[0]} not found.`, {});
@@ -212,7 +212,7 @@ export default () => {
       en.data.channels.forEach(async (c: IChanEntry) => {
         if (c.alias !== args[0]) return;
         en.data!.channels = en.data?.channels?.filter(
-          (c: IChanEntry) => c.alias !== args[0]
+          (c: IChanEntry) => c.alias !== args[0],
         );
         send([ctx.socket.id], `You leave channel ${c.channel}.`, {});
         await force(ctx, `${args[0]} :leaves the channel.`);
@@ -235,7 +235,8 @@ export default () => {
       let msg = "Your channels:%r";
       msg +=
         "%ch%cr==============================================================================%cn%r";
-      msg += ` ALIAS         CHANNEL        STATUS    TITLE           MASK             %r`;
+      msg +=
+        ` ALIAS         CHANNEL        STATUS    TITLE           MASK             %r`;
       msg +=
         "%ch%cr==============================================================================%cn";
       en.dbobj.data.channels.forEach((c: IChanEntry) => {
@@ -281,7 +282,7 @@ export default () => {
       en.dbobj.data ||= {};
       en.dbobj.data.channels ||= [];
       const chansList = en.dbobj.data.channels.filter(
-        (c: IChanEntry) => c.alias === args[0]
+        (c: IChanEntry) => c.alias === args[0],
       );
 
       if (chansList.length === 0) {
@@ -291,14 +292,16 @@ export default () => {
 
       chansList.forEach(async (c: IChanEntry) => {
         const channel = await chans.queryOne({ name: c.channel });
-        if (!channel)
+        if (!channel) {
           return send([ctx.socket.id], `Channel ${c.channel} not found.`);
+        }
 
-        if (!channel.masking)
+        if (!channel.masking) {
           return send(
             [ctx.socket.id],
-            `Channel %ch${c.channel}%cn does not allow masking.`
+            `Channel %ch${c.channel}%cn does not allow masking.`,
           );
+        }
 
         c.mask = args[1];
         await en.save();

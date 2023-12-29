@@ -1,27 +1,34 @@
-import { Router } from "../../deps.ts";
-import { Obj, dbojs, flags } from "../services/index.ts";
-import { IMError } from "../@types/index.ts";
+import { Context, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+import { dbojs, flags, Obj } from "../services/index.ts";
 import { canEdit } from "../utils/index.ts";
+import authMiddleware from "../middleware/authMiddleware.ts";
 
-const router = Router();
+const router = new Router();
 
-router.get("/dbos", async (req, res, next) => {
-  const en = await Obj.get(req.body.id);
-  const flgs = (req.query.flags as string) || "";
+router.use(authMiddleware);
+
+router.get("/dbos", async (ctx: Context) => {
+  const en = await Obj.get(ctx.state.id);
+  const queryParams = ctx.request.url.searchParams;
+
+  const flgs = queryParams.get("flags") || "";
 
   if (!en) {
-    const err: IMError = new Error("Not Found");
-    err.status = 404;
-    return next(err);
+    ctx.response.status = 404;
+    ctx.response.body = { error: "Not Found" };
+    return;
   }
 
-  const dbos = (await dbojs.find({}))
+  const dbos = (await dbojs.all())
     .filter((dbo) => canEdit(en.dbobj, dbo) && flags.check(dbo.flags, flgs))
     .map((dbo) => {
       delete dbo.data?.password;
       return dbo;
     });
-  res.status(200).json(dbos);
+
+  ctx.response.status = 200;
+  ctx.response.body = dbos;
+  return;
 });
 
 export const dbObjRouter = router;

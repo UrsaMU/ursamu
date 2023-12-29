@@ -38,10 +38,11 @@ export default () =>
         return;
       }
 
-      const flags =
-        players.length > 0 ? "player connected" : "player connected superuser";
+      const flags = players.length > 0
+        ? "player connected"
+        : "player connected superuser";
       const id = await getNextId("objid");
-      const player = await(async() => {
+      const player = await (async () => {
         await dbojs.create({
           id,
           flags,
@@ -52,9 +53,9 @@ export default () =>
             password: await hash(password, 10),
           },
         });
-        return await dbojs.queryOne({id});
+        return await dbojs.queryOne({ id });
       })();
-      if(!player) {
+      if (!player) {
         send([ctx.socket.id], "Unable to create player!.", {
           error: true,
         });

@@ -1,4 +1,3 @@
-import { join } from "node:path";
 import { broadcast } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
@@ -13,9 +12,10 @@ export default () =>
       if (!player) return;
       broadcast(
         `%chGame>%cn Server @reboot initiated by ${player.data?.name}...`,
-        {}
+        {},
       );
-
-      process.exit(0);
+      setTimeout(() => {
+        Deno.exit(0);
+      }, 100);
     },
   });

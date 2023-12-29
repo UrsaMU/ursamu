@@ -23,7 +23,7 @@ export default () => {
       if (taken) {
         return send(
           [socket.id],
-          "%chGAME>%cn That board name is already taken."
+          "%chGAME>%cn That board name is already taken.",
         );
       }
 
@@ -37,7 +37,7 @@ export default () => {
 
       send(
         [socket.id],
-        `%chGAME>%cn Board %ch${name.toUpperCase()}%cn created.`
+        `%chGAME>%cn Board %ch${name.toUpperCase()}%cn created.`,
       );
     },
   });
@@ -53,7 +53,9 @@ export default () => {
       const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const tar = await bboard.queryOne({ $or: [{ name }, { boardId: +name }] });
+      const tar = await bboard.queryOne({
+        $or: [{ name }, { boardId: +name }],
+      });
       if (!tar) {
         return send([socket.id], "%chGAME>%cn Board not found.");
       }
@@ -61,7 +63,7 @@ export default () => {
       await bboard.remove({ boardId: tar.boardId });
       send(
         [socket.id],
-        `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn deleted.`
+        `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn deleted.`,
       );
     },
   });
@@ -88,7 +90,7 @@ export default () => {
       await bboard.modify({ name: tar.name }, "$set", { name: newName });
       send(
         [socket.id],
-        `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn renamed to %ch${newName.toUpperCase()}%cn.`
+        `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn renamed to %ch${newName.toUpperCase()}%cn.`,
       );
     },
   });
@@ -103,7 +105,9 @@ export default () => {
       const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const tar = await bboard.queryOne({ $or: [{ name }, { boardId: +name }] });
+      const tar = await bboard.queryOne({
+        $or: [{ name }, { boardId: +name }],
+      });
       if (!tar) {
         return send([socket.id], "%chGAME>%cn Board not found.");
       }
@@ -111,7 +115,7 @@ export default () => {
       await bboard.modify({ name: tar.name }, "$set", { description: desc });
       send(
         [socket.id],
-        `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn description updated.`
+        `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn description updated.`,
       );
     },
   });
@@ -149,9 +153,12 @@ export default () => {
         return send([socket.id], "%chGAME>%cn No boards found.");
       }
 
-      let output = `%ch%cb==============================================================================%cn\n`;
-      output += `           Board Name                    Last Post                 # of Posts\n`;
-      output += `%ch%cb==============================================================================%cn\n`;
+      let output =
+        `%ch%cb==============================================================================%cn\n`;
+      output +=
+        `           Board Name                    Last Post                 # of Posts\n`;
+      output +=
+        `%ch%cb==============================================================================%cn\n`;
 
       boards
         .sort((a, b) => a.boardId - b.boardId)
@@ -180,16 +187,23 @@ export default () => {
           // if read only but user can write, mark access as (-).
           if (write && b.write) access = "(-)";
 
-          output += ` ${b.boardId
-            ?.toString()
-            .padEnd(5)} ${access} ${formatString(b.name, 29)} ${(
-            b.lastPost?.toDateString() || "None"
-          ).padEnd(34)} ${b.posts?.length || 0}\n`;
+          output += ` ${
+            b.boardId
+              ?.toString()
+              .padEnd(5)
+          } ${access} ${formatString(b.name, 29)} ${
+            (
+              b.lastPost?.toDateString() || "None"
+            ).padEnd(34)
+          } ${b.posts?.length || 0}\n`;
         });
 
-      output += `%ch%cb==============================================================================%cn\n`;
-      output += `'*' = restricted     '-' = Read Only     '(-)' - Read Only, but you can write\n`;
-      output += `%ch%cb==============================================================================%cn\n`;
+      output +=
+        `%ch%cb==============================================================================%cn\n`;
+      output +=
+        `'*' = restricted     '-' = Read Only     '(-)' - Read Only, but you can write\n`;
+      output +=
+        `%ch%cb==============================================================================%cn\n`;
       send([socket.id], output);
     },
   });

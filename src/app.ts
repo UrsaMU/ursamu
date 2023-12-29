@@ -1,54 +1,39 @@
-import { express, RequestHandler, Request, Response } from "../deps.ts";
-import { createServer } from "node:http";
 import { IMSocket } from "./@types/IMSocket.ts";
 import { cmdParser } from "./services/commands/index.ts";
-import { Server } from "../deps.ts";
-import { dbojs } from "./services/Database/index.ts";
 import { send } from "./services/broadcast/index.ts";
 import { moniker } from "./utils/moniker.ts";
 import { joinChans } from "./utils/joinChans.ts";
 import { IContext } from "./@types/IContext.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { authRouter, dbObjRouter } from "./routes/index.ts";
-import authMiddleware from "./middleware/authMiddleware.ts";
-import { IMError } from "./@types/index.ts";
 import { playerForSocket } from "./utils/playerForSocket.ts";
+import { Server } from "https://deno.land/x/socket_io@0.2.0/mod.ts";
+import { Application } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 
-export const app = express();
-export const server = createServer(app);
-export const io = new Server(server);
+export const app = new Application();
 
-app.use(express.static("public"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(authRouter.routes());
+app.use(authRouter.allowedMethods());
 
-app.use("/api/v1/auth/", authRouter);
-app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
+app.use(dbObjRouter.routes());
+app.use(dbObjRouter.allowedMethods());
 
-app.use(
-  (error: IMError, req: Request, res: Response, next: RequestHandler): void => {
-    // Handle error here
-    console.error(error);
-    res
-      .status(error.status || 500)
-      .json({ error: true, status: error.status, message: error.message });
-  }
-);
+export const io = new Server();
 
-io.on("connection", (socket: IMSocket) => {
-  socket.on("message", async (message) => {
-    if (message.data.cid) socket.cid = message.data.cid;
+io.on("connection", (socket: any) => {
+  socket.on("message", async (message: IContext) => {
+    if (message.data?.cid) socket.cid = message.data.cid;
     const player = await playerForSocket(socket);
     if (player) socket.join(`#${player.location}`);
 
-    if (message.data.disconnect) {
+    if (message.data?.disconnect) {
       socket.disconnect();
       return;
     }
 
     const ctx: IContext = { socket, msg: message.msg };
     joinChans(ctx);
-    if (message.msg.trim()) cmdParser.run(ctx);
+    if (message.msg?.trim()) cmdParser.run(ctx);
   });
 
   socket.on("disconnect", async () => {
@@ -56,8 +41,8 @@ io.on("connection", (socket: IMSocket) => {
     if (!en) return;
 
     const socks: IMSocket[] = [];
-    for (const [id, sock] of io.sockets.sockets.entries()) {
-      const s = sock as IMSocket;
+    for (const [id, sock] of (await io.fetchSockets()).entries()) {
+      const s = sock as any;
       if (s.cid && s.cid === en.id) {
         socks.push(s);
       }
@@ -67,13 +52,13 @@ io.on("connection", (socket: IMSocket) => {
       await setFlags(en, "!connected");
       return await send(
         [`#${en.location}`],
-        `${moniker(en)} has disconnected.`
+        `${moniker(en)} has disconnected.`,
       );
     }
 
     return await send(
       [`#${en.location}`],
-      `${moniker(en)} has partially disconnected.`
+      `${moniker(en)} has partially disconnected.`,
     );
   });
 

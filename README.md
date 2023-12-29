@@ -6,19 +6,25 @@
 
 ## What is UrsaMU?
 
-UrsaMU is a MUSH-like server written in Typescript. It is designed to be a modern, and extensible MUSH-like server.
+UrsaMU is a MUSH-like server written in Typescript. It is designed to be a
+modern, and extensible MUSH-like server.
 
 ## What is a MUSH?
 
-A MUSH is a text-based, multi-user, real-time virtual environment. It is a descendant of MUDs, which were the precursors to modern MMORPGs. MUSHes are designed to be highly extensible, and are often used for role-playing games, or social environments.
+A MUSH is a text-based, multi-user, real-time virtual environment. It is a
+descendant of MUDs, which were the precursors to modern MMORPGs. MUSHes are
+designed to be highly extensible, and are often used for role-playing games, or
+social environments.
 
 ## What is a MUSH-like?
 
-A MUSH-like is a server that is similar to a MUSH, but is not a MUSH. UrsaMU is a MUSH-like because it is not a MUSH, but it is similar to a MUSH.
+A MUSH-like is a server that is similar to a MUSH, but is not a MUSH. UrsaMU is
+a MUSH-like because it is not a MUSH, but it is similar to a MUSH.
 
 ## Starting the server
 
-To start the server in 'production' mode, make sure you have node installed, I suggest NVM, and then from the `ursamu` folder run:
+To start the server in 'production' mode, make sure you have node installed, I
+suggest NVM, and then from the `ursamu` folder run:
 
 ```bash
 git clone https://github.com/ursamu/ursamu.git
@@ -48,7 +54,8 @@ cd ursamu
 sudo docker-compose up -d
 ```
 
-The game database will be exported to the `data/` directory on the host filesystem, for easy backups.
+The game database will be exported to the `data/` directory on the host
+filesystem, for easy backups.
 
 ## Development on ARM macOS
 
@@ -71,4 +78,5 @@ Ursamu is licensed under the MIT License.
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome. For major changes, please open an issue first to
+discuss what you would like to change.

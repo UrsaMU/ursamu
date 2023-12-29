@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/pup/pup.ts"
+export * from "https://deno.land/x/pup/pup.ts";
