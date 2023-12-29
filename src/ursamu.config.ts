@@ -18,7 +18,7 @@ const config: IConfig = {
     text: {
       connect: "../text/default_connect.txt",
     },
-    playerStart: 1,
+    playerStart: 0,
   },
 };
 
