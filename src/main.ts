@@ -32,11 +32,14 @@ export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
   
   plugins(join(__dirname, "./commands"));
   for (const plug of plugs) {
+    if (plug.startsWith("http://") || plug.startsWith("https://")) {
+      plugins(plug);
+  } else {
     plugins(join(__dirname, plug));
   }
+}
   
   loadTxtDir(join(__dirname, "../text"));
-  
 
   dbojs.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
   counters.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
