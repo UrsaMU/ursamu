@@ -5,6 +5,7 @@ import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { createObj } from "./services/DBObjs/index.ts";
 import { chans, counters, dbojs, mail } from "./services/Database/index.ts";
+import { config as dataConfig } from "./ursamu.config.ts";
 import defaultConfig from "./ursamu.config.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
@@ -13,15 +14,6 @@ import { dpath } from "../deps.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 const __data = join(__dirname, "..", "data");
-export const dataConfig = await (async () => {
-  try {
-    const raw = await Deno.readTextFile(join(__data, "config.json"));
-    return JSON.parse(raw);
-  } catch (e) {
-    console.log("Unable to load data configuration, using defaults!", e);
-    return {};
-  }
-})();
 
 export const gameConfig = new Config(defaultConfig);
 
