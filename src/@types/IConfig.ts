@@ -1,4 +1,4 @@
-import { IStat } from "./istat.ts"
+import { IStat } from "./IStat.ts"
 
 export interface IConfig {
   server?: {
