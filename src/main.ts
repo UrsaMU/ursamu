@@ -11,6 +11,7 @@ import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { Config, IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
+import { setAllStats } from "./services/characters/index.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 const __data = join(__dirname, "..", "data");
@@ -29,6 +30,10 @@ export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
     } else {
       plugins(join(__dirname, plug));
     }
+  }
+
+  if(gameConfig.server?.allStats) {
+    setAllStats(gameConfig.server?.allStats);
   }
 
   loadTxtDir(join(__dirname, "../text"));

@@ -1,4 +1,4 @@
-import { IMStat } from "../../src/@types/index.ts";
+import { IMStat } from "../../../@types/index.ts";
 
 export const attributes: IMStat[] = [
   {

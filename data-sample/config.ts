@@ -37,7 +37,7 @@ export const config = {
       "src/commands/roll.ts",
       "src/commands/say.ts",
       "src/commands/set.ts",
-      "src/commands/sheet.ts",
+      "data/commands/sheet.ts",
       "src/commands/short.ts",
       "src/commands/stats.ts",
       "src/commands/test.ts",
@@ -54,6 +54,6 @@ export const config = {
       ...backgrounds,
       ...disciplines,
       ...other,
-    ];
+    ]
   }
 }
