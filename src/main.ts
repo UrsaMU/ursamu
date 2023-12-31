@@ -5,7 +5,7 @@ import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { createObj } from "./services/DBObjs/index.ts";
 import { chans, counters, dbojs, mail } from "./services/Database/index.ts";
-import { config as dataConfig } from "./ursamu.config.ts";
+import { default as dataConfig } from "./ursamu.config.ts";
 import defaultConfig from "./ursamu.config.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
