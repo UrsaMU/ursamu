@@ -17,7 +17,7 @@ const __data = join(__dirname, "..", "data");
 
 const dataConfig = await (async () => {
   try {
-    return import("../data/config.ts");
+    return await import("../data/config.ts");
   } catch(e) {
     console.log("Unable to load data/config.ts:", e);
     return {};
