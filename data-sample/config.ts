@@ -7,43 +7,43 @@ import { skills } from "./stats/skills.ts";
 import { disciplines } from "./stats/disciplines.ts";
 import { other } from "./stats/other.ts";
 
-export const config = {
+const config = {
   server: {
     plugins: [
-      "src/commands/@js.ts",
-      "src/commands/alias.ts",
-      "src/commands/attrCommands.ts",
-      "src/commands/BBS.ts",
-      "src/commands/building.ts",
-      "src/commands/channels.ts",
-      "src/commands/connect.ts",
-      "src/commands/create.ts",
-      "src/commands/data.ts",
-      "src/commands/desc.ts",
-      "src/commands/examine.ts",
-      "src/commands/finger.ts",
-      "src/commands/flags.ts",
-      "src/commands/help.ts",
-      "src/commands/lock.ts",
-      "src/commands/look.ts",
-      "src/commands/mail.ts",
-      "src/commands/moniker.ts",
-      "src/commands/name.ts",
-      "src/commands/page.ts",
-      "src/commands/pools.ts",
-      "src/commands/pose.ts",
-      "src/commands/quit.ts",
-      "src/commands/restart.ts",
-      "src/commands/roll.ts",
-      "src/commands/say.ts",
-      "src/commands/set.ts",
-      "data/commands/sheet.ts",
-      "src/commands/short.ts",
-      "src/commands/stats.ts",
-      "src/commands/test.ts",
-      "src/commands/think.ts",
-      "src/commands/upgrade.ts",
-      "src/commands/who.ts"
+      "commands/@js.ts",
+      "commands/alias.ts",
+      "commands/attrCommands.ts",
+      "commands/BBS.ts",
+      "commands/building.ts",
+      "commands/channels.ts",
+      "commands/connect.ts",
+      "commands/create.ts",
+      "commands/data.ts",
+      "commands/desc.ts",
+      "commands/examine.ts",
+      "commands/finger.ts",
+      "commands/flags.ts",
+      "commands/help.ts",
+      "commands/lock.ts",
+      "commands/look.ts",
+      "commands/mail.ts",
+      "commands/moniker.ts",
+      "commands/name.ts",
+      "commands/page.ts",
+      "commands/pools.ts",
+      "commands/pose.ts",
+      "commands/quit.ts",
+      "commands/restart.ts",
+      "commands/roll.ts",
+      "commands/say.ts",
+      "commands/set.ts",
+      "../data/commands/sheet.ts",
+      "commands/short.ts",
+      "commands/stats.ts",
+      "commands/test.ts",
+      "commands/think.ts",
+      "commands/upgrade.ts",
+      "commands/who.ts"
     ],
     allStats: [
       ...bio,
@@ -56,4 +56,6 @@ export const config = {
       ...other,
     ]
   }
-}
+};
+
+export default config;

@@ -15,24 +15,34 @@ import { setAllStats } from "./services/characters/index.ts";
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 const __data = join(__dirname, "..", "data");
 
-const dataConfig = await (async () => {
-  try {
-    return await import("../data/config.ts");
-  } catch(e) {
-    console.log("Unable to load data/config.ts:", e);
-    return {};
-  }
-})();
-
 export const gameConfig = new Config(defaultConfig);
 
-export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
-  gameConfig.setConfig({ ...defaultConfig, ...cfg });
+export const mu = async () => {
+  // Pull config from data/ if it exists
+  const dataConfig = await (async () => {
+    try {
+      const ret = await import("../data/config.ts");
+      return ret.default;
+    } catch(e) {
+      console.log("Unable to load data/config.ts:", e);
+      return {};
+    }
+  })();
 
-  const pluginsList = gameConfig.server?.plugins || [];
+  dataConfig.server = dataConfig.server ? dataConfig.server : {};
+  dataConfig.game = dataConfig.game ? dataConfig.game : {};
 
-  plugins(join(__dirname, "./commands"));
-  for (const plug of plugs) {
+  // With the default ursamu.config.ts as the defaults
+  gameConfig.setConfig({
+    server: { ...defaultConfig.server, ...dataConfig.server },
+    game: { ...defaultConfig.game, ...dataConfig.game },
+  });
+
+  // Pull plugin list from config, default to all of the built-ins
+  const pluginsList = gameConfig.server?.plugins || [ "./commands" ];
+
+  // Iterate and install plugins
+  for (const plug of pluginsList) {
     if (plug.startsWith("http://") || plug.startsWith("https://")) {
       plugins(plug);
     } else {
@@ -40,16 +50,18 @@ export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
     }
   }
 
+  // Install stats if they exist
   if(gameConfig.server?.allStats) {
     setAllStats(gameConfig.server?.allStats);
   }
 
+  // Load text files (later should be overridable in data/)
   loadTxtDir(join(__dirname, "../text"));
 
-  dbojs.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
-  counters.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
-  chans.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
-  mail.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
+  dbojs.init(gameConfig.server?.db);
+  counters.init(gameConfig.server?.db);
+  chans.init(gameConfig.server?.db);
+  mail.init(gameConfig.server?.db);
 
   const handler = io.handler(async (req: any) => {
     return await app.handle(req) || new Response("Not found.", { status: 404 });
