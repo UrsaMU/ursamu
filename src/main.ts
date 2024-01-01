@@ -117,5 +117,5 @@ export const mu = async () => {
 };
 
 if (import.meta.main) {
-  mu(dataConfig);
+  mu();
 }
