@@ -201,6 +201,19 @@ export default () => {
       output += await attributes(tarObj);
       output += await skills(tarObj);
       output += footer();
+
+      if (await getStat(tarObj.dbobj, "splat")) {
+        send([ctx.socket.id], output);
+      } else {
+        if (tarObj.dbref === en.dbref) {
+          send(
+            [ctx.socket.id],
+            "%chGame>%cn You have no splat set. See: %ch+help splat%cn",
+          );
+        } else {
+          send([ctx.socket.id], "%chGame>%cn That character has no splat set.");
+        }
+      }
     },
   });
 };
