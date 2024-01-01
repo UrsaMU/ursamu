@@ -16,7 +16,7 @@ export async function plugins(source: string) {
             maxDepth: 1,
           });
         }
-        return [ source ];
+        return [ { isFile: true, path: source } ];
       } catch {
         return [];
       }
