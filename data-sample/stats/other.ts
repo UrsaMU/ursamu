@@ -1,6 +1,6 @@
 import { IMStat } from "../../src/@types/index.ts";
 import { flags } from "../../src/services/flags/index.ts";
-import { getStat } from "../../src/getStats.ts";
+import { getStat } from "../../src/services/characters/getStats.ts";
 
 export const other: IMStat[] = [
   {
