@@ -1,4 +1,4 @@
-import { IMStat } from "../../../@types/index.ts";
+import { IMStat } from "../../src/@types/index.ts";
 export const backgrounds: IMStat[] = [
   {
     name: "allies",

@@ -1,7 +1,7 @@
-import { get } from "../../../../deps.ts";
-import { IDBOBJ, IMStat } from "../../../@types/index.ts";
-import { Obj } from "../../DBObjs/index.ts";
-import { getStat } from "../getStats.ts";
+import { get } from "../../deps.ts";
+import { IDBOBJ, IMStat } from "../../src/@types/index.ts";
+import { Obj } from "../../src/services/DBObjs/index.ts";
+import { getStat } from "../../src/services/characters/getStats.ts";
 
 export const disciplines: IMStat[] = [
   {
