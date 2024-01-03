@@ -3,6 +3,16 @@ import { Obj } from "../DBObjs/index.ts";
 import { dbojs } from "../Database/index.ts";
 import { allStats } from "./index.ts";
 
+export async function validateValue(char: IDBOBJ, stat: IDBOBJ, value: any) : boolean {
+  const splat = character.splat || "";
+
+  if(typeof fullStat.values == "function") {
+    return fullStat.values(char, value)
+  } else {
+    return fullStat.values.includes(value) && fullStat.values.length > 0 && value
+  }
+}
+
 export const setStat = async (
   character: IDBOBJ,
   stat: string,
@@ -76,7 +86,7 @@ export const setStat = async (
         throw new Error("Invalid specialty.");
       }
 
-      if (specObj && specObj.values && !specObj.values.includes(value)) {
+      if (!validateValue(charObj, specObj, value)) {
         throw new Error("Invalid specialty value.");
       }
 
@@ -89,7 +99,7 @@ export const setStat = async (
   if (!isNaN(+value)) value = +value;
 
   // Check the value
-  if (!fullStat.values.includes(value) && fullStat.values.length > 0 && value) {
+  if (!validateValue(charObj, fullStat, value)) {
     throw new Error(`Invalid value for ${fullStat.name.toUpperCase()}.`);
   }
 
