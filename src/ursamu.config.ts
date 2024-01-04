@@ -9,7 +9,7 @@ const config: IConfig = {
     counters: "mongodb://root:root@mongo/",
     chans: "mongodb://root:root@mongo/",
     mail: "mongodb://root:root@mongo/",
-    bboard: "mongodb://root:root@mongo/"
+    bboard: "mongodb://root:root@mongo/",
   },
   game: {
     name: "Ursamu",
