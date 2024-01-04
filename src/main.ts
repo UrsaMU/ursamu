@@ -8,7 +8,7 @@ import { chans, counters, dbojs, mail } from "./services/Database/index.ts";
 import defaultConfig from "./ursamu.config.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
-import { Config, IConfig, IPlugin } from "./@types/index.ts";
+import { Config, IConfig } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 import { bboard } from "./services/index.ts";
 

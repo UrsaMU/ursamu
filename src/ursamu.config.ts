@@ -6,10 +6,10 @@ const config: IConfig = {
     ws: 4202,
     http: 4203,
     db: "mongodb://root:root@mongo/",
-    counters: "data/counters.db",
-    chans: "data/chans.db",
-    mail: "data/mail.db",
-    bboard: "data/bboard.db",
+    counters: "mongodb://root:root@mongo/",
+    chans: "mongodb://root:root@mongo/",
+    mail: "mongodb://root:root@mongo/",
+    bboard: "mongodb://root:root@mongo/"
   },
   game: {
     name: "Ursamu",
