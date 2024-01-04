@@ -30,7 +30,7 @@ cmdParser.use(async (ctx, next) => {
           console.error(e);
           send(
             [ctx.socket.id],
-            `Uh oh! You've run into an error! please contact staff wit hthe following info!%r%r%chError:%cn ${e}`,
+            `Uh oh! You've run into an error! please contact staff with the following info!%r%r%chError:%cn ${e}`,
             { error: true },
           );
         });
