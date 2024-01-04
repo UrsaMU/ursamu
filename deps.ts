@@ -23,3 +23,4 @@ export const set = lodash.set;
 export const get = lodash.get;
 export const isnumber = lodash.isnumber;
 export const repeat = lodash.repeat;
+export const merge = lodash.merge;

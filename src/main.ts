@@ -1,4 +1,4 @@
-import { join } from "../deps.ts";
+import { join, merge } from "../deps.ts";
 import { serve } from "https://deno.land/std@0.166.0/http/server.ts";
 import { app, io } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
@@ -27,7 +27,7 @@ export const dataConfig = await (async () => {
 export const gameConfig = new Config(defaultConfig);
 
 export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
-  gameConfig.setConfig({ ...defaultConfig, ...cfg });
+  gameConfig.setConfig(merge(gameConfig.config, cfg || {}));
 
   const pluginsList = gameConfig.server?.plugins || [];
 
