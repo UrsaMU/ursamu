@@ -10,6 +10,7 @@ import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { Config, IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
+import { bboard } from "./services/index.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 const __data = join(__dirname, "..", "data");
@@ -31,7 +32,7 @@ export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
   const pluginsList = gameConfig.server?.plugins || [];
 
   plugins(join(__dirname, "./commands"));
-  for (const plug of plugs) {
+  for (const plug of pluginsList) {
     if (plug.startsWith("http://") || plug.startsWith("https://")) {
       plugins(plug);
     } else {
@@ -45,6 +46,7 @@ export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
   counters.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
   chans.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
   mail.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
+  bboard.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
 
   const handler = io.handler(async (req: any) => {
     return await app.handle(req) || new Response("Not found.", { status: 404 });
@@ -53,15 +55,6 @@ export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
   serve(handler, { port: gameConfig.server?.ws });
 
   const rooms = await dbojs.query({ flags: /room/i });
-
-  const counter = {
-    _id: "objid",
-    seq: 0,
-  };
-
-  if (!(await counters.query({ _id: "objid" })).length) {
-    await counters.create(counter);
-  }
 
   if (!rooms.length) {
     const room = await createObj("room safe void", { name: "The Void" });
@@ -85,7 +78,6 @@ export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
       lock: "admin+",
     });
   }
-  console.log(`Server started on port ${gameConfig.server?.ws}.`);
 
   Deno.addSignalListener("SIGINT", async () => {
     const players = await dbojs.query({ flags: /connected/i });

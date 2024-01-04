@@ -1,11 +1,14 @@
-import { repeat } from "../../deps.ts";
 import parser from "../services/parser/parser.ts";
+
+export const stripSubs = (list: string, string = "") => {
+  return parser.stripSubs(list, parser.stripSubs("post", string));
+};
 
 export const repeatString = (string = " ", length: number) => {
   // check how many spaces are left after the filler string is rendered. We will need
   // to render these last few spaces manually.
   const remainder = Math.floor(
-    length % parser.stripSubs("telnet", string).length,
+    length % stripSubs("telnet", string).length,
   );
 
   // Split the array and filter out empty cells.
@@ -28,7 +31,7 @@ export const repeatString = (string = " ", length: number) => {
     cleanArray = cleanArray[0].split("");
   }
   return (
-    string?.repeat(length / parser.stripSubs("telnet", string).length) +
+    string?.repeat(length / stripSubs("telnet", string).length) +
     cleanArray.slice(0, remainder)
   );
 };
@@ -54,15 +57,16 @@ export const ljust = (string = "", length: number, filler = " ") => {
 
 export const center = (string = "", length: number, filler = " ") => {
   const left = Math.floor(
-    (length - parser.stripSubs("telnet", string).length) / 2,
+    (length - stripSubs("telnet", string).length) / 2,
   );
-  const right = length - parser.stripSubs("telnet", string).length - left;
+  const right = length -
+    stripSubs("telnet", string).length - left;
   return repeatString(filler, left) + string + repeatString(filler, right);
 };
 
 export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
   const truncate = (input: any, size: any, fill: any) => {
-    let length = parser.stripSubs("telnet", input).length;
+    let length = stripSubs("telnet", input).length;
     return length > size - 3
       ? `${input.substring(0, size - 3)}...`
       : input + fill.repeat(size - length);

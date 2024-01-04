@@ -1,34 +1,13 @@
-import { readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { addCmd, cmds } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { flags } from "../services/flags/flags.ts";
 import parser from "../services/parser/parser.ts";
-import { center, columns, ljust, repeatString } from "../utils/format.ts";
+import { center, columns, repeatString } from "../utils/format.ts";
 import { send } from "../services/broadcast/index.ts";
 import { gameConfig } from "../main.ts";
-import { ICmd, IHelp } from "../@types/index.ts";
-import { dpath } from "../../deps.ts";
-
-const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+import { txtFiles } from "../services/commands/index.ts";
+import { extract } from "../../deps.ts";
 export default async () => {
-  const text = new Map<string, string>();
-  const dirent = await readdir(join(__dirname, "../../help"), {
-    withFileTypes: true,
-  });
-
-  const files = dirent.filter(
-    (dirent) => dirent.isFile() && dirent.name.endsWith(".md"),
-  );
-
-  for (const file of files) {
-    const textFile = await readFile(
-      join(__dirname, `../../help/${file.name}`),
-      "utf8",
-    );
-    text.set(`${file.name.replace(".md", "").replace(".txt", "")}`, textFile);
-  }
-
   addCmd({
     name: "help",
     pattern: /^[/+@]?help$/i,
@@ -45,11 +24,13 @@ export default async () => {
         .filter((cmd) => flags.check(flgs, cmd.lock || ""))
         .map((cmd) => {
           let name = "";
-          if (text.has(`help_${cmd.name}`)) {
+          if (
+            txtFiles.has(`help_${cmd.name}.md`) ||
+            txtFiles.has(`help_${cmd.name}.txt`)
+          ) {
             name = cmd.name.toUpperCase();
           } else {
             name = `%cr${cmd.name.toUpperCase()}*%cn`;
-            // cmd.name = cmd.name.toUpperCase();
           }
 
           if (cmd.category) {
@@ -60,13 +41,44 @@ export default async () => {
           }
 
           return { name, category: cmd.category };
-        })
-        .sort((a, b) =>
-          parser
-            .stripSubs("telnet", a.name.toLowerCase())
-            .localeCompare(parser.stripSubs("telnet", b.name.toLowerCase()))
-        );
+        });
 
+      const topics = Array.from(txtFiles.keys()).filter((key) =>
+        key.startsWith("topic_")
+      );
+
+      // check topics for frontmatter
+      for (const topic of topics) {
+        const name = topic.replace("topic_", "").replace(/\.md|\.txt/, "")
+          .toUpperCase();
+        const content = txtFiles.get(topic) || "";
+        try {
+          const fm = extract(content);
+          if (fm.attrs?.hidden) {
+            continue;
+          }
+          if (fm.attrs?.category) {
+            cats.add(fm.attrs.category as string);
+          } else {
+            cats.add("General");
+          }
+          commands.push({
+            name,
+            category: fm.attrs?.category || "General",
+          });
+        } catch {
+          commands.push({
+            name,
+            category: "General",
+          });
+        }
+      }
+
+      commands = commands.sort((a: any, b: any) =>
+        parser
+          .stripSubs("telnet", a.name.toLowerCase())
+          .localeCompare(parser.stripSubs("telnet", b.name.toLowerCase()))
+      );
       let output = center(
         `%cy[%cn %ch%cc${
           gameConfig.game?.name ? gameConfig.game.name + " " : ""
@@ -107,24 +119,49 @@ export default async () => {
     hidden: true,
     exec: async (ctx, args) => {
       const topic = args[0];
-      if (text.has(`help_${topic}`)) {
+      if (
+        txtFiles.has(`help_${topic}.md`) || txtFiles.has(`help_${topic}.txt`)
+      ) {
         let output = center(
           `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
           78,
-          "%cr-%cn",
+          "%cr=%cn",
         ) + "\n";
-        output += text.get(`help_${topic}`) || "";
-        output += repeatString("%cr-%cn", 78);
+        let helpFile = "";
+
+        try {
+          const data = extract(txtFiles.get(`help_${topic}.md`) || "");
+          helpFile = data.body;
+        } catch {
+          helpFile = txtFiles.get(`help_${topic}.md`) ||
+            txtFiles.get(`help_${topic}.txt`) || "";
+        }
+
+        output += parser.substitute("markdown", helpFile || "");
+        output += repeatString("%cr=%cn", 78);
         send([ctx.socket.id], output, {});
         return;
-      } else if (text.has(`topic_${topic}`)) {
+      } else if (
+        txtFiles.has(`topic_${topic}.md`) || txtFiles.has(`topic_${topic}.txt`)
+      ) {
         let output = center(
           `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
           78,
-          "%cr-%cn",
+          "%cr=%cn",
         ) + "\n";
-        output += text.get(`topic_${topic}`) || "";
-        output += repeatString("%cr-%cn", 78);
+
+        let helpFile = "";
+
+        try {
+          const data = extract(txtFiles.get(`topic_${topic}.md`) || "");
+          helpFile = data.body;
+        } catch {
+          helpFile = txtFiles.get(`topic_${topic}.md`) ||
+            txtFiles.get(`topic_${topic}.txt`) || "";
+        }
+
+        output += parser.substitute("markdown", helpFile || "");
+        output += repeatString("%cr=%cn", 78);
         send([ctx.socket.id], output, {});
         return;
       } else {

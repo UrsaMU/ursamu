@@ -9,7 +9,7 @@ export const loadTxtDir = async (dir: string) => {
     if (stat.isDirectory()) {
       loadTxtDir(path.join(dir, file));
     } else {
-      if (file.endsWith(".txt" || ".md")) {
+      if (file.endsWith(".txt") || file.endsWith(".md")) {
         const content = readFileSync(path.join(dir, file), "utf8");
         txtFiles.set(file, content);
       }

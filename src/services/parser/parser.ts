@@ -1,5 +1,5 @@
 import { Parser } from "../../../deps.ts";
-import { ljust } from "../../utils/index.ts";
+import { center } from "../../utils/format.ts";
 
 const parser = new Parser();
 
@@ -22,6 +22,22 @@ parser.addSubs(
   { before: /%[cx]u/g, after: "\x1b[4m", strip: "" },
   { before: /%[cx]i/g, after: "\x1b[3m", strip: "" },
   { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
+);
+
+parser.addSubs(
+  "pre",
+  { before: /%\[/g, after: "&lb;", strip: "[" },
+  { before: /%\]/g, after: "&rb;", strip: "]" },
+  { before: /%\(/g, after: "&lp;", strip: "(" },
+  { before: /%\)/g, after: "&rp;", strip: ")" },
+);
+
+parser.addSubs(
+  "post",
+  { before: /&lb;/g, after: "[" },
+  { before: /&rb;/g, after: "]" },
+  { before: /&lp;/g, after: "(" },
+  { before: /&rp;/g, after: ")" },
 );
 
 parser.addSubs(
@@ -52,5 +68,16 @@ parser.addSubs(
   { before: /%[cx]i/g, after: "<i>", strip: "" },
   { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
 );
+
+parser.addSubs(
+  "markdown",
+  { before: /#{1,6}\s+(.*)/g, after: "%ch%cu$1%cn" },
+  { before: /\`([^\`]+)\`/g, after: "%cu$1%cn" },
+);
+
+parser.add("center", async (args) => {
+  const [text, width = 78, fill = " "] = args;
+  return center(text, width, fill);
+});
 
 export default parser;

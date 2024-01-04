@@ -76,6 +76,10 @@ export class Obj {
     return this.obj.data;
   }
 
+  set data(data: any) {
+    this.obj.data = data;
+  }
+
   get splat() {
     return this.obj.data?.stats?.find((s) => s.name === "splat")?.value;
   }

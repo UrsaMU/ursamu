@@ -1,38 +1,35 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs } from "../services/Database/index.ts";
+import { Obj } from "../services/index.ts";
 
 export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
   if (!tar || ["here", "room"].includes(tar.toLowerCase())) {
-    return await dbojs.queryOne({ id: en.location });
+    return new Obj(await dbojs.queryOne({ id: en.location }));
   }
 
   if (+tar) {
-    return await dbojs.queryOne({ id: +tar });
+    return new Obj(await dbojs.queryOne({ id: +tar }));
   }
 
   if (["me", "self"].includes(tar.toLowerCase())) {
-    return en;
+    return new Obj(en);
   }
 
-  const found = await (async () => {
-    return await dbojs.queryOne({
-      $where: function () {
-        const target = `${tar}`;
-        return (
-          RegExp(this.data.name.replace(";", "|"), "ig").test(target) ||
-          this.id === +target.slice(1) ||
-          this.id === target ||
-          this.data.alias?.toLowerCase() === target.toLowerCase()
-        );
-      },
-    });
-  })();
+  const lowerCaseTar = tar.toLowerCase();
+  const found = await dbojs.queryOne({
+    $or: [
+      { "data.name": new RegExp(lowerCaseTar.replace(";", "|"), "i") },
+      { "data.alias": new RegExp(lowerCaseTar.replace(";", "|"), "i") },
+      { id: +tar },
+      { dbref: tar },
+    ],
+  });
 
   if (!found) {
     return;
   }
 
   if (found && (global || [found.location, found.id].includes(en.location))) {
-    return found;
+    return new Obj(found);
   }
 };
