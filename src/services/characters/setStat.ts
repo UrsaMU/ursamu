@@ -4,7 +4,7 @@ import { dbojs } from "../Database/index.ts";
 import { allStats } from "./index.ts";
 
 export async function validateValue(char: IDBOBJ, stat: IDBOBJ, value: any) : boolean {
-  const splat = character.splat || "";
+  const splat = char.splat || "";
 
   if(typeof fullStat.values == "function") {
     return fullStat.values(char, value)
