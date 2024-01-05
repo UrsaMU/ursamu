@@ -14,6 +14,8 @@ export {
   extract,
   test,
 } from "https://deno.land/std@0.210.0/front_matter/any.ts";
+export { Server } from "https://deno.land/x/socket_io@0.2.0/mod.ts";
+export type { Socket } from "https://deno.land/x/socket_io@0.2.0/mod.ts";
 import bcrypt from "npm:bcryptjs@2.4.3";
 export const compare = bcrypt.compare;
 export const hash = bcrypt.hash;

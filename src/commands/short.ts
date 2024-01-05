@@ -1,6 +1,6 @@
+import { Obj } from "../index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
-import { getCharacter } from "../services/characters/character.ts";
 import { addCmd } from "../services/commands/index.ts";
 
 export default () =>
@@ -9,7 +9,7 @@ export default () =>
     lock: "connected",
     pattern: /^[@\+]?short\s+(.*)/i,
     exec: async (ctx, args) => {
-      const en = await getCharacter(ctx.socket.cid);
+      const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
       en.data ||= {};

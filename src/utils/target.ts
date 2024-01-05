@@ -21,6 +21,7 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
       { "data.name": new RegExp(lowerCaseTar.replace(";", "|"), "i") },
       { "data.alias": new RegExp(lowerCaseTar.replace(";", "|"), "i") },
       { id: +tar },
+      { id: +tar.slice(1) },
       { dbref: tar },
     ],
   });

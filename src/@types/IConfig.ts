@@ -1,5 +1,3 @@
-import { IStat } from "./IStat.ts";
-
 export interface IConfig {
   server?: {
     telnet?: number;
@@ -12,7 +10,6 @@ export interface IConfig {
     wiki?: string;
     bboard?: string;
     plugins?: string[];
-    allStats?: IStat[];
   };
   game?: {
     name?: string;

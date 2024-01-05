@@ -15,4 +15,3 @@ export * from "./IAttribute.ts";
 export * from "./IPlugin.ts";
 export * from "./IHelp.ts";
 export * from "./Boards.ts";
-export * from "./IStat.ts";

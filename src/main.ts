@@ -41,6 +41,7 @@ export const mu = async (cfg?: IConfig, ...plugs: string[]) => {
   }
 
   loadTxtDir(join(__dirname, "../text"));
+  loadTxtDir(join(__dirname, "../help"));
 
   dbojs.init(gameConfig.server?.db || "mongodb://root:root@mongo/");
   counters.init(gameConfig.server?.db || "mongodb://root:root@mongo/");

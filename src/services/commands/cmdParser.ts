@@ -1,11 +1,11 @@
 import { MiddlewareStack } from "./middleware.ts";
 import { ICmd } from "../../@types/ICmd.ts";
 import { flags } from "../flags/flags.ts";
-import { getCharacter } from "../characters/character.ts";
 import { send } from "../broadcast/index.ts";
 import { dbojs } from "../Database/index.ts";
 import { matchExits } from "./movement.ts";
 import { matchChannel } from "./channels.ts";
+import { Obj } from "../index.ts";
 
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
@@ -14,7 +14,7 @@ export const txtFiles = new Map<string, string>();
 export const addCmd = (...cmd: ICmd[]) => cmds.push(...cmd);
 
 cmdParser.use(async (ctx, next) => {
-  const char = await getCharacter(ctx.socket.cid);
+  const char = await Obj.get(ctx.socket.cid);
 
   const { msg } = ctx;
   for (const cmd of cmds) {
