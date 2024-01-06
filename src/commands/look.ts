@@ -65,7 +65,9 @@ export default () =>
         players.forEach((p) => {
           output += isAdmin(p) ? "%ch%cc *%cn  " : "    ";
           output += ljust(`${displayName(en, p)}`, 25);
-          output += rjust(idle(p.data?.lastCommand || 0), 5);
+          output += en.id === p.id
+            ? rjust(idle(Date.now()), 5)
+            : rjust(idle(p.data?.lastCommand || 0), 5);
           output += ljust(
             `  ${
               p.data?.shortdesc || "%ch%cxUse '+short <desc>' to set this.%cn"

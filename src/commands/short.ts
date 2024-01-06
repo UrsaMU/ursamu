@@ -1,5 +1,4 @@
 import { Obj } from "../index.ts";
-import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 
@@ -14,7 +13,7 @@ export default () =>
 
       en.data ||= {};
       en.data.shortdesc = args[0].trim();
-      await dbojs.modify({ id: en.id }, "$set", en);
+      await en.save();
       send([ctx.socket.id], `Your short description has been updated.`, {});
     },
   });
