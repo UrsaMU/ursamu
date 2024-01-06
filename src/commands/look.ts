@@ -78,7 +78,7 @@ export default () =>
 
       if (exits.length) {
         output += center(" %chExits%cn ", 78, "%cr-%cn");
-        output += columns(exits, 80, 3);
+        output += columns(exits, 78, 3).trim() + "%r";
       }
 
       output += repeatString("%cr=%cn", 78);

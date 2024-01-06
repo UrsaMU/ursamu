@@ -7,12 +7,12 @@ import { setAttr } from "../utils/setAttr.ts";
 export default () => {
   addCmd({
     name: "&",
-    pattern: /^&(.*)\s+(.*)\s*=\s*(.*)?$/i,
+    pattern: /^&(.*)\s+(.*?)\s*=\s*(.*)?$/i,
     lock: "connected",
     exec: async (ctx, args) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
-      console.log(args);
+
       const tar = await target(en, args[1]);
       if (!tar) return send([ctx.socket.id], "%chGame>%cn Target not found.");
 

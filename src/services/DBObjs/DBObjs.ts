@@ -51,6 +51,55 @@ export class Obj {
     }
   }
 
+  async getAttr(attr: string): Promise<string> {
+    let attribute = this.obj.data?.attributes?.find((a) =>
+      a.name.toLowerCase() === attr.toLowerCase()
+    );
+
+    if (attribute) return attribute.value;
+
+    const parent = this.obj.data?.parent;
+
+    if (parent) {
+      try {
+        const attrParent = await Obj.get(parent);
+        return (await attrParent?.getAttr(attr) || "");
+      } catch {
+        return "";
+      }
+    }
+
+    return "";
+  }
+
+  async setAttr(attr: string, value: string, setter?: Obj | string) {
+    const attribute = this.obj.data?.attributes?.find((a) =>
+      a.name.toLowerCase() === attr.toLowerCase()
+    );
+
+    let attrSetter = "";
+
+    if (setter instanceof Obj) {
+      if (setter.name) {
+        attrSetter = setter.name;
+      }
+    } else {
+      const setterObj = await Obj.get(setter);
+      attrSetter = setterObj?.dbref || setter || "";
+    }
+
+    if (attribute) {
+      attribute.value = value;
+      attribute.setter = attrSetter;
+    } else {
+      this.obj.data?.attributes?.push({
+        name: attr,
+        value,
+        setter: attrSetter,
+      });
+    }
+  }
+
   get dbobj() {
     return this.obj;
   }

@@ -1,5 +1,6 @@
 import { Parser } from "../../../deps.ts";
-import { center } from "../../utils/format.ts";
+import { center, ljust, rjust } from "../../utils/format.ts";
+import { substitution } from "../../utils/substitution.ts";
 
 const parser = new Parser();
 
@@ -26,18 +27,18 @@ parser.addSubs(
 
 parser.addSubs(
   "pre",
-  { before: /%\[/g, after: "&lb;", strip: "[" },
-  { before: /%\]/g, after: "&rb;", strip: "]" },
-  { before: /%\(/g, after: "&lp;", strip: "(" },
-  { before: /%\)/g, after: "&rp;", strip: ")" },
+  { before: /%\[/g, after: "&lb;", strip: " " },
+  { before: /%\]/g, after: "&rb;", strip: " " },
+  { before: /%\(/g, after: "&lp;", strip: " " },
+  { before: /%\)/g, after: "&rp;", strip: " " },
 );
 
 parser.addSubs(
   "post",
-  { before: /&lb;/g, after: "[" },
-  { before: /&rb;/g, after: "]" },
-  { before: /&lp;/g, after: "(" },
-  { before: /&rp;/g, after: ")" },
+  { before: /&lb;/g, after: "[", strip: " " },
+  { before: /&rb;/g, after: "]", strip: " " },
+  { before: /&lp;/g, after: "(", strip: " " },
+  { before: /&rp;/g, after: ")", strip: " " },
 );
 
 parser.addSubs(
@@ -75,9 +76,51 @@ parser.addSubs(
   { before: /\`([^\`]+)\`/g, after: "%cu$1%cn" },
 );
 
-parser.add("center", async (args) => {
+parser.add("center", async (args, _, scope) => {
   const [text, width = 78, fill = " "] = args;
-  return center(text, width, fill);
+  const msg = substitution(text, scope);
+  return center(msg, width, fill);
 });
 
+parser.add("ljust", async (args) => {
+  const [text, width = 78, fill = " "] = args;
+  return ljust(text, width, fill);
+});
+
+parser.add("rjust", async (args) => {
+  const [text, width = 78, fill = " "] = args;
+  return rjust(text, width, fill);
+});
+
+parser.add("iter", async (args, data, scope) => {
+  let [list, action, sep, outSep] = args;
+  list = substitution(list, scope);
+  action = substitution(action, scope);
+  list = list.split(sep || " ");
+  console.log(list, action, sep, outSep);
+  const output = [];
+  console.log("Action: ", action);
+  for (const item of list) {
+    scope["##"] = item;
+    const msg = substitution(action, scope);
+    output.push(await parse(msg, data, scope));
+  }
+
+  return output.join(outSep || " ");
+});
+
+parser.add("add", async (args) => args.reduce((a, b) => +a + +b, 0));
+
 export default parser;
+export const parse = async (
+  msg: string,
+  data: any,
+  scope: { [key: string]: any },
+) => {
+  const run = await parser.run({ msg, data, scope }) || "";
+  if (run === msg || !run) {
+    return await parser.run({ msg: `[${msg}]`, data, scope });
+  }
+
+  return msg;
+};

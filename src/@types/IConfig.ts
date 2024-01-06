@@ -4,11 +4,6 @@ export interface IConfig {
     ws?: number;
     http?: number;
     db?: string;
-    counters?: string;
-    chans?: string;
-    mail?: string;
-    wiki?: string;
-    bboard?: string;
     plugins?: string[];
   };
   game?: {
@@ -16,9 +11,6 @@ export interface IConfig {
     description?: string;
     version?: string;
     playerStart?: number;
-    text: {
-      connect: string;
-    };
   };
 }
 

@@ -1,3 +1,4 @@
+import { Obj } from "../index.ts";
 import { broadcast } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
@@ -8,7 +9,7 @@ export default () =>
     pattern: /^@reboot|^@restart/g,
     lock: "connected admin+",
     exec: async (ctx) => {
-      const player = await dbojs.queryOne({ id: ctx.socket.cid });
+      const player = await Obj.get(ctx.socket.cid);
       if (!player) return;
       broadcast(
         `%chGame>%cn Server @reboot initiated by ${player.data?.name}...`,

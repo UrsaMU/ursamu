@@ -65,22 +65,23 @@ export const center = (string = "", length: number, filler = " ") => {
 };
 
 export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
-  const truncate = (input: any, size: any, fill: any) => {
+  const truncate = (input: string, size: number, fill: string) => {
     let length = stripSubs("telnet", input).length;
     return length > size - 3
       ? `${input.substring(0, size - 3)}...`
-      : input + fill.repeat(size - length);
+      : input.trim() + fill.repeat(size - length);
   };
 
   let cell = Math.floor(width / cols);
   let counter = 0;
-  let output = "%r%b";
+  let output = "%r%b"; // Adjusted initial value
+
   for (const item of list) {
-    if (counter < cols) {
+    if (counter < cols - 1) {
       output += truncate(item, cell, fill);
     } else {
       output += "%r%b" + truncate(item, cell, fill);
-      counter = 0;
+      counter = -1; // Reset to -1, because it increments to 0 at the end of the loop
     }
     counter++;
   }

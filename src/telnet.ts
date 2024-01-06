@@ -10,10 +10,19 @@ interface ITelnetSocket extends Socket {
 }
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
-const welcome = readFileSync(
-  join(__dirname, config.game?.text.connect || "../text/connect_default.txt"),
-  "utf8",
-);
+let welcome = "";
+
+try {
+  welcome = readFileSync(
+    join(__dirname, "../data/text/connect.txt"),
+    "utf8",
+  );
+} catch {
+  welcome = readFileSync(
+    join(__dirname, "../text/default_connect.txt"),
+    "utf8",
+  );
+}
 
 const server = createServer((socket: ITelnetSocket) => {
   const sock = io(`http://localhost:${config.server?.ws}`);
