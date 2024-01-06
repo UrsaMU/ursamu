@@ -73,7 +73,9 @@ parser.addSubs(
 parser.addSubs(
   "markdown",
   { before: /#{1,6}\s+(.*)/g, after: "%ch%cu$1%cn" },
-  { before: /\`([^\`]+)\`/g, after: "%cu$1%cn" },
+  { before: /\`([^\`]+)\`/g, after: "%cc%cu$1%cn" },
+  { before: /\*\*([^\*]+)\*\*/g, after: "%ch$1%cn" },
+  { before: /_([^_]+)_/g, after: "%ci$1%cn" },
 );
 
 parser.add("center", async (args, _, scope) => {

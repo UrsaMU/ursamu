@@ -7,7 +7,7 @@ Usage:
 - `@ccreate <channel name>` - Create a channel
 - `@cdestroy <channel name>` - Destroy a channel
 - `@cset <channel>/<setting>=<value>` - Set a channel's settings
-  - `alias` ` - Set the alias for a channel
+  - `alias` - Set the alias for a channel
   - `header` - Set the header for a channel
   - `hidden` - Set whether a channel is hidden or not
   - `name` - Set the name of a channel
