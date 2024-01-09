@@ -14,19 +14,15 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
     return en;
   }
 
-  const found = await (async () => {
-    return await dbojs.queryOne({
-      $where: function () {
-        const target = `${tar}`;
-        return (
-          RegExp(this.data.name.replace(";", "|"), "ig").test(target) ||
-          this.id === +target.slice(1) ||
-          this.id === target ||
-          this.data.alias?.toLowerCase() === target.toLowerCase()
-        );
-      },
-    });
-  })();
+  const found = await dbojs.queryOne({
+    $or: [
+      { "data.name": new RegExp(lowerCaseTar.replace(";", "|"), "i") },
+      { "data.alias": new RegExp(lowerCaseTar.replace(";", "|"), "i") },
+      { id: +tar },
+      { id: +tar.slice(1) },
+      { dbref: tar },
+    ],
+  });
 
   if (!found) {
     return;

@@ -137,8 +137,8 @@ export default () => {
         return send([ctx.socket.id], "%chGame>%cn permission denied.");
       }
 
-      en.dbobj.data = {
-        ...en.dbobj.data,
+      targ.dbobj.data = {
+        ...targ.dbobj.data,
         stats: [],
         damage: {
           physical: { superficial: 0, aggravated: 0 },
