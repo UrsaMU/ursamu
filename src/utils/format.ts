@@ -1,5 +1,6 @@
 import { repeat } from "../../deps.ts";
 import parser from "../services/parser/parser.ts";
+import { gameConfig } from "../config.ts";
 
 export const repeatString = (string = " ", length: number) => {
   // check how many spaces are left after the filler string is rendered. We will need
@@ -110,17 +111,25 @@ export const threeColumn = (...lists: string[][]) => {
   return output;
 };
 
-export const header = (string = "", filler = "%cr=%cn", width = 78) => {
-  return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler);
+export const header = (string = "", filler = undefined, width = 78) => {
+  const borderStart = gameConfig.game?.header.borderStart;
+  const borderEnd = gameConfig.game?.header.borderEnd;
+  filler = typeof filler == "string" ? filler : gameConfig.game?.header.filler;
+  return center(`${borderStart}${string}${borderEnd}`, width, filler);
 };
 
-export const divider = (string = "", filler = "%cr-%cn", width = 78) => {
+export const divider = (string = "", filler = undefined, width = 78) => {
+  filler = typeof filler == "string" ? filler : gameConfig.game?.divider.filler;
   return center(` %ch${string}%cn `, width, filler);
 };
 
-export const footer = (string = "", filler = "%cr=%cn", width = 78) => {
+export const footer = (string = "", filler = undefined, width = 78) => {
+  const borderStart = gameConfig.game?.header.borderStart;
+  const borderEnd = gameConfig.game?.header.borderEnd;
+  filler = typeof filler == "string" ? filler : gameConfig.game?.header.filler;
+
   if (string) {
-    return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler);
+    return center(`${borderStart}${string}${borderEnd}`, width, filler);
   }
 
   return repeatString(filler, width);

@@ -19,6 +19,14 @@ const config: IConfig = {
       connect: "../text/default_connect.txt",
     },
     playerStart: 0,
+    header: {
+      borderStart: " %cy[%cn %ch",
+      borderEnd: "%cn %cy]%cn ",
+      filler: "%cr=%cn",
+    },
+    divider: {
+      filler: "%cr-%cn",
+    },
   },
 };
 
