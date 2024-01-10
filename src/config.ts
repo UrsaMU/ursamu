@@ -1,4 +1,4 @@
-import { dpath } from "../deps.ts";
+import { join, merge, dpath } from "../deps.ts";
 import defaultConfig from "./ursamu.config.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
