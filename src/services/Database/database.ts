@@ -36,7 +36,7 @@ export class DBO<T> {
 
   async queryOne(query?: any) {
     const ret = await this.query(query);
-    return ret.length ? ret[0] : false;
+    return ret.length ? ret[0] : undefined;
   }
 
   async all() {

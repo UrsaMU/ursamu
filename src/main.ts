@@ -1,4 +1,4 @@
-import { join } from "../deps.ts";
+import { join, merge } from "../deps.ts";
 import { serve } from "https://deno.land/std@0.166.0/http/server.ts";
 import { app, io } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
@@ -21,25 +21,24 @@ export const mu = async () => {
   // Pull config from data/ if it exists
   const dataConfig = await (async () => {
     try {
-      const ret = await import("../data/config.ts");
+      const ret = await import(join(__data, "config.ts"));
       return ret.default;
-    } catch(e) {
+    } catch (e) {
       console.log("Unable to load data/config.ts:", e);
       return {};
     }
   })();
 
-  dataConfig.server = dataConfig.server ? dataConfig.server : {};
-  dataConfig.game = dataConfig.game ? dataConfig.game : {};
+  dataConfig.server ||= {};
+  dataConfig.game ||= {};
 
   // With the default ursamu.config.ts as the defaults
-  gameConfig.setConfig({
-    server: { ...defaultConfig.server, ...dataConfig.server },
-    game: { ...defaultConfig.game, ...dataConfig.game },
-  });
+  gameConfig.setConfig(merge(defaultConfig, dataConfig));
 
   // Pull plugin list from config, default to all of the built-ins
-  const pluginsList = gameConfig.server?.plugins || [ "./commands" ];
+  const pluginsList = gameConfig.server?.plugins || [];
+
+  plugins(join(__dirname, "./commands"));
 
   // Iterate and install plugins
   for (const plug of pluginsList) {
@@ -51,17 +50,18 @@ export const mu = async () => {
   }
 
   // Install stats if they exist
-  if(gameConfig.server?.allStats) {
+  if (gameConfig.server?.allStats) {
     setAllStats(gameConfig.server?.allStats);
   }
 
   // Load text files (later should be overridable in data/)
   loadTxtDir(join(__dirname, "../text"));
+  loadTxtDir(join(__dirname, "../help"));
 
-  dbojs.init(gameConfig.server?.db);
-  counters.init(gameConfig.server?.db);
-  chans.init(gameConfig.server?.db);
-  mail.init(gameConfig.server?.db);
+  dbojs.init(gameConfig.server?.db || "");
+  counters.init(gameConfig.server?.db || "");
+  chans.init(gameConfig.server?.db || "");
+  mail.init(gameConfig.server?.db || "");
 
   const handler = io.handler(async (req: any) => {
     return await app.handle(req) || new Response("Not found.", { status: 404 });

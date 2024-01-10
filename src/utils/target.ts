@@ -16,8 +16,8 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
 
   const found = await dbojs.queryOne({
     $or: [
-      { "data.name": new RegExp(lowerCaseTar.replace(";", "|"), "i") },
-      { "data.alias": new RegExp(lowerCaseTar.replace(";", "|"), "i") },
+      { "data.name": new RegExp(tar.toLowerCase().replace(";", "|"), "i") },
+      { "data.alias": new RegExp(tar.toLowerCase().replace(";", "|"), "i") },
       { id: +tar },
       { id: +tar.slice(1) },
       { dbref: tar },
