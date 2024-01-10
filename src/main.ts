@@ -5,35 +5,15 @@ import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { createObj } from "./services/DBObjs/index.ts";
 import { chans, counters, dbojs, mail } from "./services/Database/index.ts";
-import defaultConfig from "./ursamu.config.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { Config, IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 import { setAllStats } from "./services/characters/index.ts";
-
-const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
-const __data = join(__dirname, "..", "data");
-
-export const gameConfig = new Config(defaultConfig);
+import { gameConfig } from "./config.ts";
 
 export const mu = async () => {
-  // Pull config from data/ if it exists
-  const dataConfig = await (async () => {
-    try {
-      const ret = await import(join(__data, "config.ts"));
-      return ret.default;
-    } catch (e) {
-      console.log("Unable to load data/config.ts:", e);
-      return {};
-    }
-  })();
-
-  dataConfig.server ||= {};
-  dataConfig.game ||= {};
-
-  // With the default ursamu.config.ts as the defaults
-  gameConfig.setConfig(merge(defaultConfig, dataConfig));
+  const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 
   // Pull plugin list from config, default to all of the built-ins
   const pluginsList = gameConfig.server?.plugins || [];
