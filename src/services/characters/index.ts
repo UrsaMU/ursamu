@@ -14,6 +14,6 @@ export let allStats = [
   ...skills,
 ];
 
-export function setAllStats(newStats: array) : array {
+export function setAllStats(newStats: array): array {
   allStats = newStats;
 }

@@ -1,6 +1,12 @@
 import { get } from "../../deps.ts";
 import { IDBOBJ } from "../../src/@types/index.ts";
-import { addCmd, allStats, getStat, Obj, send } from "../../src/services/index.ts";
+import {
+  addCmd,
+  allStats,
+  getStat,
+  Obj,
+  send,
+} from "../../src/services/index.ts";
 import {
   center,
   divider,

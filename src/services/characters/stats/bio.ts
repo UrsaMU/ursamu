@@ -20,6 +20,6 @@ export const bio: IMStat[] = [
     name: "splat",
     values: ["human"],
     type: "bio",
-    lock: "builder+"
-  }
+    lock: "builder+",
+  },
 ];

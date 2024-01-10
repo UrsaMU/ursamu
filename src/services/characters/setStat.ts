@@ -3,13 +3,17 @@ import { Obj } from "../DBObjs/index.ts";
 import { dbojs } from "../Database/index.ts";
 import { allStats } from "./index.ts";
 
-export async function validateValue(char: IDBOBJ, stat: IDBOBJ, value: any) : boolean {
+export async function validateValue(
+  char: IDBOBJ,
+  stat: IDBOBJ,
+  value: any,
+): boolean {
   const splat = char.splat || "";
 
-  if(typeof stat.values == "function") {
-    return stat.values(char, value)
+  if (typeof stat.values == "function") {
+    return stat.values(char, value);
   } else {
-    return stat.values.includes(value) && stat.values.length > 0 && value
+    return stat.values.includes(value) && stat.values.length > 0 && value;
   }
 }
 

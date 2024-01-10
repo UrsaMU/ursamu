@@ -43,7 +43,7 @@ const config = {
       "commands/test.ts",
       "commands/think.ts",
       "commands/upgrade.ts",
-      "commands/who.ts"
+      "commands/who.ts",
     ],
     allStats: [
       ...bio,
@@ -54,8 +54,8 @@ const config = {
       ...backgrounds,
       ...disciplines,
       ...other,
-    ]
-  }
+    ],
+  },
 };
 
 export default config;
