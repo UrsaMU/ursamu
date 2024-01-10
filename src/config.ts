@@ -1,5 +1,7 @@
 import { join, merge, dpath } from "../deps.ts";
 import defaultConfig from "./ursamu.config.ts";
+import { Config } from "./@types/index.ts";
+
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 const __data = join(__dirname, "..", "data");
