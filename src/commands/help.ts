@@ -6,7 +6,7 @@ import { flags } from "../services/flags/flags.ts";
 import parser from "../services/parser/parser.ts";
 import { center, columns, ljust, repeatString } from "../utils/format.ts";
 import { send } from "../services/broadcast/index.ts";
-import { gameConfig } from "../main.ts";
+import { gameConfig } from "../config.ts";
 import { ICmd, IHelp } from "../@types/index.ts";
 import { dpath } from "../../deps.ts";
 
