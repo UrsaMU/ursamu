@@ -4,9 +4,9 @@ import { flags } from "../services/flags/flags.ts";
 import parser from "../services/parser/parser.ts";
 import { center, columns, repeatString } from "../utils/format.ts";
 import { send } from "../services/broadcast/index.ts";
-import { gameConfig } from "../main.ts";
 import { txtFiles } from "../services/commands/index.ts";
 import { extract } from "../../deps.ts";
+import { mu } from "../services/server/mu.ts";
 export default async () => {
   addCmd({
     name: "help",
@@ -81,7 +81,7 @@ export default async () => {
       );
       let output = center(
         `%cy[%cn %ch%cc${
-          gameConfig.game?.name ? gameConfig.game.name + " " : ""
+          mu.cfg.game?.name ? mu.cfg.game.name + " " : ""
         }%cn%chHelp%cn System %cy]%cn`,
         78,
         "%cr=%cn",

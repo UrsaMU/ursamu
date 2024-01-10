@@ -30,6 +30,9 @@ export default () => {
         flags: "room",
       };
       const roomObj = await dbojs.create(obj);
+      if (!roomObj) {
+        return await send([ctx.socket.id], "Could not create room.");
+      }
       send(
         [ctx.socket.id],
         `Room ${room} created with dbref %ch#${roomObj.id}%cn.`,
@@ -50,6 +53,11 @@ export default () => {
         };
 
         const toObj = await dbojs.create(obj);
+
+        if (!toObj) {
+          return await send([ctx.socket.id], `Could not create exit ${to}.`);
+        }
+
         send(
           [ctx.socket.id],
           `Exit ${to.split(";")[0]} created with dbref %ch#${toObj.id}%cn.`,
@@ -71,6 +79,9 @@ export default () => {
         };
 
         const fromObj = await dbojs.create(obj);
+        if (!fromObj) {
+          return await send([ctx.socket.id], `Could not create exit ${from}.`);
+        }
         send(
           [ctx.socket.id],
           `Exit ${from.split(";")[0]} created with dbref %ch#${fromObj.id}%cn.`,
@@ -178,7 +189,7 @@ export default () => {
         await force(ctx, "look");
       }
 
-      await dbojs.delete({ _id: obj._id });
+      await dbojs.delete({ _id: obj.id });
       send([ctx.socket.id], `You destroy ${displayName(en, obj)}.`, {});
       const exits = await dbojs.query({
         $and: [
@@ -224,6 +235,10 @@ export default () => {
           destination: roomObj.id,
         },
       });
+
+      if (!exit) {
+        return send([ctx.socket.id], `Cout not find %ch${name}%cn`, {});
+      }
 
       if (roomObj) {
         send(

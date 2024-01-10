@@ -92,7 +92,7 @@ export default () => {
         tempmsg,
         {},
       );
-      if (!targets.filter((ob) => ob._id === en._id).length) {
+      if (!targets.filter((ob) => ob.id === en.id).length) {
         send([ctx.socket.id], sendermsg, {});
       }
       en.data ||= {};

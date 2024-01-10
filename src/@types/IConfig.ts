@@ -1,3 +1,5 @@
+import { merge } from "../../deps.ts";
+
 export interface IConfig {
   server?: {
     telnet?: number;
@@ -28,6 +30,6 @@ export class Config {
   }
 
   setConfig = (config: IConfig) => {
-    this.config = config;
+    this.config = merge(config, this.config);
   };
 }

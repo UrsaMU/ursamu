@@ -134,7 +134,11 @@ export class Obj {
   }
 
   get location() {
-    return this.obj.location;
+    return this.obj.location || -1;
+  }
+
+  set location(location: number) {
+    this.obj.location = location;
   }
 
   get description() {

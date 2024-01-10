@@ -73,7 +73,7 @@ export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
   };
 
   let cell = Math.floor(width / cols);
-  let counter = 0;
+  let counter = -1;
   let output = "%r%b"; // Adjusted initial value
 
   for (const item of list) {

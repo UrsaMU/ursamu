@@ -28,11 +28,11 @@ const server = createServer((socket: ITelnetSocket) => {
   const sock = io(`http://localhost:${config.server?.ws}`);
   socket.write(welcome + "\r\n");
 
-  sock.on("message", (data) => {
-    if (data.data?.cid) socket.cid = data.data.cid;
-    socket.write(data.msg + "\r\n");
+  sock.on("message", ({ data, msg }) => {
+    if (data?.cid) socket.cid = data.cid;
+    socket.write(msg + "\r\n");
 
-    if (data.data?.quit) return socket.end();
+    if (data?.quit) return socket.end();
   });
 
   socket.on("disconnect", () => sock.close());
