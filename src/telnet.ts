@@ -11,7 +11,10 @@ interface ITelnetSocket extends Socket {
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 const welcome = readFileSync(
-  join(__dirname, gameConfig.game?.text.connect || "../text/connect_default.txt"),
+  join(
+    __dirname,
+    gameConfig.game?.text.connect || "../text/connect_default.txt",
+  ),
   "utf8",
 );
 
@@ -70,5 +73,6 @@ const server = createServer((socket: ITelnetSocket) => {
 
 server.listen(
   gameConfig.server?.telnet,
-  () => console.log(`Telnet server listening on port ${gameConfig.server?.telnet}`),
+  () =>
+    console.log(`Telnet server listening on port ${gameConfig.server?.telnet}`),
 );
