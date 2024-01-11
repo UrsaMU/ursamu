@@ -10,6 +10,10 @@ export { io } from "npm:socket.io-client@4.7.1";
 export { VM } from "npm:vm2@3.9.19";
 export { Context, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 export type { Next } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+export {
+  extract,
+  test,
+} from "https://deno.land/std@0.210.0/front_matter/any.ts";
 
 import bcrypt from "npm:bcryptjs@2.4.3";
 export const compare = bcrypt.compare;

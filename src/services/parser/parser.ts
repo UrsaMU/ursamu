@@ -65,4 +65,12 @@ parser.addSubs(
   { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
 );
 
+parser.addSubs(
+  "markdown",
+  { before: /#{1,6}\s+(.*)/g, after: "%ch%cu$1%cn" },
+  { before: /\`([^\`]+)\`/g, after: "%cu$1%cn" },
+  { before: /\*\*([^\*]+)\*\*/g, after: "%ch$1%cn" },
+  { before: /_([^_]+)_/g, after: "%ci$1%cn" },
+);
+
 export default parser;

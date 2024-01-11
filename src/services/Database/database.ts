@@ -4,6 +4,7 @@ import config from "../../ursamu.config.ts";
 import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types/index.ts";
+import { Obj } from "../DBObjs/DBObjs.ts";
 
 function d(...args: any) {
   const e = new Error();
@@ -46,6 +47,10 @@ export class DBO<T> {
 
   async modify(query: any, operator: string, data: any) {
     var body = {} as any;
+
+    // check if data is of type Obj
+    if (data instanceof Obj) data = data.dbobj;
+
     if (data._id) delete data._id;
     body[operator] = data;
     const ret = await this.coll()?.updateMany(query, body);

@@ -25,6 +25,7 @@ export const mu = async () => {
     if (plug.startsWith("http://") || plug.startsWith("https://")) {
       plugins(plug);
     } else {
+      console.log(join(__dirname, plug));
       plugins(join(__dirname, plug));
     }
   }
@@ -35,8 +36,8 @@ export const mu = async () => {
   }
 
   // Load text files (later should be overridable in data/)
-  loadTxtDir(join(__dirname, "../text"));
-  loadTxtDir(join(__dirname, "../help"));
+  await loadTxtDir(join(__dirname, "../text"));
+  await loadTxtDir(join(__dirname, "../help"));
 
   dbojs.init(gameConfig.server?.db || "");
   counters.init(gameConfig.server?.db || "");
