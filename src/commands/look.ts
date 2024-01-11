@@ -8,6 +8,8 @@ import {
   ljust,
   repeatString,
   rjust,
+  header,
+  divider
 } from "../utils/format.ts";
 import { idle } from "../utils/idle.ts";
 import { isAdmin } from "../utils/isAdmin.ts";
@@ -29,11 +31,7 @@ export default () =>
         return;
       }
 
-      let output = center(
-        `%cy[%cn %ch${displayName(en, tar)}%cn %cy]%cn`,
-        78,
-        "%cr=%cn",
-      );
+      let output = header(displayName(en, tar));
 
       output += `\n${tar.description || "You see nothing special."}\n`;
 
@@ -59,7 +57,7 @@ export default () =>
       });
 
       if (players.length) {
-        output += center(" %chCharacters%cn ", 78, "%cr-%cn");
+        output += header("Characters");
         output += "\n";
 
         players.forEach((p) => {
@@ -77,11 +75,11 @@ export default () =>
       }
 
       if (exits.length) {
-        output += center(" %chExits%cn ", 78, "%cr-%cn");
+        output += header("Exits");
         output += columns(exits, 80, 3);
       }
 
-      output += repeatString("%cr=%cn", 78);
+      output += divider();
       send([ctx.socket.id], output, {});
     },
   });
