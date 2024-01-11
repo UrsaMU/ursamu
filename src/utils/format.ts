@@ -66,7 +66,7 @@ export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
     let length = parser.stripSubs("telnet", input).length;
     return length > size - 3
       ? `${input.substring(0, size - 3)}...`
-      : input + fill.repeat(size - length);
+      : input.trim() + fill.repeat(size - length);
   };
 
   let cell = Math.floor(width / cols);

@@ -2,16 +2,7 @@ import { send } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { displayName } from "../utils/displayName.ts";
-import {
-  center,
-  columns,
-  ljust,
-  repeatString,
-  rjust,
-  header,
-  divider,
-  footer
-} from "../utils/format.ts";
+import { columns, footer, header, ljust, rjust } from "../utils/format.ts";
 import { idle } from "../utils/idle.ts";
 import { isAdmin } from "../utils/isAdmin.ts";
 import { target } from "../utils/target.ts";
@@ -77,7 +68,7 @@ export default () =>
 
       if (exits.length) {
         output += header("Exits");
-        output += columns(exits, 80, 3);
+        output += columns(exits, 80, 3).trim() + "\n";
       }
 
       output += footer();

@@ -22,6 +22,7 @@ export interface IConfig {
     text: {
       connect: string;
     };
+    [key: string]: any;
   };
 }
 
