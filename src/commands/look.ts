@@ -79,7 +79,7 @@ export default () =>
         output += columns(exits, 80, 3);
       }
 
-      output += divider();
+      output += footer();
       send([ctx.socket.id], output, {});
     },
   });
