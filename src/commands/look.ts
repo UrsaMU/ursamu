@@ -9,7 +9,8 @@ import {
   repeatString,
   rjust,
   header,
-  divider
+  divider,
+  footer
 } from "../utils/format.ts";
 import { idle } from "../utils/idle.ts";
 import { isAdmin } from "../utils/isAdmin.ts";
