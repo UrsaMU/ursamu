@@ -32,10 +32,9 @@ export const mu = async () => {
   await loadTxtDir(join(__dirname, "../text"));
   await loadTxtDir(join(__dirname, "../help"));
 
-  dbojs.init(gameConfig.server?.db || "");
-  counters.init(gameConfig.server?.db || "");
-  chans.init(gameConfig.server?.db || "");
-  mail.init(gameConfig.server?.db || "");
+  dbojs.init();
+  chans.init();
+  mail.init();
 
   const handler = io.handler(async (req: any) => {
     return await app.handle(req) || new Response("Not found.", { status: 404 });
@@ -45,17 +44,8 @@ export const mu = async () => {
 
   const rooms = await dbojs.query({ flags: /room/i });
 
-  const counter = {
-    _id: "objid",
-    seq: 0,
-  };
-
-  if (!(await counters.query({ _id: "objid" })).length) {
-    await counters.create(counter);
-  }
-
   if (!rooms.length) {
-    const room = await createObj("room safe void", { name: "The Void" });
+    await createObj("room safe void", { name: "The Void" });
     console.log("The Void created.");
   }
 

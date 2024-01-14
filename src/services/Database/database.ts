@@ -1,6 +1,5 @@
 import { MongoClient } from "../../../deps.ts";
 import { IDBOBJ } from "../../@types/IDBObj.ts";
-import config from "../../ursamu.config.ts";
 import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types/index.ts";
@@ -17,9 +16,11 @@ export class DBO<T> {
   db: any;
   collection: string;
   client: MongoClient | undefined;
+  connector: string | undefined;
 
-  constructor(path: string) {
+  constructor(path: string, connector?: string) {
     this.collection = path.replace(".", "_");
+    this.connector = connector;
   }
 
   coll() {
@@ -62,23 +63,21 @@ export class DBO<T> {
     return await this.coll()?.deleteMany(query);
   }
 
-  async length(query: any) {}
+  async length(query: any) {
+    return await this.coll()?.countDocuments(query);
+  }
 
-  async init(connector: string) {
-    this.client = new MongoClient(connector);
+  async init() {
+    this.client = new MongoClient(
+      this.connector || gameConfig.server?.db || "",
+    );
     this.client.connect();
     return this;
   }
 }
 
-export interface ICounters {
-  _id: string;
-  seq: number;
-}
-
 const models = gameConfig.server?.dbModel;
-let counters: DBO<ICounters>,
-  dbojs: DBO<IDBOBJ>,
+let dbojs: DBO<IDBOBJ>,
   chans: DBO<IChannel>,
   mail: DBO<IMail>,
   wiki: DBO<IArticle>,
@@ -88,12 +87,6 @@ if (models && models["dbojs"]) {
   dbojs = models["dbojs"];
 } else {
   dbojs = new DBO<IDBOBJ>("dbojs");
-}
-
-if (models && models["counters"]) {
-  counters = models["counters"];
-} else {
-  counters = new DBO<ICounters>("counters");
 }
 
 if (models && models["chans"]) {
@@ -120,4 +113,4 @@ if (models && models["bboard"]) {
   bboard = new DBO<IBoard>("bboard");
 }
 
-export { bboard, chans, counters, dbojs, mail, wiki };
+export { bboard, chans, dbojs, mail, wiki };
