@@ -1,4 +1,4 @@
-import { join, merge } from "../deps.ts";
+import { join } from "../deps.ts";
 import { serve } from "https://deno.land/std@0.166.0/http/server.ts";
 import { app, io } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
@@ -7,9 +7,7 @@ import { createObj } from "./services/DBObjs/index.ts";
 import { chans, counters, dbojs, mail } from "./services/Database/index.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
-import { Config, IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
-import { setAllStats } from "./services/characters/index.ts";
 import { gameConfig } from "./config.ts";
 
 export const mu = async () => {
@@ -28,11 +26,6 @@ export const mu = async () => {
       console.log(join(__dirname, plug));
       plugins(join(__dirname, plug));
     }
-  }
-
-  // Install stats if they exist
-  if (gameConfig.server?.allStats) {
-    setAllStats(gameConfig.server?.allStats);
   }
 
   // Load text files (later should be overridable in data/)

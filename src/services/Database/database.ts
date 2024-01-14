@@ -5,6 +5,7 @@ import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types/index.ts";
 import { Obj } from "../DBObjs/DBObjs.ts";
+import { gameConfig } from "../../config.ts";
 
 function d(...args: any) {
   const e = new Error();
@@ -51,7 +52,7 @@ export class DBO<T> {
     // check if data is of type Obj
     if (data instanceof Obj) data = data.dbobj;
 
-    if (data._id) delete data._id;
+    if (data?._id) delete data?._id;
     body[operator] = data;
     const ret = await this.coll()?.updateMany(query, body);
     return await this.query(query);
@@ -66,6 +67,7 @@ export class DBO<T> {
   async init(connector: string) {
     this.client = new MongoClient(connector);
     this.client.connect();
+    return this;
   }
 }
 
@@ -74,9 +76,48 @@ export interface ICounters {
   seq: number;
 }
 
-export const counters = new DBO<ICounters>(`counters`);
-export const bboard = new DBO<IBoard>(`bboards`);
-export const dbojs = new DBO<IDBOBJ>(`dbojs`);
-export const chans = new DBO<IChannel>(`chans`);
-export const mail = new DBO<IMail>(`mail`);
-export const wiki = new DBO<IArticle>(`wiki`);
+const models = gameConfig.server?.dbModel;
+let counters: DBO<ICounters>,
+  dbojs: DBO<IDBOBJ>,
+  chans: DBO<IChannel>,
+  mail: DBO<IMail>,
+  wiki: DBO<IArticle>,
+  bboard: DBO<IBoard>;
+
+if (models && models["dbojs"]) {
+  dbojs = models["dbojs"];
+} else {
+  dbojs = new DBO<IDBOBJ>("dbojs");
+}
+
+if (models && models["counters"]) {
+  counters = models["counters"];
+} else {
+  counters = new DBO<ICounters>("counters");
+}
+
+if (models && models["chans"]) {
+  chans = models["chans"];
+} else {
+  chans = new DBO<IChannel>("chans");
+}
+
+if (models && models["mail"]) {
+  mail = models["mail"];
+} else {
+  mail = new DBO<IMail>("mail");
+}
+
+if (models && models["wiki"]) {
+  wiki = models["wiki"];
+} else {
+  wiki = new DBO<IArticle>("wiki");
+}
+
+if (models && models["bboard"]) {
+  bboard = models["bboard"];
+} else {
+  bboard = new DBO<IBoard>("bboard");
+}
+
+export { bboard, chans, counters, dbojs, mail, wiki };

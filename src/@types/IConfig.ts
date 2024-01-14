@@ -1,3 +1,4 @@
+import { DBO } from "../index.ts";
 import { IStat } from "./IStat.ts";
 
 export interface IConfig {
@@ -6,6 +7,9 @@ export interface IConfig {
     ws?: number;
     http?: number;
     db?: string;
+    dbModel?: {
+      [key: string]: DBO<any>;
+    };
     counters?: string;
     chans?: string;
     mail?: string;

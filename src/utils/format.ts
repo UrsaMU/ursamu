@@ -111,19 +111,23 @@ export const threeColumn = (...lists: string[][]) => {
   return output;
 };
 
-export const header = (string = "", filler = undefined, width = 78) => {
+export const header = (string = "", filler: string | undefined, width = 78) => {
   const borderStart = gameConfig.game?.header.borderStart;
   const borderEnd = gameConfig.game?.header.borderEnd;
   filler = typeof filler == "string" ? filler : gameConfig.game?.header.filler;
   return center(`${borderStart}${string}${borderEnd}`, width, filler);
 };
 
-export const divider = (string = "", filler = undefined, width = 78) => {
+export const divider = (
+  string = "",
+  filler: string | undefined,
+  width = 78,
+) => {
   filler = typeof filler == "string" ? filler : gameConfig.game?.divider.filler;
   return center(` %ch${string}%cn `, width, filler);
 };
 
-export const footer = (string = "", filler = undefined, width = 78) => {
+export const footer = (string = "", filler: string | undefined, width = 78) => {
   const borderStart = gameConfig.game?.header.borderStart;
   const borderEnd = gameConfig.game?.header.borderEnd;
   filler = typeof filler == "string" ? filler : gameConfig.game?.header.filler;

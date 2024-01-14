@@ -5,7 +5,7 @@ import { dbojs } from "../Database/index.ts";
 import { flags } from "../flags/flags.ts";
 
 export const createObj = async (flgs: string, datas: any) => {
-  const id = await getNextId("objid");
+  const id = await getNextId(dbojs);
   const { tags, data } = flags.set("", datas, flgs);
   const obj = {
     id,

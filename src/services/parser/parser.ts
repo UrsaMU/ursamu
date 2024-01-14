@@ -1,5 +1,5 @@
 import { Parser } from "../../../deps.ts";
-import { ljust } from "../../utils/index.ts";
+import { hexToRgb } from "../../utils/hex2Rgb.ts";
 
 const parser = new Parser();
 
@@ -21,17 +21,22 @@ parser.addSubs(
   { before: /%[cx]h/g, after: "\x1b[1m", strip: "" },
   { before: /%[cx]u/g, after: "\x1b[4m", strip: "" },
   { before: /%[cx]i/g, after: "\x1b[3m", strip: "" },
-  { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
   // 24bit color
   {
-    before: /%[cx]<#(\d+),(\d+),(\d+)>/g,
-    after: "\x1b[38;2;$1;$2;$3m",
+    before: /%[cx]<#([0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?)>/g,
+    after: (...args) => {
+      const hex = hexToRgb(`#${args[1]}`);
+      return `\x1b[38;2;${hex?.red};${hex?.green};${hex?.blue}m`;
+    },
     strip: "",
   },
   // 24bit background color
   {
-    before: /%[cx]<#b(\d+),(\d+),(\d+)>/g,
-    after: "\x1b[48;2;$1;$2;$3m",
+    before: /%[CX]<#([0-9A-Fa-f]{3}([0-9A-Fa-f]{3})?)>/g,
+    after: (...args) => {
+      const hex = hexToRgb(`#${args[1]}`);
+      return `\x1b[48;2;${hex?.red};${hex?.green};${hex?.blue}m`;
+    },
     strip: "",
   },
 );

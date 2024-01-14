@@ -1,6 +1,6 @@
+import { Obj } from "../index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
-import { getCharacter } from "../services/characters/character.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { canEdit } from "../utils/canEdit.ts";
 import { displayName } from "../utils/displayName.ts";
@@ -12,7 +12,7 @@ export default () => {
     pattern: /^e[xamine]+\s+(.*)$/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
-      const en = await getCharacter(ctx.socket.cid);
+      const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
       const tar = await target(en, args[0]);
@@ -22,7 +22,6 @@ export default () => {
         let output = `%chName:%cn ${tar.data?.name}${
           tar.data?.alias ? "(" + tar.data?.alias.toUpperCase() + ")" : ""
         }\n`;
-        output += `%ch_ID:%cn ${tar._id}\n`;
         output += `%chDBREF:%cn #${tar.id}\n`;
         output += `%chFLAGS:%cn ${tar.flags}\n`;
         output += `%chLOCATION%cn ${loc ? displayName(en, loc) : "None?!"}\n`;

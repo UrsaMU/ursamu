@@ -47,8 +47,6 @@ export default async () => {
         key.startsWith("topic_")
       );
 
-      console.log(topics);
-
       // check topics for frontmatter
       for (const topic of topics) {
         const name = topic.replace("topic_", "").replace(/\.md|\.txt/, "")
