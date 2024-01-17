@@ -9,6 +9,7 @@ import { authRouter, dbObjRouter } from "./routes/index.ts";
 import { playerForSocket } from "./utils/playerForSocket.ts";
 import { Server } from "https://deno.land/x/socket_io@0.2.0/mod.ts";
 import { Application } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+import { webRouter } from "./routes/webRouter.ts";
 
 export const app = new Application();
 
@@ -17,6 +18,9 @@ app.use(authRouter.allowedMethods());
 
 app.use(dbObjRouter.routes());
 app.use(dbObjRouter.allowedMethods());
+
+app.use(webRouter.routes());
+app.use(webRouter.allowedMethods());
 
 export const io = new Server();
 

@@ -22,6 +22,7 @@ export {
   test,
 } from "https://deno.land/std@0.210.0/front_matter/any.ts";
 export * from "./src/index.ts";
+export * from "./src/utils/index.ts";
 
 import bcrypt from "npm:bcryptjs@2.4.3";
 export const compare = bcrypt.compare;

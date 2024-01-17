@@ -10,6 +10,7 @@ import { Obj } from "../index.ts";
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
 export const txtFiles = new Map<string, string>();
+export const viewFiles = new Map<string, string>();
 
 export const addCmd = (...cmd: ICmd[]) => cmds.push(...cmd);
 

@@ -17,6 +17,7 @@ export const mu = async () => {
   const pluginsList = gameConfig.server?.plugins || [];
 
   plugins(join(__dirname, "./commands"));
+  plugins(join(__dirname, "../views"));
 
   // Iterate and install plugins
   for (const plug of pluginsList) {

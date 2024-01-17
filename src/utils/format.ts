@@ -111,7 +111,11 @@ export const threeColumn = (...lists: string[][]) => {
   return output;
 };
 
-export const header = (string = "", filler: string | undefined, width = 78) => {
+export const header = (
+  string = "",
+  filler?: string | undefined,
+  width = 78,
+) => {
   const borderStart = gameConfig.game?.header.borderStart;
   const borderEnd = gameConfig.game?.header.borderEnd;
   filler = typeof filler == "string" ? filler : gameConfig.game?.header.filler;
@@ -120,7 +124,7 @@ export const header = (string = "", filler: string | undefined, width = 78) => {
 
 export const divider = (
   string = "",
-  filler: string | undefined,
+  filler?: string | undefined,
   width = 78,
 ) => {
   filler = typeof filler == "string" ? filler : gameConfig.game?.divider.filler;
