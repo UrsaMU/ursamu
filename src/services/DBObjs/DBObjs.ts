@@ -55,6 +55,10 @@ export class Obj {
     return this.obj;
   }
 
+  get owner() {
+    return this.obj.data?.owner;
+  }
+
   get id() {
     return this.obj?.id;
   }
