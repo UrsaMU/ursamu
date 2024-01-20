@@ -131,9 +131,15 @@ export const divider = (
   return center(` %ch${string}%cn `, width, filler);
 };
 
-export const footer = (string = "", filler: string | undefined, width = 78) => {
+export const footer = (
+  string?: string | undefined,
+  filler?: string | undefined,
+  width?: number | undefined,
+) => {
   const borderStart = gameConfig.game?.header.borderStart;
   const borderEnd = gameConfig.game?.header.borderEnd;
+  filler ||= "%cr=%cn";
+  width ||= 78;
   filler = typeof filler == "string" ? filler : gameConfig.game?.header.filler;
 
   if (string) {

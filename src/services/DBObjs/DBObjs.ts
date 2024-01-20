@@ -77,6 +77,7 @@ export class Obj {
   }
 
   get data() {
+    this.obj.data ||= {};
     return this.obj.data;
   }
 
@@ -84,8 +85,18 @@ export class Obj {
     this.obj.data = data;
   }
 
-  get splat() {
-    return this.obj.data?.stats?.find((s) => s.name === "splat")?.value;
+  get template() {
+    return this.obj.data?.stats?.find((s) => s.name === "template")?.value;
+  }
+
+  set template(template: string) {
+    const stats = this.obj.data?.stats?.map((s) => {
+      if (s.name === "template") {
+        s.value = template;
+      }
+      return s;
+    });
+    this.data.stats = stats;
   }
 
   get location() {
