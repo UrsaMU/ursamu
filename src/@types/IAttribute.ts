@@ -1,5 +1,5 @@
 export interface IAttribute {
-  name: string;
+  key: string;
   value: string;
   type?: string;
   setter: string;

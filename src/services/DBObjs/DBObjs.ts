@@ -1,4 +1,5 @@
 import { IDBOBJ } from "../../@types/IDBObj.ts";
+import { IAttribute } from "../../index.ts";
 import { getNextId } from "../../utils/getNextId.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database/index.ts";
@@ -105,6 +106,25 @@ export class Obj {
 
   get description() {
     return this.obj.description;
+  }
+
+  get attributes() {
+    this.obj.data ||= {};
+    this.obj.data.attributes ||= {};
+
+    return this.obj.data?.attributes;
+  }
+
+  set attributes(attributes: { [key: string]: IAttribute }) {
+    this.data.attributes = attributes;
+  }
+
+  get alias() {
+    return this.obj.data?.alias;
+  }
+
+  set alias(alias: string) {
+    this.data.alias = alias;
   }
 
   get stats() {

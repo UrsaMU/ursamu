@@ -8,7 +8,7 @@ export interface IDBOBJ {
   location?: number;
   flags: string;
   data?: {
-    attributes?: IAttribute[];
+    attributes?: { [key: string]: IAttribute };
     name?: string;
     password?: string;
     moniker?: string;

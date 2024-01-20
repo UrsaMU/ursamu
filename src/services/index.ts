@@ -1,6 +1,6 @@
 export * from "./broadcast/index.ts";
 export * from "./commands/index.ts";
-
+export * from "./attributes/index.ts";
 export * from "./Database/index.ts";
 export * from "./DBObjs/index.ts";
 export * from "./flags/index.ts";
