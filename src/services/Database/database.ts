@@ -1,10 +1,10 @@
 import { MongoClient } from "../../../deps.ts";
 import { IDBOBJ } from "../../@types/IDBObj.ts";
-import config from "../../ursamu.config.ts";
 import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types/index.ts";
 import { Obj } from "../DBObjs/DBObjs.ts";
+import { gameConfig } from "../../config.ts";
 
 function d(...args: any) {
   const e = new Error();
@@ -16,9 +16,11 @@ export class DBO<T> {
   db: any;
   collection: string;
   client: MongoClient | undefined;
+  connector: string | undefined;
 
-  constructor(path: string) {
+  constructor(path: string, connector?: string) {
     this.collection = path.replace(".", "_");
+    this.connector = connector;
   }
 
   coll() {
@@ -51,7 +53,7 @@ export class DBO<T> {
     // check if data is of type Obj
     if (data instanceof Obj) data = data.dbobj;
 
-    if (data._id) delete data._id;
+    if (data?._id) delete data?._id;
     body[operator] = data;
     const ret = await this.coll()?.updateMany(query, body);
     return await this.query(query);
@@ -61,22 +63,54 @@ export class DBO<T> {
     return await this.coll()?.deleteMany(query);
   }
 
-  async length(query: any) {}
+  async length(query: any) {
+    return await this.coll()?.countDocuments(query);
+  }
 
-  async init(connector: string) {
-    this.client = new MongoClient(connector);
+  async init() {
+    this.client = new MongoClient(
+      this.connector || gameConfig.server?.db || "",
+    );
     this.client.connect();
+    return this;
   }
 }
 
-export interface ICounters {
-  _id: string;
-  seq: number;
+const models = gameConfig.server?.dbModel;
+let dbojs: DBO<IDBOBJ>,
+  chans: DBO<IChannel>,
+  mail: DBO<IMail>,
+  wiki: DBO<IArticle>,
+  bboard: DBO<IBoard>;
+
+if (models && models["dbojs"]) {
+  dbojs = models["dbojs"];
+} else {
+  dbojs = new DBO<IDBOBJ>("dbojs");
 }
 
-export const counters = new DBO<ICounters>(`counters`);
-export const bboard = new DBO<IBoard>(`bboards`);
-export const dbojs = new DBO<IDBOBJ>(`dbojs`);
-export const chans = new DBO<IChannel>(`chans`);
-export const mail = new DBO<IMail>(`mail`);
-export const wiki = new DBO<IArticle>(`wiki`);
+if (models && models["chans"]) {
+  chans = models["chans"];
+} else {
+  chans = new DBO<IChannel>("chans");
+}
+
+if (models && models["mail"]) {
+  mail = models["mail"];
+} else {
+  mail = new DBO<IMail>("mail");
+}
+
+if (models && models["wiki"]) {
+  wiki = models["wiki"];
+} else {
+  wiki = new DBO<IArticle>("wiki");
+}
+
+if (models && models["bboard"]) {
+  bboard = models["bboard"];
+} else {
+  bboard = new DBO<IBoard>("bboard");
+}
+
+export { bboard, chans, dbojs, mail, wiki };

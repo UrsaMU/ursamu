@@ -1,11 +1,12 @@
 import { IDBOBJ } from "../../@types/IDBObj.ts";
+import { IAttribute } from "../../index.ts";
 import { getNextId } from "../../utils/getNextId.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database/index.ts";
 import { flags } from "../flags/flags.ts";
 
 export const createObj = async (flgs: string, datas: any) => {
-  const id = await getNextId("objid");
+  const id = await getNextId(dbojs);
   const { tags, data } = flags.set("", datas, flgs);
   const obj = {
     id,
@@ -55,6 +56,10 @@ export class Obj {
     return this.obj;
   }
 
+  get owner() {
+    return this.obj.data?.owner;
+  }
+
   get id() {
     return this.obj?.id;
   }
@@ -73,6 +78,7 @@ export class Obj {
   }
 
   get data() {
+    this.obj.data ||= {};
     return this.obj.data;
   }
 
@@ -80,8 +86,18 @@ export class Obj {
     this.obj.data = data;
   }
 
-  get splat() {
-    return this.obj.data?.stats?.find((s) => s.name === "splat")?.value;
+  get template() {
+    return this.obj.data?.stats?.find((s) => s.name === "template")?.value;
+  }
+
+  set template(template: string) {
+    const stats = this.obj.data?.stats?.map((s) => {
+      if (s.name === "template") {
+        s.value = template;
+      }
+      return s;
+    });
+    this.data.stats = stats;
   }
 
   get location() {
@@ -90,6 +106,25 @@ export class Obj {
 
   get description() {
     return this.obj.description;
+  }
+
+  get attributes() {
+    this.obj.data ||= {};
+    this.obj.data.attributes ||= {};
+
+    return this.obj.data?.attributes;
+  }
+
+  set attributes(attributes: { [key: string]: IAttribute }) {
+    this.data.attributes = attributes;
+  }
+
+  get alias() {
+    return this.obj.data?.alias;
+  }
+
+  set alias(alias: string) {
+    this.data.alias = alias;
   }
 
   get stats() {

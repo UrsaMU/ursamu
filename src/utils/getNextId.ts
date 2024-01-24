@@ -1,4 +1,4 @@
-import { bboard, DBO, dbojs } from "../index.ts";
+import { bboard, DBO, dbojs, IBoard, IDBOBJ } from "../index.ts";
 
 function findMissingNumbers(numbers: number[]): number[] {
   const sortedNumbers = numbers.slice().sort((a, b) => a - b);
@@ -19,14 +19,8 @@ interface IdbMap {
   [key: string]: DBO<any>;
 }
 
-const dbMap: IdbMap = {
-  "boards": bboard,
-  "dbobjs": dbojs,
-};
-
-export const getNextId = async (counterName: string) => {
-  const db = dbMap[counterName] || dbojs;
-  const numbers = (await db.all()).map((item: any) => item.id);
+export const getNextId = async (dbo: DBO<IDBOBJ | IBoard>) => {
+  const numbers = (await dbo.all()).map((item: any) => item.id);
   const missingNumbers = findMissingNumbers(numbers);
 
   return missingNumbers.length ? missingNumbers[0] : numbers.length;

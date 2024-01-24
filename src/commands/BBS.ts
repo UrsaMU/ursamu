@@ -16,7 +16,7 @@ export default () => {
       const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const id = await getNextId("boardId");
+      const id = await getNextId(bboard);
       if (!id) return send([socket.id], "%chGAME>%cn No board ID generated.");
 
       const taken = await bboard.queryOne({ name });
@@ -60,7 +60,7 @@ export default () => {
         return send([socket.id], "%chGAME>%cn Board not found.");
       }
 
-      await bboard.remove({ boardId: tar.boardId });
+      await bboard.delete({ boardId: tar.boardId });
       send(
         [socket.id],
         `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn deleted.`,

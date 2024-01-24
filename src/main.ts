@@ -1,15 +1,13 @@
-import { join, merge } from "../deps.ts";
+import { join } from "../deps.ts";
 import { serve } from "https://deno.land/std@0.166.0/http/server.ts";
 import { app, io } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { createObj } from "./services/DBObjs/index.ts";
-import { chans, counters, dbojs, mail } from "./services/Database/index.ts";
+import { chans, dbojs, mail } from "./services/Database/index.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
-import { Config, IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
-import { setAllStats } from "./services/characters/index.ts";
 import { gameConfig } from "./config.ts";
 
 export const mu = async () => {
@@ -19,6 +17,7 @@ export const mu = async () => {
   const pluginsList = gameConfig.server?.plugins || [];
 
   plugins(join(__dirname, "./commands"));
+  plugins(join(__dirname, "../views"));
 
   // Iterate and install plugins
   for (const plug of pluginsList) {
@@ -30,19 +29,13 @@ export const mu = async () => {
     }
   }
 
-  // Install stats if they exist
-  if (gameConfig.server?.allStats) {
-    setAllStats(gameConfig.server?.allStats);
-  }
-
   // Load text files (later should be overridable in data/)
   await loadTxtDir(join(__dirname, "../text"));
   await loadTxtDir(join(__dirname, "../help"));
 
-  dbojs.init(gameConfig.server?.db || "");
-  counters.init(gameConfig.server?.db || "");
-  chans.init(gameConfig.server?.db || "");
-  mail.init(gameConfig.server?.db || "");
+  dbojs.init();
+  chans.init();
+  mail.init();
 
   const handler = io.handler(async (req: any) => {
     return await app.handle(req) || new Response("Not found.", { status: 404 });
@@ -52,17 +45,8 @@ export const mu = async () => {
 
   const rooms = await dbojs.query({ flags: /room/i });
 
-  const counter = {
-    _id: "objid",
-    seq: 0,
-  };
-
-  if (!(await counters.query({ _id: "objid" })).length) {
-    await counters.create(counter);
-  }
-
   if (!rooms.length) {
-    const room = await createObj("room safe void", { name: "The Void" });
+    await createObj("room safe void", { name: "The Void" });
     console.log("The Void created.");
   }
 

@@ -1,17 +1,18 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
+import { Obj } from "../index.ts";
 import { dbojs } from "../services/Database/index.ts";
 
 export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
   if (!tar || ["here", "room"].includes(tar.toLowerCase())) {
-    return await dbojs.queryOne({ id: en.location });
+    return await Obj.get(en.location);
   }
 
   if (+tar) {
-    return await dbojs.queryOne({ id: +tar });
+    return await Obj.get(+tar);
   }
 
   if (["me", "self"].includes(tar.toLowerCase())) {
-    return en;
+    return Obj.get(en.id);
   }
 
   const found = await dbojs.queryOne({
@@ -29,6 +30,6 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
   }
 
   if (found && (global || [found.location, found.id].includes(en.location))) {
-    return found;
+    return Obj.get(found.id);
   }
 };

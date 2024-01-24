@@ -41,7 +41,7 @@ export default () =>
       const flags = players.length > 0
         ? "player connected"
         : "player connected superuser";
-      const id = await getNextId("objid");
+      const id = await getNextId(dbojs);
       const player = await (async () => {
         await dbojs.create({
           id,

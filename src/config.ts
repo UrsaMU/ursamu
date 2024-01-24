@@ -1,9 +1,9 @@
-import { dpath, join, merge } from "../deps.ts";
+import { dpath, join } from "../deps.ts";
 import defaultConfig from "./ursamu.config.ts";
 import { Config } from "./@types/index.ts";
-
+import lodash from "npm:lodash@4.17.21";
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
-const __data = join(__dirname, "..", "data");
+const __data = Deno.env.get("DATA") || join(__dirname, "..", "data");
 
 export const gameConfig = new Config(defaultConfig);
 
@@ -22,4 +22,4 @@ dataConfig.server ||= {};
 dataConfig.game ||= {};
 
 // With the default ursamu.config.ts as the defaults
-gameConfig.setConfig(merge(defaultConfig, dataConfig));
+gameConfig.setConfig(lodash.merge(defaultConfig, dataConfig));
