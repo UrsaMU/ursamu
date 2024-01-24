@@ -10,7 +10,7 @@ import { target } from "../utils/target.ts";
 export default () =>
   addCmd({
     name: "look",
-    pattern: /^l(?:ook)?(?:\s+(.*))?/i,
+    pattern: /^l(?:o{0,2}k?)?(?:\s+(.*))?$/i,
     lock: "connected",
     exec: async (ctx, args) => {
       const query = await dbojs.query({ id: ctx.socket.cid });
