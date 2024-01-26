@@ -1,0 +1,4 @@
+#! /bin/bash
+echo "Starting UrsaMU."
+nohup  ./pup run  >  ./data/mu.log 2>&1 &
+echo "UrsaMU started."

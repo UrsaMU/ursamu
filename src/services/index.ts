@@ -7,3 +7,4 @@ export * from "./flags/index.ts";
 export * from "./parser/index.ts";
 export * from "./dice/index.ts";
 export * from "./events/index.ts";
+export * from "./conditions/index.ts";
