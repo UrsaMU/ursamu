@@ -21,9 +21,8 @@ export default () => {
         if (t) targets.push(t);
       }
 
-      // we need to build two lists, a list of target._ids and a list of targets
-      // with their Name(alias) notation. We'll use the latter to display the list in
-      // the page message.
+      const enactorId = `#${ctx.socket.cid}`;
+      const enactorName = moniker(en);
 
       const targetIds = targets
         .filter((t) => (t.id && t.flags.includes("connected") ? true : false))
@@ -33,14 +32,14 @@ export default () => {
         (t) => `${moniker(t)}${t.data?.alias ? "(" + t.data.alias + ")" : ""}`,
       );
 
-      // now we can send the page message to the targets
       let msgOrReply = msg ? msg?.trim() : reply?.trim();
       let tempmsg = "";
       let sendermsg = "";
-      let senderHeader = `To (${targetNames.join(", ")}),`;
+      let senderHeader = `You page (${targetNames.join(", ")}),`;
       let header = targetIds.length > 1
-        ? `To (${targetNames.join(", ")}),`
+        ? `From afar, to (${targetNames.join(", ")}),`
         : "From afar,";
+
       switch (true) {
         case msgOrReply?.trim().startsWith(";"):
           tempmsg = `${header} ${moniker(en)}${
@@ -81,20 +80,17 @@ export default () => {
         );
       }
 
-      if (!targetIds.length && !en.data?.lasstpage) {
+      if (!targetIds.length && !en.data?.lastpage) {
         return send([ctx.socket.id], "No one to page.", {});
       }
 
-      // now we can send the page message to the targets
       const targts = Array.from(new Set(targetIds));
-      send(
-        targts.map((t) => `#${t}`),
-        tempmsg,
-        {},
-      );
-      if (!targets.filter((ob) => ob._id === en._id).length) {
-        send([ctx.socket.id], sendermsg, {});
-      }
+      targts.forEach((targetId) => {
+        const isEnactor = `#${targetId}` === enactorId;
+        const messageToSend = isEnactor ? sendermsg : tempmsg;
+        send([`#${targetId}`], messageToSend, {});
+      });
+
       en.data ||= {};
       en.data.lastpage = targts;
       await dbojs.modify({ _id: en._id }, "$set", en);
