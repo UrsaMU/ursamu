@@ -5,9 +5,9 @@ import lodash from "npm:lodash@4.17.21";
 console.log(import.meta.url);
 
 let __dirname = "";
-if (!import.meta.url.startsWith("file://")) {
+if (import.meta.url.startsWith("file://")) {
   __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
-} else if (import.meta.url.startsWith("http")) {
+} else {
   __dirname = "./";
 }
 const __data = Deno.env.get("DATA") || join(__dirname, "..", "data");
