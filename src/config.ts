@@ -21,7 +21,7 @@ const dataConfig = await (async () => {
     return ret.default;
   } catch {
     try {
-      const ret = await import(join(__dirname, "./data/config.json"));
+      const ret = await import(join(__dirname, "./data/config.ts"));
       return ret.default;
     } catch (e) {
       console.log("Unable to load data/config.ts:", e);
