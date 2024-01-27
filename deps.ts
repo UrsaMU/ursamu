@@ -5,7 +5,7 @@ export const isnumber = lodash.isnumber;
 export const repeat = lodash.repeat;
 export const merge = lodash.merge;
 
-export * as dpath from "https://deno.land/std@0.208.0/path/mod.ts";
+export * as dpath from "https://deno.land/std@0.213.0/path/mod.ts";
 export * as dfs from "https://deno.land/std@0.208.0/fs/mod.ts";
 export { join } from "https://deno.land/std@0.210.0/path/mod.ts";
 export { MongoClient } from "npm:mongodb@6.3.0";
