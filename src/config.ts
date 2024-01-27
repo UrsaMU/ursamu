@@ -3,7 +3,13 @@ import defaultConfig from "./ursamu.config.ts";
 import { Config } from "./@types/index.ts";
 import lodash from "npm:lodash@4.17.21";
 console.log(import.meta.url);
-const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+
+let __dirname = "";
+if (!import.meta.url.startsWith("file://")) {
+  __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+} else if (import.meta.url.startsWith("http")) {
+  __dirname = "./";
+}
 const __data = Deno.env.get("DATA") || join(__dirname, "..", "data");
 
 export const gameConfig = new Config(defaultConfig);
