@@ -8,7 +8,7 @@ let __dirname = "";
 if (import.meta.url.startsWith("file://")) {
   __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 } else {
-  __dirname = join(Deno.cwd(), "src");
+  __dirname = "./src";
 }
 const __data = Deno.env.get("DATA") || join(__dirname, "..", "data");
 
@@ -19,9 +19,14 @@ const dataConfig = await (async () => {
   try {
     const ret = await import(join(__data, "config.ts"));
     return ret.default;
-  } catch (e) {
-    console.log("Unable to load data/config.ts:", e);
-    return {};
+  } catch {
+    try {
+      const ret = await import(join(__dirname, "./data/config.json"));
+      return ret.default;
+    } catch (e) {
+      console.log("Unable to load data/config.ts:", e);
+      return {};
+    }
   }
 })();
 
