@@ -8,9 +8,9 @@ let __dirname = "";
 if (import.meta.url.startsWith("file://")) {
   __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 } else {
-  __dirname = "./src";
+  __dirname = Deno.cwd();
 }
-const __data = Deno.env.get("DATA") || join(__dirname, "../", "data");
+const __data = Deno.env.get("DATA") || join(__dirname, "data");
 
 export const gameConfig = new Config(defaultConfig);
 
