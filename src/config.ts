@@ -8,7 +8,7 @@ let __dirname = "";
 if (import.meta.url.startsWith("file://")) {
   __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 } else {
-  __dirname = "./";
+  __dirname = "./src/";
 }
 const __data = Deno.env.get("DATA") || join(__dirname, "..", "data");
 
