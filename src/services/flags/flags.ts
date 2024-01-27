@@ -87,8 +87,18 @@ export const flags = new Tags(
     lock: "builder+",
   },
   {
-    name: "kinfolk",
-    code: "[k]",
+    name: "thing",
+    code: "T",
+    lock: "superuser",
+  },
+  {
+    name: "bucket",
+    code: "B",
+    lock: "builder+",
+  },
+  {
+    name: "job",
+    code: "J",
     lock: "builder+",
   },
 );

@@ -15,7 +15,7 @@ export const createObj = async (flgs: string, datas: any) => {
   };
 
   await dbojs.create(obj);
-  return await dbojs.query({ id });
+  return new Obj(await dbojs.queryOne({ id }));
 };
 
 export class Obj {
@@ -129,6 +129,11 @@ export class Obj {
 
   get stats() {
     return this.obj.data?.stats;
+  }
+
+  async set(key: string, value: any) {
+    this.attributes[key] = value;
+    await this.save();
   }
 
   async exits() {

@@ -147,7 +147,7 @@ export default () => {
       const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const boards = await bboard.query({});
+      const boards = await bboard.query({}) || [];
 
       if (!boards.length) {
         return send([socket.id], "%chGAME>%cn No boards found.");

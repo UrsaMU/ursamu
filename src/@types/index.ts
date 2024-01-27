@@ -17,3 +17,4 @@ export * from "./IHelp.ts";
 export * from "./Boards.ts";
 export * from "./IStat.ts";
 export * from "./IConditions.ts";
+export * from "./Jobs.ts";
