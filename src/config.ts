@@ -17,7 +17,7 @@ export const gameConfig = new Config(defaultConfig);
 // Pull config from data/ if it exists
 const dataConfig = await (async () => {
   try {
-    const ret = await import(join(__data, "config.ts"));
+    const ret = await import(join(__data, "./config.ts"));
     return ret.default;
   } catch {
     try {
