@@ -10,7 +10,7 @@ if (import.meta.url.startsWith("file://")) {
 } else {
   __dirname = Deno.cwd();
 }
-const __data = Deno.env.get("DATA") || join(__dirname, "data");
+const __data = Deno.env.get("DATA") || join(__dirname, "../data");
 
 export const gameConfig = new Config(defaultConfig);
 
