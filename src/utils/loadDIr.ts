@@ -1,10 +1,11 @@
 import { dfs, dpath, join, viewFiles } from "../../deps.ts";
 
-export async function plugins(source: string) {
+export async function plugins(source: string, mu?: any) {
   // Check if the source is a URL
   if (source.startsWith("http://") || source.startsWith("https://")) {
     const module = await import(source);
-    module.default?.();
+    if (mu) return module.default?.(mu);
+    return module.default?.();
   } else {
     // Handle local directory logic
     const entries = await (async () => {
@@ -28,7 +29,8 @@ export async function plugins(source: string) {
           return viewFiles.set(dpath.basename(entry.path), file);
         }
         const module = await import(dpath.toFileUrl(entry.path).toString());
-        module.default?.();
+        if (mu) return module.default?.(mu);
+        return module.default?.();
       }
     }
   }

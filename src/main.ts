@@ -11,7 +11,7 @@ import { dpath } from "../deps.ts";
 import { gameConfig } from "./config.ts";
 
 export const mu = async () => {
-  const __dirname = dpath.dirname(dpath.fromFileUrl(new URL(import.meta.url)));
+  const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 
   // Pull plugin list from config, default to all of the built-ins
   const pluginsList = gameConfig.server?.plugins || [];
