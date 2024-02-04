@@ -9,29 +9,29 @@ import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { dpath } from "../deps.ts";
 import { gameConfig } from "./config.ts";
+import { cmds } from "./index.ts";
 
-export const mu = async () => {
+export async function mu() {
   const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 
   // Pull plugin list from config, default to all of the built-ins
   const pluginsList = gameConfig.server?.plugins || [];
 
-  plugins(join(__dirname, "./commands"));
-  plugins(join(__dirname, "../views"));
+  await plugins(join(__dirname, "./commands"));
+  await plugins(join(__dirname, "../views"));
 
   // Iterate and install plugins
   for (const plug of pluginsList) {
     if (plug.startsWith("http://") || plug.startsWith("https://")) {
-      plugins(plug);
+      await plugins(plug);
     } else {
-      console.log(join(__dirname, plug));
-      plugins(join(__dirname, plug));
+      await plugins(join(__dirname, plug));
     }
-  }
 
-  // Load text files (later should be overridable in data/)
-  await loadTxtDir(join(__dirname, "../text"));
-  await loadTxtDir(join(__dirname, "../help"));
+    // Load text files (later should be overridable in data/)
+    await loadTxtDir(join(__dirname, "../text"));
+    await loadTxtDir(join(__dirname, "../help"));
+  }
 
   dbojs.init();
   chans.init();
@@ -79,7 +79,7 @@ export const mu = async () => {
     await broadcast("Server shutting down.");
     Deno.exit(0);
   });
-};
+}
 
 if (import.meta.main) {
   mu();

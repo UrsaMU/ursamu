@@ -4,16 +4,16 @@ import { Config } from "./@types/index.ts";
 import lodash from "npm:lodash@4.17.21";
 
 let __dirname = "";
+let __data = "";
 
 if (import.meta.url.startsWith("file://")) {
   __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+  __data = Deno.env.get("DATA") || join(__dirname, "../data");
 }
-
-const __data = Deno.env.get("DATA") || join(__dirname, "../data");
 
 export const gameConfig = new Config(defaultConfig);
 if (__dirname.startsWith("/")) {
-  console.log(__dirname);
+  console.log(__data);
   // Pull config from data/ if it exists
   const dataConfig = await (async () => {
     try {

@@ -22,6 +22,7 @@ export async function plugins(source: string, mu?: any) {
         return [];
       }
     })();
+
     for await (const entry of entries) {
       if (entry.isFile) {
         if (entry.path.endsWith(".hbs")) {
@@ -29,8 +30,8 @@ export async function plugins(source: string, mu?: any) {
           return viewFiles.set(dpath.basename(entry.path), file);
         }
         const module = await import(dpath.toFileUrl(entry.path).toString());
-        if (mu) return module.default?.(mu);
-        return module.default?.();
+        if (mu) module.default?.(mu);
+        module.default?.();
       }
     }
   }
