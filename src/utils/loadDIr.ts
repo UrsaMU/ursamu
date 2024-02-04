@@ -4,8 +4,8 @@ export async function plugins(source: string, mu?: any) {
   // Check if the source is a URL
   if (source.startsWith("http://") || source.startsWith("https://")) {
     const module = await import(source);
-    if (mu) return module.default?.(mu);
-    return module.default?.();
+    console.log(module.default());
+    console.log(`Loaded plugin from ${source}`);
   } else {
     // Handle local directory logic
     const entries = await (async () => {
@@ -27,11 +27,11 @@ export async function plugins(source: string, mu?: any) {
       if (entry.isFile) {
         if (entry.path.endsWith(".hbs")) {
           const file = await Deno.readTextFile(entry.path);
-          return viewFiles.set(dpath.basename(entry.path), file);
+          viewFiles.set(dpath.basename(entry.path), file);
+        } else {
+          const module = await import(dpath.toFileUrl(entry.path).toString());
+          const result = mu ? module.default?.(mu) : module.default?.();
         }
-        const module = await import(dpath.toFileUrl(entry.path).toString());
-        if (mu) module.default?.(mu);
-        module.default?.();
       }
     }
   }

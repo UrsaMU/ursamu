@@ -9,7 +9,6 @@ import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import { dpath } from "../deps.ts";
 import { gameConfig } from "./config.ts";
-import { cmds } from "./index.ts";
 
 export async function mu() {
   const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
@@ -27,6 +26,11 @@ export async function mu() {
     } else {
       await plugins(join(__dirname, plug));
     }
+
+    const stuff = await import(
+      "https://raw.githubusercontent.com/lcanady/plugin-wod5th/main/mod.ts"
+    );
+    stuff.default();
 
     // Load text files (later should be overridable in data/)
     await loadTxtDir(join(__dirname, "../text"));
@@ -67,6 +71,7 @@ export async function mu() {
       lock: "admin+",
     });
   }
+
   console.log(`Server started on port ${gameConfig.server?.ws}.`);
 
   Deno.addSignalListener("SIGINT", async () => {
