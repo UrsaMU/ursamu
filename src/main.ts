@@ -24,18 +24,14 @@ export async function mu() {
     if (plug.startsWith("http://") || plug.startsWith("https://")) {
       await plugins(plug);
     } else {
+      console.log(join(__dirname, plug));
       await plugins(join(__dirname, plug));
     }
-
-    const stuff = await import(
-      "https://raw.githubusercontent.com/lcanady/plugin-wod5th/main/mod.ts"
-    );
-    stuff.default();
-
-    // Load text files (later should be overridable in data/)
-    await loadTxtDir(join(__dirname, "../text"));
-    await loadTxtDir(join(__dirname, "../help"));
   }
+
+  // Load text files (later should be overridable in data/)
+  await loadTxtDir(join(__dirname, "../text"));
+  await loadTxtDir(join(__dirname, "../help"));
 
   dbojs.init();
   chans.init();
