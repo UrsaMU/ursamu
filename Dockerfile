@@ -2,6 +2,7 @@ ARG BASE=denoland/deno:ubuntu
 FROM $BASE
 
 RUN apt-get -y update && apt-get -y install build-essential bash
+RUN apt-get -y install git
 RUN mkdir /ursamu
 WORKDIR /ursamu
 ADD deps.ts docker-deps.ts LICENSE README.md pup pup.jsonc ursamu_github_banner.png /ursamu/
