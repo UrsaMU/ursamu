@@ -1,3 +1,4 @@
+import { IMSocket } from "../@types/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 
 export const playerForSocket = async (socket: IMSocket) => {
