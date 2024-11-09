@@ -21,7 +21,7 @@ export default () => {
         send(
           [ctx.socket.id],
           `Alias for ${tar.data.name} set to %ch${alias}%cn`,
-          {}
+          {},
         );
         dbojs.update({ id: tar.id }, { $set: { data: tar.data } });
       } else {

@@ -59,8 +59,8 @@ export default () => {
       }
 
       output += repeatString("%cr-%cn", 78) + "\n";
-      output +=
-        " " + ljust(`%ch${players.length}%cn players online`, 78) + "\n";
+      output += " " + ljust(`%ch${players.length}%cn players online`, 78) +
+        "\n";
       output += repeatString("%cr=%cn", 78);
       send([ctx.socket.id], output);
     },

@@ -25,14 +25,14 @@ export default () =>
       let output = center(
         `%cy[%cn %ch${displayName(en, tar)}%cn %cy]%cn`,
         78,
-        "%cr=%cn"
+        "%cr=%cn",
       );
 
       output += `\n${tar.description || "You see nothing special."}\n`;
 
       const contents = await dbojs.find({ location: tar.id });
       const players = contents.filter(
-        (c) => c.flags.includes("player") && c.flags.includes("connected")
+        (c) => c.flags.includes("player") && c.flags.includes("connected"),
       );
 
       const exits = (
@@ -62,7 +62,7 @@ export default () =>
             `  ${
               p.data?.shortdesc || "%ch%cxUse '+short <desc>' to set this.%cn"
             }`,
-            42
+            42,
           );
           output += "\n";
         });

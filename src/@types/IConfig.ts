@@ -32,7 +32,7 @@ export class Config {
     if (directory) {
       this.config = deepMerge(
         config,
-        require(`${directory}/ursamu.config.json`) as IConfig
+        require(`${directory}/ursamu.config.json`) as IConfig,
       );
     } else {
       this.config = config;

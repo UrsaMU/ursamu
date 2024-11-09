@@ -5,7 +5,7 @@ import pm2 from "pm2";
 function startProcess(
   scriptPath: string,
   name: string,
-  directory?: string
+  directory?: string,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     pm2.start(
@@ -22,7 +22,7 @@ function startProcess(
         }
         console.log(`${name} started successfully.`);
         resolve();
-      }
+      },
     );
   });
 }

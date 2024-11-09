@@ -25,11 +25,12 @@ export default () => {
 
       en.dbobj.data ||= {};
       const ids = tars.map((t) => `#${t.id}`) as string[];
-      if (en.dbobj.data.tempMail)
+      if (en.dbobj.data.tempMail) {
         return send(
           [ctx.socket.id],
-          "You already have a message started. Use @mail/send to send it."
+          "You already have a message started. Use @mail/send to send it.",
         );
+      }
 
       en.dbobj.data.tempMail = {
         from: `#${en.id}`,
@@ -42,7 +43,7 @@ export default () => {
       await dbojs.update({ id: en.id }, en.dbobj);
       await send(
         [ctx.socket.id],
-        "Enter your message with '-<text>'. Use @mail/send to send it."
+        "Enter your message with '-<text>'. Use @mail/send to send it.",
       );
     },
   });
@@ -58,12 +59,13 @@ export default () => {
 
       if (!en) return;
       en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
+      if (!en.dbobj.data.tempMail) {
         return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+      }
 
       if (marker === "~") {
-        en.dbobj.data.tempMail.message +=
-          message + " " + en.dbobj.data.tempMail.message;
+        en.dbobj.data.tempMail.message += message + " " +
+          en.dbobj.data.tempMail.message;
       } else if (marker === "-" && message === "-") {
         return force(ctx, "@mail/send");
       } else {
@@ -84,20 +86,22 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
       en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
+      if (!en.dbobj.data.tempMail) {
         return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+      }
 
       const message = en.dbobj.data.tempMail;
-      if (!message.message)
+      if (!message.message) {
         return send(
           [ctx.socket.id],
-          "%chMAIL:%cn No message entered. Use '-' to enter a message."
+          "%chMAIL:%cn No message entered. Use '-' to enter a message.",
         );
+      }
       await mail.insert(message);
       send([ctx.socket.id], "%chMAIL:%cn Message sent.");
       send(
         en.dbobj.data.tempMail.to,
-        `%chMAIL:%cn You have a new message from ${en.name}`
+        `%chMAIL:%cn You have a new message from ${en.name}`,
       );
       delete en.dbobj.data.tempMail;
       await dbojs.update({ id: en.id }, en.dbobj);
@@ -149,8 +153,9 @@ export default () => {
       if (!en) return;
 
       en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
+      if (!en.dbobj.data.tempMail) {
         return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+      }
 
       let names: string[] = [];
       for (const id of en.dbobj.data.tempMail.to) {
@@ -183,9 +188,11 @@ export default () => {
       }
 
       let output = "-".repeat(78) + "\n";
-      output += `From: ${en.name?.padEnd(
-        20
-      )} Subject: ${en.dbobj.data.tempMail.subject.slice(0, 60)}\n`;
+      output += `From: ${
+        en.name?.padEnd(
+          20,
+        )
+      } Subject: ${en.dbobj.data.tempMail.subject.slice(0, 60)}\n`;
       output += `To: ${names.join(", ")}\n`;
       if (cc.length) output += `CC: ${cc.join(", ")}\n`;
       if (bcc.length) output += `BCC: ${bcc.join(", ")}\n`;
@@ -206,12 +213,13 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
       en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
+      if (!en.dbobj.data.tempMail) {
         return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+      }
 
       en.dbobj.data.tempMail.message = en.dbobj.data.tempMail.message.replace(
         before,
-        after
+        after,
       );
 
       await dbojs.update({ id: en.id }, en.dbobj);
@@ -228,8 +236,9 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
       en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
+      if (!en.dbobj.data.tempMail) {
         return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+      }
 
       delete en.dbobj.data.tempMail;
       await dbojs.update({ id: en.id }, en.dbobj);
@@ -247,8 +256,9 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
       en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
+      if (!en.dbobj.data.tempMail) {
         return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+      }
 
       en.dbobj.data.tempMail.cc ||= [];
       for (const tar of targets.split(",")) {
@@ -272,8 +282,9 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
       en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
+      if (!en.dbobj.data.tempMail) {
         return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+      }
 
       en.dbobj.data.tempMail.bcc ||= [];
       for (const tar of targets.split(",")) {
@@ -296,11 +307,12 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
       const mails = (await mail.find({ to: { $in: [en.dbref] } })).sort(
-        (a, b) => a.date - b.date
+        (a, b) => a.date - b.date,
       );
       const num = +args[0];
-      if (num > mails.length || num < 1)
+      if (num > mails.length || num < 1) {
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
+      }
       const m = mails[num - 1];
       const from = await Obj.get(m.from);
       const to = await Promise.all(m.to.map((id) => Obj.get(id)));
@@ -309,9 +321,11 @@ export default () => {
         ? await Promise.all(m.bcc.map((id) => Obj.get(id)))
         : "";
       let output = center(`%b%chMAIL: ${num}%cn%b`, 78, "=") + "\n";
-      output += `From: ${from?.name
-        ?.padEnd(15)
-        .slice(0, 15)} Subject: ${m.subject.padEnd(45).slice(0, 45)}\n`;
+      output += `From: ${
+        from?.name
+          ?.padEnd(15)
+          .slice(0, 15)
+      } Subject: ${m.subject.padEnd(45).slice(0, 45)}\n`;
       output += `To: ${to.map((t) => t?.name || "").join(", ")}\n`;
       if (cc) output += `CC: ${cc.map((t) => t?.name).join(", ")}\n`;
       if (bcc) output += `BCC: ${bcc.map((t) => t?.name).join(", ")}\n`;
@@ -335,7 +349,7 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
       const mails = (await mail.find({ to: { $in: [en.dbref] } })).sort(
-        (a, b) => a.date - b.date
+        (a, b) => a.date - b.date,
       );
       let output = center(`%b%chMAIL: ${mails.length}%cn%b`, 78, "=") + "\n";
       for (const m of mails) {
@@ -347,9 +361,11 @@ export default () => {
           : "";
         output += `${en.dbobj.data?.mailread?.includes(m._id!) ? " " : "U"} ${
           mails.indexOf(m) + 1
-        } From: ${from?.name?.padEnd(15).slice(0, 15)} Subject: ${m.subject
-          .padEnd(45)
-          .slice(0, 45)}\n`;
+        } From: ${from?.name?.padEnd(15).slice(0, 15)} Subject: ${
+          m.subject
+            .padEnd(45)
+            .slice(0, 45)
+        }\n`;
       }
       output += "=".repeat(78);
       send([ctx.socket.id], output);
@@ -366,21 +382,26 @@ export default () => {
       if (!en) return;
       const mails = await mail.find({ to: { $in: [en.dbref] } });
       const num = parseInt(args[1]);
-      if (num > mails.length || num < 1)
+      if (num > mails.length || num < 1) {
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
+      }
       const m = mails[num - 1];
       const from = await Obj.get(m.from);
       const to = await Promise.all(m.to.map((id) => Obj.get(id)));
       const cc = m.cc ? await Promise.all(m.cc.map((id) => Obj.get(id))) : "";
       let output = center(`%b%chMAIL: ${num}%cn%b`, 78, "=") + "\n";
-      output += `From: ${from?.name
-        ?.padEnd(15)
-        .slice(0, 25)} Subject: ${m.subject.padEnd(48).slice(0, 48)}\n`;
-      output += `To: ${to
-        .map((p) => p?.name)
-        .join(", ")
-        .padEnd(15)
-        .slice(0, 15)}\n`;
+      output += `From: ${
+        from?.name
+          ?.padEnd(15)
+          .slice(0, 25)
+      } Subject: ${m.subject.padEnd(48).slice(0, 48)}\n`;
+      output += `To: ${
+        to
+          .map((p) => p?.name)
+          .join(", ")
+          .padEnd(15)
+          .slice(0, 15)
+      }\n`;
       if (cc) output += `CC: ${cc.map((p) => p?.name).join(", ")}\n`;
       output += "-".repeat(78) + "\n";
       output += m.message + "\n";
@@ -405,15 +426,17 @@ export default () => {
       if (!en) return;
       const mails = await mail.find({ to: { $in: [en.dbref] } });
       const num = parseInt(args[0]);
-      if (num > mails.length || num < 1)
+      if (num > mails.length || num < 1) {
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
+      }
       const m = mails[num - 1];
       const readers = await dbojs.find({ "data.mailread": { $in: [m._id] } });
-      if (readers.length)
+      if (readers.length) {
         return send(
           [ctx.socket.id],
-          "%chMAIL:%cn Message has been read, cannot delete."
+          "%chMAIL:%cn Message has been read, cannot delete.",
         );
+      }
 
       await mail.remove({ _id: m._id });
       send([ctx.socket.id], "%chMAIL:%cn Message deleted.");
@@ -430,8 +453,9 @@ export default () => {
       if (!en) return;
       const mails = await mail.find({ to: { $in: [en.dbref] } });
       const num = parseInt(args[0]);
-      if (num > mails.length || num < 1)
+      if (num > mails.length || num < 1) {
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
+      }
       const m = mails[num - 1];
       const from = await Obj.get(m.from);
       en.dbobj.data ||= {};
@@ -472,7 +496,7 @@ export default () => {
         [ctx.socket.id],
         `%chMAIL:%cn You have %ch${
           mails.filter((m) => !en.dbobj.data?.mailread?.includes(m._id!)).length
-        }%cn new messages.`
+        }%cn new messages.`,
       );
     },
   });
@@ -487,8 +511,9 @@ export default () => {
       if (!en) return;
       const mails = await mail.find({ to: { $in: [en.dbref] } });
       const num = parseInt(args[1]);
-      if (num > mails.length || num < 1)
+      if (num > mails.length || num < 1) {
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
+      }
       const m = mails[num - 1];
       const from = await Obj.get(m.from);
       const to = await Promise.all(m.to.map((id) => Obj.get(id)));
@@ -521,8 +546,9 @@ export default () => {
       if (!en) return;
       const mails = await mail.find({ to: { $in: [en.dbref] } });
       const num = +args[0];
-      if (num > mails.length || num < 1)
+      if (num > mails.length || num < 1) {
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
+      }
       const m = mails[num - 1];
 
       en.dbobj.data ||= {};
@@ -533,7 +559,8 @@ export default () => {
         en.dbobj.data.tempMail = {
           to: [to?.dbref],
           subject: `Fwd: ${m.subject}`,
-          message: `---------- Forwarded message ----------\nFrom: ${m.from}\nSubject: ${m.subject}\n\n${m.message}\n----------- End Forward Message -----------\n`,
+          message:
+            `---------- Forwarded message ----------\nFrom: ${m.from}\nSubject: ${m.subject}\n\n${m.message}\n----------- End Forward Message -----------\n`,
           from: en.dbref,
           date: Date.now(),
         };

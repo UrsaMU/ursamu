@@ -1,5 +1,5 @@
 import { IDBOBJ } from "../@types";
-import { Obj, flags } from "../services";
+import { flags, Obj } from "../services";
 
 export const checkFlags = (tar: IDBOBJ | Obj, flgs: string) =>
-  flags.check(tar.flags, (flgs = ""));
+  flags.check(tar.flags, flgs = "");

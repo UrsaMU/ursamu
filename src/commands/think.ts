@@ -1,4 +1,4 @@
-import { Obj, dbojs } from "../services";
+import { dbojs, Obj } from "../services";
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import parser from "../services/parser/parser";
@@ -20,7 +20,7 @@ export default () =>
           msg,
           data: { enactor, target: enactor },
           scope: {},
-        })) as string
+        })) as string,
       );
     },
   });

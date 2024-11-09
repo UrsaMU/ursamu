@@ -1,4 +1,4 @@
-import { Obj, addCmd, send } from "../services";
+import { addCmd, Obj, send } from "../services";
 import { canEdit, target } from "../utils";
 
 export default () => {
@@ -31,14 +31,12 @@ export default () => {
       if (attr) {
         if (!args[2]) {
           tarObj.data.attributes = tarObj.data.attributes?.filter(
-            (a) => a.name !== attr.name
+            (a) => a.name !== attr.name,
           );
           await tarObj.save();
           return await send(
             [ctx.socket.id],
-            `%chGame>%cn  ${
-              tarObj.name
-            }'s attribute %ch${attr.name.toUpperCase()}%cn removed.`
+            `%chGame>%cn  ${tarObj.name}'s attribute %ch${attr.name.toUpperCase()}%cn removed.`,
           );
         } else {
           attr.value = args[2];
@@ -46,9 +44,7 @@ export default () => {
           await tarObj.save();
           return await send(
             [ctx.socket.id],
-            `%chGame>%cn  ${
-              tarObj.name
-            }'s attribute %ch${attr.name.toUpperCase()}%cn set.`
+            `%chGame>%cn  ${tarObj.name}'s attribute %ch${attr.name.toUpperCase()}%cn set.`,
           );
         }
       } else {
@@ -65,9 +61,9 @@ export default () => {
         await tarObj.save();
         return await send(
           [ctx.socket.id],
-          `%chGame>%cn  ${
-            tarObj.name
-          }'s attribute %ch${args[0].toUpperCase()}%cn set.`
+          `%chGame>%cn  ${tarObj.name}'s attribute %ch${
+            args[0].toUpperCase()
+          }%cn set.`,
         );
       }
     },

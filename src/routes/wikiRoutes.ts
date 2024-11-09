@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Obj, flags, wiki } from "../services";
+import { flags, Obj, wiki } from "../services";
 import { IMError } from "../@types";
 import authMiddleware from "../middleware/authMiddleware";
 
@@ -97,7 +97,7 @@ router.put("/:id", authMiddleware, async (req, res, next) => {
         ...req.body,
         updatedBy: en?.dbref,
         updatedAt: new Date(),
-      }
+      },
     );
 
     res.status(200).json(updatedEntry);

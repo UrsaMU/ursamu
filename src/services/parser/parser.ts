@@ -10,7 +10,6 @@ parser.addSubs(
   { before: /%r/g, after: "\n" },
   { before: /%b/g, after: " ", strip: " " },
   { before: /%t/g, after: "\t" },
-
   //color
   { before: /%[cx]n/g, after: "\x1b[0m", strip: "" },
   { before: /%[cx]x/g, after: "\x1b[30m", strip: "" },
@@ -24,7 +23,7 @@ parser.addSubs(
   { before: /%[cx]h/g, after: "\x1b[1m", strip: "" },
   { before: /%[cx]u/g, after: "\x1b[4m", strip: "" },
   { before: /%[cx]i/g, after: "\x1b[3m", strip: "" },
-  { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" }
+  { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
 );
 
 parser.addSubs(
@@ -32,7 +31,6 @@ parser.addSubs(
   { before: /%r/g, after: "<br />" },
   { before: /%b/g, after: "&nbsp;", strip: " " },
   { before: /%t/g, after: "&nbsp;&nbsp;&nbsp;&nbsp;" },
-
   //color
   {
     before: /%[cx]n/g,
@@ -54,7 +52,7 @@ parser.addSubs(
     strip: "",
   },
   { before: /%[cx]i/g, after: "<i>", strip: "" },
-  { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" }
+  { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
 );
 
 parser.add("add", (args) => args.reduce((a: string, b: string) => +a + +b, 0));

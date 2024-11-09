@@ -1,6 +1,5 @@
 import { IDBOBJ, IMStatEntry } from "../../../@types";
 
-
 export const formatValue = (obj: IDBOBJ, stat: string): string => {
   const statEntry = obj.data?.stats?.find((s: IMStatEntry) =>
     s.name.toLowerCase().startsWith(stat.toLowerCase())

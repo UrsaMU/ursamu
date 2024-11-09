@@ -1,5 +1,5 @@
 import { isNumber } from "lodash";
-import { Obj, addCmd, roll, send } from "../services";
+import { addCmd, Obj, roll, send } from "../services";
 import { moniker } from "../utils";
 import { getStat, statObj } from "../plugins/wod/services";
 
@@ -74,14 +74,19 @@ export default () => {
         critical = true;
       }
 
-      const succsessesColor =
-        successes > 0 ? `%ch%cg${successes}%cn` : `%ch%cy${successes}%cn`;
+      const succsessesColor = successes > 0
+        ? `%ch%cg${successes}%cn`
+        : `%ch%cy${successes}%cn`;
 
-      let output = `%ch%cyROLL>%cn ${moniker(
-        en
-      )} rolls ${pool} -> ${succsessesColor} success(es) (${diceColor.join(
-        " "
-      )})`;
+      let output = `%ch%cyROLL>%cn ${
+        moniker(
+          en,
+        )
+      } rolls ${pool} -> ${succsessesColor} success(es) (${
+        diceColor.join(
+          " ",
+        )
+      })`;
 
       await send([`#${en.location}`], output);
     },

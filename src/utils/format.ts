@@ -5,7 +5,7 @@ export const repeatString = (string = " ", length: number) => {
   // check how many spaces are left after the filler string is rendered. We will need
   // to render these last few spaces manually.
   const remainder = Math.floor(
-    length % parser.stripSubs("telnet", string).length
+    length % parser.stripSubs("telnet", string).length,
   );
 
   // Split the array and filter out empty cells.
@@ -20,7 +20,6 @@ export const repeatString = (string = " ", length: number) => {
           return cell;
         }
       })
-
       // fire the substitutions on each cell.
       .map((cell) => {
         return "%" + cell + "%cn";
@@ -55,7 +54,7 @@ export const ljust = (string = "", length: number, filler = " ") => {
 
 export const center = (string = "", length: number, filler = " ") => {
   const left = Math.floor(
-    (length - parser.stripSubs("telnet", string).length) / 2
+    (length - parser.stripSubs("telnet", string).length) / 2,
   );
   const right = length - parser.stripSubs("telnet", string).length - left;
   return repeatString(filler, left) + string + repeatString(filler, right);

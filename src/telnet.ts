@@ -1,4 +1,4 @@
-import { Socket, createServer } from "net";
+import { createServer, Socket } from "net";
 import { io } from "socket.io-client";
 import cfg from "./ursamu.config";
 import parser from "./services/parser/parser";
@@ -39,7 +39,9 @@ const handleSocketIO = (socket: ITelnetSocket, sock: any) => {
 
   sock.io.on("reconnect", () => {
     if (socket.cid) {
-      socket.write(parser.substitute("telnet", "%ch%cgReconnected to game server.%cn\r\n"));
+      socket.write(
+        parser.substitute("telnet", "%ch%cgReconnected to game server.%cn\r\n"),
+      );
       sock.emit("message", {
         msg: "",
         data: {
@@ -53,25 +55,37 @@ const handleSocketIO = (socket: ITelnetSocket, sock: any) => {
   sock.io.on("reconnect_attempt", () => {
     if (!socket.reconnecting) {
       socket.reconnecting = true;
-      socket.write(parser.substitute("telnet", "%ch%cyAttempting to reconnect...%cn\r\n"));
+      socket.write(
+        parser.substitute("telnet", "%ch%cyAttempting to reconnect...%cn\r\n"),
+      );
     }
   });
 
   sock.io.on("reconnect_error", () => {
-    socket.write(parser.substitute("telnet", "%ch%crReconnection failed, retrying...%cn\r\n"));
+    socket.write(
+      parser.substitute(
+        "telnet",
+        "%ch%crReconnection failed, retrying...%cn\r\n",
+      ),
+    );
   });
 
   sock.io.on("disconnect", () => {
-    socket.write(parser.substitute("telnet", "%ch%cyTemporarily disconnected from game server, attempting to reconnect...%cn\r\n"));
+    socket.write(
+      parser.substitute(
+        "telnet",
+        "%ch%cyTemporarily disconnected from game server, attempting to reconnect...%cn\r\n",
+      ),
+    );
   });
 };
 
 const handleTelnetSocket = (socket: ITelnetSocket) => {
   socket.on("data", (data) => {
     if (socket.socketIO) {
-      socket.socketIO.emit("message", { 
-        msg: data.toString(), 
-        data: { cid: socket.cid } 
+      socket.socketIO.emit("message", {
+        msg: data.toString(),
+        data: { cid: socket.cid },
       });
     }
   });
@@ -99,7 +113,7 @@ const handleTelnetSocket = (socket: ITelnetSocket) => {
 const server = createServer(async (socket: ITelnetSocket) => {
   try {
     socket.write((await readFile(join(directory), "utf-8")) + "\r\n");
-    
+
     const sock = io(`http://localhost:${cfg.config.server?.ws}`, {
       reconnection: true,
       reconnectionAttempts: Infinity,
@@ -109,7 +123,6 @@ const server = createServer(async (socket: ITelnetSocket) => {
 
     handleSocketIO(socket, sock);
     handleTelnetSocket(socket);
-
   } catch (error) {
     console.error("Error in telnet server:", error);
     socket.end();
@@ -120,8 +133,10 @@ server.on("error", (err) => {
   console.error("Telnet server error:", err);
 });
 
-server.listen(cfg.config.server?.telnet, () =>
-  console.log(`Telnet server listening on port ${cfg.config.server?.telnet}`)
+server.listen(
+  cfg.config.server?.telnet,
+  () =>
+    console.log(`Telnet server listening on port ${cfg.config.server?.telnet}`),
 );
 
 export { activeSockets };

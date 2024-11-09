@@ -1,5 +1,5 @@
 import { Request, Response, Router } from "express";
-import { Obj, dbojs } from "../services";
+import { dbojs, Obj } from "../services";
 import { compare } from "bcryptjs";
 import { sign } from "../services/jwt";
 import { config } from "dotenv";

@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { Obj, addCmd } from "../services";
+import { addCmd, Obj } from "../services";
 import { join } from "path";
 import { cwd } from "process";
 

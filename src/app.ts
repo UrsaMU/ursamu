@@ -45,7 +45,7 @@ app.use(
     res
       .status(error.status || 500)
       .json({ error: true, status: error.status, message: error.message });
-  }
+  },
 );
 
 const handleSocketConnection = (socket: IMSocket) => {
@@ -54,7 +54,7 @@ const handleSocketConnection = (socket: IMSocket) => {
       if (message.data?.cid) {
         const cid = message.data.cid as number;
         socket.cid = cid;
-        
+
         // Add socket to connected sockets map
         if (!connectedSockets.has(cid)) {
           connectedSockets.set(cid, new Set());
@@ -83,7 +83,7 @@ const handleSocketConnection = (socket: IMSocket) => {
           await setFlags(player, "connected");
           await send(
             [`#${player.location}`],
-            `${moniker(player)} reconnects.`
+            `${moniker(player)} reconnects.`,
           );
         }
         return;
@@ -119,7 +119,7 @@ const handleSocketDisconnect = async (socket: IMSocket) => {
           await setFlags(en, "!connected");
           await send(
             [`#${en.location}`],
-            `${moniker(en)} has disconnected.`
+            `${moniker(en)} has disconnected.`,
           );
         }
       } else {
@@ -127,7 +127,7 @@ const handleSocketDisconnect = async (socket: IMSocket) => {
         if (en) {
           await send(
             [`#${en.location}`],
-            `${moniker(en)} has partially disconnected.`
+            `${moniker(en)} has partially disconnected.`,
           );
         }
       }

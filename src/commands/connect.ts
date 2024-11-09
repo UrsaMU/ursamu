@@ -26,8 +26,8 @@ export default () =>
         await dbojs.find({
           $or: [
             { "data.name": { $regex: new RegExp(`^${name}$`, "i") } },
-            { "data.alias": { $regex: new RegExp(`^${name}$`, "i") } }
-          ]
+            { "data.alias": { $regex: new RegExp(`^${name}$`, "i") } },
+          ],
         })
       )[0];
 
@@ -50,14 +50,14 @@ export default () =>
       ctx.socket.join(`#${found.location}`);
       await setFlags(found, "connected");
       found.data ||= {};
-      
+
       // Update only the necessary fields, excluding _id
       const updateData = {
         flags: found.flags,
         location: found.location,
-        data: found.data
+        data: found.data,
       };
-      
+
       await dbojs.update({ id: found.id }, { $set: updateData });
       await send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
         cid: found.id,
@@ -66,7 +66,7 @@ export default () =>
       await send(
         [`#${found.location}`],
         `${moniker(found)} has connected.`,
-        {}
+        {},
       );
       await force(ctx, "@mail/notify");
       await joinChans(ctx);

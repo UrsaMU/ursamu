@@ -4,15 +4,23 @@
 
 ## Welcome to UrsaMU!
 
-UrsaMU is an innovative, Typescript-based server, echoing the classic MUSH (Multi-User Shared Hallucination) experience with a modern twist. Designed for flexibility and extendability, it's an ideal platform for creating immersive, text-based virtual worlds.
+UrsaMU is an innovative, Typescript-based server, echoing the classic MUSH
+(Multi-User Shared Hallucination) experience with a modern twist. Designed for
+flexibility and extendability, it's an ideal platform for creating immersive,
+text-based virtual worlds.
 
 ## What's a MUSH?
 
-MUSH, a text-driven, multi-user environment, is rooted in the legacy of MUDs (Multi-User Dungeons) - the early ancestors of today's MMORPGs. These platforms are renowned for their customizability, serving as fertile grounds for role-playing adventures and vibrant social hubs.
+MUSH, a text-driven, multi-user environment, is rooted in the legacy of MUDs
+(Multi-User Dungeons) - the early ancestors of today's MMORPGs. These platforms
+are renowned for their customizability, serving as fertile grounds for
+role-playing adventures and vibrant social hubs.
 
 ## And a MUSH-Like?
 
-UrsaMU stands as a MUSH-like server - embodying the essence of MUSH but with distinct features and enhancements, offering a unique twist on traditional text-based online environments.
+UrsaMU stands as a MUSH-like server - embodying the essence of MUSH but with
+distinct features and enhancements, offering a unique twist on traditional
+text-based online environments.
 
 ## Getting Started with UrsaMU
 
@@ -31,7 +39,6 @@ git clone https://github.com/ursamu/ursamu.git
 cd ursamu
 npm i -g pm2 ts-node
 npm i
-
 ```
 
 ### Starting the Server:
@@ -56,11 +63,14 @@ npm run stop  # Gracefully stop UrsaMU
 
 ### Contributing
 
-Your contributions are what make UrsaMU better! Feel free to fork, send pull requests, or open issues for discussion on enhancements or bug fixes. For significant changes, we recommend opening an issue first to discuss your ideas.
+Your contributions are what make UrsaMU better! Feel free to fork, send pull
+requests, or open issues for discussion on enhancements or bug fixes. For
+significant changes, we recommend opening an issue first to discuss your ideas.
 
 ## License
 
-UrsaMU is open-sourced under the MIT License. Embrace the freedom to use, modify, and distribute it as you see fit.
+UrsaMU is open-sourced under the MIT License. Embrace the freedom to use,
+modify, and distribute it as you see fit.
 
 ---
 

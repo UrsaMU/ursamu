@@ -90,5 +90,5 @@ export const flags = new Tags(
     name: "kinfolk",
     code: "[k]",
     lock: "builder+",
-  }
+  },
 );

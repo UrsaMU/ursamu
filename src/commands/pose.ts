@@ -11,8 +11,9 @@ export default () =>
       const player = await dbojs.findOne({ id: ctx.socket.cid });
       if (!player) return;
       const name = player.data?.moniker || player.data?.name;
-      const msg =
-        args[0] === ";" ? `${name}${args[1]}%cn` : `${name} ${args[1]}%cn`;
+      const msg = args[0] === ";"
+        ? `${name}${args[1]}%cn`
+        : `${name} ${args[1]}%cn`;
 
       send([`#${player.location}`], msg, {});
     },

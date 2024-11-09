@@ -101,7 +101,7 @@ export class Obj {
       flags: this.obj.flags,
       data: this.obj.data,
       location: this.obj.location,
-      description: this.obj.description
+      description: this.obj.description,
     };
     await dbojs.update({ id: this.id }, { $set: updateData });
   }

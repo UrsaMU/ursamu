@@ -23,7 +23,7 @@ export default () =>
         send(
           [`#${player.id}`],
           "You can't change someone's moniker to something that doesn't match their name.",
-          {}
+          {},
         );
         return;
       }
@@ -32,7 +32,7 @@ export default () =>
       send(
         [ctx.socket.id],
         `You have set ${tar.data.name}'s moniker to ${args[1]}.`,
-        {}
+        {},
       );
     },
   });

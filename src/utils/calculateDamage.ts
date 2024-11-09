@@ -5,7 +5,7 @@ const calculateDamage = async (
   obj: IDBOBJ,
   superficial: number,
   aggravated: number,
-  type: string
+  type: string,
 ) => {
   const maxBoxes = +(await getStat(obj, "stamina")) + 3;
   const characterType = await getStat(obj, "splat");
@@ -42,7 +42,7 @@ const calculateDamage = async (
   // Check for Impaired or Incapacitated status
   const filledBoxes = damageBoxes.reduce(
     (acc, val) => acc + (val !== "[ ]" ? 1 : 0),
-    0
+    0,
   );
 
   if (filledBoxes >= maxBoxes) {

@@ -7,7 +7,7 @@ export const loadDir = async (dir: string) => {
   const dirent = await readdir(dir);
   const files = dirent.filter(
     (file) =>
-      file.endsWith(".ts") || (file.endsWith(".js") && !file.endsWith(".d.ts"))
+      file.endsWith(".ts") || (file.endsWith(".js") && !file.endsWith(".d.ts")),
   );
 
   files.forEach((file) => {
@@ -18,7 +18,7 @@ export const loadDir = async (dir: string) => {
 
 export const loadDirCallback = (
   dir: string,
-  callback: (file: any, dir: string) => void
+  callback: (file: any, dir: string) => void,
 ) => {
   fs.readdir(dir, (err, files) => {
     if (err) throw err;

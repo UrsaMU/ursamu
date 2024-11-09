@@ -1,4 +1,4 @@
-import { readFile, readdir } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 import { addCmd, cmds } from "../services/commands";
 import { dbojs } from "../services/Database";
@@ -15,13 +15,13 @@ export default async () => {
   });
 
   const files = dirent.filter(
-    (dirent) => dirent.isFile() && dirent.name.endsWith(".md")
+    (dirent) => dirent.isFile() && dirent.name.endsWith(".md"),
   );
 
   for (const file of files) {
     const textFile = await readFile(
       join(__dirname, `../../help/${file.name}`),
-      "utf8"
+      "utf8",
     );
     text.set(`${file.name.replace(".md", "").replace(".txt", "")}`, textFile);
   }
@@ -64,32 +64,30 @@ export default async () => {
             .localeCompare(parser.stripSubs("telnet", b.name.toLowerCase()))
         );
 
-      let output =
-        center(
-          `%cy[%cn %ch%cc${
-            cfg.config.game?.name ? cfg.config.game.name + " " : ""
-          }%cn%chHelp%cn System %cy]%cn`,
-          78,
-          "%cr=%cn"
-        ) + "\n";
+      let output = center(
+        `%cy[%cn %ch%cc${
+          cfg.config.game?.name ? cfg.config.game.name + " " : ""
+        }%cn%chHelp%cn System %cy]%cn`,
+        78,
+        "%cr=%cn",
+      ) + "\n";
 
       for (const cat of Array.from(cats).sort((a, b) => a.localeCompare(b))) {
         output +=
           center(`%cy[%cn %ch${cat.toUpperCase()}%cn %cy]%cn`, 78, "%cr-%cn") +
           "\n";
-        output +=
-          columns(
-            commands
-              .filter((c: any) => {
-                if (c.category?.toLowerCase() === cat?.toLowerCase()) {
-                  return true;
-                }
-              })
-              .map((c: any) => c.name),
-            78,
-            4,
-            " "
-          ) + "\n\n";
+        output += columns(
+          commands
+            .filter((c: any) => {
+              if (c.category?.toLowerCase() === cat?.toLowerCase()) {
+                return true;
+              }
+            })
+            .map((c: any) => c.name),
+          78,
+          4,
+          " ",
+        ) + "\n\n";
       }
 
       output +=
@@ -107,23 +105,21 @@ export default async () => {
     exec: async (ctx, args) => {
       const topic = args[0];
       if (text.has(`help_${topic}`)) {
-        let output =
-          center(
-            `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
-            78,
-            "%cr-%cn"
-          ) + "\n";
+        let output = center(
+          `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
+          78,
+          "%cr-%cn",
+        ) + "\n";
         output += text.get(`help_${topic}`) || "";
         output += repeatString("%cr-%cn", 78);
         send([ctx.socket.id], output, {});
         return;
       } else if (text.has(`topic_${topic}`)) {
-        let output =
-          center(
-            `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
-            78,
-            "%cr-%cn"
-          ) + "\n";
+        let output = center(
+          `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
+          78,
+          "%cr-%cn",
+        ) + "\n";
         output += text.get(`topic_${topic}`) || "";
         output += repeatString("%cr-%cn", 78);
         send([ctx.socket.id], output, {});

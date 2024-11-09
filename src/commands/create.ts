@@ -30,8 +30,8 @@ export default () =>
       const taken = await dbojs.find({
         $or: [
           { "data.name": { $regex: new RegExp(`^${name}$`, "i") } },
-          { "data.alias": { $regex: new RegExp(`^${name}$`, "i") } }
-        ]
+          { "data.alias": { $regex: new RegExp(`^${name}$`, "i") } },
+        ],
       });
 
       if (taken.length > 0) {
@@ -41,8 +41,9 @@ export default () =>
         return;
       }
 
-      const flags =
-        players.length > 0 ? "player connected" : "player connected superuser";
+      const flags = players.length > 0
+        ? "player connected"
+        : "player connected superuser";
       const id = await getNextId();
       const player = await dbojs.insert({
         id,
@@ -52,7 +53,7 @@ export default () =>
           name,
           home: cfg.config.game?.playerStart,
           password: await hash(password, 10),
-          lastCommand: Date.now()
+          lastCommand: Date.now(),
         },
       });
 

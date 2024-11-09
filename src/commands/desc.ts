@@ -26,7 +26,7 @@ export default () =>
         send(
           [ctx.socket.id],
           `Description for %ch${displayName(en, tar)}%cn set!`,
-          {}
+          {},
         );
         return;
       }

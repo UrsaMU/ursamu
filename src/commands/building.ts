@@ -33,7 +33,7 @@ export default () => {
       send(
         [ctx.socket.id],
         `Room ${room} created with dbref %ch#${roomObj.id}%cn.`,
-        {}
+        {},
       );
 
       // If to exit exits, dig it.
@@ -53,7 +53,7 @@ export default () => {
         send(
           [ctx.socket.id],
           `Exit ${to.split(";")[0]} created with dbref %ch#${toObj.id}%cn.`,
-          {}
+          {},
         );
       }
 
@@ -74,7 +74,7 @@ export default () => {
         send(
           [ctx.socket.id],
           `Exit ${from.split(";")[0]} created with dbref %ch#${fromObj.id}%cn.`,
-          {}
+          {},
         );
       }
 
@@ -115,17 +115,17 @@ export default () => {
       send(
         [ctx.socket.id],
         `You teleport ${moniker(tar)} to %ch${displayName(en, locObj)}%cn.`,
-        {}
+        {},
       );
       send(
         [`#${tar.id}`],
         `You are teleported to %ch${displayName(en, locObj)}%cn.`,
-        {}
+        {},
       );
       send(
         [`#${tar.data?.location}`],
         `%ch${moniker(en)}%cn teleports out.`,
-        {}
+        {},
       );
       ctx.socket.join(`#${locObj.id}`);
       send([`#${locObj.id}`], `%ch${moniker(en)}%cn teleports in.`, {});
@@ -147,24 +147,26 @@ export default () => {
 
       const obj = await target(en, name, true);
 
-      if (!obj || !canEdit(en, obj))
+      if (!obj || !canEdit(en, obj)) {
         return send([ctx.socket.id], "You can't destroy that.", {});
+      }
       if (
         obj &&
         obj.flags.includes("safe") &&
         swtch?.toLowerCase() !== "override"
-      )
+      ) {
         return send(
           [ctx.socket.id],
           "You can't destroy that. It's safe. Try using the 'override' switch.",
-          {}
+          {},
         );
+      }
 
       if (obj.flags.includes("void")) {
         return send(
           [ctx.socket.id],
           "You can't destroy that. It's the void.",
-          {}
+          {},
         );
       }
 
@@ -226,11 +228,13 @@ export default () => {
       if (roomObj) {
         send(
           [ctx.socket.id],
-          `You open exit %ch${displayName(en, exit)} to ${displayName(
-            en,
-            roomObj
-          )}.`,
-          {}
+          `You open exit %ch${displayName(en, exit)} to ${
+            displayName(
+              en,
+              roomObj,
+            )
+          }.`,
+          {},
         );
       } else {
         send([ctx.socket.id], `You open exit ${displayName(en, exit)}.`, {});
