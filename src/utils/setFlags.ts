@@ -11,7 +11,13 @@ export const setFlags = async (dbo: IDBOBJ, flgs: string) => {
   dbo.data = data;
 
   const socket = await getSocket(dbo.id);
-  const done = await dbojs.update({ id: dbo.id }, dbo);
+  const updateData = {
+    flags: dbo.flags,
+    data: dbo.data,
+    location: dbo.location
+  };
+  
+  const done = await dbojs.update({ id: dbo.id }, { $set: updateData });
 
   if (socket) {
     const ctx: IContext = { socket, msg: "l", data: {} };

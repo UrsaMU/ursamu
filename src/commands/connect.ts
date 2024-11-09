@@ -24,14 +24,13 @@ export default () =>
 
       const found = (
         await dbojs.find({
-          $where: function () {
-            return (
-              this.data.name?.toLowerCase() === name?.toLowerCase() ||
-              this.data.alias?.toLowerCase() === name?.toLowerCase()
-            );
-          },
+          $or: [
+            { "data.name": { $regex: new RegExp(`^${name}$`, "i") } },
+            { "data.alias": { $regex: new RegExp(`^${name}$`, "i") } }
+          ]
         })
       )[0];
+
       if (!found) {
         send([ctx.socket.id], "I can't find a character by that name!", {
           error: true,
@@ -51,7 +50,15 @@ export default () =>
       ctx.socket.join(`#${found.location}`);
       await setFlags(found, "connected");
       found.data ||= {};
-      await dbojs.update({ id: found.id }, found);
+      
+      // Update only the necessary fields, excluding _id
+      const updateData = {
+        flags: found.flags,
+        location: found.location,
+        data: found.data
+      };
+      
+      await dbojs.update({ id: found.id }, { $set: updateData });
       await send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {
         cid: found.id,
       });

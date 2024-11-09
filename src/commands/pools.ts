@@ -118,7 +118,12 @@ export default () => {
       );
 
       // update the target.
-      await dbojs.update({ _id: targ._id }, targ);
+      const updateData = {
+        data: targ.data,
+        location: targ.location,
+        flags: targ.flags
+      };
+      await dbojs.update({ id: targ.id }, { $set: updateData });
     },
   });
 

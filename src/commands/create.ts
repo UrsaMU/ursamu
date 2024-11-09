@@ -19,7 +19,7 @@ export default () =>
       let name = "";
       let password = "";
       const pieces = args[0].split(" ");
-      if (pieces.length < 2) {
+      if (pieces.length === 2) {
         [name, password] = pieces;
       } else {
         password = pieces.pop() || "";
@@ -28,7 +28,10 @@ export default () =>
 
       const players = await dbojs.find({ flags: /player/i });
       const taken = await dbojs.find({
-        $or: [{ "data.name": name }, { "data.alias": name }],
+        $or: [
+          { "data.name": { $regex: new RegExp(`^${name}$`, "i") } },
+          { "data.alias": { $regex: new RegExp(`^${name}$`, "i") } }
+        ]
       });
 
       if (taken.length > 0) {
@@ -49,16 +52,14 @@ export default () =>
           name,
           home: cfg.config.game?.playerStart,
           password: await hash(password, 10),
+          lastCommand: Date.now()
         },
       });
 
       ctx.socket.join(`#${player.id}`);
       ctx.socket.join(`#${player.location}`);
       ctx.socket.cid = player.id;
-      player.data ||= {};
-      player.data.lastCommand = Date.now();
 
-      await dbojs.update({ id: player.id }, player);
       await joinChans(ctx);
 
       send([ctx.socket.id], `Welcome to the game, ${player.data?.name}!`, {

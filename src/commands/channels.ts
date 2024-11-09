@@ -45,7 +45,14 @@ export default () => {
             alias,
             active: true,
           });
-          await dbojs.update({ _id: en._id }, en);
+          
+          const updateData = {
+            data: en.data,
+            flags: en.flags,
+            location: en.location
+          };
+          
+          await dbojs.update({ id: en.id }, { $set: updateData });
           ctx.socket.join(name);
           await force(ctx, `${alias} :joins the channel.`);
           send(
@@ -89,9 +96,16 @@ export default () => {
           plyr.data.channels = plyr.data.channels?.filter(
             (c: IChanEntry) => c.channel !== chan.name
           );
-          await dbojs.update({ id: plyr.id }, plyr);
+          
+          const updateData = {
+            data: plyr.data,
+            flags: plyr.flags,
+            location: plyr.location
+          };
+          
+          await dbojs.update({ id: plyr.id }, { $set: updateData });
         }
-        await chans.remove({ _id: chan._id });
+        await chans.remove({ id: chan.id });
         send([ctx.socket.id], `Channel %ch${chan.name}%cn deleted.`, {});
       } else {
         send([ctx.socket.id], `Channel ${args[0]} not found.`, {});
@@ -109,54 +123,45 @@ export default () => {
       if (chan) {
         const key = args[1].toLowerCase();
         const val = args[2];
+        const updateData: any = {};
+        
         if (key === "alias") {
-          chan.alias = val;
-          await chans.update({ _id: chan._id }, chan);
-          send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
+          updateData.alias = val;
         } else if (key === "header") {
-          chan.header = val;
-          await chans.update({ _id: chan._id }, chan);
-          send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
+          updateData.header = val;
         } else if (key === "hidden") {
-          chan.hidden = !!val;
-          await chans.update({ _id: chan._id }, chan);
-          send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
+          updateData.hidden = !!val;
         } else if (key === "name") {
           const taken = await chans.findOne({ name: RegExp(val, "i") });
           if (!taken) {
-            chan.name = val;
-            await chans.update({ _id: chan._id }, chan);
-            send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
+            updateData.name = val;
           } else {
             send([ctx.socket.id], `Channel ${val} already exists.`, {});
+            return;
           }
-        } else if (key === "alias") {
-          chan.alias = val;
-          await chans.update({ _id: chan._id }, chan);
-          send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
         } else if (key === "lock") {
-          chan.lock = val;
-          await chans.update({ _id: chan._id }, chan);
-          send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
+          updateData.lock = val;
         } else if (key === "masking") {
-          chan.masking = val.toLocaleLowerCase() === "true" ? true : false;
-          await chans.update({ _id: chan._id }, chan);
-          send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
+          updateData.masking = val.toLocaleLowerCase() === "true";
         } else {
           send([ctx.socket.id], `Invalid setting ${key}.`, {});
+          return;
+        }
+
+        await chans.update({ id: chan.id }, { $set: updateData });
+        send([ctx.socket.id], `Channel %ch${chan.name}%cn updated.`, {});
+
+        // Force the connected sockets (players) to cycle their channels
+        // and join the new ones.
+        const sockets = Array.from(io.sockets.sockets.entries()).map(
+          (s) => s[1] as IMSocket
+        );
+
+        for (const socket of sockets) {
+          await joinChans({ socket });
         }
       } else {
         send([ctx.socket.id], `Channel %ch${args[0]}%cn not found.`, {});
-      }
-
-      // Force the connected sockets (players) to cycle their channels
-      // and join the new ones.
-      const sockets = Array.from(io.sockets.sockets.entries()).map(
-        (s) => s[1] as IMSocket
-      );
-
-      for (const socket of sockets) {
-        await joinChans({ socket });
       }
     },
   });
@@ -184,7 +189,13 @@ export default () => {
           active: true,
         });
 
-        await dbojs.update({ _id: en._id }, en);
+        const updateData = {
+          data: en.data,
+          flags: en.flags,
+          location: en.location
+        };
+
+        await dbojs.update({ id: en.id }, { $set: updateData });
         send([ctx.socket.id], `You join channel ${chan.name}.`, {});
         ctx.socket.join(chan.name);
         await force(ctx, `${chan.alias} :joins the channel.`);
@@ -217,7 +228,14 @@ export default () => {
         send([ctx.socket.id], `You leave channel ${c.channel}.`, {});
         await force(ctx, `${args[0]} :leaves the channel.`);
         ctx.socket.leave(c.channel);
-        await dbojs.update({ _id: en._id }, en);
+        
+        const updateData = {
+          data: en.data,
+          flags: en.flags,
+          location: en.location
+        };
+        
+        await dbojs.update({ id: en.id }, { $set: updateData });
       });
     },
   });

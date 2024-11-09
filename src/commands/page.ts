@@ -21,13 +21,12 @@ export default () => {
         if (t) targets.push(t);
       }
 
-      // we need to build two lists, a list of target._ids and a list of targets
+      // we need to build two lists, a list of target.ids and a list of targets
       // with their Name(alias) notation. We'll use the latter to display the list in
       // the page message.
 
       const targetIds = targets
         .filter((t) => (t.id && t.flags.includes("connected") ? true : false))
-
         .filter(Boolean)
         .map((t) => t.id);
       const targetNames = targets.map(
@@ -91,11 +90,18 @@ export default () => {
         tempmsg,
         {}
       );
-      if (!targets.filter((ob) => ob._id === en._id).length)
+      if (!targets.filter((ob) => ob.id === en.id).length)
         send([ctx.socket.id], sendermsg, {});
       en.data ||= {};
       en.data.lastpage = targts;
-      await dbojs.update({ _id: en._id }, en);
+      
+      const updateData = {
+        data: en.data,
+        flags: en.flags,
+        location: en.location
+      };
+      
+      await dbojs.update({ id: en.id }, { $set: updateData });
     },
   });
 };

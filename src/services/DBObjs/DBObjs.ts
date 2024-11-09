@@ -97,7 +97,13 @@ export class Obj {
   }
 
   async save() {
-    await dbojs.update({ id: this.id }, this.obj);
+    const updateData = {
+      flags: this.obj.flags,
+      data: this.obj.data,
+      location: this.obj.location,
+      description: this.obj.description
+    };
+    await dbojs.update({ id: this.id }, { $set: updateData });
   }
 
   set dbobj(obj: IDBOBJ) {
