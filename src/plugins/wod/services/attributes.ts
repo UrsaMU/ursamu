@@ -1,4 +1,4 @@
-import { Obj } from "../DBObjs";
+import { Obj } from "../../../services/DBObjs/DBObjs";
 
 export const setAttr = async (obj: Obj, attr: string, value: string) => {
   const stat = obj.data?.stats?.find((s) =>

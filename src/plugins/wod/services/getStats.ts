@@ -1,5 +1,7 @@
-import { IDBOBJ } from "../../@types";
-import { Obj, allStats } from "..";
+import { allStats } from ".";
+import { IDBOBJ } from "../../../@types";
+import { Obj } from "../../../services";
+
 
 export const getStat = async (character: IDBOBJ | Obj, stat: string) => {
   // first we need to see if the player has the stat in their data.

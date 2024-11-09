@@ -1,5 +1,7 @@
 import { IMStatEntry } from "../@types";
-import { Obj, addCmd, dbojs, flags, getStat, send } from "../services";
+import { getStat } from "../plugins/wod/services";
+import { Obj, addCmd, dbojs, flags, send } from "../services";
+
 import { moniker, target } from "../utils";
 
 export default () => {

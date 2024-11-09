@@ -1,6 +1,7 @@
-import { IDBOBJ, IMStatEntry } from "../../@types";
-import { Obj } from "../DBObjs";
-import { dbojs } from "../Database";
+
+import { IDBOBJ, IMStatEntry } from "../../../@types";
+import { Obj } from "../../../services/DBObjs/DBObjs";
+import { dbojs } from "../../../services/Database";
 import { allStats } from "./index";
 
 export const setStat = async (
@@ -44,7 +45,7 @@ export const setStat = async (
 
   if (instance && fullStat.hasInstance && fullStat.instances?.length) {
     const inst = fullStat.instances?.find(
-      (i) => i.toLowerCase() === instance.toLowerCase()
+      (i: string) => i.toLowerCase() === instance.toLowerCase()
     );
     if (!inst) throw new Error("Invalid instance().");
   }
@@ -70,7 +71,7 @@ export const setStat = async (
 
     //  if there's a check on the specialty, see if it passes.
     if (fullStat.specialties) {
-      const specObj = fullStat.specialties?.find((s) => s.name === specialty);
+      const specObj = fullStat.specialties?.find((s:any) => s.name === specialty);
 
       if (!specObj && fullStat.specialties?.length) {
         throw new Error("Invalid specialty.");

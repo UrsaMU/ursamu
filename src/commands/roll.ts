@@ -1,6 +1,7 @@
 import { isNumber } from "lodash";
-import { Obj, addCmd, getStat, roll, send, statObj } from "../services";
+import { Obj, addCmd, roll, send } from "../services";
 import { moniker } from "../utils";
+import { getStat, statObj } from "../plugins/wod/services";
 
 export default () => {
   addCmd({
@@ -18,9 +19,6 @@ export default () => {
         .replace(" - ", " -")
         .split(" ")
         .map((item: string) => {
-          // if there is a + pt - then replace the name after it with the stat name
-          // or it it is a number, leave it alone. Return a string.
-          // if there is no + or - then return the stat name.
           if (item.includes("+") || item.includes("-")) {
             const [, sign, stat] = item.split(/(\+|\-)/);
             const statO = statObj(stat);
@@ -36,7 +34,6 @@ export default () => {
         .join(" ")
         .replace(/\s+/g, " ");
 
-      // get # of dice.
       const poolNum = pool
         .replace(/\s\+\s/g, " +")
         .replace(/\s\-\s/g, " -")

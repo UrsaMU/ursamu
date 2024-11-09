@@ -1,4 +1,4 @@
-import { IMStat } from "../../../@types";
+import { IMStat } from "../../../../@types/IMStat";
 
 export const attributes: IMStat[] = [
   {

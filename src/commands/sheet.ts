@@ -1,6 +1,7 @@
 import { get } from "lodash";
 import { IDBOBJ } from "../@types";
-import { Obj, addCmd, allStats, send, getStat } from "../services";
+import { Obj, addCmd, send  } from "../services";
+import { getStat, allStats } from "../plugins/wod/services";
 import {
   center,
   divider,

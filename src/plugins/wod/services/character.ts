@@ -1,12 +1,11 @@
-import { createObj } from "../DBObjs/DBObjs";
 import { hash } from "bcryptjs";
-import { dbojs } from "../Database";
 
 type data = {
   [key: string]: any;
 };
 
 export const createCharacter = async (
+  createObj: Function,
   name: string,
   password: string,
   flags: string,
@@ -21,7 +20,7 @@ export const createCharacter = async (
   return character;
 };
 
-export const getCharacter = async (id?: number) => {
+export const getCharacter = async (dbojs: any, id?: number) => {
   let character = await dbojs.findOne({ id });
   return character;
 };

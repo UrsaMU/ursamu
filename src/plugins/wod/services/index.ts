@@ -12,6 +12,7 @@ export * from "./setStat";
 export * from "./getStats";
 export * from "./formatValue";
 export * from "./statObj";
+export * from "./character"; // Added export for character module
 
 export const allStats = [
   ...bio,

@@ -1,5 +1,6 @@
-import { IMStat } from "../../../@types";
-import { flags } from "../../flags";
+import { IMStat } from "../../../../@types";
+import { flags } from "../../../../services";
+
 import { getStat } from "../getStats";
 
 export const other: IMStat[] = [

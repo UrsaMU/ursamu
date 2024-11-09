@@ -1,7 +1,8 @@
 import { Obj, addCmd, flags, send } from "../services";
-import { allStats, formatValue, setStat } from "../services/characters";
 import { canEdit, capString, moniker, target } from "../utils";
 import { IMStatEntry } from "../@types";
+import { allStats, formatValue, setStat } from "../plugins/wod/services";
+import { getStat, statObj } from "../plugins/wod/services";
 
 // +stats <stat> = <value>
 
@@ -49,7 +50,7 @@ export default () => {
         return send(
           [ctx.socket.id],
           `%chGame>%cn Invalid splat. Must be one of: ${fullStat.values
-            .map((s) => `%ch${capString(s)}%cn`)
+            .map((s:any) => `%ch${capString(s)}%cn`)
             .join(", ")}`
         );
       }
@@ -202,7 +203,7 @@ export default () => {
           }%cn`
         );
       } catch (error: any) {
-        return send([ctx.socket.id], `%chGame>%cn ${error.message}`);
+        return send([ctx.socket.id], "%chGame>%cn ${error.message}");
       }
     },
   });

@@ -1,6 +1,6 @@
 export * from "./broadcast";
 export * from "./commands";
-export * from "./characters";
+export * from "../plugins/wod/services"
 export * from "./Database";
 export * from "./DBObjs";
 export * from "./flags";

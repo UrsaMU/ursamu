@@ -1,6 +1,6 @@
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
-import { getCharacter } from "../services/characters/character";
+import { getCharacter } from "../plugins/wod/services/character";
 import { addCmd } from "../services/commands";
 
 export default () =>

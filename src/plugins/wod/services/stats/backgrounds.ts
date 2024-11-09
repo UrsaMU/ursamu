@@ -1,4 +1,5 @@
-import { IMStat } from "../../../@types";
+import { IMStat } from "../../../../@types";
+
 export const backgrounds: IMStat[] = [
   {
     name: "allies",

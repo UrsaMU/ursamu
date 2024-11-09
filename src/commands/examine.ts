@@ -1,6 +1,7 @@
+import { getCharacter } from "../plugins/wod/services";
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
-import { getCharacter } from "../services/characters/character";
+
 import { addCmd } from "../services/commands";
 import { canEdit } from "../utils/canEdit";
 import { displayName } from "../utils/displayName";
