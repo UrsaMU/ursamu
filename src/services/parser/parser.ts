@@ -55,9 +55,9 @@ parser.addSubs(
   { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
 );
 
-parser.add("add", (args) => args.reduce((a: string, b: string) => +a + +b, 0));
-parser.add("sub", (args) => args.reduce((a: string, b: string) => +a - +b, 0));
-parser.add("rand", (args) => {
+parser.add("add", async (args) => args.reduce((a: string, b: string) => +a + +b, 0));
+parser.add("sub", async (args) => args.reduce((a: string, b: string) => +a - +b, 0));
+parser.add("rand", async (args) => {
   const min = +args[0];
   const max = +args[1];
   return Math.floor(Math.random() * (max - min + 1) + min);
