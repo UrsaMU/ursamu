@@ -17,7 +17,7 @@ export default () => {
       if (isNaN(healAmount) || healAmount <= 0) {
         return send(
           [ctx.socket.id],
-          "%ch%crERROR>%cn Invalid healing amount. Must be a positive number."
+          "%ch%crERROR>%cn Invalid healing amount. Must be a positive number.",
         );
       }
 
@@ -26,7 +26,7 @@ export default () => {
       if (!validDamageTypes.includes(damageType.toLowerCase())) {
         return send(
           [ctx.socket.id],
-          "%ch%crERROR>%cn Invalid damage type. Must be 'superficial' or 'aggravated'."
+          "%ch%crERROR>%cn Invalid damage type. Must be 'superficial' or 'aggravated'.",
         );
       }
 
@@ -35,7 +35,7 @@ export default () => {
       if (!validTypes.includes(type.toLowerCase())) {
         return send(
           [ctx.socket.id],
-          "%ch%crERROR>%cn Invalid type. Must be 'physical', 'social', or 'mental'."
+          "%ch%crERROR>%cn Invalid type. Must be 'physical', 'social', or 'mental'.",
         );
       }
 
@@ -44,7 +44,7 @@ export default () => {
         en,
         damageType.toLowerCase() === "superficial" ? healAmount : 0,
         damageType.toLowerCase() === "aggravated" ? healAmount : 0,
-        type.toLowerCase()
+        type.toLowerCase(),
       );
 
       if (!result.success && result.error) {
@@ -52,7 +52,9 @@ export default () => {
       }
 
       // Broadcast healing message
-      const message = `%ch%cgHEAL>%cn ${moniker(en)} heals ${healAmount} ${damageType} ${type} damage.`;
+      const message = `%ch%cgHEAL>%cn ${
+        moniker(en)
+      } heals ${healAmount} ${damageType} ${type} damage.`;
       await send([`#${en.location}`], message);
 
       // Save the updated entity

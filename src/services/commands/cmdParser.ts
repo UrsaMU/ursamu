@@ -13,7 +13,9 @@ export const cmds: ICmd[] = [];
 export const addCmd = (...newCmds: ICmd[]) => {
   for (const cmd of newCmds) {
     // Check if command with same name already exists
-    const existingIndex = cmds.findIndex(existing => existing.name === cmd.name);
+    const existingIndex = cmds.findIndex((existing) =>
+      existing.name === cmd.name
+    );
     if (existingIndex !== -1) {
       // Replace existing command
       cmds[existingIndex] = cmd;

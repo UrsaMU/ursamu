@@ -148,10 +148,10 @@ export class UrsaMU {
     try {
       // Load text files first
       loadTxtDir(join(__dirname, "../text"));
-      
+
       // Load plugins before commands to ensure plugin help files are available
       this.loadPlugins();
-      
+
       // Load commands last
       loadDir(join(__dirname, "commands"));
     } catch (error) {
@@ -163,18 +163,18 @@ export class UrsaMU {
     try {
       const pluginsDir = join(__dirname, "plugins");
       const dirent = await readdir(pluginsDir);
-      
+
       for (const dir of dirent) {
         const pluginPath = join(pluginsDir, dir);
         const stat = await fs.promises.stat(pluginPath);
-        
+
         if (stat.isDirectory()) {
           try {
             // Initialize the plugin which will load its own commands
             const indexPath = join(pluginPath, "index");
             delete require.cache[require.resolve(indexPath)];
             const plugin = require(indexPath).default;
-            
+
             if (plugin && typeof plugin.init === "function") {
               plugin.init();
               this.plugins.push(plugin);
@@ -193,7 +193,7 @@ export class UrsaMU {
   public async start() {
     server.listen(cfg.config.server?.ws, async () => {
       try {
-        const rooms = await dbojs.find({ flags: /room/});
+        const rooms = await dbojs.find({ flags: /room/ });
 
         if (rooms.length === 0) {
           const room = await createObj("room safe void", { name: "The Void" });

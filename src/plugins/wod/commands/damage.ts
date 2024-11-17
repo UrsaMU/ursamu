@@ -78,7 +78,7 @@ export default () => {
       if (!targ.data.damage[type]) {
         targ.data.damage[type] = {
           superficial: 0,
-          aggravated: 0
+          aggravated: 0,
         };
       }
 
@@ -87,7 +87,7 @@ export default () => {
         targ,
         damName === "superficial" ? damaged : 0,
         damName === "aggravated" ? damaged : 0,
-        type
+        type,
       );
 
       // Update the damage values
@@ -106,10 +106,12 @@ export default () => {
       await dbojs.update({ id: targ.id }, { $set: updateData });
 
       // Send message with status if applicable
-      const statusMsg = result.status ? ` (%ch%cr${result.status}%cn)` : '';
+      const statusMsg = result.status ? ` (%ch%cr${result.status}%cn)` : "";
       send(
         [`#${targ.location}`],
-        `%ch%crDamage>%cn ${moniker(targ)} has taken %ch%cr${damaged}%cn %ch${damName}%cn damage(${type})${statusMsg}.`,
+        `%ch%crDamage>%cn ${
+          moniker(targ)
+        } has taken %ch%cr${damaged}%cn %ch${damName}%cn damage(${type})${statusMsg}.`,
       );
     },
   });

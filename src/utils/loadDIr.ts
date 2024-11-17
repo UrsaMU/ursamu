@@ -5,8 +5,9 @@ export const loadDir = async (dir: string) => {
   const dirent = await readdir(dir);
   const files = dirent.filter(
     (file) =>
-      (file.endsWith(".ts") || (file.endsWith(".js") && !file.endsWith(".d.ts"))) &&
-      file !== "index.ts" && file !== "index.js"
+      (file.endsWith(".ts") ||
+        (file.endsWith(".js") && !file.endsWith(".d.ts"))) &&
+      file !== "index.ts" && file !== "index.js",
   );
 
   files.forEach((file) => {

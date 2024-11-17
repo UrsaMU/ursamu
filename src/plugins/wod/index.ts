@@ -15,7 +15,7 @@ const plugin: IPlugin = {
     loadTxtDir(path.join(__dirname, "help"));
 
     return true; // Return true to indicate successful initialization
-  }
+  },
 };
 
 export default plugin;

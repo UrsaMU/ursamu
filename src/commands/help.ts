@@ -25,7 +25,11 @@ export default async () => {
         .map((cmd) => {
           let name = "";
           // Check if help exists in txtFiles
-          if (Array.from(txtFiles.keys()).some(key => key.startsWith(`help_${cmd.name}`))) {
+          if (
+            Array.from(txtFiles.keys()).some((key) =>
+              key.startsWith(`help_${cmd.name}`)
+            )
+          ) {
             name = cmd.name.toUpperCase();
           } else {
             name = `%cr${cmd.name.toUpperCase()}*%cn`;
@@ -85,20 +89,20 @@ export default async () => {
     pattern: /^[/+@]?help\s+(.*)/i,
     hidden: true,
     exec: async (ctx, args) => {
-      const topic = args[0].toLowerCase().replace(/^[+/]/g, '');
-      
+      const topic = args[0].toLowerCase().replace(/^[+/]/g, "");
+
       // Function to find help file
       const findHelpFile = (searchTopic: string) => {
         // Try exact match first
-        let helpKey = Array.from(txtFiles.keys()).find(key => 
-          key.toLowerCase() === `help_${searchTopic}.md` || 
+        let helpKey = Array.from(txtFiles.keys()).find((key) =>
+          key.toLowerCase() === `help_${searchTopic}.md` ||
           key.toLowerCase() === `topic_${searchTopic}.md`
         );
 
         // If no exact match, try partial matches
         if (!helpKey) {
-          helpKey = Array.from(txtFiles.keys()).find(key => 
-            key.toLowerCase().includes(`help_${searchTopic}`) || 
+          helpKey = Array.from(txtFiles.keys()).find((key) =>
+            key.toLowerCase().includes(`help_${searchTopic}`) ||
             key.toLowerCase().includes(`topic_${searchTopic}`)
           );
         }
@@ -108,10 +112,10 @@ export default async () => {
 
       // Try different variations of the topic
       const variations = [
-        topic,                   // Original topic
-        topic.replace('/', '_'), // Replace slash with underscore
-        topic.split('/')[0],     // First part before slash
-        topic.split('/')[1]      // Second part after slash
+        topic, // Original topic
+        topic.replace("/", "_"), // Replace slash with underscore
+        topic.split("/")[0], // First part before slash
+        topic.split("/")[1], // Second part after slash
       ];
 
       let helpKey;

@@ -17,7 +17,7 @@ export const calculateDamage = async (
   if (!obj.data.damage[type]) {
     obj.data.damage[type] = {
       superficial: 0,
-      aggravated: 0
+      aggravated: 0,
     };
   }
 
@@ -78,7 +78,7 @@ export const heal = async (
   obj: IDBOBJ,
   superficialAmount: number = 0,
   aggravatedAmount: number = 0,
-  type: string = "physical"
+  type: string = "physical",
 ) => {
   // Initialize damage structure if it doesn't exist
   if (!obj.data?.damage) {
@@ -87,12 +87,12 @@ export const heal = async (
   if (!obj.data.damage[type]) {
     obj.data.damage[type] = {
       superficial: 0,
-      aggravated: 0
+      aggravated: 0,
     };
     return {
       success: false,
       error: "No damage of that type to heal",
-      newState: await calculateDamage(obj, 0, 0, type)
+      newState: await calculateDamage(obj, 0, 0, type),
     };
   }
 
@@ -104,7 +104,7 @@ export const heal = async (
     return {
       success: false,
       error: "No superficial damage to heal",
-      newState: await calculateDamage(obj, 0, 0, type)
+      newState: await calculateDamage(obj, 0, 0, type),
     };
   }
 
@@ -112,7 +112,7 @@ export const heal = async (
     return {
       success: false,
       error: "No aggravated damage to heal",
-      newState: await calculateDamage(obj, 0, 0, type)
+      newState: await calculateDamage(obj, 0, 0, type),
     };
   }
 
@@ -130,7 +130,7 @@ export const heal = async (
   obj.data.damage[type] = {
     ...obj.data.damage[type],
     superficial: currentSuperficial,
-    aggravated: currentAggravated
+    aggravated: currentAggravated,
   };
 
   // Calculate new damage track state
@@ -138,8 +138,9 @@ export const heal = async (
 
   return {
     success: true,
-    message: `Healed ${superficialAmount} superficial and ${aggravatedAmount} aggravated damage`,
+    message:
+      `Healed ${superficialAmount} superficial and ${aggravatedAmount} aggravated damage`,
     newState,
-    error: null
+    error: null,
   };
 };
