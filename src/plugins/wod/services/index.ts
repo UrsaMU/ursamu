@@ -12,7 +12,9 @@ export * from "./setStat";
 export * from "./getStats";
 export * from "./formatValue";
 export * from "./statObj";
-export * from "./character"; // Added export for character module
+export * from "./character";
+export * from "./dice"; // Added export for dice module
+export * from "./damage"; // Added export for damage calculation
 
 export const allStats = [
   ...bio,

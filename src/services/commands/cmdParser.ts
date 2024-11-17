@@ -9,9 +9,20 @@ import { matchChannel } from "./channels";
 
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
-export const txtFiles = new Map<string, string>();
 
-export const addCmd = (...cmd: ICmd[]) => cmds.push(...cmd);
+export const addCmd = (...newCmds: ICmd[]) => {
+  for (const cmd of newCmds) {
+    // Check if command with same name already exists
+    const existingIndex = cmds.findIndex(existing => existing.name === cmd.name);
+    if (existingIndex !== -1) {
+      // Replace existing command
+      cmds[existingIndex] = cmd;
+    } else {
+      // Add new command
+      cmds.push(cmd);
+    }
+  }
+};
 
 cmdParser.use(async (ctx, next) => {
   const char = await getCharacter(dbojs, ctx.socket.cid);

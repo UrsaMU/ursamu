@@ -9,7 +9,7 @@ export class DBO<T> {
   db: Datastore<T>;
 
   constructor(path: string) {
-    this.db = Datastore.create(path);
+    this.db = Datastore.create({ filename: path, autoload: true });
   }
 
   async insert(data: T) {

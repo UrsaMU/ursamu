@@ -1,7 +1,8 @@
 import { isNumber } from "lodash";
-import { addCmd, Obj, roll, send } from "../services";
-import { moniker } from "../utils";
-import { getStat, statObj } from "../plugins/wod/services";
+import { addCmd, Obj, send } from "../../../services";
+import { moniker } from "../../../utils";
+import { getStat, statObj } from "../services";
+import { roll } from "../services/dice";
 
 export default () => {
   addCmd({

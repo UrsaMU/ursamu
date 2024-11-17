@@ -68,8 +68,8 @@ export default () =>
         `${moniker(found)} has connected.`,
         {},
       );
-      await force(ctx, "@mail/notify");
       await joinChans(ctx);
+      await force(ctx, "@mail/notify");
       await force(ctx, "look");
     },
   });

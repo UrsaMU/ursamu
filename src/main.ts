@@ -4,10 +4,7 @@ import { dbojs } from "./services/Database";
 import { setFlags } from "./utils/setFlags";
 import { broadcast } from "./services/broadcast";
 
-const args = process.argv.slice(2);
-const dirArg = args.find((arg) => arg.startsWith("--dir="));
-export const directory = dirArg ? dirArg.split("=")[1] : "";
-const mu = new UrsaMU(directory);
+const mu = new UrsaMU();
 
 process.on("SIGINT", async () => {
   const players = await dbojs.find({ flags: /connected/i });

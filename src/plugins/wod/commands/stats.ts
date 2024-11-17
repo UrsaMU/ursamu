@@ -1,8 +1,9 @@
-import { addCmd, flags, Obj, send } from "../services";
-import { canEdit, capString, moniker, target } from "../utils";
-import { IMStatEntry } from "../@types";
-import { allStats, formatValue, setStat } from "../plugins/wod/services";
-import { getStat, statObj } from "../plugins/wod/services";
+import { addCmd, flags, Obj, send } from "../../../services";
+import { canEdit, capString, moniker, target } from "../../../utils";
+import { IMStatEntry } from "../../../@types";
+import { allStats, formatValue, setStat } from "../services";
+import { getStat, statObj } from "../services";
+import { IContext } from "../../../@types";
 
 // +stats <stat> = <value>
 
@@ -13,7 +14,7 @@ export default () => {
     lock: "connected !approved|storyteller+",
     category: "chargen",
 
-    exec: async (ctx, args) => {
+    exec: async (ctx: IContext, args: string[]) => {
       let tar = "me",
         splat = "";
       const en = await Obj.get(ctx.socket.cid);
@@ -87,11 +88,11 @@ export default () => {
     pattern: /^[@\+]?stats\/reset(?:\s+(.*))?$/i,
     lock: "connected !approved|admin+",
     category: "chargen",
-    exec: async (ctx, [tar]) => {
+    exec: async (ctx: IContext, args: string[]) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
-      if (!tar) tar = "me";
+      const tar = args[0] || "me";
       const targ = await target(en.dbobj, tar);
       if (!targ) return send([ctx.socket.id], "%chGame>%cn Invalid target.");
 
@@ -122,11 +123,11 @@ export default () => {
     pattern: /^[@\+]?stats\/reset\/confirm\s+(.*)$/i,
     lock: "connected !approved|admin+",
     hidden: true,
-    exec: async (ctx, [tar]) => {
+    exec: async (ctx: IContext, args: string[]) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
-      if (!tar) tar = "me";
+      const tar = args[0] || "me";
       const targ = await target(en.dbobj, tar);
       if (!targ) return send([ctx.socket.id], "%chGame>%cn Invalid target.");
 
@@ -156,7 +157,7 @@ export default () => {
     pattern: /^[@\+]?stat[s]?(?:\/(.*))?\s+(.*)\s*=\s*(.*)?$/i,
     category: "chargen",
     lock: "connected !approved|admin+",
-    exec: async (ctx, args) => {
+    exec: async (ctx: IContext, args: string[]) => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
       let tar;
@@ -213,4 +214,4 @@ export default () => {
       }
     },
   });
-};
+}

@@ -2,16 +2,12 @@ import { join } from "path";
 import pm2 from "pm2";
 
 // Function to start a PM2 process
-function startProcess(
-  scriptPath: string,
-  name: string,
-  directory?: string,
-): Promise<void> {
+function startProcess(scriptPath: string, name: string): Promise<void> {
   return new Promise((resolve, reject) => {
     pm2.start(
       {
         script: "ts-node",
-        args: `${join(__dirname, scriptPath)} --dir=${directory}`,
+        args: join(__dirname, scriptPath),
         name: name,
         exec_mode: "fork",
       },
@@ -27,10 +23,10 @@ function startProcess(
   });
 }
 
-export async function startAll(directory?: string) {
+export async function startAll() {
   try {
-    await startProcess("../main.ts", "MainProcess", directory); // Pass directory
-    await startProcess("../telnet.ts", "TelnetProcess", directory); // Pass directory
+    await startProcess("../main.ts", "MainProcess");
+    await startProcess("../telnet.ts", "TelnetProcess");
   } catch (err) {
     console.error("Error starting processes:", err);
   } finally {

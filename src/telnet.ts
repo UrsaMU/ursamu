@@ -5,13 +5,7 @@ import parser from "./services/parser/parser";
 import { join } from "path";
 import { readFile } from "fs/promises";
 
-const args = process.argv.slice(2);
-const dirArg = args.find((arg) => arg.startsWith("--dir="));
-let directory = dirArg ? dirArg.split("=")[1] : "";
-
-directory = directory
-  ? join(directory, "./text/connect.txt")
-  : join(__dirname, "../text/default_connect.txt");
+const connectTextPath = join(__dirname, "../text/default_connect.txt");
 
 interface ITelnetSocket extends Socket {
   cid?: number;
@@ -112,7 +106,7 @@ const handleTelnetSocket = (socket: ITelnetSocket) => {
 
 const server = createServer(async (socket: ITelnetSocket) => {
   try {
-    socket.write((await readFile(join(directory), "utf-8")) + "\r\n");
+    socket.write((await readFile(connectTextPath, "utf-8")) + "\r\n");
 
     const sock = io(`http://localhost:${cfg.config.server?.ws}`, {
       reconnection: true,

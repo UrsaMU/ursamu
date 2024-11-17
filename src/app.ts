@@ -14,8 +14,10 @@ import authMiddleware from "./middleware/authMiddleware";
 import { IMError, IPlugin } from "./@types";
 import cfg from "./ursamu.config";
 import { chans, createObj } from "./services";
-import { loadDir, loadPLugin, loadTxtDir } from "./utils";
+import { loadDir, loadTxtDir } from "./utils";
 import { join } from "path";
+import fs from "fs";
+import { readdir } from "fs/promises";
 
 export const app = express();
 export const server = createServer(app);
@@ -142,30 +144,58 @@ io.on("connection", handleSocketConnection);
 export class UrsaMU {
   private plugins: IPlugin[] = [];
 
-  constructor(directory = "") {
+  constructor() {
     try {
-      loadDir(join(__dirname, "commands"));
+      // Load text files first
       loadTxtDir(join(__dirname, "../text"));
-      if (directory) {
-        loadPLugin(directory);
-      }
+      
+      // Load plugins before commands to ensure plugin help files are available
+      this.loadPlugins();
+      
+      // Load commands last
+      loadDir(join(__dirname, "commands"));
     } catch (error) {
       console.error("Error loading directories:", error);
+    }
+  }
+
+  private async loadPlugins() {
+    try {
+      const pluginsDir = join(__dirname, "plugins");
+      const dirent = await readdir(pluginsDir);
+      
+      for (const dir of dirent) {
+        const pluginPath = join(pluginsDir, dir);
+        const stat = await fs.promises.stat(pluginPath);
+        
+        if (stat.isDirectory()) {
+          try {
+            // Initialize the plugin which will load its own commands
+            const indexPath = join(pluginPath, "index");
+            delete require.cache[require.resolve(indexPath)];
+            const plugin = require(indexPath).default;
+            
+            if (plugin && typeof plugin.init === "function") {
+              plugin.init();
+              this.plugins.push(plugin);
+              console.log(`Loaded plugin: ${plugin.name}`);
+            }
+          } catch (error) {
+            console.error(`Error loading plugin from ${dir}:`, error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error loading plugins:", error);
     }
   }
 
   public async start() {
     server.listen(cfg.config.server?.ws, async () => {
       try {
-        const rooms = await dbojs.find({
-          $where: function () {
-            if (!this.flags) return false;
-            if (!Array.isArray(this.flags)) return false;
-            return this.flags.includes("room") === true;
-          },
-        });
+        const rooms = await dbojs.find({ flags: /room/});
 
-        if (!rooms.length) {
+        if (rooms.length === 0) {
           const room = await createObj("room safe void", { name: "The Void" });
           console.log("The Void created.");
         }

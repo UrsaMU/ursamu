@@ -5,4 +5,4 @@ export * from "./Database";
 export * from "./DBObjs";
 export * from "./flags";
 export * from "./parser";
-export * from "./dice";
+export * from "./text";

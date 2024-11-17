@@ -1,0 +1,8 @@
+{
+  "name": "World of Darkness",
+  "version": "1.0.0",
+  "description": "World of Darkness character system",
+  "engine": {
+    "main": "index.ts"
+  }
+}

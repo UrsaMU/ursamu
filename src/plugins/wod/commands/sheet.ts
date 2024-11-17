@@ -1,7 +1,7 @@
 import { get } from "lodash";
-import { IDBOBJ } from "../@types";
-import { addCmd, Obj, send } from "../services";
-import { allStats, getStat } from "../plugins/wod/services";
+import { IDBOBJ } from "../../../@types";
+import { addCmd, Obj, send } from "../../../services";
+import { allStats, getStat } from "../services";
 import {
   center,
   divider,
@@ -11,7 +11,7 @@ import {
   moniker,
   repeatString,
   target,
-} from "../utils";
+} from "../../../utils";
 
 const bio = async (obj: Obj) => {
   const splat = await getStat(obj.dbobj, "splat");
@@ -405,34 +405,8 @@ const health = async (obj: IDBOBJ) => {
 
   return output;
 };
-/*sheet
- ===========================[  Sheet for: Kumakun  ]===========================
- Full Name:                             Concept:
- Birth Date:                            Splat:
- Ambition:                              Desire:
---------------------------------- Attributes ---------------------------------
-         Physical                   Social                    Mental
- Strength...............1  Charisma...............1  Intelligence...........1
- Dexterity..............1  Manipulation...........1  Wits...................1
- Stamina................1  Composure..............1  Resolve................1
------------------------------------ Skills -----------------------------------
- Athletics..............0  Animal Ken.............0  Academics..............0
- Brawl..................0  Etiquette..............0  Awareness..............0
- Craft..................0  Insight................0  Finance................0
- Driving................0  Intimidation...........0  Investigation..........0
- Firearms...............0  Leadership.............0  Medicine...............0
- Larceny................0  Performance............0  Occult.................0
- Melee..................0  Persuasion.............0  Politics...............0
- Stealth................0  Streetwise.............0  Science................0
- Survival...............0  Subterfuge.............0  Technology.............0
------------------------------------ Health -----------------------------------
- Health: [ ][ ][ ][ ][ ][ ][ ][ ]
-------------------------------------------------------------------------------
- Health.................0  Willpower..............0  Humanity...............0
- Blood Potency..........1  Blood Pool.............0  Experience.............0
-==============================================================================
- */
-export default () => {
+
+function sheetCommand() {
   addCmd({
     name: "sheet",
     pattern: /^[@\+]?sheet(?:\s+(.*))?$/i,
@@ -477,4 +451,6 @@ export default () => {
       }
     },
   });
-};
+}
+
+export default sheetCommand;
