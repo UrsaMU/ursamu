@@ -56,7 +56,7 @@ const colorMap: { [key: string]: number } = {
   lightcyan: 159,
   lightmagenta: 207,
   lightyellow: 229,
-  lightgrey: 252
+  lightgrey: 252,
 };
 
 const parser = new Parser();
@@ -81,25 +81,27 @@ parser.addSubs(
   { before: /%[cx]i/g, after: "\x1b[3m", strip: "" },
   { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
   // Extended color support with both % and $ prefix
-  { 
-    before: /%c<#([0-9A-Fa-f]{6})>/g, 
+  {
+    before: /%c<#([0-9A-Fa-f]{6})>/g,
     after: (match, hex) => {
       const r = parseInt(hex.slice(0, 2), 16);
       const g = parseInt(hex.slice(2, 4), 16);
       const b = parseInt(hex.slice(4, 6), 16);
       return `\x1b[38;2;${r};${g};${b}m`;
-    }, 
-    strip: "" 
+    },
+    strip: "",
   },
   // 256 color support with names or numbers, both % and $ prefix
-  { 
-    before: /%c<(\d{1,3}|[a-zA-Z]+)>/g, 
+  {
+    before: /%c<(\d{1,3}|[a-zA-Z]+)>/g,
     after: (match, color) => {
-      const colorCode = isNaN(color as any) ? colorMap[color.toLowerCase()] || 15 : parseInt(color);
+      const colorCode = isNaN(color as any)
+        ? colorMap[color.toLowerCase()] || 15
+        : parseInt(color);
       return `\x1b[38;5;${colorCode}m`;
-    }, 
-    strip: "" 
-  }
+    },
+    strip: "",
+  },
 );
 
 parser.addSubs(
@@ -129,20 +131,22 @@ parser.addSubs(
   },
   { before: /%[cx]i/g, after: "<i>", strip: "" },
   { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
-  { 
-    before: /%c<#([0-9A-Fa-f]{6})>/g, 
-    after: (match, hex) => `<span style='color: #${hex}'>`, 
-    strip: "" 
+  {
+    before: /%c<#([0-9A-Fa-f]{6})>/g,
+    after: (match, hex) => `<span style='color: #${hex}'>`,
+    strip: "",
   },
   // 256 color support with names or numbers
-  { 
-    before: /%c<(\d{1,3}|[a-zA-Z]+)>/g, 
+  {
+    before: /%c<(\d{1,3}|[a-zA-Z]+)>/g,
     after: (match, color) => {
-      const colorCode = isNaN(color as any) ? colorMap[color.toLowerCase()] || 15 : parseInt(color);
+      const colorCode = isNaN(color as any)
+        ? colorMap[color.toLowerCase()] || 15
+        : parseInt(color);
       return `<span style='color: var(--color-${colorCode})'>`;
-    }, 
-    strip: "" 
-  }
+    },
+    strip: "",
+  },
 );
 
 parser.add(
