@@ -39,14 +39,14 @@ const cfg = new Config({
     // Example of a local plugin configuration
     wod: {
       enabled: true,
-      path: path.join(process.cwd(), "./src/plugins/wod")
+      path: path.join(process.cwd(), "./src/plugins/wod"),
     },
     // Example of how to configure an npm package plugin
     // "some-mush-plugin": {
     //   enabled: true,
     //   package: "@username/some-mush-plugin"
     // }
-  }
+  },
 });
 
 export default cfg;

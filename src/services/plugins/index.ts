@@ -1,6 +1,6 @@
-import path from 'path';
-import { IConfig, IPluginConfig } from '../../@types/IConfig';
-import { IPlugin } from '../../@types/IPlugin';
+import path from "path";
+import { IConfig, IPluginConfig } from "../../@types/IConfig";
+import { IPlugin } from "../../@types/IPlugin";
 
 export class PluginService {
   private loadedPlugins: Map<string, IPlugin> = new Map();
@@ -83,7 +83,7 @@ export class PluginService {
     }
 
     this.loadedPlugins.delete(name);
-    
+
     if (this.config.plugins?.[name]) {
       this.config.plugins[name].enabled = false;
     }
@@ -105,4 +105,6 @@ export class PluginService {
 }
 
 // Export a singleton instance
-export const pluginService = new PluginService(require('../../ursamu.config').default.config);
+export const pluginService = new PluginService(
+  require("../../ursamu.config").default.config,
+);

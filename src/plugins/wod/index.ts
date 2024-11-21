@@ -8,7 +8,7 @@ const plugin: IPlugin = {
     name: "World of Darkness",
     version: "1.0.0",
     description: "World of Darkness character system",
-    author: "UrsaMU"
+    author: "UrsaMU",
   },
   initialize: async () => {
     // Initialize commands
@@ -16,7 +16,7 @@ const plugin: IPlugin = {
 
     // Load help files
     loadTxtDir(path.join(__dirname, "help"));
-  }
+  },
 };
 
 export default plugin;

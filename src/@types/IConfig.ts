@@ -3,7 +3,7 @@ import { deepMerge } from "../utils/deepMerge";
 export interface IPluginConfig {
   enabled: boolean;
   package?: string; // For npm package plugins
-  path?: string;    // For local plugins
+  path?: string; // For local plugins
 }
 
 export interface IConfig {
