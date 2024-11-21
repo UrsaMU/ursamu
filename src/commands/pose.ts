@@ -5,7 +5,7 @@ import { dbojs } from "../services/Database";
 export default () =>
   addCmd({
     name: "pose",
-    pattern: /^(pose\s+|:|;)(.*)/i,
+    pattern: /^(pose\s+|:|;)\s*(.*)/i,
     lock: "connected",
     exec: async (ctx, args) => {
       const player = await dbojs.findOne({ id: ctx.socket.cid });

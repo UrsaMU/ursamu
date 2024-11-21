@@ -1,12 +1,24 @@
-import { ICmd } from "./ICmd";
-import { IConfig } from "./IConfig";
-
+/**
+ * Interface for plugins in the system
+ */
 export interface IPlugin {
-  name: string;
-  description?: string;
-  version: string;
-  config?: IConfig;
+  /**
+   * Initialize the plugin
+   */
+  initialize?: () => Promise<void>;
 
-  init?: () => boolean | Promise<boolean>;
-  remove?: () => void | Promise<void>;
+  /**
+   * Clean up plugin resources
+   */
+  cleanup?: () => Promise<void>;
+
+  /**
+   * Plugin metadata
+   */
+  meta: {
+    name: string;
+    version: string;
+    description: string;
+    author: string;
+  };
 }

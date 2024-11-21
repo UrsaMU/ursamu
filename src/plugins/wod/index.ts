@@ -4,18 +4,19 @@ import { loadTxtDir } from "../../utils/loadTxtDir";
 import path from "path";
 
 const plugin: IPlugin = {
-  name: "World of Darkness",
-  version: "1.0.0",
-  description: "World of Darkness character system",
-  init: () => {
+  meta: {
+    name: "World of Darkness",
+    version: "1.0.0",
+    description: "World of Darkness character system",
+    author: "UrsaMU"
+  },
+  initialize: async () => {
     // Initialize commands
     initCommands();
 
     // Load help files
     loadTxtDir(path.join(__dirname, "help"));
-
-    return true; // Return true to indicate successful initialization
-  },
+  }
 };
 
 export default plugin;

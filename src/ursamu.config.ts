@@ -33,9 +33,20 @@ const cfg = new Config({
     name: "Ursamu",
     description: "A Modern MUSH-Like engine written in Typescript.",
     version: "0.0.1",
-
     playerStart: 1,
   },
+  plugins: {
+    // Example of a local plugin configuration
+    wod: {
+      enabled: true,
+      path: path.join(process.cwd(), "./src/plugins/wod")
+    },
+    // Example of how to configure an npm package plugin
+    // "some-mush-plugin": {
+    //   enabled: true,
+    //   package: "@username/some-mush-plugin"
+    // }
+  }
 });
 
 export default cfg;

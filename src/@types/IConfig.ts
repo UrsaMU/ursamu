@@ -1,5 +1,10 @@
-import { directory } from "../main";
 import { deepMerge } from "../utils/deepMerge";
+
+export interface IPluginConfig {
+  enabled: boolean;
+  package?: string; // For npm package plugins
+  path?: string;    // For local plugins
+}
 
 export interface IConfig {
   engine?: {
@@ -25,19 +30,13 @@ export interface IConfig {
       connect: string;
     };
   };
+  plugins?: {
+    [key: string]: IPluginConfig;
+  };
 }
 
 export class Config {
   constructor(public config: IConfig) {
-    if (directory) {
-      this.config = deepMerge(
-        config,
-        require(`${directory}/ursamu.config.json`) as IConfig,
-      );
-    } else {
-      this.config = config;
-    }
-
     this.config = config;
   }
 
@@ -51,6 +50,10 @@ export class Config {
 
   get engine() {
     return this.config.engine;
+  }
+
+  get plugins() {
+    return this.config.plugins || {};
   }
 
   setConfig = (config: IConfig) => {
