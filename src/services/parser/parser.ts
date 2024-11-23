@@ -63,6 +63,28 @@ const parser = new Parser();
 
 parser.addSubs(
   "telnet",
+  // Markdown formatting
+  // Headings
+  {
+    before: /^(#{1,6})\s*(.*)$/gm,
+    after: (match, hashes, heading) => {
+      
+      return `%ch%cu${heading}%cn`;
+    },
+    strip: "",
+  },
+  // Bold
+  { before: /\*\*(.*?)\*\*/g, after: "%ch$1%cn", strip: "" },
+  { before: /__(.*?)__/g, after: "%ch$1%cn", strip: "" },
+  // Italic
+  { before: /\*(.*?)\*/g, after: "%ci$1%cn", strip: "" },
+  { before: /_(.*?)_/g, after: "%ci$1%cn", strip: "" },
+  // Underline
+  { before: /__(.*?)__/g, after: "%cu$1%cn", strip: "" },
+  // Strikethrough
+  { before: /~~(.*?)~~/g, after: "%cu>$1%cn", strip: "" },
+  // Inline code
+  { before: /`(.*?)`/g, after: "%ci%cu$1%cn", strip: "" },
   { before: /%r/g, after: "\n" },
   { before: /%b/g, after: " ", strip: " " },
   { before: /%t/g, after: "\t" },
@@ -91,19 +113,20 @@ parser.addSubs(
     },
     strip: "",
   },
-  // 256 color support with names or numbers, both % and $ prefix
+  // 256 color support with names or numbers
   {
     before: /%c<(\d{1,3}|[a-zA-Z]+)>/g,
     after: (match, color) => {
       const colorCode = isNaN(color as any)
-        ? colorMap[color.toLowerCase()] || 15
-        : parseInt(color);
+      ? colorMap[color.toLowerCase()] || 15
+      : parseInt(color);
       return `\x1b[38;5;${colorCode}m`;
     },
     strip: "",
   },
 );
-
+  
+  
 parser.addSubs(
   "html",
   { before: /%r/g, after: "<br />" },

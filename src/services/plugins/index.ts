@@ -32,7 +32,8 @@ export class PluginService {
         plugin = await import(config.package);
       } else if (config.path) {
         // Load from local path
-        plugin = await import(config.path);
+        const imported = await import(config.path);
+        plugin = imported.default;
       } else {
         throw new Error(`Plugin ${name} has no package or path specified`);
       }
@@ -50,6 +51,10 @@ export class PluginService {
       console.log(`Plugin ${name} loaded successfully`);
     } catch (error) {
       console.error(`Error loading plugin ${name}:`, error);
+      // Log the full error stack for debugging
+      if (error instanceof Error) {
+        console.error(error.stack);
+      }
     }
   }
 

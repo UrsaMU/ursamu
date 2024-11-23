@@ -145,6 +145,8 @@ export class UrsaMU {
     try {
       // Load text files first
       loadTxtDir(join(__dirname, "../text"));
+      // Load help files
+      loadTxtDir(join(__dirname, "../help"));
 
       // Load commands
       loadDir(join(__dirname, "commands"));

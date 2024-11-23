@@ -1,7 +1,6 @@
 import { createServer, Socket } from "net";
 import { io } from "socket.io-client";
 import cfg from "./ursamu.config";
-import parser from "./services/parser/parser";
 import { join } from "path";
 import { readFile } from "fs/promises";
 
@@ -33,9 +32,7 @@ const handleSocketIO = (socket: ITelnetSocket, sock: any) => {
 
   sock.io.on("reconnect", () => {
     if (socket.cid) {
-      socket.write(
-        parser.substitute("telnet", "%ch%cgReconnected to game server.%cn\r\n"),
-      );
+      socket.write("%ch%cgReconnected to game server.%cn\r\n");
       sock.emit("message", {
         msg: "",
         data: {
@@ -50,26 +47,20 @@ const handleSocketIO = (socket: ITelnetSocket, sock: any) => {
     if (!socket.reconnecting) {
       socket.reconnecting = true;
       socket.write(
-        parser.substitute("telnet", "%ch%cyAttempting to reconnect...%cn\r\n"),
+        "%ch%cyAttempting to reconnect...%cn\r\n"
       );
     }
   });
 
   sock.io.on("reconnect_error", () => {
     socket.write(
-      parser.substitute(
-        "telnet",
         "%ch%crReconnection failed, retrying...%cn\r\n",
-      ),
     );
   });
 
   sock.io.on("disconnect", () => {
     socket.write(
-      parser.substitute(
-        "telnet",
         "%ch%cyTemporarily disconnected from game server, attempting to reconnect...%cn\r\n",
-      ),
     );
   });
 };

@@ -1,3 +1,6 @@
+---
+category: Character Creation
+---
 # Character Generation Commands
 
 Welcome to the character generation system, help. This file acts as both a guide

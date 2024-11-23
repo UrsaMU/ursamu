@@ -1,13 +1,50 @@
 # UrsaMU: The Modern MUSH-Like Server
 
-![UrsaMU](ursamu_githug.banner.png)
+![UrsaMU](ursamu_github_banner.png)
 
 ## Welcome to UrsaMU!
 
-UrsaMU is an innovative, Typescript-based server, echoing the classic MUSH
+UrsaMU is an innovative, TypeScript-based server, echoing the classic MUSH
 (Multi-User Shared Hallucination) experience with a modern twist. Designed for
 flexibility and extendability, it's an ideal platform for creating immersive,
 text-based virtual worlds.
+
+## Core Features
+
+- **Multi-Protocol Support**: Connect via Telnet or Web interface
+- **Advanced Character System**:
+  - Customizable attributes and stats
+  - Character generation system
+  - Flexible flag system
+  - Detailed character descriptions and profiles
+- **Rich Communication Tools**:
+  - Channel system for group conversations
+  - Private messaging/page system
+  - Pose and emote commands
+  - Mail system for offline communication
+  - Bulletin Board System (BBS)
+- **Building System**:
+  - Room creation and management
+  - Exit linking
+  - Object creation
+  - Lock system for security
+- **Help System**:
+  - Comprehensive documentation
+  - Topic-based help files
+  - Command reference
+- **Plugin Architecture**:
+  - Modular design for easy extensions
+  - World of Darkness (WoD) plugin included:
+    - Character sheets
+    - Dice rolling system
+    - Damage and healing mechanics
+    - Stats management
+- **Additional Features**:
+  - Wiki system for world documentation
+  - Robust authentication system
+  - Command parser with middleware support
+  - Attribute-based permissions
+  - Customizable startup/shutdown scripts
 
 ## What's a MUSH?
 
@@ -15,12 +52,6 @@ MUSH, a text-driven, multi-user environment, is rooted in the legacy of MUDs
 (Multi-User Dungeons) - the early ancestors of today's MMORPGs. These platforms
 are renowned for their customizability, serving as fertile grounds for
 role-playing adventures and vibrant social hubs.
-
-## And a MUSH-Like?
-
-UrsaMU stands as a MUSH-like server - embodying the essence of MUSH but with
-distinct features and enhancements, offering a unique twist on traditional
-text-based online environments.
 
 ## Getting Started with UrsaMU
 

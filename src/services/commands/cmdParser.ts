@@ -1,7 +1,6 @@
 import { MiddlewareStack } from "./middleware";
 import { ICmd } from "../../@types/ICmd";
 import { flags } from "../flags/flags";
-import { getCharacter } from "../../plugins/wod/services/character";
 import { send } from "../broadcast";
 import { dbojs } from "../Database";
 import { matchExits } from "./movement";
@@ -22,12 +21,13 @@ export const addCmd = (...newCmds: ICmd[]) => {
     } else {
       // Add new command
       cmds.push(cmd);
+      
     }
   }
 };
 
 cmdParser.use(async (ctx, next) => {
-  const char = await getCharacter(dbojs, ctx.socket.cid);
+  const char = await dbojs.findOne({ id: ctx.socket.cid });
 
   const { msg } = ctx;
   for (const cmd of cmds) {
@@ -43,7 +43,7 @@ cmdParser.use(async (ctx, next) => {
           console.error(e);
           send(
             [ctx.socket.id],
-            `Uh oh! You've run into an error! please contact staff wit hthe following info!%r%r%chError:%cn ${e}`,
+            `Uh oh! You've run into an error! please contact staff with the following info!%r%r%chError:%cn ${e}`,
             { error: true },
           );
         });

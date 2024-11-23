@@ -1,11 +1,21 @@
-# Splat
+---
+category: Character Creation
+---
+# Setting Your Character Type (Splat)
 
-Splat allows you to set one of the available types of characters to make on the
-game, vampire, mortal, etc. You must set your splat before you can begin setting
-your stats. Once your splat is set, you'll have to `stats/reset`before you can
-set your splat again. Using `stats/reset` will reset your entire character
-sheet.
+The `+splat` command is used to set your character's basic type. This is the first command you should use in character creation.
 
-Usage: `splat [<target>=]<splat>`
+## Usage
+`+splat <splat>` - Sets your character type
 
-See Also: `stats`, `stats/reset`
+## Important Notes
+- You can only use this command once
+- To change your splat, you must first use `+stats/reset`
+- This command must be used before setting other character stats
+
+## Example
+```
++splat vampire
+```
+
+See 'help stats' for the next step in character creation after setting your splat.

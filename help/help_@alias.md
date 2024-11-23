@@ -1,13 +1,25 @@
-# Alias
+---
+category: System Commands
+---
+# @ALIAS Command
 
-Usage: `@alias <target> = <alias>`
+The @ALIAS command allows you to create custom command aliases. Aliases are shortcuts that can be used to execute longer commands.
 
-@alias is a command that allows you to create aliases for characters. With this
-people can use your alias to interact with your character, or the character
-who's alias is set `(admin+)`.
+## Syntax
+`@alias <name>=<command>`
+`@alias/delete <name>`
+`@alias/list`
 
-Example:
-
+## Examples
 ```
-@alias me = K
+@alias afk=pose is away from their keyboard.
+@alias/delete afk
+@alias/list
 ```
+
+## Options
+* /delete - Remove an existing alias
+* /list - Show all your current aliases
+
+See also:
+- help @set (Setting other character attributes)

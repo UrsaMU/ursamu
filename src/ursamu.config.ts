@@ -39,7 +39,7 @@ const cfg = new Config({
     // Example of a local plugin configuration
     wod: {
       enabled: true,
-      path: path.join(process.cwd(), "./src/plugins/wod"),
+      path: path.join(process.cwd(), "./src/plugins/wod/index.ts"),
     },
     // Example of how to configure an npm package plugin
     // "some-mush-plugin": {

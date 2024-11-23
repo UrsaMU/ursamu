@@ -5,7 +5,7 @@ import parser from "../services/parser/parser";
 import { center, columns, repeatString } from "../utils/format";
 import { send } from "../services/broadcast";
 import cfg from "../ursamu.config";
-import { txtFiles } from "../services/text";
+import { txtFiles, type HelpFileData } from "../services/text";
 
 export default async () => {
   addCmd({
@@ -30,9 +30,9 @@ export default async () => {
               key.startsWith(`help_${cmd.name}`)
             )
           ) {
-            name = cmd.name.toUpperCase();
+            name = cmd.name.toUpperCase().trim();
           } else {
-            name = `%cr${cmd.name.toUpperCase()}*%cn`;
+            name = `%cr${cmd.name.toUpperCase().trim()}%cn`;
           }
 
           if (cmd.category) {
@@ -49,6 +49,30 @@ export default async () => {
             .stripSubs("telnet", a.name.toLowerCase())
             .localeCompare(parser.stripSubs("telnet", b.name.toLowerCase()))
         );
+
+      // Add topic files that don't correspond to commands
+      const topicFiles = Array.from(txtFiles.entries())
+        .filter(([key, data]: [string, HelpFileData]) => key.startsWith('topic_') && !data.hidden)
+        .map(([key, data]: [string, HelpFileData]) => {
+          const name = key.replace('topic_', '').replace('.md', '').toUpperCase();
+          const category = data.category || 'Topics';
+          cats.add(category);
+          return { name, category };
+        });
+
+      // Add help files that don't correspond to commands
+      const helpFiles = Array.from(txtFiles.entries())
+        .filter(([key, data]: [string, HelpFileData]) => key.startsWith('help_') && !data.hidden &&
+          !localCmds.some(cmd => key === `help_${cmd.name}.md`))
+        .map(([key, data]: [string, HelpFileData]) => {
+          const name = key.replace('help_', '').replace('.md', '').toUpperCase();
+          const category = data.category || 'General';
+          cats.add(category);
+          return { name, category };
+        });
+
+      // Add all visible files to commands
+      commands = [...commands, ...topicFiles, ...helpFiles];
 
       let output = center(
         `%cy[%cn %ch%cc${
@@ -78,6 +102,7 @@ export default async () => {
 
       output +=
         "Type '%chhelp <command>%cn' for more information on a command.\n";
+      output += "Type '%chhelp <topic>%cn' to read about a specific topic.\n";
       output += repeatString("%cr=%cn", 78);
       await send([ctx.socket.id], output, {});
       localCmds = [];
@@ -110,6 +135,38 @@ export default async () => {
         return helpKey;
       };
 
+      // Function to find related help files
+      const findRelatedFiles = (currentTopic: string): string[] => {
+        const relatedFiles: string[] = [];
+        const currentTopicName = currentTopic.replace(/^(help_|topic_)/, '').replace('.md', '');
+        const words = currentTopicName.toLowerCase().split(/[_\s-]/);
+        
+        Array.from(txtFiles.keys()).forEach(key => {
+          // Skip the current topic
+          if (key.toLowerCase() === currentTopic.toLowerCase()) return;
+          
+          // Skip hidden files unless user is a wizard
+          const fileData = txtFiles.get(key);
+          if (fileData?.hidden) return;
+          
+          const fileName = key.replace(/^(help_|topic_)/, '').replace('.md', '');
+          const fileWords = fileName.toLowerCase().split(/[_\s-]/);
+          
+          // Check if any words match
+          const hasMatch = words.some(word => 
+            fileWords.some(fileWord => 
+              fileWord.includes(word) || word.includes(fileWord)
+            )
+          );
+          
+          if (hasMatch) {
+            relatedFiles.push(fileName.toUpperCase());
+          }
+        });
+        
+        return relatedFiles;
+      };
+
       // Try different variations of the topic
       const variations = [
         topic, // Original topic
@@ -125,13 +182,32 @@ export default async () => {
       }
 
       if (helpKey) {
-        const content = txtFiles.get(helpKey);
+        const helpData = txtFiles.get(helpKey);
+        
+        // Check if the help file is hidden and if the user has permission to see it
+        if (helpData?.hidden) {
+          const player = await dbojs.findOne({ id: ctx.socket.cid });
+          if (!player || !flags.check(player.flags || "", "Wizard")) {
+            send([ctx.socket.id], `No help available for '${topic}'.`, {});
+            return;
+          }
+        }
+
         let output = center(
           `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
           78,
           "%cr-%cn",
         ) + "\n";
-        output += content || "";
+
+        output += helpData?.content + "\n\n";
+
+        // Add related topics
+        const relatedFiles = findRelatedFiles(helpKey);
+        if (relatedFiles.length > 0) {
+          output += "%ch%cyRelated Topics:%cn\n";
+          output += relatedFiles.join(", ") + "\n";
+        }
+
         output += repeatString("%cr-%cn", 78);
         send([ctx.socket.id], output, {});
         return;

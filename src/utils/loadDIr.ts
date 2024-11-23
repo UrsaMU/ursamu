@@ -1,6 +1,8 @@
 import fs from "fs";
 import { readdir } from "fs/promises";
+import path from "path";
 
+// Original loadDir for loading modules
 export const loadDir = async (dir: string) => {
   const dirent = await readdir(dir);
   const files = dirent.filter(
@@ -19,6 +21,12 @@ export const loadDir = async (dir: string) => {
       }
     });
   });
+};
+
+// New function for getting file paths
+export const getFilePaths = async (dir: string): Promise<string[]> => {
+  const files = await readdir(dir);
+  return files.map(file => path.join(dir, file));
 };
 
 export const loadDirCallback = (

@@ -62,7 +62,7 @@ export const center = (string = "", length: number, filler = " ") => {
 
 export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
   const truncate = (input: any, size: any, fill: any) => {
-    let length = parser.stripSubs("telnet", input).length;
+    let length = parser.stripSubs("telnet", input).trim().length;
     return length > size - 3
       ? `${input.substring(0, size - 3)}...`
       : input + fill.repeat(size - length);
