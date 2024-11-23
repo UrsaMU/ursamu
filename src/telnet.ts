@@ -32,7 +32,7 @@ const handleSocketIO = (socket: ITelnetSocket, sock: any) => {
 
   sock.io.on("reconnect", () => {
     if (socket.cid) {
-      socket.write("%ch%cgReconnected to game server.%cn\r\n");
+      socket.write("Reconnected to game server.\r\n");
       sock.emit("message", {
         msg: "",
         data: {
@@ -47,20 +47,20 @@ const handleSocketIO = (socket: ITelnetSocket, sock: any) => {
     if (!socket.reconnecting) {
       socket.reconnecting = true;
       socket.write(
-        "%ch%cyAttempting to reconnect...%cn\r\n",
+        "Attempting to reconnect...\r\n",
       );
     }
   });
 
   sock.io.on("reconnect_error", () => {
     socket.write(
-      "%ch%crReconnection failed, retrying...%cn\r\n",
+      "Reconnection failed, retrying...\r\n",
     );
   });
 
   sock.io.on("disconnect", () => {
     socket.write(
-      "%ch%cyTemporarily disconnected from game server, attempting to reconnect...%cn\r\n",
+      "Temporarily disconnected from game server, attempting to reconnect...\r\n",
     );
   });
 };
