@@ -68,7 +68,6 @@ parser.addSubs(
   {
     before: /^(#{1,6})\s*(.*)$/gm,
     after: (match, hashes, heading) => {
-      
       return `%ch%cu${heading}%cn`;
     },
     strip: "",
@@ -118,15 +117,14 @@ parser.addSubs(
     before: /%c<(\d{1,3}|[a-zA-Z]+)>/g,
     after: (match, color) => {
       const colorCode = isNaN(color as any)
-      ? colorMap[color.toLowerCase()] || 15
-      : parseInt(color);
+        ? colorMap[color.toLowerCase()] || 15
+        : parseInt(color);
       return `\x1b[38;5;${colorCode}m`;
     },
     strip: "",
   },
 );
-  
-  
+
 parser.addSubs(
   "html",
   { before: /%r/g, after: "<br />" },

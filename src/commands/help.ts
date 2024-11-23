@@ -5,7 +5,7 @@ import parser from "../services/parser/parser";
 import { center, columns, repeatString } from "../utils/format";
 import { send } from "../services/broadcast";
 import cfg from "../ursamu.config";
-import { txtFiles, type HelpFileData } from "../services/text";
+import { type HelpFileData, txtFiles } from "../services/text";
 
 export default async () => {
   addCmd({
@@ -52,21 +52,27 @@ export default async () => {
 
       // Add topic files that don't correspond to commands
       const topicFiles = Array.from(txtFiles.entries())
-        .filter(([key, data]: [string, HelpFileData]) => key.startsWith('topic_') && !data.hidden)
+        .filter(([key, data]: [string, HelpFileData]) =>
+          key.startsWith("topic_") && !data.hidden
+        )
         .map(([key, data]: [string, HelpFileData]) => {
-          const name = key.replace('topic_', '').replace('.md', '').toUpperCase();
-          const category = data.category || 'Topics';
+          const name = key.replace("topic_", "").replace(".md", "")
+            .toUpperCase();
+          const category = data.category || "Topics";
           cats.add(category);
           return { name, category };
         });
 
       // Add help files that don't correspond to commands
       const helpFiles = Array.from(txtFiles.entries())
-        .filter(([key, data]: [string, HelpFileData]) => key.startsWith('help_') && !data.hidden &&
-          !localCmds.some(cmd => key === `help_${cmd.name}.md`))
+        .filter(([key, data]: [string, HelpFileData]) =>
+          key.startsWith("help_") && !data.hidden &&
+          !localCmds.some((cmd) => key === `help_${cmd.name}.md`)
+        )
         .map(([key, data]: [string, HelpFileData]) => {
-          const name = key.replace('help_', '').replace('.md', '').toUpperCase();
-          const category = data.category || 'General';
+          const name = key.replace("help_", "").replace(".md", "")
+            .toUpperCase();
+          const category = data.category || "General";
           cats.add(category);
           return { name, category };
         });
@@ -138,32 +144,36 @@ export default async () => {
       // Function to find related help files
       const findRelatedFiles = (currentTopic: string): string[] => {
         const relatedFiles: string[] = [];
-        const currentTopicName = currentTopic.replace(/^(help_|topic_)/, '').replace('.md', '');
+        const currentTopicName = currentTopic.replace(/^(help_|topic_)/, "")
+          .replace(".md", "");
         const words = currentTopicName.toLowerCase().split(/[_\s-]/);
-        
-        Array.from(txtFiles.keys()).forEach(key => {
+
+        Array.from(txtFiles.keys()).forEach((key) => {
           // Skip the current topic
           if (key.toLowerCase() === currentTopic.toLowerCase()) return;
-          
+
           // Skip hidden files unless user is a wizard
           const fileData = txtFiles.get(key);
           if (fileData?.hidden) return;
-          
-          const fileName = key.replace(/^(help_|topic_)/, '').replace('.md', '');
+
+          const fileName = key.replace(/^(help_|topic_)/, "").replace(
+            ".md",
+            "",
+          );
           const fileWords = fileName.toLowerCase().split(/[_\s-]/);
-          
+
           // Check if any words match
-          const hasMatch = words.some(word => 
-            fileWords.some(fileWord => 
+          const hasMatch = words.some((word) =>
+            fileWords.some((fileWord) =>
               fileWord.includes(word) || word.includes(fileWord)
             )
           );
-          
+
           if (hasMatch) {
             relatedFiles.push(fileName.toUpperCase());
           }
         });
-        
+
         return relatedFiles;
       };
 
@@ -183,7 +193,7 @@ export default async () => {
 
       if (helpKey) {
         const helpData = txtFiles.get(helpKey);
-        
+
         // Check if the help file is hidden and if the user has permission to see it
         if (helpData?.hidden) {
           const player = await dbojs.findOne({ id: ctx.socket.cid });

@@ -28,7 +28,7 @@ export const loadText = async () => {
     txtFiles.set(name, {
       content,
       category: data.category,
-      hidden: data.hidden
+      hidden: data.hidden,
     });
   }
 };

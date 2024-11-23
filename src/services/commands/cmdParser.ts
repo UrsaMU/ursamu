@@ -21,7 +21,6 @@ export const addCmd = (...newCmds: ICmd[]) => {
     } else {
       // Add new command
       cmds.push(cmd);
-      
     }
   }
 };

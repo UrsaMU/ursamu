@@ -47,20 +47,20 @@ const handleSocketIO = (socket: ITelnetSocket, sock: any) => {
     if (!socket.reconnecting) {
       socket.reconnecting = true;
       socket.write(
-        "%ch%cyAttempting to reconnect...%cn\r\n"
+        "%ch%cyAttempting to reconnect...%cn\r\n",
       );
     }
   });
 
   sock.io.on("reconnect_error", () => {
     socket.write(
-        "%ch%crReconnection failed, retrying...%cn\r\n",
+      "%ch%crReconnection failed, retrying...%cn\r\n",
     );
   });
 
   sock.io.on("disconnect", () => {
     socket.write(
-        "%ch%cyTemporarily disconnected from game server, attempting to reconnect...%cn\r\n",
+      "%ch%cyTemporarily disconnected from game server, attempting to reconnect...%cn\r\n",
     );
   });
 };

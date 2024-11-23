@@ -2,7 +2,9 @@ import fs, { readFileSync } from "fs";
 import path from "path";
 import { txtFiles } from "../services/text";
 
-const parseFrontmatter = (content: string): { frontmatter: any; content: string } => {
+const parseFrontmatter = (
+  content: string,
+): { frontmatter: any; content: string } => {
   const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
   const match = content.match(frontmatterRegex);
 
@@ -14,8 +16,8 @@ const parseFrontmatter = (content: string): { frontmatter: any; content: string 
   const frontmatter: any = {};
 
   // Parse the frontmatter
-  frontmatterStr.split('\n').forEach(line => {
-    const [key, value] = line.split(':').map(str => str.trim());
+  frontmatterStr.split("\n").forEach((line) => {
+    const [key, value] = line.split(":").map((str) => str.trim());
     if (key && value) {
       frontmatter[key] = value;
     }
@@ -23,7 +25,7 @@ const parseFrontmatter = (content: string): { frontmatter: any; content: string 
 
   return {
     frontmatter,
-    content: remainingContent.trim()
+    content: remainingContent.trim(),
   };
 };
 
@@ -36,18 +38,18 @@ export const loadTxtDir = async (dir: string) => {
     } else {
       if (file.endsWith(".txt") || file.endsWith(".md")) {
         const rawContent = readFileSync(path.join(dir, file), "utf8");
-        
+
         if (file.endsWith(".md")) {
           // Parse frontmatter for markdown files
           const { frontmatter, content } = parseFrontmatter(rawContent);
           txtFiles.set(file, {
             content,
-            category: frontmatter.category
+            category: frontmatter.category,
           });
         } else {
           // For .txt files, just store the content
           txtFiles.set(file, {
-            content: rawContent
+            content: rawContent,
           });
         }
       }

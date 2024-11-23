@@ -26,7 +26,7 @@ export const loadDir = async (dir: string) => {
 // New function for getting file paths
 export const getFilePaths = async (dir: string): Promise<string[]> => {
   const files = await readdir(dir);
-  return files.map(file => path.join(dir, file));
+  return files.map((file) => path.join(dir, file));
 };
 
 export const loadDirCallback = (
