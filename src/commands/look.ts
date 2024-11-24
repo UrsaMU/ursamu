@@ -60,13 +60,14 @@ export default () =>
           // Get fresh data for each player
           const freshPlayer = await dbojs.db.findOne({ id: p.id }).exec();
           if (!freshPlayer) continue;
-          
+
           output += isAdmin(freshPlayer) ? "%ch%cc *%cn  " : "    ";
           output += ljust(`${displayName(en, freshPlayer)}`, 25);
           output += rjust(idle(freshPlayer.data?.lastCommand || 0), 5);
           output += ljust(
             `  ${
-              freshPlayer.data?.shortdesc || "%ch%cxUse '+short <desc>' to set this.%cn"
+              freshPlayer.data?.shortdesc ||
+              "%ch%cxUse '+short <desc>' to set this.%cn"
             }`,
             42,
           );

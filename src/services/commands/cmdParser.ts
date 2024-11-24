@@ -40,7 +40,7 @@ cmdParser.use(async (ctx, next) => {
         obj.data ||= {};
         obj.data.lastCommand = Date.now();
         await obj.save();
-        
+
         await cmd.exec(ctx, match.slice(1))?.catch((e) => {
           console.error(e);
           send(
