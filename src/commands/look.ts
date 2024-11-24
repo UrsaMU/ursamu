@@ -4,8 +4,7 @@ import { addCmd } from "../services/commands";
 import { dbojs } from "../services/Database";
 import { displayName } from "../utils/displayName";
 import { center, columns, ljust, repeatString, rjust } from "../utils/format";
-import { getIdle, idle } from "../utils/idle";
-import { isAdmin } from "../utils/isAdmin";
+import { getIdle } from "../utils/idle";
 import { target } from "../utils/target";
 
 export default () =>
@@ -18,7 +17,9 @@ export default () =>
       const en = await dbojs.db.findOne({ id: ctx.socket.cid });
       if (!en) return;
       const tar = await target(en, args[0]);
-
+      if(!tar) return;
+      const obj = new Obj(tar);
+      
       if (!tar) {
         send([ctx.socket.id], "I can't find that here!", {});
         return;
@@ -30,7 +31,7 @@ export default () =>
         "%cr=%cn",
       );
 
-      output += `\n${tar.description || "You see nothing special."}\n`;
+      output += `\n${await getAttr(obj, "description", "You see nothing special.")}\n`;
 
       // Force fresh queries for contents
       const contents = await dbojs.db.find({ location: tar.id });
@@ -64,9 +65,7 @@ export default () =>
           const obj = new Obj(freshPlayer);
 
           const idleTime = await getIdle(freshPlayer.id);
-
-          output += isAdmin(freshPlayer) ? "%ch%cc *%cn  " : "    ";
-          output += ljust(`${displayName(en, freshPlayer)}`, 25);
+          output += ljust(` ${displayName(en, freshPlayer)}`, 25);
           output += rjust(idleTime, 5);
           output += ljust(
             `  ${await getAttr(
@@ -74,7 +73,7 @@ export default () =>
               "short-desc",
               "%ch%cxUse '&short-desc me=<desc>' to set this.%cn",
             )}`,
-            42,
+            48,
           );
           output += "\n";
         }

@@ -28,7 +28,6 @@ export const addCmd = (...newCmds: ICmd[]) => {
 
 cmdParser.use(async (ctx, next) => {
   const char = await dbojs.findOne({ id: ctx.socket.cid });
-  console.log("CID: ", ctx.socket.cid);
   const { msg } = ctx;
   for (const cmd of cmds) {
     const match = msg?.trim().match(cmd.pattern);
