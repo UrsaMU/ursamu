@@ -26,7 +26,7 @@ export const startIdleCheck = async () => {
           await setFlags(char, "!connected");
           await send(
             [`#${char.location}`],
-            `${moniker(char)} has disconnected. (Dead Connection)`
+            `${moniker(char)} has disconnected. (Dead Connection)`,
           );
           continue;
         }
@@ -39,7 +39,8 @@ export const startIdleCheck = async () => {
             // Notify all connected clients
             for (const socket of sockets) {
               socket.emit("message", {
-                msg: "%ch%crYou have been disconnected due to inactivity.%cn\r\n",
+                msg:
+                  "%ch%crYou have been disconnected due to inactivity.%cn\r\n",
                 data: { quit: true, cid: char.id },
               });
             }
@@ -51,7 +52,7 @@ export const startIdleCheck = async () => {
           await setFlags(char, "!connected");
           await send(
             [`#${char.location}`],
-            `${moniker(char)} has disconnected. (Idle Timeout)`
+            `${moniker(char)} has disconnected. (Idle Timeout)`,
           );
         }
       }
