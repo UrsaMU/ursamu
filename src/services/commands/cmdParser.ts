@@ -34,7 +34,12 @@ cmdParser.use(async (ctx, next) => {
     const match = msg?.trim().match(cmd.pattern);
     if (flags.check(char?.flags || "", cmd.lock || "")) {
       if (match) {
-        ctx.socket.lastCommand = Date.now();
+        const timestamp = Date.now();
+        ctx.socket.lastCommand = timestamp;
+        // Store lastCommand in database
+        if (char) {
+          await dbojs.update({ id: ctx.socket.cid }, { ...char, lastCommand: timestamp });
+        }
         await cmd.exec(ctx, match.slice(1))?.catch((e) => {
           console.error(e);
           send(

@@ -1,4 +1,5 @@
 import { connectedSockets } from "../app";
+import { dbojs } from "../services/Database";
 
 export const idle = (secs: number) => {
   const snds = secs ? Math.round((Date.now() - secs) / 1000) : 0;
@@ -42,18 +43,10 @@ export const idle = (secs: number) => {
   }
 };
 
-export const getIdle = (id: number) => {
-  // Get the set of sockets for this character ID
-  const sockets = connectedSockets.get(id);
-  if (!sockets?.size) return `-1s`;
+export const getIdle = async (id: number) => {
+  // Get the character data from database
+  const char = await dbojs.findOne({ id });
+  if (!char) return idle(0);
 
-  // Find the most recent lastCommand across all sockets for this character
-  let mostRecentCommand = 0;
-  for (const socket of sockets) {
-    if (socket.lastCommand && socket.lastCommand > mostRecentCommand) {
-      mostRecentCommand = socket.lastCommand;
-    }
-  }
-
-  return idle(mostRecentCommand);
+  return idle(char.lastCommand || 0);
 };

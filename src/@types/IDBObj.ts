@@ -7,6 +7,7 @@ export interface IDBOBJ {
   description?: string;
   location?: number;
   flags: string;
+  lastCommand?: number;
   data?: {
     attributes?: IAttribute[];
     name?: string;

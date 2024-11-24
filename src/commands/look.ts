@@ -1,3 +1,4 @@
+import { getAttr, Obj } from "../services";
 import { send } from "../services/broadcast";
 import { addCmd } from "../services/commands";
 import { dbojs } from "../services/Database";
@@ -60,14 +61,16 @@ export default () =>
           // Get fresh data for each player
           const freshPlayer = await dbojs.db.findOne({ id: p.id });
           if (!freshPlayer) continue;
+          const obj = new Obj(freshPlayer);
 
+          const idleTime = await getIdle(freshPlayer.id);
+          
           output += isAdmin(freshPlayer) ? "%ch%cc *%cn  " : "    ";
           output += ljust(`${displayName(en, freshPlayer)}`, 25);
-          output += rjust(getIdle(freshPlayer.id), 5);
+          output += rjust(idleTime, 5);
           output += ljust(
             `  ${
-              freshPlayer.data?.shortdesc ||
-              "%ch%cxUse '+short <desc>' to set this.%cn"
+              await getAttr(obj, "short-desc",  "%ch%cxUse '&short-desc me=<desc>' to set this.%cn")
             }`,
             42,
           );

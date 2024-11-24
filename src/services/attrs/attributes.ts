@@ -10,10 +10,10 @@ export const setAttr = async (obj: Obj, attr: string, value: string) => {
   return true;
 };
 
-export const getAttr = async (obj: Obj, stat: string) => {
+export const getAttr = async (obj: Obj, stat: string, def: string = "") => {
   const s = obj.data?.attributes?.find((s) =>
     s.name.toLowerCase().startsWith(stat.toLowerCase())
   );
-  if (!s) return "";
+  if (!s) return def;
   return s.value;
 };
