@@ -43,8 +43,17 @@ export const idle = (secs: number) => {
 };
 
 export const getIdle = (id: number) => {
-  // Is there a socket with this ID?
-  const socket = connectedSockets.get(id);
-  if (!socket?.size) return `-1s`;
-  return idle(Array.from(socket)[0].lastCommand || 0);
-};
+  // Get the set of sockets for this character ID
+  const sockets = connectedSockets.get(id);
+  if (!sockets?.size) return `-1s`;
+
+  // Find the most recent lastCommand across all sockets for this character
+  let mostRecentCommand = 0;
+  for (const socket of sockets) {
+    if (socket.lastCommand && socket.lastCommand > mostRecentCommand) {
+      mostRecentCommand = socket.lastCommand;
+    }
+  }
+
+  return idle(mostRecentCommand);
+}
