@@ -7,10 +7,9 @@
     "test": "jest",
     "telnet": "ts-node-dev src/telnet.ts",
     "server": "ts-node-dev --rs src/main.ts",
-    "build": "rm -rf dist && tsc -p tsconfig.json",
-    "pm2:server": "pm2 start dist/main.js --name ursamu --watch dist/main.js",
-    "pm2:telnet": "pm2 start dist/telnet.js --name telnet",
-    "start": "npm run build && npm run pm2:server && npm run pm2:telnet",
+    "pm2:server": "pm2 start --interpreter ts-node src/main.ts --name ursamu",
+    "pm2:telnet": "pm2 start --interpreter ts-node src/telnet.ts --name telnet",
+    "start": "npm run pm2:server && npm run pm2:telnet",
     "restart": "pm2 restart ursamu && pm2 restart telnet",
     "stop": "pm2 delete ursamu && pm2 delete telnet",
     "dev": "concurrently \"npm run telnet\" \"npm run server\""
@@ -46,6 +45,8 @@
     "pm2": "^5.3.0",
     "socket.io": "^4.7.1",
     "socket.io-client": "^4.7.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -65,7 +66,6 @@
     "prettier": "^2.8.8",
     "socket.io-mock": "^1.3.2",
     "ts-jest": "^29.2.5",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.1.6"
+    "ts-node-dev": "^2.0.0"
   }
 }
