@@ -16,13 +16,13 @@ export default () =>
       if (!en) return;
       const enObj = new Obj(en);
       const tar = await target(en, args[0]);
-      
+
       if (!tar) {
         send([ctx.socket.id], "I can't find that here!", {});
         return;
       }
       const obj = new Obj(tar);
-      console.log(args)
+      console.log(args);
       if (args[1]) {
         await setAttr(obj, "description", args[1], enObj.dbref);
 

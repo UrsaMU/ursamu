@@ -1,6 +1,11 @@
 import { Obj } from "../DBObjs/DBObjs";
 
-export const setAttr = async (obj: Obj, attr: string, value: string, setter: string) => {
+export const setAttr = async (
+  obj: Obj,
+  attr: string,
+  value: string,
+  setter: string,
+) => {
   // Initialize attributes array if it doesn't exist
   obj.data ||= { attributes: [] };
   obj.data.attributes ||= [];
@@ -19,7 +24,7 @@ export const setAttr = async (obj: Obj, attr: string, value: string, setter: str
       value: value,
       setter: setter,
       type: "attribute",
-      data: {}
+      data: {},
     });
   }
 

@@ -17,9 +17,9 @@ export default () =>
       const en = await dbojs.db.findOne({ id: ctx.socket.cid });
       if (!en) return;
       const tar = await target(en, args[0]);
-      if(!tar) return;
+      if (!tar) return;
       const obj = new Obj(tar);
-      
+
       if (!tar) {
         send([ctx.socket.id], "I can't find that here!", {});
         return;
@@ -31,7 +31,11 @@ export default () =>
         "%cr=%cn",
       );
 
-      output += `\n${await getAttr(obj, "description", "You see nothing special.")}\n`;
+      output += `\n${await getAttr(
+        obj,
+        "description",
+        "You see nothing special.",
+      )}\n`;
 
       // Force fresh queries for contents
       const contents = await dbojs.db.find({ location: tar.id });

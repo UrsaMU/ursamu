@@ -1,11 +1,15 @@
 # Color Reference Guide
 
 ## Description
-This guide lists all available named colors that can be used with color-related commands like +gradientname. Colors can be specified either by name or using hex codes (#RRGGBB format).
+
+This guide lists all available named colors that can be used with color-related
+commands like +gradientname. Colors can be specified either by name or using hex
+codes (#RRGGBB format).
 
 ## Available Colors
 
 ### Basic Colors
+
 - red (#FF0000)
 - green (#00FF00)
 - blue (#0000FF)
@@ -16,6 +20,7 @@ This guide lists all available named colors that can be used with color-related 
 - black (#000000)
 
 ### Reds & Pinks
+
 - crimson (#DC143C)
 - darkred (#8B0000)
 - maroon (#800000)
@@ -28,6 +33,7 @@ This guide lists all available named colors that can be used with color-related 
 - rose (#FF007F)
 
 ### Oranges & Browns
+
 - orange (#FFA500)
 - darkorange (#FF8C00)
 - peach (#FFDAB9)
@@ -37,6 +43,7 @@ This guide lists all available named colors that can be used with color-related 
 - tan (#D2B48C)
 
 ### Yellows & Golds
+
 - gold (#FFD700)
 - goldenrod (#DAA520)
 - khaki (#F0E68C)
@@ -44,6 +51,7 @@ This guide lists all available named colors that can be used with color-related 
 - lemon (#FFF700)
 
 ### Greens
+
 - lime (#00FF00)
 - forestgreen (#228B22)
 - olive (#808000)
@@ -54,6 +62,7 @@ This guide lists all available named colors that can be used with color-related 
 - teal (#008080)
 
 ### Blues
+
 - navy (#000080)
 - royalblue (#4169E1)
 - skyblue (#87CEEB)
@@ -63,6 +72,7 @@ This guide lists all available named colors that can be used with color-related 
 - indigo (#4B0082)
 
 ### Purples
+
 - purple (#800080)
 - violet (#EE82EE)
 - lavender (#E6E6FA)
@@ -71,12 +81,14 @@ This guide lists all available named colors that can be used with color-related 
 - orchid (#DA70D6)
 
 ### Metallics
+
 - silver (#C0C0C0)
 - platinum (#E5E4E2)
 - bronze (#CD7F32)
 - copper (#B87333)
 
 ### Nature Inspired
+
 - grass (#608038)
 - ocean (#0077BE)
 - sunset (#FF6F59)
@@ -85,6 +97,7 @@ This guide lists all available named colors that can be used with color-related 
 - forest (#284F28)
 
 ### Modern Web Colors
+
 - slate (#708090)
 - steel (#4682B4)
 - ruby (#E0115F)
@@ -95,6 +108,7 @@ This guide lists all available named colors that can be used with color-related 
 - charcoal (#36454F)
 
 ### Pastels
+
 - pastelblue (#AEC6CF)
 - pastelpink (#FFD1DC)
 - pastelgreen (#B0E2AC)
@@ -103,6 +117,7 @@ This guide lists all available named colors that can be used with color-related 
 - pastelorange (#FFB347)
 
 ## Usage Examples
+
 ```
 +gradientname me=red,blue
 +gradientname me=#FF0000,#0000FF
@@ -110,5 +125,6 @@ This guide lists all available named colors that can be used with color-related 
 ```
 
 ## See Also
+
 - help gradientname - Information about setting gradient-colored names
 - help moniker - Information about custom name display
