@@ -17,6 +17,7 @@ import { chans, createObj } from "./services";
 import { loadDir, loadTxtDir } from "./utils";
 import { join } from "path";
 import { pluginService } from "./services/plugins";
+import { startIdleCheck } from "./utils/idleCheck";
 
 export const app = express();
 export const server = createServer(app);
@@ -186,6 +187,11 @@ export class UrsaMU {
             lock: "admin+",
           });
         }
+
+        // Start the idle check system
+        startIdleCheck();
+        console.log("Idle check system started");
+
         console.log(`Server started on port ${cfg.config.server?.ws}.`);
       } catch (error) {
         console.error("Error during startup:", error);
