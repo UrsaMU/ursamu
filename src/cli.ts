@@ -12,8 +12,6 @@ program
   .option("-s, --stop", "Stop the server")
   .option("-r, --restart", "Restart the server")
   .action((options) => {
-    let directoryPath = "";
-
     if (options.stop) {
       console.log("Stopping server...");
       stopAll();
@@ -27,10 +25,10 @@ program
     }
 
     if (options.dir) {
-      directoryPath = resolve(process.cwd(), options.dir);
+      resolve(process.cwd(), options.dir);
     }
 
-    startAll(directoryPath);
+    startAll();
   });
 
 program.parse(process.argv);

@@ -11,8 +11,8 @@ questions, please contact a staff member.
 
 ## Commands
 
--`+splat <splat>`: Sets your splat. This is the first command you should use.
-You can only use this command once. To set your splat again you will have to
+-`+template <template>`: Sets your template. This is the first command you should use.
+You can only use this command once. To set your template again you will have to
 `+stats/reset`.
 
 - `+stat [<player>/]<stat>=<value>`: Sets a stat to a value. If no player is
@@ -31,14 +31,14 @@ You can only use this command once. To set your splat again you will have to
   are a staff member, you can set the stat for another player.
 
 - `+stat/reset`: Resets your stats to their default values. This will also reset
-  your splat, and your specialties.
+  your template, and your specialties.
 
 ## Order
 
-### 1. Set your splat
+### 1. Set your template
 
-Use the `+splat` command to set your splat. You can only use this command once.
-To set your splat again you will have to `+stats/reset`.
+Use the `+template` command to set your template. You can only use this command once.
+To set your template again you will have to `+stats/reset`.
 
 ### 2. Set your stats
 

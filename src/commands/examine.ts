@@ -1,4 +1,5 @@
 import { getCharacter } from "../plugins/wod/services";
+import { Obj } from "../services";
 import { dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 
@@ -13,11 +14,12 @@ export default () => {
     pattern: /^e[xamine]+\s+(.*)$/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
-      const en = await getCharacter(ctx.socket.cid);
+      const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
       const tar = await target(en, args[0]);
-      const loc = await dbojs.findOne({ id: tar?.location });
+      const loc = await Obj.get(tar?.location);
+      
       if (en && tar && canEdit(en, tar)) {
         delete tar.data?.password;
         let output = `%chName:%cn ${tar.data?.name}${

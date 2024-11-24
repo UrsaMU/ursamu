@@ -7,7 +7,7 @@ import { skills } from "./stats/skills";
 import { disciplines } from "./stats/disciplines";
 import { other } from "./stats/other";
 
-export * from "./attributes";
+export * from "../../../services/attrs/attributes";
 export * from "./setStat";
 export * from "./getStats";
 export * from "./formatValue";

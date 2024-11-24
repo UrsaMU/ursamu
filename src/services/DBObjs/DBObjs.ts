@@ -59,6 +59,10 @@ export class Obj {
     return this.obj?.id;
   }
 
+  get _id () {
+    return this.obj?._id;
+  }
+
   get name() {
     if (!this.obj) return "";
     return moniker(this.obj);
@@ -81,11 +85,19 @@ export class Obj {
   }
 
   get location() {
-    return this.obj.location;
+    return this.obj.location || 0;
+  }
+
+  set location(loc: number) {
+    this.obj.location = loc;
   }
 
   get description() {
-    return this.obj.description;
+    return this.obj.description || "You see nothing special.";
+  }
+
+  set description(desc: string) {
+   this.obj.description = desc;
   }
 
   async exits() {

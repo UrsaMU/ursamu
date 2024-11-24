@@ -14,12 +14,12 @@ import {
 } from "../../../utils";
 
 const bio = async (obj: Obj) => {
-  const splat = await getStat(obj.dbobj, "splat");
+  const template = await getStat(obj.dbobj, "template");
 
   let bioList = allStats
     .filter(
       (stat) =>
-        stat.type === "bio" && (!stat.splat || stat.splat.includes(splat)),
+        stat.type === "bio" && (!stat.template || stat.template.includes(template)),
     )
     .map(async (stat) =>
       formatStat(stat.name, await getStat(obj.dbobj, stat.name), 28, true)
@@ -205,7 +205,7 @@ const advantages = (obj: Obj) => {
 };
 
 const disciplines = async (obj: Obj) => {
-  const splat = await getStat(obj.dbobj, "splat");
+  const template = await getStat(obj.dbobj, "template");
 
   const totalDisciplines: any[] = [];
 
@@ -264,12 +264,12 @@ const disciplines = async (obj: Obj) => {
 };
 
 const other = async (obj: Obj) => {
-  const splat = await getStat(obj.dbobj, "splat");
+  const template = await getStat(obj.dbobj, "template");
   let output = "";
 
   const other = allStats.filter(
     (stat) =>
-      stat.type === "other" && (stat.splat?.includes(splat) || !stat.splat),
+      stat.type === "other" && (stat.template?.includes(template) || !stat.template),
   );
 
   let totalOther = [];
@@ -294,7 +294,7 @@ const calculateDamage = (
   superficial: number,
   aggravated: number,
   maxBoxes: number,
-  characterType: string, // Assuming characterType can be "mortal", "ghoul", or others
+  template: string, // Changed from characterType to template to be consistent
 ) => {
   let damageBoxes = Array(maxBoxes).fill("[ ]");
   let status = "";
@@ -331,7 +331,7 @@ const calculateDamage = (
   if (filledBoxes >= maxBoxes) {
     // Special rule for mortal and ghoul characters when they reach impaired
     if (
-      (characterType === "mortal" || characterType === "ghoul") &&
+      (template === "mortal" || template === "ghoul") &&
       aggravated < maxBoxes
     ) {
       status = "Incapacitated";
@@ -348,7 +348,7 @@ const calculateDamage = (
 
 const displayDamageTrack = async (obj: IDBOBJ, type: string) => {
   let output = "";
-  let splat = await getStat(obj, "splat");
+  let template = await getStat(obj, "template");
   obj.data ||= {};
   obj.data.damage ||= {
     damage: {
@@ -381,7 +381,7 @@ const displayDamageTrack = async (obj: IDBOBJ, type: string) => {
     superficial,
     aggravated,
     maxBoxes,
-    splat,
+    template,
   );
   let trackLabel = type === "physical" ? "Health:    " : "Willpower: ";
 
@@ -437,16 +437,16 @@ function sheetCommand() {
       output += await other(tarObj);
       output += footer();
 
-      if (await getStat(tarObj.dbobj, "splat")) {
+      if (await getStat(tarObj.dbobj, "template")) {
         send([ctx.socket.id], output);
       } else {
         if (tarObj.dbref === en.dbref) {
           send(
             [ctx.socket.id],
-            "%chGame>%cn You have no splat set. See: %ch+help splat%cn",
+            "%chGame>%cn You have no template set. See: %ch+help template%cn",
           );
         } else {
-          send([ctx.socket.id], "%chGame>%cn That character has no splat set.");
+          send([ctx.socket.id], "%chGame>%cn That character has no template set.");
         }
       }
     },

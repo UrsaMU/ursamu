@@ -1,54 +1,40 @@
 import { IDBOBJ } from "../@types/IDBObj";
+import { Obj } from "../services";
 import { dbojs } from "../services/Database";
 
-export const target = async (en: IDBOBJ, tar: string, global?: Boolean) => {
-  if (!tar) {
-    return await dbojs.findOne({ id: en.location });
+export const target = async (en: IDBOBJ, tar: string = "", global?: Boolean): Promise<Obj | null> => {
+  
+  // Handle special targets
+  if (!tar || tar.toLowerCase() === "here") {
+    const room = await Obj.get(en.location);
+    return room || null;
   }
-
-  if (+tar) {
-    return await dbojs.findOne({ id: +tar });
-  }
-
-  if (tar.toLowerCase() === "here") {
-    return await dbojs.findOne({ id: en.location });
-  }
-
+  
   if (tar.toLowerCase() === "me") {
-    return en;
+    return new Obj().load(en);
   }
 
-  if (tar.toLowerCase() === "self") {
-    return en;
-  }
 
-  if (tar.toLowerCase() === "room") {
-    return await dbojs.findOne({ id: en.location });
+  if (tar.startsWith("#")) {
+    const obj = await Obj.get(tar.slice(1));
+    return obj || null;
   } else {
-    const found = (
-      await dbojs.find({
-        $where: function () {
-          return (
-            RegExp(this.data.name.replace(";", "|"), "ig").test(tar) ||
-            this.id === +tar.slice(1) ||
-            this.id === tar ||
-            this.data.alias?.toLowerCase() === tar.toLowerCase()
-          );
-        },
-      })
-    )[0];
-    if (!found) {
-      return;
-    }
+    const targ = await dbojs.findOne({
+      $or: [
+        { "data.name": new RegExp(tar, "i") },
+        { "data.alias": new RegExp(tar, "i") },
+        { "data.dbref": new RegExp(tar, "i") },
+      ]
+    });
 
-    if (global) {
-      return found;
+    if(!targ) return null;
+
+    if( en.location !== targ.location && !global ) {
+      return null;
+    } else if ( en.location !== targ.location && global ) {
+      return new Obj().load(targ);
     } else {
-      if (found.location === en.location || found.id === en.location) {
-        return found;
-      } else {
-        return;
-      }
+      return new Obj().load(targ);
     }
   }
 };

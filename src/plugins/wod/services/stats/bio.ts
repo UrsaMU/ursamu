@@ -18,7 +18,7 @@ export const bio: IMStat[] = [
   },
 
   {
-    name: "splat",
+    name: "template",
     values: ["vampire", "mortal", "ghoul"],
     type: "bio",
     lock: "builder+",
@@ -27,7 +27,7 @@ export const bio: IMStat[] = [
     name: "auspice",
     values: ["ahroun, galliard, philodox, theurge, ragabash"],
     type: "bio",
-    splat: ["werewolf"],
+    template: ["werewolf"],
   },
   {
     name: "tribe",
@@ -45,7 +45,7 @@ export const bio: IMStat[] = [
       "ghost council",
     ],
     type: "bio",
-    splat: ["werewolf"],
+    template: ["werewolf"],
   },
   {
     name: "ambition",
@@ -61,18 +61,18 @@ export const bio: IMStat[] = [
     name: "Predator",
     values: [],
     type: "bio",
-    splat: ["vampire"],
+    template: ["vampire"],
   },
   {
     name: "clan",
     values: [],
     type: "bio",
-    splat: ["vampire"],
+    template: ["vampire"],
   },
   {
     name: "generation",
     values: [],
     type: "bio",
-    splat: ["vampire"],
+    template: ["vampire"],
   },
 ];

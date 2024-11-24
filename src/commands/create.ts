@@ -54,8 +54,9 @@ export default () =>
           home: cfg.config.game?.playerStart,
           password: await hash(password, 10),
           lastCommand: Date.now(),
+          lastLogin: Date.now(),
         },
-      });
+      })
 
       ctx.socket.join(`#${player.id}`);
       ctx.socket.join(`#${player.location}`);

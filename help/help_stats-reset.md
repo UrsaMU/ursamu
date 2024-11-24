@@ -11,6 +11,6 @@ category: Character Creation
 ## Details
 
 - Resets all stats to default values
-- Also resets splat and specialties
+- Also resets template and specialties
 - Use when you need to start over
 - Cannot be undone

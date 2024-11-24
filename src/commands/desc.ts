@@ -22,7 +22,7 @@ export default () =>
 
       if (args[1]) {
         tar.description = args[1];
-        await dbojs.update({ id: tar.id }, tar);
+        tar.save();
         send(
           [ctx.socket.id],
           `Description for %ch${displayName(en, tar)}%cn set!`,

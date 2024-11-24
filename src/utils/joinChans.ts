@@ -1,16 +1,22 @@
 import { IChanEntry } from "../@types/Channels";
 import { IContext } from "../@types/IContext";
+import { Obj } from "../services";
 import { chans, dbojs } from "../services/Database";
 import { send } from "../services/broadcast";
 import { force } from "../services/commands";
 import { flags } from "../services/flags/flags";
 
 export const joinChans = async (ctx: IContext) => {
-  const player = await dbojs.findOne({ id: ctx.socket.cid });
+  const player = await Obj.get(ctx.socket.cid);
   if (!player) return;
   const channels = await chans.find({});
   ctx.socket.join(`#${player.location}`);
   ctx.socket.join(`#${player.id}`);
+  
+  player.data ||= {};
+  player.data.lastIp = ctx.socket.handshake.address;
+  await player.save()
+
 
   for (const channel of channels) {
     if (channel.alias && flags.check(player.flags || "", channel.lock || "")) {

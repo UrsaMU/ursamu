@@ -9,14 +9,14 @@ character step by step.
 
 ## Character Creation Steps
 
-1. Set your splat using `+splat` - This defines your character type
+1. Set your template using `+template` - This defines your character type
 2. Set your stats using `+stat` - Define your character's attributes and
    abilities
 3. Set specialties using `+stat` with specialty notation
 
 For detailed information on each step, see:
 
-- help splat - For information on setting your character type
+- help template - For information on setting your character type
 - help stats - For details on setting stats and values
 - help specialties - For information on setting specialties and powers
 
