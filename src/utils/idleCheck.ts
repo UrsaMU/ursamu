@@ -33,7 +33,7 @@ export const startIdleCheck = async () => {
         if (!sockets || sockets.size === 0) {
           // Double check the character is still marked as connected
           const currentChar = await dbojs.findOne({ id: char.id });
-          if (currentChar && currentChar.flags?.includes('connected')) {
+          if (currentChar && currentChar.flags?.includes("connected")) {
             await setFlags(char, "!connected");
             await send(
               [`#${char.location}`],
@@ -52,7 +52,7 @@ export const startIdleCheck = async () => {
               data: { quit: true, cid: char.id },
             });
           }
-          
+
           // Clear the sockets
           connectedSockets.delete(char.id);
 
