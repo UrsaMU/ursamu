@@ -12,7 +12,6 @@ export default () => {
       await send([ctx.socket.id], "Upgrading server, please wait...");
       execSync("git pull");
       execSync("npm install");
-      execSync("npm run build");
       await send([ctx.socket.id], "Server upgraded, restarting...");
       await force(ctx, "@restart");
     },
