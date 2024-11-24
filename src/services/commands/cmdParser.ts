@@ -5,7 +5,6 @@ import { send } from "../broadcast";
 import { dbojs } from "../Database";
 import { matchExits } from "./movement";
 import { matchChannel } from "./channels";
-import { Obj } from "../DBObjs";
 
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
@@ -27,20 +26,19 @@ export const addCmd = (...newCmds: ICmd[]) => {
 };
 
 cmdParser.use(async (ctx, next) => {
-  const char = await Obj.get(ctx.socket.cid);
-  if (!char) return;
+  const char = await dbojs.findOne({ id: ctx.socket.cid });
 
   const { msg } = ctx;
   for (const cmd of cmds) {
     const match = msg?.trim().match(cmd.pattern);
     if (flags.check(char?.flags || "", cmd.lock || "")) {
       if (match) {
-        const obj = await Obj.get(char.id);
-        if (!obj) return;
-        obj.data ||= {};
-        obj.data.lastCommand = Date.now();
-        await obj.save();
-
+        if (char) {
+          char.data ||= {};
+          char.data.lastCommand = Date.now();
+          // Update the existing document without upsert
+          await dbojs.update({ id: ctx.socket.cid }, char);
+        }
         await cmd.exec(ctx, match.slice(1))?.catch((e) => {
           console.error(e);
           send(
