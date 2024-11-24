@@ -3,7 +3,7 @@ import { addCmd } from "../services/commands";
 import { dbojs } from "../services/Database";
 import { displayName } from "../utils/displayName";
 import { center, columns, ljust, repeatString, rjust } from "../utils/format";
-import { idle } from "../utils/idle";
+import { getIdle, idle } from "../utils/idle";
 import { isAdmin } from "../utils/isAdmin";
 import { target } from "../utils/target";
 
@@ -14,7 +14,7 @@ export default () =>
     lock: "connected",
     exec: async (ctx, args) => {
       // Force a fresh query with no caching
-      const en = await dbojs.db.findOne({ id: ctx.socket.cid }).exec();
+      const en = await dbojs.db.findOne({ id: ctx.socket.cid })
       if (!en) return;
       const tar = await target(en, args[0]);
 
@@ -32,7 +32,7 @@ export default () =>
       output += `\n${tar.description || "You see nothing special."}\n`;
 
       // Force fresh queries for contents
-      const contents = await dbojs.db.find({ location: tar.id }).exec();
+      const contents = await dbojs.db.find({ location: tar.id });
       const players = contents.filter(
         (c) => c.flags.includes("player") && c.flags.includes("connected"),
       );
@@ -58,12 +58,12 @@ export default () =>
 
         for (const p of players) {
           // Get fresh data for each player
-          const freshPlayer = await dbojs.db.findOne({ id: p.id }).exec();
+          const freshPlayer = await dbojs.db.findOne({ id: p.id })
           if (!freshPlayer) continue;
 
           output += isAdmin(freshPlayer) ? "%ch%cc *%cn  " : "    ";
           output += ljust(`${displayName(en, freshPlayer)}`, 25);
-          output += rjust(idle(freshPlayer.data?.lastCommand || 0), 5);
+          output += rjust( getIdle(freshPlayer.id), 5);
           output += ljust(
             `  ${
               freshPlayer.data?.shortdesc ||

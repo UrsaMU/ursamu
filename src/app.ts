@@ -31,7 +31,7 @@ export const io = new Server(server, {
 export { cfg };
 
 // Track connected sockets by character ID
-const connectedSockets = new Map<number, Set<IMSocket>>();
+export const connectedSockets = new Map<number, Set<IMSocket>>();
 
 app.use(express.static("public"));
 app.use(express.json());

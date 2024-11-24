@@ -1,3 +1,5 @@
+import { connectedSockets } from "../app";
+
 export const idle = (secs: number) => {
   const snds = secs ? Math.round((Date.now() - secs) / 1000) : 0;
 
@@ -39,3 +41,11 @@ export const idle = (secs: number) => {
       return `%ch%cx${time}%cn`;
   }
 };
+
+
+export const getIdle = (id: number) => {
+  // Is there a socket with this ID?
+  const socket = connectedSockets.get(id);
+  if (!socket?.size) return `-1s`;
+  return idle(Array.from(socket)[0].lastCommand || 0);
+}
