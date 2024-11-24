@@ -52,12 +52,15 @@ export default () =>
       found.data ||= {};
 
       // Update only the necessary fields, excluding _id
-      found.data.lastLogin = Date.now();
+      const now = Date.now();
+      found.data.lastLogin = now;
+      found.lastCommand = now;  // Initialize lastCommand on connect
 
       const updateData = {
         flags: found.flags,
         location: found.location,
         data: found.data,
+        lastCommand: found.lastCommand  // Include lastCommand in update
       };
 
       await dbojs.update({ id: found.id }, { $set: updateData });
