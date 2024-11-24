@@ -64,14 +64,16 @@ export default () =>
           const obj = new Obj(freshPlayer);
 
           const idleTime = await getIdle(freshPlayer.id);
-          
+
           output += isAdmin(freshPlayer) ? "%ch%cc *%cn  " : "    ";
           output += ljust(`${displayName(en, freshPlayer)}`, 25);
           output += rjust(idleTime, 5);
           output += ljust(
-            `  ${
-              await getAttr(obj, "short-desc",  "%ch%cxUse '&short-desc me=<desc>' to set this.%cn")
-            }`,
+            `  ${await getAttr(
+              obj,
+              "short-desc",
+              "%ch%cxUse '&short-desc me=<desc>' to set this.%cn",
+            )}`,
             42,
           );
           output += "\n";

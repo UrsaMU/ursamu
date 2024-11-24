@@ -38,7 +38,10 @@ cmdParser.use(async (ctx, next) => {
         ctx.socket.lastCommand = timestamp;
         // Store lastCommand in database
         if (char) {
-          await dbojs.update({ id: ctx.socket.cid }, { ...char, lastCommand: timestamp });
+          await dbojs.update({ id: ctx.socket.cid }, {
+            ...char,
+            lastCommand: timestamp,
+          });
         }
         await cmd.exec(ctx, match.slice(1))?.catch((e) => {
           console.error(e);
