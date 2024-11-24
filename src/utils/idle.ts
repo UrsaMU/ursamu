@@ -56,4 +56,4 @@ export const getIdle = (id: number) => {
   }
 
   return idle(mostRecentCommand);
-}
+};
