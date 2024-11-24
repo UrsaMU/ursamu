@@ -13,7 +13,8 @@ export default () =>
     pattern: /^l(?:ook)?(?:\s+(.*))?/i,
     lock: "connected",
     exec: async (ctx, args) => {
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      // Force a fresh query with no caching
+      const en = await dbojs.db.findOne({ id: ctx.socket.cid }).exec();
       if (!en) return;
       const tar = await target(en, args[0]);
 
@@ -30,7 +31,8 @@ export default () =>
 
       output += `\n${tar.description || "You see nothing special."}\n`;
 
-      const contents = await dbojs.find({ location: tar.id });
+      // Force fresh queries for contents
+      const contents = await dbojs.db.find({ location: tar.id }).exec();
       const players = contents.filter(
         (c) => c.flags.includes("player") && c.flags.includes("connected"),
       );
@@ -54,18 +56,22 @@ export default () =>
         output += center(" %chCharacters%cn ", 78, "%cr-%cn");
         output += "\n";
 
-        players.forEach((p) => {
-          output += isAdmin(p) ? "%ch%cc *%cn  " : "    ";
-          output += ljust(`${displayName(en, p)}`, 25);
-          output += rjust(idle(p.data?.lastCommand || 0), 5);
+        for (const p of players) {
+          // Get fresh data for each player
+          const freshPlayer = await dbojs.db.findOne({ id: p.id }).exec();
+          if (!freshPlayer) continue;
+          
+          output += isAdmin(freshPlayer) ? "%ch%cc *%cn  " : "    ";
+          output += ljust(`${displayName(en, freshPlayer)}`, 25);
+          output += rjust(idle(freshPlayer.data?.lastCommand || 0), 5);
           output += ljust(
             `  ${
-              p.data?.shortdesc || "%ch%cxUse '+short <desc>' to set this.%cn"
+              freshPlayer.data?.shortdesc || "%ch%cxUse '+short <desc>' to set this.%cn"
             }`,
             42,
           );
           output += "\n";
-        });
+        }
       }
 
       if (exits.length) {
