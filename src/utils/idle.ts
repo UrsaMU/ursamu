@@ -42,10 +42,9 @@ export const idle = (secs: number) => {
   }
 };
 
-
 export const getIdle = (id: number) => {
   // Is there a socket with this ID?
   const socket = connectedSockets.get(id);
   if (!socket?.size) return `-1s`;
   return idle(Array.from(socket)[0].lastCommand || 0);
-}
+};
