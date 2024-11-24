@@ -3,6 +3,7 @@ import { dbojs } from "../services/Database";
 import { setFlags } from "./setFlags";
 import { moniker } from "./moniker";
 import { send } from "../services/broadcast";
+import { isAdmin } from "./isAdmin";
 
 const IDLE_TIMEOUT = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
 
@@ -14,7 +15,7 @@ export const startIdleCheck = async () => {
 
       for (const char of connectedChars) {
         // Skip staff members
-        if (char.flags.includes("staff")) continue;
+        if (isAdmin(char)) continue;
 
         const now = Date.now();
         const lastCommand = char.lastCommand || 0;
