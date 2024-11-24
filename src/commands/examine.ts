@@ -19,7 +19,7 @@ export default () => {
 
       const tar = await target(en, args[0]);
       const loc = await Obj.get(tar?.location);
-      
+
       if (en && tar && canEdit(en, tar)) {
         delete tar.data?.password;
         let output = `%chName:%cn ${tar.data?.name}${

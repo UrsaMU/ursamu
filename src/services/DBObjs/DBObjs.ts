@@ -59,7 +59,7 @@ export class Obj {
     return this.obj?.id;
   }
 
-  get _id () {
+  get _id() {
     return this.obj?._id;
   }
 
@@ -97,7 +97,7 @@ export class Obj {
   }
 
   set description(desc: string) {
-   this.obj.description = desc;
+    this.obj.description = desc;
   }
 
   async exits() {

@@ -12,11 +12,10 @@ export const joinChans = async (ctx: IContext) => {
   const channels = await chans.find({});
   ctx.socket.join(`#${player.location}`);
   ctx.socket.join(`#${player.id}`);
-  
+
   player.data ||= {};
   player.data.lastIp = ctx.socket.handshake.address;
-  await player.save()
-
+  await player.save();
 
   for (const channel of channels) {
     if (channel.alias && flags.check(player.flags || "", channel.lock || "")) {

@@ -29,7 +29,6 @@ export class DBO<T> {
   }
 
   async update(query: any, data: any) {
-
     // if it's an Obj we need to .save()
     // else update the db
     if (data.save) {

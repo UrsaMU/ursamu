@@ -53,13 +53,12 @@ export default () =>
 
       // Update only the necessary fields, excluding _id
       found.data.lastLogin = Date.now();
-      
+
       const updateData = {
         flags: found.flags,
         location: found.location,
         data: found.data,
       };
-
 
       await dbojs.update({ id: found.id }, { $set: updateData });
       await send([ctx.socket.id], `Welcome back, ${moniker(found)}.`, {

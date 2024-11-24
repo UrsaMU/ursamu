@@ -11,7 +11,9 @@ export const setAttr = async (obj: Obj, attr: string, value: string) => {
 };
 
 export const getAttr = async (obj: Obj, stat: string) => {
-  const s = obj.data?.attributes?.find((s) => s.name.toLowerCase().startsWith(stat.toLowerCase()));
+  const s = obj.data?.attributes?.find((s) =>
+    s.name.toLowerCase().startsWith(stat.toLowerCase())
+  );
   if (!s) return "";
   return s.value;
 };

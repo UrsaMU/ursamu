@@ -56,7 +56,7 @@ export default () =>
           lastCommand: Date.now(),
           lastLogin: Date.now(),
         },
-      })
+      });
 
       ctx.socket.join(`#${player.id}`);
       ctx.socket.join(`#${player.location}`);

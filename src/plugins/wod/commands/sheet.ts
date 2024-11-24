@@ -19,7 +19,8 @@ const bio = async (obj: Obj) => {
   let bioList = allStats
     .filter(
       (stat) =>
-        stat.type === "bio" && (!stat.template || stat.template.includes(template)),
+        stat.type === "bio" &&
+        (!stat.template || stat.template.includes(template)),
     )
     .map(async (stat) =>
       formatStat(stat.name, await getStat(obj.dbobj, stat.name), 28, true)
@@ -269,7 +270,8 @@ const other = async (obj: Obj) => {
 
   const other = allStats.filter(
     (stat) =>
-      stat.type === "other" && (stat.template?.includes(template) || !stat.template),
+      stat.type === "other" &&
+      (stat.template?.includes(template) || !stat.template),
   );
 
   let totalOther = [];
@@ -446,7 +448,10 @@ function sheetCommand() {
             "%chGame>%cn You have no template set. See: %ch+help template%cn",
           );
         } else {
-          send([ctx.socket.id], "%chGame>%cn That character has no template set.");
+          send(
+            [ctx.socket.id],
+            "%chGame>%cn That character has no template set.",
+          );
         }
       }
     },

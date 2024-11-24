@@ -11,9 +11,9 @@ questions, please contact a staff member.
 
 ## Commands
 
--`+template <template>`: Sets your template. This is the first command you should use.
-You can only use this command once. To set your template again you will have to
-`+stats/reset`.
+-`+template <template>`: Sets your template. This is the first command you
+should use. You can only use this command once. To set your template again you
+will have to `+stats/reset`.
 
 - `+stat [<player>/]<stat>=<value>`: Sets a stat to a value. If no player is
   specified, it will set the stat for you. If you are a staff member, you can
@@ -37,8 +37,8 @@ You can only use this command once. To set your template again you will have to
 
 ### 1. Set your template
 
-Use the `+template` command to set your template. You can only use this command once.
-To set your template again you will have to `+stats/reset`.
+Use the `+template` command to set your template. You can only use this command
+once. To set your template again you will have to `+stats/reset`.
 
 ### 2. Set your stats
 
