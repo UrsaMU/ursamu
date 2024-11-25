@@ -9,6 +9,8 @@ export default () => {
     name: "page",
     pattern: /^(?:p|page)\s+(?:(.*)\s*=\s*(.*)|(.*))/i,
     lock: "connected",
+    help: "Send a page to a player.",
+    category: "Communication",
     exec: async (ctx, args) => {
       const [obj, msg, reply] = args;
       const en = await dbojs.findOne({ id: ctx.socket.cid });

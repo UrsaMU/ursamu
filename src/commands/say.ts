@@ -7,6 +7,7 @@ export default () =>
     name: "say",
     pattern: /^(say\s+|")(.*)/i,
     lock: "connected",
+    category: "Communication",
     exec: async (ctx, args) => {
       const player = await dbojs.findOne({ id: ctx.socket.cid });
       if (player) {

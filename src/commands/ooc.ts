@@ -5,6 +5,7 @@ export default () => {
     name: "ooc",
     pattern: /^ooc\s*([;:].+|.*)/i,
     lock: "connected",
+    category: "Communication",
     exec: async (ctx, args) => {
       const player = await Obj.get(ctx.socket.cid);
       if (!player) return;
