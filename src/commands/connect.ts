@@ -47,7 +47,7 @@ export default () =>
       }
 
       ctx.socket.cid = found.id;
-      
+
       // Initialize the socket set for this character if it doesn't exist
       if (!connectedSockets.has(found.id)) {
         connectedSockets.set(found.id, new Set());
