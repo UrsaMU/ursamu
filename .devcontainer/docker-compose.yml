@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  ursamu-dev:
+    build: 
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/ursamu:cached
+      - node_modules:/ursamu/node_modules
+    command: sleep infinity
+    ports:
+      - "4201:4201"
+      - "4202:4202"
+      - "4203:4203"
+    environment:
+      - NODE_ENV=development
+    tty: true
+    stdin_open: true
+
+volumes:
+  node_modules:

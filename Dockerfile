@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM node:20-alpine
 
 RUN apk update && apk add alpine-sdk bash
 RUN mkdir /ursamu
