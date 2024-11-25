@@ -5,6 +5,7 @@ import { dbojs } from "../services/Database";
 import { setFlags } from "../utils/setFlags";
 import { joinChans } from "../utils/joinChans";
 import { moniker } from "../utils/moniker";
+import { connectedSockets } from "../app";
 
 export default () =>
   addCmd({
@@ -46,6 +47,17 @@ export default () =>
       }
 
       ctx.socket.cid = found.id;
+      
+      // Initialize the socket set for this character if it doesn't exist
+      if (!connectedSockets.has(found.id)) {
+        connectedSockets.set(found.id, new Set());
+      }
+      // Add this socket to the character's socket set
+      const sockets = connectedSockets.get(found.id);
+      if (sockets) {
+        sockets.add(ctx.socket);
+      }
+
       ctx.socket.join(`#${found.id}`);
       ctx.socket.join(`#${found.location}`);
       await setFlags(found, "connected");

@@ -6,6 +6,7 @@ import { getNextId } from "../utils/getNextId";
 import { moniker } from "../utils/moniker";
 import { joinChans } from "../utils/joinChans";
 import cfg from "../ursamu.config";
+import { connectedSockets } from "../app";
 
 export default () =>
   addCmd({
@@ -45,6 +46,7 @@ export default () =>
         ? "player connected"
         : "player connected superuser";
       const id = await getNextId();
+      const now = Date.now();
       const player = await dbojs.insert({
         id,
         flags,
@@ -53,14 +55,25 @@ export default () =>
           name,
           home: cfg.config.game?.playerStart,
           password: await hash(password, 10),
-          lastCommand: Date.now(),
-          lastLogin: Date.now(),
+          lastCommand: now,
+          lastLogin: now,
         },
       });
 
+      ctx.socket.cid = player.id;
+
+      // Initialize the socket set for this character
+      if (!connectedSockets.has(player.id)) {
+        connectedSockets.set(player.id, new Set());
+      }
+      // Add this socket to the character's socket set
+      const sockets = connectedSockets.get(player.id);
+      if (sockets) {
+        sockets.add(ctx.socket);
+      }
+
       ctx.socket.join(`#${player.id}`);
       ctx.socket.join(`#${player.location}`);
-      ctx.socket.cid = player.id;
 
       await joinChans(ctx);
 
