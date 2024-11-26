@@ -205,7 +205,11 @@
       "artificialIntelligence": {
         "name": "Artificial Intelligence",
         "description": "You are an artificial intelligence, a consciousness built inside a computer construct.",
-        "knowledge": ["artificial intelligence", "cybernetics", "making an escape"],
+        "knowledge": [
+          "artificial intelligence",
+          "cybernetics",
+          "making an escape"
+        ],
         "specialAbility": {
           "name": "Cybernetic Body",
           "description": "You have a fully cybernetic body in which your program is contained. You do not require food, drink or sleep, but do require regular maintenance - as such, your living expenses are halved."
@@ -214,7 +218,11 @@
       "ghost": {
         "name": "Ghost",
         "description": "You are an artificial intelligence without a body. You exist within hard drives and data streams.",
-        "knowledge": ["artificial intelligence", "cybersecurity systems", "staying hidden"],
+        "knowledge": [
+          "artificial intelligence",
+          "cybersecurity systems",
+          "staying hidden"
+        ],
         "specialAbility": {
           "name": "Jump",
           "description": "If you're connected to the net, you can always find some form of cybernetic to jump into and take control of."

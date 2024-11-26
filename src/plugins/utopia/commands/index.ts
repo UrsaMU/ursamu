@@ -1,4 +1,4 @@
-import chargenCommand from './chargenCommand';
+import chargenCommand from "./chargenCommand";
 
 const initCommands: any = [chargenCommand];
 

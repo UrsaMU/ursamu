@@ -88,7 +88,12 @@
       "skills": ["persuasion", "deception"],
       "knowledge": {
         "choose": 2,
-        "from": ["government", "criminal organizations", "corporations", "mega-corporations"]
+        "from": [
+          "government",
+          "criminal organizations",
+          "corporations",
+          "mega-corporations"
+        ]
       },
       "special": {
         "type": "skill",
@@ -174,7 +179,14 @@
       "skills": ["engineering", "investigation"],
       "knowledge": {
         "choose": 2,
-        "from": ["communications tech", "stealth tech", "shield and barrier tech", "power armor", "drones", "turrets"]
+        "from": [
+          "communications tech",
+          "stealth tech",
+          "shield and barrier tech",
+          "power armor",
+          "drones",
+          "turrets"
+        ]
       },
       "special": {
         "type": "skill",
@@ -217,7 +229,10 @@
       "name": "Merchant",
       "description": "Merchants are the lifeblood of Utopia's economy. They are the shop owners, brokers and business people of Utopia, always looking for a new way to earn some money or a new situation that they can turn to their advantage.",
       "skills": ["bartering", "persuasion"],
-      "knowledge": ["business sense", "any 1 knowledge related to your business"],
+      "knowledge": [
+        "business sense",
+        "any 1 knowledge related to your business"
+      ],
       "special": {
         "type": "ability",
         "name": "Monetize",
@@ -299,7 +314,14 @@
         "required": ["mercenary work"],
         "choose": {
           "count": 1,
-          "from": ["government", "military", "corporations", "criminal enterprises", "mega-corporations", "police"]
+          "from": [
+            "government",
+            "military",
+            "corporations",
+            "criminal enterprises",
+            "mega-corporations",
+            "police"
+          ]
         }
       },
       "special": {

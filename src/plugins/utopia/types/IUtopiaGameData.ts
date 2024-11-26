@@ -30,7 +30,7 @@ export interface SpecialAbilityAction {
 }
 
 export interface SpecialAbilityBase {
-  type: 'equipment' | 'skill' | 'action' | 'ability';
+  type: "equipment" | "skill" | "action" | "ability";
   name: string;
   description: string;
   uses?: number;
@@ -38,13 +38,13 @@ export interface SpecialAbilityBase {
 }
 
 export interface EquipmentSpecial extends SpecialAbilityBase {
-  type: 'equipment';
+  type: "equipment";
   actions?: SpecialAbilityAction[];
   features?: string[];
 }
 
 export interface AbilitySpecial extends SpecialAbilityBase {
-  type: 'ability';
+  type: "ability";
   rewards?: string[];
   abilities?: {
     [key: string]: SpecialAbilityAction[];
@@ -52,14 +52,18 @@ export interface AbilitySpecial extends SpecialAbilityBase {
 }
 
 export interface SkillSpecial extends SpecialAbilityBase {
-  type: 'skill';
+  type: "skill";
 }
 
 export interface ActionSpecial extends SpecialAbilityBase {
-  type: 'action';
+  type: "action";
 }
 
-export type SpecialAbility = EquipmentSpecial | AbilitySpecial | SkillSpecial | ActionSpecial;
+export type SpecialAbility =
+  | EquipmentSpecial
+  | AbilitySpecial
+  | SkillSpecial
+  | ActionSpecial;
 
 export interface Specialization {
   name: string;
