@@ -38,8 +38,12 @@ const cfg = new Config({
   plugins: {
     // Example of a local plugin configuration
     wod: {
-      enabled: true,
+      enabled: false,
       path: path.join(process.cwd(), "./src/plugins/wod/index.ts"),
+    },
+    utopia: {
+      enabled: true,
+      path: path.join(process.cwd(), "./src/plugins/utopia/index.ts"),
     },
     // Example of how to configure an npm package plugin
     // "some-mush-plugin": {
