@@ -12,12 +12,17 @@ export interface ITelnetSocket extends Socket {
 export class TelnetService {
   private server: Server | null = null;
   private activeSockets = new Map<number, ITelnetSocket>();
-  private connectTextPath = join(__dirname, "../../../text/default_connect.txt");
+  private connectTextPath = join(
+    __dirname,
+    "../../../text/default_connect.txt",
+  );
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectDelay = 1000;
 
-  private async createSocketIOConnection(telnetSocket: ITelnetSocket): Promise<SocketIOClient> {
+  private async createSocketIOConnection(
+    telnetSocket: ITelnetSocket,
+  ): Promise<SocketIOClient> {
     const sock = io(`http://localhost:${cfg.config.server?.ws}`, {
       reconnection: true,
       reconnectionAttempts: Infinity,
@@ -27,13 +32,17 @@ export class TelnetService {
 
     // Handle server disconnection
     sock.on("disconnect", () => {
-      telnetSocket.write("\x1b[1mGame>\x1b[0m Server connection lost. Attempting to reconnect...\r\n");
+      telnetSocket.write(
+        "\x1b[1mGame>\x1b[0m Server connection lost. Attempting to reconnect...\r\n",
+      );
     });
 
     // Handle reconnection
     sock.io.on("reconnect", () => {
       if (telnetSocket.cid) {
-        telnetSocket.write("\x1b[1mGame>\x1b[0m Reconnected to game server.\r\n");
+        telnetSocket.write(
+          "\x1b[1mGame>\x1b[0m Reconnected to game server.\r\n",
+        );
         sock.emit("message", {
           msg: "",
           data: {
@@ -45,7 +54,9 @@ export class TelnetService {
 
     // Handle reconnect failure
     sock.io.on("reconnect_failed", () => {
-      telnetSocket.write("\x1b[1mGame>\x1b[0m Failed to reconnect to server. Please try again later.\r\n");
+      telnetSocket.write(
+        "\x1b[1mGame>\x1b[0m Failed to reconnect to server. Please try again later.\r\n",
+      );
       telnetSocket.end();
     });
 
@@ -103,7 +114,9 @@ export class TelnetService {
     try {
       this.server = createServer(async (socket: ITelnetSocket) => {
         try {
-          socket.write((await readFile(this.connectTextPath, "utf-8")) + "\r\n");
+          socket.write(
+            (await readFile(this.connectTextPath, "utf-8")) + "\r\n",
+          );
 
           const sock = await this.createSocketIOConnection(socket);
           this.handleSocketIO(socket, sock);
@@ -118,8 +131,12 @@ export class TelnetService {
         console.error("Telnet server error:", err);
       });
 
-      this.server.listen(cfg.config.server?.telnet, () =>
-        console.log(`Telnet server listening on port ${cfg.config.server?.telnet}`)
+      this.server.listen(
+        cfg.config.server?.telnet,
+        () =>
+          console.log(
+            `Telnet server listening on port ${cfg.config.server?.telnet}`,
+          ),
       );
     } catch (error) {
       console.error("Failed to start telnet server:", error);
@@ -134,7 +151,9 @@ export class TelnetService {
         if (socket.socketIO) {
           socket.socketIO.disconnect();
         }
-        socket.write("\x1b[1mGame>\x1b[0m Server is shutting down. Goodbye!\r\n");
+        socket.write(
+          "\x1b[1mGame>\x1b[0m Server is shutting down. Goodbye!\r\n",
+        );
         socket.end();
       }
       this.activeSockets.clear();

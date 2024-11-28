@@ -9,7 +9,7 @@ export interface CharacterOptions {
     medium: number;
     severe: number;
     debilitating: number;
-  }
+  };
 }
 
 // Specialization Interfaces

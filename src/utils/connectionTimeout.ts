@@ -9,9 +9,9 @@ export const startConnectionTimeout = (socket: IMSocket) => {
     if (!socket.cid) {
       socket.emit("message", {
         msg: "Connection timed out. Please connect with a character.\r\n",
-        data: { 
+        data: {
           disconnect: true,
-          quit: true  // This ensures the telnet socket disconnects properly
+          quit: true, // This ensures the telnet socket disconnects properly
         },
       });
       socket.disconnect(true);

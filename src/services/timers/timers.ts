@@ -9,10 +9,10 @@ class TimerService {
 
   constructor() {
     this.timers = new Map();
-    
+
     // Check for due timers every minute
     this.checkInterval = setInterval(() => this.checkTimers(), 60000);
-    
+
     // Initial load of timers
     this.loadTimers();
   }
@@ -43,7 +43,9 @@ class TimerService {
       // Get the player who created the timer
       const player = await dbojs.findOne({ id: timer.data?.dbref });
       if (!player) {
-        console.error(`Timer ${timer.id} - Creator (dbref #${timer.data?.dbref}) not found`);
+        console.error(
+          `Timer ${timer.id} - Creator (dbref #${timer.data?.dbref}) not found`,
+        );
         return;
       }
 
@@ -51,7 +53,7 @@ class TimerService {
       const ctx: IContext = {
         socket: { cid: player.id } as any,
         msg: timer.script,
-        data: timer.data
+        data: timer.data,
       };
 
       // Execute the timer's script using force
@@ -77,7 +79,7 @@ class TimerService {
     const now = Date.now();
     const dueTimers = await dbojs.find({
       active: true,
-      executeAt: { $lte: now }
+      executeAt: { $lte: now },
     }) as ITimer[];
 
     for (const timer of dueTimers) {
@@ -103,9 +105,9 @@ class TimerService {
       active: true,
       data: {
         ...options.data,
-        dbref // Store who created the timer
+        dbref, // Store who created the timer
       },
-      flags: ''
+      flags: "",
     };
 
     await dbojs.insert(timer);
@@ -135,11 +137,11 @@ class TimerService {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
     }
-    
+
     for (const timeoutId of this.timers.values()) {
       clearTimeout(timeoutId);
     }
-    
+
     this.timers.clear();
   }
 }

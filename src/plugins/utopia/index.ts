@@ -17,7 +17,7 @@ const UtopiaPlugin: IPlugin = {
     // Get the commands and register them
     const pluginCommands = commands();
     addCmd(...pluginCommands);
-    
+
     // Load help files
     loadTxtDir(join(__dirname, "help"));
   },

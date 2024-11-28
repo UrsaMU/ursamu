@@ -18,7 +18,10 @@ import { loadDir, loadTxtDir } from "./utils";
 import { join } from "path";
 import { pluginService } from "./services/plugins";
 import { startIdleCheck } from "./utils/idleCheck";
-import { startConnectionTimeout, clearConnectionTimeout } from "./utils/connectionTimeout";
+import {
+  clearConnectionTimeout,
+  startConnectionTimeout,
+} from "./utils/connectionTimeout";
 
 export const app = express();
 export const server = createServer(app);
