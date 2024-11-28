@@ -1,7 +1,7 @@
 import chargenCommand from "./chargenCommand";
 
-const initCommands: any = [chargenCommand];
+const initCommands = [chargenCommand];
 
 export default () => {
-  initCommands.forEach((cmd: () => {}) => cmd());
+  return initCommands;
 };

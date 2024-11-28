@@ -18,6 +18,7 @@ import { loadDir, loadTxtDir } from "./utils";
 import { join } from "path";
 import { pluginService } from "./services/plugins";
 import { startIdleCheck } from "./utils/idleCheck";
+import { startConnectionTimeout, clearConnectionTimeout } from "./utils/connectionTimeout";
 
 export const app = express();
 export const server = createServer(app);
@@ -51,11 +52,15 @@ app.use(
 );
 
 const handleSocketConnection = (socket: IMSocket) => {
+  startConnectionTimeout(socket);
+
   socket.on("message", async (message) => {
     try {
       if (message.data?.cid) {
         const cid = message.data.cid as number;
         socket.cid = cid;
+
+        clearConnectionTimeout(socket);
 
         // Add socket to connected sockets map
         if (!connectedSockets.has(cid)) {

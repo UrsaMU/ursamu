@@ -7,3 +7,5 @@ export * from "./flags";
 export * from "./parser";
 export * from "./text";
 export * from "./attrs";
+export * from "./timers";
+export * from "./telnet";

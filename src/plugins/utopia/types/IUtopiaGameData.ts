@@ -2,7 +2,14 @@ export interface CharacterOptions {
   origin: string;
   specialization: string;
   skills: string[];
+  knowledge: string[];
   equipment: string[];
+  wounds: {
+    light: number;
+    medium: number;
+    severe: number;
+    debilitating: number;
+  }
 }
 
 // Specialization Interfaces

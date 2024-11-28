@@ -2,6 +2,7 @@ import { join } from "path";
 import { IPlugin } from "../../@types/IPlugin";
 import { loadTxtDir } from "../../utils";
 import commands from "./commands";
+import { addCmd } from "../../services/commands/cmdParser";
 
 const UtopiaPlugin: IPlugin = {
   meta: {
@@ -13,8 +14,11 @@ const UtopiaPlugin: IPlugin = {
 
   // Plugin initialization method
   async initialize() {
-    // Initialize plugin-specific game logic
-    commands();
+    // Get the commands and register them
+    const pluginCommands = commands();
+    addCmd(...pluginCommands);
+    
+    // Load help files
     loadTxtDir(join(__dirname, "help"));
   },
 
