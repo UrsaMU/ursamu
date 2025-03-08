@@ -16,6 +16,7 @@ export default () => {
       let tar = "me",
         splat = "";
       const en = await Obj.get(ctx.socket.cid);
+      console.log("FOOOO:",en);
       if (!en) return;
 
       // if args[0] contains an =, then we need to split it up.

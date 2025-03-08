@@ -37,11 +37,11 @@ app.use(
 
 io.on("connection", (socket: IMSocket) => {
   socket.on("message", async (message) => {
-    if (message.data.cid) socket.cid = message.data.cid;
+    if (message?.data?.cid) socket.cid = message.data.cid;
     const player = await playerForSocket(socket);
     if (player) socket.join(`#${player.location}`);
 
-    if (message.data.disconnect) {
+    if (message?.data?.disconnect) {
       socket.disconnect();
       return;
     }
@@ -65,15 +65,29 @@ io.on("connection", (socket: IMSocket) => {
 
     if (socks.length < 1) {
       await setFlags(en, "!connected");
+      // Get all socket IDs to exclude
+      const excludeIds = socks.map(s => s.id);
+      // Add the current disconnecting socket ID
+      excludeIds.push(socket.id);
+      
       return await send(
         [`#${en.location}`],
-        `${moniker(en)} has disconnected.`
+        `${moniker(en)} has disconnected.`,
+        {},
+        excludeIds  // Exclude all sockets of the disconnecting player
       );
     }
 
+    // Get all socket IDs to exclude
+    const excludeIds = socks.map(s => s.id);
+    // Add the current disconnecting socket ID
+    excludeIds.push(socket.id);
+    
     return await send(
       [`#${en.location}`],
-      `${moniker(en)} has partially disconnected.`
+      `${moniker(en)} has partially disconnected.`,
+      {},
+      excludeIds  // Exclude all sockets of the partially disconnecting player
     );
   });
 

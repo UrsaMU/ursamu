@@ -14,11 +14,12 @@ export interface IConfig {
     name?: string;
     description?: string;
     version?: string;
-    playerStart?: number;
+    playerStart?: string;
     text: {
       connect: string;
     };
   };
+  plugins?: Record<string, any>;
 }
 
 export class Config {
@@ -32,6 +33,10 @@ export class Config {
 
   get game() {
     return this.config.game;
+  }
+
+  get plugins() {
+    return this.config.plugins;
   }
 
   setConfig = (config: IConfig) => {

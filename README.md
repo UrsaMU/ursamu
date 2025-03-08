@@ -38,6 +38,127 @@ To stop the Ursamu server, you can use the following command:
 ./pup terminate
 ```
 
+## Configuration
+
+UrsaMU comes with a user-friendly configuration system that allows you to customize the server settings. The configuration is stored in a JSON file in the `/config` directory at the project root.
+
+### Setting Up Configuration
+
+The easiest way to set up your configuration is to use the provided setup script:
+
+```bash
+# Run the setup script
+deno task setup-config
+```
+
+This script will:
+1. Create the `/config` directory if it doesn't exist
+2. Create a default configuration file if it doesn't exist (using the sample configuration file if available)
+3. Prompt you to edit the configuration file using your preferred text editor
+
+A sample configuration file (`config.sample.json`) is provided as a template. You can copy this file to `config/config.json` and modify it to suit your needs.
+
+### Using the Configuration CLI
+
+UrsaMU provides a command-line interface for managing the configuration:
+
+```bash
+# Show the entire configuration
+deno task config
+
+# Get a specific configuration value
+deno task config --get server.ws
+
+# Set a configuration value
+deno task config --set server.ws 4202
+
+# Reset the configuration to default values
+deno task config --reset
+
+# Show help (includes the configuration directory path)
+deno task config --help
+```
+
+### Configuration File
+
+The configuration is stored in a JSON file (`config/config.json`) that can be edited directly. The file is created automatically when the server starts if it doesn't exist.
+
+### Plugin Configuration
+
+Plugins can register their own configuration sections. These are stored in the `plugins` section of the configuration file.
+
+## Plugins
+
+UrsaMU supports a modular plugin system that allows you to extend the functionality of the server. Plugins can register their own configuration sections and are loaded automatically when the server starts.
+
+### Creating a Plugin
+
+The easiest way to create a new plugin is to use the provided script:
+
+```bash
+# Create a new plugin
+deno task create-plugin my-plugin
+```
+
+This will create a new plugin directory with a basic plugin structure, including configuration support.
+
+### Plugin Structure
+
+A plugin is a directory in the `src/plugins` directory with an `index.ts` file that exports a default object implementing the `IPlugin` interface:
+
+```typescript
+import { IPlugin } from "../../@types/IPlugin.ts";
+import { getConfig } from "../../services/Config/mod.ts";
+
+const myPlugin: IPlugin = {
+  name: "my-plugin",
+  version: "1.0.0",
+  description: "My awesome plugin",
+  
+  // Plugin configuration
+  config: {
+    plugins: {
+      "my-plugin": {
+        enabled: true,
+        // Plugin-specific configuration
+      }
+    }
+  },
+  
+  // Plugin initialization
+  init: async () => {
+    // Plugin initialization code
+    return true;
+  }
+};
+
+export default myPlugin;
+```
+
+### Plugin Configuration
+
+Plugins can register their own configuration sections. These are stored in the `plugins` section of the configuration file:
+
+```json
+{
+  "plugins": {
+    "my-plugin": {
+      "enabled": true,
+      // Plugin-specific configuration
+    }
+  }
+}
+```
+
+Plugins can access their configuration using the `getConfig` function:
+
+```typescript
+import { getConfig } from "../../services/Config/mod.ts";
+
+// Get a configuration value
+const enabled = getConfig<boolean>("plugins.my-plugin.enabled");
+```
+
 ## Docker
 
 It is easy to run the game under docker:
@@ -48,7 +169,7 @@ cd ursamu
 sudo docker-compose up -d
 ```
 
-The game database will be exported to the `data/` directory on the host filesystem, for easy backups.
+The game database will be exported to the `data/` directory on the host filesystem, for easy backups. The configuration will be stored in the `config/` directory.
 
 ## Development on ARM macOS
 

@@ -1,0 +1,7 @@
+{
+    "deno.enable": true,
+    "deno.enablePaths": [
+        "./src/main.ts",
+        "./src/telnet.ts"
+    ]
+}

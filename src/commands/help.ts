@@ -6,7 +6,7 @@ import { flags } from "../services/flags/flags.ts";
 import parser from "../services/parser/parser.ts";
 import { center, columns, ljust, repeatString } from "../utils/format.ts";
 import { send } from "../services/broadcast/index.ts";
-import { gameConfig } from "../main.ts";
+import { getConfig } from "../services/Config/mod.ts";
 import { ICmd, IHelp } from "../@types/index.ts";
 import { dpath } from "../../deps.ts";
 
@@ -34,8 +34,8 @@ export default async () => {
     pattern: /^[/+@]?help$/i,
     hidden: true,
     exec: async (ctx) => {
-      const player = await dbojs.queryOne({ id: ctx.socket.cid });
-      const flgs = player?.flags || "";
+      const player = ctx.socket.cid ? await dbojs.queryOne({ id: ctx.socket.cid }) : null;
+      const flgs = player ? player.flags || "" : "";
 
       let cats: Set<string> = new Set();
       let commands: any = [];
@@ -70,7 +70,7 @@ export default async () => {
       let output =
         center(
           `%cy[%cn %ch%cc${
-            gameConfig.game?.name ? gameConfig.game.name + " " : ""
+            getConfig<any>('game.name') ? getConfig<any>('game.name') + " " : ""
           }%cn%chHelp%cn System %cy]%cn`,
           78,
           "%cr=%cn"

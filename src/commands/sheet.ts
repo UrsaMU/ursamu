@@ -11,7 +11,16 @@ import {
   target,
 } from "../utils/index.ts";
 
-const bio = async (obj: Obj) => {
+// Add the interface definition directly in the file
+interface IMStatEntry {
+  name: string;
+  value: any;
+  temp?: any;
+  type?: string;
+  category?: string;
+}
+
+const bio = async (obj: Obj): Promise<string> => {
   const splat = await getStat(obj.dbobj, "splat");
 
   let bioList =
@@ -37,7 +46,7 @@ const bio = async (obj: Obj) => {
   return output + "%r";
 };
 
-const attributes = async (obj: Obj) => {
+const attributes = async (obj: Obj): Promise<string> => {
   const physical = [
     center("Physical", 24, " "),
     formatStat("strength", await getStat(obj.dbobj, "strength")),
@@ -69,12 +78,12 @@ const attributes = async (obj: Obj) => {
   return output;
 };
 
-const skills = async (obj: Obj) => {
+const skills = async (obj: Obj): Promise<string> => {
   const physical = allStats.filter(
     (stat) => stat.type === "skill" && stat.category === "physical"
   );
 
-  const totalPhysical = [];
+  const totalPhysical: string[] = [];
 
   for (const stat of physical) {
     totalPhysical.push(
@@ -94,7 +103,7 @@ const skills = async (obj: Obj) => {
     (stat) => stat.type === "skill" && stat.category === "social"
   );
 
-  const totalSocial = [];
+  const totalSocial: string[] = [];
 
   for (const stat of social) {
     totalSocial.push(
@@ -112,7 +121,7 @@ const skills = async (obj: Obj) => {
     (stat) => stat.type === "skill" && stat.category === "mental"
   );
 
-  const totalMental = [];
+  const totalMental: string[] = [];
 
   for (const stat of mental) {
     totalMental.push(
@@ -153,7 +162,7 @@ const skills = async (obj: Obj) => {
   return output;
 };
 
-const advantages = (obj: Obj) => {
+const advantages = async (obj: Obj): Promise<string> => {
   let output = `${divider("Backgrounds", "%cr-%cn", 26)}${divider(
     "Advantages",
     "%cr-%cn",
@@ -178,19 +187,27 @@ const advantages = (obj: Obj) => {
     [];
 
   const max = Math.max(backgrounds.length, merits.length, flaws.length);
-  const totalBackgrounds = [];
-  const totalMerits = [];
-  const totalFlaws = [];
+  const totalBackgrounds: string[] = [];
+  const totalMerits: string[] = [];
+  const totalFlaws: string[] = [];
 
+  const resolvedBackgrounds = await Promise.all(backgrounds);
   totalBackgrounds.push(
-    ...backgrounds,
+    ...resolvedBackgrounds,
     ...Array(max - backgrounds.length).fill(" ".repeat(24))
   );
+  
+  const resolvedMerits = await Promise.all(merits);
   totalMerits.push(
-    ...merits,
+    ...resolvedMerits,
     ...Array(max - merits.length).fill(" ".repeat(24))
   );
-  totalFlaws.push(...flaws, ...Array(max - flaws.length).fill(" ".repeat(24)));
+  
+  const resolvedFlaws = await Promise.all(flaws);
+  totalFlaws.push(
+    ...resolvedFlaws,
+    ...Array(max - flaws.length).fill(" ".repeat(24))
+  );
 
   for (let i = 0; i < max; i++) {
     output += ` ${totalBackgrounds[i]}  ${totalMerits[i]}  ${totalFlaws[i]}\n`;
@@ -202,19 +219,17 @@ const advantages = (obj: Obj) => {
   return "";
 };
 
-const disciplines = async (obj: Obj) => {
+const disciplines = async (obj: Obj): Promise<string> => {
   const splat = await getStat(obj.dbobj, "splat");
 
-  const totalDisciplines: any[] = [];
+  const totalDisciplines: string[][] = [];
 
-  const disciplines =
+  const disciplines: IMStatEntry[] =
     obj.data?.stats
       ?.filter((s) => s.type === "discipline")
       .sort((a, b) => a.name.localeCompare(b.name)) || [];
 
-  // split the disciplines into two columns. using a columns array.
-
-  const columns: any[][] = [[], []];
+  const columns: IMStatEntry[][] = [[], []];
   for (let i = 0; i < disciplines.length; i++) {
     columns[i % 2].push(disciplines[i]);
   }
@@ -223,7 +238,7 @@ const disciplines = async (obj: Obj) => {
   columns[1] = columns[1].sort((a, b) => a.name.localeCompare(b.name));
 
   for (const col of columns) {
-    const colDisciplines = [];
+    const colDisciplines: string[] = [];
     for (const stat of col) {
       colDisciplines.push(
         formatStat(stat.name, await getStat(obj.dbobj, stat.name), 37)
@@ -252,7 +267,7 @@ const disciplines = async (obj: Obj) => {
   );
 
   output += totalDisciplines[0]
-    .map((d: any, i: number) => ` ${d}  ${totalDisciplines[1][i]}`)
+    .map((d: string, i: number) => ` ${d}  ${totalDisciplines[1][i]}`)
     .join("\n")
     .trim();
 
@@ -260,7 +275,7 @@ const disciplines = async (obj: Obj) => {
   return output + "%r";
 };
 
-const other = async (obj: Obj) => {
+const other = async (obj: Obj): Promise<string> => {
   const splat = await getStat(obj.dbobj, "splat");
   let output = "";
 
@@ -269,7 +284,7 @@ const other = async (obj: Obj) => {
       stat.type === "other" && (stat.splat?.includes(splat) || !stat.splat)
   );
 
-  let totalOther = [];
+  let totalOther: string[] = [];
 
   for (const stat of other) {
     totalOther.push(formatStat(stat.name, await getStat(obj.dbobj, stat.name)));
@@ -343,11 +358,17 @@ const calculateDamage = (
   return { damageBoxes, status };
 };
 
-const displayDamageTrack = async (obj: IDBOBJ, type: string) => {
+const displayDamageTrack = async (obj: IDBOBJ, type: string): Promise<string> => {
   let output = "";
   let splat = await getStat(obj, "splat");
-  const superficial = parseInt(obj.data?.damage[type].superficial || 0);
-  const aggravated = parseInt(obj.data?.damage[type].aggravated || 0);
+  
+  // Initialize damage object if it doesn't exist
+  if (!obj.data) obj.data = {};
+  if (!obj.data.damage) obj.data.damage = {};
+  if (!obj.data.damage[type]) obj.data.damage[type] = { superficial: 0, aggravated: 0 };
+  
+  const superficial = parseInt(obj.data.damage[type].superficial || 0);
+  const aggravated = parseInt(obj.data.damage[type].aggravated || 0);
   let maxBoxes;
 
   if (type === "physical") {
@@ -378,7 +399,7 @@ const displayDamageTrack = async (obj: IDBOBJ, type: string) => {
   return output;
 };
 
-const health = async (obj: IDBOBJ) => {
+const health = async (obj: IDBOBJ): Promise<string> => {
   let output = divider("Character Status") + "\n";
 
   output += await displayDamageTrack(obj, "physical");
@@ -422,13 +443,20 @@ export default () => {
     lock: "connected",
     exec: async (ctx, [tar]) => {
       let tarObj;
-
+      console.log("FOOOOB:", ctx.socket.cid);
       const en = await Obj.get(ctx.socket.cid);
+
       if (!en) return;
 
       // handle target.
       if (tar) {
-        tarObj = await Obj.get((await target(en.dbobj, tar))?.id);
+        const targetObj = await target(en.dbobj, tar);
+        if (targetObj && targetObj.id) {
+          tarObj = await Obj.get(targetObj.id);
+        } else {
+          send([ctx.socket.id], "I can't find that target.", {});
+          return;
+        }
       } else {
         tarObj = en;
       }

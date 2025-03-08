@@ -6,7 +6,7 @@ import config from "./ursamu.config.ts";
 import parser from "./services/parser/parser.ts";
 
 interface ITelnetSocket extends Socket {
-  cid?: number;
+  cid?: string;
 }
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
@@ -31,32 +31,39 @@ const server = createServer((socket: ITelnetSocket) => {
 
   sock.io.on("reconnect", () => {
     socket.write(
-      parser.substitute("telnet", "%chGame>%cn @reboot Complete.\r\n")
+      parser.substitute("telnet", "%ch%cg-%cn @reboot Complete.\r\n")
     );
-    sock.emit("message", {
-      msg: "",
-      data: {
-        cid: socket.cid,
-        reconnect: true,
-      },
-    });
+    if (socket.cid) {
+      sock.emit("message", {
+        msg: "",
+        data: {
+          cid: socket.cid,
+          reconnect: true,
+        },
+      });
+    }
   });
 
   sock.io.on("reconnect_attempt", () => {
-    sock.emit("message", {
-      msg: "",
-      data: {
-        cid: socket.cid,
-        reconnect: true,
-      },
-    });
+    if (socket.cid) {
+      sock.emit("message", {
+        msg: "",
+        data: {
+          cid: socket.cid,
+          reconnect: true,
+        },
+      });
+    }
   });
 
-  // sock.on("disconnect", () => socket.end());
   sock.on("error", () => socket.end());
 
   socket.on("data", (data) => {
-    sock.emit("message", { msg: data.toString(), data: { cid: socket.cid } });
+    if (socket.cid) {
+      sock.emit("message", { msg: data.toString(), data: { cid: socket.cid } });
+    } else {
+      sock.emit("message", { msg: data.toString() });
+    }
   });
 
   socket.on("end", () => {

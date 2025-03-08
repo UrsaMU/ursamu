@@ -2,10 +2,9 @@ import { IAttribute } from "./IAttribute.ts";
 import { IMStatEntry } from "./IMStatEntry.ts";
 
 export interface IDBOBJ {
-  _id?: string;
-  id: number;
+  id: string;
   description?: string;
-  location?: number;
+  location?: string;
   flags: string;
   data?: {
     attributes?: IAttribute[];

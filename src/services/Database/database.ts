@@ -1,66 +1,161 @@
-import { MongoClient } from "../../../deps.ts";
 import { IDBOBJ } from "../../@types/IDBObj.ts";
 import config from "../../ursamu.config.ts";
 import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
 import { IArticle, IBoard } from "../../@types/index.ts";
+import { dpath } from "../../../deps.ts";
 
-function d(...args) {
-  const e = new Error();
-  const level = e.stack.split("\n").slice(3, 5);
-  console.log(...args, level);
+interface WithId {
+  id: string;
 }
 
-export class DBO<T> {
-  db: any;
+type QueryCondition = {
+  [key: string]: string | number | boolean | RegExp | QueryCondition | QueryCondition[];
+};
+
+type QueryOperator<T> = {
+  $or?: QueryCondition[];
+  $and?: QueryCondition[];
+  $where?: (this: T) => boolean;
+};
+
+type Query<T> = QueryCondition | QueryOperator<T>;
+
+export class DBO<T extends WithId> {
+  private static kv: Deno.Kv | null = null;
+  private prefix: string;
 
   constructor(path: string) {
-    this.collection = path.replace('.','_');
-    const uri = `mongodb://root:root@mongo/`;
-    this.client = new MongoClient(uri);
-    this.client.connect();
+    this.prefix = path.replace('.', '_');
   }
 
-  coll() {
-    return this.client.db().collection(this.collection);
+  private async getKv(): Promise<Deno.Kv> {
+    if (!DBO.kv) {
+      // Create the data directory if it doesn't exist
+      try {
+        await Deno.mkdir("./data", { recursive: true });
+      } catch (error) {
+        if (!(error instanceof Deno.errors.AlreadyExists)) {
+          throw error;
+        }
+      }
+      
+      // Use a persistent path for the KV store
+      const path = "./data/ursamu.db";
+      console.log(`Opening KV database at: ${path}`);
+      DBO.kv = await Deno.openKv(path);
+    }
+    return DBO.kv;
+  }
+
+  async clear() {
+    const kv = await this.getKv();
+    const entries = kv.list({ prefix: [this.prefix] });
+    for await (const entry of entries) {
+      await kv.delete(entry.key);
+    }
+  }
+
+  private getKey(id: string): Deno.KvKey {
+    return [this.prefix, id];
   }
 
   async create(data: T) {
-    return await this.coll().insertOne(data);
+    const kv = await this.getKv();
+    const plainData = { ...data };
+    await kv.set(this.getKey(data.id), plainData);
+    return data;
   }
 
-  async query(query?: any) {
-    const ret = await this.coll().find(query);
-    return await ret.toArray();
+  async query(query?: Query<T>) {
+    const kv = await this.getKv();
+    const entries = kv.list({ prefix: [this.prefix] });
+    const results: T[] = [];
+    for await (const entry of entries) {
+      const value = entry.value as T;
+      if (this.matchesQuery(value, query)) {
+        results.push(value);
+      }
+    }
+    return results;
   }
 
-  async queryOne(query?: any) {
-    const ret = await this.query(query);
-    return ret.length ? ret[0] : false;
+  async queryOne(query?: Query<T>) {
+    const results = await this.query(query);
+    return results.length ? results[0] : false;
   }
 
   async all() {
-    const ret = await this.coll().find({});
-    return await ret.toArray();
+    const kv = await this.getKv();
+    const entries = kv.list({ prefix: [this.prefix] });
+    const results: T[] = [];
+    for await (const entry of entries) {
+      results.push(entry.value as T);
+    }
+    return results;
   }
 
-  async modify(query: any, operator: string, data: any) {
-    var body = {}
-    body[operator] = data
-    const ret = await this.coll().updateMany(query, body)
-    return await this.query(query)
+  async modify(query: Query<T>, operator: string, data: Partial<T>) {
+    const items = await this.query(query);
+    const kv = await this.getKv();
+    for (const item of items) {
+      const updated = { ...item };
+      if (operator === "$set") {
+        Object.assign(updated, data);
+      } else if (operator === "$inc") {
+        for (const [key, value] of Object.entries(data)) {
+          const currentValue = ((updated as unknown) as Record<string, number>)[key] || 0;
+          ((updated as unknown) as Record<string, number>)[key] = currentValue + (value as number);
+        }
+      }
+      const plainData = { ...updated };
+      await kv.set(this.getKey(item.id), plainData);
+    }
+    return await this.query(query);
   }
 
-  async delete(query: any) {
-    return await this.coll().deleteMany(query);
+  async delete(query: Query<T>) {
+    const items = await this.query(query);
+    const kv = await this.getKv();
+    for (const item of items) {
+      await kv.delete(this.getKey(item.id));
+    }
+    return items;
   }
 
-  async length(query: any) {
+  private matchesQuery(value: T, query?: Query<T>): boolean {
+    if (!query) return true;
+    
+    if ('$or' in query && Array.isArray(query.$or)) {
+      return query.$or.some((cond: QueryCondition) => this.matchesQuery(value, cond));
+    }
+    
+    if ('$and' in query && Array.isArray(query.$and)) {
+      return query.$and.every((cond: QueryCondition) => this.matchesQuery(value, cond));
+    }
+    
+    if ('$where' in query && typeof query.$where === 'function') {
+      return query.$where.call(value);
+    }
+    
+    for (const [key, condition] of Object.entries(query)) {
+      if (condition instanceof RegExp) {
+        if (!condition.test(value[key as keyof T] as string)) {
+          return false;
+        }
+      } else if (typeof condition === "object") {
+        if (!this.matchesQuery(value[key as keyof T] as T, condition as Query<T>)) {
+          return false;
+        }
+      } else if (value[key as keyof T] !== condition) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
-export interface ICounters {
-  _id: string;
+export interface ICounters extends WithId {
   seq: number;
 }
 

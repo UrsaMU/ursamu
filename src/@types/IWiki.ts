@@ -1,5 +1,5 @@
 export interface IArticle {
-  _id?: number;
+  id: string;
   featuredImage?: string;
   category: string;
   featured?: boolean;

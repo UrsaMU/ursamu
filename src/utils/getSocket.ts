@@ -4,7 +4,7 @@ import { io } from "../app.ts";
 import { Obj } from "../services/DBObjs/index.ts";
 import { joinChans } from "./joinChans.ts";
 
-export const getSocket = async (id: number) => {
+export const getSocket = async (id: string) => {
   const dbo = await Obj.get(id);
   if (!dbo) return;
 
@@ -13,7 +13,7 @@ export const getSocket = async (id: number) => {
   for (const [id, sock] of sockets.entries()) {
     const socket = sock as IMSocket;
 
-    if (socket.cid === dbo.id) {
+    if (socket.cid && socket.cid.toString() === dbo.id) {
       return socket;
     }
   }

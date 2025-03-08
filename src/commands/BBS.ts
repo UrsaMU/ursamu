@@ -28,6 +28,7 @@ export default () => {
       }
 
       await bboard.create({
+        id,
         name,
         description: desc || "",
         category: "General",
@@ -53,18 +54,19 @@ export default () => {
       const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const tar = await bboard.queryOne({ $or: [{ name }, { boardId: +name }] });
+      const tar = await bboard.queryOne({ $or: [{ name }, { boardId: name }] });
       if (!tar) {
         return send([socket.id], "%chGAME>%cn Board not found.");
       }
 
-      await bboard.remove({ boardId: tar.boardId });
+      await bboard.delete({ boardId: tar.boardId });
       send(
         [socket.id],
         `%chGAME>%cn Board %ch${tar.name.toUpperCase()}%cn deleted.`
       );
     },
   });
+
   // 2. Modification
   // RenameBoard: Change the name of a board.
   // Syntax: +renameboard <old name>=<new name>
@@ -78,7 +80,7 @@ export default () => {
       if (!en) return;
 
       const tar = await bboard.queryOne({
-        $or: [{ name: oldName }, { boardId: +oldName }],
+        $or: [{ name: oldName }, { boardId: oldName }],
       });
 
       if (!tar) {
@@ -92,6 +94,7 @@ export default () => {
       );
     },
   });
+
   // BoardDesc: Change the description of a board.
   // Syntax: +boarddesc <board name>=<new description>
   addCmd({
@@ -103,7 +106,7 @@ export default () => {
       const en = await dbojs.queryOne({ id: socket.cid });
       if (!en) return;
 
-      const tar = await bboard.queryOne({ $or: [{ name }, { boardId: +name }] });
+      const tar = await bboard.queryOne({ $or: [{ name }, { boardId: name }] });
       if (!tar) {
         return send([socket.id], "%chGAME>%cn Board not found.");
       }
@@ -115,6 +118,7 @@ export default () => {
       );
     },
   });
+
   // 3. Permissions
   // Permissions: Set who can read or write to a board.
   // Syntax: +permissions <board name>=<read access>/<write access>

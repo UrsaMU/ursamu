@@ -1,14 +1,16 @@
 export interface IPost {
-  postId: number;
-  boardId: number;
+  postId: string;
+  boardId: string;
   authorId: string; // Assuming author is identified by an ID
   title: string;
   content: string;
   timestamp: Date;
   isLocked: boolean;
 }
+
 export interface IBoard {
-  boardId: number;
+  id: string;
+  boardId: string;
   name: string;
   read?: string;
   write?: string;

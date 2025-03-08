@@ -6,8 +6,8 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
     return await dbojs.queryOne({ id: en.location });
   }
 
-  if (+tar) {
-    return await dbojs.queryOne({ id: +tar });
+  if (tar.startsWith("#")) {
+    return await dbojs.queryOne({ id: tar.slice(1) });
   }
 
   if (["me", "self"].includes(tar.toLowerCase())) {
@@ -20,7 +20,6 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
         const target = `${tar}`;
         return (
           RegExp(this.data.name.replace(";", "|"), "ig").test(target) ||
-          this.id === +target.slice(1) ||
           this.id === target ||
           this.data.alias?.toLowerCase() === target.toLowerCase()
         );
@@ -35,5 +34,4 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
   if (found && (global || [found.location, found.id].includes(en.location))) {
     return found;
   }
-
 };
