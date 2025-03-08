@@ -13,6 +13,7 @@ export default () =>
     pattern: /^l(?:ook)?(?:\s+(.*))?/i,
     lock: "connected",
     exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
       const query = await dbojs.query({ id: ctx.socket.cid });
       if (!query.length) return;
       const en = query[0];

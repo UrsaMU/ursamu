@@ -1,5 +1,5 @@
 import path from "node:path";
-import { server } from "./app.ts";
+import { server} from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { chans, counters, dbojs } from "./services/Database/index.ts";
@@ -30,6 +30,7 @@ export const mu = async (cfg?: IConfig, customPlugins?: IPlugin[]) => {
     }
   }
 
+  // Start the WebSocket server
   server.listen(getConfig<number>("server.ws"), async () => {
     // Initialize all registered plugins
     await initializePlugins();
@@ -86,7 +87,27 @@ export const mu = async (cfg?: IConfig, customPlugins?: IPlugin[]) => {
       });
       console.log("Default channels created");
     }
-    console.log(`Server started on port ${getConfig<number>("server.ws")}.`);
+    console.log(`WebSocket server started on port ${getConfig<number>("server.ws")}.`);
+    
+    // Start the HTTP server
+    const httpPort = getConfig<number>("server.http");
+    
+    // Use Deno.serve instead of Deno.listen and Deno.serveHttp
+    Deno.serve({ port: httpPort }, () => {
+      try {        
+        // For now, just return a simple response
+        // You can implement proper routing later
+        return new Response("UrsaMU API Server", { 
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        });
+      } catch (error) {
+        console.error("Error handling request:", error);
+        return new Response("Internal Server Error", { status: 500 });
+      }
+    });
+    
+    console.log(`HTTP server started on port ${httpPort}.`);
   });
 
   Deno.addSignalListener("SIGINT", async () => {

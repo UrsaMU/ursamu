@@ -1,9 +1,13 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs } from "../services/Database/index.ts";
 
-export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
+export const target = async (
+  en: IDBOBJ,
+  tar: string,
+  global?: boolean
+): Promise<IDBOBJ | undefined | false> => {
   if (!tar || ["here", "room"].includes(tar.toLowerCase())) {
-    return await dbojs.queryOne({ id: en.location });
+    return en.location ? await dbojs.queryOne({ id: en.location }) : undefined;
   }
 
   if (tar.startsWith("#")) {
@@ -19,19 +23,26 @@ export const target = async (en: IDBOBJ, tar: string, global?: boolean) => {
       $where: function () {
         const target = `${tar}`;
         return (
-          RegExp(this.data.name.replace(";", "|"), "ig").test(target) ||
+          RegExp(this.data?.name?.replace(";", "|") || "", "ig").test(target) ||
           this.id === target ||
-          this.data.alias?.toLowerCase() === target.toLowerCase()
+          this.data?.alias?.toLowerCase() === target.toLowerCase()
         );
       },
     });
   })();
 
   if (!found) {
-    return;
+    return undefined;
   }
 
-  if (found && (global || [found.location, found.id].includes(en.location))) {
+  if (global) {
     return found;
   }
+
+  if (found.location && en.location && 
+      (found.location === en.location || found.id === en.location)) {
+    return found;
+  }
+  
+  return undefined;
 };

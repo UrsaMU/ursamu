@@ -121,6 +121,12 @@ export class Obj {
     await dbojs.modify({ id: this.id }, "$set", this.obj);
   }
 
+  set data(data: any) {
+    if (!this.obj) return;
+    this.obj.data = { ...this.obj.data, ...data };
+    this.save();
+  }
+
   set dbobj(obj: IDBOBJ) {
     if (!this.obj) return;
     this.obj = { ...this.obj, ...obj };

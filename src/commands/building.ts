@@ -17,6 +17,7 @@ export default () => {
     category: "building",
     exec: async (ctx, args) => {
       const [swtch, room, to, from] = args;
+      if (!ctx.socket.cid) return;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
@@ -93,6 +94,7 @@ export default () => {
       /^[@/+]?t(?:e|el|ele|elep|elepo|elepor|eleport)?\s+(.*)\s*=\s*(.*)/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
@@ -141,7 +143,7 @@ export default () => {
     category: "building",
     exec: async (ctx, args) => {
       const [swtch, name] = args;
-
+      if (!ctx.socket.cid) return;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
@@ -176,7 +178,7 @@ export default () => {
         await force(ctx, "look");
       }
 
-      await dbojs.delete({ _id: obj._id });
+      await dbojs.delete({ id: obj.id });
       send([ctx.socket.id], `You destroy ${displayName(en, obj)}.`, {});
       const exits = await dbojs.query({
         $and: [
@@ -189,7 +191,7 @@ export default () => {
 
       // destroy any exits that would be orphaned.
       for (const exit of exits) {
-        await dbojs.delete({ _id: exit._id });
+        await dbojs.delete({ id: exit.id });
       }
     },
   });
@@ -201,10 +203,11 @@ export default () => {
     pattern: /^[@/+]?open\s+(.*)\s*=\s*(.*)/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
       const [name, room] = args.map((a) => a.trim());
-      let roomObj: IDBOBJ | undefined | null;
+      let roomObj: IDBOBJ | undefined | null | false;
 
       if (room) roomObj = await target(en, room, true);
       if (!roomObj) {
@@ -223,18 +226,14 @@ export default () => {
         },
       });
 
-      if (roomObj) {
-        send(
-          [ctx.socket.id],
-          `You open exit %ch${displayName(en, exit)} to ${displayName(
-            en,
-            roomObj
-          )}.`,
-          {}
-        );
-      } else {
-        send([ctx.socket.id], `You open exit ${displayName(en, exit)}.`, {});
-      }
+      send(
+        [ctx.socket.id],
+        `You open exit %ch${displayName(en, exit)} to ${displayName(
+          en,
+          roomObj
+        )}.`,
+        {}
+      );
     },
   });
 };

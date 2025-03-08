@@ -11,6 +11,7 @@ export default () => {
     help: "Set an alias",
     exec: async (ctx, args) => {
       const [name, alias] = args;
+      if (!ctx.socket.cid) return;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
       const tar = await target(en, name, true);
