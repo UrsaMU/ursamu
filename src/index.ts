@@ -1,26 +1,20 @@
-// Core exports for the UrSamu library
+// Export types
 export * from "./@types/index.ts";
 
-// Services
-export * from "./services/index.ts";
+// Export services
+export * from "./services/Config/mod.ts";
+export * from "./services/Database/index.ts";
+export * from "./services/broadcast/index.ts";
+export * from "./services/commands/index.ts";
 
-// Utilities
-export * from "./utils/index.ts";
+// Export the telnet server function directly
+export { startTelnetServer } from "./services/Telnet/telnet.ts";
 
 // Server components
 export { app, server, io } from "./app.ts";
 
-// Main entry point
+// Export utilities
+export * from "./utils/index.ts";
+
+// Export the main MU function
 export { mu } from "./main.ts";
-
-// Command system
-export * from "./services/commands/index.ts";
-
-// Database access
-export * from "./services/Database/index.ts";
-
-// Configuration system
-export * from "./services/Config/mod.ts";
-
-// Broadcast system
-export * from "./services/broadcast/index.ts";

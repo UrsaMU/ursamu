@@ -6,8 +6,10 @@
     "telnet": "deno run -A --unstable-detect-cjs --unstable-kv ./src/telnet.ts",
     "config": "deno run -A ./src/cli/config.ts",
     "setup-config": "bash ./scripts/setup-config.sh",
-    "create-plugin": "bash ./scripts/create-plugin.sh"
-
+    "create-plugin": "bash ./scripts/create-plugin.sh",
+    "create": "deno run -A ./src/cli/create.ts",
+    "cli": "deno run -A ./src/cli/ursamu.ts",
+    "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts"
   },
   "compilerOptions": {
     "lib": ["deno.window"],

@@ -195,6 +195,32 @@ echo "BASE=deno-arm" > .env
 sudo docker-compose up -d
 ```
 
+## Telnet Server
+
+UrsaMU provides a simple telnet server facade that can be used in child projects. This facade handles all the complex telnet logic internally, making it easy to add telnet support to your game.
+
+To use the telnet server in a child project:
+
+```typescript
+import { startTelnetServer } from "ursamu";
+
+// Start the telnet server with default options
+startTelnetServer();
+
+// Or with custom options
+startTelnetServer({
+  port: 4201,                    // Custom port
+  wsPort: 4202,                  // WebSocket port to connect to
+  welcomeFile: "text/welcome.txt" // Custom welcome file
+});
+```
+
+The telnet server will automatically try to find the welcome file in several locations:
+1. As an absolute path (if it starts with '/')
+2. Relative to the project root
+3. In the text directory of the project
+4. Using a default welcome message if no file is found
+
 ## License
 
 Ursamu is licensed under the MIT License.

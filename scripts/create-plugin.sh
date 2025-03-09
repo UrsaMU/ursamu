@@ -16,8 +16,10 @@ if [ -d "$PLUGIN_DIR" ]; then
   exit 1
 fi
 
-# Create the plugin directory
+# Create the plugin directory and scripts directory
 mkdir -p "$PLUGIN_DIR"
+mkdir -p "$PLUGIN_DIR/scripts"
+mkdir -p "$PLUGIN_DIR/src"
 
 # Create the plugin index.ts file
 cat > "$PLUGIN_DIR/index.ts" << EOF
@@ -71,6 +73,69 @@ const ${PLUGIN_NAME}Plugin: IPlugin = {
 export default ${PLUGIN_NAME}Plugin;
 EOF
 
+# Create the main.ts file
+cat > "$PLUGIN_DIR/src/main.ts" << EOF
+// Main server for ${PLUGIN_NAME} plugin
+console.log("Starting ${PLUGIN_NAME} main server...");
+
+// Add your main server code here
+
+EOF
+
+# Create the telnet.ts file
+cat > "$PLUGIN_DIR/src/telnet.ts" << EOF
+// Telnet server for ${PLUGIN_NAME} plugin
+console.log("Starting ${PLUGIN_NAME} telnet server...");
+
+// Add your telnet server code here
+
+EOF
+
+# Create the run.sh script
+cat > "$PLUGIN_DIR/scripts/run.sh" << EOF
+#!/bin/bash
+
+# Run script for ${PLUGIN_NAME^} Plugin
+# This script runs both the main server and telnet server with the necessary flags
+# With watch mode enabled for automatic reloading on file changes
+
+# Change to the project root directory
+cd "\$(dirname "\$0")/.." || exit
+
+# Function to handle cleanup when the script is terminated
+cleanup() {
+  echo "Shutting down servers..."
+  kill \$MAIN_PID \$TELNET_PID 2>/dev/null
+  exit 0
+}
+
+# Set up trap to catch termination signals
+trap cleanup SIGINT SIGTERM
+
+# Run the main server with watch mode
+echo "Starting main server in watch mode..."
+deno run --allow-all --unstable-detect-cjs --unstable-kv --watch src/main.ts &
+MAIN_PID=\$!
+
+# Run the telnet server with watch mode
+echo "Starting telnet server in watch mode..."
+deno run --allow-all --unstable-detect-cjs --unstable-kv --watch src/telnet.ts &
+TELNET_PID=\$!
+
+# Wait for both processes
+echo "Servers are running in watch mode. Press Ctrl+C to stop."
+echo "Servers will automatically restart when files are changed."
+echo "Main server and telnet server can restart independently."
+wait \$MAIN_PID \$TELNET_PID
+
+# If we get here, one of the servers has exited
+echo "One of the servers has exited. Shutting down..."
+cleanup
+EOF
+
+# Make the run.sh script executable
+chmod +x "$PLUGIN_DIR/scripts/run.sh"
+
 echo "Plugin created at $PLUGIN_DIR"
 echo ""
 echo "To use this plugin, you need to:"
@@ -85,4 +150,7 @@ echo "{
       // Add your plugin-specific configuration here
     }
   }
-}" 
+}"
+echo ""
+echo "To run the plugin servers with watch mode:"
+echo "cd $PLUGIN_DIR && ./scripts/run.sh" 
