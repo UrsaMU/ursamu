@@ -8,6 +8,7 @@ export default () =>
     pattern: /^(say\s+|")(.*)/i,
     lock: "connected",
     exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
       const player = await dbojs.queryOne({ id: ctx.socket.cid });
       if (player) {
         const name = player.data?.moniker || player.data?.name;
