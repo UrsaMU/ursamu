@@ -3,7 +3,7 @@
 import { parse } from "https://deno.land/std/flags/mod.ts";
 import { dpath } from "../../deps.ts";
 import { ConfigManager } from "../services/Config/index.ts";
-import defaultConfig from "../ursamu.config.ts";
+import { getAllConfig } from "../services/Config/mod.ts";
 
 // Parse command line arguments
 const args = parse(Deno.args, {
@@ -18,9 +18,8 @@ const args = parse(Deno.args, {
   },
 });
 
-// Initialize the config manager with default config
-// It will automatically use the /config directory at the project root
-const configManager = ConfigManager.init(defaultConfig);
+// Get the existing config manager instance
+const configManager = ConfigManager.getInstance();
 
 // Get the config directory
 const configDir = configManager.getConfigDir();
@@ -91,4 +90,4 @@ if (args.set) {
 }
 
 // If no command is provided, show the entire configuration
-console.log(JSON.stringify(configManager.getAll(), null, 2)); 
+console.log(JSON.stringify(getAllConfig(), null, 2)); 

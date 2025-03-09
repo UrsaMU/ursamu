@@ -2,7 +2,7 @@ import { hash } from "../../deps.ts";
 import { send } from "../services/broadcast/index.ts";
 import { addCmd, force } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
-import config from "../ursamu.config.ts";
+import { getConfig } from "../services/Config/mod.ts";
 import { getNextId } from "../utils/getNextId.ts";
 import { moniker } from "../utils/moniker.ts";
 import { joinChans } from "../utils/joinChans.ts";
@@ -69,7 +69,7 @@ export default () =>
       const id = await getNextId("objid");
 
       // Get the starting room - fix the type issue with a non-null assertion
-      const startRoom = await dbojs.queryOne({ id: config.game?.playerStart || "" });
+      const startRoom = await dbojs.queryOne({ id: getConfig<string>("game.playerStart") || "" });
       if (!startRoom) {
         send([ctx.socket.id], "Error: Starting room not found!", {
           error: true,
@@ -104,7 +104,7 @@ export default () =>
       (ctx.socket as any).join(`#${player.id}`);
       (ctx.socket as any).join(`#${player.location}`);
       ctx.socket.cid = player.id;
-      await send([ctx.socket.id], `Welcome to ${config.game?.name}!`, {
+      await send([ctx.socket.id], `Welcome to ${getConfig<string>("game.name")}!`, {
         cid: player.id,
       });
       

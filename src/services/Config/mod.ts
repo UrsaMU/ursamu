@@ -2,7 +2,7 @@ import { ConfigManager } from "./index.ts";
 import { PluginConfigManager } from "./plugin.ts";
 import { merge } from "./utils.ts";
 import { IConfig } from "../../@types/IConfig.ts";
-import defaultConfig from "../../ursamu.config.ts";
+import defaultConfig from "./defaultConfig.ts";
 
 // Initialize the ConfigManager with the default configuration
 const configManager = ConfigManager.init(defaultConfig);

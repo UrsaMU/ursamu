@@ -16,6 +16,15 @@ A MUSH is a text-based, multi-user, real-time virtual environment. It is a desce
 
 A MUSH-like is a server that is similar to a MUSH, but is not a MUSH. UrsaMU is a MUSH-like because it is not a MUSH, but it is similar to a MUSH.
 
+## Using UrsaMU
+
+UrsaMU can be used in two ways:
+
+1. **As a standalone server**: You can run UrsaMU as a standalone server and connect to it via telnet or a web client.
+2. **As a library**: You can use UrsaMU as a library to build your own custom MU* game with minimal effort.
+
+For information on using UrsaMU as a library, see [README-LIB.md](README-LIB.md).
+
 ## Starting the server
 
 To start the server in 'production' mode, make sure you have node installed, I suggest NVM, and then from the `ursamu` folder run:

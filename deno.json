@@ -1,11 +1,13 @@
 {
   "nodeModulesDir": "auto",
   "tasks": {
-    "start": "deno run -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
+    "start": "bash ./scripts/run.sh",
+    "server": "deno run -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
     "telnet": "deno run -A --unstable-detect-cjs --unstable-kv ./src/telnet.ts",
     "config": "deno run -A ./src/cli/config.ts",
     "setup-config": "bash ./scripts/setup-config.sh",
     "create-plugin": "bash ./scripts/create-plugin.sh"
+
   },
   "compilerOptions": {
     "lib": ["deno.window"],
