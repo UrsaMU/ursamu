@@ -2,7 +2,6 @@ import { IDBOBJ } from "../../@types/IDBObj.ts";
 import { getConfig } from "../Config/mod.ts";
 import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
-import { IArticle, IBoard } from "../../@types/index.ts";
 import { dpath } from "../../../deps.ts";
 // @ts-ignore: Deno namespace is available at runtime
 
@@ -161,8 +160,6 @@ export interface ICounters extends WithId {
 }
 
 export const counters = new DBO<ICounters>(`${getConfig<string>("server.counters")}`);
-export const bboard = new DBO<IBoard>(`${getConfig<string>("server.bboard")}`);
 export const dbojs = new DBO<IDBOBJ>(`${getConfig<string>("server.db")}`);
 export const chans = new DBO<IChannel>(`${getConfig<string>("server.chans")}`);
 export const mail = new DBO<IMail>(`${getConfig<string>("server.mail")}`);
-export const wiki = new DBO<IArticle>(`${getConfig<string>("server.wiki")}`);
