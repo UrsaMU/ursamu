@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to create plugins to extend UrsaMU">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/prism.css">
+  <meta name="theme-color" content="#0f172a">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/plugins/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="min-h-screen flex flex-col bg-slate-900 text-slate-200">
+  <!-- Header with navigation -->
+  <header class="bg-slate-800 shadow-lg sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-white flex items-center">
+          <span class="text-purple-400 mr-2">UrsaMU</span> Docs
+        </a>
+        
+        <nav class="hidden lg:block">
+          <ul class="flex space-x-8">
+            
+            <li>
+              <a href="/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Home</a>
+            </li>
+            
+            <li>
+              <a href="/guides/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Guides</a>
+            </li>
+            
+            <li>
+              <a href="/configuration/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Configuration</a>
+            </li>
+            
+            <li>
+              <a href="/api/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">API Reference</a>
+            </li>
+            
+            <li>
+              <a href="/plugins/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Plugins</a>
+            </li>
+            
+            <li>
+              <a href="/development/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Development</a>
+            </li>
+            
+          </ul>
+        </nav>
+        
+        <button id="menu-toggle" class="lg:hidden text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-700">
+      <div class="container mx-auto px-4 py-3">
+        <ul class="space-y-3">
+          
+          <li>
+            <a href="/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Home</a>
+          </li>
+          
+          <li>
+            <a href="/guides/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Guides</a>
+          </li>
+          
+          <li>
+            <a href="/configuration/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Configuration</a>
+          </li>
+          
+          <li>
+            <a href="/api/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">API Reference</a>
+          </li>
+          
+          <li>
+            <a href="/plugins/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Plugins</a>
+          </li>
+          
+          <li>
+            <a href="/development/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Development</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area -->
+  <div class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex flex-col lg:flex-row lg:gap-12">
+      <!-- Sidebar navigation (if available) -->
+      
+      <aside class="lg:w-72 flex-shrink-0 mb-8 lg:mb-0 order-2 lg:order-1">
+        <div class="sticky top-24 bg-slate-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-lg font-semibold mb-4 text-white">On This Page</h3>
+          <nav>
+            
+              <ul class="space-y-3 border-l border-slate-700 pl-4">
+                
+                <li>
+                  <a href="#plugin-basics" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Plugin Basics</a>
+                </li>
+                
+                <li>
+                  <a href="#plugin-interface" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Plugin Interface</a>
+                </li>
+                
+                <li>
+                  <a href="#plugin-structure" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Plugin Structure</a>
+                </li>
+                
+                <li>
+                  <a href="#plugin-configuration" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Plugin Configuration</a>
+                </li>
+                
+                <li>
+                  <a href="#plugin-lifecycle" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Plugin Lifecycle</a>
+                </li>
+                
+                <li>
+                  <a href="#examples" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Examples</a>
+                </li>
+                
+              </ul>
+            
+          </nav>
+        </div>
+      </aside>
+      
+      
+      <!-- Main content -->
+      <main class="w-full order-1 lg:order-2 lg:max-w-3xl">
+        <article class="prose prose-invert prose-headings:text-white prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-a:transition-colors max-w-none ">
+          
+          <h1>UrsaMU Plugin Development</h1>
+<p>This section covers how to develop plugins for UrsaMU, allowing you to extend and customize the server with new functionality.</p>
+<h2>Plugin Basics</h2>
+<p>Plugins are modular extensions that add functionality to UrsaMU without modifying the core codebase. They allow you to:</p>
+<ul>
+<li>Add new commands and features</li>
+<li>Modify existing behavior</li>
+<li>Integrate with external services</li>
+<li>Customize the game experience</li>
+</ul>
+<p>UrsaMU’s plugin system is designed to be lightweight and straightforward, making it easy to create and share plugins.</p>
+<h2>Plugin Interface</h2>
+<p>All UrsaMU plugins implement the <code>IPlugin</code> interface, which defines the structure and required methods for a plugin:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export interface IPlugin {
+  name: string;                // Required: Unique name of the plugin
+  description?: string;        // Optional: Description of what the plugin does
+  version: string;             // Required: Semantic version (e.g., "1.0.0")
+  config?: IConfig;            // Optional: Plugin configuration
+  init?: () =&gt; boolean | Promise&lt;boolean&gt;;  // Optional: Initialization method
+  remove?: () =&gt; void | Promise&lt;void&gt;;      // Optional: Cleanup method
+}
+</code></pre>
+<h2>Plugin Structure</h2>
+<p>A UrsaMU plugin is a TypeScript module that exports a default object implementing the <code>IPlugin</code> interface. Plugins should be placed in the <code>src/plugins/</code> directory, with each plugin in its own subdirectory:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">src/plugins/
+├── my-plugin/
+│   └── index.ts       # Main plugin file
+├── another-plugin/
+│   └── index.ts
+└── ...
+</code></pre>
+<p>Here’s a minimal example of a plugin:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+
+const myPlugin: IPlugin = {
+  name: "my-plugin",
+  version: "1.0.0",
+  description: "A simple UrsaMU plugin",
+  
+  init: async () =&gt; {
+    console.log("My plugin initialized!");
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    console.log("My plugin removed!");
+  }
+};
+
+export default myPlugin;
+</code></pre>
+<h2>Plugin Configuration</h2>
+<p>Plugins can define their own configuration options in the <code>config</code> property. The configuration follows this structure:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">config: {
+  plugins: {
+    "plugin-name": {
+      // Plugin-specific configuration options
+      option1: "value1",
+      option2: 42,
+      // Nested configuration is supported
+      features: {
+        feature1: true,
+        feature2: false
+      }
+    }
+  }
+}
+</code></pre>
+<p>To access configuration values in your plugin, use the <code>getConfig</code> function:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { getConfig } from "../../services/Config/mod.ts";
+
+// Get a configuration value with type safety
+const option1 = getConfig&lt;string&gt;("plugins.my-plugin.option1");
+const option2 = getConfig&lt;number&gt;("plugins.my-plugin.option2");
+const feature1Enabled = getConfig&lt;boolean&gt;("plugins.my-plugin.features.feature1");
+</code></pre>
+<h2>Plugin Lifecycle</h2>
+<p>UrsaMU plugins have a simple lifecycle:</p>
+<ol>
+<li><strong>Loading</strong>: The plugin is loaded from the filesystem</li>
+<li><strong>Registration</strong>: The plugin is registered with the configuration system</li>
+<li><strong>Initialization</strong>: The <code>init</code> method is called (if defined)</li>
+<li><strong>Removal</strong>: The <code>remove</code> method is called (if defined) when the plugin is unloaded</li>
+</ol>
+<p>The <code>init</code> method should return <code>true</code> for successful initialization or <code>false</code> if initialization failed. This allows the system to know whether the plugin was successfully initialized.</p>
+<h2>Examples</h2>
+<h3>Basic Plugin</h3>
+<p>A simple plugin that just logs messages during initialization and removal:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+
+const basicPlugin: IPlugin = {
+  name: "basic-plugin",
+  version: "1.0.0",
+  description: "A basic plugin example",
+  
+  init: async () =&gt; {
+    console.log("Basic plugin initialized!");
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    console.log("Basic plugin removed!");
+  }
+};
+
+export default basicPlugin;
+</code></pre>
+<h3>Configuration Plugin</h3>
+<p>A plugin that uses configuration options:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { getConfig } from "../../services/Config/mod.ts";
+
+const configPlugin: IPlugin = {
+  name: "config-plugin",
+  version: "1.0.0",
+  description: "A plugin that demonstrates configuration",
+  
+  config: {
+    plugins: {
+      "config-plugin": {
+        enabled: true,
+        message: "Hello from the config plugin!",
+        options: {
+          option1: "value1",
+          option2: 42
+        }
+      }
+    }
+  },
+  
+  init: async () =&gt; {
+    const enabled = getConfig&lt;boolean&gt;("plugins.config-plugin.enabled");
+    
+    if (enabled) {
+      const message = getConfig&lt;string&gt;("plugins.config-plugin.message");
+      console.log(message);
+      
+      const option1 = getConfig&lt;string&gt;("plugins.config-plugin.options.option1");
+      const option2 = getConfig&lt;number&gt;("plugins.config-plugin.options.option2");
+      
+      console.log(`Options: ${option1}, ${option2}`);
+    } else {
+      console.log("Config plugin is disabled");
+    }
+    
+    return true;
+  }
+};
+
+export default configPlugin;
+</code></pre>
+<h3>Command Plugin</h3>
+<p>A plugin that adds a custom command:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { registerCommand } from "../../services/Commands/mod.ts";
+
+const commandPlugin: IPlugin = {
+  name: "command-plugin",
+  version: "1.0.0",
+  description: "A plugin that adds a custom command",
+  
+  init: async () =&gt; {
+    // Register a custom command
+    registerCommand({
+      name: "hello",
+      pattern: "hello *",
+      flags: "connected",
+      exec: (ctx) =&gt; {
+        const target = ctx.args.trim() || "world";
+        ctx.send(`Hello, ${target}!`);
+      }
+    });
+    
+    return true;
+  }
+};
+
+export default commandPlugin;
+</code></pre>
+<h3>Database Plugin</h3>
+<p>A plugin that interacts with the database:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { dbojs } from "../../services/Database/index.ts";
+
+const databasePlugin: IPlugin = {
+  name: "database-plugin",
+  version: "1.0.0",
+  description: "A plugin that interacts with the database",
+  
+  init: async () =&gt; {
+    // Create a custom object
+    const customObject = {
+      flags: "thing",
+      data: {
+        name: "Custom Object",
+        description: "An object created by a plugin"
+      }
+    };
+    
+    try {
+      const obj = await dbojs.create(customObject);
+      console.log(`Created custom object with ID: ${obj.id}`);
+    } catch (error) {
+      console.error("Error creating custom object:", error);
+      return false;
+    }
+    
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    // Clean up by removing objects created by this plugin
+    try {
+      const objects = await dbojs.query({
+        "data.name": "Custom Object"
+      });
+      
+      for (const obj of objects) {
+        await dbojs.delete(obj.id);
+        console.log(`Deleted custom object with ID: ${obj.id}`);
+      }
+    } catch (error) {
+      console.error("Error cleaning up custom objects:", error);
+    }
+  }
+};
+
+export default databasePlugin;
+</code></pre>
+<h2>Using Plugins in a Child Game</h2>
+<p>When creating a child game using UrsaMU as a library, you can provide custom plugins through the <code>mu</code> function:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
+import myCustomPlugin from "./plugins/my-custom-plugin.ts";
+
+// Initialize UrsaMU with custom plugins
+const game = await mu(
+  {
+    // Custom configuration
+    server: {
+      telnet: 4201,
+      ws: 4202,
+      http: 4203
+    },
+    game: {
+      name: "My Custom Game"
+    }
+  },
+  [
+    // Custom plugins
+    myCustomPlugin
+  ],
+  {
+    // Options
+    loadDefaultCommands: true,
+    loadDefaultTextFiles: true
+  }
+);
+</code></pre>
+<h2>Best Practices</h2>
+<ol>
+<li><strong>Unique Names</strong>: Ensure your plugin has a unique name to avoid conflicts</li>
+<li><strong>Proper Versioning</strong>: Use semantic versioning for your plugin (MAJOR.MINOR.PATCH)</li>
+<li><strong>Configuration Namespacing</strong>: Keep your configuration under your plugin’s name</li>
+<li><strong>Error Handling</strong>: Properly handle errors in your <code>init</code> and <code>remove</code> methods</li>
+<li><strong>Cleanup</strong>: Always clean up resources in the <code>remove</code> method</li>
+<li><strong>Documentation</strong>: Document your plugin’s purpose, configuration options, and usage</li>
+</ol>
+
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 py-8 mt-12 border-t border-slate-700">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <p>© UrsaMU Team - <a href="https://github.com/lcanady/ursamu" class="text-purple-400 hover:text-purple-300 transition-colors">GitHub Repository</a></p>
+        </div>
+        <div>
+          <p>Built with <a href="https://lume.land" class="text-purple-400 hover:text-purple-300 transition-colors">Lume</a> for <a href="https://deno.land" class="text-purple-400 hover:text-purple-300 transition-colors">Deno</a></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Smooth scrolling for anchor links
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add IDs to headings if they don't have them
+      const article = document.querySelector('article');
+      if (article) {
+        const headings = article.querySelectorAll('h2, h3, h4, h5, h6');
+        headings.forEach(heading => {
+          if (!heading.id) {
+            // Create ID from heading text
+            const id = heading.textContent
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/[\s_-]+/g, '-')
+              .replace(/^-+|-+$/g, '');
+            heading.id = id;
+          }
+        });
+      }
+      
+      // Get all links that have hash (#) in them
+      const anchorLinks = document.querySelectorAll('a[href^="#"]');
+      
+      // Add click event listener to each anchor link
+      anchorLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Prevent default jump-to behavior
+          e.preventDefault();
+          
+          // Get the target element
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return; // Skip if it's just "#"
+          
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            // Calculate header height for offset
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            // Get the target's position
+            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+            
+            // Scroll to the target with offset for the header
+            window.scrollTo({
+              top: targetPosition - headerHeight - 20, // 20px extra padding
+              behavior: 'smooth'
+            });
+            
+            // Update URL hash without jumping
+            history.pushState(null, null, targetId);
+          }
+        });
+      });
+    });
+  </script>
+
+ </body></html>

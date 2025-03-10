@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to contribute to the UrsaMU project">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/prism.css">
+  <meta name="theme-color" content="#0f172a">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/development/contributing/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="min-h-screen flex flex-col bg-slate-900 text-slate-200">
+  <!-- Header with navigation -->
+  <header class="bg-slate-800 shadow-lg sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-white flex items-center">
+          <span class="text-purple-400 mr-2">UrsaMU</span> Docs
+        </a>
+        
+        <nav class="hidden lg:block">
+          <ul class="flex space-x-8">
+            
+            <li>
+              <a href="/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Home</a>
+            </li>
+            
+            <li>
+              <a href="/guides/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Guides</a>
+            </li>
+            
+            <li>
+              <a href="/configuration/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Configuration</a>
+            </li>
+            
+            <li>
+              <a href="/api/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">API Reference</a>
+            </li>
+            
+            <li>
+              <a href="/plugins/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Plugins</a>
+            </li>
+            
+            <li>
+              <a href="/development/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Development</a>
+            </li>
+            
+          </ul>
+        </nav>
+        
+        <button id="menu-toggle" class="lg:hidden text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-700">
+      <div class="container mx-auto px-4 py-3">
+        <ul class="space-y-3">
+          
+          <li>
+            <a href="/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Home</a>
+          </li>
+          
+          <li>
+            <a href="/guides/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Guides</a>
+          </li>
+          
+          <li>
+            <a href="/configuration/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Configuration</a>
+          </li>
+          
+          <li>
+            <a href="/api/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">API Reference</a>
+          </li>
+          
+          <li>
+            <a href="/plugins/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Plugins</a>
+          </li>
+          
+          <li>
+            <a href="/development/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Development</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area -->
+  <div class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex flex-col lg:flex-row lg:gap-12">
+      <!-- Sidebar navigation (if available) -->
+      
+      <aside class="lg:w-72 flex-shrink-0 mb-8 lg:mb-0 order-2 lg:order-1">
+        <div class="sticky top-24 bg-slate-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-lg font-semibold mb-4 text-white">On This Page</h3>
+          <nav>
+            
+              <ul class="space-y-3 border-l border-slate-700 pl-4">
+                
+                <li>
+                  <a href="#code-of-conduct" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Code of Conduct</a>
+                </li>
+                
+                <li>
+                  <a href="#getting-started" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Getting Started</a>
+                </li>
+                
+                <li>
+                  <a href="#development-process" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Development Process</a>
+                </li>
+                
+                <li>
+                  <a href="#pull-requests" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Pull Requests</a>
+                </li>
+                
+                <li>
+                  <a href="#coding-standards" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Coding Standards</a>
+                </li>
+                
+                <li>
+                  <a href="#documentation" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Documentation</a>
+                </li>
+                
+              </ul>
+            
+          </nav>
+        </div>
+      </aside>
+      
+      
+      <!-- Main content -->
+      <main class="w-full order-1 lg:order-2 lg:max-w-3xl">
+        <article class="prose prose-invert prose-headings:text-white prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-a:transition-colors max-w-none ">
+          
+          <h1>Contributing to UrsaMU</h1>
+<p>Thank you for your interest in contributing to UrsaMU! This guide will help you get started with contributing to the project.</p>
+<h2>Code of Conduct</h2>
+<p>UrsaMU has adopted a Code of Conduct that we expect project participants to adhere to. Please read <a href="./code-of-conduct.md">the full text</a> so that you can understand what actions will and will not be tolerated.</p>
+<h2>Getting Started</h2>
+<h3>Prerequisites</h3>
+<p>Before you begin, ensure you have the following installed:</p>
+<ul>
+<li><a href="https://deno.land/">Deno</a> (version 1.37.0 or higher)</li>
+<li><a href="https://git-scm.com/">Git</a></li>
+<li>A code editor (we recommend <a href="https://code.visualstudio.com/">VS Code</a> with the Deno extension)</li>
+</ul>
+<h3>Setting Up Your Development Environment</h3>
+<ol>
+<li>Fork the <a href="https://github.com/lcanady/ursamu">UrsaMU repository</a> on GitHub</li>
+<li>Clone your fork to your local machine:<pre class="language-bash" tabindex="0"><code class="language-bash">git clone https://github.com/YOUR_USERNAME/ursamu.git
+cd ursamu
+</code></pre>
+</li>
+<li>Add the original repository as a remote:<pre class="language-bash" tabindex="0"><code class="language-bash">git remote add upstream https://github.com/lcanady/ursamu.git
+</code></pre>
+</li>
+<li>Install dependencies:<pre class="language-bash" tabindex="0"><code class="language-bash">deno task setup
+</code></pre>
+</li>
+</ol>
+<h2>Development Process</h2>
+<h3>Branching Strategy</h3>
+<ul>
+<li><code>main</code> - The main development branch</li>
+<li><code>release/*</code> - Release branches</li>
+<li><code>feature/*</code> - Feature branches</li>
+<li><code>bugfix/*</code> - Bug fix branches</li>
+</ul>
+<p>Always create a new branch for your changes:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">git checkout -b feature/your-feature-name
+</code></pre>
+<h3>Development Workflow</h3>
+<ol>
+<li>Make sure your branch is up to date with the latest changes:<pre class="language-bash" tabindex="0"><code class="language-bash">git fetch upstream
+git rebase upstream/main
+</code></pre>
+</li>
+<li>Make your changes</li>
+<li>Run tests to ensure your changes don’t break anything:<pre class="language-bash" tabindex="0"><code class="language-bash">deno task test
+</code></pre>
+</li>
+<li>Commit your changes with a descriptive commit message:<pre class="language-bash" tabindex="0"><code class="language-bash">git commit -m "Add feature: your feature description"
+</code></pre>
+</li>
+<li>Push your changes to your fork:<pre class="language-bash" tabindex="0"><code class="language-bash">git push origin feature/your-feature-name
+</code></pre>
+</li>
+</ol>
+<h2>Pull Requests</h2>
+<p>When you’re ready to submit your changes, create a pull request:</p>
+<ol>
+<li>Go to your fork on GitHub</li>
+<li>Select your branch</li>
+<li>Click “Pull Request”</li>
+<li>Fill out the pull request template with details about your changes</li>
+<li>Submit the pull request</li>
+</ol>
+<h3>Pull Request Guidelines</h3>
+<ul>
+<li>Keep pull requests focused on a single feature or bug fix</li>
+<li>Make sure all tests pass</li>
+<li>Update documentation as needed</li>
+<li>Follow the coding standards</li>
+<li>Be responsive to feedback and questions</li>
+</ul>
+<h2>Coding Standards</h2>
+<p>UrsaMU follows a set of coding standards to maintain consistency across the codebase:</p>
+<ul>
+<li>Use TypeScript for all code</li>
+<li>Follow the <a href="https://deno.land/manual/contributing/style_guide">Deno Style Guide</a></li>
+<li>Use meaningful variable and function names</li>
+<li>Write comments for complex logic</li>
+<li>Include JSDoc comments for public APIs</li>
+<li>Write tests for new features and bug fixes</li>
+</ul>
+<h2>Documentation</h2>
+<p>Documentation is a crucial part of UrsaMU. When contributing, please:</p>
+<ul>
+<li>Update the documentation for any changes to APIs or features</li>
+<li>Use clear, concise language</li>
+<li>Include examples where appropriate</li>
+<li>Follow the <a href="./documentation-guidelines.md">documentation guidelines</a></li>
+</ul>
+<h3>Building Documentation</h3>
+<p>To build and preview the documentation locally:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task docs
+</code></pre>
+<p>This will start a local server where you can preview the documentation.</p>
+<h2>Getting Help</h2>
+<p>If you need help with contributing to UrsaMU, you can:</p>
+<ul>
+<li>Join the <a href="#">UrsaMU Discord server</a></li>
+<li>Open an issue on GitHub</li>
+<li>Reach out to the maintainers</li>
+</ul>
+<p>Thank you for contributing to UrsaMU! Your efforts help make the project better for everyone.</p>
+
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 py-8 mt-12 border-t border-slate-700">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <p>© UrsaMU Team - <a href="https://github.com/lcanady/ursamu" class="text-purple-400 hover:text-purple-300 transition-colors">GitHub Repository</a></p>
+        </div>
+        <div>
+          <p>Built with <a href="https://lume.land" class="text-purple-400 hover:text-purple-300 transition-colors">Lume</a> for <a href="https://deno.land" class="text-purple-400 hover:text-purple-300 transition-colors">Deno</a></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Smooth scrolling for anchor links
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add IDs to headings if they don't have them
+      const article = document.querySelector('article');
+      if (article) {
+        const headings = article.querySelectorAll('h2, h3, h4, h5, h6');
+        headings.forEach(heading => {
+          if (!heading.id) {
+            // Create ID from heading text
+            const id = heading.textContent
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/[\s_-]+/g, '-')
+              .replace(/^-+|-+$/g, '');
+            heading.id = id;
+          }
+        });
+      }
+      
+      // Get all links that have hash (#) in them
+      const anchorLinks = document.querySelectorAll('a[href^="#"]');
+      
+      // Add click event listener to each anchor link
+      anchorLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Prevent default jump-to behavior
+          e.preventDefault();
+          
+          // Get the target element
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return; // Skip if it's just "#"
+          
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            // Calculate header height for offset
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            // Get the target's position
+            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+            
+            // Scroll to the target with offset for the header
+            window.scrollTo({
+              top: targetPosition - headerHeight - 20, // 20px extra padding
+              behavior: 'smooth'
+            });
+            
+            // Update URL hash without jumping
+            history.pushState(null, null, targetId);
+          }
+        });
+      });
+    });
+  </script>
+
+ </body></html>

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to use hooks in UrsaMU plugins to respond to events">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/prism.css">
+  <meta name="theme-color" content="#0f172a">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/plugins/hooks/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="min-h-screen flex flex-col bg-slate-900 text-slate-200">
+  <!-- Header with navigation -->
+  <header class="bg-slate-800 shadow-lg sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-white flex items-center">
+          <span class="text-purple-400 mr-2">UrsaMU</span> Docs
+        </a>
+        
+        <nav class="hidden lg:block">
+          <ul class="flex space-x-8">
+            
+            <li>
+              <a href="/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Home</a>
+            </li>
+            
+            <li>
+              <a href="/guides/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Guides</a>
+            </li>
+            
+            <li>
+              <a href="/configuration/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Configuration</a>
+            </li>
+            
+            <li>
+              <a href="/api/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">API Reference</a>
+            </li>
+            
+            <li>
+              <a href="/plugins/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Plugins</a>
+            </li>
+            
+            <li>
+              <a href="/development/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Development</a>
+            </li>
+            
+          </ul>
+        </nav>
+        
+        <button id="menu-toggle" class="lg:hidden text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-700">
+      <div class="container mx-auto px-4 py-3">
+        <ul class="space-y-3">
+          
+          <li>
+            <a href="/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Home</a>
+          </li>
+          
+          <li>
+            <a href="/guides/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Guides</a>
+          </li>
+          
+          <li>
+            <a href="/configuration/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Configuration</a>
+          </li>
+          
+          <li>
+            <a href="/api/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">API Reference</a>
+          </li>
+          
+          <li>
+            <a href="/plugins/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Plugins</a>
+          </li>
+          
+          <li>
+            <a href="/development/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Development</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area -->
+  <div class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex flex-col lg:flex-row lg:gap-12">
+      <!-- Sidebar navigation (if available) -->
+      
+      <aside class="lg:w-72 flex-shrink-0 mb-8 lg:mb-0 order-2 lg:order-1">
+        <div class="sticky top-24 bg-slate-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-lg font-semibold mb-4 text-white">On This Page</h3>
+          <nav>
+            
+              <ul class="space-y-3 border-l border-slate-700 pl-4">
+                
+                <li>
+                  <a href="#understanding-hooks" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Understanding Hooks</a>
+                </li>
+                
+                <li>
+                  <a href="#available-hooks" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Available Hooks</a>
+                </li>
+                
+                <li>
+                  <a href="#creating-custom-hooks" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Creating Custom Hooks</a>
+                </li>
+                
+                <li>
+                  <a href="#best-practices" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Best Practices</a>
+                </li>
+                
+                <li>
+                  <a href="#examples" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Examples</a>
+                </li>
+                
+              </ul>
+            
+          </nav>
+        </div>
+      </aside>
+      
+      
+      <!-- Main content -->
+      <main class="w-full order-1 lg:order-2 lg:max-w-3xl">
+        <article class="prose prose-invert prose-headings:text-white prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-a:transition-colors max-w-none ">
+          
+          <h1>Plugin Hooks</h1>
+<p>Hooks are a powerful feature of UrsaMU’s plugin system that allow plugins to respond to events that occur in the game. This guide explains how to use hooks in your plugins.</p>
+<h2>Understanding Hooks</h2>
+<p>Hooks in UrsaMU work on an event-based system. The core server and other plugins emit events at specific points in their execution, and your plugin can register listeners for these events. When an event occurs, all registered listeners are called in the order they were registered.</p>
+<h3>Hook Registration</h3>
+<p>To register a hook in your plugin, use the <code>app.hooks.on</code> method in your plugin’s <code>onInit</code> or <code>onLoad</code> method:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">onInit(app: App): void {
+  // Register a hook for the 'player:connect' event
+  app.hooks.on('player:connect', (player) =&gt; {
+    console.log(`Player ${player.name} connected!`);
+  });
+}
+</code></pre>
+<h3>Hook Priorities</h3>
+<p>You can specify a priority for your hook to control the order in which hooks are executed:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Register a hook with high priority (will run before hooks with lower priority)
+app.hooks.on('player:connect', (player) =&gt; {
+  console.log(`Player ${player.name} connected!`);
+}, 100);
+
+// Register a hook with low priority (will run after hooks with higher priority)
+app.hooks.on('player:connect', (player) =&gt; {
+  console.log(`This will run after the high priority hook`);
+}, 10);
+</code></pre>
+<p>Higher priority values run first. The default priority is 50.</p>
+<h3>Async Hooks</h3>
+<p>Hooks can be asynchronous, allowing you to perform async operations:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.on('player:connect', async (player) =&gt; {
+  // Perform some async operation
+  await someAsyncFunction();
+  console.log(`Player ${player.name} connected!`);
+});
+</code></pre>
+<h2>Available Hooks</h2>
+<p>UrsaMU provides many built-in hooks that your plugins can use. Here are the most commonly used hooks:</p>
+<h3>Player Hooks</h3>
+<table>
+<thead>
+<tr>
+<th>Hook Name</th>
+<th>Description</th>
+<th>Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>player:connect</code></td>
+<td>Fired when a player connects</td>
+<td><code>player: Player</code></td>
+</tr>
+<tr>
+<td><code>player:disconnect</code></td>
+<td>Fired when a player disconnects</td>
+<td><code>player: Player</code></td>
+</tr>
+<tr>
+<td><code>player:create</code></td>
+<td>Fired when a new player is created</td>
+<td><code>player: Player</code></td>
+</tr>
+<tr>
+<td><code>player:destroy</code></td>
+<td>Fired when a player is deleted</td>
+<td><code>player: Player</code></td>
+</tr>
+<tr>
+<td><code>player:command</code></td>
+<td>Fired when a player enters a command</td>
+<td><code>player: Player, command: string</code></td>
+</tr>
+<tr>
+<td><code>player:look</code></td>
+<td>Fired when a player looks at something</td>
+<td><code>player: Player, target: GameObject</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Room Hooks</h3>
+<table>
+<thead>
+<tr>
+<th>Hook Name</th>
+<th>Description</th>
+<th>Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>room:enter</code></td>
+<td>Fired when a player enters a room</td>
+<td><code>player: Player, room: Room</code></td>
+</tr>
+<tr>
+<td><code>room:leave</code></td>
+<td>Fired when a player leaves a room</td>
+<td><code>player: Player, room: Room</code></td>
+</tr>
+<tr>
+<td><code>room:create</code></td>
+<td>Fired when a new room is created</td>
+<td><code>room: Room</code></td>
+</tr>
+<tr>
+<td><code>room:destroy</code></td>
+<td>Fired when a room is deleted</td>
+<td><code>room: Room</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Object Hooks</h3>
+<table>
+<thead>
+<tr>
+<th>Hook Name</th>
+<th>Description</th>
+<th>Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>object:create</code></td>
+<td>Fired when a new object is created</td>
+<td><code>object: GameObject</code></td>
+</tr>
+<tr>
+<td><code>object:destroy</code></td>
+<td>Fired when an object is deleted</td>
+<td><code>object: GameObject</code></td>
+</tr>
+<tr>
+<td><code>object:attribute:set</code></td>
+<td>Fired when an attribute is set on an object</td>
+<td><code>object: GameObject, key: string, value: any</code></td>
+</tr>
+<tr>
+<td><code>object:attribute:get</code></td>
+<td>Fired when an attribute is retrieved from an object</td>
+<td><code>object: GameObject, key: string, value: any</code></td>
+</tr>
+</tbody>
+</table>
+<h3>System Hooks</h3>
+<table>
+<thead>
+<tr>
+<th>Hook Name</th>
+<th>Description</th>
+<th>Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>system:startup</code></td>
+<td>Fired when the server starts up</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>system:shutdown</code></td>
+<td>Fired when the server is shutting down</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>system:reload</code></td>
+<td>Fired when the server is reloaded</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>system:error</code></td>
+<td>Fired when a system error occurs</td>
+<td><code>error: Error</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Database Hooks</h3>
+<table>
+<thead>
+<tr>
+<th>Hook Name</th>
+<th>Description</th>
+<th>Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>db:save</code></td>
+<td>Fired when an object is saved to the database</td>
+<td><code>object: GameObject</code></td>
+</tr>
+<tr>
+<td><code>db:load</code></td>
+<td>Fired when an object is loaded from the database</td>
+<td><code>object: GameObject</code></td>
+</tr>
+</tbody>
+</table>
+<h2>Creating Custom Hooks</h2>
+<p>Your plugins can also create and emit custom hooks for other plugins to use. This is a powerful way to make your plugin extensible.</p>
+<h3>Emitting Hooks</h3>
+<p>To emit a custom hook, use the <code>app.hooks.emit</code> method:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Emit a custom hook with data
+app.hooks.emit('my-plugin:custom-event', { data: 'some data' });
+</code></pre>
+<h3>Naming Conventions</h3>
+<p>When creating custom hooks, it’s a good practice to prefix the hook name with your plugin name to avoid conflicts:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Good - prefixed with plugin name
+app.hooks.emit('dice-roller:roll-result', { dice: 3, sides: 6, result: 14 });
+
+// Bad - generic name could conflict with other plugins
+app.hooks.emit('roll-result', { dice: 3, sides: 6, result: 14 });
+</code></pre>
+<h2>Best Practices</h2>
+<h3>Hook Performance</h3>
+<p>Hooks are powerful but can impact performance if overused. Follow these guidelines:</p>
+<ol>
+<li><strong>Be Selective</strong>: Only register hooks for events your plugin actually needs to respond to.</li>
+<li><strong>Keep Handlers Fast</strong>: Hook handlers should execute quickly to avoid slowing down the server.</li>
+<li><strong>Use Async Carefully</strong>: Async hooks don’t block the server, but they can lead to race conditions if not handled properly.</li>
+</ol>
+<h3>Error Handling</h3>
+<p>Always include error handling in your hook handlers:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.on('player:connect', (player) =&gt; {
+  try {
+    // Your hook logic here
+  } catch (error) {
+    console.error(`Error in player:connect hook: ${error.message}`);
+  }
+});
+</code></pre>
+<h3>Cleanup</h3>
+<p>When your plugin is unloaded, make sure to remove any hooks it registered:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">onInit(app: App): void {
+  // Store a reference to the hook handler
+  this.connectHandler = (player) =&gt; {
+    console.log(`Player ${player.name} connected!`);
+  };
+  
+  // Register the hook
+  app.hooks.on('player:connect', this.connectHandler);
+}
+
+onUnload(app: App): void {
+  // Remove the hook when the plugin is unloaded
+  app.hooks.off('player:connect', this.connectHandler);
+}
+</code></pre>
+<h2>Examples</h2>
+<h3>Welcome Message Plugin</h3>
+<p>This plugin sends a welcome message to players when they connect:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { App, IPlugin, Player } from "ursamu";
+
+export default class WelcomePlugin implements IPlugin {
+  name = "welcome";
+  version = "1.0.0";
+  description = "Sends welcome messages to players";
+  author = "Your Name";
+  
+  // Store hook handlers for cleanup
+  private connectHandler: (player: Player) =&gt; void;
+  
+  config = {
+    message: "Welcome to the game! Type 'help' for assistance."
+  };
+  
+  onInit(app: App): void {
+    // Create the connect handler
+    this.connectHandler = (player) =&gt; {
+      // Send the welcome message after a short delay
+      setTimeout(() =&gt; {
+        player.send(`|c${this.config.message}|n`);
+      }, 1000);
+    };
+    
+    // Register the hook
+    app.hooks.on('player:connect', this.connectHandler);
+    
+    console.log(`${this.name} initialized`);
+  }
+  
+  onLoad(app: App): void {
+    console.log(`${this.name} v${this.version} loaded!`);
+  }
+  
+  onUnload(app: App): void {
+    // Clean up hooks
+    app.hooks.off('player:connect', this.connectHandler);
+    console.log(`${this.name} unloaded`);
+  }
+}
+</code></pre>
+<h3>Command Logger Plugin</h3>
+<p>This plugin logs all commands entered by players:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { App, IPlugin, Player } from "ursamu";
+
+export default class CommandLoggerPlugin implements IPlugin {
+  name = "command-logger";
+  version = "1.0.0";
+  description = "Logs all commands entered by players";
+  author = "Your Name";
+  
+  private commandHandler: (player: Player, command: string) =&gt; void;
+  
+  onInit(app: App): void {
+    this.commandHandler = (player, command) =&gt; {
+      // Don't log passwords
+      if (command.startsWith("connect") || command.startsWith("create") || command.startsWith("password")) {
+        console.log(`${player.name} entered a sensitive command`);
+      } else {
+        console.log(`${player.name} entered command: ${command}`);
+      }
+    };
+    
+    // Register with high priority to ensure it runs before command processing
+    app.hooks.on('player:command', this.commandHandler, 100);
+    
+    console.log(`${this.name} initialized`);
+  }
+  
+  onLoad(app: App): void {
+    console.log(`${this.name} v${this.version} loaded!`);
+  }
+  
+  onUnload(app: App): void {
+    app.hooks.off('player:command', this.commandHandler);
+    console.log(`${this.name} unloaded`);
+  }
+}
+</code></pre>
+<h3>Custom Hook Example</h3>
+<p>This plugin creates a custom weather system with hooks that other plugins can use:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { App, IPlugin } from "ursamu";
+
+export default class WeatherPlugin implements IPlugin {
+  name = "weather";
+  version = "1.0.0";
+  description = "Adds a weather system with custom hooks";
+  author = "Your Name";
+  
+  private weatherTypes = ["sunny", "cloudy", "rainy", "stormy", "snowy"];
+  private currentWeather = "sunny";
+  private weatherInterval: number;
+  
+  onInit(app: App): void {
+    // Register weather command
+    app.commands.register("weather", {
+      name: "weather",
+      pattern: "weather",
+      flags: "connected",
+      exec: (ctx) =&gt; {
+        ctx.send(`The current weather is ${this.currentWeather}.`);
+      }
+    });
+    
+    console.log(`${this.name} initialized`);
+  }
+  
+  onLoad(app: App): void {
+    // Start the weather cycle
+    this.startWeatherCycle(app);
+    console.log(`${this.name} v${this.version} loaded!`);
+  }
+  
+  onUnload(app: App): void {
+    // Stop the weather cycle
+    clearInterval(this.weatherInterval);
+    console.log(`${this.name} unloaded`);
+  }
+  
+  startWeatherCycle(app: App): void {
+    // Change weather every 30 minutes
+    this.weatherInterval = setInterval(() =&gt; {
+      const oldWeather = this.currentWeather;
+      
+      // Choose a new weather type
+      let newWeather = oldWeather;
+      while (newWeather === oldWeather) {
+        newWeather = this.weatherTypes[Math.floor(Math.random() * this.weatherTypes.length)];
+      }
+      
+      this.currentWeather = newWeather;
+      
+      // Emit a custom hook for the weather change
+      app.hooks.emit('weather:change', {
+        oldWeather,
+        newWeather,
+        timestamp: new Date()
+      });
+      
+      // Announce the weather change to all players
+      app.players.broadcast(`The weather has changed from ${oldWeather} to ${newWeather}.`);
+      
+    }, 30 * 60 * 1000); // 30 minutes
+  }
+}
+</code></pre>
+<p>Other plugins can then hook into the weather system:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In another plugin
+onInit(app: App): void {
+  // React to weather changes
+  app.hooks.on('weather:change', (data) =&gt; {
+    console.log(`Weather changed from ${data.oldWeather} to ${data.newWeather}`);
+    
+    // Do something based on the new weather
+    if (data.newWeather === "stormy") {
+      app.players.broadcast("Thunder booms in the distance!");
+    }
+  });
+}
+</code></pre>
+<p>By using hooks effectively, you can create plugins that interact with each other and with the core server in powerful ways.</p>
+
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 py-8 mt-12 border-t border-slate-700">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <p>© UrsaMU Team - <a href="https://github.com/lcanady/ursamu" class="text-purple-400 hover:text-purple-300 transition-colors">GitHub Repository</a></p>
+        </div>
+        <div>
+          <p>Built with <a href="https://lume.land" class="text-purple-400 hover:text-purple-300 transition-colors">Lume</a> for <a href="https://deno.land" class="text-purple-400 hover:text-purple-300 transition-colors">Deno</a></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Smooth scrolling for anchor links
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add IDs to headings if they don't have them
+      const article = document.querySelector('article');
+      if (article) {
+        const headings = article.querySelectorAll('h2, h3, h4, h5, h6');
+        headings.forEach(heading => {
+          if (!heading.id) {
+            // Create ID from heading text
+            const id = heading.textContent
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/[\s_-]+/g, '-')
+              .replace(/^-+|-+$/g, '');
+            heading.id = id;
+          }
+        });
+      }
+      
+      // Get all links that have hash (#) in them
+      const anchorLinks = document.querySelectorAll('a[href^="#"]');
+      
+      // Add click event listener to each anchor link
+      anchorLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Prevent default jump-to behavior
+          e.preventDefault();
+          
+          // Get the target element
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return; // Skip if it's just "#"
+          
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            // Calculate header height for offset
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            // Get the target's position
+            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+            
+            // Scroll to the target with offset for the header
+            window.scrollTo({
+              top: targetPosition - headerHeight - 20, // 20px extra padding
+              behavior: 'smooth'
+            });
+            
+            // Update URL hash without jumping
+            history.pushState(null, null, targetId);
+          }
+        });
+      });
+    });
+  </script>
+
+ </body></html>

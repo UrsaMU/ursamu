@@ -12,7 +12,7 @@ import nunjucks from "lume/plugins/nunjucks.ts";
 
 const site = lume({
   src: "./",
-  dest: "./_site",
+  dest: "../site",
   location: new URL("https://ursamu.github.io/"),
 });
 
@@ -28,16 +28,7 @@ site
   .use(prism())
   .use(search())
   .use(sitemap())
-  .use(tailwindcss({
-    options: {
-      darkMode: 'class',
-      content: [
-        "./_includes/**/*.{njk,md}",
-        "./_layouts/**/*.{njk,md}",
-        "./**/*.{md,njk}",
-      ],
-    },
-  }))
+  .use(tailwindcss())
   .use(postcss())
   .use(date())
   .use(nunjucks())

@@ -1,8 +1,7 @@
+/* Tailwind CSS directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Custom styles can go here */
 
 :root {
   --color-primary: #3730a3;

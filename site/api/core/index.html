@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrsaMU Documentation</title>
+  <meta name="description" content="Core API reference for UrsaMU">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/prism.css">
+  <meta name="theme-color" content="#0f172a">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/api/core/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="min-h-screen flex flex-col bg-slate-900 text-slate-200">
+  <!-- Header with navigation -->
+  <header class="bg-slate-800 shadow-lg sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-white flex items-center">
+          <span class="text-purple-400 mr-2">UrsaMU</span> Docs
+        </a>
+        
+        <nav class="hidden lg:block">
+          <ul class="flex space-x-8">
+            
+            <li>
+              <a href="/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Home</a>
+            </li>
+            
+            <li>
+              <a href="/guides/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Guides</a>
+            </li>
+            
+            <li>
+              <a href="/configuration/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Configuration</a>
+            </li>
+            
+            <li>
+              <a href="/api/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">API Reference</a>
+            </li>
+            
+            <li>
+              <a href="/plugins/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Plugins</a>
+            </li>
+            
+            <li>
+              <a href="/development/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Development</a>
+            </li>
+            
+          </ul>
+        </nav>
+        
+        <button id="menu-toggle" class="lg:hidden text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-700">
+      <div class="container mx-auto px-4 py-3">
+        <ul class="space-y-3">
+          
+          <li>
+            <a href="/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Home</a>
+          </li>
+          
+          <li>
+            <a href="/guides/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Guides</a>
+          </li>
+          
+          <li>
+            <a href="/configuration/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Configuration</a>
+          </li>
+          
+          <li>
+            <a href="/api/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">API Reference</a>
+          </li>
+          
+          <li>
+            <a href="/plugins/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Plugins</a>
+          </li>
+          
+          <li>
+            <a href="/development/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Development</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area -->
+  <div class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex flex-col lg:flex-row lg:gap-12">
+      <!-- Sidebar navigation (if available) -->
+      
+      <aside class="lg:w-72 flex-shrink-0 mb-8 lg:mb-0 order-2 lg:order-1">
+        <div class="sticky top-24 bg-slate-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-lg font-semibold mb-4 text-white">On This Page</h3>
+          <nav>
+            
+              <ul class="space-y-3 border-l border-slate-700 pl-4">
+                
+                <li>
+                  <a href="#app" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">App</a>
+                </li>
+                
+                <li>
+                  <a href="#player" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Player</a>
+                </li>
+                
+                <li>
+                  <a href="#gameobject" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">GameObject</a>
+                </li>
+                
+                <li>
+                  <a href="#command" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Command</a>
+                </li>
+                
+                <li>
+                  <a href="#hook" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Hook</a>
+                </li>
+                
+                <li>
+                  <a href="#database" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Database</a>
+                </li>
+                
+              </ul>
+            
+          </nav>
+        </div>
+      </aside>
+      
+      
+      <!-- Main content -->
+      <main class="w-full order-1 lg:order-2 lg:max-w-3xl">
+        <article class="prose prose-invert prose-headings:text-white prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-a:transition-colors max-w-none ">
+          
+          <h1>UrsaMU Core API Reference</h1>
+<p>This document provides a reference for the core UrsaMU API classes and interfaces.</p>
+<h2>App</h2>
+<p>The <code>App</code> class is the central hub of UrsaMU. It provides access to all the major subsystems and services.</p>
+<h3>Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>config</code></td>
+<td><code>Config</code></td>
+<td>The application configuration</td>
+</tr>
+<tr>
+<td><code>db</code></td>
+<td><code>Database</code></td>
+<td>The database manager</td>
+</tr>
+<tr>
+<td><code>commands</code></td>
+<td><code>CommandManager</code></td>
+<td>The command manager</td>
+</tr>
+<tr>
+<td><code>hooks</code></td>
+<td><code>HookManager</code></td>
+<td>The hook manager</td>
+</tr>
+<tr>
+<td><code>plugins</code></td>
+<td><code>PluginManager</code></td>
+<td>The plugin manager</td>
+</tr>
+<tr>
+<td><code>players</code></td>
+<td><code>PlayerManager</code></td>
+<td>The player manager</td>
+</tr>
+<tr>
+<td><code>objects</code></td>
+<td><code>ObjectManager</code></td>
+<td>The game object manager</td>
+</tr>
+<tr>
+<td><code>flags</code></td>
+<td><code>FlagManager</code></td>
+<td>The flag manager</td>
+</tr>
+<tr>
+<td><code>channels</code></td>
+<td><code>ChannelManager</code></td>
+<td>The channel manager</td>
+</tr>
+<tr>
+<td><code>mail</code></td>
+<td><code>MailManager</code></td>
+<td>The mail manager</td>
+</tr>
+<tr>
+<td><code>bboard</code></td>
+<td><code>BulletinBoardManager</code></td>
+<td>The bulletin board manager</td>
+</tr>
+</tbody>
+</table>
+<h3>Methods</h3>
+<h4><code>start()</code></h4>
+<p>Starts the UrsaMU server.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.start();
+</code></pre>
+<h4><code>stop()</code></h4>
+<p>Stops the UrsaMU server.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.stop();
+</code></pre>
+<h4><code>reload()</code></h4>
+<p>Reloads the UrsaMU server configuration and plugins.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.reload();
+</code></pre>
+<h4><code>broadcast(message: string)</code></h4>
+<p>Broadcasts a message to all connected players.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.broadcast("Server is restarting in 5 minutes!");
+</code></pre>
+<h2>Player</h2>
+<p>The <code>Player</code> class represents a connected player in the game.</p>
+<h3>Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dbref</code></td>
+<td><code>string</code></td>
+<td>The database reference ID</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The player’s name</td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td><code>string</code></td>
+<td>The hashed password</td>
+</tr>
+<tr>
+<td><code>connected</code></td>
+<td><code>boolean</code></td>
+<td>Whether the player is currently connected</td>
+</tr>
+<tr>
+<td><code>location</code></td>
+<td><code>string</code></td>
+<td>The dbref of the player’s current location</td>
+</tr>
+<tr>
+<td><code>flags</code></td>
+<td><code>string[]</code></td>
+<td>The flags set on the player</td>
+</tr>
+<tr>
+<td><code>attributes</code></td>
+<td><code>Record&lt;string, any&gt;</code></td>
+<td>Custom attributes stored on the player</td>
+</tr>
+</tbody>
+</table>
+<h3>Methods</h3>
+<h4><code>send(message: string)</code></h4>
+<p>Sends a message to the player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.send("Welcome to UrsaMU!");
+</code></pre>
+<h4><code>move(destination: string | GameObject)</code></h4>
+<p>Moves the player to a new location.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Move by dbref
+player.move("#123");
+
+// Move by object reference
+const room = app.objects.get("#123");
+player.move(room);
+</code></pre>
+<h4><code>disconnect(reason?: string)</code></h4>
+<p>Disconnects the player from the server.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.disconnect("Idle timeout");
+</code></pre>
+<h4><code>hasFlag(flag: string)</code></h4>
+<p>Checks if the player has a specific flag.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (player.hasFlag("WIZARD")) {
+  // Player is a wizard
+}
+</code></pre>
+<h4><code>setFlag(flag: string)</code></h4>
+<p>Sets a flag on the player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.setFlag("BUILDER");
+</code></pre>
+<h4><code>clearFlag(flag: string)</code></h4>
+<p>Removes a flag from the player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.clearFlag("GUEST");
+</code></pre>
+<h4><code>get(attribute: string, defaultValue?: any)</code></h4>
+<p>Gets an attribute value from the player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const description = player.get("description", "No description set.");
+</code></pre>
+<h4><code>set(attribute: string, value: any)</code></h4>
+<p>Sets an attribute value on the player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.set("description", "A tall figure with a mysterious aura.");
+</code></pre>
+<h2>GameObject</h2>
+<p>The <code>GameObject</code> class is the base class for all game objects (rooms, exits, things).</p>
+<h3>Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>dbref</code></td>
+<td><code>string</code></td>
+<td>The database reference ID</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The object’s name</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td><code>"ROOM" | "EXIT" | "THING" | "PLAYER"</code></td>
+<td>The object type</td>
+</tr>
+<tr>
+<td><code>owner</code></td>
+<td><code>string</code></td>
+<td>The dbref of the object’s owner</td>
+</tr>
+<tr>
+<td><code>location</code></td>
+<td><code>string</code></td>
+<td>The dbref of the object’s location</td>
+</tr>
+<tr>
+<td><code>flags</code></td>
+<td><code>string[]</code></td>
+<td>The flags set on the object</td>
+</tr>
+<tr>
+<td><code>attributes</code></td>
+<td><code>Record&lt;string, any&gt;</code></td>
+<td>Custom attributes stored on the object</td>
+</tr>
+</tbody>
+</table>
+<h3>Methods</h3>
+<h4><code>hasFlag(flag: string)</code></h4>
+<p>Checks if the object has a specific flag.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (obj.hasFlag("DARK")) {
+  // Object is dark
+}
+</code></pre>
+<h4><code>setFlag(flag: string)</code></h4>
+<p>Sets a flag on the object.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">obj.setFlag("LOCKED");
+</code></pre>
+<h4><code>clearFlag(flag: string)</code></h4>
+<p>Removes a flag from the object.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">obj.clearFlag("LOCKED");
+</code></pre>
+<h4><code>get(attribute: string, defaultValue?: any)</code></h4>
+<p>Gets an attribute value from the object.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const description = obj.get("description", "Nothing special.");
+</code></pre>
+<h4><code>set(attribute: string, value: any)</code></h4>
+<p>Sets an attribute value on the object.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">obj.set("description", "A rusty old key.");
+</code></pre>
+<h4><code>save()</code></h4>
+<p>Saves the object to the database.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">obj.set("description", "A new description");
+obj.save();
+</code></pre>
+<h2>Command</h2>
+<p>The <code>Command</code> interface defines the structure of a command in UrsaMU.</p>
+<h3>Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>The name of the command</td>
+</tr>
+<tr>
+<td><code>pattern</code></td>
+<td><code>string</code></td>
+<td>The pattern to match for this command</td>
+</tr>
+<tr>
+<td><code>flags</code></td>
+<td><code>string</code></td>
+<td>The flags required to use this command</td>
+</tr>
+<tr>
+<td><code>exec</code></td>
+<td><code>(ctx: CommandContext) =&gt; void | Promise&lt;void&gt;</code></td>
+<td>The function to execute when the command is run</td>
+</tr>
+<tr>
+<td><code>help</code></td>
+<td><code>string</code></td>
+<td>The help text for the command</td>
+</tr>
+</tbody>
+</table>
+<h3>CommandContext</h3>
+<p>The <code>CommandContext</code> interface provides context for command execution.</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>player</code></td>
+<td><code>Player</code></td>
+<td>The player who executed the command</td>
+</tr>
+<tr>
+<td><code>command</code></td>
+<td><code>string</code></td>
+<td>The full command string</td>
+</tr>
+<tr>
+<td><code>args</code></td>
+<td><code>string</code></td>
+<td>The arguments passed to the command</td>
+</tr>
+<tr>
+<td><code>switches</code></td>
+<td><code>Record&lt;string, string&gt;</code></td>
+<td>Any switches used with the command</td>
+</tr>
+<tr>
+<td><code>app</code></td>
+<td><code>App</code></td>
+<td>The application instance</td>
+</tr>
+</tbody>
+</table>
+<h4><code>send(message: string)</code></h4>
+<p>Sends a message to the player who executed the command.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">ctx.send("Command executed successfully!");
+</code></pre>
+<h3>Example</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Define a command
+const lookCommand = {
+  name: "look",
+  pattern: "look *",
+  flags: "connected",
+  exec: (ctx) =&gt; {
+    const target = ctx.args.trim() || ctx.player.location;
+    // Implementation of look command
+    ctx.send(`You look at ${target}`);
+  },
+  help: "look [&lt;object&gt;]\nLooks at an object or the current room."
+};
+
+// Register the command
+app.commands.register("core", lookCommand);
+</code></pre>
+<h2>Hook</h2>
+<p>The <code>HookManager</code> class manages event hooks in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>on(event: string, callback: Function, priority?: number)</code></h4>
+<p>Registers a callback for an event.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.on("player:connect", (player) =&gt; {
+  console.log(`Player ${player.name} connected`);
+}, 50);
+</code></pre>
+<h4><code>off(event: string, callback: Function)</code></h4>
+<p>Removes a callback for an event.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.off("player:connect", myCallback);
+</code></pre>
+<h4><code>emit(event: string, ...args: any[])</code></h4>
+<p>Emits an event with arguments.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.emit("custom:event", { data: "some data" });
+</code></pre>
+<h4><code>once(event: string, callback: Function, priority?: number)</code></h4>
+<p>Registers a one-time callback for an event.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.once("system:startup", () =&gt; {
+  console.log("Server started");
+});
+</code></pre>
+<h2>Database</h2>
+<p>The <code>Database</code> class provides access to the UrsaMU database.</p>
+<h3>Methods</h3>
+<h4><code>get(key: string)</code></h4>
+<p>Gets a value from the database.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const value = await app.db.get("players:#123");
+</code></pre>
+<h4><code>set(key: string, value: any)</code></h4>
+<p>Sets a value in the database.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.db.set("players:#123", playerData);
+</code></pre>
+<h4><code>delete(key: string)</code></h4>
+<p>Deletes a value from the database.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.db.delete("players:#123");
+</code></pre>
+<h4><code>list(prefix: string)</code></h4>
+<p>Lists all keys with a specific prefix.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const playerKeys = await app.db.list("players:");
+</code></pre>
+<h4><code>transaction(callback: (tx: Transaction) =&gt; Promise&lt;void&gt;)</code></h4>
+<p>Performs a transaction.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.db.transaction(async (tx) =&gt; {
+  const player = await tx.get("players:#123");
+  player.money += 100;
+  await tx.set("players:#123", player);
+});
+</code></pre>
+<h2>CommandManager</h2>
+<p>The <code>CommandManager</code> class manages commands in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>register(plugin: string, command: Command)</code></h4>
+<p>Registers a command.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.commands.register("myplugin", {
+  name: "hello",
+  pattern: "hello",
+  flags: "connected",
+  exec: (ctx) =&gt; {
+    ctx.send("Hello, world!");
+  }
+});
+</code></pre>
+<h4><code>unregister(plugin: string, commandName: string)</code></h4>
+<p>Unregisters a command.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.commands.unregister("myplugin", "hello");
+</code></pre>
+<h4><code>get(commandName: string)</code></h4>
+<p>Gets a command by name.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const command = app.commands.get("look");
+</code></pre>
+<h4><code>match(input: string)</code></h4>
+<p>Finds a command that matches the input.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const match = app.commands.match("look at sword");
+if (match) {
+  // Execute the command
+  match.command.exec({
+    player,
+    command: match.command.name,
+    args: match.args,
+    switches: match.switches,
+    app
+  });
+}
+</code></pre>
+<h2>PluginManager</h2>
+<p>The <code>PluginManager</code> class manages plugins in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>register(plugin: IPlugin)</code></h4>
+<p>Registers a plugin.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.plugins.register(new MyPlugin());
+</code></pre>
+<h4><code>unregister(pluginName: string)</code></h4>
+<p>Unregisters a plugin.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.plugins.unregister("myplugin");
+</code></pre>
+<h4><code>get(pluginName: string)</code></h4>
+<p>Gets a plugin by name.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const plugin = app.plugins.get("myplugin");
+</code></pre>
+<h4><code>loadAll()</code></h4>
+<p>Loads all registered plugins.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.plugins.loadAll();
+</code></pre>
+<h4><code>unloadAll()</code></h4>
+<p>Unloads all registered plugins.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.plugins.unloadAll();
+</code></pre>
+<h2>PlayerManager</h2>
+<p>The <code>PlayerManager</code> class manages players in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>create(name: string, password: string)</code></h4>
+<p>Creates a new player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = await app.players.create("NewPlayer", "password123");
+</code></pre>
+<h4><code>authenticate(name: string, password: string)</code></h4>
+<p>Authenticates a player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = await app.players.authenticate("PlayerName", "password123");
+if (player) {
+  // Authentication successful
+}
+</code></pre>
+<h4><code>get(dbref: string)</code></h4>
+<p>Gets a player by dbref.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = app.players.get("#123");
+</code></pre>
+<h4><code>getByName(name: string)</code></h4>
+<p>Gets a player by name.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = app.players.getByName("PlayerName");
+</code></pre>
+<h4><code>getConnected()</code></h4>
+<p>Gets all connected players.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const connectedPlayers = app.players.getConnected();
+</code></pre>
+<h4><code>broadcast(message: string)</code></h4>
+<p>Broadcasts a message to all connected players.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.players.broadcast("Server announcement: We will be upgrading soon!");
+</code></pre>
+<h2>ObjectManager</h2>
+<p>The <code>ObjectManager</code> class manages game objects in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>create(type: string, name: string, owner: string)</code></h4>
+<p>Creates a new game object.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const room = await app.objects.create("ROOM", "Town Square", "#1");
+</code></pre>
+<h4><code>get(dbref: string)</code></h4>
+<p>Gets an object by dbref.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const obj = app.objects.get("#123");
+</code></pre>
+<h4><code>search(query: ObjectQuery)</code></h4>
+<p>Searches for objects matching a query.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const results = await app.objects.search({
+  type: "ROOM",
+  flags: ["DARK"],
+  owner: "#1"
+});
+</code></pre>
+<h4><code>delete(dbref: string)</code></h4>
+<p>Deletes an object.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.objects.delete("#123");
+</code></pre>
+<h2>FlagManager</h2>
+<p>The <code>FlagManager</code> class manages flags in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>register(flag: Flag)</code></h4>
+<p>Registers a new flag.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.flags.register({
+  name: "INVISIBLE",
+  letter: "I",
+  type: ["PLAYER", "THING"],
+  permission: "wizard"
+});
+</code></pre>
+<h4><code>unregister(flagName: string)</code></h4>
+<p>Unregisters a flag.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.flags.unregister("INVISIBLE");
+</code></pre>
+<h4><code>get(flagName: string)</code></h4>
+<p>Gets a flag by name.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const flag = app.flags.get("WIZARD");
+</code></pre>
+<h4><code>check(obj: GameObject, flagName: string)</code></h4>
+<p>Checks if an object has a flag.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const hasFlag = app.flags.check(player, "WIZARD");
+</code></pre>
+<h2>ChannelManager</h2>
+<p>The <code>ChannelManager</code> class manages communication channels in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>create(name: string, owner: string, options?: ChannelOptions)</code></h4>
+<p>Creates a new channel.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const channel = await app.channels.create("Public", "#1", {
+  header: "Public Channel",
+  joinable: true,
+  leavable: true
+});
+</code></pre>
+<h4><code>get(name: string)</code></h4>
+<p>Gets a channel by name.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const channel = app.channels.get("Public");
+</code></pre>
+<h4><code>join(channelName: string, player: Player)</code></h4>
+<p>Adds a player to a channel.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.channels.join("Public", player);
+</code></pre>
+<h4><code>leave(channelName: string, player: Player)</code></h4>
+<p>Removes a player from a channel.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.channels.leave("Public", player);
+</code></pre>
+<h4><code>send(channelName: string, sender: Player, message: string)</code></h4>
+<p>Sends a message to a channel.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.channels.send("Public", player, "Hello, everyone!");
+</code></pre>
+<h2>MailManager</h2>
+<p>The <code>MailManager</code> class manages the mail system in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>send(sender: string, recipient: string, subject: string, body: string)</code></h4>
+<p>Sends a mail message.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.mail.send("#1", "#2", "Hello", "This is a test message.");
+</code></pre>
+<h4><code>get(mailId: string)</code></h4>
+<p>Gets a mail message by ID.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const message = await app.mail.get("mail:123");
+</code></pre>
+<h4><code>getInbox(player: string)</code></h4>
+<p>Gets a player’s inbox.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const inbox = await app.mail.getInbox("#1");
+</code></pre>
+<h4><code>delete(mailId: string)</code></h4>
+<p>Deletes a mail message.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.mail.delete("mail:123");
+</code></pre>
+<h2>BulletinBoardManager</h2>
+<p>The <code>BulletinBoardManager</code> class manages bulletin boards in UrsaMU.</p>
+<h3>Methods</h3>
+<h4><code>createBoard(name: string, owner: string, options?: BoardOptions)</code></h4>
+<p>Creates a new bulletin board.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const board = await app.bboard.createBoard("Announcements", "#1", {
+  readPermission: "connected",
+  writePermission: "wizard"
+});
+</code></pre>
+<h4><code>getBoard(name: string)</code></h4>
+<p>Gets a board by name.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const board = await app.bboard.getBoard("Announcements");
+</code></pre>
+<h4><code>post(boardName: string, author: string, subject: string, body: string)</code></h4>
+<p>Posts a message to a board.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.bboard.post("Announcements", "#1", "Server Update", "We will be updating the server tomorrow.");
+</code></pre>
+<h4><code>getPost(postId: string)</code></h4>
+<p>Gets a post by ID.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const post = await app.bboard.getPost("post:123");
+</code></pre>
+<h4><code>deletePost(postId: string)</code></h4>
+<p>Deletes a post.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.bboard.deletePost("post:123");
+</code></pre>
+
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 py-8 mt-12 border-t border-slate-700">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <p>© UrsaMU Team - <a href="https://github.com/lcanady/ursamu" class="text-purple-400 hover:text-purple-300 transition-colors">GitHub Repository</a></p>
+        </div>
+        <div>
+          <p>Built with <a href="https://lume.land" class="text-purple-400 hover:text-purple-300 transition-colors">Lume</a> for <a href="https://deno.land" class="text-purple-400 hover:text-purple-300 transition-colors">Deno</a></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Smooth scrolling for anchor links
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add IDs to headings if they don't have them
+      const article = document.querySelector('article');
+      if (article) {
+        const headings = article.querySelectorAll('h2, h3, h4, h5, h6');
+        headings.forEach(heading => {
+          if (!heading.id) {
+            // Create ID from heading text
+            const id = heading.textContent
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/[\s_-]+/g, '-')
+              .replace(/^-+|-+$/g, '');
+            heading.id = id;
+          }
+        });
+      }
+      
+      // Get all links that have hash (#) in them
+      const anchorLinks = document.querySelectorAll('a[href^="#"]');
+      
+      // Add click event listener to each anchor link
+      anchorLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Prevent default jump-to behavior
+          e.preventDefault();
+          
+          // Get the target element
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return; // Skip if it's just "#"
+          
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            // Calculate header height for offset
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            // Get the target's position
+            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+            
+            // Scroll to the target with offset for the header
+            window.scrollTo({
+              top: targetPosition - headerHeight - 20, // 20px extra padding
+              behavior: 'smooth'
+            });
+            
+            // Update URL hash without jumping
+            history.pushState(null, null, targetId);
+          }
+        });
+      });
+    });
+  </script>
+
+ </body></html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrsaMU Documentation</title>
+  <meta name="description" content="How to install and set up UrsaMU on your system">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/prism.css">
+  <meta name="theme-color" content="#0f172a">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/guides/installation/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="min-h-screen flex flex-col bg-slate-900 text-slate-200">
+  <!-- Header with navigation -->
+  <header class="bg-slate-800 shadow-lg sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-white flex items-center">
+          <span class="text-purple-400 mr-2">UrsaMU</span> Docs
+        </a>
+        
+        <nav class="hidden lg:block">
+          <ul class="flex space-x-8">
+            
+            <li>
+              <a href="/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Home</a>
+            </li>
+            
+            <li>
+              <a href="/guides/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Guides</a>
+            </li>
+            
+            <li>
+              <a href="/configuration/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Configuration</a>
+            </li>
+            
+            <li>
+              <a href="/api/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">API Reference</a>
+            </li>
+            
+            <li>
+              <a href="/plugins/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Plugins</a>
+            </li>
+            
+            <li>
+              <a href="/development/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Development</a>
+            </li>
+            
+          </ul>
+        </nav>
+        
+        <button id="menu-toggle" class="lg:hidden text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-700">
+      <div class="container mx-auto px-4 py-3">
+        <ul class="space-y-3">
+          
+          <li>
+            <a href="/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Home</a>
+          </li>
+          
+          <li>
+            <a href="/guides/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Guides</a>
+          </li>
+          
+          <li>
+            <a href="/configuration/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Configuration</a>
+          </li>
+          
+          <li>
+            <a href="/api/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">API Reference</a>
+          </li>
+          
+          <li>
+            <a href="/plugins/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Plugins</a>
+          </li>
+          
+          <li>
+            <a href="/development/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Development</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area -->
+  <div class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex flex-col lg:flex-row lg:gap-12">
+      <!-- Sidebar navigation (if available) -->
+      
+      <aside class="lg:w-72 flex-shrink-0 mb-8 lg:mb-0 order-2 lg:order-1">
+        <div class="sticky top-24 bg-slate-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-lg font-semibold mb-4 text-white">On This Page</h3>
+          <nav>
+            
+              <ul class="space-y-3 border-l border-slate-700 pl-4">
+                
+                <li>
+                  <a href="#prerequisites" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Prerequisites</a>
+                </li>
+                
+                <li>
+                  <a href="#installation-methods" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Installation Methods</a>
+                </li>
+                
+                <li>
+                  <a href="#configuration" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Configuration</a>
+                </li>
+                
+                <li>
+                  <a href="#running-the-server" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Running the Server</a>
+                </li>
+                
+                <li>
+                  <a href="#connecting" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Connecting</a>
+                </li>
+                
+                <li>
+                  <a href="#next-steps" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Next Steps</a>
+                </li>
+                
+              </ul>
+            
+          </nav>
+        </div>
+      </aside>
+      
+      
+      <!-- Main content -->
+      <main class="w-full order-1 lg:order-2 lg:max-w-3xl">
+        <article class="prose prose-invert prose-headings:text-white prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-a:transition-colors max-w-none ">
+          
+          <h1>Installation Guide</h1>
+<p>This guide will walk you through the process of installing and setting up UrsaMU on your system.</p>
+<h2>Prerequisites</h2>
+<p>Before installing UrsaMU, ensure you have the following:</p>
+<ul>
+<li><a href="https://deno.land/"><strong>Deno</strong></a> version 1.32.0 or higher</li>
+<li>Git (for cloning the repository)</li>
+</ul>
+<h2>Installation Methods</h2>
+<p>UrsaMU can be installed in multiple ways. Choose the method that works best for your environment.</p>
+<h3>Method 1: Direct from GitHub</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Clone the repository
+git clone https://github.com/ursamu/ursamu.git
+
+# Navigate to the project directory
+cd ursamu
+
+# Set up configuration
+deno task setup-config
+</code></pre>
+<h3>Method 2: Using the UrsaMU CLI</h3>
+<p>UrsaMU provides a CLI tool for creating new projects:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Install the UrsaMU CLI
+deno install -A -n ursamu https://deno.land/x/ursamu/src/cli/ursamu.ts
+
+# Create a new project
+ursamu create my-game
+cd my-game
+</code></pre>
+<h3>Method 3: Using Docker</h3>
+<p>UrsaMU provides a Docker image for easy deployment:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Clone the repository
+git clone https://github.com/ursamu/ursamu.git
+cd ursamu
+
+# Start the server with Docker Compose
+docker-compose up -d
+</code></pre>
+<p>The game databases will be exported to the <code>data/</code> directory, and configuration will be stored in the <code>config/</code> directory.</p>
+<h2>Configuration</h2>
+<p>UrsaMU uses a flexible configuration system stored in JSON format:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Show the entire configuration
+deno task config
+
+# Get a specific configuration value
+deno task config --get server.ws
+
+# Set a configuration value
+deno task config --set server.ws 4202
+</code></pre>
+<p>The configuration is stored in <code>config/config.json</code> and includes:</p>
+<ul>
+<li>Server ports and database paths</li>
+<li>Game name, description, and version</li>
+<li>Text file locations</li>
+<li>Plugin settings</li>
+</ul>
+<p>For detailed information on all available configuration options, see the <a href="../configuration/">Configuration Guide</a>.</p>
+<h2>Running the Server</h2>
+<p>UrsaMU uses a dual-server architecture with the main server and telnet server running as separate processes:</p>
+<h3>Starting Both Servers</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Start both main and telnet servers with watch mode
+deno task start
+</code></pre>
+<p>This will:</p>
+<ul>
+<li>Start both the main server and telnet server as separate processes</li>
+<li>Enable watch mode for automatic reloading when files change</li>
+<li>Allow each server to restart independently</li>
+</ul>
+<h3>Development Mode</h3>
+<p>For development with individual servers:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Main server only with watch mode
+deno task dev
+
+# Telnet server only with watch mode
+deno task telnet
+</code></pre>
+<h2>Connecting</h2>
+<p>Once the server is running, you can connect to it using:</p>
+<ul>
+<li><strong>Telnet Client</strong>: <code>telnet localhost 4201</code></li>
+<li><strong>Web Client</strong>: http://localhost:4203 (if you build a web interface)</li>
+<li><strong>Socket.IO Client</strong>: Connect to <code>http://localhost:4202</code> from custom clients using the Socket.IO client library</li>
+</ul>
+<p>Example Socket.IO client connection:</p>
+<pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token comment">// Using the Socket.IO client library</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> io <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"socket.io-client"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> socket <span class="token operator">=</span> <span class="token function">io</span><span class="token punctuation">(</span><span class="token string">"http://localhost:4202"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+socket<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">"connect"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Connected to UrsaMU server"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Listen for messages from the server</span>
+socket<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">data</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Received:"</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  
+  <span class="token comment">// Handle special data like disconnection</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span>data<span class="token operator">?.</span>quit<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Server requested disconnect"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    socket<span class="token punctuation">.</span><span class="token function">disconnect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Send a command to the server</span>
+socket<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"look"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// To connect as a player</span>
+socket<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"connect PlayerName Password"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// To create a new character</span>
+socket<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"create NewCharacter Password"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// To disconnect</span>
+socket<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"quit"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h2>Next Steps</h2>
+<p>Now that you have UrsaMU installed and running, you might want to:</p>
+<ul>
+<li><a href="./user-guide"><strong>User Guide</strong></a> - Learn how to use UrsaMU as a player</li>
+<li><a href="../configuration/"><strong>Configuration</strong></a> - Explore detailed configuration options</li>
+<li><a href="../plugins/index.md"><strong>Plugin Development</strong></a> - Learn how to create plugins to extend UrsaMU</li>
+</ul>
+
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 py-8 mt-12 border-t border-slate-700">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <p>© UrsaMU Team - <a href="https://github.com/lcanady/ursamu" class="text-purple-400 hover:text-purple-300 transition-colors">GitHub Repository</a></p>
+        </div>
+        <div>
+          <p>Built with <a href="https://lume.land" class="text-purple-400 hover:text-purple-300 transition-colors">Lume</a> for <a href="https://deno.land" class="text-purple-400 hover:text-purple-300 transition-colors">Deno</a></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Smooth scrolling for anchor links
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add IDs to headings if they don't have them
+      const article = document.querySelector('article');
+      if (article) {
+        const headings = article.querySelectorAll('h2, h3, h4, h5, h6');
+        headings.forEach(heading => {
+          if (!heading.id) {
+            // Create ID from heading text
+            const id = heading.textContent
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/[\s_-]+/g, '-')
+              .replace(/^-+|-+$/g, '');
+            heading.id = id;
+          }
+        });
+      }
+      
+      // Get all links that have hash (#) in them
+      const anchorLinks = document.querySelectorAll('a[href^="#"]');
+      
+      // Add click event listener to each anchor link
+      anchorLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Prevent default jump-to behavior
+          e.preventDefault();
+          
+          // Get the target element
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return; // Skip if it's just "#"
+          
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            // Calculate header height for offset
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            // Get the target's position
+            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+            
+            // Scroll to the target with offset for the header
+            window.scrollTo({
+              top: targetPosition - headerHeight - 20, // 20px extra padding
+              behavior: 'smooth'
+            });
+            
+            // Update URL hash without jumping
+            history.pushState(null, null, targetId);
+          }
+        });
+      });
+    });
+  </script>
+
+ </body></html>

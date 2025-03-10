@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" class="dark"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to configure UrsaMU for your needs">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/prism.css">
+  <meta name="theme-color" content="#0f172a">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/configuration/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="min-h-screen flex flex-col bg-slate-900 text-slate-200">
+  <!-- Header with navigation -->
+  <header class="bg-slate-800 shadow-lg sticky top-0 z-10">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-white flex items-center">
+          <span class="text-purple-400 mr-2">UrsaMU</span> Docs
+        </a>
+        
+        <nav class="hidden lg:block">
+          <ul class="flex space-x-8">
+            
+            <li>
+              <a href="/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Home</a>
+            </li>
+            
+            <li>
+              <a href="/guides/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Guides</a>
+            </li>
+            
+            <li>
+              <a href="/configuration/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Configuration</a>
+            </li>
+            
+            <li>
+              <a href="/api/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">API Reference</a>
+            </li>
+            
+            <li>
+              <a href="/plugins/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Plugins</a>
+            </li>
+            
+            <li>
+              <a href="/development/" class="text-slate-300 hover:text-purple-300 transition-colors py-2">Development</a>
+            </li>
+            
+          </ul>
+        </nav>
+        
+        <button id="menu-toggle" class="lg:hidden text-white">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewbox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-700">
+      <div class="container mx-auto px-4 py-3">
+        <ul class="space-y-3">
+          
+          <li>
+            <a href="/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Home</a>
+          </li>
+          
+          <li>
+            <a href="/guides/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Guides</a>
+          </li>
+          
+          <li>
+            <a href="/configuration/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Configuration</a>
+          </li>
+          
+          <li>
+            <a href="/api/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">API Reference</a>
+          </li>
+          
+          <li>
+            <a href="/plugins/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Plugins</a>
+          </li>
+          
+          <li>
+            <a href="/development/" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">Development</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area -->
+  <div class="container mx-auto px-4 py-8 flex-grow">
+    <div class="flex flex-col lg:flex-row lg:gap-12">
+      <!-- Sidebar navigation (if available) -->
+      
+      <aside class="lg:w-72 flex-shrink-0 mb-8 lg:mb-0 order-2 lg:order-1">
+        <div class="sticky top-24 bg-slate-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-lg font-semibold mb-4 text-white">On This Page</h3>
+          <nav>
+            
+              <ul class="space-y-3 border-l border-slate-700 pl-4">
+                
+                <li>
+                  <a href="#overview" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Overview</a>
+                </li>
+                
+                <li>
+                  <a href="#configuration-files" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Configuration Files</a>
+                </li>
+                
+                <li>
+                  <a href="#server-configuration" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Server Configuration</a>
+                </li>
+                
+                <li>
+                  <a href="#game-configuration" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Game Configuration</a>
+                </li>
+                
+                <li>
+                  <a href="#database-configuration" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Database Configuration</a>
+                </li>
+                
+                <li>
+                  <a href="#plugin-configuration" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Plugin Configuration</a>
+                </li>
+                
+                <li>
+                  <a href="#text-files" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Text Files</a>
+                </li>
+                
+                <li>
+                  <a href="#advanced-configuration" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">Advanced Configuration</a>
+                </li>
+                
+              </ul>
+            
+          </nav>
+        </div>
+      </aside>
+      
+      
+      <!-- Main content -->
+      <main class="w-full order-1 lg:order-2 lg:max-w-3xl">
+        <article class="prose prose-invert prose-headings:text-white prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-a:transition-colors max-w-none ">
+          
+          <h1>Configuring UrsaMU</h1>
+<p>This guide explains how to configure UrsaMU for your specific needs.</p>
+<h2>Overview</h2>
+<p>UrsaMU uses a flexible configuration system that allows you to customize various aspects of the game. The configuration is stored in JSON files and can be accessed programmatically through the configuration API.</p>
+<h2>Configuration Files</h2>
+<p>The main configuration file is typically located at <code>config/config.json</code>. This file contains settings for the server, game, database, and other components.</p>
+<p>Here’s an example of a basic configuration file:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "port": 4201,
+    "host": "0.0.0.0"
+  },
+  "game": {
+    "name": "My UrsaMU Game",
+    "motd": "Welcome to My UrsaMU Game!",
+    "debug": false
+  },
+  "database": {
+    "path": "./data"
+  }
+}
+</code></pre>
+<h2>Server Configuration</h2>
+<p>The <code>server</code> section of the configuration file contains settings related to the server:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "port": 4201,
+    "host": "0.0.0.0",
+    "webSocket": true,
+    "telnet": true,
+    "web": true,
+    "webPort": 4202
+  }
+}
+</code></pre>
+<h3>Server Options</h3>
+<ul>
+<li><code>port</code> (number): The port for the main server (default: 4201)</li>
+<li><code>host</code> (string): The host address to bind to (default: “0.0.0.0”)</li>
+<li><code>webSocket</code> (boolean): Whether to enable WebSocket connections (default: true)</li>
+<li><code>telnet</code> (boolean): Whether to enable Telnet connections (default: true)</li>
+<li><code>web</code> (boolean): Whether to enable the web interface (default: true)</li>
+<li><code>webPort</code> (number): The port for the web interface (default: 4202)</li>
+</ul>
+<h2>Game Configuration</h2>
+<p>The <code>game</code> section contains settings related to the game itself:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "game": {
+    "name": "My UrsaMU Game",
+    "motd": "Welcome to My UrsaMU Game!",
+    "debug": false,
+    "startingRoom": "1",
+    "startingMoney": 100,
+    "maxPlayers": 100,
+    "idleTimeout": 3600
+  }
+}
+</code></pre>
+<h3>Game Options</h3>
+<ul>
+<li><code>name</code> (string): The name of the game (default: “UrsaMU”)</li>
+<li><code>motd</code> (string): Message of the day (default: “Welcome to UrsaMU!”)</li>
+<li><code>debug</code> (boolean): Whether to enable debug mode (default: false)</li>
+<li><code>startingRoom</code> (string): The ID of the starting room for new players (default: “1”)</li>
+<li><code>startingMoney</code> (number): The amount of money new players start with (default: 0)</li>
+<li><code>maxPlayers</code> (number): The maximum number of players allowed (default: 0, unlimited)</li>
+<li><code>idleTimeout</code> (number): The number of seconds before a player is considered idle (default: 3600)</li>
+</ul>
+<h2>Database Configuration</h2>
+<p>The <code>database</code> section contains settings related to the database:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "database": {
+    "path": "./data",
+    "backupInterval": 3600000,
+    "maxBackups": 5
+  }
+}
+</code></pre>
+<h3>Database Options</h3>
+<ul>
+<li><code>path</code> (string): The path to the database files (default: “./data”)</li>
+<li><code>backupInterval</code> (number): The interval in milliseconds between automatic backups (default: 3600000, 1 hour)</li>
+<li><code>maxBackups</code> (number): The maximum number of backups to keep (default: 5)</li>
+</ul>
+<h2>Plugin Configuration</h2>
+<p>Plugins can have their own configuration sections in the main configuration file:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "plugins": {
+    "my-plugin": {
+      "enabled": true,
+      "option1": "value1",
+      "option2": 42
+    }
+  }
+}
+</code></pre>
+<h3>Accessing Plugin Configuration</h3>
+<p>Plugins can access their configuration using the <code>getConfig</code> function:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { getConfig } from "../../services/Config/mod.ts";
+
+// Get a plugin configuration value with a default fallback
+const option1 = getConfig("plugins.my-plugin.option1", "default");
+const option2 = getConfig("plugins.my-plugin.option2", 0);
+</code></pre>
+<h2>Text Files</h2>
+<p>UrsaMU uses text files for various game messages. These files are typically located in the <code>config/text</code> directory:</p>
+<ul>
+<li><code>connect.txt</code>: The connection screen shown to players when they connect</li>
+<li><code>motd.txt</code>: The message of the day shown to players when they connect</li>
+<li><code>welcome.txt</code>: The welcome message shown to new players</li>
+<li><code>help.txt</code>: The help text shown to players when they type “help”</li>
+</ul>
+<h3>Example Text File</h3>
+<p>Here’s an example of a <code>connect.txt</code> file:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">%ch%cy==================================%cn
+%ch%cw           My UrsaMU Game        %cn
+%ch%cy==================================%cn
+
+Welcome to My UrsaMU Game!
+
+Type 'connect &lt;name&gt; &lt;password&gt;' to connect.
+Type 'create &lt;name&gt; &lt;password&gt;' to create a new character.
+Type 'quit' to disconnect.
+
+%ch%cy==================================%cn
+</code></pre>
+<h3>Color Codes</h3>
+<p>Text files can use color codes to add color to the text:</p>
+<ul>
+<li><code>%cn</code>: Reset to default color</li>
+<li><code>%ch</code>: Highlight (bold)</li>
+<li><code>%cr</code>: Red</li>
+<li><code>%cg</code>: Green</li>
+<li><code>%cy</code>: Yellow</li>
+<li><code>%cb</code>: Blue</li>
+<li><code>%cm</code>: Magenta</li>
+<li><code>%cc</code>: Cyan</li>
+<li><code>%cw</code>: White</li>
+</ul>
+<h2>Advanced Configuration</h2>
+<h3>Configuration API</h3>
+<p>UrsaMU provides a configuration API for accessing and modifying configuration values programmatically:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { getConfig, setConfig } from "../../services/Config/mod.ts";
+
+// Get a configuration value
+const port = getConfig("server.port", 4201);
+
+// Set a configuration value
+await setConfig("server.port", 4202);
+</code></pre>
+<h3>Environment Variables</h3>
+<p>UrsaMU supports environment variables for configuration. Environment variables take precedence over values in the configuration file.</p>
+<p>Environment variables should be prefixed with <code>URSAMU_</code> and use underscores instead of dots:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">URSAMU_SERVER_PORT=4202
+URSAMU_GAME_NAME="My UrsaMU Game"
+URSAMU_DATABASE_PATH="./custom-data"
+</code></pre>
+<h3>Configuration Hierarchy</h3>
+<p>UrsaMU uses the following hierarchy for configuration values (from highest to lowest precedence):</p>
+<ol>
+<li>Environment variables</li>
+<li>Values set programmatically via <code>setConfig</code></li>
+<li>Values in the configuration file</li>
+<li>Default values</li>
+</ol>
+<h3>Custom Configuration Files</h3>
+<p>You can specify a custom configuration file when starting UrsaMU:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
+import { config } from "./my-custom-config.ts";
+
+await mu({ config });
+</code></pre>
+<h3>Dynamic Configuration</h3>
+<p>Some configuration values can be changed at runtime:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { setConfig } from "../../services/Config/mod.ts";
+
+// Change the game name at runtime
+await setConfig("game.name", "New Game Name");
+</code></pre>
+<h3>Configuration Validation</h3>
+<p>UrsaMU validates configuration values to ensure they are of the correct type and within acceptable ranges. If a configuration value is invalid, UrsaMU will log a warning and use the default value instead.</p>
+<h3>Example: Complete Configuration</h3>
+<p>Here’s an example of a complete configuration file with all available options:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "port": 4201,
+    "host": "0.0.0.0",
+    "webSocket": true,
+    "telnet": true,
+    "web": true,
+    "webPort": 4202,
+    "ssl": {
+      "enabled": false,
+      "key": "path/to/key.pem",
+      "cert": "path/to/cert.pem"
+    }
+  },
+  "game": {
+    "name": "My UrsaMU Game",
+    "motd": "Welcome to My UrsaMU Game!",
+    "debug": false,
+    "startingRoom": "1",
+    "startingMoney": 100,
+    "maxPlayers": 100,
+    "idleTimeout": 3600,
+    "registerEnabled": true,
+    "guestEnabled": true,
+    "guestPrefix": "Guest"
+  },
+  "database": {
+    "path": "./data",
+    "backupInterval": 3600000,
+    "maxBackups": 5
+  },
+  "plugins": {
+    "my-plugin": {
+      "enabled": true,
+      "option1": "value1",
+      "option2": 42
+    }
+  },
+  "logging": {
+    "level": "info",
+    "file": "logs/ursamu.log",
+    "maxSize": 10485760,
+    "maxFiles": 5
+  }
+}
+</code></pre>
+<p>By following this guide, you can configure UrsaMU to suit your specific needs and create a customized MU* experience.</p>
+
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 py-8 mt-12 border-t border-slate-700">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-6 md:mb-0">
+          <p>© UrsaMU Team - <a href="https://github.com/lcanady/ursamu" class="text-purple-400 hover:text-purple-300 transition-colors">GitHub Repository</a></p>
+        </div>
+        <div>
+          <p>Built with <a href="https://lume.land" class="text-purple-400 hover:text-purple-300 transition-colors">Lume</a> for <a href="https://deno.land" class="text-purple-400 hover:text-purple-300 transition-colors">Deno</a></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    document.getElementById('menu-toggle').addEventListener('click', function() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // Smooth scrolling for anchor links
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add IDs to headings if they don't have them
+      const article = document.querySelector('article');
+      if (article) {
+        const headings = article.querySelectorAll('h2, h3, h4, h5, h6');
+        headings.forEach(heading => {
+          if (!heading.id) {
+            // Create ID from heading text
+            const id = heading.textContent
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/[\s_-]+/g, '-')
+              .replace(/^-+|-+$/g, '');
+            heading.id = id;
+          }
+        });
+      }
+      
+      // Get all links that have hash (#) in them
+      const anchorLinks = document.querySelectorAll('a[href^="#"]');
+      
+      // Add click event listener to each anchor link
+      anchorLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          // Prevent default jump-to behavior
+          e.preventDefault();
+          
+          // Get the target element
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return; // Skip if it's just "#"
+          
+          const targetElement = document.querySelector(targetId);
+          
+          if (targetElement) {
+            // Calculate header height for offset
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            // Get the target's position
+            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+            
+            // Scroll to the target with offset for the header
+            window.scrollTo({
+              top: targetPosition - headerHeight - 20, // 20px extra padding
+              behavior: 'smooth'
+            });
+            
+            // Update URL hash without jumping
+            history.pushState(null, null, targetId);
+          }
+        });
+      });
+    });
+  </script>
+
+ </body></html>
