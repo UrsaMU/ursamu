@@ -31,12 +31,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Install Lume
-        run: deno run -A https://deno.land/x/lume/install.ts
-
-      - name: Build Documentation
+      - name: Install and Build Documentation
         run: |
           cd docs
+          echo 'import "lume/cli.ts"' | deno run --unstable -A -
           deno task build
 
       - name: Upload artifact
