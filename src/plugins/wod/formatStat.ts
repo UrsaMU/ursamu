@@ -1,5 +1,5 @@
-import { capString } from "../../utils/capString";
-import { ljust } from "../../utils/format";
+import { capString } from "./capString.ts";
+import { ljust, rjust } from "./format.ts";
 
 export const formatStat = (
   stat: string,

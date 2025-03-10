@@ -1,6 +1,6 @@
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
-import { dbojs } from "../services/Database";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { dbojs } from "../services/Database/index.ts";
 
 export default () =>
   addCmd({
@@ -9,7 +9,7 @@ export default () =>
     lock: "connected",
     category: "Communication",
     exec: async (ctx, args) => {
-      const player = await dbojs.findOne({ id: ctx.socket.cid });
+      const player = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!player) return;
       const name = player.data?.moniker || player.data?.name;
       const msg = args[0] === ";"

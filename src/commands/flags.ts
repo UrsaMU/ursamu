@@ -1,10 +1,10 @@
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
-import { flags } from "../services/flags/flags";
-import { displayName } from "../utils/displayName";
-import { setFlags } from "../utils/setFlags";
-import { target } from "../utils/target";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { flags } from "../services/flags/flags.ts";
+import { displayName } from "../utils/displayName.ts";
+import { setFlags } from "../utils/setFlags.ts";
+import { target } from "../utils/target.ts";
 
 export default () =>
   addCmd({
@@ -13,7 +13,7 @@ export default () =>
     lock: "connected admin+",
     exec: async (ctx, args) => {
       const [tar, flgs] = args;
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
       const obj = await target(en, tar, true);

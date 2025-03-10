@@ -2,5 +2,11 @@ node_modules
 data
 dist
 WIP
-.pup*
 db
+db
+.pup.*
+# Ignore config files but keep the directory structure
+config/*.json
+# Don't ignore the README and .gitkeep
+!config/README.md
+!config/.gitkeep

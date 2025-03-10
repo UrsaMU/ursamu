@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import { jwt } from "../../../deps.ts";
 
 export const sign = (payload: any): Promise<string | void> =>
   new Promise((resolve, reject) => {

@@ -25,14 +25,12 @@ export interface IConfig {
     name?: string;
     description?: string;
     version?: string;
-    playerStart?: number;
-    text?: {
+    playerStart?: string;
+    text: {
       connect: string;
     };
   };
-  plugins?: {
-    [key: string]: IPluginConfig;
-  };
+  plugins?: Record<string, any>;
 }
 
 export class Config {
@@ -48,12 +46,8 @@ export class Config {
     return this.config.game;
   }
 
-  get engine() {
-    return this.config.engine;
-  }
-
   get plugins() {
-    return this.config.plugins || {};
+    return this.config.plugins;
   }
 
   setConfig = (config: IConfig) => {

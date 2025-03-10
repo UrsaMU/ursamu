@@ -1,27 +1,18 @@
-import express, { NextFunction, Request, Response } from "express";
-import { createServer } from "http";
-import { IMSocket } from "./@types/IMSocket";
-import { cmdParser } from "./services/commands";
-import { Server } from "socket.io";
-import { dbojs } from "./services/Database";
-import { send } from "./services/broadcast";
-import { moniker } from "./utils/moniker";
-import { joinChans } from "./utils/joinChans";
-import { IContext } from "./@types/IContext";
-import { setFlags } from "./utils/setFlags";
-import { authRouter, dbObjRouter } from "./routes";
-import authMiddleware from "./middleware/authMiddleware";
-import { IMError } from "./@types";
-import cfg from "./ursamu.config";
-import { chans, createObj } from "./services";
-import { loadDir, loadTxtDir } from "./utils";
-import { join } from "path";
-import { pluginService } from "./services/plugins";
-import { startIdleCheck } from "./utils/idleCheck";
-import {
-  clearConnectionTimeout,
-  startConnectionTimeout,
-} from "./utils/connectionTimeout";
+import { express, RequestHandler, Request, Response } from "../deps.ts";
+import { createServer } from "node:http";
+import { IMSocket } from "./@types/IMSocket.ts";
+import { cmdParser } from "./services/commands/index.ts";
+import { Server } from "../deps.ts";
+import { dbojs } from "./services/Database/index.ts";
+import { send } from "./services/broadcast/index.ts";
+import { moniker } from "./utils/moniker.ts";
+import { joinChans } from "./utils/joinChans.ts";
+import { IContext } from "./@types/IContext.ts";
+import { setFlags } from "./utils/setFlags.ts";
+import { authRouter, dbObjRouter } from "./routes/index.ts";
+import authMiddleware from "./middleware/authMiddleware.ts";
+import { IMError } from "./@types/index.ts";
+import { playerForSocket } from "./utils/playerForSocket.ts";
 
 export const app = express();
 export const server = createServer(app);
@@ -46,7 +37,8 @@ app.use("/api/v1/auth/", authRouter);
 app.use("/api/v1/dbobj/", authMiddleware, dbObjRouter);
 
 app.use(
-  (error: IMError, req: Request, res: Response, next: NextFunction): void => {
+  (error: IMError, req: Request, res: Response, next: RequestHandler): void => {
+    // Handle error here
     console.error(error);
     res
       .status(error.status || 500)
@@ -58,163 +50,61 @@ const handleSocketConnection = (socket: IMSocket) => {
   startConnectionTimeout(socket);
 
   socket.on("message", async (message) => {
-    try {
-      if (message.data?.cid) {
-        const cid = message.data.cid as number;
-        socket.cid = cid;
+    if (message?.data?.cid) socket.cid = message.data.cid;
+    const player = await playerForSocket(socket);
+    if (player) socket.join(`#${player.location}`);
 
-        clearConnectionTimeout(socket);
-
-        // Add socket to connected sockets map
-        if (!connectedSockets.has(cid)) {
-          connectedSockets.set(cid, new Set());
-        }
-        const sockets = connectedSockets.get(cid);
-        if (sockets) {
-          sockets.add(socket);
-        }
-      }
-
-      if (socket.cid) {
-        const player = await dbojs.findOne({ id: socket.cid });
-        if (player) {
-          socket.join(`#${player.location}`);
-        }
-      }
-
-      if (message.data?.disconnect) {
-        handleSocketDisconnect(socket);
-        return;
-      }
-
-      if (message.data?.reconnect && socket.cid) {
-        const player = await dbojs.findOne({ id: socket.cid });
-        if (player) {
-          await setFlags(player, "connected");
-          await send(
-            [`#${player.location}`],
-            `${moniker(player)} reconnects.`,
-          );
-        }
-        return;
-      }
-
-      const ctx: IContext = { socket, msg: message.msg };
-      joinChans(ctx);
-      if (message.msg.trim()) cmdParser.run(ctx);
-    } catch (error) {
-      console.error("Error handling socket message:", error);
-      socket.emit("message", {
-        msg: "%ch%crError processing your request. Please try again.%cn\r\n",
-        data: { cid: socket.cid },
-      });
+    if (message?.data?.disconnect) {
+      socket.disconnect();
+      return;
     }
+
+    const ctx: IContext = { socket, msg: message.msg };
+    joinChans(ctx);
+    if (message.msg.trim()) cmdParser.run(ctx);
   });
 
-  socket.on("disconnect", () => handleSocketDisconnect(socket));
-  socket.on("error", () => handleSocketDisconnect(socket));
-};
+  socket.on("disconnect", async () => {
+    const en = await playerForSocket(socket);
+    if (!en) return;
 
-const handleSocketDisconnect = async (socket: IMSocket) => {
-  try {
-    if (!socket.cid) return;
-
-    const sockets = connectedSockets.get(socket.cid);
-    if (sockets) {
-      sockets.delete(socket);
-      if (sockets.size === 0) {
-        connectedSockets.delete(socket.cid);
-        const en = await dbojs.findOne({ id: socket.cid });
-        if (en) {
-          await setFlags(en, "!connected");
-          await send(
-            [`#${en.location}`],
-            `${moniker(en)} has disconnected.`,
-          );
-        }
-      } else {
-        const en = await dbojs.findOne({ id: socket.cid });
-        if (en) {
-          await send(
-            [`#${en.location}`],
-            `${moniker(en)} has partially disconnected.`,
-          );
-        }
+    const socks: IMSocket[] = [];
+    for (const [id, sock] of io.sockets.sockets.entries()) {
+      const s = sock as IMSocket;
+      if (s.cid && s.cid === en.id) {
+        socks.push(s);
       }
     }
-  } catch (error) {
-    console.error("Error handling socket disconnect:", error);
-  }
-};
 
-io.on("connection", handleSocketConnection);
-
-export class UrsaMU {
-  constructor() {
-    try {
-      // Load text files first
-      loadTxtDir(join(__dirname, "../text"));
-      // Load help files
-      loadTxtDir(join(__dirname, "../help"));
-
-      // Load commands
-      loadDir(join(__dirname, "commands"));
-    } catch (error) {
-      console.error("Error loading directories:", error);
+    if (socks.length < 1) {
+      await setFlags(en, "!connected");
+      // Get all socket IDs to exclude
+      const excludeIds = socks.map(s => s.id);
+      // Add the current disconnecting socket ID
+      excludeIds.push(socket.id);
+      
+      return await send(
+        [`#${en.location}`],
+        `${moniker(en)} has disconnected.`,
+        {},
+        excludeIds  // Exclude all sockets of the disconnecting player
+      );
     }
-  }
 
-  public async start() {
-    server.listen(cfg.config.server?.ws, async () => {
-      try {
-        // Initialize plugins
-        await pluginService.initialize();
-        console.log("Plugin system initialized");
+    // Get all socket IDs to exclude
+    const excludeIds = socks.map(s => s.id);
+    // Add the current disconnecting socket ID
+    excludeIds.push(socket.id);
+    
+    return await send(
+      [`#${en.location}`],
+      `${moniker(en)} has partially disconnected.`,
+      {},
+      excludeIds  // Exclude all sockets of the partially disconnecting player
+    );
+  });
 
-        const rooms = await dbojs.find({ flags: /room/ });
-
-        if (rooms.length === 0) {
-          const room = await createObj("room safe void", { name: "The Void" });
-          console.log("The Void created.");
-        }
-
-        // create the default channels
-        const channels = await chans.find({});
-        if (!channels.length) {
-          console.log("No channels found, creating some!");
-          await chans.insert({
-            name: "Public",
-            header: "%ch%cc[Public]%cn",
-            alias: "pub",
-          });
-
-          await chans.insert({
-            name: "Admin",
-            header: "%ch%cy[Admin]%cn",
-            alias: "ad",
-            lock: "admin+",
-          });
-        }
-
-        // Start the idle check system
-        startIdleCheck();
-        console.log("Idle check system started");
-
-        console.log(`Server started on port ${cfg.config.server?.ws}.`);
-      } catch (error) {
-        console.error("Error during startup:", error);
-      }
-    });
-  }
-
-  public async stop() {
-    // Clean up plugins before stopping
-    const plugins = pluginService.getAllPlugins();
-    for (const [name, plugin] of plugins) {
-      if (plugin.cleanup) {
-        await plugin.cleanup();
-      }
-    }
-    server.close();
-  }
-}
+  socket.on("error", () => {
+    socket.disconnect();
+  });
+});

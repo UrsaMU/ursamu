@@ -1,4 +1,4 @@
-import { IContext } from "./IContext";
+import { IContext } from "./IContext.ts";
 
 export type IMiddlewareFunction = (
   ctx: IContext,

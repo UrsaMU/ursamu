@@ -1,36 +1,52 @@
-import { repeat } from "lodash";
-import parser from "../services/parser/parser";
+import { repeat } from "../../deps.ts";
+import parser from "../services/parser/parser.ts";
 
 export const repeatString = (string = " ", length: number) => {
-  // check how many spaces are left after the filler string is rendered. We will need
-  // to render these last few spaces manually.
-  const remainder = Math.floor(
-    length % parser.stripSubs("telnet", string).length,
-  );
-
-  // Split the array and filter out empty cells.
+  // If length is 0 or negative, return empty string
+  if (length <= 0) return "";
+  
+  // If string is empty, return empty string
+  if (!string) return "";
+  
+  // Get the effective length of the string without ANSI codes
+  const strippedLength = parser.stripSubs("telnet", string).length;
+  
+  // If the stripped length is 0, we can't repeat it meaningfully
+  if (strippedLength === 0) return "";
+  
+  // Calculate how many complete repetitions we need
+  const repetitions = Math.floor(length / strippedLength);
+  
+  // Calculate the remainder for partial repetition
+  const remainder = length % strippedLength;
+  
+  // For simple strings without formatting codes, use the built-in repeat
+  if (!string.includes("%")) {
+    return string.repeat(repetitions) + (remainder > 0 ? string.substring(0, remainder) : "");
+  }
+  
+  // For strings with formatting codes, we need special handling
+  // Get the repeated part
+  const repeatedPart = repetitions > 0 ? string.repeat(repetitions) : "";
+  
+  // If there's no remainder, return just the repeated part
+  if (remainder === 0) return repeatedPart;
+  
+  // Handle the remainder part with ANSI codes
+  // Split the string by % and process for ANSI codes
   let cleanArray = string.split("%").filter(Boolean);
-  // If the array length is longer than 1 (more then one cell), process for ansii
+  
   if (cleanArray.length > 1) {
-    // If it's just a clear formatting call 'cn' then we don't need to worry
-    // about it.  We'll handle making sure ansii is cleared after each substitution manually.
+    // Process ANSI codes
     cleanArray = cleanArray
-      .filter((cell) => {
-        if (cell.toLowerCase() !== "cn") {
-          return cell;
-        }
-      })
-      // fire the substitutions on each cell.
-      .map((cell) => {
-        return "%" + cell + "%cn";
-      });
+      .filter(cell => cell.toLowerCase() !== "cn")
+      .map(cell => "%" + cell + "%cn");
   } else {
     cleanArray = cleanArray[0].split("");
   }
-  return (
-    string?.repeat(length / parser.stripSubs("telnet", string).length) +
-    cleanArray.slice(0, remainder)
-  );
+  
+  // Return the repeated part plus the remainder
+  return repeatedPart + cleanArray.slice(0, remainder).join("");
 };
 
 export const rjust = (string = "", length: number, filler = " ") => {

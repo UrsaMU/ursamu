@@ -1,5 +1,5 @@
 export interface IMail {
-  _id?: string;
+  id: string;
   from: string;
   to: string[];
   message: string;

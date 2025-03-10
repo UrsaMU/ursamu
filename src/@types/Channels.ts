@@ -1,5 +1,5 @@
 export interface IChannel {
-  id?: number;
+  id: string;
   name: string;
   lock?: string;
   hidden?: boolean;
@@ -9,7 +9,7 @@ export interface IChannel {
 }
 
 export interface IChanEntry {
-  id?: number;
+  id: string;
   channel: string;
   alias: string;
   mask?: string;

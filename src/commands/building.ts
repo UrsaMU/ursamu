@@ -1,12 +1,12 @@
-import { IDBOBJ } from "../@types/IDBObj";
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd, force } from "../services/commands";
-import { target } from "../utils/target";
-import { moniker } from "../utils/moniker";
-import { canEdit } from "../utils/canEdit";
-import { displayName } from "../utils/displayName";
-import { getNextId } from "../utils/getNextId";
+import { IDBOBJ } from "../@types/IDBObj.ts";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd, force } from "../services/commands/index.ts";
+import { target } from "../utils/target.ts";
+import { moniker } from "../utils/moniker.ts";
+import { canEdit } from "../utils/canEdit.ts";
+import { displayName } from "../utils/displayName.ts";
+import { getNextId } from "../utils/getNextId.ts";
 
 export default () => {
   addCmd({
@@ -17,7 +17,8 @@ export default () => {
     category: "building",
     exec: async (ctx, args) => {
       const [swtch, room, to, from] = args;
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
       // Dig the room.
@@ -29,7 +30,7 @@ export default () => {
         },
         flags: "room",
       };
-      const roomObj = await dbojs.insert(obj);
+      const roomObj = await dbojs.create(obj);
       send(
         [ctx.socket.id],
         `Room ${room} created with dbref %ch#${roomObj.id}%cn.`,
@@ -49,7 +50,7 @@ export default () => {
           flags: "exit",
         };
 
-        const toObj = await dbojs.insert(obj);
+        const toObj = await dbojs.create(obj);
         send(
           [ctx.socket.id],
           `Exit ${to.split(";")[0]} created with dbref %ch#${toObj.id}%cn.`,
@@ -70,7 +71,7 @@ export default () => {
           flags: "exit",
         };
 
-        const fromObj = await dbojs.insert(obj);
+        const fromObj = await dbojs.create(obj);
         send(
           [ctx.socket.id],
           `Exit ${from.split(";")[0]} created with dbref %ch#${fromObj.id}%cn.`,
@@ -93,7 +94,8 @@ export default () => {
       /^[@/+]?t(?:e|el|ele|elep|elepo|elepor|eleport)?\s+(.*)\s*=\s*(.*)/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
       const tar = await target(en, args[0].trim(), true);
@@ -110,7 +112,7 @@ export default () => {
       }
 
       tar.location = locObj.id;
-      await dbojs.update({ id: tar.id }, tar);
+      await dbojs.modify({ id: tar.id }, "$set", tar);
 
       send(
         [ctx.socket.id],
@@ -141,8 +143,8 @@ export default () => {
     category: "building",
     exec: async (ctx, args) => {
       const [swtch, name] = args;
-
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
       const obj = await target(en, name, true);
@@ -173,25 +175,25 @@ export default () => {
       // send the player home if they're in a place that's being destroyed.
       if (obj && obj.id === en.location) {
         en.location = en.data?.home || 1;
-        await dbojs.update({ id: en.id }, en);
+        await dbojs.modify({ id: en.id }, "$set", en);
         await send([ctx.socket.id], "You are sent home.", {});
         await force(ctx, "look");
       }
 
-      await dbojs.remove({ _id: obj._id });
+      await dbojs.delete({ id: obj.id });
       send([ctx.socket.id], `You destroy ${displayName(en, obj)}.`, {});
-      const exits = await dbojs.find({
+      const exits = await dbojs.query({
         $and: [
           {
             $or: [{ "data.destination": obj.id }, { location: obj.id }],
           },
-          { flags: /exit/ },
+          { flags: new RegExp("exit") },
         ],
       });
 
       // destroy any exits that would be orphaned.
       for (const exit of exits) {
-        await dbojs.remove({ _id: exit._id });
+        await dbojs.delete({ id: exit.id });
       }
     },
   });
@@ -203,10 +205,11 @@ export default () => {
     pattern: /^[@/+]?open\s+(.*)\s*=\s*(.*)/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
-      const en = await dbojs.findOne({ id: ctx.socket.cid });
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
       const [name, room] = args.map((a) => a.trim());
-      let roomObj: IDBOBJ | undefined | null;
+      let roomObj: IDBOBJ | undefined | null | false;
 
       if (room) roomObj = await target(en, room, true);
       if (!roomObj) {
@@ -215,7 +218,7 @@ export default () => {
 
       const id = await getNextId();
 
-      const exit = await dbojs.insert({
+      const exit = await dbojs.create({
         id,
         flags: "exit",
         location: en.location,
@@ -225,20 +228,14 @@ export default () => {
         },
       });
 
-      if (roomObj) {
-        send(
-          [ctx.socket.id],
-          `You open exit %ch${displayName(en, exit)} to ${
-            displayName(
-              en,
-              roomObj,
-            )
-          }.`,
-          {},
-        );
-      } else {
-        send([ctx.socket.id], `You open exit ${displayName(en, exit)}.`, {});
-      }
+      send(
+        [ctx.socket.id],
+        `You open exit %ch${displayName(en, exit)} to ${displayName(
+          en,
+          roomObj
+        )}.`,
+        {}
+      );
     },
   });
 };

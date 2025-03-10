@@ -1,9 +1,8 @@
-import { IAttribute } from "../../@types";
-import { IDBOBJ } from "../../@types/IDBObj";
-import { getNextId } from "../../utils/getNextId";
-import { moniker } from "../../utils/moniker";
-import { dbojs } from "../Database";
-import { flags } from "../flags/flags";
+import { IDBOBJ } from "../../@types/IDBObj.ts";
+import { getNextId } from "../../utils/getNextId.ts";
+import { moniker } from "../../utils/moniker.ts";
+import { dbojs } from "../Database/index.ts";
+import { flags } from "../flags/flags.ts";
 
 export const createObj = async (flgs: string, datas: any) => {
   const id = await getNextId();
@@ -14,7 +13,8 @@ export const createObj = async (flgs: string, datas: any) => {
     data,
   };
 
-  return await dbojs.insert(obj);
+  await dbojs.create(obj);
+  return await dbojs.query({id});
 };
 
 export class Obj {
@@ -31,24 +31,41 @@ export class Obj {
     return this;
   }
 
-  static async get(obj: string | number | undefined, en?: Obj) {
+  static async get(obj: string | number | undefined, en?: Obj): Promise<Obj | null> {
+    console.log("Obj.get called with:", obj, typeof obj);
+    
     if (typeof obj === "string") {
-      let returnObj;
-
       if (obj.startsWith("#")) {
-        returnObj = await dbojs.findOne({ id: +obj.slice(1) });
+        const id = obj.slice(1);
+        const returnObj = await dbojs.queryOne({ id });
+        if (returnObj) {
+          console.log("Found by string (id):", returnObj.id);
+          return new Obj().load(returnObj);
+        }
       } else {
-        returnObj = await dbojs.findOne({ "data.name": new RegExp(obj, "i") });
-      }
-      if (returnObj) {
-        return new Obj().load(returnObj);
+        const returnObj = await dbojs.queryOne({$or:[{ "data.name": new RegExp(obj, "i") },
+          {id: `${obj}`},
+          {"data.alias": new RegExp(obj, "i")}
+        ],
+        
+      });
+        if (returnObj) {
+          console.log("Found by string (name):", returnObj.id);
+          return new Obj().load(returnObj);
+        }
       }
     } else if (typeof obj === "number") {
-      const returnObj = await dbojs.findOne({ id: obj });
+      const id = String(obj);
+      const returnObj = await dbojs.queryOne({ id });
+      console.log("Query by number (converted to string):", id, "Result:", returnObj ? returnObj.id : null);
       if (returnObj) {
         return new Obj().load(returnObj);
       }
     }
+    
+    console.log("No object found, returning null");
+    // Return null when no object is found
+    return null;
   }
 
   get dbobj() {
@@ -101,21 +118,21 @@ export class Obj {
   }
 
   async exits() {
-    return await dbojs.find({ location: this.id, flags: "exit" });
+    return await dbojs.query({ location: this.id, flags: "exit" });
   }
 
   async contents() {
-    return await dbojs.find({ location: this.id });
+    return await dbojs.query({ location: this.id });
   }
 
   async save() {
-    const updateData = {
-      flags: this.obj.flags,
-      data: this.obj.data,
-      location: this.obj.location,
-      description: this.obj.description,
-    };
-    await dbojs.update({ id: this.id }, { $set: updateData });
+    await dbojs.modify({ id: this.id }, "$set", this.obj);
+  }
+
+  set data(data: any) {
+    if (!this.obj) return;
+    this.obj.data = { ...this.obj.data, ...data };
+    this.save();
   }
 
   set dbobj(obj: IDBOBJ) {

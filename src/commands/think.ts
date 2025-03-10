@@ -1,7 +1,5 @@
-import { dbojs, Obj } from "../services";
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
-import parser from "../services/parser/parser";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
 
 export default () =>
   addCmd({

@@ -1,23 +1,13 @@
-import { counters, dbojs } from "../services/Database";
+import { counters, ICounters } from "../services/Database/index.ts";
 
-function findMissingNumbers(arr: number[]): number[] {
-  const missingNumbers: number[] = [];
-  const maxNumber = Math.max(...arr);
-  const minNumber = Math.min(...arr);
-
-  for (let i = minNumber; i <= maxNumber; i++) {
-    if (!arr.includes(i)) {
-      missingNumbers.push(i);
-    }
+export async function getNextId(name: string) {
+  const counter = await counters.queryOne({ id: name });
+  if (!counter) {
+    const newCounter = { id: name, seq: 1 } as ICounters;
+    await counters.create(newCounter);
+    return "1";
   }
-
-  return missingNumbers;
-}
-
-export async function getNextId() {
-  const ids = (await dbojs.db.find({}, { id: 1 })).map((x) => x.id);
-  if (!ids.length) ids.push(0);
-  const missing = findMissingNumbers(ids);
-  if (missing.length) return missing[0];
-  return Math.max(...ids) + 1 || 1;
+  counter.seq += 1;
+  await counters.modify({ id: name }, "$set", counter);
+  return counter.seq.toString();
 }

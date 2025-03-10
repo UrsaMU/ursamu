@@ -1,0 +1,38 @@
+{
+  "server": {
+    "telnet": 4201,
+    "ws": 4202,
+    "http": 4203,
+    "db": "data/ursamu.db",
+    "counters": "data/counters.db",
+    "chans": "data/chans.db",
+    "mail": "data/mail.db",
+    "bboard": "data/bboard.db"
+  },
+  "game": {
+    "name": "Ursamu",
+    "description": "A Modern MUSH-Like engine written in Typescript.",
+    "version": "0.0.1",
+    "text": {
+      "connect": "../text/default_connect.txt"
+    },
+    "playerStart": "1"
+  },
+  "plugins": {
+    "example": {
+      "enabled": true,
+      "greeting": "Hello from the example plugin!",
+      "features": {
+        "feature1": true,
+        "feature2": false,
+        "feature3": {
+          "enabled": true,
+          "options": {
+            "option1": "value1",
+            "option2": 42
+          }
+        }
+      }
+    }
+  }
+} 

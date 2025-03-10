@@ -1,9 +1,9 @@
-import { Obj } from "../services/DBObjs";
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
-import { canEdit } from "../utils/canEdit";
-import { displayName } from "../utils/displayName";
-import { target } from "../utils/target";
+import { Obj } from "../services/DBObjs/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { canEdit } from "../utils/canEdit.ts";
+import { displayName } from "../utils/displayName.ts";
+import { target } from "../utils/target.ts";
 
 export default () => {
   addCmd({

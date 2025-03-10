@@ -1,6 +1,20 @@
-export * from "./utils";
-export * from "./services";
-export * from "./@types";
-export * from "./app";
-export * from "./main";
-export * from "./ursamu.config";
+// Export types
+export * from "./@types/index.ts";
+
+// Export services
+export * from "./services/Config/mod.ts";
+export * from "./services/Database/index.ts";
+export * from "./services/broadcast/index.ts";
+export * from "./services/commands/index.ts";
+
+// Export the telnet server function directly
+export { startTelnetServer } from "./services/Telnet/telnet.ts";
+
+// Server components
+export { app, server, io } from "./app.ts";
+
+// Export utilities
+export * from "./utils/index.ts";
+
+// Export the main MU function
+export { mu } from "./main.ts";

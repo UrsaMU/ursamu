@@ -1,12 +1,10 @@
-import { getCharacter } from "../plugins/wod/services";
-import { Obj } from "../services";
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-
-import { addCmd } from "../services/commands";
-import { canEdit } from "../utils/canEdit";
-import { displayName } from "../utils/displayName";
-import { target } from "../utils/target";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { canEdit } from "../utils/canEdit.ts";
+import { displayName } from "../utils/displayName.ts";
+import { target } from "../utils/target.ts";
+import { IDBOBJ } from "../@types/IDBObj.ts";
 
 export default () => {
   addCmd({
@@ -14,18 +12,22 @@ export default () => {
     pattern: /^e[xamine]+\s+(.*)$/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
-      const en = await Obj.get(ctx.socket.cid);
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
 
       const tar = await target(en, args[0]);
-      const loc = await Obj.get(tar?.location);
-
+      if (!tar) {
+        return send([ctx.socket.id], "I don't see that here.");
+      }
+      
+      const loc = tar.location ? await dbojs.queryOne({ id: tar.location }) : null;
       if (en && tar && canEdit(en, tar)) {
         delete tar.data?.password;
         let output = `%chName:%cn ${tar.data?.name}${
           tar.data?.alias ? "(" + tar.data?.alias.toUpperCase() + ")" : ""
         }\n`;
-        output += `%ch_ID:%cn ${tar._id}\n`;
+        output += `%ch_ID:%cn ${tar.id}\n`;
         output += `%chDBREF:%cn #${tar.id}\n`;
         output += `%chFLAGS:%cn ${tar.flags}\n`;
         output += `%chLOCATION%cn ${loc ? displayName(en, loc) : "None?!"}\n`;

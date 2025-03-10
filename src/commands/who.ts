@@ -1,9 +1,9 @@
-import { Obj } from "../services/DBObjs";
-import { dbojs } from "../services/Database";
-import { send } from "../services/broadcast";
-import { addCmd } from "../services/commands";
-import { idle, moniker } from "../utils";
-import { center, header, ljust, repeatString } from "../utils/format";
+import { Obj } from "../services/DBObjs/index.ts";
+import { dbojs } from "../services/Database/index.ts";
+import { send } from "../services/broadcast/index.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { idle, moniker } from "../utils/index.ts";
+import { center, header, ljust, repeatString } from "../utils/format.ts";
 
 export default () => {
   addCmd({
@@ -23,7 +23,7 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
-      const playersRaw = await dbojs.find({
+      const playersRaw = await dbojs.query({
         $and: [{ flags: /player/ }, { flags: /connected/ }],
       });
 

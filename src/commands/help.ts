@@ -1,20 +1,24 @@
-import { addCmd, cmds } from "../services/commands";
-import { dbojs } from "../services/Database";
-import { flags } from "../services/flags/flags";
-import parser from "../services/parser/parser";
-import { center, columns, repeatString } from "../utils/format";
-import { send } from "../services/broadcast";
-import cfg from "../ursamu.config";
-import { type HelpFileData, txtFiles } from "../services/text";
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { addCmd, cmds } from "../services/commands/index.ts";
+import { dbojs } from "../services/Database/index.ts";
+import { flags } from "../services/flags/flags.ts";
+import parser from "../services/parser/parser.ts";
+import { center, columns, ljust, repeatString } from "../utils/format.ts";
+import { send } from "../services/broadcast/index.ts";
+import { getConfig } from "../services/Config/mod.ts";
+import { ICmd, IHelp } from "../@types/index.ts";
+import { dpath } from "../../deps.ts";
 
+const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
 export default async () => {
   addCmd({
     name: "help",
     pattern: /^[/+@]?help$/i,
     hidden: true,
     exec: async (ctx) => {
-      const player = await dbojs.findOne({ id: ctx.socket.cid });
-      const flgs = player?.flags || "";
+      const player = ctx.socket.cid ? await dbojs.queryOne({ id: ctx.socket.cid }) : null;
+      const flgs = player ? player.flags || "" : "";
 
       let cats: Set<string> = new Set();
       let commands: any = [];
@@ -50,43 +54,14 @@ export default async () => {
             .localeCompare(parser.stripSubs("telnet", b.name.toLowerCase()))
         );
 
-      // Add topic files that don't correspond to commands
-      const topicFiles = Array.from(txtFiles.entries())
-        .filter(([key, data]: [string, HelpFileData]) =>
-          key.startsWith("topic_") && !data.hidden
-        )
-        .map(([key, data]: [string, HelpFileData]) => {
-          const name = key.replace("topic_", "").replace(".md", "")
-            .toUpperCase();
-          const category = data.category || "Topics";
-          cats.add(category);
-          return { name, category };
-        });
-
-      // Add help files that don't correspond to commands
-      const helpFiles = Array.from(txtFiles.entries())
-        .filter(([key, data]: [string, HelpFileData]) =>
-          key.startsWith("help_") && !data.hidden &&
-          !localCmds.some((cmd) => key === `help_${cmd.name}.md`)
-        )
-        .map(([key, data]: [string, HelpFileData]) => {
-          const name = key.replace("help_", "").replace(".md", "")
-            .toUpperCase();
-          const category = data.category || "General";
-          cats.add(category);
-          return { name, category };
-        });
-
-      // Add all visible files to commands
-      commands = [...commands, ...topicFiles, ...helpFiles];
-
-      let output = center(
-        `%cy[%cn %ch%cc${
-          cfg.config.game?.name ? cfg.config.game.name + " " : ""
-        }%cn%chHelp%cn System %cy]%cn`,
-        78,
-        "%cr=%cn",
-      ) + "\n";
+      let output =
+        center(
+          `%cy[%cn %ch%cc${
+            getConfig<any>('game.name') ? getConfig<any>('game.name') + " " : ""
+          }%cn%chHelp%cn System %cy]%cn`,
+          78,
+          "%cr=%cn"
+        ) + "\n";
 
       for (const cat of Array.from(cats).sort((a, b) => a.localeCompare(b))) {
         output +=

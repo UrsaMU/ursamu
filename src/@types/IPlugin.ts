@@ -1,6 +1,6 @@
-/**
- * Interface for plugins in the system
- */
+import { ICmd } from "./ICmd.ts";
+import { IConfig } from "./IConfig.ts";
+
 export interface IPlugin {
   /**
    * Initialize the plugin

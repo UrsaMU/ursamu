@@ -1,11 +1,11 @@
-import { MiddlewareStack } from "./middleware";
-import { ICmd } from "../../@types/ICmd";
-import { flags } from "../flags/flags";
-import { send } from "../broadcast";
-import { dbojs } from "../Database";
-import { matchExits } from "./movement";
-import { matchChannel } from "./channels";
-import { Obj } from "../DBObjs";
+import { MiddlewareStack } from "./middleware.ts";
+import { ICmd } from "../../@types/ICmd.ts";
+import { flags } from "../flags/flags.ts";
+import { send } from "../broadcast/index.ts";
+import { dbojs } from "../Database/index.ts";
+import { matchExits } from "./movement.ts";
+import { matchChannel } from "./channels.ts";
+import { Obj } from "../DBObjs/DBObjs.ts";
 
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
@@ -27,7 +27,7 @@ export const addCmd = (...newCmds: ICmd[]) => {
 };
 
 cmdParser.use(async (ctx, next) => {
-  const char = await dbojs.findOne({ id: ctx.socket.cid });
+  const char = await Obj.get(ctx.socket.cid);
   const { msg } = ctx;
   for (const cmd of cmds) {
     const match = msg?.trim().match(cmd.pattern);
@@ -37,10 +37,9 @@ cmdParser.use(async (ctx, next) => {
         ctx.socket.lastCommand = timestamp;
         // Store lastCommand in database
         if (char) {
-          await dbojs.update({ id: ctx.socket.cid }, {
-            ...char,
-            lastCommand: timestamp,
-          });
+          char.data ||= {};
+          char.data.lastCommand = Date.now();
+          await dbojs.modify({ id: char.id }, "$set", char);
         }
         await cmd.exec(ctx, match.slice(1))?.catch((e) => {
           console.error(e);
