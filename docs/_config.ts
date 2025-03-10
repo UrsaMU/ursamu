@@ -33,7 +33,8 @@ site
   .use(date())
   .use(nunjucks())
   .copy("assets")
-  .ignore("README.md", "deno.json", "_site", "node_modules");
+  .copy("assets/css")
+  .ignore("README.md", "deno.json", "_site", "node_modules", "scripts");
 
 // Global site data
 site.data("site", {
