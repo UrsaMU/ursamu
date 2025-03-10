@@ -1,5 +1,5 @@
 {
-  "nodeModulesDir": true,
+  "nodeModulesDir": "auto",
   "tasks": {
     "start": "bash ./scripts/run.sh",
     "server": "deno run -A --unstable-detect-cjs --unstable-kv ./src/main.ts",

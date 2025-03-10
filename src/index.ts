@@ -8,7 +8,7 @@ export * from "./services/broadcast/index.ts";
 export * from "./services/commands/index.ts";
 
 // Export the telnet server function directly
-export { startTelnetServer } from "./services/Telnet/telnet.ts";
+export { startTelnetServer } from "./services/telnet/telnet.ts";
 
 // Server components
 export { app, server, io } from "./app.ts";
