@@ -160,7 +160,7 @@ console.log("Created scripts/run.sh");
 try {
   await Deno.chmod(join(targetDir, "scripts", "run.sh"), 0o755);
   console.log("Made scripts/run.sh executable");
-} catch (error) {
+} catch {
   console.warn("Warning: Could not make scripts/run.sh executable. You may need to do this manually.");
 }
 
@@ -217,21 +217,50 @@ console.log("Created deno.json");
 // Create a README.md file
 const readmeContent = `# ${projectName}
 
-A custom UrsaMU game built with the UrsaMU engine.
+A modern MU* game built with the UrsaMU engine - a next-generation MUSH-like platform written in TypeScript.
 
-## Architecture
+<p align="center">
+  <img src="https://ursamu.io/ursamu_github_banner.png" alt="${projectName} Banner" width="600">
+</p>
 
-This project uses a dual-server architecture:
-- **Main Server**: Handles the core game logic, database operations, and web interfaces
-- **Telnet Server**: Runs as a separate process to handle telnet connections
+## 🏗️ Architecture
 
-Both servers can restart independently when their respective files change, thanks to watch mode.
+${projectName} uses a microservices architecture with independent processes:
 
-## Getting Started
+### Core Services
 
-### Running Both Servers
+- **Main Server** (src/main.ts)
+  - Game engine and core logic
+  - Database operations
+  - Web API endpoints
+  - WebSocket connections
+  - Plugin management
 
-To start both the main server and telnet server with watch mode:
+- **Telnet Server** (src/telnet.ts)
+  - Dedicated telnet connection handling
+  - Runs as a separate process
+  - Can restart independently
+
+### Database Services
+
+Multiple KV databases for different game aspects:
+- Main database (data/ursamu.db)
+- Counters (data/counters.db)
+- Channels (data/chans.db)
+- Mail system (data/mail.db)
+- Bulletin boards (data/bboard.db)
+
+### Network Services
+
+- **Telnet**: Port 4201 - Classic MU* connection
+- **WebSocket**: Port 4202 - Modern web clients
+- **HTTP API**: Port 4203 - RESTful API and web interface
+
+## 🚀 Getting Started
+
+### Quick Start
+
+To launch all services with automatic reload:
 
 \`\`\`bash
 deno task start
@@ -240,13 +269,13 @@ bash ./scripts/run.sh
 \`\`\`
 
 This will:
-- Start both servers as separate processes
-- Enable watch mode for automatic reloading when files change
-- Allow each server to restart independently
+- Start all services as independent processes
+- Enable watch mode for automatic reloading
+- Allow each service to restart independently when its files change
 
-### Running Individual Servers
+### Development Mode
 
-For development with individual servers:
+For targeted development:
 
 \`\`\`bash
 # Main server only with watch mode
@@ -256,40 +285,67 @@ deno task dev
 deno task telnet
 \`\`\`
 
-## Connecting to the Game
+## 🔌 Connecting
 
-Once the servers are running, you can connect using:
-- **Telnet**: localhost:4201
-- **WebSocket**: localhost:4202
-- **HTTP**: localhost:4203
+Connect to your game using:
+- **Telnet Client**: \`telnet localhost 4201\`
+- **Web Client**: http://localhost:4203 (if you build a web interface)
+- **WebSocket**: Connect to \`ws://localhost:4202\` from custom clients
+- **HTTP API**: \`http://localhost:4203/api/...\` (if you implement API endpoints)
 
-## Project Structure
+## 📁 Project Structure
 
-- \`/src\`: Source code
-  - \`main.ts\`: Main server entry point
-  - \`telnet.ts\`: Telnet server entry point
-  - \`/plugins\`: Custom plugins
-- \`/scripts\`: Utility scripts
-  - \`run.sh\`: Script to run both servers with watch mode
-- \`/text\`: Text files used by the game
-- \`/help\`: Help files
-- \`/config\`: Configuration files
-- \`/data\`: Database files
+\`\`\`
+${projectName}/
+├── config/             # Configuration files
+├── data/               # Database files
+├── help/               # Help files for in-game help system
+├── scripts/            # Utility scripts
+│   └── run.sh          # Main script to run all services
+├── src/                # Source code
+│   ├── main.ts         # Main server entry point
+│   ├── telnet.ts       # Telnet server entry point
+│   └── plugins/        # Custom plugins
+├── text/               # Text files
+│   └── default_connect.txt  # Welcome screen
+├── deno.json           # Deno configuration and tasks
+└── README.md           # This file
+\`\`\`
 
-## Configuration
+## ⚙️ Configuration
 
-The game configuration is stored in the \`config/config.json\` file.
+The game configuration is stored in \`config/config.json\` and includes:
 
-## Customizing
+- Server ports and database paths
+- Game name, description, and version
+- Text file locations
+- Plugin settings
 
-### Text Files
+## 🧩 Extending Functionality
 
-Edit text files in the \`text\` directory, including:
+### Plugins
+
+Create custom plugins in the \`src/plugins\` directory to extend functionality:
+- Commands
+- Systems
+- Features
+- Integrations
+
+### Customizing Text
+
+Edit files in the \`text/\` directory to customize player-facing content:
 - \`default_connect.txt\`: The welcome screen shown to connecting players
 
-### Adding Plugins
+## 📚 Documentation
 
-Create custom plugins in the \`src/plugins\` directory.
+For more information about UrsaMU:
+- [UrsaMU Website](https://ursamu.io)
+- [UrsaMU Documentation](https://docs.ursamu.io)
+- [UrsaMU GitHub](https://github.com/lcanady/ursamu)
+
+## 📝 License
+
+This project is based on UrsaMU, which is licensed under the MIT License.
 `;
 
 await Deno.writeTextFile(join(targetDir, "README.md"), readmeContent);

@@ -1,0 +1,188 @@
+/* Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #3730a3;
+  --color-primary-dark: #312e81;
+  --color-primary-light: #4f46e5;
+  --color-accent: #8b5cf6;
+  --color-bg-dark: #0f172a;
+  --color-bg-light: #1e293b;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-border: #334155;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-slate-900 text-slate-100;
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-primary);
+}
+
+/* Custom styles */
+.prose h1 {
+  @apply text-3xl font-bold mb-6 text-indigo-300;
+  color: var(--color-text-primary);
+}
+
+.prose h2 {
+  @apply text-2xl font-bold mt-10 mb-4 text-indigo-200 border-b border-slate-700 pb-2;
+  color: var(--color-accent);
+  border-color: var(--color-border);
+}
+
+.prose h3 {
+  @apply text-xl font-semibold mt-8 mb-3 text-indigo-200;
+  color: var(--color-text-primary);
+}
+
+.prose h4 {
+  @apply text-lg font-semibold mt-6 mb-2 text-indigo-100;
+  color: var(--color-text-primary);
+}
+
+.prose p {
+  @apply mb-4 leading-relaxed;
+  color: var(--color-text-secondary);
+}
+
+.prose ul, .prose ol {
+  @apply mb-4 ml-6;
+  color: var(--color-text-secondary);
+}
+
+.prose ul {
+  @apply list-disc;
+}
+
+.prose ol {
+  @apply list-decimal;
+}
+
+.prose li {
+  @apply mb-1;
+}
+
+.prose a {
+  @apply text-purple-400 hover:text-purple-300 underline;
+}
+
+.prose code {
+  @apply bg-slate-800 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.prose pre {
+  @apply bg-slate-800 text-white p-4 rounded-md overflow-x-auto mb-4;
+}
+
+.prose pre code {
+  @apply bg-transparent text-white p-0;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-indigo-500 pl-4 italic text-slate-300 my-4;
+}
+
+.prose table {
+  @apply w-full border-collapse mb-4;
+}
+
+.prose th, .prose td {
+  @apply border border-slate-700 p-2;
+}
+
+.prose th {
+  @apply bg-slate-800 font-semibold;
+}
+
+/* Image styles */
+.prose img {
+  @apply mx-auto my-8 max-w-full;
+
+}
+
+/* Navigation styles */
+.nav-item {
+  @apply block py-1 text-slate-300 hover:text-indigo-300 transition-colors;
+}
+
+.nav-item-active {
+  @apply font-semibold text-indigo-400;
+}
+
+/* Header and footer styles */
+header {
+  @apply bg-slate-800 text-white shadow-md;
+  background-color: var(--color-bg-light);
+}
+
+footer {
+  @apply bg-slate-800 border-t border-slate-700 py-6;
+  background-color: var(--color-bg-light);
+  border-color: var(--color-border);
+}
+
+/* Logo banner styles */
+.logo-banner {
+  @apply py-12 bg-slate-900;
+}
+
+/* Logo styles */
+.logo-container {
+  @apply flex flex-col items-center justify-center;
+}
+
+.logo-image {
+  @apply h-auto;
+  max-width: 100%;
+  width: 768px; /* Matches the typical max-width of the main content column */
+}
+
+.logo-text {
+  @apply text-5xl font-bold text-center text-white;
+}
+
+.logo-subtitle {
+  @apply text-2xl text-center text-purple-300 mt-3;
+}
+
+/* Mobile menu */
+#mobile-menu {
+  @apply bg-slate-800;
+  background-color: var(--color-bg-light);
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary-dark);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Add smooth scrolling behavior to the html element */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add scroll margin to headings for better anchor positioning */
+h1, h2, h3, h4, h5, h6 {
+  scroll-margin-top: 80px; /* Adjust based on your header height */
+} 

@@ -1,0 +1,21 @@
+# Generated site
+_site/
+
+# Node modules (if using npm packages)
+node_modules/
+
+# Deno lock file
+deno.lock
+
+# Environment variables
+.env
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db 

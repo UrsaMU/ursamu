@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from "node:fs";
 import { Socket, createServer } from "node:net";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { Buffer } from "node:buffer";
 import { dpath, io } from "../../../deps.ts";
 import { getConfig } from "../Config/mod.ts";
