@@ -96,6 +96,7 @@ export default () => {
           [ctx.socket.id],
           "%chMAIL:%cn No message entered. Use '-' to enter a message.",
         );
+      }
       await mail.create(message);
       send([ctx.socket.id], "%chMAIL:%cn Message sent.");
       send(
@@ -435,7 +436,6 @@ export default () => {
           [ctx.socket.id],
           "%chMAIL:%cn Message has been read, cannot delete.",
         );
-      }
 
       await mail.delete({ _id: m._id });
       send([ctx.socket.id], "%chMAIL:%cn Message deleted.");

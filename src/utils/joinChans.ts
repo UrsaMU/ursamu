@@ -15,7 +15,7 @@ export const joinChans = async (ctx: IContext) => {
 
   player.data ||= {};
   player.data.lastIp = ctx.socket.handshake.address;
-  await player.save();
+  await dbojs.modify({ id: player.id }, "$set", player);
 
   for (const channel of channels) {
     if (channel.alias && flags.check(player.flags || "", channel.lock || "")) {

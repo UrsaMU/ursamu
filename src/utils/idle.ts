@@ -1,5 +1,4 @@
-import { connectedSockets } from "../app";
-import { dbojs } from "../services/Database";
+import { dbojs } from '../services/Database/index.ts';
 
 export const idle = (secs: number) => {
   const snds = secs ? Math.round((Date.now() - secs) / 1000) : 0;
@@ -45,7 +44,7 @@ export const idle = (secs: number) => {
 
 export const getIdle = async (id: number) => {
   // Get the character data from database
-  const char = await dbojs.findOne({ id });
+  const char = await dbojs.queryOne({ id });
   if (!char) return idle(0);
 
   return idle(char.lastCommand || 0);

@@ -1,18 +1,21 @@
-import fs, { readFileSync } from "node:fs";
-import path from "node:path";
+import {  dpath } from "../../deps.ts";
 import { txtFiles } from "../services/commands/index.ts";
 
-export const loadTxtDir = async (dir: string) => {
-  const files = fs.readdirSync(dir);
-  for (const file of files) {
-    const stat = fs.statSync(path.join(dir, file));
-    if (stat.isDirectory()) {
-      loadTxtDir(path.join(dir, file));
-    } else {
-      if (file.endsWith(".txt") || file.endsWith(".md")) {
-        const content = readFileSync(path.join(dir, file), "utf8");
-        txtFiles.set(file, content);
+export const loadTxtDir = (dir: string) => {
+  try {
+    const files = Deno.readDirSync(dir);
+    for (const file of files) {
+      const filePath = dpath.join(dir, file.name);
+      if (file.isDirectory) {
+        loadTxtDir(filePath);
+      } else {
+        if (file.name.endsWith(".txt") || file.name.endsWith(".md")) {
+          const content = Deno.readTextFileSync(filePath);
+          txtFiles.set(file.name, content);
+        }
       }
     }
+  } catch (error) {
+    console.error(`Error loading text directory ${dir}:`, error);
   }
 };

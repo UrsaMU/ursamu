@@ -10,7 +10,7 @@ export default () => {
       const en = await Obj.get(ctx.socket.cid);
       if (!en) return;
 
-      const tar = await target(en, args[1]);
+      const tar = await target(en.dbobj, args[1]);
       if (!tar) return send([ctx.socket.id], "%chGame>%cn Target not found.");
 
       const tarObj = await Obj.get(tar.id);
@@ -18,7 +18,7 @@ export default () => {
         return send([ctx.socket.id], "%chGame>%cn Target not found.");
       }
 
-      if (!canEdit(en, tar)) {
+      if (!canEdit(en.dbobj, tar)) {
         return send([ctx.socket.id], "%chGame>%cn Permission denied.");
       }
 

@@ -1,4 +1,6 @@
-import { addCmd, Obj, send } from "../services";
+import { addCmd } from "../services/commands/index.ts";
+import { Obj } from "../services/DBObjs/DBObjs.ts";
+import { send } from "../services/broadcast/index.ts";
 
 export default () => {
   addCmd({

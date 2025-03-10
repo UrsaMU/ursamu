@@ -6,4 +6,4 @@
  */
 
 // Re-export everything from the src/index.ts file
-export * from "./src/index.ts"; 
+export * from "src/index.ts"; 

@@ -1,5 +1,3 @@
-import { deepMerge } from "../utils/deepMerge";
-
 export interface IPluginConfig {
   enabled: boolean;
   package?: string; // For npm package plugins
@@ -30,7 +28,7 @@ export interface IConfig {
       connect: string;
     };
   };
-  plugins?: Record<string, any>;
+  plugins?: Record<string, IPluginConfig | unknown>;
 }
 
 export class Config {

@@ -19,12 +19,12 @@ trap cleanup SIGINT SIGTERM
 
 # Run the main server with watch mode
 echo "Starting UrsaMU main server in watch mode..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv --watch src/main.ts &
+deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-sloppy-imports --watch src/main.ts &
 MAIN_PID=$!
 
 # Run the telnet server with watch mode
 echo "Starting UrsaMU telnet server in watch mode..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv --watch src/telnet.ts &
+deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-sloppy-imports --watch src/telnet.ts &
 TELNET_PID=$!
 
 # Wait for both processes
