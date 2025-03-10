@@ -1,33 +1,23 @@
-import { IDBOBJ } from "../@types/IDBObj";
-import { Obj } from "../services";
-import { dbojs } from "../services/Database";
 import { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs } from "../services/Database/index.ts";
 
 export const target = async (
   en: IDBOBJ,
   tar: string = "",
-  global?: Boolean,
-): Promise<Obj | null> => {
-  // Handle special targets
-  if (!tar || tar.toLowerCase() === "here") {
-    const room = await Obj.get(en.location);
-    return room || null;
-export const target = async (
-  en: IDBOBJ,
-  tar: string,
   global?: boolean
-): Promise<IDBOBJ | undefined | false> => {
+): Promise<IDBOBJ | false> => {
+  // Handle special targets
   if (!tar || ["here", "room"].includes(tar.toLowerCase())) {
-    return en.location ? await dbojs.queryOne({ id: en.location }) : undefined;
+    if (en.location) {
+      return await dbojs.queryOne({ id: en.location });
+    }
+    return false;
   }
 
   if (tar.startsWith("#")) {
     return await dbojs.queryOne({ id: tar.slice(1) });
   }
 
-  if (tar.toLowerCase() === "me") {
-    return new Obj().load(en);
   if (["me", "self"].includes(tar.toLowerCase())) {
     return en;
   }
@@ -46,7 +36,7 @@ export const target = async (
   })();
 
   if (!found) {
-    return undefined;
+    return false;
   }
 
   if (global) {
@@ -58,5 +48,5 @@ export const target = async (
     return found;
   }
   
-  return undefined;
+  return false;
 };

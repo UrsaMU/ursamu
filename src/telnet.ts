@@ -1,4 +1,4 @@
-import { startTelnetServer } from "./services/telnet/telnet.ts";
+import { startTelnetServer } from "./services/Telnet/telnet.ts";
 
 // Start the telnet server using the facade
 startTelnetServer();
