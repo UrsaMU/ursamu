@@ -12,8 +12,10 @@
     "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts"
   },
   "compilerOptions": {
-    "lib": ["deno.window"],
-    "types": ["./node_modules/@types/node/index.d.ts", "./deno-types.d.ts"]
+    "lib": ["deno.window"]
   },
-  "importMap": "./import_map.json"
+  "imports": {
+    "ursamu": "https://raw.githubusercontent.com/UrsaMU/ursamu/main/mod.ts",
+    "ursamu/": "https://raw.githubusercontent.com/UrsaMU/ursamu/main/"
+  }
 } 

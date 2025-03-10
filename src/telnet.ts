@@ -1,4 +1,8 @@
-import { startTelnetServer } from "./services/index.ts";
+import { startTelnetServer } from "ursamu";
 
-// Start the telnet server using the facade
-startTelnetServer();
+// Start the telnet server with the correct welcome file path
+startTelnetServer({
+  welcomeFile: "text/default_connect.txt"
+});
+
+console.log("Telnet server is running!");

@@ -23,7 +23,7 @@ const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
  * @param options Additional options for customizing the initialization
  * @returns An object containing references to the initialized components
  */
-export const mu = async (
+export const initializeEngine = async (
   cfg?: IConfig, 
   customPlugins?: IPlugin[],
   options: {
@@ -148,6 +148,9 @@ export const mu = async (
   };
 };
 
+// Export initializeEngine as mu for backward compatibility
+export const mu = initializeEngine;
+
 /**
  * Initialize default rooms if they don't exist
  */
@@ -210,5 +213,31 @@ async function initializeDefaultChannels() {
   }
 }
 
-// Only run the mu function if this file is being executed directly
-if (import.meta.main) mu();
+// Initialize the UrsaMU engine with custom configuration
+const config = {
+  server: {
+    telnet: 4201,
+    ws: 4202,
+    http: 4203,
+    db: "data/ursamu.db",
+    counters: "data/counters.db",
+    chans: "data/chans.db",
+    mail: "data/mail.db",
+    bboard: "data/bboard.db"
+  },
+  game: {
+    name: "UrsaMU",
+    description: "A custom UrsaMU game",
+    version: "0.0.1",
+    text: {
+      connect: "text/default_connect.txt"
+    },
+    playerStart: "1"
+  }
+};
+
+// Start the game engine
+if (import.meta.main) {
+  const game = await initializeEngine(config);
+  console.log(`${game.config.get("game.name")} main server is running!`);
+}
