@@ -28,7 +28,16 @@ site
   .use(prism())
   .use(search())
   .use(sitemap())
-  .use(tailwindcss())
+  .use(tailwindcss({
+    options: {
+      darkMode: 'class',
+      content: [
+        "./_includes/**/*.{njk,md}",
+        "./_layouts/**/*.{njk,md}",
+        "./**/*.{md,njk}",
+      ],
+    },
+  }))
   .use(postcss())
   .use(date())
   .use(nunjucks())
