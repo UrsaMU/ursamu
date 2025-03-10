@@ -1,12 +1,4 @@
-%ch%cc==================================%cn
-%ch%cw Welcome to %cyUrsaMU%cn
-%ch%cc==================================%cn
-
 A modern MUSH-like engine written in TypeScript.
-
-%ch%cwType %cy'connect <n> <password>'%cw to connect.%cn
-%ch%cwType %cy'create <n> <password>'%cw to create a new character.%cn
-%ch%cwType %cy'quit'%cw to disconnect.%cn
 
 888     888 8888888b.   .d8888b.        d8888 888b     d888 888     888 
 888     888 888   Y88b d88P  Y88b      d88888 8888b   d8888 888     888 
