@@ -1,10 +1,10 @@
 {
   "tasks": {
-    "lume": "echo \"import 'lume/cli.ts'\" | deno run --allow-all --allow-read --allow-write --allow-net --allow-env --allow-run -",
+    "lume": "echo \"import 'lume/cli.ts'\" | deno run -A -",
     "build": "deno task lume",
     "serve": "deno task lume -s",
-    "add-frontmatter": "deno run --allow-read --allow-write scripts/add-frontmatter.ts",
-    "create-page": "deno run --allow-read --allow-write scripts/create-page.ts"
+    "add-frontmatter": "deno run -A scripts/add-frontmatter.ts",
+    "create-page": "deno run -A scripts/create-page.ts"
   },
   "imports": {
     "lume/": "https://deno.land/x/lume@v2.0.0/"

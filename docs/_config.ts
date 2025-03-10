@@ -33,6 +33,8 @@ site
   .use(date())
   .use(nunjucks())
   .copy("assets")
+  .copy("styles.css")
+  .copy("prism.css")
   .ignore("README.md", "deno.json", "_site", "node_modules");
 
 // Global site data
