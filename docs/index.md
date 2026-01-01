@@ -1,46 +1,59 @@
 ---
 layout: layout.njk
-description: Documentation for UrsaMU, a modern MU* server built with Deno
-hideTitle: true
-nav:
-  - text: Getting Started
-    url: "#getting-started"
-  - text: For Developers
-    url: "#for-developers"
-  - text: Resources
-    url: "#resources"
-  - text: License
-    url: "#license"
+title: Welcome
+description: The official documentation for UrsaMU, a modern MU* engine for the next generation.
 ---
 
-<img src="/assets/ursamu_github_banner.png" alt="UrsaMU Logo" class="rounded-lg shadow-lg max-w-full mb-8" />
+<div class="text-center py-12">
+  <img src="/assets/logo.png" alt="UrsaMU Banner" class="mx-auto rounded-3xl shadow-2xl border border-ursamu-primary/50 mb-12 max-w-2xl w-full" />
 
-UrsaMU is a modern MU* server built with Deno, designed to be fast, secure, and easy to use. This documentation will help you get started with UrsaMU, whether you're a player, administrator, or developer.
+<h1 class="text-6xl font-black mb-4">UrsaMU</h1>
+  <p class="text-2xl text-purple-300/80 max-w-2xl mx-auto leading-relaxed">
+    A high-performance, modular MU* engine built with TypeScript and Deno.
+  </p>
+</div>
 
-## Getting Started
+---
 
-Get up and running with UrsaMU quickly:
+<div class="grid md:grid-cols-2 gap-8 my-16">
+  <div class="bg-ursamu-primary/10 border border-ursamu-primary/20 p-8 rounded-3xl hover:border-ursamu-accent/50 transition-colors">
+    <h2 class="mt-0! text-ursamu-accent flex items-center gap-3">
+      <span>🚀</span> Getting Started
+    </h2>
+    <p class="mb-6 opacity-80">Quickly set up your own world and start building.</p>
+    <ul class="space-y-3 list-none! pl-0!">
+      <li><a href="./guides/installation.md" class="font-bold">Installation Guide</a></li>
+      <li><a href="./configuration/README.md" class="font-bold">Configuration</a></li>
+      <li><a href="./guides/user-guide.md" class="font-bold">User Guide</a></li>
+    </ul>
+  </div>
 
-- [**Installation Guide**](./guides/installation) - Install UrsaMU on your system
-- [**Configuration**](./configuration/) - Configure your UrsaMU server
-- [**User Guide**](./guides/user-guide) - Learn how to use UrsaMU as a player
+<div class="bg-ursamu-primary/10 border border-ursamu-primary/20 p-8 rounded-3xl hover:border-ursamu-accent/50 transition-colors">
+    <h2 class="mt-0! text-ursamu-accent flex items-center gap-3">
+      <span>🛠</span> Developer Portal
+    </h2>
+    <p class="mb-6 opacity-80">Deep dive into the core engine and plugin system.</p>
+    <ul class="space-y-3 list-none! pl-0!">
+      <li><a href="./api/README.md" class="font-bold">API Reference</a></li>
+      <li><a href="./plugins/README.md" class="font-bold">Plugin Development</a></li>
+      <li><a href="./development/contributing.md" class="font-bold">Contributing</a></li>
+    </ul>
+  </div>
+</div>
 
-## For Developers
+---
 
-Extend and customize UrsaMU to fit your needs:
+## 📚 Community & Resources
 
-- [**API Reference**](./api/) - Detailed API documentation
-- [**Plugin Development**](./plugins/) - Create plugins to extend UrsaMU
-- [**Contributing**](./development/contributing) - Contribute to the UrsaMU project
+Get help and connect with other builders:
 
-## Resources
+- [**GitHub Repository**](https://github.com/ursamu/ursamu) - Source code and
+  issue tracking.
+- [**Discord Server**](https://discord.gg/ursamu) - Get real-time help and chat
+  with the community.
 
-Additional resources for the UrsaMU community:
+---
 
-- [**GitHub Repository**](https://github.com/ursamu/ursamu) - Source code and issue tracking
-- [**Community Forum**](https://ursamu.io/forum) - Discuss UrsaMU with other users
-- [**Discord Server**](https://discord.gg/ursamu) - Get real-time help and chat with the community
-
-## License
-
-UrsaMU is licensed under the [MIT License](../LICENSE), which means you can use, modify, and distribute it freely. 
+<div class="text-center opacity-50 text-sm italic">
+  UrsaMU is licensed under the MIT License.
+</div>

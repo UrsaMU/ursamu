@@ -1,165 +1,58 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang }}" class="{{ site.theme }}">
+<html lang="{{ site.lang }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ site.title }}</title>
+  <title>{{ title }} | {{ site.title }}</title>
   <meta name="description" content="{{ description or site.description }}">
   <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="/prism.css">
-  <meta name="theme-color" content="#0f172a">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 </head>
-<body class="min-h-screen flex flex-col bg-slate-900 text-slate-200">
-  <!-- Header with navigation -->
-  <header class="bg-slate-800 shadow-lg sticky top-0 z-10">
-    <div class="container mx-auto px-4 py-3">
-      <div class="flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold text-white flex items-center">
-          <span class="text-purple-400 mr-2">UrsaMU</span> Docs
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/" class="flex items-center gap-3 group">
+        <img src="/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform" />
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        {% for item in site.nav %}
+          <a href="{{ item.url }}" class="hover:text-ursamu-accent transition-colors font-medium">
+            {{ item.text }}
+          </a>
+        {% endfor %}
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="{{ site.repository }}" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
         </a>
-        
-        <nav class="hidden lg:block">
-          <ul class="flex space-x-8">
-            {% for item in site.nav %}
-            <li>
-              <a href="{{ item.url }}" class="text-slate-300 hover:text-purple-300 transition-colors py-2">{{ item.text }}</a>
-            </li>
-            {% endfor %}
-          </ul>
-        </nav>
-        
-        <button id="menu-toggle" class="lg:hidden text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Mobile menu -->
-    <div id="mobile-menu" class="hidden lg:hidden border-t border-slate-700">
-      <div class="container mx-auto px-4 py-3">
-        <ul class="space-y-3">
-          {% for item in site.nav %}
-          <li>
-            <a href="{{ item.url }}" class="block py-2 text-slate-300 hover:text-purple-300 transition-colors">{{ item.text }}</a>
-          </li>
-          {% endfor %}
-        </ul>
       </div>
     </div>
   </header>
 
-  <!-- Main content area -->
-  <div class="container mx-auto px-4 {% if hideTitle %}pt-4{% else %}py-8{% endif %} flex-grow">
-    <div class="flex flex-col lg:flex-row lg:gap-12">
-      <!-- Sidebar navigation (if available) -->
-      {% if nav %}
-      <aside class="lg:w-72 flex-shrink-0 mb-8 lg:mb-0 order-2 lg:order-1">
-        <div class="sticky top-24 bg-slate-800 rounded-lg p-6 shadow-lg">
-          <h3 class="text-lg font-semibold mb-4 text-white">On This Page</h3>
-          <nav>
-            {% if nav[0] and nav[0].text %}
-              <ul class="space-y-3 border-l border-slate-700 pl-4">
-                {% for item in nav %}
-                <li>
-                  <a href="{{ item.url }}" class="block py-1 text-purple-400 hover:text-purple-300 transition-colors">{{ item.text }}</a>
-                </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              {{ nav | safe }}
-            {% endif %}
-          </nav>
-        </div>
-      </aside>
-      {% endif %}
-      
-      <!-- Main content -->
-      <main class="w-full order-1 lg:order-2 {% if nav %}lg:max-w-3xl{% endif %}">
-        <article class="prose prose-invert prose-headings:text-white prose-a:text-purple-400 prose-a:no-underline hover:prose-a:text-purple-300 prose-a:transition-colors max-w-none {% if hideTitle %}pt-0 mt-0{% endif %}">
-          {% if title and not hideTitle %}
-          <h1 class="text-3xl lg:text-4xl font-bold mb-6">{{ title }}</h1>
-          {% endif %}
-          {{ content | safe }}
-        </article>
-      </main>
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      {{ content | safe }}
     </div>
-  </div>
+  </main>
 
-  <!-- Footer -->
-  <footer class="bg-slate-800 py-8 mt-12 border-t border-slate-700">
-    <div class="container mx-auto px-4">
-      <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-6 md:mb-0">
-          <p>&copy; {{ site.author }} - <a href="{{ site.repository }}" class="text-purple-400 hover:text-purple-300 transition-colors">GitHub Repository</a></p>
-        </div>
-        <div>
-          <p>Built with <a href="https://lume.land" class="text-purple-400 hover:text-purple-300 transition-colors">Lume</a> for <a href="https://deno.land" class="text-purple-400 hover:text-purple-300 transition-colors">Deno</a></p>
-        </div>
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        &copy; {{ date | date('yyyy') }} UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
       </div>
     </div>
   </footer>
 
-  <script>
-    // Mobile menu toggle
-    document.getElementById('menu-toggle').addEventListener('click', function() {
-      document.getElementById('mobile-menu').classList.toggle('hidden');
-    });
-
-    // Smooth scrolling for anchor links
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add IDs to headings if they don't have them
-      const article = document.querySelector('article');
-      if (article) {
-        const headings = article.querySelectorAll('h2, h3, h4, h5, h6');
-        headings.forEach(heading => {
-          if (!heading.id) {
-            // Create ID from heading text
-            const id = heading.textContent
-              .toLowerCase()
-              .replace(/[^\w\s-]/g, '')
-              .replace(/[\s_-]+/g, '-')
-              .replace(/^-+|-+$/g, '');
-            heading.id = id;
-          }
-        });
-      }
-      
-      // Get all links that have hash (#) in them
-      const anchorLinks = document.querySelectorAll('a[href^="#"]');
-      
-      // Add click event listener to each anchor link
-      anchorLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-          // Prevent default jump-to behavior
-          e.preventDefault();
-          
-          // Get the target element
-          const targetId = this.getAttribute('href');
-          if (targetId === '#') return; // Skip if it's just "#"
-          
-          const targetElement = document.querySelector(targetId);
-          
-          if (targetElement) {
-            // Calculate header height for offset
-            const headerHeight = document.querySelector('header').offsetHeight;
-            
-            // Get the target's position
-            const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
-            
-            // Scroll to the target with offset for the header
-            window.scrollTo({
-              top: targetPosition - headerHeight - 20, // 20px extra padding
-              behavior: 'smooth'
-            });
-            
-            // Update URL hash without jumping
-            history.pushState(null, null, targetId);
-          }
-        });
-      });
-    });
-  </script>
 </body>
-</html> 
+</html>

@@ -12,7 +12,7 @@ import nunjucks from "lume/plugins/nunjucks.ts";
 
 const site = lume({
   src: "./",
-  dest: "../site",
+  dest: "_site",
   location: new URL("https://ursamu.github.io/"),
 });
 
@@ -28,11 +28,26 @@ site
   .use(prism())
   .use(search())
   .use(sitemap())
-  .use(tailwindcss())
+  .use(tailwindcss({
+    options: {
+      theme: {
+        extend: {
+          colors: {
+            ursamu: {
+              bg: "#1a0b2e",
+              primary: "#4c1d95",
+              accent: "#8b5cf6",
+            },
+          },
+        },
+      },
+    },
+  }))
   .use(postcss())
   .use(date())
   .use(nunjucks())
   .copy("assets")
+  .copy("init.ts")
   .ignore("README.md", "deno.json", "_site", "node_modules");
 
 // Global site data
@@ -41,7 +56,8 @@ site.data("site", {
   description: "Documentation for UrsaMU, a modern MU* server built with Deno",
   author: "UrsaMU Team",
   lang: "en",
-  repository: "https://github.com/lcanady/ursamu",
+  layout: "layout.njk",
+  repository: "https://github.com/ursamu/ursamu",
   theme: "dark",
   nav: [
     { text: "Home", url: "/" },
@@ -53,4 +69,4 @@ site.data("site", {
   ],
 });
 
-export default site; 
+export default site;

@@ -184,7 +184,7 @@ A modern MUSH-like engine written in TypeScript.
 Y88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P 
  "Y88888P"  888   T88b  "Y8888P" d88P     888 888       888  "Y88888P"  
 
->> A Next Generation MU*. https://ursamu.io
+>> A Next Generation MU*. https://github.com/ursamu/ursamu
 
 Use 'create <name> <password>' to create a new character. 
 Use 'connect <name> <password>' to connect to the game.
@@ -220,7 +220,7 @@ const readmeContent = `# ${projectName}
 A modern MU* game built with the UrsaMU engine - a next-generation MUSH-like platform written in TypeScript.
 
 <p align="center">
-  <img src="https://ursamu.io/ursamu_github_banner.png" alt="${projectName} Banner" width="600">
+  <img src="https://raw.githubusercontent.com/ursamu/ursamu/main/ursamu_github_banner.png" alt="${projectName} Banner" width="600">
 </p>
 
 ## 🏗️ Architecture
@@ -339,9 +339,8 @@ Edit files in the \`text/\` directory to customize player-facing content:
 ## 📚 Documentation
 
 For more information about UrsaMU:
-- [UrsaMU Website](https://ursamu.io)
-- [UrsaMU Documentation](https://docs.ursamu.io)
-- [UrsaMU GitHub](https://github.com/lcanady/ursamu)
+- [UrsaMU Documentation](https://ursamu.github.io/)
+- [UrsaMU GitHub](https://github.com/ursamu/ursamu)
 
 ## 📝 License
 

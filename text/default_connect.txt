@@ -9,7 +9,7 @@ A modern MUSH-like engine written in TypeScript.
 Y88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P 
  "Y88888P"  888   T88b  "Y8888P" d88P     888 888       888  "Y88888P"  
 
->> A Next Generation MU*. https://ursamu.io
+>> A Next Generation MU*. https://github.com/ursamu/ursamu
 
 Use 'create <name> <password>' to create a new character. 
 Use 'connect <name> <password>' to connect to the game.
