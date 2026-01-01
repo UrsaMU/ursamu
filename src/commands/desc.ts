@@ -11,6 +11,7 @@ export default () =>
     lock: "connected",
     help: "Set a description",
     exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
       const tar = await target(en, args[0]);

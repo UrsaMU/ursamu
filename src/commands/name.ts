@@ -10,7 +10,7 @@ export default () => {
     pattern: /^[@/+]?name\s+(.*)\s*=\s*(.*)/i,
     lock: "connected",
     exec: async (ctx, args) => {
-      const en = await dbojs.queryOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid || "" });
       if (!en) return;
 
       const potential = await dbojs.queryOne({ name: new RegExp(args[2], "i") });

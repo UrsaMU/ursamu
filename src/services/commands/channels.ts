@@ -17,46 +17,44 @@ export const matchChannel = async (ctx: IContext) => {
   const trig = parts[0];
   let msg = parts.slice(1).join(" ").trim();
   const match = msg?.match(/^(:|;)?(.*)$/i);
+  if (!match) return false;
 
-  if(!en.data?.channels) {
+  if (!en.data?.channels) {
     return false;
   }
   const channel = en.data?.channels?.find((c: IChanEntry) => c.alias === trig)
-  if(!channel) {
+  if (!channel) {
     return false;
   }
   const chan = await chans.queryOne({ name: channel.channel });
 
-  if(!chan) {
+  if (!chan) {
     return false;
   }
   if (!flags.check(en.flags || "", channel?.lock || "")) return false;
   if (match[1] === ":") {
-    msg = `${chan?.title ? chan?.title + " " : ""}${
-      chan?.mask ? chan.mask : moniker(en)
-    } ${match[2]}`;
+    msg = `${channel?.title ? channel?.title + " " : ""}${channel?.mask ? channel.mask : moniker(en)
+      } ${match[2]}`;
   } else if (match[1] === ";") {
-    msg = `${chan?.title ? chan?.title + " " : ""}${
-      chan?.mask ? chan.mask : moniker(en)
-    }${match[2]}`;
-  } else if (msg.toLowerCase() === "on" && chan?.active === false) {
-    chan.active = true;
-    ctx.socket.join(chan.channel);
+    msg = `${channel?.title ? channel?.title + " " : ""}${channel?.mask ? channel.mask : moniker(en)
+      }${match[2]}`;
+  } else if (msg.toLowerCase() === "on" && channel?.active === false) {
+    channel.active = true;
+    ctx.socket.join(channel.channel);
     await dbojs.update({ id: en.id }, en);
-    force(ctx, `${chan.alias} :has joined the channel.`);
-    send([ctx.socket.id], `You have joined channel ${chan.channel}.`, {});
+    force(ctx, `${channel.alias} :has joined the channel.`);
+    send([ctx.socket.id], `You have joined channel ${channel.channel}.`, {});
     return true;
-  } else if (msg.toLowerCase() === "off" && chan?.active === true) {
-    await force(ctx, `${chan.alias} :has left the channel.`);
-    chan.active = false;
-    ctx.socket.leave(chan.channel);
+  } else if (msg.toLowerCase() === "off" && channel?.active === true) {
+    await force(ctx, `${channel.alias} :has left the channel.`);
+    channel.active = false;
+    ctx.socket.leave(channel.channel);
     await dbojs.update({ id: en.id }, en);
-    send([ctx.socket.id], `You have left channel ${chan.channel}.`, {});
+    send([ctx.socket.id], `You have left channel ${channel.channel}.`, {});
     return true;
   } else {
-    msg = `${chan?.title || ""}${
-      chan?.mask ? chan.mask : moniker(en)
-    } says, "${msg}"`;
+    msg = `${channel?.title || ""}${channel?.mask ? channel.mask : moniker(en)
+      } says, "${msg}"`;
   }
 
   if (!channel?.active) {

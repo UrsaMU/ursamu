@@ -18,7 +18,8 @@ nav:
 
 # Installation Guide
 
-This guide will walk you through the process of installing and setting up UrsaMU on your system.
+This guide will walk you through the process of installing and setting up UrsaMU
+on your system.
 
 ## Prerequisites
 
@@ -29,7 +30,8 @@ Before installing UrsaMU, ensure you have the following:
 
 ## Installation Methods
 
-UrsaMU can be installed in multiple ways. Choose the method that works best for your environment.
+UrsaMU can be installed in multiple ways. Choose the method that works best for
+your environment.
 
 ### Method 1: Direct from GitHub
 
@@ -50,7 +52,7 @@ UrsaMU provides a CLI tool for creating new projects:
 
 ```bash
 # Install the UrsaMU CLI
-deno install -A -n ursamu https://deno.land/x/ursamu/src/cli/ursamu.ts
+deno task install-cli
 
 # Create a new project
 ursamu create my-game
@@ -70,7 +72,8 @@ cd ursamu
 docker-compose up -d
 ```
 
-The game databases will be exported to the `data/` directory, and configuration will be stored in the `config/` directory.
+The game databases will be exported to the `data/` directory, and configuration
+will be stored in the `config/` directory.
 
 ## Configuration
 
@@ -88,16 +91,19 @@ deno task config --set server.ws 4202
 ```
 
 The configuration is stored in `config/config.json` and includes:
+
 - Server ports and database paths
 - Game name, description, and version
 - Text file locations
 - Plugin settings
 
-For detailed information on all available configuration options, see the [Configuration Guide](../configuration/).
+For detailed information on all available configuration options, see the
+[Configuration Guide](../configuration/).
 
 ## Running the Server
 
-UrsaMU uses a dual-server architecture with the main server and telnet server running as separate processes:
+UrsaMU uses a dual-server architecture with the main server and telnet server
+running as separate processes:
 
 ### Starting Both Servers
 
@@ -107,6 +113,7 @@ deno task start
 ```
 
 This will:
+
 - Start both the main server and telnet server as separate processes
 - Enable watch mode for automatic reloading when files change
 - Allow each server to restart independently
@@ -117,7 +124,7 @@ For development with individual servers:
 
 ```bash
 # Main server only with watch mode
-deno task dev
+deno task server
 
 # Telnet server only with watch mode
 deno task telnet
@@ -129,7 +136,8 @@ Once the server is running, you can connect to it using:
 
 - **Telnet Client**: `telnet localhost 4201`
 - **Web Client**: http://localhost:4203 (if you build a web interface)
-- **Socket.IO Client**: Connect to `http://localhost:4202` from custom clients using the Socket.IO client library
+- **Socket.IO Client**: Connect to `http://localhost:4202` from custom clients
+  using the Socket.IO client library
 
 Example Socket.IO client connection:
 
@@ -146,7 +154,7 @@ socket.on("connect", () => {
 // Listen for messages from the server
 socket.on("message", (data) => {
   console.log("Received:", data.msg);
-  
+
   // Handle special data like disconnection
   if (data.data?.quit) {
     console.log("Server requested disconnect");
@@ -157,25 +165,25 @@ socket.on("message", (data) => {
 // Send a command to the server
 socket.emit("message", {
   msg: "look",
-  data: {}
+  data: {},
 });
 
 // To connect as a player
 socket.emit("message", {
   msg: "connect PlayerName Password",
-  data: {}
+  data: {},
 });
 
 // To create a new character
 socket.emit("message", {
   msg: "create NewCharacter Password",
-  data: {}
+  data: {},
 });
 
 // To disconnect
 socket.emit("message", {
   msg: "quit",
-  data: {}
+  data: {},
 });
 ```
 
@@ -184,5 +192,7 @@ socket.emit("message", {
 Now that you have UrsaMU installed and running, you might want to:
 
 - [**User Guide**](./user-guide) - Learn how to use UrsaMU as a player
-- [**Configuration**](../configuration/) - Explore detailed configuration options
-- [**Plugin Development**](../plugins/index.md) - Learn how to create plugins to extend UrsaMU 
+- [**Configuration**](../configuration/) - Explore detailed configuration
+  options
+- [**Plugin Development**](../plugins/index.md) - Learn how to create plugins to
+  extend UrsaMU

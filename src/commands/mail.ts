@@ -130,6 +130,7 @@ export default () => {
           message,
           read: false,
           date: Date.now(),
+          id: crypto.randomUUID(),
         };
 
         await mail.create(ml);
@@ -321,7 +322,7 @@ export default () => {
       send([ctx.socket.id], output);
       en.dbobj.data ||= {};
       en.dbobj.data.mailread ||= [];
-      en.dbobj.data.mailread.push(m._id!);
+      en.dbobj.data.mailread.push(m.id!);
       await dbojs.modify({ id: en.id }, "$set", en.dbobj);
     },
   });
@@ -345,11 +346,10 @@ export default () => {
         const bcc = m.bcc
           ? await Promise.all(m.bcc.map((id) => Obj.get(id)))
           : "";
-        output += `${en.dbobj.data?.mailread?.includes(m._id!) ? " " : "U"} ${
-          mails.indexOf(m) + 1
-        } From: ${from?.name?.padEnd(15).slice(0, 15)} Subject: ${m.subject
-          .padEnd(45)
-          .slice(0, 45)}\n`;
+        output += `${en.dbobj.data?.mailread?.includes(m.id!) ? " " : "U"} ${mails.indexOf(m) + 1
+          } From: ${from?.name?.padEnd(15).slice(0, 15)} Subject: ${m.subject
+            .padEnd(45)
+            .slice(0, 45)}\n`;
       }
       output += "=".repeat(78);
       send([ctx.socket.id], output);
@@ -388,8 +388,8 @@ export default () => {
       send([ctx.socket.id], output);
       en.dbobj.data ||= {};
       en.dbobj.data.mailread ||= [];
-      if (!en.dbobj.data.mailread.includes(m._id!)) {
-        en.dbobj.data.mailread.push(m._id!);
+      if (!en.dbobj.data.mailread.includes(m.id!)) {
+        en.dbobj.data.mailread.push(m.id!);
         await dbojs.modify({ id: en.id }, "$set", en.dbobj);
       }
     },
@@ -408,14 +408,14 @@ export default () => {
       if (num > mails.length || num < 1)
         return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
       const m = mails[num - 1];
-      const readers = await dbojs.query({ "data.mailread": { $in: [m._id] } });
+      const readers = await dbojs.query({ "data.mailread": { $in: [m.id] } });
       if (readers.length)
         return send(
           [ctx.socket.id],
           "%chMAIL:%cn Message has been read, cannot delete."
         );
 
-      await mail.delete({ _id: m._id });
+      await mail.delete({ id: m.id });
       send([ctx.socket.id], "%chMAIL:%cn Message deleted.");
     },
   });
@@ -470,8 +470,7 @@ export default () => {
 
       await send(
         [ctx.socket.id],
-        `%chMAIL:%cn You have %ch${
-          mails.filter((m) => !en.dbobj.data?.mailread?.includes(m._id!)).length
+        `%chMAIL:%cn You have %ch${mails.filter((m) => !en.dbobj.data?.mailread?.includes(m.id!)).length
         }%cn new messages.`
       );
     },

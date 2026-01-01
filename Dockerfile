@@ -1,21 +1,41 @@
-ARG BASE=denoland/deno:ubuntu
-FROM $BASE
+# Stage 1: Cache dependencies
+FROM denoland/deno:alpine as cache
 
-RUN apt-get -y update && apt-get -y install build-essential bash
-RUN mkdir /ursamu
-WORKDIR /ursamu
-ADD deps.ts LICENSE README.md pup pup.jsonc ursamu_github_banner.png /ursamu/
-ADD help/ /ursamu/help/
-ADD src/ /ursamu/src/
-RUN mkdir /ursamu/data
-RUN deno run -A deps.ts
-RUN deno run -A docker-deps.ts || true
+WORKDIR /app
 
-VOLUME /ursamu/data
-VOLUME /ursamu/text
+# Copy config files
+COPY deno.json import_map.json ./
+# Copy deps file
+COPY deps.ts ./
 
-CMD ["-c", "./pup run"]
-ENTRYPOINT ["/bin/bash"]
+# Cache main dependencies
+RUN deno cache deps.ts
 
-# telnet, ws, http
+# Stage 2: Runtime
+FROM denoland/deno:alpine
+
+WORKDIR /app
+
+# Install bash for the run script
+RUN apk add --no-cache bash
+
+# Copy cached dependencies from stage 1
+COPY --from=cache /deno-dir /deno-dir
+
+# Copy source code
+COPY . .
+
+# Cache application entry points to speed up startup
+RUN deno cache src/main.ts src/telnet.ts
+
+# Expose ports
+# 4201: Telnet
+# 4202: WebSocket
+# 4203: HTTP API
 EXPOSE 4201 4202 4203
+
+# Create volumes for data persistence
+VOLUME ["/app/data", "/app/config"]
+
+# Start the server
+CMD ["deno", "task", "start"]

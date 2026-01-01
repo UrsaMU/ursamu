@@ -5,7 +5,7 @@ export async function plugins(dir: string) {
   for await (const entry of entries) {
     if (entry.isFile) {
       // Dynamically import the module
-      const module = await import(dpath.toFileUrl(entry.path));
+      const module = await import(dpath.toFileUrl(entry.path).href);
       // If the module has a default export function, call it
       module.default?.();
     }

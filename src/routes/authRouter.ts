@@ -24,7 +24,7 @@ router.post("/", async (req: Request, res: Response, next) => {
   obj.dbobj.data ||= {};
   obj.dbobj.data.password ||= "";
 
-  compare(password, obj.dbobj.data.password, async (err, isMatch) => {
+  compare(password, obj.dbobj.data.password, async (err: any, isMatch: boolean) => {
     if (err) return res.status(500).send("Internal server error.");
     if (!isMatch) return res.status(400).send("Invalid username or password.");
 

@@ -1,7 +1,7 @@
-import { IMSocket } from "./IMSocket.ts";
+import { UserSocket, IMSocket } from "./IMSocket.ts";
 
 export interface IContext {
-  socket: IMSocket;
+  socket: UserSocket | IMSocket;
   msg?: string;
   data?: { [key: string]: any };
 }

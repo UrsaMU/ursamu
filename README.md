@@ -6,7 +6,10 @@
 
 ## What is UrsaMU?
 
-UrsaMU is a modern MUSH-like server written in TypeScript and powered by Deno. It provides a flexible, extensible platform for creating text-based, multi-user virtual environments with a focus on performance, modularity, and developer experience.
+UrsaMU is a modern MUSH-like server written in TypeScript and powered by Deno.
+It provides a flexible, extensible platform for creating text-based, multi-user
+virtual environments with a focus on performance, modularity, and developer
+experience.
 
 ## Architecture
 
@@ -14,12 +17,16 @@ UrsaMU uses a microservices architecture with independent processes:
 
 ### Core Services
 
-- **Main Server**: Handles the core game logic, database operations, web API endpoints, Socket.IO connections, and plugin management.
-- **Telnet Server**: Runs as a separate process to handle telnet connections, allowing it to restart independently from the main server.
+- **Main Server**: Handles the core game logic, database operations, web API
+  endpoints, Socket.IO connections, and plugin management.
+- **Telnet Server**: Runs as a separate process to handle telnet connections,
+  allowing it to restart independently from the main server.
 
 ### Database Services
 
-UrsaMU uses Deno KV for efficient data storage, with multiple databases for different game aspects:
+UrsaMU uses Deno KV for efficient data storage, with multiple databases for
+different game aspects:
+
 - Main database (data/ursamu.db)
 - Counters (data/counters.db)
 - Channels (data/chans.db)
@@ -29,19 +36,22 @@ UrsaMU uses Deno KV for efficient data storage, with multiple databases for diff
 ### Network Services
 
 - **Telnet**: Port 4201 - Classic MU* connection
-- **Socket.IO**: Port 4202 - Modern web clients with real-time bidirectional communication
+- **Socket.IO**: Port 4202 - Modern web clients with real-time bidirectional
+  communication
 - **HTTP API**: Port 4203 - RESTful API and web interface
 
 ## Using UrsaMU
 
 UrsaMU can be used in three ways:
 
-1. **As a standalone server**: Run UrsaMU as a complete server and connect via telnet or web client.
+1. **As a standalone server**: Run UrsaMU as a complete server and connect via
+   telnet or web client.
 2. **As a library**: Use UrsaMU as a library to build your own custom MU* game.
 3. **As a plugin platform**: Create plugins to extend UrsaMU's functionality.
 
-For information on using UrsaMU as a library, see [README-LIB.md](README-LIB.md).
-For information on using the UrsaMU CLI, see [README-CLI.md](README-CLI.md).
+For information on using UrsaMU as a library, see the
+[API Documentation](docs/api/index.md). For information on using the UrsaMU CLI,
+see the [Installation Guide](docs/guides/installation.md).
 
 ## Quick Start
 
@@ -66,26 +76,30 @@ deno task start
 ```
 
 This will:
+
 - Start both the main server and telnet server as separate processes
 - Enable watch mode for automatic reloading when files change
 - Allow each server to restart independently
 
 For development with individual servers:
 
+````bash
 ```bash
-# Main server only with watch mode
-deno task dev
+# Main server only
+deno task server
 
-# Telnet server only with watch mode
+# Telnet server only
 deno task telnet
-```
+````
 
 ### Connecting
 
 Connect to your UrsaMU server using:
+
 - **Telnet Client**: `telnet localhost 4201`
 - **Web Client**: http://localhost:4203 (if you build a web interface)
-- **Socket.IO Client**: Connect to `http://localhost:4202` from custom clients using the Socket.IO client library
+- **Socket.IO Client**: Connect to `http://localhost:4202` from custom clients
+  using the Socket.IO client library
 
 ## Creating a New UrsaMU Project
 
@@ -93,7 +107,7 @@ UrsaMU provides a CLI tool for creating new projects:
 
 ```bash
 # Install the UrsaMU CLI
-deno install -A -n ursamu https://deno.land/x/ursamu/src/cli/ursamu.ts
+deno task install-cli
 
 # Create a new project
 ursamu create my-game
@@ -103,7 +117,8 @@ cd my-game
 deno task start
 ```
 
-This creates a new project with the dual-server architecture and watch mode already configured.
+This creates a new project with the dual-server architecture and watch mode
+already configured.
 
 ## Configuration
 
@@ -121,6 +136,7 @@ deno task config --set server.ws 4202
 ```
 
 The configuration is stored in `config/config.json` and includes:
+
 - Server ports and database paths
 - Game name, description, and version
 - Text file locations
@@ -136,6 +152,7 @@ deno task create-plugin my-plugin
 ```
 
 This creates a new plugin with:
+
 - Basic structure implementing the `IPlugin` interface
 - Configuration support
 - Separate main and telnet server files
@@ -155,7 +172,9 @@ src/plugins/my-plugin/
 
 ## Telnet Server
 
-UrsaMU now provides a telnet server that runs as a separate process, allowing it to restart independently from the main server. This improves stability and development experience.
+UrsaMU now provides a telnet server that runs as a separate process, allowing it
+to restart independently from the main server. This improves stability and
+development experience.
 
 To use the telnet server in a child project:
 
@@ -167,14 +186,16 @@ startTelnetServer();
 
 // Or with custom options
 startTelnetServer({
-  port: 4201,                     // Custom port
-  welcomeFile: "text/default_connect.txt" // Custom welcome file
+  port: 4201, // Custom port
+  welcomeFile: "text/default_connect.txt", // Custom welcome file
 });
 ```
 
 ## Socket.IO Integration
 
-UrsaMU uses Socket.IO for real-time bidirectional communication with web clients. This provides a more robust and feature-rich alternative to plain WebSockets, with benefits like:
+UrsaMU uses Socket.IO for real-time bidirectional communication with web
+clients. This provides a more robust and feature-rich alternative to plain
+WebSockets, with benefits like:
 
 - Automatic reconnection
 - Room-based messaging
@@ -209,11 +230,13 @@ cd ursamu
 docker-compose up -d
 ```
 
-The game databases will be exported to the `data/` directory, and configuration will be stored in the `config/` directory.
+The game databases will be exported to the `data/` directory, and configuration
+will be stored in the `config/` directory.
 
 ## Documentation
 
 For more information about UrsaMU:
+
 - [UrsaMU Website](https://ursamu.io)
 - [UrsaMU Documentation](https://docs.ursamu.io)
 
@@ -223,4 +246,5 @@ UrsaMU is licensed under the MIT License.
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome. For major changes, please open an issue first to
+discuss what you would like to change.

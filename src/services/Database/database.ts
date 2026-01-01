@@ -3,25 +3,14 @@ import { getConfig } from "../Config/mod.ts";
 import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
 import { dpath } from "../../../deps.ts";
+import { IDatabase, Query, QueryCondition, QueryOperator } from "../../interfaces/IDatabase.ts";
 // @ts-ignore: Deno namespace is available at runtime
 
 interface WithId {
   id: string;
 }
 
-type QueryCondition = {
-  [key: string]: string | number | boolean | RegExp | QueryCondition | QueryCondition[];
-};
-
-type QueryOperator<T> = {
-  $or?: QueryCondition[];
-  $and?: QueryCondition[];
-  $where?: (this: T) => boolean;
-};
-
-type Query<T> = QueryCondition | QueryOperator<T>;
-
-export class DBO<T extends WithId> {
+export class DBO<T extends WithId> implements IDatabase<T> {
   private static kv: Deno.Kv | null = null;
   private prefix: string;
 
@@ -31,19 +20,21 @@ export class DBO<T extends WithId> {
 
   private async getKv(): Promise<Deno.Kv> {
     if (!DBO.kv) {
+      // Get path from config/env or Use a persistent path for the KV store
+      const dbPath = Deno.env.get("URSAMU_DB") || getConfig<string>("server.db") || "./data/ursamu.db";
+      const dbDir = dpath.dirname(dbPath);
+
       // Create the data directory if it doesn't exist
       try {
-        await Deno.mkdir("./data", { recursive: true });
+        await Deno.mkdir(dbDir, { recursive: true });
       } catch (error) {
         if (!(error instanceof Deno.errors.AlreadyExists)) {
           throw error;
         }
       }
-      
-      // Use a persistent path for the KV store
-      const path = "./data/ursamu.db";
-      console.log(`Opening KV database at: ${path}`);
-      DBO.kv = await Deno.openKv(path);
+
+      console.log(`Opening KV database at: ${dbPath}`);
+      DBO.kv = await Deno.openKv(dbPath);
     }
     return DBO.kv;
   }
@@ -125,19 +116,19 @@ export class DBO<T extends WithId> {
 
   private matchesQuery(value: T, query?: Query<T>): boolean {
     if (!query) return true;
-    
+
     if ('$or' in query && Array.isArray(query.$or)) {
-      return query.$or.some((cond: QueryCondition) => this.matchesQuery(value, cond));
+      return (query.$or as QueryCondition[]).some((cond: QueryCondition) => this.matchesQuery(value, cond));
     }
-    
+
     if ('$and' in query && Array.isArray(query.$and)) {
-      return query.$and.every((cond: QueryCondition) => this.matchesQuery(value, cond));
+      return (query.$and as QueryCondition[]).every((cond: QueryCondition) => this.matchesQuery(value, cond));
     }
-    
+
     if ('$where' in query && typeof query.$where === 'function') {
       return query.$where.call(value);
     }
-    
+
     for (const [key, condition] of Object.entries(query)) {
       if (condition instanceof RegExp) {
         if (!condition.test(value[key as keyof T] as string)) {
@@ -152,6 +143,21 @@ export class DBO<T extends WithId> {
       }
     }
     return true;
+  }
+
+  async update(query: Query<T>, data: T) {
+    const cv = await this.getKv();
+    const plainData = { ...data };
+    await cv.set(this.getKey(data.id), plainData);
+    return data;
+  }
+
+  async find(query?: Query<T>) {
+    return this.query(query);
+  }
+
+  async findOne(query?: Query<T>) {
+    return this.queryOne(query);
   }
 }
 

@@ -1,13 +1,11 @@
-import { readFileSync, existsSync } from "node:fs";
-import { Socket, createServer } from "node:net";
-import { join } from "node:path";
-import { Buffer } from "node:buffer";
-import { dpath, io } from "../../../deps.ts";
+import { dpath } from "../../../deps.ts";
 import { getConfig } from "../Config/mod.ts";
 import parser from "../parser/parser.ts";
 
-interface ITelnetSocket extends Socket {
+interface ITelnetSocket {
   cid?: string;
+  write(data: string | Uint8Array): void;
+  end(): void;
 }
 
 // Define a specific interface for the message data
@@ -26,7 +24,7 @@ interface ISocketMessage {
  * @param options Configuration options for the telnet server
  * @returns The telnet server instance
  */
-export const startTelnetServer = (options?: {
+export const startTelnetServer = async (options?: {
   port?: number;
   welcomeFile?: string;
   wsPort?: number;
@@ -34,39 +32,44 @@ export const startTelnetServer = (options?: {
   const port = options?.port || getConfig<number>("server.telnet");
   const wsPort = options?.wsPort || getConfig<number>("server.ws");
   const welcomeFile = options?.welcomeFile || getConfig<string>("game.text.connect") || "text/default_connect.txt";
-  
+
   const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
   const projectRoot = dpath.dirname(dpath.dirname(dpath.dirname(__dirname)));
-  
+
   try {
     // Try multiple possible locations for the welcome file
     const possiblePaths = [
       // Absolute path
       welcomeFile.startsWith('/') ? welcomeFile : null,
       // Relative to project root
-      join(projectRoot, welcomeFile),
+      dpath.join(projectRoot, welcomeFile),
       // Relative to text directory in project root
-      join(projectRoot, 'text', welcomeFile.split('/').pop() || ''),
+      dpath.join(projectRoot, 'text', welcomeFile.split('/').pop() || ''),
       // Default fallback
-      join(projectRoot, 'text/default_connect.txt'),
+      dpath.join(projectRoot, 'text/default_connect.txt'),
       // Another fallback
-      join(__dirname, '../../../text/default_connect.txt')
+      dpath.join(__dirname, '../../../text/default_connect.txt')
     ].filter(Boolean) as string[];
-    
+
     let welcomePath: string | null = null;
     let welcome = '';
-    
+
     // Try each path until we find one that exists
     for (const path of possiblePaths) {
-      if (path && existsSync(path)) {
-        welcomePath = path;
-        break;
+      if (path) {
+        try {
+          await Deno.stat(path);
+          welcomePath = path;
+          break;
+        } catch {
+          continue;
+        }
       }
     }
-    
+
     if (welcomePath) {
       console.log(`Loading welcome file from: ${welcomePath}`);
-      welcome = readFileSync(welcomePath, "utf8");
+      welcome = await Deno.readTextFile(welcomePath);
     } else {
       // If no file is found, use a default welcome message
       console.log("No welcome file found, using default welcome message");
@@ -83,73 +86,97 @@ A modern MUSH-like engine written in TypeScript.
 `;
     }
 
-    const server = createServer((socket: ITelnetSocket) => {
-      const sock = io(`http://localhost:${wsPort}`);
-      socket.write(welcome + "\r\n");
+    const listener = Deno.listen({ port });
+    console.log(`Telnet server listening on port ${port}`);
 
-      sock.on("message", (data: ISocketMessage) => {
-        if (data.data?.cid) socket.cid = data.data.cid;
-        socket.write(data.msg + "\r\n");
+    // Handle connections
+    (async () => {
+      for await (const conn of listener) {
+        handleTelnetConnection(conn, wsPort, welcome);
+      }
+    })();
 
-        if (data.data?.quit) return socket.end();
-      });
-
-      socket.on("disconnect", () => sock.close());
-      socket.on("error", () => sock.close());
-
-      sock.io.on("reconnect", () => {
-        socket.write(
-          parser.substitute("telnet", "%ch%cg-%cn @reboot Complete.\r\n")
-        );
-        if (socket.cid) {
-          sock.emit("message", {
-            msg: "",
-            data: {
-              cid: socket.cid,
-              reconnect: true,
-            },
-          });
-        }
-      });
-
-      sock.io.on("reconnect_attempt", () => {
-        if (socket.cid) {
-          sock.emit("message", {
-            msg: "",
-            data: {
-              cid: socket.cid,
-              reconnect: true,
-            },
-          });
-        }
-      });
-
-      sock.on("error", () => socket.end());
-
-      socket.on("data", (data: Buffer) => {
-        if (socket.cid) {
-          sock.emit("message", { msg: data.toString(), data: { cid: socket.cid } });
-        } else {
-          sock.emit("message", { msg: data.toString() });
-        }
-      });
-
-      socket.on("end", () => {
-        sock.disconnect();
-      });
-
-      socket.on("error", (err) => {
-        console.log(err);
-      });
-    });
-
-    server.listen(port, () =>
-      console.log(`Telnet server listening on port ${port}`)
-    );
-
-    return server;
+    return listener;
   } catch (error) {
     console.error("Error starting telnet server:", error);
     throw error;
   }
-}; 
+};
+
+async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: string) {
+  const wsUrl = `ws://localhost:${wsPort}`;
+  const sock = new WebSocket(wsUrl);
+  let cid: string | undefined;
+
+  const encoder = new TextEncoder();
+
+  // Helper to write to connection
+  const write = async (data: string | Uint8Array) => {
+    try {
+      if (typeof data === "string") {
+        await conn.write(encoder.encode(data));
+      } else {
+        await conn.write(data);
+      }
+    } catch {
+      // Connection likely closed
+    }
+  };
+
+  await write(welcome + "\r\n");
+
+  sock.onopen = () => {
+    // Telnet just connected to WS
+  };
+
+  sock.onmessage = (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (payload.data?.cid) cid = payload.data.cid;
+
+      // If message is meant for Telnet, it should be in 'msg' (formatted ANSI)
+      if (payload.msg) {
+        write(payload.msg + "\r\n");
+      }
+
+      if (payload.data?.quit) {
+        conn.close();
+        sock.close();
+      }
+    } catch (e) {
+      console.error("Telnet WS Parse Error", e);
+    }
+  };
+
+  sock.onclose = () => {
+    try { conn.close(); } catch { }
+  };
+
+  sock.onerror = (e) => {
+    try { conn.close(); } catch { }
+  };
+
+  // Read from Telnet
+  const buffer = new Uint8Array(1024);
+  try {
+    while (true) {
+      const n = await conn.read(buffer);
+      if (n === null) break; // EOF
+
+      if (sock.readyState === WebSocket.OPEN) {
+        const msg = new TextDecoder().decode(buffer.subarray(0, n)).trim();
+        if (msg) {
+          sock.send(JSON.stringify({
+            msg,
+            data: { cid }
+          }));
+        }
+      }
+    }
+  } catch (err) {
+    // console.log("Connection Error:", err);
+  } finally {
+    try { conn.close(); } catch { }
+    if (sock.readyState === WebSocket.OPEN) sock.close();
+  }
+} 

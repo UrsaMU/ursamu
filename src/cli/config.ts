@@ -73,16 +73,16 @@ if (args.set) {
     console.error("Error: No value provided for --set");
     Deno.exit(1);
   }
-  
+
   let value = args._[0];
-  
+
   // Try to parse the value as JSON
   try {
-    value = JSON.parse(value);
+    if (typeof value === "string") value = JSON.parse(value);
   } catch {
     // If it's not valid JSON, use it as a string
   }
-  
+
   configManager.set(args.set, value);
   configManager.saveConfig();
   console.log(`Configuration key '${args.set}' set to:`, value);

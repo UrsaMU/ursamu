@@ -3,6 +3,9 @@ import { getNextId } from "../../utils/getNextId.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database/index.ts";
 import { flags } from "../flags/flags.ts";
+import { IEntity } from "../../interfaces/IEntity.ts";
+
+import { IAttribute } from "../../@types/IAttribute.ts";
 
 export const createObj = async (flgs: string, datas: any) => {
   const id = await getNextId("objid");
@@ -14,10 +17,10 @@ export const createObj = async (flgs: string, datas: any) => {
   };
 
   await dbojs.create(obj);
-  return await dbojs.query({id});
+  return await dbojs.query({ id });
 };
 
-export class Obj {
+export class Obj implements IEntity {
   private obj: IDBOBJ = {} as IDBOBJ;
 
   constructor(obj?: IDBOBJ) {
@@ -33,7 +36,7 @@ export class Obj {
 
   static async get(obj: string | number | undefined, en?: Obj): Promise<Obj | null> {
     console.log("Obj.get called with:", obj, typeof obj);
-    
+
     if (typeof obj === "string") {
       if (obj.startsWith("#")) {
         const id = obj.slice(1);
@@ -43,12 +46,13 @@ export class Obj {
           return new Obj().load(returnObj);
         }
       } else {
-        const returnObj = await dbojs.queryOne({$or:[{ "data.name": new RegExp(obj, "i") },
-          {id: `${obj}`},
-          {"data.alias": new RegExp(obj, "i")}
-        ],
-        
-      });
+        const returnObj = await dbojs.queryOne({
+          $or: [{ "data.name": new RegExp(obj, "i") },
+          { id: `${obj}` },
+          { "data.alias": new RegExp(obj, "i") }
+          ],
+
+        });
         if (returnObj) {
           console.log("Found by string (name):", returnObj.id);
           return new Obj().load(returnObj);
@@ -62,7 +66,7 @@ export class Obj {
         return new Obj().load(returnObj);
       }
     }
-    
+
     console.log("No object found, returning null");
     // Return null when no object is found
     return null;
@@ -78,7 +82,7 @@ export class Obj {
 
   get name() {
     if (!this.obj) return "";
-    return moniker(this.obj);
+    return moniker(this.obj) || "";
   }
 
   get flags() {
@@ -94,7 +98,7 @@ export class Obj {
   }
 
   get splat() {
-    return this.obj.data?.stats?.find((s) => s.name === "splat")?.value;
+    return this.obj.data?.stats?.find((s: IAttribute) => s.name === "splat")?.value;
   }
 
   get location() {

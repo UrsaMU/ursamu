@@ -9,13 +9,22 @@
     "create-plugin": "bash ./scripts/create-plugin.sh",
     "create": "deno run -A ./src/cli/create.ts",
     "cli": "deno run -A ./src/cli/ursamu.ts",
-    "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts"
+    "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts",
+    "test": "deno test --allow-read --allow-env --allow-write --unstable-kv"
   },
   "compilerOptions": {
-    "lib": ["deno.window"]
+    "lib": [
+      "deno.window",
+      "deno.unstable"
+    ]
   },
   "imports": {
     "ursamu": "https://raw.githubusercontent.com/UrsaMU/ursamu/main/mod.ts",
-    "ursamu/": "https://raw.githubusercontent.com/UrsaMU/ursamu/main/"
+    "ursamu/": "https://raw.githubusercontent.com/UrsaMU/ursamu/main/",
+    "lume": "https://deno.land/x/lume@v2.0.0/mod.ts",
+    "lume/": "https://deno.land/x/lume@v2.0.0/",
+    "@std/flags": "https://deno.land/std@0.204.0/flags/mod.ts",
+    "@std/path": "https://deno.land/std@0.204.0/path/mod.ts",
+    "@std/fs": "https://deno.land/std@0.204.0/fs/mod.ts"
   }
-} 
+}

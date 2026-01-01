@@ -1,9 +1,13 @@
 /**
  * UrSamu MU Engine - Library Entry Point
- * 
- * This file serves as the main entry point for importing UrSamu as a library.
- * It re-exports all the necessary components from the src directory.
  */
 
-// Re-export everything from the src/index.ts file
-export * from "./src/index.ts"; 
+// Export Interfaces
+export * from "./src/interfaces/index.ts";
+
+// Export Core Factory/Services
+export { createObj } from "./src/services/DBObjs/DBObjs.ts";
+export { mu } from "./src/main.ts";
+export { startTelnetServer } from "./src/services/telnet/telnet.ts";
+
+// Hide internal class implementations by not exporting everything

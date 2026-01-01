@@ -1,8 +1,8 @@
 #!/usr/bin/env -S deno run -A
 
-import { parse } from "https://deno.land/std@0.204.0/flags/mod.ts";
-import { join, dirname, fromFileUrl } from "https://deno.land/std@0.204.0/path/mod.ts";
-import { existsSync } from "https://deno.land/std@0.204.0/fs/mod.ts";
+import { parse } from "@std/flags";
+import { join, dirname, fromFileUrl } from "@std/path";
+import { existsSync } from "@std/fs";
 
 // Get the directory of the current script
 const __dirname = dirname(fromFileUrl(import.meta.url));
@@ -199,7 +199,7 @@ const denoJsonContent = `{
   "nodeModulesDir": "auto",
   "tasks": {
     "start": "bash ./scripts/run.sh",
-    "dev": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
+    "server": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
     "telnet": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/telnet.ts"
   },
   "compilerOptions": {
@@ -279,7 +279,7 @@ For targeted development:
 
 \`\`\`bash
 # Main server only with watch mode
-deno task dev
+deno task server
 
 # Telnet server only with watch mode
 deno task telnet

@@ -11,7 +11,7 @@ export default () => {
     lock: "connected",
     exec: async (ctx, args) => {
       const [obj, msg, reply] = args;
-      const en = await dbojs.queryOne({ id: ctx.socket.cid });
+      const en = await dbojs.queryOne({ id: ctx.socket.cid || "" });
       if (!en) return;
 
       const tars = obj?.split(" ") || en.data?.lastpage || [];
@@ -43,31 +43,25 @@ export default () => {
         targetIds.length > 1 ? `To (${targetNames.join(", ")}),` : "From afar,";
       switch (true) {
         case msgOrReply?.trim().startsWith(";"):
-          tempmsg = `${header} ${moniker(en)}${
-            en.data?.alias ? "(" + en.data?.alias + ")" : ""
-          }${msgOrReply.slice(1)}`;
-          sendermsg = `${senderHeader} ${moniker(en)}${
-            en.data?.alias ? "(" + en.data?.alias + ")" : ""
-          }${msgOrReply.slice(1)}`;
+          tempmsg = `${header} ${moniker(en)}${en.data?.alias ? "(" + en.data?.alias + ")" : ""
+            }${msgOrReply.slice(1)}`;
+          sendermsg = `${senderHeader} ${moniker(en)}${en.data?.alias ? "(" + en.data?.alias + ")" : ""
+            }${msgOrReply.slice(1)}`;
 
           break;
         case msgOrReply?.trim().startsWith(":"):
-          tempmsg = `${header} ${moniker(en)}${
-            en.data?.alias ? "(" + en.data?.alias + ")" : ""
-          } ${msgOrReply.slice(1)}`;
+          tempmsg = `${header} ${moniker(en)}${en.data?.alias ? "(" + en.data?.alias + ")" : ""
+            } ${msgOrReply.slice(1)}`;
 
-          sendermsg = `${senderHeader} ${moniker(en)}${
-            en.data?.alias ? "(" + en.data?.alias + ")" : ""
-          } ${msgOrReply.slice(1)}`;
+          sendermsg = `${senderHeader} ${moniker(en)}${en.data?.alias ? "(" + en.data?.alias + ")" : ""
+            } ${msgOrReply.slice(1)}`;
           break;
         default:
-          tempmsg = `${header} ${moniker(en)}${
-            en.data?.alias ? "(" + en.data?.alias + ")" : ""
-          } pages: ${msgOrReply}`;
+          tempmsg = `${header} ${moniker(en)}${en.data?.alias ? "(" + en.data?.alias + ")" : ""
+            } pages: ${msgOrReply}`;
 
-          sendermsg = `${senderHeader} ${moniker(en)}${
-            en.data?.alias ? "(" + en.data?.alias + ")" : ""
-          } pages: ${msgOrReply}`;
+          sendermsg = `${senderHeader} ${moniker(en)}${en.data?.alias ? "(" + en.data?.alias + ")" : ""
+            } pages: ${msgOrReply}`;
       }
 
       if (en.data?.lastpage && reply) {
@@ -91,11 +85,11 @@ export default () => {
         tempmsg,
         {}
       );
-      if (!targets.filter((ob) => ob._id === en._id).length)
+      if (!targets.filter((ob) => ob.id === en.id).length)
         send([ctx.socket.id], sendermsg, {});
       en.data ||= {};
       en.data.lastpage = targts;
-      await dbojs.modify({ _id: en._id }, "$set", en);
+      await dbojs.modify({ id: en.id }, "$set", en);
     },
   });
 };

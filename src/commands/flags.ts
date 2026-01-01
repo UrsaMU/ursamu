@@ -12,6 +12,7 @@ export default () =>
     pattern: /^@flags\s+(.*)\s*=\s*(.*)?$/i,
     lock: "connected admin+",
     exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
       const [tar, flgs] = args;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;

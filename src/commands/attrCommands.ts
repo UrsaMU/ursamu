@@ -1,5 +1,6 @@
 import { Obj, addCmd, send } from "../services/index.ts";
 import { canEdit, target } from "../utils/index.ts";
+import { IAttribute } from "../@types/IAttribute.ts";
 
 export default () => {
   addCmd({
@@ -22,7 +23,7 @@ export default () => {
       }
       if (!tarObj.data) tarObj.dbobj.data = { attributes: [] };
 
-      const attr = tarObj.data?.attributes?.find((a) =>
+      const attr = tarObj.data?.attributes?.find((a: IAttribute) =>
         a.name.toLowerCase().startsWith(args[0].toLowerCase())
       );
 
@@ -34,8 +35,7 @@ export default () => {
           await tarObj.save();
           return await send(
             [ctx.socket.id],
-            `%chGame>%cn  ${
-              tarObj.name
+            `%chGame>%cn  ${tarObj.name
             }'s attribute %ch${attr.name.toUpperCase()}%cn removed.`
           );
         } else {
@@ -44,8 +44,7 @@ export default () => {
           await tarObj.save();
           return await send(
             [ctx.socket.id],
-            `%chGame>%cn  ${
-              tarObj.name
+            `%chGame>%cn  ${tarObj.name
             }'s attribute %ch${attr.name.toUpperCase()}%cn set.`
           );
         }
@@ -62,8 +61,7 @@ export default () => {
         await tarObj.save();
         return await send(
           [ctx.socket.id],
-          `%chGame>%cn  ${
-            tarObj.name
+          `%chGame>%cn  ${tarObj.name
           }'s attribute %ch${args[0].toUpperCase()}%cn set.`
         );
       } else {

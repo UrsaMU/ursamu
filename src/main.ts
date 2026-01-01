@@ -1,4 +1,4 @@
-import path from "node:path";
+
 import { server } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
@@ -9,6 +9,7 @@ import { IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 import { initConfig, initializePlugins, getConfig } from "./services/Config/mod.ts";
 import { loadPlugins } from "./utils/loadPlugins.ts";
+import { wsService } from "./services/WebSocket/index.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 
@@ -24,7 +25,7 @@ const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
  * @returns An object containing references to the initialized components
  */
 export const initializeEngine = async (
-  cfg?: IConfig, 
+  cfg?: IConfig,
   customPlugins?: IPlugin[],
   options: {
     loadDefaultCommands?: boolean;
@@ -50,9 +51,9 @@ export const initializeEngine = async (
 
   // Load default commands if enabled
   if (loadDefaultCommands) {
-    plugins(path.join(__dirname, "./commands"));
+    plugins(dpath.join(__dirname, "./commands"));
   }
-  
+
   // Load custom commands if path provided
   if (customCommandsPath) {
     plugins(customCommandsPath);
@@ -60,18 +61,18 @@ export const initializeEngine = async (
 
   // Load default text files if enabled
   if (loadDefaultTextFiles) {
-    loadTxtDir(path.join(__dirname, "../text"));
+    loadTxtDir(dpath.join(__dirname, "../text"));
   }
-  
+
   // Load custom text files if path provided
   if (customTextPath) {
     loadTxtDir(customTextPath);
   }
 
   // Load plugins from the plugins directory
-  const pluginsDir = path.join(__dirname, "./plugins");
+  const pluginsDir = dpath.join(__dirname, "./plugins");
   const loadedPlugins = await loadPlugins(pluginsDir);
-  
+
   // Add any custom plugins
   if (customPlugins && customPlugins.length > 0) {
     console.log(`Loading ${customPlugins.length} custom plugins...`);
@@ -92,18 +93,30 @@ export const initializeEngine = async (
     if (autoCreateDefaultChannels) {
       await initializeDefaultChannels();
     }
-    
+
     console.log(`WebSocket server started on port ${getConfig<number>("server.ws")}.`);
-    
+
     // Start the HTTP server
     const httpPort = getConfig<number>("server.http");
-    
+
     // Use Deno.serve instead of Deno.listen and Deno.serveHttp
-    Deno.serve({ port: httpPort }, () => {
-      try {        
+    Deno.serve({ port: httpPort }, (req) => {
+      try {
+        if (req.headers.get("upgrade") === "websocket") {
+          const { socket, response } = Deno.upgradeWebSocket(req);
+
+          // Import wsService dynamically to avoid circular deps if needed, 
+          // or just standard import at top. Assuming standard import for now.
+          // wrapping in async iife if dynamic, but top level is better.
+          // For now, let's trust the top level import we will add.
+
+          wsService.handleConnection(socket);
+          return response;
+        }
+
         // For now, just return a simple response
         // You can implement proper routing later
-        return new Response("UrsaMU API Server", { 
+        return new Response("UrsaMU API Server", {
           status: 200,
           headers: { "Content-Type": "application/json" }
         });
@@ -112,7 +125,7 @@ export const initializeEngine = async (
         return new Response("Internal Server Error", { status: 500 });
       }
     });
-    
+
     console.log(`HTTP server started on port ${httpPort}.`);
   });
 
@@ -238,6 +251,24 @@ const config = {
 
 // Start the game engine
 if (import.meta.main) {
-  const game = await initializeEngine(config);
-  console.log(`${game.config.get("game.name")} main server is running!`);
+  const { logError } = await import("./utils/logger.ts");
+
+  // Global Error Handlers
+  globalThis.addEventListener("unhandledrejection", (e) => {
+    e.preventDefault();
+    logError(e.reason, "Unhandled Rejection");
+  });
+
+  globalThis.addEventListener("error", (e) => {
+    e.preventDefault();
+    logError(e.error, "Uncaught Exception");
+  });
+
+  try {
+    const game = await initializeEngine(config);
+    console.log(`${game.config.get("game.name")} main server is running!`);
+  } catch (error) {
+    await logError(error, "Fatal Initialization Error");
+    Deno.exit(1);
+  }
 }

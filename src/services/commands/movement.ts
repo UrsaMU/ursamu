@@ -13,7 +13,7 @@ export const matchExits = async (ctx: IContext) => {
 
     en.data ||= {};
     const exits = await dbojs.query({
-      $and: [{ flags: /exit/i }, { location: en.location }],
+      $and: [{ flags: /exit/i }, { location: en.location || "" }],
     });
 
     for (const exit of exits) {
@@ -22,7 +22,7 @@ export const matchExits = async (ctx: IContext) => {
 
       const players = await dbojs.query({
         $and: [
-          { location: en.location },
+          { location: en.location || "" },
           { flags: /player/i },
           { flags: /connected/i },
           { id: { $ne: en.id } },
@@ -30,7 +30,7 @@ export const matchExits = async (ctx: IContext) => {
       });
 
       if (match) {
-        const room = await dbojs.queryOne({ id: en.location });
+        const room = await dbojs.queryOne({ id: en.location || "" });
         const dest = await dbojs.queryOne({ id: exit.data?.destination });
 
         if (dest && flags.check(en.flags, exit?.data?.lock || "")) {
@@ -47,7 +47,7 @@ export const matchExits = async (ctx: IContext) => {
           await dbojs.modify({ id: en.id }, "$set", en);
           ctx.socket.join(`#${en.location}`);
 
-          if (!en.flags.includes("dark")) {
+          if (!en.flags.includes("dark") && room) {
             send(
               [`#${en.location}`],
               `${en.data.name} arrives from ${room?.data?.name}.`,

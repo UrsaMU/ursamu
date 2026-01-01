@@ -10,7 +10,7 @@ export default () =>
     pattern: /^[@\+]?moniker\s+(.*)\s*=\s*(.*)/i,
     lock: "connected admin+",
     exec: async (ctx, args) => {
-      const player = await dbojs.queryOne({ id: ctx.socket.cid });
+      const player = await dbojs.queryOne({ id: ctx.socket.cid || "" });
       if (!player) return;
       const tar = await target(player, args[0]);
       if (!tar) {

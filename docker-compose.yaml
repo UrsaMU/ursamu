@@ -15,7 +15,7 @@ services:
       - "8080:4202"
       - "80:4203"
     volumes:
-     - "./data:/ursamu/data"
-     - "./text:/ursamu/text"
-     - "./config:/ursamu/config"
+      - "./data:/app/data"
+      - "./text:/app/text"
+      - "./config:/app/config"
     container_name: ursamu

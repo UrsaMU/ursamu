@@ -14,16 +14,32 @@ const pluginManager = PluginConfigManager.init(configManager);
  * Initialize the configuration system
  * This should be called at the start of the application
  */
-export function initConfig(config?: IConfig): void {
+export async function initConfig(config?: IConfig): Promise<void> {
+  // Ensure config file exists
+  const configPath = "config/config.json";
+  const samplePath = "config/config.sample.json";
+
+  try {
+    const fileInfo = await Deno.stat(configPath);
+    if (!fileInfo.isFile) {
+      throw new Error("Config is directory?");
+    }
+  } catch (e) {
+    if (e instanceof Deno.errors.NotFound) {
+      console.log("Config file not found. Creating from sample...");
+      await Deno.copyFile(samplePath, configPath);
+    }
+  }
+
   if (config) {
     // Merge the provided config with the default config
     const mergedConfig = merge(defaultConfig, config);
-    
+
     // Set the merged config in the ConfigManager
     Object.entries(mergedConfig).forEach(([key, value]) => {
       configManager.set(key, value);
     });
-    
+
     // Save the configuration
     configManager.saveConfig();
   }

@@ -6,80 +6,69 @@
  */
 
 import { mu, IConfig, IPlugin } from "./index.ts";
-import path from "node:path";
 import { dpath } from "../deps.ts";
 
 // Define your custom configuration
-const myConfig: IConfig = {
-  // Override default configuration values
-  game: {
-    name: "My UrSamu Game",
-    description: "A custom game built with UrSamu",
-    version: "1.0.0",
-    text: {
-      connect: "connect.txt" // Path to connect text file
-    }
-  },
+const config: IConfig = {
   server: {
-    // Server configuration
-    ws: 4202,    // WebSocket port
-    http: 4201,  // HTTP port
-    telnet: 4200 // Telnet port
+    telnet: 4201,
+    ws: 4202,
+    http: 4203,
+    db: "data/ursamu.db",
+    counters: "data/counters.db",
+    chans: "data/chans.db",
+    mail: "data/mail.db",
+    bboard: "data/bboard.db",
   },
-  // Add any other custom configuration options
-};
-
-// Define your custom plugins
-const myPlugins: IPlugin[] = [
-  // Example plugin
-  {
-    name: "my-custom-plugin",
-    version: "1.0.0",
-    description: "A custom plugin for my game",
-    init: async () => {
-      console.log("Initializing my custom plugin");
-      return true;
+  game: {
+    name: "UrsaMU",
+    description: "A custom UrsaMU game",
+    version: "0.0.1",
+    text: {
+      connect: "text/default_connect.txt",
     },
-    remove: async () => {
-      console.log("Removing my custom plugin");
-    }
-  }
-];
-
-// Get the current directory
-const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
-
-// Define initialization options
-const options = {
-  loadDefaultCommands: true,      // Load default UrSamu commands
-  loadDefaultTextFiles: true,     // Load default UrSamu text files
-  autoCreateDefaultRooms: true,   // Create default rooms if none exist
-  autoCreateDefaultChannels: true, // Create default channels if none exist
-  customCommandsPath: path.join(__dirname, "../commands"), // Path to your custom commands
-  customTextPath: path.join(__dirname, "../text"),         // Path to your custom text files
+    playerStart: "1",
+  },
+  // Add any custom plugins here
+  plugins: [
+    // Example:
+    // {
+    //   name: "my-plugin",
+    //   version: "1.0.0",
+    //   init: (game) => {
+    //     console.log("My plugin loaded!");
+    //   }
+    // }
+  ],
 };
 
-// Initialize the UrSamu engine
-async function startGame() {
+export default config;
+
+// Default way to start the server
+if (import.meta.main) {
+  const { logError } = await import("./utils/logger.ts");
+
+  // Global Error Handlers
+  globalThis.addEventListener("unhandledrejection", (e) => {
+    e.preventDefault();
+    logError(e.reason, "Unhandled Rejection");
+  });
+
+  globalThis.addEventListener("error", (e) => {
+    e.preventDefault();
+    logError(e.error, "Uncaught Exception");
+  });
+
   try {
-    // Initialize the engine with your custom configuration, plugins, and options
-    const engine = await mu(myConfig, myPlugins, options);
-    
-    // You can access engine components here
-    console.log(`${engine.config.get("game.name")} started successfully!`);
-    
-    // Add any additional initialization code here
-    
+    const game = await mu(config);
+    console.log(`${game.config.get("game.name")} main server is running!`);
+
+    // Example of loading plugins from a directory
+    const pluginsDir = dpath.join(dpath.dirname(dpath.fromFileUrl(import.meta.url)), "plugins");
+    // await game.plugins.load(pluginsDir);
+
   } catch (error) {
-    console.error("Failed to start the game:", error);
+    await logError(error, "Fatal Initialization Error");
+    Deno.exit(1);
   }
 }
-
-// Start the game if this file is being executed directly
-// @ts-ignore: Deno specific property
-if (import.meta.main) {
-  startGame();
-}
-
-// Export the startGame function for use in other files
-export { startGame }; 

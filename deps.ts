@@ -1,7 +1,7 @@
 // @ts-nocheck
 export * as dpath from "https://deno.land/std@0.208.0/path/mod.ts";
 export * as dfs from "https://deno.land/std@0.208.0/fs/mod.ts";
-export type { Kv } from "https://deno.land/x/deno@v1.37.1/cli/types.d.ts";
+export type Kv = Deno.Kv;
 
 export { Tags } from "npm:@digibear/tags@1.0.0"
 export { Parser } from "npm:@ursamu/parser@1.2.4"
@@ -14,7 +14,7 @@ export { VM } from "npm:vm2@3.9.19"
 // @deno-types="npm:@types/express@4.17.21"
 export { Router } from "npm:express@4.18.2"
 export { default as express } from "npm:express@4.18.2"
-export type { Request, Response, RequestHandler } from "npm:express@4.18.2"
+export type { Request, Response, RequestHandler, NextFunction } from "npm:express@4.18.2"
 
 import bcrypt from "npm:bcryptjs@2.4.3"
 export const compare = bcrypt.compare
