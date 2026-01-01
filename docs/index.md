@@ -35,13 +35,12 @@ templateEngine: [vto, md]
     <div class="absolute -top-6 left-1/2 -translate-x-1/2 px-8 py-3 bg-purple-600 rounded-full text-sm font-black uppercase tracking-widest shadow-2xl shadow-purple-600/40">
       ✨ UrsaMU DX
     </div>
-    <div class="bg-black/60 rounded-2xl p-8 font-mono text-sm relative border border-white/5">
       <div class="flex items-center gap-2 mb-6 opacity-40">
         <span class="w-3 h-3 rounded-full bg-red-500"></span>
         <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
         <span class="w-3 h-3 rounded-full bg-green-500"></span>
       </div>
-      <code class="text-purple-300 leading-loose">deno <span class="text-white">run -A https://ursamu.github.io/ursamu/init.ts</span></code>
+      <code class="text-purple-300 leading-loose">dx <span class="text-white">jsr:@ursamu/ursamu init</span></code>
     </div>
     <p class="text-center mt-8 text-slate-400 text-sm italic font-light">
       The "DX" Experience. Bootstrap your world or manage your configuration with our powerful interactive wizard.

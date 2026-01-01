@@ -9,18 +9,37 @@ and **Deno**.
 
 ---
 
-## ⚡ One-Line Install (NEW)
+## ⚡ Quick Start: The "DX" Experience
 
-The easiest way to get started. Just run this command and follow the wizard.
+The easiest way to create and manage an UrsaMU project is using `dx` (if
+installed) or `deno run`.
+
+> [!TIP]
+> **No install required!** You can run the CLI directly from JSR.
+
+### Creates a new Project
 
 ```bash
-deno run -A https://ursamu.github.io/ursamu/init.ts
+dx jsr:@ursamu/ursamu init
 ```
 
-> [!IMPORTANT]
-> This command will walk you through naming your project, configuring ports, and
-> setting up your first admin account. It's the "dx" experience for MU*
-> development.
+_Or without `dx`:_
+
+```bash
+deno run -A jsr:@ursamu/ursamu init
+```
+
+### Manage Plugins
+
+You can also manage plugins smoothly without installing a global binary:
+
+```bash
+# List plugins
+dx jsr:@ursamu/ursamu plugin list
+
+# Install a plugin
+dx jsr:@ursamu/ursamu plugin install https://github.com/my/plugin
+```
 
 ---
 
