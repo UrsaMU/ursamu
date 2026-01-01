@@ -7,7 +7,7 @@ import { IEntity } from "../../interfaces/IEntity.ts";
 
 import { IAttribute } from "../../@types/IAttribute.ts";
 
-export const createObj = async (flgs: string, datas: Record<string, unknown>) => {
+export const createObj = async (flgs: string, datas: Record<string, unknown>): Promise<IDBOBJ[]> => {
   const id = await getNextId("objid");
   const { tags, data } = flags.set("", datas, flgs);
   const obj = {

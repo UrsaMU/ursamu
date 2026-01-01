@@ -36,8 +36,8 @@ export const initializeEngine = async (
     autoCreateDefaultChannels?: boolean;
     customCommandsPath?: string;
     customTextPath?: string;
-  } = {}
-) => {
+  } = {},
+): Promise<Record<string, any>> => {
   // Set default options
   const {
     loadDefaultCommands = true,

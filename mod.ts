@@ -11,3 +11,7 @@ export { mu } from "./src/main.ts";
 export { startTelnetServer } from "./src/services/telnet/telnet.ts";
 
 // Hide internal class implementations by not exporting everything
+
+if (import.meta.main) {
+  await import("./src/cli/ursamu.ts");
+}

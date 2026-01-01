@@ -27,7 +27,7 @@ export const startTelnetServer = async (options?: {
   port?: number;
   welcomeFile?: string;
   wsPort?: number;
-}) => {
+}): Promise<Deno.Listener> => {
   const port = options?.port || getConfig<number>("server.telnet");
   const wsPort = options?.wsPort || getConfig<number>("server.http") || 4203;
   const welcomeFile = options?.welcomeFile || getConfig<string>("game.text.connect") || "text/default_connect.txt";
