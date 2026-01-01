@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Contribute to the UrsaMU project and help make it better">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/development/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>UrsaMU Development</h1>
+<p>This section covers how to contribute to the UrsaMU project, whether you’re fixing bugs, adding features, or improving documentation.</p>
+<h2>Getting Started</h2>
+<p>Everything you need to start contributing to UrsaMU:</p>
+<ul>
+<li><a href="./environment.md">Development Environment</a> - Set up your development environment</li>
+<li><a href="./structure.md">Project Structure</a> - Understand the UrsaMU codebase</li>
+<li><a href="./building.md">Building from Source</a> - How to build UrsaMU from source</li>
+<li><a href="./testing.md">Running Tests</a> - How to run the UrsaMU test suite</li>
+</ul>
+<h2>Development Workflow</h2>
+<p>The UrsaMU development process:</p>
+<ul>
+<li><a href="./contributing.md">Contributing Guide</a> - How to contribute to UrsaMU</li>
+<li><a href="./issues.md">Issue Tracking</a> - How we track issues and feature requests</li>
+<li><a href="./pull-requests.md">Pull Requests</a> - How to submit changes to UrsaMU</li>
+<li><a href="./code-review.md">Code Review</a> - Our code review process</li>
+</ul>
+<h2>Code Standards</h2>
+<p>Our coding standards and best practices:</p>
+<ul>
+<li><a href="./style.md">Coding Style</a> - UrsaMU coding style guidelines</li>
+<li><a href="./typescript.md">TypeScript Guidelines</a> - TypeScript-specific guidelines</li>
+<li><a href="./testing-guidelines.md">Testing Guidelines</a> - How to write tests for UrsaMU</li>
+<li><a href="./documentation-guidelines.md">Documentation Guidelines</a> - How to document your code</li>
+</ul>
+<h2>Documentation</h2>
+<p>How to contribute to UrsaMU documentation:</p>
+<ul>
+<li><a href="./docs-structure.md">Documentation Structure</a> - How the documentation is organized</li>
+<li><a href="./writing-docs.md">Writing Documentation</a> - How to write clear and helpful documentation</li>
+<li><a href="./api-docs.md">API Documentation</a> - How to document APIs</li>
+<li><a href="./building-docs.md">Building Documentation</a> - How to build and test documentation locally</li>
+</ul>
+<h2>Architecture</h2>
+<ul>
+<li><a href="./architecture.md">System Architecture</a></li>
+<li><a href="./database-schema.md">Database Schema</a></li>
+<li><a href="./command-system.md">Command System</a></li>
+</ul>
+<h2>Advanced Topics</h2>
+<ul>
+<li><a href="./performance.md">Performance Optimization</a></li>
+<li><a href="./security.md">Security Considerations</a></li>
+<li><a href="./testing.md">Testing</a></li>
+</ul>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

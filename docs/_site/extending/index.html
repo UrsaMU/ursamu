@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to extend UrsaMU with custom functionality">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/extending/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Extending UrsaMU</h1>
+<p>This guide explains how to extend UrsaMU with custom functionality beyond what plugins provide.</p>
+<h2>Overview</h2>
+<p>UrsaMU is designed to be highly extensible. While plugins are the primary way to add functionality, there are several other extension points that allow you to customize the system at a deeper level.</p>
+<p>Extension points include:</p>
+<ul>
+<li>Custom commands</li>
+<li>Custom flags</li>
+<li>Custom functions</li>
+<li>Custom hooks</li>
+<li>Advanced extensions (middleware, services, etc.)</li>
+</ul>
+<h2>Extension Points</h2>
+<h3>When to Use Extensions vs. Plugins</h3>
+<ul>
+<li><strong>Plugins</strong>: Use plugins for self-contained features that can be enabled or disabled as a unit.</li>
+<li><strong>Extensions</strong>: Use extensions when you need to modify core behavior or add functionality that integrates deeply with the system.</li>
+</ul>
+<p>Extensions are typically implemented within plugins but can also be added directly in a child game.</p>
+<h2>Custom Commands</h2>
+<p>Commands are the primary way players interact with UrsaMU. You can create custom commands to add new functionality.</p>
+<h3>Registering Commands</h3>
+<p>Use the <code>registerCommand</code> function to register a new command:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerCommand } from "../../services/Commands/mod.ts";
+
+registerCommand({
+  name: "mycommand",       // Unique identifier for the command
+  pattern: "mycommand *",  // Pattern to match user input
+  flags: "connected",      // Flags required to use the command
+  exec: (ctx) =&gt; {         // Function to execute when command is triggered
+    const args = ctx.args.trim();
+    ctx.send(`You typed: ${args}`);
+  }
+});
+</code></pre>
+<h3>Command Context</h3>
+<p>The <code>ctx</code> object passed to the <code>exec</code> function contains:</p>
+<ul>
+<li><code>player</code>: The player who triggered the command</li>
+<li><code>cmd</code>: The command that was triggered</li>
+<li><code>args</code>: The arguments passed to the command</li>
+<li><code>switches</code>: Any switches used with the command</li>
+<li><code>send</code>: Function to send output to the player</li>
+</ul>
+<h3>Command Patterns</h3>
+<p>Command patterns determine when a command is triggered:</p>
+<ul>
+<li>Exact match: <code>"look"</code> - Matches only “look”</li>
+<li>Wildcard: <code>"look *"</code> - Matches “look” followed by anything</li>
+<li>Multiple patterns: <code>"look/l"</code> - Matches either “look” or “l”</li>
+<li>Regex: <code>"^l(.*)$"</code> - Uses a regular expression to match</li>
+</ul>
+<h2>Custom Flags</h2>
+<p>Flags are used to control access to commands and features. You can create custom flags to implement your own permission system.</p>
+<h3>Registering Flags</h3>
+<p>Use the <code>registerFlag</code> function to register a new flag:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFlag } from "../../services/Flags/mod.ts";
+
+registerFlag({
+  name: "myflag",          // Name of the flag
+  description: "My custom flag", // Description of what the flag does
+  default: false           // Default value for new objects
+});
+</code></pre>
+<h3>Checking Flags</h3>
+<p>Use the <code>hasFlag</code> function to check if an object has a flag:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { hasFlag } from "../../services/Flags/mod.ts";
+
+// Check if player has the "myflag" flag
+if (hasFlag(player, "myflag")) {
+  // Do something
+}
+</code></pre>
+<h3>Setting Flags</h3>
+<p>Use the <code>setFlag</code> function to set a flag on an object:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { setFlag } from "../../services/Flags/mod.ts";
+
+// Set the "myflag" flag on a player
+await setFlag(player, "myflag", true);
+</code></pre>
+<h2>Custom Functions</h2>
+<p>Functions are used in expressions and can be called from commands. You can create custom functions to add new capabilities to the expression system.</p>
+<h3>Registering Functions</h3>
+<p>Use the <code>registerFunction</code> function to register a new function:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFunction } from "../../services/Functions/mod.ts";
+
+registerFunction({
+  name: "myfunc",          // Name of the function
+  description: "My custom function", // Description of what the function does
+  args: ["arg1", "?arg2"],  // Arguments (? prefix means optional)
+  exec: (args, ctx) =&gt; {    // Function to execute
+    const [arg1, arg2 = "default"] = args;
+    return `${arg1} and ${arg2}`;
+  }
+});
+</code></pre>
+<h3>Using Custom Functions</h3>
+<p>Once registered, your function can be used in expressions:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; think myfunc(hello, world)
+hello and world
+</code></pre>
+<h2>Custom Hooks</h2>
+<p>Hooks allow you to run code at specific points in the system’s execution. You can create custom hooks to add behavior that runs automatically.</p>
+<h3>Registering Hooks</h3>
+<p>Use the <code>registerHook</code> function to register a new hook:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerHook } from "../../services/Hooks/mod.ts";
+
+// Register a hook that runs when a player connects
+registerHook("playerConnect", async (player) =&gt; {
+  console.log(`Player ${player.data.name} connected`);
+  
+  // You can modify the player or perform other actions
+  player.data.lastLogin = new Date().toISOString();
+  await dbojs.update(player);
+});
+</code></pre>
+<h3>Available Hook Points</h3>
+<p>UrsaMU provides several hook points:</p>
+<ul>
+<li><code>playerConnect</code>: Triggered when a player connects</li>
+<li><code>playerDisconnect</code>: Triggered when a player disconnects</li>
+<li><code>playerCreate</code>: Triggered when a player is created</li>
+<li><code>commandBefore</code>: Triggered before a command is executed</li>
+<li><code>commandAfter</code>: Triggered after a command is executed</li>
+<li><code>objectCreate</code>: Triggered when an object is created</li>
+<li><code>objectDestroy</code>: Triggered when an object is destroyed</li>
+</ul>
+<h3>Creating Custom Hook Points</h3>
+<p>You can create your own hook points for plugins to use:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerHookPoint, triggerHook } from "../../services/Hooks/mod.ts";
+
+// Register a new hook point
+registerHookPoint("myCustomHook");
+
+// Trigger the hook somewhere in your code
+await triggerHook("myCustomHook", { data: "some data" });
+</code></pre>
+<h2>Advanced Extensions</h2>
+<h3>Custom Middleware</h3>
+<p>You can create custom middleware to process commands before they’re executed:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerMiddleware } from "../../services/Commands/mod.ts";
+
+// Register middleware that logs all commands
+registerMiddleware(async (ctx, next) =&gt; {
+  console.log(`Player ${ctx.player.data.name} executed: ${ctx.cmd} ${ctx.args}`);
+  
+  // Call the next middleware in the chain
+  await next();
+  
+  console.log("Command execution completed");
+});
+</code></pre>
+<h3>Custom Services</h3>
+<p>You can create custom services to provide functionality to other parts of the system:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/services/MyService/mod.ts
+class MyService {
+  private data: Map&lt;string, any&gt; = new Map();
+  
+  constructor() {
+    console.log("MyService initialized");
+  }
+  
+  set(key: string, value: any): void {
+    this.data.set(key, value);
+  }
+  
+  get(key: string): any {
+    return this.data.get(key);
+  }
+}
+
+// Create a singleton instance
+export const myService = new MyService();
+</code></pre>
+<h3>Custom Database Models</h3>
+<p>You can create custom database models to store specialized data:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { dbojs } from "../../services/Database/index.ts";
+
+// Define a type for your model
+interface MyModel {
+  id: string;
+  name: string;
+  data: Record&lt;string, any&gt;;
+}
+
+// Create functions to work with your model
+async function createMyModel(data: Omit&lt;MyModel, "id"&gt;): Promise&lt;MyModel&gt; {
+  const model = await dbojs.create({
+    flags: "mymodel",
+    data: {
+      name: data.name,
+      ...data.data
+    }
+  });
+  
+  return {
+    id: model.id,
+    name: data.name,
+    data: data.data
+  };
+}
+
+async function getMyModels(): Promise&lt;MyModel[]&gt; {
+  const models = await dbojs.query({ flags: /mymodel/i });
+  
+  return models.map(model =&gt; ({
+    id: model.id,
+    name: model.data.name,
+    data: { ...model.data }
+  }));
+}
+</code></pre>
+<h3>Custom Web Routes</h3>
+<p>If you’re using the web interface, you can add custom routes:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { app } from "../../app.ts";
+
+// Add a custom API endpoint
+app.router.get("/api/custom", (ctx) =&gt; {
+  ctx.response.body = { message: "Custom API endpoint" };
+});
+
+// Add a custom page
+app.router.get("/custom", async (ctx) =&gt; {
+  ctx.response.body = await app.render("custom.html", {
+    title: "Custom Page",
+    data: { /* your data */ }
+  });
+});
+</code></pre>
+<h3>Example: Complete Extension</h3>
+<p>Here’s an example of a plugin that uses multiple extension points:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { registerCommand } from "../../services/Commands/mod.ts";
+import { registerFlag } from "../../services/Flags/mod.ts";
+import { registerFunction } from "../../services/Functions/mod.ts";
+import { registerHook } from "../../services/Hooks/mod.ts";
+import { dbojs } from "../../services/Database/index.ts";
+
+const myExtensionPlugin: IPlugin = {
+  name: "my-extension",
+  version: "1.0.0",
+  description: "A plugin that demonstrates various extension points",
+  
+  init: async () =&gt; {
+    // Register a custom flag
+    registerFlag({
+      name: "vip",
+      description: "VIP player with special privileges",
+      default: false
+    });
+    
+    // Register a custom function
+    registerFunction({
+      name: "isvip",
+      description: "Check if a player is a VIP",
+      args: ["player"],
+      exec: async (args, ctx) =&gt; {
+        const [playerName] = args;
+        
+        // Find the player
+        const players = await dbojs.query({
+          "data.name": new RegExp(`^${playerName}$`, "i"),
+          flags: /player/i
+        });
+        
+        if (players.length === 0) {
+          return "0";
+        }
+        
+        // Check if the player has the VIP flag
+        return players[0].flags.includes("vip") ? "1" : "0";
+      }
+    });
+    
+    // Register a custom command
+    registerCommand({
+      name: "vip",
+      pattern: "vip *",
+      flags: "wizard",
+      exec: async (ctx) =&gt; {
+        const args = ctx.args.trim().split(" ");
+        const action = args[0];
+        const target = args[1];
+        
+        if (!action || !target) {
+          return ctx.send("Usage: vip add/remove &lt;player&gt;");
+        }
+        
+        // Find the target player
+        const players = await dbojs.query({
+          "data.name": new RegExp(`^${target}$`, "i"),
+          flags: /player/i
+        });
+        
+        if (players.length === 0) {
+          return ctx.send(`Player '${target}' not found.`);
+        }
+        
+        const player = players[0];
+        
+        if (action === "add") {
+          // Add the VIP flag
+          if (!player.flags.includes("vip")) {
+            player.flags.push("vip");
+            await dbojs.update(player);
+            ctx.send(`Added VIP status to ${player.data.name}.`);
+          } else {
+            ctx.send(`${player.data.name} is already a VIP.`);
+          }
+        } else if (action === "remove") {
+          // Remove the VIP flag
+          if (player.flags.includes("vip")) {
+            player.flags = player.flags.filter(f =&gt; f !== "vip");
+            await dbojs.update(player);
+            ctx.send(`Removed VIP status from ${player.data.name}.`);
+          } else {
+            ctx.send(`${player.data.name} is not a VIP.`);
+          }
+        } else {
+          ctx.send("Usage: vip add/remove &lt;player&gt;");
+        }
+      }
+    });
+    
+    // Register a hook
+    registerHook("playerConnect", async (player) =&gt; {
+      // Check if the player is a VIP
+      if (player.flags.includes("vip")) {
+        // Broadcast a message to all connected players
+        const connectedPlayers = await dbojs.query({
+          flags: /connected/i
+        });
+        
+        for (const p of connectedPlayers) {
+          p.send(`VIP player ${player.data.name} has connected!`);
+        }
+      }
+    });
+    
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    // Cleanup code here
+  }
+};
+
+export default myExtensionPlugin;
+</code></pre>
+<p>By using these extension points, you can deeply customize UrsaMU to create a unique game experience tailored to your needs.</p>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

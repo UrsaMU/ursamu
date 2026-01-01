@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to administer an UrsaMU server">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/admin-guide/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Admin Guide</h1>
+<p>This guide covers the administrative aspects of running an UrsaMU server, including user management, configuration, backups, and troubleshooting.</p>
+<h2>User Management</h2>
+<h3>Creating Admin Users</h3>
+<p>To create an admin user:</p>
+<ol>
+<li>Connect to your server</li>
+<li>Create a new user with the <code>create</code> command</li>
+<li>Grant admin privileges with:<pre class="language-none" tabindex="0"><code class="language-none">@power &lt;username&gt;=wizard
+</code></pre>
+</li>
+</ol>
+<h3>Managing User Accounts</h3>
+<p>As an administrator, you can manage user accounts with these commands:</p>
+<ul>
+<li><code>@newpassword &lt;user&gt;=&lt;password&gt;</code> - Reset a user’s password</li>
+<li><code>@lock &lt;user&gt;=!&lt;user&gt;</code> - Lock a user out of their account</li>
+<li><code>@unlock &lt;user&gt;</code> - Unlock a user’s account</li>
+<li><code>@power &lt;user&gt;=&lt;power level&gt;</code> - Set a user’s power level</li>
+<li><code>@nuke &lt;user&gt;</code> - Delete a user account (use with caution)</li>
+</ul>
+<h3>User Roles and Permissions</h3>
+<p>UrsaMU has several built-in power levels:</p>
+<ul>
+<li><strong>Guest</strong> (1) - Limited access, can only use basic commands</li>
+<li><strong>Player</strong> (2) - Standard player access</li>
+<li><strong>Builder</strong> (3) - Can create and modify objects and rooms</li>
+<li><strong>Wizard</strong> (4) - Full administrative access</li>
+<li><strong>God</strong> (5) - Owner-level access, can modify system settings</li>
+</ul>
+<h2>Server Configuration</h2>
+<h3>Basic Configuration</h3>
+<p>The main configuration file is <code>config.json</code> in the server root directory. Key settings include:</p>
+<ul>
+<li><code>port</code> - The port the server listens on</li>
+<li><code>hostname</code> - The server hostname</li>
+<li><code>database</code> - Database connection settings</li>
+<li><code>logLevel</code> - Logging verbosity</li>
+</ul>
+<h3>Advanced Configuration</h3>
+<p>Advanced settings can be configured in the <code>advanced.json</code> file:</p>
+<ul>
+<li><code>maxConnections</code> - Maximum number of simultaneous connections</li>
+<li><code>idleTimeout</code> - Time in seconds before idle connections are disconnected</li>
+<li><code>backupInterval</code> - Time in seconds between automatic backups</li>
+<li><code>allowGuests</code> - Whether to allow guest connections</li>
+</ul>
+<h2>Backup and Restore</h2>
+<h3>Automatic Backups</h3>
+<p>UrsaMU performs automatic backups based on the <code>backupInterval</code> setting. Backups are stored in the <code>backups</code> directory.</p>
+<h3>Manual Backups</h3>
+<p>To perform a manual backup:</p>
+<ol>
+<li>Connect as an admin</li>
+<li>Use the <code>@backup</code> command</li>
+</ol>
+<h3>Restoring from Backup</h3>
+<p>To restore from a backup:</p>
+<ol>
+<li>Stop the server</li>
+<li>Run the restore command:<pre class="language-none" tabindex="0"><code class="language-none">deno task restore &lt;backup-file&gt;
+</code></pre>
+</li>
+<li>Restart the server</li>
+</ol>
+<h2>Troubleshooting</h2>
+<h3>Common Issues</h3>
+<h4>Server Won’t Start</h4>
+<ul>
+<li>Check if the port is already in use</li>
+<li>Verify database connection settings</li>
+<li>Check for syntax errors in configuration files</li>
+</ul>
+<h4>Database Connection Issues</h4>
+<ul>
+<li>Verify database credentials</li>
+<li>Check if the database server is running</li>
+<li>Ensure the database exists and has the correct schema</li>
+</ul>
+<h4>Performance Problems</h4>
+<ul>
+<li>Check server load</li>
+<li>Monitor memory usage</li>
+<li>Consider increasing resources or optimizing configuration</li>
+</ul>
+<h3>Logs</h3>
+<p>Server logs are stored in the <code>logs</code> directory. The log level can be configured in <code>config.json</code>:</p>
+<ul>
+<li><code>error</code> - Only errors</li>
+<li><code>warn</code> - Errors and warnings</li>
+<li><code>info</code> - General information (default)</li>
+<li><code>debug</code> - Detailed debugging information</li>
+</ul>
+<h2>Security</h2>
+<h3>Securing Your Server</h3>
+<ul>
+<li>Use HTTPS for web connections</li>
+<li>Set up a firewall to restrict access</li>
+<li>Keep your server software updated</li>
+<li>Use strong passwords for admin accounts</li>
+</ul>
+<h3>SSL Configuration</h3>
+<p>To enable SSL:</p>
+<ol>
+<li>Obtain SSL certificates</li>
+<li>Configure SSL in <code>config.json</code>:<pre class="language-json" tabindex="0"><code class="language-json">"ssl": {
+  "enabled": true,
+  "cert": "/path/to/cert.pem",
+  "key": "/path/to/key.pem"
+}
+</code></pre>
+</li>
+</ol>
+<h2>Performance</h2>
+<h3>Optimizing Performance</h3>
+<ul>
+<li>Increase <code>maxConnections</code> for busy servers</li>
+<li>Adjust database connection pool size</li>
+<li>Enable caching for frequently accessed data</li>
+<li>Consider using a CDN for static assets</li>
+</ul>
+<h3>Monitoring</h3>
+<p>Monitor your server’s performance with:</p>
+<ul>
+<li><code>@stat</code> command for real-time statistics</li>
+<li>External monitoring tools</li>
+<li>Database performance monitoring</li>
+</ul>
+<h3>Scaling</h3>
+<p>For larger installations, consider:</p>
+<ul>
+<li>Horizontal scaling with multiple server instances</li>
+<li>Load balancing</li>
+<li>Database sharding</li>
+<li>Caching layers</li>
+</ul>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

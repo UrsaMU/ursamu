@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn the basics of UrsaMU plugin development">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/plugins/basics/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Plugin Basics</h1>
+<h2>What Are Plugins?</h2>
+<p>Plugins are modular extensions that add functionality to UrsaMU without modifying the core codebase. They allow you to:</p>
+<ul>
+<li>Add new commands and features</li>
+<li>Modify existing behavior</li>
+<li>Integrate with external services</li>
+<li>Customize the game experience</li>
+</ul>
+<p>UrsaMU’s plugin system is designed to be flexible and powerful, allowing developers to extend the server in virtually any way while maintaining compatibility with future updates.</p>
+<h2>Plugin Interface</h2>
+<p>All UrsaMU plugins implement the <code>IPlugin</code> interface, which defines the structure and required methods for a plugin:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IPlugin {
+  // Required properties
+  name: string;         // Unique name of the plugin
+  version: string;      // Semantic version (e.g., "1.0.0")
+  description: string;  // Brief description of what the plugin does
+  author: string;       // Plugin author's name or identifier
+  
+  // Optional properties
+  dependencies?: string[];  // Other plugins this plugin depends on
+  config?: Record&lt;string, any&gt;;  // Plugin configuration
+
+  // Required methods
+  onInit(app: App): Promise&lt;void&gt; | void;  // Called when the plugin is initialized
+  onLoad(app: App): Promise&lt;void&gt; | void;  // Called when the plugin is loaded
+  onUnload(app: App): Promise&lt;void&gt; | void;  // Called when the plugin is unloaded
+}
+</code></pre>
+<h2>Plugin Lifecycle</h2>
+<p>UrsaMU plugins go through several lifecycle stages:</p>
+<ol>
+<li><strong>Registration</strong>: The plugin is registered with the plugin manager</li>
+<li><strong>Initialization</strong>: The <code>onInit</code> method is called, allowing the plugin to set up resources</li>
+<li><strong>Loading</strong>: The <code>onLoad</code> method is called, activating the plugin’s functionality</li>
+<li><strong>Unloading</strong>: The <code>onUnload</code> method is called when the plugin is disabled or the server shuts down</li>
+</ol>
+<h3>The <code>onInit</code> Method</h3>
+<p>The <code>onInit</code> method is called once when the plugin is first initialized. Use this method to:</p>
+<ul>
+<li>Register commands</li>
+<li>Set up database schemas</li>
+<li>Initialize resources</li>
+<li>Register event listeners</li>
+</ul>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">onInit(app: App): void {
+  // Register a new command
+  app.commands.register("myplugin", {
+    name: "hello",
+    pattern: "hello",
+    flags: "connected",
+    exec: (ctx) =&gt; {
+      ctx.send("Hello from my plugin!");
+    }
+  });
+}
+</code></pre>
+<h3>The <code>onLoad</code> Method</h3>
+<p>The <code>onLoad</code> method is called each time the plugin is loaded or reloaded. Use this method to:</p>
+<ul>
+<li>Start services</li>
+<li>Connect to external resources</li>
+<li>Activate functionality</li>
+</ul>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">onLoad(app: App): void {
+  console.log(`${this.name} v${this.version} loaded!`);
+  // Start any services or activate functionality
+}
+</code></pre>
+<h3>The <code>onUnload</code> Method</h3>
+<p>The <code>onUnload</code> method is called when the plugin is unloaded or the server shuts down. Use this method to:</p>
+<ul>
+<li>Clean up resources</li>
+<li>Close connections</li>
+<li>Save state</li>
+</ul>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">onUnload(app: App): void {
+  console.log(`${this.name} unloaded`);
+  // Clean up resources
+}
+</code></pre>
+<h2>Plugin Configuration</h2>
+<p>Plugins can define their own configuration options, which can be set in the server’s configuration file:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "plugins": {
+    "my-plugin": {
+      "option1": "value1",
+      "option2": 42
+    }
+  }
+}
+</code></pre>
+<p>Access configuration values in your plugin:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">class MyPlugin implements IPlugin {
+  name = "my-plugin";
+  version = "1.0.0";
+  description = "An example plugin";
+  author = "Your Name";
+  
+  // Default configuration
+  config = {
+    option1: "default",
+    option2: 0
+  };
+  
+  onInit(app: App): void {
+    // Access configuration values
+    console.log(this.config.option1); // "value1" from config or "default" if not set
+    console.log(this.config.option2); // 42 from config or 0 if not set
+  }
+}
+</code></pre>
+<h2>Example Plugin</h2>
+<p>Here’s a complete example of a simple plugin that adds a “hello” command:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/hello-world/index.ts
+import { App, IPlugin } from "ursamu";
+
+export default class HelloWorldPlugin implements IPlugin {
+  name = "hello-world";
+  version = "1.0.0";
+  description = "A simple hello world plugin";
+  author = "Your Name";
+  
+  config = {
+    greeting: "Hello, world!"
+  };
+  
+  onInit(app: App): void {
+    // Register the hello command
+    app.commands.register("hello-world", {
+      name: "hello",
+      pattern: "hello",
+      flags: "connected",
+      exec: (ctx) =&gt; {
+        ctx.send(this.config.greeting);
+      }
+    });
+    
+    console.log(`${this.name} initialized`);
+  }
+  
+  onLoad(app: App): void {
+    console.log(`${this.name} v${this.version} loaded!`);
+  }
+  
+  onUnload(app: App): void {
+    console.log(`${this.name} unloaded`);
+  }
+}
+</code></pre>
+<p>To use this plugin, you would:</p>
+<ol>
+<li>Create the directory <code>src/plugins/hello-world/</code></li>
+<li>Save the above code as <code>index.ts</code> in that directory</li>
+<li>Add the plugin to your configuration:</li>
+</ol>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "plugins": {
+    "hello-world": {
+      "greeting": "Hello from my custom plugin!"
+    }
+  }
+}
+</code></pre>
+<ol start="4">
+<li>Restart your UrsaMU server</li>
+</ol>
+<p>Now, when a player types “hello” in the game, they’ll see the custom greeting message.</p>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

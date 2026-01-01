@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to configure UrsaMU for your needs">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/configuration/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Configuring UrsaMU</h1>
+<p>This guide explains how to configure UrsaMU for your specific needs.</p>
+<h2>Overview</h2>
+<p>UrsaMU uses a flexible configuration system that allows you to customize various<br>
+aspects of the game. The configuration is stored in JSON files and can be<br>
+accessed programmatically through the configuration API.</p>
+<h2>Configuration Files</h2>
+<p>The main configuration file is typically located at <code>config/config.json</code>. This<br>
+file contains settings for the server, game, database, and other components.</p>
+<p>Here’s an example of a basic configuration file:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "telnet": 4201,
+    "ws": 4202,
+    "http": 4203,
+    "db": "data/ursamu.db",
+    "counters": "counters",
+    "chans": "chans",
+    "mail": "mail",
+    "bboard": "bboard"
+  },
+  "game": {
+    "name": "UrsaMU",
+    "description": "A Modern MUSH-Like engine written in Typescript.",
+    "version": "0.0.1",
+    "text": {
+      "connect": "text/default_connect.txt"
+    },
+    "playerStart": "1"
+  }
+}
+</code></pre>
+<h2>Server Configuration</h2>
+<p>The <code>server</code> section of the configuration file contains settings related to the<br>
+server:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "telnet": 4201,
+    "ws": 4202,
+    "http": 4203,
+    "db": "data/ursamu.db",
+    "counters": "counters",
+    "chans": "chans",
+    "mail": "mail",
+    "bboard": "bboard"
+  }
+}
+</code></pre>
+<h3>Server Options</h3>
+<ul>
+<li><code>telnet</code> (number): The port for the telnet server (default: 4201)</li>
+<li><code>ws</code> (number): The port for the WebSocket server (default: 4202)</li>
+<li><code>http</code> (number): The port for the HTTP server (default: 4203)</li>
+<li><code>db</code> (string): Path to the database file (default: “data/ursamu.db”)</li>
+<li><code>counters</code> (string): DB prefix for counters (default: “counters”)</li>
+<li><code>chans</code> (string): DB prefix for channels (default: “chans”)</li>
+<li><code>mail</code> (string): DB prefix for mail (default: “mail”)</li>
+<li><code>bboard</code> (string): DB prefix for bulletin boards (default: “bboard”)</li>
+</ul>
+<h2>Game Configuration</h2>
+<p>The <code>game</code> section contains settings related to the game itself:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "game": {
+    "name": "My UrsaMU Game",
+    "motd": "Welcome to My UrsaMU Game!",
+    "debug": false,
+    "startingRoom": "1",
+    "startingMoney": 100,
+    "maxPlayers": 100,
+    "idleTimeout": 3600
+  }
+}
+</code></pre>
+<h3>Game Options</h3>
+<ul>
+<li><code>name</code> (string): The name of the game (default: “UrsaMU”)</li>
+<li><code>motd</code> (string): Message of the day (default: “Welcome to UrsaMU!”)</li>
+<li><code>debug</code> (boolean): Whether to enable debug mode (default: false)</li>
+<li><code>startingRoom</code> (string): The ID of the starting room for new players (default:<br>
+“1”)</li>
+<li><code>startingMoney</code> (number): The amount of money new players start with<br>
+(default: 0)</li>
+<li><code>maxPlayers</code> (number): The maximum number of players allowed (default: 0,<br>
+unlimited)</li>
+<li><code>idleTimeout</code> (number): The number of seconds before a player is considered<br>
+idle (default: 3600)</li>
+</ul>
+<h2>Plugin Configuration</h2>
+<p>Plugins can have their own configuration sections in the main configuration<br>
+file:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "plugins": {
+    "my-plugin": {
+      "enabled": true,
+      "option1": "value1",
+      "option2": 42
+    }
+  }
+}
+</code></pre>
+<h3>Accessing Plugin Configuration</h3>
+<p>Plugins can access their configuration using the <code>getConfig</code> function:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { getConfig } from "../../services/Config/mod.ts";
+
+// Get a plugin configuration value with a default fallback
+const option1 = getConfig("plugins.my-plugin.option1", "default");
+const option2 = getConfig("plugins.my-plugin.option2", 0);
+</code></pre>
+<h2>Text Files</h2>
+<p>UrsaMU uses text files for various game messages. These files are typically<br>
+located in the <code>config/text</code> directory:</p>
+<ul>
+<li><code>connect.txt</code>: The connection screen shown to players when they connect</li>
+<li><code>motd.txt</code>: The message of the day shown to players when they connect</li>
+<li><code>welcome.txt</code>: The welcome message shown to new players</li>
+<li><code>help.txt</code>: The help text shown to players when they type “help”</li>
+</ul>
+<h3>Example Text File</h3>
+<p>Here’s an example of a <code>connect.txt</code> file:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">%ch%cy==================================%cn
+%ch%cw           My UrsaMU Game        %cn
+%ch%cy==================================%cn
+
+Welcome to My UrsaMU Game!
+
+Type 'connect &lt;name&gt; &lt;password&gt;' to connect.
+Type 'create &lt;name&gt; &lt;password&gt;' to create a new character.
+Type 'quit' to disconnect.
+
+%ch%cy==================================%cn
+</code></pre>
+<h3>Color Codes</h3>
+<p>Text files can use color codes to add color to the text:</p>
+<ul>
+<li><code>%cn</code>: Reset to default color</li>
+<li><code>%ch</code>: Highlight (bold)</li>
+<li><code>%cr</code>: Red</li>
+<li><code>%cg</code>: Green</li>
+<li><code>%cy</code>: Yellow</li>
+<li><code>%cb</code>: Blue</li>
+<li><code>%cm</code>: Magenta</li>
+<li><code>%cc</code>: Cyan</li>
+<li><code>%cw</code>: White</li>
+</ul>
+<h2>Advanced Configuration</h2>
+<h3>Configuration API</h3>
+<p>UrsaMU provides a configuration API for accessing and modifying configuration<br>
+values programmatically:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { getConfig, setConfig } from "../../services/Config/mod.ts";
+
+// Get a configuration value
+const port = getConfig("server.port", 4201);
+
+// Set a configuration value
+await setConfig("server.port", 4202);
+</code></pre>
+<h3>Environment Variables</h3>
+<p>UrsaMU supports environment variables for configuration. Environment variables<br>
+take precedence over values in the configuration file.</p>
+<p>Environment variables should be prefixed with <code>URSAMU_</code> and use underscores<br>
+instead of dots:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">URSAMU_SERVER_PORT=4202
+URSAMU_GAME_NAME="My UrsaMU Game"
+URSAMU_DATABASE_PATH="./custom-data"
+</code></pre>
+<h3>Configuration Hierarchy</h3>
+<p>UrsaMU uses the following hierarchy for configuration values (from highest to<br>
+lowest precedence):</p>
+<ol>
+<li>Environment variables</li>
+<li>Values set programmatically via <code>setConfig</code></li>
+<li>Values in the configuration file</li>
+<li>Default values</li>
+</ol>
+<h3>Custom Configuration Files</h3>
+<p>You can specify a custom configuration file when starting UrsaMU:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
+import { config } from "./my-custom-config.ts";
+
+await mu({ config });
+</code></pre>
+<h3>Dynamic Configuration</h3>
+<p>Some configuration values can be changed at runtime:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { setConfig } from "../../services/Config/mod.ts";
+
+// Change the game name at runtime
+await setConfig("game.name", "New Game Name");
+</code></pre>
+<h3>Configuration Validation</h3>
+<p>UrsaMU validates configuration values to ensure they are of the correct type and<br>
+within acceptable ranges. If a configuration value is invalid, UrsaMU will log a<br>
+warning and use the default value instead.</p>
+<h3>Example: Complete Configuration</h3>
+<p>Here’s an example of a complete configuration file with all available options:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "port": 4201,
+    "host": "0.0.0.0",
+    "webSocket": true,
+    "telnet": true,
+    "web": true,
+    "webPort": 4202,
+    "ssl": {
+      "enabled": false,
+      "key": "path/to/key.pem",
+      "cert": "path/to/cert.pem"
+    }
+  },
+  "game": {
+    "name": "My UrsaMU Game",
+    "motd": "Welcome to My UrsaMU Game!",
+    "debug": false,
+    "startingRoom": "1",
+    "startingMoney": 100,
+    "maxPlayers": 100,
+    "idleTimeout": 3600,
+    "registerEnabled": true,
+    "guestEnabled": true,
+    "guestPrefix": "Guest"
+  },
+  "database": {
+    "path": "./data",
+    "backupInterval": 3600000,
+    "maxBackups": 5
+  },
+  "plugins": {
+    "my-plugin": {
+      "enabled": true,
+      "option1": "value1",
+      "option2": 42
+    }
+  },
+  "logging": {
+    "level": "info",
+    "file": "logs/ursamu.log",
+    "maxSize": 10485760,
+    "maxFiles": 5
+  }
+}
+</code></pre>
+<p>By following this guide, you can configure UrsaMU to suit your specific needs<br>
+and create a customized MU* experience.</p>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

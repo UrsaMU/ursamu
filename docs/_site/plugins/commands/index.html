@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to create commands in UrsaMU plugins">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/plugins/commands/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Creating Commands in UrsaMU Plugins</h1>
+<p>This guide explains how to create and register commands in your UrsaMU plugins.</p>
+<h2>Command Basics</h2>
+<p>Commands are the primary way players interact with UrsaMU. They allow players to perform actions, get information, and interact with the game world. As a plugin developer, you can add new commands to extend the functionality of UrsaMU.</p>
+<h2>Command Structure</h2>
+<p>In UrsaMU, commands are defined using the <code>ICmd</code> interface:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface ICmd {
+  name: string;         // The name of the command
+  pattern: string;      // The pattern to match for this command
+  flags?: string;       // The flags required to use this command (optional)
+  exec: (ctx: any) =&gt; void | Promise&lt;void&gt;; // The function to execute
+}
+</code></pre>
+<h3>Command Name</h3>
+<p>The <code>name</code> property is a unique identifier for your command. It should be lowercase and contain only letters, numbers, and hyphens.</p>
+<h3>Command Pattern</h3>
+<p>The <code>pattern</code> property is a string that defines when your command should be triggered. It can include wildcards to match different variations of the command. For example:</p>
+<ul>
+<li><code>"look"</code> - Matches exactly “look”</li>
+<li><code>"look *"</code> - Matches “look” followed by any text</li>
+<li><code>"look/examine *"</code> - Matches either “look” or “examine” followed by any text</li>
+</ul>
+<h3>Command Flags</h3>
+<p>The optional <code>flags</code> property defines the permissions required to use the command. It can be a single flag or a space-separated list of flags. For example:</p>
+<ul>
+<li><code>"connected"</code> - The player must be connected</li>
+<li><code>"wizard"</code> - The player must have the WIZARD flag</li>
+<li><code>"connected wizard"</code> - The player must be both connected and have the WIZARD flag</li>
+</ul>
+<h3>Command Execution Function</h3>
+<p>The <code>exec</code> property is a function that is called when the command is executed. It receives a context object that provides information about the command and the player who executed it.</p>
+<h2>Registering Commands</h2>
+<p>To register a command in your plugin, use the <code>registerCommand</code> function in your plugin’s <code>init</code> method:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { registerCommand } from "../../services/Commands/mod.ts";
+
+const myPlugin: IPlugin = {
+  name: "my-plugin",
+  version: "1.0.0",
+  description: "A plugin that adds custom commands",
+  
+  init: async () =&gt; {
+    // Register a command
+    registerCommand({
+      name: "hello",
+      pattern: "hello *",
+      flags: "connected",
+      exec: (ctx) =&gt; {
+        const target = ctx.args.trim() || "world";
+        ctx.send(`Hello, ${target}!`);
+      }
+    });
+    
+    return true;
+  }
+};
+
+export default myPlugin;
+</code></pre>
+<h2>Command Context</h2>
+<p>The context object passed to the command’s <code>exec</code> function provides information about the command and the player who executed it:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface CommandContext {
+  player: any;          // The player who executed the command
+  cmd: string;          // The command that was executed
+  args: string;         // The arguments passed to the command
+  switches: any;        // Any switches used with the command
+  send: (msg: string) =&gt; void; // Function to send a message to the player
+}
+</code></pre>
+<h3>Player</h3>
+<p>The <code>player</code> property is a reference to the player who executed the command. You can use this to get information about the player or perform actions on behalf of the player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">exec: (ctx) =&gt; {
+  const playerName = ctx.player.data.name;
+  ctx.send(`Hello, ${playerName}!`);
+}
+</code></pre>
+<h3>Command and Arguments</h3>
+<p>The <code>cmd</code> property contains the command that was executed, and the <code>args</code> property contains any text that follows the command pattern.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">exec: (ctx) =&gt; {
+  ctx.send(`You executed: ${ctx.cmd} with args: ${ctx.args}`);
+}
+</code></pre>
+<h3>Switches</h3>
+<p>The <code>switches</code> property contains any switches used with the command. Switches are specified with a forward slash followed by a name and optionally an equals sign and a value.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">exec: (ctx) =&gt; {
+  if (ctx.switches.verbose) {
+    ctx.send("Verbose mode enabled");
+  }
+  
+  const format = ctx.switches.format || "standard";
+  ctx.send(`Using format: ${format}`);
+}
+</code></pre>
+<h3>Send</h3>
+<p>The <code>send</code> method sends a message to the player who executed the command.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">exec: (ctx) =&gt; {
+  ctx.send("This message will be sent to the player");
+}
+</code></pre>
+<h2>Command Patterns</h2>
+<p>Command patterns determine when your command is triggered. UrsaMU uses a simple pattern matching system:</p>
+<h3>Exact Match</h3>
+<p>To match a command exactly, use the command name:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">pattern: "look"  // Matches exactly "look"
+</code></pre>
+<h3>Wildcard Match</h3>
+<p>To match a command followed by any text, use an asterisk:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">pattern: "look *"  // Matches "look" followed by any text
+</code></pre>
+<h3>Multiple Patterns</h3>
+<p>To match multiple patterns, separate them with a forward slash:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">pattern: "look/examine *"  // Matches either "look" or "examine" followed by any text
+</code></pre>
+<h2>Examples</h2>
+<h3>Simple Command</h3>
+<p>A simple command that greets the player:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerCommand({
+  name: "greet",
+  pattern: "greet *",
+  flags: "connected",
+  exec: (ctx) =&gt; {
+    const target = ctx.args.trim() || "world";
+    ctx.send(`Hello, ${target}!`);
+  }
+});
+</code></pre>
+<h3>Command with Switches</h3>
+<p>A command that uses switches to modify its behavior:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerCommand({
+  name: "search",
+  pattern: "search *",
+  flags: "connected",
+  exec: (ctx) =&gt; {
+    const target = ctx.args.trim();
+    const area = ctx.switches.area || "current";
+    const detail = ctx.switches.detail || "normal";
+    
+    ctx.send(`Searching for ${target} in ${area} area with ${detail} detail level.`);
+    // Search implementation
+  }
+});
+</code></pre>
+<h3>Command with Subcommands</h3>
+<p>A command with subcommands:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerCommand({
+  name: "channel",
+  pattern: "channel *",
+  flags: "connected",
+  exec: (ctx) =&gt; {
+    const args = ctx.args.trim().split(" ");
+    const subcommand = args[0];
+    const subargs = args.slice(1).join(" ");
+    
+    switch (subcommand) {
+      case "join":
+        if (!subargs) {
+          return ctx.send("Join which channel?");
+        }
+        ctx.send(`Joining channel ${subargs}.`);
+        // Join implementation
+        break;
+      case "leave":
+        if (!subargs) {
+          return ctx.send("Leave which channel?");
+        }
+        ctx.send(`Leaving channel ${subargs}.`);
+        // Leave implementation
+        break;
+      case "list":
+        ctx.send("Available channels:");
+        // List implementation
+        break;
+      default:
+        ctx.send(`
+          |cChannel Commands:|n
+          channel join &lt;name&gt; - Join a channel
+          channel leave &lt;name&gt; - Leave a channel
+          channel list - List available channels
+        `);
+        break;
+    }
+  }
+});
+</code></pre>
+<h3>Asynchronous Command</h3>
+<p>A command that performs asynchronous operations:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerCommand({
+  name: "profile",
+  pattern: "profile *",
+  flags: "connected",
+  exec: async (ctx) =&gt; {
+    const target = ctx.args.trim() || ctx.player.data.name;
+    
+    try {
+      // Get the target player
+      const players = await dbojs.query({
+        "data.name": new RegExp(`^${target}$`, "i"),
+        flags: /player/i
+      });
+      
+      if (players.length === 0) {
+        return ctx.send(`Player ${target} not found.`);
+      }
+      
+      const player = players[0];
+      
+      // Format the profile
+      let message = `|c${player.data.name}'s Profile:|n\n`;
+      message += `Description: ${player.data.description || "None"}\n`;
+      
+      ctx.send(message);
+    } catch (error) {
+      ctx.send(`Error: ${error.message}`);
+    }
+  }
+});
+</code></pre>
+<p>By following these guidelines and examples, you can create powerful and user-friendly commands for your UrsaMU plugins.</p>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

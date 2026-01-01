@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to use the database in UrsaMU plugins">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/plugins/database/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Using the Database in UrsaMU Plugins</h1>
+<p>This guide explains how to use the UrsaMU database system in your plugins to store and retrieve data.</p>
+<h2>Database Basics</h2>
+<p>UrsaMU uses a simple database system for storing game objects and other data. The database is accessible through several services that provide methods for creating, reading, updating, and deleting data.</p>
+<h2>Database Services</h2>
+<p>UrsaMU provides several database services for different types of data:</p>
+<ul>
+<li><strong>dbojs</strong> - The main database for game objects (players, rooms, exits, things)</li>
+<li><strong>counters</strong> - A database for counters (used for generating unique IDs)</li>
+<li><strong>chans</strong> - A database for communication channels</li>
+<li><strong>mail</strong> - A database for the mail system</li>
+<li><strong>bboard</strong> - A database for bulletin boards</li>
+</ul>
+<p>These services are imported from the Database service module:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { dbojs, counters, chans, mail, bboard } from "../../services/Database/index.ts";
+</code></pre>
+<h2>CRUD Operations</h2>
+<p>Each database service provides methods for creating, reading, updating, and deleting data.</p>
+<h3>Creating Objects</h3>
+<p>To create a new object in the database, use the <code>create</code> method:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Create a new game object
+const newObject = {
+  flags: "thing",
+  data: {
+    name: "My Object",
+    description: "A custom object created by a plugin"
+  }
+};
+
+try {
+  const obj = await dbojs.create(newObject);
+  console.log(`Created object with ID: ${obj.id}`);
+} catch (error) {
+  console.error("Error creating object:", error);
+}
+</code></pre>
+<h3>Reading Objects</h3>
+<p>To retrieve an object from the database, use the <code>get</code> method with the object’s ID:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Get an object by ID
+try {
+  const obj = await dbojs.get("123");
+  if (obj) {
+    console.log(`Found object: ${obj.data.name}`);
+  } else {
+    console.log("Object not found");
+  }
+} catch (error) {
+  console.error("Error getting object:", error);
+}
+</code></pre>
+<h3>Updating Objects</h3>
+<p>To update an object in the database, modify the object and use the <code>update</code> method:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Update an object
+try {
+  const obj = await dbojs.get("123");
+  if (obj) {
+    // Modify the object
+    obj.data.description = "Updated description";
+    
+    // Save the changes
+    await dbojs.update(obj);
+    console.log("Object updated");
+  }
+} catch (error) {
+  console.error("Error updating object:", error);
+}
+</code></pre>
+<h3>Deleting Objects</h3>
+<p>To delete an object from the database, use the <code>delete</code> method with the object’s ID:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Delete an object
+try {
+  await dbojs.delete("123");
+  console.log("Object deleted");
+} catch (error) {
+  console.error("Error deleting object:", error);
+}
+</code></pre>
+<h2>Querying Data</h2>
+<p>UrsaMU provides a powerful query system for finding objects in the database.</p>
+<h3>Basic Queries</h3>
+<p>To find objects that match specific criteria, use the <code>query</code> method:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Find all rooms
+try {
+  const rooms = await dbojs.query({ flags: /room/i });
+  console.log(`Found ${rooms.length} rooms`);
+} catch (error) {
+  console.error("Error querying rooms:", error);
+}
+</code></pre>
+<h3>Complex Queries</h3>
+<p>You can create more complex queries by combining multiple criteria:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Find all objects owned by a specific player
+try {
+  const objects = await dbojs.query({
+    owner: "123",
+    flags: /thing/i
+  });
+  console.log(`Found ${objects.length} objects owned by player 123`);
+} catch (error) {
+  console.error("Error querying objects:", error);
+}
+</code></pre>
+<h3>Querying by Name</h3>
+<p>To find objects by name, you can use a regular expression:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Find a player by name (case-insensitive)
+try {
+  const players = await dbojs.query({
+    "data.name": new RegExp("^PlayerName$", "i"),
+    flags: /player/i
+  });
+  
+  if (players.length &gt; 0) {
+    console.log(`Found player: ${players[0].data.name}`);
+  } else {
+    console.log("Player not found");
+  }
+} catch (error) {
+  console.error("Error querying player:", error);
+}
+</code></pre>
+<h3>Getting All Objects</h3>
+<p>To get all objects in a database, use the <code>all</code> method:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Get all channels
+try {
+  const channels = await chans.all();
+  console.log(`Found ${channels.length} channels`);
+} catch (error) {
+  console.error("Error getting channels:", error);
+}
+</code></pre>
+<h2>Examples</h2>
+<h3>Creating a Room</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { dbojs, counters } from "../../services/Database/index.ts";
+
+const roomCreatorPlugin: IPlugin = {
+  name: "room-creator",
+  version: "1.0.0",
+  description: "A plugin that creates custom rooms",
+  
+  init: async () =&gt; {
+    try {
+      // Get the next object ID
+      let counter = await counters.get("objid");
+      if (!counter) {
+        // Create the counter if it doesn't exist
+        counter = await counters.create({
+          id: "objid",
+          seq: 1
+        });
+      }
+      
+      // Increment the counter
+      counter.seq += 1;
+      await counters.update(counter);
+      
+      // Create a new room
+      const roomId = counter.seq.toString();
+      const newRoom = {
+        id: roomId,
+        flags: "room",
+        data: {
+          name: "Custom Room",
+          description: "A room created by the room-creator plugin."
+        }
+      };
+      
+      const room = await dbojs.create(newRoom);
+      console.log(`Created room with ID: ${room.id}`);
+      
+      return true;
+    } catch (error) {
+      console.error("Error creating room:", error);
+      return false;
+    }
+  },
+  
+  remove: async () =&gt; {
+    try {
+      // Find and delete rooms created by this plugin
+      const rooms = await dbojs.query({
+        "data.name": "Custom Room",
+        flags: /room/i
+      });
+      
+      for (const room of rooms) {
+        await dbojs.delete(room.id);
+        console.log(`Deleted room with ID: ${room.id}`);
+      }
+    } catch (error) {
+      console.error("Error cleaning up rooms:", error);
+    }
+  }
+};
+
+export default roomCreatorPlugin;
+</code></pre>
+<h3>Creating a Channel</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { chans } from "../../services/Database/index.ts";
+
+const channelPlugin: IPlugin = {
+  name: "channel-plugin",
+  version: "1.0.0",
+  description: "A plugin that creates a custom channel",
+  
+  init: async () =&gt; {
+    try {
+      // Check if the channel already exists
+      const existingChannels = await chans.query({ id: "custom" });
+      
+      if (existingChannels.length === 0) {
+        // Create the channel
+        await chans.create({
+          id: "custom",
+          name: "Custom",
+          header: "%ch%cg[Custom]%cn",
+          alias: "cus",
+          lock: "connected"
+        });
+        
+        console.log("Created custom channel");
+      } else {
+        console.log("Custom channel already exists");
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error creating channel:", error);
+      return false;
+    }
+  },
+  
+  remove: async () =&gt; {
+    try {
+      // Delete the custom channel
+      await chans.delete("custom");
+      console.log("Deleted custom channel");
+    } catch (error) {
+      console.error("Error deleting channel:", error);
+    }
+  }
+};
+
+export default channelPlugin;
+</code></pre>
+<h3>Player Inventory System</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { dbojs } from "../../services/Database/index.ts";
+import { registerCommand } from "../../services/Commands/mod.ts";
+
+const inventoryPlugin: IPlugin = {
+  name: "inventory",
+  version: "1.0.0",
+  description: "A plugin that adds an inventory system",
+  
+  init: async () =&gt; {
+    // Register the inventory command
+    registerCommand({
+      name: "inventory",
+      pattern: "inventory/inv/i",
+      flags: "connected",
+      exec: async (ctx) =&gt; {
+        try {
+          // Get the player's inventory items
+          const items = await dbojs.query({
+            location: ctx.player.id,
+            flags: /thing/i
+          });
+          
+          if (items.length === 0) {
+            ctx.send("You are not carrying anything.");
+            return;
+          }
+          
+          // Display the inventory
+          let message = "|cYour Inventory:|n\n";
+          
+          for (const item of items) {
+            message += `${item.data.name} - ${item.data.description || "No description"}\n`;
+          }
+          
+          ctx.send(message);
+        } catch (error) {
+          ctx.send(`Error: ${error.message}`);
+        }
+      }
+    });
+    
+    // Register the give command
+    registerCommand({
+      name: "give",
+      pattern: "give *",
+      flags: "connected",
+      exec: async (ctx) =&gt; {
+        const args = ctx.args.trim().split("=");
+        
+        if (args.length !== 2) {
+          return ctx.send("Usage: give &lt;item&gt;=&lt;player&gt;");
+        }
+        
+        const itemName = args[0].trim();
+        const playerName = args[1].trim();
+        
+        try {
+          // Find the item in the player's inventory
+          const items = await dbojs.query({
+            location: ctx.player.id,
+            "data.name": new RegExp(`^${itemName}$`, "i"),
+            flags: /thing/i
+          });
+          
+          if (items.length === 0) {
+            return ctx.send(`You don't have '${itemName}'.`);
+          }
+          
+          const item = items[0];
+          
+          // Find the target player
+          const players = await dbojs.query({
+            "data.name": new RegExp(`^${playerName}$`, "i"),
+            flags: /player/i
+          });
+          
+          if (players.length === 0) {
+            return ctx.send(`Player '${playerName}' not found.`);
+          }
+          
+          const targetPlayer = players[0];
+          
+          // Move the item to the target player
+          item.location = targetPlayer.id;
+          await dbojs.update(item);
+          
+          ctx.send(`You give ${item.data.name} to ${targetPlayer.data.name}.`);
+        } catch (error) {
+          ctx.send(`Error: ${error.message}`);
+        }
+      }
+    });
+    
+    return true;
+  }
+};
+
+export default inventoryPlugin;
+</code></pre>
+<p>By following these guidelines and examples, you can effectively use the UrsaMU database system in your plugins to store and retrieve data.</p>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

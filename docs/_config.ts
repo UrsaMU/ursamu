@@ -9,7 +9,7 @@ import tailwindcss from "lume/plugins/tailwindcss.ts";
 import postcss from "lume/plugins/postcss.ts";
 import date from "lume/plugins/date.ts";
 import nunjucks from "lume/plugins/nunjucks.ts";
-import relative_urls from "lume/plugins/relative_urls.ts";
+// import relative_urls from "lume/plugins/relative_urls.ts";
 import typography from "@tailwindcss/typography";
 
 const site = lume({
@@ -49,7 +49,7 @@ site
   .use(postcss())
   .use(date())
   .use(nunjucks())
-  .use(relative_urls())
+  // .use(relative_urls())
   .copy("assets")
   .copy("init.ts")
   .ignore("README.md", "deno.json", "_site", "node_modules");

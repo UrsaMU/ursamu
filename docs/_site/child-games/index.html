@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to create a child game using UrsaMU as a library">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/child-games/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Creating Child Games with UrsaMU</h1>
+<p>This guide explains how to create a child game using UrsaMU as a library.</p>
+<h2>Overview</h2>
+<p>A “child game” is a complete MU* game built on top of the UrsaMU engine. Unlike plugins, which extend the functionality of UrsaMU, a child game is a standalone application that uses UrsaMU as a library.</p>
+<p>Creating a child game allows you to:</p>
+<ul>
+<li>Create a completely customized MU* experience</li>
+<li>Define your own game world, theme, and mechanics</li>
+<li>Distribute your game as a standalone application</li>
+<li>Maintain your game separately from the UrsaMU core</li>
+</ul>
+<h2>Getting Started</h2>
+<h3>Prerequisites</h3>
+<p>Before creating a child game, ensure you have:</p>
+<ul>
+<li><a href="https://deno.land/">Deno</a> installed (version 1.37.0 or higher)</li>
+<li>Basic knowledge of TypeScript</li>
+<li>Understanding of MU* concepts</li>
+</ul>
+<h3>Installation</h3>
+<ol>
+<li>Create a new directory for your game:</li>
+</ol>
+<pre class="language-bash" tabindex="0"><code class="language-bash">mkdir my-game
+cd my-game
+</code></pre>
+<ol start="2">
+<li>Initialize a new Deno project:</li>
+</ol>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno init
+</code></pre>
+<ol start="3">
+<li>Install UrsaMU as a dependency:</li>
+</ol>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Add UrsaMU as a dependency in your deps.ts file
+</code></pre>
+<h2>Project Structure</h2>
+<p>A typical child game project structure looks like this:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">my-game/
+├── config/                  # Configuration files
+│   ├── config.json          # Main configuration
+│   ├── text/                # Text files
+│   └── plugins/             # Plugin configurations
+├── src/                     # Source code
+│   ├── commands/            # Custom commands
+│   ├── plugins/             # Custom plugins
+│   ├── types/               # TypeScript type definitions
+│   └── main.ts              # Entry point
+├── data/                    # Database files (generated)
+├── deps.ts                  # Dependencies
+├── deno.json                # Deno configuration
+└── README.md                # Documentation
+</code></pre>
+<h2>Configuration</h2>
+<h3>Basic Configuration</h3>
+<p>Create a <code>config/config.json</code> file with your game’s configuration:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "port": 4201,
+    "host": "0.0.0.0"
+  },
+  "game": {
+    "name": "My Game",
+    "motd": "Welcome to My Game!",
+    "debug": false
+  },
+  "database": {
+    "path": "./data"
+  }
+}
+</code></pre>
+<h3>Text Files</h3>
+<p>UrsaMU uses text files for various game messages. Create a <code>config/text</code> directory and add your custom text files:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">config/text/
+├── connect.txt       # Connection screen
+├── motd.txt          # Message of the day
+└── welcome.txt       # Welcome message for new players
+</code></pre>
+<h2>Customization</h2>
+<h3>Creating the Main File</h3>
+<p>Create a <code>src/main.ts</code> file as the entry point for your game:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
+import { config } from "../config/mod.ts";
+
+// Import your custom plugins
+import myPlugin from "./plugins/myPlugin/mod.ts";
+
+// Start the game
+await mu({
+  config,
+  plugins: [
+    myPlugin,
+    // Add more custom plugins here
+  ]
+});
+
+console.log("Game started!");
+</code></pre>
+<h3>Custom Commands</h3>
+<p>Create custom commands in the <code>src/commands</code> directory:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/commands/hello.ts
+import { registerCommand } from "ursamu";
+
+registerCommand({
+  name: "hello",
+  pattern: "hello *",
+  flags: "connected",
+  exec: (ctx) =&gt; {
+    const target = ctx.args.trim() || "World";
+    ctx.send(`Hello, ${target}!`);
+  }
+});
+</code></pre>
+<h3>Custom Plugins</h3>
+<p>Create custom plugins in the <code>src/plugins</code> directory:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/myPlugin/mod.ts
+import { IPlugin } from "ursamu";
+
+const myPlugin: IPlugin = {
+  name: "my-plugin",
+  version: "1.0.0",
+  description: "A custom plugin for my game",
+  
+  init: async () =&gt; {
+    console.log("My plugin initialized!");
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    console.log("My plugin removed!");
+  }
+};
+
+export default myPlugin;
+</code></pre>
+<h2>Deployment</h2>
+<h3>Running Your Game</h3>
+<p>Run your game with Deno:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run --allow-net --allow-read --allow-write --allow-env src/main.ts
+</code></pre>
+<h3>Creating a Startup Script</h3>
+<p>Create a <code>start.sh</code> script for easier startup:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">#!/bin/bash
+deno run --allow-net --allow-read --allow-write --allow-env src/main.ts
+</code></pre>
+<p>Make it executable:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">chmod +x start.sh
+</code></pre>
+<h3>Docker Deployment</h3>
+<p>Create a <code>Dockerfile</code> for containerized deployment:</p>
+<pre class="language-dockerfile" tabindex="0"><code class="language-dockerfile">FROM denoland/deno:1.37.0
+
+WORKDIR /app
+
+COPY . .
+
+RUN deno cache src/main.ts
+
+EXPOSE 4201
+
+CMD ["deno", "run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "src/main.ts"]
+</code></pre>
+<p>Build and run the Docker container:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">docker build -t my-game .
+docker run -p 4201:4201 my-game
+</code></pre>
+<h2>Examples</h2>
+<h3>Basic Child Game</h3>
+<p>Here’s a complete example of a basic child game:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// deps.ts
+export { mu, registerCommand, IPlugin } from "ursamu";
+
+// src/main.ts
+import { mu } from "../deps.ts";
+import welcomePlugin from "./plugins/welcome/mod.ts";
+
+// Define configuration
+const config = {
+  server: {
+    port: 4201,
+    host: "0.0.0.0"
+  },
+  game: {
+    name: "My First MU",
+    motd: "Welcome to My First MU!"
+  }
+};
+
+// Start the game
+await mu({
+  config,
+  plugins: [welcomePlugin]
+});
+
+console.log(`${config.game.name} is running on port ${config.server.port}`);
+
+// src/plugins/welcome/mod.ts
+import { IPlugin, registerCommand } from "../../../deps.ts";
+
+const welcomePlugin: IPlugin = {
+  name: "welcome",
+  version: "1.0.0",
+  description: "A welcome plugin for new players",
+  
+  init: async () =&gt; {
+    // Register a welcome command
+    registerCommand({
+      name: "welcome",
+      pattern: "welcome *",
+      flags: "connected",
+      exec: (ctx) =&gt; {
+        const target = ctx.args.trim() || "friend";
+        ctx.send(`Welcome to our game, ${target}!`);
+      }
+    });
+    
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    // Cleanup code here
+  }
+};
+
+export default welcomePlugin;
+</code></pre>
+<h3>Advanced Child Game</h3>
+<p>For a more advanced example, see the <a href="https://github.com/UrsaMU/examples">UrsaMU Examples repository</a> which contains complete child game examples with various features.</p>
+<h3>Customizing the Database</h3>
+<p>You can customize how your game uses the database:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/main.ts
+import { mu } from "../deps.ts";
+
+await mu({
+  config: {
+    // ... other config options
+    database: {
+      path: "./custom-data",
+      backupInterval: 3600000 // Backup every hour
+    }
+  }
+});
+</code></pre>
+<h3>Creating a Custom Theme</h3>
+<p>You can create a custom theme by overriding the default text files and adding custom CSS for the web interface:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/theme/mod.ts
+import { IPlugin } from "../../../deps.ts";
+
+const themePlugin: IPlugin = {
+  name: "custom-theme",
+  version: "1.0.0",
+  description: "Custom theme for my game",
+  
+  init: async () =&gt; {
+    // Register custom CSS
+    // Set up custom colors
+    // Override default text files
+    return true;
+  }
+};
+
+export default themePlugin;
+</code></pre>
+<p>By following this guide, you can create a fully customized MU* game using UrsaMU as a foundation, while maintaining the flexibility to extend and modify it to suit your specific needs.</p>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

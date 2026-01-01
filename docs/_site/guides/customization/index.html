@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to customize your UrsaMU server">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/customization/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Customization Guide</h1>
+<p>This guide covers how to customize your UrsaMU server to create a unique experience for your players.</p>
+<h2>Themes</h2>
+<h3>Visual Themes</h3>
+<p>UrsaMU supports customizable visual themes for the web interface:</p>
+<ol>
+<li>Create a new theme directory in <code>themes/</code></li>
+<li>Create CSS files for your theme</li>
+<li>Configure your theme in <code>config.json</code>:<pre class="language-json" tabindex="0"><code class="language-json">"theme": {
+  "name": "your-theme-name",
+  "options": {
+    "primaryColor": "#3498db",
+    "secondaryColor": "#2ecc71"
+  }
+}
+</code></pre>
+</li>
+</ol>
+<h3>Text Formatting</h3>
+<p>You can customize text formatting with ANSI color codes:</p>
+<ul>
+<li><code>%r</code> - Red</li>
+<li><code>%g</code> - Green</li>
+<li><code>%b</code> - Blue</li>
+<li><code>%c</code> - Cyan</li>
+<li><code>%m</code> - Magenta</li>
+<li><code>%y</code> - Yellow</li>
+<li><code>%w</code> - White</li>
+<li><code>%x</code> - Reset to default</li>
+</ul>
+<p>Example: <code>%rThis text is red%x and this is normal.</code></p>
+<h2>Commands</h2>
+<h3>Creating Custom Commands</h3>
+<p>You can create custom commands using the command API:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.commands.add({
+  name: "mycmd",
+  pattern: /^mycmd\s+(.+)$/i,
+  flags: "connected",
+  exec: (match, context) =&gt; {
+    const arg = match[1];
+    context.send(`You used mycmd with argument: ${arg}`);
+  }
+});
+</code></pre>
+<h3>Modifying Existing Commands</h3>
+<p>You can override existing commands by registering a new command with the same name:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.commands.add({
+  name: "look",
+  pattern: /^(?:look|l)(?:\s+(.+))?$/i,
+  flags: "connected",
+  exec: (match, context) =&gt; {
+    // Your custom look implementation
+  }
+});
+</code></pre>
+<h2>Game Mechanics</h2>
+<h3>Custom Attributes</h3>
+<p>You can define custom attributes for objects and characters:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.attributes.define({
+  name: "strength",
+  defaultValue: 10,
+  min: 1,
+  max: 20,
+  flags: ["character", "numeric"]
+});
+</code></pre>
+<h3>Custom Functions</h3>
+<p>Create custom functions for use in your game:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.functions.add({
+  name: "add",
+  args: ["num1", "num2"],
+  exec: (args, context) =&gt; {
+    return Number(args.num1) + Number(args.num2);
+  }
+});
+</code></pre>
+<h3>Custom Flags</h3>
+<p>Define custom flags for objects:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.flags.define({
+  name: "invisible",
+  description: "Object is invisible to normal players",
+  defaultValue: false
+});
+</code></pre>
+<h2>Integration</h2>
+<h3>External APIs</h3>
+<p>UrsaMU can integrate with external APIs:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.hooks.on("command:weather", async (context) =&gt; {
+  const weather = await fetch("https://api.weather.com/...");
+  const data = await weather.json();
+  context.send(`Current weather: ${data.description}`);
+});
+</code></pre>
+<h3>Database Integration</h3>
+<p>Connect to external databases:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const db = new Database({
+  type: "postgres",
+  host: "localhost",
+  port: 5432,
+  username: "user",
+  password: "password",
+  database: "mydb"
+});
+
+game.hooks.on("startup", () =&gt; {
+  db.connect();
+});
+</code></pre>
+<h2>Plugins</h2>
+<h3>Installing Plugins</h3>
+<p>To install a plugin:</p>
+<ol>
+<li>Download the plugin to the <code>plugins/</code> directory</li>
+<li>Add the plugin to your configuration:<pre class="language-json" tabindex="0"><code class="language-json">"plugins": [
+  "my-plugin"
+]
+</code></pre>
+</li>
+<li>Restart your server</li>
+</ol>
+<h3>Creating Plugins</h3>
+<p>Create your own plugins to extend UrsaMU:</p>
+<ol>
+<li>Create a new directory in <code>plugins/</code></li>
+<li>Create a <code>plugin.json</code> file:<pre class="language-json" tabindex="0"><code class="language-json">{
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "description": "My custom plugin",
+  "main": "index.ts"
+}
+</code></pre>
+</li>
+<li>Create an <code>index.ts</code> file with your plugin code</li>
+<li>See the <a href="../plugins/index.md">Plugin Development</a> section for more details</li>
+</ol>
+<h2>Web Interface</h2>
+<h3>Customizing the Web Client</h3>
+<p>The web client can be customized by modifying the templates:</p>
+<ol>
+<li>Copy the default templates from <code>templates/</code> to <code>custom-templates/</code></li>
+<li>Modify the templates as needed</li>
+<li>Configure UrsaMU to use your custom templates:<pre class="language-json" tabindex="0"><code class="language-json">"templates": {
+  "directory": "custom-templates"
+}
+</code></pre>
+</li>
+</ol>
+<h3>Custom CSS</h3>
+<p>Add custom CSS to the web interface:</p>
+<ol>
+<li>Create a <code>custom.css</code> file in <code>public/css/</code></li>
+<li>Add your custom styles</li>
+<li>Configure UrsaMU to include your CSS:<pre class="language-json" tabindex="0"><code class="language-json">"webClient": {
+  "customCSS": ["custom.css"]
+}
+</code></pre>
+</li>
+</ol>
+<h3>Custom JavaScript</h3>
+<p>Add custom JavaScript to the web interface:</p>
+<ol>
+<li>Create a <code>custom.js</code> file in <code>public/js/</code></li>
+<li>Add your custom scripts</li>
+<li>Configure UrsaMU to include your JavaScript:<pre class="language-json" tabindex="0"><code class="language-json">"webClient": {
+  "customJS": ["custom.js"]
+}
+</code></pre>
+</li>
+</ol>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

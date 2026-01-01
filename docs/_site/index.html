@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome | UrsaMU Documentation</title>
+  <meta name="description" content="The official documentation for UrsaMU, a modern MU* engine for the next generation.">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <div class="text-center py-12">
+  <img src="{{ " assets="" logo.png"="" |="" url="" }}"="" alt="UrsaMU Banner" class="mx-auto rounded-3xl shadow-2xl border border-ursamu-primary/50 mb-12 max-w-2xl w-full">
+<h1 class="text-6xl font-black mb-4">UrsaMU</h1>
+  <p class="text-2xl text-purple-300/80 max-w-2xl mx-auto leading-relaxed">
+    A high-performance, modular MU* engine built with TypeScript and Deno.
+  </p>
+</div>
+<hr>
+<div class="grid md:grid-cols-2 gap-8 my-16">
+  <div class="bg-ursamu-primary/10 border border-ursamu-primary/20 p-8 rounded-3xl hover:border-ursamu-accent/50 transition-colors">
+    <h2 class="mt-0! text-ursamu-accent flex items-center gap-3">
+      <span>🚀</span> Getting Started
+    </h2>
+    <p class="mb-6 opacity-80">Quickly set up your own world and start building.</p>
+    <ul class="space-y-3 list-none! pl-0!">
+      <li><a href="./guides/installation.md" class="font-bold">Installation Guide</a></li>
+      <li><a href="./configuration/README.md" class="font-bold">Configuration</a></li>
+      <li><a href="./guides/user-guide.md" class="font-bold">User Guide</a></li>
+    </ul>
+  </div>
+<div class="bg-ursamu-primary/10 border border-ursamu-primary/20 p-8 rounded-3xl hover:border-ursamu-accent/50 transition-colors">
+    <h2 class="mt-0! text-ursamu-accent flex items-center gap-3">
+      <span>🛠</span> Developer Portal
+    </h2>
+    <p class="mb-6 opacity-80">Deep dive into the core engine and plugin system.</p>
+    <ul class="space-y-3 list-none! pl-0!">
+      <li><a href="./api/README.md" class="font-bold">API Reference</a></li>
+      <li><a href="./plugins/README.md" class="font-bold">Plugin Development</a></li>
+      <li><a href="./development/contributing.md" class="font-bold">Contributing</a></li>
+    </ul>
+  </div>
+</div>
+<hr>
+<h2>📚 Community &amp; Resources</h2>
+<p>Get help and connect with other builders:</p>
+<ul>
+<li><a href="https://github.com/ursamu/ursamu"><strong>GitHub Repository</strong></a> - Source code and<br>
+issue tracking.</li>
+<li><a href="https://discord.gg/ursamu"><strong>Discord Server</strong></a> - Get real-time help and chat<br>
+with the community.</li>
+</ul>
+<hr>
+<div class="text-center opacity-50 text-sm italic">
+  UrsaMU is licensed under the MIT License.
+</div>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

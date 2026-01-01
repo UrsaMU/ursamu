@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Create your first UrsaMU plugin with this step-by-step guide">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/plugins/first-plugin/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Creating Your First Plugin</h1>
+<p>This guide will walk you through creating a simple UrsaMU plugin from scratch. We’ll create a “dice roller” plugin that adds commands for rolling dice in the game.</p>
+<h2>Prerequisites</h2>
+<p>Before you begin, make sure you have:</p>
+<ol>
+<li>A working UrsaMU installation</li>
+<li>Basic knowledge of TypeScript</li>
+<li>A code editor (VS Code recommended)</li>
+</ol>
+<h2>Creating the Plugin Structure</h2>
+<p>UrsaMU provides a task to create a new plugin structure. Open your terminal and run:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task create-plugin dice-roller
+</code></pre>
+<p>This will create a new directory <code>src/plugins/dice-roller/</code> with the following structure:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">src/plugins/dice-roller/
+├── index.ts           # Main plugin file
+├── scripts/           # Utility scripts
+│   └── run.sh         # Script to run both servers
+└── src/               # Source code
+    ├── main.ts        # Main server entry point
+    └── telnet.ts      # Telnet server entry point
+</code></pre>
+<p>If you prefer to create the structure manually, create the following files:</p>
+<ol>
+<li>Create the plugin directory:</li>
+</ol>
+<pre class="language-bash" tabindex="0"><code class="language-bash">mkdir -p src/plugins/dice-roller
+</code></pre>
+<ol start="2">
+<li>Create the main plugin file:</li>
+</ol>
+<pre class="language-bash" tabindex="0"><code class="language-bash">touch src/plugins/dice-roller/index.ts
+</code></pre>
+<h2>Implementing the Plugin</h2>
+<p>Now, let’s implement our dice roller plugin. Open <code>src/plugins/dice-roller/index.ts</code> and add the following code:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { App, IPlugin } from "ursamu";
+
+/**
+ * A plugin that adds dice rolling commands to UrsaMU
+ */
+export default class DiceRollerPlugin implements IPlugin {
+  name = "dice-roller";
+  version = "1.0.0";
+  description = "Adds dice rolling commands to UrsaMU";
+  author = "Your Name";
+  
+  // Default configuration
+  config = {
+    maxDice: 100,    // Maximum number of dice that can be rolled at once
+    maxSides: 1000,  // Maximum number of sides per die
+  };
+  
+  /**
+   * Initialize the plugin
+   */
+  onInit(app: App): void {
+    // Register the roll command
+    app.commands.register("dice-roller", {
+      name: "roll",
+      pattern: "roll *",
+      flags: "connected",
+      exec: (ctx) =&gt; {
+        const args = ctx.args.trim();
+        
+        // If no arguments, show help
+        if (!args) {
+          return ctx.send(`
+            |cDice Roller Help|n
+            Usage: roll &lt;number&gt;d&lt;sides&gt; [+/-&lt;modifier&gt;]
+            Examples:
+              roll 1d6       - Roll a 6-sided die
+              roll 2d10      - Roll two 10-sided dice
+              roll 3d6+2     - Roll three 6-sided dice and add 2
+              roll 2d20-1    - Roll two 20-sided dice and subtract 1
+          `);
+        }
+        
+        // Parse the dice expression
+        const result = this.parseDiceExpression(args);
+        
+        if (result.error) {
+          return ctx.send(`|rError:|n ${result.error}`);
+        }
+        
+        // Format the result
+        const rollText = result.rolls.join(", ");
+        const totalText = result.modifier !== 0 
+          ? `${result.total - result.modifier} ${result.modifier &gt; 0 ? '+' : ''}${result.modifier} = ${result.total}`
+          : result.total.toString();
+        
+        ctx.send(`
+          |c${ctx.player.name} rolls ${args}|n
+          Rolls: ${rollText}
+          Total: ${totalText}
+        `);
+      }
+    });
+    
+    console.log(`${this.name} initialized`);
+  }
+  
+  /**
+   * Parse a dice expression like "3d6+2"
+   */
+  parseDiceExpression(expression: string) {
+    // Regular expression to match dice notation
+    const diceRegex = /^(\d+)d(\d+)(?:([+-])(\d+))?$/i;
+    const match = expression.match(diceRegex);
+    
+    if (!match) {
+      return { error: "Invalid dice expression. Use format: NdS[+/-M] (e.g., 3d6+2)" };
+    }
+    
+    const numDice = parseInt(match[1], 10);
+    const numSides = parseInt(match[2], 10);
+    const modifierSign = match[3] || "+";
+    const modifierValue = match[4] ? parseInt(match[4], 10) : 0;
+    const modifier = modifierSign === "+" ? modifierValue : -modifierValue;
+    
+    // Validate the dice parameters
+    if (numDice &lt;= 0 || numDice &gt; this.config.maxDice) {
+      return { error: `Number of dice must be between 1 and ${this.config.maxDice}` };
+    }
+    
+    if (numSides &lt;= 0 || numSides &gt; this.config.maxSides) {
+      return { error: `Number of sides must be between 1 and ${this.config.maxSides}` };
+    }
+    
+    // Roll the dice
+    const rolls: number[] = [];
+    let total = 0;
+    
+    for (let i = 0; i &lt; numDice; i++) {
+      const roll = Math.floor(Math.random() * numSides) + 1;
+      rolls.push(roll);
+      total += roll;
+    }
+    
+    // Add the modifier
+    total += modifier;
+    
+    return { rolls, total, modifier };
+  }
+  
+  /**
+   * Called when the plugin is loaded
+   */
+  onLoad(app: App): void {
+    console.log(`${this.name} v${this.version} loaded!`);
+  }
+  
+  /**
+   * Called when the plugin is unloaded
+   */
+  onUnload(app: App): void {
+    console.log(`${this.name} unloaded`);
+  }
+}
+</code></pre>
+<h2>Testing Your Plugin</h2>
+<p>Now that you’ve created your plugin, let’s test it:</p>
+<ol>
+<li>Make sure your plugin is enabled in your configuration file (<code>config/config.json</code>):</li>
+</ol>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "plugins": {
+    "dice-roller": {
+      "maxDice": 100,
+      "maxSides": 1000
+    }
+  }
+}
+</code></pre>
+<ol start="2">
+<li>Start your UrsaMU server:</li>
+</ol>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task start
+</code></pre>
+<ol start="3">
+<li>
+<p>Connect to your server using a telnet client or the web interface.</p>
+</li>
+<li>
+<p>Try using the roll command:</p>
+</li>
+</ol>
+<pre class="language-none" tabindex="0"><code class="language-none">roll 3d6
+</code></pre>
+<p>You should see output similar to:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">YourName rolls 3d6
+Rolls: 4, 2, 6
+Total: 12
+</code></pre>
+<p>Try other dice expressions:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">roll 2d20+5
+roll 1d100-10
+roll 4d4
+</code></pre>
+<h2>Next Steps</h2>
+<p>Congratulations! You’ve created your first UrsaMU plugin. Here are some ways you could extend this plugin:</p>
+<ol>
+<li>Add more dice rolling commands (e.g., <code>rollpublic</code>, <code>rollprivate</code>)</li>
+<li>Add special dice types (e.g., Fate/Fudge dice, exploding dice)</li>
+<li>Add dice macros that players can save and reuse</li>
+<li>Add statistics tracking for dice rolls</li>
+</ol>
+<p>For more advanced plugin development, check out these guides:</p>
+<ul>
+<li><a href="./hooks.md">Plugin Hooks</a> - Learn how to hook into UrsaMU events</li>
+<li><a href="./configuration.md">Plugin Configuration</a> - More advanced configuration options</li>
+<li><a href="./dependencies.md">Plugin Dependencies</a> - How to depend on other plugins</li>
+</ul>
+<p>Remember that plugins are a powerful way to extend UrsaMU without modifying the core code. By keeping your customizations in plugins, you ensure that your game can be easily updated when new versions of UrsaMU are released.</p>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

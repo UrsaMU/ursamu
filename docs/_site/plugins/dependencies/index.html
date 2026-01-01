@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to manage dependencies between UrsaMU plugins">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/plugins/dependencies/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Plugin Dependencies</h1>
+<p>This guide explains how to manage dependencies between UrsaMU plugins, allowing your plugins to work together and build upon each other’s functionality.</p>
+<h2>Understanding Plugin Dependencies</h2>
+<p>In UrsaMU, plugins can depend on other plugins to extend or use their functionality. This allows you to:</p>
+<ul>
+<li>Create modular plugins that focus on specific features</li>
+<li>Build upon existing plugins without duplicating code</li>
+<li>Create plugin ecosystems where plugins work together</li>
+</ul>
+<p>Dependencies are declared in your plugin class and are automatically resolved by UrsaMU’s plugin manager when loading plugins.</p>
+<h2>Declaring Dependencies</h2>
+<p>To declare that your plugin depends on other plugins, add a <code>dependencies</code> array to your plugin class:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { App, IPlugin } from "ursamu";
+
+export default class MyPlugin implements IPlugin {
+  name = "my-plugin";
+  version = "1.0.0";
+  description = "A plugin that depends on other plugins";
+  author = "Your Name";
+  
+  // Declare dependencies
+  dependencies = ["plugin-a", "plugin-b"];
+  
+  // Rest of your plugin implementation
+  // ...
+}
+</code></pre>
+<p>In this example, <code>my-plugin</code> depends on both <code>plugin-a</code> and <code>plugin-b</code>. UrsaMU will ensure that these plugins are loaded before <code>my-plugin</code>.</p>
+<h3>Optional Dependencies</h3>
+<p>Sometimes you might want to use another plugin if it’s available, but your plugin can still function without it. You can handle this by checking if the dependency is available at runtime:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">onInit(app: App): void {
+  // Check if an optional dependency is available
+  const optionalPlugin = app.plugins.get("optional-plugin");
+  
+  if (optionalPlugin) {
+    // Use the optional plugin
+    console.log("Optional plugin is available, using its features");
+    this.useOptionalFeatures(optionalPlugin);
+  } else {
+    // Fall back to basic functionality
+    console.log("Optional plugin is not available, using basic features");
+    this.useBasicFeatures();
+  }
+}
+</code></pre>
+<h2>Accessing Other Plugins</h2>
+<p>Once you’ve declared dependencies, you can access other plugins through the <code>app.plugins</code> manager:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">onInit(app: App): void {
+  // Get a reference to a dependency
+  const pluginA = app.plugins.get("plugin-a");
+  
+  if (pluginA) {
+    // Use pluginA's functionality
+    console.log(`Using ${pluginA.name} v${pluginA.version}`);
+    
+    // Access public methods or properties
+    if (typeof pluginA.somePublicMethod === 'function') {
+      pluginA.somePublicMethod();
+    }
+  }
+}
+</code></pre>
+<h3>Type Safety with Plugin Interfaces</h3>
+<p>For better type safety, you can define interfaces for the plugins you depend on:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Define an interface for the plugin you depend on
+interface PluginA extends IPlugin {
+  somePublicMethod(): void;
+  somePublicProperty: string;
+}
+
+onInit(app: App): void {
+  // Get a reference to a dependency with type casting
+  const pluginA = app.plugins.get("plugin-a") as PluginA;
+  
+  if (pluginA) {
+    // Now TypeScript knows about the methods and properties
+    console.log(pluginA.somePublicProperty);
+    pluginA.somePublicMethod();
+  }
+}
+</code></pre>
+<h2>Dependency Resolution</h2>
+<p>UrsaMU’s plugin manager handles dependency resolution automatically. Here’s how it works:</p>
+<ol>
+<li>The plugin manager scans all available plugins</li>
+<li>It builds a dependency graph based on the <code>dependencies</code> arrays</li>
+<li>It sorts the plugins in dependency order (dependencies first)</li>
+<li>It initializes and loads the plugins in the correct order</li>
+</ol>
+<p>If there are circular dependencies (A depends on B, B depends on A), the plugin manager will detect this and report an error.</p>
+<h3>Dependency Errors</h3>
+<p>If a required dependency is missing, UrsaMU will log an error and not load your plugin:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">Error: Plugin "my-plugin" depends on "missing-plugin", but it is not available.
+</code></pre>
+<p>To avoid this, make sure all your dependencies are installed and enabled in the configuration.</p>
+<h2>Best Practices</h2>
+<h3>Minimize Dependencies</h3>
+<p>Keep your dependencies to a minimum. Each dependency makes your plugin more fragile and harder to maintain.</p>
+<h3>Document Dependencies</h3>
+<p>Clearly document your plugin’s dependencies in your plugin’s documentation:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">/**
+ * A plugin that extends the chat system with emoji support.
+ * 
+ * @requires chat-system - This plugin extends the chat-system plugin
+ * @requires emoji-data - This plugin uses emoji data from the emoji-data plugin
+ */
+export default class EmojiChatPlugin implements IPlugin {
+  // ...
+}
+</code></pre>
+<h3>Version Compatibility</h3>
+<p>Be aware that plugins may change between versions. If you depend on specific functionality, you might want to check the version of the dependency:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">onInit(app: App): void {
+  const dependency = app.plugins.get("some-plugin");
+  
+  if (dependency) {
+    // Check version compatibility
+    const version = dependency.version.split('.');
+    const major = parseInt(version[0], 10);
+    const minor = parseInt(version[1], 10);
+    
+    if (major &lt; 2 || (major === 2 &amp;&amp; minor &lt; 5)) {
+      console.warn(`${this.name} requires some-plugin v2.5.0 or higher, but found v${dependency.version}`);
+    }
+  }
+}
+</code></pre>
+<h3>Provide Public APIs</h3>
+<p>If you’re creating a plugin that others might depend on, provide a clear public API:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default class UtilityPlugin implements IPlugin {
+  name = "utility";
+  version = "1.0.0";
+  description = "Provides utility functions for other plugins";
+  author = "Your Name";
+  
+  // Public API methods that other plugins can use
+  formatTimestamp(date: Date): string {
+    return date.toISOString();
+  }
+  
+  generateId(): string {
+    return Math.random().toString(36).substring(2, 15);
+  }
+  
+  // Internal methods (prefixed with underscore)
+  _internalMethod(): void {
+    // This method is not meant to be used by other plugins
+  }
+  
+  // Rest of your plugin implementation
+  // ...
+}
+</code></pre>
+<h2>Examples</h2>
+<h3>Simple Dependency Example</h3>
+<p>Here’s an example of a plugin that depends on a “chat-system” plugin to add emoji support:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { App, IPlugin } from "ursamu";
+
+// Define an interface for the chat-system plugin
+interface ChatSystemPlugin extends IPlugin {
+  formatMessage(message: string): string;
+  sendChannelMessage(channel: string, sender: string, message: string): void;
+}
+
+export default class EmojiPlugin implements IPlugin {
+  name = "emoji";
+  version = "1.0.0";
+  description = "Adds emoji support to the chat system";
+  author = "Your Name";
+  
+  // Declare dependency on chat-system
+  dependencies = ["chat-system"];
+  
+  // Emoji mapping
+  private emojiMap: Record&lt;string, string&gt; = {
+    ":smile:": "😊",
+    ":laugh:": "😂",
+    ":sad:": "😢",
+    ":heart:": "❤️",
+    // ... more emoji mappings
+  };
+  
+  onInit(app: App): void {
+    // Get the chat-system plugin
+    const chatSystem = app.plugins.get("chat-system") as ChatSystemPlugin;
+    
+    if (!chatSystem) {
+      console.error("Chat system plugin not found!");
+      return;
+    }
+    
+    // Register a hook to process messages before they're sent
+    app.hooks.on("chat:before-send", (data) =&gt; {
+      // Replace emoji codes with actual emoji
+      data.message = this.replaceEmoji(data.message);
+      return data;
+    });
+    
+    // Register an emoji command
+    app.commands.register("emoji", {
+      name: "emoji",
+      pattern: "emoji *",
+      flags: "connected",
+      exec: (ctx) =&gt; {
+        const args = ctx.args.trim();
+        
+        if (!args) {
+          // List available emoji
+          const emojiList = Object.keys(this.emojiMap)
+            .map(code =&gt; `${code} - ${this.emojiMap[code]}`)
+            .join("\n");
+          
+          ctx.send(`|cAvailable Emoji:|n\n${emojiList}`);
+          return;
+        }
+        
+        // Send an emoji to the current channel
+        const currentChannel = ctx.player.get("currentChannel") || "Public";
+        chatSystem.sendChannelMessage(
+          currentChannel,
+          ctx.player.name,
+          this.replaceEmoji(args)
+        );
+      }
+    });
+    
+    console.log(`${this.name} initialized`);
+  }
+  
+  // Replace emoji codes with actual emoji
+  replaceEmoji(message: string): string {
+    let result = message;
+    
+    for (const [code, emoji] of Object.entries(this.emojiMap)) {
+      result = result.replace(new RegExp(code, 'g'), emoji);
+    }
+    
+    return result;
+  }
+  
+  onLoad(app: App): void {
+    console.log(`${this.name} v${this.version} loaded!`);
+  }
+  
+  onUnload(app: App): void {
+    console.log(`${this.name} unloaded`);
+  }
+}
+</code></pre>
+<h3>Complex Dependency Example</h3>
+<p>Here’s a more complex example of a plugin that depends on multiple plugins to create an achievement system:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { App, IPlugin, Player } from "ursamu";
+
+// Define interfaces for the plugins we depend on
+interface DatabasePlugin extends IPlugin {
+  saveData(collection: string, id: string, data: any): Promise&lt;void&gt;;
+  getData(collection: string, id: string): Promise&lt;any&gt;;
+  listData(collection: string): Promise&lt;string[]&gt;;
+}
+
+interface NotificationPlugin extends IPlugin {
+  notify(player: Player, message: string, type: string): void;
+}
+
+interface EventsPlugin extends IPlugin {
+  on(event: string, handler: (data: any) =&gt; void): void;
+  off(event: string, handler: (data: any) =&gt; void): void;
+}
+
+export default class AchievementPlugin implements IPlugin {
+  name = "achievements";
+  version = "1.0.0";
+  description = "Adds an achievement system to the game";
+  author = "Your Name";
+  
+  // Declare dependencies
+  dependencies = ["database", "notifications"];
+  
+  // Optional dependency
+  private eventsPlugin: EventsPlugin | null = null;
+  
+  // Achievement definitions
+  private achievements: Record&lt;string, {
+    name: string;
+    description: string;
+    icon: string;
+    secret: boolean;
+    criteria: (player: Player) =&gt; boolean | Promise&lt;boolean&gt;;
+  }&gt; = {};
+  
+  // Event handlers
+  private eventHandlers: Record&lt;string, (data: any) =&gt; void&gt; = {};
+  
+  onInit(app: App): void {
+    // Get required dependencies
+    const dbPlugin = app.plugins.get("database") as DatabasePlugin;
+    const notifyPlugin = app.plugins.get("notifications") as NotificationPlugin;
+    
+    if (!dbPlugin || !notifyPlugin) {
+      console.error("Required dependencies not found!");
+      return;
+    }
+    
+    // Check for optional dependency
+    this.eventsPlugin = app.plugins.get("events") as EventsPlugin;
+    
+    // Define some achievements
+    this.registerAchievement({
+      id: "first-login",
+      name: "First Steps",
+      description: "Log in to the game for the first time",
+      icon: "🏆",
+      secret: false,
+      criteria: () =&gt; true // Always awarded on first check
+    });
+    
+    this.registerAchievement({
+      id: "explorer",
+      name: "Explorer",
+      description: "Visit 10 different rooms",
+      icon: "🧭",
+      secret: false,
+      criteria: async (player) =&gt; {
+        // Get the player's visited rooms from the database
+        const data = await dbPlugin.getData("player-data", player.dbref);
+        const visitedRooms = data?.visitedRooms || [];
+        return visitedRooms.length &gt;= 10;
+      }
+    });
+    
+    // Register commands
+    app.commands.register("achievements", {
+      name: "achievements",
+      pattern: "achievements",
+      flags: "connected",
+      exec: async (ctx) =&gt; {
+        // Get the player's achievements
+        const data = await dbPlugin.getData("achievements", ctx.player.dbref);
+        const earned = data?.earned || [];
+        
+        // Format the achievement list
+        let message = "|cYour Achievements:|n\n";
+        
+        for (const [id, achievement] of Object.entries(this.achievements)) {
+          if (earned.includes(id) || !achievement.secret) {
+            const status = earned.includes(id) ? "|g✓|n" : "|r✗|n";
+            message += `${status} ${achievement.icon} ${achievement.name}: ${achievement.description}\n`;
+          }
+        }
+        
+        ctx.send(message);
+      }
+    });
+    
+    // Set up event handlers if the events plugin is available
+    if (this.eventsPlugin) {
+      // Handler for room entry
+      this.eventHandlers.roomEnter = async (data) =&gt; {
+        const { player, room } = data;
+        
+        // Get the player's data
+        const playerData = await dbPlugin.getData("player-data", player.dbref) || {};
+        
+        // Update visited rooms
+        const visitedRooms = new Set(playerData.visitedRooms || []);
+        visitedRooms.add(room.dbref);
+        playerData.visitedRooms = Array.from(visitedRooms);
+        
+        // Save the updated data
+        await dbPlugin.saveData("player-data", player.dbref, playerData);
+        
+        // Check achievements
+        this.checkAchievements(player, notifyPlugin);
+      };
+      
+      // Register the event handlers
+      this.eventsPlugin.on("room:enter", this.eventHandlers.roomEnter);
+    }
+    
+    // Register a hook for player connection to check achievements
+    app.hooks.on("player:connect", async (player) =&gt; {
+      await this.checkAchievements(player, notifyPlugin);
+    });
+    
+    console.log(`${this.name} initialized with ${Object.keys(this.achievements).length} achievements`);
+  }
+  
+  onLoad(app: App): void {
+    console.log(`${this.name} v${this.version} loaded!`);
+  }
+  
+  onUnload(app: App): void {
+    // Clean up event handlers
+    if (this.eventsPlugin) {
+      for (const [event, handler] of Object.entries(this.eventHandlers)) {
+        this.eventsPlugin.off(event, handler);
+      }
+    }
+    
+    console.log(`${this.name} unloaded`);
+  }
+  
+  // Register a new achievement
+  registerAchievement(achievement: {
+    id: string;
+    name: string;
+    description: string;
+    icon: string;
+    secret: boolean;
+    criteria: (player: Player) =&gt; boolean | Promise&lt;boolean&gt;;
+  }): void {
+    this.achievements[achievement.id] = achievement;
+  }
+  
+  // Check if a player has earned any achievements
+  async checkAchievements(player: Player, notifyPlugin: NotificationPlugin): Promise&lt;void&gt; {
+    const dbPlugin = app.plugins.get("database") as DatabasePlugin;
+    
+    // Get the player's current achievements
+    const data = await dbPlugin.getData("achievements", player.dbref) || {};
+    const earned = new Set(data.earned || []);
+    let newAchievements = false;
+    
+    // Check each achievement
+    for (const [id, achievement] of Object.entries(this.achievements)) {
+      // Skip already earned achievements
+      if (earned.has(id)) continue;
+      
+      // Check if the player meets the criteria
+      const meetsCondition = await achievement.criteria(player);
+      
+      if (meetsCondition) {
+        // Award the achievement
+        earned.add(id);
+        newAchievements = true;
+        
+        // Notify the player
+        notifyPlugin.notify(
+          player,
+          `|c🏆 Achievement Unlocked:|n ${achievement.icon} ${achievement.name}\n${achievement.description}`,
+          "achievement"
+        );
+      }
+    }
+    
+    // Save updated achievements if any were earned
+    if (newAchievements) {
+      await dbPlugin.saveData("achievements", player.dbref, {
+        earned: Array.from(earned),
+        lastUpdated: new Date().toISOString()
+      });
+    }
+  }
+}
+</code></pre>
+<p>By following these guidelines and examples, you can create plugins that work together effectively, building upon each other’s functionality to create rich, extensible game experiences.</p>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Learn how to create plugins to extend UrsaMU">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/plugins/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>UrsaMU Plugin Development</h1>
+<p>This section covers how to develop plugins for UrsaMU, allowing you to extend and customize the server with new functionality.</p>
+<h2>Plugin Basics</h2>
+<p>Plugins are modular extensions that add functionality to UrsaMU without modifying the core codebase. They allow you to:</p>
+<ul>
+<li>Add new commands and features</li>
+<li>Modify existing behavior</li>
+<li>Integrate with external services</li>
+<li>Customize the game experience</li>
+</ul>
+<p>UrsaMU’s plugin system is designed to be lightweight and straightforward, making it easy to create and share plugins.</p>
+<h2>Plugin Interface</h2>
+<p>All UrsaMU plugins implement the <code>IPlugin</code> interface, which defines the structure and required methods for a plugin:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export interface IPlugin {
+  name: string;                // Required: Unique name of the plugin
+  description?: string;        // Optional: Description of what the plugin does
+  version: string;             // Required: Semantic version (e.g., "1.0.0")
+  config?: IConfig;            // Optional: Plugin configuration
+  init?: () =&gt; boolean | Promise&lt;boolean&gt;;  // Optional: Initialization method
+  remove?: () =&gt; void | Promise&lt;void&gt;;      // Optional: Cleanup method
+}
+</code></pre>
+<h2>Plugin Structure</h2>
+<p>A UrsaMU plugin is a TypeScript module that exports a default object implementing the <code>IPlugin</code> interface. Plugins should be placed in the <code>src/plugins/</code> directory, with each plugin in its own subdirectory:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">src/plugins/
+├── my-plugin/
+│   └── index.ts       # Main plugin file
+├── another-plugin/
+│   └── index.ts
+└── ...
+</code></pre>
+<p>Here’s a minimal example of a plugin:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+
+const myPlugin: IPlugin = {
+  name: "my-plugin",
+  version: "1.0.0",
+  description: "A simple UrsaMU plugin",
+  
+  init: async () =&gt; {
+    console.log("My plugin initialized!");
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    console.log("My plugin removed!");
+  }
+};
+
+export default myPlugin;
+</code></pre>
+<h2>Plugin Configuration</h2>
+<p>Plugins can define their own configuration options in the <code>config</code> property. The configuration follows this structure:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">config: {
+  plugins: {
+    "plugin-name": {
+      // Plugin-specific configuration options
+      option1: "value1",
+      option2: 42,
+      // Nested configuration is supported
+      features: {
+        feature1: true,
+        feature2: false
+      }
+    }
+  }
+}
+</code></pre>
+<p>To access configuration values in your plugin, use the <code>getConfig</code> function:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { getConfig } from "../../services/Config/mod.ts";
+
+// Get a configuration value with type safety
+const option1 = getConfig&lt;string&gt;("plugins.my-plugin.option1");
+const option2 = getConfig&lt;number&gt;("plugins.my-plugin.option2");
+const feature1Enabled = getConfig&lt;boolean&gt;("plugins.my-plugin.features.feature1");
+</code></pre>
+<h2>Plugin Lifecycle</h2>
+<p>UrsaMU plugins have a simple lifecycle:</p>
+<ol>
+<li><strong>Loading</strong>: The plugin is loaded from the filesystem</li>
+<li><strong>Registration</strong>: The plugin is registered with the configuration system</li>
+<li><strong>Initialization</strong>: The <code>init</code> method is called (if defined)</li>
+<li><strong>Removal</strong>: The <code>remove</code> method is called (if defined) when the plugin is unloaded</li>
+</ol>
+<p>The <code>init</code> method should return <code>true</code> for successful initialization or <code>false</code> if initialization failed. This allows the system to know whether the plugin was successfully initialized.</p>
+<h2>Examples</h2>
+<h3>Basic Plugin</h3>
+<p>A simple plugin that just logs messages during initialization and removal:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+
+const basicPlugin: IPlugin = {
+  name: "basic-plugin",
+  version: "1.0.0",
+  description: "A basic plugin example",
+  
+  init: async () =&gt; {
+    console.log("Basic plugin initialized!");
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    console.log("Basic plugin removed!");
+  }
+};
+
+export default basicPlugin;
+</code></pre>
+<h3>Configuration Plugin</h3>
+<p>A plugin that uses configuration options:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { getConfig } from "../../services/Config/mod.ts";
+
+const configPlugin: IPlugin = {
+  name: "config-plugin",
+  version: "1.0.0",
+  description: "A plugin that demonstrates configuration",
+  
+  config: {
+    plugins: {
+      "config-plugin": {
+        enabled: true,
+        message: "Hello from the config plugin!",
+        options: {
+          option1: "value1",
+          option2: 42
+        }
+      }
+    }
+  },
+  
+  init: async () =&gt; {
+    const enabled = getConfig&lt;boolean&gt;("plugins.config-plugin.enabled");
+    
+    if (enabled) {
+      const message = getConfig&lt;string&gt;("plugins.config-plugin.message");
+      console.log(message);
+      
+      const option1 = getConfig&lt;string&gt;("plugins.config-plugin.options.option1");
+      const option2 = getConfig&lt;number&gt;("plugins.config-plugin.options.option2");
+      
+      console.log(`Options: ${option1}, ${option2}`);
+    } else {
+      console.log("Config plugin is disabled");
+    }
+    
+    return true;
+  }
+};
+
+export default configPlugin;
+</code></pre>
+<h3>Command Plugin</h3>
+<p>A plugin that adds a custom command:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { registerCommand } from "../../services/Commands/mod.ts";
+
+const commandPlugin: IPlugin = {
+  name: "command-plugin",
+  version: "1.0.0",
+  description: "A plugin that adds a custom command",
+  
+  init: async () =&gt; {
+    // Register a custom command
+    registerCommand({
+      name: "hello",
+      pattern: "hello *",
+      flags: "connected",
+      exec: (ctx) =&gt; {
+        const target = ctx.args.trim() || "world";
+        ctx.send(`Hello, ${target}!`);
+      }
+    });
+    
+    return true;
+  }
+};
+
+export default commandPlugin;
+</code></pre>
+<h3>Database Plugin</h3>
+<p>A plugin that interacts with the database:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
+import { dbojs } from "../../services/Database/index.ts";
+
+const databasePlugin: IPlugin = {
+  name: "database-plugin",
+  version: "1.0.0",
+  description: "A plugin that interacts with the database",
+  
+  init: async () =&gt; {
+    // Create a custom object
+    const customObject = {
+      flags: "thing",
+      data: {
+        name: "Custom Object",
+        description: "An object created by a plugin"
+      }
+    };
+    
+    try {
+      const obj = await dbojs.create(customObject);
+      console.log(`Created custom object with ID: ${obj.id}`);
+    } catch (error) {
+      console.error("Error creating custom object:", error);
+      return false;
+    }
+    
+    return true;
+  },
+  
+  remove: async () =&gt; {
+    // Clean up by removing objects created by this plugin
+    try {
+      const objects = await dbojs.query({
+        "data.name": "Custom Object"
+      });
+      
+      for (const obj of objects) {
+        await dbojs.delete(obj.id);
+        console.log(`Deleted custom object with ID: ${obj.id}`);
+      }
+    } catch (error) {
+      console.error("Error cleaning up custom objects:", error);
+    }
+  }
+};
+
+export default databasePlugin;
+</code></pre>
+<h2>Using Plugins in a Child Game</h2>
+<p>When creating a child game using UrsaMU as a library, you can provide custom plugins through the <code>mu</code> function:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
+import myCustomPlugin from "./plugins/my-custom-plugin.ts";
+
+// Initialize UrsaMU with custom plugins
+const game = await mu(
+  {
+    // Custom configuration
+    server: {
+      telnet: 4201,
+      ws: 4202,
+      http: 4203
+    },
+    game: {
+      name: "My Custom Game"
+    }
+  },
+  [
+    // Custom plugins
+    myCustomPlugin
+  ],
+  {
+    // Options
+    loadDefaultCommands: true,
+    loadDefaultTextFiles: true
+  }
+);
+</code></pre>
+<h2>Best Practices</h2>
+<ol>
+<li><strong>Unique Names</strong>: Ensure your plugin has a unique name to avoid conflicts</li>
+<li><strong>Proper Versioning</strong>: Use semantic versioning for your plugin (MAJOR.MINOR.PATCH)</li>
+<li><strong>Configuration Namespacing</strong>: Keep your configuration under your plugin’s name</li>
+<li><strong>Error Handling</strong>: Properly handle errors in your <code>init</code> and <code>remove</code> methods</li>
+<li><strong>Cleanup</strong>: Always clean up resources in the <code>remove</code> method</li>
+<li><strong>Documentation</strong>: Document your plugin’s purpose, configuration options, and usage</li>
+</ol>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

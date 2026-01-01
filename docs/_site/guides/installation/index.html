@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="How to install and set up UrsaMU on your system">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/installation/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>Installation Guide</h1>
+<p>This guide will walk you through the process of installing and setting up UrsaMU<br>
+on your system.</p>
+<h2>Prerequisites</h2>
+<p>Before installing UrsaMU, ensure you have the following:</p>
+<ul>
+<li><a href="https://deno.land/"><strong>Deno</strong></a> version 1.32.0 or higher</li>
+<li>Git (for cloning the repository)</li>
+</ul>
+<h2>Installation Methods</h2>
+<p>UrsaMU can be installed in multiple ways. Choose the method that works best for<br>
+your environment.</p>
+<h3>Method 1: Direct from GitHub</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Clone the repository
+git clone https://github.com/ursamu/ursamu.git
+
+# Navigate to the project directory
+cd ursamu
+
+# Set up configuration
+deno task setup-config
+</code></pre>
+<h3>Method 2: Using the UrsaMU CLI</h3>
+<p>UrsaMU provides a CLI tool for creating new projects:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Install the UrsaMU CLI
+deno task install-cli
+
+# Create a new project
+ursamu create my-game
+cd my-game
+</code></pre>
+<h3>Method 3: Using Docker</h3>
+<p>UrsaMU provides a Docker image for easy deployment:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Clone the repository
+git clone https://github.com/ursamu/ursamu.git
+cd ursamu
+
+# Start the server with Docker Compose
+docker-compose up -d
+</code></pre>
+<p>The game databases will be exported to the <code>data/</code> directory, and configuration<br>
+will be stored in the <code>config/</code> directory.</p>
+<h2>Configuration</h2>
+<p>UrsaMU uses a flexible configuration system stored in JSON format:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Show the entire configuration
+deno task config
+
+# Get a specific configuration value
+deno task config --get server.ws
+
+# Set a configuration value
+deno task config --set server.ws 4202
+</code></pre>
+<p>The configuration is stored in <code>config/config.json</code> and includes:</p>
+<ul>
+<li>Server ports and database paths</li>
+<li>Game name, description, and version</li>
+<li>Text file locations</li>
+<li>Plugin settings</li>
+</ul>
+<p>For detailed information on all available configuration options, see the<br>
+<a href="../configuration/">Configuration Guide</a>.</p>
+<h2>Running the Server</h2>
+<p>UrsaMU uses a dual-server architecture with the main server and telnet server<br>
+running as separate processes:</p>
+<h3>Starting Both Servers</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Start both main and telnet servers with watch mode
+deno task start
+</code></pre>
+<p>This will:</p>
+<ul>
+<li>Start both the main server and telnet server as separate processes</li>
+<li>Enable watch mode for automatic reloading when files change</li>
+<li>Allow each server to restart independently</li>
+</ul>
+<h3>Development Mode</h3>
+<p>For development with individual servers:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Main server only with watch mode
+deno task server
+
+# Telnet server only with watch mode
+deno task telnet
+</code></pre>
+<h2>Connecting</h2>
+<p>Once the server is running, you can connect to it using:</p>
+<ul>
+<li><strong>Telnet Client</strong>: <code>telnet localhost 4201</code></li>
+<li><strong>Web Client</strong>: http://localhost:4203 (if you build a web interface)</li>
+<li><strong>Socket.IO Client</strong>: Connect to <code>http://localhost:4202</code> from custom clients<br>
+using the Socket.IO client library</li>
+</ul>
+<p>Example Socket.IO client connection:</p>
+<pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token comment">// Using the Socket.IO client library</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> io <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"socket.io-client"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> socket <span class="token operator">=</span> <span class="token function">io</span><span class="token punctuation">(</span><span class="token string">"http://localhost:4202"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+socket<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">"connect"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Connected to UrsaMU server"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Listen for messages from the server</span>
+socket<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">data</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Received:"</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span>msg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Handle special data like disconnection</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span>data<span class="token operator">?.</span>quit<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Server requested disconnect"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    socket<span class="token punctuation">.</span><span class="token function">disconnect</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Send a command to the server</span>
+socket<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"look"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// To connect as a player</span>
+socket<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"connect PlayerName Password"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// To create a new character</span>
+socket<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"create NewCharacter Password"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// To disconnect</span>
+socket<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">"message"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"quit"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h2>Next Steps</h2>
+<p>Now that you have UrsaMU installed and running, you might want to:</p>
+<ul>
+<li><a href="./user-guide"><strong>User Guide</strong></a> - Learn how to use UrsaMU as a player</li>
+<li><a href="../configuration/"><strong>Configuration</strong></a> - Explore detailed configuration<br>
+options</li>
+<li><a href="../plugins/index.md"><strong>Plugin Development</strong></a> - Learn how to create plugins to<br>
+extend UrsaMU</li>
+</ul>
+
+    </div>
+  </main>
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</body></html>

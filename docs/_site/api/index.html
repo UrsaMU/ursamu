@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> | UrsaMU Documentation</title>
+  <meta name="description" content="Comprehensive API reference for UrsaMU">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/api/">
+<meta name="twitter:card" content="summary">
+</head>
+<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+  
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="/ursamu/" class="flex items-center gap-3 group">
+        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform">
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
+          UrsaMU
+        </span>
+      </a>
+      
+      <nav class="hidden md:flex gap-6">
+        
+          <a href="/ursamu/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Home
+          </a>
+        
+          <a href="/ursamu/guides/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Guides
+          </a>
+        
+          <a href="/ursamu/configuration/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Configuration
+          </a>
+        
+          <a href="/ursamu/api/" class="hover:text-ursamu-accent transition-colors font-medium">
+            API Reference
+          </a>
+        
+          <a href="/ursamu/plugins/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Plugins
+          </a>
+        
+          <a href="/ursamu/development/" class="hover:text-ursamu-accent transition-colors font-medium">
+            Development
+          </a>
+        
+      </nav>
+      
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/ursamu/ursamu" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
+          <svg class="w-6 h-6 fill-current" viewbox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow container mx-auto px-4 py-12">
+    <div class="prose prose-invert prose-purple max-w-none">
+      <h1>UrsaMU API Reference</h1>
+<p>This document provides a comprehensive reference for the UrsaMU API.</p>
+<h2>Core API</h2>
+<h3>mu(options)</h3>
+<p>The main function to initialize and start the UrsaMU engine.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>options</code> (Object): Configuration options for the UrsaMU engine
+<ul>
+<li><code>config</code> (Object): Configuration object</li>
+<li><code>plugins</code> (Array): Array of plugins to load</li>
+</ul>
+</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<void>: Resolves when the engine has started</void></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
+
+await mu({
+  config: {
+    server: {
+      port: 4201,
+      host: "0.0.0.0"
+    },
+    game: {
+      name: "My Game"
+    }
+  },
+  plugins: [myPlugin]
+});
+</code></pre>
+<h3>app</h3>
+<p>The global application object that provides access to various services and utilities.</p>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><code>config</code>: The configuration manager</li>
+<li><code>db</code>: The database manager</li>
+<li><code>commands</code>: The command manager</li>
+<li><code>flags</code>: The flag manager</li>
+<li><code>functions</code>: The function manager</li>
+<li><code>hooks</code>: The hook manager</li>
+<li><code>router</code>: The web router (if web interface is enabled)</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { app } from "ursamu";
+
+// Access the configuration
+const gameName = app.config.get("game.name");
+
+// Access the database
+const player = await app.db.get("player:123");
+</code></pre>
+<h2>Database API</h2>
+<h3>dbojs</h3>
+<p>The main database service for game objects.</p>
+<p><strong>Methods:</strong></p>
+<h4>create(data)</h4>
+<p>Creates a new object in the database.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>data</code> (Object): The object data to create</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<object>: The created object
+
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { dbojs } from "../../services/Database/index.ts";
+
+const newObject = await dbojs.create({
+  flags: "thing",
+  data: {
+    name: "My Object",
+    description: "A custom object"
+  }
+});
+</code></pre>
+<h4>get(id)</h4>
+<p>Retrieves an object from the database by ID.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>id</code> (string): The ID of the object to retrieve</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise&lt;Object|null&gt;: The retrieved object, or null if not found</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const object = await dbojs.get("123");
+</code></pre>
+<h4>update(object)</h4>
+<p>Updates an object in the database.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>object</code> (Object): The object to update</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<object>: The updated object
+
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">object.data.description = "Updated description";
+await dbojs.update(object);
+</code></pre>
+<h4>delete(id)</h4>
+<p>Deletes an object from the database.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>id</code> (string): The ID of the object to delete</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<void></void></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await dbojs.delete("123");
+</code></pre>
+<h4>query(criteria)</h4>
+<p>Queries the database for objects matching the given criteria.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>criteria</code> (Object): Query criteria</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise&lt;Array<object>&gt;: Array of matching objects
+
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Find all rooms
+const rooms = await dbojs.query({ flags: /room/i });
+
+// Find objects owned by a player
+const objects = await dbojs.query({ owner: "123" });
+
+// Find a player by name
+const players = await dbojs.query({
+  "data.name": new RegExp("^PlayerName$", "i"),
+  flags: /player/i
+});
+</code></pre>
+<h4>all()</h4>
+<p>Retrieves all objects from the database.</p>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise&lt;Array<object>&gt;: Array of all objects
+
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const allObjects = await dbojs.all();
+</code></pre>
+<h3>counters</h3>
+<p>The database service for counters.</p>
+<p><strong>Methods:</strong></p>
+<p>Similar to <code>dbojs</code>, with the same method signatures.</p>
+<h3>chans</h3>
+<p>The database service for communication channels.</p>
+<p><strong>Methods:</strong></p>
+<p>Similar to <code>dbojs</code>, with the same method signatures.</p>
+<h3>mail</h3>
+<p>The database service for the mail system.</p>
+<p><strong>Methods:</strong></p>
+<p>Similar to <code>dbojs</code>, with the same method signatures.</p>
+<h3>bboard</h3>
+<p>The database service for bulletin boards.</p>
+<p><strong>Methods:</strong></p>
+<p>Similar to <code>dbojs</code>, with the same method signatures.</p>
+<h2>Command API</h2>
+<h3>registerCommand(command)</h3>
+<p>Registers a new command.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>command</code> (Object): The command to register
+<ul>
+<li><code>name</code> (string): Unique identifier for the command</li>
+<li><code>pattern</code> (string): Pattern to match user input</li>
+<li><code>flags</code> (string): Flags required to use the command</li>
+<li><code>exec</code> (Function): Function to execute when command is triggered</li>
+</ul>
+</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>void</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerCommand } from "../../services/Commands/mod.ts";
+
+registerCommand({
+  name: "hello",
+  pattern: "hello *",
+  flags: "connected",
+  exec: (ctx) =&gt; {
+    const target = ctx.args.trim() || "World";
+    ctx.send(`Hello, ${target}!`);
+  }
+});
+</code></pre>
+<h3>registerMiddleware(middleware)</h3>
+<p>Registers middleware to process commands.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>middleware</code> (Function): The middleware function</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>void</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerMiddleware } from "../../services/Commands/mod.ts";
+
+registerMiddleware(async (ctx, next) =&gt; {
+  console.log(`Command executed: ${ctx.cmd}`);
+  await next();
+});
+</code></pre>
+<h3>Command Context</h3>
+<p>The context object passed to command execution functions.</p>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><code>player</code> (Object): The player who triggered the command</li>
+<li><code>cmd</code> (string): The command that was triggered</li>
+<li><code>args</code> (string): The arguments passed to the command</li>
+<li><code>switches</code> (Object): Any switches used with the command</li>
+<li><code>send</code> (Function): Function to send output to the player</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">exec: (ctx) =&gt; {
+  // Access the player
+  const playerName = ctx.player.data.name;
+  
+  // Access command arguments
+  const args = ctx.args.trim();
+  
+  // Access switches
+  const verbose = ctx.switches.verbose;
+  
+  // Send output to the player
+  ctx.send(`Hello, ${playerName}!`);
+}
+</code></pre>
+<h2>Flag API</h2>
+<h3>registerFlag(flag)</h3>
+<p>Registers a new flag.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>flag</code> (Object): The flag to register
+<ul>
+<li><code>name</code> (string): Name of the flag</li>
+<li><code>description</code> (string): Description of what the flag does</li>
+<li><code>default</code> (boolean): Default value for new objects</li>
+</ul>
+</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>void</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFlag } from "../../services/Flags/mod.ts";
+
+registerFlag({
+  name: "vip",
+  description: "VIP player with special privileges",
+  default: false
+});
+</code></pre>
+<h3>hasFlag(object, flag)</h3>
+<p>Checks if an object has a flag.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>object</code> (Object): The object to check</li>
+<li><code>flag</code> (string): The flag to check for</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>boolean: True if the object has the flag, false otherwise</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { hasFlag } from "../../services/Flags/mod.ts";
+
+if (hasFlag(player, "wizard")) {
+  // Player is a wizard
+}
+</code></pre>
+<h3>setFlag(object, flag, value)</h3>
+<p>Sets a flag on an object.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>object</code> (Object): The object to modify</li>
+<li><code>flag</code> (string): The flag to set</li>
+<li><code>value</code> (boolean): The value to set (true to add, false to remove)</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<object>: The updated object
+
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { setFlag } from "../../services/Flags/mod.ts";
+
+// Add the "vip" flag to a player
+await setFlag(player, "vip", true);
+
+// Remove the "vip" flag from a player
+await setFlag(player, "vip", false);
+</code></pre>
+<h2>Function API</h2>
+<h3>registerFunction(func)</h3>
+<p>Registers a new function for use in expressions.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>func</code> (Object): The function to register
+<ul>
+<li><code>name</code> (string): Name of the function</li>
+<li><code>description</code> (string): Description of what the function does</li>
+<li><code>args</code> (Array<string>): Array of argument names</string></li>
+<li><code>exec</code> (Function): Function to execute</li>
+</ul>
+</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>void</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFunction } from "../../services/Functions/mod.ts";
+
+registerFunction({
+  name: "add",
+  description: "Adds two numbers",
+  args: ["num1", "num2"],
+  exec: (args) =&gt; {
+    const [num1, num2] = args.map(Number);
+    return (num1 + num2).toString();
+  }
+});
+</code></pre>
+<h2>Hook API</h2>
+<h3>registerHook(hookName, callback)</h3>
+<p>Registers a hook to be called at a specific point in the system’s execution.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>hookName</code> (string): The name of the hook point</li>
+<li><code>callback</code> (Function): The function to call when the hook is triggered</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>void</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerHook } from "../../services/Hooks/mod.ts";
+
+registerHook("playerConnect", async (player) =&gt; {
+  console.log(`Player ${player.data.name} connected`);
+});
+</code></pre>
+<h3>registerHookPoint(hookName)</h3>
+<p>Registers a new hook point.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>hookName</code> (string): The name of the hook point to register</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>void</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerHookPoint } from "../../services/Hooks/mod.ts";
+
+registerHookPoint("myCustomHook");
+</code></pre>
+<h3>triggerHook(hookName, …args)</h3>
+<p>Triggers a hook, calling all registered callbacks.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>hookName</code> (string): The name of the hook point to trigger</li>
+<li><code>...args</code> (any): Arguments to pass to the hook callbacks</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<void></void></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { triggerHook } from "../../services/Hooks/mod.ts";
+
+await triggerHook("myCustomHook", { data: "some data" });
+</code></pre>
+<h2>Utility API</h2>
+<h3>parseFlags(flags)</h3>
+<p>Parses a flag string into an array of flags.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>flags</code> (string): The flag string to parse</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Array<string>: Array of parsed flags</string></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { parseFlags } from "../../utils/flags.ts";
+
+const flags = parseFlags("wizard builder connected");
+// Returns: ["wizard", "builder", "connected"]
+</code></pre>
+<h3>formatText(text, data)</h3>
+<p>Formats text with substitutions.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>text</code> (string): The text to format</li>
+<li><code>data</code> (Object): Data for substitutions</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>string: The formatted text</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { formatText } from "../../utils/text.ts";
+
+const formatted = formatText("Hello, %{name}!", { name: "World" });
+// Returns: "Hello, World!"
+</code></pre>
+<h3>parseArgs(input)</h3>
+<p>Parses command input into command, arguments, and switches.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>input</code> (string): The input to parse</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Object: The parsed input
+<ul>
+<li><code>cmd</code> (string): The command</li>
+<li><code>args</code> (string): The arguments</li>
+<li><code>switches</code> (Object): The switches</li>
+</ul>
+</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { parseArgs } from "../../utils/args.ts";
+
+const parsed = parseArgs("look/verbose at box");
+// Returns: { cmd: "look", args: "at box", switches: { verbose: true } }
+</code></pre>
+<h3>match(pattern, input)</h3>
+<p>Checks if input matches a command pattern.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>pattern</code> (string): The pattern to match against</li>
+<li><code>input</code> (string): The input to check</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>boolean: True if the input matches the pattern, false otherwise</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { match } from "../../utils/match.ts";
+
+const isMatch = match("look *", "look at box");
+// Returns: true
+</code></pre>
+<h3>evaluateExpression(expression, context)</h3>
+<p>Evaluates an expression.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>expression</code> (string): The expression to evaluate</li>
+<li><code>context</code> (Object): The context for evaluation</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<string>: The result of the evaluation</string></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { evaluateExpression } from "../../utils/expressions.ts";
+
+const result = await evaluateExpression("add(5, 3)", { player });
+// Returns: "8"
+</code></pre>
+<h3>sanitize(text)</h3>
+<p>Sanitizes text for safe display.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>text</code> (string): The text to sanitize</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>string: The sanitized text</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { sanitize } from "../../utils/text.ts";
+
+const safe = sanitize("&lt;script&gt;alert('XSS')&lt;/script&gt;");
+// Returns: "&amp;lt;script&amp;gt;alert('XSS')&amp;lt;/script&amp;gt;"
+</code></pre>
+<h3>colorize(text)</h3>
+<p>Converts color codes in text to ANSI color codes.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>text</code> (string): The text to colorize</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>string: The colorized text</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { colorize } from "../../utils/colors.ts";
+
+const colored = colorize("%chHello, %cgWorld!%cn");
+// Returns text with ANSI color codes
+</code></pre>
+<h3>stripColors(text)</h3>
+<p>Removes color codes from text.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>text</code> (string): The text to strip colors from</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>string: The text without color codes</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { stripColors } from "../../utils/colors.ts";
+
+const plain = stripColors("%chHello, %cgWorld!%cn");
+// Returns: "Hello, World!"
+</code></pre>
+<h3>generateId()</h3>
+<p>Generates a unique ID.</p>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>string: A unique ID</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { generateId } from "../../utils/id.ts";
+
+const id = generateId();
+// Returns something like: "a1b2c3d4"
+</code></pre>
+<h3>hash(text)</h3>
+<p>Creates a hash of the given text.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>text</code> (string): The text to hash</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<string>: The hashed text</string></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { hash } from "../../utils/hash.ts";
+
+const hashed = await hash("password");
+// Returns a bcrypt hash
+</code></pre>
+<h3>compareHash(text, hash)</h3>
+<p>Compares text with a hash.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>text</code> (string): The text to compare</li>
+<li><code>hash</code> (string): The hash to compare against</li>
+</ul>
+<p><strong>Returns:</strong></p>
+<ul>
+<li>Promise<boolean>: True if the text matches the hash, false otherwise</boolean></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { compareHash } from "../../utils/hash.ts";
+
+const isMatch = await compareHash("password", hashedPassword);
+// Returns: true or false
+</code></pre>
+<p>This API reference covers the main functionality of UrsaMU. For more detailed information on specific functions or classes, refer to the source code or the relevant documentation sections.</p>
+
+    
+  
+
+  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
+    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="text-sm opacity-60">
+        © 2025 UrsaMU Team. Built with Lume.
+      </div>
+      <div class="flex gap-6 text-sm">
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+</object></li></ul></object></li></ul></object></li></ul></object></li></ul></object></li></ul></div></main></body></html>
