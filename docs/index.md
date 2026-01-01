@@ -5,7 +5,7 @@ description: The official documentation for UrsaMU, a modern MU* engine for the 
 ---
 
 <div class="text-center py-12">
-  <img src="/assets/logo.png" alt="UrsaMU Banner" class="mx-auto rounded-3xl shadow-2xl border border-ursamu-primary/50 mb-12 max-w-2xl w-full" />
+  <img src="{{ "/assets/logo.png" | url }}" alt="UrsaMU Banner" class="mx-auto rounded-3xl shadow-2xl border border-ursamu-primary/50 mb-12 max-w-2xl w-full" />
 
 <h1 class="text-6xl font-black mb-4">UrsaMU</h1>
   <p class="text-2xl text-purple-300/80 max-w-2xl mx-auto leading-relaxed">
