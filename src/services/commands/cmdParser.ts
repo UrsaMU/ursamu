@@ -50,8 +50,9 @@ cmdParser.use(async (ctx, next) => {
   await next();
 });
 
-cmdParser.use(async (ctx, next) => {
-  if (ctx.socket.cid) {
+cmdParser.use(async (ctx, _next) => {
+  if (ctx.socket.cid && ctx.msg?.trim()) {
     send([ctx.socket.id], "Huh? Type 'help' for help.", { error: true });
   }
+  await Promise.resolve();
 });

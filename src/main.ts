@@ -1,5 +1,5 @@
 
-import { server } from "./app.ts";
+import { handleRequest } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { chans, counters, dbojs } from "./services/Database/index.ts";
@@ -10,6 +10,8 @@ import { dpath } from "../deps.ts";
 import { initConfig, initializePlugins, getConfig } from "./services/Config/mod.ts";
 import { loadPlugins } from "./utils/loadPlugins.ts";
 import { wsService } from "./services/WebSocket/index.ts";
+import { hash, genSalt } from "../deps.ts";
+import { getNextId } from "./utils/getNextId.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
 
@@ -81,53 +83,41 @@ export const initializeEngine = async (
     }
   }
 
-  // Start the WebSocket server
-  server.listen(getConfig<number>("server.ws"), async () => {
-    // Initialize all registered plugins
-    await initializePlugins();
+  // Start the consolidated Deno.serve for HTTP and WebSockets
+  const httpPort = getConfig<number>("server.http") || 4203;
 
-    if (autoCreateDefaultRooms) {
-      await initializeDefaultRooms();
-    }
-
-    if (autoCreateDefaultChannels) {
-      await initializeDefaultChannels();
-    }
-
-    console.log(`WebSocket server started on port ${getConfig<number>("server.ws")}.`);
-
-    // Start the HTTP server
-    const httpPort = getConfig<number>("server.http");
-
-    // Use Deno.serve instead of Deno.listen and Deno.serveHttp
-    Deno.serve({ port: httpPort }, (req) => {
-      try {
-        if (req.headers.get("upgrade") === "websocket") {
-          const { socket, response } = Deno.upgradeWebSocket(req);
-
-          // Import wsService dynamically to avoid circular deps if needed, 
-          // or just standard import at top. Assuming standard import for now.
-          // wrapping in async iife if dynamic, but top level is better.
-          // For now, let's trust the top level import we will add.
-
-          wsService.handleConnection(socket);
-          return response;
-        }
-
-        // For now, just return a simple response
-        // You can implement proper routing later
-        return new Response("UrsaMU API Server", {
-          status: 200,
-          headers: { "Content-Type": "application/json" }
-        });
-      } catch (error) {
-        console.error("Error handling request:", error);
-        return new Response("Internal Server Error", { status: 500 });
+  Deno.serve({ port: httpPort }, async (req) => {
+    try {
+      // Handle WebSocket upgrade
+      if (req.headers.get("upgrade") === "websocket") {
+        const { socket, response } = Deno.upgradeWebSocket(req);
+        wsService.handleConnection(socket);
+        return response;
       }
-    });
 
-    console.log(`HTTP server started on port ${httpPort}.`);
+      // Handle standard HTTP requests
+      return await handleRequest(req);
+    } catch (error) {
+      console.error("Error handling request:", error);
+      return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
   });
+
+  // Initialize all registered plugins
+  await initializePlugins();
+
+  if (autoCreateDefaultRooms) {
+    await initializeDefaultRooms();
+  }
+
+  if (autoCreateDefaultChannels) {
+    await initializeDefaultChannels();
+  }
+
+  console.log(`Server started on port ${httpPort} (HTTP & WebSockets).`);
 
   Deno.addSignalListener("SIGINT", async () => {
     const players = await dbojs.query({ flags: /connected/i });
@@ -142,7 +132,6 @@ export const initializeEngine = async (
 
   // Return an object with references to important components
   return {
-    server,
     config: {
       get: getConfig,
       init: initConfig,
@@ -233,10 +222,10 @@ const config = {
     ws: 4202,
     http: 4203,
     db: "data/ursamu.db",
-    counters: "data/counters.db",
-    chans: "data/chans.db",
-    mail: "data/mail.db",
-    bboard: "data/bboard.db"
+    counters: "counters",
+    chans: "chans",
+    mail: "mail",
+    bboard: "bboard"
   },
   game: {
     name: "UrsaMU",
@@ -266,9 +255,73 @@ if (import.meta.main) {
 
   try {
     const game = await initializeEngine(config);
+    await checkAndCreateSuperuser();
     console.log(`${game.config.get("game.name")} main server is running!`);
   } catch (error) {
     await logError(error, "Fatal Initialization Error");
     Deno.exit(1);
+  }
+}
+
+/**
+ * Check if any players exist, and if not, prompt to create a superuser
+ */
+async function checkAndCreateSuperuser() {
+  const players = await dbojs.query({ flags: /player/i });
+
+  if (players.length === 0) {
+    console.log("\nNo players found in the database.");
+    console.log("Welcome! Let's set up your superuser account.\n");
+
+    const getRes = (text: string) => {
+      const val = prompt(text);
+      if (val === null) return null;
+      return val.trim();
+    };
+
+    let email = getRes("Enter email address:");
+    if (email === null) {
+      console.log("Unable to read input (non-interactive mode detected).");
+      console.log("To set up a superuser, please run the server interactively:");
+      console.log("  deno task server");
+      console.log("Skipping superuser creation for now.\n");
+      return;
+    }
+
+    while (!email) {
+      email = getRes("Enter email address:");
+      if (email === null) return;
+    }
+
+    let username = getRes("Enter username:");
+    if (username === null) return;
+    while (!username) {
+      username = getRes("Enter username:");
+      if (username === null) return;
+    }
+
+    let password = getRes("Enter password:");
+    if (password === null) return;
+    while (!password) {
+      password = getRes("Enter password:");
+      if (password === null) return;
+    }
+
+    const id = await getNextId("objid");
+    
+    // Create the superuser
+    await dbojs.create({
+      id,
+      flags: "player connected superuser",
+      data: {
+        name: username,
+        email,
+        password: await hash(password, await genSalt(10)),
+        home: "1",
+      },
+      location: "1",
+    });
+
+    console.log(`\nSuperuser '${username}' created successfully!`);
   }
 }

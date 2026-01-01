@@ -1,27 +1,22 @@
-// @ts-nocheck
-export * as dpath from "https://deno.land/std@0.208.0/path/mod.ts";
-export * as dfs from "https://deno.land/std@0.208.0/fs/mod.ts";
+// @ts-nocheck: some dependencies do not have types or cause issues with Deno's type checker
+export * as dpath from "https://deno.land/std@0.224.0/path/mod.ts";
+export * as dfs from "https://deno.land/std@0.224.0/fs/mod.ts";
 export type Kv = Deno.Kv;
 
-export { Tags } from "npm:@digibear/tags@1.0.0"
-export { Parser } from "npm:@ursamu/parser@1.2.4"
-export { config } from "npm:dotenv@16.3.1"
-export * as jwt from "npm:jsonwebtoken@9.0.1"
-export { Socket, Server } from "npm:socket.io@4.7.1"
-export { io } from "npm:socket.io-client@4.7.1"
-export { VM } from "npm:vm2@3.9.19"
+export { Tags } from "@digibear/tags";
+export { Parser } from "@ursamu/parser";
+export { load } from "dotenv";
+export * as djwt from "djwt";
+export { getQuickJS } from "quickjs-emscripten";
+export type { QuickJSWASMModule } from "quickjs-emscripten";
 
-// @deno-types="npm:@types/express@4.17.21"
-export { Router } from "npm:express@4.18.2"
-export { default as express } from "npm:express@4.18.2"
-export type { Request, Response, RequestHandler, NextFunction } from "npm:express@4.18.2"
+import * as bcrypt from "bcrypt";
+export const compare = bcrypt.compare;
+export const hash = bcrypt.hash;
+export const genSalt = bcrypt.genSalt;
 
-import bcrypt from "npm:bcryptjs@2.4.3"
-export const compare = bcrypt.compare
-export const hash = bcrypt.hash
-
-import lodash from "npm:lodash@4.17.21"
-export const set = lodash.set
-export const get = lodash.get
-export const isnumber = lodash.isnumber
-export const repeat = lodash.repeat
+import lodash from "lodash";
+export const set = lodash.set;
+export const get = lodash.get;
+export const isnumber = lodash.isnumber;
+export const repeat = lodash.repeat;

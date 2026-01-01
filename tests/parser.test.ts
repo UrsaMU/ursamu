@@ -1,7 +1,7 @@
-
-import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
-import { cmdParser, addCmd, cmds } from "../src/services/commands/cmdParser.ts";
+import { assertEquals } from "@std/assert";
+import { addCmd } from "../src/services/commands/cmdParser.ts";
 import { IContext } from "../src/@types/IContext.ts";
+import { IMSocket } from "../src/@types/IMSocket.ts";
 
 // Mock dependencies
 // We can't easily mock imported modules without a loader or dependency injection.
@@ -9,8 +9,8 @@ import { IContext } from "../src/@types/IContext.ts";
 // We should try to add a command that matches and verifies execution.
 
 Deno.test("Command Parser Test", async (t) => {
-    let executed = false;
-    let capturedArgs: string[] = [];
+    let _executed = false;
+    let _capturedArgs: string[] = [];
 
     // 清除现有的 cmds (hacky but needed for isolation if cmds is global)
     // In a real scenario we might want a reset method.
@@ -19,15 +19,17 @@ Deno.test("Command Parser Test", async (t) => {
         name: "test",
         pattern: /^test\s+(.*)/,
         lock: "connected",
-        exec: async (ctx, args) => {
-            executed = true;
-            capturedArgs = args;
+        exec: (ctx, args) => {
+            _executed = true;
+            _capturedArgs = args;
+            assertEquals(ctx.msg, "test hello world");
+            return Promise.resolve();
         }
     });
 
-    await t.step("Execute Command", async () => {
-        const ctx: IContext = {
-            socket: { cid: "1", id: "socket1" } as any,
+    await t.step("Execute Command", () => {
+        const _ctx: IContext = {
+            socket: { cid: "1", id: "socket1" } as unknown as IMSocket,
             msg: "test hello world",
             data: {}
         };
@@ -49,12 +51,13 @@ Deno.test("Command Parser Test", async (t) => {
 
         // Let's try adding a command with no lock.
 
-        let noLockExecuted = false;
+        let _noLockExecuted = false;
         addCmd({
             name: "nolock",
             pattern: /^nolock\s+(.*)/,
-            exec: async (ctx, args) => {
-                noLockExecuted = true;
+            exec: (_ctx, _args) => {
+                _noLockExecuted = true;
+                return Promise.resolve();
             }
         });
 

@@ -3,14 +3,14 @@ import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { idle, moniker } from "../utils/index.ts";
-import { center, header, ljust, repeatString } from "../utils/format.ts";
+import { header, ljust, repeatString } from "../utils/format.ts";
 
 export default () => {
   addCmd({
     name: "who",
     pattern: /^[\+@]?who$/i,
     lock: "connected",
-    exec: async (ctx, args) => {
+    exec: async (ctx, _args) => {
       // ============================== Online Players ===============================
       // Player                 Alias    Type    Idle  Doing  (Type: @doing <txt>)
       // -----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ export default () => {
         const obj = await Obj.get(pl.id);
         if (!obj) continue;
         output += " " + ljust(moniker(obj), 23) + " ";
-        output += ljust(obj.data?.alias || "", 8) + " ";
+        output += ljust((obj.data?.alias as string) || "", 8) + " ";
         if (obj.flags.includes("storyteller")) {
           output += ljust("%ch%cgStoryteller%cn", 10) + " ";
         } else if (obj.flags.includes("admin")) {
@@ -54,8 +54,8 @@ export default () => {
           output += ljust("Player", 10) + " ";
         }
 
-        output += ljust(idle(obj.data?.lastCommand || 0), 6);
-        output += ljust(obj.data?.doing || "", 23) + "\n";
+        output += ljust(idle((obj.data?.lastCommand as number) || 0), 6);
+        output += ljust((obj.data?.doing as string) || "", 23) + "\n";
       }
 
       output += repeatString("%cr-%cn", 78) + "\n";

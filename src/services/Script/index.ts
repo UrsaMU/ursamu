@@ -1,5 +1,5 @@
 
-import { getQuickJS, QuickJSWASMModule } from "npm:quickjs-emscripten";
+import { getQuickJS, QuickJSWASMModule } from "../../../deps.ts";
 import { createScriptContext } from "./api.ts";
 import { IContext } from "../../@types/IContext.ts";
 
@@ -27,12 +27,12 @@ export class ScriptService {
 
         const runtime = this.qjs!.newRuntime();
         const vm = runtime.newContext();
-        const sandbox = createScriptContext(ctx);
+        const _sandbox = createScriptContext(ctx);
 
         // Check for watchdog (timeout)
         const start = Date.now();
         runtime.setInterruptHandler(() => {
-            return Date.now() - start > 100; // 100ms timeout
+            return Date.now() - start > 50; // 50ms timeout
         });
 
         try {
@@ -56,8 +56,16 @@ export class ScriptService {
                 return value;
             }
 
-        } catch (e) {
-            throw new Error(`Script Execution Error: ${e}`);
+        } catch (e: unknown) {
+            let msg = "";
+            if (e instanceof Error) {
+                msg = e.message;
+            } else if (typeof e === "object" && e !== null && "message" in e) {
+                msg = String((e as Record<string, unknown>).message);
+            } else {
+                msg = String(e);
+            }
+            throw new Error(`Script Execution Error: ${msg}`);
         } finally {
             vm.dispose();
         }

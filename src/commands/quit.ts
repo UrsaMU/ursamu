@@ -1,5 +1,3 @@
-import { io } from "../app.ts";
-import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 

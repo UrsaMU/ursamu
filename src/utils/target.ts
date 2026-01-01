@@ -25,7 +25,7 @@ export const target = async (
         return (
           RegExp(this.data?.name?.replace(";", "|") || "", "ig").test(target) ||
           this.id === target ||
-          this.data?.alias?.toLowerCase() === target.toLowerCase()
+          (this.data?.alias as string | undefined)?.toLowerCase() === target.toLowerCase()
         );
       },
     });

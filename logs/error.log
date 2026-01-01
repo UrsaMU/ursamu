@@ -1,0 +1,8 @@
+[2026-01-01T07:26:05.667Z] [ERROR] Fatal Initialization Error: ReferenceError: checkAndCreateSuperuser is not defined
+    at file:///Users/kumakun/github/ursamu/src/main.ts:271:5
+[2026-01-01T09:42:52.763Z] [ERROR] Fatal Initialization Error: AddrInUse: Address already in use (os error 48)
+    at listen (ext:deno_net/01_net.js:605:35)
+    at serveInner (ext:deno_http/00_serve.ts:675:16)
+    at Object.serve (ext:deno_http/00_serve.ts:591:10)
+    at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:89:8)
+    at async file:///Users/kumakun/github/ursamu/src/main.ts:257:18

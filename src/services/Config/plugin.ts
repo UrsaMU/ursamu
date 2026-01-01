@@ -69,14 +69,14 @@ export class PluginConfigManager {
   /**
    * Get a plugin's configuration
    */
-  public getPluginConfig(pluginName: string): Record<string, any> | undefined {
+  public getPluginConfig(pluginName: string): Record<string, unknown> | undefined {
     return this.configManager.getPluginConfig(pluginName);
   }
 
   /**
    * Update a plugin's configuration
    */
-  public updatePluginConfig(pluginName: string, config: Record<string, any>): void {
+  public updatePluginConfig(pluginName: string, config: Record<string, unknown>): void {
     this.configManager.updatePluginConfig(pluginName, config);
     
     // Update the plugin's config object as well

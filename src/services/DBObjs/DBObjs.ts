@@ -7,7 +7,7 @@ import { IEntity } from "../../interfaces/IEntity.ts";
 
 import { IAttribute } from "../../@types/IAttribute.ts";
 
-export const createObj = async (flgs: string, datas: any) => {
+export const createObj = async (flgs: string, datas: Record<string, unknown>) => {
   const id = await getNextId("objid");
   const { tags, data } = flags.set("", datas, flgs);
   const obj = {
@@ -34,7 +34,7 @@ export class Obj implements IEntity {
     return this;
   }
 
-  static async get(obj: string | number | undefined, en?: Obj): Promise<Obj | null> {
+  static async get(obj: string | number | undefined, _en?: Obj): Promise<Obj | null> {
     console.log("Obj.get called with:", obj, typeof obj);
 
     if (typeof obj === "string") {
@@ -76,6 +76,12 @@ export class Obj implements IEntity {
     return this.obj;
   }
 
+  set dbobj(obj: IDBOBJ) {
+    if (!this.obj) return;
+    this.obj = { ...this.obj, ...obj };
+    this.save();
+  }
+
   get id() {
     return this.obj?.id;
   }
@@ -93,12 +99,18 @@ export class Obj implements IEntity {
     return `#${this.obj.id}`;
   }
 
-  get data() {
-    return this.obj.data;
+  get data(): Record<string, unknown> {
+    return (this.obj.data || {}) as Record<string, unknown>;
+  }
+
+  set data(data: Record<string, unknown>) {
+    if (!this.obj) return;
+    this.obj.data = { ...this.obj.data, ...data };
+    this.save();
   }
 
   get splat() {
-    return this.obj.data?.stats?.find((s: IAttribute) => s.name === "splat")?.value;
+    return this.obj.data?.attributes?.find((s: IAttribute) => s.name === "splat")?.value;
   }
 
   get location() {
@@ -109,8 +121,8 @@ export class Obj implements IEntity {
     return this.obj.description;
   }
 
-  get stats() {
-    return this.obj.data?.stats;
+  get stats(): IAttribute[] | undefined {
+    return this.obj.data?.attributes;
   }
 
   async exits() {
@@ -123,17 +135,5 @@ export class Obj implements IEntity {
 
   async save() {
     await dbojs.modify({ id: this.id }, "$set", this.obj);
-  }
-
-  set data(data: any) {
-    if (!this.obj) return;
-    this.obj.data = { ...this.obj.data, ...data };
-    this.save();
-  }
-
-  set dbobj(obj: IDBOBJ) {
-    if (!this.obj) return;
-    this.obj = { ...this.obj, ...obj };
-    this.save();
   }
 }

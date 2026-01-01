@@ -1,27 +1,36 @@
-import { Router } from "../../deps.ts";
 import { Obj, dbojs, flags } from "../services/index.ts";
-import { IMError } from "../@types/index.ts";
 import { canEdit } from "../utils/index.ts";
 
-const router = Router();
+export const dbObjHandler = async (req: Request, userId: string): Promise<Response> => {
+  const url = new URL(req.url);
+  
+  if (url.pathname.endsWith("/dbos") && req.method === "GET") {
+    const en = await Obj.get(userId);
+    const flgs = url.searchParams.get("flags") || "";
 
-router.get("/dbos", async (req, res, next) => {
-  const en = await Obj.get(req.body.id);
-  const flgs = (req.query.flags as string) || "";
+    if (!en) {
+      return new Response(JSON.stringify({ error: "Not Found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-  if (!en) {
-    const err: IMError = new Error("Not Found");
-    err.status = 404;
-    return next(err);
+    const allDbos = await dbojs.find({});
+    const dbos = allDbos
+      .filter((dbo) => canEdit(en.dbobj, dbo) && flags.check(dbo.flags, flgs))
+      .map((dbo) => {
+        const copy = { ...dbo };
+        if (copy.data) {
+          delete copy.data.password;
+        }
+        return copy;
+      });
+
+    return new Response(JSON.stringify(dbos), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  const dbos = (await dbojs.find({}))
-    .filter((dbo) => canEdit(en.dbobj, dbo) && flags.check(dbo.flags, flgs))
-    .map((dbo) => {
-      delete dbo.data?.password;
-      return dbo;
-    });
-  res.status(200).json(dbos);
-});
-
-export const dbObjRouter = router;
+  return new Response("Not Found", { status: 404 });
+};

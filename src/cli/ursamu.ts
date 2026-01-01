@@ -1,7 +1,7 @@
 #!/usr/bin/env -S deno run -A
 
-import { parse } from "https://deno.land/std@0.204.0/flags/mod.ts";
-import { dirname, fromFileUrl, join } from "https://deno.land/std@0.204.0/path/mod.ts";
+import { parse } from "@std/flags";
+import { dirname, fromFileUrl, join } from "@std/path";
 
 // Parse command line arguments
 const args = parse(Deno.args, {

@@ -22,7 +22,8 @@ export const matchChannel = async (ctx: IContext) => {
   if (!en.data?.channels) {
     return false;
   }
-  const channel = en.data?.channels?.find((c: IChanEntry) => c.alias === trig)
+  const userChans = en.data.channels as IChanEntry[];
+  const channel = userChans.find((c: IChanEntry) => c.alias === trig);
   if (!channel) {
     return false;
   }
@@ -31,7 +32,7 @@ export const matchChannel = async (ctx: IContext) => {
   if (!chan) {
     return false;
   }
-  if (!flags.check(en.flags || "", channel?.lock || "")) return false;
+  if (!flags.check(en.flags || "", chan.lock || "")) return false;
   if (match[1] === ":") {
     msg = `${channel?.title ? channel?.title + " " : ""}${channel?.mask ? channel.mask : moniker(en)
       } ${match[2]}`;

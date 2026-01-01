@@ -1,5 +1,4 @@
 import { IPlugin } from "../../@types/IPlugin.ts";
-import { IConfig } from "../../@types/IConfig.ts";
 import { getConfig } from "../../services/Config/mod.ts";
 
 // Define a custom configuration interface for the plugin
@@ -49,7 +48,7 @@ const examplePlugin: IPlugin = {
   },
   
   // Plugin initialization
-  init: async () => {
+  init: () => {
     console.log("Initializing example plugin...");
     
     // Access the plugin's configuration

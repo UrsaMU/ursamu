@@ -1,4 +1,3 @@
-import { dpath } from "../../deps.ts";
 import { broadcast } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";

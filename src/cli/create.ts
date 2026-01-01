@@ -73,10 +73,10 @@ const config = {
     ws: 4202,
     http: 4203,
     db: "data/ursamu.db",
-    counters: "data/counters.db",
-    chans: "data/chans.db",
-    mail: "data/mail.db",
-    bboard: "data/bboard.db"
+    counters: "counters",
+    chans: "chans",
+    mail: "mail",
+    bboard: "bboard"
   },
   game: {
     name: "${projectName}",

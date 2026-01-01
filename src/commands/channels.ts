@@ -1,7 +1,5 @@
-import { IMSocket } from "../@types/index.ts";
 import { IChanEntry } from "../@types/Channels.ts";
-import { io } from "../app.ts";
-import { Obj } from "../services/DBObjs/index.ts";
+import { wsService } from "../services/WebSocket/index.ts";
 import { chans, dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { addCmd, force } from "../services/commands/index.ts";
@@ -29,7 +27,7 @@ export default () => {
         const name = parts[0];
         const alias = parts[1];
 
-        const chan = await chans.create({
+        await chans.create({
           id: await getNextId("chanid"),
           name,
           header: `%ch[${name}]%cn`,
@@ -41,12 +39,14 @@ export default () => {
 
         if (alias) {
           en.data ||= {};
-          en.data.channels ||= [];
-          en.data.channels.push({
+          const channels = (en.data.channels || []) as IChanEntry[];
+          channels.push({
+            id: await getNextId("chanid"), // Assuming it needs a unique ID too
             channel: name,
             alias,
             active: true,
           });
+          en.data.channels = channels;
           await dbojs.modify({ id: en.id }, "$set", en);
           ctx.socket.join(name);
           await force(ctx, `${alias} :joins the channel.`);
@@ -58,9 +58,7 @@ export default () => {
 
           // Force the connected sockets (players) to cycle their channels
           // and join the new ones.
-          const sockets = Array.from(io.sockets.sockets.values()).map(
-            (s) => s as IMSocket
-          );
+          const sockets = wsService.getConnectedSockets();
 
           for (const socket of sockets) {
             await joinChans({ socket });
@@ -88,7 +86,8 @@ export default () => {
         const players = await dbojs.query({ flags: /player/ });
         for (const plyr of players) {
           plyr.data ||= {};
-          plyr.data.channels = plyr.data.channels?.filter(
+          const channels = (plyr.data.channels || []) as IChanEntry[];
+          plyr.data.channels = channels.filter(
             (c: IChanEntry) => c.channel !== chan.name
           );
           await dbojs.modify({ id: plyr.id }, "$set", plyr);
@@ -149,9 +148,7 @@ export default () => {
 
       // Force the connected sockets (players) to cycle their channels
       // and join the new ones.
-      const sockets = Array.from(io.sockets.sockets.values()).map(
-        (s) => s as IMSocket
-      );
+      const sockets = wsService.getConnectedSockets();
 
       for (const socket of sockets) {
         await joinChans({ socket });
@@ -175,12 +172,14 @@ export default () => {
           return;
         }
         en.data ||= {};
-        en.data.channels ||= [];
-        en.data.channels.push({
+        const channels = (en.data.channels || []) as IChanEntry[];
+        channels.push({
+          id: await getNextId("chanid"),
           channel: chan.name,
           alias: args[0],
           active: true,
         });
+        en.data.channels = channels;
 
         await dbojs.modify({ id: en.id }, "$set", en);
         send([ctx.socket.id], `You join channel ${chan.name}.`, {});
@@ -206,17 +205,20 @@ export default () => {
       const en = await dbojs.queryOne({ id: ctx.socket.cid! });
       if (!en) return;
       en.data ||= {};
-      en.data.channels ||= [];
-      en.data.channels.forEach(async (c: IChanEntry) => {
-        if (c.alias !== args[0]) return;
-        en.data!.channels = en.data?.channels?.filter(
-          (c: IChanEntry) => c.alias !== args[0]
-        );
-        send([ctx.socket.id], `You leave channel ${c.channel}.`, {});
-        await force(ctx, `${args[0]} :leaves the channel.`);
-        (ctx.socket as any).leave(c.channel);
-        await dbojs.modify({ id: en.id }, "$set", en);
-      });
+      const channels = (en.data.channels || []) as IChanEntry[];
+      
+      for (const c of channels) {
+        if (c.alias === args[0]) {
+          en.data.channels = channels.filter(
+            (chanEntry: IChanEntry) => chanEntry.alias !== args[0]
+          );
+          send([ctx.socket.id], `You leave channel ${c.channel}.`, {});
+          await force(ctx, `${args[0]} :leaves the channel.`);
+          ctx.socket.leave(c.channel);
+          await dbojs.modify({ id: en.id }, "$set", en);
+          break;
+        }
+      }
     },
   });
 
@@ -225,11 +227,11 @@ export default () => {
     pattern: /^comlist/i,
     lock: "connected",
     hidden: true,
-    exec: async (ctx, args) => {
+    exec: async (ctx, _args) => {
       const en = await dbojs.queryOne({ id: ctx.socket.cid! });
       if (!en) return;
       en.data ||= {};
-      en.data.channels ||= [];
+      const channels = (en.data.channels || []) as IChanEntry[];
       let msg = "Your channels:%r";
       msg +=
         "%ch%cr==============================================================================%cn%r";
@@ -237,8 +239,8 @@ export default () => {
       msg +=
         "%ch%cr==============================================================================%cn";
       
-      for (const c of en.data.channels) {
-        const channel = await chans.queryOne({ name: c.channel });
+      for (const c of channels) {
+        const _channel = await chans.queryOne({ name: c.channel });
         const status = c.active ? "Active" : "Inactive";
         const title = c.title || "";
         const mask = c.mask || "";
@@ -265,19 +267,20 @@ export default () => {
       if (!en) return;
 
       en.data ||= {};
-      en.data.channels ||= [];
+      const channels = (en.data.channels || []) as IChanEntry[];
       let updated = false;
       
-      for (let i = 0; i < en.data.channels.length; i++) {
-        const c = en.data.channels[i];
-        if (c.alias === args[0]) {
-          en.data.channels[i].title = args[1].trim();
-          if (en.data.channels[i].title === "") delete en.data.channels[i].title;
+      for (let i = 0; i < channels.length; i++) {
+        if (channels[i].alias === args[0]) {
+          channels[i].title = args[1].trim();
+          if (channels[i].title === "") delete channels[i].title;
           updated = true;
+          break;
         }
       }
       
       if (updated) {
+        en.data.channels = channels;
         await dbojs.modify({ id: en.id }, "$set", en);
         send([ctx.socket.id], `Channel title updated.`, {});
       } else {
@@ -296,8 +299,8 @@ export default () => {
       if (!en) return;
 
       en.data ||= {};
-      en.data.channels ||= [];
-      const chansList = en.data.channels.filter(
+      const channels = (en.data.channels || []) as IChanEntry[];
+      const chansList = channels.filter(
         (c: IChanEntry) => c.alias === args[0]
       );
 
@@ -307,30 +310,30 @@ export default () => {
       }
 
       let updated = false;
-      for (let i = 0; i < en.data.channels.length; i++) {
-        const c = en.data.channels[i];
-        if (c.alias === args[0]) {
-          const channel = await chans.queryOne({ name: c.channel });
+      for (let i = 0; i < channels.length; i++) {
+        if (channels[i].alias === args[0]) {
+          const channel = await chans.queryOne({ name: channels[i].channel });
           if (!channel) {
-            send([ctx.socket.id], `Channel ${c.channel} not found.`, {});
+            send([ctx.socket.id], `Channel ${channels[i].channel} not found.`, {});
             continue;
           }
           
           if (!channel.masking) {
             send(
               [ctx.socket.id],
-              `Channel %ch${c.channel}%cn does not allow masking.`,
+              `Channel %ch${channels[i].channel}%cn does not allow masking.`,
               {}
             );
             continue;
           }
           
-          en.data.channels[i].mask = args[1];
+          channels[i].mask = args[1];
           updated = true;
         }
       }
       
       if (updated) {
+        en.data.channels = channels;
         await dbojs.modify({ id: en.id }, "$set", en);
         send([ctx.socket.id], `Channel mask updated.`, {});
       }

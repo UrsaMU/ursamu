@@ -8,10 +8,10 @@ import { merge } from "./utils.ts";
  */
 export class ConfigManager {
   private static instance: ConfigManager;
-  private config: Record<string, any> = {};
+  private config: Record<string, unknown> = {};
   private configDir: string;
   private defaultConfig: IConfig;
-  private pluginConfigs: Map<string, Record<string, any>> = new Map();
+  private pluginConfigs: Map<string, Record<string, unknown>> = new Map();
   private configFile = "config.json";
 
   private constructor(defaultConfig: IConfig, configDir?: string) {
@@ -20,7 +20,17 @@ export class ConfigManager {
     // If no config directory is provided, use the /config directory at the project root
     if (!configDir) {
       // Get the project root directory (two levels up from the current file)
-      const currentDir = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+      let currentDir: string;
+      try {
+        if (import.meta.url.startsWith("file://")) {
+          currentDir = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+        } else {
+          currentDir = Deno.cwd();
+        }
+      } catch {
+        currentDir = Deno.cwd();
+      }
+      
       const projectRoot = dpath.resolve(currentDir, "../../..");
       this.configDir = dpath.join(projectRoot, "config");
       
@@ -81,7 +91,7 @@ export class ConfigManager {
         const fileConfig = JSON.parse(fileContent);
         
         // Merge with default config
-        this.config = merge(this.defaultConfig, fileConfig);
+        this.config = merge(this.defaultConfig as unknown as Record<string, unknown>, fileConfig);
         console.log("Configuration loaded from", configPath);
       } catch (error) {
         if (error instanceof Deno.errors.NotFound) {
@@ -122,14 +132,14 @@ export class ConfigManager {
    * Set a configuration value by key
    * Supports dot notation (e.g., "server.port")
    */
-  public set(key: string, value: any): void {
+  public set(key: string, value: unknown): void {
     this.setValueByPath(this.config, key, value);
   }
 
   /**
    * Get the entire configuration object
    */
-  public getAll(): Record<string, any> {
+  public getAll(): Record<string, unknown> {
     return { ...this.config };
   }
 
@@ -145,23 +155,25 @@ export class ConfigManager {
    * Register a plugin configuration
    * This allows plugins to have their own configuration sections
    */
-  public registerPlugin(pluginName: string, pluginConfig: Record<string, any>): void {
+  public registerPlugin(pluginName: string, pluginConfig: Record<string, unknown>): void {
     this.pluginConfigs.set(pluginName, pluginConfig);
     
     // Create a plugin section in the config if it doesn't exist
-    if (!this.config.plugins) {
-      this.config.plugins = {};
+    const config = this.config as Record<string, unknown>;
+    if (!config.plugins) {
+      config.plugins = {};
     }
     
+    const plugins = config.plugins as Record<string, unknown>;
     // If plugin config doesn't exist yet, initialize it
-    if (!this.config.plugins[pluginName]) {
-      this.config.plugins[pluginName] = pluginConfig;
+    if (!plugins[pluginName]) {
+      plugins[pluginName] = pluginConfig;
       this.saveConfig();
     } else {
       // Merge existing plugin config with new defaults
-      this.config.plugins[pluginName] = merge(
+      plugins[pluginName] = merge(
         pluginConfig,
-        this.config.plugins[pluginName]
+        plugins[pluginName] as Record<string, unknown>
       );
       this.saveConfig();
     }
@@ -170,20 +182,25 @@ export class ConfigManager {
   /**
    * Get a plugin's configuration
    */
-  public getPluginConfig(pluginName: string): Record<string, any> | undefined {
-    return this.config.plugins?.[pluginName];
+  public getPluginConfig(pluginName: string): Record<string, unknown> | undefined {
+    const config = this.config as Record<string, unknown>;
+    const plugins = config.plugins as Record<string, unknown> | undefined;
+    if (!plugins) return undefined;
+    return plugins[pluginName] as Record<string, unknown>;
   }
 
   /**
    * Update a plugin's configuration
    */
-  public updatePluginConfig(pluginName: string, pluginConfig: Record<string, any>): void {
-    if (!this.config.plugins) {
-      this.config.plugins = {};
+  public updatePluginConfig(pluginName: string, pluginConfig: Record<string, unknown>): void {
+    const config = this.config as Record<string, unknown>;
+    if (!config.plugins) {
+      config.plugins = {};
     }
     
-    this.config.plugins[pluginName] = merge(
-      this.config.plugins[pluginName] || {},
+    const plugins = config.plugins as Record<string, unknown>;
+    plugins[pluginName] = merge(
+      (plugins[pluginName] as Record<string, unknown>) || {},
       pluginConfig
     );
     
@@ -193,15 +210,15 @@ export class ConfigManager {
   /**
    * Helper method to get a value using dot notation path
    */
-  private getValueByPath(obj: Record<string, any>, path: string): any {
+  private getValueByPath(obj: Record<string, unknown>, path: string): unknown {
     const parts = path.split('.');
-    let current = obj;
+    let current: unknown = obj;
     
     for (const part of parts) {
-      if (current === undefined || current === null) {
+      if (current === undefined || current === null || typeof current !== 'object') {
         return undefined;
       }
-      current = current[part];
+      current = (current as Record<string, unknown>)[part];
     }
     
     return current;
@@ -210,16 +227,16 @@ export class ConfigManager {
   /**
    * Helper method to set a value using dot notation path
    */
-  private setValueByPath(obj: Record<string, any>, path: string, value: any): void {
+  private setValueByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
     const parts = path.split('.');
     let current = obj;
     
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i];
-      if (!(part in current)) {
+      if (!(part in current) || typeof current[part] !== 'object' || current[part] === null) {
         current[part] = {};
       }
-      current = current[part];
+      current = current[part] as Record<string, unknown>;
     }
     
     current[parts[parts.length - 1]] = value;

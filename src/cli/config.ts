@@ -1,7 +1,6 @@
 #!/usr/bin/env -S deno run -A
 
-import { parse } from "https://deno.land/std/flags/mod.ts";
-import { dpath } from "../../deps.ts";
+import { parse } from "@std/flags";
 import { ConfigManager } from "../services/Config/index.ts";
 import { getAllConfig } from "../services/Config/mod.ts";
 

@@ -1,10 +1,11 @@
-import { compare, hash } from "../../deps.ts";
+import { compare } from "../../deps.ts";
 import { send } from "../services/broadcast/index.ts";
 import { addCmd, force } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { setFlags } from "../utils/setFlags.ts";
 import { joinChans } from "../utils/joinChans.ts";
 import { moniker } from "../utils/moniker.ts";
+import { isNameTaken } from "../utils/isNameTaken.ts";
 
 export default () =>
   addCmd({
@@ -32,20 +33,14 @@ export default () =>
         return;
       }
 
-      console.log(`Attempting to connect with name: "${name}"`);
+      console.log(`Attempting to connect with name/alias: "${name}"`);
       
       try {
-        // Get all players and find the matching one
-        const allPlayers = await dbojs.query({});
-        console.log(`Total players in database: ${allPlayers.length}`);
-        
-        // Find player with matching name (case insensitive)
-        const found = allPlayers.find(player => 
-          player.data?.name && player.data.name.toLowerCase() === name.toLowerCase()
-        );
+        // Find player with matching name or alias (case insensitive)
+        const found = await isNameTaken(name);
         
         if (!found) {
-          console.log(`No player found with name: "${name}"`);
+          console.log(`No player found with name/alias: "${name}"`);
           send([ctx.socket.id], "I can't find a character by that name!", {
             error: true,
           });

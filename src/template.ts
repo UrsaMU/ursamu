@@ -5,7 +5,7 @@
  * Copy this file to your project and modify it to suit your needs.
  */
 
-import { mu, IConfig, IPlugin } from "./index.ts";
+import { mu, IConfig } from "./index.ts";
 import { dpath } from "../deps.ts";
 
 // Define your custom configuration
@@ -30,16 +30,13 @@ const config: IConfig = {
     playerStart: "1",
   },
   // Add any custom plugins here
-  plugins: [
+  plugins: {
     // Example:
-    // {
-    //   name: "my-plugin",
-    //   version: "1.0.0",
-    //   init: (game) => {
-    //     console.log("My plugin loaded!");
-    //   }
+    // "my-plugin": {
+    //   enabled: true,
+    //   options: {}
     // }
-  ],
+  },
 };
 
 export default config;
@@ -64,8 +61,8 @@ if (import.meta.main) {
     console.log(`${game.config.get("game.name")} main server is running!`);
 
     // Example of loading plugins from a directory
-    const pluginsDir = dpath.join(dpath.dirname(dpath.fromFileUrl(import.meta.url)), "plugins");
-    // await game.plugins.load(pluginsDir);
+    const _pluginsDir = dpath.join(dpath.dirname(dpath.fromFileUrl(import.meta.url)), "plugins");
+    // await game.plugins.load(_pluginsDir);
 
   } catch (error) {
     await logError(error, "Fatal Initialization Error");

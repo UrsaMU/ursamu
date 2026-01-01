@@ -1,11 +1,12 @@
 
-import { assertEquals, assertRejects } from "https://deno.land/std@0.208.0/assert/mod.ts";
+import { assertEquals, assertRejects } from "@std/assert";
 import { scriptService } from "../src/services/Script/index.ts";
 import { IContext } from "../src/@types/IContext.ts";
+import { IMSocket } from "../src/@types/IMSocket.ts";
 
 Deno.test("Script Service Tests", async (t) => {
     const mockCtx: IContext = {
-        socket: { cid: "123", id: "mock-socket" } as any,
+        socket: { cid: "123", id: "mock-socket" } as unknown as IMSocket,
         msg: "",
         data: {}
     };

@@ -1,5 +1,5 @@
-import { jwt } from "../../deps.ts";
+import { djwt } from "../../deps.ts";
 
-export interface IPayload extends jwt.JwtPayload {
+export interface IPayload extends djwt.Payload {
   id: string;
 }

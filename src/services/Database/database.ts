@@ -2,8 +2,8 @@ import { IDBOBJ } from "../../@types/IDBObj.ts";
 import { getConfig } from "../Config/mod.ts";
 import { IChannel } from "../../@types/Channels.ts";
 import { IMail } from "../../@types/IMail.ts";
-import { dpath } from "../../../deps.ts";
-import { IDatabase, Query, QueryCondition, QueryOperator } from "../../interfaces/IDatabase.ts";
+import { dpath, get } from "../../../deps.ts";
+import { IDatabase, Query, QueryCondition } from "../../interfaces/IDatabase.ts";
 // @ts-ignore: Deno namespace is available at runtime
 
 interface WithId {
@@ -130,22 +130,24 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     }
 
     for (const [key, condition] of Object.entries(query)) {
+      const val = key.includes('.') ? get(value, key) : value[key as keyof T];
+      
       if (condition instanceof RegExp) {
-        if (!condition.test(value[key as keyof T] as string)) {
+        if (!condition.test(val as string)) {
           return false;
         }
       } else if (typeof condition === "object") {
-        if (!this.matchesQuery(value[key as keyof T] as T, condition as Query<T>)) {
+        if (!this.matchesQuery(val as T, condition as Query<T>)) {
           return false;
         }
-      } else if (value[key as keyof T] !== condition) {
+      } else if (val !== condition) {
         return false;
       }
     }
     return true;
   }
 
-  async update(query: Query<T>, data: T) {
+  async update(_query: Query<T>, data: T) {
     const cv = await this.getKv();
     const plainData = { ...data };
     await cv.set(this.getKey(data.id), plainData);
@@ -153,11 +155,11 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   }
 
   async find(query?: Query<T>) {
-    return this.query(query);
+    return await this.query(query);
   }
 
   async findOne(query?: Query<T>) {
-    return this.queryOne(query);
+    return await this.queryOne(query);
   }
 }
 

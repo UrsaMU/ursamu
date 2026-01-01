@@ -1,4 +1,3 @@
-import { ICmd } from "./ICmd.ts";
 import { IConfig } from "./IConfig.ts";
 
 export interface IPlugin {

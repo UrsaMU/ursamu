@@ -1,4 +1,4 @@
-import { dfs, dpath } from "../../deps.ts";
+import { dpath } from "../../deps.ts";
 import { txtFiles } from "../services/commands/index.ts";
 
 export const loadTxtDir = async (dir: string) => {

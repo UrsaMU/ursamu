@@ -1,14 +1,15 @@
-
-import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
+import { assertEquals } from "@std/assert";
 import { DBO } from "../src/services/Database/database.ts";
 import { IDBOBJ } from "../src/@types/IDBObj.ts";
 
 // Mock Deno.KV
 const kv = await Deno.openKv(":memory:");
-Deno.openKv = async () => kv;
+Deno.openKv = () => Promise.resolve(kv);
+// deno-lint-ignore no-explicit-any
+(DBO as any).kv = null;
 
 Deno.test("Database Adapter Test", async (t) => {
-    const db = new DBO<IDBOBJ>("test.db");
+    const db = new DBO<IDBOBJ>("test");
 
     await t.step("Create Object", async () => {
         const obj = { id: "1", flags: "test", data: { name: "Test Object" } };

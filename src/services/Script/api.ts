@@ -1,13 +1,11 @@
-
 import { IContext } from "../../@types/IContext.ts";
 import { send, broadcast } from "../broadcast/index.ts";
-import { moniker } from "../../utils/moniker.ts";
 
 export const createScriptContext = (ctx: IContext) => {
     return {
         me: {
             id: ctx.socket.cid,
-            name: async () => {
+            name: () => {
                 // Fetch name if needed, or just return basic info
                 return "Player";
             }

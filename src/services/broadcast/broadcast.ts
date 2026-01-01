@@ -1,8 +1,8 @@
 import { wsService } from "../WebSocket/index.ts";
 import parser from "../parser/parser.ts";
-type data = { [key: string]: any };
+type data = Record<string, unknown>;
 
-export const send = async (targets: string[], msg: string, data?: data, exclude: string[] = []) => {
+export const send = (_targets: string[], msg: string, data?: data, _exclude: string[] = []) => {
   // TODO: Implement sophisticated targeting in WebSocketService
   // For now, mapping this to a simple broadcast for compatibility or direct send if ID known
 
@@ -18,7 +18,7 @@ export const send = async (targets: string[], msg: string, data?: data, exclude:
   });
 };
 
-export const broadcast = async (msg: string, data?: data) => {
+export const broadcast = (msg: string, data?: data) => {
   const cleanedMsg = parser.substitute("telnet", msg);
   wsService.broadcast({
     event: "message",

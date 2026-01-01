@@ -1,4 +1,5 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
+import { IAttribute } from "../@types/IAttribute.ts";
 
 export interface IEntity {
     id?: string;
@@ -6,10 +7,10 @@ export interface IEntity {
     name: string;
     flags: string;
     dbref: string;
-    data: any;
+    data: Record<string, unknown>;
     location?: string;
     description?: string;
-    stats?: any[];
+    stats?: IAttribute[];
 
     load(obj: IDBOBJ): IEntity;
     save(): Promise<void>;

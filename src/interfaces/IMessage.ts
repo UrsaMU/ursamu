@@ -8,12 +8,12 @@ export interface IState {
         items: string[];
     };
     msg?: string;
-    data?: Record<string, any>;
-    [key: string]: any;
+    data?: Record<string, unknown>;
+    [key: string]: unknown;
 }
 
 export interface IMessage {
     event: string;
     payload: IState;
-    context?: Record<string, any>;
+    context?: Record<string, unknown>;
 }

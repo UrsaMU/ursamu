@@ -1,40 +1,51 @@
-import { Request, Response, Router } from "../../deps.ts";
-import { Obj, dbojs } from "../services/index.ts";
+import { dbojs } from "../services/Database/index.ts";
+import { Obj } from "../services/DBObjs/index.ts";
 import { compare } from "../../deps.ts";
 import { sign } from "../services/jwt/index.ts";
-import { config } from "../../deps.ts";
 
-config();
+export const authHandler = async (req: Request): Promise<Response> => {
+  if (req.method !== "POST") {
+    return new Response("Method Not Allowed", { status: 405 });
+  }
 
-const router = Router();
+  try {
+    const { username, password } = await req.json();
+    const ob = await dbojs.findOne({
+      $or: [
+        { "data.alias": new RegExp(username, "i") },
+        { "data.name": new RegExp(username, "i") },
+      ],
+    });
 
-router.post("/", async (req: Request, res: Response, next) => {
-  const { username, password } = req.body;
-  const ob = await dbojs.findOne({
-    $or: [
-      { "data.alias": new RegExp(username, "i") },
-      { "data.name": new RegExp(username, "i") },
-    ],
-  });
+    if (!ob) {
+      return new Response(JSON.stringify({ error: "Invalid username or password." }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-  if (!ob) return next(new Error("Invalid username or password."));
+    const obj = new Obj().load(ob);
+    obj.dbobj.data ||= {};
+    const hashedPassword = obj.dbobj.data.password || "";
 
-  const obj = new Obj().load(ob);
-
-  obj.dbobj.data ||= {};
-  obj.dbobj.data.password ||= "";
-
-  compare(password, obj.dbobj.data.password, async (err: any, isMatch: boolean) => {
-    if (err) return res.status(500).send("Internal server error.");
-    if (!isMatch) return res.status(400).send("Invalid username or password.");
+    const isMatch = await compare(password, hashedPassword);
+    if (!isMatch) {
+      return new Response(JSON.stringify({ error: "Invalid username or password." }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
     const token = await sign({ id: obj.dbobj.id });
-    if (token) {
-      res.status(200).json({ token });
-    } else {
-      next(err);
-    }
-  });
-});
-
-export const authRouter = router;
+    return new Response(JSON.stringify({ token }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+};

@@ -59,7 +59,7 @@ export function getConfig<T>(key: string): T {
  * @param key The configuration key (supports dot notation)
  * @param value The value to set
  */
-export function setConfig(key: string, value: any): void {
+export function setConfig(key: string, value: unknown): void {
   configManager.set(key, value);
   configManager.saveConfig();
 }
@@ -67,22 +67,24 @@ export function setConfig(key: string, value: any): void {
 /**
  * Get the entire configuration object
  */
-export function getAllConfig(): Record<string, any> {
+export function getAllConfig(): Record<string, unknown> {
   return configManager.getAll();
 }
 
-/**
- * Register a plugin with the system
- */
-export function registerPlugin(plugin: any): void {
-  pluginManager.registerPlugin(plugin);
-}
+import { IPlugin } from "../../@types/IPlugin.ts";
 
 /**
  * Initialize all registered plugins
  */
 export async function initializePlugins(): Promise<void> {
   await pluginManager.initializePlugins();
+}
+
+/**
+ * Register a plugin with the system
+ */
+export function registerPlugin(plugin: IPlugin): void {
+  pluginManager.registerPlugin(plugin);
 }
 
 // Export everything

@@ -4,7 +4,6 @@ import { addCmd } from "../services/commands/index.ts";
 import { canEdit } from "../utils/canEdit.ts";
 import { displayName } from "../utils/displayName.ts";
 import { target } from "../utils/target.ts";
-import { IDBOBJ } from "../@types/IDBObj.ts";
 
 export default () => {
   addCmd({
@@ -25,7 +24,7 @@ export default () => {
       if (en && tar && canEdit(en, tar)) {
         delete tar.data?.password;
         let output = `%chName:%cn ${tar.data?.name}${
-          tar.data?.alias ? "(" + tar.data?.alias.toUpperCase() + ")" : ""
+          tar.data?.alias ? "(" + (tar.data?.alias as string).toUpperCase() + ")" : ""
         }\n`;
         output += `%ch_ID:%cn ${tar.id}\n`;
         output += `%chDBREF:%cn #${tar.id}\n`;

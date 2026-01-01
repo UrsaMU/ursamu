@@ -1,10 +1,13 @@
 # UrsaMU Configuration Directory
 
-This directory contains the configuration files for UrsaMU. The main configuration file is `config.json`, which is created automatically when the server starts if it doesn't exist.
+This directory contains the configuration files for UrsaMU. The main
+configuration file is `config.json`, which is created automatically when the
+server starts if it doesn't exist.
 
 ## Configuration File
 
-The `config.json` file contains the configuration for the server and plugins. It is a JSON file with the following structure:
+The `config.json` file contains the configuration for the server and plugins. It
+is a JSON file with the following structure:
 
 ```json
 {
@@ -13,10 +16,10 @@ The `config.json` file contains the configuration for the server and plugins. It
     "ws": 4202,
     "http": 4203,
     "db": "data/ursamu.db",
-    "counters": "data/counters.db",
-    "chans": "data/chans.db",
-    "mail": "data/mail.db",
-    "bboard": "data/bboard.db"
+    "counters": "counters",
+    "chans": "chans",
+    "mail": "mail",
+    "bboard": "bboard"
   },
   "game": {
     "name": "Ursamu",
@@ -72,7 +75,8 @@ You can also edit the `config.json` file directly using a text editor.
 
 ## Setting Up Configuration
 
-The easiest way to set up your configuration is to use the provided setup script:
+The easiest way to set up your configuration is to use the provided setup
+script:
 
 ```bash
 # Run the setup script
@@ -80,6 +84,8 @@ deno task setup-config
 ```
 
 This script will:
+
 1. Create the `/config` directory if it doesn't exist
-2. Create a default configuration file if it doesn't exist (using the sample configuration file if available)
-3. Prompt you to edit the configuration file using your preferred text editor 
+2. Create a default configuration file if it doesn't exist (using the sample
+   configuration file if available)
+3. Prompt you to edit the configuration file using your preferred text editor

@@ -15,15 +15,18 @@ export const joinChans = async (ctx: IContext) => {
 
   for (const channel of channels) {
     if (channel.alias && flags.check(player.flags || "", channel.lock || "")) {
-      const chan = player.data?.channels?.filter(
+      const userChans = (player.data?.channels || []) as IChanEntry[];
+      const chan = userChans.filter(
         (ch: IChanEntry) => ch.channel === channel.name
       );
 
       if (!chan?.length) {
         player.data ||= {};
         player.data.channels ||= [];
+        const chs = player.data.channels as IChanEntry[];
 
-        player.data?.channels?.push({
+        chs.push({
+          id: channel.id,
           channel: channel.name,
           alias: channel.alias,
           active: true,
@@ -42,14 +45,16 @@ export const joinChans = async (ctx: IContext) => {
       !flags.check(player.flags || "", channel.lock || "")
     ) {
       // remove channels that are locked from the player.
-      const chan = player.data?.channels?.filter(
+      const userChans = (player.data?.channels || []) as IChanEntry[];
+      const chan = userChans.filter(
         (ch: IChanEntry) => ch.channel === channel.name
       );
 
       if (chan?.length) {
         player.data ||= {};
         player.data.channels ||= [];
-        player.data.channels = player.data.channels.filter(
+        const chs = player.data.channels as IChanEntry[];
+        player.data.channels = chs.filter(
           (c: IChanEntry) => c.channel !== channel.name
         );
 
@@ -63,7 +68,8 @@ export const joinChans = async (ctx: IContext) => {
     }
   }
 
-  player.data?.channels?.forEach(
+  const userChans = (player.data?.channels || []) as IChanEntry[];
+  userChans.forEach(
     (channel: IChanEntry) => channel.active && ctx.socket.join(channel.channel)
   );
 };

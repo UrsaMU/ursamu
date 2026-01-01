@@ -4,10 +4,9 @@ import { addCmd, cmds } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { flags } from "../services/flags/flags.ts";
 import parser from "../services/parser/parser.ts";
-import { center, columns, ljust, repeatString } from "../utils/format.ts";
+import { center, columns, repeatString } from "../utils/format.ts";
 import { send } from "../services/broadcast/index.ts";
 import { getConfig } from "../services/Config/mod.ts";
-import { ICmd, IHelp } from "../@types/index.ts";
 import { dpath } from "../../deps.ts";
 
 const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
@@ -37,9 +36,9 @@ export default async () => {
       const player = ctx.socket.cid ? await dbojs.queryOne({ id: ctx.socket.cid }) : null;
       const flgs = player ? player.flags || "" : "";
 
-      let cats: Set<string> = new Set();
-      let commands: any = [];
-      let localCmds = [...cmds];
+      const cats: Set<string> = new Set();
+      let commands: { name: string; category: string }[] = [];
+      const localCmds = [...cmds];
       commands = localCmds
         .filter((cmd) => !cmd.hidden)
         .filter((cmd) => flags.check(flgs, cmd.lock || ""))
@@ -70,7 +69,7 @@ export default async () => {
       let output =
         center(
           `%cy[%cn %ch%cc${
-            getConfig<any>('game.name') ? getConfig<any>('game.name') + " " : ""
+            getConfig<string>('game.name') ? getConfig<string>('game.name') + " " : ""
           }%cn%chHelp%cn System %cy]%cn`,
           78,
           "%cr=%cn"
@@ -83,12 +82,12 @@ export default async () => {
         output +=
           columns(
             commands
-              .filter((c: any) => {
+              .filter((c) => {
                 if (c.category?.toLowerCase() === cat?.toLowerCase()) {
                   return true;
                 }
               })
-              .map((c: any) => c.name),
+              .map((c) => c.name),
             78,
             4,
             " "
@@ -99,7 +98,6 @@ export default async () => {
         "Type '%chhelp <command>%cn' for more information on a command.\n";
       output += repeatString("%cr=%cn", 78);
       await send([ctx.socket.id], output, {});
-      localCmds = [];
     },
   });
 
@@ -107,7 +105,7 @@ export default async () => {
     name: "help/topic",
     pattern: /^[/+@]?help\s+(.*)/i,
     hidden: true,
-    exec: async (ctx, args) => {
+    exec: (ctx, args) => {
       const topic = args[0];
       if (text.has(`help_${topic}`)) {
         let output =

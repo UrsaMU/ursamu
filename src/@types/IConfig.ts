@@ -19,7 +19,8 @@ export interface IConfig {
       connect: string;
     };
   };
-  plugins?: Record<string, any>;
+  plugins?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 export class Config {

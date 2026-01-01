@@ -1,4 +1,3 @@
-import { repeat } from "../../deps.ts";
 import parser from "../services/parser/parser.ts";
 
 export const repeatString = (string = " ", length: number) => {
@@ -77,14 +76,14 @@ export const center = (string = "", length: number, filler = " ") => {
 };
 
 export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
-  const truncate = (input: any, size: any, fill: any) => {
-    let length = parser.stripSubs("telnet", input).length;
+  const truncate = (input: string, size: number, fill: string) => {
+    const length = parser.stripSubs("telnet", input).length;
     return length > size - 3
       ? `${input.substring(0, size - 3)}...`
       : input + fill.repeat(size - length);
   };
 
-  let cell = Math.floor(width / cols);
+  const cell = Math.floor(width / cols);
   let counter = 0;
   let output = "%r%b";
   for (const item of list) {
@@ -106,8 +105,8 @@ export const threeColumn = (...lists: string[][]) => {
   // exhausted.  If the list is shorter than the longest list, pad it with empty
   // strings.
 
-  const truncate = (input: any, size: any, fill: any) => {
-    let length = parser.stripSubs("telnet", input).length;
+  const truncate = (input: string, size: number, fill: string) => {
+    const length = parser.stripSubs("telnet", input).length;
     return length > size - 3
       ? `${input.substring(0, size - 3)}...`
       : input + fill.repeat(size - length);

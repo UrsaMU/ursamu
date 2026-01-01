@@ -1,5 +1,5 @@
 
-import { dfs, dpath } from "../../deps.ts";
+import { dpath } from "../../deps.ts";
 
 const LOG_DIR = "./logs";
 
@@ -13,7 +13,7 @@ async function ensureLogDir() {
     }
 }
 
-export const logError = async (error: any, context: string = "") => {
+export const logError = async (error: unknown, context: string = "") => {
     await ensureLogDir();
     const timestamp = new Date().toISOString();
     const errorMessage = error instanceof Error ? error.stack || error.message : String(error);

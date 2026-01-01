@@ -6,7 +6,7 @@ import { setFlags } from "../../utils/setFlags.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { UserSocket } from "../../@types/IMSocket.ts";
 import { Presenter } from "../Presenter/index.ts";
-import { IMessage, IState } from "../../interfaces/IMessage.ts";
+import { IMessage } from "../../interfaces/IMessage.ts";
 
 export class WebSocketService {
     private static instance: WebSocketService;
@@ -24,7 +24,8 @@ export class WebSocketService {
     }
 
     handleConnection(socket: WebSocket) {
-        socket.onopen = () => {
+        const onOpen = () => {
+            if (this.clients.has(socket)) return;
             this.clients.add(socket);
             this.socketData.set(socket, {
                 id: crypto.randomUUID(),
@@ -35,10 +36,16 @@ export class WebSocketService {
                 disconnect: () => { },
                 on: () => { }
             });
-            console.log("New WebSocket connection");
+            console.log("New WebSocket connection established");
         };
 
-        socket.onmessage = async (event) => {
+        if (socket.readyState === WebSocket.OPEN) {
+            onOpen();
+        } else {
+            socket.addEventListener("open", onOpen);
+        }
+
+        socket.addEventListener("message", async (event) => {
             try {
                 const data = JSON.parse(event.data);
                 const sockData = this.socketData.get(socket);
@@ -67,9 +74,9 @@ export class WebSocketService {
             } catch (error) {
                 console.error("Error parsing message:", error);
             }
-        };
+        });
 
-        socket.onclose = async () => {
+        socket.addEventListener("close", async () => {
             const sockData = this.socketData.get(socket);
             this.clients.delete(socket);
             this.socketData.delete(socket);
@@ -89,11 +96,11 @@ export class WebSocketService {
                     });
                 }
             }
-        };
+        });
 
-        socket.onerror = (e) => {
+        socket.addEventListener("error", (e) => {
             console.error("WebSocket error:", e);
-        };
+        });
     }
 
     // Send to specific socket(s)
@@ -115,9 +122,6 @@ export class WebSocketService {
 
     // Broadcast to all
     broadcast(message: IMessage) {
-        const textData = Presenter.render(message.payload, "telnet") as string;
-        const jsonData = JSON.stringify(Presenter.render(message.payload, "web"));
-
         for (const client of this.clients) {
             // Determine client type (stubbed)
             // If web client, send jsonData
@@ -132,6 +136,11 @@ export class WebSocketService {
 
             client.send(JSON.stringify(payload));
         }
+    }
+
+    // Get all connected sockets
+    getConnectedSockets(): UserSocket[] {
+        return Array.from(this.socketData.values());
     }
 }
 

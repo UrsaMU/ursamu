@@ -10,6 +10,6 @@ export interface IDBOBJ {
     name?: string;
     password?: string;
     moniker?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }

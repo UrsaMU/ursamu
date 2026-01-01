@@ -6,5 +6,5 @@ export default () =>
     name: "think",
     pattern: /^think\s+(.*)/i,
     lock: "connected",
-    exec: async (ctx, args) => send([ctx.socket.id], args[0]),
+    exec: (ctx, args) => send([ctx.socket.id], args[0]),
   });

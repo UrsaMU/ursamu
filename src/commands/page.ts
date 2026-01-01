@@ -14,7 +14,7 @@ export default () => {
       const en = await dbojs.queryOne({ id: ctx.socket.cid || "" });
       if (!en) return;
 
-      const tars = obj?.split(" ") || en.data?.lastpage || [];
+      const tars = obj?.split(" ") || (en.data?.lastpage as string[] | undefined) || [];
       const targets = [];
       for (const tar of tars) {
         const t = await target(en, tar, true);
@@ -35,11 +35,11 @@ export default () => {
       );
 
       // now we can send the page message to the targets
-      let msgOrReply = msg ? msg?.trim() : reply?.trim();
+      const msgOrReply = msg ? msg?.trim() : reply?.trim();
       let tempmsg = "";
       let sendermsg = "";
-      let senderHeader = `To (${targetNames.join(", ")}),`;
-      let header =
+      const senderHeader = `To (${targetNames.join(", ")}),`;
+      const header =
         targetIds.length > 1 ? `To (${targetNames.join(", ")}),` : "From afar,";
       switch (true) {
         case msgOrReply?.trim().startsWith(";"):

@@ -1,28 +1,17 @@
-import { RequestHandler, Request, Response, NextFunction } from "../../deps.ts";
-import { IMError, IPayload } from "../@types/index.ts";
 import { verify } from "../services/jwt/index.ts";
 
-export default async (req: Request, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
-    const err: IMError = new Error("Unauthorized");
-    err.status = 401;
-    return next(err);
-  }
+export const authenticate = async (req: Request): Promise<string | null> => {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader) return null;
+
+  const token = authHeader.split(" ")[1];
+  if (!token) return null;
 
   try {
-    const decoded = (await verify(token)) as IPayload;
-    if (!decoded) {
-      const err: IMError = new Error("Unauthorized");
-      err.status = 401;
-      return next(err);
-    }
-    req.body.id = decoded.id;
+    const decoded = await verify(token);
+    if (!decoded || typeof decoded.id !== "string") return null;
+    return decoded.id;
   } catch {
-    const err: IMError = new Error("Unauthorized");
-    err.status = 401;
-    return next(err);
+    return null;
   }
-
-  next();
 };

@@ -1,6 +1,5 @@
 import { dpath } from "../../../deps.ts";
 import { getConfig } from "../Config/mod.ts";
-import parser from "../parser/parser.ts";
 
 interface ITelnetSocket {
   cid?: string;
@@ -30,7 +29,7 @@ export const startTelnetServer = async (options?: {
   wsPort?: number;
 }) => {
   const port = options?.port || getConfig<number>("server.telnet");
-  const wsPort = options?.wsPort || getConfig<number>("server.ws");
+  const wsPort = options?.wsPort || getConfig<number>("server.http") || 4203;
   const welcomeFile = options?.welcomeFile || getConfig<string>("game.text.connect") || "text/default_connect.txt";
 
   const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
@@ -149,11 +148,11 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
   };
 
   sock.onclose = () => {
-    try { conn.close(); } catch { }
+    try { conn.close(); } catch { /* ignore */ }
   };
 
-  sock.onerror = (e) => {
-    try { conn.close(); } catch { }
+  sock.onerror = (_e) => {
+    try { conn.close(); } catch { /* ignore */ }
   };
 
   // Read from Telnet
@@ -164,7 +163,17 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
       if (n === null) break; // EOF
 
       if (sock.readyState === WebSocket.OPEN) {
-        const msg = new TextDecoder().decode(buffer.subarray(0, n)).trim();
+        const raw = new TextDecoder().decode(buffer.subarray(0, n));
+        
+        // Filter Telnet IAC sequences and non-printable chars
+        // IAC sequences start with 0xFF (\xff)
+        const msg = raw
+          .replace(/\xff[\xfb-\xfe]./g, "") // IAC DO/DONT/WILL/WONT <opt>
+          .replace(/\xff[\xf0-\xfa]/g, "") // IAC SB/SE/etc
+          .replace(/\xff\xff/g, "\xff")    // Escaped IAC
+          .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // Non-printable ASCII
+          .trim();
+
         if (msg) {
           sock.send(JSON.stringify({
             msg,
@@ -173,10 +182,10 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
         }
       }
     }
-  } catch (err) {
+  } catch (_err) {
     // console.log("Connection Error:", err);
   } finally {
-    try { conn.close(); } catch { }
+    try { conn.close(); } catch { /* ignore */ }
     if (sock.readyState === WebSocket.OPEN) sock.close();
   }
 } 

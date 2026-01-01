@@ -1,28 +1,28 @@
 import { capString } from "./capString.ts";
-import { ljust, rjust } from "./format.ts";
+import { ljust } from "./format.ts";
 
 export const formatStat = (
   stat: string,
-  value: any,
+  value: unknown,
   width = 24,
   right = false
 ) => {
-  if (typeof value === "number") value = value.toString();
-  if (!value) value = "";
-  const hasVal = !!+value ? "" : `%ch%cx`;
-  const val = +value !== 0 ? `%ch${value}%cn` : `%ch%cx0%cn`;
+  let valStr = String(value ?? "");
+  if (!valStr) valStr = "";
+  const hasVal = +(valStr) ? "" : `%ch%cx`;
+  const valDisplay = +valStr !== 0 ? `%ch${valStr}%cn` : `%ch%cx0%cn`;
   if (!right) {
     return (
       ljust(
         `${hasVal}${capString(stat)}`,
-        width - (value?.length || 1),
+        width - (valStr.length || 1),
         "%ch%cx.%cn"
-      ) + val
+      ) + valDisplay
     );
   }
 
   return (
-    ljust(`${value.length > 0 ? "" : "%ch%cx"}${capString(stat)}:`, 12) +
-    ljust(`%ch${capString(value)}%cn`, 25)
+    ljust(`${valStr.length > 0 ? "" : "%ch%cx"}${capString(stat)}:`, 12) +
+    ljust(`%ch${capString(valStr)}%cn`, 25)
   );
 };

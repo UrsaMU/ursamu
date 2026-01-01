@@ -1,5 +1,4 @@
 import { IContext } from "../../@types/IContext.ts";
-import { displayName } from "../../utils/displayName.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database/index.ts";
 import { send } from "../broadcast/index.ts";
@@ -17,7 +16,8 @@ export const matchExits = async (ctx: IContext) => {
     });
 
     for (const exit of exits) {
-      const reg = new RegExp(`^${exit.data?.name?.replace(/;/g, "|")}$`, "i");
+      const name = exit.data?.name as string | undefined;
+      const reg = new RegExp(`^${name?.replace(/;/g, "|")}$`, "i");
       const match = ctx.msg?.trim().match(reg);
 
       const players = await dbojs.query({
@@ -31,9 +31,11 @@ export const matchExits = async (ctx: IContext) => {
 
       if (match) {
         const room = await dbojs.queryOne({ id: en.location || "" });
-        const dest = await dbojs.queryOne({ id: exit.data?.destination });
+        const destination = exit.data?.destination as string | undefined;
+        if (!destination) continue;
+        const dest = await dbojs.queryOne({ id: destination });
 
-        if (dest && flags.check(en.flags, exit?.data?.lock || "")) {
+        if (dest && flags.check(en.flags, (exit?.data?.lock as string) || "")) {
           if (!en.flags.includes("dark")) {
             ctx.socket.leave(`${en.location}`);
             send(

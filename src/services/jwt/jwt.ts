@@ -1,26 +1,28 @@
-import { jwt } from "../../../deps.ts";
+import { djwt } from "../../../deps.ts";
 
-export const sign = (payload: any): Promise<string | void> =>
-  new Promise((resolve, reject) => {
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET || "TotallyNotSoSecure",
-      { expiresIn: "1h" },
-      (err: any, token: any) => {
-        if (err) reject(err);
-        resolve(token);
-      }
-    );
-  });
+const getSecretKey = async () => {
+  const secret = Deno.env.get("JWT_SECRET") || "TotallyNotSoSecure";
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  return await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"],
+  );
+};
 
-export const verify = (token: string): Promise<jwt.JwtPayload | unknown> =>
-  new Promise((resolve, reject) => {
-    jwt.verify(
-      token,
-      process.env.JWT_SECRET || "TotallyNotSoSecure",
-      (err: any, decoded: any) => {
-        if (err) reject(err);
-        resolve(decoded);
-      }
-    );
-  });
+export const sign = async (payload: Record<string, unknown>): Promise<string> => {
+  const key = await getSecretKey();
+  return await djwt.create(
+    { alg: "HS256", typ: "JWT" },
+    { ...payload, exp: djwt.getNumericDate(60 * 60) },
+    key
+  );
+};
+
+export const verify = async (token: string): Promise<Record<string, unknown>> => {
+  const key = await getSecretKey();
+  return (await djwt.verify(token, key)) as Record<string, unknown>;
+};
