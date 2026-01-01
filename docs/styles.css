@@ -3,8 +3,22 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-bg: #0a0a0a;
+    --color-surface: #111111;
+    --color-border: #1f1f1f;
+    --color-text: #d4d4d4;
+    --color-text-muted: #a1a1aa;
+    --color-primary: #8b5cf6;
+    --color-accent: #c084fc;
+  }
+
   body {
-    @apply bg-ursamu-bg text-gray-200 antialiased;
+    @apply bg-[var(--color-bg)] text-[var(--color-text)] antialiased selection:bg-purple-500/30;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-white font-semibold tracking-tight;
   }
 }
 
@@ -13,24 +27,43 @@
 }
 
 .prose h1 {
-  @apply text-4xl md:text-5xl font-extrabold mb-8 tracking-tight text-white;
+  @apply text-4xl md:text-5xl font-extrabold mb-8 text-white;
 }
 
 .prose h2 {
-  @apply text-2xl font-bold mt-12 mb-6 border-b border-ursamu-primary/30 pb-2
-    text-ursamu-accent;
+  @apply text-xl font-bold mt-16 mb-4 border-b border-[var(--color-border)] pb-2 text-white;
+}
+
+.prose h3 {
+  @apply text-lg font-bold mt-8 mb-4 text-white;
 }
 
 .prose a {
-  @apply text-ursamu-accent no-underline hover:underline
-    decoration-ursamu-accent/50 underline-offset-4;
+  @apply text-[var(--color-primary)] no-underline hover:text-[var(--color-accent)] transition-colors;
 }
 
 .prose pre {
-  @apply bg-[#0d0d0d] border border-ursamu-primary/40 rounded-xl p-4 my-8
-    shadow-2xl;
+  @apply bg-[#0d0d0d] border border-[var(--color-border)] rounded-lg p-4 my-8 shadow-sm;
 }
 
 .prose code {
-  @apply text-purple-300 bg-purple-900/30 px-1 rounded font-mono text-sm;
+  @apply text-purple-300 bg-purple-900/20 px-1.5 py-0.5 rounded font-mono text-sm border border-purple-800/20;
+}
+
+.prose ul, .prose ol {
+  @apply my-6 space-y-2;
+}
+
+.prose li {
+  @apply leading-relaxed;
+}
+
+/* Custom Grid Cards */
+.feature-card {
+  @apply bg-[var(--color-surface)] border border-[var(--color-border)] p-6 rounded-xl 
+    hover:border-purple-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10;
+}
+
+.feature-card h2 {
+  @apply text-white flex items-center gap-3 mb-3 border-none pb-0 mt-0;
 }

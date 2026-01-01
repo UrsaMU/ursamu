@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- LUME_LAYOUT_VTO_VER_3 -->
+<!-- LUME_LAYOUT_VTO_VER_4 -->
 <html lang="{{ it.lang || "en" }}">
 <head>
   <meta charset="UTF-8">
@@ -9,48 +9,47 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 </head>
-<body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
+<body class="flex flex-col min-h-screen">
   
-  <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <a href="/" class="flex items-center gap-3 group">
-        <img src="/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform" />
-        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
-          UrsaMU
-        </span>
+  <header class="border-b border-[var(--color-border)] py-4 sticky top-0 bg-[var(--color-bg)]/80 backdrop-blur-sm z-50">
+    <div class="container mx-auto px-6 flex justify-between items-center">
+      <a href="/" class="text-lg font-bold tracking-tighter hover:text-purple-400 transition-colors">
+        UrsaMU
       </a>
       
-      <nav class="hidden md:flex gap-6">
+      <nav class="hidden md:flex gap-8 text-sm font-medium text-[var(--color-text-muted)]">
         {{ for item of it.site.nav }}
-          <a href="{{ item.url }}" class="hover:text-ursamu-accent transition-colors font-medium">
+          <a href="{{ item.url }}" class="hover:text-white transition-colors">
             {{ item.text }}
           </a>
         {{ /for }}
       </nav>
       
       <div class="flex items-center gap-4">
-        <a href="{{ it.site.repository }}" class="p-2 rounded-full hover:bg-ursamu-primary/50 transition-colors" title="GitHub Repository">
-          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        <a href="{{ it.site.repository }}" class="text-[var(--color-text-muted)] hover:text-white transition-colors" title="GitHub">
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
         </a>
       </div>
     </div>
   </header>
 
-  <main class="flex-grow container mx-auto px-4 py-12">
-    <div class="prose prose-invert prose-purple max-w-none">
-      {{ it.content }}
+  <main class="flex-grow py-16">
+    <div class="container mx-auto px-6">
+      <div class="prose prose-invert max-w-4xl mx-auto">
+        {{ it.content }}
+      </div>
     </div>
   </main>
 
-  <footer class="bg-ursamu-bg border-t border-ursamu-primary/30 py-8">
-    <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
-      <div class="text-sm opacity-60">
+  <footer class="border-t border-[var(--color-border)] py-12 text-sm text-[var(--color-text-muted)]">
+    <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+      <div>
         &copy; 2025 UrsaMU Team. Built with Lume.
       </div>
-      <div class="flex gap-6 text-sm">
-        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
-        <a href="/api" class="hover:text-ursamu-accent">API</a>
-        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
+      <div class="flex gap-8">
+        <a href="/guides/installation" class="hover:text-white transition-colors">Installation</a>
+        <a href="/api" class="hover:text-white transition-colors">API</a>
+        <a href="/plugins" class="hover:text-white transition-colors">Plugins</a>
       </div>
     </div>
   </footer>
