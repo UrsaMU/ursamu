@@ -145,59 +145,55 @@ deno task telnet
 
 ## Connecting
 
-Once the server is running, you can connect to it using:
+### WebSocket Client
 
-- **Telnet Client**: `telnet localhost 4201`
-- **Web Client**: http://localhost:4203 (if you build a web interface)
-- **Socket.IO Client**: Connect to `http://localhost:4202` from custom clients
-  using the Socket.IO client library
-
-Example Socket.IO client connection:
+UrsaMU uses a native WebSocket interface. You can connect to it from any modern
+browser or WebSocket-capable client:
 
 ```javascript
-// Using the Socket.IO client library
-import { io } from "socket.io-client";
+// Connect to the UrsaMU WebSocket server
+const socket = new WebSocket("ws://localhost:4203");
 
-const socket = io("http://localhost:4202");
-
-socket.on("connect", () => {
+socket.addEventListener("open", (event) => {
   console.log("Connected to UrsaMU server");
 });
 
 // Listen for messages from the server
-socket.on("message", (data) => {
+socket.addEventListener("message", (event) => {
+  const data = JSON.parse(event.data);
   console.log("Received:", data.msg);
 
   // Handle special data like disconnection
   if (data.data?.quit) {
     console.log("Server requested disconnect");
-    socket.disconnect();
+    socket.close();
   }
 });
 
 // Send a command to the server
-socket.emit("message", {
+// Note: UrsaMU expects a JSON string with 'msg' and 'data' fields
+socket.send(JSON.stringify({
   msg: "look",
   data: {},
-});
+}));
 
 // To connect as a player
-socket.emit("message", {
+socket.send(JSON.stringify({
   msg: "connect PlayerName Password",
   data: {},
-});
+}));
 
 // To create a new character
-socket.emit("message", {
+socket.send(JSON.stringify({
   msg: "create NewCharacter Password",
   data: {},
-});
+}));
 
 // To disconnect
-socket.emit("message", {
+socket.send(JSON.stringify({
   msg: "quit",
   data: {},
-});
+}));
 ```
 
 ## Next Steps
