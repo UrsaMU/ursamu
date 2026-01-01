@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Contribute to the UrsaMU project and help make it better
 nav:
   - text: Getting Started

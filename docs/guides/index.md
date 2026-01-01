@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: User guides and tutorials for UrsaMU
 nav:
   - text: Installation Guide

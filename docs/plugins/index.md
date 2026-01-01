@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to create plugins to extend UrsaMU
 nav:
   - text: Plugin Basics

@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn the basics of UrsaMU plugin development
 nav:
   - text: What Are Plugins?

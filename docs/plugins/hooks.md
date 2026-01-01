@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to use hooks in UrsaMU plugins to respond to events
 nav:
   - text: Understanding Hooks

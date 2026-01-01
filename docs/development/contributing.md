@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to contribute to the UrsaMU project
 nav:
   - text: Code of Conduct

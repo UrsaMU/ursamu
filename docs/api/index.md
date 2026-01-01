@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Comprehensive API reference for UrsaMU
 nav:
   - text: Core API

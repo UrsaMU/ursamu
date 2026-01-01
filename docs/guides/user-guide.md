@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to use UrsaMU as a player
 nav:
   - text: Getting Started

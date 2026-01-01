@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to configure UrsaMU for your needs
 nav:
   - text: Overview

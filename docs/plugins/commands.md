@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to create commands in UrsaMU plugins
 nav:
   - text: Command Basics

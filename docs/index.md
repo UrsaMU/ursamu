@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 title: Welcome
 description: The official documentation for UrsaMU, a modern MU* engine for the next generation.
 ---

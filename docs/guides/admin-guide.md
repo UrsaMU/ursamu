@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to administer an UrsaMU server
 nav:
   - text: User Management

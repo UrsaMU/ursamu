@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to create a child game using UrsaMU as a library
 nav:
   - text: Overview

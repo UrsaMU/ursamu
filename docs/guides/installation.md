@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: How to install and set up UrsaMU on your system
 nav:
   - text: Prerequisites

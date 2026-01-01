@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to manage dependencies between UrsaMU plugins
 nav:
   - text: Understanding Plugin Dependencies

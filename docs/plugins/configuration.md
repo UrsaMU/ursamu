@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to configure UrsaMU plugins and make your plugins configurable
 nav:
   - text: Plugin Configuration Basics

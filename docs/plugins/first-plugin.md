@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Create your first UrsaMU plugin with this step-by-step guide
 nav:
   - text: Prerequisites

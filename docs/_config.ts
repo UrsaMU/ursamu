@@ -8,8 +8,7 @@ import sitemap from "lume/plugins/sitemap.ts";
 import tailwindcss from "lume/plugins/tailwindcss.ts";
 import postcss from "lume/plugins/postcss.ts";
 import date from "lume/plugins/date.ts";
-import nunjucks from "lume/plugins/nunjucks.ts";
-// import relative_urls from "lume/plugins/relative_urls.ts";
+import vento from "lume/plugins/vento.ts";
 import typography from "@tailwindcss/typography";
 
 const site = lume({
@@ -48,8 +47,7 @@ site
   }))
   .use(postcss())
   .use(date())
-  .use(nunjucks())
-  // .use(relative_urls())
+  .use(vento())
   .copy("assets")
   .copy("init.ts")
   .ignore("README.md", "deno.json", "_site", "node_modules");
@@ -60,7 +58,7 @@ site.data("site", {
   description: "Documentation for UrsaMU, a modern MU* server built with Deno",
   author: "UrsaMU Team",
   lang: "en",
-  layout: "layout.njk",
+  layout: "layout.vto",
   repository: "https://github.com/ursamu/ursamu",
   theme: "dark",
   nav: [

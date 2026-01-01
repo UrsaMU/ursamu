@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to use the database in UrsaMU plugins
 nav:
   - text: Database Basics

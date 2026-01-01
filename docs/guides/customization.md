@@ -1,5 +1,5 @@
 ---
-layout: layout.njk
+layout: layout.vto
 description: Learn how to customize your UrsaMU server
 nav:
   - text: Themes
