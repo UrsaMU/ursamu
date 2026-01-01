@@ -2,7 +2,7 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> | UrsaMU Documentation</title>
+  <title>Customization Guide | UrsaMU Documentation</title>
   <meta name="description" content="Learn how to customize your UrsaMU server">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
@@ -60,9 +60,50 @@
 
   <main class="flex-grow py-20 relative">
     <div class="container mx-auto px-8">
-      <div class="animate-fade-in">
-        <h1>Customization Guide</h1>
-<p>This guide covers how to customize your UrsaMU server to create a unique experience for your players.</p>
+      
+        <div class="flex flex-col lg:flex-row gap-16">
+          <!-- Sidebar -->
+          <aside class="hidden lg:block w-72 flex-shrink-0">
+            <nav class="sidebar">
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Guides</h4>
+                <div class="space-y-1">
+                  
+                    <a href="/ursamu/guides/admin-guide/" class="sidebar-link ">
+                      Admin Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/customization/" class="sidebar-link active">
+                      Customization Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/installation/" class="sidebar-link ">
+                      Installation Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/user-guide/" class="sidebar-link ">
+                      User Guide
+                    </a>
+                  
+                </div>
+              </div>
+
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Reference</h4>
+                <div class="space-y-1">
+                  <a href="/ursamu/configuration/" class="sidebar-link ">Configuration</a>
+                  <a href="/ursamu/api/" class="sidebar-link ">API Reference</a>
+                  <a href="/ursamu/plugins/" class="sidebar-link ">Plugins</a>
+                </div>
+              </div>
+            </nav>
+          </aside>
+
+          <!-- Content -->
+          <article class="flex-grow prose animate-fade-in">
+            <h1>Customization Guide</h1>
+<p>This guide covers how to customize your UrsaMU server to create a unique<br>
+experience for your players.</p>
 <h2>Themes</h2>
 <h3>Visual Themes</h3>
 <p>UrsaMU supports customizable visual themes for the web interface:</p>
@@ -102,18 +143,19 @@
   exec: (match, context) =&gt; {
     const arg = match[1];
     context.send(`You used mycmd with argument: ${arg}`);
-  }
+  },
 });
 </code></pre>
 <h3>Modifying Existing Commands</h3>
-<p>You can override existing commands by registering a new command with the same name:</p>
+<p>You can override existing commands by registering a new command with the same<br>
+name:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">game.commands.add({
   name: "look",
   pattern: /^(?:look|l)(?:\s+(.+))?$/i,
   flags: "connected",
   exec: (match, context) =&gt; {
     // Your custom look implementation
-  }
+  },
 });
 </code></pre>
 <h2>Game Mechanics</h2>
@@ -124,7 +166,7 @@
   defaultValue: 10,
   min: 1,
   max: 20,
-  flags: ["character", "numeric"]
+  flags: ["character", "numeric"],
 });
 </code></pre>
 <h3>Custom Functions</h3>
@@ -134,7 +176,7 @@
   args: ["num1", "num2"],
   exec: (args, context) =&gt; {
     return Number(args.num1) + Number(args.num2);
-  }
+  },
 });
 </code></pre>
 <h3>Custom Flags</h3>
@@ -142,7 +184,7 @@
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">game.flags.define({
   name: "invisible",
   description: "Object is invisible to normal players",
-  defaultValue: false
+  defaultValue: false,
 });
 </code></pre>
 <h2>Integration</h2>
@@ -162,7 +204,7 @@
   port: 5432,
   username: "user",
   password: "password",
-  database: "mydb"
+  database: "mydb",
 });
 
 game.hooks.on("startup", () =&gt; {
@@ -231,7 +273,9 @@ game.hooks.on("startup", () =&gt; {
 </li>
 </ol>
 
-      </div>
+          </article>
+        </div>
+      
     </div>
   </main>
 

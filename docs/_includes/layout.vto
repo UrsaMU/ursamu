@@ -39,9 +39,43 @@
 
   <main class="flex-grow py-20 relative">
     <div class="container mx-auto px-8">
-      <div class="animate-fade-in">
-        {{ it.content }}
-      </div>
+      {{ if it.url === "/" }}
+        <div class="animate-fade-in">
+          {{ it.content }}
+        </div>
+      {{ else }}
+        <div class="flex flex-col lg:flex-row gap-16">
+          <!-- Sidebar -->
+          <aside class="hidden lg:block w-72 flex-shrink-0">
+            <nav class="sidebar">
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Guides</h4>
+                <div class="space-y-1">
+                  {{ for page of it.search.pages("url^=/guides/ url!=/guides/", "title=asc") }}
+                    <a href="{{ page.url }}" class="sidebar-link {{ if it.url === page.url }}active{{ /if }}">
+                      {{ page.title || page.slug }}
+                    </a>
+                  {{ /for }}
+                </div>
+              </div>
+
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Reference</h4>
+                <div class="space-y-1">
+                  <a href="/configuration/" class="sidebar-link {{ if it.url === '/configuration/' }}active{{ /if }}">Configuration</a>
+                  <a href="/api/" class="sidebar-link {{ if it.url === '/api/' }}active{{ /if }}">API Reference</a>
+                  <a href="/plugins/" class="sidebar-link {{ if it.url === '/plugins/' }}active{{ /if }}">Plugins</a>
+                </div>
+              </div>
+            </nav>
+          </aside>
+
+          <!-- Content -->
+          <article class="flex-grow prose animate-fade-in">
+            {{ it.content }}
+          </article>
+        </div>
+      {{ /if }}
     </div>
   </main>
 

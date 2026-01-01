@@ -1,5 +1,6 @@
 ---
 layout: layout.vto
+title: Guides
 description: User guides and tutorials for UrsaMU
 nav:
   - text: Installation Guide
@@ -14,7 +15,9 @@ nav:
 
 # UrsaMU Guides
 
-This section contains comprehensive guides and tutorials to help you get started with UrsaMU, whether you're installing it for the first time, learning how to use it as a player, or administering your own server.
+This section contains comprehensive guides and tutorials to help you get started
+with UrsaMU, whether you're installing it for the first time, learning how to
+use it as a player, or administering your own server.
 
 ## Installation Guide
 
@@ -50,4 +53,4 @@ Learn how to customize your UrsaMU server:
 - [Themes](./customization.md#themes)
 - [Commands](./customization.md#commands)
 - [Game Mechanics](./customization.md#game-mechanics)
-- [Integration](./customization.md#integration) 
+- [Integration](./customization.md#integration)

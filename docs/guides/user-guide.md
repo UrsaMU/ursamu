@@ -1,5 +1,6 @@
 ---
 layout: layout.vto
+title: User Guide
 description: Learn how to use UrsaMU as a player
 nav:
   - text: Getting Started
@@ -18,7 +19,8 @@ nav:
 
 # User Guide
 
-This guide will help you get started with UrsaMU as a player, covering everything from basic commands to advanced features.
+This guide will help you get started with UrsaMU as a player, covering
+everything from basic commands to advanced features.
 
 ## Getting Started
 
@@ -26,9 +28,12 @@ This guide will help you get started with UrsaMU as a player, covering everythin
 
 You can connect to an UrsaMU server in several ways:
 
-1. **Web Client**: Most UrsaMU servers provide a web client that you can access through your browser.
-2. **Telnet Client**: You can use a telnet client to connect to the server's port.
-3. **MU* Client**: Specialized clients like Mudlet, TinTin++, or MUSHclient can provide enhanced features.
+1. **Web Client**: Most UrsaMU servers provide a web client that you can access
+   through your browser.
+2. **Telnet Client**: You can use a telnet client to connect to the server's
+   port.
+3. __MU_ Client_*: Specialized clients like Mudlet, TinTin++, or MUSHclient can
+   provide enhanced features.
 
 ### Creating an Account
 
@@ -40,7 +45,8 @@ Before you can play, you'll need to create an account:
 
 ## Basic Commands
 
-UrsaMU uses a command-based interface. Here are some essential commands to get you started:
+UrsaMU uses a command-based interface. Here are some essential commands to get
+you started:
 
 - `help` - Display help information
 - `look` or `l` - Look at your surroundings
@@ -74,8 +80,10 @@ There are several ways to communicate with other players in UrsaMU:
 ### Local Communication
 
 - `say <message>` or `"<message>` - Talk to people in the same room
-- `pose <action>` or `:<action>` - Perform an action visible to others in the room
-- `whisper <player>=<message>` - Send a private message to someone in the same room
+- `pose <action>` or `:<action>` - Perform an action visible to others in the
+  room
+- `whisper <player>=<message>` - Send a private message to someone in the same
+  room
 
 ### Global Communication
 
@@ -117,4 +125,5 @@ UrsaMU offers many advanced features for experienced players:
 - `@config <option>=<value>` - Configure your client settings
 - `@alias <alias>=<command>` - Create a command alias
 
-For more detailed information on any of these topics, use the `help <topic>` command in-game. 
+For more detailed information on any of these topics, use the `help <topic>`
+command in-game.

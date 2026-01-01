@@ -1,5 +1,6 @@
 ---
 layout: layout.vto
+title: Configuration
 description: Learn how to configure UrsaMU for your needs
 nav:
   - text: Overview

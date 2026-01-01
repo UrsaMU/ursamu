@@ -1,5 +1,6 @@
 ---
 layout: layout.vto
+title: Installation Guide
 description: How to install and set up UrsaMU on your system
 nav:
   - text: Prerequisites

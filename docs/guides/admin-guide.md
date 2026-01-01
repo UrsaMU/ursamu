@@ -1,5 +1,6 @@
 ---
 layout: layout.vto
+title: Admin Guide
 description: Learn how to administer an UrsaMU server
 nav:
   - text: User Management
@@ -18,7 +19,8 @@ nav:
 
 # Admin Guide
 
-This guide covers the administrative aspects of running an UrsaMU server, including user management, configuration, backups, and troubleshooting.
+This guide covers the administrative aspects of running an UrsaMU server,
+including user management, configuration, backups, and troubleshooting.
 
 ## User Management
 
@@ -57,7 +59,8 @@ UrsaMU has several built-in power levels:
 
 ### Basic Configuration
 
-The main configuration file is `config.json` in the server root directory. Key settings include:
+The main configuration file is `config.json` in the server root directory. Key
+settings include:
 
 - `port` - The port the server listens on
 - `hostname` - The server hostname
@@ -77,7 +80,8 @@ Advanced settings can be configured in the `advanced.json` file:
 
 ### Automatic Backups
 
-UrsaMU performs automatic backups based on the `backupInterval` setting. Backups are stored in the `backups` directory.
+UrsaMU performs automatic backups based on the `backupInterval` setting. Backups
+are stored in the `backups` directory.
 
 ### Manual Backups
 
@@ -121,7 +125,8 @@ To restore from a backup:
 
 ### Logs
 
-Server logs are stored in the `logs` directory. The log level can be configured in `config.json`:
+Server logs are stored in the `logs` directory. The log level can be configured
+in `config.json`:
 
 - `error` - Only errors
 - `warn` - Errors and warnings
@@ -175,4 +180,4 @@ For larger installations, consider:
 - Horizontal scaling with multiple server instances
 - Load balancing
 - Database sharding
-- Caching layers 
+- Caching layers

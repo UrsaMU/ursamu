@@ -1,5 +1,6 @@
 ---
 layout: layout.vto
+title: Customization Guide
 description: Learn how to customize your UrsaMU server
 nav:
   - text: Themes
@@ -18,7 +19,8 @@ nav:
 
 # Customization Guide
 
-This guide covers how to customize your UrsaMU server to create a unique experience for your players.
+This guide covers how to customize your UrsaMU server to create a unique
+experience for your players.
 
 ## Themes
 
@@ -68,13 +70,14 @@ game.commands.add({
   exec: (match, context) => {
     const arg = match[1];
     context.send(`You used mycmd with argument: ${arg}`);
-  }
+  },
 });
 ```
 
 ### Modifying Existing Commands
 
-You can override existing commands by registering a new command with the same name:
+You can override existing commands by registering a new command with the same
+name:
 
 ```typescript
 game.commands.add({
@@ -83,7 +86,7 @@ game.commands.add({
   flags: "connected",
   exec: (match, context) => {
     // Your custom look implementation
-  }
+  },
 });
 ```
 
@@ -99,7 +102,7 @@ game.attributes.define({
   defaultValue: 10,
   min: 1,
   max: 20,
-  flags: ["character", "numeric"]
+  flags: ["character", "numeric"],
 });
 ```
 
@@ -113,7 +116,7 @@ game.functions.add({
   args: ["num1", "num2"],
   exec: (args, context) => {
     return Number(args.num1) + Number(args.num2);
-  }
+  },
 });
 ```
 
@@ -125,7 +128,7 @@ Define custom flags for objects:
 game.flags.define({
   name: "invisible",
   description: "Object is invisible to normal players",
-  defaultValue: false
+  defaultValue: false,
 });
 ```
 
@@ -154,7 +157,7 @@ const db = new Database({
   port: 5432,
   username: "user",
   password: "password",
-  database: "mydb"
+  database: "mydb",
 });
 
 game.hooks.on("startup", () => {
@@ -233,4 +236,4 @@ Add custom JavaScript to the web interface:
    "webClient": {
      "customJS": ["custom.js"]
    }
-   ``` 
+   ```

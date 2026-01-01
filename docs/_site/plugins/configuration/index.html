@@ -60,8 +60,48 @@
 
   <main class="flex-grow py-20 relative">
     <div class="container mx-auto px-8">
-      <div class="animate-fade-in">
-        <h1>Plugin Configuration</h1>
+      
+        <div class="flex flex-col lg:flex-row gap-16">
+          <!-- Sidebar -->
+          <aside class="hidden lg:block w-72 flex-shrink-0">
+            <nav class="sidebar">
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Guides</h4>
+                <div class="space-y-1">
+                  
+                    <a href="/ursamu/guides/admin-guide/" class="sidebar-link ">
+                      Admin Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/customization/" class="sidebar-link ">
+                      Customization Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/installation/" class="sidebar-link ">
+                      Installation Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/user-guide/" class="sidebar-link ">
+                      User Guide
+                    </a>
+                  
+                </div>
+              </div>
+
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Reference</h4>
+                <div class="space-y-1">
+                  <a href="/ursamu/configuration/" class="sidebar-link ">Configuration</a>
+                  <a href="/ursamu/api/" class="sidebar-link ">API Reference</a>
+                  <a href="/ursamu/plugins/" class="sidebar-link ">Plugins</a>
+                </div>
+              </div>
+            </nav>
+          </aside>
+
+          <!-- Content -->
+          <article class="flex-grow prose animate-fade-in">
+            <h1>Plugin Configuration</h1>
 <p>This guide explains how to configure UrsaMU plugins and how to make your own plugins configurable.</p>
 <h2>Plugin Configuration Basics</h2>
 <p>UrsaMU plugins can define their own configuration options, which can be set in the server’s configuration file. This allows server administrators to customize the behavior of plugins without modifying the plugin code.</p>
@@ -517,7 +557,9 @@ export default class DiscordIntegrationPlugin implements IPlugin {
 </code></pre>
 <p>By following these guidelines, you can create plugins with flexible, well-documented configuration options that make your plugins more useful and adaptable to different UrsaMU installations.</p>
 
-      </div>
+          </article>
+        </div>
+      
     </div>
   </main>
 

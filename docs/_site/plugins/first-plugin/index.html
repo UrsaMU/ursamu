@@ -60,8 +60,48 @@
 
   <main class="flex-grow py-20 relative">
     <div class="container mx-auto px-8">
-      <div class="animate-fade-in">
-        <h1>Creating Your First Plugin</h1>
+      
+        <div class="flex flex-col lg:flex-row gap-16">
+          <!-- Sidebar -->
+          <aside class="hidden lg:block w-72 flex-shrink-0">
+            <nav class="sidebar">
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Guides</h4>
+                <div class="space-y-1">
+                  
+                    <a href="/ursamu/guides/admin-guide/" class="sidebar-link ">
+                      Admin Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/customization/" class="sidebar-link ">
+                      Customization Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/installation/" class="sidebar-link ">
+                      Installation Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/user-guide/" class="sidebar-link ">
+                      User Guide
+                    </a>
+                  
+                </div>
+              </div>
+
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Reference</h4>
+                <div class="space-y-1">
+                  <a href="/ursamu/configuration/" class="sidebar-link ">Configuration</a>
+                  <a href="/ursamu/api/" class="sidebar-link ">API Reference</a>
+                  <a href="/ursamu/plugins/" class="sidebar-link ">Plugins</a>
+                </div>
+              </div>
+            </nav>
+          </aside>
+
+          <!-- Content -->
+          <article class="flex-grow prose animate-fade-in">
+            <h1>Creating Your First Plugin</h1>
 <p>This guide will walk you through creating a simple UrsaMU plugin from scratch. We’ll create a “dice roller” plugin that adds commands for rolling dice in the game.</p>
 <h2>Prerequisites</h2>
 <p>Before you begin, make sure you have:</p>
@@ -275,7 +315,9 @@ roll 4d4
 </ul>
 <p>Remember that plugins are a powerful way to extend UrsaMU without modifying the core code. By keeping your customizations in plugins, you ensure that your game can be easily updated when new versions of UrsaMU are released.</p>
 
-      </div>
+          </article>
+        </div>
+      
     </div>
   </main>
 

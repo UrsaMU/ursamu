@@ -1,5 +1,6 @@
 ---
 layout: layout.vto
+title: API Reference
 description: Comprehensive API reference for UrsaMU
 nav:
   - text: Core API
@@ -47,19 +48,20 @@ await mu({
   config: {
     server: {
       port: 4201,
-      host: "0.0.0.0"
+      host: "0.0.0.0",
     },
     game: {
-      name: "My Game"
-    }
+      name: "My Game",
+    },
   },
-  plugins: [myPlugin]
+  plugins: [myPlugin],
 });
 ```
 
 ### app
 
-The global application object that provides access to various services and utilities.
+The global application object that provides access to various services and
+utilities.
 
 **Properties:**
 
@@ -112,8 +114,8 @@ const newObject = await dbojs.create({
   flags: "thing",
   data: {
     name: "My Object",
-    description: "A custom object"
-  }
+    description: "A custom object",
+  },
 });
 ```
 
@@ -196,7 +198,7 @@ const objects = await dbojs.query({ owner: "123" });
 // Find a player by name
 const players = await dbojs.query({
   "data.name": new RegExp("^PlayerName$", "i"),
-  flags: /player/i
+  flags: /player/i,
 });
 ```
 
@@ -276,7 +278,7 @@ registerCommand({
   exec: (ctx) => {
     const target = ctx.args.trim() || "World";
     ctx.send(`Hello, ${target}!`);
-  }
+  },
 });
 ```
 
@@ -318,19 +320,19 @@ The context object passed to command execution functions.
 **Example:**
 
 ```typescript
-exec: (ctx) => {
+exec: ((ctx) => {
   // Access the player
   const playerName = ctx.player.data.name;
-  
+
   // Access command arguments
   const args = ctx.args.trim();
-  
+
   // Access switches
   const verbose = ctx.switches.verbose;
-  
+
   // Send output to the player
   ctx.send(`Hello, ${playerName}!`);
-}
+});
 ```
 
 ## Flag API
@@ -358,7 +360,7 @@ import { registerFlag } from "../../services/Flags/mod.ts";
 registerFlag({
   name: "vip",
   description: "VIP player with special privileges",
-  default: false
+  default: false,
 });
 ```
 
@@ -441,7 +443,7 @@ registerFunction({
   exec: (args) => {
     const [num1, num2] = args.map(Number);
     return (num1 + num2).toString();
-  }
+  },
 });
 ```
 
@@ -747,4 +749,6 @@ const isMatch = await compareHash("password", hashedPassword);
 // Returns: true or false
 ```
 
-This API reference covers the main functionality of UrsaMU. For more detailed information on specific functions or classes, refer to the source code or the relevant documentation sections. 
+This API reference covers the main functionality of UrsaMU. For more detailed
+information on specific functions or classes, refer to the source code or the
+relevant documentation sections.

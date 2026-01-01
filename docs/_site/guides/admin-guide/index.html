@@ -2,7 +2,7 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> | UrsaMU Documentation</title>
+  <title>Admin Guide | UrsaMU Documentation</title>
   <meta name="description" content="Learn how to administer an UrsaMU server">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
@@ -60,9 +60,50 @@
 
   <main class="flex-grow py-20 relative">
     <div class="container mx-auto px-8">
-      <div class="animate-fade-in">
-        <h1>Admin Guide</h1>
-<p>This guide covers the administrative aspects of running an UrsaMU server, including user management, configuration, backups, and troubleshooting.</p>
+      
+        <div class="flex flex-col lg:flex-row gap-16">
+          <!-- Sidebar -->
+          <aside class="hidden lg:block w-72 flex-shrink-0">
+            <nav class="sidebar">
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Guides</h4>
+                <div class="space-y-1">
+                  
+                    <a href="/ursamu/guides/admin-guide/" class="sidebar-link active">
+                      Admin Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/customization/" class="sidebar-link ">
+                      Customization Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/installation/" class="sidebar-link ">
+                      Installation Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/user-guide/" class="sidebar-link ">
+                      User Guide
+                    </a>
+                  
+                </div>
+              </div>
+
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Reference</h4>
+                <div class="space-y-1">
+                  <a href="/ursamu/configuration/" class="sidebar-link ">Configuration</a>
+                  <a href="/ursamu/api/" class="sidebar-link ">API Reference</a>
+                  <a href="/ursamu/plugins/" class="sidebar-link ">Plugins</a>
+                </div>
+              </div>
+            </nav>
+          </aside>
+
+          <!-- Content -->
+          <article class="flex-grow prose animate-fade-in">
+            <h1>Admin Guide</h1>
+<p>This guide covers the administrative aspects of running an UrsaMU server,<br>
+including user management, configuration, backups, and troubleshooting.</p>
 <h2>User Management</h2>
 <h3>Creating Admin Users</h3>
 <p>To create an admin user:</p>
@@ -93,7 +134,8 @@
 </ul>
 <h2>Server Configuration</h2>
 <h3>Basic Configuration</h3>
-<p>The main configuration file is <code>config.json</code> in the server root directory. Key settings include:</p>
+<p>The main configuration file is <code>config.json</code> in the server root directory. Key<br>
+settings include:</p>
 <ul>
 <li><code>port</code> - The port the server listens on</li>
 <li><code>hostname</code> - The server hostname</li>
@@ -110,7 +152,8 @@
 </ul>
 <h2>Backup and Restore</h2>
 <h3>Automatic Backups</h3>
-<p>UrsaMU performs automatic backups based on the <code>backupInterval</code> setting. Backups are stored in the <code>backups</code> directory.</p>
+<p>UrsaMU performs automatic backups based on the <code>backupInterval</code> setting. Backups<br>
+are stored in the <code>backups</code> directory.</p>
 <h3>Manual Backups</h3>
 <p>To perform a manual backup:</p>
 <ol>
@@ -147,7 +190,8 @@
 <li>Consider increasing resources or optimizing configuration</li>
 </ul>
 <h3>Logs</h3>
-<p>Server logs are stored in the <code>logs</code> directory. The log level can be configured in <code>config.json</code>:</p>
+<p>Server logs are stored in the <code>logs</code> directory. The log level can be configured<br>
+in <code>config.json</code>:</p>
 <ul>
 <li><code>error</code> - Only errors</li>
 <li><code>warn</code> - Errors and warnings</li>
@@ -198,7 +242,9 @@
 <li>Caching layers</li>
 </ul>
 
-      </div>
+          </article>
+        </div>
+      
     </div>
   </main>
 

@@ -2,7 +2,7 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> | UrsaMU Documentation</title>
+  <title>User Guide | UrsaMU Documentation</title>
   <meta name="description" content="Learn how to use UrsaMU as a player">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
@@ -60,16 +60,60 @@
 
   <main class="flex-grow py-20 relative">
     <div class="container mx-auto px-8">
-      <div class="animate-fade-in">
-        <h1>User Guide</h1>
-<p>This guide will help you get started with UrsaMU as a player, covering everything from basic commands to advanced features.</p>
+      
+        <div class="flex flex-col lg:flex-row gap-16">
+          <!-- Sidebar -->
+          <aside class="hidden lg:block w-72 flex-shrink-0">
+            <nav class="sidebar">
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Guides</h4>
+                <div class="space-y-1">
+                  
+                    <a href="/ursamu/guides/admin-guide/" class="sidebar-link ">
+                      Admin Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/customization/" class="sidebar-link ">
+                      Customization Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/installation/" class="sidebar-link ">
+                      Installation Guide
+                    </a>
+                  
+                    <a href="/ursamu/guides/user-guide/" class="sidebar-link active">
+                      User Guide
+                    </a>
+                  
+                </div>
+              </div>
+
+              <div class="sidebar-group">
+                <h4 class="sidebar-group-title">Reference</h4>
+                <div class="space-y-1">
+                  <a href="/ursamu/configuration/" class="sidebar-link ">Configuration</a>
+                  <a href="/ursamu/api/" class="sidebar-link ">API Reference</a>
+                  <a href="/ursamu/plugins/" class="sidebar-link ">Plugins</a>
+                </div>
+              </div>
+            </nav>
+          </aside>
+
+          <!-- Content -->
+          <article class="flex-grow prose animate-fade-in">
+            <h1>User Guide</h1>
+<p>This guide will help you get started with UrsaMU as a player, covering<br>
+everything from basic commands to advanced features.</p>
 <h2>Getting Started</h2>
 <h3>Connecting to UrsaMU</h3>
 <p>You can connect to an UrsaMU server in several ways:</p>
 <ol>
-<li><strong>Web Client</strong>: Most UrsaMU servers provide a web client that you can access through your browser.</li>
-<li><strong>Telnet Client</strong>: You can use a telnet client to connect to the server’s port.</li>
-<li><em><em>MU</em> Client</em>*: Specialized clients like Mudlet, TinTin++, or MUSHclient can provide enhanced features.</li>
+<li><strong>Web Client</strong>: Most UrsaMU servers provide a web client that you can access<br>
+through your browser.</li>
+<li><strong>Telnet Client</strong>: You can use a telnet client to connect to the server’s<br>
+port.</li>
+<li><em><em>MU</em> Client</em>*: Specialized clients like Mudlet, TinTin++, or MUSHclient can<br>
+provide enhanced features.</li>
 </ol>
 <h3>Creating an Account</h3>
 <p>Before you can play, you’ll need to create an account:</p>
@@ -79,7 +123,8 @@
 <li>Follow the prompts to complete your registration</li>
 </ol>
 <h2>Basic Commands</h2>
-<p>UrsaMU uses a command-based interface. Here are some essential commands to get you started:</p>
+<p>UrsaMU uses a command-based interface. Here are some essential commands to get<br>
+you started:</p>
 <ul>
 <li><code>help</code> - Display help information</li>
 <li><code>look</code> or <code>l</code> - Look at your surroundings</li>
@@ -108,8 +153,10 @@
 <h3>Local Communication</h3>
 <ul>
 <li><code>say &lt;message&gt;</code> or <code>"&lt;message&gt;</code> - Talk to people in the same room</li>
-<li><code>pose &lt;action&gt;</code> or <code>:&lt;action&gt;</code> - Perform an action visible to others in the room</li>
-<li><code>whisper &lt;player&gt;=&lt;message&gt;</code> - Send a private message to someone in the same room</li>
+<li><code>pose &lt;action&gt;</code> or <code>:&lt;action&gt;</code> - Perform an action visible to others in the<br>
+room</li>
+<li><code>whisper &lt;player&gt;=&lt;message&gt;</code> - Send a private message to someone in the same<br>
+room</li>
 </ul>
 <h3>Global Communication</h3>
 <ul>
@@ -147,9 +194,12 @@
 <li><code>@config &lt;option&gt;=&lt;value&gt;</code> - Configure your client settings</li>
 <li><code>@alias &lt;alias&gt;=&lt;command&gt;</code> - Create a command alias</li>
 </ul>
-<p>For more detailed information on any of these topics, use the <code>help &lt;topic&gt;</code> command in-game.</p>
+<p>For more detailed information on any of these topics, use the <code>help &lt;topic&gt;</code><br>
+command in-game.</p>
 
-      </div>
+          </article>
+        </div>
+      
     </div>
   </main>
 
