@@ -2,68 +2,102 @@
 layout: layout.vto
 title: Welcome
 description: The official documentation for UrsaMU, a modern MU* engine for the next generation.
+templateEngine: [vto, md]
 ---
 
-<div class="text-center py-20">
-  <img src="/assets/logo.png" alt="UrsaMU Banner" class="mx-auto rounded-2xl border border-[var(--color-border)] mb-8 max-w-sm w-full opacity-90" />
+<div class="text-center py-24 mb-12 relative">
+  <div class="relative inline-block mb-12">
+    <div class="absolute inset-0 bg-purple-500/20 blur-[60px] rounded-full transition-all group-hover:bg-purple-500/30"></div>
+    <img src="/assets/logo.png" alt="UrsaMU Banner" class="relative mx-auto rounded-[2.5rem] border border-white/10 shadow-2xl max-w-md w-full hover:scale-[1.01] transition-transform duration-500" />
+  </div>
 
-<h1 class="text-5xl font-black mb-4 tracking-tighter">UrsaMU</h1>
-  <p class="text-xl text-[var(--color-text-muted)] max-w-2xl mx-auto leading-relaxed">
-    A high-performance, modular MU* engine built with TypeScript and Deno.
+<h1 class="text-6xl md:text-8xl font-black mb-6 tracking-tightest leading-none">
+    Forge Your World<span class="text-purple-500">.</span>
+  </h1>
+  <p class="text-2xl text-slate-400 max-w-3xl mx-auto leading-relaxed mb-14 font-light">
+    A high-performance, modular MU* engine built with <span class="text-white font-medium">TypeScript</span> and <span class="text-white font-medium">Deno</span>.
+    Powering the next generation of text-based virtual worlds.
   </p>
 
-<div class="mt-12 flex justify-center gap-4">
-    <a href="/guides/installation" class="px-8 py-3 bg-[var(--color-primary)] text-white rounded-full font-bold hover:bg-[var(--color-accent)] transition-all shadow-lg shadow-purple-500/20">
-      Get Started
+<div class="flex flex-col sm:flex-row justify-center gap-6">
+    <a href="/guides/installation" class="btn-primary">
+      Start Building
     </a>
-    <a href="{{ it.site.repository }}" class="px-8 py-3 border border-[var(--color-border)] rounded-full font-bold hover:bg-white/5 transition-all">
-      GitHub
+    <a href="https://github.com/ursamu/ursamu" class="btn-secondary flex items-center justify-center gap-3">
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.834 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      View Code
     </a>
   </div>
 </div>
 
-<div class="grid md:grid-cols-2 gap-6 my-20">
-  <div class="feature-card">
-    <h2>🚀 Getting Started</h2>
-    <p class="text-[var(--color-text-muted)] text-sm mb-6">Quickly set up your world and start building.</p>
-    <ul class="space-y-3 text-sm">
-      <li><a href="/guides/installation" class="font-bold">Installation Guide</a></li>
-      <li><a href="/configuration" class="font-bold">Configuration</a></li>
-      <li><a href="/guides/user-guide" class="font-bold">User Guide</a></li>
+<div class="max-w-4xl mx-auto px-4 py-20 animate-fade-in" style="animation-delay: 0.2s">
+  <div class="bg-slate-900/40 rounded-3xl p-10 border border-white/5 backdrop-blur-md relative group">
+    <div class="absolute -top-6 left-1/2 -translate-x-1/2 px-8 py-3 bg-purple-600 rounded-full text-sm font-black uppercase tracking-widest shadow-2xl shadow-purple-600/40">
+      ✨ UrsaMU DX
+    </div>
+    <div class="bg-black/60 rounded-2xl p-8 font-mono text-sm relative border border-white/5">
+      <div class="flex items-center gap-2 mb-6 opacity-40">
+        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+      </div>
+      <code class="text-purple-300 leading-loose">deno <span class="text-white">run -A https://ursamu.github.io/ursamu/init.ts</span></code>
+    </div>
+    <p class="text-center mt-8 text-slate-400 text-sm italic font-light">
+      The "DX" Experience. Bootstrap your world or manage your configuration with our powerful interactive wizard.
+    </p>
+  </div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-10 my-24">
+  <div class="glass-card group h-full">
+    <div class="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-purple-500/20 transition-colors">
+      <span class="text-3xl">🚀</span>
+    </div>
+    <h2 class="text-3xl font-bold mb-4 border-none pb-0 mt-0">Getting Started</h2>
+    <p class="text-slate-400 text-base mb-10 leading-relaxed font-light">New to UrsaMU? Our guides will walk you through setting up your first world, configuring your server, and learning the basics.</p>
+    <ul class="space-y-4 text-sm font-semibold tracking-wide">
+      <li><a href="/guides/installation" class="flex items-center gap-2 group/link hover:text-white transition-colors">Installation Guide <span class="opacity-0 group-hover/link:opacity-100 transition-all translate-x-[-4px] group-hover/link:translate-x-0">→</span></a></li>
+      <li><a href="/configuration" class="flex items-center gap-2 group/link hover:text-white transition-colors">Configuration <span class="opacity-0 group-hover/link:opacity-100 transition-all translate-x-[-4px] group-hover/link:translate-x-0">→</span></a></li>
+      <li><a href="/guides/user-guide" class="flex items-center gap-2 group/link hover:text-white transition-colors">User Guide <span class="opacity-0 group-hover/link:opacity-100 transition-all translate-x-[-4px] group-hover/link:translate-x-0">→</span></a></li>
     </ul>
   </div>
 
-<div class="feature-card">
-    <h2>🛠 Developer Portal</h2>
-    <p class="text-[var(--color-text-muted)] text-sm mb-6">Deep dive into the core engine and plugin system.</p>
-    <ul class="space-y-3 text-sm">
-      <li><a href="/api" class="font-bold">API Reference</a></li>
-      <li><a href="/plugins" class="font-bold">Plugin Development</a></li>
-      <li><a href="/development/contributing" class="font-bold">Contributing</a></li>
+<div class="glass-card group h-full">
+    <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-blue-500/20 transition-colors">
+      <span class="text-3xl">🛠️</span>
+    </div>
+    <h2 class="text-3xl font-bold mb-4 border-none pb-0 mt-0">Developer Portal</h2>
+    <p class="text-slate-400 text-base mb-10 leading-relaxed font-light">Deep dive into the core engine. Learn how to create custom plugins, extend the command system, and leverage the power of Deno.</p>
+    <ul class="space-y-4 text-sm font-semibold tracking-wide">
+      <li><a href="/api" class="flex items-center gap-2 group/link hover:text-white transition-colors">API Reference <span class="opacity-0 group-hover/link:opacity-100 transition-all translate-x-[-4px] group-hover/link:translate-x-0">→</span></a></li>
+      <li><a href="/plugins" class="flex items-center gap-2 group/link hover:text-white transition-colors">Plugin Development <span class="opacity-0 group-hover/link:opacity-100 transition-all translate-x-[-4px] group-hover/link:translate-x-0">→</span></a></li>
+      <li><a href="/development/contributing" class="flex items-center gap-2 group/link hover:text-white transition-colors">Contributing <span class="opacity-0 group-hover/link:opacity-100 transition-all translate-x-[-4px] group-hover/link:translate-x-0">→</span></a></li>
     </ul>
   </div>
 </div>
 
-<div class="feature-card mb-20">
-  <h2 class="text-center justify-center">📚 Community & Resources</h2>
-  <div class="grid md:grid-cols-2 gap-8 mt-6">
-    <div>
-      <h3 class="text-sm font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2">Code</h3>
-      <p class="text-sm">
-        <a href="https://github.com/ursamu/ursamu" class="font-bold">GitHub Repository</a><br/>
-        Source code, issues, and discussions.
+<div class="glass-card mb-32 p-16 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-64 h-64 bg-purple-600/5 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
+  <h2 class="text-4xl font-black text-center mb-16 border-none pb-0 mt-0 tracking-tight">📚 Community & Resources</h2>
+  <div class="grid md:grid-cols-2 gap-16">
+    <div class="p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+      <h3 class="text-xs font-black uppercase tracking-widest text-purple-400 mb-6 px-1">Open Source</h3>
+      <p class="text-slate-300">
+        <a href="https://github.com/ursamu/ursamu" class="text-2xl font-bold block mb-3 text-white">GitHub Repository</a>
+        Star us on GitHub to support the project and follow live development.
       </p>
     </div>
-    <div>
-      <h3 class="text-sm font-bold uppercase tracking-widest text-[var(--color-text-muted)] mb-2">Help</h3>
-      <p class="text-sm">
-        <a href="https://discord.gg/ursamu" class="font-bold">Discord Server</a><br/>
-        Real-time support and builder community.
+    <div class="p-8 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
+      <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400 mb-6 px-1">Join the Chat</h3>
+      <p class="text-slate-300">
+        <a href="https://discord.gg/ursamu" class="text-2xl font-bold block mb-3 text-white">Discord Server</a>
+        Join our community to get help, share ideas, and connect with other creators.
       </p>
     </div>
   </div>
 </div>
 
-<div class="text-center opacity-30 text-[10px] tracking-widest uppercase pb-20">
-  UrsaMU is licensed under the MIT License
+<div class="text-center opacity-20 text-[11px] tracking-[0.2em] uppercase pb-32 font-black">
+  UrsaMU Engine &bull; Licensed under the MIT License
 </div>

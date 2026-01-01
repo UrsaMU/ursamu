@@ -33,6 +33,18 @@ Before installing UrsaMU, ensure you have the following:
 UrsaMU can be installed in multiple ways. Choose the method that works best for
 your environment.
 
+### ⚡ The UrsaMU DX Experience (Recommended)
+
+The easiest way to set up and manage your UrsaMU world is using the **UrsaMU
+DX** one-liner. This interactive wizard will walk you through naming your
+project, configuring ports, and setting up your first administrator account.
+
+```bash
+deno run -A https://ursamu.github.io/ursamu/init.ts
+```
+
+---
+
 ### Method 1: Direct from GitHub
 
 ```bash
