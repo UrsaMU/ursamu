@@ -5,7 +5,8 @@
     "serve": "deno task lume -s"
   },
   "imports": {
-    "lume/": "https://deno.land/x/lume@v2.0.0/"
+    "lume/": "https://deno.land/x/lume@v2.0.0/",
+    "@tailwindcss/typography": "npm:@tailwindcss/typography@^0.5.10"
   },
   "compilerOptions": {
     "types": [
