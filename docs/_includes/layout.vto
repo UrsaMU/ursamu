@@ -1,19 +1,20 @@
 <!DOCTYPE html>
+<!-- LUME_LAYOUT_VTO_VER_3 -->
 <html lang="{{ it.lang || "en" }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ it.title }} | {{ it.site.title }}</title>
   <meta name="description" content="{{ it.description || it.site.description }}">
-  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 </head>
 <body class="bg-ursamu-bg text-gray-200 min-h-screen flex flex-col font-sans">
   
   <header class="sticky top-0 z-50 backdrop-blur-md bg-ursamu-bg/80 border-b border-ursamu-primary/30">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-      <a href="/ursamu/" class="flex items-center gap-3 group">
-        <img src="/ursamu/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform" />
+      <a href="/" class="flex items-center gap-3 group">
+        <img src="/assets/logo.png" alt="UrsaMU Logo" class="h-10 w-auto rounded border border-ursamu-accent/50 group-hover:scale-105 transition-transform" />
         <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-ursamu-accent to-purple-400">
           UrsaMU
         </span>
@@ -21,7 +22,7 @@
       
       <nav class="hidden md:flex gap-6">
         {{ for item of it.site.nav }}
-          <a href="{{ item.url === '/' ? '/ursamu/' : '/ursamu' + item.url }}" class="hover:text-ursamu-accent transition-colors font-medium">
+          <a href="{{ item.url }}" class="hover:text-ursamu-accent transition-colors font-medium">
             {{ item.text }}
           </a>
         {{ /for }}
@@ -47,9 +48,9 @@
         &copy; 2025 UrsaMU Team. Built with Lume.
       </div>
       <div class="flex gap-6 text-sm">
-        <a href="/ursamu/guides/installation" class="hover:text-ursamu-accent">Installation</a>
-        <a href="/ursamu/api" class="hover:text-ursamu-accent">API</a>
-        <a href="/ursamu/plugins" class="hover:text-ursamu-accent">Plugins</a>
+        <a href="/guides/installation" class="hover:text-ursamu-accent">Installation</a>
+        <a href="/api" class="hover:text-ursamu-accent">API</a>
+        <a href="/plugins" class="hover:text-ursamu-accent">Plugins</a>
       </div>
     </div>
   </footer>

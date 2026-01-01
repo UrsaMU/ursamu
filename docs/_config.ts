@@ -9,6 +9,8 @@ import tailwindcss from "lume/plugins/tailwindcss.ts";
 import postcss from "lume/plugins/postcss.ts";
 import date from "lume/plugins/date.ts";
 import vento from "lume/plugins/vento.ts";
+import base_path from "lume/plugins/base_path.ts";
+import resolve_urls from "lume/plugins/resolve_urls.ts";
 import typography from "@tailwindcss/typography";
 
 const site = lume({
@@ -48,6 +50,8 @@ site
   .use(postcss())
   .use(date())
   .use(vento())
+  .use(base_path())
+  .use(resolve_urls())
   .copy("assets")
   .copy("init.ts")
   .ignore("README.md", "deno.json", "_site", "node_modules");
