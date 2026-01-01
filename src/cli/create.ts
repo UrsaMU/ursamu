@@ -339,7 +339,7 @@ Edit files in the \`text/\` directory to customize player-facing content:
 ## 📚 Documentation
 
 For more information about UrsaMU:
-- [UrsaMU Documentation](https://ursamu.github.io/)
+- [UrsaMU Documentation](https://ursamu.github.io/ursamu/)
 - [UrsaMU GitHub](https://github.com/ursamu/ursamu)
 
 ## 📝 License

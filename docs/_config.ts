@@ -13,7 +13,7 @@ import nunjucks from "lume/plugins/nunjucks.ts";
 const site = lume({
   src: "./",
   dest: "_site",
-  location: new URL("https://ursamu.github.io/"),
+  location: new URL("https://ursamu.github.io/ursamu/"),
 });
 
 site

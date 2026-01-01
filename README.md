@@ -14,7 +14,7 @@ and **Deno**.
 The easiest way to get started. Just run this command and follow the wizard.
 
 ```bash
-deno run -A https://ursamu.github.io/init.ts
+deno run -A https://ursamu.github.io/ursamu/init.ts
 ```
 
 > [!IMPORTANT]
@@ -87,8 +87,8 @@ deno task install-cli
 
 Documentation is hosted on GitHub Pages:
 
-- 📖 [Official Documentation](https://ursamu.github.io/)
-- 📦 [API Reference](https://ursamu.github.io/api/)
+- 📖 [Official Documentation](https://ursamu.github.io/ursamu/)
+- 📦 [API Reference](https://ursamu.github.io/ursamu/api/)
 - 🐙 [UrsaMU GitHub](https://github.com/ursamu/ursamu)
 
 ---
