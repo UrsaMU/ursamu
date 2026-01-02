@@ -1,3 +1,4 @@
+import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { Obj, dbojs, flags } from "../services/index.ts";
 import { canEdit } from "../utils/index.ts";
 
@@ -16,15 +17,17 @@ export const dbObjHandler = async (req: Request, userId: string): Promise<Respon
     }
 
     const allDbos = await dbojs.find({});
-    const dbos = allDbos
-      .filter((dbo) => canEdit(en.dbobj, dbo) && flags.check(dbo.flags, flgs))
-      .map((dbo) => {
-        const copy = { ...dbo };
-        if (copy.data) {
-          delete copy.data.password;
+    const dbos: IDBOBJ[] = [];
+
+    for (const dbo of allDbos) {
+        if (await canEdit(en.dbobj, dbo) && flags.check(dbo.flags, flgs)) {
+             const copy = { ...dbo };
+             if (copy.data) {
+                 delete copy.data.password;
+             }
+             dbos.push(copy);
         }
-        return copy;
-      });
+    }
 
     return new Response(JSON.stringify(dbos), {
       status: 200,

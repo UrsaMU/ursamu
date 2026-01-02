@@ -1,6 +1,6 @@
 import { Obj, addCmd, send } from "../services/index.ts";
 import { canEdit, target } from "../utils/index.ts";
-import { IAttribute } from "../@types/IAttribute.ts";
+import type { IAttribute } from "../@types/IAttribute.ts";
 
 export default () => {
   addCmd({
@@ -18,19 +18,23 @@ export default () => {
       if (!tarObj)
         return send([ctx.socket.id], "%chGame>%cn Target not found.");
 
-      if (!canEdit(en, tar)) {
+      if (!await canEdit(en, tar)) {
         return send([ctx.socket.id], "%chGame>%cn You can't edit that.");
       }
+      // as any cast needed due to Record<string, unknown> type of data
+      // deno-lint-ignore no-explicit-any
+      const data = tarObj.data as any;
+
       if (!tarObj.data) tarObj.dbobj.data = { attributes: [] };
 
-      const attr = tarObj.data?.attributes?.find((a: IAttribute) =>
+      const attr = data?.attributes?.find((a: IAttribute) =>
         a.name.toLowerCase().startsWith(args[0].toLowerCase())
       );
 
       if (attr && tarObj && tarObj.data) {
         if (!args[2]) {
-          tarObj.data.attributes = tar.data?.attributes?.filter(
-            (a) => a.name !== attr.name
+          data.attributes = data?.attributes?.filter(
+            (a: IAttribute) => a.name !== attr.name
           );
           await tarObj.save();
           return await send(
@@ -49,9 +53,9 @@ export default () => {
           );
         }
       } else if (!attr && tarObj && tarObj.data) {
-        tarObj.data.attributes ||= [];
+        data.attributes ||= [];
 
-        tarObj.dbobj.data?.attributes?.push({
+        data.attributes?.push({
           name: args[0],
           value: args[2],
           setter: en.dbref,

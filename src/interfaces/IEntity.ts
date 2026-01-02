@@ -1,6 +1,9 @@
 import { IDBOBJ } from "../@types/IDBObj.ts";
 import { IAttribute } from "../@types/IAttribute.ts";
 
+/**
+ * Represents a game entity with common properties and methods.
+ */
 export interface IEntity {
     id?: string;
     dbobj: IDBOBJ;

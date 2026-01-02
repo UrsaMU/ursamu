@@ -1,0 +1,3 @@
+# @destroy
+
+Destroy an object

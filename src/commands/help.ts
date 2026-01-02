@@ -9,23 +9,38 @@ import { send } from "../services/broadcast/index.ts";
 import { getConfig } from "../services/Config/mod.ts";
 import { dpath } from "../../deps.ts";
 
-const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url))
+const __dirname = import.meta.url.startsWith("file://") ? dpath.dirname(dpath.fromFileUrl(import.meta.url)) : Deno.cwd();
+
 export default async () => {
   const text = new Map<string, string>();
-  const dirent = await readdir(join(__dirname, "../../help"), {
-    withFileTypes: true,
-  });
+  
+  try {
+    const helpDir = import.meta.url.startsWith("file://") ? join(__dirname, "../../help") : join(Deno.cwd(), "help");
+    
+    // Only proceed if directory exists
+    try {
+       await Deno.stat(helpDir);
+    } catch {
+       return; // No help dir, skip loading
+    }
 
-  const files = dirent.filter(
-    (dirent) => dirent.isFile() && dirent.name.endsWith(".md")
-  );
+    const dirent = await readdir(helpDir, {
+      withFileTypes: true,
+    });
 
-  for (const file of files) {
-    const textFile = await readFile(
-      join(__dirname, `../../help/${file.name}`),
-      "utf8"
+    const files = dirent.filter(
+      (dirent) => dirent.isFile() && dirent.name.endsWith(".md")
     );
-    text.set(`${file.name.replace(".md", "").replace(".txt", "")}`, textFile);
+
+    for (const file of files) {
+      const textFile = await readFile(
+        join(helpDir, file.name),
+        "utf8"
+      );
+      text.set(`${file.name.replace(".md", "").replace(".txt", "")}`, textFile);
+    }
+  } catch (e) {
+    console.warn("Could not load help files:", e);
   }
 
   addCmd({

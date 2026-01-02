@@ -17,17 +17,16 @@ const pluginManager = PluginConfigManager.init(configManager);
 export async function initConfig(config?: IConfig): Promise<void> {
   // Ensure config file exists
   const configPath = "config/config.json";
-  const samplePath = "config/config.sample.json";
 
   try {
     const fileInfo = await Deno.stat(configPath);
     if (!fileInfo.isFile) {
-      throw new Error("Config is directory?");
+     // throw new Error("Config is directory?");
     }
   } catch (e) {
     if (e instanceof Deno.errors.NotFound) {
-      console.log("Config file not found. Creating from sample...");
-      await Deno.copyFile(samplePath, configPath);
+      console.log("Config file not found.");
+      // ConfigManager will handle creating the default config
     }
   }
 

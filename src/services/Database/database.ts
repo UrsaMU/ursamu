@@ -12,15 +12,31 @@ interface WithId {
 
 export class DBO<T extends WithId> implements IDatabase<T> {
   private static kv: Deno.Kv | null = null;
-  private prefix: string;
+  private pathOrKey: string;
 
-  constructor(path: string) {
-    this.prefix = path.replace('.', '_');
+  constructor(pathOrKey: string) {
+    this.pathOrKey = pathOrKey;
+  }
+
+  private get prefix(): string {
+    // overload: if the path contains dots and doesn't look like a file path, try to get it from config
+    // Actually, we passed the config key directly in the exports below. 
+    // So we should try to get the config value. If that fails or returns the same key, assume it's a path.
+    // Ideally, we check if it is a known config key.
+    
+    const configValue = getConfig<string>(this.pathOrKey);
+    // If getConfig returns the key itself (default behavior if missing?) or undefined, we might fall back.
+    // But getConfig usually returns the value.
+    if (configValue) {
+        return configValue.replace('.', '_');
+    }
+    return this.pathOrKey.replace('.', '_');
   }
 
   private async getKv(): Promise<Deno.Kv> {
     if (!DBO.kv) {
       // Get path from config/env or Use a persistent path for the KV store
+      // We need to resolve server.db specifically for the KV file path, regardless of the 'prefix' of this specific DBO.
       const dbPath = Deno.env.get("URSAMU_DB") || getConfig<string>("server.db") || "./data/ursamu.db";
       const dbDir = dpath.dirname(dbPath);
 
@@ -44,6 +60,13 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const entries = kv.list({ prefix: [this.prefix] });
     for await (const entry of entries) {
       await kv.delete(entry.key);
+    }
+  }
+
+  public static async close() {
+    if (DBO.kv) {
+      await DBO.kv.close();
+      DBO.kv = null;
     }
   }
 
@@ -167,7 +190,7 @@ export interface ICounters extends WithId {
   seq: number;
 }
 
-export const counters = new DBO<ICounters>(`${getConfig<string>("server.counters")}`);
-export const dbojs = new DBO<IDBOBJ>(`${getConfig<string>("server.db")}`);
-export const chans = new DBO<IChannel>(`${getConfig<string>("server.chans")}`);
-export const mail = new DBO<IMail>(`${getConfig<string>("server.mail")}`);
+export const counters = new DBO<ICounters>("server.counters");
+export const dbojs = new DBO<IDBOBJ>("server.db");
+export const chans = new DBO<IChannel>("server.chans");
+export const mail = new DBO<IMail>("server.mail");

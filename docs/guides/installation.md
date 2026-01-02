@@ -41,7 +41,9 @@ DX** one-liner. This interactive wizard will walk you through naming your
 project, configuring ports, and setting up your first administrator account.
 
 ```bash
-deno run -A https://ursamu.github.io/ursamu/init.ts
+deno install -A --global -n deno-x jsr:@dx/dx
+deno x --install-alias
+dx jsr:@ursamu/ursamu init
 ```
 
 ---

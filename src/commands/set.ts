@@ -21,7 +21,7 @@ export default () => {
       if (!tarObj?.dbobj)
         return send([ctx.socket.id], "I don't see that here.");
 
-      if (canEdit(en, tarObj.dbobj)) {
+      if (await canEdit(en, tarObj.dbobj)) {
         tarObj.dbobj.data ||= {};
 
         if (v === undefined) {

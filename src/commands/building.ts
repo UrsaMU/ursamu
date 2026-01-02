@@ -1,4 +1,4 @@
-import { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { addCmd, force } from "../services/commands/index.ts";
@@ -114,14 +114,16 @@ export default () => {
       tar.location = locObj.id;
       await dbojs.modify({ id: tar.id }, "$set", tar);
 
+      const canSeeLoc = locObj ? await canEdit(en, locObj) : false;
+
       send(
         [ctx.socket.id],
-        `You teleport ${moniker(tar)} to %ch${displayName(en, locObj)}%cn.`,
+        `You teleport ${moniker(tar)} to %ch${displayName(en, locObj, canSeeLoc)}%cn.`,
         {}
       );
       send(
         [`#${tar.id}`],
-        `You are teleported to %ch${displayName(en, locObj)}%cn.`,
+        `You are teleported to %ch${displayName(en, locObj, canSeeLoc)}%cn.`,
         {}
       );
       send(
@@ -149,7 +151,7 @@ export default () => {
 
       const obj = await target(en, name, true);
 
-      if (!obj || !canEdit(en, obj))
+      if (!obj || !await canEdit(en, obj))
         return send([ctx.socket.id], "You can't destroy that.", {});
       if (
         obj &&
@@ -172,14 +174,15 @@ export default () => {
 
       // send the player home if they're in a place that's being destroyed.
       if (obj && obj.id === en.location) {
-        en.location = en.data?.home || 1;
+        // deno-lint-ignore no-explicit-any
+        en.location = (en.data as any)?.home || 1;
         await dbojs.modify({ id: en.id }, "$set", en);
         await send([ctx.socket.id], "You are sent home.", {});
         await force(ctx, "look");
       }
 
       await dbojs.delete({ id: obj.id });
-      send([ctx.socket.id], `You destroy ${displayName(en, obj)}.`, {});
+      send([ctx.socket.id], `You destroy ${displayName(en, obj, true)}.`, {});
       const exits = await dbojs.query({
         $and: [
           {
@@ -200,13 +203,13 @@ export default () => {
     name: "@open",
     category: "building",
     help: "Open an exit",
-    pattern: /^[@/+]?open\s+(.*)\s*=\s*(.*)/i,
+    pattern: /^[@/+]?open(?:\/(.*))?\s+([^=]+)\s*=\s*([^,]+)(?:,\s*(.*))?/i,
     lock: "connected builder+",
     exec: async (ctx, args) => {
       if (!ctx.socket.cid) return;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
-      const [name, room] = args.map((a) => a.trim());
+      const [swtch, name, room, backExit] = args.map((a) => a?.trim());
       let roomObj: IDBOBJ | undefined | null | false;
 
       if (room) roomObj = await target(en, room, true);
@@ -215,25 +218,143 @@ export default () => {
       }
 
       const id = await getNextId("objid");
+      const location = swtch?.toLowerCase() === "inventory" ? en.id : en.location;
 
       const exit = await dbojs.create({
         id,
         flags: "exit",
-        location: en.location,
+        location: location,
         data: {
           name: name,
           destination: roomObj.id,
         },
       });
 
+      const canSeeRoom = roomObj ? await canEdit(en, roomObj) : false;
       send(
         [ctx.socket.id],
-        `You open exit %ch${displayName(en, exit)} to ${displayName(
+        `You open exit %ch${displayName(en, exit, true)} to ${displayName(
           en,
-          roomObj
+          roomObj,
+          canSeeRoom
         )}.`,
         {}
       );
+
+      // Handle back exit
+      if (backExit) {
+        const backId = await getNextId("objid");
+        const backExitObj = await dbojs.create({
+            id: backId,
+            flags: "exit",
+            location: roomObj.id,
+            data: {
+                name: backExit,
+                destination: en.location
+            }
+        });
+        
+        const sourceLoc = en.location ? await dbojs.queryOne({id: en.location}) : en;
+        const canSeeSource = sourceLoc ? await canEdit(en, sourceLoc) : false;
+        send([ctx.socket.id], `You open exit %ch${displayName(en, backExitObj, true)} to ${displayName(en, sourceLoc || en, canSeeSource)}.`, {});
+      }
     },
+  });
+
+  addCmd({
+    name: "@link",
+    category: "building",
+    help: "Link an exit or room",
+    pattern: /^[@/+]?link\s+(.*)\s*=\s*(.*)/i,
+    lock: "connected builder+",
+    exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
+      if (!en) return;
+      const [name, targetRoom] = args.map((a) => a.trim());
+      
+      const obj = await target(en, name, true);
+      if (!obj) {
+        return send([ctx.socket.id], `Could not find %ch${name}%cn.`, {});
+      }
+
+      // If it's a room, we link the dropto
+      if (obj.flags.includes("room")) {
+        const roomTarget = await target(en, targetRoom, true);
+        if (!roomTarget) {
+            return send([ctx.socket.id], `Could not find %ch${targetRoom}%cn.`, {});
+        }
+        
+        const canSeeTarget = await canEdit(en, roomTarget);
+        obj.data ||= {};
+        obj.data.dropto = roomTarget.id;
+        await dbojs.modify({ id: obj.id }, "$set", obj);
+        return send([ctx.socket.id], `You link ${displayName(en, obj, true)} to ${displayName(en, roomTarget, canSeeTarget)}.`, {});
+      }
+
+      // If it's an exit, we link the destination
+      if (obj.flags.includes("exit")) {
+        const roomTarget = await target(en, targetRoom, true);
+        if (!roomTarget) {
+            return send([ctx.socket.id], `Could not find %ch${targetRoom}%cn.`, {});
+        }
+        
+        const canSeeTarget = await canEdit(en, roomTarget);
+        obj.data ||= {};
+        obj.data.destination = roomTarget.id;
+        await dbojs.modify({ id: obj.id }, "$set", obj);
+         return send([ctx.socket.id], `You link ${displayName(en, obj, true)} to ${displayName(en, roomTarget, canSeeTarget)}.`, {});
+      }
+
+      // For everything else (players, things), we link the home
+      const homeTarget = await target(en, targetRoom, true);
+        if (!homeTarget) {
+            return send([ctx.socket.id], `Could not find %ch${targetRoom}%cn.`, {});
+        }
+        
+        const canSeeTarget = await canEdit(en, homeTarget);
+        obj.data ||= {};
+        obj.data.home = homeTarget.id;
+        await dbojs.modify({ id: obj.id }, "$set", obj);
+        return send([ctx.socket.id], `You link ${displayName(en, obj, true)} to ${displayName(en, homeTarget, canSeeTarget)}.`, {});
+
+    }
+  });
+
+  addCmd({
+    name: "@unlink",
+    category: "building",
+    help: "Unlink an exit or room",
+    pattern: /^[@/+]?unlink\s+(.*)/i,
+    lock: "connected builder+",
+    exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
+      if (!en) return;
+      const [name] = args.map((a) => a.trim());
+      
+      const obj = await target(en, name, true);
+      if (!obj) {
+        return send([ctx.socket.id], `Could not find %ch${name}%cn.`, {});
+      }
+
+      // If it's a room, we unlink the dropto
+      if (obj.flags.includes("room")) {
+        obj.data ||= {};
+        delete obj.data.dropto;
+        await dbojs.modify({ id: obj.id }, "$set", obj);
+        return send([ctx.socket.id], `You unlink ${displayName(en, obj)}.`, {});
+      }
+
+      // If it's an exit, we unlink the destination
+      if (obj.flags.includes("exit")) {
+        obj.data ||= {};
+        delete obj.data.destination;
+        await dbojs.modify({ id: obj.id }, "$set", obj);
+        return send([ctx.socket.id], `You unlink ${displayName(en, obj)}.`, {});
+      }
+
+      send([ctx.socket.id], "You can only unlink rooms or exits.", {});
+    }
   });
 };

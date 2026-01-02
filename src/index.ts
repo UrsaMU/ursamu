@@ -11,7 +11,7 @@ export * from "./services/commands/index.ts";
 export { startTelnetServer } from "./services/telnet/telnet.ts";
 
 // Server components
-export { app, server, io } from "./app.ts";
+export { handleRequest } from "./app.ts";
 
 // Export utilities
 export * from "./utils/index.ts";

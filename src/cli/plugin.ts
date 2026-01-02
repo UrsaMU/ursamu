@@ -1,11 +1,14 @@
 import { parse } from "@std/flags";
 import { join, basename, dirname, fromFileUrl } from "@std/path";
 import { exists } from "@std/fs";
+import parser from "../services/parser/parser.ts";
 
 const args = parse(Deno.args, {
   boolean: ["help"],
   alias: { h: "help" },
 });
+
+const fmt = (str: string) => parser.substitute("telnet", str);
 
 const command = String(args._[0] || "");
 const subArgs = args._.slice(1).map((arg: string | number) => String(arg));
@@ -187,7 +190,7 @@ export async function initPluginProject(name: string, description?: string, vers
         "test": "deno test -A"
       },
       "imports": {
-        "ursamu": "npm:ursamu"
+        "ursamu": "jsr:@ursamu/ursamu"
       }
     };
     await Deno.writeTextFile(join(targetDir, "deno.json"), JSON.stringify(denoJson, null, 2));
@@ -262,28 +265,28 @@ deno task test
 }
 
 async function interactiveInitPlugin() {
-  console.log(`
+  console.log(fmt(`
 %ch%cc==================================================%cn
 %ch%cw      Welcome to the %cyUrsaMU Plugin%cw Wizard%cn
 %ch%cc==================================================%cn
 %cw
 This wizard will help you bootstrap your new standalone
 UrsaMU plugin with a full testing suite.
-%cn`);
+%cn`));
 
   // 1. Plugin Information
   const pluginName = getRes("Plugin Name", "my-ursamu-plugin");
   const pluginDesc = getRes("Plugin Description", "A description for your plugin.");
   const pluginVer  = getRes("Plugin Version", "1.0.0");
 
-  console.log(`\n%ch%cgCreating plugin: %cy${pluginName}%cn`);
+  console.log(fmt(`\n%ch%cgCreating plugin: %cy${pluginName}%cn`));
 
   try {
     await initPluginProject(pluginName, pluginDesc, pluginVer);
     
-    console.log(`\n%ch%cg✨ Success! Plugin project created.%cn`);
+    console.log(fmt(`\n%ch%cg✨ Success! Plugin project created.%cn`));
   } catch (err) {
-    console.error(`\n%crFatal Error during plugin setup:%cn`, err);
+    console.error(fmt(`\n%crFatal Error during plugin setup:%cn`), err);
     Deno.exit(1);
   }
 }

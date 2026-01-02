@@ -1,6 +1,7 @@
 import { send } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
+import { canEdit } from "../utils/canEdit.ts";
 import { displayName } from "../utils/displayName.ts";
 import { target } from "../utils/target.ts";
 
@@ -22,11 +23,14 @@ export default () =>
       }
 
       if (args[1]) {
+        if (!await canEdit(en, tar)) {
+            return send([ctx.socket.id], "You can't describe that.", {});
+        }
         tar.description = args[1];
         await dbojs.modify({ id: tar.id }, "$set", tar);
         send(
           [ctx.socket.id],
-          `Description for %ch${displayName(en, tar)}%cn set!`,
+          `Description for %ch${displayName(en, tar, true)}%cn set!`,
           {}
         );
         return;

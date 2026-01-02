@@ -18,7 +18,7 @@ export default () => {
       const potential = await isNameTaken(newName);
       const tar = await target(en, name, true);
       if (!tar) return send([ctx.socket.id], "I can't find that.", {});
-      if (!canEdit(en, tar))
+      if (!await canEdit(en, tar))
         return send([ctx.socket.id], "I can't find that.", {});
       if (
         potential &&

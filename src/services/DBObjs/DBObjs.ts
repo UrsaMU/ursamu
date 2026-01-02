@@ -7,6 +7,12 @@ import { IEntity } from "../../interfaces/IEntity.ts";
 
 import { IAttribute } from "../../@types/IAttribute.ts";
 
+/**
+ * Create a new database object.
+ * @param flgs - The initial flags for the object (e.g., "room safe").
+ * @param datas - The initial data/attributes for the object.
+ * @returns The created object(s).
+ */
 export const createObj = async (flgs: string, datas: Record<string, unknown>): Promise<IDBOBJ[]> => {
   const id = await getNextId("objid");
   const { tags, data } = flags.set("", datas, flgs);
@@ -20,6 +26,9 @@ export const createObj = async (flgs: string, datas: Record<string, unknown>): P
   return await dbojs.query({ id });
 };
 
+/**
+ * Represents a database object wrapper with utility methods.
+ */
 export class Obj implements IEntity {
   private obj: IDBOBJ = {} as IDBOBJ;
 

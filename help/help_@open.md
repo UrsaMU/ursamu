@@ -1,0 +1,3 @@
+# @open
+
+Open an exit

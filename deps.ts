@@ -10,7 +10,7 @@ export * as djwt from "djwt";
 export { getQuickJS } from "quickjs-emscripten";
 export type { QuickJSWASMModule } from "quickjs-emscripten";
 
-import * as bcrypt from "bcrypt";
+import bcrypt from "bcrypt";
 export const compare = bcrypt.compare;
 export const hash = bcrypt.hash;
 export const genSalt = bcrypt.genSalt;

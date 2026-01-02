@@ -1,8 +1,19 @@
 #!/usr/bin/env -S deno run -A
 
+
+/**
+ * @module ursamu-cli
+ * @description The Command Line Interface for UrsaMU.
+ *
+ * This module provides the `ursamu` command, which handles project creation (`init`),
+ * plugin management (`plugin`), and other utility tasks.
+ */
 import { parse } from "@std/flags";
 import { join, dirname, fromFileUrl } from "@std/path";
 import { existsSync } from "@std/fs";
+import parser from "../services/parser/parser.ts";
+
+const fmt = (str: string) => parser.substitute("telnet", str);
 
 const getRes = (text: string, defaultValue?: string) => {
   const promptText = defaultValue ? `${text} [${defaultValue}]: ` : `${text}: `;
@@ -35,13 +46,13 @@ if (args.help) {
 
 // Interactive mode if no args
 if (args._.length === 0) {
-  console.log(`
+  console.log(fmt(`
 %ch%cc==================================================%cn
 %ch%cw        Welcome to the %cyUrsaMU%cw CLI%cn
 %ch%cc==================================================%cn
 %cw
 Select an action:
-%cn`);
+%cn`));
 
   console.log("1. Create a new UrsaMU Game Project");
   console.log("2. Create a new UrsaMU Plugin Project");
@@ -97,34 +108,34 @@ Select an action:
  * Initialize a new UrsaMU project (Interactive Wizard)
  */
 function initProject() {
-  console.log(`
+  console.log(fmt(`
 %ch%cc==================================================%cn
 %ch%cw        Welcome to the %cyUrsaMU%cw Setup Wizard%cn
 %ch%cc==================================================%cn
 %cw
 This wizard will help you bootstrap your new MU* 
 project in seconds.
-%cn`);
+%cn`));
 
   // 1. Project Information
   const projectName = getRes("Project Name", "my-ursamu-game");
   const targetDir = join(Deno.cwd(), projectName);
 
   if (existsSync(targetDir)) {
-    console.error(`\n%crError: Directory already exists at ${targetDir}.%cn`);
+    console.error(fmt(`\n%crError: Directory already exists at ${targetDir}.%cn`));
     Deno.exit(1);
   }
 
   // 2. Configuration Defaults
-  console.log("\n%ch%cy--- Network Configuration ---%cn");
+  console.log(fmt("\n%ch%cy--- Network Configuration ---%cn"));
   const telnetPort = getRes("Telnet Port", "4201");
   const httpPort = getRes("Web API/WS Port", "4203");
 
-  console.log("\n%ch%cy--- Game Details ---%cn");
+  console.log(fmt("\n%ch%cy--- Game Details ---%cn"));
   const gameName = getRes("Game Name", projectName);
   const gameDesc = getRes("Game Description", "A modern MU* game.");
 
-  console.log(`\n%ch%cgPreparing to create project in: %cy${targetDir}%cn`);
+  console.log(fmt(`\n%ch%cgPreparing to create project in: %cy${targetDir}%cn`));
 
   // 3. Create Structure
   try {
@@ -139,41 +150,43 @@ project in seconds.
     // main.ts
     const mainTs = `import { mu } from "ursamu";
 
-const config = {
-  server: {
-    telnet: ${telnetPort},
-    ws: 4202,
-    http: ${httpPort},
-    db: "data/ursamu.db",
-    counters: "counters",
-    chans: "chans",
-    mail: "mail",
-    bboard: "bboard"
-  },
-  game: {
-    name: "${gameName}",
-    description: "${gameDesc}",
-    version: "0.0.1",
-    text: {
-      connect: "text/default_connect.txt"
-    },
-    playerStart: "1"
-  }
-};
-
-const game = await mu(config);
+const game = await mu(); // Load config from config/config.json
 console.log(\`\${game.config.get("game.name")} is live!\`);
 `;
+
+    // config/config.json
+    const configJson = {
+      server: {
+        telnet: parseInt(telnetPort),
+        ws: 4202,
+        http: parseInt(httpPort),
+        db: "data/ursamu.db",
+        counters: "counters",
+        chans: "chans",
+        mail: "mail",
+        bboard: "bboard"
+      },
+      game: {
+        name: gameName,
+        description: gameDesc,
+        version: "0.0.1",
+        text: {
+          connect: "text/default_connect.txt"
+        },
+        playerStart: "1"
+      }
+    };
+    Deno.writeTextFileSync(join(targetDir, "config", "config.json"), JSON.stringify(configJson, null, 2));
 
     // deno.json
     const denoJson = `{
   "tasks": {
-    "start": "bash ./scripts/run.sh",
+    "start": "deno run -A --unstable-detect-cjs --unstable-kv jsr:@ursamu/ursamu/start",
     "server": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
     "telnet": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/telnet.ts"
   },
   "imports": {
-    "ursamu": "npm:ursamu"
+    "ursamu": "jsr:@ursamu/ursamu"
   }
 }`;
 
@@ -208,23 +221,14 @@ Y88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P
     Deno.writeTextFileSync(join(targetDir, "src", "telnet.ts"), 
       `import { startTelnetServer } from "ursamu";\nstartTelnetServer({ welcomeFile: "text/default_connect.txt" });`);
 
-    // run.sh (simplified for portable init)
-    const runSh = `#!/bin/bash
-cleanup() { kill $MAIN_PID $TELNET_PID 2>/dev/null; exit 0; }
-trap cleanup SIGINT SIGTERM
-deno run -A --unstable-kv --watch src/main.ts & MAIN_PID=$!
-deno run -A --unstable-kv --watch src/telnet.ts & TELNET_PID=$!
-wait $MAIN_PID $TELNET_PID`;
-    Deno.writeTextFileSync(join(targetDir, "scripts", "run.sh"), runSh);
-    Deno.chmodSync(join(targetDir, "scripts", "run.sh"), 0o755);
 
-    console.log(`\n%ch%cg✨ Success! Project created in ${projectName}.%cn`);
+    console.log(fmt(`\n%ch%cg✨ Success! Project created in ${projectName}.%cn`));
     console.log(`\nTo start your game:`);
-    console.log(`  %cycd ${projectName}%cn`);
-    console.log(`  %cydeno task start%cn\n`);
+    console.log(fmt(`  %cycd ${projectName}%cn`));
+    console.log(fmt(`  %cydeno task start%cn\n`));
 
   } catch (err) {
-    console.error(`\n%crFatal Error during setup:%cn`, err);
+    console.error(fmt(`\n%crFatal Error during setup:%cn`), err);
     Deno.exit(1);
   }
 }
@@ -307,4 +311,4 @@ async function runCommand(scriptName: string, args: string[]) {
     console.error(`Error running command: ${error instanceof Error ? error.message : String(error)}`);
     Deno.exit(1);
   }
-} 
+}

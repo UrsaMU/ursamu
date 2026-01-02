@@ -23,6 +23,6 @@ export default () =>
       }
 
       await setFlags(obj, flgs);
-      send([ctx.socket.id], `Flags set on %ch${displayName(en, obj)}%cn.`, {});
+      send([ctx.socket.id], `Flags set on %ch${displayName(en, obj, true)}%cn.`, {});
     },
   });

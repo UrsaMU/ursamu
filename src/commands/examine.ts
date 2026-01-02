@@ -21,7 +21,7 @@ export default () => {
       }
       
       const loc = tar.location ? await dbojs.queryOne({ id: tar.location }) : null;
-      if (en && tar && canEdit(en, tar)) {
+      if (en && tar && await canEdit(en, tar)) {
         delete tar.data?.password;
         let output = `%chName:%cn ${tar.data?.name}${
           tar.data?.alias ? "(" + (tar.data?.alias as string).toUpperCase() + ")" : ""
@@ -29,7 +29,8 @@ export default () => {
         output += `%ch_ID:%cn ${tar.id}\n`;
         output += `%chDBREF:%cn #${tar.id}\n`;
         output += `%chFLAGS:%cn ${tar.flags}\n`;
-        output += `%chLOCATION%cn ${loc ? displayName(en, loc) : "None?!"}\n`;
+        const canSeeLoc = loc ? await canEdit(en, loc) : false;
+        output += `%chLOCATION%cn ${loc ? displayName(en, loc, canSeeLoc) : "None?!"}\n`;
         tar.data ||= {};
         if (tar.data.owner) output += `%chOwner:%cn ${tar.data.owner}\n`;
         if (tar.data.lock) output += `%chLock:%cn ${tar.data.lock}\n`;

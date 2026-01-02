@@ -2,7 +2,7 @@
 
 ### The Next-Generation MU* Engine
 
-![ursamu header](ursamu_github_banner.png)
+![ursamu header](https://raw.githubusercontent.com/ursamu/ursamu/main/ursamu_github_banner.png)
 
 UrsaMU is a modern, high-performance MUSH-like server built with **TypeScript**
 and **Deno**.
@@ -18,6 +18,15 @@ installed) or `deno run`.
 > **No install required!** You can run the CLI directly from JSR.
 
 ### Creates a new Project
+
+First, ensure you have `dx` installed:
+
+```bash
+deno install -A --global -n deno-x jsr:@dx/dx
+deno x --install-alias
+```
+
+Then create your project:
 
 ```bash
 dx jsr:@ursamu/ursamu init

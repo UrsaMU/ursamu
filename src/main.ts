@@ -1,4 +1,8 @@
 
+/**
+ * @module ursamu-core
+ * @description The core engine initialization and management module.
+ */
 import { handleRequest } from "./app.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
@@ -13,7 +17,16 @@ import { wsService } from "./services/WebSocket/index.ts";
 import { hash, genSalt } from "../deps.ts";
 import { getNextId } from "./utils/getNextId.ts";
 
-const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+let __dirname;
+try {
+  if (import.meta.url.startsWith("file://")) {
+    __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+  } else {
+    __dirname = Deno.cwd();
+  }
+} catch {
+  __dirname = Deno.cwd();
+}
 
 /**
  * UrSamu MU Engine - Core initialization function
@@ -49,11 +62,19 @@ export const initializeEngine = async (
   } = options;
 
   // Initialize the configuration system
-  initConfig(cfg);
+  await initConfig(cfg);
 
+  // Determine the project root and current directory context
+  const isLocal = import.meta.url.startsWith("file://");
+  
   // Load default commands if enabled
   if (loadDefaultCommands) {
-    plugins(dpath.join(__dirname, "./commands"));
+    if (isLocal) {
+      plugins(dpath.join(__dirname, "./commands"));
+    } else {
+      // On JSR, we import the build-time generated index
+      await import("./commands/index.ts");
+    }
   }
 
   // Load custom commands if path provided
@@ -63,7 +84,17 @@ export const initializeEngine = async (
 
   // Load default text files if enabled
   if (loadDefaultTextFiles) {
-    loadTxtDir(dpath.join(__dirname, "../text"));
+    // If local source, text is one level up (../text)
+    // If JSR, text is expected in project root (./text)
+    const textDir = isLocal ? dpath.join(__dirname, "../text") : dpath.join(Deno.cwd(), "text");
+    // Only try to load if directory exists to avoid crash
+    try {
+      if (isLocal || (await Deno.stat(textDir).then(() => true).catch(() => false))) {
+          await loadTxtDir(textDir);
+      }
+    } catch (e) {
+      console.warn(`Could not load default text files from ${textDir}:`, e);
+    }
   }
 
   // Load custom text files if path provided
@@ -72,8 +103,20 @@ export const initializeEngine = async (
   }
 
   // Load plugins from the plugins directory
-  const pluginsDir = dpath.join(__dirname, "./plugins");
-  const loadedPlugins = await loadPlugins(pluginsDir);
+  // If local source, plugins is in ./plugins (relative to src)
+  // If JSR, plugins is expected in ./src/plugins (relative to project root/CWD)
+  const pluginsDir = isLocal ? dpath.join(__dirname, "./plugins") : dpath.join(Deno.cwd(), "src", "plugins");
+  
+  // Only try to load if directory exists
+  let loadedPlugins: IPlugin[] = [];
+  try {
+     // Check if directory exists before loading
+     if (await Deno.stat(pluginsDir).then(info => info.isDirectory).catch(() => false)) {
+        loadedPlugins = await loadPlugins(pluginsDir);
+     }
+  } catch (e) {
+    console.warn(`Could not load plugins from ${pluginsDir}:`, e);
+  }
 
   // Add any custom plugins
   if (customPlugins && customPlugins.length > 0) {
@@ -266,7 +309,7 @@ if (import.meta.main) {
 /**
  * Check if any players exist, and if not, prompt to create a superuser
  */
-async function checkAndCreateSuperuser() {
+export async function checkAndCreateSuperuser() {
   const players = await dbojs.query({ flags: /player/i });
 
   if (players.length === 0) {

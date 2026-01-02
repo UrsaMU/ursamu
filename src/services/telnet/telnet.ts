@@ -1,5 +1,6 @@
 import { dpath } from "../../../deps.ts";
 import { getConfig } from "../Config/mod.ts";
+import parser from "../parser/parser.ts";
 
 interface ITelnetSocket {
   cid?: string;
@@ -32,8 +33,19 @@ export const startTelnetServer = async (options?: {
   const wsPort = options?.wsPort || getConfig<number>("server.http") || 4203;
   const welcomeFile = options?.welcomeFile || getConfig<string>("game.text.connect") || "text/default_connect.txt";
 
-  const __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
-  const projectRoot = dpath.dirname(dpath.dirname(dpath.dirname(__dirname)));
+  let __dirname;
+  try {
+    if (import.meta.url.startsWith("file://")) {
+      __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+    } else {
+      __dirname = Deno.cwd();
+    }
+  } catch {
+    __dirname = Deno.cwd();
+  }
+  
+  const projectRoot = import.meta.url.startsWith("file://") ? 
+    dpath.dirname(dpath.dirname(dpath.dirname(__dirname))) : Deno.cwd();
 
   try {
     // Try multiple possible locations for the welcome file
@@ -106,6 +118,7 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
   const wsUrl = `ws://localhost:${wsPort}`;
   const sock = new WebSocket(wsUrl);
   let cid: string | undefined;
+  const msgBuffer: string[] = [];
 
   const encoder = new TextEncoder();
 
@@ -122,10 +135,15 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
     }
   };
 
-  await write(welcome + "\r\n");
+  await write(parser.substitute("telnet", welcome) + "\r\n");
 
   sock.onopen = () => {
     // Telnet just connected to WS
+    // Flush buffer
+    while(msgBuffer.length > 0) {
+      const msg = msgBuffer.shift();
+      if(msg) sock.send(msg);
+    }
   };
 
   sock.onmessage = (event) => {
@@ -176,6 +194,23 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
         if (msg) {
           sock.send(JSON.stringify({
+            msg,
+            data: { cid }
+          }));
+        }
+      } else {
+        const raw = new TextDecoder().decode(buffer.subarray(0, n));
+         // Filter Telnet IAC sequences and non-printable chars
+        // IAC sequences start with 0xFF (\xff)
+        const msg = raw
+          .replace(/\xff[\xfb-\xfe]./g, "") // IAC DO/DONT/WILL/WONT <opt>
+          .replace(/\xff[\xf0-\xfa]/g, "") // IAC SB/SE/etc
+          .replace(/\xff\xff/g, "\xff")    // Escaped IAC
+          .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // Non-printable ASCII
+          .trim();
+
+        if(msg) {
+          msgBuffer.push(JSON.stringify({
             msg,
             data: { cid }
           }));

@@ -1,12 +1,12 @@
 
-import { IContext } from "../../@types/IContext.ts";
+import type { IContext } from "../../@types/IContext.ts";
 import { cmdParser } from "../commands/index.ts";
 import { playerForSocket } from "../../utils/playerForSocket.ts";
 import { setFlags } from "../../utils/setFlags.ts";
 import { moniker } from "../../utils/moniker.ts";
-import { UserSocket } from "../../@types/IMSocket.ts";
+import type { UserSocket } from "../../@types/IMSocket.ts";
 import { Presenter } from "../Presenter/index.ts";
-import { IMessage } from "../../interfaces/IMessage.ts";
+import type { IMessage } from "../../interfaces/IMessage.ts";
 
 export class WebSocketService {
     private static instance: WebSocketService;
@@ -111,11 +111,11 @@ export class WebSocketService {
 
         for (const client of this.clients) {
             const meta = this.socketData.get(client);
-            // Naive Check: if target is a channel, does user have it?
-            // Logic specific to implementation.
-            // For direct messages (target = socket.id), we check ID.
-            if (meta && targets.includes(meta.id)) {
-                client.send(JSON.stringify(Presenter.render(message.payload, "telnet"))); // Defaulting to text for now
+            // Check matching socket ID OR matching CID (Player ID)
+            if (meta && (targets.includes(meta.id) || (meta.cid && targets.includes(meta.cid)))) {
+                // client.send(JSON.stringify(Presenter.render(message.payload, "telnet"))); // Defaulting to text for now
+                const output = Presenter.render(message.payload, "telnet");
+                client.send(JSON.stringify({ msg: output, data: message.payload.data }));
             }
         }
     }

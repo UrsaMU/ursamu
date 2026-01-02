@@ -19,26 +19,13 @@ export class ConfigManager {
     
     // If no config directory is provided, use the /config directory at the project root
     if (!configDir) {
-      // Get the project root directory (two levels up from the current file)
-      let currentDir: string;
-      try {
-        if (import.meta.url.startsWith("file://")) {
-          currentDir = dpath.dirname(dpath.fromFileUrl(import.meta.url));
-        } else {
-          currentDir = Deno.cwd();
-        }
-      } catch {
-        currentDir = Deno.cwd();
-      }
-      
-      const projectRoot = dpath.resolve(currentDir, "../../..");
-      this.configDir = dpath.join(projectRoot, "config");
+      this.configDir = dpath.join(Deno.cwd(), "config");
       
       // Create the config directory if it doesn't exist
       try {
         Deno.mkdirSync(this.configDir, { recursive: true });
       } catch (error) {
-        if (!(error instanceof Deno.errors.AlreadyExists)) {
+        if (!(error instanceof Deno.errors.AlreadyExists) && !(error instanceof Deno.errors.AlreadyExists)) {
           console.error("Error creating config directory:", error);
         }
       }

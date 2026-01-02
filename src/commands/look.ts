@@ -1,6 +1,7 @@
 import { send } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
+import { canEdit } from "../utils/canEdit.ts";
 import { displayName } from "../utils/displayName.ts";
 import { center, columns, ljust, repeatString, rjust } from "../utils/format.ts";
 import { idle } from "../utils/idle.ts";
@@ -24,8 +25,9 @@ export default () =>
         return;
       }
 
+      const canSeeTar = await canEdit(en, tar);
       let output = center(
-        `%cy[%cn %ch${displayName(en, tar)}%cn %cy]%cn`,
+        `%cy[%cn %ch${displayName(en, tar, canSeeTar)}%cn %cy]%cn`,
         78,
         "%cr=%cn"
       );
@@ -57,10 +59,12 @@ export default () =>
         output += center(" %chCharacters%cn ", 78, "%cr-%cn");
         output += "\n";
 
-        players.forEach((p) => {
+        for (const p of players) {
+          const canSeeP = await canEdit(en, p);
           output += isAdmin(p) ? "%ch%cc *%cn  " : "    ";
-          output += ljust(`${displayName(en, p)}`, 25);
-          output += rjust(idle(p.data?.lastCommand || 0), 5);
+          output += ljust(`${displayName(en, p, canSeeP)}`, 25);
+          // deno-lint-ignore no-explicit-any
+          output += rjust(idle((p.data as any)?.lastCommand || 0), 5);
           output += ljust(
             `  ${
               p.data?.shortdesc || "%ch%cxUse '+short <desc>' to set this.%cn"
@@ -68,7 +72,7 @@ export default () =>
             42
           );
           output += "\n";
-        });
+        }
       }
 
       if (exits.length) {
