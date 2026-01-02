@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-import-prefix
 import { walk } from "https://deno.land/std@0.224.0/fs/walk.ts";
 import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
 

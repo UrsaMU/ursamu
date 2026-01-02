@@ -1,8 +1,8 @@
 
 import { assertEquals, assertRejects } from "@std/assert";
 import { scriptService } from "../src/services/Script/index.ts";
-import { IContext } from "../src/@types/IContext.ts";
-import { IMSocket } from "../src/@types/IMSocket.ts";
+import type { IContext } from "../src/@types/IContext.ts";
+import type { IMSocket } from "../src/@types/IMSocket.ts";
 
 Deno.test("Script Service Tests", async (t) => {
     const mockCtx: IContext = {

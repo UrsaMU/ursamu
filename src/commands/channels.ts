@@ -1,4 +1,5 @@
-import { IChanEntry } from "../@types/Channels.ts";
+import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IChanEntry, IChannel } from "../@types/Channels.ts";
 import { wsService } from "../services/WebSocket/index.ts";
 import { chans, dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
@@ -98,6 +99,91 @@ export default () => {
         send([ctx.socket.id], `Channel ${args[0]} not found.`, {});
       }
     },
+  });
+
+  addCmd({
+    name: "@cboot",
+    pattern: /^@cboot\s+(.*)\s*=\s*(.*)/i,
+    lock: "connected admin+", // Should be owner of channel or admin
+    hidden: true,
+    exec: async (ctx, args) => {
+        const chanName = args[0];
+        const targetName = args[1];
+        
+        const chan = await chans.queryOne({ name: new RegExp(chanName, "i") });
+        if (!chan) return send([ctx.socket.id], `Channel ${chanName} not found.`);
+        
+        // Find the player
+        // We need to find the specific player. `search.ts` logic or iteration?
+        // Iteration for now as we don't have a direct "find player by alias/name" easy generic exposed here besides `target` but `target` looks for local.
+        // Actually, we can use `dbojs.queryOne` for name.
+        
+        // Handle *player syntax or just name
+        const cleanName = targetName.startsWith('*') ? targetName.substring(1) : targetName;
+        const targetPlyr = await dbojs.queryOne({ "data.name": new RegExp(`^${cleanName}$`, "i"), flags: /player/i });
+        
+        if (!targetPlyr || typeof targetPlyr !== 'object') return send([ctx.socket.id], `Player ${targetName} not found.`);
+        const player = targetPlyr as IDBOBJ;
+        
+        player.data ||= {};
+        const channels = (player.data?.channels as IChanEntry[] | undefined) || [];
+        const initialLen = channels.length;
+        const newChannels = channels.filter((c) => c.channel !== chan.name);
+        if(player.data) player.data.channels = newChannels;
+        
+        if (newChannels.length === initialLen) {
+             return send([ctx.socket.id], `${player.data.name} is not on channel ${chan.name}.`);
+        }
+        
+        await dbojs.modify({ id: player.id }, "$set", player);
+        
+        // Notify
+        send([ctx.socket.id], `You booted ${player.data.name} from channel ${chan.name}.`);
+        
+        // If the booted player is connected, we might want to notify them or force a leave?
+        // Reuse logic from delcom essentially.
+        // We need to find their socket if they are connected.
+        const sockets = wsService.getConnectedSockets();
+        for (const sock of sockets) {
+            if (sock.cid === player.id) {
+                // If we had a direct send to socket method for a specific user...
+                // wsService.send([sock.id], ...)
+                // But we can trigger a re-join or just let the data update handle it (next time they verify).
+                // JoinChans might need to be re-run? 
+                // Actually `joinChans` adds joins. We need `leave`.
+                // For now, let's just update the DB. The socket is still "in" the room likely until restart or rejoin.
+                // Ideally:
+                // sock.leave(chan.name);
+                // But we don't have easy access to the exact socket object here without iterating.
+            }
+        }
+    }
+  });
+
+  addCmd({
+      name: "@cchown",
+      pattern: /^@cchown\s+(.*)\s*=\s*(.*)/i,
+      lock: "connected admin+",
+      hidden: true,
+      exec: async (ctx, args) => {
+          const chanName = args[0];
+          const newOwnerName = args[1];
+          
+          const chanQuery = await chans.queryOne({ name: new RegExp(chanName, "i") });
+          if (!chanQuery) return send([ctx.socket.id], `Channel ${chanName} not found.`);
+          const chan = chanQuery as IChannel;
+          
+          const cleanName = newOwnerName.startsWith('*') ? newOwnerName.substring(1) : newOwnerName;
+          const newOwner = await dbojs.queryOne({ "data.name": new RegExp(`^${cleanName}$`, "i"), flags: /player/i });
+          
+          if (!newOwner || typeof newOwner !== 'object') return send([ctx.socket.id], `Player ${newOwnerName} not found.`);
+          const ownerObj = newOwner as IDBOBJ;
+          
+          chan.owner = ownerObj.id;
+          await chans.modify({ id: chan.id }, "$set", chan);
+          
+          send([ctx.socket.id], `Channel ${chan.name} owner changed to ${ownerObj.data?.name}.`);
+      }
   });
 
   addCmd({

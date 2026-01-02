@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.208.0/assert/mod.ts";
+import { assertEquals } from "@std/assert";
 import { parser } from "../src/services/Softcode/parser.ts";
 
 Deno.test("Softcode Parser - Basic Text", async () => {

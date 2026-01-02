@@ -1,4 +1,4 @@
-import { IConfig } from "../../@types/IConfig.ts";
+import type { IConfig } from "../../@types/IConfig.ts";
 
 // This is a minimal default configuration that will be used if no config.json exists
 // The actual configuration should be managed through the config.json file in the /config directory

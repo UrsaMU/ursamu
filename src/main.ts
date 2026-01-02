@@ -4,18 +4,20 @@
  * @description The core engine initialization and management module.
  */
 import { handleRequest } from "./app.ts";
+import "./reboot.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
 import { chans, counters, dbojs } from "./services/Database/index.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
-import { IConfig, IPlugin } from "./@types/index.ts";
+import type { IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 import { initConfig, initializePlugins, getConfig } from "./services/Config/mod.ts";
 import { loadPlugins } from "./utils/loadPlugins.ts";
 import { wsService } from "./services/WebSocket/index.ts";
 import { hash, genSalt } from "../deps.ts";
 import { getNextId } from "./utils/getNextId.ts";
+import { queue } from "./services/Queue/index.ts";
 
 let __dirname;
 try {
@@ -50,7 +52,8 @@ export const initializeEngine = async (
     customCommandsPath?: string;
     customTextPath?: string;
   } = {},
-): Promise<Record<string, any>> => {
+  // deno-lint-ignore no-explicit-any
+): Promise<any> => {
   // Set default options
   const {
     loadDefaultCommands = true,
@@ -63,6 +66,13 @@ export const initializeEngine = async (
 
   // Initialize the configuration system
   await initConfig(cfg);
+
+  // Load substitutions from config
+  const substitutions = getConfig<Record<string, string>>("substitutions");
+  if (substitutions) {
+      const { updateParserSubs } = await import("./services/parser/parser.ts");
+      updateParserSubs(substitutions);
+  }
 
   // Determine the project root and current directory context
   const isLocal = import.meta.url.startsWith("file://");
@@ -161,6 +171,9 @@ export const initializeEngine = async (
   }
 
   console.log(`Server started on port ${httpPort} (HTTP & WebSockets).`);
+  
+  // Initialize Queue
+  queue.init();
 
   Deno.addSignalListener("SIGINT", async () => {
     const players = await dbojs.query({ flags: /connected/i });

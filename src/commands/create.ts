@@ -6,7 +6,7 @@ import { getConfig } from "../services/Config/mod.ts";
 import { getNextId } from "../utils/getNextId.ts";
 import { moniker } from "../utils/moniker.ts";
 import { joinChans } from "../utils/joinChans.ts";
-import { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { isNameTaken } from "../utils/isNameTaken.ts";
 
 export default () =>

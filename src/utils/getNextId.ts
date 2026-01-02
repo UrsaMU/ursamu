@@ -1,4 +1,4 @@
-import { counters, ICounters } from "../services/Database/index.ts";
+import { counters, type ICounters } from "../services/Database/index.ts";
 
 export async function getNextId(name: string) {
   const counter = await counters.queryOne({ id: name });

@@ -1,5 +1,5 @@
 import { dfs, dpath } from "../../deps.ts";
-import { IPlugin } from "../@types/IPlugin.ts";
+import type { IPlugin } from "../@types/IPlugin.ts";
 import { registerPlugin } from "../services/Config/mod.ts";
 
 /**

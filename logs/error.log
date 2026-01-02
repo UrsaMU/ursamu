@@ -20,3 +20,58 @@
     at async file:///Users/kumakun/github/ursamu/src/main.ts:300:18
 [2026-01-02T03:36:05.594Z] [ERROR] Unhandled Rejection: SyntaxError: Identifier 'canEdit' has already been declared at file:///Users/kumakun/github/ursamu/src/commands/lock.ts:5:10
     at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T04:28:51.209Z] [ERROR] Unhandled Rejection: SyntaxError: The requested module '../services/Database/index.ts' does not provide an export named 'Obj' at file:///Users/kumakun/github/ursamu/src/commands/format.ts:3:10
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T04:30:04.407Z] [ERROR] Unhandled Rejection: SyntaxError: The requested module '../services/Database/index.ts' does not provide an export named 'Obj' at file:///Users/kumakun/github/ursamu/src/commands/format.ts:3:10
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T06:03:17.355Z] [ERROR] Unhandled Rejection: SyntaxError: Unexpected reserved word at file:///Users/kumakun/github/ursamu/src/commands/look.ts:113:25
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T06:03:28.471Z] [ERROR] Unhandled Rejection: SyntaxError: Unexpected reserved word at file:///Users/kumakun/github/ursamu/src/commands/look.ts:114:25
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:32:46.470Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expected ',', got 'const' at file:///Users/kumakun/github/ursamu/src/commands/building.ts:319:9
+
+          const canSeeTarget = (await canEdit(en, homeTarget)) || homeTarget.flags...
+          ~~~~~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:33:13.920Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expression expected at file:///Users/kumakun/github/ursamu/src/commands/look.ts:141:6
+
+      },
+       ~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:37:04.630Z] [ERROR] Unhandled Rejection: SyntaxError: Identifier 'dbojs' has already been declared at file:///Users/kumakun/github/ursamu/src/commands/search.ts:4:10
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:37:05.452Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expected ';', '}' or <eof> at file:///Users/kumakun/github/ursamu/src/commands/search.ts:75:36
+
+                    { flags: { "$not": /exit/i } }
+                                     ~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:37:16.691Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expected ';', '}' or <eof> at file:///Users/kumakun/github/ursamu/src/commands/search.ts:72:36
+
+                    { flags: { "$not": /exit/i } }
+                                     ~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:37:17.531Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expected ';', '}' or <eof> at file:///Users/kumakun/github/ursamu/src/commands/search.ts:72:36
+
+                    { flags: { "$not": /exit/i } }
+                                     ~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:44:54.989Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expression expected at file:///Users/kumakun/github/ursamu/src/commands/set.ts:45:3
+
+    });
+    ~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:45:11.358Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expression expected at file:///Users/kumakun/github/ursamu/src/commands/set.ts:45:3
+
+    });
+    ~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:45:24.558Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expected ';', '}' or <eof> at file:///Users/kumakun/github/ursamu/src/commands/channels.ts:188:9
+
+      lock: "connected admin+",
+          ~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T15:45:25.346Z] [ERROR] Unhandled Rejection: TypeError: The module's source code could not be parsed: Expected ',', got ')' at file:///Users/kumakun/github/ursamu/src/commands/channels.ts:185:4
+
+    });
+     ~
+    at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)

@@ -3,6 +3,6 @@
 import dev from "$fresh/dev.ts";
 import config from "./fresh.config.ts";
 
-import "jsr:@std/dotenv@0.224.0/load";
+import "dotenv/load";
 
 await dev(import.meta.url, "./main.ts", config);

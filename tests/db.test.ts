@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { DBO } from "../src/services/Database/database.ts";
-import { IDBOBJ } from "../src/@types/IDBObj.ts";
+import type { IDBOBJ } from "../src/@types/IDBObj.ts";
 
 // Mock Deno.KV
 const kv = await Deno.openKv(":memory:");

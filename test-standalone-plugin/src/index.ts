@@ -10,7 +10,7 @@ const plugin = {
    * Initialization logic for the plugin
    * @returns {boolean | Promise<boolean>}
    */
-  init: async () => {
+  init: () => {
     console.log("test-standalone-plugin plugin initialized!");
     return true;
   }

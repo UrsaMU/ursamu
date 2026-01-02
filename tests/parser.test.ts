@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { addCmd } from "../src/services/commands/cmdParser.ts";
-import { IContext } from "../src/@types/IContext.ts";
-import { IMSocket } from "../src/@types/IMSocket.ts";
+import type { IContext } from "../src/@types/IContext.ts";
+import type { IMSocket } from "../src/@types/IMSocket.ts";
 
 // Mock dependencies
 // We can't easily mock imported modules without a loader or dependency injection.

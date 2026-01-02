@@ -1,4 +1,4 @@
-import { startTelnetServer } from "ursamu";
+import { startTelnetServer } from "./services/telnet/telnet.ts";
 
 // Start the telnet server with the correct welcome file path
 startTelnetServer({

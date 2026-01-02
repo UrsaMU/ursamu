@@ -17,6 +17,12 @@ export default () =>
         {}
       );
 
-      Deno.exit(0);
+      const rebootContent = `// This file is modified by the @reboot command to trigger a restart\nexport const rebootId = ${Date.now()};\n`;
+      try {
+          await Deno.writeTextFile("src/reboot.ts", rebootContent);
+      } catch (e) {
+          console.error("Failed to trigger reboot:", e);
+          broadcast(`%chGame>%cn Reboot failed: ${e}`, {});
+      }
     },
   });

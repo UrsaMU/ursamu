@@ -1,4 +1,4 @@
-import { IEntity } from "./IEntity.ts";
+import type { IEntity } from "./IEntity.ts";
 
 /**
  * Represents a room entity.

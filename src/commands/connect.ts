@@ -6,6 +6,7 @@ import { setFlags } from "../utils/setFlags.ts";
 import { joinChans } from "../utils/joinChans.ts";
 import { moniker } from "../utils/moniker.ts";
 import { isNameTaken } from "../utils/isNameTaken.ts";
+import { hooks } from "../services/Hooks/index.ts";
 
 export default () =>
   addCmd({
@@ -119,6 +120,9 @@ export default () =>
         // Force look command
         await force(ctx, "look");
         console.log(`Forced look command for player: ${found.data?.name}`);
+        
+        // Execute @aconnect hooks
+        await hooks.aconnect(found);
         
         console.log(`Connect command completed successfully for: ${found.data?.name}`);
       } catch (error) {

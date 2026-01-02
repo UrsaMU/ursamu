@@ -4,7 +4,7 @@
 /// <reference lib="dom.asynciterable" />
 /// <reference lib="deno.ns" />
 
-import "jsr:@std/dotenv@0.224.0/load";
+import "dotenv/load";
 
 import { start } from "$fresh/server.ts";
 import manifest from "./fresh.gen.ts";

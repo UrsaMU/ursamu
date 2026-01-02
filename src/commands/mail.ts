@@ -4,7 +4,7 @@ import { send } from "../services/broadcast/index.ts";
 import { addCmd, force } from "../services/commands/index.ts";
 import { center } from "../utils/format.ts";
 import { target } from "../utils/target.ts";
-import { IMail } from "../@types/IMail.ts";
+import type { IMail } from "../@types/IMail.ts";
 
 export default () => {
   addCmd({

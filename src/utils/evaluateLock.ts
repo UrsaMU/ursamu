@@ -82,7 +82,7 @@ const parseLock = async (
       // Actually parser expects objects. If validationMode is false, enactor/target MUST be present.
       if (!enactor || !target) return false; // Should not happen in eval mode
 
-      const result = await parser(token, { enactor, target });
+      const result = await parser(token, { data: { enactor, target } });
       return result !== "0" && !result.startsWith("#-1") && result !== ""; 
     }
 

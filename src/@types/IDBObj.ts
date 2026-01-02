@@ -1,4 +1,4 @@
-import { IAttribute } from "./IAttribute.ts";
+import type { IAttribute } from "./IAttribute.ts";
 
 export interface IDBOBJ {
   id: string;

@@ -1,6 +1,9 @@
+import type { IParserContext } from "../types.ts";
+
 export type SoftcodeFunction = (
   args: string[],
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
+  context?: IParserContext
 ) => Promise<string> | string;
 
 const registry = new Map<string, SoftcodeFunction>();

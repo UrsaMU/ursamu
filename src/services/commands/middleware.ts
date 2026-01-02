@@ -1,5 +1,5 @@
-import { IContext } from "../../@types/IContext.ts";
-import { IMiddlewareFunction } from "../../@types/IMiddlewareFunction.ts";
+import type { IContext } from "../../@types/IContext.ts";
+import type { IMiddlewareFunction } from "../../@types/IMiddlewareFunction.ts";
 
 export class MiddlewareStack {
   private middlewares: IMiddlewareFunction[] = [];

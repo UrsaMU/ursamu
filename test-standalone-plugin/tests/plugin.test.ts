@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-import-prefix
 import { assertEquals } from "https://deno.land/std/assert/mod.ts";
 import plugin from "../src/index.ts";
 

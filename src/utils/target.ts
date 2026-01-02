@@ -1,4 +1,4 @@
-import { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs } from "../services/Database/index.ts";
 
 export const target = async (

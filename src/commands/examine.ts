@@ -20,8 +20,9 @@ export default () => {
         return send([ctx.socket.id], "I don't see that here.");
       }
       
+      
       const loc = tar.location ? await dbojs.queryOne({ id: tar.location }) : null;
-      if (en && tar && await canEdit(en, tar)) {
+      if (en && tar && ((await canEdit(en, tar)) || tar.flags.includes("visual"))) {
         delete tar.data?.password;
         let output = `%chName:%cn ${tar.data?.name}${
           tar.data?.alias ? "(" + (tar.data?.alias as string).toUpperCase() + ")" : ""
@@ -34,7 +35,15 @@ export default () => {
         tar.data ||= {};
         if (tar.data.owner) output += `%chOwner:%cn ${tar.data.owner}\n`;
         if (tar.data.lock) output += `%chLock:%cn ${tar.data.lock}\n`;
-        output += `%chDATA:%cn ${JSON.stringify(tar.data, null, 4)}`;
+        
+        // Attributes
+        if (tar.data.attributes) {
+            output += "%chAttributes:%cn\n";
+            for (const attr of tar.data.attributes) {
+                 output += `  %ch${attr.name.toUpperCase()}:%cn ${attr.value}\n`;
+            }
+        }
+
         return send([ctx.socket.id], output);
       }
       send([ctx.socket.id], "You can't examine that.");

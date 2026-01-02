@@ -1,4 +1,4 @@
-import { IConfig } from "./IConfig.ts";
+import type { IConfig } from "./IConfig.ts";
 
 export interface IPlugin {
   name: string;

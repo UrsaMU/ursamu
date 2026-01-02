@@ -70,7 +70,7 @@ Select an action:
       await runCommand("plugin.ts", ["init"]);
       Deno.exit(0);
       break;
-    case "3":
+    case "3": {
        // For plugin management, we need more context.
        // Let's prompt for the subcommand.
        console.log("\nPlugin Management:");
@@ -95,6 +95,7 @@ Select an action:
        }
        Deno.exit(0);
        break;
+    }
     case "4":
       Deno.exit(0);
       break;

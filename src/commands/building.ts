@@ -80,7 +80,8 @@ export default () => {
       }
 
       // tel them there if needed.
-      if (swtch?.toLowerCase() == "teleport") {
+      // tel them there if needed.
+      if (swtch && (swtch.toLowerCase() === "/teleport" || swtch.toLowerCase() === "/tel")) {
         force(ctx, `teleport #${roomObj.id}`);
       }
     },
@@ -114,7 +115,9 @@ export default () => {
       tar.location = locObj.id;
       await dbojs.modify({ id: tar.id }, "$set", tar);
 
-      const canSeeLoc = locObj ? await canEdit(en, locObj) : false;
+      const canSeeLoc =
+        (locObj ? await canEdit(en, locObj) : false) ||
+        locObj.flags.includes("enter_ok");
 
       send(
         [ctx.socket.id],
@@ -308,17 +311,35 @@ export default () => {
 
       // For everything else (players, things), we link the home
       const homeTarget = await target(en, targetRoom, true);
-        if (!homeTarget) {
-            return send([ctx.socket.id], `Could not find %ch${targetRoom}%cn.`, {});
-        }
-        
-        const canSeeTarget = await canEdit(en, homeTarget);
-        obj.data ||= {};
-        obj.data.home = homeTarget.id;
-        await dbojs.modify({ id: obj.id }, "$set", obj);
-        return send([ctx.socket.id], `You link ${displayName(en, obj, true)} to ${displayName(en, homeTarget, canSeeTarget)}.`, {});
+      if (!homeTarget) {
+        return send(
+          [ctx.socket.id],
+          `Could not find %ch${targetRoom}%cn.`,
+          {}
+        );
+      }
 
-    }
+      const canSeeTarget =
+        (await canEdit(en, homeTarget)) ||
+        homeTarget.flags.includes("link_ok");
+        
+      if (!canSeeTarget) {
+        return send([ctx.socket.id], "You can't link to that.", {});
+      }
+
+      obj.data ||= {};
+      obj.data.home = homeTarget.id;
+      await dbojs.modify({ id: obj.id }, "$set", obj);
+      return send(
+        [ctx.socket.id],
+        `You link ${displayName(en, obj, true)} to ${displayName(
+          en,
+          homeTarget,
+          canSeeTarget
+        )}.`,
+        {}
+      );
+    },
   });
 
   addCmd({
@@ -355,6 +376,77 @@ export default () => {
       }
 
       send([ctx.socket.id], "You can only unlink rooms or exits.", {});
+    }
+  });
+
+  addCmd({
+    name: "@parent",
+    category: "building",
+    help: "Set the parent of an object",
+    pattern: /^[@/+]?parent\s+(.*)\s*=\s*(.*)/i,
+    lock: "connected builder+",
+    exec: async (ctx, args) => {
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
+      if (!en) return;
+      const [name, parentName] = args.map((a) => a.trim());
+      
+      const obj = await target(en, name, true);
+      if (!obj) {
+          return send([ctx.socket.id], `Could not find %ch${name}%cn.`, {});
+      }
+      
+      const parentObj = await target(en, parentName, true);
+      if (!parentObj) {
+           return send([ctx.socket.id], `Could not find %ch${parentName}%cn.`, {});
+      }
+      
+      // Check for circular reference?
+      // MUX usually prevents A->B->A.
+      let curr: IDBOBJ | undefined = (parentObj as IDBOBJ);
+      let count = 0;
+      while(curr && count < 20) {
+          if (curr.id === obj.id) {
+              return send([ctx.socket.id], "Circular parent reference detected.", {});
+          }
+          // deno-lint-ignore no-explicit-any
+          const pId: string = (curr.data as any).parent;
+          if (!pId) break;
+          const next: IDBOBJ | false = await dbojs.queryOne({id: pId.replace("#", "")});
+          curr = next || undefined;
+          count++;
+      }
+
+      obj.data ||= {};
+      obj.data.parent = "#" + parentObj.id;
+      
+      await dbojs.modify({ id: obj.id }, "$set", obj);
+      send([ctx.socket.id], `Parent of ${displayName(en, obj, true)} set to ${displayName(en, parentObj, true)}.`, {});
+    }
+  });
+
+  addCmd({
+    name: "@parent/clear",
+    category: "building",
+    help: "Clear the parent of an object",
+    pattern: /^[@/+]?parent\/clear\s+(.*)/i,
+    lock: "connected builder+",
+    exec: async (ctx, args) => {
+       if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
+      if (!en) return;
+      const name = args[0].trim();
+      
+      const obj = await target(en, name, true);
+      if (!obj) {
+          return send([ctx.socket.id], `Could not find %ch${name}%cn.`, {});
+      }
+      
+      obj.data ||= {};
+      delete obj.data.parent;
+      
+      await dbojs.modify({ id: obj.id }, "$set", obj);
+      send([ctx.socket.id], `Parent cleared for ${displayName(en, obj, true)}.`, {});
     }
   });
 };

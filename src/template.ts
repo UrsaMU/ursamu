@@ -5,7 +5,7 @@
  * Copy this file to your project and modify it to suit your needs.
  */
 
-import { mu, IConfig } from "./index.ts";
+import { mu, type IConfig } from "./index.ts";
 import { dpath } from "../deps.ts";
 
 // Define your custom configuration

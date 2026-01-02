@@ -1,9 +1,9 @@
-import { IDBOBJ } from "../../@types/IDBObj.ts";
+import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { getConfig } from "../Config/mod.ts";
-import { IChannel } from "../../@types/Channels.ts";
-import { IMail } from "../../@types/IMail.ts";
+import type { IChannel } from "../../@types/Channels.ts";
+import type { IMail } from "../../@types/IMail.ts";
 import { dpath, get } from "../../../deps.ts";
-import { IDatabase, Query, QueryCondition } from "../../interfaces/IDatabase.ts";
+import type { IDatabase, Query, QueryCondition } from "../../interfaces/IDatabase.ts";
 // @ts-ignore: Deno namespace is available at runtime
 
 interface WithId {

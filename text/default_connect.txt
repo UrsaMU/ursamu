@@ -1,17 +1,17 @@
-A modern MUSH-like engine written in TypeScript.
+%ch%b%bA modern MUSH-like engine written in TypeScript.%cn
 
-888     888 8888888b.   .d8888b.        d8888 888b     d888 888     888 
-888     888 888   Y88b d88P  Y88b      d88888 8888b   d8888 888     888 
-888     888 888    888 Y88b.          d88P888 88888b.d88888 888     888 
-888     888 888   d88P  "Y888b.      d88P 888 888Y88888P888 888     888 
-888     888 8888888P"      "Y88b.   d88P  888 888 Y888P 888 888     888 
-888     888 888 T88b         "888  d88P   888 888  Y8P  888 888     888 
-Y88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P 
- "Y88888P"  888   T88b  "Y8888P" d88P     888 888       888  "Y88888P"  
+%ch%cw888     888 8888888b.   .d8888b.        d8888 888b     d888 888     888 
+%cw888     888 888   Y88b d88P  Y88b      d88888 8888b   d8888 888     888 
+%ch%cc888     888 888    888 Y88b.          d88P888 88888b.d88888 888     888 
+%cc888     888 888   d88P  "Y888b.      d88P 888 888Y88888P888 888     888 
+%cc888     888 8888888P"      "Y88b.   d88P  888 888 Y888P 888 888     888 
+%ch%cb888     888 888 T88b         "888  d88P   888 888  Y8P  888 888     888 
+%cbY88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P 
+%cb "Y88888P"  888   T88b  "Y8888P" d88P     888 888       888  "Y88888P"  %cn
 
->> A Next Generation MU*. https://github.com/ursamu/ursamu
+%ch%b%b>>%cn %ch%cwA Next Generation MU*.%cn %ch%cc<#4499FF>https://github.com/ursamu/ursamu%cn
 
-Use 'create <name> <password>' to create a new character. 
-Use 'connect <name> <password>' to connect to the game.
+%bUse '%ch%cycreate%cn %cc<name> <password>%cn' to create a new character. 
+%bUse '%ch%cyconnect%cn %cc<name> <password>%cn' to connect to the game.
 
-Uae 'QUIT' to exit.
+%bUse '%ch%crQUIT%cn' to exit.

@@ -1,5 +1,5 @@
-import { IChanEntry } from "../../@types/Channels.ts";
-import { IContext } from "../../@types/IContext.ts";
+import type { IChanEntry } from "../../@types/Channels.ts";
+import type { IContext } from "../../@types/IContext.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { chans, dbojs } from "../Database/index.ts";
 import { send } from "../broadcast/index.ts";

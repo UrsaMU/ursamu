@@ -1,4 +1,4 @@
-import { IContext } from "../../@types/IContext.ts";
+import type { IContext } from "../../@types/IContext.ts";
 import { send, broadcast } from "../broadcast/index.ts";
 
 export const createScriptContext = (ctx: IContext) => {

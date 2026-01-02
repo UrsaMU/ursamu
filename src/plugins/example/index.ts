@@ -1,4 +1,4 @@
-import { IPlugin } from "../../@types/IPlugin.ts";
+import type { IPlugin } from "../../@types/IPlugin.ts";
 import { getConfig } from "../../services/Config/mod.ts";
 
 // Define a custom configuration interface for the plugin

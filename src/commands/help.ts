@@ -109,6 +109,17 @@ export default async () => {
           ) + "\n\n";
       }
 
+      const topics = Array.from(text.keys())
+        .filter((k) => k.startsWith("topic_"))
+        .map((k) => k.replace("topic_", "").toUpperCase())
+        .sort();
+
+      if (topics.length > 0) {
+        output +=
+          center(`%cy[%cn %chTOPICS%cn %cy]%cn`, 78, "%cr-%cn") + "\n";
+        output += columns(topics, 78, 4, " ") + "\n\n";
+      }
+
       output +=
         "Type '%chhelp <command>%cn' for more information on a command.\n";
       output += repeatString("%cr=%cn", 78);
@@ -121,26 +132,41 @@ export default async () => {
     pattern: /^[/+@]?help\s+(.*)/i,
     hidden: true,
     exec: (ctx, args) => {
-      const topic = args[0];
-      if (text.has(`help_${topic}`)) {
-        let output =
-          center(
-            `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
-            78,
-            "%cr-%cn"
-          ) + "\n";
-        output += text.get(`help_${topic}`) || "";
+      const topic = args[0].toLowerCase();
+
+      if (topic === "topics" || topic === "all") {
+        const topics = Array.from(text.keys())
+          .filter((k) => k.startsWith("topic_"))
+          .map((k) => k.replace("topic_", "").toUpperCase())
+          .sort();
+
+        let output = center(`%cy[%cn %chTOPICS%cn %cy]%cn`, 78, "%cr-%cn") + "\n";
+        output += columns(topics, 78, 4, " ") + "\n";
         output += repeatString("%cr-%cn", 78);
         send([ctx.socket.id], output, {});
         return;
-      } else if (text.has(`topic_${topic}`)) {
-        let output =
+      }
+
+      // Try exact match first
+      let helpKey = `help_${topic}`;
+      if (!text.has(helpKey)) {
+        // Try adding @ if missing
+        helpKey = `help_@${topic}`;
+        if (!text.has(helpKey)) {
+           // Try topic
+           helpKey = `topic_${topic}`;
+        }
+      }
+
+      if (text.has(helpKey)) {
+        const title = helpKey.startsWith("topic_") ? topic : (helpKey.replace("help_", ""));
+         let output =
           center(
-            `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`,
+            `%cy[%cn %ch${title.toUpperCase()}%cn %cy]%cn`,
             78,
             "%cr-%cn"
           ) + "\n";
-        output += text.get(`topic_${topic}`) || "";
+        output += text.get(helpKey) || "";
         output += repeatString("%cr-%cn", 78);
         send([ctx.socket.id], output, {});
         return;

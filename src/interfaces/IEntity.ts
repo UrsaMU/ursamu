@@ -1,5 +1,5 @@
-import { IDBOBJ } from "../@types/IDBObj.ts";
-import { IAttribute } from "../@types/IAttribute.ts";
+import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IAttribute } from "../@types/IAttribute.ts";
 
 /**
  * Represents a game entity with common properties and methods.

@@ -1,4 +1,4 @@
-import { UserSocket, IMSocket } from "./IMSocket.ts";
+import type { UserSocket, IMSocket } from "./IMSocket.ts";
 
 export interface IContext {
   socket: UserSocket | IMSocket;

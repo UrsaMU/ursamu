@@ -90,5 +90,21 @@ export const flags = new Tags(
     name: "kinfolk",
     code: "[k]",
     lock: "builder+",
+  },
+  {
+      name: "link_ok",
+      code: "l",
+  },
+  {
+      name: "enter_ok",
+      code: "E", 
+  },
+  {
+      name: "visual",
+      code: "V",
+  },
+  {
+      name: "opaque",
+      code: "O",
   }
 );

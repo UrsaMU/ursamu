@@ -1,4 +1,5 @@
 import { send } from "../services/broadcast/index.ts";
+import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { displayName } from "../utils/displayName.ts";
@@ -34,6 +35,22 @@ export default () => {
 
             // MUX @parent stores the parent dbref in data.parent (usually) or a specific field.
             // Let's assume data.parent for now.
+
+            // Cycle detection
+             let current: IDBOBJ | null | undefined = parentObj;
+             let depth = 0;
+             while (current && depth < 50) {
+                 if (current.id === thingObj.id) {
+                     return send([ctx.socket.id], "You can't be your own grandfather!", {});
+                 }
+                 if (current.data?.parent) {
+                     current = (await dbojs.queryOne({ id: current.data.parent as string })) || null;
+                 } else {
+                     current = null;
+                 }
+                 depth++;
+             }
+
             thingObj.data ||= {};
             thingObj.data.parent = parentObj.id;
             

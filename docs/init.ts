@@ -1,5 +1,6 @@
 #!/usr/bin/env -S deno run -A
 
+// deno-lint-ignore-file no-import-prefix
 import { join } from "https://deno.land/std@0.216.0/path/mod.ts";
 import { existsSync } from "https://deno.land/std@0.216.0/fs/mod.ts";
 

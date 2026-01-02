@@ -6,6 +6,7 @@ export interface IChannel {
   header: string;
   alias?: string;
   masking?: boolean;
+  owner?: string;
 }
 
 export interface IChanEntry {

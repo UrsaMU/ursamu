@@ -66,10 +66,13 @@
     "quickjs-emscripten": "npm:quickjs-emscripten@0.29.0",
     "@ursamu/parser": "npm:@ursamu/parser@1.2.4",
     "dotenv": "jsr:@std/dotenv@^0.224.0",
+    "dotenv/": "jsr:@std/dotenv@^0.224.0/",
+    "dotenv/load": "jsr:@std/dotenv@^0.224.0/load",
     "@digibear/tags": "npm:@digibear/tags@1.0.0",
     "@tailwindcss/typography": "npm:@tailwindcss/typography@^0.5.0"
   },
   "exclude": [
-    "**/_fresh/*"
+    "**/_fresh/*",
+    "docs/_site"
   ]
 }

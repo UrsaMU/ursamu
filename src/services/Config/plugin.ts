@@ -1,5 +1,5 @@
-import { IPlugin } from "../../@types/IPlugin.ts";
-import { ConfigManager } from "./index.ts";
+import type { IPlugin } from "../../@types/IPlugin.ts";
+import type { ConfigManager } from "./index.ts";
 
 /**
  * PluginConfigManager - Manages plugin configurations

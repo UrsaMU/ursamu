@@ -1,4 +1,4 @@
-import { IContext } from "./IContext.ts";
+import type { IContext } from "./IContext.ts";
 
 export interface ICmd {
   name: string;

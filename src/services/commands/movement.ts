@@ -1,4 +1,4 @@
-import { IContext } from "../../@types/IContext.ts";
+import type { IContext } from "../../@types/IContext.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database/index.ts";
 import { send } from "../broadcast/index.ts";

@@ -1,5 +1,5 @@
 import { dpath } from "../../../deps.ts";
-import { IConfig } from "../../@types/IConfig.ts";
+import type { IConfig } from "../../@types/IConfig.ts";
 import { merge } from "./utils.ts";
 
 /**

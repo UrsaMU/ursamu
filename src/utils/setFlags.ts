@@ -1,7 +1,7 @@
-import { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { flags } from "../services/flags/flags.ts";
 import { dbojs } from "../services/Database/index.ts";
-import { IContext } from "../@types/IContext.ts";
+import type { IContext } from "../@types/IContext.ts";
 import { joinChans } from "./joinChans.ts";
 import { getSocket } from "./getSocket.ts";
 

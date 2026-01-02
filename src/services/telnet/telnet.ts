@@ -115,10 +115,11 @@ A modern MUSH-like engine written in TypeScript.
 };
 
 async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: string) {
-  const wsUrl = `ws://localhost:${wsPort}`;
-  const sock = new WebSocket(wsUrl);
+  let sock: WebSocket | null = null;
   let cid: string | undefined;
   const msgBuffer: string[] = [];
+  let isReconnecting = false;
+  let manuallyClosed = false;
 
   const encoder = new TextEncoder();
 
@@ -137,41 +138,85 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
   await write(parser.substitute("telnet", welcome) + "\r\n");
 
-  sock.onopen = () => {
-    // Telnet just connected to WS
-    // Flush buffer
-    while(msgBuffer.length > 0) {
-      const msg = msgBuffer.shift();
-      if(msg) sock.send(msg);
-    }
+  const connect = () => {
+      const wsUrl = `ws://localhost:${wsPort}`;
+      sock = new WebSocket(wsUrl);
+
+      sock.onopen = () => {
+        // Telnet just connected to WS
+        
+        if (isReconnecting) {
+            write(parser.substitute("telnet", "%chGame>%cn Server is back! Reconnected.\r\n"));
+            
+            // If we have a CID, try to re-attach/login?
+            // The current implementation just stores CID but doesn't auto-login on WS layer unless the server handles it.
+            // For now, we assume the user might need to look or interact to resume.
+            // Ideally, we'd send a "re-sync" packet.
+            if (cid) {
+               sock?.send(JSON.stringify({
+                   msg: "look",
+                   data: { cid }
+               }));
+            }
+
+            isReconnecting = false;
+        }
+
+        // Flush buffer
+        while(msgBuffer.length > 0) {
+          const msg = msgBuffer.shift();
+          if(msg) sock?.send(msg);
+        }
+      };
+
+      sock.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload.data?.cid) cid = payload.data.cid;
+
+          // If message is meant for Telnet, it should be in 'msg' (formatted ANSI)
+          if (payload.msg) {
+            write(payload.msg + "\r\n");
+          }
+
+          if (payload.data?.quit) {
+            manuallyClosed = true;
+            conn.close();
+            sock?.close();
+          }
+
+          if (payload.data?.shutdown) {
+              manuallyClosed = true;
+              conn.close();
+              sock?.close();
+              Deno.exit(0);
+          }
+        } catch (e) {
+          console.error("Telnet WS Parse Error", e);
+        }
+      };
+
+      sock.onclose = () => {
+        if (!manuallyClosed) {
+             if (!isReconnecting) {
+                 write(parser.substitute("telnet", "%chGame>%cn Server is restarting...\r\n"));
+                 isReconnecting = true;
+             }
+             
+             // Retry connection in 1 second
+             setTimeout(() => {
+                 connect();
+             }, 1000);
+        }
+      };
+
+      sock.onerror = (_e) => {
+          // Error often precedes close, so we handle logic in onclose or just let it close
+      };
   };
 
-  sock.onmessage = (event) => {
-    try {
-      const payload = JSON.parse(event.data);
-      if (payload.data?.cid) cid = payload.data.cid;
-
-      // If message is meant for Telnet, it should be in 'msg' (formatted ANSI)
-      if (payload.msg) {
-        write(payload.msg + "\r\n");
-      }
-
-      if (payload.data?.quit) {
-        conn.close();
-        sock.close();
-      }
-    } catch (e) {
-      console.error("Telnet WS Parse Error", e);
-    }
-  };
-
-  sock.onclose = () => {
-    try { conn.close(); } catch { /* ignore */ }
-  };
-
-  sock.onerror = (_e) => {
-    try { conn.close(); } catch { /* ignore */ }
-  };
+  // Initial connection
+  connect();
 
   // Read from Telnet
   const buffer = new Uint8Array(1024);
@@ -180,35 +225,26 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
       const n = await conn.read(buffer);
       if (n === null) break; // EOF
 
-      if (sock.readyState === WebSocket.OPEN) {
-        const raw = new TextDecoder().decode(buffer.subarray(0, n));
+      const raw = new TextDecoder().decode(buffer.subarray(0, n));
         
-        // Filter Telnet IAC sequences and non-printable chars
-        // IAC sequences start with 0xFF (\xff)
-        const msg = raw
-          .replace(/\xff[\xfb-\xfe]./g, "") // IAC DO/DONT/WILL/WONT <opt>
-          .replace(/\xff[\xf0-\xfa]/g, "") // IAC SB/SE/etc
-          .replace(/\xff\xff/g, "\xff")    // Escaped IAC
-          .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // Non-printable ASCII
-          .trim();
-
-        if (msg) {
-          sock.send(JSON.stringify({
-            msg,
-            data: { cid }
-          }));
-        }
-      } else {
-        const raw = new TextDecoder().decode(buffer.subarray(0, n));
          // Filter Telnet IAC sequences and non-printable chars
         // IAC sequences start with 0xFF (\xff)
         const msg = raw
           .replace(/\xff[\xfb-\xfe]./g, "") // IAC DO/DONT/WILL/WONT <opt>
           .replace(/\xff[\xf0-\xfa]/g, "") // IAC SB/SE/etc
           .replace(/\xff\xff/g, "\xff")    // Escaped IAC
+          // deno-lint-ignore no-control-regex
           .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // Non-printable ASCII
           .trim();
 
+      if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) {
+        if (msg) {
+          (sock as WebSocket).send(JSON.stringify({
+            msg,
+            data: { cid }
+          }));
+        }
+      } else {
         if(msg) {
           msgBuffer.push(JSON.stringify({
             msg,
@@ -220,7 +256,8 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
   } catch (_err) {
     // console.log("Connection Error:", err);
   } finally {
+    manuallyClosed = true;
     try { conn.close(); } catch { /* ignore */ }
-    if (sock.readyState === WebSocket.OPEN) sock.close();
+    if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) (sock as WebSocket).close();
   }
 } 

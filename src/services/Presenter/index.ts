@@ -1,5 +1,5 @@
 
-import { IState } from "../../interfaces/IMessage.ts";
+import type { IState } from "../../interfaces/IMessage.ts";
 
 export class Presenter {
     static render(state: IState, clientType: "telnet" | "web" = "telnet"): string | object {

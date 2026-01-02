@@ -19,6 +19,7 @@ export interface IConfig {
       connect: string;
     };
   };
+  substitutions?: Record<string, string>;
   plugins?: Record<string, unknown>;
   [key: string]: unknown;
 }

@@ -16,6 +16,7 @@
     "jsr:@std/collections@0.224": "0.224.2",
     "jsr:@std/crypto@0.224.0": "0.224.0",
     "jsr:@std/datetime@~0.225.5": "0.225.6",
+    "jsr:@std/dotenv@*": "0.224.2",
     "jsr:@std/dotenv@0.224": "0.224.2",
     "jsr:@std/dotenv@0.224.0": "0.224.0",
     "jsr:@std/encoding@0.224": "0.224.1",

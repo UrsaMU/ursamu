@@ -7,6 +7,7 @@ import { moniker } from "../../utils/moniker.ts";
 import type { UserSocket } from "../../@types/IMSocket.ts";
 import { Presenter } from "../Presenter/index.ts";
 import type { IMessage } from "../../interfaces/IMessage.ts";
+import { hooks } from "../Hooks/index.ts";
 
 export class WebSocketService {
     private static instance: WebSocketService;
@@ -85,6 +86,7 @@ export class WebSocketService {
                 const player = await playerForSocket(sockData);
                 if (player) {
                     await setFlags(player, "!connected");
+                    await hooks.adisconnect(player);
                     this.broadcast({
                         event: "disconnect",
                         payload: {
@@ -141,6 +143,15 @@ export class WebSocketService {
     // Get all connected sockets
     getConnectedSockets(): UserSocket[] {
         return Array.from(this.socketData.values());
+    }
+    
+    // Disconnect a player by CID
+    disconnect(cid: string) {
+        for (const [socket, meta] of this.socketData.entries()) {
+            if (meta.cid === cid) {
+                socket.close();
+            }
+        }
     }
 }
 

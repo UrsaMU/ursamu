@@ -1,7 +1,7 @@
 import { ConfigManager } from "./index.ts";
 import { PluginConfigManager } from "./plugin.ts";
 import { merge } from "./utils.ts";
-import { IConfig } from "../../@types/IConfig.ts";
+import type { IConfig } from "../../@types/IConfig.ts";
 import defaultConfig from "./defaultConfig.ts";
 
 // Initialize the ConfigManager with the default configuration
@@ -70,7 +70,7 @@ export function getAllConfig(): Record<string, unknown> {
   return configManager.getAll();
 }
 
-import { IPlugin } from "../../@types/IPlugin.ts";
+import type { IPlugin } from "../../@types/IPlugin.ts";
 
 /**
  * Initialize all registered plugins

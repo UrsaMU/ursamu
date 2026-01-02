@@ -1,7 +1,7 @@
 
-import { getQuickJS, QuickJSWASMModule } from "../../../deps.ts";
+import { getQuickJS, type QuickJSWASMModule } from "../../../deps.ts";
 import { createScriptContext } from "./api.ts";
-import { IContext } from "../../@types/IContext.ts";
+import type { IContext } from "../../@types/IContext.ts";
 
 export class ScriptService {
     private static instance: ScriptService;
