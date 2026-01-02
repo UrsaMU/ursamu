@@ -23,6 +23,12 @@ const defaultConfig: IConfig = {
       connect: "../text/default_connect.txt",
     },
   },
+  discord: {
+    token: "",
+    clientId: "",
+    guildId: "",
+    channels: {},
+  },
   plugins: {},
 };
 

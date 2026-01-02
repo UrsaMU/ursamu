@@ -54,7 +54,15 @@ export class WebSocketService {
                 if (!sockData) return;
 
                 // Update cid if provided (handling migration from socket.io logic)
-                if (data.data?.cid) sockData.cid = data.data.cid;
+                if (data.data?.cid) {
+                    sockData.cid = data.data.cid;
+                    // Restore connected flag if missing
+                    const player = await playerForSocket(sockData);
+                    if (player && !player.flags.includes("connected")) {
+                        await setFlags(player, "connected");
+                        console.log(`[WS] Restored session for ${moniker(player)}`);
+                    }
+                }
 
                 // Handle disconnect request
                 if (data.data?.disconnect) {

@@ -20,3 +20,5 @@ export const set = lodash.set;
 export const get = lodash.get;
 export const isnumber = lodash.isnumber;
 export const repeat = lodash.repeat;
+
+export * as discord from "https://deno.land/x/discordeno@18.0.1/mod.ts";

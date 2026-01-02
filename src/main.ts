@@ -18,6 +18,7 @@ import { wsService } from "./services/WebSocket/index.ts";
 import { hash, genSalt } from "../deps.ts";
 import { getNextId } from "./utils/getNextId.ts";
 import { queue } from "./services/Queue/index.ts";
+import { discordBridge } from "./services/discord/index.ts";
 
 let __dirname;
 try {
@@ -80,7 +81,7 @@ export const initializeEngine = async (
   // Load default commands if enabled
   if (loadDefaultCommands) {
     if (isLocal) {
-      plugins(dpath.join(__dirname, "./commands"));
+      await plugins(dpath.join(__dirname, "./commands"));
     } else {
       // On JSR, we import the build-time generated index
       await import("./commands/index.ts");
@@ -174,6 +175,9 @@ export const initializeEngine = async (
   
   // Initialize Queue
   queue.init();
+
+  // Initialize Discord Bridge
+  await discordBridge.init();
 
   Deno.addSignalListener("SIGINT", async () => {
     const players = await dbojs.query({ flags: /connected/i });

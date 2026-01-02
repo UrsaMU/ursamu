@@ -4,6 +4,7 @@ import { addCmd } from "../services/commands/index.ts";
 import { canEdit } from "../utils/canEdit.ts";
 import { target } from "../utils/target.ts";
 import { set } from "../../deps.ts";
+import { setFlags } from "../utils/setFlags.ts";
 
 export default () => {
   addCmd({
@@ -22,6 +23,11 @@ export default () => {
         return send([ctx.socket.id], "I don't see that here.");
 
       if (await canEdit(en, tarObj.dbobj)) {
+        // Check if we are setting a flag (no value provided, or explicit flag syntax)
+        // If k exists but v is undefined, it matches `set obj/attr` (clearing attr).
+        // BUT, our regex is `set (.*)/(.*) = (.*)`. This forces a slash.
+        // So this block handles attributes ONLY.
+        
         tarObj.dbobj.data ||= {};
 
         if (v === undefined) {
@@ -41,6 +47,35 @@ export default () => {
         );
       }
     },
+  });
+
+  addCmd({
+    name: "@set/flags", 
+    pattern: /^[@\+]?set\s+(?!.*\/)(.*?)\s*=\s*(.*)$/i, // neg lookahead for slash in first part
+    lock: "connected",
+    exec: async (ctx, args) => {
+      const [t, flgs] = args;
+      const en = await Obj.get(ctx.socket.cid);
+      if (!en) return;
+
+      const tar = await target(en, t, true);
+      if (!tar) return send([ctx.socket.id], "I don't see that here.");
+      const tarObj = await Obj.get(tar.id);
+      if (!tarObj?.dbobj)
+        return send([ctx.socket.id], "I don't see that here.");
+
+      // Check if user can edit target (basic check)
+      if (await canEdit(en, tarObj.dbobj)) {
+         try {
+            await setFlags(tarObj.dbobj, flgs, en.dbobj);
+            send([ctx.socket.id], `Set ${flgs} on ${tarObj.name}.`);
+         } catch(_e) {
+            send([ctx.socket.id], `Permission denied.`);
+         }
+      } else {
+         send([ctx.socket.id], "Permission denied.");
+      }
+    }
   });
 
   addCmd({

@@ -10,6 +10,8 @@ export interface IDBOBJ {
     name?: string;
     password?: string;
     moniker?: string;
+    money?: number;
+    quota?: number;
     [key: string]: unknown;
   };
 }

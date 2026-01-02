@@ -5,9 +5,17 @@
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_joke from "./routes/api/joke.ts";
+import * as $edit_index from "./routes/edit/index.tsx";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
+import * as $sheet from "./routes/sheet.tsx";
+import * as $wiki_topic_ from "./routes/wiki/[topic].tsx";
+import * as $wiki_index from "./routes/wiki/index.tsx";
+import * as $CharacterSheet from "./islands/CharacterSheet.tsx";
+import * as $CodeEditor from "./islands/CodeEditor.tsx";
 import * as $Counter from "./islands/Counter.tsx";
+import * as $EditPage from "./islands/EditPage.tsx";
+import * as $GameClient from "./islands/GameClient.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
@@ -15,11 +23,19 @@ const manifest = {
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/api/joke.ts": $api_joke,
+    "./routes/edit/index.tsx": $edit_index,
     "./routes/greet/[name].tsx": $greet_name_,
     "./routes/index.tsx": $index,
+    "./routes/sheet.tsx": $sheet,
+    "./routes/wiki/[topic].tsx": $wiki_topic_,
+    "./routes/wiki/index.tsx": $wiki_index,
   },
   islands: {
+    "./islands/CharacterSheet.tsx": $CharacterSheet,
+    "./islands/CodeEditor.tsx": $CodeEditor,
     "./islands/Counter.tsx": $Counter,
+    "./islands/EditPage.tsx": $EditPage,
+    "./islands/GameClient.tsx": $GameClient,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

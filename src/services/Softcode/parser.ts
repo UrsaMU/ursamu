@@ -15,10 +15,15 @@ export async function parser(
       ctx = context as IParserContext;
   } else {
       // Assume it's just data or a partial context
+      // deno-lint-ignore no-explicit-any
+      const anyContext = context as any;
       ctx = {
           data: (context && "data" in context ? context.data : context) as Record<string, unknown>,
           registers: (context && "registers" in context ? context.registers : {}) as Record<string, string>,
           args: (context && "args" in context ? context.args : []) as string[],
+          enactor: anyContext.enactor,
+          executor: anyContext.executor,
+          caller: anyContext.caller
       };
   }
   
@@ -51,6 +56,28 @@ export async function parser(
        if (/\d/.test(next)) {
            const argIdx = parseInt(next);
            output += ctx.args[argIdx] || "";
+           i++;
+           continue;
+       }
+
+       // Substitutions
+       if (next === "#") {
+           output += ctx.enactor ? `#${ctx.enactor.id}` : "#-1";
+           i++;
+           continue;
+       }
+       if (next === "!") {
+           output += ctx.executor ? `#${ctx.executor.id}` : "#-1";
+           i++;
+           continue;
+       }
+       if (next === "n" || next === "N") {
+           output += ctx.enactor ? (ctx.enactor.data?.name || "Unknown") : "";
+           i++;
+           continue;
+       }
+       if (next === "l" || next === "L") {
+           output += ctx.enactor ? `#${ctx.enactor.location}` : "#-1";
            i++;
            continue;
        }

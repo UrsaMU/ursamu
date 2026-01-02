@@ -22,7 +22,11 @@ export default () =>
         return;
       }
 
-      await setFlags(obj, flgs);
-      send([ctx.socket.id], `Flags set on %ch${displayName(en, obj, true)}%cn.`, {});
+      try {
+        await setFlags(obj, flgs, en);
+        send([ctx.socket.id], `Flags set on %ch${displayName(en, obj, true)}%cn.`, {});
+      } catch (e) {
+        send([ctx.socket.id], `Error: ${(e as Error).message}`);
+      }
     },
   });

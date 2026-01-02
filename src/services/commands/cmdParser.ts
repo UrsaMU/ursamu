@@ -11,11 +11,15 @@ export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
 export const txtFiles = new Map<string, string>();
 
-export const addCmd = (...cmd: ICmd[]) => cmds.push(...cmd);
+export const addCmd = (...cmd: ICmd[]) => {
+  console.log(`[CmdParser] Adding ${cmd.length} commands: ${cmd.map(c => c.name).join(", ")}`);
+  cmds.push(...cmd);
+};
 
 cmdParser.use(async (ctx, next) => {
   const char = await Obj.get(ctx.socket.cid);
   const { msg } = ctx;
+  console.log(`[CmdParser] Processing msg: "${msg}" with ${cmds.length} registered commands.`);
   for (const cmd of cmds) {
     const match = msg?.trim().match(cmd.pattern);
     if (flags.check(char?.flags || "", cmd.lock || "")) {
@@ -23,7 +27,7 @@ cmdParser.use(async (ctx, next) => {
         if (char) {
           char.data ||= {};
           char.data.lastCommand = Date.now();
-          await dbojs.modify({ id: char.id }, "$set", char);
+          await dbojs.modify({ id: char.id }, "$set", char.dbobj);
         }
         await cmd.exec(ctx, match.slice(1))?.catch((e) => {
           console.error(e);

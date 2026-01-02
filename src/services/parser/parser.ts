@@ -1,5 +1,52 @@
-import { Parser } from "../../../deps.ts";
+import { Parser, getQuickJS, type QuickJSWASMModule } from "../../../deps.ts";
 const parser = new Parser();
+const quickJs: QuickJSWASMModule = await getQuickJS();
+
+const evalSafe = (code: string) => {
+  try {
+    const vm = quickJs.newContext();
+    const start = Date.now();
+    vm.runtime.setInterruptHandler(() => Date.now() - start > 50);
+    vm.runtime.setMemoryLimit(1024 * 1024);
+    
+    // Polyfill simple return if not present? 
+    // Users might write [js(1+1)] -> evalCode("1+1") returns 2.
+    // If they write [js(return 1+1)], it might fail if evalCode expects expression?
+    // QuickJS evalCode evaluates script. "1+1" works. "return 1+1" is invalid at top level.
+    // So we just eval the code as is.
+    
+    const result = vm.evalCode(code);
+    
+    if (result.error) {
+      const err = vm.dump(result.error);
+      result.error.dispose();
+      vm.dispose();
+      // deno-lint-ignore no-explicit-any
+      return `[JS Error: ${(err as any).message || String(err)}]`;
+    }
+    
+    const value = vm.dump(result.value);
+    result.value.dispose();
+    vm.dispose();
+    return String(value);
+  } catch (e) {
+    return `[JS Error: ${e}]`;
+  }
+};
+
+// Add JS substitution
+parser.addSubs(
+  "telnet", 
+  // @ts-ignore: mu-parser function usage
+  {
+      before: /\[js\(([\s\S]*?)\)\]/g,
+      // @ts-ignore: mu-parser function usage
+      // deno-lint-ignore no-explicit-any
+      after: ((_match: string, code: string) => {
+          return evalSafe(code);
+      }) as any
+  }
+);
 
 parser.addSubs(
   "telnet",
@@ -60,6 +107,15 @@ parser.addSubs(
 
 parser.addSubs(
   "html",
+  // @ts-ignore: mu-parser function usage
+  {
+      before: /\[js\(([\s\S]*?)\)\]/g,
+      // @ts-ignore: mu-parser function usage
+      // deno-lint-ignore no-explicit-any
+      after: ((_match: string, code: string) => {
+          return evalSafe(code);
+      }) as any
+  },
   { before: /%r/g, after: "<br />" },
   { before: /%b/g, after: "&nbsp;", strip: " " },
   { before: /%t/g, after: "&nbsp;&nbsp;&nbsp;&nbsp;" },

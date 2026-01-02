@@ -73,6 +73,8 @@ export default () =>
             name,
             home: startRoom.id,
             password: await hash(password, 10),
+            money: 100,
+            quota: 20
           },
         };
         await dbojs.create(newPlayer);

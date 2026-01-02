@@ -5,6 +5,7 @@ import { chans, dbojs } from "../Database/index.ts";
 import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
+import { discordBridge } from "../discord/index.ts";
 
 export const matchChannel = async (ctx: IContext) => {
   if (!ctx.socket.cid) {
@@ -63,5 +64,6 @@ export const matchChannel = async (ctx: IContext) => {
   }
 
   send([chan.name], `${chan.header} ${msg}`, {});
+  discordBridge.sendToDiscord(chan.name, moniker(en), msg);
   return true;
 };

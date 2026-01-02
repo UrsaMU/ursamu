@@ -7,5 +7,7 @@ import "./time.ts";
 import "./flow.ts";
 import "./logic.ts";
 import "./mail.ts";
+import "./eval.ts";
+import "./iter.ts";
 
 export { getFunction, registerFunction } from "./registry.ts";

@@ -11,6 +11,7 @@ import { isAdmin } from "../utils/isAdmin.ts";
 import { target } from "../utils/target.ts";
 import { getAttribute } from "../utils/getAttribute.ts";
 import { flags } from "../services/flags/flags.ts";
+import { getMapData } from "../services/Map/index.ts";
 
 export default () =>
   addCmd({
@@ -138,6 +139,10 @@ export default () =>
       }
 
       output += repeatString("%cr=%cn", 78);
-      send([ctx.socket.id], output, {});
+      
+      // Generate Map Data (radius 2)
+      const mapData = await getMapData(tar.id, 2);
+      
+      send([ctx.socket.id], output, { map: mapData });
     },
   });

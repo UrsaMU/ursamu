@@ -129,6 +129,39 @@ registerFunction("get", async (args, data) => {
   return attr?.value || "";
 });
 
+registerFunction("v", async (args, data) => {
+    // Alias to get
+    // v(attr) or v(obj/attr)
+    // get() implementation handles obj/attr parsing?
+    // Let's check get implementation above:
+    // It handles args[0] with slash.
+    // So we can just reuse the logic or call the implementation?
+    // We can't easily call the implementation function directly if not exported.
+    // So I'll just copy the logic or register it separately.
+    
+    // START COPY FROM GET
+    const enactor = (data.enactor as IDBOBJ);
+    if (!enactor) return "#-1 NO ENACTOR";
+  
+    const rawArg = args[0] || "";
+    const slashIdx = rawArg.indexOf("/");
+  
+    let thingName = "me";
+    let attrName = rawArg;
+  
+    if (slashIdx !== -1) {
+       thingName = rawArg.slice(0, slashIdx);
+       attrName = rawArg.slice(slashIdx + 1);
+    }
+  
+    const obj = await target(enactor, thingName, true);
+    if (!obj) return "#-1 NO MATCH";
+  
+    const attr = await getAttribute(obj, attrName);
+    return attr?.value || "";
+    // END COPY
+});
+
 registerFunction("lcon", async (args, data) => {
   const enactor = getEnactor(data);
   if (!enactor) return "#-1 NO ENACTOR";

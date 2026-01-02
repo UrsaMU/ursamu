@@ -75,3 +75,9 @@
     });
      ~
     at async plugins (file:///Users/kumakun/github/ursamu/src/utils/loadDIr.ts:8:22)
+[2026-01-02T21:34:01.989Z] [ERROR] Fatal Initialization Error: AddrInUse: Address already in use (os error 48)
+    at listen (ext:deno_net/01_net.js:605:35)
+    at serveInner (ext:deno_http/00_serve.ts:675:16)
+    at Object.serve (ext:deno_http/00_serve.ts:591:10)
+    at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:142:8)
+    at async file:///Users/kumakun/github/ursamu/src/main.ts:313:18

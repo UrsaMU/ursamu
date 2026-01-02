@@ -78,6 +78,38 @@ export default () => {
           const en = await dbojs.queryOne({ id: ctx.socket.cid || "" });
           if (!en) return;
 
+          // Check if giving money
+          if (/^\d+$/.test(item)) {
+              const amount = parseInt(item, 10);
+              const rec = await target(en, receiver);
+              
+              if (!rec || rec.location !== en.location) {
+                  return send([ctx.socket.id], "They aren't here.", {});
+              }
+              
+              if (!rec.flags.includes("player")) {
+                   return send([ctx.socket.id], "You can only give money to players.", {});
+              }
+              
+              const currentMoney = (en.data?.money as number) || 0;
+              if (currentMoney < amount) {
+                  return send([ctx.socket.id], "You don't have that much money.", {});
+              }
+              
+              en.data ||= {};
+              rec.data ||= {};
+              
+              en.data.money = currentMoney - amount;
+              rec.data.money = ((rec.data.money as number) || 0) + amount;
+              
+              await dbojs.modify({ id: en.id }, "$set", en);
+              await dbojs.modify({ id: rec.id }, "$set", rec);
+              
+              send([ctx.socket.id], `You give ${amount} coins to ${moniker(rec)}.`, {});
+              send([`#${rec.id}`], `${moniker(en)} gives you ${amount} coins.`, {});
+              return;
+          }
+
           const thing = await target(en, item);
           if (!thing || thing.location !== en.id) {
               return send([ctx.socket.id], "You aren't carrying that.", {});

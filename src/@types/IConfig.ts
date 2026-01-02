@@ -19,6 +19,12 @@ export interface IConfig {
       connect: string;
     };
   };
+  discord?: {
+    token?: string;
+    clientId?: string;
+    guildId?: string;
+    channels?: Record<string, string>;
+  };
   substitutions?: Record<string, string>;
   plugins?: Record<string, unknown>;
   [key: string]: unknown;

@@ -6,13 +6,16 @@ interface Message {
 }
 
 import SafeMessage from "../components/SafeMessage.tsx";
+import MapDisplay from "../components/MapDisplay.tsx";
 
 export default function GameClient() {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(typeof localStorage !== "undefined" ? localStorage.getItem("ursamu_token") : null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
+  // deno-lint-ignore no-explicit-any
+  const [mapData, setMapData] = useState<any>(null);
   
   // Login State
   const [username, setUsername] = useState("");
@@ -34,8 +37,8 @@ export default function GameClient() {
     e.preventDefault();
     setError("");
     try {
-      // Trying port 4202 for REST API as per discovery (server is on 4202)
-      const res = await fetch("http://localhost:4202/api/v1/auth/", {
+      // Trying port 4203 for REST API (Consolidated server)
+      const res = await fetch("http://localhost:4203/api/v1/auth/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
@@ -49,8 +52,7 @@ export default function GameClient() {
       const data = await res.json();
       if (data.token) {
         setToken(data.token);
-        // Optional: Save to localStorage (client-side only)
-        // localStorage.setItem("ursamu_token", data.token);
+        localStorage.setItem("ursamu_token", data.token);
       } else {
         throw new Error("No token received");
       }
@@ -79,9 +81,8 @@ export default function GameClient() {
       }
 
       // Connect to WS. 
-      // User requested 4202. Code analysis suggested 4203 for Native WS.
-      // I will try 4202 first. If it uses Socket.IO it might fail or upgrade.
-      const wsUrl = "ws://localhost:4202"; 
+      // Using 4203 as per main.ts consolidated server
+      const wsUrl = "ws://localhost:4203"; 
       console.log(`Connecting to ${wsUrl}...`);
       
       const ws = new WebSocket(wsUrl);
@@ -92,7 +93,7 @@ export default function GameClient() {
         // Authenticate / Set CID
         ws.send(JSON.stringify({
           data: { cid },
-          msg: "connect" // Trigger initial room look?
+          // msg: "connect" // Removed to prevent "Huh?" response. CID data handles session restore.
         }));
         
         // Send a look command to get initial state
@@ -104,7 +105,23 @@ export default function GameClient() {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          setMessages((prev) => [...prev, data]);
+          
+          // Separate Map Data from Message Stream if present
+          if (data.data?.map) {
+              setMapData(data.data.map);
+          }
+          
+          // Only add to log if there is a 'msg'
+          if (data.msg) {
+             setMessages((prev) => [...prev, data]);
+          } else if (!data.data?.map) {
+             // If payload is JUST data (like map) and no msg, don't spam chat, unless debugging.
+             // But existing logic dumps generic data to log? 
+             // "If no msg... dump json".
+             // We can suppress that if we handled the map.
+             if (Object.keys(data.data || {}).length === 1 && data.data?.map) return;
+             setMessages((prev) => [...prev, { msg: "" /* No msg to render */ }]); // Or just skip
+          }
         } catch (e) {
           console.error("Error parsing WS message", e);
           setMessages((prev) => [...prev, { msg: event.data }]);
@@ -177,14 +194,17 @@ export default function GameClient() {
       <header class="bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center">
         <h1 class="text-xl font-bold text-purple-400">UrsaMU Client</h1>
         <div class="flex items-center gap-4">
+           <a href="/sheet" class="text-sm text-purple-400 hover:text-purple-300">Character Sheet</a>
            <span class={`w-3 h-3 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></span>
-           <button type="button" onClick={() => { setToken(null); setSocket(null); }} class="text-xs text-gray-400 hover:text-white">Logout</button>
+           <button type="button" onClick={() => { setToken(null); setSocket(null); localStorage.removeItem("ursamu_token"); }} class="text-xs text-gray-400 hover:text-white">Logout</button>
         </div>
       </header>
 
-      {/* Terminal Output */}
-      <div class="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-gray-700">
-        {messages.map((m, i) => (
+      {/* Main Content Area */}
+      <div class="flex-1 flex overflow-hidden">
+        {/* Terminal Output */}
+        <div class="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-gray-700">
+           {messages.map((m, i) => (
           <div key={i} class="break-words">
             {/* Render message content. Depending on format, it might need HTML parsing or ANSI conversion. 
                 For now, just dumping the msg string or JSON */}
@@ -195,6 +215,17 @@ export default function GameClient() {
         ))}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Side Panel (Map & Context) */}
+      <div class="w-64 bg-gray-800 border-l border-gray-700 p-4 hidden md:flex flex-col gap-4">
+          <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">Mini-Map</div>
+          <MapDisplay data={mapData} />
+          
+          <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mt-4">Context</div>
+          {/* We could list clickable exits/objects here later */}
+          <div class="text-sm text-gray-400 italic">Clickable objects coming soon.</div>
+      </div>
+    </div>
 
       {/* Input Area */}
       <form onSubmit={sendCommand} class="bg-gray-800 p-4 border-t border-gray-700 flex gap-2">

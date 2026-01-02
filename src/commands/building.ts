@@ -20,6 +20,24 @@ export default () => {
       if (!ctx.socket.cid) return;
       const en = await dbojs.queryOne({ id: ctx.socket.cid });
       if (!en) return;
+      
+      // Quota Check
+      let cost = 1; // Room
+      if (to) cost++;
+      if (from) cost++;
+      
+      const quota = (en.data?.quota as number) || 0;
+      // Admins (wizard+) usually ignore quota, but for MVP let's enforce or check flags
+      const isStaff = en.flags.includes("wizard") || en.flags.includes("admin");
+      
+      if (!isStaff && quota < cost) {
+          return send([ctx.socket.id], `You don't have enough quota. Cost: ${cost}, You have: ${quota}.`, {});
+      }
+
+      if (!isStaff && en.data) {
+          en.data.quota = quota - cost;
+          await dbojs.modify({ id: en.id }, "$set", en);
+      }
 
       // Dig the room.
       let id = await getNextId("objid");
@@ -27,6 +45,7 @@ export default () => {
         id,
         data: {
           name: room,
+          owner: en.id // Ensure owner is set!
         },
         flags: "room",
       };
@@ -46,6 +65,7 @@ export default () => {
           data: {
             name: to,
             destination: roomObj.id,
+            owner: en.id
           },
           flags: "exit",
         };
@@ -67,6 +87,7 @@ export default () => {
           data: {
             name: from,
             destination: en.location,
+            owner: en.id
           },
           flags: "exit",
         };
@@ -219,6 +240,22 @@ export default () => {
       if (!roomObj) {
         return send([ctx.socket.id], `Could not find %ch${room}%cn.`, {});
       }
+      
+      // Quota Check
+      let cost = 1;
+      if (backExit) cost++;
+      
+      const quota = (en.data?.quota as number) || 0;
+      const isStaff = en.flags.includes("wizard") || en.flags.includes("admin");
+      
+      if (!isStaff && quota < cost) {
+          return send([ctx.socket.id], `You don't have enough quota. Cost: ${cost}, You have: ${quota}.`, {});
+      }
+
+      if (!isStaff && en.data) {
+          en.data.quota = quota - cost;
+          await dbojs.modify({ id: en.id }, "$set", en);
+      }
 
       const id = await getNextId("objid");
       const location = swtch?.toLowerCase() === "inventory" ? en.id : en.location;
@@ -230,6 +267,7 @@ export default () => {
         data: {
           name: name,
           destination: roomObj.id,
+          owner: en.id
         },
       });
 
@@ -253,8 +291,9 @@ export default () => {
             location: roomObj.id,
             data: {
                 name: backExit,
-                destination: en.location
-            }
+                destination: en.location,
+                owner: en.id
+            },
         });
         
         const sourceLoc = en.location ? await dbojs.queryOne({id: en.location}) : en;
@@ -447,6 +486,53 @@ export default () => {
       
       await dbojs.modify({ id: obj.id }, "$set", obj);
       send([ctx.socket.id], `Parent cleared for ${displayName(en, obj, true)}.`, {});
+    }
+  });
+
+  addCmd({
+    name: "@create",
+    pattern: /^@create\s+(.*)/i,
+    lock: "connected builder+",
+    help: "Create a thing",
+    category: "building",
+    exec: async (ctx, args) => {
+      const [name] = args;
+      if (!ctx.socket.cid) return;
+      const en = await dbojs.queryOne({ id: ctx.socket.cid });
+      if (!en) return;
+
+      // Quota Check
+      const cost = 1;
+      const quota = (en.data?.quota as number) || 0;
+      const isStaff = en.flags.includes("wizard") || en.flags.includes("admin");
+      
+      if (!isStaff && quota < cost) {
+          return send([ctx.socket.id], `You don't have enough quota. Cost: ${cost}, You have: ${quota}.`, {});
+      }
+
+      if (!isStaff && en.data) {
+          en.data.quota = quota - cost;
+          await dbojs.modify({ id: en.id }, "$set", en);
+      }
+      
+      const parts = name.split("=");
+      const objName = parts[0];
+      const objCost = parts[1] ? parseInt(parts[1]) : 0; 
+
+      const id = await getNextId("objid");
+      const obj: IDBOBJ = {
+        id,
+        location: en.id, // Inventory
+        flags: "thing",
+        data: {
+          name: objName,
+          owner: en.id,
+          value: objCost
+        }
+      };
+
+      await dbojs.create(obj);
+      send([ctx.socket.id], `You create ${objName}.`, {});
     }
   });
 };

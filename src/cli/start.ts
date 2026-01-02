@@ -55,11 +55,22 @@ const spawnInherit = (script: string) => {
 const mainProc = spawnInherit("src/main.ts");
 const telnetProc = spawnInherit("src/telnet.ts");
 
+// Spawn Web Client
+console.log("Starting Web Client...");
+const webProc = new Deno.Command(Deno.execPath(), {
+  args: ["task", "start"],
+  cwd: join(Deno.cwd(), "src", "web-client"),
+  stdout: "inherit",
+  stderr: "inherit",
+}).spawn();
+
+
 // Handle cleanup
 const cleanup = () => {
   console.log("\nShutting down servers...");
   try { mainProc.kill(); } catch { /* ignore */ }
   try { telnetProc.kill(); } catch { /* ignore */ }
+  try { webProc.kill(); } catch { /* ignore */ }
 };
 
 Deno.addSignalListener("SIGINT", () => {
