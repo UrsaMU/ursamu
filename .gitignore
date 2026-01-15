@@ -10,3 +10,7 @@ config/*.json
 # Don't ignore the README and .gitkeep
 !config/README.md
 !config/.gitkeep
+
+# Ignore skills repository
+.agent/skills
+.agents/skills
