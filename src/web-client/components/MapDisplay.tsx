@@ -1,6 +1,3 @@
-
-
-
 interface IMapNode {
   id: string;
   name: string;
@@ -27,28 +24,34 @@ interface MapDisplayProps {
 }
 
 export default function MapDisplay({ data }: MapDisplayProps) {
-  if (!data) return <div class="text-gray-500 text-xs italic text-center p-4">No map data available</div>;
+  if (!data) {
+    return (
+      <div class="text-gray-500 text-xs italic text-center p-4">
+        No map data available
+      </div>
+    );
+  }
 
   const getCoords = (node: IMapNode) => {
     // Center is 100,100. Scale is 40px per unit.
     return {
       x: 100 + node.x * 50,
-      y: 100 + node.y * 50
+      y: 100 + node.y * 50,
     };
   };
 
   return (
-    <div class="border border-gray-700 rounded bg-gray-900 overflow-hidden w-full h-48 flex items-center justify-center">
+    <div class="border border-white/5 rounded bg-slate-900/60 backdrop-blur-md overflow-hidden w-full h-48 flex items-center justify-center">
       <svg width="200" height="200" viewBox="0 0 200 200">
         {/* Edges */}
         {data.edges.map((edge, i) => {
-          const fromNode = data.nodes.find(n => n.id === edge.from);
-          const toNode = data.nodes.find(n => n.id === edge.to);
+          const fromNode = data.nodes.find((n) => n.id === edge.from);
+          const toNode = data.nodes.find((n) => n.id === edge.to);
           if (!fromNode || !toNode) return null;
-          
+
           const start = getCoords(fromNode);
           const end = getCoords(toNode);
-          
+
           return (
             <line
               key={`edge-${i}`}
@@ -66,7 +69,7 @@ export default function MapDisplay({ data }: MapDisplayProps) {
         {data.nodes.map((node) => {
           const { x, y } = getCoords(node);
           const isCenter = node.id === data.center;
-          
+
           return (
             <g key={node.id}>
               <circle

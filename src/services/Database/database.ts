@@ -2,6 +2,8 @@ import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { getConfig } from "../Config/mod.ts";
 import type { IChannel } from "../../@types/Channels.ts";
 import type { IMail } from "../../@types/IMail.ts";
+import type { ITextEntry } from "../../@types/ITextEntry.ts";
+import type { IScene } from "../../@types/IScene.ts";
 import { dpath, get } from "../../../deps.ts";
 import type { IDatabase, Query, QueryCondition } from "../../interfaces/IDatabase.ts";
 // @ts-ignore: Deno namespace is available at runtime
@@ -194,3 +196,5 @@ export const counters = new DBO<ICounters>("server.counters");
 export const dbojs = new DBO<IDBOBJ>("server.db");
 export const chans = new DBO<IChannel>("server.chans");
 export const mail = new DBO<IMail>("server.mail");
+export const texts = new DBO<ITextEntry>("server.texts");
+export const scenes = new DBO<IScene>("server.scenes");

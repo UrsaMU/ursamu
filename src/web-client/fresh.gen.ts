@@ -4,28 +4,57 @@
 
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
+import * as $_middleware from "./routes/_middleware.ts";
+import * as $api_path_ from "./routes/api/[...path].ts";
 import * as $api_joke from "./routes/api/joke.ts";
+import * as $build from "./routes/build.tsx";
+import * as $directory from "./routes/directory.tsx";
 import * as $edit_index from "./routes/edit/index.tsx";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
+import * as $login from "./routes/login.tsx";
+import * as $play from "./routes/play.tsx";
+import * as $profile from "./routes/profile.tsx";
+import * as $register from "./routes/register.tsx";
+import * as $scenes_id_ from "./routes/scenes/[id].tsx";
+import * as $scenes_index from "./routes/scenes/index.tsx";
+import * as $scenes_new from "./routes/scenes/new.tsx";
 import * as $sheet from "./routes/sheet.tsx";
 import * as $wiki_topic_ from "./routes/wiki/[topic].tsx";
 import * as $wiki_index from "./routes/wiki/index.tsx";
 import * as $CharacterSheet from "./islands/CharacterSheet.tsx";
 import * as $CodeEditor from "./islands/CodeEditor.tsx";
 import * as $Counter from "./islands/Counter.tsx";
+import * as $CreateSceneForm from "./islands/CreateSceneForm.tsx";
 import * as $EditPage from "./islands/EditPage.tsx";
 import * as $GameClient from "./islands/GameClient.tsx";
+import * as $LoginForm from "./islands/LoginForm.tsx";
+import * as $Profile from "./islands/Profile.tsx";
+import * as $RegisterForm from "./islands/RegisterForm.tsx";
+import * as $SceneBuilder from "./islands/SceneBuilder.tsx";
+import * as $ScenePlayer from "./islands/ScenePlayer.tsx";
+import * as $StickyNav from "./islands/StickyNav.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
+    "./routes/_middleware.ts": $_middleware,
+    "./routes/api/[...path].ts": $api_path_,
     "./routes/api/joke.ts": $api_joke,
+    "./routes/build.tsx": $build,
+    "./routes/directory.tsx": $directory,
     "./routes/edit/index.tsx": $edit_index,
     "./routes/greet/[name].tsx": $greet_name_,
     "./routes/index.tsx": $index,
+    "./routes/login.tsx": $login,
+    "./routes/play.tsx": $play,
+    "./routes/profile.tsx": $profile,
+    "./routes/register.tsx": $register,
+    "./routes/scenes/[id].tsx": $scenes_id_,
+    "./routes/scenes/index.tsx": $scenes_index,
+    "./routes/scenes/new.tsx": $scenes_new,
     "./routes/sheet.tsx": $sheet,
     "./routes/wiki/[topic].tsx": $wiki_topic_,
     "./routes/wiki/index.tsx": $wiki_index,
@@ -34,8 +63,15 @@ const manifest = {
     "./islands/CharacterSheet.tsx": $CharacterSheet,
     "./islands/CodeEditor.tsx": $CodeEditor,
     "./islands/Counter.tsx": $Counter,
+    "./islands/CreateSceneForm.tsx": $CreateSceneForm,
     "./islands/EditPage.tsx": $EditPage,
     "./islands/GameClient.tsx": $GameClient,
+    "./islands/LoginForm.tsx": $LoginForm,
+    "./islands/Profile.tsx": $Profile,
+    "./islands/RegisterForm.tsx": $RegisterForm,
+    "./islands/SceneBuilder.tsx": $SceneBuilder,
+    "./islands/ScenePlayer.tsx": $ScenePlayer,
+    "./islands/StickyNav.tsx": $StickyNav,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;

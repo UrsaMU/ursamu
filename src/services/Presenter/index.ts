@@ -1,5 +1,6 @@
 
 import type { IState } from "../../interfaces/IMessage.ts";
+import parser from "../parser/parser.ts";
 
 export class Presenter {
     static render(state: IState, clientType: "telnet" | "web" = "telnet"): string | object {
@@ -11,7 +12,7 @@ export class Presenter {
         let output = "";
 
         if (state.msg) {
-            output += state.msg + "\r\n";
+            output += parser.substitute("telnet", state.msg) + "\r\n";
         }
 
         if (state.room) {

@@ -17,7 +17,20 @@ export interface IConfig {
     playerStart?: string;
     text: {
       connect: string;
+      welcome?: string;
     };
+  };
+  theme?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    background?: string;
+    surface?: string;
+    text?: string;
+    muted?: string;
+    glass?: string;
+    glassBorder?: string;
+    backgroundImage?: string;
   };
   discord?: {
     token?: string;

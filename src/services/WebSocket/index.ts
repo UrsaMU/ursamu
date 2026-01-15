@@ -24,12 +24,13 @@ export class WebSocketService {
         return WebSocketService.instance;
     }
 
-    handleConnection(socket: WebSocket) {
+    handleConnection(socket: WebSocket, clientType: string = "telnet") {
         const onOpen = () => {
             if (this.clients.has(socket)) return;
             this.clients.add(socket);
             this.socketData.set(socket, {
                 id: crypto.randomUUID(),
+                clientType,
                 join: () => { },
                 uID: "",
                 cid: "",
@@ -37,7 +38,7 @@ export class WebSocketService {
                 disconnect: () => { },
                 on: () => { }
             });
-            console.log("New WebSocket connection established");
+            console.log(`New WebSocket connection established (${clientType})`);
         };
 
         if (socket.readyState === WebSocket.OPEN) {
@@ -123,9 +124,14 @@ export class WebSocketService {
             const meta = this.socketData.get(client);
             // Check matching socket ID OR matching CID (Player ID)
             if (meta && (targets.includes(meta.id) || (meta.cid && targets.includes(meta.cid)))) {
-                // client.send(JSON.stringify(Presenter.render(message.payload, "telnet"))); // Defaulting to text for now
-                const output = Presenter.render(message.payload, "telnet");
-                client.send(JSON.stringify({ msg: output, data: message.payload.data }));
+                if (meta.clientType === "web") {
+                     const output = Presenter.render(message.payload, "web");
+                     client.send(JSON.stringify(output));
+                } else {
+                     // client.send(JSON.stringify(Presenter.render(message.payload, "telnet"))); // Defaulting to text for now
+                     const output = Presenter.render(message.payload, "telnet");
+                     client.send(JSON.stringify({ msg: output, data: message.payload.data }));
+                }
             }
         }
     }
@@ -133,18 +139,17 @@ export class WebSocketService {
     // Broadcast to all
     broadcast(message: IMessage) {
         for (const client of this.clients) {
-            // Determine client type (stubbed)
-            // If web client, send jsonData
-            // If telnet client, send textData
-            // For now, send text structure in JSON wrapper or raw?
-            // UrsaMU legacy uses JSON wrapper { msg: string, data: ... }
-
-            const payload = {
-                msg: message.payload.msg,
-                data: message.payload.data
-            };
-
-            client.send(JSON.stringify(payload));
+            const meta = this.socketData.get(client);
+            if (meta?.clientType === "web") {
+                 const output = Presenter.render(message.payload, "web");
+                 client.send(JSON.stringify(output));
+            } else {
+                 const output = Presenter.render(message.payload, "telnet");
+                 client.send(JSON.stringify({
+                     msg: output,
+                     data: message.payload.data
+                 }));
+            }
         }
     }
 

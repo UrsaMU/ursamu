@@ -7,7 +7,7 @@ import { handleRequest } from "./app.ts";
 import "./reboot.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
-import { chans, counters, dbojs } from "./services/Database/index.ts";
+import { chans, counters, dbojs, texts } from "./services/Database/index.ts";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import type { IConfig, IPlugin } from "./@types/index.ts";
@@ -42,6 +42,37 @@ try {
  * @param options Additional options for customizing the initialization
  * @returns An object containing references to the initialized components
  */
+async function initializeDefaultTexts() {
+  // Always try to read from file to keep DB in sync with local dev changes
+  try {
+      const fileContent = await Deno.readTextFile("text/welcome.md");
+      const current = await texts.queryOne({ id: "welcome" });
+
+      if (!current || current.content !== fileContent) {
+          if (current) {
+              await texts.modify({ id: "welcome" }, "$set", { content: fileContent });
+              console.log("Welcome text updated from file.");
+          } else {
+              await texts.create({
+                  id: "welcome",
+                  content: fileContent
+              });
+              console.log("Welcome text seeded from file.");
+          }
+      }
+  } catch (_e) {
+     // File doesn't exist? Check if DB has it
+     const welcome = await texts.queryOne({ id: "welcome" });
+     if (!welcome) {
+        console.log("No welcome text found in file or DB. Creating default.");
+         await texts.create({
+             id: "welcome",
+             content: "# Welcome to UrsaMU\n\nYour journey begins here."
+         });
+     }
+  }
+}
+
 export const initializeEngine = async (
   cfg?: IConfig,
   customPlugins?: IPlugin[],
@@ -145,7 +176,9 @@ export const initializeEngine = async (
       // Handle WebSocket upgrade
       if (req.headers.get("upgrade") === "websocket") {
         const { socket, response } = Deno.upgradeWebSocket(req);
-        wsService.handleConnection(socket);
+        const url = new URL(req.url);
+        const clientType = url.searchParams.get("client") || "telnet";
+        wsService.handleConnection(socket, clientType);
         return response;
       }
 
@@ -170,6 +203,8 @@ export const initializeEngine = async (
   if (autoCreateDefaultChannels) {
     await initializeDefaultChannels();
   }
+
+  await initializeDefaultTexts();
 
   console.log(`Server started on port ${httpPort} (HTTP & WebSockets).`);
   
@@ -204,6 +239,7 @@ export const initializeEngine = async (
       dbojs,
       chans,
       counters,
+      texts,
     },
     broadcast,
     setFlags,
@@ -274,6 +310,8 @@ async function initializeDefaultChannels() {
     console.log("Default channels created");
   }
 }
+
+
 
 // Initialize the UrsaMU engine with custom configuration
 const config = {

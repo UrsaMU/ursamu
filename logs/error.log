@@ -81,3 +81,17 @@
     at Object.serve (ext:deno_http/00_serve.ts:591:10)
     at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:142:8)
     at async file:///Users/kumakun/github/ursamu/src/main.ts:313:18
+[2026-01-14T17:29:11.551Z] [ERROR] Fatal Initialization Error: AddrInUse: Address already in use (os error 48)
+    at listen (ext:deno_net/01_net.js:605:35)
+    at serveInner (ext:deno_http/00_serve.ts:675:16)
+    at Object.serve (ext:deno_http/00_serve.ts:591:10)
+    at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:143:8)
+    at async file:///Users/kumakun/github/ursamu/src/main.ts:317:18
+[2026-01-14T21:15:58.609Z] [ERROR] Fatal Initialization Error: ReferenceError: initializeDefaultTexts is not defined
+    at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:176:3)
+    at eventLoopTick (ext:core/01_core.js:187:7)
+    at async file:///Users/kumakun/github/ursamu/src/main.ts:321:18
+[2026-01-14T21:18:02.687Z] [ERROR] Fatal Initialization Error: ReferenceError: initializeDefaultTexts is not defined
+    at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:176:3)
+    at eventLoopTick (ext:core/01_core.js:187:7)
+    at async file:///Users/kumakun/github/ursamu/src/main.ts:324:18

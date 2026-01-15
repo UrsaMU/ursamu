@@ -1,7 +1,9 @@
 import { Head } from "$fresh/runtime.ts";
 import EditPage from "../../islands/EditPage.tsx";
 
-export default function EditorRoute() {
+import Layout from "../../components/Layout.tsx";
+
+export default function EditorRoute({ url }: { url: URL }) {
   return (
     <>
       <Head>
@@ -9,7 +11,9 @@ export default function EditorRoute() {
         <link rel="stylesheet" href="/styles.css" />
         <script src="https://cdn.tailwindcss.com"></script>
       </Head>
-      <EditPage />
+      <Layout currentPath={url.pathname}>
+        <EditPage />
+      </Layout>
     </>
   );
 }

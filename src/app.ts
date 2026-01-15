@@ -1,4 +1,4 @@
-import { authHandler, dbObjHandler, wikiHandler } from "./routes/index.ts";
+import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler } from "./routes/index.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
 
 /**
@@ -43,6 +43,32 @@ export const handleRequest = async (req: Request): Promise<Response> => {
 
     if (path.startsWith("/api/v1/wiki")) {
       return await wikiHandler(req);
+    }
+
+    if (path.startsWith("/api/v1/scenes")) {
+      const userId = await authenticate(req);
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return await sceneHandler(req, userId);
+    }
+    
+    if (path.startsWith("/api/v1/building")) {
+      const userId = await authenticate(req);
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return await buildingHandler(req, userId);
+    }
+
+    if (path.startsWith("/api/v1/config") || path.startsWith("/api/v1/connect") || path.startsWith("/api/v1/welcome")) {
+        return await configHandler(req);
     }
 
     // Health check or root
