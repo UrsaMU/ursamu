@@ -95,3 +95,9 @@
     at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:176:3)
     at eventLoopTick (ext:core/01_core.js:187:7)
     at async file:///Users/kumakun/github/ursamu/src/main.ts:324:18
+[2026-01-15T17:33:41.697Z] [ERROR] Fatal Initialization Error: AddrInUse: Address already in use (os error 48)
+    at listen (ext:deno_net/01_net.js:605:35)
+    at serveInner (ext:deno_http/00_serve.ts:675:16)
+    at Object.serve (ext:deno_http/00_serve.ts:591:10)
+    at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:174:8)
+    at async file:///Users/kumakun/github/ursamu/src/main.ts:355:18

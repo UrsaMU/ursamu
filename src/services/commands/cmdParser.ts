@@ -12,7 +12,6 @@ export const cmds: ICmd[] = [];
 export const txtFiles = new Map<string, string>();
 
 export const addCmd = (...cmd: ICmd[]) => {
-  console.log(`[CmdParser] Adding ${cmd.length} commands: ${cmd.map(c => c.name).join(", ")}`);
   cmds.push(...cmd);
 };
 

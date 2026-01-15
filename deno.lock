@@ -67,8 +67,6 @@
     "jsr:@zaubrik/djwt@^3.0.2": "3.0.2",
     "npm:@digibear/tags@1.0.0": "1.0.0",
     "npm:@js-temporal/polyfill@0.4.4": "0.4.4",
-    "npm:@preact/signals-core@1.5.1": "1.5.1",
-    "npm:@preact/signals@1.2.2": "1.2.2_preact@10.22.0",
     "npm:@tailwindcss/typography@0.5": "0.5.19_tailwindcss@3.3.6__postcss@8.4.38",
     "npm:@types/estree@1.0.5": "1.0.5",
     "npm:@types/express@4.17.21": "4.17.21",
@@ -439,16 +437,6 @@
       "dependencies": [
         "@nodelib/fs.scandir",
         "fastq"
-      ]
-    },
-    "@preact/signals-core@1.5.1": {
-      "integrity": "sha512-dE6f+WCX5ZUDwXzUIWNMhhglmuLpqJhuy3X3xHrhZYI0Hm2LyQwOu0l9mdPiWrVNsE+Q7txOnJPgtIqHCYoBVA=="
-    },
-    "@preact/signals@1.2.2_preact@10.22.0": {
-      "integrity": "sha512-ColCqdo4cRP18bAuIR4Oik5rDpiyFtPIJIygaYPMEAwTnl4buWkBOflGBSzhYyPyJfKpkwlekrvK+1pzQ2ldWw==",
-      "dependencies": [
-        "@preact/signals-core",
-        "preact"
       ]
     },
     "@tailwindcss/typography@0.5.19_tailwindcss@3.3.6__postcss@8.4.38": {
@@ -2870,8 +2858,6 @@
       "jsr:@std/std@0.224",
       "jsr:@zaubrik/djwt@^3.0.2",
       "npm:@digibear/tags@1.0.0",
-      "npm:@preact/signals-core@1.5.1",
-      "npm:@preact/signals@1.2.2",
       "npm:@tailwindcss/typography@0.5",
       "npm:@ursamu/parser@1.2.4",
       "npm:bcryptjs@2.4.3",

@@ -13,7 +13,7 @@ interface LayoutProps {
 
 export default function Layout({
   children,
-  isLanding = false,
+  isLanding: _isLanding = false,
   currentPath = "",
   noSidebar = false,
   noHero: _noHero = false,
@@ -39,7 +39,7 @@ export default function Layout({
       <StickyNav currentPath={currentPath} />
 
       {/* Main Content Grid */}
-      {!isLanding && !noSidebar
+      {!noSidebar
         ? (
           <div
             id="main-content"
@@ -51,21 +51,26 @@ export default function Layout({
 
             {/* Right Sidebar - Widgets */}
             <aside class="space-y-6 hidden lg:block">
-              <SidebarWidget title="System Status">
+              <SidebarWidget
+                title="Game Status"
+                icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                }
+              >
                 <div class="space-y-4">
                   <div class="flex justify-between items-center text-sm border-b border-glass-border pb-2">
-                    <span class="text-muted uppercase tracking-wider text-[0.65rem] font-header font-bold">
+                    <span class="text-slate-300 uppercase tracking-wider text-xs font-header font-bold">
                       Players Online
                     </span>
-                    <span class="text-text font-mono font-bold text-lg text-primary drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]">
+                    <span class="text-white font-mono font-bold text-lg drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]">
                       12
                     </span>
                   </div>
                   <div class="flex justify-between items-center text-sm">
-                    <span class="text-muted uppercase tracking-wider text-[0.65rem] font-header font-bold">
+                    <span class="text-slate-300 uppercase tracking-wider text-xs font-header font-bold">
                       Server Date
                     </span>
-                    <span class="text-muted font-mono text-xs">2239-03-10</span>
+                    <span class="text-slate-300 font-mono text-xs">2239-03-10</span>
                   </div>
                   <div class="pt-2 text-xs text-center flex items-center justify-center gap-2 text-emerald-400 font-mono uppercase tracking-wider bg-emerald-950/20 py-2 rounded border border-emerald-500/10">
                     <span class="relative flex h-2 w-2">
@@ -79,22 +84,27 @@ export default function Layout({
                 </div>
               </SidebarWidget>
 
-              <SidebarWidget title="Upcoming Events">
+              <SidebarWidget
+                title="Upcoming Events"
+                icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                }
+              >
                 <ul class="space-y-3">
                   <li class="flex gap-3 items-start group cursor-pointer p-2 rounded hover:bg-glass-highlight transition-colors border border-transparent hover:border-glass-border">
                     <div class="bg-surface border border-glass-border rounded px-2 py-1 text-center min-w-[3rem] group-hover:border-primary/50 transition-colors shadow-lg">
                       <div class="text-[0.6rem] uppercase text-red-400 font-bold font-header">
                         MAR
                       </div>
-                      <div class="text-lg font-bold text-text leading-none font-mono">
+                      <div class="text-lg font-bold text-white leading-none font-mono">
                         15
                       </div>
                     </div>
                     <div>
-                      <div class="text-sm font-bold text-text group-hover:text-primary transition-colors font-header tracking-wide">
+                      <div class="text-sm font-bold text-white group-hover:text-primary transition-colors font-header tracking-wide">
                         Officer's Ball
                       </div>
-                      <div class="text-[0.65rem] text-muted mt-0.5 font-mono">
+                      <div class="text-xs text-slate-300 mt-0.5 font-mono">
                         20:00 server time
                       </div>
                     </div>
@@ -104,15 +114,15 @@ export default function Layout({
                       <div class="text-[0.6rem] uppercase text-sky-400 font-bold font-header">
                         MAR
                       </div>
-                      <div class="text-lg font-bold text-text leading-none font-mono">
+                      <div class="text-lg font-bold text-white leading-none font-mono">
                         18
                       </div>
                     </div>
                     <div>
-                      <div class="text-sm font-bold text-text group-hover:text-primary transition-colors font-header tracking-wide">
+                      <div class="text-sm font-bold text-white group-hover:text-primary transition-colors font-header tracking-wide">
                         Fleet Maneuvers
                       </div>
-                      <div class="text-[0.65rem] text-muted mt-0.5 font-mono">
+                      <div class="text-xs text-slate-300 mt-0.5 font-mono">
                         14:00 server time
                       </div>
                     </div>
@@ -120,7 +130,12 @@ export default function Layout({
                 </ul>
               </SidebarWidget>
 
-              <SidebarWidget title="Recent Scenes">
+              <SidebarWidget
+                title="Recent Scenes"
+                icon={
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                }
+              >
                 <ul class="space-y-1 text-sm">
                   <li>
                     <a href="#" class="group block p-2 rounded hover:bg-glass-highlight transition-colors border border-transparent hover:border-glass-border">
@@ -128,14 +143,14 @@ export default function Layout({
                         <span class="text-[0.6rem] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono uppercase">
                           Social
                         </span>
-                        <span class="text-[0.65rem] text-muted font-mono group-hover:text-muted/80">
+                        <span class="text-xs text-slate-300 font-mono group-hover:text-slate-200">
                           2239-03-10
                         </span>
                       </div>
-                      <span class="text-text group-hover:text-primary transition-colors font-bold block text-sm font-header tracking-wide">
+                      <span class="text-white group-hover:text-primary transition-colors font-bold block text-sm font-header tracking-wide">
                         Distractions
                       </span>
-                      <span class="text-muted text-xs mt-1 block group-hover:text-muted/80">
+                      <span class="text-slate-300 text-xs mt-1 block group-hover:text-slate-200">
                          The Mess Hall
                       </span>
                     </a>
@@ -146,14 +161,14 @@ export default function Layout({
                         <span class="text-[0.6rem] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono uppercase">
                           Event
                         </span>
-                        <span class="text-[0.65rem] text-muted font-mono group-hover:text-muted/80">
+                        <span class="text-xs text-slate-300 font-mono group-hover:text-slate-200">
                           2239-03-09
                         </span>
                       </div>
-                      <span class="text-text group-hover:text-primary transition-colors font-bold block text-sm font-header tracking-wide">
+                      <span class="text-white group-hover:text-primary transition-colors font-bold block text-sm font-header tracking-wide">
                         The End of the Line
                       </span>
-                      <span class="text-muted text-xs mt-1 block group-hover:text-muted/80">
+                      <span class="text-slate-300 text-xs mt-1 block group-hover:text-slate-200">
                         Briefing Room
                       </span>
                     </a>

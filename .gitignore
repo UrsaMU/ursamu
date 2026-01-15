@@ -14,3 +14,6 @@ config/*.json
 # Ignore skills repository
 .agent/skills
 .agents/skills
+
+# Fresh build directory
+_fresh/

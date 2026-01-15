@@ -1,4 +1,6 @@
-#!/bin/bash
+
+# Clear the terminal
+clear
 
 # Run script for UrsaMU
 # This script runs both the UrsaMU main server and telnet server with the necessary flags

@@ -61,30 +61,20 @@ export default function Home({ data, url }: PageProps<WelcomeData>) {
   const htmlContent = marked.parse(content);
 
   return (
-    <Layout isLanding currentPath={url.pathname} noHero>
+    <Layout currentPath={url.pathname} noHero>
       <Head>
         <title>UrsaMU - Home</title>
       </Head>
 
-      {/* Full Screen Welcome Section */}
-      <div class="relative min-h-screen w-full overflow-hidden flex flex-col">
-        
-        {/* Hero Content */}
-        <div class="flex-grow container mx-auto px-4 relative z-20 flex flex-col justify-center py-20">
-          {/* Main Hero Content (Centered) - Standard Web Content */}
-          <div class="space-y-8 animate-fade-in-up max-w-4xl mx-auto w-full">
-            <div class="mb-8 hidden">
-              {/* Connection Info - Prominent (Configurable) */}
-            </div>
-
-            {/* deno-lint-ignore react-no-danger */}
-            <div
-              class="content prose prose-invert prose-lg max-w-none text-muted"
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-            />
-          </div>
-        </div>
+      {/* Main Hero Content (Centered) - Standard Web Content */}
+      <div class="space-y-8 animate-fade-in-up w-full">
+        {/* deno-lint-ignore react-no-danger */}
+        <div
+          class="content prose prose-invert prose-lg max-w-none text-muted"
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
+        />
       </div>
     </Layout>
   );
 }
+
