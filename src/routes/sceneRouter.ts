@@ -3,7 +3,7 @@ import { getNextId } from "../utils/getNextId.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
 import type { IScene, IPose } from "../@types/IScene.ts";
 import { send } from "../services/broadcast/index.ts";
-import { evaluateLock } from "../utils/evaluateLock.ts";
+import { evaluateLock, hydrate } from "../utils/evaluateLock.ts";
 
 export const sceneHandler = async (req: Request, userId: string): Promise<Response> => {
   const url = new URL(req.url);
@@ -38,7 +38,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           } else {
               try {
                  if (typeof evaluateLock === 'function') {
-                     canEnter = await evaluateLock(lock || "", user.dbobj, room);
+                     canEnter = await evaluateLock(lock || "", hydrate(user.dbobj), hydrate(room));
                  } else {
                      canEnter = true; 
                  }

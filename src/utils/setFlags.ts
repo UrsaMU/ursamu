@@ -4,7 +4,7 @@ import { dbojs } from "../services/Database/index.ts";
 import type { IContext } from "../@types/IContext.ts";
 import { joinChans } from "./joinChans.ts";
 import { getSocket } from "./getSocket.ts";
-import { evaluateLock } from "./evaluateLock.ts";
+import { evaluateLock, hydrate } from "./evaluateLock.ts";
 
 export const setFlags = async (dbo: IDBOBJ, flgs: string, enactor?: IDBOBJ) => {
   if (enactor) {
@@ -21,7 +21,7 @@ export const setFlags = async (dbo: IDBOBJ, flgs: string, enactor?: IDBOBJ) => {
 
       if (flagDef) {
         if (flagDef.lock) {
-          if (!(await evaluateLock(flagDef.lock, enactor, dbo))) {
+          if (!(await evaluateLock(flagDef.lock, hydrate(enactor), hydrate(dbo)))) {
             throw new Error(`Permission denied: ${flagDef.name}`);
           }
         }

@@ -119,7 +119,7 @@ export default function StickyNav(
                   onClick={() => setMenuOpen(!menuOpen)}
                   class="flex items-center gap-3 animate-fade-in hover:bg-white/5 rounded-full pl-3 pr-1 py-1 transition-colors border border-transparent hover:border-white/5"
                 >
-                  <span class="text-xs font-bold uppercase tracking-wider text-muted select-none">
+                  <span class="text-xs font-bold uppercase tracking-wider text-slate-200 select-none">
                     {username}
                   </span>
                   <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#F59E0B] to-amber-600 flex items-center justify-center text-white font-bold text-xs shadow-lg border border-white/10">

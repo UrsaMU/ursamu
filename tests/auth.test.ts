@@ -19,7 +19,7 @@ Deno.test("Auth Route", async (t) => {
         data: {
           name: "AuthTestUser",
           alias: "authtestuser",
-          password: await hash("password123"),
+          password: await hash("password123", 10),
         },
       });
     }

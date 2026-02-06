@@ -38,6 +38,14 @@ export interface IConfig {
     guildId?: string;
     channels?: Record<string, string>;
   };
+  intents?: {
+    registry: Record<string, {
+      priority: number;
+      enabled: boolean;
+      metadata?: Record<string, unknown>;
+    }>;
+    interceptorOrder: "FIFO" | "LIFO";
+  };
   substitutions?: Record<string, string>;
   plugins?: Record<string, unknown>;
   [key: string]: unknown;

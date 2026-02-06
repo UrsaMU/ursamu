@@ -53,12 +53,15 @@ export default function LoginForm() {
       <div class="w-full max-w-md relative z-10">
         <form
           onSubmit={handleLogin}
-          class="bg-slate-900/60 border border-white/5 p-8 md:p-10 rounded-3xl backdrop-blur-md shadow-2xl relative overflow-hidden group"
+          class="bg-gradient-to-br from-slate-900/90 to-slate-900/50 border border-white/10 p-8 md:p-10 rounded-3xl backdrop-blur-xl shadow-2xl shadow-black/20 relative overflow-hidden group"
         >
+          {/* Glossy Top Highlight */}
+          <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50"></div>
+
           {/* Decorative gradients */}
-          <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-700">
+          <div class="absolute -top-24 -right-24 w-48 h-48 bg-primary/10 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-700">
           </div>
-          <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-700">
+          <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl opacity-30 group-hover:opacity-50 transition-opacity duration-700">
           </div>
 
           <div class="relative z-10">
@@ -100,7 +103,7 @@ export default function LoginForm() {
                   type="text"
                   value={username}
                   onInput={(e) => setUsername(e.currentTarget.value)}
-                  class="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 focus:bg-black/40 transition-all duration-300 placeholder:text-slate-600 focus:ring-1 focus:ring-primary/50 text-base"
+                  class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 focus:bg-slate-900/80 transition-all duration-300 placeholder:text-slate-600 focus:ring-1 focus:ring-primary/50 text-base"
                   placeholder="Enter your username"
                   required
                 />
@@ -114,7 +117,7 @@ export default function LoginForm() {
                   type="password"
                   value={password}
                   onInput={(e) => setPassword(e.currentTarget.value)}
-                  class="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 focus:bg-black/40 transition-all duration-300 placeholder:text-slate-600 focus:ring-1 focus:ring-primary/50 text-base"
+                  class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 focus:bg-slate-900/80 transition-all duration-300 placeholder:text-slate-600 focus:ring-1 focus:ring-primary/50 text-base"
                   placeholder="••••••••"
                   required
                 />
@@ -124,7 +127,7 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              class="w-full bg-gradient-to-r from-primary to-orange-600 hover:from-primary/90 hover:to-orange-600/90 text-white font-bold py-3.5 px-6 rounded-xl mt-8 transition-all duration-300 shadow-lg shadow-primary/20 hover:shadow-primary/30 uppercase tracking-widest text-xs transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center gap-2"
+              class="w-full bg-gradient-to-r from-primary to-orange-600 hover:from-primary/90 hover:to-orange-600/90 text-white font-bold py-3.5 px-6 rounded-xl mt-8 transition-all duration-300 shadow-lg shadow-primary/20 hover:shadow-primary/30 uppercase tracking-widest text-xs transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex justify-center items-center gap-2 border border-white/10"
             >
               {loading
                 ? (

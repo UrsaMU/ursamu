@@ -126,6 +126,12 @@ export class Obj implements IEntity {
     return this.obj.location;
   }
 
+  set location(loc: string | undefined) {
+    if (!this.obj) return;
+    this.obj.location = loc;
+    this.save();
+  }
+
   get description() {
     return this.obj.description;
   }

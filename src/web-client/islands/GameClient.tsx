@@ -208,7 +208,10 @@ export default function GameClient() {
         <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none">
         </div>
 
-        <GameOutput messages={messages} />
+        <GameOutput 
+          messages={messages} 
+          onAction={(action) => socket?.send(JSON.stringify({ msg: action }))}
+        />
 
         <div ref={messagesEndRef} />
 
