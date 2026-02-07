@@ -33,14 +33,21 @@ export async function initConfig(config?: IConfig): Promise<void> {
   if (config) {
     // Merge the provided config with the default config
     const mergedConfig = merge(defaultConfig, config);
+    let changed = false;
 
-    // Set the merged config in the ConfigManager
+    // Set the merged config in the ConfigManager only if it differs
     Object.entries(mergedConfig).forEach(([key, value]) => {
-      configManager.set(key, value);
+      const current = configManager.get(key);
+      if (JSON.stringify(current) !== JSON.stringify(value)) {
+        configManager.set(key, value);
+        changed = true;
+      }
     });
 
-    // Save the configuration
-    configManager.saveConfig();
+    // Save the configuration only if something changed
+    if (changed) {
+      configManager.saveConfig();
+    }
   }
 }
 

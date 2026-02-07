@@ -1,3 +1,0 @@
-# quit
-
-No help available.

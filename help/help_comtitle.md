@@ -1,3 +1,0 @@
-# comtitle
-
-No help available.

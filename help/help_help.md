@@ -1,3 +1,0 @@
-# help
-
-No help available.

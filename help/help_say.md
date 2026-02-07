@@ -1,3 +1,0 @@
-# say
-
-No help available.

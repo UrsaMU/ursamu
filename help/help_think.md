@@ -1,3 +1,0 @@
-# think
-
-No help available.

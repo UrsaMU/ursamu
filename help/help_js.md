@@ -1,3 +1,0 @@
-# js
-
-No help available.

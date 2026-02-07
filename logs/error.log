@@ -101,3 +101,29 @@
     at Object.serve (ext:deno_http/00_serve.ts:591:10)
     at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:174:8)
     at async file:///Users/kumakun/github/ursamu/src/main.ts:355:18
+[2026-02-06T19:53:08.653Z] [ERROR] Fatal Initialization Error: AddrInUse: Address already in use (os error 48)
+    at listen (ext:deno_net/01_net.js:605:35)
+    at serveInner (ext:deno_http/00_serve.ts:675:16)
+    at Object.serve (ext:deno_http/00_serve.ts:591:10)
+    at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:174:8)
+    at async file:///Users/kumakun/github/ursamu/src/main.ts:355:18
+[2026-02-07T19:09:36.248Z] [ERROR] Fatal Initialization Error: AddrInUse: Address already in use (os error 48)
+    at listen (ext:deno_net/01_net.js:605:35)
+    at serveInner (ext:deno_http/00_serve.ts:675:16)
+    at Object.serve (ext:deno_http/00_serve.ts:591:10)
+    at initializeEngine (file:///Users/kumakun/github/ursamu/src/main.ts:174:8)
+    at async file:///Users/kumakun/github/ursamu/src/main.ts:355:18
+[2026-02-07T19:48:37.813Z] [ERROR] Unhandled Rejection: TypeError: Cannot read properties of undefined (reading '0')
+    at DBO.matchesQuery (file:///Users/kumakun/github/ursamu/src/services/Database/database.ts:158:62)
+    at DBO.matchesQuery (file:///Users/kumakun/github/ursamu/src/services/Database/database.ts:165:19)
+    at DBO.matchesQuery (file:///Users/kumakun/github/ursamu/src/services/Database/database.ts:165:19)
+    at DBO.query (file:///Users/kumakun/github/ursamu/src/services/Database/database.ts:92:16)
+    at eventLoopTick (ext:core/01_core.js:187:7)
+    at async file:///Users/kumakun/github/ursamu/src/services/Sandbox/SandboxService.ts:326:34
+[2026-02-07T19:48:40.744Z] [ERROR] Unhandled Rejection: TypeError: Cannot read properties of undefined (reading '0')
+    at DBO.matchesQuery (file:///Users/kumakun/github/ursamu/src/services/Database/database.ts:158:62)
+    at DBO.matchesQuery (file:///Users/kumakun/github/ursamu/src/services/Database/database.ts:165:19)
+    at DBO.matchesQuery (file:///Users/kumakun/github/ursamu/src/services/Database/database.ts:165:19)
+    at DBO.query (file:///Users/kumakun/github/ursamu/src/services/Database/database.ts:92:16)
+    at eventLoopTick (ext:core/01_core.js:187:7)
+    at async file:///Users/kumakun/github/ursamu/src/services/Sandbox/SandboxService.ts:326:34

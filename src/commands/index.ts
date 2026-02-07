@@ -2,7 +2,6 @@ import "./@js.ts";
 import "./alias.ts";
 import "./attrCommands.ts";
 import "./create.ts";
-import "./desc.ts";
 import "./format.ts";
 import "./help.ts";
 import "./lock.ts";

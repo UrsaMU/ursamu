@@ -1,3 +1,0 @@
-# delcom
-
-No help available.

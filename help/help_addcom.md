@@ -1,3 +1,0 @@
-# addcom
-
-No help available.

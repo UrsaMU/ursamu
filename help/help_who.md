@@ -1,3 +1,0 @@
-# who
-
-No help available.

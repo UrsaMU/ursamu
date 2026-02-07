@@ -1,3 +1,0 @@
-# examine
-
-No help available.

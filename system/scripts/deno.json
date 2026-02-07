@@ -1,0 +1,6 @@
+{
+  "extends": "../../deno.json",
+  "compilerOptions": {
+    "lib": ["deno.window", "deno.unstable"]
+  }
+}

@@ -309,6 +309,36 @@ class LocalSandbox {
             }
             break;
           }
+          case "mail:send": {
+            if (e.data.mail) {
+              const { mail } = await import("../Database/index.ts");
+              (async () => {
+                await mail.create(e.data.mail);
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            }
+            break;
+          }
+          case "mail:read": {
+            if (e.data.query) {
+               const { mail } = await import("../Database/index.ts");
+               (async () => {
+                 const results = await mail.query(e.data.query);
+                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: results });
+               })();
+            }
+            break;
+          }
+          case "mail:delete": {
+            if (e.data.id) {
+               const { mail } = await import("../Database/index.ts");
+               (async () => {
+                 await mail.delete({ id: e.data.id });
+                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+               })();
+            }
+            break;
+          }
         }
       };
       worker.onerror = (e) => {

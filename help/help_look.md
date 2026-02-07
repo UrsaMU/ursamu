@@ -1,3 +1,0 @@
-# look
-
-No help available.

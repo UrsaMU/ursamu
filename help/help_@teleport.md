@@ -1,3 +1,0 @@
-# @teleport
-
-Teleport an object

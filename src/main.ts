@@ -88,7 +88,7 @@ export const initializeEngine = async (
 ): Promise<any> => {
   // Set default options
   const {
-    loadDefaultCommands = true,
+    loadDefaultCommands = false,
     loadDefaultTextFiles = true,
     autoCreateDefaultRooms = true,
     autoCreateDefaultChannels = true,

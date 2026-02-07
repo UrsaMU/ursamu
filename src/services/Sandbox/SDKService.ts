@@ -1,4 +1,6 @@
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import type { IDBOBJ } from "../../@types/IDBObj.ts";
+import type { Obj } from "../DBObjs/DBObjs.ts";
 
 export interface SDKObject {
   id: string;
@@ -55,5 +57,38 @@ export class SDKService {
       target: context.target,
       cmd: context.cmd || { name: "", args: [] }
     } as unknown as Partial<IUrsamuSDK>;
+  }
+
+  /**
+   * Hydrate a database object wrapper into a serializable SDKObject.
+   * @param obj The database object wrapper to hydrate.
+   * @param fetchContents Whether to also hydrate the contents of the object.
+   */
+  static async hydrate(obj: Obj, fetchContents = false): Promise<SDKObject> {
+    const data = obj.data || {};
+    const state = { 
+      ...data, 
+      ...(data.state as Record<string, unknown> || {}),
+      name: obj.name, // Ensure name is available in state
+    };
+
+    const sdkObj: SDKObject = {
+      id: obj.id,
+      name: obj.name,
+      flags: new Set(obj.flags.split(" ")),
+      state: state,
+    };
+
+    if (fetchContents) {
+      const contents = await obj.contents();
+      sdkObj.contents = await Promise.all(
+        contents.map(async (c) => {
+          const { Obj } = await import("../DBObjs/DBObjs.ts");
+          return await this.hydrate(new Obj(c as unknown as IDBOBJ));
+        })
+      );
+    }
+
+    return sdkObj;
   }
 }

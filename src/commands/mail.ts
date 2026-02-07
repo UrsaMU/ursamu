@@ -1,555 +1,171 @@
-import { Obj } from "../services/DBObjs/index.ts";
-import { dbojs, mail } from "../services/Database/index.ts";
-import { send } from "../services/broadcast/index.ts";
-import { addCmd, force } from "../services/commands/index.ts";
-import { center } from "../utils/format.ts";
-import { target } from "../utils/target.ts";
-import type { IMail } from "../@types/IMail.ts";
+import { addCmd } from "../services/commands/index.ts";
+import { mailer, comp, mailadd } from "../../system/scripts/mail.ts";
 
-export default () => {
-  addCmd({
-    name: "@mail",
-    pattern: /[@/+]?mail\s+(.*)\s*=\s*(.*)/,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const [targets, subject] = args;
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const tars = [];
-      for (const tar of targets.split(",")) {
-        const t = await target(en, tar.trim());
-        if (t) {
-          tars.push(t);
-        }
-      }
+addCmd({
+  name: "@mail",
+  pattern: /[@/+]?mail\s+(.*)\s*=\s*(.*)/,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await comp(ctx.socket, args);
+  },
+});
 
-      en.dbobj.data ||= {};
-      const ids = tars.map((t) => `#${t.id}`) as string[];
-      if (en.dbobj.data.tempMail)
-        return send(
-          [ctx.socket.id],
-          "You already have a message started. Use @mail/send to send it."
-        );
+addCmd({
+  name: "-",
+  pattern: /^(-|~)(.*)/,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailadd(ctx.socket, args);
+  },
+});
 
-      en.dbobj.data.tempMail = {
-        from: `#${en.id}`,
-        to: ids,
-        subject,
-        message: "",
-        date: Date.now(),
-      };
+addCmd({
+  name: "@mail/send",
+  pattern: /^(?:[@+]?mail\/send|--)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx) => {
+    await mailer(ctx.socket, ["send"]);
+  },
+});
 
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      await send(
-        [ctx.socket.id],
-        "Enter your message with '-<text>'. Use @mail/send to send it."
-      );
-    },
-  });
+addCmd({
+  name: "@mail/quick",
+  pattern: /^[@/+]?mail\/quick\s+(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["quick", ...args]);
+  },
+});
 
-  addCmd({
-    name: "-",
-    pattern: /^(-|~)(.*)/,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const [marker, message] = args;
-      const en = await Obj.get(ctx.socket.cid);
+addCmd({
+  name: "@mail/proof",
+  pattern: /^[@/+]?mail\/proof/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx) => {
+    await mailer(ctx.socket, ["proof"]);
+  },
+});
 
-      if (!en) return;
-      en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
-        return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+addCmd({
+  name: "@mail/edit",
+  pattern: /^[@/+]?mail\/edit\s+(.*)\s*=\s*(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["edit", ...args]);
+  },
+});
 
-      const tempMail = en.dbobj.data.tempMail as IMail;
-      if (marker === "~") {
-        tempMail.message +=
-          message + " " + tempMail.message;
-      } else if (marker === "-" && message === "-") {
-        return force(ctx, "@mail/send");
-      } else {
-        tempMail.message += message + " ";
-      }
+addCmd({
+  name: "@mail/abort",
+  pattern: /^[@/+]?mail\/abort/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx) => {
+    await mailer(ctx.socket, ["abort"]);
+  },
+});
 
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      send([ctx.socket.id], "%chMAIL:%cn Message updated.");
-    },
-  });
+addCmd({
+  name: "@mail/cc",
+  pattern: /^[@/+]?mail\/cc\s+(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["cc", ...args]);
+  },
+});
 
-  addCmd({
-    name: "@mail/send",
-    pattern: /^(?:[@+]?mail\/send|--)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
-        return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+addCmd({
+  name: "@mail/bcc",
+  pattern: /^[@/+]?mail\/bcc\s+(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["bcc", ...args]);
+  },
+});
 
-      const message = en.dbobj.data.tempMail as IMail;
-      if (!message.message)
-        return send(
-          [ctx.socket.id],
-          "%chMAIL:%cn No message entered. Use '-' to enter a message."
-        );
-      await mail.create(message);
-      send([ctx.socket.id], "%chMAIL:%cn Message sent.");
-      send(
-        message.to,
-        `%chMAIL:%cn You have a new message from ${en.name}`
-      );
-      delete en.dbobj.data.tempMail;
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-    },
-  });
+addCmd({
+  name: "@mail/read2",
+  pattern: /^[@/+]?mail\s+(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["read", ...args]);
+  },
+});
 
-  addCmd({
-    name: "@mail/quick",
-    pattern: /^[@/+]?mail\/quick\s+(.*)\/(.*)\s*=\s*(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const [targets, subject, message] = args;
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const tars = [];
-      for (const tar of targets.split(",")) {
-        const t = await target(en.dbobj, tar.trim());
-        if (t) {
-          tars.push(t);
-        }
-      }
+addCmd({
+  name: "@mail",
+  pattern: /^[@/+]?mail$/i,
+  lock: "connected",
+  exec: async (ctx) => {
+    await mailer(ctx.socket, []);
+  },
+});
 
-      if (en) {
-        const ids = tars.map((t) => `#${t.id}`);
-        const ml = {
-          from: en.dbref,
-          to: ids,
-          subject,
-          message,
-          read: false,
-          date: Date.now(),
-          id: crypto.randomUUID(),
-        };
+addCmd({
+  name: "@mail/read",
+  pattern: /^[@/+]?mail\/read\s+(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["read", ...args]);
+  },
+});
 
-        await mail.create(ml);
-        send([ctx.socket.id], "%chMAIL:%cn Message sent.");
-        send(ids, `%chMAIL:%cn You have a new message from ${en.name}`);
-      }
-    },
-  });
+addCmd({
+  name: "@mail/delete",
+  pattern: /^[@/+]?mail\/delete\s+(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["delete", ...args]);
+  },
+});
 
-  addCmd({
-    name: "@mail/proof",
-    pattern: /^[@/+]?mail\/proof/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
+addCmd({
+  name: "@mail/reply",
+  pattern: /^[@/+]?mail\/reply\s+(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["reply", ...args]);
+  },
+});
 
-      en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
-        return send([ctx.socket.id], "%chMAIL:%cn No message started.");
+addCmd({
+  name: "@mail/notify",
+  pattern: /^[@/+]?mail\/notify/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx) => {
+    await mailer(ctx.socket, ["notify"]);
+  },
+});
 
-      const tempMail = en.dbobj.data.tempMail as IMail;
-      const names: string[] = [];
-      for (const id of tempMail.to) {
-        const p = await Obj.get(id);
-        if (p) {
-          names.push(p.name || "");
-        }
-      }
+addCmd({
+  name: "@mail/replyall",
+  pattern: /^[@/+]?mail\/replyall\s+(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["replyall", ...args]);
+  },
+});
 
-      const cc: string[] = [];
-      tempMail.cc ||= [];
-      if (tempMail.cc.length > 0) {
-        for (const id of tempMail.cc) {
-          const p = await Obj.get(id);
-          if (p) {
-            cc.push(p.name || "");
-          }
-        }
-      }
-
-      const bcc: string[] = [];
-      tempMail.bcc ||= [];
-      if (tempMail?.bcc?.length > 0) {
-        for (const id of tempMail.bcc) {
-          const p = await Obj.get(id);
-          if (p) {
-            cc.push(p.name || "");
-          }
-        }
-      }
-
-      let output = "-".repeat(78) + "\n";
-      output += `From: ${en.name?.padEnd(
-        20
-      )} Subject: ${tempMail.subject.slice(0, 60)}\n`;
-      output += `To: ${names.join(", ")}\n`;
-      if (cc.length) output += `CC: ${cc.join(", ")}\n`;
-      if (bcc.length) output += `BCC: ${bcc.join(", ")}\n`;
-      output += "-".repeat(78) + "\n";
-      output += tempMail.message.trim() + "\n";
-      output += "-".repeat(78);
-      send([ctx.socket.id], output);
-    },
-  });
-
-  addCmd({
-    name: "@mail/edit",
-    pattern: /^[@/+]?mail\/edit\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const [before, after] = args.slice(1);
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
-        return send([ctx.socket.id], "%chMAIL:%cn No message started.");
-
-      const tempMail = en.dbobj.data.tempMail as IMail;
-      tempMail.message = tempMail.message.replace(
-        before,
-        after
-      );
-
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      send([ctx.socket.id], "%chMAIL:%cn Message updated.");
-    },
-  });
-
-  addCmd({
-    name: "@mail/abort",
-    pattern: /^[@/+]?mail\/abort/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
-        return send([ctx.socket.id], "%chMAIL:%cn No message started.");
-
-      delete en.dbobj.data.tempMail;
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      send([ctx.socket.id], "%chMAIL:%cn Message aborted.");
-    },
-  });
-
-  addCmd({
-    name: "@mail/cc",
-    pattern: /^[@/+]?mail\/cc\s+(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const targets = args[1];
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
-        return send([ctx.socket.id], "%chMAIL:%cn No message started.");
-
-      const tempMail = en.dbobj.data.tempMail as IMail;
-      tempMail.cc ||= [];
-      for (const tar of targets.split(",")) {
-        const t = await target(en, tar.trim());
-        if (!t) continue;
-        if (t.id) tempMail.cc.push(`#${t.id}`);
-      }
-
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      send([ctx.socket.id], "%chMAIL:%cn CC updated.");
-    },
-  });
-
-  addCmd({
-    name: "@mail/bcc",
-    pattern: /^[@/+]?mail\/bcc\s+(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const targets = args[1];
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      en.dbobj.data ||= {};
-      if (!en.dbobj.data.tempMail)
-        return send([ctx.socket.id], "%chMAIL:%cn No message started.");
-
-      const tempMail = en.dbobj.data.tempMail as IMail;
-      tempMail.bcc ||= [];
-      for (const tar of targets.split(",")) {
-        const t = await target(en, tar);
-        if (!t) continue;
-        if (t.id) tempMail.bcc.push(`#${t.id}`);
-      }
-
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      send([ctx.socket.id], "%chMAIL:%cn BCC updated.");
-    },
-  });
-
-  addCmd({
-    name: "@mail/read2",
-    pattern: /^[@/+]?mail\s+(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const mails = (await mail.query({ to: { $in: [en.dbref] } })).sort(
-        (a, b) => a.date - b.date
-      );
-      const num = +args[0];
-      if (num > mails.length || num < 1)
-        return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
-      const m = mails[num - 1];
-      const from = await Obj.get(m.from);
-      const to = await Promise.all(m.to.map((id) => Obj.get(id)));
-      const cc = m.cc ? await Promise.all(m.cc.map((id) => Obj.get(id))) : "";
-      const bcc = m.bcc
-        ? await Promise.all(m.bcc.map((id) => Obj.get(id)))
-        : "";
-      let output = center(`%b%chMAIL: ${num}%cn%b`, 78, "=") + "\n";
-      output += `From: ${from?.name
-        ?.padEnd(15)
-        .slice(0, 15)} Subject: ${m.subject.padEnd(45).slice(0, 45)}\n`;
-      output += `To: ${to.map((t) => t?.name || "").join(", ")}\n`;
-      if (cc) output += `CC: ${cc.map((t) => t?.name).join(", ")}\n`;
-      if (bcc) output += `BCC: ${bcc.map((t) => t?.name).join(", ")}\n`;
-      output += "-".repeat(78) + "\n";
-      output += m.message + "\n";
-      output += "=".repeat(78);
-      send([ctx.socket.id], output);
-      en.dbobj.data ||= {};
-      const mailread = (en.dbobj.data.mailread || []) as string[];
-      mailread.push(m.id!);
-      en.dbobj.data.mailread = mailread;
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-    },
-  });
-
-  addCmd({
-    name: "@mail",
-    pattern: /^[@/+]?mail$/i,
-    lock: "connected",
-    exec: async (ctx, _args) => {
-      const _targets = _args[1];
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const mails = (await mail.query({ to: { $in: [en.dbref] } })).sort(
-        (a, b) => a.date - b.date
-      );
-      let output = center(`%b%chMAIL: ${mails.length}%cn%b`, 78, "=") + "\n";
-      for (const m of mails) {
-        const from = await Obj.get(m.from);
-        const _to = await Promise.all(m.to.map((id) => Obj.get(id)));
-        const _cc = m.cc ? await Promise.all(m.cc.map((id) => Obj.get(id))) : "";
-        const _bcc = m.bcc
-          ? await Promise.all(m.bcc.map((id) => Obj.get(id)))
-          : "";
-        const mailread = (en.dbobj.data?.mailread || []) as string[];
-        output += `${mailread.includes(m.id!) ? " " : "U"} ${mails.indexOf(m) + 1
-          } From: ${from?.name?.padEnd(15).slice(0, 15)} Subject: ${m.subject
-            .padEnd(45)
-            .slice(0, 45)}\n`;
-      }
-      output += "=".repeat(78);
-      send([ctx.socket.id], output);
-    },
-  });
-
-  addCmd({
-    name: "@mail/read",
-    pattern: /^[@/+]?mail\/read\s+(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const mails = await mail.query({ to: { $in: [en.dbref] } });
-      const num = parseInt(args[1]);
-      if (num > mails.length || num < 1)
-        return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
-      const m = mails[num - 1];
-      const from = await Obj.get(m.from);
-      const to = await Promise.all(m.to.map((id) => Obj.get(id)));
-      const cc = m.cc ? await Promise.all(m.cc.map((id) => Obj.get(id))) : "";
-      let output = center(`%b%chMAIL: ${num}%cn%b`, 78, "=") + "\n";
-      output += `From: ${from?.name
-        ?.padEnd(15)
-        .slice(0, 25)} Subject: ${m.subject.padEnd(48).slice(0, 48)}\n`;
-      output += `To: ${to
-        .map((p) => p?.name)
-        .join(", ")
-        .padEnd(15)
-        .slice(0, 15)}\n`;
-      if (cc) output += `CC: ${cc.map((p) => p?.name).join(", ")}\n`;
-      output += "-".repeat(78) + "\n";
-      output += m.message + "\n";
-      output += "=".repeat(78);
-      send([ctx.socket.id], output);
-      en.dbobj.data ||= {};
-      const mailread = (en.dbobj.data.mailread || []) as string[];
-      if (!mailread.includes(m.id!)) {
-        mailread.push(m.id!);
-        en.dbobj.data.mailread = mailread;
-        await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      }
-    },
-  });
-
-  addCmd({
-    name: "@mail/delete",
-    pattern: /^[@/+]?mail\/delete\s+(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const mails = await mail.query({ to: { $in: [en.dbref] } });
-      const num = parseInt(args[0]);
-      if (num > mails.length || num < 1)
-        return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
-      const m = mails[num - 1];
-      const readers = await dbojs.query({ "data.mailread": { $in: [m.id] } });
-      if (readers.length)
-        return send(
-          [ctx.socket.id],
-          "%chMAIL:%cn Message has been read, cannot delete."
-        );
-
-      await mail.delete({ id: m.id });
-      send([ctx.socket.id], "%chMAIL:%cn Message deleted.");
-    },
-  });
-
-  addCmd({
-    name: "@mail/reply",
-    pattern: /^[@/+]?mail\/reply\s+(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const mails = await mail.query({ to: { $in: [en.dbref] } });
-      const num = parseInt(args[0]);
-      if (num > mails.length || num < 1)
-        return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
-      const m = mails[num - 1];
-      const from = await Obj.get(m.from);
-      en.dbobj.data ||= {};
-
-      en.dbobj.data.tempMail = {
-        to: [from?.dbref],
-        subject: `Re: ${m.subject}`,
-        message: "",
-        from: en.dbref!,
-        date: Date.now(),
-      };
-
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      send([ctx.socket.id], "%chMAIL:%cn Reply started.");
-    },
-  });
-
-  addCmd({
-    name: "@mail/notify",
-    pattern: /^[@/+]?mail\/notify/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const mails = await mail.query({
-        $or: [
-          { to: { $in: [en.dbref] } },
-          { cc: { $in: [en.dbref] } },
-          { bcc: { $in: [en.dbref] } },
-        ],
-      });
-
-      en.dbobj.data ||= {};
-      const mailread = (en.dbobj.data.mailread || []) as string[];
-
-      await send(
-        [ctx.socket.id],
-        `%chMAIL:%cn You have %ch${mails.filter((m) => !mailread.includes(m.id!)).length
-        }%cn new messages.`
-      );
-    },
-  });
-
-  addCmd({
-    name: "@mail/replyall",
-    pattern: /^[@/+]?mail\/replyall\s+(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const mails = await mail.query({ to: { $in: [en.dbref] } });
-      const num = parseInt(args[1]);
-      if (num > mails.length || num < 1)
-        return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
-      const m = mails[num - 1];
-      const from = await Obj.get(m.from);
-      const to = await Promise.all(m.to.map((id) => Obj.get(id)));
-      const cc = m.cc ? await Promise.all(m.cc.map((id) => Obj.get(id))) : "";
-      en.dbobj.data ||= {};
-
-      en.dbobj.data.tempMail = {
-        to: [from?.dbref!],
-        subject: `Re: ${m.subject}`,
-        message: "",
-        from: en.dbref,
-        date: Date.now(),
-      };
-
-      const tempMail = en.dbobj.data.tempMail as IMail;
-      if (to) tempMail.to.push(...to.map((p) => p?.dbref!));
-      if (cc) tempMail.to.push(...cc.map((p) => p?.dbref!));
-
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      send([ctx.socket.id], "%chMAIL:%cn Reply started.");
-    },
-  });
-
-  addCmd({
-    name: "@mail/forward",
-    pattern: /^[@/+]?mail\/forward\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected",
-    hidden: true,
-    exec: async (ctx, args) => {
-      const en = await Obj.get(ctx.socket.cid);
-      if (!en) return;
-      const mails = await mail.query({ to: { $in: [en.dbref] } });
-      const num = +args[0];
-      if (num > mails.length || num < 1)
-        return send([ctx.socket.id], "%chMAIL:%cn Invalid message number.");
-      const m = mails[num - 1];
-
-      en.dbobj.data ||= {};
-
-      const to = await Obj.get(args[0]);
-      if (!to) return send([ctx.socket.id], "%chMAIL:%cn Invalid recipient.");
-      if (to.dbref) {
-        en.dbobj.data.tempMail = {
-          to: [to?.dbref],
-          subject: `Fwd: ${m.subject}`,
-          message: `---------- Forwarded message ----------\nFrom: ${m.from}\nSubject: ${m.subject}\n\n${m.message}\n----------- End Forward Message -----------\n`,
-          from: en.dbref,
-          date: Date.now(),
-        };
-      }
-
-      await dbojs.modify({ id: en.id }, "$set", en.dbobj);
-      send([ctx.socket.id], "%chMAIL:%cn Forward started.");
-    },
-  });
-};
+addCmd({
+  name: "@mail/forward",
+  pattern: /^[@/+]?mail\/forward\s+(.*)\s*=\s*(.*)/i,
+  lock: "connected",
+  hidden: true,
+  exec: async (ctx, args) => {
+    await mailer(ctx.socket, ["forward", ...args]);
+  },
+});

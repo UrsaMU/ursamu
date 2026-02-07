@@ -1,3 +1,0 @@
-# comlist
-
-No help available.

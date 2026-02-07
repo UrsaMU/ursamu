@@ -18,7 +18,7 @@ export default async (u: IUrsamuSDK) => {
   const objCost = costStr ? parseInt(costStr.trim()) : 0;
 
   // Quota & Permission Check
-  const isStaff = actor.flags.has("wizard") || actor.flags.has("admin");
+  const isStaff = actor.flags.has("wizard") || actor.flags.has("admin") || actor.flags.has("superuser");
   const quota = (actor.state.quota as number) || 0;
   const cost = 1;
 

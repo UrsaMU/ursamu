@@ -18,6 +18,18 @@ interface SDKDBObj extends IDBObj {
   broadcast?: (message: string) => void;
 }
 
+interface IMail {
+  id?: string;
+  from: string;
+  to: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject: string;
+  message: string;
+  read: boolean;
+  date: number;
+}
+
 interface IUrsamuSDK {
   state: Record<string, unknown>;
   me: IDBObj;
@@ -57,6 +69,11 @@ interface IUrsamuSDK {
     join(channel: string, alias: string): Promise<void>;
     leave(alias: string): Promise<void>;
     list(): Promise<unknown[]>;
+  };
+  mail: {
+    send(mail: Partial<IMail>): Promise<void>;
+    read(query: Record<string, unknown>): Promise<IMail[]>;
+    delete(id: string): Promise<void>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
 }
@@ -99,12 +116,15 @@ self.onmessage = async (e: MessageEvent) => {
 
   const { code, sdk: sdkData = {} } = e.data;
   
-  const hydrateFlags = (obj: unknown): IDBObj => {
+  const hydrateSDKObject = (obj: unknown): IDBObj => {
     const raw = obj as Record<string, unknown>;
     if (raw) {
-      raw.flags = new Set(Array.isArray(raw.flags) ? (raw.flags as string[]) : []);
+      if (!(raw.flags instanceof Set)) {
+        raw.flags = new Set(Array.isArray(raw.flags) ? (raw.flags as string[]) : []);
+      }
+      raw.state = (raw.state as Record<string, unknown>) || {};
       if (raw.contents) {
-        raw.contents = (raw.contents as unknown[]).map(hydrateFlags);
+        raw.contents = (raw.contents as unknown[]).map(hydrateSDKObject);
       }
     }
     return raw as unknown as IDBObj;
@@ -112,13 +132,13 @@ self.onmessage = async (e: MessageEvent) => {
 
   const u: IUrsamuSDK = {
     state: createStateProxy(sdkData.state, (p: string, v: unknown) => self.postMessage({ type: 'patch', prop: p, value: v })),
-    me: hydrateFlags(sdkData.me),
+    me: hydrateSDKObject(sdkData.me),
     here: {
-      ...(hydrateFlags(sdkData.here) as SDKDBObj),
+      ...(hydrateSDKObject(sdkData.here) as SDKDBObj),
       broadcast: (msg: string) => self.postMessage({ type: 'broadcast', message: msg })
     } as IDBObj,
     target: sdkData.target ? ({
-      ...(hydrateFlags(sdkData.target) as SDKDBObj),
+      ...(hydrateSDKObject(sdkData.target) as SDKDBObj),
       broadcast: (msg: string) => self.postMessage({ type: 'broadcast', message: msg, target: (sdkData.target as IDBObj).id })
     } as IDBObj) : undefined,
     ui: {
@@ -134,7 +154,7 @@ self.onmessage = async (e: MessageEvent) => {
     db: {
       search: async (q: string | Record<string, unknown>) => {
         const results = await request<unknown[]>("db:search", { query: q });
-        return (results || []).map(hydrateFlags);
+        return (results || []).map(hydrateSDKObject);
       },
       create: (template: Partial<IDBObj>) => request<IDBObj>("db:create", { template }),
       destroy: (id: string) => request<void>("db:destroy", { id }),
@@ -160,6 +180,11 @@ self.onmessage = async (e: MessageEvent) => {
       join: (channel: string, alias: string) => request<void>("chan:join", { channel, alias }),
       leave: (alias: string) => request<void>("chan:leave", { alias }),
       list: () => request<unknown[]>("chan:list", {})
+    },
+    mail: {
+      send: (mail: Partial<IMail>) => request<void>("mail:send", { mail }),
+      read: (query: Record<string, unknown>) => request<IMail[]>("mail:read", { query }),
+      delete: (id: string) => request<void>("mail:delete", { id })
     },
     setFlags: (target: string | IDBObj, flags: string) => 
       request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags })

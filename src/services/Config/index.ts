@@ -100,7 +100,19 @@ export class ConfigManager {
   public saveConfig(): void {
     try {
       const configPath = dpath.join(this.configDir, this.configFile);
-      Deno.writeTextFileSync(configPath, JSON.stringify(this.config, null, 2));
+      const newContent = JSON.stringify(this.config, null, 2);
+      
+      // Only write if content has changed to avoid triggering watcher restarts
+      try {
+        const existingContent = Deno.readTextFileSync(configPath);
+        if (existingContent === newContent) {
+          return;
+        }
+      } catch (_e) {
+        // File might not exist yet, proceed with write
+      }
+
+      Deno.writeTextFileSync(configPath, newContent);
       console.log("Configuration saved to", configPath);
     } catch (error) {
       console.error("Error saving configuration:", error);

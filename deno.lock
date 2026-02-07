@@ -65,6 +65,7 @@
     "jsr:@ts-morph/bootstrap@0.27": "0.27.0",
     "jsr:@ts-morph/common@0.27": "0.27.0",
     "jsr:@zaubrik/djwt@^3.0.2": "3.0.2",
+    "npm:@deno/kv@*": "0.13.0",
     "npm:@deno/sandbox@*": "0.10.0",
     "npm:@digibear/tags@1.0.0": "1.0.0",
     "npm:@js-temporal/polyfill@0.4.4": "0.4.4",
@@ -364,6 +365,35 @@
       "integrity": "sha512-a7cxGcJ2wIlMFLlh8z2ONm+715QkPHiyJcxwQlKOz/03GPw1COpfhcmC9wm4xlZfp//jWHNNMwzjtqHXVWU9KA==",
       "dependencies": [
         "postcss-selector-parser@6.1.2"
+      ]
+    },
+    "@deno/kv-darwin-arm64@0.13.0": {
+      "integrity": "sha512-yKYaanxbT5xo/Vfempgt2klZVFf3P/dFYOkJqaerwBS020WLziJpjb9N5cmmT63btaT8dZX0df0a/xUH0INdQw==",
+      "os": ["darwin"],
+      "cpu": ["arm64"]
+    },
+    "@deno/kv-darwin-x64@0.13.0": {
+      "integrity": "sha512-xDZF0boT0EabY92+VoArV0bHighpTVP5svKf6CYL/EuOxTHXXyOvkMlpPjWKTKv0F80gxxTGGowWIjMaMrAiUw==",
+      "os": ["darwin"],
+      "cpu": ["x64"]
+    },
+    "@deno/kv-linux-x64-gnu@0.13.0": {
+      "integrity": "sha512-zDEG02D2FT2VkNpMKwt5umUdepb2VVxp0PRKSIgHoo6bIbSQGJ1SmtJYV/4QbdwRFBuZyitioOJpeG2OPZCd5Q==",
+      "os": ["linux"],
+      "cpu": ["x64"]
+    },
+    "@deno/kv-win32-x64-msvc@0.13.0": {
+      "integrity": "sha512-yNAtCBc878WlMtnHZD0zjHx72+zJi5f/L7KmiW4rykunmv/5xLWZnOH49L05HWSRhIj2fxzL9slZPIayxfwUSg==",
+      "os": ["win32"],
+      "cpu": ["x64"]
+    },
+    "@deno/kv@0.13.0": {
+      "integrity": "sha512-RO1zn9JFePB2kScM2zHBKeDRvdBK0PRsJwzN21hVuqzzmjrJeKgKdaojBElXavPknNqRzU4FsGCzuk93LuJawA==",
+      "optionalDependencies": [
+        "@deno/kv-darwin-arm64",
+        "@deno/kv-darwin-x64",
+        "@deno/kv-linux-x64-gnu",
+        "@deno/kv-win32-x64-msvc"
       ]
     },
     "@deno/sandbox@0.10.0": {

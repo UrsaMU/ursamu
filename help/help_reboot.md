@@ -1,3 +1,0 @@
-# reboot
-
-No help available.
