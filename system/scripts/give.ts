@@ -13,7 +13,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  const receiver = await u.util.target(actor, receiverArg);
+  const receiver = await u.util.target?.(actor, receiverArg);
   if (!receiver || receiver.location !== actor.location) {
     u.send("They aren't here.");
     return;
@@ -48,7 +48,7 @@ export default async (u: IUrsamuSDK) => {
   }
 
   // Handle item giving
-  const thing = await u.util.target(actor, itemArg);
+  const thing = await u.util.target?.(actor, itemArg);
 
   if (!thing || thing.location !== actor.id) {
     u.send("You aren't carrying that.");

@@ -96,7 +96,7 @@ const renderMarkdown = (text: string): string => {
 
     // 1. Code Blocks (``` ... ```)
     const codeBlocks: string[] = [];
-    output = output.replace(/```([\s\S]*?)```/g, (match, code) => {
+    output = output.replace(/```([\s\S]*?)```/g, (_match, code) => {
         const indented = code.split("\n").map((line: string) => "  " + line).join("\n");
         codeBlocks.push(`%ch%cg${indented}%cn`);
         return `__CODEBLOCK_${codeBlocks.length - 1}__`;
@@ -106,7 +106,7 @@ const renderMarkdown = (text: string): string => {
     output = output.replace(/`([^`]+)`/g, "%ch%cg$1%cn");
 
     // 3. Headers
-    output = output.replace(/^#\s+(.+)$/gm, (match, title) => {
+    output = output.replace(/^#\s+(.+)$/gm, (_match, title) => {
         return `%ch%cc# ${title}%cn`;
     });
 
@@ -124,7 +124,7 @@ const renderMarkdown = (text: string): string => {
     output = wordWrap(output, 78);
 
     // Restore Code Blocks
-    output = output.replace(/__CODEBLOCK_(\d+)__/g, (match, index) => {
+    output = output.replace(/__CODEBLOCK_(\d+)__/g, (_match, index) => {
         return "\n" + codeBlocks[parseInt(index)] + "\n";
     });
 
@@ -235,7 +235,7 @@ export default async (u: IUrsamuSDK) => {
         const children = subTopics.get(normTopic);
 
         if (content || (children && children.length > 0)) {
-            let header = `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`;
+            const header = `%cy[%cn %ch${topic.toUpperCase()}%cn %cy]%cn`;
             let output = center(header, 78, "%cr-%cn") + "\n";
             
             if (content) {

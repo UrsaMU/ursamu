@@ -28,7 +28,7 @@ export interface IUrsamuSDK {
   util: {
     displayName(obj: IDBObj, actor: IDBObj): string;
     getMapData?(targetId: string, radius: number): unknown;
-    target?(actor: IDBObj, query: string): Promise<IDBObj | undefined>;
+    target(actor: IDBObj, query: string): Promise<IDBObj | undefined>;
     [key: string]: unknown;
   };
   db: {
