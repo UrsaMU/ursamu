@@ -41,9 +41,9 @@ parser.addSubs(
   {
       before: /\[js\(([\s\S]*?)\)\]/g,
       // @ts-ignore: mu-parser function usage
-      // deno-lint-ignore no-explicit-any
       after: ((_match: string, code: string) => {
           return evalSafe(code);
+      // deno-lint-ignore no-explicit-any
       }) as any
   }
 );
@@ -111,9 +111,9 @@ parser.addSubs(
   {
       before: /\[js\(([\s\S]*?)\)\]/g,
       // @ts-ignore: mu-parser function usage
-      // deno-lint-ignore no-explicit-any
       after: ((_match: string, code: string) => {
           return evalSafe(code);
+      // deno-lint-ignore no-explicit-any
       }) as any
   },
   { before: /%r/g, after: "<br />" },

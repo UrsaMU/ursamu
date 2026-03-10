@@ -1,4 +1,3 @@
-import { assertEquals } from "@std/assert";
 import helpScript from "../system/scripts/help.ts";
 
 Deno.test({
@@ -17,6 +16,7 @@ Deno.test({
                 output += msg;
             },
             force: () => {}
+        // deno-lint-ignore no-explicit-any
         } as any;
         
         await helpScript(u);
@@ -39,6 +39,7 @@ Deno.test({
                 output += msg;
             },
             force: () => {}
+        // deno-lint-ignore no-explicit-any
         } as any;
         
         await helpScript(u);
@@ -61,6 +62,7 @@ Deno.test({
                 output += msg;
             },
             force: () => {}
+        // deno-lint-ignore no-explicit-any
         } as any;
         
         await helpScript(u);
@@ -77,6 +79,7 @@ Deno.test({
                 output += msg;
             },
             force: () => {}
+        // deno-lint-ignore no-explicit-any
         } as any;
         
         await helpScript(u);

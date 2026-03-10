@@ -54,18 +54,6 @@ class LocalSandbox {
               broadcastAll(message, data);
             }
             break;
-          case "force":
-            if (e.data.command) {
-              (async () => {
-                const { force } = await import("../commands/force.ts");
-                const { wsService } = await import("../WebSocket/index.ts");
-                const socket = wsService.getConnectedSockets().find(s => s.id === context?.socketId);
-                if (socket) {
-                  await force({ socket, msg: e.data.command }, e.data.command);
-                }
-              })();
-            }
-            break;
           case "teleport":
             if (e.data.target && e.data.destination) {
                 Obj.get(e.data.target).then(obj => {

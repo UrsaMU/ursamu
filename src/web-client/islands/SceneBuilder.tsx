@@ -38,7 +38,7 @@ export default function SceneBuilder() {
     }
   };
 
-  const startScene = () => {
+  const _startScene = () => {
     if (!createdRoom) return;
     // Redirect to scene creation with location pre-filled?
     // Or simpler: Just create the scene now?
@@ -64,6 +64,7 @@ export default function SceneBuilder() {
             <p>ID: #{createdRoom.id}</p>
             <div class="mt-4 flex gap-2">
               <button
+                type="button"
                 onClick={() => setCreatedRoom(null)}
                 class="btn btn-secondary text-xs"
               >
@@ -71,6 +72,7 @@ export default function SceneBuilder() {
               </button>
               {/* Placeholder for future integration */}
               <button
+                type="button"
                 onClick={() => navigator.clipboard.writeText(createdRoom.id)}
                 class="btn btn-primary text-xs"
               >

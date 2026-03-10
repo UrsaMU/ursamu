@@ -27,6 +27,7 @@ Deno.test({
       here: room,
       target: room,
       util: {
+        // deno-lint-ignore no-explicit-any
         displayName: (o: any) => o.state?.name || o.name || "Unknown"
       }
     };
@@ -34,6 +35,7 @@ Deno.test({
     let sentMessage = "";
     const mockU = {
         send: (msg: string) => { sentMessage = msg; },
+        // deno-lint-ignore no-explicit-any
         ui: { panel: (opt: any) => opt, layout: () => {} },
         ...sdkData,
         canEdit: () => true
@@ -50,6 +52,7 @@ Deno.test({
     sentMessage = "";
     const mockU2 = {
         send: (msg: string) => { sentMessage = msg; },
+        // deno-lint-ignore no-explicit-any
         ui: { panel: (opt: any) => opt, layout: () => {} },
         ...sdkData,
         canEdit: () => false

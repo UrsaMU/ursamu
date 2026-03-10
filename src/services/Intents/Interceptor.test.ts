@@ -45,7 +45,9 @@ Deno.test({ name: "Interceptor Service Tests", sanitizeOps: false, sanitizeResou
     ];
     const result = await InterceptorService.intercept(mockIntent, candidates);
     assertEquals(result, true);
+    // deno-lint-ignore no-explicit-any
     assertEquals((candidates[0].state as any).order, 1);
+    // deno-lint-ignore no-explicit-any
     assertEquals((candidates[1].state as any).order, 2);
   });
 }});

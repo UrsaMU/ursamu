@@ -2,7 +2,7 @@ import { PageProps } from "$fresh/server.ts";
 import SceneBuilder from "../islands/SceneBuilder.tsx";
 import Layout from "../components/Layout.tsx";
 
-export default function BuildPage(props: PageProps) {
+export default function BuildPage(_props: PageProps) {
   return (
     <Layout currentPath="/build">
       <div class="h-full bg-slate-950 text-white font-sans p-4 md:p-8 overflow-y-auto">

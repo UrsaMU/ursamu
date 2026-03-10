@@ -7,7 +7,7 @@
  *   - system/scripts/examine.ts  (@examine / ex)
  *   - system/scripts/inventory.ts (i/inv)
  */
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import { assertStringIncludes } from "@std/assert";
 import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 import { dbojs, DBO } from "../src/services/Database/database.ts";
 import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
@@ -94,7 +94,7 @@ Deno.test("@set — invalid attribute name is rejected", OPTS, async () => {
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "Crate" },
@@ -156,7 +156,7 @@ Deno.test("@set — successfully sets attribute and confirms in message", OPTS, 
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "Barrel" },
@@ -181,7 +181,7 @@ Deno.test("@set — clearing attribute sends confirmation message", OPTS, async 
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "Keg", WEIGHT: "30" },
@@ -204,7 +204,7 @@ Deno.test("@set — cannot clear internal system property 'name'", OPTS, async (
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "Chest" },
@@ -226,7 +226,7 @@ Deno.test("@set — value exceeding 4096 chars sends 'Value too long'", OPTS, as
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "Tome" },
@@ -284,7 +284,7 @@ Deno.test("&ATTR — successfully sets attribute on target", OPTS, async () => {
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "Stone" },
@@ -308,7 +308,7 @@ Deno.test("&ATTR — clears a previously-set attribute", OPTS, async () => {
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "Gem", attributes: [{ name: "SHINE", value: "bright", setter: ACTOR_ID, type: "attribute" }] },
@@ -378,7 +378,7 @@ Deno.test("@examine — output includes description and flags", OPTS, async () =
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing sticky",
     data: { name: "Pearl", description: "A lustrous pearl." },
@@ -440,7 +440,7 @@ Deno.test("inventory — empty inventory reports nothing carried", OPTS, async (
 });
 
 Deno.test("inventory — with items lists each item name", OPTS, async () => {
-  const actor = await dbojs.create({
+  const _actor = await dbojs.create({
     id: ACTOR_ID,
     flags: "player connected",
     data: { name: "Player" },

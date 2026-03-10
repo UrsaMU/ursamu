@@ -6,7 +6,7 @@ interface StickyNavProps {
 }
 
 export default function StickyNav(
-  { currentPath, forceShowLogo = false }: StickyNavProps,
+  { currentPath, forceShowLogo: _forceShowLogo = false }: StickyNavProps,
 ) {
 
   const [config, setConfig] = useState<

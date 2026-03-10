@@ -85,7 +85,7 @@ Deno.test({
   fn: async () => {
     const _room  = await dbojs.create({ id: ROOM_ID,  flags: "room",   data: { name: "Test Room" } });
     const actor  = await dbojs.create({ id: ACTOR_ID, flags: "player", data: { name: "TestActor" }, location: ROOM_ID });
-    const thing  = await dbojs.create({ id: THING_ID, flags: "thing",  data: { name: "RedBall"  }, location: ROOM_ID });
+    const _thing  = await dbojs.create({ id: THING_ID, flags: "thing",  data: { name: "RedBall"  }, location: ROOM_ID });
 
     const found = await target(actor, `#${THING_ID}`);
 
@@ -103,7 +103,7 @@ Deno.test({
   fn: async () => {
     const _room  = await dbojs.create({ id: ROOM_ID,  flags: "room",   data: { name: "Test Room" } });
     const actor  = await dbojs.create({ id: ACTOR_ID, flags: "player", data: { name: "TestActor" }, location: ROOM_ID });
-    const thing  = await dbojs.create({ id: THING_ID, flags: "thing",  data: { name: "RedBall"  }, location: ROOM_ID });
+    const _thing  = await dbojs.create({ id: THING_ID, flags: "thing",  data: { name: "RedBall"  }, location: ROOM_ID });
 
     const found = await target(actor, "RedBall");
 
@@ -137,7 +137,7 @@ Deno.test({
     const _room1  = await dbojs.create({ id: ROOM_ID,   flags: "room",  data: { name: "Room One" } });
     const _room2  = await dbojs.create({ id: ROOM2_ID,  flags: "room",  data: { name: "Room Two" } });
     const actor   = await dbojs.create({ id: ACTOR_ID,  flags: "player",data: { name: "TestActor" }, location: ROOM_ID });
-    const remote  = await dbojs.create({ id: THING2_ID, flags: "thing", data: { name: "BlueCube"  }, location: ROOM2_ID });
+    const _remote  = await dbojs.create({ id: THING2_ID, flags: "thing", data: { name: "BlueCube"  }, location: ROOM2_ID });
 
     const foundGlobal = await target(actor, "BlueCube", true);
     const foundLocal  = await target(actor, "BlueCube");       // no global flag
@@ -276,7 +276,7 @@ Deno.test({
   sanitizeResources: false,
   sanitizeOps: false,
   fn: async () => {
-    const parent = await dbojs.create({
+    const _parent = await dbojs.create({
       id: GA_PARENT_ID,
       flags: "thing",
       data: {
@@ -308,7 +308,7 @@ Deno.test({
   sanitizeResources: false,
   sanitizeOps: false,
   fn: async () => {
-    const parent = await dbojs.create({
+    const _parent = await dbojs.create({
       id: GA_PARENT_ID,
       flags: "thing",
       data: {
@@ -339,7 +339,7 @@ Deno.test({
   sanitizeResources: false,
   sanitizeOps: false,
   fn: async () => {
-    const grandparent = await dbojs.create({
+    const _grandparent = await dbojs.create({
       id: GA_PARENT_ID,
       flags: "thing",
       data: {
@@ -347,7 +347,7 @@ Deno.test({
         attributes: [{ name: "material", value: "wood", setter: GA_PARENT_ID }],
       },
     });
-    const parent = await dbojs.create({
+    const _parent = await dbojs.create({
       id: GA_CHILD_ID,
       flags: "thing",
       data: { name: "Parent", parent: GA_PARENT_ID },

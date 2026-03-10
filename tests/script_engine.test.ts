@@ -1,4 +1,3 @@
-import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 import { cmdParser } from "../src/services/commands/cmdParser.ts";
 import { dbojs, DBO } from "../src/services/Database/database.ts";
@@ -33,6 +32,7 @@ Deno.test({
     };
     
     // Run parser
+    // deno-lint-ignore no-explicit-any
     await cmdParser.run(ctx as any);
     
     // Cleanup

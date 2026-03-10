@@ -85,6 +85,7 @@ Deno.test({ name: "Core Migration: channels script join", sanitizeResources: fal
   
   const updated = await dbojs.queryOne({ id: player.id });
   if (updated && typeof updated === "object") {
+    // deno-lint-ignore no-explicit-any
     const chans = (updated.data?.channels as any[]) || [];
     assertEquals(chans.some(c => c.channel === "Public" && c.alias === "P"), true);
   } else {

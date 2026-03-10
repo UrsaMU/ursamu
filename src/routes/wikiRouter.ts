@@ -1,7 +1,7 @@
 
 import { txtFiles } from "../services/commands/index.ts";
 
-export const wikiHandler = async (req: Request): Promise<Response> => {
+export const wikiHandler = (req: Request): Response => {
   const url = new URL(req.url);
   
   // List all topics

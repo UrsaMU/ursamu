@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "preact/hooks";
 
 interface Message {
   msg?: string;
-  data?: any;
-  room?: any;
+  data?: Record<string, unknown>;
+  room?: Record<string, unknown>;
 }
 
 import GameOutput from "../components/GameOutput.tsx";

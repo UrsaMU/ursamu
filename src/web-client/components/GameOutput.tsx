@@ -2,7 +2,7 @@ import { DeclarativeRenderer } from "./DeclarativeRenderer.tsx";
 import { ParsedText } from "./ParsedText.tsx";
 
 interface GameOutputProps {
-  messages: Array<{ msg?: string; data?: { ui?: any } }>;
+  messages: Array<{ msg?: string; data?: { ui?: Record<string, unknown> } }>;
   onAction?: (action: string) => void;
 }
 

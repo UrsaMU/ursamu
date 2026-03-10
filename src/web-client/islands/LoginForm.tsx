@@ -146,7 +146,7 @@ export default function LoginForm() {
               Don't have an account?{" "}
               <a
                 href={`/register${
-                  typeof window !== "undefined" ? window.location.search : ""
+                  globalThis.location?.search ?? ""
                 }`}
                 class="text-primary hover:text-white transition-colors font-bold underline decoration-transparent hover:decoration-primary/50 underline-offset-4"
               >

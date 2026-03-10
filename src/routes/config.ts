@@ -7,8 +7,9 @@ export const configHandler = async (req: Request) => {
   const path = url.pathname;
 
   if (path.endsWith("/config")) {
+    // deno-lint-ignore no-explicit-any
     const config = ConfigManager.getInstance().getAll() as any;
-    
+
     // Return safe subset of config
     const safeConfig = {
       game: {
@@ -42,6 +43,7 @@ export const configHandler = async (req: Request) => {
 
   if (path.endsWith("/connect")) {
      try {
+        // deno-lint-ignore no-explicit-any
         const config = ConfigManager.getInstance().getAll() as any;
         const connectFile = config.game?.text?.connect || "../text/default_connect.txt";
         

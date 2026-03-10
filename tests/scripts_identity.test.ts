@@ -158,13 +158,13 @@ Deno.test("@name — name already taken by another object is rejected", OPTS, as
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing1 = await dbojs.create({
+  const _thing1 = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "BoxA" },
     location: ROOM_ID,
   });
-  const thing2 = await dbojs.create({
+  const _thing2 = await dbojs.create({
     id: OTHER_ID,
     flags: "thing",
     data: { name: "BoxB" },
@@ -341,7 +341,7 @@ Deno.test("@alias — clearing alias (empty value) removes it from DB", OPTS, as
     data: { name: "Admin" },
     location: ROOM_ID,
   });
-  const thing = await dbojs.create({
+  const _thing = await dbojs.create({
     id: THING_ID,
     flags: "thing",
     data: { name: "Candle", alias: "taper" },

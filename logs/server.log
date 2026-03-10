@@ -3335,3 +3335,1599 @@ Obj.get called with: 10 string
 Found by string (name): 10
 Obj.get called with: 1 string
 Found by string (name): 1
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/services/Intents/Interceptor.test.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/system/scripts/channels.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/services/parser/parser.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/services/parser/parser.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/services/broadcast/broadcast.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/routes/wikiRouter.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/routes/config.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/routes/config.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/commands/softcode.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/CodeEditor.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/GameClient.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/components/GameOutput.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/SceneBuilder.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/SceneBuilder.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/SceneBuilder.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/ScenePlayer.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/ScenePlayer.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/StickyNav.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/LoginForm.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/CharacterSheet.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/routes/build.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/components/SafeMessage.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/routes/index.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/deno.json"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/services/Sandbox/SandboxService.ts"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/CharacterSheet.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/ScenePlayer.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}
+[0m[38;5;12mWatcher[0m [0m[38;5;245mRestarting! File change detected: "/Users/kumakun/github/ursamu/src/web-client/islands/ScenePlayer.tsx"[0m
+Configuration loaded from /Users/kumakun/github/ursamu/config/config.json
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Loading plugin from /Users/kumakun/github/ursamu/src/plugins/example/index.ts
+Configuration saved to /Users/kumakun/github/ursamu/config/config.json
+Plugin example v1.0.0 loaded
+Listening on http://0.0.0.0:4203/ (http://localhost:4203/)
+Initializing example plugin...
+Example plugin is disabled
+Plugin example initialized successfully.
+Checking for existing rooms...
+Opening KV database at: data/ursamu.db
+Found 4 rooms
+Checking counter...
+Checking for channels...
+Found 2 channels
+Server started on port 4203 (HTTP & WebSockets).
+[Queue] Service initialized.
+Discord Bridge: No token configured, skipping.
+UrsaMU main server is running!
+[CmdParser] Loaded system aliases: {
+  name: "name",
+  search: "search",
+  stats: "search",
+  moniker: "moniker",
+  lock: "lock",
+  unlock: "lock",
+  toad: "admin",
+  newpassword: "admin",
+  newpass: "admin",
+  chown: "admin",
+  site: "admin",
+  reboot: "admin",
+  restart: "admin",
+  shutdown: "admin",
+  nameformat: "format",
+  descformat: "format",
+  conformat: "format",
+  exitformat: "format",
+  setAttr: "setAttr",
+  alias: "alias",
+  desc: "describe",
+  "mail/send": "mail",
+  "mail/read": "mail",
+  "mail/delete": "mail",
+  "mail/quick": "mail",
+  "mail/proof": "mail",
+  "mail/edit": "mail",
+  "mail/abort": "mail",
+  "mail/cc": "mail",
+  "mail/bcc": "mail",
+  "mail/reply": "mail",
+  "mail/notify": "mail",
+  "mail/replyall": "mail",
+  "mail/forward": "mail",
+  "mail/subject": "mail"
+}

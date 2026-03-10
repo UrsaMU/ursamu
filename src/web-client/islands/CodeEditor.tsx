@@ -77,7 +77,9 @@ export default function CodeEditor(
 
 declare global {
   interface Window {
+    // deno-lint-ignore no-explicit-any
     monaco: any;
+    // deno-lint-ignore no-explicit-any
     require: any;
   }
 }

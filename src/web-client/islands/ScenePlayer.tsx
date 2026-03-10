@@ -62,11 +62,12 @@ export default function ScenePlayer(
   }, [sceneId, scene ? scene.poses.length : 0, scene ? scene.id : ""]);
 
   // Scroll to bottom on new poses
+  // deno-lint-ignore react-rules-of-hooks
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [scene ? scene.poses.length : 0]);
+  }, [scene?.poses.length ?? 0]);
 
   const handlePost = async () => {
     if (!poseInput.trim()) return;
@@ -260,6 +261,7 @@ export default function ScenePlayer(
                 Manage Scene
               </h3>
               <button
+                type="button"
                 onClick={() => setShowManageModal(false)}
                 class="text-slate-500 hover:text-white transition-colors"
               >

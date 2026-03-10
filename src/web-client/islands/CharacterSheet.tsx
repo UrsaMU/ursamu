@@ -18,7 +18,7 @@ interface IUserData {
 }
 
 export default function CharacterSheet() {
-  const [token, setToken] = useState<string | null>(
+  const [token, _setToken] = useState<string | null>(
     typeof localStorage !== "undefined"
       ? localStorage.getItem("ursamu_token")
       : null,
@@ -43,7 +43,7 @@ export default function CharacterSheet() {
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       return payload.id;
-    } catch (e) {
+    } catch (_e) {
       return "";
     }
   };

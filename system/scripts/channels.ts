@@ -33,7 +33,7 @@ export default async (u: IUrsamuSDK) => {
     default: {
       const list = await u.chan.list();
       u.send("--- Channels ---");
-      for (const chan of list as any[]) {
+      for (const chan of list as { name: string; alias?: string }[]) {
         u.send(`${chan.name} [${chan.alias || "No Alias"}]`);
       }
       u.send("----------------");

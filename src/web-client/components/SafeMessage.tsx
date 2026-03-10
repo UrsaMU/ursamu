@@ -48,9 +48,7 @@ export default function SafeMessage({ message }: SafeMessageProps) {
   // ANSI: \u001b[...m
   // MUX: %c[x]
   // deno-lint-ignore no-control-regex
-  const parts = message.split(
-    /(\u001b\[(?:\d+(?:;\d+)*)?m|%[cx]?[rbgymcwxhui]|%[cx]n|%[cx]#\d+)/g,
-  );
+  const parts = message.split(/(\u001b\[(?:\d+(?:;\d+)*)?m|%[cx]?[rbgymcwxhui]|%[cx]n|%[cx]#\d+)/g);
 
   let isBold = false;
   let isUnderline = false;

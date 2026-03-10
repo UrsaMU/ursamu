@@ -27,7 +27,7 @@ export const handler: Handlers<WelcomeData> = {
 export default function Home({ data, url }: PageProps<WelcomeData>) {
   // Simple parser to extract the first image as background if it exists at the start
   let content = data.text;
-  let bgImage =
+  let _bgImage =
     "https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=2608&auto=format&fit=crop"; // Default
 
   // Check for markdown image at start: ![alt](url)
@@ -35,7 +35,7 @@ export default function Home({ data, url }: PageProps<WelcomeData>) {
   const match = content.match(imgRegex);
 
   if (match) {
-    bgImage = match[1];
+    _bgImage = match[1];
     content = content.replace(imgRegex, ""); // Remove the image from the text flow
   }
 

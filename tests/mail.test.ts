@@ -7,6 +7,7 @@ Deno.test({
     sanitizeOps: false,
     fn: async (t: Deno.TestContext) => {
     
+    // deno-lint-ignore no-explicit-any
     const mails: any[] = [];
 
     await t.step("send mail (oneliner)", async () => {
@@ -16,14 +17,16 @@ Deno.test({
             util: { target: () => Promise.resolve({ id: "2", name: "Bob" }) },
             db: { modify: () => Promise.resolve() },
             mail: {
+                // deno-lint-ignore no-explicit-any
                 send: (m: any) => { mails.push({...m, id: "m1", from: "#1"}); return Promise.resolve(); },
                 read: () => Promise.resolve(mails),
                 delete: () => Promise.resolve()
             },
             send: () => {},
             force: () => {}
+        // deno-lint-ignore no-explicit-any
         } as any;
-        
+
         await mailScript(u);
         assertEquals(mails.length, 1);
         assertEquals(mails[0].subject, "Subject");
@@ -37,7 +40,8 @@ Deno.test({
             util: { target: () => Promise.resolve({ id: "2", name: "Bob" }) },
             db: { modify: () => Promise.resolve() },
             mail: {
-                send: (m: any) => { 
+                // deno-lint-ignore no-explicit-any
+                send: (m: any) => {
                     const idx = mails.findIndex(old => old.id === m.id);
                     if (idx !== -1) mails[idx] = m;
                     return Promise.resolve(); 
@@ -49,8 +53,9 @@ Deno.test({
                  if (msg.includes("Subject:")) assertEquals(true, true);
             },
             force: () => {}
+        // deno-lint-ignore no-explicit-any
         } as any;
-        
+
         await mailScript(u);
         assertEquals(mails[0].read, true);
     });
@@ -72,8 +77,9 @@ Deno.test({
             },
             send: () => {},
             force: () => {}
+        // deno-lint-ignore no-explicit-any
         } as any;
-        
+
         await mailScript(u);
         assertEquals(mails.length, 0);
     });

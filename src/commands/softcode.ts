@@ -33,6 +33,7 @@ export default () => {
             await sandboxService.runScript(attr.value, {
                 id: tar.id,
                 location: tar.location || "limbo",
+                // deno-lint-ignore no-explicit-any
                 state: (tar as any).data?.state || {},
                 target: evalArgs[0] ? { id: evalArgs[0] } : undefined
             });

@@ -1,5 +1,4 @@
 import { wsService } from "../WebSocket/index.ts";
-import parser from "../parser/parser.ts";
 type data = Record<string, unknown>;
 
 export const send = (targets: string[], msg: string, data?: data, _exclude: string[] = []) => {
