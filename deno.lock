@@ -2971,6 +2971,7 @@
       "jsr:@std/assert@0.224",
       "jsr:@std/dotenv@0.224",
       "jsr:@std/flags@0.224",
+      "jsr:@std/fmt@0.224",
       "jsr:@std/fs@0.224",
       "jsr:@std/path@0.224",
       "jsr:@std/std@0.224",

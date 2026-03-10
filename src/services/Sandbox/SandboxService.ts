@@ -93,10 +93,10 @@ class LocalSandbox {
                   
                   const sdkResults = await Promise.all(results.map((r: unknown) => {
                       const obj = r as IDBOBJ;
-                      const ctx = { 
-                        id: obj.id, 
-                        me: { ...obj, flags: new Set(obj.flags.split(" ")), state: obj.data || {} }, 
-                        state: obj.data || {} 
+                      const ctx = {
+                        id: obj.id,
+                        me: { ...obj, name: obj.data?.name, flags: new Set(obj.flags.split(" ")), state: obj.data || {} },
+                        state: obj.data || {}
                       };
                       const sdk = SDKService.prepareSDK(ctx as unknown as SDKContext);
                       return sdk.me;
@@ -199,7 +199,7 @@ class LocalSandbox {
                const { wsService } = await import("../WebSocket/index.ts");
                const { dbojs: db } = await import("../Database/index.ts");
                const { setFlags } = await import("../../utils/setFlags.ts");
-               
+
                (async () => {
                   const socket = wsService.getConnectedSockets().find(s => s.id === context.socketId);
                   if (socket) {
@@ -209,11 +209,11 @@ class LocalSandbox {
                     if (player) {
                       await setFlags(player, "connected");
                       if (player.location) socket.join(`#${player.location}`);
-                      
+
                       // Feature parity with legacy connect
                       const { joinChans } = await import("../../utils/joinChans.ts");
                       const { hooks } = await import("../Hooks/index.ts");
-                      
+
                       const ctx = { socket, msg: "" };
                       await joinChans(ctx);
                       await hooks.aconnect(player);
@@ -223,6 +223,69 @@ class LocalSandbox {
                })();
             }
             break;
+          }
+          case "auth:hash": {
+             if (e.data.password) {
+                 const { hash } = await import("../../../deps.ts");
+                 const hashed = await hash(e.data.password, 10);
+                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: hashed });
+             } else {
+                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+             }
+             break;
+          }
+          case "auth:setPassword": {
+             if (e.data.id && e.data.password) {
+                 const { hash } = await import("../../../deps.ts");
+                 const { dbojs: db } = await import("../Database/index.ts");
+                 (async () => {
+                   const hashed = await hash(e.data.password, 10);
+                   const player = await db.queryOne({ id: e.data.id });
+                   if (player) {
+                     player.data ||= {};
+                     player.data.password = hashed;
+                     await db.modify({ id: e.data.id }, "$set", player);
+                   }
+                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+                 })();
+             } else {
+                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+             }
+             break;
+          }
+          case "sys:setConfig": {
+              if (e.data.key && e.data.value !== undefined) {
+                  const { setConfig } = await import("../Config/mod.ts");
+                  setConfig(e.data.key, e.data.value);
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              } else {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              }
+              break;
+          }
+          case "sys:disconnect": {
+              if (e.data.id) {
+                  const { wsService } = await import("../WebSocket/index.ts");
+                  wsService.disconnect(e.data.id);
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              } else {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              }
+              break;
+          }
+          case "sys:reboot": {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              const { broadcast: bcast } = await import("../broadcast/index.ts");
+              bcast("Server rebooting...", {});
+              setTimeout(() => Deno.exit(75), 500); // exit code 75 signals reboot to ursamu.sh
+              break;
+          }
+          case "sys:shutdown": {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              const { broadcast: bcast } = await import("../broadcast/index.ts");
+              bcast("Server shutting down...", {});
+              setTimeout(() => Deno.exit(0), 500);
+              break;
           }
           case "chan:join": {
             if (e.data.channel && e.data.alias && context?.id) {
@@ -301,11 +364,67 @@ class LocalSandbox {
                 const en = await db.queryOne({ id: e.data.actor });
                 if (en) {
                   const result = await target(en, e.data.query);
-                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: result });
+                  if (result) {
+                    // Serialize with array flags so worker can hydrate into a Set
+                    const sdkResult = {
+                      id: result.id,
+                      name: result.data?.name || result.id,
+                      flags: result.flags.split(" ").filter(Boolean),
+                      location: result.location,
+                      state: result.data || {},
+                      contents: [],
+                    };
+                    worker.postMessage({ type: "response", msgId: e.data.msgId, data: sdkResult });
+                  } else {
+                    worker.postMessage({ type: "response", msgId: e.data.msgId, data: undefined });
+                  }
                 } else {
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: undefined });
                 }
               })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: undefined });
+            }
+            break;
+          }
+          case "events:emit": {
+            if (e.data.event) {
+              const { eventsService } = await import("../Events/index.ts");
+              eventsService.emit(e.data.event, e.data.data, e.data.context);
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "events:subscribe": {
+            if (e.data.event && e.data.handler && context?.id) {
+              const { eventsService } = await import("../Events/index.ts");
+              const subId = await eventsService.subscribe(e.data.event, e.data.handler, context.id);
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: subId });
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "execute":
+          case "force": {
+            if (e.data.command && context?.id) {
+               const { force } = await import("../commands/index.ts");
+               const { dbojs: db } = await import("../Database/index.ts");
+               (async () => {
+                  const en = await db.queryOne({ id: context.id });
+                  if (en) {
+                      const { wsService } = await import("../WebSocket/index.ts");
+                      const socket = wsService.getConnectedSockets().find(s => s.cid === en.id);
+                      const mockCtx = { socket: socket || { cid: en.id, id: "script-" + en.id, join: () => {}, leave: () => {}, send: () => {} }, msg: e.data.command };
+                      // deno-lint-ignore no-explicit-any
+                      await force(mockCtx as any, e.data.command);
+                  }
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+               })();
+            } else {
+               worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
             }
             break;
           }

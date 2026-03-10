@@ -6,6 +6,7 @@ export interface SDKObject {
   id: string;
   name?: string;
   flags?: string[] | Set<string>;
+  location?: string;
   state?: Record<string, unknown>;
   contents?: SDKObject[];
 }
@@ -17,7 +18,7 @@ export interface SDKContext {
   target?: SDKObject;
   location?: string; // (deprecated, use 'here')
   state: Record<string, unknown>;
-  cmd?: { name: string; args: string[] };
+  cmd?: { name: string; original?: string; args: string[]; switches?: string[] };
   socketId?: string;
   [key: string]: unknown; // Allow additional context fields
 }
@@ -76,6 +77,7 @@ export class SDKService {
       id: obj.id,
       name: obj.name,
       flags: new Set(obj.flags.split(" ")),
+      location: obj.location,
       state: state,
     };
 

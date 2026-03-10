@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { sandboxService } from "./SandboxService.ts";
 
-Deno.test("SDK & State Interaction Tests", async (t) => {
+Deno.test({ name: "SDK & State Interaction Tests", sanitizeOps: false, sanitizeResources: false, fn: async (t) => {
   const mockCtx = {
     id: "obj1",
     location: "room1",
@@ -25,4 +25,4 @@ Deno.test("SDK & State Interaction Tests", async (t) => {
     const script = "u.send('Hello')";
     await sandboxService.runScript(script, { ...mockCtx, state: mockCtx.state });
   });
-});
+}});

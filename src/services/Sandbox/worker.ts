@@ -5,17 +5,17 @@
  * Worker script for the Ursamu Scripting Engine.
  * Supports ESM-style scripts: export default async (u) => { ... }
  */
-
 interface IDBObj {
   id: string;
   name?: string;
   location?: string;
+  flags: Set<string>;
   state: Record<string, unknown>;
   contents: IDBObj[];
 }
 
 interface SDKDBObj extends IDBObj {
-  broadcast?: (message: string) => void;
+  broadcast?: (message: string, options?: Record<string, unknown>) => void;
 }
 
 interface IMail {
@@ -53,17 +53,28 @@ interface IUrsamuSDK {
   };
   cmd: {
     name: string;
+    original?: string;
     args: string[];
+    switches?: string[];
   };
   canEdit(actor: IDBObj, target: IDBObj): boolean;
   send(message: string, target?: string, options?: Record<string, unknown>): void;
   broadcast(message: string, options?: Record<string, unknown>): void;
   execute(command: string): void;
+  force(command: string): void;
   teleport(target: string, destination: string): void;
   checkLock(target: string | IDBObj, lock: string): Promise<boolean>;
   auth: {
     verify(name: string, password: string): Promise<boolean>;
     login(id: string): Promise<void>;
+    hash(password: string): Promise<string>;
+    setPassword(id: string, password: string): Promise<void>;
+  };
+  sys: {
+    setConfig(key: string, value: unknown): Promise<void>;
+    disconnect(id: string): Promise<void>;
+    reboot(): Promise<void>;
+    shutdown(): Promise<void>;
   };
   chan: {
     join(channel: string, alias: string): Promise<void>;
@@ -76,6 +87,10 @@ interface IUrsamuSDK {
     delete(id: string): Promise<void>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
+  events: {
+    emit(event: string, data: unknown, context?: Record<string, unknown>): Promise<void>;
+    on(event: string, handler: string): Promise<string>;
+  };
 }
 
 let msgId = 0;
@@ -88,6 +103,127 @@ const request = <T>(type: string, payload: Record<string, unknown>): Promise<T> 
     self.postMessage({ type, msgId: id, ...payload });
   });
 };
+
+/** Hydrate a raw DB/SDK object, converting flags strings/arrays to Sets. */
+const hydrateSDKObject = (obj: unknown): IDBObj => {
+  const raw = obj as Record<string, unknown>;
+  if (raw) {
+    if (!(raw.flags instanceof Set)) {
+      raw.flags = new Set(
+        Array.isArray(raw.flags)
+          ? (raw.flags as string[])
+          : typeof raw.flags === "string"
+          ? (raw.flags as string).split(" ").filter(Boolean)
+          : []
+      );
+    }
+    raw.state = (raw.state as Record<string, unknown>) || {};
+    if (raw.contents) {
+      raw.contents = (raw.contents as unknown[]).map(hydrateSDKObject);
+    }
+  }
+  return raw as unknown as IDBObj;
+};
+
+// --- Formatting utilities available via u.util ---
+
+const _padStr = (str: string, width: number, align: string, fill = " "): string => {
+  const s = String(str);
+  const len = s.length;
+  if (len >= width) return s.slice(0, width);
+  const pad = width - len;
+  if (align === "right") return fill.repeat(pad) + s;
+  if (align === "center") {
+    const left = Math.floor(pad / 2);
+    const right = pad - left;
+    return fill.repeat(left) + s + fill.repeat(right);
+  }
+  return s + fill.repeat(pad);
+};
+
+const _getRawVal = (raw: unknown, idx: number): string => {
+  if (Array.isArray(raw)) return idx < raw.length ? String(raw[idx]) : "";
+  if (raw && typeof raw === "object" && "value" in raw) {
+    const v = (raw as { value: unknown }).value;
+    return Array.isArray(v) ? (idx < v.length ? String(v[idx]) : "") : String(v);
+  }
+  return raw != null ? String(raw) : "";
+};
+
+const _getRawAlign = (raw: unknown): string => {
+  if (raw && typeof raw === "object" && !Array.isArray(raw) && "align" in raw) {
+    return String((raw as { align: unknown }).align);
+  }
+  return "left";
+};
+
+const ljust = (str = "", width: number, fill = " "): string => _padStr(str, width, "left", fill);
+const rjust = (str = "", width: number, fill = " "): string => _padStr(str, width, "right", fill);
+const center = (str = "", width: number, fill = " "): string => _padStr(str, width, "center", fill);
+
+const sprintf = (fmt: string, ...args: unknown[]): string => {
+  let i = 0;
+  return fmt.replace(/%([+\- ]?)(\d*)(?:\.(\d+))?([sdifebotxX%])/g, (_, flag: string, width: string, prec: string, spec: string) => {
+    if (spec === "%") return "%";
+    const arg = args[i++];
+    let s: string;
+    switch (spec) {
+      case "s": s = String(arg ?? ""); break;
+      case "d": case "i": s = String(Math.trunc(Number(arg))); break;
+      case "f": s = prec !== undefined ? Number(arg).toFixed(Number(prec)) : String(Number(arg)); break;
+      case "e": s = prec !== undefined ? Number(arg).toExponential(Number(prec)) : Number(arg).toExponential(); break;
+      case "b": s = Number(arg).toString(2); break;
+      case "o": s = Number(arg).toString(8); break;
+      case "x": s = Number(arg).toString(16); break;
+      case "X": s = Number(arg).toString(16).toUpperCase(); break;
+      case "t": s = String(Boolean(arg)); break;
+      default: s = String(arg ?? "");
+    }
+    const w = Number(width);
+    if (w > s.length) {
+      return flag === "-" ? s + " ".repeat(w - s.length) : " ".repeat(w - s.length) + s;
+    }
+    return s;
+  });
+};
+
+const template = (
+  str: string,
+  data?: Record<string, string | string[] | { value: string | string[]; align?: "left" | "right" | "center" }>
+): string => {
+  if (!data) return str;
+  let maxRows = 1;
+  for (const v of Object.values(data)) {
+    if (Array.isArray(v)) maxRows = Math.max(maxRows, v.length);
+    else if (v && typeof v === "object" && "value" in v && Array.isArray(v.value)) {
+      maxRows = Math.max(maxRows, v.value.length);
+    }
+  }
+  const processRow = (rowIdx: number) =>
+    str.replace(
+      /\[([A-Z])\1*\]|\[([a-z])\2*\]|([a-z])\3+/g,
+      (match: string, ucKey: string, lcBracketed: string, lcNoBracket: string) => {
+        if (ucKey) {
+          const width = match.length - 2;
+          const raw = data[ucKey];
+          return "[" + _padStr(_getRawVal(raw, rowIdx), width, _getRawAlign(raw)) + "]";
+        } else if (lcBracketed) {
+          const width = match.length;
+          const raw = data[lcBracketed];
+          return _padStr(_getRawVal(raw, rowIdx), width, _getRawAlign(raw));
+        } else {
+          const width = match.length;
+          const raw = data[lcNoBracket];
+          return _padStr(_getRawVal(raw, rowIdx), width, _getRawAlign(raw));
+        }
+      }
+    );
+  const rows: string[] = [];
+  for (let i = 0; i < maxRows; i++) rows.push(processRow(i));
+  return rows.join("\n");
+};
+
+// --- End formatting utilities ---
 
 const createStateProxy = (initialState: Record<string, unknown>, onPatch: (prop: string, value: unknown) => void) => {
   return new Proxy(initialState || {}, {
@@ -115,31 +251,17 @@ self.onmessage = async (e: MessageEvent) => {
   }
 
   const { code, sdk: sdkData = {} } = e.data;
-  
-  const hydrateSDKObject = (obj: unknown): IDBObj => {
-    const raw = obj as Record<string, unknown>;
-    if (raw) {
-      if (!(raw.flags instanceof Set)) {
-        raw.flags = new Set(Array.isArray(raw.flags) ? (raw.flags as string[]) : []);
-      }
-      raw.state = (raw.state as Record<string, unknown>) || {};
-      if (raw.contents) {
-        raw.contents = (raw.contents as unknown[]).map(hydrateSDKObject);
-      }
-    }
-    return raw as unknown as IDBObj;
-  };
 
   const u: IUrsamuSDK = {
     state: createStateProxy(sdkData.state, (p: string, v: unknown) => self.postMessage({ type: 'patch', prop: p, value: v })),
     me: hydrateSDKObject(sdkData.me),
     here: {
       ...(hydrateSDKObject(sdkData.here) as SDKDBObj),
-      broadcast: (msg: string) => self.postMessage({ type: 'broadcast', message: msg })
+      broadcast: (msg: string, options?: Record<string, unknown>) => self.postMessage({ type: 'broadcast', message: msg, data: options })
     } as IDBObj,
     target: sdkData.target ? ({
       ...(hydrateSDKObject(sdkData.target) as SDKDBObj),
-      broadcast: (msg: string) => self.postMessage({ type: 'broadcast', message: msg, target: (sdkData.target as IDBObj).id })
+      broadcast: (msg: string, options?: Record<string, unknown>) => self.postMessage({ type: 'broadcast', message: msg, target: (sdkData.target as IDBObj).id, data: options })
     } as IDBObj) : undefined,
     ui: {
       panel: (opt: unknown) => opt,
@@ -148,7 +270,15 @@ self.onmessage = async (e: MessageEvent) => {
     },
     util: {
       displayName: (o: IDBObj) => (o.state?.moniker as string) || (o.state?.name as string) || (o.name as string) || "Unknown",
-      target: (actor: IDBObj, query: string) => request<IDBObj | undefined>("util:target", { actor: actor.id, query }),
+      target: async (actor: IDBObj, query: string) => {
+        const result = await request<IDBObj | undefined>("util:target", { actor: actor.id, query });
+        return result ? hydrateSDKObject(result) : undefined;
+      },
+      center,
+      ljust,
+      rjust,
+      template,
+      sprintf,
       ...sdkData.util
     },
     db: {
@@ -167,14 +297,24 @@ self.onmessage = async (e: MessageEvent) => {
     broadcast: (msg: string, options?: Record<string, unknown>) =>
       self.postMessage({ type: "broadcast", message: msg, data: options }),
     execute: (command: string) =>
+      self.postMessage({ type: "execute", command }),
+    force: (command: string) =>
       self.postMessage({ type: "force", command }),
     teleport: (target: string, destination: string) =>
       self.postMessage({ type: "teleport", target, destination }),
-    checkLock: (target: string | IDBObj, lock: string) => 
+    checkLock: (target: string | IDBObj, lock: string) =>
       request<boolean>("lock:check", { target: typeof target === "string" ? target : target.id, lock }),
     auth: {
       verify: (name: string, password: string) => request<boolean>("auth:verify", { name, password }),
-      login: (id: string) => request<void>("auth:login", { id })
+      login: (id: string) => request<void>("auth:login", { id }),
+      hash: (password: string) => request<string>("auth:hash", { password }),
+      setPassword: (id: string, password: string) => request<void>("auth:setPassword", { id, password })
+    },
+    sys: {
+      setConfig: (key: string, value: unknown) => request<void>("sys:setConfig", { key, value }),
+      disconnect: (id: string) => request<void>("sys:disconnect", { id }),
+      reboot: () => request<void>("sys:reboot", {}),
+      shutdown: () => request<void>("sys:shutdown", {})
     },
     chan: {
       join: (channel: string, alias: string) => request<void>("chan:join", { channel, alias }),
@@ -186,8 +326,14 @@ self.onmessage = async (e: MessageEvent) => {
       read: (query: Record<string, unknown>) => request<IMail[]>("mail:read", { query }),
       delete: (id: string) => request<void>("mail:delete", { id })
     },
-    setFlags: (target: string | IDBObj, flags: string) => 
-      request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags })
+    setFlags: (target: string | IDBObj, flags: string) =>
+      request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags }),
+    events: {
+      emit: (event: string, data: unknown, context?: Record<string, unknown>) =>
+        request<void>("events:emit", { event, data, context }),
+      on: (event: string, handler: string) =>
+        request<string>("events:subscribe", { event, handler })
+    }
   };
 
   (self as unknown as { u: IUrsamuSDK }).u = u;

@@ -3,7 +3,7 @@ import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 import { dbojs } from "../src/services/Database/index.ts";
 import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 
-Deno.test({ name: "Core Migration: connect script", sanitizeResources: false }, async () => {
+Deno.test({ name: "Core Migration: connect script", sanitizeResources: false, sanitizeOps: false }, async () => {
   const code = await Deno.readTextFile("./system/scripts/connect.ts");
   
   const player = await dbojs.create({

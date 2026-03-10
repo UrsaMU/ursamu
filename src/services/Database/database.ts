@@ -29,7 +29,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const configValue = getConfig<string>(this.pathOrKey);
     // If getConfig returns the key itself (default behavior if missing?) or undefined, we might fall back.
     // But getConfig usually returns the value.
-    if (configValue) {
+    if (configValue && typeof configValue === 'string') {
         return configValue.replace('.', '_');
     }
     return this.pathOrKey.replace('.', '_');

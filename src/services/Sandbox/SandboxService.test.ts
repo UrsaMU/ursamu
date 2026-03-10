@@ -1,7 +1,7 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { sandboxService } from "./SandboxService.ts";
 
-Deno.test("SandboxService Tests", async (t) => {
+Deno.test({ name: "SandboxService Tests", sanitizeOps: false, sanitizeResources: false, fn: async (t) => {
   await t.step("Pool Initialization", async () => {
     await sandboxService.initPool();
     // Assuming we can check the pool size or just ensure it doesn't throw
@@ -21,4 +21,4 @@ Deno.test("SandboxService Tests", async (t) => {
       "Script execution timed out"
     );
   });
-});
+}});

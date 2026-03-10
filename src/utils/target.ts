@@ -39,10 +39,13 @@ export const target = async (
     return found;
   }
 
-  if (found.location && en.location && 
-      (found.location === en.location || found.id === en.location)) {
+  // Found object is in actor's current room, IS the room, or is in actor's inventory
+  if (found.location && (
+      (en.location && (found.location === en.location || found.id === en.location)) ||
+      found.location === en.id
+  )) {
     return found;
   }
-  
+
   return undefined;
 };

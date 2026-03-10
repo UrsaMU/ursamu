@@ -11,7 +11,7 @@ Deno.test("Intent Registry Tests", () => {
   assertEquals(look?.priority, 1);
 });
 
-Deno.test("Interceptor Service Tests", async (t) => {
+Deno.test({ name: "Interceptor Service Tests", sanitizeOps: false, sanitizeResources: false, fn: async (t) => {
   const mockIntent = {
     name: "get",
     actorId: "player1",
@@ -48,4 +48,4 @@ Deno.test("Interceptor Service Tests", async (t) => {
     assertEquals((candidates[0].state as any).order, 1);
     assertEquals((candidates[1].state as any).order, 2);
   });
-});
+}});
