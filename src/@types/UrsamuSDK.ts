@@ -77,6 +77,9 @@ export interface IUrsamuSDK {
     join(channel: string, alias: string): Promise<void>;
     leave(alias: string): Promise<void>;
     list(): Promise<unknown[]>;
+    create(name: string, options?: { header?: string; lock?: string; hidden?: boolean }): Promise<unknown>;
+    destroy(name: string): Promise<unknown>;
+    set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }): Promise<unknown>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
   events: {

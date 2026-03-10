@@ -5,7 +5,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  * ESM Refactored, Production-ready, and Telnet-compatible.
  */
 export default async (u: IUrsamuSDK) => {
-  const players = (await u.db.search('connected')).filter((p) => p.flags.has('player') && !p.flags.has('dark'));
+  const players = (await u.db.search({ flags: /connected/i })).filter((p) => p.flags.has('player') && !p.flags.has('dark'));
 
   // 1. Telnet Output
   let telnet = `%chWho's Online%cn\n`;

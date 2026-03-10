@@ -76,9 +76,8 @@ Deno.test("isAdmin — builder (lvl 7) does not qualify", OPTS, () => {
   assertEquals(isAdmin(mkObj("1", "player builder")), false);
 });
 
-Deno.test("isAdmin — 'wizard' is not a defined flag level, does not qualify", OPTS, () => {
-  // 'wizard' is used in game scripts but not registered in flags.ts — lvl stays at player (1)
-  assertEquals(isAdmin(mkObj("1", "player wizard")), false);
+Deno.test("isAdmin — 'wizard' (lvl 9) qualifies", OPTS, () => {
+  assertEquals(isAdmin(mkObj("1", "player wizard")), true);
 });
 
 // ---------------------------------------------------------------------------

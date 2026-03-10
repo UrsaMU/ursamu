@@ -329,6 +329,72 @@ class LocalSandbox {
             })();
             break;
           }
+          case "chan:create": {
+            if (e.data.name) {
+              const { chans: chanDb } = await import("../Database/index.ts");
+              (async () => {
+                const name = (e.data.name as string).toLowerCase().trim();
+                const existing = await chanDb.queryOne({ name });
+                if (existing) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Channel already exists." } });
+                  return;
+                }
+                const chan = await chanDb.create({
+                  id: name,
+                  name,
+                  header: (e.data.header as string) || `[${name.toUpperCase()}]`,
+                  lock: (e.data.lock as string) || "",
+                  hidden: (e.data.hidden as boolean) || false,
+                  owner: context?.id || ""
+                });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: chan });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "chan:destroy": {
+            if (e.data.name) {
+              const { chans: chanDb } = await import("../Database/index.ts");
+              (async () => {
+                const name = (e.data.name as string).toLowerCase().trim();
+                const existing = await chanDb.queryOne({ name });
+                if (!existing) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Channel not found." } });
+                  return;
+                }
+                await chanDb.delete({ name });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: { ok: true } });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "chan:set": {
+            if (e.data.name) {
+              const { chans: chanDb } = await import("../Database/index.ts");
+              (async () => {
+                const name = (e.data.name as string).toLowerCase().trim();
+                const existing = await chanDb.queryOne({ name });
+                if (!existing) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Channel not found." } });
+                  return;
+                }
+                const updates: Record<string, unknown> = {};
+                if (e.data.header !== undefined) updates.header = e.data.header;
+                if (e.data.lock !== undefined) updates.lock = e.data.lock;
+                if (e.data.hidden !== undefined) updates.hidden = e.data.hidden;
+                if (e.data.masking !== undefined) updates.masking = e.data.masking;
+                await chanDb.modify({ name }, "$set", updates);
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: { ok: true } });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
           case "flags:set": {
             if (e.data.target && e.data.flags) {
               const { dbojs: db } = await import("../Database/index.ts");

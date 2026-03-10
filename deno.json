@@ -30,7 +30,7 @@
     "create": "deno run -A ./src/cli/create.ts",
     "cli": "deno run -A ./src/cli/ursamu.ts",
     "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts",
-    "test": "deno test --allow-read --allow-env --allow-write --unstable-kv",
+    "test": "deno test --allow-all --unstable-kv --no-check",
     "build": "deno run -A dev.ts build",
     "preview": "deno run -A main.ts"
   },

@@ -5,6 +5,7 @@ WIP
 db
 db
 .pup.*
+logs/
 # Ignore config files but keep the directory structure
 config/*.json
 # Don't ignore the README and .gitkeep

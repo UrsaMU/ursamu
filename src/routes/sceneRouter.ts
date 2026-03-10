@@ -44,7 +44,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
                  }
               } catch (e) {
                  console.error(`[Locations] Error evaluating lock for room ${room.id}:`, e);
-                 canEnter = true; // Fail open for now
+                 canEnter = false; // Fail closed on lock evaluation error
               }
           }
           
@@ -371,14 +371,6 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
            return new Response("No valid updates", { status: 400 });
       }
   }
-  
-  // GET /api/v1/scenes/locations
-  // It seems we need to handle this BEFORE the regex match for :id if it's strictly /locations
-  // But wait, the previous block matches /api/v1/scenes/:id... 
-  // 'locations' matches regex ([^/]+) ? Yes.
-  // So /api/v1/scenes/locations matches sceneId="locations".
-  // We should move this check UP or handle it specifically.
-  // Let's refactor slightly to check exact paths first.
 
   return new Response("Not Found", { status: 404 });
 };

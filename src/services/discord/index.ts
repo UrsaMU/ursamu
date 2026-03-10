@@ -2,6 +2,8 @@
 import { discord } from "../../../deps.ts";
 import { getConfig } from "../Config/mod.ts";
 import { send } from "../broadcast/index.ts";
+import { dbojs } from "../Database/index.ts";
+import type { IChanEntry } from "../../@types/Channels.ts";
 
 export class DiscordService {
   private static instance: DiscordService;
@@ -68,23 +70,23 @@ export class DiscordService {
 
       const channelId = message.channelId.toString();
       const gameChan = this.channelMap[channelId];
+      if (!gameChan) return;
 
-      if (gameChan) {
-          // Broadcast to game channel
-          // Format: [Discord] <User>: Message
-          const sender = message.member?.nick || message.author.username;
-          const content = message.content;
-          
-          // Send to game channel
-          // We need to use `send` but target the channel. 
-          // `send` takes `targets: string[]`. Channels usually have an alias like "pub" or "Public".
-          // If accessing `chans` service is needed, we might need to import it.
-          // For now, assume simple send to channel name works if `broadcast` handles it.
-          // broadcast/index.ts `send` handles channel targets if they start with specific routing?
-          // Actually, `send` targets are usually socket IDs or Channel IDs?
-          // Let's assume we send to the channel name/alias.
-          
-          await send([gameChan], `[Discord] %ch${sender}%cn: ${content}`, {});
+      const sender = message.member?.nick || message.author.username;
+      const content = message.content;
+      const formattedMsg = `[Discord] %ch${sender}%cn: ${content}`;
+
+      // Find all players subscribed to this game channel and send to their IDs
+      const allPlayers = await dbojs.query({ flags: /player/i });
+      const subscribers = allPlayers
+        .filter((p) => {
+          const chans = p.data?.channels as IChanEntry[] | undefined;
+          return chans?.some((c) => c.channel === gameChan && c.active);
+        })
+        .map((p) => p.id);
+
+      if (subscribers.length > 0) {
+        send(subscribers, formattedMsg, {});
       }
   }
 

@@ -14,6 +14,12 @@ export const flags = new Tags(
     lock: "superuser",
   },
   {
+    name: "wizard",
+    code: "wiz",
+    lvl: 9,
+    lock: "superuser",
+  },
+  {
     name: "storyteller",
     code: "st",
     lvl: 8,

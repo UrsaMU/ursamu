@@ -80,6 +80,9 @@ interface IUrsamuSDK {
     join(channel: string, alias: string): Promise<void>;
     leave(alias: string): Promise<void>;
     list(): Promise<unknown[]>;
+    create(name: string, options?: { header?: string; lock?: string; hidden?: boolean }): Promise<unknown>;
+    destroy(name: string): Promise<unknown>;
+    set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }): Promise<unknown>;
   };
   mail: {
     send(mail: Partial<IMail>): Promise<void>;
@@ -319,7 +322,12 @@ self.onmessage = async (e: MessageEvent) => {
     chan: {
       join: (channel: string, alias: string) => request<void>("chan:join", { channel, alias }),
       leave: (alias: string) => request<void>("chan:leave", { alias }),
-      list: () => request<unknown[]>("chan:list", {})
+      list: () => request<unknown[]>("chan:list", {}),
+      create: (name: string, options?: { header?: string; lock?: string; hidden?: boolean }) =>
+        request<unknown>("chan:create", { name, ...options }),
+      destroy: (name: string) => request<unknown>("chan:destroy", { name }),
+      set: (name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }) =>
+        request<unknown>("chan:set", { name, ...options })
     },
     mail: {
       send: (mail: Partial<IMail>) => request<void>("mail:send", { mail }),
