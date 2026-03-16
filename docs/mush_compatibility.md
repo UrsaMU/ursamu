@@ -50,6 +50,17 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | Help system | ✅ Working | `help [<topic>]` |
 | Discord bridge | ✅ Working | Relay in-game chat to Discord |
 | Scene tracking & export | ✅ Working | REST API, Markdown or JSON output |
+| `@emit` / `@pemit` / `@remit` | ✅ Working | Staff broadcast commands |
+| MOTD (`@motd`, `@motd/set`) | ✅ Working | Displayed automatically on login |
+| Login notifications | ✅ Working | Unread mail + new bboard posts on connect |
+| Connection history | ✅ Working | Last login time and failed attempt count |
+| Bulletin board (`@bblist`, `@bbread`, `@bbpost`) | ✅ Working | Full bboard system with unread tracking |
+| `@quota` | ✅ Working | View and set object quota |
+| `@find` | ✅ Working | Search objects by name, flag, or type |
+| `@stats` | ✅ Working | Server uptime and object counts |
+| `@trigger <obj>/<attr>` | ✅ Working | Fire stored attributes as scripts |
+| `@wipe <obj>` | ✅ Working | Clear all user-set attributes |
+| `@Aconnect` / `@Adisconnect` | ✅ Working | `&ACONNECT` / `&ADISCONNECT` attributes fire on login/logout |
 
 ---
 
@@ -60,8 +71,8 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | MUSHcode (softcode) scripting | TypeScript/JS in sandboxed Web Workers |
 | Telnet primary | WebSocket primary (Telnet sidecar available) |
 | Attributes on objects run softcode | Scripts registered as commands or object triggers |
-| `@tr` / `@trigger` | `u.execute()` in SDK |
-| `@pemit` / `@remit` | `u.emit.send()` / `u.emit.broadcast()` |
+| `@tr` / `@trigger` | `@trigger <obj>/<attr>` command + `u.trigger()` SDK method |
+| `@pemit` / `@remit` | `@pemit` and `@remit` — both implemented |
 | `@switch` / `@if` / MUSHcode functions | Full JavaScript/TypeScript in scripts |
 
 MUSHcode attributes (`@va`–`@vz`, inline softcode, `&ATTRIBUTE`) are **not supported**. UrsaMU scripting uses the [Sandbox SDK](../guides/scripting/) instead.
@@ -70,15 +81,10 @@ MUSHcode attributes (`@va`–`@vz`, inline softcode, `&ATTRIBUTE`) are **not sup
 
 ## Planned Enhancements
 
-These features are missing compared to PennMUSH/TinyMUX and are on the post-1.0 roadmap:
-
 | Feature | Notes |
 |---------|-------|
-| MOTD system | `motd.txt` + `wizmotd.txt` auto-displayed after login |
-| Login notifications | "You have 3 unread mail messages" on connect |
-| Connection history | Last login IP/time, failed attempt count |
-| Terminal/screen settings | Width detection, persistent pager settings |
-| `@Aconnect` / `@Adisconnect` hooks | Attribute-based connect hooks |
+| Terminal/screen settings | Width detection via Telnet NAWS, persistent pager settings |
+| MUSHcode inline softcode | Not planned — use TypeScript scripts instead |
 
 ---
 

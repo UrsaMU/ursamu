@@ -6,276 +6,473 @@ description: How to write and run scripts in UrsaMU's sandboxed scripting enviro
 
 # Scripting Guide
 
-UrsaMU scripts are TypeScript/JavaScript files that run inside **Web Workers** — completely isolated from the host process. Scripts interact with the game world through a typed SDK called the **UrsaMU SDK** (`u`).
+UrsaMU scripts are TypeScript/JavaScript files that run inside **Web Workers** — completely isolated from the host process. Every script receives a typed SDK object called `u` that provides everything a script needs to interact with the game world.
 
-## How Scripting Works
+## How It Works
 
-When a player triggers a script (via an object, command, or trigger), the Sandbox Service:
+When a player runs a command (or `@trigger` fires an attribute), the Sandbox Service:
 
-1. Spins up a Web Worker
-2. Injects the SDK as the global `u` object
-3. Injects the execution environment as `en` (the entity context)
-4. Runs the script
-5. Collects results and sends them back to the hub
+1. Spawns a Web Worker
+2. Injects the **`u` SDK object** as a global
+3. Runs the script (ESM module or legacy block)
+4. Worker posts results/messages back to the server
+5. Worker terminates
 
-Scripts are isolated — they **cannot** crash the server, access the filesystem, or open network connections directly. Everything goes through the SDK.
+Scripts are fully isolated — they cannot crash the server, access the filesystem, or make network requests. All interaction happens through `u`.
 
-## The Execution Context (`en`)
+---
 
-Every script receives an `en` (entity/environment) object describing who triggered it and where:
+## The `u` Object
+
+Every script has access to a global `u` object. It contains both the current execution context and all SDK methods.
+
+### Context Properties
 
 ```typescript
-en.id        // ID of the actor (player or object running the script)
-en.name      // Display name of the actor
-en.location  // ID of the room the actor is in
-en.cmd       // Command string that triggered the script
-en.args      // Argument string passed to the command
-en.switches  // Object of switches used (e.g. { verbose: true })
-en.socket    // Socket ID of the triggering connection
-en.cid       // Character ID (if connected player)
+u.me        // IDBObj — the actor (player or object running the script)
+u.here      // IDBObj — the room the actor is in; also has .broadcast()
+u.target    // IDBObj | undefined — an optional target object
+u.cmd       // { name, args, switches } — the command that triggered this
+u.state     // Record<string, unknown> — reactive per-execution state
+u.socketId  // string | undefined — socket ID of the triggering connection
 ```
 
-## The SDK (`u`)
-
-The SDK is available as the global `u` object. It provides namespaced groups of functions:
-
-### `u.emit` — Sending Messages
+#### `IDBObj` shape
 
 ```typescript
-// Send a message to the triggering player only
-await u.emit.send("You look around.");
-
-// Broadcast to everyone in a room
-await u.emit.broadcast(roomId, "Someone waves.");
-
-// Broadcast to everyone EXCEPT a player
-await u.emit.broadcastExcept(roomId, actorId, "Alice waves.");
+{
+  id: string;
+  name?: string;
+  location?: string;
+  flags: Set<string>;          // e.g. new Set(["player", "connected"])
+  state: Record<string, unknown>;  // player/object data (desc, attrs, etc.)
+  contents: IDBObj[];
+}
 ```
 
-### `u.db` — Database Access
+#### `u.cmd` shape
 
 ```typescript
-// Get an object by ID
-const room = await u.db.get(en.location);
-console.log(room.name); // "The Grand Hall"
+u.cmd.name       // "look", "score", "bbpost", etc.
+u.cmd.original   // raw command string typed by the player
+u.cmd.args       // string[] — [rawArgString, ...splitArgs]
+u.cmd.switches   // string[] | undefined — ["edit"] from "@bbpost/edit"
+```
 
-// Search objects by query
+---
+
+## Messaging
+
+```typescript
+// Send to the triggering player only
+u.send("You look around the room.");
+
+// Send to a specific player by ID
+u.send("You have new mail.", targetPlayerId);
+
+// Send with options (e.g. quit)
+u.send("Goodbye!", undefined, { quit: true });
+
+// Broadcast to ALL connected players (use sparingly)
+u.broadcast("The server will reboot in 5 minutes.");
+
+// Broadcast to all players in the current room
+u.here.broadcast("Alice waves cheerfully.");
+
+// Broadcast to all in target's room
+u.target?.broadcast("Someone enters the room.");
+```
+
+---
+
+## Database (`u.db`)
+
+```typescript
+// Search by query object (returns SDK IDBObj array)
 const players = await u.db.search({ flags: /player/i });
-
-// Modify an object
-await u.db.modify(en.id, { data: { ...currentData, score: 100 } });
+const here    = await u.db.search({ id: u.me.location });
+const byName  = await u.db.search({ "data.name": /alice/i });
 
 // Create a new object
-const obj = await u.db.create({
+const coin = await u.db.create({
   flags: new Set(["thing"]),
-  data: { name: "A Coin", description: "A shiny gold coin." },
-  location: en.location,
+  location: u.me.id,        // put it in actor's inventory
+  state: { name: "Gold Coin", description: "A shiny coin." }
+});
+
+// Modify an object (always spread state to avoid clobbering)
+await u.db.modify(u.me.id, "$set", {
+  data: { ...u.me.state, score: (u.me.state.score as number || 0) + 10 }
 });
 
 // Destroy an object
-await u.db.destroy(objId);
+await u.db.destroy(coin.id);
 ```
 
-### `u.move` — Moving Objects
+> **Important:** always spread existing state when modifying:
+> `{ data: { ...u.me.state, myField: value } }` — omitting the spread
+> will wipe all other fields.
+
+---
+
+## Finding Objects (`u.util.target`)
 
 ```typescript
-// Move actor to a new location
-await u.move.move(en.id, destinationRoomId);
-
-// Get the exit that leads to a room
-const exit = await u.move.getExit(en.location, "north");
+// Find by name, ID, alias, "me", "here", etc.
+const target = await u.util.target(u.me, u.cmd.args[0]);
+if (!target) {
+  u.send("I can't find that.");
+  return;
+}
 ```
 
-### `u.chan` — Channel Operations
+---
+
+## Flags & Permissions
 
 ```typescript
-// Send a message to a channel
-await u.chan.send("public", `[Public] ${en.name}: Hello!`);
+// Check flags
+u.me.flags.has("wizard")    // true/false
+u.me.flags.has("connected")
 
-// Create a channel (admin/wizard only)
-await u.chan.create("newchannel", { header: "[New]" });
+// Check edit permission (owner, admin, wizard)
+if (!u.canEdit(u.me, target)) {
+  u.send("Permission denied.");
+  return;
+}
 
-// Destroy a channel (admin/wizard only)
-await u.chan.destroy("oldchannel");
-
-// Set channel properties (admin/wizard only)
-await u.chan.set("mychannel", "header", "[MyChan]");
+// Set or remove flags
+await u.setFlags(target.id, "dark");       // add flag
+await u.setFlags(target.id, "!dark");      // remove flag
+await u.setFlags(target.id, "wizard");     // grant wizard
 ```
 
-### `u.ui` — Structured UI Output
+---
+
+## Locks
 
 ```typescript
-// Send a structured layout to a web client
-u.ui.layout({
-  type: "table",
-  data: [
-    { col1: "Name", col2: "Score" },
-    { col1: "Alice", col2: "1200" },
-  ],
+// Evaluate a stored lock expression
+const canPass = await u.checkLock(target, "player+");
+```
+
+---
+
+## Movement
+
+```typescript
+// Move any object to a destination
+u.teleport(objectId, destinationRoomId);
+```
+
+---
+
+## Executing Commands
+
+```typescript
+// Run a command as the actor (fires the full command pipeline)
+u.execute("look");
+u.execute("say Hello, world!");
+
+// Force a command (bypasses some permission checks — use carefully)
+u.force("@set me=dark");
+```
+
+---
+
+## Text (`u.text`)
+
+Server-side named text blobs — used for MOTD, help files, etc.
+
+```typescript
+// Read a stored text entry
+const motd = await u.text.read("motd");
+
+// Write/update a text entry (admin scripts)
+await u.text.set("motd", "Welcome to the game! Events tonight at 8pm.");
+```
+
+---
+
+## Bulletin Boards (`u.bb`)
+
+```typescript
+// List all boards (includes unread counts for current player)
+const boards = await u.bb.listBoards();
+
+// List posts on a board
+const posts = await u.bb.listPosts("announcements");
+
+// Read a specific post
+const post = await u.bb.readPost("announcements", 1);
+if (post) u.send(`${post.subject}\n${post.body}`);
+
+// Post to a board
+await u.bb.post("announcements", "Server Update", "Maintenance tonight at midnight.");
+
+// Mark a board as read
+await u.bb.markRead("announcements");
+
+// Get unread count totals
+const newCount = await u.bb.totalNewCount();
+```
+
+---
+
+## Mail (`u.mail`)
+
+```typescript
+// Send a message
+await u.mail.send({
+  id: crypto.randomUUID(),
+  from: `#${u.me.id}`,
+  to: [`#${recipientId}`],
+  subject: "Hello",
+  message: "Nice to meet you!",
+  read: false,
+  date: Date.now()
 });
+
+// Read mail (query by recipient ID)
+const inbox = await u.mail.read({ to: { $in: [`#${u.me.id}`] } });
+
+// Delete a message
+await u.mail.delete(messageId);
 ```
 
-### `u.auth` — Authentication
+---
+
+## Channels (`u.chan`)
 
 ```typescript
-// Hash a password
-const hashed = await u.auth.hash("mypassword");
+// Join a channel
+await u.chan.join("public", "pub");
 
-// Verify a password
-const valid = await u.auth.setPassword(en.id, "newpassword");
+// Leave by alias
+await u.chan.leave("pub");
+
+// List all channels
+const channels = await u.chan.list();
+
+// Admin: create a channel
+await u.chan.create("events", { header: "[EVENTS]", hidden: false });
+
+// Admin: destroy a channel
+await u.chan.destroy("events");
+
+// Admin: change channel properties
+await u.chan.set("public", { header: "[PUB]", lock: "player+", masking: false });
 ```
 
-### `u.sys` — System Controls (Wizard Only)
+---
+
+## Attribute Triggers (`u.trigger`)
+
+Fire a stored `&ATTR` on any object as a script:
 
 ```typescript
-// Restart the server
-await u.sys.reboot();
+// Fire &OPEN on the target object, passing args
+await u.trigger(target.id, "OPEN", ["force"]);
 
-// Shutdown the server
-await u.sys.shutdown();
+// Fire &ACONNECT on the player
+await u.trigger(u.me.id, "ACONNECT");
 ```
 
-### `u.util` — Utilities
+---
+
+## Authentication (`u.auth`)
+
+Primarily used in `connect.ts` and registration scripts:
 
 ```typescript
-// Strip MUSH color codes and ANSI escapes
-const clean = u.util.stripSubs("%chHello%cn %cgWorld%cn");
-// → "Hello World"
+// Verify login credentials
+const ok = await u.auth.verify(name, password);
 
-// Pad/align text
-const centered  = u.util.center("Title", 40, "-");
-const leftAlign = u.util.ljust("Left", 20);
-const rightAlign = u.util.rjust("Right", 20);
+// Complete login (sets connected flag, joins socket rooms)
+await u.auth.login(playerId);
 
-// sprintf-style formatting
-const formatted = u.util.sprintf("%-10s %5d", "Player", 1200);
+// Hash a password for storage
+const hashed = await u.auth.hash("mysecretpassword");
 
-// String interpolation
-const msg = u.util.template("Welcome, {name}!", { name: en.name });
+// Change a player's password
+await u.auth.setPassword(playerId, "newpassword");
 ```
+
+---
+
+## System (`u.sys`)
+
+Admin/wizard-only controls:
+
+```typescript
+// Set a config key at runtime
+await u.sys.setConfig("game.masterRoom", "42");
+
+// Disconnect a socket by socket ID
+await u.sys.disconnect(socketId);
+
+// Get server uptime in milliseconds
+const ms = await u.sys.uptime();
+const minutes = Math.floor(ms / 60000);
+
+// Reboot or shut down
+await u.sys.reboot();    // exits with code 75 (restart signal)
+await u.sys.shutdown();  // exits with code 0
+```
+
+---
+
+## Events (`u.events`)
+
+Pub/sub events across the server:
+
+```typescript
+// Emit an event
+await u.events.emit("player.levelup", { id: u.me.id, newLevel: 5 });
+
+// Subscribe a handler attribute (the handler receives the event data)
+const subId = await u.events.on("player.levelup", "LEVELUP_HANDLER");
+```
+
+---
+
+## Formatting Utilities (`u.util`)
+
+```typescript
+// Display name (uses moniker if set, falls back to name)
+const name = u.util.displayName(u.me, u.me);
+
+// Text alignment
+u.util.ljust("Left",    20)         // "Left                "
+u.util.rjust("Right",   20)         // "               Right"
+u.util.center("Center", 20, "-")    // "-------Center-------"
+
+// printf-style sprintf
+u.util.sprintf("%-10s %5d", "Score", 1200)
+
+// Column template (multi-row data)
+u.util.template(
+  "[NNN] [TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT]",
+  { N: "42", T: "Some long title here" }
+)
+
+// Strip MUSH color codes and ANSI escapes (for storage/validation)
+u.util.stripSubs("%chHello %cgWorld%cn")  // → "Hello World"
+```
+
+---
+
+## Structured UI (`u.ui`)
+
+For web client panels (JSON output, not text):
+
+```typescript
+// Layout — posts a structured result to the web client
+u.ui.layout({
+  components: [
+    { type: "header", title: "Character Sheet" },
+    { type: "table", content: [["Name", u.util.displayName(u.me, u.me)]] }
+  ]
+});
+
+// Render a template string
+const html = u.ui.render("<b>{{name}}</b>", { name: "Alice" });
+```
+
+---
 
 ## Writing a Script
 
-Scripts are TypeScript (or JavaScript) files stored in `system/scripts/`. They can use either **ESM module syntax** or **legacy block mode**.
+Scripts live in `system/scripts/`. The file name becomes the command name (minus any `@` prefix).
 
-### ESM Style (Recommended)
-
-Files with an `export` statement are detected as ESM modules:
+### ESM Style (recommended)
 
 ```typescript
 // system/scripts/greet.ts
-export {};  // signals ESM mode
+import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
-const target = en.args.trim() || "World";
-await u.emit.send(`Hello, ${target}!`);
-await u.emit.broadcast(en.location, `${en.name} says hello to ${target}.`);
+export default async (u: IUrsamuSDK) => {
+  const targetName = (u.cmd.args[0] || "").trim();
+  if (!targetName) {
+    u.send("Usage: greet <player>");
+    return;
+  }
+
+  const target = await u.util.target(u.me, targetName);
+  if (!target) {
+    u.send(`I can't find '${targetName}'.`);
+    return;
+  }
+
+  const myName = u.util.displayName(u.me, u.me);
+  u.send(`You wave to ${u.util.displayName(target, u.me)}.`);
+  u.send(`${myName} waves to you.`, target.id);
+  u.here.broadcast(`${myName} waves to ${u.util.displayName(target, u.me)}.`);
+};
 ```
+
+Players run it as `greet <name>` or `@greet <name>`.
 
 ### Legacy Block Style
 
-Files without exports run as a simple code block:
+Files without `export` run as a plain async block. The `u` global is injected directly:
 
 ```typescript
-// system/scripts/score.ts
-const me = await u.db.get(en.id);
-const score = me.data?.score ?? 0;
-await u.emit.send(`Your score: ${score}`);
+// system/scripts/gold.ts
+const gold = (u.me.state.gold as number) || 0;
+u.send(`You have ${gold} gold coins.`);
 ```
 
-## Registering a Script as a Command
+### Aliases
 
-Scripts become commands by registering them in `system/scripts/index.ts` (or via a plugin):
+Export a const `aliases` array to register additional trigger names:
 
 ```typescript
-import { registerCommand } from "../../services/Commands/mod.ts";
-
-registerCommand({
-  name: "greet",
-  pattern: "greet *",
-  flags: "connected",
-  exec: async (ctx) => {
-    await runScript("greet", ctx);
-  },
-});
+export const aliases = ["greet", "wave"];
 ```
 
-Or using the inline exec form:
+### Switches
+
+Commands like `@bbpost/edit` or `@motd/set` pass the portion after `/` as `u.cmd.switches`:
 
 ```typescript
-registerCommand({
-  name: "score",
-  pattern: "score",
-  flags: "connected",
-  exec: async (ctx) => {
-    const me = await dbojs.get(ctx.player.id);
-    const score = me?.data?.score ?? 0;
-    ctx.send(`Your score: ${score}`);
-  },
-});
+// u.cmd.switches = ["edit"] when player types @mycommand/edit
+const switches = u.cmd.switches || [];
+if (switches.includes("edit")) {
+  // handle edit mode
+}
 ```
 
-## Testing Scripts
-
-Scripts can be tested using `deno test`. The pattern is to:
-
-1. Read the script file
-2. Strip imports/exports with `wrapScript()`
-3. Create a mock `en` and `u` environment
-4. Execute the script and assert on outputs
-
-```typescript
-// tests/my_script.test.ts
-import { assertEquals } from "jsr:@std/assert";
-import { wrapScript } from "./helpers.ts";
-
-Deno.test("greet script sends hello", async () => {
-  const script = await Deno.readTextFile("system/scripts/greet.ts");
-  const wrapped = wrapScript(script);
-
-  const sent: string[] = [];
-  const env = {
-    en: { id: "p1", name: "Alice", location: "r1", args: "Bob" },
-    u: {
-      emit: {
-        send: (msg: string) => { sent.push(msg); },
-        broadcast: () => {},
-      },
-      // ... other SDK stubs
-    },
-  };
-
-  await new Function("en", "u", `return (async () => { ${wrapped} })()`)(
-    env.en, env.u
-  );
-
-  assertEquals(sent[0], "Hello, Bob!");
-});
-```
+---
 
 ## Security Model
 
-| Capability | Available in Script? |
-|-----------|---------------------|
+| Capability | Available? |
+|---|---|
 | File system access | No |
-| Network requests | No |
-| Host process access | No |
-| Database (via SDK) | Yes |
-| Messaging (via SDK) | Yes |
-| Channel ops (via SDK) | Yes |
-| System commands (wizard only) | Conditional |
-| Custom ESM imports (same worker) | Yes |
-| JSR sub-path imports | Limited |
+| Network requests (`fetch`) | No |
+| `Deno.*` API | No |
+| Database (via `u.db`) | Yes |
+| Messaging (via `u.send`, `u.broadcast`) | Yes |
+| Channel ops (via `u.chan`) | Yes |
+| Mail (via `u.mail`) | Yes |
+| Bulletin boards (via `u.bb`) | Yes |
+| System commands (via `u.sys`) | Wizard/admin only — enforced by scripts |
+| ESM imports within same worker | Yes |
+| JSR sub-path imports | Limited (import maps don't resolve in workers) |
 
-Scripts run inside Web Workers with `/// <reference no-default-lib="true" />`, preventing access to `Deno.*`, `fetch()`, and the filesystem.
+Scripts run inside `Worker` with `/// <reference no-default-lib="true" />`, which blocks `Deno`, `fetch`, `XMLHttpRequest`, and the filesystem.
+
+---
 
 ## MUSH Color Codes
 
-UrsaMU supports the traditional MUSH color substitution syntax for player-facing text:
+UrsaMU processes traditional MUSH substitution codes in all outgoing text:
 
-| Code | Meaning |
-|------|---------|
-| `%ch` | Bold/bright |
-| `%cn` | Reset/normal |
+| Code | Effect |
+|---|---|
+| `%ch` | Bold / bright |
+| `%cn` | Reset to normal |
 | `%cr` | Red |
 | `%cg` | Green |
 | `%cb` | Blue |
@@ -283,9 +480,14 @@ UrsaMU supports the traditional MUSH color substitution syntax for player-facing
 | `%cw` | White |
 | `%cc` | Cyan |
 | `%cm` | Magenta |
-| `%n` | Player name substitute |
+| `%n` | Actor's name |
 | `%r` / `%R` | Newline |
 | `%t` | Tab |
 | `%b` | Space |
 
-Use `u.util.stripSubs(text)` to strip all color codes (useful for validation or storage).
+```typescript
+u.send("%ch%cyWelcome to Arenthia!%cn");
+u.send(`%ch%cr${u.util.ljust("ALERT", 10)}%cn Server restarting in 5 minutes.`);
+```
+
+Use `u.util.stripSubs(text)` to remove all codes before storing or comparing strings.
