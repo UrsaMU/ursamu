@@ -422,30 +422,24 @@ socket<span class="token punctuation">.</span><span class="token function">send<
 socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"look"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
 <h2>First Admin</h2>
-<p>After the server starts for the first time, you need to bootstrap your admin account.</p>
-<p><strong>Step 1</strong> — Connect to your server and create your character:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">create YourName YourPassword
+<p>UrsaMU handles first-run setup automatically. On the very first <code>deno task start</code><br>
+when the database is empty, the server pauses and prompts you interactively:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">No players found in the database.
+Welcome! Let's set up your superuser account.
+
+Enter email address: admin@example.com
+Enter username: Admin
+Enter password: ••••••••
 </code></pre>
-<p><strong>Step 2</strong> — Quit the game (<code>quit</code>), then run this one-liner from your project directory to grant yourself wizard access:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno eval "
-import { dbojs } from './node_modules/ursamu/src/services/Database/index.ts';
-const results = await dbojs.find({ 'data.name': /^YourName$/i });
-const player = results[0];
-if (player) {
-  player.flags.add('wizard');
-  await dbojs.modify({ id: player.id }, '\$set', { flags: player.flags });
-  console.log('Wizard flag set on', player.data?.name);
-} else {
-  console.error('Player not found');
-}
-" --unstable-kv -A
-</code></pre>
-<p>Replace <code>YourName</code> with your character name.</p>
-<p><strong>Step 3</strong> — Reconnect. You now have full wizard (superuser) access and can use<br>
-<code>@set &lt;player&gt;=admin</code> to grant admin rights to other players in-game.</p>
+<p>This creates your account with the <strong>superuser</strong> flag (level 10 — the highest<br>
+permission level). Once done, the Hub, Telnet, and web client all start.</p>
+<p>After that, use <code>@set &lt;player&gt;=admin</code> in-game to grant admin rights to other<br>
+trusted staff. The <code>superuser</code> flag itself can only be created at the database<br>
+level via this first-run flow — it cannot be granted from inside the game.</p>
 <blockquote>
-<p><strong>Tip</strong>: You only need to do this once. After setting the wizard flag, all<br>
-future admin management can be done from inside the game.</p>
+<p><strong>Tip</strong>: If you run <code>deno task start</code> non-interactively (e.g. inside a script<br>
+or Docker without a TTY), the prompt is skipped and you’ll see a message<br>
+suggesting you run <code>deno task server</code> directly to complete setup.</p>
 </blockquote>
 <h2>Next Steps</h2>
 <p>Now that you have UrsaMU installed and running, you might want to:</p>

@@ -197,37 +197,28 @@ socket.send(JSON.stringify({ msg: "look", data: {} }));
 
 ## First Admin
 
-After the server starts for the first time, you need to bootstrap your admin account.
+UrsaMU handles first-run setup automatically. On the very first `deno task start`
+when the database is empty, the server pauses and prompts you interactively:
 
-**Step 1** — Connect to your server and create your character:
 ```
-create YourName YourPassword
-```
+No players found in the database.
+Welcome! Let's set up your superuser account.
 
-**Step 2** — Quit the game (`quit`), then run this one-liner from your project directory to grant yourself wizard access:
-
-```bash
-deno eval "
-import { dbojs } from './node_modules/ursamu/src/services/Database/index.ts';
-const results = await dbojs.find({ 'data.name': /^YourName$/i });
-const player = results[0];
-if (player) {
-  player.flags.add('wizard');
-  await dbojs.modify({ id: player.id }, '\$set', { flags: player.flags });
-  console.log('Wizard flag set on', player.data?.name);
-} else {
-  console.error('Player not found');
-}
-" --unstable-kv -A
+Enter email address: admin@example.com
+Enter username: Admin
+Enter password: ••••••••
 ```
 
-Replace `YourName` with your character name.
+This creates your account with the **superuser** flag (level 10 — the highest
+permission level). Once done, the Hub, Telnet, and web client all start.
 
-**Step 3** — Reconnect. You now have full wizard (superuser) access and can use
-`@set <player>=admin` to grant admin rights to other players in-game.
+After that, use `@set <player>=admin` in-game to grant admin rights to other
+trusted staff. The `superuser` flag itself can only be created at the database
+level via this first-run flow — it cannot be granted from inside the game.
 
-> **Tip**: You only need to do this once. After setting the wizard flag, all
-> future admin management can be done from inside the game.
+> **Tip**: If you run `deno task start` non-interactively (e.g. inside a script
+> or Docker without a TTY), the prompt is skipped and you'll see a message
+> suggesting you run `deno task server` directly to complete setup.
 
 ## Next Steps
 

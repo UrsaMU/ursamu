@@ -24,59 +24,57 @@ including user management, configuration, backups, and troubleshooting.
 
 ## First-Run Setup
 
-On a brand-new server, the database is empty — there are no admin accounts yet.
-You need to bootstrap your first superuser account manually. This only needs to
-be done once.
+UrsaMU handles first-run setup automatically. This only needs to happen once.
 
-### Step 1 — Start the server and create your character
+### How it works
+
+Run the server for the first time:
 
 ```bash
 deno task start
 ```
 
-Connect with your MU* client (port `4201`) or the web client, then:
+When the database is empty, the startup script pauses and prompts you:
 
 ```
-create YourName YourPassword
+No players found in the database.
+Welcome! Let's set up your superuser account.
+
+Enter email address: you@example.com
+Enter username: Admin
+Enter password: ••••••••
+
+Superuser 'Admin' created successfully!
 ```
 
-Quit the game immediately after: `quit`
+After setup completes, the Hub, Telnet sidecar, and web client all start automatically.
 
-### Step 2 — Grant yourself wizard access
+### Permission levels
 
-From your project directory, run:
+UrsaMU uses a flag-based permission system:
 
-```bash
-deno run -A --unstable-kv - <<'EOF'
-import { dbojs } from "jsr:@ursamu/ursamu/src/services/Database/index.ts";
-const results = await dbojs.find({ "data.name": /^YourName$/i });
-const player = results[0];
-if (player) {
-  player.flags.add("wizard");
-  await dbojs.modify({ id: player.id }, "$set", { flags: player.flags });
-  console.log("Wizard flag set on", player.data?.name);
-} else {
-  console.error("Player not found — check the name and try again");
-}
-EOF
-```
+| Flag | Level | Who can set it | Description |
+|------|-------|---------------|-------------|
+| `superuser` | 10 | First-run prompt only | Full server owner access |
+| `admin` | 9 | Superuser (in-game) | Full admin command access |
+| `wizard` | 9 | Superuser (in-game) | Same as admin — alternative role name |
+| `storyteller` | 8 | Admin (in-game) | Storytelling/moderation access |
+| `builder` | 7 | Admin (in-game) | Building permissions |
+| `player` | 1 | Automatic on `create` | Standard player |
 
-Replace `YourName` with your character's name exactly as you created it.
-
-### Step 3 — Reconnect
-
-Log back in. You now have full wizard (superuser) access. From this point you can
-manage everything from inside the game.
-
-To grant admin access to another player:
+From inside the game, grant admin rights with:
 
 ```
 @set TheirName=admin
 ```
 
-> The `wizard` flag (superuser level) can only be set at the database level and
-> cannot be granted via `@set` by any in-game command — this is intentional. Use
-> `admin` for trusted staff and reserve `wizard` for server owners.
+The `superuser` flag cannot be granted via `@set` — it can only be created
+through the first-run interactive prompt.
+
+> **Non-interactive environments**: If you run `deno task start` without a TTY
+> (e.g. in a Docker container), the prompt is skipped. Run `deno task server`
+> directly in an interactive terminal to complete first-run setup, then switch
+> back to `deno task start` for normal operation.
 
 ---
 
@@ -105,14 +103,13 @@ As an administrator, you can manage user accounts with these commands:
 
 ### User Roles and Permissions
 
-UrsaMU uses a flag-based permission system. The key permission flags are:
+See the [Permission levels](#permission-levels) table in the First-Run Setup
+section above. In summary:
 
-- **player** — Standard player account. Set automatically on character creation.
-- **admin** — Full administrative access. Can use all admin commands, manage
-  channels, set flags, and modify any object.
-- **wizard** — Restricted super-admin flag (level 9). Locked to superusers only.
-  Code: `wiz`. Grants the same command access as `admin` but is reserved for
-  server owners. Cannot be set by regular admins.
+- `superuser` (10) — created at first run, cannot be granted in-game
+- `admin` / `wizard` (9) — granted by a superuser with `@set`
+- `storyteller` (8), `builder` (7) — granted by an admin with `@set`
+- `player` (1) — automatic on character creation
 
 To set a flag on a player:
 
@@ -156,15 +153,9 @@ configured at runtime.
 
 ## Web Client
 
-UrsaMU ships with an optional browser-based client built with Deno Fresh. It is
-a separate process from the main Hub and must be started independently.
-
-### Starting the Web Client
-
-```bash
-cd src/web-client
-deno task start
-```
+UrsaMU ships with an optional browser-based client built with Deno Fresh
+(`src/web-client/`). When `src/web-client/` is present, **`deno task start`
+starts it automatically** alongside the Hub and Telnet sidecar.
 
 The web client runs at [http://localhost:8000](http://localhost:8000).
 
@@ -176,6 +167,15 @@ The web client runs at [http://localhost:8000](http://localhost:8000).
 - Character profile and character sheet pages
 - Player directory
 - Wiki pages
+
+### Starting Manually
+
+If you want to run the web client independently (e.g. during development):
+
+```bash
+cd src/web-client
+deno task start
+```
 
 ### Production Deployment
 

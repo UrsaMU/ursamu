@@ -273,42 +273,82 @@
 <p>This guide covers the administrative aspects of running an UrsaMU server,<br>
 including user management, configuration, backups, and troubleshooting.</p>
 <h2>First-Run Setup</h2>
-<p>On a brand-new server, the database is empty — there are no admin accounts yet.<br>
-You need to bootstrap your first superuser account manually. This only needs to<br>
-be done once.</p>
-<h3>Step 1 — Start the server and create your character</h3>
+<p>UrsaMU handles first-run setup automatically. This only needs to happen once.</p>
+<h3>How it works</h3>
+<p>Run the server for the first time:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash">deno task start
 </code></pre>
-<p>Connect with your MU* client (port <code>4201</code>) or the web client, then:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">create YourName YourPassword
+<p>When the database is empty, the startup script pauses and prompts you:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">No players found in the database.
+Welcome! Let's set up your superuser account.
+
+Enter email address: you@example.com
+Enter username: Admin
+Enter password: ••••••••
+
+Superuser 'Admin' created successfully!
 </code></pre>
-<p>Quit the game immediately after: <code>quit</code></p>
-<h3>Step 2 — Grant yourself wizard access</h3>
-<p>From your project directory, run:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A --unstable-kv - &lt;&lt;'EOF'
-import { dbojs } from "jsr:@ursamu/ursamu/src/services/Database/index.ts";
-const results = await dbojs.find({ "data.name": /^YourName$/i });
-const player = results[0];
-if (player) {
-  player.flags.add("wizard");
-  await dbojs.modify({ id: player.id }, "$set", { flags: player.flags });
-  console.log("Wizard flag set on", player.data?.name);
-} else {
-  console.error("Player not found — check the name and try again");
-}
-EOF
-</code></pre>
-<p>Replace <code>YourName</code> with your character’s name exactly as you created it.</p>
-<h3>Step 3 — Reconnect</h3>
-<p>Log back in. You now have full wizard (superuser) access. From this point you can<br>
-manage everything from inside the game.</p>
-<p>To grant admin access to another player:</p>
+<p>After setup completes, the Hub, Telnet sidecar, and web client all start automatically.</p>
+<h3>Permission levels</h3>
+<p>UrsaMU uses a flag-based permission system:</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Level</th>
+<th>Who can set it</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>superuser</code></td>
+<td>10</td>
+<td>First-run prompt only</td>
+<td>Full server owner access</td>
+</tr>
+<tr>
+<td><code>admin</code></td>
+<td>9</td>
+<td>Superuser (in-game)</td>
+<td>Full admin command access</td>
+</tr>
+<tr>
+<td><code>wizard</code></td>
+<td>9</td>
+<td>Superuser (in-game)</td>
+<td>Same as admin — alternative role name</td>
+</tr>
+<tr>
+<td><code>storyteller</code></td>
+<td>8</td>
+<td>Admin (in-game)</td>
+<td>Storytelling/moderation access</td>
+</tr>
+<tr>
+<td><code>builder</code></td>
+<td>7</td>
+<td>Admin (in-game)</td>
+<td>Building permissions</td>
+</tr>
+<tr>
+<td><code>player</code></td>
+<td>1</td>
+<td>Automatic on <code>create</code></td>
+<td>Standard player</td>
+</tr>
+</tbody>
+</table>
+<p>From inside the game, grant admin rights with:</p>
 <pre class="language-none" tabindex="0"><code class="language-none">@set TheirName=admin
 </code></pre>
+<p>The <code>superuser</code> flag cannot be granted via <code>@set</code> — it can only be created<br>
+through the first-run interactive prompt.</p>
 <blockquote>
-<p>The <code>wizard</code> flag (superuser level) can only be set at the database level and<br>
-cannot be granted via <code>@set</code> by any in-game command — this is intentional. Use<br>
-<code>admin</code> for trusted staff and reserve <code>wizard</code> for server owners.</p>
+<p><strong>Non-interactive environments</strong>: If you run <code>deno task start</code> without a TTY<br>
+(e.g. in a Docker container), the prompt is skipped. Run <code>deno task server</code><br>
+directly in an interactive terminal to complete first-run setup, then switch<br>
+back to <code>deno task start</code> for normal operation.</p>
 </blockquote>
 <hr>
 <h2>User Management</h2>
@@ -329,14 +369,13 @@ flag and disconnects)</li>
 <em>(admin or wizard required)</em></li>
 </ul>
 <h3>User Roles and Permissions</h3>
-<p>UrsaMU uses a flag-based permission system. The key permission flags are:</p>
+<p>See the <a href="#permission-levels">Permission levels</a> table in the First-Run Setup<br>
+section above. In summary:</p>
 <ul>
-<li><strong>player</strong> — Standard player account. Set automatically on character creation.</li>
-<li><strong>admin</strong> — Full administrative access. Can use all admin commands, manage<br>
-channels, set flags, and modify any object.</li>
-<li><strong>wizard</strong> — Restricted super-admin flag (level 9). Locked to superusers only.<br>
-Code: <code>wiz</code>. Grants the same command access as <code>admin</code> but is reserved for<br>
-server owners. Cannot be set by regular admins.</li>
+<li><code>superuser</code> (10) — created at first run, cannot be granted in-game</li>
+<li><code>admin</code> / <code>wizard</code> (9) — granted by a superuser with <code>@set</code></li>
+<li><code>storyteller</code> (8), <code>builder</code> (7) — granted by an admin with <code>@set</code></li>
+<li><code>player</code> (1) — automatic on character creation</li>
 </ul>
 <p>To set a flag on a player:</p>
 <pre class="language-none" tabindex="0"><code class="language-none">@set &lt;username&gt;=&lt;flag&gt;
@@ -364,12 +403,9 @@ stderr:</p>
 <p>This is a fixed limit defined in <code>WebSocketService</code> and cannot currently be<br>
 configured at runtime.</p>
 <h2>Web Client</h2>
-<p>UrsaMU ships with an optional browser-based client built with Deno Fresh. It is<br>
-a separate process from the main Hub and must be started independently.</p>
-<h3>Starting the Web Client</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
-deno task start
-</code></pre>
+<p>UrsaMU ships with an optional browser-based client built with Deno Fresh<br>
+(<code>src/web-client/</code>). When <code>src/web-client/</code> is present, <strong><code>deno task start</code><br>
+starts it automatically</strong> alongside the Hub and Telnet sidecar.</p>
 <p>The web client runs at <a href="http://localhost:8000">http://localhost:8000</a>.</p>
 <h3>What the Web Client Provides</h3>
 <ul>
@@ -380,6 +416,11 @@ deno task start
 <li>Player directory</li>
 <li>Wiki pages</li>
 </ul>
+<h3>Starting Manually</h3>
+<p>If you want to run the web client independently (e.g. during development):</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
+deno task start
+</code></pre>
 <h3>Production Deployment</h3>
 <p>For production, build the Fresh app first:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
