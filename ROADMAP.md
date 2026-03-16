@@ -84,6 +84,32 @@ Work items are ordered by community impact. Pick the next unchecked item and go.
   but these haven't been tested or documented to the same standard as the core server.
   Needs: feature audit, e2e tests, and a web-client-specific guide in the docs.
 
+- [ ] **Extensive docs & examples site**
+  The current docs cover installation, guides, and API reference. What's missing is depth and
+  worked examples that help both non-technical game operators and plugin developers.
+
+  **Operator-focused:**
+  - Step-by-step "build your first room network" tutorial
+  - "Set up a Discord bridge" walkthrough
+  - Scene export workflow guide
+  - Hosting on a VPS (nginx reverse proxy, systemd service, TLS with Let's Encrypt)
+  - Docker deployment guide (production-grade `docker-compose.yaml` with env vars)
+  - Backup and restore procedures for Deno KV databases
+
+  **Developer-focused:**
+  - Full SDK cookbook: one page per `u.*` namespace with real examples
+  - "Build your first plugin" end-to-end tutorial
+  - "Build your first system script" tutorial
+  - Plugin registry / showcase page (community plugins)
+  - Recipes section: common patterns (room descriptions, object triggers, score sheets, etc.)
+  - Migration guide: "Coming from PennMUSH — here's the UrsaMU equivalent"
+
+  **Site infrastructure:**
+  - Wire up the Lume search plugin (already imported, not yet configured)
+  - Versioned docs (so 1.0 docs don't disappear when 2.0 ships)
+  - "Edit this page on GitHub" link on every doc page
+  - Contribution guide for the docs themselves
+
 ---
 
 ## Completed (shipped in 1.0.0)
