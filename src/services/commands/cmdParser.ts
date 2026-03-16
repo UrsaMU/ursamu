@@ -162,6 +162,14 @@ cmdParser.use(async (ctx, next) => {
      scriptName = scriptName.slice(1);
   }
 
+  // Parse switches from command name (e.g., "bbpost/edit" → name="bbpost", switches=["edit"])
+  let cmdSwitches: string[] = [];
+  if (scriptName.includes("/")) {
+    const slashIdx = scriptName.indexOf("/");
+    cmdSwitches = scriptName.slice(slashIdx + 1).split("/").filter(Boolean);
+    scriptName = scriptName.slice(0, slashIdx);
+  }
+
   // Attempt to load and run script if it exists in system/scripts
   try {
     const scriptPath = `./system/scripts/${scriptName}.ts`;
@@ -191,7 +199,7 @@ cmdParser.use(async (ctx, next) => {
             target: targetObj ? await SDKService.hydrate(new Obj(targetObj)) : undefined,
             location: char?.location || "limbo",
             state: char?.data?.state as Record<string, unknown> || {},
-            cmd: { name: scriptName, args: [rawArgs, ...scriptArgs] },
+            cmd: { name: scriptName, args: [rawArgs, ...scriptArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
             socketId: ctx.socket.id
         });
         return;

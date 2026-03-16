@@ -90,6 +90,23 @@ interface IUrsamuSDK {
     delete(id: string): Promise<void>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
+  text: {
+    read(id: string): Promise<string>;
+    set(id: string, content: string): Promise<void>;
+  };
+  bb: {
+    listBoards(): Promise<unknown[]>;
+    listPosts(boardId: string): Promise<unknown[]>;
+    readPost(boardId: string, postNum: number): Promise<unknown | null>;
+    post(boardId: string, subject: string, body: string): Promise<{ id: string }>;
+    editPost(boardId: string, postNum: number, body: string): Promise<void>;
+    deletePost(boardId: string, postNum: number): Promise<void>;
+    createBoard(name: string, options?: { description?: string; order?: number }): Promise<unknown>;
+    destroyBoard(boardId: string): Promise<void>;
+    markRead(boardId: string): Promise<void>;
+    newPostCount(boardId: string): Promise<number>;
+    totalNewCount(): Promise<number>;
+  };
   events: {
     emit(event: string, data: unknown, context?: Record<string, unknown>): Promise<void>;
     on(event: string, handler: string): Promise<string>;
@@ -322,7 +339,8 @@ self.onmessage = async (e: MessageEvent) => {
       setConfig: (key: string, value: unknown) => request<void>("sys:setConfig", { key, value }),
       disconnect: (id: string) => request<void>("sys:disconnect", { id }),
       reboot: () => request<void>("sys:reboot", {}),
-      shutdown: () => request<void>("sys:shutdown", {})
+      shutdown: () => request<void>("sys:shutdown", {}),
+      uptime: () => request<number>("sys:uptime", {})
     },
     chan: {
       join: (channel: string, alias: string) => request<void>("chan:join", { channel, alias }),
@@ -341,6 +359,24 @@ self.onmessage = async (e: MessageEvent) => {
     },
     setFlags: (target: string | IDBObj, flags: string) =>
       request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags }),
+    text: {
+      read: (id: string) => request<string>("text:read", { id }),
+      set: (id: string, content: string) => request<void>("text:set", { id, content })
+    },
+    bb: {
+      listBoards: () => request<unknown[]>("bb:listBoards", {}),
+      listPosts: (boardId: string) => request<unknown[]>("bb:listPosts", { boardId }),
+      readPost: (boardId: string, postNum: number) => request<unknown | null>("bb:readPost", { boardId, postNum }),
+      post: (boardId: string, subject: string, body: string) => request<{ id: string }>("bb:post", { boardId, subject, body }),
+      editPost: (boardId: string, postNum: number, body: string) => request<void>("bb:editPost", { boardId, postNum, body }),
+      deletePost: (boardId: string, postNum: number) => request<void>("bb:deletePost", { boardId, postNum }),
+      createBoard: (name: string, options?: { description?: string; order?: number }) =>
+        request<unknown>("bb:createBoard", { name, ...(options || {}) }),
+      destroyBoard: (boardId: string) => request<void>("bb:destroyBoard", { boardId }),
+      markRead: (boardId: string) => request<void>("bb:markRead", { boardId }),
+      newPostCount: (boardId: string) => request<number>("bb:newPostCount", { boardId }),
+      totalNewCount: () => request<number>("bb:totalNewCount", {})
+    },
     events: {
       emit: (event: string, data: unknown, context?: Record<string, unknown>) =>
         request<void>("events:emit", { event, data, context }),

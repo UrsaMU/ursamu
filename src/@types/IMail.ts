@@ -7,4 +7,5 @@ export interface IMail {
   cc?: string[];
   bcc?: string[];
   date: number;
+  read?: boolean;
 }

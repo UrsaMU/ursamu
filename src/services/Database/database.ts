@@ -198,3 +198,8 @@ export const chans = new DBO<IChannel>("server.chans");
 export const mail = new DBO<IMail>("server.mail");
 export const texts = new DBO<ITextEntry>("server.texts");
 export const scenes = new DBO<IScene>("server.scenes");
+
+import type { IBBoard } from "../../@types/IBBoard.ts";
+import type { IBBoardPost } from "../../@types/IBBoardPost.ts";
+export const bboards = new DBO<IBBoard>("server.bboards");
+export const bboard = new DBO<IBBoardPost>("server.bboard");

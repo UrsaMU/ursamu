@@ -1,4 +1,6 @@
 import { Sandbox, type SandboxOptions } from "../../../deps.ts";
+
+const SERVER_START = Date.now();
 import type { ISandboxConfig } from "../../@types/ISandboxConfig.ts";
 import { SDKService, type SDKContext } from "./SDKService.ts";
 import { send as broadcastSend, broadcast as broadcastAll } from "../broadcast/index.ts";
@@ -171,12 +173,20 @@ class LocalSandbox {
             if (e.data.name && e.data.password) {
               const { isNameTaken } = await import("../../utils/isNameTaken.ts");
               const { compare } = await import("../../../deps.ts");
-              
+              const { dbojs: db } = await import("../Database/index.ts");
+
               (async () => {
                 const found = await isNameTaken(e.data.name);
                 if (!found) return worker.postMessage({ type: "response", msgId: e.data.msgId, data: false });
-                
+
                 const match = await compare(e.data.password, found.data?.password || "");
+                if (!match) {
+                  // Track failed attempts
+                  const attempts = ((found.data?.failedAttempts as number) || 0) + 1;
+                  found.data ||= {};
+                  found.data.failedAttempts = attempts;
+                  await db.modify({ id: found.id }, "$set", found);
+                }
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: match });
               })();
             }
@@ -273,6 +283,10 @@ class LocalSandbox {
               const { broadcast: bcast } = await import("../broadcast/index.ts");
               bcast("Server shutting down...", {});
               setTimeout(() => Deno.exit(0), 500);
+              break;
+          }
+          case "sys:uptime": {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: Date.now() - SERVER_START });
               break;
           }
           case "chan:join": {
@@ -509,6 +523,232 @@ class LocalSandbox {
                  await mail.delete({ id: e.data.id });
                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
                })();
+            }
+            break;
+          }
+          case "text:read": {
+            if (e.data.id) {
+              const { texts } = await import("../Database/index.ts");
+              (async () => {
+                const entry = await texts.queryOne({ id: e.data.id as string });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: entry ? entry.content : "" });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
+            }
+            break;
+          }
+          case "text:set": {
+            if (e.data.id !== undefined && e.data.content !== undefined) {
+              const { texts } = await import("../Database/index.ts");
+              (async () => {
+                const existing = await texts.queryOne({ id: e.data.id as string });
+                if (existing) {
+                  await texts.modify({ id: e.data.id as string }, "$set", { content: e.data.content });
+                } else {
+                  await texts.create({ id: e.data.id as string, content: e.data.content as string });
+                }
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "bb:listBoards": {
+            const { bboards } = await import("../Database/index.ts");
+            const { bboard: bbPost } = await import("../Database/index.ts");
+            (async () => {
+              const boards = await bboards.query({});
+              boards.sort((a, b) => a.order - b.order);
+              const result = await Promise.all(boards.map(async (b) => {
+                const posts = await bbPost.query({ board: b.id });
+                // get per-player read state from context
+                const lastRead = (context?.state as Record<string, unknown>)?.bbLastRead as Record<string, number> || {};
+                const lastReadNum = lastRead[b.id] || 0;
+                const newCount = posts.filter(p => p.num > lastReadNum).length;
+                return { id: b.id, name: b.name, description: b.description, order: b.order, postCount: posts.length, newCount };
+              }));
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: result });
+            })();
+            break;
+          }
+          case "bb:listPosts": {
+            if (e.data.boardId) {
+              const { bboard: bbPost } = await import("../Database/index.ts");
+              (async () => {
+                const posts = await bbPost.query({ board: e.data.boardId as string });
+                posts.sort((a, b) => a.num - b.num);
+                const result = posts.map(p => ({ id: p.id, num: p.num, subject: p.subject, authorName: p.authorName, date: p.date, edited: p.edited }));
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: result });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: [] });
+            }
+            break;
+          }
+          case "bb:readPost": {
+            if (e.data.boardId && e.data.postNum !== undefined) {
+              const { bboard: bbPost } = await import("../Database/index.ts");
+              (async () => {
+                const post = await bbPost.queryOne({ board: e.data.boardId as string, num: e.data.postNum as number });
+                if (!post) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+                  return;
+                }
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: { id: post.id, subject: post.subject, body: post.body, authorName: post.authorName, date: post.date, edited: post.edited } });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "bb:post": {
+            if (e.data.boardId && e.data.subject && e.data.body) {
+              const { bboards, bboard: bbPost } = await import("../Database/index.ts");
+              const { dbojs: db } = await import("../Database/index.ts");
+              (async () => {
+                const board = await bboards.queryOne({ id: e.data.boardId as string });
+                if (!board) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Board not found." } });
+                  return;
+                }
+                const posts = await bbPost.query({ board: e.data.boardId as string });
+                const num = posts.length + 1;
+                const author = context?.id || "0";
+                const en = await db.queryOne({ id: author });
+                const authorName = en?.data?.name || en?.id || "Unknown";
+                const { crypto } = globalThis;
+                const id = crypto.randomUUID();
+                const post = await bbPost.create({ id, board: e.data.boardId as string, num, subject: e.data.subject as string, body: e.data.body as string, author, authorName, date: Date.now() });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: { id: post.id } });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "bb:editPost": {
+            if (e.data.boardId && e.data.postNum !== undefined && e.data.body !== undefined) {
+              const { bboard: bbPost } = await import("../Database/index.ts");
+              (async () => {
+                const post = await bbPost.queryOne({ board: e.data.boardId as string, num: e.data.postNum as number });
+                if (!post) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+                  return;
+                }
+                await bbPost.modify({ id: post.id }, "$set", { body: e.data.body as string, edited: Date.now() });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "bb:deletePost": {
+            if (e.data.boardId && e.data.postNum !== undefined) {
+              const { bboard: bbPost } = await import("../Database/index.ts");
+              (async () => {
+                const post = await bbPost.queryOne({ board: e.data.boardId as string, num: e.data.postNum as number });
+                if (post) await bbPost.delete({ id: post.id });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "bb:createBoard": {
+            if (e.data.name) {
+              const { bboards } = await import("../Database/index.ts");
+              (async () => {
+                const name = (e.data.name as string).trim();
+                const id = name.toLowerCase().replace(/\s+/g, "-");
+                const existing = await bboards.queryOne({ id });
+                if (existing) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Board already exists." } });
+                  return;
+                }
+                const allBoards = await bboards.query({});
+                const order = (e.data.order as number) ?? (allBoards.length + 1);
+                const board = await bboards.create({ id, name, description: e.data.description as string | undefined, order });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: { id: board.id, name: board.name } });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "bb:destroyBoard": {
+            if (e.data.boardId) {
+              const { bboards, bboard: bbPost } = await import("../Database/index.ts");
+              (async () => {
+                await bboards.delete({ id: e.data.boardId as string });
+                await bbPost.delete({ board: e.data.boardId as string });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "bb:markRead": {
+            if (e.data.boardId && context?.id) {
+              const { bboard: bbPost } = await import("../Database/index.ts");
+              const { dbojs: db } = await import("../Database/index.ts");
+              (async () => {
+                const posts = await bbPost.query({ board: e.data.boardId as string });
+                const maxNum = posts.reduce((m, p) => Math.max(m, p.num), 0);
+                const en = await db.queryOne({ id: context.id });
+                if (en) {
+                  en.data ||= {};
+                  const lastRead = (en.data.bbLastRead as Record<string, number>) || {};
+                  lastRead[e.data.boardId as string] = maxNum;
+                  en.data.bbLastRead = lastRead;
+                  await db.modify({ id: en.id }, "$set", en);
+                }
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "bb:newPostCount": {
+            if (e.data.boardId && context?.id) {
+              const { bboard: bbPost } = await import("../Database/index.ts");
+              const { dbojs: db } = await import("../Database/index.ts");
+              (async () => {
+                const en = await db.queryOne({ id: context.id });
+                const lastRead = (en?.data?.bbLastRead as Record<string, number>) || {};
+                const lastReadNum = lastRead[e.data.boardId as string] || 0;
+                const posts = await bbPost.query({ board: e.data.boardId as string });
+                const count = posts.filter(p => p.num > lastReadNum).length;
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: count });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: 0 });
+            }
+            break;
+          }
+          case "bb:totalNewCount": {
+            if (context?.id) {
+              const { bboards, bboard: bbPost } = await import("../Database/index.ts");
+              const { dbojs: db } = await import("../Database/index.ts");
+              (async () => {
+                const en = await db.queryOne({ id: context.id });
+                const lastRead = (en?.data?.bbLastRead as Record<string, number>) || {};
+                const boards = await bboards.query({});
+                let total = 0;
+                for (const board of boards) {
+                  const lastReadNum = lastRead[board.id] || 0;
+                  const posts = await bbPost.query({ board: board.id });
+                  total += posts.filter(p => p.num > lastReadNum).length;
+                }
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: total });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: 0 });
             }
             break;
           }

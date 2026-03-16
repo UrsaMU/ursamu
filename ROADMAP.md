@@ -6,58 +6,51 @@ Work items are ordered by community impact. Pick the next unchecked item and go.
 
 ## Tier 1 — Community will notice immediately
 
-- [ ] **Bulletin board (`bboard`)**
-  DB collection exists. Need in-game commands: `@bb`, `@bbread`, `@bbpost`, `@bbnew`, `@bblist`.
-  The social backbone of every MUSH — announcements, rules, IC news, OOC discussion.
+- [x] **Bulletin board (`bboard`)**
+  `@bblist`, `@bbread`, `@bbpost`, `@bbcreate`, `@bbdestroy`. Per-player unread tracking via `data.bbLastRead`.
 
-- [ ] **Login notifications**
-  On connect, show: "You have 2 unread mail messages." and "There are 4 new bboard posts since your last visit."
-  Hook into `system/scripts/connect.ts` after `u.execute("look")`.
+- [x] **Login notifications**
+  On connect: unread mail count and new bboard post count shown after welcome message.
 
-- [ ] **MOTD**
-  Display `text/motd.txt` (and `text/wizmotd.txt` for wizards) after authentication.
-  Add `@motd` command to view/set from in-game. Admins live by this for announcements and event notices.
+- [x] **MOTD**
+  `@motd` to view; `@motd/set` / `@motd/clear` for admins. Stored via `u.text` (texts DBO).
+  Displayed automatically on every login via `connect.ts`.
 
-- [ ] **`@emit` / `@pemit` / `@remit`**
-  Staff broadcasting tools. No implementation exists.
-  - `@emit <room>=<msg>` — send to a room (no attribution)
-  - `@pemit <player>=<msg>` — send privately to any player
-  - `@remit <room>=<msg>` — send to a room with attribution (like a pose)
+- [x] **`@emit` / `@pemit` / `@remit`**
+  - `@emit <room>=<msg>` — send to all connected players in a room (no attribution)
+  - `@pemit <player>=<msg>` — send privately to any connected player
+  - `@remit <room>=<msg>` — send to a room with actor attribution
 
 ---
 
 ## Tier 2 — Power users will hit these
 
-- [ ] **Mail: fix silent aliases and stuck drafts**
-  `mail/reply`, `mail/forward`, `mail/cc`, `mail/bcc` are in the aliases list but missing from the
-  `switch` statement — they silently do nothing. Also: draft state stored in `en.state.tempMail`
-  persists across disconnects; add a timeout/cleanup or warn on reconnect.
+- [x] **Mail: fix silent aliases and stuck drafts**
+  `mail/reply`, `mail/forward`, `mail/cc`, `mail/bcc`, `mail/replyall` — all implemented.
+  CC/BCC shown in proof and delivery. Draft warning on reconnect. Switch detection fixed.
 
-- [ ] **`@quota` command**
-  `@create` already checks and deducts quota but there's no way to view or set it.
-  - `@quota` — show your current quota
-  - `@quota <player>=<n>` — admin sets quota on a player
+- [x] **`@quota` command**
+  `@quota` shows your current quota. `@quota <player>=<n>` for admin.
 
 - [ ] **Attribute execution (`&ATTR` triggers)**
   `setAttr.ts` stores attributes but they're inert — can't fire, be triggered, or be read by locks.
   Needs `u.execute()` callable from stored attributes, or a lightweight expression evaluator.
   This is a larger design decision (sandbox policy for per-object scripts).
 
-- [ ] **Connection history**
-  On connect, show last login time/IP and failed attempt count.
-  Store `lastLogin`, `lastIp`, `failedAttempts` in player data; display in `connect.ts`.
+- [x] **Connection history**
+  Last login timestamp and failed attempt count shown on every login.
+  `auth:verify` now increments `failedAttempts` on bad password; cleared on successful login.
 
 ---
 
 ## Tier 3 — Nice to have
 
-- [ ] **`@find`**
-  Search the DB by name/type/flag from in-game.
-  `@find <name>` — list matching objects with dbref. Admins use this constantly.
+- [x] **`@find`**
+  `@find <name>`, `@find/flag <flag>`, `@find/type <type>` — search the DB by name/type/flag.
 
-- [ ] **`@stats`**
-  Server uptime, object counts by type, connected player count.
-  `@stats` — summary view; `@stats/full` — detailed breakdown.
+- [x] **`@stats`**
+  `@stats` — uptime, connected players, total objects. `@stats/full` — adds per-type breakdown.
+  `sys.uptime()` added to SDK; `SERVER_START` constant in SandboxService.
 
 - [ ] **`@wipe`**
   Clear all user-set attributes from an object.
@@ -128,4 +121,5 @@ Work items are ordered by community impact. Pick the next unchecked item and go.
 - [x] Auto-`look` on connect
 - [x] Flag-based permissions (`superuser`/`admin`/`wizard`/`storyteller`/`builder`/`player`)
 - [x] `&ATTR` attribute storage (`setAttr.ts`)
+- [x] Command switches (`@cmd/switch` syntax parsed and passed to scripts)
 - [x] 294 passing tests

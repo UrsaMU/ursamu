@@ -51,9 +51,46 @@ export default async (u: IUrsamuSDK) => {
   // Welcome message
   u.send(`Welcome back, ${u.util.displayName(player, player)}.`);
 
+  // Connection history
+  const lastLogin = player.state.lastLogin as number | undefined;
+  const failedAttempts = player.state.failedAttempts as number | undefined;
+  if (lastLogin) {
+    u.send(`Last login: ${new Date(lastLogin).toLocaleString()}`);
+  }
+  if (failedAttempts && failedAttempts > 0) {
+    u.send(`%ch%cr${failedAttempts} failed login attempt${failedAttempts === 1 ? "" : "s"} since your last visit.%cn`);
+  }
+
+  // Warn about abandoned draft
+  if (player.state.tempMail) {
+    u.send("%chMAIL:%cn You have an unsent draft. Use '@mail proof' to review or '@mail abort' to discard.");
+  }
+
+  // Record this login and clear failed attempts
+  await u.db.modify(player.id, "$set", { data: { ...player.state, lastLogin: Date.now(), failedAttempts: 0 } });
+
   // Broadcast to room
   if (player.location) {
     u.broadcast(`${u.util.displayName(player, player)} has connected.`);
+  }
+
+  // Show MOTD if set
+  const motd = await u.text.read("motd");
+  if (motd) {
+    u.send("%ch%cy--- Message of the Day ---%cn");
+    u.send(motd);
+    u.send("%ch%cy--------------------------%cn");
+  }
+
+  // Login notifications: unread mail and new bboard posts
+  const mailItems = await u.mail.read({ to: player.id, read: false });
+  if (mailItems.length > 0) {
+    u.send(`%ch%cyYou have ${mailItems.length} unread mail message${mailItems.length === 1 ? "" : "s"}.%cn`);
+  }
+
+  const newBBPosts = await u.bb.totalNewCount();
+  if (newBBPosts > 0) {
+    u.send(`%ch%cyThere ${newBBPosts === 1 ? "is" : "are"} ${newBBPosts} new bulletin board post${newBBPosts === 1 ? "" : "s"}.%cn`);
   }
 
   // Force a look command
