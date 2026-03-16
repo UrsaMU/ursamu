@@ -1111,6 +1111,10 @@ body {
   position: fixed;
 }
 
+.sticky{
+  position: sticky;
+}
+
 .block{
   display: block;
 }
@@ -1740,7 +1744,7 @@ body {
 
 .home-hero {
   text-align: center;
-  padding: 5rem 2rem 3rem;
+  padding: 4rem 2rem 3rem;
   max-width: 900px;
   margin: 0 auto;
   position: relative;

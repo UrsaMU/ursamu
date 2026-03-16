@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ursamu.github.io/ursamu/</loc>
-    <lastmod>2026-03-16T17:39:30.924Z</lastmod>
+    <lastmod>2026-03-16T19:48:28.137Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/about/</loc>
@@ -42,19 +42,31 @@
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/admin-guide/</loc>
-    <lastmod>2026-03-16T17:41:00.460Z</lastmod>
+    <lastmod>2026-03-16T17:46:46.546Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/customization/</loc>
     <lastmod>2026-01-01T15:56:35.692Z</lastmod>
   </url>
   <url>
+    <loc>https://ursamu.github.io/ursamu/guides/first-script/</loc>
+    <lastmod>2026-03-16T18:53:42.209Z</lastmod>
+  </url>
+  <url>
     <loc>https://ursamu.github.io/ursamu/guides/installation/</loc>
-    <lastmod>2026-03-16T17:40:37.626Z</lastmod>
+    <lastmod>2026-03-16T17:46:08.467Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ursamu.github.io/ursamu/guides/recipes/</loc>
+    <lastmod>2026-03-16T18:55:49.988Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/scripting/</loc>
-    <lastmod>2026-03-10T14:40:37.141Z</lastmod>
+    <lastmod>2026-03-16T18:53:10.400Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ursamu.github.io/ursamu/guides/sdk-cookbook/</loc>
+    <lastmod>2026-03-16T18:54:58.935Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/user-guide/</loc>
@@ -62,7 +74,7 @@
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/mush_compatibility/</loc>
-    <lastmod>2026-03-16T17:40:10.829Z</lastmod>
+    <lastmod>2026-03-16T18:56:35.581Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/plugins/</loc>

@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About UrsaMU | UrsaMU Documentation</title>
-  <meta name="description" content="What is UrsaMU, how it works, and what makes it different from other MU* servers.">
+  <title>SDK Cookbook | UrsaMU Documentation</title>
+  <meta name="description" content="Complete reference for every u.* namespace with real working examples">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/about/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/sdk-cookbook/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -47,7 +47,7 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/ursamu/guides/" class="header-nav-link active">
       Guides
     </a>
     
@@ -112,7 +112,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link active">
+      <a href="/ursamu/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -148,7 +148,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
@@ -275,287 +275,440 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/ursamu/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">About UrsaMU</span>
+        <span class="breadcrumbs-current">SDK Cookbook</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>About UrsaMU</h1>
-<p>UrsaMU is an open-source, high-performance <strong>MU* (MUSH/MUX/MOO-style) game server</strong> built from the ground up with modern tools — TypeScript and Deno — instead of the decades-old C codebases that traditional text-based game servers rely on.</p>
-<p>It is designed for <strong>game operators and developers</strong> who want to run text-based collaborative fiction worlds without fighting ancient technology.</p>
-<h2>What is a MUSH?</h2>
-<p>MUSH stands for <strong>Multi-User Shared Hallucination</strong> — a genre of text-based online games where players create characters, inhabit virtual rooms, communicate with each other, and together build persistent interactive stories.</p>
-<p>Unlike MMORPGs with graphics and combat systems, a MUSH is:</p>
-<ul>
-<li><strong>Text-based</strong>: all interaction happens through typed commands</li>
-<li><strong>Collaborative</strong>: players write scenes, roleplay stories, and build worlds together</li>
-<li><strong>Scriptable</strong>: the game world itself can be programmed using in-game languages</li>
-<li><strong>Social</strong>: designed around conversation, storytelling, and community</li>
-</ul>
-<p>MUSH-style games have existed since the late 1980s and remain active communities today for tabletop RPG adaptation, fan fiction, original fiction, and creative writing.</p>
-<h2>Why UrsaMU?</h2>
-<p>Existing MU* servers (TinyMUSH, PennMUSH, RhostMUSH, MUX2) are written in C, first authored in the 1990s, and carry decades of technical debt. They are difficult to extend, deploy, and maintain.</p>
-<p>UrsaMU takes a fresh approach:</p>
-<table>
-<thead>
-<tr>
-<th>Traditional MU*</th>
-<th>UrsaMU</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Written in C</td>
-<td>Written in TypeScript</td>
-</tr>
-<tr>
-<td>No standard package system</td>
-<td>Deno native (JSR, npm imports)</td>
-</tr>
-<tr>
-<td>Telnet-only</td>
-<td>WebSocket primary, Telnet sidecar</td>
-</tr>
-<tr>
-<td>Embedded scripting in MUSHcode</td>
-<td>Scripts run in sandboxed Web Workers</td>
-</tr>
-<tr>
-<td>Modify core to extend</td>
-<td>Plugin architecture</td>
-</tr>
-<tr>
-<td>Manual compile &amp; deploy</td>
-<td><code>deno task start</code></td>
-</tr>
-</tbody>
-</table>
-<h2>Core Features</h2>
-<h3>WebSocket-Native Protocol</h3>
-<p>The primary interface to UrsaMU is <strong>WebSocket</strong>, not Telnet. This means:</p>
-<ul>
-<li>Native browser connectivity — build web clients without proxies</li>
-<li>Structured JSON messages for clean client/server contracts</li>
-<li>A Telnet sidecar is still available for classic MU* clients</li>
-</ul>
-<pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token keyword">const</span> socket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WebSocket</span><span class="token punctuation">(</span><span class="token string">"ws://yourgame.example.com:4202"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <h1>SDK Cookbook</h1>
+<p>Every method available on the <code>u</code> object, organized by namespace, with working examples pulled from real system scripts.</p>
+<hr>
+<h2>Context Objects</h2>
+<p>These are injected automatically — you don’t call them, you read them.</p>
+<h3><code>u.me</code> — The Actor</h3>
+<p>The player or object that triggered the script.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.me.id           // "42"
+u.me.name         // "Alice" (raw DB name)
+u.me.location     // "1" (room ID)
+u.me.flags        // Set&lt;string&gt; — e.g. Set { "player", "connected", "wizard" }
+u.me.state        // Record&lt;string,unknown&gt; — all player data (desc, attrs, etc.)
+u.me.contents     // IDBObj[] — objects in actor's inventory
 
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"look"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"connect PlayerName Password"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<h3>Sandboxed Script Engine</h3>
-<p>Game scripts (for commands, objects, and automation) run in <strong>Web Workers</strong>, completely isolated from the host process. Scripts:</p>
-<ul>
-<li>Cannot crash the server</li>
-<li>Cannot access the filesystem or network directly</li>
-<li>Communicate through a typed SDK message protocol</li>
-<li>Support ESM <code>import</code> syntax for library reuse</li>
-</ul>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// A sample script that greets the room
-const here = await u.db.get(en.location);
-u.emit.send(`${en.name} waves hello to ${here.name}.`);
-u.emit.broadcast(here.id, `${en.name} waves hello!`);
-</code></pre>
-<h3>Plugin Architecture</h3>
-<p>Everything in UrsaMU is extensible via plugins:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "ursamu";
-import { registerCommand } from "ursamu/commands";
+// Check permission level
+u.me.flags.has("superuser")  // highest — created at first boot
+u.me.flags.has("admin")      // or "wizard" — both level 9
+u.me.flags.has("player")
+u.me.flags.has("connected")  // currently logged in
 
-const myPlugin: IPlugin = {
-  name: "my-game-plugin",
-  version: "1.0.0",
-  init: async () =&gt; {
-    registerCommand({
-      name: "greet",
-      pattern: "greet *",
-      flags: "connected",
-      exec: (ctx) =&gt; ctx.send(`Hello, ${ctx.args}!`),
-    });
-    return true;
-  },
-};
+// Read stored data
+const desc  = u.me.state.desc  as string || "You see nothing special.";
+const gold  = u.me.state.gold  as number || 0;
+const level = u.me.state.level as number || 1;
+</code></pre>
+<h3><code>u.here</code> — The Room</h3>
+<p>The room the actor is currently in. Has an extra <code>.broadcast()</code> method.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.here.id        // room ID
+u.here.name      // room name
+u.here.state     // room data (desc, exits, etc.)
+u.here.contents  // IDBObj[] — everyone and everything in the room
 
-export default myPlugin;
-</code></pre>
-<h3>Discord Integration</h3>
-<p>An optional built-in Discord bridge relays game communication to Discord channels and back. Features exponential-backoff reconnection and idempotent initialization — no duplicate event listeners on restart.</p>
-<h3>Scene Tracking &amp; Export</h3>
-<p>UrsaMU tracks <strong>roleplay scenes</strong> — collaborative writing sessions between players. Scenes can be archived via the REST API:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Export a scene as formatted Markdown
-GET /api/v1/scenes/:id/export?format=markdown
+// Send to everyone in the room
+u.here.broadcast("The lights flicker.");
 
-# Export as raw JSON
-GET /api/v1/scenes/:id/export?format=json
+// Send to everyone in the room (with options)
+u.here.broadcast("An explosion rocks the building!", { source: "event" });
 </code></pre>
-<h3>Rate Limiting</h3>
-<p>The WebSocket hub enforces <strong>10 commands per second</strong> per connection. Excess commands are silently dropped and logged — protecting the server from runaway clients.</p>
-<h2>Architecture Overview</h2>
-<pre class="language-none" tabindex="0"><code class="language-none">┌──────────────────────────────────────────────────────────────────┐
-│  Clients                                                          │
-│  Browser WebSocket  ─┐                                           │
-│  MU* Client (Telnet) ─┤── Telnet Sidecar ─┐                     │
-│  Discord ─────────────┘                   │                     │
-└───────────────────────────────────────────┼─────────────────────┘
-                                            │
-┌───────────────────────────────────────────▼─────────────────────┐
-│  UrsaMU Hub (Deno process)                                       │
-│                                                                   │
-│  ┌────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
-│  │ WebSocket  │  │  HTTP REST   │  │  Discord Bridge        │  │
-│  │ Service    │  │  (Hono/Oak)  │  │  (Gateway reconnect)   │  │
-│  └─────┬──────┘  └──────┬───────┘  └────────────────────────┘  │
-│        │                │                                         │
-│  ┌─────▼────────────────▼──────────────────────────┐            │
-│  │  Command Parser / Middleware Pipeline            │            │
-│  └─────────────────────────┬───────────────────────┘            │
-│                             │                                     │
-│  ┌──────────────────────────▼──────────────────────┐            │
-│  │  Sandbox Service                                 │            │
-│  │  ┌──────────────────────────────────────────┐   │            │
-│  │  │  Web Worker (script runtime)              │   │            │
-│  │  │  SDK: db • emit • move • chan • ui • sys  │   │            │
-│  │  └──────────────────────────────────────────┘   │            │
-│  └──────────────────────────────────────────────────┘            │
-│                                                                   │
-│  ┌──────────────────────────────────────────────────┐            │
-│  │  Database Layer (dbojs)                          │            │
-│  │  objects • channels • mail • bboard • counters  │            │
-│  └──────────────────────────────────────────────────┘            │
-└──────────────────────────────────────────────────────────────────┘
+<h3><code>u.target</code> — Optional Target</h3>
+<p>Set when the parser resolves a target from the command args. May be <code>undefined</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!u.target) {
+  u.send("No target found.");
+  return;
+}
+
+u.target.id
+u.target.name
+u.target.flags
+u.target.broadcast("Something pokes you.");
 </code></pre>
-<h2>Technology Stack</h2>
-<table>
-<thead>
-<tr>
-<th>Layer</th>
-<th>Technology</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Runtime</td>
-<td>Deno (TypeScript, ESM)</td>
-</tr>
-<tr>
-<td>Primary transport</td>
-<td>WebSocket</td>
-</tr>
-<tr>
-<td>Secondary transport</td>
-<td>Telnet (sidecar)</td>
-</tr>
-<tr>
-<td>Web framework</td>
-<td>Hono / Oak</td>
-</tr>
-<tr>
-<td>Database</td>
-<td>dbojs (embedded, file-backed)</td>
-</tr>
-<tr>
-<td>Scripting</td>
-<td>Web Workers (sandboxed ESM)</td>
-</tr>
-<tr>
-<td>Testing</td>
-<td><code>deno test</code> — 294 tests, 0 failures</td>
-</tr>
-<tr>
-<td>Docs</td>
-<td>Lume (static site generator)</td>
-</tr>
-<tr>
-<td>CI</td>
-<td>GitHub Actions</td>
-</tr>
-</tbody>
-</table>
-<h2>Comparison with Other MU* Servers</h2>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>PennMUSH</th>
-<th>TinyMUSH</th>
-<th>MUX2</th>
-<th><strong>UrsaMU</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Language</td>
-<td>C</td>
-<td>C</td>
-<td>C</td>
-<td><strong>TypeScript</strong></td>
-</tr>
-<tr>
-<td>Protocol</td>
-<td>Telnet</td>
-<td>Telnet</td>
-<td>Telnet</td>
-<td><strong>WebSocket</strong></td>
-</tr>
-<tr>
-<td>Scripting</td>
-<td>MUSHcode</td>
-<td>MUSHcode</td>
-<td>MUSHcode</td>
-<td><strong>Sandboxed ESM</strong></td>
-</tr>
-<tr>
-<td>Plugin system</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Yes</strong></td>
-</tr>
-<tr>
-<td>Web client</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Native</strong></td>
-</tr>
-<tr>
-<td>Discord</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Built-in</strong></td>
-</tr>
-<tr>
-<td>Package manager</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Deno/JSR</strong></td>
-</tr>
-<tr>
-<td>Docker support</td>
-<td>Manual</td>
-<td>Manual</td>
-<td>Manual</td>
-<td><strong>Yes</strong></td>
-</tr>
-<tr>
-<td>License</td>
-<td>Penn (custom)</td>
-<td>TinyMUSH</td>
-<td>Artistic</td>
-<td><strong>MIT</strong></td>
-</tr>
-</tbody>
-</table>
-<h2>Project Status</h2>
-<p>UrsaMU is at <strong>v1.0</strong>. Current version is <code>1.0.0</code>.</p>
-<ul>
-<li><strong>Test suite</strong>: 294 passing, 0 failing</li>
-<li><strong>Core systems</strong>: complete (commands, sandbox, WebSocket, Discord, scenes, channels)</li>
-<li><strong>Status</strong>: v1.0.0 released</li>
-</ul>
-<p>The project is open-source under the MIT License. Contributions are welcome!</p>
+<h3><code>u.cmd</code> — The Command</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.cmd.name       // "look" — the script name that was matched
+u.cmd.original   // "@look north" — full string the player typed
+u.cmd.args       // ["north", "north"] — [rawArgString, ...splitArgs]
+u.cmd.switches   // ["edit"] from "@bbpost/edit ..."  (or undefined)
+
+// Common args pattern:
+const arg = (u.cmd.args[0] || "").trim();
+
+// Common switches pattern:
+const sw = u.cmd.switches || [];
+if (sw.includes("verbose")) { /* ... */ }
+</code></pre>
+<h3><code>u.state</code> — Reactive Script State</h3>
+<p>Per-execution scratch space. Changes are sent back to the server as patches.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read initial state (usually empty for one-shot scripts)
+const prev = u.state.lastRan as number | undefined;
+
+// Write state (patches are sent back automatically via Proxy)
+u.state.lastRan = Date.now();
+</code></pre>
+<hr>
+<h2>Messaging</h2>
+<h3><code>u.send(message, target?, options?)</code></h3>
+<p>Send a message to a player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// To the actor
+u.send("You pick up the coin.");
+
+// To a specific player by ID
+u.send("Alice picks up a coin.", aliceId);
+
+// With options
+u.send("Disconnecting...", undefined, { quit: true });  // triggers disconnect
+
+// MUSH color codes work everywhere
+u.send("%ch%cgYou level up!%cn");
+u.send(`%ch%cr[ERROR]%cn ${message}`);
+</code></pre>
+<h3><code>u.broadcast(message, options?)</code></h3>
+<p>Send to <strong>all</strong> connected players on the server. Use sparingly.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.broadcast("The server will reboot in 5 minutes.");
+u.broadcast(`%ch%cy[ANNOUNCE]%cn ${announcement}`);
+</code></pre>
+<h3><code>u.here.broadcast(message, options?)</code></h3>
+<p>Send to everyone in the actor’s current room.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.here.broadcast(`${u.util.displayName(u.me, u.me)} arrives.`);
+</code></pre>
+<hr>
+<h2>Database (<code>u.db</code>)</h2>
+<h3><code>u.db.search(query)</code></h3>
+<p>Returns an array of <code>IDBObj</code>. Query can be a string (target lookup) or an object.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// By name (case-insensitive)
+const results = await u.db.search({ "data.name": /alice/i });
+
+// By flag
+const wizards = await u.db.search({ flags: /wizard/i });
+
+// All connected players
+const online = await u.db.search({ flags: /connected/i });
+
+// Objects in a specific room
+const contents = await u.db.search({ location: u.here.id });
+
+// Players in a room (combined)
+const players = await u.db.search({ location: u.here.id, flags: /player/i });
+
+// OR query
+const found = await u.db.search({
+  $or: [
+    { "data.name": /alice/i },
+    { "data.alias": /alice/i }
+  ]
+});
+</code></pre>
+<h3><code>u.db.create(template)</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const sword = await u.db.create({
+  flags: new Set(["thing", "weapon"]),
+  location: u.me.id,   // in actor's inventory
+  state: {
+    name: "Iron Sword",
+    description: "A basic iron sword.",
+    damage: 5,
+    owner: u.me.id
+  }
+});
+u.send(`You create ${sword.state.name as string} (#${sword.id}).`);
+</code></pre>
+<h3><code>u.db.modify(id, op, data)</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// $set — merge data fields (always spread existing state)
+await u.db.modify(u.me.id, "$set", {
+  data: { ...u.me.state, gold: (u.me.state.gold as number || 0) + 100 }
+});
+
+// $set on any object
+await u.db.modify(objectId, "$set", {
+  data: { ...targetObj.state, locked: true }
+});
+</code></pre>
+<h3><code>u.db.destroy(id)</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.db.destroy(objectId);
+u.send(`Object #${objectId} destroyed.`);
+</code></pre>
+<hr>
+<h2>Target Resolution (<code>u.util.target</code>)</h2>
+<p>The standard way to resolve player input into an object.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Accepts: name, ID, alias, "me", "here", partial match
+const target = await u.util.target(u.me, inputString);
+
+if (!target) {
+  u.send("I can't find that.");
+  return;
+}
+</code></pre>
+<p>The lookup searches:</p>
+<ol>
+<li><code>me</code> / <code>here</code> keywords</li>
+<li>Actor’s inventory (by name/alias)</li>
+<li>Current room contents (by name/alias)</li>
+<li>All objects globally (if <code>global</code> param is <code>true</code>)</li>
+</ol>
+<hr>
+<h2>Flags (<code>u.setFlags</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.setFlags(target.id, "dark");     // add "dark" flag
+await u.setFlags(target.id, "!dark");    // remove "dark" flag
+await u.setFlags(target.id, "wizard");   // grant wizard (superuser required)
+
+// Or by object reference
+await u.setFlags(u.me, "builder");
+</code></pre>
+<hr>
+<h2>Permission Check (<code>u.canEdit</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!u.canEdit(u.me, target)) {
+  u.send("Permission denied.");
+  return;
+}
+// proceed with edit
+</code></pre>
+<p>Returns <code>true</code> if the actor owns the target, or is admin/wizard/superuser.</p>
+<hr>
+<h2>Locks (<code>u.checkLock</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Evaluate a lock expression against the actor
+const canPass = await u.checkLock(target.id, "player+");
+const isWiz   = await u.checkLock(u.me.id,   "wizard");
+
+// Lock syntax examples:
+// "player+"      — must have player flag
+// "wizard|admin" — wizard OR admin
+// "!dark"        — must NOT have dark flag
+// "#42"          — must be object #42
+</code></pre>
+<hr>
+<h2>Movement (<code>u.teleport</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Move any object to a destination room
+u.teleport(u.me.id, destinationId);
+
+// Move an object from inventory to a room
+u.teleport(objectId, u.here.id);
+</code></pre>
+<hr>
+<h2>Execute Commands (<code>u.execute</code>, <code>u.force</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Run a command as the actor (goes through full command pipeline)
+u.execute("look");
+u.execute(`say I just arrived!`);
+
+// Force a command (bypasses some permission checks)
+u.force("@set me=dark");
+u.force(`@teleport #${objectId}=#${roomId}`);
+</code></pre>
+<hr>
+<h2>Text Storage (<code>u.text</code>)</h2>
+<p>Named text blobs stored in the database. Useful for MOTD, templates, help pages.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read
+const motd = await u.text.read("motd");
+if (motd) u.send(motd);
+
+// Write
+await u.text.set("motd", "Server maintenance tonight at midnight EST.");
+
+// Clear
+await u.text.set("motd", "");
+</code></pre>
+<hr>
+<h2>Bulletin Boards (<code>u.bb</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// List boards with unread counts (for current player)
+const boards = await u.bb.listBoards();
+// → [{ id, name, description, order, postCount, newCount }, ...]
+
+// List posts on a board
+const posts = await u.bb.listPosts("announcements");
+// → [{ id, num, subject, authorName, date, edited? }, ...]
+
+// Read a specific post by number
+const post = await u.bb.readPost("announcements", 3);
+if (post) {
+  u.send(`Subject: ${post.subject}`);
+  u.send(`By: ${post.authorName}`);
+  u.send(post.body);
+}
+
+// Post to a board
+await u.bb.post("announcements", "Game Night Friday!", "Join us at 8pm EST.");
+
+// Edit a post (author or admin)
+await u.bb.editPost("announcements", 3, "Updated body text.");
+
+// Delete a post
+await u.bb.deletePost("announcements", 3);
+
+// Admin: create a board
+await u.bb.createBoard("General", { description: "General discussion", order: 1 });
+
+// Admin: destroy a board (also deletes all posts)
+await u.bb.destroyBoard("old-board");
+
+// Mark all posts on a board as read (for current player)
+await u.bb.markRead("announcements");
+
+// Unread counts
+const boardNew = await u.bb.newPostCount("announcements");  // for one board
+const totalNew = await u.bb.totalNewCount();                 // across all boards
+</code></pre>
+<hr>
+<h2>Mail (<code>u.mail</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send
+await u.mail.send({
+  id: crypto.randomUUID(),
+  from: `#${u.me.id}`,
+  to: [`#${recipientId}`],
+  cc: [`#${ccId}`],          // optional
+  subject: "Guild Meeting",
+  message: "Meeting tomorrow at 8pm in the hall.",
+  read: false,
+  date: Date.now()
+});
+
+// Notify recipient (send them an in-game message)
+u.send(`%chMAIL:%cn You have new mail from ${u.util.displayName(u.me, u.me)}.`, recipientId);
+
+// Read (query your inbox)
+const inbox = await u.mail.read({ to: { $in: [`#${u.me.id}`] } });
+inbox.sort((a, b) =&gt; a.date - b.date);
+const unread = inbox.filter(m =&gt; !m.read);
+
+// Delete
+await u.mail.delete(messageId);
+</code></pre>
+<hr>
+<h2>Channels (<code>u.chan</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Join (adds to player's channel list + socket room)
+await u.chan.join("public", "pub");
+
+// Leave by alias
+await u.chan.leave("pub");
+
+// List all channels
+const channels = await u.chan.list();
+
+// Admin: create
+await u.chan.create("events", {
+  header: "[EVENTS]",
+  lock: "player+",
+  hidden: false
+});
+
+// Admin: modify
+await u.chan.set("public", {
+  header: "[PUB]",
+  masking: true   // hide speaker names
+});
+
+// Admin: destroy
+await u.chan.destroy("events");
+</code></pre>
+<hr>
+<h2>Attribute Triggers (<code>u.trigger</code>)</h2>
+<p>Run a stored <code>&amp;ATTR</code> as a sandbox script, with the enactor as <code>u.me</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Fire &amp;ONENTER on the room with no args
+await u.trigger(u.here.id, "ONENTER");
+
+// Fire &amp;USE on an object, passing args
+await u.trigger(objectId, "USE", ["open"]);
+
+// Fire &amp;ACONNECT on the player
+await u.trigger(u.me.id, "ACONNECT");
+</code></pre>
+<hr>
+<h2>Authentication (<code>u.auth</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Verify credentials (returns true/false)
+const valid = await u.auth.verify(name, password);
+
+// Complete login (sets connected flag, joins socket rooms, fires hooks)
+await u.auth.login(playerId);
+
+// Hash a password
+const hashed = await u.auth.hash(plaintext);
+
+// Change password
+await u.auth.setPassword(playerId, newPassword);
+</code></pre>
+<hr>
+<h2>System (<code>u.sys</code>)</h2>
+<p>Wizard/admin only (enforced in each script — the SDK does not enforce it itself).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Set a runtime config value
+await u.sys.setConfig("game.masterRoom", "42");
+
+// Disconnect a socket (by socket ID, not player ID)
+await u.sys.disconnect(socketId);
+
+// Server uptime in milliseconds
+const ms = await u.sys.uptime();
+const h  = Math.floor(ms / 3600000);
+const m  = Math.floor((ms % 3600000) / 60000);
+u.send(`Uptime: ${h}h ${m}m`);
+
+// Reboot (exit code 75 — scripts/run.sh restarts on this code)
+await u.sys.reboot();
+
+// Shutdown (exit code 0)
+await u.sys.shutdown();
+</code></pre>
+<hr>
+<h2>Events (<code>u.events</code>)</h2>
+<p>Server-wide pub/sub system.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Emit an event with data
+await u.events.emit("player.died", {
+  id: u.me.id,
+  cause: "fell off a cliff"
+});
+
+// Subscribe a stored attribute to an event
+// The attribute value is a script that receives the event data
+const subId = await u.events.on("player.died", "DEATH_HANDLER");
+</code></pre>
+<hr>
+<h2>Formatting (<code>u.util</code>)</h2>
+<h3>Alignment</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Left-pad to width (optional fill character)
+u.util.ljust("text", 20)           // "text                "
+u.util.ljust("text", 20, ".")      // "text................"
+
+// Right-align
+u.util.rjust("100", 20)            // "                 100"
+
+// Center
+u.util.center("Title", 40, "-")    // "-------------------Title------------------"
+u.util.center("Title", 40)         // "                 Title                  "
+</code></pre>
+<h3>sprintf</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.util.sprintf("%-10s %5d", "Alice", 1200)   // "Alice       1200"
+u.util.sprintf("%.2f%%", 98.6)               // "98.60%"
+u.util.sprintf("%05d", 42)                   // "00042"
+</code></pre>
+<h3>template</h3>
+<p>Multi-row column formatter. Uppercase keys are bracketed (<code>[value]</code>), lowercase are unbracketed.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const out = u.util.template(
+  "[NNN] [TTTTTTTTTTTTTTTTTTTT] rrrrr",
+  {
+    N: { value: "42",        align: "right" },
+    T: { value: "Post title", align: "left"  },
+    r: { value: "Alice",      align: "left"  }
+  }
+);
+// → "[ 42] [Post title          ] Alice"
+</code></pre>
+<h3>stripSubs</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Remove all MUSH codes and ANSI escapes
+u.util.stripSubs("%ch%crDanger!%cn")   // → "Danger!"
+u.util.stripSubs("%n waves.")          // → " waves."
+
+// Use before validation or DB storage
+const clean = u.util.stripSubs(userInput).trim();
+if (!clean) { u.send("Value cannot be empty."); return; }
+</code></pre>
+<h3>displayName</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Returns moniker (if set) → name → "Unknown"
+u.util.displayName(u.me, u.me)       // "Alice" or moniker
+u.util.displayName(target, u.me)     // target's display name as seen by actor
+</code></pre>
 
       </article>
 
@@ -568,6 +721,13 @@ GET /api/v1/scenes/:id/export?format=json
       
         
           
+        
+      
+        
+          
+        
+      
+        
           
         
       
@@ -576,33 +736,56 @@ GET /api/v1/scenes/:id/export?format=json
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
         
       
         
@@ -627,13 +810,16 @@ GET /api/v1/scenes/:id/export?format=json
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <div></div>
+          <a href="/ursamu/guides/scripting/" class="page-nav-btn prev">
+            <span class="page-nav-label">← Previous</span>
+            <span class="page-nav-title">Scripting Guide</span>
+          </a>
         
 
         
-          <a href="/ursamu/api/" class="page-nav-btn next">
+          <a href="/ursamu/guides/user-guide/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">API Reference</span>
+            <span class="page-nav-title">User Guide</span>
           </a>
         
       </nav>

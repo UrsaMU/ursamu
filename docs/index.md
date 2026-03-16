@@ -8,17 +8,9 @@ templateEngine: [vto, md]
 <!-- ── HERO ───────────────────────────────────────────────────────── -->
 <div class="home-hero animate-in">
 
-  <div style="margin-bottom:2rem">
-    <img
-      src="/assets/banner.png"
-      alt="UrsaMU — A Modern MUSH Server"
-      style="max-width:480px;width:100%;border-radius:16px;border:1px solid rgba(139,92,246,0.2);box-shadow:0 20px 60px rgba(0,0,0,0.5)"
-    />
-  </div>
-
   <div class="version-badge" style="cursor:default">
     <svg width="10" height="10" viewBox="0 0 10 10" fill="var(--primary-light)"><circle cx="5" cy="5" r="5"/></svg>
-    v1.0.0 &nbsp;&bull;&nbsp; MIT License
+    v1.3.0 &nbsp;&bull;&nbsp; MIT License
   </div>
 
   <h1>A Modern MUSH Server</h1>

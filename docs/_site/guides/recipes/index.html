@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About UrsaMU | UrsaMU Documentation</title>
-  <meta name="description" content="What is UrsaMU, how it works, and what makes it different from other MU* servers.">
+  <title>Scripting Recipes | UrsaMU Documentation</title>
+  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/about/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/recipes/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -47,7 +47,7 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/ursamu/guides/" class="header-nav-link active">
       Guides
     </a>
     
@@ -112,7 +112,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link active">
+      <a href="/ursamu/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -152,7 +152,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+      <a href="/ursamu/guides/recipes/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -275,287 +275,301 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/ursamu/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">About UrsaMU</span>
+        <span class="breadcrumbs-current">Scripting Recipes</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>About UrsaMU</h1>
-<p>UrsaMU is an open-source, high-performance <strong>MU* (MUSH/MUX/MOO-style) game server</strong> built from the ground up with modern tools — TypeScript and Deno — instead of the decades-old C codebases that traditional text-based game servers rely on.</p>
-<p>It is designed for <strong>game operators and developers</strong> who want to run text-based collaborative fiction worlds without fighting ancient technology.</p>
-<h2>What is a MUSH?</h2>
-<p>MUSH stands for <strong>Multi-User Shared Hallucination</strong> — a genre of text-based online games where players create characters, inhabit virtual rooms, communicate with each other, and together build persistent interactive stories.</p>
-<p>Unlike MMORPGs with graphics and combat systems, a MUSH is:</p>
-<ul>
-<li><strong>Text-based</strong>: all interaction happens through typed commands</li>
-<li><strong>Collaborative</strong>: players write scenes, roleplay stories, and build worlds together</li>
-<li><strong>Scriptable</strong>: the game world itself can be programmed using in-game languages</li>
-<li><strong>Social</strong>: designed around conversation, storytelling, and community</li>
-</ul>
-<p>MUSH-style games have existed since the late 1980s and remain active communities today for tabletop RPG adaptation, fan fiction, original fiction, and creative writing.</p>
-<h2>Why UrsaMU?</h2>
-<p>Existing MU* servers (TinyMUSH, PennMUSH, RhostMUSH, MUX2) are written in C, first authored in the 1990s, and carry decades of technical debt. They are difficult to extend, deploy, and maintain.</p>
-<p>UrsaMU takes a fresh approach:</p>
-<table>
-<thead>
-<tr>
-<th>Traditional MU*</th>
-<th>UrsaMU</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Written in C</td>
-<td>Written in TypeScript</td>
-</tr>
-<tr>
-<td>No standard package system</td>
-<td>Deno native (JSR, npm imports)</td>
-</tr>
-<tr>
-<td>Telnet-only</td>
-<td>WebSocket primary, Telnet sidecar</td>
-</tr>
-<tr>
-<td>Embedded scripting in MUSHcode</td>
-<td>Scripts run in sandboxed Web Workers</td>
-</tr>
-<tr>
-<td>Modify core to extend</td>
-<td>Plugin architecture</td>
-</tr>
-<tr>
-<td>Manual compile &amp; deploy</td>
-<td><code>deno task start</code></td>
-</tr>
-</tbody>
-</table>
-<h2>Core Features</h2>
-<h3>WebSocket-Native Protocol</h3>
-<p>The primary interface to UrsaMU is <strong>WebSocket</strong>, not Telnet. This means:</p>
-<ul>
-<li>Native browser connectivity — build web clients without proxies</li>
-<li>Structured JSON messages for clean client/server contracts</li>
-<li>A Telnet sidecar is still available for classic MU* clients</li>
-</ul>
-<pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token keyword">const</span> socket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WebSocket</span><span class="token punctuation">(</span><span class="token string">"ws://yourgame.example.com:4202"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <h1>Scripting Recipes</h1>
+<p>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</p>
+<hr>
+<h2>Room Description with Dynamic Content</h2>
+<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
+const hour = new Date().getHours();
+const timeOfDay = hour &lt; 6 ? "night"
+  : hour &lt; 12 ? "morning"
+  : hour &lt; 18 ? "afternoon"
+  : "evening";
 
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"look"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"connect PlayerName Password"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<h3>Sandboxed Script Engine</h3>
-<p>Game scripts (for commands, objects, and automation) run in <strong>Web Workers</strong>, completely isolated from the host process. Scripts:</p>
-<ul>
-<li>Cannot crash the server</li>
-<li>Cannot access the filesystem or network directly</li>
-<li>Communicate through a typed SDK message protocol</li>
-<li>Support ESM <code>import</code> syntax for library reuse</li>
-</ul>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// A sample script that greets the room
-const here = await u.db.get(en.location);
-u.emit.send(`${en.name} waves hello to ${here.name}.`);
-u.emit.broadcast(here.id, `${en.name} waves hello!`);
-</code></pre>
-<h3>Plugin Architecture</h3>
-<p>Everything in UrsaMU is extensible via plugins:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "ursamu";
-import { registerCommand } from "ursamu/commands";
+const desc = u.here.state.desc as string || "A nondescript room.";
+u.send(`[${u.here.name}]`);
+u.send(desc);
+u.send(`It is ${timeOfDay}.`);
 
-const myPlugin: IPlugin = {
-  name: "my-game-plugin",
-  version: "1.0.0",
-  init: async () =&gt; {
-    registerCommand({
-      name: "greet",
-      pattern: "greet *",
-      flags: "connected",
-      exec: (ctx) =&gt; ctx.send(`Hello, ${ctx.args}!`),
-    });
-    return true;
-  },
+// List obvious exits
+const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
+if (exits.length) {
+  const names = exits.map(e =&gt; e.name || e.id).join(", ");
+  u.send(`Obvious exits: ${names}`);
+}
+</code></pre>
+<hr>
+<h2>Simple Score Sheet</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
+import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export default (u: IUrsamuSDK) =&gt; {
+  const s = u.me.state;
+  const name  = u.util.displayName(u.me, u.me);
+  const level = (s.level  as number) || 1;
+  const xp    = (s.xp     as number) || 0;
+  const hp    = (s.hp     as number) || 100;
+  const maxHp = (s.maxHp  as number) || 100;
+  const gold  = (s.gold   as number) || 0;
+
+  const W = 40;
+  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
+  const row = (label: string, value: string) =&gt;
+    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
+
+  u.send(HR);
+  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
+  u.send(HR);
+  u.send(row("Level:",  String(level)));
+  u.send(row("XP:",     String(xp)));
+  u.send(row("HP:",     `${hp} / ${maxHp}`));
+  u.send(row("Gold:",   String(gold)));
+  u.send(HR);
 };
+</code></pre>
+<hr>
+<h2>Simple Shop</h2>
+<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
+import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
-export default myPlugin;
-</code></pre>
-<h3>Discord Integration</h3>
-<p>An optional built-in Discord bridge relays game communication to Discord channels and back. Features exponential-backoff reconnection and idempotent initialization — no duplicate event listeners on restart.</p>
-<h3>Scene Tracking &amp; Export</h3>
-<p>UrsaMU tracks <strong>roleplay scenes</strong> — collaborative writing sessions between players. Scenes can be archived via the REST API:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Export a scene as formatted Markdown
-GET /api/v1/scenes/:id/export?format=markdown
+interface ShopItem { name: string; cost: number; flags: string[] }
 
-# Export as raw JSON
-GET /api/v1/scenes/:id/export?format=json
+export default async (u: IUrsamuSDK) =&gt; {
+  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
+
+  // Find a shop object in the room
+  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
+  if (!shopObj) {
+    u.send("There is nothing for sale here.");
+    return;
+  }
+
+  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
+
+  if (!arg) {
+    // List items
+    u.send("%ch%cyItems for sale:%cn");
+    for (const item of catalog) {
+      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
+    }
+    u.send('Type "buy &lt;item name&gt;" to purchase.');
+    return;
+  }
+
+  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
+  if (!item) {
+    u.send(`No item matching '${arg}' is for sale here.`);
+    return;
+  }
+
+  const gold = (u.me.state.gold as number) || 0;
+  if (gold &lt; item.cost) {
+    u.send(`You need ${item.cost} gold but only have ${gold}.`);
+    return;
+  }
+
+  // Deduct gold and create item in inventory
+  await u.db.modify(u.me.id, "$set", {
+    data: { ...u.me.state, gold: gold - item.cost }
+  });
+
+  await u.db.create({
+    flags: new Set(["thing", ...item.flags]),
+    location: u.me.id,
+    state: { name: item.name, owner: u.me.id }
+  });
+
+  u.send(`You buy ${item.name} for ${item.cost} gold.`);
+  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
+};
 </code></pre>
-<h3>Rate Limiting</h3>
-<p>The WebSocket hub enforces <strong>10 commands per second</strong> per connection. Excess commands are silently dropped and logged — protecting the server from runaway clients.</p>
-<h2>Architecture Overview</h2>
-<pre class="language-none" tabindex="0"><code class="language-none">┌──────────────────────────────────────────────────────────────────┐
-│  Clients                                                          │
-│  Browser WebSocket  ─┐                                           │
-│  MU* Client (Telnet) ─┤── Telnet Sidecar ─┐                     │
-│  Discord ─────────────┘                   │                     │
-└───────────────────────────────────────────┼─────────────────────┘
-                                            │
-┌───────────────────────────────────────────▼─────────────────────┐
-│  UrsaMU Hub (Deno process)                                       │
-│                                                                   │
-│  ┌────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
-│  │ WebSocket  │  │  HTTP REST   │  │  Discord Bridge        │  │
-│  │ Service    │  │  (Hono/Oak)  │  │  (Gateway reconnect)   │  │
-│  └─────┬──────┘  └──────┬───────┘  └────────────────────────┘  │
-│        │                │                                         │
-│  ┌─────▼────────────────▼──────────────────────────┐            │
-│  │  Command Parser / Middleware Pipeline            │            │
-│  └─────────────────────────┬───────────────────────┘            │
-│                             │                                     │
-│  ┌──────────────────────────▼──────────────────────┐            │
-│  │  Sandbox Service                                 │            │
-│  │  ┌──────────────────────────────────────────┐   │            │
-│  │  │  Web Worker (script runtime)              │   │            │
-│  │  │  SDK: db • emit • move • chan • ui • sys  │   │            │
-│  │  └──────────────────────────────────────────┘   │            │
-│  └──────────────────────────────────────────────────┘            │
-│                                                                   │
-│  ┌──────────────────────────────────────────────────┐            │
-│  │  Database Layer (dbojs)                          │            │
-│  │  objects • channels • mail • bboard • counters  │            │
-│  └──────────────────────────────────────────────────┘            │
-└──────────────────────────────────────────────────────────────────┘
+<p>Set up a shop object:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
+@set shop=shop
+@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
 </code></pre>
-<h2>Technology Stack</h2>
-<table>
-<thead>
-<tr>
-<th>Layer</th>
-<th>Technology</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Runtime</td>
-<td>Deno (TypeScript, ESM)</td>
-</tr>
-<tr>
-<td>Primary transport</td>
-<td>WebSocket</td>
-</tr>
-<tr>
-<td>Secondary transport</td>
-<td>Telnet (sidecar)</td>
-</tr>
-<tr>
-<td>Web framework</td>
-<td>Hono / Oak</td>
-</tr>
-<tr>
-<td>Database</td>
-<td>dbojs (embedded, file-backed)</td>
-</tr>
-<tr>
-<td>Scripting</td>
-<td>Web Workers (sandboxed ESM)</td>
-</tr>
-<tr>
-<td>Testing</td>
-<td><code>deno test</code> — 294 tests, 0 failures</td>
-</tr>
-<tr>
-<td>Docs</td>
-<td>Lume (static site generator)</td>
-</tr>
-<tr>
-<td>CI</td>
-<td>GitHub Actions</td>
-</tr>
-</tbody>
-</table>
-<h2>Comparison with Other MU* Servers</h2>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>PennMUSH</th>
-<th>TinyMUSH</th>
-<th>MUX2</th>
-<th><strong>UrsaMU</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Language</td>
-<td>C</td>
-<td>C</td>
-<td>C</td>
-<td><strong>TypeScript</strong></td>
-</tr>
-<tr>
-<td>Protocol</td>
-<td>Telnet</td>
-<td>Telnet</td>
-<td>Telnet</td>
-<td><strong>WebSocket</strong></td>
-</tr>
-<tr>
-<td>Scripting</td>
-<td>MUSHcode</td>
-<td>MUSHcode</td>
-<td>MUSHcode</td>
-<td><strong>Sandboxed ESM</strong></td>
-</tr>
-<tr>
-<td>Plugin system</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Yes</strong></td>
-</tr>
-<tr>
-<td>Web client</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Native</strong></td>
-</tr>
-<tr>
-<td>Discord</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Built-in</strong></td>
-</tr>
-<tr>
-<td>Package manager</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Deno/JSR</strong></td>
-</tr>
-<tr>
-<td>Docker support</td>
-<td>Manual</td>
-<td>Manual</td>
-<td>Manual</td>
-<td><strong>Yes</strong></td>
-</tr>
-<tr>
-<td>License</td>
-<td>Penn (custom)</td>
-<td>TinyMUSH</td>
-<td>Artistic</td>
-<td><strong>MIT</strong></td>
-</tr>
-</tbody>
-</table>
-<h2>Project Status</h2>
-<p>UrsaMU is at <strong>v1.0</strong>. Current version is <code>1.0.0</code>.</p>
-<ul>
-<li><strong>Test suite</strong>: 294 passing, 0 failing</li>
-<li><strong>Core systems</strong>: complete (commands, sandbox, WebSocket, Discord, scenes, channels)</li>
-<li><strong>Status</strong>: v1.0.0 released</li>
-</ul>
-<p>The project is open-source under the MIT License. Contributions are welcome!</p>
+<hr>
+<h2>Announcement Board (Post on Login)</h2>
+<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
+const announcement = await u.text.read("announcement");
+if (announcement) {
+  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
+}
+</code></pre>
+<p>Admin sets it:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
+</code></pre>
+<p>Or with a dedicated announce script:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
+import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export default async (u: IUrsamuSDK) =&gt; {
+  const actor = u.me;
+  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
+    u.send("Permission denied.");
+    return;
+  }
+  const msg = (u.cmd.args[0] || "").trim();
+  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
+
+  await u.text.set("announcement", msg);
+  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
+  u.send("Announcement set and broadcast.");
+};
+</code></pre>
+<hr>
+<h2>Timed Event (Scheduled Message)</h2>
+<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
+const now = new Date();
+const timeStr = now.toLocaleTimeString();
+u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
+
+// Reset daily quest flags for all players
+const players = await u.db.search({ flags: /player/i });
+for (const p of players) {
+  await u.db.modify(p.id, "$set", {
+    data: { ...p.state, dailyQuestDone: false }
+  });
+}
+</code></pre>
+<hr>
+<h2>Object Lock (Only Owner Can Pick Up)</h2>
+<p>Set a lock on an object so only its owner can get it:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
+const target = await u.util.target(u.me, arg);
+if (!target) { u.send("I don't see that here."); return; }
+
+if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
+  u.send("That doesn't belong to you.");
+  return;
+}
+// ... proceed with get
+</code></pre>
+<hr>
+<h2>Permission Guard Pattern</h2>
+<p>The standard pattern for admin-only commands:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
+             || u.me.flags.has("wizard")
+             || u.me.flags.has("superuser");
+
+if (!isAdmin) {
+  u.send("Permission denied.");
+  return;
+}
+</code></pre>
+<hr>
+<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
+<p>The most common argument pattern in MUSH-style commands:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
+const eqIdx = raw.indexOf("=");
+
+if (eqIdx === -1) {
+  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
+  return;
+}
+
+const targetRef = raw.slice(0, eqIdx).trim();
+const value     = raw.slice(eqIdx + 1).trim();
+
+const target = await u.util.target(u.me, targetRef);
+if (!target) { u.send("Target not found."); return; }
+</code></pre>
+<hr>
+<h2>Read and Display a Bulletin Board Post</h2>
+<p>Show the latest post from the announcements board on login:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
+const posts = await u.bb.listPosts("announcements");
+if (posts.length) {
+  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
+  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
+}
+</code></pre>
+<hr>
+<h2>Currency Transfer (Give Gold)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
+import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export default async (u: IUrsamuSDK) =&gt; {
+  const raw = (u.cmd.args[0] || "").trim();
+  const eqIdx = raw.indexOf("=");
+  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
+
+  const targetRef = raw.slice(0, eqIdx).trim();
+  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
+
+  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
+
+  const target = await u.util.target(u.me, targetRef);
+  if (!target) { u.send("Player not found."); return; }
+  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
+
+  const myGold = (u.me.state.gold as number) || 0;
+  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
+
+  // Transfer
+  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
+  await u.db.modify(target.id, "$set", {
+    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
+  });
+
+  const myName = u.util.displayName(u.me, u.me);
+  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
+  u.send(`${myName} gives you ${amount} gold.`, target.id);
+  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
+};
+</code></pre>
+<hr>
+<h2>Persistent Room Counter</h2>
+<p>Track how many times a room has been visited:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
+const visits = ((u.here.state.visitCount as number) || 0) + 1;
+await u.db.modify(u.here.id, "$set", {
+  data: { ...u.here.state, visitCount: visits }
+});
+
+if (visits % 100 === 0) {
+  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
+}
+</code></pre>
+<hr>
+<h2>Formatting a Who List</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
+const online = await u.db.search({ flags: /connected/i });
+const W = 60;
+
+u.send("%ch%cy" + "=".repeat(W) + "%cn");
+u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
+u.send("%ch%cy" + "=".repeat(W) + "%cn");
+u.send(
+  u.util.ljust("%chName%cn", 24) +
+  u.util.ljust("%chLocation%cn", 26) +
+  u.util.rjust("%chIdle%cn", 10)
+);
+u.send("-".repeat(W));
+
+for (const p of online) {
+  const name     = u.util.displayName(p, u.me);
+  const location = (p.state.roomName as string) || `#${p.location}`;
+  const idle     = p.state.lastCommand
+    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
+    : "0m";
+
+  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
+}
+
+u.send("-".repeat(W));
+u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
+</code></pre>
 
       </article>
 
@@ -568,6 +582,13 @@ GET /api/v1/scenes/:id/export?format=json
       
         
           
+        
+      
+        
+          
+        
+      
+        
           
         
       
@@ -576,29 +597,48 @@ GET /api/v1/scenes/:id/export?format=json
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
         
       
         
@@ -627,13 +667,16 @@ GET /api/v1/scenes/:id/export?format=json
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <div></div>
+          <a href="/ursamu/guides/installation/" class="page-nav-btn prev">
+            <span class="page-nav-label">← Previous</span>
+            <span class="page-nav-title">Installation Guide</span>
+          </a>
         
 
         
-          <a href="/ursamu/api/" class="page-nav-btn next">
+          <a href="/ursamu/guides/scripting/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">API Reference</span>
+            <span class="page-nav-title">Scripting Guide</span>
           </a>
         
       </nav>

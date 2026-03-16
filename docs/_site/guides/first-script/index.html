@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About UrsaMU | UrsaMU Documentation</title>
-  <meta name="description" content="What is UrsaMU, how it works, and what makes it different from other MU* servers.">
+  <title>Build Your First Script | UrsaMU Documentation</title>
+  <meta name="description" content="A step-by-step walkthrough for writing your first UrsaMU system script from scratch">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/about/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/first-script/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -47,7 +47,7 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/ursamu/guides/" class="header-nav-link active">
       Guides
     </a>
     
@@ -112,7 +112,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link active">
+      <a href="/ursamu/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -144,7 +144,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
-      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+      <a href="/ursamu/guides/first-script/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
@@ -275,287 +275,178 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/ursamu/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">About UrsaMU</span>
+        <span class="breadcrumbs-current">Build Your First Script</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>About UrsaMU</h1>
-<p>UrsaMU is an open-source, high-performance <strong>MU* (MUSH/MUX/MOO-style) game server</strong> built from the ground up with modern tools — TypeScript and Deno — instead of the decades-old C codebases that traditional text-based game servers rely on.</p>
-<p>It is designed for <strong>game operators and developers</strong> who want to run text-based collaborative fiction worlds without fighting ancient technology.</p>
-<h2>What is a MUSH?</h2>
-<p>MUSH stands for <strong>Multi-User Shared Hallucination</strong> — a genre of text-based online games where players create characters, inhabit virtual rooms, communicate with each other, and together build persistent interactive stories.</p>
-<p>Unlike MMORPGs with graphics and combat systems, a MUSH is:</p>
-<ul>
-<li><strong>Text-based</strong>: all interaction happens through typed commands</li>
-<li><strong>Collaborative</strong>: players write scenes, roleplay stories, and build worlds together</li>
-<li><strong>Scriptable</strong>: the game world itself can be programmed using in-game languages</li>
-<li><strong>Social</strong>: designed around conversation, storytelling, and community</li>
-</ul>
-<p>MUSH-style games have existed since the late 1980s and remain active communities today for tabletop RPG adaptation, fan fiction, original fiction, and creative writing.</p>
-<h2>Why UrsaMU?</h2>
-<p>Existing MU* servers (TinyMUSH, PennMUSH, RhostMUSH, MUX2) are written in C, first authored in the 1990s, and carry decades of technical debt. They are difficult to extend, deploy, and maintain.</p>
-<p>UrsaMU takes a fresh approach:</p>
-<table>
-<thead>
-<tr>
-<th>Traditional MU*</th>
-<th>UrsaMU</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Written in C</td>
-<td>Written in TypeScript</td>
-</tr>
-<tr>
-<td>No standard package system</td>
-<td>Deno native (JSR, npm imports)</td>
-</tr>
-<tr>
-<td>Telnet-only</td>
-<td>WebSocket primary, Telnet sidecar</td>
-</tr>
-<tr>
-<td>Embedded scripting in MUSHcode</td>
-<td>Scripts run in sandboxed Web Workers</td>
-</tr>
-<tr>
-<td>Modify core to extend</td>
-<td>Plugin architecture</td>
-</tr>
-<tr>
-<td>Manual compile &amp; deploy</td>
-<td><code>deno task start</code></td>
-</tr>
-</tbody>
-</table>
-<h2>Core Features</h2>
-<h3>WebSocket-Native Protocol</h3>
-<p>The primary interface to UrsaMU is <strong>WebSocket</strong>, not Telnet. This means:</p>
-<ul>
-<li>Native browser connectivity — build web clients without proxies</li>
-<li>Structured JSON messages for clean client/server contracts</li>
-<li>A Telnet sidecar is still available for classic MU* clients</li>
-</ul>
-<pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token keyword">const</span> socket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WebSocket</span><span class="token punctuation">(</span><span class="token string">"ws://yourgame.example.com:4202"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <h1>Build Your First Script</h1>
+<p>This guide walks you through writing a real script from scratch — starting with “hello world” and building up to something useful that reads player data and sends formatted output.</p>
+<p><strong>Prerequisites:</strong> UrsaMU running locally, a text editor, basic TypeScript familiarity.</p>
+<hr>
+<h2>Step 1 — Hello World</h2>
+<p>Create a new file at <code>system/scripts/hello.ts</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"look"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"connect PlayerName Password"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<h3>Sandboxed Script Engine</h3>
-<p>Game scripts (for commands, objects, and automation) run in <strong>Web Workers</strong>, completely isolated from the host process. Scripts:</p>
-<ul>
-<li>Cannot crash the server</li>
-<li>Cannot access the filesystem or network directly</li>
-<li>Communicate through a typed SDK message protocol</li>
-<li>Support ESM <code>import</code> syntax for library reuse</li>
-</ul>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// A sample script that greets the room
-const here = await u.db.get(en.location);
-u.emit.send(`${en.name} waves hello to ${here.name}.`);
-u.emit.broadcast(here.id, `${en.name} waves hello!`);
-</code></pre>
-<h3>Plugin Architecture</h3>
-<p>Everything in UrsaMU is extensible via plugins:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "ursamu";
-import { registerCommand } from "ursamu/commands";
-
-const myPlugin: IPlugin = {
-  name: "my-game-plugin",
-  version: "1.0.0",
-  init: async () =&gt; {
-    registerCommand({
-      name: "greet",
-      pattern: "greet *",
-      flags: "connected",
-      exec: (ctx) =&gt; ctx.send(`Hello, ${ctx.args}!`),
-    });
-    return true;
-  },
+export default (u: IUrsamuSDK) =&gt; {
+  u.send("Hello, world!");
 };
-
-export default myPlugin;
 </code></pre>
-<h3>Discord Integration</h3>
-<p>An optional built-in Discord bridge relays game communication to Discord channels and back. Features exponential-backoff reconnection and idempotent initialization — no duplicate event listeners on restart.</p>
-<h3>Scene Tracking &amp; Export</h3>
-<p>UrsaMU tracks <strong>roleplay scenes</strong> — collaborative writing sessions between players. Scenes can be archived via the REST API:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Export a scene as formatted Markdown
-GET /api/v1/scenes/:id/export?format=markdown
-
-# Export as raw JSON
-GET /api/v1/scenes/:id/export?format=json
+<p>Start your server and connect. Type <code>hello</code> (or <code>@hello</code>). You should see:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">Hello, world!
 </code></pre>
-<h3>Rate Limiting</h3>
-<p>The WebSocket hub enforces <strong>10 commands per second</strong> per connection. Excess commands are silently dropped and logged — protecting the server from runaway clients.</p>
-<h2>Architecture Overview</h2>
-<pre class="language-none" tabindex="0"><code class="language-none">┌──────────────────────────────────────────────────────────────────┐
-│  Clients                                                          │
-│  Browser WebSocket  ─┐                                           │
-│  MU* Client (Telnet) ─┤── Telnet Sidecar ─┐                     │
-│  Discord ─────────────┘                   │                     │
-└───────────────────────────────────────────┼─────────────────────┘
-                                            │
-┌───────────────────────────────────────────▼─────────────────────┐
-│  UrsaMU Hub (Deno process)                                       │
-│                                                                   │
-│  ┌────────────┐  ┌──────────────┐  ┌────────────────────────┐  │
-│  │ WebSocket  │  │  HTTP REST   │  │  Discord Bridge        │  │
-│  │ Service    │  │  (Hono/Oak)  │  │  (Gateway reconnect)   │  │
-│  └─────┬──────┘  └──────┬───────┘  └────────────────────────┘  │
-│        │                │                                         │
-│  ┌─────▼────────────────▼──────────────────────────┐            │
-│  │  Command Parser / Middleware Pipeline            │            │
-│  └─────────────────────────┬───────────────────────┘            │
-│                             │                                     │
-│  ┌──────────────────────────▼──────────────────────┐            │
-│  │  Sandbox Service                                 │            │
-│  │  ┌──────────────────────────────────────────┐   │            │
-│  │  │  Web Worker (script runtime)              │   │            │
-│  │  │  SDK: db • emit • move • chan • ui • sys  │   │            │
-│  │  └──────────────────────────────────────────┘   │            │
-│  └──────────────────────────────────────────────────┘            │
-│                                                                   │
-│  ┌──────────────────────────────────────────────────┐            │
-│  │  Database Layer (dbojs)                          │            │
-│  │  objects • channels • mail • bboard • counters  │            │
-│  └──────────────────────────────────────────────────┘            │
-└──────────────────────────────────────────────────────────────────┘
-</code></pre>
-<h2>Technology Stack</h2>
-<table>
-<thead>
-<tr>
-<th>Layer</th>
-<th>Technology</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Runtime</td>
-<td>Deno (TypeScript, ESM)</td>
-</tr>
-<tr>
-<td>Primary transport</td>
-<td>WebSocket</td>
-</tr>
-<tr>
-<td>Secondary transport</td>
-<td>Telnet (sidecar)</td>
-</tr>
-<tr>
-<td>Web framework</td>
-<td>Hono / Oak</td>
-</tr>
-<tr>
-<td>Database</td>
-<td>dbojs (embedded, file-backed)</td>
-</tr>
-<tr>
-<td>Scripting</td>
-<td>Web Workers (sandboxed ESM)</td>
-</tr>
-<tr>
-<td>Testing</td>
-<td><code>deno test</code> — 294 tests, 0 failures</td>
-</tr>
-<tr>
-<td>Docs</td>
-<td>Lume (static site generator)</td>
-</tr>
-<tr>
-<td>CI</td>
-<td>GitHub Actions</td>
-</tr>
-</tbody>
-</table>
-<h2>Comparison with Other MU* Servers</h2>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>PennMUSH</th>
-<th>TinyMUSH</th>
-<th>MUX2</th>
-<th><strong>UrsaMU</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Language</td>
-<td>C</td>
-<td>C</td>
-<td>C</td>
-<td><strong>TypeScript</strong></td>
-</tr>
-<tr>
-<td>Protocol</td>
-<td>Telnet</td>
-<td>Telnet</td>
-<td>Telnet</td>
-<td><strong>WebSocket</strong></td>
-</tr>
-<tr>
-<td>Scripting</td>
-<td>MUSHcode</td>
-<td>MUSHcode</td>
-<td>MUSHcode</td>
-<td><strong>Sandboxed ESM</strong></td>
-</tr>
-<tr>
-<td>Plugin system</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Yes</strong></td>
-</tr>
-<tr>
-<td>Web client</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Native</strong></td>
-</tr>
-<tr>
-<td>Discord</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Built-in</strong></td>
-</tr>
-<tr>
-<td>Package manager</td>
-<td>No</td>
-<td>No</td>
-<td>No</td>
-<td><strong>Deno/JSR</strong></td>
-</tr>
-<tr>
-<td>Docker support</td>
-<td>Manual</td>
-<td>Manual</td>
-<td>Manual</td>
-<td><strong>Yes</strong></td>
-</tr>
-<tr>
-<td>License</td>
-<td>Penn (custom)</td>
-<td>TinyMUSH</td>
-<td>Artistic</td>
-<td><strong>MIT</strong></td>
-</tr>
-</tbody>
-</table>
-<h2>Project Status</h2>
-<p>UrsaMU is at <strong>v1.0</strong>. Current version is <code>1.0.0</code>.</p>
+<p><strong>How it works:</strong></p>
 <ul>
-<li><strong>Test suite</strong>: 294 passing, 0 failing</li>
-<li><strong>Core systems</strong>: complete (commands, sandbox, WebSocket, Discord, scenes, channels)</li>
-<li><strong>Status</strong>: v1.0.0 released</li>
+<li>The file name <code>hello.ts</code> becomes the command <code>hello</code></li>
+<li><code>@</code> prefix is stripped automatically, so <code>@hello</code> works too</li>
+<li><code>u.send()</code> with no second argument sends to you (the actor)</li>
+<li>The <code>import</code> line is for TypeScript IDE support — it’s stripped before running</li>
 </ul>
-<p>The project is open-source under the MIT License. Contributions are welcome!</p>
+<hr>
+<h2>Step 2 — Use the Actor</h2>
+<p>Scripts know who ran them via <code>u.me</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export default (u: IUrsamuSDK) =&gt; {
+  const name = u.util.displayName(u.me, u.me);
+  u.send(`Hello, ${name}! You are in room #${u.me.location}.`);
+};
+</code></pre>
+<p><code>u.util.displayName(obj, viewer)</code> returns the moniker if set, otherwise the name.</p>
+<hr>
+<h2>Step 3 — Read Arguments</h2>
+<p>Players can pass text after the command name. It’s available in <code>u.cmd.args[0]</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export default (u: IUrsamuSDK) =&gt; {
+  const arg = (u.cmd.args[0] || "").trim();
+
+  if (!arg) {
+    u.send("Usage: hello &lt;name&gt;");
+    return;
+  }
+
+  u.send(`Hello, ${arg}!`);
+};
+</code></pre>
+<p>Type <code>hello Alice</code> → <code>Hello, Alice!</code></p>
+<hr>
+<h2>Step 4 — Find Another Player</h2>
+<p>Use <code>u.util.target()</code> to resolve a name, ID, alias, <code>me</code>, or <code>here</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export default async (u: IUrsamuSDK) =&gt; {
+  const arg = (u.cmd.args[0] || "").trim();
+  if (!arg) {
+    u.send("Usage: wave &lt;player&gt;");
+    return;
+  }
+
+  const target = await u.util.target(u.me, arg);
+  if (!target) {
+    u.send(`I can't find '${arg}'.`);
+    return;
+  }
+
+  const myName   = u.util.displayName(u.me,    u.me);
+  const theirName = u.util.displayName(target, u.me);
+
+  u.send(`You wave to ${theirName}.`);
+  u.send(`${myName} waves to you.`, target.id);   // private message to them
+  u.here.broadcast(`${myName} waves to ${theirName}.`);  // everyone in room sees it
+};
+</code></pre>
+<hr>
+<h2>Step 5 — Read and Write Player Data</h2>
+<p>Player data lives in <code>u.me.state</code>. To persist a change, use <code>u.db.modify</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export default async (u: IUrsamuSDK) =&gt; {
+  const switches = u.cmd.switches || [];
+
+  if (switches.includes("reset")) {
+    // Admin-only: reset the counter
+    if (!u.me.flags.has("admin") &amp;&amp; !u.me.flags.has("wizard")) {
+      u.send("Permission denied.");
+      return;
+    }
+    await u.db.modify(u.me.id, "$set", {
+      data: { ...u.me.state, waveCount: 0 }
+    });
+    u.send("Wave count reset.");
+    return;
+  }
+
+  // Increment wave count
+  const count = ((u.me.state.waveCount as number) || 0) + 1;
+  await u.db.modify(u.me.id, "$set", {
+    data: { ...u.me.state, waveCount: count }
+  });
+
+  u.send(`You have waved ${count} time${count === 1 ? "" : "s"}.`);
+};
+</code></pre>
+<blockquote>
+<p><strong>Always spread <code>u.me.state</code></strong> when writing back. If you omit the spread, you’ll<br>
+overwrite all other fields on the object.</p>
+</blockquote>
+<p>Type <code>wave</code> → <code>You have waved 1 time.</code><br>
+Type <code>wave</code> again → <code>You have waved 2 times.</code><br>
+Type <code>@wave/reset</code> (as admin) → <code>Wave count reset.</code></p>
+<hr>
+<h2>Step 6 — Format a Table</h2>
+<p>Use <code>u.util.ljust()</code>, <code>u.util.rjust()</code>, and <code>u.util.center()</code> to align columns:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export default (u: IUrsamuSDK) =&gt; {
+  const name   = u.util.displayName(u.me, u.me);
+  const gold   = (u.me.state.gold   as number) || 0;
+  const silver = (u.me.state.silver as number) || 0;
+  const level  = (u.me.state.level  as number) || 1;
+
+  const HR = "%ch%cy" + "-".repeat(40) + "%cn";
+
+  u.send("%ch%cy" + u.util.center("Character Sheet", 40, "=") + "%cn");
+  u.send(HR);
+  u.send(u.util.ljust("Name:", 12)  + u.util.ljust(name,          28));
+  u.send(u.util.ljust("Level:", 12) + u.util.ljust(String(level), 28));
+  u.send(HR);
+  u.send(u.util.ljust("Gold:",   12) + u.util.rjust(String(gold),   28));
+  u.send(u.util.ljust("Silver:", 12) + u.util.rjust(String(silver), 28));
+  u.send(HR);
+};
+</code></pre>
+<p>Output:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">========= Character Sheet ==========
+----------------------------------------
+Name:       Alice
+Level:      5
+----------------------------------------
+Gold:                              1200
+Silver:                             340
+----------------------------------------
+</code></pre>
+<hr>
+<h2>Step 7 — Add Aliases</h2>
+<p>Export a const <code>aliases</code> array to register extra command names:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+
+export const aliases = ["sheet", "sc"];
+
+export default (u: IUrsamuSDK) =&gt; {
+  // ... your script
+};
+</code></pre>
+<p>Now <code>sheet</code>, <code>sc</code>, <code>@sheet</code>, and <code>@sc</code> all trigger this script.</p>
+<hr>
+<h2>Next Steps</h2>
+<ul>
+<li>Read the <a href="/ursamu/guides/scripting/">SDK Reference</a> for every available method</li>
+<li>Browse the <a href="/ursamu/guides/recipes/">Recipes</a> for common patterns (shops, timed events, etc.)</li>
+<li>Look at <code>system/scripts/who.ts</code>, <code>score.ts</code>, and <code>bblist.ts</code> for real examples</li>
+<li>Add a test in <code>tests/</code> using the wrapScript pattern from existing test files</li>
+</ul>
 
       </article>
 
@@ -568,6 +459,13 @@ GET /api/v1/scenes/:id/export?format=json
       
         
           
+        
+      
+        
+          
+        
+      
+        
           
         
       
@@ -576,25 +474,40 @@ GET /api/v1/scenes/:id/export?format=json
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
-      
+          
         
       
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
         
       
         
@@ -627,13 +540,16 @@ GET /api/v1/scenes/:id/export?format=json
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <div></div>
+          <a href="/ursamu/guides/customization/" class="page-nav-btn prev">
+            <span class="page-nav-label">← Previous</span>
+            <span class="page-nav-title">Customization Guide</span>
+          </a>
         
 
         
-          <a href="/ursamu/api/" class="page-nav-btn next">
+          <a href="/ursamu/guides/installation/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">API Reference</span>
+            <span class="page-nav-title">Installation Guide</span>
           </a>
         
       </nav>

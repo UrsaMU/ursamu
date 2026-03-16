@@ -76,7 +76,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v0.4.22</span>
+    <span class="header-version">v1.2.0</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -143,6 +143,18 @@
       <a href="/ursamu/guides/scripting/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
+      </a>
+      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        Your First Script
+      </a>
+      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        SDK Cookbook
+      </a>
+      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Recipes
       </a>
     </div>
 
@@ -270,205 +282,343 @@
       <!-- Page content -->
       <article class="prose">
         <h1>Scripting Guide</h1>
-<p>UrsaMU scripts are TypeScript/JavaScript files that run inside <strong>Web Workers</strong> — completely isolated from the host process. Scripts interact with the game world through a typed SDK called the <strong>UrsaMU SDK</strong> (<code>u</code>).</p>
-<h2>How Scripting Works</h2>
-<p>When a player triggers a script (via an object, command, or trigger), the Sandbox Service:</p>
+<p>UrsaMU scripts are TypeScript/JavaScript files that run inside <strong>Web Workers</strong> — completely isolated from the host process. Every script receives a typed SDK object called <code>u</code> that provides everything a script needs to interact with the game world.</p>
+<h2>How It Works</h2>
+<p>When a player runs a command (or <code>@trigger</code> fires an attribute), the Sandbox Service:</p>
 <ol>
-<li>Spins up a Web Worker</li>
-<li>Injects the SDK as the global <code>u</code> object</li>
-<li>Injects the execution environment as <code>en</code> (the entity context)</li>
-<li>Runs the script</li>
-<li>Collects results and sends them back to the hub</li>
+<li>Spawns a Web Worker</li>
+<li>Injects the <strong><code>u</code> SDK object</strong> as a global</li>
+<li>Runs the script (ESM module or legacy block)</li>
+<li>Worker posts results/messages back to the server</li>
+<li>Worker terminates</li>
 </ol>
-<p>Scripts are isolated — they <strong>cannot</strong> crash the server, access the filesystem, or open network connections directly. Everything goes through the SDK.</p>
-<h2>The Execution Context (<code>en</code>)</h2>
-<p>Every script receives an <code>en</code> (entity/environment) object describing who triggered it and where:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">en.id        // ID of the actor (player or object running the script)
-en.name      // Display name of the actor
-en.location  // ID of the room the actor is in
-en.cmd       // Command string that triggered the script
-en.args      // Argument string passed to the command
-en.switches  // Object of switches used (e.g. { verbose: true })
-en.socket    // Socket ID of the triggering connection
-en.cid       // Character ID (if connected player)
+<p>Scripts are fully isolated — they cannot crash the server, access the filesystem, or make network requests. All interaction happens through <code>u</code>.</p>
+<hr>
+<h2>The <code>u</code> Object</h2>
+<p>Every script has access to a global <code>u</code> object. It contains both the current execution context and all SDK methods.</p>
+<h3>Context Properties</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.me        // IDBObj — the actor (player or object running the script)
+u.here      // IDBObj — the room the actor is in; also has .broadcast()
+u.target    // IDBObj | undefined — an optional target object
+u.cmd       // { name, args, switches } — the command that triggered this
+u.state     // Record&lt;string, unknown&gt; — reactive per-execution state
+u.socketId  // string | undefined — socket ID of the triggering connection
 </code></pre>
-<h2>The SDK (<code>u</code>)</h2>
-<p>The SDK is available as the global <code>u</code> object. It provides namespaced groups of functions:</p>
-<h3><code>u.emit</code> — Sending Messages</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send a message to the triggering player only
-await u.emit.send("You look around.");
-
-// Broadcast to everyone in a room
-await u.emit.broadcast(roomId, "Someone waves.");
-
-// Broadcast to everyone EXCEPT a player
-await u.emit.broadcastExcept(roomId, actorId, "Alice waves.");
+<h4><code>IDBObj</code> shape</h4>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">{
+  id: string;
+  name?: string;
+  location?: string;
+  flags: Set&lt;string&gt;;          // e.g. new Set(["player", "connected"])
+  state: Record&lt;string, unknown&gt;;  // player/object data (desc, attrs, etc.)
+  contents: IDBObj[];
+}
 </code></pre>
-<h3><code>u.db</code> — Database Access</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Get an object by ID
-const room = await u.db.get(en.location);
-console.log(room.name); // "The Grand Hall"
+<h4><code>u.cmd</code> shape</h4>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.cmd.name       // "look", "score", "bbpost", etc.
+u.cmd.original   // raw command string typed by the player
+u.cmd.args       // string[] — [rawArgString, ...splitArgs]
+u.cmd.switches   // string[] | undefined — ["edit"] from "@bbpost/edit"
+</code></pre>
+<hr>
+<h2>Messaging</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send to the triggering player only
+u.send("You look around the room.");
 
-// Search objects by query
+// Send to a specific player by ID
+u.send("You have new mail.", targetPlayerId);
+
+// Send with options (e.g. quit)
+u.send("Goodbye!", undefined, { quit: true });
+
+// Broadcast to ALL connected players (use sparingly)
+u.broadcast("The server will reboot in 5 minutes.");
+
+// Broadcast to all players in the current room
+u.here.broadcast("Alice waves cheerfully.");
+
+// Broadcast to all in target's room
+u.target?.broadcast("Someone enters the room.");
+</code></pre>
+<hr>
+<h2>Database (<code>u.db</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Search by query object (returns SDK IDBObj array)
 const players = await u.db.search({ flags: /player/i });
-
-// Modify an object
-await u.db.modify(en.id, { data: { ...currentData, score: 100 } });
+const here    = await u.db.search({ id: u.me.location });
+const byName  = await u.db.search({ "data.name": /alice/i });
 
 // Create a new object
-const obj = await u.db.create({
+const coin = await u.db.create({
   flags: new Set(["thing"]),
-  data: { name: "A Coin", description: "A shiny gold coin." },
-  location: en.location,
+  location: u.me.id,        // put it in actor's inventory
+  state: { name: "Gold Coin", description: "A shiny coin." }
+});
+
+// Modify an object (always spread state to avoid clobbering)
+await u.db.modify(u.me.id, "$set", {
+  data: { ...u.me.state, score: (u.me.state.score as number || 0) + 10 }
 });
 
 // Destroy an object
-await u.db.destroy(objId);
+await u.db.destroy(coin.id);
 </code></pre>
-<h3><code>u.move</code> — Moving Objects</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Move actor to a new location
-await u.move.move(en.id, destinationRoomId);
-
-// Get the exit that leads to a room
-const exit = await u.move.getExit(en.location, "north");
+<blockquote>
+<p><strong>Important:</strong> always spread existing state when modifying:<br>
+<code>{ data: { ...u.me.state, myField: value } }</code> — omitting the spread<br>
+will wipe all other fields.</p>
+</blockquote>
+<hr>
+<h2>Finding Objects (<code>u.util.target</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Find by name, ID, alias, "me", "here", etc.
+const target = await u.util.target(u.me, u.cmd.args[0]);
+if (!target) {
+  u.send("I can't find that.");
+  return;
+}
 </code></pre>
-<h3><code>u.chan</code> — Channel Operations</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send a message to a channel
-await u.chan.send("public", `[Public] ${en.name}: Hello!`);
+<hr>
+<h2>Flags &amp; Permissions</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Check flags
+u.me.flags.has("wizard")    // true/false
+u.me.flags.has("connected")
 
-// Create a channel (admin/wizard only)
-await u.chan.create("newchannel", { header: "[New]" });
+// Check edit permission (owner, admin, wizard)
+if (!u.canEdit(u.me, target)) {
+  u.send("Permission denied.");
+  return;
+}
 
-// Destroy a channel (admin/wizard only)
-await u.chan.destroy("oldchannel");
-
-// Set channel properties (admin/wizard only)
-await u.chan.set("mychannel", "header", "[MyChan]");
+// Set or remove flags
+await u.setFlags(target.id, "dark");       // add flag
+await u.setFlags(target.id, "!dark");      // remove flag
+await u.setFlags(target.id, "wizard");     // grant wizard
 </code></pre>
-<h3><code>u.ui</code> — Structured UI Output</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send a structured layout to a web client
+<hr>
+<h2>Locks</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Evaluate a stored lock expression
+const canPass = await u.checkLock(target, "player+");
+</code></pre>
+<hr>
+<h2>Movement</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Move any object to a destination
+u.teleport(objectId, destinationRoomId);
+</code></pre>
+<hr>
+<h2>Executing Commands</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Run a command as the actor (fires the full command pipeline)
+u.execute("look");
+u.execute("say Hello, world!");
+
+// Force a command (bypasses some permission checks — use carefully)
+u.force("@set me=dark");
+</code></pre>
+<hr>
+<h2>Text (<code>u.text</code>)</h2>
+<p>Server-side named text blobs — used for MOTD, help files, etc.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read a stored text entry
+const motd = await u.text.read("motd");
+
+// Write/update a text entry (admin scripts)
+await u.text.set("motd", "Welcome to the game! Events tonight at 8pm.");
+</code></pre>
+<hr>
+<h2>Bulletin Boards (<code>u.bb</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// List all boards (includes unread counts for current player)
+const boards = await u.bb.listBoards();
+
+// List posts on a board
+const posts = await u.bb.listPosts("announcements");
+
+// Read a specific post
+const post = await u.bb.readPost("announcements", 1);
+if (post) u.send(`${post.subject}\n${post.body}`);
+
+// Post to a board
+await u.bb.post("announcements", "Server Update", "Maintenance tonight at midnight.");
+
+// Mark a board as read
+await u.bb.markRead("announcements");
+
+// Get unread count totals
+const newCount = await u.bb.totalNewCount();
+</code></pre>
+<hr>
+<h2>Mail (<code>u.mail</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send a message
+await u.mail.send({
+  id: crypto.randomUUID(),
+  from: `#${u.me.id}`,
+  to: [`#${recipientId}`],
+  subject: "Hello",
+  message: "Nice to meet you!",
+  read: false,
+  date: Date.now()
+});
+
+// Read mail (query by recipient ID)
+const inbox = await u.mail.read({ to: { $in: [`#${u.me.id}`] } });
+
+// Delete a message
+await u.mail.delete(messageId);
+</code></pre>
+<hr>
+<h2>Channels (<code>u.chan</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Join a channel
+await u.chan.join("public", "pub");
+
+// Leave by alias
+await u.chan.leave("pub");
+
+// List all channels
+const channels = await u.chan.list();
+
+// Admin: create a channel
+await u.chan.create("events", { header: "[EVENTS]", hidden: false });
+
+// Admin: destroy a channel
+await u.chan.destroy("events");
+
+// Admin: change channel properties
+await u.chan.set("public", { header: "[PUB]", lock: "player+", masking: false });
+</code></pre>
+<hr>
+<h2>Attribute Triggers (<code>u.trigger</code>)</h2>
+<p>Fire a stored <code>&amp;ATTR</code> on any object as a script:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Fire &amp;OPEN on the target object, passing args
+await u.trigger(target.id, "OPEN", ["force"]);
+
+// Fire &amp;ACONNECT on the player
+await u.trigger(u.me.id, "ACONNECT");
+</code></pre>
+<hr>
+<h2>Authentication (<code>u.auth</code>)</h2>
+<p>Primarily used in <code>connect.ts</code> and registration scripts:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Verify login credentials
+const ok = await u.auth.verify(name, password);
+
+// Complete login (sets connected flag, joins socket rooms)
+await u.auth.login(playerId);
+
+// Hash a password for storage
+const hashed = await u.auth.hash("mysecretpassword");
+
+// Change a player's password
+await u.auth.setPassword(playerId, "newpassword");
+</code></pre>
+<hr>
+<h2>System (<code>u.sys</code>)</h2>
+<p>Admin/wizard-only controls:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Set a config key at runtime
+await u.sys.setConfig("game.masterRoom", "42");
+
+// Disconnect a socket by socket ID
+await u.sys.disconnect(socketId);
+
+// Get server uptime in milliseconds
+const ms = await u.sys.uptime();
+const minutes = Math.floor(ms / 60000);
+
+// Reboot or shut down
+await u.sys.reboot();    // exits with code 75 (restart signal)
+await u.sys.shutdown();  // exits with code 0
+</code></pre>
+<hr>
+<h2>Events (<code>u.events</code>)</h2>
+<p>Pub/sub events across the server:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Emit an event
+await u.events.emit("player.levelup", { id: u.me.id, newLevel: 5 });
+
+// Subscribe a handler attribute (the handler receives the event data)
+const subId = await u.events.on("player.levelup", "LEVELUP_HANDLER");
+</code></pre>
+<hr>
+<h2>Formatting Utilities (<code>u.util</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Display name (uses moniker if set, falls back to name)
+const name = u.util.displayName(u.me, u.me);
+
+// Text alignment
+u.util.ljust("Left",    20)         // "Left                "
+u.util.rjust("Right",   20)         // "               Right"
+u.util.center("Center", 20, "-")    // "-------Center-------"
+
+// printf-style sprintf
+u.util.sprintf("%-10s %5d", "Score", 1200)
+
+// Column template (multi-row data)
+u.util.template(
+  "[NNN] [TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT]",
+  { N: "42", T: "Some long title here" }
+)
+
+// Strip MUSH color codes and ANSI escapes (for storage/validation)
+u.util.stripSubs("%chHello %cgWorld%cn")  // → "Hello World"
+</code></pre>
+<hr>
+<h2>Structured UI (<code>u.ui</code>)</h2>
+<p>For web client panels (JSON output, not text):</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Layout — posts a structured result to the web client
 u.ui.layout({
-  type: "table",
-  data: [
-    { col1: "Name", col2: "Score" },
-    { col1: "Alice", col2: "1200" },
-  ],
+  components: [
+    { type: "header", title: "Character Sheet" },
+    { type: "table", content: [["Name", u.util.displayName(u.me, u.me)]] }
+  ]
 });
+
+// Render a template string
+const html = u.ui.render("&lt;b&gt;{{name}}&lt;/b&gt;", { name: "Alice" });
 </code></pre>
-<h3><code>u.auth</code> — Authentication</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Hash a password
-const hashed = await u.auth.hash("mypassword");
-
-// Verify a password
-const valid = await u.auth.setPassword(en.id, "newpassword");
-</code></pre>
-<h3><code>u.sys</code> — System Controls (Wizard Only)</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Restart the server
-await u.sys.reboot();
-
-// Shutdown the server
-await u.sys.shutdown();
-</code></pre>
-<h3><code>u.util</code> — Utilities</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Strip MUSH color codes and ANSI escapes
-const clean = u.util.stripSubs("%chHello%cn %cgWorld%cn");
-// → "Hello World"
-
-// Pad/align text
-const centered  = u.util.center("Title", 40, "-");
-const leftAlign = u.util.ljust("Left", 20);
-const rightAlign = u.util.rjust("Right", 20);
-
-// sprintf-style formatting
-const formatted = u.util.sprintf("%-10s %5d", "Player", 1200);
-
-// String interpolation
-const msg = u.util.template("Welcome, {name}!", { name: en.name });
-</code></pre>
+<hr>
 <h2>Writing a Script</h2>
-<p>Scripts are TypeScript (or JavaScript) files stored in <code>system/scripts/</code>. They can use either <strong>ESM module syntax</strong> or <strong>legacy block mode</strong>.</p>
-<h3>ESM Style (Recommended)</h3>
-<p>Files with an <code>export</code> statement are detected as ESM modules:</p>
+<p>Scripts live in <code>system/scripts/</code>. The file name becomes the command name (minus any <code>@</code> prefix).</p>
+<h3>ESM Style (recommended)</h3>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/greet.ts
-export {};  // signals ESM mode
+import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
-const target = en.args.trim() || "World";
-await u.emit.send(`Hello, ${target}!`);
-await u.emit.broadcast(en.location, `${en.name} says hello to ${target}.`);
+export default async (u: IUrsamuSDK) =&gt; {
+  const targetName = (u.cmd.args[0] || "").trim();
+  if (!targetName) {
+    u.send("Usage: greet &lt;player&gt;");
+    return;
+  }
+
+  const target = await u.util.target(u.me, targetName);
+  if (!target) {
+    u.send(`I can't find '${targetName}'.`);
+    return;
+  }
+
+  const myName = u.util.displayName(u.me, u.me);
+  u.send(`You wave to ${u.util.displayName(target, u.me)}.`);
+  u.send(`${myName} waves to you.`, target.id);
+  u.here.broadcast(`${myName} waves to ${u.util.displayName(target, u.me)}.`);
+};
 </code></pre>
+<p>Players run it as <code>greet &lt;name&gt;</code> or <code>@greet &lt;name&gt;</code>.</p>
 <h3>Legacy Block Style</h3>
-<p>Files without exports run as a simple code block:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-const me = await u.db.get(en.id);
-const score = me.data?.score ?? 0;
-await u.emit.send(`Your score: ${score}`);
+<p>Files without <code>export</code> run as a plain async block. The <code>u</code> global is injected directly:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/gold.ts
+const gold = (u.me.state.gold as number) || 0;
+u.send(`You have ${gold} gold coins.`);
 </code></pre>
-<h2>Registering a Script as a Command</h2>
-<p>Scripts become commands by registering them in <code>system/scripts/index.ts</code> (or via a plugin):</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerCommand } from "../../services/Commands/mod.ts";
-
-registerCommand({
-  name: "greet",
-  pattern: "greet *",
-  flags: "connected",
-  exec: async (ctx) =&gt; {
-    await runScript("greet", ctx);
-  },
-});
+<h3>Aliases</h3>
+<p>Export a const <code>aliases</code> array to register additional trigger names:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export const aliases = ["greet", "wave"];
 </code></pre>
-<p>Or using the inline exec form:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerCommand({
-  name: "score",
-  pattern: "score",
-  flags: "connected",
-  exec: async (ctx) =&gt; {
-    const me = await dbojs.get(ctx.player.id);
-    const score = me?.data?.score ?? 0;
-    ctx.send(`Your score: ${score}`);
-  },
-});
+<h3>Switches</h3>
+<p>Commands like <code>@bbpost/edit</code> or <code>@motd/set</code> pass the portion after <code>/</code> as <code>u.cmd.switches</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// u.cmd.switches = ["edit"] when player types @mycommand/edit
+const switches = u.cmd.switches || [];
+if (switches.includes("edit")) {
+  // handle edit mode
+}
 </code></pre>
-<h2>Testing Scripts</h2>
-<p>Scripts can be tested using <code>deno test</code>. The pattern is to:</p>
-<ol>
-<li>Read the script file</li>
-<li>Strip imports/exports with <code>wrapScript()</code></li>
-<li>Create a mock <code>en</code> and <code>u</code> environment</li>
-<li>Execute the script and assert on outputs</li>
-</ol>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// tests/my_script.test.ts
-import { assertEquals } from "jsr:@std/assert";
-import { wrapScript } from "./helpers.ts";
-
-Deno.test("greet script sends hello", async () =&gt; {
-  const script = await Deno.readTextFile("system/scripts/greet.ts");
-  const wrapped = wrapScript(script);
-
-  const sent: string[] = [];
-  const env = {
-    en: { id: "p1", name: "Alice", location: "r1", args: "Bob" },
-    u: {
-      emit: {
-        send: (msg: string) =&gt; { sent.push(msg); },
-        broadcast: () =&gt; {},
-      },
-      // ... other SDK stubs
-    },
-  };
-
-  await new Function("en", "u", `return (async () =&gt; { ${wrapped} })()`)(
-    env.en, env.u
-  );
-
-  assertEquals(sent[0], "Hello, Bob!");
-});
-</code></pre>
+<hr>
 <h2>Security Model</h2>
 <table>
 <thead>
 <tr>
 <th>Capability</th>
-<th>Available in Script?</th>
+<th>Available?</th>
 </tr>
 </thead>
 <tbody>
@@ -477,57 +627,66 @@ Deno.test("greet script sends hello", async () =&gt; {
 <td>No</td>
 </tr>
 <tr>
-<td>Network requests</td>
+<td>Network requests (<code>fetch</code>)</td>
 <td>No</td>
 </tr>
 <tr>
-<td>Host process access</td>
+<td><code>Deno.*</code> API</td>
 <td>No</td>
 </tr>
 <tr>
-<td>Database (via SDK)</td>
+<td>Database (via <code>u.db</code>)</td>
 <td>Yes</td>
 </tr>
 <tr>
-<td>Messaging (via SDK)</td>
+<td>Messaging (via <code>u.send</code>, <code>u.broadcast</code>)</td>
 <td>Yes</td>
 </tr>
 <tr>
-<td>Channel ops (via SDK)</td>
+<td>Channel ops (via <code>u.chan</code>)</td>
 <td>Yes</td>
 </tr>
 <tr>
-<td>System commands (wizard only)</td>
-<td>Conditional</td>
+<td>Mail (via <code>u.mail</code>)</td>
+<td>Yes</td>
 </tr>
 <tr>
-<td>Custom ESM imports (same worker)</td>
+<td>Bulletin boards (via <code>u.bb</code>)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>System commands (via <code>u.sys</code>)</td>
+<td>Wizard/admin only — enforced by scripts</td>
+</tr>
+<tr>
+<td>ESM imports within same worker</td>
 <td>Yes</td>
 </tr>
 <tr>
 <td>JSR sub-path imports</td>
-<td>Limited</td>
+<td>Limited (import maps don’t resolve in workers)</td>
 </tr>
 </tbody>
 </table>
-<p>Scripts run inside Web Workers with <code>/// &lt;reference no-default-lib="true" /&gt;</code>, preventing access to <code>Deno.*</code>, <code>fetch()</code>, and the filesystem.</p>
+<p>Scripts run inside <code>Worker</code> with <code>/// &lt;reference no-default-lib="true" /&gt;</code>, which blocks <code>Deno</code>, <code>fetch</code>, <code>XMLHttpRequest</code>, and the filesystem.</p>
+<hr>
 <h2>MUSH Color Codes</h2>
-<p>UrsaMU supports the traditional MUSH color substitution syntax for player-facing text:</p>
+<p>UrsaMU processes traditional MUSH substitution codes in all outgoing text:</p>
 <table>
 <thead>
 <tr>
 <th>Code</th>
-<th>Meaning</th>
+<th>Effect</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>%ch</code></td>
-<td>Bold/bright</td>
+<td>Bold / bright</td>
 </tr>
 <tr>
 <td><code>%cn</code></td>
-<td>Reset/normal</td>
+<td>Reset to normal</td>
 </tr>
 <tr>
 <td><code>%cr</code></td>
@@ -559,7 +718,7 @@ Deno.test("greet script sends hello", async () =&gt; {
 </tr>
 <tr>
 <td><code>%n</code></td>
-<td>Player name substitute</td>
+<td>Actor’s name</td>
 </tr>
 <tr>
 <td><code>%r</code> / <code>%R</code></td>
@@ -575,7 +734,10 @@ Deno.test("greet script sends hello", async () =&gt; {
 </tr>
 </tbody>
 </table>
-<p>Use <code>u.util.stripSubs(text)</code> to strip all color codes (useful for validation or storage).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send("%ch%cyWelcome to Arenthia!%cn");
+u.send(`%ch%cr${u.util.ljust("ALERT", 10)}%cn Server restarting in 5 minutes.`);
+</code></pre>
+<p>Use <code>u.util.stripSubs(text)</code> to remove all codes before storing or comparing strings.</p>
 
       </article>
 
@@ -636,11 +798,21 @@ Deno.test("greet script sends hello", async () =&gt; {
       
         
           
+        
+      
+        
           
         
       
         
           
+          
+        
+      
+        
+          
+        
+      
         
       
         
@@ -665,16 +837,16 @@ Deno.test("greet script sends hello", async () =&gt; {
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/guides/installation/" class="page-nav-btn prev">
+          <a href="/ursamu/guides/recipes/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Installation Guide</span>
+            <span class="page-nav-title">Scripting Recipes</span>
           </a>
         
 
         
-          <a href="/ursamu/guides/user-guide/" class="page-nav-btn next">
+          <a href="/ursamu/guides/sdk-cookbook/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">User Guide</span>
+            <span class="page-nav-title">SDK Cookbook</span>
           </a>
         
       </nav>
