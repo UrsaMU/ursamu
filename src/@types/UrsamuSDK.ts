@@ -108,6 +108,3 @@ export interface IUrsamuSDK {
   };
 }
 
-declare global {
-  const u: IUrsamuSDK;
-}
