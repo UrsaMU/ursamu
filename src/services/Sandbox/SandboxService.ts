@@ -636,7 +636,7 @@ class LocalSandbox {
                 const num = posts.length + 1;
                 const author = context?.id || "0";
                 const en = await db.queryOne({ id: author });
-                const authorName = en?.data?.name || en?.id || "Unknown";
+                const authorName = (en && en.data?.name) || (en && en.id) || "Unknown";
                 const { crypto } = globalThis;
                 const id = crypto.randomUUID();
                 const post = await bbPost.create({ id, board: e.data.boardId as string, num, subject: e.data.subject as string, body: e.data.body as string, author, authorName, date: Date.now() });
@@ -739,7 +739,7 @@ class LocalSandbox {
               const { dbojs: db } = await import("../Database/index.ts");
               (async () => {
                 const en = await db.queryOne({ id: context.id });
-                const lastRead = (en?.data?.bbLastRead as Record<string, number>) || {};
+                const lastRead = ((en && en.data?.bbLastRead) as Record<string, number>) || {};
                 const lastReadNum = lastRead[e.data.boardId as string] || 0;
                 const posts = await bbPost.query({ board: e.data.boardId as string });
                 const count = posts.filter(p => p.num > lastReadNum).length;
@@ -756,7 +756,7 @@ class LocalSandbox {
               const { dbojs: db } = await import("../Database/index.ts");
               (async () => {
                 const en = await db.queryOne({ id: context.id });
-                const lastRead = (en?.data?.bbLastRead as Record<string, number>) || {};
+                const lastRead = ((en && en.data?.bbLastRead) as Record<string, number>) || {};
                 const boards = await bboards.query({});
                 let total = 0;
                 for (const board of boards) {
