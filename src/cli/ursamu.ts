@@ -184,7 +184,8 @@ console.log(\`\${game.config.get("game.name")} is live!\`);
   "tasks": {
     "start": "deno run -A --unstable-detect-cjs --unstable-kv jsr:@ursamu/ursamu/start",
     "server": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
-    "telnet": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/telnet.ts"
+    "telnet": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/telnet.ts",
+    "make-wizard": "deno run -A --unstable-kv ./scripts/make-wizard.ts"
   },
   "imports": {
     "ursamu": "jsr:@ursamu/ursamu"
@@ -219,14 +220,48 @@ Y88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P
     Deno.writeTextFileSync(join(targetDir, "text", "default_connect.txt"), connectText);
 
     // telnet.ts
-    Deno.writeTextFileSync(join(targetDir, "src", "telnet.ts"), 
+    Deno.writeTextFileSync(join(targetDir, "src", "telnet.ts"),
       `import { startTelnetServer } from "ursamu";\nstartTelnetServer({ welcomeFile: "text/default_connect.txt" });`);
+
+    // make-wizard.ts
+    const makeWizardTs = `#!/usr/bin/env -S deno run -A --unstable-kv
+/**
+ * Bootstrap script — grants wizard (superuser) flag to a character.
+ * Run ONCE after creating your first character:
+ *
+ *   deno task make-wizard YourCharacterName
+ */
+import { dbojs } from "ursamu/src/services/Database/index.ts";
+
+const name = Deno.args[0];
+if (!name) {
+  console.error("Usage: deno task make-wizard <character-name>");
+  Deno.exit(1);
+}
+
+const results = await dbojs.find({ "data.name": new RegExp(\`^\${name}$\`, "i") });
+const player = results[0];
+
+if (!player) {
+  console.error(\`Character "\${name}" not found. Check the name and try again.\`);
+  Deno.exit(1);
+}
+
+player.flags.add("wizard");
+await dbojs.modify({ id: player.id }, "$set", { flags: player.flags });
+console.log(\`✅  Wizard flag granted to \${player.data?.name} (#\${player.id}).\`);
+console.log("Reconnect to the game to activate your new permissions.");
+`;
+    Deno.writeTextFileSync(join(targetDir, "scripts", "make-wizard.ts"), makeWizardTs);
 
 
     console.log(fmt(`\n%ch%cg✨ Success! Project created in ${projectName}.%cn`));
-    console.log(`\nTo start your game:`);
-    console.log(fmt(`  %cycd ${projectName}%cn`));
-    console.log(fmt(`  %cydeno task start%cn\n`));
+    console.log(`\nNext steps:`);
+    console.log(fmt(`  1. %cycd ${projectName}%cn`));
+    console.log(fmt(`  2. %cydeno task start%cn          — start the Hub + Telnet servers`));
+    console.log(fmt(`  3. Connect on port %cy${telnetPort}%cn and type: %cycreate YourName YourPassword%cn`));
+    console.log(fmt(`  4. Quit the game, then run: %cydeno task make-wizard YourName%cn`));
+    console.log(fmt(`  5. Reconnect — you now have wizard (superuser) access!\n`));
 
   } catch (err) {
     console.error(fmt(`\n%crFatal Error during setup:%cn`), err);

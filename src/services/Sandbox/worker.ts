@@ -164,6 +164,10 @@ const ljust = (str = "", width: number, fill = " "): string => _padStr(str, widt
 const rjust = (str = "", width: number, fill = " "): string => _padStr(str, width, "right", fill);
 const center = (str = "", width: number, fill = " "): string => _padStr(str, width, "center", fill);
 
+/** Strip MUSH-style substitution codes (%ch, %cn, etc.) and raw ANSI escapes. */
+const stripSubs = (str = ""): string =>
+  str.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").replace(/\x1b\[[0-9;]*m/g, "");
+
 const sprintf = (fmt: string, ...args: unknown[]): string => {
   let i = 0;
   return fmt.replace(/%([+\- ]?)(\d*)(?:\.(\d+))?([sdifebotxX%])/g, (_, flag: string, width: string, prec: string, spec: string) => {
@@ -282,6 +286,7 @@ self.onmessage = async (e: MessageEvent) => {
       rjust,
       template,
       sprintf,
+      stripSubs,
       ...sdkData.util
     },
     db: {

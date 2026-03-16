@@ -14,6 +14,8 @@ export class DiscordService {
   private channelMap: Record<string, string> = {}; // discordId -> gameChanId
   private gameToDiscordMap: Record<string, string> = {}; // gameChanId -> discordId
   private connected = false;
+  private reconnectAttempts = 0;
+  private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
   private constructor() {}
 
@@ -25,7 +27,15 @@ export class DiscordService {
   }
 
   async init() {
-    await Promise.resolve(); // satisfying async requirement for now
+    // Idempotent: clear maps and cancel any pending reconnect on re-init
+    if (this.reconnectTimer !== undefined) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = undefined;
+    }
+    this.channelMap = {};
+    this.gameToDiscordMap = {};
+    this.connected = false;
+
     // deno-lint-ignore no-explicit-any
     const conf = getConfig("discord") as any;
     if (!conf || !conf.token) {
@@ -36,7 +46,7 @@ export class DiscordService {
     this.token = conf.token;
     this.guildId = conf.guildId || "";
     const channels = conf.channels || {};
-    
+
     // Reverse map for lookup
     for (const [gameChan, discordId] of Object.entries(channels)) {
         this.gameToDiscordMap[gameChan] = discordId as string;
@@ -50,6 +60,7 @@ export class DiscordService {
         ready: () => {
           console.log("Discord Bridge: Connected!");
           this.connected = true;
+          this.reconnectAttempts = 0;
         },
         messageCreate: (_bot, message) => {
            this.handleMessage(message);
@@ -59,8 +70,17 @@ export class DiscordService {
 
     // Start bot without awaiting to avoid blocking the main server loop
     discord.startBot(this.bot).catch((e: Error) => {
-        console.error("Discord Bridge Error:", e);
+        console.error("Discord Bridge: Connection lost:", e);
+        this.scheduleReconnect();
     });
+  }
+
+  private scheduleReconnect() {
+    this.connected = false;
+    const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 60_000);
+    this.reconnectAttempts++;
+    console.log(`Discord Bridge: Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts})...`);
+    this.reconnectTimer = setTimeout(() => this.init(), delay);
   }
 
   // deno-lint-ignore no-explicit-any

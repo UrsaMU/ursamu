@@ -54,12 +54,13 @@ site
   .use(resolve_urls())
   .copy("assets")
   .copy("init.ts")
+  .copy("ursamu_github_banner.png")
   .ignore("README.md", "deno.json", "_site", "node_modules");
 
 // Global site data
 site.data("site", {
   title: "UrsaMU Documentation",
-  description: "Documentation for UrsaMU, a modern MU* server built with Deno",
+  description: "UrsaMU — a high-performance, modular MU* engine built with TypeScript and Deno. Documentation for players, admins, and developers.",
   author: "UrsaMU Team",
   lang: "en",
   layout: "layout.vto",
@@ -68,8 +69,7 @@ site.data("site", {
   nav: [
     { text: "Home", url: "/" },
     { text: "Guides", url: "/guides/" },
-    { text: "Configuration", url: "/configuration/" },
-    { text: "API Reference", url: "/api/" },
+    { text: "API", url: "/api/" },
     { text: "Plugins", url: "/plugins/" },
     { text: "Development", url: "/development/" },
   ],

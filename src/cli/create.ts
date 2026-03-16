@@ -207,7 +207,7 @@ const denoJsonContent = `{
     "types": ["./node_modules/@types/node/index.d.ts"]
   },
   "imports": {
-    "ursamu": "npm:ursamu"
+    "ursamu": "jsr:@ursamu/ursamu"
   }
 }`;
 

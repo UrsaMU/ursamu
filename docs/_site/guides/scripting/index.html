@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Guide | UrsaMU Documentation</title>
-  <meta name="description" content="Learn how to administer an UrsaMU server">
+  <title>Scripting Guide | UrsaMU Documentation</title>
+  <meta name="description" content="How to write and run scripts in UrsaMU's sandboxed scripting environment">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/admin-guide/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/scripting/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -132,7 +132,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link active">
+      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
@@ -140,7 +140,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+      <a href="/ursamu/guides/scripting/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
@@ -263,224 +263,319 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/ursamu/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Admin Guide</span>
+        <span class="breadcrumbs-current">Scripting Guide</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Admin Guide</h1>
-<p>This guide covers the administrative aspects of running an UrsaMU server,<br>
-including user management, configuration, backups, and troubleshooting.</p>
-<h2>First-Run Setup</h2>
-<p>On a brand-new server, the database is empty — there are no admin accounts yet.<br>
-You need to bootstrap your first superuser account manually. This only needs to<br>
-be done once.</p>
-<h3>Step 1 — Start the server and create your character</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task start
+        <h1>Scripting Guide</h1>
+<p>UrsaMU scripts are TypeScript/JavaScript files that run inside <strong>Web Workers</strong> — completely isolated from the host process. Scripts interact with the game world through a typed SDK called the <strong>UrsaMU SDK</strong> (<code>u</code>).</p>
+<h2>How Scripting Works</h2>
+<p>When a player triggers a script (via an object, command, or trigger), the Sandbox Service:</p>
+<ol>
+<li>Spins up a Web Worker</li>
+<li>Injects the SDK as the global <code>u</code> object</li>
+<li>Injects the execution environment as <code>en</code> (the entity context)</li>
+<li>Runs the script</li>
+<li>Collects results and sends them back to the hub</li>
+</ol>
+<p>Scripts are isolated — they <strong>cannot</strong> crash the server, access the filesystem, or open network connections directly. Everything goes through the SDK.</p>
+<h2>The Execution Context (<code>en</code>)</h2>
+<p>Every script receives an <code>en</code> (entity/environment) object describing who triggered it and where:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">en.id        // ID of the actor (player or object running the script)
+en.name      // Display name of the actor
+en.location  // ID of the room the actor is in
+en.cmd       // Command string that triggered the script
+en.args      // Argument string passed to the command
+en.switches  // Object of switches used (e.g. { verbose: true })
+en.socket    // Socket ID of the triggering connection
+en.cid       // Character ID (if connected player)
 </code></pre>
-<p>Connect with your MU* client (port <code>4201</code>) or the web client, then:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">create YourName YourPassword
+<h2>The SDK (<code>u</code>)</h2>
+<p>The SDK is available as the global <code>u</code> object. It provides namespaced groups of functions:</p>
+<h3><code>u.emit</code> — Sending Messages</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send a message to the triggering player only
+await u.emit.send("You look around.");
+
+// Broadcast to everyone in a room
+await u.emit.broadcast(roomId, "Someone waves.");
+
+// Broadcast to everyone EXCEPT a player
+await u.emit.broadcastExcept(roomId, actorId, "Alice waves.");
 </code></pre>
-<p>Quit the game immediately after: <code>quit</code></p>
-<h3>Step 2 — Grant yourself wizard access</h3>
-<p>From your project directory, run:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A --unstable-kv - &lt;&lt;'EOF'
-import { dbojs } from "jsr:@ursamu/ursamu/src/services/Database/index.ts";
-const results = await dbojs.find({ "data.name": /^YourName$/i });
-const player = results[0];
-if (player) {
-  player.flags.add("wizard");
-  await dbojs.modify({ id: player.id }, "$set", { flags: player.flags });
-  console.log("Wizard flag set on", player.data?.name);
-} else {
-  console.error("Player not found — check the name and try again");
-}
-EOF
+<h3><code>u.db</code> — Database Access</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Get an object by ID
+const room = await u.db.get(en.location);
+console.log(room.name); // "The Grand Hall"
+
+// Search objects by query
+const players = await u.db.search({ flags: /player/i });
+
+// Modify an object
+await u.db.modify(en.id, { data: { ...currentData, score: 100 } });
+
+// Create a new object
+const obj = await u.db.create({
+  flags: new Set(["thing"]),
+  data: { name: "A Coin", description: "A shiny gold coin." },
+  location: en.location,
+});
+
+// Destroy an object
+await u.db.destroy(objId);
 </code></pre>
-<p>Replace <code>YourName</code> with your character’s name exactly as you created it.</p>
-<h3>Step 3 — Reconnect</h3>
-<p>Log back in. You now have full wizard (superuser) access. From this point you can<br>
-manage everything from inside the game.</p>
-<p>To grant admin access to another player:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set TheirName=admin
+<h3><code>u.move</code> — Moving Objects</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Move actor to a new location
+await u.move.move(en.id, destinationRoomId);
+
+// Get the exit that leads to a room
+const exit = await u.move.getExit(en.location, "north");
 </code></pre>
-<blockquote>
-<p>The <code>wizard</code> flag (superuser level) can only be set at the database level and<br>
-cannot be granted via <code>@set</code> by any in-game command — this is intentional. Use<br>
-<code>admin</code> for trusted staff and reserve <code>wizard</code> for server owners.</p>
-</blockquote>
-<hr>
-<h2>User Management</h2>
-<h3>Creating Admin Users</h3>
-<p>To grant admin privileges to an existing player, use the <code>@set</code> command as a<br>
-superuser or existing admin:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;username&gt;=admin
+<h3><code>u.chan</code> — Channel Operations</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send a message to a channel
+await u.chan.send("public", `[Public] ${en.name}: Hello!`);
+
+// Create a channel (admin/wizard only)
+await u.chan.create("newchannel", { header: "[New]" });
+
+// Destroy a channel (admin/wizard only)
+await u.chan.destroy("oldchannel");
+
+// Set channel properties (admin/wizard only)
+await u.chan.set("mychannel", "header", "[MyChan]");
 </code></pre>
-<h3>Managing User Accounts</h3>
-<p>As an administrator, you can manage user accounts with these commands:</p>
-<ul>
-<li><code>@newpassword &lt;user&gt;=&lt;password&gt;</code> — Reset a user’s password</li>
-<li><code>@boot &lt;user&gt;</code> — Disconnect a player from the server</li>
-<li><code>@toad &lt;user&gt;</code> — Convert a player object into a regular thing (removes player<br>
-flag and disconnects)</li>
-<li><code>@chown &lt;object&gt;=&lt;player&gt;</code> — Transfer ownership of an object to another player</li>
-<li><code>@moniker &lt;player&gt;=&lt;display name&gt;</code> — Set a player’s color-coded display name<br>
-<em>(admin or wizard required)</em></li>
-</ul>
-<h3>User Roles and Permissions</h3>
-<p>UrsaMU uses a flag-based permission system. The key permission flags are:</p>
-<ul>
-<li><strong>player</strong> — Standard player account. Set automatically on character creation.</li>
-<li><strong>admin</strong> — Full administrative access. Can use all admin commands, manage<br>
-channels, set flags, and modify any object.</li>
-<li><strong>wizard</strong> — Restricted super-admin flag (level 9). Locked to superusers only.<br>
-Code: <code>wiz</code>. Grants the same command access as <code>admin</code> but is reserved for<br>
-server owners. Cannot be set by regular admins.</li>
-</ul>
-<p>To set a flag on a player:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;username&gt;=&lt;flag&gt;
+<h3><code>u.ui</code> — Structured UI Output</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send a structured layout to a web client
+u.ui.layout({
+  type: "table",
+  data: [
+    { col1: "Name", col2: "Score" },
+    { col1: "Alice", col2: "1200" },
+  ],
+});
 </code></pre>
-<p>To remove a flag (prefix with <code>!</code>):</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;username&gt;=!&lt;flag&gt;
+<h3><code>u.auth</code> — Authentication</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Hash a password
+const hashed = await u.auth.hash("mypassword");
+
+// Verify a password
+const valid = await u.auth.setPassword(en.id, "newpassword");
 </code></pre>
-<h3>Channel Administration</h3>
-<p>Admins and wizards can create, configure, and destroy communication channels:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@chancreate &lt;name&gt;[=&lt;header&gt;]        -- Create a channel
-@chancreate/hidden &lt;name&gt;            -- Create a hidden channel
-@chancreate/lock &lt;name&gt;=&lt;expr&gt;       -- Create a channel with a lock
-@chandestroy &lt;name&gt;                  -- Destroy a channel
-@chanset &lt;name&gt;/header=&lt;text&gt;        -- Change a channel's header
-@chanset &lt;name&gt;/lock=&lt;expr&gt;          -- Set a lock expression
-@chanset &lt;name&gt;/hidden=true|false    -- Toggle channel visibility
-@chanset &lt;name&gt;/masking=true|false   -- Toggle name masking
+<h3><code>u.sys</code> — System Controls (Wizard Only)</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Restart the server
+await u.sys.reboot();
+
+// Shutdown the server
+await u.sys.shutdown();
 </code></pre>
-<h3>Rate Limiting</h3>
-<p>The server enforces a WebSocket command rate limit of <strong>10 commands per second</strong><br>
-per connection. Requests that exceed this are silently dropped and logged to<br>
-stderr:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">[WS] Rate limit hit for socket &lt;id&gt; (cid: &lt;player-id&gt;)
+<h3><code>u.util</code> — Utilities</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Strip MUSH color codes and ANSI escapes
+const clean = u.util.stripSubs("%chHello%cn %cgWorld%cn");
+// → "Hello World"
+
+// Pad/align text
+const centered  = u.util.center("Title", 40, "-");
+const leftAlign = u.util.ljust("Left", 20);
+const rightAlign = u.util.rjust("Right", 20);
+
+// sprintf-style formatting
+const formatted = u.util.sprintf("%-10s %5d", "Player", 1200);
+
+// String interpolation
+const msg = u.util.template("Welcome, {name}!", { name: en.name });
 </code></pre>
-<p>This is a fixed limit defined in <code>WebSocketService</code> and cannot currently be<br>
-configured at runtime.</p>
-<h2>Web Client</h2>
-<p>UrsaMU ships with an optional browser-based client built with Deno Fresh. It is<br>
-a separate process from the main Hub and must be started independently.</p>
-<h3>Starting the Web Client</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
-deno task start
+<h2>Writing a Script</h2>
+<p>Scripts are TypeScript (or JavaScript) files stored in <code>system/scripts/</code>. They can use either <strong>ESM module syntax</strong> or <strong>legacy block mode</strong>.</p>
+<h3>ESM Style (Recommended)</h3>
+<p>Files with an <code>export</code> statement are detected as ESM modules:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/greet.ts
+export {};  // signals ESM mode
+
+const target = en.args.trim() || "World";
+await u.emit.send(`Hello, ${target}!`);
+await u.emit.broadcast(en.location, `${en.name} says hello to ${target}.`);
 </code></pre>
-<p>The web client runs at <a href="http://localhost:8000">http://localhost:8000</a>.</p>
-<h3>What the Web Client Provides</h3>
-<ul>
-<li>Login / character registration forms</li>
-<li>In-game terminal interface (sends/receives WebSocket commands)</li>
-<li>Scene viewer and scene builder</li>
-<li>Character profile and character sheet pages</li>
-<li>Player directory</li>
-<li>Wiki pages</li>
-</ul>
-<h3>Production Deployment</h3>
-<p>For production, build the Fresh app first:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
-deno task build
-deno task preview    # runs the pre-built version
+<h3>Legacy Block Style</h3>
+<p>Files without exports run as a simple code block:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
+const me = await u.db.get(en.id);
+const score = me.data?.score ?? 0;
+await u.emit.send(`Your score: ${score}`);
 </code></pre>
-<p>Point a reverse proxy (nginx, Caddy) at port <code>8000</code> for TLS termination. The<br>
-main Hub (port <code>4203</code>) should also be proxied for WebSocket connections from<br>
-the web client.</p>
-<hr>
-<h2>Server Configuration</h2>
-<h3>Basic Configuration</h3>
-<p>Run the interactive configuration wizard:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task config
+<h2>Registering a Script as a Command</h2>
+<p>Scripts become commands by registering them in <code>system/scripts/index.ts</code> (or via a plugin):</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerCommand } from "../../services/Commands/mod.ts";
+
+registerCommand({
+  name: "greet",
+  pattern: "greet *",
+  flags: "connected",
+  exec: async (ctx) =&gt; {
+    await runScript("greet", ctx);
+  },
+});
 </code></pre>
-<p>Key configuration areas:</p>
-<ul>
-<li>Server ports (Hub WS: 4202, Hub HTTP: 4203, Telnet: 4201, Web client: 8000)</li>
-<li>Game name and welcome messages</li>
-<li>Starting room ID</li>
-</ul>
-<h3>Restarting and Shutting Down</h3>
-<p>From in-game (admin or wizard required):</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@reboot      -- Gracefully restart the server
-@shutdown    -- Shut down the server
+<p>Or using the inline exec form:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerCommand({
+  name: "score",
+  pattern: "score",
+  flags: "connected",
+  exec: async (ctx) =&gt; {
+    const me = await dbojs.get(ctx.player.id);
+    const score = me?.data?.score ?? 0;
+    ctx.send(`Your score: ${score}`);
+  },
+});
 </code></pre>
-<p>From the terminal, use <code>Ctrl+C</code> to stop a running process, then restart with:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task server    # Hub only
-deno task start     # Hub + telnet with file watching
+<h2>Testing Scripts</h2>
+<p>Scripts can be tested using <code>deno test</code>. The pattern is to:</p>
+<ol>
+<li>Read the script file</li>
+<li>Strip imports/exports with <code>wrapScript()</code></li>
+<li>Create a mock <code>en</code> and <code>u</code> environment</li>
+<li>Execute the script and assert on outputs</li>
+</ol>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// tests/my_script.test.ts
+import { assertEquals } from "jsr:@std/assert";
+import { wrapScript } from "./helpers.ts";
+
+Deno.test("greet script sends hello", async () =&gt; {
+  const script = await Deno.readTextFile("system/scripts/greet.ts");
+  const wrapped = wrapScript(script);
+
+  const sent: string[] = [];
+  const env = {
+    en: { id: "p1", name: "Alice", location: "r1", args: "Bob" },
+    u: {
+      emit: {
+        send: (msg: string) =&gt; { sent.push(msg); },
+        broadcast: () =&gt; {},
+      },
+      // ... other SDK stubs
+    },
+  };
+
+  await new Function("en", "u", `return (async () =&gt; { ${wrapped} })()`)(
+    env.en, env.u
+  );
+
+  assertEquals(sent[0], "Hello, Bob!");
+});
 </code></pre>
-<h2>Scene Management</h2>
-<p>Scenes are collaborative roleplay logs. They can be exported via the HTTP API.</p>
-<h3>Exporting a Scene</h3>
-<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/scenes/:id/export
-</code></pre>
-<p>Optional query parameter:</p>
+<h2>Security Model</h2>
 <table>
 <thead>
 <tr>
-<th><code>format</code></th>
-<th>Result</th>
+<th>Capability</th>
+<th>Available in Script?</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>markdown</code> <em>(default)</em></td>
-<td>A formatted Markdown log with poses and participant list</td>
+<td>File system access</td>
+<td>No</td>
 </tr>
 <tr>
-<td><code>json</code></td>
-<td>Full scene object as JSON</td>
+<td>Network requests</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Host process access</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Database (via SDK)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Messaging (via SDK)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Channel ops (via SDK)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>System commands (wizard only)</td>
+<td>Conditional</td>
+</tr>
+<tr>
+<td>Custom ESM imports (same worker)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>JSR sub-path imports</td>
+<td>Limited</td>
 </tr>
 </tbody>
 </table>
-<p>Example with <code>curl</code>:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Markdown log
-curl -H "Authorization: Bearer &lt;token&gt;" \
-     https://yourgame.example.com/api/v1/scenes/42/export
-
-# Raw JSON
-curl -H "Authorization: Bearer &lt;token&gt;" \
-     https://yourgame.example.com/api/v1/scenes/42/export?format=json
-</code></pre>
-<h2>Troubleshooting</h2>
-<h3>Common Issues</h3>
-<h4>Server Won’t Start</h4>
-<ul>
-<li>Check if a port is already in use (<code>4201</code>, <code>4202</code>, <code>4203</code>, or <code>8000</code>)</li>
-<li>Ensure Deno is installed and up to date (<code>deno upgrade</code>)</li>
-<li>Check for errors in configuration output (<code>deno task config</code>)</li>
-</ul>
-<h4>Player Can’t Connect</h4>
-<ul>
-<li>Confirm the Hub is running (<code>deno task server</code>)</li>
-<li>For Telnet clients, confirm the Telnet sidecar is running (<code>deno task telnet</code>)</li>
-<li>For the web client, confirm it is running (<code>deno task start</code> in<br>
-<code>src/web-client/</code>)</li>
-</ul>
-<h4>Permission Denied Errors</h4>
-<ul>
-<li>Verify the player has the correct flags set (<code>@set &lt;player&gt;=admin</code>)</li>
-<li>The <code>wizard</code> flag can only be set by a superuser at the database level</li>
-</ul>
-<h3>Logs</h3>
-<p>UrsaMU logs to stdout/stderr. Redirect output to a file if you need persistent<br>
-logs:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task server &gt; logs/server.log 2&gt;&amp;1
-</code></pre>
-<h2>Security</h2>
-<h3>Securing Your Server</h3>
-<ul>
-<li>Place the Hub behind a reverse proxy (e.g., nginx) for TLS termination</li>
-<li>Set up a firewall to limit external access to only the necessary ports</li>
-<li>Keep Deno and dependencies updated</li>
-<li>Use strong passwords — the <code>auth.hash</code> SDK method uses bcrypt</li>
-</ul>
-<h3>The <code>wizard</code> Flag</h3>
-<p>The <code>wizard</code> flag is locked to <strong>superuser</strong> level and cannot be granted by<br>
-regular admins. It is intended for server owners who need a permanent,<br>
-unforgeable high-privilege account. Set it directly at the database level during<br>
-initial setup.</p>
+<p>Scripts run inside Web Workers with <code>/// &lt;reference no-default-lib="true" /&gt;</code>, preventing access to <code>Deno.*</code>, <code>fetch()</code>, and the filesystem.</p>
+<h2>MUSH Color Codes</h2>
+<p>UrsaMU supports the traditional MUSH color substitution syntax for player-facing text:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>%ch</code></td>
+<td>Bold/bright</td>
+</tr>
+<tr>
+<td><code>%cn</code></td>
+<td>Reset/normal</td>
+</tr>
+<tr>
+<td><code>%cr</code></td>
+<td>Red</td>
+</tr>
+<tr>
+<td><code>%cg</code></td>
+<td>Green</td>
+</tr>
+<tr>
+<td><code>%cb</code></td>
+<td>Blue</td>
+</tr>
+<tr>
+<td><code>%cy</code></td>
+<td>Yellow</td>
+</tr>
+<tr>
+<td><code>%cw</code></td>
+<td>White</td>
+</tr>
+<tr>
+<td><code>%cc</code></td>
+<td>Cyan</td>
+</tr>
+<tr>
+<td><code>%cm</code></td>
+<td>Magenta</td>
+</tr>
+<tr>
+<td><code>%n</code></td>
+<td>Player name substitute</td>
+</tr>
+<tr>
+<td><code>%r</code> / <code>%R</code></td>
+<td>Newline</td>
+</tr>
+<tr>
+<td><code>%t</code></td>
+<td>Tab</td>
+</tr>
+<tr>
+<td><code>%b</code></td>
+<td>Space</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>u.util.stripSubs(text)</code> to strip all color codes (useful for validation or storage).</p>
 
       </article>
 
@@ -529,7 +624,6 @@ initial setup.</p>
       
         
           
-          
         
       
         
@@ -537,9 +631,16 @@ initial setup.</p>
         
       
         
-      
+          
         
       
+        
+          
+          
+        
+      
+        
+          
         
       
         
@@ -564,16 +665,16 @@ initial setup.</p>
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/guides/" class="page-nav-btn prev">
+          <a href="/ursamu/guides/installation/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Guides</span>
+            <span class="page-nav-title">Installation Guide</span>
           </a>
         
 
         
-          <a href="/ursamu/guides/customization/" class="page-nav-btn next">
+          <a href="/ursamu/guides/user-guide/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Customization Guide</span>
+            <span class="page-nav-title">User Guide</span>
           </a>
         
       </nav>

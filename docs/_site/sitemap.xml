@@ -2,7 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://ursamu.github.io/ursamu/</loc>
-    <lastmod>2026-01-01T15:56:35.692Z</lastmod>
+    <lastmod>2026-03-16T17:39:30.924Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ursamu.github.io/ursamu/about/</loc>
+    <lastmod>2026-03-16T17:39:37.816Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/api/</loc>
@@ -34,11 +38,11 @@
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/</loc>
-    <lastmod>2026-01-01T15:56:35.694Z</lastmod>
+    <lastmod>2026-03-16T17:42:05.321Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/admin-guide/</loc>
-    <lastmod>2026-01-01T15:56:35.693Z</lastmod>
+    <lastmod>2026-03-16T17:41:00.460Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/customization/</loc>
@@ -46,11 +50,19 @@
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/installation/</loc>
-    <lastmod>2026-01-01T15:56:35.694Z</lastmod>
+    <lastmod>2026-03-16T17:40:37.626Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ursamu.github.io/ursamu/guides/scripting/</loc>
+    <lastmod>2026-03-10T14:40:37.141Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/guides/user-guide/</loc>
-    <lastmod>2026-01-01T15:56:35.693Z</lastmod>
+    <lastmod>2026-03-10T13:55:00.784Z</lastmod>
+  </url>
+  <url>
+    <loc>https://ursamu.github.io/ursamu/mush_compatibility/</loc>
+    <lastmod>2026-03-16T17:40:10.829Z</lastmod>
   </url>
   <url>
     <loc>https://ursamu.github.io/ursamu/plugins/</loc>

@@ -9,6 +9,10 @@ nav:
     url: "./user-guide.md"
   - text: Admin Guide
     url: "./admin-guide.md"
+  - text: Scripting
+    url: "./scripting.md"
+  - text: MUSH Compatibility
+    url: "../mush_compatibility.md"
   - text: Customization
     url: "./customization.md"
 ---
@@ -45,6 +49,24 @@ Learn how to administer an UrsaMU server:
 - [Server Configuration](./admin-guide.md#server-configuration)
 - [Backup and Restore](./admin-guide.md#backup-and-restore)
 - [Troubleshooting](./admin-guide.md#troubleshooting)
+
+## Scripting Guide
+
+Write TypeScript/JS scripts that run in the sandboxed SDK:
+
+- [How scripting works](./scripting.md#how-scripting-works)
+- [The SDK (`u`)](./scripting.md#the-sdk-u)
+- [Writing a script](./scripting.md#writing-a-script)
+- [Testing scripts](./scripting.md#testing-scripts)
+
+## MUSH Compatibility
+
+Coming from PennMUSH, TinyMUSH, or MUX2? See what works today and what's planned:
+
+- [What works today](../mush_compatibility/#what-works-today)
+- [What's different](../mush_compatibility/#whats-different-from-traditional-mush)
+- [Planned enhancements](../mush_compatibility/#planned-enhancements)
+- [Connecting with MU* clients](../mush_compatibility/#connecting-with-a-traditional-mu-client)
 
 ## Customization
 

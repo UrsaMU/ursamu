@@ -21,7 +21,6 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
       const allObjects = await dbojs.query({});
       const rooms = allObjects.filter(o => o.flags.includes("room"));
       
-      console.log(`[Locations Debug] Found ${rooms.length} rooms (filtered from ${allObjects.length} total objects).`);
       
       const accessibleRooms: {id: string, name: string, type: "public" | "private"}[] = [];
 
@@ -174,6 +173,58 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           });
       }
 
+      // GET /api/v1/scenes/:id/export?format=markdown|json
+      if (subPath === "/export" && req.method === "GET") {
+          const format = url.searchParams.get("format") || "markdown";
+
+          if (format === "json") {
+              return new Response(JSON.stringify(scene, null, 2), {
+                  status: 200,
+                  headers: { "Content-Type": "application/json" }
+              });
+          }
+
+          // Markdown log export
+          const strip = (s: string) => s.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").replace(/\x1b\[[0-9;]*m/g, "");
+          const fmtDate = (ts: number) => new Date(ts).toISOString().slice(0, 10);
+
+          const locName = scene.locationDetails?.name ?? scene.location;
+          const participantNames = scene.participantsDetails?.map(p => strip(p.moniker || p.name)).join(", ")
+              ?? scene.participants.join(", ");
+
+          const lines: string[] = [
+              `# ${strip(scene.name)}`,
+              ``,
+              `**Type:** ${scene.sceneType ?? "social"} | **Status:** ${scene.status}  `,
+              `**Location:** ${strip(locName)}  `,
+              `**Started:** ${fmtDate(scene.startTime)}${scene.endTime ? `  \n**Ended:** ${fmtDate(scene.endTime)}` : ""}  `,
+              `**Participants:** ${participantNames}`,
+              ``,
+              `---`,
+              ``
+          ];
+
+          for (const pose of scene.poses) {
+              const speaker = strip(pose.moniker || pose.charName);
+              if (pose.type === "ooc") {
+                  lines.push(`*[OOC] ${speaker}: ${pose.msg}*`);
+              } else if (pose.type === "set") {
+                  lines.push(`*[Scene Set] ${pose.msg}*`);
+              } else {
+                  lines.push(`**${speaker}** ${pose.msg}`);
+              }
+              lines.push(``);
+          }
+
+          lines.push(`---`);
+          lines.push(`*Exported ${fmtDate(Date.now())}*`);
+
+          return new Response(lines.join("\n"), {
+              status: 200,
+              headers: { "Content-Type": "text/markdown; charset=utf-8" }
+          });
+      }
+
       // POST /api/v1/scenes/:id/pose
       // Handles 'pose', 'ooc', 'set' types
       if (subPath === "/pose" && req.method === "POST") {
@@ -184,8 +235,8 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           if (!user) return new Response("Unauthorized", { status: 401 });
 
           // Basic validation
-          if (!msg && type !== 'set') { 
-                // handle logic
+          if (!msg && type !== 'set') {
+            return new Response("Missing pose message", { status: 400 });
           }
 
           const newPose: IPose = {
@@ -346,10 +397,15 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
            const user = await Obj.get(userId);
            if (!user) return new Response("Unauthorized", { status: 401 });
            
-           // Weak owner check: if scene has owner, must match. If no owner (legacy), allow? Or adopt?
            if (scene.owner && scene.owner !== user.dbref) {
-               // Allow admins? For now, strict owner.
-               return new Response("Forbidden: Only scene owner can modify scene.", { status: 403 });
+               const isAdmin = user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser");
+               if (!isAdmin) {
+                   return new Response("Forbidden: Only scene owner can modify scene.", { status: 403 });
+               }
+           } else if (!scene.owner) {
+               // Adopt ownerless (legacy) scenes
+               scene.owner = user.dbref;
+               await scenes.modify({ id: sceneId }, "$set", { owner: scene.owner });
            }
 
            // White list updates

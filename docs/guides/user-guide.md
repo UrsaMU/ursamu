@@ -48,12 +48,14 @@ Before you can play, you'll need to create an account:
 UrsaMU uses a command-based interface. Here are some essential commands to get
 you started:
 
-- `help` - Display help information
-- `look` or `l` - Look at your surroundings
-- `say <message>` or `"<message>` - Say something to everyone in the room
-- `pose <action>` or `:<action>` - Perform an action
-- `@who` - See who is currently online
-- `quit` - Disconnect from the server
+- `help [<topic>]` — Display help information
+- `look` or `l` — Look at your surroundings
+- `say <message>` or `"<message>` — Say something to everyone in the room
+- `pose <action>` or `:<action>` — Perform an emote/action
+- `who` — See who is currently online
+- `score` — View your character stats
+- `inventory` or `inv` — List items you are carrying
+- `quit` — Disconnect from the server
 
 ## Character Creation
 
@@ -61,17 +63,15 @@ After creating an account, you'll want to set up your character:
 
 ### Setting Character Information
 
-- `@name <name>` - Set your character's name
-- `@desc <description>` - Set your character's description
-- `@sex <gender>` - Set your character's gender
-- `@alias <alias>` - Set an alias for your character
+- `@name me=<name>` — Rename your character
+- `@desc me=<description>` — Set your character's description
+- `@alias <alias>=<command>` — Create a personal command shortcut
 
-### Character Attributes
+### Examining Objects
 
-UrsaMU allows you to set various attributes for your character:
-
-- `@set me=<attribute>:<value>` - Set an attribute on your character
-- `@list me` - List all attributes on your character
+- `look [<object>]` — Look at the room or a specific object
+- `examine <object>` — Inspect an object's full details (owner, flags, contents)
+- `doing` — Show your current activity/status line
 
 ## Communication
 
@@ -82,14 +82,29 @@ There are several ways to communicate with other players in UrsaMU:
 - `say <message>` or `"<message>` - Talk to people in the same room
 - `pose <action>` or `:<action>` - Perform an action visible to others in the
   room
-- `whisper <player>=<message>` - Send a private message to someone in the same
-  room
 
 ### Global Communication
 
-- `page <player>=<message>` - Send a private message to any connected player
-- `@channel/join <channel>` - Join a chat channel
-- `<channel> <message>` - Send a message to a channel
+- `page <player>=<message>` — Send a private message to any connected player
+- `@channel/list` — List all available channels
+- `@channel/join <channel>=<alias>` — Join a channel with a local alias
+- `@channel/leave <alias>` — Leave a channel
+- `<alias> <message>` — Send a message on a joined channel (using your alias)
+
+## Object Interaction
+
+You can pick up, drop, and exchange objects with other players:
+
+- `get <object>` — Pick up an object from the room
+- `drop <object>` — Drop an object into the current room
+- `give <object>=<player>` — Give an object to another player in the room
+- `inventory` or `inv` — List what you are carrying
+
+## Movement
+
+- Move through exits by typing the exit name (e.g., `north`, `n`)
+- `home` — Return to your home location
+- `teleport <destination>` — Teleport to a room or object (if permitted)
 
 ## Building
 
@@ -97,33 +112,27 @@ If you have building permissions, you can create and modify the game world:
 
 ### Creating Rooms
 
-- `@dig <room name>` - Create a new room
-- `@open <exit name>=<destination>` - Create an exit to another room
-- `@link <exit>=<destination>` - Link an exit to a destination
+- `@dig <room name>` — Create a new room
+- `@dig <room name>=<exit>/<return exit>` — Create a room with linked exits
+- `@open <exit name>=<destination>` — Create an exit to another room
+- `@link <exit>=<destination>` — Link an exit to a destination room
+- `@unlink <exit>` — Remove a link from an exit
 
 ### Creating Objects
 
-- `@create <object name>` - Create a new object
-- `@set <object>=<attribute>:<value>` - Set an attribute on an object
+- `@create <object name>` — Create a new object
+- `@clone <object>` — Clone an existing object
+- `@destroy <object>` — Destroy an object (must be owner)
+- `@parent <object>=<parent>` — Set a parent object for inheritance
+- `@desc <object>=<text>` — Set an object's description
+- `@name <object>=<new name>` — Rename an object
+- `@moniker <object>=<display name>` — Set an alternate display name
 
-## Advanced Features
+### Permissions and Locks
 
-UrsaMU offers many advanced features for experienced players:
+- `@lock <object>=<lock expression>` — Set a lock on an object
+- `@set <object>=<flag>` — Set a flag on an object (e.g., `@set box=locked`)
+- `@set <object>=!<flag>` — Remove a flag
 
-### Scripting
-
-- `@program <name>=<code>` - Create a new program
-- `@trigger <object>/<attribute>=<event>` - Set up a trigger on an object
-
-### Permissions
-
-- `@lock <object>=<lock expression>` - Set a lock on an object
-- `@chown <object>=<player>` - Change the owner of an object
-
-### Customization
-
-- `@config <option>=<value>` - Configure your client settings
-- `@alias <alias>=<command>` - Create a command alias
-
-For more detailed information on any of these topics, use the `help <topic>`
-command in-game.
+For more detailed information on any topic, use the `help <topic>` command
+in-game.

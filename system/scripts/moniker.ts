@@ -21,17 +21,11 @@ export default async (u: IUrsamuSDK) => {
       return u.send("Usage: @moniker <target>=<moniker>");
   }
 
-  // Logic: Moniker must match name (case insensitive) just with different capitalization/coloring?
-  // Original: `if (stripped.toLowerCase() != tar.data.name?.toLowerCase())`
-  // We need to strip subs (ansi) from moniker to check.
-  // SDK doesn't expose stripSubs.
-  // We can try to approximate or assume plain text for now.
-  // Or just check if `moniker` (assuming it has codes) roughly equals name.
-  // Let's rely on basic check for now.
-  
-  // Implementation note: Missing `parser.stripSubs`.
-  // Adding a TODO.
-  
+  const stripped = u.util.stripSubs(moniker.trim());
+  if (!stripped) {
+    return u.send("Moniker cannot be empty.");
+  }
+
   target.state.moniker = moniker.trim();
   // Use nested data object — DB.modify uses Object.assign so dot notation keys don't work
   await u.db.modify(target.id, "$set", { data: { ...target.state } });

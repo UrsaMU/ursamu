@@ -14,6 +14,21 @@ export class WebSocketService {
     private clients: Set<WebSocket> = new Set();
     // Map socket to metadata
     private socketData: Map<WebSocket, UserSocket> = new Map();
+    // Rate limiting: max commands per window per socket
+    private static readonly RATE_LIMIT = 10;
+    private static readonly RATE_WINDOW_MS = 1000;
+    private rateLimits: Map<string, { count: number; resetAt: number }> = new Map();
+
+    private isRateLimited(socketId: string): boolean {
+        const now = Date.now();
+        const entry = this.rateLimits.get(socketId);
+        if (!entry || now >= entry.resetAt) {
+            this.rateLimits.set(socketId, { count: 1, resetAt: now + WebSocketService.RATE_WINDOW_MS });
+            return false;
+        }
+        entry.count++;
+        return entry.count > WebSocketService.RATE_LIMIT;
+    }
 
     private constructor() { }
 
@@ -78,7 +93,11 @@ export class WebSocketService {
 
                 // Note: joinChans(ctx) would go here if needed
                 if (ctx.msg && ctx.msg.trim()) {
-                    await cmdParser.run(ctx);
+                    if (this.isRateLimited(sockData.id)) {
+                        console.warn(`[WS] Rate limit hit for socket ${sockData.id} (cid: ${sockData.cid || "anon"})`);
+                    } else {
+                        await cmdParser.run(ctx);
+                    }
                 }
 
             } catch (error) {
@@ -90,6 +109,7 @@ export class WebSocketService {
             const sockData = this.socketData.get(socket);
             this.clients.delete(socket);
             this.socketData.delete(socket);
+            if (sockData?.id) this.rateLimits.delete(sockData.id);
 
             if (sockData?.cid) {
                 const player = await playerForSocket(sockData);

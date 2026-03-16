@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Guide | UrsaMU Documentation</title>
-  <meta name="description" content="Learn how to administer an UrsaMU server">
+  <title>MUSH Compatibility | UrsaMU Documentation</title>
+  <meta name="description" content="What UrsaMU supports compared to traditional MUSH servers like PennMUSH and TinyMUX, and what's planned.">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/admin-guide/">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/mush_compatibility/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -47,7 +47,7 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link active">
+    <a href="/ursamu/guides/" class="header-nav-link">
       Guides
     </a>
     
@@ -132,7 +132,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link active">
+      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
@@ -263,224 +263,308 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/ursamu/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Admin Guide</span>
+        <span class="breadcrumbs-current">MUSH Compatibility</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Admin Guide</h1>
-<p>This guide covers the administrative aspects of running an UrsaMU server,<br>
-including user management, configuration, backups, and troubleshooting.</p>
-<h2>First-Run Setup</h2>
-<p>On a brand-new server, the database is empty — there are no admin accounts yet.<br>
-You need to bootstrap your first superuser account manually. This only needs to<br>
-be done once.</p>
-<h3>Step 1 — Start the server and create your character</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task start
-</code></pre>
-<p>Connect with your MU* client (port <code>4201</code>) or the web client, then:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">create YourName YourPassword
-</code></pre>
-<p>Quit the game immediately after: <code>quit</code></p>
-<h3>Step 2 — Grant yourself wizard access</h3>
-<p>From your project directory, run:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A --unstable-kv - &lt;&lt;'EOF'
-import { dbojs } from "jsr:@ursamu/ursamu/src/services/Database/index.ts";
-const results = await dbojs.find({ "data.name": /^YourName$/i });
-const player = results[0];
-if (player) {
-  player.flags.add("wizard");
-  await dbojs.modify({ id: player.id }, "$set", { flags: player.flags });
-  console.log("Wizard flag set on", player.data?.name);
-} else {
-  console.error("Player not found — check the name and try again");
-}
-EOF
-</code></pre>
-<p>Replace <code>YourName</code> with your character’s name exactly as you created it.</p>
-<h3>Step 3 — Reconnect</h3>
-<p>Log back in. You now have full wizard (superuser) access. From this point you can<br>
-manage everything from inside the game.</p>
-<p>To grant admin access to another player:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set TheirName=admin
-</code></pre>
-<blockquote>
-<p>The <code>wizard</code> flag (superuser level) can only be set at the database level and<br>
-cannot be granted via <code>@set</code> by any in-game command — this is intentional. Use<br>
-<code>admin</code> for trusted staff and reserve <code>wizard</code> for server owners.</p>
-</blockquote>
+        <h1>MUSH Compatibility</h1>
+<p>UrsaMU is <strong>not a drop-in replacement</strong> for PennMUSH, TinyMUSH, or MUX2. It is a fresh platform with a different architecture — WebSocket-native, TypeScript, sandboxed scripts instead of MUSHcode.</p>
+<p>If you are migrating from a traditional MUSH or hosting your first server, this page tells you exactly what works today and what is planned.</p>
 <hr>
-<h2>User Management</h2>
-<h3>Creating Admin Users</h3>
-<p>To grant admin privileges to an existing player, use the <code>@set</code> command as a<br>
-superuser or existing admin:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;username&gt;=admin
-</code></pre>
-<h3>Managing User Accounts</h3>
-<p>As an administrator, you can manage user accounts with these commands:</p>
-<ul>
-<li><code>@newpassword &lt;user&gt;=&lt;password&gt;</code> — Reset a user’s password</li>
-<li><code>@boot &lt;user&gt;</code> — Disconnect a player from the server</li>
-<li><code>@toad &lt;user&gt;</code> — Convert a player object into a regular thing (removes player<br>
-flag and disconnects)</li>
-<li><code>@chown &lt;object&gt;=&lt;player&gt;</code> — Transfer ownership of an object to another player</li>
-<li><code>@moniker &lt;player&gt;=&lt;display name&gt;</code> — Set a player’s color-coded display name<br>
-<em>(admin or wizard required)</em></li>
-</ul>
-<h3>User Roles and Permissions</h3>
-<p>UrsaMU uses a flag-based permission system. The key permission flags are:</p>
-<ul>
-<li><strong>player</strong> — Standard player account. Set automatically on character creation.</li>
-<li><strong>admin</strong> — Full administrative access. Can use all admin commands, manage<br>
-channels, set flags, and modify any object.</li>
-<li><strong>wizard</strong> — Restricted super-admin flag (level 9). Locked to superusers only.<br>
-Code: <code>wiz</code>. Grants the same command access as <code>admin</code> but is reserved for<br>
-server owners. Cannot be set by regular admins.</li>
-</ul>
-<p>To set a flag on a player:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;username&gt;=&lt;flag&gt;
-</code></pre>
-<p>To remove a flag (prefix with <code>!</code>):</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;username&gt;=!&lt;flag&gt;
-</code></pre>
-<h3>Channel Administration</h3>
-<p>Admins and wizards can create, configure, and destroy communication channels:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@chancreate &lt;name&gt;[=&lt;header&gt;]        -- Create a channel
-@chancreate/hidden &lt;name&gt;            -- Create a hidden channel
-@chancreate/lock &lt;name&gt;=&lt;expr&gt;       -- Create a channel with a lock
-@chandestroy &lt;name&gt;                  -- Destroy a channel
-@chanset &lt;name&gt;/header=&lt;text&gt;        -- Change a channel's header
-@chanset &lt;name&gt;/lock=&lt;expr&gt;          -- Set a lock expression
-@chanset &lt;name&gt;/hidden=true|false    -- Toggle channel visibility
-@chanset &lt;name&gt;/masking=true|false   -- Toggle name masking
-</code></pre>
-<h3>Rate Limiting</h3>
-<p>The server enforces a WebSocket command rate limit of <strong>10 commands per second</strong><br>
-per connection. Requests that exceed this are silently dropped and logged to<br>
-stderr:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">[WS] Rate limit hit for socket &lt;id&gt; (cid: &lt;player-id&gt;)
-</code></pre>
-<p>This is a fixed limit defined in <code>WebSocketService</code> and cannot currently be<br>
-configured at runtime.</p>
-<h2>Web Client</h2>
-<p>UrsaMU ships with an optional browser-based client built with Deno Fresh. It is<br>
-a separate process from the main Hub and must be started independently.</p>
-<h3>Starting the Web Client</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
-deno task start
-</code></pre>
-<p>The web client runs at <a href="http://localhost:8000">http://localhost:8000</a>.</p>
-<h3>What the Web Client Provides</h3>
-<ul>
-<li>Login / character registration forms</li>
-<li>In-game terminal interface (sends/receives WebSocket commands)</li>
-<li>Scene viewer and scene builder</li>
-<li>Character profile and character sheet pages</li>
-<li>Player directory</li>
-<li>Wiki pages</li>
-</ul>
-<h3>Production Deployment</h3>
-<p>For production, build the Fresh app first:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
-deno task build
-deno task preview    # runs the pre-built version
-</code></pre>
-<p>Point a reverse proxy (nginx, Caddy) at port <code>8000</code> for TLS termination. The<br>
-main Hub (port <code>4203</code>) should also be proxied for WebSocket connections from<br>
-the web client.</p>
-<hr>
-<h2>Server Configuration</h2>
-<h3>Basic Configuration</h3>
-<p>Run the interactive configuration wizard:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task config
-</code></pre>
-<p>Key configuration areas:</p>
-<ul>
-<li>Server ports (Hub WS: 4202, Hub HTTP: 4203, Telnet: 4201, Web client: 8000)</li>
-<li>Game name and welcome messages</li>
-<li>Starting room ID</li>
-</ul>
-<h3>Restarting and Shutting Down</h3>
-<p>From in-game (admin or wizard required):</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@reboot      -- Gracefully restart the server
-@shutdown    -- Shut down the server
-</code></pre>
-<p>From the terminal, use <code>Ctrl+C</code> to stop a running process, then restart with:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task server    # Hub only
-deno task start     # Hub + telnet with file watching
-</code></pre>
-<h2>Scene Management</h2>
-<p>Scenes are collaborative roleplay logs. They can be exported via the HTTP API.</p>
-<h3>Exporting a Scene</h3>
-<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/scenes/:id/export
-</code></pre>
-<p>Optional query parameter:</p>
+<h2>What Works Today</h2>
 <table>
 <thead>
 <tr>
-<th><code>format</code></th>
-<th>Result</th>
+<th>Feature</th>
+<th>Status</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>markdown</code> <em>(default)</em></td>
-<td>A formatted Markdown log with poses and participant list</td>
+<td><code>connect &lt;name&gt; &lt;password&gt;</code></td>
+<td>✅ Working</td>
+<td>Standard login command</td>
 </tr>
 <tr>
-<td><code>json</code></td>
-<td>Full scene object as JSON</td>
+<td><code>create &lt;name&gt; &lt;password&gt;</code></td>
+<td>✅ Working</td>
+<td>Character creation</td>
+</tr>
+<tr>
+<td><code>look</code> / <code>l</code></td>
+<td>✅ Working</td>
+<td>Room and object descriptions</td>
+</tr>
+<tr>
+<td>Auto-<code>look</code> on connect</td>
+<td>✅ Working</td>
+<td>Fires automatically after login</td>
+</tr>
+<tr>
+<td><code>say</code> / <code>"</code></td>
+<td>✅ Working</td>
+<td>Room speech</td>
+</tr>
+<tr>
+<td><code>pose</code> / <code>:</code></td>
+<td>✅ Working</td>
+<td>Emotes</td>
+</tr>
+<tr>
+<td><code>page &lt;player&gt;=&lt;msg&gt;</code></td>
+<td>✅ Working</td>
+<td>Private messages</td>
+</tr>
+<tr>
+<td><code>who</code></td>
+<td>✅ Working</td>
+<td>Online player list</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td>✅ Working</td>
+<td>Character stats</td>
+</tr>
+<tr>
+<td><code>inventory</code> / <code>inv</code></td>
+<td>✅ Working</td>
+<td>Carried objects</td>
+</tr>
+<tr>
+<td><code>get</code> / <code>drop</code> / <code>give</code></td>
+<td>✅ Working</td>
+<td>Object interaction</td>
+</tr>
+<tr>
+<td><code>home</code></td>
+<td>✅ Working</td>
+<td>Return to home location</td>
+</tr>
+<tr>
+<td><code>teleport</code></td>
+<td>✅ Working</td>
+<td>Admin/wizard teleport</td>
+</tr>
+<tr>
+<td><code>examine</code></td>
+<td>✅ Working</td>
+<td>Full object inspection</td>
+</tr>
+<tr>
+<td><code>@desc</code> / <code>@name</code></td>
+<td>✅ Working</td>
+<td>Object descriptions and naming</td>
+</tr>
+<tr>
+<td><code>@dig</code></td>
+<td>✅ Working</td>
+<td>Create rooms</td>
+</tr>
+<tr>
+<td><code>@open</code> / <code>@link</code> / <code>@unlink</code></td>
+<td>✅ Working</td>
+<td>Exit management</td>
+</tr>
+<tr>
+<td><code>@create</code></td>
+<td>✅ Working</td>
+<td>Create objects</td>
+</tr>
+<tr>
+<td><code>@destroy</code> / <code>@clone</code></td>
+<td>✅ Working</td>
+<td>Object lifecycle</td>
+</tr>
+<tr>
+<td><code>@lock</code> / <code>@set</code></td>
+<td>✅ Working</td>
+<td>Flags and locks</td>
+</tr>
+<tr>
+<td><code>@parent</code></td>
+<td>✅ Working</td>
+<td>Object inheritance</td>
+</tr>
+<tr>
+<td><code>@boot</code> / <code>@toad</code></td>
+<td>✅ Working</td>
+<td>Admin user management</td>
+</tr>
+<tr>
+<td><code>@newpassword</code></td>
+<td>✅ Working</td>
+<td>Password reset</td>
+</tr>
+<tr>
+<td><code>@chown</code></td>
+<td>✅ Working</td>
+<td>Ownership transfer</td>
+</tr>
+<tr>
+<td><code>@channel/list/join/leave</code></td>
+<td>✅ Working</td>
+<td>Channel system</td>
+</tr>
+<tr>
+<td><code>@chancreate</code> / <code>@chandestroy</code> / <code>@chanset</code></td>
+<td>✅ Working</td>
+<td>Channel admin</td>
+</tr>
+<tr>
+<td><code>@reboot</code> / <code>@shutdown</code></td>
+<td>✅ Working</td>
+<td>Server control (admin+)</td>
+</tr>
+<tr>
+<td><code>@moniker</code></td>
+<td>✅ Working</td>
+<td>Color-coded display names (admin+)</td>
+</tr>
+<tr>
+<td>Connection banner</td>
+<td>✅ Working</td>
+<td><code>text/default_connect.txt</code> shown pre-auth</td>
+</tr>
+<tr>
+<td>Broadcast on connect/disconnect</td>
+<td>✅ Working</td>
+<td>Room sees join/leave messages</td>
+</tr>
+<tr>
+<td>Exit movement (type exit name)</td>
+<td>✅ Working</td>
+<td>Standard directional movement</td>
+</tr>
+<tr>
+<td>Help system</td>
+<td>✅ Working</td>
+<td><code>help [&lt;topic&gt;]</code></td>
+</tr>
+<tr>
+<td>Discord bridge</td>
+<td>✅ Working</td>
+<td>Relay in-game chat to Discord</td>
+</tr>
+<tr>
+<td>Scene tracking &amp; export</td>
+<td>✅ Working</td>
+<td>REST API, Markdown or JSON output</td>
 </tr>
 </tbody>
 </table>
-<p>Example with <code>curl</code>:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Markdown log
-curl -H "Authorization: Bearer &lt;token&gt;" \
-     https://yourgame.example.com/api/v1/scenes/42/export
-
-# Raw JSON
-curl -H "Authorization: Bearer &lt;token&gt;" \
-     https://yourgame.example.com/api/v1/scenes/42/export?format=json
-</code></pre>
-<h2>Troubleshooting</h2>
-<h3>Common Issues</h3>
-<h4>Server Won’t Start</h4>
-<ul>
-<li>Check if a port is already in use (<code>4201</code>, <code>4202</code>, <code>4203</code>, or <code>8000</code>)</li>
-<li>Ensure Deno is installed and up to date (<code>deno upgrade</code>)</li>
-<li>Check for errors in configuration output (<code>deno task config</code>)</li>
-</ul>
-<h4>Player Can’t Connect</h4>
-<ul>
-<li>Confirm the Hub is running (<code>deno task server</code>)</li>
-<li>For Telnet clients, confirm the Telnet sidecar is running (<code>deno task telnet</code>)</li>
-<li>For the web client, confirm it is running (<code>deno task start</code> in<br>
-<code>src/web-client/</code>)</li>
-</ul>
-<h4>Permission Denied Errors</h4>
-<ul>
-<li>Verify the player has the correct flags set (<code>@set &lt;player&gt;=admin</code>)</li>
-<li>The <code>wizard</code> flag can only be set by a superuser at the database level</li>
-</ul>
-<h3>Logs</h3>
-<p>UrsaMU logs to stdout/stderr. Redirect output to a file if you need persistent<br>
-logs:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task server &gt; logs/server.log 2&gt;&amp;1
-</code></pre>
-<h2>Security</h2>
-<h3>Securing Your Server</h3>
-<ul>
-<li>Place the Hub behind a reverse proxy (e.g., nginx) for TLS termination</li>
-<li>Set up a firewall to limit external access to only the necessary ports</li>
-<li>Keep Deno and dependencies updated</li>
-<li>Use strong passwords — the <code>auth.hash</code> SDK method uses bcrypt</li>
-</ul>
-<h3>The <code>wizard</code> Flag</h3>
-<p>The <code>wizard</code> flag is locked to <strong>superuser</strong> level and cannot be granted by<br>
-regular admins. It is intended for server owners who need a permanent,<br>
-unforgeable high-privilege account. Set it directly at the database level during<br>
-initial setup.</p>
+<hr>
+<h2>What’s Different from Traditional MUSH</h2>
+<table>
+<thead>
+<tr>
+<th>Traditional MUSH</th>
+<th>UrsaMU</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MUSHcode (softcode) scripting</td>
+<td>TypeScript/JS in sandboxed Web Workers</td>
+</tr>
+<tr>
+<td>Telnet primary</td>
+<td>WebSocket primary (Telnet sidecar available)</td>
+</tr>
+<tr>
+<td>Attributes on objects run softcode</td>
+<td>Scripts registered as commands or object triggers</td>
+</tr>
+<tr>
+<td><code>@tr</code> / <code>@trigger</code></td>
+<td><code>u.execute()</code> in SDK</td>
+</tr>
+<tr>
+<td><code>@pemit</code> / <code>@remit</code></td>
+<td><code>u.emit.send()</code> / <code>u.emit.broadcast()</code></td>
+</tr>
+<tr>
+<td><code>@switch</code> / <code>@if</code> / MUSHcode functions</td>
+<td>Full JavaScript/TypeScript in scripts</td>
+</tr>
+</tbody>
+</table>
+<p>MUSHcode attributes (<code>@va</code>–<code>@vz</code>, inline softcode, <code>&amp;ATTRIBUTE</code>) are <strong>not supported</strong>. UrsaMU scripting uses the <a href="../guides/scripting/">Sandbox SDK</a> instead.</p>
+<hr>
+<h2>Planned Enhancements</h2>
+<p>These features are missing compared to PennMUSH/TinyMUX and are on the post-1.0 roadmap:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MOTD system</td>
+<td><code>motd.txt</code> + <code>wizmotd.txt</code> auto-displayed after login</td>
+</tr>
+<tr>
+<td>Login notifications</td>
+<td>“You have 3 unread mail messages” on connect</td>
+</tr>
+<tr>
+<td>Connection history</td>
+<td>Last login IP/time, failed attempt count</td>
+</tr>
+<tr>
+<td>Terminal/screen settings</td>
+<td>Width detection, persistent pager settings</td>
+</tr>
+<tr>
+<td><code>@Aconnect</code> / <code>@Adisconnect</code> hooks</td>
+<td>Attribute-based connect hooks</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Connecting with a Traditional MU* Client</h2>
+<p>UrsaMU’s Telnet sidecar makes it compatible with any standard MU* client:</p>
+<table>
+<thead>
+<tr>
+<th>Client</th>
+<th>Platform</th>
+<th>Connection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://www.mudlet.org/">Mudlet</a></td>
+<td>Windows / Mac / Linux</td>
+<td>Host + port (default <code>4201</code>)</td>
+</tr>
+<tr>
+<td><a href="https://mushclient.com/">MUSHclient</a></td>
+<td>Windows</td>
+<td>Host + port (default <code>4201</code>)</td>
+</tr>
+<tr>
+<td><a href="https://www.potatomushclient.com/">Potato</a></td>
+<td>Windows / Mac / Linux</td>
+<td>Host + port (default <code>4201</code>)</td>
+</tr>
+<tr>
+<td>SimpleMU</td>
+<td>Windows</td>
+<td>Host + port (default <code>4201</code>)</td>
+</tr>
+<tr>
+<td>Any terminal</td>
+<td>Any</td>
+<td><code>telnet &lt;host&gt; 4201</code></td>
+</tr>
+</tbody>
+</table>
+<p>WebSocket-capable clients can connect directly to port <code>4202</code> (or <code>4203</code> for HTTP/WS).</p>
 
       </article>
 
@@ -529,6 +613,13 @@ initial setup.</p>
       
         
           
+        
+      
+        
+          
+        
+      
+        
           
         
       
@@ -537,13 +628,16 @@ initial setup.</p>
         
       
         
-      
+          
         
       
         
-      
+          
+          
         
       
+        
+          
         
       
         
@@ -564,16 +658,16 @@ initial setup.</p>
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/guides/" class="page-nav-btn prev">
+          <a href="/ursamu/guides/user-guide/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Guides</span>
+            <span class="page-nav-title">User Guide</span>
           </a>
         
 
         
-          <a href="/ursamu/guides/customization/" class="page-nav-btn next">
+          <a href="/ursamu/plugins/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Customization Guide</span>
+            <span class="page-nav-title"></span>
           </a>
         
       </nav>

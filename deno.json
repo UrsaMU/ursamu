@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/ursamu",
-  "version": "0.4.22",
+  "version": "1.0.0",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",

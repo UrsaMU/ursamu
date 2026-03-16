@@ -56,7 +56,7 @@ export const queue = {
         await force(
           {
             // deno-lint-ignore no-explicit-any
-            socket: { cid: entry.executor, id: "queue" } as any,
+            socket: { cid: entry.executor, id: "queue", join: () => {}, leave: () => {}, send: () => {}, disconnect: () => {} } as any,
             msg: entry.command,
             data: entry.data || {},
           },

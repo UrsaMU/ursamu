@@ -13,6 +13,8 @@ nav:
     url: "#running-the-server"
   - text: Connecting
     url: "#connecting"
+  - text: First Admin
+    url: "#first-admin"
   - text: Next Steps
     url: "#next-steps"
 ---
@@ -147,56 +149,85 @@ deno task telnet
 
 ## Connecting
 
-### WebSocket Client
+### MU* Clients (Recommended for most players)
 
-UrsaMU uses a native WebSocket interface. You can connect to it from any modern
-browser or WebSocket-capable client:
+The easiest way to connect is with a standard MU* client over Telnet (port `4201`):
+
+| Client | Platform | Download |
+|--------|----------|---------|
+| **Mudlet** | Windows / Mac / Linux | [mudlet.org](https://www.mudlet.org/) |
+| **MUSHclient** | Windows | [mushclient.com](https://mushclient.com/) |
+| **Potato** | Windows / Mac / Linux | [potatomushclient.com](https://www.potatomushclient.com/) |
+| Any terminal | Any | `telnet localhost 4201` |
+
+In your client, add a new connection profile with:
+- **Host**: `localhost` (or your server's hostname/IP)
+- **Port**: `4201`
+
+Once connected, type `create YourName YourPassword` to create a character, or
+`connect YourName YourPassword` to log in.
+
+### Web Client
+
+UrsaMU ships with an optional browser-based client. To start it:
+
+```bash
+cd src/web-client
+deno task start
+```
+
+Then open [http://localhost:8000](http://localhost:8000) in your browser.
+
+### WebSocket (Developer / Custom Client)
+
+For direct WebSocket access, connect to `ws://localhost:4203` and send JSON:
 
 ```javascript
-// Connect to the UrsaMU WebSocket server
 const socket = new WebSocket("ws://localhost:4203");
 
-socket.addEventListener("open", (event) => {
-  console.log("Connected to UrsaMU server");
-});
+// Create a character
+socket.send(JSON.stringify({ msg: "create NewCharacter Password", data: {} }));
 
-// Listen for messages from the server
-socket.addEventListener("message", (event) => {
-  const data = JSON.parse(event.data);
-  console.log("Received:", data.msg);
+// Connect as a player
+socket.send(JSON.stringify({ msg: "connect PlayerName Password", data: {} }));
 
-  // Handle special data like disconnection
-  if (data.data?.quit) {
-    console.log("Server requested disconnect");
-    socket.close();
-  }
-});
-
-// Send a command to the server
-// Note: UrsaMU expects a JSON string with 'msg' and 'data' fields
-socket.send(JSON.stringify({
-  msg: "look",
-  data: {},
-}));
-
-// To connect as a player
-socket.send(JSON.stringify({
-  msg: "connect PlayerName Password",
-  data: {},
-}));
-
-// To create a new character
-socket.send(JSON.stringify({
-  msg: "create NewCharacter Password",
-  data: {},
-}));
-
-// To disconnect
-socket.send(JSON.stringify({
-  msg: "quit",
-  data: {},
-}));
+// Send any command
+socket.send(JSON.stringify({ msg: "look", data: {} }));
 ```
+
+## First Admin
+
+After the server starts for the first time, you need to bootstrap your admin account.
+
+**Step 1** — Connect to your server and create your character:
+```
+create YourName YourPassword
+```
+
+**Step 2** — Quit the game (`quit`), then run this one-liner from your project directory to grant yourself wizard access:
+
+```bash
+deno eval "
+import { dbojs } from './node_modules/ursamu/src/services/Database/index.ts';
+const results = await dbojs.find({ 'data.name': /^YourName$/i });
+const player = results[0];
+if (player) {
+  player.flags.add('wizard');
+  await dbojs.modify({ id: player.id }, '\$set', { flags: player.flags });
+  console.log('Wizard flag set on', player.data?.name);
+} else {
+  console.error('Player not found');
+}
+" --unstable-kv -A
+```
+
+Replace `YourName` with your character name.
+
+**Step 3** — Reconnect. You now have full wizard (superuser) access and can use
+`@set <player>=admin` to grant admin rights to other players in-game.
+
+> **Tip**: You only need to do this once. After setting the wizard flag, all
+> future admin management can be done from inside the game.
 
 ## Next Steps
 

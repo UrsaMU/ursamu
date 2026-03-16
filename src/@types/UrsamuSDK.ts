@@ -39,6 +39,7 @@ export interface IUrsamuSDK {
       data?: Record<string, string | string[] | { value: string | string[]; align?: "left" | "right" | "center" }>
     ): string;
     sprintf(format: string, ...args: unknown[]): string;
+    stripSubs(str: string): string;
     [key: string]: unknown;
   };
   db: {

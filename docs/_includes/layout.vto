@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- LUME_LAYOUT_VTO_VER_5 -->
+<!-- LUME_LAYOUT_VTO_VER_6 -->
 <html lang="{{ it.lang || "en" }}">
 <head>
   <meta charset="UTF-8">
@@ -9,89 +9,438 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 </head>
-<body class="flex flex-col min-h-screen relative overflow-x-hidden">
-  
-  <!-- Ambient background elements -->
-  <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full -z-10"></div>
-  <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full -z-10"></div>
+<body>
 
-  <header class="border-b border-white/5 py-6 sticky top-0 bg-[#050505]/60 backdrop-blur-xl z-50">
-    <div class="container mx-auto px-8 flex justify-between items-center">
-      <a href="/" class="text-xl font-black tracking-tighter hover:opacity-80 transition-opacity">
-        UrsaMU<span class="text-purple-500">.</span>
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ═══ HEADER ══════════════════════════════════════════════════════ -->
+<header class="site-header">
+
+  <!-- Logo -->
+  <a href="/" class="site-logo">
+    <svg width="32" height="32" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Geometric low-poly bear, matching logo style -->
+      <polygon points="26,2 34,10 42,7 39,17 48,22 40,29 43,40 33,36 26,44 19,36 9,40 12,29 4,22 13,17 10,7 18,10" fill="rgba(139,92,246,0.18)" stroke="rgba(167,139,250,0.75)" stroke-width="1.2" stroke-linejoin="round"/>
+      <line x1="26" y1="2"  x2="26" y2="18" stroke="rgba(167,139,250,0.35)" stroke-width="0.8"/>
+      <line x1="34" y1="10" x2="26" y2="18" stroke="rgba(167,139,250,0.35)" stroke-width="0.8"/>
+      <line x1="18" y1="10" x2="26" y2="18" stroke="rgba(167,139,250,0.35)" stroke-width="0.8"/>
+      <line x1="48" y1="22" x2="26" y2="18" stroke="rgba(167,139,250,0.25)" stroke-width="0.8"/>
+      <line x1="4"  y1="22" x2="26" y2="18" stroke="rgba(167,139,250,0.25)" stroke-width="0.8"/>
+      <line x1="40" y1="29" x2="26" y2="18" stroke="rgba(167,139,250,0.2)"  stroke-width="0.7"/>
+      <line x1="12" y1="29" x2="26" y2="18" stroke="rgba(167,139,250,0.2)"  stroke-width="0.7"/>
+      <circle cx="20" cy="24" r="2.2" fill="rgba(196,181,253,0.95)"/>
+      <circle cx="32" cy="24" r="2.2" fill="rgba(196,181,253,0.95)"/>
+      <polygon points="26,33 22,27 30,27" fill="rgba(139,92,246,0.85)"/>
+    </svg>
+    <span class="site-logo-name">UrsaMU</span>
+    <span class="site-logo-tag">docs</span>
+  </a>
+
+  <!-- Divider -->
+  <div class="header-divider"></div>
+
+  <!-- Top nav links -->
+  <nav class="header-nav" aria-label="Primary navigation">
+    {{ for item of it.site.nav }}
+    {{ if item.url !== "/" }}
+    <a href="{{ item.url }}" class="header-nav-link{{ if it.url && it.url.startsWith(item.url) }} active{{ /if }}">
+      {{ item.text }}
+    </a>
+    {{ /if }}
+    {{ /for }}
+  </nav>
+
+  <div class="header-spacer"></div>
+
+  <!-- Actions -->
+  <div class="header-actions">
+    <span class="header-version">v0.4.22</span>
+
+    <a href="{{ it.site.repository }}" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+      </svg>
+    </a>
+
+    <!-- Mobile menu button — CSS hides this above 1024px -->
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+</header>
+
+<!-- ═══ BODY ═════════════════════════════════════════════════════════ -->
+{{ if it.url === "/" }}
+<!-- ── HOME PAGE (no sidebar) ──────────────────────────────────────── -->
+<main class="animate-in">
+  {{ it.content }}
+</main>
+
+{{ else }}
+<!-- ── DOCS PAGE (3-column) ─────────────────────────────────────────── -->
+<div class="docs-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="docs-sidebar" id="docsSidebar" aria-label="Documentation navigation">
+
+    <!-- Search -->
+    <div class="sidebar-search">
+      <input
+        class="sidebar-search-input"
+        type="search"
+        placeholder="Search docs…"
+        id="sidebarSearch"
+        aria-label="Search documentation"
+      />
+      <div class="search-results" id="searchResults" style="display:none;position:relative;margin-top:0.25rem;"></div>
+    </div>
+
+    <!-- Section: Overview -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Overview</div>
+
+      <a href="/about/" class="sidebar-link{{ if it.url === '/about/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        About UrsaMU
       </a>
-      
-      <nav class="hidden md:flex gap-10">
-        {{ for item of it.site.nav }}
-          <a href="{{ item.url }}" class="nav-link">
-            {{ item.text }}
-          </a>
-        {{ /for }}
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Getting Started -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+
+      <a href="/guides/installation/" class="sidebar-link{{ if it.url === '/guides/installation/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Installation
+      </a>
+      <a href="/guides/user-guide/" class="sidebar-link{{ if it.url === '/guides/user-guide/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Player Guide
+      </a>
+      <a href="/guides/admin-guide/" class="sidebar-link{{ if it.url === '/guides/admin-guide/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin Guide
+      </a>
+      <a href="/guides/customization/" class="sidebar-link{{ if it.url === '/guides/customization/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
+        Customization
+      </a>
+      <a href="/guides/scripting/" class="sidebar-link{{ if it.url === '/guides/scripting/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        Scripting Guide
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Configuration -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Configuration</div>
+
+      <a href="/configuration/" class="sidebar-link{{ if it.url === '/configuration/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 8v4l3 3"/></svg>
+        Overview
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: API Reference -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">API Reference</div>
+
+      <a href="/api/" class="sidebar-link{{ if it.url === '/api/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Overview
+      </a>
+      <a href="/api/core/" class="sidebar-link{{ if it.url === '/api/core/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+        Core API
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Plugins -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Plugins</div>
+
+      <a href="/plugins/" class="sidebar-link{{ if it.url === '/plugins/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>
+        Overview
+      </a>
+      <a href="/plugins/basics/" class="sidebar-link{{ if it.url === '/plugins/basics/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        Basics
+      </a>
+      <a href="/plugins/first-plugin/" class="sidebar-link{{ if it.url === '/plugins/first-plugin/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        First Plugin
+      </a>
+      <a href="/plugins/commands/" class="sidebar-link{{ if it.url === '/plugins/commands/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        Commands
+      </a>
+      <a href="/plugins/hooks/" class="sidebar-link{{ if it.url === '/plugins/hooks/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"/><polyline points="2 2 2 8 8 8"/></svg>
+        Hooks
+      </a>
+      <a href="/plugins/database/" class="sidebar-link{{ if it.url === '/plugins/database/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Database
+      </a>
+      <a href="/plugins/configuration/" class="sidebar-link{{ if it.url === '/plugins/configuration/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Configuration
+      </a>
+      <a href="/plugins/dependencies/" class="sidebar-link{{ if it.url === '/plugins/dependencies/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
+        Dependencies
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Development -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Development</div>
+
+      <a href="/development/" class="sidebar-link{{ if it.url === '/development/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Overview
+      </a>
+      <a href="/development/contributing/" class="sidebar-link{{ if it.url === '/development/contributing/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Contributing
+      </a>
+      <a href="/extending/" class="sidebar-link{{ if it.url === '/extending/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Extending
+      </a>
+      <a href="/child-games/" class="sidebar-link{{ if it.url === '/child-games/' }} active{{ /if }}">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+        Child Games
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Community -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Community</div>
+      <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        GitHub
+      </a>
+      <a href="https://discord.gg/ursamu" target="_blank" rel="noopener" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Discord
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="docs-content-wrap">
+    <main class="docs-content animate-in">
+
+      <!-- Breadcrumbs -->
+      {{ if it.url && it.url !== "/" }}
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumbs-sep">›</span>
+        <span class="breadcrumbs-current">{{ it.title }}</span>
       </nav>
-      
-      <div class="flex items-center gap-6">
-        <a href="{{ it.site.repository }}" class="text-slate-400 hover:text-white transition-colors" title="GitHub">
-          <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-        </a>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-grow py-20 relative">
-    <div class="container mx-auto px-8">
-      {{ if it.url === "/" }}
-        <div class="animate-fade-in">
-          {{ it.content }}
-        </div>
-      {{ else }}
-        <div class="flex flex-col lg:flex-row gap-16">
-          <!-- Sidebar -->
-          <aside class="hidden lg:block w-72 flex-shrink-0">
-            <nav class="sidebar">
-              <div class="sidebar-group">
-                <h4 class="sidebar-group-title">Guides</h4>
-                <div class="space-y-1">
-                  {{ for page of it.search.pages("url^=/guides/ url!=/guides/", "title=asc") }}
-                    <a href="{{ page.url }}" class="sidebar-link {{ if it.url === page.url }}active{{ /if }}">
-                      {{ page.title || page.slug }}
-                    </a>
-                  {{ /for }}
-                </div>
-              </div>
-
-              <div class="sidebar-group">
-                <h4 class="sidebar-group-title">Reference</h4>
-                <div class="space-y-1">
-                  <a href="/configuration/" class="sidebar-link {{ if it.url === '/configuration/' }}active{{ /if }}">Configuration</a>
-                  <a href="/api/" class="sidebar-link {{ if it.url === '/api/' }}active{{ /if }}">API Reference</a>
-                  <a href="/plugins/" class="sidebar-link {{ if it.url === '/plugins/' }}active{{ /if }}">Plugins</a>
-                </div>
-              </div>
-            </nav>
-          </aside>
-
-          <!-- Content -->
-          <article class="flex-grow prose animate-fade-in">
-            {{ it.content }}
-          </article>
-        </div>
       {{ /if }}
-    </div>
-  </main>
 
-  <footer class="border-t border-white/5 py-16 text-sm text-slate-500">
-    <div class="container mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-10">
-      <div class="flex items-center gap-3">
-        <span class="font-bold text-slate-300">UrsaMU</span>
-        <span>&copy; 2025 Team.</span>
+      <!-- Page content -->
+      <article class="prose">
+        {{ it.content }}
+      </article>
+
+      <!-- Prev / Next navigation -->
+      {{ set allPages = it.search.pages("layout=layout.vto url!=/", "url=asc") }}
+      {{ set prevPage = null }}
+      {{ set nextPage = null }}
+      {{ set foundCurrent = false }}
+      {{ set prevCandidate = null }}
+      {{ for p of allPages }}
+        {{ if p.url === it.url }}
+          {{ set foundCurrent = true }}
+          {{ set prevPage = prevCandidate }}
+        {{ else if foundCurrent && !nextPage }}
+          {{ set nextPage = p }}
+        {{ else if !foundCurrent }}
+          {{ set prevCandidate = p }}
+        {{ /if }}
+      {{ /for }}
+
+      {{ if prevPage || nextPage }}
+      <nav class="page-nav" aria-label="Page navigation">
+        {{ if prevPage }}
+          <a href="{{ prevPage.url }}" class="page-nav-btn prev">
+            <span class="page-nav-label">← Previous</span>
+            <span class="page-nav-title">{{ prevPage.title }}</span>
+          </a>
+        {{ else }}
+          <div></div>
+        {{ /if }}
+
+        {{ if nextPage }}
+          <a href="{{ nextPage.url }}" class="page-nav-btn next">
+            <span class="page-nav-label">Next →</span>
+            <span class="page-nav-title">{{ nextPage.title }}</span>
+          </a>
+        {{ /if }}
+      </nav>
+      {{ /if }}
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div>
+        <strong style="color:var(--text-muted)">UrsaMU</strong>
+        &nbsp;&mdash;&nbsp;MIT License &bull; &copy; 2025
       </div>
-      <div class="flex gap-12">
-        <a href="/guides/installation" class="hover:text-white transition-colors">Installation</a>
-        <a href="/api" class="hover:text-white transition-colors">API</a>
-        <a href="/plugins" class="hover:text-white transition-colors">Plugins</a>
+      <div class="footer-links">
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
+        <a href="{{ it.site.repository }}" target="_blank" rel="noopener">GitHub</a>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </div>
+
+  <!-- RIGHT: TABLE OF CONTENTS (auto-built by JS) -->
+  <aside class="docs-toc" id="docsToc" aria-label="On this page">
+    <div class="toc-title">On this page</div>
+    <ul class="toc-list" id="tocList"></ul>
+  </aside>
+
+</div><!-- /docs-layout -->
+{{ /if }}
+
+<!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  // ── Mobile sidebar toggle ──────────────────────────────────────────
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('docsSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar && sidebar.classList.add('open');
+    overlay && overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar && sidebar.classList.remove('open');
+    overlay && overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn && menuBtn.addEventListener('click', function() {
+    if (sidebar && sidebar.classList.contains('open')) closeSidebar();
+    else openSidebar();
+  });
+
+  overlay && overlay.addEventListener('click', closeSidebar);
+
+  // Close on resize past mobile breakpoint
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1024) closeSidebar();
+  });
+
+  // ── Auto table of contents ─────────────────────────────────────────
+  const tocList = document.getElementById('tocList');
+  const article = document.querySelector('article.prose');
+
+  if (tocList && article) {
+    const headings = article.querySelectorAll('h2, h3');
+
+    if (headings.length === 0) {
+      const tocEl = document.getElementById('docsToc');
+      if (tocEl) tocEl.style.display = 'none';
+    } else {
+      headings.forEach(function(h, i) {
+        // Ensure heading has an ID
+        if (!h.id) {
+          h.id = 'section-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-item' + (h.tagName === 'H3' ? ' toc-h3' : '');
+
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Highlight active section on scroll
+      const tocLinks = tocList.querySelectorAll('a');
+
+      function updateToc() {
+        let activeIndex = 0;
+        const scrollTop = window.scrollY + 80;
+
+        headings.forEach(function(h, i) {
+          if (h.offsetTop <= scrollTop) activeIndex = i;
+        });
+
+        tocList.querySelectorAll('.toc-item').forEach(function(item, i) {
+          item.classList.toggle('active', i === activeIndex);
+        });
+      }
+
+      window.addEventListener('scroll', updateToc, { passive: true });
+      updateToc();
+    }
+  }
+
+  // ── Sidebar search (client-side filter) ───────────────────────────
+  const searchInput = document.getElementById('sidebarSearch');
+  const sidebarLinks = sidebar ? sidebar.querySelectorAll('.sidebar-link') : [];
+
+  if (searchInput && sidebarLinks.length) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+
+      sidebarLinks.forEach(function(link) {
+        const text = link.textContent.toLowerCase();
+        const section = link.closest('.sidebar-section');
+        if (!query) {
+          link.style.display = '';
+        } else {
+          link.style.display = text.includes(query) ? '' : 'none';
+        }
+      });
+
+      // Hide empty section titles
+      if (sidebar) {
+        sidebar.querySelectorAll('.sidebar-section').forEach(function(sec) {
+          const visibleLinks = sec.querySelectorAll('.sidebar-link:not([style*="none"])');
+          sec.style.display = (!query || visibleLinks.length > 0) ? '' : 'none';
+        });
+      }
+    });
+  }
+
+  // ── Scroll active sidebar link into view ───────────────────────────
+  const activeLink = sidebar && sidebar.querySelector('.sidebar-link.active');
+  if (activeLink) {
+    activeLink.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+})();
+</script>
 
 </body>
 </html>

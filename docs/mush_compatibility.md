@@ -1,59 +1,97 @@
-# UrsaMU MUSH Compatibility Status
+---
+layout: layout.vto
+title: MUSH Compatibility
+description: What UrsaMU supports compared to traditional MUSH servers like PennMUSH and TinyMUX, and what's planned.
+---
 
-To meet the goal of supporting everything a real MUSH (PennMUSH, TinyMUX)
-supports during the connection flow, the following features are currently
-missing or require enhancement:
+# MUSH Compatibility
 
-## Missing Features
+UrsaMU is **not a drop-in replacement** for PennMUSH, TinyMUSH, or MUX2. It is a fresh platform with a different architecture — WebSocket-native, TypeScript, sandboxed scripts instead of MUSHcode.
 
-### 1. Connection Banner & Welcome Screen
-
-- **Real MUSH**: Before authentication, a text file (`welcome.txt` or similar)
-  is displayed immediately upon port connection.
-- **UrsaMU**: Displays a welcome text from the database (seeded by
-  `text/welcome.md`), but lacks support for pre-auth banner customization via
-  traditional MUSH flags.
-
-### 2. Message of the Day (MOTD)
-
-- **Real MUSH**: Displays `motd.txt` and `wizmotd.txt` post-authentication.
-- **UrsaMU**: Currently has no dedicated MOTD system that auto-triggers after
-  login.
-
-### 3. Connection Statistics
-
-- **Real MUSH**: Shows "Last connect was from [IP] on [Date]", "There have been
-  [X] failed login attempts", and "The time is now [Time]".
-- **UrsaMU**: Partially tracks `lastCommand`, but doesn't display connection
-  history or IP stats on login.
-
-### 4. Mail & News Notifications
-
-- **Real MUSH**: Automatically notifies the player: "You have 3 unread Mail
-  messages" or "There are 5 new News items since your last visit."
-- **UrsaMU**: Mail and News systems are in progress but lack automated login
-  notifications.
-
-### 5. Automatic Commands (Forced `look`)
-
-- **Real MUSH**: Automatically executes a `look` command for the player.
-- **UrsaMU**: **[TBD]** Working on adding `u.execute("look")` to the
-  `connect.ts` script.
-
-### 6. Attribute-based Hooks (`@Aconnect`)
-
-- **Real MUSH**: Runs the `@Aconnect` attribute on the player and the Master
-  Room.
-- **UrsaMU**: Has basic `aconnect` hook support, but it needs better exposure to
-  the scripting SDK to allow scripts to trigger complex login workflows.
-
-### 7. Terminal & Screen Settings
-
-- **Real MUSH**: Detects terminal type, screen width, and pager settings.
-- **UrsaMU**: Basic Telnet support exists, but auto-detection and persistent
-  screen settings are missing.
+If you are migrating from a traditional MUSH or hosting your first server, this page tells you exactly what works today and what is planned.
 
 ---
 
-**Next Step**: Implementing `u.execute("look")` in the `connect.ts` system
-script.
+## What Works Today
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| `connect <name> <password>` | ✅ Working | Standard login command |
+| `create <name> <password>` | ✅ Working | Character creation |
+| `look` / `l` | ✅ Working | Room and object descriptions |
+| Auto-`look` on connect | ✅ Working | Fires automatically after login |
+| `say` / `"` | ✅ Working | Room speech |
+| `pose` / `:` | ✅ Working | Emotes |
+| `page <player>=<msg>` | ✅ Working | Private messages |
+| `who` | ✅ Working | Online player list |
+| `score` | ✅ Working | Character stats |
+| `inventory` / `inv` | ✅ Working | Carried objects |
+| `get` / `drop` / `give` | ✅ Working | Object interaction |
+| `home` | ✅ Working | Return to home location |
+| `teleport` | ✅ Working | Admin/wizard teleport |
+| `examine` | ✅ Working | Full object inspection |
+| `@desc` / `@name` | ✅ Working | Object descriptions and naming |
+| `@dig` | ✅ Working | Create rooms |
+| `@open` / `@link` / `@unlink` | ✅ Working | Exit management |
+| `@create` | ✅ Working | Create objects |
+| `@destroy` / `@clone` | ✅ Working | Object lifecycle |
+| `@lock` / `@set` | ✅ Working | Flags and locks |
+| `@parent` | ✅ Working | Object inheritance |
+| `@boot` / `@toad` | ✅ Working | Admin user management |
+| `@newpassword` | ✅ Working | Password reset |
+| `@chown` | ✅ Working | Ownership transfer |
+| `@channel/list/join/leave` | ✅ Working | Channel system |
+| `@chancreate` / `@chandestroy` / `@chanset` | ✅ Working | Channel admin |
+| `@reboot` / `@shutdown` | ✅ Working | Server control (admin+) |
+| `@moniker` | ✅ Working | Color-coded display names (admin+) |
+| Connection banner | ✅ Working | `text/default_connect.txt` shown pre-auth |
+| Broadcast on connect/disconnect | ✅ Working | Room sees join/leave messages |
+| Exit movement (type exit name) | ✅ Working | Standard directional movement |
+| Help system | ✅ Working | `help [<topic>]` |
+| Discord bridge | ✅ Working | Relay in-game chat to Discord |
+| Scene tracking & export | ✅ Working | REST API, Markdown or JSON output |
+
+---
+
+## What's Different from Traditional MUSH
+
+| Traditional MUSH | UrsaMU |
+|-----------------|--------|
+| MUSHcode (softcode) scripting | TypeScript/JS in sandboxed Web Workers |
+| Telnet primary | WebSocket primary (Telnet sidecar available) |
+| Attributes on objects run softcode | Scripts registered as commands or object triggers |
+| `@tr` / `@trigger` | `u.execute()` in SDK |
+| `@pemit` / `@remit` | `u.emit.send()` / `u.emit.broadcast()` |
+| `@switch` / `@if` / MUSHcode functions | Full JavaScript/TypeScript in scripts |
+
+MUSHcode attributes (`@va`–`@vz`, inline softcode, `&ATTRIBUTE`) are **not supported**. UrsaMU scripting uses the [Sandbox SDK](../guides/scripting/) instead.
+
+---
+
+## Planned Enhancements
+
+These features are missing compared to PennMUSH/TinyMUX and are on the post-1.0 roadmap:
+
+| Feature | Notes |
+|---------|-------|
+| MOTD system | `motd.txt` + `wizmotd.txt` auto-displayed after login |
+| Login notifications | "You have 3 unread mail messages" on connect |
+| Connection history | Last login IP/time, failed attempt count |
+| Terminal/screen settings | Width detection, persistent pager settings |
+| `@Aconnect` / `@Adisconnect` hooks | Attribute-based connect hooks |
+
+---
+
+## Connecting with a Traditional MU* Client
+
+UrsaMU's Telnet sidecar makes it compatible with any standard MU* client:
+
+| Client | Platform | Connection |
+|--------|---------|-----------|
+| [Mudlet](https://www.mudlet.org/) | Windows / Mac / Linux | Host + port (default `4201`) |
+| [MUSHclient](https://mushclient.com/) | Windows | Host + port (default `4201`) |
+| [Potato](https://www.potatomushclient.com/) | Windows / Mac / Linux | Host + port (default `4201`) |
+| SimpleMU | Windows | Host + port (default `4201`) |
+| Any terminal | Any | `telnet <host> 4201` |
+
+WebSocket-capable clients can connect directly to port `4202` (or `4203` for HTTP/WS).

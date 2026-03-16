@@ -204,6 +204,67 @@ Deno.test("Scene — /locations excludes locked room for non-admin", OPTS, async
 });
 
 // ---------------------------------------------------------------------------
+// Scene Router — export endpoint
+// ---------------------------------------------------------------------------
+
+Deno.test("Scene — GET /api/v1/scenes/:id/export?format=json returns full JSON", OPTS, async () => {
+  // Add a pose first so the export has content
+  const poseReq = new Request(`http://localhost/api/v1/scenes/${createdSceneId}/pose`, {
+    method: "POST",
+    body: JSON.stringify({ msg: "Hello world.", type: "pose" }),
+    headers: { "Content-Type": "application/json" },
+  });
+  await sceneHandler(poseReq, U_ID);
+
+  const req = new Request(`http://localhost/api/v1/scenes/${createdSceneId}/export?format=json`, {
+    method: "GET",
+  });
+  const res = await sceneHandler(req, U_ID);
+  assertEquals(res.status, 200);
+  assertEquals(res.headers.get("content-type"), "application/json");
+  const body = await res.json();
+  assertEquals(body.id, createdSceneId);
+  assertEquals(body.name, "Test Scene");
+});
+
+Deno.test("Scene — GET /api/v1/scenes/:id/export returns markdown by default", OPTS, async () => {
+  const req = new Request(`http://localhost/api/v1/scenes/${createdSceneId}/export`, {
+    method: "GET",
+  });
+  const res = await sceneHandler(req, U_ID);
+  assertEquals(res.status, 200);
+  const ct = res.headers.get("content-type") ?? "";
+  assertEquals(ct.startsWith("text/markdown"), true);
+  const text = await res.text();
+  // Should contain the scene name as a heading
+  assertEquals(text.includes("# Test Scene"), true);
+  // Should contain the pose content
+  assertEquals(text.includes("Hello world."), true);
+});
+
+Deno.test("Scene — GET /api/v1/scenes/nonexistent/export returns 404", OPTS, async () => {
+  const req = new Request("http://localhost/api/v1/scenes/no_such_scene/export", {
+    method: "GET",
+  });
+  const res = await sceneHandler(req, U_ID);
+  assertEquals(res.status, 404);
+});
+
+// ---------------------------------------------------------------------------
+// Scene Router — PATCH ownership / validation
+// ---------------------------------------------------------------------------
+
+Deno.test("Scene — PATCH /api/v1/scenes/:id missing msg pose returns 400", OPTS, async () => {
+  const req = new Request(`http://localhost/api/v1/scenes/${createdSceneId}/pose`, {
+    method: "POST",
+    body: JSON.stringify({ type: "pose" }), // no msg
+    headers: { "Content-Type": "application/json" },
+  });
+  const res = await sceneHandler(req, U_ID);
+  assertEquals(res.status, 400);
+});
+
+// ---------------------------------------------------------------------------
 // Discord — init guard when no token configured
 // ---------------------------------------------------------------------------
 
