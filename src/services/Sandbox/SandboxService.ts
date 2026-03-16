@@ -859,7 +859,7 @@ export class SandboxService {
     // Phase 1: Transpile TypeScript if necessary
     let execCode = code;
     try {
-        const { transform } = await import("https://esm.sh/sucrase@3.35.0?exports=transform");
+        const { transform } = await import("npm:sucrase@3.35.0");
         execCode = transform(code, { transforms: ["typescript"] }).code;
         
         // Strip imports - they are for IDE type checking and won't resolve in the sandbox
