@@ -5,15 +5,24 @@ import { getConfig } from "../Config/mod.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 
 export const hooks = {
-  executeAttribute: async (obj: IDBOBJ, attrName: string, _args: string[] = [], _enactor?: IDBOBJ) => {
+  executeAttribute: async (obj: IDBOBJ, attrName: string, args: string[] = [], enactor?: IDBOBJ) => {
     const attr = await getAttribute(obj, attrName);
     if (!attr) return;
 
-    // Evaluate via Script Engine
-    await sandboxService.runScript(attr.value, { 
-        id: obj.id,
-        location: obj.location || "limbo",
-        state: obj.data?.state as Record<string, unknown> || {},
+    const actor = enactor || obj;
+    const { SDKService } = await import("../Sandbox/SDKService.ts");
+    const { Obj } = await import("../DBObjs/DBObjs.ts");
+
+    const meObj = await Obj.get(actor.id);
+    const hereObj = actor.location ? await Obj.get(actor.location) : null;
+
+    await sandboxService.runScript(attr.value, {
+      id: actor.id,
+      me: meObj ? await SDKService.hydrate(meObj) : { id: actor.id, flags: new Set(actor.flags.split(" ")), state: actor.data || {} },
+      here: hereObj ? await SDKService.hydrate(hereObj, true) : undefined,
+      location: actor.location || "limbo",
+      state: actor.data?.state as Record<string, unknown> || {},
+      cmd: { name: attrName.toLowerCase(), args },
     });
   },
 

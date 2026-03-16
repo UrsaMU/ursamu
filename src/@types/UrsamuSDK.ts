@@ -84,6 +84,7 @@ export interface IUrsamuSDK {
     set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }): Promise<unknown>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
+  trigger(target: string, attr: string, args?: string[]): Promise<void>;
   text: {
     read(id: string): Promise<string>;
     set(id: string, content: string): Promise<void>;

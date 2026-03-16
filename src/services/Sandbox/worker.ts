@@ -359,6 +359,8 @@ self.onmessage = async (e: MessageEvent) => {
     },
     setFlags: (target: string | IDBObj, flags: string) =>
       request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags }),
+    trigger: (target: string, attr: string, args?: string[]) =>
+      request<void>("trigger:attr", { target, attr, args: args || [] }),
     text: {
       read: (id: string) => request<string>("text:read", { id }),
       set: (id: string, content: string) => request<void>("text:set", { id, content })

@@ -32,10 +32,10 @@ Work items are ordered by community impact. Pick the next unchecked item and go.
 - [x] **`@quota` command**
   `@quota` shows your current quota. `@quota <player>=<n>` for admin.
 
-- [ ] **Attribute execution (`&ATTR` triggers)**
-  `setAttr.ts` stores attributes but they're inert — can't fire, be triggered, or be read by locks.
-  Needs `u.execute()` callable from stored attributes, or a lightweight expression evaluator.
-  This is a larger design decision (sandbox policy for per-object scripts).
+- [x] **Attribute execution (`&ATTR` triggers)**
+  `setAttr.ts` dot-notation bug fixed. `@trigger <obj>/<attr> [=args]` fires any stored attribute
+  as a sandbox script with full SDK context. `hooks.executeAttribute` now passes enactor as `u.me`.
+  `u.trigger(targetId, attrName, args)` available from any script.
 
 - [x] **Connection history**
   Last login timestamp and failed attempt count shown on every login.
@@ -52,17 +52,17 @@ Work items are ordered by community impact. Pick the next unchecked item and go.
   `@stats` — uptime, connected players, total objects. `@stats/full` — adds per-type breakdown.
   `sys.uptime()` added to SDK; `SERVER_START` constant in SandboxService.
 
-- [ ] **`@wipe`**
-  Clear all user-set attributes from an object.
-  `@wipe <object>` — removes all `&ATTR`-style attributes. Standard maintenance.
+- [x] **`@wipe`**
+  `@wipe <object>` — clears all `&ATTR`-style attributes. Respects canEdit permissions.
 
 - [ ] **Terminal width detection**
   Auto-detect client terminal width from Telnet NAWS negotiation.
   Store per-session; use in `format.ts` and table layouts instead of hardcoded 78 cols.
+  Requires Telnet option negotiation (non-trivial protocol work).
 
-- [ ] **`@Aconnect` / `@Adisconnect`**
-  Run `&ACONNECT` attribute on the player object and Master Room on login/logout.
-  Low priority — most games use dedicated scripts — but MUSH veterans expect it.
+- [x] **`@Aconnect` / `@Adisconnect`**
+  Already fully implemented in `src/services/Hooks/index.ts` and wired into both the WebSocket
+  service (adisconnect on drop) and the `auth:login` handler (aconnect on login).
 
 ---
 

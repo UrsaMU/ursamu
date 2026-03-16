@@ -409,6 +409,25 @@ class LocalSandbox {
             }
             break;
           }
+          case "trigger:attr": {
+            if (e.data.target && e.data.attr) {
+              const { dbojs: db } = await import("../Database/index.ts");
+              const { hooks } = await import("../Hooks/index.ts");
+              (async () => {
+                try {
+                  const obj = await db.queryOne({ id: e.data.target as string });
+                  const enactor = context?.id ? await db.queryOne({ id: context.id }) : undefined;
+                  if (obj) {
+                    await hooks.executeAttribute(obj, e.data.attr as string, (e.data.args as string[]) || [], enactor || undefined);
+                  }
+                } catch (_) { /* attribute not found or script error — non-fatal */ }
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
           case "flags:set": {
             if (e.data.target && e.data.flags) {
               const { dbojs: db } = await import("../Database/index.ts");
