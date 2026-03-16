@@ -1,5 +1,4 @@
-import configData from "../../../config/config.json" with { type: "json" };
-import type { IConfig } from "../../@types/IConfig.ts";
+import { getConfig } from "../Config/mod.ts";
 
 export interface IntentDefinition {
   priority: number;
@@ -23,9 +22,9 @@ export class IntentRegistry {
   }
 
   private loadFromConfig() {
-    const config = configData as unknown as IConfig;
-    if (config.intents?.registry) {
-      this.intents = config.intents.registry as Record<string, IntentDefinition>;
+    const registry = getConfig<Record<string, IntentDefinition>>("intents.registry");
+    if (registry) {
+      this.intents = registry;
     }
   }
 
@@ -38,8 +37,7 @@ export class IntentRegistry {
   }
 
   getInterceptorOrder(): "FIFO" | "LIFO" {
-    const config = configData as unknown as IConfig;
-    return config.intents?.interceptorOrder || "FIFO";
+    return getConfig<"FIFO" | "LIFO">("intents.interceptorOrder") || "FIFO";
   }
 }
 
