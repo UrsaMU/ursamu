@@ -325,35 +325,36 @@ const inventoryPlugin: IPlugin = {
   
   init: async () => {
     // Register the inventory command
-    registerCommand({
+    addCmd({
       name: "inventory",
-      pattern: "inventory/inv/i",
-      flags: "connected",
-      exec: async (ctx) => {
+      pattern: /^(?:inventory|inv|i)$/i,
+      lock: "connected",
+      exec: async (u: IUrsamuSDK) => {
         try {
           // Get the player's inventory items
-          const items = await dbojs.query({
-            location: ctx.player.id,
-            flags: /thing/i
+          const items = await u.db.search({
+            location: u.me.id,
+            flags: /thing/i,
           });
-          
+
           if (items.length === 0) {
-            ctx.send("You are not carrying anything.");
+            u.send("You are not carrying anything.");
             return;
           }
-          
+
           // Display the inventory
-          let message = "|cYour Inventory:|n\n";
-          
+          let message = "%chYour Inventory:%cn\r\n";
           for (const item of items) {
-            message += `${item.data.name} - ${item.data.description || "No description"}\n`;
+            const name = String(item.state.name ?? item.id);
+            const desc = String(item.state.description ?? "No description");
+            message += `${name} - ${desc}\r\n`;
           }
-          
-          ctx.send(message);
+
+          u.send(message);
         } catch (error) {
-          ctx.send(`Error: ${error.message}`);
+          u.send(`Error: ${(error as Error).message}`);
         }
-      }
+      },
     });
     
     // Register the give command

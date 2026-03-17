@@ -69,15 +69,17 @@ The `onInit` method is called once when the plugin is first initialized. Use thi
 - Register event listeners
 
 ```typescript
+import { addCmd } from "jsr:@ursamu/ursamu";
+
 onInit(app: App): void {
   // Register a new command
-  app.commands.register("myplugin", {
+  addCmd({
     name: "hello",
-    pattern: "hello",
-    flags: "connected",
-    exec: (ctx) => {
-      ctx.send("Hello from my plugin!");
-    }
+    pattern: /^hello$/i,
+    lock: "connected",
+    exec: (u) => {
+      u.send("Hello from my plugin!");
+    },
   });
 }
 ```
@@ -170,13 +172,13 @@ export default class HelloWorldPlugin implements IPlugin {
   
   onInit(app: App): void {
     // Register the hello command
-    app.commands.register("hello-world", {
+    addCmd({
       name: "hello",
-      pattern: "hello",
-      flags: "connected",
-      exec: (ctx) => {
-        ctx.send(this.config.greeting);
-      }
+      pattern: /^hello$/i,
+      lock: "connected",
+      exec: (u) => {
+        u.send(this.config.greeting);
+      },
     });
     
     console.log(`${this.name} initialized`);

@@ -250,17 +250,17 @@ Similar to `dbojs`, with the same method signatures.
 
 ## Command API
 
-### registerCommand(command)
+### addCmd(command)
 
 Registers a new command.
 
 **Parameters:**
 
-- `command` (Object): The command to register
+- `command` (ICmd): The command to register
   - `name` (string): Unique identifier for the command
-  - `pattern` (string): Pattern to match user input
-  - `flags` (string): Flags required to use the command
-  - `exec` (Function): Function to execute when command is triggered
+  - `pattern` (string | RegExp): Regex pattern to match user input; capture groups become `u.cmd.args`
+  - `lock` (string): Lock expression required to use the command (e.g. `"connected"`, `"wizard"`)
+  - `exec` (Function): Function to execute — receives `IUrsamuSDK`
 
 **Returns:**
 
@@ -269,70 +269,70 @@ Registers a new command.
 **Example:**
 
 ```typescript
-import { registerCommand } from "../../services/Commands/mod.ts";
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
-registerCommand({
+addCmd({
   name: "hello",
-  pattern: "hello *",
-  flags: "connected",
-  exec: (ctx) => {
-    const target = ctx.args.trim() || "World";
-    ctx.send(`Hello, ${target}!`);
+  pattern: /^hello\s*(.*)/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) => {
+    const target = u.cmd.args[0]?.trim() || "World";
+    u.send(`Hello, ${target}!`);
   },
 });
 ```
 
-### registerMiddleware(middleware)
+### IUrsamuSDK
 
-Registers middleware to process commands.
+The unified SDK object passed to every command's `exec` function. The same object is available in sandbox scripts.
 
-**Parameters:**
+**Key properties:**
 
-- `middleware` (Function): The middleware function
+| Property | Type | Description |
+|----------|------|-------------|
+| `u.me` | `IDBObj` | The actor who executed the command |
+| `u.here` | `IDBObj \| null` | The room the actor is in |
+| `u.cmd.args` | `string[]` | Regex capture groups from the matched pattern |
+| `u.cmd.switches` | `string[]` | Switches supplied to the command |
+| `u.socketId` | `string` | The WebSocket socket ID |
 
-**Returns:**
+**Key methods:**
 
-- void
+| Method | Description |
+|--------|-------------|
+| `u.send(msg)` | Send output to the actor |
+| `u.broadcast(roomId, msg)` | Broadcast to everyone in a room |
+| `u.force(cmd)` | Execute a command string as the actor |
+| `u.setFlags(id, flags)` | Add/remove flags (`"+wizard"`, `"-dark"`) |
+| `u.teleport(id, destination)` | Move an object to a destination |
+| `u.canEdit(actor, target)` | Check if actor can edit target (async) |
+| `u.db.search(query)` | Search the database |
+| `u.db.create(data)` | Create a new object |
+| `u.db.modify(id, data)` | Update an object |
+| `u.db.destroy(id)` | Delete an object |
+| `u.util.target(actor, name)` | Find a named object (async) |
+| `u.util.stripSubs(str)` | Strip MUSH color/substitution codes |
+| `u.auth.hash(password)` | Hash a password |
+| `u.sys.disconnect(socketId)` | Disconnect a socket |
+| `u.sys.reboot()` | Reboot the server |
 
 **Example:**
 
 ```typescript
-import { registerMiddleware } from "../../services/Commands/mod.ts";
-
-registerMiddleware(async (ctx, next) => {
-  console.log(`Command executed: ${ctx.cmd}`);
-  await next();
-});
-```
-
-### Command Context
-
-The context object passed to command execution functions.
-
-**Properties:**
-
-- `player` (Object): The player who triggered the command
-- `cmd` (string): The command that was triggered
-- `args` (string): The arguments passed to the command
-- `switches` (Object): Any switches used with the command
-- `send` (Function): Function to send output to the player
-
-**Example:**
-
-```typescript
-exec: ((ctx) => {
-  // Access the player
-  const playerName = ctx.player.data.name;
+exec: async (u: IUrsamuSDK) => {
+  // Access the actor
+  const actorName = String(u.me.state.name ?? u.me.id);
 
   // Access command arguments
-  const args = ctx.args.trim();
+  const target = u.cmd.args[0]?.trim() ?? "";
 
-  // Access switches
-  const verbose = ctx.switches.verbose;
+  // Check switches
+  const isVerbose = u.cmd.switches?.includes("verbose");
 
-  // Send output to the player
-  ctx.send(`Hello, ${playerName}!`);
-});
+  // Send output to the actor
+  u.send(`Hello, ${actorName}!`);
+};
 ```
 
 ## Flag API

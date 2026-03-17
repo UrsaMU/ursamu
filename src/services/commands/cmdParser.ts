@@ -10,10 +10,11 @@ import { InterceptorService } from "../Intents/InterceptorService.ts";
 import { intentRegistry } from "../Intents/IntentRegistry.ts";
 import { sandboxService } from "../Sandbox/SandboxService.ts";
 import { getAttribute } from "../../utils/getAttribute.ts";
-import { evaluateLock } from "../../utils/evaluateLock.ts";
+import { evaluateLock, hydrate } from "../../utils/evaluateLock.ts";
 import type { IDBObj } from "../../@types/UrsamuSDK.ts";
 import { SDKService, type SDKObject } from "../Sandbox/SDKService.ts";
 import { target } from "../../utils/target.ts";
+import { createNativeSDK } from "../SDK/index.ts";
 
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
@@ -210,14 +211,14 @@ cmdParser.use(async (ctx, next) => {
 
   // 4. Fallback to legacy hard-coded commands (only if any are loaded)
   if (cmds.length > 0) {
-    const actor: IDBObj = {
-      id: char?.id || "unknown",
-      name: (char?.data?.name as string) || "Unknown",
-      flags: new Set(char?.flags ? char.flags.split(" ") : []),
-      location: char?.location || "limbo",
-      state: (char?.data as Record<string, unknown>) || {},
-      contents: []
-    };
+    const actor: IDBObj = char
+      ? hydrate(char as unknown as Parameters<typeof hydrate>[0])
+      : {
+          id: "unknown",
+          flags: new Set<string>(),
+          state: {},
+          contents: [],
+        };
 
     console.log(`[CmdParser] Processing msg: "${msg}" with ${cmds.length} registered commands.`);
     for (const cmd of cmds) {
@@ -229,11 +230,16 @@ cmdParser.use(async (ctx, next) => {
             char.data.lastCommand = Date.now();
             await dbojs.modify({ id: char.id }, "$set", char.dbobj);
           }
-          await (cmd.exec(ctx, match.slice(1)) as Promise<void>)?.catch((e: Error) => {
+          const u = await createNativeSDK(ctx.socket.id, char?.id || "#-1", {
+            name: cmd.name,
+            original: msg,
+            args: match.slice(1),
+          });
+          await (cmd.exec(u) as Promise<void>)?.catch((e: Error) => {
             console.error(e);
             send(
               [ctx.socket.id],
-              `Uh oh! You've run into an error! please contact staff wit hthe following info!%r%r%chError:%cn ${e}`,
+              `Uh oh! You've run into an error! Please contact staff with the following info!%r%r%chError:%cn ${e}`,
               { error: true }
             );
           });

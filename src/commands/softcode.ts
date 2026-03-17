@@ -7,60 +7,64 @@ import { send } from "../services/broadcast/index.ts";
 import { target } from "../utils/target.ts";
 import { queue } from "../services/Queue/index.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
 export default () => {
-    addCmd({
-        name: "@trigger",
-        pattern: /^@tr(?:igger)?\s+([^/]+)\/([^=]+)(?:=(.*))?$/i,
-        lock: "connected",
-        exec: async (ctx, args) => {
-            const en = await dbojs.queryOne({ id: ctx.socket.cid! });
-            if (!en) return;
-            
-            const tarName = args[0];
-            const attrName = args[1].toUpperCase();
-            const triggerArgsRaw = args[2] || "";
-            
-            const tar = await target(en as unknown as IDBOBJ, tarName);
-            if (!tar) return send([ctx.socket.id], "I can't find that here!", {});
-            
-            const attr = await getAttribute(tar, attrName);
-            if (!attr) return send([ctx.socket.id], `Attribute ${attrName} not found on ${tarName}.`, {});
-            
-            const evalArgs = splitArgs(triggerArgsRaw).map(a => a.trim());
-            
-            // Execute via Script Engine
-            await sandboxService.runScript(attr.value, {
-                id: tar.id,
-                location: tar.location || "limbo",
-                // deno-lint-ignore no-explicit-any
-                state: (tar as any).data?.state || {},
-                target: evalArgs[0] ? { id: evalArgs[0] } : undefined
-            });
+  addCmd({
+    name: "@trigger",
+    pattern: /^@tr(?:igger)?\s+([^/]+)\/([^=]+)(?:=(.*))?$/i,
+    lock: "connected",
+    exec: async (u: IUrsamuSDK) => {
+      const en = await dbojs.queryOne({ id: u.me.id });
+      if (!en) return;
 
-            send([ctx.socket.id], `Triggered script on ${tarName}/${attrName}.`, {});
-        }
-    });
+      const tarName = u.cmd.args[0];
+      const attrName = u.cmd.args[1].toUpperCase();
+      const triggerArgsRaw = u.cmd.args[2] || "";
 
-    addCmd({
-        name: "@wait",
-        pattern: /^@wait\s+(\d+)\s*=\s*(.*)/i,
-        lock: "connected",
-        exec: (ctx, args) => {
-            const seconds = parseInt(args[0]);
-            const cmd = args[1];
-            
-            if (isNaN(seconds) || seconds < 0) return send([ctx.socket.id], "Invalid time.", {});
-            
-            // Queue the command
-            queue.enqueue({
-                command: cmd,
-                executor: ctx.socket.cid || "#-1",
-                enactor: ctx.socket.cid || "#-1",
-                data: ctx.data || {}
-            }, seconds * 1000).then((pid) => {
-                 send([ctx.socket.id], `Wait ${seconds}s: ${cmd} (PID: ${pid})`, {});
-            });
-        }
-    });
+      const tar = await target(en as unknown as IDBOBJ, tarName);
+      if (!tar) return send([u.socketId || ""], "I can't find that here!");
+
+      const attr = await getAttribute(tar, attrName);
+      if (!attr) return send([u.socketId || ""], `Attribute ${attrName} not found on ${tarName}.`);
+
+      const evalArgs = splitArgs(triggerArgsRaw).map((a) => a.trim());
+
+      await sandboxService.runScript(attr.value, {
+        id: tar.id,
+        location: tar.location || "limbo",
+        // deno-lint-ignore no-explicit-any
+        state: (tar as any).data?.state || {},
+        target: evalArgs[0] ? { id: evalArgs[0] } : undefined,
+      });
+
+      send([u.socketId || ""], `Triggered script on ${tarName}/${attrName}.`);
+    },
+  });
+
+  addCmd({
+    name: "@wait",
+    pattern: /^@wait\s+(\d+)\s*=\s*(.*)/i,
+    lock: "connected",
+    exec: (u: IUrsamuSDK) => {
+      const seconds = parseInt(u.cmd.args[0]);
+      const cmd = u.cmd.args[1];
+      if (isNaN(seconds) || seconds < 0)
+        return send([u.socketId || ""], "Invalid time.");
+
+      queue
+        .enqueue(
+          {
+            command: cmd,
+            executor: u.me.id,
+            enactor: u.me.id,
+            data: {},
+          },
+          seconds * 1000
+        )
+        .then((pid) => {
+          send([u.socketId || ""], `Wait ${seconds}s: ${cmd} (PID: ${pid})`);
+        });
+    },
+  });
 };

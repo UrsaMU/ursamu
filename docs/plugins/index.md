@@ -205,31 +205,18 @@ export default configPlugin;
 A plugin that adds a custom command:
 
 ```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
-import { registerCommand } from "../../services/Commands/mod.ts";
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
-const commandPlugin: IPlugin = {
-  name: "command-plugin",
-  version: "1.0.0",
-  description: "A plugin that adds a custom command",
-  
-  init: async () => {
-    // Register a custom command
-    registerCommand({
-      name: "hello",
-      pattern: "hello *",
-      flags: "connected",
-      exec: (ctx) => {
-        const target = ctx.args.trim() || "world";
-        ctx.send(`Hello, ${target}!`);
-      }
-    });
-    
-    return true;
-  }
-};
-
-export default commandPlugin;
+addCmd({
+  name: "hello",
+  pattern: /^hello\s*(.*)/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) => {
+    const target = u.cmd.args[0]?.trim() || "world";
+    u.send(`Hello, ${target}!`);
+  },
+});
 ```
 
 ### Database Plugin

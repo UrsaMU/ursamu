@@ -76,18 +76,18 @@ u.emit.broadcast(here.id, `${en.name} waves hello!`);
 Everything in UrsaMU is extensible via plugins:
 
 ```typescript
-import { IPlugin } from "ursamu";
-import { registerCommand } from "ursamu/commands";
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
 const myPlugin: IPlugin = {
   name: "my-game-plugin",
   version: "1.0.0",
   init: async () => {
-    registerCommand({
+    addCmd({
       name: "greet",
-      pattern: "greet *",
-      flags: "connected",
-      exec: (ctx) => ctx.send(`Hello, ${ctx.args}!`),
+      pattern: /^greet\s*(.*)/i,
+      lock: "connected",
+      exec: (u: IUrsamuSDK) => u.send(`Hello, ${u.cmd.args[0]?.trim() ?? "world"}!`),
     });
     return true;
   },
@@ -163,7 +163,7 @@ The WebSocket hub enforces **10 commands per second** per connection. Excess com
 | Web framework | Hono / Oak |
 | Database | dbojs (embedded, file-backed) |
 | Scripting | Web Workers (sandboxed ESM) |
-| Testing | `deno test` — 294 tests, 0 failures |
+| Testing | `deno test` — 296 tests, 0 failures |
 | Docs | Lume (static site generator) |
 | CI | GitHub Actions |
 
@@ -185,7 +185,7 @@ The WebSocket hub enforces **10 commands per second** per connection. Excess com
 
 UrsaMU is at **v1.0**. Current version is `1.0.0`.
 
-- **Test suite**: 294 passing, 0 failing
+- **Test suite**: 296 passing, 0 failing
 - **Core systems**: complete (commands, sandbox, WebSocket, Discord, scenes, channels)
 - **Status**: v1.0.0 released
 

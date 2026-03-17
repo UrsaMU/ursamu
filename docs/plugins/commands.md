@@ -8,8 +8,8 @@ nav:
     url: "#command-structure"
   - text: Registering Commands
     url: "#registering-commands"
-  - text: Command Context
-    url: "#command-context"
+  - text: The SDK Object
+    url: "#the-sdk-object"
   - text: Command Patterns
     url: "#command-patterns"
   - text: Examples
@@ -18,288 +18,342 @@ nav:
 
 # Creating Commands in UrsaMU Plugins
 
-This guide explains how to create and register commands in your UrsaMU plugins.
+This guide explains how to create and register commands in your UrsaMU plugins using the `addCmd` API.
 
 ## Command Basics
 
-Commands are the primary way players interact with UrsaMU. They allow players to perform actions, get information, and interact with the game world. As a plugin developer, you can add new commands to extend the functionality of UrsaMU.
+Commands are the primary way players interact with UrsaMU. When a player types a command, UrsaMU matches it against registered patterns and calls the corresponding `exec` function with a fully populated SDK object (`u`).
+
+Plugin commands use the **same `IUrsamuSDK` API** as system scripts in `system/scripts/`, so everything you can do in a script you can do in a plugin command.
 
 ## Command Structure
 
-In UrsaMU, commands are defined using the `ICmd` interface:
+Commands are defined using the `ICmd` interface:
 
 ```typescript
-interface ICmd {
-  name: string;         // The name of the command
-  pattern: string;      // The pattern to match for this command
-  flags?: string;       // The flags required to use this command (optional)
-  exec: (ctx: any) => void | Promise<void>; // The function to execute
-}
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+
+addCmd({
+  name: "hello",              // Unique command identifier
+  pattern: /^hello\s*(.*)/i, // Regex — capture groups become u.cmd.args
+  lock: "connected",          // Lock expression (empty = no restriction)
+  help: "Greet the world",    // Optional help text
+  category: "social",         // Optional category for help listings
+  exec: async (u: IUrsamuSDK) => {
+    const target = u.cmd.args[0]?.trim() || "world";
+    u.send(`Hello, ${target}!`);
+  },
+});
 ```
 
-### Command Name
+### `name`
 
-The `name` property is a unique identifier for your command. It should be lowercase and contain only letters, numbers, and hyphens.
+A unique string identifier for the command. Used in help listings and error messages.
 
-### Command Pattern
+### `pattern`
 
-The `pattern` property is a string that defines when your command should be triggered. It can include wildcards to match different variations of the command. For example:
+A `RegExp` that is matched against the player's input. Capture groups (parentheses) are passed as `u.cmd.args`. For example:
 
-- `"look"` - Matches exactly "look"
-- `"look *"` - Matches "look" followed by any text
-- `"look/examine *"` - Matches either "look" or "examine" followed by any text
+```typescript
+pattern: /^give\s+(.*)\s*=\s*(.*)/i
+// u.cmd.args[0] → item name
+// u.cmd.args[1] → recipient name
+```
 
-### Command Flags
+### `lock`
 
-The optional `flags` property defines the permissions required to use the command. It can be a single flag or a space-separated list of flags. For example:
+A lock expression that controls who can run the command. The player must pass the lock to execute it. Common values:
 
-- `"connected"` - The player must be connected
-- `"wizard"` - The player must have the WIZARD flag
-- `"connected wizard"` - The player must be both connected and have the WIZARD flag
+- `""` — no restriction (login screen commands like `create`, `connect`)
+- `"connected"` — must be logged in
+- `"connected builder+"` — connected and builder flag or higher
+- `"connected admin+"` — connected and admin flag or higher
+- `"connected wizard"` — connected and wizard flag
 
-### Command Execution Function
+### `exec`
 
-The `exec` property is a function that is called when the command is executed. It receives a context object that provides information about the command and the player who executed it.
+The function called when the command matches. Receives a single `u: IUrsamuSDK` argument.
 
 ## Registering Commands
 
-To register a command in your plugin, use the `registerCommand` function in your plugin's `init` method:
+Call `addCmd` anywhere in your plugin's initialization code. Commands are registered globally and persist for the lifetime of the server process.
 
 ```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
-import { registerCommand } from "../../services/Commands/mod.ts";
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
-const myPlugin: IPlugin = {
-  name: "my-plugin",
-  version: "1.0.0",
-  description: "A plugin that adds custom commands",
-  
-  init: async () => {
-    // Register a command
-    registerCommand({
-      name: "hello",
-      pattern: "hello *",
-      flags: "connected",
-      exec: (ctx) => {
-        const target = ctx.args.trim() || "world";
-        ctx.send(`Hello, ${target}!`);
-      }
-    });
-    
-    return true;
+// Register one command
+addCmd({
+  name: "ping",
+  pattern: /^ping$/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) => {
+    u.send("Pong!");
+  },
+});
+
+// Register multiple commands at once
+addCmd(
+  {
+    name: "north",
+    pattern: /^n(?:orth)?$/i,
+    lock: "connected",
+    exec: async (u: IUrsamuSDK) => { await u.force("go north"); },
+  },
+  {
+    name: "south",
+    pattern: /^s(?:outh)?$/i,
+    lock: "connected",
+    exec: async (u: IUrsamuSDK) => { await u.force("go south"); },
   }
-};
-
-export default myPlugin;
+);
 ```
 
-## Command Context
+## The SDK Object
 
-The context object passed to the command's `exec` function provides information about the command and the player who executed it:
+Your `exec` function receives `u: IUrsamuSDK` — the same object available to `system/scripts/` sandbox scripts.
+
+### Who am I?
 
 ```typescript
-interface CommandContext {
-  player: any;          // The player who executed the command
-  cmd: string;          // The command that was executed
-  args: string;         // The arguments passed to the command
-  switches: any;        // Any switches used with the command
-  send: (msg: string) => void; // Function to send a message to the player
+exec: (u: IUrsamuSDK) => {
+  const myId = u.me.id;                          // Actor's DB ID
+  const myName = String(u.me.state.name ?? "?"); // Actor's name
+  const myFlags = u.me.flags;                    // Set<string> of flags
+  const myLocation = u.me.location;              // Current room ID
+  const socketId = u.socketId;                   // WebSocket connection ID
 }
 ```
 
-### Player
-
-The `player` property is a reference to the player who executed the command. You can use this to get information about the player or perform actions on behalf of the player.
+### Command arguments
 
 ```typescript
-exec: (ctx) => {
-  const playerName = ctx.player.data.name;
-  ctx.send(`Hello, ${playerName}!`);
+// Pattern: /^score\s*(.*)/i
+exec: (u: IUrsamuSDK) => {
+  const rawArg = u.cmd.args[0];         // Everything after "score "
+  const switches = u.cmd.switches;      // e.g. ["brief"] from "score/brief"
+  const original = u.cmd.original;      // Full original input
 }
 ```
 
-### Command and Arguments
-
-The `cmd` property contains the command that was executed, and the `args` property contains any text that follows the command pattern.
+### Sending messages
 
 ```typescript
-exec: (ctx) => {
-  ctx.send(`You executed: ${ctx.cmd} with args: ${ctx.args}`);
+exec: (u: IUrsamuSDK) => {
+  u.send("This goes to you.");
+  u.send("This goes to another player.", otherPlayerId);
+  u.broadcast("Everyone in this room sees this.");
+  u.here.broadcast("Also everyone in this room.");
 }
 ```
 
-### Switches
-
-The `switches` property contains any switches used with the command. Switches are specified with a forward slash followed by a name and optionally an equals sign and a value.
+### Finding targets
 
 ```typescript
-exec: (ctx) => {
-  if (ctx.switches.verbose) {
-    ctx.send("Verbose mode enabled");
+exec: async (u: IUrsamuSDK) => {
+  const tar = await u.util.target(u.me, u.cmd.args[0]);
+  if (!tar) return u.send("I can't find that.");
+
+  u.send(`You see: ${u.util.displayName(tar, u.me)}`);
+}
+```
+
+### Database operations
+
+```typescript
+exec: async (u: IUrsamuSDK) => {
+  // Search
+  const results = await u.db.search({ flags: /player/i });
+
+  // Create
+  const obj = await u.db.create({
+    name: "Widget",
+    flags: new Set(["thing"]),
+    location: u.me.location,
+    state: { description: "A widget" },
+    contents: [],
+  });
+
+  // Modify
+  await u.db.modify(obj.id, "$set", { data: { description: "Updated" } });
+
+  // Delete
+  await u.db.destroy(obj.id);
+}
+```
+
+### Permissions
+
+```typescript
+exec: async (u: IUrsamuSDK) => {
+  const tar = await u.util.target(u.me, u.cmd.args[0]);
+  if (!tar) return u.send("Not found.");
+
+  if (!await u.canEdit(u.me, tar)) {
+    return u.send("Permission denied.");
   }
-  
-  const format = ctx.switches.format || "standard";
-  ctx.send(`Using format: ${format}`);
+  // ... proceed
 }
 ```
 
-### Send
-
-The `send` method sends a message to the player who executed the command.
+### System operations
 
 ```typescript
-exec: (ctx) => {
-  ctx.send("This message will be sent to the player");
+exec: async (u: IUrsamuSDK) => {
+  // Run a command as the current player
+  await u.force("look");
+  await u.execute("inventory");
+
+  // Teleport
+  await u.teleport(u.me.id, destinationRoomId);
+
+  // Set flags
+  await u.setFlags(u.me, "builder");
+
+  // Disconnect a player
+  await u.sys.disconnect(targetPlayerId);
 }
 ```
 
 ## Command Patterns
 
-Command patterns determine when your command is triggered. UrsaMU uses a simple pattern matching system:
+Patterns are regular expressions. Capture groups become entries in `u.cmd.args`.
 
-### Exact Match
-
-To match a command exactly, use the command name:
+### Simple command
 
 ```typescript
-pattern: "look"  // Matches exactly "look"
+pattern: /^inventory$/i
+// Matches: "inventory"
+// u.cmd.args: []
 ```
 
-### Wildcard Match
-
-To match a command followed by any text, use an asterisk:
+### Command with one argument
 
 ```typescript
-pattern: "look *"  // Matches "look" followed by any text
+pattern: /^look\s+(.*)/i
+// Matches: "look <target>"
+// u.cmd.args[0]: target string
 ```
 
-### Multiple Patterns
-
-To match multiple patterns, separate them with a forward slash:
+### Command with two arguments
 
 ```typescript
-pattern: "look/examine *"  // Matches either "look" or "examine" followed by any text
+pattern: /^give\s+(.*)\s*=\s*(.*)/i
+// Matches: "give <item>=<recipient>"
+// u.cmd.args[0]: item
+// u.cmd.args[1]: recipient
+```
+
+### Command with switches
+
+Switches are parsed from the command name by the cmdParser before reaching your `exec`. Use `/switch` in input:
+
+```typescript
+// Player types: "@set/quiet myobj=flag"
+exec: (u: IUrsamuSDK) => {
+  if (u.cmd.switches?.includes("quiet")) {
+    // quiet mode
+  }
+}
 ```
 
 ## Examples
 
-### Simple Command
-
-A simple command that greets the player:
+### Simple greeting command
 
 ```typescript
-registerCommand({
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+
+addCmd({
   name: "greet",
-  pattern: "greet *",
-  flags: "connected",
-  exec: (ctx) => {
-    const target = ctx.args.trim() || "world";
-    ctx.send(`Hello, ${target}!`);
-  }
+  pattern: /^greet\s*(.*)/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) => {
+    const target = u.cmd.args[0]?.trim() || "world";
+    u.send(`Hello, ${target}!`);
+  },
 });
 ```
 
-### Command with Switches
-
-A command that uses switches to modify its behavior:
+### Command with target lookup
 
 ```typescript
-registerCommand({
-  name: "search",
-  pattern: "search *",
-  flags: "connected",
-  exec: (ctx) => {
-    const target = ctx.args.trim();
-    const area = ctx.switches.area || "current";
-    const detail = ctx.switches.detail || "normal";
-    
-    ctx.send(`Searching for ${target} in ${area} area with ${detail} detail level.`);
-    // Search implementation
-  }
+addCmd({
+  name: "inspect",
+  pattern: /^inspect\s+(.*)/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const tar = await u.util.target(u.me, u.cmd.args[0]);
+    if (!tar) return u.send("You don't see that here.");
+
+    const name = u.util.displayName(tar, u.me);
+    const desc = String(tar.state.description || "You see nothing special.");
+    u.send(`${name}\n${desc}`);
+  },
 });
 ```
 
-### Command with Subcommands
-
-A command with subcommands:
+### Async command with database access
 
 ```typescript
-registerCommand({
-  name: "channel",
-  pattern: "channel *",
-  flags: "connected",
-  exec: (ctx) => {
-    const args = ctx.args.trim().split(" ");
-    const subcommand = args[0];
-    const subargs = args.slice(1).join(" ");
-    
-    switch (subcommand) {
-      case "join":
-        if (!subargs) {
-          return ctx.send("Join which channel?");
-        }
-        ctx.send(`Joining channel ${subargs}.`);
-        // Join implementation
-        break;
-      case "leave":
-        if (!subargs) {
-          return ctx.send("Leave which channel?");
-        }
-        ctx.send(`Leaving channel ${subargs}.`);
-        // Leave implementation
-        break;
-      case "list":
-        ctx.send("Available channels:");
-        // List implementation
-        break;
-      default:
-        ctx.send(`
-          |cChannel Commands:|n
-          channel join <name> - Join a channel
-          channel leave <name> - Leave a channel
-          channel list - List available channels
-        `);
-        break;
+addCmd({
+  name: "who",
+  pattern: /^who$/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const players = await u.db.search({ flags: /connected/i });
+
+    if (players.length === 0) {
+      return u.send("No one is connected.");
     }
-  }
+
+    const names = players
+      .map((p) => String(p.state.name ?? p.id))
+      .join(", ");
+
+    u.send(`Connected players: ${names}`);
+  },
 });
 ```
 
-### Asynchronous Command
-
-A command that performs asynchronous operations:
+### Admin command with permission check
 
 ```typescript
-registerCommand({
-  name: "profile",
-  pattern: "profile *",
-  flags: "connected",
-  exec: async (ctx) => {
-    const target = ctx.args.trim() || ctx.player.data.name;
-    
-    try {
-      // Get the target player
-      const players = await dbojs.query({
-        "data.name": new RegExp(`^${target}$`, "i"),
-        flags: /player/i
-      });
-      
-      if (players.length === 0) {
-        return ctx.send(`Player ${target} not found.`);
-      }
-      
-      const player = players[0];
-      
-      // Format the profile
-      let message = `|c${player.data.name}'s Profile:|n\n`;
-      message += `Description: ${player.data.description || "None"}\n`;
-      
-      ctx.send(message);
-    } catch (error) {
-      ctx.send(`Error: ${error.message}`);
+addCmd({
+  name: "@nuke",
+  pattern: /^@nuke\s+(.*)/i,
+  lock: "connected admin+",
+  exec: async (u: IUrsamuSDK) => {
+    const tar = await u.util.target(u.me, u.cmd.args[0]);
+    if (!tar) return u.send("Not found.");
+
+    if (tar.flags.has("superuser")) {
+      return u.send("You cannot nuke a superuser.");
     }
-  }
+
+    await u.db.destroy(tar.id);
+    u.send(`Destroyed ${u.util.displayName(tar, u.me)}.`);
+  },
 });
 ```
 
-By following these guidelines and examples, you can create powerful and user-friendly commands for your UrsaMU plugins. 
+### Command with room broadcast
+
+```typescript
+addCmd({
+  name: "shout",
+  pattern: /^shout\s+(.*)/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) => {
+    const message = u.cmd.args[0];
+    const name = String(u.me.state.name ?? u.me.id);
+
+    u.send(`You shout: "${message}"`);
+    u.here.broadcast(`${name} shouts: "${message}"`, {
+      exclude: [u.socketId ?? ""],
+    });
+  },
+});
+```

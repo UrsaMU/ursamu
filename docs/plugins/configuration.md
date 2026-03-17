@@ -462,29 +462,29 @@ export default class DiscordIntegrationPlugin implements IPlugin {
     }
     
     // Register commands
-    app.commands.register("discord-integration", {
+    addCmd({
       name: "discord",
-      pattern: "discord *",
-      flags: "connected",
-      exec: (ctx) => {
-        const args = ctx.args.trim();
-        
+      pattern: /^discord\s*(.*)/i,
+      lock: "connected",
+      exec: (u) => {
+        const args = u.cmd.args[0]?.trim() ?? "";
+
         if (!args) {
-          return ctx.send(`
-            |cDiscord Integration Help|n
-            discord status - Show Discord connection status
-            discord link - Link your Discord account
-            discord unlink - Unlink your Discord account
-          `);
+          return u.send(
+            "%chDiscord Integration Help%cn\r\n" +
+            "discord status - Show Discord connection status\r\n" +
+            "discord link   - Link your Discord account\r\n" +
+            "discord unlink - Unlink your Discord account"
+          );
         }
-        
+
         if (args === "status") {
           const status = this.client ? "connected" : "disconnected";
-          ctx.send(`Discord integration is ${this.config.enabled ? 'enabled' : 'disabled'} and ${status}.`);
+          u.send(`Discord integration is ${this.config.enabled ? "enabled" : "disabled"} and ${status}.`);
         }
-        
+
         // Other command handlers...
-      }
+      },
     });
     
     console.log(`${this.name} initialized`);

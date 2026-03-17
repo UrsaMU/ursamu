@@ -294,13 +294,13 @@ export default class WeatherPlugin implements IPlugin {
   
   onInit(app: App): void {
     // Register weather command
-    app.commands.register("weather", {
+    addCmd({
       name: "weather",
-      pattern: "weather",
-      flags: "connected",
-      exec: (ctx) => {
-        ctx.send(`The current weather is ${this.currentWeather}.`);
-      }
+      pattern: /^weather$/i,
+      lock: "connected",
+      exec: (u) => {
+        u.send(`The current weather is ${this.currentWeather}.`);
+      },
     });
     
     console.log(`${this.name} initialized`);

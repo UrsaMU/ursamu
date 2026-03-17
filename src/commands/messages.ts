@@ -4,6 +4,7 @@ import { addCmd } from "../services/commands/index.ts";
 import { canEdit } from "../utils/canEdit.ts";
 import { target } from "../utils/target.ts";
 import { displayName } from "../utils/displayName.ts";
+import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
 export default () => {
   const messages = [
@@ -22,32 +23,37 @@ export default () => {
       lock: "connected builder+",
       help: msg.help,
       category: "building",
-      exec: async (ctx, args) => {
-        const [obj, message] = args;
-        if (!ctx.socket.cid) return;
-        const en = await Obj.get(ctx.socket.cid);
+      exec: async (u: IUrsamuSDK) => {
+        const [obj, message] = u.cmd.args;
+        const en = await Obj.get(u.me.id);
         if (!en) return;
 
         const tar = await target(en.dbobj, obj, true);
-        if (!tar) return send([ctx.socket.id], "I don't see that here.");
+        if (!tar) return send([u.socketId || ""], "I don't see that here.");
 
         const tarObj = await Obj.get(tar.id);
-        if(!tarObj?.dbobj) return send([ctx.socket.id], "I don't see that here.");
+        if (!tarObj?.dbobj) return send([u.socketId || ""], "I don't see that here.");
 
         if (await canEdit(en.dbobj, tarObj.dbobj)) {
           tarObj.dbobj.data ||= {};
-          
+
           if (!message) {
             delete tarObj.dbobj.data[msg.attr];
             await tarObj.save();
-             return send([ctx.socket.id], `${msg.name} cleared on ${displayName(en.dbobj, tarObj.dbobj, true)}.`);
+            return send(
+              [u.socketId || ""],
+              `${msg.name} cleared on ${displayName(en.dbobj, tarObj.dbobj, true)}.`
+            );
           }
 
           tarObj.dbobj.data[msg.attr] = message;
           await tarObj.save();
-          send([ctx.socket.id], `${msg.name} set on ${displayName(en.dbobj, tarObj.dbobj, true)}.`);
+          send(
+            [u.socketId || ""],
+            `${msg.name} set on ${displayName(en.dbobj, tarObj.dbobj, true)}.`
+          );
         } else {
-             send([ctx.socket.id], "Permission denied.");
+          send([u.socketId || ""], "Permission denied.");
         }
       },
     });

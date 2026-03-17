@@ -2,6 +2,47 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [1.3.0] — 2026-03-16
+
+### Breaking Changes
+
+- **Plugin command API unified with sandbox SDK** — `ICmd.exec` signature changed from `(ctx: IContext, args: string[])` to `(u: IUrsamuSDK)`. All plugin commands now receive the same `IUrsamuSDK` object that sandbox scripts receive.
+
+  **Before:**
+  ```typescript
+  exec: (ctx, args) => {
+    const target = args[0]?.trim();
+    ctx.socket.send(target);
+  }
+  ```
+  **After:**
+  ```typescript
+  exec: (u: IUrsamuSDK) => {
+    const target = u.cmd.args[0]?.trim();
+    u.send(target);
+  }
+  ```
+
+### New
+
+- **`createNativeSDK(socketId, actorId, cmd)`** — factory function in `src/services/SDK/index.ts` that builds a full `IUrsamuSDK` from native services for use in the command pipeline.
+- **`IUrsamuSDK.canEdit`** now returns `Promise<boolean>` (was `boolean`).
+- Plugin commands can now use all SDK capabilities: `u.force()`, `u.setFlags()`, `u.teleport()`, `u.db.*`, `u.chan.*`, `u.sys.*`, `u.auth.*`, `u.util.*`, etc.
+
+### Migration Guide
+
+Update any `addCmd` calls:
+
+| Old | New |
+|-----|-----|
+| `exec: (ctx, args) =>` | `exec: (u: IUrsamuSDK) =>` |
+| `args[0]` | `u.cmd.args[0]` |
+| `ctx.socket.send(msg)` | `u.send(msg)` |
+| `ctx.socket.cid` | `u.me.id` |
+| `ctx.socket.id` | `u.socketId` |
+
+---
+
 ## [1.0.0] — 2026-03-16
 
 First stable release.
@@ -50,7 +91,7 @@ REST endpoint `GET /api/v1/scenes/:id/export?format=markdown|json` for exporting
 ### Developer Experience
 
 - `deno task init` (or `dx jsr:@ursamu/ursamu init`) — interactive project wizard with `make-wizard` bootstrap script
-- `deno task test` — 294 passing tests, 0 failures
+- `deno task test` — 296 passing tests, 0 failures
 - Docker + `docker-compose.yaml` support
 - JSR package: `jsr:@ursamu/ursamu`
 

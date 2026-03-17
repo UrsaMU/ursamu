@@ -150,15 +150,16 @@ Create custom commands in the `src/commands` directory:
 
 ```typescript
 // src/commands/hello.ts
-import { registerCommand } from "ursamu";
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
-registerCommand({
+addCmd({
   name: "hello",
-  pattern: "hello *",
-  flags: "connected",
-  exec: (ctx) => {
-    const target = ctx.args.trim() || "World";
-    ctx.send(`Hello, ${target}!`);
+  pattern: /^hello\s*(.*)/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) => {
+    const target = u.cmd.args[0]?.trim() || "World";
+    u.send(`Hello, ${target}!`);
   }
 });
 ```
@@ -246,18 +247,16 @@ docker run -p 4201:4201 my-game
 Here's a complete example of a basic child game:
 
 ```typescript
-// deps.ts
-export { mu, registerCommand, IPlugin } from "ursamu";
-
 // src/main.ts
-import { mu } from "../deps.ts";
+import { mu } from "jsr:@ursamu/ursamu";
 import welcomePlugin from "./plugins/welcome/mod.ts";
 
 // Define configuration
 const config = {
   server: {
-    port: 4201,
-    host: "0.0.0.0"
+    telnet: 4201,
+    ws: 4202,
+    http: 4203,
   },
   game: {
     name: "My First MU",
@@ -266,36 +265,34 @@ const config = {
 };
 
 // Start the game
-await mu({
-  config,
-  plugins: [welcomePlugin]
-});
+await mu(config, [welcomePlugin]);
 
-console.log(`${config.game.name} is running on port ${config.server.port}`);
+console.log(`${config.game.name} is running`);
 
 // src/plugins/welcome/mod.ts
-import { IPlugin, registerCommand } from "../../../deps.ts";
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
 const welcomePlugin: IPlugin = {
   name: "welcome",
   version: "1.0.0",
   description: "A welcome plugin for new players",
-  
+
   init: async () => {
     // Register a welcome command
-    registerCommand({
+    addCmd({
       name: "welcome",
-      pattern: "welcome *",
-      flags: "connected",
-      exec: (ctx) => {
-        const target = ctx.args.trim() || "friend";
-        ctx.send(`Welcome to our game, ${target}!`);
+      pattern: /^welcome\s*(.*)/i,
+      lock: "connected",
+      exec: (u: IUrsamuSDK) => {
+        const target = u.cmd.args[0]?.trim() || "friend";
+        u.send(`Welcome to our game, ${target}!`);
       }
     });
-    
+
     return true;
   },
-  
+
   remove: async () => {
     // Cleanup code here
   }

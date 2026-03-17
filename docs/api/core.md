@@ -234,56 +234,68 @@ obj.save();
 
 ## Command
 
-The `Command` interface defines the structure of a command in UrsaMU.
+The `ICmd` interface defines the structure of a command in UrsaMU.
 
 ### Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `name` | `string` | The name of the command |
-| `pattern` | `string` | The pattern to match for this command |
-| `flags` | `string` | The flags required to use this command |
-| `exec` | `(ctx: CommandContext) => void \| Promise<void>` | The function to execute when the command is run |
+| `pattern` | `string \| RegExp` | Regex pattern to match; capture groups become `u.cmd.args` |
+| `lock` | `string` | Lock expression required to run this command |
+| `exec` | `(u: IUrsamuSDK) => void \| Promise<void>` | The function to execute when the command is run |
 | `help` | `string` | The help text for the command |
+| `hidden` | `boolean` | If true, omit from help listings |
 
-### CommandContext
+### IUrsamuSDK
 
-The `CommandContext` interface provides context for command execution.
+The SDK object received by every command's `exec` function. Plugin commands and sandbox scripts receive the same interface.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `player` | `Player` | The player who executed the command |
-| `command` | `string` | The full command string |
-| `args` | `string` | The arguments passed to the command |
-| `switches` | `Record<string, string>` | Any switches used with the command |
-| `app` | `App` | The application instance |
+| `me` | `IDBObj` | The actor who executed the command |
+| `here` | `IDBObj \| null` | The room the actor is currently in |
+| `cmd.args` | `string[]` | Regex capture groups from the matched pattern |
+| `cmd.switches` | `string[]` | Switches supplied (e.g. `["verbose"]`) |
+| `socketId` | `string` | The WebSocket socket ID of the actor |
 
-#### `send(message: string)`
+#### `u.send(message: string)`
 
-Sends a message to the player who executed the command.
+Sends a message to the actor who executed the command.
 
 ```typescript
-ctx.send("Command executed successfully!");
+u.send("Command executed successfully!");
+```
+
+#### `u.broadcast(roomId: string, message: string)`
+
+Broadcasts a message to all players in a room.
+
+```typescript
+u.broadcast(u.here?.id ?? "", "Something happens here.");
 ```
 
 ### Example
 
 ```typescript
-// Define a command
-const lookCommand = {
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+
+// Define and register a command
+addCmd({
   name: "look",
-  pattern: "look *",
-  flags: "connected",
-  exec: (ctx) => {
-    const target = ctx.args.trim() || ctx.player.location;
-    // Implementation of look command
-    ctx.send(`You look at ${target}`);
+  pattern: /^(?:look|l)\s*(.*)/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const targetName = u.cmd.args[0]?.trim();
+    const target = targetName
+      ? await u.util.target(u.me, targetName)
+      : u.here;
+    if (!target) return u.send("I don't see that here.");
+    u.send(`You look at ${String(target.state.name ?? target.id)}.`);
   },
   help: "look [<object>]\nLooks at an object or the current room."
-};
-
-// Register the command
-app.commands.register("core", lookCommand);
+});
 ```
 
 ## Hook
@@ -384,17 +396,19 @@ The `CommandManager` class manages commands in UrsaMU.
 
 ### Methods
 
-#### `register(plugin: string, command: Command)`
+#### `register(plugin: string, command: ICmd)`
 
-Registers a command.
+Registers a command. Prefer using `addCmd()` directly from the SDK package.
 
 ```typescript
-app.commands.register("myplugin", {
+import { addCmd } from "jsr:@ursamu/ursamu";
+
+addCmd({
   name: "hello",
-  pattern: "hello",
-  flags: "connected",
-  exec: (ctx) => {
-    ctx.send("Hello, world!");
+  pattern: /^hello$/i,
+  lock: "connected",
+  exec: (u) => {
+    u.send("Hello, world!");
   }
 });
 ```
@@ -422,14 +436,8 @@ Finds a command that matches the input.
 ```typescript
 const match = app.commands.match("look at sword");
 if (match) {
-  // Execute the command
-  match.command.exec({
-    player,
-    command: match.command.name,
-    args: match.args,
-    switches: match.switches,
-    app
-  });
+  // Commands are executed by the command parser via createNativeSDK
+  // Direct invocation is not typical — let the parser route commands
 }
 ```
 

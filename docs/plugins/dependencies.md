@@ -262,31 +262,29 @@ export default class EmojiPlugin implements IPlugin {
     });
     
     // Register an emoji command
-    app.commands.register("emoji", {
+    addCmd({
       name: "emoji",
-      pattern: "emoji *",
-      flags: "connected",
-      exec: (ctx) => {
-        const args = ctx.args.trim();
-        
+      pattern: /^emoji\s*(.*)/i,
+      lock: "connected",
+      exec: (u) => {
+        const args = u.cmd.args[0]?.trim() ?? "";
+
         if (!args) {
-          // List available emoji
           const emojiList = Object.keys(this.emojiMap)
-            .map(code => `${code} - ${this.emojiMap[code]}`)
-            .join("\n");
-          
-          ctx.send(`|cAvailable Emoji:|n\n${emojiList}`);
+            .map((code) => `${code} - ${this.emojiMap[code]}`)
+            .join("\r\n");
+          u.send(`%chAvailable Emoji:%cn\r\n${emojiList}`);
           return;
         }
-        
-        // Send an emoji to the current channel
-        const currentChannel = ctx.player.get("currentChannel") || "Public";
+
+        const currentChannel = String(u.me.state.currentChannel ?? "Public");
+        const playerName = String(u.me.state.name ?? u.me.id);
         chatSystem.sendChannelMessage(
           currentChannel,
-          ctx.player.name,
+          playerName,
           this.replaceEmoji(args)
         );
-      }
+      },
     });
     
     console.log(`${this.name} initialized`);

@@ -1,4 +1,4 @@
-import type { IContext } from "./IContext.ts";
+import type { IUrsamuSDK } from "./UrsamuSDK.ts";
 
 export interface ICmd {
   name: string;
@@ -7,5 +7,5 @@ export interface ICmd {
   hidden?: boolean;
   pattern: string | RegExp;
   lock?: string;
-  exec: (ctx: IContext, args: string[]) => void | Promise<void>;
+  exec: (u: IUrsamuSDK) => void | Promise<void>;
 }

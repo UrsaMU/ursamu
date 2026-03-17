@@ -63,7 +63,8 @@ touch src/plugins/dice-roller/index.ts
 Now, let's implement our dice roller plugin. Open `src/plugins/dice-roller/index.ts` and add the following code:
 
 ```typescript
-import { App, IPlugin } from "ursamu";
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
 /**
  * A plugin that adds dice rolling commands to UrsaMU
@@ -83,49 +84,48 @@ export default class DiceRollerPlugin implements IPlugin {
   /**
    * Initialize the plugin
    */
-  onInit(app: App): void {
+  onInit(): void {
+    const plugin = this;
+
     // Register the roll command
-    app.commands.register("dice-roller", {
+    addCmd({
       name: "roll",
-      pattern: "roll *",
-      flags: "connected",
-      exec: (ctx) => {
-        const args = ctx.args.trim();
-        
+      pattern: /^roll\s*(.*)/i,
+      lock: "connected",
+      exec: (u: IUrsamuSDK) => {
+        const args = u.cmd.args[0]?.trim() ?? "";
+
         // If no arguments, show help
         if (!args) {
-          return ctx.send(`
-            |cDice Roller Help|n
-            Usage: roll <number>d<sides> [+/-<modifier>]
-            Examples:
-              roll 1d6       - Roll a 6-sided die
-              roll 2d10      - Roll two 10-sided dice
-              roll 3d6+2     - Roll three 6-sided dice and add 2
-              roll 2d20-1    - Roll two 20-sided dice and subtract 1
-          `);
+          return u.send(
+            "%chDice Roller Help%cn\r\n" +
+            "Usage: roll <number>d<sides> [+/-<modifier>]\r\n" +
+            "Examples:\r\n" +
+            "  roll 1d6       - Roll a 6-sided die\r\n" +
+            "  roll 2d10      - Roll two 10-sided dice\r\n" +
+            "  roll 3d6+2     - Roll three 6-sided dice and add 2\r\n" +
+            "  roll 2d20-1    - Roll two 20-sided dice and subtract 1"
+          );
         }
-        
+
         // Parse the dice expression
-        const result = this.parseDiceExpression(args);
-        
+        const result = plugin.parseDiceExpression(args);
+
         if (result.error) {
-          return ctx.send(`|rError:|n ${result.error}`);
+          return u.send(`%crError:%cn ${result.error}`);
         }
-        
+
         // Format the result
         const rollText = result.rolls.join(", ");
-        const totalText = result.modifier !== 0 
-          ? `${result.total - result.modifier} ${result.modifier > 0 ? '+' : ''}${result.modifier} = ${result.total}`
+        const totalText = result.modifier !== 0
+          ? `${result.total - result.modifier} ${result.modifier > 0 ? "+" : ""}${result.modifier} = ${result.total}`
           : result.total.toString();
-        
-        ctx.send(`
-          |c${ctx.player.name} rolls ${args}|n
-          Rolls: ${rollText}
-          Total: ${totalText}
-        `);
-      }
+
+        const playerName = String(u.me.state.name ?? u.me.id);
+        u.send(`%ch${playerName} rolls ${args}%cn\r\nRolls: ${rollText}\r\nTotal: ${totalText}`);
+      },
     });
-    
+
     console.log(`${this.name} initialized`);
   }
   

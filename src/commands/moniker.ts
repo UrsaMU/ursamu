@@ -1,38 +1,27 @@
-import { send } from "../services/broadcast/index.ts";
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
-import parser from "../services/parser/parser.ts";
 import { target } from "../utils/target.ts";
+import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
 export default () =>
   addCmd({
     name: "moniker",
     pattern: /^[@\+]?moniker\s+(.*)\s*=\s*(.*)/i,
     lock: "connected admin+",
-    exec: async (ctx, args) => {
-      const player = await dbojs.queryOne({ id: ctx.socket.cid || "" });
+    exec: async (u: IUrsamuSDK) => {
+      const player = await dbojs.queryOne({ id: u.me.id });
       if (!player) return;
-      const tar = await target(player, args[0]);
-      if (!tar) {
-        send([`#${player.location}`], "I can't find that player.", {});
-        return;
-      }
-      const stripped = parser.stripSubs("telnet", args[1]);
+      const tar = await target(player, u.cmd.args[0]);
+      if (!tar) return u.send("I can't find that player.");
+
+      const stripped = u.util.stripSubs(u.cmd.args[1]);
       tar.data ||= {};
-      if (stripped.toLowerCase() != tar.data.name?.toLowerCase()) {
-        send(
-          [`#${player.id}`],
-          "You can't change someone's moniker to something that doesn't match their name.",
-          {}
-        );
+      if (stripped.toLowerCase() !== String(tar.data.name || "").toLowerCase()) {
+        u.send("You can't change someone's moniker to something that doesn't match their name.");
         return;
       }
-      tar.data.moniker = args[1];
+      tar.data.moniker = u.cmd.args[1];
       await dbojs.modify({ id: tar.id }, "$set", tar);
-      send(
-        [ctx.socket.id],
-        `You have set ${tar.data.name}'s moniker to ${args[1]}.`,
-        {}
-      );
+      u.send(`You have set ${String(tar.data.name)}'s moniker to ${u.cmd.args[1]}.`);
     },
   });

@@ -54,7 +54,7 @@ export interface IUrsamuSDK {
     args: string[];
     switches?: string[];
   };
-  canEdit(actor: IDBObj, target: IDBObj): boolean;
+  canEdit(actor: IDBObj, target: IDBObj): Promise<boolean>;
   send(message: string, target?: string, options?: Record<string, unknown>): void;
   broadcast(message: string, options?: Record<string, unknown>): void;
   execute(command: string): void;
