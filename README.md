@@ -327,6 +327,12 @@ deno run -A jsr:@ursamu/ursamu/cli plugin info <name>
 # Show configuration
 deno task config
 
+# Update ursamu engine to the latest version (run from game project root)
+deno run -A jsr:@ursamu/ursamu/cli update
+
+# Preview what update would change without writing anything
+deno run -A jsr:@ursamu/ursamu/cli update --dry-run
+
 # Install the CLI tool locally
 deno task install-cli
 ```
