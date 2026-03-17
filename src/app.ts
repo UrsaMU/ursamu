@@ -2,6 +2,13 @@ import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, bu
 import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
 
+type PluginRouteHandler = (req: Request, userId: string | null) => Promise<Response>;
+const pluginRoutes: Array<{ prefix: string; handler: PluginRouteHandler }> = [];
+
+export function registerPluginRoute(prefix: string, handler: PluginRouteHandler): void {
+  pluginRoutes.push({ prefix, handler });
+}
+
 /**
  * Handle HTTP requests for the UrsaMU server
  * This replaces the Express application and provides native Deno handling for API routes
@@ -92,6 +99,18 @@ export const handleRequest = async (req: Request): Promise<Response> => {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
+    }
+
+    // Plugin routes
+    for (const { prefix, handler } of pluginRoutes) {
+      if (path.startsWith(prefix)) {
+        const userId = await authenticate(req).catch(() => null);
+        const pluginResponse = await handler(req, userId);
+        for (const [key, value] of Object.entries(corsHeaders)) {
+          pluginResponse.headers.set(key, value);
+        }
+        return pluginResponse;
+      }
     }
 
     return new Response(JSON.stringify({ error: "Not Found" }), {
