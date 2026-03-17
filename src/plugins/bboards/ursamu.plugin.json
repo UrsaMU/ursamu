@@ -1,0 +1,9 @@
+{
+  "name": "bboards",
+  "version": "1.0.0",
+  "description": "Bulletin board system with in-game +bb commands and REST API",
+  "ursamu": ">=1.0.0",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts"
+}

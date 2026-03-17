@@ -522,7 +522,7 @@ player.move(room);
 obj.save();
 </code></pre>
 <h2>Command</h2>
-<p>The <code>Command</code> interface defines the structure of a command in UrsaMU.</p>
+<p>The <code>ICmd</code> interface defines the structure of a command in UrsaMU.</p>
 <h3>Properties</h3>
 <table>
 <thead>
@@ -540,17 +540,17 @@ obj.save();
 </tr>
 <tr>
 <td><code>pattern</code></td>
-<td><code>string</code></td>
-<td>The pattern to match for this command</td>
+<td><code>string | RegExp</code></td>
+<td>Regex pattern to match; capture groups become <code>u.cmd.args</code></td>
 </tr>
 <tr>
-<td><code>flags</code></td>
+<td><code>lock</code></td>
 <td><code>string</code></td>
-<td>The flags required to use this command</td>
+<td>Lock expression required to run this command</td>
 </tr>
 <tr>
 <td><code>exec</code></td>
-<td><code>(ctx: CommandContext) =&gt; void | Promise&lt;void&gt;</code></td>
+<td><code>(u: IUrsamuSDK) =&gt; void | Promise&lt;void&gt;</code></td>
 <td>The function to execute when the command is run</td>
 </tr>
 <tr>
@@ -558,10 +558,15 @@ obj.save();
 <td><code>string</code></td>
 <td>The help text for the command</td>
 </tr>
+<tr>
+<td><code>hidden</code></td>
+<td><code>boolean</code></td>
+<td>If true, omit from help listings</td>
+</tr>
 </tbody>
 </table>
-<h3>CommandContext</h3>
-<p>The <code>CommandContext</code> interface provides context for command execution.</p>
+<h3>IUrsamuSDK</h3>
+<p>The SDK object received by every command’s <code>exec</code> function. Plugin commands and sandbox scripts receive the same interface.</p>
 <table>
 <thead>
 <tr>
@@ -572,52 +577,59 @@ obj.save();
 </thead>
 <tbody>
 <tr>
-<td><code>player</code></td>
-<td><code>Player</code></td>
-<td>The player who executed the command</td>
+<td><code>me</code></td>
+<td><code>IDBObj</code></td>
+<td>The actor who executed the command</td>
 </tr>
 <tr>
-<td><code>command</code></td>
+<td><code>here</code></td>
+<td><code>IDBObj | null</code></td>
+<td>The room the actor is currently in</td>
+</tr>
+<tr>
+<td><code>cmd.args</code></td>
+<td><code>string[]</code></td>
+<td>Regex capture groups from the matched pattern</td>
+</tr>
+<tr>
+<td><code>cmd.switches</code></td>
+<td><code>string[]</code></td>
+<td>Switches supplied (e.g. <code>["verbose"]</code>)</td>
+</tr>
+<tr>
+<td><code>socketId</code></td>
 <td><code>string</code></td>
-<td>The full command string</td>
-</tr>
-<tr>
-<td><code>args</code></td>
-<td><code>string</code></td>
-<td>The arguments passed to the command</td>
-</tr>
-<tr>
-<td><code>switches</code></td>
-<td><code>Record&lt;string, string&gt;</code></td>
-<td>Any switches used with the command</td>
-</tr>
-<tr>
-<td><code>app</code></td>
-<td><code>App</code></td>
-<td>The application instance</td>
+<td>The WebSocket socket ID of the actor</td>
 </tr>
 </tbody>
 </table>
-<h4><code>send(message: string)</code></h4>
-<p>Sends a message to the player who executed the command.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">ctx.send("Command executed successfully!");
+<h4><code>u.send(message: string)</code></h4>
+<p>Sends a message to the actor who executed the command.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send("Command executed successfully!");
+</code></pre>
+<h4><code>u.broadcast(roomId: string, message: string)</code></h4>
+<p>Broadcasts a message to all players in a room.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.broadcast(u.here?.id ?? "", "Something happens here.");
 </code></pre>
 <h3>Example</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Define a command
-const lookCommand = {
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+
+// Define and register a command
+addCmd({
   name: "look",
-  pattern: "look *",
-  flags: "connected",
-  exec: (ctx) =&gt; {
-    const target = ctx.args.trim() || ctx.player.location;
-    // Implementation of look command
-    ctx.send(`You look at ${target}`);
+  pattern: /^(?:look|l)\s*(.*)/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) =&gt; {
+    const targetName = u.cmd.args[0]?.trim();
+    const target = targetName
+      ? await u.util.target(u.me, targetName)
+      : u.here;
+    if (!target) return u.send("I don't see that here.");
+    u.send(`You look at ${String(target.state.name ?? target.id)}.`);
   },
   help: "look [&lt;object&gt;]\nLooks at an object or the current room."
-};
-
-// Register the command
-app.commands.register("core", lookCommand);
+});
 </code></pre>
 <h2>Hook</h2>
 <p>The <code>HookManager</code> class manages event hooks in UrsaMU.</p>
@@ -672,14 +684,16 @@ app.commands.register("core", lookCommand);
 <h2>CommandManager</h2>
 <p>The <code>CommandManager</code> class manages commands in UrsaMU.</p>
 <h3>Methods</h3>
-<h4><code>register(plugin: string, command: Command)</code></h4>
-<p>Registers a command.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.commands.register("myplugin", {
+<h4><code>register(plugin: string, command: ICmd)</code></h4>
+<p>Registers a command. Prefer using <code>addCmd()</code> directly from the SDK package.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
+
+addCmd({
   name: "hello",
-  pattern: "hello",
-  flags: "connected",
-  exec: (ctx) =&gt; {
-    ctx.send("Hello, world!");
+  pattern: /^hello$/i,
+  lock: "connected",
+  exec: (u) =&gt; {
+    u.send("Hello, world!");
   }
 });
 </code></pre>
@@ -695,14 +709,8 @@ app.commands.register("core", lookCommand);
 <p>Finds a command that matches the input.</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">const match = app.commands.match("look at sword");
 if (match) {
-  // Execute the command
-  match.command.exec({
-    player,
-    command: match.command.name,
-    args: match.args,
-    switches: match.switches,
-    app
-  });
+  // Commands are executed by the command parser via createNativeSDK
+  // Direct invocation is not typical — let the parser route commands
 }
 </code></pre>
 <h2>PluginManager</h2>

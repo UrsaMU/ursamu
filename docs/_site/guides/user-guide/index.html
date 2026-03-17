@@ -315,6 +315,31 @@ you started:</p>
 <li><code>examine &lt;object&gt;</code> — Inspect an object’s full details (owner, flags, contents)</li>
 <li><code>doing</code> — Show your current activity/status line</li>
 </ul>
+<h2>Bulletin Boards</h2>
+<p>Bulletin boards are persistent message boards, organized by topic.</p>
+<ul>
+<li><code>+bblist</code> — list all boards with post counts and unread counts</li>
+<li><code>+bbread &lt;board&gt;</code> — list posts on a board</li>
+<li><code>+bbread &lt;board&gt;/&lt;num&gt;</code> — read a specific post</li>
+<li><code>+bbpost &lt;board&gt;=&lt;subject&gt;/&lt;body&gt;</code> — post to a board</li>
+<li><code>+bbpost/edit &lt;board&gt;/&lt;num&gt;=&lt;new body&gt;</code> — edit one of your posts</li>
+<li><code>+bbpost/delete &lt;board&gt;/&lt;num&gt;</code> — delete one of your posts</li>
+</ul>
+<p>Board names are case-insensitive slugs (spaces become dashes):</p>
+<pre class="language-none" tabindex="0"><code class="language-none">+bbread general
++bbpost general=Welcome to the game/Hello everyone, looking forward to playing here!
+</code></pre>
+<p>Reading a post automatically marks that board as read.</p>
+<h2>Staff Jobs</h2>
+<p>The jobs system lets players submit requests, bug reports, or ideas to staff.</p>
+<ul>
+<li><code>+job &lt;title&gt;=&lt;description&gt;</code> — submit a request</li>
+<li><code>+job/&lt;category&gt; &lt;title&gt;=&lt;desc&gt;</code> — submit with a category (<code>request</code>, <code>bug</code>, <code>app</code>, <code>idea</code>)</li>
+<li><code>+jobs</code> — list all your open jobs</li>
+<li><code>+job/view &lt;#&gt;</code> — view the full details of a job</li>
+<li><code>+job/comment &lt;#&gt;=&lt;text&gt;</code> — add a comment to a job</li>
+<li><code>+job/close &lt;#&gt;[=&lt;reason&gt;]</code> — close a job you submitted</li>
+</ul>
 <h2>Communication</h2>
 <p>There are several ways to communicate with other players in UrsaMU:</p>
 <h3>Local Communication</h3>

@@ -1,0 +1,9 @@
+{
+  "name": "jobs",
+  "version": "1.0.0",
+  "description": "Staff job/request tracking system with in-game commands and REST API",
+  "ursamu": ">=1.0.0",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts"
+}

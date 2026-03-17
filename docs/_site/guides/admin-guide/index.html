@@ -381,6 +381,30 @@ section above. In summary:</p>
 <p>To remove a flag (prefix with <code>!</code>):</p>
 <pre class="language-none" tabindex="0"><code class="language-none">@set &lt;username&gt;=!&lt;flag&gt;
 </code></pre>
+<h3>Bulletin Board Administration</h3>
+<p>Admins and wizards can create and destroy bulletin boards:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">+bbcreate &lt;name&gt;[=&lt;description&gt;]     -- Create a board
++bbdestroy &lt;board&gt;                   -- Destroy a board and all its posts
+</code></pre>
+<p>Board names are slugified automatically (spaces become dashes). Example:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">+bbcreate General=General discussion board
++bbcreate Staff=Staff-only discussion
++bbdestroy general
+</code></pre>
+<p>The REST API exposes full board management under <code>/api/v1/boards</code> (see<br>
+the REST API section below).</p>
+<h3>Jobs System</h3>
+<p>The jobs system lets players submit requests to staff. As staff you have<br>
+additional commands:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">+job/assign &lt;#&gt;=&lt;player&gt;          -- Assign a job to a staff member
++job/status &lt;#&gt;=&lt;status&gt;          -- Set status (new/open/pending/in-progress/resolved/closed)
++job/priority &lt;#&gt;=&lt;priority&gt;      -- Set priority (low/normal/high/critical)
++job/complete &lt;#&gt;=&lt;resolution&gt;    -- Mark resolved with a resolution note
++job/reopen &lt;#&gt;                   -- Reopen a closed job
++job/staffnote &lt;#&gt;=&lt;text&gt;         -- Add a staff-only note (not visible to submitter)
++job/delete &lt;#&gt;                   -- Delete a job
+</code></pre>
+<p>Job statistics are available via the REST API at <code>GET /api/v1/jobs/stats</code>.</p>
 <h3>Channel Administration</h3>
 <p>Admins and wizards can create, configure, and destroy communication channels:</p>
 <pre class="language-none" tabindex="0"><code class="language-none">@chancreate &lt;name&gt;[=&lt;header&gt;]        -- Create a channel
@@ -482,6 +506,208 @@ curl -H "Authorization: Bearer &lt;token&gt;" \
 curl -H "Authorization: Bearer &lt;token&gt;" \
      https://yourgame.example.com/api/v1/scenes/42/export?format=json
 </code></pre>
+<h2>REST API Reference</h2>
+<p>All endpoints are served on the Hub’s HTTP port (default <code>4203</code>). Most require<br>
+a <code>Bearer</code> JWT token in the <code>Authorization</code> header, obtained from<br>
+<code>POST /api/v1/auth/login</code>.</p>
+<h3>Authentication</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/auth/login</code></td>
+<td>Returns <code>{ token }</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/auth/register</code></td>
+<td>Create a new character</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/me</code></td>
+<td>Current user profile</td>
+</tr>
+</tbody>
+</table>
+<h3>Players</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/players/online</code></td>
+<td>List connected players</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/channels</code></td>
+<td>List channels</td>
+</tr>
+</tbody>
+</table>
+<h3>Bulletin Boards</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/boards</code></td>
+<td>All boards with post + unread counts</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/boards</code></td>
+<td>Create a board <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/boards/unread</code></td>
+<td>Unread summary across all boards</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/boards/:id</code></td>
+<td>Single board</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/boards/:id</code></td>
+<td>Update board <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/boards/:id</code></td>
+<td>Delete board + all posts <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/boards/:id/posts</code></td>
+<td>Paginated post list (<code>limit</code>, <code>offset</code>)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/boards/:id/posts</code></td>
+<td>Create a post</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/boards/:id/posts/:num</code></td>
+<td>Read a post</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/boards/:id/posts/:num</code></td>
+<td>Edit a post <em>(author or staff)</em></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/boards/:id/posts/:num</code></td>
+<td>Delete a post <em>(author or staff)</em></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/boards/:id/read</code></td>
+<td>Mark board as read</td>
+</tr>
+</tbody>
+</table>
+<h3>Jobs</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/jobs</code></td>
+<td>List jobs (staff see all; players see their own)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/jobs</code></td>
+<td>Submit a job</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/jobs/stats</code></td>
+<td>Counts by status, category, priority <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/jobs/:id</code></td>
+<td>Get a job by number or ID</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/jobs/:id</code></td>
+<td>Update status/priority/assignee <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/jobs/:id</code></td>
+<td>Delete a job <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/jobs/:id/comment</code></td>
+<td>Add a comment</td>
+</tr>
+</tbody>
+</table>
+<h3>Scenes</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes</code></td>
+<td>List scenes</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/:id/export</code></td>
+<td>Export as <code>?format=markdown</code> or <code>?format=json</code></td>
+</tr>
+</tbody>
+</table>
+<h3>WebSocket</h3>
+<p>Connect via <code>ws://host:4202</code> (or the Hub port). Authenticate either by<br>
+sending <code>connect &lt;name&gt; &lt;password&gt;</code> as your first message, or by passing a<br>
+JWT at connection time:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">ws://host:4203?token=&lt;jwt&gt;&amp;client=web
+</code></pre>
+<p>The <code>client=web</code> parameter enables rich JSON payloads instead of plain text.</p>
+<hr>
 <h2>Troubleshooting</h2>
 <h3>Common Issues</h3>
 <h4>Server Won’t Start</h4>

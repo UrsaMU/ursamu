@@ -2,252 +2,283 @@
 layout: layout.vto
 description: Create your first UrsaMU plugin with this step-by-step guide
 nav:
-  - text: Prerequisites
-    url: "#prerequisites"
-  - text: Creating the Plugin Structure
-    url: "#creating-the-plugin-structure"
-  - text: Implementing the Plugin
-    url: "#implementing-the-plugin"
-  - text: Testing Your Plugin
-    url: "#testing-your-plugin"
+  - text: Scaffold the Plugin
+    url: "#scaffold-the-plugin"
+  - text: File Walkthrough
+    url: "#file-walkthrough"
+  - text: Test It
+    url: "#test-it"
+  - text: Publish It
+    url: "#publish-it"
   - text: Next Steps
     url: "#next-steps"
 ---
 
 # Creating Your First Plugin
 
-This guide will walk you through creating a simple UrsaMU plugin from scratch. We'll create a "dice roller" plugin that adds commands for rolling dice in the game.
+This guide walks through creating a working UrsaMU plugin from scratch. We'll
+build a **notes plugin** — players can save short notes, list them, and delete
+them, both in-game and through the REST API.
 
-## Prerequisites
+## Scaffold the Plugin
 
-Before you begin, make sure you have:
-
-1. A working UrsaMU installation
-2. Basic knowledge of TypeScript
-3. A code editor (VS Code recommended)
-
-## Creating the Plugin Structure
-
-UrsaMU provides a task to create a new plugin structure. Open your terminal and run:
+Run this from your game project root:
 
 ```bash
-deno task create-plugin dice-roller
+ursamu create plugin notes
 ```
 
-This will create a new directory `src/plugins/dice-roller/` with the following structure:
+This creates `src/plugins/notes/` with four pre-wired files:
 
 ```
-src/plugins/dice-roller/
-├── index.ts           # Main plugin file
-├── scripts/           # Utility scripts
-│   └── run.sh         # Script to run both servers
-└── src/               # Source code
-    ├── main.ts        # Main server entry point
-    └── telnet.ts      # Telnet server entry point
+src/plugins/notes/
+├── index.ts      — plugin entry point
+├── commands.ts   — in-game +notes command
+├── router.ts     — REST handler for /api/v1/notes
+└── db.ts         — custom DBO database
 ```
 
-If you prefer to create the structure manually, create the following files:
+The plugin is already auto-discovered. Restart the server and it loads.
 
-1. Create the plugin directory:
-```bash
-mkdir -p src/plugins/dice-roller
-```
+---
 
-2. Create the main plugin file:
-```bash
-touch src/plugins/dice-roller/index.ts
-```
+## File Walkthrough
 
-## Implementing the Plugin
+### db.ts — Define your data shape
 
-Now, let's implement our dice roller plugin. Open `src/plugins/dice-roller/index.ts` and add the following code:
+Replace the generated stub with a `INote` type:
 
 ```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { DBO } from "../../services/Database/database.ts";
 
-/**
- * A plugin that adds dice rolling commands to UrsaMU
- */
-export default class DiceRollerPlugin implements IPlugin {
-  name = "dice-roller";
-  version = "1.0.0";
-  description = "Adds dice rolling commands to UrsaMU";
-  author = "Your Name";
-  
-  // Default configuration
-  config = {
-    maxDice: 100,    // Maximum number of dice that can be rolled at once
-    maxSides: 1000,  // Maximum number of sides per die
-  };
-  
-  /**
-   * Initialize the plugin
-   */
-  onInit(): void {
-    const plugin = this;
+export interface INote {
+  id: string;
+  author: string;        // player ID
+  authorName: string;
+  text: string;
+  createdAt: number;     // ms timestamp
+}
 
-    // Register the roll command
-    addCmd({
-      name: "roll",
-      pattern: /^roll\s*(.*)/i,
-      lock: "connected",
-      exec: (u: IUrsamuSDK) => {
-        const args = u.cmd.args[0]?.trim() ?? "";
+export const notes = new DBO<INote>("server.notes");
+```
 
-        // If no arguments, show help
-        if (!args) {
-          return u.send(
-            "%chDice Roller Help%cn\r\n" +
-            "Usage: roll <number>d<sides> [+/-<modifier>]\r\n" +
-            "Examples:\r\n" +
-            "  roll 1d6       - Roll a 6-sided die\r\n" +
-            "  roll 2d10      - Roll two 10-sided dice\r\n" +
-            "  roll 3d6+2     - Roll three 6-sided dice and add 2\r\n" +
-            "  roll 2d20-1    - Roll two 20-sided dice and subtract 1"
-          );
-        }
+### commands.ts — In-game commands
 
-        // Parse the dice expression
-        const result = plugin.parseDiceExpression(args);
+```typescript
+import { addCmd } from "../../services/commands/cmdParser.ts";
+import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import { notes } from "./db.ts";
 
-        if (result.error) {
-          return u.send(`%crError:%cn ${result.error}`);
-        }
+addCmd({
+  name: "+note",
+  pattern: /^\+note(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const sw  = (u.cmd.args[0] || "").toLowerCase();
+    const arg = (u.cmd.args[1] || "").trim();
 
-        // Format the result
-        const rollText = result.rolls.join(", ");
-        const totalText = result.modifier !== 0
-          ? `${result.total - result.modifier} ${result.modifier > 0 ? "+" : ""}${result.modifier} = ${result.total}`
-          : result.total.toString();
+    // +note/list
+    if (sw === "list") {
+      const mine = await notes.find({ author: u.me.id });
+      if (!mine.length) { u.send("You have no notes."); return; }
+      for (const n of mine) u.send(`[${n.id.slice(-6)}] ${n.text}`);
+      return;
+    }
 
-        const playerName = String(u.me.state.name ?? u.me.id);
-        u.send(`%ch${playerName} rolls ${args}%cn\r\nRolls: ${rollText}\r\nTotal: ${totalText}`);
-      },
+    // +note/delete <id>
+    if (sw === "delete") {
+      const note = await notes.queryOne({ id: arg });
+      if (!note) { u.send("Note not found."); return; }
+      if (note.author !== u.me.id) { u.send("That is not your note."); return; }
+      await notes.delete({ id: note.id });
+      u.send("Deleted.");
+      return;
+    }
+
+    // +note <text>
+    if (!arg) { u.send('Usage: +note <text>  or  +note/list  or  +note/delete <id>'); return; }
+
+    const note = await notes.create({
+      id:         crypto.randomUUID(),
+      author:     u.me.id,
+      authorName: u.me.name || u.me.id,
+      text:       arg,
+      createdAt:  Date.now(),
     });
+    u.send(`Saved [${note.id.slice(-6)}].`);
+  },
+});
+```
 
-    console.log(`${this.name} initialized`);
+**In-game usage:**
+```
++note Remember to update the wiki
++note/list
++note/delete <id>
+```
+
+### router.ts — REST endpoints
+
+```typescript
+import { dbojs } from "../../services/Database/index.ts";
+import { notes } from "./db.ts";
+
+const H = { "Content-Type": "application/json" };
+const json = (d: unknown, s = 200) =>
+  new Response(JSON.stringify(d), { status: s, headers: H });
+
+export async function notesRouteHandler(
+  req: Request,
+  userId: string | null
+): Promise<Response> {
+  if (!userId) return json({ error: "Unauthorized" }, 401);
+
+  const { pathname } = new URL(req.url);
+
+  // GET /api/v1/notes — list my notes
+  if (pathname === "/api/v1/notes" && req.method === "GET") {
+    return json(await notes.find({ author: userId }));
   }
-  
-  /**
-   * Parse a dice expression like "3d6+2"
-   */
-  parseDiceExpression(expression: string) {
-    // Regular expression to match dice notation
-    const diceRegex = /^(\d+)d(\d+)(?:([+-])(\d+))?$/i;
-    const match = expression.match(diceRegex);
-    
-    if (!match) {
-      return { error: "Invalid dice expression. Use format: NdS[+/-M] (e.g., 3d6+2)" };
-    }
-    
-    const numDice = parseInt(match[1], 10);
-    const numSides = parseInt(match[2], 10);
-    const modifierSign = match[3] || "+";
-    const modifierValue = match[4] ? parseInt(match[4], 10) : 0;
-    const modifier = modifierSign === "+" ? modifierValue : -modifierValue;
-    
-    // Validate the dice parameters
-    if (numDice <= 0 || numDice > this.config.maxDice) {
-      return { error: `Number of dice must be between 1 and ${this.config.maxDice}` };
-    }
-    
-    if (numSides <= 0 || numSides > this.config.maxSides) {
-      return { error: `Number of sides must be between 1 and ${this.config.maxSides}` };
-    }
-    
-    // Roll the dice
-    const rolls: number[] = [];
-    let total = 0;
-    
-    for (let i = 0; i < numDice; i++) {
-      const roll = Math.floor(Math.random() * numSides) + 1;
-      rolls.push(roll);
-      total += roll;
-    }
-    
-    // Add the modifier
-    total += modifier;
-    
-    return { rolls, total, modifier };
+
+  // POST /api/v1/notes — create a note
+  if (pathname === "/api/v1/notes" && req.method === "POST") {
+    const body = await req.json().catch(() => null);
+    const text = typeof body?.text === "string" ? body.text.trim() : "";
+    if (!text) return json({ error: "text is required" }, 400);
+
+    const player     = await dbojs.queryOne({ id: userId });
+    const authorName = (player && player.data?.name) || userId;
+
+    const note = await notes.create({
+      id:         crypto.randomUUID(),
+      author:     userId,
+      authorName,
+      text,
+      createdAt:  Date.now(),
+    });
+    return json(note, 201);
   }
-  
-  /**
-   * Called when the plugin is loaded
-   */
-  onLoad(app: App): void {
-    console.log(`${this.name} v${this.version} loaded!`);
+
+  // DELETE /api/v1/notes/:id
+  const m = pathname.match(/^\/api\/v1\/notes\/(.+)$/);
+  if (m && req.method === "DELETE") {
+    const note = await notes.queryOne({ id: m[1] });
+    if (!note)               return json({ error: "Not found" }, 404);
+    if (note.author !== userId) return json({ error: "Forbidden" }, 403);
+    await notes.delete({ id: note.id });
+    return json({ deleted: true });
   }
-  
-  /**
-   * Called when the plugin is unloaded
-   */
-  onUnload(app: App): void {
-    console.log(`${this.name} unloaded`);
-  }
+
+  return json({ error: "Not Found" }, 404);
 }
 ```
 
-## Testing Your Plugin
+### index.ts — Wire it together
 
-Now that you've created your plugin, let's test it:
+```typescript
+import type { IPlugin } from "../../@types/IPlugin.ts";
+import { registerPluginRoute } from "../../app.ts";
+import { notesRouteHandler } from "./router.ts";
+import "./commands.ts";
 
-1. Make sure your plugin is enabled in your configuration file (`config/config.json`):
+const notesPlugin: IPlugin = {
+  name: "notes",
+  version: "1.0.0",
+  description: "Player notes — in-game commands and REST API",
+
+  init: async () => {
+    registerPluginRoute("/api/v1/notes", notesRouteHandler);
+    console.log("[notes] initialized");
+    return true;
+  },
+
+  remove: async () => {
+    console.log("[notes] removed");
+  },
+};
+
+export default notesPlugin;
+```
+
+---
+
+## Test It
+
+Start (or restart) the server:
+
+```bash
+deno task server
+```
+
+**In-game:**
+
+```
++note This is my first note
++note/list
++note/delete <id>
+```
+
+**Via REST:**
+
+```bash
+# Get a token first
+TOKEN=$(curl -s -X POST http://localhost:4203/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Admin","password":"yourpassword"}' | jq -r .token)
+
+# Create a note
+curl -s -X POST http://localhost:4203/api/v1/notes \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Hello from the API"}' | jq
+
+# List notes
+curl -s http://localhost:4203/api/v1/notes \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Delete a note
+curl -s -X DELETE http://localhost:4203/api/v1/notes/<id> \
+  -H "Authorization: Bearer $TOKEN" | jq
+```
+
+---
+
+## Publish It
+
+If you want to share your plugin on GitHub so others can install it with
+`ursamu plugin install`, add a manifest file to the plugin directory:
 
 ```json
 {
-  "plugins": {
-    "dice-roller": {
-      "maxDice": 100,
-      "maxSides": 1000
-    }
-  }
+  "name": "notes",
+  "version": "1.0.0",
+  "description": "Player notes — in-game commands and REST API",
+  "ursamu": ">=1.0.0",
+  "author": "Your Name",
+  "license": "MIT",
+  "main": "index.ts"
 }
 ```
 
-2. Start your UrsaMU server:
+Save it as `ursamu.plugin.json`. Users can then install your plugin with:
 
 ```bash
-deno task start
+ursamu plugin install https://github.com/you/ursamu-notes
 ```
 
-3. Connect to your server using a telnet client or the web interface.
+To create a standalone, publish-ready plugin project from scratch (with
+`deno.json`, tests, `.gitignore`, and `ursamu.plugin.json` pre-generated):
 
-4. Try using the roll command:
-
-```
-roll 3d6
-```
-
-You should see output similar to:
-
-```
-YourName rolls 3d6
-Rolls: 4, 2, 6
-Total: 12
+```bash
+ursamu create plugin notes --standalone
 ```
 
-Try other dice expressions:
-
-```
-roll 2d20+5
-roll 1d100-10
-roll 4d4
-```
+---
 
 ## Next Steps
 
-Congratulations! You've created your first UrsaMU plugin. Here are some ways you could extend this plugin:
-
-1. Add more dice rolling commands (e.g., `rollpublic`, `rollprivate`)
-2. Add special dice types (e.g., Fate/Fudge dice, exploding dice)
-3. Add dice macros that players can save and reuse
-4. Add statistics tracking for dice rolls
-
-For more advanced plugin development, check out these guides:
-
-- [Plugin Hooks](./hooks.md) - Learn how to hook into UrsaMU events
-- [Plugin Configuration](./configuration.md) - More advanced configuration options
-- [Plugin Dependencies](./dependencies.md) - How to depend on other plugins
-
-Remember that plugins are a powerful way to extend UrsaMU without modifying the core code. By keeping your customizations in plugins, you ensure that your game can be easily updated when new versions of UrsaMU are released. 
+- `src/plugins/jobs/` — a real-world example with staff permission checks and complex REST routes
+- `src/plugins/bboards/` — per-user unread state across multiple resources
+- `src/plugins/events/` — sequential IDs, RSVP capacity enforcement, event status visibility
+- [Plugin Reference](./index.md) — full `IUrsamuSDK` and `DBO<T>` API tables
+- [Plugin Events](./hooks.md) — subscribing and emitting game events

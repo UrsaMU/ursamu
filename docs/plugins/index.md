@@ -2,315 +2,341 @@
 layout: layout.vto
 description: Learn how to create plugins to extend UrsaMU
 nav:
-  - text: Plugin Basics
-    url: "#plugin-basics"
-  - text: Plugin Interface
-    url: "#plugin-interface"
+  - text: Overview
+    url: "#overview"
   - text: Plugin Structure
     url: "#plugin-structure"
-  - text: Plugin Configuration
-    url: "#plugin-configuration"
-  - text: Plugin Lifecycle
-    url: "#plugin-lifecycle"
-  - text: Examples
-    url: "#examples"
+  - text: Quick Scaffold
+    url: "#quick-scaffold"
+  - text: Plugin Interface
+    url: "#plugin-interface"
+  - text: Adding Commands
+    url: "#adding-commands"
+  - text: Adding REST Routes
+    url: "#adding-rest-routes"
+  - text: Custom Database
+    url: "#custom-database"
+  - text: Configuration
+    url: "#configuration"
+  - text: The Manifest File
+    url: "#the-manifest-file"
+  - text: Installing Community Plugins
+    url: "#installing-community-plugins"
+  - text: Real Examples
+    url: "#real-examples"
 ---
 
 # UrsaMU Plugin Development
 
-This section covers how to develop plugins for UrsaMU, allowing you to extend and customize the server with new functionality.
+## Overview
 
-## Plugin Basics
+Plugins are the primary way to extend UrsaMU. A plugin can provide any
+combination of:
 
-Plugins are modular extensions that add functionality to UrsaMU without modifying the core codebase. They allow you to:
+- **In-game commands** — registered with `addCmd`, available to all connected players
+- **REST API routes** — registered with `registerPluginRoute`, accessible to custom frontends
+- **A private database** — a `DBO<T>` collection namespaced to the plugin
+- **Config defaults** — merged into the global config on startup
 
-- Add new commands and features
-- Modify existing behavior
-- Integrate with external services
-- Customize the game experience
+Plugins are **auto-discovered**. Drop a folder into `src/plugins/` with an
+`index.ts` that exports a default `IPlugin` object and the engine loads it on
+next start — no registration required.
 
-UrsaMU's plugin system is designed to be lightweight and straightforward, making it easy to create and share plugins.
-
-## Plugin Interface
-
-All UrsaMU plugins implement the `IPlugin` interface, which defines the structure and required methods for a plugin:
-
-```typescript
-export interface IPlugin {
-  name: string;                // Required: Unique name of the plugin
-  description?: string;        // Optional: Description of what the plugin does
-  version: string;             // Required: Semantic version (e.g., "1.0.0")
-  config?: IConfig;            // Optional: Plugin configuration
-  init?: () => boolean | Promise<boolean>;  // Optional: Initialization method
-  remove?: () => void | Promise<void>;      // Optional: Cleanup method
-}
-```
+---
 
 ## Plugin Structure
 
-A UrsaMU plugin is a TypeScript module that exports a default object implementing the `IPlugin` interface. Plugins should be placed in the `src/plugins/` directory, with each plugin in its own subdirectory:
+A full plugin lives in its own subdirectory:
 
 ```
-src/plugins/
-├── my-plugin/
-│   └── index.ts       # Main plugin file
-├── another-plugin/
-│   └── index.ts
-└── ...
+src/plugins/my-plugin/
+├── index.ts             — entry point (IPlugin, registerPluginRoute)
+├── commands.ts          — in-game commands (addCmd)
+├── router.ts            — HTTP route handler
+├── db.ts                — custom DBO database
+└── ursamu.plugin.json   — manifest (required for ursamu plugin install)
 ```
 
-Here's a minimal example of a plugin:
+Only `index.ts` is required. The other files are imported from it.
+
+---
+
+## Quick Scaffold
+
+The fastest way to start is the built-in CLI scaffolder. Run from your game
+project root:
+
+```bash
+ursamu create plugin my-plugin
+```
+
+This generates all four files pre-named and pre-wired. Restart the server and
+the plugin loads automatically. You can also copy `src/plugins/example/`
+directly — it is a fully working reference implementation.
+
+---
+
+## Plugin Interface
+
+Every plugin implements `IPlugin`:
 
 ```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
+import type { IPlugin } from "../../@types/IPlugin.ts";
 
 const myPlugin: IPlugin = {
-  name: "my-plugin",
-  version: "1.0.0",
-  description: "A simple UrsaMU plugin",
-  
+  name: "my-plugin",        // unique slug — used for logging and config namespacing
+  version: "1.0.0",         // semver
+  description: "Does a thing",
+
+  // Optional: default config values merged into global config at startup
+  config: {
+    plugins: {
+      "my-plugin": {
+        enabled: true,
+        maxItems: 50,
+      },
+    },
+  },
+
+  // Called once at startup — register routes here, return false to abort load
   init: async () => {
-    console.log("My plugin initialized!");
+    console.log("[my-plugin] initialized");
     return true;
   },
-  
+
+  // Called when the plugin is unloaded
   remove: async () => {
-    console.log("My plugin removed!");
-  }
+    console.log("[my-plugin] removed");
+  },
 };
 
 export default myPlugin;
 ```
 
-## Plugin Configuration
+---
 
-Plugins can define their own configuration options in the `config` property. The configuration follows this structure:
+## Adding Commands
 
-```typescript
-config: {
-  plugins: {
-    "plugin-name": {
-      // Plugin-specific configuration options
-      option1: "value1",
-      option2: 42,
-      // Nested configuration is supported
-      features: {
-        feature1: true,
-        feature2: false
-      }
-    }
-  }
-}
-```
-
-To access configuration values in your plugin, use the `getConfig` function:
+Import `addCmd` and call it at module load time (in `commands.ts`, not inside
+`init()`). The `exec` function receives a fully populated `IUrsamuSDK` (`u`).
 
 ```typescript
-import { getConfig } from "../../services/Config/mod.ts";
-
-// Get a configuration value with type safety
-const option1 = getConfig<string>("plugins.my-plugin.option1");
-const option2 = getConfig<number>("plugins.my-plugin.option2");
-const feature1Enabled = getConfig<boolean>("plugins.my-plugin.features.feature1");
-```
-
-## Plugin Lifecycle
-
-UrsaMU plugins have a simple lifecycle:
-
-1. **Loading**: The plugin is loaded from the filesystem
-2. **Registration**: The plugin is registered with the configuration system
-3. **Initialization**: The `init` method is called (if defined)
-4. **Removal**: The `remove` method is called (if defined) when the plugin is unloaded
-
-The `init` method should return `true` for successful initialization or `false` if initialization failed. This allows the system to know whether the plugin was successfully initialized.
-
-## Examples
-
-### Basic Plugin
-
-A simple plugin that just logs messages during initialization and removal:
-
-```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
-
-const basicPlugin: IPlugin = {
-  name: "basic-plugin",
-  version: "1.0.0",
-  description: "A basic plugin example",
-  
-  init: async () => {
-    console.log("Basic plugin initialized!");
-    return true;
-  },
-  
-  remove: async () => {
-    console.log("Basic plugin removed!");
-  }
-};
-
-export default basicPlugin;
-```
-
-### Configuration Plugin
-
-A plugin that uses configuration options:
-
-```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
-import { getConfig } from "../../services/Config/mod.ts";
-
-const configPlugin: IPlugin = {
-  name: "config-plugin",
-  version: "1.0.0",
-  description: "A plugin that demonstrates configuration",
-  
-  config: {
-    plugins: {
-      "config-plugin": {
-        enabled: true,
-        message: "Hello from the config plugin!",
-        options: {
-          option1: "value1",
-          option2: 42
-        }
-      }
-    }
-  },
-  
-  init: async () => {
-    const enabled = getConfig<boolean>("plugins.config-plugin.enabled");
-    
-    if (enabled) {
-      const message = getConfig<string>("plugins.config-plugin.message");
-      console.log(message);
-      
-      const option1 = getConfig<string>("plugins.config-plugin.options.option1");
-      const option2 = getConfig<number>("plugins.config-plugin.options.option2");
-      
-      console.log(`Options: ${option1}, ${option2}`);
-    } else {
-      console.log("Config plugin is disabled");
-    }
-    
-    return true;
-  }
-};
-
-export default configPlugin;
-```
-
-### Command Plugin
-
-A plugin that adds a custom command:
-
-```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "../../services/commands/cmdParser.ts";
+import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
 addCmd({
-  name: "hello",
-  pattern: /^hello\s*(.*)/i,
+  name: "+greet",
+  pattern: /^\+greet(?:\/(\S+))?\s*(.*)/i,
   lock: "connected",
-  exec: (u: IUrsamuSDK) => {
-    const target = u.cmd.args[0]?.trim() || "world";
-    u.send(`Hello, ${target}!`);
+  exec: async (u: IUrsamuSDK) => {
+    const sw  = (u.cmd.args[0] || "").toLowerCase(); // switch after /
+    const arg = (u.cmd.args[1] || "").trim();        // rest of input
+
+    if (sw === "all") {
+      u.broadcast(`${u.me.name} greets everyone!`);
+      return;
+    }
+
+    u.send(`Hello, ${arg || "world"}!`);
   },
 });
 ```
 
-### Database Plugin
-
-A plugin that interacts with the database:
+Import `commands.ts` from `index.ts` to trigger registration at startup:
 
 ```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
-import { dbojs } from "../../services/Database/index.ts";
-
-const databasePlugin: IPlugin = {
-  name: "database-plugin",
-  version: "1.0.0",
-  description: "A plugin that interacts with the database",
-  
-  init: async () => {
-    // Create a custom object
-    const customObject = {
-      flags: "thing",
-      data: {
-        name: "Custom Object",
-        description: "An object created by a plugin"
-      }
-    };
-    
-    try {
-      const obj = await dbojs.create(customObject);
-      console.log(`Created custom object with ID: ${obj.id}`);
-    } catch (error) {
-      console.error("Error creating custom object:", error);
-      return false;
-    }
-    
-    return true;
-  },
-  
-  remove: async () => {
-    // Clean up by removing objects created by this plugin
-    try {
-      const objects = await dbojs.query({
-        "data.name": "Custom Object"
-      });
-      
-      for (const obj of objects) {
-        await dbojs.delete(obj.id);
-        console.log(`Deleted custom object with ID: ${obj.id}`);
-      }
-    } catch (error) {
-      console.error("Error cleaning up custom objects:", error);
-    }
-  }
-};
-
-export default databasePlugin;
+// index.ts
+import "./commands.ts";
 ```
 
-## Using Plugins in a Child Game
+### The IUrsamuSDK object
 
-When creating a child game using UrsaMU as a library, you can provide custom plugins through the `mu` function:
+| Property | Description |
+|----------|-------------|
+| `u.me` | The acting player — `id`, `name`, `flags` (Set), `state`, `location` |
+| `u.here` | The current room |
+| `u.cmd.args` | Regex capture groups from `pattern` |
+| `u.send(msg)` | Send a message to the current player |
+| `u.broadcast(msg)` | Send a message to everyone in the room |
+| `u.db.search(query)` | Query the main object database |
+| `u.bb.*` | Bulletin board SDK |
+| `u.chan.*` | Channel SDK |
+| `u.events.*` | Pub/sub EventsService SDK |
+| `u.auth.*` | Auth SDK (hash, setPassword) |
+| `u.sys.*` | System SDK (disconnect, setConfig) |
+| `u.util.*` | Utility helpers (target, stripSubs, ljust, rjust, …) |
+
+---
+
+## Adding REST Routes
+
+Register a route handler from `init()`:
 
 ```typescript
-import { mu } from "ursamu";
-import myCustomPlugin from "./plugins/my-custom-plugin.ts";
+// index.ts
+import { registerPluginRoute } from "../../app.ts";
+import { myRouteHandler } from "./router.ts";
 
-// Initialize UrsaMU with custom plugins
-const game = await mu(
-  {
-    // Custom configuration
-    server: {
-      telnet: 4201,
-      ws: 4202,
-      http: 4203
-    },
-    game: {
-      name: "My Custom Game"
-    }
-  },
-  [
-    // Custom plugins
-    myCustomPlugin
-  ],
-  {
-    // Options
-    loadDefaultCommands: true,
-    loadDefaultTextFiles: true
-  }
-);
+init: async () => {
+  registerPluginRoute("/api/v1/my-plugin", myRouteHandler);
+  return true;
+},
 ```
 
-## Best Practices
+The handler receives the raw `Request` and the authenticated `userId` (or
+`null` if unauthenticated — JWT verification is handled by the engine before
+your handler is called):
 
-1. **Unique Names**: Ensure your plugin has a unique name to avoid conflicts
-2. **Proper Versioning**: Use semantic versioning for your plugin (MAJOR.MINOR.PATCH)
-3. **Configuration Namespacing**: Keep your configuration under your plugin's name
-4. **Error Handling**: Properly handle errors in your `init` and `remove` methods
-5. **Cleanup**: Always clean up resources in the `remove` method
-6. **Documentation**: Document your plugin's purpose, configuration options, and usage 
+```typescript
+// router.ts
+const JSON_HEADERS = { "Content-Type": "application/json" };
+
+function json(data: unknown, status = 200): Response {
+  return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
+}
+
+export async function myRouteHandler(
+  req: Request,
+  userId: string | null
+): Promise<Response> {
+  if (!userId) return json({ error: "Unauthorized" }, 401);
+
+  const { pathname } = new URL(req.url);
+
+  if (pathname === "/api/v1/my-plugin" && req.method === "GET") {
+    return json({ ok: true });
+  }
+
+  return json({ error: "Not Found" }, 404);
+}
+```
+
+All CORS headers are added automatically by the engine.
+
+---
+
+## Custom Database
+
+Create a typed `DBO<T>` collection in `db.ts`:
+
+```typescript
+import { DBO } from "../../services/Database/database.ts";
+
+export interface IMyRecord {
+  id: string;
+  author: string;
+  text: string;
+  createdAt: number;
+}
+
+export const myRecords = new DBO<IMyRecord>("server.my-plugin-records");
+```
+
+`DBO<T>` methods:
+
+| Method | Description |
+|--------|-------------|
+| `create(record)` | Insert a new record, returns the created object |
+| `queryOne(query)` | Find the first match, or `undefined` |
+| `find(query)` | Find all matches |
+| `update({}, record)` | Replace a record (matches by `id`) |
+| `modify(query, "$set", data)` | Partial field update |
+| `delete(query)` | Remove matching records |
+| `all()` | Return every record in the collection |
+
+---
+
+## Configuration
+
+Plugins declare defaults in the `config` property. Values are read via
+`getConfig`:
+
+```typescript
+import { getConfig } from "../../services/Config/mod.ts";
+
+const maxItems = getConfig<number>("plugins.my-plugin.maxItems") ?? 50;
+```
+
+Operators override values in `config/config.json` under the same key path.
+
+---
+
+## The Manifest File
+
+Every plugin that will be shared or installed from GitHub **must** include an
+`ursamu.plugin.json` at the plugin root. The install command reads this file to
+display details and populate the local registry.
+
+```json
+{
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "description": "Does something useful",
+  "ursamu": ">=1.0.0",
+  "author": "Your Name",
+  "license": "MIT",
+  "main": "index.ts"
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | yes | Directory-safe slug — becomes the install folder name |
+| `version` | yes | Semver string |
+| `description` | yes | Short human-readable description |
+| `ursamu` | yes | Semver range of compatible UrsaMU versions |
+| `author` | no | Author name or contact |
+| `license` | no | SPDX license identifier, e.g. `"MIT"` |
+| `main` | no | Entry-point file, defaults to `"index.ts"` |
+
+The `ursamu create plugin <name> --standalone` command generates this file
+automatically when scaffolding a new publishable plugin project.
+
+---
+
+## Installing Community Plugins
+
+The plugin manager handles install, update, remove, and inspect operations:
+
+```bash
+# Install from a GitHub URL
+ursamu plugin install https://github.com/user/my-plugin
+
+# Update to the latest commit
+ursamu plugin update my-plugin
+
+# List all installed plugins (with version + source)
+ursamu plugin list
+
+# Show manifest and registry details
+ursamu plugin info my-plugin
+
+# Remove a plugin
+ursamu plugin remove my-plugin
+```
+
+The install flow:
+1. Clones the repo with `git clone --depth 1`
+2. Reads `ursamu.plugin.json` (warns but continues if absent)
+3. **Displays the manifest and asks for confirmation** before writing anything
+4. Copies the plugin into `src/plugins/`
+5. Records the source URL in `src/plugins/.registry.json` so `update` works later
+
+Use `--force` to skip the confirmation prompt in CI/automation:
+
+```bash
+ursamu plugin install --force https://github.com/user/my-plugin
+```
+
+---
+
+## Real Examples
+
+The bundled plugins demonstrate every capability:
+
+| Plugin | What it shows |
+|--------|---------------|
+| `src/plugins/example/` | Minimal template — commands, REST, database, config |
+| `src/plugins/jobs/` | Full CRUD REST API, staff permission checks, in-game commands with switches |
+| `src/plugins/bboards/` | Multi-resource REST API, per-user state (unread counts), admin-restricted mutations |
+| `src/plugins/events/` | Sequential IDs, RSVP capacity enforcement, cancelled-event visibility rules, REST + in-game commands |

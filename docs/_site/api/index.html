@@ -437,16 +437,16 @@ const players = await dbojs.query({
 <p><strong>Methods:</strong></p>
 <p>Similar to <code>dbojs</code>, with the same method signatures.</p>
 <h2>Command API</h2>
-<h3>registerCommand(command)</h3>
+<h3>addCmd(command)</h3>
 <p>Registers a new command.</p>
 <p><strong>Parameters:</strong></p>
 <ul>
-<li><code>command</code> (Object): The command to register
+<li><code>command</code> (ICmd): The command to register
 <ul>
 <li><code>name</code> (string): Unique identifier for the command</li>
-<li><code>pattern</code> (string): Pattern to match user input</li>
-<li><code>flags</code> (string): Flags required to use the command</li>
-<li><code>exec</code> (Function): Function to execute when command is triggered</li>
+<li><code>pattern</code> (string | RegExp): Regex pattern to match user input; capture groups become <code>u.cmd.args</code></li>
+<li><code>lock</code> (string): Lock expression required to use the command (e.g. <code>"connected"</code>, <code>"wizard"</code>)</li>
+<li><code>exec</code> (Function): Function to execute — receives <code>IUrsamuSDK</code></li>
 </ul>
 </li>
 </ul>
@@ -455,60 +455,143 @@ const players = await dbojs.query({
 <li>void</li>
 </ul>
 <p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerCommand } from "../../services/Commands/mod.ts";
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
-registerCommand({
+addCmd({
   name: "hello",
-  pattern: "hello *",
-  flags: "connected",
-  exec: (ctx) =&gt; {
-    const target = ctx.args.trim() || "World";
-    ctx.send(`Hello, ${target}!`);
+  pattern: /^hello\s*(.*)/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) =&gt; {
+    const target = u.cmd.args[0]?.trim() || "World";
+    u.send(`Hello, ${target}!`);
   },
 });
 </code></pre>
-<h3>registerMiddleware(middleware)</h3>
-<p>Registers middleware to process commands.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>middleware</code> (Function): The middleware function</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>void</li>
-</ul>
+<h3>IUrsamuSDK</h3>
+<p>The unified SDK object passed to every command’s <code>exec</code> function. The same object is available in sandbox scripts.</p>
+<p><strong>Key properties:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>u.me</code></td>
+<td><code>IDBObj</code></td>
+<td>The actor who executed the command</td>
+</tr>
+<tr>
+<td><code>u.here</code></td>
+<td><code>IDBObj | null</code></td>
+<td>The room the actor is in</td>
+</tr>
+<tr>
+<td><code>u.cmd.args</code></td>
+<td><code>string[]</code></td>
+<td>Regex capture groups from the matched pattern</td>
+</tr>
+<tr>
+<td><code>u.cmd.switches</code></td>
+<td><code>string[]</code></td>
+<td>Switches supplied to the command</td>
+</tr>
+<tr>
+<td><code>u.socketId</code></td>
+<td><code>string</code></td>
+<td>The WebSocket socket ID</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key methods:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>u.send(msg)</code></td>
+<td>Send output to the actor</td>
+</tr>
+<tr>
+<td><code>u.broadcast(roomId, msg)</code></td>
+<td>Broadcast to everyone in a room</td>
+</tr>
+<tr>
+<td><code>u.force(cmd)</code></td>
+<td>Execute a command string as the actor</td>
+</tr>
+<tr>
+<td><code>u.setFlags(id, flags)</code></td>
+<td>Add/remove flags (<code>"+wizard"</code>, <code>"-dark"</code>)</td>
+</tr>
+<tr>
+<td><code>u.teleport(id, destination)</code></td>
+<td>Move an object to a destination</td>
+</tr>
+<tr>
+<td><code>u.canEdit(actor, target)</code></td>
+<td>Check if actor can edit target (async)</td>
+</tr>
+<tr>
+<td><code>u.db.search(query)</code></td>
+<td>Search the database</td>
+</tr>
+<tr>
+<td><code>u.db.create(data)</code></td>
+<td>Create a new object</td>
+</tr>
+<tr>
+<td><code>u.db.modify(id, data)</code></td>
+<td>Update an object</td>
+</tr>
+<tr>
+<td><code>u.db.destroy(id)</code></td>
+<td>Delete an object</td>
+</tr>
+<tr>
+<td><code>u.util.target(actor, name)</code></td>
+<td>Find a named object (async)</td>
+</tr>
+<tr>
+<td><code>u.util.stripSubs(str)</code></td>
+<td>Strip MUSH color/substitution codes</td>
+</tr>
+<tr>
+<td><code>u.auth.hash(password)</code></td>
+<td>Hash a password</td>
+</tr>
+<tr>
+<td><code>u.sys.disconnect(socketId)</code></td>
+<td>Disconnect a socket</td>
+</tr>
+<tr>
+<td><code>u.sys.reboot()</code></td>
+<td>Reboot the server</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerMiddleware } from "../../services/Commands/mod.ts";
-
-registerMiddleware(async (ctx, next) =&gt; {
-  console.log(`Command executed: ${ctx.cmd}`);
-  await next();
-});
-</code></pre>
-<h3>Command Context</h3>
-<p>The context object passed to command execution functions.</p>
-<p><strong>Properties:</strong></p>
-<ul>
-<li><code>player</code> (Object): The player who triggered the command</li>
-<li><code>cmd</code> (string): The command that was triggered</li>
-<li><code>args</code> (string): The arguments passed to the command</li>
-<li><code>switches</code> (Object): Any switches used with the command</li>
-<li><code>send</code> (Function): Function to send output to the player</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">exec: ((ctx) =&gt; {
-  // Access the player
-  const playerName = ctx.player.data.name;
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">exec: async (u: IUrsamuSDK) =&gt; {
+  // Access the actor
+  const actorName = String(u.me.state.name ?? u.me.id);
 
   // Access command arguments
-  const args = ctx.args.trim();
+  const target = u.cmd.args[0]?.trim() ?? "";
 
-  // Access switches
-  const verbose = ctx.switches.verbose;
+  // Check switches
+  const isVerbose = u.cmd.switches?.includes("verbose");
 
-  // Send output to the player
-  ctx.send(`Hello, ${playerName}!`);
-});
+  // Send output to the actor
+  u.send(`Hello, ${actorName}!`);
+};
 </code></pre>
 <h2>Flag API</h2>
 <h3>registerFlag(flag)</h3>

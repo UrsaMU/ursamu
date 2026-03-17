@@ -1,16 +1,15 @@
 #!/usr/bin/env -S deno run -A
 
-
 /**
  * @module ursamu-cli
  * @description The Command Line Interface for UrsaMU.
  *
- * This module provides the `ursamu` command, which handles project creation (`init`),
- * plugin management (`plugin`), and other utility tasks.
+ * Delegates to sub-scripts:
+ *   create.ts  — project + in-tree plugin scaffolding
+ *   plugin.ts  — plugin install / update / remove / list / info
  */
 import { parse } from "@std/flags";
 import { join, dirname, fromFileUrl } from "@std/path";
-import { existsSync } from "@std/fs";
 import parser from "../services/parser/parser.ts";
 
 const fmt = (str: string) => parser.substitute("telnet", str);
@@ -22,29 +21,23 @@ const getRes = (text: string, defaultValue?: string) => {
   return val.trim();
 };
 
-// Parse command line arguments
 const args = parse(Deno.args, {
   boolean: ["help", "version"],
-  alias: {
-    h: "help",
-    v: "version",
-  },
+  alias: { h: "help", v: "version" },
 });
 
-// Show version
 if (args.version) {
   console.log("UrsaMU CLI v1.0.0");
   Deno.exit(0);
 }
 
-// Show help if no command is provided or help flag is set
-// Show help if help flag is set
 if (args.help) {
   showHelp();
   Deno.exit(0);
 }
 
-// Interactive mode if no args
+// ─── interactive menu ─────────────────────────────────────────────────────────
+
 if (args._.length === 0) {
   console.log(fmt(`
 %ch%cc==================================================%cn
@@ -55,214 +48,124 @@ Select an action:
 %cn`));
 
   console.log("1. Create a new UrsaMU Game Project");
-  console.log("2. Create a new UrsaMU Plugin Project");
-  console.log("3. Manage Plugins (install, list, remove)");
-  console.log("4. Exit");
+  console.log("2. Scaffold a new in-tree Plugin");
+  console.log("3. Create a standalone Plugin Project");
+  console.log("4. Manage installed Plugins (install, update, list, remove)");
+  console.log("5. Exit");
 
   const choice = getRes("Selection", "1");
 
   switch (choice) {
-    case "1":
-      await initProject();
-      Deno.exit(0);
+    case "1": {
+      const projectName = getRes("Project Name", "my-ursamu-game");
+      const telnetPort  = getRes("Telnet Port",  "4201");
+      const httpPort    = getRes("HTTP/WS Port", "4203");
+      const gameName    = getRes("Game Name",    projectName);
+      const gameDesc    = getRes("Description",  "A modern MU* game.");
+      await runCommand("create.ts", [
+        projectName,
+        `--name=${projectName}`,
+        `--telnet-port=${telnetPort}`,
+        `--http-port=${httpPort}`,
+        `--game-name=${gameName}`,
+        `--game-desc=${gameDesc}`,
+        "--non-interactive",
+      ]);
       break;
-    case "2":
-      await runCommand("plugin.ts", ["init"]);
-      Deno.exit(0);
-      break;
-    case "3": {
-       // For plugin management, we need more context.
-       // Let's prompt for the subcommand.
-       console.log("\nPlugin Management:");
-       console.log("1. List installed plugins");
-       console.log("2. Install a plugin");
-       console.log("3. Remove a plugin");
-       
-       const pChoice = getRes("Selection", "1");
-       switch(pChoice) {
-         case "1": { await runCommand("plugin.ts", ["list"]); break; }
-         case "2": {
-            const url = getRes("GitHub URL");
-            await runCommand("plugin.ts", ["install", url]); 
-            break;
-         }
-         case "3": {
-            const name = getRes("Plugin Name");
-            await runCommand("plugin.ts", ["remove", name]);
-            break;
-         }
-         default: console.log("Invalid selection."); break;
-       }
-       Deno.exit(0);
-       break;
     }
-    case "4":
+    case "2": {
+      const name = getRes("Plugin Name");
+      if (!name) { console.log("Aborted."); break; }
+      await runCommand("create.ts", ["plugin", name, "--non-interactive"]);
+      break;
+    }
+    case "3": {
+      const name    = getRes("Plugin Name");
+      const desc    = getRes("Description",  "A UrsaMU plugin");
+      const version = getRes("Version",      "1.0.0");
+      const author  = getRes("Author",       "");
+      if (!name) { console.log("Aborted."); break; }
+      await runCommand("create.ts", [
+        "plugin", name, "--standalone", "--non-interactive",
+        `--game-desc=${desc}`,
+        `--telnet-port=${version}`,   // re-uses flag slot for version
+        `--game-name=${author}`,      // re-uses flag slot for author
+      ]);
+      break;
+    }
+    case "4": {
+      console.log("\nPlugin Management:");
+      console.log("1. List installed plugins");
+      console.log("2. Install a plugin from GitHub");
+      console.log("3. Update an installed plugin");
+      console.log("4. Remove a plugin");
+      console.log("5. Show plugin info");
+
+      const pChoice = getRes("Selection", "1");
+      switch (pChoice) {
+        case "1": await runCommand("plugin.ts", ["list"]); break;
+        case "2": {
+          const url = getRes("GitHub URL");
+          if (url) await runCommand("plugin.ts", ["install", url]);
+          break;
+        }
+        case "3": {
+          const name = getRes("Plugin Name");
+          if (name) await runCommand("plugin.ts", ["update", name]);
+          break;
+        }
+        case "4": {
+          const name = getRes("Plugin Name");
+          if (name) await runCommand("plugin.ts", ["remove", name]);
+          break;
+        }
+        case "5": {
+          const name = getRes("Plugin Name");
+          if (name) await runCommand("plugin.ts", ["info", name]);
+          break;
+        }
+        default: console.log("Invalid selection.");
+      }
+      break;
+    }
+    case "5":
       Deno.exit(0);
       break;
     default:
       console.log("Invalid selection.");
       Deno.exit(1);
   }
+
+  Deno.exit(0);
 }
 
-/**
- * Initialize a new UrsaMU project (Interactive Wizard)
- */
-function initProject() {
-  console.log(fmt(`
-%ch%cc==================================================%cn
-%ch%cw        Welcome to the %cyUrsaMU%cw Setup Wizard%cn
-%ch%cc==================================================%cn
-%cw
-This wizard will help you bootstrap your new MU* 
-project in seconds.
-%cn`));
+// ─── command dispatch ─────────────────────────────────────────────────────────
 
-  // 1. Project Information
-  const projectName = getRes("Project Name", "my-ursamu-game");
-  const targetDir = join(Deno.cwd(), projectName);
+const command  = args._[0];
+const restArgs = args._.slice(1).map(String);
 
-  if (existsSync(targetDir)) {
-    console.error(fmt(`\n%crError: Directory already exists at ${targetDir}.%cn`));
-    Deno.exit(1);
-  }
-
-  // 2. Configuration Defaults
-  console.log(fmt("\n%ch%cy--- Network Configuration ---%cn"));
-  const telnetPort = getRes("Telnet Port", "4201");
-  const httpPort = getRes("Web API/WS Port", "4203");
-
-  console.log(fmt("\n%ch%cy--- Game Details ---%cn"));
-  const gameName = getRes("Game Name", projectName);
-  const gameDesc = getRes("Game Description", "A modern MU* game.");
-
-  console.log(fmt(`\n%ch%cgPreparing to create project in: %cy${targetDir}%cn`));
-
-  // 3. Create Structure
-  try {
-    Deno.mkdirSync(targetDir);
-    const dirs = ["config", "data", "src", "src/plugins", "text", "help", "scripts"];
-    for (const dir of dirs) {
-      Deno.mkdirSync(join(targetDir, dir), { recursive: true });
-    }
-
-    // 4. Scaffold Files
-    
-    // main.ts
-    const mainTs = `import { mu } from "ursamu";
-
-const game = await mu(); // Load config from config/config.json
-console.log(\`\${game.config.get("game.name")} is live!\`);
-`;
-
-    // config/config.json
-    const configJson = {
-      server: {
-        telnet: parseInt(telnetPort),
-        ws: 4202,
-        http: parseInt(httpPort),
-        db: "data/ursamu.db",
-        counters: "counters",
-        chans: "chans",
-        mail: "mail",
-        bboard: "bboard"
-      },
-      game: {
-        name: gameName,
-        description: gameDesc,
-        version: "0.0.1",
-        text: {
-          connect: "text/default_connect.txt"
-        },
-        playerStart: "1"
-      }
-    };
-    Deno.writeTextFileSync(join(targetDir, "config", "config.json"), JSON.stringify(configJson, null, 2));
-
-    // deno.json
-    const denoJson = `{
-  "tasks": {
-    "start": "deno run -A --unstable-detect-cjs --unstable-kv jsr:@ursamu/ursamu/start",
-    "server": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
-    "telnet": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/telnet.ts"
-  },
-  "imports": {
-    "ursamu": "jsr:@ursamu/ursamu"
-  }
-}`;
-
-    // connect text
-    const connectText = `%ch%cc==================================%cn
-%ch%cw Welcome to %cy${gameName}%cn
-%ch%cc==================================%cn
-
-A modern MUSH-like engine written in TypeScript.
-
-%ch%cwType %cy'connect <n> <password>'%cw to connect.%cn
-%ch%cwType %cy'create <n> <password>'%cw to create a new character.%cn
-%ch%cwType %cy'quit'%cw to disconnect.%cn
-
-888     888 8888888b.   .d8888b.        d8888 888b     d888 888     888 
-888     888 888   Y88b d88P  Y88b      d88888 8888b   d8888 888     888 
-888     888 888    888 Y88b.          d88P888 88888b.d88888 888     888 
-888     888 888   d88P  "Y888b.      d88P 888 888Y88888P888 888     888 
-888     888 8888888P"      "Y88b.   d88P  888 888 Y888P 888 888     888 
-888     888 888 T88b         "888  d88P   888 888  Y8P  888 888     888 
-Y88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P 
- "Y88888P"  888   T88b  "Y8888P" d88P     888 888       888  "Y88888P"  
-
->> Powered by UrsaMU. https://github.com/ursamu/ursamu
-`;
-
-    Deno.writeTextFileSync(join(targetDir, "src", "main.ts"), mainTs);
-    Deno.writeTextFileSync(join(targetDir, "deno.json"), denoJson);
-    Deno.writeTextFileSync(join(targetDir, "text", "default_connect.txt"), connectText);
-
-    // telnet.ts
-    Deno.writeTextFileSync(join(targetDir, "src", "telnet.ts"),
-      `import { startTelnetServer } from "ursamu";\nstartTelnetServer({ welcomeFile: "text/default_connect.txt" });`);
-
-    console.log(fmt(`\n%ch%cg✨ Success! Project created in ${projectName}.%cn`));
-    console.log(`\nNext steps:`);
-    console.log(fmt(`  1. %cycd ${projectName}%cn`));
-    console.log(fmt(`  2. %cydeno task start%cn`));
-    console.log(fmt(`     On first run you will be prompted to create your superuser account.`));
-    console.log(fmt(`  3. Connect on port %cy${telnetPort}%cn with your MU* client or telnet.\n`));
-
-  } catch (err) {
-    console.error(fmt(`\n%crFatal Error during setup:%cn`), err);
-    Deno.exit(1);
-  }
-}
-
-const command = args._[0];
-const restArgs = args._.slice(1).map(arg => String(arg));
-
-// Handle commands
 switch (command) {
-  case "create": // Legacy alias
+  case "create":
   case "init":
-    await initProject();
+    await runCommand("create.ts", restArgs);
     break;
-    
+
   case "plugin":
-    // Run the plugin command
     await runCommand("plugin.ts", restArgs);
     break;
 
   case "help":
     showHelp();
     break;
-    
+
   default:
     console.error(`Unknown command: ${command}`);
-    console.log("Run 'ursamu help' for usage information");
+    console.log("Run 'ursamu help' for usage information.");
     Deno.exit(1);
 }
 
-/**
- * Show help information
- */
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
 function showHelp() {
   console.log(`
 UrsaMU CLI
@@ -270,47 +173,44 @@ UrsaMU CLI
 Usage:
   ursamu <command> [options]
 
-Available commands:
-  init                   Create a new UrsaMU project (Interactive)
-  plugin <command>       Plugin management (install, init, list, remove)
-  help                   Show this help message
+Commands:
+  create <name>                Create a new game project
+  create plugin <name>         Scaffold an in-tree plugin
+  create plugin <name> --standalone
+                               Create a standalone publishable plugin project
+  plugin install <url>         Install a plugin from GitHub
+  plugin update  <name>        Update an installed plugin to the latest commit
+  plugin remove  <name>        Uninstall a plugin
+  plugin list                  List installed plugins
+  plugin info    <name>        Show plugin manifest + registry details
+  help                         Show this help message
 
 Options:
-  -h, --help             Show this help message
-  -v, --version          Show version information
+  -h, --help       Show this help message
+  -v, --version    Show version information
 
 Examples:
-  ursamu init
+  ursamu create my-game
+  ursamu create plugin my-feature
+  ursamu create plugin my-feature --standalone
+  ursamu plugin install https://github.com/user/my-plugin
+  ursamu plugin update my-plugin
   ursamu plugin list
-  `);
+`);
 }
 
-/**
- * Run a CLI command
- * @param scriptName The name of the script to run
- * @param args Arguments to pass to the script
- */
-async function runCommand(scriptName: string, args: string[]) {
-  try {
-    // Get the directory of the current script
-    const currentDir = dirname(fromFileUrl(import.meta.url));
-    const scriptPath = join(currentDir, scriptName);
-    
-    // Create a new process to run the command
-    const command = new Deno.Command(Deno.execPath(), {
-      args: ["run", "-A", scriptPath, ...args],
-      stdout: "inherit",
-      stderr: "inherit",
-    });
-    
-    const process = command.spawn();
-    const status = await process.status;
-    
-    if (!status.success) {
-      Deno.exit(status.code);
-    }
-  } catch (error: unknown) {
-    console.error(`Error running command: ${error instanceof Error ? error.message : String(error)}`);
-    Deno.exit(1);
-  }
+async function runCommand(scriptName: string, scriptArgs: string[]) {
+  const currentDir = dirname(fromFileUrl(import.meta.url));
+  const scriptPath = join(currentDir, scriptName);
+
+  const cmd = new Deno.Command(Deno.execPath(), {
+    args: ["run", "-A", scriptPath, ...scriptArgs],
+    stdin:  "inherit",
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
+  const proc   = cmd.spawn();
+  const status = await proc.status;
+  if (!status.success) Deno.exit(status.code);
 }

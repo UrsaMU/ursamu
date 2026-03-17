@@ -289,36 +289,40 @@
 <h2>Custom Commands</h2>
 <p>Commands are the primary way players interact with UrsaMU. You can create custom commands to add new functionality.</p>
 <h3>Registering Commands</h3>
-<p>Use the <code>registerCommand</code> function to register a new command:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerCommand } from "../../services/Commands/mod.ts";
+<p>Use the <code>addCmd</code> function to register a new command:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
-registerCommand({
-  name: "mycommand",       // Unique identifier for the command
-  pattern: "mycommand *",  // Pattern to match user input
-  flags: "connected",      // Flags required to use the command
-  exec: (ctx) =&gt; {         // Function to execute when command is triggered
-    const args = ctx.args.trim();
-    ctx.send(`You typed: ${args}`);
+addCmd({
+  name: "mycommand",                    // Unique identifier for the command
+  pattern: /^mycommand\s*(.*)/i,        // Regex pattern to match user input
+  lock: "connected",                    // Lock expression required to use the command
+  exec: (u: IUrsamuSDK) =&gt; {           // Function to execute when command is triggered
+    const args = u.cmd.args[0]?.trim() ?? "";
+    u.send(`You typed: ${args}`);
   }
 });
 </code></pre>
-<h3>Command Context</h3>
-<p>The <code>ctx</code> object passed to the <code>exec</code> function contains:</p>
+<h3>Command Context (IUrsamuSDK)</h3>
+<p>The <code>u</code> object passed to the <code>exec</code> function contains:</p>
 <ul>
-<li><code>player</code>: The player who triggered the command</li>
-<li><code>cmd</code>: The command that was triggered</li>
-<li><code>args</code>: The arguments passed to the command</li>
-<li><code>switches</code>: Any switches used with the command</li>
-<li><code>send</code>: Function to send output to the player</li>
+<li><code>u.me</code>: The actor who triggered the command (<code>IDBObj</code> with <code>id</code>, <code>state</code>, <code>flags</code>, etc.)</li>
+<li><code>u.here</code>: The room the actor is currently in</li>
+<li><code>u.cmd.args</code>: Array of regex capture groups from the matched pattern</li>
+<li><code>u.cmd.switches</code>: Array of switches (e.g. <code>@command/switch</code>)</li>
+<li><code>u.send(msg)</code>: Send output to the actor</li>
+<li><code>u.broadcast(roomId, msg)</code>: Broadcast a message to a room</li>
+<li><code>u.force(cmd)</code>: Execute a command as the actor</li>
+<li><code>u.setFlags(target, flags)</code>: Set flags on an object</li>
+<li><code>u.db</code>: Database operations (search, create, modify, destroy)</li>
+<li><code>u.util</code>: Utilities (target, stripSubs, etc.)</li>
 </ul>
 <h3>Command Patterns</h3>
-<p>Command patterns determine when a command is triggered:</p>
-<ul>
-<li>Exact match: <code>"look"</code> - Matches only “look”</li>
-<li>Wildcard: <code>"look *"</code> - Matches “look” followed by anything</li>
-<li>Multiple patterns: <code>"look/l"</code> - Matches either “look” or “l”</li>
-<li>Regex: <code>"^l(.*)$"</code> - Uses a regular expression to match</li>
-</ul>
+<p>Command patterns are regular expressions. Capture groups become <code>u.cmd.args</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// /^look\s*(.*)/i — captures the optional target as u.cmd.args[0]
+// /^give\s+(\S+)\s+to\s+(.*)/i — two capture groups: args[0] and args[1]
+// /^quit$/i — exact match, no capture groups
+</code></pre>
 <h2>Custom Flags</h2>
 <p>Flags are used to control access to commands and features. You can create custom flags to implement your own permission system.</p>
 <h3>Registering Flags</h3>
@@ -498,8 +502,8 @@ app.router.get("/custom", async (ctx) =&gt; {
 </code></pre>
 <h3>Example: Complete Extension</h3>
 <p>Here’s an example of a plugin that uses multiple extension points:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "../../@types/IPlugin.ts";
-import { registerCommand } from "../../services/Commands/mod.ts";
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin, addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 import { registerFlag } from "../../services/Flags/mod.ts";
 import { registerFunction } from "../../services/Functions/mod.ts";
 import { registerHook } from "../../services/Hooks/mod.ts";
@@ -542,51 +546,47 @@ const myExtensionPlugin: IPlugin = {
     });
     
     // Register a custom command
-    registerCommand({
+    addCmd({
       name: "vip",
-      pattern: "vip *",
-      flags: "wizard",
-      exec: async (ctx) =&gt; {
-        const args = ctx.args.trim().split(" ");
-        const action = args[0];
-        const target = args[1];
-        
+      pattern: /^vip\s+(\S+)\s+(.*)/i,
+      lock: "wizard",
+      exec: async (u: IUrsamuSDK) =&gt; {
+        const action = u.cmd.args[0]?.trim() ?? "";
+        const target = u.cmd.args[1]?.trim() ?? "";
+
         if (!action || !target) {
-          return ctx.send("Usage: vip add/remove &lt;player&gt;");
+          return u.send("Usage: vip add/remove &lt;player&gt;");
         }
-        
+
         // Find the target player
         const players = await dbojs.query({
           "data.name": new RegExp(`^${target}$`, "i"),
           flags: /player/i
         });
-        
+
         if (players.length === 0) {
-          return ctx.send(`Player '${target}' not found.`);
+          return u.send(`Player '${target}' not found.`);
         }
-        
+
         const player = players[0];
-        
+        const playerName = String(player.data?.name ?? player.id);
+
         if (action === "add") {
-          // Add the VIP flag
           if (!player.flags.includes("vip")) {
-            player.flags.push("vip");
-            await dbojs.update(player);
-            ctx.send(`Added VIP status to ${player.data.name}.`);
+            await u.setFlags(player.id, "+vip");
+            u.send(`Added VIP status to ${playerName}.`);
           } else {
-            ctx.send(`${player.data.name} is already a VIP.`);
+            u.send(`${playerName} is already a VIP.`);
           }
         } else if (action === "remove") {
-          // Remove the VIP flag
           if (player.flags.includes("vip")) {
-            player.flags = player.flags.filter(f =&gt; f !== "vip");
-            await dbojs.update(player);
-            ctx.send(`Removed VIP status from ${player.data.name}.`);
+            await u.setFlags(player.id, "-vip");
+            u.send(`Removed VIP status from ${playerName}.`);
           } else {
-            ctx.send(`${player.data.name} is not a VIP.`);
+            u.send(`${playerName} is not a VIP.`);
           }
         } else {
-          ctx.send("Usage: vip add/remove &lt;player&gt;");
+          u.send("Usage: vip add/remove &lt;player&gt;");
         }
       }
     });

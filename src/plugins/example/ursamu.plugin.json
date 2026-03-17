@@ -1,0 +1,9 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "Starter template — demonstrates commands, REST routes, and a custom database",
+  "ursamu": ">=1.0.0",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts"
+}

@@ -11,6 +11,8 @@ nav:
     url: "#web-client"
   - text: Server Configuration
     url: "#server-configuration"
+  - text: REST API Reference
+    url: "#rest-api-reference"
   - text: Troubleshooting
     url: "#troubleshooting"
   - text: Security
@@ -122,6 +124,43 @@ To remove a flag (prefix with `!`):
 ```
 @set <username>=!<flag>
 ```
+
+### Bulletin Board Administration
+
+Admins and wizards can create and destroy bulletin boards:
+
+```
++bbcreate <name>[=<description>]     -- Create a board
++bbdestroy <board>                   -- Destroy a board and all its posts
+```
+
+Board names are slugified automatically (spaces become dashes). Example:
+
+```
++bbcreate General=General discussion board
++bbcreate Staff=Staff-only discussion
++bbdestroy general
+```
+
+The REST API exposes full board management under `/api/v1/boards` (see
+the REST API section below).
+
+### Jobs System
+
+The jobs system lets players submit requests to staff. As staff you have
+additional commands:
+
+```
++job/assign <#>=<player>          -- Assign a job to a staff member
++job/status <#>=<status>          -- Set status (new/open/pending/in-progress/resolved/closed)
++job/priority <#>=<priority>      -- Set priority (low/normal/high/critical)
++job/complete <#>=<resolution>    -- Mark resolved with a resolution note
++job/reopen <#>                   -- Reopen a closed job
++job/staffnote <#>=<text>         -- Add a staff-only note (not visible to submitter)
++job/delete <#>                   -- Delete a job
+```
+
+Job statistics are available via the REST API at `GET /api/v1/jobs/stats`.
 
 ### Channel Administration
 
@@ -253,6 +292,77 @@ curl -H "Authorization: Bearer <token>" \
 curl -H "Authorization: Bearer <token>" \
      https://yourgame.example.com/api/v1/scenes/42/export?format=json
 ```
+
+## REST API Reference
+
+All endpoints are served on the Hub's HTTP port (default `4203`). Most require
+a `Bearer` JWT token in the `Authorization` header, obtained from
+`POST /api/v1/auth/login`.
+
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/login` | Returns `{ token }` |
+| `POST` | `/api/v1/auth/register` | Create a new character |
+| `GET` | `/api/v1/me` | Current user profile |
+
+### Players
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/players/online` | List connected players |
+| `GET` | `/api/v1/channels` | List channels |
+
+### Bulletin Boards
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/boards` | All boards with post + unread counts |
+| `POST` | `/api/v1/boards` | Create a board *(staff)* |
+| `GET` | `/api/v1/boards/unread` | Unread summary across all boards |
+| `GET` | `/api/v1/boards/:id` | Single board |
+| `PATCH` | `/api/v1/boards/:id` | Update board *(staff)* |
+| `DELETE` | `/api/v1/boards/:id` | Delete board + all posts *(staff)* |
+| `GET` | `/api/v1/boards/:id/posts` | Paginated post list (`limit`, `offset`) |
+| `POST` | `/api/v1/boards/:id/posts` | Create a post |
+| `GET` | `/api/v1/boards/:id/posts/:num` | Read a post |
+| `PATCH` | `/api/v1/boards/:id/posts/:num` | Edit a post *(author or staff)* |
+| `DELETE` | `/api/v1/boards/:id/posts/:num` | Delete a post *(author or staff)* |
+| `POST` | `/api/v1/boards/:id/read` | Mark board as read |
+
+### Jobs
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/jobs` | List jobs (staff see all; players see their own) |
+| `POST` | `/api/v1/jobs` | Submit a job |
+| `GET` | `/api/v1/jobs/stats` | Counts by status, category, priority *(staff)* |
+| `GET` | `/api/v1/jobs/:id` | Get a job by number or ID |
+| `PATCH` | `/api/v1/jobs/:id` | Update status/priority/assignee *(staff)* |
+| `DELETE` | `/api/v1/jobs/:id` | Delete a job *(staff)* |
+| `POST` | `/api/v1/jobs/:id/comment` | Add a comment |
+
+### Scenes
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/scenes` | List scenes |
+| `GET` | `/api/v1/scenes/:id/export` | Export as `?format=markdown` or `?format=json` |
+
+### WebSocket
+
+Connect via `ws://host:4202` (or the Hub port). Authenticate either by
+sending `connect <name> <password>` as your first message, or by passing a
+JWT at connection time:
+
+```
+ws://host:4203?token=<jwt>&client=web
+```
+
+The `client=web` parameter enables rich JSON payloads instead of plain text.
+
+---
 
 ## Troubleshooting
 

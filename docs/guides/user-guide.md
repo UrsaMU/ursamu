@@ -9,12 +9,14 @@ nav:
     url: "#basic-commands"
   - text: Character Creation
     url: "#character-creation"
+  - text: Bulletin Boards
+    url: "#bulletin-boards"
+  - text: Staff Jobs
+    url: "#staff-jobs"
   - text: Communication
     url: "#communication"
   - text: Building
     url: "#building"
-  - text: Advanced Features
-    url: "#advanced-features"
 ---
 
 # User Guide
@@ -72,6 +74,37 @@ After creating an account, you'll want to set up your character:
 - `look [<object>]` — Look at the room or a specific object
 - `examine <object>` — Inspect an object's full details (owner, flags, contents)
 - `doing` — Show your current activity/status line
+
+## Bulletin Boards
+
+Bulletin boards are persistent message boards, organized by topic.
+
+- `+bblist` — list all boards with post counts and unread counts
+- `+bbread <board>` — list posts on a board
+- `+bbread <board>/<num>` — read a specific post
+- `+bbpost <board>=<subject>/<body>` — post to a board
+- `+bbpost/edit <board>/<num>=<new body>` — edit one of your posts
+- `+bbpost/delete <board>/<num>` — delete one of your posts
+
+Board names are case-insensitive slugs (spaces become dashes):
+
+```
++bbread general
++bbpost general=Welcome to the game/Hello everyone, looking forward to playing here!
+```
+
+Reading a post automatically marks that board as read.
+
+## Staff Jobs
+
+The jobs system lets players submit requests, bug reports, or ideas to staff.
+
+- `+job <title>=<description>` — submit a request
+- `+job/<category> <title>=<desc>` — submit with a category (`request`, `bug`, `app`, `idea`)
+- `+jobs` — list all your open jobs
+- `+job/view <#>` — view the full details of a job
+- `+job/comment <#>=<text>` — add a comment to a job
+- `+job/close <#>[=<reason>]` — close a job you submitted
 
 ## Communication
 

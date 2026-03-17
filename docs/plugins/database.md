@@ -1,419 +1,216 @@
 ---
 layout: layout.vto
-description: Learn how to use the database in UrsaMU plugins
+description: Using DBO<T> to store and query plugin data in UrsaMU
 nav:
-  - text: Database Basics
-    url: "#database-basics"
-  - text: Database Services
-    url: "#database-services"
-  - text: CRUD Operations
-    url: "#crud-operations"
-  - text: Querying Data
-    url: "#querying-data"
-  - text: Examples
-    url: "#examples"
+  - text: Overview
+    url: "#overview"
+  - text: Defining a Collection
+    url: "#defining-a-collection"
+  - text: DBO Methods
+    url: "#dbo-methods"
+  - text: Querying
+    url: "#querying"
+  - text: Built-in Collections
+    url: "#built-in-collections"
+  - text: Sequential IDs
+    url: "#sequential-ids"
+  - text: Full Example
+    url: "#full-example"
 ---
 
-# Using the Database in UrsaMU Plugins
+# Plugin Database
 
-This guide explains how to use the UrsaMU database system in your plugins to store and retrieve data.
+## Overview
 
-## Database Basics
+UrsaMU's database layer is built on Deno KV. The generic class `DBO<T>`
+provides a typed CRUD interface for any collection. Each plugin creates its own
+named collections that live in the shared KV store, isolated by key prefix.
 
-UrsaMU uses a simple database system for storing game objects and other data. The database is accessible through several services that provide methods for creating, reading, updating, and deleting data.
+---
 
-## Database Services
+## Defining a Collection
 
-UrsaMU provides several database services for different types of data:
-
-- **dbojs** - The main database for game objects (players, rooms, exits, things)
-- **counters** - A database for counters (used for generating unique IDs)
-- **chans** - A database for communication channels
-- **mail** - A database for the mail system
-- **bboard** - A database for bulletin boards
-
-These services are imported from the Database service module:
+Create a `db.ts` file in your plugin directory:
 
 ```typescript
-import { dbojs, counters, chans, mail, bboard } from "../../services/Database/index.ts";
-```
+// src/plugins/my-plugin/db.ts
+import { DBO } from "../../services/Database/database.ts";
 
-## CRUD Operations
-
-Each database service provides methods for creating, reading, updating, and deleting data.
-
-### Creating Objects
-
-To create a new object in the database, use the `create` method:
-
-```typescript
-// Create a new game object
-const newObject = {
-  flags: "thing",
-  data: {
-    name: "My Object",
-    description: "A custom object created by a plugin"
-  }
-};
-
-try {
-  const obj = await dbojs.create(newObject);
-  console.log(`Created object with ID: ${obj.id}`);
-} catch (error) {
-  console.error("Error creating object:", error);
+export interface IMyRecord {
+  id: string;
+  playerId: string;
+  text: string;
+  createdAt: number;   // ms timestamp
 }
+
+// The string key must be globally unique — prefix with "server." by convention
+export const myRecords = new DBO<IMyRecord>("server.my-plugin-records");
 ```
 
-### Reading Objects
-
-To retrieve an object from the database, use the `get` method with the object's ID:
+Import the collection wherever you need it:
 
 ```typescript
-// Get an object by ID
-try {
-  const obj = await dbojs.get("123");
-  if (obj) {
-    console.log(`Found object: ${obj.data.name}`);
-  } else {
-    console.log("Object not found");
-  }
-} catch (error) {
-  console.error("Error getting object:", error);
-}
+import { myRecords } from "./db.ts";
 ```
 
-### Updating Objects
+---
 
-To update an object in the database, modify the object and use the `update` method:
+## DBO Methods
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `create` | `create(record: T): Promise<T>` | Insert a record, returns the created object |
+| `queryOne` | `queryOne(query: Partial<T>): Promise<T \| undefined>` | First match or `undefined` |
+| `find` | `find(query: Partial<T>): Promise<T[]>` | All matching records |
+| `update` | `update(query: Partial<T>, record: T): Promise<void>` | Replace a record (matched by `id`) |
+| `modify` | `modify(query: Partial<T>, op: "$set", data: Partial<T>): Promise<void>` | Partial field update |
+| `delete` | `delete(query: Partial<T>): Promise<void>` | Delete all matching records |
+| `all` | `all(): Promise<T[]>` | Return every record in the collection |
+
+> **Update vs Modify**: `update({}, record)` replaces the full document.
+> `modify({ id }, "$set", { field: value })` updates only the listed fields.
+
+---
+
+## Querying
+
+Pass any subset of fields as the query object. All fields in the query must
+match (logical AND). An empty object `{}` matches everything.
 
 ```typescript
-// Update an object
-try {
-  const obj = await dbojs.get("123");
-  if (obj) {
-    // Modify the object
-    obj.data.description = "Updated description";
-    
-    // Save the changes
-    await dbojs.update(obj);
-    console.log("Object updated");
-  }
-} catch (error) {
-  console.error("Error updating object:", error);
-}
+// Find all records for a specific player
+const mine = await myRecords.find({ playerId: "p123" });
+
+// Find the first record with a specific id
+const one = await myRecords.queryOne({ id: "rec-7" });
+
+// All records
+const all = await myRecords.all();
 ```
 
-### Deleting Objects
+---
 
-To delete an object from the database, use the `delete` method with the object's ID:
+## Built-in Collections
 
-```typescript
-// Delete an object
-try {
-  await dbojs.delete("123");
-  console.log("Object deleted");
-} catch (error) {
-  console.error("Error deleting object:", error);
-}
-```
+The core engine exposes these pre-defined collections from
+`src/services/Database/index.ts`:
 
-## Querying Data
-
-UrsaMU provides a powerful query system for finding objects in the database.
-
-### Basic Queries
-
-To find objects that match specific criteria, use the `query` method:
+| Export | KV Key | Contents |
+|--------|--------|----------|
+| `dbojs` | `server.objects` | All game objects (players, rooms, exits, things) |
+| `counters` | `server.counters` | Auto-increment sequences |
+| `chans` | `server.chans` | Communication channels |
+| `mail` | `server.mail` | In-game mail messages |
+| `bboard` | `server.bboard` | Bulletin board posts |
+| `scenes` | `server.scenes` | Scene logs |
 
 ```typescript
-// Find all rooms
-try {
-  const rooms = await dbojs.query({ flags: /room/i });
-  console.log(`Found ${rooms.length} rooms`);
-} catch (error) {
-  console.error("Error querying rooms:", error);
-}
-```
-
-### Complex Queries
-
-You can create more complex queries by combining multiple criteria:
-
-```typescript
-// Find all objects owned by a specific player
-try {
-  const objects = await dbojs.query({
-    owner: "123",
-    flags: /thing/i
-  });
-  console.log(`Found ${objects.length} objects owned by player 123`);
-} catch (error) {
-  console.error("Error querying objects:", error);
-}
-```
-
-### Querying by Name
-
-To find objects by name, you can use a regular expression:
-
-```typescript
-// Find a player by name (case-insensitive)
-try {
-  const players = await dbojs.query({
-    "data.name": new RegExp("^PlayerName$", "i"),
-    flags: /player/i
-  });
-  
-  if (players.length > 0) {
-    console.log(`Found player: ${players[0].data.name}`);
-  } else {
-    console.log("Player not found");
-  }
-} catch (error) {
-  console.error("Error querying player:", error);
-}
-```
-
-### Getting All Objects
-
-To get all objects in a database, use the `all` method:
-
-```typescript
-// Get all channels
-try {
-  const channels = await chans.all();
-  console.log(`Found ${channels.length} channels`);
-} catch (error) {
-  console.error("Error getting channels:", error);
-}
-```
-
-## Examples
-
-### Creating a Room
-
-```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
 import { dbojs, counters } from "../../services/Database/index.ts";
 
-const roomCreatorPlugin: IPlugin = {
-  name: "room-creator",
-  version: "1.0.0",
-  description: "A plugin that creates custom rooms",
-  
-  init: async () => {
-    try {
-      // Get the next object ID
-      let counter = await counters.get("objid");
-      if (!counter) {
-        // Create the counter if it doesn't exist
-        counter = await counters.create({
-          id: "objid",
-          seq: 1
-        });
-      }
-      
-      // Increment the counter
-      counter.seq += 1;
-      await counters.update(counter);
-      
-      // Create a new room
-      const roomId = counter.seq.toString();
-      const newRoom = {
-        id: roomId,
-        flags: "room",
-        data: {
-          name: "Custom Room",
-          description: "A room created by the room-creator plugin."
-        }
-      };
-      
-      const room = await dbojs.create(newRoom);
-      console.log(`Created room with ID: ${room.id}`);
-      
-      return true;
-    } catch (error) {
-      console.error("Error creating room:", error);
-      return false;
-    }
-  },
-  
-  remove: async () => {
-    try {
-      // Find and delete rooms created by this plugin
-      const rooms = await dbojs.query({
-        "data.name": "Custom Room",
-        flags: /room/i
-      });
-      
-      for (const room of rooms) {
-        await dbojs.delete(room.id);
-        console.log(`Deleted room with ID: ${room.id}`);
-      }
-    } catch (error) {
-      console.error("Error cleaning up rooms:", error);
-    }
-  }
-};
+// Find a player by name
+const player = await dbojs.queryOne({ data: { name: "Alice" } });
 
-export default roomCreatorPlugin;
+// Find all objects in a room
+const contents = await dbojs.find({ location: roomId });
 ```
 
-### Creating a Channel
+---
+
+## Sequential IDs
+
+Use the `counters` collection to generate monotonically increasing numbers
+(e.g., ticket #1, event #2):
 
 ```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
-import { chans } from "../../services/Database/index.ts";
+import { counters } from "../../services/Database/index.ts";
 
-const channelPlugin: IPlugin = {
-  name: "channel-plugin",
-  version: "1.0.0",
-  description: "A plugin that creates a custom channel",
-  
-  init: async () => {
-    try {
-      // Check if the channel already exists
-      const existingChannels = await chans.query({ id: "custom" });
-      
-      if (existingChannels.length === 0) {
-        // Create the channel
-        await chans.create({
-          id: "custom",
-          name: "Custom",
-          header: "%ch%cg[Custom]%cn",
-          alias: "cus",
-          lock: "connected"
-        });
-        
-        console.log("Created custom channel");
-      } else {
-        console.log("Custom channel already exists");
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("Error creating channel:", error);
-      return false;
-    }
-  },
-  
-  remove: async () => {
-    try {
-      // Delete the custom channel
-      await chans.delete("custom");
-      console.log("Deleted custom channel");
-    } catch (error) {
-      console.error("Error deleting channel:", error);
-    }
+export async function getNextId(namespace: string): Promise<number> {
+  const row = await counters.queryOne({ id: namespace });
+  if (!row) {
+    await counters.create({ id: namespace, seq: 1 });
+    return 1;
   }
-};
-
-export default channelPlugin;
+  const next = row.seq + 1;
+  await counters.modify({ id: namespace }, "$set", { seq: next });
+  return next;
+}
 ```
 
-### Player Inventory System
+Call it with a unique namespace per plugin:
 
 ```typescript
-import { IPlugin } from "../../@types/IPlugin.ts";
-import { dbojs } from "../../services/Database/index.ts";
-import { registerCommand } from "../../services/Commands/mod.ts";
-
-const inventoryPlugin: IPlugin = {
-  name: "inventory",
-  version: "1.0.0",
-  description: "A plugin that adds an inventory system",
-  
-  init: async () => {
-    // Register the inventory command
-    addCmd({
-      name: "inventory",
-      pattern: /^(?:inventory|inv|i)$/i,
-      lock: "connected",
-      exec: async (u: IUrsamuSDK) => {
-        try {
-          // Get the player's inventory items
-          const items = await u.db.search({
-            location: u.me.id,
-            flags: /thing/i,
-          });
-
-          if (items.length === 0) {
-            u.send("You are not carrying anything.");
-            return;
-          }
-
-          // Display the inventory
-          let message = "%chYour Inventory:%cn\r\n";
-          for (const item of items) {
-            const name = String(item.state.name ?? item.id);
-            const desc = String(item.state.description ?? "No description");
-            message += `${name} - ${desc}\r\n`;
-          }
-
-          u.send(message);
-        } catch (error) {
-          u.send(`Error: ${(error as Error).message}`);
-        }
-      },
-    });
-    
-    // Register the give command
-    registerCommand({
-      name: "give",
-      pattern: "give *",
-      flags: "connected",
-      exec: async (ctx) => {
-        const args = ctx.args.trim().split("=");
-        
-        if (args.length !== 2) {
-          return ctx.send("Usage: give <item>=<player>");
-        }
-        
-        const itemName = args[0].trim();
-        const playerName = args[1].trim();
-        
-        try {
-          // Find the item in the player's inventory
-          const items = await dbojs.query({
-            location: ctx.player.id,
-            "data.name": new RegExp(`^${itemName}$`, "i"),
-            flags: /thing/i
-          });
-          
-          if (items.length === 0) {
-            return ctx.send(`You don't have '${itemName}'.`);
-          }
-          
-          const item = items[0];
-          
-          // Find the target player
-          const players = await dbojs.query({
-            "data.name": new RegExp(`^${playerName}$`, "i"),
-            flags: /player/i
-          });
-          
-          if (players.length === 0) {
-            return ctx.send(`Player '${playerName}' not found.`);
-          }
-          
-          const targetPlayer = players[0];
-          
-          // Move the item to the target player
-          item.location = targetPlayer.id;
-          await dbojs.update(item);
-          
-          ctx.send(`You give ${item.data.name} to ${targetPlayer.data.name}.`);
-        } catch (error) {
-          ctx.send(`Error: ${error.message}`);
-        }
-      }
-    });
-    
-    return true;
-  }
-};
-
-export default inventoryPlugin;
+const num = await getNextId("my-plugin.tickets");
 ```
 
-By following these guidelines and examples, you can effectively use the UrsaMU database system in your plugins to store and retrieve data. 
+---
+
+## Full Example
+
+A plugin that lets players save short bookmarks:
+
+```typescript
+// db.ts
+import { DBO } from "../../services/Database/database.ts";
+
+export interface IBookmark {
+  id: string;
+  playerId: string;
+  playerName: string;
+  label: string;
+  url: string;
+  createdAt: number;
+}
+
+export const bookmarks = new DBO<IBookmark>("server.bookmarks");
+```
+
+```typescript
+// commands.ts
+import { addCmd } from "../../services/commands/cmdParser.ts";
+import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import { bookmarks } from "./db.ts";
+
+addCmd({
+  name: "+bookmark",
+  pattern: /^\+bookmark(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const sw  = (u.cmd.args[0] || "").toLowerCase();
+    const arg = (u.cmd.args[1] || "").trim();
+
+    // +bookmark/list
+    if (sw === "list") {
+      const mine = await bookmarks.find({ playerId: u.me.id });
+      if (!mine.length) { u.send("No bookmarks saved."); return; }
+      for (const b of mine) u.send(`[${b.id.slice(-4)}] ${b.label} — ${b.url}`);
+      return;
+    }
+
+    // +bookmark/delete <id>
+    if (sw === "delete") {
+      const b = await bookmarks.queryOne({ id: arg, playerId: u.me.id });
+      if (!b) { u.send("Bookmark not found."); return; }
+      await bookmarks.delete({ id: b.id });
+      u.send("Deleted.");
+      return;
+    }
+
+    // +bookmark <label>=<url>
+    const eq = arg.indexOf("=");
+    if (eq === -1) { u.send("Usage: +bookmark <label>=<url>"); return; }
+    const label = arg.slice(0, eq).trim();
+    const url   = arg.slice(eq + 1).trim();
+    if (!label || !url) { u.send("Usage: +bookmark <label>=<url>"); return; }
+
+    await bookmarks.create({
+      id:         crypto.randomUUID(),
+      playerId:   u.me.id,
+      playerName: u.me.name || u.me.id,
+      label,
+      url,
+      createdAt:  Date.now(),
+    });
+    u.send(`Bookmark "${label}" saved.`);
+  },
+});
+```

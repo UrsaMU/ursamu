@@ -1,215 +1,159 @@
 ---
 layout: layout.vto
-description: Learn the basics of UrsaMU plugin development
+description: The IPlugin interface, lifecycle, and auto-discovery explained
 nav:
-  - text: What Are Plugins?
-    url: "#what-are-plugins"
-  - text: Plugin Interface
-    url: "#plugin-interface"
-  - text: Plugin Lifecycle
-    url: "#plugin-lifecycle"
-  - text: Plugin Configuration
-    url: "#plugin-configuration"
-  - text: Example Plugin
-    url: "#example-plugin"
+  - text: Auto-Discovery
+    url: "#auto-discovery"
+  - text: The IPlugin Interface
+    url: "#the-iplugin-interface"
+  - text: Lifecycle
+    url: "#lifecycle"
+  - text: A Minimal Plugin
+    url: "#a-minimal-plugin"
+  - text: Standard File Layout
+    url: "#standard-file-layout"
 ---
 
 # Plugin Basics
 
-## What Are Plugins?
+## Auto-Discovery
 
-Plugins are modular extensions that add functionality to UrsaMU without modifying the core codebase. They allow you to:
+UrsaMU automatically loads every folder inside `src/plugins/` that contains an
+`index.ts` exporting a default `IPlugin` object. No registration, no config
+entry required — just drop the folder in and restart the server.
 
-- Add new commands and features
-- Modify existing behavior
-- Integrate with external services
-- Customize the game experience
+```
+src/plugins/
+├── bboards/        ← auto-loaded
+├── events/         ← auto-loaded
+├── jobs/           ← auto-loaded
+└── my-plugin/      ← auto-loaded the next time you start
+```
 
-UrsaMU's plugin system is designed to be flexible and powerful, allowing developers to extend the server in virtually any way while maintaining compatibility with future updates.
+---
 
-## Plugin Interface
-
-All UrsaMU plugins implement the `IPlugin` interface, which defines the structure and required methods for a plugin:
+## The IPlugin Interface
 
 ```typescript
-interface IPlugin {
-  // Required properties
-  name: string;         // Unique name of the plugin
-  version: string;      // Semantic version (e.g., "1.0.0")
-  description: string;  // Brief description of what the plugin does
-  author: string;       // Plugin author's name or identifier
-  
-  // Optional properties
-  dependencies?: string[];  // Other plugins this plugin depends on
-  config?: Record<string, any>;  // Plugin configuration
+// src/@types/IPlugin.ts
+export interface IPlugin {
+  name: string;          // unique slug — used in logs and config namespacing
+  version: string;       // semver, e.g. "1.0.0"
+  description?: string;
+  config?: IConfig;      // optional default config values (deep-merged at startup)
 
-  // Required methods
-  onInit(app: App): Promise<void> | void;  // Called when the plugin is initialized
-  onLoad(app: App): Promise<void> | void;  // Called when the plugin is loaded
-  onUnload(app: App): Promise<void> | void;  // Called when the plugin is unloaded
+  init?: () => boolean | Promise<boolean>;  // called once at startup
+  remove?: () => void   | Promise<void>;    // called when the plugin is unloaded
 }
 ```
 
-## Plugin Lifecycle
+That is the complete interface. There is no `author` field, no `dependencies`
+array, no `App` parameter, and no `onInit`/`onLoad`/`onUnload` lifecycle
+methods. The interface is intentionally minimal.
 
-UrsaMU plugins go through several lifecycle stages:
+---
 
-1. **Registration**: The plugin is registered with the plugin manager
-2. **Initialization**: The `onInit` method is called, allowing the plugin to set up resources
-3. **Loading**: The `onLoad` method is called, activating the plugin's functionality
-4. **Unloading**: The `onUnload` method is called when the plugin is disabled or the server shuts down
+## Lifecycle
 
-### The `onInit` Method
+| Stage | Trigger | What happens |
+|-------|---------|-------------|
+| **Module import** | Server start — `index.ts` is imported | `addCmd()` calls in `commands.ts` run immediately at import time |
+| **`init()`** | Called once after all modules are imported | Call `registerPluginRoute()`, log startup info, return `true` on success or `false` to signal failure |
+| **`remove()`** | Plugin unloaded | Clean up any timers, intervals, or external connections |
 
-The `onInit` method is called once when the plugin is first initialized. Use this method to:
+> `addCmd` and `new DBO<T>()` are called at **module-load time**, not inside
+> `init()`. Import `"./commands.ts"` from `index.ts` and the registrations
+> happen automatically.
 
-- Register commands
-- Set up database schemas
-- Initialize resources
-- Register event listeners
+---
 
-```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
-
-onInit(app: App): void {
-  // Register a new command
-  addCmd({
-    name: "hello",
-    pattern: /^hello$/i,
-    lock: "connected",
-    exec: (u) => {
-      u.send("Hello from my plugin!");
-    },
-  });
-}
-```
-
-### The `onLoad` Method
-
-The `onLoad` method is called each time the plugin is loaded or reloaded. Use this method to:
-
-- Start services
-- Connect to external resources
-- Activate functionality
+## A Minimal Plugin
 
 ```typescript
-onLoad(app: App): void {
-  console.log(`${this.name} v${this.version} loaded!`);
-  // Start any services or activate functionality
-}
+// src/plugins/hello/index.ts
+import type { IPlugin } from "../../@types/IPlugin.ts";
+
+const helloPlugin: IPlugin = {
+  name: "hello",
+  version: "1.0.0",
+  description: "A minimal working plugin",
+
+  init: async () => {
+    console.log("[hello] initialized");
+    return true;
+  },
+
+  remove: async () => {
+    console.log("[hello] removed");
+  },
+};
+
+export default helloPlugin;
 ```
 
-### The `onUnload` Method
+That is a complete, loadable plugin. Start the server and you will see
+`[hello] initialized` in the log.
 
-The `onUnload` method is called when the plugin is unloaded or the server shuts down. Use this method to:
+---
 
-- Clean up resources
-- Close connections
-- Save state
+## Standard File Layout
+
+Full-featured plugins split their code across four files, plus a manifest:
+
+```
+src/plugins/my-plugin/
+├── index.ts             — IPlugin object; wires everything together
+├── commands.ts          — addCmd() registrations
+├── router.ts            — HTTP route handler
+├── db.ts                — DBO<T> database collections + types
+└── ursamu.plugin.json   — manifest (required for ursamu plugin install)
+```
+
+### index.ts wires the other three
 
 ```typescript
-onUnload(app: App): void {
-  console.log(`${this.name} unloaded`);
-  // Clean up resources
-}
+import type { IPlugin } from "../../@types/IPlugin.ts";
+import { registerPluginRoute } from "../../app.ts";
+import { myRouteHandler } from "./router.ts";
+import "./commands.ts";  // importing triggers addCmd() registrations
+
+const myPlugin: IPlugin = {
+  name: "my-plugin",
+  version: "1.0.0",
+  description: "Does something useful",
+
+  init: async () => {
+    registerPluginRoute("/api/v1/my-plugin", myRouteHandler);
+    console.log("[my-plugin] initialized");
+    return true;
+  },
+
+  remove: async () => {
+    console.log("[my-plugin] removed");
+  },
+};
+
+export default myPlugin;
 ```
 
-## Plugin Configuration
+### ursamu.plugin.json
 
-Plugins can define their own configuration options, which can be set in the server's configuration file:
+Every plugin that may be shared or installed by others should include this
+manifest at the plugin root:
 
 ```json
 {
-  "plugins": {
-    "my-plugin": {
-      "option1": "value1",
-      "option2": 42
-    }
-  }
+  "name": "my-plugin",
+  "version": "1.0.0",
+  "description": "Does something useful",
+  "ursamu": ">=1.0.0",
+  "author": "Your Name",
+  "license": "MIT",
+  "main": "index.ts"
 }
 ```
 
-Access configuration values in your plugin:
-
-```typescript
-class MyPlugin implements IPlugin {
-  name = "my-plugin";
-  version = "1.0.0";
-  description = "An example plugin";
-  author = "Your Name";
-  
-  // Default configuration
-  config = {
-    option1: "default",
-    option2: 0
-  };
-  
-  onInit(app: App): void {
-    // Access configuration values
-    console.log(this.config.option1); // "value1" from config or "default" if not set
-    console.log(this.config.option2); // 42 from config or 0 if not set
-  }
-}
-```
-
-## Example Plugin
-
-Here's a complete example of a simple plugin that adds a "hello" command:
-
-```typescript
-// src/plugins/hello-world/index.ts
-import { App, IPlugin } from "ursamu";
-
-export default class HelloWorldPlugin implements IPlugin {
-  name = "hello-world";
-  version = "1.0.0";
-  description = "A simple hello world plugin";
-  author = "Your Name";
-  
-  config = {
-    greeting: "Hello, world!"
-  };
-  
-  onInit(app: App): void {
-    // Register the hello command
-    addCmd({
-      name: "hello",
-      pattern: /^hello$/i,
-      lock: "connected",
-      exec: (u) => {
-        u.send(this.config.greeting);
-      },
-    });
-    
-    console.log(`${this.name} initialized`);
-  }
-  
-  onLoad(app: App): void {
-    console.log(`${this.name} v${this.version} loaded!`);
-  }
-  
-  onUnload(app: App): void {
-    console.log(`${this.name} unloaded`);
-  }
-}
-```
-
-To use this plugin, you would:
-
-1. Create the directory `src/plugins/hello-world/`
-2. Save the above code as `index.ts` in that directory
-3. Add the plugin to your configuration:
-
-```json
-{
-  "plugins": {
-    "hello-world": {
-      "greeting": "Hello from my custom plugin!"
-    }
-  }
-}
-```
-
-4. Restart your UrsaMU server
-
-Now, when a player types "hello" in the game, they'll see the custom greeting message. 
+This is the file `ursamu plugin install` reads to confirm what it is installing,
+display details, and populate the local registry. See the
+[Plugin Manager](./index.md#installing-community-plugins) docs for the full
+install/update/remove workflow.

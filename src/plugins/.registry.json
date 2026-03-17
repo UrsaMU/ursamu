@@ -1,0 +1,38 @@
+{
+  "bboards": {
+    "name": "bboards",
+    "version": "1.0.0",
+    "description": "Bulletin board system with in-game +bb commands and REST API",
+    "source": "bundled",
+    "author": "UrsaMU",
+    "installedAt": "2026-03-16T00:00:00.000Z",
+    "updatedAt": "2026-03-16T00:00:00.000Z"
+  },
+  "events": {
+    "name": "events",
+    "version": "1.0.0",
+    "description": "In-game event calendar with RSVP tracking and REST API",
+    "source": "bundled",
+    "author": "UrsaMU",
+    "installedAt": "2026-03-16T00:00:00.000Z",
+    "updatedAt": "2026-03-16T00:00:00.000Z"
+  },
+  "example": {
+    "name": "example",
+    "version": "1.0.0",
+    "description": "Starter template — demonstrates commands, REST routes, and a custom database",
+    "source": "bundled",
+    "author": "UrsaMU",
+    "installedAt": "2026-03-16T00:00:00.000Z",
+    "updatedAt": "2026-03-16T00:00:00.000Z"
+  },
+  "jobs": {
+    "name": "jobs",
+    "version": "1.0.0",
+    "description": "Staff job/request tracking system with in-game commands and REST API",
+    "source": "bundled",
+    "author": "UrsaMU",
+    "installedAt": "2026-03-16T00:00:00.000Z",
+    "updatedAt": "2026-03-16T00:00:00.000Z"
+  }
+}

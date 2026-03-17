@@ -345,18 +345,18 @@ u.emit.broadcast(here.id, `${en.name} waves hello!`);
 </code></pre>
 <h3>Plugin Architecture</h3>
 <p>Everything in UrsaMU is extensible via plugins:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin } from "ursamu";
-import { registerCommand } from "ursamu/commands";
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
 const myPlugin: IPlugin = {
   name: "my-game-plugin",
   version: "1.0.0",
   init: async () =&gt; {
-    registerCommand({
+    addCmd({
       name: "greet",
-      pattern: "greet *",
-      flags: "connected",
-      exec: (ctx) =&gt; ctx.send(`Hello, ${ctx.args}!`),
+      pattern: /^greet\s*(.*)/i,
+      lock: "connected",
+      exec: (u: IUrsamuSDK) =&gt; u.send(`Hello, ${u.cmd.args[0]?.trim() ?? "world"}!`),
     });
     return true;
   },
@@ -445,7 +445,7 @@ GET /api/v1/scenes/:id/export?format=json
 </tr>
 <tr>
 <td>Testing</td>
-<td><code>deno test</code> — 294 tests, 0 failures</td>
+<td><code>deno test</code> — 296 tests, 0 failures</td>
 </tr>
 <tr>
 <td>Docs</td>
@@ -537,7 +537,7 @@ GET /api/v1/scenes/:id/export?format=json
 <h2>Project Status</h2>
 <p>UrsaMU is at <strong>v1.0</strong>. Current version is <code>1.0.0</code>.</p>
 <ul>
-<li><strong>Test suite</strong>: 294 passing, 0 failing</li>
+<li><strong>Test suite</strong>: 296 passing, 0 failing</li>
 <li><strong>Core systems</strong>: complete (commands, sandbox, WebSocket, Discord, scenes, channels)</li>
 <li><strong>Status</strong>: v1.0.0 released</li>
 </ul>
