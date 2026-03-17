@@ -12,7 +12,7 @@
  *   info    <name>   Show manifest + registry details for a plugin
  */
 import { parse } from "@std/flags";
-import { join, basename, dirname, fromFileUrl } from "@std/path";
+import { join, basename } from "@std/path";
 import { exists } from "@std/fs";
 import type { PluginManifest, Registry, RegistryEntry } from "./types.ts";
 
@@ -24,7 +24,9 @@ const args = parse(Deno.args, {
 const command = String(args._[0] || "");
 const subArgs  = args._.slice(1).map(String);
 
-const PLUGINS_DIR   = join(dirname(dirname(fromFileUrl(import.meta.url))), "plugins");
+// Always resolve relative to the user's working directory so the CLI works
+// whether installed locally, globally, or run via `dx jsr:@ursamu/ursamu`.
+const PLUGINS_DIR   = join(Deno.cwd(), "src", "plugins");
 const REGISTRY_PATH = join(PLUGINS_DIR, ".registry.json");
 
 // ─── registry helpers ─────────────────────────────────────────────────────────

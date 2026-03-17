@@ -287,7 +287,7 @@ if (existsSync(targetDir)) {
 
 // Create the project directory
 console.log(`Creating new UrsaMU project: ${projectName}`);
-Deno.mkdir(targetDir);
+await Deno.mkdir(targetDir);
 
 // Create the basic project structure
 const directories = [
@@ -301,7 +301,7 @@ const directories = [
 ];
 
 for (const dir of directories) {
-  Deno.mkdir(join(targetDir, dir), { recursive: true });
+  await Deno.mkdir(join(targetDir, dir), { recursive: true });
   console.log(`Created directory: ${dir}`);
 }
 

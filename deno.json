@@ -32,6 +32,7 @@
     "cli": "deno run -A ./src/cli/ursamu.ts",
     "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts",
     "test": "deno test --allow-all --unstable-kv --no-check",
+    "test:coverage": "deno test --allow-all --unstable-kv --no-check --coverage=coverage && deno coverage coverage --lcov > coverage/lcov.info && deno coverage coverage",
     "build": "deno run -A dev.ts build",
     "preview": "deno run -A main.ts"
   },
