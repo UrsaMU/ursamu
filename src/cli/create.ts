@@ -4,8 +4,10 @@ import { parse } from "@std/flags";
 import { join, dirname, fromFileUrl } from "@std/path";
 import { existsSync } from "@std/fs";
 
-// Get the directory of the current script
-const __dirname = dirname(fromFileUrl(import.meta.url));
+// Get the directory of the current script (safe for both file:// and JSR https:// URLs)
+const __dirname = import.meta.url.startsWith("file://")
+  ? dirname(fromFileUrl(import.meta.url))
+  : Deno.cwd();
 // Working directory — used by both the plugin scaffold and project creation paths
 const currentDir = Deno.cwd();
 

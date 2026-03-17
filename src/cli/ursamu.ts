@@ -200,8 +200,10 @@ Examples:
 }
 
 async function runCommand(scriptName: string, scriptArgs: string[]) {
-  const currentDir = dirname(fromFileUrl(import.meta.url));
-  const scriptPath = join(currentDir, scriptName);
+  // When run from JSR the URL is https://, not file:// — use URL-relative resolution.
+  const scriptPath = import.meta.url.startsWith("file://")
+    ? join(dirname(fromFileUrl(import.meta.url)), scriptName)
+    : new URL(scriptName, import.meta.url).href;
 
   const cmd = new Deno.Command(Deno.execPath(), {
     args: ["run", "-A", scriptPath, ...scriptArgs],
