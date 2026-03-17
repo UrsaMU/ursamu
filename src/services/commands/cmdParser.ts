@@ -171,12 +171,17 @@ cmdParser.use(async (ctx, next) => {
     scriptName = scriptName.slice(0, slashIdx);
   }
 
+  // Scripts allowed to run before a player is authenticated (connect-screen commands).
+  // Everything else requires an active session so that pre-auth input never
+  // accidentally dispatches to a builder/admin script.
+  const PRE_AUTH_SCRIPTS = new Set(["connect"]);
+
   // Attempt to load and run script if it exists in system/scripts
   try {
     const scriptPath = `./system/scripts/${scriptName}.ts`;
     const scriptInfo = await Deno.stat(scriptPath).catch(() => null);
-    
-    if (scriptInfo?.isFile) {
+
+    if (scriptInfo?.isFile && (char || PRE_AUTH_SCRIPTS.has(scriptName))) {
         const code = await Deno.readTextFile(scriptPath);
         
         // Update last command
