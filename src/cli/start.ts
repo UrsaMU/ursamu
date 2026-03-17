@@ -1,18 +1,18 @@
-import { join } from "@std/path";
-import { checkAndCreateSuperuser } from "../main.ts";
-import { initConfig } from "../services/Config/mod.ts";
-import { DBO } from "../services/Database/database.ts";
-
 /**
  * @module start
  * @description The orchestrator script for the UrsaMU engine.
- * 
+ *
  * This module handles the "zero-config" startup flow:
  * 1. Initializes configuration.
  * 2. Checks for (or interactively creates) a superuser.
  * 3. Spawns the main game server and telnet server as child processes.
  * 4. Manages process lifecycles and graceful shutdown.
  */
+
+import { join } from "@std/path";
+import { checkAndCreateSuperuser } from "../main.ts";
+import { initConfig } from "../services/Config/mod.ts";
+import { DBO } from "../services/Database/database.ts";
 
 /**
  * Orchestrator script to start UrsaMU
