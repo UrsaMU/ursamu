@@ -1,4 +1,5 @@
 import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler } from "./routes/index.ts";
+import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
 
 /**
@@ -28,6 +29,20 @@ export const handleRequest = async (req: Request): Promise<Response> => {
     // API Routes
     if (path.startsWith("/api/v1/auth")) {
       return await authHandler(req);
+    }
+
+    if (path === "/api/v1/me" && req.method === "GET") {
+      const userId = await authenticate(req);
+      if (!userId) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+      return await meHandler(req, userId);
+    }
+
+    if (path === "/api/v1/players/online" && req.method === "GET") {
+      return await onlinePlayersHandler(req);
+    }
+
+    if (path === "/api/v1/channels" && req.method === "GET") {
+      return await channelsHandler(req);
     }
 
     if (path.startsWith("/api/v1/dbobj")) {

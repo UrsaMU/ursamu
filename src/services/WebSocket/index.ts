@@ -39,11 +39,11 @@ export class WebSocketService {
         return WebSocketService.instance;
     }
 
-    handleConnection(socket: WebSocket, clientType: string = "telnet") {
-        const onOpen = () => {
+    handleConnection(socket: WebSocket, clientType: string = "telnet", preAuthUserId?: string) {
+        const onOpen = async () => {
             if (this.clients.has(socket)) return;
             this.clients.add(socket);
-            this.socketData.set(socket, {
+            const sockData: UserSocket = {
                 id: crypto.randomUUID(),
                 clientType,
                 join: () => { },
@@ -52,8 +52,21 @@ export class WebSocketService {
                 leave: () => { },
                 disconnect: () => { },
                 on: () => { }
-            });
+            };
+            this.socketData.set(socket, sockData);
             console.log(`New WebSocket connection established (${clientType})`);
+
+            // JWT pre-auth: restore session without requiring `connect name password`
+            if (preAuthUserId) {
+                sockData.cid = preAuthUserId;
+                const player = await playerForSocket(sockData);
+                if (player) {
+                    if (!player.flags.includes("connected")) {
+                        await setFlags(player, "connected");
+                    }
+                    console.log(`[WS] Pre-authenticated as ${moniker(player)}`);
+                }
+            }
         };
 
         if (socket.readyState === WebSocket.OPEN) {
