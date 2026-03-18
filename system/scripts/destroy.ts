@@ -2,22 +2,19 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
 /**
  * System Script: destroy.ts
- * Migrated from legacy @destroy command.
+ * @destroy <target>            — shows confirmation prompt
+ * @destroy/confirm <target>    — actually destroys the object
+ * @destroy/override <target>   — destroys even if safe flag is set
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const fullArgs = (u.cmd.args[0] || "").trim();
-  
-  // Pattern: @destroy[/sw] <target>
-  const match = fullArgs.match(/^(\/.*)?\s+(.*)/i);
+  const switches = u.cmd.switches || [];
+  const targetName = (u.cmd.args[0] || "").trim();
 
-  if (!match) {
-    u.send("Usage: @destroy[/override] <target>");
+  if (!targetName) {
+    u.send("Usage: @destroy[/confirm] <target>");
     return;
   }
-
-  const swtch = (match[1] || "").toLowerCase();
-  const targetName = match[2].trim();
 
   const searchTarget = await u.db.search(targetName);
   const target = searchTarget[0];
@@ -33,46 +30,56 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  // Safe check
-  if (target.flags.has("safe") && swtch !== "/override") {
-    u.send("You can't destroy that. It's safe. Try using the '/override' switch.");
-    return;
-  }
-
-  // Void check
+  // Void check — never destroyable
   if (target.flags.has("void")) {
-    u.send("You can't destroy that. It's the void.");
+    u.send("You can't destroy the void.");
     return;
   }
 
-  // Room destruction check: Send actors home
+  // Safe check — requires /override
+  if (target.flags.has("safe") && !switches.includes("override")) {
+    u.send(`${u.util.displayName(target, actor)} has the SAFE flag. Use %ch@destroy/override%cn to destroy it.`);
+    return;
+  }
+
+  // Player check — can't destroy players with @destroy (use @toad)
+  if (target.flags.has("player")) {
+    u.send("Use %ch@toad%cn to destroy players.");
+    return;
+  }
+
+  // Confirmation required
+  if (!switches.includes("confirm") && !switches.includes("override")) {
+    u.send(`Are you sure you want to destroy ${u.util.displayName(target, actor)} (#${target.id})?`);
+    u.send(`Use %ch@destroy/confirm ${targetName}%cn to confirm.`);
+    return;
+  }
+
+  // Room destruction: send occupants home
   if (target.flags.has("room")) {
     const homeId = (actor.state.home as string) || "1";
-    // This is complex for a script to find ALL objects in a room and move them.
-    // The legacy code used en.location = en.data.home || 1.
-    // For now, let's at least handle the enactor if they are in the target room.
     if (u.here.id === target.id) {
-       u.teleport("me", homeId);
-       u.send("You are sent home.");
+      u.teleport("me", homeId);
+      u.send("You are sent home.");
     }
   }
 
   await u.db.destroy(target.id);
   u.send(`You destroy ${u.util.displayName(target, actor)}.`);
-  
-  // Clean up Orphaned Exits
-  // In legacy, it queries for exits where destination or location is the destroyed object.
-  // We can do this via db.search with a query object.
+
+  // Clean up orphaned exits
   const orphanedExits = await u.db.search({
     $and: [
-      {
-        $or: [{ "data.destination": target.id }, { location: target.id }],
-      },
+      { $or: [{ "data.destination": target.id }, { location: target.id }] },
       { flags: /exit/i },
     ],
   });
 
   for (const exit of orphanedExits) {
     await u.db.destroy(exit.id);
+  }
+
+  if (orphanedExits.length > 0) {
+    u.send(`${orphanedExits.length} orphaned exit${orphanedExits.length === 1 ? "" : "s"} also destroyed.`);
   }
 };

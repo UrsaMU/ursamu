@@ -26,8 +26,8 @@ export default async (u: IUrsamuSDK) => {
   telnet += `Location: ${target.location || "Limbo"}\n`;
   telnet += `\n%chDescription:%cn\n${(target.state.description as string) || "No description."}\n`;
 
-  const systemKeys = ['name', 'moniker', 'alias', 'owner', 'lock', 'description', 'flags', 'id', 'location'];
-  const attributes = Object.entries(target.state).filter(([key]) => !systemKeys.includes(key.toLowerCase()));
+  const hiddenKeys = ['name', 'moniker', 'alias', 'owner', 'lock', 'description', 'flags', 'id', 'location', 'password', 'tempmail'];
+  const attributes = Object.entries(target.state).filter(([key]) => !hiddenKeys.includes(key.toLowerCase()));
 
   if (attributes.length > 0) {
     telnet += "\n%chAttributes:%cn\n";
