@@ -2,6 +2,7 @@ import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 import { jobs, getNextJobNumber } from "./db.ts";
 import type { IJob, IJobComment } from "../../@types/IJob.ts";
+import { jobHooks } from "./hooks.ts";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -144,6 +145,7 @@ addCmd({
       };
 
       await jobs.create(job);
+      await jobHooks.emit("job:created", job);
       u.send(`%ch+job:%cn Job #${num} "${title}" submitted (${category}).`);
       return;
     }
@@ -209,6 +211,7 @@ addCmd({
       };
       const updated: IJob = { ...job, comments: [...job.comments, comment], updatedAt: Date.now() };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:commented", updated, comment);
       u.send(`%ch+job:%cn Comment added to job #${num}.`);
       return;
     }
@@ -235,6 +238,7 @@ addCmd({
       };
       const updated: IJob = { ...job, comments: [...job.comments, comment], updatedAt: Date.now() };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:commented", updated, comment);
       u.send(`%ch+job:%cn Staff note added to job #${num}.`);
       return;
     }
@@ -266,6 +270,7 @@ addCmd({
 
       const updated: IJob = { ...job, status: "closed", closedAt: now, updatedAt: now, comments: newComments };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:closed", updated);
       u.send(`%ch+job:%cn Job #${num} closed.`);
       return;
     }
@@ -287,6 +292,7 @@ addCmd({
 
       const updated: IJob = { ...job, assignedTo: target.id, assigneeName: target.name || target.id, updatedAt: Date.now() };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:assigned", updated);
       u.send(`%ch+job:%cn Job #${num} assigned to ${target.name || target.id}.`);
       return;
     }
@@ -308,6 +314,7 @@ addCmd({
 
       const updated: IJob = { ...job, status: status as IJob["status"], updatedAt: Date.now() };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:status-changed", updated, job.status);
       u.send(`%ch+job:%cn Job #${num} status set to ${status}.`);
       return;
     }
@@ -329,6 +336,7 @@ addCmd({
 
       const updated: IJob = { ...job, priority: priority as IJob["priority"], updatedAt: Date.now() };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:priority-changed", updated, job.priority);
       u.send(`%ch+job:%cn Job #${num} priority set to ${priority}.`);
       return;
     }
@@ -356,6 +364,7 @@ addCmd({
       };
       const updated: IJob = { ...job, status: "resolved", updatedAt: now, comments: [...job.comments, comment] };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:resolved", updated);
       u.send(`%ch+job:%cn Job #${num} marked resolved.`);
       return;
     }
@@ -371,6 +380,7 @@ addCmd({
 
       const updated: IJob = { ...job, status: "open", closedAt: undefined, updatedAt: Date.now() };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:reopened", updated);
       u.send(`%ch+job:%cn Job #${num} reopened.`);
       return;
     }
@@ -385,6 +395,7 @@ addCmd({
       if (!job) { u.send(`%ch+job:%cn No job #${num} found.`); return; }
 
       await jobs.delete({ id: job.id });
+      await jobHooks.emit("job:deleted", job);
       u.send(`%ch+job:%cn Job #${num} deleted.`);
       return;
     }

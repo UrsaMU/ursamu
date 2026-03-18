@@ -1,6 +1,7 @@
 import { jobs, getNextJobNumber } from "./db.ts";
 import type { IJob, IJobComment } from "../../@types/IJob.ts";
 import { dbojs } from "../../services/Database/index.ts";
+import { jobHooks } from "./hooks.ts";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -152,6 +153,7 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
     };
 
     await jobs.create(job);
+    await jobHooks.emit("job:created", job);
     return jsonResponse(job, 201);
   }
 
@@ -202,6 +204,26 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
 
       const updated: IJob = { ...job, ...update };
       await jobs.update({}, updated);
+
+      // Fire granular hooks based on what actually changed
+      if ("status" in update && update.status !== job.status) {
+        if (update.status === "closed") {
+          await jobHooks.emit("job:closed", updated);
+        } else if (update.status === "resolved") {
+          await jobHooks.emit("job:resolved", updated);
+        } else if ((job.status === "closed" || job.status === "resolved") && update.status === "open") {
+          await jobHooks.emit("job:reopened", updated);
+        } else {
+          await jobHooks.emit("job:status-changed", updated, job.status);
+        }
+      }
+      if ("priority" in update && update.priority !== job.priority) {
+        await jobHooks.emit("job:priority-changed", updated, job.priority);
+      }
+      if ("assignedTo" in update && update.assignedTo !== job.assignedTo) {
+        await jobHooks.emit("job:assigned", updated);
+      }
+
       return jsonResponse(updated);
     }
 
@@ -215,6 +237,7 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
       if (!job) return jsonResponse({ error: "Not found" }, 404);
 
       await jobs.delete({ id: job.id });
+      await jobHooks.emit("job:deleted", job);
       return jsonResponse({ deleted: true });
     }
 
@@ -256,6 +279,7 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
 
       const updated: IJob = { ...job, comments: [...job.comments, comment], updatedAt: Date.now() };
       await jobs.update({}, updated);
+      await jobHooks.emit("job:commented", updated, comment);
       return jsonResponse(comment, 201);
     }
   }
