@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any no-unused-vars
 /**
  * Price of Power: Character Generation System
  *
@@ -1561,7 +1562,7 @@ async function handleSetStat(sid: string, playerObj: any, data: Record<string, u
         send([sid], `%ch>GAME:%cn ${bgCanonical} set to ${newVal}. Background points remaining: ${bgPts - delta}.`);
       }
       // Update data for pool check
-      const updatedData = { ...data, bg_points: bgPts - delta };
+      const updatedData: Record<string, unknown> = { ...data, bg_points: bgPts - delta };
       if (isDualCost) updatedData.freebie_points = freebies - delta;
       checkAllPoolsSpent(sid, updatedData);
     } else if (phase === "2") {
