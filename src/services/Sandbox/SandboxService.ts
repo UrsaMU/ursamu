@@ -4,7 +4,7 @@ const SERVER_START = Date.now();
 import type { ISandboxConfig } from "../../@types/ISandboxConfig.ts";
 import { SDKService, type SDKContext } from "./SDKService.ts";
 import { send as broadcastSend, broadcast as broadcastAll } from "../broadcast/index.ts";
-import { Obj } from "../DBObjs/DBObjs.ts";
+import { Obj as _Obj } from "../DBObjs/DBObjs.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { IDBObj } from "../../@types/UrsamuSDK.ts";
 import type { IChanEntry } from "../../@types/Channels.ts";
@@ -25,6 +25,11 @@ class LocalSandbox {
 
     return new Promise((resolve, reject) => {
       worker.onmessage = async (e) => {
+        // Guard: reject malformed messages before touching any field
+        if (!e.data || typeof e.data !== "object" || typeof e.data.type !== "string") {
+          console.warn("[SandboxService] Dropped malformed worker message");
+          return;
+        }
         const { type, data, prop, value, message, target: msgTarget } = e.data;
 
         switch (type) {
@@ -307,7 +312,12 @@ class LocalSandbox {
              break;
           }
           case "sys:setConfig": {
-              if (e.data.key && e.data.value !== undefined) {
+              const ALLOWED_CONFIG_KEYS = new Set([
+                "server.name", "server.description", "server.banner",
+                "server.corsOrigins", "server.maxConnections",
+                "game.maxPlayers", "game.description", "game.loginMessage", "game.welcomeMessage",
+              ]);
+              if (e.data.key && e.data.value !== undefined && ALLOWED_CONFIG_KEYS.has(e.data.key)) {
                   const { setConfig } = await import("../Config/mod.ts");
                   setConfig(e.data.key, e.data.value);
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });

@@ -44,7 +44,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
 
       // Create the data directory if it doesn't exist
       try {
-        await Deno.mkdir(dbDir, { recursive: true });
+        await Deno.mkdir(dbDir, { recursive: true, mode: 0o700 });
       } catch (error) {
         if (!(error instanceof Deno.errors.AlreadyExists)) {
           throw error;
@@ -202,6 +202,41 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       }
     }
     return true;
+  }
+
+  /**
+   * Atomically read-modify-write a single record using Deno KV compare-and-swap.
+   * Retries up to `retries` times on version conflict before throwing.
+   */
+  async atomicModify(id: string, transform: (current: T) => T, retries = 3): Promise<T> {
+    const kv = await this.getKv();
+    const key = this.getKey(id);
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const entry = await kv.get<T>(key);
+      if (entry.value === null) throw new Error(`[DBO] Record not found: ${id}`);
+      const updated = transform({ ...entry.value });
+      const result = await kv.atomic().check(entry).set(key, updated).commit();
+      if (result.ok) return updated;
+    }
+    throw new Error(`[DBO] atomicModify failed after ${retries + 1} attempts on "${id}"`);
+  }
+
+  /**
+   * Atomically increment a counter record's `seq` field.
+   * Creates the record with seq=1 if it doesn't exist yet.
+   * Returns the new value.
+   */
+  async atomicIncrement(id: string): Promise<number> {
+    const kv = await this.getKv();
+    const key = this.getKey(id);
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const entry = await kv.get<{ id: string; seq: number }>(key);
+      const next = (entry.value?.seq ?? 0) + 1;
+      const updated = { ...(entry.value ?? { id }), seq: next };
+      const result = await kv.atomic().check(entry).set(key, updated).commit();
+      if (result.ok) return next;
+    }
+    throw new Error(`[DBO] atomicIncrement failed after 10 attempts on "${id}"`);
   }
 
   async update(_query: Query<T>, data: T): Promise<T> {

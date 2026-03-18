@@ -136,6 +136,18 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
 
       // GET /api/v1/scenes/:id
       if (!subPath && req.method === "GET") {
+          // Private scenes are only visible to owner, participants, and allowed users
+          if (scene.private) {
+              const viewer = await Obj.get(userId);
+              const isAllowed = viewer && (
+                  scene.owner === viewer.dbref ||
+                  (scene.participants && scene.participants.includes(viewer.dbref)) ||
+                  (scene.allowed && scene.allowed.includes(viewer.dbref)) ||
+                  viewer.flags.includes("wizard") || viewer.flags.includes("admin") || viewer.flags.includes("superuser")
+              );
+              if (!isAllowed) return new Response("Forbidden", { status: 403 });
+          }
+
           // Populate participant names
           const participantsDetails: { id: string; name: string; moniker?: string; }[] = [];
           if (scene.participants) {
@@ -185,6 +197,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           }
 
           // Markdown log export
+          // deno-lint-ignore no-control-regex
           const strip = (s: string) => s.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").replace(/\x1b\[[0-9;]*m/g, "");
           const fmtDate = (ts: number) => new Date(ts).toISOString().slice(0, 10);
 
@@ -234,9 +247,23 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           
           if (!user) return new Response("Unauthorized", { status: 401 });
 
+          // Private scene: only allowed users may post
+          if (scene.private) {
+              const canPost = scene.owner === user.dbref ||
+                  (scene.participants && scene.participants.includes(user.dbref)) ||
+                  (scene.allowed && scene.allowed.includes(user.dbref)) ||
+                  user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser");
+              if (!canPost) return new Response("Forbidden", { status: 403 });
+          }
+
           // Basic validation
           if (!msg && type !== 'set') {
             return new Response("Missing pose message", { status: 400 });
+          }
+
+          const MAX_POSE_LENGTH = 4000;
+          if (msg && msg.length > MAX_POSE_LENGTH) {
+            return new Response(`Pose message too long (max ${MAX_POSE_LENGTH} characters).`, { status: 400 });
           }
 
           const newPose: IPose = {
@@ -313,7 +340,10 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           }
 
           const body = await req.json();
-          if (body.msg) existingPose.msg = body.msg;
+          if (body.msg) {
+              if (body.msg.length > 4000) return new Response("Pose message too long (max 4000 characters).", { status: 400 });
+              existingPose.msg = body.msg;
+          }
           // Don't allow changing type/timestamp broadly?
 
           scene.poses[poseIndex] = existingPose;

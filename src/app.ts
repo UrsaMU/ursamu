@@ -57,6 +57,9 @@ export const handleRequest = async (req: Request): Promise<Response> => {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
   };
 
   // Rate limit check
@@ -140,7 +143,8 @@ export const handleRequest = async (req: Request): Promise<Response> => {
     // Avatar images — public, no auth required
     if (path.startsWith("/avatars/")) {
       const id = path.slice("/avatars/".length);
-      if (!id || id.includes("/") || id.includes("..")) {
+      // Only allow safe characters: alphanumeric, hyphen, underscore (no dots, slashes, or escapes)
+      if (!id || !/^[a-zA-Z0-9_-]+$/.test(id)) {
         return new Response("Not Found", { status: 404 });
       }
       const EXT_MIME: Record<string, string> = {
