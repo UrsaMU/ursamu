@@ -39,7 +39,7 @@
     "create": "deno run -A ./src/cli/create.ts",
     "cli": "deno run -A ./src/cli/ursamu.ts",
     "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts",
-    "test": "deno test --allow-all --unstable-kv --no-check",
+    "test": "deno test --allow-all --unstable-kv --no-check tests/ src/services/Intents/ src/services/Sandbox/ src/plugins/events/",
     "upgrade": "deno run -A ./src/cli/ursamu.ts update",
     "upgrade:reload": "deno run -A ./src/cli/ursamu.ts update && deno run --reload -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
     "test:coverage": "deno test --allow-all --unstable-kv --no-check --coverage=coverage && deno coverage coverage --lcov > coverage/lcov.info && deno coverage coverage"

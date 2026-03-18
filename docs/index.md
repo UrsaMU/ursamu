@@ -10,7 +10,7 @@ templateEngine: [vto, md]
 
   <div class="version-badge" style="cursor:default">
     <svg width="10" height="10" viewBox="0 0 10 10" fill="var(--primary-light)"><circle cx="5" cy="5" r="5"/></svg>
-    v1.3.0 &nbsp;&bull;&nbsp; MIT License
+    v1.4.3 &nbsp;&bull;&nbsp; MIT License
   </div>
 
   <h1>A Modern MUSH Server</h1>
@@ -115,7 +115,7 @@ templateEngine: [vto, md]
 <div class="home-section-grid">
   <a href="/guides/installation/" class="home-section-card">
     <h4>Installation</h4>
-    <p>Get UrsaMU running in minutes with the DX wizard, Docker, or from source.</p>
+    <p>Get UrsaMU running in minutes with the DX wizard or from source.</p>
   </a>
   <a href="/guides/user-guide/" class="home-section-card">
     <h4>Player Guide</h4>
