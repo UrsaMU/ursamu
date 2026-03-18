@@ -8,7 +8,7 @@ export default async (u: IUrsamuSDK) => {
   const rawArgs = args[0]; // The full argument string "target=value" or "target"
 
   // 1. Permission Check
-  if (!u.me.flags.has("admin") && !u.me.flags.has("wizard")) {
+  if (!u.me.flags.has("admin") && !u.me.flags.has("wizard") && !u.me.flags.has("superuser")) {
     u.send("Permission denied.");
     return;
   }
@@ -126,7 +126,7 @@ async function handleChown(u: IUrsamuSDK, args: string) {
   if (!thing) return u.send("Object not found.");
   if (!newOwner || !newOwner.flags.has("player")) return u.send("New owner not found.");
 
-  await u.db.modify(thing.id, "$set", { data: { owner: newOwner.id } });
+  await u.db.modify(thing.id, "$set", { "data.owner": newOwner.id });
   u.send(`Owner of ${u.util.displayName(thing, u.me)} changed to ${u.util.displayName(newOwner, u.me)}.`);
 }
 

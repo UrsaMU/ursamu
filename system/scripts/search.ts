@@ -49,7 +49,7 @@ async function handleStats(u: IUrsamuSDK) {
 async function handleSearch(u: IUrsamuSDK) {
     // @search query
     // args: ["query=val"] or ["query"]
-    const input = u.cmd.args.join(" ");
+    const input = (u.cmd.args[0] || "").trim();
     const parts = input.split("=");
     // deno-lint-ignore no-explicit-any
     let search: any = {};

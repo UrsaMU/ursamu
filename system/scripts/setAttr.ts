@@ -12,7 +12,7 @@ export default async (u: IUrsamuSDK) => {
   // So if `&ATTR obj=value`
   // Args[0] = "ATTR obj=value"
   
-  const raw = u.cmd.args[0];
+  const raw = u.cmd.args[0] || "";
   // Parse: ATTR obj=value
   // Split by first space to get ATTR
   const [attrHeader, ...rest] = raw.split(" ");
@@ -35,13 +35,10 @@ export default async (u: IUrsamuSDK) => {
   // deno-lint-ignore no-explicit-any
   const existingIndex = attributes.findIndex((a: any) => a.name === attrName);
 
-  if (value !== undefined) { 
-      const _newVal = value.trim(); 
-      const actualValue = value; 
-      
+  if (value !== undefined) {
       const newAttr = {
           name: attrName,
-          value: actualValue,
+          value: value.trim(),
           setter: u.me.id,
           type: "attribute"
       };
@@ -62,5 +59,5 @@ export default async (u: IUrsamuSDK) => {
       }
   }
 
-  await u.db.modify(target.id, "$set", { data: { ...target.state, attributes } });
+  await u.db.modify(target.id, "$set", { "data.attributes": attributes });
 };

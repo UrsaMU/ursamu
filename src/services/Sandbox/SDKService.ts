@@ -76,7 +76,7 @@ export class SDKService {
     const sdkObj: SDKObject = {
       id: obj.id,
       name: obj.name,
-      flags: new Set(obj.flags.split(" ")),
+      flags: new Set((obj.flags || "").split(" ").filter(Boolean)),
       location: obj.location,
       state: state,
     };

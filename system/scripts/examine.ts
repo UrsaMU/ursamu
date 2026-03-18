@@ -10,8 +10,8 @@ const SYSTEM_KEYS = new Set([
 const HIDDEN_KEYS = new Set(['password']);
 
 export default async (u: IUrsamuSDK) => {
-  const actor  = u.me;
-  const targetName = u.cmd.args.join(" ").trim() || "me";
+  const actor = u.me;
+  const targetName = (u.cmd.args[0] || "").trim() || "me";
   const target = (await u.db.search(targetName))[0];
 
   if (!target) {
@@ -67,7 +67,17 @@ export default async (u: IUrsamuSDK) => {
   if (attributes.length > 0) {
     telnet += "\n%chAttributes:%cn\n";
     attributes.forEach(([k, v]) => {
-      telnet += `  %ch${k.toUpperCase()}:%cn ${String(v)}\n`;
+      let display: string;
+      if (v === null || v === undefined) {
+        display = "(not set)";
+      } else if (typeof v === "object" && !Array.isArray(v)) {
+        display = Object.entries(v as Record<string, unknown>).map(([sk, sv]) => `${sk}: ${sv}`).join(", ");
+      } else if (Array.isArray(v)) {
+        display = v.map(item => typeof item === "object" ? JSON.stringify(item) : String(item)).join(", ");
+      } else {
+        display = String(v);
+      }
+      telnet += `  %ch${k.toUpperCase()}:%cn ${display}\n`;
     });
   }
 

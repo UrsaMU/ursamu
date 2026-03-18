@@ -25,7 +25,7 @@ export class ConfigManager {
       try {
         Deno.mkdirSync(this.configDir, { recursive: true });
       } catch (error) {
-        if (!(error instanceof Deno.errors.AlreadyExists) && !(error instanceof Deno.errors.AlreadyExists)) {
+        if (!(error instanceof Deno.errors.AlreadyExists)) {
           console.error("Error creating config directory:", error);
         }
       }
@@ -67,7 +67,7 @@ export class ConfigManager {
   /**
    * Load configuration from the config file
    */
-  private loadConfig(): void {
+  public loadConfig(): void {
     try {
       const configPath = dpath.join(this.configDir, this.configFile);
       

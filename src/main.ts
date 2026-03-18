@@ -119,7 +119,7 @@ export const initializeEngine = async (
 
   // Load custom commands if path provided
   if (customCommandsPath) {
-    plugins(customCommandsPath);
+    await plugins(customCommandsPath);
   }
 
   // Load default text files if enabled
@@ -139,7 +139,7 @@ export const initializeEngine = async (
 
   // Load custom text files if path provided
   if (customTextPath) {
-    loadTxtDir(customTextPath);
+    await loadTxtDir(customTextPath);
   }
 
   // Load plugins from the plugins directory
@@ -174,6 +174,11 @@ export const initializeEngine = async (
     try {
       // Handle WebSocket upgrade
       if (req.headers.get("upgrade") === "websocket") {
+        const remoteIp = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+        const maxPerIp = getConfig<number>("server.maxConnectionsPerIp") || 20;
+        if (!wsService.canConnect(remoteIp, maxPerIp)) {
+          return new Response("Too many connections from this address", { status: 429 });
+        }
         const { socket, response } = Deno.upgradeWebSocket(req);
         const url = new URL(req.url);
         const clientType = url.searchParams.get("client") || "telnet";
@@ -191,7 +196,7 @@ export const initializeEngine = async (
             // Invalid token — allow unauthenticated connection
           }
         }
-        wsService.handleConnection(socket, clientType, preAuthUserId);
+        wsService.handleConnection(socket, clientType, preAuthUserId, remoteIp);
         return response;
       }
 
@@ -365,7 +370,7 @@ if (import.meta.main) {
   });
 
   try {
-    const game = await initializeEngine(config);
+    const game = await initializeEngine(config, undefined, { loadDefaultCommands: true });
     await checkAndCreateSuperuser();
     console.log(`${game.config.get("game.name")} main server is running!`);
   } catch (error) {

@@ -15,8 +15,8 @@ export default () => {
       if (!en) return;
 
       const [name, newName] = u.cmd.args;
-      const potential = await isNameTaken(newName);
-      const tar = await target(en, name, true);
+      const potential = await isNameTaken(newName?.trim());
+      const tar = await target(en, name?.trim(), true);
       if (!tar) return u.send("I can't find that.");
       if (!await canEdit(en, tar)) return u.send("I can't find that.");
       if (

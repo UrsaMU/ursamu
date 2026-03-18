@@ -6,7 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default (u: IUrsamuSDK) => {
   const actor = u.me;
-  const message = u.cmd.args.join(" ").trim();
+  const message = (u.cmd.args[0] || "").trim();
 
   if (!message) {
     u.send("What do you want to say?");

@@ -3,7 +3,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 export const aliases = ["name"];
 
 export default async (u: IUrsamuSDK) => {
-  const input = u.cmd.args.join(" ");
+  const input = (u.cmd.args[0] || "").trim();
   const [targetName, newName] = input.split("=");
 
   if (!targetName || !newName) {
@@ -38,15 +38,8 @@ export default async (u: IUrsamuSDK) => {
       }
   }
 
-  target.state.name = newName.trim();
-  delete target.state.moniker; // Clear moniker on rename
-
-  // Build updated data, spreading current state and overriding name/clearing moniker
-  // Note: DB.modify uses Object.assign, so we must pass the nested data object directly
-  const newData = { ...target.state };
-  delete newData.moniker;
-  newData.name = newName.trim();
-  await u.db.modify(target.id, "$set", { data: newData });
+  await u.db.modify(target.id, "$set", { "data.name": newName.trim() });
+  await u.db.modify(target.id, "$unset", { "data.moniker": 1 });
   
   u.send("Name set.");
 };

@@ -167,6 +167,9 @@ cmdParser.use(async (ctx, next) => {
   }
 
   // 3. Fallback to system scripts in system/scripts/
+  // Connect-screen commands that system scripts may handle for unauthenticated users
+  const connectScreenScripts = new Set(["connect", "who", "help", "quit"]);
+
   const aliasMap: Record<string, string> = {
     "l": "look",
     "ex": "examine",
@@ -175,6 +178,7 @@ cmdParser.use(async (ctx, next) => {
     "p": "page",
     "tel": "teleport",
     "teleport": "teleport",
+    "co": "connect",
     ...systemAliases
   };
 
@@ -204,6 +208,16 @@ cmdParser.use(async (ctx, next) => {
     }
   }
 
+  // Common MUX @ prefixes
+  if (scriptName.startsWith("@") || scriptName.startsWith("+")) {
+     scriptName = scriptName.slice(1);
+     // Re-check alias map after stripping prefix (e.g. @desc → desc → describe)
+     if (aliasMap[scriptName]) {
+       scriptName = aliasMap[scriptName];
+     }
+  }
+
+
   // Parse switches from command name (e.g., "bbpost/edit" → name="bbpost", switches=["edit"])
   let cmdSwitches: string[] = [];
   if (scriptName.includes("/")) {
@@ -212,16 +226,16 @@ cmdParser.use(async (ctx, next) => {
     scriptName = scriptName.slice(0, slashIdx);
   }
 
-  // Scripts allowed to run before a player is authenticated (connect-screen commands).
-  // Everything else requires an active session so that pre-auth input never
-  // accidentally dispatches to a builder/admin script.
-  const PRE_AUTH_SCRIPTS = new Set(["connect", "create"]);
-
   // Attempt to load and run script — checks game project override then engine's built-in copy
+  // Skip system scripts for unauthenticated users unless it's a connect-screen command
   try {
+    if (!ctx.socket.cid && !connectScreenScripts.has(scriptName)) {
+      // Fall through to legacy commands (e.g. character creation via "create")
+      throw { skip: true };
+    }
     const code = await readEngineScript(`${scriptName}.ts`);
 
-    if (code && (char || PRE_AUTH_SCRIPTS.has(scriptName))) {
+    if (code && (char || connectScreenScripts.has(scriptName))) {
         
         // Update last command
         if (char) {
@@ -249,8 +263,10 @@ cmdParser.use(async (ctx, next) => {
         });
         return;
     }
-  } catch (e) {
-    console.warn(`[CmdParser] System script execution failed for ${scriptName}:`, e);
+  } catch (e: unknown) {
+    if (!(e && typeof e === "object" && "skip" in e)) {
+      console.warn(`[CmdParser] System script execution failed for ${scriptName}:`, e);
+    }
   }
 
   // 4. Fallback to legacy hard-coded commands (only if any are loaded)

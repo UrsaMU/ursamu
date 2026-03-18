@@ -4,7 +4,7 @@ import type { IChannel } from "../../@types/Channels.ts";
 import type { IMail } from "../../@types/IMail.ts";
 import type { ITextEntry } from "../../@types/ITextEntry.ts";
 import type { IScene } from "../../@types/IScene.ts";
-import { dpath, get } from "../../../deps.ts";
+import { dpath, get, set as lodashSet } from "../../../deps.ts";
 import type { IDatabase, Query, QueryCondition } from "../../interfaces/IDatabase.ts";
 // @ts-ignore: Deno namespace is available at runtime
 
@@ -117,11 +117,43 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     for (const item of items) {
       const updated = { ...item };
       if (operator === "$set") {
-        Object.assign(updated, data);
+        for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+          if (key.includes(".")) {
+            // Dot-notation: navigate into nested object (e.g. "data.name" → updated.data.name)
+            lodashSet(updated, key, value);
+          } else {
+            (updated as Record<string, unknown>)[key] = value;
+          }
+        }
+      } else if (operator === "$unset") {
+        for (const key of Object.keys(data as Record<string, unknown>)) {
+          if (key.includes(".")) {
+            // Dot-notation: navigate to parent and delete the final key
+            const parts = key.split(".");
+            const last = parts.pop()!;
+            let obj: Record<string, unknown> = updated as Record<string, unknown>;
+            for (const part of parts) {
+              if (obj[part] && typeof obj[part] === "object") {
+                obj = obj[part] as Record<string, unknown>;
+              } else {
+                obj = null as unknown as Record<string, unknown>;
+                break;
+              }
+            }
+            if (obj) delete obj[last];
+          } else {
+            delete (updated as Record<string, unknown>)[key];
+          }
+        }
       } else if (operator === "$inc") {
         for (const [key, value] of Object.entries(data)) {
-          const currentValue = ((updated as unknown) as Record<string, number>)[key] || 0;
-          ((updated as unknown) as Record<string, number>)[key] = currentValue + (value as number);
+          if (key.includes(".")) {
+            const current = get(updated, key, 0) as number;
+            lodashSet(updated, key, current + (value as number));
+          } else {
+            const currentValue = ((updated as unknown) as Record<string, number>)[key] || 0;
+            ((updated as unknown) as Record<string, number>)[key] = currentValue + (value as number);
+          }
         }
       }
       const plainData = { ...updated };

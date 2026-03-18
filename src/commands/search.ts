@@ -7,7 +7,7 @@ export default () => {
   addCmd({
     name: "@search",
     pattern: /^@search\s+(.*)/i,
-    lock: "connected builder+",
+    lock: "connected & builder+",
     help: "Search for objects",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {

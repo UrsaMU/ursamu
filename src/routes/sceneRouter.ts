@@ -251,8 +251,10 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           };
 
           // Add pose to scene
+          if (!scene.poses) scene.poses = [];
+          if (!scene.participants) scene.participants = [];
           scene.poses.push(newPose);
-          // Add participant if not already there 
+          // Add participant if not already there
           if (!scene.participants.includes(user.dbref)) {
               scene.participants.push(user.dbref);
           }
@@ -371,7 +373,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           let targetObj = await Obj.get(target);
           if (!targetObj) {
                // Try name search
-               const all = await dbojs.query({ name: new RegExp(`^${target}$`, "i") });
+               const all = await dbojs.query({ "data.name": new RegExp(`^${target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") });
                const found = all.find(o => o.flags.includes("player") || o.flags.includes("connected")); 
                if (found) targetObj = await Obj.get(found.id);
           }

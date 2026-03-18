@@ -7,7 +7,9 @@
     "counters": "data/counters.db",
     "chans": "data/chans.db",
     "mail": "data/mail.db",
-    "bboard": "data/bboard.db"
+    "bboard": "data/bboard.db",
+    "corsOrigins": "*",
+    "maxConnectionsPerIp": 20
   },
   "game": {
     "name": "Ursamu",

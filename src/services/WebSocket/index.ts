@@ -18,6 +18,9 @@ export class WebSocketService {
     private static readonly RATE_LIMIT = 10;
     private static readonly RATE_WINDOW_MS = 1000;
     private rateLimits: Map<string, { count: number; resetAt: number }> = new Map();
+    // Per-IP connection tracking
+    private connectionsPerIp: Map<string, Set<WebSocket>> = new Map();
+    private socketIp: Map<WebSocket, string> = new Map();
 
     private isRateLimited(socketId: string): boolean {
         const now = Date.now();
@@ -30,6 +33,34 @@ export class WebSocketService {
         return entry.count > WebSocketService.RATE_LIMIT;
     }
 
+    /** Check if an IP has exceeded the max connection limit. */
+    canConnect(ip: string, max: number): boolean {
+        const existing = this.connectionsPerIp.get(ip);
+        return !existing || existing.size < max;
+    }
+
+    private trackIp(socket: WebSocket, ip: string): void {
+        this.socketIp.set(socket, ip);
+        let set = this.connectionsPerIp.get(ip);
+        if (!set) {
+            set = new Set();
+            this.connectionsPerIp.set(ip, set);
+        }
+        set.add(socket);
+    }
+
+    private untrackIp(socket: WebSocket): void {
+        const ip = this.socketIp.get(socket);
+        if (ip) {
+            const set = this.connectionsPerIp.get(ip);
+            if (set) {
+                set.delete(socket);
+                if (set.size === 0) this.connectionsPerIp.delete(ip);
+            }
+            this.socketIp.delete(socket);
+        }
+    }
+
     private constructor() { }
 
     static getInstance(): WebSocketService {
@@ -39,10 +70,11 @@ export class WebSocketService {
         return WebSocketService.instance;
     }
 
-    handleConnection(socket: WebSocket, clientType: string = "telnet", preAuthUserId?: string) {
+    handleConnection(socket: WebSocket, clientType: string = "telnet", preAuthUserId?: string, remoteIp?: string) {
         const onOpen = async () => {
             if (this.clients.has(socket)) return;
             this.clients.add(socket);
+            if (remoteIp) this.trackIp(socket, remoteIp);
             const sockData: UserSocket = {
                 id: crypto.randomUUID(),
                 clientType,
@@ -108,6 +140,9 @@ export class WebSocketService {
                 if (ctx.msg && ctx.msg.trim()) {
                     if (this.isRateLimited(sockData.id)) {
                         console.warn(`[WS] Rate limit hit for socket ${sockData.id} (cid: ${sockData.cid || "anon"})`);
+                        try {
+                            socket.send(JSON.stringify({ msg: "[Rate limit] Too many commands — slow down.", data: {} }));
+                        } catch { /* socket may be closing */ }
                     } else {
                         await cmdParser.run(ctx);
                     }
@@ -122,6 +157,7 @@ export class WebSocketService {
             const sockData = this.socketData.get(socket);
             this.clients.delete(socket);
             this.socketData.delete(socket);
+            this.untrackIp(socket);
             if (sockData?.id) this.rateLimits.delete(sockData.id);
 
             if (sockData?.cid) {
@@ -166,22 +202,18 @@ export class WebSocketService {
 
     // Send to specific socket(s)
     send(targets: string[], message: IMessage) {
-        // In our simplified model, we might need a way to map "targets" (which were channel names or IDs) to sockets.
-        // For now, let's assume 'targets' contains socket IDs or we broadcast to all for simplistic "pub" channels
-        // Real implementation requires channel subscription tracking.
-
         for (const client of this.clients) {
             const meta = this.socketData.get(client);
-            // Check matching socket ID OR matching CID (Player ID)
             if (meta && (targets.includes(meta.id) || (meta.cid && targets.includes(meta.cid)))) {
-                if (meta.clientType === "web") {
-                     const output = Presenter.render(message.payload, "web");
-                     client.send(JSON.stringify(output));
-                } else {
-                     // client.send(JSON.stringify(Presenter.render(message.payload, "telnet"))); // Defaulting to text for now
-                     const output = Presenter.render(message.payload, "telnet");
-                     client.send(JSON.stringify({ msg: output, data: message.payload.data }));
-                }
+                try {
+                    if (meta.clientType === "web") {
+                        const output = Presenter.render(message.payload, "web");
+                        client.send(JSON.stringify(output));
+                    } else {
+                        const output = Presenter.render(message.payload, "telnet");
+                        client.send(JSON.stringify({ msg: output, data: message.payload.data }));
+                    }
+                } catch { /* socket may be closing */ }
             }
         }
     }
@@ -190,16 +222,18 @@ export class WebSocketService {
     broadcast(message: IMessage) {
         for (const client of this.clients) {
             const meta = this.socketData.get(client);
-            if (meta?.clientType === "web") {
-                 const output = Presenter.render(message.payload, "web");
-                 client.send(JSON.stringify(output));
-            } else {
-                 const output = Presenter.render(message.payload, "telnet");
-                 client.send(JSON.stringify({
-                     msg: output,
-                     data: message.payload.data
-                 }));
-            }
+            try {
+                if (meta?.clientType === "web") {
+                    const output = Presenter.render(message.payload, "web");
+                    client.send(JSON.stringify(output));
+                } else {
+                    const output = Presenter.render(message.payload, "telnet");
+                    client.send(JSON.stringify({
+                        msg: output,
+                        data: message.payload.data
+                    }));
+                }
+            } catch { /* socket may be closing */ }
         }
     }
 

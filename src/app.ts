@@ -1,9 +1,34 @@
-import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler, mailHandler } from "./routes/index.ts";
+import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler } from "./routes/index.ts";
 import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
+import { getConfig } from "./services/Config/mod.ts";
 
 type PluginRouteHandler = (req: Request, userId: string | null) => Promise<Response>;
 const pluginRoutes: Array<{ prefix: string; handler: PluginRouteHandler }> = [];
+
+// --- Per-IP rate limiting for REST API ---
+const apiRateLimits = new Map<string, { count: number; resetAt: number }>();
+const API_RATE_LIMIT = 30;      // max requests per window
+const API_RATE_WINDOW_MS = 10000; // 10 second window
+
+function isApiRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = apiRateLimits.get(ip);
+  if (!entry || now >= entry.resetAt) {
+    apiRateLimits.set(ip, { count: 1, resetAt: now + API_RATE_WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > API_RATE_LIMIT;
+}
+
+// Clean up stale entries every 60 seconds
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of apiRateLimits) {
+    if (now >= entry.resetAt) apiRateLimits.delete(ip);
+  }
+}, 60000);
 
 export function registerPluginRoute(prefix: string, handler: PluginRouteHandler): void {
   pluginRoutes.push({ prefix, handler });
@@ -17,12 +42,28 @@ export const handleRequest = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
   const path = url.pathname;
 
-  // CORS Headers
+  // CORS Headers — configurable via server.corsOrigins (default: "*")
+  const configured = getConfig<string | string[]>("server.corsOrigins") ?? "*";
+  const origin = req.headers.get("Origin") ?? "";
+  let allowOrigin = "*";
+  if (configured !== "*") {
+    const allowed = Array.isArray(configured) ? configured : [configured];
+    allowOrigin = allowed.includes(origin) ? origin : allowed[0];
+  }
   const corsHeaders = {
-    "Access-Control-Allow-Origin": "*", // Or specific origin if needed
+    "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   };
+
+  // Rate limit check
+  const clientIp = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+  if (isApiRateLimited(clientIp)) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "10" },
+    });
+  }
 
   // Handle Preflight
   if (req.method === "OPTIONS") {
@@ -87,17 +128,6 @@ export const handleRequest = async (req: Request): Promise<Response> => {
         });
       }
       return await buildingHandler(req, userId);
-    }
-
-    if (path.startsWith("/api/v1/mail")) {
-      const userId = await authenticate(req);
-      if (!userId) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-      return await mailHandler(req, userId);
     }
 
     if (path.startsWith("/api/v1/config") || path.startsWith("/api/v1/connect") || path.startsWith("/api/v1/welcome")) {

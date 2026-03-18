@@ -27,16 +27,20 @@ export const hooks = {
   },
 
   aconnect: async (player: IDBOBJ) => {
-    // 1. Player @aconnect
-    await hooks.executeAttribute(player, "ACONNECT", [], player);
+    try {
+      // 1. Player @aconnect
+      await hooks.executeAttribute(player, "ACONNECT", [], player);
 
-    // 2. Master Room @aconnect
-    const masterRoomId = getConfig<string>("game.masterRoom") || "0";
-    if (masterRoomId) {
-        const masterRoom = await dbojs.queryOne({id: masterRoomId});
-        if (masterRoom) {
-            await hooks.executeAttribute(masterRoom, "ACONNECT", [], player);
-        }
+      // 2. Master Room @aconnect
+      const masterRoomId = getConfig<string>("game.masterRoom") || "0";
+      if (masterRoomId) {
+          const masterRoom = await dbojs.queryOne({id: masterRoomId});
+          if (masterRoom) {
+              await hooks.executeAttribute(masterRoom, "ACONNECT", [], player);
+          }
+      }
+    } catch (e) {
+      console.error("[Hooks] aconnect error:", e);
     }
   },
 

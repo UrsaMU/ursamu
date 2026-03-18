@@ -63,7 +63,6 @@ export const dbObjHandler = async (req: Request, userId: string): Promise<Respon
           const updates = await req.json();
 
           if (updates.data) {
-              // Strip protected fields from the data payload
               const { password: _pw, ...safeData } = updates.data as Record<string, unknown>;
               targetObj.data = { ...targetObj.data, ...safeData };
           }

@@ -102,8 +102,7 @@ export default async (u: IUrsamuSDK) => {
   });
 
   if (!isStaff) {
-    actor.state.quota = quota - cost;
-    await u.db.modify(actor.id, "$set", { data: { ...actor.state } });
+    await u.db.modify(actor.id, "$set", { "data.quota": quota - cost });
   }
 
   u.send(`You create ${objName} (#${thing.id}).`);

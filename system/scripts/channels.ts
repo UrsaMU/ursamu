@@ -1,5 +1,7 @@
 import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
+export const aliases = ["channel"];
+
 /**
  * System Script: channels.ts
  * Manages game channels (join, leave, list).
@@ -10,6 +12,10 @@ export default async (u: IUrsamuSDK) => {
 
   switch (switchArg) {
     case "join": {
+      if (!args[0]) {
+        u.send("Usage: @channel/join <channel>=<alias>");
+        return;
+      }
       const [chan, alias] = args[0].split("=");
       if (!chan || !alias) {
         u.send("Usage: @channel/join <channel>=<alias>");

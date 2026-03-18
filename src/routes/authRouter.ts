@@ -4,6 +4,8 @@ import { compare, hash, genSalt } from "../../deps.ts";
 import { sign } from "../services/jwt/index.ts";
 import { getNextId } from "../utils/getNextId.ts";
 
+const escRx = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export const authHandler = async (req: Request): Promise<Response> => {
   if (req.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
@@ -27,9 +29,9 @@ export const authHandler = async (req: Request): Promise<Response> => {
         // Check if user exists
         const existing = await dbojs.findOne({
             $or: [
-                { "data.alias": new RegExp(`^${username}$`, "i") },
-                { "data.name": new RegExp(`^${username}$`, "i") },
-                { "data.email": new RegExp(`^${email}$`, "i") },
+                { "data.alias": new RegExp(`^${escRx(username)}$`, "i") },
+                { "data.name": new RegExp(`^${escRx(username)}$`, "i") },
+                { "data.email": new RegExp(`^${escRx(email)}$`, "i") },
             ],
         });
 
@@ -66,8 +68,8 @@ export const authHandler = async (req: Request): Promise<Response> => {
         // LOGIN logic
         const ob = await dbojs.findOne({
             $or: [
-                { "data.alias": new RegExp(username, "i") },
-                { "data.name": new RegExp(username, "i") },
+                { "data.alias": new RegExp(`^${escRx(username)}$`, "i") },
+                { "data.name": new RegExp(`^${escRx(username)}$`, "i") },
             ],
         });
 
