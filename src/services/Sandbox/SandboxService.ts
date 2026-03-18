@@ -797,7 +797,7 @@ export class SandboxService {
   private pool: SandboxInstance[] = [];
   private poolSize = 5;
   private maxPoolSize = 10;
-  private defaultTimeout = 10000;
+  private defaultTimeout = 5000;
 
   private constructor() {}
 

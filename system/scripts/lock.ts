@@ -57,7 +57,7 @@ export default async (u: IUrsamuSDK) => {
   const target = await u.util.target(u.me, targetName?.trim());
   if (!target) return u.send("I can't find that.");
 
-  if (!u.canEdit(u.me, target)) return u.send("Permission denied.");
+  if (!(await u.canEdit(u.me, target))) return u.send("Permission denied.");
 
   const type = switchName || "basic"; // default lock
 

@@ -25,7 +25,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  if (!u.canEdit(actor, target)) {
+  if (!(await u.canEdit(actor, target))) {
     u.send("Permission denied.");
     return;
   }
@@ -50,7 +50,7 @@ export default async (u: IUrsamuSDK) => {
   } else {
     // Players/Things link their 'home'
     // Permission check for home linking (usually needs to be link_ok or controlled)
-    const canLinkTo = u.canEdit(actor, destination) || destination.flags.has("link_ok");
+    const canLinkTo = (await u.canEdit(actor, destination)) || destination.flags.has("link_ok");
     if (!canLinkTo) {
       u.send("You can't link to that.");
       return;

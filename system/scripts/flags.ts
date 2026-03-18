@@ -31,7 +31,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  if (!u.canEdit(u.me, tar)) {
+  if (!(await u.canEdit(u.me, tar))) {
     u.send("Permission denied.");
     return;
   }

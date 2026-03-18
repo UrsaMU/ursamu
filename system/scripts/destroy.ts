@@ -28,7 +28,7 @@ export default async (u: IUrsamuSDK) => {
   }
 
   // Permission check
-  if (!u.canEdit(actor, target)) {
+  if (!(await u.canEdit(actor, target))) {
     u.send("You can't destroy that.");
     return;
   }

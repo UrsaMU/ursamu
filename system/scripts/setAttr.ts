@@ -28,7 +28,7 @@ export default async (u: IUrsamuSDK) => {
   const target = await u.util.target(u.me, targetName.trim());
   if (!target) return u.send("Target not found.");
 
-  if (!u.canEdit(u.me, target)) return u.send("Permission denied.");
+  if (!(await u.canEdit(u.me, target))) return u.send("Permission denied.");
 
   // deno-lint-ignore no-explicit-any
   const attributes = (target.state.attributes as any[]) || [];

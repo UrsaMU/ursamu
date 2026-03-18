@@ -44,43 +44,29 @@ export class Obj implements IEntity {
   }
 
   static async get(obj: string | number | undefined, _en?: Obj): Promise<Obj | null> {
-    console.log("Obj.get called with:", obj, typeof obj);
-
     if (typeof obj === "string" && obj === "") {
       return null;
     }
+
 
     if (typeof obj === "string") {
       if (obj.startsWith("#")) {
         const id = obj.slice(1);
         const returnObj = await dbojs.queryOne({ id });
-        if (returnObj) {
-          console.log("Found by string (id):", returnObj.id);
-          return new Obj().load(returnObj);
-        }
+        if (returnObj) return new Obj().load(returnObj);
       } else {
         const returnObj = await dbojs.queryOne({
           $or: [{ "data.name": new RegExp(obj, "i") },
           { id: `${obj}` },
           { "data.alias": new RegExp(obj, "i") }
           ],
-
         });
-        if (returnObj) {
-          console.log("Found by string (name):", returnObj.id);
-          return new Obj().load(returnObj);
-        }
+        if (returnObj) return new Obj().load(returnObj);
       }
     } else if (typeof obj === "number") {
-      const id = String(obj);
-      const returnObj = await dbojs.queryOne({ id });
-      console.log("Query by number (converted to string):", id, "Result:", returnObj ? returnObj.id : null);
-      if (returnObj) {
-        return new Obj().load(returnObj);
-      }
+      const returnObj = await dbojs.queryOne({ id: String(obj) });
+      if (returnObj) return new Obj().load(returnObj);
     }
-
-    console.log("No object found, returning null");
     // Return null when no object is found
     return null;
   }

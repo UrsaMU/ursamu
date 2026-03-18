@@ -15,7 +15,7 @@ export default async (u: IUrsamuSDK) => {
   }
   
   // 2. Permission check
-  if (!u.canEdit(u.me, target)) {
+  if (!(await u.canEdit(u.me, target))) {
       return u.send("Permission denied.");
   }
 
