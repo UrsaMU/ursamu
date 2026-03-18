@@ -157,9 +157,16 @@ export default async (u: IUrsamuSDK) => {
             const fromObj = await u.util.target(en, fromId).catch(() => null);
             const fromName = fromObj?.name || "Unknown";
 
+            const toNames: string[] = [];
+            for (const t of (m.to || [])) {
+              const tid = t.replace("#", "");
+              const tObj = await u.util.target(en, tid).catch(() => null);
+              toNames.push(tObj?.name || t);
+            }
+
             u.send(`\nMessage: ${num}`);
             u.send(`From:    ${fromName} (#${fromId})`);
-            u.send(`To:      ${(m.to || []).join(", ")}`);
+            u.send(`To:      ${toNames.join(", ")}`);
             if (m.cc?.length) u.send(`CC:      ${m.cc.join(", ")}`);
             u.send(`Subject: ${m.subject}`);
             u.send(`Date:    ${DATE(m.date)}`);
