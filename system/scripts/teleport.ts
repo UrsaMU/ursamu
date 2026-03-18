@@ -34,13 +34,13 @@ export default async (u: IUrsamuSDK) => {
   }
 
   // Permission check: Usually you need to control the target or be staff
-  if (!u.canEdit(actor, target)) {
+  if (!(await u.canEdit(actor, target))) {
      u.send("Permission denied.");
      return;
   }
 
   // Destination check: enter_ok or controlled
-  const canEnter = u.canEdit(actor, destination) || destination.flags.has("enter_ok");
+  const canEnter = (await u.canEdit(actor, destination)) || destination.flags.has("enter_ok");
   if (!canEnter) {
     u.send("Permission denied (destination check).");
     return;

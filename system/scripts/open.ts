@@ -54,7 +54,7 @@ export default async (u: IUrsamuSDK) => {
     }
   });
 
-  const _canEditDest = u.canEdit(actor, destination);
+  const _canEditDest = await u.canEdit(actor, destination);
   const destDisplay = u.util.displayName(destination, actor);
   u.send(`You open exit %ch${exitName.split(";")[0]}%cn to ${destDisplay}.`);
 

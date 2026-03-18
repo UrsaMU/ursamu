@@ -4,7 +4,7 @@ import { IUrsamuSDK, IDBObj as _IDBObj } from "../../src/@types/UrsamuSDK.ts";
  * System Script: look.ts
  * ESM Refactored, Production-ready, and Telnet-compatible.
  */
-export default (u: IUrsamuSDK) => {
+export default async (u: IUrsamuSDK) => {
   const actor = u.me;
   const target = u.target || u.here;
 
@@ -19,7 +19,7 @@ export default (u: IUrsamuSDK) => {
     return;
   }
 
-  const canEditTarget = u.canEdit(actor, target);
+  const canEditTarget = await u.canEdit(actor, target);
   const isOpaque = target.flags.has('opaque');
   const showContents = !isOpaque || canEditTarget;
 
