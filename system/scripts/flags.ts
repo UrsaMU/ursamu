@@ -7,8 +7,12 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 export default async (u: IUrsamuSDK) => {
   const raw = (u.cmd.args[0] || "").trim();
   const eqIdx = raw.indexOf("=");
-  const targetName = eqIdx !== -1 ? raw.slice(0, eqIdx).trim() : "";
-  const flags = eqIdx !== -1 ? raw.slice(eqIdx + 1).trim() : "";
+  if (eqIdx === -1) {
+    u.send("Usage: @flags <target>=<flags>");
+    return;
+  }
+  const targetName = raw.slice(0, eqIdx).trim();
+  const flags = raw.slice(eqIdx + 1).trim();
 
   if (!targetName || !flags) {
     u.send("Usage: @flags <target>=<flags>");

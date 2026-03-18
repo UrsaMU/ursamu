@@ -185,7 +185,7 @@ cmdParser.use(async (ctx, next) => {
     const scriptPath = `./system/scripts/${scriptName}.ts`;
     const scriptInfo = await Deno.stat(scriptPath).catch(() => null);
 
-    if (scriptInfo?.isFile) {
+    if (scriptInfo?.isFile && (char || connectScreenScripts.has(scriptName))) {
         const code = await Deno.readTextFile(scriptPath);
         
         // Update last command

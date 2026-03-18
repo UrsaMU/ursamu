@@ -76,14 +76,14 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return [this.prefix, id];
   }
 
-  async create(data: T) {
+  async create(data: T): Promise<T> {
     const kv = await this.getKv();
     const plainData = { ...data };
     await kv.set(this.getKey(data.id), plainData);
     return data;
   }
 
-  async query(query?: Query<T>) {
+  async query(query?: Query<T>): Promise<T[]> {
     const kv = await this.getKv();
     const entries = kv.list({ prefix: [this.prefix] });
     const results: T[] = [];
@@ -96,12 +96,12 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return results;
   }
 
-  async queryOne(query?: Query<T>) {
+  async queryOne(query?: Query<T>): Promise<T | false> {
     const results = await this.query(query);
     return results.length ? results[0] : false;
   }
 
-  async all() {
+  async all(): Promise<T[]> {
     const kv = await this.getKv();
     const entries = kv.list({ prefix: [this.prefix] });
     const results: T[] = [];
@@ -111,7 +111,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return results;
   }
 
-  async modify(query: Query<T>, operator: string, data: Partial<T>) {
+  async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
     const items = await this.query(query);
     const kv = await this.getKv();
     for (const item of items) {
@@ -130,7 +130,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return await this.query(query);
   }
 
-  async delete(query: Query<T>) {
+  async delete(query: Query<T>): Promise<T[]> {
     const items = await this.query(query);
     const kv = await this.getKv();
     for (const item of items) {
@@ -172,18 +172,18 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return true;
   }
 
-  async update(_query: Query<T>, data: T) {
+  async update(_query: Query<T>, data: T): Promise<T> {
     const cv = await this.getKv();
     const plainData = { ...data };
     await cv.set(this.getKey(data.id), plainData);
     return data;
   }
 
-  async find(query?: Query<T>) {
+  async find(query?: Query<T>): Promise<T[]> {
     return await this.query(query);
   }
 
-  async findOne(query?: Query<T>) {
+  async findOne(query?: Query<T>): Promise<T | false> {
     return await this.queryOne(query);
   }
 }
@@ -192,14 +192,14 @@ export interface ICounters extends WithId {
   seq: number;
 }
 
-export const counters = new DBO<ICounters>("server.counters");
-export const dbojs = new DBO<IDBOBJ>("server.db");
-export const chans = new DBO<IChannel>("server.chans");
-export const mail = new DBO<IMail>("server.mail");
-export const texts = new DBO<ITextEntry>("server.texts");
-export const scenes = new DBO<IScene>("server.scenes");
+export const counters: DBO<ICounters> = new DBO<ICounters>("server.counters");
+export const dbojs: DBO<IDBOBJ> = new DBO<IDBOBJ>("server.db");
+export const chans: DBO<IChannel> = new DBO<IChannel>("server.chans");
+export const mail: DBO<IMail> = new DBO<IMail>("server.mail");
+export const texts: DBO<ITextEntry> = new DBO<ITextEntry>("server.texts");
+export const scenes: DBO<IScene> = new DBO<IScene>("server.scenes");
 
 import type { IBBoard } from "../../@types/IBBoard.ts";
 import type { IBBoardPost } from "../../@types/IBBoardPost.ts";
-export const bboards = new DBO<IBBoard>("server.bboards");
-export const bboard = new DBO<IBBoardPost>("server.bboard");
+export const bboards: DBO<IBBoard> = new DBO<IBBoard>("server.bboards");
+export const bboard: DBO<IBBoardPost> = new DBO<IBBoardPost>("server.bboard");

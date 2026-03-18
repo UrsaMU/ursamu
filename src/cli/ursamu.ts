@@ -51,7 +51,8 @@ Select an action:
   console.log("2. Scaffold a new in-tree Plugin");
   console.log("3. Create a standalone Plugin Project");
   console.log("4. Manage installed Plugins (install, update, list, remove)");
-  console.log("5. Exit");
+  console.log("5. Update ursamu engine to latest version");
+  console.log("6. Exit");
 
   const choice = getRes("Selection", "1");
 
@@ -129,6 +130,9 @@ Select an action:
       break;
     }
     case "5":
+      await runCommand("update.ts", []);
+      break;
+    case "6":
       Deno.exit(0);
       break;
     default:
@@ -152,6 +156,10 @@ switch (command) {
 
   case "plugin":
     await runCommand("plugin.ts", restArgs);
+    break;
+
+  case "update":
+    await runCommand("update.ts", restArgs);
     break;
 
   case "help":
@@ -183,6 +191,8 @@ Commands:
   plugin remove  <name>        Uninstall a plugin
   plugin list                  List installed plugins
   plugin info    <name>        Show plugin manifest + registry details
+  update                       Update ursamu engine to latest JSR version
+  update --dry-run             Preview the update without writing changes
   help                         Show this help message
 
 Options:

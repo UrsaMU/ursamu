@@ -50,6 +50,8 @@ export default async (u: IUrsamuSDK) => {
     resultMsg = `Set - ${target.name}/${attribute}: ${value}`;
   }
 
+  await u.db.modify(target.id, "$set", { data: { ...target.state } });
+
   // ANSI Output
   u.send(resultMsg);
 

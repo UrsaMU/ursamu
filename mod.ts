@@ -22,6 +22,11 @@ export { createObj } from "./src/services/DBObjs/DBObjs.ts";
 export { mu, checkAndCreateSuperuser } from "./src/main.ts";
 export { startTelnetServer } from "./src/services/telnet/telnet.ts";
 
+// Export Plugin API — available to game projects and external plugins
+export { DBO } from "./src/services/Database/database.ts";
+export { registerPluginRoute } from "./src/app.ts";
+export { dbojs } from "./src/services/Database/index.ts";
+
 // Hide internal class implementations by not exporting everything
 
 if (import.meta.main) {

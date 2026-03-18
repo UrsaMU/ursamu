@@ -12,7 +12,7 @@ import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import type { IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
-import { initConfig, initializePlugins, getConfig } from "./services/Config/mod.ts";
+import { initConfig, initializePlugins, getConfig, registerPlugin } from "./services/Config/mod.ts";
 import { loadPlugins } from "./utils/loadPlugins.ts";
 import { wsService } from "./services/WebSocket/index.ts";
 import { hash, genSalt } from "../deps.ts";
@@ -160,11 +160,12 @@ export const initializeEngine = async (
     console.warn(`Could not load plugins from ${pluginsDir}:`, e);
   }
 
-  // Add any custom plugins
+  // Add any custom plugins and register them so initializePlugins() will call init()
   if (customPlugins && customPlugins.length > 0) {
     console.log(`Loading ${customPlugins.length} custom plugins...`);
     for (const plugin of customPlugins) {
       loadedPlugins.push(plugin);
+      registerPlugin(plugin);
     }
   }
 
