@@ -395,6 +395,9 @@ self.onmessage = async (e: MessageEvent) => {
     // Dynamic Module Execution
     // Check if it's an ESM module (contains export)
     if (code.includes('export ')) {
+      // The blob: URL is created from in-memory script code and never uses the
+      // import map, so the JSR "unanalyzable-dynamic-import" warning for this
+      // line is a false positive — no rewriting is needed or possible here.
       const blob = new Blob([code], { type: 'application/javascript' });
       const url = URL.createObjectURL(blob);
       try {
