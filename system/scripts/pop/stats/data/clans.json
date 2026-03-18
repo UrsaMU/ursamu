@@ -1,0 +1,132 @@
+[
+  {
+    "key": "Brujah",
+    "title": "Brujah",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Potence",
+      "Presence",
+      "Temporis"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Cappadocian",
+    "title": "Cappadocian",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Auspex",
+      "Fortitude",
+      "Necromancy"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Gangrel",
+    "title": "Gangrel",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Animalism",
+      "Fortitude",
+      "Protean"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Lasombra",
+    "title": "Lasombra",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Dominate",
+      "Obtenebration",
+      "Potence"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Malkavian",
+    "title": "Malkavian",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Auspex",
+      "Dementation",
+      "Obfuscate"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Nosferatu",
+    "title": "Nosferatu",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Animalism",
+      "Obfuscate",
+      "Potence"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Ravnos",
+    "title": "Ravnos",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Animalism",
+      "Chimerstry",
+      "Fortitude"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Salubri",
+    "title": "Salubri",
+    "text": "TBD",
+    "healer_inclan_disciplines": [
+      "Auspex",
+      "Fortitude",
+      "Obeah"
+    ],
+    "warrior_inclan_disciplines": [
+      "Auspex",
+      "Fortitude",
+      "Valeren"
+    ],
+    "watcher_inclan_disciplines": [
+      "Auspex",
+      "Fortitude",
+      "Valeren"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Toreador",
+    "title": "Toreador",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Auspex",
+      "Celerity",
+      "Presence"
+    ],
+    "category": "clans",
+    "aliases": []
+  },
+  {
+    "key": "Ventrue",
+    "title": "Ventrue",
+    "text": "TBD",
+    "inclan_disciplines": [
+      "Dominate",
+      "Fortitude",
+      "Presence"
+    ],
+    "category": "clans",
+    "aliases": []
+  }
+]

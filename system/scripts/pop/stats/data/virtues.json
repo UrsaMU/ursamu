@@ -1,0 +1,36 @@
+[
+  {
+    "key": "Conscience",
+    "aliases": [
+      "conscience",
+      "con"
+    ],
+    "text": "Conscience is a Trait describing a character's moral\njudgment and stems from her attitude and outlook. It\nprevents a Vampire from succumbing to the Beast by\ndefining the Beast's urges as unacceptable. Conscience\nfactors into the difficulty of many rolls to avoid\ncommitting a transgression.",
+    "page_ref": "VTDA 20th, p. 183",
+    "category": "virtues",
+    "title": "Conscience"
+  },
+  {
+    "key": "Courage",
+    "aliases": [
+      "courage",
+      "cou"
+    ],
+    "text": "Courage is a universal trait. It represents bravery\nand mettle when faced with circumstances vampires\nendemically dread: fire and sunlight.",
+    "page_ref": "VTDA 20th, p. 183",
+    "category": "virtues",
+    "title": "Courage"
+  },
+  {
+    "key": "Self-Control",
+    "aliases": [
+      "self_control",
+      "sel",
+      "self"
+    ],
+    "text": "Self-Control defines a character's discipline and\nmastery over the Beast. Those with high Self-Control\nrarely succumb to emotional urges and are thus able\nto resist frenzy. Self-Control forms the dice\npool to resist frenzy.\n\nNote: A character may never roll more dice to resist\nor control frenzy than she has in her blood pool.",
+    "page_ref": "VTDA 20th, p. 183",
+    "category": "virtues",
+    "title": "Self-Control"
+  }
+]

@@ -1,0 +1,177 @@
+[
+  {
+    "key": "Animalism",
+    "aliases": [
+      "animalism",
+      "ani"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 151",
+    "category": "disciplines",
+    "title": "Animalism"
+  },
+  {
+    "key": "Auspex",
+    "aliases": [
+      "auspex",
+      "aus"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 152",
+    "category": "disciplines",
+    "title": "Auspex"
+  },
+  {
+    "key": "Celerity",
+    "aliases": [
+      "celerity",
+      "cel"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 155",
+    "category": "disciplines",
+    "title": "Celerity"
+  },
+  {
+    "key": "Chimerstry",
+    "aliases": [
+      "chimerstry",
+      "chi"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 155",
+    "category": "disciplines",
+    "title": "Chimerstry"
+  },
+  {
+    "key": "Dementation",
+    "aliases": [
+      "dementation",
+      "dem"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 156",
+    "category": "disciplines",
+    "title": "Dementation"
+  },
+  {
+    "key": "Dominate",
+    "aliases": [
+      "dominate",
+      "dom"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 157",
+    "category": "disciplines",
+    "title": "Dominate"
+  },
+  {
+    "key": "Fortitude",
+    "aliases": [
+      "fortitude",
+      "for"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 160",
+    "category": "disciplines",
+    "title": "Fortitude"
+  },
+  {
+    "key": "Necromancy",
+    "aliases": [
+      "necromancy",
+      "nec"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 163",
+    "category": "disciplines",
+    "title": "Necromancy"
+  },
+  {
+    "key": "Obeah",
+    "aliases": [
+      "obeah"
+    ],
+    "text": "TBD",
+    "page_ref": "V20 Lore of the Clans, p. 197",
+    "category": "disciplines",
+    "title": "Obeah"
+  },
+  {
+    "key": "Obfuscate",
+    "aliases": [
+      "obfuscate",
+      "obf"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 166",
+    "category": "disciplines",
+    "title": "Obfuscate"
+  },
+  {
+    "key": "Obtenebration",
+    "aliases": [
+      "obtenebration",
+      "obt"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 168",
+    "category": "disciplines",
+    "title": "Obtenebration"
+  },
+  {
+    "key": "Potence",
+    "aliases": [
+      "potence",
+      "pot"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 170",
+    "category": "disciplines",
+    "title": "Potence"
+  },
+  {
+    "key": "Presence",
+    "aliases": [
+      "presence",
+      "pre"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 171",
+    "category": "disciplines",
+    "title": "Presence"
+  },
+  {
+    "key": "Protean",
+    "aliases": [
+      "protean",
+      "pro"
+    ],
+    "text": "TBD",
+    "page_ref": "VTM 20th, p. 173",
+    "category": "disciplines",
+    "title": "Protean"
+  },
+  {
+    "key": "Temporis",
+    "aliases": [
+      "temporis",
+      "temp"
+    ],
+    "text": "TBD",
+    "page_ref": "V20 Lore of the Clans, p. 54",
+    "category": "disciplines",
+    "title": "Temporis"
+  },
+  {
+    "key": "Valeren",
+    "aliases": [
+      "valeren",
+      "val"
+    ],
+    "text": "TBD",
+    "page_ref": "V20 Lore of the Clans, p. 197",
+    "category": "disciplines",
+    "title": "Valeren"
+  }
+]

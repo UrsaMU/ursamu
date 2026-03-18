@@ -1,0 +1,129 @@
+[
+  {
+    "key": "Academics",
+    "aliases": [
+      "academics",
+      "aca"
+    ],
+    "text": "At this time, the world is ordered by memory, ritual\nand tradition rather than formal doctrine. Knowledge is\npreserved in temple archives, carried in the speeches of\norators and guarded within noble households. The motions\nof the heavens are observed but not yet measured; numbers\nare tools of trade and tribute; law is recited before it\nis written.\n\nWith Academics, you possess a cultivated understanding of\nhistory, rhetoric, philosophy, mathematics, and sacred custom.\nYou are trained in the disciplines that shape cities and empires\n--the power of words, the foundation of knowledge and the wisdom\nof those who came before. In an age where most learn only what\nthey are told, you seek to know why.",
+    "page_ref": "N/A",
+    "HR": "Each level of academics affords you one field of expertise.\nYou can buy additional fields for 2 XP or 1 freebie pt each.\nFields of expertise must be notated using +notes.\nCharacters with academics 1+ are literate.\nCharacters without academics are illiterate.",
+    "category": "knowledges",
+    "title": "Academics"
+  },
+  {
+    "key": "Enigmas",
+    "aliases": [
+      "enigmas",
+      "eni"
+    ],
+    "text": "Enigmas encompass symbolism, history, lore, and cryptography.\nThe smallest pieces click into a cohesive whole when you\nhave sufficient knowledge of enigmas.\nEach thread spins together into a tapestry of an answer.\n\nYour experience with enigmas allows you to draw\nlogical connections to deduce the solution when it is least\nevident to others.",
+    "page_ref": "VTDA 20th, p. 171",
+    "category": "knowledges",
+    "title": "Enigmas"
+  },
+  {
+    "key": "Hearth Wisdom",
+    "aliases": [
+      "hearth_wisdom",
+      "hearth",
+      "wisdom",
+      "hea"
+    ],
+    "text": "What berries can you eat? Will it rain tomorrow? What's\nthe best remedy for whooping cough? This wisdom is not found\nin books, but from sitting at the knee of people wiser than you,\nand spoken in sewing circles and market stalls. They know\nthe cures and they know the reasons to be afraid of the dark.",
+    "page_ref": "VTDA 20th, p. 172",
+    "category": "knowledges",
+    "title": "Hearth Wisdom"
+  },
+  {
+    "key": "Investigation",
+    "aliases": [
+      "investigation",
+      "inv"
+    ],
+    "text": "Your eye spies the smallest details, tracing them back\nthrough the web of information. You have the questions\nand they have the answers, and woe betide any who stand\nlong in the way of your search.\n\nYou connect all the threads, weaving them together\nto reveal the tapestry of the truth. Or the gods' truth.\nOr the Senate's truth. Whatever truth you seek, you have\nthe tools to discover it.",
+    "page_ref": "VTDA 20th, p. 172",
+    "category": "knowledges",
+    "title": "Investigation"
+  },
+  {
+    "key": "Law",
+    "aliases": [
+      "law"
+    ],
+    "text": "The Romans called it Justitia, but you don't need Latin\nto know how it works. Those who have the purse to pay\nreceive finer justice than those who don't; the patrician\ntrumps the plebeian and the plebeian trumps the slave.",
+    "page_ref": "VTDA 20th, p. 172",
+    "category": "knowledges",
+    "title": "Law"
+  },
+  {
+    "key": "Logistics",
+    "aliases": [
+      "logistics",
+      "log"
+    ],
+    "text": "The oil that allows the gears of a great house to run\nsmoothly. The knowledge of handling books and the market\naccounts. Management of number of workers for the harvest,\nmaintain the stables, keep the ponds and forests stocked,\nand so forth.",
+    "page_ref": "VTDA 20th, p. 175",
+    "HR": "The name of 'Seneschal' was replaced for personal reasons.",
+    "category": "knowledges",
+    "title": "Logistics"
+  },
+  {
+    "key": "Medicine",
+    "aliases": [
+      "medicine",
+      "med"
+    ],
+    "text": "This is an age when illness is as often blamed on offended\nspirits as on natural causes. Healing belongs to midwives,\ntemple attendants, herbalists, and physicians trained\nthrough apprenticeship rather than formal study. Remedies\nare drawn from roots, resins, wine, honey, and poultices;\nprayers and offerings may accompany treatment as readily as\nbandages. Knowledge of the body comes from wounds sustained in\nbattle and the tending of livestock, not careful dissection.\nBones are set, fevers cooled, and bleeding stanched, but the\ndeeper workings of flesh and breath remain mysterious. In the\nmeantime, drink the bitter draught, trust in the gods, and hope\nthe sickness passes.",
+    "page_ref": "Original",
+    "category": "knowledges",
+    "title": "Medicine"
+  },
+  {
+    "key": "Military Strategy",
+    "aliases": [
+      "military_strategy",
+      "military",
+      "strategy",
+      "mil"
+    ],
+    "text": "TBD",
+    "page_ref": "VTDA 20th, p. 162",
+    "category": "knowledges",
+    "title": "Military Strategy"
+  },
+  {
+    "key": "Occult",
+    "aliases": [
+      "occult",
+      "occ"
+    ],
+    "text": "To know the occult is to understand the unseen and\nthe inexplicable. The supernatural is a hole that reaches\nmuch deeper and darker than people imagine. Just as you\nreach the bottom, another tunnel reveals itself, burrowing\never deeper.\n\nSome might say Occult and Theology are just two\nsides of a coin that reality flips. One person's miracle is\nanother person's ghostly encounter. Both require a faith\nin something not easily seen or understood. Overlap does\noccur between the two, especially in the case of miracles\nor saints.\n\nIf a character's Occult score is high, the outcomes of\ntheir Occult rolls tend to be more accurate.",
+    "page_ref": "VTDA 20th, p. 173-174",
+    "HR": "Each level of occult affords you one field of expertise.\nYou can buy additional fields for 2 XP or 1 freebie pt each.\nFields of expertise must be notated using +notes.",
+    "category": "knowledges",
+    "title": "Occult"
+  },
+  {
+    "key": "Politics",
+    "aliases": [
+      "politics",
+      "pol"
+    ],
+    "text": "Politics is the great game; some say the greatest game. It\ncan bring unimaginable power, but the wheel of fortune can\nturn quickly, grinding the ambitious into the finest of powder.\nHistory is littered with the names of those who overreached.\n\nHigh-level politics is a mixture of diplomacy and\ncarefully exercised leverage. The more you understand,\nthe more you can bend others to achieve your goals.",
+    "page_ref": "VTDA 20th, p. 174",
+    "category": "knowledges",
+    "title": "Politics"
+  },
+  {
+    "key": "Theology",
+    "aliases": [
+      "theology",
+      "the"
+    ],
+    "text": "Theology is the science of the gods, by whatever name you\nmight call them, and never was it more compelling than at\nthis time in history. The gods were in the smallest mustard seed\nand in the largest ocean. Plagues were the wrath of the gods and\na bountiful harvest were the blessings of the gods made manifest.",
+    "page_ref": "VTDA 20th, p. 175",
+    "category": "knowledges",
+    "title": "Theology"
+  }
+]

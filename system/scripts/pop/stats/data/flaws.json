@@ -1,0 +1,1475 @@
+[
+  {
+    "key": "Amnesia",
+    "aliases": [
+      "amnesia",
+      "amn"
+    ],
+    "points": 2,
+    "restrictions": "null.",
+    "text": "You are unable to remember anything about your past, yourself, or your family (whether mortal or supernatural), though your past might well come back to haunt you.",
+    "mechanics": "Your origins and the circumstances behind your amnesia are for the Storyteller to determine, and they are encouraged to make it as interesting as possible.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Amnesia"
+  },
+  {
+    "key": "Conspicuous Consumption",
+    "aliases": [
+      "conspicuous_consumption",
+      "conspicuous",
+      "consumption"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "It is not enough for you to draw nourishment from the blood of mortals.\nYou must also consume your victim's organs or other blood-rich tissue.",
+    "mechanics": "This will necessitate the deaths of all your victims (unless you are extremely creative),\nwhich might lead to numerous problems with maintaining Humanity (and a low profile).\nCharacters with this Flaw should additionally purchase the Eat Food Merit.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Conspicuous Consumption"
+  },
+  {
+    "key": "Deep Sleeper",
+    "aliases": [
+      "deep_sleeper",
+      "deep",
+      "dee"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "When you sleep, it is very difficult for you to awaken.",
+    "mechanics": "+2 difficulty to awaken during the day for any reason.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Deep Sleeper"
+  },
+  {
+    "key": "Flashbacks",
+    "aliases": [
+      "flashbacks",
+      "fla"
+    ],
+    "points": 6,
+    "restrictions": "Sphere: Vampire",
+    "text": "You managed to make it through the Creation Rites or other similarly traumatic experience, but not wholly intact. \nThe most insignificant thing can throw you into a different mood or state of mind,\nand as such your behavior is extremely unpredictable.",
+    "mechanics": "Your Willpower fluctuates. \nAt the beginning of each scene, make a Willpower roll.\nIf you succeed, you may participate in the story as normal.\nIf you fail, your Willpower score is considered to be 1 for the scene's duration.\nYou only have one Willpower point to spend.",
+    "HR": "If your Willpower is lowered to 1, you gain 1 Willpower back every day thereafter;\n It doesn't automatically replenish to maximum value.",
+    "page_ref": "VTM 20th, p. 487",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Flashbacks"
+  },
+  {
+    "key": "Guilt-Wracked",
+    "aliases": [
+      "guilt_wracked",
+      "guilt-wracked",
+      "guilt",
+      "wracked",
+      "gui"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire",
+    "text": "You simply cannot come to grips with the fact that you must drink blood to survive.\nYou suffer horrible guilt each time you feed and try to avoid doing so as much as possible.",
+    "mechanics": "Each time you feed, roll Conscience vs. 7, or else frenzy every time you feed.\nYou rarely have much blood in your system, leaving you vulnerable to both attacks and hunger-based frenzies.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Guilt-Wracked"
+  },
+  {
+    "key": "Impatient",
+    "aliases": [
+      "impatient",
+      "imp"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have no patience for standing around and waiting.\nYou want to do things now -- fuck those slowpokes trying to hold you back.",
+    "mechanics": "Every time you are forced to wait around instead of acting, a Self-Control roll is required to see if you go tearing off on your own instead.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Impatient"
+  },
+  {
+    "key": "Lunacy",
+    "aliases": [
+      "lunacy",
+      "lun"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are affected by the phases of the moon, increasing your chances to frenzy.",
+    "mechanics": "Under the crescent moon, difficulties to avoid frenzy increase by one.\nUnder the half or gibbous moon, difficulties to avoid frenzy rise by two.\nUnder the full moon, difficulties to avoid frenzy rise by three.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Lunacy"
+  },
+  {
+    "key": "Nightmares",
+    "aliases": [
+      "nightmares",
+      "nig"
+    ],
+    "points": 1,
+    "restrictions": "null.",
+    "text": "You experience horrendous nightmares every time you sleep.\nMemories of them haunt you during your waking hours.",
+    "mechanics": "Upon awakening, you must make a Willpower roll (difficulty 7) or lose a die on all actions for that night.\nA botched Willpower roll indicates that, even when awake, you still believe that you are locked in a nightmare.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Nightmares"
+  },
+  {
+    "key": "Phobia",
+    "aliases": [
+      "phobia",
+      "pho"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have an overpowering fear of something.\nSpiders, snakes, crowds, and heights are examples of common phobias.",
+    "mechanics": "You must make a Courage roll every time you encounter the object of your fear.\nThe difficulty of the roll is determined by the Storyteller.\nIf you fail the roll, you must retreat from the object or situation.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Phobia"
+  },
+  {
+    "key": "Prey Exclusion",
+    "aliases": [
+      "prey_exclusion",
+      "prey",
+      "exclusion"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire. Clan: Ventrue.",
+    "text": "You refuse to hunt a certain class of prey.",
+    "mechanics": "If you accidentally feed upon such an individual, you automatically frenzy and must make a roll to prevent Humanity or Path loss (diff 7). \nWitnessing other Kindred feeding on the object of your exclusion might also provoke a frenzy, at the Storyteller's discretion.\nClan Ventrue cannot take this flaw.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Prey Exclusion"
+  },
+  {
+    "key": "Short Fuse",
+    "aliases": [
+      "short_fuse",
+      "fuse"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire. Clan: Brujah.",
+    "text": "You are easily angered.",
+    "mechanics": "+2 difficulty to avoid frenzy.\nClan: Brujah can't take this flaw.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Short Fuse"
+  },
+  {
+    "key": "Shy",
+    "aliases": [
+      "shy"
+    ],
+    "points": 1,
+    "restrictions": "null.",
+    "text": "You are distinctly ill at ease when dealing with people and try to avoid social situations whenever possible.",
+    "mechanics": "+2 diff for all rolls involving social interactions with strangers.\n+3 diff involving social interactions if your character becomes the center of attention in a large group.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Shy"
+  },
+  {
+    "key": "Soft-Hearted",
+    "aliases": [
+      "soft-hearted",
+      "soft",
+      "hearted",
+      "sof"
+    ],
+    "points": 1,
+    "restrictions": "null.",
+    "text": "You cannot stand to watch others suffer.",
+    "mechanics": "You avoid any situation that involves causing someone physical or emotional pain, unless you make a Willpower roll (diff 8).\nYou must have a Humanity rating of 7 or above to take this Flaw.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Soft-Hearted"
+  },
+  {
+    "key": "Speech Impediment",
+    "aliases": [
+      "speech_impediment",
+      "speech",
+      "impediment",
+      "spe"
+    ],
+    "points": 1,
+    "restrictions": "null.",
+    "text": "You have a stammer or other speech impediment that hampers verbal communication.",
+    "mechanics": "+2 diff to all die rolls involving verbal communication.\nThis Flaw must be roleplayed whenever possible.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Speech Impediment"
+  },
+  {
+    "key": "Stereotype",
+    "aliases": [
+      "stereotype",
+      "stereo"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You buy heavily into all of the Vampire stories you've read and heard.\nYou wear a cape or body glitter, speak with an accent, and otherwise act in a cartoonish fashion.\nSuch behavior is embarrassing in the extreme to other Kindred, who are likely to ostracize or mock you.",
+    "mechanics": "-2 to all NPC opinion.\n+2 difficulty to Social rolls with other vampires who don't share your habits.\nYour threat may increase substantially, making you more likely to stand out to hunters.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Stereotype"
+  },
+  {
+    "key": "Territorial",
+    "aliases": [
+      "territorial",
+      "ter"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are extremely territorial, staking out a particular area as your hunting ground and reacting aggressively to trespassers.",
+    "mechanics": "If another Vampire enters your territory uninvited, you must make a frenzy roll.\n If you fail, you immediately attack the interloper and continue attacking until the intruder is dead or has left your hunting grounds.\nYou are reluctant to leave your territory except in desperate circumstances.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Territorial"
+  },
+  {
+    "key": "Thirst For Innocence",
+    "aliases": [
+      "thirst_for_innocence",
+      "thirst",
+      "innocence",
+      "thi"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "The sight of innocence -- of any sort -- arouses in you a terrible bloodlust.",
+    "mechanics": "Roll Self-Control or else go into hunger frenzy and attack the source of your hunger.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Thirst For Innocence"
+  },
+  {
+    "key": "Unconvinced",
+    "aliases": [
+      "unconvinced",
+      "unc"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire. Clan: Tremere.",
+    "text": "You fail to see the need for the core ideologies of your Sect or Clan, and have gone on record as saying so.\nTaking your stand has made you suspect in the eyes of your superiors, and may have attracted the attention of your enemies as well.",
+    "mechanics": "-1 opinion modifier to all NPCs.\nClan Tremere cannot take this flaw.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Unconvinced"
+  },
+  {
+    "key": "Vengeful",
+    "aliases": [
+      "ven"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have a score to settle, incurred either during your mortal days or after the Embrace.",
+    "mechanics": "You are obsessed with taking your revenge on an individual or group, and it is your overriding priority in any situation where you encounter the object of your revenge.\nYou may temporarily resist your need for vengeance by spending a Willpower point.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Vengeful"
+  },
+  {
+    "key": "Weak-Willed",
+    "aliases": [
+      "weak_willed",
+      "weak-willed",
+      "weak",
+      "willed",
+      "wea"
+    ],
+    "points": 3,
+    "restrictions": "null.",
+    "text": "You are highly susceptible to Dominate and intimidation by others.",
+    "mechanics": "Dominate attempts automatically affect you unless the Discipline wielder is of higher Generation.\n+2 diff to resist Social abilities such as Intimidation or Leadership, as well as mind-altering spells or magic.\nYour Willpower Trait may never rise above 4.",
+    "page_ref": "VTM 20th, p. 486",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_flaws",
+    "title": "Weak-Willed"
+  },
+  {
+    "key": "Addiction",
+    "aliases": [
+      "addiction",
+      "addict"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You suffer from an addiction to a substance, which must now be present in the blood you drink.",
+    "mechanics": "The substance can be alcohol, nicotine, or hard drugs.\nThis substance always impairs you in some fashion (see 'Poisons and Drugs,' VTM 20th, p. 301, for particulars).\nWithout this substance in mortal blood consumed, you automatically frenzy.\nVitae is exempt from this flaw. (House Rule)",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Addiction"
+  },
+  {
+    "key": "Bad Sight",
+    "aliases": [
+      "bad_sight",
+      "bad sight",
+      "bad",
+      "sight"
+    ],
+    "points": [
+      1,
+      3
+    ],
+    "restrictions": "Cannot take flaw 'Bad Sight' & merit 'Acute Senses: Sight'.\nCannot take flaw 'Blind' & flaw 'Bad Sight'.",
+    "text": "Your sight is defective.",
+    "mechanics": "+2 difficulty to any roll involving the use of eyesight.\n1 Point: This condition can be corrected with aids (squinting, a hand held over the brow, etc.).\n3 Point: This condition is too severe to be corrected.",
+    "page_ref": "VTM 20th, p. 481",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Bad Sight"
+  },
+  {
+    "key": "Blind",
+    "aliases": [
+      "blind",
+      "bli"
+    ],
+    "points": 6,
+    "restrictions": "Cannot take flaw 'Blind' & merit 'Acute Senses: Sight'.\nCannot take flaw 'Blind' & flaw 'One Eye'.\nCannot take flaw 'Blind' & flaw 'Bad Sight'\nCannot take flaw 'Blind' & discipline 'Dominate'.",
+    "text": "You cannot see.",
+    "mechanics": "+2 difficulty to all Dexterity-based rolls. \nImmunity to Dominate rolls needing eye contact (but not Auspex-orientated Dominate rolls). (House Rule) \nCannot utilize the Dominate discipline at all. (House Rule)",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Blind"
+  },
+  {
+    "key": "Deaf",
+    "aliases": [
+      "deaf",
+      "dea"
+    ],
+    "points": 4,
+    "restrictions": "Cannot take flaw 'Hard of Hearing' & flaw 'Deaf'.\nCannot take merit 'Acute Senses: Hearing' & flaw 'Deaf'.",
+    "text": "You cannot hear.",
+    "mechanics": "+3 difficulty to many Perception rolls.\n+1 difficulty to some incoming applications of Dominate (case-by-case basis) (House Rule).",
+    "page_ref": "VTM 20th, p. 483",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Deaf"
+  },
+  {
+    "key": "Deformity",
+    "aliases": [
+      "deformity",
+      "def"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have some kind of deformity -- a misshapen limb, hunchback, or clubfoot, for example -- which affects your physical abilities and interactions with others.",
+    "mechanics": "The mechanical disadvantage is determined by the deformity chosen on a case-by-case basis.",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Deformity"
+  },
+  {
+    "key": "Disease Carrier",
+    "aliases": [
+      "disease_carrier",
+      "disease carrier",
+      "disease",
+      "carrier",
+      "dise"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Your blood carries a lethal and highly contagious disease. \nIn Ancient Rome, humanity (and vampires) have no idea how diseases spread.",
+    "mechanics": "Kindred who drink your blood have a 1 in 10 chance of becoming a carrier.\nYou must spend an extra blood point each night on awakening, or you will begin manifesting symptoms of the disease.\nThe mechanical disadvantage is determined by the deformity chosen on a case-by-case basis.",
+    "page_ref": "VTM 20th, p. 483",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Disease Carrier"
+  },
+  {
+    "key": "Disfigured",
+    "aliases": [
+      "disfigured",
+      "disf"
+    ],
+    "points": 2,
+    "restrictions": "Clan: Nosferatu.",
+    "text": "A hideous disfigurement makes your appearance disturbing and memorable.",
+    "mechanics": "+2 difficulty to all dice rolls relating to social interactions.\nYou may not have an Appearance rating greater than 2.",
+    "page_ref": "VTM 20th, p. 481",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Disfigured"
+  },
+  {
+    "key": "Dulled Bite",
+    "aliases": [
+      "dulled_bite",
+      "dulled bite",
+      "dulled",
+      "dull",
+      "dul"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.\nCannot take flaw 'Dulled Bite' & flaw 'Permanent Fangs'.",
+    "text": "For some reason your fangs never developed fully, or they may not have manifested at all.\nA number of Caitiff often manifest this Flaw.",
+    "mechanics": "When feeding, you need to find some other method of making the blood flow.\nFailing that, you must achieve double the normal number of successes in order to make your bite penetrate properly.",
+    "page_ref": "VTM 20th, p. 481",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Dulled Bite"
+  },
+  {
+    "key": "Flesh Of The Corpse",
+    "aliases": [
+      "flesh_of_the_corpse",
+      "flesh of the corpse",
+      "flesh",
+      "corpse",
+      "fle"
+    ],
+    "points": 5,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Your flesh does not fully regenerate itself once it is damaged.\nWhile you are able to heal yourself to the point of regaining full functionality, your skin still retains the cuts, tears, bullet holes, and other visible damage that you have incurred.",
+    "mechanics": "Depending on the nature of the damage, this Flaw will make social dealings exceedingly difficult, and may decrease your Appearance dots over time (even to 0).",
+    "page_ref": "VTM 20th, p. 483",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Flesh Of The Corpse"
+  },
+  {
+    "key": "Glowing Eyes",
+    "aliases": [
+      "glowing_eyes",
+      "glowing eyes",
+      "glo"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have the stereotypical glowing eyes of Vampire legend.\nThe tradeoffs are many; you must constantly disguise your condition (no, contacts don't cut it).\nWARNING: This flaw is a great way to raise threat and for hunters to find & try to kill you.",
+    "mechanics": "-1 difficulty on Intimidation rolls when dealing with mortals.\n+1 difficulty on all eyesight rolls.\n+2 difficulty on Stealth rolls.",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Glowing Eyes"
+  },
+  {
+    "key": "Hard of Hearing",
+    "aliases": [
+      "hard_of_hearing",
+      "hard of hearing",
+      "hard",
+      "hearing"
+    ],
+    "points": 1,
+    "restrictions": "Cannot take flaw 'Hard of Hearing' & merit 'Acute Senses: Hearing'.\nCannot take flaw 'Hard of Hearing' & flaw 'Deaf'.",
+    "text": "Your hearing is defective.",
+    "mechanics": "+2 difficulty to any roll involving the use of hearing.",
+    "page_ref": "VTM 20th, p. 480-481",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Hard of Hearing"
+  },
+  {
+    "key": "Infectious Bite",
+    "aliases": [
+      "infectious_bite",
+      "infectious bite",
+      "infectious",
+      "infect"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire",
+    "text": "You may not automatically lick the wounds of your feeding closed and you have a small chance of spreading potentially fatal disease.",
+    "mechanics": "You cannot cover your tracks in hunting.\nYou have a 1 in 5 chance of causing mortal victims to become seriously ill.\nIf your prey dies, you have to make a Humanity roll. (House Rule)",
+    "page_ref": "VTM 20th, p. 481",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Infectious Bite"
+  },
+  {
+    "key": "Infertile Vitae",
+    "aliases": [
+      "infertile_vitae",
+      "infertile vitae",
+      "infertile",
+      "vitae"
+    ],
+    "points": 5,
+    "restrictions": "Sphere: Vampire.",
+    "text": "During your Embrace, something went horribly wrong, causing your blood to mutate under the stress of dying and rising again.\nA number of Caitiff often manifest this Flaw.",
+    "mechanics": "All those who you try to embrace die.",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Infertile Vitae"
+  },
+  {
+    "key": "Lame",
+    "aliases": [
+      "lame",
+      "lam"
+    ],
+    "points": 3,
+    "restrictions": "null",
+    "text": "Your legs are damaged, which prevents you from running or walking easily.\nYou are forced to walk with a cane or possibly leg braces, and you have a pronounced limp to your stride.",
+    "mechanics": "Your walking speed is one-quarter that of a normal human, and running is impossible.",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Lame"
+  },
+  {
+    "key": "Lazy",
+    "aliases": [
+      "lazy",
+      "laz"
+    ],
+    "points": 3,
+    "restrictions": "null",
+    "text": "You are simply lazy, avoiding anything that requires effort on your part.\nPreferring to let others do the hard work, you lounge around.\nFor any action that requires preparation, there's a good chance you didn't properly prepare.",
+    "mechanics": "+1 difficulty on spontaneous Physical actions (including combat, unless part of a planned offensive).",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Lazy"
+  },
+  {
+    "key": "Monstrous",
+    "aliases": [
+      "monstrous",
+      "mon"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire. Clan: Nosferatu.",
+    "text": "Your physical form was twisted during the Embrace, and now reflects the Beast that rages inside you.\nCharacters with this Flaw appear to be savage monsters.",
+    "mechanics": "Your character has an appearance rating of 0.",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Monstrous"
+  },
+  {
+    "key": "Mute",
+    "aliases": [
+      "mute",
+      "mut"
+    ],
+    "points": 4,
+    "restrictions": "Cannot take merit 'Enchanting Voice' & flaw 'Mute'.",
+    "text": "You cannot speak.",
+    "mechanics": "You cannot talk to PCs or NPCs unless everyone concerned purchases a commonly understood sign language (via the Language Merit) or you write down what you wish to say.",
+    "page_ref": "VTM 20th, p. 483",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Mute"
+  },
+  {
+    "key": "One Eye",
+    "aliases": [
+      "one_eye",
+      "one eye",
+      "one"
+    ],
+    "points": 2,
+    "restrictions": "Cannot take flaw 'One Eye' & merit 'Acute Senses: Sight'.\nCannot take flaw 'Blind' & flaw 'One Eye'.",
+    "text": "You have only one eye -- which eye is missing is up to you.",
+    "mechanics": "+2 difficulty to all rolls involving eyesight.\n+1 additional difficulty on all rolls involving depth perception (including ranged combat).",
+    "page_ref": "VTM 20th, p. 481",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "One Eye"
+  },
+  {
+    "key": "Open Wound",
+    "aliases": [
+      "open_wound",
+      "open wound",
+      "open",
+      "ope"
+    ],
+    "points": [
+      2,
+      4
+    ],
+    "restrictions": "Sphere: Vampire. \nCannot take flaw 'Open Wound' & flaw 'Permanent Wound'.",
+    "text": "You have one or more wounds that refuse to heal, and which constantly drip blood.",
+    "mechanics": "Level One: You lose one extra point of blood every night, and, if the wound is visible, +1 difficulty for social rolls. \nLevel Two: As above, and, you rise from sleep at the Wounded health level, though this may be healed by spending blood points.",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Open Wound"
+  },
+  {
+    "key": "Permanent Fangs",
+    "aliases": [
+      "permanent_fangs",
+      "permanent fangs",
+      "fangs"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.\nCannot take flaw 'Dulled Bite' & flaw 'Permanent Fangs'.",
+    "text": "Your fangs do not retract, making it impossible for you to hide your true nature.\nWhile some mortals may think you've had your teeth filed or are wearing prosthetics, sooner or later you're going to run into someone who knows what you truly are.",
+    "mechanics": "Your character has a max appearance rating of 3.\nWARNING: This flaw is a great way to raise threat and for hunters to find & try to kill you.",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Permanent Fangs"
+  },
+  {
+    "key": "Permanent Wound",
+    "aliases": [
+      "permanent_wound",
+      "permanent wound"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You suffered injuries during your Embrace which your transformation somehow failed to repair.",
+    "mechanics": "At the beginning of each night, you rise from sleep at the Wounded health level, though this may be healed by spending blood points.",
+    "page_ref": "VTM 20th, p. 482-483",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Permanent Wound"
+  },
+  {
+    "key": "Short",
+    "aliases": [
+      "short"
+    ],
+    "points": 1,
+    "restrictions": "Cannot take merit 'Huge Size'.",
+    "text": "You are well below average height -- four and a half feet tall or less.",
+    "mechanics": "+1 difficulty reaching or manipulating objects designed for normal adult size. (House Rule)\nYour running speed is one-half that of an average human.",
+    "page_ref": "VTM 20th, p. 481",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Short"
+  },
+  {
+    "key": "Slow Healing",
+    "aliases": [
+      "slow_healing",
+      "slow healing",
+      "slow",
+      "slo"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have difficulty healing wounds.\nA number of Caitiff often manifest this Flaw.",
+    "mechanics": "It requires two blood points to heal one health level of bashing or lethal damage.\nYou heal one health level of aggravated damage every five days (plus the usual five blood points and Willpower expenditure).",
+    "page_ref": "VTM 20th, p. 483",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Slow Healing"
+  },
+  {
+    "key": "Smell Of The Grave",
+    "aliases": [
+      "smell_of_the_grave",
+      "smell of the grave",
+      "smell",
+      "grave",
+      "sme"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire",
+    "text": "You exude an odor of dampness and newly turned earth, which no amount of scents or perfumes will cover.\nMortals in your immediate presence become uncomfortable.",
+    "mechanics": "+1 difficulties to all Social rolls affecting mortals.",
+    "page_ref": "VTM 20th, p. 481",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Smell Of The Grave"
+  },
+  {
+    "key": "Thin Blood",
+    "aliases": [
+      "thin blood",
+      "thin_blood",
+      "thin",
+      "blood",
+      "thi"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Your blood is thin, weak, and does not sustain you well.\nA number of Caitiff often manifest this Flaw.",
+    "mechanics": "All blood point costs are doubled (e.g., using blood-related Disciplines, buffing physical attributes or healing damage).\nRising in the evening still only takes one blood.\nYou are unable to create a blood bond.\nEfforts to sire other vampires succeed only 1 in 5 times.\nYou cannot take this flaw unless you are Generation 11 or higher (BG: Generation 0).",
+    "page_ref": "VTM 20th, p. 483",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Thin Blood"
+  },
+  {
+    "key": "Tic/Twitch",
+    "aliases": [
+      "tic",
+      "twitch",
+      "tic/twitch"
+    ],
+    "points": 1,
+    "restrictions": "null",
+    "text": "You have some sort of repetitive motion that you make in times of stress, and it's a dead giveaway as to your identity.\nExamples include a nervous cough, constantly wringing your hands, cracking your knuckles, and so on.",
+    "mechanics": "It costs one Willpower to refrain from engaging in your tic.",
+    "page_ref": "VTM 20th, p. 481",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Tic/Twitch"
+  },
+  {
+    "key": "Vulnerability To Silver",
+    "aliases": [
+      "vulnerability to silver",
+      "vulnerability_to_silver",
+      "vulnerability",
+      "silver",
+      "vul"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire",
+    "text": "To you, silver is as painful and as deadly as the rays of the sun.\nThe mere touch of silver objects discomforts you.\nA number of Caitiff often manifest this Flaw.",
+    "mechanics": "You suffer aggravated wounds from any silver weapons (bullets, knives, etc.).",
+    "page_ref": "VTM 20th, p. 482",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_flaws",
+    "title": "Vulnerability To Silver"
+  },
+  {
+    "key": "Botched Presentation",
+    "aliases": [
+      "botched_presentation",
+      "botched",
+      "presentation",
+      "bot"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "When your sire presented you to the Prince of the city, you flubbed it.\nNow you're convinced His Majesty hates you (whether he does or not).",
+    "mechanics": "When you are in the presence of the Prince or high officer,\nsucceed at a Willpower vs 7 roll or mess up in a way Staff chooses.",
+    "page_ref": "VTM 20th, p. 489",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Botched Presentation"
+  },
+  {
+    "key": "Bound",
+    "aliases": [
+      "bound",
+      "bou"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are blood bound to another Vampire.\nYour regent may not necessarily treat you badly,\nbut the fact remains that your will is not your own.\nThe knowledge gnaws on you, even as you find yourself\nlost in devotion to your vampiric master.",
+    "mechanics": "The Vampire regent must be an NPC.\nAnticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Bound"
+  },
+  {
+    "key": "Catspaw",
+    "aliases": [
+      "catspaw",
+      "cpaw"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You've done dirty work for someone high up in the\ncity's hierarchy in the past -- the Sheriff, the Bishop,\nor even someone higher. However, instead of granting\nyou favor, your deeds have made you an embarrassment\nor a liability. For the moment, your former employer's\nconcern is to keep you quiet. In the long term, it's to\nget rid of you.",
+    "mechanics": "The work, outcome, and the NPC must be clearly stated.\nAnticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.\nThis flaw is more likely to be 'earned' during play than taken\nduring CG.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Catspaw"
+  },
+  {
+    "key": "Clan Enmity",
+    "aliases": [
+      "clan_enmity",
+      "enmity"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "One Clan in particular wants you dead. You have offended\nthe entire Clan, from elders to neonates, and as a\nresult every member of that bloodline wants your head on\na plate. The effects of the Flaw may manifest as anything\nfrom very public snubs and insults to actual attempts on\nyour unlife.",
+    "mechanics": "-4 opinion on all NPC relation with that clan.\n+2 diff on all Social rolls relating to members of the\nclan in question.",
+    "page_ref": "VTM 20th, p. 492",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Clan Enmity"
+  },
+  {
+    "key": "Dark Secret",
+    "aliases": [
+      "dark_secret",
+      "secret"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have some sort of secret that, if uncovered,\nwould be of immense embarrassment to you and would\nmake you a pariah in the local Kindred community. \nThis could be anything from having murdered an elder\nto being a member of the Anarchs.",
+    "mechanics": "No immediate mechanical disadvantage, however, if the secret is exposed,\nexpect title challenges, loss of station, or a variety of 'bad things'.",
+    "page_ref": "VTM 20th, p. 489",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Dark Secret"
+  },
+  {
+    "key": "Disgrace To The Blood",
+    "aliases": [
+      "disgrace",
+      "dis"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire. Clan: Ventrue.",
+    "text": "Your sire regards the fact that they Embraced you to\nbe a titanic mistake, and has let everyone know it. You\nare mocked at gatherings, taunted by your peers, and\nactively despised by the one who should be giving you\nguidance. Any request or petition you make is likely to\nbe looked down upon by friends of your sire, and your\nachievements are likely to be discounted.",
+    "mechanics": "No immediate mechanical disadvantage, however, expect a difficult unlife.\nThis flaw is more likely to be 'earned' during gameplay than started out with.\nClan: Ventrue cannot take this flaw on account that while a sire may feel\nthat way, they would never publicly risk a dignatas loss by saying they\nmade a mistake.",
+    "page_ref": "VTM 20th, p. 492",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Disgrace To The Blood"
+  },
+  {
+    "key": "Enemy",
+    "aliases": [
+      "enemy",
+      "ene"
+    ],
+    "points": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have an enemy, or perhaps a group of enemies,\nwho seek to harm you. The power of the enemy depends\non how many points the player wishes to spend.",
+    "mechanics": "The power of the enemy depends on points invested.\nAnticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.\nThis flaw is more likely to be 'earned' during play than taken\nduring CG.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Enemy"
+  },
+  {
+    "key": "Escaped Target",
+    "aliases": [
+      "escaped_target",
+      "target",
+      "escaped",
+      "esc"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You had targeted a mortal for the Embrace, but\nsomeone else got there first. You cannot stand the\nhumiliation of being cheated of your prize, and fly into a\nrage whenever you see the one who got away. This hatred may\nlead you into other irrational behaviors, like Embracing enemies of\nthe neonate, creating unauthorized childer, or even\ntrying to kill your rival.",
+    "mechanics": "+2 diff to avoid frenzy pertaining to this situation.\n+1 diff to all Charisma rolls until this situation is resolved.",
+    "page_ref": "VTM 20th, p. 491",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Escaped Target"
+  },
+  {
+    "key": "Expendable",
+    "aliases": [
+      "expendable",
+      "expend"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Someone in power doesn't want you around.\nMaybe they want territory you possess, or is jealous of the\nattention you're getting from a prize mortal retainer -- \nthe details are irrelevant. What does matter is that they have\nthe power to maneuver you into dangerous situations 'for the good of the sect',\nand has no compunctions about doing so.",
+    "mechanics": "No immediate mechanical disadvantage, however, expect a difficult unlife.\nThis flaw is more likely to be 'earned' during gameplay than started out with.",
+    "page_ref": "VTM 20th, p. 489",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Expendable"
+  },
+  {
+    "key": "Failure",
+    "aliases": [
+      "failure",
+      "fai"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You once held a title in the city, but failed catastrophically\nin your duties. Now you are branded incompetent, excluded from\ncircles of power and responsibility, and generally ostracized\nby those on their way up. Your exclusion may make you a target\nfor recruitment by the Sect's enemies (or so the whispers run,\nmaking you even more distrusted). Conversely, the consequences\nof your error might come back to haunt you.",
+    "mechanics": "No mechanical disadvantage, but anticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.",
+    "page_ref": "VTM 20th, p. 491",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Failure"
+  },
+  {
+    "key": "Hunted Like A Dog",
+    "aliases": [
+      "hunted_like_a_dog",
+      "like"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Another Sect or group of vampires has decided that\nyou're a target for extermination, and pursues you\nrelentlessly. On the bright side, the enemies of your\nenemy may well wish to help you out, potentially garnering\nyou allies.",
+    "mechanics": "No immediate mechanical disadvantage, however, expect a difficult unlife.\nThis flaw is more likely to be 'earned' during gameplay than started out with.",
+    "page_ref": "VTM 20th, p. 492",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Hunted Like A Dog"
+  },
+  {
+    "key": "Incomplete Understanding",
+    "aliases": [
+      "incomplete_understanding",
+      "incomplete",
+      "understanding",
+      "inc"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "The whole matter has been explained to you, but\nyou're still not quite sure how things in your Sect work.\nYour imperfect understanding of the rules and regulations\nof your new existence means that sooner or later,\nyou're going to make a mistake.\nIt's only a matter of time.",
+    "mechanics": "No immediate mechanical disadvantage, however, expect Staff to mess\nwith you in a variety of ways, large and small, until this flaw is\nbought off.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Incomplete Understanding"
+  },
+  {
+    "key": "Infamous Sire",
+    "aliases": [
+      "infamous_sire",
+      "infamous",
+      "sire"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Your sire was, and perhaps still is, distrusted and disliked\nby many of the city's Kindred.\nAs a result, you are distrusted and disliked as well.",
+    "mechanics": "-1 opinion with most NPCs.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Infamous Sire"
+  },
+  {
+    "key": "Laughingstock",
+    "aliases": [
+      "laughingstock",
+      "lau"
+    ],
+    "points": 5,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Somehow you've drawn the scorn of the local Harpies,\nwho make you their favorite target.",
+    "mechanics": "+2 diff on all Social rolls in Elysium.\n+1 diff on all Social rolls anywhere else.\n+2 diff to use Intimidation or any Dominate powers\non anyone who has heard the stories mocking you.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Laughingstock"
+  },
+  {
+    "key": "Loathsome Regnant",
+    "aliases": [
+      "loathsome_regnant",
+      "loathsome",
+      "regnant",
+      "loa"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Not only are you blood bound, but you are also in\nthrall to a Vampire who mistreats you hideously. Perhaps\nyou are publicly abused or humiliated; perhaps\nyour master forces you to commit unspeakable acts for\nhim. In any case, existence under the bond is a never-\nending nightmare, with your regnant serving to conduct\nthe symphony of malice.",
+    "mechanics": "There is no inherent mechanical disadvantage with this flaw.\nAnticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.",
+    "page_ref": "VTM 20th, p. 492",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Loathsome Regnant"
+  },
+  {
+    "key": "Mistaken Identity",
+    "aliases": [
+      "mistaken_identity",
+      "mistaken",
+      "identity"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You look similar to descriptions of another Kindred,\nwhich causes cases of mistaken identity.\nThis can cause numerous awkward or even dangerous situations,\nespecially if you're 'twin' has a terrible reputation,\nor is wanted for some crime.",
+    "mechanics": "After picking an established NPC (no PC look-alikes), Staff will\nmake issues for your character, both large and small.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Mistaken Identity"
+  },
+  {
+    "key": "Narc",
+    "aliases": [
+      "narc"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are known to be a snitch, an informer firmly\nplanted in the pocket of the vampires in charge. Those\non whom you might yet inform loathe you as a result,\nfeeding you misinformation when they can in an attempt\nto discredit you. Given the opportunity, they might do\nyou mischief.",
+    "mechanics": "A significant negative opinion modifier will be given to\nanyone you had or will snitch on.\n+1 diff on all Social rolls against those who don't agree\nwith your politics.",
+    "page_ref": "VTM 20th, p. 492",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Narc"
+  },
+  {
+    "key": "New Arrival",
+    "aliases": [
+      "new_arrival",
+      "arrival"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You've just arrived in your new city of residence, and\ndon't know anyone in the place. Existing factions may\ntry to recruit or eliminate you, while vampires in\npositions of authority size you up and take your measure.\nMeanwhile, your ignorance of the city's current events,\nhistory, and politics (not to mention the personality\nquirks of the vampires already in place) may cause you\nto make a serious blunder.",
+    "mechanics": "While having no mechanical disadvantages, this flaw is best taken\nby players new to Vampire.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "New Arrival"
+  },
+  {
+    "key": "New Kid",
+    "aliases": [
+      "new_kid",
+      "kid"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You're the latest in the city to be Embraced or have\nyet to prove yourself to your Sect, and everyone knows\nit. That automatically puts you at the bottom of the\nsocial totem pole. Other neonates take every\nopportunity to demonstrate your inferiority.\nEven if someone else is added to the ranks of the unliving,\nyou're still regarded as something as a bit of a geek by\nyour peers -- a distinction that can have dangerous\nconsequences if bullets start flying.",
+    "mechanics": "All social-related rolls are at +1 diff when dealing with other neonates.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "New Kid"
+  },
+  {
+    "key": "Old Flame",
+    "aliases": [
+      "old_flame",
+      "flame"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Someone you once cared deeply for is now with the enemy.\nThey still attempt to play on your sympathies 'for old times\nsake' while working against you.",
+    "mechanics": "Unless you succeed on a contested Manipulation+Expression roll\nAgainst your former friend, you cannot act against them unless the\nsituation becomes life-threatening.",
+    "page_ref": "VTM 20th, p. 491",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Old Flame"
+  },
+  {
+    "key": "Overextended",
+    "aliases": [
+      "overextended",
+      "ove"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You've got your fingers in too many pies, and people\nare starting to notice. You have too many ghouls, too\nmany retainers, or too much influence, which means\nthat a lot of people have a vested interest in trimming\nback your operations. These enemies take every opportunity\nto reduce your power and influence, and if that means\nlying, cheating, or killing, so be it. Furthermore,\nyour enemies block every attempt you make to move\ninto new areas of control. You're boxed in, and the box\nis getting smaller.",
+    "mechanics": "There is no inherent mechanical disadvantage with this flaw.\nThis flaw is much more likely to be 'earned' during play than\ntaken at CG.\nAnticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.",
+    "page_ref": "VTM 20th, p. 492",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Overextended"
+  },
+  {
+    "key": "Rival Sires",
+    "aliases": [
+      "rival_sires",
+      "rival",
+      "riv"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "The flip side of Escaped Target, two vampires wanted\nto gift you with the embrace. One succeeded, one\nfailed -- and they're not happy about that failure.\nYou, your sire, or both of you have become the target\nof the failed suitor's ire.",
+    "mechanics": "Regardless, your persecutor is at +2 diff to refrain from\nfrenzy in your presence. In addition, they may well be working\nactively to discredit or destroy you.",
+    "page_ref": "VTM 20th, p. 491-492",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Rival Sires"
+  },
+  {
+    "key": "Sire's Resentment",
+    "aliases": [
+      "sires_resentment",
+      "sires",
+      "resentment"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Your sire dislikes you and wishes you ill.\nGiven the smallest opportunity, they will actively\nseek to do you harm. Your sire's allies also work against\nyou, and many elders resent you.",
+    "mechanics": "Negative opinion modifiers and anticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Sire's Resentment"
+  },
+  {
+    "key": "Sleeping With The Enemy",
+    "aliases": [
+      "sleeping_with_the_enemy",
+      "sleeping",
+      "sle"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have some sort of intimate connection with a\nmember of an opposing Sect or inimical Clan. You may\nhave a lover, a childe, a friend, or a contact working\nthe other side of the fence, but regardless of politics\nyou retain a friendly (or more than friendly) relationship\nwith your putative foe. Your close ties to someone on the\nother side would be regarded as treason by your superiors\nwithin the Sect, and if you are discovered, the penalty\nwould surely be death.",
+    "mechanics": "No mechanical disadvantage, but anticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.",
+    "page_ref": "VTM 20th, p. 492",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Sleeping With The Enemy"
+  },
+  {
+    "key": "Special Responsibility",
+    "aliases": [
+      "special_responsibility",
+      "special",
+      "responsibility",
+      "spr"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Shortly after your Embrace, you volunteered for\nsome task in order to gain respect and approval from\nthe vampires around you. Now, you wish you had never\nopened your damn mouth! While you are not given\nany special credit for performing this duty, you would\nlose a lot of respect if you were to stop. The nature\nand the details of your duty should be worked out with\nStaff in advance. Ideas can range from lending money to\nother Kindred or acting as a messenger or possibly\ngathering victims for ritae (such as Blood Feasts).",
+    "mechanics": "Anticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.",
+    "page_ref": "VTM 20th, p. 490",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_flaws",
+    "title": "Special Responsibility"
+  },
+  {
+    "key": "Beacon Of The Unholy",
+    "aliases": [
+      "beacon_of_the_unholy",
+      "beacon",
+      "unholy",
+      "bea"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You radiate palpable evil.",
+    "mechanics": "Clergy and devout kine know instinctively that there is\nsomething horribly wrong with you, and will react\naccordingly.",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Beacon Of The Unholy"
+  },
+  {
+    "key": "Can't Cross Running Water",
+    "aliases": [
+      "cant_cross_running_water",
+      "cant",
+      "cross",
+      "running",
+      "water"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You believe in the old folklore, and cannot cross running\nwater unless you are at least 50 feet (15 meters) above it.\nRunning water is considered to be any body of water at least\ntwo feet (half a meter) wide in any direction and not\ncompletely stagnant.",
+    "mechanics": "No mechanical disadvantages.",
+    "page_ref": "VTM 20th, p. 495",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Can't Cross Running Water"
+  },
+  {
+    "key": "Cast No Reflection",
+    "aliases": [
+      "cast_no_reflection",
+      "cast",
+      "reflection",
+      "cas"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire. Clan: Lasombra.",
+    "text": "You actually cast no reflection, just like the vampires\nof legend. This can have a detrimental effect when trying\nto pass as a human.",
+    "mechanics": "Vampires of Clan Lasombra automatically have this flaw\n(and you may be mistaken as one if you possess this).",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Cast No Reflection"
+  },
+  {
+    "key": "Cold Breeze",
+    "aliases": [
+      "cold_breeze",
+      "cold",
+      "breeze"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "A chill wind follows you everywhere you go. While\nit may make for dramatic entrances, this effect also\ndiscomforts mortals and marks you as obviously super-\nnatural.",
+    "mechanics": "+1 diff on all Social rolls with kine.",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Cold Breeze"
+  },
+  {
+    "key": "Cursed",
+    "aliases": [
+      "cursed",
+      "cur"
+    ],
+    "points": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are the recipient of a supernatural curse. The\nstrength and pervasiveness of the curse depend upon\nhow many points you wish to incur.",
+    "mechanics": "Specific book examples:\n[1 pt]: If you pass on a secret you were entrusted with\nyour betrayal will come back to harm you in some way.\n[2 pt]: You stutter uncontrollably when you try to describe\nwhat you have seen or heard.\n[3 pt]: Tools break or malfunction when you try to use them.\n[4 pt]: You are doomed to make enemies of those whom you most\nlove or admire.\n[5 pt]: Every one of your accomplishments or triumphs will\neventually become soiled or fail in some way.",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Cursed"
+  },
+  {
+    "key": "Dark Fate",
+    "aliases": [
+      "dark_fate",
+      "fate"
+    ],
+    "points": 5,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are doomed to experience Final Death or, worse,\nsuffer eternal agony. No matter what you do, you cannot\navoid this terrible fate.",
+    "mechanics": "At some point during gameplay your Dark Fate will come\nupon you. Even more ghastly is the fact that you\noccasionally have visions of this fate, and the\nmalaise these images inspire requires an expenditure\nof a temporary Willpower point to avoid, or else you\nlose a die from all your actions for the remainder of\nthe night.\nIt is up to Staff to determine the exact nature of this fate\nand when it will occur.\nThis is a difficult Flaw to roleplay; ironically, though it\nmay seem as though it removes all free will, the knowledge\nof one's death can be quite liberating.",
+    "page_ref": "VTM 20th, p. 495",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Dark Fate"
+  },
+  {
+    "key": "Deathsight",
+    "aliases": [
+      "deathsight",
+      "deaths"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Everything appears rotted and decayed to you. The\nworld appears to you as a corpse; mortals look diseased\nor skeletal, buildings seem decrepit, and your fellow\nKindred seem to be walking, moldering cadavers.",
+    "mechanics": "-2 diff to resist all rolls based on Appearance.\n+2 diff to all Perception-based rolls.\n+1 diff on all Social-based rolls.",
+    "page_ref": "VTM 20th, p. 494-495",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Deathsight"
+  },
+  {
+    "key": "Eerie Presence",
+    "aliases": [
+      "eerie_presence",
+      "eerie",
+      "eer"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Mortals have an unconscious awareness of your undead\nnature, which makes them anxious and ill at ease in\nyour presence.",
+    "mechanics": "+2 diff to all Social rolls with kine.",
+    "page_ref": "VTM 20th, p. 495",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Eerie Presence"
+  },
+  {
+    "key": "Grip Of The Damned",
+    "aliases": [
+      "grip_of_the_damned",
+      "grip",
+      "damned"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "There is no ecstasy in your Embrace -- only terror and\npain. Mortals upon whom you feed struggle and shriek\nwhile you attempt to feed, requiring you to grapple\nwith them for as long as you wish to take their blood.",
+    "mechanics": "No mechanical disadvantages; feeding is a lot harder.",
+    "page_ref": "VTM 20th, p. 495",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Grip Of The Damned"
+  },
+  {
+    "key": "Haunted",
+    "aliases": [
+      "haunted",
+      "hau"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are haunted by an angry and tormented spirit,\nmost likely one of your first victims. This spirit actively\nattempts to hinder you, especially when feeding, and does\nits utmost to vent its anguish upon you and anyone in your\npresence.",
+    "mechanics": "Staff determines the exact nature of the spirit, its powers,\nand whether or not it can eventually be laid to rest.",
+    "page_ref": "VTM 20th, p. 495",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Haunted"
+  },
+  {
+    "key": "Light-Sensitive",
+    "aliases": [
+      "light_sensitive",
+      "light",
+      "sensitive"
+    ],
+    "points": 5,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are even more sensitive to sunlight than other vampires are.",
+    "mechanics": "Sunlight causes double damage.\nMoonlight causes lethal damage, but it must shine direct.",
+    "HR": "Unlike sun damage, moon damage can be prevented by cloth or other\ncoverings.",
+    "page_ref": "VTM 20th, p. 495",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Light-Sensitive"
+  },
+  {
+    "key": "Lord Of The Flies",
+    "aliases": [
+      "lord_of_the_flies",
+      "lord",
+      "flies",
+      "lor"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Buzzing harbingers of decay swirl around you everywhere.\nTheir constant presence makes it difficult for you to\ninteract socially and nearly impossible to sneak up\non someone or hide effectively. The buzzing of the\nflies inevitably gives you away.",
+    "mechanics": "+1 diff on Social rolls.\n+2 diff on Stealth rolls.",
+    "page_ref": "VTM 20th, p. 495",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Lord Of The Flies"
+  },
+  {
+    "key": "Repulsed by Garlic",
+    "aliases": [
+      "repulsed_by_garlic",
+      "repulsed",
+      "garlic",
+      "rep"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You cannot abide garlic.",
+    "mechanics": "The smallest whiff of garlic will drive you from a room\nunless you make a successful Willpower roll (difficulty\nbased on the strength of the odor).",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Repulsed by Garlic"
+  },
+  {
+    "key": "Touch Of Frost",
+    "aliases": [
+      "touch_of_frost",
+      "touch",
+      "frost",
+      "tou"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Plants wither as you approach and die at your touch.\nYour touch leeches heat from living beings, as though\nyou were made of ice.",
+    "mechanics": "There is no inherent mechanical disadvantage with this flaw.\nAnticipate Staff interference,\npotential 'bad things', up to and including 'losing is fun'.",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_flaws",
+    "title": "Touch Of Frost"
+  }
+]

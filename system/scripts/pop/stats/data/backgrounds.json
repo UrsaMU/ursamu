@@ -1,0 +1,117 @@
+[
+  {
+    "key": "Allies",
+    "aliases": [
+      "allies",
+      "ally"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Allies"
+  },
+  {
+    "key": "Alternate Identity",
+    "aliases": [
+      "alternate identity",
+      "alt id"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Alternate Identity"
+  },
+  {
+    "key": "Blood Potency",
+    "aliases": [
+      "blood potency",
+      "bp"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Blood Potency"
+  },
+  {
+    "key": "Contacts",
+    "aliases": [
+      "contacts",
+      "contact"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Contacts"
+  },
+  {
+    "key": "Domain",
+    "aliases": [
+      "domain"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Domain"
+  },
+  {
+    "key": "Fame",
+    "aliases": [
+      "fame"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Fame"
+  },
+  {
+    "key": "Generation",
+    "aliases": [
+      "generation",
+      "gen"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Generation"
+  },
+  {
+    "key": "Herd",
+    "aliases": [
+      "herd"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Herd"
+  },
+  {
+    "key": "Influence",
+    "aliases": [
+      "influence"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Influence"
+  },
+  {
+    "key": "Mentor",
+    "aliases": [
+      "mentor"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Mentor"
+  },
+  {
+    "key": "Resources",
+    "aliases": [
+      "resources",
+      "res"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Resources"
+  },
+  {
+    "key": "Retainers",
+    "aliases": [
+      "retainers",
+      "retainer"
+    ],
+    "text": "TBD",
+    "category": "backgrounds",
+    "title": "Retainers"
+  }
+]

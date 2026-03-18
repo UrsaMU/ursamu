@@ -1,0 +1,123 @@
+[
+  {
+    "key": "Alertness",
+    "aliases": [
+      "alertness",
+      "ale"
+    ],
+    "text": "Alertness allows characters to notice physical changes\nin their environment, such as items out of place, changes in\nscenery, and strange noises. Usually coupled with Perception,\nAlertness is useful for the character who wishes to be the first\nto uncover whatever secrets the world may hold",
+    "page_ref": "VTDA 20th, p. 162",
+    "category": "talents",
+    "title": "Alertness"
+  },
+  {
+    "key": "Athletics",
+    "aliases": [
+      "athletics",
+      "ath"
+    ],
+    "text": "Athletics is the realm of the physically talented. It\nencompasses activities of the sports field, not the\nbattlefield. Running, jumping, dodging attacks, and throwing\nobjects are all examples of Athletics exploits.",
+    "page_ref": "VTDA 20th, p. 162",
+    "category": "talents",
+    "title": "Athletics"
+  },
+  {
+    "key": "Awareness",
+    "aliases": [
+      "awareness",
+      "awe"
+    ],
+    "text": "With belief and superstition holding the same weight\nas knowledge and science, the distinction between the natural\nworld and the supernatural is not as solid. Many expect to see\nthose things which lie in the dark places of our world. Sometimes,\nthose things are indeed seen. Awareness makes the cold chill on your\nneck and the thing out of the corner of your eye more solid, more\nperceptible for human and supernatural alike. Better to know it's\nthere so you can deal with it accordingly than go through life\nignorantly and perhaps anger something on your way.",
+    "page_ref": "VTDA 20th, p. 163",
+    "category": "talents",
+    "title": "Awareness"
+  },
+  {
+    "key": "Brawl",
+    "aliases": [
+      "brawl",
+      "bra"
+    ],
+    "text": "In the taverns or on the battlefield, because of honor\nor misunderstandings, fighting is a fact of life in this dark\nworld. Unarmed combat encompasses everything from the skilled,\nmethodical strikes of the martial artist to the rough-and-tumble\nstreet fighter. Those who Brawl know where to strike as well as\nhow (an elbow to the throat or nose) and can take hits as well\nas deal them. And for the scrappiest of fighters, fighting\n'fair' isn't worth anything if it means losing. Win. With\nyour own two hands and knuckles and muscles. Win.",
+    "page_ref": "VTDA 20th, p. 163-164",
+    "category": "talents",
+    "title": "Brawl"
+  },
+  {
+    "key": "Empathy",
+    "aliases": [
+      "empathy",
+      "emp"
+    ],
+    "text": "While Alertness picks up the physical characteristics\nof a location or situation, Empathy allows a person to\ndiscern the emotional states of those they encounter.\nEmpathy can be used for ill or good, to weed out deception\nor determine a person's true feelings. Facts don't tell the\nwhole story. Emotions add another layer of complexity\nto every situation. Sorting them out can reveal what is\nreally at stake.",
+    "page_ref": "VTDA 20th, p. 164",
+    "category": "talents",
+    "title": "Empathy"
+  },
+  {
+    "key": "Expression",
+    "aliases": [
+      "expression",
+      "exp"
+    ],
+    "text": "Sometimes it's easier to convince people than it is to\nforce them into submission. Expression is an art which has\nbeen valued through time and many a war has been turned\nor undertaken because a good case was clearly and expertly\nstated. Facts aren't necessary in all cases; the ability to\nwield words expertly, brand meaning into listeners' minds,\nand slip the point into the listeners' hearts can accomplish\nmuch more. Please note, being able to make one's case using\nthe quotes and allegories of others doesn't mean you can\nnecessarily read them yourself. Reading and writing is for\nacademics. Bringing them to life to influence those who will\nlisten? That's your job.",
+    "page_ref": "VTDA 20th, p. 164",
+    "category": "talents",
+    "title": "Expression"
+  },
+  {
+    "key": "Intimidation",
+    "aliases": [
+      "intimidation",
+      "intim"
+    ],
+    "text": "Among many of the weapons in a person's social arsenal\nstriking fear into the hearts of others is a keen tool indeed.\nThreaten people's loved ones, flesh, livelihood, whatever\nthey hold dear. See how quickly they will bend to your\nwill.",
+    "page_ref": "VTDA 20th, p. 164",
+    "category": "talents",
+    "title": "Intimidation"
+  },
+  {
+    "key": "Leadership",
+    "aliases": [
+      "leadership",
+      "lea"
+    ],
+    "text": "'Where there is no vision, the people perish.' Every\nbody needs a head. Leadership allows one such person to\ntake on that role and direct those who have respect and\nare willing to follow. The best leaders inspire rather than\nexploit their disciples; Leadership is more often rolled\nwith Charisma rather than Manipulation.",
+    "page_ref": "VTDA 20th, p. 165",
+    "category": "talents",
+    "title": "Leadership"
+  },
+  {
+    "key": "Legerdemain",
+    "aliases": [
+      "legerdemain",
+      "leg"
+    ],
+    "text": "Can your hands move faster than their eyes? Legerdemain\nprovides a type of manual dexterity which aids in sleights\nof hand, picking pockets, and even juggling. Why sing for\nyour supper when you can just take it, with no one the wiser?",
+    "page_ref": "VTDA 20th, p. 165",
+    "category": "talents",
+    "title": "Legerdemain"
+  },
+  {
+    "key": "Streetwise",
+    "aliases": [
+      "streetwise",
+      "street"
+    ],
+    "text": "TBD",
+    "page_ref": "VTDA 20th, p. 162",
+    "category": "talents",
+    "title": "Streetwise"
+  },
+  {
+    "key": "Subterfuge",
+    "aliases": [
+      "subterfuge",
+      "sub"
+    ],
+    "text": "Subterfuge is an elegant way of saying 'lying.' While\nthe motives behind the lies may be good or evil, the\nability to hide one's feelings and motives can be used to\naccomplish deeds of varying morality.",
+    "page_ref": "VTDA 20th, p. 165",
+    "category": "talents",
+    "title": "Subterfuge"
+  }
+]

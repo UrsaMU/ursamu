@@ -1,0 +1,380 @@
+[
+  {
+    "key": "Architect",
+    "aliases": [
+      "architect"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Architect"
+  },
+  {
+    "key": "Autocrat",
+    "aliases": [
+      "autocrat"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Autocrat"
+  },
+  {
+    "key": "Bon Vivant",
+    "aliases": [
+      "bon vivant"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Bon Vivant"
+  },
+  {
+    "key": "Bravo",
+    "aliases": [
+      "bravo"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Bravo"
+  },
+  {
+    "key": "Capitalist",
+    "aliases": [
+      "capitalist"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Capitalist"
+  },
+  {
+    "key": "Caregiver",
+    "aliases": [
+      "caregiver"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Caregiver"
+  },
+  {
+    "key": "Celebrant",
+    "aliases": [
+      "celebrant"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Celebrant"
+  },
+  {
+    "key": "Chameleon",
+    "aliases": [
+      "chameleon"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Chameleon"
+  },
+  {
+    "key": "Child",
+    "aliases": [
+      "child"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Child"
+  },
+  {
+    "key": "Competitor",
+    "aliases": [
+      "competitor"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Competitor"
+  },
+  {
+    "key": "Conformist",
+    "aliases": [
+      "conformist"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Conformist"
+  },
+  {
+    "key": "Conniver",
+    "aliases": [
+      "conniver"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Conniver"
+  },
+  {
+    "key": "Creep Show",
+    "aliases": [
+      "creep show"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Creep Show"
+  },
+  {
+    "key": "Curmudgeon",
+    "aliases": [
+      "curmudgeon"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Curmudgeon"
+  },
+  {
+    "key": "Dabbler",
+    "aliases": [
+      "dabbler"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Dabbler"
+  },
+  {
+    "key": "Deviant",
+    "aliases": [
+      "deviant"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Deviant"
+  },
+  {
+    "key": "Director",
+    "aliases": [
+      "director"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Director"
+  },
+  {
+    "key": "Enigma",
+    "aliases": [
+      "enigma"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Enigma"
+  },
+  {
+    "key": "Eye Of The Storm",
+    "aliases": [
+      "eye of the storm"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Eye Of The Storm"
+  },
+  {
+    "key": "Gallant",
+    "aliases": [
+      "gallant"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Gallant"
+  },
+  {
+    "key": "Guru",
+    "aliases": [
+      "guru"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Guru"
+  },
+  {
+    "key": "Idealist",
+    "aliases": [
+      "idealist"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Idealist"
+  },
+  {
+    "key": "Judge",
+    "aliases": [
+      "judge"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Judge"
+  },
+  {
+    "key": "Loner",
+    "aliases": [
+      "loner"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Loner"
+  },
+  {
+    "key": "Martyr",
+    "aliases": [
+      "martyr"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Martyr"
+  },
+  {
+    "key": "Masochist",
+    "aliases": [
+      "masochist"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Masochist"
+  },
+  {
+    "key": "Mercenary",
+    "aliases": [
+      "mercenary"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Mercenary"
+  },
+  {
+    "key": "Monster",
+    "aliases": [
+      "monster"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Monster"
+  },
+  {
+    "key": "Pedagogue",
+    "aliases": [
+      "pedagogue"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Pedagogue"
+  },
+  {
+    "key": "Penitent",
+    "aliases": [
+      "penitent"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Penitent"
+  },
+  {
+    "key": "Perfectionist",
+    "aliases": [
+      "perfectionist"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Perfectionist"
+  },
+  {
+    "key": "Rebel",
+    "aliases": [
+      "rebel"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Rebel"
+  },
+  {
+    "key": "Rogue",
+    "aliases": [
+      "rogue"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Rogue"
+  },
+  {
+    "key": "Sadist",
+    "aliases": [
+      "sadist"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Sadist"
+  },
+  {
+    "key": "Scientist",
+    "aliases": [
+      "scientist"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Scientist"
+  },
+  {
+    "key": "Sociopath",
+    "aliases": [
+      "sociopath"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Sociopath"
+  },
+  {
+    "key": "Soldier",
+    "aliases": [
+      "soldier"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Soldier"
+  },
+  {
+    "key": "Survivor",
+    "aliases": [
+      "survivor"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Survivor"
+  },
+  {
+    "key": "Thrill Seeker",
+    "aliases": [
+      "thrill seeker"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Thrill Seeker"
+  },
+  {
+    "key": "Traditionalist",
+    "aliases": [
+      "traditionalist"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Traditionalist"
+  },
+  {
+    "key": "Trickster",
+    "aliases": [
+      "trickster"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Trickster"
+  },
+  {
+    "key": "Visionary",
+    "aliases": [
+      "visionary"
+    ],
+    "text": "TBD",
+    "category": "archetypes",
+    "title": "Visionary"
+  }
+]

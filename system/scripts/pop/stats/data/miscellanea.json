@@ -1,0 +1,13 @@
+[
+  {
+    "key": "Willpower",
+    "aliases": [
+      "willpower",
+      "wil"
+    ],
+    "text": "Willpower measures a character's inner drive and\nability to overcome unfavorable odds. It has a permanent\nrating and a temporary pool of points. The rating is rolled\nor tested, while the pool is spent. When a player spends\na point of Willpower, mark the expenditures in the pool\n(the squares) -- it will fluctuate a great deal during the\ncourse of a story. A character with no Willpower pool is\nexhausted mentally, physically, and spiritually, and can no\nlonger muster the energy to undertake an action or cause.\n\nMeasured on a 1-10 scale, a character's Willpower is equal\nto their Courage at character creation.",
+    "page_ref": "VTDA 20th, p. 183",
+    "category": "miscellanea",
+    "title": "Willpower"
+  }
+]

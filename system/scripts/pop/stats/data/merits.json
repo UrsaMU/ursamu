@@ -1,0 +1,931 @@
+[
+  {
+    "key": "Code Of Honor",
+    "aliases": [
+      "code_of_honor",
+      "code of honor",
+      "code",
+      "honor",
+      "cod"
+    ],
+    "points": [
+      2
+    ],
+    "restrictions": "null.",
+    "text": "You have a personal code of ethics to which you adhere. The specifics of this code must be worked out with the Director prior to play, and the character must follow it strictly.",
+    "mechanics": "Characters with this Merit gain two additional dice to all Willpower or Virtue rolls when acting in accordance with their code (e.g., defending the helpless) or when attempting to avoid situations that might force them to violate their code.",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Code Of Honor"
+  },
+  {
+    "key": "Coldly Logical",
+    "aliases": [
+      "coldly logical",
+      "coldly_logical",
+      "coldly",
+      "logical",
+      "col"
+    ],
+    "points": 1,
+    "restrictions": "null",
+    "text": "While some might refer to you as a 'cold fish,' you have a knack for separating factual reporting from emotional or hysterical coloration.\nYou may or may not be emotional yourself, but you can see clearly when others are clouding the facts with their feelings.",
+    "mechanics": "-1 difficulty in interpreting information wherein emotionality would interfere with accuracy.",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Coldly Logical"
+  },
+  {
+    "key": "Concentration",
+    "aliases": [
+      "concentration",
+      "conc"
+    ],
+    "points": 1,
+    "restrictions": "null",
+    "text": "You have the ability to focus your mind and shut out any distractions or annoyances.",
+    "mechanics": "You are unaffected by any penalties stemming from distracting circumstances (e.g., loud noises, strobe lights, or hanging upside down).",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Concentration"
+  },
+  {
+    "key": "Introspection",
+    "aliases": [
+      "introspection"
+    ],
+    "points": 1,
+    "restrictions": "null",
+    "text": "You have keen insight into the ulterior motives of all your actions.\nThrough this nightly exercise, you also have incredible insight into the underlying motives of others' actions.",
+    "mechanics": "+2 dice to Perception rolls against a PC or NPC with the same Nature or Demeanor as you.",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Introspection"
+  },
+  {
+    "key": "Language",
+    "aliases": [
+      "language",
+      "lan"
+    ],
+    "points": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "restrictions": "null",
+    "text": "You know a language in addition to your native one.",
+    "mechanics": "You can take this Merit multiple times, each reflecting a different language. \nThis merit can be taken as many times as you want and does not count towards your merit cap.",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Language"
+  },
+  {
+    "key": "Light Sleeper",
+    "aliases": [
+      "light_sleeper",
+      "light sleeper",
+      "light",
+      "lig"
+    ],
+    "points": [
+      2
+    ],
+    "restrictions": "Sphere: Vampire\nCannot take merit 'Light Sleeper' & flaw 'Deep Sleeper'.",
+    "text": "You can awaken instantly at any sign of trouble or danger, and do so without any sleepiness or hesitation.",
+    "mechanics": "You may ignore rules regarding how Humanity restricts the number of dice available during the day.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Light Sleeper"
+  },
+  {
+    "key": "Natural Linguist",
+    "aliases": [
+      "natural_linguist",
+      "natural linguist",
+      "natural",
+      "linguist",
+      "nat"
+    ],
+    "points": [
+      2
+    ],
+    "restrictions": "null.",
+    "text": "You have a flair for languages.",
+    "mechanics": "You may add three dice to any dice pool involving written or spoken languages, and each purchase of the Language Merit gives you two languages instead of just one.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Natural Linguist"
+  },
+  {
+    "key": "Precocious",
+    "aliases": [
+      "precocious"
+    ],
+    "points": [
+      3
+    ],
+    "restrictions": "null.",
+    "text": "You learn quickly.",
+    "mechanics": "While the blood cost remains the same, the number of successful rolls needed to raise Talents, Skills or Knowledges (user choice) is cut in half.",
+    "HR": "This merit has been modified from the original version to better suit this game.",
+    "page_ref": "VTM 20th, p. 485",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Precocious"
+  },
+  {
+    "key": "Time Sense",
+    "aliases": [
+      "time_sense",
+      "time sense",
+      "tim",
+      "time"
+    ],
+    "points": [
+      1
+    ],
+    "restrictions": "null",
+    "text": "You have an innate sense of time and are able to estimate the passage of time accurately without using a watch or other mechanical device.",
+    "mechanics": "You always know what time it is. I'd make fun of you, but sometimes you really need to know when that sun will rise or set, and you're on top of that. Kudos to you.",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Time Sense"
+  },
+  {
+    "key": "Useful Knowledge",
+    "aliases": [
+      "useful_knowledge",
+      "useful knowledge",
+      "use",
+      "useful"
+    ],
+    "points": [
+      1
+    ],
+    "restrictions": "Sphere: Vampire",
+    "text": "You have expertise in a specific field that makes your conversation intriguing to an older Kindred. So long as your knowledge holds the other Vampire's attention, they have a vested interest in keeping you around. Then again, once they've pumped you for every iota of information you possess, that patronage may suddenly vanish.",
+    "mechanics": "This merit imparts a 1-dot Mentor with a specific interest. Unlike a Mentor, Useful Knowledge does not imply a permanent relationship.",
+    "page_ref": "VTM 20th, p. 484",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "mental_merits",
+    "title": "Useful Knowledge"
+  },
+  {
+    "key": "Acute Senses",
+    "aliases": [
+      "acute senses",
+      "acute_senses",
+      "acute",
+      "acu"
+    ],
+    "points": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "restrictions": "Cannot take flaw 'Hard Of Hearing' & merit 'Acute Senses: Hearing'.\nCannot take merit 'Acute Senses: Hearing' & flaw 'Deaf'.\nCannot take flaw 'Bad Sight' & merit 'Acute Senses: Sight'.",
+    "text": "One of your senses is exceptionally sharp--sight, hearing, smell, touch, or taste.",
+    "mechanics": "The difficulty for all tasks involving the use of this particular sense is reduced by two.",
+    "page_ref": "VTM 20th, p. 479--480",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Acute Senses"
+  },
+  {
+    "key": "Ambidextrous",
+    "aliases": [
+      "ambidextrous",
+      "ambid",
+      "amb"
+    ],
+    "points": 1,
+    "restrictions": "null",
+    "text": "You have a high degree of off-hand dexterity and can perform tasks with the 'wrong' hand at no penalty.",
+    "mechanics": "The rules for taking multiple actions still apply, but you do not suffer a difficulty penalty if you use two weapons or are forced to use your off hand.",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Ambidextrous"
+  },
+  {
+    "key": "Blush Of Health",
+    "aliases": [
+      "blush_of_health",
+      "blush",
+      "health",
+      "blu"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire",
+    "text": "You look more hale and healthy in appearance than other vampires, allowing you to blend with human society much more easily.\nYou still retain the color of a living mortal, and your skin feels only slightly cool to the touch.",
+    "mechanics": "Increases difficulty by 2 on rolls to determine vampirism by non-vampires. (House Rule)",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Blush Of Health"
+  },
+  {
+    "key": "Bruiser",
+    "aliases": [
+      "bruiser",
+      "brui",
+      "bru"
+    ],
+    "points": 1,
+    "restrictions": "null.",
+    "text": "Your appearance is sufficiently thug-like to inspire fear (or at least disquiet) in those who see you.\nWhile you're not necessarily ugly, you do radiate a quiet menace, to the point where people cross the street to avoid passing near you.",
+    "mechanics": "All Intimidation rolls against those who have not demonstrated their physical superiority to you are at -1 difficulty.",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Bruiser"
+  },
+  {
+    "key": "Catlike Balance",
+    "aliases": [
+      "catlike_balance",
+      "catlike balance",
+      "catlike",
+      "cat"
+    ],
+    "points": 1,
+    "restrictions": "null",
+    "text": "You possess an innately perfect sense of balance.",
+    "mechanics": "Characters with this Merit reduce difficulties of all balance-related rolls (e.g., Dexterity + Athletics to walk along a narrow ledge) by two.",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Catlike Balance"
+  },
+  {
+    "key": "Daredevil",
+    "aliases": [
+      "daredevil",
+      "dare",
+      "devil"
+    ],
+    "points": 3,
+    "restrictions": "null",
+    "text": "You are good at taking risks, and even better at surviving them.",
+    "mechanics": "+3 dice to rolls attempting exceptionally risky non-combat actions and negate a single botch die.\nThis action must be at least difficulty 8 and have the potential to inflict at least 3 health levels of damage.",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Daredevil"
+  },
+  {
+    "key": "Early Riser",
+    "aliases": [
+      "early_riser",
+      "early riser",
+      "early",
+      "riser",
+      "ear"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire. Cannot take flaw 'Deep Sleeper'.",
+    "text": "No one can explain it, but you seem to have the ability to work on less rest than your fellow vampires.\nYou always seem to be the first to rise and the last to go to bed even if you've been out until dawn.",
+    "mechanics": "Your Humanitas is considered to be 10 for purposes of deciding when you rise each evening.",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Early Riser"
+  },
+  {
+    "key": "Eat Food",
+    "aliases": [
+      "eat_food",
+      "eat",
+      "food",
+      "eat food"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire",
+    "text": "You have the capacity to eat food and even savor its taste.\nWhile you cannot derive any nourishment from eating regular foods, this ability will serve you well in pretending to be human.\nOf course, you can't digest what you eat, and there will be some point during the evening when you have to heave it back up.",
+    "mechanics": "This character does not immediately throw up food or drink upon consumption.",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Eat Food"
+  },
+  {
+    "key": "Efficient Digestion",
+    "aliases": [
+      "efficient_digestion",
+      "efficient digestion",
+      "efficient",
+      "digestion",
+      "eff"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire",
+    "text": "You are able to draw more than the usual amount of nourishment from blood.",
+    "mechanics": "Gain an additional point to your blood pool for every two points of blood you consume.\nThis does not allow you to exceed your blood pool maximum.\nThis does apply to human blood and vitae. (House Rule)",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Efficient Digestion"
+  },
+  {
+    "key": "Enchanting Voice",
+    "aliases": [
+      "enchanting_voice",
+      "enchanting voice",
+      "enchanting",
+      "voice",
+      "enc"
+    ],
+    "points": 2,
+    "restrictions": "null; See Rules: Social Rolls\nCannot take merit 'Enchanting Voice' & flaw 'Mute'.",
+    "text": "There is something about your voice that others cannot ignore.\nWhen you command, they are cowed.\nWhen you seduce, they swoon.\nWhether thundering, soothing, persuading, or simply talking, your voice commands attention.",
+    "mechanics": "-2 difficulty to all rolls involving voice to persuade, charm, or command.\nThis bonus does not apply to the use of supernatural powers (ie: Dominate).",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Enchanting Voice"
+  },
+  {
+    "key": "Friendly Face",
+    "aliases": [
+      "friendly_face",
+      "friendly face",
+      "friendly",
+      "face",
+      "fri"
+    ],
+    "points": 1,
+    "restrictions": "Clan Nosferatu.\nCannot take merit 'Friendly Face' & flaw 'Disfigured'.\nCannot take merit 'Friendly Face' & flaw 'Monstrous'.",
+    "text": "You have a face that reminds everyone of someone, to the point where strangers are inclined to be well-inclined toward you because of it.\nThe effect doesn't fade even if you explain the 'mistake'.",
+    "mechanics": "-1 difficulty on all appropriate Social-based rolls (yes for Seduction, no for Intimidation, for example) when a stranger is involved.\nThis Merit only functions on a first meeting.",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Friendly Face"
+  },
+  {
+    "key": "Huge Size",
+    "aliases": [
+      "huge_size",
+      "huge",
+      "size",
+      "hug"
+    ],
+    "points": 4,
+    "restrictions": "Cannot take 'Short' flaw.",
+    "text": "You are abnormally large in size, at least 6'10\" and 300 pounds in weight.",
+    "mechanics": "Gain an additional Bruised health level.\n+2 dice to push objects (non-combat), open barred doors, and avoid being knocked down. (House Rule)\nThis merit is identical to 'Sturdy', but has character height/weight requirements.",
+    "page_ref": "VTM 20th, p. 480",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "physical_merits",
+    "title": "Huge Size"
+  },
+  {
+    "key": "Broken Bond",
+    "aliases": [
+      "broken_bond",
+      "broken",
+      "bond",
+      "bro"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You were once blood-bound but have secretly slipped the leash,\nand you are free to act as you will once more.\nYour regnant has no idea that you are not in fact bound,\nand continues to treat you as if you were.",
+    "mechanics": "Your character should be blood bound, but is not.",
+    "page_ref": "VTM 20th, p. 489",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Broken Bond"
+  },
+  {
+    "key": "Bullyboy",
+    "aliases": [
+      "bullyboy",
+      "bully",
+      "bul"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You're part of the brute squad the local kindred law enforcement calls on when they need some muscle.\nAs a result, you get in on action that others miss entirely, score points with those in power, and occasionally get a chance to act outside of the law. \nHow far outside the law you can go depends on circumstance and how much the Vampire you report to likes you.",
+    "mechanics": "+2 opinion of all Camarilla law enforcement personnel.\nYour character will be called into combat operations on a routine basis without boon payment.",
+    "page_ref": "VTM 20th, p. 488",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Bullyboy"
+  },
+  {
+    "key": "Clan Friendship",
+    "aliases": [
+      "clan_friendship",
+      "friendship"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "One particular Clan (not your own) has a special liking for you.\nYou might have done the Clan as a whole a favor at some point,\nor perhaps you're just a loud voice in support of their aims.",
+    "mechanics": "-2 diff on all friendly Social rolls involving members of that Clan.\n+1 - +4 opinion of NPC members of that clan, decided randomly.",
+    "page_ref": "VTM 20th, p. 489",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Clan Friendship"
+  },
+  {
+    "key": "Elysium Regular",
+    "aliases": [
+      "elysium_regular",
+      "elysium",
+      "regular",
+      "ely"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire",
+    "text": "You spend an unusual amount of time in Elysium.\nYou see and are seen to such an extent that all of the movers and shakers of Elysium at least know who you are.\nExtended time spent in Elysium also gives you extended opportunities to interact with the Harpies and other Kindred of that stature,\nand they'll know your name when you approach them.",
+    "mechanics": "This merit essentially equates to 'Contact 1: Harpies'.\nIt also confers +1 opinion of all NPC harpies to your character.",
+    "HR": "This merit has been changed to better accommodate gameplay.",
+    "page_ref": "VTM 20th, p. 487",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Elysium Regular"
+  },
+  {
+    "key": "Former Ghoul",
+    "aliases": [
+      "former_ghoul",
+      "former",
+      "ghoul"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire",
+    "text": "You were introduced to the Blood long before you were made Kindred.\nYour long experience as a ghoul gives you insight into and comfort with vampiric society.",
+    "mechanics": "-1 diff on all Social rolls when used on other neonates.\n-1 diff on all rolls relating to vampiric knowledge.",
+    "page_ref": "VTM 20th, p. 487",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Former Ghoul"
+  },
+  {
+    "key": "Friend Of The Underground",
+    "aliases": [
+      "friend_of_the_underground",
+      "friend",
+      "underground"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire. Clan: Nosferatu.",
+    "text": "While you're not a Nosferatu, you know your way around the sewers, tunnels, ducts, subway tubes, and other subterranean passages of your hometown.\nThe local Nosferatu (and any other creatures dwelling down in the muck) may not actually like you, but they're not inclined to kill you on sight when they see you in their territory.",
+    "mechanics": "-1 diff on any rolls involving navigating the underground world.\n+3 opinion of all NPC Nosferatu.",
+    "page_ref": "VTM 20th, p. 489",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Friend Of The Underground"
+  },
+  {
+    "key": "Harmless",
+    "aliases": [
+      "harmless",
+      "harm"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire",
+    "text": "Everyone in the city knows you, and knows that you're no threat to their plans.\nWhile that sort of estimation may seem insulting, it's also what's kept you from being killed.\nNo one considers you worth their time to deal with, and that low opinion keeps you safe.",
+    "mechanics": "There's no mechanical benefit, but, there's a lot of benefit in avoiding negative NPC interaction.\nIf you start acting in a way that demonstrates that you are no longer harmless, others' reactions to you will\nlikely change as a result.",
+    "page_ref": "VTM 20th, p. 487",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Harmless"
+  },
+  {
+    "key": "Lawman's Friend",
+    "aliases": [
+      "lawmans_friend",
+      "lawmans",
+      "lawman"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "For whatever reason (maybe your winning smile or perhaps just your superb groveling technique), the local Sheriff in charge of discipline likes you.\nHe's inclined to overlook your minor trespasses and let you in on things you're not supposed to know about.\nHe even gives you warnings about occasional crackdowns and times when the higher-ups aren't feeling generous.",
+    "mechanics": "Taking this merit gives a special relation with the Sheriff of the Praxis.\nAbusing this connection might well turn a friendly Vampire into an enemy -- and the\nchange might not be apparent until it's too late.",
+    "page_ref": "VTM 20th, p. 488",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Lawman's Friend"
+  },
+  {
+    "key": "Mole",
+    "aliases": [
+      "mole",
+      "mol"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have an informer buried in one of your Sect's enemy organizations who funnels you all sorts of information\nas to what her peers are up to.\nWhat you do with the information is up to you, but abusing the knowledge might be a good way to get your\ninformer killed.",
+    "mechanics": "This merit confers an 'ally' (background) at level 3 in an enemy faction.",
+    "page_ref": "VTM 20th, p. 488",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Mole"
+  },
+  {
+    "key": "Natural Leader",
+    "aliases": [
+      "natural_leader",
+      "natural",
+      "leader",
+      "natlead"
+    ],
+    "points": 1,
+    "restrictions": "null.",
+    "text": "You are gifted with a certain magnetism to which others naturally defer.",
+    "mechanics": "+2 dice to all leadership rolls.\nA Charisma of 3 or greater is required to take this merit.",
+    "page_ref": "VTM 20th, p. 487-488",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Natural Leader"
+  },
+  {
+    "key": "Old Pal",
+    "aliases": [
+      "old_pal",
+      "old",
+      "pal"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "An acquaintance from your breathing days was Embraced at the same time you were.\nYour friendship has endured even death and unlife, and you find a constant source of support and aid in your old friend.\nThey expect the same of you, which isn't always convenient, but at least you each have someone to hang onto who remembers the good old nights -- and days.",
+    "mechanics": "Old Pal counts as a level 2 ally who's loyalty you can pretty much always count on.\nThey will call on you to use your action, on occasion, to help them; you can do the same from them.",
+    "page_ref": "VTM 20th, p. 488",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Old Pal"
+  },
+  {
+    "key": "Open Road",
+    "aliases": [
+      "open_road",
+      "open",
+      "road",
+      "ope"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Unlike many Kindred, you like to travel.\nYou have a solid knowledge of safe travel routes and methodologies, not to mention haven space available in any number of destinations.\nUnless someone out there knows your exact route and is specifically looking for you, you can move between cities\nunimpeded by random encounters with Lupines, overzealous state troopers, and the like.",
+    "mechanics": "You (and the groups you lead) can travel distances without being impeded, except in the aforementioned conditions.",
+    "page_ref": "VTM 20th, p. 488",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Open Road"
+  },
+  {
+    "key": "Prestigious Sire",
+    "aliases": [
+      "prestigious_sire",
+      "prestigious",
+      "pres"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Your sire has or had great status in her Sect or Clan, and this has accorded you a certain amount of prestige.\nThough your sire may no longer have any dealings with you, the simple fact of your ancestry has marked you forever.\nThis prestige might aid you greatly in dealings with other vampires, or it might engender jealousy or contempt.",
+    "mechanics": "Potentially +1 or -1 to opinions of key vampires, on a case by case basis.",
+    "page_ref": "VTM 20th, p. 488",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Prestigious Sire"
+  },
+  {
+    "key": "Protege",
+    "aliases": [
+      "protege"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Your sire watched you for some time before Embracing you, and spoke glowingly of you to acquaintances.\nThese vampires may be inclined to look favorably on you by dint of your sire's recommendation.",
+    "mechanics": "-1 diff on Social rolls with all who have heard good things about you.",
+    "page_ref": "VTM 20th, p. 488",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Protege"
+  },
+  {
+    "key": "Rising Star",
+    "aliases": [
+      "rising_star",
+      "rising",
+      "star",
+      "ris"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You're one of the up-and-comers in the city, a rising star in your Sect.\nEveryone wants to know you and be your friend, even as those in power groom you for positions of greater responsibility.",
+    "mechanics": "+1 opinion and -1 diff to all social rolls against any vampires in your Sect who aren't actively opposing\nyour ascent.",
+    "page_ref": "VTM 20th, p. 489",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Rising Star"
+  },
+  {
+    "key": "Sanctity",
+    "aliases": [
+      "sanctity",
+      "san"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "This Merit is sometimes called the halo effect.\nEveryone considers you pure and innocent, though not necessarily naive.\nYou have a saint-like quality that is hard to pinpoint but cannot be denied.\nYou are trusted, even if you are not trustworthy.",
+    "mechanics": "+1 opinion of the majority of kindred in the city.\nYou tend to receive lesser punishments for wrongdoing.",
+    "page_ref": "VTM 20th, p. 488",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Sanctity"
+  },
+  {
+    "key": "Scholar Of Others",
+    "aliases": [
+      "scholar_of_others",
+      "others"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have taken the time to learn about and specialize in a supernatural faction that is not necessarily your enemy.\nYou are aware of at least some of the group's customs, strategies, abilities, and long-term goals, and can put that knowledge to good use.",
+    "mechanics": "-2 diff for all non-combat rolls pertaining to the subject of specialization.\n+1 diff for all non-combat rolls pertaining to other enemies, because you're so focused on your field.",
+    "HR": "While you do not get -2 diff for combat actions, you do get -2 diff for creating and implementing strategy\nagainst the chosen group.\nYou cannot take the merit 'Scholar of Enemies' and the merit 'Scholar of Others'.",
+    "page_ref": "VTM 20th, p. 489",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "social_merits",
+    "title": "Scholar Of Others"
+  },
+  {
+    "key": "Additional Discipline",
+    "aliases": [
+      "additional_discipline",
+      "additional",
+      "discipline",
+      "add"
+    ],
+    "points": 5,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You can take one additional Discipline as if it were\na clan discipline. All costs to learn that discipline\nare paid out as if it were native to your clan.\nThis merit can only be taken once.\nCaitiff cannot take this merit.",
+    "mechanics": "As stated above.",
+    "HR": "As a Vampire can only naturally have three disciplines\non this game, this merit is exceptionally useful.\nThe only other way to get disciplines is through\ndiablerie.\nOnly common disciplines can be taken with this merit.",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Additional Discipline"
+  },
+  {
+    "key": "Deceptive Aura",
+    "aliases": [
+      "deceptive_aura",
+      "deceptive",
+      "aura",
+      "dec"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Your aura is unnaturally bright and colorful for a Vampire.",
+    "mechanics": "You register as a mortal on all attempts to read your aura.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Deceptive Aura"
+  },
+  {
+    "key": "Healing Touch",
+    "aliases": [
+      "healing_touch",
+      "healing touch",
+      "healing",
+      "touch"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Normally vampires can only seal the wounds they\ninflict from feeding by licking them. With but a touch,\nyou can achieve the same effect, closing the puncture\nwounds left by drinking blood.",
+    "mechanics": "You can seal puncture marks by lick or by touch.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Healing Touch"
+  },
+  {
+    "key": "Hidden Diablerie",
+    "aliases": [
+      "hidden_diablerie",
+      "hidden",
+      "diablerie",
+      "hid"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "The tell-tale black streaks of diablerie do not\nmanifest in your aura.",
+    "mechanics": "Diablerie cannot be told by looking at your aura.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Hidden Diablerie"
+  },
+  {
+    "key": "Inoffensive To Animals",
+    "aliases": [
+      "inoffensive_to_animals",
+      "inoffensive",
+      "animals",
+      "ino"
+    ],
+    "points": 1,
+    "restrictions": "Sphere: Vampire.",
+    "text": "With rare exceptions, animals usually despise the\nKindred. Some flee, others attack, but all dislike being\nin the presence of a Vampire. You have no such problem.\nAnimals may not enjoy being in your company, but they\ndon't actively flee from you.",
+    "mechanics": "Animals will not automatically run from or attack you.",
+    "HR": "In a world where horses are the only reliable & fast method\nof transportation, this merit is far more useful now.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Inoffensive To Animals"
+  },
+  {
+    "key": "Lucky",
+    "aliases": [
+      "lucky",
+      "luc"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You were born lucky -- or else the Devil looks after\nhis own.",
+    "mechanics": "You can repeat any one (and only one) roll, including\nbotches, in a scene. The re-roll must be announced\nimmediately after failure.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Lucky"
+  },
+  {
+    "key": "Medium",
+    "aliases": [
+      "medium",
+      "medi"
+    ],
+    "points": 2,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You possess the natural affinity to sense and hear spirits\nghosts, and shades. Though you cannot see them, you can\nsense them, speak to them and, through pleading or \ncajoling, draw them to your presence. You may call upon\nthem for aid or advice, but there will always be a price.",
+    "mechanics": "You can speak and deal with spirits.\n-2 diff for Awareness rolls involving spirits of the dead.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Medium"
+  },
+  {
+    "key": "Nine Lives",
+    "aliases": [
+      "nine_lives",
+      "nine",
+      "lives",
+      "nin"
+    ],
+    "points": 5,
+    "restrictions": "Sphere: Vampire.",
+    "text": "Fate has granted you the opportunity to come as\nclose to Final Death as anyone can get and still survive.",
+    "mechanics": "When a roll occurs that would result in your death, the\nroll is made again. If the next roll succeeds, then you\nlive -- and one of your nine lives is used up.\nIf that subsequent roll fails, then another reroll is made,\nuntil either a successful roll occurs or your nine lives are\nused up.",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Nine Lives"
+  },
+  {
+    "key": "Oracular Ability",
+    "aliases": [
+      "oracular_ability",
+      "ora"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You can see and interpret signs and omens. You are\nable to draw advice from these omens, for they provide\nhints of the future and warnings of the present.",
+    "mechanics": "When Staff feels that you are in position to see an omen\na Perception+Awareness roll will be made with the difficulty\nrelative to how well the omen is concealed.\nIf successful, you may then roll Intelligence + Occult to\ninterpret what you have seen; the difficulty is again\nrelative to the complexity of the omen.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Oracular Ability"
+  },
+  {
+    "key": "Spirit Mentor",
+    "aliases": [
+      "spirit_mentor",
+      "spirit",
+      "spi"
+    ],
+    "points": 3,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have a ghostly companion and guide.\nThe identity and exact powers of this spirit are up to Staff.\nbut it can be called upon in difficult situations for help and guidance",
+    "mechanics": "The spirit acts as a mentor of Mentor 3.",
+    "HR": "There is a serious advantage of taking this merit:\nIt is extremely hard for most clans to kill a spirit.",
+    "page_ref": "VTM 20th, p. 493",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Spirit Mentor"
+  },
+  {
+    "key": "true Love",
+    "aliases": [
+      "true_love",
+      "true",
+      "love",
+      "tru"
+    ],
+    "points": 4,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You have discovered, perhaps too late, a true love.\nThey are mortal, but are the center of your existence,\nand inspire you to keep going in a world of darkness\nand despair. Whenever you suffer, the thought of your\ntrue love gives you the strength to persevere.",
+    "mechanics": "This merit grants you one automatic success on\nWillpower rolls, which can be negated only by\na botched die. This can be a great gift but also\na hindrance, for your true love may require\nprotection and occasionally rescue.",
+    "page_ref": "VTM 20th, p. 493-494",
+    "requires_note": true,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "true Love"
+  },
+  {
+    "key": "Unbondable",
+    "aliases": [
+      "unbondable",
+      "unb"
+    ],
+    "points": 5,
+    "restrictions": "Sphere: Vampire.",
+    "text": "You are immune to being blood bound.",
+    "mechanics": "As stated above.",
+    "page_ref": "VTM 20th, p. 494",
+    "requires_note": false,
+    "locks": "read:all()",
+    "category": "supernatural_merits",
+    "title": "Unbondable"
+  }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "key": "Animal Ken",
+    "aliases": [
+      "animal_ken",
+      "animal",
+      "ken"
+    ],
+    "text": "Animals in this era are not only domestic companions,\nbut also labor on farms, trackers in the field, and\ncompanions in battle. Animal Ken reflects one's rapport\nwith beasts both domestic and wild, including the ability\nto tame and train them, to understand their instincts and\nuse that knowledge in their handling, and to predict and\ncontrol their behavior.",
+    "page_ref": "VTDA 20th, p. 166",
+    "category": "skills",
+    "title": "Animal Ken"
+  },
+  {
+    "key": "Archery",
+    "aliases": [
+      "archery",
+      "arc"
+    ],
+    "text": "Archery is both a domestic and a martial skill. With\nthe same bow, a person can feed her family or defend\nher home. This ability covers not only the use of bows\nbut also one's proficiency in maintaining, repairing,\nand making arrows.",
+    "page_ref": "VTDA 20th, p. 166",
+    "category": "skills",
+    "title": "Archery"
+  },
+  {
+    "key": "Commerce",
+    "aliases": [
+      "commerce",
+      "com"
+    ],
+    "text": "At its most basic, Commerce is the practice of buying and selling.\nHowever, all the intricate details that go into getting goods\nto market also factor into this skill: knowing trade routes,\nevaluating the quality of the goods, negotiating their prices,\nkeeping track of who might want what, and what they'd be\nwilling to pay for it. Because understanding the value of\nhorseflesh doesn't completely correlate to, say, the value\nof silk, you should choose a field of expertise during\ncharacter creation. Additional fields may be purchased\nwith experience or freebie points. Attempting to deal\nin a good outside your field of expertise is treated\nas though the Skill is at 0, and rolls begin with\ntheir difficulty increased by 1.\n\nNot all Commerce is legal; in fact, some of it delves\ninto the downright inhuman. Trade routes exist for stolen\ngoods, drugs, and slave trafficking as well as spices and silk.",
+    "HR": "Each level of commerce affords you one field of expertise.\nYou can buy additional fields for 2 XP or 1 freebie pt each.\nFields of expertise must be notated using +notes.",
+    "page_ref": "VTDA 20th, p. 166-167",
+    "category": "skills",
+    "title": "Commerce"
+  },
+  {
+    "key": "Crafts",
+    "aliases": [
+      "crafts",
+      "cra"
+    ],
+    "text": "The Crafts Skill encompasses a wide variety of practices,\nfrom making furniture to the creation of weapons and armor.\nCrafts covers the act of making useful items and tools.\nAlso included is the ability to evaluate the expertise and\nvalue of another person's work. You should choose a field of\nexpertise during character creation, as knowing how to build\na house does not confer the ability to forge a sword.\nAdditional fields may be purchased with experience or freebie\npoints. Attempting to deal in a good outside your field of\nexpertise is treated as though the skill is at 0, and rolls\nbegin with their difficulty increased by one.",
+    "HR": "Each level of crafts affords you one field of expertise.\nYou can buy additional fields for 2 XP or 1 freebie pt each.\nFields of expertise must be notated using +notes.",
+    "page_ref": "VTDA 20th, p. 167",
+    "category": "skills",
+    "title": "Crafts"
+  },
+  {
+    "key": "Etiquette",
+    "aliases": [
+      "etiquette",
+      "eti"
+    ],
+    "text": "Etiquette is the ability to comport oneself appropriately\nin social situations, and to assess and adapt to traditions and\nexpectations that are new to the participant, including manners,\nspeech patterns, dress, movement, and social interactions.\n\nCharacters begin knowing the basic etiquette of their\nown class and culture without taking levels in Etiquette.",
+    "page_ref": "VTDA 20th, p. 167",
+    "category": "skills",
+    "title": "Etiquette"
+  },
+  {
+    "key": "Larceny",
+    "aliases": [
+      "larceny",
+      "lar"
+    ],
+    "text": "TBD",
+    "page_ref": "VTDA 20th, p. 162",
+    "category": "skills",
+    "title": "Larceny"
+  },
+  {
+    "key": "Melee",
+    "aliases": [
+      "melee",
+      "mel"
+    ],
+    "text": "Melee is a measure of the character's prowess with\nhand-to-hand weapons (as opposed to ranged weapons,\ncovered by Archery, or fighting unarmed, covered by\nBrawl). This Skill includes the ability to use staves\nswords, clubs, axes, and knives. Some melee weapons can\nbe repaired and crafted based on the character's level of\nexpertise, though making metal weapons requires Crafts.",
+    "page_ref": "VTDA 20th, p. 167",
+    "HR": "Each level of melee affords you one field of expertise.\nYou can buy additional fields for 2 XP or 1 freebie pt each.\nFields of expertise must be notated using +notes.",
+    "category": "skills",
+    "title": "Melee"
+  },
+  {
+    "key": "Performance",
+    "aliases": [
+      "performance",
+      "perf"
+    ],
+    "text": "Performance is the ability to entertain an audience and\nkeep them enthralled, whether it's a full amphitheater, a\nhandful of passers-by, or a single mark. You should choose\na field of expertise during character creation. Additional\nfields may be purchased with experience or freebie points.\nYou may evaluate another person's skill outside your own\nfield of expertise with this Ability.",
+    "page_ref": "VTDA 20th, p. 168",
+    "category": "skills",
+    "title": "Performance"
+  },
+  {
+    "key": "Riding",
+    "aliases": [
+      "riding",
+      "rid"
+    ],
+    "text": "Riding describes the character's affinity for travelling\nby horseback, fighting while mounted, and in a limited\ncapacity, caring for the animal. Expert riders can also gauge\nthe value of other animals and treat minor ailments that\nbefall them. They are also able to spot quality craftsmanship\nfrom poor when it comes to gearing their mount.",
+    "page_ref": "VTDA 20th, p. 168",
+    "category": "skills",
+    "title": "Riding"
+  },
+  {
+    "key": "Stealth",
+    "aliases": [
+      "stealth",
+      "ste"
+    ],
+    "text": "Stealth is the ability to pass unseen and undetected\nthrough a space, to get in and get out with no one the\nwiser. This includes hiding in plain sight in the midst of a\ncrowd, tailing a mark, or skulking past guards to gain entry\nto a household. If the roll is contested, the character pits\ntheir Dexterity + Stealth against the target's Perception +\nAlertness. Sleight-of-hand attempts fall under Legerdemain.",
+    "page_ref": "VTDA 20th, p. 169",
+    "category": "skills",
+    "title": "Stealth"
+  },
+  {
+    "key": "Survival",
+    "aliases": [
+      "survival",
+      "sur"
+    ],
+    "text": "Survival measures how successfully the character\ncan move about in, adapt to, and thrive in the elements.\nSometimes, Survival is more about living long enough to\nreturn to civilization than it is about eschewing it: finding\nyour way through the forest, foraging for food, and locating\ndrinkable water.",
+    "HR": "For a Vampire to heal in combat, they need to make a\nsuccessful Stamina + Survival vs 6 roll.",
+    "page_ref": "VTDA 20th, p. 170",
+    "category": "skills",
+    "title": "Survival"
+  }
+]

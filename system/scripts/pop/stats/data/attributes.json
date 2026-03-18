@@ -1,0 +1,102 @@
+[
+  {
+    "key": "Dexterity",
+    "aliases": [
+      "dexterity",
+      "dex"
+    ],
+    "text": "The Dexterity Attribute measures a character's General\nphysical prowess. It encompasses the character's speed\nagility, and overall quickness, as well as indicating\nthe character's ability to manipulate objects with\ncontrol and precision. Also included under Dexterity's\nheading are hand-eye coordination, reflexes and bodily\ngrace.",
+    "page_ref": "VTM 20th, p. 97",
+    "category": "physical_attributes",
+    "title": "Dexterity"
+  },
+  {
+    "key": "Stamina",
+    "aliases": [
+      "stamina",
+      "sta"
+    ],
+    "text": "The Stamina Trait reflects a character's health,\ntoughness, and resilience. It indicates how long a \ncharacter can exert themself and how much punishment\nthey can withstand before suffering physical trauma.\nStamina also includes a bit of psychic fortitude,\nindicating a character's grit and tenacity.",
+    "page_ref": "VTM 20th, p. 97",
+    "category": "physical_attributes",
+    "title": "Stamina"
+  },
+  {
+    "key": "Strength",
+    "aliases": [
+      "strength",
+      "str"
+    ],
+    "text": "Strength is the raw, brute power of a character. It\ngoverns how much weight a character can lift, how\nmuch they can physically push, and how hard they can\nhit another character or object. The Strength Trait is\nadded to a character's damage dice pool when they hit\ntheir opponent in hand-to-hand combat. It is also used\nwhen a character wishes to break, lift, or carry something\nas well as when a character tries to jump a distance.",
+    "page_ref": "VTM 20th, p. 96",
+    "category": "physical_attributes",
+    "title": "Strength"
+  },
+  {
+    "key": "Intelligence",
+    "aliases": [
+      "intelligence",
+      "int"
+    ],
+    "text": "The Intelligence Attribute refers to a character's\ngrasp of facts and knowledge. It also governs a character's\nability to reason, solve problems, and evaluate situations.\nIntelligence also includes critical thinking and flexibility\nof thought.\n\nIntelligence does not include savvy, wisdom, or common\nsense, as those are properties of the character's\npersonality, not Traits. Even the smartest character\nmay be too foolish to realize the thugs who want to\n'borrow' their car keys are up to no good.'\nCharacters with low Intelligence aren't necessarily\nstupid (though they might be); they are just uneducated\nor simple thinkers. Likewise, characters with high\nIntelligence aren't all Einsteins; they may be better\nat rote memorization or have particularly keen judgement.",
+    "page_ref": "VTM 20th, p. 99",
+    "category": "mental_attributes",
+    "title": "Intelligence"
+  },
+  {
+    "key": "Perception",
+    "aliases": [
+      "perception",
+      "per"
+    ],
+    "text": "Perception measures a character's ability to observe\ntheir environment. This may involve a conscious effort,\nsuch as searching an area, but it is more often intuitive,\nas the character's keen senses notice something out of the\nordinary. Perception is a sensitivity to one's surroundings\nand is seldom present in the cynical or jaded (who have\nseen it all before).\n\nPerception is used to determine whether or not a\ncharacter understands a given situation or detects an\nenvironmental stimulus. It can warn a character of\nambushes, distinguish a clue from a pile of refuse, or\nuncover any other hidden or overlookable detail,\nwhether physical or otherwise.",
+    "page_ref": "VTM 20th, p. 99",
+    "category": "mental_attributes",
+    "title": "Perception"
+  },
+  {
+    "key": "Wits",
+    "aliases": [
+      "wits",
+      "wit"
+    ],
+    "text": "The Wits Trait measures the character's ability to\nthink on their feet and react quickly to a certain situation.\nIt also reflects a character's General cleverness. Characters\nwith low Wits ratings are thick and mentally lethargic, or\nmaybe gullible and unsophisticated. By contrast, characters\nwith high Wits Traits almost always have a plan immediately\nand adapt to their surroundings with striking expedience.\nCharacters with high Wits also manage to keep their cool\nin stressful situations.",
+    "page_ref": "VTM 20th, p. 99",
+    "category": "mental_attributes",
+    "title": "Wits"
+  },
+  {
+    "key": "Appearance",
+    "aliases": [
+      "appearance",
+      "app"
+    ],
+    "text": "The Appearance Attribute is a measure of how\nwell a character makes a first impression. This may be\nconventional 'attractiveness', but it can also be the\neffect of distinctive features, an exotic mien, an air\nof confidence, distinctive posture, a flair for dressing\nwell -- anything remarkable upon initial observation\ncan contribute to a character's Appearance. Indeed,\nAppearance is the amalgamation of many descriptive\npersonal characteristics. Appearance is subconscious\nand instinctual -- it appeals to the lower levels of the\npsyche, so it shapes first impressions and the nature of\nmemories thereafter.\n\nThis Trait is useful for getting potential vessels to\nheed your beckoning across a crowded dance floor. In\nsituations in which first impressions are paramount, or\nthat involve people who view Appearance as very\nimportant, a character may have no more dice in a Social\ndice pool than their Appearance rating. Thus, it is\ncritically important to either look your best or get\nto know people before you start trying to convince them\nto fire-bomb the Justicar's haven.",
+    "page_ref": "VTM 20th, p. 98-99",
+    "category": "social_attributes",
+    "title": "Appearance"
+  },
+  {
+    "key": "Charisma",
+    "aliases": [
+      "charisma",
+      "cha"
+    ],
+    "text": "Charisma is a character's ability to entice and please\nothers through their personality. Charisma comes into\nquestion when a character tries to win another character's\nsympathies or encourage others to trust them.\nIt governs a character's ability to convince others to\nsee their point of view. This Attribute doesn't\nnecessarily indicate how the character is charismatic,\nwhether they're a silver-tongued charmer or a grinning\nbully. (These should come across through roleplaying).",
+    "page_ref": "VTM 20th, p. 97",
+    "category": "social_attributes",
+    "title": "Charisma"
+  },
+  {
+    "key": "Manipulation",
+    "aliases": [
+      "manipulation",
+      "man",
+      "manip"
+    ],
+    "text": "Manipulation measures a character's ability for self\nexpression in the interests of getting others to share\ntheir outlook or follow their whims. In short, it's getting\nothers to do what they want. Manipulation comes into\nplay when a character tries to influence or subtly guide\nanother's behavior. Manipulation is used to trick, bluff,\nfast-talk, and railroad other characters. Whether or not\nthe characters in question actually like the manipulator\nis irrelevant (this is why Manipulation differs from Charisma)\nAfter all, a skilled motivator can even employ the talents of\npeople who hate them.\n\nManipulation is a dangerous affair, though it is way\nmany Kindred primarily affect the world around them.\nFailed attempts at manipulation often earn the ire of\nthe would-be patsy. Botching a Manipulation roll may\nadd a name to the character's list of enemies.\n\nPeople are manipulated every day, and typically ignore\nit. ('Would you run to the store for me?') If the fact\nis brought to their attention, however, many people\nbecome quite defensive. Manipulation can be the most\npowerful tool in a Kindred's repertoire, but failure\ncan be disastrous. Characters with high Manipulation\nratings are often distrusted by those around them.",
+    "page_ref": "VTM 20th, p. 97-98",
+    "category": "social_attributes",
+    "title": "Manipulation"
+  }
+]
