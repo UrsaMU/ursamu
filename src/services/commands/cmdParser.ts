@@ -216,8 +216,13 @@ cmdParser.use(async (ctx, next) => {
   let cmdSwitches: string[] = [];
   if (scriptName.includes("/")) {
     const slashIdx = scriptName.indexOf("/");
-    cmdSwitches = scriptName.slice(slashIdx + 1).split("/").filter(Boolean);
-    scriptName = scriptName.slice(0, slashIdx);
+    // Re-check alias map for the base name before "/" (e.g. channel/join → channels/join)
+    const baseName = scriptName.slice(0, slashIdx);
+    if (aliasMap[baseName]) {
+      scriptName = aliasMap[baseName] + scriptName.slice(slashIdx);
+    }
+    cmdSwitches = scriptName.slice(scriptName.indexOf("/") + 1).split("/").filter(Boolean);
+    scriptName = scriptName.slice(0, scriptName.indexOf("/"));
   }
 
   // Attempt to load and run script — checks game project override then engine's built-in copy
