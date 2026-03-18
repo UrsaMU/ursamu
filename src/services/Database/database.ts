@@ -96,9 +96,9 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return results;
   }
 
-  async queryOne(query?: Query<T>): Promise<T | false> {
+  async queryOne(query?: Query<T>): Promise<T | undefined> {
     const results = await this.query(query);
-    return results.length ? results[0] : false;
+    return results.length ? results[0] : undefined;
   }
 
   async all(): Promise<T[]> {
@@ -215,7 +215,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return await this.query(query);
   }
 
-  async findOne(query?: Query<T>): Promise<T | false> {
+  async findOne(query?: Query<T>): Promise<T | undefined> {
     return await this.queryOne(query);
   }
 }

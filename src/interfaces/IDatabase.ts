@@ -26,7 +26,7 @@ export type Query<T> = QueryCondition | QueryOperator<T>;
 export interface IDatabase<T> {
     create(data: T): Promise<T>;
     query(query?: Query<T>): Promise<T[]>;
-    queryOne(query?: Query<T>): Promise<T | false>;
+    queryOne(query?: Query<T>): Promise<T | undefined>;
     all(): Promise<T[]>;
     modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]>;
     delete(query: Query<T>): Promise<T[]>;
