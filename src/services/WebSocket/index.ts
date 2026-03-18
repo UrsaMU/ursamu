@@ -75,13 +75,15 @@ export class WebSocketService {
             if (this.clients.has(socket)) return;
             this.clients.add(socket);
             if (remoteIp) this.trackIp(socket, remoteIp);
+            const rooms = new Set<string>();
             const sockData: UserSocket = {
                 id: crypto.randomUUID(),
                 clientType,
-                join: () => { },
+                channels: rooms,
+                join: (room: string) => { rooms.add(room); },
                 uID: "",
                 cid: "",
-                leave: () => { },
+                leave: (room: string) => { rooms.delete(room); },
                 disconnect: () => { },
                 on: () => { }
             };
@@ -187,7 +189,8 @@ export class WebSocketService {
     send(targets: string[], message: IMessage) {
         for (const client of this.clients) {
             const meta = this.socketData.get(client);
-            if (meta && (targets.includes(meta.id) || (meta.cid && targets.includes(meta.cid)))) {
+            const inRoom = meta?.channels ? targets.some(t => meta.channels!.has(t)) : false;
+            if (meta && (targets.includes(meta.id) || (meta.cid && targets.includes(meta.cid)) || inRoom)) {
                 try {
                     if (meta.clientType === "web") {
                         const output = Presenter.render(message.payload, "web");
