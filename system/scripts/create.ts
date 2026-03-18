@@ -38,9 +38,10 @@ export default async (u: IUrsamuSDK) => {
     }
   });
 
-  // Decrease quota
+  // Decrease quota and persist
   if (!isStaff) {
     actor.state.quota = quota - cost;
+    await u.db.modify(actor.id, "$set", { data: { ...actor.state } });
   }
 
   u.send(`You create ${objName} (#${thing.id}).`);

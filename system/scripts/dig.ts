@@ -22,7 +22,7 @@ export default async (u: IUrsamuSDK) => {
   const fromExit = match[4] ? match[4].trim() : "";
 
   // Quota & Permission Check (Simplified for script)
-  const isStaff = actor.flags.has("wizard") || actor.flags.has("admin");
+  const isStaff = actor.flags.has("wizard") || actor.flags.has("admin") || actor.flags.has("superuser");
   const quota = (actor.state.quota as number) || 0;
   
   let cost = 1; // Room
@@ -73,9 +73,10 @@ export default async (u: IUrsamuSDK) => {
     u.send(`Exit ${fromExit.split(";")[0]} created with dbref %ch#${from.id}%cn.`);
   }
 
-  // Decrease quota
+  // Decrease quota and persist
   if (!isStaff) {
     actor.state.quota = quota - cost;
+    await u.db.modify(actor.id, "$set", { data: { ...actor.state } });
   }
 
   // Handle teleport switch

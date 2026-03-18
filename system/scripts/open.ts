@@ -31,7 +31,7 @@ export default async (u: IUrsamuSDK) => {
   }
 
   // Quota & Permission Check
-  const isStaff = actor.flags.has("wizard") || actor.flags.has("admin");
+  const isStaff = actor.flags.has("wizard") || actor.flags.has("admin") || actor.flags.has("superuser");
   const quota = (actor.state.quota as number) || 0;
   let cost = 1;
   if (backExitName) cost++;
@@ -72,8 +72,9 @@ export default async (u: IUrsamuSDK) => {
     u.send(`You open back exit %ch${backExitName.split(";")[0]}%cn to ${u.util.displayName(u.here, actor)}.`);
   }
 
-  // Decrease quota
+  // Decrease quota and persist
   if (!isStaff) {
     actor.state.quota = quota - cost;
+    await u.db.modify(actor.id, "$set", { data: { ...actor.state } });
   }
 };

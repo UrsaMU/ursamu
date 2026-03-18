@@ -47,7 +47,7 @@ Deno.test({ name: "Core Migration: flags script", sanitizeResources: false }, as
   const context: SDKContext = {
     id: player.id,
     state: {},
-    cmd: { name: "@flags", args: ["TargetThing", "safe"] },
+    cmd: { name: "@flags", args: ["TargetThing=safe"] },
     socketId: "s2"
   };
 
