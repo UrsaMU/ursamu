@@ -44,6 +44,7 @@ export class Obj implements IEntity {
   }
 
   static async get(obj: string | number | undefined, _en?: Obj): Promise<Obj | null> {
+    if (obj === "" || obj === null || obj === undefined) return null;
     if (typeof obj === "string") {
       if (obj.startsWith("#")) {
         const id = obj.slice(1);

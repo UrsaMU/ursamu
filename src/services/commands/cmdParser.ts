@@ -215,7 +215,7 @@ cmdParser.use(async (ctx, next) => {
   // Scripts allowed to run before a player is authenticated (connect-screen commands).
   // Everything else requires an active session so that pre-auth input never
   // accidentally dispatches to a builder/admin script.
-  const PRE_AUTH_SCRIPTS = new Set(["connect"]);
+  const PRE_AUTH_SCRIPTS = new Set(["connect", "create"]);
 
   // Attempt to load and run script — checks game project override then engine's built-in copy
   try {
