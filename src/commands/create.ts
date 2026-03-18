@@ -34,9 +34,10 @@ export default () =>
         return;
       }
 
-      const players = await dbojs.query({ flags: /player/i });
+      // Grant superuser to the first character created when no superusers exist yet.
+      const superusers = await dbojs.query({ flags: /superuser/i });
       const flags =
-        players.length > 0 ? "player connected" : "player connected superuser";
+        superusers.length > 0 ? "player connected" : "player connected superuser";
       const id = await getNextId("objid");
 
       const startRoom = await dbojs.queryOne({

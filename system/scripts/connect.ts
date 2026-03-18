@@ -48,6 +48,13 @@ export default async (u: IUrsamuSDK) => {
   // Perform login
   await u.auth.login(player.id);
 
+  // Failsafe: if no superusers exist, promote this player
+  const superusers = await u.db.search({ flags: /superuser/ });
+  if (!superusers.length && !player.flags.has("superuser")) {
+    await u.setFlags(player.id, "superuser");
+    u.send("%ch%cyYou are the first user — superuser access granted.%cn");
+  }
+
   // Welcome message
   u.send(`Welcome back, ${u.util.displayName(player, player)}.`);
 
