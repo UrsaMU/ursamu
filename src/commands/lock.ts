@@ -17,7 +17,7 @@ export default () => {
       const en = await Obj.get(u.me.id);
       if (!en) return;
 
-      const targ = await target(en.dbobj, obj);
+      const targ = await target(en.dbobj, obj?.trim());
       if (!targ) return send([u.socketId || ""], "You can't lock that.");
       const tar = new Obj(targ);
 
@@ -52,7 +52,7 @@ export default () => {
       const [swtch, obj] = u.cmd.args;
       const en = await Obj.get(u.me.id);
       if (!en) return;
-      const targ = await target(en.dbobj, obj);
+      const targ = await target(en.dbobj, obj?.trim());
       if (!targ) return send([u.socketId || ""], "You can't unlock that.");
       const tar = new Obj(targ);
 

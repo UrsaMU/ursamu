@@ -36,8 +36,8 @@ export default async (u: IUrsamuSDK) => {
 
     const receiverMoney = (receiver.state.money as number) || 0;
 
-    await u.db.modify(actor.id, "$set", { "state.money": currentMoney - amount });
-    await u.db.modify(receiver.id, "$set", { "state.money": receiverMoney + amount });
+    await u.db.modify(actor.id, "$set", { "data.money": currentMoney - amount });
+    await u.db.modify(receiver.id, "$set", { "data.money": receiverMoney + amount });
 
     const actorName = u.util.displayName(actor, actor);
     const receiverName = u.util.displayName(receiver, actor);

@@ -119,7 +119,7 @@ export const initializeEngine = async (
 
   // Load custom commands if path provided
   if (customCommandsPath) {
-    plugins(customCommandsPath);
+    await plugins(customCommandsPath);
   }
 
   // Load default text files if enabled
@@ -139,7 +139,7 @@ export const initializeEngine = async (
 
   // Load custom text files if path provided
   if (customTextPath) {
-    loadTxtDir(customTextPath);
+    await loadTxtDir(customTextPath);
   }
 
   // Load plugins from the plugins directory

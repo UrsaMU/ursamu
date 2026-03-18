@@ -27,10 +27,10 @@ export default async (u: IUrsamuSDK) => {
   }
 
   if (target.flags.has("room")) {
-    await u.db.modify(target.id, "$unset", { "data.dropto": "" });
+    await u.db.modify(target.id, "$unset", { "data.dropto": 1 });
     u.send(`You unlink ${u.util.displayName(target, actor)}.`);
   } else if (target.flags.has("exit")) {
-    await u.db.modify(target.id, "$unset", { "data.destination": "" });
+    await u.db.modify(target.id, "$unset", { "data.destination": 1 });
     u.send(`You unlink ${u.util.displayName(target, actor)}.`);
   } else {
     u.send("You can only unlink rooms or exits.");

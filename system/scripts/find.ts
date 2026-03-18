@@ -16,13 +16,15 @@ export default async (u: IUrsamuSDK) => {
 
   let results;
 
+  const escaped = arg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
   if (switches.includes("flag")) {
-    results = await u.db.search({ flags: new RegExp(arg, "i") });
+    results = await u.db.search({ flags: new RegExp(escaped, "i") });
   } else if (switches.includes("type")) {
-    results = await u.db.search({ flags: new RegExp(`\\b${arg}\\b`, "i") });
+    results = await u.db.search({ flags: new RegExp(`\\b${escaped}\\b`, "i") });
   } else {
     // Name search — partial, case-insensitive
-    results = await u.db.search({ "data.name": new RegExp(arg, "i") });
+    results = await u.db.search({ "data.name": new RegExp(escaped, "i") });
   }
 
   if (!results.length) {

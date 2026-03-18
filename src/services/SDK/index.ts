@@ -232,7 +232,7 @@ export async function createNativeSDK(
     teleport: async (targetStr: string, destination: string) => {
       const tarObj =
         (await dbojs.queryOne({ id: targetStr })) ||
-        (await dbojs.queryOne({ "data.name": new RegExp(`^${targetStr}$`, "i") }));
+        (await dbojs.queryOne({ "data.name": new RegExp(`^${targetStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") }));
       if (!tarObj) return;
       tarObj.location = destination;
       await dbojs.modify({ id: tarObj.id }, "$set", tarObj);
@@ -248,7 +248,7 @@ export async function createNativeSDK(
     auth: {
       verify: async (name: string, password: string) => {
         const player = await dbojs.queryOne({
-          "data.name": new RegExp(`^${name}$`, "i"),
+          "data.name": new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i"),
           flags: /player/i,
         });
         if (!player || !player.data?.password) return false;

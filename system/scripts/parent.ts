@@ -74,7 +74,7 @@ export default async (u: IUrsamuSDK) => {
       u.send("Circular parent reference detected.");
       return;
     }
-    const pId = (curr.state.parent as string || "").replace("#", "");
+    const pId = ((curr.state.parent as string) || "").replace("#", "");
     if (!pId) break;
     const parentSearch = await u.db.search(`#${pId}`);
     curr = parentSearch[0];

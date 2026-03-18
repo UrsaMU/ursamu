@@ -8,7 +8,7 @@ export default async (u: IUrsamuSDK) => {
   const rawArgs = args[0]; // The full argument string "target=value" or "target"
 
   // 1. Permission Check
-  if (!u.me.flags.has("admin") && !u.me.flags.has("wizard")) {
+  if (!u.me.flags.has("admin") && !u.me.flags.has("wizard") && !u.me.flags.has("superuser")) {
     u.send("Permission denied.");
     return;
   }

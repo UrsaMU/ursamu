@@ -28,7 +28,7 @@ export default () => {
         const en = await Obj.get(u.me.id);
         if (!en) return;
 
-        const tar = await target(en.dbobj, obj, true);
+        const tar = await target(en.dbobj, obj?.trim(), true);
         if (!tar) return send([u.socketId || ""], "I don't see that here.");
 
         const tarObj = await Obj.get(tar.id);

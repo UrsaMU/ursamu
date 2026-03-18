@@ -14,14 +14,15 @@ export default () =>
       const tar = await target(player, u.cmd.args[0]);
       if (!tar) return u.send("I can't find that player.");
 
-      const stripped = u.util.stripSubs(u.cmd.args[1]);
+      const monikerVal = (u.cmd.args[1] || "").trim();
+      const stripped = u.util.stripSubs(monikerVal);
       tar.data ||= {};
       if (stripped.toLowerCase() !== String(tar.data.name || "").toLowerCase()) {
         u.send("You can't change someone's moniker to something that doesn't match their name.");
         return;
       }
-      tar.data.moniker = u.cmd.args[1];
+      tar.data.moniker = monikerVal;
       await dbojs.modify({ id: tar.id }, "$set", tar);
-      u.send(`You have set ${String(tar.data.name)}'s moniker to ${u.cmd.args[1]}.`);
+      u.send(`You have set ${String(tar.data.name)}'s moniker to ${monikerVal}.`);
     },
   });
