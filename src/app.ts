@@ -3,6 +3,9 @@ import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playe
 import { authenticate } from "./middleware/authMiddleware.ts";
 import { getConfig } from "./services/Config/mod.ts";
 
+export { addCmd } from "./services/commands/cmdParser.ts";
+export type { ICmd } from "./@types/ICmd.ts";
+
 type PluginRouteHandler = (req: Request, userId: string | null) => Promise<Response>;
 const pluginRoutes: Array<{ prefix: string; handler: PluginRouteHandler }> = [];
 
