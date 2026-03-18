@@ -15,8 +15,6 @@ import { dpath } from "../deps.ts";
 import { initConfig, initializePlugins, getConfig, registerPlugin } from "./services/Config/mod.ts";
 import { loadPlugins } from "./utils/loadPlugins.ts";
 import { wsService } from "./services/WebSocket/index.ts";
-import { hash, genSalt } from "../deps.ts";
-import { getNextId } from "./utils/getNextId.ts";
 import { queue } from "./services/Queue/index.ts";
 import { discordBridge } from "./services/discord/index.ts";
 
@@ -377,64 +375,22 @@ if (import.meta.main) {
 }
 
 /**
- * Check if any players exist, and if not, prompt to create a superuser
+ * Check if any players exist, and if not, print first-run instructions.
+ * The first player to run `create <name> <password>` via telnet is
+ * automatically granted superuser by src/commands/create.ts.
  */
 export async function checkAndCreateSuperuser() {
   const players = await dbojs.query({ flags: /player/i });
 
   if (players.length === 0) {
-    console.log("\nNo players found in the database.");
-    console.log("Welcome! Let's set up your superuser account.\n");
-
-    const getRes = (text: string) => {
-      const val = prompt(text);
-      if (val === null) return null;
-      return val.trim();
-    };
-
-    let email = getRes("Enter email address:");
-    if (email === null) {
-      console.log("Unable to read input (non-interactive mode detected).");
-      console.log("To set up a superuser, please run the server interactively:");
-      console.log("  deno task server");
-      console.log("Skipping superuser creation for now.\n");
-      return;
-    }
-
-    while (!email) {
-      email = getRes("Enter email address:");
-      if (email === null) return;
-    }
-
-    let username = getRes("Enter username:");
-    if (username === null) return;
-    while (!username) {
-      username = getRes("Enter username:");
-      if (username === null) return;
-    }
-
-    let password = getRes("Enter password:");
-    if (password === null) return;
-    while (!password) {
-      password = getRes("Enter password:");
-      if (password === null) return;
-    }
-
-    const id = await getNextId("objid");
-    
-    // Create the superuser
-    await dbojs.create({
-      id,
-      flags: "player connected superuser",
-      data: {
-        name: username,
-        email,
-        password: await hash(password, await genSalt(10)),
-        home: "1",
-      },
-      location: "1",
-    });
-
-    console.log(`\nSuperuser '${username}' created successfully!`);
+    console.log("\n┌─────────────────────────────────────────────────────┐");
+    console.log("│  Fresh database detected — no players exist yet.    │");
+    console.log("│                                                     │");
+    console.log("│  Connect via telnet and run:                        │");
+    console.log("│    create <name> <password>                         │");
+    console.log("│                                                     │");
+    console.log("│  The first player created is automatically given    │");
+    console.log("│  superuser access.                                  │");
+    console.log("└─────────────────────────────────────────────────────┘\n");
   }
 }
