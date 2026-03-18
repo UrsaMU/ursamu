@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/ursamu",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",
@@ -40,6 +40,8 @@
     "cli": "deno run -A ./src/cli/ursamu.ts",
     "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts",
     "test": "deno test --allow-all --unstable-kv --no-check",
+    "upgrade": "deno run -A ./src/cli/ursamu.ts update",
+    "upgrade:reload": "deno run -A ./src/cli/ursamu.ts update && deno run --reload -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
     "test:coverage": "deno test --allow-all --unstable-kv --no-check --coverage=coverage && deno coverage coverage --lcov > coverage/lcov.info && deno coverage coverage"
   },
   "compilerOptions": {

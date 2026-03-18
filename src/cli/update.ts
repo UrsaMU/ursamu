@@ -44,11 +44,9 @@ if (!existsSync(denoJsonPath)) {
   Deno.exit(1);
 }
 
-let denoJsonRaw: string;
 let denoJson: Record<string, unknown>;
 try {
-  denoJsonRaw = await Deno.readTextFile(denoJsonPath);
-  denoJson = JSON.parse(denoJsonRaw);
+  denoJson = JSON.parse(await Deno.readTextFile(denoJsonPath));
 } catch {
   console.error("Error: Could not parse deno.json.");
   Deno.exit(1);
@@ -79,9 +77,20 @@ const SHELL_SCRIPTS = ["daemon.sh", "stop.sh", "restart.sh", "status.sh"];
 const scriptsDir = join(cwd, "scripts");
 
 let latestVersion: string | null = null;
+let upstreamTasks: Record<string, string> | null = null;
+let denoJsonDirty = false;
 
 if (isLocal) {
   console.log(`Local ursamu detected (${currentSpecifier}) — skipping version bump.`);
+  // Load tasks from local ursamu deno.json
+  const localDenoJsonPath = join(cwd, currentSpecifier.replace(/\/$/, ""), "deno.json");
+  try {
+    const raw = await Deno.readTextFile(localDenoJsonPath);
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    upstreamTasks = parsed.tasks as Record<string, string> | null;
+  } catch {
+    console.warn("Warning: could not read local ursamu deno.json — skipping task sync.");
+  }
 } else {
   const currentVersionMatch = currentSpecifier.match(/@(\d+\.\d+\.\d+)/);
   const currentVersion = currentVersionMatch ? currentVersionMatch[1] : null;
@@ -103,31 +112,101 @@ if (isLocal) {
     console.log(`Already up to date (${latestVersion}).`);
   } else {
     const newSpecifier = `jsr:@ursamu/ursamu@${latestVersion}`;
-    console.log(`  Current : ${currentSpecifier}`);
-    console.log(`  Latest  : ${newSpecifier}`);
+    console.log(`  ${currentSpecifier} → ${newSpecifier}`);
+    imports[importKey] = newSpecifier;
+    denoJsonDirty = true;
+  }
 
-    if (!dryRun) {
-      // ── 4. update deno.json ───────────────────────────────────────────────
-      imports[importKey] = newSpecifier;
-      const updatedRaw = denoJsonRaw.replace(
-        new RegExp(`"${currentSpecifier.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`, "g"),
-        `"${newSpecifier}"`
-      );
-      await Deno.writeTextFile(denoJsonPath, updatedRaw);
-      console.log("Updated deno.json.");
-      console.log(`\nUpdated @ursamu/ursamu ${currentVersion ?? "(unpinned)"} → ${latestVersion}`);
-      if (currentVersion) {
+  // ── 4. fetch upstream deno.json for task sync ─────────────────────────────
+
+  try {
+    const res = await fetch(`https://jsr.io/@ursamu/ursamu/${latestVersion}/deno.json`);
+    if (res.ok) {
+      const parsed = await res.json() as Record<string, unknown>;
+      upstreamTasks = parsed.tasks as Record<string, string> | null;
+    } else {
+      console.warn(`Warning: could not fetch upstream deno.json (${res.status}) — skipping task sync.`);
+    }
+  } catch (e) {
+    console.warn(`Warning: could not fetch upstream deno.json — ${e}`);
+  }
+}
+
+// ── 5. merge tasks ────────────────────────────────────────────────────────────
+
+if (upstreamTasks) {
+  const currentTasks = (denoJson.tasks as Record<string, string> | undefined) ?? {};
+  const added: string[] = [];
+  const changed: string[] = [];
+
+  // Collect changes first, then decide what to apply
+  const toAdd: [string, string][] = [];
+  const toChange: [string, string][] = [];
+
+  for (const [key, val] of Object.entries(upstreamTasks)) {
+    if (currentTasks[key] === val) continue;
+    if (key in currentTasks) toChange.push([key, val]);
+    else toAdd.push([key, val]);
+  }
+
+  // Always apply new tasks
+  for (const [key, val] of toAdd) {
+    currentTasks[key] = val;
+    added.push(key);
+    denoJsonDirty = true;
+  }
+
+  // Prompt before overwriting existing tasks
+  if (toChange.length && !dryRun) {
+    console.log(`  The following tasks differ from upstream:`);
+    for (const [key, val] of toChange) {
+      console.log(`    ${key}:`);
+      console.log(`      current  : ${currentTasks[key]}`);
+      console.log(`      upstream : ${val}`);
+    }
+    const buf = new Uint8Array(4);
+    await Deno.stdout.write(new TextEncoder().encode("  Overwrite? [y/N] "));
+    const n = await Deno.stdin.read(buf);
+    const answer = new TextDecoder().decode(buf.subarray(0, n ?? 0)).trim().toLowerCase();
+    if (answer === "y") {
+      for (const [key, val] of toChange) {
+        currentTasks[key] = val;
+        changed.push(key);
+        denoJsonDirty = true;
+      }
+    }
+  } else if (toChange.length && dryRun) {
+    // In dry-run mode, show what would change without prompting
+    for (const [key] of toChange) changed.push(key);
+  }
+
+  if (added.length)   console.log(`  Tasks added   : ${added.join(", ")}`);
+  if (changed.length) console.log(`  Tasks updated : ${changed.join(", ")}`);
+  if (!added.length && !changed.length && !toChange.length) console.log("  Tasks already in sync.");
+
+  denoJson.tasks = currentTasks;
+}
+
+if (denoJsonDirty) {
+  if (!dryRun) {
+    await Deno.writeTextFile(denoJsonPath, JSON.stringify(denoJson, null, 2) + "\n");
+    console.log("Updated deno.json.");
+    if (!isLocal && latestVersion) {
+      const currentVersionMatch = currentSpecifier.match(/@(\d+\.\d+\.\d+)/);
+      const currentVersion = currentVersionMatch ? currentVersionMatch[1] : null;
+      if (currentVersion && currentVersion !== latestVersion) {
+        console.log(`\nUpdated @ursamu/ursamu ${currentVersion} → ${latestVersion}`);
         console.log(`Changelog: https://github.com/UrsaMU/ursamu/releases/tag/v${latestVersion}`);
       }
-    } else {
-      console.log("\nDry run — no files written.");
     }
+  } else {
+    console.log("\nDry run — no files written.");
   }
 }
 
 if (dryRun) Deno.exit(0);
 
-// ── 5. re-cache entry points ──────────────────────────────────────────────────
+// ── 6. re-cache entry points ──────────────────────────────────────────────────
 
 const entryPoints: string[] = [];
 for (const candidate of ["src/main.ts", "src/telnet.ts", "main.ts"]) {
@@ -149,7 +228,7 @@ if (entryPoints.length > 0) {
   }
 }
 
-// ── 6. sync shell scripts ─────────────────────────────────────────────────────
+// ── 7. sync shell scripts ─────────────────────────────────────────────────────
 // These aren't accessible via the Deno import system so we copy/fetch them explicitly.
 
 try {
