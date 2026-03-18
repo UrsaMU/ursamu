@@ -1,8 +1,0 @@
-{
-  "tasks": {
-    "test": "deno test -A"
-  },
-  "imports": {
-    "ursamu": "npm:ursamu"
-  }
-}
