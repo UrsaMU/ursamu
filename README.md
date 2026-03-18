@@ -68,7 +68,6 @@ UrsaMU uses independent processes so each component can restart without affectin
 
 - **Hub** — game logic, Deno KV persistence, HTTP REST API, and WebSocket connections (single port, default `4203`)
 - **Telnet Sidecar** — proxies classic Telnet connections to the Hub via WebSockets (`4201`)
-- **Web Client** — optional Deno Fresh browser client (`src/web-client/`)
 
 ---
 
@@ -204,6 +203,8 @@ UrsaMU uses independent processes so each component can restart without affectin
 | `@quota <player>=<num>` | Set a player's object quota (admin+) |
 | `@reboot` | Restart the server (admin+) |
 | `@shutdown` | Shut down the server (admin+) |
+| `@site <key>=<value>` | Set a server configuration value (admin/wizard) |
+| `@resettoken <player>` | Generate a one-time password-reset token for a player (admin/wizard) |
 | `@chancreate <name>[=<header>]` | Create a channel (admin/wizard) |
 | `@chandestroy <name>` | Destroy a channel (admin/wizard) |
 | `@chanset <name>/<prop>=<value>` | Configure a channel (admin/wizard) |
@@ -234,6 +235,7 @@ All endpoints require a `Bearer` token except where noted.
 |----------|------|-------------|
 | `POST /api/v1/auth/register` | None | Create a new character |
 | `POST /api/v1/auth/login` | None | Authenticate and receive a JWT |
+| `POST /api/v1/auth/reset-password` | None | Consume a reset token and set a new password |
 
 ### Player & Channels
 
