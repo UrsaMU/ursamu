@@ -1,5 +1,7 @@
 import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
+export const aliases = ["channel"];
+
 /**
  * System Script: channels.ts
  * Manages game channels (join, leave, list).
