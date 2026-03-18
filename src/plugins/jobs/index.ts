@@ -4,6 +4,9 @@ import { jobsRouteHandler } from "./router.ts";
 // Import commands to trigger their addCmd registration at init time
 import "./commands.ts";
 
+export { jobHooks } from "./hooks.ts";
+export type { JobHookMap } from "./hooks.ts";
+
 const jobsPlugin: IPlugin = {
   name: "jobs",
   version: "1.0.0",

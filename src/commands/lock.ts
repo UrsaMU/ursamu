@@ -11,13 +11,13 @@ export default () => {
   addCmd({
     name: "@lock",
     pattern: /^[@\+]?lock(?:\/(\w+))?\s+([^=]+)\s*=\s*(.*)/i,
-    lock: "connected builder+",
+    lock: "connected & builder+",
     exec: async (u: IUrsamuSDK) => {
       const [swtch, obj, key] = u.cmd.args;
       const en = await Obj.get(u.me.id);
       if (!en) return;
 
-      const targ = await target(en.dbobj, obj);
+      const targ = await target(en.dbobj, obj?.trim());
       if (!targ) return send([u.socketId || ""], "You can't lock that.");
       const tar = new Obj(targ);
 
@@ -47,12 +47,12 @@ export default () => {
   addCmd({
     name: "@unlock",
     pattern: /^[@\+]?unlock(?:\/(\w+))?\s+(.*)/i,
-    lock: "connected builder+",
+    lock: "connected & builder+",
     exec: async (u: IUrsamuSDK) => {
       const [swtch, obj] = u.cmd.args;
       const en = await Obj.get(u.me.id);
       if (!en) return;
-      const targ = await target(en.dbobj, obj);
+      const targ = await target(en.dbobj, obj?.trim());
       if (!targ) return send([u.socketId || ""], "You can't unlock that.");
       const tar = new Obj(targ);
 

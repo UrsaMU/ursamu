@@ -5,7 +5,7 @@ export const aliases = ["nameformat", "descformat", "conformat", "exitformat"];
 
 export default async (u: IUrsamuSDK) => {
   const cmd = u.cmd.original?.toLowerCase() || u.cmd.name.toLowerCase();
-  const input = u.cmd.args.join(" ");
+  const input = (u.cmd.args[0] || "").trim();
   const [name, format] = input.split("=");
 
   const target = await u.util.target(u.me, name?.trim());

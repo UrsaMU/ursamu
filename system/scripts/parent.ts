@@ -6,7 +6,7 @@ import { IUrsamuSDK, IDBObj } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const fullArgs = u.cmd.args.join(" ").trim();
+  const fullArgs = (u.cmd.args[0] || "").trim();
   const swtch = (u.cmd.name.split("/")[1] || "").toLowerCase();
 
   // Handle @parent/clear
@@ -30,7 +30,7 @@ export default async (u: IUrsamuSDK) => {
       return;
     }
 
-    await u.db.modify(target.id, "$unset", { "data.parent": "" });
+    await u.db.modify(target.id, "$unset", { "data.parent": 1 });
     u.send(`Parent cleared for ${u.util.displayName(target, actor)}.`);
     return;
   }
@@ -74,13 +74,13 @@ export default async (u: IUrsamuSDK) => {
       u.send("Circular parent reference detected.");
       return;
     }
-    const pId = (curr.state.parent as string || "").replace("#", "");
+    const pId = ((curr.state.parent as string) || "").replace("#", "");
     if (!pId) break;
     const parentSearch = await u.db.search(`#${pId}`);
     curr = parentSearch[0];
     count++;
   }
 
-  await u.db.modify(target.id, "$set", { "data.parent": "#" + parentObj.id });
+  await u.db.modify(target.id, "$set", { "data.parent": parentObj.id });
   u.send(`Parent of ${u.util.displayName(target, actor)} set to ${u.util.displayName(parentObj, actor)}.`);
 };

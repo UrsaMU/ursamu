@@ -3,8 +3,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 export const aliases = ["alias"];
 
 export default async (u: IUrsamuSDK) => {
-  const args = u.cmd.args;
-  const input = args.join(" "); // "target=alias" or "target="
+  const input = (u.cmd.args[0] || "").trim();
 
   const [name, alias] = input.split("=");
   
@@ -40,8 +39,7 @@ export default async (u: IUrsamuSDK) => {
     }
     
     // Set 
-    target.state.alias = aliasName;
-    await u.db.modify(target.id, "$set", { data: { alias: aliasName } });
+    await u.db.modify(target.id, "$set", { "data.alias": aliasName });
     u.send(`Alias for ${target.name} set to ${aliasName}.`);
   } else {
     // Clear alias

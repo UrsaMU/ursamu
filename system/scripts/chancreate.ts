@@ -17,17 +17,21 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  const input = u.cmd.args.join(" ").trim();
+  const input = (u.cmd.args[0] || "").trim();
   if (!input) {
     u.send("Usage: @chancreate <name>[=<header>]");
     return;
   }
 
-  const [namePart, headerPart] = input.split("=").map(s => s.trim());
+  const eqIdx = input.indexOf("=");
+  const namePart = eqIdx >= 0 ? input.slice(0, eqIdx).trim() : input.trim();
+  const valuePart = eqIdx >= 0 ? input.slice(eqIdx + 1).trim() : "";
   const name = namePart.toLowerCase();
-  const header = headerPart || `[${name.toUpperCase()}]`;
-  const hidden = (u.cmd.switches || []).includes("hidden");
-  const lock = (u.cmd.switches || []).includes("lock") ? headerPart || "" : "";
+  const switches = u.cmd.switches || [];
+  const isLockSwitch = switches.includes("lock");
+  const hidden = switches.includes("hidden");
+  const header = isLockSwitch ? `[${name.toUpperCase()}]` : (valuePart || `[${name.toUpperCase()}]`);
+  const lock = isLockSwitch ? valuePart : "";
 
   const result = await u.chan.create(name, { header, lock, hidden }) as { error?: string };
 
@@ -36,5 +40,8 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  u.send(`Channel %ch${name}%cn created with header "${header}".`);
+  let msg = `Channel %ch${name}%cn created with header "${header}".`;
+  if (lock) msg += ` Lock: ${lock}`;
+  if (hidden) msg += ` (hidden)`;
+  u.send(msg);
 };

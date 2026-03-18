@@ -1,6 +1,7 @@
 import "./@js.ts";
 import "./alias.ts";
 import "./attrCommands.ts";
+import "./avatar.ts";
 import "./create.ts";
 import "./format.ts";
 import "./lock.ts";
@@ -13,4 +14,7 @@ import "./edit.ts";
 import "./admin.ts";
 import "./search.ts";
 import "./messages.ts";
+import "./reload.ts";
+import "./test.ts";
+import "./nuke.ts";
 

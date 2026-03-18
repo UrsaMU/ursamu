@@ -6,6 +6,7 @@ import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
 import { discordBridge } from "../discord/index.ts";
+import { channelEvents } from "../channel-events.ts";
 
 export const matchChannel = async (ctx: IContext) => {
   if (!ctx.socket.cid) {
@@ -43,15 +44,15 @@ export const matchChannel = async (ctx: IContext) => {
   } else if (msg.toLowerCase() === "on" && channel?.active === false) {
     channel.active = true;
     ctx.socket.join(channel.channel);
-    await dbojs.update({ id: en.id }, en);
-    force(ctx, `${channel.alias} :has joined the channel.`);
+    await dbojs.modify({ id: en.id }, "$set", en);
+    await force(ctx, `${channel.alias} :has joined the channel.`);
     send([ctx.socket.id], `You have joined channel ${channel.channel}.`, {});
     return true;
   } else if (msg.toLowerCase() === "off" && channel?.active === true) {
     await force(ctx, `${channel.alias} :has left the channel.`);
     channel.active = false;
     ctx.socket.leave(channel.channel);
-    await dbojs.update({ id: en.id }, en);
+    await dbojs.modify({ id: en.id }, "$set", en);
     send([ctx.socket.id], `You have left channel ${channel.channel}.`, {});
     return true;
   } else {
@@ -65,5 +66,11 @@ export const matchChannel = async (ctx: IContext) => {
 
   send([chan.name], `${chan.header} ${msg}`, {});
   discordBridge.sendToDiscord(chan.name, moniker(en), msg);
+  channelEvents.emit("channel:message", {
+    channelName: chan.name,
+    senderId:    en.id,
+    senderName:  moniker(en),
+    message:     msg,
+  });
   return true;
 };

@@ -219,7 +219,7 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
   connect();
 
   // Read from Telnet
-  const buffer = new Uint8Array(1024);
+  const buffer = new Uint8Array(16384);
   try {
     while (true) {
       const n = await conn.read(buffer);

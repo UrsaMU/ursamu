@@ -15,7 +15,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  const name = u.cmd.args.join(" ").trim().toLowerCase();
+  const name = (u.cmd.args[0] || "").trim().toLowerCase();
 
   if (!name) {
     u.send("Usage: @chandestroy <name>");

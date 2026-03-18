@@ -1,6 +1,6 @@
 import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
-export const aliases = ["desc"];
+export const aliases = ["desc", "description"];
 
 /**
  * System Script: describe.ts
@@ -46,12 +46,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  await u.db.modify(target.id, "$set", { 
-      data: { 
-          ...target.state, // This includes 'description' now
-          description: description 
-      } 
-  });
+  await u.db.modify(target.id, "$set", { "data.description": description });
   
   u.send("Set.");
 };

@@ -21,7 +21,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  const input = u.cmd.args.join(" ").trim();
+  const input = (u.cmd.args[0] || "").trim();
   // Expect: <name>/<property>=<value>
   const match = input.match(/^([^/]+)\/(\w+)\s*=\s*(.*)$/);
 

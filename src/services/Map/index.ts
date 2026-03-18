@@ -36,10 +36,7 @@ const DIR_OFFSETS: Record<string, { x: number; y: number }> = {
   ne: { x: 1, y: -1 },
   sw: { x: -1, y: 1 },
   se: { x: 1, y: 1 },
-  u: { x: 0, y: 0 }, // Up/Down/Out/In typically don't map well to 2D grid, ignore for now or keep same coord?
-  d: { x: 0, y: 0 },
-  up: { x: 0, y: 0 },
-  down: { x: 0, y: 0 },
+  // u/d/up/down/out/in are not mapped spatially — they would collide at (0,0) in a 2D grid
 };
 
 export const getMapData = async (centerId: string, depth = 2): Promise<IMapData> => {

@@ -6,7 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const input = u.cmd.args.join(" ").trim();
+  const input = (u.cmd.args[0] || "").trim();
   const match = input.match(/^(.+?)\s*=\s*(.*)$/);
 
   if (!match) {
@@ -47,10 +47,9 @@ export default async (u: IUrsamuSDK) => {
   }
 
   u.teleport(target.id, destination.id);
-  
+
   const targetNameDisplay = u.util.displayName(target, actor);
   const destNameDisplay = u.util.displayName(destination, actor);
 
   u.send(`You teleport ${targetNameDisplay} to ${destNameDisplay}.`);
-  // Note: The teleport method in SandboxService handles the actual movements and look.
 };

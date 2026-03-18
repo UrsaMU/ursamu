@@ -17,7 +17,9 @@ export const matchExits = async (ctx: IContext) => {
 
     for (const exit of exits) {
       const name = exit.data?.name as string | undefined;
-      const reg = new RegExp(`^${name?.replace(/;/g, "|")}$`, "i");
+      if (!name) continue;
+      const parts = name.split(";").map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      const reg = new RegExp(`^${parts.join("|")}$`, "i");
       const match = ctx.msg?.trim().match(reg);
 
       const players = await dbojs.query({
@@ -39,7 +41,7 @@ export const matchExits = async (ctx: IContext) => {
           if (!en.flags.includes("dark")) {
             ctx.socket.leave(`${en.location}`);
             send(
-              [`#${en.location}`],
+              players.map((p) => p.id),
               `${moniker(en)} leaves for ${dest.data?.name}.`,
               {}
             );
@@ -50,8 +52,16 @@ export const matchExits = async (ctx: IContext) => {
           ctx.socket.join(`#${en.location}`);
 
           if (!en.flags.includes("dark") && room) {
+            const arrivals = await dbojs.query({
+              $and: [
+                { location: en.location },
+                { flags: /player/i },
+                { flags: /connected/i },
+                { id: { $ne: en.id } },
+              ],
+            });
             send(
-              [`#${en.location}`],
+              arrivals.map((p) => p.id),
               `${en.data.name} arrives from ${room?.data?.name}.`,
               {}
             );
@@ -64,7 +74,7 @@ export const matchExits = async (ctx: IContext) => {
 
           if (players.length > 0) {
             send(
-              players.map((p) => `#${p.id}`),
+              players.map((p) => p.id),
               `${moniker(en)} tries to go ${exit.data?.name}, but fails.`
             );
           }

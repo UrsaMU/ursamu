@@ -10,16 +10,16 @@ import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 export default () =>
   addCmd({
     name: "create",
-    pattern: /^create\s+(.*)/i,
+    pattern: /^(?:create|cr)\s+(.*)/i,
     exec: async (u: IUrsamuSDK) => {
       let name = "";
       let password = "";
       const pieces = u.cmd.args[0].split(" ");
-      if (pieces.length < 2) {
-        [name, password] = pieces;
-      } else {
+      if (pieces.length >= 2) {
         password = pieces.pop() || "";
         name = pieces.join(" ");
+      } else {
+        [name] = pieces;
       }
       name = name.trim();
 

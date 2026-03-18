@@ -3,7 +3,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 export const aliases = ["moniker"];
 
 export default async (u: IUrsamuSDK) => {
-  const input = u.cmd.args.join(" ");
+  const input = (u.cmd.args[0] || "").trim();
   const eqIdx = input.indexOf("=");
 
   if (eqIdx === -1) {
@@ -21,7 +21,7 @@ export default async (u: IUrsamuSDK) => {
   if (!target) return u.send("I can't find that.");
 
   // Permission check
-  if (!u.me.flags.has("admin") && !u.me.flags.has("wizard")) {
+  if (!u.me.flags.has("admin") && !u.me.flags.has("wizard") && !u.me.flags.has("superuser")) {
       return u.send("Permission denied.");
   }
 
@@ -30,9 +30,9 @@ export default async (u: IUrsamuSDK) => {
     return u.send("Moniker cannot be empty.");
   }
 
-  target.state.moniker = moniker.trim();
-  // Use nested data object — DB.modify uses Object.assign so dot notation keys don't work
-  await u.db.modify(target.id, "$set", { data: { ...target.state } });
-  
+  await u.db.modify(target.id, "$set", { "data.moniker": moniker.trim() });
+
+
   u.send(`Set moniker for ${target.name} to ${moniker.trim()}.`);
+  u.here.broadcast(`${target.name} is now known as ${moniker.trim()}.`, { exclude: [u.me.id] });
 };

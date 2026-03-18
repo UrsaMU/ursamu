@@ -5,7 +5,7 @@ export default () => {
   addCmd({
     name: "@boot",
     pattern: /^@boot\s+(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Disconnect a player",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
@@ -22,7 +22,7 @@ export default () => {
   addCmd({
     name: "@toad",
     pattern: /^@toad\s+(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Destroy a player",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
@@ -39,7 +39,7 @@ export default () => {
   addCmd({
     name: "@newpassword",
     pattern: /^@newpass(?:word)?\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Change a player's password",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
@@ -55,7 +55,7 @@ export default () => {
   addCmd({
     name: "@chown",
     pattern: /^@chown\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Change ownership of an object",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
@@ -64,7 +64,7 @@ export default () => {
       const newOwner = await u.util.target(u.me, newOwnerName);
       if (!thing) return u.send("Object not found.");
       if (!newOwner || !newOwner.flags.has("player")) return u.send("New owner not found.");
-      await u.db.modify(thing.id, "$set", { data: { ...thing.state, owner: newOwner.id } });
+      await u.db.modify(thing.id, "$set", { "data.owner": newOwner.id });
       u.send(`Owner of ${u.util.displayName(thing, u.me)} changed to ${u.util.displayName(newOwner, u.me)}.`);
     },
   });
@@ -72,7 +72,7 @@ export default () => {
   addCmd({
     name: "@site",
     pattern: /^@site\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Set site configuration",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {

@@ -50,9 +50,12 @@ parser.addSubs(
 
 parser.addSubs(
   "telnet",
-  { before: /%r/g, after: "\n" },
+  { before: /%r/g, after: "\r\n" },
+  { before: /%R/g, after: "\r\n" },
   { before: /%b/g, after: " ", strip: " " },
+  { before: /%B/g, after: " ", strip: " " },
   { before: /%t/g, after: "\t" },
+  { before: /%T/g, after: "\t" },
   { before: /%\[/g, after: "[" },
   { before: /%\]/g, after: "]" },
   { before: /%\(/g, after: "(" },

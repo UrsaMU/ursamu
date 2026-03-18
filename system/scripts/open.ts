@@ -6,10 +6,10 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const fullArgs = u.cmd.args.join(" ").trim();
+  const fullArgs = (u.cmd.args[0] || "").trim();
 
   // Pattern: @open[/sw] <name>=<room>[,<back exit>]
-  const match = fullArgs.match(/^(\/.*)?\s+([^=,]+)\s*=\s*([^,]+)(?:,\s*(.*))?/i);
+  const match = fullArgs.match(/^(?:(\/.+?)\s+)?([^=,]+)\s*=\s*([^,]+)(?:,\s*(.*))?/i);
 
   if (!match) {
     u.send("Usage: @open[/inventory] <name>=<room>[,<back exit>]");
@@ -74,7 +74,6 @@ export default async (u: IUrsamuSDK) => {
 
   // Decrease quota and persist
   if (!isStaff) {
-    actor.state.quota = quota - cost;
-    await u.db.modify(actor.id, "$set", { data: { ...actor.state } });
+    await u.db.modify(actor.id, "$set", { "data.quota": quota - cost });
   }
 };

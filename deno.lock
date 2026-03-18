@@ -83,7 +83,7 @@
     "npm:date-fns@3.6.0": "3.6.0",
     "npm:discordeno@18.0.1": "18.0.1",
     "npm:estree-walker@3.0.3": "3.0.3",
-    "npm:lodash-es@4.17.21": "4.17.21",
+    "npm:lodash@^4.17.23": "4.17.23",
     "npm:markdown-it-attrs@4.1.6": "4.1.6_markdown-it@13.0.2",
     "npm:markdown-it-deflist@3.0.0": "3.0.0",
     "npm:markdown-it@13.0.2": "13.0.2",
@@ -948,8 +948,8 @@
         "uc.micro@2.1.0"
       ]
     },
-    "lodash-es@4.17.21": {
-      "integrity": "sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw=="
+    "lodash@4.17.23": {
+      "integrity": "sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w=="
     },
     "lru-cache@10.4.3": {
       "integrity": "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="
@@ -3072,7 +3072,10 @@
     "https://deno.land/x/xml@4.0.0/utils/streamable.ts": "1603a5f10c859b95d4e9502365a0fba0b19d5d068356e20d5a6813cd37fee780",
     "https://deno.land/x/xml@4.0.0/utils/stringifier.ts": "699c74bf061e979d9b6ac5b7184c2107a6e6cab4125be249aac7f848b324777c",
     "https://deno.land/x/xml@4.0.0/utils/types.ts": "f5dd32c96f85813a93d155bf8eb2aba88e11c7805c87e97aff12cbaa48db627b",
+    "https://esm.sh/*@preact/signals-core@1.5.1": "375c3958358064bf74df7e273d76755be9330994cddc687413aacc4e7f9177b3",
+    "https://esm.sh/*@preact/signals-core@1.5.1/denonext/signals-core.mjs": "aef7e41046f10bfd789833d60bb18b07a75530d3f1f9e56de63e87fd4e88f07b",
     "https://esm.sh/*@preact/signals@1.2.2": "325a059801c4a39c5bb1ff7441f81a7f894f5d1e63e03fa7da6f5125a8507098",
+    "https://esm.sh/*@preact/signals@1.2.2/denonext/signals.mjs": "c48c13b4bb7e26f4089fbb719f9966b2ee91e1b32d99d7f86eeb2fb78cf15447",
     "https://esm.sh/*preact-render-to-string@6.3.1": "37f046906d7cc1ce35828a029a05a4eed6c8eefc4b646a301939757dfbf8ab18",
     "https://esm.sh/@babel/helper-validator-identifier@7.22.20": "3b0b7d94b8ac689175ecb7e72183b07c6a771cc7680a7c9916091add73bd7f88",
     "https://esm.sh/@jridgewell/gen-mapping@0.3.13/denonext/gen-mapping.mjs": "297f733cd1f48cde4050055e4379df23b701394106946ec8692f41fd4fbc06a3",
@@ -3089,6 +3092,7 @@
     "https://esm.sh/lodash-es@4.17.21/denonext/lodash-es.mjs": "6f7d7db2f829218b6a787d9652b7e90333a1b89e5eb3a8b4c4b9eb6de3b062ec",
     "https://esm.sh/preact@10.22.0": "0fb9b89617c3a27b6be4eee74bd07b845e92900e6b7fdb757bc3a498a6ec9065",
     "https://esm.sh/preact@10.22.0/debug": "fb8d7b9ea5c7bbfb6cb9d9f9abfa31e8038b08ec623ec029f8feafbe6c5891e4",
+    "https://esm.sh/preact@10.22.0/denonext/preact.mjs": "8d07e2251111a69a3d7caf057173bbb806ac7d79954397ce5377309067f50097",
     "https://esm.sh/preact@10.22.0/hooks": "8a1ea3148ef7373b9c3dc027a147ff6728a4e53e10e3506c1191b087f0e564e1",
     "https://esm.sh/preact@10.22.0/jsx-runtime": "6c6117abd414386ed23785f7c198e03bee696c1fa0fee01b72a64abe5e7ae7fb",
     "https://esm.sh/sucrase@3.35.0/denonext/sucrase.mjs?exports=transform": "c814152a3c748ac06dd70d8711bdf3ee89673c1077bf855b0037198d0a8d1be1",
@@ -3182,7 +3186,7 @@
       "npm:@tailwindcss/typography@0.5",
       "npm:@ursamu/parser@1.2.4",
       "npm:bcryptjs@2.4.3",
-      "npm:lodash-es@4.17.21",
+      "npm:lodash@^4.17.23",
       "npm:preact@10.22.0",
       "npm:quickjs-emscripten@0.29.0"
     ]

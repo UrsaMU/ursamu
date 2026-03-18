@@ -232,7 +232,7 @@ export async function createNativeSDK(
     teleport: async (targetStr: string, destination: string) => {
       const tarObj =
         (await dbojs.queryOne({ id: targetStr })) ||
-        (await dbojs.queryOne({ "data.name": new RegExp(`^${targetStr}$`, "i") }));
+        (await dbojs.queryOne({ "data.name": new RegExp(`^${targetStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") }));
       if (!tarObj) return;
       tarObj.location = destination;
       await dbojs.modify({ id: tarObj.id }, "$set", tarObj);
@@ -248,7 +248,7 @@ export async function createNativeSDK(
     auth: {
       verify: async (name: string, password: string) => {
         const player = await dbojs.queryOne({
-          "data.name": new RegExp(`^${name}$`, "i"),
+          "data.name": new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i"),
           flags: /player/i,
         });
         if (!player || !player.data?.password) return false;
@@ -266,7 +266,10 @@ export async function createNativeSDK(
         const ctx: IContext = { socket };
         await joinChans(ctx);
       },
-      hash: (password: string) => hash(password, 10),
+      hash: async (password: string) => {
+        try { return await hash(password, 10); }
+        catch (e) { console.error("[SDK] hash error:", e); throw e; }
+      },
       setPassword: async (id: string, password: string) => {
         const hashed = await hash(password, 10);
         const objResult = await dbojs.queryOne({ id });
@@ -288,10 +291,10 @@ export async function createNativeSDK(
         await Promise.resolve();
       },
       reboot: async () => {
-        await Deno.writeTextFile(
-          "src/reboot.ts",
-          `// Reboot triggered\nexport const rebootId = ${Date.now()};\n`
-        );
+        // Exit with code 75 — start.ts recognises this as a reboot request and restarts main
+        // without touching the telnet process.
+        setTimeout(() => Deno.exit(75), 500);
+        await Promise.resolve();
       },
       shutdown: async () => {
         setTimeout(() => Deno.exit(0), 100);
