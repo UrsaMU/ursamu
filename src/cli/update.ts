@@ -170,7 +170,7 @@ try {
       }
     } else {
       // Fetch from JSR
-      const url = `https://jsr.io/@ursamu/ursamu@${latestVersion}/scripts/${name}`;
+      const url = `https://jsr.io/@ursamu/ursamu/${latestVersion}/scripts/${name}`;
       const res = await fetch(url);
       if (!res.ok) {
         console.warn(`  Warning: could not fetch scripts/${name} (${res.status}) — skipping.`);
