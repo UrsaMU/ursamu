@@ -87,17 +87,7 @@
     "key": "Salubri",
     "title": "Salubri",
     "text": "TBD",
-    "healer_inclan_disciplines": [
-      "Auspex",
-      "Fortitude",
-      "Obeah"
-    ],
-    "warrior_inclan_disciplines": [
-      "Auspex",
-      "Fortitude",
-      "Valeren"
-    ],
-    "watcher_inclan_disciplines": [
+    "inclan_disciplines": [
       "Auspex",
       "Fortitude",
       "Valeren"

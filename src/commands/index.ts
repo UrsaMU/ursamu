@@ -24,4 +24,6 @@ import popStat from "./pop/stat.ts";
 popStat();
 import { registerChargenCommands } from "./pop/chargen.ts";
 registerChargenCommands();
+import registerTimeCommands from "./pop/time.ts";
+registerTimeCommands();
 

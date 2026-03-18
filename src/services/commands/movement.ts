@@ -38,6 +38,11 @@ export const matchExits = async (ctx: IContext) => {
         const dest = await dbojs.queryOne({ id: destination });
 
         if (dest && flags.check(en.flags, (exit?.data?.lock as string) || "")) {
+          // Block approved players from entering the CG room
+          if (dest.id === "6" && en.data?.approved) {
+            send([ctx.socket.id], "You have already been approved. You cannot enter character generation.");
+            return true;
+          }
           if (!en.flags.includes("dark")) {
             ctx.socket.leave(`${en.location}`);
             send(
