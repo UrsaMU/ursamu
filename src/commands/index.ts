@@ -17,3 +17,7 @@ import "./reload.ts";
 import "./test.ts";
 import "./nuke.ts";
 
+// Price of Power game systems
+import popStat from "./pop/stat.ts";
+popStat();
+
