@@ -1,0 +1,9 @@
+{
+  "name": "discord",
+  "version": "1.0.0",
+  "description": "Webhook-based Discord integration — posts job events and channel talk to Discord",
+  "ursamu": ">=1.0.0",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts"
+}
