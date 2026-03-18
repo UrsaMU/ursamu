@@ -102,7 +102,7 @@ export async function loadSystemAliases() {
 // Start loading aliases
 loadSystemAliases();
 
-export const addCmd = (...cmd: ICmd[]) => {
+export const addCmd = (...cmd: ICmd[]): void => {
   cmds.push(...cmd);
 };
 

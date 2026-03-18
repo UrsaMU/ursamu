@@ -41,7 +41,13 @@ const _handlers: HandlerList = {
 
 // ─── public API ───────────────────────────────────────────────────────────────
 
-export const jobHooks = {
+export interface IJobHooks {
+  on<K extends keyof JobHookMap>(event: K, handler: JobHookMap[K]): void;
+  off<K extends keyof JobHookMap>(event: K, handler: JobHookMap[K]): void;
+  emit<K extends keyof JobHookMap>(event: K, ...args: Parameters<JobHookMap[K]>): Promise<void>;
+}
+
+export const jobHooks: IJobHooks = {
   /**
    * Register a handler for a job lifecycle event.
    *
