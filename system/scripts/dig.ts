@@ -6,7 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const fullArgs = u.cmd.args.join(" ").trim();
+  const fullArgs = (u.cmd.args[0] || "").trim();
   
   // Pattern: @dig[/sw] <room>[=<to exit>[,<from exit>]]
   const match = fullArgs.match(/^(?:(\/[^ ]+)\s+)?([^=,]+)(?:\s*=\s*([^,]+))?(?:,\s*(.*))?/i);
@@ -76,6 +76,7 @@ export default async (u: IUrsamuSDK) => {
   // Decrease quota
   if (!isStaff) {
     actor.state.quota = quota - cost;
+    await u.db.modify(actor.id, "$set", { data: { ...actor.state } });
   }
 
   // Handle teleport switch

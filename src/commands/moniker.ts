@@ -7,7 +7,7 @@ export default () =>
   addCmd({
     name: "moniker",
     pattern: /^[@\+]?moniker\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     exec: async (u: IUrsamuSDK) => {
       const player = await dbojs.queryOne({ id: u.me.id });
       if (!player) return;

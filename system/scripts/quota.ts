@@ -43,6 +43,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  await u.db.modify(target.id, "$set", { data: { ...target.state, quota: newQuota } });
+  target.state.quota = newQuota;
+  await u.db.modify(target.id, "$set", { data: target.state });
   u.send(`Quota for ${u.util.displayName(target, actor)} set to ${newQuota}.`);
 };

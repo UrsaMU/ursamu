@@ -5,7 +5,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  * Handles player authentication and session initialization.
  */
 export default async (u: IUrsamuSDK) => {
-  const pieces = u.cmd.args[0].split(" ");
+  const pieces = (u.cmd.args[0] || "").split(" ");
   let name = "";
   let password = "";
   

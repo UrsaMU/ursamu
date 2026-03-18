@@ -6,7 +6,7 @@ import { IUrsamuSDK, IDBObj as _IDBObj } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const targetName = u.cmd.args.join(" ").trim() || "me";
+  const targetName = (u.cmd.args[0] || "").trim() || "me";
   const target = (await u.db.search(targetName))[0];
 
   if (!target) {

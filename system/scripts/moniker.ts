@@ -3,7 +3,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 export const aliases = ["moniker"];
 
 export default async (u: IUrsamuSDK) => {
-  const input = u.cmd.args.join(" ");
+  const input = (u.cmd.args[0] || "").trim();
   const [name, moniker] = input.split("=");
 
   const target = await u.util.target(u.me, name?.trim());
@@ -13,7 +13,7 @@ export default async (u: IUrsamuSDK) => {
   // Original was "connected admin+".
   // But maybe users should be able to set their own moniker?
   // Original logic: `lock: "connected admin+"`.
-  if (!u.me.flags.has("admin") && !u.me.flags.has("wizard")) {
+  if (!u.me.flags.has("admin") && !u.me.flags.has("wizard") && !u.me.flags.has("superuser")) {
       return u.send("Permission denied.");
   }
 

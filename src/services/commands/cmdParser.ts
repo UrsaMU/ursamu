@@ -126,6 +126,9 @@ cmdParser.use(async (ctx, next) => {
   }
 
   // 3. Fallback to system scripts in system/scripts/
+  // Connect-screen commands that system scripts may handle for unauthenticated users
+  const connectScreenScripts = new Set(["connect", "who", "help", "quit"]);
+
   const aliasMap: Record<string, string> = {
     "l": "look",
     "ex": "examine",
@@ -134,6 +137,7 @@ cmdParser.use(async (ctx, next) => {
     "p": "page",
     "tel": "teleport",
     "teleport": "teleport",
+    "co": "connect",
     ...systemAliases
   };
 
@@ -172,10 +176,15 @@ cmdParser.use(async (ctx, next) => {
   }
 
   // Attempt to load and run script if it exists in system/scripts
+  // Skip system scripts for unauthenticated users unless it's a connect-screen command
   try {
+    if (!ctx.socket.cid && !connectScreenScripts.has(scriptName)) {
+      // Fall through to legacy commands (e.g. character creation via "create")
+      throw { skip: true };
+    }
     const scriptPath = `./system/scripts/${scriptName}.ts`;
     const scriptInfo = await Deno.stat(scriptPath).catch(() => null);
-    
+
     if (scriptInfo?.isFile) {
         const code = await Deno.readTextFile(scriptPath);
         
@@ -190,7 +199,7 @@ cmdParser.use(async (ctx, next) => {
         // to be available as the first argument in the SDK's cmd.args array.
         const rawArgs = msg.trim().slice(intentName.length).trim();
         const targetQuery = scriptArgs[0];
-        const targetObj = targetQuery ? await target(char as unknown as IDBOBJ, targetQuery) : undefined;
+        const targetObj = (targetQuery && char) ? await target(char as unknown as IDBOBJ, targetQuery) : undefined;
         const room = char?.location ? await Obj.get(char.location) : null;
 
         await sandboxService.runScript(code, {
@@ -205,8 +214,10 @@ cmdParser.use(async (ctx, next) => {
         });
         return;
     }
-  } catch (e) {
-    console.warn(`[CmdParser] System script execution failed for ${scriptName}:`, e);
+  } catch (e: unknown) {
+    if (!(e && typeof e === "object" && "skip" in e)) {
+      console.warn(`[CmdParser] System script execution failed for ${scriptName}:`, e);
+    }
   }
 
   // 4. Fallback to legacy hard-coded commands (only if any are loaded)

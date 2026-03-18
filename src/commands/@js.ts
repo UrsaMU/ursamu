@@ -6,7 +6,7 @@ export default () =>
   addCmd({
     name: "js",
     pattern: /^[+@]?js\s+(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     exec: async (u: IUrsamuSDK) => {
       const code = u.cmd.args[0];
       try {

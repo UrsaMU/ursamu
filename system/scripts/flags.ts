@@ -5,8 +5,10 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  * Sets or removes flags on an object.
  */
 export default async (u: IUrsamuSDK) => {
-  const targetName = u.cmd.args[0];
-  const flags = u.cmd.args[1];
+  const raw = (u.cmd.args[0] || "").trim();
+  const eqIdx = raw.indexOf("=");
+  const targetName = eqIdx !== -1 ? raw.slice(0, eqIdx).trim() : "";
+  const flags = eqIdx !== -1 ? raw.slice(eqIdx + 1).trim() : "";
 
   if (!targetName || !flags) {
     u.send("Usage: @flags <target>=<flags>");

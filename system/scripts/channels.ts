@@ -10,6 +10,10 @@ export default async (u: IUrsamuSDK) => {
 
   switch (switchArg) {
     case "join": {
+      if (!args[0]) {
+        u.send("Usage: @channel/join <channel>=<alias>");
+        return;
+      }
       const [chan, alias] = args[0].split("=");
       if (!chan || !alias) {
         u.send("Usage: @channel/join <channel>=<alias>");

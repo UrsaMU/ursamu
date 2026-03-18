@@ -11,7 +11,7 @@ export default () => {
   addCmd({
     name: "@lock",
     pattern: /^[@\+]?lock(?:\/(\w+))?\s+([^=]+)\s*=\s*(.*)/i,
-    lock: "connected builder+",
+    lock: "connected & builder+",
     exec: async (u: IUrsamuSDK) => {
       const [swtch, obj, key] = u.cmd.args;
       const en = await Obj.get(u.me.id);
@@ -47,7 +47,7 @@ export default () => {
   addCmd({
     name: "@unlock",
     pattern: /^[@\+]?unlock(?:\/(\w+))?\s+(.*)/i,
-    lock: "connected builder+",
+    lock: "connected & builder+",
     exec: async (u: IUrsamuSDK) => {
       const [swtch, obj] = u.cmd.args;
       const en = await Obj.get(u.me.id);

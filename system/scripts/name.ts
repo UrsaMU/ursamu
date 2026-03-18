@@ -3,7 +3,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 export const aliases = ["name"];
 
 export default async (u: IUrsamuSDK) => {
-  const input = u.cmd.args.join(" ");
+  const input = (u.cmd.args[0] || "").trim();
   const [targetName, newName] = input.split("=");
 
   if (!targetName || !newName) {

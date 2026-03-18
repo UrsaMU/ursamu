@@ -20,7 +20,7 @@ export default () => {
     addCmd({
       name: msg.name,
       pattern: new RegExp(`^${msg.name}\\s+(.*)\\s*=\\s*(.*)?$`, "i"),
-      lock: "connected builder+",
+      lock: "connected & builder+",
       help: msg.help,
       category: "building",
       exec: async (u: IUrsamuSDK) => {

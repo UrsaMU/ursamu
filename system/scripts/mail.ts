@@ -87,18 +87,22 @@ export default async (u: IUrsamuSDK) => {
 
     // Determine subcommand from switches or positional args
     let subCmd = switches[0] || "";
+    // After subcommand detection, subArgs holds remaining text for the handler
+    let subArgs = rawinput;
     if (!subCmd) {
-        const firstArg = (args[1] || "").toLowerCase();
-        if (args[1]) {
-            if (["send", "read", "delete", "quick", "proof", "edit", "abort", "cc", "bcc", "reply", "notify", "replyall", "forward", "subject"].includes(firstArg)) {
-                subCmd = firstArg;
-            } else if (!isNaN(parseInt(firstArg))) {
-                subCmd = "read";
-            } else {
-                subCmd = "draft";
-            }
-        } else {
+        const words = rawinput.split(/\s+/);
+        const firstWord = (words[0] || "").toLowerCase();
+        if (!rawinput.trim()) {
             subCmd = "list";
+        } else if (["send", "read", "delete", "quick", "proof", "edit", "abort", "cc", "bcc", "reply", "notify", "replyall", "forward", "subject"].includes(firstWord)) {
+            subCmd = firstWord;
+            subArgs = words.slice(1).join(" ");
+        } else if (!isNaN(parseInt(firstWord))) {
+            subCmd = "read";
+            subArgs = rawinput;
+        } else {
+            subCmd = "draft";
+            subArgs = rawinput;
         }
     }
 
@@ -132,7 +136,7 @@ export default async (u: IUrsamuSDK) => {
         }
 
         case "read": {
-            const numStr = switches.length ? args[0] : (args[1] === "read" ? args[2] : args[1]);
+            const numStr = subArgs.trim();
             const num = parseInt(numStr || "");
             const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
             mails.sort((a, b) => a.date - b.date);
@@ -165,7 +169,7 @@ export default async (u: IUrsamuSDK) => {
 
         case "reply": {
             // @mail/reply <num> — starts a draft replying to message #num
-            const num = parseInt(args[0] || "");
+            const num = parseInt(subArgs.trim() || "");
             const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
             mails.sort((a, b) => a.date - b.date);
 
@@ -196,7 +200,7 @@ export default async (u: IUrsamuSDK) => {
 
         case "replyall": {
             // @mail/replyall <num> — reply to sender + all original recipients
-            const num = parseInt(args[0] || "");
+            const num = parseInt(subArgs.trim() || "");
             const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
             mails.sort((a, b) => a.date - b.date);
 
@@ -230,13 +234,13 @@ export default async (u: IUrsamuSDK) => {
 
         case "forward": {
             // @mail/forward <num>=<target>
-            const eqIdx = (args[0] || "").indexOf("=");
+            const eqIdx = subArgs.indexOf("=");
             if (eqIdx === -1) {
                 u.send("%chMAIL:%cn Usage: @mail/forward <message number>=<target>");
                 return;
             }
-            const num = parseInt((args[0] || "").slice(0, eqIdx));
-            const targetName = (args[0] || "").slice(eqIdx + 1).trim();
+            const num = parseInt(subArgs.slice(0, eqIdx));
+            const targetName = subArgs.slice(eqIdx + 1).trim();
 
             const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
             mails.sort((a, b) => a.date - b.date);
@@ -268,7 +272,7 @@ export default async (u: IUrsamuSDK) => {
         case "cc": {
             // @mail/cc <target> — add cc to current draft
             if (!en.state.tempMail) return u.send("%chMAIL:%cn No draft in progress.");
-            const targetName = args[0] || "";
+            const targetName = subArgs.trim();
             if (!targetName) return u.send("%chMAIL:%cn Usage: @mail/cc <target>");
             const target = await u.util.target(en, targetName);
             if (!target) return u.send(`%chMAIL:%cn Target '${targetName}' not found.`);
@@ -284,7 +288,7 @@ export default async (u: IUrsamuSDK) => {
         case "bcc": {
             // @mail/bcc <target> — add bcc to current draft
             if (!en.state.tempMail) return u.send("%chMAIL:%cn No draft in progress.");
-            const targetName = args[0] || "";
+            const targetName = subArgs.trim();
             if (!targetName) return u.send("%chMAIL:%cn Usage: @mail/bcc <target>");
             const target = await u.util.target(en, targetName);
             if (!target) return u.send(`%chMAIL:%cn Target '${targetName}' not found.`);
@@ -298,7 +302,7 @@ export default async (u: IUrsamuSDK) => {
         }
 
         case "draft": {
-            const targetName = args[1] || args[0];
+            const targetName = subArgs.trim();
             const target = await u.util.target(en, targetName);
             if (!target) return u.send(`%chMAIL:%cn Target '${targetName}' not found.`);
 
@@ -327,7 +331,7 @@ export default async (u: IUrsamuSDK) => {
 
         case "subject": {
             if (!en.state.tempMail) return u.send("%chMAIL:%cn No draft in progress.");
-            const subject = (args[0] || "").replace(/^subject\s+/i, "").trim() || args.slice(2).join(" ");
+            const subject = subArgs.trim();
             const draft = en.state.tempMail as IMail;
             draft.subject = subject;
             await u.db.modify(en.id, "$set", { data: en.state });
@@ -382,7 +386,7 @@ export default async (u: IUrsamuSDK) => {
         }
 
         case "delete": {
-            const numStr = switches.length ? args[0] : (args[1] === "delete" ? args[2] : args[1]);
+            const numStr = subArgs.trim();
             const num = parseInt(numStr || "");
             const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
             mails.sort((a, b) => a.date - b.date);

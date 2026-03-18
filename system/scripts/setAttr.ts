@@ -12,7 +12,7 @@ export default async (u: IUrsamuSDK) => {
   // So if `&ATTR obj=value`
   // Args[0] = "ATTR obj=value"
   
-  const raw = u.cmd.args[0];
+  const raw = u.cmd.args[0] || "";
   // Parse: ATTR obj=value
   // Split by first space to get ATTR
   const [attrHeader, ...rest] = raw.split(" ");

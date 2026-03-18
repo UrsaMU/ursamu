@@ -9,6 +9,8 @@ export interface IConfig {
     mail?: string;
     wiki?: string;
     bboard?: string;
+    corsOrigins?: string | string[];
+    maxConnectionsPerIp?: number;
   };
   game?: {
     name?: string;

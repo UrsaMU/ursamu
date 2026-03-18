@@ -5,7 +5,7 @@ export default () => {
   addCmd({
     name: "@boot",
     pattern: /^@boot\s+(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Disconnect a player",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
@@ -22,7 +22,7 @@ export default () => {
   addCmd({
     name: "@toad",
     pattern: /^@toad\s+(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Destroy a player",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
@@ -39,7 +39,7 @@ export default () => {
   addCmd({
     name: "@newpassword",
     pattern: /^@newpass(?:word)?\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Change a player's password",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
@@ -55,7 +55,7 @@ export default () => {
   addCmd({
     name: "@chown",
     pattern: /^@chown\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Change ownership of an object",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
@@ -72,7 +72,7 @@ export default () => {
   addCmd({
     name: "@site",
     pattern: /^@site\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected admin+",
+    lock: "connected & admin+",
     help: "Set site configuration",
     category: "admin",
     exec: async (u: IUrsamuSDK) => {

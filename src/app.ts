@@ -1,6 +1,7 @@
 import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler } from "./routes/index.ts";
 import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
+import { getConfig } from "./services/Config/mod.ts";
 
 type PluginRouteHandler = (req: Request, userId: string | null) => Promise<Response>;
 const pluginRoutes: Array<{ prefix: string; handler: PluginRouteHandler }> = [];
@@ -17,9 +18,16 @@ export const handleRequest = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
   const path = url.pathname;
 
-  // CORS Headers
+  // CORS Headers — configurable via server.corsOrigins (default: "*")
+  const configured = getConfig<string | string[]>("server.corsOrigins") ?? "*";
+  const origin = req.headers.get("Origin") ?? "";
+  let allowOrigin = "*";
+  if (configured !== "*") {
+    const allowed = Array.isArray(configured) ? configured : [configured];
+    allowOrigin = allowed.includes(origin) ? origin : allowed[0];
+  }
   const corsHeaders = {
-    "Access-Control-Allow-Origin": "*", // Or specific origin if needed
+    "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
   };

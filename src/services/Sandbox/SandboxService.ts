@@ -26,7 +26,7 @@ class LocalSandbox {
     return new Promise((resolve, reject) => {
       worker.onmessage = async (e) => {
         const { type, data, prop, value, message, target: msgTarget } = e.data;
-        
+
         switch (type) {
           case "result":
             worker.terminate();
@@ -58,11 +58,13 @@ class LocalSandbox {
             break;
           case "teleport":
             if (e.data.target && e.data.destination) {
-                Obj.get(e.data.target).then(obj => {
+                (async () => {
+                    const obj = await Obj.get(e.data.target);
                     if (obj) {
                         obj.location = e.data.destination;
+                        await obj.save();
                     }
-                });
+                })().catch(err => console.error("[Sandbox] Teleport error:", err));
             }
             break;
           case "db:search":
@@ -794,7 +796,7 @@ export class SandboxService {
   private pool: SandboxInstance[] = [];
   private poolSize = 5;
   private maxPoolSize = 10;
-  private defaultTimeout = 200;
+  private defaultTimeout = 10000;
 
   private constructor() {}
 

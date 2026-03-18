@@ -43,7 +43,7 @@ export const matchChannel = async (ctx: IContext) => {
   } else if (msg.toLowerCase() === "on" && channel?.active === false) {
     channel.active = true;
     ctx.socket.join(channel.channel);
-    await dbojs.update({ id: en.id }, en);
+    await dbojs.modify({ id: en.id }, "$set", en);
     force(ctx, `${channel.alias} :has joined the channel.`);
     send([ctx.socket.id], `You have joined channel ${channel.channel}.`, {});
     return true;
@@ -51,7 +51,7 @@ export const matchChannel = async (ctx: IContext) => {
     await force(ctx, `${channel.alias} :has left the channel.`);
     channel.active = false;
     ctx.socket.leave(channel.channel);
-    await dbojs.update({ id: en.id }, en);
+    await dbojs.modify({ id: en.id }, "$set", en);
     send([ctx.socket.id], `You have left channel ${channel.channel}.`, {});
     return true;
   } else {

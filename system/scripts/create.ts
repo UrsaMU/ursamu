@@ -6,7 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const input = u.cmd.args.join(" ").trim();
+  const input = (u.cmd.args[0] || "").trim();
 
   if (!input) {
     u.send("Usage: @create <name>[=<cost>]");
@@ -41,6 +41,7 @@ export default async (u: IUrsamuSDK) => {
   // Decrease quota
   if (!isStaff) {
     actor.state.quota = quota - cost;
+    await u.db.modify(actor.id, "$set", { data: { ...actor.state } });
   }
 
   u.send(`You create ${objName} (#${thing.id}).`);

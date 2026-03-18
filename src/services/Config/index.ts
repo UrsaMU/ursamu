@@ -67,7 +67,7 @@ export class ConfigManager {
   /**
    * Load configuration from the config file
    */
-  private loadConfig(): void {
+  public loadConfig(): void {
     try {
       const configPath = dpath.join(this.configDir, this.configFile);
       
