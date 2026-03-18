@@ -20,7 +20,7 @@ export default async (u: IUrsamuSDK) => {
   }
 
   // Permission check
-  if (!u.canEdit(actor, obj)) {
+  if (!(await u.canEdit(actor, obj))) {
     u.send("Permission denied.");
     return;
   }

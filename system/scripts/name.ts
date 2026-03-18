@@ -13,7 +13,7 @@ export default async (u: IUrsamuSDK) => {
   const target = await u.util.target(u.me, targetName.trim(), true);
   if (!target) return u.send("I can't find that.");
 
-  if (!u.canEdit(u.me, target)) return u.send("Permission denied.");
+  if (!(await u.canEdit(u.me, target))) return u.send("Permission denied.");
 
   // Using u.db.search instead
   // SDK doesn't expose isNameTaken directly in `u` but maybe `u.common`?

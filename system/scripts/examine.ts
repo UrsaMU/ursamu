@@ -14,7 +14,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  if (!u.canEdit(actor, target) && !target.flags.has("visual")) {
+  if (!(await u.canEdit(actor, target)) && !target.flags.has("visual")) {
     u.send("You can't examine that.");
     return;
   }
