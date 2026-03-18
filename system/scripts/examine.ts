@@ -23,7 +23,7 @@ export default async (u: IUrsamuSDK) => {
   let telnet = `%ch${target.name} (#${target.id})%cn\n`;
   telnet += `Flags: ${Array.from(target.flags).join(" ")}\n`;
   telnet += `Owner: ${(target.state.owner as string) || "None"}  Lock: ${(target.state.lock as string) || "None"}\n`;
-  telnet += `Location: ${(target.state.location as string) || "Limbo"}\n`;
+  telnet += `Location: ${target.location || "Limbo"}\n`;
   telnet += `\n%chDescription:%cn\n${(target.state.description as string) || "No description."}\n`;
 
   const systemKeys = ['name', 'moniker', 'alias', 'owner', 'lock', 'description', 'flags', 'id', 'location'];

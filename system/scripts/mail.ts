@@ -147,8 +147,11 @@ export default async (u: IUrsamuSDK) => {
             }
 
             const m = mails[num - 1];
-            m.read = true;
-            await u.mail.send(m);
+            if (m.id && !m.read) {
+              await u.mail.delete(m.id);
+              m.read = true;
+              await u.mail.send(m);
+            }
 
             const fromId = m.from.replace("#", "");
             const fromObj = await u.util.target(en, fromId).catch(() => null);

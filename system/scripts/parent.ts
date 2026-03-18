@@ -30,7 +30,7 @@ export default async (u: IUrsamuSDK) => {
       return;
     }
 
-    await u.db.modify(target.id, "$unset", { "data.parent": "" });
+    await u.db.modify(target.id, "$unset", { "data.parent": 1 });
     u.send(`Parent cleared for ${u.util.displayName(target, actor)}.`);
     return;
   }
@@ -81,6 +81,6 @@ export default async (u: IUrsamuSDK) => {
     count++;
   }
 
-  await u.db.modify(target.id, "$set", { "data.parent": "#" + parentObj.id });
+  await u.db.modify(target.id, "$set", { "data.parent": parentObj.id });
   u.send(`Parent of ${u.util.displayName(target, actor)} set to ${u.util.displayName(parentObj, actor)}.`);
 };

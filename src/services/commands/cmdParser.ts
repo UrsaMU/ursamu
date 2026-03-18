@@ -206,6 +206,10 @@ cmdParser.use(async (ctx, next) => {
   // Common MUX @ prefixes
   if (scriptName.startsWith("@") || scriptName.startsWith("+")) {
      scriptName = scriptName.slice(1);
+     // Re-check alias map after stripping prefix (e.g. @desc → desc → describe)
+     if (aliasMap[scriptName]) {
+       scriptName = aliasMap[scriptName];
+     }
   }
 
   // Parse switches from command name (e.g., "bbpost/edit" → name="bbpost", switches=["edit"])

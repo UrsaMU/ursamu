@@ -20,7 +20,7 @@ export default () => {
           return u.send("That name or alias is already taken.");
       }
 
-      await dbojs.modify({ id: tar.id }, "$set", { data: { ...tar.state, alias } });
+      await dbojs.modify({ id: tar.id }, "$set", { "data.alias": alias } as any);
       u.send(`Alias for ${String(tar.state.name || tar.id)} set to %ch${alias}%cn`);
     },
   });

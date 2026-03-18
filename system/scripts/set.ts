@@ -39,18 +39,16 @@ export default async (u: IUrsamuSDK) => {
        u.send("Cannot delete internal system properties.");
        return;
     }
-    delete target.state[attribute];
+    await u.db.modify(target.id, "$unset", { [`data.${attribute}`]: 1 });
     resultMsg = `Attribute ${attribute} cleared on ${target.name}.`;
   } else {
     if (value.length > 4096) {
       u.send("Value too long.");
       return;
     }
-    target.state[attribute] = value;
+    await u.db.modify(target.id, "$set", { [`data.${attribute}`]: value });
     resultMsg = `Set - ${target.name}/${attribute}: ${value}`;
   }
-
-  await u.db.modify(target.id, "$set", { [`data.${attribute}`]: target.state[attribute] });
 
   // ANSI Output
   u.send(resultMsg);

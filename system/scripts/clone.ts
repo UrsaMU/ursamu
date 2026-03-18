@@ -25,15 +25,16 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  // Prepare clone template
+  // Prepare clone template — only copy safe, known properties
+  // (obj.state from db.search is incomplete, so we whitelist instead of spread)
   const cloneTemplate = {
     flags: obj.flags,
     location: actor.id, // Clone appears in inventory
     state: {
-      ...obj.state,
       name: newName ? newName.trim() : (obj.state.name || "Cloned Object"),
-      password: "", // Don't copy password
-      owner: actor.id
+      description: obj.state.description || "",
+      owner: actor.id,
+      attributes: obj.state.attributes || [],
     }
   };
 

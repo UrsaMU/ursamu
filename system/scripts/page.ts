@@ -30,8 +30,8 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  const actorName = actor.name || (actor.state?.name as string) || "Someone";
-  const targetActualName = target.name || (target.state?.name as string) || "Someone";
+  const actorName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "Someone";
+  const targetActualName = (target.state?.moniker as string) || (target.state?.name as string) || target.name || "Someone";
 
   // ANSI Output for Telnet
   u.send(`%ch${actorName}%cn pages you: ${message}`, target.id);

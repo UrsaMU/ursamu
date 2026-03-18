@@ -14,4 +14,5 @@ import "./admin.ts";
 import "./search.ts";
 import "./messages.ts";
 import "./reload.ts";
+import "./test.ts";
 

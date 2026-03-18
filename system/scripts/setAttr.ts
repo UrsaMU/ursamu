@@ -35,13 +35,10 @@ export default async (u: IUrsamuSDK) => {
   // deno-lint-ignore no-explicit-any
   const existingIndex = attributes.findIndex((a: any) => a.name === attrName);
 
-  if (value !== undefined) { 
-      const _newVal = value.trim(); 
-      const actualValue = value; 
-      
+  if (value !== undefined) {
       const newAttr = {
           name: attrName,
-          value: actualValue,
+          value: value.trim(),
           setter: u.me.id,
           type: "attribute"
       };
