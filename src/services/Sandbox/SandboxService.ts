@@ -56,15 +56,69 @@ class LocalSandbox {
               broadcastAll(message, data);
             }
             break;
-          case "teleport":
-            if (e.data.target && e.data.destination) {
-                Obj.get(e.data.target).then(obj => {
-                    if (obj) {
-                        obj.location = e.data.destination;
-                    }
-                });
+          case "room:broadcast": {
+            if (message && e.data.room) {
+              const { dbojs: db } = await import("../Database/index.ts");
+              const excludeIds: string[] = Array.isArray(e.data.exclude) ? e.data.exclude as string[] : [];
+              const players = await db.query({
+                $and: [{ location: e.data.room }, { flags: /connected/i }]
+              });
+              const targets = players
+                .filter(p => !excludeIds.includes(p.id))
+                .map(p => p.id);
+              if (targets.length > 0) {
+                broadcastSend(targets, message, data);
+              }
             }
             break;
+          }
+          case "teleport": {
+            if (e.data.target && e.data.destination) {
+                const { dbojs: db } = await import("../Database/index.ts");
+                const { moniker: mk } = await import("../../utils/moniker.ts");
+
+                (async () => {
+                    const target = await db.queryOne({ id: e.data.target });
+                    const dest = await db.queryOne({ id: e.data.destination });
+                    if (!target || !dest) return;
+
+                    const sourceId = target.location;
+
+                    // Notify source room players
+                    if (sourceId) {
+                        const sourcePlayers = await db.query({
+                            $and: [{ location: sourceId }, { flags: /connected/i }, { id: { $ne: target.id } }]
+                        });
+                        const sourceTargets = sourcePlayers.map(p => p.id);
+                        if (sourceTargets.length > 0) {
+                            broadcastSend(sourceTargets, `${mk(target)} has left.`, {});
+                        }
+                    }
+
+                    // Persist new location
+                    await db.modify({ id: target.id }, "$set", { location: e.data.destination });
+
+                    // Notify destination room players
+                    const destPlayers = await db.query({
+                        $and: [{ location: e.data.destination }, { flags: /connected/i }, { id: { $ne: target.id } }]
+                    });
+                    const destTargets = destPlayers.map(p => p.id);
+                    if (destTargets.length > 0) {
+                        const sourceRoom = sourceId ? await db.queryOne({ id: sourceId }) : null;
+                        const fromStr = sourceRoom?.data?.name ? ` from ${sourceRoom.data.name}` : "";
+                        broadcastSend(destTargets, `${mk(target)} has arrived${fromStr}.`, {});
+                    }
+
+                    // Auto-look for the moved player
+                    const targetSocket = wsService.getConnectedSockets().find(s => s.cid === target.id);
+                    if (targetSocket) {
+                        const { cmdParser } = await import("../commands/index.ts");
+                        await cmdParser.run({ socket: targetSocket, msg: "look" });
+                    }
+                })();
+            }
+            break;
+          }
           case "db:search":
             if (e.data.query) {
               const { dbojs: db } = await import("../Database/index.ts");
@@ -496,13 +550,19 @@ class LocalSandbox {
           }
           case "execute":
           case "force": {
-            if (e.data.command && context?.id) {
+            if (e.data.command) {
                const { force } = await import("../commands/index.ts");
                const { dbojs: db } = await import("../Database/index.ts");
                (async () => {
-                  const en = await db.queryOne({ id: context.id });
+                  const { wsService } = await import("../WebSocket/index.ts");
+                  // Resolve actor: prefer context.id, fall back to the live socket's cid (e.g. post-login in connect script)
+                  let actorId = context?.id && context.id !== "#-1" ? context.id : undefined;
+                  if (!actorId && context?.socketId) {
+                    const liveSocket = wsService.getConnectedSockets().find(s => s.id === context.socketId);
+                    if (liveSocket?.cid) actorId = liveSocket.cid;
+                  }
+                  const en = actorId ? await db.queryOne({ id: actorId }) : undefined;
                   if (en) {
-                      const { wsService } = await import("../WebSocket/index.ts");
                       const socket = wsService.getConnectedSockets().find(s => s.cid === en.id);
                       const mockCtx = { socket: socket || { cid: en.id, id: "script-" + en.id, join: () => {}, leave: () => {}, send: () => {} }, msg: e.data.command };
                       // deno-lint-ignore no-explicit-any

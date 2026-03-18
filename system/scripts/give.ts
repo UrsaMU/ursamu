@@ -36,14 +36,15 @@ export default async (u: IUrsamuSDK) => {
 
     const receiverMoney = (receiver.state.money as number) || 0;
 
-    await u.db.modify(actor.id, "$set", { "state.money": currentMoney - amount });
-    await u.db.modify(receiver.id, "$set", { "state.money": receiverMoney + amount });
+    await u.db.modify(actor.id, "$set", { data: { ...actor.state, money: currentMoney - amount } });
+    await u.db.modify(receiver.id, "$set", { data: { ...receiver.state, money: receiverMoney + amount } });
 
     const actorName = u.util.displayName(actor, actor);
     const receiverName = u.util.displayName(receiver, actor);
 
     u.send(`You give ${amount} coins to ${receiverName}.`);
     u.send(`${actorName} gives you ${amount} coins.`, receiver.id);
+    u.here.broadcast(`${actorName} gives ${amount} coins to ${receiverName}.`, { exclude: [actor.id, receiver.id] });
     return;
   }
 
@@ -63,4 +64,5 @@ export default async (u: IUrsamuSDK) => {
 
   u.send(`You give ${thingName} to ${receiverName}.`);
   u.send(`${actorName} gives you ${thingName}.`, receiver.id);
+  u.here.broadcast(`${actorName} gives ${thingName} to ${receiverName}.`, { exclude: [actor.id, receiver.id] });
 };

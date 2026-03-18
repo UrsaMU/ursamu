@@ -355,9 +355,11 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           const user = await Obj.get(userId);
           if (!user) return new Response("Unauthorized", { status: 401 });
 
-          // Only owner or allowed can invite? Let's say Owner for now.
-          if (scene.owner !== user.dbref) {
-               return new Response("Only the owner can invite.", { status: 403 });
+          const canInvite = scene.owner === user.dbref ||
+              (Array.isArray(scene.allowed) && scene.allowed.includes(user.dbref)) ||
+              user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser");
+          if (!canInvite) {
+               return new Response("Only the owner or co-authors can invite.", { status: 403 });
           }
 
           const body = await req.json();

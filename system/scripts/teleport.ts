@@ -47,10 +47,9 @@ export default async (u: IUrsamuSDK) => {
   }
 
   u.teleport(target.id, destination.id);
-  
+
   const targetNameDisplay = u.util.displayName(target, actor);
   const destNameDisplay = u.util.displayName(destination, actor);
 
   u.send(`You teleport ${targetNameDisplay} to ${destNameDisplay}.`);
-  // Note: The teleport method in SandboxService handles the actual movements and look.
 };
