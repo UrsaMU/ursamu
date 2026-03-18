@@ -15,6 +15,7 @@ function clean(str: string): string {
   return str
     .replace(/%c[a-zA-Z0-9]/gi, "")
     .replace(/%[nrtbR]/g, "")
+    // deno-lint-ignore no-control-regex
     .replace(/\x1b\[[0-9;]*m/g, "")
     .trim()
     .slice(0, 80) || "Unknown";
@@ -184,7 +185,7 @@ const discordPlugin: IPlugin = {
   version:     "1.0.0",
   description: "Webhook-based Discord integration — posts job events and channel talk to Discord",
 
-  init: async () => {
+  init: () => {
     setupCommands();
     registerPluginRoute("/api/v1/discord", discordRouteHandler);
     subscribeJobHooks();
@@ -193,7 +194,7 @@ const discordPlugin: IPlugin = {
     return true;
   },
 
-  remove: async () => {
+  remove: () => {
     console.log("[discord] Plugin removed");
   },
 };

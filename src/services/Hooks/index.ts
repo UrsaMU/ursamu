@@ -3,6 +3,7 @@ import { getAttribute } from "../../utils/getAttribute.ts";
 import { sandboxService } from "../Sandbox/SandboxService.ts";
 import { getConfig } from "../Config/mod.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
+import { gameHooks } from "./GameHooks.ts";
 
 export const hooks = {
   executeAttribute: async (obj: IDBOBJ, attrName: string, args: string[] = [], enactor?: IDBOBJ) => {
@@ -42,11 +43,15 @@ export const hooks = {
     } catch (e) {
       console.error("[Hooks] aconnect error:", e);
     }
+    gameHooks.emit("player:login", {
+      actorId:   player.id,
+      actorName: (player.data?.name as string) || player.id,
+    }).catch(e => console.error("[GameHooks] player:login:", e));
   },
 
   adisconnect: async (player: IDBOBJ) => {
     await hooks.executeAttribute(player, "ADISCONNECT", [], player);
-    
+
     const masterRoomId = getConfig<string>("game.masterRoom") || "0";
     if (masterRoomId) {
         const masterRoom = await dbojs.queryOne({id: masterRoomId});
@@ -54,5 +59,9 @@ export const hooks = {
             await hooks.executeAttribute(masterRoom, "ADISCONNECT", [], player);
         }
     }
+    gameHooks.emit("player:logout", {
+      actorId:   player.id,
+      actorName: (player.data?.name as string) || player.id,
+    }).catch(e => console.error("[GameHooks] player:logout:", e));
   }
 };

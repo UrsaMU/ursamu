@@ -183,6 +183,7 @@ const center = (str = "", width: number, fill = " "): string => _padStr(str, wid
 
 /** Strip MUSH-style substitution codes (%ch, %cn, etc.) and raw ANSI escapes. */
 const stripSubs = (str = ""): string =>
+  // deno-lint-ignore no-control-regex
   str.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").replace(/\x1b\[[0-9;]*m/g, "");
 
 const sprintf = (fmt: string, ...args: unknown[]): string => {
@@ -340,7 +341,8 @@ self.onmessage = async (e: MessageEvent) => {
       disconnect: (id: string) => request<void>("sys:disconnect", { id }),
       reboot: () => request<void>("sys:reboot", {}),
       shutdown: () => request<void>("sys:shutdown", {}),
-      uptime: () => request<number>("sys:uptime", {})
+      uptime: () => request<number>("sys:uptime", {}),
+      update: (branch = "") => request<void>("sys:update", { branch })
     },
     chan: {
       join: (channel: string, alias: string) => request<void>("chan:join", { channel, alias }),

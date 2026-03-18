@@ -74,6 +74,8 @@ export interface IUrsamuSDK {
     reboot(): Promise<void>;
     shutdown(): Promise<void>;
     uptime(): Promise<number>;
+    /** Pull the latest code from git and reboot. Optionally specify a branch. */
+    update(branch?: string): Promise<void>;
   };
   chan: {
     join(channel: string, alias: string): Promise<void>;

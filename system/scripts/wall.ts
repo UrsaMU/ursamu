@@ -4,7 +4,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  * @wall <message>  — broadcast a message to all connected players
  * Superuser/admin/wizard only.
  */
-export default async (u: IUrsamuSDK) => {
+export default (u: IUrsamuSDK) => {
   const actor = u.me;
 
   if (!actor.flags.has("superuser") && !actor.flags.has("admin") && !actor.flags.has("wizard")) {

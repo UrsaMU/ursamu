@@ -33,7 +33,7 @@ const examplePlugin: IPlugin = {
     },
   },
 
-  init: async () => {
+  init: () => {
     // Register all HTTP routes handled by this plugin.
     // The prefix must match the paths used in your route handler.
     registerPluginRoute("/api/v1/example", exampleRouteHandler);
@@ -41,7 +41,7 @@ const examplePlugin: IPlugin = {
     return true;
   },
 
-  remove: async () => {
+  remove: () => {
     console.log("[example] Plugin removed");
   },
 };

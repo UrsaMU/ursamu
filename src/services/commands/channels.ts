@@ -7,6 +7,7 @@ import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
 import { discordBridge } from "../discord/index.ts";
 import { channelEvents } from "../channel-events.ts";
+import { gameHooks } from "../Hooks/GameHooks.ts";
 
 export const matchChannel = async (ctx: IContext) => {
   if (!ctx.socket.cid) {
@@ -66,11 +67,13 @@ export const matchChannel = async (ctx: IContext) => {
 
   send([chan.name], `${chan.header} ${msg}`, {});
   discordBridge.sendToDiscord(chan.name, moniker(en), msg);
-  channelEvents.emit("channel:message", {
+  const chanPayload = {
     channelName: chan.name,
     senderId:    en.id,
     senderName:  moniker(en),
     message:     msg,
-  });
+  };
+  channelEvents.emit("channel:message", chanPayload);
+  gameHooks.emit("channel:message", chanPayload).catch(e => console.error("[GameHooks] channel:message:", e));
   return true;
 };

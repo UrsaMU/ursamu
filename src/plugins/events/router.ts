@@ -1,6 +1,7 @@
 import { dbojs } from "../../services/Database/index.ts";
 import { gameEvents, eventRsvps, getNextEventNumber, parseDateTime } from "./db.ts";
 import type { IGameEvent, IEventRSVP } from "../../@types/IGameEvent.ts";
+import { eventHooks } from "./hooks.ts";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -144,6 +145,7 @@ export async function eventsRouteHandler(
     };
 
     await gameEvents.create(ev);
+    await eventHooks.emit("event:created", ev);
     return jsonResponse(ev, 201);
   }
 
@@ -216,6 +218,19 @@ export async function eventsRouteHandler(
 
       const updated: IGameEvent = { ...ev, ...update };
       await gameEvents.update({}, updated);
+
+      if (updated.status !== ev.status) {
+        if (updated.status === "cancelled") {
+          await eventHooks.emit("event:cancelled", updated);
+        } else if (updated.status === "completed") {
+          await eventHooks.emit("event:completed", updated);
+        } else {
+          await eventHooks.emit("event:updated", updated);
+        }
+      } else {
+        await eventHooks.emit("event:updated", updated);
+      }
+
       return jsonResponse(updated);
     }
 
@@ -228,6 +243,7 @@ export async function eventsRouteHandler(
 
       await gameEvents.delete({ id: ev.id });
       await eventRsvps.delete({ eventId: ev.id });
+      await eventHooks.emit("event:deleted", ev);
       return jsonResponse({ deleted: true });
     }
 
@@ -291,6 +307,7 @@ export async function eventsRouteHandler(
       if (existing) {
         const updated = { ...existing, status, note, createdAt: existing.createdAt };
         await eventRsvps.update({}, updated);
+        await eventHooks.emit("event:rsvp", ev, updated);
         return jsonResponse(updated);
       }
 
@@ -304,6 +321,7 @@ export async function eventsRouteHandler(
         createdAt:  Date.now(),
       };
       await eventRsvps.create(rsvp);
+      await eventHooks.emit("event:rsvp", ev, rsvp);
       return jsonResponse(rsvp, 201);
     }
 
@@ -316,6 +334,7 @@ export async function eventsRouteHandler(
       if (!existing) return jsonResponse({ error: "No RSVP to cancel" }, 404);
 
       await eventRsvps.delete({ id: existing.id });
+      await eventHooks.emit("event:rsvp-cancelled", ev, existing);
       return jsonResponse({ deleted: true });
     }
   }
