@@ -9,7 +9,7 @@ export default async (u: IUrsamuSDK) => {
   const fullArgs = (u.cmd.args[0] || "").trim();
 
   // Pattern: @open[/sw] <name>=<room>[,<back exit>]
-  const match = fullArgs.match(/^(\/.*)?\s+([^=,]+)\s*=\s*([^,]+)(?:,\s*(.*))?/i);
+  const match = fullArgs.match(/^(?:(\/.+?)\s+)?([^=,]+)\s*=\s*([^,]+)(?:,\s*(.*))?/i);
 
   if (!match) {
     u.send("Usage: @open[/inventory] <name>=<room>[,<back exit>]");
