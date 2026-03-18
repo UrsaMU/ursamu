@@ -187,7 +187,12 @@ cmdParser.use(async (ctx, next) => {
     "~": "mailadd",
   };
 
-  let scriptName = aliasMap[intentName] || intentName;
+  // Strip @ / + before alias lookup so "@desc" resolves via the same alias as "desc"
+  const lookupName = (intentName.startsWith("@") || intentName.startsWith("+"))
+    ? intentName.slice(1)
+    : intentName;
+
+  let scriptName = aliasMap[lookupName] || lookupName;
   let scriptArgs = intent.args;
 
   // Handle prefixes
@@ -197,11 +202,6 @@ cmdParser.use(async (ctx, next) => {
         scriptArgs = [msg.trim().slice(prefix.length).trim()];
         break;
     }
-  }
-
-  // Common MUX @ prefixes
-  if (scriptName.startsWith("@") || scriptName.startsWith("+")) {
-     scriptName = scriptName.slice(1);
   }
 
   // Parse switches from command name (e.g., "bbpost/edit" → name="bbpost", switches=["edit"])
@@ -234,7 +234,7 @@ cmdParser.use(async (ctx, next) => {
         // to be available as the first argument in the SDK's cmd.args array.
         const rawArgs = msg.trim().slice(intentName.length).trim();
         const targetQuery = scriptArgs[0];
-        const targetObj = targetQuery ? await target(char as unknown as IDBOBJ, targetQuery) : undefined;
+        const targetObj = (targetQuery && char) ? await target(char as unknown as IDBOBJ, targetQuery) : undefined;
         const room = char?.location ? await Obj.get(char.location) : null;
 
         await sandboxService.runScript(code, {
@@ -244,7 +244,7 @@ cmdParser.use(async (ctx, next) => {
             target: targetObj ? await SDKService.hydrate(new Obj(targetObj)) : undefined,
             location: char?.location || "limbo",
             state: char?.data?.state as Record<string, unknown> || {},
-            cmd: { name: scriptName, args: [rawArgs, ...scriptArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
+            cmd: { name: scriptName, args: [rawArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
             socketId: ctx.socket.id
         });
         return;

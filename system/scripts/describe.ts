@@ -1,6 +1,6 @@
 import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
-export const aliases = ["desc"];
+export const aliases = ["desc", "description"];
 
 /**
  * System Script: describe.ts

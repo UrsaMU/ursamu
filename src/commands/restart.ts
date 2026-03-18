@@ -4,7 +4,7 @@ import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 export default () =>
   addCmd({
     name: "reboot",
-    pattern: /^@reboot|^@restart/g,
+    pattern: /^@reboot|^@restart|^@reload/g,
     lock: "connected admin+",
     exec: async (u: IUrsamuSDK) => {
       u.broadcast(`%chGame>%cn Server @reboot initiated by ${String(u.me.state.name || u.me.id)}...`);

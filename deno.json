@@ -12,6 +12,7 @@
     "include": [
       "src",
       "system",
+      "scripts",
       "mod.ts",
       "deno.json",
       "deps.ts",
@@ -24,6 +25,11 @@
   },
   "tasks": {
     "start": "bash ./scripts/run.sh",
+    "daemon": "bash ./scripts/daemon.sh",
+    "stop": "bash ./scripts/stop.sh",
+    "restart": "bash ./scripts/restart.sh",
+    "status": "bash ./scripts/status.sh",
+    "logs": "tail -f logs/main.log logs/telnet.log",
     "server": "deno run -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
     "telnet": "deno run -A --unstable-detect-cjs --unstable-kv ./src/telnet.ts",
     "config": "deno run -A ./src/cli/config.ts",
@@ -60,7 +66,7 @@
     "@preact/signals-core": "https://esm.sh/*@preact/signals-core@1.5.1",
     "$std/": "jsr:@std/std@^0.224.0/",
     "bcrypt": "npm:bcryptjs@2.4.3",
-    "lodash": "npm:lodash-es@4.17.21",
+    "lodash": "npm:lodash@^4.17.23",
     "djwt": "jsr:@zaubrik/djwt@^3.0.2",
     "quickjs-emscripten": "npm:quickjs-emscripten@0.29.0",
     "@ursamu/parser": "npm:@ursamu/parser@1.2.4",

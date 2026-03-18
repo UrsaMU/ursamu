@@ -33,9 +33,10 @@ echo "Starting UrsaMU main server in watch mode..."
 deno run --allow-all --unstable-detect-cjs --unstable-kv --watch=src/,system/scripts/ --watch-exclude=config/ src/main.ts &
 MAIN_PID=$!
 
-# Run the telnet server with watch mode
-echo "Starting UrsaMU telnet server in watch mode..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv --watch=src/,system/scripts/ --watch-exclude=config/ src/telnet.ts &
+# Telnet runs without --watch so it stays up across code reloads.
+# It auto-reconnects to the WS when main restarts.
+echo "Starting UrsaMU telnet server..."
+deno run --allow-all --unstable-detect-cjs --unstable-kv src/telnet.ts &
 TELNET_PID=$!
 
 # Run the web client

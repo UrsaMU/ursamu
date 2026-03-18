@@ -288,10 +288,10 @@ export async function createNativeSDK(
         await Promise.resolve();
       },
       reboot: async () => {
-        await Deno.writeTextFile(
-          "src/reboot.ts",
-          `// Reboot triggered\nexport const rebootId = ${Date.now()};\n`
-        );
+        // Exit with code 75 — start.ts recognises this as a reboot request and restarts main
+        // without touching the telnet process.
+        setTimeout(() => Deno.exit(75), 500);
+        await Promise.resolve();
       },
       shutdown: async () => {
         setTimeout(() => Deno.exit(0), 100);

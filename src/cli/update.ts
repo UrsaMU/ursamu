@@ -71,53 +71,61 @@ if (!importKey || !URSAMU_RE.test(imports[importKey])) {
 }
 
 const currentSpecifier = imports[importKey];
-const currentVersionMatch = currentSpecifier.match(/@(\d+\.\d+\.\d+)/);
-const currentVersion = currentVersionMatch ? currentVersionMatch[1] : null;
+const isLocal = currentSpecifier.startsWith(".") || currentSpecifier.startsWith("/");
 
-// ── 2. fetch latest version from JSR ─────────────────────────────────────────
+// ── 2. resolve latest version (JSR) or local path ────────────────────────────
 
-console.log("Checking JSR for the latest @ursamu/ursamu release...");
+const SHELL_SCRIPTS = ["daemon.sh", "stop.sh", "restart.sh", "status.sh"];
+const scriptsDir = join(cwd, "scripts");
 
-let latestVersion: string;
-try {
-  const res = await fetch("https://jsr.io/@ursamu/ursamu/meta.json");
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const meta = await res.json() as { latest: string };
-  latestVersion = meta.latest;
-} catch (e) {
-  console.error(`Error: Could not fetch version info from JSR — ${e}`);
-  Deno.exit(1);
+let latestVersion: string | null = null;
+
+if (isLocal) {
+  console.log(`Local ursamu detected (${currentSpecifier}) — skipping version bump.`);
+} else {
+  const currentVersionMatch = currentSpecifier.match(/@(\d+\.\d+\.\d+)/);
+  const currentVersion = currentVersionMatch ? currentVersionMatch[1] : null;
+
+  console.log("Checking JSR for the latest @ursamu/ursamu release...");
+  try {
+    const res = await fetch("https://jsr.io/@ursamu/ursamu/meta.json");
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const meta = await res.json() as { latest: string };
+    latestVersion = meta.latest;
+  } catch (e) {
+    console.error(`Error: Could not fetch version info from JSR — ${e}`);
+    Deno.exit(1);
+  }
+
+  // ── 3. compare ─────────────────────────────────────────────────────────────
+
+  if (currentVersion === latestVersion) {
+    console.log(`Already up to date (${latestVersion}).`);
+  } else {
+    const newSpecifier = `jsr:@ursamu/ursamu@${latestVersion}`;
+    console.log(`  Current : ${currentSpecifier}`);
+    console.log(`  Latest  : ${newSpecifier}`);
+
+    if (!dryRun) {
+      // ── 4. update deno.json ───────────────────────────────────────────────
+      imports[importKey] = newSpecifier;
+      const updatedRaw = denoJsonRaw.replace(
+        new RegExp(`"${currentSpecifier.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`, "g"),
+        `"${newSpecifier}"`
+      );
+      await Deno.writeTextFile(denoJsonPath, updatedRaw);
+      console.log("Updated deno.json.");
+      console.log(`\nUpdated @ursamu/ursamu ${currentVersion ?? "(unpinned)"} → ${latestVersion}`);
+      if (currentVersion) {
+        console.log(`Changelog: https://github.com/UrsaMU/ursamu/releases/tag/v${latestVersion}`);
+      }
+    } else {
+      console.log("\nDry run — no files written.");
+    }
+  }
 }
 
-// ── 3. compare ───────────────────────────────────────────────────────────────
-
-if (currentVersion === latestVersion) {
-  console.log(`Already up to date (${latestVersion}).`);
-  Deno.exit(0);
-}
-
-const newSpecifier = `jsr:@ursamu/ursamu@${latestVersion}`;
-
-console.log(`  Current : ${currentSpecifier}`);
-console.log(`  Latest  : ${newSpecifier}`);
-
-if (dryRun) {
-  console.log("\nDry run — no files written.");
-  Deno.exit(0);
-}
-
-// ── 4. update deno.json ───────────────────────────────────────────────────────
-
-imports[importKey] = newSpecifier;
-
-// Preserve original formatting by doing a simple string replace
-const updatedRaw = denoJsonRaw.replace(
-  new RegExp(`"${currentSpecifier.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`, "g"),
-  `"${newSpecifier}"`
-);
-
-await Deno.writeTextFile(denoJsonPath, updatedRaw);
-console.log("\nUpdated deno.json.");
+if (dryRun) Deno.exit(0);
 
 // ── 5. re-cache entry points ──────────────────────────────────────────────────
 
@@ -141,7 +149,42 @@ if (entryPoints.length > 0) {
   }
 }
 
-console.log(`\nUpdated @ursamu/ursamu ${currentVersion ?? "(unpinned)"} → ${latestVersion}`);
-if (currentVersion) {
-  console.log(`Changelog: https://github.com/UrsaMU/ursamu/releases/tag/v${latestVersion}`);
+// ── 6. sync shell scripts ─────────────────────────────────────────────────────
+// These aren't accessible via the Deno import system so we copy/fetch them explicitly.
+
+try {
+  await Deno.mkdir(scriptsDir, { recursive: true });
+  let synced = 0;
+
+  for (const name of SHELL_SCRIPTS) {
+    let content: string | null = null;
+
+    if (isLocal) {
+      // Copy from local ursamu path
+      const localPath = join(cwd, currentSpecifier.replace(/\/$/, ""), "scripts", name);
+      try {
+        content = await Deno.readTextFile(localPath);
+      } catch {
+        console.warn(`  Warning: could not read ${localPath} — skipping.`);
+        continue;
+      }
+    } else {
+      // Fetch from JSR
+      const url = `https://jsr.io/@ursamu/ursamu@${latestVersion}/scripts/${name}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.warn(`  Warning: could not fetch scripts/${name} (${res.status}) — skipping.`);
+        continue;
+      }
+      content = await res.text();
+    }
+
+    await Deno.writeTextFile(join(scriptsDir, name), content);
+    try { await Deno.chmod(join(scriptsDir, name), 0o755); } catch { /* non-unix */ }
+    synced++;
+  }
+
+  if (synced > 0) console.log(`Synced ${synced} shell script(s) in scripts/.`);
+} catch (e) {
+  console.warn(`Warning: could not sync shell scripts — ${e}`);
 }
