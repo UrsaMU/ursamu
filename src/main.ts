@@ -383,6 +383,7 @@ export async function checkAndCreateSuperuser() {
   const players = await dbojs.query({ flags: /player/i });
 
   if (players.length === 0) {
+    // Fresh database — print first-run instructions
     console.log("\n┌─────────────────────────────────────────────────────┐");
     console.log("│  Fresh database detected — no players exist yet.    │");
     console.log("│                                                     │");
@@ -392,5 +393,16 @@ export async function checkAndCreateSuperuser() {
     console.log("│  The first player created is automatically given    │");
     console.log("│  superuser access.                                  │");
     console.log("└─────────────────────────────────────────────────────┘\n");
+    return;
+  }
+
+  // Players exist but no superuser — promote the first player (lowest id)
+  const superusers = await dbojs.query({ flags: /superuser/i });
+  if (superusers.length === 0) {
+    const sorted = players.slice().sort((a, b) => Number(a.id) - Number(b.id));
+    const first = sorted[0];
+    await setFlags(first, "superuser");
+    const name = first.data?.name || first.id;
+    console.log(`\n[Init] No superuser found — promoted '${name}' (#${first.id}) to superuser.\n`);
   }
 }
