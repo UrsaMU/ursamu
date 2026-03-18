@@ -533,8 +533,8 @@ Multiple KV databases for different game aspects:
 ### Network Services
 
 - **Telnet**: Port 4201 - Classic MU* connection
-- **WebSocket**: Port 4202 - Modern web clients
-- **HTTP API**: Port 4203 - RESTful API and web interface
+- **WebSocket**: Port 4202 - WebSocket connections
+- **HTTP API**: Port 4203 - RESTful API
 
 ## 🚀 Getting Started
 
@@ -569,9 +569,8 @@ deno task telnet
 
 Connect to your game using:
 - **Telnet Client**: \`telnet localhost 4201\`
-- **Web Client**: http://localhost:4203 (if you build a web interface)
 - **WebSocket**: Connect to \`ws://localhost:4202\` from custom clients
-- **HTTP API**: \`http://localhost:4203/api/...\` (if you implement API endpoints)
+- **HTTP API**: \`http://localhost:4203/api/...\`
 
 ## 📁 Project Structure
 
