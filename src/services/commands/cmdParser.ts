@@ -245,7 +245,10 @@ cmdParser.use(async (ctx, next) => {
 
         // For system scripts, we want the raw arguments after the command name
         // to be available as the first argument in the SDK's cmd.args array.
-        const rawArgs = msg.trim().slice(intentName.length).trim();
+        // For prefix-mapped commands (like - → mailadd), use the prefix-extracted args
+        // since intentName is the first word, not just the prefix character.
+        const isPrefixCmd = Object.keys(prefixMap).some(p => msg.trim().startsWith(p) && scriptName === prefixMap[p]);
+        const rawArgs = isPrefixCmd ? (scriptArgs[0] || "") : msg.trim().slice(intentName.length).trim();
         const targetQuery = scriptArgs[0];
         const targetObj = (targetQuery && char) ? await target(char as unknown as IDBOBJ, targetQuery) : undefined;
         const room = char?.location ? await Obj.get(char.location) : null;
