@@ -67,7 +67,7 @@ export const dbObjHandler = async (req: Request, userId: string): Promise<Respon
           // For MVP Character Sheet, we mainly want to update attributes/data.
           
           if (updates.data) {
-              targetObj.data = { ...targetObj.data, ...updates.data };
+              targetObj.data = { ...(targetObj.data || {}), ...updates.data };
               // Ensure we don't overwrite password via this route accidentally if passed empty? 
               // The spread should handle preserving if not in updates.data
           }

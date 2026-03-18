@@ -74,7 +74,6 @@ export default async (u: IUrsamuSDK) => {
 
   // Decrease quota and persist
   if (!isStaff) {
-    actor.state.quota = quota - cost;
-    await u.db.modify(actor.id, "$set", { data: { ...actor.state } });
+    await u.db.modify(actor.id, "$set", { "data.quota": quota - cost });
   }
 };

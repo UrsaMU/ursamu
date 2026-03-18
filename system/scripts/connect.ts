@@ -66,8 +66,8 @@ export default async (u: IUrsamuSDK) => {
     u.send("%chMAIL:%cn You have an unsent draft. Use '@mail proof' to review or '@mail abort' to discard.");
   }
 
-  // Record this login and clear failed attempts
-  await u.db.modify(player.id, "$set", { data: { ...player.state, lastLogin: Date.now(), failedAttempts: 0 } });
+  // Record this login and clear failed attempts (targeted update to avoid overwriting other data fields)
+  await u.db.modify(player.id, "$set", { "data.lastLogin": Date.now(), "data.failedAttempts": 0 });
 
   // Broadcast to room
   if (player.location) {

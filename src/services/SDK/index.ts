@@ -266,7 +266,10 @@ export async function createNativeSDK(
         const ctx: IContext = { socket };
         await joinChans(ctx);
       },
-      hash: (password: string) => hash(password, 10),
+      hash: async (password: string) => {
+        try { return await hash(password, 10); }
+        catch (e) { console.error("[SDK] hash error:", e); throw e; }
+      },
       setPassword: async (id: string, password: string) => {
         const hashed = await hash(password, 10);
         const objResult = await dbojs.queryOne({ id });

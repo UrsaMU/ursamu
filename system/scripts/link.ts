@@ -6,7 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const input = u.cmd.args.join(" ").trim();
+  const input = (u.cmd.args[0] || "").trim();
   const match = input.match(/^(.+?)\s*=\s*(.*)$/);
 
   if (!match) {

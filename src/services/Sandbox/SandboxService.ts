@@ -47,7 +47,8 @@ class LocalSandbox {
               broadcastSend(targets, message, data);
               
               if (data?.quit && context?.socketId) {
-                wsService.getConnectedSockets().find(s => s.id === context.socketId)?.disconnect();
+                const sock = wsService.getConnectedSockets().find(s => s.id === context.socketId);
+                if (sock?.cid) wsService.disconnect(sock.cid);
               }
             }
             break;

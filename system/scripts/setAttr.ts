@@ -62,5 +62,5 @@ export default async (u: IUrsamuSDK) => {
       }
   }
 
-  await u.db.modify(target.id, "$set", { data: { ...target.state, attributes } });
+  await u.db.modify(target.id, "$set", { "data.attributes": attributes });
 };

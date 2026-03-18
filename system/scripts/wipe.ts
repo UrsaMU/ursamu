@@ -31,6 +31,6 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  await u.db.modify(target.id, "$set", { data: { ...target.state, attributes: [] } });
+  await u.db.modify(target.id, "$set", { "data.attributes": [] });
   u.send(`Wiped ${attrs.length} attribute${attrs.length === 1 ? "" : "s"} from ${target.name || target.id}.`);
 };

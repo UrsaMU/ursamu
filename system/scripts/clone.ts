@@ -6,7 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const fullArgs = u.cmd.args.join(" ").trim();
+  const fullArgs = (u.cmd.args[0] || "").trim();
   
   // Pattern: @clone <obj>=<new name>
   const [objName, newName] = fullArgs.split("=");

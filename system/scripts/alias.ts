@@ -39,8 +39,7 @@ export default async (u: IUrsamuSDK) => {
     }
     
     // Set 
-    target.state.alias = aliasName;
-    await u.db.modify(target.id, "$set", { data: { alias: aliasName } });
+    await u.db.modify(target.id, "$set", { "data.alias": aliasName });
     u.send(`Alias for ${target.name} set to ${aliasName}.`);
   } else {
     // Clear alias

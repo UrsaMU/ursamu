@@ -4,7 +4,7 @@ export const aliases = ["lock", "unlock"];
 
 export default async (u: IUrsamuSDK) => {
   const _cmd = u.cmd.original?.toLowerCase() || u.cmd.name.toLowerCase();
-  const _rawInput = u.cmd.args.join(" "); // "obj=key" or "swtch obj=key" handling
+  const _rawInput = (u.cmd.args[0] || ""); // "obj=key" or "swtch obj=key" handling
   
   // Regex to parse: lock[/switch] target=key
   // But cmdParser separates args.
@@ -51,7 +51,7 @@ export default async (u: IUrsamuSDK) => {
   // `lock target = key` -> args: ["target", "=", "key"]
   // We should join back and split by first `=`
   
-  const fullArgs = u.cmd.args.join(" ");
+  const fullArgs = (u.cmd.args[0] || "");
   const [targetName, key] = fullArgs.split("=");
   
   const target = await u.util.target(u.me, targetName?.trim());

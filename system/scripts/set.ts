@@ -5,7 +5,7 @@ import { IUrsamuSDK, IDBObj as _IDBObj } from "../../src/@types/UrsamuSDK.ts";
  * ESM Refactored, Production-ready, and Telnet-compatible.
  */
 export default async (u: IUrsamuSDK) => {
-  const input = u.cmd.args.join(" ").trim();
+  const input = (u.cmd.args[0] || "").trim();
   const match = input.match(/^(.+?)\/(.+?)=(.*)$/);
 
   if (!match) {
@@ -50,7 +50,7 @@ export default async (u: IUrsamuSDK) => {
     resultMsg = `Set - ${target.name}/${attribute}: ${value}`;
   }
 
-  await u.db.modify(target.id, "$set", { data: { ...target.state } });
+  await u.db.modify(target.id, "$set", { [`data.${attribute}`]: target.state[attribute] });
 
   // ANSI Output
   u.send(resultMsg);

@@ -17,7 +17,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  const input = u.cmd.args.join(" ").trim();
+  const input = (u.cmd.args[0] || "").trim();
   if (!input) {
     u.send("Usage: @chancreate <name>[=<header>]");
     return;

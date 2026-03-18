@@ -6,7 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const input = u.cmd.args.join(" ").trim();
+  const input = (u.cmd.args[0] || "").trim();
 
   const match = input.match(/^(.+?)=(.*)$/);
   if (!match) {
@@ -30,8 +30,8 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  const actorName = (actor.state.moniker as string) || (actor.state.name as string) || actor.name;
-  const targetActualName = (target.state.moniker as string) || (target.state.name as string) || target.name;
+  const actorName = actor.name || (actor.state?.name as string) || "Someone";
+  const targetActualName = target.name || (target.state?.name as string) || "Someone";
 
   // ANSI Output for Telnet
   u.send(`%ch${actorName}%cn pages you: ${message}`, target.id);

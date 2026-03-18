@@ -98,6 +98,6 @@ export default async (u: IUrsamuSDK) => {
     }
     
     mail.message += message + "\n";
-    await u.db.modify(en.id, "$set", { data: en.state });
+    await u.db.modify(en.id, "$set", { "data.tempMail": mail });
     u.send("%chMAIL:%cn Message updated.");
 };

@@ -6,7 +6,7 @@ import { IUrsamuSDK, IDBObj } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const fullArgs = u.cmd.args.join(" ").trim();
+  const fullArgs = (u.cmd.args[0] || "").trim();
   const swtch = (u.cmd.name.split("/")[1] || "").toLowerCase();
 
   // Handle @parent/clear

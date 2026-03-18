@@ -64,7 +64,7 @@ export default () => {
       const newOwner = await u.util.target(u.me, newOwnerName);
       if (!thing) return u.send("Object not found.");
       if (!newOwner || !newOwner.flags.has("player")) return u.send("New owner not found.");
-      await u.db.modify(thing.id, "$set", { data: { ...thing.state, owner: newOwner.id } });
+      await u.db.modify(thing.id, "$set", { "data.owner": newOwner.id });
       u.send(`Owner of ${u.util.displayName(thing, u.me)} changed to ${u.util.displayName(newOwner, u.me)}.`);
     },
   });

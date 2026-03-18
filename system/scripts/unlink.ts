@@ -6,7 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const targetName = u.cmd.args.join(" ").trim();
+  const targetName = (u.cmd.args[0] || "").trim();
 
   if (!targetName) {
     u.send("Usage: @unlink <target>");

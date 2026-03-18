@@ -184,7 +184,7 @@ export default async (u: IUrsamuSDK) => {
             }
 
             const orig = mails[num - 1];
-            en.state.tempMail = {
+            const draft = {
                 id: crypto.randomUUID(),
                 from: `#${en.id}`,
                 to: [orig.from],
@@ -193,7 +193,7 @@ export default async (u: IUrsamuSDK) => {
                 date: Date.now(),
                 read: false
             };
-            await u.db.modify(en.id, "$set", { data: en.state });
+            await u.db.modify(en.id, "$set", { "data.tempMail": draft });
             u.send(`%chMAIL:%cn Replying to "${orig.subject}". Use '-<text>' to add lines, 'mail send' to send.`);
             break;
         }
@@ -218,7 +218,7 @@ export default async (u: IUrsamuSDK) => {
             const allRecipients = [orig.from, ...orig.to.filter(id => id !== `#${en.id}`)];
             const unique = [...new Set(allRecipients)];
 
-            en.state.tempMail = {
+            const draft = {
                 id: crypto.randomUUID(),
                 from: `#${en.id}`,
                 to: unique,
@@ -227,7 +227,7 @@ export default async (u: IUrsamuSDK) => {
                 date: Date.now(),
                 read: false
             };
-            await u.db.modify(en.id, "$set", { data: en.state });
+            await u.db.modify(en.id, "$set", { "data.tempMail": draft });
             u.send(`%chMAIL:%cn Replying to all (${unique.length} recipients). Use '-<text>' to add lines.`);
             break;
         }
@@ -280,7 +280,7 @@ export default async (u: IUrsamuSDK) => {
             draft.cc ||= [];
             const ccId = `#${target.id}`;
             if (!draft.cc.includes(ccId)) draft.cc.push(ccId);
-            await u.db.modify(en.id, "$set", { data: en.state });
+            await u.db.modify(en.id, "$set", { "data.tempMail": draft });
             u.send(`%chMAIL:%cn Added ${target.name} to CC.`);
             break;
         }
@@ -296,7 +296,7 @@ export default async (u: IUrsamuSDK) => {
             draft.bcc ||= [];
             const bccId = `#${target.id}`;
             if (!draft.bcc.includes(bccId)) draft.bcc.push(bccId);
-            await u.db.modify(en.id, "$set", { data: en.state });
+            await u.db.modify(en.id, "$set", { "data.tempMail": draft });
             u.send(`%chMAIL:%cn Added ${target.name} to BCC.`);
             break;
         }
@@ -311,7 +311,7 @@ export default async (u: IUrsamuSDK) => {
                 return;
             }
 
-            en.state.tempMail = {
+            const draft = {
                 id: crypto.randomUUID(),
                 from: `#${en.id}`,
                 to: [`#${target.id}`],
@@ -321,7 +321,7 @@ export default async (u: IUrsamuSDK) => {
                 read: false
             };
 
-            await u.db.modify(en.id, "$set", { data: en.state });
+            await u.db.modify(en.id, "$set", { "data.tempMail": draft });
             u.send(`%chMAIL:%cn Draft started to %ch${target.name}%cn.`);
             u.send(`Use 'mail subject <text>' to set the subject.`);
             u.send(`Use '-<line>' to add text to the body.`);
@@ -334,7 +334,7 @@ export default async (u: IUrsamuSDK) => {
             const subject = subArgs.trim();
             const draft = en.state.tempMail as IMail;
             draft.subject = subject;
-            await u.db.modify(en.id, "$set", { data: en.state });
+            await u.db.modify(en.id, "$set", { "data.tempMail": draft });
             u.send(`%chMAIL:%cn Subject set: ${subject}`);
             break;
         }
@@ -356,8 +356,7 @@ export default async (u: IUrsamuSDK) => {
                     u.send(`%chMAIL:%cn You have a new message from ${en.name || "Unknown"}`, id);
                 }
             }
-            delete en.state.tempMail;
-            await u.db.modify(en.id, "$set", { data: en.state });
+            await u.db.modify(en.id, "$unset", { "data.tempMail": 1 });
             break;
         }
 
@@ -379,8 +378,7 @@ export default async (u: IUrsamuSDK) => {
 
         case "abort": {
             if (!en.state.tempMail) return u.send("%chMAIL:%cn No draft in progress.");
-            delete en.state.tempMail;
-            await u.db.modify(en.id, "$set", { data: en.state });
+            await u.db.modify(en.id, "$unset", { "data.tempMail": 1 });
             u.send("%chMAIL:%cn Draft discarded.");
             break;
         }

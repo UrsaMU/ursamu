@@ -5,7 +5,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  * ESM Refactored, Production-ready.
  */
 export default (u: IUrsamuSDK) => {
-  const message = u.cmd.args.join(" ");
+  const message = (u.cmd.args[0] || "").trim();
 
   if (!message) {
     u.send("What do you want to think?");

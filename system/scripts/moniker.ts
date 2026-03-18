@@ -30,9 +30,7 @@ export default async (u: IUrsamuSDK) => {
     return u.send("Moniker cannot be empty.");
   }
 
-  target.state.moniker = moniker.trim();
-  // Use nested data object — DB.modify uses Object.assign so dot notation keys don't work
-  await u.db.modify(target.id, "$set", { data: { ...target.state } });
+  await u.db.modify(target.id, "$set", { "data.moniker": moniker.trim() });
   
   u.send(`Set moniker for ${target.name} to ${moniker.trim()}.`);
 };
