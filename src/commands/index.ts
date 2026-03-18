@@ -1,6 +1,7 @@
 import "./@js.ts";
 import "./alias.ts";
 import "./attrCommands.ts";
+import "./avatar.ts";
 import "./create.ts";
 import "./format.ts";
 import "./lock.ts";

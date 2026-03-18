@@ -36,14 +36,6 @@ export class ScriptService {
         });
 
         try {
-            // Expose API to the VM
-            // This is complex with quickjs-emscripten as we need to wrap objects
-            // For formatted string simplicity in this Phase verify:
-            // We will just expose a basic 'game' object if possible or just run code for calculation
-
-            // Simplified: Just evaluating code for now to prove connection.
-            // Direct object bridging requires more boilerplate (creating handles for each property).
-            // Standard Eval:
             const result = vm.evalCode(code);
 
             if (result.error) {

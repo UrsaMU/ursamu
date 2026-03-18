@@ -52,7 +52,7 @@ const spawnInherit = (script: string) => {
   return cmd.spawn();
 }
 
-const mainProc = spawnInherit("src/main.ts");
+// Telnet runs as a long-lived independent process — it only goes down on hard shutdown (SIGINT).
 const telnetProc = spawnInherit("src/telnet.ts");
 
 // Spawn Web Client (optional — only if src/web-client exists)
@@ -74,10 +74,22 @@ try {
 }
 
 
-// Handle cleanup
+const REBOOT_CODE = 75;
+
+// Main server restart loop — exit code 75 means "please restart me" (@reboot).
+// Any other exit code means a permanent stop (@shutdown or crash).
+const runMain = async () => {
+  while (true) {
+    const proc = spawnInherit("src/main.ts");
+    const { code } = await proc.status;
+    if (code !== REBOOT_CODE) break;
+    console.log("\n🔄 Restarting main server...");
+  }
+};
+
+// Hard shutdown cleanup — only reached when main exits permanently or on SIGINT.
 const cleanup = () => {
   console.log("\nShutting down servers...");
-  try { mainProc.kill(); } catch { /* ignore */ }
   try { telnetProc.kill(); } catch { /* ignore */ }
   try { webProc?.kill(); } catch { /* ignore */ }
 };
@@ -87,5 +99,5 @@ Deno.addSignalListener("SIGINT", () => {
   Deno.exit(0);
 });
 
-// Wait for processes
-await Promise.all([mainProc.status, telnetProc.status]);
+await runMain();
+cleanup();

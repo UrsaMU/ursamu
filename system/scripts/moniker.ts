@@ -31,6 +31,8 @@ export default async (u: IUrsamuSDK) => {
   }
 
   await u.db.modify(target.id, "$set", { "data.moniker": moniker.trim() });
-  
+
+
   u.send(`Set moniker for ${target.name} to ${moniker.trim()}.`);
+  u.here.broadcast(`${target.name} is now known as ${moniker.trim()}.`, { exclude: [u.me.id] });
 };

@@ -44,6 +44,7 @@ export default async (u: IUrsamuSDK) => {
 
     u.send(`You give ${amount} coins to ${receiverName}.`);
     u.send(`${actorName} gives you ${amount} coins.`, receiver.id);
+    u.here.broadcast(`${actorName} gives ${amount} coins to ${receiverName}.`, { exclude: [actor.id, receiver.id] });
     return;
   }
 
@@ -63,4 +64,5 @@ export default async (u: IUrsamuSDK) => {
 
   u.send(`You give ${thingName} to ${receiverName}.`);
   u.send(`${actorName} gives you ${thingName}.`, receiver.id);
+  u.here.broadcast(`${actorName} gives ${thingName} to ${receiverName}.`, { exclude: [actor.id, receiver.id] });
 };

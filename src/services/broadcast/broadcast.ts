@@ -1,9 +1,10 @@
 import { wsService } from "../WebSocket/index.ts";
 type data = Record<string, unknown>;
 
-export const send = (targets: string[], msg: string, data?: data, _exclude: string[] = []) => {
-  if (targets.length > 0) {
-    wsService.send(targets, {
+export const send = (targets: string[], msg: string, data?: data, exclude: string[] = []) => {
+  const filtered = exclude.length > 0 ? targets.filter(t => !exclude.includes(t)) : targets;
+  if (filtered.length > 0) {
+    wsService.send(filtered, {
       event: "message",
       payload: {
         msg,

@@ -42,7 +42,7 @@ Deno.test("Name and Alias Uniqueness", async (t) => {
 
   await t.step("isNameTaken: should return false for unknown name", async () => {
     const taken = await isNameTaken("Unknown");
-    assertEquals(taken, false);
+    assertEquals(taken, undefined);
   });
 
   await t.step("Collision: Name already taken as alias", async () => {

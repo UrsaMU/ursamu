@@ -61,19 +61,15 @@ export const dbObjHandler = async (req: Request, userId: string): Promise<Respon
 
       if (req.method === "PATCH") {
           const updates = await req.json();
-          // Safe update fields? 
-          // Allow updating 'data' and 'description' for now.
-          // Don't allow changing ID, location, flags (unless specific logic?)
-          // For MVP Character Sheet, we mainly want to update attributes/data.
-          
+
           if (updates.data) {
-              targetObj.data = { ...(targetObj.data || {}), ...updates.data };
-              // Ensure we don't overwrite password via this route accidentally if passed empty? 
-              // The spread should handle preserving if not in updates.data
+              const { password: _pw, ...safeData } = updates.data as Record<string, unknown>;
+              targetObj.data = { ...targetObj.data, ...safeData };
           }
-          
+
+          // Explicitly ignore id, flags, location — only allow data and description
           if (updates.description) targetObj.description = updates.description;
-          if (updates.name) targetObj.data = { ...targetObj.data, name: updates.name }; // Name is deeper in data usually?
+          if (updates.name) targetObj.data = { ...targetObj.data, name: updates.name };
 
           await dbojs.modify({ id: targetObj.id }, "$set", targetObj);
           
