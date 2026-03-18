@@ -167,15 +167,32 @@ export class WebSocketService {
                 if (player) {
                     await setFlags(player, "!connected");
                     await hooks.adisconnect(player);
-                    this.broadcast({
-                        event: "disconnect",
-                        payload: {
-                            msg: `${moniker(player)} has disconnected.`,
-                            room: {
-                                name: "", desc: "", exits: [], players: [], items: [] // dummy
+
+                    if (player.location) {
+                        const { dbojs } = await import("../Database/index.ts");
+                        const roomPlayers = await dbojs.query({
+                            $and: [{ location: player.location }, { flags: /connected/i }, { id: { $ne: player.id } }]
+                        });
+                        const room = await dbojs.queryOne({ id: player.location });
+                        const roomData = room ? {
+                            name: room.data?.name || "",
+                            desc: (room.data?.description as string) || (room.data?.desc as string) || "",
+                            exits: [],
+                            players: [],
+                            items: []
+                        } : { name: "", desc: "", exits: [], players: [], items: [] };
+
+                        this.send(
+                            roomPlayers.map(p => p.id),
+                            {
+                                event: "disconnect",
+                                payload: {
+                                    msg: `${moniker(player)} has disconnected.`,
+                                    room: roomData
+                                }
                             }
-                        }
-                    });
+                        );
+                    }
                 }
             }
         });

@@ -6,9 +6,17 @@ export interface IntentDefinition {
   metadata?: Record<string, unknown>;
 }
 
+const DEFAULT_INTENTS: Record<string, IntentDefinition> = {
+  say:  { priority: 10, enabled: true },
+  look: { priority: 1,  enabled: true },
+  get:  { priority: 5,  enabled: true },
+  drop: { priority: 5,  enabled: true },
+  give: { priority: 5,  enabled: true },
+};
+
 export class IntentRegistry {
   private static instance: IntentRegistry;
-  private intents: Record<string, IntentDefinition> = {};
+  private intents: Record<string, IntentDefinition> = { ...DEFAULT_INTENTS };
 
   private constructor() {
     this.loadFromConfig();
@@ -24,7 +32,7 @@ export class IntentRegistry {
   private loadFromConfig() {
     const registry = getConfig<Record<string, IntentDefinition>>("intents.registry");
     if (registry) {
-      this.intents = registry;
+      this.intents = { ...DEFAULT_INTENTS, ...registry };
     }
   }
 

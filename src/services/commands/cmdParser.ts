@@ -102,7 +102,7 @@ export async function loadSystemAliases() {
 // Start loading aliases
 loadSystemAliases();
 
-export const addCmd = (...cmd: ICmd[]) => {
+export const addCmd = (...cmd: ICmd[]): void => {
   cmds.push(...cmd);
 };
 
@@ -191,7 +191,12 @@ cmdParser.use(async (ctx, next) => {
     "~": "mailadd",
   };
 
-  let scriptName = aliasMap[intentName] || intentName;
+  // Strip @ / + before alias lookup so "@desc" resolves via the same alias as "desc"
+  const lookupName = (intentName.startsWith("@") || intentName.startsWith("+"))
+    ? intentName.slice(1)
+    : intentName;
+
+  let scriptName = aliasMap[lookupName] || lookupName;
   let scriptArgs = intent.args;
 
   // Handle prefixes
@@ -211,6 +216,7 @@ cmdParser.use(async (ctx, next) => {
        scriptName = aliasMap[scriptName];
      }
   }
+
 
   // Parse switches from command name (e.g., "bbpost/edit" → name="bbpost", switches=["edit"])
   let cmdSwitches: string[] = [];
@@ -260,7 +266,7 @@ cmdParser.use(async (ctx, next) => {
             target: targetObj ? await SDKService.hydrate(new Obj(targetObj)) : undefined,
             location: char?.location || "limbo",
             state: char?.data?.state as Record<string, unknown> || {},
-            cmd: { name: scriptName, args: [rawArgs, ...scriptArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
+            cmd: { name: scriptName, args: [rawArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
             socketId: ctx.socket.id
         });
         return;

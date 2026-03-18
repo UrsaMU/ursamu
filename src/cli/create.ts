@@ -410,9 +410,9 @@ echo "Starting main server in watch mode..."
 deno run --allow-all --unstable-detect-cjs --unstable-kv --watch src/main.ts &
 MAIN_PID=\$!
 
-# Run the telnet server with watch mode
-echo "Starting telnet server in watch mode..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv --watch src/telnet.ts &
+# Telnet runs without --watch so it stays up across code reloads.
+echo "Starting telnet server..."
+deno run --allow-all --unstable-detect-cjs --unstable-kv src/telnet.ts &
 TELNET_PID=\$!
 
 # Wait for both processes
@@ -471,9 +471,16 @@ console.log("Created text/default_connect.txt with complete content");
 const denoJsonContent = `{
   "nodeModulesDir": "auto",
   "tasks": {
-    "start": "bash ./scripts/run.sh",
-    "server": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
-    "telnet": "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/telnet.ts"
+    "start":   "bash ./scripts/run.sh",
+    "daemon":  "bash ./scripts/daemon.sh",
+    "stop":    "bash ./scripts/stop.sh",
+    "restart": "bash ./scripts/restart.sh",
+    "status":  "bash ./scripts/status.sh",
+    "logs":    "tail -f logs/main.log logs/telnet.log",
+    "update":  "deno run -A jsr:@ursamu/ursamu/cli update",
+    "server":  "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
+    "telnet":  "deno run -A --unstable-detect-cjs --unstable-kv ./src/telnet.ts",
+    "test":    "deno test --allow-all --unstable-kv --no-check"
   },
   "compilerOptions": {
     "lib": ["deno.window"],
@@ -526,8 +533,8 @@ Multiple KV databases for different game aspects:
 ### Network Services
 
 - **Telnet**: Port 4201 - Classic MU* connection
-- **WebSocket**: Port 4202 - Modern web clients
-- **HTTP API**: Port 4203 - RESTful API and web interface
+- **WebSocket**: Port 4202 - WebSocket connections
+- **HTTP API**: Port 4203 - RESTful API
 
 ## 🚀 Getting Started
 
@@ -562,9 +569,8 @@ deno task telnet
 
 Connect to your game using:
 - **Telnet Client**: \`telnet localhost 4201\`
-- **Web Client**: http://localhost:4203 (if you build a web interface)
 - **WebSocket**: Connect to \`ws://localhost:4202\` from custom clients
-- **HTTP API**: \`http://localhost:4203/api/...\` (if you implement API endpoints)
+- **HTTP API**: \`http://localhost:4203/api/...\`
 
 ## 📁 Project Structure
 

@@ -281,7 +281,7 @@ self.onmessage = async (e: MessageEvent) => {
     me: hydrateSDKObject(sdkData.me),
     here: {
       ...(hydrateSDKObject(sdkData.here) as SDKDBObj),
-      broadcast: (msg: string, options?: Record<string, unknown>) => self.postMessage({ type: 'broadcast', message: msg, data: options })
+      broadcast: (msg: string, options?: Record<string, unknown>) => self.postMessage({ type: 'room:broadcast', room: (sdkData.here as IDBObj)?.id, message: msg, exclude: options?.exclude, data: options })
     } as IDBObj,
     target: sdkData.target ? ({
       ...(hydrateSDKObject(sdkData.target) as SDKDBObj),

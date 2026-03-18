@@ -141,7 +141,7 @@ Deno.test("Admin: @toad - destroys target player", OPTS, async () => {
   const result = await sandboxService.runScript(wrapAdmin(extra), ctx, SLOW) as string[];
   assertStringIncludes(result.join(" "), "toaded");
   const remaining = await dbojs.queryOne({ id: victim.id });
-  assertEquals(remaining, false);
+  assertEquals(remaining, undefined);
   await cleanup(adm.id);
 });
 

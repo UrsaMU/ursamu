@@ -157,7 +157,19 @@ const checkAtom = async (atom: string, enactor: IDBObj, _target: IDBObj, depth: 
     const actualVal = enactor.state?.[attr.toLowerCase()];
     if (actualVal === undefined) return false;
     
-    // Simple equality for now.
+    // Comparison operators: attr:>5, attr:>=10, attr:<3, attr:<=100
+    const cmpMatch = val.match(/^(>=|<=|>|<)(.+)$/);
+    if (cmpMatch) {
+      const [, op, numStr] = cmpMatch;
+      const numVal = parseFloat(numStr);
+      const actualNum = parseFloat(String(actualVal));
+      if (!isNaN(numVal) && !isNaN(actualNum)) {
+        if (op === ">=") return actualNum >= numVal;
+        if (op === "<=") return actualNum <= numVal;
+        if (op === ">") return actualNum > numVal;
+        if (op === "<") return actualNum < numVal;
+      }
+    }
     return String(actualVal) === val;
   }
   

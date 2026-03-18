@@ -3,6 +3,9 @@ import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playe
 import { authenticate } from "./middleware/authMiddleware.ts";
 import { getConfig } from "./services/Config/mod.ts";
 
+export { addCmd } from "./services/commands/cmdParser.ts";
+export type { ICmd } from "./@types/ICmd.ts";
+
 type PluginRouteHandler = (req: Request, userId: string | null) => Promise<Response>;
 const pluginRoutes: Array<{ prefix: string; handler: PluginRouteHandler }> = [];
 
@@ -132,6 +135,35 @@ export const handleRequest = async (req: Request): Promise<Response> => {
 
     if (path.startsWith("/api/v1/config") || path.startsWith("/api/v1/connect") || path.startsWith("/api/v1/welcome")) {
         return await configHandler(req);
+    }
+
+    // Avatar images — public, no auth required
+    if (path.startsWith("/avatars/")) {
+      const id = path.slice("/avatars/".length);
+      if (!id || id.includes("/") || id.includes("..")) {
+        return new Response("Not Found", { status: 404 });
+      }
+      const EXT_MIME: Record<string, string> = {
+        png: "image/png", jpg: "image/jpeg", gif: "image/gif", webp: "image/webp",
+      };
+      try {
+        for await (const entry of Deno.readDir("data/avatars")) {
+          if (entry.name.startsWith(id + ".")) {
+            const ext = entry.name.split(".").pop() ?? "";
+            const file = await Deno.readFile(`data/avatars/${entry.name}`);
+            return new Response(file, {
+              status: 200,
+              headers: {
+                "Content-Type": EXT_MIME[ext] ?? "application/octet-stream",
+                "Cache-Control": "public, max-age=3600",
+              },
+            });
+          }
+        }
+      } catch {
+        // data/avatars doesn't exist yet
+      }
+      return new Response("Not Found", { status: 404 });
     }
 
     // Health check or root
