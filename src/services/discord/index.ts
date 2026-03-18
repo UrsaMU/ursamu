@@ -26,7 +26,7 @@ export class DiscordService {
     return DiscordService.instance;
   }
 
-  async init() {
+  init() {
     // Idempotent: clear maps and cancel any pending reconnect on re-init
     if (this.reconnectTimer !== undefined) {
       clearTimeout(this.reconnectTimer);

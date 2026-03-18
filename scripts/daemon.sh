@@ -25,8 +25,11 @@ mkdir -p "$LOG_DIR"
 nohup deno run --allow-all --unstable-detect-cjs --unstable-kv src/telnet.ts >> "$TELNET_LOG" 2>&1 &
 TELNET_PID=$!
 
-# Start main server (via start.ts restart loop).
-nohup deno run --allow-all --unstable-detect-cjs --unstable-kv src/main.ts >> "$MAIN_LOG" 2>&1 &
+# Start main server via the restart loop.
+# Exit code 75 (@reboot / @update) restarts automatically.
+# Exit code 0 (@shutdown) and crashes stop the loop.
+chmod +x "$(dirname "$0")/main-loop.sh"
+MAIN_LOG="$MAIN_LOG" nohup bash "$(dirname "$0")/main-loop.sh" >> /dev/null 2>&1 &
 MAIN_PID=$!
 
 # Save PIDs

@@ -12,13 +12,13 @@ const jobsPlugin: IPlugin = {
   version: "1.0.0",
   description: "Staff job/request tracking system with in-game commands and REST API",
 
-  init: async () => {
+  init: () => {
     registerPluginRoute("/api/v1/jobs", jobsRouteHandler);
     console.log("[jobs] Plugin initialized — +job commands active, /api/v1/jobs routes registered");
     return true;
   },
 
-  remove: async () => {
+  remove: () => {
     console.log("[jobs] Plugin removed");
   },
 };

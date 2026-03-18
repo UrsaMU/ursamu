@@ -4,6 +4,7 @@ import { dbojs } from "../Database/index.ts";
 import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
+import { gameHooks } from "../Hooks/GameHooks.ts";
 
 export const matchExits = async (ctx: IContext) => {
   if (ctx.socket.cid) {
@@ -67,6 +68,15 @@ export const matchExits = async (ctx: IContext) => {
             );
           }
 
+          gameHooks.emit("player:move", {
+            actorId:      en.id,
+            actorName:    moniker(en),
+            fromRoomId:   room?.id  || "",
+            toRoomId:     dest.id,
+            fromRoomName: (room?.data?.name  as string) || "",
+            toRoomName:   (dest.data?.name   as string) || "",
+            exitName:     (name.split(";")[0]).trim(),
+          }).catch(e => console.error("[GameHooks] player:move:", e));
           force(ctx, "look");
           return true;
         } else {

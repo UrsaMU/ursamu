@@ -300,7 +300,8 @@ export async function createNativeSDK(
         setTimeout(() => Deno.exit(0), 100);
         await Promise.resolve();
       },
-      uptime: async () => performance.now(),
+      uptime: () => Promise.resolve(performance.now()),
+      update: (_branch?: string) => Promise.resolve(),
     },
 
     chan: {
@@ -484,9 +485,7 @@ export async function createNativeSDK(
       emit: async (_event: string, _data: unknown, _context?: Record<string, unknown>) => {
         await Promise.resolve();
       },
-      on: async (_event: string, _handler: string) => {
-        return "";
-      },
+      on: (_event: string, _handler: string): Promise<string> => Promise.resolve(""),
     },
   };
 
