@@ -15,6 +15,30 @@ import type { IDBObj } from "../../@types/UrsamuSDK.ts";
 import { SDKService, type SDKObject } from "../Sandbox/SDKService.ts";
 import { target } from "../../utils/target.ts";
 import { createNativeSDK } from "../SDK/index.ts";
+import { fromFileUrl } from "@std/path";
+
+// Base URL for the engine's bundled system scripts (3 dirs up from this file: src/services/commands/ -> root)
+const ENGINE_SCRIPTS_URL = new URL("../../../system/scripts/", import.meta.url);
+
+/** Read a script file, checking the game project's local override first, then the engine's built-in copy. */
+async function readEngineScript(name: string): Promise<string | null> {
+  // 1. Local game-project override (./system/scripts/<name>)
+  try {
+    return await Deno.readTextFile(`./system/scripts/${name}`);
+  } catch { /* no local copy */ }
+
+  // 2. Engine's bundled copy (works for both local dev [file://] and JSR [https://])
+  const url = new URL(name, ENGINE_SCRIPTS_URL);
+  try {
+    if (url.protocol === "file:") {
+      return await Deno.readTextFile(fromFileUrl(url));
+    }
+    const res = await fetch(url.toString());
+    return res.ok ? await res.text() : null;
+  } catch {
+    return null;
+  }
+}
 
 export const cmdParser = new MiddlewareStack();
 export const cmds: ICmd[] = [];
@@ -22,39 +46,56 @@ export const txtFiles = new Map<string, string>();
 
 export const systemAliases: Record<string, string> = {};
 
+/** Names of all engine system scripts — used for alias scanning when no local system/scripts dir exists. */
+const ENGINE_SCRIPT_NAMES = [
+  "admin","alias","chancreate","chandestroy","channels","chanset","clone","connect",
+  "create","describe","destroy","dig","doing","drop","emit","examine","find","flags",
+  "format","get","give","help","home","inventory","link","lock","look","mail","mailadd",
+  "moniker","motd","name","open","page","parent","pemit","pose","quit","quota","remit",
+  "say","score","search","set","setAttr","stats","teleport","think","trigger","unlink",
+  "who","wipe",
+];
+
+async function parseAliasesFromContent(content: string, scriptName: string) {
+  const match = content.match(/export\s+const\s+aliases\s*=\s*(\[.*?\])/);
+  if (!match) return;
+  try {
+    const rawArray = match[1];
+    const cleanArray = rawArray.replace(/'/g, '"').replace(/,\s*\]/, "]");
+    const aliases = JSON.parse(cleanArray);
+    aliases.forEach((alias: string) => { systemAliases[alias] = scriptName; });
+  } catch (e) {
+    console.warn(`[CmdParser] Failed to parse aliases for ${scriptName}:`, e);
+  }
+}
+
 export async function loadSystemAliases() {
+  // Try the game project's local system/scripts directory first
+  let localDirExists = false;
   try {
     for await (const dirEntry of Deno.readDir("./system/scripts")) {
       if (dirEntry.isFile && dirEntry.name.endsWith(".ts")) {
+        localDirExists = true;
         try {
-            const content = await Deno.readTextFile(`./system/scripts/${dirEntry.name}`);
-            const match = content.match(/export\s+const\s+aliases\s*=\s*(\[.*?\])/);
-            if (match) {
-                // Safer than eval, but requires standard JSON syntax or simple string array
-                // Since it's TS code, it might use single quotes.
-                // Let's use a simple regex approach or JSON.parse if we enforce double quotes.
-                // Given we control the scripts or user writes them, `JSON.parse` on a relaxed string might fail.
-                // Let's do a simple eval-like parse or just use `Function` if trusted (it is local code).
-                // Actually, `JSON.parse` with replacing ' with " might suffice for simple arrays.
-                
-                // We'll use a safer approach than eval by parsing the array string manual-ish or loose JSON.
-                const rawArray = match[1];
-                const cleanArray = rawArray.replace(/'/g, '"').replace(/,\s*\]/, "]");
-                const aliases = JSON.parse(cleanArray);
-                
-                const scriptName = dirEntry.name.replace(".ts", "");
-                aliases.forEach((alias: string) => {
-                systemAliases[alias] = scriptName;
-                });
-            }
+          const content = await Deno.readTextFile(`./system/scripts/${dirEntry.name}`);
+          await parseAliasesFromContent(content, dirEntry.name.replace(".ts", ""));
         } catch (e) {
-             console.warn(`[CmdParser] Failed to parse aliases for ${dirEntry.name}:`, e);
+          console.warn(`[CmdParser] Failed to parse aliases for ${dirEntry.name}:`, e);
         }
       }
     }
+  } catch { /* local dir not present — fall through to engine scripts */ }
+
+  if (!localDirExists) {
+    // Fall back to the engine's bundled scripts
+    for (const name of ENGINE_SCRIPT_NAMES) {
+      const content = await readEngineScript(`${name}.ts`);
+      if (content) await parseAliasesFromContent(content, name);
+    }
+  }
+
+  if (Object.keys(systemAliases).length > 0) {
     console.log("[CmdParser] Loaded system aliases:", systemAliases);
-  } catch (e) {
-    console.warn("[CmdParser] Failed to load system aliases:", e);
   }
 }
 
@@ -176,13 +217,11 @@ cmdParser.use(async (ctx, next) => {
   // accidentally dispatches to a builder/admin script.
   const PRE_AUTH_SCRIPTS = new Set(["connect"]);
 
-  // Attempt to load and run script if it exists in system/scripts
+  // Attempt to load and run script — checks game project override then engine's built-in copy
   try {
-    const scriptPath = `./system/scripts/${scriptName}.ts`;
-    const scriptInfo = await Deno.stat(scriptPath).catch(() => null);
+    const code = await readEngineScript(`${scriptName}.ts`);
 
-    if (scriptInfo?.isFile && (char || PRE_AUTH_SCRIPTS.has(scriptName))) {
-        const code = await Deno.readTextFile(scriptPath);
+    if (code && (char || PRE_AUTH_SCRIPTS.has(scriptName))) {
         
         // Update last command
         if (char) {

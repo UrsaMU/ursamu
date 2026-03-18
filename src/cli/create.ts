@@ -298,11 +298,42 @@ const directories = [
   "text",
   "help",
   "scripts",
+  "system/scripts",
 ];
 
 for (const dir of directories) {
   await Deno.mkdir(join(targetDir, dir), { recursive: true });
   console.log(`Created directory: ${dir}`);
+}
+
+// Copy engine's system scripts into the new project so they are editable
+{
+  const SCRIPT_NAMES = [
+    "admin","alias","chancreate","chandestroy","channels","chanset","clone","connect",
+    "create","describe","destroy","dig","doing","drop","emit","examine","find","flags",
+    "format","get","give","help","home","inventory","link","lock","look","mail","mailadd",
+    "moniker","motd","name","open","page","parent","pemit","pose","quit","quota","remit",
+    "say","score","search","set","setAttr","stats","teleport","think","trigger","unlink",
+    "who","wipe",
+  ];
+  const engineScriptsBase = new URL("../../system/scripts/", import.meta.url);
+  let copied = 0;
+  for (const name of SCRIPT_NAMES) {
+    const url = new URL(`${name}.ts`, engineScriptsBase);
+    try {
+      let content: string;
+      if (url.protocol === "file:") {
+        content = await Deno.readTextFile(fromFileUrl(url));
+      } else {
+        const res = await fetch(url.toString());
+        if (!res.ok) continue;
+        content = await res.text();
+      }
+      await Deno.writeTextFile(join(targetDir, "system", "scripts", `${name}.ts`), content);
+      copied++;
+    } catch { /* skip missing */ }
+  }
+  console.log(`Created system/scripts/ (${copied} scripts)`);
 }
 
 // Create the main.ts file
