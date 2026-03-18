@@ -1,4 +1,4 @@
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+Aimport { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
 export const aliases = ["channel"];
 
@@ -7,7 +7,7 @@ export const aliases = ["channel"];
  * Manages game channels (join, leave, list).
  */
 export default async (u: IUrsamuSDK) => {
-  const switchArg = u.cmd.name.split("/")[1] || "";
+  const switchArg = (u.cmd.switches && u.cmd.switches[0]) || "";
   const args = u.cmd.args;
 
   switch (switchArg) {
