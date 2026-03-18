@@ -30,7 +30,10 @@ export async function loadPlugins(dir: string): Promise<IPlugin[]> {
           
           console.log(`Loading plugin from ${entry.path}`);
           
-          // Import the plugin
+          // Import the plugin from a runtime-discovered filesystem path.
+          // The file:// URL bypasses the import map entirely, so the JSR
+          // "unanalyzable-dynamic-import" warning here is a false positive —
+          // no import-map rewriting is needed or possible for absolute file paths.
           const module = await import(dpath.toFileUrl(entry.path).href);
           
           if (module.default && typeof module.default === "object") {
