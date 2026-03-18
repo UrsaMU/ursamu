@@ -187,14 +187,30 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     }
 
     for (const [key, condition] of Object.entries(query)) {
+      if (key === "$ne") continue; // handled below
       const val = key.includes('.') ? get(value, key) : value[key as keyof T];
-      
+
       if (condition instanceof RegExp) {
         if (!condition.test(val as string)) {
           return false;
         }
-      } else if (typeof condition === "object") {
-        if (!this.matchesQuery(val as T, condition as Query<T>)) {
+      } else if (typeof condition === "object" && condition !== null && !Array.isArray(condition)) {
+        const condObj = condition as Record<string, unknown>;
+        // Handle $in operator: check if val (or val as array) contains any of the $in values
+        if ("$in" in condObj) {
+          const inValues = condObj.$in as unknown[];
+          if (Array.isArray(val)) {
+            if (!inValues.some(v => (val as unknown[]).includes(v))) return false;
+          } else {
+            if (!inValues.includes(val)) return false;
+          }
+        }
+        // Handle $ne operator: check if val does not equal
+        else if ("$ne" in condObj) {
+          if (val === condObj.$ne) return false;
+        }
+        // Otherwise recurse
+        else if (!this.matchesQuery(val as T, condition as Query<T>)) {
           return false;
         }
       } else if (val !== condition) {
