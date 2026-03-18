@@ -2,7 +2,9 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
 /**
  * System Script: page.ts
- * ESM Refactored, Production-ready, and Telnet-compatible.
+ *
+ * page <target>=<message>       → Jupiter(J) pages you: Hello!
+ * page <target>=:<pose>         → From afar, Jupiter(J) waves.
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
@@ -15,9 +17,9 @@ export default async (u: IUrsamuSDK) => {
   }
 
   const targetName = match[1].trim();
-  const message = match[2].trim();
+  const rawMessage = match[2].trim();
 
-  if (!message) {
+  if (!rawMessage) {
     u.send("What do you want to say?");
     return;
   }
@@ -30,12 +32,29 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  const actorName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "Someone";
-  const targetActualName = (target.state?.moniker as string) || (target.state?.name as string) || target.name || "Someone";
+  // Build display names with alias
+  const actorAlias = actor.state?.alias as string;
+  const actorBaseName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "Someone";
+  const actorDisplay = actorAlias ? `${actorBaseName}(${actorAlias})` : actorBaseName;
 
-  // ANSI Output for Telnet
-  u.send(`%ch${actorName}%cn pages you: ${message}`, target.id);
-  u.send(`You paged ${targetActualName} with: ${message}`);
+  const targetAlias = target.state?.alias as string;
+  const targetBaseName = (target.state?.moniker as string) || (target.state?.name as string) || target.name || "Someone";
+  const targetDisplay = targetAlias ? `${targetBaseName}(${targetAlias})` : targetBaseName;
+
+  // Check for pose (starts with :)
+  if (rawMessage.startsWith(":")) {
+    const pose = rawMessage.slice(1);
+    // To target
+    u.send(`From afar, %ch${actorDisplay}%cn ${pose}`, target.id);
+    // To sender
+    u.send(`Long distance to ${targetDisplay}: %ch${actorDisplay}%cn ${pose}`);
+  } else {
+    // Normal page
+    // To target
+    u.send(`%ch${actorDisplay}%cn pages you: ${rawMessage}`, target.id);
+    // To sender
+    u.send(`You paged ${targetDisplay} with: ${rawMessage}`);
+  }
 
   // Structured result for Web
   u.ui.layout({
@@ -43,10 +62,10 @@ export default async (u: IUrsamuSDK) => {
     meta: {
       type: "page",
       actorId: actor.id,
-      actorName: actorName,
+      actorName: actorDisplay,
       targetId: target.id,
-      targetName: targetActualName,
-      message: message
+      targetName: targetDisplay,
+      message: rawMessage
     }
   });
 };
