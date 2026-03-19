@@ -11,9 +11,9 @@
  *   list             List installed plugins
  *   info    <name>   Show manifest + registry details for a plugin
  */
-import { parse } from "@std/flags";
-import { join, basename } from "@std/path";
-import { exists } from "@std/fs";
+import { parse } from "jsr:@std/flags@^0.224.0";
+import { join, basename } from "jsr:@std/path@^0.224.0";
+import { exists } from "jsr:@std/fs@^0.224.0";
 import type { PluginManifest, Registry, RegistryEntry } from "./types.ts";
 
 const args = parse(Deno.args, {

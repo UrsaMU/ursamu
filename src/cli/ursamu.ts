@@ -8,8 +8,8 @@
  *   create.ts  — project + in-tree plugin scaffolding
  *   plugin.ts  — plugin install / update / remove / list / info
  */
-import { parse } from "@std/flags";
-import { join, dirname, fromFileUrl } from "@std/path";
+import { parse } from "jsr:@std/flags@^0.224.0";
+import { join, dirname, fromFileUrl } from "jsr:@std/path@^0.224.0";
 import parser from "../services/parser/parser.ts";
 
 const fmt = (str: string) => parser.substitute("telnet", str);
