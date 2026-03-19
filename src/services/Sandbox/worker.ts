@@ -355,7 +355,9 @@ self.onmessage = async (e: MessageEvent) => {
     mail: {
       send: (mail: Partial<IMail>) => request<void>("mail:send", { mail }),
       read: (query: Record<string, unknown>) => request<IMail[]>("mail:read", { query }),
-      delete: (id: string) => request<void>("mail:delete", { id })
+      delete: (id: string) => request<void>("mail:delete", { id }),
+      modify: (query: Record<string, unknown>, operator: string, update: Record<string, unknown>) =>
+        request<void>("mail:modify", { query, operator, update })
     },
     setFlags: (target: string | IDBObj, flags: string) =>
       request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags }),

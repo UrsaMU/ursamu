@@ -40,6 +40,7 @@ interface IUrsamuSDK {
         send(mail: Partial<IMail>): Promise<void>;
         read(query: Record<string, unknown>): Promise<IMail[]>;
         delete(id: string): Promise<void>;
+        modify(query: Record<string, unknown>, operator: string, update: Record<string, unknown>): Promise<void>;
     };
     send(message: string | string[], target?: string): void;
     force(command: string): void;
@@ -49,6 +50,24 @@ interface IUrsamuSDK {
 const HR = "%cr" + "-".repeat(70) + "%cn";
 const PAD = (text: string, width: number) => text.padEnd(width).slice(0, width);
 const DATE = (timestamp: number) => new Date(timestamp).toLocaleDateString() + " " + new Date(timestamp).toLocaleTimeString();
+
+// Helper: get all mail where player is in TO or CC
+async function getMyMail(u: IUrsamuSDK, playerId: string): Promise<IMail[]> {
+    const dbref = `#${playerId}`;
+    const toMails = await u.mail.read({ to: { $in: [dbref] } });
+    const ccMails = await u.mail.read({ cc: { $in: [dbref] } });
+    // Merge and deduplicate by id
+    const seen = new Set<string>();
+    const all: IMail[] = [];
+    for (const m of [...toMails, ...ccMails]) {
+        const key = m.id || `${m.from}-${m.date}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            all.push(m);
+        }
+    }
+    return all;
+}
 
 export default async (u: IUrsamuSDK) => {
     const args = u.cmd.args;
@@ -109,7 +128,7 @@ export default async (u: IUrsamuSDK) => {
     // Execute Action
     switch(subCmd) {
         case "list": {
-            const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
+            const mails = await getMyMail(u, en.id);
             mails.sort((a, b) => a.date - b.date);
 
             const unreadCount = mails.filter(m => !m.read).length;
@@ -138,7 +157,7 @@ export default async (u: IUrsamuSDK) => {
         case "read": {
             const numStr = subArgs.trim();
             const num = parseInt(numStr || "");
-            const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
+            const mails = await getMyMail(u, en.id);
             mails.sort((a, b) => a.date - b.date);
 
             if (!num || num < 1 || num > mails.length) {
@@ -148,9 +167,12 @@ export default async (u: IUrsamuSDK) => {
 
             const m = mails[num - 1];
             if (m.id && !m.read) {
-              await u.mail.delete(m.id);
-              m.read = true;
-              await u.mail.send(m);
+              try {
+                await u.mail.modify({ id: m.id }, "$set", { read: true });
+                m.read = true;
+              } catch {
+                // Fallback: mark read failed silently, mail is preserved
+              }
             }
 
             const fromId = m.from.replace("#", "");
@@ -180,7 +202,7 @@ export default async (u: IUrsamuSDK) => {
         case "reply": {
             // @mail/reply <num> — starts a draft replying to message #num
             const num = parseInt(subArgs.trim() || "");
-            const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
+            const mails = await getMyMail(u, en.id);
             mails.sort((a, b) => a.date - b.date);
 
             if (!num || num < 1 || num > mails.length) {
@@ -211,7 +233,7 @@ export default async (u: IUrsamuSDK) => {
         case "replyall": {
             // @mail/replyall <num> — reply to sender + all original recipients
             const num = parseInt(subArgs.trim() || "");
-            const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
+            const mails = await getMyMail(u, en.id);
             mails.sort((a, b) => a.date - b.date);
 
             if (!num || num < 1 || num > mails.length) {
@@ -252,7 +274,7 @@ export default async (u: IUrsamuSDK) => {
             const num = parseInt(subArgs.slice(0, eqIdx));
             const targetName = subArgs.slice(eqIdx + 1).trim();
 
-            const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
+            const mails = await getMyMail(u, en.id);
             mails.sort((a, b) => a.date - b.date);
 
             if (!num || num < 1 || num > mails.length) {
@@ -357,9 +379,14 @@ export default async (u: IUrsamuSDK) => {
                 return u.send("%chMAIL:%cn Cannot send empty message.");
             }
 
-            await u.mail.send(draft);
+            try {
+                await u.mail.send(draft);
+            } catch (e) {
+                u.send(`%chMAIL:%cn Failed to send: ${e}`);
+                return;
+            }
             u.send("%chMAIL:%cn Message sent.");
-            const allTo = [...draft.to, ...(draft.cc || [])];
+            const allTo = [...draft.to, ...(draft.cc || []), ...(draft.bcc || [])];
             for (const tId of allTo) {
                 const id = tId.replace("#", "");
                 if (id !== en.id) {
@@ -396,7 +423,7 @@ export default async (u: IUrsamuSDK) => {
         case "delete": {
             const numStr = subArgs.trim();
             const num = parseInt(numStr || "");
-            const mails = await u.mail.read({ to: { $in: [`#${en.id}`] } });
+            const mails = await getMyMail(u, en.id);
             mails.sort((a, b) => a.date - b.date);
 
             if (!num || num < 1 || num > mails.length) {

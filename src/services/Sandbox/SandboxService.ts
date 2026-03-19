@@ -612,6 +612,16 @@ class LocalSandbox {
             }
             break;
           }
+          case "mail:modify": {
+            if (e.data.query && e.data.operator && e.data.update) {
+               const { mail } = await import("../Database/index.ts");
+               (async () => {
+                 await mail.modify(e.data.query, e.data.operator, e.data.update);
+                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+               })();
+            }
+            break;
+          }
           case "text:read": {
             if (e.data.id) {
               const { texts } = await import("../Database/index.ts");
