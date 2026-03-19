@@ -106,6 +106,11 @@ export const addCmd = (...cmd: ICmd[]): void => {
   cmds.push(...cmd);
 };
 
+/** Clear all registered legacy commands (used by @reload commands). */
+export const clearCmds = (): void => {
+  cmds.length = 0;
+};
+
 cmdParser.use(async (ctx, next) => {
   const char = await Obj.get(ctx.socket.cid);
   const { msg } = ctx;
