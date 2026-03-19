@@ -4,7 +4,7 @@ const SERVER_START = Date.now();
 import type { ISandboxConfig } from "../../@types/ISandboxConfig.ts";
 import { SDKService, type SDKContext } from "./SDKService.ts";
 import { send as broadcastSend, broadcast as broadcastAll } from "../broadcast/index.ts";
-import { Obj } from "../DBObjs/DBObjs.ts";
+import { Obj as _Obj } from "../DBObjs/DBObjs.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { IDBObj } from "../../@types/UrsamuSDK.ts";
 import type { IChanEntry } from "../../@types/Channels.ts";
@@ -262,6 +262,12 @@ class LocalSandbox {
                     if (player) {
                       await setFlags(player, "connected");
                       if (player.location) socket.join(`#${player.location}`);
+
+                      // Record login time directly on DB object
+                      const { dbojs: loginDb } = await import("../Database/index.ts");
+                      player.data = player.data || {};
+                      player.data.lastLogin = Date.now();
+                      await loginDb.modify({ id: player.id }, "$set", player);
 
                       // Feature parity with legacy connect
                       const { joinChans } = await import("../../utils/joinChans.ts");
