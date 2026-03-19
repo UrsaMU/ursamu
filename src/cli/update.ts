@@ -9,6 +9,7 @@
 import { parse } from "@std/flags";
 import { join } from "@std/path";
 import { existsSync } from "@std/fs";
+import { bold, cyan, dim, green, red, yellow } from "@std/fmt/colors";
 
 const args = parse(Deno.args, {
   boolean: ["help", "dry-run"],
@@ -158,14 +159,17 @@ if (upstreamTasks) {
 
   // Prompt before overwriting existing tasks
   if (toChange.length && !dryRun) {
-    console.log(`  The following tasks differ from upstream:`);
+    console.log();
+    console.log(yellow(bold("  Tasks differ from upstream:")));
+    console.log(dim("  " + "─".repeat(56)));
     for (const [key, val] of toChange) {
-      console.log(`    ${key}:`);
-      console.log(`      current  : ${currentTasks[key]}`);
-      console.log(`      upstream : ${val}`);
+      console.log(`  ${bold(cyan(key))}`);
+      console.log(`    ${dim("current ")}  ${red(currentTasks[key])}`);
+      console.log(`    ${dim("upstream")}  ${green(val)}`);
     }
+    console.log(dim("  " + "─".repeat(56)));
     const buf = new Uint8Array(4);
-    await Deno.stdout.write(new TextEncoder().encode("  Overwrite? [y/N] "));
+    await Deno.stdout.write(new TextEncoder().encode(`\n  Overwrite with upstream? ${dim("[y/N]")} `));
     const n = await Deno.stdin.read(buf);
     const answer = new TextDecoder().decode(buf.subarray(0, n ?? 0)).trim().toLowerCase();
     if (answer === "y") {
@@ -180,9 +184,9 @@ if (upstreamTasks) {
     for (const [key] of toChange) changed.push(key);
   }
 
-  if (added.length)   console.log(`  Tasks added   : ${added.join(", ")}`);
-  if (changed.length) console.log(`  Tasks updated : ${changed.join(", ")}`);
-  if (!added.length && !changed.length && !toChange.length) console.log("  Tasks already in sync.");
+  if (added.length)   console.log(`  ${green("✓")} Tasks added   : ${bold(added.join(", "))}`);
+  if (changed.length) console.log(`  ${green("✓")} Tasks updated : ${bold(changed.join(", "))}`);
+  if (!added.length && !changed.length && !toChange.length) console.log(`  ${green("✓")} Tasks already in sync.`);
 
   denoJson.tasks = currentTasks;
 }

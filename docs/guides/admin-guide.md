@@ -234,14 +234,124 @@ From in-game (admin or wizard required):
 ```
 @reboot      -- Gracefully restart the server
 @shutdown    -- Shut down the server
+@update      -- Pull latest code from git and restart (see below)
 ```
 
 From the terminal, use `Ctrl+C` to stop a running process, then restart with:
 
 ```bash
-deno task server    # Hub only
-deno task start     # Hub + telnet with file watching
+deno task start     # Hub only (no watch)
+deno task dev       # Hub + Telnet with file watching (development)
+deno task daemon    # Background service with restart loop (production)
 ```
+
+### Updating from Git (`@update`)
+
+Admins and wizards can update the running server from in-game without touching
+the terminal:
+
+```
+@update              -- git pull from the default branch (origin/main)
+@update main         -- pull a specific branch
+@upgrade             -- alias for @update
+```
+
+The command:
+1. Broadcasts `%chGame>%cn Updating from git...` to all connected players
+2. Runs `git pull origin <branch>`
+3. Exits with code 75, which tells the daemon restart loop to reboot the server
+
+> Telnet connections survive the reboot — the Telnet sidecar stays up and
+> reconnects to the Hub automatically.
+
+### Daemon Restart Loop
+
+When started via `bash scripts/daemon.sh`, the server runs inside a restart
+loop (`scripts/main-loop.sh`) that watches the process exit code:
+
+| Exit code | Meaning | Action |
+|-----------|---------|--------|
+| `75` | Restart signal (`@reboot`, `@update`) | Restart after delay |
+| `0` | Clean shutdown (`@shutdown`) | Stop — do not restart |
+| Other | Unexpected crash | Stop — check logs |
+
+**Rapid-restart protection** — if the server exits in under 5 seconds the
+restart delay doubles (1 s → 2 s → 4 s → … capped at 60 s). A stable
+long-running restart resets the delay back to 1 second.
+
+The deno child PID is written to `.ursamu-deno.pid`; the loop PID is in
+`.ursamu.pid`. Use `bash scripts/stop.sh` to gracefully stop both.
+
+## Wiki Administration
+
+The wiki plugin stores articles as Markdown files in `./wiki/` with a
+folder-driven URL structure. Admins and wizards manage pages with `@wiki`
+in-game commands.
+
+### In-game wiki commands
+
+```
+@wiki/create <path>=<title>/<body>
+  -- Create a new wiki page. Path mirrors the folder structure.
+  -- Example: @wiki/create news/patch-notes=Patch Notes/Details here...
+
+@wiki/edit <path>=<new body>
+  -- Replace the body of an existing page (frontmatter is preserved).
+  -- Example: @wiki/edit news/patch-notes=Updated content here.
+
+@wiki/fetch <url>=<wiki-path>
+  -- Download an image or PDF from a public URL into the wiki folder.
+  -- Example: @wiki/fetch https://example.com/map.png=maps/world.png
+  -- Allowed types: .jpg .jpeg .png .gif .webp .svg .pdf (max 10 MB)
+```
+
+> **Security note:** `@wiki/fetch` blocks private/loopback/link-local IP
+> ranges (localhost, 127.x, 10.x, 192.168.x, etc.) to prevent SSRF attacks.
+> Only publicly routable URLs are permitted.
+
+### Wiki REST API
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/v1/wiki` | Required | List all pages (title + path) |
+| `GET` | `/api/v1/wiki?q=<query>` | Required | Full-text search (title, body, tags) |
+| `GET` | `/api/v1/wiki/<path>` | Required | Read a page or list a directory |
+| `GET` | `/api/v1/wiki/<path.ext>` | Required | Serve a static asset (image, PDF) |
+| `POST` | `/api/v1/wiki` | Staff | Create a page |
+| `PATCH` | `/api/v1/wiki/<path>` | Staff | Update body and/or frontmatter |
+| `DELETE` | `/api/v1/wiki/<path>` | Staff | Delete a page or asset |
+| `PUT` | `/api/v1/wiki/<path.ext>` | Staff | Upload a static asset (binary) |
+
+**Example — create a page:**
+
+```bash
+curl -X POST https://yourgame.example.com/api/v1/wiki \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "path": "news/patch-notes",
+    "title": "Patch Notes",
+    "date": "2026-03-18",
+    "body": "## Changes\n- Added new location."
+  }'
+```
+
+**Wiki page frontmatter format:**
+
+```yaml
+---
+title: My Page Title
+date: 2026-03-18
+author: Admin
+tags: [news, update]
+---
+
+Page body in Markdown here.
+```
+
+All metadata keys must match `/^[\w-]+$/`. Body size limit is **10 MB**.
+
+---
 
 ## Scene Management
 
@@ -328,7 +438,28 @@ a `Bearer` JWT token in the `Authorization` header, obtained from
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/api/v1/scenes` | List scenes |
+| `POST` | `/api/v1/scenes` | Create a scene |
+| `GET` | `/api/v1/scenes/locations` | List accessible rooms |
+| `GET` | `/api/v1/scenes/:id` | Scene detail |
+| `PATCH` | `/api/v1/scenes/:id` | Update name, desc, status, sceneType |
+| `POST` | `/api/v1/scenes/:id/pose` | Add a pose/ooc/set entry |
+| `PATCH` | `/api/v1/scenes/:id/pose/:poseId` | Edit a pose |
+| `POST` | `/api/v1/scenes/:id/join` | Join a scene |
+| `POST` | `/api/v1/scenes/:id/invite` | Invite a player |
 | `GET` | `/api/v1/scenes/:id/export` | Export as `?format=markdown` or `?format=json` |
+
+### Wiki
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/wiki` | List all pages |
+| `GET` | `/api/v1/wiki?q=<query>` | Full-text search |
+| `GET` | `/api/v1/wiki/<path>` | Read page or directory listing |
+| `GET` | `/api/v1/wiki/<path.ext>` | Serve static asset |
+| `POST` | `/api/v1/wiki` | Create page *(staff)* |
+| `PATCH` | `/api/v1/wiki/<path>` | Update page *(staff)* |
+| `DELETE` | `/api/v1/wiki/<path>` | Delete page or asset *(staff)* |
+| `PUT` | `/api/v1/wiki/<path.ext>` | Upload static asset *(staff)* |
 
 ### WebSocket
 

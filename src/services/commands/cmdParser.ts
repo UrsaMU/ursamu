@@ -102,6 +102,14 @@ export async function loadSystemAliases() {
 // Start loading aliases
 loadSystemAliases();
 
+/**
+ * Register one or more commands with the game's command parser.
+ *
+ * Commands are matched in registration order. The first command whose
+ * `pattern` matches the player's input wins.
+ *
+ * @param cmd - One or more command descriptors (`ICmd`) to register.
+ */
 export const addCmd = (...cmd: ICmd[]): void => {
   cmds.push(...cmd);
 };

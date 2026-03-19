@@ -1,27 +1,39 @@
+/** A single comment or staff note on a job. */
 export interface IJobComment {
   id: string;
-  authorId: string;        // player dbref
+  /** Player dbref of the comment author. */
+  authorId: string;
   authorName: string;
   text: string;
   timestamp: number;
-  staffOnly: boolean;      // hidden from submitter if true
+  /** When `true` the comment is hidden from the original submitter. */
+  staffOnly: boolean;
 }
 
+/** A player request, bug report, or staff ticket. */
 export interface IJob {
-  id: string;              // "job-1", "job-2", ...
-  number: number;          // human-readable (#1, #2)
+  /** Stable storage key, e.g. `"job-1"`. */
+  id: string;
+  /** Human-readable job number shown in-game (#1, #2, …). */
+  number: number;
   title: string;
-  category: string;        // "request" | "bug" | "app" | "complaint" | "idea" | "staff"
+  /** Category tag: `"request"`, `"bug"`, `"app"`, `"complaint"`, `"idea"`, or `"staff"`. */
+  category: string;
   priority: "low" | "normal" | "high" | "critical";
   status: "new" | "open" | "pending" | "in-progress" | "resolved" | "closed";
-  submittedBy: string;     // dbref
+  /** Dbref of the player who submitted the job. */
+  submittedBy: string;
   submitterName: string;
-  assignedTo?: string;     // dbref
+  /** Dbref of the assigned staff member, if any. */
+  assignedTo?: string;
   assigneeName?: string;
   description: string;
   comments: IJobComment[];
-  createdAt: number;       // timestamp
+  /** Unix timestamp (ms) when the job was created. */
+  createdAt: number;
+  /** Unix timestamp (ms) of the last update. */
   updatedAt: number;
   closedAt?: number;
-  staffOnly: boolean;      // internal staff jobs not visible to players
+  /** When `true` this is an internal staff job not visible to regular players. */
+  staffOnly: boolean;
 }

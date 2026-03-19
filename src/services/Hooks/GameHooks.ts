@@ -156,6 +156,21 @@ export interface IGameHooks {
   emit<K extends keyof GameHookMap>(event: K, ...args: Parameters<GameHookMap[K]>): Promise<void>;
 }
 
+/**
+ * The global game-event bus.
+ *
+ * Subscribe to engine lifecycle events (player login/logout, say, pose,
+ * page, move, channel, scene mutations) and react in real time.
+ *
+ * @example
+ * ```ts
+ * import { gameHooks } from "jsr:@ursamu/ursamu";
+ *
+ * gameHooks.on("player:say", ({ actorName, message }) => {
+ *   console.log(`${actorName} says: ${message}`);
+ * });
+ * ```
+ */
 export const gameHooks: IGameHooks = {
   /**
    * Subscribe to a game lifecycle event.

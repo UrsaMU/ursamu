@@ -10,7 +10,7 @@ templateEngine: [vto, md]
 
   <div class="version-badge" style="cursor:default">
     <svg width="10" height="10" viewBox="0 0 10 10" fill="var(--primary-light)"><circle cx="5" cy="5" r="5"/></svg>
-    v1.4.3 &nbsp;&bull;&nbsp; MIT License
+    v1.5.0 &nbsp;&bull;&nbsp; MIT License
   </div>
 
   <h1>A Modern MUSH Server</h1>
@@ -105,6 +105,22 @@ templateEngine: [vto, md]
     <p>Collaborative roleplay scene tracking with REST export endpoints — download logs as Markdown or JSON.</p>
   </div>
 
+  <div class="feature-card">
+    <div class="feature-card-icon">
+      <svg viewBox="0 0 24 24"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+    </div>
+    <h3>Game Hooks</h3>
+    <p>Typed, fire-and-forget event bus — 12 built-in events covering players, scenes, and channels. Plugins subscribe without touching core command files.</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+    </div>
+    <h3>Wiki &amp; Content</h3>
+    <p>File-based markdown wiki with folder-driven routing, YAML frontmatter, full REST API, and in-game read/search/write commands.</p>
+  </div>
+
 </div>
 
 <!-- ── SECTION GRID ───────────────────────────────────────────────── -->
@@ -158,7 +174,11 @@ templateEngine: [vto, md]
       </div>
       <div>
         <div style="color:var(--text);font-weight:600;margin-bottom:0.35rem">Integrations</div>
-        Discord gateway &bull; Scene REST API &bull; Plugin SDK
+        Discord gateway &bull; Scene REST API &bull; Wiki REST API &bull; Plugin SDK
+      </div>
+      <div>
+        <div style="color:var(--text);font-weight:600;margin-bottom:0.35rem">Events</div>
+        GameHooks typed bus &bull; WikiHooks &bull; EventHooks &bull; Daemon restart loop (exit 75)
       </div>
     </div>
   </div>

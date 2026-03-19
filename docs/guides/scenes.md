@@ -21,6 +21,8 @@ nav:
     url: "#private-scenes"
   - text: Exporting a Scene
     url: "#exporting-a-scene"
+  - text: Scene Hooks
+    url: "#scene-hooks"
   - text: API Reference
     url: "#api-reference"
 ---
@@ -357,6 +359,61 @@ curl -H "Authorization: Bearer <token>" \
 
 MUSH color codes are stripped from all character names and pose content in the
 export, so the output is clean plain text.
+
+---
+
+## Scene Hooks
+
+Every scene mutation fires a typed event on `gameHooks`, allowing plugins
+(AI GM assistants, logging systems, etc.) to react without touching the
+scene REST router.
+
+Import `gameHooks` from `jsr:@ursamu/ursamu`:
+
+```typescript
+import { gameHooks } from "jsr:@ursamu/ursamu";
+import type { SceneSetEvent, SceneClearEvent } from "jsr:@ursamu/ursamu";
+```
+
+### Hook reference
+
+| Event | When it fires | Key payload fields |
+|-------|--------------|-------------------|
+| `scene:created` | New scene opened (`POST /scenes`) | `sceneId`, `sceneName`, `roomId`, `actorId`, `actorName`, `sceneType` |
+| `scene:pose` | Any pose posted (`POST /scenes/:id/pose`) | `sceneId`, `sceneName`, `roomId`, `actorId`, `actorName`, `msg`, `type` |
+| `scene:set` | Pose with `type: "set"` posted | `sceneId`, `sceneName`, `roomId`, `actorId`, `actorName`, `description` |
+| `scene:title` | Scene renamed (`PATCH /scenes/:id` with new `name`) | `sceneId`, `oldName`, `newName`, `actorId`, `actorName` |
+| `scene:clear` | Scene closed/finished/archived | `sceneId`, `sceneName`, `actorId`, `actorName`, `status` |
+
+`scene:set` and `scene:pose` both fire when a `"set"` pose is posted —
+`scene:pose` for anything that needs to see all pose types, `scene:set` for
+handlers that only care about scene descriptions.
+
+### Example: AI GM assistant
+
+```typescript
+import { gameHooks } from "jsr:@ursamu/ursamu";
+import { send } from "../../services/broadcast/index.ts";
+import type { SceneSetEvent, SceneTitleEvent, SceneClearEvent } from "jsr:@ursamu/ursamu";
+
+// Narrate the new setting in the GM's voice
+gameHooks.on("scene:set", ({ roomId, description }: SceneSetEvent) => {
+  send([roomId], `%ch%cm[GM]%cn ${description}`, {});
+});
+
+// Announce title changes
+gameHooks.on("scene:title", ({ roomId, oldName, newName }: SceneTitleEvent) => {
+  // roomId is not in SceneTitleEvent — look it up from sceneId if needed
+  console.log(`[GM] Scene renamed: "${oldName}" → "${newName}"`);
+});
+
+// Wrap up when a scene closes
+gameHooks.on("scene:clear", ({ sceneName, status }: SceneClearEvent) => {
+  console.log(`[GM] Scene "${sceneName}" ${status}.`);
+});
+```
+
+See [Plugin Hooks & Events](/plugins/hooks/) for the complete GameHooks API.
 
 ---
 
