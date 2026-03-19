@@ -5,12 +5,12 @@ import "./commands.ts";
 
 const bboardsPlugin: IPlugin = {
   name: "bboards",
-  version: "1.0.0",
-  description: "Bulletin board system with in-game @bb commands and REST API",
+  version: "2.0.0",
+  description: "Myrddin-style BBS — +bbread, +bbpost, +bbreply, drafts, signatures, threading, read tracking",
 
   init: () => {
     registerPluginRoute("/api/v1/boards", bboardsRouteHandler);
-    console.log("[bboards] Plugin initialized — @bb commands active, /api/v1/boards routes registered");
+    console.log("[bboards] Plugin initialized — +bb commands active, /api/v1/boards routes registered");
     return true;
   },
 
