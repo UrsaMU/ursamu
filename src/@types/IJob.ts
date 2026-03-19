@@ -1,27 +1,38 @@
+export const VALID_BUCKETS = [
+  "BUG", "BUILD", "CGEN", "SUGGESTION", "TYPO",
+  "LOGS", "PLOT", "PRP", "PVP", "ROSTER", "XP",
+  "WIKI", "SPHERE", "INFLUENCE",
+] as const;
+
+export type JobBucket = typeof VALID_BUCKETS[number];
+
 export interface IJobComment {
-  id: string;
-  authorId: string;        // player dbref
+  authorId: string;
   authorName: string;
   text: string;
   timestamp: number;
-  staffOnly: boolean;      // hidden from submitter if true
+  published: boolean;       // visible to players? (default true)
 }
 
 export interface IJob {
-  id: string;              // "job-1", "job-2", ...
-  number: number;          // human-readable (#1, #2)
+  id: string;               // "job-1", "job-2", ...
+  number: number;           // human-readable (#1, #2)
   title: string;
-  category: string;        // "request" | "bug" | "app" | "complaint" | "idea" | "staff"
-  priority: "low" | "normal" | "high" | "critical";
-  status: "new" | "open" | "pending" | "in-progress" | "resolved" | "closed";
-  submittedBy: string;     // dbref
+  bucket: JobBucket;
+  status: "open" | "closed" | "cancelled";
+  submittedBy: string;      // dbref
   submitterName: string;
-  assignedTo?: string;     // dbref
+  assignedTo?: string;      // dbref
   assigneeName?: string;
+  closedByName?: string;
   description: string;
   comments: IJobComment[];
-  createdAt: number;       // timestamp
+  additionalPlayers: string[];  // player dbrefs who can view
+  createdAt: number;        // timestamp
   updatedAt: number;
-  closedAt?: number;
-  staffOnly: boolean;      // internal staff jobs not visible to players
+}
+
+export interface IJobAccess {
+  id: string;               // bucket name
+  staffIds: string[];       // player dbrefs with access
 }
