@@ -26,11 +26,11 @@ export default async (u: IUrsamuSDK) => {
   // Build Output Data
   const description = (target.state.description as string) || "You see nothing special.";
 
-  const characters = (target.contents || []).filter(obj => 
+  const characters = (target.contents || []).filter(obj =>
     obj.flags.has('player') && obj.flags.has('connected') && obj.id !== actor.id
   );
 
-  const objects = (target.contents || []).filter(obj => 
+  const objects = (target.contents || []).filter(obj =>
     !obj.flags.has('player') && !obj.flags.has('exit') && !obj.flags.has('room')
   );
 
