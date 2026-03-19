@@ -449,69 +449,143 @@ registerFunction({
 
 ## Hook API
 
-### registerHook(hookName, callback)
+### GameHooks
 
-Registers a hook to be called at a specific point in the system's execution.
-
-**Parameters:**
-
-- `hookName` (string): The name of the hook point
-- `callback` (Function): The function to call when the hook is triggered
-
-**Returns:**
-
-- void
-
-**Example:**
+`gameHooks` is the typed engine-level event bus exported from `jsr:@ursamu/ursamu`.
+It fires for 12 built-in events across players, scenes, and channels.
 
 ```typescript
-import { registerHook } from "../../services/Hooks/mod.ts";
+import { gameHooks } from "jsr:@ursamu/ursamu";
 
-registerHook("playerConnect", async (player) => {
-  console.log(`Player ${player.data.name} connected`);
-});
+gameHooks.on(event, handler)    // subscribe (idempotent — no double-register)
+gameHooks.off(event, handler)   // unsubscribe
+await gameHooks.emit(event, payload)  // fire all handlers; errors caught per-handler
 ```
 
-### registerHookPoint(hookName)
-
-Registers a new hook point.
-
-**Parameters:**
-
-- `hookName` (string): The name of the hook point to register
-
-**Returns:**
-
-- void
-
-**Example:**
+**Fire-and-forget pattern:**
 
 ```typescript
-import { registerHookPoint } from "../../services/Hooks/mod.ts";
-
-registerHookPoint("myCustomHook");
+gameHooks.emit("player:login", payload)
+  .catch((e) => console.error("[hooks] error:", e));
 ```
 
-### triggerHook(hookName, ...args)
+#### Built-in events
 
-Triggers a hook, calling all registered callbacks.
+| Event | Payload type | When |
+|-------|-------------|------|
+| `player:say` | `SayEvent` | Player speaks in a room |
+| `player:pose` | `PoseEvent` | Player poses/emotes |
+| `player:page` | `PageEvent` | Player pages another |
+| `player:move` | `MoveEvent` | Player traverses an exit |
+| `player:login` | `SessionEvent` | Player connects and logs in |
+| `player:logout` | `SessionEvent` | Player disconnects |
+| `channel:message` | `ChannelMessageEvent` | Player speaks on a channel |
+| `scene:created` | `SceneCreatedEvent` | New scene opened |
+| `scene:pose` | `ScenePoseEvent` | Any pose posted to a scene |
+| `scene:set` | `SceneSetEvent` | Scene-set description posted |
+| `scene:title` | `SceneTitleEvent` | Scene renamed |
+| `scene:clear` | `SceneClearEvent` | Scene closed/finished/archived |
 
-**Parameters:**
-
-- `hookName` (string): The name of the hook point to trigger
-- `...args` (any): Arguments to pass to the hook callbacks
-
-**Returns:**
-
-- Promise<void>
-
-**Example:**
+#### Payload types (exported from `jsr:@ursamu/ursamu`)
 
 ```typescript
-import { triggerHook } from "../../services/Hooks/mod.ts";
-
-await triggerHook("myCustomHook", { data: "some data" });
+SayEvent          { actorId, actorName, roomId, message }
+PoseEvent         { actorId, actorName, roomId, content, isSemipose }
+PageEvent         { actorId, actorName, targetId, targetName, message }
+MoveEvent         { actorId, actorName, fromRoomId, toRoomId, fromRoomName, toRoomName, exitName }
+SessionEvent      { actorId, actorName }
+ChannelMessageEvent { channelName, senderId, senderName, message }
+SceneCreatedEvent { sceneId, sceneName, roomId, actorId, actorName, sceneType }
+ScenePoseEvent    { sceneId, sceneName, roomId, actorId, actorName, msg, type }
+SceneSetEvent     { sceneId, sceneName, roomId, actorId, actorName, description }
+SceneTitleEvent   { sceneId, oldName, newName, actorId, actorName }
+SceneClearEvent   { sceneId, sceneName, actorId, actorName, status }
 ```
+
+#### Example
+
+```typescript
+import { gameHooks } from "jsr:@ursamu/ursamu";
+import type { SceneSetEvent } from "jsr:@ursamu/ursamu";
+
+const onSet = ({ roomId, description }: SceneSetEvent) => {
+  console.log(`Scene set in room ${roomId}: ${description}`);
+};
+
+gameHooks.on("scene:set", onSet);
+// Later, in plugin remove():
+gameHooks.off("scene:set", onSet);
+```
+
+### WikiHooks
+
+Typed hook bus for wiki page mutations (from `src/plugins/wiki/mod.ts`):
+
+```typescript
+import { wikiHooks } from "../../plugins/wiki/mod.ts";
+
+wikiHooks.on("wiki:created", ({ path, meta, body }) => {});
+wikiHooks.on("wiki:edited",  ({ path, meta, body }) => {});
+wikiHooks.on("wiki:deleted", ({ path, meta })       => {});
+```
+
+### EventHooks
+
+Typed hook bus for the events plugin (from `src/plugins/events/hooks.ts`):
+
+```typescript
+import { eventHooks } from "../../plugins/events/hooks.ts";
+
+eventHooks.on("event:created",   ({ eventId, name, startTime, createdBy }) => {});
+eventHooks.on("event:updated",   ({ eventId, changes }) => {});
+eventHooks.on("event:deleted",   ({ eventId }) => {});
+eventHooks.on("event:started",   ({ eventId, name }) => {});
+eventHooks.on("event:ended",     ({ eventId, name }) => {});
+eventHooks.on("event:rsvp",      ({ eventId, playerId, status }) => {});
+eventHooks.on("event:cancelled", ({ eventId, name }) => {});
+```
+
+### Wiki REST API
+
+The wiki plugin mounts a REST API at `/api/v1/wiki`. All write operations
+require `admin`, `wizard`, or `superuser` flags.
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/v1/wiki` | Required | List all pages (title, path) |
+| `GET` | `/api/v1/wiki?q=<query>` | Required | Full-text search (title, body, tags) |
+| `GET` | `/api/v1/wiki/<path>` | Required | Read page (JSON) or directory listing |
+| `GET` | `/api/v1/wiki/<path.ext>` | Required | Serve static asset (image, PDF) |
+| `POST` | `/api/v1/wiki` | Staff | Create a page |
+| `PATCH` | `/api/v1/wiki/<path>` | Staff | Update body and/or frontmatter |
+| `DELETE` | `/api/v1/wiki/<path>` | Staff | Delete page or static asset |
+| `PUT` | `/api/v1/wiki/<path.ext>` | Staff | Upload static asset (binary) |
+
+**GET page response shape:**
+
+```json
+{
+  "path": "news/patch-notes",
+  "title": "Patch Notes",
+  "date": "2026-03-18",
+  "author": "Admin",
+  "tags": ["news"],
+  "body": "## Changes\n..."
+}
+```
+
+**POST / PATCH request body:**
+
+```json
+{
+  "path": "news/patch-notes",
+  "title": "Patch Notes",
+  "body": "## Changes\n..."
+}
+```
+
+Any extra fields beyond `path` and `body` become frontmatter. Keys must
+match `/^[\w-]+$/`. Max body size: **10 MB**.
 
 ## Utility API
 

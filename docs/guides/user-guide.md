@@ -15,6 +15,8 @@ nav:
     url: "#staff-jobs"
   - text: Communication
     url: "#communication"
+  - text: Wiki
+    url: "#wiki"
   - text: Building
     url: "#building"
 ---
@@ -123,6 +125,34 @@ There are several ways to communicate with other players in UrsaMU:
 - `@channel/join <channel>=<alias>` — Join a channel with a local alias
 - `@channel/leave <alias>` — Leave a channel
 - `<alias> <message>` — Send a message on a joined channel (using your alias)
+
+## Wiki
+
+The wiki is a shared knowledge base for lore, news, fiction, and game
+information. All connected players can read and search it from in-game.
+
+```
++wiki                         -- List top-level pages and directories
++wiki <path>                  -- Read a page or list a directory
++wiki/search <query>          -- Search all pages by title, body, or tag
+```
+
+**Examples:**
+
+```
++wiki                         -- Show the wiki index
++wiki news                    -- List all pages under news/
++wiki news/patch-notes        -- Read a specific page
++wiki/search dragon           -- Find all pages mentioning "dragon"
+```
+
+Paths mirror the folder structure exactly. A page at `lore/factions/iron-circle`
+is read with `+wiki lore/factions/iron-circle`.
+
+> Staff members can create, edit, and fetch images with `@wiki` commands —
+> see the [Admin Guide](/guides/admin-guide/#wiki-administration) for details.
+
+---
 
 ## Object Interaction
 
