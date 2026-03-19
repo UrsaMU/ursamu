@@ -224,7 +224,18 @@ cmdParser.use(async (ctx, next) => {
 
 
   // Parse switches from command name (e.g., "bbpost/edit" → name="bbpost", switches=["edit"])
+  // Also handle compound aliases (e.g., "mail/delete" aliased to "mail" — extract "delete" as switch)
   let cmdSwitches: string[] = [];
+
+  // Check if the current scriptName was resolved from a compound alias (e.g., "mail/delete" → "mail")
+  // In that case, find the original lookupName to extract the switch
+  const originalLookup = (intentName.startsWith("@") || intentName.startsWith("+"))
+    ? intentName.slice(1) : intentName;
+  if (originalLookup.includes("/") && !scriptName.includes("/")) {
+    // The alias consumed the switch — extract it from the original
+    cmdSwitches = originalLookup.slice(originalLookup.indexOf("/") + 1).split("/").filter(Boolean);
+  }
+
   if (scriptName.includes("/")) {
     const slashIdx = scriptName.indexOf("/");
     // Re-check alias map for the base name before "/" (e.g. channel/join → channels/join)
