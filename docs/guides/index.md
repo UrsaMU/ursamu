@@ -17,6 +17,8 @@ nav:
     url: "./lock-expressions.md"
   - text: Password Reset
     url: "./password-reset.md"
+  - text: Wiki
+    url: "./wiki.md"
   - text: Writing Help Files
     url: "./help-authoring.md"
   - text: Scenes
@@ -97,6 +99,16 @@ Create, write in, and export collaborative roleplay logs:
 - [Private scenes & invitations](./scenes.md#private-scenes)
 - [Exporting a scene](./scenes.md#exporting-a-scene)
 - [Full API reference](./scenes.md#api-reference)
+
+## Wiki
+
+Build and manage your game wiki with file-based Markdown:
+
+- [Directory structure](./wiki.md#directory-structure)
+- [Frontmatter](./wiki.md#frontmatter)
+- [In-game commands](./wiki.md#in-game-commands)
+- [REST API](./wiki.md#rest-api)
+- [Hooks](./wiki.md#hooks)
 
 ## Writing Help Files
 
