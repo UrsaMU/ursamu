@@ -488,19 +488,19 @@ gameHooks.emit("player:login", payload)
 
 #### Payload types (exported from `jsr:@ursamu/ursamu`)
 
-```typescript
-SayEvent          { actorId, actorName, roomId, message }
-PoseEvent         { actorId, actorName, roomId, content, isSemipose }
-PageEvent         { actorId, actorName, targetId, targetName, message }
-MoveEvent         { actorId, actorName, fromRoomId, toRoomId, fromRoomName, toRoomName, exitName }
-SessionEvent      { actorId, actorName }
-ChannelMessageEvent { channelName, senderId, senderName, message }
-SceneCreatedEvent { sceneId, sceneName, roomId, actorId, actorName, sceneType }
-ScenePoseEvent    { sceneId, sceneName, roomId, actorId, actorName, msg, type }
-SceneSetEvent     { sceneId, sceneName, roomId, actorId, actorName, description }
-SceneTitleEvent   { sceneId, oldName, newName, actorId, actorName }
-SceneClearEvent   { sceneId, sceneName, actorId, actorName, status }
-```
+| Type | Fields |
+|------|--------|
+| `SayEvent` | `actorId`, `actorName`, `roomId`, `message` |
+| `PoseEvent` | `actorId`, `actorName`, `roomId`, `content`, `isSemipose` |
+| `PageEvent` | `actorId`, `actorName`, `targetId`, `targetName`, `message` |
+| `MoveEvent` | `actorId`, `actorName`, `fromRoomId`, `toRoomId`, `fromRoomName`, `toRoomName`, `exitName` |
+| `SessionEvent` | `actorId`, `actorName` |
+| `ChannelMessageEvent` | `channelName`, `senderId`, `senderName`, `message` |
+| `SceneCreatedEvent` | `sceneId`, `sceneName`, `roomId`, `actorId`, `actorName`, `sceneType` |
+| `ScenePoseEvent` | `sceneId`, `sceneName`, `roomId`, `actorId`, `actorName`, `msg`, `type` |
+| `SceneSetEvent` | `sceneId`, `sceneName`, `roomId`, `actorId`, `actorName`, `description` |
+| `SceneTitleEvent` | `sceneId`, `oldName`, `newName`, `actorId`, `actorName` |
+| `SceneClearEvent` | `sceneId`, `sceneName`, `actorId`, `actorName`, `status` |
 
 #### Example
 

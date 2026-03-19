@@ -36,7 +36,7 @@ You can connect to an UrsaMU server in several ways:
    through your browser.
 2. **Telnet Client**: You can use a telnet client to connect to the server's
    port.
-3. __MU_ Client_*: Specialized clients like Mudlet, TinTin++, or MUSHclient can
+3. **MU\* Client**: Specialized clients like Mudlet, TinTin++, or MUSHclient can
    provide enhanced features.
 
 ### Creating an Account

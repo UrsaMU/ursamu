@@ -240,8 +240,9 @@ From in-game (admin or wizard required):
 From the terminal, use `Ctrl+C` to stop a running process, then restart with:
 
 ```bash
-deno task server    # Hub only
-deno task start     # Hub + telnet with file watching
+deno task start     # Hub only (no watch)
+deno task dev       # Hub + Telnet with file watching (development)
+deno task daemon    # Background service with restart loop (production)
 ```
 
 ### Updating from Git (`@update`)
