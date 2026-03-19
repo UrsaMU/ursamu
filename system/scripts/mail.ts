@@ -401,11 +401,20 @@ export default async (u: IUrsamuSDK) => {
             if (!en.state.tempMail) return u.send("%chMAIL:%cn No draft in progress.");
             const m = en.state.tempMail as IMail;
 
+            const resolveNames = async (ids: string[]): Promise<string> => {
+                const names: string[] = [];
+                for (const id of ids) {
+                    const obj = await u.util.target(en, id.replace("#", "")).catch(() => null);
+                    names.push(obj?.name || id);
+                }
+                return names.join(", ");
+            };
+
             u.send(`\n%chDRAFT PREVIEW%cn`);
             u.send(`From:    ${en.name} (#${en.id})`);
-            u.send(`To:      ${m.to.join(", ")}`);
-            if (m.cc?.length) u.send(`CC:      ${m.cc.join(", ")}`);
-            if (m.bcc?.length) u.send(`BCC:     ${m.bcc.join(", ")}`);
+            u.send(`To:      ${await resolveNames(m.to)}`);
+            if (m.cc?.length) u.send(`CC:      ${await resolveNames(m.cc)}`);
+            if (m.bcc?.length) u.send(`BCC:     ${await resolveNames(m.bcc)}`);
             u.send(`Subject: ${m.subject}`);
             u.send(HR);
             u.send(m.message || "(No Body)");
