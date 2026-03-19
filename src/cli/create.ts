@@ -1,8 +1,8 @@
 #!/usr/bin/env -S deno run -A
 
-import { parse } from "@std/flags";
-import { join, dirname, fromFileUrl } from "@std/path";
-import { existsSync } from "@std/fs";
+import { parse } from "jsr:@std/flags@^0.224.0";
+import { join, dirname, fromFileUrl } from "jsr:@std/path@^0.224.0";
+import { existsSync } from "jsr:@std/fs@^0.224.0";
 
 // Get the directory of the current script (safe for both file:// and JSR https:// URLs)
 const __dirname = import.meta.url.startsWith("file://")

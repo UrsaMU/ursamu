@@ -73,29 +73,39 @@ export function registerPluginRoute(prefix: string, handler: PluginRouteHandler)
  * wiki, scenes, channels, players, config, building, or plugin routes).
  * Applies CORS headers and per-IP rate limiting on every request.
  */
-export const handleRequest = async (req: Request): Promise<Response> => {
+export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promise<Response> => {
   const url = new URL(req.url);
   const path = url.pathname;
 
-  // CORS Headers — configurable via server.corsOrigins (default: "*")
-  const configured = getConfig<string | string[]>("server.corsOrigins") ?? "*";
+  // CORS Headers — configurable via server.corsOrigins (no default; omitting the header
+  // enforces same-origin policy). Set to an explicit origin or list in production.
+  const configured = getConfig<string | string[]>("server.corsOrigins");
   const origin = req.headers.get("Origin") ?? "";
-  let allowOrigin = "*";
-  if (configured !== "*") {
+  let allowOrigin: string | null = null;
+  if (configured === "*") {
+    allowOrigin = "*";
+  } else if (configured) {
     const allowed = Array.isArray(configured) ? configured : [configured];
-    allowOrigin = allowed.includes(origin) ? origin : allowed[0];
+    if (allowed.includes(origin)) allowOrigin = origin;
   }
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": allowOrigin,
+  const corsHeaders: Record<string, string> = {
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Content-Security-Policy": "default-src 'self'",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   };
+  if (allowOrigin) corsHeaders["Access-Control-Allow-Origin"] = allowOrigin;
 
-  // Rate limit check
-  const clientIp = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+  // Rate limit check — only trust x-forwarded-for when server.trustedProxy is enabled.
+  // Without a trusted proxy the Fetch API Request has no socket-level IP; per-IP rate
+  // limiting is disabled in that mode (all requests share "unknown").
+  const trustedProxy = getConfig<boolean>("server.trustedProxy") ?? false;
+  const clientIp = trustedProxy
+    ? (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown"
+    : remoteAddr;
   if (isApiRateLimited(clientIp)) {
     return new Response(JSON.stringify({ error: "Too many requests" }), {
       status: 429,
@@ -114,7 +124,7 @@ export const handleRequest = async (req: Request): Promise<Response> => {
   const response = await (async () => {
     // API Routes
     if (path.startsWith("/api/v1/auth")) {
-      return await authHandler(req);
+      return await authHandler(req, remoteAddr);
     }
 
     if (path === "/api/v1/me" && req.method === "GET") {

@@ -1,6 +1,6 @@
 #!/usr/bin/env -S deno run -A
 
-import { parse } from "@std/flags";
+import { parse } from "jsr:@std/flags@^0.224.0";
 import { ConfigManager } from "../services/Config/index.ts";
 import { getAllConfig } from "../services/Config/mod.ts";
 

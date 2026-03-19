@@ -6,10 +6,10 @@
  * to the latest version published on JSR, then re-caches entry-point files.
  */
 
-import { parse } from "@std/flags";
-import { join } from "@std/path";
-import { existsSync } from "@std/fs";
-import { bold, cyan, dim, green, red, yellow } from "@std/fmt/colors";
+import { parse } from "jsr:@std/flags@^0.224.0";
+import { join } from "jsr:@std/path@^0.224.0";
+import { existsSync } from "jsr:@std/fs@^0.224.0";
+import { bold, cyan, dim, green, red, yellow } from "jsr:@std/fmt@^0.224.0/colors";
 
 const args = parse(Deno.args, {
   boolean: ["help", "dry-run"],
