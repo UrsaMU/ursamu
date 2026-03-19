@@ -299,12 +299,31 @@ const directories = [
   "help",
   "scripts",
   "system/scripts",
+  "wiki",
 ];
 
 for (const dir of directories) {
   await Deno.mkdir(join(targetDir, dir), { recursive: true });
   console.log(`Created directory: ${dir}`);
 }
+
+// Create starter wiki page
+await Deno.writeTextFile(join(targetDir, "wiki", "home.md"), `# ${projectName} Wiki
+
+Welcome to the ${projectName} wiki. Use this directory to document your game world, lore, rules, and staff notes.
+
+## Getting Started
+
+- [Lore & Setting](lore.md) — world background and theme
+- [Rules](rules.md) — game rules and policies
+- [Staff Notes](staff.md) — internal notes for staff
+
+## Tips
+
+- Add new \`.md\` files to this directory for each topic.
+- Link between pages using relative paths, e.g. \`[Rules](rules.md)\`.
+`);
+console.log("Created wiki/home.md");
 
 // Copy engine's system scripts into the new project so they are editable
 {
@@ -587,6 +606,8 @@ ${projectName}/
 │   └── plugins/        # Custom plugins
 ├── text/               # Text files
 │   └── default_connect.txt  # Welcome screen
+├── wiki/               # Game wiki and documentation
+│   └── home.md         # Wiki home page
 ├── deno.json           # Deno configuration and tasks
 └── README.md           # This file
 \`\`\`
