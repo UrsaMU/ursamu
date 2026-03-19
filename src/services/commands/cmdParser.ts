@@ -213,9 +213,11 @@ cmdParser.use(async (ctx, next) => {
   let scriptArgs = intent.args;
 
   // Handle prefixes
+  let usedPrefix = "";
   for (const [prefix, name] of Object.entries(prefixMap)) {
     if (msg.trim().startsWith(prefix)) {
         scriptName = name;
+        usedPrefix = prefix;
         scriptArgs = [msg.trim().slice(prefix.length).trim()];
         break;
     }
@@ -290,7 +292,7 @@ cmdParser.use(async (ctx, next) => {
             target: targetObj ? await SDKService.hydrate(new Obj(targetObj)) : undefined,
             location: char?.location || "limbo",
             state: char?.data?.state as Record<string, unknown> || {},
-            cmd: { name: scriptName, args: [rawArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
+            cmd: { name: usedPrefix || scriptName, args: [rawArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
             socketId: ctx.socket.id
         });
         return;
