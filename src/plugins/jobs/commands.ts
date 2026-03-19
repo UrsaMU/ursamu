@@ -96,9 +96,15 @@ async function listJobs(u: IUrsamuSDK): Promise<void> {
 
 addCmd({
   name: "+job",
-  pattern: /^\+job(?!s)(?:\/(\S+))?\s*(.*)/i,
+  pattern: /^\+job(?:\/(\S+))?\s*(.*)/i,
   lock: "connected",
   exec: async (u: IUrsamuSDK) => {
+    // Handle "+jobs" being caught by "+job" pattern
+    if (u.cmd.original?.trim().match(/^\+jobs\s*$/i)) {
+      await listJobs(u);
+      return;
+    }
+
     const sw  = (u.cmd.args[0] || "").toLowerCase().trim();
     const arg = (u.cmd.args[1] || "").trim();
     const staff = isStaff(u);
