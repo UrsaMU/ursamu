@@ -50,9 +50,18 @@ interface IUrsamuSDK {
 }
 
 // Formatting Helpers
-const HR = "%cr" + "-".repeat(70) + "%cn";
+const HR = "-".repeat(77);
 const PAD = (text: string, width: number) => text.padEnd(width).slice(0, width);
 const DATE = (timestamp: number) => new Date(timestamp).toLocaleDateString() + " " + new Date(timestamp).toLocaleTimeString();
+const DATEFULL = (timestamp: number) => {
+    const d = new Date(timestamp);
+    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    const ss = String(d.getSeconds()).padStart(2,"0");
+    return `${days[d.getDay()]} ${months[d.getMonth()]} ${d.getDate()} ${hh}:${mm}:${ss} ${d.getFullYear()}`;
+};
 
 // Helper: get all mail where player is in TO or CC
 async function getMyMail(u: IUrsamuSDK, playerId: string): Promise<IMail[]> {
@@ -199,23 +208,17 @@ export default async (u: IUrsamuSDK) => {
             const fromObj = await u.util.target(en, fromId).catch(() => null);
             const fromName = fromObj?.name || "Unknown";
 
-            const toNames: string[] = [];
-            for (const t of (m.to || [])) {
-              const tid = t.replace("#", "");
-              const tObj = await u.util.target(en, tid).catch(() => null);
-              toNames.push(tObj?.name || t);
-            }
+            const status = m.read ? "OLD" : "NEW";
+            const size = (m.message || "").length;
 
-            u.send(`\nMessage: ${num}`);
-            u.send(`From:    ${fromName} (#${fromId})`);
-            u.send(`To:      ${toNames.join(", ")}`);
-            if (m.cc?.length) u.send(`CC:      ${m.cc.join(", ")}`);
-            u.send(`Subject: ${m.subject}`);
-            u.send(`Date:    ${DATE(m.date)}`);
             u.send(HR);
-            u.send("");
-            u.send(m.message);
-            u.send("");
+            u.send(`Message #: ${num}`);
+            u.send(`Status: ${PAD(status, 12)}From: ${fromName}`);
+            u.send(`Date/Time: ${PAD(DATEFULL(m.date), 28)}Size: ${size} Bytes`);
+            u.send(`Subject: ${m.subject}`);
+            u.send(HR);
+            u.send(m.message || "(No body)");
+            u.send(HR);
             break;
         }
 
