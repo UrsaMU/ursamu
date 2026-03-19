@@ -26,4 +26,10 @@ import { registerChargenCommands } from "./pop/chargen.ts";
 registerChargenCommands();
 import registerTimeCommands from "./pop/time.ts";
 registerTimeCommands();
+import { registerNotesCommands } from "./pop/notes.ts";
+registerNotesCommands();
+import registerSheet from "./pop/sheet.ts";
+registerSheet();
+import registerBBSInit from "./pop/bbs-init.ts";
+registerBBSInit();
 
