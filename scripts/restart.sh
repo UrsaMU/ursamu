@@ -15,17 +15,25 @@ fi
 # shellcheck disable=SC1090
 source "$PID_FILE"
 
-# Stop main only
+DENO_PID_FILE=".ursamu-deno.pid"
+
+# Stop main loop + inner deno process
 if [ -n "$MAIN_PID" ]; then
-  kill "$MAIN_PID" 2>/dev/null && echo "Stopped main server (PID: $MAIN_PID)."
+  kill "$MAIN_PID" 2>/dev/null && echo "Stopped main loop (PID: $MAIN_PID)."
+  sleep 1
+fi
+if [ -f "$DENO_PID_FILE" ]; then
+  kill "$(cat "$DENO_PID_FILE")" 2>/dev/null || true
+  rm -f "$DENO_PID_FILE"
 fi
 
-# Restart main
+# Restart via the loop script
 mkdir -p "$LOG_DIR"
-nohup deno run --allow-all --unstable-detect-cjs --unstable-kv src/main.ts >> "$MAIN_LOG" 2>&1 &
+chmod +x "$(dirname "$0")/main-loop.sh"
+MAIN_LOG="$MAIN_LOG" nohup bash "$(dirname "$0")/main-loop.sh" >> /dev/null 2>&1 &
 MAIN_PID=$!
 
 # Update PID file — preserve TELNET_PID
 printf "MAIN_PID=%s\nTELNET_PID=%s\n" "$MAIN_PID" "$TELNET_PID" > "$PID_FILE"
 
-echo "Main server restarted (PID: $MAIN_PID). Telnet untouched."
+echo "Main server restarted via loop (PID: $MAIN_PID). Telnet untouched."

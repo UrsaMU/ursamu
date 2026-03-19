@@ -22,7 +22,7 @@ async function save(cfg: IDiscordConfig): Promise<void> {
   }
 }
 
-export async function getDiscordConfig(): Promise<IDiscordConfig> {
+export function getDiscordConfig(): Promise<IDiscordConfig> {
   return load();
 }
 

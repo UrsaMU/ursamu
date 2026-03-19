@@ -31,7 +31,7 @@ const PNG_BYTES = new Uint8Array([
 // Minimal JPEG header (SOI marker — enough to distinguish for extension test)
 const JPEG_BYTES = new Uint8Array([0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x01]);
 
-async function get(path: string): Promise<Response> {
+function get(path: string): Promise<Response> {
   return handleRequest(new Request(`http://localhost${path}`));
 }
 

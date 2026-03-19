@@ -163,7 +163,7 @@ The WebSocket hub enforces **10 commands per second** per connection. Excess com
 | Web framework | Hono / Oak |
 | Database | dbojs (embedded, file-backed) |
 | Scripting | Web Workers (sandboxed ESM) |
-| Testing | `deno test` — 296 tests, 0 failures |
+| Testing | `deno test` — 450 tests, 0 failures |
 | Docs | Lume (static site generator) |
 | CI | GitHub Actions |
 
@@ -175,18 +175,18 @@ The WebSocket hub enforces **10 commands per second** per connection. Excess com
 | Protocol | Telnet | Telnet | Telnet | **WebSocket** |
 | Scripting | MUSHcode | MUSHcode | MUSHcode | **Sandboxed ESM** |
 | Plugin system | No | No | No | **Yes** |
-| Web client | No | No | No | **Native** |
+| Web client | No | No | No | **Via plugins** |
 | Discord | No | No | No | **Built-in** |
 | Package manager | No | No | No | **Deno/JSR** |
-| Docker support | Manual | Manual | Manual | **Yes** |
+| Containerization | Manual | Manual | Manual | **Game-level** |
 | License | Penn (custom) | TinyMUSH | Artistic | **MIT** |
 
 ## Project Status
 
-UrsaMU is at **v1.0**. Current version is `1.0.0`.
+UrsaMU is at **v1.4.3**.
 
-- **Test suite**: 296 passing, 0 failing
-- **Core systems**: complete (commands, sandbox, WebSocket, Discord, scenes, channels)
-- **Status**: v1.0.0 released
+- **Test suite**: 450 passing, 0 failing
+- **Core systems**: complete (commands, sandbox, WebSocket, Discord, scenes, channels, security hardening)
+- **Status**: actively maintained, published on JSR
 
 The project is open-source under the MIT License. Contributions are welcome!

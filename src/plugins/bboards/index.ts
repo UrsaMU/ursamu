@@ -8,13 +8,13 @@ const bboardsPlugin: IPlugin = {
   version: "1.0.0",
   description: "Bulletin board system with in-game @bb commands and REST API",
 
-  init: async () => {
+  init: () => {
     registerPluginRoute("/api/v1/boards", bboardsRouteHandler);
     console.log("[bboards] Plugin initialized — @bb commands active, /api/v1/boards routes registered");
     return true;
   },
 
-  remove: async () => {
+  remove: () => {
     console.log("[bboards] Plugin removed");
   },
 };

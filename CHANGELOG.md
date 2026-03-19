@@ -2,6 +2,63 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [1.5.0] — 2026-03-18
+
+### New Features
+
+#### GameHooks — typed engine-level event bus
+- `gameHooks.on(event, handler)` / `.off()` / `.emit()` — subscribe to game lifecycle events from any plugin without modifying core command files
+- **Player events:** `player:say`, `player:pose`, `player:page`, `player:move`, `player:login`, `player:logout`
+- **Scene events:** `scene:created`, `scene:pose`, `scene:set`, `scene:title`, `scene:clear`
+- **Channel events:** `channel:message`
+- All events fire with fully-typed payloads (`SayEvent`, `PoseEvent`, `SceneSetEvent`, etc.)
+- Duplicate handler prevention — registering the same function twice is a no-op
+- Error isolation — a throwing handler does not prevent subsequent handlers from running
+- Exported from `mod.ts` so plugin authors can subscribe without any internal imports
+
+#### Scene Hooks
+- `scene:created` — fires when a new scene is opened (POST `/api/v1/scenes`)
+- `scene:pose` — fires on every pose posted to a scene (pose, ooc, set)
+- `scene:set` — fires additionally when a `type: "set"` pose is posted (the GM description hook)
+- `scene:title` — fires when a PATCH changes the scene name
+- `scene:clear` — fires when a PATCH transitions status to `"closed"`, `"finished"`, or `"archived"`
+
+#### Wiki Plugin (`src/plugins/wiki/`)
+- File-based markdown wiki with folder-driven routing (mirrors Next.js router conventions)
+- YAML frontmatter support (`title`, `date`, `author`, `tags`, and arbitrary keys)
+- **REST API** (`/api/v1/wiki`): `GET` list/read/search, `POST` create, `PATCH` update, `DELETE` remove, `PUT` upload static assets
+- **In-game commands:** `+wiki [path]`, `+wiki/search <query>`, `@wiki/create`, `@wiki/edit`, `@wiki/fetch`
+- Static asset co-location — images and PDFs live alongside articles and are served by the wiki router
+- WikiHooks (`wiki:created`, `wiki:edited`, `wiki:deleted`) for plugin-level reactions
+- Exported from `src/plugins/wiki/mod.ts`
+
+#### EventHooks (`src/plugins/events/hooks.ts`)
+- Typed hook bus for the events plugin — same pattern as GameHooks
+- Events: `event:created`, `event:updated`, `event:deleted`, `event:started`, `event:ended`, `event:rsvp`, `event:cancelled`
+
+#### `@update` command + daemon restart loop
+- `@update [branch]` / `@upgrade [branch]` — admin-only in-game command; runs `git pull origin <branch>` and exits with code 75 to signal the restart loop
+- `u.sys.update(branch?)` added to the sandbox SDK
+- `scripts/main-loop.sh` — restart loop: exit 75 → restart with exponential backoff; exit 0 → clean stop; any other exit → stop (investigate logs)
+- Rapid-restart protection: if the server exits in under 5 seconds the delay doubles (1 s → 2 s → … → 60 s cap)
+- `scripts/daemon.sh` / `scripts/stop.sh` / `scripts/restart.sh` updated to use the loop
+
+### Security
+
+- **SSRF guard** — `@wiki/fetch` blocks private/loopback/link-local IP ranges before fetching
+- **TOCTOU fix** — wiki page creation uses `Deno.open({ createNew: true })` for atomic create (no stat-then-write race)
+- **Body size limits** — POST and PATCH wiki routes check `Content-Length` before buffering
+- **Metadata key validation** — wiki frontmatter keys restricted to `/^[\w-]+$/`
+- **Git option injection prevention** — `@update` branch validated against `/^[\w./\-]+$/`; names starting with `-` are rejected
+- **Duplicate hook deduplication** — `gameHooks.on` is idempotent
+
+### Tests
+
+- **588 passing / 0 failing** (up from 450)
+- New test files: `tests/game_hooks.test.ts`, `tests/scene_hooks.test.ts`, `tests/events_hooks.test.ts`, `tests/wiki_hooks.test.ts`, `tests/wiki_router.test.ts`, `tests/wiki.test.ts`, `tests/update_script.test.ts`
+
+---
+
 ## [1.3.0] — 2026-03-16
 
 ### Breaking Changes

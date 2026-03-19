@@ -176,7 +176,7 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
           // If message is meant for Telnet, it should be in 'msg' (formatted ANSI)
           if (payload.msg) {
-            write(payload.msg + "\r\n");
+            write(payload.msg.replace(/[\r\n]+$/, "") + "\r\n");
           }
 
           if (payload.data?.quit) {

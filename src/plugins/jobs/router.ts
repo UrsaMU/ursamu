@@ -193,34 +193,32 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
         return jsonResponse({ error: "Invalid JSON body" }, 400);
       }
 
-      const ALLOWED = ["status", "priority", "assignedTo", "title", "description"];
-      const update: Partial<IJob> = { updatedAt: Date.now() };
+      const ALLOWED = new Set(["status", "priority", "assignedTo", "title", "description"]);
 
-      for (const field of ALLOWED) {
-        if (field in body) {
-          (update as Record<string, unknown>)[field] = body[field];
+      const updated = await jobs.atomicModify(job.id, (current) => {
+        const next: IJob = { ...current, updatedAt: Date.now() };
+        for (const field of ALLOWED) {
+          if (field in body) (next as unknown as Record<string, unknown>)[field] = body[field];
         }
-      }
+        return next;
+      });
 
-      const updated: IJob = { ...job, ...update };
-      await jobs.update({}, updated);
-
-      // Fire granular hooks based on what actually changed
-      if ("status" in update && update.status !== job.status) {
-        if (update.status === "closed") {
+      // Fire granular hooks based on what actually changed (compare new state to pre-update snapshot)
+      if (updated.status !== job.status) {
+        if (updated.status === "closed") {
           await jobHooks.emit("job:closed", updated);
-        } else if (update.status === "resolved") {
+        } else if (updated.status === "resolved") {
           await jobHooks.emit("job:resolved", updated);
-        } else if ((job.status === "closed" || job.status === "resolved") && update.status === "open") {
+        } else if ((job.status === "closed" || job.status === "resolved") && updated.status === "open") {
           await jobHooks.emit("job:reopened", updated);
         } else {
           await jobHooks.emit("job:status-changed", updated, job.status);
         }
       }
-      if ("priority" in update && update.priority !== job.priority) {
+      if (updated.priority !== job.priority) {
         await jobHooks.emit("job:priority-changed", updated, job.priority);
       }
-      if ("assignedTo" in update && update.assignedTo !== job.assignedTo) {
+      if (updated.assignedTo !== job.assignedTo) {
         await jobHooks.emit("job:assigned", updated);
       }
 

@@ -53,10 +53,10 @@ const ENGINE_SCRIPT_NAMES = [
   "format","get","give","help","home","inventory","link","lock","look","mail","mailadd",
   "moniker","motd","name","open","page","parent","pemit","pose","quit","quota","remit",
   "say","score","search","set","setAttr","stats","teleport","think","trigger","unlink",
-  "who","wipe",
+  "update","who","wipe",
 ];
 
-async function parseAliasesFromContent(content: string, scriptName: string) {
+function parseAliasesFromContent(content: string, scriptName: string) {
   const match = content.match(/export\s+const\s+aliases\s*=\s*(\[.*?\])/);
   if (!match) return;
   try {
@@ -102,6 +102,14 @@ export async function loadSystemAliases() {
 // Start loading aliases
 loadSystemAliases();
 
+/**
+ * Register one or more commands with the game's command parser.
+ *
+ * Commands are matched in registration order. The first command whose
+ * `pattern` matches the player's input wins.
+ *
+ * @param cmd - One or more command descriptors (`ICmd`) to register.
+ */
 export const addCmd = (...cmd: ICmd[]): void => {
   cmds.push(...cmd);
 };

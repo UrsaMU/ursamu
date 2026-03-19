@@ -12,13 +12,13 @@ const jobsPlugin: IPlugin = {
   version: "1.0.0",
   description: "Anomaly-style jobs system — +request for players, +jobs for staff, bucket access control, escalation, archive",
 
-  init: async () => {
+  init: () => {
     registerPluginRoute("/api/v1/jobs", jobsRouteHandler);
     console.log("[jobs] Plugin initialized — +request/+jobs/+archive commands active, /api/v1/jobs routes registered");
     return true;
   },
 
-  remove: async () => {
+  remove: () => {
     console.log("[jobs] Plugin removed");
   },
 };

@@ -1,33 +1,267 @@
 ---
 layout: layout.vto
-description: Reacting to and emitting game events with EventsService
+description: Typed event hooks for reacting to game, scene, wiki, and custom events
 nav:
-  - text: Overview
-    url: "#overview"
-  - text: Subscribing to Events
-    url: "#subscribing-to-events"
-  - text: Emitting Events
-    url: "#emitting-events"
-  - text: In-Game Event Subscriptions
-    url: "#in-game-event-subscriptions"
+  - text: GameHooks
+    url: "#gamehooks"
+  - text: Scene Events
+    url: "#scene-events"
+  - text: WikiHooks
+    url: "#wikihooks"
+  - text: EventHooks
+    url: "#eventhooks"
+  - text: EventsService (pub/sub)
+    url: "#eventsservice-pubsub"
   - text: Naming Conventions
     url: "#naming-conventions"
   - text: Full Example
     url: "#full-example"
 ---
 
-# Plugin Events
+# Plugin Hooks & Events
 
-## Overview
+UrsaMU ships two complementary event systems. Choose the one that fits your use case:
 
-UrsaMU uses an internal pub/sub system via `EventsService`. Plugins can
-subscribe to named event channels, emit custom events, and trigger sandbox
-scripts when events fire. This is the correct way to react to things that
-happen in the game world — there is no `app.hooks` API.
+| System | Best for |
+|--------|----------|
+| **GameHooks** | Reacting to engine-level events (player login, movement, say, scene changes) from TypeScript plugin code |
+| **EventsService** | Running sandbox scripts when custom events fire; in-game `u.events.on/emit` scripting |
+
+Both are safe to use together in the same plugin.
 
 ---
 
-## Subscribing to Events
+## GameHooks
+
+`gameHooks` is a typed, singleton event bus exported from `mod.ts`. It fires
+for 12 built-in engine events and is the correct way to react to player and
+scene activity without modifying core command files.
+
+```typescript
+import { gameHooks } from "jsr:@ursamu/ursamu";
+
+// Subscribe
+gameHooks.on("player:login", ({ actorId, actorName }) => {
+  console.log(`[GM] ${actorName} connected.`);
+});
+
+// Unsubscribe (pass the same function reference)
+gameHooks.off("player:login", myHandler);
+```
+
+### API
+
+```typescript
+gameHooks.on(event, handler)   // subscribe — idempotent (no double-register)
+gameHooks.off(event, handler)  // unsubscribe
+await gameHooks.emit(event, payload)  // fire all handlers; errors are caught per-handler
+```
+
+**Error isolation** — a throwing handler is logged and skipped; subsequent
+handlers still run.
+
+**Fire-and-forget pattern** (used throughout the engine):
+
+```typescript
+gameHooks.emit("player:login", payload)
+  .catch((e) => console.error("[hooks] player:login error:", e));
+```
+
+---
+
+### Player Events
+
+#### `player:say`
+
+Fires when a player speaks in a room via `say` / `"`.
+
+```typescript
+gameHooks.on("player:say", ({ actorId, actorName, roomId, message }) => {
+  // actorId   — DB id of the speaker
+  // actorName — display name
+  // roomId    — room where the message was spoken
+  // message   — the spoken text (raw, may contain MUSH codes)
+});
+```
+
+#### `player:pose`
+
+Fires when a player poses/emotes via `pose` / `:` / `;`.
+
+```typescript
+gameHooks.on("player:pose", ({ actorId, actorName, roomId, content, isSemipose }) => {
+  // content    — full formatted content, e.g. "Alice grins."
+  // isSemipose — true when ; shorthand was used (no space between name and text)
+});
+```
+
+#### `player:page`
+
+Fires when a player pages another player.
+
+```typescript
+gameHooks.on("player:page", ({ actorId, actorName, targetId, targetName, message }) => {});
+```
+
+#### `player:move`
+
+Fires when a player traverses an exit.
+
+```typescript
+gameHooks.on("player:move", ({
+  actorId, actorName,
+  fromRoomId, toRoomId,
+  fromRoomName, toRoomName,
+  exitName,         // e.g. "North"
+}) => {});
+```
+
+#### `player:login`
+
+Fires when a player connects and logs in.
+
+```typescript
+gameHooks.on("player:login", ({ actorId, actorName }) => {});
+```
+
+#### `player:logout`
+
+Fires when a player disconnects.
+
+```typescript
+gameHooks.on("player:logout", ({ actorId, actorName }) => {});
+```
+
+#### `channel:message`
+
+Fires when a player speaks on a channel.
+
+```typescript
+gameHooks.on("channel:message", ({ channelName, senderId, senderName, message }) => {});
+```
+
+---
+
+### Scene Events
+
+Scene hooks fire from the REST API (`/api/v1/scenes`) when scenes are created,
+modified, or closed. They are the integration point for AI GM assistants and
+other scene-aware plugins.
+
+#### `scene:created`
+
+Fires after a new scene is opened (`POST /api/v1/scenes`).
+
+```typescript
+gameHooks.on("scene:created", ({ sceneId, sceneName, roomId, actorId, actorName, sceneType }) => {
+  // sceneType — "social" | "action" | "event" | "vignette" | etc.
+});
+```
+
+#### `scene:pose`
+
+Fires when any pose is posted to a scene — type `"pose"`, `"ooc"`, or `"set"`.
+
+```typescript
+gameHooks.on("scene:pose", ({ sceneId, sceneName, roomId, actorId, actorName, msg, type }) => {
+  // type — "pose" | "ooc" | "set"
+});
+```
+
+#### `scene:set`
+
+Fires **additionally** when a pose with `type: "set"` is posted (the scene
+description hook). This is the primary integration point for an AI narrator —
+it receives the raw description text and can respond with narration, open a new
+round, or page participants.
+
+```typescript
+gameHooks.on("scene:set", ({ sceneId, sceneName, roomId, actorId, actorName, description }) => {
+  // description — the full scene-set text
+});
+```
+
+#### `scene:title`
+
+Fires when a scene is renamed via `PATCH /api/v1/scenes/:id`.
+
+```typescript
+gameHooks.on("scene:title", ({ sceneId, oldName, newName, actorId, actorName }) => {});
+```
+
+#### `scene:clear`
+
+Fires when a scene is closed or finished (status transitions to `"closed"`,
+`"finished"`, or `"archived"`).
+
+```typescript
+gameHooks.on("scene:clear", ({ sceneId, sceneName, actorId, actorName, status }) => {
+  // status — "closed" | "finished" | "archived"
+});
+```
+
+---
+
+## WikiHooks
+
+The wiki plugin exposes its own typed hook bus for reacting to wiki page
+mutations. Import it from the wiki plugin's public module:
+
+```typescript
+import { wikiHooks } from "../../plugins/wiki/mod.ts";
+```
+
+### Events
+
+#### `wiki:created`
+
+```typescript
+wikiHooks.on("wiki:created", ({ path, meta, body }) => {
+  // path — URL path of the new page, e.g. "news/announcement"
+  // meta — frontmatter key/value map
+  // body — page body markdown
+});
+```
+
+#### `wiki:edited`
+
+```typescript
+wikiHooks.on("wiki:edited", ({ path, meta, body }) => {});
+```
+
+#### `wiki:deleted`
+
+```typescript
+wikiHooks.on("wiki:deleted", ({ path, meta }) => {});
+```
+
+Same `on/off/emit` API and error-isolation semantics as GameHooks.
+
+---
+
+## EventHooks
+
+The events plugin (calendar/RSVP system) exposes its own typed bus:
+
+```typescript
+import { eventHooks } from "../../plugins/events/hooks.ts";
+
+eventHooks.on("event:created",   ({ eventId, name, startTime, createdBy }) => {});
+eventHooks.on("event:updated",   ({ eventId, changes }) => {});
+eventHooks.on("event:deleted",   ({ eventId }) => {});
+eventHooks.on("event:started",   ({ eventId, name }) => {});
+eventHooks.on("event:ended",     ({ eventId, name }) => {});
+eventHooks.on("event:rsvp",      ({ eventId, playerId, status }) => {});
+eventHooks.on("event:cancelled", ({ eventId, name }) => {});
+```
+
+---
+
+## EventsService (pub/sub)
+
+For running **sandbox scripts** in response to events, use `EventsService`.
+This is different from GameHooks — subscribers are script strings that run
+inside Web Workers with full `u.*` SDK access.
 
 ```typescript
 import { EventsService } from "../../services/Events/index.ts";
@@ -35,83 +269,32 @@ import { EventsService } from "../../services/Events/index.ts";
 const svc = EventsService.getInstance();
 
 // Subscribe a handler script to run when "player.connect" fires.
-// Returns a subscription UUID — store it so you can unsubscribe later.
 const subId = await svc.subscribe(
-  "player.connect",         // event name
-  `u.send("Welcome back, " + u.me.name + "!");`,  // sandbox script
-  actorId,                  // the DB object that "owns" this subscription
+  "player.connect",
+  `u.send("Welcome back, " + u.me.name + "!");`,
+  actorId,   // DB object that "owns" this subscription
 );
-```
 
-The script string is run in the sandbox with full `u.*` SDK access. The
-`actorId` is the DB object the script runs as (typically the player or a
-world object).
-
-### Unsubscribing
-
-```typescript
+// Unsubscribe
 await svc.unsubscribe(subId);
 ```
 
-Always unsubscribe in your plugin's `remove()` if you subscribed during
-`init()` — otherwise orphaned subscribers accumulate across reloads.
+Always unsubscribe in your plugin's `remove()` — orphaned subscribers
+accumulate across reloads.
+
+### Emitting custom events
 
 ```typescript
-let connectSubId: string;
-
-const myPlugin: IPlugin = {
-  name: "welcome",
-  version: "1.0.0",
-
-  init: async () => {
-    const svc = EventsService.getInstance();
-    connectSubId = await svc.subscribe(
-      "player.connect",
-      `u.send("%ch%cgWelcome back, " + u.me.name + "!%cn");`,
-      "world",   // run as the world object
-    );
-    return true;
-  },
-
-  remove: async () => {
-    const svc = EventsService.getInstance();
-    await svc.unsubscribe(connectSubId);
-  },
-};
-```
-
----
-
-## Emitting Events
-
-Emit any named event from plugin code. All active subscribers for that event
-will receive it:
-
-```typescript
-import { EventsService } from "../../services/Events/index.ts";
-
-const svc = EventsService.getInstance();
-
-// Emit with optional payload data and actor context
 await svc.emit("weather.change", { newWeather: "stormy" });
 
-// With an actor context (the actor becomes u.me in subscriber scripts)
-await svc.emit(
-  "weather.change",
-  { newWeather: "stormy" },
-  { id: actorId, state: {} },
-);
+// With actor context (becomes u.me in subscriber scripts)
+await svc.emit("weather.change", { newWeather: "stormy" }, { id: actorId, state: {} });
 ```
 
----
-
-## In-Game Event Subscriptions
-
-Players and world objects can subscribe to events from inside the game using
-`u.events.on()` and fire them with `u.events.emit()` in sandbox scripts:
+### In-game event scripting
 
 ```typescript
-// In a sandbox script or system script:
+// In a sandbox or system script:
 const subId = await u.events.on("weather.change", `
   u.send("The weather changed to: " + event.newWeather);
 `);
@@ -119,107 +302,59 @@ const subId = await u.events.on("weather.change", `
 await u.events.emit("weather.change", { newWeather: "rainy" });
 ```
 
-This makes the events system available to in-game scripting without exposing
-server internals.
-
 ---
 
 ## Naming Conventions
 
-Use dot-separated namespaces to avoid collisions:
+Use dot-separated namespaces for custom events; built-in events use `:`-separated namespaces:
 
 ```
-player.connect          ← core engine event
-player.disconnect       ← core engine event
-weather.change          ← weather plugin event
-my-plugin.item.pickup   ← custom plugin event
+player:login          ← built-in GameHook
+scene:set             ← built-in GameHook
+wiki:created          ← built-in WikiHook
+weather.change        ← custom plugin event (EventsService)
+my-plugin.item.pickup ← custom plugin event (EventsService)
 ```
-
-Prefix your plugin's events with its name. Core events use bare namespaces
-(`player.*`, `room.*`, etc.).
 
 ---
 
 ## Full Example
 
-A weather plugin that broadcasts weather changes to all subscribers:
+A plugin that reacts to scene:set to broadcast a GM narration and also logs
+player logins:
 
 ```typescript
-// src/plugins/weather/index.ts
+// src/plugins/gm-assist/index.ts
 import type { IPlugin } from "../../@types/IPlugin.ts";
-import { EventsService } from "../../services/Events/index.ts";
-import "./commands.ts";
+import { gameHooks } from "jsr:@ursamu/ursamu";
+import { send } from "../../services/broadcast/index.ts";
+import type { SceneSetEvent, SessionEvent } from "jsr:@ursamu/ursamu";
 
-const WEATHER_TYPES = ["sunny", "cloudy", "rainy", "stormy", "snowy"] as const;
-let weatherInterval: number | undefined;
+const onSceneSet = async ({ sceneId, sceneName, roomId, description }: SceneSetEvent) => {
+  // Narrate the scene to the room in GM voice
+  send([roomId], `%ch%cm[GM]%cn ${description}`, {});
+  console.log(`[GM] Scene "${sceneName}" set in room ${roomId}`);
+};
 
-const weatherPlugin: IPlugin = {
-  name: "weather",
+const onLogin = ({ actorName }: SessionEvent) => {
+  console.log(`[GM] ${actorName} logged in.`);
+};
+
+const gmPlugin: IPlugin = {
+  name: "gm-assist",
   version: "1.0.0",
-  description: "Rotating weather system with event hooks",
 
-  init: async () => {
-    let current: string = "sunny";
-
-    weatherInterval = setInterval(async () => {
-      const options = WEATHER_TYPES.filter(w => w !== current);
-      current = options[Math.floor(Math.random() * options.length)];
-
-      const svc = EventsService.getInstance();
-      await svc.emit("weather.change", { weather: current });
-    }, 30 * 60 * 1000) as unknown as number;   // every 30 min
-
-    console.log("[weather] initialized — weather cycle started");
+  init: () => {
+    gameHooks.on("scene:set",     onSceneSet);
+    gameHooks.on("player:login",  onLogin);
     return true;
   },
 
-  remove: async () => {
-    if (weatherInterval !== undefined) clearInterval(weatherInterval);
-    console.log("[weather] removed");
+  remove: () => {
+    gameHooks.off("scene:set",    onSceneSet);
+    gameHooks.off("player:login", onLogin);
   },
 };
 
-export default weatherPlugin;
-```
-
-```typescript
-// src/plugins/weather/commands.ts
-import { addCmd } from "../../services/commands/cmdParser.ts";
-import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
-import { EventsService } from "../../services/Events/index.ts";
-
-addCmd({
-  name: "+weather",
-  pattern: /^\+weather(?:\/(\S+))?\s*(.*)/i,
-  lock: "connected",
-  exec: async (u: IUrsamuSDK) => {
-    const sw = (u.cmd.args[0] || "").toLowerCase();
-
-    if (sw === "watch") {
-      // Subscribe this player to weather changes
-      const svc = EventsService.getInstance();
-      const subId = await svc.subscribe(
-        "weather.change",
-        `u.send("%ch%cyWeather report:%cn The weather is now " + event.weather + ".");`,
-        u.me.id,
-      );
-      u.send(`%ch+weather:%cn You will now receive weather updates. (sub: ${subId.slice(-6)})`);
-      return;
-    }
-
-    u.send("Usage: +weather/watch  — subscribe to weather updates");
-  },
-});
-```
-
-Any other plugin can now react to weather changes:
-
-```typescript
-// In another plugin's init():
-const svc = EventsService.getInstance();
-await svc.subscribe(
-  "weather.change",
-  `if (event.weather === "stormy") u.broadcast("Thunder rumbles in the distance!");`,
-  "world",
-);
+export default gmPlugin;
 ```

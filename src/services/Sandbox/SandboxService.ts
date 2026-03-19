@@ -9,6 +9,7 @@ import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { IDBObj } from "../../@types/UrsamuSDK.ts";
 import type { IChanEntry } from "../../@types/Channels.ts";
 import { wsService } from "../WebSocket/index.ts";
+import { gameHooks } from "../Hooks/GameHooks.ts";
 
 /**
  * Local fallback for Sandbox when no Deno Deploy token is available.
@@ -25,12 +26,49 @@ class LocalSandbox {
 
     return new Promise((resolve, reject) => {
       worker.onmessage = async (e) => {
+        // Guard: reject malformed messages before touching any field
+        if (!e.data || typeof e.data !== "object" || typeof e.data.type !== "string") {
+          console.warn("[SandboxService] Dropped malformed worker message");
+          return;
+        }
         const { type, data, prop, value, message, target: msgTarget } = e.data;
 
         switch (type) {
           case "result":
             worker.terminate();
             resolve(data);
+            // Emit game hooks for communication events (fire-and-forget)
+            (async () => {
+              const meta = (data as { meta?: Record<string, unknown> } | null)?.meta;
+              if (!meta || typeof meta.type !== "string") return;
+              const roomId = (context?.here as { id?: string } | undefined)?.id
+                          || context?.location as string
+                          || "";
+              if (meta.type === "say") {
+                await gameHooks.emit("player:say", {
+                  actorId:   (meta.actorId   as string) || context?.id || "",
+                  actorName: (meta.actorName as string) || "",
+                  roomId,
+                  message:   (meta.message   as string) || "",
+                });
+              } else if (meta.type === "pose") {
+                await gameHooks.emit("player:pose", {
+                  actorId:    (meta.actorId   as string) || context?.id || "",
+                  actorName:  (meta.actorName as string) || "",
+                  roomId,
+                  content:    (meta.content    as string) || "",
+                  isSemipose: (meta.isSemipose as boolean) || false,
+                });
+              } else if (meta.type === "page") {
+                await gameHooks.emit("player:page", {
+                  actorId:    (meta.actorId    as string) || context?.id || "",
+                  actorName:  (meta.actorName  as string) || "",
+                  targetId:   (meta.targetId   as string) || "",
+                  targetName: (meta.targetName as string) || "",
+                  message:    (meta.message    as string) || "",
+                });
+              }
+            })().catch(e => console.error("[GameHooks] emit error:", e));
             break;
           case "error":
             worker.terminate();
@@ -313,7 +351,12 @@ class LocalSandbox {
              break;
           }
           case "sys:setConfig": {
-              if (e.data.key && e.data.value !== undefined) {
+              const ALLOWED_CONFIG_KEYS = new Set([
+                "server.name", "server.description", "server.banner",
+                "server.corsOrigins", "server.maxConnections",
+                "game.maxPlayers", "game.description", "game.loginMessage", "game.welcomeMessage",
+              ]);
+              if (e.data.key && e.data.value !== undefined && ALLOWED_CONFIG_KEYS.has(e.data.key)) {
                   const { setConfig } = await import("../Config/mod.ts");
                   setConfig(e.data.key, e.data.value);
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
@@ -330,6 +373,62 @@ class LocalSandbox {
               } else {
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
               }
+              break;
+          }
+          case "sys:update": {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              const { send: bsend, broadcast: bcast } = await import("../broadcast/index.ts");
+              const socketTargets = context?.socketId ? [context.socketId] : [];
+              const branch = (e.data.branch as string) || "";
+
+              // Permission guard — must be admin/wizard/superuser at the engine level.
+              if (context?.id) {
+                const { dbojs: _db } = await import("../Database/index.ts");
+                const actor = await _db.queryOne({ id: context.id });
+                const flags = (actor?.flags as unknown as string) || "";
+                if (!flags.includes("admin") && !flags.includes("wizard") && !flags.includes("superuser")) {
+                  bsend(socketTargets, "%chGame>%cn Permission denied.", {});
+                  break;
+                }
+              }
+
+              // Validate branch name — must be alphanumeric/hyphens/dots/slashes only,
+              // and must not start with "-" (prevents git option injection).
+              if (branch && (!/^[\w./\-]+$/.test(branch) || branch.startsWith("-"))) {
+                bsend(socketTargets, `%chGame>%cn Invalid branch name: "${branch}"`, {});
+                break;
+              }
+
+              (async () => {
+                try {
+                  // 1. git pull
+                  const pullArgs = branch ? ["pull", "origin", branch] : ["pull"];
+                  const pullProc = new Deno.Command("git", {
+                    args: pullArgs,
+                    stdout: "piped",
+                    stderr: "piped",
+                    cwd: Deno.cwd(),
+                  });
+                  const pull = await pullProc.output();
+                  const pullOut = new TextDecoder().decode(pull.stdout).trim();
+                  const pullErr = new TextDecoder().decode(pull.stderr).trim();
+                  const pullMsg = (pullOut || pullErr).replace(/\n/g, " | ");
+
+                  if (!pull.success) {
+                    bsend(socketTargets, `%chGame>%cn git pull failed: ${pullErr || pullOut}`, {});
+                    return;
+                  }
+
+                  bsend(socketTargets, `%chGame>%cn ${pullMsg || "Already up to date."}`, {});
+
+                  // 2. Reboot
+                  bcast("%chGame>%cn Update complete. Rebooting...", {});
+                  setTimeout(() => Deno.exit(75), 500);
+                } catch (err) {
+                  const msg = err instanceof Error ? err.message : String(err);
+                  bsend(socketTargets, `%chGame>%cn Update error: ${msg}`, {});
+                }
+              })();
               break;
           }
           case "sys:reboot": {

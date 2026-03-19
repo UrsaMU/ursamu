@@ -1,239 +1,356 @@
 ---
 layout: layout.vto
 title: Customization Guide
-description: Learn how to customize your UrsaMU server
+description: How to customize UrsaMU — MUSH colors, custom commands, plugins, REST routes, and external integrations.
 nav:
-  - text: Themes
-    url: "#themes"
-  - text: Commands
-    url: "#commands"
-  - text: Game Mechanics
-    url: "#game-mechanics"
-  - text: Integration
-    url: "#integration"
+  - text: Text Formatting
+    url: "#text-formatting"
+  - text: Custom Commands
+    url: "#custom-commands"
+  - text: Custom Attributes
+    url: "#custom-attributes"
   - text: Plugins
     url: "#plugins"
-  - text: Web Interface
-    url: "#web-interface"
+  - text: REST Routes
+    url: "#rest-routes"
+  - text: External Integrations
+    url: "#external-integrations"
 ---
 
 # Customization Guide
 
-This guide covers how to customize your UrsaMU server to create a unique
-experience for your players.
+This guide covers the real extension points for UrsaMU — the patterns you
+actually use to add commands, store per-object data, build plugins, and connect
+to outside services.
 
-## Themes
+---
 
-### Visual Themes
+## Text Formatting
 
-UrsaMU supports customizable visual themes for the web interface:
+UrsaMU uses MUSH-style substitution codes for in-game text. They work in any
+string you pass to `u.send()`, `u.broadcast()`, or stored in a help file.
 
-1. Create a new theme directory in `themes/`
-2. Create CSS files for your theme
-3. Configure your theme in `config.json`:
-   ```json
-   "theme": {
-     "name": "your-theme-name",
-     "options": {
-       "primaryColor": "#3498db",
-       "secondaryColor": "#2ecc71"
-     }
-   }
-   ```
+### Color codes
 
-### Text Formatting
+| Code | Color / Effect |
+|------|----------------|
+| `%cr` | Red |
+| `%cg` | Green |
+| `%cy` | Yellow |
+| `%cb` | Blue |
+| `%cm` | Magenta |
+| `%cw` | White |
+| `%ch` | Bold / bright |
+| `%cn` | Reset to normal |
 
-You can customize text formatting with ANSI color codes:
+**Example:**
 
-- `%r` - Red
-- `%g` - Green
-- `%b` - Blue
-- `%c` - Cyan
-- `%m` - Magenta
-- `%y` - Yellow
-- `%w` - White
-- `%x` - Reset to default
+```
+u.send("%ch%crERROR:%cn You can't do that.");
+// → bold red "ERROR:" followed by normal text
+```
 
-Example: `%rThis text is red%x and this is normal.`
+### Other substitutions
 
-## Commands
+| Code | Expands to |
+|------|-----------|
+| `%n` | Actor's name |
+| `%r` | Newline |
+| `%t` | Tab |
+| `%b` | Space |
 
-### Creating Custom Commands
+> **Note:** In the old Customization guide this was listed as `%r = Red`. That
+> was wrong — `%r` is a **newline**, not red. Red is `%cr`.
 
-You can create custom commands using the command API:
+---
+
+## Custom Commands
+
+Register new in-game commands with `addCmd()`. Call it at module level — it
+runs once when your file is imported at server startup.
 
 ```typescript
-game.commands.add({
-  name: "mycmd",
-  pattern: /^mycmd\s+(.+)$/i,
-  flags: "connected",
-  exec: (match, context) => {
-    const arg = match[1];
-    context.send(`You used mycmd with argument: ${arg}`);
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+
+addCmd({
+  name: "+roll",
+  pattern: /^\+roll(?:\s+(\d+)d(\d+))?/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const count = parseInt(u.cmd.args[0] || "1");
+    const sides = parseInt(u.cmd.args[1] || "6");
+    const results: number[] = [];
+    for (let i = 0; i < count; i++) {
+      results.push(Math.ceil(Math.random() * sides));
+    }
+    const total = results.reduce((a, b) => a + b, 0);
+    u.send(`%ch+ROLL:%cn ${results.join(", ")} = %ch${total}%cn`);
   },
+  help: "+roll [<count>d<sides>]\nRolls dice. Default: 1d6.",
 });
 ```
 
-### Modifying Existing Commands
+### ICmd fields
 
-You can override existing commands by registering a new command with the same
-name:
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | `string` | Yes | Display name for help listings |
+| `pattern` | `string \| RegExp` | Yes | Matched against raw input; capture groups become `u.cmd.args` |
+| `lock` | `string` | No | Lock expression evaluated before exec (default: none) |
+| `exec` | `(u: IUrsamuSDK) => void \| Promise<void>` | Yes | Command handler |
+| `help` | `string` | No | Help text shown by the `help` command |
+| `hidden` | `boolean` | No | If `true`, omit from help listings |
+| `category` | `string` | No | Groups commands under a category in help |
+
+### Overriding built-in commands
+
+Register a command with the same name — the last one registered wins.
 
 ```typescript
-game.commands.add({
+addCmd({
   name: "look",
   pattern: /^(?:look|l)(?:\s+(.+))?$/i,
-  flags: "connected",
-  exec: (match, context) => {
-    // Your custom look implementation
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const arg = (u.cmd.args[0] || "").trim();
+    if (arg) {
+      const target = await u.util.target(u.me, arg);
+      if (!target) return u.send("I don't see that here.");
+      return u.send(target.state.desc as string || "You see nothing special.");
+    }
+    u.send(u.here.state.desc as string || "You see nothing special.");
   },
 });
 ```
 
-## Game Mechanics
+### Switches
 
-### Custom Attributes
-
-You can define custom attributes for objects and characters:
+Commands can accept `/switch` syntax — `@set/quiet object=flag`:
 
 ```typescript
-game.attributes.define({
-  name: "strength",
-  defaultValue: 10,
-  min: 1,
-  max: 20,
-  flags: ["character", "numeric"],
-});
-```
-
-### Custom Functions
-
-Create custom functions for use in your game:
-
-```typescript
-game.functions.add({
-  name: "add",
-  args: ["num1", "num2"],
-  exec: (args, context) => {
-    return Number(args.num1) + Number(args.num2);
+addCmd({
+  name: "@myset",
+  pattern: /^@myset(?:\/([\w]+))?\s+(.*)/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) => {
+    const sw  = (u.cmd.args[0] || "").toLowerCase();
+    const arg = u.cmd.args[1] || "";
+    if (sw === "quiet") {
+      // suppress output
+    }
+    u.send(`Set: ${arg}`);
   },
 });
 ```
 
-### Custom Flags
+---
 
-Define custom flags for objects:
+## Custom Attributes
+
+All game objects have a `state` field (`Record<string, unknown>`) for storing
+arbitrary data. Use `u.db.modify()` to write and `obj.state` to read.
+
+### Storing a value
 
 ```typescript
-game.flags.define({
-  name: "invisible",
-  description: "Object is invisible to normal players",
-  defaultValue: false,
+// Set "gold" on the actor
+await u.db.modify(u.me.id, "state", { ...u.me.state, gold: 100 });
+```
+
+### Reading a value
+
+```typescript
+const gold = u.me.state.gold as number || 0;
+u.send(`%chGOLD:%cn You have ${gold} gold.`);
+```
+
+### Storing on another object
+
+```typescript
+const target = await u.util.target(u.me, u.cmd.args[0]);
+if (!target) return u.send("Not found.");
+await u.db.modify(target.id, "state", { ...target.state, desc: u.cmd.args[1] });
+u.send("Description set.");
+```
+
+### Per-object stats example
+
+```typescript
+// +stats command
+addCmd({
+  name: "+stats",
+  pattern: /^\+stats(?:\s+(.+))?/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const who = u.cmd.args[0]
+      ? await u.util.target(u.me, u.cmd.args[0])
+      : u.me;
+    if (!who) return u.send("Not found.");
+    const str = who.state.str as number || 10;
+    const dex = who.state.dex as number || 10;
+    const con = who.state.con as number || 10;
+    u.send(
+      `%ch${who.name}%cn — STR: %ch${str}%cn  DEX: %ch${dex}%cn  CON: %ch${con}%cn`
+    );
+  },
 });
 ```
 
-## Integration
-
-### External APIs
-
-UrsaMU can integrate with external APIs:
-
-```typescript
-game.hooks.on("command:weather", async (context) => {
-  const weather = await fetch("https://api.weather.com/...");
-  const data = await weather.json();
-  context.send(`Current weather: ${data.description}`);
-});
-```
-
-### Database Integration
-
-Connect to external databases:
-
-```typescript
-const db = new Database({
-  type: "postgres",
-  host: "localhost",
-  port: 5432,
-  username: "user",
-  password: "password",
-  database: "mydb",
-});
-
-game.hooks.on("startup", () => {
-  db.connect();
-});
-```
+---
 
 ## Plugins
 
-### Installing Plugins
+A plugin is a TypeScript module with an optional `init()` function. Plugins
+are imported by your game's `src/main.ts` at startup.
 
-To install a plugin:
+### Plugin structure
 
-1. Download the plugin to the `plugins/` directory
-2. Add the plugin to your configuration:
-   ```json
-   "plugins": [
-     "my-plugin"
-   ]
-   ```
-3. Restart your server
+```
+src/plugins/my-plugin/
+├── index.ts        ← IPlugin export (optional init hook)
+└── commands.ts     ← addCmd() registrations
+```
 
-### Creating Plugins
+### `index.ts`
 
-Create your own plugins to extend UrsaMU:
+```typescript
+import type { IPlugin } from "jsr:@ursamu/ursamu";
+import "./commands.ts";   // importing triggers addCmd() registrations
 
-1. Create a new directory in `plugins/`
-2. Create a `plugin.json` file:
-   ```json
-   {
-     "name": "my-plugin",
-     "version": "1.0.0",
-     "description": "My custom plugin",
-     "main": "index.ts"
-   }
-   ```
-3. Create an `index.ts` file with your plugin code
-4. See the [Plugin Development](../plugins/index.md) section for more details
+export const plugin: IPlugin = {
+  name:        "my-plugin",
+  version:     "1.0.0",
+  description: "Does cool things.",
+  init: async () => {
+    // One-time setup runs before the first player connects.
+    // Fetch external data, seed DB records, register scheduled jobs, etc.
+    console.log("[my-plugin] Ready.");
+    return true;
+  },
+  remove: () => {
+    // Optional cleanup if the plugin is ever unloaded.
+  },
+};
+```
 
-## Web Interface
+### Loading a plugin in `src/main.ts`
 
-### Customizing the Web Client
+```typescript
+import { plugin as myPlugin } from "./plugins/my-plugin/index.ts";
 
-The web client can be customized by modifying the templates:
+if (myPlugin.init) await myPlugin.init();
+```
 
-1. Copy the default templates from `templates/` to `custom-templates/`
-2. Modify the templates as needed
-3. Configure UrsaMU to use your custom templates:
-   ```json
-   "templates": {
-     "directory": "custom-templates"
-   }
-   ```
+### IPlugin fields
 
-### Custom CSS
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | `string` | Yes | Unique plugin identifier |
+| `version` | `string` | Yes | Semver version string |
+| `description` | `string` | No | Human-readable description |
+| `init` | `() => boolean \| Promise<boolean>` | No | Called once at startup; return `false` to abort |
+| `remove` | `() => void \| Promise<void>` | No | Called when plugin is unloaded |
 
-Add custom CSS to the web interface:
+---
 
-1. Create a `custom.css` file in `public/css/`
-2. Add your custom styles
-3. Configure UrsaMU to include your CSS:
-   ```json
-   "webClient": {
-     "customCSS": ["custom.css"]
-   }
-   ```
+## REST Routes
 
-### Custom JavaScript
+Register custom HTTP endpoints with `registerPluginRoute()`. Routes are
+mounted alongside the built-in `/api/v1/` routes.
 
-Add custom JavaScript to the web interface:
+```typescript
+import { registerPluginRoute } from "jsr:@ursamu/ursamu";
 
-1. Create a `custom.js` file in `public/js/`
-2. Add your custom scripts
-3. Configure UrsaMU to include your JavaScript:
-   ```json
-   "webClient": {
-     "customJS": ["custom.js"]
-   }
-   ```
+registerPluginRoute("/api/v1/my-plugin", async (req, userId) => {
+  if (req.method !== "GET") {
+    return new Response("Method Not Allowed", { status: 405 });
+  }
+  return Response.json({ message: "Hello from my plugin!", userId });
+});
+```
+
+The handler receives:
+- `req: Request` — the Deno `Request` object
+- `userId: string | null` — the authenticated player's DB ID, or `null` if
+  the request has no valid JWT
+
+> **Auth tip:** Check `userId` and return `401` for endpoints that require
+> authentication. The JWT is decoded for you — you don't need to re-verify it.
+
+### Returning data from the DB
+
+```typescript
+registerPluginRoute("/api/v1/leaderboard", async (_req, _userId) => {
+  const players = await dbojs.queryAll((o) => o.flags.has("player"));
+  const ranked = players
+    .map((p) => ({ name: p.data?.name, gold: p.data?.state?.gold ?? 0 }))
+    .sort((a, b) => (b.gold as number) - (a.gold as number))
+    .slice(0, 10);
+  return Response.json(ranked);
+});
+```
+
+---
+
+## External Integrations
+
+### Fetching data in a command
+
+Deno has native `fetch()` — no extra packages needed.
+
+```typescript
+addCmd({
+  name: "+weather",
+  pattern: /^\+weather\s+(.+)/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const city = encodeURIComponent(u.cmd.args[0]);
+    try {
+      const resp = await fetch(`https://wttr.in/${city}?format=3`);
+      const text = await resp.text();
+      u.send(`%chWEATHER:%cn ${text.trim()}`);
+    } catch {
+      u.send("%chWEATHER:%cn Could not retrieve weather.");
+    }
+  },
+  help: "+weather <city>\nFetches current weather for a city.",
+});
+```
+
+### Fetching in `init()`
+
+If your plugin needs to pre-fetch data or connect to an external service, do
+it in `init()` so it's ready before players arrive:
+
+```typescript
+let motdText = "Welcome!";
+
+export const plugin: IPlugin = {
+  name: "motd-fetcher",
+  version: "1.0.0",
+  init: async () => {
+    try {
+      const resp = await fetch("https://your-api.example.com/motd");
+      motdText = (await resp.json()).message;
+    } catch {
+      // keep default
+    }
+    return true;
+  },
+};
+
+// In a command handler:
+addCmd({
+  name: "+motd",
+  pattern: /^\+motd$/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) => { u.send(motdText); },
+});
+```
+
+### Discord bridge
+
+For a Discord bridge plugin, use the built-in `u.chan` SDK methods alongside
+a Discord WebSocket client in your plugin's `init()`. See the Discord plugin
+in `src/plugins/discord/` as a reference implementation.

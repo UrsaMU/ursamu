@@ -26,6 +26,21 @@ export { startTelnetServer } from "./src/services/telnet/telnet.ts";
 export { DBO } from "./src/services/Database/database.ts";
 export { registerPluginRoute } from "./src/app.ts";
 export { dbojs } from "./src/services/Database/index.ts";
+export { gameHooks } from "./src/services/Hooks/GameHooks.ts";
+export type {
+  GameHookMap,
+  SayEvent,
+  PoseEvent,
+  PageEvent,
+  MoveEvent,
+  SessionEvent,
+  ChannelMessageEvent,
+  SceneCreatedEvent,
+  ScenePoseEvent,
+  SceneSetEvent,
+  SceneTitleEvent,
+  SceneClearEvent,
+} from "./src/services/Hooks/GameHooks.ts";
 
 // Hide internal class implementations by not exporting everything
 

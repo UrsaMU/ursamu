@@ -1,3 +1,23 @@
+/**
+ * @module app
+ * @description The UrsaMU HTTP application layer.
+ *
+ * Exports the plugin route registration API (`registerPluginRoute`), the
+ * main HTTP request dispatcher (`handleRequest`), and re-exports the
+ * command registration helper (`addCmd`) for convenience.
+ *
+ * @example
+ * ```ts
+ * import { registerPluginRoute, addCmd } from "@ursamu/ursamu/app";
+ *
+ * // Mount a custom REST endpoint
+ * registerPluginRoute("/api/v1/my-plugin", myHandler);
+ *
+ * // Register an in-game command
+ * addCmd({ name: "greet", pattern: /^greet$/i, exec: (u) => u.emit("Hello!") });
+ * ```
+ */
+
 import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler } from "./routes/index.ts";
 import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
@@ -33,13 +53,25 @@ setInterval(() => {
   }
 }, 60000);
 
+/**
+ * Register a custom HTTP route prefix and handler for use by plugins.
+ *
+ * The handler receives every request whose path starts with `prefix` and must
+ * return a `Response`. `userId` is `null` when the request is unauthenticated.
+ *
+ * @param prefix - URL path prefix, e.g. `"/api/v1/my-plugin"`.
+ * @param handler - Async function `(req, userId) => Response`.
+ */
 export function registerPluginRoute(prefix: string, handler: PluginRouteHandler): void {
   pluginRoutes.push({ prefix, handler });
 }
 
 /**
- * Handle HTTP requests for the UrsaMU server
- * This replaces the Express application and provides native Deno handling for API routes
+ * Main HTTP request dispatcher for the UrsaMU server.
+ *
+ * Routes incoming requests to the appropriate sub-handler (auth, objects,
+ * wiki, scenes, channels, players, config, building, or plugin routes).
+ * Applies CORS headers and per-IP rate limiting on every request.
  */
 export const handleRequest = async (req: Request): Promise<Response> => {
   const url = new URL(req.url);
@@ -57,6 +89,9 @@ export const handleRequest = async (req: Request): Promise<Response> => {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
   };
 
   // Rate limit check
@@ -140,7 +175,8 @@ export const handleRequest = async (req: Request): Promise<Response> => {
     // Avatar images — public, no auth required
     if (path.startsWith("/avatars/")) {
       const id = path.slice("/avatars/".length);
-      if (!id || id.includes("/") || id.includes("..")) {
+      // Only allow safe characters: alphanumeric, hyphen, underscore (no dots, slashes, or escapes)
+      if (!id || !/^[a-zA-Z0-9_-]+$/.test(id)) {
         return new Response("Not Found", { status: 404 });
       }
       const EXT_MIME: Record<string, string> = {

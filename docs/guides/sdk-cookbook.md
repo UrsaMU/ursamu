@@ -476,11 +476,15 @@ const h  = Math.floor(ms / 3600000);
 const m  = Math.floor((ms % 3600000) / 60000);
 u.send(`Uptime: ${h}h ${m}m`);
 
-// Reboot (exit code 75 — scripts/run.sh restarts on this code)
+// Reboot (exit code 75 — daemon restart loop restarts the server)
 await u.sys.reboot();
 
 // Shutdown (exit code 0)
 await u.sys.shutdown();
+
+// Pull latest code from git and restart (runs git pull, then exits 75)
+await u.sys.update();            // pull origin/main
+await u.sys.update("develop");   // pull a specific branch
 ```
 
 ---

@@ -4,6 +4,7 @@ import { Obj } from "../services/DBObjs/DBObjs.ts";
 import type { IScene, IPose } from "../@types/IScene.ts";
 import { send } from "../services/broadcast/index.ts";
 import { evaluateLock, hydrate } from "../utils/evaluateLock.ts";
+import { gameHooks } from "../services/Hooks/GameHooks.ts";
 
 export const sceneHandler = async (req: Request, userId: string): Promise<Response> => {
   const url = new URL(req.url);
@@ -120,6 +121,15 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
 
       await scenes.create(newScene);
 
+      gameHooks.emit("scene:created", {
+          sceneId:   newScene.id,
+          sceneName: newScene.name,
+          roomId:    newScene.location,
+          actorId:   user.dbref,
+          actorName: user.name || "Unknown",
+          sceneType: newScene.sceneType ?? "social",
+      }).catch((e) => console.error("[GameHooks] scene:created error:", e));
+
       return new Response(JSON.stringify(newScene), {
           status: 201,
           headers: { "Content-Type": "application/json" }
@@ -136,6 +146,18 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
 
       // GET /api/v1/scenes/:id
       if (!subPath && req.method === "GET") {
+          // Private scenes are only visible to owner, participants, and allowed users
+          if (scene.private) {
+              const viewer = await Obj.get(userId);
+              const isAllowed = viewer && (
+                  scene.owner === viewer.dbref ||
+                  (scene.participants && scene.participants.includes(viewer.dbref)) ||
+                  (scene.allowed && scene.allowed.includes(viewer.dbref)) ||
+                  viewer.flags.includes("wizard") || viewer.flags.includes("admin") || viewer.flags.includes("superuser")
+              );
+              if (!isAllowed) return new Response("Forbidden", { status: 403 });
+          }
+
           // Populate participant names
           const participantsDetails: { id: string; name: string; moniker?: string; }[] = [];
           if (scene.participants) {
@@ -185,6 +207,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           }
 
           // Markdown log export
+          // deno-lint-ignore no-control-regex
           const strip = (s: string) => s.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").replace(/\x1b\[[0-9;]*m/g, "");
           const fmtDate = (ts: number) => new Date(ts).toISOString().slice(0, 10);
 
@@ -234,9 +257,23 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           
           if (!user) return new Response("Unauthorized", { status: 401 });
 
+          // Private scene: only allowed users may post
+          if (scene.private) {
+              const canPost = scene.owner === user.dbref ||
+                  (scene.participants && scene.participants.includes(user.dbref)) ||
+                  (scene.allowed && scene.allowed.includes(user.dbref)) ||
+                  user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser");
+              if (!canPost) return new Response("Forbidden", { status: 403 });
+          }
+
           // Basic validation
           if (!msg && type !== 'set') {
             return new Response("Missing pose message", { status: 400 });
+          }
+
+          const MAX_POSE_LENGTH = 4000;
+          if (msg && msg.length > MAX_POSE_LENGTH) {
+            return new Response(`Pose message too long (max ${MAX_POSE_LENGTH} characters).`, { status: 400 });
           }
 
           const newPose: IPose = {
@@ -276,7 +313,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           if (target.startsWith("#")) {
               let broadcastMsg = "";
               const userName = user.name || "Unknown";
-              
+
               if (type === "ooc") {
                   broadcastMsg = `%ch[OOC] ${userName}:%cn ${msg}`;
               } else if (type === "set") {
@@ -285,8 +322,31 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
                   // Pose
                   broadcastMsg = `%ch${userName}%cn ${msg}`;
               }
-              
+
               send([target], broadcastMsg, {});
+          }
+
+          // Fire scene:pose for every pose type, plus scene:set for set descriptions.
+          const posePayload = {
+              sceneId:   sceneId,
+              sceneName: scene.name,
+              roomId:    scene.location,
+              actorId:   user.dbref,
+              actorName: user.name || "Unknown",
+              msg:       msg || "",
+              type:      type as "pose" | "ooc" | "set",
+          };
+          gameHooks.emit("scene:pose", posePayload)
+              .catch((e) => console.error("[GameHooks] scene:pose error:", e));
+          if (type === "set") {
+              gameHooks.emit("scene:set", {
+                  sceneId:     sceneId,
+                  sceneName:   scene.name,
+                  roomId:      scene.location,
+                  actorId:     user.dbref,
+                  actorName:   user.name || "Unknown",
+                  description: msg || "",
+              }).catch((e) => console.error("[GameHooks] scene:set error:", e));
           }
 
           return new Response(JSON.stringify(newPose), {
@@ -313,7 +373,10 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           }
 
           const body = await req.json();
-          if (body.msg) existingPose.msg = body.msg;
+          if (body.msg) {
+              if (body.msg.length > 4000) return new Response("Pose message too long (max 4000 characters).", { status: 400 });
+              existingPose.msg = body.msg;
+          }
           // Don't allow changing type/timestamp broadly?
 
           scene.poses[poseIndex] = existingPose;
@@ -423,6 +486,32 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
            if (Object.keys(allowedUpdates).length > 0) {
                 await scenes.modify({ id: sceneId }, "$set", allowedUpdates);
                 const updated = await scenes.queryOne({ id: sceneId });
+
+                // scene:title — name changed
+                if (allowedUpdates.name && allowedUpdates.name !== scene.name) {
+                    gameHooks.emit("scene:title", {
+                        sceneId:   sceneId,
+                        oldName:   scene.name,
+                        newName:   allowedUpdates.name,
+                        actorId:   user.dbref,
+                        actorName: user.name || "Unknown",
+                    }).catch((e) => console.error("[GameHooks] scene:title error:", e));
+                }
+
+                // scene:clear — scene closed or finished
+                if (allowedUpdates.status && allowedUpdates.status !== scene.status) {
+                    const closedStatuses = ["closed", "finished", "archived"];
+                    if (closedStatuses.includes(allowedUpdates.status)) {
+                        gameHooks.emit("scene:clear", {
+                            sceneId:   sceneId,
+                            sceneName: allowedUpdates.name ?? scene.name,
+                            actorId:   user.dbref,
+                            actorName: user.name || "Unknown",
+                            status:    allowedUpdates.status,
+                        }).catch((e) => console.error("[GameHooks] scene:clear error:", e));
+                    }
+                }
+
                 return new Response(JSON.stringify(updated), {
                      status: 200,
                      headers: { "Content-Type": "application/json" }

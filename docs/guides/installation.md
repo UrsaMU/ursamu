@@ -76,22 +76,6 @@ ursamu create my-game
 cd my-game
 ```
 
-### Method 3: Using Docker
-
-UrsaMU provides a Docker image for easy deployment:
-
-```bash
-# Clone the repository
-git clone https://github.com/ursamu/ursamu.git
-cd ursamu
-
-# Start the server with Docker Compose
-docker-compose up -d
-```
-
-The game databases will be exported to the `data/` directory, and configuration
-will be stored in the `config/` directory.
-
 ## Configuration
 
 UrsaMU uses a flexible configuration system stored in JSON format:
@@ -167,17 +151,6 @@ In your client, add a new connection profile with:
 Once connected, type `create YourName YourPassword` to create a character, or
 `connect YourName YourPassword` to log in.
 
-### Web Client
-
-UrsaMU ships with an optional browser-based client. To start it:
-
-```bash
-cd src/web-client
-deno task start
-```
-
-Then open [http://localhost:8000](http://localhost:8000) in your browser.
-
 ### WebSocket (Developer / Custom Client)
 
 For direct WebSocket access, connect to `ws://localhost:4203` and send JSON:
@@ -210,15 +183,15 @@ Enter password: ••••••••
 ```
 
 This creates your account with the **superuser** flag (level 10 — the highest
-permission level). Once done, the Hub, Telnet, and web client all start.
+permission level). Once done, the Hub and Telnet sidecar start automatically.
 
 After that, use `@set <player>=admin` in-game to grant admin rights to other
 trusted staff. The `superuser` flag itself can only be created at the database
 level via this first-run flow — it cannot be granted from inside the game.
 
 > **Tip**: If you run `deno task start` non-interactively (e.g. inside a script
-> or Docker without a TTY), the prompt is skipped and you'll see a message
-> suggesting you run `deno task server` directly to complete setup.
+> without a TTY), the prompt is skipped and you'll see a message suggesting you
+> run `deno task server` directly to complete setup.
 
 ## Next Steps
 

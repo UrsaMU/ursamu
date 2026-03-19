@@ -12,7 +12,6 @@ import { jobs, jobArchive, jobAccess, getNextJobNumber } from "./db.ts";
 import type { IJob, IJobComment, IJobAccess } from "../../@types/IJob.ts";
 import { VALID_BUCKETS } from "../../@types/IJob.ts";
 import { jobHooks } from "./hooks.ts";
-import { send as broadcastSend } from "../../services/broadcast/index.ts";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -30,21 +29,69 @@ function header(title: string): string {
   return "=".repeat(pad) + t + "=".repeat(WIDTH - pad - t.length);
 }
 
+function jobHeader(title: string): string {
+  const t = `%ch%cw< ${title} >%cn`;
+  const tLen = `< ${title} >`.length;
+  const pad = Math.floor((WIDTH - tLen) / 2);
+  const rpad = WIDTH - pad - tLen;
+  return "%cb" + "-=-".repeat(Math.floor(pad / 3)) + "=".repeat(pad % 3) + "%cn" + t +
+    "%cb" + "-=-".repeat(Math.floor(rpad / 3)) + "=".repeat(rpad % 3) + "%cn";
+}
+
+function jobFooter(title: string): string {
+  return jobHeader(title);
+}
+
 function divider(): string {
   return "-".repeat(WIDTH);
+}
+
+function jobDivider(): string {
+  return "%cb" + "-".repeat(WIDTH) + "%cn";
 }
 
 function footer(): string {
   return "=".repeat(WIDTH);
 }
 
-function formatDate(epoch: number): string {
+function formatTimeFull(epoch: number): string {
+  try {
+    const d = new Date(epoch);
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    const ss = String(d.getSeconds()).padStart(2, "0");
+    return `${days[d.getDay()]} ${months[d.getMonth()]} ${d.getDate()} ${hh}:${mm}:${ss} ${d.getFullYear()}`;
+  } catch {
+    return "???";
+  }
+}
+
+function formatTimeShort(epoch: number): string {
   try {
     const d = new Date(epoch);
     const mm = String(d.getMonth() + 1).padStart(2, "0");
     const dd = String(d.getDate()).padStart(2, "0");
     const yyyy = d.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
+    const h = d.getHours();
+    const ampm = h >= 12 ? "pm" : "am";
+    const h12 = h % 12 || 12;
+    const min = String(d.getMinutes()).padStart(2, "0");
+    return `${mm}/${dd}/${yyyy} ${h12}:${min}${ampm}`;
+  } catch {
+    return "???";
+  }
+}
+
+function formatDate(epoch: number): string {
+  try {
+    const d = new Date(epoch);
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const mon = months[d.getMonth()];
+    const dd = String(d.getDate()).padStart(2, "0");
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${mon}-${dd}-${yy}`;
   } catch {
     return "???";
   }
@@ -60,10 +107,19 @@ function formatTimestamp(epoch: number): string {
 }
 
 function getEscalation(job: IJob): { color: string; label: string } {
-  const ageHours = (Date.now() - job.createdAt) / 3600000;
-  if (ageHours < 48) return { color: "%cg", label: "OK" };
-  if (ageHours < 96) return { color: "%cy", label: "DUE" };
-  return { color: "%cr", label: "OVERDUE" };
+  // Find last staff comment timestamp (comments not from submitter)
+  const staffComments = job.comments.filter((c) => c.authorId !== job.submittedBy);
+  const lastActivity = staffComments.length > 0
+    ? staffComments[staffComments.length - 1].timestamp
+    : job.createdAt;
+  const hoursSinceActivity = (Date.now() - lastActivity) / 3600000;
+
+  if (staffComments.length === 0 && hoursSinceActivity < 48) {
+    return { color: "%cg", label: "NEW" };
+  }
+  if (hoursSinceActivity < 48) return { color: "%cg", label: "" };
+  if (hoursSinceActivity < 96) return { color: "%ch%cy", label: "DUE" };
+  return { color: "%ch%cr", label: "DUE" };
 }
 
 function isNew(job: IJob): boolean {
@@ -87,51 +143,72 @@ async function canStaffSeeBucket(staffId: string, bucket: string, isSuperuser: b
   return access.staffIds.includes(staffId);
 }
 
-async function notifyPlayer(u: IUrsamuSDK, playerId: string, subject: string, body: string): Promise<void> {
-  try {
-    // Use the mail system to send notification
-    const { dbojs } = await import("../../services/Database/index.ts");
-    const player = await dbojs.queryOne({ id: playerId });
-    if (!player) return;
+function formatJobList(jobList: IJob[], title: string): string[] {
+  const lines: string[] = [];
+  lines.push(jobHeader(title));
 
-    const senderName = (u.me.state?.name as string) || u.me.name || "System";
-    const mail = {
-      from: u.me.id,
-      fromName: senderName,
-      to: [playerId],
-      subject,
-      body,
-      date: Date.now(),
-      read: false,
-    };
+  // Fixed column positions (0-indexed)
+  // #=0  Category=4  Title=15  Started=43  Handler=57  Status=69
+  // Gaps: Started→Handler = 57 - (43+10) = 4,  Handler→Status = 69 - (57+8) = 4
+  const P = [0, 5, 15, 47, 60, 71];
 
-    // Store mail on recipient
-    const existing = (player.data?.mail as unknown[]) || [];
-    existing.push(mail);
-    await dbojs.modify({ id: playerId }, "$set", { "data.mail": existing });
-  } catch {
-    // Mail notification failure shouldn't break jobs
-  }
-}
-
-async function broadcastToStaff(message: string, bucket: string): Promise<void> {
-  try {
-    const { dbojs } = await import("../../services/Database/index.ts");
-    const connected = await dbojs.query({ flags: /connected/ });
-    const staffPlayers = connected.filter(
-      (p) => p.flags && (p.flags.includes("admin") || p.flags.includes("wizard") || p.flags.includes("superuser")),
-    );
-
-    for (const staff of staffPlayers) {
-      const canSee = await canStaffSeeBucket(staff.id, bucket, staff.flags.includes("superuser"));
-      if (canSee) {
-        broadcastSend([staff.id], message);
+  const placeLine = (cols: string[]): string => {
+    const row = " ".repeat(WIDTH).split("");
+    for (let i = 0; i < cols.length && i < P.length; i++) {
+      const maxW = (i + 1 < P.length ? P[i + 1] - P[i] - 1 : WIDTH - P[i]);
+      const text = cols[i].slice(0, maxW);
+      for (let c = 0; c < text.length; c++) {
+        if (P[i] + c < WIDTH) row[P[i] + c] = text[c];
       }
     }
+    return row.join("");
+  };
+
+  const hdrRow = placeLine(["#", "Category", "Title", "Started", "Handler", ""]);
+  lines.push(`%cc${hdrRow.slice(0, P[5])}${"Status".padStart(WIDTH - P[5])}%cn`);
+  lines.push(jobDivider());
+
+  for (const j of jobList) {
+    const esc = getEscalation(j);
+    const rawBucket = j.bucket || (j as Record<string, unknown>).category as string || "???";
+    // Center bucket value under "Category" header (8 chars)
+    const bPad = Math.max(0, Math.floor((8 - rawBucket.length) / 2));
+    const bucket = " ".repeat(bPad) + rawBucket;
+    const rawHandler = j.assigneeName || "-----";
+    // Center handler value under "Handler" header (7 chars)
+    const hPad = Math.max(0, Math.floor((7 - rawHandler.length) / 2));
+    const handler = " ".repeat(hPad) + rawHandler;
+    const rawStatus = esc.label || "";
+    const statusColored = rawStatus ? `${esc.color}${rawStatus}%cn` : "";
+
+    const plainRow = placeLine([
+      String(j.number), bucket, j.title, formatDate(j.createdAt), handler, "",
+    ]);
+    const statusPad = WIDTH - P[5] - rawStatus.length;
+    lines.push(`${plainRow.slice(0, P[5])}${" ".repeat(Math.max(0, statusPad))}${statusColored}`);
+  }
+
+  lines.push(jobFooter("End Jobs"));
+  return lines;
+}
+
+async function sendJobMail(fromId: string, _fromName: string, toId: string, subject: string, body: string): Promise<void> {
+  try {
+    const { mail } = await import("../../services/Database/index.ts");
+    await mail.create({
+      id: `mail-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      from: `#${fromId}`,
+      to: [`#${toId}`],
+      subject,
+      message: body,
+      date: Date.now(),
+      read: false,
+    });
   } catch {
-    // Broadcast failure shouldn't break jobs
+    // Mail failure shouldn't break jobs
   }
 }
+
 
 // ---------------------------------------------------------------------------
 // +request — Player command
@@ -156,24 +233,7 @@ addCmd({
       }
 
       myJobs.sort((a, b) => a.number - b.number);
-      const lines: string[] = [];
-      lines.push(header("My Requests"));
-      lines.push(
-        `${"#".padEnd(5)}${"Bucket".padEnd(12)}${"Title".padEnd(30)}${"Date".padEnd(12)}${"Status".padEnd(10)}Esc`,
-      );
-      lines.push(divider());
-
-      for (const j of myJobs) {
-        const esc = getEscalation(j);
-        const newTag = isNew(j) ? " NEW" : "";
-        lines.push(
-          `${String(j.number).padEnd(5)}${j.bucket.padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${formatDate(j.createdAt).padEnd(12)}${j.status.padEnd(10)}${esc.color}${esc.label}${newTag}%cn`,
-        );
-      }
-
-      lines.push(divider());
-      lines.push(`${myJobs.length} request${myJobs.length === 1 ? "" : "s"}.`);
-      u.send(lines.join("\n"));
+      u.send(formatJobList(myJobs, "POP Jobs").join("\n"));
       return;
     }
 
@@ -191,32 +251,32 @@ addCmd({
         }
 
         const esc = getEscalation(job);
+        const bucket = job.bucket || (job as Record<string, unknown>).category as string || "???";
+        const statusLabel = esc.label ? `${esc.color}${esc.label}%cn` : "";
+        const newTag = isNew(job) ? " (NEW)" : "";
         const lines: string[] = [];
-        lines.push(header(`Request #${job.number}`));
-        lines.push(` Title:    ${job.title}`);
-        lines.push(` Bucket:   ${job.bucket}`);
-        lines.push(` Created:  ${coloredDate(job)}  ${esc.color}[${esc.label}]%cn`);
-        lines.push(` Handler:  ${job.assigneeName || "Unassigned"}`);
-        lines.push(` Status:   ${job.status}`);
-        lines.push(divider());
+        lines.push(jobHeader(`Job ${job.number}`));
+        const leftCol = 38;
+        const rightCol = WIDTH - leftCol - 1;
+        lines.push(`${"Job Title:".padEnd(leftCol)} ${"Requester:".padEnd(15)}${job.submitterName}`);
+        lines.push(`${("%ch%cw" + job.title + "%cn").padEnd(leftCol)}`);
+        lines.push(`${"Category:".padEnd(leftCol)} ${"Status:".padEnd(15)}${statusLabel}${newTag}`);
+        lines.push(`${bucket.padEnd(leftCol)} ${"Handler:".padEnd(15)}${job.assigneeName || "-----"}`);
+        lines.push(`${"Created:".padEnd(leftCol)}`);
+        lines.push(`${formatTimeFull(job.createdAt)}`);
+        lines.push(`Additional Players: ${job.additionalPlayers?.join(", ") || ""}`);
+        lines.push(jobDivider());
         lines.push(job.description);
 
         const pubComments = job.comments.filter((c) => c.published);
         if (pubComments.length > 0) {
-          lines.push(divider());
-          lines.push(header("Comments"));
+          lines.push("");
           for (const c of pubComments) {
-            lines.push(`[${c.authorName}] ${formatTimestamp(c.timestamp)}`);
-            lines.push(`  ${c.text}`);
+            lines.push(`%ch%cy${c.authorName}%cn [${formatTimeShort(c.timestamp)}]: ${c.text}`);
           }
         }
 
-        if (job.additionalPlayers && job.additionalPlayers.length > 0) {
-          lines.push(divider());
-          lines.push(` Additional viewers: ${job.additionalPlayers.join(", ")}`);
-        }
-
-        lines.push(footer());
+        lines.push(jobFooter("End Job"));
         u.send(lines.join("\n"));
         return;
       }
@@ -275,7 +335,6 @@ addCmd({
       await jobs.create(job);
       await jobHooks.emit("job:created", job);
       u.send(`>JOBS: Request #${num} "${title}" submitted to ${bucket}.`);
-      await broadcastToStaff(`>JOBS: ${submitterName} submitted Request #${num} "${title}" [${bucket}].`, bucket);
       return;
     }
 
@@ -307,7 +366,6 @@ addCmd({
       await jobs.update({}, job);
       await jobHooks.emit("job:commented", job, comment);
       u.send(`>JOBS: Comment added to request #${num}.`);
-      await broadcastToStaff(`>JOBS: ${authorName} updated Request #${num}.`, job.bucket);
       return;
     }
 
@@ -357,7 +415,8 @@ addCmd({
       job.updatedAt = Date.now();
       await jobs.update({}, job);
       u.send(`>JOBS: ${target.name} added to request #${num}.`);
-      await notifyPlayer(u, target.id, `Added to Request #${num}`, `You have been added as a viewer to Request #${num}: ${job.title}`);
+      const addName = (u.me.state?.name as string) || u.me.name || "System";
+      await sendJobMail(u.me.id, addName, target.id, `Added to Request #${num}`, `You have been added as a viewer to Request #${num}: ${job.title}`);
       return;
     }
 
@@ -387,18 +446,7 @@ addCmd({
     );
     if (myJobs.length === 0) { u.send(">JOBS: You have no open requests."); return; }
     myJobs.sort((a, b) => a.number - b.number);
-    const lines: string[] = [];
-    lines.push(header("My Requests"));
-    lines.push(`${"#".padEnd(5)}${"Bucket".padEnd(12)}${"Title".padEnd(30)}${"Date".padEnd(12)}${"Status".padEnd(10)}Esc`);
-    lines.push(divider());
-    for (const j of myJobs) {
-      const esc = getEscalation(j);
-      const newTag = isNew(j) ? " NEW" : "";
-      lines.push(`${String(j.number).padEnd(5)}${j.bucket.padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${formatDate(j.createdAt).padEnd(12)}${j.status.padEnd(10)}${esc.color}${esc.label}${newTag}%cn`);
-    }
-    lines.push(divider());
-    lines.push(`${myJobs.length} request${myJobs.length === 1 ? "" : "s"}.`);
-    u.send(lines.join("\n"));
+    u.send(formatJobList(myJobs, "POP Jobs").join("\n"));
   },
 });
 
@@ -407,25 +455,21 @@ addCmd({
   pattern: /^\+myjobs?\s*(.*)$/i,
   lock: "connected",
   exec: async (u: IUrsamuSDK) => {
-    // Same as +requests
+    // Superuser sees all jobs
+    if (u.me.flags.has("superuser")) {
+      const all = await jobs.find({});
+      if (all.length === 0) { u.send(">JOBS: No open jobs."); return; }
+      all.sort((a, b) => a.number - b.number);
+      u.send(formatJobList(all, "POP Jobs").join("\n"));
+      return;
+    }
     const all = await jobs.find({});
     const myJobs = all.filter(
       (j) => j.submittedBy === u.me.id || j.additionalPlayers?.includes(u.me.id),
     );
     if (myJobs.length === 0) { u.send(">JOBS: You have no open requests."); return; }
     myJobs.sort((a, b) => a.number - b.number);
-    const lines: string[] = [];
-    lines.push(header("My Requests"));
-    lines.push(`${"#".padEnd(5)}${"Bucket".padEnd(12)}${"Title".padEnd(30)}${"Date".padEnd(12)}${"Status".padEnd(10)}Esc`);
-    lines.push(divider());
-    for (const j of myJobs) {
-      const esc = getEscalation(j);
-      const newTag = isNew(j) ? " NEW" : "";
-      lines.push(`${String(j.number).padEnd(5)}${j.bucket.padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${formatDate(j.createdAt).padEnd(12)}${j.status.padEnd(10)}${esc.color}${esc.label}${newTag}%cn`);
-    }
-    lines.push(divider());
-    lines.push(`${myJobs.length} request${myJobs.length === 1 ? "" : "s"}.`);
-    u.send(lines.join("\n"));
+    u.send(formatJobList(myJobs, "POP Jobs").join("\n"));
   },
 });
 
@@ -460,33 +504,31 @@ addCmd({
         if (!canSee) { u.send(">JOBS: You don't have access to that bucket."); return; }
 
         const esc = getEscalation(job);
+        const bucket = job.bucket || (job as Record<string, unknown>).category as string || "???";
+        const statusLabel = esc.label ? `${esc.color}${esc.label}%cn` : "";
+        const newTag = isNew(job) ? " (NEW)" : "";
         const lines: string[] = [];
-        lines.push(header(`Job #${job.number}`));
-        lines.push(` Title:     ${job.title}`);
-        lines.push(` Bucket:    ${job.bucket}`);
-        lines.push(` Submitted: ${job.submitterName} on ${coloredDate(job)}  ${esc.color}[${esc.label}]%cn`);
-        lines.push(` Handler:   ${job.assigneeName || "Unassigned"}`);
-        lines.push(` Status:    ${job.status}`);
-        lines.push(divider());
+        lines.push(jobHeader(`Job ${job.number}`));
+        // Fixed-width columns: left label (11) + left value (30) + right label (11) + right value
+        const pad = (label: string, w: number) => label.padEnd(w);
+        const LBL = 11;
+        const VAL = 30;
+        lines.push(`%cc${pad("Job Title:", LBL)}%cn${job.title.padEnd(VAL)}%cc${pad("Requester:", LBL)}%cn${job.submitterName}`);
+        lines.push(`%cc${pad("Category:", LBL)}%cn${bucket.padEnd(VAL)}%cc${pad("Status:", LBL)}%cn${statusLabel}${newTag}`);
+        lines.push(`%cc${pad("Created:", LBL)}%cn${formatTimeFull(job.createdAt).padEnd(VAL)}%cc${pad("Handler:", LBL)}%cn${job.assigneeName || "-----"}`);
+        lines.push(`%cc${"Additional Players:"}%cn ${job.additionalPlayers?.join(", ") || ""}`);
+        lines.push(jobDivider());
         lines.push(job.description);
 
         if (job.comments.length > 0) {
-          lines.push(divider());
-          lines.push(header("Comments"));
+          lines.push("");
           for (let i = 0; i < job.comments.length; i++) {
             const c = job.comments[i];
-            const pubTag = c.published ? "" : " %ch%cr[unpublished]%cn";
-            lines.push(`[${i}] [${c.authorName}]${pubTag} ${formatTimestamp(c.timestamp)}`);
-            lines.push(`  ${c.text}`);
+            lines.push(`%ch%cy${c.authorName}%cn [${formatTimeShort(c.timestamp)}]: ${c.text}`);
           }
         }
 
-        if (job.additionalPlayers && job.additionalPlayers.length > 0) {
-          lines.push(divider());
-          lines.push(` Additional viewers: ${job.additionalPlayers.join(", ")}`);
-        }
-
-        lines.push(footer());
+        lines.push(jobFooter("End Job"));
         u.send(lines.join("\n"));
         return;
       }
@@ -529,12 +571,11 @@ addCmd({
       await jobHooks.emit("job:commented", job, comment);
       u.send(`>JOBS: Comment added to job #${num}.`);
 
-      // Notify creator and additional players
-      const notifyIds = [job.submittedBy, ...(job.additionalPlayers || [])];
-      for (const pid of notifyIds) {
-        if (pid !== u.me.id) {
-          await notifyPlayer(u, pid, `Job #${num} Updated`, `${authorName} commented on your request #${num}: ${text}`);
-        }
+      // Mail the creator
+      if (job.submittedBy !== u.me.id) {
+        await sendJobMail(u.me.id, authorName, job.submittedBy,
+          `Job #${num}: ${job.title}`,
+          `${authorName} commented on your request #${num}:\n\n${text}`);
       }
       return;
     }
@@ -594,13 +635,15 @@ addCmd({
       await jobHooks.emit("job:closed", job);
       u.send(`>JOBS: Job #${num} closed and archived.`);
 
-      // Notify creator and additional players
-      const notifyIds = [job.submittedBy, ...(job.additionalPlayers || [])];
-      for (const pid of notifyIds) {
-        if (pid !== u.me.id) {
-          const closeMsg = reason ? `Closed with comment: ${reason}` : "Closed.";
-          await notifyPlayer(u, pid, `Request #${num} Closed`, `Your request #${num} "${job.title}" has been closed by ${closerName}. ${closeMsg}`);
+      // Mail the creator with the full close notification
+      if (job.submittedBy !== u.me.id) {
+        let mailBody = `${closerName} has completed your request. A copy has been attached.\n\n${job.description}`;
+        if (reason) {
+          mailBody += `\n\n Final Comment:\n${closerName} [${formatTimeShort(Date.now())}]: ${reason}`;
         }
+        await sendJobMail(u.me.id, closerName, job.submittedBy,
+          `Request #${num} Completed: ${job.title}`,
+          mailBody);
       }
       return;
     }
@@ -628,7 +671,8 @@ addCmd({
       job.updatedAt = Date.now();
       await jobs.update({}, job);
       u.send(`>JOBS: ${target.name} added to job #${num}.`);
-      await notifyPlayer(u, target.id, `Added to Job #${num}`, `You have been added as a viewer to Job #${num}: ${job.title}`);
+      const addStaffName = (u.me.state?.name as string) || u.me.name || "System";
+      await sendJobMail(u.me.id, addStaffName, target.id, `Added to Job #${num}`, `You have been added as a viewer to Job #${num}: ${job.title}`);
       return;
     }
 
@@ -702,11 +746,17 @@ addCmd({
       if (!u.me.flags.has("superuser")) { u.send(">JOBS: Superuser only."); return; }
       const allJobs = await jobs.find({});
       allJobs.sort((a, b) => a.number - b.number);
+      // Delete all existing jobs
+      for (const j of allJobs) {
+        await jobs.delete({ id: j.id });
+      }
+      // Re-create with sequential numbers
       let newNum = 1;
       for (const j of allJobs) {
-        j.number = newNum++;
-        j.id = `job-${j.number}`;
-        await jobs.update({}, j);
+        j.number = newNum;
+        j.id = `job-${newNum}`;
+        newNum++;
+        await jobs.create(j);
       }
       u.send(`>JOBS: ${allJobs.length} jobs renumbered.`);
       return;
@@ -758,24 +808,8 @@ async function listStaffJobs(u: IUrsamuSDK, filterBucket?: string): Promise<void
     return;
   }
 
-  const lines: string[] = [];
-  lines.push(header(filterBucket ? `Jobs — ${filterBucket}` : "Jobs"));
-  lines.push(
-    `${"#".padEnd(5)}${"Bucket".padEnd(12)}${"Title".padEnd(25)}${"Submitter".padEnd(16)}${"Date".padEnd(12)}Esc`,
-  );
-  lines.push(divider());
-
-  for (const j of visible) {
-    const esc = getEscalation(j);
-    const newTag = isNew(j) ? " NEW" : "";
-    lines.push(
-      `${String(j.number).padEnd(5)}${j.bucket.padEnd(12)}${j.title.slice(0, 24).padEnd(25)}${j.submitterName.slice(0, 15).padEnd(16)}${coloredDate(j).padEnd(12)}${esc.color}${esc.label}${newTag}%cn`,
-    );
-  }
-
-  lines.push(divider());
-  lines.push(`${visible.length} job${visible.length === 1 ? "" : "s"}.`);
-  u.send(lines.join("\n"));
+  const title = filterBucket ? `POP Jobs — ${filterBucket}` : "POP Jobs";
+  u.send(formatJobList(visible, title).join("\n"));
 }
 
 // ---------------------------------------------------------------------------
@@ -805,7 +839,7 @@ addCmd({
 
       for (const j of archived) {
         lines.push(
-          `${String(j.number).padEnd(5)}${j.bucket.padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${j.status.padEnd(12)}${formatDate(j.updatedAt)}`,
+          `${String(j.number).padEnd(5)}${(j.bucket || (j as Record<string, unknown>).category as string || "???").padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${j.status.padEnd(12)}${formatDate(j.updatedAt)}`,
         );
       }
       lines.push(divider());
@@ -837,9 +871,7 @@ addCmd({
         lines.push(divider());
         lines.push(header("Comments"));
         for (const c of job.comments) {
-          const pubTag = c.published ? "" : " [unpublished]";
-          lines.push(`[${c.authorName}]${pubTag} ${formatTimestamp(c.timestamp)}`);
-          lines.push(`  ${c.text}`);
+          lines.push(`%ch%cy${c.authorName}%cn [${formatTimeShort(c.timestamp)}]: ${c.text}`);
         }
       }
       lines.push(footer());

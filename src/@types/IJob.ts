@@ -6,33 +6,46 @@ export const VALID_BUCKETS = [
 
 export type JobBucket = typeof VALID_BUCKETS[number];
 
+/** A single comment or staff note on a job. */
 export interface IJobComment {
   authorId: string;
   authorName: string;
   text: string;
   timestamp: number;
-  published: boolean;       // visible to players? (default true)
+  /** When `true`, visible to players. When `false`, staff-only. */
+  published: boolean;
 }
 
+/** A player request, bug report, or staff ticket. */
 export interface IJob {
-  id: string;               // "job-1", "job-2", ...
-  number: number;           // human-readable (#1, #2)
+  /** Stable storage key, e.g. `"job-1"`. */
+  id: string;
+  /** Human-readable job number shown in-game (#1, #2, …). */
+  number: number;
   title: string;
   bucket: JobBucket;
   status: "open" | "closed" | "cancelled";
-  submittedBy: string;      // dbref
+  /** Dbref of the player who submitted the job. */
+  submittedBy: string;
   submitterName: string;
-  assignedTo?: string;      // dbref
+  /** Dbref of the assigned staff member, if any. */
+  assignedTo?: string;
   assigneeName?: string;
   closedByName?: string;
   description: string;
   comments: IJobComment[];
-  additionalPlayers: string[];  // player dbrefs who can view
-  createdAt: number;        // timestamp
+  /** Player dbrefs who can view this job in addition to the submitter. */
+  additionalPlayers: string[];
+  /** Unix timestamp (ms) when the job was created. */
+  createdAt: number;
+  /** Unix timestamp (ms) of the last update. */
   updatedAt: number;
 }
 
+/** Per-bucket staff access control. */
 export interface IJobAccess {
-  id: string;               // bucket name
-  staffIds: string[];       // player dbrefs with access
+  /** Bucket name (e.g. "BUG", "CGEN"). */
+  id: string;
+  /** Player dbrefs with access to this bucket. Empty = all staff. */
+  staffIds: string[];
 }

@@ -20,6 +20,7 @@ export default () => {
           return u.send("That name or alias is already taken.");
       }
 
+      // deno-lint-ignore no-explicit-any
       await dbojs.modify({ id: tar.id }, "$set", { "data.alias": alias } as any);
       u.send(`Alias for ${String(tar.state.name || tar.id)} set to %ch${alias}%cn`);
     },
