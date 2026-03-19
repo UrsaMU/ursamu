@@ -145,8 +145,9 @@ export default async (u: IUrsamuSDK) => {
                     const fromObj = await u.util.target(en, fromId).catch(() => null);
                     const fromName = fromObj?.name || "Unknown";
 
-                    const idCol = m.read ? `%cn${i}` : `%ch%cw${i}%cn`;
-                    u.send(`${PAD(idCol, 15)} ${PAD(fromName, 20)} ${PAD(m.subject, 30)} ${PAD(new Date(m.date).toLocaleDateString(), 15)}`);
+                    const numStr = PAD(String(i), 5);
+                    const idCol = m.read ? `${numStr}` : `%ch%cw${numStr}%cn`;
+                    u.send(`${idCol} ${PAD(fromName, 20)} ${PAD(m.subject, 30)} ${PAD(new Date(m.date).toLocaleDateString(), 15)}`);
                     i++;
                 }
             }
@@ -375,8 +376,8 @@ export default async (u: IUrsamuSDK) => {
             if (!en.state.tempMail) return u.send("%chMAIL:%cn No draft in progress.");
             const draft = en.state.tempMail as IMail;
 
-            if (!draft.message && !draft.subject) {
-                return u.send("%chMAIL:%cn Cannot send empty message.");
+            if (!draft.message || !draft.message.trim()) {
+                return u.send("%chMAIL:%cn Cannot send a message with no body. Use '-<text>' to add content.");
             }
 
             try {
