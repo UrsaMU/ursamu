@@ -183,8 +183,17 @@ function getReply(post: IPost, replyNum: number): IReply | undefined {
 
 function getNextReplyNum(post: IPost): number {
   if (!post.replies || post.replies.length === 0) return 1;
-  return Math.max(...post.replies.map((r) => r.num)) + 1;
+  // Use max + 1 to avoid gaps. Even if a reply was deleted, new replies
+  // get the next sequential number above the highest existing one.
+  const maxNum = Math.max(...post.replies.map((r) => r.num));
+  return maxNum + 1;
 }
+
+// Note: Reply numbering has a theoretical race condition if two users
+// reply to the same post simultaneously. The DBO doesn't support
+// transactions, so the second save could overwrite the first reply.
+// In practice this is extremely rare on a MUSH. If it becomes an issue,
+// the post should be re-read after save to verify the reply was persisted.
 
 // ---------------------------------------------------------------------------
 // Read tracking (stored on player: state.bb_read)
@@ -365,14 +374,12 @@ function canWrite(_u: IUrsamuSDK, board: IBoard): boolean {
 // Post renumbering
 // ---------------------------------------------------------------------------
 
-async function renumberPosts(boardNum: number): Promise<void> {
-  const boardPosts = await getBoardPosts(boardNum);
-  for (let i = 0; i < boardPosts.length; i++) {
-    const newNum = i + 1;
-    if (boardPosts[i].num !== newNum) {
-      await posts.modify({ id: boardPosts[i].id }, "$set", { num: newNum });
-    }
-  }
+// Post renumbering is intentionally disabled. Renumbering after deletion
+// corrupts all players' read tracking keys (e.g., "3.1" becomes invalid
+// when post 4 becomes post 3). Instead, we leave gaps in post numbering
+// after deletion, which is the standard approach on MUSH BBS systems.
+async function renumberPosts(_boardNum: number): Promise<void> {
+  // No-op: gaps in numbering are intentional and safe.
 }
 
 // ---------------------------------------------------------------------------
@@ -503,8 +510,8 @@ function resolveKey(
     const rn = parseInt(rnStr, 10);
     const post = boardPosts.find((p) => p.num === pn) || null;
     if (!post) return { post: null, reply: undefined };
-    const reply = post.replies.find((r) => r.num === rn);
-    return { post, reply };
+    const reply = post.replies.find((r) => r.num === rn) || undefined;
+    return { post, reply: reply ?? undefined };
   }
   const pn = parseInt(msgKey, 10);
   const post = boardPosts.find((p) => p.num === pn) || null;
@@ -1305,7 +1312,7 @@ async function submitDraft(u: IUrsamuSDK): Promise<void> {
 
 addCmd({
   name: "+bb",
-  pattern: /^\+?bb\s+(.+)/i,
+  pattern: /^\+bb(?![a-z])\s+(.+)/i,
   lock: "connected",
   exec: async (u: IUrsamuSDK) => {
     const args = (u.cmd.args[0] || "").trim();
@@ -1978,7 +1985,7 @@ async function editDraft(
       u.send("%ch>BBS:%cn Text not found in draft body.");
       return;
     }
-    draft.body = draft.body.replace(old, newText);
+    draft.body = draft.body.replaceAll(old, newText);
     await setDraft(u, draft);
     u.send("%ch>BBS:%cn Draft body updated.");
   } else {
@@ -1986,7 +1993,7 @@ async function editDraft(
       u.send("%ch>BBS:%cn Text not found in draft subject.");
       return;
     }
-    draft.subject = draft.subject.replace(old, newText);
+    draft.subject = draft.subject.replaceAll(old, newText);
     await setDraft(u, draft);
     u.send("%ch>BBS:%cn Draft subject updated.");
   }
@@ -2040,7 +2047,7 @@ async function editPost(
       u.send("%ch>BBS:%cn Text not found in reply body.");
       return;
     }
-    reply.body = reply.body.replace(old, newText);
+    reply.body = reply.body.replaceAll(old, newText);
     reply.editCount = (reply.editCount || 0) + 1;
     const updatedReplies = post.replies.map((r) =>
       r.num === replyNum ? reply : r
@@ -2077,7 +2084,7 @@ async function editPost(
   }
 
   await posts.modify({ id: post.id }, "$set", {
-    body: post.body.replace(old, newText),
+    body: post.body.replaceAll(old, newText),
     editCount: post.editCount + 1,
   });
   u.send(`%ch>BBS:%cn Post ${board.num}/${postNum} updated.`);
