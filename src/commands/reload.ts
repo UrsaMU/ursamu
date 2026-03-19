@@ -101,31 +101,11 @@ export default () =>
         }
       };
 
-      if (!arg) {
-        // Default: config, text, aliases (safe, no-risk reload)
-        reloadConfig();
-        await reloadText();
-        await reloadAliases();
-      } else if (arg === "all") {
-        reloadConfig();
-        await reloadText();
-        await reloadAliases();
-        await reloadCommands();
-        await reloadAllPlugins();
-      } else if (arg === "config") {
-        reloadConfig();
-      } else if (arg === "text") {
-        await reloadText();
-      } else if (arg === "aliases") {
-        await reloadAliases();
-      } else if (arg === "commands") {
-        await reloadCommands();
-      } else if (arg === "plugins") {
-        await reloadAllPlugins();
-      } else {
-        u.send("Usage: @reload [config|text|aliases|commands|plugins|all]");
-        return;
-      }
+      reloadConfig();
+      await reloadText();
+      await reloadAliases();
+      await reloadCommands();
+      await reloadAllPlugins();
 
       results.push("(System scripts are always live -- no reload needed.)");
       u.send(results.join("%r"));
