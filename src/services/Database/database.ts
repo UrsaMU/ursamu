@@ -12,6 +12,15 @@ interface WithId {
   id: string;
 }
 
+/**
+ * Generic key-value database backed by Deno KV.
+ *
+ * Each `DBO` instance operates on an isolated namespace derived from its
+ * config key (e.g. `"server.db"`). Supports CRUD, arbitrary queries,
+ * and atomic read-modify-write operations.
+ *
+ * @template T - The record type stored in this collection. Must have an `id: string` field.
+ */
 export class DBO<T extends WithId> implements IDatabase<T> {
   private static kv: Deno.Kv | null = null;
   private pathOrKey: string;
@@ -255,18 +264,27 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   }
 }
 
+/** Internal counter record used by `atomicIncrement` for auto-generated IDs. */
 export interface ICounters extends WithId {
   seq: number;
 }
 
+/** Shared counter store (job IDs, object IDs, etc.). */
 export const counters: DBO<ICounters> = new DBO<ICounters>("server.counters");
+/** Primary game-object store (rooms, players, exits, items). */
 export const dbojs: DBO<IDBOBJ> = new DBO<IDBOBJ>("server.db");
+/** Channel definitions store. */
 export const chans: DBO<IChannel> = new DBO<IChannel>("server.chans");
+/** Player mail store. */
 export const mail: DBO<IMail> = new DBO<IMail>("server.mail");
+/** Server text entries (welcome screen, MOTD, etc.). */
 export const texts: DBO<ITextEntry> = new DBO<ITextEntry>("server.texts");
+/** Scene (scene-logger) store. */
 export const scenes: DBO<IScene> = new DBO<IScene>("server.scenes");
 
 import type { IBBoard } from "../../@types/IBBoard.ts";
 import type { IBBoardPost } from "../../@types/IBBoardPost.ts";
+/** Bulletin board group definitions. */
 export const bboards: DBO<IBBoard> = new DBO<IBBoard>("server.bboards");
+/** Individual bulletin board posts. */
 export const bboard: DBO<IBBoardPost> = new DBO<IBBoardPost>("server.bboard");
