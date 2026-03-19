@@ -2506,7 +2506,7 @@ addCmd({
 
 const BBHELP_TOPICS: Record<string, string> = {
   "": [
-    "                Commands for The Price Of Power BBS",
+    "                    Commands for the BBS System",
     "-----------------------------------------------------------------------------",
     "     This BBS was inspired by Myrddin's BBS for MUSHes.",
     "     To see help on a particular topic, type '+bbhelp <topic>'",
@@ -2523,7 +2523,7 @@ const BBHELP_TOPICS: Record<string, string> = {
     "=============================================================================",
   ].join("\n"),
   "bbread": [
-    "                   Commands for The Price of Power BBS:",
+    "                   Commands for the BBS System:",
     "-----------------------------------------------------------------------------",
     "     +bbread                         Scans joined bulletin board groups.",
     "     +bbread <#>                     Scans messages in group <#>.",
@@ -2552,7 +2552,7 @@ const BBHELP_TOPICS: Record<string, string> = {
     "=============================================================================",
   ].join("\n"),
   "bbpost": [
-    "                   Commands for The Price of Power's BBS",
+    "                   Commands for the BBS System",
     "-----------------------------------------------------------------------------",
     "     +bbpost <#>/<title>             This starts a post to group <#>.",
     "     +bbwrite <text>                 This adds text to an already started post.",
@@ -2581,7 +2581,7 @@ const BBHELP_TOPICS: Record<string, string> = {
     "=============================================================================",
   ].join("\n"),
   "bbmisc": [
-    "                   Commands for The Price Of Power's BBS",
+    "                   Commands for the BBS System",
     "-----------------------------------------------------------------------------",
     "     +bbremove <#>/<list>            Removes a message by you. <list> can be a",
     "                                       single number, a group of numbers, or a",
