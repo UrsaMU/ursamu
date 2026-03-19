@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any require-await
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs, chans, mail } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";

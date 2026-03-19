@@ -27,7 +27,7 @@ Deno.test({ name: "Core Migration: connect script", sanitizeResources: false, sa
   await dbojs.delete({ id: player.id });
 });
 
-Deno.test({ name: "Core Migration: flags script", sanitizeResources: false }, async () => {
+Deno.test({ name: "Core Migration: flags script", sanitizeResources: false, sanitizeOps: false }, async () => {
   const code = await Deno.readTextFile("./system/scripts/flags.ts");
   
   const player = await dbojs.create({

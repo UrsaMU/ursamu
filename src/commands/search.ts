@@ -3,6 +3,8 @@ import { addCmd } from "../services/commands/index.ts";
 import { center, columns } from "../utils/format.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
+const escRx = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export default () => {
   addCmd({
     name: "@search",
@@ -18,12 +20,12 @@ export default () => {
       if (parts.length > 1) {
         const [key, val] = parts;
         if (key.trim() === "name") {
-          search = { "data.name": new RegExp(val.trim(), "i") };
+          search = { "data.name": new RegExp(escRx(val.trim()), "i") };
         } else if (key.trim() === "flag" || key.trim() === "flags") {
-          search = { flags: new RegExp(val.trim(), "i") };
+          search = { flags: new RegExp(escRx(val.trim()), "i") };
         } else if (key.trim() === "owner") {
           const ownerObj = await dbojs.queryOne({
-            "data.name": new RegExp(`^${val.trim()}$`, "i"),
+            "data.name": new RegExp(`^${escRx(val.trim())}$`, "i"),
             flags: /player/i,
           });
           if (ownerObj) {
@@ -35,7 +37,7 @@ export default () => {
           return u.send("Invalid search parameter. Use name=..., flags=..., or owner=...");
         }
       } else {
-        search = { "data.name": new RegExp(query.trim(), "i") };
+        search = { "data.name": new RegExp(escRx(query.trim()), "i") };
       }
 
       const results = await dbojs.query(search);

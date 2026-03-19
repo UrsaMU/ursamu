@@ -1,279 +1,111 @@
 ---
 layout: layout.vto
-description: Core API reference for UrsaMU
+title: Core API Reference
+description: ICmd, IUrsamuSDK, IPlugin, IDBObj — the complete type reference for UrsaMU plugin and script authors.
 nav:
-  - text: App
-    url: "#app"
-  - text: Player
-    url: "#player"
-  - text: GameObject
-    url: "#gameobject"
-  - text: Command
-    url: "#command"
-  - text: Hook
-    url: "#hook"
-  - text: Database
-    url: "#database"
+  - text: Imports
+    url: "#imports"
+  - text: IDBObj
+    url: "#idbobj"
+  - text: ICmd
+    url: "#icmd"
+  - text: IUrsamuSDK
+    url: "#iursamusdk"
+  - text: u.me / u.here
+    url: "#ume--uhere"
+  - text: u.db
+    url: "#udb"
+  - text: u.util
+    url: "#uutil"
+  - text: u.cmd
+    url: "#ucmd"
+  - text: u.auth
+    url: "#uauth"
+  - text: u.sys
+    url: "#usys"
+  - text: u.chan
+    url: "#uchan"
+  - text: u.bb
+    url: "#ubb"
+  - text: u.events
+    url: "#uevents"
+  - text: Top-level methods
+    url: "#top-level-methods"
+  - text: IPlugin
+    url: "#iplugin"
+  - text: Exported functions
+    url: "#exported-functions"
 ---
 
-# UrsaMU Core API Reference
+# Core API Reference
 
-This document provides a reference for the core UrsaMU API classes and interfaces.
+This page documents the types and functions available to plugin and script authors.
+All of these are exported from `jsr:@ursamu/ursamu`.
 
-## App
+---
 
-The `App` class is the central hub of UrsaMU. It provides access to all the major subsystems and services.
-
-### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `config` | `Config` | The application configuration |
-| `db` | `Database` | The database manager |
-| `commands` | `CommandManager` | The command manager |
-| `hooks` | `HookManager` | The hook manager |
-| `plugins` | `PluginManager` | The plugin manager |
-| `players` | `PlayerManager` | The player manager |
-| `objects` | `ObjectManager` | The game object manager |
-| `flags` | `FlagManager` | The flag manager |
-| `channels` | `ChannelManager` | The channel manager |
-| `mail` | `MailManager` | The mail manager |
-| `bboard` | `BulletinBoardManager` | The bulletin board manager |
-
-### Methods
-
-#### `start()`
-
-Starts the UrsaMU server.
+## Imports
 
 ```typescript
-app.start();
+// Functions and classes
+import { addCmd, registerPluginRoute, mu, createObj, DBO, dbojs } from "jsr:@ursamu/ursamu";
+
+// Types (import type — zero runtime cost)
+import type { ICmd, IPlugin, IDBObj, IUrsamuSDK } from "jsr:@ursamu/ursamu";
 ```
 
-#### `stop()`
+---
 
-Stops the UrsaMU server.
+## IDBObj
 
-```typescript
-app.stop();
-```
-
-#### `reload()`
-
-Reloads the UrsaMU server configuration and plugins.
+Every object in the game database — players, rooms, exits, things — is an
+`IDBObj`.
 
 ```typescript
-app.reload();
-```
-
-#### `broadcast(message: string)`
-
-Broadcasts a message to all connected players.
-
-```typescript
-app.broadcast("Server is restarting in 5 minutes!");
-```
-
-## Player
-
-The `Player` class represents a connected player in the game.
-
-### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `dbref` | `string` | The database reference ID |
-| `name` | `string` | The player's name |
-| `password` | `string` | The hashed password |
-| `connected` | `boolean` | Whether the player is currently connected |
-| `location` | `string` | The dbref of the player's current location |
-| `flags` | `string[]` | The flags set on the player |
-| `attributes` | `Record<string, any>` | Custom attributes stored on the player |
-
-### Methods
-
-#### `send(message: string)`
-
-Sends a message to the player.
-
-```typescript
-player.send("Welcome to UrsaMU!");
-```
-
-#### `move(destination: string | GameObject)`
-
-Moves the player to a new location.
-
-```typescript
-// Move by dbref
-player.move("#123");
-
-// Move by object reference
-const room = app.objects.get("#123");
-player.move(room);
-```
-
-#### `disconnect(reason?: string)`
-
-Disconnects the player from the server.
-
-```typescript
-player.disconnect("Idle timeout");
-```
-
-#### `hasFlag(flag: string)`
-
-Checks if the player has a specific flag.
-
-```typescript
-if (player.hasFlag("WIZARD")) {
-  // Player is a wizard
+interface IDBObj {
+  id: string;                    // Numeric DB ID, e.g. "1", "42"
+  name?: string;                 // Display name (top-level shortcut to state.name)
+  flags: Set<string>;            // Flag set, e.g. Set { "player", "connected" }
+  location?: string;             // ID of containing room or object
+  state: Record<string, unknown>; // All stored data — desc, stats, attrs, etc.
+  contents: IDBObj[];            // Objects contained by this object
 }
 ```
 
-#### `setFlag(flag: string)`
+| Field | Description |
+|-------|-------------|
+| `id` | Numeric string, e.g. `"1"`. Use this when calling DB methods or `u.teleport()`. |
+| `flags` | Use `flags.has("wizard")`, not array methods. |
+| `state` | Arbitrary key-value store. Cast values on read: `obj.state.gold as number`. |
+| `contents` | Populated at query time — may be empty even if the object has contents depending on context. |
 
-Sets a flag on the player.
+---
 
-```typescript
-player.setFlag("BUILDER");
-```
+## ICmd
 
-#### `clearFlag(flag: string)`
-
-Removes a flag from the player.
-
-```typescript
-player.clearFlag("GUEST");
-```
-
-#### `get(attribute: string, defaultValue?: any)`
-
-Gets an attribute value from the player.
+Passed to `addCmd()` to register a command.
 
 ```typescript
-const description = player.get("description", "No description set.");
-```
-
-#### `set(attribute: string, value: any)`
-
-Sets an attribute value on the player.
-
-```typescript
-player.set("description", "A tall figure with a mysterious aura.");
-```
-
-## GameObject
-
-The `GameObject` class is the base class for all game objects (rooms, exits, things).
-
-### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `dbref` | `string` | The database reference ID |
-| `name` | `string` | The object's name |
-| `type` | `"ROOM" \| "EXIT" \| "THING" \| "PLAYER"` | The object type |
-| `owner` | `string` | The dbref of the object's owner |
-| `location` | `string` | The dbref of the object's location |
-| `flags` | `string[]` | The flags set on the object |
-| `attributes` | `Record<string, any>` | Custom attributes stored on the object |
-
-### Methods
-
-#### `hasFlag(flag: string)`
-
-Checks if the object has a specific flag.
-
-```typescript
-if (obj.hasFlag("DARK")) {
-  // Object is dark
+interface ICmd {
+  name:     string;
+  pattern:  string | RegExp;
+  lock?:    string;
+  exec:     (u: IUrsamuSDK) => void | Promise<void>;
+  help?:    string;
+  hidden?:  boolean;
+  category?: string;
 }
 ```
 
-#### `setFlag(flag: string)`
-
-Sets a flag on the object.
-
-```typescript
-obj.setFlag("LOCKED");
-```
-
-#### `clearFlag(flag: string)`
-
-Removes a flag from the object.
-
-```typescript
-obj.clearFlag("LOCKED");
-```
-
-#### `get(attribute: string, defaultValue?: any)`
-
-Gets an attribute value from the object.
-
-```typescript
-const description = obj.get("description", "Nothing special.");
-```
-
-#### `set(attribute: string, value: any)`
-
-Sets an attribute value on the object.
-
-```typescript
-obj.set("description", "A rusty old key.");
-```
-
-#### `save()`
-
-Saves the object to the database.
-
-```typescript
-obj.set("description", "A new description");
-obj.save();
-```
-
-## Command
-
-The `ICmd` interface defines the structure of a command in UrsaMU.
-
-### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | `string` | The name of the command |
-| `pattern` | `string \| RegExp` | Regex pattern to match; capture groups become `u.cmd.args` |
-| `lock` | `string` | Lock expression required to run this command |
-| `exec` | `(u: IUrsamuSDK) => void \| Promise<void>` | The function to execute when the command is run |
-| `help` | `string` | The help text for the command |
-| `hidden` | `boolean` | If true, omit from help listings |
-
-### IUrsamuSDK
-
-The SDK object received by every command's `exec` function. Plugin commands and sandbox scripts receive the same interface.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `me` | `IDBObj` | The actor who executed the command |
-| `here` | `IDBObj \| null` | The room the actor is currently in |
-| `cmd.args` | `string[]` | Regex capture groups from the matched pattern |
-| `cmd.switches` | `string[]` | Switches supplied (e.g. `["verbose"]`) |
-| `socketId` | `string` | The WebSocket socket ID of the actor |
-
-#### `u.send(message: string)`
-
-Sends a message to the actor who executed the command.
-
-```typescript
-u.send("Command executed successfully!");
-```
-
-#### `u.broadcast(roomId: string, message: string)`
-
-Broadcasts a message to all players in a room.
-
-```typescript
-u.broadcast(u.here?.id ?? "", "Something happens here.");
-```
+| Field | Description |
+|-------|-------------|
+| `name` | Human-readable name; appears in `help` listings unless `hidden` is true. |
+| `pattern` | RegExp (or string converted to RegExp) matched against raw player input. Capture groups map to `u.cmd.args[0]`, `u.cmd.args[1]`, … |
+| `lock` | Lock expression evaluated before `exec`. If the check fails the command silently does nothing. See the [Lock Expressions guide](../guides/lock-expressions.md). |
+| `exec` | Async-safe — you can `await` inside freely. |
+| `help` | Shown when a player runs `help <name>`. |
+| `hidden` | Hides the command from `help` and `@commands` listings. |
+| `category` | Groups related commands together in listings. |
 
 ### Example
 
@@ -281,487 +113,506 @@ u.broadcast(u.here?.id ?? "", "Something happens here.");
 import { addCmd } from "jsr:@ursamu/ursamu";
 import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
-// Define and register a command
 addCmd({
-  name: "look",
-  pattern: /^(?:look|l)\s*(.*)/i,
+  name: "+greet",
+  pattern: /^\+greet\s+(.+)/i,
   lock: "connected",
-  exec: async (u: IUrsamuSDK) => {
-    const targetName = u.cmd.args[0]?.trim();
-    const target = targetName
-      ? await u.util.target(u.me, targetName)
-      : u.here;
-    if (!target) return u.send("I don't see that here.");
-    u.send(`You look at ${String(target.state.name ?? target.id)}.`);
+  exec: (u: IUrsamuSDK) => {
+    u.send(`Hello, ${u.cmd.args[0]}!`);
   },
-  help: "look [<object>]\nLooks at an object or the current room."
+  help: "+greet <name>\nSays hello.",
 });
 ```
 
-## Hook
+---
 
-The `HookManager` class manages event hooks in UrsaMU.
+## IUrsamuSDK
 
-### Methods
-
-#### `on(event: string, callback: Function, priority?: number)`
-
-Registers a callback for an event.
+The `u` object injected into every command's `exec()` function and into
+sandbox scripts. It provides everything the command needs — actor info, DB
+access, messaging, and utility helpers.
 
 ```typescript
-app.hooks.on("player:connect", (player) => {
-  console.log(`Player ${player.name} connected`);
-}, 50);
+interface IUrsamuSDK {
+  state:    Record<string, unknown>;   // Shared state bag for the command run
+  socketId?: string;                   // WebSocket ID of the connected player
+  me:       IDBObj;                    // The actor who triggered the command
+  here:     IDBObj & { broadcast(msg: string): void };  // Actor's current room
+  target?:  IDBObj & { broadcast(msg: string): void };  // Optional pre-resolved target
+  cmd:      { name: string; args: string[]; switches?: string[]; original?: string };
+  // ... namespaces below
+}
 ```
 
-#### `off(event: string, callback: Function)`
+---
 
-Removes a callback for an event.
+## u.me / u.here
 
 ```typescript
-app.hooks.off("player:connect", myCallback);
+u.me.id          // "42"
+u.me.name        // "Alice"
+u.me.location    // room ID
+u.me.flags       // Set<string>
+u.me.state       // all stored player data
+u.me.contents    // inventory
+
+u.here.id        // room ID
+u.here.name      // room name
+u.here.state     // room data (desc, exits, etc.)
+u.here.contents  // everyone and everything in the room
+u.here.broadcast("Message to everyone in the room.");
 ```
 
-#### `emit(event: string, ...args: any[])`
-
-Emits an event with arguments.
+Check flags:
 
 ```typescript
-app.hooks.emit("custom:event", { data: "some data" });
+u.me.flags.has("superuser")   // first player ever created
+u.me.flags.has("admin")       // or "wizard" — equivalent
+u.me.flags.has("builder")
+u.me.flags.has("player")
+u.me.flags.has("connected")   // currently online
 ```
 
-#### `once(event: string, callback: Function, priority?: number)`
+---
 
-Registers a one-time callback for an event.
+## u.db
+
+Database operations. All methods are async.
+
+### `u.db.search(query)`
 
 ```typescript
-app.hooks.once("system:startup", () => {
-  console.log("Server started");
+const results: IDBObj[] = await u.db.search(query);
+```
+
+`query` can be:
+- A string — searched against name, ID, and flags
+- An object — field filter, e.g. `{ flags: ["room"] }`
+
+```typescript
+// Find all rooms
+const rooms = await u.db.search({ flags: ["room"] });
+
+// Find by name fragment
+const matches = await u.db.search("Town Square");
+```
+
+### `u.db.create(template)`
+
+```typescript
+const obj: IDBObj = await u.db.create({
+  name: "Magic Sword",
+  flags: new Set(["thing"]),
+  location: u.me.id,
+  state: { desc: "A gleaming sword.", damage: 5 },
+  contents: [],
 });
 ```
 
-## Database
+### `u.db.modify(id, field, value)`
 
-The `Database` class provides access to the UrsaMU database.
-
-### Methods
-
-#### `get(key: string)`
-
-Gets a value from the database.
+Updates a single field on an object.
 
 ```typescript
-const value = await app.db.get("players:#123");
+// Update state (always spread to preserve existing keys)
+await u.db.modify(u.me.id, "state", { ...u.me.state, gold: 100 });
+
+// Update name
+await u.db.modify(obj.id, "name", "New Name");
+
+// Update location
+await u.db.modify(obj.id, "location", destinationId);
 ```
 
-#### `set(key: string, value: any)`
-
-Sets a value in the database.
+### `u.db.destroy(id)`
 
 ```typescript
-await app.db.set("players:#123", playerData);
+await u.db.destroy(obj.id);
 ```
 
-#### `delete(key: string)`
+---
 
-Deletes a value from the database.
+## u.util
+
+Utility helpers.
+
+### `u.util.target(actor, query, global?)`
+
+Resolves a name or `#id` reference to an `IDBObj`. Searches the actor's
+inventory then the current room. Pass `global: true` to search the whole DB.
 
 ```typescript
-await app.db.delete("players:#123");
+const obj = await u.util.target(u.me, u.cmd.args[0]);
+if (!obj) return u.send("I don't see that here.");
 ```
 
-#### `list(prefix: string)`
+### `u.util.displayName(obj, actor)`
 
-Lists all keys with a specific prefix.
+Returns the display name of `obj` as seen by `actor`, applying moniker
+substitutions if set.
 
 ```typescript
-const playerKeys = await app.db.list("players:");
+u.send(`You see ${u.util.displayName(target, u.me)}.`);
 ```
 
-#### `transaction(callback: (tx: Transaction) => Promise<void>)`
+### `u.util.stripSubs(str)`
 
-Performs a transaction.
+Strips MUSH color codes (`%cX`, `%n`, `%r`, `%t`, `%b`) and raw ANSI escapes.
+Useful for measuring the true display length of a string.
 
 ```typescript
-await app.db.transaction(async (tx) => {
-  const player = await tx.get("players:#123");
-  player.money += 100;
-  await tx.set("players:#123", player);
-});
+const plain = u.util.stripSubs("%chBold text%cn");
+// → "Bold text"
 ```
 
-## CommandManager
+### `u.util.center(str, length, filler?)`
 
-The `CommandManager` class manages commands in UrsaMU.
+Centers `str` within `length` characters, optionally padding with `filler`.
 
-### Methods
+```typescript
+u.send(u.util.center("TITLE", 78, "-"));
+// → "--------------------------------TITLE---------------------------------"
+```
 
-#### `register(plugin: string, command: ICmd)`
+### `u.util.ljust(str, length, filler?)` / `u.util.rjust(str, length, filler?)`
 
-Registers a command. Prefer using `addCmd()` directly from the SDK package.
+Left-pads or right-pads a string.
+
+```typescript
+u.send(u.util.ljust("Name", 20) + u.util.rjust("100", 10));
+```
+
+### `u.util.sprintf(format, ...args)`
+
+Printf-style formatting.
+
+```typescript
+u.send(u.util.sprintf("%-20s %5d gp", player.name, gold));
+```
+
+---
+
+## u.cmd
+
+Populated by the command parser before `exec` is called.
+
+```typescript
+u.cmd.name       // "look"
+u.cmd.args       // string[] — capture groups from the pattern RegExp
+u.cmd.switches   // string[] — e.g. ["quiet"] from "@set/quiet ..."
+u.cmd.original   // The raw input string the player typed
+```
+
+---
+
+## u.auth
+
+Authentication helpers for scripts that need to verify or change passwords.
+
+```typescript
+// Verify a password
+const ok: boolean = await u.auth.verify(u.me.name!, "mypassword");
+
+// Hash a password (bcrypt)
+const hashed: string = await u.auth.hash("newpassword");
+
+// Change a player's password (use carefully — no confirmation prompt)
+await u.auth.setPassword(u.me.id, "newpassword");
+
+// Log in a player (rarely needed in scripts)
+await u.auth.login(u.me.id);
+```
+
+---
+
+## u.sys
+
+Server administration methods. Most are locked behind the `wizard` or
+`superuser` flag in system scripts.
+
+```typescript
+// Set a config value (only keys whitelisted in the engine are accepted)
+await u.sys.setConfig("server.name", "My Game");
+
+// Disconnect a player by socket ID
+await u.sys.disconnect(socketId);
+
+// Server uptime in milliseconds
+const ms: number = await u.sys.uptime();
+
+// Reboot or shut down (DANGEROUS — confirms nothing)
+await u.sys.reboot();
+await u.sys.shutdown();
+```
+
+---
+
+## u.chan
+
+Channel management. Players can join/leave channels and admins can create and
+configure them.
+
+```typescript
+// Join a channel (alias is the local shorthand, e.g. "pub")
+await u.chan.join("Public", "pub");
+
+// Leave by alias
+await u.chan.leave("pub");
+
+// List all channels the actor is a member of
+const channels = await u.chan.list();
+
+// Admin — create a channel
+await u.chan.create("Staff", { header: "%ch[STAFF]%cn", hidden: true });
+
+// Admin — destroy a channel
+await u.chan.destroy("Staff");
+
+// Admin — update channel settings
+await u.chan.set("Public", { header: "%ch[PUB]%cn", masking: false });
+```
+
+---
+
+## u.bb
+
+Bulletin board access.
+
+```typescript
+// List all boards
+const boards = await u.bb.listBoards();
+// → [{ id, name, description, order, postCount, newCount }, ...]
+
+// List posts on a board
+const posts = await u.bb.listPosts(boardId);
+// → [{ id, num, subject, authorName, date, edited? }, ...]
+
+// Read a post (by board + post number)
+const post = await u.bb.readPost(boardId, postNum);
+// → { id, subject, body, authorName, date, edited? } | null
+
+// Post a message
+await u.bb.post(boardId, "Subject line", "Body text.");
+
+// Edit a post you authored
+await u.bb.editPost(boardId, postNum, "New body text.");
+
+// Delete a post (owner or admin)
+await u.bb.deletePost(boardId, postNum);
+
+// Count unread posts
+const total: number = await u.bb.totalNewCount();
+```
+
+---
+
+## u.events
+
+Emit custom events and register handlers by attribute name.
+
+```typescript
+// Emit an event (other scripts can listen)
+await u.events.emit("game:levelup", { playerId: u.me.id, level: 5 });
+
+// Register a listener (stores a script key to call when the event fires)
+const handlerId = await u.events.on("game:levelup", "scripts/levelup-handler");
+```
+
+---
+
+## Top-level methods
+
+These are direct properties on `u`, not namespaced.
+
+### `u.send(message, target?, options?)`
+
+Sends `message` to the actor, or to `target` (DB ID) if provided.
+
+```typescript
+u.send("You say, \"Hello!\"");
+u.send("Whispered message.", otherPlayerId);
+```
+
+### `u.broadcast(message, options?)`
+
+Sends `message` to everyone in the actor's current room.
+
+```typescript
+u.broadcast(`${u.me.name} waves.`);
+```
+
+### `u.setFlags(target, flags)`
+
+Sets or clears flags on a target. Prefix with `!` to remove.
+
+```typescript
+await u.setFlags(u.me.id, "builder");      // add "builder"
+await u.setFlags(u.me.id, "!builder");     // remove "builder"
+await u.setFlags(obj.id, "dark");
+```
+
+### `u.checkLock(target, lock)`
+
+Evaluates a lock expression against a target. Returns `true` if the lock passes.
+
+```typescript
+const canEnter = await u.checkLock(u.me, "builder|wizard");
+```
+
+See the [Lock Expressions guide](../guides/lock-expressions.md) for syntax.
+
+### `u.teleport(target, destination)`
+
+Moves `target` (DB ID) to `destination` (DB ID).
+
+```typescript
+await u.teleport(u.me.id, "1");  // send actor to room #1
+```
+
+### `u.force(command)`
+
+Executes `command` as if the actor typed it.
+
+```typescript
+u.force("look");
+```
+
+### `u.execute(command)`
+
+Executes `command` as the server (no actor context).
+
+```typescript
+u.execute("@pemit #3=Server message.");
+```
+
+### `u.trigger(target, attr, args?)`
+
+Triggers an attribute script on `target`.
+
+```typescript
+await u.trigger(room.id, "onEnter", [u.me.id]);
+```
+
+### `u.canEdit(actor, target)`
+
+Returns `true` if `actor` has permission to edit `target`.
+
+```typescript
+const ok = await u.canEdit(u.me, target);
+if (!ok) return u.send("Permission denied.");
+```
+
+---
+
+## IPlugin
+
+The interface your plugin's exported object must satisfy.
+
+```typescript
+interface IPlugin {
+  name:         string;
+  version:      string;
+  description?: string;
+  init?:        () => boolean | Promise<boolean>;
+  remove?:      () => void   | Promise<void>;
+}
+```
+
+```typescript
+import type { IPlugin } from "jsr:@ursamu/ursamu";
+import "./commands.ts";
+
+export const plugin: IPlugin = {
+  name:        "my-plugin",
+  version:     "1.0.0",
+  description: "Does cool things.",
+  init: async () => {
+    // Startup logic — seed data, connect to external services, etc.
+    return true;   // return false to abort loading
+  },
+};
+```
+
+---
+
+## Exported functions
+
+These are the top-level exports you import from `jsr:@ursamu/ursamu`.
+
+### `addCmd(...cmds: ICmd[])`
+
+Registers one or more commands. Safe to call at module level.
 
 ```typescript
 import { addCmd } from "jsr:@ursamu/ursamu";
 
-addCmd({
-  name: "hello",
-  pattern: /^hello$/i,
-  lock: "connected",
-  exec: (u) => {
-    u.send("Hello, world!");
-  }
+addCmd(
+  { name: "cmd1", pattern: /^cmd1$/i, exec: (u) => u.send("one") },
+  { name: "cmd2", pattern: /^cmd2$/i, exec: (u) => u.send("two") },
+);
+```
+
+### `registerPluginRoute(prefix, handler)`
+
+Registers a custom HTTP route handled by your plugin.
+
+```typescript
+import { registerPluginRoute } from "jsr:@ursamu/ursamu";
+
+registerPluginRoute("/api/v1/my-plugin", async (req, userId) => {
+  return Response.json({ ok: true, userId });
 });
 ```
 
-#### `unregister(plugin: string, commandName: string)`
+`handler` signature: `(req: Request, userId: string | null) => Promise<Response>`
 
-Unregisters a command.
+### `mu(config?)`
+
+Starts the UrsaMU engine. Called once in your game's `src/main.ts`. Returns
+a Deno `Deno.HttpServer` instance.
 
 ```typescript
-app.commands.unregister("myplugin", "hello");
+import { mu } from "jsr:@ursamu/ursamu";
+await mu();
 ```
 
-#### `get(commandName: string)`
+### `createObj(template)`
 
-Gets a command by name.
-
-```typescript
-const command = app.commands.get("look");
-```
-
-#### `match(input: string)`
-
-Finds a command that matches the input.
+Creates a new object directly in the DB. Useful in startup scripts or
+migrations that run outside a command handler (where `u.db.create()` isn't
+available).
 
 ```typescript
-const match = app.commands.match("look at sword");
-if (match) {
-  // Commands are executed by the command parser via createNativeSDK
-  // Direct invocation is not typical — let the parser route commands
-}
-```
+import { createObj } from "jsr:@ursamu/ursamu";
 
-## PluginManager
-
-The `PluginManager` class manages plugins in UrsaMU.
-
-### Methods
-
-#### `register(plugin: IPlugin)`
-
-Registers a plugin.
-
-```typescript
-app.plugins.register(new MyPlugin());
-```
-
-#### `unregister(pluginName: string)`
-
-Unregisters a plugin.
-
-```typescript
-app.plugins.unregister("myplugin");
-```
-
-#### `get(pluginName: string)`
-
-Gets a plugin by name.
-
-```typescript
-const plugin = app.plugins.get("myplugin");
-```
-
-#### `loadAll()`
-
-Loads all registered plugins.
-
-```typescript
-await app.plugins.loadAll();
-```
-
-#### `unloadAll()`
-
-Unloads all registered plugins.
-
-```typescript
-await app.plugins.unloadAll();
-```
-
-## PlayerManager
-
-The `PlayerManager` class manages players in UrsaMU.
-
-### Methods
-
-#### `create(name: string, password: string)`
-
-Creates a new player.
-
-```typescript
-const player = await app.players.create("NewPlayer", "password123");
-```
-
-#### `authenticate(name: string, password: string)`
-
-Authenticates a player.
-
-```typescript
-const player = await app.players.authenticate("PlayerName", "password123");
-if (player) {
-  // Authentication successful
-}
-```
-
-#### `get(dbref: string)`
-
-Gets a player by dbref.
-
-```typescript
-const player = app.players.get("#123");
-```
-
-#### `getByName(name: string)`
-
-Gets a player by name.
-
-```typescript
-const player = app.players.getByName("PlayerName");
-```
-
-#### `getConnected()`
-
-Gets all connected players.
-
-```typescript
-const connectedPlayers = app.players.getConnected();
-```
-
-#### `broadcast(message: string)`
-
-Broadcasts a message to all connected players.
-
-```typescript
-app.players.broadcast("Server announcement: We will be upgrading soon!");
-```
-
-## ObjectManager
-
-The `ObjectManager` class manages game objects in UrsaMU.
-
-### Methods
-
-#### `create(type: string, name: string, owner: string)`
-
-Creates a new game object.
-
-```typescript
-const room = await app.objects.create("ROOM", "Town Square", "#1");
-```
-
-#### `get(dbref: string)`
-
-Gets an object by dbref.
-
-```typescript
-const obj = app.objects.get("#123");
-```
-
-#### `search(query: ObjectQuery)`
-
-Searches for objects matching a query.
-
-```typescript
-const results = await app.objects.search({
-  type: "ROOM",
-  flags: ["DARK"],
-  owner: "#1"
+const room = await createObj({
+  name: "The Void",
+  flags: new Set(["room"]),
+  state: { desc: "An empty room." },
+  contents: [],
 });
 ```
 
-#### `delete(dbref: string)`
+### `DBO`
 
-Deletes an object.
+The raw Deno KV database wrapper. Use `dbojs` for most game-data access — `DBO`
+is for low-level or plugin-specific storage.
 
 ```typescript
-await app.objects.delete("#123");
+import { DBO } from "jsr:@ursamu/ursamu";
+
+const db = new DBO<{ score: number }>("server.highscores");
+await db.create({ score: 100 });
+const all = await db.all();
 ```
 
-## FlagManager
+### `dbojs`
 
-The `FlagManager` class manages flags in UrsaMU.
-
-### Methods
-
-#### `register(flag: Flag)`
-
-Registers a new flag.
+The game-object database accessor. Lets you query `IDBObj` records directly.
 
 ```typescript
-app.flags.register({
-  name: "INVISIBLE",
-  letter: "I",
-  type: ["PLAYER", "THING"],
-  permission: "wizard"
-});
+import { dbojs } from "jsr:@ursamu/ursamu";
+
+const players = await dbojs.queryAll((o) => o.flags.has("player"));
+const room    = await dbojs.queryOne((o) => o.id === "1");
 ```
-
-#### `unregister(flagName: string)`
-
-Unregisters a flag.
-
-```typescript
-app.flags.unregister("INVISIBLE");
-```
-
-#### `get(flagName: string)`
-
-Gets a flag by name.
-
-```typescript
-const flag = app.flags.get("WIZARD");
-```
-
-#### `check(obj: GameObject, flagName: string)`
-
-Checks if an object has a flag.
-
-```typescript
-const hasFlag = app.flags.check(player, "WIZARD");
-```
-
-## ChannelManager
-
-The `ChannelManager` class manages communication channels in UrsaMU.
-
-### Methods
-
-#### `create(name: string, owner: string, options?: ChannelOptions)`
-
-Creates a new channel.
-
-```typescript
-const channel = await app.channels.create("Public", "#1", {
-  header: "Public Channel",
-  joinable: true,
-  leavable: true
-});
-```
-
-#### `get(name: string)`
-
-Gets a channel by name.
-
-```typescript
-const channel = app.channels.get("Public");
-```
-
-#### `join(channelName: string, player: Player)`
-
-Adds a player to a channel.
-
-```typescript
-await app.channels.join("Public", player);
-```
-
-#### `leave(channelName: string, player: Player)`
-
-Removes a player from a channel.
-
-```typescript
-await app.channels.leave("Public", player);
-```
-
-#### `send(channelName: string, sender: Player, message: string)`
-
-Sends a message to a channel.
-
-```typescript
-await app.channels.send("Public", player, "Hello, everyone!");
-```
-
-## MailManager
-
-The `MailManager` class manages the mail system in UrsaMU.
-
-### Methods
-
-#### `send(sender: string, recipient: string, subject: string, body: string)`
-
-Sends a mail message.
-
-```typescript
-await app.mail.send("#1", "#2", "Hello", "This is a test message.");
-```
-
-#### `get(mailId: string)`
-
-Gets a mail message by ID.
-
-```typescript
-const message = await app.mail.get("mail:123");
-```
-
-#### `getInbox(player: string)`
-
-Gets a player's inbox.
-
-```typescript
-const inbox = await app.mail.getInbox("#1");
-```
-
-#### `delete(mailId: string)`
-
-Deletes a mail message.
-
-```typescript
-await app.mail.delete("mail:123");
-```
-
-## BulletinBoardManager
-
-The `BulletinBoardManager` class manages bulletin boards in UrsaMU.
-
-### Methods
-
-#### `createBoard(name: string, owner: string, options?: BoardOptions)`
-
-Creates a new bulletin board.
-
-```typescript
-const board = await app.bboard.createBoard("Announcements", "#1", {
-  readPermission: "connected",
-  writePermission: "wizard"
-});
-```
-
-#### `getBoard(name: string)`
-
-Gets a board by name.
-
-```typescript
-const board = await app.bboard.getBoard("Announcements");
-```
-
-#### `post(boardName: string, author: string, subject: string, body: string)`
-
-Posts a message to a board.
-
-```typescript
-await app.bboard.post("Announcements", "#1", "Server Update", "We will be updating the server tomorrow.");
-```
-
-#### `getPost(postId: string)`
-
-Gets a post by ID.
-
-```typescript
-const post = await app.bboard.getPost("post:123");
-```
-
-#### `deletePost(postId: string)`
-
-Deletes a post.
-
-```typescript
-await app.bboard.deletePost("post:123");
-``` 

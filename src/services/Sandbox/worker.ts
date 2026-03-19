@@ -183,6 +183,7 @@ const center = (str = "", width: number, fill = " "): string => _padStr(str, wid
 
 /** Strip MUSH-style substitution codes (%ch, %cn, etc.) and raw ANSI escapes. */
 const stripSubs = (str = ""): string =>
+  // deno-lint-ignore no-control-regex
   str.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").replace(/\x1b\[[0-9;]*m/g, "");
 
 const sprintf = (fmt: string, ...args: unknown[]): string => {
@@ -340,7 +341,8 @@ self.onmessage = async (e: MessageEvent) => {
       disconnect: (id: string) => request<void>("sys:disconnect", { id }),
       reboot: () => request<void>("sys:reboot", {}),
       shutdown: () => request<void>("sys:shutdown", {}),
-      uptime: () => request<number>("sys:uptime", {})
+      uptime: () => request<number>("sys:uptime", {}),
+      update: (branch = "") => request<void>("sys:update", { branch })
     },
     chan: {
       join: (channel: string, alias: string) => request<void>("chan:join", { channel, alias }),
@@ -355,7 +357,9 @@ self.onmessage = async (e: MessageEvent) => {
     mail: {
       send: (mail: Partial<IMail>) => request<void>("mail:send", { mail }),
       read: (query: Record<string, unknown>) => request<IMail[]>("mail:read", { query }),
-      delete: (id: string) => request<void>("mail:delete", { id })
+      delete: (id: string) => request<void>("mail:delete", { id }),
+      modify: (query: Record<string, unknown>, operator: string, update: Record<string, unknown>) =>
+        request<void>("mail:modify", { query, operator, update })
     },
     setFlags: (target: string | IDBObj, flags: string) =>
       request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags }),
@@ -395,6 +399,9 @@ self.onmessage = async (e: MessageEvent) => {
     // Dynamic Module Execution
     // Check if it's an ESM module (contains export)
     if (code.includes('export ')) {
+      // The blob: URL is created from in-memory script code and never uses the
+      // import map, so the JSR "unanalyzable-dynamic-import" warning for this
+      // line is a false positive — no rewriting is needed or possible here.
       const blob = new Blob([code], { type: 'application/javascript' });
       const url = URL.createObjectURL(blob);
       try {

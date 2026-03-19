@@ -1,6 +1,5 @@
 import { dbojs, chans } from "../services/Database/index.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
-import { moniker } from "../utils/moniker.ts";
 
 /** GET /api/v1/me — current user profile from JWT */
 export const meHandler = async (_req: Request, userId: string): Promise<Response> => {

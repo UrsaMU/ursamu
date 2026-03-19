@@ -13,6 +13,18 @@ nav:
     url: "./scripting.md"
   - text: MUSH Compatibility
     url: "../mush_compatibility.md"
+  - text: Lock Expressions
+    url: "./lock-expressions.md"
+  - text: Password Reset
+    url: "./password-reset.md"
+  - text: Wiki
+    url: "./wiki.md"
+  - text: Writing Help Files
+    url: "./help-authoring.md"
+  - text: Scenes
+    url: "./scenes.md"
+  - text: Production Deployment
+    url: "./deployment.md"
   - text: Customization
     url: "./customization.md"
 ---
@@ -67,6 +79,62 @@ Coming from PennMUSH, TinyMUSH, or MUX2? See what works today and what's planned
 - [What's different](../mush_compatibility/#whats-different-from-traditional-mush)
 - [Planned enhancements](../mush_compatibility/#planned-enhancements)
 - [Connecting with MU* clients](../mush_compatibility/#connecting-with-a-traditional-mu-client)
+
+## Production Deployment
+
+Get UrsaMU running reliably in production:
+
+- [Environment variables](./deployment.md#environment-variables)
+- [Daemon mode](./deployment.md#daemon-mode)
+- [systemd service](./deployment.md#systemd)
+- [Nginx + TLS](./deployment.md#nginx-and-tls)
+- [Firewall & log rotation](./deployment.md#firewall)
+
+## Scenes
+
+Create, write in, and export collaborative roleplay logs:
+
+- [Creating a scene](./scenes.md#creating-a-scene)
+- [Writing poses](./scenes.md#writing-poses)
+- [Private scenes & invitations](./scenes.md#private-scenes)
+- [Exporting a scene](./scenes.md#exporting-a-scene)
+- [Full API reference](./scenes.md#api-reference)
+
+## Wiki
+
+Build and manage your game wiki with file-based Markdown:
+
+- [Directory structure](./wiki.md#directory-structure)
+- [Frontmatter](./wiki.md#frontmatter)
+- [In-game commands](./wiki.md#in-game-commands)
+- [REST API](./wiki.md#rest-api)
+- [Hooks](./wiki.md#hooks)
+
+## Writing Help Files
+
+Create and organize in-game help files for your players:
+
+- [Directory structure](./help-authoring.md#directory-structure)
+- [File naming conventions](./help-authoring.md#file-naming)
+- [Markdown support & tables](./help-authoring.md#markdown-support)
+- [How players access help](./help-authoring.md#how-players-access-help)
+
+## Password Reset
+
+How admins generate reset tokens and players consume them:
+
+- [Admin steps](./password-reset.md#admin-steps)
+- [Player steps & API](./password-reset.md#player-steps)
+- [Error responses](./password-reset.md#error-responses)
+
+## Lock Expressions
+
+Control access to commands, exits, and objects with lock expressions:
+
+- [Flag checks](./lock-expressions.md#flag-checks)
+- [Boolean operators](./lock-expressions.md#boolean-operators)
+- [Attribute checks](./lock-expressions.md#attribute-checks)
+- [Using locks in scripts](./lock-expressions.md#using-locks-in-scripts)
 
 ## Customization
 

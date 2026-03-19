@@ -16,5 +16,8 @@ config/*.json
 .agent/skills
 .agents/skills
 
+# Claude Code local settings and agent worktrees
+.claude/
+
 # Fresh build directory
 _fresh/

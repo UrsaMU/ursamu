@@ -8,13 +8,13 @@ const eventsPlugin: IPlugin = {
   version: "1.0.0",
   description: "In-game event calendar with RSVP tracking and REST API",
 
-  init: async () => {
+  init: () => {
     registerPluginRoute("/api/v1/events", eventsRouteHandler);
     console.log("[events] Plugin initialized — +event commands active, /api/v1/events routes registered");
     return true;
   },
 
-  remove: async () => {
+  remove: () => {
     console.log("[events] Plugin removed");
   },
 };

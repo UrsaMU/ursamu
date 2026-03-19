@@ -31,4 +31,8 @@ export interface IDatabase<T> {
     modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]>;
     delete(query: Query<T>): Promise<T[]>;
     clear(): Promise<void>;
+    /** Atomic compare-and-swap read-modify-write on a single record by id. */
+    atomicModify(id: string, transform: (current: T) => T, retries?: number): Promise<T>;
+    /** Atomic increment of a counter record's `seq` field; creates if absent. */
+    atomicIncrement(id: string): Promise<number>;
 }

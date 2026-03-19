@@ -55,13 +55,101 @@ const columns = (list: string[], width: number, cols: number, padChar: string = 
     return output;
 };
 
+const renderTable = (rawLines: string[]): string => {
+    const isSeparator = (l: string) => /^\|[-:| ]+\|?\s*$/.test(l);
+    const dataLines = rawLines.filter(l => !isSeparator(l));
+    if (dataLines.length === 0) return "";
+
+    const rows = dataLines.map(l =>
+        l.replace(/^\|/, "").replace(/\|$/, "")
+         .split("|")
+         .map(cell => cell.trim())
+    );
+
+    const numCols = Math.max(...rows.map(r => r.length));
+    const normalizedRows = rows.map(r => {
+        while (r.length < numCols) r.push("");
+        return r;
+    });
+
+    const colorInline = (cell: string) => cell.replace(/`([^`]+)`/g, "%ch%cg$1%cn");
+    const coloredRows = normalizedRows.map((row, i) =>
+        i === 0
+            ? row.map(cell => `%ch%cy${colorInline(cell)}%cn`)
+            : row.map(colorInline)
+    );
+
+    // Natural column widths based on visible characters
+    const naturalWidths = Array.from({ length: numCols }, (_, ci) =>
+        Math.max(...coloredRows.map(r => stripColors(r[ci] ?? "").length))
+    );
+
+    // 2-space indent + 2-space gaps between columns
+    const overhead = 2 + 2 * (numCols - 1);
+    const available = 78 - overhead;
+    const totalNatural = naturalWidths.reduce((a, b) => a + b, 0);
+
+    let colWidths: number[];
+    if (totalNatural <= available) {
+        colWidths = [...naturalWidths];
+    } else {
+        const minW = 8;
+        colWidths = naturalWidths.map(w =>
+            Math.max(minW, Math.floor(w * available / totalNatural))
+        );
+        // Absorb rounding into last column
+        const used = colWidths.slice(0, -1).reduce((a, b) => a + b, 0);
+        colWidths[colWidths.length - 1] = Math.max(minW, available - used);
+    }
+
+    // Word-wrap a (possibly color-coded) string to a visible width
+    const wrapCell = (text: string, width: number): string[] => {
+        if (stripColors(text).length <= width) return [text];
+        const tokens = text.split(" ");
+        const lines: string[] = [];
+        let cur = "";
+        for (const tok of tokens) {
+            const candidate = cur ? cur + " " + tok : tok;
+            if (stripColors(candidate).length <= width) {
+                cur = candidate;
+            } else {
+                if (cur) lines.push(cur);
+                cur = stripColors(tok).length > width ? tok.slice(0, width) : tok;
+            }
+        }
+        if (cur) lines.push(cur);
+        return lines.length ? lines : [""];
+    };
+
+    const pad = (text: string, width: number): string =>
+        text + " ".repeat(Math.max(0, width - stripColors(text).length));
+
+    const outputLines: string[] = [];
+    const indent = "  ";
+
+    coloredRows.forEach((row, rowIdx) => {
+        const cells = row.map((cell, ci) => wrapCell(cell, colWidths[ci]));
+        const height = Math.max(...cells.map(c => c.length));
+        for (let li = 0; li < height; li++) {
+            const parts = cells.map((cell, ci) => pad(cell[li] ?? "", colWidths[ci]));
+            outputLines.push(indent + parts.join("  "));
+        }
+        if (rowIdx === 0) {
+            outputLines.push(indent + colWidths.map(w => "-".repeat(w)).join("  "));
+        }
+    });
+
+    return outputLines.join("\n");
+};
+
 const wordWrap = (text: string, width: number): string => {
     // Split into paragraphs to preserve structure
     const lines = text.split("\n");
-    
+
     return lines.map(line => {
         // preserve code blocks or placeholders
         if (line.includes("__CODEBLOCK_")) return line;
+        if (line.includes("__TABLE_")) return line;
         if (line.trim() === "") return "";
 
         // Detect indentation (important for lists)
@@ -120,12 +208,25 @@ const renderMarkdown = (text: string): string => {
     // 5. Lists ( - item)
     output = output.replace(/^\s*-\s+(.+)$/gm, "  • $1");
 
-    // 6. Word Wrap
+    // 6. Extract markdown tables before word-wrap (consecutive | lines)
+    const tables: string[] = [];
+    output = output.replace(/^(\|.+(?:\n|$))+/gm, (match) => {
+        const tableLines = match.trimEnd().split("\n").filter(l => l.trim().startsWith("|"));
+        tables.push(renderTable(tableLines));
+        return `__TABLE_${tables.length - 1}__`;
+    });
+
+    // 7. Word Wrap
     output = wordWrap(output, 78);
 
     // Restore Code Blocks
     output = output.replace(/__CODEBLOCK_(\d+)__/g, (_match, index) => {
         return "\n" + codeBlocks[parseInt(index)] + "\n";
+    });
+
+    // Restore Tables
+    output = output.replace(/__TABLE_(\d+)__/g, (_match, index) => {
+        return "\n" + tables[parseInt(index)] + "\n";
     });
 
     return output;

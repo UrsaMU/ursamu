@@ -10,15 +10,15 @@ export type { JobHookMap } from "./hooks.ts";
 const jobsPlugin: IPlugin = {
   name: "jobs",
   version: "1.0.0",
-  description: "Staff job/request tracking system with in-game commands and REST API",
+  description: "Anomaly-style jobs system — +request for players, +jobs for staff, bucket access control, escalation, archive",
 
-  init: async () => {
+  init: () => {
     registerPluginRoute("/api/v1/jobs", jobsRouteHandler);
-    console.log("[jobs] Plugin initialized — +job commands active, /api/v1/jobs routes registered");
+    console.log("[jobs] Plugin initialized — +request/+jobs/+archive commands active, /api/v1/jobs routes registered");
     return true;
   },
 
-  remove: async () => {
+  remove: () => {
     console.log("[jobs] Plugin removed");
   },
 };

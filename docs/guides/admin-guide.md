@@ -7,14 +7,14 @@ nav:
     url: "#first-run-setup"
   - text: User Management
     url: "#user-management"
-  - text: Web Client
-    url: "#web-client"
   - text: Server Configuration
     url: "#server-configuration"
   - text: REST API Reference
     url: "#rest-api-reference"
   - text: Troubleshooting
     url: "#troubleshooting"
+  - text: Password Reset
+    url: "#password-reset"
   - text: Security
     url: "#security"
 ---
@@ -49,7 +49,7 @@ Enter password: ••••••••
 Superuser 'Admin' created successfully!
 ```
 
-After setup completes, the Hub, Telnet sidecar, and web client all start automatically.
+After setup completes, the Hub and Telnet sidecar start automatically.
 
 ### Permission levels
 
@@ -73,10 +73,10 @@ From inside the game, grant admin rights with:
 The `superuser` flag cannot be granted via `@set` — it can only be created
 through the first-run interactive prompt.
 
-> **Non-interactive environments**: If you run `deno task start` without a TTY
-> (e.g. in a Docker container), the prompt is skipped. Run `deno task server`
-> directly in an interactive terminal to complete first-run setup, then switch
-> back to `deno task start` for normal operation.
+> **Non-interactive environments**: If you run `deno task start` without a TTY,
+> the prompt is skipped. Run `deno task server` directly in an interactive
+> terminal to complete first-run setup, then switch back to `deno task start`
+> for normal operation.
 
 ---
 
@@ -95,7 +95,9 @@ superuser or existing admin:
 
 As an administrator, you can manage user accounts with these commands:
 
-- `@newpassword <user>=<password>` — Reset a user's password
+- `@newpassword <user>=<password>` — Reset a user's password directly
+- `@resettoken <user>` — Generate a one-time password-reset token (valid 1 hour);
+  give the token to the player so they can reset via `POST /api/v1/auth/reset-password`
 - `@boot <user>` — Disconnect a player from the server
 - `@toad <user>` — Convert a player object into a regular thing (removes player
   flag and disconnects)
@@ -190,48 +192,6 @@ stderr:
 This is a fixed limit defined in `WebSocketService` and cannot currently be
 configured at runtime.
 
-## Web Client
-
-UrsaMU ships with an optional browser-based client built with Deno Fresh
-(`src/web-client/`). When `src/web-client/` is present, **`deno task start`
-starts it automatically** alongside the Hub and Telnet sidecar.
-
-The web client runs at [http://localhost:8000](http://localhost:8000).
-
-### What the Web Client Provides
-
-- Login / character registration forms
-- In-game terminal interface (sends/receives WebSocket commands)
-- Scene viewer and scene builder
-- Character profile and character sheet pages
-- Player directory
-- Wiki pages
-
-### Starting Manually
-
-If you want to run the web client independently (e.g. during development):
-
-```bash
-cd src/web-client
-deno task start
-```
-
-### Production Deployment
-
-For production, build the Fresh app first:
-
-```bash
-cd src/web-client
-deno task build
-deno task preview    # runs the pre-built version
-```
-
-Point a reverse proxy (nginx, Caddy) at port `8000` for TLS termination. The
-main Hub (port `4203`) should also be proxied for WebSocket connections from
-the web client.
-
----
-
 ## Server Configuration
 
 ### Basic Configuration
@@ -244,9 +204,28 @@ deno task config
 
 Key configuration areas:
 
-- Server ports (Hub WS: 4202, Hub HTTP: 4203, Telnet: 4201, Web client: 8000)
+- Server ports (Hub WS: 4202, Hub HTTP: 4203, Telnet: 4201)
 - Game name and welcome messages
 - Starting room ID
+
+### Runtime Configuration (`@site`)
+
+Admins and wizards can change a subset of server configuration values at runtime
+without restarting:
+
+```
+@site server.name=My Awesome Game
+@site game.loginMessage=Welcome back!
+@site game.welcomeMessage=Welcome to the game!
+@site server.banner=A roleplay game set in urban fantasy
+```
+
+Allowed keys: `server.name`, `server.description`, `server.banner`,
+`server.corsOrigins`, `server.maxConnections`, `game.maxPlayers`,
+`game.description`, `game.loginMessage`, `game.welcomeMessage`.
+
+Attempts to set other keys (e.g. `server.db`, `jwt.secret`) are blocked and
+logged to the security log.
 
 ### Restarting and Shutting Down
 
@@ -255,14 +234,124 @@ From in-game (admin or wizard required):
 ```
 @reboot      -- Gracefully restart the server
 @shutdown    -- Shut down the server
+@update      -- Pull latest code from git and restart (see below)
 ```
 
 From the terminal, use `Ctrl+C` to stop a running process, then restart with:
 
 ```bash
-deno task server    # Hub only
-deno task start     # Hub + telnet with file watching
+deno task start     # Hub only (no watch)
+deno task dev       # Hub + Telnet with file watching (development)
+deno task daemon    # Background service with restart loop (production)
 ```
+
+### Updating from Git (`@update`)
+
+Admins and wizards can update the running server from in-game without touching
+the terminal:
+
+```
+@update              -- git pull from the default branch (origin/main)
+@update main         -- pull a specific branch
+@upgrade             -- alias for @update
+```
+
+The command:
+1. Broadcasts `%chGame>%cn Updating from git...` to all connected players
+2. Runs `git pull origin <branch>`
+3. Exits with code 75, which tells the daemon restart loop to reboot the server
+
+> Telnet connections survive the reboot — the Telnet sidecar stays up and
+> reconnects to the Hub automatically.
+
+### Daemon Restart Loop
+
+When started via `bash scripts/daemon.sh`, the server runs inside a restart
+loop (`scripts/main-loop.sh`) that watches the process exit code:
+
+| Exit code | Meaning | Action |
+|-----------|---------|--------|
+| `75` | Restart signal (`@reboot`, `@update`) | Restart after delay |
+| `0` | Clean shutdown (`@shutdown`) | Stop — do not restart |
+| Other | Unexpected crash | Stop — check logs |
+
+**Rapid-restart protection** — if the server exits in under 5 seconds the
+restart delay doubles (1 s → 2 s → 4 s → … capped at 60 s). A stable
+long-running restart resets the delay back to 1 second.
+
+The deno child PID is written to `.ursamu-deno.pid`; the loop PID is in
+`.ursamu.pid`. Use `bash scripts/stop.sh` to gracefully stop both.
+
+## Wiki Administration
+
+The wiki plugin stores articles as Markdown files in `./wiki/` with a
+folder-driven URL structure. Admins and wizards manage pages with `@wiki`
+in-game commands.
+
+### In-game wiki commands
+
+```
+@wiki/create <path>=<title>/<body>
+  -- Create a new wiki page. Path mirrors the folder structure.
+  -- Example: @wiki/create news/patch-notes=Patch Notes/Details here...
+
+@wiki/edit <path>=<new body>
+  -- Replace the body of an existing page (frontmatter is preserved).
+  -- Example: @wiki/edit news/patch-notes=Updated content here.
+
+@wiki/fetch <url>=<wiki-path>
+  -- Download an image or PDF from a public URL into the wiki folder.
+  -- Example: @wiki/fetch https://example.com/map.png=maps/world.png
+  -- Allowed types: .jpg .jpeg .png .gif .webp .svg .pdf (max 10 MB)
+```
+
+> **Security note:** `@wiki/fetch` blocks private/loopback/link-local IP
+> ranges (localhost, 127.x, 10.x, 192.168.x, etc.) to prevent SSRF attacks.
+> Only publicly routable URLs are permitted.
+
+### Wiki REST API
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/api/v1/wiki` | Required | List all pages (title + path) |
+| `GET` | `/api/v1/wiki?q=<query>` | Required | Full-text search (title, body, tags) |
+| `GET` | `/api/v1/wiki/<path>` | Required | Read a page or list a directory |
+| `GET` | `/api/v1/wiki/<path.ext>` | Required | Serve a static asset (image, PDF) |
+| `POST` | `/api/v1/wiki` | Staff | Create a page |
+| `PATCH` | `/api/v1/wiki/<path>` | Staff | Update body and/or frontmatter |
+| `DELETE` | `/api/v1/wiki/<path>` | Staff | Delete a page or asset |
+| `PUT` | `/api/v1/wiki/<path.ext>` | Staff | Upload a static asset (binary) |
+
+**Example — create a page:**
+
+```bash
+curl -X POST https://yourgame.example.com/api/v1/wiki \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "path": "news/patch-notes",
+    "title": "Patch Notes",
+    "date": "2026-03-18",
+    "body": "## Changes\n- Added new location."
+  }'
+```
+
+**Wiki page frontmatter format:**
+
+```yaml
+---
+title: My Page Title
+date: 2026-03-18
+author: Admin
+tags: [news, update]
+---
+
+Page body in Markdown here.
+```
+
+All metadata keys must match `/^[\w-]+$/`. Body size limit is **10 MB**.
+
+---
 
 ## Scene Management
 
@@ -305,6 +394,7 @@ a `Bearer` JWT token in the `Authorization` header, obtained from
 |--------|----------|-------------|
 | `POST` | `/api/v1/auth/login` | Returns `{ token }` |
 | `POST` | `/api/v1/auth/register` | Create a new character |
+| `POST` | `/api/v1/auth/reset-password` | Consume a reset token and set a new password |
 | `GET` | `/api/v1/me` | Current user profile |
 
 ### Players
@@ -348,7 +438,28 @@ a `Bearer` JWT token in the `Authorization` header, obtained from
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/api/v1/scenes` | List scenes |
+| `POST` | `/api/v1/scenes` | Create a scene |
+| `GET` | `/api/v1/scenes/locations` | List accessible rooms |
+| `GET` | `/api/v1/scenes/:id` | Scene detail |
+| `PATCH` | `/api/v1/scenes/:id` | Update name, desc, status, sceneType |
+| `POST` | `/api/v1/scenes/:id/pose` | Add a pose/ooc/set entry |
+| `PATCH` | `/api/v1/scenes/:id/pose/:poseId` | Edit a pose |
+| `POST` | `/api/v1/scenes/:id/join` | Join a scene |
+| `POST` | `/api/v1/scenes/:id/invite` | Invite a player |
 | `GET` | `/api/v1/scenes/:id/export` | Export as `?format=markdown` or `?format=json` |
+
+### Wiki
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/wiki` | List all pages |
+| `GET` | `/api/v1/wiki?q=<query>` | Full-text search |
+| `GET` | `/api/v1/wiki/<path>` | Read page or directory listing |
+| `GET` | `/api/v1/wiki/<path.ext>` | Serve static asset |
+| `POST` | `/api/v1/wiki` | Create page *(staff)* |
+| `PATCH` | `/api/v1/wiki/<path>` | Update page *(staff)* |
+| `DELETE` | `/api/v1/wiki/<path>` | Delete page or asset *(staff)* |
+| `PUT` | `/api/v1/wiki/<path.ext>` | Upload static asset *(staff)* |
 
 ### WebSocket
 
@@ -370,7 +481,7 @@ The `client=web` parameter enables rich JSON payloads instead of plain text.
 
 #### Server Won't Start
 
-- Check if a port is already in use (`4201`, `4202`, `4203`, or `8000`)
+- Check if a port is already in use (`4201`, `4202`, `4203`)
 - Ensure Deno is installed and up to date (`deno upgrade`)
 - Check for errors in configuration output (`deno task config`)
 
@@ -378,13 +489,11 @@ The `client=web` parameter enables rich JSON payloads instead of plain text.
 
 - Confirm the Hub is running (`deno task server`)
 - For Telnet clients, confirm the Telnet sidecar is running (`deno task telnet`)
-- For the web client, confirm it is running (`deno task start` in
-  `src/web-client/`)
 
 #### Permission Denied Errors
 
 - Verify the player has the correct flags set (`@set <player>=admin`)
-- The `wizard` flag can only be set by a superuser at the database level
+- The `wizard` flag can only be granted by a **superuser** (`@set <player>=wizard`)
 
 ### Logs
 
@@ -395,18 +504,72 @@ logs:
 deno task server > logs/server.log 2>&1
 ```
 
+## Password Reset
+
+See the full [Password Reset guide](./password-reset.md) for the step-by-step
+flow. In brief:
+
+1. Run `@resettoken <player>` in-game — a UUID token is printed to your session
+2. Pass the token to the player out-of-band (Discord, email, etc.)
+3. The player calls `POST /api/v1/auth/reset-password` with `{ token, newPassword }`
+4. The token is single-use and expires after **1 hour**
+
+---
+
 ## Security
 
 ### Securing Your Server
 
-- Place the Hub behind a reverse proxy (e.g., nginx) for TLS termination
-- Set up a firewall to limit external access to only the necessary ports
+- Place the Hub behind a reverse proxy (e.g., nginx, Caddy) for TLS termination
+- Set up a firewall to limit external access to only the necessary ports (`4201`, `4202`, `4203`)
 - Keep Deno and dependencies updated
+- Set a strong `JWT_SECRET` environment variable before starting (see below)
 - Use strong passwords — the `auth.hash` SDK method uses bcrypt
+
+### JWT Secret
+
+UrsaMU signs session tokens with a secret key. Set it via environment variable
+before starting the server:
+
+```bash
+export JWT_SECRET="your-long-random-secret-here"
+deno task start
+```
+
+If `JWT_SECRET` is not set, a random secret is generated at startup and a
+warning is printed. This means all sessions are invalidated on restart.
+
+### Brute-Force Login Protection
+
+The login endpoint (`POST /api/v1/auth/login`) enforces a per-IP rate limit of
+**10 failed attempts per minute**. After that threshold is reached the server
+returns `429 Too Many Requests` and logs the event to `logs/security.log`.
+
+### Security Headers
+
+All HTTP responses include hardening headers:
+
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+
+### Security Logging
+
+Security events are written to `logs/security.log`:
+
+- `LOGIN_FAILED` — wrong password
+- `LOGIN_RATE_LIMITED` — IP blocked after too many failures
+- `PASSWORD_RESET` — password reset token consumed
+- `ADMIN_BOOT`, `ADMIN_TOAD`, `ADMIN_NEWPASSWORD` — admin user management actions
+- `ADMIN_SITE_SET`, `ADMIN_SITE_BLOCKED` — `@site` command activity
+- `ADMIN_RESETTOKEN` — reset token generation
 
 ### The `wizard` Flag
 
-The `wizard` flag is locked to **superuser** level and cannot be granted by
-regular admins. It is intended for server owners who need a permanent,
-unforgeable high-privilege account. Set it directly at the database level during
-initial setup.
+The `wizard` flag sits at the same permission level as `admin` (level 9) but
+can only be granted by a **superuser**. Regular admins cannot elevate another
+player to wizard. Grant it with:
+
+```
+@set <player>=wizard
+```

@@ -62,14 +62,24 @@ export const dbObjHandler = async (req: Request, userId: string): Promise<Respon
       if (req.method === "PATCH") {
           const updates = await req.json();
 
-          if (updates.data) {
-              const { password: _pw, ...safeData } = updates.data as Record<string, unknown>;
-              targetObj.data = { ...targetObj.data, ...safeData };
+          // Whitelist the data fields that may be updated via API
+          const ALLOWED_DATA_FIELDS = new Set(["name", "description", "moniker", "image"]);
+          const POISON_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+          if (updates.data && typeof updates.data === "object") {
+              const filtered: Record<string, unknown> = {};
+              for (const [k, v] of Object.entries(updates.data as Record<string, unknown>)) {
+                  if (ALLOWED_DATA_FIELDS.has(k) && !POISON_KEYS.has(k)) {
+                      filtered[k] = v;
+                  }
+              }
+              targetObj.data = { ...targetObj.data, ...filtered };
           }
 
-          // Explicitly ignore id, flags, location — only allow data and description
-          if (updates.description) targetObj.description = updates.description;
-          if (updates.name) targetObj.data = { ...targetObj.data, name: updates.name };
+          // Explicitly ignore id, flags, location — only allow description at top level
+          if (updates.description && !POISON_KEYS.has("description")) {
+            targetObj.description = updates.description;
+          }
 
           await dbojs.modify({ id: targetObj.id }, "$set", targetObj);
           

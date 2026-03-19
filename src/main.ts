@@ -29,17 +29,6 @@ try {
   __dirname = Deno.cwd();
 }
 
-/**
- * UrSamu MU Engine - Core initialization function
- * 
- * This function initializes the UrSamu engine with the provided configuration and plugins.
- * It can be used both as a standalone application and as a library.
- * 
- * @param cfg Optional custom configuration to override defaults
- * @param customPlugins Optional array of custom plugins to load
- * @param options Additional options for customizing the initialization
- * @returns An object containing references to the initialized components
- */
 async function initializeDefaultTexts() {
   // Always try to read from file to keep DB in sync with local dev changes
   try {
@@ -71,6 +60,17 @@ async function initializeDefaultTexts() {
   }
 }
 
+/**
+ * Initialize and start the UrsaMU engine.
+ *
+ * Loads configuration, seeds default rooms and channels, registers built-in
+ * and custom plugins, and starts the HTTP and WebSocket servers.
+ *
+ * @param cfg - Optional configuration overrides (merged with defaults and `config.json`).
+ * @param customPlugins - Additional plugins to load before the default plugin directory.
+ * @param options - Fine-grained control over which defaults are loaded.
+ * @returns References to the initialized services (db, broadcast, etc.).
+ */
 export const initializeEngine = async (
   cfg?: IConfig,
   customPlugins?: IPlugin[],
@@ -157,6 +157,12 @@ export const initializeEngine = async (
   } catch (e) {
     console.warn(`Could not load plugins from ${pluginsDir}:`, e);
   }
+
+  // Share loaded plugins with @reload command for hot-reload
+  try {
+    const { setLoadedPlugins } = await import("./commands/reload.ts");
+    setLoadedPlugins(loadedPlugins);
+  } catch { /* reload command may not be loaded yet */ }
 
   // Add any custom plugins and register them so initializePlugins() will call init()
   if (customPlugins && customPlugins.length > 0) {
@@ -264,7 +270,11 @@ export const initializeEngine = async (
   };
 };
 
-// Export initializeEngine as mu for backward compatibility
+/**
+ * Alias for `initializeEngine` — the primary entry point for starting UrsaMU.
+ *
+ * @see {@link initializeEngine} for the full parameter list.
+ */
 export const mu = initializeEngine;
 
 /**

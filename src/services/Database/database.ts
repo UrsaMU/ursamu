@@ -12,6 +12,15 @@ interface WithId {
   id: string;
 }
 
+/**
+ * Generic key-value database backed by Deno KV.
+ *
+ * Each `DBO` instance operates on an isolated namespace derived from its
+ * config key (e.g. `"server.db"`). Supports CRUD, arbitrary queries,
+ * and atomic read-modify-write operations.
+ *
+ * @template T - The record type stored in this collection. Must have an `id: string` field.
+ */
 export class DBO<T extends WithId> implements IDatabase<T> {
   private static kv: Deno.Kv | null = null;
   private pathOrKey: string;
@@ -44,7 +53,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
 
       // Create the data directory if it doesn't exist
       try {
-        await Deno.mkdir(dbDir, { recursive: true });
+        await Deno.mkdir(dbDir, { recursive: true, mode: 0o700 });
       } catch (error) {
         if (!(error instanceof Deno.errors.AlreadyExists)) {
           throw error;
@@ -220,6 +229,41 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return true;
   }
 
+  /**
+   * Atomically read-modify-write a single record using Deno KV compare-and-swap.
+   * Retries up to `retries` times on version conflict before throwing.
+   */
+  async atomicModify(id: string, transform: (current: T) => T, retries = 3): Promise<T> {
+    const kv = await this.getKv();
+    const key = this.getKey(id);
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      const entry = await kv.get<T>(key);
+      if (entry.value === null) throw new Error(`[DBO] Record not found: ${id}`);
+      const updated = transform({ ...entry.value });
+      const result = await kv.atomic().check(entry).set(key, updated).commit();
+      if (result.ok) return updated;
+    }
+    throw new Error(`[DBO] atomicModify failed after ${retries + 1} attempts on "${id}"`);
+  }
+
+  /**
+   * Atomically increment a counter record's `seq` field.
+   * Creates the record with seq=1 if it doesn't exist yet.
+   * Returns the new value.
+   */
+  async atomicIncrement(id: string): Promise<number> {
+    const kv = await this.getKv();
+    const key = this.getKey(id);
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const entry = await kv.get<{ id: string; seq: number }>(key);
+      const next = (entry.value?.seq ?? 0) + 1;
+      const updated = { ...(entry.value ?? { id }), seq: next };
+      const result = await kv.atomic().check(entry).set(key, updated).commit();
+      if (result.ok) return next;
+    }
+    throw new Error(`[DBO] atomicIncrement failed after 10 attempts on "${id}"`);
+  }
+
   async update(_query: Query<T>, data: T): Promise<T> {
     const cv = await this.getKv();
     const plainData = { ...data };
@@ -236,18 +280,27 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   }
 }
 
+/** Internal counter record used by `atomicIncrement` for auto-generated IDs. */
 export interface ICounters extends WithId {
   seq: number;
 }
 
+/** Shared counter store (job IDs, object IDs, etc.). */
 export const counters: DBO<ICounters> = new DBO<ICounters>("server.counters");
+/** Primary game-object store (rooms, players, exits, items). */
 export const dbojs: DBO<IDBOBJ> = new DBO<IDBOBJ>("server.db");
+/** Channel definitions store. */
 export const chans: DBO<IChannel> = new DBO<IChannel>("server.chans");
+/** Player mail store. */
 export const mail: DBO<IMail> = new DBO<IMail>("server.mail");
+/** Server text entries (welcome screen, MOTD, etc.). */
 export const texts: DBO<ITextEntry> = new DBO<ITextEntry>("server.texts");
+/** Scene (scene-logger) store. */
 export const scenes: DBO<IScene> = new DBO<IScene>("server.scenes");
 
 import type { IBBoard } from "../../@types/IBBoard.ts";
 import type { IBBoardPost } from "../../@types/IBBoardPost.ts";
+/** Bulletin board group definitions. */
 export const bboards: DBO<IBBoard> = new DBO<IBBoard>("server.bboards");
+/** Individual bulletin board posts. */
 export const bboard: DBO<IBBoardPost> = new DBO<IBBoardPost>("server.bboard");

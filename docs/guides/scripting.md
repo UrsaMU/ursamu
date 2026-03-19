@@ -316,9 +316,16 @@ const ms = await u.sys.uptime();
 const minutes = Math.floor(ms / 60000);
 
 // Reboot or shut down
-await u.sys.reboot();    // exits with code 75 (restart signal)
-await u.sys.shutdown();  // exits with code 0
+await u.sys.reboot();    // exits with code 75 — daemon restart loop restarts the server
+await u.sys.shutdown();  // exits with code 0 — clean stop
+
+// Pull latest code from git and restart
+await u.sys.update();          // pull origin/main
+await u.sys.update("develop"); // pull a specific branch
 ```
+
+Exit code 75 is caught by `scripts/main-loop.sh` which restarts the process
+with exponential backoff on rapid exits. Telnet connections survive reboots.
 
 ---
 
