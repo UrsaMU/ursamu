@@ -90,29 +90,35 @@ export default async (u: IUrsamuSDK) => {
     // 1. Parse Command — switches come from u.cmd.switches (set by cmdParser)
     const switches = u.cmd.switches || [];
 
-    // Check for "One-liner" Compose: mail <target> <subject> = <message>
+    // MUSH-style compose: @mail <target>=<subject> — starts a draft with subject
     if (rawinput.includes("=") && switches.length === 0) {
-        const [left, message] = rawinput.split("=");
-        const parts = left.trim().split(" ");
-        const targetName = parts[0];
-        const subject = parts.slice(1).join(" ");
+        const eqIdx = rawinput.indexOf("=");
+        const targetName = rawinput.slice(0, eqIdx).trim();
+        const subject = rawinput.slice(eqIdx + 1).trim();
 
         const target = await u.util.target(en, targetName);
         if (!target) return u.send(`%chMAIL:%cn Target '${targetName}' not found.`);
 
-        const newMail: Partial<IMail> = {
+        if (en.state.tempMail) {
+            u.send("%chMAIL:%cn You already have a draft in progress. Use '@mail/abort' to discard it.");
+            return;
+        }
+
+        const draft = {
             id: crypto.randomUUID(),
             from: `#${en.id}`,
             to: [`#${target.id}`],
-            subject: subject || "No Subject",
-            message: message.trim(),
+            subject: subject || "(No Subject)",
+            message: "",
             date: Date.now(),
             read: false
         };
 
-        await u.mail.send(newMail);
-        u.send(`%chMAIL:%cn Message sent to ${target.name}.`);
-        u.send(`%chMAIL:%cn You have a new message from ${en.name || "Unknown"}`, target.id);
+        await u.db.modify(en.id, "$set", { "data.tempMail": draft });
+        u.send(`%chMAIL:%cn Draft started to %ch${target.name}%cn. Subject: ${subject || "(No Subject)"}`);
+        u.send(`Use '-<text>' to add lines to the body.`);
+        u.send(`Use '--' to send.`);
+        u.send(`Use '@mail/abort' to cancel.`);
         return;
     }
 
