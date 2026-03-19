@@ -77,11 +77,10 @@ function formatDateTime(epoch: number): string {
 function bbDate(epoch: number): string {
   try {
     const d = new Date(epoch);
-    const months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ];
-    return `${months[d.getMonth()]} ${String(d.getDate()).padStart(2, " ")} ${d.getFullYear()}`;
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const yy = String(d.getFullYear()).slice(-2);
+    return `${mm}-${dd}-${yy}`;
   } catch {
     return "";
   }
@@ -604,19 +603,27 @@ async function doBBScan(u: IUrsamuSDK): Promise<void> {
   }
 
   const lines: string[] = ["%cb" + EQ_LINE + "%cn"];
-  lines.push(
-    "       " +
-      "Group Name".padEnd(48) +
-      "Last Post".padStart(12) +
-      "Messages".padStart(11),
-  );
+  // Fixed positions: #(4) space flag(3) space title ... Last Post + Messages right-aligned
+  const P = { num: 0, flag: 5, title: 9, lastpost: 51, msgs: 68 };
+
+  const hdr = " ".repeat(WIDTH).split("");
+  const placeHdr = (pos: number, text: string) => {
+    for (let i = 0; i < text.length && pos + i < WIDTH; i++) hdr[pos + i] = text[i];
+  };
+  placeHdr(P.num, "   #");
+  placeHdr(P.title + 1, "Group Name");
+  // Right-align headers
+  const lpHdr = "Last Post";
+  const msHdr = "Messages";
+  placeHdr(WIDTH - msHdr.length, msHdr);
+  placeHdr(WIDTH - msHdr.length - 4 - lpHdr.length, lpHdr);
+  lines.push(hdr.join(""));
   lines.push("%cb" + DASH_LINE + "%cn");
 
   for (const board of visibleBoards) {
     const boardPosts = await getBoardPosts(board.num);
     const total = boardPosts.length;
 
-    // Flag: * restricted, - read only, (-) read only but you can write
     let flag = "   ";
     if (board.readLock !== "all()") {
       flag = " * ";
@@ -632,13 +639,37 @@ async function doBBScan(u: IUrsamuSDK): Promise<void> {
       dateStr = bbDate(latest.createdAt);
     }
 
-    const titlePad = Math.max(48 - board.title.length, 0);
-    lines.push(
-      `${String(board.num).padStart(2)} ${flag} %cc${board.title}%cn` +
-        " ".repeat(titlePad) +
-        dateStr.padStart(12) +
-        String(total).padStart(11),
-    );
+    const numStr = String(board.num).padStart(4);
+    const titleStr = board.title.padEnd(35).slice(0, 35);
+    // Fixed positions for right columns
+    const msPos = WIDTH - msHdr.length; // Messages starts here
+    const lpPos = msPos - 4 - lpHdr.length; // Last Post starts here
+    const leftPart = `${numStr} ${flag}%cc${titleStr}%cn`;
+    const leftVisible = numStr.length + 1 + flag.length + titleStr.length;
+    // Build right portion with fixed positions
+    const row = " ".repeat(WIDTH).split("");
+    // Place visible left content (extra space between flag and title)
+    let pos = 0;
+    for (const ch of `${numStr} ${flag} ${titleStr}`) {
+      if (pos < WIDTH) row[pos++] = ch;
+    }
+    // Place date at lpPos
+    for (let i = 0; i < dateStr.length && lpPos + i < WIDTH; i++) {
+      row[lpPos + i] = dateStr[i];
+    }
+    // Place total right-aligned at end
+    const totalStr = String(total);
+    const tStart = WIDTH - totalStr.length;
+    for (let i = 0; i < totalStr.length; i++) {
+      row[tStart + i] = totalStr[i];
+    }
+    const plainRow = row.join("");
+    // Re-insert color codes around the title
+    const titleStart = numStr.length + 1 + flag.length + 1;
+    const beforeTitle = plainRow.slice(0, titleStart);
+    const titlePart = plainRow.slice(titleStart, titleStart + titleStr.length);
+    const afterTitle = plainRow.slice(titleStart + titleStr.length);
+    lines.push(`${beforeTitle}%cc${titlePart}%cn${afterTitle}`);
   }
 
   lines.push("%cb" + DASH_LINE + "%cn");
@@ -2466,5 +2497,154 @@ addCmd({
         "%ch>BBS:%cn Unknown setting. Use 'timeout' or 'anonymous'.",
       );
     }
+  },
+});
+
+// ---------------------------------------------------------------------------
+// +bbhelp
+// ---------------------------------------------------------------------------
+
+const BBHELP_TOPICS: Record<string, string> = {
+  "": [
+    "                Commands for The Price Of Power BBS",
+    "-----------------------------------------------------------------------------",
+    "     This BBS was inspired by Myrddin's BBS for MUSHes.",
+    "     To see help on a particular topic, type '+bbhelp <topic>'",
+    "     (Example: +bbhelp bbread).",
+    "",
+    "     TOPIC                 DESCRIPTION",
+    "     ~~~~~                 ~~~~~~~~~~~",
+    "     bbread                Reading bulletin board messages.",
+    "     bbpost                Posting bulletin board messages.",
+    "     bbmisc                Other commands (removing messages, unsubscribing",
+    "                             groups, resubscribing to groups, etc)",
+    "",
+    "     bbtimeout             Expanded help on the topic of message timeouts.",
+    "=============================================================================",
+  ].join("\n"),
+  "bbread": [
+    "                   Commands for The Price of Power BBS:",
+    "-----------------------------------------------------------------------------",
+    "     +bbread                         Scans joined bulletin board groups.",
+    "     +bbread <#>                     Scans messages in group <#>.",
+    "     +bbread <#>/<list>              Reads message(s). <list> can be a single",
+    "                                        number, multiple numbers, or a range",
+    "                                        of numbers (ie. 1-6), or any combo.",
+    "     +bbread <#>/<msg>*              Reads <msg> and all replies, if any.",
+    "     +bbread <#>/u                   Reads all unread messages in group <#>.",
+    "",
+    "     +bbcatchup <#>                  Marks all messages in group <#> as read.",
+    "                                        You can use multiple group #'s/names",
+    "                                        or may use the word 'all' to catchup",
+    "                                        on all messages on all boards.",
+    "",
+    "     +bbnew <#>                      Lists unread messages in group <#>",
+    "",
+    "     +bbnext                         Reads the 'next' unread message.",
+    "     +bbnext <#>                     Reads the 'next' unread message in group",
+    "                                        <#>.",
+    "",
+    "     +bbscan        Totals unread postings (if any) in each joined group.",
+    "",
+    "Note: You can use the board's name (or abbreviation) in place of its number.",
+    "-----------------------------------------------------------------------------",
+    "See also: +bbhelp bbpost, +bbhelp bbmisc",
+    "=============================================================================",
+  ].join("\n"),
+  "bbpost": [
+    "                   Commands for The Price of Power's BBS",
+    "-----------------------------------------------------------------------------",
+    "     +bbpost <#>/<title>             This starts a post to group <#>.",
+    "     +bbwrite <text>                 This adds text to an already started post.",
+    "     +bb <text>                      Same as +bbwrite.",
+    "     +bbedit <area>=<old>/<new>      Edits your post in progress. Valid areas",
+    "                                       are: text, title",
+    "     +bbproof                        Displays your current post in progress.",
+    "     +bbtoss                         Discards your current post in progress.",
+    "     +bbpost                         This will post your current post in",
+    "                                       progress.",
+    "",
+    "     +bbreply <#>/<#>                Start a threaded reply to post <#>/<#>",
+    "                                        Use normal authoring commands above to",
+    "                                        write, proofread, edit, post.",
+    "",
+    "     +bbpost <#>/<subject>=<body>    Posts a message to group <#>. This is a",
+    "                                       quick way of posting a message with",
+    "                                       one command.",
+    "     +bbreply <#>/<#>=<body>         Posts a threaded reply to <#>/<#> with a",
+    "                                       single command.",
+    "",
+    "     +bbedit <#>/<#>=<old>/<new>     Edits one of your posted messages.",
+    "",
+    "-----------------------------------------------------------------------------",
+    "See also: +bbhelp bbread, +bbhelp bbmisc",
+    "=============================================================================",
+  ].join("\n"),
+  "bbmisc": [
+    "                   Commands for The Price Of Power's BBS",
+    "-----------------------------------------------------------------------------",
+    "     +bbremove <#>/<list>            Removes a message by you. <list> can be a",
+    "                                       single number, a group of numbers, or a",
+    "                                       range (10-14).",
+    "     +bbmove <#>/<#> to <#>          Moves one of your messages to a new group.",
+    "     +bbleave <#>                    Unsubscribe from group <#>.",
+    "     +bbjoin <#>                     Joins a group you've previously 'left'.",
+    "     +bblist                         Listing of all groups available to you",
+    "                                       along with their timeout values.",
+    "     +bbsearch <#>/<name>            Shows you a list of <name>'s postings on",
+    "                                       group <#>.",
+    "     +bbnotify <#>=<on|off>          Turn post notification for group <#> on",
+    "                                       or off.",
+    "     +bbsig [text]                   Set your BBS signature.",
+    "     +bbsig /clear                   Clear your BBS signature.",
+    "",
+    "     Staff only:",
+    "     +bbnewgroup <title>             Create a new bulletin board.",
+    "     +bbcleargroup <#>               Mark a board for deletion.",
+    "     +bbconfirm <#>                  Confirm board deletion.",
+    "     +bblock <#>=<lock>              Set read lock on a board.",
+    "     +bbwritelock <#>=<lock>         Set write lock on a board.",
+    "     +bbtimeout <#>/<#>=<days>       Changes timeout for a message to <days>.",
+    "     +bbconfig                       View/set BBS configuration.",
+    "",
+    "-----------------------------------------------------------------------------",
+    "See also: +bbhelp bbread, +bbhelp bbpost",
+    "=============================================================================",
+  ].join("\n"),
+  "bbtimeout": [
+    "                   BBS Timeout System",
+    "-----------------------------------------------------------------------------",
+    "     The BBS supports automatic expiration of old posts.",
+    "",
+    "     Each board can have a default timeout (in days). Posts on that board",
+    "     will be automatically removed after that many days. A timeout of 0",
+    "     means posts never expire.",
+    "",
+    "     Individual posts can also have their own timeout, which overrides",
+    "     the board default.",
+    "",
+    "     Staff commands:",
+    "     +bbconfig timeout=<days>        Set global default timeout.",
+    "     +bbconfig <#>/timeout=<days>    Set board-specific timeout.",
+    "     +bbtimeout <#>/<#>=<days>       Set timeout for a specific post.",
+    "     +bbconfig autotimeout=on|off    Enable/disable auto-cleanup.",
+    "",
+    "     A timeout of 0 means no expiration.",
+    "=============================================================================",
+  ].join("\n"),
+};
+
+addCmd({
+  name: "+bbhelp",
+  pattern: /^\+bbhelp\s*(.*)/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) => {
+    const topic = (u.cmd.args[0] || "").trim().toLowerCase().replace(/^\+/, "");
+    const text = BBHELP_TOPICS[topic];
+    if (!text) {
+      u.send(`%ch>BBS:%cn Unknown help topic '${topic}'. Type +bbhelp for a list of topics.`);
+      return;
+    }
+    u.send(text);
   },
 });
