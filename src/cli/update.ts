@@ -74,7 +74,7 @@ const isLocal = currentSpecifier.startsWith(".") || currentSpecifier.startsWith(
 
 // ── 2. resolve latest version (JSR) or local path ────────────────────────────
 
-const SHELL_SCRIPTS = ["daemon.sh", "stop.sh", "restart.sh", "status.sh"];
+const SHELL_SCRIPTS = ["daemon.sh", "main-loop.sh", "run.sh", "stop.sh", "restart.sh", "status.sh"];
 const scriptsDir = join(cwd, "scripts");
 
 let latestVersion: string | null = null;
