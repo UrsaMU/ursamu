@@ -15,6 +15,9 @@ interface IMail {
   message: string;
   read: boolean;
   date: number;
+  replied?: boolean;
+  forwarded?: boolean;
+  starred?: boolean;
 }
 
 interface IDBObj {
@@ -113,7 +116,7 @@ export default async (u: IUrsamuSDK) => {
         const firstWord = (words[0] || "").toLowerCase();
         if (!rawinput.trim()) {
             subCmd = "list";
-        } else if (["send", "read", "delete", "quick", "proof", "edit", "abort", "cc", "bcc", "reply", "notify", "replyall", "forward", "subject"].includes(firstWord)) {
+        } else if (["send", "read", "delete", "quick", "proof", "edit", "abort", "cc", "bcc", "reply", "notify", "replyall", "forward", "subject", "save", "unsave"].includes(firstWord)) {
             subCmd = firstWord;
             subArgs = words.slice(1).join(" ");
         } else if (!isNaN(parseInt(firstWord))) {
@@ -131,10 +134,10 @@ export default async (u: IUrsamuSDK) => {
             const mails = await getMyMail(u, en.id);
             mails.sort((a, b) => a.date - b.date);
 
-            const unreadCount = mails.filter(m => !m.read).length;
-            u.send(`\n%chMAILBOX:%cn ${mails.length} message${mails.length===1?'':'s'} (${unreadCount} new)\n`);
-            u.send(`%ch${PAD("#", 5)} ${PAD("From", 20)} ${PAD("Subject", 30)} ${PAD("Date", 15)}%cn`);
-            u.send(HR);
+            // Header
+            const hdrText = " MAIL: Folder Current ";
+            const hdrPad = Math.floor((77 - hdrText.length) / 2);
+            u.send("-".repeat(hdrPad) + hdrText + "-".repeat(77 - hdrPad - hdrText.length));
 
             if (mails.length === 0) {
                 u.send("  No messages.");
@@ -145,13 +148,29 @@ export default async (u: IUrsamuSDK) => {
                     const fromObj = await u.util.target(en, fromId).catch(() => null);
                     const fromName = fromObj?.name || "Unknown";
 
-                    const numStr = PAD(String(i), 5);
-                    const idCol = m.read ? `${numStr}` : `%ch%cw${numStr}%cn`;
-                    u.send(`${idCol} ${PAD(fromName, 20)} ${PAD(m.subject, 30)} ${PAD(new Date(m.date).toLocaleDateString(), 15)}`);
+                    // Build status flags [URFS----]
+                    const f1 = m.read ? "-" : "U";
+                    const f2 = m.replied ? "R" : "-";
+                    const f3 = m.forwarded ? "F" : "-";
+                    const f4 = m.starred ? "S" : "-";
+                    const flags = `[${f1}${f2}${f3}${f4}----]`;
+
+                    // Character count
+                    const charCount = (m.message || "").length;
+                    const charStr = `(${String(charCount).padStart(4)})`;
+
+                    // Format line
+                    const num = String(i).padStart(3);
+                    const from = `From: ${PAD(fromName, 16)}`;
+                    const sub = `Sub:  ${(m.subject || "(No Subject)").slice(0, 28)}`;
+
+                    u.send(`${flags} ${num} ${charStr}   ${from} ${sub}`);
                     i++;
                 }
             }
-            u.send("");
+
+            // Footer
+            u.send("-".repeat(77));
             break;
         }
 
@@ -227,6 +246,10 @@ export default async (u: IUrsamuSDK) => {
                 read: false
             };
             await u.db.modify(en.id, "$set", { "data.tempMail": draft });
+            // Mark original as replied
+            if (orig.id) {
+                try { await u.mail.modify({ id: orig.id }, "$set", { replied: true }); } catch {}
+            }
             u.send(`%chMAIL:%cn Replying to "${orig.subject}". Use '-<text>' to add lines, 'mail send' to send.`);
             break;
         }
@@ -297,6 +320,10 @@ export default async (u: IUrsamuSDK) => {
                 read: false
             };
             await u.mail.send(forwarded);
+            // Mark original as forwarded
+            if (orig.id) {
+                try { await u.mail.modify({ id: orig.id }, "$set", { forwarded: true }); } catch {}
+            }
             u.send(`%chMAIL:%cn Message forwarded to ${target.name}.`);
             u.send(`%chMAIL:%cn You have a forwarded message from ${en.name || "Unknown"}`, target.id);
             break;
@@ -442,11 +469,51 @@ export default async (u: IUrsamuSDK) => {
             }
 
             const m = mails[num - 1];
+            if (m.starred) {
+                u.send("%chMAIL:%cn That message is saved. Use '@mail/unsave " + num + "' first to allow deletion.");
+                return;
+            }
             await u.mail.delete(m.id!);
             u.send("%chMAIL:%cn Message deleted.");
+            break;
+        }
+
+        case "save": {
+            const num = parseInt(subArgs.trim() || "");
+            const mails = await getMyMail(u, en.id);
+            mails.sort((a, b) => a.date - b.date);
+
+            if (!num || num < 1 || num > mails.length) {
+                u.send("%chMAIL:%cn Invalid message number.");
+                return;
+            }
+
+            const m = mails[num - 1];
+            if (m.id) {
+                await u.mail.modify({ id: m.id }, "$set", { starred: true });
+                u.send(`%chMAIL:%cn Message ${num} saved. It is now protected from deletion.`);
+            }
+            break;
+        }
+
+        case "unsave": {
+            const num = parseInt(subArgs.trim() || "");
+            const mails = await getMyMail(u, en.id);
+            mails.sort((a, b) => a.date - b.date);
+
+            if (!num || num < 1 || num > mails.length) {
+                u.send("%chMAIL:%cn Invalid message number.");
+                return;
+            }
+
+            const m = mails[num - 1];
+            if (m.id) {
+                await u.mail.modify({ id: m.id }, "$set", { starred: false });
+                u.send(`%chMAIL:%cn Message ${num} unsaved. It can now be deleted.`);
+            }
             break;
         }
     }
 };
 
-export const aliases = ["mail/send", "mail/read", "mail/delete", "mail/proof", "mail/abort", "mail/cc", "mail/bcc", "mail/reply", "mail/replyall", "mail/forward", "mail/subject"];
+export const aliases = ["mail/send", "mail/read", "mail/delete", "mail/proof", "mail/abort", "mail/cc", "mail/bcc", "mail/reply", "mail/replyall", "mail/forward", "mail/subject", "mail/save", "mail/unsave"];
