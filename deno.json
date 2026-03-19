@@ -25,7 +25,8 @@
     "exclude": ["tests", "data"]
   },
   "tasks": {
-    "start": "bash ./scripts/run.sh",
+    "start": "deno run -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
+    "dev": "bash ./scripts/run.sh",
     "daemon": "bash ./scripts/daemon.sh",
     "stop": "bash ./scripts/stop.sh",
     "restart": "bash ./scripts/restart.sh",
