@@ -178,6 +178,7 @@ async function getPost(
 }
 
 function getReply(post: IPost, replyNum: number): IReply | undefined {
+  if (!post.replies || !Array.isArray(post.replies)) return undefined;
   return post.replies.find((r) => r.num === replyNum);
 }
 
@@ -374,12 +375,53 @@ function canWrite(_u: IUrsamuSDK, board: IBoard): boolean {
 // Post renumbering
 // ---------------------------------------------------------------------------
 
-// Post renumbering is intentionally disabled. Renumbering after deletion
-// corrupts all players' read tracking keys (e.g., "3.1" becomes invalid
-// when post 4 becomes post 3). Instead, we leave gaps in post numbering
-// after deletion, which is the standard approach on MUSH BBS systems.
-async function renumberPosts(_boardNum: number): Promise<void> {
-  // No-op: gaps in numbering are intentional and safe.
+// Renumber posts after deletion and migrate all players' read tracking keys.
+async function renumberPosts(boardNum: number): Promise<void> {
+  const boardPosts = await getBoardPosts(boardNum);
+  if (boardPosts.length === 0) return;
+
+  // Build old→new number mapping
+  const numMap = new Map<number, number>();
+  for (let i = 0; i < boardPosts.length; i++) {
+    const newNum = i + 1;
+    if (boardPosts[i].num !== newNum) {
+      numMap.set(boardPosts[i].num, newNum);
+      await posts.modify({ id: boardPosts[i].id }, "$set", { num: newNum });
+    }
+  }
+
+  // If no numbers changed, nothing to migrate
+  if (numMap.size === 0) return;
+
+  // Migrate all players' read tracking for this board
+  try {
+    const { dbojs } = await import("../../services/Database/index.ts");
+    const allPlayers = await dbojs.query({ flags: /player/ });
+    for (const player of allPlayers) {
+      const readData = (player.data?.bb_read as Record<string, string[]>) || {};
+      const boardKey = String(boardNum);
+      const oldKeys = readData[boardKey];
+      if (!oldKeys || !Array.isArray(oldKeys) || oldKeys.length === 0) continue;
+
+      const newKeys: string[] = [];
+      for (const key of oldKeys) {
+        if (key.includes(".")) {
+          const [pStr, rStr] = key.split(".", 2);
+          const oldP = parseInt(pStr, 10);
+          const newP = numMap.get(oldP);
+          newKeys.push(newP !== undefined ? `${newP}.${rStr}` : key);
+        } else {
+          const oldP = parseInt(key, 10);
+          const newP = numMap.get(oldP);
+          newKeys.push(newP !== undefined ? String(newP) : key);
+        }
+      }
+      readData[boardKey] = newKeys;
+      await dbojs.modify({ id: player.id }, "$set", { "data.bb_read": readData });
+    }
+  } catch {
+    // Read tracking migration failure shouldn't block deletion
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -485,9 +527,10 @@ function parsePostSpec(
     const trimmed = part.trim();
     if (trimmed.includes("-")) {
       const [startStr, endStr] = trimmed.split("-", 2);
-      const start = parseInt(startStr, 10);
-      const end = parseInt(endStr, 10);
+      let start = parseInt(startStr, 10);
+      let end = parseInt(endStr, 10);
       if (isNaN(start) || isNaN(end)) return null;
+      if (start > end) { const tmp = start; start = end; end = tmp; }
       for (let i = start; i <= end; i++) {
         if (postNums.has(i)) nums.push(i);
       }
@@ -1051,8 +1094,14 @@ addCmd({
     }
 
     if (args.toLowerCase() === "all") {
-      await markAllBoardsRead(u);
-      u.send("%ch>BBS:%cn All boards marked as read.");
+      // Only catch up boards the user can read
+      const allBoards = await boards.find({});
+      for (const b of allBoards) {
+        if (canRead(u, b) && isMember(u, b.num)) {
+          await markAllRead(u, b.num);
+        }
+      }
+      u.send("%ch>BBS:%cn All accessible boards marked as read.");
       return;
     }
 
@@ -1067,6 +1116,10 @@ addCmd({
       const { board, error } = await findBoard(part);
       if (!board) {
         u.send(`%ch>BBS:%cn ${error}`);
+        continue;
+      }
+      if (!canRead(u, board)) {
+        u.send(`%ch>BBS:%cn You don't have access to ${board.title}.`);
         continue;
       }
       await markAllRead(u, board.num);
@@ -2284,6 +2337,10 @@ addCmd({
       return;
     }
 
+    if (!lockStr) {
+      u.send("%ch>BBS:%cn Lock cannot be empty. Use 'all()' for no restriction.");
+      return;
+    }
     await boards.modify({ id: board.id }, "$set", { readLock: lockStr });
     u.send(
       `%ch>BBS:%cn Read lock on '${board.title}' set to: ${lockStr}`,
@@ -2319,6 +2376,10 @@ addCmd({
       return;
     }
 
+    if (!lockStr) {
+      u.send("%ch>BBS:%cn Lock cannot be empty. Use 'all()' for no restriction.");
+      return;
+    }
     await boards.modify({ id: board.id }, "$set", { writeLock: lockStr });
     u.send(
       `%ch>BBS:%cn Write lock on '${board.title}' set to: ${lockStr}`,
