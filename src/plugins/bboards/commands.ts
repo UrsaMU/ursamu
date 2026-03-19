@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 /**
  * Myrddin-style BBS Commands for UrsaMU
  *
@@ -343,7 +342,9 @@ async function clearDraft(u: IUrsamuSDK): Promise<void> {
 // ---------------------------------------------------------------------------
 
 function getSig(u: IUrsamuSDK): string | null {
-  return (u.me.state.bb_sig as string) || null;
+  const sig = u.me.state.bb_sig;
+  if (typeof sig === "string" && sig.length > 0) return sig;
+  return null;
 }
 
 async function setSig(u: IUrsamuSDK, sig: string): Promise<void> {
@@ -593,10 +594,61 @@ async function setConfig(cfg: Partial<IBBConfig>): Promise<void> {
       readLock: "all()",
       writeLock: "all()",
       pendingDelete: false,
-      ...cfg,
-    } as any);
+    } as IBoard);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Post expiration cleanup
+// ---------------------------------------------------------------------------
+
+export async function cleanupExpiredPosts(): Promise<number> {
+  const cfg = await getConfig();
+  if (!cfg.autoTimeout) return 0;
+
+  const now = Date.now();
+  const allBoards = await getAllBoards();
+  let removed = 0;
+
+  for (const board of allBoards) {
+    const boardTimeout = board.timeout || cfg.timeout;
+    if (boardTimeout <= 0) continue;
+
+    const boardPosts = await getBoardPosts(board.num);
+    for (const post of boardPosts) {
+      const postTimeout = post.timeout || boardTimeout;
+      if (postTimeout <= 0) continue;
+
+      const ageMs = now - post.createdAt;
+      const timeoutMs = postTimeout * 24 * 60 * 60 * 1000;
+      if (ageMs > timeoutMs) {
+        await posts.delete({ id: post.id });
+        removed++;
+      }
+    }
+
+    if (removed > 0) {
+      await renumberPosts(board.num);
+    }
+  }
+
+  return removed;
+}
+
+// Run expiration check on startup and every 6 hours
+(async () => {
+  try {
+    const removed = await cleanupExpiredPosts();
+    if (removed > 0) console.log(`[bboards] Cleaned up ${removed} expired post(s).`);
+  } catch { /* startup cleanup failure is non-fatal */ }
+
+  setInterval(async () => {
+    try {
+      const removed = await cleanupExpiredPosts();
+      if (removed > 0) console.log(`[bboards] Cleaned up ${removed} expired post(s).`);
+    } catch { /* periodic cleanup failure is non-fatal */ }
+  }, 6 * 60 * 60 * 1000);
+})();
 
 // ---------------------------------------------------------------------------
 // Notification broadcast
@@ -1230,7 +1282,8 @@ addCmd({
     u.send(
       `%ch>BBS:%cn Draft started for board ${board.num} (${board.title}).\n` +
         ` Subject: %ch${subject}%cn\n` +
-        ` Use %ch+bb <text>%cn to add text, %ch+bbproof%cn to preview, %ch+bbpost%cn to submit.`,
+        ` Use %ch+bb <text>%cn to add text (required before posting).\n` +
+        ` Use %ch+bbproof%cn to preview, %ch+bbpost%cn to submit.`,
     );
   },
 });
@@ -2297,6 +2350,20 @@ addCmd({
 
     const title = board.title;
 
+    // Warn connected players who have drafts on this board
+    try {
+      const { dbojs } = await import("../../services/Database/index.ts");
+      const connected = await dbojs.query({ flags: /connected/ });
+      for (const player of connected) {
+        const draft = player.data?.bb_draft as Record<string, unknown> | undefined;
+        if (draft && draft.boardNum === board.num) {
+          await dbojs.modify({ id: player.id }, "$unset", { "data.bb_draft": 1 });
+          const { send } = await import("../../services/broadcast/index.ts");
+          send([player.id], `%ch>BBS:%cn Board '${title}' was deleted. Your draft has been discarded.`);
+        }
+      }
+    } catch { /* draft cleanup failure shouldn't block deletion */ }
+
     // Delete all posts on this board
     const boardPosts = await getBoardPosts(board.num);
     for (const post of boardPosts) {
@@ -2423,8 +2490,8 @@ addCmd({
 
     const postNum = parseInt(parsed.postStr, 10);
     const days = parseInt(rhs, 10);
-    if (isNaN(postNum) || isNaN(days)) {
-      u.send("%ch>BBS:%cn Post number and days must be integers.");
+    if (isNaN(postNum) || isNaN(days) || days < 0) {
+      u.send("%ch>BBS:%cn Post number must be an integer and days must be 0 or greater.");
       return;
     }
 
