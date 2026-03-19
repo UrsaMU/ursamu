@@ -75,9 +75,11 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
       const visibleScenes = activeScenes.filter(scene => {
           if (!scene.private) return true;
           if (!user) return false;
+          // Admins/wizards can see all scenes
+          if (user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser")) return true;
           // Visible if owner, participant, or allowed
-          return scene.owner === user.dbref || 
-                 (scene.participants && scene.participants.includes(user.dbref)) || 
+          return scene.owner === user.dbref ||
+                 (scene.participants && scene.participants.includes(user.dbref)) ||
                  (scene.allowed && scene.allowed.includes(user.dbref));
       });
 
