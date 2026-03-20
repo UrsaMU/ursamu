@@ -80,6 +80,6 @@ export default async (u: IUrsamuSDK) => {
 
   // Handle teleport switch
   if (swtch === "/teleport" || swtch === "/tel") {
-    u.teleport("me", room.id);
+    u.teleport(actor.id, room.id);
   }
 };

@@ -40,7 +40,7 @@ export const matchExits = async (ctx: IContext) => {
 
         if (dest && flags.check(en.flags, (exit?.data?.lock as string) || "")) {
           if (!en.flags.includes("dark")) {
-            ctx.socket.leave(`${en.location}`);
+            ctx.socket.leave(`#${en.location}`);
             send(
               players.map((p) => p.id),
               `${moniker(en)} leaves for ${dest.data?.name}.`,

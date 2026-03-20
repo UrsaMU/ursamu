@@ -8,7 +8,8 @@ const defaultConfig: IConfig = {
     ws: 4202,
     http: 4203,
     // These are now used as prefixes for Deno.Kv keys, not separate database files
-    db: "db",           // Main database prefix
+    db: "db",             // Main database prefix
+    counters: "counters", // Counters prefix (object IDs, etc.)
     chans: "channels",    // Channels prefix
     mail: "mail",         // Mail prefix
     wiki: "wiki",         // Wiki prefix

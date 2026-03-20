@@ -3,8 +3,8 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 /**
  * System Script: page.ts
  *
- * page <target>=<message>       → Jupiter(J) pages you: Hello!
- * page <target>=:<pose>         → From afar, Jupiter(J) waves.
+ * page <target>=<message>       → PlayerName(PN) pages you: Hello!
+ * page <target>=:<pose>         → From afar, PlayerName(PN) waves.
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;

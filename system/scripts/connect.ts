@@ -97,7 +97,7 @@ export default async (u: IUrsamuSDK) => {
   }
 
   // Login notifications: unread mail and new bboard posts
-  const mailItems = await u.mail.read({ to: player.id, read: false });
+  const mailItems = await u.mail.read({ to: { $in: [`#${player.id}`] }, read: false });
   if (mailItems.length > 0) {
     u.send(`%ch%cyYou have ${mailItems.length} unread mail message${mailItems.length === 1 ? "" : "s"}.%cn`);
   }

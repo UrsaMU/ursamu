@@ -409,7 +409,9 @@ export async function createNativeSDK(
         const board = await bboards.queryOne({ id: boardId });
         if (!board) return { error: "Board not found." };
         const posts = await bbPosts.query({ board: boardId });
-        const num = posts.length + 1;
+        const num = posts.length > 0
+          ? Math.max(...posts.map((p) => p.num)) + 1
+          : 1;
         const author = rawActor?.id || "0";
         const authorName = (rawActor && rawActor.data?.name) || author;
         const id = crypto.randomUUID();

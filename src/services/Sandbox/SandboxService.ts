@@ -824,7 +824,9 @@ class LocalSandbox {
                   return;
                 }
                 const posts = await bbPost.query({ board: e.data.boardId as string });
-                const num = posts.length + 1;
+                const num = posts.length > 0
+                  ? Math.max(...posts.map((p) => p.num)) + 1
+                  : 1;
                 const author = context?.id || "0";
                 const en = await db.queryOne({ id: author });
                 const authorName = (en && en.data?.name) || (en && en.id) || "Unknown";
