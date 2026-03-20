@@ -1,5 +1,5 @@
 import { dpath } from "../../../deps.ts";
-import { getConfig } from "../Config/mod.ts";
+import { getConfig, initConfig } from "../Config/mod.ts";
 import parser from "../parser/parser.ts";
 
 interface ITelnetSocket {
@@ -29,8 +29,10 @@ export const startTelnetServer = async (options?: {
   welcomeFile?: string;
   wsPort?: number;
 }): Promise<Deno.Listener> => {
-  const port = options?.port || getConfig<number>("server.telnet");
-  const wsPort = options?.wsPort || getConfig<number>("server.http") || 4203;
+  // Ensure config is loaded so custom ports in config.json are respected
+  await initConfig();
+  const port = options?.port ?? getConfig<number>("server.telnet") ?? 4201;
+  const wsPort = options?.wsPort ?? getConfig<number>("server.http") ?? 4203;
   const welcomeFile = options?.welcomeFile || getConfig<string>("game.text.connect") || "text/default_connect.txt";
 
   let __dirname;
