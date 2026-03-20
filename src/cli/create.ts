@@ -15,7 +15,7 @@ const currentDir = Deno.cwd();
 // Parse command line arguments
 const args = parse(Deno.args, {
   boolean: ["help", "standalone", "non-interactive"],
-  string: ["name", "telnet-port", "http-port", "game-name", "game-desc"],
+  string: ["name", "telnet-port", "http-port", "game-name", "game-desc", "plugin-version", "plugin-author"],
   alias: {
     h: "help",
   },
@@ -58,9 +58,9 @@ if (args._[0]?.toString() === "plugin") {
 
   // ── standalone plugin project (publishable repo) ──────────────────────────
   if (args["standalone"]) {
-    const pluginDesc    = args["game-desc"] ?? (args["non-interactive"] ? `A UrsaMU plugin` : prompt(`Description [A UrsaMU plugin]: `)?.trim() || "A UrsaMU plugin");
-    const pluginVersion = args["telnet-port"] ?? (args["non-interactive"] ? "1.0.0" : prompt(`Version [1.0.0]: `)?.trim() || "1.0.0");
-    const pluginAuthor  = args["non-interactive"] ? "" : prompt(`Author []: `)?.trim() ?? "";
+    const pluginDesc    = args["plugin-author"] ? (args["game-desc"] ?? "A UrsaMU plugin") : (args["game-desc"] ?? (args["non-interactive"] ? `A UrsaMU plugin` : prompt(`Description [A UrsaMU plugin]: `)?.trim() || "A UrsaMU plugin"));
+    const pluginVersion = args["plugin-version"] ?? args["telnet-port"] ?? (args["non-interactive"] ? "1.0.0" : prompt(`Version [1.0.0]: `)?.trim() || "1.0.0");
+    const pluginAuthor  = args["plugin-author"] ?? (args["non-interactive"] ? "" : prompt(`Author []: `)?.trim() ?? "");
 
     const targetDir = join(currentDir, pluginName);
     if (existsSync(targetDir)) {

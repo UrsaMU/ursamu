@@ -32,13 +32,22 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  // Staff: check if left side is a player name (not a password)
+  // Self-service first: try verifying left side as old password
+  const oldPass = left;
+  const match = await u.auth.verify(actor.state.name as string, oldPass);
+
+  if (match) {
+    await u.auth.setPassword(actor.id, newPass);
+    u.send("Your password has been changed.");
+    return;
+  }
+
+  // Staff: if old-password didn't match, try left side as a player name
   if (isStaff) {
     const results = await u.db.search(left);
     const target = results.find(obj => obj.flags.has("player"));
 
     if (target && target.id !== actor.id) {
-      // Staff setting someone else's password
       await u.auth.setPassword(target.id, newPass);
       u.send(`Password for ${target.name || target.id} has been changed.`);
       u.send(`Your password has been changed by staff.`, target.id);
@@ -46,15 +55,5 @@ export default async (u: IUrsamuSDK) => {
     }
   }
 
-  // Self-service: left side is old password
-  const oldPass = left;
-  const match = await u.auth.verify(actor.state.name as string, oldPass);
-
-  if (!match) {
-    u.send("Incorrect old password.");
-    return;
-  }
-
-  await u.auth.setPassword(actor.id, newPass);
-  u.send("Your password has been changed.");
+  u.send("Incorrect old password.");
 };

@@ -55,10 +55,11 @@ export class Obj implements IEntity {
         const returnObj = await dbojs.queryOne({ id });
         if (returnObj) return new Obj().load(returnObj);
       } else {
+        const escaped = obj.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const returnObj = await dbojs.queryOne({
-          $or: [{ "data.name": new RegExp(obj, "i") },
+          $or: [{ "data.name": new RegExp(escaped, "i") },
           { id: `${obj}` },
-          { "data.alias": new RegExp(obj, "i") }
+          { "data.alias": new RegExp(escaped, "i") }
           ],
         });
         if (returnObj) return new Obj().load(returnObj);
@@ -78,7 +79,7 @@ export class Obj implements IEntity {
   set dbobj(obj: IDBOBJ) {
     if (!this.obj?.id) return; // guard: skip if obj was never properly loaded
     this.obj = { ...this.obj, ...obj };
-    this.save();
+    this.save().catch(e => console.error("[Obj] set dbobj save failed:", e));
   }
 
   get id() {
@@ -105,7 +106,7 @@ export class Obj implements IEntity {
   set data(data: Record<string, unknown>) {
     if (!this.obj) return;
     this.obj.data = { ...this.obj.data, ...data };
-    this.save();
+    this.save().catch(e => console.error("[Obj] set data save failed:", e));
   }
 
   get splat() {
@@ -119,7 +120,7 @@ export class Obj implements IEntity {
   set location(loc: string | undefined) {
     if (!this.obj) return;
     this.obj.location = loc;
-    this.save();
+    this.save().catch(e => console.error("[Obj] set location save failed:", e));
   }
 
   get description() {

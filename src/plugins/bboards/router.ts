@@ -192,7 +192,9 @@ export async function bboardsRouteHandler(
       const authorName = (player && player.data?.name) || userId;
 
       const allPosts = await posts.query({ boardId: board.num });
-      const num = allPosts.length + 1;
+      const num = allPosts.length > 0
+        ? Math.max(...allPosts.map((p) => p.num)) + 1
+        : 1;
       const globalId = await getNextPostId();
       const id  = `bbpost-${globalId}`;
 

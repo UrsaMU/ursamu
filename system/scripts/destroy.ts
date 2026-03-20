@@ -55,12 +55,13 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  // Room destruction: send occupants home
+  // Room destruction: send ALL occupants home before destroying
   if (target.flags.has("room")) {
-    const homeId = (actor.state.home as string) || "1";
-    if (u.here.id === target.id) {
-      u.teleport("me", homeId);
-      u.send("You are sent home.");
+    const occupants = (target.contents || []).filter(obj => obj.flags.has("player"));
+    for (const occ of occupants) {
+      const occHome = (occ.state.home as string) || "1";
+      u.teleport(occ.id, occHome);
+      u.send("The room you were in has been destroyed. You are sent home.", occ.id);
     }
   }
 

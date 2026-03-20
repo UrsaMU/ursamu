@@ -94,7 +94,7 @@ export default async (u: IUrsamuSDK) => {
   components.push(u.ui.panel({ type: "list", title: "Metadata", content: [
     { label: "Flags",    value: Array.from(target.flags).join(" ") },
     { label: "Owner",    value: (target.state.owner as string) || "None" },
-    { label: "Location", value: (target.state.location as string) || "Limbo" },
+    { label: "Location", value: locationLine },
     { label: "Home",     value: homeLine },
     { label: "Channels", value: chansLine },
   ]}));

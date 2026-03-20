@@ -29,8 +29,6 @@ export const idle = (secs: number) => {
   switch (true) {
     case snds < 60 * 10:
       return `%ch%cg${time}%cn`;
-    case snds < 60 * 15:
-      return `%ch%cy${time}%cn`;
     case snds < 60 * 25:
       return `%ch%cy${time}%cn`;
     case snds < 60 * 60:

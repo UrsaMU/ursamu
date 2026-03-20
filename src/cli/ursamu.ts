@@ -89,8 +89,8 @@ Select an action:
       await runCommand("create.ts", [
         "plugin", name, "--standalone", "--non-interactive",
         `--game-desc=${desc}`,
-        `--telnet-port=${version}`,   // re-uses flag slot for version
-        `--game-name=${author}`,      // re-uses flag slot for author
+        `--plugin-version=${version}`,
+        `--plugin-author=${author}`,
       ]);
       break;
     }

@@ -39,9 +39,9 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     // If getConfig returns the key itself (default behavior if missing?) or undefined, we might fall back.
     // But getConfig usually returns the value.
     if (configValue && typeof configValue === 'string') {
-        return configValue.replace('.', '_');
+        return configValue.replaceAll('.', '_');
     }
-    return this.pathOrKey.replace('.', '_');
+    return this.pathOrKey.replaceAll('.', '_');
   }
 
   private async getKv(): Promise<Deno.Kv> {

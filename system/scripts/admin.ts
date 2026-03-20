@@ -130,6 +130,12 @@ async function handleChown(u: IUrsamuSDK, args: string) {
   u.send(`Owner of ${u.util.displayName(thing, u.me)} changed to ${u.util.displayName(newOwner, u.me)}.`);
 }
 
+const ALLOWED_SITE_CONFIGS = new Set([
+  "server.name", "server.description", "server.banner",
+  "server.corsOrigins", "server.maxConnections",
+  "game.maxPlayers", "game.description", "game.loginMessage", "game.welcomeMessage",
+]);
+
 async function handleSite(u: IUrsamuSDK, args: string) {
   if (!args) return u.send("Usage: @site <key>=<value>");
 
@@ -140,6 +146,10 @@ async function handleSite(u: IUrsamuSDK, args: string) {
   const value = args.slice(eqIdx + 1).trim();
 
   if (!key || !value) return u.send("Usage: @site <key>=<value>");
+
+  if (!ALLOWED_SITE_CONFIGS.has(key)) {
+    return u.send(`Unknown or protected config key: ${key}. Allowed: ${[...ALLOWED_SITE_CONFIGS].join(", ")}`);
+  }
 
   await u.sys.setConfig(key, value);
   u.send(`Config ${key} set to ${value}.`);

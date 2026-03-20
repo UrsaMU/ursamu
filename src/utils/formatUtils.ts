@@ -1,4 +1,4 @@
-import { parser } from "../services/parser/parser.ts";
+import parser from "../services/parser/parser.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { displayName } from "./displayName.ts";
 
@@ -94,6 +94,6 @@ export const evaluateFormat = async (
   processed = processed.replaceAll(/%t/gi, "\t");
   processed = processed.replaceAll(/%%/g, "%"); // Escaped percent
 
-  // Pass through the softcode parser
-  return await parser(processed, data);
+  // Pass through the softcode parser for ANSI substitution
+  return parser.substitute("telnet", processed);
 };

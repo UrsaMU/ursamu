@@ -37,9 +37,7 @@ export default async (u: IUrsamuSDK) => {
   const exits = (target.contents || []).filter(obj => obj.flags.has('exit'));
 
   // Phase 1: Telnet Output (ANSI Text)
-  const nameStr = canEditTarget
-    ? `${u.util.displayName(target, actor)}(#${target.id})`
-    : u.util.displayName(target, actor);
+  const nameStr = u.util.displayName(target, actor);
   let telnetOutput = `%ch${nameStr}%cn\n`;
   telnetOutput += `${description}\n`;
 

@@ -29,8 +29,13 @@ export default async (u: IUrsamuSDK) => {
 
   // Prepare clone template — only copy safe, known properties
   // (obj.state from db.search is incomplete, so we whitelist instead of spread)
+  // Strip structural flags — clones should always be "thing" objects
+  const STRUCTURAL_FLAGS = new Set(["player", "room", "exit", "connected", "superuser", "admin", "wizard"]);
+  const safeFlags = new Set([...obj.flags].filter(f => !STRUCTURAL_FLAGS.has(f)));
+  safeFlags.add("thing");
+
   const cloneTemplate = {
-    flags: obj.flags,
+    flags: safeFlags,
     location: actor.id, // Clone appears in inventory
     state: {
       name: newName ? newName.trim() : (obj.state.name || "Cloned Object"),

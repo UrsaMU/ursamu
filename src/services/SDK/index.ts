@@ -252,7 +252,7 @@ export async function createNativeSDK(
           flags: /player/i,
         });
         if (!player || !player.data?.password) return false;
-        return await compare(String(player.data.password), password);
+        return await compare(password, String(player.data.password));
       },
       login: async (id: string) => {
         const playerResult = await dbojs.queryOne({ id });

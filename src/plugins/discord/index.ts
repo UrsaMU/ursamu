@@ -58,13 +58,11 @@ function subscribeJobHooks(): void {
     if (!url) return;
     const cfg    = await getDiscordConfig();
     const avatar = await resolveAvatar(job.submittedBy, job.submitterName, cfg.publicUrl);
-    const priorityNote = job.priority !== "normal"
-      ? ` • Priority: **${job.priority}**` : "";
     const embed: DiscordEmbed = {
       color:       COLORS.green,
       title:       `New Job #${job.number} — ${job.title}`,
       description: job.description.slice(0, 1024),
-      footer:      { text: `Category: ${job.category}${priorityNote}` },
+      footer:      { text: `Bucket: ${job.bucket}` },
     };
     postWebhook(url, {
       username:   clean(job.submitterName),
@@ -92,7 +90,7 @@ function subscribeJobHooks(): void {
 
   jobHooks.on("job:commented", async (job, comment) => {
     const url = await getWebhookUrl("jobs");
-    if (!url || comment.staffOnly) return;
+    if (!url || !comment.published) return;
     const cfg    = await getDiscordConfig();
     const avatar = await resolveAvatar(comment.authorId, comment.authorName, cfg.publicUrl);
     postWebhook(url, {
@@ -115,7 +113,7 @@ function subscribeJobHooks(): void {
         color:       COLORS.orange,
         title:       `Job #${job.number} Status Changed`,
         description: `**${job.title}**\n${oldStatus} → **${job.status}**`,
-        footer:      { text: `Priority: ${job.priority}` },
+        footer:      { text: `Bucket: ${job.bucket}` },
       }],
     });
   });
@@ -129,7 +127,7 @@ function subscribeJobHooks(): void {
         color:       COLORS.teal,
         title:       `Job #${job.number} Resolved`,
         description: `**${job.title}**`,
-        footer:      { text: `Category: ${job.category}` },
+        footer:      { text: `Bucket: ${job.bucket}` },
       }],
     });
   });
