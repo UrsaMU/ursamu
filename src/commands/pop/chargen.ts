@@ -16,14 +16,18 @@
  *   +giftxp <player>=<amount>
  *   +advance <player>
  *   +approve <player>
- *   +wipe <player>
- *   +wipe/confirm <player>
+ *   +cgwipe <player>
+ *   +cgwipe/confirm <player>
  */
 
 import { addCmd } from "../../services/commands/index.ts";
 import { dbojs } from "../../services/Database/index.ts";
 import { send } from "../../services/broadcast/index.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import { getPlayerNotes } from "./notes.ts";
+import { jobs, getNextJobNumber } from "../../plugins/jobs/db.ts";
+import { jobHooks } from "../../plugins/jobs/hooks.ts";
+import type { IJob } from "../../@types/IJob.ts";
 
 /** Send a message to a player by their database id (if connected). */
 async function sendToPlayer(playerId: string, msg: string) {
@@ -60,9 +64,9 @@ const BACKGROUND_NAMES: string[] = [];
 const DISCIPLINE_NAMES: string[] = [];
 const ARCHETYPE_NAMES: string[] = [];
 
-// Merit/flaw lookups: { lowercase: { key, category, points } }
-const MERIT_LOOKUP = new Map<string, { key: string; category: string; points: number | number[] }>();
-const FLAW_LOOKUP = new Map<string, { key: string; category: string; points: number | number[] }>();
+// Merit/flaw lookups: { lowercase: { key, category, points, requires_note } }
+const MERIT_LOOKUP = new Map<string, { key: string; category: string; points: number | number[]; requires_note: boolean }>();
+const FLAW_LOOKUP = new Map<string, { key: string; category: string; points: number | number[]; requires_note: boolean }>();
 
 // Alias → canonical name mapping for all stats (attributes, abilities, backgrounds, virtues, disciplines)
 const STAT_ALIAS_MAP = new Map<string, string>();
@@ -189,16 +193,18 @@ async function loadGameData() {
   // Load merits/flaws
   const merits = await loadJson("merits.json");
   for (const m of merits) {
-    MERIT_LOOKUP.set((m.key as string).toLowerCase(), { key: m.key, category: m.category, points: m.points });
+    const entry = { key: m.key, category: m.category, points: m.points, requires_note: !!m.requires_note };
+    MERIT_LOOKUP.set((m.key as string).toLowerCase(), entry);
     if (m.aliases) {
-      for (const a of m.aliases) MERIT_LOOKUP.set(a.toLowerCase(), { key: m.key, category: m.category, points: m.points });
+      for (const a of m.aliases) MERIT_LOOKUP.set(a.toLowerCase(), entry);
     }
   }
   const flaws = await loadJson("flaws.json");
   for (const f of flaws) {
-    FLAW_LOOKUP.set((f.key as string).toLowerCase(), { key: f.key, category: f.category, points: f.points });
+    const entry = { key: f.key, category: f.category, points: f.points, requires_note: !!f.requires_note };
+    FLAW_LOOKUP.set((f.key as string).toLowerCase(), entry);
     if (f.aliases) {
-      for (const a of f.aliases) FLAW_LOOKUP.set(a.toLowerCase(), { key: f.key, category: f.category, points: f.points });
+      for (const a of f.aliases) FLAW_LOOKUP.set(a.toLowerCase(), entry);
     }
   }
 
@@ -354,6 +360,168 @@ function totalFlawPoints(stats: Record<string, number>): number {
     }
   }
   return total;
+}
+
+// ============================================================================
+// NOTE CHECKING (for chargen integration)
+// ============================================================================
+
+interface NoteCheckResult {
+  missing: string[];    // required notes that don't exist at all
+  unapproved: string[]; // required notes that exist but aren't approved
+}
+
+async function checkRequiredNotes(
+  playerId: string,
+  data: Record<string, unknown>,
+): Promise<NoteCheckResult> {
+  const notes = await getPlayerNotes(playerId);
+  const stats = getStats(data);
+
+  // Build list of required note names
+  const required: string[] = ["Background"];
+
+  // Commerce and Crafts require notes if the character has dots in them
+  if ((stats["Commerce"] || 0) > 0) required.push("Commerce");
+  if ((stats["Crafts"] || 0) > 0) required.push("Crafts");
+
+  // Merits/flaws with requires_note: true
+  const seen = new Set<string>();
+  for (const [key, val] of Object.entries(stats)) {
+    if (val <= 0) continue;
+    const meritData = MERIT_LOOKUP.get(key.toLowerCase());
+    if (meritData?.requires_note && !seen.has(meritData.key)) {
+      required.push(meritData.key);
+      seen.add(meritData.key);
+    }
+    const flawData = FLAW_LOOKUP.get(key.toLowerCase());
+    if (flawData?.requires_note && !seen.has(flawData.key)) {
+      required.push(flawData.key);
+      seen.add(flawData.key);
+    }
+  }
+
+  // Check each required note against player's actual notes
+  const missing: string[] = [];
+  const unapproved: string[] = [];
+
+  for (const reqName of required) {
+    // Match by title (case-insensitive) or by category for "Background"
+    let found;
+    if (reqName === "Background") {
+      found = notes.find(
+        (n) =>
+          n.title.toLowerCase() === "background" ||
+          n.title.toLowerCase() === "bg" ||
+          n.category.toLowerCase() === "backgrounds",
+      );
+    } else {
+      found = notes.find(
+        (n) => n.title.toLowerCase() === reqName.toLowerCase(),
+      );
+    }
+
+    if (!found) {
+      missing.push(reqName);
+    } else if (!found.approved) {
+      unapproved.push(reqName);
+    }
+  }
+
+  return { missing, unapproved };
+}
+
+// ============================================================================
+// JOB CREATION (for chargen submissions)
+// ============================================================================
+
+async function createCgenJob(
+  playerId: string,
+  playerName: string,
+  title: string,
+  description: string,
+) {
+  const num = await getNextJobNumber();
+  const now = Date.now();
+  const job: IJob = {
+    id: `job-${num}`,
+    number: num,
+    title,
+    bucket: "CGEN",
+    status: "open",
+    submittedBy: playerId,
+    submitterName: playerName,
+    description,
+    comments: [],
+    additionalPlayers: [],
+    createdAt: now,
+    updatedAt: now,
+  };
+  await jobs.create(job);
+  await jobHooks.emit("job:created", job);
+}
+
+// ============================================================================
+// NOTE STATUS DISPLAY (for +check)
+// ============================================================================
+
+async function formatNoteStatus(
+  playerId: string,
+  data: Record<string, unknown>,
+): Promise<string> {
+  const result = await checkRequiredNotes(playerId, data);
+  if (result.missing.length === 0 && result.unapproved.length === 0) {
+    return "\n%ch>GAME:%cn %chRequired Notes:%cn All complete and approved.";
+  }
+
+  const notes = await getPlayerNotes(playerId);
+  const allRequired: string[] = [];
+
+  // Rebuild required list to show all statuses
+  allRequired.push("Background");
+  const stats = getStats(data);
+  if ((stats["Commerce"] || 0) > 0) allRequired.push("Commerce");
+  if ((stats["Crafts"] || 0) > 0) allRequired.push("Crafts");
+  const seen = new Set<string>(["Background", "Commerce", "Crafts"]);
+  for (const [key, val] of Object.entries(stats)) {
+    if (val <= 0) continue;
+    const meritData = MERIT_LOOKUP.get(key.toLowerCase());
+    if (meritData?.requires_note && !seen.has(meritData.key)) {
+      allRequired.push(meritData.key);
+      seen.add(meritData.key);
+    }
+    const flawData = FLAW_LOOKUP.get(key.toLowerCase());
+    if (flawData?.requires_note && !seen.has(flawData.key)) {
+      allRequired.push(flawData.key);
+      seen.add(flawData.key);
+    }
+  }
+
+  let out = "\n%ch>GAME:%cn %chRequired Notes:%cn";
+  for (const reqName of allRequired) {
+    let found;
+    if (reqName === "Background") {
+      found = notes.find(
+        (n) =>
+          n.title.toLowerCase() === "background" ||
+          n.title.toLowerCase() === "bg" ||
+          n.category.toLowerCase() === "backgrounds",
+      );
+    } else {
+      found = notes.find(
+        (n) => n.title.toLowerCase() === reqName.toLowerCase(),
+      );
+    }
+
+    if (!found) {
+      out += `\n  %cr*%cn ${reqName} %cr(missing)%cn`;
+    } else if (!found.approved) {
+      out += `\n  %cy-%cn ${reqName} %cy(unapproved)%cn`;
+    } else {
+      out += `\n  %cgx%cn ${reqName} %cg(approved)%cn`;
+    }
+  }
+  return out;
 }
 
 // Phase 2 floor enforcement: can't lower below Phase 1 snapshot
@@ -547,9 +715,12 @@ export function registerChargenCommands() {
             const potential = (humanitas - 7) * 3;
             msg += `\n%chTip:%cn You can lower Humanitas (currently ${humanitas}) for 3 freebies per point (min 7). Use %ch+setstat Humanitas=<value>%cn for up to %ch${potential}%cn more freebies.`;
           }
+          msg += await formatNoteStatus(u.me.id, data);
           send([sid], msg);
         } else {
-          send([sid], "%ch>GAME:%cn All freebie points spent. Use %ch+progress%cn to submit for note review.");
+          let msg = "%ch>GAME:%cn All freebie points spent. Use %ch+progress%cn to submit for note review.";
+          msg += await formatNoteStatus(u.me.id, data);
+          send([sid], msg);
         }
         return;
       }
@@ -562,12 +733,13 @@ export function registerChargenCommands() {
           return;
         }
         const xp = (data.xp as number) || 0;
+        const noteStatus = await formatNoteStatus(u.me.id, data);
         if (xp > 3) {
-          send([sid], `%ch>GAME:%cn %chPhase 3 - XP Spending.%cn\nYou have %ch${xp}%cn XP remaining to spend with %ch+setstat%cn.`);
+          send([sid], `%ch>GAME:%cn %chPhase 3 - XP Spending.%cn\nYou have %ch${xp}%cn XP remaining to spend with %ch+setstat%cn.${noteStatus}`);
         } else if (xp > 0) {
-          send([sid], `%ch>GAME:%cn %chPhase 3 - XP Spending.%cn\nYou have %ch${xp}%cn XP remaining (under threshold - eligible to submit).\nUse %ch+progress%cn to submit for approval.`);
+          send([sid], `%ch>GAME:%cn %chPhase 3 - XP Spending.%cn\nYou have %ch${xp}%cn XP remaining (under threshold - eligible to submit).\nUse %ch+progress%cn to submit for approval.${noteStatus}`);
         } else {
-          send([sid], "%ch>GAME:%cn %chPhase 3 - XP Spending.%cn\nAll XP spent. Use %ch+progress%cn to submit for approval.");
+          send([sid], `%ch>GAME:%cn %chPhase 3 - XP Spending.%cn\nAll XP spent. Use %ch+progress%cn to submit for approval.${noteStatus}`);
         }
         return;
       }
@@ -788,11 +960,17 @@ export function registerChargenCommands() {
       if (phase === "2") {
         const errors: string[] = [];
         if ((data.freebie_points as number || 0) > 0) errors.push(`${data.freebie_points} freebie points remaining`);
-        // TODO: check required notes
+
+        // Check required notes exist (don't need approval yet at Phase 2)
+        const noteCheck = await checkRequiredNotes(playerObj.id, data);
+        if (noteCheck.missing.length > 0) {
+          for (const n of noteCheck.missing) errors.push(`Missing note: ${n}`);
+        }
 
         if (errors.length > 0) {
           let out = "%ch>GAME:%cn Cannot advance. Remaining:\n";
           for (const e of errors) out += `  %cr*%cn ${e}\n`;
+          out += "Use %ch+note/<category> <name>=<text>%cn to create required notes.";
           send([sid], out);
           return;
         }
@@ -803,7 +981,18 @@ export function registerChargenCommands() {
           "data.freebie_review_submitted": true,
         } as any);
 
-        send([sid], "%ch>GAME:%cn Phase 2 complete! Your character has been submitted for staff review.\nPlease wait for staff to run %ch+advance%cn.");
+        // Create CGEN job for staff note review
+        const clan = (data.clan as string) || "Unknown";
+        const sphere = (data.sphere as string) || "Unknown";
+        const playerName = (data.name as string) || "Unknown";
+        await createCgenJob(
+          playerObj.id,
+          playerName,
+          `Note Review: ${playerName}`,
+          `Note review requested for ${playerName}.\nClan: ${clan}\nSphere: ${sphere}\nUse +notes ${playerName}/* to review their notes.`,
+        );
+
+        send([sid], "%ch>GAME:%cn Phase 2 complete! Your character has been submitted for staff review.\nA CGEN job has been created. Please wait for staff to run %ch+advance%cn.");
         return;
       }
 
@@ -813,13 +1002,40 @@ export function registerChargenCommands() {
           send([sid], `%ch>GAME:%cn You have ${xp} XP remaining. Spend down to 3 or less before submitting.`);
           return;
         }
-        // TODO: check required notes approved
+
+        // Check required notes exist AND are approved
+        const noteCheck = await checkRequiredNotes(playerObj.id, data);
+        if (noteCheck.missing.length > 0) {
+          let out = "%ch>GAME:%cn Cannot submit — missing required notes:\n";
+          for (const n of noteCheck.missing) out += `  %cr*%cn ${n}\n`;
+          out += "Use %ch+note/<category> <name>=<text>%cn to create them.";
+          send([sid], out);
+          return;
+        }
+        if (noteCheck.unapproved.length > 0) {
+          let out = "%ch>GAME:%cn Cannot submit — these notes need staff approval first:\n";
+          for (const n of noteCheck.unapproved) out += `  %cy*%cn ${n}\n`;
+          out += "Please wait for staff to approve your notes.";
+          send([sid], out);
+          return;
+        }
 
         await dbojs.modify({ id: playerObj.id }, "$set", {
           "data.approval_submitted": true,
         } as any);
 
-        send([sid], "%ch>GAME:%cn Your character has been submitted for final approval. Staff will review shortly.");
+        // Create CGEN job for final approval
+        const clan = (data.clan as string) || "Unknown";
+        const sphere = (data.sphere as string) || "Unknown";
+        const playerName = (data.name as string) || "Unknown";
+        await createCgenJob(
+          playerObj.id,
+          playerName,
+          `Approval: ${playerName}`,
+          `${playerName} is ready for approval.\nClan: ${clan}\nSphere: ${sphere}\nUse +sheet ${playerName} to review their character.`,
+        );
+
+        send([sid], "%ch>GAME:%cn Your character has been submitted for final approval. A CGEN job has been created. Staff will review shortly.");
         return;
       }
 
@@ -906,7 +1122,31 @@ export function registerChargenCommands() {
       }
 
       if (phase === "3") {
-        send([sid], "%ch>GAME:%cn Phase 3 is permanent. You cannot revert.");
+        if (data.approval_submitted) {
+          send([sid], "%ch>GAME:%cn You have already submitted for approval. You cannot revert.");
+          return;
+        }
+        const confirmTime = data._revert_confirm as number | undefined;
+        if (confirmTime && (Date.now() - confirmTime) < 30000) {
+          // Confirmed — revert to Phase 2 values, restore starting XP
+          const phase2Stats = data.phase2_stats as Record<string, number> | undefined;
+          if (!phase2Stats) {
+            send([sid], "%ch>GAME:%cn No Phase 2 snapshot found. Cannot revert.");
+            return;
+          }
+          const startingXp = (data.phase3_starting_xp as number) ?? 0;
+          await dbojs.modify({ id: playerObj.id }, "$set", {
+            "data.stats": { ...phase2Stats },
+            "data.xp": startingXp,
+            "data.cg_phase": "2.5",
+            "data.approval_submitted": false,
+          } as any);
+          await dbojs.modify({ id: playerObj.id }, "$unset", { "data._revert_confirm": 1 } as any);
+          send([sid], `%ch>GAME:%cn Reverted to Phase 2 values. XP restored to ${startingXp}. All Phase 3 spending has been undone.`);
+          return;
+        }
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data._revert_confirm": Date.now() } as any);
+        send([sid], "%ch>GAME:%cn %crWARNING:%cn This will discard ALL Phase 3 spending and restore your Phase 2 stats and full tier XP. Type %ch+revert%cn again within 30 seconds to confirm.");
         return;
       }
 
@@ -940,7 +1180,10 @@ export function registerChargenCommands() {
         return;
       }
 
-      await dbojs.modify({ id: target.id }, "$set", { "data.cg_phase": "3" } as any);
+      await dbojs.modify({ id: target.id }, "$set", {
+        "data.cg_phase": "3",
+        "data.phase3_starting_xp": (data.xp as number) || 0,
+      } as any);
       send([sid], `%ch>GAME:%cn ${data.name} advanced to Phase 3 (XP spending).`);
       sendToPlayer(target.id, `%ch>GAME:%cn %cgYou have been advanced to Phase 3 by staff.%cn You can now spend XP with %ch+setstat%cn.`);
     },
@@ -978,12 +1221,25 @@ export function registerChargenCommands() {
         return;
       }
 
+      // Set approved flag
       await dbojs.modify({ id: target.id }, "$set", {
         "data.approved": true,
         "data.cg_phase": "approved",
       } as any);
 
-      // Move to OOC Polis only if currently in CG room
+      // Clean up chargen-only attributes (keep stats, bio, notes, approved)
+      const cleanupKeys = [
+        "attr_priority", "abil_priority", "attr_dots_remaining", "abil_dots_remaining",
+        "bg_points", "freebie_points", "virtue_points", "discipline_points",
+        "phase1_stats", "phase2_stats", "phase1_freebie_points",
+        "phase3_starting_xp", "freebie_review_submitted", "approval_submitted",
+        "_pending_confirm", "_revert_confirm",
+      ];
+      const unsetObj: Record<string, number> = {};
+      for (const k of cleanupKeys) unsetObj[`data.${k}`] = 1;
+      await dbojs.modify({ id: target.id }, "$unset", unsetObj as any);
+
+      // Move to OOC Polis
       if (target.location === CHARGEN_ROOM) {
         await dbojs.modify({ id: target.id }, "$set", { location: "1" } as any);
       }
@@ -1024,8 +1280,8 @@ export function registerChargenCommands() {
   // ============================================================================
 
   addCmd({
-    name: "+wipe",
-    pattern: /^\+wipe(?:\/(\w+))?\s+(.+)/i,
+    name: "+cgwipe",
+    pattern: /^\+cgwipe(?:\/(\w+))?\s+(.+)/i,
     lock: "superuser | admin+ | wizard",
     exec: async (u: IUrsamuSDK) => {
       const sid = u.socketId || "";
@@ -1036,8 +1292,14 @@ export function registerChargenCommands() {
       const target = results.find(o => o.flags.includes("player"));
       if (!target) return send([sid], "Player not found.");
 
+      // Block wiping approved characters
+      if (target.data?.approved) {
+        send([sid], `%ch>GAME:%cn ${target.data?.name} is already approved. Cannot wipe an approved character.`);
+        return;
+      }
+
       if (sw !== "confirm") {
-        send([sid], `%ch>GAME:%cn This will wipe ALL chargen data for ${target.data?.name}. Use %ch+wipe/confirm ${targetName}%cn to proceed.`);
+        send([sid], `%ch>GAME:%cn This will wipe ALL chargen data for ${target.data?.name}. Use %ch+cgwipe/confirm ${targetName}%cn to proceed.`);
         return;
       }
 
@@ -1047,8 +1309,9 @@ export function registerChargenCommands() {
         "bg_points", "freebie_points", "virtue_points", "discipline_points", "xp",
         "stats", "phase1_stats", "phase2_stats", "phase1_freebie_points",
         "freebie_review_submitted", "approval_submitted", "approved",
-        "_pending_confirm", "fullname", "birthyear", "embraceyear",
-        "concept", "nature", "demeanor", "sire",
+        "phase3_starting_xp", "_pending_confirm", "_revert_confirm",
+        "fullname", "birthyear", "embraceyear",
+        "concept", "nature", "demeanor", "sire", "notes",
       ];
 
       const unsetObj: Record<string, number> = {};
@@ -1415,15 +1678,26 @@ async function handleSetStat(sid: string, playerObj: any, data: Record<string, u
       }
     } else if (phase === "3") {
       const delta = newVal - current;
-      if (delta <= 0) return send([sid], "%ch>GAME:%cn Cannot lower attributes in Phase 3.");
-      // XP cost: N x 4 for each level
-      let xpCost = 0;
-      for (let d = current; d < newVal; d++) xpCost += d * 4;
+      if (delta === 0) return send([sid], `%ch>GAME:%cn ${canonical} is already at ${newVal}.`);
       const xp = (data.xp as number) || 0;
-      if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
-      stats[canonical] = newVal;
-      await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
-      send([sid], `%ch>GAME:%cn ${canonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      if (delta > 0) {
+        // XP cost: N x 4 for each level
+        let xpCost = 0;
+        for (let d = current; d < newVal; d++) xpCost += d * 4;
+        if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
+        stats[canonical] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
+        send([sid], `%ch>GAME:%cn ${canonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      } else {
+        const phase2Stats = data.phase2_stats as Record<string, number> | undefined;
+        const floor = phase2Stats?.[canonical] ?? 1;
+        if (newVal < floor) return send([sid], `%ch>GAME:%cn Cannot lower ${canonical} below Phase 2 value of ${floor}.`);
+        let xpRefund = 0;
+        for (let d = newVal; d < current; d++) xpRefund += d * 4;
+        stats[canonical] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp + xpRefund } as any);
+        send([sid], `%ch>GAME:%cn ${canonical} set to ${newVal}. XP refunded: ${xpRefund}. Remaining: ${xp + xpRefund}.`);
+      }
     } else {
       send([sid], "%ch>GAME:%cn Cannot change attributes in this phase.");
     }
@@ -1497,15 +1771,26 @@ async function handleSetStat(sid: string, playerObj: any, data: Record<string, u
       }
     } else if (phase === "3") {
       const delta = newVal - current;
-      if (delta <= 0) return send([sid], "%ch>GAME:%cn Cannot lower abilities in Phase 3.");
-      // XP cost: new ability (0→1) = 3 flat, existing = N x 2
-      let xpCost = 0;
-      for (let d = current; d < newVal; d++) xpCost += d === 0 ? 3 : d * 2;
+      if (delta === 0) return send([sid], `%ch>GAME:%cn ${canonical} is already at ${newVal}.`);
       const xp = (data.xp as number) || 0;
-      if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
-      stats[canonical] = newVal;
-      await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
-      send([sid], `%ch>GAME:%cn ${canonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      if (delta > 0) {
+        // XP cost: new ability (0→1) = 3 flat, existing = N x 2
+        let xpCost = 0;
+        for (let d = current; d < newVal; d++) xpCost += d === 0 ? 3 : d * 2;
+        if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
+        stats[canonical] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
+        send([sid], `%ch>GAME:%cn ${canonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      } else {
+        const phase2Stats = data.phase2_stats as Record<string, number> | undefined;
+        const floor = phase2Stats?.[canonical] ?? 0;
+        if (newVal < floor) return send([sid], `%ch>GAME:%cn Cannot lower ${canonical} below Phase 2 value of ${floor}.`);
+        let xpRefund = 0;
+        for (let d = newVal; d < current; d++) xpRefund += d === 0 ? 3 : d * 2;
+        stats[canonical] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp + xpRefund } as any);
+        send([sid], `%ch>GAME:%cn ${canonical} set to ${newVal}. XP refunded: ${xpRefund}. Remaining: ${xp + xpRefund}.`);
+      }
     } else {
       send([sid], "%ch>GAME:%cn Cannot change abilities in this phase.");
     }
@@ -1594,16 +1879,28 @@ async function handleSetStat(sid: string, playerObj: any, data: Record<string, u
       }
     } else if (phase === "3") {
       const delta = newVal - current;
-      if (delta <= 0) return send([sid], "%ch>GAME:%cn Cannot lower backgrounds in Phase 3.");
-      // XP cost: 5 per dot
-      const xpCost = delta * 5;
+      if (delta === 0) return send([sid], `%ch>GAME:%cn ${bgCanonical} is already at ${newVal}.`);
       const xp = (data.xp as number) || 0;
-      if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
-      stats[bgCanonical] = newVal;
-      if (bgCanonical === "Generation") stats["Generation Value"] = 11 - newVal;
-      if (bgCanonical === "Blood Potency") syncBloodPool(stats, newVal);
-      await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
-      send([sid], `%ch>GAME:%cn ${bgCanonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      if (delta > 0) {
+        // XP cost: 5 per dot
+        const xpCost = delta * 5;
+        if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
+        stats[bgCanonical] = newVal;
+        if (bgCanonical === "Generation") stats["Generation Value"] = 11 - newVal;
+        if (bgCanonical === "Blood Potency") syncBloodPool(stats, newVal);
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
+        send([sid], `%ch>GAME:%cn ${bgCanonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      } else {
+        const phase2Stats = data.phase2_stats as Record<string, number> | undefined;
+        const floor = phase2Stats?.[bgCanonical] ?? 0;
+        if (newVal < floor) return send([sid], `%ch>GAME:%cn Cannot lower ${bgCanonical} below Phase 2 value of ${floor}.`);
+        const xpRefund = Math.abs(delta) * 5;
+        stats[bgCanonical] = newVal;
+        if (bgCanonical === "Generation") stats["Generation Value"] = 11 - newVal;
+        if (bgCanonical === "Blood Potency") syncBloodPool(stats, newVal);
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp + xpRefund } as any);
+        send([sid], `%ch>GAME:%cn ${bgCanonical} set to ${newVal}. XP refunded: ${xpRefund}. Remaining: ${xp + xpRefund}.`);
+      }
     } else {
       send([sid], "%ch>GAME:%cn Cannot change backgrounds in this phase.");
     }
@@ -1658,15 +1955,26 @@ async function handleSetStat(sid: string, playerObj: any, data: Record<string, u
       }
     } else if (phase === "3") {
       const delta = newVal - current;
-      if (delta <= 0) return send([sid], "%ch>GAME:%cn Cannot lower virtues in Phase 3.");
-      // XP cost: N x 2
-      let xpCost = 0;
-      for (let d = current; d < newVal; d++) xpCost += d * 2;
+      if (delta === 0) return send([sid], `%ch>GAME:%cn ${virtueCanonical} is already at ${newVal}.`);
       const xp = (data.xp as number) || 0;
-      if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
-      stats[virtueCanonical] = newVal;
-      await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
-      send([sid], `%ch>GAME:%cn ${virtueCanonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      if (delta > 0) {
+        // XP cost: N x 2
+        let xpCost = 0;
+        for (let d = current; d < newVal; d++) xpCost += d * 2;
+        if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
+        stats[virtueCanonical] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
+        send([sid], `%ch>GAME:%cn ${virtueCanonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      } else {
+        const phase2Stats = data.phase2_stats as Record<string, number> | undefined;
+        const floor = phase2Stats?.[virtueCanonical] ?? 1;
+        if (newVal < floor) return send([sid], `%ch>GAME:%cn Cannot lower ${virtueCanonical} below Phase 2 value of ${floor}.`);
+        let xpRefund = 0;
+        for (let d = newVal; d < current; d++) xpRefund += d * 2;
+        stats[virtueCanonical] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp + xpRefund } as any);
+        send([sid], `%ch>GAME:%cn ${virtueCanonical} set to ${newVal}. XP refunded: ${xpRefund}. Remaining: ${xp + xpRefund}.`);
+      }
     } else {
       send([sid], "%ch>GAME:%cn Cannot change virtues in this phase.");
     }
@@ -1739,8 +2047,33 @@ async function handleSetStat(sid: string, playerObj: any, data: Record<string, u
         } as any);
         send([sid], `%ch>GAME:%cn ${discCanonical} set to ${newVal}. Freebies refunded: ${refund}. Remaining: ${freebies + refund}.`);
       }
+    } else if (phase === "3") {
+      if (delta === 0) return send([sid], `%ch>GAME:%cn ${discCanonical} is already at ${newVal}.`);
+      const xp = (data.xp as number) || 0;
+      if (delta > 0) {
+        if (!isInclan && !accessible) {
+          send([sid], `%ch>GAME:%cn ${discCanonical} is not in-clan for ${clan}. Only in-clan disciplines (and one from Additional Discipline merit) can be raised in Phase 3.`);
+          return;
+        }
+        // XP cost: current level x 5 per dot, first dot = 10
+        let xpCost = 0;
+        for (let d = current; d < newVal; d++) xpCost += d === 0 ? 10 : d * 5;
+        if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
+        stats[discCanonical] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
+        send([sid], `%ch>GAME:%cn ${discCanonical} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      } else {
+        const phase2Stats = data.phase2_stats as Record<string, number> | undefined;
+        const floor = phase2Stats?.[discCanonical] ?? 0;
+        if (newVal < floor) return send([sid], `%ch>GAME:%cn Cannot lower ${discCanonical} below Phase 2 value of ${floor}.`);
+        let xpRefund = 0;
+        for (let d = newVal; d < current; d++) xpRefund += d === 0 ? 10 : d * 5;
+        stats[discCanonical] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp + xpRefund } as any);
+        send([sid], `%ch>GAME:%cn ${discCanonical} set to ${newVal}. XP refunded: ${xpRefund}. Remaining: ${xp + xpRefund}.`);
+      }
     } else {
-      send([sid], "%ch>GAME:%cn Disciplines can only be changed in Phase 1 and 2. Raise them with XP after approval.");
+      send([sid], "%ch>GAME:%cn Cannot change disciplines in this phase.");
     }
     return;
   }
@@ -1778,15 +2111,27 @@ async function handleSetStat(sid: string, playerObj: any, data: Record<string, u
         send([sid], `%ch>GAME:%cn Willpower set to ${newVal}. Freebies refunded: ${refund}. Remaining: ${freebies + refund}.`);
       }
     } else if (phase === "3") {
-      // XP cost: N x 1
-      let xpCost = 0;
-      for (let d = current; d < newVal; d++) xpCost += d * 1;
       const xp = (data.xp as number) || 0;
-      if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
-      stats["Willpower"] = newVal;
-      stats["Willpower Current"] = newVal;
-      await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
-      send([sid], `%ch>GAME:%cn Willpower set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      if (delta > 0) {
+        // XP cost: N x 1
+        let xpCost = 0;
+        for (let d = current; d < newVal; d++) xpCost += d * 1;
+        if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
+        stats["Willpower"] = newVal;
+        stats["Willpower Current"] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp - xpCost } as any);
+        send([sid], `%ch>GAME:%cn Willpower set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      } else {
+        const phase2Stats = data.phase2_stats as Record<string, number> | undefined;
+        const floor = phase2Stats?.["Willpower"] ?? 1;
+        if (newVal < floor) return send([sid], `%ch>GAME:%cn Cannot lower Willpower below Phase 2 value of ${floor}.`);
+        let xpRefund = 0;
+        for (let d = newVal; d < current; d++) xpRefund += d * 1;
+        stats["Willpower"] = newVal;
+        stats["Willpower Current"] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", { "data.stats": cleanStats(stats), "data.xp": xp + xpRefund } as any);
+        send([sid], `%ch>GAME:%cn Willpower set to ${newVal}. XP refunded: ${xpRefund}. Remaining: ${xp + xpRefund}.`);
+      }
     }
     return;
   }
@@ -1915,16 +2260,35 @@ async function handleSetStat(sid: string, playerObj: any, data: Record<string, u
       } else {
         send([sid], `%ch>GAME:%cn ${meritData.key} set to ${newVal}. Freebies refunded: ${refund}. Total: ${freebies + refund}.`);
       }
-    } else if (phase === "3" && delta > 0) {
-      const xpCost = delta * 5;
-      const xp = (data.xp as number) || 0;
-      if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
-      stats[meritData.key] = newVal;
-      await dbojs.modify({ id: playerObj.id }, "$set", {
-        "data.stats": cleanStats(stats),
-        "data.xp": xp - xpCost,
-      } as any);
-      send([sid], `%ch>GAME:%cn ${meritData.key} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+    } else if (phase === "3") {
+      if (delta > 0) {
+        const xpCost = delta * 5;
+        const xp = (data.xp as number) || 0;
+        if (xpCost > xp) return send([sid], `%ch>GAME:%cn Not enough XP. Cost: ${xpCost}, Have: ${xp}.`);
+        stats[meritData.key] = newVal;
+        await dbojs.modify({ id: playerObj.id }, "$set", {
+          "data.stats": cleanStats(stats),
+          "data.xp": xp - xpCost,
+        } as any);
+        send([sid], `%ch>GAME:%cn ${meritData.key} set to ${newVal}. XP spent: ${xpCost}. Remaining: ${xp - xpCost}.`);
+      } else {
+        // Lowering/removing merit — refund XP back to Phase 2 floor
+        const phase2Stats = data.phase2_stats as Record<string, number> | undefined;
+        const floor = phase2Stats?.[meritData.key] ?? 0;
+        if (newVal < floor) return send([sid], `%ch>GAME:%cn Cannot lower ${meritData.key} below Phase 2 value of ${floor}.`);
+        const xpRefund = Math.abs(delta) * 5;
+        const xp = (data.xp as number) || 0;
+        if (newVal === 0) {
+          delete stats[meritData.key];
+        } else {
+          stats[meritData.key] = newVal;
+        }
+        await dbojs.modify({ id: playerObj.id }, "$set", {
+          "data.stats": cleanStats(stats),
+          "data.xp": xp + xpRefund,
+        } as any);
+        send([sid], `%ch>GAME:%cn ${meritData.key} set to ${newVal}. XP refunded: ${xpRefund}. Remaining: ${xp + xpRefund}.`);
+      }
     }
     return;
   }

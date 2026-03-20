@@ -173,6 +173,14 @@ export async function hasApprovedNoteInCategory(
   );
 }
 
+export async function getPlayerNoteByTitle(
+  playerId: string,
+  title: string,
+): Promise<Note | undefined> {
+  const notes = await getPlayerNotes(playerId);
+  return notes.find((n) => n.title.toLowerCase() === title.toLowerCase());
+}
+
 // ============================================================================
 // COMMANDS
 // ============================================================================
@@ -365,14 +373,37 @@ export function registerNotesCommands() {
         }
       }
 
-      // Normal +note or +note/<category> flow
+      // If the switch looks like a player name (not a valid category) and
+      // rawArgs has no "=", treat it as +note <player>/<noteQuery> read.
+      // The cmdParser may split "Claude/Background" into switch="Claude" args="Background".
       const categorySwitch = switchName;
       let category = "General";
+      let categoryIsValid = false;
       if (categorySwitch) {
         const cat = resolveCategory(categorySwitch);
-        if (!cat) return send([sid], `>GAME: Invalid category '${categorySwitch}'. Valid: ${VALID_CATEGORIES.slice(0, -1).join(", ")}`);
-        if (cat === "IMPORTANT" && !staff) return send([sid], ">GAME: You cannot use that category.");
-        category = cat;
+        if (cat) {
+          if (cat === "IMPORTANT" && !staff) return send([sid], ">GAME: You cannot use that category.");
+          category = cat;
+          categoryIsValid = true;
+        } else {
+          // Not a valid category — might be +note <player>/<note> parsed as switch
+          // Reconstruct as target/noteQuery read
+          const eqIdx = rawArgs.indexOf("=");
+          if (eqIdx === -1) {
+            // READ: treat switchName as player name, rawArgs as note query
+            const found = await lookupPlayer(categorySwitch);
+            if (found) {
+              const notes = getNotes(found.data);
+              const note = findNote(notes, rawArgs, staff);
+              if (!note) return send([sid], ">GAME: Note not found.");
+              const isOwn = found.id === playerObj.id;
+              if (!isOwn && !staff && note.status !== "PUBLIC") return send([sid], ">GAME: That note is private.");
+              return send([sid], formatNoteDisplay(note));
+            }
+          }
+          // Not a player either — invalid category
+          return send([sid], `>GAME: Invalid category '${categorySwitch}'. Valid: ${VALID_CATEGORIES.slice(0, -1).join(", ")}`);
+        }
       }
 
       const eqIdx = rawArgs.indexOf("=");
@@ -402,7 +433,7 @@ export function registerNotesCommands() {
           if (existing.category === "IMPORTANT" && !staff) return send([sid], ">GAME: Note not found.");
           if (existing.approved && !staff) return send([sid], ">GAME: That note has been approved and cannot be changed. Contact staff if you need to update it.");
           existing.text = text;
-          if (categorySwitch) existing.category = category;
+          if (categoryIsValid) existing.category = category;
           if (staff) { existing.approved = false; existing.approved_by = null; existing.approved_at = null; }
           await dbojs.modify({ id: targetObj.id }, "$set", { "data.notes": notes } as any);
           send([sid], `>GAME: Note #${existing.id} ('${existing.title}') updated.`);

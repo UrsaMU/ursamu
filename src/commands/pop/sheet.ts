@@ -9,6 +9,7 @@
 
 import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import { dbojs } from "../../services/Database/index.ts";
 import * as dpath from "@std/path";
 
 // ---------------------------------------------------------------------------
@@ -164,14 +165,14 @@ export default () =>
           u.send(">GAME: Only staff may view another character's sheet.");
           return;
         }
-        const results = await u.db.search(arg);
-        const target = results.find((o) => o.flags.has("player"));
+        const results = await dbojs.query({ "data.name": new RegExp(`^${arg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") });
+        const target = results.find((o: any) => o.flags.includes("player"));
         if (!target) {
           u.send(`>GAME: No character found matching '${arg}'.`);
           return;
         }
-        targetData = target.state as Record<string, unknown>;
-        targetName = (targetData.name as string) || target.name || "Unknown";
+        targetData = (target.data || {}) as Record<string, unknown>;
+        targetName = (targetData.name as string) || "Unknown";
       } else {
         targetData = u.me.state as Record<string, unknown>;
         targetName = (targetData.moniker as string) || (targetData.name as string) || u.me.name || "Unknown";
