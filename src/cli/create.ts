@@ -482,7 +482,7 @@ Y88b. .d88P 888  T88b  Y88b  d88P d8888888888 888   "   888 Y88b. .d88P
 Use 'create <name> <password>' to create a new character. 
 Use 'connect <name> <password>' to connect to the game.
 
-Uae 'QUIT' to exit.`;
+Use 'QUIT' to exit.`;
 
 await Deno.writeTextFile(join(targetDir, "text", "default_connect.txt"), connectTextContent);
 console.log("Created text/default_connect.txt with complete content");

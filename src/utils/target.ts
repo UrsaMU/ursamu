@@ -18,12 +18,16 @@ export const target = async (
     return en;
   }
 
+  // Helper: escape regex metacharacters to prevent ReDoS from user-controlled data
+  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
   const found = await (async () => {
     return await dbojs.queryOne({
       $where: function () {
         const target = `${tar}`;
+        const nameParts = (this.data?.name || "").split(";").map((p: string) => escapeRegex(p)).join("|");
         return (
-          RegExp(this.data?.name?.replace(";", "|") || "", "ig").test(target) ||
+          RegExp(nameParts || "^$", "ig").test(target) ||
           this.id === target ||
           (this.data?.alias as string | undefined)?.toLowerCase() === target.toLowerCase()
         );

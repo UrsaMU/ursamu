@@ -28,7 +28,7 @@ export default () => {
       if (!val.includes(findStr))
         return send([u.socketId || ""], `String '${findStr}' not found in ${attrName}.`);
 
-      const newVal = val.replace(findStr, replaceStr);
+      const newVal = val.replaceAll(findStr, replaceStr);
 
       tar.data ||= {};
       tar.data.attributes ||= [];

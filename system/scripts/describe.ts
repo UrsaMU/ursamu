@@ -41,7 +41,7 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  if (description.length > 4096) {
+  if (typeof description === 'string' && description.length > 4096) {
     u.send("Description too long.");
     return;
   }

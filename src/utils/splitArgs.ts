@@ -14,12 +14,15 @@ export function splitArgs(
     
     // Handle escaped chars
     if (char === "%" || char === "\\") {
-        const next = str[i+1];
-        if (next) {
-            current += char + next;
-            i++;
+        if (i + 1 >= str.length) {
+            // Trailing escape char with nothing after it — treat as literal
+            current += char;
             continue;
         }
+        const next = str[i+1];
+        current += char + next;
+        i++;
+        continue;
     }
 
     if (char === "[") depth++;

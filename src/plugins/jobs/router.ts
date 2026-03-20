@@ -276,7 +276,7 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
       };
 
       const updated: IJob = { ...job, comments: [...job.comments, comment], updatedAt: Date.now() };
-      await jobs.update({}, updated);
+      await jobs.update({ id: job.id }, updated);
       await jobHooks.emit("job:commented", updated, comment);
       return jsonResponse(comment, 201);
     }

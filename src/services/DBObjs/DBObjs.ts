@@ -76,7 +76,7 @@ export class Obj implements IEntity {
   }
 
   set dbobj(obj: IDBOBJ) {
-    if (!this.obj) return;
+    if (!this.obj?.id) return; // guard: skip if obj was never properly loaded
     this.obj = { ...this.obj, ...obj };
     this.save();
   }

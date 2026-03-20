@@ -46,6 +46,11 @@ export default async (u: IUrsamuSDK) => {
       u.send("Value too long.");
       return;
     }
+    const attrCount = target.data ? Object.keys(target.data).length : 0;
+    if (!target.data?.[attribute] && attrCount >= 100) {
+      u.send("Too many attributes (limit 100). Remove some before adding new ones.");
+      return;
+    }
     await u.db.modify(target.id, "$set", { [`data.${attribute}`]: value });
     resultMsg = `Set - ${target.name}/${attribute}: ${value}`;
   }

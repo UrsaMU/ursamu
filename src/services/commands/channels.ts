@@ -15,7 +15,7 @@ export const matchChannel = async (ctx: IContext) => {
   }
   const en = await dbojs.queryOne({ id: ctx.socket.cid });
 
-  if (!en) return;
+  if (!en) return false;
   const parts = ctx.msg?.split(" ") || [];
   const trig = parts[0];
   let msg = parts.slice(1).join(" ").trim();

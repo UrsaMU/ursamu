@@ -76,10 +76,13 @@ async function handleSearch(u: IUrsamuSDK) {
     }
     
     const results = await u.db.search(search);
-    // const nameTaken = await u.common.isNameTaken(newName.trim());
-    // Using u.db.search instead
     if (results.length === 0) return u.send("No matches found.");
-    
-    const list = results.map(r => `${r.name}(#${r.id})`).join("\n");
+
+    const MAX_RESULTS = 100;
+    const limited = results.slice(0, MAX_RESULTS);
+    const list = limited.map(r => `${r.name}(#${r.id})`).join("\n");
     u.send(list);
+    if (results.length > MAX_RESULTS) {
+      u.send(`(Showing first ${MAX_RESULTS} of ${results.length} results. Narrow your search.)`);
+    }
 }

@@ -27,6 +27,12 @@ export default async (u: IUrsamuSDK) => {
   // Handle money giving
   if (/^\d+$/.test(itemArg)) {
     const amount = parseInt(itemArg, 10);
+
+    if (amount <= 0 || amount > 999999999) {
+      u.send("Invalid amount. Must be between 1 and 999,999,999.");
+      return;
+    }
+
     const currentMoney = (actor.state.money as number) || 0;
 
     if (currentMoney < amount) {

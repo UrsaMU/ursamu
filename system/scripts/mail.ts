@@ -280,7 +280,7 @@ export default async (u: IUrsamuSDK) => {
             }
 
             const orig = mails[num - 1];
-            const allRecipients = [orig.from, ...orig.to.filter(id => id !== `#${en.id}`)];
+            const allRecipients = [orig.from, ...orig.to].filter(id => id !== `#${en.id}`);
             const unique = [...new Set(allRecipients)];
 
             const draft = {

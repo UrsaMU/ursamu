@@ -9,7 +9,9 @@ export default async (u: IUrsamuSDK) => {
   const fullArgs = (u.cmd.args[0] || "").trim();
   
   // Pattern: @clone <obj>=<new name>
-  const [objName, newName] = fullArgs.split("=");
+  const eqIdx = fullArgs.indexOf("=");
+  const objName = eqIdx >= 0 ? fullArgs.slice(0, eqIdx) : fullArgs;
+  const newName = eqIdx >= 0 ? fullArgs.slice(eqIdx + 1) : undefined;
   
   const searchTarget = await u.db.search(objName.trim());
   const obj = searchTarget[0];
@@ -42,7 +44,13 @@ export default async (u: IUrsamuSDK) => {
   // If the target has attributes in its state, they will be copied by the spread operator.
   // We might want to update the 'setter' of attributes if they are tracked.
 
-  const clone = await u.db.create(cloneTemplate);
-  
+  let clone;
+  try {
+    clone = await u.db.create(cloneTemplate);
+  } catch (err) {
+    u.send(`Clone failed: ${err instanceof Error ? err.message : String(err)}`);
+    return;
+  }
+
   u.send(`Cloned: ${u.util.displayName(obj, actor)}(#${obj.id}) -> ${clone.state.name}(#${clone.id})`);
 };

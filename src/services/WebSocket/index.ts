@@ -117,7 +117,9 @@ export class WebSocketService {
                 if (!sockData) return;
 
                 // Update cid if provided (handling migration from socket.io logic)
-                if (data.data?.cid) {
+                // Security: only allow cid to be set when the socket has no cid yet,
+                // preventing CID spoofing/impersonation of other players.
+                if (data.data?.cid && !sockData.cid) {
                     sockData.cid = data.data.cid;
                     // Restore connected flag if missing
                     const player = await playerForSocket(sockData);

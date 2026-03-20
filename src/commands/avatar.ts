@@ -99,18 +99,22 @@ export default () =>
 
       const ext = MIME_TO_EXT[mime];
 
+      // Verify player record exists before writing file to avoid orphaned files
+      const player = await dbojs.queryOne({ id: u.me.id });
+      if (!player) {
+        u.send("Error: could not find your player record.");
+        return;
+      }
+
       // Remove old avatar, save new one
       await ensureDir(AVATARS_DIR);
       await removeExistingAvatar(u.me.id);
       await Deno.writeFile(join(AVATARS_DIR, `${u.me.id}.${ext}`), bytes);
 
       // Store ext on player record for fast lookup
-      const player = await dbojs.queryOne({ id: u.me.id });
-      if (player) {
-        player.data ||= {};
-        player.data.avatarExt = ext;
-        await dbojs.modify({ id: player.id }, "$set", player);
-      }
+      player.data ||= {};
+      player.data.avatarExt = ext;
+      await dbojs.modify({ id: player.id }, "$set", player);
 
       u.send("Avatar saved.");
     },
