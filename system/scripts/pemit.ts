@@ -28,7 +28,7 @@ export default async (u: IUrsamuSDK) => {
   }
 
   const results = await u.db.search(playerRef);
-  const target = results[0];
+  const target = results.find(r => r.flags.has("player"));
   if (!target) {
     u.send(`I can't find a player called '${playerRef}'.`);
     return;

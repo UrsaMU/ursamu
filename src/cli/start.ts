@@ -30,6 +30,7 @@ try {
   await DBO.close();
 } catch (e) {
   console.error("Error during startup check:", e);
+  try { await DBO.close(); } catch { /* ignore close errors */ }
   Deno.exit(1);
 }
 

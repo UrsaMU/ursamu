@@ -290,6 +290,7 @@ export default async (u: IUrsamuSDK) => {
     const subTopics = new Map<string, string[]>();
 
     try {
+        // Note: relative path assumes CWD is the game project root.
         for await (const entry of Deno.readDir("./system/scripts")) {
             if (entry.isFile && (entry.name.endsWith(".ts") || entry.name.endsWith(".js"))) {
                 if (entry.name.startsWith(".")) continue;

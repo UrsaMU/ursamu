@@ -21,8 +21,7 @@ export default () => {
       if (!await canEdit(en, tar)) return u.send("I can't find that.");
       if (
         potential &&
-        newName.toLowerCase() !== String(tar.data?.name || "").toLowerCase() &&
-        tar.flags.includes("player")
+        newName.toLowerCase() !== String(tar.data?.name || "").toLowerCase()
       )
         return u.send("That name or alias is already taken.");
 

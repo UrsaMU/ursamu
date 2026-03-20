@@ -32,10 +32,11 @@ export default async (u: IUrsamuSDK) => {
 
   // Find the player object to get the ID
   // We search for name or alias
-  const results = await u.db.search({ 
+  const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const results = await u.db.search({
     $or: [
-      { "data.name": new RegExp(`^${name}$`, "i") },
-      { "data.alias": new RegExp(`^${name}$`, "i") }
+      { "data.name": new RegExp(`^${esc}$`, "i") },
+      { "data.alias": new RegExp(`^${esc}$`, "i") }
     ]
   });
 
@@ -49,7 +50,13 @@ export default async (u: IUrsamuSDK) => {
   await u.auth.login(player.id);
 
   // Failsafe: if no superusers exist, promote this player
-  const superusers = await u.db.search({ flags: /superuser/ });
+  let superusers: typeof results = [];
+  try {
+    const all = await u.db.search({});
+    superusers = all.filter((o) => o.flags && o.flags.has("superuser"));
+  } catch (e) {
+    console.warn("connect.ts: superuser search failed, skipping promotion check:", e);
+  }
   if (!superusers.length && !player.flags.has("superuser")) {
     await u.setFlags(player.id, "superuser");
     u.send("%ch%cyYou are the first user — superuser access granted.%cn");

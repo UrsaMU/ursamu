@@ -122,6 +122,16 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return results;
   }
 
+  /** Check if a key or any segment of a dot-notation path is a prototype pollution vector. */
+  private static isDangerousKey(key: string): boolean {
+    const dangerous = new Set(["__proto__", "constructor", "prototype"]);
+    if (dangerous.has(key)) return true;
+    if (key.includes(".")) {
+      return key.split(".").some(seg => dangerous.has(seg));
+    }
+    return false;
+  }
+
   async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
     const items = await this.query(query);
     const kv = await this.getKv();
@@ -129,6 +139,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       const updated = { ...item };
       if (operator === "$set") {
         for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+          if (DBO.isDangerousKey(key)) continue;
           if (key.includes(".")) {
             // Dot-notation: navigate into nested object (e.g. "data.name" → updated.data.name)
             lodashSet(updated, key, value);
@@ -138,6 +149,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
         }
       } else if (operator === "$unset") {
         for (const key of Object.keys(data as Record<string, unknown>)) {
+          if (DBO.isDangerousKey(key)) continue;
           if (key.includes(".")) {
             // Dot-notation: navigate to parent and delete the final key
             const parts = key.split(".");
@@ -151,13 +163,17 @@ export class DBO<T extends WithId> implements IDatabase<T> {
                 break;
               }
             }
-            if (obj) delete obj[last];
+            if (obj != null) delete obj[last];
           } else {
             delete (updated as Record<string, unknown>)[key];
           }
         }
       } else if (operator === "$inc") {
         for (const [key, value] of Object.entries(data)) {
+          if (typeof value !== "number" || isNaN(value)) {
+            console.warn(`[Database] $inc: skipping key "${key}" — value is not a valid number:`, value);
+            continue;
+          }
           if (key.includes(".")) {
             const current = get(updated, key, 0) as number;
             lodashSet(updated, key, current + (value as number));
@@ -198,14 +214,30 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     }
 
     for (const [key, condition] of Object.entries(query)) {
+      if (key === "$ne") continue; // handled below
       const val = key.includes('.') ? get(value, key) : value[key as keyof T];
-      
+
       if (condition instanceof RegExp) {
         if (!condition.test(val as string)) {
           return false;
         }
-      } else if (typeof condition === "object") {
-        if (!this.matchesQuery(val as T, condition as Query<T>)) {
+      } else if (typeof condition === "object" && condition !== null && !Array.isArray(condition)) {
+        const condObj = condition as Record<string, unknown>;
+        // Handle $in operator: check if val (or val as array) contains any of the $in values
+        if ("$in" in condObj) {
+          const inValues = condObj.$in as unknown[];
+          if (Array.isArray(val)) {
+            if (!inValues.some(v => (val as unknown[]).includes(v))) return false;
+          } else {
+            if (!inValues.includes(val)) return false;
+          }
+        }
+        // Handle $ne operator: check if val does not equal
+        else if ("$ne" in condObj) {
+          if (val === condObj.$ne) return false;
+        }
+        // Otherwise recurse
+        else if (!this.matchesQuery(val as T, condition as Query<T>)) {
           return false;
         }
       } else if (val !== condition) {
@@ -250,6 +282,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     throw new Error(`[DBO] atomicIncrement failed after 10 attempts on "${id}"`);
   }
 
+  // Note: KV store is keyed by data.id; query parameter is ignored.
   async update(_query: Query<T>, data: T): Promise<T> {
     const cv = await this.getKv();
     const plainData = { ...data };

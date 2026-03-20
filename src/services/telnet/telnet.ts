@@ -145,15 +145,9 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
       sock = new WebSocket(wsUrl);
 
       sock.onopen = () => {
-        // Telnet just connected to WS
-        
         if (isReconnecting) {
             write(parser.substitute("telnet", "%chGame>%cn Server is back! Reconnected.\r\n"));
-            
-            // If we have a CID, try to re-attach/login?
-            // The current implementation just stores CID but doesn't auto-login on WS layer unless the server handles it.
-            // For now, we assume the user might need to look or interact to resume.
-            // Ideally, we'd send a "re-sync" packet.
+
             if (cid) {
                sock?.send(JSON.stringify({
                    msg: "look",

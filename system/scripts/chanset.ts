@@ -35,6 +35,16 @@ export default async (u: IUrsamuSDK) => {
   const property = match[2].trim().toLowerCase();
   const value = match[3].trim();
 
+  // Only the channel owner or a superuser may modify the channel.
+  if (!actor.flags.has("superuser")) {
+    const allChans = await u.chan.list() as { name: string; owner?: string }[];
+    const chanObj = allChans.find(c => c.name === chanName);
+    if (chanObj && chanObj.owner !== `#${actor.id}` && chanObj.owner !== actor.id) {
+      u.send("Permission denied. Only the channel owner or a superuser may modify this channel.");
+      return;
+    }
+  }
+
   const options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean } = {};
 
   switch (property) {

@@ -19,10 +19,10 @@ export const idle = (secs: number) => {
       time = `${Math.floor(snds / 604800)}w`;
       break;
     case snds < 29030400:
-      time = `${Math.floor(snds / 2419200)}m`;
+      time = `${Math.floor(snds / 2592000)}mo`;
       break;
     default:
-      time = `${Math.floor(snds / 29030400)}y`;
+      time = `${Math.floor(snds / 31536000)}y`;
       break;
   }
 

@@ -6,7 +6,13 @@ export const aliases = ["nameformat", "descformat", "conformat", "exitformat"];
 export default async (u: IUrsamuSDK) => {
   const cmd = u.cmd.original?.toLowerCase() || u.cmd.name.toLowerCase();
   const input = (u.cmd.args[0] || "").trim();
-  const [name, format] = input.split("=");
+  const [name, ...formatParts] = input.split("=");
+  const format = formatParts.length > 0 ? formatParts.join("=") : undefined;
+
+  if (!name || format === undefined) {
+    u.send("Usage: @format <target>/<attribute>=<format>");
+    return;
+  }
 
   const target = await u.util.target(u.me, name?.trim());
   if (!target) return u.send("I can't find that.");

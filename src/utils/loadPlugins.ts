@@ -70,4 +70,71 @@ export async function loadPlugins(dir: string): Promise<IPlugin[]> {
   }
   
   return loadedPlugins;
-} 
+}
+
+/**
+ * Reload all plugins from a directory (hot-reload, no disconnect).
+ * Calls remove() on existing plugins, then re-imports with cache-busting.
+ * @param dir The plugins directory
+ * @param existingPlugins The currently loaded plugins to call remove() on
+ * @returns Array of freshly loaded plugins
+ */
+export async function reloadPlugins(dir: string, existingPlugins: IPlugin[]): Promise<IPlugin[]> {
+  // Call remove() on existing plugins
+  for (const plugin of existingPlugins) {
+    try {
+      if (plugin.remove) {
+        await plugin.remove();
+        console.log(`[reload] Plugin ${plugin.name} removed.`);
+      }
+    } catch (e) {
+      console.error(`[reload] Error removing plugin ${plugin.name}:`, e);
+    }
+  }
+
+  const loadedPlugins: IPlugin[] = [];
+
+  try {
+    const dirInfo = await Deno.stat(dir);
+    if (!dirInfo.isDirectory) return loadedPlugins;
+
+    const entries = dfs.walk(dir, { maxDepth: 2 });
+    const cacheBuster = `?t=${Date.now()}`;
+
+    for await (const entry of entries) {
+      if (entry.isFile && entry.name === "index.ts") {
+        try {
+          const pluginDir = dpath.dirname(entry.path);
+          const pluginName = dpath.basename(pluginDir);
+
+          console.log(`[reload] Reloading plugin from ${entry.path}`);
+
+          // Cache-busting import to force Deno to load fresh module
+          const module = await import(dpath.toFileUrl(entry.path).href + cacheBuster);
+
+          if (module.default && typeof module.default === "object") {
+            const plugin = module.default as IPlugin;
+            if (!plugin.name) plugin.name = pluginName;
+            if (!plugin.version) plugin.version = "0.0.1";
+
+            registerPlugin(plugin);
+            loadedPlugins.push(plugin);
+
+            // Call init() on the fresh plugin
+            if (plugin.init) {
+              await plugin.init();
+            }
+
+            console.log(`[reload] Plugin ${plugin.name} v${plugin.version} reloaded.`);
+          }
+        } catch (error) {
+          console.error(`[reload] Error reloading plugin from ${entry.path}:`, error);
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`[reload] Error reloading plugins from ${dir}:`, error);
+  }
+
+  return loadedPlugins;
+}

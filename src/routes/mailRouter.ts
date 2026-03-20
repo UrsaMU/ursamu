@@ -26,8 +26,14 @@ export const mailHandler = async (req: Request, userId: string): Promise<Respons
   // GET /api/v1/mail — inbox (messages addressed to the current user)
   if (path === "/api/v1/mail" && req.method === "GET") {
     const all = await mail.query({});
+    const seen = new Set<string | number>();
     const inbox = all
-      .filter((m) => m.to.includes(dbref) || (m.cc ?? []).includes(dbref))
+      .filter((m) => {
+        if (!m.to.includes(dbref) && !(m.cc ?? []).includes(dbref)) return false;
+        if (seen.has(m.id)) return false;
+        seen.add(m.id);
+        return true;
+      })
       .sort((a, b) => b.date - a.date);
     return json(inbox.map(sanitizeForRecipient));
   }

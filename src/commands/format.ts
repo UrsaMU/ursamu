@@ -25,7 +25,7 @@ const addFormatCommand = (cmdName: string, attrName: string) => {
 
       // deno-lint-ignore no-explicit-any
       const data = tarObj.data as any;
-      data.attributes ||= [];
+      if (!data?.attributes) data.attributes = [];
 
       data.attributes = data.attributes.filter(
         (a: IAttribute) => a.name !== attrName

@@ -66,19 +66,20 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  // Circular reference check
+  // Circular reference check — use a Set of visited IDs to detect cycles
+  const visited = new Set<string>();
   let curr: IDBObj | undefined = parentObj;
-  let count = 0;
-  while (curr && count < 20) {
+  while (curr) {
     if (curr.id === target.id) {
       u.send("Circular parent reference detected.");
       return;
     }
+    if (visited.has(curr.id)) break; // already seen, no cycle involving target
+    visited.add(curr.id);
     const pId = ((curr.state.parent as string) || "").replace("#", "");
     if (!pId) break;
     const parentSearch = await u.db.search(`#${pId}`);
     curr = parentSearch[0];
-    count++;
   }
 
   await u.db.modify(target.id, "$set", { "data.parent": parentObj.id });

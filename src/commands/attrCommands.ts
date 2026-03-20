@@ -20,9 +20,9 @@ export default () => {
       if (!await canEdit(en.dbobj, tar)) {
         return send([u.socketId || ""], "%chGame>%cn You can't edit that.");
       }
+      if (!tarObj.data) tarObj.dbobj.data = { attributes: [] };
       // deno-lint-ignore no-explicit-any
       const data = tarObj.data as any;
-      if (!tarObj.data) tarObj.dbobj.data = { attributes: [] };
 
       const attr = data?.attributes?.find((a: IAttribute) =>
         a.name.toLowerCase().startsWith(u.cmd.args[0].toLowerCase())
@@ -30,7 +30,7 @@ export default () => {
 
       if (attr && tarObj && tarObj.data) {
         if (!u.cmd.args[2]) {
-          data.attributes = data?.attributes?.filter(
+          data.attributes = (data?.attributes || []).filter(
             (a: IAttribute) => a.name !== attr.name
           );
           await tarObj.save();
@@ -60,8 +60,6 @@ export default () => {
           [u.socketId || ""],
           `%chGame>%cn  ${tarObj.name}'s attribute %ch${u.cmd.args[0].toUpperCase()}%cn set.`
         );
-      } else {
-        return send([u.socketId || ""], "%chGame>%cn  Something went wrong.");
       }
     },
   });

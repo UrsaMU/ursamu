@@ -8,13 +8,22 @@ export default async (u: IUrsamuSDK) => {
   const switches = u.cmd.switches || [];
   const full = switches.includes("full");
 
-  // Object counts
-  const all = await u.db.search({});
-  const rooms   = all.filter(o => o.flags.has("room")).length;
-  const players = all.filter(o => o.flags.has("player")).length;
-  const exits   = all.filter(o => o.flags.has("exit")).length;
-  const things  = all.filter(o => !o.flags.has("room") && !o.flags.has("player") && !o.flags.has("exit")).length;
-  const connected = all.filter(o => o.flags.has("connected")).length;
+  // Connected player count (only fetch connected players, not all objects)
+  const connectedPlayers = await u.db.search({ flags: /connected/ });
+  const connected = connectedPlayers.length;
+
+  // Object counts — only fetch full list for @stats/full
+  let all: Awaited<ReturnType<typeof u.db.search>> | undefined;
+  let rooms = 0, players = 0, exits = 0, things = 0, totalObjs = 0;
+
+  if (full) {
+    all = await u.db.search({});
+    rooms   = all.filter(o => o.flags.has("room")).length;
+    players = all.filter(o => o.flags.has("player")).length;
+    exits   = all.filter(o => o.flags.has("exit")).length;
+    things  = all.filter(o => !o.flags.has("room") && !o.flags.has("player") && !o.flags.has("exit")).length;
+    totalObjs = all.length;
+  }
 
   // Uptime
   const uptimeMs = await u.sys.uptime();
@@ -32,7 +41,7 @@ export default async (u: IUrsamuSDK) => {
   u.send("%ch%cy=== Server Stats ===%cn");
   u.send(`Uptime:     ${uptimeStr}`);
   u.send(`Connected:  ${connected} player${connected === 1 ? "" : "s"}`);
-  u.send(`Total objs: ${all.length}`);
+  if (full) u.send(`Total objs: ${totalObjs}`);
 
   if (full) {
     u.send("%ch%cy--- Object Breakdown ---%cn");

@@ -165,7 +165,7 @@ addCmd({
 
       const existing = await eventRsvps.queryOne({ eventId: ev.id, playerId: u.me.id });
       if (existing) {
-        await eventRsvps.update({}, { ...existing, status });
+        await eventRsvps.update({ id: existing.id }, { ...existing, status });
         u.send(`%ch+event:%cn RSVP updated to ${rsvpColor(status)}${status}%cn for "${ev.title}".`);
       } else {
         await eventRsvps.create({
@@ -301,7 +301,7 @@ addCmd({
           return;
       }
 
-      await gameEvents.update({}, { ...ev, ...update });
+      await gameEvents.update({ id: ev.id }, { ...ev, ...update });
       u.send(`%ch+event:%cn Event #${num} updated (${field}).`);
       return;
     }
@@ -324,7 +324,7 @@ addCmd({
       const ev = await getEventByNumber(num);
       if (!ev) { u.send(`%ch+event:%cn No event #${num} found.`); return; }
 
-      await gameEvents.update({}, { ...ev, status, updatedAt: Date.now() });
+      await gameEvents.update({ id: ev.id }, { ...ev, status, updatedAt: Date.now() });
       u.send(`%ch+event:%cn Event #${num} status set to ${statusColor(status)}${status}%cn.`);
       return;
     }
@@ -338,7 +338,7 @@ addCmd({
       const ev = await getEventByNumber(num);
       if (!ev) { u.send(`%ch+event:%cn No event #${num} found.`); return; }
 
-      await gameEvents.update({}, { ...ev, status: "cancelled", updatedAt: Date.now() });
+      await gameEvents.update({ id: ev.id }, { ...ev, status: "cancelled", updatedAt: Date.now() });
       u.send(`%ch+event:%cn Event #${num} "${ev.title}" has been %ch%crcancelled%cn.`);
       return;
     }

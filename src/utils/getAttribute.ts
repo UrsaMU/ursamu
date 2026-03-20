@@ -10,7 +10,8 @@ import { dbojs } from "../services/Database/index.ts";
  */
 export const getAttribute = async (
   obj: IDBOBJ,
-  attr: string
+  attr: string,
+  visited: Set<string> = new Set()
 ): Promise<IAttribute | undefined> => {
   const attribute = obj.data?.attributes?.find(
     (a) => a.name.toLowerCase() === attr.toLowerCase()
@@ -19,8 +20,11 @@ export const getAttribute = async (
   if (attribute) return attribute;
 
   if (obj.data?.parent) {
-    const parent = await dbojs.queryOne({ id: obj.data.parent as string });
-    if (parent) return getAttribute(parent, attr);
+    const parentId = obj.data.parent as string;
+    visited.add(obj.id);
+    if (visited.has(parentId)) return undefined; // Cycle detected
+    const parent = await dbojs.queryOne({ id: parentId });
+    if (parent) return getAttribute(parent, attr, visited);
   }
 
   return undefined;

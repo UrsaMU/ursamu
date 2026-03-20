@@ -14,7 +14,7 @@ interface QueueEntry {
 export const queue = {
   enqueue: async (
     entry: Omit<QueueEntry, "pid">,
-    delay: number = 0
+    delay: number = 0 // delay in milliseconds before the task executes
   ): Promise<number> => {
     const pid = parseInt(await getNextId("queueId"), 10);
     const fullEntry: QueueEntry = { ...entry, pid };

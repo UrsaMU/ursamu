@@ -8,7 +8,7 @@ export const displayName = (en: IDBOBJ, tar: IDBOBJ, controls = false) => {
     en.flags.includes("superuser") ||
     en.flags.includes("admin") ||
     en.id === tar.id ||
-    (tar.data?.owner === en.id || tar.data?.owner === `#${en.id}`)
+    String(tar.data?.owner || "").replace(/^#/, "") === String(en.id).replace(/^#/, "")
   ) {
     return `${moniker(tar)}(#${tar.id}${flags.codes(tar.flags).toUpperCase()})`;
   } else {

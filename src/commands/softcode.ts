@@ -19,6 +19,10 @@ export default () => {
       if (!en) return;
 
       const tarName = u.cmd.args[0];
+      if (!u.cmd.args[1]) {
+        u.send("Usage: @trigger <object>/<attribute>");
+        return;
+      }
       const attrName = u.cmd.args[1].toUpperCase();
       const triggerArgsRaw = u.cmd.args[2] || "";
 
@@ -30,13 +34,18 @@ export default () => {
 
       const evalArgs = splitArgs(triggerArgsRaw).map((a) => a.trim());
 
-      await sandboxService.runScript(attr.value, {
-        id: tar.id,
-        location: tar.location || "limbo",
-        // deno-lint-ignore no-explicit-any
-        state: (tar as any).data?.state || {},
-        target: evalArgs[0] ? { id: evalArgs[0] } : undefined,
-      });
+      try {
+        await sandboxService.runScript(attr.value, {
+          id: tar.id,
+          location: tar.location || "limbo",
+          // deno-lint-ignore no-explicit-any
+          state: (tar as any).data?.state || {},
+          target: evalArgs[0] ? { id: evalArgs[0] } : undefined,
+        });
+      } catch (err) {
+        send([u.socketId || ""], `%chGame>%cn Script error on ${tarName}/${attrName}: ${err instanceof Error ? err.message : String(err)}`);
+        return;
+      }
 
       send([u.socketId || ""], `Triggered script on ${tarName}/${attrName}.`);
     },

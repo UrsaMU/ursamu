@@ -28,7 +28,7 @@ export default () => {
       if (!val.includes(findStr))
         return send([u.socketId || ""], `String '${findStr}' not found in ${attrName}.`);
 
-      const newVal = val.replace(findStr, replaceStr);
+      const newVal = val.replaceAll(findStr, replaceStr);
 
       tar.data ||= {};
       tar.data.attributes ||= [];
@@ -38,6 +38,8 @@ export default () => {
         attrs[idx].value = newVal;
         await dbojs.modify({ id: tar.id }, "$set", tar);
         send([u.socketId || ""], `Set - ${attrName.toUpperCase()}: ${newVal}`);
+      } else {
+        send([u.socketId || ""], "Attribute not found.");
       }
     },
   });

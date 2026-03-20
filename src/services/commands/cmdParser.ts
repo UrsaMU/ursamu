@@ -114,6 +114,11 @@ export const addCmd = (...cmd: ICmd[]): void => {
   cmds.push(...cmd);
 };
 
+/** Clear all registered legacy commands (used by @reload commands). */
+export const clearCmds = (): void => {
+  cmds.length = 0;
+};
+
 cmdParser.use(async (ctx, next) => {
   const char = await Obj.get(ctx.socket.cid);
   const { msg } = ctx;
@@ -208,9 +213,11 @@ cmdParser.use(async (ctx, next) => {
   let scriptArgs = intent.args;
 
   // Handle prefixes
+  let usedPrefix = "";
   for (const [prefix, name] of Object.entries(prefixMap)) {
     if (msg.trim().startsWith(prefix)) {
         scriptName = name;
+        usedPrefix = prefix;
         scriptArgs = [msg.trim().slice(prefix.length).trim()];
         break;
     }
@@ -227,11 +234,27 @@ cmdParser.use(async (ctx, next) => {
 
 
   // Parse switches from command name (e.g., "bbpost/edit" → name="bbpost", switches=["edit"])
+  // Also handle compound aliases (e.g., "mail/delete" aliased to "mail" — extract "delete" as switch)
   let cmdSwitches: string[] = [];
+
+  // Check if the current scriptName was resolved from a compound alias (e.g., "mail/delete" → "mail")
+  // In that case, find the original lookupName to extract the switch
+  const originalLookup = (intentName.startsWith("@") || intentName.startsWith("+"))
+    ? intentName.slice(1) : intentName;
+  if (originalLookup.includes("/") && !scriptName.includes("/")) {
+    // The alias consumed the switch — extract it from the original
+    cmdSwitches = originalLookup.slice(originalLookup.indexOf("/") + 1).split("/").filter(Boolean);
+  }
+
   if (scriptName.includes("/")) {
     const slashIdx = scriptName.indexOf("/");
-    cmdSwitches = scriptName.slice(slashIdx + 1).split("/").filter(Boolean);
-    scriptName = scriptName.slice(0, slashIdx);
+    // Re-check alias map for the base name before "/" (e.g. channel/join → channels/join)
+    const baseName = scriptName.slice(0, slashIdx);
+    if (aliasMap[baseName]) {
+      scriptName = aliasMap[baseName] + scriptName.slice(slashIdx);
+    }
+    cmdSwitches = scriptName.slice(scriptName.indexOf("/") + 1).split("/").filter(Boolean);
+    scriptName = scriptName.slice(0, scriptName.indexOf("/"));
   }
 
   // Attempt to load and run script — checks game project override then engine's built-in copy
@@ -254,7 +277,10 @@ cmdParser.use(async (ctx, next) => {
 
         // For system scripts, we want the raw arguments after the command name
         // to be available as the first argument in the SDK's cmd.args array.
-        const rawArgs = msg.trim().slice(intentName.length).trim();
+        // For prefix-mapped commands (like - → mailadd), use the prefix-extracted args
+        // since intentName is the first word, not just the prefix character.
+        const isPrefixCmd = Object.keys(prefixMap).some(p => msg.trim().startsWith(p) && scriptName === prefixMap[p]);
+        const rawArgs = isPrefixCmd ? (scriptArgs[0] || "") : msg.trim().slice(intentName.length).trim();
         const targetQuery = scriptArgs[0];
         const targetObj = (targetQuery && char) ? await target(char as unknown as IDBOBJ, targetQuery) : undefined;
         const room = char?.location ? await Obj.get(char.location) : null;
@@ -266,7 +292,7 @@ cmdParser.use(async (ctx, next) => {
             target: targetObj ? await SDKService.hydrate(new Obj(targetObj)) : undefined,
             location: char?.location || "limbo",
             state: char?.data?.state as Record<string, unknown> || {},
-            cmd: { name: scriptName, args: [rawArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
+            cmd: { name: usedPrefix || scriptName, args: [rawArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
             socketId: ctx.socket.id
         });
         return;

@@ -158,6 +158,12 @@ export const initializeEngine = async (
     console.warn(`Could not load plugins from ${pluginsDir}:`, e);
   }
 
+  // Share loaded plugins with @reload command for hot-reload
+  try {
+    const { setLoadedPlugins } = await import("./commands/reload.ts");
+    setLoadedPlugins(loadedPlugins);
+  } catch { /* reload command may not be loaded yet */ }
+
   // Add any custom plugins and register them so initializePlugins() will call init()
   if (customPlugins && customPlugins.length > 0) {
     console.log(`Loading ${customPlugins.length} custom plugins...`);

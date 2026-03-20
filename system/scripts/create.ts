@@ -25,10 +25,11 @@ export default async (u: IUrsamuSDK) => {
     }
 
     // Check name availability
+    const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const existing = await u.db.search({
       $or: [
-        { "data.name": new RegExp(`^${name}$`, "i") },
-        { "data.alias": new RegExp(`^${name}$`, "i") },
+        { "data.name": new RegExp(`^${esc}$`, "i") },
+        { "data.alias": new RegExp(`^${esc}$`, "i") },
       ],
     });
     if (existing.length > 0) {

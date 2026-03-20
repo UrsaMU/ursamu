@@ -224,6 +224,11 @@ class LocalSandbox {
             break;
           case "db:modify":
             if (e.data.id && e.data.op && e.data.data) {
+                const allowedOps = ["$set", "$unset", "$inc"];
+                if (!allowedOps.includes(e.data.op)) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: `Invalid op: ${e.data.op}` } });
+                  break;
+                }
                 const { dbojs: db } = await import("../Database/index.ts");
                 await db.modify({ id: e.data.id }, e.data.op, e.data.data);
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
@@ -294,12 +299,20 @@ class LocalSandbox {
                (async () => {
                   const socket = wsService.getConnectedSockets().find(s => s.id === context.socketId);
                   if (socket) {
-                    socket.cid = e.data.id;
+                    // Only assign cid if not already set — prevents a compromised script
+                    // from hijacking another player's authenticated socket.
+                    if (!socket.cid) socket.cid = e.data.id;
                     socket.join(`#${e.data.id}`);
                     const player = await db.queryOne({ id: e.data.id });
                     if (player) {
                       await setFlags(player, "connected");
                       if (player.location) socket.join(`#${player.location}`);
+
+                      // Record login time directly on DB object
+                      const { dbojs: loginDb } = await import("../Database/index.ts");
+                      player.data = player.data || {};
+                      player.data.lastLogin = Date.now();
+                      await loginDb.modify({ id: player.id }, "$set", player);
 
                       // Feature parity with legacy connect
                       const { joinChans } = await import("../../utils/joinChans.ts");
@@ -310,6 +323,14 @@ class LocalSandbox {
                       await hooks.aconnect(player);
                     }
                   }
+                  // Send cid back to the WebSocket client so it can reconnect after restart
+                  if (socket) {
+                    wsService.send([socket.id], {
+                      event: "message",
+                      payload: { msg: "", data: { cid: e.data.id } }
+                    });
+                  }
+
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
                })();
             }
@@ -705,6 +726,16 @@ class LocalSandbox {
             }
             break;
           }
+          case "mail:modify": {
+            if (e.data.query && e.data.operator && e.data.update) {
+               const { mail } = await import("../Database/index.ts");
+               (async () => {
+                 await mail.modify(e.data.query, e.data.operator, e.data.update);
+                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+               })();
+            }
+            break;
+          }
           case "text:read": {
             if (e.data.id) {
               const { texts } = await import("../Database/index.ts");
@@ -954,7 +985,7 @@ export class SandboxService {
   private pool: SandboxInstance[] = [];
   private poolSize = 5;
   private maxPoolSize = 10;
-  private defaultTimeout = 5000;
+  private defaultTimeout = 10000;
 
   private constructor() {}
 

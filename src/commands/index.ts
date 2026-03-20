@@ -17,4 +17,5 @@ import "./messages.ts";
 import "./reload.ts";
 import "./test.ts";
 import "./nuke.ts";
+import "./version.ts";
 

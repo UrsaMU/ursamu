@@ -50,6 +50,11 @@ Examples:
 
 // Reset the configuration
 if (args.reset) {
+  const answer = prompt("Are you sure? This will reset all settings. (y/N)");
+  if (answer?.trim().toLowerCase() !== "y") {
+    console.log("Reset cancelled.");
+    Deno.exit(0);
+  }
   configManager.reset();
   console.log("Configuration reset to default values");
   Deno.exit(0);

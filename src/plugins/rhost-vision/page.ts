@@ -1,10 +1,11 @@
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+import { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
 /**
- * System Script: page.ts
+ * Rhost Vision: page.ts
+ * Rhost-style page formatting.
  *
- * page <target>=<message>       → Jupiter(J) pages you: Hello!
- * page <target>=:<pose>         → From afar, Jupiter(J) waves.
+ * page <target>=<message>  → Jupiter(J) pages: Hello!
+ * page <target>=:<pose>    → From afar, Jupiter(J) waves.
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
@@ -37,9 +38,7 @@ export default async (u: IUrsamuSDK) => {
   const actorBaseName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "Someone";
   const actorDisplay = actorAlias ? `${actorBaseName}(${actorAlias})` : actorBaseName;
 
-  const targetAlias = target.state?.alias as string;
   const targetBaseName = (target.state?.moniker as string) || (target.state?.name as string) || target.name || "Someone";
-  const targetDisplay = targetAlias ? `${targetBaseName}(${targetAlias})` : targetBaseName;
 
   // Check for pose (starts with :)
   if (rawMessage.startsWith(":")) {
@@ -47,13 +46,13 @@ export default async (u: IUrsamuSDK) => {
     // To target
     u.send(`From afar, %ch${actorDisplay}%cn ${pose}`, target.id);
     // To sender
-    u.send(`Long distance to ${targetDisplay}: %ch${actorDisplay}%cn ${pose}`);
+    u.send(`Long distance to ${targetBaseName}: %ch${actorBaseName}%cn ${pose}`);
   } else {
     // Normal page
     // To target
-    u.send(`%ch${actorDisplay}%cn pages you: ${rawMessage}`, target.id);
+    u.send(`%ch${actorDisplay}%cn pages: ${rawMessage}`, target.id);
     // To sender
-    u.send(`You paged ${targetDisplay} with: ${rawMessage}`);
+    u.send(`You paged ${targetBaseName} with '${rawMessage}'.`);
   }
 
   // Structured result for Web
@@ -64,7 +63,7 @@ export default async (u: IUrsamuSDK) => {
       actorId: actor.id,
       actorName: actorDisplay,
       targetId: target.id,
-      targetName: targetDisplay,
+      targetName: targetBaseName,
       message: rawMessage
     }
   });
