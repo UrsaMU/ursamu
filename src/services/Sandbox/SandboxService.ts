@@ -316,6 +316,14 @@ class LocalSandbox {
                       await hooks.aconnect(player);
                     }
                   }
+                  // Send cid back to the WebSocket client so it can reconnect after restart
+                  if (socket) {
+                    wsService.send([socket.id], {
+                      event: "message",
+                      payload: { msg: "", data: { cid: e.data.id } }
+                    });
+                  }
+
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
                })();
             }
