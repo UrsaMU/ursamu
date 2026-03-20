@@ -34,9 +34,9 @@ export default async (u: IUrsamuSDK) => {
   }
 
   // Build display names with alias
-  const actorAlias = actor.state?.alias as string;
+  const actorAlias = actor.state?.alias as string | undefined;
   const actorBaseName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "Someone";
-  const actorDisplay = actorAlias ? `${actorBaseName}(${actorAlias})` : actorBaseName;
+  const actorDisplay = (actorAlias && typeof actorAlias === "string" && actorAlias.trim()) ? `${actorBaseName}(${actorAlias})` : actorBaseName;
 
   const targetBaseName = (target.state?.moniker as string) || (target.state?.name as string) || target.name || "Someone";
 
