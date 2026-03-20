@@ -30,7 +30,7 @@ const ATTR_CATS: Record<string, string[]> = {
 };
 
 // Abilities loaded from JSON at init
-let ABIL_CATS: Record<string, string[]> = {
+const ABIL_CATS: Record<string, string[]> = {
   Talents: [],
   Skills: [],
   Knowledges: [],

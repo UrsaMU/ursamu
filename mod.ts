@@ -27,6 +27,10 @@ export { DBO } from "./src/services/Database/database.ts";
 export { registerPluginRoute } from "./src/app.ts";
 export { dbojs } from "./src/services/Database/index.ts";
 export { gameHooks } from "./src/services/Hooks/GameHooks.ts";
+export { registerJobBuckets, isValidBucket, getAllBuckets } from "./src/plugins/jobs/db.ts";
+export { seedBoards } from "./src/plugins/bboards/db.ts";
+export { registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames } from "./src/services/StatSystem/index.ts";
+export type { IStatSystem } from "./src/@types/IStatSystem.ts";
 export type {
   GameHookMap,
   SayEvent,

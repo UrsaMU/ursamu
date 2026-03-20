@@ -18,7 +18,7 @@ export default () =>
     pattern: /^@reload(?:\s+(.*))?$/i,
     lock: "connected & admin+",
     exec: async (u: IUrsamuSDK) => {
-      const arg = (u.cmd.args[0] || "").trim().toLowerCase();
+      const _arg = (u.cmd.args[0] || "").trim().toLowerCase();
       const results: string[] = [];
 
       const reloadConfig = () => {

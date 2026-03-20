@@ -56,7 +56,6 @@ Deno.test({
             date: Date.now(),
         });
 
-        // deno-lint-ignore no-explicit-any
         let markedRead = false;
         const u = {
             me: { id: "1", flags: new Set(), state: {} },

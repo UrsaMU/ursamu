@@ -65,3 +65,36 @@ export async function getNextBoardId(): Promise<number> {
 export async function getNextPostId(): Promise<number> {
   return await counters.atomicIncrement("bboard_post_id");
 }
+
+// ---------------------------------------------------------------------------
+// Plugin utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Idempotently create BBS boards by name. Boards that already exist (matched
+ * by title) are left unchanged. Call this from your plugin's `init()` to seed
+ * default boards on first startup.
+ *
+ * @example
+ * ```ts
+ * await seedBoards(["Character Generation", "Plotlines", "Requests", "XP"]);
+ * ```
+ */
+export async function seedBoards(names: string[]): Promise<void> {
+  for (const name of names) {
+    const existing = await boards.query({ title: name });
+    if (existing.length === 0) {
+      const num = await getNextBoardId();
+      await boards.create({
+        id: `board-${num}`,
+        num,
+        title: name,
+        timeout: 0,
+        anonymous: false,
+        readLock: "connected",
+        writeLock: "connected",
+        pendingDelete: false,
+      });
+    }
+  }
+}
