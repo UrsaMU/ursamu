@@ -168,7 +168,7 @@ function formatJobList(jobList: IJob[], title: string): string[] {
 
   for (const j of jobList) {
     const esc = getEscalation(j);
-    const rawBucket = j.bucket || (j as Record<string, unknown>).category as string || "???";
+    const rawBucket = j.bucket || j.category || "???";
     // Center bucket value under "Category" header (8 chars)
     const bPad = Math.max(0, Math.floor((8 - rawBucket.length) / 2));
     const bucket = " ".repeat(bPad) + rawBucket;
@@ -249,7 +249,7 @@ addCmd({
         }
 
         const esc = getEscalation(job);
-        const bucket = job.bucket || (job as Record<string, unknown>).category as string || "???";
+        const bucket = job.bucket || job.category || "???";
         const statusLabel = esc.label ? `${esc.color}${esc.label}%cn` : "";
         const newTag = isNew(job) ? " (NEW)" : "";
         const lines: string[] = [];
@@ -498,11 +498,11 @@ addCmd({
         const job = await getJobByNumber(num);
         if (!job) { u.send(`>JOBS: No job #${num} found.`); return; }
 
-        const canSee = await canStaffSeeBucket(u.me.id, job.bucket, u.me.flags.has("superuser"));
+        const canSee = await canStaffSeeBucket(u.me.id, job.bucket ?? job.category ?? "", u.me.flags.has("superuser"));
         if (!canSee) { u.send(">JOBS: You don't have access to that bucket."); return; }
 
         const esc = getEscalation(job);
-        const bucket = job.bucket || (job as Record<string, unknown>).category as string || "???";
+        const bucket = job.bucket || job.category || "???";
         const statusLabel = esc.label ? `${esc.color}${esc.label}%cn` : "";
         const newTag = isNew(job) ? " (NEW)" : "";
         const lines: string[] = [];
@@ -593,9 +593,7 @@ addCmd({
       if (!target) { u.send(`>JOBS: Player "${name}" not found.`); return; }
 
       // Validate that the target is a staff member
-      const tFlags = target.flags;
-      const hasFlag = (f: string) =>
-        tFlags instanceof Set ? tFlags.has(f) : typeof tFlags === "string" ? tFlags.includes(f) : false;
+      const hasFlag = (f: string) => target.flags.has(f);
       if (!hasFlag("superuser") && !hasFlag("admin") && !hasFlag("wizard")) {
         u.send(`>JOBS: ${name} is not a staff member. Only superuser, admin, or wizard players can be assigned jobs.`);
         return;
@@ -804,7 +802,7 @@ async function listStaffJobs(u: IUrsamuSDK, filterBucket?: string): Promise<void
   const visible: IJob[] = [];
   for (const j of allJobs) {
     if (filterBucket && j.bucket !== filterBucket) continue;
-    const canSee = await canStaffSeeBucket(u.me.id, j.bucket, isSU);
+    const canSee = await canStaffSeeBucket(u.me.id, j.bucket ?? j.category ?? "", isSU);
     if (canSee) visible.push(j);
   }
 
@@ -846,7 +844,7 @@ addCmd({
 
       for (const j of archived) {
         lines.push(
-          `${String(j.number).padEnd(5)}${(j.bucket || (j as Record<string, unknown>).category as string || "???").padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${j.status.padEnd(12)}${formatDate(j.updatedAt)}`,
+          `${String(j.number).padEnd(5)}${(j.bucket || j.category || "???").padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${j.status.padEnd(12)}${formatDate(j.updatedAt)}`,
         );
       }
       lines.push(divider());
