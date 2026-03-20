@@ -45,7 +45,7 @@ function divider(): string {
   return "-".repeat(WIDTH);
 }
 
-function footer(): string {
+function _footer(): string {
   return "=".repeat(WIDTH);
 }
 
@@ -60,7 +60,7 @@ function formatDate(epoch: number): string {
   }
 }
 
-function formatDateTime(epoch: number): string {
+function _formatDateTime(epoch: number): string {
   try {
     const d = new Date(epoch);
     const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -232,7 +232,7 @@ async function markAllRead(
   await u.db.modify(u.me.id, "$set", { "data.bb_read": bbRead });
 }
 
-async function markAllBoardsRead(u: IUrsamuSDK): Promise<void> {
+async function _markAllBoardsRead(u: IUrsamuSDK): Promise<void> {
   const allBoards = await getAllBoards();
   const bbRead = (u.me.state.bb_read as Record<string, string[]>) || {};
   for (const board of allBoards) {
@@ -294,7 +294,7 @@ async function setMembership(
 // Notifications (stored on player: state.bb_notify)
 // ---------------------------------------------------------------------------
 
-function getNotify(u: IUrsamuSDK, boardNum: number): boolean {
+function _getNotify(u: IUrsamuSDK, boardNum: number): boolean {
   const n = (u.me.state.bb_notify as Record<string, boolean>) || {};
   const val = n[String(boardNum)];
   return val === undefined ? true : val;
@@ -452,7 +452,7 @@ function formatPost(
   const postHeader = "%cb" + "=".repeat(leftPad) + "%cg" + core + "%cb" + "=".repeat(rightPad) + "%cn";
 
   // Date and time
-  const dateStr = formatTimeFull(msg.createdAt);
+  const _dateStr = formatTimeFull(msg.createdAt);
   const timeStr = (() => {
     try {
       const d = new Date(msg.createdAt);
@@ -654,11 +654,11 @@ export async function cleanupExpiredPosts(): Promise<number> {
 // Notification broadcast
 // ---------------------------------------------------------------------------
 
-async function notifyBoard(
+function notifyBoard(
   u: IUrsamuSDK,
-  board: IBoard,
+  _board: IBoard,
   message: string,
-): Promise<void> {
+): void {
   // Broadcast to the room -- connected players will see it
   try {
     u.broadcast(message);
@@ -746,8 +746,8 @@ async function doBBScan(u: IUrsamuSDK): Promise<void> {
     // Fixed positions for right columns
     const msPos = WIDTH - msHdr.length; // Messages starts here
     const lpPos = msPos - 4 - lpHdr.length; // Last Post starts here
-    const leftPart = `${numStr} ${flag}%cc${titleStr}%cn`;
-    const leftVisible = numStr.length + 1 + flag.length + titleStr.length;
+    const _leftPart = `${numStr} ${flag}%cc${titleStr}%cn`;
+    const _leftVisible = numStr.length + 1 + flag.length + titleStr.length;
     // Build right portion with fixed positions
     const row = " ".repeat(WIDTH).split("");
     // Place visible left content (extra space between flag and title)
@@ -2775,7 +2775,7 @@ addCmd({
   name: "+bbhelp",
   pattern: /^\+bbhelp\s*(.*)/i,
   lock: "connected",
-  exec: async (u: IUrsamuSDK) => {
+  exec: (u: IUrsamuSDK) => {
     const topic = (u.cmd.args[0] || "").trim().toLowerCase().replace(/^\+/, "");
     const text = BBHELP_TOPICS[topic];
     if (!text) {

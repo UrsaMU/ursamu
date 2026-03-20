@@ -5,6 +5,7 @@ import { jobHooks } from "./hooks.ts";
 import { wsService } from "../../services/WebSocket/index.ts";
 import { send } from "../../services/broadcast/index.ts";
 import { dbojs } from "../../services/Database/index.ts";
+import { getAllBuckets, getBucketStaffIds, jobAccess } from "./db.ts";
 // Import commands to trigger their addCmd registration at init time
 import "./commands.ts";
 
@@ -16,8 +17,20 @@ const jobsPlugin: IPlugin = {
   version: "1.0.0",
   description: "Anomaly-style jobs system — +request for players, +jobs for staff, bucket access control, escalation, archive",
 
-  init: () => {
+  init: async () => {
     registerPluginRoute("/api/v1/jobs", jobsRouteHandler);
+
+    // Seed per-bucket staff access for any buckets registered via registerJobBuckets()
+    // Only creates access records that don't already exist (idempotent).
+    for (const bucket of getAllBuckets()) {
+      const staffIds = getBucketStaffIds(bucket);
+      if (staffIds.length > 0) {
+        const existing = await jobAccess.queryOne({ id: bucket });
+        if (!existing) {
+          await jobAccess.create({ id: bucket, staffIds });
+        }
+      }
+    }
 
     // Notify all connected staff when a job is created (skip submitter, dedup by player)
     jobHooks.on("job:created", async (job) => {

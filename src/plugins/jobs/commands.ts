@@ -8,9 +8,8 @@
 
 import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
-import { jobs, jobArchive, jobAccess, getNextJobNumber } from "./db.ts";
+import { jobs, jobArchive, jobAccess, getNextJobNumber, isValidBucket, getAllBuckets } from "./db.ts";
 import type { IJob, IJobComment, IJobAccess } from "../../@types/IJob.ts";
-import { VALID_BUCKETS } from "../../@types/IJob.ts";
 import { jobHooks } from "./hooks.ts";
 
 // ---------------------------------------------------------------------------
@@ -96,7 +95,7 @@ function formatDate(epoch: number): string {
   }
 }
 
-function formatTimestamp(epoch: number): string {
+function _formatTimestamp(epoch: number): string {
   try {
     const d = new Date(epoch);
     return d.toISOString().slice(0, 16).replace("T", " ");
@@ -125,7 +124,7 @@ function isNew(job: IJob): boolean {
   return !job.comments.some((c) => c.authorId !== job.submittedBy);
 }
 
-function coloredDate(job: IJob): string {
+function _coloredDate(job: IJob): string {
   const { color } = getEscalation(job);
   return `${color}${formatDate(job.createdAt)}%cn`;
 }
@@ -169,7 +168,7 @@ function formatJobList(jobList: IJob[], title: string): string[] {
 
   for (const j of jobList) {
     const esc = getEscalation(j);
-    const rawBucket = j.bucket || (j as Record<string, unknown>).category as string || "???";
+    const rawBucket = j.bucket || j.category || "???";
     // Center bucket value under "Category" header (8 chars)
     const bPad = Math.max(0, Math.floor((8 - rawBucket.length) / 2));
     const bucket = " ".repeat(bPad) + rawBucket;
@@ -250,13 +249,13 @@ addCmd({
         }
 
         const esc = getEscalation(job);
-        const bucket = job.bucket || (job as Record<string, unknown>).category as string || "???";
+        const bucket = job.bucket || job.category || "???";
         const statusLabel = esc.label ? `${esc.color}${esc.label}%cn` : "";
         const newTag = isNew(job) ? " (NEW)" : "";
         const lines: string[] = [];
         lines.push(jobHeader(`Job ${job.number}`));
         const leftCol = 38;
-        const rightCol = WIDTH - leftCol - 1;
+        const _rightCol = WIDTH - leftCol - 1;
         lines.push(`${"Job Title:".padEnd(leftCol)} ${"Requester:".padEnd(15)}${job.submitterName}`);
         lines.push(`${("%ch%cw" + job.title + "%cn").padEnd(leftCol)}`);
         lines.push(`${"Category:".padEnd(leftCol)} ${"Status:".padEnd(15)}${statusLabel}${newTag}`);
@@ -299,7 +298,7 @@ addCmd({
       if (eqIdx === -1) {
         u.send("Usage: +request <title>=<text>");
         u.send("       +request/create <bucket>/<title>=<text>");
-        u.send(`Valid buckets: ${VALID_BUCKETS.join(", ")}`);
+        u.send(`Valid buckets: ${getAllBuckets().join(", ")}`);
         return;
       }
 
@@ -307,8 +306,8 @@ addCmd({
       const text = rest.slice(eqIdx + 1).trim();
       if (!title || !text) { u.send("Usage: +request <title>=<text>"); return; }
 
-      if (!VALID_BUCKETS.includes(bucket as typeof VALID_BUCKETS[number])) {
-        u.send(`>JOBS: Invalid bucket '${bucket}'. Valid: ${VALID_BUCKETS.join(", ")}`);
+      if (!isValidBucket(bucket)) {
+        u.send(`>JOBS: Invalid bucket '${bucket}'. Valid: ${getAllBuckets().join(", ")}`);
         return;
       }
 
@@ -428,7 +427,7 @@ addCmd({
     u.send("  +request/comment <#>=<text>         - add a comment");
     u.send("  +request/cancel <#>                 - cancel your request");
     u.send("  +request/addplayer <#>=<player>     - add a viewer");
-    u.send(`  Valid buckets: ${VALID_BUCKETS.join(", ")}`);
+    u.send(`  Valid buckets: ${getAllBuckets().join(", ")}`);
   },
 });
 
@@ -499,11 +498,11 @@ addCmd({
         const job = await getJobByNumber(num);
         if (!job) { u.send(`>JOBS: No job #${num} found.`); return; }
 
-        const canSee = await canStaffSeeBucket(u.me.id, job.bucket, u.me.flags.has("superuser"));
+        const canSee = await canStaffSeeBucket(u.me.id, job.bucket ?? job.category ?? "", u.me.flags.has("superuser"));
         if (!canSee) { u.send(">JOBS: You don't have access to that bucket."); return; }
 
         const esc = getEscalation(job);
-        const bucket = job.bucket || (job as Record<string, unknown>).category as string || "???";
+        const bucket = job.bucket || job.category || "???";
         const statusLabel = esc.label ? `${esc.color}${esc.label}%cn` : "";
         const newTag = isNew(job) ? " (NEW)" : "";
         const lines: string[] = [];
@@ -536,8 +535,8 @@ addCmd({
     // +job/bucket <bucket> — filter by bucket
     if (sw === "bucket") {
       const bucket = arg.toUpperCase();
-      if (!VALID_BUCKETS.includes(bucket as typeof VALID_BUCKETS[number])) {
-        u.send(`>JOBS: Invalid bucket. Valid: ${VALID_BUCKETS.join(", ")}`);
+      if (!isValidBucket(bucket)) {
+        u.send(`>JOBS: Invalid bucket. Valid: ${getAllBuckets().join(", ")}`);
         return;
       }
       await listStaffJobs(u, bucket);
@@ -594,9 +593,7 @@ addCmd({
       if (!target) { u.send(`>JOBS: Player "${name}" not found.`); return; }
 
       // Validate that the target is a staff member
-      const tFlags = target.flags;
-      const hasFlag = (f: string) =>
-        tFlags instanceof Set ? tFlags.has(f) : typeof tFlags === "string" ? tFlags.includes(f) : false;
+      const hasFlag = (f: string) => target.flags.has(f);
       if (!hasFlag("superuser") && !hasFlag("admin") && !hasFlag("wizard")) {
         u.send(`>JOBS: ${name} is not a staff member. Only superuser, admin, or wizard players can be assigned jobs.`);
         return;
@@ -692,15 +689,15 @@ addCmd({
       const bucket = arg.slice(0, eqIdx).trim().toUpperCase();
       const staffName = arg.slice(eqIdx + 1).trim();
 
-      if (!VALID_BUCKETS.includes(bucket as typeof VALID_BUCKETS[number])) {
-        u.send(`>JOBS: Invalid bucket. Valid: ${VALID_BUCKETS.join(", ")}`);
+      if (!isValidBucket(bucket)) {
+        u.send(`>JOBS: Invalid bucket. Valid: ${getAllBuckets().join(", ")}`);
         return;
       }
 
       const target = await u.util.target(u.me, staffName);
       if (!target) { u.send(`>JOBS: Staff "${staffName}" not found.`); return; }
 
-      let access = await jobAccess.queryOne({ id: bucket });
+      const access = await jobAccess.queryOne({ id: bucket });
       if (!access) {
         await jobAccess.create({ id: bucket, staffIds: [target.id] });
       } else {
@@ -739,7 +736,7 @@ addCmd({
       const allAccess = await jobAccess.find({});
       const lines: string[] = [];
       lines.push(header("Bucket Access"));
-      for (const bucket of VALID_BUCKETS) {
+      for (const bucket of getAllBuckets()) {
         const entry = allAccess.find((a: IJobAccess) => a.id === bucket);
         const staffList = entry && entry.staffIds.length > 0 ? entry.staffIds.join(", ") : "(all staff)";
         lines.push(` ${bucket.padEnd(14)} ${staffList}`);
@@ -802,10 +799,10 @@ async function listStaffJobs(u: IUrsamuSDK, filterBucket?: string): Promise<void
   const allJobs = await jobs.find({});
   const isSU = u.me.flags.has("superuser");
 
-  let visible: IJob[] = [];
+  const visible: IJob[] = [];
   for (const j of allJobs) {
     if (filterBucket && j.bucket !== filterBucket) continue;
-    const canSee = await canStaffSeeBucket(u.me.id, j.bucket, isSU);
+    const canSee = await canStaffSeeBucket(u.me.id, j.bucket ?? j.category ?? "", isSU);
     if (canSee) visible.push(j);
   }
 
@@ -847,7 +844,7 @@ addCmd({
 
       for (const j of archived) {
         lines.push(
-          `${String(j.number).padEnd(5)}${(j.bucket || (j as Record<string, unknown>).category as string || "???").padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${j.status.padEnd(12)}${formatDate(j.updatedAt)}`,
+          `${String(j.number).padEnd(5)}${(j.bucket || j.category || "???").padEnd(12)}${j.title.slice(0, 29).padEnd(30)}${j.status.padEnd(12)}${formatDate(j.updatedAt)}`,
         );
       }
       lines.push(divider());

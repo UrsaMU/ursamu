@@ -59,8 +59,10 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
 
     for (const j of all) {
       byStatus[j.status]   = (byStatus[j.status]   || 0) + 1;
-      byCategory[j.category] = (byCategory[j.category] || 0) + 1;
-      byPriority[j.priority] = (byPriority[j.priority] || 0) + 1;
+      const cat = j.category ?? "uncategorized";
+      byCategory[cat] = (byCategory[cat] || 0) + 1;
+      const pri = j.priority ?? "normal";
+      byPriority[pri] = (byPriority[pri] || 0) + 1;
       if (j.status !== "closed" && j.status !== "resolved") {
         j.assignedTo ? openAssigned++ : openUnassigned++;
       }
@@ -216,7 +218,7 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
         }
       }
       if (updated.priority !== job.priority) {
-        await jobHooks.emit("job:priority-changed", updated, job.priority);
+        await jobHooks.emit("job:priority-changed", updated, job.priority ?? "normal");
       }
       if (updated.assignedTo !== job.assignedTo) {
         await jobHooks.emit("job:assigned", updated);
