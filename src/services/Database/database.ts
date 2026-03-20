@@ -46,9 +46,11 @@ export class DBO<T extends WithId> implements IDatabase<T> {
 
   private async getKv(): Promise<Deno.Kv> {
     if (!DBO.kv) {
-      // Get path from config/env or Use a persistent path for the KV store
-      // We need to resolve server.db specifically for the KV file path, regardless of the 'prefix' of this specific DBO.
-      const dbPath = Deno.env.get("URSAMU_DB") || getConfig<string>("server.db") || "./data/ursamu.db";
+      // Resolve the KV store file path.
+      // URSAMU_DB env var overrides everything. Otherwise, always place the database
+      // in the game project's own data/ folder (relative to Deno.cwd()), never inside
+      // the engine package. The server.db config key is a KV namespace prefix, not a path.
+      const dbPath = Deno.env.get("URSAMU_DB") || dpath.join(Deno.cwd(), "data", "ursamu.db");
       const dbDir = dpath.dirname(dbPath);
 
       // Create the data directory if it doesn't exist
