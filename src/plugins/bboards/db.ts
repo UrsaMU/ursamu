@@ -70,18 +70,59 @@ export async function getNextPostId(): Promise<number> {
 // Plugin utilities
 // ---------------------------------------------------------------------------
 
+/** Per-board options accepted by {@link seedBoards}. */
+export interface ISeedBoardOptions {
+  /**
+   * Lock expression controlling who can read/see the board.
+   * Defaults to `"all()"` (open to everyone who is connected).
+   *
+   * Common values: `"all()"`, `"connected"`, `"admin+"`, `"wizard+"`,
+   * or any engine lock expression.
+   */
+  readLock?: string;
+  /**
+   * Lock expression controlling who can post to the board.
+   * Defaults to `"all()"`.
+   */
+  writeLock?: string;
+  /** Post expiry in days. `0` means no timeout (default). */
+  timeout?: number;
+  /** When `true`, author names are hidden on posts. Defaults to `false`. */
+  anonymous?: boolean;
+}
+
 /**
  * Idempotently create BBS boards by name. Boards that already exist (matched
  * by title) are left unchanged. Call this from your plugin's `init()` to seed
  * default boards on first startup.
  *
+ * Lock expressions follow the engine's lock syntax. Omitting `readLock` /
+ * `writeLock` opens the board to all connected players (matching
+ * `+bbnewboard` defaults). Pass a lock string to restrict access.
+ *
  * @example
  * ```ts
- * await seedBoards(["Character Generation", "Plotlines", "Requests", "XP"]);
+ * // Open boards
+ * await seedBoards(["OOC", "Announcements"]);
+ *
+ * // Staff-only board
+ * await seedBoards([{ name: "Staff", readLock: "wizard+", writeLock: "wizard+" }]);
+ *
+ * // Mix of plain names and options objects
+ * await seedBoards([
+ *   "OOC",
+ *   { name: "Character Generation", writeLock: "admin+" },
+ *   { name: "Requests", readLock: "connected", writeLock: "connected" },
+ * ]);
  * ```
  */
-export async function seedBoards(names: string[]): Promise<void> {
-  for (const name of names) {
+export async function seedBoards(
+  entries: (string | (ISeedBoardOptions & { name: string }))[],
+): Promise<void> {
+  for (const entry of entries) {
+    const name = typeof entry === "string" ? entry : entry.name;
+    const opts: ISeedBoardOptions = typeof entry === "string" ? {} : entry;
+
     const existing = await boards.query({ title: name });
     if (existing.length === 0) {
       const num = await getNextBoardId();
@@ -89,10 +130,10 @@ export async function seedBoards(names: string[]): Promise<void> {
         id: `board-${num}`,
         num,
         title: name,
-        timeout: 0,
-        anonymous: false,
-        readLock: "connected",
-        writeLock: "connected",
+        timeout: opts.timeout ?? 0,
+        anonymous: opts.anonymous ?? false,
+        readLock: opts.readLock ?? "all()",
+        writeLock: opts.writeLock ?? "all()",
         pendingDelete: false,
       });
     }
