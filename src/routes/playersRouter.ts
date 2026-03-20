@@ -1,4 +1,4 @@
-import { dbojs, chans } from "../services/Database/index.ts";
+import { dbojs, chans, chanHistory } from "../services/Database/index.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
 
 /** GET /api/v1/me — current user profile from JWT */
@@ -56,6 +56,44 @@ export const channelsHandler = async (_req: Request): Promise<Response> => {
   }));
 
   return new Response(JSON.stringify(list), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+/**
+ * GET /api/v1/channels/:id/history?limit=50
+ * Returns persisted history for a channel. `id` may be the channel's `id`
+ * field or its `name`. Returns 404 if the channel is not found, 403 if
+ * logging is disabled on that channel.
+ */
+export const channelHistoryHandler = async (req: Request, idOrName: string): Promise<Response> => {
+  const url = new URL(req.url);
+  const limit = Math.min(Math.max(parseInt(url.searchParams.get("limit") ?? "50", 10), 1), 500);
+
+  // Try id first, then name
+  const chan = await chans.queryOne({ id: idOrName }) ?? await chans.queryOne({ name: idOrName });
+  if (!chan) {
+    return new Response(JSON.stringify({ error: "Channel not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  if (!chan.logHistory) {
+    return new Response(JSON.stringify({ error: "History logging is not enabled for this channel" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const all = await chanHistory.query({ chanId: chan.id });
+  const page = all
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, limit)
+    .reverse()
+    .map(({ playerName, message, timestamp }) => ({ playerName, message, timestamp }));
+
+  return new Response(JSON.stringify(page), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });

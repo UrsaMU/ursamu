@@ -83,6 +83,8 @@ interface IUrsamuSDK {
     create(name: string, options?: { header?: string; lock?: string; hidden?: boolean }): Promise<unknown>;
     destroy(name: string): Promise<unknown>;
     set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }): Promise<unknown>;
+    log(channel: string, enable: boolean): Promise<void>;
+    history(channel: string, limit?: number): Promise<{ playerName: string; message: string; timestamp: number }[]>;
   };
   mail: {
     send(mail: Partial<IMail>): Promise<void>;
@@ -352,7 +354,10 @@ self.onmessage = async (e: MessageEvent) => {
         request<unknown>("chan:create", { name, ...options }),
       destroy: (name: string) => request<unknown>("chan:destroy", { name }),
       set: (name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }) =>
-        request<unknown>("chan:set", { name, ...options })
+        request<unknown>("chan:set", { name, ...options }),
+      log: (channel: string, enable: boolean) => request<void>("chan:log", { channel, enable }),
+      history: (channel: string, limit = 50) =>
+        request<{ playerName: string; message: string; timestamp: number }[]>("chan:history", { channel, limit }),
     },
     mail: {
       send: (mail: Partial<IMail>) => request<void>("mail:send", { mail }),

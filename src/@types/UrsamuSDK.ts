@@ -84,6 +84,10 @@ export interface IUrsamuSDK {
     create(name: string, options?: { header?: string; lock?: string; hidden?: boolean }): Promise<unknown>;
     destroy(name: string): Promise<unknown>;
     set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }): Promise<unknown>;
+    /** Enable or disable history logging for a channel (staff only). */
+    log(channel: string, enable: boolean): Promise<void>;
+    /** Return recent history for a channel. `limit` defaults to 50. */
+    history(channel: string, limit?: number): Promise<{ playerName: string; message: string; timestamp: number }[]>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
   trigger(target: string, attr: string, args?: string[]): Promise<void>;

@@ -1,7 +1,7 @@
-import type { IChanEntry } from "../../@types/Channels.ts";
+import type { IChanEntry, IChanMessage } from "../../@types/Channels.ts";
 import type { IContext } from "../../@types/IContext.ts";
 import { moniker } from "../../utils/moniker.ts";
-import { chans, dbojs } from "../Database/index.ts";
+import { chans, chanHistory, dbojs } from "../Database/index.ts";
 import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
@@ -75,5 +75,29 @@ export const matchChannel = async (ctx: IContext) => {
   };
   channelEvents.emit("channel:message", chanPayload);
   gameHooks.emit("channel:message", chanPayload).catch(e => console.error("[GameHooks] channel:message:", e));
+
+  // Persist to history if enabled on this channel
+  if (chan.logHistory) {
+    const entry: IChanMessage = {
+      id:          `chanmsg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      chanId:      chan.id,
+      playerId:    en.id,
+      playerName:  moniker(en),
+      message:     msg,
+      timestamp:   Date.now(),
+    };
+    await chanHistory.create(entry);
+
+    // Prune oldest messages when over the configured limit
+    const limit = chan.historyLimit ?? 500;
+    const all = await chanHistory.query({ chanId: chan.id });
+    if (all.length > limit) {
+      const sorted = all.sort((a, b) => a.timestamp - b.timestamp);
+      for (const old of sorted.slice(0, all.length - limit)) {
+        await chanHistory.delete({ id: old.id });
+      }
+    }
+  }
+
   return true;
 };

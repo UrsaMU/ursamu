@@ -584,6 +584,47 @@ class LocalSandbox {
             }
             break;
           }
+          case "chan:log": {
+            if (e.data.channel !== undefined && e.data.enable !== undefined) {
+              const { chans: chanDb } = await import("../Database/index.ts");
+              (async () => {
+                const name = (e.data.channel as string).toLowerCase().trim();
+                const existing = await chanDb.queryOne({ name });
+                if (!existing) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Channel not found." } });
+                  return;
+                }
+                await chanDb.modify({ name }, "$set", { logHistory: Boolean(e.data.enable) });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: { ok: true } });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "chan:history": {
+            if (e.data.channel !== undefined) {
+              const { chans: chanDb, chanHistory: histDb } = await import("../Database/index.ts");
+              (async () => {
+                const name = (e.data.channel as string).toLowerCase().trim();
+                const chan = await chanDb.queryOne({ name });
+                if (!chan) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: [] });
+                  return;
+                }
+                const limit = Number(e.data.limit ?? 50);
+                const all = await histDb.query({ chanId: chan.id });
+                const result = all
+                  .sort((a, b) => a.timestamp - b.timestamp)
+                  .slice(-limit)
+                  .map(({ playerName, message, timestamp }) => ({ playerName, message, timestamp }));
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: result });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: [] });
+            }
+            break;
+          }
           case "trigger:attr": {
             if (e.data.target && e.data.attr) {
               const { dbojs: db } = await import("../Database/index.ts");
