@@ -136,7 +136,7 @@ export async function bboardsRouteHandler(
         if (field in body) (update as Record<string, unknown>)[field] = body[field];
       }
       const updated: IBBoard = { ...board, ...update };
-      await bboards.update({}, updated);
+      await bboards.update({ id: boardId }, updated);
       return jsonResponse(updated);
     }
 
@@ -223,7 +223,7 @@ export async function bboardsRouteHandler(
       const newSubject = typeof body.subject === "string" ? body.subject.trim() : post.subject;
 
       const updated: IBBoardPost = { ...post, body: newBody, subject: newSubject, edited: Date.now() };
-      await bbPosts.update({}, updated);
+      await bbPosts.update({ id: post.id }, updated);
       return jsonResponse(updated);
     }
 

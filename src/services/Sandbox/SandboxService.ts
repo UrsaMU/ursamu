@@ -224,6 +224,11 @@ class LocalSandbox {
             break;
           case "db:modify":
             if (e.data.id && e.data.op && e.data.data) {
+                const allowedOps = ["$set", "$unset", "$inc"];
+                if (!allowedOps.includes(e.data.op)) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: `Invalid op: ${e.data.op}` } });
+                  break;
+                }
                 const { dbojs: db } = await import("../Database/index.ts");
                 await db.modify({ id: e.data.id }, e.data.op, e.data.data);
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });

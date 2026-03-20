@@ -61,6 +61,8 @@ export default () => {
 
       if (/^\d+$/.test(item)) {
         const amount = parseInt(item, 10);
+        if (!Number.isFinite(amount) || amount <= 0 || amount > Number.MAX_SAFE_INTEGER)
+          return send([u.socketId || ""], "Invalid amount.");
         const rec = await target(en, receiver);
         if (!rec || rec.location !== en.location)
           return send([u.socketId || ""], "They aren't here.");

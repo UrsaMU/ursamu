@@ -107,7 +107,7 @@ function formatTimestamp(epoch: number): string {
 
 function getEscalation(job: IJob): { color: string; label: string } {
   // Find last staff comment timestamp (comments not from submitter)
-  const staffComments = job.comments.filter((c) => c.authorId !== job.submittedBy);
+  const staffComments = job.comments.filter((c) => c.authorId !== job.submittedBy && c.published);
   const lastActivity = staffComments.length > 0
     ? staffComments[staffComments.length - 1].timestamp
     : job.createdAt;
@@ -362,7 +362,7 @@ addCmd({
 
       job.comments.push(comment);
       job.updatedAt = Date.now();
-      await jobs.update({}, job);
+      await jobs.update({ id: job.id }, job);
       await jobHooks.emit("job:commented", job, comment);
       u.send(`>JOBS: Comment added to request #${num}.`);
       return;
@@ -412,7 +412,7 @@ addCmd({
 
       job.additionalPlayers.push(target.id);
       job.updatedAt = Date.now();
-      await jobs.update({}, job);
+      await jobs.update({ id: job.id }, job);
       u.send(`>JOBS: ${target.name} added to request #${num}.`);
       const addName = (u.me.state?.name as string) || u.me.name || "System";
       await sendJobMail(u.me.id, addName, target.id, `Added to Request #${num}`, `You have been added as a viewer to Request #${num}: ${job.title}`);
@@ -566,7 +566,7 @@ addCmd({
 
       job.comments.push(comment);
       job.updatedAt = Date.now();
-      await jobs.update({}, job);
+      await jobs.update({ id: job.id }, job);
       await jobHooks.emit("job:commented", job, comment);
       u.send(`>JOBS: Comment added to job #${num}.`);
 
@@ -593,10 +593,19 @@ addCmd({
       const target = await u.util.target(u.me, name);
       if (!target) { u.send(`>JOBS: Player "${name}" not found.`); return; }
 
+      // Validate that the target is a staff member
+      const tFlags = target.flags;
+      const hasFlag = (f: string) =>
+        tFlags instanceof Set ? tFlags.has(f) : typeof tFlags === "string" ? tFlags.includes(f) : false;
+      if (!hasFlag("superuser") && !hasFlag("admin") && !hasFlag("wizard")) {
+        u.send(`>JOBS: ${name} is not a staff member. Only superuser, admin, or wizard players can be assigned jobs.`);
+        return;
+      }
+
       job.assignedTo = target.id;
       job.assigneeName = (target.state?.moniker as string) || (target.state?.name as string) || target.name || "Unknown";
       job.updatedAt = Date.now();
-      await jobs.update({}, job);
+      await jobs.update({ id: job.id }, job);
       await jobHooks.emit("job:assigned", job);
       u.send(`>JOBS: Job #${num} assigned to ${job.assigneeName}.`);
       return;
@@ -668,7 +677,7 @@ addCmd({
 
       job.additionalPlayers.push(target.id);
       job.updatedAt = Date.now();
-      await jobs.update({}, job);
+      await jobs.update({ id: job.id }, job);
       u.send(`>JOBS: ${target.name} added to job #${num}.`);
       const addStaffName = (u.me.state?.name as string) || u.me.name || "System";
       await sendJobMail(u.me.id, addStaffName, target.id, `Added to Job #${num}`, `You have been added as a viewer to Job #${num}: ${job.title}`);
@@ -697,7 +706,7 @@ addCmd({
       } else {
         if (!access.staffIds.includes(target.id)) {
           access.staffIds.push(target.id);
-          await jobAccess.update({}, access);
+          await jobAccess.update({ id: access.id }, access);
         }
       }
       u.send(`>JOBS: ${target.name} granted access to ${bucket} bucket.`);
@@ -718,7 +727,7 @@ addCmd({
       const access = await jobAccess.queryOne({ id: bucket });
       if (access && access.staffIds.includes(target.id)) {
         access.staffIds = access.staffIds.filter((id: string) => id !== target.id);
-        await jobAccess.update({}, access);
+        await jobAccess.update({ id: access.id }, access);
       }
       u.send(`>JOBS: ${target.name} removed from ${bucket} bucket.`);
       return;

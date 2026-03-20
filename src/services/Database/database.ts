@@ -122,6 +122,16 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return results;
   }
 
+  /** Check if a key or any segment of a dot-notation path is a prototype pollution vector. */
+  private static isDangerousKey(key: string): boolean {
+    const dangerous = new Set(["__proto__", "constructor", "prototype"]);
+    if (dangerous.has(key)) return true;
+    if (key.includes(".")) {
+      return key.split(".").some(seg => dangerous.has(seg));
+    }
+    return false;
+  }
+
   async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
     const items = await this.query(query);
     const kv = await this.getKv();
@@ -129,6 +139,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       const updated = { ...item };
       if (operator === "$set") {
         for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+          if (DBO.isDangerousKey(key)) continue;
           if (key.includes(".")) {
             // Dot-notation: navigate into nested object (e.g. "data.name" → updated.data.name)
             lodashSet(updated, key, value);
@@ -138,6 +149,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
         }
       } else if (operator === "$unset") {
         for (const key of Object.keys(data as Record<string, unknown>)) {
+          if (DBO.isDangerousKey(key)) continue;
           if (key.includes(".")) {
             // Dot-notation: navigate to parent and delete the final key
             const parts = key.split(".");
@@ -158,6 +170,10 @@ export class DBO<T extends WithId> implements IDatabase<T> {
         }
       } else if (operator === "$inc") {
         for (const [key, value] of Object.entries(data)) {
+          if (typeof value !== "number" || isNaN(value)) {
+            console.warn(`[Database] $inc: skipping key "${key}" — value is not a valid number:`, value);
+            continue;
+          }
           if (key.includes(".")) {
             const current = get(updated, key, 0) as number;
             lodashSet(updated, key, current + (value as number));

@@ -77,11 +77,19 @@ export default async (u: IUrsamuSDK) => {
   } else {
      // Lock
      if (!key) return u.send("You must specify a key.");
-     
-     // Validate lock string?
-     // We need to validate if possible. 
-     // `u.checkLock` evaluates, but doesn't strictly validate syntax unless we expose a validator.
-     // For now, accept it.
+
+     // Validate lock string: check balanced parentheses and valid operators
+     const lockStr = key.trim();
+     let parenCount = 0;
+     for (const ch of lockStr) {
+       if (ch === "(") parenCount++;
+       else if (ch === ")") parenCount--;
+       if (parenCount < 0) return u.send("Invalid lock: unbalanced parentheses.");
+     }
+     if (parenCount !== 0) return u.send("Invalid lock: unbalanced parentheses.");
+     // Reject empty operands around operators (e.g., "&foo", "foo|", "foo&&bar")
+     if (/^[&|]|[&|]$|[&|]{2,}/.test(lockStr.replace(/\s/g, "")))
+       return u.send("Invalid lock: malformed operators.");
      
      if (type === "basic") {
          target.state.lock = key.trim();

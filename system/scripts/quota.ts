@@ -36,6 +36,11 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
+  if (newQuota > 1000) {
+    u.send("Quota cannot exceed 1000.");
+    return;
+  }
+
   const results = await u.db.search(playerRef);
   const target = results[0];
   if (!target) {

@@ -57,7 +57,7 @@ export function postWebhook(url: string, payload: WebhookPayload): void {
   const prev = queues.get(url) ?? Promise.resolve();
   const next = prev
     .then(() => postDirect(url, payload))
-    .catch(() => {/* already logged inside postDirect */});
+    .catch(() => {/* already logged inside postDirect */})
+    .finally(() => { if (queues.get(url) === next) queues.delete(url); });
   queues.set(url, next);
-  next.then(() => { if (queues.get(url) === next) queues.delete(url); });
 }

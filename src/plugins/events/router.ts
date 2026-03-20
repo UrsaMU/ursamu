@@ -217,7 +217,7 @@ export async function eventsRouteHandler(
       }
 
       const updated: IGameEvent = { ...ev, ...update };
-      await gameEvents.update({}, updated);
+      await gameEvents.update({ id: ev.id }, updated);
 
       if (updated.status !== ev.status) {
         if (updated.status === "cancelled") {
@@ -306,7 +306,7 @@ export async function eventsRouteHandler(
       const existing = await eventRsvps.queryOne({ eventId: ev.id, playerId: userId });
       if (existing) {
         const updated = { ...existing, status, note, createdAt: existing.createdAt };
-        await eventRsvps.update({}, updated);
+        await eventRsvps.update({ id: existing.id }, updated);
         await eventHooks.emit("event:rsvp", ev, updated);
         return jsonResponse(updated);
       }

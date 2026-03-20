@@ -136,8 +136,9 @@ const tokenize = (str: string): string[] => {
 };
 
 const checkAtom = async (atom: string, enactor: IDBObj, _target: IDBObj, depth: number): Promise<boolean> => {
+  if (depth > 10) return false; // Prevent deep recursion in atom checks
   atom = atom.trim();
-  
+
   // Power/Flag Check
   if (atom.startsWith("+") || atom.match(/^[a-zA-Z0-9_+]+$/)) { 
     const flagName = atom.startsWith("+") ? atom.slice(1) : atom;

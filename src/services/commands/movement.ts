@@ -18,7 +18,7 @@ export const matchExits = async (ctx: IContext) => {
 
     for (const exit of exits) {
       const name = exit.data?.name as string | undefined;
-      if (!name) continue;
+      if (!name || typeof name !== 'string') continue;
       const parts = name.split(";").map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
       const reg = new RegExp(`^${parts.join("|")}$`, "i");
       const match = ctx.msg?.trim().match(reg);
@@ -68,7 +68,7 @@ export const matchExits = async (ctx: IContext) => {
             });
             send(
               arrivals.map((p) => p.id),
-              `${en.data.name} arrives from ${room?.data?.name}.`,
+              `${moniker(en)} arrives from ${room?.data?.name}.`,
               {}
             );
           }

@@ -2091,6 +2091,7 @@ async function editDraft(
       u.send("%ch>BBS:%cn Text not found in draft body.");
       return;
     }
+    // replaceAll is intentional: BBS edit replaces every occurrence in the draft.
     draft.body = draft.body.replaceAll(old, newText);
     await setDraft(u, draft);
     u.send("%ch>BBS:%cn Draft body updated.");
@@ -2099,6 +2100,7 @@ async function editDraft(
       u.send("%ch>BBS:%cn Text not found in draft subject.");
       return;
     }
+    // replaceAll is intentional: BBS edit replaces every occurrence in the draft.
     draft.subject = draft.subject.replaceAll(old, newText);
     await setDraft(u, draft);
     u.send("%ch>BBS:%cn Draft subject updated.");

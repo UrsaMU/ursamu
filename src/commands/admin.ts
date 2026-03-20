@@ -2,6 +2,13 @@ import { addCmd } from "../services/commands/index.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 import { logSecurity } from "../utils/logger.ts";
 
+/** Check whether a flags value (Set or space-delimited string) contains a flag. */
+const hasFlag = (flags: Set<string> | string | unknown, flag: string): boolean => {
+  if (flags instanceof Set) return flags.has(flag);
+  if (typeof flags === "string") return flags.includes(flag);
+  return false;
+};
+
 export default () => {
   addCmd({
     name: "@boot",
@@ -12,8 +19,8 @@ export default () => {
     exec: async (u: IUrsamuSDK) => {
       const tar = await u.util.target(u.me, u.cmd.args[0]);
       if (!tar) return u.send("Player not found.");
-      if (!tar.flags.has("player")) return u.send("You can only boot players.");
-      if (tar.flags.has("superuser")) return u.send("You cannot boot a superuser.");
+      if (!hasFlag(tar.flags, "player")) return u.send("You can only boot players.");
+      if (hasFlag(tar.flags, "superuser")) return u.send("You cannot boot a superuser.");
       await logSecurity("ADMIN_BOOT", { actor: u.me.id, target: tar.id });
       u.send("You are being booted from the server.", tar.id);
       await u.sys.disconnect(tar.id);
@@ -29,8 +36,8 @@ export default () => {
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
       const tar = await u.util.target(u.me, u.cmd.args[0]);
-      if (!tar || !tar.flags.has("player")) return u.send("Player not found.");
-      if (tar.flags.has("superuser")) return u.send("You cannot toad a superuser.");
+      if (!tar || !hasFlag(tar.flags, "player")) return u.send("Player not found.");
+      if (hasFlag(tar.flags, "superuser")) return u.send("You cannot toad a superuser.");
       await logSecurity("ADMIN_TOAD", { actor: u.me.id, target: tar.id });
       u.send("You have been toaded.", tar.id);
       await u.sys.disconnect(tar.id);
@@ -48,7 +55,7 @@ export default () => {
     exec: async (u: IUrsamuSDK) => {
       const [name, pass] = u.cmd.args;
       const tar = await u.util.target(u.me, name);
-      if (!tar || !tar.flags.has("player")) return u.send("Player not found.");
+      if (!tar || !hasFlag(tar.flags, "player")) return u.send("Player not found.");
       await logSecurity("ADMIN_NEWPASSWORD", { actor: u.me.id, target: tar.id });
       await u.auth.setPassword(tar.id, pass);
       u.send(`Password for ${u.util.displayName(tar, u.me)} changed.`);
@@ -67,7 +74,7 @@ export default () => {
       const thing = await u.util.target(u.me, thingName);
       const newOwner = await u.util.target(u.me, newOwnerName);
       if (!thing) return u.send("Object not found.");
-      if (!newOwner || !newOwner.flags.has("player")) return u.send("New owner not found.");
+      if (!newOwner || !hasFlag(newOwner.flags, "player")) return u.send("New owner not found.");
       await u.db.modify(thing.id, "$set", { "data.owner": newOwner.id });
       u.send(`Owner of ${u.util.displayName(thing, u.me)} changed to ${u.util.displayName(newOwner, u.me)}.`);
     },
@@ -81,7 +88,7 @@ export default () => {
     category: "admin",
     exec: async (u: IUrsamuSDK) => {
       const tar = await u.util.target(u.me, u.cmd.args[0]);
-      if (!tar || !tar.flags.has("player")) return u.send("Player not found.");
+      if (!tar || !hasFlag(tar.flags, "player")) return u.send("Player not found.");
       const token = crypto.randomUUID();
       const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
       await u.db.modify(tar.id, "$set", { "data.resetToken": token, "data.resetTokenExpiry": expiry });

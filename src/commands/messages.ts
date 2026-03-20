@@ -38,6 +38,7 @@ export default () => {
           tarObj.dbobj.data ||= {};
 
           if (!message) {
+            if (!tarObj.dbobj.data) { await tarObj.save(); return; }
             delete tarObj.dbobj.data[msg.attr];
             await tarObj.save();
             return send(
