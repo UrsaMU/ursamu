@@ -299,7 +299,9 @@ class LocalSandbox {
                (async () => {
                   const socket = wsService.getConnectedSockets().find(s => s.id === context.socketId);
                   if (socket) {
-                    socket.cid = e.data.id;
+                    // Only assign cid if not already set — prevents a compromised script
+                    // from hijacking another player's authenticated socket.
+                    if (!socket.cid) socket.cid = e.data.id;
                     socket.join(`#${e.data.id}`);
                     const player = await db.queryOne({ id: e.data.id });
                     if (player) {
