@@ -9,7 +9,7 @@ export const capString = (string: string) => {
   return words
     .map((word) => {
       if (word.startsWith("(")) {
-        return `(${capitalizeFirstLetter(word.slice(1))})`;
+        return `(${capitalizeFirstLetter(word.slice(1))}`;
       } else {
         return capitalizeFirstLetter(word);
       }
