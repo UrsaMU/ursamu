@@ -22,17 +22,18 @@ export default async (u: IUrsamuSDK) => {
   // `alias.ts` used `u.db.search`.
   // I should use `u.db.search`.
   
-  const existing = await u.db.search({ "data.name": new RegExp(`^${newName.trim()}$`, "i") });
+  const esc = newName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const existing = await u.db.search({ "data.name": new RegExp(`^${esc}$`, "i") });
   if (existing.length > 0) {
        // Check if it's the same object?
        if (existing[0].id !== target.id) {
            return u.send("That name is already taken.");
        }
   }
-  
+
   if (target.flags.has("player")) {
       // Check alias too?
-      const aliasTaken = await u.db.search({ "data.alias": new RegExp(`^${newName.trim()}$`, "i") });
+      const aliasTaken = await u.db.search({ "data.alias": new RegExp(`^${esc}$`, "i") });
       if (aliasTaken.length > 0 && aliasTaken[0].id !== target.id) {
           return u.send("That name is taken as an alias.");
       }
