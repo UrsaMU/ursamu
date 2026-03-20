@@ -49,7 +49,7 @@ Deno.test("POST /register — creates user and returns token", OPTS, async () =>
 
   const req = new Request("http://localhost/api/v1/auth/register", {
     method: "POST",
-    body: JSON.stringify({ username: "RegTestUser", password: "pass123", email: "reg@test.com" }),
+    body: JSON.stringify({ username: "RegTestUser", password: "pass1234", email: "reg@test.com" }),
     headers: { "Content-Type": "application/json" },
   });
   const res = await authHandler(req);
@@ -68,7 +68,7 @@ Deno.test("POST /register — duplicate username returns 409", OPTS, async () =>
 
   const req = new Request("http://localhost/api/v1/auth/register", {
     method: "POST",
-    body: JSON.stringify({ username: "DupUser", password: "pw", email: "other@test.com" }),
+    body: JSON.stringify({ username: "DupUser", password: "password1", email: "other@test.com" }),
     headers: { "Content-Type": "application/json" },
   });
   const res = await authHandler(req);

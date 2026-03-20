@@ -4,6 +4,7 @@ import { compare, hash, genSalt } from "../../deps.ts";
 import { sign } from "../services/jwt/index.ts";
 import { getNextId } from "../utils/getNextId.ts";
 import { logSecurity } from "../utils/logger.ts";
+import { getConfig } from "../services/Config/mod.ts";
 
 const escRx = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -41,11 +42,12 @@ setInterval(() => {
 }, 60_000);
 
 // --- Input length limits ---
+const MIN_PASSWORD = 8;
 const MAX_USERNAME = 64;
 const MAX_PASSWORD = 512;
 const MAX_EMAIL = 254;
 
-export const authHandler = async (req: Request): Promise<Response> => {
+export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise<Response> => {
   if (req.method !== "POST") {
     return new Response("Method Not Allowed", { status: 405 });
   }
@@ -54,7 +56,10 @@ export const authHandler = async (req: Request): Promise<Response> => {
   const isRegister = url.pathname.endsWith("/register");
   const isReset = url.pathname.endsWith("/reset-password");
 
-  const clientIp = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+  const trustedProxy = getConfig<boolean>("server.trustedProxy") ?? false;
+  const clientIp = trustedProxy
+    ? (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown"
+    : remoteAddr;
 
   // --- Password reset ---
   if (isReset) {
@@ -65,8 +70,8 @@ export const authHandler = async (req: Request): Promise<Response> => {
           status: 400, headers: { "Content-Type": "application/json" },
         });
       }
-      if (typeof newPassword !== "string" || newPassword.length > MAX_PASSWORD) {
-        return new Response(JSON.stringify({ error: `Password must be ${MAX_PASSWORD} characters or fewer.` }), {
+      if (typeof newPassword !== "string" || newPassword.length < MIN_PASSWORD || newPassword.length > MAX_PASSWORD) {
+        return new Response(JSON.stringify({ error: `Password must be between ${MIN_PASSWORD} and ${MAX_PASSWORD} characters.` }), {
           status: 400, headers: { "Content-Type": "application/json" },
         });
       }
@@ -118,8 +123,8 @@ export const authHandler = async (req: Request): Promise<Response> => {
         if (typeof username !== "string" || username.length > MAX_USERNAME) {
             return new Response(JSON.stringify({ error: `Username must be ${MAX_USERNAME} characters or fewer.` }), { status: 400, headers: { "Content-Type": "application/json" } });
         }
-        if (typeof password !== "string" || password.length > MAX_PASSWORD) {
-            return new Response(JSON.stringify({ error: `Password must be ${MAX_PASSWORD} characters or fewer.` }), { status: 400, headers: { "Content-Type": "application/json" } });
+        if (typeof password !== "string" || password.length < MIN_PASSWORD || password.length > MAX_PASSWORD) {
+            return new Response(JSON.stringify({ error: `Password must be between ${MIN_PASSWORD} and ${MAX_PASSWORD} characters.` }), { status: 400, headers: { "Content-Type": "application/json" } });
         }
         if (typeof email !== "string" || email.length > MAX_EMAIL) {
             return new Response(JSON.stringify({ error: `Email must be ${MAX_EMAIL} characters or fewer.` }), { status: 400, headers: { "Content-Type": "application/json" } });
