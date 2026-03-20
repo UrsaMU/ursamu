@@ -1,7 +1,10 @@
 import { force } from "../commands/index.ts";
 import { getNextId } from "../../utils/getNextId.ts";
+import { dpath } from "../../../deps.ts";
 
-const kv = await Deno.openKv();
+// Use the same KV store as the rest of the engine
+const dbPath = Deno.env.get("URSAMU_DB") || dpath.join(Deno.cwd(), "data", "ursamu.db");
+const kv = await Deno.openKv(dbPath);
 
 interface QueueEntry {
   pid: number;

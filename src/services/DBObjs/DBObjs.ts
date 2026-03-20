@@ -132,7 +132,7 @@ export class Obj implements IEntity {
   }
 
   async exits() {
-    return await dbojs.query({ location: this.id, flags: "exit" });
+    return await dbojs.query({ location: this.id, flags: /exit/i });
   }
 
   async contents() {
