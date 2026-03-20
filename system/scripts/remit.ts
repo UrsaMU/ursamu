@@ -28,7 +28,7 @@ export default async (u: IUrsamuSDK) => {
   }
 
   const roomResults = await u.db.search(roomRef);
-  const room = roomResults[0];
+  const room = roomResults.find(r => r.flags.has("room"));
   if (!room) {
     u.send(`I can't find a room called '${roomRef}'.`);
     return;

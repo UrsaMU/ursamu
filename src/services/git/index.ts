@@ -38,7 +38,7 @@ export class GitService {
         
         // Handle options object as last arg
         const lastArg = args[args.length - 1];
-        if (typeof lastArg === "object" && lastArg.cwd) {
+        if (typeof lastArg === "object" && lastArg !== null && lastArg.cwd) {
             cwd = lastArg.cwd;
             args.pop();
         }

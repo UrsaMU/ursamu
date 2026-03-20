@@ -41,5 +41,5 @@ export const setFlags = async (dbo: IDBOBJ, flgs: string, enactor?: IDBOBJ) => {
     await joinChans(ctx);
   }
 
-  return done.length ? done[0] : done;
+  return done.length ? done[0] : null;
 };

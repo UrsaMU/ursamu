@@ -41,6 +41,7 @@ export const repeatString = (string = " ", length: number) => {
       .filter(cell => cell.toLowerCase() !== "cn")
       .map(cell => "%" + cell + "%cn");
   } else {
+    if (cleanArray.length === 0) return "";
     cleanArray = cleanArray[0].split("");
   }
   
@@ -77,6 +78,7 @@ export const center = (string = "", length: number, filler = " ") => {
 
 export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
   const truncate = (input: string, size: number, fill: string) => {
+    if (size <= 3) return input.substring(0, size);
     const length = parser.stripSubs("telnet", input).length;
     return length > size - 3
       ? `${input.substring(0, size - 3)}...`
@@ -106,6 +108,7 @@ export const threeColumn = (...lists: string[][]) => {
   // strings.
 
   const truncate = (input: string, size: number, fill: string) => {
+    if (size <= 3) return input.substring(0, size);
     const length = parser.stripSubs("telnet", input).length;
     return length > size - 3
       ? `${input.substring(0, size - 3)}...`
