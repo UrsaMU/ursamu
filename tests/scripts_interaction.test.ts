@@ -16,6 +16,7 @@ const RAW_GET  = await Deno.readTextFile("./system/scripts/get.ts");
 const RAW_DROP = await Deno.readTextFile("./system/scripts/drop.ts");
 const RAW_GIVE = await Deno.readTextFile("./system/scripts/give.ts");
 const RAW_HOME = await Deno.readTextFile("./system/scripts/home.ts");
+const RAW_TRIGGER = await Deno.readTextFile("./system/scripts/trigger.ts");
 
 /** Strip imports/exports so the script runs as legacy block code */
 function wrapScript(raw: string, extra = ""): string {
@@ -272,6 +273,30 @@ Deno.test("home — sends 'home' message", OPTS, async () => {
   assertStringIncludes(result[0]?.msg ?? "", "home");
 
   await cleanup(ACTOR_ID);
+});
+
+// ===========================================================================
+// trigger.ts — trigger an attribute
+// ===========================================================================
+
+Deno.test("@trigger — missing authorization vulnerability (RED phase)", OPTS, async () => {
+  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Attacker" }, location: ROOM_ID });
+  // Target owned by someone else (make it an admin player so the fallback power check fails)
+  await dbojs.create({ id: THING_ID, flags: "player admin", data: { name: "AdminPlayer", owner: "admin_id" }, location: ROOM_ID });
+
+  const ctx = await makeCtx(ACTOR_ID, "trigger", ["AdminPlayer/EXPLODE"]);
+  ctx.permissions = { [THING_ID]: false };
+  
+  // Try to trigger the attribute
+  const result = await sandboxService.runScript(wrapScript(RAW_TRIGGER), ctx, SLOW) as { msg: string }[];
+  
+  const msgs = result.map(r => r.msg).join(" ");
+  // If the vulnerability exists, the script will silently execute the trigger
+  // and NOT send "Permission denied."
+  // By asserting it DOES include "Permission denied.", this test should FAIL in the RED phase.
+  assertStringIncludes(msgs, "Permission denied.");
+
+  await cleanup(ACTOR_ID, THING_ID);
 });
 
 // Close the DB after all tests

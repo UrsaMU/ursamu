@@ -21,6 +21,7 @@ import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 const RAW_CREATE   = await Deno.readTextFile("./system/scripts/create.ts");
 const RAW_DIG      = await Deno.readTextFile("./system/scripts/dig.ts");
 const RAW_DESCRIBE = await Deno.readTextFile("./system/scripts/describe.ts");
+const RAW_OPEN     = await Deno.readTextFile("./system/scripts/open.ts");
 
 // ---------------------------------------------------------------------------
 // Script wrapper
@@ -477,5 +478,40 @@ Deno.test("@describe — can describe 'here' (the actor's current room)", OPTS, 
   }
 
   await cleanup(ACTOR_ID, ROOM_ID);
+});
+
+// ---------------------------------------------------------------------------
+// @open tests
+// ---------------------------------------------------------------------------
+
+Deno.test("@open — missing authorization vulnerability on back exits (RED phase)", OPTS, async () => {
+  const actor = await dbojs.create({
+    id: ACTOR_ID,
+    flags: "player connected",
+    data: { name: "NormalPlayer" },
+    location: ROOM_ID,
+  });
+
+  const destRoom = await dbojs.create({
+    id: "sb_dest_room",
+    flags: "room",
+    data: { name: "Admin_Only_Room", owner: "admin_id" },
+  });
+
+  const ctx = makeCtx(actor.id, "player connected", "NormalPlayer", "@open", ["MyExit=#sb_dest_room,BackExit"], { quota: 5 });
+  // Mock permissions to deny building in destRoom
+  ctx.permissions = { ["sb_dest_room"]: false };
+
+  const result = await sandboxService.runScript(wrapScript(RAW_OPEN), ctx, SLOW) as string[];
+
+  const msgs = result.join(" ");
+  // If the vulnerability exists, the script will create the back exit and not deny permission.
+  assertStringIncludes(msgs, "Permission denied");
+
+  await cleanup(ACTOR_ID, destRoom.id);
+});
+
+// Close the DB after all tests
+Deno.test("cleanup — close DB", OPTS, async () => {
   await DBO.close();
 });
