@@ -658,7 +658,7 @@ export function registerNotesCommands() {
   addCmd({
     name: "+noteapprove",
     pattern: /^\+noteapprove\s+(.*)/i,
-    lock: "connected&superuser+",
+    lock: "connected & superuser+",
     exec: async (u: IUrsamuSDK) => {
       const sid = u.socketId || "";
       const playerObj = await dbojs.queryOne({ id: u.me.id });

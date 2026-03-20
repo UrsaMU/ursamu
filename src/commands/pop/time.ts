@@ -256,7 +256,7 @@ export default () => {
           return;
         }
         const raw = value.toUpperCase();
-        let multiplier = -1; // default BCE
+        let multiplier = 1; // default CE
         let numStr = raw;
 
         if (raw.endsWith("BCE") || raw.endsWith("BC")) {

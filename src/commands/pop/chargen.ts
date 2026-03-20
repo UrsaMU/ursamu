@@ -381,9 +381,12 @@ async function checkRequiredNotes(
   // Build list of required note names
   const required: string[] = ["Background"];
 
-  // Commerce and Crafts require notes if the character has dots in them
-  if ((stats["Commerce"] || 0) > 0) required.push("Commerce");
-  if ((stats["Crafts"] || 0) > 0) required.push("Crafts");
+  // Commerce and Crafts require notes if the character has dots in them.
+  // Also check phase2_stats snapshot — if the ability was set during Phase 2,
+  // the note is still required even if the current value was lowered to 0.
+  const phase2 = (data.phase2_stats || {}) as Record<string, number>;
+  if ((stats["Commerce"] || 0) > 0 || (phase2["Commerce"] || 0) > 0) required.push("Commerce");
+  if ((stats["Crafts"] || 0) > 0 || (phase2["Crafts"] || 0) > 0) required.push("Crafts");
 
   // Merits/flaws with requires_note: true
   const seen = new Set<string>();
@@ -2413,7 +2416,7 @@ async function handleBioField(sid: string, playerObj: any, data: Record<string, 
     return;
   }
 
-  if (normalized === "birthyear" || normalized === "birthyear") {
+  if (normalized === "birthyear" || normalized === "birth_year") {
     if (!data.sphere) return send([sid], "%ch>GAME:%cn You must choose a sphere first.");
     if (!value) {
       await dbojs.modify({ id: playerObj.id }, "$unset", { "data.birthyear": 1 } as any);
@@ -2450,7 +2453,7 @@ async function handleBioField(sid: string, playerObj: any, data: Record<string, 
     return;
   }
 
-  if (normalized === "embraceyear" || normalized === "embraceyear") {
+  if (normalized === "embraceyear" || normalized === "embrace_year") {
     if (!data.sphere) return send([sid], "%ch>GAME:%cn You must choose a sphere first.");
     if (!value) {
       await dbojs.modify({ id: playerObj.id }, "$unset", { "data.embraceyear": 1 } as any);
