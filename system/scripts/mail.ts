@@ -52,7 +52,7 @@ interface IUrsamuSDK {
 // Formatting Helpers
 const HR = "-".repeat(77);
 const PAD = (text: string, width: number) => text.padEnd(width).slice(0, width);
-const DATE = (timestamp: number) => new Date(timestamp).toLocaleDateString() + " " + new Date(timestamp).toLocaleTimeString();
+const _DATE = (timestamp: number) => new Date(timestamp).toLocaleDateString() + " " + new Date(timestamp).toLocaleTimeString();
 const DATEFULL = (timestamp: number) => {
     const d = new Date(timestamp);
     const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -257,7 +257,7 @@ export default async (u: IUrsamuSDK) => {
             await u.db.modify(en.id, "$set", { "data.tempMail": draft });
             // Mark original as replied
             if (orig.id) {
-                try { await u.mail.modify({ id: orig.id }, "$set", { replied: true }); } catch {}
+                try { await u.mail.modify({ id: orig.id }, "$set", { replied: true }); } catch { /* ignore */ }
             }
             u.send(`%chMAIL:%cn Replying to "${orig.subject}". Use '-<text>' to add lines, 'mail send' to send.`);
             break;
@@ -331,7 +331,7 @@ export default async (u: IUrsamuSDK) => {
             await u.mail.send(forwarded);
             // Mark original as forwarded
             if (orig.id) {
-                try { await u.mail.modify({ id: orig.id }, "$set", { forwarded: true }); } catch {}
+                try { await u.mail.modify({ id: orig.id }, "$set", { forwarded: true }); } catch { /* ignore */ }
             }
             u.send(`%chMAIL:%cn Message forwarded to ${target.name}.`);
             u.send(`%chMAIL:%cn You have a forwarded message from ${en.name || "Unknown"}`, target.id);
