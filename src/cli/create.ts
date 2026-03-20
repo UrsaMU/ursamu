@@ -3,6 +3,7 @@
 import { parse } from "jsr:@std/flags@^0.224.0";
 import { join, dirname, fromFileUrl } from "jsr:@std/path@^0.224.0";
 import { existsSync } from "jsr:@std/fs@^0.224.0";
+import { GAME_PROJECT_TASKS } from "./game-project-tasks.ts";
 
 // Get the directory of the current script (safe for both file:// and JSR https:// URLs)
 const __dirname = import.meta.url.startsWith("file://")
@@ -489,18 +490,7 @@ console.log("Created text/default_connect.txt with complete content");
 // Create a deno.json file
 const denoJsonContent = `{
   "nodeModulesDir": "auto",
-  "tasks": {
-    "start":   "bash ./scripts/run.sh",
-    "daemon":  "bash ./scripts/daemon.sh",
-    "stop":    "bash ./scripts/stop.sh",
-    "restart": "bash ./scripts/restart.sh",
-    "status":  "bash ./scripts/status.sh",
-    "logs":    "tail -f logs/main.log logs/telnet.log",
-    "update":  "deno run -A jsr:@ursamu/ursamu/cli update",
-    "server":  "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
-    "telnet":  "deno run -A --unstable-detect-cjs --unstable-kv ./src/telnet.ts",
-    "test":    "deno test --allow-all --unstable-kv --no-check"
-  },
+  "tasks": ${JSON.stringify(GAME_PROJECT_TASKS, null, 2).replace(/\n/g, "\n  ")},
   "compilerOptions": {
     "lib": ["deno.window"],
     "types": ["./node_modules/@types/node/index.d.ts"]

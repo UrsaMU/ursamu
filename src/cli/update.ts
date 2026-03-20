@@ -10,6 +10,7 @@ import { parse } from "jsr:@std/flags@^0.224.0";
 import { join } from "jsr:@std/path@^0.224.0";
 import { existsSync } from "jsr:@std/fs@^0.224.0";
 import { bold, cyan, dim, green, red, yellow } from "jsr:@std/fmt@^0.224.0/colors";
+import { GAME_PROJECT_TASKS } from "./game-project-tasks.ts";
 
 const args = parse(Deno.args, {
   boolean: ["help", "dry-run"],
@@ -78,20 +79,14 @@ const SHELL_SCRIPTS = ["daemon.sh", "main-loop.sh", "run.sh", "stop.sh", "restar
 const scriptsDir = join(cwd, "scripts");
 
 let latestVersion: string | null = null;
-let upstreamTasks: Record<string, string> | null = null;
 let denoJsonDirty = false;
+
+// Game-project tasks are always sourced from the bundled constant — not from
+// the engine's own deno.json (which contains engine-dev tasks, not game tasks).
+const upstreamTasks: Record<string, string> = GAME_PROJECT_TASKS;
 
 if (isLocal) {
   console.log(`Local ursamu detected (${currentSpecifier}) — skipping version bump.`);
-  // Load tasks from local ursamu deno.json
-  const localDenoJsonPath = join(cwd, currentSpecifier.replace(/\/$/, ""), "deno.json");
-  try {
-    const raw = await Deno.readTextFile(localDenoJsonPath);
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    upstreamTasks = parsed.tasks as Record<string, string> | null;
-  } catch {
-    console.warn("Warning: could not read local ursamu deno.json — skipping task sync.");
-  }
 } else {
   const currentVersionMatch = currentSpecifier.match(/@(\d+\.\d+\.\d+)/);
   const currentVersion = currentVersionMatch ? currentVersionMatch[1] : null;
@@ -116,20 +111,6 @@ if (isLocal) {
     console.log(`  ${currentSpecifier} → ${newSpecifier}`);
     imports[importKey] = newSpecifier;
     denoJsonDirty = true;
-  }
-
-  // ── 4. fetch upstream deno.json for task sync ─────────────────────────────
-
-  try {
-    const res = await fetch(`https://jsr.io/@ursamu/ursamu/${latestVersion}/deno.json`);
-    if (res.ok) {
-      const parsed = await res.json() as Record<string, unknown>;
-      upstreamTasks = parsed.tasks as Record<string, string> | null;
-    } else {
-      console.warn(`Warning: could not fetch upstream deno.json (${res.status}) — skipping task sync.`);
-    }
-  } catch (e) {
-    console.warn(`Warning: could not fetch upstream deno.json — ${e}`);
   }
 }
 
