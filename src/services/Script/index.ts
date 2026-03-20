@@ -32,7 +32,9 @@ export class ScriptService {
         // Check for watchdog (timeout)
         const start = Date.now();
         runtime.setInterruptHandler(() => {
-            return Date.now() - start > 50; // 50ms timeout
+            const timedOut = Date.now() - start > 50; // 50ms timeout
+            if (timedOut) console.warn("[Script] Execution timed out after 50ms");
+            return timedOut;
         });
 
         try {
@@ -60,6 +62,7 @@ export class ScriptService {
             throw new Error(`Script Execution Error: ${msg}`);
         } finally {
             vm.dispose();
+            runtime.dispose();
         }
     }
 }

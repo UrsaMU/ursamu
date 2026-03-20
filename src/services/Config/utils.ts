@@ -18,7 +18,7 @@ export function merge<T extends Record<string, unknown>>(
       typeof source[key] === 'object' &&
       !Array.isArray(source[key])
     ) {
-      if (!(key in target)) {
+      if (!(key in target) || Array.isArray(target[key]) || Array.isArray(source[key])) {
         Object.assign(output, { [key]: source[key] });
       } else {
         output[key as keyof T] = merge(

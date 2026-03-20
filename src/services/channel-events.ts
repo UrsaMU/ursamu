@@ -21,7 +21,8 @@ const _handlers: HandlerList = {
 
 export const channelEvents = {
   on<K extends keyof ChannelEventMap>(event: K, handler: ChannelEventMap[K]): void {
-    (_handlers[event] as ChannelEventMap[K][]).push(handler);
+    const list = _handlers[event] as ChannelEventMap[K][];
+    if (!list.includes(handler)) list.push(handler);
   },
 
   off<K extends keyof ChannelEventMap>(event: K, handler: ChannelEventMap[K]): void {

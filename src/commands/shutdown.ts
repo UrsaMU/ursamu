@@ -13,11 +13,6 @@ export default () =>
     exec: async (_u: IUrsamuSDK) => {
       await broadcast("Server shutting down...");
 
-      const players = await dbojs.query({ flags: /connected/i });
-      for (const player of players) {
-        await setFlags(player, "!connected");
-      }
-
       wsService.broadcast({
         event: "message",
         payload: {
@@ -25,6 +20,11 @@ export default () =>
           data: { shutdown: true },
         },
       });
+
+      const players = await dbojs.query({ flags: /connected/i });
+      for (const player of players) {
+        await setFlags(player, "!connected");
+      }
 
       setTimeout(() => {
         console.log("Shutting down via @shutdown command.");

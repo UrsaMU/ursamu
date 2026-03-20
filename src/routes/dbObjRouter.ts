@@ -78,7 +78,7 @@ export const dbObjHandler = async (req: Request, userId: string): Promise<Respon
 
           // Explicitly ignore id, flags, location — only allow description at top level
           if (updates.description && !POISON_KEYS.has("description")) {
-            targetObj.description = updates.description;
+            targetObj.data = { ...targetObj.data, description: updates.description };
           }
 
           await dbojs.modify({ id: targetObj.id }, "$set", targetObj);
