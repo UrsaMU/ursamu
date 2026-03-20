@@ -11,7 +11,9 @@ export const send = (targets: string[], msg: string, data?: data, exclude: strin
         data
       }
     })
-  } else {
+  } else if (targets.length === 0) {
+    // Only broadcast to everyone when no targets were specified (intentional broadcast).
+    // If targets were specified but all got excluded, send to nobody.
     wsService.broadcast({
       event: "message",
       payload: {

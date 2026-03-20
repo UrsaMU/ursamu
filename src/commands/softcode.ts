@@ -19,6 +19,10 @@ export default () => {
       if (!en) return;
 
       const tarName = u.cmd.args[0];
+      if (!u.cmd.args[1]) {
+        u.send("Usage: @trigger <object>/<attribute>");
+        return;
+      }
       const attrName = u.cmd.args[1].toUpperCase();
       const triggerArgsRaw = u.cmd.args[2] || "";
 

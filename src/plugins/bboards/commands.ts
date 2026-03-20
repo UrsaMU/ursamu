@@ -554,7 +554,7 @@ function resolveKey(
     const rn = parseInt(rnStr, 10);
     const post = boardPosts.find((p) => p.num === pn) || null;
     if (!post) return { post: null, reply: undefined };
-    const reply = post.replies.find((r) => r.num === rn) || undefined;
+    const reply = (post.replies || []).find((r) => r.num === rn) || undefined;
     return { post, reply: reply ?? undefined };
   }
   const pn = parseInt(msgKey, 10);

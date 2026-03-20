@@ -41,11 +41,11 @@ export default async (u: IUrsamuSDK) => {
   // Handle linking based on object type
   if (target.flags.has("room")) {
     // Rooms link their 'dropto'
-    await u.db.modify(target.id, "$set", { data: { ...target.state, dropto: destination.id } });
+    await u.db.modify(target.id, "$set", { "data.dropto": destination.id });
     u.send(`You link ${u.util.displayName(target, actor)} to ${u.util.displayName(destination, actor)}.`);
   } else if (target.flags.has("exit")) {
     // Exits link their 'destination'
-    await u.db.modify(target.id, "$set", { data: { ...target.state, destination: destination.id } });
+    await u.db.modify(target.id, "$set", { "data.destination": destination.id });
     u.send(`You link ${u.util.displayName(target, actor)} to ${u.util.displayName(destination, actor)}.`);
   } else {
     // Players/Things link their 'home'
@@ -55,7 +55,7 @@ export default async (u: IUrsamuSDK) => {
       u.send("You can't link to that.");
       return;
     }
-    await u.db.modify(target.id, "$set", { data: { ...target.state, home: destination.id } });
+    await u.db.modify(target.id, "$set", { "data.home": destination.id });
     u.send(`You link ${u.util.displayName(target, actor)} to ${u.util.displayName(destination, actor)}.`);
   }
 };

@@ -1,4 +1,4 @@
-import { parser } from "../services/Softcode/parser.ts";
+import { parser } from "../services/parser/parser.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { displayName } from "./displayName.ts";
 

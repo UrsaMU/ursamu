@@ -6,7 +6,7 @@ import { IUrsamuSDK, IDBObj as _IDBObj } from "../../src/@types/UrsamuSDK.ts";
  */
 export default (u: IUrsamuSDK) => {
   const actor = u.me;
-  const items = (actor.contents || []).filter(obj => !obj.flags.has('exit') && !obj.flags.has('room'));
+  const items = (actor.contents || []).filter(obj => !obj.flags.has('exit') && !obj.flags.has('room') && !obj.flags.has('player'));
 
   // 1. Telnet Output
   let telnet = `%ch${u.util.displayName(actor, actor)}'s Inventory%cn\n`;

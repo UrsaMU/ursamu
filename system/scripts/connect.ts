@@ -49,7 +49,13 @@ export default async (u: IUrsamuSDK) => {
   await u.auth.login(player.id);
 
   // Failsafe: if no superusers exist, promote this player
-  const superusers = await u.db.search({ flags: /superuser/ });
+  let superusers: typeof results = [];
+  try {
+    const all = await u.db.search({});
+    superusers = all.filter((o) => o.flags && o.flags.has("superuser"));
+  } catch (e) {
+    console.warn("connect.ts: superuser search failed, skipping promotion check:", e);
+  }
   if (!superusers.length && !player.flags.has("superuser")) {
     await u.setFlags(player.id, "superuser");
     u.send("%ch%cyYou are the first user — superuser access granted.%cn");
