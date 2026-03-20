@@ -1,5 +1,5 @@
 import { dpath } from "../../../deps.ts";
-import { getConfig } from "../Config/mod.ts";
+import { getConfig, initConfig } from "../Config/mod.ts";
 import parser from "../parser/parser.ts";
 
 interface ITelnetSocket {
@@ -29,8 +29,10 @@ export const startTelnetServer = async (options?: {
   welcomeFile?: string;
   wsPort?: number;
 }): Promise<Deno.Listener> => {
-  const port = options?.port || getConfig<number>("server.telnet");
-  const wsPort = options?.wsPort || getConfig<number>("server.http") || 4203;
+  // Ensure config is loaded so custom ports in config.json are respected
+  await initConfig();
+  const port = options?.port ?? getConfig<number>("server.telnet") ?? 4201;
+  const wsPort = options?.wsPort ?? getConfig<number>("server.http") ?? 4203;
   const welcomeFile = options?.welcomeFile || getConfig<string>("game.text.connect") || "text/default_connect.txt";
 
   let __dirname;
@@ -143,15 +145,9 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
       sock = new WebSocket(wsUrl);
 
       sock.onopen = () => {
-        // Telnet just connected to WS
-        
         if (isReconnecting) {
             write(parser.substitute("telnet", "%chGame>%cn Server is back! Reconnected.\r\n"));
-            
-            // If we have a CID, try to re-attach/login?
-            // The current implementation just stores CID but doesn't auto-login on WS layer unless the server handles it.
-            // For now, we assume the user might need to look or interact to resume.
-            // Ideally, we'd send a "re-sync" packet.
+
             if (cid) {
                sock?.send(JSON.stringify({
                    msg: "look",

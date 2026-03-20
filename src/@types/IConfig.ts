@@ -10,6 +10,7 @@ export interface IConfig {
     wiki?: string;
     bboard?: string;
     corsOrigins?: string | string[];
+    trustedProxy?: boolean;
     maxConnectionsPerIp?: number;
   };
   game?: {

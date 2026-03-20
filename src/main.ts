@@ -176,11 +176,14 @@ export const initializeEngine = async (
   // Start the consolidated Deno.serve for HTTP and WebSockets
   const httpPort = getConfig<number>("server.http") || 4203;
 
-  Deno.serve({ port: httpPort }, async (req) => {
+  Deno.serve({ port: httpPort }, async (req, info) => {
     try {
+      const trustedProxy = getConfig<boolean>("server.trustedProxy") ?? false;
       // Handle WebSocket upgrade
       if (req.headers.get("upgrade") === "websocket") {
-        const remoteIp = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+        const remoteIp = trustedProxy
+          ? (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown"
+          : info.remoteAddr.hostname;
         const maxPerIp = getConfig<number>("server.maxConnectionsPerIp") || 20;
         if (!wsService.canConnect(remoteIp, maxPerIp)) {
           return new Response("Too many connections from this address", { status: 429 });
@@ -207,7 +210,10 @@ export const initializeEngine = async (
       }
 
       // Handle standard HTTP requests
-      return await handleRequest(req);
+      const remoteAddr = trustedProxy
+        ? (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown"
+        : info.remoteAddr.hostname;
+      return await handleRequest(req, remoteAddr);
     } catch (error) {
       console.error("Error handling request:", error);
       return new Response(JSON.stringify({ error: "Internal Server Error" }), {

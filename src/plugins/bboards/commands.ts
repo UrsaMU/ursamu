@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 /**
  * Myrddin-style BBS Commands for UrsaMU
  *
@@ -178,13 +177,23 @@ async function getPost(
 }
 
 function getReply(post: IPost, replyNum: number): IReply | undefined {
+  if (!post.replies || !Array.isArray(post.replies)) return undefined;
   return post.replies.find((r) => r.num === replyNum);
 }
 
 function getNextReplyNum(post: IPost): number {
   if (!post.replies || post.replies.length === 0) return 1;
-  return Math.max(...post.replies.map((r) => r.num)) + 1;
+  // Use max + 1 to avoid gaps. Even if a reply was deleted, new replies
+  // get the next sequential number above the highest existing one.
+  const maxNum = Math.max(...post.replies.map((r) => r.num));
+  return maxNum + 1;
 }
+
+// Note: Reply numbering has a theoretical race condition if two users
+// reply to the same post simultaneously. The DBO doesn't support
+// transactions, so the second save could overwrite the first reply.
+// In practice this is extremely rare on a MUSH. If it becomes an issue,
+// the post should be re-read after save to verify the reply was persisted.
 
 // ---------------------------------------------------------------------------
 // Read tracking (stored on player: state.bb_read)
@@ -333,7 +342,9 @@ async function clearDraft(u: IUrsamuSDK): Promise<void> {
 // ---------------------------------------------------------------------------
 
 function getSig(u: IUrsamuSDK): string | null {
-  return (u.me.state.bb_sig as string) || null;
+  const sig = u.me.state.bb_sig;
+  if (typeof sig === "string" && sig.length > 0) return sig;
+  return null;
 }
 
 async function setSig(u: IUrsamuSDK, sig: string): Promise<void> {
@@ -365,13 +376,52 @@ function canWrite(_u: IUrsamuSDK, board: IBoard): boolean {
 // Post renumbering
 // ---------------------------------------------------------------------------
 
+// Renumber posts after deletion and migrate all players' read tracking keys.
 async function renumberPosts(boardNum: number): Promise<void> {
   const boardPosts = await getBoardPosts(boardNum);
+  if (boardPosts.length === 0) return;
+
+  // Build old→new number mapping
+  const numMap = new Map<number, number>();
   for (let i = 0; i < boardPosts.length; i++) {
     const newNum = i + 1;
     if (boardPosts[i].num !== newNum) {
+      numMap.set(boardPosts[i].num, newNum);
       await posts.modify({ id: boardPosts[i].id }, "$set", { num: newNum });
     }
+  }
+
+  // If no numbers changed, nothing to migrate
+  if (numMap.size === 0) return;
+
+  // Migrate all players' read tracking for this board
+  try {
+    const { dbojs } = await import("../../services/Database/index.ts");
+    const allPlayers = await dbojs.query({ flags: /player/ });
+    for (const player of allPlayers) {
+      const readData = (player.data?.bb_read as Record<string, string[]>) || {};
+      const boardKey = String(boardNum);
+      const oldKeys = readData[boardKey];
+      if (!oldKeys || !Array.isArray(oldKeys) || oldKeys.length === 0) continue;
+
+      const newKeys: string[] = [];
+      for (const key of oldKeys) {
+        if (key.includes(".")) {
+          const [pStr, rStr] = key.split(".", 2);
+          const oldP = parseInt(pStr, 10);
+          const newP = numMap.get(oldP);
+          newKeys.push(newP !== undefined ? `${newP}.${rStr}` : key);
+        } else {
+          const oldP = parseInt(key, 10);
+          const newP = numMap.get(oldP);
+          newKeys.push(newP !== undefined ? String(newP) : key);
+        }
+      }
+      readData[boardKey] = newKeys;
+      await dbojs.modify({ id: player.id }, "$set", { "data.bb_read": readData });
+    }
+  } catch {
+    // Read tracking migration failure shouldn't block deletion
   }
 }
 
@@ -478,9 +528,10 @@ function parsePostSpec(
     const trimmed = part.trim();
     if (trimmed.includes("-")) {
       const [startStr, endStr] = trimmed.split("-", 2);
-      const start = parseInt(startStr, 10);
-      const end = parseInt(endStr, 10);
+      let start = parseInt(startStr, 10);
+      let end = parseInt(endStr, 10);
       if (isNaN(start) || isNaN(end)) return null;
+      if (start > end) { const tmp = start; start = end; end = tmp; }
       for (let i = start; i <= end; i++) {
         if (postNums.has(i)) nums.push(i);
       }
@@ -503,8 +554,8 @@ function resolveKey(
     const rn = parseInt(rnStr, 10);
     const post = boardPosts.find((p) => p.num === pn) || null;
     if (!post) return { post: null, reply: undefined };
-    const reply = post.replies.find((r) => r.num === rn);
-    return { post, reply };
+    const reply = post.replies.find((r) => r.num === rn) || undefined;
+    return { post, reply: reply ?? undefined };
   }
   const pn = parseInt(msgKey, 10);
   const post = boardPosts.find((p) => p.num === pn) || null;
@@ -543,10 +594,61 @@ async function setConfig(cfg: Partial<IBBConfig>): Promise<void> {
       readLock: "all()",
       writeLock: "all()",
       pendingDelete: false,
-      ...cfg,
-    } as any);
+    } as IBoard);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Post expiration cleanup
+// ---------------------------------------------------------------------------
+
+export async function cleanupExpiredPosts(): Promise<number> {
+  const cfg = await getConfig();
+  if (!cfg.autoTimeout) return 0;
+
+  const now = Date.now();
+  const allBoards = await getAllBoards();
+  let removed = 0;
+
+  for (const board of allBoards) {
+    const boardTimeout = board.timeout || cfg.timeout;
+    if (boardTimeout <= 0) continue;
+
+    const boardPosts = await getBoardPosts(board.num);
+    for (const post of boardPosts) {
+      const postTimeout = post.timeout || boardTimeout;
+      if (postTimeout <= 0) continue;
+
+      const ageMs = now - post.createdAt;
+      const timeoutMs = postTimeout * 24 * 60 * 60 * 1000;
+      if (ageMs > timeoutMs) {
+        await posts.delete({ id: post.id });
+        removed++;
+      }
+    }
+
+    if (removed > 0) {
+      await renumberPosts(board.num);
+    }
+  }
+
+  return removed;
+}
+
+// Run expiration check on startup and every 6 hours
+(async () => {
+  try {
+    const removed = await cleanupExpiredPosts();
+    if (removed > 0) console.log(`[bboards] Cleaned up ${removed} expired post(s).`);
+  } catch { /* startup cleanup failure is non-fatal */ }
+
+  setInterval(async () => {
+    try {
+      const removed = await cleanupExpiredPosts();
+      if (removed > 0) console.log(`[bboards] Cleaned up ${removed} expired post(s).`);
+    } catch { /* periodic cleanup failure is non-fatal */ }
+  }, 6 * 60 * 60 * 1000);
+})();
 
 // ---------------------------------------------------------------------------
 // Notification broadcast
@@ -1044,8 +1146,14 @@ addCmd({
     }
 
     if (args.toLowerCase() === "all") {
-      await markAllBoardsRead(u);
-      u.send("%ch>BBS:%cn All boards marked as read.");
+      // Only catch up boards the user can read
+      const allBoards = await boards.find({});
+      for (const b of allBoards) {
+        if (canRead(u, b) && isMember(u, b.num)) {
+          await markAllRead(u, b.num);
+        }
+      }
+      u.send("%ch>BBS:%cn All accessible boards marked as read.");
       return;
     }
 
@@ -1060,6 +1168,10 @@ addCmd({
       const { board, error } = await findBoard(part);
       if (!board) {
         u.send(`%ch>BBS:%cn ${error}`);
+        continue;
+      }
+      if (!canRead(u, board)) {
+        u.send(`%ch>BBS:%cn You don't have access to ${board.title}.`);
         continue;
       }
       await markAllRead(u, board.num);
@@ -1170,7 +1282,8 @@ addCmd({
     u.send(
       `%ch>BBS:%cn Draft started for board ${board.num} (${board.title}).\n` +
         ` Subject: %ch${subject}%cn\n` +
-        ` Use %ch+bb <text>%cn to add text, %ch+bbproof%cn to preview, %ch+bbpost%cn to submit.`,
+        ` Use %ch+bb <text>%cn to add text (required before posting).\n` +
+        ` Use %ch+bbproof%cn to preview, %ch+bbpost%cn to submit.`,
     );
   },
 });
@@ -1305,7 +1418,7 @@ async function submitDraft(u: IUrsamuSDK): Promise<void> {
 
 addCmd({
   name: "+bb",
-  pattern: /^\+?bb\s+(.+)/i,
+  pattern: /^\+bb(?![a-z])\s+(.+)/i,
   lock: "connected",
   exec: async (u: IUrsamuSDK) => {
     const args = (u.cmd.args[0] || "").trim();
@@ -1978,7 +2091,7 @@ async function editDraft(
       u.send("%ch>BBS:%cn Text not found in draft body.");
       return;
     }
-    draft.body = draft.body.replace(old, newText);
+    draft.body = draft.body.replaceAll(old, newText);
     await setDraft(u, draft);
     u.send("%ch>BBS:%cn Draft body updated.");
   } else {
@@ -1986,7 +2099,7 @@ async function editDraft(
       u.send("%ch>BBS:%cn Text not found in draft subject.");
       return;
     }
-    draft.subject = draft.subject.replace(old, newText);
+    draft.subject = draft.subject.replaceAll(old, newText);
     await setDraft(u, draft);
     u.send("%ch>BBS:%cn Draft subject updated.");
   }
@@ -2040,7 +2153,7 @@ async function editPost(
       u.send("%ch>BBS:%cn Text not found in reply body.");
       return;
     }
-    reply.body = reply.body.replace(old, newText);
+    reply.body = reply.body.replaceAll(old, newText);
     reply.editCount = (reply.editCount || 0) + 1;
     const updatedReplies = post.replies.map((r) =>
       r.num === replyNum ? reply : r
@@ -2077,7 +2190,7 @@ async function editPost(
   }
 
   await posts.modify({ id: post.id }, "$set", {
-    body: post.body.replace(old, newText),
+    body: post.body.replaceAll(old, newText),
     editCount: post.editCount + 1,
   });
   u.send(`%ch>BBS:%cn Post ${board.num}/${postNum} updated.`);
@@ -2237,6 +2350,20 @@ addCmd({
 
     const title = board.title;
 
+    // Warn connected players who have drafts on this board
+    try {
+      const { dbojs } = await import("../../services/Database/index.ts");
+      const connected = await dbojs.query({ flags: /connected/ });
+      for (const player of connected) {
+        const draft = player.data?.bb_draft as Record<string, unknown> | undefined;
+        if (draft && draft.boardNum === board.num) {
+          await dbojs.modify({ id: player.id }, "$unset", { "data.bb_draft": 1 });
+          const { send } = await import("../../services/broadcast/index.ts");
+          send([player.id], `%ch>BBS:%cn Board '${title}' was deleted. Your draft has been discarded.`);
+        }
+      }
+    } catch { /* draft cleanup failure shouldn't block deletion */ }
+
     // Delete all posts on this board
     const boardPosts = await getBoardPosts(board.num);
     for (const post of boardPosts) {
@@ -2277,6 +2404,10 @@ addCmd({
       return;
     }
 
+    if (!lockStr) {
+      u.send("%ch>BBS:%cn Lock cannot be empty. Use 'all()' for no restriction.");
+      return;
+    }
     await boards.modify({ id: board.id }, "$set", { readLock: lockStr });
     u.send(
       `%ch>BBS:%cn Read lock on '${board.title}' set to: ${lockStr}`,
@@ -2312,6 +2443,10 @@ addCmd({
       return;
     }
 
+    if (!lockStr) {
+      u.send("%ch>BBS:%cn Lock cannot be empty. Use 'all()' for no restriction.");
+      return;
+    }
     await boards.modify({ id: board.id }, "$set", { writeLock: lockStr });
     u.send(
       `%ch>BBS:%cn Write lock on '${board.title}' set to: ${lockStr}`,
@@ -2355,8 +2490,8 @@ addCmd({
 
     const postNum = parseInt(parsed.postStr, 10);
     const days = parseInt(rhs, 10);
-    if (isNaN(postNum) || isNaN(days)) {
-      u.send("%ch>BBS:%cn Post number and days must be integers.");
+    if (isNaN(postNum) || isNaN(days) || days < 0) {
+      u.send("%ch>BBS:%cn Post number must be an integer and days must be 0 or greater.");
       return;
     }
 
