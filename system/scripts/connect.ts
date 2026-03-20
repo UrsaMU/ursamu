@@ -32,10 +32,11 @@ export default async (u: IUrsamuSDK) => {
 
   // Find the player object to get the ID
   // We search for name or alias
-  const results = await u.db.search({ 
+  const esc = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const results = await u.db.search({
     $or: [
-      { "data.name": new RegExp(`^${name}$`, "i") },
-      { "data.alias": new RegExp(`^${name}$`, "i") }
+      { "data.name": new RegExp(`^${esc}$`, "i") },
+      { "data.alias": new RegExp(`^${esc}$`, "i") }
     ]
   });
 
