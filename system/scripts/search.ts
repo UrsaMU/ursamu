@@ -2,6 +2,8 @@ import { IUrsamuSDK, IDBObj } from "../../src/@types/UrsamuSDK.ts";
 
 export const aliases = ["search", "stats"];
 
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export default async (u: IUrsamuSDK) => {
   const cmd = u.cmd.original?.toLowerCase() || u.cmd.name.toLowerCase();
 
@@ -56,13 +58,13 @@ async function handleSearch(u: IUrsamuSDK) {
     
     if (parts.length > 1) {
         const [key, val] = parts;
-        if (key.trim() === "name") {
-             search = { "data.name": new RegExp(val.trim(), "i") };
+        if (key.trim().toLowerCase() === "name") {
+             search = { "data.name": new RegExp(escapeRegex(val.trim()), "i") };
         } else if (key.trim().match(/^flags?$/i)) {
-             search = { flags: new RegExp(val.trim(), "i") };
-        } else if (key.trim() === "owner") {
+             search = { flags: new RegExp(escapeRegex(val.trim()), "i") };
+        } else if (key.trim().toLowerCase() === "owner") {
              // Resolve owner name
-             const owner = await u.db.search({ "data.name": new RegExp(`^${val.trim()}$`, "i"), flags: /player/i });
+             const owner = await u.db.search({ "data.name": new RegExp(`^${escapeRegex(val.trim())}$`, "i"), flags: /player/i });
              if (owner.length > 0) {
                  search = { "data.owner": owner[0].id };
              } else {
@@ -72,7 +74,7 @@ async function handleSearch(u: IUrsamuSDK) {
              return u.send("Invalid search parameter.");
         }
     } else {
-        search = { "data.name": new RegExp(input.trim(), "i") };
+        search = { "data.name": new RegExp(escapeRegex(input.trim()), "i") };
     }
     
     const results = await u.db.search(search);

@@ -85,11 +85,11 @@ const parseLock = async (
       // Script Engine evaluation
       if (!enactor || !target) return false;
 
-      const result = await sandboxService.runScript(token.slice(1, -1), { 
+      const result = await sandboxService.runScript(token.slice(1, -1), {
         id: enactor.id,
         location: enactor.location || "limbo",
         state: enactor.state || {},
-        target: { id: target.id }
+        target: target ? { id: target.id } : undefined
       });
       return !!result && result !== "0" && result !== ""; 
     }

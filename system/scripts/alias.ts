@@ -2,6 +2,8 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
 export const aliases = ["alias"];
 
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 export default async (u: IUrsamuSDK) => {
   const input = (u.cmd.args[0] || "").trim();
 
@@ -28,8 +30,8 @@ export default async (u: IUrsamuSDK) => {
     // We might need to assume it's okay or add API.
     // Original code checked `isNameTaken`.
     // We can use `u.db.search` to check.
-    const taken = await u.db.search({ "data.alias": new RegExp(`^${aliasName}$`, "i") });
-    const takenName = await u.db.search({ "data.name": new RegExp(`^${aliasName}$`, "i") });
+    const taken = await u.db.search({ "data.alias": new RegExp(`^${escapeRegex(aliasName)}$`, "i") });
+    const takenName = await u.db.search({ "data.name": new RegExp(`^${escapeRegex(aliasName)}$`, "i") });
     
     if (taken.length > 0 && taken[0].id !== target.id) {
         return u.send("That alias is already taken.");

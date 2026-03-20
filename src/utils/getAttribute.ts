@@ -21,8 +21,8 @@ export const getAttribute = async (
 
   if (obj.data?.parent) {
     const parentId = obj.data.parent as string;
-    if (visited.has(parentId)) return undefined; // Cycle detected
     visited.add(obj.id);
+    if (visited.has(parentId)) return undefined; // Cycle detected
     const parent = await dbojs.queryOne({ id: parentId });
     if (parent) return getAttribute(parent, attr, visited);
   }

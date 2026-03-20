@@ -38,6 +38,8 @@ export default () => {
         attrs[idx].value = newVal;
         await dbojs.modify({ id: tar.id }, "$set", tar);
         send([u.socketId || ""], `Set - ${attrName.toUpperCase()}: ${newVal}`);
+      } else {
+        send([u.socketId || ""], "Attribute not found.");
       }
     },
   });

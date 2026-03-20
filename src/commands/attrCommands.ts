@@ -30,7 +30,7 @@ export default () => {
 
       if (attr && tarObj && tarObj.data) {
         if (!u.cmd.args[2]) {
-          data.attributes = data?.attributes?.filter(
+          data.attributes = (data?.attributes || []).filter(
             (a: IAttribute) => a.name !== attr.name
           );
           await tarObj.save();

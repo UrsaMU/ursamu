@@ -46,8 +46,8 @@ export default async (u: IUrsamuSDK) => {
       u.send("Value too long.");
       return;
     }
-    const attrCount = target.data ? Object.keys(target.data).length : 0;
-    if (!target.data?.[attribute] && attrCount >= 100) {
+    const attrCount = target.state ? Object.keys(target.state).length : 0;
+    if (!target.state?.[attribute] && attrCount >= 100) {
       u.send("Too many attributes (limit 100). Remove some before adding new ones.");
       return;
     }

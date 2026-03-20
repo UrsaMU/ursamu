@@ -163,7 +163,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
                 break;
               }
             }
-            if (obj) delete obj[last];
+            if (obj != null) delete obj[last];
           } else {
             delete (updated as Record<string, unknown>)[key];
           }
@@ -282,6 +282,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     throw new Error(`[DBO] atomicIncrement failed after 10 attempts on "${id}"`);
   }
 
+  // Note: KV store is keyed by data.id; query parameter is ignored.
   async update(_query: Query<T>, data: T): Promise<T> {
     const cv = await this.getKv();
     const plainData = { ...data };
