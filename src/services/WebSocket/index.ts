@@ -129,11 +129,17 @@ export class WebSocketService {
                 // preventing CID spoofing/impersonation of other players.
                 if (data.data?.cid && !sockData.cid) {
                     sockData.cid = data.data.cid;
-                    // Restore connected flag if missing
                     const player = await playerForSocket(sockData);
-                    if (player && !player.flags.includes("connected")) {
-                        await setFlags(player, "connected");
-                        console.log(`[WS] Restored session for ${moniker(player)}`);
+                    if (player) {
+                        // Restore connected flag if missing
+                        if (!player.flags.includes("connected")) {
+                            await setFlags(player, "connected");
+                            console.log(`[WS] Restored session for ${moniker(player)}`);
+                        }
+                        // Always rejoin channel rooms — socket rooms are in-memory
+                        // and lost on server restart even if the connected flag persists
+                        const { joinChans } = await import("../../utils/joinChans.ts");
+                        await joinChans({ socket: sockData, msg: "" });
                     }
                 }
 
