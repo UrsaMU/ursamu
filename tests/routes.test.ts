@@ -229,6 +229,38 @@ Deno.test("POST /building/room — unknown route returns 404", OPTS, async () =>
 });
 
 // ===========================================================================
+// #12 — buildingRouter: name > 200 chars or description > 2000 chars must 400
+// ===========================================================================
+
+Deno.test("#12 — POST /building/room — name > 200 chars returns 400", OPTS, async () => {
+  await dbojs.create({ id: ADMIN_ID, flags: "player builder connected", data: { name: "BuildAdmin12" } });
+
+  const req = new Request("http://localhost/api/v1/building/room", {
+    method: "POST",
+    body: JSON.stringify({ name: "A".repeat(201), description: "Fine" }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const res = await buildingHandler(req, ADMIN_ID);
+  assertEquals(res.status, 400);
+
+  await cleanup(ADMIN_ID);
+});
+
+Deno.test("#12 — POST /building/room — description > 2000 chars returns 400", OPTS, async () => {
+  await dbojs.create({ id: ADMIN_ID, flags: "player builder connected", data: { name: "BuildAdmin12b" } });
+
+  const req = new Request("http://localhost/api/v1/building/room", {
+    method: "POST",
+    body: JSON.stringify({ name: "ValidRoom", description: "B".repeat(2001) }),
+    headers: { "Content-Type": "application/json" },
+  });
+  const res = await buildingHandler(req, ADMIN_ID);
+  assertEquals(res.status, 400);
+
+  await cleanup(ADMIN_ID);
+});
+
+// ===========================================================================
 // wikiRouter — GET /wiki and GET /wiki/:topic
 // ===========================================================================
 
@@ -269,6 +301,22 @@ Deno.test("GET /wiki/:topic — URL-decoded topic name", OPTS, async () => {
   assertEquals(res.status, 200);
   const body = await res.json();
   assertStringIncludes(body.content, "Connect help");
+});
+
+// ===========================================================================
+// #1 — wikiRouter: path traversal guard (decodeURIComponent + ".." sequences)
+// ===========================================================================
+
+Deno.test("#1 — GET /wiki/../../../etc/passwd must return 400, not 404", OPTS, () => {
+  const req = new Request("http://localhost/api/v1/wiki/..%2F..%2F..%2Fetc%2Fpasswd");
+  const res = wikiHandler(req);
+  assertEquals(res.status, 400);
+});
+
+Deno.test("#1 — GET /wiki/topic with null byte must return 400", OPTS, () => {
+  const req = new Request("http://localhost/api/v1/wiki/topic%00.txt");
+  const res = wikiHandler(req);
+  assertEquals(res.status, 400);
 });
 
 // ===========================================================================

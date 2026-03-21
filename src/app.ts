@@ -31,13 +31,18 @@ const pluginRoutes: Array<{ prefix: string; handler: PluginRouteHandler }> = [];
 
 // --- Per-IP rate limiting for REST API ---
 const apiRateLimits = new Map<string, { count: number; resetAt: number }>();
-const API_RATE_LIMIT = 30;      // max requests per window
+const API_RATE_LIMIT = 30;        // max requests per window
 const API_RATE_WINDOW_MS = 10000; // 10 second window
+// Hard cap on tracked IPs — prevents memory exhaustion from IP-cycling attacks.
+const MAX_API_TRACKED_IPS = 10_000;
 
 function isApiRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = apiRateLimits.get(ip);
   if (!entry || now >= entry.resetAt) {
+    if (!entry && apiRateLimits.size >= MAX_API_TRACKED_IPS) {
+      apiRateLimits.delete(apiRateLimits.keys().next().value!);
+    }
     apiRateLimits.set(ip, { count: 1, resetAt: now + API_RATE_WINDOW_MS });
     return false;
   }
@@ -123,7 +128,7 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
 
   const response = await (async () => {
     // API Routes
-    if (path.startsWith("/api/v1/auth")) {
+    if (path === "/api/v1/auth" || path.startsWith("/api/v1/auth/")) {
       return await authHandler(req, remoteAddr);
     }
 
@@ -203,7 +208,9 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       return await mailHandler(req, userId);
     }
 
-    if (path.startsWith("/api/v1/config") || path.startsWith("/api/v1/connect") || path.startsWith("/api/v1/welcome")) {
+    if (path === "/api/v1/config" || path.startsWith("/api/v1/config/") ||
+        path === "/api/v1/connect" || path.startsWith("/api/v1/connect/") ||
+        path === "/api/v1/welcome" || path.startsWith("/api/v1/welcome/")) {
         return await configHandler(req);
     }
 

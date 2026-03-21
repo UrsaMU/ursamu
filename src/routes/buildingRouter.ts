@@ -28,6 +28,12 @@ export const buildingHandler = async (req: Request, userId: string): Promise<Res
     const { name, description, parent } = body;
 
     if (!name) return new Response("Missing name", { status: 400 });
+    if (typeof name !== "string" || name.length > 200) {
+      return new Response(JSON.stringify({ error: "Room name must be 200 characters or fewer." }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+    if (description !== undefined && (typeof description !== "string" || description.length > 2000)) {
+      return new Response(JSON.stringify({ error: "Room description must be 2000 characters or fewer." }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
 
     const id = await getNextId("objid");
     
