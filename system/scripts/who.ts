@@ -6,6 +6,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  */
 export default async (u: IUrsamuSDK) => {
   const players = (await u.db.search({ flags: /connected/i })).filter((p) => p.flags.has('player') && !p.flags.has('dark'));
+  const width = (u.me.data?.termWidth as number) || 78;
 
   const formatIdle = (lastCmd: unknown): string => {
     if (typeof lastCmd !== "number") return "---";
@@ -22,14 +23,14 @@ export default async (u: IUrsamuSDK) => {
   // 1. Telnet Output
   let telnet = `%chWho's Online%cn\n`;
   telnet += `${"Player".padEnd(24)}${"Idle".padEnd(8)}Doing\n`;
-  telnet += `------------------------------------------------------------------------------\n`;
+  telnet += `${"-".repeat(width)}\n`;
   players.forEach((p) => {
     const pName = (p.state.moniker as string) || (p.state.name as string) || p.name || "Unknown";
     const idle = formatIdle(p.state.lastCommand);
     const doing = (p.state.doing as string) || "";
     telnet += `${pName.padEnd(24)}${idle.padEnd(8)}${doing}\n`;
   });
-  telnet += `------------------------------------------------------------------------------\n`;
+  telnet += `${"-".repeat(width)}\n`;
   telnet += `${players.length} player${players.length === 1 ? "" : "s"} online.\n`;
   u.send(telnet);
 

@@ -135,6 +135,12 @@ export class WebSocketService {
                     return;
                 }
 
+                // Handle NAWS termWidth update from telnet sidecar
+                if (typeof data.data?.termWidth === "number" && sockData.cid) {
+                    const { dbojs } = await import("../Database/index.ts");
+                    await dbojs.modify({ id: sockData.cid }, "$set", { "data.termWidth": data.data.termWidth } as never);
+                }
+
                 const ctx: IContext = {
                     socket: sockData,
                     msg: data.msg || ""

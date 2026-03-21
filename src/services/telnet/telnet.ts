@@ -2,6 +2,44 @@ import { dpath } from "../../../deps.ts";
 import { getConfig, initConfig } from "../Config/mod.ts";
 import parser from "../parser/parser.ts";
 
+// Telnet protocol constants (RFC 854 / RFC 1073)
+const IAC = 255;
+const WILL = 251;
+const DO = 253;
+const DONT = 254;
+const SB = 250;
+const SE = 240;
+const NAWS_OPTION = 31;
+
+// Suppress unused-variable warnings for WILL/DONT — kept for readability/completeness
+const _WILL = WILL;
+const _DONT = DONT;
+
+/**
+ * Parse a NAWS subnegotiation byte sequence.
+ *
+ * Expects the full IAC SB 31 ... IAC SE sequence.
+ * Returns { width, height } or null if the sequence is malformed or out of range.
+ */
+export function parseNawsBytes(bytes: Uint8Array): { width: number; height: number } | null {
+  // Minimum valid sequence: IAC SB NAWS_OPTION w-hi w-lo h-hi h-lo IAC SE = 9 bytes
+  if (bytes.length < 9) return null;
+  if (bytes[0] !== IAC || bytes[1] !== SB || bytes[2] !== NAWS_OPTION) return null;
+  if (bytes[bytes.length - 2] !== IAC || bytes[bytes.length - 1] !== SE) return null;
+
+  const widthHi = bytes[3];
+  const widthLo = bytes[4];
+  const heightHi = bytes[5];
+  const heightLo = bytes[6];
+
+  const width = (widthHi << 8) | widthLo;
+  const height = (heightHi << 8) | heightLo;
+
+  if (width < 40 || width > 250) return null;
+
+  return { width, height };
+}
+
 interface ITelnetSocket {
   cid?: string;
   write(data: string | Uint8Array): void;
@@ -138,6 +176,9 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
     }
   };
 
+  // Send IAC DO NAWS to request window size from the client
+  await write(new Uint8Array([IAC, DO, NAWS_OPTION]));
+
   await write(parser.substitute("telnet", welcome) + "\r\n");
 
   const connect = () => {
@@ -221,13 +262,40 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
       const n = await conn.read(buffer);
       if (n === null) break; // EOF
 
-      const raw = new TextDecoder().decode(buffer.subarray(0, n));
-        
+      const chunk = buffer.subarray(0, n);
+
+      // --- NAWS subnegotiation detection ---
+      // Look for IAC SB 31 ... IAC SE within the raw bytes
+      for (let i = 0; i < chunk.length - 8; i++) {
+        if (chunk[i] === IAC && chunk[i + 1] === SB && chunk[i + 2] === NAWS_OPTION) {
+          // Find the closing IAC SE
+          for (let j = i + 3; j < chunk.length - 1; j++) {
+            if (chunk[j] === IAC && chunk[j + 1] === SE) {
+              const nawsSeq = chunk.subarray(i, j + 2);
+              const parsed = parseNawsBytes(nawsSeq);
+              if (parsed && cid) {
+                // Forward termWidth to the WS hub so the player's DB record can be updated
+                if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) {
+                  (sock as WebSocket).send(JSON.stringify({
+                    msg: "",
+                    data: { cid, termWidth: parsed.width }
+                  }));
+                }
+              }
+              break;
+            }
+          }
+          break;
+        }
+      }
+
+      const raw = new TextDecoder().decode(chunk);
+
          // Filter Telnet IAC sequences and non-printable chars
         // IAC sequences start with 0xFF (\xff)
         const msg = raw
           .replace(/\xff[\xfb-\xfe]./g, "") // IAC DO/DONT/WILL/WONT <opt>
-          .replace(/\xff[\xf0-\xfa]/g, "") // IAC SB/SE/etc
+          .replace(/\xff[\xf0-\xfa].*/g, "") // IAC SB/SE/etc (strip remainder of subneg)
           .replace(/\xff\xff/g, "\xff")    // Escaped IAC
           // deno-lint-ignore no-control-regex
           .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // Non-printable ASCII
