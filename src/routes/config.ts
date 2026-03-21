@@ -1,5 +1,6 @@
 import { ConfigManager } from "../services/Config/index.ts";
 import { texts } from "../services/Database/index.ts";
+import { resolve, normalize } from "https://deno.land/std/path/mod.ts";
 
 
 export const configHandler = async (req: Request) => {
@@ -45,12 +46,20 @@ export const configHandler = async (req: Request) => {
      try {
         // deno-lint-ignore no-explicit-any
         const config = ConfigManager.getInstance().getAll() as any;
-        const connectFile = config.game?.text?.connect || "../text/default_connect.txt";
-        
-        // Resolve path relative to CWD (project root)
-        const filePath = connectFile; 
-        
-        const text = await Deno.readTextFile(filePath);
+        const connectFile = config.game?.text?.connect || "text/default_connect.txt";
+
+        // Guard against path traversal: resolve and ensure within project root
+        const root = resolve(Deno.cwd());
+        const filePath = resolve(root, connectFile);
+        const normalised = normalize(filePath);
+        if (!normalised.startsWith(root)) {
+          return new Response(JSON.stringify({ error: "Invalid connect text path." }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
+        const text = await Deno.readTextFile(normalised);
         return new Response(JSON.stringify({ text }), {
             headers: { "Content-Type": "application/json" },
         });

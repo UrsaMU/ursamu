@@ -19,7 +19,8 @@ export default () => {
         await git.init(url);
         send([u.socketId || ""], "Repo cloned successfully.");
       } catch (e) {
-        send([u.socketId || ""], `Error: ${(e as Error).message}`, { error: true });
+        console.error("[Git] @git/init error:", e);
+        send([u.socketId || ""], "Git clone failed. Check server logs for details.", { error: true });
       }
     },
   });
@@ -42,7 +43,14 @@ export default () => {
             try {
               const data = JSON.parse(content);
               if (data.id) {
-                await dbojs.modify({ id: data.id }, "$set", data);
+                // Only allow safe fields — never overwrite flags or password from repo files
+                const safe: Record<string, unknown> = {};
+                if (data.data) {
+                  const { password: _pw, ...safeData } = data.data;
+                  safe.data = safeData;
+                }
+                if (data.location) safe.location = data.location;
+                await dbojs.modify({ id: data.id }, "$set", safe);
                 count++;
               }
             } catch { /* ignore */ }
@@ -50,7 +58,8 @@ export default () => {
         }
         send([u.socketId || ""], `Loaded ${count} objects.`);
       } catch (e) {
-        send([u.socketId || ""], `Error: ${(e as Error).message}`, { error: true });
+        console.error("[Git] @git/pull error:", e);
+        send([u.socketId || ""], "Git pull failed. Check server logs for details.", { error: true });
       }
     },
   });
@@ -78,7 +87,8 @@ export default () => {
         await git.push(msg);
         send([u.socketId || ""], "Pushed successfully.");
       } catch (e) {
-        send([u.socketId || ""], `Error: ${(e as Error).message}`, { error: true });
+        console.error("[Git] @git/push error:", e);
+        send([u.socketId || ""], "Git push failed. Check server logs for details.", { error: true });
       }
     },
   });

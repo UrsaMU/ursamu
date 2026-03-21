@@ -52,11 +52,22 @@ export const mailHandler = async (req: Request, userId: string): Promise<Respons
     if (!to || !Array.isArray(to) || to.length === 0) {
       return json({ error: "Field 'to' must be a non-empty array of dbrefs" }, 400);
     }
+    const MAX_RECIPIENTS = 50;
+    const totalRecipients = to.length + (Array.isArray(cc) ? cc.length : 0) + (Array.isArray(bcc) ? bcc.length : 0);
+    if (totalRecipients > MAX_RECIPIENTS) {
+      return json({ error: `Total recipients (to + cc + bcc) cannot exceed ${MAX_RECIPIENTS}` }, 400);
+    }
     if (!subject || typeof subject !== "string" || !subject.trim()) {
       return json({ error: "Field 'subject' is required" }, 400);
     }
+    if (subject.length > 200) {
+      return json({ error: "Subject exceeds 200 characters" }, 400);
+    }
     if (!message || typeof message !== "string" || !message.trim()) {
       return json({ error: "Field 'message' is required" }, 400);
+    }
+    if (message.length > 10000) {
+      return json({ error: "Message exceeds 10,000 characters" }, 400);
     }
 
     const id = await getNextId("mail");

@@ -22,7 +22,7 @@ export default () =>
         return;
       }
       tar.data.moniker = monikerVal;
-      await dbojs.modify({ id: tar.id }, "$set", tar);
+      await dbojs.modify({ id: tar.id }, "$set", { "data.moniker": monikerVal });
       u.send(`You have set ${String(tar.data.name)}'s moniker to ${monikerVal}.`);
     },
   });

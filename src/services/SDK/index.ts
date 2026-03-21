@@ -235,7 +235,7 @@ export async function createNativeSDK(
         (await dbojs.queryOne({ "data.name": new RegExp(`^${targetStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") }));
       if (!tarObj) return;
       tarObj.location = destination;
-      await dbojs.modify({ id: tarObj.id }, "$set", tarObj);
+      await dbojs.modify({ id: tarObj.id }, "$set", { location: destination });
     },
 
     checkLock: async (target: string | IDBObj, lock: string) => {
@@ -273,11 +273,8 @@ export async function createNativeSDK(
       setPassword: async (id: string, password: string) => {
         const hashed = await hash(password, 10);
         const objResult = await dbojs.queryOne({ id });
-        const obj = objResult || null;
-        if (!obj) return;
-        obj.data ||= {};
-        obj.data.password = hashed;
-        await dbojs.modify({ id }, "$set", obj);
+        if (!objResult) return;
+        await dbojs.modify({ id }, "$set", { "data.password": hashed });
       },
     },
 
@@ -455,7 +452,7 @@ export async function createNativeSDK(
           const lastRead = (player.data.bbLastRead as Record<string, number>) || {};
           lastRead[boardId] = maxNum;
           player.data.bbLastRead = lastRead;
-          await dbojs.modify({ id: player.id }, "$set", player);
+          await dbojs.modify({ id: player.id }, "$set", { "data.bbLastRead": lastRead });
         }
       },
 

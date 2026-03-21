@@ -16,10 +16,22 @@ export const wikiHandler = (req: Request): Response => {
   // Get specific topic
   const match = url.pathname.match(/\/api\/v1\/wiki\/(.+)/);
   if (match) {
-      const topic = match[1]; // Should be filename like 'connect.txt' or 'help/connect.txt'
-      // Need to handle URL decoding
+      const topic = match[1];
       const decoded = decodeURIComponent(topic);
-      
+
+      // Block path traversal attempts (../, ..\, null bytes, absolute paths)
+      if (
+        decoded.includes("..") ||
+        decoded.includes("\0") ||
+        decoded.startsWith("/") ||
+        decoded.startsWith("\\")
+      ) {
+        return new Response(JSON.stringify({ error: "Invalid topic path" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
       const content = txtFiles.get(decoded);
       
       if (!content) {

@@ -140,6 +140,10 @@ export class Obj implements IEntity {
   }
 
   async save() {
-    await dbojs.modify({ id: this.id }, "$set", this.obj);
+    await dbojs.modify({ id: this.id }, "$set", {
+      flags: this.obj.flags,
+      data: this.obj.data,
+      location: this.obj.location,
+    });
   }
 }

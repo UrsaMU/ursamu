@@ -46,10 +46,19 @@ function isApiRateLimited(ip: string): boolean {
 }
 
 // Clean up stale entries every 60 seconds
+const MAX_API_TRACKED_IPS = 10_000;
 setInterval(() => {
   const now = Date.now();
   for (const [ip, entry] of apiRateLimits) {
     if (now >= entry.resetAt) apiRateLimits.delete(ip);
+  }
+  if (apiRateLimits.size > MAX_API_TRACKED_IPS) {
+    const excess = apiRateLimits.size - MAX_API_TRACKED_IPS;
+    const iter = apiRateLimits.keys();
+    for (let i = 0; i < excess; i++) {
+      const key = iter.next().value;
+      if (key !== undefined) apiRateLimits.delete(key);
+    }
   }
 }, 60000);
 
@@ -123,7 +132,7 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
 
   const response = await (async () => {
     // API Routes
-    if (path.startsWith("/api/v1/auth")) {
+    if (path === "/api/v1/auth" || path.startsWith("/api/v1/auth/")) {
       return await authHandler(req, remoteAddr);
     }
 
@@ -141,7 +150,7 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       return await channelsHandler(req);
     }
 
-    if (path.startsWith("/api/v1/dbobj")) {
+    if (path === "/api/v1/dbobj" || path.startsWith("/api/v1/dbobj/")) {
       const userId = await authenticate(req);
       if (!userId) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -152,11 +161,11 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       return await dbObjHandler(req, userId);
     }
 
-    if (path.startsWith("/api/v1/wiki")) {
+    if (path === "/api/v1/wiki" || path.startsWith("/api/v1/wiki/")) {
       return await wikiHandler(req);
     }
 
-    if (path.startsWith("/api/v1/scenes")) {
+    if (path === "/api/v1/scenes" || path.startsWith("/api/v1/scenes/")) {
       const userId = await authenticate(req);
       if (!userId) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -167,7 +176,7 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       return await sceneHandler(req, userId);
     }
     
-    if (path.startsWith("/api/v1/building")) {
+    if (path === "/api/v1/building" || path.startsWith("/api/v1/building/")) {
       const userId = await authenticate(req);
       if (!userId) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -178,7 +187,10 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       return await buildingHandler(req, userId);
     }
 
-    if (path.startsWith("/api/v1/config") || path.startsWith("/api/v1/connect") || path.startsWith("/api/v1/welcome")) {
+    if ((path === "/api/v1/config" || path.startsWith("/api/v1/config/"))
+        || (path === "/api/v1/connect" || path.startsWith("/api/v1/connect/"))
+        || (path === "/api/v1/welcome" || path.startsWith("/api/v1/welcome/"))
+    ) {
         return await configHandler(req);
     }
 

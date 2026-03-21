@@ -19,10 +19,19 @@ export const buildingHandler = async (req: Request, userId: string): Promise<Res
          return new Response("Forbidden: You must be a builder.", { status: 403 });
     }
 
-    const body = await req.json();
-    const { name, description, parent } = body;
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
 
-    if (!name) return new Response("Missing name", { status: 400 });
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const description = typeof body.description === "string" ? body.description.slice(0, 5000) : "";
+    const parent = typeof body.parent === "string" ? body.parent : undefined;
+
+    if (!name) return new Response(JSON.stringify({ error: "name is required" }), { status: 400, headers: { "Content-Type": "application/json" } });
+    if (name.length > 200) return new Response(JSON.stringify({ error: "name exceeds 200 characters" }), { status: 400, headers: { "Content-Type": "application/json" } });
 
     const id = await getNextId("objid");
     

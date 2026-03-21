@@ -36,7 +36,7 @@ export default () => {
       const idx = attrs.findIndex((a) => a.name.toUpperCase() === attrName.toUpperCase());
       if (idx !== -1) {
         attrs[idx].value = newVal;
-        await dbojs.modify({ id: tar.id }, "$set", tar);
+        await dbojs.modify({ id: tar.id }, "$set", { "data.attributes": attrs });
         send([u.socketId || ""], `Set - ${attrName.toUpperCase()}: ${newVal}`);
       } else {
         send([u.socketId || ""], "Attribute not found.");

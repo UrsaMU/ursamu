@@ -48,7 +48,7 @@ export default () =>
         if (player) {
           player.data ||= {};
           delete player.data.avatarExt;
-          await dbojs.modify({ id: player.id }, "$set", player);
+          await dbojs.modify({ id: player.id }, "$set", { "data.avatarExt": null });
         }
         u.send("Avatar cleared.");
         return;
@@ -114,7 +114,7 @@ export default () =>
       // Store ext on player record for fast lookup
       player.data ||= {};
       player.data.avatarExt = ext;
-      await dbojs.modify({ id: player.id }, "$set", player);
+      await dbojs.modify({ id: player.id }, "$set", { "data.avatarExt": ext });
 
       u.send("Avatar saved.");
     },

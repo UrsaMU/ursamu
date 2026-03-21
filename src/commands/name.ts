@@ -28,7 +28,7 @@ export default () => {
       tar.data ||= {};
       tar.data.name = newName;
       delete tar.data.moniker;
-      await dbojs.modify({ id: tar.id }, "$set", tar);
+      await dbojs.modify({ id: tar.id }, "$set", { "data.name": newName, "data.moniker": null });
       u.send("Name set.");
     },
   });

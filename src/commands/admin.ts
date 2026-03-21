@@ -93,7 +93,9 @@ export default () => {
       const expiry = Date.now() + 60 * 60 * 1000; // 1 hour
       await u.db.modify(tar.id, "$set", { "data.resetToken": token, "data.resetTokenExpiry": expiry });
       await logSecurity("ADMIN_RESETTOKEN", { actor: u.me.id, target: tar.id });
+      // Show full token only to the admin who generated it; log only a truncated version
       u.send(`Reset token for ${u.util.displayName(tar, u.me)}: ${token} (expires in 1 hour)`);
+      u.send(`%ch%cyWARNING:%cn Copy this token now — it will not be shown again.`);
     },
   });
 

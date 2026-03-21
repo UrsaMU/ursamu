@@ -43,7 +43,8 @@ export default () => {
           target: evalArgs[0] ? { id: evalArgs[0] } : undefined,
         });
       } catch (err) {
-        send([u.socketId || ""], `%chGame>%cn Script error on ${tarName}/${attrName}: ${err instanceof Error ? err.message : String(err)}`);
+        console.error(`[Softcode] Script error on ${tarName}/${attrName}:`, err);
+        send([u.socketId || ""], `%chGame>%cn Script error on ${tarName}/${attrName}. Check server logs for details.`);
         return;
       }
 

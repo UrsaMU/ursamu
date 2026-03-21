@@ -49,7 +49,7 @@ export const matchExits = async (ctx: IContext) => {
           }
 
           en.location = dest?.id;
-          await dbojs.modify({ id: en.id }, "$set", en);
+          await dbojs.modify({ id: en.id }, "$set", { location: en.location });
           ctx.socket.join(`#${en.location}`);
 
           if (!en.flags.includes("dark") && room) {

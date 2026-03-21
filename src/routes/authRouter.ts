@@ -34,10 +34,21 @@ function recordLoginFailure(ip: string): void {
   }
 }
 
+const MAX_TRACKED_IPS = 10_000;
+
 setInterval(() => {
   const now = Date.now();
   for (const [ip, entry] of loginAttempts) {
     if (now >= entry.resetAt) loginAttempts.delete(ip);
+  }
+  // Hard cap: if map still exceeds limit, drop oldest entries
+  if (loginAttempts.size > MAX_TRACKED_IPS) {
+    const excess = loginAttempts.size - MAX_TRACKED_IPS;
+    const iter = loginAttempts.keys();
+    for (let i = 0; i < excess; i++) {
+      const key = iter.next().value;
+      if (key !== undefined) loginAttempts.delete(key);
+    }
   }
 }, 60_000);
 
@@ -83,20 +94,20 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
       }
       const expiry = user.data.resetTokenExpiry as number | undefined;
       if (!expiry || Date.now() > expiry) {
-        user.data ||= {};
-        delete user.data.resetToken;
-        delete user.data.resetTokenExpiry;
-        await dbojs.modify({ id: user.id }, "$set", user);
+        await dbojs.modify({ id: user.id }, "$set", {
+          "data.resetToken": null,
+          "data.resetTokenExpiry": null,
+        });
         return new Response(JSON.stringify({ error: "Invalid or expired reset token." }), {
           status: 400, headers: { "Content-Type": "application/json" },
         });
       }
       const hashed = await hash(newPassword, await genSalt(10));
-      user.data ||= {};
-      user.data.password = hashed;
-      delete user.data.resetToken;
-      delete user.data.resetTokenExpiry;
-      await dbojs.modify({ id: user.id }, "$set", user);
+      await dbojs.modify({ id: user.id }, "$set", {
+        "data.password": hashed,
+        "data.resetToken": null,
+        "data.resetTokenExpiry": null,
+      });
       await logSecurity("PASSWORD_RESET", { userId: user.id, ip: clientIp });
       return new Response(JSON.stringify({ message: "Password updated successfully." }), {
         status: 200, headers: { "Content-Type": "application/json" },
@@ -216,8 +227,8 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
     }
 
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    console.error("[auth] Unexpected error:", err);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

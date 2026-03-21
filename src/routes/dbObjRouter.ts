@@ -60,16 +60,24 @@ export const dbObjHandler = async (req: Request, userId: string): Promise<Respon
       }
 
       if (req.method === "PATCH") {
-          const updates = await req.json();
+          let updates: Record<string, unknown>;
+          try { updates = await req.json(); } catch {
+            return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+          }
 
-          // Whitelist the data fields that may be updated via API
-          const ALLOWED_DATA_FIELDS = new Set(["name", "description", "moniker", "image"]);
+          // Whitelist the data fields that may be updated via API, with type validators
+          const ALLOWED_DATA_FIELDS: Record<string, (v: unknown) => boolean> = {
+            name: (v) => typeof v === "string" && v.length > 0 && v.length <= 200,
+            description: (v) => typeof v === "string" && v.length <= 5000,
+            moniker: (v) => typeof v === "string" && v.length <= 200,
+            image: (v) => typeof v === "string" && v.length <= 500,
+          };
           const POISON_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
           if (updates.data && typeof updates.data === "object") {
               const filtered: Record<string, unknown> = {};
               for (const [k, v] of Object.entries(updates.data as Record<string, unknown>)) {
-                  if (ALLOWED_DATA_FIELDS.has(k) && !POISON_KEYS.has(k)) {
+                  if (k in ALLOWED_DATA_FIELDS && !POISON_KEYS.has(k) && ALLOWED_DATA_FIELDS[k](v)) {
                       filtered[k] = v;
                   }
               }
@@ -81,7 +89,7 @@ export const dbObjHandler = async (req: Request, userId: string): Promise<Respon
             targetObj.data = { ...targetObj.data, description: updates.description };
           }
 
-          await dbojs.modify({ id: targetObj.id }, "$set", targetObj);
+          await dbojs.modify({ id: targetObj.id }, "$set", { data: targetObj.data });
           
           const copy = { ...targetObj };
           if (copy.data) delete copy.data.password;

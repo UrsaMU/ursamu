@@ -94,11 +94,23 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
 
   // POST /api/v1/scenes - Create new scene
   if (path === "/api/v1/scenes" && req.method === "POST") {
-      const body = await req.json();
-      const { name, location, desc, private: isPrivate, sceneType } = body;
+      let body: Record<string, unknown>;
+      try {
+        body = await req.json();
+      } catch {
+        return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+      }
+      if (!body || typeof body !== "object") {
+        return new Response(JSON.stringify({ error: "Invalid request body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+      }
+      const name = typeof body.name === "string" ? body.name.trim() : "";
+      const location = typeof body.location === "string" ? body.location.trim() : "";
+      const desc = typeof body.desc === "string" ? body.desc.slice(0, 5000) : undefined;
+      const isPrivate = !!body.private;
+      const sceneType = typeof body.sceneType === "string" ? body.sceneType : undefined;
 
       if (!name || !location) {
-          return new Response("Missing name or location", { status: 400 });
+          return new Response(JSON.stringify({ error: "name and location are required" }), { status: 400, headers: { "Content-Type": "application/json" } });
       }
 
       const id = await getNextId("sceneid");
@@ -253,8 +265,11 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
       // POST /api/v1/scenes/:id/pose
       // Handles 'pose', 'ooc', 'set' types
       if (subPath === "/pose" && req.method === "POST") {
-          const body = await req.json();
-          const { msg, type = "pose" } = body;
+          let body: Record<string, unknown>;
+          try { body = await req.json(); } catch {
+            return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+          }
+          const { msg, type = "pose" } = body as { msg?: string; type?: string };
           const user = await Obj.get(userId);
           
           if (!user) return new Response("Unauthorized", { status: 401 });
@@ -369,14 +384,18 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
 
           const existingPose = scene.poses[poseIndex];
           
-          // Verify ownership (or admin/scene owner?)
-          if (existingPose.charId !== user.dbref && scene.owner !== user.dbref) {
+          // Verify ownership, scene owner, or admin
+          const isAdmin = user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser");
+          if (existingPose.charId !== user.dbref && scene.owner !== user.dbref && !isAdmin) {
               return new Response("Forbidden", { status: 403 });
           }
 
-          const body = await req.json();
+          let body: Record<string, unknown>;
+          try { body = await req.json(); } catch {
+            return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+          }
           if (body.msg) {
-              if (body.msg.length > 4000) return new Response("Pose message too long (max 4000 characters).", { status: 400 });
+              if (typeof body.msg !== "string" || body.msg.length > 4000) return new Response("Pose message too long (max 4000 characters).", { status: 400 });
               existingPose.msg = body.msg;
           }
           // Don't allow changing type/timestamp broadly?
@@ -429,8 +448,11 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
                return new Response("Only the owner or co-authors can invite.", { status: 403 });
           }
 
-          const body = await req.json();
-          const { target } = body; // target can be dbref or name
+          let body: Record<string, unknown>;
+          try { body = await req.json(); } catch {
+            return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+          }
+          const { target } = body as { target?: string }; // target can be dbref or name
 
           if (!target) return new Response("Missing target", { status: 400 });
 
@@ -460,7 +482,10 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
       
       // PATCH /api/v1/scenes/:id (Update status/meta)
       if (!subPath && req.method === "PATCH") {
-           const updates = await req.json();
+           let updates: Record<string, unknown>;
+           try { updates = await req.json(); } catch {
+             return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+           }
            
            // Verify Owner for status changes/meta
            const user = await Obj.get(userId);

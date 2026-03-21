@@ -9,12 +9,17 @@ export class GitService {
     }
 
     async init(repoUrl: string) {
+        // Block argument injection via URLs starting with '-'
+        if (repoUrl.startsWith("-")) {
+            throw new Error("Invalid repository URL");
+        }
+
         // cleanup old if exists
         try {
             await Deno.remove(this.repoPath, { recursive: true });
         } catch { /* ignore */ }
-        
-        await this.run("clone", repoUrl, this.repoPath);
+
+        await this.run("clone", "--", repoUrl, this.repoPath);
     }
 
     async pull() {

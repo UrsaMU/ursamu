@@ -31,8 +31,8 @@ export default () =>
 
         send([u.socketId || ""], `${value}`);
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : String(e);
-        send([u.socketId || ""], `%ch%crError>%cn ${msg}%cn`);
+        console.error("[JS] Eval error:", e);
+        send([u.socketId || ""], `%ch%crError>%cn Script evaluation failed. Check server logs.%cn`);
       }
     },
   });

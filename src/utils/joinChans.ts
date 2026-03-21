@@ -33,7 +33,7 @@ export const joinChans = async (ctx: IContext) => {
         });
 
         ctx.socket.join(channel.name);
-        await dbojs.modify({ id: player.id }, "$set", player);
+        await dbojs.modify({ id: player.id }, "$set", { "data.channels": player.data?.channels });
         await force(ctx, `${channel.alias} :has joined the channel.`);
         send(
           [ctx.socket.id],
@@ -59,7 +59,7 @@ export const joinChans = async (ctx: IContext) => {
         );
 
         ctx.socket.leave(channel.name);
-        await dbojs.modify({ id: player.id }, "$set", player);
+        await dbojs.modify({ id: player.id }, "$set", { "data.channels": player.data?.channels });
         await send(
           [ctx.socket.id],
           `You have left ${channel.name} with the alias '${channel.alias}'.`

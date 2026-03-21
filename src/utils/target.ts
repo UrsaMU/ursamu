@@ -18,18 +18,21 @@ export const target = async (
     return en;
   }
 
-  // Helper: escape regex metacharacters to prevent ReDoS from user-controlled data
-  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Sanitise the user-supplied target string so it is safe for use inside
+  // the $where closure (no template-literal injection risk).
+  const safeTar = String(tar).replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$/g, "\\$");
 
   const found = await (async () => {
     return await dbojs.queryOne({
       $where: function () {
-        const target = `${tar}`;
-        const nameParts = (this.data?.name || "").split(";").map((p: string) => escapeRegex(p)).join("|");
+        const target = safeTar;
+        const tarLower = target.toLowerCase();
+        // Simple string matching — no regex on user input
+        const names = ((this.data?.name || "") as string).split(";").map((p: string) => p.trim().toLowerCase());
         return (
-          RegExp(nameParts || "^$", "ig").test(target) ||
+          names.some((n: string) => n === tarLower) ||
           this.id === target ||
-          (this.data?.alias as string | undefined)?.toLowerCase() === target.toLowerCase()
+          ((this.data?.alias as string | undefined) || "").toLowerCase() === tarLower
         );
       },
     });

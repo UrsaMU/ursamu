@@ -270,9 +270,7 @@ cmdParser.use(async (ctx, next) => {
         
         // Update last command
         if (char) {
-            char.data ||= {};
-            char.data.lastCommand = Date.now();
-            await dbojs.modify({ id: char.id }, "$set", char.dbobj);
+            await dbojs.modify({ id: char.id }, "$set", { "data.lastCommand": Date.now() });
         }
 
         // For system scripts, we want the raw arguments after the command name
@@ -320,9 +318,7 @@ cmdParser.use(async (ctx, next) => {
       if (await evaluateLock(cmd.lock || "", actor, actor)) {
         if (match) {
           if (char) {
-            char.data ||= {};
-            char.data.lastCommand = Date.now();
-            await dbojs.modify({ id: char.id }, "$set", char.dbobj);
+            await dbojs.modify({ id: char.id }, "$set", { "data.lastCommand": Date.now() });
           }
           const u = await createNativeSDK(ctx.socket.id, char?.id || "#-1", {
             name: cmd.name,
@@ -330,10 +326,10 @@ cmdParser.use(async (ctx, next) => {
             args: match.slice(1),
           });
           await (cmd.exec(u) as Promise<void>)?.catch((e: Error) => {
-            console.error(e);
+            console.error("[CmdParser] Command execution error:", e);
             send(
               [ctx.socket.id],
-              `Uh oh! You've run into an error! Please contact staff with the following info!%r%r%chError:%cn ${e}`,
+              `Uh oh! Something went wrong running that command. Please contact staff.`,
               { error: true }
             );
           });

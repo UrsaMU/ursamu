@@ -28,6 +28,11 @@ export default () =>
         return;
       }
 
+      if (password.length < 8) {
+        u.send("Password must be at least 8 characters.");
+        return;
+      }
+
       const nameExists = await isNameTaken(name);
       if (nameExists) {
         u.send("That name is already taken or unavailable.");

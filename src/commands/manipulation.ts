@@ -23,7 +23,7 @@ export default () => {
         return send([u.socketId || ""], "You can't pick that up.");
 
       thing.location = en.id;
-      await dbojs.modify({ id: thing.id }, "$set", thing);
+      await dbojs.modify({ id: thing.id }, "$set", { location: thing.location });
 
       send([u.socketId || ""], `You pick up ${displayName(en, thing, true)}.`);
       send([`#${en.location}`], `${moniker(en)} picks up ${displayName(en, thing, true)}.`, {}, [u.socketId || ""]);
@@ -43,7 +43,7 @@ export default () => {
         return send([u.socketId || ""], "You aren't carrying that.");
 
       thing.location = en.location;
-      await dbojs.modify({ id: thing.id }, "$set", thing);
+      await dbojs.modify({ id: thing.id }, "$set", { location: thing.location });
 
       send([u.socketId || ""], `You drop ${displayName(en, thing, true)}.`);
       send([`#${en.location}`], `${moniker(en)} drops ${displayName(en, thing, true)}.`, {}, [u.socketId || ""]);
@@ -75,8 +75,8 @@ export default () => {
         rec.data ||= {};
         en.data.money = currentMoney - amount;
         rec.data.money = ((rec.data.money as number) || 0) + amount;
-        await dbojs.modify({ id: en.id }, "$set", en);
-        await dbojs.modify({ id: rec.id }, "$set", rec);
+        await dbojs.modify({ id: en.id }, "$set", { "data.money": en.data.money });
+        await dbojs.modify({ id: rec.id }, "$set", { "data.money": rec.data.money });
         send([u.socketId || ""], `You give ${amount} coins to ${moniker(rec)}.`);
         send([`#${rec.id}`], `${moniker(en)} gives you ${amount} coins.`);
         return;
@@ -92,7 +92,7 @@ export default () => {
         return send([u.socketId || ""], "You can only give things to players.");
 
       thing.location = rec.id;
-      await dbojs.modify({ id: thing.id }, "$set", thing);
+      await dbojs.modify({ id: thing.id }, "$set", { location: thing.location });
       send([u.socketId || ""], `You give ${displayName(en, thing, true)} to ${moniker(rec)}.`);
       send([`#${rec.id}`], `${moniker(en)} gives you ${displayName(en, thing, true)}.`);
     },
