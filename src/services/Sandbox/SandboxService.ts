@@ -576,12 +576,35 @@ class LocalSandbox {
                 if (e.data.lock !== undefined) updates.lock = e.data.lock;
                 if (e.data.hidden !== undefined) updates.hidden = e.data.hidden;
                 if (e.data.masking !== undefined) updates.masking = e.data.masking;
+                if (e.data.logHistory !== undefined) updates.logHistory = e.data.logHistory;
+                if (e.data.historyLimit !== undefined) updates.historyLimit = e.data.historyLimit;
                 await chanDb.modify({ name }, "$set", updates);
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: { ok: true } });
               })();
             } else {
               worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
             }
+            break;
+          }
+          case "chan:history": {
+            (async () => {
+              const { chanHistory: histDb, chans: chanDb } = await import("../Database/index.ts");
+              const name = (e.data.name as string | undefined)?.toLowerCase().trim();
+              if (!name) {
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: [] });
+                return;
+              }
+              const chan = await chanDb.queryOne({ name });
+              if (!chan) {
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Channel not found." } });
+                return;
+              }
+              const limit = typeof e.data.limit === "number" ? e.data.limit : 20;
+              const all = await histDb.find({ chanId: chan.id });
+              all.sort((a, b) => a.timestamp - b.timestamp);
+              const slice = all.slice(-limit);
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: slice });
+            })();
             break;
           }
           case "trigger:attr": {

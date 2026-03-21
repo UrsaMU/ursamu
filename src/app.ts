@@ -19,7 +19,7 @@
  */
 
 import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler, mailHandler } from "./routes/index.ts";
-import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playersRouter.ts";
+import { meHandler, onlinePlayersHandler, channelsHandler, channelHistoryHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
 import { getConfig } from "./services/Config/mod.ts";
 
@@ -141,6 +141,18 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
 
     if (path === "/api/v1/channels" && req.method === "GET") {
       return await channelsHandler(req);
+    }
+
+    const chanHistoryMatch = path.match(/^\/api\/v1\/channels\/([^/]+)\/history$/);
+    if (chanHistoryMatch && req.method === "GET") {
+      const userId = await authenticate(req);
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return await channelHistoryHandler(req, chanHistoryMatch[1]);
     }
 
     if (path.startsWith("/api/v1/dbobj")) {

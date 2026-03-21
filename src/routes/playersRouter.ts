@@ -1,4 +1,4 @@
-import { dbojs, chans } from "../services/Database/index.ts";
+import { dbojs, chans, chanHistory } from "../services/Database/index.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
 
 const hasFlag = (flags: string, ...names: string[]): boolean => {
@@ -58,9 +58,36 @@ export const channelsHandler = async (_req: Request): Promise<Response> => {
     alias: c.alias || null,
     header: c.header || null,
     lock: c.lock || null,
+    logHistory: c.logHistory ?? false,
   }));
 
   return new Response(JSON.stringify(list), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+/** GET /api/v1/channels/:id/history?limit=<n> — channel message history (auth required) */
+export const channelHistoryHandler = async (req: Request, channelId: string): Promise<Response> => {
+  const chan = await chans.queryOne({ id: channelId });
+  if (!chan) {
+    return new Response(JSON.stringify({ error: "Channel not found." }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  if (!chan.logHistory) {
+    return new Response(JSON.stringify({ error: "History is not enabled for this channel." }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const url = new URL(req.url);
+  const limit = Math.min(parseInt(url.searchParams.get("limit") || "20") || 20, 500);
+  const all = await chanHistory.find({ chanId: channelId });
+  all.sort((a, b) => a.timestamp - b.timestamp);
+  const slice = all.slice(-limit);
+  return new Response(JSON.stringify(slice), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });

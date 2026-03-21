@@ -1,7 +1,7 @@
 import type { IUrsamuSDK, IDBObj } from "../../@types/UrsamuSDK.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { IContext } from "../../@types/IContext.ts";
-import { dbojs, chans, texts, bboards, bboard as bbPosts } from "../Database/index.ts";
+import { dbojs, chans, chanHistory, texts, bboards, bboard as bbPosts } from "../Database/index.ts";
 import { send as sendFn } from "../broadcast/index.ts";
 import { wsService } from "../WebSocket/index.ts";
 import { hydrate, evaluateLock } from "../../utils/evaluateLock.ts";
@@ -333,9 +333,18 @@ export async function createNativeSDK(
           lock?: string;
           hidden?: boolean;
           masking?: boolean;
+          logHistory?: boolean;
+          historyLimit?: number;
         }
       ) => {
         return await chans.modify({ name }, "$set", options);
+      },
+      history: async (chanName: string, limit = 20) => {
+        const chan = await chans.queryOne({ name: chanName.toLowerCase().trim() });
+        if (!chan) return [];
+        const all = await chanHistory.find({ chanId: chan.id });
+        all.sort((a, b) => a.timestamp - b.timestamp);
+        return all.slice(-limit);
       },
     },
 
