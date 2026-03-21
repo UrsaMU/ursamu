@@ -21,8 +21,12 @@ export default async (u: IUrsamuSDK) => {
         u.send("Usage: @channel/join <channel>=<alias>");
         return;
       }
-      await u.chan.join(chan.trim(), alias.trim());
-      u.send(`You have joined channel ${chan.trim()} with alias ${alias.trim()}.`);
+      try {
+        await u.chan.join(chan.trim(), alias.trim());
+        u.send(`You have joined channel ${chan.trim()} with alias ${alias.trim()}.`);
+      } catch (e) {
+        u.send(`Failed to join channel ${chan.trim()}: ${e instanceof Error ? e.message : String(e)}`);
+      }
       break;
     }
     case "leave": {
@@ -31,8 +35,12 @@ export default async (u: IUrsamuSDK) => {
         u.send("Usage: @channel/leave <alias>");
         return;
       }
-      await u.chan.leave(alias.trim());
-      u.send(`You have left the channel with alias ${alias.trim()}.`);
+      try {
+        await u.chan.leave(alias.trim());
+        u.send(`You have left the channel with alias ${alias.trim()}.`);
+      } catch (e) {
+        u.send(`Failed to leave channel: ${e instanceof Error ? e.message : String(e)}`);
+      }
       break;
     }
     case "list":

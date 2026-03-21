@@ -33,7 +33,6 @@ export const joinChans = async (ctx: IContext) => {
           active: true,
         });
 
-        ctx.socket.join(channel.name);
         // deno-lint-ignore no-explicit-any
         await dbojs.modify({ id: player.id }, "$set", { "data.channels": chs } as any as Partial<IDBOBJ>);
         await force(ctx, `${channel.alias} :has joined the channel.`);
@@ -72,8 +71,16 @@ export const joinChans = async (ctx: IContext) => {
     }
   }
 
-  const userChans = (player.data?.channels || []) as IChanEntry[];
-  userChans.forEach(
-    (channel: IChanEntry) => channel.active && ctx.socket.join(channel.channel)
-  );
+  // Re-read player data to ensure we have the latest channel list,
+  // then join ALL active channel rooms on the socket. This is the
+  // single authoritative join point — covers both new and existing
+  // channels, and ensures the socket is always in sync with the DB
+  // even after a reconnect or server restart.
+  const freshPlayer = await dbojs.queryOne({ id: player.id });
+  const finalChans = ((freshPlayer?.data?.channels || []) as IChanEntry[]);
+  for (const channel of finalChans) {
+    if (channel.active) {
+      ctx.socket.join(channel.channel);
+    }
+  }
 };

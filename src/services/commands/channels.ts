@@ -37,26 +37,35 @@ export const matchChannel = async (ctx: IContext) => {
     return false;
   }
   if (!flags.check(en.flags || "", chan.lock || "")) return false;
+
+  // Toggle on/off — use loose checks so undefined active is treated as off
+  if (msg.toLowerCase() === "on" && !channel.active) {
+    channel.active = true;
+    ctx.socket.join(channel.channel);
+    await dbojs.modify({ id: en.id }, "$set", { "data.channels": userChans } as Partial<typeof en>);
+    await force(ctx, `${channel.alias} :has joined the channel.`);
+    send([ctx.socket.id], `You have joined channel ${channel.channel}.`, {});
+    return true;
+  } else if (msg.toLowerCase() === "off" && channel.active) {
+    channel.active = false;
+    ctx.socket.leave(channel.channel);
+    await dbojs.modify({ id: en.id }, "$set", { "data.channels": userChans } as Partial<typeof en>);
+    await force(ctx, `${channel.alias} :has left the channel.`);
+    send([ctx.socket.id], `You have left channel ${channel.channel}.`, {});
+    return true;
+  }
+
+  // Reject empty messages
+  if (!msg || !msg.trim()) {
+    return true;
+  }
+
   if (match[1] === ":") {
     msg = `${channel?.title ? channel?.title + " " : ""}${channel?.mask ? channel.mask : moniker(en)
       } ${match[2]}`;
   } else if (match[1] === ";") {
     msg = `${channel?.title ? channel?.title + " " : ""}${channel?.mask ? channel.mask : moniker(en)
       }${match[2]}`;
-  } else if (msg.toLowerCase() === "on" && channel?.active === false) {
-    channel.active = true;
-    ctx.socket.join(channel.channel);
-    await dbojs.modify({ id: en.id }, "$set", en);
-    await force(ctx, `${channel.alias} :has joined the channel.`);
-    send([ctx.socket.id], `You have joined channel ${channel.channel}.`, {});
-    return true;
-  } else if (msg.toLowerCase() === "off" && channel?.active === true) {
-    await force(ctx, `${channel.alias} :has left the channel.`);
-    channel.active = false;
-    ctx.socket.leave(channel.channel);
-    await dbojs.modify({ id: en.id }, "$set", en);
-    send([ctx.socket.id], `You have left channel ${channel.channel}.`, {});
-    return true;
   } else {
     msg = `${channel?.title || ""}${channel?.mask ? channel.mask : moniker(en)
       } says, "${msg}"`;
@@ -90,13 +99,16 @@ export const matchChannel = async (ctx: IContext) => {
       message: msg,
       timestamp: Date.now(),
     });
-    // Trim to limit — delete oldest entries beyond cap
-    const all = await chanHistory.find({ chanId: chan.id });
-    all.sort((a, b) => a.timestamp - b.timestamp);
-    if (all.length > limit) {
-      const toDelete = all.slice(0, all.length - limit);
-      for (const entry of toDelete) {
-        await chanHistory.delete({ id: entry.id });
+    // Trim to limit — only check every 50 messages to avoid
+    // a full table scan on every single message sent
+    if (Math.random() < 0.02) {
+      const all = await chanHistory.find({ chanId: chan.id });
+      if (all.length > limit) {
+        all.sort((a, b) => a.timestamp - b.timestamp);
+        const toDelete = all.slice(0, all.length - limit);
+        for (const entry of toDelete) {
+          await chanHistory.delete({ id: entry.id });
+        }
       }
     }
   }
