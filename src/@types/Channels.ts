@@ -7,6 +7,18 @@ export interface IChannel {
   alias?: string;
   masking?: boolean;
   owner?: string;
+  logHistory?: boolean;
+  historyLimit?: number;
+}
+
+export interface IChanMessage {
+  id: string;
+  chanId: string;
+  chanName: string;
+  playerId: string;
+  playerName: string;
+  message: string;
+  timestamp: number;
 }
 
 export interface IChanEntry {

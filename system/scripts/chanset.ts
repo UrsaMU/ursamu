@@ -27,7 +27,7 @@ export default async (u: IUrsamuSDK) => {
 
   if (!match) {
     u.send("Usage: @chanset <name>/<property>=<value>");
-    u.send("  Properties: header, lock, hidden (on/off), masking (on/off)");
+    u.send("  Properties: header, lock, hidden (on/off), masking (on/off), log (on/off), historyLimit (<n>)");
     return;
   }
 
@@ -45,7 +45,7 @@ export default async (u: IUrsamuSDK) => {
     }
   }
 
-  const options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean } = {};
+  const options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean; logHistory?: boolean; historyLimit?: number } = {};
 
   switch (property) {
     case "header":
@@ -60,8 +60,21 @@ export default async (u: IUrsamuSDK) => {
     case "masking":
       options.masking = value.toLowerCase() === "on" || value.toLowerCase() === "yes" || value === "1";
       break;
+    case "log":
+    case "loghistory":
+      options.logHistory = value.toLowerCase() === "on" || value.toLowerCase() === "yes" || value === "1";
+      break;
+    case "historylimit": {
+      const n = parseInt(value);
+      if (isNaN(n) || n < 1 || n > 5000) {
+        u.send("historyLimit must be a number between 1 and 5000.");
+        return;
+      }
+      options.historyLimit = n;
+      break;
+    }
     default:
-      u.send(`Unknown property: ${property}. Valid: header, lock, hidden, masking`);
+      u.send(`Unknown property: ${property}. Valid: header, lock, hidden, masking, log, historyLimit`);
       return;
   }
 

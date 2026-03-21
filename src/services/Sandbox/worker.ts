@@ -82,7 +82,8 @@ interface IUrsamuSDK {
     list(): Promise<unknown[]>;
     create(name: string, options?: { header?: string; lock?: string; hidden?: boolean }): Promise<unknown>;
     destroy(name: string): Promise<unknown>;
-    set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }): Promise<unknown>;
+    set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean; logHistory?: boolean; historyLimit?: number }): Promise<unknown>;
+    history(name: string, limit?: number): Promise<{ id: string; playerName: string; message: string; timestamp: number }[]>;
   };
   mail: {
     send(mail: Partial<IMail>): Promise<void>;
@@ -351,8 +352,10 @@ self.onmessage = async (e: MessageEvent) => {
       create: (name: string, options?: { header?: string; lock?: string; hidden?: boolean }) =>
         request<unknown>("chan:create", { name, ...options }),
       destroy: (name: string) => request<unknown>("chan:destroy", { name }),
-      set: (name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }) =>
-        request<unknown>("chan:set", { name, ...options })
+      set: (name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean; logHistory?: boolean; historyLimit?: number }) =>
+        request<unknown>("chan:set", { name, ...options }),
+      history: (name: string, limit = 20) =>
+        request<{ id: string; playerName: string; message: string; timestamp: number }[]>("chan:history", { name, limit }),
     },
     mail: {
       send: (mail: Partial<IMail>) => request<void>("mail:send", { mail }),
