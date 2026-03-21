@@ -2,6 +2,61 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [1.7.0] — 2026-03-21
+
+### New Features
+
+#### `@o*` / `@a*` Attribute Messaging
+- Objects now support classic MUSH message attributes: **SUCC / OSUCC / ASUCC** (pickup), **DROP / ODROP / ADROP** (drop), **SUCC / OSUCC / ASUCC** (give), and **ODESC** (look)
+- Movement triggers **OLEAVE / LEAVE** (old room), **OENTER / ENTER** (new room), and **ALEAVE / AENTER** (exit owner) — all read from plain-text attributes on the relevant exit
+- New SDK method: `u.attr.get(id, name)` — reads any named attribute from a DB object; available in sandbox scripts, native commands, and the `createNativeSDK` factory
+
+#### `@listen` / `@ahear` — NPC Reactivity Hooks
+- Any object in a room with a **LISTEN** attribute auto-reacts when a player speaks
+- Pattern matching supports glob syntax: `*` (always), `foo*` (starts-with), `*foo` (ends-with), `*foo*` / `foo` (substring) — case-insensitive
+- On match, the object's **AHEAR** attribute fires in the object's own context with `[message, actorId]` as args
+- `matchListen(pattern, text)` exported from `src/utils/index.ts` for use in plugins
+
+#### `@startup` — Boot-Time Attribute Execution
+- Objects with a **STARTUP** attribute have it executed at server boot via `runStartupAttrs()`
+- Restricted to **wizard / admin / superuser**-flagged objects (plain player objects are skipped)
+- Fire-and-forget after Discord init; per-object errors are isolated and logged
+- Enables persistent NPC behaviors, world setup scripts, and boot-time automation
+
+#### Docker Support
+- `Dockerfile` — multi-stage Deno image with dep-cache layer; ports 4201 (telnet), 4202 (WS), 4203 (HTTP)
+- `docker-compose.yaml` — volumes for `data/`, `config/`, `logs/`; `restart: unless-stopped`
+- `.dockerignore` — excludes tests, data, coverage, `.claude`, logs
+- New tasks: `docker:build`, `docker:up`, `docker:down`, `docker:logs`
+
+#### NAWS — Telnet Terminal Width Negotiation (RFC 1073)
+- Telnet sidecar sends `IAC DO NAWS` on connect; parses `IAC SB 31` response
+- Width validated to 40–250; height to 1–255
+- Handles NAWS sequences split across TCP chunks via `accumulateNaws(carry, chunk)`
+- Negotiated width stored as `data.termWidth` in the player's DB record
+- `who` command uses `termWidth` (default 78) for the separator line
+
+### Security
+
+10 vulnerabilities patched via TDD audit of v1.7 features (all test-driven, Red → Green → Refactor).
+
+#### Critical / High
+- **AHEAR message truncation** — raw say message truncated at 2,000 chars before passing to `u.trigger()`; LISTEN patterns > 500 chars rejected before matching; silent `catch(_e){}` replaced with `console.warn`
+- **NAWS height bounds** — `parseNawsBytes()` now validates height (1–255) in addition to width
+- **`msgBuffer` cap** — `MAX_MSG_BUFFER_SIZE = 200` with oldest-entry eviction prevents heap exhaustion during WS reconnects
+- **STARTUP privilege guard** — `runStartupAttrs()` skips objects without wizard / admin / superuser flag; prevents player-owned objects from running arbitrary commands at every boot
+
+#### Medium / Low
+- **WebSocket `termWidth` validation** — exported `clampTermWidth(w)` validator (40–250) gates all DB writes; rejects negative and out-of-range values sent directly via WS
+- **Split-frame NAWS** — exported `accumulateNaws(carry, chunk)` correctly reassembles NAWS sequences that span TCP reads
+- **`who` idle NaN guard** — `formatIdle()` adds `isNaN()` check so `NaN` lastCommand renders `"---"` instead of `"NaNs"`
+
+### Tests
+- 13 new security tests across `tests/scripts_listen.test.ts`, `tests/naws.test.ts`, `tests/startup_attrs.test.ts`, `tests/scripts_interaction.test.ts`, `tests/scripts_comms.test.ts`
+- Suite: **672 passed / 0 failed**
+
+---
+
 ## [1.6.0] — 2026-03-21
 
 ### New Features

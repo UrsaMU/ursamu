@@ -291,7 +291,7 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
   // Read from Telnet
   const buffer = new Uint8Array(16384);
-  let nawsCarry = new Uint8Array(0); // carry-over for NAWS sequences that span chunk boundaries
+  let nawsCarry: Uint8Array = new Uint8Array(0); // carry-over for NAWS sequences that span chunk boundaries
   try {
     while (true) {
       const n = await conn.read(buffer);
