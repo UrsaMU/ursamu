@@ -19,6 +19,15 @@ export const wikiHandler = (req: Request): Response => {
       const topic = match[1]; // Should be filename like 'connect.txt' or 'help/connect.txt'
       // Need to handle URL decoding
       const decoded = decodeURIComponent(topic);
+
+      // Reject path traversal sequences and null bytes — defense-in-depth even
+      // though txtFiles is an in-memory Map (protects against future dynamic loading).
+      if (decoded.includes("..") || decoded.includes("\0")) {
+        return new Response(JSON.stringify({ error: "Invalid topic name." }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
       
       const content = txtFiles.get(decoded);
       

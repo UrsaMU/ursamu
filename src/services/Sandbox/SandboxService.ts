@@ -1,6 +1,16 @@
 import { Sandbox, type SandboxOptions } from "../../../deps.ts";
 
 const SERVER_START = Date.now();
+
+/**
+ * Scoped DB update — writes only the specified dot-notation field paths instead
+ * of the entire object. Prevents full-object $set from clobbering concurrent writes.
+ * Exported for direct use in tests.
+ */
+export async function scopedUpdate(id: string, fields: Record<string, unknown>): Promise<void> {
+  const { dbojs } = await import("../Database/index.ts");
+  await dbojs.modify({ id }, "$set", fields);
+}
 import type { ISandboxConfig } from "../../@types/ISandboxConfig.ts";
 import { SDKService, type SDKContext } from "./SDKService.ts";
 import { send as broadcastSend, broadcast as broadcastAll } from "../broadcast/index.ts";
@@ -279,11 +289,9 @@ class LocalSandbox {
 
                 const match = await compare(e.data.password, found.data?.password || "");
                 if (!match) {
-                  // Track failed attempts
+                  // Track failed attempts — scoped update to avoid clobbering concurrent writes
                   const attempts = ((found.data?.failedAttempts as number) || 0) + 1;
-                  found.data ||= {};
-                  found.data.failedAttempts = attempts;
-                  await db.modify({ id: found.id }, "$set", found);
+                  await scopedUpdate(found.id, { "data.failedAttempts": attempts });
                 }
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: match });
               })();
@@ -308,11 +316,8 @@ class LocalSandbox {
                       await setFlags(player, "connected");
                       if (player.location) socket.join(`#${player.location}`);
 
-                      // Record login time directly on DB object
-                      const { dbojs: loginDb } = await import("../Database/index.ts");
-                      player.data = player.data || {};
-                      player.data.lastLogin = Date.now();
-                      await loginDb.modify({ id: player.id }, "$set", player);
+                      // Record login time — scoped update to avoid clobbering concurrent writes
+                      await scopedUpdate(player.id, { "data.lastLogin": Date.now() });
 
                       // Feature parity with legacy connect
                       const { joinChans } = await import("../../utils/joinChans.ts");
@@ -354,9 +359,7 @@ class LocalSandbox {
                    const hashed = await hash(e.data.password, 10);
                    const player = await db.queryOne({ id: e.data.id });
                    if (player) {
-                     player.data ||= {};
-                     player.data.password = hashed;
-                     await db.modify({ id: e.data.id }, "$set", player);
+                     await scopedUpdate(e.data.id, { "data.password": hashed });
                    }
                    worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
                  })();
@@ -475,9 +478,8 @@ class LocalSandbox {
                     en.data ||= {};
                     const channels = (en.data.channels as unknown[] || []) as IChanEntry[];
                     channels.push({ channel: e.data.channel, alias: e.data.alias, active: true } as IChanEntry);
-                    en.data.channels = channels;
-                    await db.modify({ id: en.id }, "$set", en);
-                    
+                    await scopedUpdate(en.id, { "data.channels": channels });
+
                     const socket = wsService.getConnectedSockets().find(s => s.cid === en.id);
                     if (socket) socket.join(e.data.channel);
                   }
@@ -499,8 +501,7 @@ class LocalSandbox {
                     const index = channels.findIndex((c) => c.alias === e.data.alias);
                     if (index !== -1) {
                       const [chan] = channels.splice(index, 1);
-                      en.data.channels = channels;
-                      await db.modify({ id: en.id }, "$set", en);
+                      await scopedUpdate(en.id, { "data.channels": channels });
                       const socket = wsService.getConnectedSockets().find(s => s.cid === en.id);
                       if (socket) socket.leave(chan.channel);
                     }
@@ -934,11 +935,9 @@ class LocalSandbox {
                 const maxNum = posts.reduce((m, p) => Math.max(m, p.num), 0);
                 const en = await db.queryOne({ id: context.id });
                 if (en) {
-                  en.data ||= {};
-                  const lastRead = (en.data.bbLastRead as Record<string, number>) || {};
+                  const lastRead = ((en.data?.bbLastRead as Record<string, number>) || {});
                   lastRead[e.data.boardId as string] = maxNum;
-                  en.data.bbLastRead = lastRead;
-                  await db.modify({ id: en.id }, "$set", en);
+                  await scopedUpdate(en.id, { "data.bbLastRead": lastRead });
                 }
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
               })();

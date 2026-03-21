@@ -5,6 +5,29 @@ import { dbojs } from "../services/Database/index.ts";
 import { dpath } from "../../deps.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
+// Allowed top-level fields when loading game objects from the git repo.
+// Any object that contains fields outside this set, or that carries a
+// password field, is rejected — it cannot overwrite sensitive DB data.
+const ALLOWED_TOP_LEVEL = new Set(["id", "flags", "data", "location", "contents"]);
+const FORBIDDEN_DATA_FIELDS = new Set(["password", "resetToken", "resetTokenExpiry", "failedAttempts"]);
+
+export function validateGitObject(obj: unknown): boolean {
+  if (!obj || typeof obj !== "object") return false;
+  const o = obj as Record<string, unknown>;
+  if (typeof o.id !== "string" || !o.id) return false;
+  // Reject unknown top-level fields
+  for (const key of Object.keys(o)) {
+    if (!ALLOWED_TOP_LEVEL.has(key)) return false;
+  }
+  // Reject forbidden data fields (e.g. injecting a password hash)
+  if (o.data && typeof o.data === "object") {
+    for (const key of Object.keys(o.data as Record<string, unknown>)) {
+      if (FORBIDDEN_DATA_FIELDS.has(key)) return false;
+    }
+  }
+  return true;
+}
+
 export default () => {
   addCmd({
     name: "@git/init",
@@ -41,7 +64,7 @@ export default () => {
             const content = await Deno.readTextFile(dpath.join(git.path, entry.name));
             try {
               const data = JSON.parse(content);
-              if (data.id) {
+              if (validateGitObject(data)) {
                 await dbojs.modify({ id: data.id }, "$set", data);
                 count++;
               }

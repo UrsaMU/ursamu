@@ -9,12 +9,20 @@ export class GitService {
     }
 
     async init(repoUrl: string) {
+        // Reject URLs that could be interpreted as git option flags.
+        // A URL starting with "-" or containing whitespace followed by "--"
+        // could inject arbitrary git options into the subprocess.
+        if (repoUrl.startsWith("-") || /\s--/.test(repoUrl) || /\s-[a-zA-Z]/.test(repoUrl)) {
+            throw new Error(`Invalid repository URL: "${repoUrl}"`);
+        }
+
         // cleanup old if exists
         try {
             await Deno.remove(this.repoPath, { recursive: true });
         } catch { /* ignore */ }
-        
-        await this.run("clone", repoUrl, this.repoPath);
+
+        // Use "--" to prevent git from interpreting the URL as a flag
+        await this.run("clone", "--", repoUrl, this.repoPath);
     }
 
     async pull() {
