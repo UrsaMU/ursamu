@@ -20,6 +20,12 @@ export async function runStartupAttrs(): Promise<void> {
     const startup = obj.data?.STARTUP;
     if (typeof startup !== "string" || startup.trim() === "") continue;
 
+    // Only fire STARTUP on wizard/admin/superuser-flagged objects (prevents
+    // untrusted player-owned objects from executing arbitrary commands at boot).
+    const f = (obj.flags || "").toLowerCase();
+    const hasElevated = f.includes("wizard") || f.includes("admin") || f.includes("superuser");
+    if (!hasElevated) continue;
+
     try {
       await force(
         {

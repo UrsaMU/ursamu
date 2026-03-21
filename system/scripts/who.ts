@@ -9,7 +9,7 @@ export default async (u: IUrsamuSDK) => {
   const width = (u.me.data?.termWidth as number) || 78;
 
   const formatIdle = (lastCmd: unknown): string => {
-    if (typeof lastCmd !== "number") return "---";
+    if (typeof lastCmd !== "number" || isNaN(lastCmd)) return "---";
     const secs = Math.floor((Date.now() - lastCmd) / 1000);
     if (secs < 60) return `${secs}s`;
     const mins = Math.floor(secs / 60);

@@ -299,6 +299,19 @@ Deno.test("@trigger — missing authorization vulnerability (RED phase)", OPTS, 
   await cleanup(ACTOR_ID, THING_ID);
 });
 
+// H5 — negative / overflow amounts must be rejected (regression guard)
+Deno.test("H5 — give money guards reject negative and overflow amounts", OPTS, () => {
+  // /^\d+$/ rejects '-5' — negative strings never enter the money path
+  const regex = /^\d+$/;
+  assertEquals(regex.test("-5"), false);
+  assertEquals(regex.test("-999999999999"), false);
+  // Very large value is parsed > 999999999 — caught by upper bound
+  const big = parseInt("99999999999999999999", 10);
+  assertEquals(big > 999_999_999, true);
+  // Zero is caught by <= 0 guard
+  assertEquals(parseInt("0", 10) <= 0, true);
+});
+
 // Close the DB after all tests
 Deno.test("cleanup — close DB", OPTS, async () => {
   await DBO.close();

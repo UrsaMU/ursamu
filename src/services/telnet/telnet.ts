@@ -36,6 +36,7 @@ export function parseNawsBytes(bytes: Uint8Array): { width: number; height: numb
   const height = (heightHi << 8) | heightLo;
 
   if (width < 40 || width > 250) return null;
+  if (height < 1 || height > 255) return null;
 
   return { width, height };
 }
@@ -154,6 +155,39 @@ A modern MUSH-like engine written in TypeScript.
   }
 };
 
+/** Maximum number of commands buffered during a WS reconnect (prevents heap exhaustion). */
+export const MAX_MSG_BUFFER_SIZE = 200;
+
+/**
+ * Accumulate bytes across TCP reads to detect NAWS sequences that span chunk boundaries.
+ *
+ * @param carry - leftover bytes from the previous read (may be empty)
+ * @param chunk - the new bytes just read
+ * @returns { naws: complete NAWS sequence bytes | null, carry: bytes to carry into next call }
+ */
+export function accumulateNaws(
+  carry: Uint8Array,
+  chunk: Uint8Array,
+): { naws: Uint8Array | null; carry: Uint8Array } {
+  const merged = new Uint8Array(carry.length + chunk.length);
+  merged.set(carry);
+  merged.set(chunk, carry.length);
+
+  for (let i = 0; i < merged.length; i++) {
+    if (merged[i] === 255 && merged[i + 1] === 250 && merged[i + 2] === 31) {
+      // Found IAC SB NAWS — look for the closing IAC SE
+      for (let j = i + 3; j < merged.length - 1; j++) {
+        if (merged[j] === 255 && merged[j + 1] === 240) {
+          return { naws: merged.subarray(i, j + 2), carry: new Uint8Array(0) };
+        }
+      }
+      // Closing IAC SE not yet arrived — carry the partial sequence forward
+      return { naws: null, carry: merged.subarray(i) };
+    }
+  }
+  return { naws: null, carry: new Uint8Array(0) };
+}
+
 async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: string) {
   let sock: WebSocket | null = null;
   let cid: string | undefined;
@@ -257,6 +291,7 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
   // Read from Telnet
   const buffer = new Uint8Array(16384);
+  let nawsCarry = new Uint8Array(0); // carry-over for NAWS sequences that span chunk boundaries
   try {
     while (true) {
       const n = await conn.read(buffer);
@@ -264,28 +299,19 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
       const chunk = buffer.subarray(0, n);
 
-      // --- NAWS subnegotiation detection ---
-      // Look for IAC SB 31 ... IAC SE within the raw bytes
-      for (let i = 0; i < chunk.length - 8; i++) {
-        if (chunk[i] === IAC && chunk[i + 1] === SB && chunk[i + 2] === NAWS_OPTION) {
-          // Find the closing IAC SE
-          for (let j = i + 3; j < chunk.length - 1; j++) {
-            if (chunk[j] === IAC && chunk[j + 1] === SE) {
-              const nawsSeq = chunk.subarray(i, j + 2);
-              const parsed = parseNawsBytes(nawsSeq);
-              if (parsed && cid) {
-                // Forward termWidth to the WS hub so the player's DB record can be updated
-                if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) {
-                  (sock as WebSocket).send(JSON.stringify({
-                    msg: "",
-                    data: { cid, termWidth: parsed.width }
-                  }));
-                }
-              }
-              break;
-            }
+      // --- NAWS subnegotiation detection (handles split TCP frames) ---
+      const { naws: nawsSeq, carry } = accumulateNaws(nawsCarry, chunk);
+      nawsCarry = carry;
+      if (nawsSeq !== null) {
+        const parsed = parseNawsBytes(nawsSeq);
+        if (parsed && cid) {
+          // Forward termWidth to the WS hub so the player's DB record can be updated
+          if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) {
+            (sock as WebSocket).send(JSON.stringify({
+              msg: "",
+              data: { cid, termWidth: parsed.width }
+            }));
           }
-          break;
         }
       }
 
@@ -310,6 +336,8 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
         }
       } else {
         if(msg) {
+          // Cap buffer to prevent heap exhaustion during long disconnects
+          if (msgBuffer.length >= MAX_MSG_BUFFER_SIZE) msgBuffer.shift();
           msgBuffer.push(JSON.stringify({
             msg,
             data: { cid }

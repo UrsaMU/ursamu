@@ -8,6 +8,11 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  * AHEAR attributes on any object whose LISTEN pattern matches the message.
  */
 
+/** Maximum length of a message forwarded to AHEAR triggers (prevents DoS). */
+const MAX_LISTEN_MSG_LEN = 2_000;
+/** Maximum raw length of a LISTEN attribute pattern before it is rejected. */
+const MAX_LISTEN_PATTERN_LEN = 500;
+
 /** Inline glob/substring matcher for LISTEN patterns. Case-insensitive. */
 function _matchListen(pattern: string, text: string): boolean {
   const p = pattern.trim().toLowerCase();
@@ -54,6 +59,10 @@ export default async (u: IUrsamuSDK) => {
   try {
     const roomId = u.here.id;
     const roomContents = await u.db.search({ location: roomId });
+    // Truncate the message before passing it to any AHEAR trigger
+    const ahearMsg = message.length > MAX_LISTEN_MSG_LEN
+      ? message.slice(0, MAX_LISTEN_MSG_LEN)
+      : message;
     for (const obj of roomContents) {
       // Skip the speaker themselves
       if (obj.id === actor.id) continue;
@@ -61,11 +70,14 @@ export default async (u: IUrsamuSDK) => {
       const listenAttr = (obj.state.attributes as Array<{ name: string; value: string }> | undefined)
         ?.find((a) => a.name.toUpperCase() === "LISTEN");
       if (!listenAttr) continue;
+      // Reject oversized LISTEN patterns before matching (DoS guard)
+      if (listenAttr.value.length > MAX_LISTEN_PATTERN_LEN) continue;
       if (!_matchListen(listenAttr.value, message)) continue;
       // Fire the AHEAR attribute on this object
-      await u.trigger(obj.id, "AHEAR", [message, actor.id]);
+      await u.trigger(obj.id, "AHEAR", [ahearMsg, actor.id]);
     }
   } catch (_e) {
     // Non-fatal: LISTEN/AHEAR errors must not interrupt the say command
+    console.warn("[say:listen]", _e);
   }
 };

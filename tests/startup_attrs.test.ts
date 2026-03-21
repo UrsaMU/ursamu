@@ -13,6 +13,10 @@ import { dbojs, DBO } from "../src/services/Database/database.ts";
 import { addCmd, clearCmds } from "../src/services/commands/cmdParser.ts";
 import { runStartupAttrs } from "../src/services/startup/index.ts";
 
+// H4 IDs
+const H4_PLAIN_ID   = "st_h4_plain";
+const H4_WIZARD_ID  = "st_h4_wizard";
+
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 // DB ID prefix for this test file
@@ -43,10 +47,10 @@ Deno.test(
       },
     });
 
-    // Create an object with STARTUP set to the test command
+    // Create an elevated object (wizard) with STARTUP set to the test command
     await dbojs.create({
       id: OBJ_A_ID,
-      flags: "thing",
+      flags: "thing wizard",
       data: { name: "PingObj", STARTUP: "st-ping" },
     });
 
@@ -114,15 +118,15 @@ Deno.test(
       },
     });
 
-    // Create two objects, both with STARTUP
+    // Create two elevated objects (admin), both with STARTUP
     await dbojs.create({
       id: OBJ_A_ID,
-      flags: "thing",
+      flags: "thing admin",
       data: { name: "Alpha", STARTUP: "st-mark" },
     });
     await dbojs.create({
       id: OBJ_C_ID,
-      flags: "thing",
+      flags: "thing admin",
       data: { name: "Gamma", STARTUP: "st-mark" },
     });
 
@@ -166,6 +170,68 @@ Deno.test(
 
     clearCmds();
     await cleanup(OBJ_B_ID);
+    await DBO.close();
+  },
+);
+
+// ---------------------------------------------------------------------------
+// H4 — STARTUP must NOT fire on plain (non-admin/wizard) objects
+// ---------------------------------------------------------------------------
+
+Deno.test(
+  "H4 — plain 'thing' object STARTUP must NOT fire (privilege guard)",
+  OPTS,
+  async () => {
+    const fired: string[] = [];
+    addCmd({
+      name: "h4-ping",
+      pattern: /^h4-ping$/,
+      // deno-lint-ignore no-explicit-any
+      exec: (_u: any) => { fired.push("should-not-fire"); },
+    });
+
+    await dbojs.create({
+      id: H4_PLAIN_ID,
+      flags: "thing",
+      data: { name: "PlainThing", STARTUP: "h4-ping" },
+    });
+
+    await runStartupAttrs();
+
+    // A plain thing (no wizard/admin/superuser) must NOT have STARTUP executed
+    if (fired.length > 0) {
+      throw new Error("H4 EXPLOIT: plain object STARTUP fired — privilege escalation possible");
+    }
+
+    clearCmds();
+    await cleanup(H4_PLAIN_ID);
+  },
+);
+
+Deno.test(
+  "H4 — wizard-flagged object STARTUP fires normally",
+  OPTS,
+  async () => {
+    const fired: string[] = [];
+    addCmd({
+      name: "h4-wizping",
+      pattern: /^h4-wizping$/,
+      // deno-lint-ignore no-explicit-any
+      exec: (_u: any) => { fired.push("wizard-fired"); },
+    });
+
+    await dbojs.create({
+      id: H4_WIZARD_ID,
+      flags: "thing wizard",
+      data: { name: "WizardThing", STARTUP: "h4-wizping" },
+    });
+
+    await runStartupAttrs();
+
+    assertEquals(fired.length, 1, "wizard object STARTUP should fire");
+
+    clearCmds();
+    await cleanup(H4_WIZARD_ID);
     await DBO.close();
   },
 );

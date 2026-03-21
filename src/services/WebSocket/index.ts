@@ -3,6 +3,14 @@ import type { IContext } from "../../@types/IContext.ts";
 import { cmdParser } from "../commands/index.ts";
 import { playerForSocket } from "../../utils/playerForSocket.ts";
 import { setFlags } from "../../utils/setFlags.ts";
+
+/** Validate a termWidth value from a WS client or telnet NAWS negotiation.
+ *  Returns the value if it is within the accepted range, or null to reject it. */
+export function clampTermWidth(w: unknown): number | null {
+  if (typeof w !== "number" || !Number.isFinite(w)) return null;
+  if (w < 40 || w > 250) return null;
+  return w;
+}
 import { moniker } from "../../utils/moniker.ts";
 import type { UserSocket } from "../../@types/IMSocket.ts";
 import { Presenter } from "../Presenter/index.ts";
@@ -135,10 +143,13 @@ export class WebSocketService {
                     return;
                 }
 
-                // Handle NAWS termWidth update from telnet sidecar
-                if (typeof data.data?.termWidth === "number" && sockData.cid) {
-                    const { dbojs } = await import("../Database/index.ts");
-                    await dbojs.modify({ id: sockData.cid }, "$set", { "data.termWidth": data.data.termWidth } as never);
+                // Handle NAWS termWidth update from telnet sidecar — validate before DB write
+                if (data.data?.termWidth !== undefined && sockData.cid) {
+                    const validWidth = clampTermWidth(data.data.termWidth);
+                    if (validWidth !== null) {
+                        const { dbojs } = await import("../Database/index.ts");
+                        await dbojs.modify({ id: sockData.cid }, "$set", { "data.termWidth": validWidth } as never);
+                    }
                 }
 
                 const ctx: IContext = {

@@ -201,6 +201,71 @@ Deno.test(
 );
 
 // ---------------------------------------------------------------------------
+// Security: C1 — oversized message must be truncated before AHEAR trigger
+// ---------------------------------------------------------------------------
+
+Deno.test(
+  "C1 — oversized say message is truncated before being passed to AHEAR trigger",
+  OPTS,
+  async () => {
+    // A message 10x the expected limit should arrive at AHEAR capped
+    const hugMsg = "A".repeat(10_000);
+    const npcObj = `{
+      id: "${NPC_ID}",
+      name: "Guard",
+      flags: new Set(["thing"]),
+      state: {
+        attributes: [
+          { name: "LISTEN", value: "*", setter: "god", type: "attribute" },
+          { name: "AHEAR",  value: "u.send('ok');", setter: "god", type: "attribute" }
+        ]
+      },
+      contents: []
+    }`;
+    const extra = `u.db = { ...u.db, search: async () => [${npcObj}] };`;
+    const ctx = makeCtx("say", [hugMsg]);
+    const result = await sandboxService.runScript(wrapSay(extra), ctx, SLOW) as SayResult;
+
+    assertEquals(result.triggers.length, 1);
+    // args[0] must be ≤ MAX_LISTEN_MSG_LEN — currently fails (no truncation)
+    if (result.triggers[0].args[0].length > 2000) {
+      throw new Error(
+        `C1 EXPLOIT: AHEAR received ${result.triggers[0].args[0].length}-char message (> 2000); no truncation in place`
+      );
+    }
+  }
+);
+
+Deno.test(
+  "C1 — oversized LISTEN pattern is skipped even if inner substring matches",
+  OPTS,
+  async () => {
+    // Pattern: "hello" + 9995 trailing spaces. _matchListen trims, so it WOULD match
+    // "hello world" unless we reject the pattern BEFORE trimming.
+    const hugePattern = "hello" + " ".repeat(9_995);
+    const npcObj = `{
+      id: "${NPC_ID}",
+      name: "Bot",
+      flags: new Set(["thing"]),
+      state: {
+        attributes: [
+          { name: "LISTEN", value: ${JSON.stringify(hugePattern)}, setter: "god", type: "attribute" }
+        ]
+      },
+      contents: []
+    }`;
+    const extra = `u.db = { ...u.db, search: async () => [${npcObj}] };`;
+    const ctx = makeCtx("say", ["hello world"]);
+    const result = await sandboxService.runScript(wrapSay(extra), ctx, SLOW) as SayResult;
+
+    // Pattern > MAX_LISTEN_PATTERN_LEN must be rejected before matching
+    if (result.triggers.length > 0) {
+      throw new Error("C1 EXPLOIT: oversized LISTEN pattern was not rejected; DoS vector open");
+    }
+  }
+);
+
+// ---------------------------------------------------------------------------
 // Cleanup
 // ---------------------------------------------------------------------------
 
