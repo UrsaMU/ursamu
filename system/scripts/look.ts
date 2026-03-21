@@ -24,7 +24,10 @@ export default async (u: IUrsamuSDK) => {
   const showContents = !isOpaque || canEditTarget;
 
   // Build Output Data
-  const description = (target.state.description as string) || "You see nothing special.";
+  const rawDesc = (target.state.description as string) || "You see nothing special.";
+  const description = u.util.parseDesc
+    ? await (u.util.parseDesc as (d: string, a: _IDBObj, t: _IDBObj) => Promise<string>)(rawDesc, actor, target)
+    : rawDesc;
 
   const characters = (target.contents || []).filter(obj => 
     obj.flags.has('player') && obj.flags.has('connected') && obj.id !== actor.id

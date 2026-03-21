@@ -1,0 +1,9 @@
+{
+  "name": "chargen",
+  "version": "1.0.0",
+  "description": "Character generation system for new players",
+  "ursamu": ">=1.7.0",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts"
+}

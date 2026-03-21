@@ -247,10 +247,14 @@ export async function wikiRouteHandler(
       if (!mime) return jsonResponse({ error: "Unsupported file type" }, 415);
       try {
         const data = await Deno.readFile(guardedBase);
+        // Force SVG and PDF to download rather than render inline so that
+        // any embedded scripts cannot execute in the user's browser.
+        const forceDownload = mime === "image/svg+xml" || mime === "application/pdf";
         return new Response(data, {
           headers: {
             "Content-Type": mime,
             "Cache-Control": "public, max-age=3600",
+            ...(forceDownload ? { "Content-Disposition": "attachment" } : {}),
           },
         });
       } catch {

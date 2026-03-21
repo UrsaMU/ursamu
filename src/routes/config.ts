@@ -1,3 +1,4 @@
+import { resolve, join } from "@std/path";
 import { ConfigManager } from "../services/Config/index.ts";
 import { texts } from "../services/Database/index.ts";
 
@@ -45,20 +46,25 @@ export const configHandler = async (req: Request) => {
      try {
         // deno-lint-ignore no-explicit-any
         const config = ConfigManager.getInstance().getAll() as any;
-        const connectFile = config.game?.text?.connect || "../text/default_connect.txt";
-        
-        // Resolve path relative to CWD (project root)
-        const filePath = connectFile; 
-        
+        const connectFile: string = config.game?.text?.connect || "text/default_connect.txt";
+
+        // Path traversal guard — resolve and verify the file stays inside ./text/
+        const textRoot  = resolve("./text");
+        const filePath  = resolve(join(".", connectFile));
+        if (!filePath.startsWith(textRoot + "/") && filePath !== textRoot) {
+          return new Response(JSON.stringify({ error: "Invalid connect text path." }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
         const text = await Deno.readTextFile(filePath);
         return new Response(JSON.stringify({ text }), {
             headers: { "Content-Type": "application/json" },
         });
-     } catch (e) {
-         console.error("Error reading connect text:", e);
+     } catch {
          return new Response(JSON.stringify({ error: "Could not read connect text." }), {
-             status: 500,
-             headers: { "Content-Type": "application/json" },
+             status: 500, headers: { "Content-Type": "application/json" },
          });
      }
   }
@@ -71,8 +77,7 @@ export const configHandler = async (req: Request) => {
         return new Response(JSON.stringify({ text }), {
             headers: { "Content-Type": "application/json" },
         });
-     } catch (e) {
-         console.error("Error reading welcome text:", e);
+     } catch {
          return new Response(JSON.stringify({ error: "Could not read welcome text." }), {
              status: 500,
              headers: { "Content-Type": "application/json" },
@@ -97,8 +102,7 @@ We've scanned the sector, but the coordinates you provided lead to deep space.
         return new Response(JSON.stringify({ text }), {
             headers: { "Content-Type": "application/json" },
         });
-     } catch (e) {
-         console.error("Error reading 404 text:", e);
+     } catch {
          return new Response(JSON.stringify({ error: "Could not read 404 text." }), {
              status: 500,
              headers: { "Content-Type": "application/json" },
