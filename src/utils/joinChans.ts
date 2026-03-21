@@ -1,5 +1,6 @@
 import type { IChanEntry } from "../@types/Channels.ts";
 import type { IContext } from "../@types/IContext.ts";
+import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { chans, dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { force } from "../services/commands/index.ts";
@@ -33,7 +34,8 @@ export const joinChans = async (ctx: IContext) => {
         });
 
         ctx.socket.join(channel.name);
-        await dbojs.modify({ id: player.id }, "$set", { "data.channels": chs });
+        // deno-lint-ignore no-explicit-any
+        await dbojs.modify({ id: player.id }, "$set", { "data.channels": chs } as any as Partial<IDBOBJ>);
         await force(ctx, `${channel.alias} :has joined the channel.`);
         send(
           [ctx.socket.id],
@@ -60,7 +62,8 @@ export const joinChans = async (ctx: IContext) => {
         player.data.channels = filtered;
 
         ctx.socket.leave(channel.name);
-        await dbojs.modify({ id: player.id }, "$set", { "data.channels": filtered });
+        // deno-lint-ignore no-explicit-any
+        await dbojs.modify({ id: player.id }, "$set", { "data.channels": filtered } as any as Partial<IDBOBJ>);
         await send(
           [ctx.socket.id],
           `You have left ${channel.name} with the alias '${channel.alias}'.`

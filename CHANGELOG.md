@@ -2,6 +2,52 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [1.6.0] — 2026-03-21
+
+### New Features
+
+#### Persistent Channel History
+- `IChannel` gains `logHistory` (default: `false`) and `historyLimit` (default: `500`) fields
+- New `server.chan_history` DB collection stores messages when logging is enabled; oldest entries trimmed to `historyLimit` automatically
+- **In-game commands:**
+  - `+channel/history <name>[=<lines>]` — show last N lines (default 20, max 500)
+  - `+channel/transcript <name>=<lines>` — ISO-timestamped export
+- **`@chanset` additions:** `log=on|off` and `historyLimit=<n>` (1–5000)
+- **REST:** `GET /api/v1/channels/:id/history?limit=<n>` (auth required; 403 when logging disabled)
+- **SDK:** `u.chan.history(name, limit?)` available in both native commands and sandbox scripts
+
+### Security
+
+19 vulnerabilities patched across two audit passes (PRs #49 and #52). All fixes are test-driven (Red→Green→Refactor).
+
+#### Critical / High
+- **Route prefix boundary** — `startsWith("/api/v1/auth")` (and config/connect/welcome) routed `/api/v1/configevil/connect` to `configHandler`, which served the connect text file. Fixed with exact+prefix matching on all routes.
+- **Authorization gaps** — `@trigger` and `@open` commands missing authorization checks; `GET /api/v1/players/online` was unauthenticated.
+- **Scene ownership bypass** — ownerless scene adoption in `PATCH /api/v1/scenes/:id` was unrestricted; now requires wizard/admin/superuser.
+- **Git subprocess injection** — `git.init(url)` passed user input directly to `Deno.Command`. Now rejects `-`-prefixed URLs and whitespace-injected flags; adds `--` separator.
+- **Unvalidated JSON → DB** — `@git/pull` wrote `JSON.parse(content)` directly to the database. New `validateGitObject()` whitelist rejects unknown fields and sensitive data keys.
+- **Password reset mass assignment** — password reset wrote the full user object; now scoped to `{ data: user.data }`.
+
+#### Medium
+- **Rate-limit map exhaustion** — `loginAttempts` and `apiRateLimits` Maps had no hard size cap. Added `MAX_TRACKED_IPS = 10,000` with oldest-entry eviction on both.
+- **flags substring matching** — `flags.includes("wizard")` could match partial strings; replaced with exact `hasFlag()` helper across scene, building, and player routers.
+- **Input length limits** — scene name (≤200), description (≤2000), mail subject (≤200), mail body (≤10,000), building room name (≤200), building description (≤2000).
+- **SandboxService full-object `$set`** — 6 handlers (`failedAttempts`, `lastLogin`, `setPassword`, `chan:join`, `chan:leave`, `bb:markRead`) wrote entire player objects back. Replaced with new `scopedUpdate()` helper using dot-notation field paths.
+- **`joinChans` full-object `$set`** — now uses scoped `data.channels` write.
+- **Error message leaks** — auth 500 responses, `@trigger` errors, and command parser errors no longer expose internal details to clients or players.
+- **`@wait` delay cap** — capped at 3600 seconds; over-limit returns an in-game error.
+
+#### Low
+- **Wiki path traversal** — `decodeURIComponent(topic)` now blocks `..` and null bytes.
+- **Mail route wiring** — `mailHandler` was exported but never registered in `app.ts`; now active under `/api/v1/mail`.
+- **Scene/invite JSON try/catch** — missing error handling on pose/invite/PATCH endpoints added.
+
+### Tests
+- 24 new security tests (`tests/security_routing.test.ts`, `tests/security_git.test.ts`, `tests/security_ratelimit.test.ts`, `tests/security_sandbox_set.test.ts`, `tests/security_joinchans.test.ts`)
+- Suite: **632 passed / 0 failed**
+
+---
+
 ## [1.5.0] — 2026-03-18
 
 ### New Features
