@@ -671,6 +671,24 @@ class LocalSandbox {
             }
             break;
           }
+          case "attr:get": {
+            if (e.data.id && e.data.name) {
+              const { dbojs: db } = await import("../Database/index.ts");
+              (async () => {
+                const obj = await db.queryOne({ id: e.data.id as string });
+                if (!obj) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+                  return;
+                }
+                const attrs = (obj.data?.attributes as Array<{ name: string; value: string }> | undefined) || [];
+                const found = attrs.find(a => a.name.toUpperCase() === (e.data.name as string).toUpperCase());
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: found?.value ?? null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
           case "events:emit": {
             if (e.data.event) {
               const { eventsService } = await import("../Events/index.ts");

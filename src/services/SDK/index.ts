@@ -348,6 +348,16 @@ export async function createNativeSDK(
       },
     },
 
+    attr: {
+      get: async (id: string, name: string): Promise<string | null> => {
+        const obj = await dbojs.queryOne({ id });
+        if (!obj) return null;
+        const attrs = (obj.data?.attributes as Array<{ name: string; value: string }> | undefined) || [];
+        const found = attrs.find(a => a.name.toUpperCase() === name.toUpperCase());
+        return found?.value ?? null;
+      },
+    },
+
     setFlags: async (target: string | IDBObj, flagStr: string) => {
       const targetId = typeof target === "string" ? target : target.id;
       const tarObj = await dbojs.queryOne({ id: targetId });

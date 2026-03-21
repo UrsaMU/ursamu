@@ -86,6 +86,9 @@ export interface IUrsamuSDK {
     set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean; logHistory?: boolean; historyLimit?: number }): Promise<unknown>;
     history(name: string, limit?: number): Promise<{ id: string; playerName: string; message: string; timestamp: number }[]>;
   };
+  attr: {
+    get(id: string, name: string): Promise<string | null>;
+  };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
   trigger(target: string, attr: string, args?: string[]): Promise<void>;
   text: {
