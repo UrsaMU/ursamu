@@ -12,6 +12,11 @@ const REACTIVE_ATTRS = ["LISTEN", "AHEAR", "ACONNECT", "ADISCONNECT", "STARTUP"]
 
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
+  const f = Array.from(actor.flags).join(" ").toLowerCase();
+  if (!f.includes("wizard") && !f.includes("admin") && !f.includes("superuser")) {
+    u.send("Permission denied.");
+    return;
+  }
   const roomId = u.here.id;
 
   const contents = await u.db.search({ location: roomId });

@@ -413,6 +413,136 @@ Deno.test("PATCH /api/v1/chargen/:playerId — 400 on invalid JSON", OPTS, async
   await cleanup();
 });
 
+// H3 — substring flag bypass: "notadmin" must NOT grant staff access
+Deno.test("H3 — user with flag 'notadmin' must be rejected from staff endpoints (substring bypass)", OPTS, async () => {
+  const FAKE_ADMIN_ID = "cg_fake_admin";
+  await dbojs.delete({ id: FAKE_ADMIN_ID }).catch(() => {});
+  // "notadmin" contains the substring "admin" — broken .includes() would grant access
+  await dbojs.create({ id: FAKE_ADMIN_ID, flags: "player notadmin", data: { name: "FakeAdmin" } });
+
+  // GET /api/v1/chargen — staff-only list endpoint
+  const { status } = await call("GET", "/api/v1/chargen", FAKE_ADMIN_ID);
+  if (status !== 403) {
+    await dbojs.delete({ id: FAKE_ADMIN_ID }).catch(() => {});
+    throw new Error(`H3 EXPLOIT: user with flag 'notadmin' got status ${status} (expected 403) — substring bypass in isStaffUser()`);
+  }
+
+  await dbojs.delete({ id: FAKE_ADMIN_ID }).catch(() => {});
+});
+
+// =============================================================================
+// M3 — +chargen/set unbounded field name/value (DoS guard)
+// =============================================================================
+
+Deno.test("M3 — +chargen/set must reject field name longer than 64 chars", OPTS, async () => {
+  await cleanup();
+  await seedPlayer();
+
+  // Import commands (side effect: registers +chargen/set via addCmd)
+  await import("../src/plugins/chargen/commands.ts");
+  const { cmds } = await import("../src/services/commands/cmdParser.ts");
+
+  const setCmd = cmds.find(c => c.name === "+chargen/set");
+  if (!setCmd) throw new Error("M3: +chargen/set command not registered");
+
+  const sent: string[] = [];
+  const oversizedField = "x".repeat(65);
+
+  // deno-lint-ignore no-explicit-any
+  const mockU: any = {
+    me: { id: PLAYER_ID, flags: new Set(["player"]), name: "TestPlayer", state: {}, contents: [] },
+    cmd: { name: "+chargen/set", args: [`${oversizedField}=some-value`], switches: [] },
+    send: (msg: string) => { sent.push(msg); },
+    here: { id: "limbo", flags: new Set(["room"]), name: "Limbo", state: {}, contents: [], broadcast: () => {} },
+    state: {},
+  };
+
+  await setCmd.exec(mockU);
+
+  // After fix: should have sent an error, not stored the oversized field
+  const stored = await findAppByPlayer(PLAYER_ID);
+  const fieldKeys = stored ? Object.keys(stored.data.fields) : [];
+  const hasOversizedKey = fieldKeys.some(k => k.length > 64);
+
+  if (hasOversizedKey) {
+    await cleanup();
+    throw new Error(`M3 EXPLOIT: +chargen/set stored a field name of ${fieldKeys.find(k => k.length > 64)!.length} chars (max should be 64)`);
+  }
+
+  await cleanup();
+});
+
+Deno.test("M3 — +chargen/set must reject field value longer than 4096 chars", OPTS, async () => {
+  await cleanup();
+  await seedPlayer();
+
+  const { cmds } = await import("../src/services/commands/cmdParser.ts");
+  const setCmd = cmds.find(c => c.name === "+chargen/set");
+  if (!setCmd) throw new Error("M3: +chargen/set command not registered");
+
+  const sent: string[] = [];
+  const oversizedValue = "y".repeat(4097);
+
+  // deno-lint-ignore no-explicit-any
+  const mockU: any = {
+    me: { id: PLAYER_ID, flags: new Set(["player"]), name: "TestPlayer", state: {}, contents: [] },
+    cmd: { name: "+chargen/set", args: [`concept=${oversizedValue}`], switches: [] },
+    send: (msg: string) => { sent.push(msg); },
+    here: { id: "limbo", flags: new Set(["room"]), name: "Limbo", state: {}, contents: [], broadcast: () => {} },
+    state: {},
+  };
+
+  await setCmd.exec(mockU);
+
+  const stored = await findAppByPlayer(PLAYER_ID);
+  const conceptValue = stored?.data.fields["concept"] as string | undefined;
+
+  if (conceptValue && conceptValue.length > 4096) {
+    await cleanup();
+    throw new Error(`M3 EXPLOIT: +chargen/set stored a field value of ${conceptValue.length} chars (max should be 4096)`);
+  }
+
+  await cleanup();
+});
+
+// =============================================================================
+// L1 — +chargen/approve and +chargen/reject unbounded notes/reason
+// =============================================================================
+
+Deno.test("L1 — PATCH /api/v1/chargen must reject notes longer than 2000 chars", OPTS, async () => {
+  await cleanup();
+  await seedStaff();
+  await seedPlayer();
+
+  const app = await getOrCreateApp(PLAYER_ID);
+  await chargenApps.update({ id: app.id }, {
+    ...app,
+    data: { ...app.data, status: "pending" as const, submittedAt: Date.now(), fields: { concept: "X" } },
+  });
+
+  const oversizedNotes = "n".repeat(2001);
+  const { status } = await call(
+    "PATCH", `/api/v1/chargen/${PLAYER_ID}`, STAFF_ID,
+    { notes: oversizedNotes }
+  );
+
+  if (status === 200) {
+    // Verify the oversized value was stored (RED state — no guard in place)
+    const stored = await findAppByPlayer(PLAYER_ID);
+    if (stored && typeof stored.data.notes === "string" && stored.data.notes.length > 2000) {
+      await cleanup();
+      throw new Error(`L1 EXPLOIT: PATCH stored notes of ${stored.data.notes.length} chars (max should be 2000)`);
+    }
+  }
+
+  await cleanup();
+});
+
+// =============================================================================
+// L2 — PATCH /api/v1/chargen notes length limit
+// =============================================================================
+// (L2 is the same as L1 — tested above via the REST PATCH endpoint)
+
 Deno.test("unknown route — 404", OPTS, async () => {
   const { status } = await call("GET", "/api/v1/chargen/foo/bar/baz", STAFF_ID);
   assertEquals(status, 404);

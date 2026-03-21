@@ -36,9 +36,17 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  // Cannot force a superuser unless the actor is also superuser
-  if (target.flags.has("superuser") && !actor.flags.has("superuser")) {
-    u.send("You cannot force a superuser.");
+  // Privilege ladder: superuser(3) > admin(2) > wizard(1) > player(0)
+  // You may only force targets at a strictly lower privilege level.
+  function privLevel(flags: Set<string>): number {
+    if (flags.has("superuser")) return 3;
+    if (flags.has("admin"))     return 2;
+    if (flags.has("wizard"))    return 1;
+    return 0;
+  }
+
+  if (privLevel(target.flags) >= privLevel(actor.flags)) {
+    u.send("Permission denied.");
     return;
   }
 

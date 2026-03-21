@@ -8,6 +8,9 @@ import { getAttribute } from "./getAttribute.ts";
  *   - `%0` with the actor's display name, `%1`–`%9` with empty string (future use)
  *   - `[u(objId/attrName, arg0, arg1)]` with the evaluated result of that attribute
  */
+/** Max number of [u()] patterns processed per description (DoS guard). */
+const MAX_U_PATTERNS = 10;
+
 export async function parseDesc(
   desc: string,
   actor: IDBObj,
@@ -27,10 +30,19 @@ export async function parseDesc(
 
   // Find and replace [u(objId/attrName, arg0, arg1, ...)] patterns
   // Pattern: [u(target/attr)] or [u(target/attr, arg0)] or [u(target/attr, arg0, arg1, ...)]
-  const uPattern = /\[u\(([^)]+)\)\]/g;
-  const matches = [...result.matchAll(uPattern)];
+  // Determine if the actor is privileged (admin/wizard/superuser)
+  const actorFlagStr = Array.from(actor.flags || []).join(" ").toLowerCase();
+  const isPrivileged = actorFlagStr.includes("wizard") ||
+    actorFlagStr.includes("admin") ||
+    actorFlagStr.includes("superuser");
 
-  if (matches.length === 0) return result;
+  const uPattern = /\[u\(([^)]+)\)\]/g;
+  const allMatches = [...result.matchAll(uPattern)];
+
+  if (allMatches.length === 0) return result;
+
+  // Cap pattern count to prevent DoS (M2)
+  const matches = allMatches.slice(0, MAX_U_PATTERNS);
 
   // Process matches in reverse to preserve indices
   const replacements: Array<{ start: number; end: number; value: string }> = [];
@@ -57,6 +69,13 @@ export async function parseDesc(
     const attrName = objAttr.slice(slashIdx + 1).trim();
 
     if (!targetId || !attrName) {
+      replacements.push({ start, end, value: "" });
+      continue;
+    }
+
+    // H4: Only allow cross-object [u()] evaluation for privileged actors.
+    // Plain players may only reference the target object itself.
+    if (!isPrivileged && targetId !== _target.id) {
       replacements.push({ start, end, value: "" });
       continue;
     }

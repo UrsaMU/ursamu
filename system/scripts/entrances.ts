@@ -9,6 +9,11 @@ export const aliases = ["@entrances"];
  */
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
+  const f = Array.from(actor.flags).join(" ").toLowerCase();
+  if (!f.includes("wizard") && !f.includes("admin") && !f.includes("superuser")) {
+    u.send("Permission denied.");
+    return;
+  }
   const arg = (u.cmd.args[0] || "").trim();
 
   let target;

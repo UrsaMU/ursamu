@@ -16,6 +16,7 @@ const RAW_TEL       = await Deno.readTextFile("./system/scripts/tel.ts");
 const RAW_FORCE     = await Deno.readTextFile("./system/scripts/forceCmd.ts");
 const RAW_SWEEP     = await Deno.readTextFile("./system/scripts/sweep.ts");
 const RAW_ENTRANCES = await Deno.readTextFile("./system/scripts/entrances.ts");
+const RAW_TIME      = await Deno.readTextFile("./system/scripts/time.ts");
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -142,6 +143,45 @@ Deno.test("@tel — admin moves player, db.modify called with new location", OPT
   assertStringIncludes(allMsgs, "teleport");
 });
 
+// M5 — wizard must NOT be able to teleport a peer/superior target
+Deno.test("M5 — wizard must NOT teleport an admin target (peer escalation)", OPTS, async () => {
+  const ctx = makeCtx("wizard", "@tel", [`${TARGET_ID}=${DEST_ID}`]);
+
+  const wrapped = (() => {
+    const stripped = RAW_TEL
+      .replace(/^import\s.*?;\s*$/gm, "")
+      .replace(/export const aliases.*?;/gs, "")
+      .replace(/export default/, "_main =")
+      .replace(/^export\s+/gm, "");
+    return [
+      "let _main;",
+      stripped,
+      "const _sent = [];",
+      "u.send = (m, t) => _sent.push({ msg: m, target: t });",
+      `const _modifyCalls = [];`,
+      `let _callCount = 0;`,
+      `u.util = { ...u.util, target: async (_a, _n) => {`,
+      `  _callCount++;`,
+      `  if (_callCount === 1) return { id: "${TARGET_ID}", name: "Admin", flags: new Set(["admin"]), state: {}, contents: [] };`,
+      `  return { id: "${DEST_ID}", name: "Hall", flags: new Set(["room"]), state: {}, contents: [] };`,
+      `}};`,
+      `u.db = { ...u.db, modify: async (id, op, data) => { _modifyCalls.push([id, op, data]); } };`,
+      "await _main(u);",
+      "return { sent: _sent, modifyCalls: _modifyCalls };",
+    ].join("\n");
+  })();
+
+  const result = await sandboxService.runScript(wrapped, ctx, SLOW) as {
+    sent: SentMsg[];
+    modifyCalls: Array<[string, string, unknown]>;
+  };
+
+  if (result.modifyCalls.length > 0) {
+    throw new Error(`M5 EXPLOIT: wizard teleported admin target — db.modify was called ${result.modifyCalls.length} time(s)`);
+  }
+  assertStringIncludes(result.sent.map(r => r.msg).join(" "), "Permission denied");
+});
+
 // ---------------------------------------------------------------------------
 // @force tests
 // ---------------------------------------------------------------------------
@@ -171,7 +211,7 @@ Deno.test("@force — cannot force superuser as non-superuser", OPTS, async () =
     u.util = { ...u.util, target: async () => ({ id: "${TARGET_ID}", name: "God", flags: new Set(["superuser"]), state: {}, contents: [] }) };
   `;
   const result = await sandboxService.runScript(wrapScript(RAW_FORCE, extra), ctx, SLOW) as SentMsg[];
-  assertStringIncludes(result.map(r => r.msg).join(" "), "superuser");
+  assertStringIncludes(result.map(r => r.msg).join(" "), "Permission denied");
 });
 
 Deno.test("@force — admin forces command, forceAs called and actor notified", OPTS, async () => {
@@ -207,19 +247,103 @@ Deno.test("@force — admin forces command, forceAs called and actor notified", 
   assertStringIncludes(result.sent.map(r => r.msg).join(" "), "force");
 });
 
+// M4 — wizard must NOT be able to force a peer-level (wizard/admin) target
+Deno.test("M4 — wizard must NOT force an admin target (peer-level escalation)", OPTS, async () => {
+  const ctx = makeCtx("wizard", "@force", [`${TARGET_ID}=say hello`]);
+  const extra = `
+    const _forceCalls = [];
+    u.util = { ...u.util, target: async () => ({ id: "${TARGET_ID}", name: "Admin", flags: new Set(["admin"]), state: {}, contents: [] }) };
+    u.forceAs = async (tId, cmd) => { _forceCalls.push({ tId, cmd }); };
+    u.send = (m, t) => _sent.push({ msg: m, target: t });
+  `;
+
+  const wrapped = (() => {
+    const stripped = RAW_FORCE
+      .replace(/^import\s.*?;\s*$/gm, "")
+      .replace(/export const aliases.*?;/gs, "")
+      .replace(/export default/, "_main =")
+      .replace(/^export\s+/gm, "");
+    return [
+      "let _main;",
+      stripped,
+      "const _sent = [];",
+      "u.send = (m, t) => _sent.push({ msg: m, target: t });",
+      `const _forceCalls = [];`,
+      `u.util = { ...u.util, target: async () => ({ id: "${TARGET_ID}", name: "Admin", flags: new Set(["admin"]), state: {}, contents: [] }) };`,
+      `u.forceAs = async (tId, cmd) => { _forceCalls.push({ tId, cmd }); };`,
+      "await _main(u);",
+      "return { sent: _sent, forceCalls: _forceCalls };",
+    ].join("\n");
+  })();
+
+  const result = await sandboxService.runScript(wrapped, ctx, SLOW) as {
+    sent: SentMsg[];
+    forceCalls: Array<{ tId: string; cmd: string }>;
+  };
+
+  if (result.forceCalls.length > 0) {
+    throw new Error(`M4 EXPLOIT: wizard forced admin target — forceAs was called ${result.forceCalls.length} time(s)`);
+  }
+  assertStringIncludes(result.sent.map(r => r.msg).join(" "), "Permission denied");
+});
+
+Deno.test("M4 — wizard must NOT force a peer wizard target", OPTS, async () => {
+  const ctx = makeCtx("wizard", "@force", [`${TARGET_ID}=say hello`]);
+
+  const wrapped = (() => {
+    const stripped = RAW_FORCE
+      .replace(/^import\s.*?;\s*$/gm, "")
+      .replace(/export const aliases.*?;/gs, "")
+      .replace(/export default/, "_main =")
+      .replace(/^export\s+/gm, "");
+    return [
+      "let _main;",
+      stripped,
+      "const _sent = [];",
+      "u.send = (m, t) => _sent.push({ msg: m, target: t });",
+      `const _forceCalls = [];`,
+      `u.util = { ...u.util, target: async () => ({ id: "${TARGET_ID}", name: "PeerWiz", flags: new Set(["wizard"]), state: {}, contents: [] }) };`,
+      `u.forceAs = async (tId, cmd) => { _forceCalls.push({ tId, cmd }); };`,
+      "await _main(u);",
+      "return { sent: _sent, forceCalls: _forceCalls };",
+    ].join("\n");
+  })();
+
+  const result = await sandboxService.runScript(wrapped, ctx, SLOW) as {
+    sent: SentMsg[];
+    forceCalls: Array<{ tId: string; cmd: string }>;
+  };
+
+  if (result.forceCalls.length > 0) {
+    throw new Error(`M4 EXPLOIT: wizard forced peer wizard target — forceAs was called ${result.forceCalls.length} time(s)`);
+  }
+  assertStringIncludes(result.sent.map(r => r.msg).join(" "), "Permission denied");
+});
+
 // ---------------------------------------------------------------------------
 // @sweep tests
 // ---------------------------------------------------------------------------
 
-Deno.test("@sweep — empty room returns 'No reactive objects'", OPTS, async () => {
+// H1 — plain player must NOT be able to run @sweep (privilege guard)
+Deno.test("H1 — plain player @sweep must be rejected with Permission denied", OPTS, async () => {
   const ctx = makeCtx("player connected", "@sweep", []);
+  const extra = `u.db = { ...u.db, search: async () => [] };`;
+  const result = await sandboxService.runScript(wrapScript(RAW_SWEEP, extra), ctx, SLOW) as SentMsg[];
+  const msgs = result.map(r => r.msg).join(" ");
+  if (!msgs.includes("Permission denied")) {
+    throw new Error(`H1 EXPLOIT: plain player ran @sweep without authorization. Output: "${msgs}"`);
+  }
+});
+
+Deno.test("@sweep — empty room returns 'No reactive objects'", OPTS, async () => {
+  const ctx = makeCtx("wizard", "@sweep", []);
   const extra = `u.db = { ...u.db, search: async () => [] };`;
   const result = await sandboxService.runScript(wrapScript(RAW_SWEEP, extra), ctx, SLOW) as SentMsg[];
   assertStringIncludes(result.map(r => r.msg).join(" "), "No reactive");
 });
 
 Deno.test("@sweep — room with LISTEN object lists it", OPTS, async () => {
-  const ctx = makeCtx("player connected", "@sweep", []);
+  const ctx = makeCtx("wizard", "@sweep", []);
 
   const npcObj = `{
     id: "${NPC_ID}",
@@ -242,7 +366,7 @@ Deno.test("@sweep — room with LISTEN object lists it", OPTS, async () => {
 });
 
 Deno.test("@sweep — actor itself is skipped even if it has reactive attrs", OPTS, async () => {
-  const ctx = makeCtx("player connected", "@sweep", []);
+  const ctx = makeCtx("admin", "@sweep", []);
 
   // Return the actor itself with a LISTEN attr — should be skipped
   const actorObj = `{
@@ -285,15 +409,26 @@ Deno.test("@sweep — multiple reactive attrs shown together", OPTS, async () =>
 // @entrances tests
 // ---------------------------------------------------------------------------
 
-Deno.test("@entrances — no exits lead to room sends 'No exits'", OPTS, async () => {
+// H2 — plain player must NOT be able to run @entrances (privilege guard)
+Deno.test("H2 — plain player @entrances must be rejected with Permission denied", OPTS, async () => {
   const ctx = makeCtx("player connected", "@entrances", []);
+  const extra = `u.db = { ...u.db, search: async () => [] };`;
+  const result = await sandboxService.runScript(wrapScript(RAW_ENTRANCES, extra), ctx, SLOW) as SentMsg[];
+  const msgs = result.map(r => r.msg).join(" ");
+  if (!msgs.includes("Permission denied")) {
+    throw new Error(`H2 EXPLOIT: plain player ran @entrances without authorization. Output: "${msgs}"`);
+  }
+});
+
+Deno.test("@entrances — no exits lead to room sends 'No exits'", OPTS, async () => {
+  const ctx = makeCtx("wizard", "@entrances", []);
   const extra = `u.db = { ...u.db, search: async () => [] };`;
   const result = await sandboxService.runScript(wrapScript(RAW_ENTRANCES, extra), ctx, SLOW) as SentMsg[];
   assertStringIncludes(result.map(r => r.msg).join(" "), "No exits");
 });
 
 Deno.test("@entrances — exit with matching destination is shown", OPTS, async () => {
-  const ctx = makeCtx("player connected", "@entrances", []);
+  const ctx = makeCtx("wizard", "@entrances", []);
 
   // The exit points to ROOM_ID (which is u.here.id in our ctx)
   const jsExit = `{
@@ -330,7 +465,7 @@ Deno.test("@entrances — exit with matching destination is shown", OPTS, async 
 });
 
 Deno.test("@entrances — exit not pointing to room is excluded", OPTS, async () => {
-  const ctx = makeCtx("player connected", "@entrances", []);
+  const ctx = makeCtx("wizard", "@entrances", []);
 
   // Exit points to a DIFFERENT room
   const jsExit = `{
@@ -348,7 +483,7 @@ Deno.test("@entrances — exit not pointing to room is excluded", OPTS, async ()
 });
 
 Deno.test("@entrances — with explicit arg, looks up that location", OPTS, async () => {
-  const ctx = makeCtx("player connected", "@entrances", ["SomeRoom"]);
+  const ctx = makeCtx("wizard", "@entrances", ["SomeRoom"]);
 
   const jsTargetRoom = `{ id: "${DEST_ID}", name: "Target Hall", flags: new Set(["room"]), state: {}, contents: [] }`;
   const jsExit = `{ id: "${EXIT_ID}", name: "South Entry", flags: new Set(["exit"]), location: "at_room2", state: { destination: "${DEST_ID}" }, contents: [] }`;
@@ -363,6 +498,91 @@ Deno.test("@entrances — with explicit arg, looks up that location", OPTS, asyn
   const allMsgs = result.map(r => r.msg).join("\n");
   assertStringIncludes(allMsgs, "South Entry");
   assertStringIncludes(allMsgs, "Foyer");
+});
+
+// ---------------------------------------------------------------------------
+// @time/set tests
+// ---------------------------------------------------------------------------
+
+function wrapTimeScript(extra = ""): string {
+  const stripped = RAW_TIME
+    .replace(/^import\s.*?;\s*$/gm, "")
+    .replace(/export const aliases.*?;/gs, "")
+    .replace(/export default/, "_main =")
+    .replace(/^export\s+/gm, "");
+  return [
+    "let _main;",
+    stripped,
+    "const _sent = [];",
+    "u.send = (m) => _sent.push({ msg: m });",
+    extra,
+    "await _main(u);",
+    "return _sent;",
+  ].join("\n");
+}
+
+function makeTimeCtx(switches: string[], args: string[]): SDKContext {
+  return {
+    id: ACTOR_ID,
+    state: {},
+    me: { id: ACTOR_ID, name: "Admin", flags: new Set(["admin", "wizard"]), state: {} },
+    here: { id: ROOM_ID, name: "Test Room", flags: new Set(["room"]), state: {} },
+    cmd: { name: "@time", original: "@time/set", args, switches },
+    socketId: `sock-${ACTOR_ID}`,
+  };
+}
+
+// M1 — negative/overflow values in @time/set must be rejected (range guard)
+Deno.test("M1 — @time/set with negative month must be rejected", OPTS, async () => {
+  // Capture setGameTime call via _sent injection
+  const extra = `
+    u.sys = {
+      ...u.sys,
+      gameTime: async () => ({ year: 1, month: 1, day: 1, hour: 0, minute: 0 }),
+      setGameTime: async (t) => { _sent.push({ msg: "SET:" + JSON.stringify(t) }); },
+    };
+  `;
+  const ctx = makeTimeCtx(["set"], ["month=-5"]);
+  const result = await sandboxService.runScript(wrapTimeScript(extra), ctx, SLOW) as SentMsg[];
+  const setCalls = result.filter(r => r.msg.startsWith("SET:")).map(r => JSON.parse(r.msg.slice(4)));
+  if (setCalls.length > 0 && setCalls[0].month < 1) {
+    throw new Error(`M1 EXPLOIT: @time/set accepted month=${setCalls[0].month} (< 1) — no range guard`);
+  }
+});
+
+Deno.test("M1 — @time/set with overflow hour must be rejected", OPTS, async () => {
+  const extra = `
+    u.sys = {
+      ...u.sys,
+      gameTime: async () => ({ year: 1, month: 1, day: 1, hour: 0, minute: 0 }),
+      setGameTime: async (t) => { _sent.push({ msg: "SET:" + JSON.stringify(t) }); },
+    };
+  `;
+  const ctx = makeTimeCtx(["set"], ["hour=99"]);
+  const result = await sandboxService.runScript(wrapTimeScript(extra), ctx, SLOW) as SentMsg[];
+  const setCalls = result.filter(r => r.msg.startsWith("SET:")).map(r => JSON.parse(r.msg.slice(4)));
+  if (setCalls.length > 0 && setCalls[0].hour > 23) {
+    throw new Error(`M1 EXPLOIT: @time/set accepted hour=${setCalls[0].hour} (> 23) — no range guard`);
+  }
+});
+
+Deno.test("M1 — valid @time/set values are accepted", OPTS, async () => {
+  const extra = `
+    u.sys = {
+      ...u.sys,
+      gameTime: async () => ({ year: 1, month: 1, day: 1, hour: 0, minute: 0 }),
+      setGameTime: async (t) => { _sent.push({ msg: "SET:" + JSON.stringify(t) }); },
+    };
+  `;
+  const ctx = makeTimeCtx(["set"], ["year=5", "month=6", "day=15", "hour=14", "minute=30"]);
+  const result = await sandboxService.runScript(wrapTimeScript(extra), ctx, SLOW) as SentMsg[];
+  const setCalls = result.filter(r => r.msg.startsWith("SET:")).map(r => JSON.parse(r.msg.slice(4)));
+  if (setCalls.length === 0) {
+    throw new Error("M1: @time/set did not call setGameTime for valid inputs");
+  }
+  assertEquals(setCalls[0].month, 6);
+  assertEquals(setCalls[0].hour, 14);
+  assertStringIncludes(result.filter(r => !r.msg.startsWith("SET:")).map(r => r.msg).join(" "), "Setting");
 });
 
 // ---------------------------------------------------------------------------

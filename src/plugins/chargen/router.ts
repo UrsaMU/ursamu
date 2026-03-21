@@ -14,8 +14,8 @@ async function isStaffUser(userId: string | null): Promise<boolean> {
   if (!userId) return false;
   const player = await dbojs.queryOne({ id: userId });
   if (!player) return false;
-  const flags = player.flags || "";
-  return flags.includes("admin") || flags.includes("wizard") || flags.includes("superuser");
+  const flagSet = new Set((player.flags || "").split(" ").filter(Boolean));
+  return flagSet.has("admin") || flagSet.has("wizard") || flagSet.has("superuser");
 }
 
 // ─── route handler ────────────────────────────────────────────────────────────
@@ -94,6 +94,9 @@ export async function chargenRouteHandler(req: Request, userId: string | null): 
       patch.status = body.status as IChargenApp["data"]["status"];
     }
     if (typeof body.notes === "string") {
+      if (body.notes.length > 2000) {
+        return jsonResponse({ error: "Notes too long (max 2000 characters)" }, 400);
+      }
       patch.notes = body.notes;
     }
     if (body.reviewedBy !== undefined) {

@@ -75,6 +75,9 @@ addCmd({
 
 // ─── +chargen/set ─────────────────────────────────────────────────────────────
 
+const MAX_FIELD_NAME_LEN = 64;
+const MAX_FIELD_VALUE_LEN = 4096;
+
 addCmd({
   name: "+chargen/set",
   pattern: /^\+chargen\/set\s+(.+)$/i,
@@ -90,6 +93,15 @@ addCmd({
 
     if (!field || !value) {
       u.send("Usage: +chargen/set <field>=<value>");
+      return;
+    }
+
+    if (field.length > MAX_FIELD_NAME_LEN) {
+      u.send(`Field name too long (max ${MAX_FIELD_NAME_LEN} characters).`);
+      return;
+    }
+    if (value.length > MAX_FIELD_VALUE_LEN) {
+      u.send(`Field value too long (max ${MAX_FIELD_VALUE_LEN} characters).`);
       return;
     }
 

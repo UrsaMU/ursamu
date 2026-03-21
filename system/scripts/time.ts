@@ -29,14 +29,27 @@ export default async (u: IUrsamuSDK) => {
     const partial: Partial<IGameTime> = {};
     const validKeys = new Set(["year", "month", "day", "hour", "minute"]);
 
+    // Valid ranges: year≥1, month 1–12, day 1–28, hour 0–23, minute 0–59
+    const RANGES: Record<string, [number, number]> = {
+      year:   [1, 9999],
+      month:  [1, 12],
+      day:    [1, 28],
+      hour:   [0, 23],
+      minute: [0, 59],
+    };
+
     for (const pair of argStr.split(/\s+/)) {
       const eqIdx = pair.indexOf("=");
       if (eqIdx === -1) continue;
       const key = pair.slice(0, eqIdx).trim().toLowerCase();
       const val = parseInt(pair.slice(eqIdx + 1).trim(), 10);
-      if (validKeys.has(key) && !isNaN(val)) {
-        (partial as Record<string, number>)[key] = val;
+      if (!validKeys.has(key) || isNaN(val)) continue;
+      const [min, max] = RANGES[key];
+      if (val < min || val > max) {
+        u.send(`Invalid value for ${key}: must be between ${min} and ${max}.`);
+        return;
       }
+      (partial as Record<string, number>)[key] = val;
     }
 
     if (Object.keys(partial).length === 0) {
