@@ -83,20 +83,18 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
       }
       const expiry = user.data.resetTokenExpiry as number | undefined;
       if (!expiry || Date.now() > expiry) {
-        user.data ||= {};
         delete user.data.resetToken;
         delete user.data.resetTokenExpiry;
-        await dbojs.modify({ id: user.id }, "$set", user);
+        await dbojs.modify({ id: user.id }, "$set", { data: user.data });
         return new Response(JSON.stringify({ error: "Invalid or expired reset token." }), {
           status: 400, headers: { "Content-Type": "application/json" },
         });
       }
       const hashed = await hash(newPassword, await genSalt(10));
-      user.data ||= {};
       user.data.password = hashed;
       delete user.data.resetToken;
       delete user.data.resetTokenExpiry;
-      await dbojs.modify({ id: user.id }, "$set", user);
+      await dbojs.modify({ id: user.id }, "$set", { data: user.data });
       await logSecurity("PASSWORD_RESET", { userId: user.id, ip: clientIp });
       return new Response(JSON.stringify({ message: "Password updated successfully." }), {
         status: 200, headers: { "Content-Type": "application/json" },
@@ -215,9 +213,8 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
         });
     }
 
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: errorMessage }), {
+  } catch {
+    return new Response(JSON.stringify({ error: "Internal server error." }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

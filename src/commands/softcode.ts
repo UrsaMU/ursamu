@@ -56,10 +56,13 @@ export default () => {
     pattern: /^@wait\s+(\d+)\s*=\s*(.*)/i,
     lock: "connected",
     exec: (u: IUrsamuSDK) => {
+      const MAX_WAIT = 3600; // 1 hour cap
       const seconds = parseInt(u.cmd.args[0]);
       const cmd = u.cmd.args[1];
       if (isNaN(seconds) || seconds < 0)
         return send([u.socketId || ""], "Invalid time.");
+      if (seconds > MAX_WAIT)
+        return send([u.socketId || ""], `Wait time cannot exceed ${MAX_WAIT} seconds.`);
 
       queue
         .enqueue(

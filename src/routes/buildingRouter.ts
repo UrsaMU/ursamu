@@ -3,6 +3,11 @@ import { getNextId } from "../utils/getNextId.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 
+const hasFlag = (flags: string, ...names: string[]): boolean => {
+  const set = new Set(flags.split(/\s+/));
+  return names.some(n => set.has(n));
+};
+
 export const buildingHandler = async (req: Request, userId: string): Promise<Response> => {
   const url = new URL(req.url);
   const path = url.pathname;
@@ -15,7 +20,7 @@ export const buildingHandler = async (req: Request, userId: string): Promise<Res
     // Permission check: Wizard/Admin or Builder?
     // For now, check if they have 'builder' flag or higher
     // Simple check: flags string inclusion.
-    if (!user.flags.includes("wizard") && !user.flags.includes("admin") && !user.flags.includes("builder")) {
+    if (!hasFlag(user.flags, "wizard", "admin", "builder")) {
          return new Response("Forbidden: You must be a builder.", { status: 403 });
     }
 
