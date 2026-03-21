@@ -1,6 +1,11 @@
 import { dbojs, chans } from "../services/Database/index.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
 
+const hasFlag = (flags: string, ...names: string[]): boolean => {
+  const set = new Set(flags.split(/\s+/));
+  return names.some(n => set.has(n));
+};
+
 /** GET /api/v1/me — current user profile from JWT */
 export const meHandler = async (_req: Request, userId: string): Promise<Response> => {
   const user = await Obj.get(userId);
@@ -30,7 +35,7 @@ export const meHandler = async (_req: Request, userId: string): Promise<Response
 export const onlinePlayersHandler = async (_req: Request): Promise<Response> => {
   const connected = await dbojs.query({ flags: /connected/i });
   const players = connected
-    .filter((p) => p.flags.includes("player"))
+    .filter((p) => hasFlag(p.flags, "player"))
     .map((p) => ({
       id: p.id,
       name: p.data?.name || "Unknown",
