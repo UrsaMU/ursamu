@@ -5,6 +5,7 @@ import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
 import { gameHooks } from "../Hooks/GameHooks.ts";
+import { wsService } from "../WebSocket/index.ts";
 
 export const matchExits = async (ctx: IContext) => {
   if (ctx.socket.cid) {
@@ -39,13 +40,24 @@ export const matchExits = async (ctx: IContext) => {
         const dest = await dbojs.queryOne({ id: destination });
 
         if (dest && flags.check(en.flags, (exit?.data?.lock as string) || "")) {
+          // Helper to get a plain-text attribute value from exit.data.attributes
+          const getExitAttr = (attrName: string): string | undefined => {
+            const attrs = exit.data?.attributes as Array<{ name: string; value: string }> | undefined;
+            return attrs?.find(a => a.name.toUpperCase() === attrName.toUpperCase())?.value;
+          };
+
           if (!en.flags.includes("dark")) {
             ctx.socket.leave(`${en.location}`);
+
+            const oleave = getExitAttr("OLEAVE");
             send(
               players.map((p) => p.id),
-              `${moniker(en)} leaves for ${dest.data?.name}.`,
+              oleave ? `${moniker(en)} ${oleave}` : `${moniker(en)} leaves for ${dest.data?.name}.`,
               {}
             );
+
+            const leave = getExitAttr("LEAVE");
+            if (leave) send([ctx.socket.id], leave, {});
           }
 
           en.location = dest?.id;
@@ -61,11 +73,28 @@ export const matchExits = async (ctx: IContext) => {
                 { id: { $ne: en.id } },
               ],
             });
+
+            const oenter = getExitAttr("OENTER");
             send(
               arrivals.map((p) => p.id),
-              `${moniker(en)} arrives from ${room?.data?.name}.`,
+              oenter ? `${moniker(en)} ${oenter}` : `${moniker(en)} arrives from ${room?.data?.name}.`,
               {}
             );
+
+            const enter = getExitAttr("ENTER");
+            if (enter) send([ctx.socket.id], enter, {});
+          }
+
+          // Notify exit owner (ALEAVE / AENTER)
+          const aleave = getExitAttr("ALEAVE");
+          const aenter = getExitAttr("AENTER");
+          if (aleave || aenter) {
+            const ownerId = exit.data?.owner as string | undefined;
+            if (ownerId) {
+              const ownerSocket = wsService.getConnectedSockets().find(s => s.cid === ownerId);
+              if (ownerSocket && aleave) send([ownerSocket.id], aleave, {});
+              if (ownerSocket && aenter) send([ownerSocket.id], aenter, {});
+            }
           }
 
           gameHooks.emit("player:move", {

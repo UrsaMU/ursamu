@@ -2,6 +2,45 @@ import { dpath } from "../../../deps.ts";
 import { getConfig, initConfig } from "../Config/mod.ts";
 import parser from "../parser/parser.ts";
 
+// Telnet protocol constants (RFC 854 / RFC 1073)
+const IAC = 255;
+const WILL = 251;
+const DO = 253;
+const DONT = 254;
+const SB = 250;
+const SE = 240;
+const NAWS_OPTION = 31;
+
+// Suppress unused-variable warnings for WILL/DONT — kept for readability/completeness
+const _WILL = WILL;
+const _DONT = DONT;
+
+/**
+ * Parse a NAWS subnegotiation byte sequence.
+ *
+ * Expects the full IAC SB 31 ... IAC SE sequence.
+ * Returns { width, height } or null if the sequence is malformed or out of range.
+ */
+export function parseNawsBytes(bytes: Uint8Array): { width: number; height: number } | null {
+  // Minimum valid sequence: IAC SB NAWS_OPTION w-hi w-lo h-hi h-lo IAC SE = 9 bytes
+  if (bytes.length < 9) return null;
+  if (bytes[0] !== IAC || bytes[1] !== SB || bytes[2] !== NAWS_OPTION) return null;
+  if (bytes[bytes.length - 2] !== IAC || bytes[bytes.length - 1] !== SE) return null;
+
+  const widthHi = bytes[3];
+  const widthLo = bytes[4];
+  const heightHi = bytes[5];
+  const heightLo = bytes[6];
+
+  const width = (widthHi << 8) | widthLo;
+  const height = (heightHi << 8) | heightLo;
+
+  if (width < 40 || width > 250) return null;
+  if (height < 1 || height > 255) return null;
+
+  return { width, height };
+}
+
 interface ITelnetSocket {
   cid?: string;
   write(data: string | Uint8Array): void;
@@ -116,6 +155,39 @@ A modern MUSH-like engine written in TypeScript.
   }
 };
 
+/** Maximum number of commands buffered during a WS reconnect (prevents heap exhaustion). */
+export const MAX_MSG_BUFFER_SIZE = 200;
+
+/**
+ * Accumulate bytes across TCP reads to detect NAWS sequences that span chunk boundaries.
+ *
+ * @param carry - leftover bytes from the previous read (may be empty)
+ * @param chunk - the new bytes just read
+ * @returns { naws: complete NAWS sequence bytes | null, carry: bytes to carry into next call }
+ */
+export function accumulateNaws(
+  carry: Uint8Array,
+  chunk: Uint8Array,
+): { naws: Uint8Array | null; carry: Uint8Array } {
+  const merged = new Uint8Array(carry.length + chunk.length);
+  merged.set(carry);
+  merged.set(chunk, carry.length);
+
+  for (let i = 0; i < merged.length; i++) {
+    if (merged[i] === 255 && merged[i + 1] === 250 && merged[i + 2] === 31) {
+      // Found IAC SB NAWS — look for the closing IAC SE
+      for (let j = i + 3; j < merged.length - 1; j++) {
+        if (merged[j] === 255 && merged[j + 1] === 240) {
+          return { naws: merged.subarray(i, j + 2), carry: new Uint8Array(0) };
+        }
+      }
+      // Closing IAC SE not yet arrived — carry the partial sequence forward
+      return { naws: null, carry: merged.subarray(i) };
+    }
+  }
+  return { naws: null, carry: new Uint8Array(0) };
+}
+
 async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: string) {
   let sock: WebSocket | null = null;
   let cid: string | undefined;
@@ -137,6 +209,9 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
       // Connection likely closed
     }
   };
+
+  // Send IAC DO NAWS to request window size from the client
+  await write(new Uint8Array([IAC, DO, NAWS_OPTION]));
 
   await write(parser.substitute("telnet", welcome) + "\r\n");
 
@@ -216,18 +291,37 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
   // Read from Telnet
   const buffer = new Uint8Array(16384);
+  let nawsCarry: Uint8Array = new Uint8Array(0); // carry-over for NAWS sequences that span chunk boundaries
   try {
     while (true) {
       const n = await conn.read(buffer);
       if (n === null) break; // EOF
 
-      const raw = new TextDecoder().decode(buffer.subarray(0, n));
-        
+      const chunk = buffer.subarray(0, n);
+
+      // --- NAWS subnegotiation detection (handles split TCP frames) ---
+      const { naws: nawsSeq, carry } = accumulateNaws(nawsCarry, chunk);
+      nawsCarry = carry;
+      if (nawsSeq !== null) {
+        const parsed = parseNawsBytes(nawsSeq);
+        if (parsed && cid) {
+          // Forward termWidth to the WS hub so the player's DB record can be updated
+          if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) {
+            (sock as WebSocket).send(JSON.stringify({
+              msg: "",
+              data: { cid, termWidth: parsed.width }
+            }));
+          }
+        }
+      }
+
+      const raw = new TextDecoder().decode(chunk);
+
          // Filter Telnet IAC sequences and non-printable chars
         // IAC sequences start with 0xFF (\xff)
         const msg = raw
           .replace(/\xff[\xfb-\xfe]./g, "") // IAC DO/DONT/WILL/WONT <opt>
-          .replace(/\xff[\xf0-\xfa]/g, "") // IAC SB/SE/etc
+          .replace(/\xff[\xf0-\xfa].*/g, "") // IAC SB/SE/etc (strip remainder of subneg)
           .replace(/\xff\xff/g, "\xff")    // Escaped IAC
           // deno-lint-ignore no-control-regex
           .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // Non-printable ASCII
@@ -242,6 +336,8 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
         }
       } else {
         if(msg) {
+          // Cap buffer to prevent heap exhaustion during long disconnects
+          if (msgBuffer.length >= MAX_MSG_BUFFER_SIZE) msgBuffer.shift();
           msgBuffer.push(JSON.stringify({
             msg,
             data: { cid }

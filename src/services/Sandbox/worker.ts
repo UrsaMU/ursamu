@@ -90,6 +90,9 @@ interface IUrsamuSDK {
     read(query: Record<string, unknown>): Promise<IMail[]>;
     delete(id: string): Promise<void>;
   };
+  attr: {
+    get(id: string, name: string): Promise<string | null>;
+  };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
   text: {
     read(id: string): Promise<string>;
@@ -363,6 +366,9 @@ self.onmessage = async (e: MessageEvent) => {
       delete: (id: string) => request<void>("mail:delete", { id }),
       modify: (query: Record<string, unknown>, operator: string, update: Record<string, unknown>) =>
         request<void>("mail:modify", { query, operator, update })
+    },
+    attr: {
+      get: (id: string, name: string) => request<string | null>("attr:get", { id, name })
     },
     setFlags: (target: string | IDBObj, flags: string) =>
       request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags }),

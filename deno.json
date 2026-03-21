@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/ursamu",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",
@@ -43,7 +43,11 @@
     "test": "deno test --allow-all --unstable-kv --no-check",
     "upgrade": "deno run -A ./src/cli/ursamu.ts update",
     "upgrade:reload": "deno run -A ./src/cli/ursamu.ts update && deno run --reload -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
-    "test:coverage": "deno test --allow-all --unstable-kv --no-check --coverage=coverage && deno coverage coverage --lcov > coverage/lcov.info && deno coverage coverage"
+    "test:coverage": "deno test --allow-all --unstable-kv --no-check --coverage=coverage && deno coverage coverage --lcov > coverage/lcov.info && deno coverage coverage",
+    "docker:build": "docker build -t ursamu .",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "compilerOptions": {
     "lib": ["deno.window", "deno.unstable"]

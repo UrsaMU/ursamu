@@ -1,0 +1,15 @@
+version: '3.9'
+services:
+  ursamu:
+    build: .
+    ports:
+      - "4201:4201"
+      - "4202:4202"
+      - "4203:4203"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/logs
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped

@@ -68,6 +68,15 @@ export default async (u: IUrsamuSDK) => {
   // Send telnet output
   u.send(telnetOutput);
 
+  // Fire @odesc on non-room targets (room sees actor looking at the object)
+  if (!target.flags.has("room")) {
+    const odesc = await u.attr.get(target.id, "ODESC");
+    if (odesc) {
+      const actorName = u.util.displayName(actor, actor);
+      u.here.broadcast(`${actorName} ${odesc}`, { exclude: [actor.id] });
+    }
+  }
+
   // Phase 2: Web UI Output (Structured JSON)
   const components: unknown[] = [];
 
