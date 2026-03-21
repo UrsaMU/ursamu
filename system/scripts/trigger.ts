@@ -43,5 +43,10 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
+  if (!(await u.canEdit(u.me, target))) {
+    u.send("Permission denied.");
+    return;
+  }
+
   await u.trigger(target.id, attrName, triggerArgs);
 };

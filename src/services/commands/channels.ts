@@ -1,7 +1,8 @@
 import type { IChanEntry } from "../../@types/Channels.ts";
 import type { IContext } from "../../@types/IContext.ts";
 import { moniker } from "../../utils/moniker.ts";
-import { chans, dbojs } from "../Database/index.ts";
+import { chans, dbojs, chanHistory } from "../Database/index.ts";
+import { getNextId } from "../../utils/getNextId.ts";
 import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
@@ -75,5 +76,30 @@ export const matchChannel = async (ctx: IContext) => {
   };
   channelEvents.emit("channel:message", chanPayload);
   gameHooks.emit("channel:message", chanPayload).catch(e => console.error("[GameHooks] channel:message:", e));
+
+  // Persist message if channel has logging enabled
+  if (chan.logHistory) {
+    const limit = chan.historyLimit ?? 500;
+    const id = await getNextId("chanHistoryId");
+    await chanHistory.create({
+      id,
+      chanId: chan.id,
+      chanName: chan.name,
+      playerId: en.id,
+      playerName: moniker(en),
+      message: msg,
+      timestamp: Date.now(),
+    });
+    // Trim to limit — delete oldest entries beyond cap
+    const all = await chanHistory.find({ chanId: chan.id });
+    all.sort((a, b) => a.timestamp - b.timestamp);
+    if (all.length > limit) {
+      const toDelete = all.slice(0, all.length - limit);
+      for (const entry of toDelete) {
+        await chanHistory.delete({ id: entry.id });
+      }
+    }
+  }
+
   return true;
 };

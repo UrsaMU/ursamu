@@ -18,8 +18,8 @@
  * ```
  */
 
-import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler } from "./routes/index.ts";
-import { meHandler, onlinePlayersHandler, channelsHandler } from "./routes/playersRouter.ts";
+import { authHandler, dbObjHandler, wikiHandler, configHandler, sceneHandler, buildingHandler, mailHandler } from "./routes/index.ts";
+import { meHandler, onlinePlayersHandler, channelsHandler, channelHistoryHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
 import { getConfig } from "./services/Config/mod.ts";
 
@@ -31,13 +31,18 @@ const pluginRoutes: Array<{ prefix: string; handler: PluginRouteHandler }> = [];
 
 // --- Per-IP rate limiting for REST API ---
 const apiRateLimits = new Map<string, { count: number; resetAt: number }>();
-const API_RATE_LIMIT = 30;      // max requests per window
+const API_RATE_LIMIT = 30;        // max requests per window
 const API_RATE_WINDOW_MS = 10000; // 10 second window
+// Hard cap on tracked IPs — prevents memory exhaustion from IP-cycling attacks.
+const MAX_API_TRACKED_IPS = 10_000;
 
 function isApiRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = apiRateLimits.get(ip);
   if (!entry || now >= entry.resetAt) {
+    if (!entry && apiRateLimits.size >= MAX_API_TRACKED_IPS) {
+      apiRateLimits.delete(apiRateLimits.keys().next().value!);
+    }
     apiRateLimits.set(ip, { count: 1, resetAt: now + API_RATE_WINDOW_MS });
     return false;
   }
@@ -123,7 +128,7 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
 
   const response = await (async () => {
     // API Routes
-    if (path.startsWith("/api/v1/auth")) {
+    if (path === "/api/v1/auth" || path.startsWith("/api/v1/auth/")) {
       return await authHandler(req, remoteAddr);
     }
 
@@ -134,11 +139,25 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
     }
 
     if (path === "/api/v1/players/online" && req.method === "GET") {
+      const userId = await authenticate(req);
+      if (!userId) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
       return await onlinePlayersHandler(req);
     }
 
     if (path === "/api/v1/channels" && req.method === "GET") {
       return await channelsHandler(req);
+    }
+
+    const chanHistoryMatch = path.match(/^\/api\/v1\/channels\/([^/]+)\/history$/);
+    if (chanHistoryMatch && req.method === "GET") {
+      const userId = await authenticate(req);
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return await channelHistoryHandler(req, chanHistoryMatch[1]);
     }
 
     if (path.startsWith("/api/v1/dbobj")) {
@@ -178,7 +197,20 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       return await buildingHandler(req, userId);
     }
 
-    if (path.startsWith("/api/v1/config") || path.startsWith("/api/v1/connect") || path.startsWith("/api/v1/welcome")) {
+    if (path.startsWith("/api/v1/mail")) {
+      const userId = await authenticate(req);
+      if (!userId) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      return await mailHandler(req, userId);
+    }
+
+    if (path === "/api/v1/config" || path.startsWith("/api/v1/config/") ||
+        path === "/api/v1/connect" || path.startsWith("/api/v1/connect/") ||
+        path === "/api/v1/welcome" || path.startsWith("/api/v1/welcome/")) {
         return await configHandler(req);
     }
 

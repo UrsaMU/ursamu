@@ -374,6 +374,44 @@ Deno.test("@chanset — admin sets hidden=on", OPTS, async () => {
 });
 
 // ===========================================================================
+// L1 — who.ts idle display must not show "NaN" for NaN lastCommand values
+// ===========================================================================
+
+Deno.test("L1 — who with NaN lastCommand shows '---' not 'NaN'", OPTS, async () => {
+  const RAW_WHO = await Deno.readTextFile("./system/scripts/who.ts");
+  const stripped = RAW_WHO
+    .replace(/^import\s.*?;\s*$/gm, "")
+    .replace(/export default/, "_who =")
+    .replace(/^export\s+/gm, "");
+
+  const script = [
+    "let _who;",
+    stripped,
+    "const _sent = [];",
+    "u.send = (m) => _sent.push(m);",
+    "u.ui = { ...u.ui, layout: () => {}, panel: (o) => o };",
+    `u.db = { ...u.db, search: async () => [{
+      id: "nan_player",
+      name: "NanPlayer",
+      flags: new Set(["player", "connected"]),
+      state: { lastCommand: NaN, name: "NanPlayer" },
+      location: "limbo",
+      contents: []
+    }] };`,
+    "await _who(u);",
+    "return { sent: _sent };",
+  ].join("\n");
+
+  const ctx = makeCtx(ACTOR_ID, "player connected", "Tester", "who", []);
+  // deno-lint-ignore no-explicit-any
+  const result = await sandboxService.runScript(script, ctx, SLOW) as any;
+  const output = result.sent.join(" ");
+  if (output.includes("NaN")) {
+    throw new Error(`L1 BUG: who output contains "NaN": ${output}`);
+  }
+});
+
+// ===========================================================================
 // Cleanup
 // ===========================================================================
 

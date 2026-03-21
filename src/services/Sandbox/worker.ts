@@ -82,12 +82,16 @@ interface IUrsamuSDK {
     list(): Promise<unknown[]>;
     create(name: string, options?: { header?: string; lock?: string; hidden?: boolean }): Promise<unknown>;
     destroy(name: string): Promise<unknown>;
-    set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }): Promise<unknown>;
+    set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean; logHistory?: boolean; historyLimit?: number }): Promise<unknown>;
+    history(name: string, limit?: number): Promise<{ id: string; playerName: string; message: string; timestamp: number }[]>;
   };
   mail: {
     send(mail: Partial<IMail>): Promise<void>;
     read(query: Record<string, unknown>): Promise<IMail[]>;
     delete(id: string): Promise<void>;
+  };
+  attr: {
+    get(id: string, name: string): Promise<string | null>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
   text: {
@@ -351,8 +355,10 @@ self.onmessage = async (e: MessageEvent) => {
       create: (name: string, options?: { header?: string; lock?: string; hidden?: boolean }) =>
         request<unknown>("chan:create", { name, ...options }),
       destroy: (name: string) => request<unknown>("chan:destroy", { name }),
-      set: (name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean }) =>
-        request<unknown>("chan:set", { name, ...options })
+      set: (name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean; logHistory?: boolean; historyLimit?: number }) =>
+        request<unknown>("chan:set", { name, ...options }),
+      history: (name: string, limit = 20) =>
+        request<{ id: string; playerName: string; message: string; timestamp: number }[]>("chan:history", { name, limit }),
     },
     mail: {
       send: (mail: Partial<IMail>) => request<void>("mail:send", { mail }),
@@ -360,6 +366,9 @@ self.onmessage = async (e: MessageEvent) => {
       delete: (id: string) => request<void>("mail:delete", { id }),
       modify: (query: Record<string, unknown>, operator: string, update: Record<string, unknown>) =>
         request<void>("mail:modify", { query, operator, update })
+    },
+    attr: {
+      get: (id: string, name: string) => request<string | null>("attr:get", { id, name })
     },
     setFlags: (target: string | IDBObj, flags: string) =>
       request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags }),

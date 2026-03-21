@@ -43,6 +43,12 @@ export default async (u: IUrsamuSDK) => {
 
   const location = swtch === "/inventory" ? actor.id : u.here.id;
 
+  const _canEditDest = await u.canEdit(actor, destination);
+  if (backExitName && !_canEditDest) {
+    u.send("Permission denied.");
+    return;
+  }
+
   // Create the exit
   const _exit = await u.db.create({
     flags: new Set(["exit"]),
@@ -54,7 +60,6 @@ export default async (u: IUrsamuSDK) => {
     }
   });
 
-  const _canEditDest = await u.canEdit(actor, destination);
   const destDisplay = u.util.displayName(destination, actor);
   u.send(`You open exit %ch${exitName.split(";")[0]}%cn to ${destDisplay}.`);
 

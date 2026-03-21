@@ -17,6 +17,7 @@ import { loadPlugins } from "./utils/loadPlugins.ts";
 import { wsService } from "./services/WebSocket/index.ts";
 import { queue } from "./services/Queue/index.ts";
 import { discordBridge } from "./services/discord/index.ts";
+import { runStartupAttrs } from "./services/startup/index.ts";
 
 let __dirname;
 try {
@@ -243,6 +244,11 @@ export const initializeEngine = async (
 
   // Initialize Discord Bridge
   await discordBridge.init();
+
+  // Fire STARTUP attributes on all objects that have one (fire-and-forget)
+  runStartupAttrs().catch((err) =>
+    console.error("[startup] runStartupAttrs failed:", err)
+  );
 
   Deno.addSignalListener("SIGINT", async () => {
     const players = await dbojs.query({ flags: /connected/i });

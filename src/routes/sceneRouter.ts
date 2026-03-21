@@ -6,6 +6,11 @@ import { send } from "../services/broadcast/index.ts";
 import { evaluateLock, hydrate } from "../utils/evaluateLock.ts";
 import { gameHooks } from "../services/Hooks/GameHooks.ts";
 
+const hasFlag = (flags: string, ...names: string[]): boolean => {
+  const set = new Set(flags.split(/\s+/));
+  return names.some(n => set.has(n));
+};
+
 export const sceneHandler = async (req: Request, userId: string): Promise<Response> => {
   const url = new URL(req.url);
   const path = url.pathname;
@@ -20,7 +25,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
       // Fetch all rooms - broadening query to debug
       // Regex query might be failing?
       const allObjects = await dbojs.query({});
-      const rooms = allObjects.filter(o => o.flags.includes("room"));
+      const rooms = allObjects.filter(o => hasFlag(o.flags, "room"));
       
       
       const accessibleRooms: {id: string, name: string, type: "public" | "private"}[] = [];
@@ -33,7 +38,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           let canEnter = true;
 
           // Admin Bypass
-          if (user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser") || user.dbref === "#1") {
+          if (hasFlag(user.flags, "wizard", "admin", "superuser") || user.dbref === "#1") {
               canEnter = true;
           } else {
               try {
@@ -76,7 +81,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           if (!scene.private) return true;
           if (!user) return false;
           // Admins/wizards can see all scenes
-          if (user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser")) return true;
+          if (hasFlag(user.flags, "wizard", "admin", "superuser")) return true;
           // Visible if owner, participant, or allowed
           return scene.owner === user.dbref ||
                  (scene.participants && scene.participants.includes(user.dbref)) ||
@@ -99,6 +104,12 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
 
       if (!name || !location) {
           return new Response("Missing name or location", { status: 400 });
+      }
+      if (typeof name !== "string" || name.length > 200) {
+          return new Response("Scene name must be 200 characters or fewer.", { status: 400 });
+      }
+      if (desc !== undefined && (typeof desc !== "string" || desc.length > 2000)) {
+          return new Response("Scene description must be 2000 characters or fewer.", { status: 400 });
       }
 
       const id = await getNextId("sceneid");
@@ -155,7 +166,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
                   scene.owner === viewer.dbref ||
                   (scene.participants && scene.participants.includes(viewer.dbref)) ||
                   (scene.allowed && scene.allowed.includes(viewer.dbref)) ||
-                  viewer.flags.includes("wizard") || viewer.flags.includes("admin") || viewer.flags.includes("superuser")
+                  hasFlag(viewer.flags, "wizard", "admin", "superuser")
               );
               if (!isAllowed) return new Response("Forbidden", { status: 403 });
           }
@@ -264,7 +275,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
               const canPost = scene.owner === user.dbref ||
                   (scene.participants && scene.participants.includes(user.dbref)) ||
                   (scene.allowed && scene.allowed.includes(user.dbref)) ||
-                  user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser");
+                  hasFlag(user.flags, "wizard", "admin", "superuser");
               if (!canPost) return new Response("Forbidden", { status: 403 });
           }
 
@@ -424,7 +435,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
 
           const canInvite = scene.owner === user.dbref ||
               (Array.isArray(scene.allowed) && scene.allowed.includes(user.dbref)) ||
-              user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser");
+              hasFlag(user.flags, "wizard", "admin", "superuser");
           if (!canInvite) {
                return new Response("Only the owner or co-authors can invite.", { status: 403 });
           }
@@ -439,7 +450,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           if (!targetObj) {
                // Try name search
                const all = await dbojs.query({ "data.name": new RegExp(`^${target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") });
-               const found = all.find(o => o.flags.includes("player") || o.flags.includes("connected")); 
+               const found = all.find(o => hasFlag(o.flags, "player", "connected"));
                if (found) targetObj = await Obj.get(found.id);
           }
 
@@ -466,24 +477,49 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
            const user = await Obj.get(userId);
            if (!user) return new Response("Unauthorized", { status: 401 });
            
+           const isAdmin = hasFlag(user.flags, "wizard", "admin", "superuser");
            if (scene.owner && scene.owner !== user.dbref) {
-               const isAdmin = user.flags.includes("wizard") || user.flags.includes("admin") || user.flags.includes("superuser");
                if (!isAdmin) {
                    return new Response("Forbidden: Only scene owner can modify scene.", { status: 403 });
                }
            } else if (!scene.owner) {
-               // Adopt ownerless (legacy) scenes
+               // Only staff can adopt ownerless (legacy) scenes
+               if (!isAdmin) {
+                   return new Response("Forbidden: Only staff can claim ownerless scenes.", { status: 403 });
+               }
                scene.owner = user.dbref;
                await scenes.modify({ id: sceneId }, "$set", { owner: scene.owner });
            }
 
            // White list updates
+           const VALID_STATUSES = new Set(["active", "paused", "closed"]);
+           const VALID_SCENE_TYPES = new Set(["social", "event", "vignette", "plot", "training", "other"]);
            const allowedUpdates: Partial<IScene> = {};
-           if (updates.status) allowedUpdates.status = updates.status;
-           if (updates.name) allowedUpdates.name = updates.name;
-           if (updates.desc) allowedUpdates.desc = updates.desc;
+           if (updates.status !== undefined) {
+               if (!VALID_STATUSES.has(updates.status)) {
+                   return new Response("Invalid status value.", { status: 400 });
+               }
+               allowedUpdates.status = updates.status;
+           }
+           if (updates.name !== undefined) {
+               if (typeof updates.name !== "string" || updates.name.length > 200) {
+                   return new Response("Scene name must be 200 characters or fewer.", { status: 400 });
+               }
+               allowedUpdates.name = updates.name;
+           }
+           if (updates.desc !== undefined) {
+               if (typeof updates.desc !== "string" || updates.desc.length > 2000) {
+                   return new Response("Scene description must be 2000 characters or fewer.", { status: 400 });
+               }
+               allowedUpdates.desc = updates.desc;
+           }
            if (updates.endTime) allowedUpdates.endTime = updates.endTime;
-           if (updates.sceneType) allowedUpdates.sceneType = updates.sceneType;
+           if (updates.sceneType !== undefined) {
+               if (!VALID_SCENE_TYPES.has(updates.sceneType)) {
+                   return new Response("Invalid sceneType value.", { status: 400 });
+               }
+               allowedUpdates.sceneType = updates.sceneType;
+           }
 
            if (Object.keys(allowedUpdates).length > 0) {
                 await scenes.modify({ id: sceneId }, "$set", allowedUpdates);

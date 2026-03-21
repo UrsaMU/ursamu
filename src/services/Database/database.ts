@@ -1,6 +1,6 @@
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { getConfig } from "../Config/mod.ts";
-import type { IChannel } from "../../@types/Channels.ts";
+import type { IChannel, IChanMessage } from "../../@types/Channels.ts";
 import type { IMail } from "../../@types/IMail.ts";
 import type { ITextEntry } from "../../@types/ITextEntry.ts";
 import type { IScene } from "../../@types/IScene.ts";
@@ -323,3 +323,5 @@ import type { IBBoardPost } from "../../@types/IBBoardPost.ts";
 export const bboards: DBO<IBBoard> = new DBO<IBBoard>("server.bboards");
 /** Individual bulletin board posts. */
 export const bboard: DBO<IBBoardPost> = new DBO<IBBoardPost>("server.bboard");
+/** Channel message history (opt-in per channel). */
+export const chanHistory: DBO<IChanMessage> = new DBO<IChanMessage>("server.chan_history");

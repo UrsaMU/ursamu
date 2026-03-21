@@ -1,5 +1,10 @@
-import { dbojs, chans } from "../services/Database/index.ts";
+import { dbojs, chans, chanHistory } from "../services/Database/index.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
+
+const hasFlag = (flags: string, ...names: string[]): boolean => {
+  const set = new Set(flags.split(/\s+/));
+  return names.some(n => set.has(n));
+};
 
 /** GET /api/v1/me — current user profile from JWT */
 export const meHandler = async (_req: Request, userId: string): Promise<Response> => {
@@ -30,7 +35,7 @@ export const meHandler = async (_req: Request, userId: string): Promise<Response
 export const onlinePlayersHandler = async (_req: Request): Promise<Response> => {
   const connected = await dbojs.query({ flags: /connected/i });
   const players = connected
-    .filter((p) => p.flags.includes("player"))
+    .filter((p) => hasFlag(p.flags, "player"))
     .map((p) => ({
       id: p.id,
       name: p.data?.name || "Unknown",
@@ -53,9 +58,36 @@ export const channelsHandler = async (_req: Request): Promise<Response> => {
     alias: c.alias || null,
     header: c.header || null,
     lock: c.lock || null,
+    logHistory: c.logHistory ?? false,
   }));
 
   return new Response(JSON.stringify(list), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
+/** GET /api/v1/channels/:id/history?limit=<n> — channel message history (auth required) */
+export const channelHistoryHandler = async (req: Request, channelId: string): Promise<Response> => {
+  const chan = await chans.queryOne({ id: channelId });
+  if (!chan) {
+    return new Response(JSON.stringify({ error: "Channel not found." }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  if (!chan.logHistory) {
+    return new Response(JSON.stringify({ error: "History is not enabled for this channel." }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  const url = new URL(req.url);
+  const limit = Math.min(parseInt(url.searchParams.get("limit") || "20") || 20, 500);
+  const all = await chanHistory.find({ chanId: channelId });
+  all.sort((a, b) => a.timestamp - b.timestamp);
+  const slice = all.slice(-limit);
+  return new Response(JSON.stringify(slice), {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });

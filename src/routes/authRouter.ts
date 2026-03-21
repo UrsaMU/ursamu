@@ -12,11 +12,17 @@ const escRx = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 const MAX_LOGIN_ATTEMPTS = 10;
 const LOGIN_WINDOW_MS = 60_000; // 1 minute
+// Hard cap on tracked IPs — prevents memory exhaustion from IP-cycling attacks.
+export const MAX_TRACKED_IPS = 10_000;
 
 function isLoginRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = loginAttempts.get(ip);
   if (!entry || now >= entry.resetAt) {
+    // Enforce hard cap: evict oldest entry if at limit
+    if (!entry && loginAttempts.size >= MAX_TRACKED_IPS) {
+      loginAttempts.delete(loginAttempts.keys().next().value!);
+    }
     loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
     return false;
   }
@@ -28,6 +34,9 @@ function recordLoginFailure(ip: string): void {
   const now = Date.now();
   const entry = loginAttempts.get(ip);
   if (!entry || now >= entry.resetAt) {
+    if (!entry && loginAttempts.size >= MAX_TRACKED_IPS) {
+      loginAttempts.delete(loginAttempts.keys().next().value!);
+    }
     loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
   } else {
     entry.count++;
@@ -83,20 +92,18 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
       }
       const expiry = user.data.resetTokenExpiry as number | undefined;
       if (!expiry || Date.now() > expiry) {
-        user.data ||= {};
         delete user.data.resetToken;
         delete user.data.resetTokenExpiry;
-        await dbojs.modify({ id: user.id }, "$set", user);
+        await dbojs.modify({ id: user.id }, "$set", { data: user.data });
         return new Response(JSON.stringify({ error: "Invalid or expired reset token." }), {
           status: 400, headers: { "Content-Type": "application/json" },
         });
       }
       const hashed = await hash(newPassword, await genSalt(10));
-      user.data ||= {};
       user.data.password = hashed;
       delete user.data.resetToken;
       delete user.data.resetTokenExpiry;
-      await dbojs.modify({ id: user.id }, "$set", user);
+      await dbojs.modify({ id: user.id }, "$set", { data: user.data });
       await logSecurity("PASSWORD_RESET", { userId: user.id, ip: clientIp });
       return new Response(JSON.stringify({ message: "Password updated successfully." }), {
         status: 200, headers: { "Content-Type": "application/json" },
@@ -215,9 +222,8 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
         });
     }
 
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ error: errorMessage }), {
+  } catch {
+    return new Response(JSON.stringify({ error: "Internal server error." }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
