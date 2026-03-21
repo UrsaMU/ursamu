@@ -54,6 +54,12 @@ export class Obj implements IEntity {
         const id = obj.slice(1);
         const returnObj = await dbojs.queryOne({ id });
         if (returnObj) return new Obj().load(returnObj);
+      } else if (/^\d+$/.test(obj)) {
+        // Pure numeric string (e.g. socket cid "2") — look up by ID only.
+        // Using name/alias regex here would match any object with this
+        // number in its name, causing session corruption.
+        const returnObj = await dbojs.queryOne({ id: obj });
+        if (returnObj) return new Obj().load(returnObj);
       } else {
         const escaped = obj.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const returnObj = await dbojs.queryOne({
