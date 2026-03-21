@@ -281,8 +281,6 @@ class LocalSandbox {
             if (e.data.name && e.data.password) {
               const { isNameTaken } = await import("../../utils/isNameTaken.ts");
               const { compare } = await import("../../../deps.ts");
-              const { dbojs: db } = await import("../Database/index.ts");
-
               (async () => {
                 const found = await isNameTaken(e.data.name);
                 if (!found) return worker.postMessage({ type: "response", msgId: e.data.msgId, data: false });
