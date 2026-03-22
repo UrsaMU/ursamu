@@ -19,7 +19,13 @@ const _handlers: HandlerList = {
   "channel:message": [],
 };
 
-export const channelEvents = {
+export interface IChannelEvents {
+  on<K extends keyof ChannelEventMap>(event: K, handler: ChannelEventMap[K]): void;
+  off<K extends keyof ChannelEventMap>(event: K, handler: ChannelEventMap[K]): void;
+  emit<K extends keyof ChannelEventMap>(event: K, ...args: Parameters<ChannelEventMap[K]>): Promise<void>;
+}
+
+export const channelEvents: IChannelEvents = {
   on<K extends keyof ChannelEventMap>(event: K, handler: ChannelEventMap[K]): void {
     const list = _handlers[event] as ChannelEventMap[K][];
     if (!list.includes(handler)) list.push(handler);
