@@ -148,6 +148,7 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
 
   const registryPath = dpath.join(pluginsDir, ".registry.json");
   const reg = await readRegistry(registryPath);
+  const installed: string[] = [];
 
   for (const entry of manifest.plugins) {
     // H1 — reject names with path traversal sequences
@@ -184,21 +185,18 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
       await Deno.remove(targetDir, { recursive: true });
     }
 
-    console.log(`[ensurePlugins] Installing "${entry.name}" from ${entry.url}${entry.ref ? `@${entry.ref}` : ""}`);
-
     const tempDir = await Deno.makeTempDir({ prefix: "ursamu-plugin-" });
     try {
       const steps = buildCloneSteps(entry.url, tempDir, entry.ref);
       let stepFailed = false;
       for (const stepArgs of steps) {
-        const proc = new Deno.Command("git", {
+        const { success, stderr } = await new Deno.Command("git", {
           args: stepArgs,
-          stdout: "inherit",
-          stderr: "inherit",
-        });
-        const status = await proc.spawn().status;
-        if (!status.success) {
-          console.error(`[ensurePlugins] git ${stepArgs[0]} failed for "${entry.name}" (exit ${status.code})`);
+          stdout: "piped",
+          stderr: "piped",
+        }).output();
+        if (!success) {
+          console.error(`[ensurePlugins] Failed to install "${entry.name}": ${new TextDecoder().decode(stderr).trim()}`);
           stepFailed = true;
           break;
         }
@@ -237,10 +235,14 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
       };
       await writeRegistry(registryPath, reg);
 
-      console.log(`[ensurePlugins] Installed "${entry.name}" v${version}`);
+      installed.push(`${entry.name}@${version}`);
     } catch (err) {
       await Deno.remove(tempDir, { recursive: true }).catch(() => {});
       console.error(`[ensurePlugins] Failed to install "${entry.name}":`, err);
     }
+  }
+
+  if (installed.length) {
+    console.log(`[plugins] Installed: ${installed.join(", ")}`);
   }
 }
