@@ -484,6 +484,38 @@ Deno.test("plugin search: reports no match when nothing qualifies", OPTS, async 
   );
 });
 
+// ─── --ref flag ───────────────────────────────────────────────────────────────
+
+Deno.test("[--ref] plugin --help: includes --ref flag documentation", OPTS, async () => {
+  const { code, stdout } = await runPlugin(["--help"]);
+  assertEquals(code, 0);
+  assertStringIncludes(stdout, "--ref");
+});
+
+Deno.test("[--ref] install --ref: flag is parsed (URL stays as URL, v1.1.0 not shifted to plugin name)", OPTS, async () => {
+  await withLocalRegistry(
+    { version: "1", plugins: [] },
+    async (registryUrl) => {
+      await withTempDir(async (dir) => {
+        const { code, stderr } = await runPlugin(
+          ["install", "--ref", "v1.1.0", "https://example.invalid/x.git"],
+          dir,
+          { URSAMU_REGISTRY_URL: registryUrl },
+        );
+        // If --ref is NOT parsed as a flag, "v1.1.0" becomes the plugin name →
+        // registry lookup → "was not found in the registry". That must NOT happen.
+        assertEquals(
+          stderr.includes("was not found in the registry"),
+          false,
+          "--ref consumed as flag, not as positional plugin name",
+        );
+        // Should fail (invalid domain → git error), exit 1
+        assertEquals(code, 1);
+      });
+    },
+  );
+});
+
 Deno.test("plugin search: marks installed plugin with version badge", OPTS, async () => {
   await withLocalRegistry(
     {

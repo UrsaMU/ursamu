@@ -35,8 +35,13 @@ registered pattern in turn and calls the first matching `exec` function.
 ## addCmd Reference
 
 ```typescript
+// In a plugin inside src/plugins/:
 import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+
+// From a child game (outside src/):
+import { addCmd } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
 
 addCmd({
   name: "+myplugin",          // unique identifier — shown in logs
@@ -160,6 +165,21 @@ u.util.rjust(str, width)  // right-pad to width
 u.util.center(str, width) // center in width
 ```
 
+### u.mail, u.attr, u.eval, u.forceAs
+
+These are also available in the `u` object. See the
+[SDK Cookbook](../guides/sdk-cookbook.md) for full examples:
+
+| Method | Description |
+|--------|-------------|
+| `u.attr.get(id, name)` | Read a soft-coded &ATTR value (returns `string \| null`) |
+| `u.eval(targetId, attr, args?)` | Evaluate &ATTR and return output as string |
+| `u.forceAs(targetId, cmd)` | Execute command as another object (wizard/admin only) |
+| `u.sys.gameTime()` | Read in-game calendar (`IGameTime`) |
+| `u.sys.setGameTime(t)` | Set in-game calendar |
+| `u.chan.history(name, limit?)` | Recent channel messages |
+| `u.mail.send/read/delete/modify` | Mail system (sandbox scripts only) |
+
 ---
 
 ## Pattern Reference
@@ -276,6 +296,7 @@ addCmd({
 ### Command that reads and writes a custom DBO
 
 ```typescript
+// Plugin in src/plugins/ — use relative imports
 import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 import { myRecords } from "./db.ts";

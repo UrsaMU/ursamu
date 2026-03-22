@@ -14,6 +14,7 @@
  *
  * Flags:
  *   --all                    (update) update every registered plugin
+ *   --ref  <tag|sha>         (install) pin install to a specific tag or commit SHA
  *   --tag  <tag>             (search) filter by tag
  *   -f, --force              Skip confirmation prompts
  *   -h, --help               Show this help
@@ -22,11 +23,12 @@ import { parse } from "jsr:@std/flags@^0.224.0";
 import { join, basename } from "jsr:@std/path@^0.224.0";
 import { exists } from "jsr:@std/fs@^0.224.0";
 import type { PluginManifest, Registry, RegistryEntry, RemoteRegistry, RemotePluginEntry } from "./types.ts";
+import { buildCloneSteps } from "../utils/ensurePlugins.ts";
 
 const args = parse(Deno.args, {
   boolean: ["help", "force", "all"],
-  string:  ["tag"],
-  alias:   { h: "help", f: "force", a: "all", t: "tag" },
+  string:  ["tag", "ref"],
+  alias:   { h: "help", f: "force", a: "all", t: "tag", r: "ref" },
 });
 
 const command = String(args._[0] || "");
@@ -142,18 +144,22 @@ async function cloneAndInstall(
   nameOverride: string | null,
   existingEntry: RegistryEntry | undefined,
   skipConfirm: boolean,
+  ref?: string,
 ): Promise<void> {
   const tempDir = await Deno.makeTempDir({ prefix: "ursamu-plugin-" });
 
   try {
-    const cloneProc = new Deno.Command("git", {
-      args: ["clone", "--depth", "1", url, tempDir],
-      stdout: "inherit",
-      stderr: "inherit",
-    });
-    const cloneStatus = await cloneProc.spawn().status;
-    if (!cloneStatus.success) {
-      throw new Error(`git clone exited with code ${cloneStatus.code}`);
+    const steps = buildCloneSteps(url, tempDir, ref);
+    for (const stepArgs of steps) {
+      const proc = new Deno.Command("git", {
+        args: stepArgs,
+        stdout: "inherit",
+        stderr: "inherit",
+      });
+      const status = await proc.spawn().status;
+      if (!status.success) {
+        throw new Error(`git ${stepArgs[0]} exited with code ${status.code}`);
+      }
     }
 
     const manifest = await tryReadManifest(tempDir);
@@ -298,9 +304,9 @@ async function installPlugin(nameOrUrl: string): Promise<void> {
     console.log(`  Resolved to: ${url}`);
   }
 
-  console.log(`Fetching plugin from ${url} ...`);
+  console.log(`Fetching plugin from ${url}${args.ref ? `@${args.ref}` : ""} ...`);
   try {
-    await cloneAndInstall(url, null, undefined, false);
+    await cloneAndInstall(url, null, undefined, false, args.ref);
   } catch (err) {
     console.error(`Failed to install plugin: ${err instanceof Error ? err.message : err}`);
     Deno.exit(1);
@@ -477,6 +483,7 @@ Commands:
 
 Options:
   --all                    (update) re-fetch all registered plugins
+  --ref  <tag|sha>         (install) pin to a tag (v1.1.0) or commit SHA
   --tag  <tag>             (search) filter results by tag
   -f, --force              Skip confirmation prompts
   -h, --help               Show this help message
@@ -486,7 +493,9 @@ Examples:
   ursamu plugin search ai                  # search by keyword
   ursamu plugin search --tag chargen       # filter by tag
   ursamu plugin install ursamu-ai-gm       # install by name (registry resolves URL)
-  ursamu plugin install https://github.com/owner/repo   # install by URL
+  ursamu plugin install https://github.com/owner/repo             # install by URL
+  ursamu plugin install --ref v1.1.0 https://github.com/owner/repo  # pin to tag
+  ursamu plugin install --ref a3f7c12 https://github.com/owner/repo # pin to SHA
   ursamu plugin update my-plugin           # update one plugin
   ursamu plugin update my-plugin other-plugin           # update several
   ursamu plugin update --all               # update everything registered

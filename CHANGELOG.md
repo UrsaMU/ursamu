@@ -2,6 +2,52 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [1.9.0] — 2026-03-21
+
+### New Features
+
+#### Plugin Manifest System (`ensurePlugins`)
+- `src/plugins/plugins.manifest.json` — declare external plugins with `name`, `url`, `ref`, and `ursamu` version constraint
+- `src/utils/ensurePlugins.ts` — auto-clones missing manifest-declared plugins on server start; supports tag, branch, or commit-SHA pinning; writes a `.registry.json`
+- `src/utils/loadPlugins.ts` — now calls `ensurePlugins()` before the directory walk
+- Security guards: `isSafePluginName` (no traversal), `isSafePluginUrl` (https only), SHA-ref detection for commit pinning
+
+#### rhost-vision Extracted to External Plugin
+- Built-in `src/plugins/rhost-vision/` removed; replaced by manifest entry pointing to `chogan1981/ursamu-rhost-vision@v1.1.0`
+- New `docs/plugins/rhost-vision.md` covers install and configuration
+
+#### Public API Additions
+- `send()` exported from `mod.ts` — plugins can now deliver targeted in-game messages without broadcasting
+- `u.sdk.forceAs(targetId, command)` — run any command as another DB object from SDK context
+
+#### `@reload` Improvements
+- `@reload/plugin <name>` — hot-reload a single named plugin without touching commands or config
+- `@reload/commands`, `@reload/config`, `@reload/scripts` switches for selective reload
+
+#### `ursamu plugin install --ref`
+- `--ref <tag|sha>` flag pins a plugin install to a specific git tag or commit SHA
+- Shared with `ensurePlugins` via `buildCloneSteps()` helper
+
+### Security
+
+- **[HIGH] SSRF** — `@avatar` now guards private/loopback/link-local/cloud-metadata hosts by name **and** resolves DNS A/AAAA records to block DNS-rebinding attacks; `isPrivateHost()` exported for direct testing
+- **[MEDIUM] Auth rate-limit** — `/auth/reset` rate-limited (shared `isLoginRateLimited` limiter); returns `429 Retry-After: 60` on excess
+- **[LOW] Weak ID** — job comment IDs switched from predictable `jc-<timestamp>-<5-char random>` to `crypto.randomUUID()`
+- **[LOW] ensurePlugins supply-chain** — path-traversal guard, https-only URL validation, and SHA pinning reduce plugin supply-chain risk
+
+### Improvements
+
+- `@set` — refactored to handle `@set <target>/<ATTR>=<value>` and `@set <target>=<FLAG> <!FLAG>` modes cleanly; docs updated
+- `examine` — improved output: object type header, owner name resolution (`#id → Name (#id)`), aligned field labels
+- `authRouter.ts` — TypeScript non-null assertions on reset token deletion path
+
+### Documentation
+
+- New guides: `docs/guides/debugging.md`, `docs/guides/gameclock.md`, `docs/guides/softcoding.md`
+- New plugin docs: `docs/plugins/chargen.md`, `docs/plugins/events.md`, `docs/plugins/rhost-vision.md`
+- `docs/llms.md` — machine-optimised AI reference for code generation tools
+- Updated: admin-guide, scripting, sdk-cookbook, user-guide, commands ref, API index and core reference
+
 ## [1.8.0] — 2026-03-21
 
 ### New Features

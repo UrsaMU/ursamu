@@ -245,6 +245,37 @@ deno task dev       # Hub + Telnet with file watching (development)
 deno task daemon    # Background service with restart loop (production)
 ```
 
+### Hot-Reload (`@reload`)
+
+Without restarting or disconnecting any players, admins and wizards can reload
+individual parts of the running server:
+
+```
+@reload                    -- reload everything (config + text + commands + plugins)
+@reload/config             -- reload config.json from disk only
+@reload/text               -- reload text files (motd, etc.) only
+@reload/cmds               -- reload native commands and system aliases only
+@reload/plugins            -- hot-reload all installed plugins
+@reload/plugin <name>      -- hot-reload one specific plugin by name
+```
+
+**Example — reload just the jobs plugin after an update:**
+
+```
+@reload/plugin jobs
+```
+
+The response shows each subsystem's status. Partial failures are reported
+inline so you can see which component (if any) didn't reload cleanly.
+
+> `@reload/plugin <name>` is case-insensitive and matches against the plugin's
+> registered name. To see what's loaded: `@reload/plugin` (no name) prints
+> the list of currently loaded plugins.
+
+> **System scripts** (`system/scripts/*.ts`) are always executed live — the
+> engine reads and compiles them on each invocation — so they never need a
+> reload.
+
 ### Updating from Git (`@update`)
 
 Admins and wizards can update the running server from in-game without touching

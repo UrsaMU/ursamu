@@ -136,7 +136,7 @@ u.me.flags.has("wizard")    // true/false
 u.me.flags.has("connected")
 
 // Check edit permission (owner, admin, wizard)
-if (!u.canEdit(u.me, target)) {
+if (!(await u.canEdit(u.me, target))) {
   u.send("Permission denied.");
   return;
 }
@@ -176,6 +176,43 @@ u.execute("say Hello, world!");
 
 // Force a command (bypasses some permission checks — use carefully)
 u.force("@set me=dark");
+```
+
+---
+
+## Attributes (`u.attr`)
+
+```typescript
+// Read a soft-coded &ATTR from any object (case-insensitive)
+const bio  = await u.attr.get(u.me.id, "FINGER-INFO");    // null if not set
+const desc = await u.attr.get(objectId, "SHORT-DESC");
+
+if (bio) u.send(bio);
+```
+
+---
+
+## Evaluate Attribute (`u.eval`)
+
+```typescript
+// Run &ATTR on an object and capture its output as a string
+const result = await u.eval("#42", "SCORE-FORMULA");
+u.send(`Result: ${result}`);
+
+// Pass arguments
+const out = await u.eval(u.me.id, "CALC", ["10", "20"]);
+```
+
+---
+
+## Force As (`u.forceAs`)
+
+```typescript
+// Execute a command as another object (wizard/admin only — check flags first)
+if (!u.me.flags.has("wizard") && !u.me.flags.has("admin")) {
+  u.send("Permission denied."); return;
+}
+await u.forceAs(npcId, "say Greetings, traveler!");
 ```
 
 ---
@@ -326,6 +363,30 @@ await u.sys.update("develop"); // pull a specific branch
 
 Exit code 75 is caught by `scripts/main-loop.sh` which restarts the process
 with exponential backoff on rapid exits. Telnet connections survive reboots.
+
+---
+
+## Game Time (`u.sys.gameTime`)
+
+```typescript
+// Read the in-game calendar
+const t = await u.sys.gameTime();
+// { year: number, month: 1-12, day: 1-28, hour: 0-23, minute: 0-59 }
+
+// Set the in-game calendar (wizard/admin only)
+await u.sys.setGameTime({ year: 1340, month: 6, day: 15, hour: 8, minute: 0 });
+```
+
+---
+
+## Channel History (`u.chan.history`)
+
+```typescript
+// Get recent messages from a channel (default last 20)
+const history = await u.chan.history("public");
+const history = await u.chan.history("public", 50);
+// → [{ id, playerName, message, timestamp }, ...]
+```
 
 ---
 

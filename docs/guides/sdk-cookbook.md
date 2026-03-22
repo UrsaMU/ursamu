@@ -567,3 +567,135 @@ if (!clean) { u.send("Value cannot be empty."); return; }
 u.util.displayName(u.me, u.me)       // "Alice" or moniker
 u.util.displayName(target, u.me)     // target's display name as seen by actor
 ```
+
+---
+
+## Attributes (`u.attr`)
+
+### `u.attr.get(id, name)`
+
+Reads a soft-coded `&ATTR` value stored on any game object. Attribute names are
+case-insensitive. Returns `null` if the attribute is not set.
+
+```typescript
+// Read your own short description
+const shortDesc = await u.attr.get(u.me.id, "SHORT-DESC");
+if (shortDesc) u.send(`Short desc: ${shortDesc}`);
+
+// Read another object's attribute
+const bio = await u.attr.get(targetId, "FINGER-INFO");
+
+// Case-insensitive
+const val = await u.attr.get(objectId, "onenter");  // same as "ONENTER"
+```
+
+---
+
+## Evaluate Attribute (`u.eval`)
+
+### `u.eval(targetId, attr, args?)`
+
+Evaluates a stored `&ATTR` as a script and returns the output as a string.
+This is the script equivalent of `@trigger` that also captures output.
+
+```typescript
+// Run &FORMULA on object #42 with args
+const result = await u.eval("#42", "FORMULA", ["5", "10"]);
+u.send(`Formula result: ${result}`);
+
+// Run an attribute on the actor
+const score = await u.eval(u.me.id, "SCORE-FORMULA");
+u.send(`Your score: ${score}`);
+```
+
+---
+
+## Force As Another Object (`u.forceAs`)
+
+### `u.forceAs(targetId, command)`
+
+Executes a command as another object (NPC, room, etc.). The SDK does not enforce
+privilege — always check flags in your script before calling.
+
+```typescript
+// Guard: admin/wizard only
+const isAdmin = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+if (!isAdmin) { u.send("Permission denied."); return; }
+
+// Make an NPC speak
+await u.forceAs(npcId, "say Welcome to the Inn!");
+
+// Make a room run a command
+await u.forceAs(roomId, "@trigger me/ONRESET");
+```
+
+---
+
+## Game Time (`u.sys.gameTime`)
+
+### `u.sys.gameTime()` / `u.sys.setGameTime(t)`
+
+Read and write the in-game calendar. Useful for seasonal events, timestamps,
+and roleplay-relevant date display.
+
+```typescript
+// Read current game time
+const t = await u.sys.gameTime();
+// t.year: number, t.month: 1-12, t.day: 1-28, t.hour: 0-23, t.minute: 0-59
+
+const monthNames = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+u.send(`Today is ${monthNames[t.month]} ${t.day}, Year ${t.year} — ${t.hour}:${String(t.minute).padStart(2,"0")}`);
+
+// Advance the calendar (admin only)
+if (!u.me.flags.has("wizard") && !u.me.flags.has("admin")) {
+  u.send("Permission denied."); return;
+}
+await u.sys.setGameTime({ year: t.year + 1, month: 1, day: 1, hour: 0, minute: 0 });
+u.broadcast("A new year has begun!");
+```
+
+---
+
+## Channel History (`u.chan.history`)
+
+### `u.chan.history(name, limit?)`
+
+Fetches recent messages from a channel. Default limit is 20.
+
+```typescript
+// Last 20 messages on the public channel
+const history = await u.chan.history("public");
+// → [{ id: string, playerName: string, message: string, timestamp: number }, ...]
+
+// Last 50 messages
+const history = await u.chan.history("staff", 50);
+
+// Display as a log
+const lines = history.map(e => {
+  const date = new Date(e.timestamp).toLocaleTimeString();
+  return `[${date}] ${e.playerName}: ${e.message}`;
+});
+u.send(lines.join("\r\n"));
+```
+
+---
+
+## Mail — Modify (`u.mail.modify`)
+
+### `u.mail.modify(query, op, update)`
+
+Updates mail records matching `query`. Used for marking messages read/unread or
+other bulk updates. Available in sandbox scripts only.
+
+```typescript
+// Mark a specific message as read
+await u.mail.modify({ id: messageId }, "$set", { read: true });
+
+// Mark all your messages as read
+await u.mail.modify(
+  { to: { $in: [`#${u.me.id}`] } },
+  "$set",
+  { read: true }
+);
+```

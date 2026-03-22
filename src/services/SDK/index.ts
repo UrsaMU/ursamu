@@ -233,6 +233,14 @@ export async function createNativeSDK(
       }
     },
 
+    forceAs: async (targetId: string, command: string) => {
+      const targetObj = await dbojs.queryOne({ id: targetId });
+      if (!targetObj) return;
+      const fakeSocket = { cid: targetId, id: `forceAs:${targetId}`, join: () => {}, leave: () => {}, send: () => {}, disconnect: () => {} };
+      const { cmdParser } = await import("../commands/cmdParser.ts");
+      await cmdParser.run({ socket: fakeSocket as never, msg: command });
+    },
+
     teleport: async (targetStr: string, destination: string) => {
       const tarObj =
         (await dbojs.queryOne({ id: targetStr })) ||
@@ -397,7 +405,7 @@ export async function createNativeSDK(
       if (!tarObj) {
         tarObj = await dbojs.queryOne({
           "data.name": new RegExp(`^${targetStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
-        }) || null;
+        }) || undefined;
       }
       if (!tarObj) return "";
       const attrData = await getAttribute(tarObj as unknown as IDBOBJ, attr);

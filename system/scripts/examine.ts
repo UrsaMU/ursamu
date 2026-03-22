@@ -9,10 +9,17 @@ const SYSTEM_KEYS = new Set([
 // Keys that contain sensitive data — never displayed.
 const HIDDEN_KEYS = new Set(['password']);
 
+function objectType(flags: Set<string>): string {
+  if (flags.has("room"))   return "Room";
+  if (flags.has("player")) return "Player";
+  if (flags.has("exit"))   return "Exit";
+  return "Thing";
+}
+
 export default async (u: IUrsamuSDK) => {
   const actor = u.me;
-  const targetName = (u.cmd.args[0] || "").trim() || "me";
-  const target = (await u.db.search(targetName))[0];
+  const targetName = (u.cmd.args[0] || "").trim();
+  const target = targetName ? await u.util.target(u.me, targetName, true) : u.here;
 
   if (!target) {
     u.send(`I can't find "${targetName}" here.`);
@@ -24,20 +31,36 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
+  const type = objectType(target.flags);
+
+  // ── Owner: resolve id → name ──────────────────────────────────────────────
+  let ownerLine = "None";
+  const ownerId = target.state.owner as string | undefined;
+  if (ownerId) {
+    const ownerObj = await u.util.target(u.me, ownerId, true);
+    ownerLine = ownerObj ? `${u.util.displayName(ownerObj, actor)} (#${ownerId})` : `#${ownerId}`;
+  }
+
   // ── Home + Location: resolve id → name ───────────────────────────────────
   let homeLine = "None";
   const homeId = target.state.home as string | undefined;
   if (homeId) {
-    const homeObj = (await u.db.search(homeId))[0];
+    const homeObj = await u.util.target(u.me, homeId, true);
     homeLine = homeObj ? `${homeObj.name} (#${homeId})` : `#${homeId}`;
   }
 
   let locationLine = "Limbo";
   const locationId = target.location;
   if (locationId) {
-    const locationObj = (await u.db.search(locationId))[0];
+    const locationObj = await u.util.target(u.me, locationId, true);
     locationLine = locationObj ? `${locationObj.name} (#${locationId})` : `#${locationId}`;
   }
+
+  // ── Contents: split into characters, exits, things ────────────────────────
+  const contents = target.contents || [];
+  const characters = contents.filter(o => o.flags.has("player"));
+  const exits      = contents.filter(o => o.flags.has("exit"));
+  const things     = contents.filter(o => !o.flags.has("player") && !o.flags.has("exit"));
 
   // ── Channels: format list ─────────────────────────────────────────────────
   type ChanEntry = { channel: string; alias: string; active: boolean };
@@ -55,17 +78,42 @@ export default async (u: IUrsamuSDK) => {
   );
 
   // ── Telnet output ─────────────────────────────────────────────────────────
-  let telnet = `%ch${target.name} (#${target.id})%cn\n`;
-  telnet += `%chFlags:%cn ${Array.from(target.flags).join(" ")}\n`;
-  telnet += `%chOwner:%cn ${(target.state.owner as string) || "None"}\n`;
-  telnet += `%chLock:%cn ${(target.state.lock as string) || "None"}\n`;
+  let telnet = `${u.util.center(`${target.name} (#${target.id}) [${type}]`, 78, "=")}%cn\n`;
+  telnet += `%chFlags:%cn    ${Array.from(target.flags).join(" ") || "None"}\n`;
+  telnet += `%chOwner:%cn    ${ownerLine}\n`;
+  telnet += `%chLock:%cn     ${(target.state.lock as string) || "None"}\n`;
   telnet += `%chLocation:%cn ${locationLine}\n`;
-  telnet += `%chHome:%cn ${homeLine}\n`;
-  telnet += `%chChannels:%cn ${chansLine}\n`;
-  telnet += `\n%chDescription:%cn\n${(target.state.description as string) || "No description."}\n`;
+  telnet += `%chHome:%cn     ${homeLine}\n`;
+
+  if (type === "Player") {
+    telnet += `%chChannels:%cn ${chansLine}\n`;
+  }
+
+  telnet += `\n%chDescription:%cn\n${(target.state.description as string) || "No description set."}\n`;
+
+  if (exits.length > 0) {
+    telnet += `\n%chExits:%cn\n`;
+    exits.forEach(e => {
+      telnet += `  %ch${e.name}%cn (#${e.id})\n`;
+    });
+  }
+
+  if (things.length > 0) {
+    telnet += `\n%chContents:%cn\n`;
+    things.forEach(t => {
+      telnet += `  ${u.util.displayName(t, actor)} (#${t.id})\n`;
+    });
+  }
+
+  if (characters.length > 0) {
+    telnet += `\n%chCharacters:%cn\n`;
+    characters.forEach(c => {
+      telnet += `  ${u.util.displayName(c, actor)} (#${c.id})\n`;
+    });
+  }
 
   if (attributes.length > 0) {
-    telnet += "\n%chAttributes:%cn\n";
+    telnet += `\n%chAttributes:%cn\n`;
     attributes.forEach(([k, v]) => {
       let display: string;
       if (v === null || v === undefined) {
@@ -81,24 +129,28 @@ export default async (u: IUrsamuSDK) => {
     });
   }
 
-  const characters = (target.contents || []).filter(o => o.flags.has('player'));
-  if (characters.length > 0) {
-    telnet += `\n%chCharacters:%cn ${characters.map(c => u.util.displayName(c, actor)).join(", ")}\n`;
-  }
-
   u.send(telnet);
 
   // ── Web UI ────────────────────────────────────────────────────────────────
   const components: unknown[] = [];
-  components.push(u.ui.panel({ type: "header", content: `${target.name} [#${target.id}]`, style: "bold" }));
+  components.push(u.ui.panel({ type: "header", content: `${target.name} [#${target.id}] — ${type}`, style: "bold" }));
   components.push(u.ui.panel({ type: "list", title: "Metadata", content: [
-    { label: "Flags",    value: Array.from(target.flags).join(" ") },
-    { label: "Owner",    value: (target.state.owner as string) || "None" },
-    { label: "Location", value: (target.state.location as string) || "Limbo" },
+    { label: "Type",     value: type },
+    { label: "Flags",    value: Array.from(target.flags).join(" ") || "None" },
+    { label: "Owner",    value: ownerLine },
+    { label: "Lock",     value: (target.state.lock as string) || "None" },
+    { label: "Location", value: locationLine },
     { label: "Home",     value: homeLine },
-    { label: "Channels", value: chansLine },
+    ...(type === "Player" ? [{ label: "Channels", value: chansLine }] : []),
   ]}));
   components.push(u.ui.panel({ type: "panel", title: "Description", content: (target.state.description as string) || "None" }));
+
+  if (exits.length > 0) {
+    components.push(u.ui.panel({
+      type: "list", title: "Exits",
+      content: exits.map(e => ({ label: e.name, value: `#${e.id}` })),
+    }));
+  }
 
   if (attributes.length > 0) {
     components.push(u.ui.panel({

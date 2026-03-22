@@ -23,6 +23,7 @@ export { mu, checkAndCreateSuperuser } from "./src/main.ts";
 export { startTelnetServer } from "./src/services/telnet/telnet.ts";
 
 // Export Plugin API — available to game projects and external plugins
+export { send } from "./src/services/broadcast/broadcast.ts";
 export { DBO } from "./src/services/Database/database.ts";
 export { registerPluginRoute } from "./src/app.ts";
 export { dbojs } from "./src/services/Database/index.ts";
