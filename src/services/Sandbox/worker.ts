@@ -18,18 +18,6 @@ interface SDKDBObj extends IDBObj {
   broadcast?: (message: string, options?: Record<string, unknown>) => void;
 }
 
-interface IMail {
-  id?: string;
-  from: string;
-  to: string[];
-  cc?: string[];
-  bcc?: string[];
-  subject: string;
-  message: string;
-  read: boolean;
-  date: number;
-}
-
 interface IUrsamuSDK {
   state: Record<string, unknown>;
   me: IDBObj;
@@ -85,11 +73,6 @@ interface IUrsamuSDK {
     destroy(name: string): Promise<unknown>;
     set(name: string, options: { header?: string; lock?: string; hidden?: boolean; masking?: boolean; logHistory?: boolean; historyLimit?: number }): Promise<unknown>;
     history(name: string, limit?: number): Promise<{ id: string; playerName: string; message: string; timestamp: number }[]>;
-  };
-  mail: {
-    send(mail: Partial<IMail>): Promise<void>;
-    read(query: Record<string, unknown>): Promise<IMail[]>;
-    delete(id: string): Promise<void>;
   };
   attr: {
     get(id: string, name: string): Promise<string | null>;

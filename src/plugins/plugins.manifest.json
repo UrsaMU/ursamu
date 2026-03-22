@@ -41,6 +41,13 @@
       "ref": "v1.0.0",
       "description": "File-based markdown wiki — pages, search, history, access control, backlinks, and Discord webhooks.",
       "ursamu": ">=1.9.0"
+    },
+    {
+      "name": "mail",
+      "url": "https://github.com/UrsaMU/mail-plugin",
+      "ref": "v1.0.0",
+      "description": "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry, and REST API.",
+      "ursamu": ">=1.9.3"
     }
   ]
 }

@@ -2,10 +2,12 @@ import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 import { chargenApps, getOrCreateApp, findAppByPlayer } from "./db.ts";
 import { chargenHooks } from "./hooks.ts";
-import { dbojs, mail } from "../../services/Database/index.ts";
+import { dbojs, DBO } from "../../services/Database/index.ts";
 import { setFlags } from "../../utils/setFlags.ts";
+// mail-plugin owns "mail.messages" — access via DBO directly to avoid plugin import coupling
+interface IMail { id: string; from: string; to: string[]; subject: string; message: string; date: number; read: boolean; folder?: string; }
+const mailDb = new DBO<IMail>("mail.messages");
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
-import type { IMail } from "../../@types/IMail.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -349,12 +351,14 @@ addCmd({
     // Send in-game mail to the player
     const mailMsg: IMail = {
       id: `cgmail-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      from: u.me.id,
-      to: [player.id],
+      from: `#${u.me.id}`,
+      to: [`#${player.id}`],
       subject: "Your Character Application",
       message: `Your character application has been rejected.\n\nReason: ${reason}\n\nPlease update your application with +chargen/set and resubmit with +chargen/submit.`,
       date: now,
+      read: false,
+      folder: "inbox",
     };
-    await mail.create(mailMsg);
+    await mailDb.create(mailMsg);
   },
 });

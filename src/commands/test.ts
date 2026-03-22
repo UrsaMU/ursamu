@@ -1,6 +1,8 @@
 // deno-lint-ignore-file no-explicit-any require-await
 import { addCmd } from "../services/commands/index.ts";
-import { dbojs, chans, mail } from "../services/Database/index.ts";
+import { dbojs, chans, DBO } from "../services/Database/index.ts";
+// mail-plugin owns "mail.messages" — access via DBO directly to avoid plugin import coupling
+const mail = new DBO<{ id: string; from: string; to: string[]; subject: string; message: string; date: number; read: boolean }>("mail.messages");
 import { send } from "../services/broadcast/index.ts";
 import { setFlags } from "../utils/setFlags.ts";
 import { evaluateLock, hydrate } from "../utils/evaluateLock.ts";

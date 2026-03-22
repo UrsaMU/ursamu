@@ -1,5 +1,7 @@
 import { addCmd } from "../services/commands/index.ts";
-import { dbojs, chans, mail, counters } from "../services/Database/index.ts";
+import { dbojs, chans, counters, DBO } from "../services/Database/index.ts";
+// mail-plugin owns "mail.messages" — access via DBO directly to avoid plugin import coupling
+const mailDb = new DBO<{ id: string }>("mail.messages");
 import { send } from "../services/broadcast/index.ts";
 import { broadcast } from "../services/broadcast/index.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
@@ -40,9 +42,9 @@ export default () =>
         await chans.delete({ id: ch.id });
       }
 
-      const mails = await mail.all();
+      const mails = await mailDb.find({});
       for (const m of mails) {
-        await mail.delete({ id: m.id });
+        await mailDb.delete({ id: m.id });
       }
 
       const ctrs = await counters.all();
