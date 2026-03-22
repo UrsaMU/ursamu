@@ -308,6 +308,45 @@ for (const dir of directories) {
   console.log(`Created directory: ${dir}`);
 }
 
+// Create plugins.manifest.json — declares which plugins ensurePlugins should install
+const pluginsManifest = {
+  plugins: [
+    {
+      name: "builder",
+      url: "https://github.com/UrsaMU/builder-plugin",
+      ref: "v1.0.0",
+      description: "World-building commands (@dig, @open, @link, @describe, @examine, and more) plus REST API.",
+      ursamu: ">=1.9.5",
+    },
+    {
+      name: "bbs",
+      url: "https://github.com/UrsaMU/bbs-plugin",
+      ref: "v1.0.0",
+      description: "Full-featured Myrddin-style BBS — boards, threading, categories, and more.",
+      ursamu: ">=1.9.0",
+    },
+    {
+      name: "mail",
+      url: "https://github.com/UrsaMU/mail-plugin",
+      ref: "v1.0.0",
+      description: "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry.",
+      ursamu: ">=1.9.3",
+    },
+    {
+      name: "wiki",
+      url: "https://github.com/UrsaMU/wiki-plugin",
+      ref: "v1.0.0",
+      description: "File-based markdown wiki — pages, search, history, access control, backlinks.",
+      ursamu: ">=1.9.0",
+    },
+  ],
+};
+await Deno.writeTextFile(
+  join(targetDir, "src", "plugins", "plugins.manifest.json"),
+  JSON.stringify(pluginsManifest, null, 2),
+);
+console.log("Created src/plugins/plugins.manifest.json");
+
 // Create starter wiki page
 await Deno.writeTextFile(join(targetDir, "wiki", "home.md"), `# ${projectName} Wiki
 
