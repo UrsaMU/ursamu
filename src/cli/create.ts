@@ -416,6 +416,15 @@ const runShContent = `#!/bin/bash
 # Change to the project root directory
 cd "\$(dirname "\$0")/.." || exit
 
+# Kill any processes already bound to our ports (4201 telnet, 4202 ws, 4203 http)
+for port in 4201 4202 4203; do
+  pids=\$(lsof -ti ":\$port" 2>/dev/null)
+  if [ -n "\$pids" ]; then
+    echo "Freeing port \$port (PIDs: \$pids)..."
+    echo "\$pids" | xargs kill -9 2>/dev/null
+  fi
+done
+
 # Function to handle cleanup when the script is terminated
 cleanup() {
   echo "Shutting down servers..."
