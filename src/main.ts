@@ -191,21 +191,10 @@ export const initializeEngine = async (
         const { socket, response } = Deno.upgradeWebSocket(req);
         const url = new URL(req.url);
         const clientType = url.searchParams.get("client") || "telnet";
-        // Optional JWT pre-auth: ws://host:port?token=<jwt>&client=web
-        let preAuthUserId: string | undefined;
-        const token = url.searchParams.get("token");
-        if (token) {
-          try {
-            const { verify } = await import("./services/jwt/index.ts");
-            const decoded = await verify(token);
-            if (decoded && typeof decoded.id === "string") {
-              preAuthUserId = decoded.id;
-            }
-          } catch {
-            // Invalid token — allow unauthenticated connection
-          }
-        }
-        wsService.handleConnection(socket, clientType, preAuthUserId, remoteIp);
+        // C1 fix: JWT is no longer read from the query parameter (?token=...).
+        // Authentication happens via the first WebSocket message: { type: "auth", token }.
+        // This prevents token leakage into server logs, browser history, and proxy caches.
+        wsService.handleConnection(socket, clientType, undefined, remoteIp);
         return response;
       }
 

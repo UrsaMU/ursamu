@@ -24,6 +24,14 @@ const RAW_DESCRIBE = await Deno.readTextFile("./system/scripts/describe.ts");
 const RAW_OPEN     = await Deno.readTextFile("./system/scripts/open.ts");
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function stripMush(s: string): string {
+  return s.replace(/%c[a-z]/gi, "").replace(/%[rntbR]/g, "");
+}
+
+// ---------------------------------------------------------------------------
 // Script wrapper
 // Strips ESM import/export declarations so the script runs as legacy block
 // code inside a `new Function` body (top-level `return` is valid there).
@@ -226,10 +234,10 @@ Deno.test("@dig — wizard digs a room only", OPTS, async () => {
   assertEquals(Array.isArray(result), true);
   // @dig sends exactly one message: "Room <name> created with dbref ..."
   assertEquals(result.length, 1, "Should send exactly one message for room-only dig");
-  assertStringIncludes(result[0], "Room NewCave created with dbref");
+  assertStringIncludes(stripMush(result[0]), "Room NewCave created with dbref");
 
-  // Verify DB
-  const dbrefMatch = result[0].match(/#(\w+)/);
+  // Verify DB (strip MUSH codes before extracting dbref)
+  const dbrefMatch = stripMush(result[0]).match(/#(\w+)/);
   const newRoomId = dbrefMatch ? dbrefMatch[1] : null;
   if (newRoomId) {
     const created = await dbojs.queryOne({ id: newRoomId });
@@ -254,12 +262,12 @@ Deno.test("@dig — room + to-exit produces two messages", OPTS, async () => {
   const result = await sandboxService.runScript(wrapScript(RAW_DIG), ctx, SLOW) as string[];
 
   assertEquals(result.length, 2, "Should send room message + one exit message");
-  assertStringIncludes(result[0], "Room EastCave created");
-  assertStringIncludes(result[1], "Exit East created");
+  assertStringIncludes(stripMush(result[0]), "Room EastCave created");
+  assertStringIncludes(stripMush(result[1]), "Exit East created");
 
-  // Clean up created objects
+  // Clean up created objects (strip MUSH codes before extracting dbrefs)
   const ids = result
-    .map((m: string) => m.match(/#(\w+)/))
+    .map((m: string) => stripMush(m).match(/#(\w+)/))
     .filter(Boolean)
     .map((m: RegExpMatchArray | null) => m![1]);
   await cleanup(ACTOR_ID, ROOM_ID, ...ids);
@@ -278,14 +286,14 @@ Deno.test("@dig — room + both exits produces three messages", OPTS, async () =
   const result = await sandboxService.runScript(wrapScript(RAW_DIG), ctx, SLOW) as string[];
 
   assertEquals(result.length, 3, "Should send room message + two exit messages");
-  assertStringIncludes(result[0], "Room WestCave created");
+  assertStringIncludes(stripMush(result[0]), "Room WestCave created");
   // One of the remaining messages is for "West" exit and one for "East" exit
-  const exitMessages = result.slice(1).join(" ");
+  const exitMessages = result.slice(1).map(stripMush).join(" ");
   assertStringIncludes(exitMessages, "Exit West created");
   assertStringIncludes(exitMessages, "Exit East created");
 
   const ids = result
-    .map((m: string) => m.match(/#(\w+)/))
+    .map((m: string) => stripMush(m).match(/#(\w+)/))
     .filter(Boolean)
     .map((m: RegExpMatchArray | null) => m![1]);
   await cleanup(ACTOR_ID, ROOM_ID, ...ids);
@@ -319,10 +327,10 @@ Deno.test("@dig — non-wizard with sufficient quota digs successfully", OPTS, a
   const ctx = makeCtx(actor.id, "player connected", "NormalPlayer", "@dig", ["QuotaCave"], { quota: 5 });
   const result = await sandboxService.runScript(wrapScript(RAW_DIG), ctx, SLOW) as string[];
 
-  assertStringIncludes(result.join(" "), "Room QuotaCave created");
+  assertStringIncludes(result.map(stripMush).join(" "), "Room QuotaCave created");
 
   const ids = result
-    .map((m: string) => m.match(/#(\w+)/))
+    .map((m: string) => stripMush(m).match(/#(\w+)/))
     .filter(Boolean)
     .map((m: RegExpMatchArray | null) => m![1]);
   await cleanup(ACTOR_ID, ROOM_ID, ...ids);

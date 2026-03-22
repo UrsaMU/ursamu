@@ -18,7 +18,7 @@
  * ```
  */
 
-import { authHandler, dbObjHandler, configHandler, sceneHandler, buildingHandler } from "./routes/index.ts";
+import { authHandler, dbObjHandler, configHandler, sceneHandler } from "./routes/index.ts";
 import { meHandler, onlinePlayersHandler, channelsHandler, channelHistoryHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
 import { getConfig } from "./services/Config/mod.ts";
@@ -70,8 +70,8 @@ async function resolveCallerPrivLevel(userId: string | null): Promise<number> {
   if (!user) return 0;
   const flags = (user.flags ?? "").split(" ");
   if (flags.includes("superuser")) return 4;
+  if (flags.includes("wizard"))    return 4; // M1 fix: wizard = same level as superuser
   if (flags.includes("admin"))     return 3;
-  if (flags.includes("wizard"))    return 2;
   if (flags.includes("builder"))   return 1;
   return 1;
 }
@@ -85,6 +85,15 @@ async function resolveCallerPrivLevel(userId: string | null): Promise<number> {
  * @param component - Component descriptor; `lock` defaults to `"connected"`.
  */
 export function registerUIComponent(component: IUIComponent): void {
+  // H1: Validate that the script URL is a relative same-origin path (starts with /).
+  // Reject absolute URLs (http://, https://, //) to prevent external script injection
+  // via a compromised or malicious plugin manifest.
+  if (component.script && !/^\//.test(component.script)) {
+    throw new Error(
+      `[registerUIComponent] Rejected external script URL for "${component.element}": ` +
+      `"${component.script}". Only relative paths starting with "/" are allowed.`
+    );
+  }
   const idx = uiComponents.findIndex(c => c.element === component.element);
   const entry = { ...component, lock: component.lock ?? "connected" };
   if (idx !== -1) {
@@ -209,7 +218,17 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
-    "Content-Security-Policy": "default-src 'self'",
+    "Content-Security-Policy": [
+      "default-src 'none'",
+      "script-src 'self'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data:",
+      "connect-src 'self' ws: wss:",
+      "font-src 'self'",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; "),
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   };
   if (allowOrigin) corsHeaders["Access-Control-Allow-Origin"] = allowOrigin;
@@ -292,17 +311,6 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       return await sceneHandler(req, userId);
     }
     
-    if (path.startsWith("/api/v1/building")) {
-      const userId = await authenticate(req);
-      if (!userId) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-      return await buildingHandler(req, userId);
-    }
-
     if (path === "/api/v1/config" || path.startsWith("/api/v1/config/") ||
         path === "/api/v1/connect" || path.startsWith("/api/v1/connect/") ||
         path === "/api/v1/welcome" || path.startsWith("/api/v1/welcome/")) {

@@ -264,12 +264,13 @@ Deno.test("@dig — quota is decremented and persisted to DB", OPTS, async () =>
   const ctx = makeCtx(actor.id, "player connected", "Player", "@dig", ["NewCave"], { quota: 5 });
   const result = await sandboxService.runScript(wrapScript(RAW_DIG), ctx, SLOW) as string[];
 
-  assertStringIncludes(result.join(" "), "Room NewCave created");
+  const plain = result.map((s: string) => s.replace(/%c[a-z]/gi, "").replace(/%[rntbR]/g, "")).join(" ");
+  assertStringIncludes(plain, "Room NewCave created");
 
   const updated = await dbojs.queryOne({ id: ACTOR_ID }) as Record<string, unknown>;
   assertEquals((updated?.data as Record<string, unknown>)?.quota, 4);
 
-  const newId = result.join(" ").match(/#(\w+)/)?.[1];
+  const newId = plain.match(/#(\w+)/)?.[1];
   await cleanup(ACTOR_ID, ROOM_ID, ...(newId ? [newId] : []));
 });
 
@@ -281,9 +282,10 @@ Deno.test("@dig — superuser bypasses quota check", OPTS, async () => {
   const ctx = makeCtx(actor.id, "player superuser", "Super", "@dig", ["SuperCave"], { quota: 0 });
   const result = await sandboxService.runScript(wrapScript(RAW_DIG), ctx, SLOW) as string[];
 
-  assertStringIncludes(result.join(" "), "Room SuperCave created");
+  const plain = result.map((s: string) => s.replace(/%c[a-z]/gi, "").replace(/%[rntbR]/g, "")).join(" ");
+  assertStringIncludes(plain, "Room SuperCave created");
 
-  const newId = result.join(" ").match(/#(\w+)/)?.[1];
+  const newId = plain.match(/#(\w+)/)?.[1];
   await cleanup(ACTOR_ID, ROOM_ID, ...(newId ? [newId] : []));
   await DBO.close();
 });

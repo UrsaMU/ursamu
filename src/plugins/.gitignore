@@ -1,0 +1,6 @@
+# External plugins installed by ensurePlugins should not be committed.
+# Ignore all subdirectories by default, then un-ignore built-in plugins.
+*/
+
+# Built-in plugins (part of the engine)
+!example/

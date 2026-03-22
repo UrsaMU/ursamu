@@ -170,6 +170,27 @@ Deno.test("WS — empty msg is not dispatched to cmdParser", OPTS, async () => {
   mock.close();
 });
 
+Deno.test("WS — typed { type:'cmd', data } message is treated as a command", OPTS, async () => {
+  const mock = makeMock("web");
+  // Web-client sends { type: "cmd", data: "<command string>" }.
+  // The handler should extract data as the command and not throw.
+  // We saturate the rate limiter with typed messages to prove they count.
+  const warns: string[] = [];
+  const origWarn = console.warn;
+  console.warn = (...args: unknown[]) => warns.push(args.join(" "));
+
+  for (let i = 0; i < 12; i++) {
+    mock.simulateMessage({ type: "cmd", data: `look ${i}` });
+  }
+
+  console.warn = origWarn;
+  // Typed messages must count against the rate limit (proves msg extraction works)
+  assertEquals(warns.filter((w) => w.includes("Rate limit")).length, 2);
+
+  await tick();
+  mock.close();
+});
+
 // ---------------------------------------------------------------------------
 // Rate limiting — exceed 10 cmd/s triggers warn log
 // ---------------------------------------------------------------------------
@@ -235,6 +256,39 @@ Deno.test("WS — disconnect(cid) closes the matching socket", OPTS, async () =>
   await tick();
 
   assertEquals(mock.closed, true);
+});
+
+// ---------------------------------------------------------------------------
+// C1 — JWT token MUST NOT be authenticated via query-param path
+// ---------------------------------------------------------------------------
+
+Deno.test("WS — auth message (type:'auth', token) sets cid [C1 Green]", OPTS, async () => {
+  const { sign } = await import("../src/services/jwt/index.ts");
+  const token = await sign({ id: "ws_auth_test_c1" });
+
+  const mock = makeMock("web");
+  const sockets = wsService.getConnectedSockets();
+  const meta = sockets[sockets.length - 1];
+
+  mock.simulateMessage({ type: "auth", token });
+  await tick(100);
+
+  assertEquals(meta.cid, "ws_auth_test_c1",
+    "auth message with valid JWT must set sockData.cid");
+
+  mock.close();
+});
+
+Deno.test("WS — invalid JWT in auth message does not set cid [C1 Guard]", OPTS, async () => {
+  const mock = makeMock("web");
+  const sockets = wsService.getConnectedSockets();
+  const meta = sockets[sockets.length - 1];
+
+  mock.simulateMessage({ type: "auth", token: "not.a.jwt" });
+  await tick(100);
+
+  assertEquals(meta.cid, "", "invalid JWT must not set cid");
+  mock.close();
 });
 
 // ---------------------------------------------------------------------------

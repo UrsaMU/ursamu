@@ -2,83 +2,68 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
 /**
  * System Script: open.ts
- * Migrated from legacy @open command.
+ * Creates exits.
+ *
+ * Usage: @open[/inventory] <name>=<room>[,<back exit>]
  */
 export default async (u: IUrsamuSDK) => {
-  const actor = u.me;
+  const actor    = u.me;
   const fullArgs = (u.cmd.args[0] || "").trim();
 
-  // Pattern: @open[/sw] <name>=<room>[,<back exit>]
-  const match = fullArgs.match(/^(?:(\/.+?)\s+)?([^=,]+)\s*=\s*([^,]+)(?:,\s*(.*))?/i);
+  // Switch comes from cmdParser — @open/inventory → u.cmd.switches[0] = "inventory"
+  const swtch = (u.cmd.switches?.[0] || "").toLowerCase();
 
+  // Pattern: <name>=<room>[,<back exit>]
+  const match = fullArgs.match(/^([^=,]+)\s*=\s*([^,]+)(?:,\s*(.*))?/i);
   if (!match) {
     u.send("Usage: @open[/inventory] <name>=<room>[,<back exit>]");
     return;
   }
 
-  const swtch = (match[1] || "").toLowerCase();
-  const exitName = match[2].trim();
-  const destName = match[3].trim();
-  const backExitName = match[4] ? match[4].trim() : "";
+  const exitName     = match[1].trim();
+  const destName     = match[2].trim();
+  const backExitName = match[3] ? match[3].trim() : "";
 
-  // Find destination room
   const searchResults = await u.db.search(destName);
-  const destination = searchResults[0];
-
+  const destination   = searchResults[0];
   if (!destination) {
     u.send(`Could not find destination room: ${destName}`);
     return;
   }
 
-  // Quota & Permission Check
   const isStaff = actor.flags.has("wizard") || actor.flags.has("admin") || actor.flags.has("superuser");
-  const quota = (actor.state.quota as number) || 0;
-  let cost = 1;
-  if (backExitName) cost++;
+  const quota   = (actor.state.quota as number) ?? 0;
+  const cost    = 1 + (backExitName ? 1 : 0);
 
   if (!isStaff && quota < cost) {
     u.send(`You don't have enough quota. Cost: ${cost}, You have: ${quota}.`);
     return;
   }
 
-  const location = swtch === "/inventory" ? actor.id : u.here.id;
-
-  const _canEditDest = await u.canEdit(actor, destination);
-  if (backExitName && !_canEditDest) {
-    u.send("Permission denied.");
+  if (backExitName && !(await u.canEdit(actor, destination))) {
+    u.send("Permission denied: you can't create a back exit in that room.");
     return;
   }
 
-  // Create the exit
+  const location = swtch === "inventory" ? actor.id : u.here.id;
+
   const _exit = await u.db.create({
     flags: new Set(["exit"]),
-    location: location,
-    state: {
-      name: exitName,
-      destination: destination.id,
-      owner: actor.id
-    }
+    location,
+    state: { name: exitName, destination: destination.id, owner: actor.id },
   });
+  u.send(`You open exit %ch${exitName.split(";")[0]}%cn to ${u.util.displayName(destination, actor)}.`);
 
-  const destDisplay = u.util.displayName(destination, actor);
-  u.send(`You open exit %ch${exitName.split(";")[0]}%cn to ${destDisplay}.`);
-
-  // Create back exit
   if (backExitName) {
     const _backExit = await u.db.create({
       flags: new Set(["exit"]),
       location: destination.id,
-      state: {
-        name: backExitName,
-        destination: u.here.id,
-        owner: actor.id
-      }
+      state: { name: backExitName, destination: u.here.id, owner: actor.id },
     });
     u.send(`You open back exit %ch${backExitName.split(";")[0]}%cn to ${u.util.displayName(u.here, actor)}.`);
   }
 
-  // Decrease quota and persist
   if (!isStaff) {
-    await u.db.modify(actor.id, "$set", { "data.quota": quota - cost });
+    await u.db.modify(actor.id, "$inc", { "data.quota": -cost });
   }
 };

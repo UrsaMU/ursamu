@@ -9,7 +9,7 @@ clear
 # Check if data/ursamu.db exists, and if not, we'll need to run interactively for the first time
 if [ ! -f "data/ursamu.db" ]; then
   echo "Database not found. Running interactive setup..."
-  deno run -A --unstable-detect-cjs --unstable-kv src/main.ts
+  deno run -A --unstable-detect-cjs --unstable-kv --unstable-net src/main.ts
   echo "Setup complete. Restarting in watch mode..."
 fi
 
@@ -30,13 +30,13 @@ trap cleanup SIGINT SIGTERM
 echo "Starting UrsaMU main server in watch mode..."
 # Explicitly watch specific directories and ignore changes in the project root like config/ or data/
 # We also include system/scripts as it contains dynamically loaded game commands
-deno run --allow-all --unstable-detect-cjs --unstable-kv --watch=src/,system/scripts/ --watch-exclude=config/ src/main.ts &
+deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-net --watch=src/,system/scripts/ --watch-exclude=config/ src/main.ts &
 MAIN_PID=$!
 
 # Telnet runs without --watch so it stays up across code reloads.
 # It auto-reconnects to the WS when main restarts.
 echo "Starting UrsaMU telnet server..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv src/telnet.ts &
+deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-net src/telnet.ts &
 TELNET_PID=$!
 
 # Wait for both processes

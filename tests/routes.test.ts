@@ -4,12 +4,12 @@
  * HTTP route handler tests:
  *   - authRouter   (register + login)
  *   - dbObjRouter  (GET /dbos, GET /dbobj/:id, PATCH /dbobj/:id)
- *   - buildingRouter (POST /building/room)
+ *
+ * Note: building routes moved to UrsaMU/builder-plugin.
  */
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import { authHandler } from "../src/routes/authRouter.ts";
 import { dbObjHandler } from "../src/routes/dbObjRouter.ts";
-import { buildingHandler } from "../src/routes/buildingRouter.ts";
 import { txtFiles } from "../src/services/commands/cmdParser.ts";
 import { dbojs, DBO } from "../src/services/Database/database.ts";
 import { hash, genSalt } from "../deps.ts";
@@ -19,9 +19,8 @@ const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 // IDs prefixed to avoid collisions with other test files
 const ADMIN_ID  = "rt_admin1";
-const PLAYER_ID = "rt_player1";
-const ROOM_ID   = "rt_room1";
 const OBJ_ID    = "rt_obj1";
+const ROOM_ID   = "rt_room1";
 
 async function cleanup(...ids: string[]) {
   for (const id of ids) await dbojs.delete({ id }).catch(() => {});
@@ -164,98 +163,6 @@ Deno.test("PATCH /dbobj/:id — updates data fields", OPTS, async () => {
   assertEquals(body.data?.password, undefined);
 
   await cleanup(ADMIN_ID, OBJ_ID);
-});
-
-// ===========================================================================
-// buildingRouter — POST /building/room
-// ===========================================================================
-
-Deno.test("POST /building/room — non-builder returns 403", OPTS, async () => {
-  const pw = await hash("pw", await genSalt(10));
-  await dbojs.create({ id: PLAYER_ID, flags: "player connected", data: { name: "PlainPlayer", password: pw } });
-
-  const req = new Request("http://localhost/api/v1/building/room", {
-    method: "POST",
-    body: JSON.stringify({ name: "My Room" }),
-    headers: { "Content-Type": "application/json" },
-  });
-  const res = await buildingHandler(req, PLAYER_ID);
-  assertEquals(res.status, 403);
-
-  await cleanup(PLAYER_ID);
-});
-
-Deno.test("POST /building/room — builder creates room", OPTS, async () => {
-  await dbojs.create({ id: ADMIN_ID, flags: "player builder connected", data: { name: "BuilderUser" } });
-
-  const req = new Request("http://localhost/api/v1/building/room", {
-    method: "POST",
-    body: JSON.stringify({ name: "New Room", description: "A test room." }),
-    headers: { "Content-Type": "application/json" },
-  });
-  const res = await buildingHandler(req, ADMIN_ID);
-  assertEquals(res.status, 201);
-  const body = await res.json();
-  assertEquals(body.data?.name, "New Room");
-  assertStringIncludes(body.flags, "room");
-
-  await cleanup(ADMIN_ID, body.id);
-});
-
-Deno.test("POST /building/room — missing name returns 400", OPTS, async () => {
-  await dbojs.create({ id: ADMIN_ID, flags: "player admin connected", data: { name: "BuildAdmin" } });
-
-  const req = new Request("http://localhost/api/v1/building/room", {
-    method: "POST",
-    body: JSON.stringify({ description: "No name" }),
-    headers: { "Content-Type": "application/json" },
-  });
-  const res = await buildingHandler(req, ADMIN_ID);
-  assertEquals(res.status, 400);
-
-  await cleanup(ADMIN_ID);
-});
-
-Deno.test("POST /building/room — unknown route returns 404", OPTS, async () => {
-  const req = new Request("http://localhost/api/v1/building/exit", {
-    method: "POST",
-    body: JSON.stringify({ name: "East" }),
-    headers: { "Content-Type": "application/json" },
-  });
-  const res = await buildingHandler(req, ADMIN_ID);
-  assertEquals(res.status, 404);
-});
-
-// ===========================================================================
-// #12 — buildingRouter: name > 200 chars or description > 2000 chars must 400
-// ===========================================================================
-
-Deno.test("#12 — POST /building/room — name > 200 chars returns 400", OPTS, async () => {
-  await dbojs.create({ id: ADMIN_ID, flags: "player builder connected", data: { name: "BuildAdmin12" } });
-
-  const req = new Request("http://localhost/api/v1/building/room", {
-    method: "POST",
-    body: JSON.stringify({ name: "A".repeat(201), description: "Fine" }),
-    headers: { "Content-Type": "application/json" },
-  });
-  const res = await buildingHandler(req, ADMIN_ID);
-  assertEquals(res.status, 400);
-
-  await cleanup(ADMIN_ID);
-});
-
-Deno.test("#12 — POST /building/room — description > 2000 chars returns 400", OPTS, async () => {
-  await dbojs.create({ id: ADMIN_ID, flags: "player builder connected", data: { name: "BuildAdmin12b" } });
-
-  const req = new Request("http://localhost/api/v1/building/room", {
-    method: "POST",
-    body: JSON.stringify({ name: "ValidRoom", description: "B".repeat(2001) }),
-    headers: { "Content-Type": "application/json" },
-  });
-  const res = await buildingHandler(req, ADMIN_ID);
-  assertEquals(res.status, 400);
-
-  await cleanup(ADMIN_ID);
 });
 
 // ===========================================================================

@@ -20,14 +20,19 @@ import { fromFileUrl } from "@std/path";
 // Base URL for the engine's bundled system scripts (3 dirs up from this file: src/services/commands/ -> root)
 const ENGINE_SCRIPTS_URL = new URL("../../../system/scripts/", import.meta.url);
 
-/** Read a script file, checking the game project's local override first, then the engine's built-in copy. */
+/** Read a script file, checking local override → plugin registry → engine built-ins. */
 async function readEngineScript(name: string): Promise<string | null> {
   // 1. Local game-project override (./system/scripts/<name>)
   try {
     return await Deno.readTextFile(`./system/scripts/${name}`);
   } catch { /* no local copy */ }
 
-  // 2. Engine's bundled copy (works for both local dev [file://] and JSR [https://])
+  // 2. Plugin registry — registered via registerScript() in plugin init()
+  const scriptKey = name.replace(/\.ts$/, "");
+  const pluginScript = _pluginScripts.get(scriptKey);
+  if (pluginScript !== undefined) return pluginScript;
+
+  // 3. Engine's bundled copy (works for both local dev [file://] and JSR [https://])
   const url = new URL(name, ENGINE_SCRIPTS_URL);
   try {
     if (url.protocol === "file:") {
@@ -45,6 +50,23 @@ export const cmds: ICmd[] = [];
 export const txtFiles = new Map<string, string>();
 
 export const systemAliases: Record<string, string> = {};
+
+/** Plugin-registered scripts — keyed by script name (no .ts extension). */
+const _pluginScripts = new Map<string, string>();
+
+/**
+ * Register a script provided by a plugin. Plugin scripts take priority over
+ * engine-bundled scripts but are overridden by local ./system/scripts/ copies.
+ * Aliases declared via `export const aliases = [...]` in the content are
+ * parsed and registered automatically.
+ *
+ * @param name    Script name without .ts extension (e.g. "dig")
+ * @param content Full TypeScript source of the script
+ */
+export function registerScript(name: string, content: string): void {
+  _pluginScripts.set(name, content);
+  parseAliasesFromContent(content, name);
+}
 
 /** Names of all engine system scripts — used for alias scanning when no local system/scripts dir exists. */
 const ENGINE_SCRIPT_NAMES = [

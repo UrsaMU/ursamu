@@ -1,29 +1,62 @@
 {
+  "discord": {
+    "name": "discord",
+    "version": "1.1.0",
+    "description": "Webhook-based Discord integration — jobs, channels, presence, and chargen events",
+    "source": "https://github.com/UrsaMU/discord-plugin",
+    "author": "unknown",
+    "ref": "v1.1.0",
+    "installedAt": "2026-03-22T16:37:17.720Z",
+    "updatedAt": "2026-03-22T16:37:17.720Z"
+  },
+  "jobs": {
+    "name": "jobs",
+    "version": "1.1.0",
+    "description": "Anomaly-style jobs/request system — player requests, staff commands, bucket access, archive, REST API",
+    "source": "https://github.com/UrsaMU/jobs-plugin",
+    "author": "unknown",
+    "ref": "v1.1.0",
+    "installedAt": "2026-03-22T16:37:18.216Z",
+    "updatedAt": "2026-03-22T16:37:18.216Z"
+  },
   "events": {
     "name": "events",
     "version": "1.0.0",
     "description": "In-game event calendar with RSVP tracking and REST API",
-    "source": "bundled",
-    "author": "UrsaMU",
-    "installedAt": "2026-03-16T00:00:00.000Z",
-    "updatedAt": "2026-03-16T00:00:00.000Z"
+    "source": "https://github.com/UrsaMU/events-plugin",
+    "author": "unknown",
+    "ref": "v1.0.0",
+    "installedAt": "2026-03-22T16:37:18.705Z",
+    "updatedAt": "2026-03-22T16:37:18.705Z"
   },
-  "example": {
-    "name": "example",
+  "wiki": {
+    "name": "wiki",
     "version": "1.0.0",
-    "description": "Starter template — demonstrates commands, REST routes, and a custom database",
-    "source": "bundled",
-    "author": "UrsaMU",
-    "installedAt": "2026-03-16T00:00:00.000Z",
-    "updatedAt": "2026-03-16T00:00:00.000Z"
+    "description": "File-based markdown wiki — pages, search, history, access control, backlinks, and Discord webhooks.",
+    "source": "https://github.com/UrsaMU/wiki-plugin",
+    "author": "unknown",
+    "ref": "v1.0.0",
+    "installedAt": "2026-03-22T16:37:19.645Z",
+    "updatedAt": "2026-03-22T16:37:19.645Z"
   },
-  "jobs": {
-    "name": "jobs",
+  "mail": {
+    "name": "mail",
     "version": "1.0.0",
-    "description": "Staff job/request tracking system with in-game commands and REST API",
-    "source": "bundled",
-    "author": "UrsaMU",
-    "installedAt": "2026-03-16T00:00:00.000Z",
-    "updatedAt": "2026-03-16T00:00:00.000Z"
+    "description": "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry, and REST API.",
+    "source": "https://github.com/UrsaMU/mail-plugin",
+    "author": "unknown",
+    "ref": "v1.0.0",
+    "installedAt": "2026-03-22T16:37:20.141Z",
+    "updatedAt": "2026-03-22T16:37:20.141Z"
   },
+  "builder": {
+    "name": "builder",
+    "version": "unknown",
+    "description": "World-building commands (@dig, @open, @link, @describe, @examine, and more) plus REST API at /api/v1/building/*.",
+    "source": "https://github.com/UrsaMU/builder-plugin",
+    "author": "unknown",
+    "ref": "v1.0.0",
+    "installedAt": "2026-03-22T16:37:20.624Z",
+    "updatedAt": "2026-03-22T16:37:20.624Z"
+  }
 }

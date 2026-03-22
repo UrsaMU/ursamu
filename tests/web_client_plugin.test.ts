@@ -14,11 +14,11 @@ import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
 import { describe, it, beforeEach, afterEach } from "jsr:@std/testing/bdd";
 
 import webClientPlugin from "../src/plugins/web-client/index.ts";
-import { handleRequest, unregisterUIComponent, getRegisteredUIComponents } from "../src/app.ts";
+import { handleRequest, unregisterUIComponent, getRegisteredUIComponents, registerUIComponent } from "../src/app.ts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const CORE_ELEMENTS = ["ursamu-output", "ursamu-input", "ursamu-who"];
+const CORE_ELEMENTS = ["ursamu-output", "ursamu-input", "ursamu-who", "ursamu-status"];
 
 /** Registry snapshot — includes all components regardless of privilege level. */
 function registeredElements(): string[] {
@@ -80,7 +80,9 @@ describe("web-client plugin — lifecycle", () => {
 
 // ─── Static file serving ─────────────────────────────────────────────────────
 
-describe("web-client plugin — static file serving", () => {
+// Deno.readFile in staticHandler creates an async op that crosses test
+// boundaries in the BDD runner — disable the op sanitizer for this group.
+describe("web-client plugin — static file serving", { sanitizeOps: false, sanitizeResources: false }, () => {
   beforeEach(async () => { await webClientPlugin.init?.(); });
   afterEach(async () => {
     if (webClientPlugin.remove) await webClientPlugin.remove();
@@ -129,6 +131,14 @@ describe("web-client plugin — static file serving", () => {
     const res = await staticGet("/client/components/ursamu-who.js");
     assertEquals(res.status, 200);
     assertStringIncludes(await res.text(), "customElements.define");
+  });
+
+  it("GET /client/components/ursamu-status.js serves a web component", async () => {
+    const res  = await staticGet("/client/components/ursamu-status.js");
+    assertEquals(res.status, 200);
+    const body = await res.text();
+    assertStringIncludes(body, "customElements.define");
+    assertStringIncludes(body, "ursamu-status");
   });
 
   it("GET /client/does-not-exist returns 404", async () => {
@@ -193,6 +203,11 @@ describe("web-client plugin — component slot assignments", () => {
     assertEquals(comp?.slot, "client.sidebar");
   });
 
+  it("ursamu-status is in client.status-bar slot", () => {
+    const comp = getRegisteredUIComponents().find((c) => c.element === "ursamu-status");
+    assertEquals(comp?.slot, "client.status-bar");
+  });
+
   it("all core components have lock 'connected' — hidden from unauthenticated manifest", async () => {
     // Unauthenticated request — no Bearer token
     const res   = await handleRequest(new Request("http://localhost/api/v1/ui-manifest"));
@@ -201,5 +216,47 @@ describe("web-client plugin — component slot assignments", () => {
     for (const el of CORE_ELEMENTS) {
       assertEquals(mounted.includes(el), false, `${el} must be hidden from unauthenticated callers`);
     }
+  });
+});
+
+// ─── H1: Script URL origin validation ─────────────────────────────────────────
+
+describe("web-client plugin — H1: script URL origin validation", () => {
+  afterEach(async () => {
+    if (webClientPlugin.remove) await webClientPlugin.remove();
+    for (const el of CORE_ELEMENTS) unregisterUIComponent(el);
+    unregisterUIComponent("h1-test-element");
+  });
+
+  it("registerUIComponent rejects external script URL [H1 Red → Green]", () => {
+    // An external URL must be rejected — only relative paths starting with / are allowed.
+    let threw = false;
+    try {
+      registerUIComponent({
+        element: "h1-test-element",
+        slot:    "test.slot",
+        script:  "https://evil.com/malicious.js",
+        lock:    "connected",
+      });
+    } catch {
+      threw = true;
+    }
+    assertEquals(threw, true, "registerUIComponent must reject external script URLs");
+  });
+
+  it("registerUIComponent accepts a relative script path", () => {
+    // Relative paths (same-origin) must be allowed.
+    let threw = false;
+    try {
+      registerUIComponent({
+        element: "h1-test-element",
+        slot:    "test.slot",
+        script:  "/client/components/h1-test-element.js",
+        lock:    "connected",
+      });
+    } catch {
+      threw = true;
+    }
+    assertEquals(threw, false, "registerUIComponent must accept relative script paths");
   });
 });

@@ -124,6 +124,27 @@ export class WebSocketService {
 
                 if (!sockData) return;
 
+                // JWT post-connection auth — client sends { type: "auth", token: "<jwt>" }
+                // instead of embedding the token in the WS URL query parameter (C1 fix).
+                // Security: only set cid when the socket has no cid yet (no re-auth / spoofing).
+                if (data.type === "auth" && typeof data.token === "string" && !sockData.cid) {
+                    try {
+                        const { verify } = await import("../jwt/index.ts");
+                        const decoded = await verify(data.token);
+                        if (decoded && typeof decoded.id === "string") {
+                            sockData.cid = decoded.id;
+                            const player = await playerForSocket(sockData);
+                            if (player && !player.flags.includes("connected")) {
+                                await setFlags(player, "connected");
+                            }
+                            console.log(`[WS] Authenticated socket via auth message (cid: ${sockData.cid})`);
+                        }
+                    } catch {
+                        // Invalid token — silently reject, socket stays unauthenticated
+                    }
+                    return;
+                }
+
                 // Update cid if provided (handling migration from socket.io logic)
                 // Security: only allow cid to be set when the socket has no cid yet,
                 // preventing CID spoofing/impersonation of other players.
@@ -152,9 +173,14 @@ export class WebSocketService {
                     }
                 }
 
+                // Support both legacy { msg } format (telnet sidecar) and typed
+                // { type: "cmd", data: <string> } format (web client / site-builder).
+                const rawCmd = data.msg ||
+                    (data.type === "cmd" ? String(data.data ?? "") : "") ||
+                    "";
                 const ctx: IContext = {
                     socket: sockData,
-                    msg: data.msg || ""
+                    msg: rawCmd,
                 };
 
                 // Note: joinChans(ctx) would go here if needed
