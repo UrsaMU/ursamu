@@ -2,6 +2,37 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [1.9.4] — 2026-03-22
+
+### Breaking
+
+- **`server.mail` DBO removed from core** — mail is now the `mail-plugin` external plugin; data in `server.mail` is not auto-migrated (export first if needed)
+- **`u.mail.*` sandbox methods removed** — mail operations are now handled natively by the plugin; sandbox scripts that called `u.mail.*` will need updating
+
+### New Plugin — mail
+
+Mail system extracted to [UrsaMU/mail-plugin](https://github.com/UrsaMU/mail-plugin) (v1.0.0) and added to `plugins.manifest.json`. Auto-installed on next server start via `ensurePlugins`.
+
+New capabilities beyond the original system script:
+- **Soft delete** — `@mail/trash`, `@mail/restore`, `@mail/purge` (trash-then-hard-delete flow)
+- **Object attachments** — `@mail/attach <object>` links game object dbrefs to a draft
+- **`-<text>` command** — registered native command for appending draft body lines
+- **Per-player quota** — delivery skipped for recipients at 100 messages; sender notified per skipped recipient
+- **Message expiry** — set `expiresAt` on any message; plugin sweeps hourly
+- **`@mailstat`** — admin command showing inbox/trash/unread totals
+- **`PATCH /api/v1/mail/:id`** — update `folder` or `starred` via REST
+- **`mail:received` game hook** — emitted per recipient on send; subscribe from any plugin
+- **`player:login` hook** — delivers unread count and draft warning at connect time
+
+### Core Cleanup
+
+- `mailRouter.ts` removed from core routes (`src/routes/index.ts`, `app.ts`)
+- `mail` DBO export removed from `src/services/Database/database.ts`
+- `u.mail.*` removed from `src/services/Sandbox/worker.ts` and `SandboxService.ts`
+- `connect.ts` — inline mail notification and broken `u.bb.totalNewCount()` reference (left over from v1.9.3) both removed
+- `chargen/commands.ts` — fixed latent bug: rejection mail now uses correct `#dbref` format and includes `read: false`
+- `GameHooks` — `mail:received` event added to the typed `GameHookMap`
+
 ## [1.9.0] — 2026-03-21
 
 ### New Features
