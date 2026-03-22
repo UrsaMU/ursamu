@@ -30,7 +30,7 @@ export const DEFAULT_PLUGINS_MANIFEST = {
     {
       name: "bbs",
       url: "https://github.com/UrsaMU/bbs-plugin",
-      ref: "v1.0.0",
+      ref: "v1.0.1",
       description: "Full-featured Myrddin-style BBS — boards, threading, categories, and more.",
       ursamu: ">=1.9.0",
     },
