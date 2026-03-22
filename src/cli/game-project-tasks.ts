@@ -12,7 +12,7 @@ export const GAME_PROJECT_TASKS: Record<string, string> = {
   "status":  "bash ./scripts/status.sh",
   "logs":    "tail -f logs/main.log logs/telnet.log",
   "update":  "deno run -A jsr:@ursamu/ursamu/cli update",
-  "server":  "deno run -A --watch --unstable-detect-cjs --unstable-kv ./src/main.ts",
-  "telnet":  "deno run -A --unstable-detect-cjs --unstable-kv ./src/telnet.ts",
+  "server":  "deno run -A --watch --unstable-detect-cjs --unstable-kv --unstable-net ./src/main.ts",
+  "telnet":  "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/telnet.ts",
   "test":    "deno test --allow-all --unstable-kv --no-check",
 };

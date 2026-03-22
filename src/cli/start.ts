@@ -43,8 +43,9 @@ const spawnInherit = (script: string) => {
     args: [
       "run", 
       "-A", 
-      "--unstable-detect-cjs", 
-      "--unstable-kv", 
+      "--unstable-detect-cjs",
+      "--unstable-kv",
+      "--unstable-net",
       join(Deno.cwd(), script)
     ],
     stdout: "inherit",
