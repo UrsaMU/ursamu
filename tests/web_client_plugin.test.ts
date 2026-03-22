@@ -14,7 +14,7 @@ import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
 import { describe, it, beforeEach, afterEach } from "jsr:@std/testing/bdd";
 
 import webClientPlugin from "../src/plugins/web-client/index.ts";
-import { handleRequest, unregisterUIComponent, getRegisteredUIComponents } from "../src/app.ts";
+import { handleRequest, unregisterUIComponent, getRegisteredUIComponents, registerUIComponent } from "../src/app.ts";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -216,5 +216,47 @@ describe("web-client plugin — component slot assignments", () => {
     for (const el of CORE_ELEMENTS) {
       assertEquals(mounted.includes(el), false, `${el} must be hidden from unauthenticated callers`);
     }
+  });
+});
+
+// ─── H1: Script URL origin validation ─────────────────────────────────────────
+
+describe("web-client plugin — H1: script URL origin validation", () => {
+  afterEach(async () => {
+    if (webClientPlugin.remove) await webClientPlugin.remove();
+    for (const el of CORE_ELEMENTS) unregisterUIComponent(el);
+    unregisterUIComponent("h1-test-element");
+  });
+
+  it("registerUIComponent rejects external script URL [H1 Red → Green]", () => {
+    // An external URL must be rejected — only relative paths starting with / are allowed.
+    let threw = false;
+    try {
+      registerUIComponent({
+        element: "h1-test-element",
+        slot:    "test.slot",
+        script:  "https://evil.com/malicious.js",
+        lock:    "connected",
+      });
+    } catch {
+      threw = true;
+    }
+    assertEquals(threw, true, "registerUIComponent must reject external script URLs");
+  });
+
+  it("registerUIComponent accepts a relative script path", () => {
+    // Relative paths (same-origin) must be allowed.
+    let threw = false;
+    try {
+      registerUIComponent({
+        element: "h1-test-element",
+        slot:    "test.slot",
+        script:  "/client/components/h1-test-element.js",
+        lock:    "connected",
+      });
+    } catch {
+      threw = true;
+    }
+    assertEquals(threw, false, "registerUIComponent must accept relative script paths");
   });
 });

@@ -21,35 +21,35 @@ export const target = async (
   // Helper: escape regex metacharacters to prevent ReDoS from user-controlled data
   const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-  const found = await (async () => {
-    return await dbojs.queryOne({
-      $where: function () {
-        const target = `${tar}`;
-        const nameParts = (this.data?.name || "").split(";").map((p: string) => escapeRegex(p)).join("|");
-        return (
-          RegExp(nameParts || "^$", "ig").test(target) ||
-          this.id === target ||
-          (this.data?.alias as string | undefined)?.toLowerCase() === target.toLowerCase()
-        );
-      },
-    });
-  })();
+  // Collect all name-matching candidates, then pick the first one in the right location.
+  // Using query() (not queryOne) so we can filter by location even if the first match is stale.
+  const candidates = await dbojs.query({
+    $where: function () {
+      const searchPat = new RegExp(`^${escapeRegex(tar)}`, "i");
+      const nameParts = (this.data?.name || "").split(";").map((p: string) => p.trim());
+      return (
+        nameParts.some((p) => searchPat.test(p)) ||
+        this.id === tar ||
+        (this.data?.alias as string | undefined)?.toLowerCase() === tar.toLowerCase()
+      );
+    },
+  });
 
-  if (!found) {
+  if (!candidates.length) {
     return undefined;
   }
 
   if (global) {
-    return found;
+    return candidates[0];
   }
 
-  // Found object is in actor's current room, IS the room, or is in actor's inventory
-  if (found.location && (
-      (en.location && (found.location === en.location || found.id === en.location)) ||
-      found.location === en.id
-  )) {
-    return found;
-  }
+  // Prefer an object in the actor's current room or inventory
+  const found = candidates.find((obj) =>
+    obj.location && (
+      (en.location && (obj.location === en.location || obj.id === en.location)) ||
+      obj.location === en.id
+    )
+  );
 
-  return undefined;
+  return found ?? undefined;
 };

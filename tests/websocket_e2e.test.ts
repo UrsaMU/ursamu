@@ -259,6 +259,39 @@ Deno.test("WS — disconnect(cid) closes the matching socket", OPTS, async () =>
 });
 
 // ---------------------------------------------------------------------------
+// C1 — JWT token MUST NOT be authenticated via query-param path
+// ---------------------------------------------------------------------------
+
+Deno.test("WS — auth message (type:'auth', token) sets cid [C1 Green]", OPTS, async () => {
+  const { sign } = await import("../src/services/jwt/index.ts");
+  const token = await sign({ id: "ws_auth_test_c1" });
+
+  const mock = makeMock("web");
+  const sockets = wsService.getConnectedSockets();
+  const meta = sockets[sockets.length - 1];
+
+  mock.simulateMessage({ type: "auth", token });
+  await tick(100);
+
+  assertEquals(meta.cid, "ws_auth_test_c1",
+    "auth message with valid JWT must set sockData.cid");
+
+  mock.close();
+});
+
+Deno.test("WS — invalid JWT in auth message does not set cid [C1 Guard]", OPTS, async () => {
+  const mock = makeMock("web");
+  const sockets = wsService.getConnectedSockets();
+  const meta = sockets[sockets.length - 1];
+
+  mock.simulateMessage({ type: "auth", token: "not.a.jwt" });
+  await tick(100);
+
+  assertEquals(meta.cid, "", "invalid JWT must not set cid");
+  mock.close();
+});
+
+// ---------------------------------------------------------------------------
 // Cleanup
 // ---------------------------------------------------------------------------
 
