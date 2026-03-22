@@ -117,8 +117,6 @@ export async function loadSystemAliases() {
     }
   }
 
-  if (Object.keys(systemAliases).length > 0) {
-    console.log("[CmdParser] Loaded system aliases:", systemAliases);
   }
 }
 
@@ -337,7 +335,6 @@ cmdParser.use(async (ctx, next) => {
           contents: [],
         };
 
-    console.log(`[CmdParser] Processing msg: "${msg}" with ${cmds.length} registered commands.`);
     for (const cmd of cmds) {
       const match = msg?.trim().match(cmd.pattern);
       if (await evaluateLock(cmd.lock || "", actor, actor)) {
