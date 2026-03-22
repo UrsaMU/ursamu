@@ -116,8 +116,6 @@ export async function loadSystemAliases() {
       if (content) await parseAliasesFromContent(content, name);
     }
   }
-
-  }
 }
 
 // Start loading aliases
