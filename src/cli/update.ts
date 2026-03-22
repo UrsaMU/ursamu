@@ -10,7 +10,7 @@ import { parse } from "jsr:@std/flags@^0.224.0";
 import { join } from "jsr:@std/path@^0.224.0";
 import { existsSync } from "jsr:@std/fs@^0.224.0";
 import { bold, cyan, dim, green, red, yellow } from "jsr:@std/fmt@^0.224.0/colors";
-import { GAME_PROJECT_TASKS } from "./game-project-tasks.ts";
+import { GAME_PROJECT_TASKS, DEFAULT_PLUGINS_MANIFEST } from "./game-project-tasks.ts";
 
 const args = parse(Deno.args, {
   boolean: ["help", "dry-run"],
@@ -251,4 +251,17 @@ try {
   if (synced > 0) console.log(`Synced ${synced} shell script(s) in scripts/.`);
 } catch (e) {
   console.warn(`Warning: could not sync shell scripts — ${e}`);
+}
+
+// ── 8. ensure plugins.manifest.json exists ────────────────────────────────────
+
+const manifestPath = join(cwd, "src", "plugins", "plugins.manifest.json");
+if (!existsSync(manifestPath)) {
+  if (!dryRun) {
+    await Deno.mkdir(join(cwd, "src", "plugins"), { recursive: true });
+    await Deno.writeTextFile(manifestPath, JSON.stringify(DEFAULT_PLUGINS_MANIFEST, null, 2));
+    console.log(`${green("✓")} Created missing src/plugins/plugins.manifest.json`);
+  } else {
+    console.log(`  Would create src/plugins/plugins.manifest.json`);
+  }
 }

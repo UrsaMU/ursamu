@@ -3,7 +3,7 @@
 import { parse } from "jsr:@std/flags@^0.224.0";
 import { join, dirname, fromFileUrl } from "jsr:@std/path@^0.224.0";
 import { existsSync } from "jsr:@std/fs@^0.224.0";
-import { GAME_PROJECT_TASKS } from "./game-project-tasks.ts";
+import { GAME_PROJECT_TASKS, DEFAULT_PLUGINS_MANIFEST } from "./game-project-tasks.ts";
 
 // Get the directory of the current script (safe for both file:// and JSR https:// URLs)
 const __dirname = import.meta.url.startsWith("file://")
@@ -309,41 +309,9 @@ for (const dir of directories) {
 }
 
 // Create plugins.manifest.json — declares which plugins ensurePlugins should install
-const pluginsManifest = {
-  plugins: [
-    {
-      name: "builder",
-      url: "https://github.com/UrsaMU/builder-plugin",
-      ref: "v1.0.0",
-      description: "World-building commands (@dig, @open, @link, @describe, @examine, and more) plus REST API.",
-      ursamu: ">=1.9.5",
-    },
-    {
-      name: "bbs",
-      url: "https://github.com/UrsaMU/bbs-plugin",
-      ref: "v1.0.0",
-      description: "Full-featured Myrddin-style BBS — boards, threading, categories, and more.",
-      ursamu: ">=1.9.0",
-    },
-    {
-      name: "mail",
-      url: "https://github.com/UrsaMU/mail-plugin",
-      ref: "v1.0.0",
-      description: "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry.",
-      ursamu: ">=1.9.3",
-    },
-    {
-      name: "wiki",
-      url: "https://github.com/UrsaMU/wiki-plugin",
-      ref: "v1.0.0",
-      description: "File-based markdown wiki — pages, search, history, access control, backlinks.",
-      ursamu: ">=1.9.0",
-    },
-  ],
-};
 await Deno.writeTextFile(
   join(targetDir, "src", "plugins", "plugins.manifest.json"),
-  JSON.stringify(pluginsManifest, null, 2),
+  JSON.stringify(DEFAULT_PLUGINS_MANIFEST, null, 2),
 );
 console.log("Created src/plugins/plugins.manifest.json");
 

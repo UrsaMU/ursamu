@@ -16,3 +16,37 @@ export const GAME_PROJECT_TASKS: Record<string, string> = {
   "telnet":  "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/telnet.ts",
   "test":    "deno test --allow-all --unstable-kv --no-check",
 };
+
+/** Default plugins.manifest.json written into new projects and restored by update. */
+export const DEFAULT_PLUGINS_MANIFEST = {
+  plugins: [
+    {
+      name: "builder",
+      url: "https://github.com/UrsaMU/builder-plugin",
+      ref: "v1.0.0",
+      description: "World-building commands (@dig, @open, @link, @describe, @examine, and more) plus REST API.",
+      ursamu: ">=1.9.5",
+    },
+    {
+      name: "bbs",
+      url: "https://github.com/UrsaMU/bbs-plugin",
+      ref: "v1.0.0",
+      description: "Full-featured Myrddin-style BBS — boards, threading, categories, and more.",
+      ursamu: ">=1.9.0",
+    },
+    {
+      name: "mail",
+      url: "https://github.com/UrsaMU/mail-plugin",
+      ref: "v1.0.0",
+      description: "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry.",
+      ursamu: ">=1.9.3",
+    },
+    {
+      name: "wiki",
+      url: "https://github.com/UrsaMU/wiki-plugin",
+      ref: "v1.0.0",
+      description: "File-based markdown wiki — pages, search, history, access control, backlinks.",
+      ursamu: ">=1.9.0",
+    },
+  ],
+};
