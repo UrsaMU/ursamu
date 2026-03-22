@@ -36,12 +36,6 @@ const defaultConfig: IConfig = {
     glassBorder: "rgba(255, 255, 255, 0.05)", // Ultra subtle border
     backgroundImage: "/images/default_bg.jpg", // Default Nebula
   },
-  discord: {
-    token: "",
-    clientId: "",
-    guildId: "",
-    channels: {},
-  },
   plugins: {},
 };
 

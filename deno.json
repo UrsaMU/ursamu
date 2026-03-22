@@ -7,7 +7,9 @@
     "./cli": "./src/cli/ursamu.ts",
     "./start": "./src/cli/start.ts",
     "./app": "./src/app.ts",
-    "./jobs": "./src/plugins/jobs/mod.ts"
+    "./jobs": "./src/plugins/jobs/mod.ts",
+    "./chargen": "./src/plugins/chargen/mod.ts",
+    "./channels": "./src/services/channel-events.ts"
   },
   "publish": {
     "include": [

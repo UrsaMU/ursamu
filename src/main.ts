@@ -16,7 +16,6 @@ import { initConfig, initializePlugins, getConfig, registerPlugin } from "./serv
 import { loadPlugins } from "./utils/loadPlugins.ts";
 import { wsService } from "./services/WebSocket/index.ts";
 import { queue } from "./services/Queue/index.ts";
-import { discordBridge } from "./services/discord/index.ts";
 import { runStartupAttrs } from "./services/startup/index.ts";
 
 let __dirname;
@@ -241,9 +240,6 @@ export const initializeEngine = async (
   
   // Initialize Queue
   queue.init();
-
-  // Initialize Discord Bridge
-  await discordBridge.init();
 
   // Initialize in-game clock (load persisted time, then tick every real minute)
   const { gameClock } = await import("./services/GameClock/index.ts");

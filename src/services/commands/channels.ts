@@ -6,7 +6,6 @@ import { getNextId } from "../../utils/getNextId.ts";
 import { send } from "../broadcast/index.ts";
 import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
-import { discordBridge } from "../discord/index.ts";
 import { channelEvents } from "../channel-events.ts";
 import { gameHooks } from "../Hooks/GameHooks.ts";
 
@@ -67,7 +66,6 @@ export const matchChannel = async (ctx: IContext) => {
   }
 
   send([chan.name], `${chan.header} ${msg}`, {});
-  discordBridge.sendToDiscord(chan.name, moniker(en), msg);
   const chanPayload = {
     channelName: chan.name,
     senderId:    en.id,

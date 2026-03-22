@@ -49,6 +49,11 @@ export type {
   SceneClearEvent,
 } from "./src/services/Hooks/GameHooks.ts";
 
+// Export command registration and plugin type — available to all plugins and game projects
+export { addCmd } from "./src/services/commands/cmdParser.ts";
+export type { IPlugin } from "./src/@types/IPlugin.ts";
+export type { IUrsamuSDK } from "./src/@types/UrsamuSDK.ts";
+
 // Hide internal class implementations by not exporting everything
 
 if (import.meta.main) {

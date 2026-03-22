@@ -35,12 +35,6 @@ export interface IConfig {
     glassBorder?: string;
     backgroundImage?: string;
   };
-  discord?: {
-    token?: string;
-    clientId?: string;
-    guildId?: string;
-    channels?: Record<string, string>;
-  };
   intents?: {
     registry: Record<string, {
       priority: number;
