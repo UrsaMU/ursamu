@@ -132,6 +132,21 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return false;
   }
 
+  /**
+   * Apply an operator to all records matching `query`.
+   *
+   * | Operator | Effect                                                      |
+   * |----------|-------------------------------------------------------------|
+   * | `$set`   | Set field(s) to the supplied value(s); dot-notation ok      |
+   * | `$unset` | Delete field(s) from the record; dot-notation ok            |
+   * | `$inc`   | Increment numeric field(s) by the supplied amount           |
+   * | `$push`  | Atomically append a value to an array field (CAS-backed);   |
+   * |          | creates the array if the field is absent; dot-notation ok   |
+   *
+   * @example
+   * // Atomic append — safe under concurrent writes
+   * await col.modify({ id: roundId }, "$push", { "data.poses": poseText });
+   */
   async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
     const items = await this.query(query);
     const kv = await this.getKv();
