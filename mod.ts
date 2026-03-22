@@ -28,8 +28,6 @@ export { DBO } from "./src/services/Database/database.ts";
 export { registerPluginRoute } from "./src/app.ts";
 export { dbojs } from "./src/services/Database/index.ts";
 export { gameHooks } from "./src/services/Hooks/GameHooks.ts";
-export { registerJobBuckets, isValidBucket, getAllBuckets, getBucketStaffIds } from "./src/plugins/jobs/db.ts";
-export type { IJobBucketOptions } from "./src/plugins/jobs/db.ts";
 export { seedBoards } from "./src/plugins/bboards/db.ts";
 export type { ISeedBoardOptions } from "./src/plugins/bboards/db.ts";
 export { registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames } from "./src/services/StatSystem/index.ts";
