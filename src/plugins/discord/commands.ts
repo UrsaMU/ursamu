@@ -14,6 +14,16 @@ export default () => {
     name: "@discord/set",
     pattern: /^[@+]?discord\/set\s+(.*?)=(.*)/i,
     lock: "connected admin+",
+    help: `@discord/set <topic>=<webhook-url>  — Map a Discord webhook URL to a topic.
+  Set url to empty to clear the webhook.
+
+  Built-in topics: jobs, presence (login/logout), staff (chargen events).
+  Any channel name also works as a topic (e.g. ooc, pub).
+
+Examples:
+  @discord/set jobs=https://discord.com/api/webhooks/...
+  @discord/set ooc=https://discord.com/api/webhooks/...
+  @discord/set jobs=    (clears the jobs webhook)`,
     exec: async (u: IUrsamuSDK) => {
       const topic = (u.cmd.args[0] || "").trim().toLowerCase();
       const url   = (u.cmd.args[1] || "").trim();
@@ -50,6 +60,11 @@ export default () => {
     name: "@discord/publicurl",
     pattern: /^[@+]?discord\/publicurl\s+(.*)/i,
     lock: "connected admin+",
+    help: `@discord/publicurl <url>  — Set the public base URL used for player avatar links.
+  Must be https. Used to construct avatar URLs when players have uploaded images.
+
+Examples:
+  @discord/publicurl https://mygame.com`,
     exec: async (u: IUrsamuSDK) => {
       const url = (u.cmd.args[0] || "").trim();
       if (!url) {
@@ -72,6 +87,7 @@ export default () => {
     name: "@discord/list",
     pattern: /^[@+]?discord\/list$/i,
     lock: "connected admin+",
+    help: `@discord/list  — Show all configured Discord webhook topics and the public URL.`,
     exec: async (u: IUrsamuSDK) => {
       const cfg    = await getDiscordConfig();
       const topics = Object.keys(cfg.webhooks);
@@ -96,6 +112,11 @@ export default () => {
     name: "@discord/test",
     pattern: /^[@+]?discord\/test\s+(.*)/i,
     lock: "connected admin+",
+    help: `@discord/test <topic>  — Send a test message to a configured webhook topic.
+
+Examples:
+  @discord/test jobs
+  @discord/test ooc`,
     exec: async (u: IUrsamuSDK) => {
       const topic = (u.cmd.args[0] || "").trim().toLowerCase();
       const cfg   = await getDiscordConfig();
