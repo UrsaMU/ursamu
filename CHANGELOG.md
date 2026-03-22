@@ -2,6 +2,48 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [1.8.0] — 2026-03-21
+
+### New Features
+
+#### `u.eval` — Sandbox Attribute Evaluation
+- New SDK method `u.eval(targetId, attrName, args?)` — evaluate a named attribute on any DB object from within a sandbox script
+- Dispatches `eval:attr` message to `SandboxService`; returns the attribute's evaluated string result
+
+#### GameClock — In-Game Time
+- `sys.gameTime()` / `sys.setGameTime(t)` — read and write the in-game clock (year, month, day, hour, minute)
+- `@time` — display current game time and server UTC time
+- `@time/set year=<n> month=<n> ...` — admin-only clock setter with per-field range validation
+
+#### `parseDesc` Utility — Smart Description Parser
+- `parseDesc(desc, actor, target)` — substitutes `%0` (actor display name), `%1–%9` (empty), and `[u(objId/attrName, args)]` inline attribute calls within room/object descriptions
+- Capped at 10 `[u()]` patterns per description (DoS guard)
+- Exposed as `u.util.parseDesc()` in the sandbox SDK
+
+#### Chargen Plugin
+- Full character-generation workflow: `+chargen`, `+chargen/set`, `+chargen/submit`, `+chargen/view`, `+chargen/approve`, `+chargen/reject`
+- REST API: `GET /api/v1/chargen`, `GET /api/v1/chargen/:playerId`, `PATCH /api/v1/chargen/:playerId`
+- Hook events: `chargen:submitted`, `chargen:approved`, `chargen:rejected`
+- On approval: sets `approved` / removes `unapproved` flag; sends in-game mail on rejection
+
+#### Admin Tools
+- `@sweep` — list all reactive objects (with SCRIPT/LISTEN attributes) in the current room
+- `@entrances` — list all exits whose destination is the current (or named) room
+- Persistent channel history logging: channels now write to `logs/channels/<name>.log`
+
+### Security
+
+- **H1** `@sweep` — added admin/wizard/superuser guard (plain players were not blocked)
+- **H2** `@entrances` — added admin/wizard/superuser guard (same fix)
+- **H3** Chargen REST API — replaced `.includes()` flag check with `Set.has()` to close substring-bypass (`"notadmin"` no longer grants staff access)
+- **H4** `parseDesc` IDOR — plain players can no longer embed `[u(otherObj/attr)]` in their own description to exfiltrate another object's attributes; only privileged actors (admin/wizard/superuser) may cross-reference objects
+- **M1** `@time/set` — added per-field range validation (year 1–9999, month 1–12, day 1–28, hour 0–23, minute 0–59)
+- **M2** `parseDesc` DoS — `[u()]` pattern count capped at 10 per description
+- **M3** `+chargen/set` — field name limited to 64 chars, field value to 4096 chars
+- **M4** `@force` — replaced single superuser guard with full privilege ladder; wizard cannot force an admin or peer wizard
+- **M5** `@tel` — same privilege-ladder guard as `@force`; wizard cannot teleport an admin or superior
+- **L1/L2** Chargen notes — `PATCH /api/v1/chargen/:id` now rejects `notes` longer than 2000 characters
+
 ## [1.7.0] — 2026-03-21
 
 ### New Features

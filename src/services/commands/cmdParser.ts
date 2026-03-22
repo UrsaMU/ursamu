@@ -54,6 +54,7 @@ const ENGINE_SCRIPT_NAMES = [
   "moniker","motd","name","open","page","parent","pemit","pose","quit","quota","remit",
   "say","score","search","set","setAttr","stats","teleport","think","trigger","unlink",
   "update","who","wipe",
+  "tel","forceCmd","sweep","entrances",
 ];
 
 function parseAliasesFromContent(content: string, scriptName: string) {

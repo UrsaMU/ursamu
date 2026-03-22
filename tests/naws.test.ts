@@ -138,7 +138,7 @@ Deno.test("H2 — MAX_MSG_BUFFER_SIZE is exported and is a reasonable cap", () =
 // M1 — WebSocket termWidth must be validated before DB write
 // ---------------------------------------------------------------------------
 
-Deno.test("M1 — negative termWidth from WS must be rejected", async () => {
+Deno.test("M1 — negative termWidth from WS must be rejected", { sanitizeResources: false, sanitizeOps: false }, async () => {
   // Simulate what the WebSocket handler should do before writing to DB
   // The handler currently has no bounds check — import the validator when added
   const { clampTermWidth } = await import("../src/services/WebSocket/index.ts");

@@ -267,12 +267,42 @@ addCmd({
         return;
       }
 
-      // SSRF guard — block private/loopback/link-local ranges.
+      // SSRF guard — resolve DNS first, then block all private/loopback/link-local
+      // ranges on the *resolved IP* so DNS-rebinding attacks can't bypass the check.
       let parsedUrl: URL;
       try { parsedUrl = new URL(fetchUrl); } catch { u.send("Invalid URL."); return; }
+
+      const isPrivateIp = (ip: string): boolean => {
+        // IPv6 loopback / ULA
+        if (ip === "::1" || ip.startsWith("fc") || ip.startsWith("fd")) return true;
+        const parts = ip.split(".").map(Number);
+        if (parts.length !== 4 || parts.some(isNaN)) return false; // not IPv4
+        const [a, b] = parts;
+        return (
+          a === 10 ||                          // 10.0.0.0/8
+          a === 127 ||                         // 127.0.0.0/8  loopback
+          a === 0 ||                           // 0.0.0.0/8
+          (a === 172 && b >= 16 && b <= 31) || // 172.16.0.0/12
+          (a === 192 && b === 168) ||          // 192.168.0.0/16
+          (a === 169 && b === 254) ||          // 169.254.0.0/16 link-local
+          (a === 100 && b >= 64 && b <= 127) || // 100.64.0.0/10 shared
+          a >= 240                             // 240.0.0.0/4   reserved
+        );
+      };
+
       const hostname = parsedUrl.hostname.toLowerCase();
-      const privatePattern = /^(localhost|127\.|0\.0\.0\.0|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|::1$|fc00:|fd)/;
-      if (privatePattern.test(hostname)) {
+      if (hostname === "localhost") { u.send("URL resolves to a private or internal address."); return; }
+
+      let resolvedAddrs: string[];
+      try {
+        resolvedAddrs = await Deno.resolveDns(hostname, "A").catch(() => []);
+        const aaaaAddrs = await Deno.resolveDns(hostname, "AAAA").catch(() => []);
+        resolvedAddrs = [...resolvedAddrs, ...aaaaAddrs];
+      } catch {
+        resolvedAddrs = [];
+      }
+
+      if (resolvedAddrs.length === 0 || resolvedAddrs.some(isPrivateIp)) {
         u.send("URL resolves to a private or internal address.");
         return;
       }

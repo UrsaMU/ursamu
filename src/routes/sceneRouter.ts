@@ -105,8 +105,8 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
       if (!name || !location) {
           return new Response("Missing name or location", { status: 400 });
       }
-      if (typeof name !== "string" || name.length > 200) {
-          return new Response("Scene name must be 200 characters or fewer.", { status: 400 });
+      if (typeof name !== "string" || !name.trim() || name.length > 200) {
+          return new Response("Scene name must be between 1 and 200 characters.", { status: 400 });
       }
       if (desc !== undefined && (typeof desc !== "string" || desc.length > 2000)) {
           return new Response("Scene description must be 2000 characters or fewer.", { status: 400 });
@@ -502,8 +502,8 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
                allowedUpdates.status = updates.status;
            }
            if (updates.name !== undefined) {
-               if (typeof updates.name !== "string" || updates.name.length > 200) {
-                   return new Response("Scene name must be 200 characters or fewer.", { status: 400 });
+               if (typeof updates.name !== "string" || !updates.name.trim() || updates.name.length > 200) {
+                   return new Response("Scene name must be between 1 and 200 characters.", { status: 400 });
                }
                allowedUpdates.name = updates.name;
            }

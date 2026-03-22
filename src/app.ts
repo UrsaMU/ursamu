@@ -227,7 +227,7 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       try {
         for await (const entry of Deno.readDir("data/avatars")) {
           if (entry.name.startsWith(id + ".")) {
-            const ext = entry.name.split(".").pop() ?? "";
+            const ext = (entry.name.split(".").pop() ?? "").toLowerCase();
             const file = await Deno.readFile(`data/avatars/${entry.name}`);
             return new Response(file, {
               status: 200,

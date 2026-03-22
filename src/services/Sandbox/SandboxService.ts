@@ -736,6 +736,101 @@ class LocalSandbox {
             }
             break;
           }
+          case "force:as": {
+            if (e.data.targetId && e.data.command) {
+              const { force } = await import("../commands/index.ts");
+              const { dbojs: db } = await import("../Database/index.ts");
+              (async () => {
+                const { wsService } = await import("../WebSocket/index.ts");
+                const en = await db.queryOne({ id: e.data.targetId });
+                if (en) {
+                  const socket = wsService.getConnectedSockets().find(s => s.cid === en.id);
+                  const mockCtx = { socket: socket || { cid: en.id, id: "force-" + en.id, join: () => {}, leave: () => {}, send: () => {}, disconnect: () => {} }, msg: e.data.command };
+                  // deno-lint-ignore no-explicit-any
+                  await force(mockCtx as any, e.data.command);
+                }
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "eval:attr": {
+            (async () => {
+              try {
+                const { dbojs: db } = await import("../Database/index.ts");
+                // deno-lint-ignore no-explicit-any
+                let tarObj: any = await db.queryOne({ id: e.data.targetStr });
+                if (!tarObj) {
+                  tarObj = await db.queryOne({
+                    "data.name": new RegExp(`^${String(e.data.targetStr).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+                  });
+                }
+                if (!tarObj) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
+                  return;
+                }
+                const attrs = ((tarObj.data?.attributes as Array<{ name: string; value: string }>) || []);
+                const attrData = attrs.find((a: { name: string }) => a.name.toUpperCase() === String(e.data.attr).toUpperCase());
+                if (!attrData) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
+                  return;
+                }
+                const result = await sandboxService.runScript(attrData.value, {
+                  id: tarObj.id,
+                  state: (tarObj.data?.state as Record<string, unknown>) || {},
+                  cmd: { name: "", args: (e.data.args as string[]) || [] },
+                });
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: result != null ? String(result) : "" });
+              } catch (_err) {
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
+              }
+            })();
+            break;
+          }
+          case "sys:gametime": {
+            (async () => {
+              const { gameClock } = await import("../GameClock/index.ts");
+              const t = gameClock.now();
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: t });
+            })();
+            break;
+          }
+          case "sys:setgametime": {
+            if (e.data.t) {
+              (async () => {
+                const { gameClock } = await import("../GameClock/index.ts");
+                gameClock.set(e.data.t as import("../GameClock/index.ts").IGameTime);
+                await gameClock.save();
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+            }
+            break;
+          }
+          case "util:parseDesc": {
+            if (e.data.desc !== undefined) {
+              (async () => {
+                const { parseDesc } = await import("../../utils/parseDesc.ts");
+                const { dbojs: db } = await import("../Database/index.ts");
+                const actor = e.data.actor ? await db.queryOne({ id: (e.data.actor as { id: string }).id }) : null;
+                const target = e.data.target ? await db.queryOne({ id: (e.data.target as { id: string }).id }) : null;
+                const result = await parseDesc(
+                  String(e.data.desc),
+                  // deno-lint-ignore no-explicit-any
+                  (actor || e.data.actor) as any,
+                  // deno-lint-ignore no-explicit-any
+                  (target || e.data.target) as any,
+                );
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: result });
+              })();
+            } else {
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
+            }
+            break;
+          }
           case "mail:send": {
             if (e.data.mail) {
               const { mail } = await import("../Database/index.ts");

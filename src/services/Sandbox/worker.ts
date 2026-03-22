@@ -62,6 +62,7 @@ interface IUrsamuSDK {
   broadcast(message: string, options?: Record<string, unknown>): void;
   execute(command: string): void;
   force(command: string): void;
+  forceAs(targetId: string, command: string): Promise<void>;
   teleport(target: string, destination: string): void;
   checkLock(target: string | IDBObj, lock: string): Promise<boolean>;
   auth: {
@@ -309,6 +310,15 @@ self.onmessage = async (e: MessageEvent) => {
       template,
       sprintf,
       stripSubs,
+      parseDesc: (desc: string, actor: import("../../@types/UrsamuSDK.ts").IDBObj, target: import("../../@types/UrsamuSDK.ts").IDBObj) => {
+        // Strip the broadcast method (and any other functions) before sending through
+        // postMessage — functions cannot be structured-cloned and cause DataCloneError.
+        const ser = (o: import("../../@types/UrsamuSDK.ts").IDBObj) => {
+          const { broadcast: _b, ...rest } = o as import("../../@types/UrsamuSDK.ts").IDBObj & { broadcast?: unknown };
+          return rest;
+        };
+        return request<string>("util:parseDesc", { desc, actor: ser(actor), target: ser(target) });
+      },
       ...sdkData.util
     },
     db: {
@@ -330,6 +340,10 @@ self.onmessage = async (e: MessageEvent) => {
       self.postMessage({ type: "execute", command }),
     force: (command: string) =>
       self.postMessage({ type: "force", command }),
+    forceAs: (targetId: string, command: string) =>
+      request<void>("force:as", { targetId, command }),
+    eval: (targetStr: string, attr: string, args?: string[]) =>
+      request<string>("eval:attr", { targetStr, attr, args: args || [] }),
     teleport: (target: string, destination: string) =>
       self.postMessage({ type: "teleport", target, destination }),
     checkLock: (target: string | IDBObj, lock: string) =>
@@ -346,7 +360,9 @@ self.onmessage = async (e: MessageEvent) => {
       reboot: () => request<void>("sys:reboot", {}),
       shutdown: () => request<void>("sys:shutdown", {}),
       uptime: () => request<number>("sys:uptime", {}),
-      update: (branch = "") => request<void>("sys:update", { branch })
+      update: (branch = "") => request<void>("sys:update", { branch }),
+      gameTime: () => request<import("../../@types/UrsamuSDK.ts").IGameTime>("sys:gametime", {}),
+      setGameTime: (t: import("../../@types/UrsamuSDK.ts").IGameTime) => request<void>("sys:setgametime", { t }),
     },
     chan: {
       join: (channel: string, alias: string) => request<void>("chan:join", { channel, alias }),

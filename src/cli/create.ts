@@ -335,6 +335,7 @@ console.log("Created wiki/home.md");
     "moniker","motd","name","open","page","parent","pemit","pose","quit","quota","remit",
     "say","score","search","set","setAttr","stats","teleport","think","trigger","unlink",
     "who","wipe",
+    "tel","forceCmd","sweep","entrances",
   ];
   const engineScriptsBase = new URL("../../system/scripts/", import.meta.url);
   let copied = 0;
