@@ -21,6 +21,13 @@ export const GAME_PROJECT_TASKS: Record<string, string> = {
 export const DEFAULT_PLUGINS_MANIFEST = {
   plugins: [
     {
+      name: "rhost-vision",
+      url: "https://github.com/chogan1981/ursamu-rhost-vision",
+      ref: "v1.1.0",
+      description: "Rhost-style display — look, who, page, score, examine, inventory, +finger, +where, +staff.",
+      ursamu: ">=1.8.0",
+    },
+    {
       name: "builder",
       url: "https://github.com/UrsaMU/builder-plugin",
       ref: "v1.0.0",
