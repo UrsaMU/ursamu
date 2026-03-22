@@ -22,7 +22,7 @@ fi
 mkdir -p "$LOG_DIR"
 
 # Start telnet first — it stays up across main restarts.
-nohup deno run --allow-all --unstable-detect-cjs --unstable-kv src/telnet.ts >> "$TELNET_LOG" 2>&1 &
+nohup deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-net src/telnet.ts >> "$TELNET_LOG" 2>&1 &
 TELNET_PID=$!
 
 # Start main server via the restart loop.

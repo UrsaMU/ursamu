@@ -17,7 +17,7 @@ cd "$(dirname "$0")/.." || exit 1
 LOG_DIR="logs"
 MAIN_LOG="${MAIN_LOG:-$LOG_DIR/main.log}"
 DENO_PID_FILE=".ursamu-deno.pid"
-DENO_ARGS=(--allow-all --unstable-detect-cjs --unstable-kv)
+DENO_ARGS=(--allow-all --unstable-detect-cjs --unstable-kv --unstable-net)
 
 RESTART_DELAY=1      # seconds to wait before next restart
 MAX_DELAY=60         # cap on exponential backoff

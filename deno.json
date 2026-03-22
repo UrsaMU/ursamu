@@ -26,15 +26,15 @@
     "exclude": ["tests", "data"]
   },
   "tasks": {
-    "start": "deno run -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
+    "start": "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/main.ts",
     "dev": "bash ./scripts/run.sh",
     "daemon": "bash ./scripts/daemon.sh",
     "stop": "bash ./scripts/stop.sh",
     "restart": "bash ./scripts/restart.sh",
     "status": "bash ./scripts/status.sh",
     "logs": "tail -f logs/main.log logs/telnet.log",
-    "server": "deno run -A --unstable-detect-cjs --unstable-kv ./src/main.ts",
-    "telnet": "deno run -A --unstable-detect-cjs --unstable-kv ./src/telnet.ts",
+    "server": "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/main.ts",
+    "telnet": "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/telnet.ts",
     "config": "deno run -A ./src/cli/config.ts",
     "setup-config": "bash ./scripts/setup-config.sh",
     "create-plugin": "bash ./scripts/create-plugin.sh",
@@ -54,6 +54,7 @@
     "lib": ["deno.window", "deno.unstable"]
   },
   "imports": {
+    "@ursamu/ursamu": "jsr:@ursamu/ursamu@^1.9.5",
     "ursamu": "./mod.ts",
     "ursamu/": "./",
     "@std/flags": "jsr:@std/flags@^0.224.0",
