@@ -53,12 +53,25 @@ irm https://deno.land/install.ps1 | iex
 - 🌐 **REST API**: Full HTTP API for building custom frontends. Every built-in system exposes clean JSON endpoints.
 - 🔌 **WebSocket Auth**: Connect via `ws://host:4203?token=<jwt>&client=web` for JWT pre-auth — no `connect name password` required.
 - 🛡️ **Built-in Systems**: Mail, channels, scenes, wiki, and a full attribute/lock engine — all REST-accessible.
-- 📦 **Plugin-Powered Extras**: Bulletin boards, staff jobs, and events ship as first-class plugins.
+- 📦 **Plugin Ecosystem**: Official plugins for Discord, staff jobs, events, and rhost-style display — installed automatically via `plugins.manifest.json`.
 - 🛠️ **Developer Friendly**: TypeScript throughout, with a rich `IUrsamuSDK` (`u`) available to every command and script.
 - 🔒 **Tiered Permissions**: Flag-based access control — `player`, `builder`, `storyteller`, `admin`, `wizard`, `superuser`.
 - 📜 **Sandbox Scripting**: Scripts run in isolated Web Workers. Full SDK access: DB, messaging, channels, auth, system control.
 - 🏗️ **CLI Scaffolding**: `create plugin <name>` generates a fully wired plugin skeleton in seconds.
-- 🤖 **Discord Bridge**: Optional Discord↔game channel bridge with automatic reconnect.
+- 🤖 **Discord Bridge**: Optional external plugin — bridges game channels to Discord with automatic reconnect.
+
+---
+
+## 🧩 Official Plugins
+
+These plugins are listed in `src/plugins/plugins.manifest.json` and are auto-installed on first run.
+
+| Plugin | Repo | Description |
+|--------|------|-------------|
+| **rhost-vision** | [chogan1981/ursamu-rhost-vision](https://github.com/chogan1981/ursamu-rhost-vision) | Rhost-style display — `look`, `who`, `score`, `+finger`, `+where`, `+staff` |
+| **discord** | [UrsaMU/discord-plugin](https://github.com/UrsaMU/discord-plugin) | Webhook-based Discord integration — channels, presence, chargen events |
+| **jobs** | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin) | Anomaly-style jobs/request system with REST API |
+| **events** | [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin) | In-game event calendar with RSVP tracking and REST API |
 
 ---
 
@@ -134,7 +147,7 @@ UrsaMU uses independent processes so each component can restart without affectin
 | `+bbpost/edit <board>/<num>=<body>` | Edit your post |
 | `+bbpost/delete <board>/<num>` | Delete your post |
 
-### Staff Jobs Commands
+### Staff Jobs Commands *(jobs-plugin)*
 
 | Command | Description |
 |---------|-------------|
@@ -145,7 +158,7 @@ UrsaMU uses independent processes so each component can restart without affectin
 | `+job/comment <#>=<text>` | Comment on a job |
 | `+job/close <#>[=<reason>]` | Close a job |
 
-### Events Commands
+### Events Commands *(events-plugin)*
 
 | Command | Description |
 |---------|-------------|
@@ -304,6 +317,15 @@ All endpoints require a `Bearer` token except where noted.
 | Endpoint | Auth | Description |
 |----------|------|-------------|
 | `GET /health` | None | Health check — returns `{"status":"ok","engine":"UrsaMU"}` |
+
+### Plugin Endpoints
+
+Official plugins add their own versioned routes when installed:
+
+| Plugin | Base path | Docs |
+|--------|-----------|------|
+| **jobs** | `/api/v1/jobs` | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin) |
+| **events** | `/api/v1/events` | [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin) |
 
 ---
 
