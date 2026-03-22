@@ -28,8 +28,6 @@ export { DBO } from "./src/services/Database/database.ts";
 export { registerPluginRoute } from "./src/app.ts";
 export { dbojs } from "./src/services/Database/index.ts";
 export { gameHooks } from "./src/services/Hooks/GameHooks.ts";
-export { registerJobBuckets, isValidBucket, getAllBuckets, getBucketStaffIds } from "./src/plugins/jobs/db.ts";
-export type { IJobBucketOptions } from "./src/plugins/jobs/db.ts";
 export { seedBoards } from "./src/plugins/bboards/db.ts";
 export type { ISeedBoardOptions } from "./src/plugins/bboards/db.ts";
 export { registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames } from "./src/services/StatSystem/index.ts";
@@ -48,6 +46,15 @@ export type {
   SceneTitleEvent,
   SceneClearEvent,
 } from "./src/services/Hooks/GameHooks.ts";
+
+// Export WebSocket service — available to plugins that need to reach connected sockets
+export { wsService } from "./src/services/WebSocket/index.ts";
+export type { UserSocket } from "./src/@types/IMSocket.ts";
+
+// Export command registration and plugin type — available to all plugins and game projects
+export { addCmd } from "./src/services/commands/cmdParser.ts";
+export type { IPlugin } from "./src/@types/IPlugin.ts";
+export type { IUrsamuSDK } from "./src/@types/UrsamuSDK.ts";
 
 // Hide internal class implementations by not exporting everything
 

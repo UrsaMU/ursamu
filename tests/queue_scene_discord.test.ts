@@ -4,12 +4,10 @@
  * Tests for:
  *  - Queue service (enqueue / cancel)
  *  - Scene router (CRUD, /locations, fail-closed lock)
- *  - Discord bridge (init guard, subscriber routing)
  */
 import { assertEquals, assertExists } from "@std/assert";
 import { queue } from "../src/services/Queue/index.ts";
 import { sceneHandler } from "../src/routes/sceneRouter.ts";
-import { discordBridge } from "../src/services/discord/index.ts";
 import { dbojs, scenes, DBO } from "../src/services/Database/database.ts";
 import { hash } from "../deps.ts";
 
@@ -262,33 +260,6 @@ Deno.test("Scene — PATCH /api/v1/scenes/:id missing msg pose returns 400", OPT
   });
   const res = await sceneHandler(req, U_ID);
   assertEquals(res.status, 400);
-});
-
-// ---------------------------------------------------------------------------
-// Discord — init guard when no token configured
-// ---------------------------------------------------------------------------
-
-Deno.test("Discord — init() skips gracefully with no token", OPTS, async () => {
-  // discordBridge.init() should return without throwing when Discord config is absent
-  // (getConfig("discord") returns undefined in test environment)
-  let threw = false;
-  try {
-    await discordBridge.init();
-  } catch {
-    threw = true;
-  }
-  assertEquals(threw, false);
-});
-
-Deno.test("Discord — sendToDiscord() returns early when not connected", OPTS, async () => {
-  // Should not throw even though the bot is not initialized
-  let threw = false;
-  try {
-    await discordBridge.sendToDiscord("Public", "Tester", "hello");
-  } catch {
-    threw = true;
-  }
-  assertEquals(threw, false);
 });
 
 // ---------------------------------------------------------------------------
