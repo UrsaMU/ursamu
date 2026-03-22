@@ -1,20 +1,23 @@
 import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
 /**
- * @wipe <object>
- * Remove all user-set attributes from an object.
- * You must be able to edit the object (owner, admin, or wizard).
+ * System Script: wipe.ts
+ *
+ * Usage:
+ *   @wipe <object>           — prompts for confirmation
+ *   @wipe/confirm <object>   — wipes all user-set attributes
  */
 export default async (u: IUrsamuSDK) => {
-  const arg = (u.cmd.args[0] || "").trim();
+  const arg     = (u.cmd.args[0] || "").trim();
+  const confirm = (u.cmd.switches?.[0] || "").toLowerCase() === "confirm";
 
   if (!arg) {
-    u.send("Usage: @wipe <object>");
+    u.send("Usage: @wipe[/confirm] <object>");
     return;
   }
 
   const results = await u.db.search(arg);
-  const target = results[0];
+  const target  = results[0];
   if (!target) {
     u.send(`I can't find '${arg}'.`);
     return;
@@ -27,10 +30,16 @@ export default async (u: IUrsamuSDK) => {
 
   const attrs = (target.state.attributes as unknown[]) || [];
   if (attrs.length === 0) {
-    u.send(`${target.name || target.id} has no attributes to wipe.`);
+    u.send(`${u.util.displayName(target, u.me)} has no attributes to wipe.`);
+    return;
+  }
+
+  if (!confirm) {
+    u.send(`This will wipe %ch${attrs.length}%cn attribute${attrs.length === 1 ? "" : "s"} from ${u.util.displayName(target, u.me)}.`);
+    u.send(`Use %ch@wipe/confirm ${arg}%cn to confirm.`);
     return;
   }
 
   await u.db.modify(target.id, "$set", { "data.attributes": [] });
-  u.send(`Wiped ${attrs.length} attribute${attrs.length === 1 ? "" : "s"} from ${target.name || target.id}.`);
+  u.send(`Wiped ${attrs.length} attribute${attrs.length === 1 ? "" : "s"} from ${u.util.displayName(target, u.me)}.`);
 };

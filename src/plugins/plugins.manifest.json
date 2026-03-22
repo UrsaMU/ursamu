@@ -48,6 +48,13 @@
       "ref": "v1.0.0",
       "description": "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry, and REST API.",
       "ursamu": ">=1.9.3"
+    },
+    {
+      "name": "builder",
+      "url": "https://github.com/UrsaMU/builder-plugin",
+      "ref": "v1.0.0",
+      "description": "World-building commands (@dig, @open, @link, @describe, @examine, and more) plus REST API at /api/v1/building/*.",
+      "ursamu": ">=1.9.5"
     }
   ]
 }

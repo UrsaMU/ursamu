@@ -6,7 +6,22 @@
  *   2. Login form interaction
  *   3. Apply server theme from /api/v1/config to CSS custom properties
  *   4. Fetch /api/v1/ui-manifest and mount web components into slots
- *   5. WebSocket lifecycle (connect, message dispatch, reconnect on logout)
+ *   5. WebSocket lifecycle (connect, typed message dispatch, reconnect, logout)
+ *
+ * Message protocol (outbound):
+ *   { type: "cmd",  data: "<command string>" }  — player command
+ *   { data: { cid } }                           — session restore (legacy sidecar)
+ *
+ * Message protocol (inbound):
+ *   { msg, room, ... }  — server state payloads dispatched as ursamu:message
+ *
+ * Custom events emitted on window:
+ *   ursamu:connected       { ws }
+ *   ursamu:disconnected    (no detail)
+ *   ursamu:reconnecting    { attempt, delay }
+ *   ursamu:reconnect-failed (no detail)
+ *   ursamu:logout          (no detail)
+ *   ursamu:message         { msg?, room?, ... }
  *
  * This file is intentionally framework-free — edit it like a normal JS file.
  */
@@ -81,15 +96,64 @@ async function mountSlots(token) {
 
 // ── WebSocket ─────────────────────────────────────────────────────────────────
 
-let _ws = null;
+let _ws               = null;
+let _reconnectAttempt = 0;
+let _reconnectTimer   = null;
+let _intentionalLogout = false;
+
+const MAX_RECONNECT  = 10;
+const RECONNECT_BASE = 1_000;   // 1 s
+const RECONNECT_CAP  = 30_000;  // 30 s
+
+/** Exponential backoff delay capped at RECONNECT_CAP. */
+function reconnectDelay(attempt) {
+  return Math.min(RECONNECT_BASE * (2 ** (attempt - 1)), RECONNECT_CAP);
+}
+
+/**
+ * Schedule a reconnect attempt unless the user intentionally logged out
+ * or a reconnect is already pending.
+ */
+function scheduleReconnect() {
+  if (_intentionalLogout)    return;  // user logged out — do not reconnect
+  if (_reconnectTimer !== null) return; // already scheduled
+
+  window._ursamu_ws = null;
+  window.dispatchEvent(new CustomEvent("ursamu:disconnected"));
+
+  _reconnectAttempt++;
+
+  if (_reconnectAttempt > MAX_RECONNECT) {
+    window.dispatchEvent(new CustomEvent("ursamu:reconnect-failed"));
+    return;
+  }
+
+  const delay = reconnectDelay(_reconnectAttempt);
+  window.dispatchEvent(new CustomEvent("ursamu:reconnecting", {
+    detail: { attempt: _reconnectAttempt, delay },
+  }));
+
+  _reconnectTimer = setTimeout(() => {
+    _reconnectTimer = null;
+    const token = getToken();
+    if (token) connectWS(token);
+  }, delay);
+}
 
 /** Open a WebSocket connection authenticated with `token`. */
 function connectWS(token) {
+  _intentionalLogout = false;
+
   const proto = location.protocol === "https:" ? "wss:" : "ws:";
   const ws    = new WebSocket(`${proto}//${location.host}?token=${encodeURIComponent(token)}&client=web`);
   _ws         = ws;
 
   ws.addEventListener("open", () => {
+    // Reset reconnect state on successful connection
+    _reconnectAttempt = 0;
+    clearTimeout(_reconnectTimer);
+    _reconnectTimer   = null;
+
     window._ursamu_ws = ws;
     window.dispatchEvent(new CustomEvent("ursamu:connected", { detail: { ws } }));
   });
@@ -103,8 +167,9 @@ function connectWS(token) {
     }
   });
 
-  ws.addEventListener("close", () => window.dispatchEvent(new CustomEvent("ursamu:disconnected")));
-  ws.addEventListener("error", () => window.dispatchEvent(new CustomEvent("ursamu:disconnected")));
+  // Both close and error trigger reconnect; scheduleReconnect is idempotent.
+  ws.addEventListener("close", scheduleReconnect);
+  ws.addEventListener("error", scheduleReconnect);
 }
 
 // ── Visibility helpers ────────────────────────────────────────────────────────
@@ -162,6 +227,12 @@ async function handleLogin(e) {
  * Example:  window.dispatchEvent(new CustomEvent("ursamu:logout"))
  */
 window.addEventListener("ursamu:logout", async () => {
+  // Set flag BEFORE closing so scheduleReconnect no-ops on the close event.
+  _intentionalLogout = true;
+  clearTimeout(_reconnectTimer);
+  _reconnectTimer   = null;
+  _reconnectAttempt = 0;
+
   clearToken();
   if (_ws) { _ws.close(); _ws = null; }
   window._ursamu_ws = null;

@@ -2,105 +2,66 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
 export const aliases = ["lock", "unlock"];
 
+/**
+ * System Script: lock.ts
+ *
+ * Usage:
+ *   @lock <target>=<key>          — lock with basic lock
+ *   @lock/<type> <target>=<key>   — lock with named type (e.g. /use)
+ *   @unlock <target>              — remove basic lock
+ *   @unlock/<type> <target>       — remove named lock
+ */
 export default async (u: IUrsamuSDK) => {
-  const _cmd = u.cmd.original?.toLowerCase() || u.cmd.name.toLowerCase();
-  const _rawInput = (u.cmd.args[0] || ""); // "obj=key" or "swtch obj=key" handling
-  
-  // Regex to parse: lock[/switch] target=key
-  // But cmdParser separates args.
-  // If user typed `@lock/use target=key`, 
-  // Intent: lock, Args: ["target=key"]? No, parser splits by space? 
-  // Let's re-verify cmdParser logic.
-  // "lock/use target=key" -> intent: lock, args: ["target=key"] if valid?
-  // Actually cmdParser splits by space.
-  // If @lock/use is typed:
-  // intentName = "@lock/use" -> parts[0].
-  // scriptName = "lock" (from systemAliases or map?)
-  // Wait, legacy parser handled /switches. 
-  // My new parser logic: `const intentName = parts[0].toLowerCase();`.
-  // If I type `@lock/use`, intentName is `@lock/use`.
-  // Does `system/scripts/lock.ts` get called?
-  // `aliasMap` has `"l": "look"`.
-  // `scriptName = aliasMap[intentName] || intentName`. 
-  // If `intentName` is `lock/use`, `scriptName` is `lock/use`.
-  // Filesystem check: `./system/scripts/lock/use.ts`? No.
-  // I need to handle switches in `cmdParser` or in the script logic?
-  // MUX usually treats `/switch` as part of the command name or a switch.
-  // `cmdParser` in `src/services/commands/cmdParser.ts` does NOT strip switches by default for system scripts.
-  // It only strips `@` prefix.
-  // So `@lock/use` becomes `lock/use`.
-  // The script `lock.ts` won't be found unless I alias `lock/use` to `lock`.
-  
-  // Implementation decision:
-  // I should update `cmdParser` to split intent by `/` and pass the switch, OR
-  // I should register aliases for common switches.
-  // Given the current parser, it looks for exact match or alias.
-  // I will add aliases for `lock/use` etc in the `aliases` export of this file.
-  // And I'll parse the switch from `u.cmd.original`.
-  
-  const original = u.cmd.original?.toLowerCase() || "";
-  const parts = original.split("/");
-  const switchName = parts.length > 1 ? parts[1] : "";
-  const isUnlock = original.startsWith("unlock") || original.startsWith("@unlock");
+  const isUnlock = (u.cmd.name || "").toLowerCase().includes("unlock") ||
+                   (u.cmd.original || "").toLowerCase().trimStart().startsWith("unlock") ||
+                   (u.cmd.original || "").toLowerCase().trimStart().startsWith("@unlock");
 
-  // Parse args: target=key
-  // `lock target=key` -> args: ["target=key"] or ["target", "=", "key"] depending on spaces?
-  // shell style splitting?
-  // `cmdParser` splits by `/\s+/`.
-  // So `lock target=key` -> args: ["target=key"]
-  // `lock target = key` -> args: ["target", "=", "key"]
-  // We should join back and split by first `=`
-  
+  // Switch comes from cmdParser — @lock/use → u.cmd.switches[0] = "use"
+  const type = (u.cmd.switches?.[0] || "basic").toLowerCase();
+
   const fullArgs = (u.cmd.args[0] || "");
-  const [targetName, key] = fullArgs.split("=");
-  
-  const target = await u.util.target(u.me, targetName?.trim());
-  if (!target) return u.send("I can't find that.");
+  const eqIdx    = fullArgs.indexOf("=");
+  const targetName = eqIdx === -1 ? fullArgs.trim() : fullArgs.slice(0, eqIdx).trim();
+  const key        = eqIdx === -1 ? ""              : fullArgs.slice(eqIdx + 1).trim();
 
-  if (!(await u.canEdit(u.me, target))) return u.send("Permission denied.");
-
-  const type = switchName || "basic"; // default lock
+  const target = await u.util.target(u.me, targetName);
+  if (!target) { u.send("I can't find that."); return; }
+  if (!(await u.canEdit(u.me, target))) { u.send("Permission denied."); return; }
 
   if (isUnlock) {
-     // Unlock
-     if (type === "basic") {
-         target.state.lock = "";
-         await u.db.modify(target.id, "$set", { "data.lock": "" });
-         u.send(`Unlocked ${target.name}.`);
-     } else {
-         const locks = (target.state.locks || {}) as Record<string, string>;
-         delete locks[type];
-         target.state.locks = locks;
-         await u.db.modify(target.id, "$set", { "data.locks": locks });
-         u.send(`Unlocked ${target.name} (${type}).`);
-     }
-  } else {
-     // Lock
-     if (!key) return u.send("You must specify a key.");
+    if (type === "basic") {
+      await u.db.modify(target.id, "$set", { "data.lock": "" });
+      u.send(`Unlocked ${u.util.displayName(target, u.me)}.`);
+    } else {
+      const locks = (target.state.locks || {}) as Record<string, string>;
+      delete locks[type];
+      await u.db.modify(target.id, "$set", { "data.locks": locks });
+      u.send(`Unlocked ${u.util.displayName(target, u.me)} (${type}).`);
+    }
+    return;
+  }
 
-     // Validate lock string: check balanced parentheses and valid operators
-     const lockStr = key.trim();
-     let parenCount = 0;
-     for (const ch of lockStr) {
-       if (ch === "(") parenCount++;
-       else if (ch === ")") parenCount--;
-       if (parenCount < 0) return u.send("Invalid lock: unbalanced parentheses.");
-     }
-     if (parenCount !== 0) return u.send("Invalid lock: unbalanced parentheses.");
-     // Reject empty operands around operators (e.g., "&foo", "foo|", "foo&&bar")
-     if (/^[&|]|[&|]$|[&|]{2,}/.test(lockStr.replace(/\s/g, "")))
-       return u.send("Invalid lock: malformed operators.");
-     
-     if (type === "basic") {
-         target.state.lock = key.trim();
-         await u.db.modify(target.id, "$set", { "data.lock": key.trim() });
-         u.send(`Locked ${target.name}.`);
-     } else {
-         const locks = (target.state.locks || {}) as Record<string, string>;
-         locks[type] = key.trim();
-         target.state.locks = locks;
-         await u.db.modify(target.id, "$set", { "data.locks": locks });
-         u.send(`Locked ${target.name} (${type}).`);
-     }
+  if (!key) { u.send("You must specify a key."); return; }
+
+  // Validate: balanced parens, no malformed operators
+  let depth = 0;
+  for (const ch of key) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    if (depth < 0) { u.send("Invalid lock: unbalanced parentheses."); return; }
+  }
+  if (depth !== 0) { u.send("Invalid lock: unbalanced parentheses."); return; }
+  if (/^[&|]|[&|]$|[&|]{2,}/.test(key.replace(/\s/g, ""))) {
+    u.send("Invalid lock: malformed operators."); return;
+  }
+
+  if (type === "basic") {
+    await u.db.modify(target.id, "$set", { "data.lock": key });
+    u.send(`Locked ${u.util.displayName(target, u.me)}.`);
+  } else {
+    const locks = (target.state.locks || {}) as Record<string, string>;
+    locks[type] = key;
+    await u.db.modify(target.id, "$set", { "data.locks": locks });
+    u.send(`Locked ${u.util.displayName(target, u.me)} (${type}).`);
   }
 };

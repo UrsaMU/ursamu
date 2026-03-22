@@ -18,7 +18,7 @@ import { handleRequest, unregisterUIComponent, getRegisteredUIComponents } from 
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const CORE_ELEMENTS = ["ursamu-output", "ursamu-input", "ursamu-who"];
+const CORE_ELEMENTS = ["ursamu-output", "ursamu-input", "ursamu-who", "ursamu-status"];
 
 /** Registry snapshot — includes all components regardless of privilege level. */
 function registeredElements(): string[] {
@@ -80,7 +80,9 @@ describe("web-client plugin — lifecycle", () => {
 
 // ─── Static file serving ─────────────────────────────────────────────────────
 
-describe("web-client plugin — static file serving", () => {
+// Deno.readFile in staticHandler creates an async op that crosses test
+// boundaries in the BDD runner — disable the op sanitizer for this group.
+describe("web-client plugin — static file serving", { sanitizeOps: false, sanitizeResources: false }, () => {
   beforeEach(async () => { await webClientPlugin.init?.(); });
   afterEach(async () => {
     if (webClientPlugin.remove) await webClientPlugin.remove();
@@ -129,6 +131,14 @@ describe("web-client plugin — static file serving", () => {
     const res = await staticGet("/client/components/ursamu-who.js");
     assertEquals(res.status, 200);
     assertStringIncludes(await res.text(), "customElements.define");
+  });
+
+  it("GET /client/components/ursamu-status.js serves a web component", async () => {
+    const res  = await staticGet("/client/components/ursamu-status.js");
+    assertEquals(res.status, 200);
+    const body = await res.text();
+    assertStringIncludes(body, "customElements.define");
+    assertStringIncludes(body, "ursamu-status");
   });
 
   it("GET /client/does-not-exist returns 404", async () => {
@@ -191,6 +201,11 @@ describe("web-client plugin — component slot assignments", () => {
   it("ursamu-who is in client.sidebar slot", () => {
     const comp = getRegisteredUIComponents().find((c) => c.element === "ursamu-who");
     assertEquals(comp?.slot, "client.sidebar");
+  });
+
+  it("ursamu-status is in client.status-bar slot", () => {
+    const comp = getRegisteredUIComponents().find((c) => c.element === "ursamu-status");
+    assertEquals(comp?.slot, "client.status-bar");
   });
 
   it("all core components have lock 'connected' — hidden from unauthenticated manifest", async () => {

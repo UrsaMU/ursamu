@@ -155,6 +155,59 @@ body {
 
 ursamu-output,
 ursamu-input,
-ursamu-who {
+ursamu-who,
+ursamu-status {
   display: block;
 }
+
+/* ── Who list player entries ────────────────────────────────────────────────── */
+
+.who-player {
+  padding:        2px 0;
+  font-size:      .85em;
+  color:          var(--fg);
+  overflow:       hidden;
+  text-overflow:  ellipsis;
+  white-space:    nowrap;
+  cursor:         default;
+}
+
+.who-player:hover { color: var(--accent); }
+
+/* ── MUSH colour palette ────────────────────────────────────────────────────── */
+/*
+ * Override any of these in your config.json "theme" block or :root override
+ * to change how in-game MUSH colour codes appear in ursamu-output.
+ *
+ * Variable       MUSH code   Default
+ * --mu-red       %cr         bright red
+ * --mu-grn       %cg         bright green
+ * --mu-yel       %cy         yellow
+ * --mu-blu       %cb         blue
+ * --mu-mag       %cm         magenta / purple
+ * --mu-cyn       %cc         cyan
+ * --mu-wht       %cw         near-white
+ * --mu-blk       %cx         dark grey
+ */
+:root {
+  --mu-red: #ef4444;
+  --mu-grn: #22c55e;
+  --mu-yel: #eab308;
+  --mu-blu: #3b82f6;
+  --mu-mag: #a855f7;
+  --mu-cyn: #06b6d4;
+  --mu-wht: #f8fafc;
+  --mu-blk: #374151;
+}
+
+.mu-bold { font-weight:      bold; }
+.mu-ul   { text-decoration:  underline; }
+.mu-it   { font-style:       italic; }
+.mu-red  { color: var(--mu-red); }
+.mu-grn  { color: var(--mu-grn); }
+.mu-yel  { color: var(--mu-yel); }
+.mu-blu  { color: var(--mu-blu); }
+.mu-mag  { color: var(--mu-mag); }
+.mu-cyn  { color: var(--mu-cyn); }
+.mu-wht  { color: var(--mu-wht); }
+.mu-blk  { color: var(--mu-blk); }

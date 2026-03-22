@@ -152,9 +152,14 @@ export class WebSocketService {
                     }
                 }
 
+                // Support both legacy { msg } format (telnet sidecar) and typed
+                // { type: "cmd", data: <string> } format (web client / site-builder).
+                const rawCmd = data.msg ||
+                    (data.type === "cmd" ? String(data.data ?? "") : "") ||
+                    "";
                 const ctx: IContext = {
                     socket: sockData,
-                    msg: data.msg || ""
+                    msg: rawCmd,
                 };
 
                 // Note: joinChans(ctx) would go here if needed

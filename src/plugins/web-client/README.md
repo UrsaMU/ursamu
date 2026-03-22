@@ -16,9 +16,10 @@ The plugin also registers three built-in components via `registerUIComponent`:
 
 | Element | Slot | Lock | Description |
 |---------|------|------|-------------|
-| `ursamu-output` | `client.output` | connected | Scrolling game output pane |
-| `ursamu-input` | `client.input` | connected | Command input bar with history |
+| `ursamu-output` | `client.output` | connected | Scrolling game output pane with MUSH colour rendering |
+| `ursamu-input` | `client.input` | connected | Command input bar with history (sends `{ type:"cmd", data }`) |
 | `ursamu-who` | `client.sidebar` | connected | Online players list (polls every 30s) |
+| `ursamu-status` | `client.status-bar` | connected | Connection status dot + reconnect countdown |
 
 ## Slot naming convention
 
@@ -110,6 +111,30 @@ on server start alongside other built-in plugins.
 installable via `plugins.manifest.json`). When extracted, internal imports
 (`../../app.ts`) become `jsr:@ursamu/ursamu`.
 
+## WebSocket message protocol
+
+The web client uses a typed message envelope:
+
+| Direction | Format | Purpose |
+|-----------|--------|---------|
+| Client → Server | `{ type: "cmd", data: "<command>" }` | Player command |
+| Server → Client | `{ msg, room, … }` | Game state (dispatched as `ursamu:message`) |
+
+The server accepts both the typed format and the legacy `{ msg: "<command>" }` format (used by the Telnet sidecar).
+
+## Window events
+
+Components communicate via window custom events:
+
+| Event | Payload | Emitted by |
+|-------|---------|-----------|
+| `ursamu:connected` | `{ ws }` | `client.js` on WS open |
+| `ursamu:disconnected` | — | `client.js` on WS close/error |
+| `ursamu:reconnecting` | `{ attempt, delay }` | `client.js` during backoff |
+| `ursamu:reconnect-failed` | — | `client.js` after 10 failed retries |
+| `ursamu:message` | server payload | `client.js` on every WS message |
+| `ursamu:logout` | — | dispatch from any component to sign out |
+
 ## Theming cheat-sheet
 
 | CSS variable | Config key | Default | Purpose |
@@ -122,3 +147,18 @@ installable via `plugins.manifest.json`). When extracted, internal imports
 | `--border` | `theme.glassBorder` | `#2a2a2a` | Dividers |
 | `--font` | — | `"Courier New"` | Font stack |
 | `--sidebar-width` | — | `200px` | Right sidebar width |
+
+### MUSH colour palette
+
+Override these in your `:root` or `config.json` to retheme in-game colour codes:
+
+| CSS variable | MUSH code | Default |
+|---|---|---|
+| `--mu-red` | `%cr` | `#ef4444` |
+| `--mu-grn` | `%cg` | `#22c55e` |
+| `--mu-yel` | `%cy` | `#eab308` |
+| `--mu-blu` | `%cb` | `#3b82f6` |
+| `--mu-mag` | `%cm` | `#a855f7` |
+| `--mu-cyn` | `%cc` | `#06b6d4` |
+| `--mu-wht` | `%cw` | `#f8fafc` |
+| `--mu-blk` | `%cx` | `#374151` |

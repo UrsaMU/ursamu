@@ -109,6 +109,33 @@ export interface MailReceivedEvent {
   senderName:  string;
 }
 
+export interface ObjectCreatedEvent {
+  objectId:   string;
+  objectName: string;
+  /** "room" | "exit" | "thing" | "player" */
+  objectType: string;
+  actorId:    string;
+  actorName:  string;
+  locationId?: string;
+}
+
+export interface ObjectDestroyedEvent {
+  objectId:   string;
+  objectName: string;
+  objectType: string;
+  actorId:    string;
+  actorName:  string;
+}
+
+export interface ObjectModifiedEvent {
+  objectId:   string;
+  objectName: string;
+  /** The field or action that was changed, e.g. "description", "flags", "name" */
+  field:      string;
+  actorId:    string;
+  actorName:  string;
+}
+
 // ─── hook map ─────────────────────────────────────────────────────────────────
 
 export type GameHookMap = {
@@ -138,6 +165,12 @@ export type GameHookMap = {
   "scene:clear":     (e: SceneClearEvent)     => void | Promise<void>;
   /** A mail message was delivered to a recipient. */
   "mail:received":   (e: MailReceivedEvent)   => void | Promise<void>;
+  /** A world object (room, exit, thing) was created by a builder. */
+  "object:created":   (e: ObjectCreatedEvent)   => void | Promise<void>;
+  /** A world object was destroyed by a builder. */
+  "object:destroyed": (e: ObjectDestroyedEvent) => void | Promise<void>;
+  /** A world object's field was modified by a builder. */
+  "object:modified":  (e: ObjectModifiedEvent)  => void | Promise<void>;
 };
 
 type HandlerList = { [K in keyof GameHookMap]: GameHookMap[K][] };
@@ -145,19 +178,22 @@ type HandlerList = { [K in keyof GameHookMap]: GameHookMap[K][] };
 // ─── registry ─────────────────────────────────────────────────────────────────
 
 const _handlers: HandlerList = {
-  "player:say":      [],
-  "player:pose":     [],
-  "player:page":     [],
-  "player:move":     [],
-  "player:login":    [],
-  "player:logout":   [],
-  "channel:message": [],
-  "scene:created":   [],
-  "scene:pose":      [],
-  "scene:set":       [],
-  "scene:title":     [],
-  "scene:clear":     [],
-  "mail:received":   [],
+  "player:say":       [],
+  "player:pose":      [],
+  "player:page":      [],
+  "player:move":      [],
+  "player:login":     [],
+  "player:logout":    [],
+  "channel:message":  [],
+  "scene:created":    [],
+  "scene:pose":       [],
+  "scene:set":        [],
+  "scene:title":      [],
+  "scene:clear":      [],
+  "mail:received":    [],
+  "object:created":   [],
+  "object:destroyed": [],
+  "object:modified":  [],
 };
 
 // ─── public API ───────────────────────────────────────────────────────────────

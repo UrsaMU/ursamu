@@ -103,6 +103,15 @@ const CORE_COMPONENTS: IUIComponent[] = [
     order:   10,
     plugin:  "web-client",
   },
+  {
+    element: "ursamu-status",
+    slot:    "client.status-bar",
+    script:  "/client/components/ursamu-status.js",
+    lock:    "connected",
+    label:   "Status Bar",
+    order:   0,
+    plugin:  "web-client",
+  },
 ];
 
 const plugin: IPlugin = {

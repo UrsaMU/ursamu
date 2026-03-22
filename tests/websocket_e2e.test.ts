@@ -170,6 +170,27 @@ Deno.test("WS — empty msg is not dispatched to cmdParser", OPTS, async () => {
   mock.close();
 });
 
+Deno.test("WS — typed { type:'cmd', data } message is treated as a command", OPTS, async () => {
+  const mock = makeMock("web");
+  // Web-client sends { type: "cmd", data: "<command string>" }.
+  // The handler should extract data as the command and not throw.
+  // We saturate the rate limiter with typed messages to prove they count.
+  const warns: string[] = [];
+  const origWarn = console.warn;
+  console.warn = (...args: unknown[]) => warns.push(args.join(" "));
+
+  for (let i = 0; i < 12; i++) {
+    mock.simulateMessage({ type: "cmd", data: `look ${i}` });
+  }
+
+  console.warn = origWarn;
+  // Typed messages must count against the rate limit (proves msg extraction works)
+  assertEquals(warns.filter((w) => w.includes("Rate limit")).length, 2);
+
+  await tick();
+  mock.close();
+});
+
 // ---------------------------------------------------------------------------
 // Rate limiting — exceed 10 cmd/s triggers warn log
 // ---------------------------------------------------------------------------
