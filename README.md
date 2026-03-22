@@ -147,25 +147,13 @@ UrsaMU uses independent processes so each component can restart without affectin
 | `+bbpost/edit <board>/<num>=<body>` | Edit your post |
 | `+bbpost/delete <board>/<num>` | Delete your post |
 
-### Staff Jobs Commands *(jobs-plugin)*
+### Plugin Commands
 
-| Command | Description |
-|---------|-------------|
-| `+job <title>=<description>` | Submit a request |
-| `+job/<category> <title>=<desc>` | Submit with category (request/bug/app/idea) |
-| `+jobs` | List all visible jobs |
-| `+job/view <#>` | View a job |
-| `+job/comment <#>=<text>` | Comment on a job |
-| `+job/close <#>[=<reason>]` | Close a job |
+Commands provided by official plugins are documented in their respective repos:
 
-### Events Commands *(events-plugin)*
-
-| Command | Description |
-|---------|-------------|
-| `+events` | List upcoming events |
-| `+event/view <#>` | View event details |
-| `+event/rsvp <#>` | RSVP to an event |
-| `+event/unrsvp <#>` | Cancel your RSVP |
+- **jobs** — `+job`, `+jobs` → [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin#commands)
+- **events** — `+event`, `+events` → [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin#commands)
+- **Discord bridge** → [UrsaMU/discord-plugin](https://github.com/UrsaMU/discord-plugin)
 
 ### Building Commands
 
@@ -223,18 +211,6 @@ UrsaMU uses independent processes so each component can restart without affectin
 | `@chanset <name>/<prop>=<value>` | Configure a channel (admin/wizard) |
 | `+bbcreate <name>[=<description>]` | Create a bulletin board (admin/wizard) |
 | `+bbdestroy <board>` | Destroy a bulletin board and all posts (admin/wizard) |
-| `+event/create <title>=<desc>` | Create an event (staff) |
-| `+event/edit <#>/<field>=<value>` | Edit event fields (staff) |
-| `+event/status <#>=<status>` | Set event status (staff) |
-| `+event/cancel <#>` | Cancel an event (staff) |
-| `+event/delete <#>` | Delete an event (staff) |
-| `+job/assign <#>=<name>` | Assign a job to a staff member |
-| `+job/status <#>=<status>` | Set job status |
-| `+job/priority <#>=<priority>` | Set job priority |
-| `+job/complete <#>=<resolution>` | Mark a job resolved |
-| `+job/reopen <#>` | Reopen a closed job |
-| `+job/delete <#>` | Delete a job |
-| `+job/staffnote <#>=<text>` | Add a staff-only note |
 
 ---
 
