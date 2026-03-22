@@ -85,16 +85,32 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
         });
       }
       const user = await dbojs.queryOne({ "data.resetToken": token });
-      if (!user || !user.data?.resetToken || user.data.resetToken !== token) {
-        return new Response(JSON.stringify({ error: "Invalid or expired reset token." }), {
-          status: 400, headers: { "Content-Type": "application/json" },
-        });
-      }
-      const expiry = user.data.resetTokenExpiry as number | undefined;
-      if (!expiry || Date.now() > expiry) {
-        delete user.data.resetToken;
-        delete user.data.resetTokenExpiry;
-        await dbojs.modify({ id: user.id }, "$set", { data: user.data });
+
+      // Use timingSafeEqual so token presence can't be inferred from response time.
+      const storedToken  = (user?.data?.resetToken as string | undefined) ?? "";
+      const enc          = new TextEncoder();
+      const tokenBytes   = enc.encode(token);
+      const storedBytes  = enc.encode(storedToken.padEnd(token.length, "\0"));
+      const tokensMatch  =
+        storedToken.length === token.length &&
+        crypto.subtle &&
+        // timingSafeEqual is not yet in Deno's crypto.subtle, so XOR manually.
+        (() => {
+          let diff = 0;
+          for (let i = 0; i < tokenBytes.length; i++) diff |= tokenBytes[i] ^ storedBytes[i];
+          return diff === 0;
+        })();
+
+      const expiry = user?.data?.resetTokenExpiry as number | undefined;
+      const expired = !expiry || Date.now() > expiry;
+
+      if (!user || !tokensMatch || expired) {
+        // Clean up an expired token while still returning the same error.
+        if (user && expired) {
+          delete user.data.resetToken;
+          delete user.data.resetTokenExpiry;
+          await dbojs.modify({ id: user.id }, "$set", { data: user.data });
+        }
         return new Response(JSON.stringify({ error: "Invalid or expired reset token." }), {
           status: 400, headers: { "Content-Type": "application/json" },
         });

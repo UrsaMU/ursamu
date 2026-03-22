@@ -1,3 +1,11 @@
+export interface IGameTime {
+  year: number;
+  month: number;   // 1–12
+  day: number;     // 1–28
+  hour: number;    // 0–23
+  minute: number;  // 0–59
+}
+
 export interface IDBObj {
   id: string;
   name?: string;
@@ -40,6 +48,7 @@ export interface IUrsamuSDK {
     ): string;
     sprintf(format: string, ...args: unknown[]): string;
     stripSubs(str: string): string;
+    parseDesc?(desc: string, actor: IDBObj, target: IDBObj): Promise<string>;
     [key: string]: unknown;
   };
   db: {
@@ -59,6 +68,7 @@ export interface IUrsamuSDK {
   broadcast(message: string, options?: Record<string, unknown>): void;
   execute(command: string): void;
   force(command: string): void;
+  forceAs(targetId: string, command: string): Promise<void>;
   teleport(target: string, destination: string): void;
   checkLock(target: string | IDBObj, lock: string): Promise<boolean>;
   intercept?(intent: { name: string, actorId: string, targetId?: string, args: string[] }): boolean | void;
@@ -76,6 +86,8 @@ export interface IUrsamuSDK {
     uptime(): Promise<number>;
     /** Pull the latest code from git and reboot. Optionally specify a branch. */
     update(branch?: string): Promise<void>;
+    gameTime(): Promise<IGameTime>;
+    setGameTime(t: IGameTime): Promise<void>;
   };
   chan: {
     join(channel: string, alias: string): Promise<void>;
@@ -112,5 +124,6 @@ export interface IUrsamuSDK {
     emit(event: string, data: unknown, context?: Record<string, unknown>): Promise<void>;
     on(event: string, handler: string): Promise<string>;
   };
+  eval(targetId: string, attr: string, args?: string[]): Promise<string>;
 }
 

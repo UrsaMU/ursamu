@@ -245,6 +245,12 @@ export const initializeEngine = async (
   // Initialize Discord Bridge
   await discordBridge.init();
 
+  // Initialize in-game clock (load persisted time, then tick every real minute)
+  const { gameClock } = await import("./services/GameClock/index.ts");
+  await gameClock.load();
+  setInterval(() => gameClock.tick(60_000), 60_000);
+  console.log(`[GameClock] Loaded. Current game time: ${gameClock.format()}`);
+
   // Fire STARTUP attributes on all objects that have one (fire-and-forget)
   runStartupAttrs().catch((err) =>
     console.error("[startup] runStartupAttrs failed:", err)

@@ -168,6 +168,10 @@ export async function createNativeSDK(
       template: templateFn,
       sprintf,
       stripSubs: (str: string) => parser.stripSubs("telnet", str),
+      parseDesc: async (desc: string, actor: IDBObj, target: IDBObj): Promise<string> => {
+        const { parseDesc: parseFn } = await import("../../utils/parseDesc.ts");
+        return parseFn(desc, actor, target);
+      },
     },
 
     db: {
@@ -302,6 +306,15 @@ export async function createNativeSDK(
       },
       uptime: () => Promise.resolve(performance.now()),
       update: (_branch?: string) => Promise.resolve(),
+      gameTime: async () => {
+        const { gameClock } = await import("../GameClock/index.ts");
+        return gameClock.now();
+      },
+      setGameTime: async (t: import("../../@types/UrsamuSDK.ts").IGameTime) => {
+        const { gameClock } = await import("../GameClock/index.ts");
+        gameClock.set(t);
+        await gameClock.save();
+      },
     },
 
     chan: {
@@ -376,6 +389,26 @@ export async function createNativeSDK(
         state: (tarObj.data?.state as Record<string, unknown>) || {},
         ...(args?.[0] ? { target: { id: args[0] } } : {}),
       });
+    },
+
+    eval: async (targetStr: string, attr: string, args?: string[]): Promise<string> => {
+      // Look up by id, then by name
+      let tarObj = await dbojs.queryOne({ id: targetStr });
+      if (!tarObj) {
+        tarObj = await dbojs.queryOne({
+          "data.name": new RegExp(`^${targetStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
+        }) || null;
+      }
+      if (!tarObj) return "";
+      const attrData = await getAttribute(tarObj as unknown as IDBOBJ, attr);
+      if (!attrData) return "";
+      const result = await sandboxService.runScript(attrData.value, {
+        id: tarObj.id,
+        location: tarObj.location || "limbo",
+        state: (tarObj.data?.state as Record<string, unknown>) || {},
+        cmd: { name: "", args: args || [] },
+      });
+      return result != null ? String(result) : "";
     },
 
     text: {
