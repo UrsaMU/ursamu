@@ -1,13 +1,12 @@
 {
   "name": "@ursamu/ursamu",
-  "version": "1.9.6",
+  "version": "1.9.7",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",
     "./cli": "./src/cli/ursamu.ts",
     "./start": "./src/cli/start.ts",
     "./app": "./src/app.ts",
-    "./chargen": "./src/plugins/chargen/mod.ts",
     "./channels": "./src/services/channel-events.ts"
   },
   "publish": {
