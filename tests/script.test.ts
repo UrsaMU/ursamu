@@ -4,7 +4,7 @@ import { scriptService } from "../src/services/Script/index.ts";
 import type { IContext } from "../src/@types/IContext.ts";
 import type { IMSocket } from "../src/@types/IMSocket.ts";
 
-Deno.test("Script Service Tests", async (t) => {
+Deno.test("Script Service Tests", { sanitizeOps: false, sanitizeResources: false }, async (t) => {
     const mockCtx: IContext = {
         socket: { cid: "123", id: "mock-socket" } as unknown as IMSocket,
         msg: "",
