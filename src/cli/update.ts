@@ -253,9 +253,10 @@ try {
   console.warn(`Warning: could not sync shell scripts — ${e}`);
 }
 
-// ── 8. ensure plugins.manifest.json exists ────────────────────────────────────
+// ── 8. ensure plugins.manifest.json exists + sync upstream refs ───────────────
 
 const manifestPath = join(cwd, "src", "plugins", "plugins.manifest.json");
+
 if (!existsSync(manifestPath)) {
   if (!dryRun) {
     await Deno.mkdir(join(cwd, "src", "plugins"), { recursive: true });
@@ -263,5 +264,38 @@ if (!existsSync(manifestPath)) {
     console.log(`${green("✓")} Created missing src/plugins/plugins.manifest.json`);
   } else {
     console.log(`  Would create src/plugins/plugins.manifest.json`);
+  }
+} else {
+  // Sync refs for any plugin whose upstream ref has been bumped.
+  // Preserves any plugins the user added that aren't in DEFAULT_PLUGINS_MANIFEST.
+  try {
+    const gameManifest = JSON.parse(await Deno.readTextFile(manifestPath)) as { plugins: { name: string; ref?: string; [k: string]: unknown }[] };
+    const upstreamByName = Object.fromEntries(DEFAULT_PLUGINS_MANIFEST.plugins.map(p => [p.name, p]));
+    let manifestDirty = false;
+    const refChanges: string[] = [];
+
+    for (const plugin of gameManifest.plugins) {
+      const upstream = upstreamByName[plugin.name];
+      if (upstream?.ref && plugin.ref !== upstream.ref) {
+        refChanges.push(`  ${bold(cyan(plugin.name))}  ${red(plugin.ref ?? "unpinned")} → ${green(upstream.ref)}`);
+        plugin.ref = upstream.ref;
+        manifestDirty = true;
+      }
+    }
+
+    if (manifestDirty) {
+      if (!dryRun) {
+        await Deno.writeTextFile(manifestPath, JSON.stringify(gameManifest, null, 2));
+        console.log(`${green("✓")} Synced plugin refs in src/plugins/plugins.manifest.json:`);
+        refChanges.forEach(l => console.log(l));
+      } else {
+        console.log(`  Would update plugin refs:`);
+        refChanges.forEach(l => console.log(l));
+      }
+    } else {
+      console.log(`${green("✓")} Plugin refs already up to date.`);
+    }
+  } catch {
+    console.warn(`  Warning: could not sync plugin refs in plugins.manifest.json`);
   }
 }
