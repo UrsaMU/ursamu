@@ -13,6 +13,13 @@
       "ref": "v1.1.0",
       "description": "Webhook-based Discord integration — jobs, channels, presence, and chargen events",
       "ursamu": ">=1.9.0"
+    },
+    {
+      "name": "jobs",
+      "url": "https://github.com/UrsaMU/jobs-plugin",
+      "ref": "v1.0.0",
+      "description": "Anomaly-style jobs/request system — player requests, staff commands, bucket access, archive, REST API",
+      "ursamu": ">=1.9.0"
     }
   ]
 }

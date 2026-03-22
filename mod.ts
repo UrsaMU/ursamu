@@ -49,6 +49,10 @@ export type {
   SceneClearEvent,
 } from "./src/services/Hooks/GameHooks.ts";
 
+// Export WebSocket service — available to plugins that need to reach connected sockets
+export { wsService } from "./src/services/WebSocket/index.ts";
+export type { UserSocket } from "./src/@types/IMSocket.ts";
+
 // Export command registration and plugin type — available to all plugins and game projects
 export { addCmd } from "./src/services/commands/cmdParser.ts";
 export type { IPlugin } from "./src/@types/IPlugin.ts";

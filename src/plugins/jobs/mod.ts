@@ -15,6 +15,6 @@
  * ```
  */
 
-export { jobs, getNextJobNumber, registerJobBuckets, isValidBucket, getAllBuckets } from "./db.ts";
+export { jobs, jobArchive, jobAccess, getNextJobNumber, registerJobBuckets, isValidBucket, getAllBuckets, getBucketStaffIds } from "./db.ts";
 export { jobHooks } from "./hooks.ts";
-export type { IJob, IJobComment } from "../../@types/IJob.ts";
+export type { IJob, IJobComment, IJobAccess } from "../../@types/IJob.ts";
