@@ -428,12 +428,12 @@ trap cleanup SIGINT SIGTERM
 
 # Run the main server with watch mode
 echo "Starting main server in watch mode..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv --watch src/main.ts &
+deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-net --watch src/main.ts &
 MAIN_PID=\$!
 
 # Telnet runs without --watch so it stays up across code reloads.
 echo "Starting telnet server..."
-deno run --allow-all --unstable-detect-cjs --unstable-kv src/telnet.ts &
+deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-net src/telnet.ts &
 TELNET_PID=\$!
 
 # Wait for both processes
