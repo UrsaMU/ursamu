@@ -242,6 +242,61 @@ Deno.test("@set — value exceeding 4096 chars sends 'Value too long'", OPTS, as
 });
 
 // ---------------------------------------------------------------------------
+// @set — flag mode tests
+// ---------------------------------------------------------------------------
+
+Deno.test("@set — flag mode: adds flag to object", OPTS, async () => {
+  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
+  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
+  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "Crate" }, location: ROOM_ID });
+
+  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@set", ["Crate=DARK"]);
+  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
+
+  assertStringIncludes(result.join(" "), "DARK");
+  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
+});
+
+Deno.test("@set — flag mode: removes flag with ! prefix", OPTS, async () => {
+  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
+  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
+  await dbojs.create({ id: THING_ID, flags: "thing dark", data: { name: "Lantern" }, location: ROOM_ID });
+
+  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@set", ["Lantern=!DARK"]);
+  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
+
+  assertStringIncludes(result.join(" "), "DARK");
+  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
+});
+
+Deno.test("@set — flag mode: rejects invalid flag token", OPTS, async () => {
+  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
+  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
+  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "Barrel" }, location: ROOM_ID });
+
+  // "bad!" has the ! at the wrong position — should fail token validation
+  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@set", ["Barrel=bad!"]);
+  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
+
+  assertStringIncludes(result.join(" "), "Invalid flag token");
+  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
+});
+
+Deno.test("@set — flag mode: denied when actor cannot edit target", OPTS, async () => {
+  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
+  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Player" }, location: ROOM_ID });
+  const thing = await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "Vault" }, location: ROOM_ID });
+
+  const ctx = makeCtx(actor.id, "player", "Player", "@set", ["Vault=DARK"], {
+    permissions: { [thing.id]: false },
+  });
+  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
+
+  assertStringIncludes(result.join(" "), "Permission denied");
+  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
+});
+
+// ---------------------------------------------------------------------------
 // &ATTR (setAttr) tests
 // ---------------------------------------------------------------------------
 
@@ -417,6 +472,55 @@ Deno.test("@examine — plain player denied on non-visual object they don't own"
 
   assertStringIncludes(result.join(" "), "can't examine");
   await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
+});
+
+Deno.test("@examine — shows correct type label for Room (via here)", OPTS, async () => {
+  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Cavern" } });
+  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
+
+  // Empty arg → examine falls back to u.here (current room); ctx.here has flags "room"
+  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@examine", [""]);
+  const result = await sandboxService.runScript(wrapScript(RAW_EXAMINE), ctx, SLOW) as string[];
+
+  assertStringIncludes(result.join("\n"), "Room");
+  await cleanup(ACTOR_ID, ROOM_ID);
+});
+
+Deno.test("@examine — shows correct type label for Thing", OPTS, async () => {
+  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
+  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
+  const thing = await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "Sword" }, location: ROOM_ID });
+
+  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@examine", ["Sword"]);
+  const result = await sandboxService.runScript(wrapScript(RAW_EXAMINE), ctx, SLOW) as string[];
+
+  assertStringIncludes(result.join("\n"), "Thing");
+  assertStringIncludes(result.join("\n"), `#${thing.id}`);
+  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
+});
+
+Deno.test("@examine — no arg defaults to current room (here)", OPTS, async () => {
+  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "TestRoom" } });
+  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
+
+  // Empty arg array — should examine here
+  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@examine", [""]);
+  const result = await sandboxService.runScript(wrapScript(RAW_EXAMINE), ctx, SLOW) as string[];
+
+  // Should show the here room — name comes from ctx.here
+  assertStringIncludes(result.join("\n"), "TestRoom");
+  await cleanup(ACTOR_ID, ROOM_ID);
+});
+
+Deno.test("@examine — shows type label for Player", OPTS, async () => {
+  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
+  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
+
+  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@examine", ["me"]);
+  const result = await sandboxService.runScript(wrapScript(RAW_EXAMINE), ctx, SLOW) as string[];
+
+  assertStringIncludes(result.join("\n"), "Player");
+  await cleanup(ACTOR_ID, ROOM_ID);
 });
 
 // ---------------------------------------------------------------------------

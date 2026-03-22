@@ -250,7 +250,7 @@ Deno.test("@force — admin forces command, forceAs called and actor notified", 
 // M4 — wizard must NOT be able to force a peer-level (wizard/admin) target
 Deno.test("M4 — wizard must NOT force an admin target (peer-level escalation)", OPTS, async () => {
   const ctx = makeCtx("wizard", "@force", [`${TARGET_ID}=say hello`]);
-  const extra = `
+  const _extra = `
     const _forceCalls = [];
     u.util = { ...u.util, target: async () => ({ id: "${TARGET_ID}", name: "Admin", flags: new Set(["admin"]), state: {}, contents: [] }) };
     u.forceAs = async (tId, cmd) => { _forceCalls.push({ tId, cmd }); };

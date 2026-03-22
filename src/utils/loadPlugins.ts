@@ -1,6 +1,7 @@
 import { dfs, dpath } from "../../deps.ts";
 import type { IPlugin } from "../@types/IPlugin.ts";
 import { registerPlugin } from "../services/Config/mod.ts";
+import { ensurePlugins } from "./ensurePlugins.ts";
 
 /**
  * Load plugins from a directory
@@ -9,7 +10,10 @@ import { registerPlugin } from "../services/Config/mod.ts";
  */
 export async function loadPlugins(dir: string): Promise<IPlugin[]> {
   const loadedPlugins: IPlugin[] = [];
-  
+
+  // Auto-install any plugins declared in plugins.manifest.json that are absent.
+  await ensurePlugins(dir);
+
   try {
     // Check if the directory exists
     const dirInfo = await Deno.stat(dir);

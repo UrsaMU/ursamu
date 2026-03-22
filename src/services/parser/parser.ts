@@ -61,6 +61,16 @@ parser.addSubs(
   { before: /%\(/g, after: "(" },
   { before: /%\)/g, after: ")" },
 
+  // MXP send links: %mxp[command|visible text]
+  // Converted to an internal marker processed by the telnet output layer.
+  // Non-MXP clients (WebSocket, HTML) receive the plain text portion via strip.
+  // @ts-ignore: mu-parser supports function `after` values
+  { before: /%mxp\[([^\|]+)\|([^\]]+)\]/g,
+    // @ts-ignore: mu-parser supports function `after` values
+    after: ((_match: string, cmd: string, text: string) => `\x03MXP[${cmd}|${text}]\x03`) as unknown as string,
+    strip: "$2",
+  },
+
   //color
   { before: /%[cx]n/g, after: "\x1b[0m", strip: "" },
   { before: /%[cx]x/g, after: "\x1b[30m", strip: "" },

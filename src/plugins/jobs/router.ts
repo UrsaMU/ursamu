@@ -34,7 +34,7 @@ async function resolveJob(idParam: string): Promise<IJob | null> {
 }
 
 function makeCommentId(): string {
-  return `jc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  return crypto.randomUUID();
 }
 
 // ─── route handler ────────────────────────────────────────────────────────────

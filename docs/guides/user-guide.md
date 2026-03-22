@@ -74,8 +74,30 @@ After creating an account, you'll want to set up your character:
 ### Examining Objects
 
 - `look [<object>]` — Look at the room or a specific object
-- `examine <object>` — Inspect an object's full details (owner, flags, contents)
+- `examine <object>` — Inspect an object's full technical details (requires edit permission or the `visual` flag on the target)
+- `examine` — Examine the current room (no argument)
 - `doing` — Show your current activity/status line
+
+`examine` output includes:
+
+- **Type** — Room, Player, Exit, or Thing
+- **Flags** — all flags set on the object
+- **Owner** — resolved to the owner's name and dbref
+- **Lock** — the object's current lock expression
+- **Location / Home** — resolved to room names and dbrefs
+- **Description** — the object's description text
+- **Exits** — exits in the room (for Room objects)
+- **Contents** — things and players currently present
+- **Attributes** — any custom `@set` attributes on the object
+
+```
+> examine me
+===== Admin (#5) [Player] ===========================
+Flags:    player wizard connected
+Owner:    Admin (#5)
+Location: The Hub (#1)
+...
+```
 
 ## Bulletin Boards
 

@@ -72,6 +72,12 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
 
   // --- Password reset ---
   if (isReset) {
+    if (isLoginRateLimited(clientIp)) {
+      await logSecurity("RESET_RATE_LIMITED", { ip: clientIp });
+      return new Response(JSON.stringify({ error: "Too many requests. Try again later." }), {
+        status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" },
+      });
+    }
     try {
       const { token, newPassword } = await req.json();
       if (!token || !newPassword) {
@@ -107,8 +113,8 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
       if (!user || !tokensMatch || expired) {
         // Clean up an expired token while still returning the same error.
         if (user && expired) {
-          delete user.data.resetToken;
-          delete user.data.resetTokenExpiry;
+          delete user.data!.resetToken;
+          delete user.data!.resetTokenExpiry;
           await dbojs.modify({ id: user.id }, "$set", { data: user.data });
         }
         return new Response(JSON.stringify({ error: "Invalid or expired reset token." }), {
@@ -116,9 +122,9 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
         });
       }
       const hashed = await hash(newPassword, await genSalt(10));
-      user.data.password = hashed;
-      delete user.data.resetToken;
-      delete user.data.resetTokenExpiry;
+      user.data!.password = hashed;
+      delete user.data!.resetToken;
+      delete user.data!.resetTokenExpiry;
       await dbojs.modify({ id: user.id }, "$set", { data: user.data });
       await logSecurity("PASSWORD_RESET", { userId: user.id, ip: clientIp });
       return new Response(JSON.stringify({ message: "Password updated successfully." }), {
@@ -136,6 +142,12 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
 
     if (isRegister) {
         // REGISTRATION logic
+        if (isLoginRateLimited(clientIp)) {
+            await logSecurity("REGISTER_RATE_LIMITED", { ip: clientIp });
+            return new Response(JSON.stringify({ error: "Too many requests. Try again later." }), {
+                status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" },
+            });
+        }
         if (!username || !password || !email) {
             return new Response(JSON.stringify({ error: "Username, email, and password are required." }), {
                 status: 400,
@@ -163,6 +175,7 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
         });
 
         if (existing) {
+            recordLoginFailure(clientIp);
             return new Response(JSON.stringify({ error: "Username or email already taken." }), {
                 status: 409,
                 headers: { "Content-Type": "application/json" },

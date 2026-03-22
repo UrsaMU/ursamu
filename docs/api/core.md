@@ -29,6 +29,14 @@ nav:
     url: "#ubb"
   - text: u.events
     url: "#uevents"
+  - text: u.attr
+    url: "#uattr"
+  - text: u.mail
+    url: "#umail-sandbox-scripts-only"
+  - text: u.eval
+    url: "#ueval"
+  - text: u.forceAs
+    url: "#uforceas"
   - text: Top-level methods
     url: "#top-level-methods"
   - text: IPlugin
@@ -209,19 +217,26 @@ const obj: IDBObj = await u.db.create({
 });
 ```
 
-### `u.db.modify(id, field, value)`
+### `u.db.modify(id, op, data)`
 
-Updates a single field on an object.
+Updates fields on an object. The `op` argument **must** be one of `"$set"`, `"$unset"`, or `"$inc"` — any other value is rejected.
 
 ```typescript
-// Update state (always spread to preserve existing keys)
-await u.db.modify(u.me.id, "state", { ...u.me.state, gold: 100 });
+// Merge one field (preferred — precise, no full-object rewrite)
+await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
 
-// Update name
-await u.db.modify(obj.id, "name", "New Name");
+// Replace full state (always spread to preserve other fields)
+await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: 100 } });
 
-// Update location
-await u.db.modify(obj.id, "location", destinationId);
+// Increment a number field
+await u.db.modify(u.me.id, "$inc", { "data.deaths": 1 });
+
+// Remove a field
+await u.db.modify(u.me.id, "$unset", { "data.tempFlag": "" });
+
+// Update name or location (these are top-level fields)
+await u.db.modify(obj.id, "$set", { name: "New Name" });
+await u.db.modify(obj.id, "$set", { location: destinationId });
 ```
 
 ### `u.db.destroy(id)`
@@ -343,6 +358,12 @@ const ms: number = await u.sys.uptime();
 // Reboot or shut down (DANGEROUS — confirms nothing)
 await u.sys.reboot();
 await u.sys.shutdown();
+
+// In-game calendar
+const t: IGameTime = await u.sys.gameTime();
+// t.year, t.month (1-12), t.day (1-28), t.hour (0-23), t.minute (0-59)
+
+await u.sys.setGameTime({ year: 1340, month: 6, day: 15, hour: 8, minute: 0 });
 ```
 
 ---
@@ -370,6 +391,11 @@ await u.chan.destroy("Staff");
 
 // Admin — update channel settings
 await u.chan.set("Public", { header: "%ch[PUB]%cn", masking: false });
+
+// Get recent channel messages
+const history = await u.chan.history("public");        // last 20 messages (default)
+const history = await u.chan.history("public", 50);    // last 50 messages
+// → [{ id: string, playerName: string, message: string, timestamp: number }, ...]
 ```
 
 ---
@@ -416,6 +442,101 @@ await u.events.emit("game:levelup", { playerId: u.me.id, level: 5 });
 
 // Register a listener (stores a script key to call when the event fires)
 const handlerId = await u.events.on("game:levelup", "scripts/levelup-handler");
+```
+
+---
+
+## u.attr
+
+Reads soft-coded `&ATTR` values stored on objects.
+
+```typescript
+// Returns the string value, or null if not set
+const bio: string | null = await u.attr.get(u.me.id, "FINGER-INFO");
+const desc = await u.attr.get(objectId, "SHORT-DESC");
+
+// Attribute names are case-insensitive
+const val = await u.attr.get(objectId, "onenter");   // same as "ONENTER"
+```
+
+---
+
+## u.mail *(sandbox scripts only)*
+
+Mail system access. Available in `system/scripts/` sandbox context.
+For native `addCmd` handlers, import `mail` from the database service directly.
+
+```typescript
+// Send a message
+await u.mail.send({
+  from:    `#${u.me.id}`,           // dbref format: "#42"
+  to:      [`#${recipientId}`],     // array of dbrefs
+  cc:      [`#${ccId}`],            // optional
+  subject: "Guild meeting",
+  message: "Tonight at 8pm.",
+  read:    false,
+  date:    Date.now(),
+});
+
+// Notify recipient in-game
+u.send(`%chMAIL:%cn You have new mail from ${u.util.displayName(u.me, u.me)}.`, recipientId);
+
+// Read inbox
+const inbox = await u.mail.read({ to: { $in: [`#${u.me.id}`] } });
+inbox.sort((a, b) => b.date - a.date);
+
+// Delete
+await u.mail.delete(messageId);
+
+// Update (e.g. mark as read)
+await u.mail.modify({ id: messageId }, "$set", { read: true });
+```
+
+**IMail shape:**
+```typescript
+{
+  id?:      string;
+  from:     string;     // "#42"
+  to:       string[];   // ["#7", "#8"]
+  cc?:      string[];
+  bcc?:     string[];
+  subject:  string;
+  message:  string;
+  read:     boolean;
+  date:     number;     // Date.now() timestamp
+}
+```
+
+---
+
+## u.eval
+
+Evaluates a stored `&ATTR` as a script and returns its output as a string.
+
+```typescript
+// Evaluate &FORMULA on object #42
+const result = await u.eval("#42", "FORMULA", ["arg1", "arg2"]);
+u.send(`Result: ${result}`);
+
+// Evaluate an attribute on the actor
+const score = await u.eval(u.me.id, "SCORE-FORMULA");
+```
+
+---
+
+## u.forceAs
+
+Executes a command as another object. Requires wizard or admin privilege — enforce
+this in your script; the SDK does not check automatically.
+
+```typescript
+if (!u.me.flags.has("wizard") && !u.me.flags.has("admin") && !u.me.flags.has("superuser")) {
+  u.send("Permission denied.");
+  return;
+}
+
+await u.forceAs(npcId, "say Welcome, traveler!");
+await u.forceAs(roomId, "look");
 ```
 
 ---

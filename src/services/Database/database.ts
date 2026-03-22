@@ -132,10 +132,49 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return false;
   }
 
+  /**
+   * Apply an operator to all records matching `query`.
+   *
+   * | Operator | Effect                                                      |
+   * |----------|-------------------------------------------------------------|
+   * | `$set`   | Set field(s) to the supplied value(s); dot-notation ok      |
+   * | `$unset` | Delete field(s) from the record; dot-notation ok            |
+   * | `$inc`   | Increment numeric field(s) by the supplied amount           |
+   * | `$push`  | Atomically append a value to an array field (CAS-backed);   |
+   * |          | creates the array if the field is absent; dot-notation ok   |
+   *
+   * @example
+   * // Atomic append — safe under concurrent writes
+   * await col.modify({ id: roundId }, "$push", { "data.poses": poseText });
+   */
   async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
     const items = await this.query(query);
     const kv = await this.getKv();
     for (const item of items) {
+      if (operator === "$push") {
+        // Atomic CAS append — prevents TOCTOU races when two callers push
+        // to the same array field concurrently.  Each record is committed via
+        // atomicModify() so concurrent writers serialize on the version check.
+        // Allow up to 20 retries — $push fields are designed for concurrent
+        // access (e.g. two players posing simultaneously), so contention is
+        // expected and the default 3 retries is insufficient under load.
+        await this.atomicModify(item.id, (current) => {
+          const rec = { ...current } as Record<string, unknown>;
+          for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+            if (DBO.isDangerousKey(key)) continue;
+            if (key.includes(".")) {
+              const arr = (get(rec, key) ?? []) as unknown[];
+              lodashSet(rec, key, [...arr, value]);
+            } else {
+              const arr = (rec[key] ?? []) as unknown[];
+              rec[key] = [...arr, value];
+            }
+          }
+          return rec as T;
+        }, 20);
+        continue; // skip the plain kv.set() below
+      }
+
       const updated = { ...item };
       if (operator === "$set") {
         for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
