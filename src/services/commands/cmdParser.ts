@@ -204,7 +204,7 @@ cmdParser.use(async (ctx, next) => {
 
   // 3. Fallback to system scripts in system/scripts/
   // Connect-screen commands that system scripts may handle for unauthenticated users
-  const connectScreenScripts = new Set(["connect", "who", "help", "quit"]);
+  const connectScreenScripts = new Set(["connect", "create", "who", "help", "quit"]);
 
   const aliasMap: Record<string, string> = {
     "l": "look",
