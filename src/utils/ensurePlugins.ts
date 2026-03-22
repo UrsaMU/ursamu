@@ -185,7 +185,10 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
       await Deno.remove(targetDir, { recursive: true });
     }
 
-    const tempDir = await Deno.makeTempDir({ prefix: "ursamu-plugin-" });
+    // Use a subdirectory as the clone destination so git creates it itself.
+    // Cloning into a pre-existing directory (even empty) fails on some git versions.
+    const tempBase = await Deno.makeTempDir({ prefix: "ursamu-plugin-" });
+    const tempDir = dpath.join(tempBase, "plugin");
     try {
       const steps = buildCloneSteps(entry.url, tempDir, entry.ref);
       let stepFailed = false;
@@ -194,6 +197,7 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
           args: stepArgs,
           stdout: "piped",
           stderr: "piped",
+          env: { ...Deno.env.toObject(), GIT_TERMINAL_PROMPT: "0" },
         }).output();
         if (!success) {
           console.error(`[ensurePlugins] Failed to install "${entry.name}": ${new TextDecoder().decode(stderr).trim()}`);
@@ -202,7 +206,7 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
         }
       }
       if (stepFailed) {
-        await Deno.remove(tempDir, { recursive: true }).catch(() => {});
+        await Deno.remove(tempBase, { recursive: true }).catch(() => {});
         continue;
       }
 
@@ -216,10 +220,13 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
       try {
         await Deno.rename(tempDir, targetDir);
       } catch (renameErr) {
-        await Deno.remove(tempDir, { recursive: true }).catch(() => {});
+        await Deno.remove(tempBase, { recursive: true }).catch(() => {});
         console.warn(`[ensurePlugins] Could not move "${entry.name}" into place: ${renameErr}`);
         continue;
       }
+
+      // tempBase is now empty after the rename — clean it up
+      await Deno.remove(tempBase, { recursive: true }).catch(() => {});
 
       const version = await readPluginVersion(targetDir);
       const now = new Date().toISOString();
@@ -237,7 +244,7 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
 
       installed.push(`${entry.name}@${version}`);
     } catch (err) {
-      await Deno.remove(tempDir, { recursive: true }).catch(() => {});
+      await Deno.remove(tempBase, { recursive: true }).catch(() => {});
       console.error(`[ensurePlugins] Failed to install "${entry.name}":`, err);
     }
   }
