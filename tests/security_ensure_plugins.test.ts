@@ -146,6 +146,89 @@ Deno.test("[INT] ensurePlugins — malicious name does not create dir outside pl
   }
 });
 
+// ─── Ref drift detection ──────────────────────────────────────────────────────
+
+Deno.test("[REF] ensurePlugins — skips already-installed plugin when ref matches", OPTS, async () => {
+  const pluginsDir = await Deno.makeTempDir({ prefix: "ursamu-test-plugins-" });
+  try {
+    // Pre-install the plugin directory with a marker file
+    const pluginDir = join(pluginsDir, "my-plugin");
+    await Deno.mkdir(pluginDir);
+    await Deno.writeTextFile(join(pluginDir, "marker.txt"), "original");
+
+    // Registry records the same ref as the manifest
+    await Deno.writeTextFile(join(pluginsDir, ".registry.json"), JSON.stringify({
+      "my-plugin": { name: "my-plugin", version: "1.0.0", description: "", source: "https://github.com/foo/my-plugin", ref: "v1.0.0", installedAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" },
+    }));
+
+    await Deno.writeTextFile(join(pluginsDir, "plugins.manifest.json"), JSON.stringify({
+      plugins: [{ name: "my-plugin", url: "https://github.com/foo/my-plugin", ref: "v1.0.0" }],
+    }));
+
+    await ensurePlugins(pluginsDir);
+
+    // Dir should be untouched — marker file still present
+    const marker = await Deno.readTextFile(join(pluginDir, "marker.txt"));
+    assertEquals(marker, "original", "Plugin dir must not be removed when ref matches");
+  } finally {
+    await Deno.remove(pluginsDir, { recursive: true }).catch(() => {});
+  }
+});
+
+Deno.test("[REF] ensurePlugins — skips already-installed plugin when manifest has no ref", OPTS, async () => {
+  const pluginsDir = await Deno.makeTempDir({ prefix: "ursamu-test-plugins-" });
+  try {
+    const pluginDir = join(pluginsDir, "my-plugin");
+    await Deno.mkdir(pluginDir);
+    await Deno.writeTextFile(join(pluginDir, "marker.txt"), "original");
+
+    await Deno.writeTextFile(join(pluginsDir, ".registry.json"), JSON.stringify({
+      "my-plugin": { name: "my-plugin", version: "1.0.0", description: "", source: "https://github.com/foo/my-plugin", ref: "v1.0.0", installedAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" },
+    }));
+
+    // No ref in manifest — unpinned; should not trigger auto-update
+    await Deno.writeTextFile(join(pluginsDir, "plugins.manifest.json"), JSON.stringify({
+      plugins: [{ name: "my-plugin", url: "https://github.com/foo/my-plugin" }],
+    }));
+
+    await ensurePlugins(pluginsDir);
+
+    const marker = await Deno.readTextFile(join(pluginDir, "marker.txt"));
+    assertEquals(marker, "original", "Plugin dir must not be removed when manifest has no ref");
+  } finally {
+    await Deno.remove(pluginsDir, { recursive: true }).catch(() => {});
+  }
+});
+
+Deno.test("[REF] ensurePlugins — removes plugin dir when manifest ref has changed", OPTS, async () => {
+  const pluginsDir = await Deno.makeTempDir({ prefix: "ursamu-test-plugins-" });
+  try {
+    const pluginDir = join(pluginsDir, "my-plugin");
+    await Deno.mkdir(pluginDir);
+    await Deno.writeTextFile(join(pluginDir, "marker.txt"), "original");
+
+    // Registry has old ref
+    await Deno.writeTextFile(join(pluginsDir, ".registry.json"), JSON.stringify({
+      "my-plugin": { name: "my-plugin", version: "1.0.0", description: "", source: "https://github.com/foo/my-plugin", ref: "v1.0.0", installedAt: "2026-01-01T00:00:00.000Z", updatedAt: "2026-01-01T00:00:00.000Z" },
+    }));
+
+    // Manifest bumped to new ref
+    await Deno.writeTextFile(join(pluginsDir, "plugins.manifest.json"), JSON.stringify({
+      plugins: [{ name: "my-plugin", url: "https://github.com/foo/my-plugin", ref: "v1.1.0" }],
+    }));
+
+    // ensurePlugins will remove the dir then attempt git clone (which will fail for a fake URL — that's fine)
+    await ensurePlugins(pluginsDir);
+
+    // The marker file must be gone — dir was removed for the update
+    let markerExists = false;
+    try { await Deno.stat(join(pluginDir, "marker.txt")); markerExists = true; } catch { /* expected */ }
+    assertEquals(markerExists, false, "Old plugin dir must be removed when ref changes");
+  } finally {
+    await Deno.remove(pluginsDir, { recursive: true }).catch(() => {});
+  }
+});
+
 Deno.test("[INT] ensurePlugins — unsafe URL scheme does not invoke git clone", OPTS, async () => {
   const pluginsDir = await Deno.makeTempDir({ prefix: "ursamu-test-plugins-" });
   try {

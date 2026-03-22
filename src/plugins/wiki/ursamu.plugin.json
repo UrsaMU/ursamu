@@ -1,9 +1,0 @@
-{
-  "name": "wiki",
-  "version": "1.0.0",
-  "description": "Namespaced wiki system for news, fiction, lore, and more — with version history and full-text search",
-  "source": "bundled",
-  "author": "UrsaMU",
-  "installedAt": "2026-03-18T00:00:00.000Z",
-  "updatedAt": "2026-03-18T00:00:00.000Z"
-}

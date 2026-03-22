@@ -278,7 +278,6 @@ ursamu create plugin notes --standalone
 ## Next Steps
 
 - `src/plugins/jobs/` — a real-world example with staff permission checks and complex REST routes
-- `src/plugins/bboards/` — per-user unread state across multiple resources
 - `src/plugins/events/` — sequential IDs, RSVP capacity enforcement, event status visibility
 - [Plugin Reference](./index.md) — full `IUrsamuSDK` and `DBO<T>` API tables
 - [Plugin Events](./hooks.md) — subscribing and emitting game events

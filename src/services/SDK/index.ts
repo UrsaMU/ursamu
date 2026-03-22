@@ -1,7 +1,7 @@
 import type { IUrsamuSDK, IDBObj } from "../../@types/UrsamuSDK.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { IContext } from "../../@types/IContext.ts";
-import { dbojs, chans, chanHistory, texts, bboards, bboard as bbPosts } from "../Database/index.ts";
+import { dbojs, chans, chanHistory, texts } from "../Database/index.ts";
 import { send as sendFn } from "../broadcast/index.ts";
 import { wsService } from "../WebSocket/index.ts";
 import { hydrate, evaluateLock } from "../../utils/evaluateLock.ts";
@@ -431,113 +431,6 @@ export async function createNativeSDK(
         } else {
           await texts.create({ id, content } as Parameters<typeof texts.create>[0]);
         }
-      },
-    },
-
-    bb: {
-      listBoards: async () => {
-        const boards = await bboards.all();
-        boards.sort((a, b) => (a.order || 0) - (b.order || 0));
-        const player = rawActor ? await dbojs.queryOne({ id: rawActor.id }) : null;
-        const lastRead = ((player && player.data?.bbLastRead) as Record<string, number>) || {};
-        return await Promise.all(boards.map(async (b) => {
-          const posts = await bbPosts.query({ board: b.id });
-          const lastReadNum = lastRead[b.id] || 0;
-          return {
-            id: b.id,
-            name: b.name,
-            description: b.description,
-            order: b.order,
-            postCount: posts.length,
-            newCount: posts.filter((p) => p.num > lastReadNum).length,
-          };
-        }));
-      },
-
-      listPosts: async (boardId: string) => {
-        const posts = await bbPosts.query({ board: boardId });
-        posts.sort((a, b) => a.num - b.num);
-        return posts;
-      },
-
-      readPost: async (boardId: string, postNum: number) => {
-        const post = await bbPosts.queryOne({ board: boardId, num: postNum });
-        return post || null;
-      },
-
-      post: async (boardId: string, subject: string, body: string) => {
-        const board = await bboards.queryOne({ id: boardId });
-        if (!board) return { error: "Board not found." };
-        const posts = await bbPosts.query({ board: boardId });
-        const num = posts.length + 1;
-        const author = rawActor?.id || "0";
-        const authorName = (rawActor && rawActor.data?.name) || author;
-        const id = crypto.randomUUID();
-        const post = await bbPosts.create({ id, board: boardId, num, subject, body, author, authorName, date: Date.now() });
-        return { id: post.id };
-      },
-
-      editPost: async (boardId: string, postNum: number, body: string) => {
-        const post = await bbPosts.queryOne({ board: boardId, num: postNum });
-        if (!post) return;
-        await bbPosts.modify({ id: post.id }, "$set", { body, edited: Date.now() });
-      },
-
-      deletePost: async (boardId: string, postNum: number) => {
-        const post = await bbPosts.queryOne({ board: boardId, num: postNum });
-        if (post) await bbPosts.delete({ id: post.id });
-      },
-
-      createBoard: async (name: string, options?: { description?: string; order?: number }) => {
-        const id = name.trim().toLowerCase().replace(/\s+/g, "-");
-        const existing = await bboards.queryOne({ id });
-        if (existing) return { error: "Board already exists." };
-        const allBoards = await bboards.query({});
-        const order = options?.order ?? (allBoards.length + 1);
-        const board = await bboards.create({ id, name: name.trim(), description: options?.description, order });
-        return { id: board.id, name: board.name };
-      },
-
-      destroyBoard: async (boardId: string) => {
-        await bboards.delete({ id: boardId });
-        await bbPosts.delete({ board: boardId });
-      },
-
-      markRead: async (boardId: string) => {
-        if (!rawActor) return;
-        const posts = await bbPosts.query({ board: boardId });
-        const maxNum = posts.reduce((m, p) => Math.max(m, p.num), 0);
-        const player = await dbojs.queryOne({ id: rawActor.id });
-        if (player) {
-          player.data ||= {};
-          const lastRead = (player.data.bbLastRead as Record<string, number>) || {};
-          lastRead[boardId] = maxNum;
-          player.data.bbLastRead = lastRead;
-          await dbojs.modify({ id: player.id }, "$set", player);
-        }
-      },
-
-      newPostCount: async (boardId: string) => {
-        if (!rawActor) return 0;
-        const player = await dbojs.queryOne({ id: rawActor.id });
-        const lastRead = ((player && player.data?.bbLastRead) as Record<string, number>) || {};
-        const lastReadNum = lastRead[boardId] || 0;
-        const posts = await bbPosts.query({ board: boardId });
-        return posts.filter((p) => p.num > lastReadNum).length;
-      },
-
-      totalNewCount: async () => {
-        if (!rawActor) return 0;
-        const player = await dbojs.queryOne({ id: rawActor.id });
-        const lastRead = ((player && player.data?.bbLastRead) as Record<string, number>) || {};
-        const boards = await bboards.query({});
-        let total = 0;
-        for (const board of boards) {
-          const lastReadNum = lastRead[board.id] || 0;
-          const posts = await bbPosts.query({ board: board.id });
-          total += posts.filter((p) => p.num > lastReadNum).length;
-        }
-        return total;
       },
     },
 

@@ -27,6 +27,20 @@
       "ref": "v1.0.0",
       "description": "In-game event calendar with RSVP tracking and REST API",
       "ursamu": ">=1.9.2"
+    },
+    {
+      "name": "bbs",
+      "url": "https://github.com/UrsaMU/bbs-plugin",
+      "ref": "v1.0.0",
+      "description": "Full-featured Myrddin-style BBS — boards, threading, categories, IC/OOC tags, sticky posts, moderation, Discord webhooks, and scene linking.",
+      "ursamu": ">=1.9.0"
+    },
+    {
+      "name": "wiki",
+      "url": "https://github.com/UrsaMU/wiki-plugin",
+      "ref": "v1.0.0",
+      "description": "File-based markdown wiki — pages, search, history, access control, backlinks, and Discord webhooks.",
+      "ursamu": ">=1.9.0"
     }
   ]
 }

@@ -36,6 +36,8 @@ interface RegistryEntry {
   description: string;
   source: string;
   author: string;
+  /** The git tag, branch, or commit SHA this entry was installed/updated from. */
+  ref?: string;
   installedAt: string;
   updatedAt: string;
 }
@@ -145,6 +147,7 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
   }
 
   const registryPath = dpath.join(pluginsDir, ".registry.json");
+  const reg = await readRegistry(registryPath);
 
   for (const entry of manifest.plugins) {
     // H1 — reject names with path traversal sequences
@@ -168,9 +171,20 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
     }
 
     const targetDir = dpath.join(pluginsDir, entry.name);
-    if (await exists(targetDir)) continue;
+    if (await exists(targetDir)) {
+      const installedRef = reg[entry.name]?.ref;
+      // Only auto-update when the manifest has a ref AND it differs from what's installed.
+      // Unpinned plugins (no manifest ref) are left as-is to avoid surprising HEAD re-fetches.
+      if (!entry.ref || installedRef === entry.ref) continue;
 
-    console.log(`[ensurePlugins] Plugin "${entry.name}" not found — installing from ${entry.url}${entry.ref ? `@${entry.ref}` : ""}`);
+      console.log(
+        `[ensurePlugins] Plugin "${entry.name}" ref changed ` +
+        `(${installedRef ?? "unpinned"} → ${entry.ref}) — updating...`,
+      );
+      await Deno.remove(targetDir, { recursive: true });
+    }
+
+    console.log(`[ensurePlugins] Installing "${entry.name}" from ${entry.url}${entry.ref ? `@${entry.ref}` : ""}`);
 
     const tempDir = await Deno.makeTempDir({ prefix: "ursamu-plugin-" });
     try {
@@ -211,14 +225,14 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
 
       const version = await readPluginVersion(targetDir);
       const now = new Date().toISOString();
-      const reg = await readRegistry(registryPath);
       reg[entry.name] = {
         name:        entry.name,
         version,
         description: entry.description ?? "",
         source:      entry.url,
         author:      "unknown",
-        installedAt: now,
+        ref:         entry.ref,
+        installedAt: reg[entry.name]?.installedAt ?? now,
         updatedAt:   now,
       };
       await writeRegistry(registryPath, reg);

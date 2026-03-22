@@ -338,5 +338,4 @@ The bundled plugins demonstrate every capability:
 |--------|---------------|
 | `src/plugins/example/` | Minimal template — commands, REST, database, config |
 | `src/plugins/jobs/` | Full CRUD REST API, staff permission checks, in-game commands with switches |
-| `src/plugins/bboards/` | Multi-resource REST API, per-user state (unread counts), admin-restricted mutations |
 | `src/plugins/events/` | Sequential IDs, RSVP capacity enforcement, cancelled-event visibility rules, REST + in-game commands |

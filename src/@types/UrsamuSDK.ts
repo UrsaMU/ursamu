@@ -107,19 +107,6 @@ export interface IUrsamuSDK {
     read(id: string): Promise<string>;
     set(id: string, content: string): Promise<void>;
   };
-  bb: {
-    listBoards(): Promise<{ id: string; name: string; description?: string; order: number; postCount: number; newCount: number }[]>;
-    listPosts(boardId: string): Promise<{ id: string; num: number; subject: string; authorName: string; date: number; edited?: number }[]>;
-    readPost(boardId: string, postNum: number): Promise<{ id: string; subject: string; body: string; authorName: string; date: number; edited?: number } | null>;
-    post(boardId: string, subject: string, body: string): Promise<{ id?: string; error?: string }>;
-    editPost(boardId: string, postNum: number, body: string): Promise<void>;
-    deletePost(boardId: string, postNum: number): Promise<void>;
-    createBoard(name: string, options?: { description?: string; order?: number }): Promise<{ id?: string; name?: string; error?: string }>;
-    destroyBoard(boardId: string): Promise<void>;
-    markRead(boardId: string): Promise<void>;
-    newPostCount(boardId: string): Promise<number>;
-    totalNewCount(): Promise<number>;
-  };
   events: {
     emit(event: string, data: unknown, context?: Record<string, unknown>): Promise<void>;
     on(event: string, handler: string): Promise<string>;

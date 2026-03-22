@@ -25,11 +25,10 @@ export { startTelnetServer } from "./src/services/telnet/telnet.ts";
 // Export Plugin API — available to game projects and external plugins
 export { send } from "./src/services/broadcast/broadcast.ts";
 export { DBO } from "./src/services/Database/database.ts";
-export { registerPluginRoute } from "./src/app.ts";
+export { registerPluginRoute, registerUIComponent, unregisterUIComponent, getRegisteredUIComponents } from "./src/app.ts";
+export type { IUIComponent } from "./src/app.ts";
 export { dbojs } from "./src/services/Database/index.ts";
 export { gameHooks } from "./src/services/Hooks/GameHooks.ts";
-export { seedBoards } from "./src/plugins/bboards/db.ts";
-export type { ISeedBoardOptions } from "./src/plugins/bboards/db.ts";
 export { registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames } from "./src/services/StatSystem/index.ts";
 export type { IStatSystem } from "./src/@types/IStatSystem.ts";
 export type {
