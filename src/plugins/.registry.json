@@ -1,13 +1,4 @@
 {
-  "bboards": {
-    "name": "bboards",
-    "version": "1.0.0",
-    "description": "Bulletin board system with in-game +bb commands and REST API",
-    "source": "bundled",
-    "author": "UrsaMU",
-    "installedAt": "2026-03-16T00:00:00.000Z",
-    "updatedAt": "2026-03-16T00:00:00.000Z"
-  },
   "events": {
     "name": "events",
     "version": "1.0.0",
@@ -35,13 +26,4 @@
     "installedAt": "2026-03-16T00:00:00.000Z",
     "updatedAt": "2026-03-16T00:00:00.000Z"
   },
-  "wiki": {
-    "name": "wiki",
-    "version": "1.0.0",
-    "description": "Namespaced wiki system for news, fiction, lore, and more — with version history and full-text search",
-    "source": "bundled",
-    "author": "UrsaMU",
-    "installedAt": "2026-03-18T00:00:00.000Z",
-    "updatedAt": "2026-03-18T00:00:00.000Z"
-  }
 }

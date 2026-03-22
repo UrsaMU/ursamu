@@ -5,13 +5,11 @@
  *   - authRouter   (register + login)
  *   - dbObjRouter  (GET /dbos, GET /dbobj/:id, PATCH /dbobj/:id)
  *   - buildingRouter (POST /building/room)
- *   - wikiRouter   (GET /wiki, GET /wiki/:topic)
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { authHandler } from "../src/routes/authRouter.ts";
 import { dbObjHandler } from "../src/routes/dbObjRouter.ts";
 import { buildingHandler } from "../src/routes/buildingRouter.ts";
-import { wikiHandler } from "../src/routes/wikiRouter.ts";
 import { txtFiles } from "../src/services/commands/cmdParser.ts";
 import { dbojs, DBO } from "../src/services/Database/database.ts";
 import { hash, genSalt } from "../deps.ts";
@@ -258,65 +256,6 @@ Deno.test("#12 — POST /building/room — description > 2000 chars returns 400"
   assertEquals(res.status, 400);
 
   await cleanup(ADMIN_ID);
-});
-
-// ===========================================================================
-// wikiRouter — GET /wiki and GET /wiki/:topic
-// ===========================================================================
-
-Deno.test("GET /wiki — returns list of loaded topics", OPTS, async () => {
-  // Seed a topic directly in the in-memory txtFiles Map
-  txtFiles.set("test_topic.txt", "This is a test topic.");
-
-  const req = new Request("http://localhost/api/v1/wiki");
-  const res = wikiHandler(req);
-  assertEquals(res.status, 200);
-  const body = await res.json();
-  assertEquals(Array.isArray(body), true);
-  assertEquals(body.includes("test_topic.txt"), true);
-});
-
-Deno.test("GET /wiki/:topic — returns topic content", OPTS, async () => {
-  txtFiles.set("test_topic.txt", "This is a test topic.");
-
-  const req = new Request("http://localhost/api/v1/wiki/test_topic.txt");
-  const res = wikiHandler(req);
-  assertEquals(res.status, 200);
-  const body = await res.json();
-  assertEquals(body.topic, "test_topic.txt");
-  assertStringIncludes(body.content, "test topic");
-});
-
-Deno.test("GET /wiki/:topic — unknown topic returns 404", OPTS, () => {
-  const req = new Request("http://localhost/api/v1/wiki/nonexistent_topic.txt");
-  const res = wikiHandler(req);
-  assertEquals(res.status, 404);
-});
-
-Deno.test("GET /wiki/:topic — URL-decoded topic name", OPTS, async () => {
-  txtFiles.set("help/connect.txt", "Connect help content.");
-
-  const req = new Request("http://localhost/api/v1/wiki/help%2Fconnect.txt");
-  const res = wikiHandler(req);
-  assertEquals(res.status, 200);
-  const body = await res.json();
-  assertStringIncludes(body.content, "Connect help");
-});
-
-// ===========================================================================
-// #1 — wikiRouter: path traversal guard (decodeURIComponent + ".." sequences)
-// ===========================================================================
-
-Deno.test("#1 — GET /wiki/../../../etc/passwd must return 400, not 404", OPTS, () => {
-  const req = new Request("http://localhost/api/v1/wiki/..%2F..%2F..%2Fetc%2Fpasswd");
-  const res = wikiHandler(req);
-  assertEquals(res.status, 400);
-});
-
-Deno.test("#1 — GET /wiki/topic with null byte must return 400", OPTS, () => {
-  const req = new Request("http://localhost/api/v1/wiki/topic%00.txt");
-  const res = wikiHandler(req);
-  assertEquals(res.status, 400);
 });
 
 // ===========================================================================

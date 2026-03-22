@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UrsaMU</title>
+  <link rel="stylesheet" href="/client/style.css" />
+</head>
+<body>
+
+  <!-- ── Login screen (visible when not authenticated) ─────────────────────── -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h1 class="login-title" id="game-title">UrsaMU</h1>
+      <p  class="login-subtitle">Enter your credentials to connect.</p>
+      <form id="login-form" autocomplete="off" novalidate>
+        <input id="login-name"     type="text"     placeholder="Character name" autocomplete="username"         required />
+        <input id="login-password" type="password" placeholder="Password"       autocomplete="current-password" required />
+        <button type="submit" id="login-btn">Connect</button>
+        <p id="login-error" class="login-error" aria-live="polite"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Game client (visible after authentication) ────────────────────────── -->
+  <div id="game-client" hidden>
+    <nav    data-slot="nav"></nav>
+    <main   id="game-main">
+      <div   data-slot="client.output"></div>
+      <aside data-slot="client.sidebar"></aside>
+    </main>
+    <div    data-slot="client.input"></div>
+    <footer data-slot="client.status-bar"></footer>
+  </div>
+
+  <script type="module" src="/client/client.js"></script>
+</body>
+</html>

@@ -29,6 +29,8 @@ export interface RegistryEntry {
   /** Original clone URL. Used by `update`. */
   source: string;
   author: string;
+  /** The git tag, branch, or commit SHA this entry was installed/updated from. */
+  ref?: string;
   /** ISO-8601 timestamp of first install. */
   installedAt: string;
   /** ISO-8601 timestamp of last update. */

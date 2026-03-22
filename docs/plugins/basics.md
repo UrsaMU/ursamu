@@ -24,7 +24,6 @@ entry required — just drop the folder in and restart the server.
 
 ```
 src/plugins/
-├── bboards/        ← auto-loaded
 ├── events/         ← auto-loaded
 ├── jobs/           ← auto-loaded
 └── my-plugin/      ← auto-loaded the next time you start

@@ -356,11 +356,5 @@ export const texts: DBO<ITextEntry> = new DBO<ITextEntry>("server.texts");
 /** Scene (scene-logger) store. */
 export const scenes: DBO<IScene> = new DBO<IScene>("server.scenes");
 
-import type { IBBoard } from "../../@types/IBBoard.ts";
-import type { IBBoardPost } from "../../@types/IBBoardPost.ts";
-/** Bulletin board group definitions. */
-export const bboards: DBO<IBBoard> = new DBO<IBBoard>("server.bboards");
-/** Individual bulletin board posts. */
-export const bboard: DBO<IBBoardPost> = new DBO<IBBoardPost>("server.bboard");
 /** Channel message history (opt-in per channel). */
 export const chanHistory: DBO<IChanMessage> = new DBO<IChanMessage>("server.chan_history");
