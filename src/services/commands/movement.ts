@@ -47,21 +47,26 @@ export const matchExits = async (ctx: IContext) => {
           };
 
           if (!en.flags.includes("dark")) {
-            ctx.socket.leave(`${en.location}`);
+            ctx.socket.leave(`#${en.location}`);
 
             const oleave = getExitAttr("OLEAVE");
-            send(
-              players.map((p) => p.id),
-              oleave ? `${moniker(en)} ${oleave}` : `${moniker(en)} leaves for ${dest.data?.name}.`,
-              {}
-            );
+            // Send departure only to sockets of players in the room (by socket ID, not player ID)
+            const departureSockets = wsService.getConnectedSockets()
+              .filter(s => s.cid && players.some(p => p.id === s.cid));
+            if (departureSockets.length > 0) {
+              send(
+                departureSockets.map(s => s.id),
+                oleave ? `${moniker(en)} ${oleave}` : `${moniker(en)} leaves for ${dest.data?.name}.`,
+                {}
+              );
+            }
 
             const leave = getExitAttr("LEAVE");
             if (leave) send([ctx.socket.id], leave, {});
           }
 
           en.location = dest?.id;
-          await dbojs.modify({ id: en.id }, "$set", en);
+          await dbojs.modify({ id: en.id }, "$set", { location: en.location } as Partial<typeof en>);
           ctx.socket.join(`#${en.location}`);
 
           if (!en.flags.includes("dark") && room) {
@@ -75,11 +80,16 @@ export const matchExits = async (ctx: IContext) => {
             });
 
             const oenter = getExitAttr("OENTER");
-            send(
-              arrivals.map((p) => p.id),
-              oenter ? `${moniker(en)} ${oenter}` : `${moniker(en)} arrives from ${room?.data?.name}.`,
-              {}
-            );
+            // Send arrival only to sockets of players in the destination room (by socket ID)
+            const arrivalSockets = wsService.getConnectedSockets()
+              .filter(s => s.cid && arrivals.some(p => p.id === s.cid));
+            if (arrivalSockets.length > 0) {
+              send(
+                arrivalSockets.map(s => s.id),
+                oenter ? `${moniker(en)} ${oenter}` : `${moniker(en)} arrives from ${room?.data?.name}.`,
+                {}
+              );
+            }
 
             const enter = getExitAttr("ENTER");
             if (enter) send([ctx.socket.id], enter, {});
@@ -112,10 +122,14 @@ export const matchExits = async (ctx: IContext) => {
           send([ctx.socket.id], "You can't go that way.");
 
           if (players.length > 0) {
-            send(
-              players.map((p) => p.id),
-              `${moniker(en)} tries to go ${exit.data?.name}, but fails.`
-            );
+            const failSockets = wsService.getConnectedSockets()
+              .filter(s => s.cid && players.some(p => p.id === s.cid));
+            if (failSockets.length > 0) {
+              send(
+                failSockets.map(s => s.id),
+                `${moniker(en)} tries to go ${exit.data?.name}, but fails.`
+              );
+            }
           }
           return true;
         }
