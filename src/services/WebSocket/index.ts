@@ -274,4 +274,4 @@ export class WebSocketService {
     }
 }
 
-export const wsService = WebSocketService.getInstance();
+export const wsService: WebSocketService = WebSocketService.getInstance();
