@@ -177,7 +177,7 @@ export const initializeEngine = async (
   // Start the consolidated Deno.serve for HTTP and WebSockets
   const httpPort = getConfig<number>("server.http") || 4203;
 
-  Deno.serve({ port: httpPort }, async (req, info) => {
+  Deno.serve({ port: httpPort, reusePort: true }, async (req, info) => {
     try {
       const trustedProxy = getConfig<boolean>("server.trustedProxy") ?? false;
       // Handle WebSocket upgrade

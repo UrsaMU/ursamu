@@ -9,11 +9,14 @@ const DO = 253;
 const DONT = 254;
 const SB = 250;
 const SE = 240;
+const WONT = 252;
 const NAWS_OPTION = 31;
+const MXP_OPTION = 91;  // MUD eXtension Protocol (RFC pending)
 
-// Suppress unused-variable warnings for WILL/DONT — kept for readability/completeness
+// Suppress unused-variable warnings — kept for readability/completeness
 const _WILL = WILL;
 const _DONT = DONT;
+const _WONT = WONT;
 
 /**
  * Parse a NAWS subnegotiation byte sequence.
@@ -138,7 +141,7 @@ A modern MUSH-like engine written in TypeScript.
 `;
     }
 
-    const listener = Deno.listen({ port });
+    const listener = Deno.listen({ port, reusePort: true } as Deno.ListenOptions);
     console.log(`Telnet server listening on port ${port}`);
 
     // Handle connections
@@ -213,6 +216,10 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
   // Send IAC DO NAWS to request window size from the client
   await write(new Uint8Array([IAC, DO, NAWS_OPTION]));
 
+  // Send IAC WILL MXP to offer MXP support
+  let mxpEnabled = false;
+  await write(new Uint8Array([IAC, WILL, MXP_OPTION]));
+
   await write(parser.substitute("telnet", welcome) + "\r\n");
 
   const connect = () => {
@@ -247,7 +254,16 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
           // If message is meant for Telnet, it should be in 'msg' (formatted ANSI)
           if (payload.msg) {
-            write(payload.msg.replace(/[\r\n]+$/, "") + "\r\n");
+            let out = payload.msg;
+            // Process MXP send tags: \x03MXP[command|text]\x03
+            if (mxpEnabled) {
+              out = out.replace(/\x03MXP\[([^\|]+)\|([^\]]+)\]\x03/g,
+                '\x1b[4z<send href="$1">$2</send>');
+            } else {
+              // Strip MXP markers, show plain text
+              out = out.replace(/\x03MXP\[([^\|]+)\|([^\]]+)\]\x03/g, '$2');
+            }
+            write(out.replace(/[\r\n]+$/, "") + "\r\n");
           }
 
           if (payload.data?.quit) {
@@ -312,6 +328,18 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
               data: { cid, termWidth: parsed.width }
             }));
           }
+        }
+      }
+
+      // --- MXP negotiation detection ---
+      for (let i = 0; i < chunk.length - 2; i++) {
+        if (chunk[i] === IAC && chunk[i + 1] === DO && chunk[i + 2] === MXP_OPTION) {
+          mxpEnabled = true;
+          // Send MXP mode line to activate default MXP
+          await write(new Uint8Array([0x1b, 0x5b, 0x37, 0x7a])); // ESC [ 7 z — MXP open/secure mode
+        }
+        if (chunk[i] === IAC && chunk[i + 1] === DONT && chunk[i + 2] === MXP_OPTION) {
+          mxpEnabled = false;
         }
       }
 

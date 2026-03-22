@@ -61,6 +61,17 @@ parser.addSubs(
   { before: /%\(/g, after: "(" },
   { before: /%\)/g, after: ")" },
 
+  // MXP send links: %mxp[command|visible text] -> marker for telnet layer
+  // @ts-ignore: mu-parser supports functions
+  { before: /%mxp\[([^\|]+)\|([^\]]+)\]/g,
+    // @ts-ignore: mu-parser supports functions
+    after: ((_match: string, cmd: string, text: string) => {
+      return `\x03MXP[${cmd}|${text}]\x03`;
+    // deno-lint-ignore no-explicit-any
+    }) as any,
+    strip: "$2"
+  },
+
   //color
   { before: /%[cx]n/g, after: "\x1b[0m", strip: "" },
   { before: /%[cx]x/g, after: "\x1b[30m", strip: "" },
