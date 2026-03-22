@@ -1,7 +1,6 @@
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { getConfig } from "../Config/mod.ts";
 import type { IChannel, IChanMessage } from "../../@types/Channels.ts";
-import type { IMail } from "../../@types/IMail.ts";
 import type { ITextEntry } from "../../@types/ITextEntry.ts";
 import type { IScene } from "../../@types/IScene.ts";
 import { dpath, get, set as lodashSet } from "../../../deps.ts";
@@ -349,8 +348,6 @@ export const counters: DBO<ICounters> = new DBO<ICounters>("server.counters");
 export const dbojs: DBO<IDBOBJ> = new DBO<IDBOBJ>("server.db");
 /** Channel definitions store. */
 export const chans: DBO<IChannel> = new DBO<IChannel>("server.chans");
-/** Player mail store. */
-export const mail: DBO<IMail> = new DBO<IMail>("server.mail");
 /** Server text entries (welcome screen, MOTD, etc.). */
 export const texts: DBO<ITextEntry> = new DBO<ITextEntry>("server.texts");
 /** Scene (scene-logger) store. */

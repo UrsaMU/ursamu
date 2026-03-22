@@ -18,7 +18,7 @@
  * ```
  */
 
-import { authHandler, dbObjHandler, configHandler, sceneHandler, buildingHandler, mailHandler } from "./routes/index.ts";
+import { authHandler, dbObjHandler, configHandler, sceneHandler, buildingHandler } from "./routes/index.ts";
 import { meHandler, onlinePlayersHandler, channelsHandler, channelHistoryHandler } from "./routes/playersRouter.ts";
 import { authenticate } from "./middleware/authMiddleware.ts";
 import { getConfig } from "./services/Config/mod.ts";
@@ -301,17 +301,6 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
         });
       }
       return await buildingHandler(req, userId);
-    }
-
-    if (path.startsWith("/api/v1/mail")) {
-      const userId = await authenticate(req);
-      if (!userId) {
-        return new Response(JSON.stringify({ error: "Unauthorized" }), {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-      return await mailHandler(req, userId);
     }
 
     if (path === "/api/v1/config" || path.startsWith("/api/v1/config/") ||

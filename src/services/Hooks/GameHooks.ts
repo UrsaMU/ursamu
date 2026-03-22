@@ -100,6 +100,15 @@ export interface SceneClearEvent {
   status:    string;
 }
 
+export interface MailReceivedEvent {
+  /** ID of the player who received the mail. */
+  recipientId: string;
+  /** ID of the new mail record in mail.messages. */
+  mailId:      string;
+  subject:     string;
+  senderName:  string;
+}
+
 // ─── hook map ─────────────────────────────────────────────────────────────────
 
 export type GameHookMap = {
@@ -127,6 +136,8 @@ export type GameHookMap = {
   "scene:title":     (e: SceneTitleEvent)     => void | Promise<void>;
   /** The scene was closed or finished. */
   "scene:clear":     (e: SceneClearEvent)     => void | Promise<void>;
+  /** A mail message was delivered to a recipient. */
+  "mail:received":   (e: MailReceivedEvent)   => void | Promise<void>;
 };
 
 type HandlerList = { [K in keyof GameHookMap]: GameHookMap[K][] };
@@ -146,6 +157,7 @@ const _handlers: HandlerList = {
   "scene:set":       [],
   "scene:title":     [],
   "scene:clear":     [],
+  "mail:received":   [],
 };
 
 // ─── public API ───────────────────────────────────────────────────────────────
