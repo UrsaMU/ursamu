@@ -274,6 +274,9 @@ if (!existsSync(manifestPath)) {
     let manifestDirty = false;
     const refChanges: string[] = [];
 
+    const gamePluginNames = new Set(gameManifest.plugins.map(p => p.name));
+    const added: string[] = [];
+
     for (const plugin of gameManifest.plugins) {
       const upstream = upstreamByName[plugin.name];
       if (upstream?.ref && plugin.ref !== upstream.ref) {
@@ -283,14 +286,35 @@ if (!existsSync(manifestPath)) {
       }
     }
 
+    // Add any default plugins that are missing from the game manifest entirely
+    for (const upstream of DEFAULT_PLUGINS_MANIFEST.plugins) {
+      if (!gamePluginNames.has(upstream.name)) {
+        gameManifest.plugins.push({ ...upstream });
+        added.push(`  ${bold(cyan(upstream.name))}  ${green(upstream.ref ?? "unpinned")}`);
+        manifestDirty = true;
+      }
+    }
+
     if (manifestDirty) {
       if (!dryRun) {
         await Deno.writeTextFile(manifestPath, JSON.stringify(gameManifest, null, 2));
-        console.log(`${green("✓")} Synced plugin refs in src/plugins/plugins.manifest.json:`);
-        refChanges.forEach(l => console.log(l));
+        if (refChanges.length) {
+          console.log(`${green("✓")} Synced plugin refs in src/plugins/plugins.manifest.json:`);
+          refChanges.forEach(l => console.log(l));
+        }
+        if (added.length) {
+          console.log(`${green("✓")} Added new default plugins to src/plugins/plugins.manifest.json:`);
+          added.forEach(l => console.log(l));
+        }
       } else {
-        console.log(`  Would update plugin refs:`);
-        refChanges.forEach(l => console.log(l));
+        if (refChanges.length) {
+          console.log(`  Would update plugin refs:`);
+          refChanges.forEach(l => console.log(l));
+        }
+        if (added.length) {
+          console.log(`  Would add missing default plugins:`);
+          added.forEach(l => console.log(l));
+        }
       }
     } else {
       console.log(`${green("✓")} Plugin refs already up to date.`);
