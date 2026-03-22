@@ -37,7 +37,7 @@ export const DEFAULT_PLUGINS_MANIFEST = {
     {
       name: "mail",
       url: "https://github.com/UrsaMU/mail-plugin",
-      ref: "v1.0.0",
+      ref: "v1.0.1",
       description: "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry.",
       ursamu: ">=1.9.3",
     },
