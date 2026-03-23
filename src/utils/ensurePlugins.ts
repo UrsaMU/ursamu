@@ -110,6 +110,42 @@ export function buildCloneSteps(url: string, dest: string, ref: string | undefin
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
+const GIT_STEP_TIMEOUT_MS = 30_000;
+
+/**
+ * Runs a single `git` command with a hard timeout.
+ * Kills the child process and returns a failure result if the timeout elapses.
+ * Prevents `ensurePlugins` from blocking server startup indefinitely when
+ * GitHub is unreachable or DNS resolution stalls.
+ */
+async function runGitStep(
+  args: string[],
+  env: Record<string, string>,
+): Promise<{ success: boolean; stderr: string }> {
+  const proc = new Deno.Command("git", {
+    args,
+    stdout: "null",
+    stderr: "piped",
+    env,
+  }).spawn();
+
+  // Drain stderr into a buffer while the process runs
+  const stderrText = new Response(proc.stderr).text();
+
+  const statusOrTimeout = await Promise.race([
+    proc.status,
+    new Promise<null>(resolve => setTimeout(() => resolve(null), GIT_STEP_TIMEOUT_MS)),
+  ]);
+
+  if (statusOrTimeout === null) {
+    // Timed out — kill the child so it does not linger
+    try { proc.kill("SIGKILL"); } catch { /* already dead */ }
+    return { success: false, stderr: `Git timed out after ${GIT_STEP_TIMEOUT_MS / 1_000}s` };
+  }
+
+  return { success: statusOrTimeout.success, stderr: await stderrText.catch(() => "") };
+}
+
 async function readRegistry(registryPath: string): Promise<Registry> {
   try {
     if (!await exists(registryPath)) return {};
@@ -192,15 +228,11 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
     try {
       const steps = buildCloneSteps(entry.url, tempDir, entry.ref);
       let stepFailed = false;
+      const gitEnv = { ...Deno.env.toObject(), GIT_TERMINAL_PROMPT: "0" };
       for (const stepArgs of steps) {
-        const { success, stderr } = await new Deno.Command("git", {
-          args: stepArgs,
-          stdout: "piped",
-          stderr: "piped",
-          env: { ...Deno.env.toObject(), GIT_TERMINAL_PROMPT: "0" },
-        }).output();
+        const { success, stderr } = await runGitStep(stepArgs, gitEnv);
         if (!success) {
-          console.error(`[ensurePlugins] Failed to install "${entry.name}": ${new TextDecoder().decode(stderr).trim()}`);
+          console.error(`[ensurePlugins] Failed to install "${entry.name}": ${stderr.trim()}`);
           stepFailed = true;
           break;
         }

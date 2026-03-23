@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/ursamu",
-  "version": "1.9.23",
+  "version": "1.9.24",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",
@@ -25,7 +25,7 @@
     "exclude": ["tests", "data"]
   },
   "tasks": {
-    "start": "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/main.ts",
+    "start": "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/cli/start.ts",
     "dev": "bash ./scripts/run.sh",
     "daemon": "bash ./scripts/daemon.sh",
     "stop": "bash ./scripts/stop.sh",
