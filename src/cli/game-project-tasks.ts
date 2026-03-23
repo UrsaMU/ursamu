@@ -22,8 +22,8 @@ export const DEFAULT_PLUGINS_MANIFEST = {
   plugins: [
     {
       name: "rhost-vision",
-      url: "https://github.com/chogan1981/ursamu-rhost-vision",
-      ref: "5cd051d989c4835279e270506acf89923f8e7f80",
+      url: "https://github.com/UrsaMU/ursamu-rhost-vision",
+      ref: "v1.1.0",
       description: "Rhost-style display — look, who, page, score, examine, inventory, +finger, +where, +staff.",
       ursamu: ">=1.8.0",
     },
