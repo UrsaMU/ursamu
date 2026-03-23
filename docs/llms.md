@@ -467,12 +467,18 @@ addCmd({
 ## IPlugin — Plugin Lifecycle
 
 ```typescript
+interface IPluginDependency {
+  name:    string;   // must match another plugin's IPlugin.name exactly
+  version: string;   // semver range, e.g. "^1.0.0", ">=2.1.0"
+}
+
 interface IPlugin {
-  name:         string;
-  version:      string;
-  description?: string;
-  init?:        () => boolean | Promise<boolean>;  // return false to abort
-  remove?:      () => void | Promise<void>;
+  name:          string;
+  version:       string;
+  description?:  string;
+  dependencies?: IPluginDependency[];  // see Plugin Coupling Patterns below
+  init?:         () => boolean | Promise<boolean>;  // return false to abort
+  remove?:       () => void | Promise<void>;
 }
 
 // index.ts
@@ -562,6 +568,22 @@ await mu();
 ---
 
 ## GameHooks — Engine Event Bus
+
+`GameHookMap` is an **interface** — plugins can extend it via TypeScript
+declaration merging to add their own typed events without modifying the engine:
+
+```typescript
+// In your plugin's augmentation file:
+import type { IJob } from "./types.ts";
+declare module "../../../services/Hooks/GameHooks.ts" {
+  interface GameHookMap {
+    "job:created": (job: IJob) => void | Promise<void>;
+  }
+}
+```
+
+Once imported, all `gameHooks.on/off/emit` calls become fully typed for the
+new event across the entire codebase.
 
 ```typescript
 import { gameHooks } from "jsr:@ursamu/ursamu";
@@ -835,4 +857,96 @@ Sandbox scripts use `inlineUtils(theme)` to embed helpers as generated JS.
 
 ---
 
-*Generated from `src/@types/UrsamuSDK.ts`, `src/services/Sandbox/worker.ts`, and source review. Last updated: 2026-03-21.*
+---
+
+## Plugin Coupling Patterns
+
+### Rule: never use `@ursamu/ursamu/*` sub-paths inside `src/plugins/`
+
+When running the engine directly, Deno resolves `@ursamu/ursamu` from the
+local `deno.json` — not from JSR. A sub-path export that is absent from the
+local `deno.json` will halt startup even if the published JSR version has it.
+
+| Context | Correct import |
+|---|---|
+| Plugin importing another **bundled** plugin | Relative: `../../jobs/mod.ts` |
+| External plugin (separate repo) importing engine types | Sub-path: `@ursamu/ursamu/jobs` |
+
+### Two strategies for plugin-to-plugin communication
+
+**Tight coupling — use `dependencies`**
+
+When plugin B genuinely cannot function without plugin A's API (types, DB
+access, configuration):
+
+```typescript
+// discord/src/index.ts
+export const plugin: IPlugin = {
+  name: "discord",
+  version: "1.1.0",
+  dependencies: [{ name: "chargen", version: ">=1.0.0" }],
+  // chargen is guaranteed to be init()'d before discord
+};
+```
+
+Startup behavior:
+- Dep missing or version out of range → **throws, server halts**
+- Dep's `init()` returned false → dependent is cascade-skipped, server continues
+- Circular dependency → **throws, server halts** (fix: use `gameHooks` instead)
+
+**Loose coupling — use `gameHooks` declaration merging**
+
+When plugin B only needs to *react* to plugin A's lifecycle events (no types,
+no direct API calls):
+
+```typescript
+// In plugin A (jobs) — game-hooks-augment.ts:
+declare module "../../../services/Hooks/GameHooks.ts" {
+  interface GameHookMap {
+    "job:created": (job: IJob) => void | Promise<void>;
+  }
+}
+
+// In plugin A's hooks.ts — bridge emit to gameHooks:
+await gameHooks.emit("job:created", job);   // fires AFTER jobHooks subscribers
+
+// In plugin B (discord) — no jobs import needed:
+import { gameHooks } from "@ursamu/ursamu";
+gameHooks.on("job:created", async (job) => { /* post to webhook */ });
+```
+
+Loose coupling means:
+- Plugin B has no `dependencies` entry for plugin A
+- Plugin B works whether or not plugin A is installed
+- No import resolution errors regardless of JSR publish state
+
+### Case study: discord → jobs import error
+
+**Symptom** (`deno task start`):
+```
+Error loading plugin from .../discord/index.ts:
+  TypeError: Unknown export './jobs' for '@ursamu/ursamu'.
+```
+
+**Root cause**: `discord/src/job-hooks.ts` imported `jobHooks` from
+`@ursamu/ursamu/jobs`. When running the engine directly, `@ursamu/ursamu`
+resolves to the local `deno.json` whose exports did not include `./jobs`.
+
+**Wrong fix**: Add `"./jobs": "..."` to `deno.json` exports and leave the
+cross-plugin import as-is. This silences the error locally but doesn't address
+the architectural problem.
+
+**Right fix (applied)**:
+1. `GameHookMap` changed from `type` to `interface` — enables declaration merging.
+2. Jobs plugin added `game-hooks-augment.ts` extending `GameHookMap` with
+   `job:created`, `job:commented`, etc.
+3. Jobs `jobHooks.emit()` now also bridges to `gameHooks.emit()`.
+4. Discord `job-hooks.ts` uses `gameHooks.on("job:created", ...)` —
+   no import from the jobs plugin at all.
+
+Result: discord no longer declares a `jobs` dependency. It reacts to job
+events whether or not it knows jobs is installed.
+
+---
+
+*Generated from `src/@types/UrsamuSDK.ts`, `src/services/Sandbox/worker.ts`, and source review. Last updated: 2026-03-22.*

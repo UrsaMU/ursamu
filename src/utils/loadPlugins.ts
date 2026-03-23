@@ -32,8 +32,6 @@ export async function loadPlugins(dir: string): Promise<IPlugin[]> {
           const pluginDir = dpath.dirname(entry.path);
           const pluginName = dpath.basename(pluginDir);
           
-          console.log(`Loading plugin from ${entry.path}`);
-          
           // Import the plugin from a runtime-discovered filesystem path.
           // The file:// URL bypasses the import map entirely, so the JSR
           // "unanalyzable-dynamic-import" warning here is a false positive —
@@ -43,24 +41,12 @@ export async function loadPlugins(dir: string): Promise<IPlugin[]> {
           if (module.default && typeof module.default === "object") {
             const plugin = module.default as IPlugin;
             
-            // Validate the plugin
-            if (!plugin.name) {
-              console.warn(`Plugin at ${entry.path} does not have a name, using directory name: ${pluginName}`);
-              plugin.name = pluginName;
-            }
+            if (!plugin.name) plugin.name = pluginName;
+            if (!plugin.version) plugin.version = "0.0.1";
             
-            if (!plugin.version) {
-              console.warn(`Plugin ${plugin.name} does not have a version, using 0.0.1`);
-              plugin.version = "0.0.1";
-            }
-            
-            // Register the plugin with the configuration system
             registerPlugin(plugin);
             
-            // Add to the loaded plugins
             loadedPlugins.push(plugin);
-            
-            console.log(`Plugin ${plugin.name} v${plugin.version} loaded`);
           } else {
             console.warn(`Module at ${entry.path} does not export a default plugin object`);
           }
@@ -89,7 +75,6 @@ export async function reloadPlugins(dir: string, existingPlugins: IPlugin[]): Pr
     try {
       if (plugin.remove) {
         await plugin.remove();
-        console.log(`[reload] Plugin ${plugin.name} removed.`);
       }
     } catch (e) {
       console.error(`[reload] Error removing plugin ${plugin.name}:`, e);
@@ -111,8 +96,6 @@ export async function reloadPlugins(dir: string, existingPlugins: IPlugin[]): Pr
           const pluginDir = dpath.dirname(entry.path);
           const pluginName = dpath.basename(pluginDir);
 
-          console.log(`[reload] Reloading plugin from ${entry.path}`);
-
           // Cache-busting import to force Deno to load fresh module
           const module = await import(dpath.toFileUrl(entry.path).href + cacheBuster);
 
@@ -128,8 +111,6 @@ export async function reloadPlugins(dir: string, existingPlugins: IPlugin[]): Pr
             if (plugin.init) {
               await plugin.init();
             }
-
-            console.log(`[reload] Plugin ${plugin.name} v${plugin.version} reloaded.`);
           }
         } catch (error) {
           console.error(`[reload] Error reloading plugin from ${entry.path}:`, error);
