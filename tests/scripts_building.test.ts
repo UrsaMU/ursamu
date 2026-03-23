@@ -19,9 +19,9 @@ import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 // ---------------------------------------------------------------------------
 
 const RAW_CREATE   = await Deno.readTextFile("./system/scripts/create.ts");
-const RAW_DIG      = await Deno.readTextFile("./system/scripts/dig.ts");
-const RAW_DESCRIBE = await Deno.readTextFile("./system/scripts/describe.ts");
-const RAW_OPEN     = await Deno.readTextFile("./system/scripts/open.ts");
+const RAW_DIG      = await Deno.readTextFile("../builder-plugin/scripts/dig.ts");
+const RAW_DESCRIBE = await Deno.readTextFile("../builder-plugin/scripts/describe.ts");
+const RAW_OPEN     = await Deno.readTextFile("../builder-plugin/scripts/open.ts");
 
 // ---------------------------------------------------------------------------
 // Helpers

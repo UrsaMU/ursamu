@@ -16,7 +16,7 @@ import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 // ---------------------------------------------------------------------------
 
 const RAW_FLAGS = await Deno.readTextFile("./system/scripts/flags.ts");
-const RAW_SET   = await Deno.readTextFile("./system/scripts/set.ts");
+const RAW_SET   = await Deno.readTextFile("../builder-plugin/scripts/set.ts");
 const RAW_DOING = await Deno.readTextFile("./system/scripts/doing.ts");
 
 // ---------------------------------------------------------------------------
@@ -257,7 +257,7 @@ Deno.test("@create — quota is decremented and persisted to DB", OPTS, async ()
 });
 
 Deno.test("@dig — quota is decremented and persisted to DB", OPTS, async () => {
-  const RAW_DIG = await Deno.readTextFile("./system/scripts/dig.ts");
+  const RAW_DIG = await Deno.readTextFile("../builder-plugin/scripts/dig.ts");
   await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
   const actor = await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Player", quota: 5 }, location: ROOM_ID });
 
@@ -275,7 +275,7 @@ Deno.test("@dig — quota is decremented and persisted to DB", OPTS, async () =>
 });
 
 Deno.test("@dig — superuser bypasses quota check", OPTS, async () => {
-  const RAW_DIG = await Deno.readTextFile("./system/scripts/dig.ts");
+  const RAW_DIG = await Deno.readTextFile("../builder-plugin/scripts/dig.ts");
   await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
   const actor = await dbojs.create({ id: ACTOR_ID, flags: "player superuser connected", data: { name: "Super", quota: 0 }, location: ROOM_ID });
 

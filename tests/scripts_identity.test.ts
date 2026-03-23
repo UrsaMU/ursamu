@@ -11,7 +11,7 @@ import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 import { dbojs } from "../src/services/Database/database.ts";
 import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 
-const RAW_NAME    = await Deno.readTextFile("./system/scripts/name.ts");
+const RAW_NAME    = await Deno.readTextFile("../builder-plugin/scripts/name.ts");
 const RAW_MONIKER = await Deno.readTextFile("./system/scripts/moniker.ts");
 const RAW_ALIAS   = await Deno.readTextFile("./system/scripts/alias.ts");
 

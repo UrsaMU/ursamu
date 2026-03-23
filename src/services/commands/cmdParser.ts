@@ -70,12 +70,10 @@ export function registerScript(name: string, content: string): void {
 
 /** Names of all engine system scripts — used for alias scanning when no local system/scripts dir exists. */
 const ENGINE_SCRIPT_NAMES = [
-  "admin","alias","chancreate","chandestroy","channels","chanset","clone","connect",
-  "create","describe","destroy","dig","doing","drop","emit","examine","find","flags",
-  "format","get","give","help","home","inventory","link","lock","look","mail","mailadd",
-  "moniker","motd","name","open","page","parent","pemit","pose","quit","quota","remit",
-  "say","score","search","set","setAttr","stats","teleport","think","trigger","unlink",
-  "update","who","wipe",
+  "admin","alias","chancreate","chandestroy","channels","chanset","connect","create",
+  "doing","drop","emit","find","flags","format","get","give","help","home","inventory",
+  "look","mail","mailadd","moniker","motd","page","pemit","pose","quit","remit",
+  "say","score","search","stats","teleport","think","trigger","update","who",
   "tel","forceCmd","sweep","entrances",
 ];
 

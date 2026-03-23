@@ -12,9 +12,9 @@ import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 import { dbojs, DBO } from "../src/services/Database/database.ts";
 import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 
-const RAW_SET      = await Deno.readTextFile("./system/scripts/set.ts");
-const RAW_SETATTR  = await Deno.readTextFile("./system/scripts/setAttr.ts");
-const RAW_EXAMINE  = await Deno.readTextFile("./system/scripts/examine.ts");
+const RAW_SET      = await Deno.readTextFile("../builder-plugin/scripts/set.ts");
+const RAW_SETATTR  = await Deno.readTextFile("../builder-plugin/scripts/setAttr.ts");
+const RAW_EXAMINE  = await Deno.readTextFile("../builder-plugin/scripts/examine.ts");
 const RAW_INVENTORY = await Deno.readTextFile("./system/scripts/inventory.ts");
 
 function wrapScript(raw: string): string {

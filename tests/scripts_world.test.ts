@@ -12,8 +12,8 @@ import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 import { DBO } from "../src/services/Database/database.ts";
 
-const RAW_LINK     = await Deno.readTextFile("./system/scripts/link.ts");
-const RAW_UNLINK   = await Deno.readTextFile("./system/scripts/unlink.ts");
+const RAW_LINK     = await Deno.readTextFile("../builder-plugin/scripts/link.ts");
+const RAW_UNLINK   = await Deno.readTextFile("../builder-plugin/scripts/unlink.ts");
 const RAW_TELEPORT = await Deno.readTextFile("./system/scripts/teleport.ts");
 const RAW_SEARCH   = await Deno.readTextFile("./system/scripts/search.ts");
 
