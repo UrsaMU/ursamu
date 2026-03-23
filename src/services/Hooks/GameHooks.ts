@@ -137,8 +137,15 @@ export interface ObjectModifiedEvent {
 }
 
 // ─── hook map ─────────────────────────────────────────────────────────────────
+// Declared as an interface so plugins can extend it via declaration merging:
+//
+//   declare module "@ursamu/ursamu" {
+//     interface GameHookMap {
+//       "my:event": (payload: MyPayload) => void | Promise<void>;
+//     }
+//   }
 
-export type GameHookMap = {
+export interface GameHookMap {
   /** A player said something in a room. */
   "player:say":      (e: SayEvent)            => void | Promise<void>;
   /** A player posed/emoted in a room. */
@@ -173,28 +180,25 @@ export type GameHookMap = {
   "object:modified":  (e: ObjectModifiedEvent)  => void | Promise<void>;
 };
 
-type HandlerList = { [K in keyof GameHookMap]: GameHookMap[K][] };
-
 // ─── registry ─────────────────────────────────────────────────────────────────
+// Map-based (not a typed record) so plugins that extend GameHookMap via
+// declaration merging can register handlers for dynamically-added event keys
+// without modifying this file.  A typed record would limit keys to the compile-
+// time snapshot of GameHookMap; a Map accepts any string at runtime.
 
-const _handlers: HandlerList = {
-  "player:say":       [],
-  "player:pose":      [],
-  "player:page":      [],
-  "player:move":      [],
-  "player:login":     [],
-  "player:logout":    [],
-  "channel:message":  [],
-  "scene:created":    [],
-  "scene:pose":       [],
-  "scene:set":        [],
-  "scene:title":      [],
-  "scene:clear":      [],
-  "mail:received":    [],
-  "object:created":   [],
-  "object:destroyed": [],
-  "object:modified":  [],
-};
+type AnyHandler = (...args: unknown[]) => void | Promise<void>;
+const _handlers = new Map<string, AnyHandler[]>();
+
+/**
+ * Lazily initialise and return the handler list for `event`.
+ * Creating the list on first access avoids pre-allocating arrays for every
+ * possible event name, including plugin-defined ones unknown at engine startup.
+ */
+function getList(event: string): AnyHandler[] {
+  let list = _handlers.get(event);
+  if (!list) { list = []; _handlers.set(event, list); }
+  return list;
+}
 
 // ─── public API ───────────────────────────────────────────────────────────────
 
@@ -233,14 +237,14 @@ export const gameHooks: IGameHooks = {
    * ```
    */
   on<K extends keyof GameHookMap>(event: K, handler: GameHookMap[K]): void {
-    const list = _handlers[event] as GameHookMap[K][];
-    if (!list.includes(handler)) list.push(handler);
+    const list = getList(event as string);
+    if (!list.includes(handler as AnyHandler)) list.push(handler as AnyHandler);
   },
 
   /** Remove a previously registered handler. */
   off<K extends keyof GameHookMap>(event: K, handler: GameHookMap[K]): void {
-    const list = _handlers[event] as GameHookMap[K][];
-    const idx  = list.indexOf(handler);
+    const list = getList(event as string);
+    const idx  = list.indexOf(handler as AnyHandler);
     if (idx !== -1) list.splice(idx, 1);
   },
 
@@ -249,9 +253,9 @@ export const gameHooks: IGameHooks = {
     event: K,
     ...args: Parameters<GameHookMap[K]>
   ): Promise<void> {
-    for (const handler of [...(_handlers[event] as ((...a: Parameters<GameHookMap[K]>) => void | Promise<void>)[])]) {
+    for (const handler of [...getList(event as string)]) {
       try {
-        await (handler as (...a: Parameters<GameHookMap[K]>) => void | Promise<void>)(...args);
+        await handler(...(args as unknown[]));
       } catch (e) {
         console.error(`[GameHooks] Uncaught error in "${event}" handler:`, e);
       }

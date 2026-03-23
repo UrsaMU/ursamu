@@ -7,7 +7,7 @@
     "author": "unknown",
     "ref": "v1.1.0",
     "installedAt": "2026-03-22T16:37:17.720Z",
-    "updatedAt": "2026-03-22T16:37:17.720Z"
+    "updatedAt": "2026-03-23T01:32:08.169Z"
   },
   "jobs": {
     "name": "jobs",
@@ -17,7 +17,7 @@
     "author": "unknown",
     "ref": "v1.1.0",
     "installedAt": "2026-03-22T16:37:18.216Z",
-    "updatedAt": "2026-03-22T16:37:18.216Z"
+    "updatedAt": "2026-03-23T01:32:08.612Z"
   },
   "events": {
     "name": "events",
@@ -27,7 +27,7 @@
     "author": "unknown",
     "ref": "v1.0.0",
     "installedAt": "2026-03-22T16:37:18.705Z",
-    "updatedAt": "2026-03-22T16:37:18.705Z"
+    "updatedAt": "2026-03-23T01:32:09.059Z"
   },
   "wiki": {
     "name": "wiki",
@@ -37,7 +37,7 @@
     "author": "unknown",
     "ref": "v1.0.0",
     "installedAt": "2026-03-22T16:37:19.645Z",
-    "updatedAt": "2026-03-22T16:37:19.645Z"
+    "updatedAt": "2026-03-23T01:32:09.998Z"
   },
   "mail": {
     "name": "mail",
@@ -45,9 +45,9 @@
     "description": "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry, and REST API.",
     "source": "https://github.com/UrsaMU/mail-plugin",
     "author": "unknown",
-    "ref": "v1.0.0",
+    "ref": "v1.0.1",
     "installedAt": "2026-03-22T16:37:20.141Z",
-    "updatedAt": "2026-03-22T16:37:20.141Z"
+    "updatedAt": "2026-03-23T01:32:10.478Z"
   },
   "builder": {
     "name": "builder",
@@ -57,6 +57,26 @@
     "author": "unknown",
     "ref": "v1.0.0",
     "installedAt": "2026-03-22T16:37:20.624Z",
-    "updatedAt": "2026-03-22T16:37:20.624Z"
+    "updatedAt": "2026-03-23T01:32:10.960Z"
+  },
+  "rhost-vision": {
+    "name": "rhost-vision",
+    "version": "1.1.0",
+    "description": "Rhost-style display — look, who, page, score, examine, inventory, +finger, +where, +staff",
+    "source": "https://github.com/chogan1981/ursamu-rhost-vision",
+    "author": "unknown",
+    "ref": "5cd051d989c4835279e270506acf89923f8e7f80",
+    "installedAt": "2026-03-23T01:32:07.605Z",
+    "updatedAt": "2026-03-23T01:32:07.605Z"
+  },
+  "bbs": {
+    "name": "bbs",
+    "version": "1.0.0",
+    "description": "Full-featured Myrddin-style BBS — boards, threading, categories, IC/OOC tags, sticky posts, moderation, Discord webhooks, and scene linking.",
+    "source": "https://github.com/UrsaMU/bbs-plugin",
+    "author": "unknown",
+    "ref": "v1.0.1",
+    "installedAt": "2026-03-23T01:32:09.515Z",
+    "updatedAt": "2026-03-23T01:32:09.515Z"
   }
 }
