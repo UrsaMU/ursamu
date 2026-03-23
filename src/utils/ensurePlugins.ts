@@ -114,33 +114,42 @@ const GIT_STEP_TIMEOUT_MS = 30_000;
 
 /**
  * Runs a single `git` command with a hard timeout.
- * Kills the child process and returns a failure result if the timeout elapses.
- * Prevents `ensurePlugins` from blocking server startup indefinitely when
- * GitHub is unreachable or DNS resolution stalls.
+ * Kills the child process and returns a failure result if the timeout elapses,
+ * preventing `ensurePlugins` from blocking server startup indefinitely.
+ * Exported for unit testing; production callers always use the defaults.
+ *
+ * @param args      Arguments forwarded to the command.
+ * @param env       Environment for the child process.
+ * @param options   Optional overrides: `timeoutMs` (default 30 s) and `cmd`
+ *                  (default "git") — the `cmd` override is test-only.
  */
-async function runGitStep(
+export async function runGitStep(
   args: string[],
   env: Record<string, string>,
+  { timeoutMs = GIT_STEP_TIMEOUT_MS, cmd = "git" }: { timeoutMs?: number; cmd?: string } = {},
 ): Promise<{ success: boolean; stderr: string }> {
-  const proc = new Deno.Command("git", {
+  const proc = new Deno.Command(cmd, {
     args,
     stdout: "null",
     stderr: "piped",
     env,
   }).spawn();
 
-  // Drain stderr into a buffer while the process runs
+  // Drain stderr into a buffer while the process runs.
   const stderrText = new Response(proc.stderr).text();
 
   const statusOrTimeout = await Promise.race([
     proc.status,
-    new Promise<null>(resolve => setTimeout(() => resolve(null), GIT_STEP_TIMEOUT_MS)),
+    new Promise<null>(resolve => setTimeout(() => resolve(null), timeoutMs)),
   ]);
 
   if (statusOrTimeout === null) {
-    // Timed out — kill the child so it does not linger
+    // Timed out — kill the child so it does not linger.
     try { proc.kill("SIGKILL"); } catch { /* already dead */ }
-    return { success: false, stderr: `Git timed out after ${GIT_STEP_TIMEOUT_MS / 1_000}s` };
+    // Suppress the stderrText Promise so it cannot become an unhandled rejection
+    // if the pipe errors rather than closing cleanly after SIGKILL.
+    stderrText.catch(() => {});
+    return { success: false, stderr: `Git timed out after ${timeoutMs / 1_000}s` };
   }
 
   return { success: statusOrTimeout.success, stderr: await stderrText.catch(() => "") };

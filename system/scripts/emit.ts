@@ -29,9 +29,11 @@ export default async (u: IUrsamuSDK) => {
     return;
   }
 
-  // Room-targeted form: admin only
+  // Room-targeted form: admin only.
+  // Note: if a builder's message contains "=", it is routed here unintentionally.
+  // The error explains the syntax so the user understands why it was rejected.
   if (!actor.flags.has("admin") && !actor.flags.has("wizard") && !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
+    u.send("Permission denied. (@emit <room>=<message> requires admin+. If your message contains '=', use @oemit instead.)");
     return;
   }
 
