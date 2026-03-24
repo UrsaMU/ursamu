@@ -68,5 +68,18 @@ export const queue = {
       }
     });
     console.log("[Queue] Service initialized.");
-  }
+  },
+
+  /** Cancel all queued tasks for the given executor dbref. */
+  cancelAll: async (executor: string): Promise<number> => {
+    let cancelled = 0;
+    const iter = kv.list<QueueEntry>({ prefix: ["queue"] });
+    for await (const entry of iter) {
+      if (entry.value?.executor === executor) {
+        await kv.delete(entry.key);
+        cancelled++;
+      }
+    }
+    return cancelled;
+  },
 };

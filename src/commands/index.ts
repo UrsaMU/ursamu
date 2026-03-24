@@ -18,4 +18,5 @@ import "./reload.ts";
 import "./test.ts";
 import "./nuke.ts";
 import "./version.ts";
+import "./halt.ts";
 

@@ -41,6 +41,12 @@ export default async (u: IUrsamuSDK) => {
   const targetBaseName = (target.state?.moniker as string) || (target.state?.name as string) || target.name || "Someone";
   const targetDisplay = targetAlias ? `${targetBaseName}(${targetAlias})` : targetBaseName;
 
+  // Notify sender if target has an away message set
+  const away = target.state?.away as string | undefined;
+  if (away) {
+    u.send(`%ch%cy[Away]%cn ${targetDisplay}: ${away}`);
+  }
+
   // Check for pose (starts with :)
   if (rawMessage.startsWith(":")) {
     const pose = rawMessage.slice(1);
