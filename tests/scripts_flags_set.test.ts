@@ -1,27 +1,22 @@
 /**
  * tests/scripts_flags_set.test.ts
  *
- * Tests for:
+ * Tests for engine-owned flag and status scripts:
  *   - system/scripts/flags.ts  (@flags — set/remove flags on objects)
- *   - system/scripts/set.ts    (@set — set/clear attributes on objects)
  *   - system/scripts/doing.ts  (@doing — set player status message)
+ *   - system/scripts/create.ts (@create — quota persistence)
+ *
+ * NOTE: @set and @dig were moved to builder-plugin.
+ * Tests for those commands live in the builder-plugin repo.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 import { dbojs, DBO } from "../src/services/Database/database.ts";
 import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 
-// ---------------------------------------------------------------------------
-// Raw scripts
-// ---------------------------------------------------------------------------
-
-const RAW_FLAGS = await Deno.readTextFile("./system/scripts/flags.ts");
-const RAW_SET   = await Deno.readTextFile("../builder-plugin/scripts/set.ts");
-const RAW_DOING = await Deno.readTextFile("./system/scripts/doing.ts");
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+const RAW_FLAGS  = await Deno.readTextFile("./system/scripts/flags.ts");
+const RAW_DOING  = await Deno.readTextFile("./system/scripts/doing.ts");
+const RAW_CREATE = await Deno.readTextFile("./system/scripts/create.ts");
 
 function wrapScript(rawScript: string, extra = ""): string {
   const stripped = rawScript
@@ -35,7 +30,6 @@ function wrapScript(rawScript: string, extra = ""): string {
     "const _sent = [];",
     "const _origSend = u.send.bind(u);",
     "u.send = (m, t, o) => { _sent.push(m); _origSend(m, t, o); };",
-    // Stub ui.layout so it doesn't resolve the sandbox early
     "u.ui = { ...u.ui, layout: () => {}, panel: (o) => o };",
     extra,
     "await _main(u);",
@@ -119,79 +113,6 @@ Deno.test("@flags — wizard sets flag on object", OPTS, async () => {
 });
 
 // ---------------------------------------------------------------------------
-// @set tests
-// ---------------------------------------------------------------------------
-
-Deno.test("@set — missing / syntax sends usage message", OPTS, async () => {
-  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
-
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@set", ["badformat"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "Usage");
-  await cleanup(ACTOR_ID);
-});
-
-Deno.test("@set — sets attribute on object and persists to DB", OPTS, async () => {
-  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
-  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "SetBox" }, location: ROOM_ID });
-
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@set", ["SetBox/COLOR=blue"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "COLOR");
-
-  // Verify it was persisted
-  const updated = await dbojs.queryOne({ id: THING_ID }) as Record<string, unknown>;
-  assertEquals((updated?.data as Record<string, unknown>)?.COLOR, "blue");
-
-  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
-});
-
-Deno.test("@set — clears attribute when value is empty and persists to DB", OPTS, async () => {
-  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
-  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "SetBox", COLOR: "red" }, location: ROOM_ID });
-
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@set", ["SetBox/COLOR="], { COLOR: "red" });
-  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "cleared");
-
-  // Verify it was removed from DB
-  const updated = await dbojs.queryOne({ id: THING_ID }) as Record<string, unknown>;
-  assertEquals((updated?.data as Record<string, unknown>)?.COLOR, undefined);
-
-  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
-});
-
-Deno.test("@set — rejects system property deletion", OPTS, async () => {
-  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
-  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "SetBox" }, location: ROOM_ID });
-
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@set", ["SetBox/name="]);
-  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "Cannot delete");
-  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
-});
-
-Deno.test("@set — rejects value over 4096 chars", OPTS, async () => {
-  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
-  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player wizard connected", data: { name: "Admin" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "SetBox" }, location: ROOM_ID });
-
-  const big = "x".repeat(4097);
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@set", [`SetBox/NOTE=${big}`]);
-  const result = await sandboxService.runScript(wrapScript(RAW_SET), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "too long");
-  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
-});
-
-// ---------------------------------------------------------------------------
 // @doing tests
 // ---------------------------------------------------------------------------
 
@@ -236,11 +157,10 @@ Deno.test("@doing — rejects message over 100 chars", OPTS, async () => {
 });
 
 // ---------------------------------------------------------------------------
-// Quota persistence tests
+// Quota persistence tests (engine-side: create.ts)
 // ---------------------------------------------------------------------------
 
 Deno.test("@create — quota is decremented and persisted to DB", OPTS, async () => {
-  const RAW_CREATE = await Deno.readTextFile("./system/scripts/create.ts");
   await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
   const actor = await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Player", quota: 5 }, location: ROOM_ID });
 
@@ -253,39 +173,6 @@ Deno.test("@create — quota is decremented and persisted to DB", OPTS, async ()
   assertEquals((updated?.data as Record<string, unknown>)?.quota, 4);
 
   const newId = result.join(" ").match(/#(\w+)/)?.[1];
-  await cleanup(ACTOR_ID, ROOM_ID, ...(newId ? [newId] : []));
-});
-
-Deno.test("@dig — quota is decremented and persisted to DB", OPTS, async () => {
-  const RAW_DIG = await Deno.readTextFile("../builder-plugin/scripts/dig.ts");
-  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
-  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Player", quota: 5 }, location: ROOM_ID });
-
-  const ctx = makeCtx(actor.id, "player connected", "Player", "@dig", ["NewCave"], { quota: 5 });
-  const result = await sandboxService.runScript(wrapScript(RAW_DIG), ctx, SLOW) as string[];
-
-  const plain = result.map((s: string) => s.replace(/%c[a-z]/gi, "").replace(/%[rntbR]/g, "")).join(" ");
-  assertStringIncludes(plain, "Room NewCave created");
-
-  const updated = await dbojs.queryOne({ id: ACTOR_ID }) as Record<string, unknown>;
-  assertEquals((updated?.data as Record<string, unknown>)?.quota, 4);
-
-  const newId = plain.match(/#(\w+)/)?.[1];
-  await cleanup(ACTOR_ID, ROOM_ID, ...(newId ? [newId] : []));
-});
-
-Deno.test("@dig — superuser bypasses quota check", OPTS, async () => {
-  const RAW_DIG = await Deno.readTextFile("../builder-plugin/scripts/dig.ts");
-  await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Test Room" } });
-  const actor = await dbojs.create({ id: ACTOR_ID, flags: "player superuser connected", data: { name: "Super", quota: 0 }, location: ROOM_ID });
-
-  const ctx = makeCtx(actor.id, "player superuser", "Super", "@dig", ["SuperCave"], { quota: 0 });
-  const result = await sandboxService.runScript(wrapScript(RAW_DIG), ctx, SLOW) as string[];
-
-  const plain = result.map((s: string) => s.replace(/%c[a-z]/gi, "").replace(/%[rntbR]/g, "")).join(" ");
-  assertStringIncludes(plain, "Room SuperCave created");
-
-  const newId = plain.match(/#(\w+)/)?.[1];
   await cleanup(ACTOR_ID, ROOM_ID, ...(newId ? [newId] : []));
   await DBO.close();
 });
