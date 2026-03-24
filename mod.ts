@@ -53,6 +53,7 @@ export type {
 // Export WebSocket service — available to plugins that need to reach connected sockets
 export { wsService } from "./src/services/WebSocket/index.ts";
 export type { UserSocket } from "./src/@types/IMSocket.ts";
+import { wsService as _wsService } from "./src/services/WebSocket/index.ts";
 
 // Export command registration and plugin type — available to all plugins and game projects
 export { addCmd, registerScript, registerCmdMiddleware } from "./src/services/commands/cmdParser.ts";
@@ -64,7 +65,7 @@ export type { IUrsamuSDK } from "./src/@types/UrsamuSDK.ts";
 // joinSocketToRoom — lets plugins (e.g. channel-plugin) subscribe a socket to a room
 // after a player:login event without coupling to the WebSocket implementation.
 export function joinSocketToRoom(socketId: string, room: string): void {
-  wsService.joinSocketToRoom(socketId, room);
+  _wsService.joinSocketToRoom(socketId, room);
 }
 
 // Hide internal class implementations by not exporting everything
