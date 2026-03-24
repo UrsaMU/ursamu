@@ -211,10 +211,11 @@ export class WebSocketService {
                 const player = await playerForSocket(sockData);
                 if (player) {
                     await setFlags(player, "!connected");
+                    const { dbojs } = await import("../Database/index.ts");
+                    await dbojs.modify({ id: player.id }, "$set", { "data.lastLogout": Date.now() });
                     await hooks.adisconnect(player);
 
                     if (player.location) {
-                        const { dbojs } = await import("../Database/index.ts");
                         const roomPlayers = await dbojs.query({
                             $and: [{ location: player.location }, { flags: /connected/i }, { id: { $ne: player.id } }]
                         });
