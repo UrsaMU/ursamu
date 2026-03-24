@@ -4,7 +4,6 @@ import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { send } from "../broadcast/index.ts";
 import { dbojs } from "../Database/index.ts";
 import { matchExits } from "./movement.ts";
-import { matchChannel } from "./channels.ts";
 import { Obj } from "../DBObjs/DBObjs.ts";
 import { InterceptorService } from "../Intents/InterceptorService.ts";
 import { intentRegistry } from "../Intents/IntentRegistry.ts";
@@ -68,9 +67,10 @@ export function registerScript(name: string, content: string): void {
   parseAliasesFromContent(content, name);
 }
 
-/** Names of all engine system scripts — used for alias scanning when no local system/scripts dir exists. */
+/** Names of all engine system scripts — used for alias scanning when no local system/scripts dir exists.
+ *  Channel scripts (chancreate, chandestroy, channels, chanset) are provided by channel-plugin, not the engine. */
 const ENGINE_SCRIPT_NAMES = [
-  "admin","alias","chancreate","chandestroy","channels","chanset","connect","create",
+  "admin","alias","connect","create",
   "doing","drop","emit","find","flags","format","get","give","help","home","inventory",
   "look","mail","mailadd","moniker","motd","page","pemit","pose","quit","remit",
   "say","score","search","stats","teleport","think","trigger","update","who",
@@ -134,6 +134,28 @@ export const addCmd = (...cmd: ICmd[]): void => {
 /** Clear all registered legacy commands (used by @reload commands). */
 export const clearCmds = (): void => {
   cmds.length = 0;
+};
+
+/**
+ * Inject a middleware function into the command pipeline.
+ *
+ * Use this in your plugin's `init()` to add custom command interceptors,
+ * such as channel alias dispatch or softcode triggers.
+ *
+ * @example
+ * ```ts
+ * import { registerCmdMiddleware } from "jsr:@ursamu/ursamu";
+ *
+ * registerCmdMiddleware(async (ctx, next) => {
+ *   if (await matchChannel(ctx)) return;
+ *   await next();
+ * });
+ * ```
+ */
+export const registerCmdMiddleware = (
+  fn: Parameters<typeof cmdParser.use>[0]
+): void => {
+  cmdParser.use(fn);
 };
 
 cmdParser.use(async (ctx, next) => {
@@ -363,11 +385,6 @@ cmdParser.use(async (ctx, next) => {
 
 cmdParser.use(async (ctx, next) => {
   if (await matchExits(ctx)) return;
-  await next();
-});
-
-cmdParser.use(async (ctx, next) => {
-  if (await matchChannel(ctx)) return;
   await next();
 });
 

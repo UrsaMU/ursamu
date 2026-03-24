@@ -317,13 +317,8 @@ class LocalSandbox {
                       // Record login time — scoped update to avoid clobbering concurrent writes
                       await scopedUpdate(player.id, { "data.lastLogin": Date.now() });
 
-                      // Feature parity with legacy connect
-                      const { joinChans } = await import("../../utils/joinChans.ts");
                       const { hooks } = await import("../Hooks/index.ts");
-
-                      const ctx = { socket, msg: "" };
-                      await joinChans(ctx);
-                      await hooks.aconnect(player);
+                      await hooks.aconnect(player, socket.id);
                     }
                   }
                   // Send cid back to the WebSocket client so it can reconnect after restart

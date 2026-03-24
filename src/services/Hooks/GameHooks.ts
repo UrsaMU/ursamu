@@ -41,6 +41,8 @@ export interface MoveEvent {
 export interface SessionEvent {
   actorId:   string;
   actorName: string;
+  /** WebSocket socket ID — used by plugins to subscribe the socket to rooms. */
+  socketId?: string;
 }
 
 export interface ChannelMessageEvent {
