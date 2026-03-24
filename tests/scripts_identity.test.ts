@@ -1,17 +1,18 @@
 /**
  * tests/scripts_identity.test.ts
  *
- * Sandbox-driven tests for identity/naming system scripts:
- *   - system/scripts/name.ts    (@name)
+ * Sandbox-driven tests for engine-owned identity scripts:
  *   - system/scripts/moniker.ts (@moniker)
  *   - system/scripts/alias.ts   (@alias)
+ *
+ * NOTE: @name was moved to builder-plugin.
+ * Tests for that command live in the builder-plugin repo.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 import { dbojs } from "../src/services/Database/database.ts";
 import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
 
-const RAW_NAME    = await Deno.readTextFile("./system/scripts/name.ts");
 const RAW_MONIKER = await Deno.readTextFile("./system/scripts/moniker.ts");
 const RAW_ALIAS   = await Deno.readTextFile("./system/scripts/alias.ts");
 
@@ -38,7 +39,6 @@ const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const ROOM_ID  = "id_room1";
 const ACTOR_ID = "id_actor1";
 const THING_ID = "id_thing1";
-const OTHER_ID = "id_thing2";
 
 async function cleanup(...ids: string[]) {
   for (const id of ids) await dbojs.delete({ id }).catch(() => {});
@@ -62,123 +62,6 @@ function makeCtx(
     ...extra,
   };
 }
-
-// ---------------------------------------------------------------------------
-// @name tests
-// ---------------------------------------------------------------------------
-
-Deno.test("@name — no args sends usage message", OPTS, async () => {
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player wizard connected",
-    data: { name: "Admin" },
-    location: ROOM_ID,
-  });
-
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@name", [""]);
-  const result = await sandboxService.runScript(wrapScript(RAW_NAME), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "Usage");
-  await cleanup(ACTOR_ID);
-});
-
-Deno.test("@name — target not found sends 'can't find' message", OPTS, async () => {
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player wizard connected",
-    data: { name: "Admin" },
-    location: ROOM_ID,
-  });
-
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@name", ["GhostObj9999=NewName"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_NAME), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "can't find");
-  await cleanup(ACTOR_ID);
-});
-
-Deno.test("@name — permission denied when actor cannot edit target", OPTS, async () => {
-  const _room = await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player connected",
-    data: { name: "Player" },
-    location: ROOM_ID,
-  });
-  const thing = await dbojs.create({
-    id: THING_ID,
-    flags: "thing",
-    data: { name: "SomeThing" },
-    location: ROOM_ID,
-  });
-
-  // Deny edit permission for THING_ID
-  const ctx = makeCtx(actor.id, "player", "Player", "@name", ["SomeThing=NewName"], {
-    permissions: { [thing.id]: false },
-  });
-  const result = await sandboxService.runScript(wrapScript(RAW_NAME), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "Permission denied");
-  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
-});
-
-Deno.test("@name — successfully renames object and updates DB", OPTS, async () => {
-  const _room = await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player wizard connected",
-    data: { name: "Admin" },
-    location: ROOM_ID,
-  });
-  const thing = await dbojs.create({
-    id: THING_ID,
-    flags: "thing",
-    data: { name: "OldThing" },
-    location: ROOM_ID,
-  });
-
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@name", ["OldThing=NewThing"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_NAME), ctx, SLOW) as string[];
-
-  assertEquals(result.join(" ").includes("Name set") || result.join(" ").includes("set"), true,
-    `Expected success message, got: ${result.join(" ")}`);
-
-  const updated = await dbojs.queryOne({ id: thing.id });
-  // deno-lint-ignore no-explicit-any
-  assertEquals((updated as any)?.data?.name, "NewThing");
-
-  await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
-});
-
-Deno.test("@name — name already taken by another object is rejected", OPTS, async () => {
-  const _room = await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Room" } });
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player wizard connected",
-    data: { name: "Admin" },
-    location: ROOM_ID,
-  });
-  const _thing1 = await dbojs.create({
-    id: THING_ID,
-    flags: "thing",
-    data: { name: "BoxA" },
-    location: ROOM_ID,
-  });
-  const _thing2 = await dbojs.create({
-    id: OTHER_ID,
-    flags: "thing",
-    data: { name: "BoxB" },
-    location: ROOM_ID,
-  });
-
-  // Try to rename BoxA to BoxB (already taken by thing2)
-  const ctx = makeCtx(actor.id, "player wizard", "Admin", "@name", ["BoxA=BoxB"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_NAME), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "taken");
-
-  await cleanup(ACTOR_ID, ROOM_ID, THING_ID, OTHER_ID);
-});
 
 // ---------------------------------------------------------------------------
 // @moniker tests
@@ -209,7 +92,6 @@ Deno.test("@moniker — no moniker value sends usage message", OPTS, async () =>
     location: ROOM_ID,
   });
 
-  // Only target, no moniker after =
   const ctx = makeCtx(actor.id, "player wizard", "Admin", "@moniker", ["Admin="]);
   const result = await sandboxService.runScript(wrapScript(RAW_MONIKER), ctx, SLOW) as string[];
 
@@ -250,7 +132,6 @@ Deno.test("@moniker — wizard successfully sets moniker and persists to DB", OP
   const ctx = makeCtx(actor.id, "player wizard", "Admin", "@moniker", ["Alice=%chAlicia%cn"]);
   const result = await sandboxService.runScript(wrapScript(RAW_MONIKER), ctx, SLOW) as string[];
 
-  // Script sends "Set moniker for <name> to <moniker>."
   assertStringIncludes(result.join(" "), "moniker");
   assertStringIncludes(result.join(" "), "Alice");
 
@@ -325,7 +206,6 @@ Deno.test("@alias — successfully sets alias and reports it", OPTS, async () =>
   assertStringIncludes(result.join(" "), "lantern");
   assertStringIncludes(result.join(" "), "Lamp");
 
-  // Verify alias was written to DB
   const updated = await dbojs.queryOne({ id: thing.id });
   // deno-lint-ignore no-explicit-any
   assertEquals((updated as any)?.data?.alias, "lantern");
@@ -351,8 +231,6 @@ Deno.test("@alias — clearing alias (empty value) removes it from DB", OPTS, as
   const ctx = makeCtx(actor.id, "player wizard", "Admin", "@alias", ["Candle="]);
   const result = await sandboxService.runScript(wrapScript(RAW_ALIAS), ctx, SLOW) as string[];
 
-  // Script sends "Alias for <name> removed."
   assertStringIncludes(result.join(" "), "removed");
-
   await cleanup(ACTOR_ID, ROOM_ID, THING_ID);
 });

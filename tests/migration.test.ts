@@ -36,20 +36,18 @@ Deno.test({
 });
 
 Deno.test({
-  name: "Core Script: set.ts",
+  name: "Core Script: sandbox runs inline script",
   fn: async () => {
-    const setCode = await Deno.readTextFile("./system/scripts/set.ts");
+    // Verifies the sandbox can execute an arbitrary inline script without error.
+    // Builder-plugin script tests (@set, @examine, etc.) live in the builder-plugin repo.
+    const inlineScript = `export default async (u) => { u.send("ping"); };`;
     const context = {
       me: { id: "actor1", name: "PlayerOne", state: {}, flags: ["player"], contents: [] },
-      cmd: { name: "set", args: ["PlayerOne/COLOR=Blue"] },
+      cmd: { name: "ping", args: [] },
       id: "actor1",
       state: {},
-      searchResults: {
-        [JSON.stringify("PlayerOne")]: [{ id: "actor1", name: "PlayerOne", state: {}, flags: ["player"], contents: [] }]
-      }
     };
-    
-    await sandboxService.runScript(setCode, context as SDKContext);
+    await sandboxService.runScript(inlineScript, context as SDKContext);
   },
   sanitizeResources: false,
   sanitizeOps: false
@@ -109,25 +107,8 @@ Deno.test({
   sanitizeOps: false
 });
 
-Deno.test({
-  name: "Core Script: examine.ts",
-  fn: async () => {
-    const examineCode = await Deno.readTextFile("./system/scripts/examine.ts");
-    const context = {
-      me: { id: "actor1", name: "PlayerOne", state: { name: "PlayerOne" }, flags: ["player", "connected"], contents: [] },
-      cmd: { name: "examine", args: ["me"] },
-      id: "actor1",
-      state: {},
-      searchResults: {
-        [JSON.stringify("me")]: [{ id: "actor1", name: "PlayerOne", state: { name: "PlayerOne" }, flags: ["player", "connected"], contents: [] }]
-      }
-    };
-    
-    await sandboxService.runScript(examineCode, context as SDKContext);
-  },
-  sanitizeResources: false,
-  sanitizeOps: false
-});
+// NOTE: Core Script: examine.ts was moved to builder-plugin.
+// Its migration test lives in the builder-plugin repo.
 
 Deno.test({
   name: "Core Script: inventory.ts",

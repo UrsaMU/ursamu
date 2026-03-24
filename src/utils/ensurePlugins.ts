@@ -110,6 +110,51 @@ export function buildCloneSteps(url: string, dest: string, ref: string | undefin
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
 
+const GIT_STEP_TIMEOUT_MS = 30_000;
+
+/**
+ * Runs a single `git` command with a hard timeout.
+ * Kills the child process and returns a failure result if the timeout elapses,
+ * preventing `ensurePlugins` from blocking server startup indefinitely.
+ * Exported for unit testing; production callers always use the defaults.
+ *
+ * @param args      Arguments forwarded to the command.
+ * @param env       Environment for the child process.
+ * @param options   Optional overrides: `timeoutMs` (default 30 s) and `cmd`
+ *                  (default "git") — the `cmd` override is test-only.
+ */
+export async function runGitStep(
+  args: string[],
+  env: Record<string, string>,
+  { timeoutMs = GIT_STEP_TIMEOUT_MS, cmd = "git" }: { timeoutMs?: number; cmd?: string } = {},
+): Promise<{ success: boolean; stderr: string }> {
+  const proc = new Deno.Command(cmd, {
+    args,
+    stdout: "null",
+    stderr: "piped",
+    env,
+  }).spawn();
+
+  // Drain stderr into a buffer while the process runs.
+  const stderrText = new Response(proc.stderr).text();
+
+  const statusOrTimeout = await Promise.race([
+    proc.status,
+    new Promise<null>(resolve => setTimeout(() => resolve(null), timeoutMs)),
+  ]);
+
+  if (statusOrTimeout === null) {
+    // Timed out — kill the child so it does not linger.
+    try { proc.kill("SIGKILL"); } catch { /* already dead */ }
+    // Suppress the stderrText Promise so it cannot become an unhandled rejection
+    // if the pipe errors rather than closing cleanly after SIGKILL.
+    stderrText.catch(() => {});
+    return { success: false, stderr: `Git timed out after ${timeoutMs / 1_000}s` };
+  }
+
+  return { success: statusOrTimeout.success, stderr: await stderrText.catch(() => "") };
+}
+
 async function readRegistry(registryPath: string): Promise<Registry> {
   try {
     if (!await exists(registryPath)) return {};
@@ -192,15 +237,11 @@ export async function ensurePlugins(pluginsDir: string): Promise<void> {
     try {
       const steps = buildCloneSteps(entry.url, tempDir, entry.ref);
       let stepFailed = false;
+      const gitEnv = { ...Deno.env.toObject(), GIT_TERMINAL_PROMPT: "0" };
       for (const stepArgs of steps) {
-        const { success, stderr } = await new Deno.Command("git", {
-          args: stepArgs,
-          stdout: "piped",
-          stderr: "piped",
-          env: { ...Deno.env.toObject(), GIT_TERMINAL_PROMPT: "0" },
-        }).output();
+        const { success, stderr } = await runGitStep(stepArgs, gitEnv);
         if (!success) {
-          console.error(`[ensurePlugins] Failed to install "${entry.name}": ${new TextDecoder().decode(stderr).trim()}`);
+          console.error(`[ensurePlugins] Failed to install "${entry.name}": ${stderr.trim()}`);
           stepFailed = true;
           break;
         }
