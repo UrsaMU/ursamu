@@ -27,7 +27,7 @@ export const hooks = {
     });
   },
 
-  aconnect: async (player: IDBOBJ) => {
+  aconnect: async (player: IDBOBJ, socketId?: string) => {
     try {
       // 1. Player @aconnect
       await hooks.executeAttribute(player, "ACONNECT", [], player);
@@ -46,10 +46,11 @@ export const hooks = {
     gameHooks.emit("player:login", {
       actorId:   player.id,
       actorName: (player.data?.name as string) || player.id,
+      socketId,
     }).catch(e => console.error("[GameHooks] player:login:", e));
   },
 
-  adisconnect: async (player: IDBOBJ) => {
+  adisconnect: async (player: IDBOBJ, socketId?: string) => {
     await hooks.executeAttribute(player, "ADISCONNECT", [], player);
 
     const masterRoomId = getConfig<string>("game.masterRoom") || "0";
@@ -62,6 +63,7 @@ export const hooks = {
     gameHooks.emit("player:logout", {
       actorId:   player.id,
       actorName: (player.data?.name as string) || player.id,
+      socketId,
     }).catch(e => console.error("[GameHooks] player:logout:", e));
   }
 };

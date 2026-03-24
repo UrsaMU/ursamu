@@ -213,7 +213,7 @@ export class WebSocketService {
                     await setFlags(player, "!connected");
                     const { dbojs } = await import("../Database/index.ts");
                     await dbojs.modify({ id: player.id }, "$set", { "data.lastLogout": Date.now() });
-                    await hooks.adisconnect(player);
+                    await hooks.adisconnect(player, sockData.id);
 
                     if (player.location) {
                         const roomPlayers = await dbojs.query({
@@ -291,6 +291,16 @@ export class WebSocketService {
         return Array.from(this.socketData.values());
     }
     
+    /** Subscribe a socket to a room/channel by socket ID. Used by the channel plugin via gameHooks. */
+    joinSocketToRoom(socketId: string, room: string): void {
+        for (const meta of this.socketData.values()) {
+            if (meta.id === socketId) {
+                meta.join(room);
+                return;
+            }
+        }
+    }
+
     // Disconnect a player by CID
     disconnect(cid: string) {
         for (const [socket, meta] of this.socketData.entries()) {

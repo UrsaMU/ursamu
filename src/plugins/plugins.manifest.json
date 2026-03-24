@@ -55,6 +55,13 @@
       "ref": "v1.0.0",
       "description": "World-building commands (@dig, @open, @link, @describe, @examine, and more) plus REST API at /api/v1/building/*.",
       "ursamu": ">=1.9.5"
+    },
+    {
+      "name": "channel",
+      "url": "https://github.com/UrsaMU/channel-plugin",
+      "ref": "v1.0.0",
+      "description": "Channel system — alias dispatch, auto-join on login, @chancreate/@chandestroy/@chanset/@channel, message history.",
+      "ursamu": ">=1.9.27"
     }
   ]
 }

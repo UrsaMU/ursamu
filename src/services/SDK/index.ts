@@ -1,6 +1,5 @@
 import type { IUrsamuSDK, IDBObj } from "../../@types/UrsamuSDK.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
-import type { IContext } from "../../@types/IContext.ts";
 import { dbojs, chans, chanHistory, texts } from "../Database/index.ts";
 import { send as sendFn } from "../broadcast/index.ts";
 import { wsService } from "../WebSocket/index.ts";
@@ -11,7 +10,6 @@ import { displayName as displayNameFn } from "../../utils/displayName.ts";
 import { setFlags as setFlagsFn } from "../../utils/setFlags.ts";
 import { getAttribute } from "../../utils/getAttribute.ts";
 import { getNextId } from "../../utils/getNextId.ts";
-import { joinChans } from "../../utils/joinChans.ts";
 import { center, ljust, rjust } from "../../utils/format.ts";
 import parser from "../parser/parser.ts";
 import { setConfig } from "../Config/mod.ts";
@@ -275,8 +273,6 @@ export async function createNativeSDK(
         socket.cid = id;
         socket.join(`#${id}`);
         if (player.location) socket.join(`#${player.location}`);
-        const ctx: IContext = { socket };
-        await joinChans(ctx);
       },
       hash: async (password: string) => {
         try { return await hash(password, 10); }
