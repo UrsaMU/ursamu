@@ -212,7 +212,7 @@ export class WebSocketService {
                 if (player) {
                     await setFlags(player, "!connected");
                     const { dbojs } = await import("../Database/index.ts");
-                    await dbojs.modify({ id: player.id }, "$set", { "data.lastLogout": Date.now() });
+                    await dbojs.modify({ id: player.id }, "$set", { "data.lastLogout": Date.now() } as never);
                     await hooks.adisconnect(player, sockData.id);
 
                     if (player.location) {
