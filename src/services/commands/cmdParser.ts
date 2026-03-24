@@ -44,7 +44,7 @@ async function readEngineScript(name: string): Promise<string | null> {
   }
 }
 
-export const cmdParser = new MiddlewareStack();
+export const cmdParser: MiddlewareStack = new MiddlewareStack();
 export const cmds: ICmd[] = [];
 export const txtFiles = new Map<string, string>();
 
