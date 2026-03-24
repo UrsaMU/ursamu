@@ -2,6 +2,8 @@
 layout: layout.vto
 description: Learn how to create plugins to extend UrsaMU
 nav:
+  - text: Official Plugins
+    url: "./official-plugins.md"
   - text: Overview
     url: "#overview"
   - text: Plugin Structure

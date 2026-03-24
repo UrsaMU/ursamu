@@ -190,3 +190,29 @@ UrsaMU is at **v1.4.3**.
 - **Status**: actively maintained, published on JSR
 
 The project is open-source under the MIT License. Contributions are welcome!
+
+---
+
+## Architecture
+
+UrsaMU uses independent processes so each component can restart without affecting the others:
+
+- **Hub** — game logic, Deno KV persistence, HTTP REST API, and WebSocket connections (single port, default `4203`)
+- **Telnet Sidecar** — proxies classic Telnet connections to the Hub via WebSockets (`4201`)
+
+The hub handles everything through a single port: WebSocket upgrades for browser/telnet clients, REST API calls for frontends and integrations, and static file serving for the optional web client.
+
+### Storage
+
+All persistence uses **Deno KV** — a built-in key-value store with ACID transactions, no external database required. Collections are namespaced by plugin (e.g. `server.chans`, `mail.messages`, `jobs.tickets`).
+
+### Plugin system
+
+Plugins are auto-discovered at startup: any `src/plugins/*/index.ts` file is loaded. The exported `plugin` object handles lifecycle (`init`/`remove`), while commands and scripts register as module-load side effects. Plugins can extend the engine via:
+
+- `addCmd` — register command patterns
+- `registerScript` — provide or override system scripts
+- `registerCmdMiddleware` — inject command pipeline steps
+- `registerPluginRoute` — add REST endpoints
+- `gameHooks` — subscribe to engine lifecycle events
+- `DBO<T>` — private namespaced storage

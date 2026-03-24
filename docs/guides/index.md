@@ -5,6 +5,10 @@ description: User guides and tutorials for UrsaMU
 nav:
   - text: Installation Guide
     url: "./installation.md"
+  - text: Command Reference
+    url: "./commands.md"
+  - text: CLI Reference
+    url: "./cli.md"
   - text: User Guide
     url: "./user-guide.md"
   - text: Admin Guide
