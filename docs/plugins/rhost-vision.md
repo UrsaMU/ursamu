@@ -2,25 +2,6 @@
 layout: layout.vto
 title: Rhost Vision Plugin
 description: A plugin that replaces UrsaMU's default display commands with Rhost-style formatting for room display, WHO list, pages, score, examine, and inventory.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Overridden Commands
-    url: "#overridden-commands"
-  - text: Player Commands
-    url: "#player-commands"
-  - text: Player-Settable Attributes
-    url: "#player-settable-attributes"
-  - text: Connection Announcements
-    url: "#connection-announcements"
-  - text: Configuration
-    url: "#configuration"
-  - text: Layout Utilities
-    url: "#layout-utilities"
-  - text: Installation
-    url: "#installation"
-  - text: File Structure
-    url: "#file-structure"
 ---
 
 # Rhost Vision Plugin
@@ -33,7 +14,6 @@ adds three new player commands: `+finger`, `+where`, and `+staff`.
 **Version:** 1.2.0
 **Author:** chogan1981
 **Requires:** UrsaMU >= 1.0.0
-
 ---
 
 ## Overview
@@ -43,7 +23,6 @@ active theme baked in) and writing them to `system/scripts/` on startup.
 Original scripts are backed up as `*.rhost-bak` files and restored automatically
 when the plugin is removed. No manual configuration is required beyond editing
 `theme.ts`.
-
 ---
 
 ## Overridden Commands
@@ -108,7 +87,6 @@ the `visual` flag.
 Replaces the default inventory command. Shows carried items with their
 `&short-desc` truncated to fit the terminal width. Reports item count in the
 footer.
-
 ---
 
 ## Player Commands
@@ -167,7 +145,6 @@ Jupiter                01:22     1m    Watching.
   1 staff member online.
 =====================================================================
 ```
-
 ---
 
 ## Player-Settable Attributes
@@ -211,7 +188,6 @@ word-wrapped and displayed below your main score fields.
 ```
 > &score-extra me=STR 8 | DEX 6 | INT 10 | WIS 7
 ```
-
 ---
 
 ## Connection Announcements
@@ -229,7 +205,6 @@ all connected players:
 The announcement uses the `dividerChar` and accent color from the active theme.
 These hooks are registered on `player:login` and `player:logout` via
 `gameHooks` and are automatically removed when the plugin is unloaded.
-
 ---
 
 ## Configuration
@@ -300,7 +275,6 @@ export const customTheme: Partial<RhostTheme> = {
 ```
 
 Leave `customTheme` as `undefined` (the default) to use the defaults unchanged.
-
 ---
 
 ## Layout Utilities
@@ -446,7 +420,6 @@ table(
 Returns all of the above layout functions as a minified, self-contained
 JavaScript snippet with the theme values baked in as constants. Used internally
 by `index.ts` to embed utilities into the generated system scripts.
-
 ---
 
 ## Installation
@@ -473,7 +446,6 @@ On removal the plugin:
 - Restores each `system/scripts/*.rhost-bak` file to its original path.
 - Removes installed help files.
 - Unsubscribes `player:login` / `player:logout` hook handlers.
-
 ---
 
 ## File Structure

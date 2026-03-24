@@ -2,21 +2,6 @@
 layout: layout.vto
 title: Installation Guide
 description: How to install and set up UrsaMU on your system
-nav:
-  - text: Prerequisites
-    url: "#prerequisites"
-  - text: Installation Methods
-    url: "#installation-methods"
-  - text: Configuration
-    url: "#configuration"
-  - text: Running the Server
-    url: "#running-the-server"
-  - text: Connecting
-    url: "#connecting"
-  - text: First Admin
-    url: "#first-admin"
-  - text: Next Steps
-    url: "#next-steps"
 ---
 
 # Installation Guide
@@ -47,7 +32,6 @@ deno install -A --global -n deno-x jsr:@dx/dx
 deno x --install-alias
 dx jsr:@ursamu/ursamu init
 ```
-
 ---
 
 ### Method 1: Direct from GitHub

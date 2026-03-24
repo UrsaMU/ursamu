@@ -2,19 +2,6 @@
 layout: layout.vto
 title: CLI Reference
 description: Complete reference for the UrsaMU command-line interface — create projects, scaffold plugins, and manage the plugin registry.
-nav:
-  - text: Running the CLI
-    url: "#running-the-cli"
-  - text: create
-    url: "#create"
-  - text: plugin
-    url: "#plugin"
-  - text: update
-    url: "#update"
-  - text: config
-    url: "#config"
-  - text: install-cli
-    url: "#install-cli"
 ---
 
 # CLI Reference
@@ -28,7 +15,6 @@ deno run -A jsr:@ursamu/ursamu/cli <command> [options]
 ```
 
 Or install it locally for convenience (see [install-cli](#install-cli)).
-
 ---
 
 ## create
@@ -66,7 +52,6 @@ deno run -A jsr:@ursamu/ursamu/cli create plugin <name> --standalone
 ```
 
 Generates a self-contained plugin repo at `./<name>/` ready for publishing to JSR or GitHub.
-
 ---
 
 ## plugin
@@ -116,7 +101,6 @@ deno run -A jsr:@ursamu/ursamu/cli plugin info <name>
 ```
 
 Displays metadata, installed version, and available update.
-
 ---
 
 ## update
@@ -132,7 +116,6 @@ Preview changes without writing:
 ```bash
 deno run -A jsr:@ursamu/ursamu/cli update --dry-run
 ```
-
 ---
 
 ## config
@@ -142,7 +125,6 @@ Print the current server configuration:
 ```bash
 deno task config
 ```
-
 ---
 
 ## install-cli

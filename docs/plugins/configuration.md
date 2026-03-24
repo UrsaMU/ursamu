@@ -1,19 +1,6 @@
 ---
 layout: layout.vto
 description: Providing default config values and reading them at runtime
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Declaring Defaults
-    url: "#declaring-defaults"
-  - text: Reading Config
-    url: "#reading-config"
-  - text: User Overrides
-    url: "#user-overrides"
-  - text: Sensitive Values
-    url: "#sensitive-values"
-  - text: Full Example
-    url: "#full-example"
 ---
 
 # Plugin Configuration
@@ -24,7 +11,6 @@ Plugins can declare default configuration values via the `config` property on
 `IPlugin`. These defaults are deep-merged into the global config at startup, so
 game operators can override any value in `config/config.json` without touching
 plugin code.
-
 ---
 
 ## Declaring Defaults
@@ -56,7 +42,6 @@ const myPlugin: IPlugin = {
 
 export default myPlugin;
 ```
-
 ---
 
 ## Reading Config
@@ -74,7 +59,6 @@ const msg     = getConfig<string>("plugins.my-plugin.welcomeMessage") ?? "";
 
 `getConfig<T>(key)` traverses the merged config using dot-notation and returns
 `undefined` if the key does not exist. Always supply a fallback.
-
 ---
 
 ## User Overrides
@@ -93,7 +77,6 @@ defaults are the baseline; anything in the file wins:
   }
 }
 ```
-
 ---
 
 ## Sensitive Values
@@ -113,7 +96,6 @@ init: async () => {
   return true;
 },
 ```
-
 ---
 
 ## Full Example

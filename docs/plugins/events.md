@@ -2,19 +2,6 @@
 layout: layout.vto
 title: Events Plugin
 description: In-game event calendar with RSVP tracking, staff management, and REST API.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Player Commands
-    url: "#player-commands"
-  - text: Staff Commands
-    url: "#staff-commands"
-  - text: Event Statuses
-    url: "#event-statuses"
-  - text: eventHooks
-    url: "#eventhooks"
-  - text: REST API
-    url: "#rest-api"
 ---
 
 # Events Plugin
@@ -25,7 +12,6 @@ events.
 
 > **Note:** This is the *event calendar* plugin (`+event` commands). It is
 > separate from `u.events`, the server-wide pub/sub system.
-
 ---
 
 ## Overview
@@ -34,7 +20,6 @@ Events have a title, description, date/time, optional location and capacity,
 and a status. Players can RSVP as attending, maybe, or declined.
 
 The plugin auto-loads when `src/plugins/events/` exists. No configuration needed.
-
 ---
 
 ## Player Commands
@@ -99,7 +84,6 @@ Cancel your RSVP.
 > +event/unrsvp 1
 RSVP cancelled for "Midsummer Festival".
 ```
-
 ---
 
 ## Staff Commands
@@ -175,7 +159,6 @@ Set a status explicitly. Useful for marking events as active or completed.
 > +event/status 1=completed
 +event: Event #1 status set to completed.
 ```
-
 ---
 
 ## Event Statuses
@@ -186,7 +169,6 @@ Set a status explicitly. Useful for marking events as active or completed.
 | `active` | Yes | Yes |
 | `completed` | Yes | No |
 | `cancelled` | No (staff only) | No |
-
 ---
 
 ## eventHooks
@@ -223,7 +205,6 @@ eventHooks.on("event:cancelled", async ({ eventId, name }) => {
 | `event:ended` | `eventId`, `name` |
 | `event:rsvp` | `eventId`, `playerId`, `status` |
 | `event:cancelled` | `eventId`, `name` |
-
 ---
 
 ## REST API

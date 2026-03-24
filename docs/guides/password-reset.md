@@ -2,17 +2,6 @@
 layout: layout.vto
 title: Password Reset
 description: How to generate and consume password reset tokens in UrsaMU.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Admin Steps
-    url: "#admin-steps"
-  - text: Player Steps
-    url: "#player-steps"
-  - text: API Reference
-    url: "#api-reference"
-  - text: Error Responses
-    url: "#error-responses"
 ---
 
 # Password Reset
@@ -21,7 +10,6 @@ UrsaMU does not have a self-service "forgot password" email flow — the server
 has no email sending built in. Instead, password resets are a two-step process:
 an admin generates a short-lived token in-game, then the player uses that token
 to set a new password via the REST API.
-
 ---
 
 ## Overview
@@ -37,7 +25,6 @@ Admin (in-game)                   Player (out of band)
 
 The token is a UUID, stored on the player object, and expires **1 hour** after
 generation. It is single-use — it is deleted immediately on successful reset.
-
 ---
 
 ## Admin Steps
@@ -64,7 +51,6 @@ player through any out-of-band channel — Discord, email, direct message, etc.
 > account. Treat it like a temporary password and communicate it securely.
 > If the token is compromised before use, run `@resettoken` again — the new
 > token replaces the old one.
-
 ---
 
 ## Player Steps
@@ -100,7 +86,6 @@ curl -X POST https://yourgame.example.com/api/v1/auth/reset-password \
 
 After a successful reset the player can log in with their new password using the
 normal `POST /api/v1/auth/login` endpoint.
-
 ---
 
 ## API Reference
@@ -116,7 +101,6 @@ normal `POST /api/v1/auth/login` endpoint.
 | Missing fields | `400` | `{ "error": "token and newPassword are required." }` |
 | Password too long | `400` | `{ "error": "Password must be 512 characters or fewer." }` |
 | Bad or expired token | `400` | `{ "error": "Invalid or expired reset token." }` |
-
 ---
 
 ## Error Responses
@@ -141,7 +125,6 @@ Passwords are limited to 512 characters.
 ```json
 { "error": "Password must be 512 characters or fewer." }
 ```
-
 ---
 
 ## Security Notes

@@ -2,19 +2,6 @@
 layout: layout.vto
 title: Customization Guide
 description: How to customize UrsaMU — MUSH colors, custom commands, plugins, REST routes, and external integrations.
-nav:
-  - text: Text Formatting
-    url: "#text-formatting"
-  - text: Custom Commands
-    url: "#custom-commands"
-  - text: Custom Attributes
-    url: "#custom-attributes"
-  - text: Plugins
-    url: "#plugins"
-  - text: REST Routes
-    url: "#rest-routes"
-  - text: External Integrations
-    url: "#external-integrations"
 ---
 
 # Customization Guide
@@ -22,7 +9,6 @@ nav:
 This guide covers the real extension points for UrsaMU — the patterns you
 actually use to add commands, store per-object data, build plugins, and connect
 to outside services.
-
 ---
 
 ## Text Formatting
@@ -61,7 +47,6 @@ u.send("%ch%crERROR:%cn You can't do that.");
 
 > **Note:** In the old Customization guide this was listed as `%r = Red`. That
 > was wrong — `%r` is a **newline**, not red. Red is `%cr`.
-
 ---
 
 ## Custom Commands
@@ -143,7 +128,6 @@ addCmd({
   },
 });
 ```
-
 ---
 
 ## Custom Attributes
@@ -196,7 +180,6 @@ addCmd({
   },
 });
 ```
-
 ---
 
 ## Plugins
@@ -251,7 +234,6 @@ if (myPlugin.init) await myPlugin.init();
 | `description` | `string` | No | Human-readable description |
 | `init` | `() => boolean \| Promise<boolean>` | No | Called once at startup; return `false` to abort |
 | `remove` | `() => void \| Promise<void>` | No | Called when plugin is unloaded |
-
 ---
 
 ## REST Routes
@@ -290,7 +272,6 @@ registerPluginRoute("/api/v1/leaderboard", async (_req, _userId) => {
   return Response.json(ranked);
 });
 ```
-
 ---
 
 ## External Integrations

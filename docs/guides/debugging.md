@@ -2,19 +2,6 @@
 layout: layout.vto
 title: Debugging Scripts
 description: How to diagnose and fix issues in UrsaMU scripts and plugins.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Common Mistakes
-    url: "#common-mistakes"
-  - text: Script Errors
-    url: "#script-errors"
-  - text: Debugging Techniques
-    url: "#debugging-techniques"
-  - text: Testing Scripts Manually
-    url: "#testing-scripts-manually"
-  - text: Plugin Debugging
-    url: "#plugin-debugging"
 ---
 
 # Debugging Scripts
@@ -22,7 +9,6 @@ nav:
 Scripts run in isolated Web Workers. This means you can't use the browser
 console, Deno's `--inspect` flag, or filesystem access. Here's how to diagnose
 and fix issues.
-
 ---
 
 ## Overview
@@ -34,7 +20,6 @@ When a script fails, the error is:
 4. Not shown to the player (the script simply produces no output)
 
 So a script that silently does nothing is often one that **threw an exception**.
-
 ---
 
 ## Common Mistakes
@@ -148,7 +133,6 @@ const target = await u.util.target(u.me, u.cmd.args[0]);
 if (!target) { u.send("I don't see that."); return; }
 u.send(`Target: ${target.name}`);
 ```
-
 ---
 
 ## Script Errors
@@ -198,7 +182,6 @@ console will show the error.
 - `ReferenceError: X is not defined` — JSR import that failed to resolve
 - `TypeError: Cannot read properties of undefined` — null/undefined not checked
 - `SyntaxError` — TypeScript that failed to transpile
-
 ---
 
 ## Debugging Techniques
@@ -246,7 +229,6 @@ server access). Useful for testing DB queries:
 ```
 @js await dbojs.queryOne({ id: "1" })
 ```
-
 ---
 
 ## Testing Scripts Manually
@@ -299,7 +281,6 @@ Deno.test("greet script sends a message", OPTS, async () => {
   assertEquals(sent[0], "You wave to Bob.");
 });
 ```
-
 ---
 
 ## Plugin Debugging

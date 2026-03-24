@@ -2,25 +2,6 @@
 layout: layout.vto
 title: Lock Expressions
 description: Reference guide for UrsaMU's lock expression syntax — controlling access to commands, objects, and exits.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Flag Checks
-    url: "#flag-checks"
-  - text: Boolean Operators
-    url: "#boolean-operators"
-  - text: DB Reference
-    url: "#db-reference-checks"
-  - text: Attribute Checks
-    url: "#attribute-checks"
-  - text: Indirect Locks
-    url: "#indirect-locks"
-  - text: Script Checks
-    url: "#script-checks"
-  - text: Using in Scripts
-    url: "#using-locks-in-scripts"
-  - text: Quick Reference
-    url: "#quick-reference"
 ---
 
 # Lock Expressions
@@ -34,7 +15,6 @@ three places:
 
 An empty or absent lock always passes — the object or command is accessible to
 everyone, including unauthenticated connections.
-
 ---
 
 ## Flag Checks
@@ -66,7 +46,6 @@ wizards, and superusers alike.
 | `admin+` | `admin`, `wizard`, `superuser` |
 
 > **Note:** `connected` has no numeric level — use it without `+`.
-
 ---
 
 ## Boolean Operators
@@ -96,7 +75,6 @@ A common pattern: require login *and* a minimum permission level.
 "connected & builder+" -- building commands
 "connected"            -- any logged-in player
 ```
-
 ---
 
 ## DB Reference Checks
@@ -110,7 +88,6 @@ Use `#id` to restrict access to a specific database object.
 
 This is useful for owner-only exits or objects that only a specific character
 should be able to use.
-
 ---
 
 ## Attribute Checks
@@ -134,7 +111,6 @@ Numeric attributes support comparison operators:
 
 Attribute names are case-insensitive. Values are compared as strings unless a
 comparison operator is present, in which case they're parsed as numbers.
-
 ---
 
 ## Indirect Locks
@@ -148,7 +124,6 @@ This lets you centralise a lock definition and point many commands at it.
 ```
 
 Indirect locks are recursion-protected (maximum depth 10) to prevent cycles.
-
 ---
 
 ## Script Checks
@@ -163,7 +138,6 @@ returns a truthy value.
 
 Script locks have access to the `u` SDK object in scope. Use sparingly — they
 run synchronously inside the lock check and should be fast.
-
 ---
 
 ## Using Locks in Scripts
@@ -189,7 +163,6 @@ u.checkLock(target: string | IDBObj, lock: string): Promise<boolean>
 
 - `target` — the object whose perspective is used to resolve `@indirect` locks
 - `lock` — any valid lock expression string
-
 ---
 
 ## Quick Reference

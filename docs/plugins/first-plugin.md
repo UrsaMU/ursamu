@@ -1,17 +1,6 @@
 ---
 layout: layout.vto
 description: Create your first UrsaMU plugin with this step-by-step guide
-nav:
-  - text: Scaffold the Plugin
-    url: "#scaffold-the-plugin"
-  - text: File Walkthrough
-    url: "#file-walkthrough"
-  - text: Test It
-    url: "#test-it"
-  - text: Publish It
-    url: "#publish-it"
-  - text: Next Steps
-    url: "#next-steps"
 ---
 
 # Creating Your First Plugin
@@ -39,7 +28,6 @@ src/plugins/notes/
 ```
 
 The plugin is already auto-discovered. Restart the server and it loads.
-
 ---
 
 ## File Walkthrough
@@ -199,7 +187,6 @@ const notesPlugin: IPlugin = {
 
 export default notesPlugin;
 ```
-
 ---
 
 ## Test It
@@ -240,7 +227,6 @@ curl -s http://localhost:4203/api/v1/notes \
 curl -s -X DELETE http://localhost:4203/api/v1/notes/<id> \
   -H "Authorization: Bearer $TOKEN" | jq
 ```
-
 ---
 
 ## Publish It
@@ -272,7 +258,6 @@ To create a standalone, publish-ready plugin project from scratch (with
 ```bash
 ursamu create plugin notes --standalone
 ```
-
 ---
 
 ## Next Steps

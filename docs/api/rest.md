@@ -2,29 +2,6 @@
 layout: layout.vto
 title: REST API Reference
 description: Complete reference for all UrsaMU HTTP endpoints — auth, players, channels, objects, scenes, mail, building, wiki, and health.
-nav:
-  - text: Authentication
-    url: "#authentication"
-  - text: Auth Endpoints
-    url: "#auth-endpoints"
-  - text: Players & Channels
-    url: "#players--channels"
-  - text: Database Objects
-    url: "#database-objects"
-  - text: Scenes
-    url: "#scenes"
-  - text: Mail
-    url: "#mail"
-  - text: Building
-    url: "#building"
-  - text: Wiki
-    url: "#wiki"
-  - text: Config & Text
-    url: "#config--text"
-  - text: Health
-    url: "#health"
-  - text: Plugin Endpoints
-    url: "#plugin-endpoints"
 ---
 
 # REST API Reference
@@ -40,7 +17,6 @@ Obtain a token via `POST /api/v1/auth/login`. Tokens are signed with `JWT_SECRET
 ```
 Authorization: Bearer <token>
 ```
-
 ---
 
 ## Auth Endpoints
@@ -50,7 +26,6 @@ Authorization: Bearer <token>
 | `POST` | `/api/v1/auth/register` | None | Create a new character account |
 | `POST` | `/api/v1/auth/login` | None | Authenticate and receive a JWT |
 | `POST` | `/api/v1/auth/reset-password` | None | Consume a one-time token and set a new password |
-
 ---
 
 ## Players & Channels
@@ -60,7 +35,6 @@ Authorization: Bearer <token>
 | `GET` | `/api/v1/me` | Required | Current user profile |
 | `GET` | `/api/v1/players/online` | None | List connected players |
 | `GET` | `/api/v1/channels` | None | List all channels |
-
 ---
 
 ## Database Objects
@@ -70,7 +44,6 @@ Authorization: Bearer <token>
 | `GET` | `/api/v1/dbos` | Required | List accessible objects (optional `?flags=` filter) |
 | `GET` | `/api/v1/dbobj/:id` | Required | Fetch a single object |
 | `PATCH` | `/api/v1/dbobj/:id` | Required | Update object data, name, or description |
-
 ---
 
 ## Scenes
@@ -87,7 +60,6 @@ Authorization: Bearer <token>
 | `PATCH` | `/api/v1/scenes/:id/pose/:poseId` | Required | Edit an existing pose |
 | `POST` | `/api/v1/scenes/:id/join` | Required | Join a scene |
 | `POST` | `/api/v1/scenes/:id/invite` | Required | Invite a player (owner only) |
-
 ---
 
 ## Mail
@@ -101,7 +73,6 @@ Provided by the [mail-plugin](https://github.com/UrsaMU/mail-plugin).
 | `POST` | `/api/v1/mail` | Required | Send a new message |
 | `GET` | `/api/v1/mail/:id` | Required | Read a message (marks as read) |
 | `DELETE` | `/api/v1/mail/:id` | Required | Delete a message |
-
 ---
 
 ## Building
@@ -111,7 +82,6 @@ Provided by the [builder-plugin](https://github.com/UrsaMU/builder-plugin). Requ
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `POST` | `/api/v1/building/room` | Required | Create a room |
-
 ---
 
 ## Wiki
@@ -122,7 +92,6 @@ Provided by the [wiki-plugin](https://github.com/UrsaMU/wiki-plugin).
 |--------|----------|------|-------------|
 | `GET` | `/api/v1/wiki` | None | List all wiki topics |
 | `GET` | `/api/v1/wiki/:topic` | None | Retrieve a wiki topic |
-
 ---
 
 ## Config & Text
@@ -132,7 +101,6 @@ Provided by the [wiki-plugin](https://github.com/UrsaMU/wiki-plugin).
 | `GET` | `/api/v1/config` | None | Server config (name, version, ports, theme) |
 | `GET` | `/api/v1/connect` | None | Connect-screen text |
 | `GET` | `/api/v1/welcome` | None | Welcome text |
-
 ---
 
 ## Health
@@ -140,7 +108,6 @@ Provided by the [wiki-plugin](https://github.com/UrsaMU/wiki-plugin).
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `GET` | `/health` | None | Returns `{"status":"ok","engine":"UrsaMU"}` |
-
 ---
 
 ## Plugin Endpoints

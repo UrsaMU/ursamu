@@ -1,21 +1,6 @@
 ---
 layout: layout.vto
 description: Using DBO<T> to store and query plugin data in UrsaMU
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Defining a Collection
-    url: "#defining-a-collection"
-  - text: DBO Methods
-    url: "#dbo-methods"
-  - text: Querying
-    url: "#querying"
-  - text: Built-in Collections
-    url: "#built-in-collections"
-  - text: Sequential IDs
-    url: "#sequential-ids"
-  - text: Full Example
-    url: "#full-example"
 ---
 
 # Plugin Database
@@ -25,7 +10,6 @@ nav:
 UrsaMU's database layer is built on Deno KV. The generic class `DBO<T>`
 provides a typed CRUD interface for any collection. Each plugin creates its own
 named collections that live in the shared KV store, isolated by key prefix.
-
 ---
 
 ## Defining a Collection
@@ -52,7 +36,6 @@ Import the collection wherever you need it:
 ```typescript
 import { myRecords } from "./db.ts";
 ```
-
 ---
 
 ## DBO Methods
@@ -69,7 +52,6 @@ import { myRecords } from "./db.ts";
 
 > **Update vs Modify**: `update({}, record)` replaces the full document.
 > `modify({ id }, "$set", { field: value })` updates only the listed fields.
-
 ---
 
 ## Querying
@@ -87,7 +69,6 @@ const one = await myRecords.queryOne({ id: "rec-7" });
 // All records
 const all = await myRecords.all();
 ```
-
 ---
 
 ## Built-in Collections
@@ -113,7 +94,6 @@ const player = await dbojs.queryOne({ data: { name: "Alice" } });
 // Find all objects in a room
 const contents = await dbojs.find({ location: roomId });
 ```
-
 ---
 
 ## Sequential IDs
@@ -141,7 +121,6 @@ Call it with a unique namespace per plugin:
 ```typescript
 const num = await getNextId("my-plugin.tickets");
 ```
-
 ---
 
 ## Full Example

@@ -2,32 +2,12 @@
 layout: layout.vto
 title: Character Generation Plugin
 description: How to use and configure the chargen plugin for new player character applications.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Player Workflow
-    url: "#player-workflow"
-  - text: Player Commands
-    url: "#player-commands"
-  - text: Staff Workflow
-    url: "#staff-workflow"
-  - text: Staff Commands
-    url: "#staff-commands"
-  - text: Application Statuses
-    url: "#application-statuses"
-  - text: chargenHooks
-    url: "#chargenhooks"
-  - text: REST API
-    url: "#rest-api"
-  - text: Extending Chargen
-    url: "#extending-chargen"
 ---
 
 # Character Generation Plugin
 
 The `chargen` plugin provides a simple application workflow for new players to
 submit character backgrounds for staff review before being granted full access.
-
 ---
 
 ## Overview
@@ -39,7 +19,6 @@ account is fully activated.
 
 The plugin auto-loads when `src/plugins/chargen/` exists. No configuration
 is required — just the plugin folder.
-
 ---
 
 ## Player Workflow
@@ -53,7 +32,6 @@ is required — just the plugin folder.
 
 While your application is **pending**, you cannot edit fields. If you need
 changes, contact staff and ask them to reopen it.
-
 ---
 
 ## Player Commands
@@ -107,7 +85,6 @@ Your character application has been submitted for staff review. You will be noti
 
 Once submitted, online staff are automatically notified. Your application
 status changes to **pending** and you cannot modify it until staff acts.
-
 ---
 
 ## Staff Workflow
@@ -117,7 +94,6 @@ status changes to **pending** and you cannot modify it until staff acts.
 3. Use `+chargen/view <player>` to read the application
 4. Use `+chargen/approve` or `+chargen/reject`
 5. Player receives in-game mail with the result
-
 ---
 
 ## Staff Commands
@@ -206,7 +182,6 @@ Permanently delete a player's application.
 > +chargen/delete bob
 Deleted bob's chargen application.
 ```
-
 ---
 
 ## Application Statuses
@@ -225,7 +200,6 @@ approved  → draft (staff reopens)
 | `pending` | No | View, approve, reject, delete |
 | `approved` | No | Reopen, delete |
 | `rejected` | No (until reopened) | Reopen, delete |
-
 ---
 
 ## chargenHooks
@@ -262,7 +236,6 @@ chargenHooks.on("chargen:rejected", (app) => {
 | `chargen:approved` | Full application object with `data.reviewedBy`, `data.reviewedAt`, `data.notes` |
 | `chargen:rejected` | Full application object with `data.notes` (rejection reason) |
 | `chargen:deleted` | Full application object |
-
 ---
 
 ## REST API
@@ -320,7 +293,6 @@ Player endpoint. Returns the calling player's own application.
 ```bash
 curl -H "Authorization: Bearer $TOKEN" http://localhost:4202/api/v1/chargen/me
 ```
-
 ---
 
 ## Extending Chargen

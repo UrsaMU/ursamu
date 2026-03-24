@@ -1,31 +1,6 @@
 ---
 layout: layout.vto
 description: Learn how to create plugins to extend UrsaMU
-nav:
-  - text: Official Plugins
-    url: "./official-plugins.md"
-  - text: Overview
-    url: "#overview"
-  - text: Plugin Structure
-    url: "#plugin-structure"
-  - text: Quick Scaffold
-    url: "#quick-scaffold"
-  - text: Plugin Interface
-    url: "#plugin-interface"
-  - text: Adding Commands
-    url: "#adding-commands"
-  - text: Adding REST Routes
-    url: "#adding-rest-routes"
-  - text: Custom Database
-    url: "#custom-database"
-  - text: Configuration
-    url: "#configuration"
-  - text: The Manifest File
-    url: "#the-manifest-file"
-  - text: Installing Community Plugins
-    url: "#installing-community-plugins"
-  - text: Real Examples
-    url: "#real-examples"
 ---
 
 # UrsaMU Plugin Development
@@ -43,7 +18,6 @@ combination of:
 Plugins are **auto-discovered**. Drop a folder into `src/plugins/` with an
 `index.ts` that exports a default `IPlugin` object and the engine loads it on
 next start — no registration required.
-
 ---
 
 ## Plugin Structure
@@ -60,7 +34,6 @@ src/plugins/my-plugin/
 ```
 
 Only `index.ts` is required. The other files are imported from it.
-
 ---
 
 ## Quick Scaffold
@@ -75,7 +48,6 @@ ursamu create plugin my-plugin
 This generates all four files pre-named and pre-wired. Restart the server and
 the plugin loads automatically. You can also copy `src/plugins/example/`
 directly — it is a fully working reference implementation.
-
 ---
 
 ## Plugin Interface
@@ -114,7 +86,6 @@ const myPlugin: IPlugin = {
 
 export default myPlugin;
 ```
-
 ---
 
 ## Adding Commands
@@ -167,7 +138,6 @@ import "./commands.ts";
 | `u.auth.*` | Auth SDK (hash, setPassword) |
 | `u.sys.*` | System SDK (disconnect, setConfig) |
 | `u.util.*` | Utility helpers (target, stripSubs, ljust, rjust, …) |
-
 ---
 
 ## Adding REST Routes
@@ -214,7 +184,6 @@ export async function myRouteHandler(
 ```
 
 All CORS headers are added automatically by the engine.
-
 ---
 
 ## Custom Database
@@ -245,7 +214,6 @@ export const myRecords = new DBO<IMyRecord>("server.my-plugin-records");
 | `modify(query, "$set", data)` | Partial field update |
 | `delete(query)` | Remove matching records |
 | `all()` | Return every record in the collection |
-
 ---
 
 ## Configuration
@@ -260,7 +228,6 @@ const maxItems = getConfig<number>("plugins.my-plugin.maxItems") ?? 50;
 ```
 
 Operators override values in `config/config.json` under the same key path.
-
 ---
 
 ## The Manifest File
@@ -293,7 +260,6 @@ display details and populate the local registry.
 
 The `ursamu create plugin <name> --standalone` command generates this file
 automatically when scaffolding a new publishable plugin project.
-
 ---
 
 ## Installing Community Plugins
@@ -329,7 +295,6 @@ Use `--force` to skip the confirmation prompt in CI/automation:
 ```bash
 ursamu plugin install --force https://github.com/user/my-plugin
 ```
-
 ---
 
 ## Real Examples

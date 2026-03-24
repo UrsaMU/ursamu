@@ -2,7 +2,6 @@
 
 Audit of missing side effects, stub code, and incomplete features found via static analysis.
 Items are ordered by severity within each category.
-
 ---
 
 ## HIGH — Player Experience Broken
@@ -18,7 +17,6 @@ Items are ordered by severity within each category.
 
 `teleport.ts` even has a comment claiming "SandboxService handles the actual movements and look" — it doesn't.
 `home.ts` has the same gap.
-
 ---
 
 ### 2. Disconnect broadcast targets everyone, with dummy room data
@@ -32,7 +30,6 @@ room: { name: "", desc: "", exits: [], players: [], items: [] } // dummy
 ```
 
 Should target only players in the disconnected player's room and include real room state.
-
 ---
 
 ### 3. Broadcast `exclude` parameter is silently ignored
@@ -41,7 +38,6 @@ Should target only players in the disconnected player's room and include real ro
 `send()` accepts `_exclude: string[]` but never uses it. Commands like `get.ts` and `drop.ts`
 correctly pass `{ exclude: [actor.id] }` to avoid double-messaging the actor, but it has no effect —
 the actor sees their own action twice (once from `u.send`, once from `u.broadcast`).
-
 ---
 
 ### 4. Give command: money field path wrong, no room broadcast
@@ -49,7 +45,6 @@ the actor sees their own action twice (once from `u.send`, once from `u.broadcas
 
 Money deduction/addition uses `"state.money"` but the actual DB field is under `data`. Transfers
 may not persist. Also, room bystanders see nothing — only actor and target receive messages.
-
 ---
 
 ## MEDIUM — Incomplete Behaviour
@@ -59,7 +54,6 @@ may not persist. Also, room bystanders see nothing — only actor and target rec
 
 Sends failed-movement messages to players via `#<id>` strings, but `send()` expects socket IDs.
 Other players in the room may not receive `"X tries to go North, but fails."`.
-
 ---
 
 ### 6. Scene invite: only owner can invite (hard-coded "for now")
@@ -67,7 +61,6 @@ Other players in the room may not receive `"X tries to go North, but fails."`.
 
 Comment: `// Only owner or allowed can invite? Let's say Owner for now.`
 The allowed/co-owner list is never checked.
-
 ---
 
 ### 7. DB object API: insufficient update validation
@@ -77,7 +70,6 @@ Comment acknowledges incomplete field validation:
 `// Safe update fields? Allow updating 'data' and 'description' for now.`
 No permission enforcement on which fields callers may write. Flags and IDs could be overwritten
 via the API.
-
 ---
 
 ### 8. Lock evaluation: only supports exact string equality
@@ -86,7 +78,6 @@ via the API.
 Comment: `// Simple equality for now.`
 Attribute locks only match exact strings. Comparison operators (`>`, `<`, `>=`, `<=`) are not
 implemented, limiting attribute-based lock expressions.
-
 ---
 
 ### 9. Open command: quota write may not persist
@@ -94,7 +85,6 @@ implemented, limiting attribute-based lock expressions.
 
 Decrements quota in local state then writes `{ data: { ...actor.state } }`. If `actor.state`
 is stale the decrement may be lost. Should write only the changed field.
-
 ---
 
 ### 10. Link command: dot-notation field paths in `db.modify`
@@ -102,7 +92,6 @@ is stale the decrement may be lost. Should write only the changed field.
 
 Uses `{ "data.dropto": id }` style paths in `db.modify` calls. Whether the database layer
 handles dot-notation is untested — it may silently store a literal key named `"data.dropto"`.
-
 ---
 
 ## LOW — Missing Polish / Design Gaps
@@ -112,7 +101,6 @@ handles dot-notation is untested — it may silently store a literal key named `
 
 `u`, `d`, `out`, `in` all map to `{ x:0, y:0 }`. Multi-level or z-axis maps render incorrectly.
 Needs a z-axis or explicit skip.
-
 ---
 
 ### 12. Doing command: status change is silent
@@ -120,7 +108,6 @@ Needs a z-axis or explicit skip.
 
 Updates the doing message but does not notify the room. Whether bystanders should see
 `"X is now: <doing>"` is a design question, but currently there is no option either way.
-
 ---
 
 ### 13. Moniker command: change is silent
@@ -128,7 +115,6 @@ Updates the doing message but does not notify the room. Whether bystanders shoul
 
 Display name is updated without any room broadcast. Bystanders see the new name with no
 transition message.
-
 ---
 
 ### 14. Script service: legacy placeholder code
@@ -136,7 +122,6 @@ transition message.
 
 Contains comments like `"Simplified: Just evaluating code for now to prove connection."` —
 appears to be unreachable/unused legacy code. Should be removed or completed.
-
 ---
 
 ### 15. Pose command: scene search on every pose
@@ -144,7 +129,6 @@ appears to be unreachable/unused legacy code. Should be removed or completed.
 
 Queries for active scenes matching the current room on every pose. No caching. Could be slow
 in rooms with high pose frequency.
-
 ---
 
 ## Not a Bug — Confirmed Intentional

@@ -12,7 +12,6 @@ with unique avatars. No bot account, no gateway connection — one-directional (
 2. Fallback: `https://robohash.org/{encodedName}?set=set4&size=80x80` (unique per name, free)
 
 Requires `publicUrl` in game config so the plugin can construct absolute avatar URLs.
-
 ---
 
 ## Plugin location
@@ -26,7 +25,6 @@ src/plugins/discord/
   router.ts             ← REST API for managing webhooks
   ursamu.plugin.json
 ```
-
 ---
 
 ## Configuration
@@ -46,7 +44,6 @@ Stored in game config under the `"discord"` key:
 
 `publicUrl` is used to construct `avatar_url` values for Discord.
 Topics are optional — unconfigured topics are silently skipped.
-
 ---
 
 ## webhook.ts — low-level poster
@@ -64,7 +61,6 @@ interface WebhookPayload {
 - Respects Discord `429 Too Many Requests` — reads `retry_after`, waits, retries once
 - Per-webhook outgoing queue (one at a time per URL) to avoid burst rate-limiting
 - Silent failure on non-retryable errors (logs to console, never crashes game)
-
 ---
 
 ## In-game commands (wizard/admin only)
@@ -75,7 +71,6 @@ interface WebhookPayload {
 @discord/list                 ← show configured topics (URLs truncated)
 @discord/test <topic>         ← post a test message to a topic
 ```
-
 ---
 
 ## REST API
@@ -88,7 +83,6 @@ All endpoints require staff (admin/wizard).
 | POST | /api/v1/discord/webhooks | `{ topic, url }` — set webhook |
 | DELETE | /api/v1/discord/webhooks/:topic | Remove topic |
 | POST | /api/v1/discord/webhooks/:topic/test | Send test message |
-
 ---
 
 ## Event → Discord mapping
@@ -118,7 +112,6 @@ Subscribe to scene pose events.
 Post as the posing player with their avatar.
 
 Format: pose text as-is (no prefix), player as username.
-
 ---
 
 ## Avatar URL resolution
@@ -133,7 +126,6 @@ function avatarUrl(playerId: string, playerName: string, config: DiscordConfig):
   return `https://robohash.org/${encodeURIComponent(playerName)}?set=set4&size=80x80`;
 }
 ```
-
 ---
 
 ## Message format examples
@@ -160,7 +152,6 @@ function avatarUrl(playerId: string, playerName: string, config: DiscordConfig):
   "content": "Anyone want to run a scene tonight?"
 }
 ```
-
 ---
 
 ## What's NOT included (future work)
@@ -170,7 +161,6 @@ function avatarUrl(playerId: string, playerName: string, config: DiscordConfig):
 - Per-channel subscription mapping (which game channels go to which topic)
 - Thread-per-scene (Discord webhook API limitation — needs a bot)
 - Attachment/image forwarding from in-game
-
 ---
 
 ## Dependencies

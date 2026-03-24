@@ -2,23 +2,6 @@
 layout: layout.vto
 title: Wiki
 description: How to create, organize, and manage your game wiki in UrsaMU.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Directory Structure
-    url: "#directory-structure"
-  - text: Frontmatter
-    url: "#frontmatter"
-  - text: In-Game Commands
-    url: "#in-game-commands"
-  - text: REST API
-    url: "#rest-api"
-  - text: Static Assets
-    url: "#static-assets"
-  - text: Hooks
-    url: "#hooks"
-  - text: Tips
-    url: "#tips"
 ---
 
 # Wiki
@@ -27,7 +10,6 @@ Every UrsaMU game project includes a `wiki/` directory at the project root.
 Files placed here are immediately available to players via in-game commands and
 to external tools via the REST API. No database setup is required — the wiki is
 file-based Markdown.
-
 ---
 
 ## Overview
@@ -46,7 +28,6 @@ wiki/
 Players read pages with `+wiki`. Admins and wizards write and edit pages with
 `@wiki`. All write operations require the `admin`, `wizard`, or `superuser`
 flag.
-
 ---
 
 ## Directory Structure
@@ -62,7 +43,6 @@ wiki/rules.md         →  +wiki rules
 
 `README.md` files at any level are ignored by the wiki system — they are for
 human readers of the repository only.
-
 ---
 
 ## Frontmatter
@@ -90,7 +70,6 @@ The Iron Pact was forged in the aftermath of the Sundering...
 
 Any additional keys are stored and returned by the API — use them freely for
 custom metadata.
-
 ---
 
 ## In-Game Commands
@@ -131,7 +110,6 @@ custom metadata.
 `@wiki/create` sets `author` and `date` automatically from the acting player.
 `@wiki/edit` preserves all existing frontmatter and replaces only the body.
 `@wiki/fetch` blocks private/loopback URLs and enforces a 10 MB limit.
-
 ---
 
 ## REST API
@@ -228,7 +206,6 @@ DELETE /api/v1/wiki/<path>
 ```
 
 Removes `<path>.md` or `<path>/index.md`. Returns `{ "deleted": true }`.
-
 ---
 
 ## Static Assets
@@ -271,7 +248,6 @@ GET /api/v1/wiki/images/banner.png
 
 Returns the raw file with the appropriate `Content-Type` header and a
 `Cache-Control: public, max-age=3600` header.
-
 ---
 
 ## Hooks
@@ -299,7 +275,6 @@ wikiHooks.on("wiki:deleted", (page) => {
 | `wiki:created` | A new page is written (REST or in-game) |
 | `wiki:edited` | A page's body or metadata is updated |
 | `wiki:deleted` | A page or asset is removed |
-
 ---
 
 ## Tips

@@ -1,19 +1,6 @@
 ---
 layout: layout.vto
 description: Registering and writing in-game commands in UrsaMU plugins
-nav:
-  - text: Command Basics
-    url: "#command-basics"
-  - text: addCmd Reference
-    url: "#addcmd-reference"
-  - text: The IUrsamuSDK Object
-    url: "#the-iursamusdk-object"
-  - text: Pattern Reference
-    url: "#pattern-reference"
-  - text: Switch Handling
-    url: "#switch-handling"
-  - text: Examples
-    url: "#examples"
 ---
 
 # Commands in Plugins
@@ -29,7 +16,6 @@ Commands are registered with `addCmd` at **module-load time** — not inside
 
 When a player types input, the command parser checks it against every
 registered pattern in turn and calls the first matching `exec` function.
-
 ---
 
 ## addCmd Reference
@@ -89,7 +75,6 @@ Controls who can run the command. The player must satisfy the lock expression.
 
 The function called on match. Receives `u: IUrsamuSDK` — the same SDK object
 available to sandbox scripts.
-
 ---
 
 ## The IUrsamuSDK Object
@@ -179,7 +164,6 @@ These are also available in the `u` object. See the
 | `u.sys.setGameTime(t)` | Set in-game calendar |
 | `u.chan.history(name, limit?)` | Recent channel messages |
 | `u.mail.send/read/delete/modify` | Mail system (sandbox scripts only) |
-
 ---
 
 ## Pattern Reference
@@ -212,7 +196,6 @@ pattern: /^\+job(?:\/(\S+))?\s*(.*)/i
 pattern: /^\+event\/edit\s+(\d+)\/(\S+)=(.+)/i
 // "+event/edit 3/title=New Title" → args[0]: "3", args[1]: "title", args[2]: "New Title"
 ```
-
 ---
 
 ## Switch Handling
@@ -253,7 +236,6 @@ addCmd({
   },
 });
 ```
-
 ---
 
 ## Examples

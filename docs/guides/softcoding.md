@@ -2,23 +2,6 @@
 layout: layout.vto
 title: Soft-Coding Guide
 description: How to store scripts and data in object attributes and trigger them with @trigger, u.trigger, and u.eval.
-nav:
-  - text: What is Soft-Coding?
-    url: "#what-is-soft-coding"
-  - text: Setting Attributes In-Game
-    url: "#setting-attributes-in-game"
-  - text: Setting Attributes via Scripts
-    url: "#setting-attributes-via-scripts"
-  - text: Reading Attributes
-    url: "#reading-attributes"
-  - text: Running Attributes
-    url: "#running-attributes"
-  - text: Common Attribute Names
-    url: "#common-attribute-names"
-  - text: Scripting Inside Attributes
-    url: "#scripting-inside-attributes"
-  - text: Practical Examples
-    url: "#practical-examples"
 ---
 
 # Soft-Coding Guide
@@ -27,7 +10,6 @@ Soft-coding is the practice of storing scripts and data directly on in-game
 objects as **attributes**, rather than writing static files. It lets builders
 and players customize room behavior, object interaction, and NPC responses
 entirely from inside the game — no server restart required.
-
 ---
 
 ## What is Soft-Coding?
@@ -57,7 +39,6 @@ An attribute's `value` is a full sandboxed script — the same format as files i
   its behavior with it.
 - Inheritance: if an attribute is not found on the object, UrsaMU walks up the
   `data.parent` chain, allowing shared behavior from parent objects.
-
 ---
 
 ## Setting Attributes In-Game
@@ -108,7 +89,6 @@ syntax, while `@set obj/ATTR=value` is more explicit.
 
 > **Note:** `@set obj=<FLAG>` (without the `/`) sets or removes a *flag*, not
 > an attribute — see the [Admin Guide](/guides/admin-guide#user-roles-and-permissions).
-
 ---
 
 ## Setting Attributes via Scripts
@@ -155,7 +135,6 @@ if (found) u.send(`Your short-desc: ${found.value}`);
 
 For most use cases, prefer `u.attr.get()` (see below) — it handles
 case-insensitivity and parent inheritance automatically.
-
 ---
 
 ## Reading Attributes
@@ -181,7 +160,6 @@ export default async (u) => {
 // Read from any object by id
 const sd = await u.attr.get(someObjectId, "SHORT-DESC");
 ```
-
 ---
 
 ## Running Attributes
@@ -239,7 +217,6 @@ Some attributes are fired automatically by the engine — no `@trigger` needed:
 `ACONNECT` and `ADISCONNECT` fire on the connecting player's own object first,
 then on the master room (configured as `game.masterRoom`). The script runs with
 the connected player as `u.me`.
-
 ---
 
 ## Common Attribute Names
@@ -269,7 +246,6 @@ other builders know what to expect.
 > **not** fired automatically by the core engine. They require either
 > `@trigger` from a system script, or your own plugin/script to call
 > `u.trigger()` at the right moment.
-
 ---
 
 ## Scripting Inside Attributes
@@ -311,7 +287,6 @@ When an attribute is fired via `u.trigger(id, attr)`:
 
 When an attribute is fired via `u.eval(id, attr, args)`, the same rules apply
 and the script's output (via `u.send`) is captured as the return value.
-
 ---
 
 ## Practical Examples
