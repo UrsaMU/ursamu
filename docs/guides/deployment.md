@@ -2,25 +2,6 @@
 layout: layout.vto
 title: Production Deployment
 description: How to run UrsaMU in production — environment setup, daemon management, nginx reverse proxy, TLS, and updates.
-nav:
-  - text: Before You Start
-    url: "#before-you-start"
-  - text: Environment Variables
-    url: "#environment-variables"
-  - text: First Run
-    url: "#first-run"
-  - text: Daemon Mode
-    url: "#daemon-mode"
-  - text: systemd
-    url: "#systemd"
-  - text: Nginx & TLS
-    url: "#nginx-and-tls"
-  - text: Firewall
-    url: "#firewall"
-  - text: Logs
-    url: "#logs"
-  - text: Updates
-    url: "#updates"
 ---
 
 # Production Deployment
@@ -28,7 +9,6 @@ nav:
 This guide covers running UrsaMU on a Linux VPS or dedicated server. The
 examples use Ubuntu/Debian and nginx, but the approach works on any Linux
 distribution.
-
 ---
 
 ## Before You Start
@@ -47,7 +27,6 @@ curl -fsSL https://deno.land/install.sh | sh
 # Add to PATH — follow the printed instructions, then:
 source ~/.bashrc
 ```
-
 ---
 
 ## Environment Variables
@@ -88,7 +67,6 @@ Or set ports in your game's `config/config.json`:
   }
 }
 ```
-
 ---
 
 ## First Run
@@ -115,7 +93,6 @@ Connect with a telnet client (`telnet localhost 4201`) and create your account.
 The first player created receives the `superuser` flag automatically.
 
 After that, switch to daemon mode for normal operation.
-
 ---
 
 ## Daemon Mode
@@ -152,7 +129,6 @@ The PIDs file is cleaned up automatically on `deno task stop`.
 > enables file watching so both servers restart on code changes. Use
 > `deno task daemon` in production where you want the servers to stay up
 > without reloading on filesystem events.
-
 ---
 
 ## systemd
@@ -220,7 +196,6 @@ setup. Run UrsaMU as a dedicated non-root user — create one with:
 ```bash
 sudo useradd -m -s /bin/bash ursamu
 ```
-
 ---
 
 ## Nginx and TLS
@@ -312,7 +287,6 @@ connections, clients should use a TLS-capable MU* client (e.g. Mudlet with SSL
 enabled) pointed directly at port 4201, with nginx/stunnel wrapping that port.
 Most game operators leave Telnet unencrypted and direct players to use the
 WebSocket connection for sensitive operations.
-
 ---
 
 ## Firewall
@@ -330,7 +304,6 @@ sudo ufw enable
 
 Port `4203` should **not** be exposed directly — all HTTP/WS traffic should
 flow through nginx on 443. Only Telnet needs a public port of its own.
-
 ---
 
 ## Logs
@@ -369,7 +342,6 @@ Prevent unbounded growth with `logrotate`. Create
 
 `copytruncate` truncates the file in place rather than moving it, so the
 running server keeps writing without needing a restart.
-
 ---
 
 ## Updates

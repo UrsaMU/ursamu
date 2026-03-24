@@ -1,21 +1,6 @@
 ---
 layout: layout.vto
 description: Typed event hooks for reacting to game, scene, wiki, and custom events
-nav:
-  - text: GameHooks
-    url: "#gamehooks"
-  - text: Scene Events
-    url: "#scene-events"
-  - text: WikiHooks
-    url: "#wikihooks"
-  - text: EventHooks
-    url: "#eventhooks"
-  - text: EventsService (pub/sub)
-    url: "#eventsservice-pubsub"
-  - text: Naming Conventions
-    url: "#naming-conventions"
-  - text: Full Example
-    url: "#full-example"
 ---
 
 # Plugin Hooks & Events
@@ -28,7 +13,6 @@ UrsaMU ships two complementary event systems. Choose the one that fits your use 
 | **EventsService** | Running sandbox scripts when custom events fire; in-game `u.events.on/emit` scripting |
 
 Both are safe to use together in the same plugin.
-
 ---
 
 ## GameHooks
@@ -66,7 +50,6 @@ handlers still run.
 gameHooks.emit("player:login", payload)
   .catch((e) => console.error("[hooks] player:login error:", e));
 ```
-
 ---
 
 ### Player Events
@@ -139,7 +122,6 @@ Fires when a player speaks on a channel.
 ```typescript
 gameHooks.on("channel:message", ({ channelName, senderId, senderName, message }) => {});
 ```
-
 ---
 
 ### Scene Events
@@ -199,7 +181,6 @@ gameHooks.on("scene:clear", ({ sceneId, sceneName, actorId, actorName, status })
   // status — "closed" | "finished" | "archived"
 });
 ```
-
 ---
 
 ## WikiHooks
@@ -236,7 +217,6 @@ wikiHooks.on("wiki:deleted", ({ path, meta }) => {});
 ```
 
 Same `on/off/emit` API and error-isolation semantics as GameHooks.
-
 ---
 
 ## EventHooks
@@ -254,7 +234,6 @@ eventHooks.on("event:ended",     ({ eventId, name }) => {});
 eventHooks.on("event:rsvp",      ({ eventId, playerId, status }) => {});
 eventHooks.on("event:cancelled", ({ eventId, name }) => {});
 ```
-
 ---
 
 ## EventsService (pub/sub)
@@ -301,7 +280,6 @@ const subId = await u.events.on("weather.change", `
 
 await u.events.emit("weather.change", { newWeather: "rainy" });
 ```
-
 ---
 
 ## Naming Conventions
@@ -315,7 +293,6 @@ wiki:created          ← built-in WikiHook
 weather.change        ← custom plugin event (EventsService)
 my-plugin.item.pickup ← custom plugin event (EventsService)
 ```
-
 ---
 
 ## Full Example

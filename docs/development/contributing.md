@@ -1,19 +1,6 @@
 ---
 layout: layout.vto
 description: Learn how to contribute to the UrsaMU project
-nav:
-  - text: Code of Conduct
-    url: "#code-of-conduct"
-  - text: Getting Started
-    url: "#getting-started"
-  - text: Development Process
-    url: "#development-process"
-  - text: Pull Requests
-    url: "#pull-requests"
-  - text: Coding Standards
-    url: "#coding-standards"
-  - text: Documentation
-    url: "#documentation"
 ---
 
 # Contributing to UrsaMU

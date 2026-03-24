@@ -2,21 +2,6 @@
 layout: layout.vto
 title: Game Clock
 description: UrsaMU's persistent in-game time system — calendar, configuration, and scripting patterns.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Calendar System
-    url: "#calendar-system"
-  - text: Configuration
-    url: "#configuration"
-  - text: Reading Game Time
-    url: "#reading-game-time"
-  - text: Setting Game Time
-    url: "#setting-game-time"
-  - text: Scripting Patterns
-    url: "#scripting-patterns"
-  - text: The +time Command
-    url: "#the-time-command"
 ---
 
 # Game Clock
@@ -25,7 +10,6 @@ UrsaMU includes a persistent in-game time system called GameClock. It runs
 independently from the real-world clock and can advance faster or slower than
 real time. This lets you run a fantasy calendar, track seasons, and write
 time-aware scripts.
-
 ---
 
 ## Overview
@@ -37,7 +21,6 @@ multiplier of `1.0`, game time and real time pass at the same rate.
 
 The clock persists across server reboots. Its state is stored in the database
 under the key `server.gameclock`.
-
 ---
 
 ## Calendar System
@@ -57,7 +40,6 @@ under the key `server.gameclock`.
 - 483,840 minutes per year
 
 Month and day names are not built in — you define them in your game's scripts.
-
 ---
 
 ## Configuration
@@ -85,7 +67,6 @@ The multiplier can also be changed at runtime from an admin script:
 ```typescript
 await u.sys.setConfig("game.timeMultiplier", 2.0);
 ```
-
 ---
 
 ## Reading Game Time
@@ -133,7 +114,6 @@ import { gameClock } from "../../services/GameClock/index.ts";
 const t = gameClock.now();
 const formatted = gameClock.format();   // "Year 340, Month 4, Day 15, 08:00"
 ```
-
 ---
 
 ## Setting Game Time
@@ -172,7 +152,6 @@ await u.sys.setGameTime({
   month: t.day + 1 > 28 ? t.month + 1 : t.month,
 });
 ```
-
 ---
 
 ## Scripting Patterns
@@ -239,7 +218,6 @@ if (ts) {
   u.send(`You were last seen on Month ${ts.month}, Day ${ts.day}, Year ${ts.year}.`);
 }
 ```
-
 ---
 
 ## The +time Command
@@ -258,7 +236,6 @@ The current in-game time is:
 
 The system script is at `system/scripts/time.ts`. To customize the output
 format or add a custom calendar, copy the script and modify it.
-
 ---
 
 ## Notes

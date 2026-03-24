@@ -1,21 +1,6 @@
 ---
 layout: layout.vto
 description: Learn how to extend UrsaMU with custom functionality
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Extension Points
-    url: "#extension-points"
-  - text: Custom Commands
-    url: "#custom-commands"
-  - text: Custom Flags
-    url: "#custom-flags"
-  - text: Custom Functions
-    url: "#custom-functions"
-  - text: Custom Hooks
-    url: "#custom-hooks"
-  - text: Advanced Extensions
-    url: "#advanced-extensions"
 ---
 
 # Extending UrsaMU

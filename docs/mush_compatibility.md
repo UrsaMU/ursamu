@@ -9,7 +9,6 @@ description: What UrsaMU supports compared to traditional MUSH servers like Penn
 UrsaMU is **not a drop-in replacement** for PennMUSH, TinyMUSH, or MUX2. It is a fresh platform with a different architecture — WebSocket-native, TypeScript, sandboxed scripts instead of MUSHcode.
 
 If you are migrating from a traditional MUSH or hosting your first server, this page tells you exactly what works today and what is planned.
-
 ---
 
 ## What Works Today
@@ -61,7 +60,6 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | `@trigger <obj>/<attr>` | ✅ Working | Fire stored attributes as scripts |
 | `@wipe <obj>` | ✅ Working | Clear all user-set attributes |
 | `@Aconnect` / `@Adisconnect` | ✅ Working | `&ACONNECT` / `&ADISCONNECT` attributes fire on login/logout |
-
 ---
 
 ## What's Different from Traditional MUSH
@@ -76,7 +74,6 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | `@switch` / `@if` / MUSHcode functions | Full JavaScript/TypeScript in scripts |
 
 MUSHcode attributes (`@va`–`@vz`, inline softcode, `&ATTRIBUTE`) are **not supported**. UrsaMU scripting uses the [Sandbox SDK](../guides/scripting/) instead.
-
 ---
 
 ## Planned Enhancements
@@ -85,7 +82,6 @@ MUSHcode attributes (`@va`–`@vz`, inline softcode, `&ATTRIBUTE`) are **not sup
 |---------|-------|
 | Terminal/screen settings | Width detection via Telnet NAWS, persistent pager settings |
 | MUSHcode inline softcode | Not planned — use TypeScript scripts instead |
-
 ---
 
 ## Connecting with a Traditional MU* Client

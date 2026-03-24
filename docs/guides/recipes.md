@@ -7,7 +7,6 @@ description: Common patterns and ready-to-use examples for UrsaMU scripts
 # Scripting Recipes
 
 Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.
-
 ---
 
 ## Room Description with Dynamic Content
@@ -34,7 +33,6 @@ if (exits.length) {
   u.send(`Obvious exits: ${names}`);
 }
 ```
-
 ---
 
 ## Simple Score Sheet
@@ -67,7 +65,6 @@ export default (u: IUrsamuSDK) => {
   u.send(HR);
 };
 ```
-
 ---
 
 ## Simple Shop
@@ -136,7 +133,6 @@ Set up a shop object:
 @set shop=shop
 @set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
 ```
-
 ---
 
 ## Announcement Board (Post on Login)
@@ -176,7 +172,6 @@ export default async (u: IUrsamuSDK) => {
   u.send("Announcement set and broadcast.");
 };
 ```
-
 ---
 
 ## Timed Event (Scheduled Message)
@@ -197,7 +192,6 @@ for (const p of players) {
   });
 }
 ```
-
 ---
 
 ## Object Lock (Only Owner Can Pick Up)
@@ -215,7 +209,6 @@ if (target.flags.has("owneronly") && target.state.owner !== u.me.id) {
 }
 // ... proceed with get
 ```
-
 ---
 
 ## Permission Guard Pattern
@@ -232,7 +225,6 @@ if (!isAdmin) {
   return;
 }
 ```
-
 ---
 
 ## Parse `<target>=<value>` Arguments
@@ -254,7 +246,6 @@ const value     = raw.slice(eqIdx + 1).trim();
 const target = await u.util.target(u.me, targetRef);
 if (!target) { u.send("Target not found."); return; }
 ```
-
 ---
 
 ## Read and Display a Bulletin Board Post
@@ -269,7 +260,6 @@ if (posts.length) {
   u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
 }
 ```
-
 ---
 
 ## Currency Transfer (Give Gold)
@@ -307,7 +297,6 @@ export default async (u: IUrsamuSDK) => {
   u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
 };
 ```
-
 ---
 
 ## Persistent Room Counter
@@ -325,7 +314,6 @@ if (visits % 100 === 0) {
   u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
 }
 ```
-
 ---
 
 ## Formatting a Who List

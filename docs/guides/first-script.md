@@ -9,7 +9,6 @@ description: A step-by-step walkthrough for writing your first UrsaMU system scr
 This guide walks you through writing a real script from scratch — starting with "hello world" and building up to something useful that reads player data and sends formatted output.
 
 **Prerequisites:** UrsaMU running locally, a text editor, basic TypeScript familiarity.
-
 ---
 
 ## Step 1 — Hello World
@@ -35,7 +34,6 @@ Hello, world!
 - `@` prefix is stripped automatically, so `@hello` works too
 - `u.send()` with no second argument sends to you (the actor)
 - The `import` line is for TypeScript IDE support — it's stripped before running
-
 ---
 
 ## Step 2 — Use the Actor
@@ -52,7 +50,6 @@ export default (u: IUrsamuSDK) => {
 ```
 
 `u.util.displayName(obj, viewer)` returns the moniker if set, otherwise the name.
-
 ---
 
 ## Step 3 — Read Arguments
@@ -75,7 +72,6 @@ export default (u: IUrsamuSDK) => {
 ```
 
 Type `hello Alice` → `Hello, Alice!`
-
 ---
 
 ## Step 4 — Find Another Player
@@ -106,7 +102,6 @@ export default async (u: IUrsamuSDK) => {
   u.here.broadcast(`${myName} waves to ${theirName}.`);  // everyone in room sees it
 };
 ```
-
 ---
 
 ## Step 5 — Read and Write Player Data
@@ -148,7 +143,6 @@ export default async (u: IUrsamuSDK) => {
 Type `wave` → `You have waved 1 time.`
 Type `wave` again → `You have waved 2 times.`
 Type `@wave/reset` (as admin) → `Wave count reset.`
-
 ---
 
 ## Step 6 — Format a Table
@@ -188,7 +182,6 @@ Gold:                              1200
 Silver:                             340
 ----------------------------------------
 ```
-
 ---
 
 ## Step 7 — Add Aliases
@@ -206,7 +199,6 @@ export default (u: IUrsamuSDK) => {
 ```
 
 Now `sheet`, `sc`, `@sheet`, and `@sc` all trigger this script.
-
 ---
 
 ## Next Steps

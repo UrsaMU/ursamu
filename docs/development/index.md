@@ -1,15 +1,6 @@
 ---
 layout: layout.vto
 description: Contribute to the UrsaMU project and help make it better
-nav:
-  - text: Getting Started
-    url: "#getting-started"
-  - text: Development Workflow
-    url: "#development-workflow"
-  - text: Code Standards
-    url: "#code-standards"
-  - text: Documentation
-    url: "#documentation"
 ---
 
 # UrsaMU Development

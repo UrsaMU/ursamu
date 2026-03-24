@@ -2,23 +2,6 @@
 layout: layout.vto
 title: Writing Help Files
 description: How to create and organize in-game help files for UrsaMU players.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Directory Structure
-    url: "#directory-structure"
-  - text: File Naming
-    url: "#file-naming"
-  - text: Markdown Support
-    url: "#markdown-support"
-  - text: Tables
-    url: "#tables"
-  - text: Color Codes
-    url: "#color-codes"
-  - text: How Players Access Help
-    url: "#how-players-access-help"
-  - text: Tips
-    url: "#tips"
 ---
 
 # Writing Help Files
@@ -26,7 +9,6 @@ nav:
 UrsaMU's in-game `help` command reads Markdown (`.md`) and plain text (`.txt`)
 files from the `help/` directory. Files are rendered with MUSH color codes and
 word-wrapped to 78 characters before being sent to the player.
-
 ---
 
 ## Overview
@@ -43,7 +25,6 @@ help/
 └── _admin/
     └── reboot.md      ← shown for "help reboot" (in admin-only category)
 ```
-
 ---
 
 ## Directory Structure
@@ -73,7 +54,6 @@ help/mail/index.md  →  shown for "help mail"
 ```
 
 You don't need to manually list subtopics — they appear automatically.
-
 ---
 
 ## File Naming
@@ -110,7 +90,6 @@ When a player types `help send`, the system finds the first matching file
 anywhere in the hierarchy. To force a scoped lookup they type `help mail/send`.
 If two files in different categories share a name, only the first match is
 returned — use scoped paths to avoid ambiguity.
-
 ---
 
 ## Markdown Support
@@ -169,7 +148,6 @@ Renders as:
 All text is automatically word-wrapped at **78 characters**. You do not need
 to manually break lines — write prose naturally and the renderer handles it.
 Indentation on list items is preserved across wrapped lines.
-
 ---
 
 ## Tables
@@ -193,7 +171,6 @@ The renderer:
 
 For tables with many columns or long content, prefer two-column layouts — they
 give the most readable result at 78 characters.
-
 ---
 
 ## Color Codes
@@ -224,7 +201,6 @@ Renders as bold yellow "WARNING:" followed by normal text.
 > **Tip:** Use color sparingly. The Markdown renderer already styles headers,
 > code, and lists consistently. Reserve manual color codes for callouts and
 > warnings.
-
 ---
 
 ## How Players Access Help
@@ -240,7 +216,6 @@ help dig              ← same result (@ stripped on lookup)
 
 The topic index groups everything into categories (directory names). Categories
 with an `index.md` show their description; others show only the subtopic list.
-
 ---
 
 ## Tips

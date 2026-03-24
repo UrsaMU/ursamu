@@ -2,21 +2,6 @@
 layout: layout.vto
 title: Admin Guide
 description: Learn how to administer an UrsaMU server
-nav:
-  - text: First-Run Setup
-    url: "#first-run-setup"
-  - text: User Management
-    url: "#user-management"
-  - text: Server Configuration
-    url: "#server-configuration"
-  - text: REST API Reference
-    url: "#rest-api-reference"
-  - text: Troubleshooting
-    url: "#troubleshooting"
-  - text: Password Reset
-    url: "#password-reset"
-  - text: Security
-    url: "#security"
 ---
 
 # Admin Guide
@@ -77,7 +62,6 @@ through the first-run interactive prompt.
 > the prompt is skipped. Run `deno task server` directly in an interactive
 > terminal to complete first-run setup, then switch back to `deno task start`
 > for normal operation.
-
 ---
 
 ## User Management
@@ -381,7 +365,6 @@ Page body in Markdown here.
 ```
 
 All metadata keys must match `/^[\w-]+$/`. Body size limit is **10 MB**.
-
 ---
 
 ## Scene Management
@@ -503,7 +486,6 @@ ws://host:4203?token=<jwt>&client=web
 ```
 
 The `client=web` parameter enables rich JSON payloads instead of plain text.
-
 ---
 
 ## Troubleshooting
@@ -544,7 +526,6 @@ flow. In brief:
 2. Pass the token to the player out-of-band (Discord, email, etc.)
 3. The player calls `POST /api/v1/auth/reset-password` with `{ token, newPassword }`
 4. The token is single-use and expires after **1 hour**
-
 ---
 
 ## Security

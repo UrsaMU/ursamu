@@ -19,7 +19,6 @@ When a player runs a command (or `@trigger` fires an attribute), the Sandbox Ser
 5. Worker terminates
 
 Scripts are fully isolated — they cannot crash the server, access the filesystem, or make network requests. All interaction happens through `u`.
-
 ---
 
 ## The `u` Object
@@ -58,7 +57,6 @@ u.cmd.original   // raw command string typed by the player
 u.cmd.args       // string[] — [rawArgString, ...splitArgs]
 u.cmd.switches   // string[] | undefined — ["edit"] from "@bbpost/edit"
 ```
-
 ---
 
 ## Messaging
@@ -82,7 +80,6 @@ u.here.broadcast("Alice waves cheerfully.");
 // Broadcast to all in target's room
 u.target?.broadcast("Someone enters the room.");
 ```
-
 ---
 
 ## Database (`u.db`)
@@ -112,7 +109,6 @@ await u.db.destroy(coin.id);
 > **Important:** always spread existing state when modifying:
 > `{ data: { ...u.me.state, myField: value } }` — omitting the spread
 > will wipe all other fields.
-
 ---
 
 ## Finding Objects (`u.util.target`)
@@ -125,7 +121,6 @@ if (!target) {
   return;
 }
 ```
-
 ---
 
 ## Flags & Permissions
@@ -146,7 +141,6 @@ await u.setFlags(target.id, "dark");       // add flag
 await u.setFlags(target.id, "!dark");      // remove flag
 await u.setFlags(target.id, "wizard");     // grant wizard
 ```
-
 ---
 
 ## Locks
@@ -155,7 +149,6 @@ await u.setFlags(target.id, "wizard");     // grant wizard
 // Evaluate a stored lock expression
 const canPass = await u.checkLock(target, "player+");
 ```
-
 ---
 
 ## Movement
@@ -164,7 +157,6 @@ const canPass = await u.checkLock(target, "player+");
 // Move any object to a destination
 u.teleport(objectId, destinationRoomId);
 ```
-
 ---
 
 ## Executing Commands
@@ -177,7 +169,6 @@ u.execute("say Hello, world!");
 // Force a command (bypasses some permission checks — use carefully)
 u.force("@set me=dark");
 ```
-
 ---
 
 ## Attributes (`u.attr`)
@@ -189,7 +180,6 @@ const desc = await u.attr.get(objectId, "SHORT-DESC");
 
 if (bio) u.send(bio);
 ```
-
 ---
 
 ## Evaluate Attribute (`u.eval`)
@@ -202,7 +192,6 @@ u.send(`Result: ${result}`);
 // Pass arguments
 const out = await u.eval(u.me.id, "CALC", ["10", "20"]);
 ```
-
 ---
 
 ## Force As (`u.forceAs`)
@@ -214,7 +203,6 @@ if (!u.me.flags.has("wizard") && !u.me.flags.has("admin")) {
 }
 await u.forceAs(npcId, "say Greetings, traveler!");
 ```
-
 ---
 
 ## Text (`u.text`)
@@ -228,7 +216,6 @@ const motd = await u.text.read("motd");
 // Write/update a text entry (admin scripts)
 await u.text.set("motd", "Welcome to the game! Events tonight at 8pm.");
 ```
-
 ---
 
 ## Bulletin Boards (`u.bb`)
@@ -253,7 +240,6 @@ await u.bb.markRead("announcements");
 // Get unread count totals
 const newCount = await u.bb.totalNewCount();
 ```
-
 ---
 
 ## Mail (`u.mail`)
@@ -276,7 +262,6 @@ const inbox = await u.mail.read({ to: { $in: [`#${u.me.id}`] } });
 // Delete a message
 await u.mail.delete(messageId);
 ```
-
 ---
 
 ## Channels (`u.chan`)
@@ -300,7 +285,6 @@ await u.chan.destroy("events");
 // Admin: change channel properties
 await u.chan.set("public", { header: "[PUB]", lock: "player+", masking: false });
 ```
-
 ---
 
 ## Attribute Triggers (`u.trigger`)
@@ -314,7 +298,6 @@ await u.trigger(target.id, "OPEN", ["force"]);
 // Fire &ACONNECT on the player
 await u.trigger(u.me.id, "ACONNECT");
 ```
-
 ---
 
 ## Authentication (`u.auth`)
@@ -334,7 +317,6 @@ const hashed = await u.auth.hash("mysecretpassword");
 // Change a player's password
 await u.auth.setPassword(playerId, "newpassword");
 ```
-
 ---
 
 ## System (`u.sys`)
@@ -363,7 +345,6 @@ await u.sys.update("develop"); // pull a specific branch
 
 Exit code 75 is caught by `scripts/main-loop.sh` which restarts the process
 with exponential backoff on rapid exits. Telnet connections survive reboots.
-
 ---
 
 ## Game Time (`u.sys.gameTime`)
@@ -376,7 +357,6 @@ const t = await u.sys.gameTime();
 // Set the in-game calendar (wizard/admin only)
 await u.sys.setGameTime({ year: 1340, month: 6, day: 15, hour: 8, minute: 0 });
 ```
-
 ---
 
 ## Channel History (`u.chan.history`)
@@ -387,7 +367,6 @@ const history = await u.chan.history("public");
 const history = await u.chan.history("public", 50);
 // → [{ id, playerName, message, timestamp }, ...]
 ```
-
 ---
 
 ## Events (`u.events`)
@@ -401,7 +380,6 @@ await u.events.emit("player.levelup", { id: u.me.id, newLevel: 5 });
 // Subscribe a handler attribute (the handler receives the event data)
 const subId = await u.events.on("player.levelup", "LEVELUP_HANDLER");
 ```
-
 ---
 
 ## Formatting Utilities (`u.util`)
@@ -427,7 +405,6 @@ u.util.template(
 // Strip MUSH color codes and ANSI escapes (for storage/validation)
 u.util.stripSubs("%chHello %cgWorld%cn")  // → "Hello World"
 ```
-
 ---
 
 ## Structured UI (`u.ui`)
@@ -446,7 +423,6 @@ u.ui.layout({
 // Render a template string
 const html = u.ui.render("<b>{{name}}</b>", { name: "Alice" });
 ```
-
 ---
 
 ## Writing a Script
@@ -510,7 +486,6 @@ if (switches.includes("edit")) {
   // handle edit mode
 }
 ```
-
 ---
 
 ## Security Model
@@ -530,7 +505,6 @@ if (switches.includes("edit")) {
 | JSR sub-path imports | Limited (import maps don't resolve in workers) |
 
 Scripts run inside `Worker` with `/// <reference no-default-lib="true" />`, which blocks `Deno`, `fetch`, `XMLHttpRequest`, and the filesystem.
-
 ---
 
 ## MUSH Color Codes

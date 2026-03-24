@@ -2,35 +2,6 @@
 layout: layout.vto
 title: Guides
 description: User guides and tutorials for UrsaMU
-nav:
-  - text: Installation Guide
-    url: "./installation.md"
-  - text: Command Reference
-    url: "./commands.md"
-  - text: CLI Reference
-    url: "./cli.md"
-  - text: User Guide
-    url: "./user-guide.md"
-  - text: Admin Guide
-    url: "./admin-guide.md"
-  - text: Scripting
-    url: "./scripting.md"
-  - text: MUSH Compatibility
-    url: "../mush_compatibility.md"
-  - text: Lock Expressions
-    url: "./lock-expressions.md"
-  - text: Password Reset
-    url: "./password-reset.md"
-  - text: Wiki
-    url: "./wiki.md"
-  - text: Writing Help Files
-    url: "./help-authoring.md"
-  - text: Scenes
-    url: "./scenes.md"
-  - text: Production Deployment
-    url: "./deployment.md"
-  - text: Customization
-    url: "./customization.md"
 ---
 
 # UrsaMU Guides

@@ -2,20 +2,12 @@
 layout: layout.vto
 title: Official Plugins
 description: The official UrsaMU plugin ecosystem — what each plugin provides, install requirements, and links to their documentation.
-nav:
-  - text: Auto-installation
-    url: "#auto-installation"
-  - text: Plugin Registry
-    url: "#plugin-registry"
-  - text: Adding a Plugin
-    url: "#adding-a-plugin"
 ---
 
 # Official Plugins
 
 UrsaMU's official plugins live in the [UrsaMU GitHub organization](https://github.com/UrsaMU).
 They are listed in `src/plugins/plugins.manifest.json` and installed automatically on first run via `ensurePlugins`.
-
 ---
 
 ## Auto-installation
@@ -23,7 +15,6 @@ They are listed in `src/plugins/plugins.manifest.json` and installed automatical
 On startup, the engine reads `plugins.manifest.json` and fetches any plugin whose `ref` differs from the installed copy. No manual install step is required.
 
 To disable auto-install for a specific plugin, remove its entry from the manifest.
-
 ---
 
 ## Plugin Registry
@@ -39,7 +30,6 @@ To disable auto-install for a specific plugin, remove its entry from the manifes
 | **wiki** | [UrsaMU/wiki-plugin](https://github.com/UrsaMU/wiki-plugin) | `>=1.9.0` | File-based markdown wiki — pages, search, history, backlinks |
 | **mail** | [UrsaMU/mail-plugin](https://github.com/UrsaMU/mail-plugin) | `>=1.9.3` | In-game mail — drafts, reply/forward, folders, attachments, quota, REST API |
 | **builder** | [UrsaMU/builder-plugin](https://github.com/UrsaMU/builder-plugin) | `>=1.9.5` | World-building commands — `@dig`, `@open`, `@link`, `@describe`, `@examine`, REST API |
-
 ---
 
 ## Adding a Plugin

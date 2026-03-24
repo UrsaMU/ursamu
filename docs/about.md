@@ -190,7 +190,6 @@ UrsaMU is at **v1.4.3**.
 - **Status**: actively maintained, published on JSR
 
 The project is open-source under the MIT License. Contributions are welcome!
-
 ---
 
 ## Architecture

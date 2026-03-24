@@ -1,21 +1,6 @@
 ---
 layout: layout.vto
 description: Learn how to create a child game using UrsaMU as a library
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Getting Started
-    url: "#getting-started"
-  - text: Project Structure
-    url: "#project-structure"
-  - text: Configuration
-    url: "#configuration"
-  - text: Customization
-    url: "#customization"
-  - text: Deployment
-    url: "#deployment"
-  - text: Examples
-    url: "#examples"
 ---
 
 # Creating Child Games with UrsaMU

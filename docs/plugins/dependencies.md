@@ -1,19 +1,6 @@
 ---
 layout: layout.vto
 description: Sharing code and utilities between UrsaMU plugins
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Sharing Utilities
-    url: "#sharing-utilities"
-  - text: Importing from Another Plugin
-    url: "#importing-from-another-plugin"
-  - text: Shared Database Collections
-    url: "#shared-database-collections"
-  - text: Coordination via Events
-    url: "#coordination-via-events"
-  - text: ursamu.plugin.json Dependencies
-    url: "#ursamu-plugin-json-dependencies"
 ---
 
 # Sharing Code Between Plugins
@@ -26,7 +13,6 @@ plugins share code the same way any TypeScript modules do: **direct imports**.
 
 This keeps things simple and type-safe. If plugin B needs something from
 plugin A, it imports it.
-
 ---
 
 ## Sharing Utilities
@@ -54,7 +40,6 @@ Any plugin can import from it:
 ```typescript
 import { formatTimestamp } from "../shared/format.ts";
 ```
-
 ---
 
 ## Importing from Another Plugin
@@ -79,7 +64,6 @@ const ev = await gameEvents.queryOne({ number: 1 });
 - Prefer importing **types and DBO collections** rather than importing
   `commands.ts` or `index.ts`, since those have side effects (command
   registration, plugin init).
-
 ---
 
 ## Shared Database Collections
@@ -104,7 +88,6 @@ export const jobs = new DBO<IJob>("server.jobs");
 Both the `jobs` plugin and a hypothetical `jobs-reporter` plugin import from
 `shared/jobsDb.ts`. The KV store is shared automatically since both collections
 use the same key (`"server.jobs"`).
-
 ---
 
 ## Coordination via Events
@@ -136,7 +119,6 @@ await svc.subscribe(
 
 This pattern is preferred when the dependency is optional or when you want
 Plugin B to work even if Plugin A is not installed.
-
 ---
 
 ## ursamu.plugin.json Dependencies

@@ -2,27 +2,11 @@
 layout: layout.vto
 title: Command Reference
 description: Complete reference for all built-in UrsaMU in-game commands — player, channel, mail, bulletin boards, building, and admin.
-nav:
-  - text: Player Commands
-    url: "#player-commands"
-  - text: Channel Commands
-    url: "#channel-commands"
-  - text: Mail Commands
-    url: "#mail-commands"
-  - text: Bulletin Board Commands
-    url: "#bulletin-board-commands"
-  - text: Building Commands
-    url: "#building-commands"
-  - text: Admin Commands
-    url: "#admin-commands"
-  - text: Plugin Commands
-    url: "#plugin-commands"
 ---
 
 # Command Reference
 
 All built-in commands available in UrsaMU. Commands marked **admin+** require the `admin` or `wizard` flag. Commands marked **builder+** require `builder` or above.
-
 ---
 
 ## Player Commands
@@ -53,7 +37,6 @@ All built-in commands available in UrsaMU. Commands marked **admin+** require th
 | `whisper <player>=<msg>` | Private in-room message; others see attribution only |
 | `quit` | Disconnect from the server |
 | `help [<topic>]` | Display help text |
-
 ---
 
 ## Channel Commands
@@ -75,7 +58,6 @@ Players join channels and get a short alias to speak with.
 | `@allcom` | List all your channel aliases |
 | `@clearcom` | Remove all your channel aliases |
 | `@comtitle <alias>=<title>` | Set a display title prefix for a channel |
-
 ---
 
 ## Mail Commands
@@ -96,7 +78,6 @@ Mail is provided by the [mail-plugin](https://github.com/UrsaMU/mail-plugin).
 | `@mail/proof` | Preview the message being composed |
 | `@mail/abort` | Discard the message being composed |
 | `@mail/delete <num>` | Delete a message |
-
 ---
 
 ## Bulletin Board Commands
@@ -111,7 +92,6 @@ Bulletin boards are provided by the [bbs-plugin](https://github.com/UrsaMU/bbs-p
 | `+bbpost <board>=<subject>/<body>` | Post to a board |
 | `+bbpost/edit <board>/<num>=<body>` | Edit your own post |
 | `+bbpost/delete <board>/<num>` | Delete your own post |
-
 ---
 
 ## Building Commands
@@ -144,7 +124,6 @@ Building commands are provided by the [builder-plugin](https://github.com/UrsaMU
 | `@decompile[/tf] <object>` | Dump object as copyable `@name`/`&ATTR` lines |
 | `@find [<name>]` | Search objects by name or flag |
 | `@quota` | Show your object creation quota |
-
 ---
 
 ## Admin Commands
@@ -186,7 +165,6 @@ Requires `admin` or `wizard` flag unless noted.
 | `@chanset <name>/<prop>=<value>` | Configure a channel |
 | `+bbcreate <name>[=<description>]` | Create a bulletin board |
 | `+bbdestroy <board>` | Destroy a bulletin board |
-
 ---
 
 ## Plugin Commands

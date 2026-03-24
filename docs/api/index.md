@@ -2,36 +2,12 @@
 layout: layout.vto
 title: API Reference
 description: Quick-reference index for all public UrsaMU APIs — imports, types, commands, database, hooks, and REST endpoints.
-nav:
-  - text: REST API
-    url: "./rest.md"
-  - text: Imports
-    url: "#imports"
-  - text: Types
-    url: "#types"
-  - text: addCmd
-    url: "#addcmd"
-  - text: u.db
-    url: "#udb"
-  - text: u.* Quick Reference
-    url: "#u-quick-reference"
-  - text: dbojs
-    url: "#dbojs"
-  - text: DBO<T>
-    url: "#dbot"
-  - text: GameHooks
-    url: "#gamehooks"
-  - text: REST API
-    url: "#rest-api"
-  - text: For AI tools
-    url: "#for-ai-tools"
 ---
 
 # API Reference
 
 Quick-reference index for all public UrsaMU APIs. For full documentation of
 each section, see [Core API Reference](./core.md).
-
 ---
 
 ## Imports
@@ -56,7 +32,6 @@ Internal plugins may use direct paths:
 import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 ```
-
 ---
 
 ## Types
@@ -70,7 +45,6 @@ import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 | `IGameTime` | In-game calendar: `{ year, month, day, hour, minute }` |
 
 See [Core API Reference](./core.md) for full type definitions.
-
 ---
 
 ## addCmd
@@ -117,7 +91,6 @@ addCmd({
 | `"#42"` | Must be exactly object #42 |
 | `"!dark"` | Must NOT have the dark flag |
 | `"wizard\|admin"` | wizard OR admin |
-
 ---
 
 ## u.db
@@ -160,7 +133,6 @@ const found   = await u.db.search({ $or: [
   { "data.name": /alice/i }, { "data.alias": /alice/i }
 ]});
 ```
-
 ---
 
 ## u.* Quick Reference
@@ -274,7 +246,6 @@ All namespaces on the `u` SDK object. Every method is `async` (returns a Promise
 |--------|-------------|
 | `emit(event, data, ctx?)` | Fire server-wide event |
 | `on(event, handlerAttr)` | Subscribe &ATTR handler |
-
 ---
 
 ## dbojs
@@ -288,7 +259,6 @@ const players = await dbojs.queryAll((o) => o.flags.has("player"));
 const room    = await dbojs.queryOne((o) => o.id === "1");
 // queryOne returns IDBOBJ | undefined | false
 ```
-
 ---
 
 ## DBO\<T\>
@@ -307,7 +277,6 @@ const one  = await notes.findOne({ id: noteId });
 await notes.update({ id: noteId }, { text: "updated" });
 await notes.delete({ id: noteId });
 ```
-
 ---
 
 ## GameHooks
@@ -342,7 +311,6 @@ gameHooks.off("player:login", handler);    // call in plugin remove()
 Other hook buses (from specific plugins):
 - `wikiHooks` — `wiki:created`, `wiki:edited`, `wiki:deleted`
 - `eventHooks` — `event:created`, `event:updated`, `event:deleted`, `event:started`, `event:ended`, `event:rsvp`, `event:cancelled`
-
 ---
 
 ## REST API
@@ -370,7 +338,6 @@ Authentication: `Authorization: Bearer <jwt>` header on all protected routes.
 | `PATCH` | `/api/v1/wiki/:path` | Staff | Update page |
 | `DELETE` | `/api/v1/wiki/:path` | Staff | Delete page |
 | `PUT` | `/api/v1/wiki/:path.ext` | Staff | Upload static asset |
-
 ---
 
 ## For AI Tools

@@ -2,54 +2,12 @@
 layout: layout.vto
 title: Core API Reference
 description: ICmd, IUrsamuSDK, IPlugin, IDBObj — the complete type reference for UrsaMU plugin and script authors.
-nav:
-  - text: Imports
-    url: "#imports"
-  - text: IDBObj
-    url: "#idbobj"
-  - text: ICmd
-    url: "#icmd"
-  - text: IUrsamuSDK
-    url: "#iursamusdk"
-  - text: u.me / u.here
-    url: "#ume--uhere"
-  - text: u.db
-    url: "#udb"
-  - text: u.util
-    url: "#uutil"
-  - text: u.cmd
-    url: "#ucmd"
-  - text: u.auth
-    url: "#uauth"
-  - text: u.sys
-    url: "#usys"
-  - text: u.chan
-    url: "#uchan"
-  - text: u.bb
-    url: "#ubb"
-  - text: u.events
-    url: "#uevents"
-  - text: u.attr
-    url: "#uattr"
-  - text: u.mail
-    url: "#umail-sandbox-scripts-only"
-  - text: u.eval
-    url: "#ueval"
-  - text: u.forceAs
-    url: "#uforceas"
-  - text: Top-level methods
-    url: "#top-level-methods"
-  - text: IPlugin
-    url: "#iplugin"
-  - text: Exported functions
-    url: "#exported-functions"
 ---
 
 # Core API Reference
 
 This page documents the types and functions available to plugin and script authors.
 All of these are exported from `jsr:@ursamu/ursamu`.
-
 ---
 
 ## Imports
@@ -61,7 +19,6 @@ import { addCmd, registerPluginRoute, mu, createObj, DBO, dbojs } from "jsr:@urs
 // Types (import type — zero runtime cost)
 import type { ICmd, IPlugin, IDBObj, IUrsamuSDK } from "jsr:@ursamu/ursamu";
 ```
-
 ---
 
 ## IDBObj
@@ -86,7 +43,6 @@ interface IDBObj {
 | `flags` | Use `flags.has("wizard")`, not array methods. |
 | `state` | Arbitrary key-value store. Cast values on read: `obj.state.gold as number`. |
 | `contents` | Populated at query time — may be empty even if the object has contents depending on context. |
-
 ---
 
 ## ICmd
@@ -131,7 +87,6 @@ addCmd({
   help: "+greet <name>\nSays hello.",
 });
 ```
-
 ---
 
 ## IUrsamuSDK
@@ -151,7 +106,6 @@ interface IUrsamuSDK {
   // ... namespaces below
 }
 ```
-
 ---
 
 ## u.me / u.here
@@ -180,7 +134,6 @@ u.me.flags.has("builder")
 u.me.flags.has("player")
 u.me.flags.has("connected")   // currently online
 ```
-
 ---
 
 ## u.db
@@ -244,7 +197,6 @@ await u.db.modify(obj.id, "$set", { location: destinationId });
 ```typescript
 await u.db.destroy(obj.id);
 ```
-
 ---
 
 ## u.util
@@ -304,7 +256,6 @@ Printf-style formatting.
 ```typescript
 u.send(u.util.sprintf("%-20s %5d gp", player.name, gold));
 ```
-
 ---
 
 ## u.cmd
@@ -317,7 +268,6 @@ u.cmd.args       // string[] — capture groups from the pattern RegExp
 u.cmd.switches   // string[] — e.g. ["quiet"] from "@set/quiet ..."
 u.cmd.original   // The raw input string the player typed
 ```
-
 ---
 
 ## u.auth
@@ -337,7 +287,6 @@ await u.auth.setPassword(u.me.id, "newpassword");
 // Log in a player (rarely needed in scripts)
 await u.auth.login(u.me.id);
 ```
-
 ---
 
 ## u.sys
@@ -365,7 +314,6 @@ const t: IGameTime = await u.sys.gameTime();
 
 await u.sys.setGameTime({ year: 1340, month: 6, day: 15, hour: 8, minute: 0 });
 ```
-
 ---
 
 ## u.chan
@@ -397,7 +345,6 @@ const history = await u.chan.history("public");        // last 20 messages (defa
 const history = await u.chan.history("public", 50);    // last 50 messages
 // → [{ id: string, playerName: string, message: string, timestamp: number }, ...]
 ```
-
 ---
 
 ## u.bb
@@ -429,7 +376,6 @@ await u.bb.deletePost(boardId, postNum);
 // Count unread posts
 const total: number = await u.bb.totalNewCount();
 ```
-
 ---
 
 ## u.events
@@ -443,7 +389,6 @@ await u.events.emit("game:levelup", { playerId: u.me.id, level: 5 });
 // Register a listener (stores a script key to call when the event fires)
 const handlerId = await u.events.on("game:levelup", "scripts/levelup-handler");
 ```
-
 ---
 
 ## u.attr
@@ -458,7 +403,6 @@ const desc = await u.attr.get(objectId, "SHORT-DESC");
 // Attribute names are case-insensitive
 const val = await u.attr.get(objectId, "onenter");   // same as "ONENTER"
 ```
-
 ---
 
 ## u.mail *(sandbox scripts only)*
@@ -506,7 +450,6 @@ await u.mail.modify({ id: messageId }, "$set", { read: true });
   date:     number;     // Date.now() timestamp
 }
 ```
-
 ---
 
 ## u.eval
@@ -521,7 +464,6 @@ u.send(`Result: ${result}`);
 // Evaluate an attribute on the actor
 const score = await u.eval(u.me.id, "SCORE-FORMULA");
 ```
-
 ---
 
 ## u.forceAs
@@ -538,7 +480,6 @@ if (!u.me.flags.has("wizard") && !u.me.flags.has("admin") && !u.me.flags.has("su
 await u.forceAs(npcId, "say Welcome, traveler!");
 await u.forceAs(roomId, "look");
 ```
-
 ---
 
 ## Top-level methods
@@ -622,7 +563,6 @@ Returns `true` if `actor` has permission to edit `target`.
 const ok = await u.canEdit(u.me, target);
 if (!ok) return u.send("Permission denied.");
 ```
-
 ---
 
 ## IPlugin
@@ -653,7 +593,6 @@ export const plugin: IPlugin = {
   },
 };
 ```
-
 ---
 
 ## Exported functions

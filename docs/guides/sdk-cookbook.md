@@ -7,7 +7,6 @@ description: Complete reference for every u.* namespace with real working exampl
 # SDK Cookbook
 
 Every method available on the `u` object, organized by namespace, with working examples pulled from real system scripts.
-
 ---
 
 ## Context Objects
@@ -98,7 +97,6 @@ const prev = u.state.lastRan as number | undefined;
 // Write state (patches are sent back automatically via Proxy)
 u.state.lastRan = Date.now();
 ```
-
 ---
 
 ## Messaging
@@ -138,7 +136,6 @@ Send to everyone in the actor's current room.
 ```typescript
 u.here.broadcast(`${u.util.displayName(u.me, u.me)} arrives.`);
 ```
-
 ---
 
 ## Database (`u.db`)
@@ -208,7 +205,6 @@ await u.db.modify(objectId, "$set", {
 await u.db.destroy(objectId);
 u.send(`Object #${objectId} destroyed.`);
 ```
-
 ---
 
 ## Target Resolution (`u.util.target`)
@@ -230,7 +226,6 @@ The lookup searches:
 2. Actor's inventory (by name/alias)
 3. Current room contents (by name/alias)
 4. All objects globally (if `global` param is `true`)
-
 ---
 
 ## Flags (`u.setFlags`)
@@ -243,7 +238,6 @@ await u.setFlags(target.id, "wizard");   // grant wizard (superuser required)
 // Or by object reference
 await u.setFlags(u.me, "builder");
 ```
-
 ---
 
 ## Permission Check (`u.canEdit`)
@@ -257,7 +251,6 @@ if (!u.canEdit(u.me, target)) {
 ```
 
 Returns `true` if the actor owns the target, or is admin/wizard/superuser.
-
 ---
 
 ## Locks (`u.checkLock`)
@@ -273,7 +266,6 @@ const isWiz   = await u.checkLock(u.me.id,   "wizard");
 // "!dark"        — must NOT have dark flag
 // "#42"          — must be object #42
 ```
-
 ---
 
 ## Movement (`u.teleport`)
@@ -285,7 +277,6 @@ u.teleport(u.me.id, destinationId);
 // Move an object from inventory to a room
 u.teleport(objectId, u.here.id);
 ```
-
 ---
 
 ## Execute Commands (`u.execute`, `u.force`)
@@ -299,7 +290,6 @@ u.execute(`say I just arrived!`);
 u.force("@set me=dark");
 u.force(`@teleport #${objectId}=#${roomId}`);
 ```
-
 ---
 
 ## Text Storage (`u.text`)
@@ -317,7 +307,6 @@ await u.text.set("motd", "Server maintenance tonight at midnight EST.");
 // Clear
 await u.text.set("motd", "");
 ```
-
 ---
 
 ## Bulletin Boards (`u.bb`)
@@ -361,7 +350,6 @@ await u.bb.markRead("announcements");
 const boardNew = await u.bb.newPostCount("announcements");  // for one board
 const totalNew = await u.bb.totalNewCount();                 // across all boards
 ```
-
 ---
 
 ## Mail (`u.mail`)
@@ -390,7 +378,6 @@ const unread = inbox.filter(m => !m.read);
 // Delete
 await u.mail.delete(messageId);
 ```
-
 ---
 
 ## Channels (`u.chan`)
@@ -421,7 +408,6 @@ await u.chan.set("public", {
 // Admin: destroy
 await u.chan.destroy("events");
 ```
-
 ---
 
 ## Attribute Triggers (`u.trigger`)
@@ -438,7 +424,6 @@ await u.trigger(objectId, "USE", ["open"]);
 // Fire &ACONNECT on the player
 await u.trigger(u.me.id, "ACONNECT");
 ```
-
 ---
 
 ## Authentication (`u.auth`)
@@ -456,7 +441,6 @@ const hashed = await u.auth.hash(plaintext);
 // Change password
 await u.auth.setPassword(playerId, newPassword);
 ```
-
 ---
 
 ## System (`u.sys`)
@@ -486,7 +470,6 @@ await u.sys.shutdown();
 await u.sys.update();            // pull origin/main
 await u.sys.update("develop");   // pull a specific branch
 ```
-
 ---
 
 ## Events (`u.events`)
@@ -504,7 +487,6 @@ await u.events.emit("player.died", {
 // The attribute value is a script that receives the event data
 const subId = await u.events.on("player.died", "DEATH_HANDLER");
 ```
-
 ---
 
 ## Formatting (`u.util`)
@@ -567,7 +549,6 @@ if (!clean) { u.send("Value cannot be empty."); return; }
 u.util.displayName(u.me, u.me)       // "Alice" or moniker
 u.util.displayName(target, u.me)     // target's display name as seen by actor
 ```
-
 ---
 
 ## Attributes (`u.attr`)
@@ -588,7 +569,6 @@ const bio = await u.attr.get(targetId, "FINGER-INFO");
 // Case-insensitive
 const val = await u.attr.get(objectId, "onenter");  // same as "ONENTER"
 ```
-
 ---
 
 ## Evaluate Attribute (`u.eval`)
@@ -607,7 +587,6 @@ u.send(`Formula result: ${result}`);
 const score = await u.eval(u.me.id, "SCORE-FORMULA");
 u.send(`Your score: ${score}`);
 ```
-
 ---
 
 ## Force As Another Object (`u.forceAs`)
@@ -628,7 +607,6 @@ await u.forceAs(npcId, "say Welcome to the Inn!");
 // Make a room run a command
 await u.forceAs(roomId, "@trigger me/ONRESET");
 ```
-
 ---
 
 ## Game Time (`u.sys.gameTime`)
@@ -654,7 +632,6 @@ if (!u.me.flags.has("wizard") && !u.me.flags.has("admin")) {
 await u.sys.setGameTime({ year: t.year + 1, month: 1, day: 1, hour: 0, minute: 0 });
 u.broadcast("A new year has begun!");
 ```
-
 ---
 
 ## Channel History (`u.chan.history`)
@@ -678,7 +655,6 @@ const lines = history.map(e => {
 });
 u.send(lines.join("\r\n"));
 ```
-
 ---
 
 ## Mail — Modify (`u.mail.modify`)

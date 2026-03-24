@@ -2,23 +2,6 @@
 layout: layout.vto
 title: Configuration
 description: Learn how to configure UrsaMU for your needs
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Configuration Files
-    url: "#configuration-files"
-  - text: Server Configuration
-    url: "#server-configuration"
-  - text: Game Configuration
-    url: "#game-configuration"
-  - text: Database Configuration
-    url: "#database-configuration"
-  - text: Plugin Configuration
-    url: "#plugin-configuration"
-  - text: Text Files
-    url: "#text-files"
-  - text: Advanced Configuration
-    url: "#advanced-configuration"
 ---
 
 # Configuring UrsaMU

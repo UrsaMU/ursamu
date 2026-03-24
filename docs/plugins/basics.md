@@ -1,17 +1,6 @@
 ---
 layout: layout.vto
 description: The IPlugin interface, lifecycle, and auto-discovery explained
-nav:
-  - text: Auto-Discovery
-    url: "#auto-discovery"
-  - text: The IPlugin Interface
-    url: "#the-iplugin-interface"
-  - text: Lifecycle
-    url: "#lifecycle"
-  - text: A Minimal Plugin
-    url: "#a-minimal-plugin"
-  - text: Standard File Layout
-    url: "#standard-file-layout"
 ---
 
 # Plugin Basics
@@ -28,7 +17,6 @@ src/plugins/
 ├── jobs/           ← auto-loaded
 └── my-plugin/      ← auto-loaded the next time you start
 ```
-
 ---
 
 ## The IPlugin Interface
@@ -49,7 +37,6 @@ export interface IPlugin {
 That is the complete interface. There is no `author` field, no `dependencies`
 array, no `App` parameter, and no `onInit`/`onLoad`/`onUnload` lifecycle
 methods. The interface is intentionally minimal.
-
 ---
 
 ## Lifecycle
@@ -63,7 +50,6 @@ methods. The interface is intentionally minimal.
 > `addCmd` and `new DBO<T>()` are called at **module-load time**, not inside
 > `init()`. Import `"./commands.ts"` from `index.ts` and the registrations
 > happen automatically.
-
 ---
 
 ## A Minimal Plugin
@@ -92,7 +78,6 @@ export default helloPlugin;
 
 That is a complete, loadable plugin. Start the server and you will see
 `[hello] initialized` in the log.
-
 ---
 
 ## Standard File Layout

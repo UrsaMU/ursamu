@@ -2,23 +2,6 @@
 layout: layout.vto
 title: User Guide
 description: Learn how to use UrsaMU as a player
-nav:
-  - text: Getting Started
-    url: "#getting-started"
-  - text: Basic Commands
-    url: "#basic-commands"
-  - text: Character Creation
-    url: "#character-creation"
-  - text: Bulletin Boards
-    url: "#bulletin-boards"
-  - text: Staff Jobs
-    url: "#staff-jobs"
-  - text: Communication
-    url: "#communication"
-  - text: Wiki
-    url: "#wiki"
-  - text: Building
-    url: "#building"
 ---
 
 # User Guide
@@ -173,7 +156,6 @@ is read with `+wiki lore/factions/iron-circle`.
 
 > Staff members can create, edit, and fetch images with `@wiki` commands —
 > see the [Admin Guide](/guides/admin-guide/#wiki-administration) for details.
-
 ---
 
 ## Object Interaction

@@ -2,29 +2,6 @@
 layout: layout.vto
 title: Scenes
 description: How to create, join, write in, and export collaborative roleplay scenes in UrsaMU.
-nav:
-  - text: Overview
-    url: "#overview"
-  - text: Creating a Scene
-    url: "#creating-a-scene"
-  - text: Listing Scenes
-    url: "#listing-scenes"
-  - text: Joining a Scene
-    url: "#joining-a-scene"
-  - text: Writing Poses
-    url: "#writing-poses"
-  - text: Editing a Pose
-    url: "#editing-a-pose"
-  - text: Updating a Scene
-    url: "#updating-a-scene"
-  - text: Private Scenes
-    url: "#private-scenes"
-  - text: Exporting a Scene
-    url: "#exporting-a-scene"
-  - text: Scene Hooks
-    url: "#scene-hooks"
-  - text: API Reference
-    url: "#api-reference"
 ---
 
 # Scenes
@@ -34,7 +11,6 @@ players. The scene system tracks who participated, what was written, and where
 it happened, and lets you export the finished log as Markdown or JSON.
 
 All scene endpoints require a `Bearer` JWT token in the `Authorization` header.
-
 ---
 
 ## Overview
@@ -58,7 +34,6 @@ PATCH /scenes/:id          (close the scene)
 GET /scenes/:id/export
   ?format=markdown    ──▶  ← Markdown log file
 ```
-
 ---
 
 ## Creating a Scene
@@ -113,7 +88,6 @@ curl -X POST https://yourgame.example.com/api/v1/scenes \
 ```
 
 The creator is automatically added as the first participant.
-
 ---
 
 ## Listing Scenes
@@ -143,7 +117,6 @@ for scene creation UIs that let the player pick a location from a list.
 ```
 
 `type` is `"private"` if the room has an enter lock set, `"public"` otherwise.
-
 ---
 
 ## Joining a Scene
@@ -161,7 +134,6 @@ No body required. If successful, the player is added to `participants`.
 ```json
 { "success": true, "scene": { ... } }
 ```
-
 ---
 
 ## Writing Poses
@@ -223,7 +195,6 @@ curl -X POST https://yourgame.example.com/api/v1/scenes/42/pose \
 ```
 
 Posting automatically adds you to `participants` if you weren't already there.
-
 ---
 
 ## Editing a Pose
@@ -246,7 +217,6 @@ Content-Type: application/json
 The `type` and `timestamp` cannot be changed after posting. Max 4000 characters.
 
 **Response (`200 OK`):** the updated pose object.
-
 ---
 
 ## Updating a Scene
@@ -277,7 +247,6 @@ curl -X PATCH https://yourgame.example.com/api/v1/scenes/42 \
   -H "Content-Type: application/json" \
   -d '{"status": "closed", "endTime": 1710003600000}'
 ```
-
 ---
 
 ## Private Scenes
@@ -305,7 +274,6 @@ Content-Type: application/json
 
 `target` can be a dbref (`#7`) or a player name. The player is added to the
 `allowed` list and can then join the scene.
-
 ---
 
 ## Exporting a Scene
@@ -344,7 +312,6 @@ curl -H "Authorization: Bearer <token>" \
 **Started:** 2026-03-18
 **Ended:** 2026-03-18
 **Participants:** Talia, Marcus
-
 ---
 
 **Talia** glances up as rain spatters her coat, then freezes.
@@ -352,14 +319,12 @@ curl -H "Authorization: Bearer <token>" \
 **Marcus** turns up his collar, not yet noticing her.
 
 *[OOC] Talia: great opener!*
-
 ---
 *Exported 2026-03-18*
 ```
 
 MUSH color codes are stripped from all character names and pose content in the
 export, so the output is clean plain text.
-
 ---
 
 ## Scene Hooks
@@ -414,7 +379,6 @@ gameHooks.on("scene:clear", ({ sceneName, status }: SceneClearEvent) => {
 ```
 
 See [Plugin Hooks & Events](/plugins/hooks/) for the complete GameHooks API.
-
 ---
 
 ## API Reference
