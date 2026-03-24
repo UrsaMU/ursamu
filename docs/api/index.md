@@ -3,6 +3,8 @@ layout: layout.vto
 title: API Reference
 description: Quick-reference index for all public UrsaMU APIs — imports, types, commands, database, hooks, and REST endpoints.
 nav:
+  - text: REST API
+    url: "./rest.md"
   - text: Imports
     url: "#imports"
   - text: Types
