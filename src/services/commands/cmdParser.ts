@@ -71,7 +71,7 @@ export function registerScript(name: string, content: string): void {
  *  Channel scripts (chancreate, chandestroy, channels, chanset) are provided by channel-plugin, not the engine. */
 const ENGINE_SCRIPT_NAMES = [
   "admin","alias","connect","create",
-  "doing","drop","emit","find","flags","format","get","give","help","home","inventory",
+  "doing","drop","emit","find","flags","format","get","give","home","inventory",
   "look","mail","mailadd","moniker","motd","page","pemit","pose","quit","remit",
   "say","score","search","stats","teleport","think","trigger","update","who",
   "tel","forceCmd","sweep","entrances",
@@ -220,7 +220,7 @@ cmdParser.use(async (ctx, next) => {
 
   // 3. Fallback to system scripts in system/scripts/
   // Connect-screen commands that system scripts may handle for unauthenticated users
-  const connectScreenScripts = new Set(["connect", "create", "who", "help", "quit"]);
+  const connectScreenScripts = new Set(["connect", "create", "who", "quit"]);
 
   const aliasMap: Record<string, string> = {
     "l": "look",

@@ -297,6 +297,45 @@ long-running restart resets the delay back to 1 second.
 The deno child PID is written to `.ursamu-deno.pid`; the loop PID is in
 `.ursamu.pid`. Use `bash scripts/stop.sh` to gracefully stop both.
 
+## Help Administration
+
+The `help` command is provided by the **[help-plugin](https://github.com/UrsaMU/help-plugin)**,
+which aggregates entries from three sources in priority order:
+
+| Priority | Source | Description |
+|----------|--------|-------------|
+| 100 | Database | Entries created with `+help/set` — override everything |
+| 50 | Files | Markdown files in `./help/` and plugin help dirs |
+| 10 | Commands | Inline `help:` fields from `addCmd()` registrations |
+
+### In-game admin commands
+
+```
++help/set <topic>=<text>   ← create or update a DB entry (Markdown supported)
++help/del <topic>          ← delete a DB entry
++help/reload               ← bust the file cache after adding/removing files
+```
+
+DB entries immediately override any file or command entry with the same slug.
+Use `+help/del` to restore the underlying file entry.
+
+### REST API
+
+```
+GET    /api/v1/help              ← list all sections and topics
+GET    /api/v1/help/:topic       ← fetch a topic (?format=md for raw Markdown)
+POST   /api/v1/help/:topic       ← create/update (admin token required)
+DELETE /api/v1/help/:topic       ← delete (admin token required)
+```
+
+### Adding help files
+
+Drop `.md` or `.txt` files in `./help/` (or a subdirectory) and run
+`+help/reload` in-game. No restart needed. See [Writing Help Files](./help-authoring.md)
+for directory layout and Markdown conventions.
+
+---
+
 ## Wiki Administration
 
 The wiki plugin stores articles as Markdown files in `./wiki/` with a
