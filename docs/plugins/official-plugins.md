@@ -22,7 +22,6 @@ To disable auto-install for a specific plugin, remove its entry from the manifes
 | Plugin | Repo | Min Engine | Description |
 |--------|------|-----------|-------------|
 | **channel** | [UrsaMU/channel-plugin](https://github.com/UrsaMU/channel-plugin) | `>=1.9.27` | Channel system — alias dispatch, auto-join, `@chancreate`/`@chandestroy`/`@chanset`, message history |
-| **rhost-vision** | [chogan1981/ursamu-rhost-vision](https://github.com/chogan1981/ursamu-rhost-vision) | `>=1.8.0` | Rhost-style display — `look`, `who`, `score`, `+finger`, `+where`, `+staff` |
 | **discord** | [UrsaMU/discord-plugin](https://github.com/UrsaMU/discord-plugin) | `>=1.9.0` | Webhook-based Discord integration — channel bridging, presence, chargen events |
 | **jobs** | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin) | `>=1.9.0` | Anomaly-style jobs/request system — player requests, staff commands, REST API |
 | **events** | [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin) | `>=1.9.2` | In-game event calendar with RSVP tracking and REST API |
