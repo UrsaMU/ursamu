@@ -256,15 +256,14 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
           if (payload.msg) {
             let out: string = payload.msg;
             // Expand or strip MXP markers produced by the %mxp[] parser substitution
+            // deno-lint-ignore no-control-regex
+            const mxpPattern = /\x03MXP\[([^\|]+)\|([^\]]+)\]\x03/g;
             if (mxpEnabled) {
               // ESC [ 4 z activates MXP open mode; wrap text in <send> tag
-              out = out.replace(
-                /\x03MXP\[([^\|]+)\|([^\]]+)\]\x03/g,
-                '\x1b[4z<send href="$1">$2</send>',
-              );
+              out = out.replace(mxpPattern, '\x1b[4z<send href="$1">$2</send>');
             } else {
               // Non-MXP clients get the plain-text portion only
-              out = out.replace(/\x03MXP\[([^\|]+)\|([^\]]+)\]\x03/g, "$2");
+              out = out.replace(mxpPattern, "$2");
             }
             write(out.replace(/[\r\n]+$/, "") + "\r\n");
           }

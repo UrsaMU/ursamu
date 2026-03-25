@@ -13,14 +13,13 @@
  * explicit base-10 parse so negative and hex values behave correctly.
  */
 
-import { describe, it, beforeEach, afterEach } from "jsr:@std/testing/bdd";
+import { describe, it, beforeEach, afterEach } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
-import { handleRequest } from "../src/app.ts";
 import { chanHistory, dbojs } from "../src/services/Database/index.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
-const CHAN_ID  = "lp_test_chan_01";
+const CHAN_ID   = "lp_test_chan_01";
 const PLAYER_ID = "lp_test_player_01";
 const ROOM_ID   = "lp_test_room_01";
 
@@ -28,12 +27,12 @@ const ROOM_ID   = "lp_test_room_01";
 async function seedHistory(n: number) {
   for (let i = 0; i < n; i++) {
     await chanHistory.create({
-      id:        `lp_hist_${i}`,
-      chanId:    CHAN_ID,
-      senderId:  PLAYER_ID,
-      senderName:"LPUser",
-      message:   `msg ${i}`,
-      timestamp: Date.now() + i,
+      id:         `lp_hist_${i}`,
+      chanId:     CHAN_ID,
+      senderId:   PLAYER_ID,
+      senderName: "LPUser",
+      message:    `msg ${i}`,
+      timestamp:  Date.now() + i,
     });
   }
 }
@@ -46,29 +45,17 @@ async function teardown() {
   await dbojs.delete({ id: ROOM_ID   }).catch(() => {});
 }
 
-function makeRequest(limit: string): Request {
-  return new Request(
-    `http://localhost/api/v1/players/${PLAYER_ID}/channels/${CHAN_ID}/history?limit=${limit}`,
-    {
-      headers: { Authorization: `Bearer FAKE` },
-    },
-  );
-}
-
 describe("SECURITY [M-01]: ?limit= clamping", OPTS, () => {
   beforeEach(async () => {
-    await dbojs.create({ id: ROOM_ID,   flags: "room",              data: { name: "Room" } });
-    await dbojs.create({ id: PLAYER_ID, flags: "player connected",  data: { name: "LPUser" }, location: ROOM_ID });
+    await dbojs.create({ id: ROOM_ID,   flags: "room",             data: { name: "Room" } });
+    await dbojs.create({ id: PLAYER_ID, flags: "player connected", data: { name: "LPUser" }, location: ROOM_ID });
     await seedHistory(10);
   });
   afterEach(teardown);
 
-  it("[EXPLOIT] negative limit bypasses || 20 fallback — returns wrong slice", async () => {
+  it("[EXPLOIT] negative limit bypasses || 20 fallback — returns wrong slice", () => {
     // With the bug: parseInt("-3") || 20 → -3 (truthy), all.slice(3) not all.slice(-3).
-    // We can't easily distinguish the result without auth, but we CAN verify the
-    // parsing logic directly by asserting the fix is NOT yet in place.
-
-    // Direct unit-level proof: demonstrate the broken parse behaviour
+    // Direct unit-level proof: demonstrate the broken parse behaviour.
     const broken = Math.min(parseInt("-3") || 20, 500);
     // Before fix: broken === -3 (negative bypasses || 20)
     assertEquals(broken < 1, true,

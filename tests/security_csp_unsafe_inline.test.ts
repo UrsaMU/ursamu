@@ -11,7 +11,7 @@
  * contain 'unsafe-inline' in the style-src directive.
  */
 
-import { describe, it } from "jsr:@std/testing/bdd";
+import { describe, it } from "@std/testing/bdd";
 import { assertNotMatch } from "@std/assert";
 import { handleRequest } from "../src/app.ts";
 

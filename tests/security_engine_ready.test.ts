@@ -11,8 +11,8 @@
  * a manual +help/reload.
  */
 
-import { describe, it } from "jsr:@std/testing/bdd";
-import { assertEquals } from "jsr:@std/assert";
+import { describe, it } from "@std/testing/bdd";
+import { assertEquals } from "@std/assert";
 
 describe("SECURITY [L-01]: engine:ready fired regardless of runStartupAttrs outcome", () => {
   it("[EXPLOIT] .then() chain silently drops engine:ready when runStartupAttrs rejects", async () => {

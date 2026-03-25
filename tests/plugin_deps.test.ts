@@ -6,9 +6,9 @@
  *
  * All tests use a local stub ConfigManager and never touch the real DB.
  */
-import { assertEquals, assertRejects, assertThrows } from "jsr:@std/assert";
-import { describe, it, beforeEach, afterEach } from "jsr:@std/testing/bdd";
-import { assertSpyCalls, spy } from "jsr:@std/testing/mock";
+import { assertEquals, assertRejects } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
+import { assertSpyCalls, spy } from "@std/testing/mock";
 import type { IPlugin } from "../src/@types/IPlugin.ts";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -32,8 +32,8 @@ function makePlugin(
     name,
     version,
     dependencies: deps,
-    init: typeof initResult === "function" ? initResult : async () => initResult,
-    remove: async () => {},
+    init: typeof initResult === "function" ? initResult : () => Promise.resolve(initResult),
+    remove: () => {},
   };
 }
 
@@ -57,8 +57,8 @@ describe("plugin dependency system", () => {
 
   it("initializes plugins in dependency order", OPTS, async () => {
     const order: string[] = [];
-    const jobs    = makePlugin("jobs",    "1.1.0", [],                            async () => { order.push("jobs");    return true; });
-    const discord = makePlugin("discord", "1.1.0", [{ name: "jobs", version: "^1.0.0" }], async () => { order.push("discord"); return true; });
+    const jobs    = makePlugin("jobs",    "1.1.0", [],                            () => { order.push("jobs");    return Promise.resolve(true); });
+    const discord = makePlugin("discord", "1.1.0", [{ name: "jobs", version: "^1.0.0" }], () => { order.push("discord"); return Promise.resolve(true); });
 
     const mgr = await freshManager();
     // Register in reverse order to prove topo sort works
@@ -71,8 +71,8 @@ describe("plugin dependency system", () => {
 
   it("handles plugins with no dependencies (backwards compatible)", OPTS, async () => {
     const ran: string[] = [];
-    const a = makePlugin("a", "1.0.0", [], async () => { ran.push("a"); return true; });
-    const b = makePlugin("b", "1.0.0", [], async () => { ran.push("b"); return true; });
+    const a = makePlugin("a", "1.0.0", [], () => { ran.push("a"); return Promise.resolve(true); });
+    const b = makePlugin("b", "1.0.0", [], () => { ran.push("b"); return Promise.resolve(true); });
 
     const mgr = await freshManager();
     mgr.registerPlugin(a);
@@ -86,7 +86,7 @@ describe("plugin dependency system", () => {
 
   it("halts startup when dep version is out of range", OPTS, async () => {
     const jobs    = makePlugin("jobs",    "1.0.0");
-    const initSpy = spy(async () => true);
+    const initSpy = spy(() => Promise.resolve(true));
     const discord = makePlugin("discord", "1.1.0", [{ name: "jobs", version: "^2.0.0" }], initSpy);
 
     const mgr = await freshManager();
@@ -102,7 +102,7 @@ describe("plugin dependency system", () => {
   });
 
   it("accepts plugin when version satisfies range", OPTS, async () => {
-    const initSpy = spy(async () => true);
+    const initSpy = spy(() => Promise.resolve(true));
     const jobs    = makePlugin("jobs",    "1.2.3");
     const discord = makePlugin("discord", "1.0.0", [{ name: "jobs", version: "^1.0.0" }], initSpy);
 
@@ -117,7 +117,7 @@ describe("plugin dependency system", () => {
   // ─── missing dep ───────────────────────────────────────────────────────────
 
   it("halts startup when dependency is absent entirely", OPTS, async () => {
-    const initSpy = spy(async () => true);
+    const initSpy = spy(() => Promise.resolve(true));
     const discord = makePlugin("discord", "1.1.0", [{ name: "jobs", version: "^1.0.0" }], initSpy);
 
     const mgr = await freshManager();
@@ -134,8 +134,8 @@ describe("plugin dependency system", () => {
   // ─── cascade ───────────────────────────────────────────────────────────────
 
   it("cascades skip to dependents when dep init returns false", OPTS, async () => {
-    const jobs      = makePlugin("jobs",    "1.0.0", [], async () => false); // fails
-    const initSpy   = spy(async () => true);
+    const jobs      = makePlugin("jobs",    "1.0.0", [], () => Promise.resolve(false)); // fails
+    const initSpy   = spy(() => Promise.resolve(true));
     const discord   = makePlugin("discord", "1.0.0", [{ name: "jobs", version: "^1.0.0" }], initSpy);
 
     const mgr = await freshManager();
@@ -148,9 +148,9 @@ describe("plugin dependency system", () => {
 
   it("cascades skip when dep init() returns false", OPTS, async () => {
     // jobs init returns false → discord (depends on jobs) is cascade-skipped
-    const jobs      = makePlugin("jobs",    "1.0.0", [], async () => false);
-    const discordInit = spy(async () => true);
-    const discord   = makePlugin("discord", "1.0.0", [{ name: "jobs", version: "^1.0.0" }], discordInit);
+    const jobs        = makePlugin("jobs",    "1.0.0", [], () => Promise.resolve(false));
+    const discordInit = spy(() => Promise.resolve(true));
+    const discord     = makePlugin("discord", "1.0.0", [{ name: "jobs", version: "^1.0.0" }], discordInit);
 
     const mgr = await freshManager();
     mgr.registerPlugin(jobs);
@@ -185,7 +185,7 @@ describe("plugin dependency system", () => {
 
   it("L2 exploit: registerPlugin overwrites same-named plugin without throwing (pre-fix)", OPTS, async () => {
     const mgr = await freshManager();
-    const real    = makePlugin("jobs", "2.0.0");
+    const real     = makePlugin("jobs", "2.0.0");
     const imposter = makePlugin("jobs", "0.1.0"); // same name, older version
 
     mgr.registerPlugin(real);
@@ -215,7 +215,7 @@ describe("plugin dependency system", () => {
     const p: IPlugin = {
       name:    "simple",
       version: "1.0.0",
-      init:    async () => { ran.push("simple"); return true; },
+      init:    () => { ran.push("simple"); return Promise.resolve(true); },
     };
 
     const mgr = await freshManager();

@@ -14,7 +14,7 @@ import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
  *   @switch %0=yes,say Okay!,no,say Nope!,say Huh?
  *   @switch/first 3=1,+1 hit,2,+2 hits,3,+3 hits
  */
-export default async (u: IUrsamuSDK) => {
+export default (u: IUrsamuSDK) => {
   const first = (u.cmd.switches || []).includes("first");
   const raw = (u.cmd.args[0] || "").trim();
   if (!raw) { u.send("Usage: @switch[/first] <value>=<case1>,<cmd1>,..."); return; }
