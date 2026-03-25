@@ -139,6 +139,15 @@ for (const [key, val] of Object.entries(REQUIRED_IMPORTS)) {
   }
 }
 
+// Always keep @ursamu/ursamu in sync with ursamu regardless of whether a
+// version bump happened — catches stale values left by older update runs.
+const ursamuSpecifier = imports[importKey];
+if (ursamuSpecifier && imports["@ursamu/ursamu"] && imports["@ursamu/ursamu"] !== ursamuSpecifier) {
+  imports["@ursamu/ursamu"] = ursamuSpecifier;
+  denoJsonDirty = true;
+  console.log(`  ${green("✓")} Synced @ursamu/ursamu → ${bold(ursamuSpecifier)}`);
+}
+
 // ── 5. merge tasks ────────────────────────────────────────────────────────────
 
 if (upstreamTasks) {
