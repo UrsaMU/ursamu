@@ -35,6 +35,20 @@ export const DEFAULT_PLUGINS_MANIFEST = {
       ursamu: ">=1.9.5",
     },
     {
+      name: "channel",
+      url: "https://github.com/UrsaMU/channel-plugin",
+      ref: "v1.0.0",
+      description: "Channel system — alias dispatch, auto-join on login, @chancreate/@chandestroy/@chanset/@channel, message history.",
+      ursamu: ">=1.9.27",
+    },
+    {
+      name: "help",
+      url: "https://github.com/UrsaMU/help-plugin",
+      ref: "v1.0.0",
+      description: "API-first help system — aggregates command help, per-plugin help folders, and runtime DB entries.",
+      ursamu: ">=1.9.0",
+    },
+    {
       name: "bbs",
       url: "https://github.com/UrsaMU/bbs-plugin",
       ref: "v1.0.1",
