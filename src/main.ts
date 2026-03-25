@@ -17,6 +17,7 @@ import { loadPlugins } from "./utils/loadPlugins.ts";
 import { wsService } from "./services/WebSocket/index.ts";
 import { queue } from "./services/Queue/index.ts";
 import { runStartupAttrs } from "./services/startup/index.ts";
+import { gameHooks } from "./services/Hooks/GameHooks.ts";
 
 let __dirname;
 try {
@@ -237,9 +238,13 @@ export const initializeEngine = async (
   console.log(`[GameClock] Loaded. Current game time: ${gameClock.format()}`);
 
   // Fire STARTUP attributes on all objects that have one (fire-and-forget)
-  runStartupAttrs().catch((err) =>
-    console.error("[startup] runStartupAttrs failed:", err)
-  );
+  // engine:ready fires regardless of whether runStartupAttrs succeeds — it
+  // signals "engine is up and all plugins are loaded", not "STARTUP attrs ran
+  // cleanly".  Catching first converts any rejection into a resolution so the
+  // chained .then() always executes.
+  runStartupAttrs()
+    .catch((err) => console.error("[startup] runStartupAttrs failed:", err))
+    .then(() => gameHooks.emit("engine:ready"));
 
   Deno.addSignalListener("SIGINT", async () => {
     const players = await dbojs.query({ flags: /connected/i });
