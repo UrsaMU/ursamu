@@ -180,6 +180,8 @@ export interface GameHookMap {
   "object:destroyed": (e: ObjectDestroyedEvent) => void | Promise<void>;
   /** A world object's field was modified by a builder. */
   "object:modified":  (e: ObjectModifiedEvent)  => void | Promise<void>;
+  /** The engine has fully initialized and all plugins are loaded. */
+  "engine:ready":     ()                        => void | Promise<void>;
 };
 
 // ─── registry ─────────────────────────────────────────────────────────────────
