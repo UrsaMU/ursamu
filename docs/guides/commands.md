@@ -175,5 +175,4 @@ Commands provided by official plugins are documented in their respective repos.
 |--------|----------|------|
 | **jobs** | `+job`, `+jobs`, `+job/create`, etc. | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin#commands) |
 | **events** | `+event`, `+events` | [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin#commands) |
-| **rhost-vision** | `+finger`, `+where`, `+staff` | [ursamu-rhost-vision](https://github.com/chogan1981/ursamu-rhost-vision) |
 | **discord** | Bridge only — no in-game commands | [UrsaMU/discord-plugin](https://github.com/UrsaMU/discord-plugin) |

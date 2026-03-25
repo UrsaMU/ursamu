@@ -33,7 +33,7 @@ Deno.test("[H1] isSafePluginName — rejects path traversal sequences", OPTS, ()
 });
 
 Deno.test("[H1] isSafePluginName — allows well-formed slugs", OPTS, () => {
-  assertEquals(isSafePluginName("rhost-vision"), true);
+  assertEquals(isSafePluginName("my-cool-plugin"), true);
   assertEquals(isSafePluginName("my-plugin"),    true);
   assertEquals(isSafePluginName("plugin123"),    true);
   assertEquals(isSafePluginName("a"),            true);
@@ -56,7 +56,7 @@ Deno.test("[H2] isSafePluginUrl — rejects http:// (unencrypted)", OPTS, () => 
 });
 
 Deno.test("[H2] isSafePluginUrl — allows https:// GitHub URLs", OPTS, () => {
-  assertEquals(isSafePluginUrl("https://github.com/chogan1981/ursamu-rhost-vision"), true);
+  assertEquals(isSafePluginUrl("https://github.com/UrsaMU/bbs-plugin"), true);
   assertEquals(isSafePluginUrl("https://github.com/someone/a-plugin"),               true);
 });
 

@@ -59,16 +59,6 @@
     "installedAt": "2026-03-22T16:37:20.624Z",
     "updatedAt": "2026-03-23T01:32:10.960Z"
   },
-  "rhost-vision": {
-    "name": "rhost-vision",
-    "version": "1.1.0",
-    "description": "Rhost-style display — look, who, page, score, examine, inventory, +finger, +where, +staff",
-    "source": "https://github.com/chogan1981/ursamu-rhost-vision",
-    "author": "unknown",
-    "ref": "5cd051d989c4835279e270506acf89923f8e7f80",
-    "installedAt": "2026-03-23T01:32:07.605Z",
-    "updatedAt": "2026-03-23T01:32:07.605Z"
-  },
   "bbs": {
     "name": "bbs",
     "version": "1.0.0",

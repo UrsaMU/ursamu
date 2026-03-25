@@ -795,40 +795,6 @@ Authentication: pass `Authorization: Bearer <jwt>` header.
 | `DELETE` | `/api/v1/wiki/:path` | Staff | Delete page |
 ---
 
-## rhost-vision Plugin — Layout Utilities
-
-`rhost-vision` is a community plugin maintained by
-[chogan1981](https://github.com/chogan1981/ursamu-rhost-vision). Install it via
-the UrsaMU CLI:
-
-```bash
-ursamu plugin install https://github.com/chogan1981/ursamu-rhost-vision
-```
-
-Once installed at `src/plugins/rhost-vision/`, `layout.ts` provides typed helpers.
-Native commands can import from it directly:
-
-```typescript
-import { header, footer, divider, wrap, table, bar, sheet, nColumns, visibleLength }
-  from "../../plugins/rhost-vision/layout.ts";
-import { defaultTheme } from "../../plugins/rhost-vision/theme.ts";
-```
-
-Sandbox scripts use `inlineUtils(theme)` to embed helpers as generated JS.
-
-| Function | Signature | Returns |
-|----------|-----------|---------|
-| `visibleLength(s)` | `(s: string) => number` | Visible char count (no MUSH codes) |
-| `header(title, theme)` | | Full-width `=== Title ===` header |
-| `footer(theme)` | | Full-width `===...` footer |
-| `divider(label\|null, theme)` | | Full-width `--- Label ---` divider |
-| `wrap(text, width, indent?)` | | `string[]` — word-wrapped lines |
-| `bar(filled, total, barWidth, theme)` | | Progress bar string |
-| `sheet(fields, labelWidth, theme)` | | Character sheet with bars |
-| `table(headers, rows, colWidths, width, theme)` | | Bordered table |
-| `nColumns(items, n, totalWidth, gap?)` | | `string[]` — N-column layout |
----
-
 ---
 
 ## Plugin Coupling Patterns
