@@ -1,14 +1,18 @@
 ---
 layout: layout.vto
 title: Writing Help Files
-description: How to create and organize in-game help files for UrsaMU players.
+description: How to create and organize in-game help files for UrsaMU players using the help-plugin.
 ---
 
 # Writing Help Files
 
-UrsaMU's in-game `help` command reads Markdown (`.md`) and plain text (`.txt`)
-files from the `help/` directory. Files are rendered with MUSH color codes and
-word-wrapped to 78 characters before being sent to the player.
+The `help` command is provided by the **[help-plugin](https://github.com/UrsaMU/help-plugin)**, which
+is bundled in the default `plugins.manifest.json` and installed automatically on first run. It replaces
+the former built-in help command.
+
+The plugin reads Markdown (`.md`) and plain text (`.txt`) files from the `help/` directory, merges
+them with any DB-stored entries and inline command help, then renders everything with MUSH color codes
+word-wrapped to 78 characters.
 ---
 
 ## Overview
@@ -23,7 +27,7 @@ help/
 │   ├── @dig.md        ← shown for "help dig" (@ stripped from lookup)
 │   └── @lock.md
 └── _admin/
-    └── reboot.md      ← shown for "help reboot" (in admin-only category)
+    └── reboot.md      ← shown for "help reboot"
 ```
 ---
 
@@ -212,10 +216,65 @@ help mail/send        ← shows mail/send.md directly
 help send             ← finds the first file named "send" anywhere
 help @dig             ← finds building/@dig.md
 help dig              ← same result (@ stripped on lookup)
+help/section mail     ← lists all topics in the mail section
+```
+---
+
+## Admin Commands
+
+Admins and wizards can create, update, and delete help entries at runtime
+without touching the filesystem. DB entries take priority over file-based
+entries (priority 100 vs 50).
+
+```
++help/set <topic>=<text>   ← create or update a DB help entry
++help/del <topic>          ← delete a DB help entry
++help/reload               ← bust the file cache (pick up new files)
 ```
 
-The topic index groups everything into categories (directory names). Categories
-with an `index.md` show their description; others show only the subtopic list.
+`<text>` supports the same Markdown syntax as file-based entries. Use `\n`
+for line breaks when typing multi-line content in-game.
+---
+
+## REST API
+
+The plugin exposes a REST API for reading and managing help entries externally.
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/api/v1/help` | public | List all sections and topics |
+| `GET` | `/api/v1/help/:topic` | public | Fetch a single topic (`?format=md` for raw) |
+| `POST` | `/api/v1/help/:topic` | admin | Create or update an entry |
+| `DELETE` | `/api/v1/help/:topic` | admin | Delete an entry |
+
+**Example — fetch a topic as Markdown:**
+
+```
+GET /api/v1/help/dig?format=md
+Authorization: Bearer <token>
+```
+---
+
+## Per-Plugin Help Folders
+
+Plugins can register their own help directories so their topics appear in the
+global index without copying files into the game's `help/` folder. Call
+`registerHelpDir()` inside your plugin's `init()`:
+
+```ts
+import { registerHelpDir } from "jsr:@ursamu/help-plugin";
+import { fromFileUrl } from "@std/path";
+
+export default {
+  name: "my-plugin",
+  async init() {
+    registerHelpDir(fromFileUrl(new URL("../help", import.meta.url)));
+  }
+} satisfies IPlugin;
+```
+
+The directory is scanned on startup (and on `+help/reload`). Files follow the
+same naming conventions as the main `help/` folder.
 ---
 
 ## Tips
@@ -266,7 +325,8 @@ Three or more levels are not surfaced cleanly in the subtopic listing.
 Put topics that should only be visible to staff in a directory prefixed with
 `_` (e.g., `help/_admin/`). The underscore is cosmetic — the files are still
 accessible to anyone who knows the topic name. If you need truly restricted
-help, gate it with a check inside a custom `help` command override.
+help, use `+help/set` to store the entry in the DB and gate display logic via
+a plugin hook on `help:lookup`.
 
 ### Test your file
 

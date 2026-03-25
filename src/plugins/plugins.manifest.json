@@ -62,6 +62,13 @@
       "ref": "v1.0.0",
       "description": "Channel system — alias dispatch, auto-join on login, @chancreate/@chandestroy/@chanset/@channel, message history.",
       "ursamu": ">=1.9.27"
+    },
+    {
+      "name": "help",
+      "url": "https://github.com/UrsaMU/help-plugin",
+      "ref": "v1.0.0",
+      "description": "API-first help system — aggregates command help, per-plugin help folders, and runtime DB entries. Replaces the native help command.",
+      "ursamu": ">=1.9.0"
     }
   ]
 }
