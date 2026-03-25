@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint
+        run: deno lint
+
+      - name: Unit tests
+        run: deno test tests/ --allow-all --unstable-kv --no-check
+
+      - name: Security tests
+        run: deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check

@@ -9,21 +9,23 @@ export class Presenter {
         }
 
         // Default to Telnet (ANSI)
-        let output = "";
+        // Accumulate raw MUSH markup first, then substitute the entire string
+        // in one pass so that every section (msg, room, exits) is converted.
+        let raw = "";
 
         if (state.msg) {
-            output += parser.substitute("telnet", state.msg) + "\r\n";
+            raw += state.msg + "\r\n";
         }
 
         if (state.room) {
-            output += `\r\n%ch%cc${state.room.name}%cn\r\n`;
-            output += `${state.room.desc}\r\n`;
+            raw += `\r\n%ch%cc${state.room.name}%cn\r\n`;
+            raw += `${state.room.desc}\r\n`;
 
             if (state.room.exits.length) {
-                output += `\r\n%ch%cyObvious Exits:%cn ${state.room.exits.join(", ")}\r\n`;
+                raw += `\r\n%ch%cyObvious Exits:%cn ${state.room.exits.join(", ")}\r\n`;
             }
         }
 
-        return output;
+        return parser.substitute("telnet", raw);
     }
 }
