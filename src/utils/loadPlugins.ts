@@ -38,14 +38,16 @@ export async function loadPlugins(dir: string): Promise<IPlugin[]> {
           // no import-map rewriting is needed or possible for absolute file paths.
           const module = await import(dpath.toFileUrl(entry.path).href);
           
-          if (module.default && typeof module.default === "object") {
-            const plugin = module.default as IPlugin;
-            
+          // Accept default export OR named `plugin` export for flexibility.
+          const candidate = module.default ?? module.plugin;
+          if (candidate && typeof candidate === "object") {
+            const plugin = candidate as IPlugin;
+
             if (!plugin.name) plugin.name = pluginName;
             if (!plugin.version) plugin.version = "0.0.1";
-            
+
             registerPlugin(plugin);
-            
+
             loadedPlugins.push(plugin);
           } else {
             console.warn(`Module at ${entry.path} does not export a default plugin object`);
@@ -99,8 +101,9 @@ export async function reloadPlugins(dir: string, existingPlugins: IPlugin[]): Pr
           // Cache-busting import to force Deno to load fresh module
           const module = await import(dpath.toFileUrl(entry.path).href + cacheBuster);
 
-          if (module.default && typeof module.default === "object") {
-            const plugin = module.default as IPlugin;
+          const candidate = module.default ?? module.plugin;
+          if (candidate && typeof candidate === "object") {
+            const plugin = candidate as IPlugin;
             if (!plugin.name) plugin.name = pluginName;
             if (!plugin.version) plugin.version = "0.0.1";
 
