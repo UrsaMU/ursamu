@@ -114,6 +114,23 @@ if (isLocal) {
   }
 }
 
+// ── 4b. ensure plugin-required import mappings are present ────────────────────
+// Plugins use bare specifiers like "@ursamu/ursamu" and "@std/path" that must
+// be resolvable from the game project's import map.
+const REQUIRED_IMPORTS: Record<string, string> = {
+  "@ursamu/ursamu": "jsr:@ursamu/ursamu",
+  "@std/path":      "jsr:@std/path@^0.224.0",
+  "@std/assert":    "jsr:@std/assert@^0.224.0",
+  "@std/fs":        "jsr:@std/fs@^0.224.0",
+};
+for (const [key, val] of Object.entries(REQUIRED_IMPORTS)) {
+  if (!imports[key]) {
+    imports[key] = val;
+    denoJsonDirty = true;
+    console.log(`  ${green("✓")} Added import mapping: ${bold(key)}`);
+  }
+}
+
 // ── 5. merge tasks ────────────────────────────────────────────────────────────
 
 if (upstreamTasks) {
