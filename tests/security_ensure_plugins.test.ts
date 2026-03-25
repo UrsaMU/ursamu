@@ -6,8 +6,8 @@
  * M1 — No ref/commit pinning (supply chain drift)
  * INT — Integration: ensurePlugins actually enforces the guards
  */
-import { assertEquals } from "jsr:@std/assert";
-import { join } from "jsr:@std/path@^0.224.0";
+import { assertEquals } from "@std/assert";
+import { join } from "@std/path";
 import {
   isSafePluginName,
   isSafePluginUrl,

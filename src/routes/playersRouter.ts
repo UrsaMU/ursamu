@@ -83,7 +83,7 @@ export const channelHistoryHandler = async (req: Request, channelId: string): Pr
     });
   }
   const url = new URL(req.url);
-  const limit = Math.min(parseInt(url.searchParams.get("limit") || "20") || 20, 500);
+  const limit = Math.max(Math.min(parseInt(url.searchParams.get("limit") || "20", 10) || 20, 500), 1);
   const all = await chanHistory.find({ chanId: channelId });
   all.sort((a, b) => a.timestamp - b.timestamp);
   const slice = all.slice(-limit);

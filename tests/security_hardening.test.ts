@@ -9,7 +9,7 @@
  */
 
 import { assertEquals, assertStringIncludes, assert } from "@std/assert";
-import { describe, it, beforeEach, afterEach } from "jsr:@std/testing/bdd";
+import { describe, it, beforeEach, afterEach } from "@std/testing/bdd";
 import { handleRequest } from "../src/app.ts";
 import { wsService } from "../src/services/WebSocket/index.ts";
 import { DBO } from "../src/services/Database/database.ts";
@@ -138,7 +138,7 @@ Deno.test("M2 — WS rate-limiter cleans up on socket close [M2 Red → Green]",
 
 // ── M3: MUSH ANSI ReDoS guard ─────────────────────────────────────────────────
 
-Deno.test("M3 — MUSH output regex does not hang on long ANSI sequence", { sanitizeOps: false, sanitizeResources: false }, async () => {
+Deno.test("M3 — MUSH output regex does not hang on long ANSI sequence", { sanitizeOps: false, sanitizeResources: false }, () => {
   // Current regex: /\x1b\[[0-9;]*m/ — unbounded repetition is ReDoS-prone
   // Fixed regex:   /\x1b\[[0-9;]{0,20}m/ — bounded, safe
 
@@ -151,6 +151,7 @@ Deno.test("M3 — MUSH output regex does not hang on long ANSI sequence", { sani
 
   const start = performance.now();
   // Bounded regex (the fix)
+  // deno-lint-ignore no-control-regex
   const safePattern = /(%c[a-zA-Z]|%[rRtTbBnN]|\x1b\[[0-9;]{0,20}m)/;
   pathological.split(safePattern);
   const elapsed = performance.now() - start;
