@@ -448,11 +448,13 @@ tests/
 | Scripting guide | [docs/guides/scripting.md](docs/guides/scripting.md) |
 | Writing help files | [docs/guides/help-authoring.md](docs/guides/help-authoring.md) |
 | CLI reference | [docs/guides/cli.md](docs/guides/cli.md) |
+| Docker | [docs/guides/docker.md](docs/guides/docker.md) |
 | Deployment | [docs/guides/deployment.md](docs/guides/deployment.md) |
 | Plugin development | [docs/plugins/index.md](docs/plugins/index.md) |
 | Official plugins | [docs/plugins/official-plugins.md](docs/plugins/official-plugins.md) |
 | REST API reference | [docs/api/rest.md](docs/api/rest.md) |
 | Core API | [docs/api/core.md](docs/api/core.md) |
+| Testing | [docs/development/testing.md](docs/development/testing.md) |
 | Architecture | [docs/about.md](docs/about.md) |
 
 ---

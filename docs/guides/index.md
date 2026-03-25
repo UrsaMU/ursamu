@@ -55,6 +55,16 @@ Coming from PennMUSH, TinyMUSH, or MUX2? See what works today and what's planned
 - [Planned enhancements](../mush_compatibility/#planned-enhancements)
 - [Connecting with MU* clients](../mush_compatibility/#connecting-with-a-traditional-mu-client)
 
+## Docker
+
+Run UrsaMU in a container:
+
+- [Quick start](./docker.md#quick-start)
+- [docker-compose.yaml reference](./docker.md#docker-composeyaml)
+- [Environment & volumes](./docker.md#environment-variables)
+- [Behind a reverse proxy](./docker.md#behind-a-reverse-proxy)
+- [Troubleshooting](./docker.md#troubleshooting)
+
 ## Production Deployment
 
 Get UrsaMU running reliably in production:
