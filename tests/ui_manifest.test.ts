@@ -4,8 +4,8 @@
  *   GET /api/v1/ui-manifest  (privilege-filtered)
  */
 
-import { assertEquals, assertArrayIncludes } from "jsr:@std/assert";
-import { describe, it, beforeEach } from "jsr:@std/testing/bdd";
+import { assertEquals, assertArrayIncludes } from "@std/assert";
+import { describe, it, beforeEach } from "@std/testing/bdd";
 
 // We test through the public exports so we catch any re-export mistakes.
 import {
