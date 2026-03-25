@@ -8,6 +8,10 @@ export class MiddlewareStack {
     this.middlewares.push(middleware);
   }
 
+  prepend(middleware: IMiddlewareFunction) {
+    this.middlewares.unshift(middleware);
+  }
+
   async run(ctx: IContext) {
     let index = 0;
     const next = async () => {

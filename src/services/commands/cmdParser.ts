@@ -137,10 +137,13 @@ export const clearCmds = (): void => {
 };
 
 /**
- * Inject a middleware function into the command pipeline.
+ * Inject a middleware function at the front of the command pipeline.
  *
- * Use this in your plugin's `init()` to add custom command interceptors,
- * such as channel alias dispatch or softcode triggers.
+ * Plugin middleware is prepended so it runs before engine system scripts,
+ * matchExits, and the "Huh?" fallback — allowing plugins to intercept
+ * channel aliases or other softcode triggers first.
+ *
+ * Use this in your plugin's `init()` to add custom command interceptors.
  *
  * @example
  * ```ts
@@ -155,7 +158,7 @@ export const clearCmds = (): void => {
 export const registerCmdMiddleware = (
   fn: Parameters<typeof cmdParser.use>[0]
 ): void => {
-  cmdParser.use(fn);
+  cmdParser.prepend(fn);
 };
 
 cmdParser.use(async (ctx, next) => {
