@@ -356,8 +356,14 @@ cmdParser.use(async (ctx, next) => {
           contents: [],
         };
 
+    // Also try matching without a leading @ or + so that "+help" matches the "help" pattern,
+    // consistent with how system scripts strip these prefixes before lookup.
+    const rawMsg      = msg?.trim() ?? "";
+    const strippedMsg = rawMsg.replace(/^[@+]/, "");
+
     for (const cmd of cmds) {
-      const match = msg?.trim().match(cmd.pattern);
+      const match = rawMsg.match(cmd.pattern) ??
+        (strippedMsg !== rawMsg ? strippedMsg.match(cmd.pattern) : null);
       if (await evaluateLock(cmd.lock || "", actor, actor)) {
         if (match) {
           if (char) {

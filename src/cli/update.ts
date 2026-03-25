@@ -110,6 +110,12 @@ if (isLocal) {
     const newSpecifier = `jsr:@ursamu/ursamu@${latestVersion}`;
     console.log(`  ${currentSpecifier} → ${newSpecifier}`);
     imports[importKey] = newSpecifier;
+    // Keep @ursamu/ursamu in sync — plugins import this specifier directly,
+    // and a version mismatch means two separate module instances with separate
+    // cmds/cmdParser state, causing addCmd registrations to be invisible.
+    if (importKey !== "@ursamu/ursamu" && "@ursamu/ursamu" in imports) {
+      imports["@ursamu/ursamu"] = newSpecifier;
+    }
     denoJsonDirty = true;
   }
 }
@@ -118,7 +124,9 @@ if (isLocal) {
 // Plugins use bare specifiers like "@ursamu/ursamu" and "@std/path" that must
 // be resolvable from the game project's import map.
 const REQUIRED_IMPORTS: Record<string, string> = {
-  "@ursamu/ursamu": "jsr:@ursamu/ursamu",
+  // Must match the ursamu version exactly — different versions = different module
+  // instances = plugins' addCmd calls land on a separate cmds array.
+  "@ursamu/ursamu": imports[importKey] ?? "jsr:@ursamu/ursamu",
   "@std/path":      "jsr:@std/path@^0.224.0",
   "@std/assert":    "jsr:@std/assert@^0.224.0",
   "@std/fs":        "jsr:@std/fs@^0.224.0",
