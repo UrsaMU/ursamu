@@ -2,7 +2,14 @@ import { Parser, getQuickJS, type QuickJSWASMModule } from "../../../deps.ts";
 const parser = new Parser();
 const quickJs: QuickJSWASMModule = await getQuickJS();
 
+let _jsCallCount = 0;
+const JS_CALL_LIMIT = 20;
+
+/** Reset JS call counter — call at the start of each message render cycle. */
+export function resetJsCallCount() { _jsCallCount = 0; }
+
 const evalSafe = (code: string) => {
+  if (++_jsCallCount > JS_CALL_LIMIT) return "[JS Error: too many js() calls]";
   try {
     const vm = quickJs.newContext();
     const start = Date.now();
