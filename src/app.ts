@@ -72,7 +72,7 @@ async function resolveCallerPrivLevel(userId: string | null): Promise<number> {
   if (flags.includes("superuser")) return 4;
   if (flags.includes("wizard"))    return 4; // M1 fix: wizard = same level as superuser
   if (flags.includes("admin"))     return 3;
-  if (flags.includes("builder"))   return 1;
+  if (flags.includes("builder"))   return 2;
   return 1;
 }
 
