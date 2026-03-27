@@ -21,7 +21,7 @@ export const matchExits = async (ctx: IContext) => {
       const name = exit.data?.name as string | undefined;
       if (!name || typeof name !== 'string') continue;
       const parts = name.split(";").map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-      const reg = new RegExp(`^${parts.join("|")}$`, "i");
+      const reg = new RegExp(`^(?:${parts.join("|")})$`, "i");
       const match = ctx.msg?.trim().match(reg);
 
       const players = await dbojs.query({
