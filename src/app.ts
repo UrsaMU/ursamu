@@ -72,7 +72,7 @@ async function resolveCallerPrivLevel(userId: string | null): Promise<number> {
   if (flags.includes("superuser")) return 4;
   if (flags.includes("wizard"))    return 4; // M1 fix: wizard = same level as superuser
   if (flags.includes("admin"))     return 3;
-  if (flags.includes("builder"))   return 1;
+  if (flags.includes("builder"))   return 2;
   return 1;
 }
 
@@ -220,11 +220,11 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Content-Security-Policy": [
       "default-src 'none'",
-      "script-src 'self'",
-      "style-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data:",
       "connect-src 'self' ws: wss:",
-      "font-src 'self'",
+      "font-src 'self' https://fonts.gstatic.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

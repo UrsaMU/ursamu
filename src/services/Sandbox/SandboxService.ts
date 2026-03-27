@@ -875,6 +875,7 @@ export type SandboxInstance = Sandbox | LocalSandbox;
 
 export class SandboxService {
   private static instance: SandboxService;
+  private static _transpileCache = new Map<string, string>();
   private pool: SandboxInstance[] = [];
   private poolSize = 5;
   private maxPoolSize = 10;
@@ -940,17 +941,20 @@ export class SandboxService {
     const sandbox = await this.getSandbox();
     const timeout = config?.timeout || this.defaultTimeout;
 
-    // Phase 1: Transpile TypeScript if necessary
-    let execCode = code;
-    try {
-        const { transform } = await import("npm:sucrase@3.35.0");
-        execCode = transform(code, { transforms: ["typescript"] }).code;
-        
-        // Strip imports - they are for IDE type checking and won't resolve in the sandbox
-        execCode = execCode.replace(/^import\s+.*?;?\s*$/gm, '');
-    } catch (e) {
-        console.warn("[Sandbox] Transpilation failed, running as raw JS/stripping imports:", e);
-        execCode = code.replace(/^import\s+.*?;?\s*$/gm, '');
+    // Phase 1: Transpile TypeScript if necessary (with cache)
+    let execCode = SandboxService._transpileCache.get(code);
+    if (!execCode) {
+      try {
+          const { transform } = await import("npm:sucrase@3.35.0");
+          execCode = transform(code, { transforms: ["typescript"] }).code;
+          execCode = execCode.replace(/^import\s+.*?;?\s*$/gm, '');
+      } catch (e) {
+          console.warn("[Sandbox] Transpilation failed, running as raw JS/stripping imports:", e);
+          execCode = code.replace(/^import\s+.*?;?\s*$/gm, '');
+      }
+      // Cache keyed by source content — same source = same output
+      if (SandboxService._transpileCache.size > 200) SandboxService._transpileCache.clear();
+      SandboxService._transpileCache.set(code, execCode);
     }
 
     // Phase 2: Prepare SDK context

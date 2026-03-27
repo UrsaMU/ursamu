@@ -19,11 +19,19 @@ import { fromFileUrl } from "@std/path";
 // Base URL for the engine's bundled system scripts (3 dirs up from this file: src/services/commands/ -> root)
 const ENGINE_SCRIPTS_URL = new URL("../../../system/scripts/", import.meta.url);
 
+/** Cache for script file reads — scripts don't change at runtime. */
+const _scriptFileCache = new Map<string, string | null>();
+
 /** Read a script file, checking local override → plugin registry → engine built-ins. */
 async function readEngineScript(name: string): Promise<string | null> {
+  const cached = _scriptFileCache.get(name);
+  if (cached !== undefined) return cached;
+
   // 1. Local game-project override (./system/scripts/<name>)
   try {
-    return await Deno.readTextFile(`./system/scripts/${name}`);
+    const content = await Deno.readTextFile(`./system/scripts/${name}`);
+    _scriptFileCache.set(name, content);
+    return content;
   } catch { /* no local copy */ }
 
   // 2. Plugin registry — registered via registerScript() in plugin init()
@@ -34,11 +42,15 @@ async function readEngineScript(name: string): Promise<string | null> {
   // 3. Engine's bundled copy (works for both local dev [file://] and JSR [https://])
   const url = new URL(name, ENGINE_SCRIPTS_URL);
   try {
+    let result: string | null = null;
     if (url.protocol === "file:") {
-      return await Deno.readTextFile(fromFileUrl(url));
+      result = await Deno.readTextFile(fromFileUrl(url));
+    } else {
+      const res = await fetch(url.toString());
+      result = res.ok ? await res.text() : null;
     }
-    const res = await fetch(url.toString());
-    return res.ok ? await res.text() : null;
+    _scriptFileCache.set(name, result);
+    return result;
   } catch {
     return null;
   }
@@ -172,21 +184,29 @@ cmdParser.use(async (ctx, next) => {
   if (room) {
     // Collect scripts from room and its contents
     const contents = await dbojs.query({ location: room.id });
-    for (const item of [room, ...contents]) {
-      const it = item as unknown as IDBOBJ;
-      const scriptAttr = await getAttribute(it, "script");
-      if (scriptAttr?.value) {
-        candidates.push({
-          id: it.id,
-          script: scriptAttr.value,
-          state: it.data?.state as Record<string, unknown> || {}
-        });
+    const allItems = [room, ...contents];
+    // Fast check: skip expensive getAttribute() loop if nothing has attributes
+    const hasAnyAttrs = allItems.some(
+      item => ((item as unknown as IDBOBJ).data?.attributes as unknown[])?.length > 0
+    );
+    if (hasAnyAttrs) {
+      for (const item of allItems) {
+        const it = item as unknown as IDBOBJ;
+        const scriptAttr = await getAttribute(it, "script");
+        if (scriptAttr?.value) {
+          candidates.push({
+            id: it.id,
+            script: scriptAttr.value,
+            state: it.data?.state as Record<string, unknown> || {}
+          });
+        }
       }
     }
   }
 
   // Determine intent
-  const parts = msg.trim().split(/\s+/);
+  const trimmedMsg = msg.trim();
+  const parts = trimmedMsg.split(/\s+/);
   const intentName = parts[0].toLowerCase();
   
   // Check if intent is enabled in registry
@@ -257,10 +277,10 @@ cmdParser.use(async (ctx, next) => {
   // Handle prefixes
   let usedPrefix = "";
   for (const [prefix, name] of Object.entries(prefixMap)) {
-    if (msg.trim().startsWith(prefix)) {
+    if (trimmedMsg.startsWith(prefix)) {
         scriptName = name;
         usedPrefix = prefix;
-        scriptArgs = [msg.trim().slice(prefix.length).trim()];
+        scriptArgs = [trimmedMsg.slice(prefix.length).trim()];
         break;
     }
   }
@@ -321,8 +341,8 @@ cmdParser.use(async (ctx, next) => {
         // to be available as the first argument in the SDK's cmd.args array.
         // For prefix-mapped commands (like - → mailadd), use the prefix-extracted args
         // since intentName is the first word, not just the prefix character.
-        const isPrefixCmd = Object.keys(prefixMap).some(p => msg.trim().startsWith(p) && scriptName === prefixMap[p]);
-        const rawArgs = isPrefixCmd ? (scriptArgs[0] || "") : msg.trim().slice(intentName.length).trim();
+        const isPrefixCmd = usedPrefix !== "";
+        const rawArgs = isPrefixCmd ? (scriptArgs[0] || "") : trimmedMsg.slice(intentName.length).trim();
         const targetQuery = scriptArgs[0];
         const targetObj = (targetQuery && char) ? await target(char as unknown as IDBOBJ, targetQuery) : undefined;
         const room = char?.location ? await Obj.get(char.location) : null;
@@ -334,7 +354,7 @@ cmdParser.use(async (ctx, next) => {
             target: targetObj ? await SDKService.hydrate(new Obj(targetObj)) : undefined,
             location: char?.location || "limbo",
             state: char?.data?.state as Record<string, unknown> || {},
-            cmd: { name: usedPrefix || scriptName, original: msg.trim(), args: [rawArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
+            cmd: { name: usedPrefix || scriptName, original: trimmedMsg, args: [rawArgs], switches: cmdSwitches.length ? cmdSwitches : undefined },
             socketId: ctx.socket.id
         });
         return;

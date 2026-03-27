@@ -96,6 +96,7 @@ export class WebSocketService {
                 on: () => { }
             };
             this.socketData.set(socket, sockData);
+            this._invalidateSocketCache();
             console.log(`New WebSocket connection established (${clientType})`);
 
             // JWT pre-auth: restore session without requiring `connect name password`
@@ -204,6 +205,7 @@ export class WebSocketService {
             const sockData = this.socketData.get(socket);
             this.clients.delete(socket);
             this.socketData.delete(socket);
+            this._invalidateSocketCache();
             this.untrackIp(socket);
             if (sockData?.id) this.rateLimits.delete(sockData.id);
 
@@ -234,7 +236,6 @@ export class WebSocketService {
                                 event: "disconnect",
                                 payload: {
                                     msg: `${moniker(player)} has disconnected.`,
-                                    room: roomData
                                 }
                             }
                         );
@@ -250,49 +251,93 @@ export class WebSocketService {
 
     // Send to specific socket(s)
     send(targets: string[], message: IMessage) {
-        for (const client of this.clients) {
-            const meta = this.socketData.get(client);
-            const inRoom = meta?.channels ? targets.some(t => meta.channels!.has(t)) : false;
-            if (meta && (targets.includes(meta.id) || (meta.cid && targets.includes(meta.cid)) || inRoom)) {
-                try {
-                    if (meta.clientType === "web") {
-                        const output = Presenter.render(message.payload, "web");
-                        client.send(JSON.stringify(output));
-                    } else {
-                        const output = Presenter.render(message.payload, "telnet");
-                        client.send(JSON.stringify({ msg: output, data: message.payload.data }));
-                    }
-                } catch { /* socket may be closing */ }
-            }
-        }
-    }
+        // Build a target set for O(1) lookup
+        const targetSet = new Set(targets);
 
-    // Broadcast to all
-    broadcast(message: IMessage) {
+        // Pre-render once per client type (not per socket)
+        let telnetOutput: string | undefined;
+        let telnetJson: string | undefined;
+        let webOutput: string | object | undefined;
+        let webJson: string | undefined;
+
         for (const client of this.clients) {
             const meta = this.socketData.get(client);
+            if (!meta) continue;
+            const match = targetSet.has(meta.id) ||
+                (meta.cid && targetSet.has(meta.cid)) ||
+                (meta.channels ? targets.some(t => meta.channels!.has(t)) : false);
+            if (!match) continue;
             try {
-                if (meta?.clientType === "web") {
-                    const output = Presenter.render(message.payload, "web");
-                    client.send(JSON.stringify(output));
+                if (meta.clientType === "web") {
+                    if (webJson === undefined) {
+                        webOutput = Presenter.render(message.payload, "web");
+                        webJson = JSON.stringify(webOutput);
+                    }
+                    client.send(webJson);
                 } else {
-                    const output = Presenter.render(message.payload, "telnet");
-                    client.send(JSON.stringify({
-                        msg: output,
-                        data: message.payload.data
-                    }));
+                    if (telnetJson === undefined) {
+                        telnetOutput = Presenter.render(message.payload, "telnet") as string;
+                        telnetJson = JSON.stringify({ msg: telnetOutput, data: message.payload.data });
+                    }
+                    client.send(telnetJson);
                 }
             } catch { /* socket may be closing */ }
         }
     }
 
-    // Get all connected sockets
-    getConnectedSockets(): UserSocket[] {
-        return Array.from(this.socketData.values());
+    // Broadcast to all
+    broadcast(message: IMessage) {
+        // Pre-render once per client type
+        let telnetJson: string | undefined;
+        let webJson: string | undefined;
+
+        for (const client of this.clients) {
+            const meta = this.socketData.get(client);
+            try {
+                if (meta?.clientType === "web") {
+                    if (webJson === undefined) {
+                        webJson = JSON.stringify(Presenter.render(message.payload, "web"));
+                    }
+                    client.send(webJson);
+                } else {
+                    if (telnetJson === undefined) {
+                        const output = Presenter.render(message.payload, "telnet");
+                        telnetJson = JSON.stringify({ msg: output, data: message.payload.data });
+                    }
+                    client.send(telnetJson);
+                }
+            } catch { /* socket may be closing */ }
+        }
     }
-    
+
+    // Cached connected sockets array — invalidated on connect/disconnect
+    private _connectedCache: UserSocket[] | null = null;
+    private _socketById = new Map<string, UserSocket>();
+
+    /** Invalidate the connected sockets cache. Call on connect/disconnect. */
+    private _invalidateSocketCache(): void {
+        this._connectedCache = null;
+    }
+
+    // Get all connected sockets (cached between connect/disconnect events)
+    getConnectedSockets(): UserSocket[] {
+        if (!this._connectedCache) {
+            this._connectedCache = Array.from(this.socketData.values());
+            // Rebuild ID index
+            this._socketById.clear();
+            for (const s of this._connectedCache) {
+                this._socketById.set(s.id, s);
+            }
+        }
+        return this._connectedCache;
+    }
+
     /** Subscribe a socket to a room/channel by socket ID. Used by the channel plugin via gameHooks. */
     joinSocketToRoom(socketId: string, room: string): void {
+        // Try fast index lookup first
+        const sock = this._socketById.get(socketId);
+        if (sock) { sock.join(room); return; }
+        // Fallback to linear scan
         for (const meta of this.socketData.values()) {
             if (meta.id === socketId) {
                 meta.join(room);
