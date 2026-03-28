@@ -462,21 +462,47 @@ class LocalSandbox {
           }
           case "chan:join": {
             if (e.data.channel && e.data.alias && context?.id) {
-               const { dbojs: db } = await import("../Database/index.ts");
+               const { dbojs: db, chans: chanDb } = await import("../Database/index.ts");
                const { wsService } = await import("../WebSocket/index.ts");
-               
+               const { flags: flagsService } = await import("../flags/flags.ts");
+
                (async () => {
                   const en = await db.queryOne({ id: context.id });
-                  if (en) {
-                    en.data ||= {};
-                    const channels = (en.data.channels as unknown[] || []) as IChanEntry[];
-                    channels.push({ channel: e.data.channel, alias: e.data.alias, active: true } as IChanEntry);
-                    await scopedUpdate(en.id, { "data.channels": channels });
-
-                    const socket = wsService.getConnectedSockets().find(s => s.cid === en.id);
-                    if (socket) socket.join(e.data.channel);
+                  if (!en) {
+                    worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Player not found." } });
+                    return;
                   }
-                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
+                  // Normalize channel name
+                  const chanName = (e.data.channel as string).toLowerCase().trim();
+                  const alias = (e.data.alias as string).toLowerCase().trim();
+
+                  // Check channel exists and lock
+                  const chan = await chanDb.queryOne({ name: chanName });
+                  if (chan && chan.lock && !flagsService.check(en.flags || "", chan.lock)) {
+                    worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Permission denied." } });
+                    return;
+                  }
+                  en.data ||= {};
+                  const channels = (en.data.channels as unknown[] || []) as IChanEntry[];
+                  // Check for existing entry — re-validate lock even on duplicates
+                  const existing = channels.find(c => c.channel.toLowerCase() === chanName);
+                  if (existing) {
+                    if (chan && chan.lock && !flagsService.check(en.flags || "", chan.lock)) {
+                      // Remove stale entry — player lost access
+                      const filtered = channels.filter(c => c.channel.toLowerCase() !== chanName);
+                      await scopedUpdate(en.id, { "data.channels": filtered });
+                      worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Permission denied." } });
+                    } else {
+                      worker.postMessage({ type: "response", msgId: e.data.msgId, data: { ok: true, existing: true } });
+                    }
+                    return;
+                  }
+                  channels.push({ id: chan?.id || chanName, channel: chanName, alias, active: true } as IChanEntry);
+                  await scopedUpdate(en.id, { "data.channels": channels });
+
+                  const socket = wsService.getConnectedSockets().find(s => s.cid === en.id);
+                  if (socket) socket.join(chanName);
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { ok: true } });
                })();
             }
             break;
@@ -505,17 +531,31 @@ class LocalSandbox {
             break;
           }
           case "chan:list": {
-            const { chans } = await import("../Database/index.ts");
+            const { chans, dbojs: db2 } = await import("../Database/index.ts");
+            const { flags: flagsService2 } = await import("../flags/flags.ts");
             (async () => {
               const list = await chans.query({});
-              worker.postMessage({ type: "response", msgId: e.data.msgId, data: list });
+              // Filter: only show channels the player has access to and that aren't hidden
+              const caller = context?.id ? await db2.queryOne({ id: context.id }) : null;
+              const callerFlags = caller?.flags || "";
+              const visible = list.filter(ch =>
+                !ch.hidden && flagsService2.check(callerFlags, ch.lock || "")
+              );
+              worker.postMessage({ type: "response", msgId: e.data.msgId, data: visible });
             })();
             break;
           }
           case "chan:create": {
             if (e.data.name) {
-              const { chans: chanDb } = await import("../Database/index.ts");
+              const { chans: chanDb, dbojs: db3 } = await import("../Database/index.ts");
               (async () => {
+                // Admin/wizard only
+                const caller = context?.id ? await db3.queryOne({ id: context.id }) : null;
+                const cf = caller?.flags || "";
+                if (!/\b(superuser|wizard|admin)\b/i.test(cf)) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Permission denied." } });
+                  return;
+                }
                 const name = (e.data.name as string).toLowerCase().trim();
                 const existing = await chanDb.queryOne({ name });
                 if (existing) {
@@ -539,8 +579,15 @@ class LocalSandbox {
           }
           case "chan:destroy": {
             if (e.data.name) {
-              const { chans: chanDb } = await import("../Database/index.ts");
+              const { chans: chanDb, dbojs: db4 } = await import("../Database/index.ts");
               (async () => {
+                // Admin/wizard only
+                const caller = context?.id ? await db4.queryOne({ id: context.id }) : null;
+                const cf = caller?.flags || "";
+                if (!/\b(superuser|wizard|admin)\b/i.test(cf)) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Permission denied." } });
+                  return;
+                }
                 const name = (e.data.name as string).toLowerCase().trim();
                 const existing = await chanDb.queryOne({ name });
                 if (!existing) {
@@ -557,8 +604,15 @@ class LocalSandbox {
           }
           case "chan:set": {
             if (e.data.name) {
-              const { chans: chanDb } = await import("../Database/index.ts");
+              const { chans: chanDb, dbojs: db5 } = await import("../Database/index.ts");
               (async () => {
+                // Admin/wizard only
+                const caller = context?.id ? await db5.queryOne({ id: context.id }) : null;
+                const cf = caller?.flags || "";
+                if (!/\b(superuser|wizard|admin)\b/i.test(cf)) {
+                  worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Permission denied." } });
+                  return;
+                }
                 const name = (e.data.name as string).toLowerCase().trim();
                 const existing = await chanDb.queryOne({ name });
                 if (!existing) {
@@ -582,7 +636,8 @@ class LocalSandbox {
           }
           case "chan:history": {
             (async () => {
-              const { chanHistory: histDb, chans: chanDb } = await import("../Database/index.ts");
+              const { chanHistory: histDb, chans: chanDb, dbojs: db6 } = await import("../Database/index.ts");
+              const { flags: flagsService3 } = await import("../flags/flags.ts");
               const name = (e.data.name as string | undefined)?.toLowerCase().trim();
               if (!name) {
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: [] });
@@ -591,6 +646,12 @@ class LocalSandbox {
               const chan = await chanDb.queryOne({ name });
               if (!chan) {
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Channel not found." } });
+                return;
+              }
+              // Check access before returning history
+              const caller = context?.id ? await db6.queryOne({ id: context.id }) : null;
+              if (chan.lock && !flagsService3.check(caller?.flags || "", chan.lock)) {
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: { error: "Permission denied." } });
                 return;
               }
               const limit = typeof e.data.limit === "number" ? e.data.limit : 20;

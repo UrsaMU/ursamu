@@ -14,66 +14,64 @@ export const joinChans = async (ctx: IContext) => {
   ctx.socket.join(`#${player.location}`);
   ctx.socket.join(`#${player.id}`);
 
+  player.data ||= {};
+  player.data.channels ||= [];
+  let userChans = player.data.channels as IChanEntry[];
+
+  // Deduplicate existing entries first (fix corruption from prior bug)
+  const originalLength = userChans.length;
+  const seen = new Set<string>();
+  userChans = userChans.filter(ch => {
+    const key = ch.channel.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  let changed = userChans.length !== originalLength;
+
   for (const channel of channels) {
-    if (channel.alias && flags.check(player.flags || "", channel.lock || "")) {
-      const userChans = (player.data?.channels || []) as IChanEntry[];
-      const chan = userChans.filter(
-        (ch: IChanEntry) => ch.channel === channel.name
+    if (!channel.alias) continue;
+
+    const hasAccess = flags.check(player.flags || "", channel.lock || "");
+    const existing = userChans.find(ch => ch.channel === channel.name);
+
+    if (hasAccess && !existing) {
+      // Player has access but isn't on the channel — add them
+      userChans.push({
+        id: channel.id,
+        channel: channel.name,
+        alias: channel.alias,
+        active: true,
+      });
+      changed = true;
+      send(
+        [ctx.socket.id],
+        `You have joined ${channel.name} with the alias '${channel.alias}'.`
       );
-
-      if (!chan?.length) {
-        player.data ||= {};
-        player.data.channels ||= [];
-        const chs = player.data.channels as IChanEntry[];
-
-        chs.push({
-          id: channel.id,
-          channel: channel.name,
-          alias: channel.alias,
-          active: true,
-        });
-
-        ctx.socket.join(channel.name);
-        // deno-lint-ignore no-explicit-any
-        await dbojs.modify({ id: player.id }, "$set", { "data.channels": chs } as any as Partial<IDBOBJ>);
-        await force(ctx, `${channel.alias} :has joined the channel.`);
-        send(
-          [ctx.socket.id],
-          `You have joined ${channel.name} with the alias '${channel.alias}'.`
-        );
-      }
-    } else if (
-      channel.alias &&
-      !flags.check(player.flags || "", channel.lock || "")
-    ) {
-      // remove channels that are locked from the player.
-      const userChans = (player.data?.channels || []) as IChanEntry[];
-      const chan = userChans.filter(
-        (ch: IChanEntry) => ch.channel === channel.name
+    } else if (!hasAccess && existing) {
+      // Player lost access — remove them
+      userChans = userChans.filter(c => c.channel !== channel.name);
+      ctx.socket.leave(channel.name);
+      changed = true;
+      send(
+        [ctx.socket.id],
+        `You have left ${channel.name} with the alias '${channel.alias}'.`
       );
-
-      if (chan?.length) {
-        player.data ||= {};
-        player.data.channels ||= [];
-        const chs = player.data.channels as IChanEntry[];
-        const filtered = chs.filter(
-          (c: IChanEntry) => c.channel !== channel.name
-        );
-        player.data.channels = filtered;
-
-        ctx.socket.leave(channel.name);
-        // deno-lint-ignore no-explicit-any
-        await dbojs.modify({ id: player.id }, "$set", { "data.channels": filtered } as any as Partial<IDBOBJ>);
-        await send(
-          [ctx.socket.id],
-          `You have left ${channel.name} with the alias '${channel.alias}'.`
-        );
-      }
     }
   }
 
-  const userChans = (player.data?.channels || []) as IChanEntry[];
-  userChans.forEach(
-    (channel: IChanEntry) => channel.active && ctx.socket.join(channel.channel)
-  );
+  // Save once if anything changed (not per-channel)
+  if (changed) {
+    await dbojs.modify({ id: player.id }, "$set", {
+      "data.channels": userChans,
+    } as any as Partial<IDBOBJ>);
+  }
+
+  // Join all active channel rooms on the socket
+  for (const channel of userChans) {
+    if (channel.active) {
+      ctx.socket.join(channel.channel);
+    }
+  }
 };
