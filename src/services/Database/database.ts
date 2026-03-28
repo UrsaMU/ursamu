@@ -436,9 +436,10 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       const plainData = { ...updated };
       await kv.set(this.getKey(item.id), plainData);
       this.shadowIndex.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
+      items[items.indexOf(item)] = plainData as T;
     }
     this.clearCache();
-    return await this.query(query);
+    return items;
   }
 
   async delete(query: Query<T>): Promise<T[]> {
