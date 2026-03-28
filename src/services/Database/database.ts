@@ -27,6 +27,8 @@ interface WithId {
 class ShadowIndex {
   // location -> Set of object IDs at that location
   private byLocation = new Map<string, Set<string>>();
+  // ID -> current location (for efficient removal without scanning all locations)
+  private idToLocation = new Map<string, string>();
   // Set of object IDs that have "connected" in their flags
   private connected = new Set<string>();
   // All indexed object IDs (for quick "is this ID indexed?" check)
@@ -39,6 +41,7 @@ class ShadowIndex {
   /** Build the index from a full scan result. */
   build(records: Array<{ id: string; flags?: string; location?: string }>) {
     this.byLocation.clear();
+    this.idToLocation.clear();
     this.connected.clear();
     this.allIds.clear();
     for (const rec of records) {
@@ -56,15 +59,20 @@ class ShadowIndex {
     } else {
       this.connected.delete(rec.id);
     }
-    // Remove from old location
-    for (const [, idSet] of this.byLocation) {
-      idSet.delete(rec.id);
+    // Remove from old location (O(1) via reverse map instead of scanning all locations)
+    const oldLoc = this.idToLocation.get(rec.id);
+    if (oldLoc) {
+      const oldSet = this.byLocation.get(oldLoc);
+      if (oldSet) oldSet.delete(rec.id);
     }
     // Add to new location
     if (rec.location) {
       let locSet = this.byLocation.get(rec.location);
       if (!locSet) { locSet = new Set(); this.byLocation.set(rec.location, locSet); }
       locSet.add(rec.id);
+      this.idToLocation.set(rec.id, rec.location);
+    } else {
+      this.idToLocation.delete(rec.id);
     }
   }
 
@@ -80,9 +88,12 @@ class ShadowIndex {
     if (!this.built) return;
     this.allIds.delete(id);
     this.connected.delete(id);
-    for (const [, idSet] of this.byLocation) {
-      idSet.delete(id);
+    const oldLoc = this.idToLocation.get(id);
+    if (oldLoc) {
+      const oldSet = this.byLocation.get(oldLoc);
+      if (oldSet) oldSet.delete(id);
     }
+    this.idToLocation.delete(id);
   }
 
   /** Get candidate IDs for connected objects at a location. Returns null if index not built. */
@@ -124,11 +135,14 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   private static CACHE_TTL_MS = 500;
   private queryCache = new Map<string, { results: unknown[]; expiresAt: number }>();
 
-  // Shadow index — only used by dbojs (game objects)
-  private shadowIndex = new ShadowIndex();
+  // Shadow index — only active when useIndex is true (dbojs)
+  private shadowIndex: ShadowIndex | null = null;
 
-  constructor(pathOrKey: string) {
+  private _cachedPrefix: string | null = null;
+
+  constructor(pathOrKey: string, useIndex = false) {
     this.pathOrKey = pathOrKey;
+    if (useIndex) this.shadowIndex = new ShadowIndex();
   }
 
   /** Serialize a query to a stable cache key. */
@@ -155,7 +169,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
    * Returns candidate IDs or null if the index can't help.
    */
   private tryIndexLookup(query?: Query<T>): Set<string> | null {
-    if (!query || !this.shadowIndex.isBuilt) return null;
+    if (!query || !this.shadowIndex?.isBuilt) return null;
 
     // Detect common query patterns
     let location: string | undefined;
@@ -178,22 +192,18 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     }
 
     if (!location && !needsConnected) return null;
-    return this.shadowIndex.getCandidateIds(location, needsConnected);
+    return this.shadowIndex?.getCandidateIds(location, needsConnected);
   }
 
   private get prefix(): string {
-    // overload: if the path contains dots and doesn't look like a file path, try to get it from config
-    // Actually, we passed the config key directly in the exports below. 
-    // So we should try to get the config value. If that fails or returns the same key, assume it's a path.
-    // Ideally, we check if it is a known config key.
-    
+    if (this._cachedPrefix) return this._cachedPrefix;
     const configValue = getConfig<string>(this.pathOrKey);
-    // If getConfig returns the key itself (default behavior if missing?) or undefined, we might fall back.
-    // But getConfig usually returns the value.
     if (configValue && typeof configValue === 'string') {
-        return configValue.replace('.', '_');
+      this._cachedPrefix = configValue.replace('.', '_');
+    } else {
+      this._cachedPrefix = this.pathOrKey.replace('.', '_');
     }
-    return this.pathOrKey.replace('.', '_');
+    return this._cachedPrefix;
   }
 
   private async getKv(): Promise<Deno.Kv> {
@@ -227,7 +237,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       await kv.delete(entry.key);
     }
     this.clearCache();
-    this.shadowIndex.build([]);
+    this.shadowIndex?.build([]);
   }
 
   public static async close() {
@@ -246,7 +256,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const plainData = { ...data };
     await kv.set(this.getKey(data.id), plainData);
     this.clearCache();
-    this.shadowIndex.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
+    this.shadowIndex?.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
     return data;
   }
 
@@ -290,8 +300,8 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       }
 
       // Index pointed to nonexistent records — rebuild from full scan
-      console.warn(`[DBO] Shadow index stale record, rebuilding (rebuild #${this.shadowIndex.rebuilds + 1})`);
-      this.shadowIndex.incrementRebuilds();
+      console.warn(`[DBO] Shadow index stale record, rebuilding (rebuild #${this.shadowIndex?.rebuilds + 1})`);
+      this.shadowIndex?.incrementRebuilds();
     }
 
     // Full scan (original behavior)
@@ -310,7 +320,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     }
 
     // Rebuild shadow index from the full scan
-    this.shadowIndex.build(allRecords);
+    this.shadowIndex?.build(allRecords);
 
     // Store in cache
     if (this.queryCache.size >= 500) this.queryCache.clear();
@@ -334,11 +344,11 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   }
 
   /** Check if a key or any segment of a dot-notation path is a prototype pollution vector. */
+  private static readonly _dangerousKeys = new Set(["__proto__", "constructor", "prototype"]);
   private static isDangerousKey(key: string): boolean {
-    const dangerous = new Set(["__proto__", "constructor", "prototype"]);
-    if (dangerous.has(key)) return true;
+    if (DBO._dangerousKeys.has(key)) return true;
     if (key.includes(".")) {
-      return key.split(".").some(seg => dangerous.has(seg));
+      return key.split(".").some(seg => DBO._dangerousKeys.has(seg));
     }
     return false;
   }
@@ -361,7 +371,8 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
     const items = await this.query(query);
     const kv = await this.getKv();
-    for (const item of items) {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
       if (operator === "$push") {
         // Atomic CAS append — prevents TOCTOU races when two callers push
         // to the same array field concurrently.  Each record is committed via
@@ -435,8 +446,8 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       }
       const plainData = { ...updated };
       await kv.set(this.getKey(item.id), plainData);
-      this.shadowIndex.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
-      items[items.indexOf(item)] = plainData as T;
+      this.shadowIndex?.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
+      items[i] = plainData as T;
     }
     this.clearCache();
     return items;
@@ -447,7 +458,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const kv = await this.getKv();
     for (const item of items) {
       await kv.delete(this.getKey(item.id));
-      this.shadowIndex.onDelete(item.id);
+      this.shadowIndex?.onDelete(item.id);
     }
     this.clearCache();
     return items;
@@ -516,7 +527,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       const result = await kv.atomic().check(entry).set(key, updated).commit();
       if (result.ok) {
         this.clearCache();
-        this.shadowIndex.onWrite(updated as unknown as { id: string; flags?: string; location?: string });
+        this.shadowIndex?.onWrite(updated as unknown as { id: string; flags?: string; location?: string });
         return updated;
       }
     }
@@ -547,7 +558,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const plainData = { ...data };
     await cv.set(this.getKey(data.id), plainData);
     this.clearCache();
-    this.shadowIndex.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
+    this.shadowIndex?.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
     return data;
   }
 
@@ -568,7 +579,7 @@ export interface ICounters extends WithId {
 /** Shared counter store (job IDs, object IDs, etc.). */
 export const counters: DBO<ICounters> = new DBO<ICounters>("server.counters");
 /** Primary game-object store (rooms, players, exits, items). */
-export const dbojs: DBO<IDBOBJ> = new DBO<IDBOBJ>("server.db");
+export const dbojs: DBO<IDBOBJ> = new DBO<IDBOBJ>("server.db", true);
 /** Channel definitions store. */
 export const chans: DBO<IChannel> = new DBO<IChannel>("server.chans");
 /** Server text entries (welcome screen, MOTD, etc.). */
