@@ -62,6 +62,8 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | `@Aconnect` / `@Adisconnect` | ✅ Working | `&ACONNECT` / `&ADISCONNECT` attributes fire on login/logout |
 | MUX softcode evaluator | ✅ Working | TinyMUX 2.x compatible — see [Softcode](#mux-softcode-support) below |
 | `@tag` / `@ltag` | ✅ Working | Global and personal named-object registry (RhostMUSH-style) |
+| `@switch` | ✅ Working | Eval value as softcode, compare cases, execute matching action |
+| `@dolist` | ✅ Working | Iterate a softcode list, execute action per item with `##`/`#@` |
 ---
 
 ## MUX Softcode Support
@@ -168,7 +170,6 @@ The `#tagname` shorthand works anywhere an object reference is accepted in softc
 | Feature | Notes |
 |---------|-------|
 | Terminal/screen settings | Width detection via Telnet NAWS, persistent pager settings |
-| `@switch` / `@dolist` command forms | Softcode evaluator handles function forms; @command forms planned |
 ---
 
 ## Connecting with a Traditional MU* Client
