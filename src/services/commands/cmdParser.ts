@@ -4,6 +4,8 @@ import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { send } from "../broadcast/index.ts";
 import { dbojs } from "../Database/index.ts";
 import { matchExits } from "./movement.ts";
+import { findDollarPattern } from "../../utils/dollarPatterns.ts";
+import { getConfig } from "../Config/mod.ts";
 import { Obj } from "../DBObjs/DBObjs.ts";
 import { InterceptorService } from "../Intents/InterceptorService.ts";
 import { intentRegistry } from "../Intents/IntentRegistry.ts";
@@ -390,6 +392,30 @@ cmdParser.use(async (ctx, next) => {
     }
   }
   await next();
+});
+
+// $pattern command dispatch — scan reachable objects for matching $attrs
+cmdParser.use(async (ctx, next) => {
+  if (!ctx.socket.cid || !ctx.msg) { await next(); return; }
+  const actor = await dbojs.queryOne({ id: ctx.socket.cid });
+  if (!actor) { await next(); return; }
+
+  const masterRoomId = getConfig<string>("game.masterRoom") || "0";
+  const hit = await findDollarPattern(actor, ctx.msg.trim(), masterRoomId, dbojs);
+  if (!hit) { await next(); return; }
+
+  // Substitute captures as %0–%9 in the action, then run the result as a command
+  const { softcodeService } = await import("../Softcode/index.ts");
+  const result = await softcodeService.runSoftcode(hit.attr.value, {
+    actorId:    actor.id,
+    executorId: hit.obj.id,
+    args:       hit.captures,
+    socketId:   ctx.socket.id,
+  });
+  if (result?.trim()) {
+    const { force } = await import("./force.ts");
+    await force(ctx, result.trim());
+  }
 });
 
 cmdParser.use(async (ctx, next) => {

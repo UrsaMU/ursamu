@@ -64,6 +64,7 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | `@tag` / `@ltag` | ✅ Working | Global and personal named-object registry (RhostMUSH-style) |
 | `@switch` | ✅ Working | Eval value as softcode, compare cases, execute matching action |
 | `@dolist` | ✅ Working | Iterate a softcode list, execute action per item with `##`/`#@` |
+| `$pattern` attrs | ✅ Working | Objects respond to player input via `$<glob>:<action>` attributes; captures map to `%0`–`%9` |
 ---
 
 ## MUX Softcode Support
