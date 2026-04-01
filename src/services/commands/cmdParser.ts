@@ -401,7 +401,8 @@ cmdParser.use(async (ctx, next) => {
   if (!actor) { await next(); return; }
 
   const masterRoomId = getConfig<string>("game.masterRoom") || "0";
-  const hit = await findDollarPattern(actor, ctx.msg.trim(), masterRoomId, dbojs);
+  // deno-lint-ignore no-explicit-any
+  const hit = await findDollarPattern(actor, ctx.msg.trim(), masterRoomId, dbojs as any);
   if (!hit) { await next(); return; }
 
   // Substitute captures as %0–%9 in the action, then run the result as a command

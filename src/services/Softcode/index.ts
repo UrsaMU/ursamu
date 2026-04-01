@@ -337,6 +337,110 @@ export class SoftcodeService {
         respond(ltag?.objectId ?? null);
         break;
       }
+      case "lsearch": {
+        const opts = msg.opts as {
+          type?: string; owner?: string; flags?: string; attr?: string; attrVal?: string;
+        };
+        const all = await db.query({});
+        const results: string[] = [];
+        for (const o of all) {
+          if (opts.type) {
+            const flags = ((o.flags ?? "") as string).split(" ").map((f: string) => f.toLowerCase());
+            if (opts.type === "PLAYER" && !flags.includes("player")) continue;
+            if (opts.type === "ROOM"   && !flags.includes("room"))   continue;
+            if (opts.type === "EXIT"   && !flags.includes("exit"))   continue;
+            if (opts.type === "THING"  && (flags.includes("player") || flags.includes("room") || flags.includes("exit"))) continue;
+          }
+          if (opts.owner) {
+            const ownerId = (o.data as Record<string,unknown>)?.owner as string | undefined;
+            if (ownerId !== opts.owner) continue;
+          }
+          if (opts.flags) {
+            const objFlags = ((o.flags ?? "") as string).split(" ").map((f: string) => f.toLowerCase());
+            const wantFlag = opts.flags.toLowerCase();
+            if (!objFlags.includes(wantFlag)) continue;
+          }
+          if (opts.attr) {
+            const val = (o.data as Record<string,unknown>)?.[opts.attr.toLowerCase()] as string | undefined;
+            if (!val) continue;
+            if (opts.attrVal && val !== opts.attrVal) continue;
+          }
+          results.push(`#${o.id}`);
+        }
+        respond(results);
+        break;
+      }
+      case "children": {
+        const parentId = msg.parentId as string;
+        const all = await db.query({});
+        const kids = all.filter(o => {
+          const p = (o.data as Record<string,unknown>)?.parent as string | undefined;
+          return p === parentId;
+        }).map(o => IDBOBJ_to_IDBObj(o as unknown as IDBOBJ));
+        respond(kids);
+        break;
+      }
+      case "lchannels": {
+        const dbMod = await import("../Database/index.ts") as Record<string,unknown>;
+        const channels = dbMod["channels"] as { find: (q: Record<string,unknown>) => Promise<Array<{name: string}>> } | undefined;
+        if (!channels) { respond(""); break; }
+        const list = await channels.find({});
+        respond(list.map((c: {name:string}) => c.name).join(" "));
+        break;
+      }
+      case "channelsFor": {
+        const pid = msg.playerId as string;
+        const player = await db.queryOne({ id: pid });
+        if (!player) { respond(""); break; }
+        const chans = (player.data as Record<string,unknown>)?.channels as string[] ?? [];
+        respond(chans.join(" "));
+        break;
+      }
+      case "mailCount": {
+        const pid = msg.playerId as string;
+        const dbMod = await import("../Database/index.ts") as Record<string,unknown>;
+        const mail = dbMod["mail"] as { find: (q: Record<string,unknown>) => Promise<Array<unknown>> } | undefined;
+        if (!mail) { respond(0); break; }
+        try {
+          const msgs = await mail.find({ recipientId: pid, read: false });
+          respond(msgs.length);
+        } catch { respond(0); }
+        break;
+      }
+      case "queueLength": {
+        // Scan queue entries for this executor
+        try {
+          const { queue } = await import("../Queue/index.ts") as { queue: { list?: (id: string) => Promise<unknown[]> } };
+          if (queue.list) {
+            const entries = await queue.list(msg.executorId as string);
+            respond(entries.length);
+          } else {
+            respond(0);
+          }
+        } catch { respond(0); }
+        break;
+      }
+      case "getIdleSecs": {
+        const pid = msg.playerId as string;
+        const sockets = wsService.getConnectedSockets();
+        const sock = sockets.find(s => s.cid === pid);
+        // IdleSecs: returning 0 for connected (no last-activity tracking yet),
+        // 999999 for disconnected (effectively infinite idle).
+        respond(sock ? 0 : 999999);
+        break;
+      }
+      case "getUserFn": {
+        const dbMod = await import("../Database/index.ts") as Record<string, unknown>;
+        const userFuncs = dbMod["userFuncs"] as {
+          findOne: (q: Record<string, unknown>) => Promise<{ code: string } | undefined>;
+        } | undefined;
+        if (!userFuncs) { respond(null); break; }
+        try {
+          const fn = await userFuncs.findOne({ id: (msg.name as string).toLowerCase() });
+          respond(fn?.code ?? null);
+        } catch { respond(null); }
+        break;
+      }
       default:
         worker.postMessage({
           type:    "db:error",

@@ -41,6 +41,31 @@ export const matchExits = async (ctx: IContext) => {
         const dest = await dbojs.queryOne({ id: destination });
 
         if (dest && flags.check(en.flags, (exit?.data?.lock as string) || "")) {
+          // Check leave lock on current room
+          const currentRoom = room;
+          if (currentRoom) {
+            const leaveLock = (currentRoom.data?.locks as Record<string, string>)?.leave;
+            if (leaveLock) {
+              const { evaluateLock, hydrate } = await import("../../utils/evaluateLock.ts");
+              const allowed = await evaluateLock(leaveLock, hydrate(en), hydrate(currentRoom));
+              if (!allowed) {
+                send([ctx.socket.id], "You can't leave here.");
+                return true;
+              }
+            }
+          }
+
+          // Check enter lock on destination room
+          const enterLock = (dest.data?.locks as Record<string, string>)?.enter;
+          if (enterLock) {
+            const { evaluateLock, hydrate } = await import("../../utils/evaluateLock.ts");
+            const allowed = await evaluateLock(enterLock, hydrate(en), hydrate(dest));
+            if (!allowed) {
+              send([ctx.socket.id], "You can't go that way.");
+              return true;
+            }
+          }
+
           // Helpers to read and evaluate exit attributes
           const getExitAttr = (attrName: string): { value: string; type?: string } | undefined => {
             const attrs = exit.data?.attributes as Array<{ name: string; value: string; type?: string }> | undefined;

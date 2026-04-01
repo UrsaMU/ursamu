@@ -58,6 +58,15 @@ export const configHandler = async (req: Request) => {
           });
         }
 
+        // Symlink guard — reject symlinks that could escape the text/ root.
+        const stat = await Deno.lstat(filePath);
+        if (stat.isSymlink) {
+          return new Response(JSON.stringify({ error: "Invalid connect text path." }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+
         const text = await Deno.readTextFile(filePath);
         return new Response(JSON.stringify({ text }), {
             headers: { "Content-Type": "application/json" },

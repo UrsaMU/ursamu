@@ -204,10 +204,10 @@ Deno.test("evaluator — iter #@ gives position", async () => {
 // Depth limit only applies inside callAttr() (u() / ulocal()) — plain
 // function calls are not depth-gated. Verify the guard exists on the context.
 
-Deno.test("evaluator — isTooDeep helper returns true at depth 20", () => {
-  const ctx = makeCtx({ depth: 20 });
+Deno.test("evaluator — isTooDeep helper returns true at depth 50", () => {
+  const ctx = makeCtx({ depth: 50 });
   assertEquals(isTooDeep(ctx), true);
-  assertEquals(isTooDeep(makeCtx({ depth: 19 })), false);
+  assertEquals(isTooDeep(makeCtx({ depth: 49 })), false);
 });
 
 // ── timeout guard ─────────────────────────────────────────────────────────

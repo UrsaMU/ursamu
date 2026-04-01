@@ -282,13 +282,9 @@ register("columns", async (a) => {
   return items.map(x => x.padEnd(w)).join(sep) + iSep;
 });
 
-// ── accent / moniker (stubs) ──────────────────────────────────────────────
+// ── accent (stub) ─────────────────────────────────────────────────────────
 
 register("accent",   async (a) => a[0] ?? "");
-register("moniker",  async (_a, ctx) => {
-  const obj = await ctx.db.queryById(_a[0]?.replace(/^#/,"") ?? ctx.executor.id);
-  return obj?.name ?? "#-1 NOT FOUND";
-});
 
 // ── crypto / hash (stubs) ─────────────────────────────────────────────────
 
@@ -378,6 +374,42 @@ function safeRegexExec(s: string, pattern: string, i: boolean): RegExpExecArray 
   try { return new RegExp(pattern, i ? "i" : "").exec(s); }
   catch { return null; }
 }
+
+// ── Phonetic matching ─────────────────────────────────────────────────────
+
+/** Soundex algorithm — returns 4-character code. */
+function soundex(s: string): string {
+  if (!s) return "";
+  const MAP: Record<string, string> = {
+    b:"1", f:"1", p:"1", v:"1",
+    c:"2", g:"2", j:"2", k:"2", q:"2", s:"2", x:"2", z:"2",
+    d:"3", t:"3",
+    l:"4",
+    m:"5", n:"5",
+    r:"6",
+  };
+  const upper = s.toUpperCase().replace(/[^A-Z]/g, "");
+  if (!upper) return "";
+  let code = upper[0];
+  let last = MAP[upper[0].toLowerCase()] ?? "0";
+  for (let i = 1; i < upper.length && code.length < 4; i++) {
+    const d = MAP[upper[i].toLowerCase()] ?? "0";
+    if (d !== "0" && d !== last) { code += d; last = d; }
+    else if (d === "0") { last = "0"; }
+  }
+  return code.padEnd(4, "0");
+}
+
+register("soundex", async (a) => soundex(a[0] ?? ""));
+register("soundslike", async (a) => soundex(a[0] ?? "") === soundex(a[1] ?? "") ? "1" : "0");
+
+// ── Character class tests ─────────────────────────────────────────────────
+
+register("isalnum", async (a) => /^[a-zA-Z0-9]+$/.test(a[0] ?? "") ? "1" : "0");
+register("ispunct", async (a) => {
+  const s = a[0] ?? "";
+  return s.length > 0 && /^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+$/.test(s) ? "1" : "0";
+});
 
 const ONES = ["","one","two","three","four","five","six","seven","eight","nine",
   "ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];

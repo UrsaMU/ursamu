@@ -62,6 +62,21 @@ Examples:
 
       const evalArgs = splitArgs(u.cmd.args[2] || "").map((a) => a.trim());
 
+      // Check use lock on target before executing the attribute
+      const useLock = (tar.data?.locks as Record<string, string>)?.use;
+      if (useLock) {
+        const { evaluateLock, hydrate } = await import("../utils/evaluateLock.ts");
+        const allowed = await evaluateLock(
+          useLock,
+          hydrate(en as unknown as IDBOBJ),
+          hydrate(tar as unknown as IDBOBJ),
+        );
+        if (!allowed) {
+          send([u.socketId || ""], "Permission denied.");
+          return;
+        }
+      }
+
       try {
         await hooks.executeAttribute(
           tar as unknown as IDBOBJ,
@@ -78,30 +93,62 @@ Examples:
 
   addCmd({
     name: "@wait",
-    pattern: /^@wait\s+(\d+)\s*=\s*(.*)/i,
+    pattern: /^@wait\s+(\S+)\s*=\s*(.*)/i,
     lock: "connected",
-    exec: (u: IUrsamuSDK) => {
-      const MAX_WAIT = 3600; // 1 hour cap
-      const seconds = parseInt(u.cmd.args[0]);
-      const cmd = u.cmd.args[1];
-      if (isNaN(seconds) || seconds < 0)
-        return send([u.socketId || ""], "Invalid time.");
-      if (seconds > MAX_WAIT)
-        return send([u.socketId || ""], `Wait time cannot exceed ${MAX_WAIT} seconds.`);
+    category: "Softcode",
+    help: `@wait <seconds>=<command>
+@wait <object>=<command>
 
-      queue
-        .enqueue(
-          {
-            command: cmd,
-            executor: u.me.id,
-            enactor: u.me.id,
-            data: {},
-          },
-          seconds * 1000
-        )
-        .then((pid) => {
-          send([u.socketId || ""], `Wait ${seconds}s: ${cmd} (PID: ${pid})`);
-        });
+Delay <command> by <seconds>, or block it until <object> is @notify'd.
+
+Time form:    @wait 30=say Hello  (executes after 30 seconds, max 3600)
+Semaphore:    @wait #5=say Done   (executes when #5 receives @notify)
+
+Use @ps to inspect queued commands. Use @halt to cancel time-queued commands.
+Use @drain to discard semaphore-blocked commands.
+
+Examples:
+  @wait 5=say Five seconds have passed.
+  @wait here=say The room was notified.`,
+    exec: async (u: IUrsamuSDK) => {
+      const MAX_WAIT = 3600;
+      const token = (u.cmd.args[0] ?? "").trim();
+      const cmd   = (u.cmd.args[1] ?? "").trim();
+      if (!cmd) return u.send("Usage: @wait <seconds|object>=<command>");
+
+      const seconds = parseInt(token, 10);
+      if (!isNaN(seconds) && /^\d+$/.test(token)) {
+        // Time-based form
+        if (seconds < 0) return u.send("Wait time cannot be negative.");
+        if (seconds > MAX_WAIT) return u.send(`Wait time cannot exceed ${MAX_WAIT} seconds.`);
+        const pid = await queue.enqueue(
+          { command: cmd, executor: u.me.id, enactor: u.me.id },
+          seconds * 1000,
+        );
+        u.send(`Wait ${seconds}s: ${cmd} (PID: ${pid})`);
+        return;
+      }
+
+      // Semaphore form — resolve object reference
+      const en = await dbojs.queryOne({ id: u.me.id });
+      if (!en) return;
+      const sem = await target(en as unknown as IDBOBJ, token);
+      if (!sem) return u.send(`I can't find semaphore object '${token}'.`);
+
+      // Ownership check: only allow if the player owns or controls the semaphore
+      // object, or is staff. Prevents flooding another player's semaphore queue.
+      const isStaff = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+      const semOwner = (sem.data?.owner as string | undefined);
+      const semOwnedByMe = semOwner === u.me.id || sem.id === u.me.id;
+      if (!semOwnedByMe && !isStaff) {
+        return u.send("Permission denied. You can only @wait on objects you control.");
+      }
+
+      const pid = await queue.enqueueSemaphore(
+        { command: cmd, executor: u.me.id, enactor: u.me.id },
+        sem.id,
+      );
+      u.send(`Waiting on #${sem.id}: ${cmd} (PID: ${pid})`);
     },
   });
 

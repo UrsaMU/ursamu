@@ -15,13 +15,21 @@ const LOGIN_WINDOW_MS = 60_000; // 1 minute
 // Hard cap on tracked IPs — prevents memory exhaustion from IP-cycling attacks.
 export const MAX_TRACKED_IPS = 10_000;
 
+function evictExpiredLoginAttempts(now: number): void {
+  for (const [ip, entry] of loginAttempts) {
+    if (now >= entry.resetAt) loginAttempts.delete(ip);
+  }
+}
+
 function isLoginRateLimited(ip: string): boolean {
   const now = Date.now();
   const entry = loginAttempts.get(ip);
   if (!entry || now >= entry.resetAt) {
-    // Enforce hard cap: evict oldest entry if at limit
-    if (!entry && loginAttempts.size >= MAX_TRACKED_IPS) {
-      loginAttempts.delete(loginAttempts.keys().next().value!);
+    if (!entry) {
+      // Sweep expired entries before admitting a new IP.
+      evictExpiredLoginAttempts(now);
+      // If still full, conservatively rate-limit rather than FIFO-evicting.
+      if (loginAttempts.size >= MAX_TRACKED_IPS) return true;
     }
     loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
     return false;
@@ -34,8 +42,9 @@ function recordLoginFailure(ip: string): void {
   const now = Date.now();
   const entry = loginAttempts.get(ip);
   if (!entry || now >= entry.resetAt) {
-    if (!entry && loginAttempts.size >= MAX_TRACKED_IPS) {
-      loginAttempts.delete(loginAttempts.keys().next().value!);
+    if (!entry) {
+      evictExpiredLoginAttempts(now);
+      if (loginAttempts.size >= MAX_TRACKED_IPS) return; // map full, skip silently
     }
     loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
   } else {
@@ -92,20 +101,19 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
       }
       const user = await dbojs.queryOne({ "data.resetToken": token });
 
-      // Use timingSafeEqual so token presence can't be inferred from response time.
+      // Constant-time token comparison — no early exit on length mismatch.
+      // Pad both sides to the longer length so the XOR loop always runs the
+      // same number of iterations, removing the timing oracle on token length.
       const storedToken  = (user?.data?.resetToken as string | undefined) ?? "";
       const enc          = new TextEncoder();
-      const tokenBytes   = enc.encode(token);
-      const storedBytes  = enc.encode(storedToken.padEnd(token.length, "\0"));
-      const tokensMatch  =
-        storedToken.length === token.length &&
-        crypto.subtle &&
-        // timingSafeEqual is not yet in Deno's crypto.subtle, so XOR manually.
-        (() => {
-          let diff = 0;
-          for (let i = 0; i < tokenBytes.length; i++) diff |= tokenBytes[i] ^ storedBytes[i];
-          return diff === 0;
-        })();
+      const maxLen       = Math.max(storedToken.length, token.length);
+      const storedBytes  = enc.encode(storedToken.padEnd(maxLen, "\0"));
+      const tokenBytes   = enc.encode(token.padEnd(maxLen, "\0"));
+      let _diff = 0;
+      for (let i = 0; i < maxLen; i++) _diff |= storedBytes[i] ^ tokenBytes[i];
+      // Incorporate length difference so tokens of unequal length never match.
+      _diff |= storedToken.length ^ token.length;
+      const tokensMatch  = _diff === 0;
 
       const expiry = user?.data?.resetTokenExpiry as number | undefined;
       const expired = !expiry || Date.now() > expiry;

@@ -92,6 +92,14 @@ function makeDbAccessor(): DbAccessor {
     getTagById:   (tagName) => dbRequest<string | null>("getTagById",   { tagName }),
     getPlayerTagById: (actorId, tagName) =>
       dbRequest<string | null>("getPlayerTagById", { actorId, tagName }),
+    lsearch:      (opts)    => dbRequest<string[]>     ("lsearch",      { opts }),
+    children:     (pid)     => dbRequest<IDBObj[]>     ("children",     { parentId: pid }),
+    lchannels:    ()        => dbRequest<string>       ("lchannels",    {}),
+    channelsFor:  (pid)     => dbRequest<string>       ("channelsFor",  { playerId: pid }),
+    mailCount:    (pid)     => dbRequest<number>       ("mailCount",    { playerId: pid }),
+    queueLength:  (eid)     => dbRequest<number>       ("queueLength",  { executorId: eid }),
+    getIdleSecs:  (pid)     => dbRequest<number>       ("getIdleSecs",  { playerId: pid }),
+    getUserFn:    (name)    => dbRequest<string | null>("getUserFn",    { name }),
   };
 }
 
@@ -144,7 +152,7 @@ self.onmessage = async (e: MessageEvent) => {
       registers: new Map(raw.registers ?? []),
       iterStack: [],
       depth:     0,
-      deadline:  Date.now() + 100,
+      deadline:  Date.now() + 500,
       db:        makeDbAccessor(),
       output:    makeOutputAccessor(),
     };

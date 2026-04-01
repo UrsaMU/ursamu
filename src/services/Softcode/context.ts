@@ -22,6 +22,31 @@ export interface DbAccessor {
   getTagById(tagName: string): Promise<string | null>;
   /** Resolve a personal (ltag) tag name for a specific player, or null. */
   getPlayerTagById(actorId: string, tagName: string): Promise<string | null>;
+  /** Search objects by type/flag/owner/attr pattern. Returns list of "#id" dbrefs. */
+  lsearch(opts: {
+    type?:    "PLAYER" | "ROOM" | "EXIT" | "THING";
+    owner?:   string;
+    flags?:   string;
+    attr?:    string;
+    attrVal?: string;
+  }): Promise<string[]>;
+  /** Return all objects whose parent === parentId. */
+  children(parentId: string): Promise<IDBObj[]>;
+  /** Return space-separated list of all channel names. */
+  lchannels(): Promise<string>;
+  /** Return space-separated list of channels player is subscribed to. */
+  channelsFor(playerId: string): Promise<string>;
+  /** Return unread mail count for a player. */
+  mailCount(playerId: string): Promise<number>;
+  /** Return number of pending queue entries for an executor. */
+  queueLength(executorId: string): Promise<number>;
+  /** Return seconds since last activity for a connected player. */
+  getIdleSecs(playerId: string): Promise<number>;
+  /**
+   * Look up a user-defined function body registered via @function.
+   * Returns the softcode string, or null if no such function exists.
+   */
+  getUserFn(name: string): Promise<string | null>;
 }
 
 // ── OutputAccessor ────────────────────────────────────────────────────────
@@ -109,7 +134,7 @@ export function isTimedOut(ctx: EvalContext): boolean {
 
 /** Returns true when the recursion depth limit has been reached. */
 export function isTooDeep(ctx: EvalContext): boolean {
-  return ctx.depth >= 20;
+  return ctx.depth >= 50;
 }
 
 /** Snapshot the register map for ulocal() save/restore. */

@@ -23,6 +23,7 @@ import type {
 import type { EvalContext } from "./context.ts";
 import { isTimedOut, isTooDeep } from "./context.ts";
 import { lookup } from "./stdlib/index.ts";
+import { parse, SoftcodeSyntaxError } from "./parser.ts";
 
 // ── Public entry point ────────────────────────────────────────────────────
 
@@ -200,6 +201,31 @@ async function evalFunctionCall(node: FunctionCallNode, ctx: EvalContext): Promi
   const fn = lookup(fnName);
   if (fn) return fn(args, ctx, rawArgs);
 
+  // Fall back to user-defined functions registered via @function.
+  if (ctx.db.getUserFn) {
+    const userCode = await ctx.db.getUserFn(fnName);
+    if (userCode) {
+      if (isTooDeep(ctx)) return "#-1 TOO DEEP";
+      try {
+        const ast = parse(userCode);
+        // Build a sub-context with the caller's evaluated args as positional args.
+        const subCtx: EvalContext = {
+          ...ctx,
+          args:     args,
+          depth:    ctx.depth + 1,
+          executor: ctx.executor,
+          caller:   ctx.executor,
+        };
+        return await evaluate(ast as ASTNode, subCtx);
+      } catch (err) {
+        if (err instanceof SoftcodeSyntaxError) {
+          return `#-1 FUNCTION (${node.name.toUpperCase()}) SYNTAX ERROR`;
+        }
+        throw err;
+      }
+    }
+  }
+
   // Unknown function → TinyMUX-compatible error.
   return `#-1 FUNCTION (${node.name.toUpperCase()}) NOT FOUND`;
 }
@@ -272,6 +298,11 @@ async function evalSubstitution(node: SubstitutionNode, ctx: EvalContext): Promi
 
   // ── Registers %q0–%q9, %qa–%qz ───────────────────────────────────────
   if (code.length === 2 && code[0] === "q") return ctx.registers.get(code[1]) ?? "";
+
+  // ── Bare %i — current iter stack item (alias for ##) ─────────────────
+  if (code === "i") {
+    return ctx.iterStack.length > 0 ? ctx.iterStack[ctx.iterStack.length - 1].item : "";
+  }
 
   // ── Iteration registers %i0–%i9 ───────────────────────────────────────
   if (code.length === 2 && code[0] === "i") {

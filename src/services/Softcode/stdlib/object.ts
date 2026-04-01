@@ -262,9 +262,10 @@ register("lparent", async (a, ctx) => {
   return chain.join(" ");
 });
 register("children", async (a, ctx) => {
-  // Not directly available from DbAccessor — returns empty for now.
-  void a; void ctx;
-  return "";
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "";
+  const kids = await ctx.db.children(obj.id);
+  return kids.map(k => `#${k.id}`).join(" ");
 });
 register("zone",    async (a, ctx) => {
   const obj = await resolveObj(a[0] ?? "me", ctx);
@@ -402,8 +403,16 @@ register("connnum",    async () => "0");
 register("connrecord", async () => "0");
 register("conntotal",  async () => "0");
 register("connleft",   async () => "0");
-register("idle",       async () => "0");
-register("doing",      async () => "");
+register("idle", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  return String(await ctx.db.getIdleSecs(obj.id));
+});
+register("doing", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "";
+  return (await ctx.db.getAttribute(obj, "DOING")) ?? "";
+});
 register("host",       async () => "");
 register("ports",      async () => "0");
 register("lports",     async () => "");
@@ -440,7 +449,10 @@ register("room",   async (a, ctx) => {
   }
   return obj?.flags.has("room") ? `#${obj.id}` : "#-1";
 });
-register("lrooms", async () => "");  // simplified
+register("lrooms", async (_a, ctx) => {
+  const rooms = await ctx.db.lsearch({ type: "ROOM" });
+  return rooms.join(" ");
+});
 register("lastcreate", async () => "#-1");  // simplified
 
 // ── server / misc ─────────────────────────────────────────────────────────
@@ -505,7 +517,14 @@ register("bittype",      async () => "0");
 
 // ── channels ──────────────────────────────────────────────────────────────
 
-register("channels",  async () => "");
+register("channels", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "";
+  return await ctx.db.channelsFor(obj.id);
+});
+register("lchannels", async (_a, ctx) => {
+  return await ctx.db.lchannels();
+});
 register("chanobj",   async () => "#-1");
 register("zwho",      async () => "");
 register("comalias",  async () => "");
@@ -514,11 +533,120 @@ register("lcmds",     async () => "");
 
 // ── mail ─────────────────────────────────────────────────────────────────
 
-register("mail",      async () => "0");
+register("mail", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  return String(await ctx.db.mailCount(obj.id));
+});
 register("mailfrom",  async () => "");
 register("mailsize",  async () => "0");
 register("mailsubj",  async () => "");
 register("mailj",     async () => "");
+
+// ── nattr / ncon / nexits / nplayers / nrooms / nobjects ─────────────────
+
+register("nattr", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  return String((await ctx.db.lattr(obj.id)).length);
+});
+register("ncon", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  const list = await ctx.db.lcon(obj.id);
+  return String(list.filter(o => !o.flags.has("exit")).length);
+});
+register("nexits", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  const list = await ctx.db.lcon(obj.id);
+  return String(list.filter(o => o.flags.has("exit")).length);
+});
+register("nplayers", async (_a, ctx) => {
+  return String((await ctx.db.lwho()).length);
+});
+register("nrooms", async (_a, ctx) => {
+  const rooms = await ctx.db.lsearch({ type: "ROOM" });
+  return String(rooms.length);
+});
+register("nobjects", async (_a, ctx) => {
+  const objs = await ctx.db.lsearch({ type: "THING" });
+  return String(objs.length);
+});
+
+// ── qlength ───────────────────────────────────────────────────────────────
+
+register("qlength", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  return String(await ctx.db.queueLength(obj.id));
+});
+
+// ── powers ────────────────────────────────────────────────────────────────
+
+// Powers map to flags in UrsaMU (no separate power system).
+// Note: power(base, exp) is the math function in math.ts — do NOT override it.
+register("haspower", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  const p = (a[1] ?? "").toLowerCase();
+  return obj.flags.has(p) ? "1" : "0";
+});
+register("powers", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "";
+  const POWER_FLAGS = ["wizard", "admin", "builder", "staff"];
+  return [...obj.flags].filter(f => POWER_FLAGS.includes(f)).join(" ");
+});
+
+// ── moniker ───────────────────────────────────────────────────────────────
+
+register("moniker", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "";
+  const m = (obj.state as Record<string,unknown>)?.moniker as string | undefined;
+  return m ?? obj.name ?? "";
+});
+
+// ── accname ───────────────────────────────────────────────────────────────
+
+register("accname", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "";
+  const sex = ((obj.state as Record<string,unknown>)?.sex as string ?? "").toLowerCase();
+  if (sex === "male" || sex === "m") return "him";
+  if (sex === "female" || sex === "f") return "her";
+  return "it";
+});
+
+// ── lsearch / search ──────────────────────────────────────────────────────
+
+register("lsearch", async (a, ctx) => {
+  // lsearch(type [, attr, val [, owner]])
+  const type  = (a[0] ?? "").toUpperCase() || undefined;
+  const attr  = a[1] || undefined;
+  const val   = a[2] || undefined;
+  const owner = a[3] || undefined;
+  const results = await ctx.db.lsearch({ type: type as "PLAYER" | "ROOM" | "EXIT" | "THING" | undefined, attr, attrVal: val, owner });
+  return results.join(" ");
+});
+register("search", async (a, ctx) => {
+  // search(type [, attr, val]) — alias for lsearch
+  const type  = (a[0] ?? "").toUpperCase() || undefined;
+  const attr  = a[1] || undefined;
+  const val   = a[2] || undefined;
+  const results = await ctx.db.lsearch({ type: type as "PLAYER" | "ROOM" | "EXIT" | "THING" | undefined, attr, attrVal: val });
+  return results.join(" ");
+});
+
+// ── msecs / numversion ────────────────────────────────────────────────────
+
+register("msecs", async () => String(Date.now()));
+register("numversion", async () => {
+  // Pack version as major*1000000 + minor*1000 + patch
+  // UrsaMU version ~ 1.9.x → 1009000
+  return "1009000";
+});
 
 // ── internal helpers ──────────────────────────────────────────────────────
 

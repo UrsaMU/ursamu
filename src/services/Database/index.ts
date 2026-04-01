@@ -36,3 +36,31 @@ export interface ILtag {
 
 export const serverTags = new DBO<IServerTag>("server.tags");
 export const playerTags = new DBO<ILtag>("server.ltags");
+
+// ── Zone master membership ────────────────────────────────────────────────
+
+export interface IZoneMembership {
+  /** Composite key: "${zmId}:${memberId}" */
+  id: string;
+  /** Dbref of the zone master object. */
+  zmId: string;
+  /** Dbref of the member object. */
+  memberId: string;
+}
+
+export const zoneMemberships = new DBO<IZoneMembership>("server.zones");
+
+// ── User-defined softcode functions (@function command) ───────────────────
+
+export interface IUserFunc {
+  /** Primary key — the function name (lowercase). */
+  id: string;
+  /** Function name (lowercase). Same as id. */
+  name: string;
+  /** MUX softcode body. %0–%9 are the call arguments. */
+  code: string;
+  /** ID of the admin who registered it. */
+  ownerId: string;
+}
+
+export const userFuncs = new DBO<IUserFunc>("server.userfuncs");

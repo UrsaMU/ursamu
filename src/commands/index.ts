@@ -19,4 +19,15 @@ import "./test.ts";
 import "./nuke.ts";
 import "./version.ts";
 import "./halt.ts";
+import "./ps.ts";
+import "./drain.ts";
+import "./notify.ts";
+import "./cpattr.ts";
+import "./mvattr.ts";
+import "./grep.ts";
+import "./zone.ts";
+import "./decompile.ts";
+import "./include.ts";
+import "./assert.ts";
+import "./function.ts";
 
