@@ -4,6 +4,49 @@ import { sandboxService } from "../Sandbox/SandboxService.ts";
 import { getConfig } from "../Config/mod.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { gameHooks } from "./GameHooks.ts";
+import type { IAttribute } from "../../@types/IAttribute.ts";
+import type { ObjectDestroyedEvent } from "./GameHooks.ts";
+
+// ── Tag cleanup on object destroy ─────────────────────────────────────────
+// When an object is destroyed, remove all global and personal tags pointing
+// to it so #tagname references don't silently resolve to deleted objects.
+
+const _onObjectDestroyed = async (e: ObjectDestroyedEvent) => {
+  try {
+    const { serverTags, playerTags } = await import("../Database/index.ts");
+    const globalTags = await serverTags.find({ objectId: e.objectId });
+    for (const t of globalTags) await serverTags.delete({ id: t.id });
+
+    const personalTags = await playerTags.find({ objectId: e.objectId });
+    for (const t of personalTags) await playerTags.delete({ id: t.id });
+  } catch (err) {
+    console.error("[Hooks] tag cleanup on object:destroyed failed:", err);
+  }
+};
+
+gameHooks.on("object:destroyed", _onObjectDestroyed);
+
+/**
+ * Returns true if the attribute should be evaluated as MUX softcode rather
+ * than TypeScript/JS via the sandbox.
+ *
+ * An attribute is softcode when:
+ *   1. Its `type` field is explicitly `"softcode"`, OR
+ *   2. Autodetect: the value contains MUX substitution/function syntax
+ *      (%X, [func(...)]) but does NOT contain TypeScript-style tokens
+ *      (import, export, const, let, var, function, =>, async).
+ */
+function isSoftcode(attr: IAttribute): boolean {
+  if (attr.type === "softcode") return true;
+  if (attr.type && attr.type !== "attribute") return false; // explicit non-softcode type
+
+  const v = attr.value;
+  const hasMux = /\[.*\(|%[0-9a-zA-Z#!@+]/u.test(v);
+  if (!hasMux) return false;
+
+  const hasJS = /\b(import|export|const|let|var|function|=>|async\s+function)\b/.test(v);
+  return !hasJS;
+}
 
 export const hooks = {
   executeAttribute: async (obj: IDBOBJ, attrName: string, args: string[] = [], enactor?: IDBOBJ) => {
@@ -11,6 +54,19 @@ export const hooks = {
     if (!attr) return;
 
     const actor = enactor || obj;
+
+    // ── Route to SoftcodeService for MUX softcode attributes ─────────────
+    if (isSoftcode(attr)) {
+      const { softcodeService } = await import("../Softcode/index.ts");
+      await softcodeService.runSoftcode(attr.value, {
+        actorId:    actor.id,
+        executorId: obj.id,
+        args,
+      });
+      return;
+    }
+
+    // ── Route to SandboxService for TypeScript/JS attributes ──────────────
     const { SDKService } = await import("../Sandbox/SDKService.ts");
     const { Obj } = await import("../DBObjs/DBObjs.ts");
 

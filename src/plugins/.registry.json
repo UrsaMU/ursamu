@@ -68,5 +68,25 @@
     "ref": "v1.0.1",
     "installedAt": "2026-03-23T01:32:09.515Z",
     "updatedAt": "2026-03-23T01:32:09.515Z"
+  },
+  "channel": {
+    "name": "channel",
+    "version": "unknown",
+    "description": "Channel system — alias dispatch, auto-join on login, @chancreate/@chandestroy/@chanset/@channel, message history.",
+    "source": "https://github.com/UrsaMU/channel-plugin",
+    "author": "unknown",
+    "ref": "v1.0.0",
+    "installedAt": "2026-03-31T22:14:33.874Z",
+    "updatedAt": "2026-03-31T22:14:33.874Z"
+  },
+  "help": {
+    "name": "help",
+    "version": "1.0.0",
+    "description": "API-first help system — aggregates command help, per-plugin help folders, and runtime DB entries. Replaces the native help command.",
+    "source": "https://github.com/UrsaMU/help-plugin",
+    "author": "unknown",
+    "ref": "v1.0.0",
+    "installedAt": "2026-03-31T22:14:34.385Z",
+    "updatedAt": "2026-03-31T22:14:34.385Z"
   }
 }
