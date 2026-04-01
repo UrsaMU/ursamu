@@ -45,6 +45,11 @@ function mockU(opts: { me?: Partial<IDBObj>; arg?: string; searchResults?: IDBOb
       ljust:       (s: string, w: number) => s.padEnd(w),
       rjust:       (s: string, w: number) => s.padStart(w),
     },
+    events: {
+      emit:  () => Promise.resolve(),
+      on:    () => Promise.resolve(""),
+      off:   () => Promise.resolve(),
+    },
   } as unknown as IUrsamuSDK, { _sent: sent });
 }
 

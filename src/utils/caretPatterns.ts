@@ -28,7 +28,8 @@ export interface CaretMatch {
 }
 
 /**
- * Scan objects in `roomId` for `^pattern` attributes matching `text`.
+ * Scan objects in `roomId` (and optionally the master room) for `^pattern`
+ * attributes matching `text`.
  *
  * Only objects with the `monitor` flag set are scanned. The `speakerId` is
  * excluded so objects do not react to their own text.
@@ -36,33 +37,43 @@ export interface CaretMatch {
  * Returns all matches (an object may have multiple matching `^` attrs).
  */
 export async function findCaretMatches(
-  roomId:    string,
-  text:      string,
-  speakerId: string,
-  dbojs:     { query: (q: unknown) => Promise<IDBOBJ[]> },
+  roomId:       string,
+  text:         string,
+  speakerId:    string,
+  dbojs:        { query: (q: unknown) => Promise<IDBOBJ[]> },
+  masterRoomId?: string,
 ): Promise<CaretMatch[]> {
   const hits: CaretMatch[] = [];
-  const roomContents = await dbojs.query({ location: roomId });
 
-  for (const obj of roomContents) {
-    if (obj.id === speakerId) continue;
+  const scanContents = async (locId: string) => {
+    const contents = await dbojs.query({ location: locId });
+    for (const obj of contents) {
+      if (obj.id === speakerId) continue;
 
-    const flags = (obj.flags || "").toLowerCase();
-    if (!flags.includes("monitor")) continue;
+      const flags = (obj.flags || "").toLowerCase();
+      if (!flags.includes("monitor")) continue;
 
-    const attrs = (obj.data?.attributes as Array<{ name: string; value: string }> | undefined) ?? [];
-    for (const attr of attrs) {
-      if (!attr.name.startsWith("^")) continue;
+      const attrs = (obj.data?.attributes as Array<{ name: string; value: string }> | undefined) ?? [];
+      for (const attr of attrs) {
+        if (!attr.name.startsWith("^")) continue;
 
-      // Strip `^` prefix; ignore any `/switch` suffix
-      const slashIdx = attr.name.indexOf("/", 1);
-      const pattern  = slashIdx === -1 ? attr.name.slice(1) : attr.name.slice(1, slashIdx);
+        // Strip `^` prefix; ignore any `/switch` suffix
+        const slashIdx = attr.name.indexOf("/", 1);
+        const pattern  = slashIdx === -1 ? attr.name.slice(1) : attr.name.slice(1, slashIdx);
 
-      const captures = matchGlob(pattern.trim(), text);
-      if (captures !== null) {
-        hits.push({ obj, attrName: attr.name, attrValue: attr.value, captures });
+        const captures = matchGlob(pattern.trim(), text);
+        if (captures !== null) {
+          hits.push({ obj, attrName: attr.name, attrValue: attr.value, captures });
+        }
       }
     }
+  };
+
+  await scanContents(roomId);
+
+  // Also scan master room contents (global listeners)
+  if (masterRoomId && masterRoomId !== roomId && masterRoomId !== "0") {
+    await scanContents(masterRoomId);
   }
 
   return hits;
@@ -76,13 +87,14 @@ export async function findCaretMatches(
  * handlers are caught and logged so they never interrupt the caller.
  */
 export async function fireCaretPatterns(
-  roomId:    string,
-  text:      string,
-  speakerId: string,
-  socketId:  string,
-  dbojs:     { query: (q: unknown) => Promise<IDBOBJ[]> },
+  roomId:        string,
+  text:          string,
+  speakerId:     string,
+  socketId:      string,
+  dbojs:         { query: (q: unknown) => Promise<IDBOBJ[]> },
+  masterRoomId?: string,
 ): Promise<void> {
-  const matches = await findCaretMatches(roomId, text, speakerId, dbojs);
+  const matches = await findCaretMatches(roomId, text, speakerId, dbojs, masterRoomId);
   if (matches.length === 0) return;
 
   const { softcodeService } = await import("../services/Softcode/index.ts");

@@ -165,3 +165,134 @@ Deno.test("@dolist — space split skips empty tokens", () => {
 Deno.test("@dolist — custom delim preserves empty tokens", () => {
   assertEquals(splitDolist("red|green||blue", "|"), ["red", "green", "", "blue"]);
 });
+
+// ── @if logic ─────────────────────────────────────────────────────────────
+
+function isTruthy(val: string): boolean {
+  return val !== "" && val !== "0" && val !== "#-1";
+}
+
+function runIf(condVal: string, rest: string): string | null {
+  const truthy = isTruthy(condVal);
+  const slashIdx = rest.indexOf("/");
+  const trueBranch  = slashIdx === -1 ? rest             : rest.slice(0, slashIdx);
+  const falseBranch = slashIdx === -1 ? ""               : rest.slice(slashIdx + 1);
+  if (truthy) return trueBranch.trim() || null;
+  return falseBranch.trim() || null;
+}
+
+Deno.test("@if — truthy condition executes true branch", () => {
+  assertEquals(runIf("1", "say yes/say no"), "say yes");
+});
+
+Deno.test("@if — falsy condition executes false branch", () => {
+  assertEquals(runIf("0", "say yes/say no"), "say no");
+});
+
+Deno.test("@if — empty string is falsy", () => {
+  assertEquals(runIf("", "say yes/say no"), "say no");
+});
+
+Deno.test("@if — #-1 is falsy", () => {
+  assertEquals(runIf("#-1", "say yes/say no"), "say no");
+});
+
+Deno.test("@if — no false branch when falsy returns null", () => {
+  assertEquals(runIf("0", "say yes"), null);
+});
+
+Deno.test("@if — true branch only, truthy", () => {
+  assertEquals(runIf("1", "say yes"), "say yes");
+});
+
+Deno.test("@if — non-zero string is truthy", () => {
+  assertEquals(runIf("hello", "say yes/say no"), "say yes");
+});
+
+// ── @while / @break logic ─────────────────────────────────────────────────
+
+class BreakSignal extends Error {
+  constructor() { super("@break"); this.name = "BreakSignal"; }
+}
+
+async function runWhile(
+  condFn: (iter: number) => string,
+  actionFn: (iter: number) => string | "BREAK",
+  cap = 1000,
+): Promise<{ executed: string[]; hitCap: boolean }> {
+  const executed: string[] = [];
+  let iters = 0;
+  try {
+    while (iters < cap) {
+      const cond = condFn(iters);
+      if (!isTruthy(cond)) break;
+      const action = actionFn(iters);
+      if (action === "BREAK") throw new BreakSignal();
+      executed.push(action);
+      iters++;
+    }
+  } catch (e) {
+    if (!(e instanceof BreakSignal)) throw e;
+  }
+  return { executed, hitCap: iters >= cap };
+}
+
+Deno.test("@while — runs while condition truthy", async () => {
+  const { executed } = await runWhile(
+    (i) => i < 3 ? "1" : "0",
+    (i) => `say ${i}`,
+  );
+  assertEquals(executed, ["say 0", "say 1", "say 2"]);
+});
+
+Deno.test("@while — never runs when condition starts falsy", async () => {
+  const { executed } = await runWhile(() => "0", () => "say x");
+  assertEquals(executed, []);
+});
+
+Deno.test("@while — safety cap stops infinite loop", async () => {
+  const { executed, hitCap } = await runWhile(() => "1", (i) => `cmd${i}`, 5);
+  assertEquals(hitCap, true);
+  assertEquals(executed.length, 5);
+});
+
+Deno.test("@while — @break exits loop early", async () => {
+  const { executed } = await runWhile(
+    (i) => i < 10 ? "1" : "0",
+    (i) => i === 3 ? "BREAK" : `say ${i}`,
+  );
+  assertEquals(executed, ["say 0", "say 1", "say 2"]);
+});
+
+Deno.test("@while — single iteration", async () => {
+  const { executed } = await runWhile(
+    (i) => i === 0 ? "1" : "0",
+    (i) => `only ${i}`,
+  );
+  assertEquals(executed, ["only 0"]);
+});
+
+// ── BreakSignal propagates through @dolist ────────────────────────────────
+
+async function runDolistWithBreak(items: string[], breakAt: number): Promise<string[]> {
+  const executed: string[] = [];
+  try {
+    for (let i = 0; i < items.length; i++) {
+      if (i === breakAt) throw new BreakSignal();
+      executed.push(`say ${items[i]}`);
+    }
+  } catch (e) {
+    if (!(e instanceof BreakSignal)) throw e;
+  }
+  return executed;
+}
+
+Deno.test("@dolist + @break — stops at breakpoint", async () => {
+  const cmds = await runDolistWithBreak(["a", "b", "c", "d"], 2);
+  assertEquals(cmds, ["say a", "say b"]);
+});
+
+Deno.test("@dolist + @break at index 0 — executes nothing", async () => {
+  const cmds = await runDolistWithBreak(["a", "b", "c"], 0);
+  assertEquals(cmds, []);
+});

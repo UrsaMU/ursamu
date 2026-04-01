@@ -690,6 +690,21 @@ class LocalSandbox {
             if (e.data.event) {
               const { eventsService } = await import("../Events/index.ts");
               eventsService.emit(e.data.event, e.data.data, e.data.context);
+              // "room:text" — fire ^-pattern listeners for MONITOR objects
+              if (e.data.event === "room:text" && e.data.data) {
+                const d = e.data.data as { roomId?: string; text?: string; speakerId?: string };
+                if (d.roomId && d.text) {
+                  const { fireCaretPatterns } = await import("../../utils/caretPatterns.ts");
+                  const { getConfig } = await import("../Config/mod.ts");
+                  const { dbojs } = await import("../Database/index.ts");
+                  const masterRoomId = getConfig<string>("game.masterRoom") || undefined;
+                  fireCaretPatterns(
+                    d.roomId, d.text, d.speakerId || "", context?.socketId as string || "",
+                    // deno-lint-ignore no-explicit-any
+                    dbojs as any, masterRoomId,
+                  ).catch(err => console.error("[SandboxService] room:text ^-pattern error:", err));
+                }
+              }
               worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
             } else {
               worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });

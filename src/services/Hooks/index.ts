@@ -31,16 +31,18 @@ const _onSay = async (e: SayEvent) => {
   if (!e.roomId) return;
   // Heard text for say: the full formatted line as players see it
   const heard = `${e.actorName} says, "${e.message}"`;
+  const masterRoomId = getConfig<string>("game.masterRoom") || undefined;
   // deno-lint-ignore no-explicit-any
-  await fireCaretPatterns(e.roomId, heard, e.actorId, e.socketId || "", dbojs as any).catch(
+  await fireCaretPatterns(e.roomId, heard, e.actorId, e.socketId || "", dbojs as any, masterRoomId).catch(
     err => console.error("[Hooks] ^-pattern error on player:say:", err)
   );
 };
 
 const _onPose = async (e: PoseEvent) => {
   if (!e.roomId) return;
+  const masterRoomId = getConfig<string>("game.masterRoom") || undefined;
   // deno-lint-ignore no-explicit-any
-  await fireCaretPatterns(e.roomId, e.content, e.actorId, e.socketId || "", dbojs as any).catch(
+  await fireCaretPatterns(e.roomId, e.content, e.actorId, e.socketId || "", dbojs as any, masterRoomId).catch(
     err => console.error("[Hooks] ^-pattern error on player:pose:", err)
   );
 };
