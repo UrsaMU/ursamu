@@ -4,8 +4,9 @@ import { sandboxService } from "../Sandbox/SandboxService.ts";
 import { getConfig } from "../Config/mod.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { gameHooks } from "./GameHooks.ts";
-import type { ObjectDestroyedEvent } from "./GameHooks.ts";
+import type { ObjectDestroyedEvent, SayEvent, PoseEvent } from "./GameHooks.ts";
 import { isSoftcode } from "../../utils/isSoftcode.ts";
+import { fireCaretPatterns } from "../../utils/caretPatterns.ts";
 
 // ── Tag cleanup on object destroy ─────────────────────────────────────────
 
@@ -23,6 +24,29 @@ const _onObjectDestroyed = async (e: ObjectDestroyedEvent) => {
 };
 
 gameHooks.on("object:destroyed", _onObjectDestroyed);
+
+// ── ^-pattern listeners (MONITOR objects) ─────────────────────────────────
+
+const _onSay = async (e: SayEvent) => {
+  if (!e.roomId) return;
+  // Heard text for say: the full formatted line as players see it
+  const heard = `${e.actorName} says, "${e.message}"`;
+  // deno-lint-ignore no-explicit-any
+  await fireCaretPatterns(e.roomId, heard, e.actorId, e.socketId || "", dbojs as any).catch(
+    err => console.error("[Hooks] ^-pattern error on player:say:", err)
+  );
+};
+
+const _onPose = async (e: PoseEvent) => {
+  if (!e.roomId) return;
+  // deno-lint-ignore no-explicit-any
+  await fireCaretPatterns(e.roomId, e.content, e.actorId, e.socketId || "", dbojs as any).catch(
+    err => console.error("[Hooks] ^-pattern error on player:pose:", err)
+  );
+};
+
+gameHooks.on("player:say",  _onSay);
+gameHooks.on("player:pose", _onPose);
 
 export const hooks = {
   /**

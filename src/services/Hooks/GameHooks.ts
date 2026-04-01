@@ -6,6 +6,8 @@ export interface SayEvent {
   /** ID of the room where the message was spoken. */
   roomId:    string;
   message:   string;
+  /** Socket ID of the speaker — used to route ^-pattern reactions. */
+  socketId?: string;
 }
 
 export interface PoseEvent {
@@ -17,6 +19,8 @@ export interface PoseEvent {
   content:    string;
   /** True when the `;` shorthand was used (no space between name and text). */
   isSemipose: boolean;
+  /** Socket ID of the speaker — used to route ^-pattern reactions. */
+  socketId?:  string;
 }
 
 export interface PageEvent {

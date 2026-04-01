@@ -65,6 +65,7 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | `@switch` | ✅ Working | Eval value as softcode, compare cases, execute matching action |
 | `@dolist` | ✅ Working | Iterate a softcode list, execute action per item with `##`/`#@` |
 | `$pattern` attrs | ✅ Working | Objects respond to player input via `$<glob>:<action>` attributes; captures map to `%0`–`%9` |
+| `^pattern` attrs (MONITOR) | ✅ Working | MONITOR-flagged objects listen to room speech/poses via `^<glob>` attributes; captures map to `%0`–`%9` |
 ---
 
 ## MUX Softcode Support

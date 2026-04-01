@@ -60,6 +60,7 @@ class LocalSandbox {
                   actorName: (meta.actorName as string) || "",
                   roomId,
                   message:   (meta.message   as string) || "",
+                  socketId:  context?.socketId as string | undefined,
                 });
               } else if (meta.type === "pose") {
                 await gameHooks.emit("player:pose", {
@@ -68,6 +69,7 @@ class LocalSandbox {
                   roomId,
                   content:    (meta.content    as string) || "",
                   isSemipose: (meta.isSemipose as boolean) || false,
+                  socketId:   context?.socketId as string | undefined,
                 });
               } else if (meta.type === "page") {
                 await gameHooks.emit("player:page", {
