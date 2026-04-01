@@ -766,18 +766,39 @@ class LocalSandbox {
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
                   return;
                 }
-                const attrs = ((tarObj.data?.attributes as Array<{ name: string; value: string }>) || []);
+                const attrs = ((tarObj.data?.attributes as Array<{ name: string; value: string; type?: string }>) || []);
                 const attrData = attrs.find((a: { name: string }) => a.name.toUpperCase() === String(e.data.attr).toUpperCase());
                 if (!attrData) {
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
                   return;
                 }
-                const result = await sandboxService.runScript(attrData.value, {
-                  id: tarObj.id,
-                  state: (tarObj.data?.state as Record<string, unknown>) || {},
-                  cmd: { name: "", args: (e.data.args as string[]) || [] },
-                });
-                worker.postMessage({ type: "response", msgId: e.data.msgId, data: result != null ? String(result) : "" });
+                // Three-way routing:
+                //   softcode  → softcodeService (MUX [func()], %subs, etc.)
+                //   "attribute" (explicit TypeScript) → sandboxService (returns value)
+                //   plain text (no type, no MUX syntax) → raw value as-is
+                const { isSoftcode } = await import("../../utils/isSoftcode.ts");
+                const evalArgs = (e.data.args as string[]) || [];
+                let result: string;
+                if (isSoftcode(attrData)) {
+                  const { softcodeService } = await import("../Softcode/index.ts");
+                  result = await softcodeService.runSoftcode(attrData.value, {
+                    actorId:    context?.id || tarObj.id,
+                    executorId: tarObj.id,
+                    args:       evalArgs,
+                    socketId:   context?.socketId,
+                  });
+                } else if (attrData.type === "attribute") {
+                  const raw = await sandboxService.runScript(attrData.value, {
+                    id:    tarObj.id,
+                    state: (tarObj.data?.state as Record<string, unknown>) || {},
+                    cmd:   { name: "", args: evalArgs },
+                  });
+                  result = raw != null ? String(raw) : "";
+                } else {
+                  // Plain text message attribute (SUCC/FAIL/DROP etc.) — return raw
+                  result = attrData.value;
+                }
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: result });
               } catch (_err) {
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
               }

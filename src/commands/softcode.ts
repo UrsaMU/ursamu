@@ -1,8 +1,7 @@
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
-import { getAttribute } from "../utils/getAttribute.ts";
-import { sandboxService } from "../services/Sandbox/SandboxService.ts";
 import { softcodeService } from "../services/Softcode/index.ts";
+import { hooks } from "../services/Hooks/index.ts";
 import { splitArgs } from "../utils/splitArgs.ts";
 import { send } from "../services/broadcast/index.ts";
 import { target } from "../utils/target.ts";
@@ -33,40 +32,39 @@ export default () => {
     name: "@trigger",
     pattern: /^@tr(?:igger)?\s+([^/]+)\/([^=]+)(?:=(.*))?$/i,
     lock: "connected",
+    help: `@trigger <object>/<attribute>[=<arg0>[,<arg1>...]]
+
+Fire a stored attribute as a script. The attribute value is executed with
+the triggering player as the enactor (%#) and the target object as the
+executor (%!). Comma-separated arguments after = become %0, %1, etc.
+
+Examples:
+  @trigger me/GREET              Fire &GREET on yourself
+  @trigger box/OPEN=force        Fire &OPEN with %0="force"`,
     exec: async (u: IUrsamuSDK) => {
       const en = await dbojs.queryOne({ id: u.me.id });
       if (!en) return;
 
-      const tarName = u.cmd.args[0];
-      if (!u.cmd.args[1]) {
-        u.send("Usage: @trigger <object>/<attribute>");
-        return;
-      }
-      const attrName = u.cmd.args[1].toUpperCase();
-      const triggerArgsRaw = u.cmd.args[2] || "";
+      const tarName = u.cmd.args[0]?.trim();
+      const attrName = u.cmd.args[1]?.trim().toUpperCase();
+      if (!tarName || !attrName) return u.send("Usage: @trigger <object>/<attribute>[=<args>]");
 
       const tar = await target(en as unknown as IDBOBJ, tarName);
-      if (!tar) return send([u.socketId || ""], "I can't find that here!");
+      if (!tar) return send([u.socketId || ""], "I can't find that.");
 
-      const attr = await getAttribute(tar, attrName);
-      if (!attr) return send([u.socketId || ""], `Attribute ${attrName} not found on ${tarName}.`);
-
-      const evalArgs = splitArgs(triggerArgsRaw).map((a) => a.trim());
+      const evalArgs = splitArgs(u.cmd.args[2] || "").map((a) => a.trim());
 
       try {
-        await sandboxService.runScript(attr.value, {
-          id: tar.id,
-          location: tar.location || "limbo",
-          // deno-lint-ignore no-explicit-any
-          state: (tar as any).data?.state || {},
-          target: evalArgs[0] ? { id: evalArgs[0] } : undefined,
-        });
+        await hooks.executeAttribute(
+          tar as unknown as IDBOBJ,
+          attrName,
+          evalArgs,
+          en as unknown as IDBOBJ,
+          u.socketId,
+        );
       } catch (err) {
-        send([u.socketId || ""], `%chGame>%cn Script error on ${tarName}/${attrName}: ${err instanceof Error ? err.message : String(err)}`);
-        return;
+        send([u.socketId || ""], `%chGame>%cn @trigger error on ${tarName}/${attrName}: ${err instanceof Error ? err.message : String(err)}`);
       }
-
-      send([u.socketId || ""], `Triggered script on ${tarName}/${attrName}.`);
     },
   });
 

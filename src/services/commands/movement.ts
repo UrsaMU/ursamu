@@ -6,6 +6,7 @@ import { flags } from "../flags/flags.ts";
 import { force } from "./force.ts";
 import { gameHooks } from "../Hooks/GameHooks.ts";
 import { wsService } from "../WebSocket/index.ts";
+import { isSoftcode } from "../../utils/isSoftcode.ts";
 
 export const matchExits = async (ctx: IContext) => {
   if (ctx.socket.cid) {
@@ -40,23 +41,41 @@ export const matchExits = async (ctx: IContext) => {
         const dest = await dbojs.queryOne({ id: destination });
 
         if (dest && flags.check(en.flags, (exit?.data?.lock as string) || "")) {
-          // Helper to get a plain-text attribute value from exit.data.attributes
-          const getExitAttr = (attrName: string): string | undefined => {
-            const attrs = exit.data?.attributes as Array<{ name: string; value: string }> | undefined;
-            return attrs?.find(a => a.name.toUpperCase() === attrName.toUpperCase())?.value;
+          // Helpers to read and evaluate exit attributes
+          const getExitAttr = (attrName: string): { value: string; type?: string } | undefined => {
+            const attrs = exit.data?.attributes as Array<{ name: string; value: string; type?: string }> | undefined;
+            return attrs?.find(a => a.name.toUpperCase() === attrName.toUpperCase());
+          };
+
+          const evalAttr = async (attrName: string, actorId: string): Promise<string | null> => {
+            const attr = getExitAttr(attrName);
+            if (!attr) return null;
+            if (isSoftcode(attr)) {
+              try {
+                const { softcodeService } = await import("../Softcode/index.ts");
+                return await softcodeService.runSoftcode(attr.value, {
+                  actorId,
+                  executorId: exit.id,
+                  socketId:   ctx.socket.id,
+                });
+              } catch {
+                return attr.value; // fall back to raw on error
+              }
+            }
+            return attr.value;
           };
 
           if (!en.flags.includes("dark")) {
             ctx.socket.leave(`${en.location}`);
 
-            const oleave = getExitAttr("OLEAVE");
+            const oleave = await evalAttr("OLEAVE", en.id);
             send(
               players.map((p) => p.id),
               oleave ? `${moniker(en)} ${oleave}` : `${moniker(en)} leaves for ${dest.data?.name}.`,
               {}
             );
 
-            const leave = getExitAttr("LEAVE");
+            const leave = await evalAttr("LEAVE", en.id);
             if (leave) send([ctx.socket.id], leave, {});
           }
 
@@ -74,26 +93,26 @@ export const matchExits = async (ctx: IContext) => {
               ],
             });
 
-            const oenter = getExitAttr("OENTER");
+            const oenter = await evalAttr("OENTER", en.id);
             send(
               arrivals.map((p) => p.id),
               oenter ? `${moniker(en)} ${oenter}` : `${moniker(en)} arrives from ${room?.data?.name}.`,
               {}
             );
 
-            const enter = getExitAttr("ENTER");
+            const enter = await evalAttr("ENTER", en.id);
             if (enter) send([ctx.socket.id], enter, {});
           }
 
           // Notify exit owner (ALEAVE / AENTER)
-          const aleave = getExitAttr("ALEAVE");
-          const aenter = getExitAttr("AENTER");
-          if (aleave || aenter) {
-            const ownerId = exit.data?.owner as string | undefined;
-            if (ownerId) {
-              const ownerSocket = wsService.getConnectedSockets().find(s => s.cid === ownerId);
-              if (ownerSocket && aleave) send([ownerSocket.id], aleave, {});
-              if (ownerSocket && aenter) send([ownerSocket.id], aenter, {});
+          const ownerId = exit.data?.owner as string | undefined;
+          if (ownerId) {
+            const ownerSocket = wsService.getConnectedSockets().find(s => s.cid === ownerId);
+            if (ownerSocket) {
+              const aleave = await evalAttr("ALEAVE", en.id);
+              const aenter = await evalAttr("AENTER", en.id);
+              if (aleave) send([ownerSocket.id], aleave, {});
+              if (aenter) send([ownerSocket.id], aenter, {});
             }
           }
 
