@@ -29,6 +29,8 @@ export class WebSocketService {
     // Per-IP connection tracking
     private connectionsPerIp: Map<string, Set<WebSocket>> = new Map();
     private socketIp: Map<WebSocket, string> = new Map();
+    // Last-activity tracking keyed on cid (or socket id for anon)
+    private lastActivity: Map<string, number> = new Map();
 
     /** Rate-limit key: use authenticated user ID so multi-socket bypass is impossible. */
     private rateLimitKey(sockData: UserSocket): string {
@@ -191,6 +193,8 @@ export class WebSocketService {
 
                 // Note: joinChans(ctx) would go here if needed
                 if (ctx.msg && ctx.msg.trim()) {
+                    // Stamp last-activity on every command (keyed on cid for auth, id for anon)
+                    this.lastActivity.set(this.rateLimitKey(sockData), Date.now());
                     if (this.isRateLimited(sockData)) {
                         console.warn(`[WS] Rate limit hit for socket ${sockData.id} (cid: ${sockData.cid || "anon"})`);
                         try {
@@ -211,7 +215,10 @@ export class WebSocketService {
             this.clients.delete(socket);
             this.socketData.delete(socket);
             this.untrackIp(socket);
-            if (sockData) this.rateLimits.delete(this.rateLimitKey(sockData));
+            if (sockData) {
+                this.rateLimits.delete(this.rateLimitKey(sockData));
+                this.lastActivity.delete(this.rateLimitKey(sockData));
+            }
 
             if (sockData?.cid) {
                 const player = await playerForSocket(sockData);
@@ -296,7 +303,22 @@ export class WebSocketService {
     getConnectedSockets(): UserSocket[] {
         return Array.from(this.socketData.values());
     }
-    
+
+    /**
+     * Return seconds since the player last sent a command.
+     * Returns 0 if the player is connected but has not yet sent a command.
+     * Returns -1 if the player is not connected.
+     */
+    getIdleSecs(playerId: string): number {
+        // Check if the player has any connected socket
+        const connected = Array.from(this.socketData.values()).some(s => s.cid === playerId);
+        if (!connected) return -1;
+        const last = this.lastActivity.get(playerId);
+        if (last === undefined) return 0; // connected but silent since join
+        return Math.floor((Date.now() - last) / 1000);
+    }
+
+
     /** Subscribe a socket to a room/channel by socket ID. Used by the channel plugin via gameHooks. */
     joinSocketToRoom(socketId: string, room: string): void {
         for (const meta of this.socketData.values()) {

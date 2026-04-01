@@ -422,11 +422,9 @@ export class SoftcodeService {
       }
       case "getIdleSecs": {
         const pid = msg.playerId as string;
-        const sockets = wsService.getConnectedSockets();
-        const sock = sockets.find(s => s.cid === pid);
-        // IdleSecs: returning 0 for connected (no last-activity tracking yet),
-        // 999999 for disconnected (effectively infinite idle).
-        respond(sock ? 0 : 999999);
+        const secs = wsService.getIdleSecs(pid);
+        // -1 = not connected → 999999 (TinyMUX convention for offline/infinite idle)
+        respond(secs < 0 ? 999999 : secs);
         break;
       }
       case "getUserFn": {

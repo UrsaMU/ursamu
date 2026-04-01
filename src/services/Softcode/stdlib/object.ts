@@ -497,8 +497,26 @@ register("etimefmt",   async (a) => {
     .replace(/%S/g, String(s).padStart(2,"0"));
 });
 register("exptime",    async () => "0");
-register("digittime",  async () => "0");
-register("singletime", async () => "0");
+register("digittime", async (a) => {
+  // digittime(seconds) → D:HH:MM:SS
+  const total = Math.max(0, int(a[0] ?? "0"));
+  const d = Math.floor(total / 86400);
+  const h = Math.floor((total % 86400) / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const hh = String(h).padStart(2, "0");
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  return d > 0 ? `${d}:${hh}:${mm}:${ss}` : `${hh}:${mm}:${ss}`;
+});
+register("singletime", async (a) => {
+  // singletime(seconds) → compact human-readable: 30s, 5m, 2h, 3d
+  const total = Math.max(0, int(a[0] ?? "0"));
+  if (total < 60)    return `${total}s`;
+  if (total < 3600)  return `${Math.floor(total / 60)}m`;
+  if (total < 86400) return `${Math.floor(total / 3600)}h`;
+  return `${Math.floor(total / 86400)}d`;
+});
 
 // ── TinyMUX stubs ─────────────────────────────────────────────────────────
 
