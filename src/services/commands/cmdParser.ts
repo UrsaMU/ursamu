@@ -4,6 +4,8 @@ import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { send } from "../broadcast/index.ts";
 import { dbojs } from "../Database/index.ts";
 import { matchExits } from "./movement.ts";
+import { findDollarPattern } from "../../utils/dollarPatterns.ts";
+import { getConfig } from "../Config/mod.ts";
 import { Obj } from "../DBObjs/DBObjs.ts";
 import { InterceptorService } from "../Intents/InterceptorService.ts";
 import { intentRegistry } from "../Intents/IntentRegistry.ts";
@@ -67,14 +69,19 @@ export function registerScript(name: string, content: string): void {
   parseAliasesFromContent(content, name);
 }
 
-/** Names of all engine system scripts — used for alias scanning when no local system/scripts dir exists.
- *  Channel scripts (chancreate, chandestroy, channels, chanset) are provided by channel-plugin, not the engine. */
+/**
+ * Fallback list of engine system script names used for alias scanning when
+ * running from JSR (where the scripts dir cannot be listed via readDir).
+ * Channel scripts are provided by channel-plugin, not the engine.
+ * Keep this list in sync with system/scripts/*.ts.
+ */
 const ENGINE_SCRIPT_NAMES = [
-  "admin","alias","connect","create",
-  "doing","drop","emit","find","flags","format","get","give","home","inventory",
-  "look","mail","mailadd","moniker","motd","page","pemit","pose","quit","remit",
-  "say","score","search","stats","teleport","think","trigger","update","who",
-  "tel","forceCmd","sweep","entrances",
+  "admin","alias","assert","away","cemit","connect","create",
+  "decompile","doing","drop","emit","entrances","find","flags","forceCmd","format","fsay",
+  "get","give","home","inventory","last","lemit","look","ltag",
+  "mail","mailadd","moniker","motd","page","password","pemit","poll","pose","quit",
+  "remit","say","score","search","stats","sweep","switch","tag","tel","teleport",
+  "think","time","trigger","update","wall","whisper","who",
 ];
 
 function parseAliasesFromContent(content: string, scriptName: string) {
@@ -91,33 +98,55 @@ function parseAliasesFromContent(content: string, scriptName: string) {
 }
 
 export async function loadSystemAliases() {
-  // Try the game project's local system/scripts directory first
-  let localDirExists = false;
+  const registeredLocally = new Set<string>();
+
+  // 1. Scan the game project's local system/scripts directory.
+  //    Local overrides always take priority for alias registration.
   try {
     for await (const dirEntry of Deno.readDir("./system/scripts")) {
-      if (dirEntry.isFile && dirEntry.name.endsWith(".ts")) {
-        localDirExists = true;
-        try {
-          const content = await Deno.readTextFile(`./system/scripts/${dirEntry.name}`);
-          await parseAliasesFromContent(content, dirEntry.name.replace(".ts", ""));
-        } catch (e) {
-          console.warn(`[CmdParser] Failed to parse aliases for ${dirEntry.name}:`, e);
-        }
+      if (!dirEntry.isFile || !dirEntry.name.endsWith(".ts")) continue;
+      const name = dirEntry.name.replace(".ts", "");
+      registeredLocally.add(name);
+      try {
+        const content = await Deno.readTextFile(`./system/scripts/${dirEntry.name}`);
+        parseAliasesFromContent(content, name);
+      } catch (e) {
+        console.warn(`[CmdParser] Failed to parse aliases for ${dirEntry.name}:`, e);
       }
     }
-  } catch { /* local dir not present — fall through to engine scripts */ }
+  } catch { /* local dir not present — fine */ }
 
-  if (!localDirExists) {
-    // Fall back to the engine's bundled scripts
-    for (const name of ENGINE_SCRIPT_NAMES) {
-      const content = await readEngineScript(`${name}.ts`);
-      if (content) await parseAliasesFromContent(content, name);
-    }
+  // 2. Always also scan the engine's bundled scripts for aliases not covered locally.
+  //    This ensures new engine scripts are discoverable even when a game was created
+  //    before those scripts existed. When running from file:// we can discover scripts
+  //    dynamically; from JSR (https://) we fall back to the hardcoded list.
+  let engineNames: string[] = [];
+  if (ENGINE_SCRIPTS_URL.protocol === "file:") {
+    try {
+      for await (const e of Deno.readDir(fromFileUrl(ENGINE_SCRIPTS_URL))) {
+        if (e.isFile && e.name.endsWith(".ts")) {
+          engineNames.push(e.name.replace(".ts", ""));
+        }
+      }
+    } catch { /* fall through */ }
+  }
+  if (engineNames.length === 0) engineNames = ENGINE_SCRIPT_NAMES;
+
+  for (const name of engineNames) {
+    if (registeredLocally.has(name)) continue; // local copy already registered
+    const content = await readEngineScript(`${name}.ts`);
+    if (content) parseAliasesFromContent(content, name);
   }
 }
 
-// Start loading aliases
-loadSystemAliases();
+// Aliases are loaded lazily on first command dispatch so that importing
+// cmdParser.ts does not fire background readTextFile ops at module load time.
+// (Eager loading caused Deno sanitizer "leaked async op" failures in tests.)
+let _aliasesReady: Promise<void> | null = null;
+function ensureAliasesLoaded(): Promise<void> {
+  if (!_aliasesReady) _aliasesReady = loadSystemAliases();
+  return _aliasesReady;
+}
 
 /**
  * Register one or more commands with the game's command parser.
@@ -224,6 +253,8 @@ cmdParser.use(async (ctx, next) => {
   // 3. Fallback to system scripts in system/scripts/
   // Connect-screen commands that system scripts may handle for unauthenticated users
   const connectScreenScripts = new Set(["connect", "create", "who", "quit"]);
+
+  await ensureAliasesLoaded();
 
   const aliasMap: Record<string, string> = {
     "l": "look",
@@ -390,6 +421,31 @@ cmdParser.use(async (ctx, next) => {
     }
   }
   await next();
+});
+
+// $pattern command dispatch — scan reachable objects for matching $attrs
+cmdParser.use(async (ctx, next) => {
+  if (!ctx.socket.cid || !ctx.msg) { await next(); return; }
+  const actor = await dbojs.queryOne({ id: ctx.socket.cid });
+  if (!actor) { await next(); return; }
+
+  const masterRoomId = getConfig<string>("game.masterRoom") || "0";
+  // deno-lint-ignore no-explicit-any
+  const hit = await findDollarPattern(actor, ctx.msg.trim(), masterRoomId, dbojs as any);
+  if (!hit) { await next(); return; }
+
+  // Substitute captures as %0–%9 in the action, then run the result as a command
+  const { softcodeService } = await import("../Softcode/index.ts");
+  const result = await softcodeService.runSoftcode(hit.attr.value, {
+    actorId:    actor.id,
+    executorId: hit.obj.id,
+    args:       hit.captures,
+    socketId:   ctx.socket.id,
+  });
+  if (result?.trim()) {
+    const { force } = await import("./force.ts");
+    await force(ctx, result.trim());
+  }
 });
 
 cmdParser.use(async (ctx, next) => {

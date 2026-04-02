@@ -8,6 +8,7 @@
  */
 
 import { addCmd } from "../../services/commands/cmdParser.ts";
+import { isStaff } from "../../utils/index.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 import * as dpath from "@std/path";
 
@@ -138,10 +139,6 @@ function eqBar(): string {
   return "=".repeat(WIDTH);
 }
 
-function isStaff(u: IUrsamuSDK): boolean {
-  return u.me.flags.has("superuser") || u.me.flags.has("admin") || u.me.flags.has("wizard");
-}
-
 // ---------------------------------------------------------------------------
 // Command
 // ---------------------------------------------------------------------------
@@ -160,7 +157,7 @@ export default () =>
 
       if (arg) {
         // Staff viewing another player
-        if (!isStaff(u)) {
+        if (!isStaff(u.me.flags)) {
           u.send(">GAME: Only staff may view another character's sheet.");
           return;
         }

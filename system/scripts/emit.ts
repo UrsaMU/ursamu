@@ -26,6 +26,12 @@ export default async (u: IUrsamuSDK) => {
       $and: [{ location: u.here.id }, { flags: /connected/i }],
     });
     for (const occ of occupants) { u.send(message, occ.id); }
+    // Fire ^-pattern listeners for MONITOR objects in the room
+    await u.events.emit("room:text", {
+      roomId:    u.here.id,
+      text:      message,
+      speakerId: actor.id,
+    });
     return;
   }
 

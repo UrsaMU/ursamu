@@ -299,8 +299,9 @@ export async function createNativeSDK(
         await Promise.resolve();
       },
       reboot: async () => {
-        // Exit with code 75 — start.ts recognises this as a reboot request and restarts main
-        // without touching the telnet process.
+        // Exit code 75 signals the start.ts supervisor loop to restart main.ts.
+        // In dev mode run.sh uses --watch on start.ts, so this exit also causes
+        // start.ts (and thus main.ts) to be re-spawned by start.ts's restart loop.
         setTimeout(() => Deno.exit(75), 500);
         await Promise.resolve();
       },

@@ -60,6 +60,7 @@ class LocalSandbox {
                   actorName: (meta.actorName as string) || "",
                   roomId,
                   message:   (meta.message   as string) || "",
+                  socketId:  context?.socketId as string | undefined,
                 });
               } else if (meta.type === "pose") {
                 await gameHooks.emit("player:pose", {
@@ -68,6 +69,7 @@ class LocalSandbox {
                   roomId,
                   content:    (meta.content    as string) || "",
                   isSemipose: (meta.isSemipose as boolean) || false,
+                  socketId:   context?.socketId as string | undefined,
                 });
               } else if (meta.type === "page") {
                 await gameHooks.emit("player:page", {
@@ -688,6 +690,21 @@ class LocalSandbox {
             if (e.data.event) {
               const { eventsService } = await import("../Events/index.ts");
               eventsService.emit(e.data.event, e.data.data, e.data.context);
+              // "room:text" — fire ^-pattern listeners for MONITOR objects
+              if (e.data.event === "room:text" && e.data.data) {
+                const d = e.data.data as { roomId?: string; text?: string; speakerId?: string };
+                if (d.roomId && d.text) {
+                  const { fireCaretPatterns } = await import("../../utils/caretPatterns.ts");
+                  const { getConfig } = await import("../Config/mod.ts");
+                  const { dbojs } = await import("../Database/index.ts");
+                  const masterRoomId = getConfig<string>("game.masterRoom") || undefined;
+                  fireCaretPatterns(
+                    d.roomId, d.text, d.speakerId || "", context?.socketId as string || "",
+                    // deno-lint-ignore no-explicit-any
+                    dbojs as any, masterRoomId,
+                  ).catch(err => console.error("[SandboxService] room:text ^-pattern error:", err));
+                }
+              }
               worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
             } else {
               worker.postMessage({ type: "response", msgId: e.data.msgId, data: null });
@@ -766,18 +783,39 @@ class LocalSandbox {
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
                   return;
                 }
-                const attrs = ((tarObj.data?.attributes as Array<{ name: string; value: string }>) || []);
+                const attrs = ((tarObj.data?.attributes as Array<{ name: string; value: string; type?: string }>) || []);
                 const attrData = attrs.find((a: { name: string }) => a.name.toUpperCase() === String(e.data.attr).toUpperCase());
                 if (!attrData) {
                   worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
                   return;
                 }
-                const result = await sandboxService.runScript(attrData.value, {
-                  id: tarObj.id,
-                  state: (tarObj.data?.state as Record<string, unknown>) || {},
-                  cmd: { name: "", args: (e.data.args as string[]) || [] },
-                });
-                worker.postMessage({ type: "response", msgId: e.data.msgId, data: result != null ? String(result) : "" });
+                // Three-way routing:
+                //   softcode  → softcodeService (MUX [func()], %subs, etc.)
+                //   "attribute" (explicit TypeScript) → sandboxService (returns value)
+                //   plain text (no type, no MUX syntax) → raw value as-is
+                const { isSoftcode } = await import("../../utils/isSoftcode.ts");
+                const evalArgs = (e.data.args as string[]) || [];
+                let result: string;
+                if (isSoftcode(attrData)) {
+                  const { softcodeService } = await import("../Softcode/index.ts");
+                  result = await softcodeService.runSoftcode(attrData.value, {
+                    actorId:    context?.id || tarObj.id,
+                    executorId: tarObj.id,
+                    args:       evalArgs,
+                    socketId:   context?.socketId,
+                  });
+                } else if (attrData.type === "attribute") {
+                  const raw = await sandboxService.runScript(attrData.value, {
+                    id:    tarObj.id,
+                    state: (tarObj.data?.state as Record<string, unknown>) || {},
+                    cmd:   { name: "", args: evalArgs },
+                  });
+                  result = raw != null ? String(raw) : "";
+                } else {
+                  // Plain text message attribute (SUCC/FAIL/DROP etc.) — return raw
+                  result = attrData.value;
+                }
+                worker.postMessage({ type: "response", msgId: e.data.msgId, data: result });
               } catch (_err) {
                 worker.postMessage({ type: "response", msgId: e.data.msgId, data: "" });
               }

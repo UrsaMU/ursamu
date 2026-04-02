@@ -23,7 +23,7 @@ export const DEFAULT_PLUGINS_MANIFEST = {
     {
       name: "builder",
       url: "https://github.com/UrsaMU/builder-plugin",
-      ref: "v1.0.0",
+      ref: "v1.0.1",
       description: "World-building commands (@dig, @open, @link, @describe, @examine, and more) plus REST API.",
       ursamu: ">=1.9.5",
     },

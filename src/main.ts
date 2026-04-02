@@ -106,7 +106,8 @@ export const initializeEngine = async (
   }
 
   // Determine the project root and current directory context
-  const isLocal = import.meta.url.startsWith("file://");
+  const isLocal = import.meta.url.startsWith("file://") &&
+    !Deno.env.get("URSAMU_JSR_MODE");
   
   // Load default commands if enabled
   if (loadDefaultCommands) {

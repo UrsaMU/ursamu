@@ -68,20 +68,18 @@ export default async (u: IUrsamuSDK) => {
   const actorName = u.util.displayName(actor, actor);
   const receiverName = u.util.displayName(receiver, actor);
 
-  const succ = await u.attr.get(thing.id, "SUCC");
-  u.send(succ ?? `You give ${thingName} to ${receiverName}.`);
+  const succ = await u.eval(thing.id, "SUCC");
+  u.send(succ || `You give ${thingName} to ${receiverName}.`);
 
   u.send(`${actorName} gives you ${thingName}.`, receiver.id);
 
-  const osucc = await u.attr.get(thing.id, "OSUCC");
-  if (osucc) {
-    u.here.broadcast(`${actorName} ${osucc}`, { exclude: [actor.id, receiver.id] });
-  } else {
-    u.here.broadcast(`${actorName} gives ${thingName} to ${receiverName}.`, { exclude: [actor.id, receiver.id] });
-  }
+  const osucc = await u.eval(thing.id, "OSUCC");
+  u.here.broadcast(
+    osucc ? `${actorName} ${osucc}` : `${actorName} gives ${thingName} to ${receiverName}.`,
+    { exclude: [actor.id, receiver.id] },
+  );
 
-  const asucc = await u.attr.get(thing.id, "ASUCC");
-  // TODO: notify owner via direct message if u.page or sendTo becomes available
+  const asucc = await u.eval(thing.id, "ASUCC");
   if (asucc && thing.state.owner) {
     u.send(asucc, thing.state.owner as string);
   }

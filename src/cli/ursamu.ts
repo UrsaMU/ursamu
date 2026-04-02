@@ -52,7 +52,8 @@ Select an action:
   console.log("3. Create a standalone Plugin Project");
   console.log("4. Manage installed Plugins (install, update, list, remove)");
   console.log("5. Update ursamu engine to latest version");
-  console.log("6. Exit");
+  console.log("6. Manage game shell scripts (daemon.sh, run.sh, etc.)");
+  console.log("7. Exit");
 
   const choice = getRes("Selection", "1");
 
@@ -132,7 +133,20 @@ Select an action:
     case "5":
       await runCommand("update.ts", []);
       break;
-    case "6":
+    case "6": {
+      console.log("\nShell Script Management:");
+      console.log("1. List game shell scripts");
+      console.log("2. Update a script (e.g. run.sh, daemon.sh)");
+      const sChoice = getRes("Selection", "1");
+      if (sChoice === "1") {
+        await runCommand("scripts.ts", ["list"]);
+      } else if (sChoice === "2") {
+        const name = getRes("Script name (e.g. run.sh)");
+        if (name) await runCommand("scripts.ts", ["update", name]);
+      }
+      break;
+    }
+    case "7":
       Deno.exit(0);
       break;
     default:
@@ -160,6 +174,10 @@ switch (command) {
 
   case "update":
     await runCommand("update.ts", restArgs);
+    break;
+
+  case "scripts":
+    await runCommand("scripts.ts", restArgs);
     break;
 
   case "help":
@@ -193,6 +211,8 @@ Commands:
   plugin info    <name>        Show plugin manifest + registry details
   update                       Update ursamu engine to latest JSR version
   update --dry-run             Preview the update without writing changes
+  scripts list                 List game shell scripts (shows which are present)
+  scripts update <name...>     Pull named shell script(s) from the engine
   help                         Show this help message
 
 Options:

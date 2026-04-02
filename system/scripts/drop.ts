@@ -25,22 +25,16 @@ export default async (u: IUrsamuSDK) => {
   const displayName = u.util.displayName(thing, actor);
   const actorName = u.util.displayName(actor, actor);
 
-  const drop = await u.attr.get(thing.id, "DROP");
-  if (drop) {
-    u.send(drop);
-  } else {
-    u.send(`You drop ${displayName}.`);
-  }
+  const drop = await u.eval(thing.id, "DROP");
+  u.send(drop || `You drop ${displayName}.`);
 
-  const odrop = await u.attr.get(thing.id, "ODROP");
-  if (odrop) {
-    u.here.broadcast(`${actorName} ${odrop}`, { exclude: [actor.id] });
-  } else {
-    u.here.broadcast(`${actorName} drops ${displayName}.`, { exclude: [actor.id] });
-  }
+  const odrop = await u.eval(thing.id, "ODROP");
+  u.here.broadcast(
+    odrop ? `${actorName} ${odrop}` : `${actorName} drops ${displayName}.`,
+    { exclude: [actor.id] },
+  );
 
-  const adrop = await u.attr.get(thing.id, "ADROP");
-  // TODO: notify owner via direct message if u.page or sendTo becomes available
+  const adrop = await u.eval(thing.id, "ADROP");
   if (adrop && thing.state.owner) {
     u.send(adrop, thing.state.owner as string);
   }

@@ -41,6 +41,16 @@ export default async (u: IUrsamuSDK) => {
   const targetBaseName = (target.state?.moniker as string) || (target.state?.name as string) || target.name || "Someone";
   const targetDisplay = targetAlias ? `${targetBaseName}(${targetAlias})` : targetBaseName;
 
+  // Check page lock on recipient — if the actor fails it, reject the page
+  const pageLock = ((target.state?.locks ?? {}) as Record<string, string>).page;
+  if (pageLock) {
+    const allowed = await u.checkLock(target.id, pageLock);
+    if (!allowed) {
+      u.send(`${targetDisplay} is not accepting pages.`);
+      return;
+    }
+  }
+
   // Notify sender if target has an away message set
   const away = target.state?.away as string | undefined;
   if (away) {

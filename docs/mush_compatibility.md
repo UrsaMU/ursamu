@@ -60,20 +60,111 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | `@trigger <obj>/<attr>` | ✅ Working | Fire stored attributes as scripts |
 | `@wipe <obj>` | ✅ Working | Clear all user-set attributes |
 | `@Aconnect` / `@Adisconnect` | ✅ Working | `&ACONNECT` / `&ADISCONNECT` attributes fire on login/logout |
+| MUX softcode evaluator | ✅ Working | TinyMUX 2.x compatible — see [Softcode](#mux-softcode-support) below |
+| `@tag` / `@ltag` | ✅ Working | Global and personal named-object registry (RhostMUSH-style) |
+| `@switch` | ✅ Working | Eval value as softcode, compare cases, execute matching action |
+| `@dolist` | ✅ Working | Iterate a softcode list, execute action per item with `##`/`#@` |
+| `$pattern` attrs | ✅ Working | Objects respond to player input via `$<glob>:<action>` attributes; captures map to `%0`–`%9` |
+| `^pattern` attrs (MONITOR) | ✅ Working | MONITOR-flagged objects listen to room speech/poses via `^<glob>` attributes; captures map to `%0`–`%9` |
+---
+
+## MUX Softcode Support
+
+UrsaMU Phase 1 ships a full TinyMUX 2.x compatible softcode evaluator alongside the TypeScript sandbox. In-game object attributes can be written in MUX softcode; all system scripts remain in TypeScript.
+
+### How it works
+
+- **TypeScript/JS attributes** (default) — executed in the existing Deno Web Worker sandbox.
+- **Softcode attributes** — executed in a dedicated softcode Deno Worker with a 100ms wall-clock timeout.
+
+To mark an attribute as softcode when setting it with `&`:
+
+```
+&GREET/softcode me=[name(%#)] greets you!
+```
+
+The `/softcode` flag persists on the attribute and routes all future evaluations through the softcode engine. Omitting the flag uses the TypeScript sandbox as before. Attributes that contain MUX substitution syntax (`%N`, `[func()]`) and no TypeScript keywords are also auto-detected as softcode.
+
+### Supported functions (~250 total)
+
+| Category | Functions |
+|----------|-----------|
+| Math | `add`, `sub`, `mul`, `div`, `mod`, `abs`, `floor`, `ceil`, `round`, `power`, `sqrt`, `exp`, `sin`, `cos`, `tan`, `rand`, `max`, `min`, `isnum`, `isint`, `eq`, `gt`, `lt`, `gte`, `lte`, `band`, `bor`, `bxor`, `shl`, `shr`, `dist2d`, `dist3d`, `vadd`, `vsub`, `vmul`, `vmag`, `vunit`, `vcross`, `vdot`, … |
+| String | `strlen`, `upcase`, `lowcase`, `capstr`, `trim`, `squish`, `left`, `right`, `mid`, `ljust`, `rjust`, `center`, `before`, `after`, `index`, `pos`, `lpos`, `edit`, `reverse`, `space`, `repeat`, `chr`, `ord`, `cat`, `strcat`, `strmatch`, `comp`, `alpha`, `regex`, `regmatch`, `regrab`, `regraball`, `wrap`, `columns`, `ansi`, `stripansi`, `sha1`, `spellnumber`, `itemize`, … |
+| List | `words`, `word`, `first`, `rest`, `last`, `extract`, `elements`, `member`, `lnum`, `ldelete`, `insert`, `replace`, `remove`, `revwords`, `shuffle`, `splice`, `grab`, `graball`, `match`, `matchall`, `pickrand`, `setunion`, `setinter`, `setdiff`, `sort`, `sortby`, `ladd`, `lmin`, `lmax`, `iter`, `parse`, `map`, `filter`, `filterbool`, `fold`, `foreach`, `munge`, `step`, `mix`, `distribute`, `merge`, `table`, … |
+| Logic | `t`, `not`, `and`, `or`, `xor`, `cand`, `cor`, `andflags`, `orflags`, `if`, `ifelse`, `switch`, `case`, `null`, `lit`, `@@`, … |
+| Object | `name`, `fullname`, `dbref`, `num`, `type`, `hastype`, `hasflag`, `flags`, `lflags`, `setflag`, `unflag`, `loc`, `where`, `room`, `home`, `contents`, `lcon`, `lexits`, `lwho`, `lplayers`, `match`, `pmatch`, `nearby`, `u`, `ulocal`, `get`, `default`, `xget`, `attr`, `lattr`, `hasattr`, `v`, `conn`, `connlast`, `connnum`, `idle`, `doing`, `host`, `ip`, `money`, `mudname`, `version`, `conntotal`, … |
+| Register | `setq`, `setr`, `r`, `localize` |
+| Output | `pemit`, `remit`, `oemit`, `cemit`, `emit`, `npemit`, `trigger` |
+| Tags | `tag`, `istag`, `listtags`, `tagmatch`, `ltag`, `isltag`, `listltags`, `ltagmatch` |
+
+### Substitutions
+
+All standard TinyMUX substitutions are supported: `%#` (enactor dbref), `%!` (executor dbref), `%@` (caller), `%N`/`%n` (name), `%L` (location), `%s`/`%S`/`%o`/`%O`/`%p`/`%P`/`%a` (pronouns), `%0`–`%9` (args), `%q0`–`%qz` (registers), `##` / `#@` (iter variables), `%VA`–`%VZ` (object attributes), `%r` (newline), `%t` (tab), `%b` (space), `%%` (literal `%`), full ANSI color codes (`%ch`, `%cr`, `%cg`, `%cb`, `%cy`, `%cw`, `%cc`, `%cn`, `%xN` truecolor).
+
+### TinyMUX compatibility stubs
+
+| Function | Behavior |
+|----------|----------|
+| `sql()` | Returns `#-1 FUNCTION DISABLED` |
+| `rxlevel()` / `txlevel()` | Returns `0` |
+| `beep()` | Returns `""` |
+| `height()` / `width()` | Returns `24` / `78` |
+| `colordepth()` | Returns `256` |
+| `textfile()` / `text()` | Returns `""` |
+
+---
+
+## @tag / @ltag — Named Object Registry
+
+UrsaMU ships a RhostMUSH-style named object registry. Instead of remembering dbrefs, you can assign human-readable names to objects.
+
+### @tag (global, wizard-only)
+
+```
+@tag citygate=here          Register current room as "citygate"
+@tag vault=#142             Register #142 as "vault"
+@tag                        (no args) list all tags
+@tag/remove citygate        Remove the "citygate" global tag
+```
+
+Global tags are visible to everyone. Only wizards and admins may create or remove them. When a tagged object is destroyed, its tags are automatically removed.
+
+### @ltag (personal, any player)
+
+```
+@ltag home=here             Register current room as your "home"
+@ltag/list                  List all your personal tags
+@ltag/remove home           Remove your personal "home" tag
+```
+
+Personal tags are scoped to your character (max 50). They are visible only in your own softcode evaluations.
+
+### Softcode usage
+
+```
+[tag(citygate)]             → dbref of the citygate room
+[istag(vault)]              → 1 if "vault" global tag exists
+[tagmatch(here,citygate)]   → 1 if here is tagged "citygate"
+[ltag(home)]                → dbref of your personal "home" tag
+[name(#citygate)]           → name of the citygate object (shorthand)
+```
+
+The `#tagname` shorthand works anywhere an object reference is accepted in softcode (personal tags shadow global ones).
+
 ---
 
 ## What's Different from Traditional MUSH
 
 | Traditional MUSH | UrsaMU |
 |-----------------|--------|
-| MUSHcode (softcode) scripting | TypeScript/JS in sandboxed Web Workers |
+| MUSHcode scripting only | TypeScript/JS sandbox **and** MUX softcode — both supported |
 | Telnet primary | WebSocket primary (Telnet sidecar available) |
-| Attributes on objects run softcode | Scripts registered as commands or object triggers |
+| All attributes run softcode | `&ATTR/softcode` opts in; default is TypeScript sandbox |
 | `@tr` / `@trigger` | `@trigger <obj>/<attr>` command + `u.trigger()` SDK method |
 | `@pemit` / `@remit` | `@pemit` and `@remit` — both implemented |
-| `@switch` / `@if` / MUSHcode functions | Full JavaScript/TypeScript in scripts |
+| No named-object registry | `@tag` / `@ltag` provide global and personal registries |
 
-MUSHcode attributes (`@va`–`@vz`, inline softcode, `&ATTRIBUTE`) are **not supported**. UrsaMU scripting uses the [Sandbox SDK](../guides/scripting/) instead.
 ---
 
 ## Planned Enhancements
@@ -81,7 +172,6 @@ MUSHcode attributes (`@va`–`@vz`, inline softcode, `&ATTRIBUTE`) are **not sup
 | Feature | Notes |
 |---------|-------|
 | Terminal/screen settings | Width detection via Telnet NAWS, persistent pager settings |
-| MUSHcode inline softcode | Not planned — use TypeScript scripts instead |
 ---
 
 ## Connecting with a Traditional MU* Client

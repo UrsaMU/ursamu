@@ -24,8 +24,15 @@ export default () => {
       // deno-lint-ignore no-explicit-any
       const data = tarObj.data as any;
 
+      // Parse optional /softcode suffix from attribute name: &ATTRNAME/softcode obj=val
+      const rawName = u.cmd.args[0];
+      const slashIdx = rawName.indexOf("/");
+      const attrName = slashIdx === -1 ? rawName : rawName.slice(0, slashIdx);
+      const typeHint  = slashIdx === -1 ? "attribute"
+        : rawName.slice(slashIdx + 1).toLowerCase() === "softcode" ? "softcode" : "attribute";
+
       const attr = data?.attributes?.find((a: IAttribute) =>
-        a.name.toLowerCase().startsWith(u.cmd.args[0].toLowerCase())
+        a.name.toLowerCase() === attrName.toLowerCase()
       );
 
       if (attr && tarObj && tarObj.data) {
@@ -39,8 +46,9 @@ export default () => {
             `%chGame>%cn  ${tarObj.name}'s attribute %ch${attr.name.toUpperCase()}%cn removed.`
           );
         } else {
-          attr.value = u.cmd.args[2];
+          attr.value  = u.cmd.args[2];
           attr.setter = en.dbref;
+          if (slashIdx !== -1) attr.type = typeHint;
           await tarObj.save();
           return send(
             [u.socketId || ""],
@@ -50,15 +58,15 @@ export default () => {
       } else if (!attr && tarObj && tarObj.data) {
         data.attributes ||= [];
         data.attributes.push({
-          name: u.cmd.args[0],
-          value: u.cmd.args[2],
+          name:   attrName,
+          value:  u.cmd.args[2],
           setter: en.dbref,
-          type: "attribute",
+          type:   typeHint,
         });
         await tarObj.save();
         return send(
           [u.socketId || ""],
-          `%chGame>%cn  ${tarObj.name}'s attribute %ch${u.cmd.args[0].toUpperCase()}%cn set.`
+          `%chGame>%cn  ${tarObj.name}'s attribute %ch${attrName.toUpperCase()}%cn set.`
         );
       }
     },
