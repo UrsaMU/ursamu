@@ -3,7 +3,6 @@ import type { IContext } from "../@types/IContext.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { chans, dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
-import { force } from "../services/commands/index.ts";
 import { flags } from "../services/flags/flags.ts";
 import { playerForSocket } from "./playerForSocket.ts";
 
@@ -65,7 +64,7 @@ export const joinChans = async (ctx: IContext) => {
   if (changed) {
     await dbojs.modify({ id: player.id }, "$set", {
       "data.channels": userChans,
-    } as any as Partial<IDBOBJ>);
+    } as unknown as Partial<IDBOBJ>);
   }
 
   // Join all active channel rooms on the socket
