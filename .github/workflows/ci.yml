@@ -25,7 +25,7 @@ jobs:
         run: deno lint
 
       - name: Unit tests
-        run: deno test tests/ --allow-all --unstable-kv --no-check
+        run: deno test tests/ --allow-all --unstable-kv --unstable-detect-cjs --no-check
 
       - name: Security tests
-        run: deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
+        run: deno test tests/security_*.test.ts --allow-all --unstable-kv --unstable-detect-cjs --no-check

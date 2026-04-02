@@ -150,7 +150,7 @@ export const matchExits = async (ctx: IContext) => {
             toRoomName:   (dest.data?.name   as string) || "",
             exitName:     (name.split(";")[0]).trim(),
           }).catch(e => console.error("[GameHooks] player:move:", e));
-          force(ctx, "look");
+          await force(ctx, "look");
           return true;
         } else {
           send([ctx.socket.id], "You can't go that way.");
