@@ -1,0 +1,302 @@
+@@ ============================================================
+@@ UrsaMU Softcode Engine Demo
+@@ Drop this on a test object and run: @trigger #<obj>=DEMO_RUN
+@@ Or walk through each section manually with: @trigger #<obj>=DEMO_<section>
+@@ ============================================================
+
+@@ ── Create the demo object ────────────────────────────────
+@create Demo=10
+
+@@ ── Top-level runner ─────────────────────────────────────
+&DEMO_RUN Demo=
+  @trigger me=DEMO_SUBS;
+  @trigger me=DEMO_STRINGS;
+  @trigger me=DEMO_MATH;
+  @trigger me=DEMO_LOGIC;
+  @trigger me=DEMO_LISTS;
+  @trigger me=DEMO_ITER;
+  @trigger me=DEMO_OBJECTS;
+  @trigger me=DEMO_REGISTERS;
+  @trigger me=DEMO_UDFs;
+  @trigger me=DEMO_FORMAT;
+  @trigger me=DEMO_ATTRS
+
+
+@@ ── 1. Substitutions ──────────────────────────────────────
+@@ Covers: %N %# %! %0-%9 %q0-%qz %r %t %b %ch %cn %% %[ %]
+&DEMO_SUBS Demo=
+  @pemit %#=%ch=== 1. Substitutions ===%cn%r
+  %r  Actor name  : %N
+  %r  Actor dbref : %#
+  %r  Executor    : %!
+  %r  Caller      : %@
+  %r  Arg count   : %+
+  %r  Tab+Space   : [%t][%b]done
+  %r  Escaped     : %%r is a literal percent-r%r
+  %r  Brackets    : %[this is NOT an eval block%]
+
+
+@@ ── 2. String functions ──────────────────────────────────
+&DEMO_STRINGS Demo=
+  @pemit %#=%ch=== 2. String Functions ===%cn%r
+  %r  upcase(hello)        = [upcase(hello)]
+  %r  lowcase(WORLD)       = [lowcase(WORLD)]
+  %r  capstr(fOO)          = [capstr(fOO)]
+  %r  strlen(Hello)        = [strlen(Hello)]
+  %r  left(abcdef,3)       = [left(abcdef,3)]
+  %r  right(abcdef,3)      = [right(abcdef,3)]
+  %r  mid(abcdef,2,3)      = [mid(abcdef,2,3)]
+  %r  trim(  hi  )         = [[trim(  hi  )]]
+  %r  squish(a  b  c)      = [squish(a  b  c)]
+  %r  before(a:b,:)        = [before(a:b,:)]
+  %r  after(a:b,:)         = [after(a:b,:)]
+  %r  pos(b,abc)           = [pos(b,abc)]
+  %r  repeat(*,5)          = [repeat(*,5)]
+  %r  reverse(abcde)       = [reverse(abcde)]
+  %r  edit(a-b-c,-,/)      = [edit(a-b-c,-,/)]
+  %r  cat(foo,bar,baz)     = [cat(foo,bar,baz)]
+  %r  strcat(foo,bar,baz)  = [strcat(foo,bar,baz)]
+  %r  wrap(the quick brown fox,20)%r  = [wrap(the quick brown fox,20)]
+  %r  ansi(hr,ERROR)       = [ansi(hr,ERROR)]
+  %r  soundex(Robert)      = [soundex(Robert)]
+  %r  soundslike(Robert,Rupert) = [soundslike(Robert,Rupert)]
+  %r  spellnum(42)         = [spellnum(42)]
+  %r  itemize(red green blue) = [itemize(red green blue)]
+  %r  sha1(hello)          = [sha1(hello)]
+
+
+@@ ── 3. Math functions ────────────────────────────────────
+&DEMO_MATH Demo=
+  @pemit %#=%ch=== 3. Math Functions ===%cn%r
+  %r  add(2,3,4)       = [add(2,3,4)]
+  %r  sub(10,3)        = [sub(10,3)]
+  %r  mul(3,4)         = [mul(3,4)]
+  %r  div(10,3)        = [div(10,3)]
+  %r  mod(10,3)        = [mod(10,3)]
+  %r  abs(-7)          = [abs(-7)]
+  %r  sqrt(144)        = [sqrt(144)]
+  %r  power(2,10)      = [power(2,10)]
+  %r  round(3.14159,2) = [round(3.14159,2)]
+  %r  floor(3.9)       = [floor(3.9)]
+  %r  ceil(3.1)        = [ceil(3.1)]
+  %r  max(1,5,3,2)     = [max(1,5,3,2)]
+  %r  min(1,5,3,2)     = [min(1,5,3,2)]
+  %r  inc(9)           = [inc(9)]
+  %r  dec(10)          = [dec(10)]
+  %r  sign(-5)         = [sign(-5)]
+  %r  pi()             = [pi()]
+  %r  e()              = [e()]
+  %r  log(100)         = [log(100)]
+  %r  band(12,10)      = [band(12,10)]
+  %r  bor(12,10)       = [bor(12,10)]
+  %r  bxor(12,10)      = [bxor(12,10)]
+  %r  shl(1,4)         = [shl(1,4)]
+  %r  baseconv(ff,16,10) = [baseconv(ff,16,10)]
+  %r  dist2d(0,0,3,4)  = [dist2d(0,0,3,4)]
+  %r  roman(1999)      = [roman(1999)]
+  %r  isnum(42)        = [isnum(42)]
+  %r  isnum(abc)       = [isnum(abc)]
+  %r  rand(100) in 0..99 (sample) = [rand(100)]
+
+
+@@ ── 4. Logic / Control ──────────────────────────────────
+&DEMO_LOGIC Demo=
+  @pemit %#=%ch=== 4. Logic / Control ===%cn%r
+  %r  t(1)              = [t(1)]
+  %r  t(0)              = [t(0)]
+  %r  not(0)            = [not(0)]
+  %r  and(1,1,1)        = [and(1,1,1)]
+  %r  and(1,0,1)        = [and(1,0,1)]
+  %r  or(0,0,1)         = [or(0,0,1)]
+  %r  xor(1,0)          = [xor(1,0)]
+  %r  xor(1,1)          = [xor(1,1)]
+  %r  if(1,yes)         = [if(1,yes)]
+  %r  if(0,yes)         = [if(0,yes)]
+  %r  ifelse(1,yes,no)  = [ifelse(1,yes,no)]
+  %r  ifelse(0,yes,no)  = [ifelse(0,yes,no)]
+  %r  eq(3,3)           = [eq(3,3)]
+  %r  lt(2,5)           = [lt(2,5)]
+  %r  gt(5,2)           = [gt(5,2)]
+  %r  switch(cat,dog,woof,cat,meow,moo)  = [switch(cat,dog,woof,cat,meow,moo)]
+  %r  switch(7,<5,low,>5,high,mid)       = [switch(7,<5,low,>5,high,mid)]
+  %r  case(b,a,alpha,b,beta,other)       = [case(b,a,alpha,b,beta,other)]
+
+
+@@ ── 5. List functions ────────────────────────────────────
+&DEMO_LISTS Demo=
+  @pemit %#=%ch=== 5. List Functions ===%cn%r
+  %r  words(a b c d)        = [words(a b c d)]
+  %r  word(a b c d,2)       = [word(a b c d,2)]
+  %r  first(a b c)          = [first(a b c)]
+  %r  rest(a b c)           = [rest(a b c)]
+  %r  last(a b c)           = [last(a b c)]
+  %r  extract(a b c d e,2,3) = [extract(a b c d e,2,3)]
+  %r  member(b,a b c)       = [member(b,a b c)]
+  %r  lnum(1,5)             = [lnum(1,5)]
+  %r  sort(banana apple cherry) = [sort(banana apple cherry)]
+  %r  sort(3 1 4 1 5,n)     = [sort(3 1 4 1 5,n)]
+  %r  insert(a c d,2,b)     = [insert(a c d,2,b)]
+  %r  replace(a b c,2,X)    = [replace(a b c,2,X)]
+  %r  remove(a b c,b)       = [remove(a b c,b)]
+  %r  ldelete(a b c d,3)    = [ldelete(a b c d,3)]
+  %r  revwords(a b c)       = [revwords(a b c)]
+  %r  setunion(a b c,b c d) = [setunion(a b c,b c d)]
+  %r  setinter(a b c,b c d) = [setinter(a b c,b c d)]
+  %r  setdiff(a b c,b c d)  = [setdiff(a b c,b c d)]
+  %r  grab(foo bar baz,b*)  = [grab(foo bar baz,b*)]
+  %r  graball(foo bar baz,b*) = [graball(foo bar baz,b*)]
+  %r  match(foo bar baz,b*) = [match(foo bar baz,b*)]
+  %r  matchall(foo bar baz,*o*) = [matchall(foo bar baz,*o*)]
+  %r  ladd(1 2 3 4 5)       = [ladd(1 2 3 4 5)]
+  %r  lmin(3 1 4 1 5)       = [lmin(3 1 4 1 5)]
+  %r  lmax(3 1 4 1 5)       = [lmax(3 1 4 1 5)]
+  %r  choose(a b c,10 1 1)  = [choose(a b c,10 1 1)]
+
+
+@@ ── 6. iter / map / filter / fold ──────────────────────
+&DEMO_ITER Demo=
+  @pemit %#=%ch=== 6. iter / map / filter / fold ===%cn%r
+
+  @@ iter: square each number
+  %r  iter(1 2 3 4 5,mul(##,##))
+  %r  = [iter(1 2 3 4 5,mul(##,##))]
+
+  @@ iter with #@ (position)
+  %r  iter(a b c,#@:#i)
+  %r  = [iter(a b c,#@:%i)]
+
+  @@ map: call a UDF on each element — define DOUBLE first
+  &DOUBLE Demo=[mul(%0,2)]
+  %r  map(Demo/DOUBLE,1 2 3 4 5)
+  %r  = [map(Demo/DOUBLE,1 2 3 4 5)]
+
+  @@ filter: keep even numbers (ISEVEN UDF)
+  &ISEVEN Demo=[not(mod(%0,2))]
+  %r  filter(Demo/ISEVEN,1 2 3 4 5 6)
+  %r  = [filter(Demo/ISEVEN,1 2 3 4 5 6)]
+
+  @@ fold: sum with fold
+  &ADD2 Demo=[add(%0,%1)]
+  %r  fold(Demo/ADD2,1 2 3 4 5,0)
+  %r  = [fold(Demo/ADD2,1 2 3 4 5,0)]
+
+  @@ foreach: uppercase each char
+  &UPPER_CHAR Demo=[ucstr(%0)]
+  %r  foreach(Demo/UPPER_CHAR,hello)
+  %r  = [foreach(Demo/UPPER_CHAR,hello)]
+
+  @@ step(2): pair-wise processing
+  &PAIR Demo=[cat(%0,%1)]
+  %r  step(Demo/PAIR,a b c d,2)
+  %r  = [step(Demo/PAIR,a b c d,2)]
+
+
+@@ ── 7. Object / DB functions ───────────────────────────
+&DEMO_OBJECTS Demo=
+  @pemit %#=%ch=== 7. Object / DB Functions ===%cn%r
+  %r  name(me)           = [name(me)]
+  %r  dbref(me)          = [dbref(me)]
+  %r  type(me)           = [type(me)]
+  %r  hastype(me,PLAYER) = [hastype(me,PLAYER)]
+  %r  flags(me)          = [flags(me)]
+  %r  hasflag(me,player) = [hasflag(me,player)]
+  %r  loc(me)            = [loc(me)]
+  %r  where(me)          = [where(me)]
+  %r  money(me)          = [money(me)]
+  %r  idle(me)           = [idle(me)] secs
+  %r  conn(me)           = [conn(me)]
+  %r  lcon(here)         = [lcon(here)]
+  %r  lexits(here)       = [lexits(here)]
+  %r  nplayers()         = [nplayers()]
+  %r  nrooms()           = [nrooms()]
+  %r  lwho()             = [lwho()]
+  %r  mudname()          = [mudname()]
+  %r  version()          = [version()]
+  %r  secs()             = [secs()]
+  %r  time()             = [time()]
+  %r  isdbref(%#)        = [isdbref(%#)]
+  %r  isdbref(foo)       = [isdbref(foo)]
+  %r  controls(me,me)    = [controls(me,me)]
+
+
+@@ ── 8. Registers (%q0–%qz, setq/getq) ─────────────────
+&DEMO_REGISTERS Demo=
+  @pemit %#=%ch=== 8. Registers ===%cn
+
+  @@ setq stores a value; getq/%%qN retrieves it
+  @@ TinyMUX: setq(0,value) returns empty, getq(0) returns value
+  %r  setq(0,hello) then getq(0)    = [setq(0,hello)][getq(0)]
+  %r  setq(a,world) then %%qa       = [setq(a,world)][%qa]
+  %r  chained: [setq(0,10)][setq(1,20)]add(%q0,%q1) = [setq(0,10)][setq(1,20)][add(%q0,%q1)]
+
+  @@ localize() — registers scoped to sub-call
+  &REG_SUB Demo=[setq(0,inner)][%q0]
+  %r  Before call: setq(0,outer) → [setq(0,outer)]
+  %r  ulocal result (inner): [ulocal(Demo/REG_SUB)]
+  %r  After ulocal, %%q0 restored: %q0
+
+
+@@ ── 9. User-Defined Functions (UDFs) ───────────────────
+@@ Demonstrates u(), ulocal(), recursion, and @function registration
+
+@@ Fibonacci via recursion
+&FIB Demo=
+  [ifelse(lte(%0,1),%0,add(u(me/FIB,sub(%0,1)),u(me/FIB,sub(%0,2))))]
+
+@@ Factorial
+&FACT Demo=[ifelse(lte(%0,1),1,mul(%0,u(me/FACT,dec(%0))))]
+
+@@ Greet with pronoun substitution
+&GREET Demo=Hello%b%0%b%r%S look%s great today!
+
+&DEMO_UDFs Demo=
+  @pemit %#=%ch=== 9. User-Defined Functions ===%cn%r
+  %r  u(me/FIB,0)   = [u(me/FIB,0)]
+  %r  u(me/FIB,1)   = [u(me/FIB,1)]
+  %r  u(me/FIB,7)   = [u(me/FIB,7)]
+  %r  u(me/FIB,10)  = [u(me/FIB,10)]
+  %r  u(me/FACT,5)  = [u(me/FACT,5)]
+  %r  u(me/FACT,10) = [u(me/FACT,10)]
+  %r  u(me/GREET,%N) = [u(me/GREET,%N)]
+
+
+@@ ── 10. Formatting / display ────────────────────────────
+&DEMO_FORMAT Demo=
+  @pemit %#=%ch=== 10. Formatting ===%cn%r
+  %r  ljust(hi,10,.)       = [[ljust(hi,10,.)]]
+  %r  rjust(hi,10,.)       = [[rjust(hi,10,.)]]
+  %r  center(hi,10,-)      = [[center(hi,10,-)]]
+  %r  space(5) len         = [strlen(space(5))]
+  %r  columns(a b c d e f,40,20,|) =%r[columns(a b c d e f,40,20,|)]
+  %r  table(red green blue yellow purple,60,10)%r[table(red green blue yellow purple,60,10)]
+  %r  ansi(h,bold) [ansi(r,red)] [ansi(g,green)] [ansi(c,cyan)]
+  %r  = [ansi(h,BOLD)] [ansi(r,RED)] [ansi(g,GREEN)] [ansi(c,CYAN)]%r
+  %r  %ch=== Separator ===%cn
+  %r  Header line (center + repeat):
+  %r  [center(%ch UrsaMU Demo %cn,78,-)]
+
+
+@@ ── 11. Attribute get/set from softcode ─────────────────
+&DEMO_ATTRS Demo=
+  @pemit %#=%ch=== 11. Dynamic Attribute Set/Get ===%cn%r
+
+  @@ Use &ATTR obj=val syntax from within softcode
+  &COUNTER Demo=0
+
+  @pemit %#=  Initial COUNTER = [get(Demo/COUNTER)]
+
+  &COUNTER Demo=[add([get(Demo/COUNTER)],1)]
+  @pemit %#=  After one increment = [get(Demo/COUNTER)]
+
+  @@ v() — get an attr on the executor (the Demo object itself)
+  @pemit %#=  v(COUNTER) = [v(COUNTER)]
+
+  @@ default() — attr with fallback
+  @pemit %#=  default(Demo/NOEXIST,fallback) = [default(Demo/NOEXIST,fallback)]
+
+  @@ hasattr / lattr
+  @pemit %#=  hasattr(Demo,COUNTER) = [hasattr(Demo,COUNTER)]
+  @pemit %#=  lattr(Demo,DEMO_*) = [lattr(Demo,DEMO_*)]
+  @pemit %#=  attrcnt(Demo) = [attrcnt(Demo)] attrs total
+
+  @pemit %#=%ch=== Demo Complete — all sections done! ===%cn

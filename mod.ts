@@ -57,6 +57,12 @@ import { wsService as _wsService } from "./src/services/WebSocket/index.ts";
 
 // Export command registration and plugin type — available to all plugins and game projects
 export { addCmd, registerScript, registerCmdMiddleware } from "./src/services/commands/cmdParser.ts";
+
+// Softcode extension API — register custom functions and %x substitutions from plugins
+export { register as registerSoftcodeFunc } from "./src/services/Softcode/stdlib/registry.ts";
+export { registerSub as registerSoftcodeSub } from "./src/services/Softcode/stdlib/subRegistry.ts";
+export type { StdlibFn as SoftcodeFn } from "./src/services/Softcode/stdlib/registry.ts";
+export type { SubHandler as SoftcodeSubHandler } from "./src/services/Softcode/stdlib/subRegistry.ts";
 export type { IMiddlewareFunction } from "./src/@types/IMiddlewareFunction.ts";
 export type { IContext } from "./src/@types/IContext.ts";
 export type { IPlugin, IPluginDependency } from "./src/@types/IPlugin.ts";

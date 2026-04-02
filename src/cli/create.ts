@@ -333,18 +333,46 @@ Welcome to the ${projectName} wiki. Use this directory to document your game wor
 `);
 console.log("Created wiki/home.md");
 
-// Copy engine's system scripts into the new project so they are editable
+// Copy engine's system scripts into the new project so they are editable.
+// Scripts provided by plugins (chan*, demo) are excluded — plugins supply them.
 {
-  const SCRIPT_NAMES = [
-    "admin","alias","chancreate","chandestroy","channels","chanset","connect","create",
-    "doing","drop","emit","find","flags","format","get","give","help","home","inventory",
-    "look","mail","mailadd","moniker","motd","page","pemit","pose","quit","remit",
-    "say","score","search","stats","teleport","think","trigger","who",
-    "tel","forceCmd","sweep","entrances",
-  ];
+  // Scripts provided by external plugins — excluded from the engine copy.
+  const PLUGIN_SCRIPTS = new Set([
+    "chancreate","chandestroy","channels","chanset",
+    "chanhistory","chantranscript","comaliases",
+    "demo",
+  ]);
+
   const engineScriptsBase = new URL("../../system/scripts/", import.meta.url);
+  let scriptNames: string[] = [];
+
+  // When running from a local checkout (file://), discover scripts dynamically
+  // so newly added engine scripts are always included without a list update.
+  if (engineScriptsBase.protocol === "file:") {
+    try {
+      for await (const e of Deno.readDir(fromFileUrl(engineScriptsBase))) {
+        if (e.isFile && e.name.endsWith(".ts")) {
+          scriptNames.push(e.name.replace(".ts", ""));
+        }
+      }
+    } catch { /* fall through to hardcoded list */ }
+  }
+
+  // Fallback for JSR installs (https://): use a complete hardcoded list.
+  if (scriptNames.length === 0) {
+    scriptNames = [
+      "admin","alias","assert","away","cemit","connect","create",
+      "decompile","doing","drop","emit","entrances","find","flags","forceCmd","format","fsay",
+      "get","give","home","inventory","last","lemit","look","ltag",
+      "mail","mailadd","moniker","motd","page","password","pemit","poll","pose","quit",
+      "remit","say","score","search","stats","sweep","switch","tag","tel","teleport",
+      "think","time","trigger","update","wall","whisper","who",
+    ];
+  }
+
   let copied = 0;
-  for (const name of SCRIPT_NAMES) {
+  for (const name of scriptNames) {
+    if (PLUGIN_SCRIPTS.has(name)) continue;
     const url = new URL(`${name}.ts`, engineScriptsBase);
     try {
       let content: string;
