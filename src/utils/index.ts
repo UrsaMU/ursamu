@@ -6,6 +6,7 @@ export * from "./globToRegex.ts";
 export * from "./isNameTaken.ts";
 export * from "./isSoftcode.ts";
 export * from "./isStaff.ts";
+export * from "./isWizard.ts";
 export * from "./logger.ts";
 export * from "./parseDesc.ts";
 export * from "./splitArgs.ts";

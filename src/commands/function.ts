@@ -2,6 +2,7 @@ import { addCmd } from "../services/commands/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { userFuncs } from "../services/Database/index.ts";
 import type { IUserFunc } from "../services/Database/index.ts";
+import { isWizard } from "../utils/index.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
 // ── @function command ─────────────────────────────────────────────────────
@@ -32,8 +33,7 @@ Examples:
 
       // Extra privilege check (lock may be evaluated as a string — this is authoritative).
       // Global function registration requires wizard+ to prevent admin-level code injection.
-      const isWizard = u.me.flags.has("wizard") || u.me.flags.has("superuser");
-      if (!isWizard) { u.send("Permission denied. (wizard+ required)"); return; }
+      if (!isWizard(u.me.flags)) { u.send("Permission denied. (wizard+ required)"); return; }
 
       // ── /list ──────────────────────────────────────────────────────────
       if (sw === "list") {

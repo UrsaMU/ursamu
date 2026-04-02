@@ -20,6 +20,7 @@
 import { addCmd } from "../../services/commands/index.ts";
 import { dbojs } from "../../services/Database/index.ts";
 import { send } from "../../services/broadcast/index.ts";
+import { isStaff } from "../../utils/index.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
 // ============================================================================
@@ -55,14 +56,6 @@ const WIDTH = 77;
 // ============================================================================
 // HELPERS
 // ============================================================================
-
-function isStaff(flags: string): boolean {
-  return (
-    flags.includes("superuser") ||
-    flags.includes("admin") ||
-    flags.includes("wizard")
-  );
-}
 
 async function sendToPlayer(playerId: string, msg: string) {
   const { wsService } = await import("../../services/WebSocket/index.ts");

@@ -48,8 +48,7 @@ Examples:
 
       if (!objRef) return u.send("Usage: @zone[/switch] <object>[=<zonemaster>]");
 
-      const isBuilder = u.me.flags.has("builder") || u.me.flags.has("admin")
-        || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+      const isBuilder = u.me.flags.has("builder") || isStaff(u.me.flags);
 
       const en = await dbojs.queryOne({ id: u.me.id });
       if (!en) return;
