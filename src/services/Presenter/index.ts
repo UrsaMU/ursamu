@@ -1,6 +1,7 @@
 
 import type { IState } from "../../interfaces/IMessage.ts";
 import parser from "../parser/parser.ts";
+import { resetJsCallCount } from "../parser/parser.ts";
 
 export class Presenter {
     static render(state: IState, clientType: "telnet" | "web" = "telnet"): string | object {
@@ -8,6 +9,8 @@ export class Presenter {
             return state;
         }
 
+        // Reset JS call counter for this render cycle
+        resetJsCallCount();
         // Default to Telnet (ANSI)
         // Accumulate raw MUSH markup first, then substitute the entire string
         // in one pass so that every section (msg, room, exits) is converted.

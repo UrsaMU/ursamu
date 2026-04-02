@@ -26,11 +26,11 @@ export const matchChannel = async (ctx: IContext) => {
     return false;
   }
   const userChans = en.data.channels as IChanEntry[];
-  const channel = userChans.find((c: IChanEntry) => c.alias === trig);
+  const channel = userChans.find((c: IChanEntry) => c.alias?.toLowerCase() === trig?.toLowerCase());
   if (!channel) {
     return false;
   }
-  const chan = await chans.queryOne({ name: channel.channel });
+  const chan = await chans.queryOne({ name: (channel.channel || "").toLowerCase().trim() });
 
   if (!chan) {
     return false;
@@ -43,17 +43,27 @@ export const matchChannel = async (ctx: IContext) => {
     msg = `${channel?.title ? channel?.title + " " : ""}${channel?.mask ? channel.mask : moniker(en)
       }${match[2]}`;
   } else if (msg.toLowerCase() === "on" && channel?.active === false) {
-    channel.active = true;
+    // Atomic: re-read fresh, update only the target channel's active flag
+    await dbojs.atomicModify(en.id, (current) => {
+      const chans = ((current.data?.channels || []) as IChanEntry[]);
+      const ch = chans.find(c => c.channel === channel.channel);
+      if (ch) ch.active = true;
+      return current;
+    });
     ctx.socket.join(channel.channel);
-    await dbojs.modify({ id: en.id }, "$set", en);
     await force(ctx, `${channel.alias} :has joined the channel.`);
     send([ctx.socket.id], `You have joined channel ${channel.channel}.`, {});
     return true;
   } else if (msg.toLowerCase() === "off" && channel?.active === true) {
     await force(ctx, `${channel.alias} :has left the channel.`);
-    channel.active = false;
+    // Atomic: re-read fresh, update only the target channel's active flag
+    await dbojs.atomicModify(en.id, (current) => {
+      const chans = ((current.data?.channels || []) as IChanEntry[]);
+      const ch = chans.find(c => c.channel === channel.channel);
+      if (ch) ch.active = false;
+      return current;
+    });
     ctx.socket.leave(channel.channel);
-    await dbojs.modify({ id: en.id }, "$set", en);
     send([ctx.socket.id], `You have left channel ${channel.channel}.`, {});
     return true;
   } else {
@@ -88,13 +98,16 @@ export const matchChannel = async (ctx: IContext) => {
       message: msg,
       timestamp: Date.now(),
     });
-    // Trim to limit — delete oldest entries beyond cap
-    const all = await chanHistory.find({ chanId: chan.id });
-    all.sort((a, b) => a.timestamp - b.timestamp);
-    if (all.length > limit) {
-      const toDelete = all.slice(0, all.length - limit);
-      for (const entry of toDelete) {
-        await chanHistory.delete({ id: entry.id });
+    // Trim to limit — only fetch and trim every 10th message to avoid
+    // full table scans on every single channel message
+    if (Math.random() < 0.1) {
+      const all = await chanHistory.find({ chanId: chan.id });
+      if (all.length > limit) {
+        all.sort((a, b) => a.timestamp - b.timestamp);
+        const toDelete = all.slice(0, all.length - limit);
+        for (const entry of toDelete) {
+          await chanHistory.delete({ id: entry.id });
+        }
       }
     }
   }
