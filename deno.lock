@@ -74,6 +74,7 @@
     "jsr:@std/yaml@0.224.0": "0.224.0",
     "jsr:@ts-morph/bootstrap@0.27": "0.27.0",
     "jsr:@ts-morph/common@0.27": "0.27.0",
+    "jsr:@ursamu/ursamu@^1.9.5": "1.9.38",
     "jsr:@zaubrik/djwt@^3.0.2": "3.0.2",
     "npm:@deno/kv@*": "0.13.0",
     "npm:@deno/sandbox@*": "0.10.0",
@@ -92,6 +93,7 @@
     "npm:date-fns@3.6.0": "3.6.0",
     "npm:discordeno@18.0.1": "18.0.1",
     "npm:estree-walker@3.0.3": "3.0.3",
+    "npm:lodash@^4.17.23": "4.18.1",
     "npm:lodash@^4.18.1": "4.18.1",
     "npm:markdown-it-attrs@4.1.6": "4.1.6_markdown-it@14.1.0",
     "npm:markdown-it-deflist@3.0.0": "3.0.0",
@@ -388,6 +390,26 @@
       "dependencies": [
         "jsr:@std/fs@1",
         "jsr:@std/path@1"
+      ]
+    },
+    "@ursamu/ursamu@1.9.38": {
+      "integrity": "aa37c93641b33e447319fd37215643bd0f59f66fa4ee7a1b9826c36666dec557",
+      "dependencies": [
+        "jsr:@std/dotenv@0.224",
+        "jsr:@std/flags",
+        "jsr:@std/fs@0.224",
+        "jsr:@std/fs@0.224.0",
+        "jsr:@std/path@0.224",
+        "jsr:@std/path@0.224.0",
+        "jsr:@std/semver@1",
+        "jsr:@zaubrik/djwt",
+        "npm:@deno/sandbox@0.10.0",
+        "npm:@digibear/tags",
+        "npm:@ursamu/parser",
+        "npm:bcryptjs@2.4.3",
+        "npm:lodash@^4.17.23",
+        "npm:quickjs-emscripten",
+        "npm:sucrase"
       ]
     },
     "@zaubrik/djwt@3.0.2": {
