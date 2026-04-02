@@ -32,13 +32,13 @@ export interface ChargenHookMap {
 // ── Hook bus ──────────────────────────────────────────────────────────────────
 
 class ChargenHooks extends EventEmitter {
-  on<K extends keyof ChargenHookMap>(event: K, listener: ChargenHookMap[K]): this {
+  override on<K extends keyof ChargenHookMap>(event: K, listener: ChargenHookMap[K]): this {
     return super.on(event, listener as (...args: unknown[]) => void);
   }
-  off<K extends keyof ChargenHookMap>(event: K, listener: ChargenHookMap[K]): this {
+  override off<K extends keyof ChargenHookMap>(event: K, listener: ChargenHookMap[K]): this {
     return super.off(event, listener as (...args: unknown[]) => void);
   }
-  emit<K extends keyof ChargenHookMap>(event: K, ...args: Parameters<ChargenHookMap[K]>): boolean {
+  override emit<K extends keyof ChargenHookMap>(event: K, ...args: Parameters<ChargenHookMap[K]>): boolean {
     return super.emit(event, ...args);
   }
 }
