@@ -43,4 +43,4 @@ class ChargenHooks extends EventEmitter {
   }
 }
 
-export const chargenHooks = new ChargenHooks();
+export const chargenHooks: ChargenHooks = new ChargenHooks();

@@ -9,7 +9,6 @@
     "./start": "./src/cli/start.ts",
     "./app": "./src/app.ts",
     "./channels": "./src/services/channel-events.ts",
-    "./jobs": "./src/plugins/jobs/mod.ts",
     "./chargen": "./src/services/Chargen/index.ts"
   },
   "publish": {
@@ -56,7 +55,7 @@
     "lib": ["deno.window", "deno.unstable"]
   },
   "imports": {
-    "@ursamu/ursamu": "jsr:@ursamu/ursamu@^1.9.5",
+    "@ursamu/ursamu": "jsr:@ursamu/ursamu@^2.0.0",
     "@ursamu/ursamu/app": "./src/app.ts",
     "@ursamu/ursamu/channels": "./src/services/channel-events.ts",
     "@ursamu/ursamu/jobs": "./src/plugins/jobs/mod.ts",
