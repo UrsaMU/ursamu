@@ -57,6 +57,10 @@
   },
   "imports": {
     "@ursamu/ursamu": "jsr:@ursamu/ursamu@^1.9.5",
+    "@ursamu/ursamu/app": "./src/app.ts",
+    "@ursamu/ursamu/channels": "./src/services/channel-events.ts",
+    "@ursamu/ursamu/jobs": "./src/plugins/jobs/mod.ts",
+    "@ursamu/ursamu/chargen": "./src/services/Chargen/index.ts",
     "ursamu": "./mod.ts",
     "ursamu/": "./",
     "@std/flags": "jsr:@std/flags@^0.224.0",
