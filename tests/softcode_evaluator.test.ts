@@ -40,6 +40,14 @@ function makeDb(overrides: Partial<DbAccessor> = {}): DbAccessor {
     getAttribute:       () => Promise.resolve(null),
     getTagById:         () => Promise.resolve(null),
     getPlayerTagById:   () => Promise.resolve(null),
+    lsearch:            () => Promise.resolve([]),
+    children:           () => Promise.resolve([]),
+    lchannels:          () => Promise.resolve(""),
+    channelsFor:        () => Promise.resolve(""),
+    mailCount:          () => Promise.resolve(0),
+    queueLength:        () => Promise.resolve(0),
+    getIdleSecs:        () => Promise.resolve(0),
+    getUserFn:          () => Promise.resolve(null),
     ...overrides,
   };
 }
