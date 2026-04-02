@@ -4,7 +4,7 @@
  * Unit tests for @ps, @drain, @notify, and semaphore @wait logic.
  * Tests the queue service's list/semaphore logic using inline stubs — no Deno KV needed.
  */
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import { assertEquals } from "@std/assert";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

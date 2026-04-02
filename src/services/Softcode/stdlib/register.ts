@@ -8,26 +8,26 @@ import { parse } from "../parser.ts";
  * setq(register, value) — set a local register, return empty string.
  * setq(r1, v1, r2, v2, ...) — set multiple registers in one call (TinyMUX 2.10+).
  */
-register("setq", async (a, ctx) => {
+register("setq", (a, ctx) => {
   for (let i = 0; i + 1 < a.length; i += 2) {
     ctx.registers.set(a[i], a[i + 1] ?? "");
   }
-  return "";
+  return Promise.resolve("");
 });
 
 /**
  * setr(register, value) — set a local register, return the value.
  */
-register("setr", async (a, ctx) => {
+register("setr", (a, ctx) => {
   const val = a[1] ?? "";
   ctx.registers.set(a[0] ?? "0", val);
-  return val;
+  return Promise.resolve(val);
 });
 
 /**
  * r(register) — read a local register value.
  */
-register("r", async (a, ctx) => ctx.registers.get(a[0] ?? "0") ?? "");
+register("r", (a, ctx) => Promise.resolve(ctx.registers.get(a[0] ?? "0") ?? ""));
 
 /**
  * localize(expression) — evaluate expression with register isolation.

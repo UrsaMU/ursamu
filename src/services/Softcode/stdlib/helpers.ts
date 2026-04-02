@@ -37,7 +37,8 @@ export function joinList(arr: string[], delim?: string): string {
 /** Strip MUSH color codes and ANSI escapes from a string. */
 export function stripAnsi(s: string): string {
   return s
-    .replace(/\x1b\[[0-9;]*m/g, "")
+    // deno-lint-ignore no-control-regex
+    .replace(/\u001b\[[0-9;]*m/g, "")
     .replace(/%c[a-z]/gi, "")
     .replace(/%[rntbRNTB]/g, "");
 }

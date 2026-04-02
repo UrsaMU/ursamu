@@ -1,5 +1,6 @@
+// deno-lint-ignore-file require-await
 import { register } from "./registry.ts";
-import { num, int, fmt, stub } from "./helpers.ts";
+import { num, int, fmt } from "./helpers.ts";
 
 // ── arithmetic ────────────────────────────────────────────────────────────
 

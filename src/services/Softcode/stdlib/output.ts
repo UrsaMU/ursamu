@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 /**
  * Output side-effect functions — pemit, remit, oemit, cemit, emit, npemit, trigger.
  *

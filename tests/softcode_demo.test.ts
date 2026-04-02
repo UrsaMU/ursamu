@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 /**
  * tests/softcode_demo.test.ts
  *

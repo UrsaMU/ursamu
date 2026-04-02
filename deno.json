@@ -81,5 +81,8 @@
         "@std/testing/mock": "jsr:@std/testing@^1.0.17/mock"
   },
   "exclude": ["docs/_site", "config", ".claude"],
-  "lint": { "rules": { "tags": ["recommended"] } }
+  "lint": {
+    "rules": { "tags": ["recommended"] },
+    "exclude": ["src/services/Softcode/parser.js"]
+  }
 }

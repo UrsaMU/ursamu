@@ -4,10 +4,11 @@
  * Unit tests for the MUX softcode standard library functions.
  * Covers: math, string, list, logic, register, and object functions.
  */
-import { assertEquals, assertStringIncludes, assertMatch } from "@std/assert";
+// deno-lint-ignore-file require-await
+import { assertEquals } from "@std/assert";
 import { parse }    from "../src/services/Softcode/parser.ts";
 import { evaluate } from "../src/services/Softcode/evaluator.ts";
-import type { EvalContext, DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
+import type { EvalContext, DbAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
 import "../src/services/Softcode/stdlib/index.ts";
 

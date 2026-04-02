@@ -32,14 +32,14 @@ function makeActor(overrides: Partial<IDBObj> = {}): IDBObj {
 
 function makeDb(overrides: Partial<DbAccessor> = {}): DbAccessor {
   return {
-    queryById:          async () => null,
-    queryByName:        async () => null,
-    lcon:               async () => [],
-    lwho:               async () => [],
-    lattr:              async () => [],
-    getAttribute:       async () => null,
-    getTagById:         async () => null,
-    getPlayerTagById:   async () => null,
+    queryById:          () => Promise.resolve(null),
+    queryByName:        () => Promise.resolve(null),
+    lcon:               () => Promise.resolve([]),
+    lwho:               () => Promise.resolve([]),
+    lattr:              () => Promise.resolve([]),
+    getAttribute:       () => Promise.resolve(null),
+    getTagById:         () => Promise.resolve(null),
+    getPlayerTagById:   () => Promise.resolve(null),
     ...overrides,
   };
 }
@@ -67,6 +67,7 @@ function makeCtx(overrides: Partial<EvalContext> = {}): EvalContext {
   };
 }
 
+// deno-lint-ignore require-await
 async function run(code: string, overrides: Partial<EvalContext> = {}): Promise<string> {
   const ast = parse(code, { startRule: "Start" });
   return evaluate(ast as Parameters<typeof evaluate>[0], makeCtx(overrides));

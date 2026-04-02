@@ -7,12 +7,13 @@
  *   - #tagname resolution in resolveObj()
  *   - object:destroyed hook cleans up tags
  */
-import { assertEquals, assertStringIncludes } from "@std/assert";
+// deno-lint-ignore-file require-await
+import { assertEquals } from "@std/assert";
 import { parse }    from "../src/services/Softcode/parser.ts";
 import { evaluate } from "../src/services/Softcode/evaluator.ts";
-import type { EvalContext, DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
+import type { EvalContext, DbAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
-import { dbojs, DBO, serverTags, playerTags } from "../src/services/Database/index.ts";
+import { DBO, serverTags, playerTags } from "../src/services/Database/index.ts";
 import "../src/services/Softcode/stdlib/index.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

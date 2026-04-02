@@ -72,13 +72,13 @@ function makeObj(id: string, location: string, attrs: Array<{ name: string; valu
 
 function makeDB(objs: IDBOBJ[]) {
   return {
-    query:    async (q: unknown) => {
+    query:    (q: unknown) => {
       const locVal = (q as { location?: string }).location;
-      return objs.filter(o => o.location === locVal);
+      return Promise.resolve(objs.filter(o => o.location === locVal));
     },
-    queryOne: async (q: unknown) => {
+    queryOne: (q: unknown) => {
       const idVal = (q as { id?: string }).id;
-      return objs.find(o => o.id === idVal) ?? null;
+      return Promise.resolve(objs.find(o => o.id === idVal) ?? null);
     },
   };
 }

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
 
 /**

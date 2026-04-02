@@ -99,7 +99,7 @@ async function confirm(question: string): Promise<boolean> {
 
 // ── Commands ──────────────────────────────────────────────────────────────────
 
-async function cmdList() {
+function cmdList() {
   console.log(`\n${bold("Game shell scripts")}  (${GAME_SCRIPTS.length} available)\n`);
   console.log(dim("  Name".padEnd(22)) + dim("Local copy"));
   console.log(dim("  " + "─".repeat(40)));

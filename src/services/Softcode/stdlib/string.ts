@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 import { register } from "./registry.ts";
 import { int, stripAnsi } from "./helpers.ts";
 

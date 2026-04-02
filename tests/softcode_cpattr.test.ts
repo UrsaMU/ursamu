@@ -4,7 +4,7 @@
  * Unit tests for @cpattr, @mvattr, and @grep attribute logic.
  * Tests the in-memory attribute manipulation functions directly.
  */
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import { assertEquals } from "@std/assert";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

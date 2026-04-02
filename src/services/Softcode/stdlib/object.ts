@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 import { register } from "./registry.ts";
 import type { EvalContext } from "../context.ts";
 import { snapshotRegisters, restoreRegisters, isTooDeep } from "../context.ts";

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 import { addCmd } from "../services/commands/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";

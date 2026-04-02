@@ -80,7 +80,7 @@ function makeTimeLimiter(maxIps = MAX_TRACKED_IPS, windowMs = 60_000, maxAttempt
 // ── Exploit proof: FIFO eviction lets attacker reset their counter ─────────
 
 Deno.test("[SEC][M2] FIFO eviction: attacker IP evicted when map is full, resets counter", () => {
-  const { isLimited, map } = makeFIFOLimiter(5, 60_000, 3); // tiny map for speed
+  const { isLimited, map: _map } = makeFIFOLimiter(5, 60_000, 3); // tiny map for speed
   const attackerIp = "1.2.3.4";
   const now = Date.now();
 

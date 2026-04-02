@@ -18,7 +18,6 @@ import type {
   SpecialVarNode,
   SubstitutionNode,
   TextNode,
-  UserCommandNode,
 } from "./types.ts";
 import type { EvalContext } from "./context.ts";
 import { isTimedOut, isTooDeep } from "./context.ts";
@@ -33,6 +32,7 @@ import { parse, SoftcodeSyntaxError } from "./parser.ts";
  * This is the single recursive entry point — all internal helpers call back
  * into this function so timeout/depth checks apply everywhere.
  */
+// deno-lint-ignore require-await
 export async function evaluate(node: ASTNode, ctx: EvalContext): Promise<string> {
   if (isTimedOut(ctx)) return "#-1 TIMEOUT";
 
@@ -84,14 +84,14 @@ async function evalParts(parts: ASTNode[], ctx: EvalContext): Promise<string> {
 }
 
 /** Evaluate a FunctionCall argument node — same as evalParts but at Arg level. */
-export async function evalArg(node: ArgNode, ctx: EvalContext): Promise<string> {
+export function evalArg(node: ArgNode, ctx: EvalContext): Promise<string> {
   return evalParts(node.parts, ctx);
 }
 
 // ── Node handlers ─────────────────────────────────────────────────────────
 
 /** DollarPattern: evaluate the action side; pattern is for matching only. */
-async function evalDollarPattern(node: DollarPatternNode, ctx: EvalContext): Promise<string> {
+function evalDollarPattern(node: DollarPatternNode, ctx: EvalContext): Promise<string> {
   return evaluate(node.action, ctx);
 }
 
@@ -143,7 +143,7 @@ async function evalAttributeSet(node: AttributeSetNode, ctx: EvalContext): Promi
  * EvalBlock [...]: evaluate inner content, concatenating function call results.
  * Innermost blocks are evaluated first by the recursive nature of the walker.
  */
-async function evalEvalBlock(node: EvalBlockNode, ctx: EvalContext): Promise<string> {
+function evalEvalBlock(node: EvalBlockNode, ctx: EvalContext): Promise<string> {
   return evalParts(node.parts, ctx);
 }
 
@@ -152,7 +152,7 @@ async function evalEvalBlock(node: EvalBlockNode, ctx: EvalContext): Promise<str
  * The grammar has already handled the protection at parse time — this just
  * evaluates the inner tokens normally.
  */
-async function evalBracedString(node: BracedStringNode, ctx: EvalContext): Promise<string> {
+function evalBracedString(node: BracedStringNode, ctx: EvalContext): Promise<string> {
   return evalParts(node.parts, ctx);
 }
 
