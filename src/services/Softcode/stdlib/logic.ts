@@ -98,7 +98,7 @@ async function reeval(str: string, ctx: EvalContext): Promise<string> {
   if (!str) return "";
   try {
     const ast = parse(str);
-    return await evaluate(ast, { ...ctx, depth: ctx.depth + 1 });
+    return await evaluate(ast as Parameters<typeof evaluate>[0], { ...ctx, depth: ctx.depth + 1 });
   } catch {
     return "";
   }
