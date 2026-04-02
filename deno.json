@@ -87,6 +87,6 @@
   "exclude": ["docs/_site", "config", ".claude"],
   "lint": {
     "rules": { "tags": ["recommended"] },
-    "exclude": ["src/services/Softcode/parser.js"]
+    "exclude": ["src/services/Softcode/parser.cjs"]
   }
 }

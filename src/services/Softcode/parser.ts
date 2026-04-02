@@ -3,7 +3,7 @@
 import { createRequire } from "node:module";
 
 const _require = createRequire(import.meta.url);
-const _parser = _require("./parser.js") as {
+const _parser = _require("./parser.cjs") as {
   parse: (
     input: string,
     options?: { startRule?: "Start" | "LockExpr" }
