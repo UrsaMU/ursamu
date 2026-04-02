@@ -1,4 +1,5 @@
 import { addCmd } from "../services/commands/index.ts";
+import { isStaff } from "../utils/index.ts";
 import { queue } from "../services/Queue/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
@@ -35,7 +36,7 @@ Examples:
 
       if (!ref) return u.send("Usage: @notify[/all] <object>[=<count>]");
 
-      const isStaff = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+      const staff = isStaff(u.me.flags);
 
       // Resolve the semaphore object
       const found = (await dbojs.query({ id: ref }))[0]
@@ -44,7 +45,7 @@ Examples:
 
       // Only the owner or staff can notify on an object
       const isOwner = (found.data?.owner as string | undefined) === u.me.id || found.id === u.me.id;
-      if (!isOwner && !isStaff) return u.send("Permission denied.");
+      if (!isOwner && !staff) return u.send("Permission denied.");
 
       const wantAll = sw === "all";
       let count: number;

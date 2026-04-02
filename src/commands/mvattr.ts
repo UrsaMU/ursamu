@@ -1,6 +1,6 @@
 import { addCmd } from "../services/commands/index.ts";
 import { Obj } from "../services/DBObjs/index.ts";
-import { canEdit, target } from "../utils/index.ts";
+import { canEdit, isStaff, target } from "../utils/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import type { IAttribute } from "../@types/IAttribute.ts";
@@ -50,8 +50,13 @@ Examples:
       if (srcIdx === -1) return u.send(`Attribute '${oldName}' not found on ${obj.name}.`);
 
       const srcAttr = attrs[srcIdx];
-      const canModify = srcAttr.setter === u.me.id
-        || u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+      const staff = isStaff(u.me.flags);
+      // Block if another player set this attribute — object ownership is not enough.
+      // Legacy attrs (empty setter) are treated as unowned and may be copied.
+      if (srcAttr.setter && srcAttr.setter !== u.me.id && !staff) {
+        return u.send(`Permission denied. Attribute '${oldName.toUpperCase()}' was set by another player.`);
+      }
+      const canModify = !srcAttr.setter || srcAttr.setter === u.me.id || staff;
 
       // Create or update the new name
       const upsert = (name: string) => {

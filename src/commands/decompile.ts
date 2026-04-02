@@ -1,5 +1,6 @@
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
+import { canEdit } from "../utils/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { target } from "../utils/target.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
@@ -37,6 +38,10 @@ Examples:
 
       const targ = await target(en as unknown as IDBOBJ, arg);
       if (!targ) { send([u.socketId ?? ""], "I don't see that here."); return; }
+      if (!await canEdit(en as unknown as IDBOBJ, targ as unknown as IDBOBJ)) {
+        u.send("Permission denied.");
+        return;
+      }
 
       const name = (targ as unknown as IDBOBJ).data?.name ?? `Object-${targ.id}`;
       const data = ((targ as unknown as IDBOBJ).data ?? {}) as Record<string, unknown>;

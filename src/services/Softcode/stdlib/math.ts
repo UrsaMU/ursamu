@@ -1,18 +1,5 @@
 import { register } from "./registry.ts";
-import type { EvalContext } from "../context.ts";
-
-// ── helpers ───────────────────────────────────────────────────────────────
-
-function num(s: string): number { return parseFloat(s) || 0; }
-function int(s: string): number { return parseInt(s, 10) || 0; }
-function fmt(n: number): string {
-  if (!isFinite(n)) return isNaN(n) ? "NaN" : (n > 0 ? "Inf" : "-Inf");
-  // Strip trailing zeros after decimal point to match TinyMUX output style.
-  return Number.isInteger(n) ? String(n) : String(parseFloat(n.toPrecision(15)));
-}
-function stub(_a: string[], _ctx: EvalContext): Promise<string> {
-  return Promise.resolve("#-1 NOT IMPLEMENTED");
-}
+import { num, int, fmt, stub } from "./helpers.ts";
 
 // ── arithmetic ────────────────────────────────────────────────────────────
 
@@ -107,10 +94,8 @@ register("lt",  async (a) => num(a[0]) <   num(a[1]) ? "1" : "0");
 register("lte", async (a) => num(a[0]) <=  num(a[1]) ? "1" : "0");
 register("gt",  async (a) => num(a[0]) >   num(a[1]) ? "1" : "0");
 register("gte", async (a) => num(a[0]) >=  num(a[1]) ? "1" : "0");
-register("comp",async (a) => {
-  const l = num(a[0]), r = num(a[1]);
-  return l < r ? "-1" : l > r ? "1" : "0";
-});
+// comp() string variant is registered in string.ts (loads after, wins).
+// ncomp() is registered below under the WoD dice section.
 
 // ── type checks ───────────────────────────────────────────────────────────
 
@@ -169,10 +154,47 @@ register("vcross",async (a) => {
   return [fmt(y1*z2-z1*y2), fmt(z1*x2-x1*z2), fmt(x1*y2-y1*x2)].join(" ");
 });
 
-// ── stubs for TinyMUX-only features ──────────────────────────────────────
+// ── numeric comparison (-1/0/1) ───────────────────────────────────────────
+// NOTE: string comp() is in string.ts and wins due to load order.
+// ncomp() is the numeric variant.
+register("ncomp", async (a) => {
+  const l = num(a[0]), r = num(a[1]);
+  return l < r ? "-1" : l > r ? "1" : "0";
+});
 
-register("successes",  stub);
-register("distribute", stub);
+// ── WoD dice ──────────────────────────────────────────────────────────────
+
+/**
+ * successes(num_dice, difficulty) — roll num_dice d10s, return count >= difficulty.
+ * Difficulty defaults to 6 (standard WoD). Returns negative on a botch (all 1s,
+ * no successes). Each 1 cancels one success; net negative = botch.
+ */
+register("successes", async (a) => {
+  const n    = Math.max(0, int(a[0]));
+  const diff = int(a[1] ?? "6") || 6;
+  let successes = 0, ones = 0;
+  for (let i = 0; i < n; i++) {
+    const roll = Math.floor(Math.random() * 10) + 1;
+    if (roll >= diff) successes++;
+    else if (roll === 1) ones++;
+  }
+  const net = successes - ones;
+  return String(net);
+});
+
+/**
+ * distribute(number, slots[, delimiter]) — spread number evenly across slots.
+ * distribute(10,3) → "4 3 3"
+ */
+register("distribute", async (a) => {
+  const total = Math.max(0, int(a[0]));
+  const slots = Math.max(1, int(a[1]));
+  const delim = a[2] ?? " ";
+  const base  = Math.floor(total / slots);
+  const extra = total % slots;
+  return Array.from({ length: slots }, (_, i) => base + (i < extra ? 1 : 0)).join(delim);
+});
+
 register("bittype",    async () => "0");
 register("roman",      async (a) => {
   // Basic Roman numeral conversion

@@ -1,7 +1,7 @@
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs, zoneMemberships } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
-import { target } from "../utils/index.ts";
+import { isStaff, target } from "../utils/index.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
@@ -62,9 +62,13 @@ Examples:
         // Check if target is a zone master (has any members)
         const asZM = await zoneMemberships.find({ zmId: objResult.id });
         if (asZM.length > 0) {
+          // Batch-fetch all members in one query instead of N sequential lookups.
+          const memberIds = asZM.map(m => m.memberId);
+          const memberObjs = await dbojs.find({ id: { $in: memberIds } });
+          const memberMap = new Map(memberObjs.map(o => [o.id, o]));
           u.send(`%chMembers of zone master #${objResult.id}:%cn`);
           for (const m of asZM) {
-            const member = await dbojs.queryOne({ id: m.memberId });
+            const member = memberMap.get(m.memberId);
             u.send(`  ${member?.data?.name ?? m.memberId}(#${m.memberId})`);
           }
         } else {
@@ -72,9 +76,13 @@ Examples:
           if (zones.length === 0) {
             u.send(`${objResult.data?.name ?? objResult.id}(#${objResult.id}) is not in any zone.`);
           } else {
+            // Batch-fetch all zone masters.
+            const zmIds = zones.map(z => z.zmId);
+            const zmObjs = await dbojs.find({ id: { $in: zmIds } });
+            const zmMap = new Map(zmObjs.map(o => [o.id, o]));
             u.send(`%chZones for #${objResult.id}:%cn`);
             for (const z of zones) {
-              const zm = await dbojs.queryOne({ id: z.zmId });
+              const zm = zmMap.get(z.zmId);
               u.send(`  ${zm?.data?.name ?? z.zmId}(#${z.zmId})`);
             }
           }
@@ -87,10 +95,10 @@ Examples:
 
       // Ownership check: non-staff builders can only modify zone memberships
       // for objects they own or control. Staff bypass this check.
-      const isStaff = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+      const staff = isStaff(u.me.flags);
       const objOwner = objResult.data?.owner as string | undefined;
       const actorOwnsObj = objOwner === u.me.id || objResult.id === u.me.id;
-      if (!isStaff && !actorOwnsObj) return u.send("Permission denied. You don't control that object.");
+      if (!staff && !actorOwnsObj) return u.send("Permission denied. You don't control that object.");
 
       // ── /add ───────────────────────────────────────────────────────────
       if (sw === "add") {

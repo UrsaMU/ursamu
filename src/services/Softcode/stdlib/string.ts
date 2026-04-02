@@ -1,16 +1,5 @@
 import { register } from "./registry.ts";
-
-// ── helpers ───────────────────────────────────────────────────────────────
-
-function int(s: string): number { return parseInt(s, 10) || 0; }
-
-/** Strip MUSH/ANSI codes from a string. */
-function stripAnsi(s: string): string {
-  return s
-    .replace(/\x1b\[[0-9;]*m/g, "")
-    .replace(/%c[a-z]/gi, "")
-    .replace(/%[rntbRNTB]/g, "");
-}
+import { int, stripAnsi } from "./helpers.ts";
 
 // ── concatenation ─────────────────────────────────────────────────────────
 
@@ -409,6 +398,46 @@ register("isalnum", async (a) => /^[a-zA-Z0-9]+$/.test(a[0] ?? "") ? "1" : "0");
 register("ispunct", async (a) => {
   const s = a[0] ?? "";
   return s.length > 0 && /^[!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+$/.test(s) ? "1" : "0";
+});
+
+// ── article ───────────────────────────────────────────────────────────────
+
+/**
+ * art(word) — returns "an" if word starts with a vowel sound, else "a".
+ * Handles the most common English cases (hour, honest, uniform, etc.).
+ */
+register("art", async (a) => {
+  const w = (a[0] ?? "").trim().toLowerCase();
+  if (!w) return "a";
+  // Words that start with vowel letters but use "a" (starts with /j/ or /w/ sound)
+  const aExceptions = /^(uni|use|u[rs][ei]|eur|ewe|one\b|out\b)/i;
+  // Words that start with consonant letters but use "an" (silent h)
+  const anExceptions = /^(hour|hon|heir|herb)/i;
+  if (anExceptions.test(w)) return "an";
+  if (aExceptions.test(w)) return "a";
+  return /^[aeiou]/i.test(w) ? "an" : "a";
+});
+
+// ── speech formatter ──────────────────────────────────────────────────────
+
+/**
+ * speak(name, string[, type]) — format speech/pose output.
+ *   type 0 / "say" (default) → `Name says "string."`
+ *   type 1 / "pose" / ":"    → `Name string`
+ *   type 2 / "semipose" / ";"→ `Namestring`
+ *   type 3 / "emit"          → `string`
+ * Adds a period at end of say if the string lacks terminal punctuation.
+ */
+register("speak", async (a) => {
+  const name = a[0] ?? "";
+  const str  = a[1] ?? "";
+  const type = (a[2] ?? "0").toLowerCase().trim();
+  if (type === "3" || type === "emit") return str;
+  if (type === "1" || type === "pose" || type === ":") return `${name} ${str}`;
+  if (type === "2" || type === "semipose" || type === ";") return `${name}${str}`;
+  // say — wrap in quotes, add terminal period if needed
+  const punct = /[.!?'")\]]$/.test(str);
+  return `${name} says "${str}${punct ? "" : "."}"`
 });
 
 const ONES = ["","one","two","three","four","five","six","seven","eight","nine",

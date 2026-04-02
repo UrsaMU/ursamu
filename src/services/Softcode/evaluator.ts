@@ -23,6 +23,7 @@ import type {
 import type { EvalContext } from "./context.ts";
 import { isTimedOut, isTooDeep } from "./context.ts";
 import { lookup } from "./stdlib/index.ts";
+import { lookupSub } from "./stdlib/subRegistry.ts";
 import { parse, SoftcodeSyntaxError } from "./parser.ts";
 
 // ── Public entry point ────────────────────────────────────────────────────
@@ -340,6 +341,10 @@ async function evalSubstitution(node: SubstitutionNode, ctx: EvalContext): Promi
   if (code === "l" || code === "M") return ctx.args[ctx.args.length - 1] ?? "";
   if (code === "w") return "";  // newline if from queue; stub
   if (code === "|") return "";  // piped output; stub
+
+  // ── Plugin-registered substitutions ──────────────────────────────────
+  const pluginSub = lookupSub(code);
+  if (pluginSub) return pluginSub(ctx);
 
   return "";
 }

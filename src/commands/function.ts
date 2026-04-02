@@ -10,7 +10,7 @@ export default () =>
   addCmd({
     name: "@function",
     pattern: /^@function(?:\/(list|remove))?\s*([^=\s]*)(?:\s*=\s*(.*))?/i,
-    lock: "connected admin+",
+    lock: "connected wizard+",
     category: "Scripting",
     help: `@function[/list|/remove] <name>[=<code>]  — Define global softcode functions.
 
@@ -18,7 +18,7 @@ Switches:
   /list     List all defined functions.
   /remove   Remove a function by name.
 
-Admin-only.  Functions are callable from softcode as name(arg0, arg1, ...).
+Wizard-only.  Functions are callable from softcode as name(arg0, arg1, ...).
 Inside the code, %0–%9 are the arguments, %! is the calling object.
 
 Examples:
@@ -31,10 +31,9 @@ Examples:
       const code = (u.cmd.args[2] ?? "").trim();
 
       // Extra privilege check (lock may be evaluated as a string — this is authoritative).
-      const isAdmin = u.me.flags.has("admin") ||
-        u.me.flags.has("wizard")     ||
-        u.me.flags.has("superuser");
-      if (!isAdmin) { u.send("Permission denied."); return; }
+      // Global function registration requires wizard+ to prevent admin-level code injection.
+      const isWizard = u.me.flags.has("wizard") || u.me.flags.has("superuser");
+      if (!isWizard) { u.send("Permission denied. (wizard+ required)"); return; }
 
       // ── /list ──────────────────────────────────────────────────────────
       if (sw === "list") {

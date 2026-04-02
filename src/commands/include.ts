@@ -1,20 +1,11 @@
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
-import { target } from "../utils/target.ts";
-import { canEdit } from "../utils/canEdit.ts";
+import { canEdit, globToRegex, target } from "../utils/index.ts";
 import { Obj } from "../services/DBObjs/index.ts";
 import type { IAttribute } from "../@types/IAttribute.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
-
-function globToRegex(pat: string): RegExp {
-  const escaped = pat
-    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
-    .replace(/\*/g, ".*")
-    .replace(/\?/g, ".");
-  return new RegExp(`^${escaped}$`, "i");
-}
 
 // Attributes that should never be copied between objects.
 const SYSTEM_ATTRS = new Set([

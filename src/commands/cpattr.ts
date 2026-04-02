@@ -1,16 +1,11 @@
 import { addCmd } from "../services/commands/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { Obj } from "../services/DBObjs/index.ts";
-import { canEdit, target } from "../utils/index.ts";
+import { canEdit, globToRegex, isStaff, target } from "../utils/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import type { IAttribute } from "../@types/IAttribute.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
-
-function globToRegex(pat: string): RegExp {
-  const escaped = pat.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
-  return new RegExp(`^${escaped}$`, "i");
-}
 
 /** Parse "obj/attr" → { objRef, attrGlob } */
 function parseSrc(s: string): { objRef: string; attrGlob: string } {
@@ -77,6 +72,8 @@ Examples:
       if (!srcObj) return u.send("Source object not found.");
       const srcAttrs: IAttribute[] = (srcObj.data?.attributes as IAttribute[] | undefined) ?? [];
 
+      const _isStaff = isStaff(u.me.flags);
+
       // Match source attributes by glob
       const attrRe   = globToRegex(attrGlob);
       const matched  = srcAttrs.filter(a => attrRe.test(a.name));
@@ -86,6 +83,7 @@ Examples:
       const dests = destStr.split(",").map(s => parseDest(s.trim())).filter(d => d.objRef);
 
       let totalCopied = 0;
+      const saves: Promise<void>[] = [];
 
       for (const { objRef: destRef, newName } of dests) {
         const destResult = await target(en as unknown as IDBOBJ, destRef);
@@ -99,6 +97,12 @@ Examples:
         const destAttrs: IAttribute[] = (destObj.data?.attributes as IAttribute[] | undefined) ?? [];
 
         for (const srcAttr of matched) {
+          // Block copying attributes set by another player (unless staff or legacy attr).
+          if (srcAttr.setter && srcAttr.setter !== u.me.id && !_isStaff) {
+            if (doVerbose) u.send(`Skipped: ${srcObj.name}/${srcAttr.name} — set by another player.`);
+            continue;
+          }
+
           const targetName = matched.length === 1 && newName ? newName : (newName ?? srcAttr.name);
 
           // /verify: skip if destination attr name would be invalid
@@ -118,8 +122,10 @@ Examples:
         }
 
         destObj.dbobj.data.attributes = destAttrs;
-        await destObj.save();
+        saves.push(destObj.save());
       }
+
+      await Promise.all(saves);
 
       if (doClear && totalCopied > 0) {
         const remaining = srcAttrs.filter(a => !matched.some(m => m.name === a.name));

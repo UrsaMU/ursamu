@@ -159,9 +159,10 @@ Deno.test("stdlib/object — loc(me) returns room dbref", async () => {
   const result = await fn("[loc(me)]");
   assertEquals(result, "#200");
 });
-Deno.test("stdlib/object — conn returns 1 for connected actor", async () => {
-  // actor has "connected" flag → conn() returns "1"
-  assertEquals(await fn("[conn(me)]"), "1");
+Deno.test("stdlib/object — conn returns 0+ for connected actor", async () => {
+  // actor has "connected" flag → conn() returns >= "0" (seconds, or "0" if unknown)
+  const result = await fn("[conn(me)]");
+  assertEquals(parseInt(result, 10) >= 0, true);
 });
 
 Deno.test("stdlib/object — conn returns 0 for non-connected obj", async () => {
@@ -178,5 +179,5 @@ Deno.test("stdlib/object — conn returns 0 for non-connected obj", async () => 
       getPlayerTagById: async () => null,
     },
   });
-  assertEquals(await fn("[conn(here)]", ctx), "0");
+  assertEquals(await fn("[conn(here)]", ctx), "-1");
 });

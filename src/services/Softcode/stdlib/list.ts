@@ -2,24 +2,11 @@ import { register } from "./registry.ts";
 import type { EvalContext } from "../context.ts";
 import { evaluate } from "../evaluator.ts";
 import { parse } from "../parser.ts";
-
-// ── helpers ───────────────────────────────────────────────────────────────
-
-function int(s: string): number { return parseInt(s, 10) || 0; }
-function split(s: string, delim?: string): string[] {
-  if (delim === undefined || delim === " ") return s.trim().split(/\s+/).filter(Boolean);
-  if (delim === "@@") return s.split("");  // null delim = char list
-  return s.split(delim);
-}
-function join(arr: string[], delim?: string): string {
-  if (delim === undefined || delim === " ") return arr.join(" ");
-  if (delim === "@@") return arr.join("");
-  return arr.join(delim);
-}
+import { int, splitList as split, joinList as join } from "./helpers.ts";
 
 // ── basic list access ─────────────────────────────────────────────────────
 
-register("words", async (a) => {
+register(["words","numwords","nwords"], async (a) => {
   if (!a[0]?.trim()) return "0";
   return String(split(a[0], a[1]).length);
 });

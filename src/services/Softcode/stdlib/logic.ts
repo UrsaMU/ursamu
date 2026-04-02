@@ -1,5 +1,7 @@
 import { register } from "./registry.ts";
 import type { EvalContext } from "../context.ts";
+import { evaluate } from "../evaluator.ts";
+import { parse } from "../parser.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────
 
@@ -90,12 +92,17 @@ register("case", async (a) => {
 /** null(...) — evaluates args for side effects, returns empty string. */
 register("null",    async () => "");
 
-/** s(string) — evaluate string as softcode (subeval alias). */
-// Full implementation requires calling back into the evaluator with a fresh
-// parse; stubbed here as a passthrough until the worker wires it up.
-register("s",       async (a) => a[0] ?? "");
-register("subeval", async (a) => a[0] ?? "");
-register("eval",    async (a) => a[0] ?? "");
+/** s(string) / eval(string) / subeval(string) — re-evaluate a string as softcode. */
+async function reeval(str: string, ctx: EvalContext): Promise<string> {
+  if (!str) return "";
+  try {
+    const ast = parse(str);
+    return await evaluate(ast, { ...ctx, depth: ctx.depth + 1 });
+  } catch {
+    return "";
+  }
+}
+register(["s", "eval", "subeval"], async (a, ctx) => reeval(a[0] ?? "", ctx));
 
 /** lit(string) — return string literally without evaluation (already done). */
 register("lit",     async (a) => a[0] ?? "");

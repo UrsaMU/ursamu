@@ -1,16 +1,11 @@
 import { addCmd } from "../services/commands/index.ts";
 import { Obj } from "../services/DBObjs/index.ts";
-import { canEdit, target } from "../utils/index.ts";
+import { canEdit, globToRegex, target } from "../utils/index.ts";
 import { send } from "../services/broadcast/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import type { IAttribute } from "../@types/IAttribute.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
-
-function globToRegex(pat: string): RegExp {
-  const escaped = pat.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
-  return new RegExp(`^${escaped}$`, "i");
-}
 
 /**
  * Returns true if a user-supplied regex pattern is likely to cause

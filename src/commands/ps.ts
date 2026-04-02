@@ -1,4 +1,5 @@
 import { addCmd } from "../services/commands/index.ts";
+import { isStaff } from "../utils/index.ts";
 import { queue } from "../services/Queue/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
@@ -34,13 +35,13 @@ Examples:
     exec: async (u: IUrsamuSDK) => {
       const sw  = (u.cmd.args[0] ?? "").toLowerCase().trim();
       const ref = (u.cmd.args[1] ?? "").trim();
-      const isStaff = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+      const staff = isStaff(u.me.flags);
 
       const wantAll     = sw === "all";
       const wantLong    = sw === "long";
       const wantSummary = sw === "summary";
 
-      if ((wantAll || ref) && !isStaff) {
+      if ((wantAll || ref) && !staff) {
         return send([u.socketId ?? ""], "Permission denied.");
       }
 

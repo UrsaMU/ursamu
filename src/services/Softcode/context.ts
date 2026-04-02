@@ -43,6 +43,11 @@ export interface DbAccessor {
   /** Return seconds since last activity for a connected player. */
   getIdleSecs(playerId: string): Promise<number>;
   /**
+   * Return seconds since the player connected.
+   * Optional — if not provided, conn() returns 0 for connected players.
+   */
+  getConnSecs?: (playerId: string) => Promise<number>;
+  /**
    * Look up a user-defined function body registered via @function.
    * Returns the softcode string, or null if no such function exists.
    */
