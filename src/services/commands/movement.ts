@@ -18,6 +18,17 @@ export const matchExits = async (ctx: IContext) => {
       $and: [{ flags: /exit/i }, { location: en.location || "" }],
     });
 
+    // Hoist queries that are the same for every exit in the loop
+    const players = await dbojs.query({
+      $and: [
+        { location: en.location || "" },
+        { flags: /player/i },
+        { flags: /connected/i },
+        { id: { $ne: en.id } },
+      ],
+    });
+    const room = await dbojs.queryOne({ id: en.location || "" });
+
     for (const exit of exits) {
       const name = exit.data?.name as string | undefined;
       if (!name || typeof name !== 'string') continue;
@@ -25,18 +36,9 @@ export const matchExits = async (ctx: IContext) => {
       const reg = new RegExp(`^(?:${parts.join("|")})$`, "i");
       const match = ctx.msg?.trim().match(reg);
 
-      const players = await dbojs.query({
-        $and: [
-          { location: en.location || "" },
-          { flags: /player/i },
-          { flags: /connected/i },
-          { id: { $ne: en.id } },
-        ],
-      });
-
       if (match) {
-        const room = await dbojs.queryOne({ id: en.location || "" });
         const destination = exit.data?.destination as string | undefined;
+
         if (!destination) continue;
         const dest = await dbojs.queryOne({ id: destination });
 

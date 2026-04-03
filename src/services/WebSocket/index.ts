@@ -31,6 +31,13 @@ export class WebSocketService {
     private socketIp: Map<WebSocket, string> = new Map();
     // Last-activity tracking keyed on cid (or socket id for anon)
     private lastActivity: Map<string, number> = new Map();
+    // Cached connected sockets array — invalidated on connect/disconnect
+    private _connectedCache: UserSocket[] | null = null;
+    private _socketById = new Map<string, UserSocket>();
+
+    private _invalidateSocketCache(): void {
+        this._connectedCache = null;
+    }
 
     /** Rate-limit key: use authenticated user ID so multi-socket bypass is impossible. */
     private rateLimitKey(sockData: UserSocket): string {
@@ -104,6 +111,7 @@ export class WebSocketService {
                 on: () => { }
             };
             this.socketData.set(socket, sockData);
+            this._invalidateSocketCache();
             console.log(`New WebSocket connection established (${clientType})`);
 
             // JWT pre-auth: restore session without requiring `connect name password`
@@ -214,6 +222,7 @@ export class WebSocketService {
             const sockData = this.socketData.get(socket);
             this.clients.delete(socket);
             this.socketData.delete(socket);
+            this._invalidateSocketCache();
             this.untrackIp(socket);
             if (sockData) {
                 this.rateLimits.delete(this.rateLimitKey(sockData));
@@ -263,45 +272,66 @@ export class WebSocketService {
 
     // Send to specific socket(s)
     send(targets: string[], message: IMessage) {
-        for (const client of this.clients) {
-            const meta = this.socketData.get(client);
-            const inRoom = meta?.channels ? targets.some(t => meta.channels!.has(t)) : false;
-            if (meta && (targets.includes(meta.id) || (meta.cid && targets.includes(meta.cid)) || inRoom)) {
-                try {
-                    if (meta.clientType === "web") {
-                        const output = Presenter.render(message.payload, "web");
-                        client.send(JSON.stringify(output));
-                    } else {
-                        const output = Presenter.render(message.payload, "telnet");
-                        client.send(JSON.stringify({ msg: output, data: message.payload.data }));
-                    }
-                } catch { /* socket may be closing */ }
-            }
-        }
-    }
+        const targetSet = new Set(targets);
+        let telnetJson: string | undefined;
+        let webJson: string | undefined;
 
-    // Broadcast to all
-    broadcast(message: IMessage) {
         for (const client of this.clients) {
             const meta = this.socketData.get(client);
+            if (!meta) continue;
+            const inRoom = meta.channels ? targets.some(t => meta.channels!.has(t)) : false;
+            if (!(targetSet.has(meta.id) || (meta.cid && targetSet.has(meta.cid)) || inRoom)) continue;
             try {
-                if (meta?.clientType === "web") {
-                    const output = Presenter.render(message.payload, "web");
-                    client.send(JSON.stringify(output));
+                if (meta.clientType === "web") {
+                    if (webJson === undefined) {
+                        webJson = JSON.stringify(Presenter.render(message.payload, "web"));
+                    }
+                    client.send(webJson);
                 } else {
-                    const output = Presenter.render(message.payload, "telnet");
-                    client.send(JSON.stringify({
-                        msg: output,
-                        data: message.payload.data
-                    }));
+                    if (telnetJson === undefined) {
+                        const output = Presenter.render(message.payload, "telnet");
+                        telnetJson = JSON.stringify({ msg: output, data: message.payload.data });
+                    }
+                    client.send(telnetJson);
                 }
             } catch { /* socket may be closing */ }
         }
     }
 
-    // Get all connected sockets
+    // Broadcast to all
+    broadcast(message: IMessage) {
+        let telnetJson: string | undefined;
+        let webJson: string | undefined;
+
+        for (const client of this.clients) {
+            const meta = this.socketData.get(client);
+            try {
+                if (meta?.clientType === "web") {
+                    if (webJson === undefined) {
+                        webJson = JSON.stringify(Presenter.render(message.payload, "web"));
+                    }
+                    client.send(webJson);
+                } else {
+                    if (telnetJson === undefined) {
+                        const output = Presenter.render(message.payload, "telnet");
+                        telnetJson = JSON.stringify({ msg: output, data: message.payload.data });
+                    }
+                    client.send(telnetJson);
+                }
+            } catch { /* socket may be closing */ }
+        }
+    }
+
+    // Get all connected sockets (cached between connect/disconnect events)
     getConnectedSockets(): UserSocket[] {
-        return Array.from(this.socketData.values());
+        if (!this._connectedCache) {
+            this._connectedCache = Array.from(this.socketData.values());
+            this._socketById.clear();
+            for (const s of this._connectedCache) {
+                this._socketById.set(s.id, s);
+            }
+        }
+        return this._connectedCache;
     }
 
     /**
@@ -321,6 +351,9 @@ export class WebSocketService {
 
     /** Subscribe a socket to a room/channel by socket ID. Used by the channel plugin via gameHooks. */
     joinSocketToRoom(socketId: string, room: string): void {
+        const sock = this._socketById.get(socketId);
+        if (sock) { sock.join(room); return; }
+        // Fallback to linear scan (cache may be stale between connect events)
         for (const meta of this.socketData.values()) {
             if (meta.id === socketId) {
                 meta.join(room);
