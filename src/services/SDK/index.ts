@@ -47,7 +47,7 @@ export async function createNativeSDK(
  * Assemble the full IUrsamuSDK from an already-resolved GameContext.
  * All DB fetching and hydration has already happened in buildContext.
  */
-async function buildSDKFromContext(ctx: GameContext): Promise<IUrsamuSDK> {
+function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
   const { socketId, actor: me, room: here, state, cmd } = ctx;
 
   const getConnSocket = () =>
@@ -293,7 +293,7 @@ async function buildSDKFromContext(ctx: GameContext): Promise<IUrsamuSDK> {
         } else {
           attrs.push(entry);
         }
-        await dbojs.modify({ id }, "$set", { "data.attributes": attrs });
+        await dbojs.modify({ id }, "$set", { "data.attributes": attrs } as unknown as Partial<IDBOBJ>);
       },
       clear: async (id: string, name: string): Promise<boolean> => {
         const obj = await dbojs.queryOne({ id });
@@ -301,7 +301,7 @@ async function buildSDKFromContext(ctx: GameContext): Promise<IUrsamuSDK> {
         const attrs = ((obj.data?.attributes as Array<{ name: string }>) || []);
         const filtered = attrs.filter(a => a.name.toUpperCase() !== name.toUpperCase());
         if (filtered.length === attrs.length) return false;
-        await dbojs.modify({ id }, "$set", { "data.attributes": filtered });
+        await dbojs.modify({ id }, "$set", { "data.attributes": filtered } as unknown as Partial<IDBOBJ>);
         return true;
       },
     },

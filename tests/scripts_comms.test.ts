@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 /**
  * tests/scripts_comms.test.ts
  *
@@ -249,10 +250,9 @@ Deno.test("@channel/list — sends channel list header and footer", OPTS, async 
 });
 
 Deno.test("@channel/join — joins channel and sends confirmation", OPTS, async () => {
-  let joined = false;
   const u = makeU({
     args: ["join", "public=pub"],
-    chan: { join: async () => { joined = true; } },
+    chan: { join: async () => {} },
   });
   await execChannel(u);
   assertStringIncludes(u._sent.join(" "), "joined");

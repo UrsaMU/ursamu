@@ -164,6 +164,7 @@ cmdParser.use(async (ctx, next) => {
   await next();
 });
 
+// deno-lint-ignore require-await
 cmdParser.use(async (ctx) => {
   if (ctx.socket.cid && ctx.msg?.trim()) {
     send([ctx.socket.id], "Huh? Type 'help' for help.", { error: true });

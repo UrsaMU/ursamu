@@ -6,7 +6,6 @@ import { splitArgs } from "../../utils/splitArgs.ts";
 import { send } from "../../services/broadcast/index.ts";
 import { target } from "../../utils/target.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
-import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
 export async function execTrigger(u: IUrsamuSDK): Promise<void> {
   const arg = (u.cmd.args[0] || "").trim();

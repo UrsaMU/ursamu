@@ -140,7 +140,7 @@ export async function handleChanMessage(
     if (en) {
       en.data ||= {};
       const chans = ((en.data.channels as unknown[] || []) as IChanEntry[]);
-      chans.push({ channel: msg.channel as string, alias: msg.alias as string, active: true });
+      chans.push({ id: crypto.randomUUID(), channel: msg.channel as string, alias: msg.alias as string, active: true });
       await scopedUpdate(en.id, { "data.channels": chans });
       const socket = wsService.getConnectedSockets().find(s => s.cid === en.id);
       if (socket) socket.join(msg.channel as string);
@@ -254,7 +254,7 @@ export async function handleTextMessage(
     const { texts } = await import("../Database/index.ts");
     const existing  = await texts.queryOne({ id: msg.id as string });
     if (existing) {
-      await texts.modify({ id: msg.id as string }, "$set", { content: msg.content });
+      await texts.modify({ id: msg.id as string }, "$set", { content: msg.content as string });
     } else {
       await texts.create({ id: msg.id as string, content: msg.content as string });
     }
