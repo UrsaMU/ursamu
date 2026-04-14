@@ -64,6 +64,8 @@ Select an action:
       const httpPort    = getRes("HTTP/WS Port", "4203");
       const gameName    = getRes("Game Name",    projectName);
       const gameDesc    = getRes("Description",  "A modern MU* game.");
+      const localMode   = getRes("Link to local engine source? (y/N)", "N");
+      const extraFlags  = localMode.toLowerCase() === "y" ? ["--local"] : [];
       await runCommand("create.ts", [
         projectName,
         `--name=${projectName}`,
@@ -72,6 +74,7 @@ Select an action:
         `--game-name=${gameName}`,
         `--game-desc=${gameDesc}`,
         "--non-interactive",
+        ...extraFlags,
       ]);
       break;
     }
@@ -201,6 +204,7 @@ Usage:
 
 Commands:
   create <name>                Create a new game project
+  create <name> --local        Scaffold a test game linked to the local engine checkout
   create plugin <name>         Scaffold an in-tree plugin
   create plugin <name> --standalone
                                Create a standalone publishable plugin project

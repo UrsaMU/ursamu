@@ -11,6 +11,16 @@ const hasFlag = (flags: string, ...names: string[]): boolean => {
   return names.some(n => set.has(n));
 };
 
+/** Returns true if `user` is permitted to view or interact with `scene`. */
+const canAccessScene = (
+  scene: { owner?: string; participants?: string[]; allowed?: string[] },
+  user:  { dbref: string; flags: string },
+): boolean =>
+  scene.owner === user.dbref ||
+  (scene.participants?.includes(user.dbref) ?? false) ||
+  (scene.allowed?.includes(user.dbref) ?? false) ||
+  hasFlag(user.flags, "wizard", "admin", "superuser");
+
 export const sceneHandler = async (req: Request, userId: string): Promise<Response> => {
   const url = new URL(req.url);
   const path = url.pathname;
@@ -162,13 +172,9 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           // Private scenes are only visible to owner, participants, and allowed users
           if (scene.private) {
               const viewer = await Obj.get(userId);
-              const isAllowed = viewer && (
-                  scene.owner === viewer.dbref ||
-                  (scene.participants && scene.participants.includes(viewer.dbref)) ||
-                  (scene.allowed && scene.allowed.includes(viewer.dbref)) ||
-                  hasFlag(viewer.flags, "wizard", "admin", "superuser")
-              );
-              if (!isAllowed) return new Response("Forbidden", { status: 403 });
+              if (!viewer || !canAccessScene(scene, viewer)) {
+                return new Response("Forbidden", { status: 403 });
+              }
           }
 
           // Populate participant names
@@ -271,12 +277,8 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           if (!user) return new Response("Unauthorized", { status: 401 });
 
           // Private scene: only allowed users may post
-          if (scene.private) {
-              const canPost = scene.owner === user.dbref ||
-                  (scene.participants && scene.participants.includes(user.dbref)) ||
-                  (scene.allowed && scene.allowed.includes(user.dbref)) ||
-                  hasFlag(user.flags, "wizard", "admin", "superuser");
-              if (!canPost) return new Response("Forbidden", { status: 403 });
+          if (scene.private && !canAccessScene(scene, user)) {
+              return new Response("Forbidden", { status: 403 });
           }
 
           // Basic validation
@@ -404,12 +406,8 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           if (!user) return new Response("Unauthorized", { status: 401 });
 
           // Check privacy
-          if (scene.private) {
-              const isAllowed = scene.owner === user.dbref || 
-                               (scene.allowed && scene.allowed.includes(user.dbref)) ||
-                               (scene.participants && scene.participants.includes(user.dbref));
-              
-              if (!isAllowed) return new Response("This scene is private.", { status: 403 });
+          if (scene.private && !canAccessScene(scene, user)) {
+              return new Response("This scene is private.", { status: 403 });
           }
 
           if (!scene.participants.includes(user.dbref)) {

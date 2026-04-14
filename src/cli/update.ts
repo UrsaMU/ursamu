@@ -60,11 +60,11 @@ if (!imports) {
   Deno.exit(1);
 }
 
-// Accept any of: "jsr:@ursamu/ursamu", "jsr:@ursamu/ursamu@x.y.z", "jsr:@ursamu/ursamu@^x.y.z"
+// Accept any of: "jsr:@ursamu/ursamu", "jsr:@ursamu/ursamu@x.y.z", local paths (../ursamu/mod.ts)
 const URSAMU_RE = /^jsr:@ursamu\/ursamu(@[^\s]*)?$/;
 const importKey = Object.keys(imports).find((k) => k === "ursamu" || k === "@ursamu/ursamu");
 
-if (!importKey || !URSAMU_RE.test(imports[importKey])) {
+if (!importKey) {
   console.error("Error: No ursamu import found in deno.json imports.");
   console.error(`Expected a key "ursamu" or "@ursamu/ursamu" pointing to jsr:@ursamu/ursamu`);
   Deno.exit(1);
@@ -72,6 +72,12 @@ if (!importKey || !URSAMU_RE.test(imports[importKey])) {
 
 const currentSpecifier = imports[importKey];
 const isLocal = currentSpecifier.startsWith(".") || currentSpecifier.startsWith("/");
+
+if (!isLocal && !URSAMU_RE.test(currentSpecifier)) {
+  console.error("Error: No ursamu import found in deno.json imports.");
+  console.error(`Expected a key "ursamu" or "@ursamu/ursamu" pointing to jsr:@ursamu/ursamu`);
+  Deno.exit(1);
+}
 
 // ── 2. resolve latest version (JSR) or local path ────────────────────────────
 

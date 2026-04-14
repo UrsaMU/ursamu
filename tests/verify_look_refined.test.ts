@@ -1,5 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import { execLook } from "../src/commands/look.ts";
 
 Deno.test({
   name: "Look Command - Refined Dbref Display Format",
@@ -22,27 +23,24 @@ Deno.test({
     };
 
     // 3. Prepare SDK mock
-    const sdkData = {
-      me: player,
-      here: room,
-      target: room,
-      util: {
-        // deno-lint-ignore no-explicit-any
-        displayName: (o: any) => o.state?.name || o.name || "Unknown"
-      }
-    };
-
     let sentMessage = "";
     const mockU = {
-        send: (msg: string) => { sentMessage = msg; },
-        // deno-lint-ignore no-explicit-any
-        ui: { panel: (opt: any) => opt, layout: () => {} },
-        ...sdkData,
-        canEdit: () => true
+      me: player,
+      here: room,
+      cmd: { name: "look", args: [""], switches: [] },
+      send: (msg: string) => { sentMessage = msg; },
+      ui: { panel: (opt: unknown) => opt, layout: () => {} },
+      canEdit: () => Promise.resolve(true),
+      db: { search: (_q: unknown) => Promise.resolve([]) },
+      attr: { get: (_id: string, _name: string) => Promise.resolve("") },
+      util: {
+        displayName: (o: { state?: { name?: string }; name?: string }) =>
+          o.state?.name || o.name || "Unknown",
+        parseDesc: undefined,
+      },
     };
 
-    const { default: lookScript } = await import("../system/scripts/look.ts");
-    await lookScript(mockU as unknown as IUrsamuSDK);
+    await execLook(mockU as unknown as IUrsamuSDK);
 
     console.log("Sent Message (Refined):", sentMessage);
     assertEquals(sentMessage.includes("Child Room(#9)"), true, "Should include Child Room(#9)");
@@ -51,13 +49,10 @@ Deno.test({
     // 4. Test Non-Editable remains unchanged
     sentMessage = "";
     const mockU2 = {
-        send: (msg: string) => { sentMessage = msg; },
-        // deno-lint-ignore no-explicit-any
-        ui: { panel: (opt: any) => opt, layout: () => {} },
-        ...sdkData,
-        canEdit: () => false
+      ...mockU,
+      canEdit: () => Promise.resolve(false),
     };
-    await lookScript(mockU2 as unknown as IUrsamuSDK);
+    await execLook(mockU2 as unknown as IUrsamuSDK);
     console.log("Sent Message (Non-Editable):", sentMessage);
     assertEquals(sentMessage.includes("Child Room(#9)"), false, "Should NOT include (#9) for non-editable");
     assertEquals(sentMessage.includes("Child Room"), true, "Should still include the name Child Room");

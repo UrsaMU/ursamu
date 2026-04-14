@@ -1,4 +1,5 @@
 import { addCmd } from "../../services/commands/index.ts";
+import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 import { dbojs } from "../../services/Database/index.ts";
 import { hooks } from "../../services/Hooks/index.ts";
 import { splitArgs } from "../../utils/splitArgs.ts";
@@ -6,6 +7,30 @@ import { send } from "../../services/broadcast/index.ts";
 import { target } from "../../utils/target.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+
+export async function execTrigger(u: IUrsamuSDK): Promise<void> {
+  const arg = (u.cmd.args[0] || "").trim();
+  if (!arg) { u.send("Usage: @trigger <object>/<attr> [=args]"); return; }
+
+  const eqIdx = arg.indexOf("=");
+  const ref = eqIdx === -1 ? arg : arg.slice(0, eqIdx).trim();
+  const triggerArgs = eqIdx === -1 ? [] : arg.slice(eqIdx + 1).trim().split(" ").filter(Boolean);
+
+  const slashIdx = ref.indexOf("/");
+  if (slashIdx === -1) { u.send("Usage: @trigger <object>/<attr>  (must include '/')"); return; }
+
+  const objRef = ref.slice(0, slashIdx).trim();
+  const attrName = ref.slice(slashIdx + 1).trim().toUpperCase();
+  if (!objRef || !attrName) { u.send("Usage: @trigger <object>/<attr>"); return; }
+
+  const results = await u.db.search(objRef);
+  const target = results[0];
+  if (!target) { u.send(`I can't find '${objRef}'.`); return; }
+
+  if (!(await u.canEdit(u.me, target))) { u.send("Permission denied."); return; }
+
+  await u.trigger(target.id, attrName, triggerArgs);
+}
 
 addCmd({
   name: "@trigger",

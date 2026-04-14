@@ -1,326 +1,303 @@
 /**
- * Tests for admin.ts system script.
- * Covers: @boot, @toad, @newpass, @chown, @site, @reboot, @shutdown,
- * and permission enforcement.
+ * tests/admin.test.ts
+ *
+ * Tests for admin commands: @boot, @toad, @newpassword, @chown, @site,
+ * @reboot, @shutdown, and permission enforcement.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
-import { hash, compare } from "../deps.ts";
+import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import { execBoot, execToad, execNewpassword, execChown, execSite, execShutdown } from "../src/commands/admin.ts";
+import { execReboot } from "../src/commands/restart.ts";
 
-const RAW_ADMIN_SCRIPT = await Deno.readTextFile("./system/scripts/admin.ts");
-
-/**
- * Strip imports/exports so the script runs as legacy block code in the sandbox
- * (top-level `return` is valid inside `new Function`).
- */
-function wrapAdmin(extra: string): string {
-  const stripped = RAW_ADMIN_SCRIPT
-    .replace(/^import\s.*?;\s*$/gm, "")
-    .replace(/export default/, "_adminMain =")   // assign without re-declaring
-    .replace(/^export\s+/gm, "");
-  return [
-    "let _adminMain;",
-    stripped,
-    "const _sent = [];",
-    "const _origSend = u.send.bind(u);",
-    "u.send = (m, target, opts) => { _sent.push(m); _origSend(m, target, opts); };",
-    extra,
-    "await _adminMain(u);",
-    "return _sent;",
-  ].join("\n");
-}
-
-const SLOW = { timeout: 8000 };
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
-async function createAdmin(id: string) {
-  return dbojs.create({
-    id,
-    flags: "player wizard connected",
-    data: { name: `Admin_${id}`, password: await hash("adminpass", 10) },
-    location: "r1",
-  });
-}
+const ACTOR_ID  = "adm_actor1";
+const TARGET_ID = "adm_target1";
+const THING_ID  = "adm_thing1";
+const ROOM_ID   = "adm_room1";
 
-async function createPlayer(id: string, name: string) {
-  return dbojs.create({
-    id,
-    flags: "player connected",
-    data: { name, password: await hash("pass", 10) },
-    location: "r1",
-  });
-}
+type ModifyCall = [string, string, unknown];
 
-async function cleanup(...ids: string[]) {
-  for (const id of ids) await dbojs.delete({ id }).catch(() => {});
-}
+function makeU(opts: {
+  cmdName?: string;
+  args?: string[];
+  flags?: string[];
+  /** Sequential target() returns */
+  targetSeq?: Array<IDBObj | undefined>;
+  modifyCalls?: ModifyCall[];
+  destroyCalls?: string[];
+  setPasswordCalls?: Array<[string, string]>;
+  setConfigCalls?: Array<[string, string]>;
+  disconnectCalls?: string[];
+  rebootCalled?: { called: boolean };
+  shutdownCalled?: { called: boolean };
+}): IUrsamuSDK & { msgs: Array<{ msg: string; target?: string }>; broadcasts: string[] } {
+  const msgs: Array<{ msg: string; target?: string }> = [];
+  const broadcasts: string[] = [];
+  let targetIdx = 0;
 
-function makeCtx(id: string, flags: string, name: string, cmd: string, args: string[]): SDKContext {
-  return {
-    id,
-    state: {},
-    me: { id, name, flags: new Set(flags.split(" ")), state: {} },
-    here: { id: "r1", name: "Test Room", flags: new Set(["room"]), state: {} },
-    cmd: { name: cmd, original: cmd, args, switches: [] },
-    socketId: `sock-${id}`,
+  const me: IDBObj = {
+    id: ACTOR_ID,
+    name: "Admin",
+    flags: new Set(opts.flags ?? ["player", "wizard", "connected"]),
+    state: { name: "Admin" },
+    location: ROOM_ID,
+    contents: [],
   };
+
+  const u = {
+    me,
+    here: {
+      id: ROOM_ID, name: "Test Room",
+      flags: new Set(["room"]), state: {}, location: "", contents: [],
+      broadcast: (m: string) => broadcasts.push(m),
+    },
+    cmd: {
+      name: opts.cmdName ?? "@boot",
+      original: opts.cmdName ?? "@boot",
+      args: opts.args ?? [],
+      switches: [],
+    },
+    send: (m: string, tgt?: string) => msgs.push({ msg: m, target: tgt }),
+    canEdit: async () => true,
+    db: {
+      search: async () => [],
+      modify: async (id: string, op: string, data: unknown) => {
+        opts.modifyCalls?.push([id, op, data]);
+      },
+      create: async (t: Partial<IDBObj>) => ({ id: "newobj", name: "", flags: new Set<string>(), state: {}, contents: [], ...t } as IDBObj),
+      destroy: async (id: string) => {
+        opts.destroyCalls?.push(id);
+      },
+    },
+    util: {
+      target: async (_a: IDBObj, _name: string): Promise<IDBObj | undefined> => {
+        const seq = opts.targetSeq ?? [];
+        return seq[targetIdx++];
+      },
+      displayName: (o: IDBObj) => o.name || o.id,
+      stripSubs: (s: string) => s,
+    },
+    auth: {
+      setPassword: async (id: string, pass: string) => {
+        opts.setPasswordCalls?.push([id, pass]);
+      },
+      hash: async (s: string) => s,
+      compare: async () => false,
+    },
+    sys: {
+      disconnect: async (id: string) => {
+        opts.disconnectCalls?.push(id);
+      },
+      reboot: async () => {
+        if (opts.rebootCalled) opts.rebootCalled.called = true;
+      },
+      shutdown: async () => {
+        if (opts.shutdownCalled) opts.shutdownCalled.called = true;
+      },
+      setConfig: async (key: string, val: string) => {
+        opts.setConfigCalls?.push([key, val]);
+      },
+      uptime: () => 0,
+      gameTime: () => new Date(),
+      setGameTime: async () => {},
+    },
+  } as unknown as IUrsamuSDK & { msgs: Array<{ msg: string; target?: string }>; broadcasts: string[] };
+
+  (u as unknown as Record<string, unknown>).msgs = msgs;
+  (u as unknown as Record<string, unknown>).broadcasts = broadcasts;
+  return u;
 }
 
-// ---------------------------------------------------------------------------
-// Permission
-// ---------------------------------------------------------------------------
+// ===========================================================================
+// Permission guard
+// ===========================================================================
 
-Deno.test("Admin: non-admin is denied", OPTS, async () => {
-  const plr = await dbojs.create({ id: "perm_np1", flags: "player connected", data: { name: "Normie" }, location: "r1" });
-  const ctx = makeCtx(plr.id, "player connected", "Normie", "@boot", ["someone"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertEquals(Array.isArray(result), true);
-  assertStringIncludes(result[0] ?? "", "Permission denied");
-  await cleanup(plr.id);
+Deno.test("admin — non-admin is denied", OPTS, async () => {
+  const u = makeU({ flags: ["player", "connected"], args: ["someone"] });
+  await execBoot(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Permission denied");
 });
 
-// ---------------------------------------------------------------------------
+// ===========================================================================
 // @boot
-// ---------------------------------------------------------------------------
+// ===========================================================================
 
-Deno.test("Admin: @boot - missing arg", OPTS, async () => {
-  const adm = await createAdmin("boot_adm1");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@boot", [""]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Usage");
-  await cleanup(adm.id);
+Deno.test("@boot — missing arg sends Usage", OPTS, async () => {
+  const u = makeU({ args: [""] });
+  await execBoot(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Usage");
 });
 
-Deno.test("Admin: @boot - target not found", OPTS, async () => {
-  const adm = await createAdmin("boot_adm2");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@boot", ["NoExist99999"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "not found");
-  await cleanup(adm.id);
+Deno.test("@boot — target not found sends error", OPTS, async () => {
+  const u = makeU({ args: ["NoExist99999"], targetSeq: [undefined] });
+  await execBoot(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "not found");
 });
 
-Deno.test("Admin: @boot - cannot boot non-player", OPTS, async () => {
-  const adm = await createAdmin("boot_adm3");
-  const thing = await dbojs.create({ id: "thing_b1", flags: "thing", data: { name: "ABox" }, location: "r1" });
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@boot", ["ABox"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "only boot players");
-  await cleanup(adm.id, thing.id);
+Deno.test("@boot — cannot boot a non-player", OPTS, async () => {
+  const thing: IDBObj = { id: THING_ID, name: "ABox", flags: new Set(["thing"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ args: ["ABox"], targetSeq: [thing] });
+  await execBoot(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "only boot players");
 });
 
-Deno.test("Admin: @boot - cannot boot superuser", OPTS, async () => {
-  const adm = await createAdmin("boot_adm4");
-  const god = await dbojs.create({ id: "god_b1", flags: "player superuser", data: { name: "GodBoot" }, location: "r1" });
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@boot", ["GodBoot"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "cannot boot a superuser");
-  await cleanup(adm.id, god.id);
+Deno.test("@boot — cannot boot a superuser", OPTS, async () => {
+  const god: IDBObj = { id: TARGET_ID, name: "GodBoot", flags: new Set(["player", "superuser"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ args: ["GodBoot"], targetSeq: [god] });
+  await execBoot(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "cannot boot a superuser");
 });
 
-Deno.test("Admin: @boot - boots a valid player", OPTS, async () => {
-  const adm = await createAdmin("boot_adm5");
-  const victim = await createPlayer("boot_vic1", "BootVictim");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@boot", ["BootVictim"]);
-  const extra = `u.sys = { ...u.sys, disconnect: async () => {} };`;
-  const result = await sandboxService.runScript(wrapAdmin(extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "booted");
-  await cleanup(adm.id, victim.id);
+Deno.test("@boot — boots a valid player and calls disconnect", OPTS, async () => {
+  const disconnectCalls: string[] = [];
+  const victim: IDBObj = { id: TARGET_ID, name: "BootVictim", flags: new Set(["player", "connected"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ args: ["BootVictim"], targetSeq: [victim], disconnectCalls });
+  await execBoot(u);
+  assertStringIncludes(u.msgs.map((m) => m.msg).join(" "), "booted");
+  assertEquals(disconnectCalls[0], TARGET_ID);
 });
 
-// ---------------------------------------------------------------------------
+// ===========================================================================
 // @toad
-// ---------------------------------------------------------------------------
+// ===========================================================================
 
-Deno.test("Admin: @toad - destroys target player", OPTS, async () => {
-  const adm = await createAdmin("toad_adm1");
-  const victim = await createPlayer("toad_vic1", "ToadVictim");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@toad", ["ToadVictim"]);
-  const extra = `u.sys = { ...u.sys, disconnect: async () => {} };`;
-  const result = await sandboxService.runScript(wrapAdmin(extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "toaded");
-  const remaining = await dbojs.queryOne({ id: victim.id });
-  assertEquals(remaining, undefined);
-  await cleanup(adm.id);
+Deno.test("@toad — target not found sends error", OPTS, async () => {
+  const u = makeU({ cmdName: "@toad", args: ["NoOne"], targetSeq: [undefined] });
+  await execToad(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "not found");
 });
 
-Deno.test("Admin: @toad - cannot toad superuser", OPTS, async () => {
-  const adm = await createAdmin("toad_adm2");
-  const god = await dbojs.create({ id: "god_t1", flags: "player superuser", data: { name: "GodToad" }, location: "r1" });
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@toad", ["GodToad"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "cannot toad a superuser");
-  const remaining = await dbojs.queryOne({ id: god.id });
-  assertEquals(!!remaining, true);
-  await cleanup(adm.id, god.id);
+Deno.test("@toad — cannot toad a superuser", OPTS, async () => {
+  const god: IDBObj = { id: TARGET_ID, name: "GodToad", flags: new Set(["player", "superuser"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ cmdName: "@toad", args: ["GodToad"], targetSeq: [god] });
+  await execToad(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "cannot toad a superuser");
 });
 
-Deno.test("Admin: @toad - target not found", OPTS, async () => {
-  const adm = await createAdmin("toad_adm3");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@toad", ["NoOne"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "not found");
-  await cleanup(adm.id);
+Deno.test("@toad — destroys target player and calls disconnect/destroy", OPTS, async () => {
+  const destroyCalls: string[] = [];
+  const disconnectCalls: string[] = [];
+  const victim: IDBObj = { id: TARGET_ID, name: "ToadVictim", flags: new Set(["player", "connected"]), state: { name: "ToadVictim" }, location: ROOM_ID, contents: [] };
+  const u = makeU({ cmdName: "@toad", args: ["ToadVictim"], targetSeq: [victim], destroyCalls, disconnectCalls });
+  await execToad(u);
+  assertStringIncludes(u.msgs.map((m) => m.msg).join(" "), "toaded");
+  assertEquals(disconnectCalls[0], TARGET_ID);
+  assertEquals(destroyCalls[0], TARGET_ID);
 });
 
-// ---------------------------------------------------------------------------
-// @newpass
-// ---------------------------------------------------------------------------
+// ===========================================================================
+// @newpassword
+// ===========================================================================
 
-Deno.test("Admin: @newpass - changes player password", OPTS, async () => {
-  const adm = await createAdmin("np_adm1");
-  const plr = await createPlayer("np_plr1", "PassVictim");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@newpass", ["PassVictim=newSecret99"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "changed");
-  const updated = await dbojs.queryOne({ id: plr.id });
-  if (updated) {
-    const matches = await compare("newSecret99", updated.data?.password as string);
-    assertEquals(matches, true);
-  }
-  await cleanup(adm.id, plr.id);
+Deno.test("@newpassword — empty args sends Usage", OPTS, async () => {
+  const u = makeU({ cmdName: "@newpassword", args: ["", ""] });
+  await execNewpassword(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Usage");
 });
 
-Deno.test("Admin: @newpass - no equals sign sends usage", OPTS, async () => {
-  const adm = await createAdmin("np_adm2");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@newpass", ["noequalsign"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Usage");
-  await cleanup(adm.id);
+Deno.test("@newpassword — missing password sends Usage", OPTS, async () => {
+  const u = makeU({ cmdName: "@newpassword", args: ["noequalsign", ""] });
+  await execNewpassword(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Usage");
 });
 
-Deno.test("Admin: @newpass - empty args sends usage", OPTS, async () => {
-  const adm = await createAdmin("np_adm3");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@newpass", [""]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Usage");
-  await cleanup(adm.id);
+Deno.test("@newpassword — player not found sends error", OPTS, async () => {
+  const u = makeU({ cmdName: "@newpassword", args: ["Ghost", "newpass"], targetSeq: [undefined] });
+  await execNewpassword(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "not found");
 });
 
-Deno.test("Admin: @newpass - player not found", OPTS, async () => {
-  const adm = await createAdmin("np_adm4");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@newpass", ["Ghost=newpass"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "not found");
-  await cleanup(adm.id);
+Deno.test("@newpassword — changes password and calls auth.setPassword", OPTS, async () => {
+  const setPasswordCalls: Array<[string, string]> = [];
+  const victim: IDBObj = { id: TARGET_ID, name: "PassVictim", flags: new Set(["player"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ cmdName: "@newpassword", args: ["PassVictim", "newSecret99"], targetSeq: [victim], setPasswordCalls });
+  await execNewpassword(u);
+  assertStringIncludes(u.msgs.map((m) => m.msg).join(" "), "changed");
+  assertEquals(setPasswordCalls[0][0], TARGET_ID);
+  assertEquals(setPasswordCalls[0][1], "newSecret99");
 });
 
-// ---------------------------------------------------------------------------
+// ===========================================================================
 // @chown
-// ---------------------------------------------------------------------------
+// ===========================================================================
 
-Deno.test("Admin: @chown - transfers object ownership", OPTS, async () => {
-  const adm = await createAdmin("chown_adm1");
-  const owner = await createPlayer("chown_own1", "NewOwner");
-  const obj = await dbojs.create({ id: "chown_obj1", flags: "thing", data: { name: "TheBox", owner: adm.id }, location: "r1" });
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@chown", ["TheBox=NewOwner"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "changed");
-  const updated = await dbojs.queryOne({ id: obj.id });
-  if (updated) assertEquals(updated.data?.owner, owner.id);
-  await cleanup(adm.id, owner.id, obj.id);
+Deno.test("@chown — missing args sends Usage", OPTS, async () => {
+  const u = makeU({ cmdName: "@chown", args: ["noequal", ""] });
+  await execChown(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Usage");
 });
 
-Deno.test("Admin: @chown - no equals sign sends usage", OPTS, async () => {
-  const adm = await createAdmin("chown_adm2");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@chown", ["noequal"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Usage");
-  await cleanup(adm.id);
+Deno.test("@chown — object not found sends error", OPTS, async () => {
+  const u = makeU({ cmdName: "@chown", args: ["GhostThing", "SomePlayer"], targetSeq: [undefined, undefined] });
+  await execChown(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "not found");
 });
 
-Deno.test("Admin: @chown - object not found", OPTS, async () => {
-  const adm = await createAdmin("chown_adm3");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@chown", ["GhostThing=SomePlayer"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "not found");
-  await cleanup(adm.id);
+Deno.test("@chown — transfers ownership and calls db.modify", OPTS, async () => {
+  const modifyCalls: ModifyCall[] = [];
+  const obj: IDBObj = { id: THING_ID, name: "TheBox", flags: new Set(["thing"]), state: { owner: ACTOR_ID }, location: ROOM_ID, contents: [] };
+  const newOwner: IDBObj = { id: TARGET_ID, name: "NewOwner", flags: new Set(["player"]), state: {}, location: ROOM_ID, contents: [] };
+  // target() returns obj first, then newOwner
+  const u = makeU({ cmdName: "@chown", args: ["TheBox", "NewOwner"], targetSeq: [obj, newOwner], modifyCalls });
+  await execChown(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "changed");
+  assertEquals(modifyCalls[0][0], THING_ID);
+  assertEquals((modifyCalls[0][2] as Record<string, unknown>)["data.owner"], TARGET_ID);
 });
 
-// ---------------------------------------------------------------------------
+// ===========================================================================
 // @site
-// ---------------------------------------------------------------------------
+// ===========================================================================
 
-Deno.test("Admin: @site - sets config value", OPTS, async () => {
-  const adm = await createAdmin("site_adm1");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@site", ["server.motd=Welcome!"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "set to");
-  await cleanup(adm.id);
+Deno.test("@site — empty key sends Usage", OPTS, async () => {
+  const u = makeU({ cmdName: "@site", args: ["", ""] });
+  await execSite(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Usage");
 });
 
-Deno.test("Admin: @site - no equals sign sends usage", OPTS, async () => {
-  const adm = await createAdmin("site_adm2");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@site", ["noequal"]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Usage");
-  await cleanup(adm.id);
+Deno.test("@site — unknown config key sends error", OPTS, async () => {
+  const u = makeU({ cmdName: "@site", args: ["noequal", "value"] });
+  await execSite(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Unknown or protected");
 });
 
-Deno.test("Admin: @site - empty args sends usage", OPTS, async () => {
-  const adm = await createAdmin("site_adm3");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@site", [""]);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Usage");
-  await cleanup(adm.id);
+Deno.test("@site — sets config value and calls sys.setConfig", OPTS, async () => {
+  const setConfigCalls: Array<[string, string]> = [];
+  const u = makeU({ cmdName: "@site", args: ["server.motd", "Welcome!"], setConfigCalls });
+  await execSite(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "set to");
+  assertEquals(setConfigCalls[0][0], "server.motd");
+  assertEquals(setConfigCalls[0][1], "Welcome!");
 });
 
-// ---------------------------------------------------------------------------
+// ===========================================================================
 // @reboot / @restart
-// ---------------------------------------------------------------------------
+// ===========================================================================
 
-Deno.test("Admin: @reboot - broadcasts and calls sys.reboot", OPTS, async () => {
-  const adm = await createAdmin("reboot_adm1");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@reboot", []);
-  const extra = [
-    "u.here.broadcast = (m) => { _sent.push('BROADCAST:' + m); };",
-    "u.sys = { ...u.sys, reboot: async () => { _sent.push('REBOOT_CALLED'); } };",
-  ].join("\n");
-  const result = await sandboxService.runScript(wrapAdmin(extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "REBOOT_CALLED");
-  assertStringIncludes(result.join(" "), "BROADCAST:");
-  await cleanup(adm.id);
+Deno.test("@reboot — broadcasts and calls sys.reboot", OPTS, async () => {
+  const rebootCalled = { called: false };
+  const u = makeU({ cmdName: "@reboot", args: [], rebootCalled });
+  await execReboot(u);
+  assertEquals(rebootCalled.called, true);
+  assertEquals(u.broadcasts.length > 0, true);
 });
 
-Deno.test("Admin: @restart - alias for reboot", OPTS, async () => {
-  const adm = await createAdmin("reboot_adm2");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@restart", []);
-  const extra = [
-    "u.here.broadcast = (m) => { _sent.push('BROADCAST:' + m); };",
-    "u.sys = { ...u.sys, reboot: async () => { _sent.push('REBOOT_CALLED'); } };",
-  ].join("\n");
-  const result = await sandboxService.runScript(wrapAdmin(extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "REBOOT_CALLED");
-  await cleanup(adm.id);
+Deno.test("@restart — same exec, also calls sys.reboot", OPTS, async () => {
+  const rebootCalled = { called: false };
+  const u = makeU({ cmdName: "@restart", args: [], rebootCalled });
+  await execReboot(u);
+  assertEquals(rebootCalled.called, true);
 });
 
-// ---------------------------------------------------------------------------
+// ===========================================================================
 // @shutdown
-// ---------------------------------------------------------------------------
+// ===========================================================================
 
-Deno.test("Admin: @shutdown - broadcasts and calls sys.shutdown", OPTS, async () => {
-  const adm = await createAdmin("shutdown_adm1");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@shutdown", []);
-  const extra = [
-    "u.here.broadcast = (m) => { _sent.push('BROADCAST:' + m); };",
-    "u.sys = { ...u.sys, shutdown: async () => { _sent.push('SHUTDOWN_CALLED'); } };",
-  ].join("\n");
-  const result = await sandboxService.runScript(wrapAdmin(extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "SHUTDOWN_CALLED");
-  assertStringIncludes(result.join(" "), "BROADCAST:");
-  await cleanup(adm.id);
-});
-
-// ---------------------------------------------------------------------------
-// Unknown command
-// ---------------------------------------------------------------------------
-
-Deno.test("Admin: unknown command sends error", OPTS, async () => {
-  const adm = await createAdmin("unk_adm1");
-  const ctx = makeCtx(adm.id, "player wizard", `Admin_${adm.id}`, "@boguscommand", []);
-  const result = await sandboxService.runScript(wrapAdmin(""), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Unknown admin command");
-  await cleanup(adm.id);
-  await DBO.close();
+Deno.test("@shutdown — broadcasts and calls sys.shutdown", OPTS, async () => {
+  const shutdownCalled = { called: false };
+  const u = makeU({ cmdName: "@shutdown", args: [], shutdownCalled });
+  await execShutdown(u);
+  assertEquals(shutdownCalled.called, true);
+  assertEquals(u.broadcasts.length > 0, true);
 });

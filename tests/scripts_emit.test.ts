@@ -1,5 +1,5 @@
 /**
- * Tests for system/scripts/emit.ts
+ * Tests for @emit command (src/commands/comms.ts — execEmit).
  *
  * Covers:
  *   [NOARG]   No message → usage error
@@ -11,6 +11,7 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import { execEmit } from "../src/commands/comms.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -50,12 +51,8 @@ function mockU(opts: { me?: Partial<IDBObj>; arg?: string; searchResults?: IDBOb
       on:    () => Promise.resolve(""),
       off:   () => Promise.resolve(),
     },
+    evalString: (s: string) => Promise.resolve(s),
   } as unknown as IUrsamuSDK, { _sent: sent });
-}
-
-async function execEmit(u: ReturnType<typeof mockU>) {
-  const { default: script } = await import("../system/scripts/emit.ts");
-  await script(u as unknown as IUrsamuSDK);
 }
 
 Deno.test("[NOARG] @emit — no message → usage error", OPTS, async () => {

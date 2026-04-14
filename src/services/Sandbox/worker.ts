@@ -76,6 +76,8 @@ interface IUrsamuSDK {
   };
   attr: {
     get(id: string, name: string): Promise<string | null>;
+    set(id: string, name: string, value: string, type?: string): Promise<void>;
+    clear(id: string, name: string): Promise<boolean>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
   text: {
@@ -314,6 +316,8 @@ self.onmessage = async (e: MessageEvent) => {
       request<void>("force:as", { targetId, command }),
     eval: (targetStr: string, attr: string, args?: string[]) =>
       request<string>("eval:attr", { targetStr, attr, args: args || [] }),
+    evalString: (str: string) =>
+      request<string>("eval:string", { code: str }),
     teleport: (target: string, destination: string) =>
       self.postMessage({ type: "teleport", target, destination }),
     checkLock: (target: string | IDBObj, lock: string) =>
@@ -354,7 +358,10 @@ self.onmessage = async (e: MessageEvent) => {
         request<void>("mail:modify", { query, operator, update })
     },
     attr: {
-      get: (id: string, name: string) => request<string | null>("attr:get", { id, name })
+      get: (id: string, name: string) => request<string | null>("attr:get", { id, name }),
+      set: (id: string, name: string, value: string, type = "attribute") =>
+        request<void>("attr:set", { id, name, value, attrType: type }),
+      clear: (id: string, name: string) => request<boolean>("attr:clear", { id, name }),
     },
     setFlags: (target: string | IDBObj, flags: string) =>
       request<void>("flags:set", { target: typeof target === "string" ? target : target.id, flags }),

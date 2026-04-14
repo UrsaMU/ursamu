@@ -23,7 +23,7 @@ export async function loadPlugins(dir: string): Promise<IPlugin[]> {
     }
     
     // Walk through the directory and find plugin entry points
-    const entries = dfs.walk(dir, { maxDepth: 2 });
+    const entries = dfs.walk(dir, { maxDepth: 2, followSymlinks: true });
     
     for await (const entry of entries) {
       if (entry.isFile && entry.name === "index.ts") {
@@ -89,7 +89,7 @@ export async function reloadPlugins(dir: string, existingPlugins: IPlugin[]): Pr
     const dirInfo = await Deno.stat(dir);
     if (!dirInfo.isDirectory) return loadedPlugins;
 
-    const entries = dfs.walk(dir, { maxDepth: 2 });
+    const entries = dfs.walk(dir, { maxDepth: 2, followSymlinks: true });
     const cacheBuster = `?t=${Date.now()}`;
 
     for await (const entry of entries) {

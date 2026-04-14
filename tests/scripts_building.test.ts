@@ -1,64 +1,64 @@
 /**
  * tests/scripts_building.test.ts
  *
- * Sandbox-driven tests for engine-owned building scripts:
- *   - system/scripts/create.ts   (@create)
+ * Tests for engine-owned building command:
+ *   - execCreateObject  (@create)
  *
  * NOTE: @dig, @describe, @open, @clone, @wipe, @quota, @parent, @lock,
  * @unlink, @name, @set, &ATTR, @examine were moved to builder-plugin.
  * Tests for those commands live in the builder-plugin repo.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
+import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import { execCreateObject } from "../src/commands/manipulation.ts";
 
-const RAW_CREATE = await Deno.readTextFile("./system/scripts/create.ts");
-
-function wrapScript(rawScript: string, extra = ""): string {
-  const stripped = rawScript
-    .replace(/^import\s.*?;\s*$/gm, "")
-    .replace(/export const aliases.*?;/gs, "")
-    .replace(/export default/, "_main =")
-    .replace(/^export\s+/gm, "");
-  return [
-    "let _main;",
-    stripped,
-    "const _sent = [];",
-    "const _origSend = u.send.bind(u);",
-    "u.send = (m, t, o) => { _sent.push(m); _origSend(m, t, o); };",
-    extra,
-    "await _main(u);",
-    "return _sent;",
-  ].join("\n");
-}
-
-const SLOW = { timeout: 10000 };
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 const ACTOR_ID = "sb_bld_admin";
 const ROOM_ID  = "sb_bld_room";
 
-async function cleanup(...ids: string[]) {
-  for (const id of ids) await dbojs.delete({ id }).catch(() => {});
-}
+type ModifyCall = [string, string, unknown];
 
-function makeCtx(
-  id: string,
-  flags: string,
-  name: string,
-  cmd: string,
-  args: string[],
-  state: Record<string, unknown> = {}
-): SDKContext {
-  return {
-    id,
-    state,
-    me: { id, name, flags: new Set(flags.split(" ")), state },
-    here: { id: ROOM_ID, name: "Build Room", flags: new Set(["room"]), state: {} },
-    cmd: { name: cmd, original: cmd, args, switches: [] },
-    socketId: `sock-${id}`,
+function makeU(opts: {
+  flags?: string[];
+  args?: string[];
+  actorState?: Record<string, unknown>;
+  modifyCalls?: ModifyCall[];
+}): IUrsamuSDK & { sent: string[] } {
+  const sent: string[] = [];
+  let createIdx = 0;
+  const me: IDBObj = {
+    id: ACTOR_ID, name: "BuildAdmin",
+    flags: new Set(opts.flags ?? ["player", "wizard", "connected"]),
+    state: opts.actorState ?? {},
+    location: ROOM_ID, contents: [],
   };
+  const u = {
+    me,
+    here: { id: ROOM_ID, name: "Build Room", flags: new Set(["room"]), state: {}, location: "", contents: [] },
+    cmd: { name: "@create", original: "@create", args: opts.args ?? [], switches: [] },
+    send: (m: string) => sent.push(m),
+    db: {
+      search: async () => [],
+      modify: async (id: string, op: string, data: unknown) => {
+        opts.modifyCalls?.push([id, op, data]);
+      },
+      create: async (template: Partial<IDBObj>): Promise<IDBObj> => {
+        const id = `new_thing_${createIdx++}`;
+        return {
+          id,
+          name: (template.state?.name as string) || "Object",
+          flags: template.flags ?? new Set(["thing"]),
+          state: template.state ?? {},
+          location: template.location ?? me.id,
+          contents: [],
+        };
+      },
+    },
+    util: { target: async () => undefined, displayName: (o: IDBObj) => o.name || o.id },
+  } as unknown as IUrsamuSDK & { sent: string[] };
+  (u as unknown as Record<string, unknown>).sent = sent;
+  return u;
 }
 
 // ---------------------------------------------------------------------------
@@ -66,97 +66,40 @@ function makeCtx(
 // ---------------------------------------------------------------------------
 
 Deno.test("@create — no args sends usage message", OPTS, async () => {
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player wizard connected",
-    data: { name: "BuildAdmin" },
-    location: ROOM_ID,
-  });
-
-  const ctx = makeCtx(actor.id, "player wizard", "BuildAdmin", "@create", [""]);
-  const result = await sandboxService.runScript(wrapScript(RAW_CREATE), ctx, SLOW) as string[];
-
-  assertEquals(Array.isArray(result), true);
-  assertStringIncludes(result.join(" "), "Usage");
-
-  await cleanup(ACTOR_ID);
+  const u = makeU({ args: [""] });
+  await execCreateObject(u);
+  assertStringIncludes(u.sent.join(" "), "Usage");
 });
 
-Deno.test("@create — wizard creates object, DB entry is stored", OPTS, async () => {
-  const _room  = await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Build Room" } });
-  const actor  = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player wizard connected",
-    data: { name: "BuildAdmin" },
-    location: ROOM_ID,
-  });
-
-  const ctx = makeCtx(actor.id, "player wizard", "BuildAdmin", "@create", ["TestBox"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_CREATE), ctx, SLOW) as string[];
-
-  assertEquals(Array.isArray(result), true, "result should be an array");
-  assertStringIncludes(result.join(" "), "You create TestBox");
-  const dbrefMatch = result.join(" ").match(/#(\w+)/);
-  assertEquals(dbrefMatch !== null, true, "confirmation message should contain a dbref");
-
-  const newThingId = dbrefMatch![1];
-  const created = await dbojs.queryOne({ id: newThingId });
-  assertEquals(!!created, true, "created object should be findable in the DB");
-  if (created) assertEquals(created.data?.name, "TestBox");
-
-  await cleanup(ACTOR_ID, ROOM_ID, newThingId);
+Deno.test("@create — wizard creates object, dbref in confirmation", OPTS, async () => {
+  const u = makeU({ args: ["TestBox"] });
+  await execCreateObject(u);
+  assertStringIncludes(u.sent.join(" "), "You create TestBox");
+  assertEquals(u.sent.join(" ").includes("#"), true);
 });
 
 Deno.test("@create — non-wizard with quota=0 gets quota error", OPTS, async () => {
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player connected",
-    data: { name: "NormalPlayer" },
-    location: ROOM_ID,
-  });
-
-  const ctx = makeCtx(actor.id, "player connected", "NormalPlayer", "@create", ["CheapThing"], { quota: 0 });
-  const result = await sandboxService.runScript(wrapScript(RAW_CREATE), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "quota");
-  await cleanup(ACTOR_ID);
+  const u = makeU({ flags: ["player", "connected"], args: ["CheapThing"], actorState: { quota: 0 } });
+  await execCreateObject(u);
+  assertStringIncludes(u.sent.join(" "), "quota");
 });
 
 Deno.test("@create — non-wizard with sufficient quota creates object", OPTS, async () => {
-  const _room = await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Build Room" } });
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player connected",
-    data: { name: "NormalPlayer" },
-    location: ROOM_ID,
+  const modifyCalls: ModifyCall[] = [];
+  const u = makeU({
+    flags: ["player", "connected"],
+    args: ["QuotaThing"],
+    actorState: { quota: 5 },
+    modifyCalls,
   });
-
-  const ctx = makeCtx(actor.id, "player connected", "NormalPlayer", "@create", ["QuotaThing"], { quota: 5 });
-  const result = await sandboxService.runScript(wrapScript(RAW_CREATE), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "You create QuotaThing");
-
-  const dbrefMatch = result.join(" ").match(/#(\w+)/);
-  const newId = dbrefMatch ? dbrefMatch[1] : null;
-  await cleanup(ACTOR_ID, ROOM_ID, ...(newId ? [newId] : []));
+  await execCreateObject(u);
+  assertStringIncludes(u.sent.join(" "), "You create QuotaThing");
+  assertEquals(modifyCalls.length, 1);
+  assertEquals((modifyCalls[0][2] as Record<string, unknown>)["data.quota"], 4);
 });
 
 Deno.test("@create — name with cost suffix (name=cost) is accepted", OPTS, async () => {
-  const _room = await dbojs.create({ id: ROOM_ID, flags: "room", data: { name: "Build Room" } });
-  const actor = await dbojs.create({
-    id: ACTOR_ID,
-    flags: "player wizard connected",
-    data: { name: "BuildAdmin" },
-    location: ROOM_ID,
-  });
-
-  const ctx = makeCtx(actor.id, "player wizard", "BuildAdmin", "@create", ["PriceyBox=10"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_CREATE), ctx, SLOW) as string[];
-
-  assertStringIncludes(result.join(" "), "You create PriceyBox");
-
-  const dbrefMatch = result.join(" ").match(/#(\w+)/);
-  const newId = dbrefMatch ? dbrefMatch[1] : null;
-  await cleanup(ACTOR_ID, ROOM_ID, ...(newId ? [newId] : []));
-  await DBO.close();
+  const u = makeU({ args: ["PriceyBox=10"] });
+  await execCreateObject(u);
+  assertStringIncludes(u.sent.join(" "), "You create PriceyBox");
 });

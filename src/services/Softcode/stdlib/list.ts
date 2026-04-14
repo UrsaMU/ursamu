@@ -368,7 +368,10 @@ function globRe(pattern: string): RegExp {
 }
 
 function safeParse(code: string): ReturnType<typeof parse> | null {
-  try { return parse(code) as ReturnType<typeof parse>; }
+  try {
+    const trimmed = code.trim();
+    return parse(`[${trimmed}]`) as ReturnType<typeof parse>;
+  }
   catch { return null; }
 }
 

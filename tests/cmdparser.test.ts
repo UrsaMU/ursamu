@@ -33,30 +33,14 @@ async function cleanup(...ids: string[]) {
 // systemAliases — alias loading from scripts
 // ===========================================================================
 
-Deno.test("systemAliases — loadSystemAliases populates map", OPTS, async () => {
-  // loadSystemAliases is called at import time but async; call again to ensure it's complete
+Deno.test("systemAliases — loadSystemAliases runs without error (no system scripts)", OPTS, async () => {
+  // System scripts have been removed; all commands are native addCmd registrations.
+  // loadSystemAliases should complete cleanly with no aliases populated.
   await loadSystemAliases();
-  // These aliases are exported from actual system scripts
   assertEquals(typeof systemAliases, "object");
-  // @chancreate exports aliases: ["chancreate", "@chancreate"]
-  assertEquals(systemAliases["chancreate"], "chancreate");
-  assertEquals(systemAliases["@chancreate"], "chancreate");
-  // @chandestroy exports aliases: ["chandestroy", "@chandestroy"]
-  assertEquals(systemAliases["chandestroy"], "chandestroy");
-  // alias.ts exports aliases: ["alias"]
-  assertEquals(systemAliases["alias"], "alias");
-});
-
-Deno.test("systemAliases — search script has 'search' and 'stats' aliases", OPTS, async () => {
-  await loadSystemAliases();
-  assertEquals(systemAliases["search"], "search");
-  assertEquals(systemAliases["stats"], "search");
-});
-
-Deno.test("systemAliases — mail script has subcommand aliases", OPTS, async () => {
-  await loadSystemAliases();
-  assertEquals(systemAliases["mail/send"], "mail");
-  assertEquals(systemAliases["mail/read"], "mail");
+  // No system scripts → no script-based aliases
+  assertEquals(systemAliases["chancreate"], undefined);
+  assertEquals(systemAliases["mail/send"], undefined);
 });
 
 // ===========================================================================

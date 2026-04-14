@@ -1594,6 +1594,7 @@ function peg$parse(input, options) {
     if (s3 !== peg$FAILED) {
       while (s3 !== peg$FAILED) {
         s2.push(s3);
+        if (/^[a-zA-Z_][a-zA-Z0-9_]*\(/.test(input.slice(peg$currPos))) break;
         s3 = input.charAt(peg$currPos);
         if (peg$r7.test(s3)) {
           peg$currPos++;
@@ -1835,6 +1836,9 @@ function peg$parse(input, options) {
     if (s3 !== peg$FAILED) {
       while (s3 !== peg$FAILED) {
         s2.push(s3);
+        // Stop before a potential function call (FuncIdent immediately followed by "(")
+        // so that ArgToken can match it as FunctionCall on the next iteration.
+        if (/^[a-zA-Z_][a-zA-Z0-9_]*\(/.test(input.slice(peg$currPos))) break;
         s3 = input.charAt(peg$currPos);
         if (peg$r9.test(s3)) {
           peg$currPos++;

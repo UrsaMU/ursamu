@@ -20,6 +20,7 @@ import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { IDBObj } from "../../@types/UrsamuSDK.ts";
 import { send as broadcastSend, broadcast as broadcastAll } from "../broadcast/index.ts";
 import { wsService } from "../WebSocket/index.ts";
+import { runInWorker } from "../Sandbox/workerRunner.ts";
 
 // ── Public context shape ──────────────────────────────────────────────────
 
@@ -116,118 +117,13 @@ export class SoftcodeService {
     const executor = hydrateObj(executorRaw as unknown as IDBOBJ);
     const caller   = callerRaw ? hydrateObj(callerRaw as unknown as IDBOBJ) : null;
 
-    // ── Spawn worker ─────────────────────────────────────────────────────
-    const worker = new Worker(WORKER_URL, { type: "module" });
-    const msgId  = crypto.randomUUID();
+    // ── Spawn worker via shared lifecycle ────────────────────────────────
+    const msgId    = crypto.randomUUID();
     const socketId = context.socketId;
 
-    return new Promise<string>((resolve, reject) => {
-      let settled = false;
-
-      // ── Timeout guard ────────────────────────────────────────────────
-      const timer = setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        worker.terminate();
-        reject(new SoftcodeTimeoutError());
-      }, 150); // 150ms wall-clock (worker enforces 100ms internally)
-
-      // ── Message dispatcher ───────────────────────────────────────────
-      worker.onmessage = async (e: MessageEvent) => {
-        if (!e.data || typeof e.data.type !== "string") return;
-        const msg = e.data as Record<string, unknown>;
-
-        switch (msg.type) {
-          // ── Evaluation result ────────────────────────────────────────
-          case "result":
-            if (settled) return;
-            settled = true;
-            clearTimeout(timer);
-            worker.terminate();
-            resolve(msg.value as string);
-            return;
-
-          // ── Evaluation error ─────────────────────────────────────────
-          case "error":
-            if (settled) return;
-            settled = true;
-            clearTimeout(timer);
-            worker.terminate();
-            reject(new Error(msg.message as string));
-            return;
-
-          // ── Output: pemit ────────────────────────────────────────────
-          case "send": {
-            const message  = msg.message as string;
-            const targetId = msg.targetId as string | undefined;
-
-            // Detect channel emit sentinel: "\x00cemit\x00channel\x00msg"
-            if (message.startsWith("\x00cemit\x00")) {
-              const parts   = message.split("\x00");
-              const channel = parts[2] ?? "";
-              const chanMsg = parts[3] ?? "";
-              await this._dispatchChanEmit(channel, chanMsg);
-              return;
-            }
-
-            if (targetId) {
-              // Route to the target object's socket
-              const sock = wsService.getConnectedSockets().find(s => s.cid === targetId);
-              const targets = sock ? [sock.id] : [];
-              if (targets.length > 0) broadcastSend(targets, message, {});
-            } else if (socketId) {
-              broadcastSend([socketId], message, {});
-            }
-            return;
-          }
-
-          // ── Output: remit / oemit ────────────────────────────────────
-          case "roomcast": {
-            const { dbojs: db } = await import("../Database/index.ts");
-            const room     = msg.room     as string;
-            const message  = msg.message  as string;
-            const excludeId= msg.exclude  as string | undefined;
-
-            const players = await db.query({
-              $and: [{ location: room }, { flags: /connected/i }]
-            });
-            const targets = players
-              .filter(p => p.id !== excludeId)
-              .map(p => p.id);
-
-            if (targets.length > 0) broadcastSend(targets, message, {});
-            return;
-          }
-
-          // ── Output: emit (all connected) ─────────────────────────────
-          case "broadcast": {
-            broadcastAll(msg.message as string, {});
-            return;
-          }
-
-          // ── DB round-trip requests ────────────────────────────────────
-          case "db:query":
-            this._handleDbQuery(worker, msg).catch(err => {
-              worker.postMessage({
-                type:    "db:error",
-                msgId:   msg.msgId,
-                message: err instanceof Error ? err.message : String(err),
-              });
-            });
-            return;
-        }
-      };
-
-      worker.onerror = (e) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        worker.terminate();
-        reject(new Error(`Softcode worker error: ${e.message}`));
-      };
-
-      // ── Send the run message ─────────────────────────────────────────
-      worker.postMessage({
+    return runInWorker<string>(
+      new URL(WORKER_URL),
+      {
         type:    "run",
         msgId,
         code,
@@ -238,8 +134,62 @@ export class SoftcodeService {
           args:      context.args ?? [],
           registers: context.registers ?? [],
         },
-      });
-    });
+      },
+      async (msg, worker, resolve, reject) => {
+        switch (msg.type as string) {
+          case "result":
+            resolve(msg.value as string);
+            return;
+
+          case "error":
+            reject(new Error(msg.message as string));
+            return;
+
+          case "send": {
+            const message  = msg.message as string;
+            const targetId = msg.targetId as string | undefined;
+            if (message.startsWith("\x00cemit\x00")) {
+              const parts = message.split("\x00");
+              await this._dispatchChanEmit(parts[2] ?? "", parts[3] ?? "");
+              return;
+            }
+            if (targetId) {
+              const sock = wsService.getConnectedSockets().find(s => s.cid === targetId);
+              if (sock) broadcastSend([sock.id], message, {});
+            } else if (socketId) {
+              broadcastSend([socketId], message, {});
+            }
+            return;
+          }
+
+          case "roomcast": {
+            const { dbojs: db } = await import("../Database/index.ts");
+            const players = await db.query({
+              $and: [{ location: msg.room as string }, { flags: /connected/i }],
+            });
+            const targets = players
+              .filter(p => p.id !== (msg.exclude as string | undefined))
+              .map(p => p.id);
+            if (targets.length > 0) broadcastSend(targets, msg.message as string, {});
+            return;
+          }
+
+          case "broadcast":
+            broadcastAll(msg.message as string, {});
+            return;
+
+          case "db:query":
+            this._handleDbQuery(worker, msg).catch(err =>
+              worker.postMessage({
+                type: "db:error", msgId: msg.msgId,
+                message: err instanceof Error ? err.message : String(err),
+              }),
+            );
+            return;
+        }
+      },
+      150, // 150ms wall-clock (worker enforces 100ms internally)
+    );
   }
 
   // ── DB query handler (main-thread side of db:query round-trips) ──────────
