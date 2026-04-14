@@ -50,8 +50,8 @@ export async function handleAttrMessage(
       setter:   String(context?.id || ""),
     };
     if (idx >= 0) attrs[idx] = entry; else attrs.push(entry);
-    obj.data.attributes = attrs;
-    await db.modify({ id: obj.id }, "$set", { "data.attributes": attrs });
+    (obj.data as Record<string, unknown>).attributes = attrs;
+    await db.modify({ id: obj.id }, "$set", { "data.attributes": attrs } as Record<string, unknown>);
     respond(worker, msgId, null);
     return;
   }
@@ -65,7 +65,7 @@ export async function handleAttrMessage(
     const attrs    = ((obj.data.attributes as Array<{ name: string }>) || []);
     const filtered = attrs.filter(a => a.name.toUpperCase() !== (msg.name as string).toUpperCase());
     if (filtered.length === attrs.length) { respond(worker, msgId, false); return; }
-    await db.modify({ id: obj.id }, "$set", { "data.attributes": filtered });
+    await db.modify({ id: obj.id }, "$set", { "data.attributes": filtered } as Record<string, unknown>);
     respond(worker, msgId, true);
     return;
   }
@@ -89,7 +89,7 @@ export async function handleFlagsMessage(
 export async function handleUtilTargetMessage(
   msg:     Msg,
   worker:  Worker,
-  context: SDKContext | undefined,
+  _context: SDKContext | undefined,
 ): Promise<void> {
   const { msgId } = msg;
   if (!msg.actor || !msg.query) { respond(worker, msgId, undefined); return; }
@@ -163,7 +163,7 @@ export async function handleEventsMessage(
   if (type === "events:emit") {
     if (!msg.event) { respond(worker, msgId, null); return; }
     const { eventsService } = await import("../Events/index.ts");
-    eventsService.emit(msg.event as string, msg.data, msg.context);
+    eventsService.emit(msg.event as string, msg.data, msg.context as Record<string, unknown> | undefined);
 
     // Also fire ^-pattern listeners when text is spoken in a room
     if (msg.event === "room:text" && msg.data) {

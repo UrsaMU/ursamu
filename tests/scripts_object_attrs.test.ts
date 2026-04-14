@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 /**
  * tests/scripts_object_attrs.test.ts
  *

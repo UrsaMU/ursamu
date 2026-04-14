@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 /**
  * tests/core_migration.test.ts
  *

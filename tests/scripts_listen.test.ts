@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 /**
  * tests/scripts_listen.test.ts
  *

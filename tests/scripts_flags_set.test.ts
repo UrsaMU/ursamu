@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 /**
  * tests/scripts_flags_set.test.ts
  *
