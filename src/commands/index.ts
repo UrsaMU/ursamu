@@ -30,4 +30,13 @@ import "./decompile.ts";
 import "./include.ts";
 import "./assert.ts";
 import "./function.ts";
+import "./comms.ts";
+import "./social.ts";
+import "./look.ts";
+import "./home.ts";
+import "./auth.ts";
+import "./channels.ts";
+import "./world.ts";
+import "./tags.ts";
+import "./demo.ts";
 

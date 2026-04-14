@@ -58,15 +58,22 @@ import { wsService as _wsService } from "./src/services/WebSocket/index.ts";
 // Export command registration and plugin type — available to all plugins and game projects
 export { addCmd, registerScript, registerCmdMiddleware } from "./src/services/commands/cmdParser.ts";
 
+// Engine execution context — the substrate that all command handling builds on
+export type { GameContext } from "./src/engine/context.ts";
+export { buildContext } from "./src/engine/context.ts";
+
 // Softcode extension API — register custom functions and %x substitutions from plugins
 export { register as registerSoftcodeFunc } from "./src/services/Softcode/stdlib/registry.ts";
 export { registerSub as registerSoftcodeSub } from "./src/services/Softcode/stdlib/subRegistry.ts";
 export type { StdlibFn as SoftcodeFn } from "./src/services/Softcode/stdlib/registry.ts";
 export type { SubHandler as SoftcodeSubHandler } from "./src/services/Softcode/stdlib/subRegistry.ts";
+// Plugin lifecycle management — available to external plugins that need to read their config
+export { PluginConfigManager } from "./src/services/Config/plugin.ts";
 export type { IMiddlewareFunction } from "./src/@types/IMiddlewareFunction.ts";
 export type { IContext } from "./src/@types/IContext.ts";
 export type { IPlugin, IPluginDependency } from "./src/@types/IPlugin.ts";
-export type { IUrsamuSDK } from "./src/@types/UrsamuSDK.ts";
+export type { IUrsamuSDK, IDBObj } from "./src/@types/UrsamuSDK.ts";
+export type { IDBOBJ } from "./src/@types/IDBObj.ts";
 
 // joinSocketToRoom — lets plugins (e.g. channel-plugin) subscribe a socket to a room
 // after a player:login event without coupling to the WebSocket implementation.

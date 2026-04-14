@@ -1,187 +1,196 @@
 /**
  * tests/scripts_world.test.ts
  *
- * Tests for engine-owned world-manipulation scripts:
- *   - system/scripts/teleport.ts  (@teleport)
- *   - system/scripts/search.ts    (@search / @stats)
- *
- * NOTE: @link and @unlink were moved to builder-plugin.
- * Tests for those commands live in the builder-plugin repo.
+ * Tests for engine-owned world-manipulation commands:
+ *   - execTeleport  (@teleport)
+ *   - execFind      (@find / @search)
+ *   - execStats     (@stats)
  */
-import { assertStringIncludes } from "@std/assert";
-import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
-import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
-import { DBO } from "../src/services/Database/database.ts";
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import { execTeleport, execFind, execStats } from "../src/commands/world.ts";
 
-const RAW_TELEPORT = await Deno.readTextFile("./system/scripts/teleport.ts");
-const RAW_SEARCH   = await Deno.readTextFile("./system/scripts/search.ts");
-
-function wrapScript(raw: string, extra = ""): string {
-  const stripped = raw
-    .replace(/^import\s.*?;\s*$/gm, "")
-    .replace(/export const aliases.*?;/gs, "")
-    .replace(/export default/, "_main =")
-    .replace(/^export\s+/gm, "");
-  return [
-    "let _main;",
-    stripped,
-    "const _sent = [];",
-    "u.send = (m) => _sent.push(m);",
-    extra,
-    "await _main(u);",
-    "return _sent;",
-  ].join("\n");
-}
-
-const SLOW = { timeout: 10000 };
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
+
 const ROOM_ID  = "sw_room1";
 const ACTOR_ID = "sw_actor1";
 
-const jsRoom  = `{ id: "sw_room1",  name: "Start Room",  flags: new Set(["room"]),        state: { name: "Start Room"  }, contents: [] }`;
-const jsRoom2 = `{ id: "sw_room2",  name: "End Room",    flags: new Set(["room"]),        state: { name: "End Room"    }, contents: [] }`;
-const jsExit  = `{ id: "sw_exit1",  name: "North Exit",  flags: new Set(["exit"]),        state: { name: "North"       }, contents: [] }`;
-const jsThing = `{ id: "sw_thing1", name: "Magic Orb",   flags: new Set(["thing"]),       state: { name: "Magic Orb"   }, contents: [] }`;
-const jsLocked= `{ id: "sw_lr1",    name: "Locked Room", flags: new Set(["room"]),        state: { name: "Locked Room" }, contents: [] }`;
+const room1: IDBObj  = { id: "sw_room1",  name: "Start Room",  flags: new Set(["room"]),   state: { name: "Start Room"  }, contents: [] };
+const room2: IDBObj  = { id: "sw_room2",  name: "End Room",    flags: new Set(["room"]),   state: { name: "End Room"    }, contents: [] };
+const thing: IDBObj  = { id: "sw_thing1", name: "Magic Orb",   flags: new Set(["thing"]),  state: { name: "Magic Orb"   }, contents: [] };
+const exit1: IDBObj  = { id: "sw_exit1",  name: "North Exit",  flags: new Set(["exit"]),   state: { name: "North"       }, contents: [] };
+const locked: IDBObj = { id: "sw_lr1",    name: "Locked Room", flags: new Set(["room"]),   state: { name: "Locked Room" }, contents: [] };
+const player1: IDBObj= { id: "sw_p1",     name: "Player1",     flags: new Set(["player"]), state: { name: "Player1"     }, contents: [] };
 
-const baseStubs = `
-  u.util = { ...u.util, displayName: (o) => o.name || o.id };
-  u.canEdit = () => true;
-  u.teleport = () => {};
-`;
-
-function makeCtx(id: string, flags: string, name: string, cmd: string, args: string[]): SDKContext {
-  return {
-    id,
-    state: { name },
-    me: { id, name, flags: new Set(flags.split(" ")), state: { name } },
-    here: { id: ROOM_ID, name: "Test Room", flags: new Set(["room"]), state: {} },
-    cmd: { name: cmd, original: cmd, args, switches: [] },
-    socketId: `sock-${id}`,
+function makeU(opts: {
+  flags?: string[];
+  cmdName?: string;
+  args?: string[];
+  switches?: string[];
+  searchResults?: IDBObj[][];
+  canEditFn?: (a: IDBObj, t: IDBObj) => boolean;
+  teleportCalls?: string[][];
+}): IUrsamuSDK & { sent: string[]; teleportCalls: string[][] } {
+  const sent: string[] = [];
+  const teleportCalls: string[][] = opts.teleportCalls ?? [];
+  const me: IDBObj = {
+    id: ACTOR_ID, name: "Actor",
+    flags: new Set(opts.flags ?? ["player", "connected"]),
+    state: { name: "Actor" },
+    location: ROOM_ID, contents: [],
   };
+  let searchCallIdx = 0;
+  const searchMock = (opts.searchResults ?? [])
+    ? async (_q: unknown) => {
+        const batch = opts.searchResults ?? [];
+        const idx = searchCallIdx++;
+        return batch[idx] ?? [];
+      }
+    : async () => [];
+
+  const u = {
+    me,
+    here: { id: ROOM_ID, name: "Test Room", flags: new Set(["room"]), state: {}, location: "", contents: [] },
+    cmd: {
+      name: opts.cmdName ?? "@teleport",
+      original: opts.cmdName ?? "@teleport",
+      args: opts.args ?? [],
+      switches: opts.switches ?? [],
+    },
+    send: (m: string) => sent.push(m),
+    canEdit: (opts.canEditFn
+      ? async (_a: IDBObj, t: IDBObj) => opts.canEditFn!(_a, t)
+      : async () => true) as (a: IDBObj, t: IDBObj) => Promise<boolean>,
+    teleport: (fromId: string, toId: string) => teleportCalls.push([fromId, toId]),
+    db: { search: searchMock },
+    util: {
+      displayName: (o: IDBObj) => (o.state?.name as string) || o.name || o.id,
+    },
+    sys: {
+      uptime: async () => 3_661_000,   // 1h 1m 1s
+      gameTime: async () => ({ year: 5, month: 3, day: 10, hour: 14, minute: 30 }),
+      setGameTime: async () => {},
+    },
+    events: { emit: async () => {} },
+  } as unknown as IUrsamuSDK & { sent: string[]; teleportCalls: string[][] };
+  (u as unknown as Record<string, unknown>).sent = sent;
+  (u as unknown as Record<string, unknown>).teleportCalls = teleportCalls;
+  return u;
 }
 
 // ===========================================================================
-// teleport.ts
+// execTeleport
 // ===========================================================================
 
 Deno.test("@teleport — no = sends usage", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Actor", "@teleport", ["Alice"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_TELEPORT), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Usage");
+  const u = makeU({ args: ["Alice"] });
+  await execTeleport(u);
+  assertStringIncludes(u.sent.join(" "), "Usage");
 });
 
 Deno.test("@teleport — target not found", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Actor", "@teleport", ["Ghost=Room2"]);
-  const extra = baseStubs + `u.db = { ...u.db, search: async () => [] };`;
-  const result = await sandboxService.runScript(wrapScript(RAW_TELEPORT, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Could not find target");
+  const u = makeU({ args: ["Ghost=Room2"], searchResults: [[], []] });
+  await execTeleport(u);
+  assertStringIncludes(u.sent.join(" "), "Could not find target");
 });
 
 Deno.test("@teleport — destination not found", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "admin connected", "Admin", "@teleport", ["Magic Orb=Nowhere"]);
-  const extra = baseStubs + `
-    let _c = 0;
-    u.db = { ...u.db, search: async () => ++_c === 1 ? [${jsThing}] : [] };
-  `;
-  const result = await sandboxService.runScript(wrapScript(RAW_TELEPORT, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Could not find destination");
+  const u = makeU({ flags: ["admin", "connected"], args: ["Magic Orb=Nowhere"], searchResults: [[thing], []] });
+  await execTeleport(u);
+  assertStringIncludes(u.sent.join(" "), "Could not find destination");
 });
 
 Deno.test("@teleport — permission denied on target", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Player", "@teleport", ["Magic Orb=End Room"]);
-  const extra = `
-    u.util = { ...u.util, displayName: (o) => o.name || o.id };
-    u.canEdit = () => false;
-    u.teleport = () => {};
-    let _c = 0;
-    u.db = { ...u.db, search: async () => ++_c === 1 ? [${jsThing}] : [${jsRoom2}] };
-  `;
-  const result = await sandboxService.runScript(wrapScript(RAW_TELEPORT, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Permission denied");
+  const u = makeU({
+    args: ["Magic Orb=End Room"],
+    searchResults: [[thing], [room2]],
+    canEditFn: () => false,
+  });
+  await execTeleport(u);
+  assertStringIncludes(u.sent.join(" "), "Permission denied");
 });
 
 Deno.test("@teleport — permission denied on non-enter_ok destination", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "admin connected", "Admin", "@teleport", ["Magic Orb=Locked Room"]);
-  const extra = `
-    u.util = { ...u.util, displayName: (o) => o.name || o.id };
-    u.canEdit = (a, t) => t.id !== "sw_lr1";
-    u.teleport = () => {};
-    let _c = 0;
-    u.db = { ...u.db, search: async () => ++_c === 1 ? [${jsThing}] : [${jsLocked}] };
-  `;
-  const result = await sandboxService.runScript(wrapScript(RAW_TELEPORT, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Permission denied");
+  const u = makeU({
+    flags: ["admin", "connected"],
+    args: ["Magic Orb=Locked Room"],
+    searchResults: [[thing], [locked]],
+    canEditFn: (_a, t) => t.id !== "sw_lr1",
+  });
+  await execTeleport(u);
+  assertStringIncludes(u.sent.join(" "), "Permission denied");
 });
 
-Deno.test("@teleport — success sends confirmation", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "admin connected", "Admin", "@teleport", ["Magic Orb=End Room"]);
-  const extra = baseStubs + `
-    let _c = 0;
-    u.db = { ...u.db, search: async () => ++_c === 1 ? [${jsThing}] : [${jsRoom2}] };
-  `;
-  const result = await sandboxService.runScript(wrapScript(RAW_TELEPORT, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "teleport");
-  assertStringIncludes(result.join(" "), "Magic Orb");
-  assertStringIncludes(result.join(" "), "End Room");
+Deno.test("@teleport — success calls teleport and sends confirmation", OPTS, async () => {
+  const calls: string[][] = [];
+  const u = makeU({
+    flags: ["admin", "connected"],
+    args: ["Magic Orb=End Room"],
+    searchResults: [[thing], [room2]],
+    teleportCalls: calls,
+  });
+  await execTeleport(u);
+  assertEquals(calls.length, 1);
+  assertEquals(calls[0], ["sw_thing1", "sw_room2"]);
+  assertStringIncludes(u.sent.join(" "), "teleport");
+  assertStringIncludes(u.sent.join(" "), "Magic Orb");
+  assertStringIncludes(u.sent.join(" "), "End Room");
 });
 
 // ===========================================================================
-// search.ts
+// execFind
 // ===========================================================================
 
-Deno.test("@search — name search returns match", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Player", "@search", ["Magic Orb"]);
-  const extra = baseStubs + `u.db = { ...u.db, search: async () => [${jsThing}] };`;
-  const result = await sandboxService.runScript(wrapScript(RAW_SEARCH, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Magic Orb");
+Deno.test("@find — name search returns match", OPTS, async () => {
+  const u = makeU({ cmdName: "@find", args: ["", "Magic Orb"], searchResults: [[thing]] });
+  await execFind(u);
+  assertStringIncludes(u.sent.join(" "), "Magic Orb");
 });
 
-Deno.test("@search — no results", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Player", "@search", ["Nonexistent"]);
-  const extra = baseStubs + `u.db = { ...u.db, search: async () => [] };`;
-  const result = await sandboxService.runScript(wrapScript(RAW_SEARCH, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "No matches found");
+Deno.test("@find — no results", OPTS, async () => {
+  const u = makeU({ cmdName: "@find", args: ["", "Nonexistent"], searchResults: [[]] });
+  await execFind(u);
+  assertStringIncludes(u.sent.join(" "), "No objects found");
 });
 
-Deno.test("@search — name=val form", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Player", "@search", ["name=Orb"]);
-  const extra = baseStubs + `u.db = { ...u.db, search: async () => [${jsThing}] };`;
-  const result = await sandboxService.runScript(wrapScript(RAW_SEARCH, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Magic Orb");
+Deno.test("@find — flag search returns rooms", OPTS, async () => {
+  const u = makeU({ cmdName: "@find", args: ["flag", "room"], searchResults: [[room1, room2]] });
+  await execFind(u);
+  assertStringIncludes(u.sent.join(" "), "Start Room");
 });
 
-Deno.test("@search — flag=val form", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Player", "@search", ["flag=room"]);
-  const extra = baseStubs + `u.db = { ...u.db, search: async () => [${jsRoom}] };`;
-  const result = await sandboxService.runScript(wrapScript(RAW_SEARCH, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Start Room");
+Deno.test("@find — no arg sends usage", OPTS, async () => {
+  const u = makeU({ cmdName: "@find", args: ["", ""] });
+  await execFind(u);
+  assertStringIncludes(u.sent.join(" "), "Usage");
 });
 
-Deno.test("@search — invalid param sends error", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Player", "@search", ["color=blue"]);
-  const extra = baseStubs + `u.db = { ...u.db, search: async () => [] };`;
-  const result = await sandboxService.runScript(wrapScript(RAW_SEARCH, extra), ctx, SLOW) as string[];
-  assertStringIncludes(result.join(" "), "Invalid search parameter");
+// ===========================================================================
+// execStats
+// ===========================================================================
+
+Deno.test("@stats — shows connected count and uptime", OPTS, async () => {
+  const u = makeU({
+    cmdName: "@stats", args: [],
+    searchResults: [[player1]],  // connected players search
+  });
+  await execStats(u);
+  const out = u.sent.join(" ");
+  assertStringIncludes(out, "Connected");
+  assertStringIncludes(out, "Uptime");
 });
 
-Deno.test("@stats — shows total object counts", OPTS, async () => {
-  const ctx = makeCtx(ACTOR_ID, "player connected", "Player", "@stats", []);
-  ctx.cmd.original = "@stats";
-  const extra = baseStubs + `
-    u.db = { ...u.db, search: async () => [
-      ${jsRoom}, ${jsRoom2}, ${jsExit}, ${jsThing},
-      { id: "sw_p1", name: "Player1", flags: new Set(["player"]), state: {}, contents: [] }
-    ]};
-  `;
-  const result = await sandboxService.runScript(wrapScript(RAW_SEARCH, extra), ctx, SLOW) as string[];
-  const out = result.join(" ");
-  assertStringIncludes(out, "Total Objects");
+Deno.test("@stats/full — shows total object counts with breakdown", OPTS, async () => {
+  const all = [room1, room2, exit1, thing, player1];
+  const u = makeU({
+    cmdName: "@stats", args: ["full"],
+    // First call: connected filter; second call: all objects ({})
+    searchResults: [[player1], all],
+  });
+  await execStats(u);
+  const out = u.sent.join(" ");
+  assertStringIncludes(out, "Total objs");
   assertStringIncludes(out, "5");
-  assertStringIncludes(out, "Rooms: 2");
-  assertStringIncludes(out, "Players: 1");
-});
-
-Deno.test("cleanup — close DB", OPTS, async () => {
-  await DBO.close();
+  assertStringIncludes(out, "Rooms");
+  assertStringIncludes(out, "Players");
 });

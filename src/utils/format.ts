@@ -1,5 +1,44 @@
 import parser from "../services/parser/parser.ts";
 
+// ---------------------------------------------------------------------------
+// String utilities
+// ---------------------------------------------------------------------------
+
+/** Capitalize the first letter of each word, handling leading parentheses. */
+function capitalizeFirstLetter(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+export const capString = (string: string): string => {
+  return string.split(" ").map(word =>
+    word.startsWith("(")
+      ? `(${capitalizeFirstLetter(word.slice(1))}`
+      : capitalizeFirstLetter(word),
+  ).join(" ");
+};
+
+/** Pad or truncate `input` to exactly `length` characters. */
+export function formatString(input: string, length = 30): string {
+  if (input.length < length) return input.padEnd(length, " ");
+  if (input.length > length) return `${input.substring(0, length - 3)}...`;
+  return input;
+}
+
+// ---------------------------------------------------------------------------
+// Stat display
+// ---------------------------------------------------------------------------
+
+/** Format a stat label + numeric value as a MUSH-colored key...value line. */
+export const formatStat = (stat: string, value: unknown, width = 24, right = false): string => {
+  const valStr    = String(value ?? "") || "";
+  const hasVal    = +valStr ? "" : `%ch%cx`;
+  const valDisplay = +valStr !== 0 ? `%ch${valStr}%cn` : `%ch%cx0%cn`;
+  if (!right) {
+    return ljust(`${hasVal}${capString(stat)}`, width - (valStr.length || 1), "%ch%cx.%cn") + valDisplay;
+  }
+  return ljust(`${valStr.length > 0 ? "" : "%ch%cx"}${capString(stat)}:`, 12) + ljust(`%ch${capString(valStr)}%cn`, 25);
+};
+
 export const repeatString = (string = " ", length: number) => {
   // If length is 0 or negative, return empty string
   if (length <= 0) return "";

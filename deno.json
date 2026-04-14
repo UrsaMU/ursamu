@@ -40,6 +40,7 @@
     "setup-config": "bash ./scripts/setup-config.sh",
     "create-plugin": "bash ./scripts/create-plugin.sh",
     "create": "deno run -A ./src/cli/create.ts",
+    "create:local": "deno run -A ./src/cli/create.ts --local",
     "cli": "deno run -A ./src/cli/ursamu.ts",
     "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts",
     "test": "deno test --allow-all --unstable-kv --unstable-detect-cjs --no-check",

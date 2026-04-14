@@ -37,7 +37,7 @@ export const DEFAULT_PLUGINS_MANIFEST = {
     {
       name: "help",
       url: "https://github.com/UrsaMU/help-plugin",
-      ref: "v1.0.0",
+      ref: "v1.0.2",
       description: "API-first help system — aggregates command help, per-plugin help folders, and runtime DB entries.",
       ursamu: ">=1.9.0",
     },

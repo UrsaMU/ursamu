@@ -1,12 +1,13 @@
 /**
  * tests/scripts_lemit.test.ts
  *
- * Tests for system/scripts/lemit.ts (@lemit command).
+ * Tests for @lemit command (src/commands/comms.ts — execLemit).
  * Verifies it sends to all connected occupants of the enactor's room
  * and fires the room:text event for ^-pattern listeners.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import { execLemit } from "../src/commands/comms.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -48,12 +49,8 @@ function mockU(opts: { me?: Partial<IDBObj>; arg?: string; occupants?: IDBObj[] 
       on: () => Promise.resolve(""),
       off: () => Promise.resolve(),
     },
+    evalString: (s: string) => Promise.resolve(s),
   } as unknown as IUrsamuSDK, { _sent: sent, _emitted: emitted });
-}
-
-async function execLemit(u: ReturnType<typeof mockU>) {
-  const { default: script } = await import("../system/scripts/lemit.ts");
-  await script(u as unknown as IUrsamuSDK);
 }
 
 Deno.test("@lemit — sends message to all connected occupants", OPTS, async () => {

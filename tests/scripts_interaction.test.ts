@@ -1,43 +1,19 @@
 /**
  * tests/scripts_interaction.test.ts
  *
- * Tests for player-interaction system scripts:
- *   - get.ts    (pick up an object)
- *   - drop.ts   (drop an object from inventory)
- *   - give.ts   (give object or money to another player)
- *   - home.ts   (teleport to home)
+ * Tests for player-interaction commands:
+ *   - execGet      (pick up an object)
+ *   - execDrop     (drop an object from inventory)
+ *   - execGive     (give object or money to another player)
+ *   - execHome     (teleport to home)
+ *   - execTrigger  (@trigger — fire a stored attribute)
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
+import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import { execGet, execDrop, execGive } from "../src/commands/manipulation.ts";
+import { execHome } from "../src/commands/home.ts";
+import { execTrigger } from "../src/commands/softcode/trigger.ts";
 
-const RAW_GET  = await Deno.readTextFile("./system/scripts/get.ts");
-const RAW_DROP = await Deno.readTextFile("./system/scripts/drop.ts");
-const RAW_GIVE = await Deno.readTextFile("./system/scripts/give.ts");
-const RAW_HOME = await Deno.readTextFile("./system/scripts/home.ts");
-const RAW_TRIGGER = await Deno.readTextFile("./system/scripts/trigger.ts");
-
-/** Strip imports/exports so the script runs as legacy block code */
-function wrapScript(raw: string, extra = ""): string {
-  const stripped = raw
-    .replace(/^import\s.*?;\s*$/gm, "")
-    .replace(/export const aliases.*?;/gs, "")
-    .replace(/export default/, "_main =")
-    .replace(/^export\s+/gm, "");
-  return [
-    "let _main;",
-    stripped,
-    "const _sent = [];",
-    "const _origSend = u.send.bind(u);",
-    "u.send = (m, t, o) => { _sent.push({ msg: m, target: t }); _origSend(m, t, o); };",
-    extra,
-    "await _main(u);",
-    "return _sent;",
-  ].join("\n");
-}
-
-const SLOW = { timeout: 10000 };
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 const ROOM_ID  = "si_room1";
@@ -45,274 +21,241 @@ const ACTOR_ID = "si_actor1";
 const RECV_ID  = "si_recv1";
 const THING_ID = "si_thing1";
 
-async function makeCtx(
-  actorId: string,
-  cmd: string,
-  args: string[]
-): Promise<SDKContext> {
-  // dbojs.queryOne returns IDBOBJ | undefined | false; cast to IDBOBJ for convenience
-  // deno-lint-ignore no-explicit-any
-  const actor = (await dbojs.queryOne({ id: actorId })) as any;
-  return {
-    id: actorId,
-    state: actor?.data || {},
-    me: {
-      id: actorId,
-      name: (actor?.data?.name as string) || actorId,
-      flags: new Set((actor?.flags || "player").split(" ")),
-      location: actor?.location as string | undefined,
-      state: (actor?.data as Record<string, unknown>) || {},
+type Msg = { msg: string; target?: string };
+type ModifyCall = [string, string, unknown];
+
+/** Build a mock IUrsamuSDK for interaction tests */
+function makeU(opts: {
+  cmdName?: string;
+  args?: string[];
+  actorState?: Record<string, unknown>;
+  actorContents?: IDBObj[];
+  targetSeq?: Array<IDBObj | undefined>;   // sequential target() returns
+  searchSeq?: IDBObj[][];                  // sequential db.search() returns
+  canEditFn?: (a: IDBObj, t: IDBObj) => boolean;
+  modifyCalls?: ModifyCall[];
+  triggerCalls?: Array<{ id: string; attr: string; args: string[] }>;
+  teleportCalls?: string[][];
+}): IUrsamuSDK & { msgs: Msg[] } {
+  const msgs: Msg[] = [];
+  const broadcasts: string[] = [];
+  let targetIdx = 0;
+  let searchIdx = 0;
+  const me: IDBObj = {
+    id: ACTOR_ID, name: "Tester",
+    flags: new Set(["player", "connected"]),
+    state: opts.actorState ?? { name: "Tester" },
+    location: ROOM_ID,
+    contents: opts.actorContents ?? [],
+  };
+  const u = {
+    me,
+    here: {
+      id: ROOM_ID, name: "Test Room",
+      flags: new Set(["room"]), state: {}, location: "", contents: [],
+      broadcast: (m: string) => broadcasts.push(m),
     },
-    here: { id: ROOM_ID, name: "Test Room", flags: new Set(["room"]), state: {} },
-    cmd: { name: cmd, original: cmd, args, switches: [] },
-    socketId: `sock-${actorId}`,
-  };
+    cmd: {
+      name: opts.cmdName ?? "get",
+      original: opts.cmdName ?? "get",
+      args: opts.args ?? [],
+      switches: [],
+    },
+    send: (m: string, tgt?: string) => msgs.push({ msg: m, target: tgt }),
+    canEdit: (opts.canEditFn
+      ? async (_a: IDBObj, t: IDBObj) => opts.canEditFn!(_a, t)
+      : async () => true) as (a: IDBObj, t: IDBObj) => Promise<boolean>,
+    teleport: (from: string, to: string) => { opts.teleportCalls?.push([from, to]); },
+    db: {
+      search: async (_q: unknown): Promise<IDBObj[]> => {
+        const seq = opts.searchSeq ?? [];
+        return seq[searchIdx++] ?? [];
+      },
+      modify: async (id: string, op: string, data: unknown) => {
+        opts.modifyCalls?.push([id, op, data]);
+      },
+      create: async (t: Partial<IDBObj>) => ({ id: "new1", name: "", flags: new Set<string>(), state: {}, contents: [], ...t } as IDBObj),
+      destroy: async () => {},
+    },
+    util: {
+      target: async (_a: IDBObj, _name: string): Promise<IDBObj | undefined> => {
+        if (opts.targetSeq) return opts.targetSeq[targetIdx++];
+        return undefined;
+      },
+      displayName: (o: IDBObj) => o.name || o.id,
+      stripSubs: (s: string) => s,
+    },
+    eval: async (_id: string, _attr: string): Promise<string> => "",
+    trigger: async (id: string, attr: string, args: string[]) => {
+      opts.triggerCalls?.push({ id, attr, args });
+    },
+  } as unknown as IUrsamuSDK & { msgs: Msg[] };
+  (u as unknown as Record<string, unknown>).msgs = msgs;
+  return u;
 }
 
-async function cleanup(...ids: string[]) {
-  for (const id of ids) await dbojs.delete({ id }).catch(() => {});
-}
-
 // ===========================================================================
-// get.ts — pick up
+// execGet — pick up
 // ===========================================================================
 
-Deno.test("@get — no args sends 'Get what?'", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Tester" }, location: ROOM_ID });
-  const ctx = await makeCtx(ACTOR_ID, "get", []);
-  const result = await sandboxService.runScript(wrapScript(RAW_GET), ctx, SLOW) as { msg: string }[];
-  assertStringIncludes(result[0]?.msg ?? "", "Get what");
-  await cleanup(ACTOR_ID);
+Deno.test("get — no args sends 'Get what?'", OPTS, async () => {
+  const u = makeU({ args: [] });
+  await execGet(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Get what");
 });
 
-Deno.test("@get — picks up a thing in the same room and moves it to inventory", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Tester" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "Shiny Orb" }, location: ROOM_ID });
+Deno.test("get — picks up a thing in the same room", OPTS, async () => {
+  const modifyCalls: ModifyCall[] = [];
+  const thing: IDBObj = { id: THING_ID, name: "Shiny Orb", flags: new Set(["thing"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ args: ["Shiny Orb"], targetSeq: [thing], modifyCalls });
+  await execGet(u);
 
-  const ctx = await makeCtx(ACTOR_ID, "get", ["Shiny Orb"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_GET), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "pick up");
-
-  const updated = await dbojs.queryOne({ id: THING_ID });
-  assertEquals((updated as { location?: string } | undefined)?.location, ACTOR_ID);
-
-  await cleanup(ACTOR_ID, THING_ID);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "pick up");
+  assertEquals(modifyCalls[0][0], THING_ID);
+  assertEquals(modifyCalls[0][1], "$set");
+  assertEquals((modifyCalls[0][2] as Record<string, unknown>).location, ACTOR_ID);
 });
 
-Deno.test("@get — cannot pick up a player", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Tester" }, location: ROOM_ID });
-  await dbojs.create({ id: RECV_ID,  flags: "player connected", data: { name: "Victim" }, location: ROOM_ID });
-
-  const ctx = await makeCtx(ACTOR_ID, "get", ["Victim"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_GET), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "can't pick up players");
-
-  await cleanup(ACTOR_ID, RECV_ID);
+Deno.test("get — cannot pick up a player", OPTS, async () => {
+  const victim: IDBObj = { id: RECV_ID, name: "Victim", flags: new Set(["player", "connected"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ args: ["Victim"], targetSeq: [victim] });
+  await execGet(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "can't pick up players");
 });
 
-Deno.test("@get — cannot pick up an exit", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Tester" }, location: ROOM_ID });
-  await dbojs.create({ id: "si_exit1", flags: "exit", data: { name: "North" }, location: ROOM_ID });
-
-  const ctx = await makeCtx(ACTOR_ID, "get", ["North"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_GET), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "can't pick that up");
-
-  await cleanup(ACTOR_ID, "si_exit1");
+Deno.test("get — cannot pick up an exit", OPTS, async () => {
+  const exit: IDBObj = { id: "si_exit1", name: "North", flags: new Set(["exit"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ args: ["North"], targetSeq: [exit] });
+  await execGet(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "can't pick that up");
 });
 
-Deno.test("@get — thing not in same room returns 'don't see that here'", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Tester" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "FarBall" }, location: "si_other_room" });
-
-  const ctx = await makeCtx(ACTOR_ID, "get", ["FarBall"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_GET), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "don't see");
-
-  await cleanup(ACTOR_ID, THING_ID);
+Deno.test("get — thing not in same room returns 'don't see that here'", OPTS, async () => {
+  const farThing: IDBObj = { id: THING_ID, name: "FarBall", flags: new Set(["thing"]), state: {}, location: "si_other_room", contents: [] };
+  const u = makeU({ args: ["FarBall"], targetSeq: [farThing] });
+  await execGet(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "don't see");
 });
 
 // ===========================================================================
-// drop.ts — drop
+// execDrop — drop
 // ===========================================================================
 
-Deno.test("@drop — no args sends 'Drop what?'", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Tester" }, location: ROOM_ID });
-  const ctx = await makeCtx(ACTOR_ID, "drop", []);
-  const result = await sandboxService.runScript(wrapScript(RAW_DROP), ctx, SLOW) as { msg: string }[];
-  assertStringIncludes(result[0]?.msg ?? "", "Drop what");
-  await cleanup(ACTOR_ID);
+Deno.test("drop — no args sends 'Drop what?'", OPTS, async () => {
+  const u = makeU({ cmdName: "drop", args: [] });
+  await execDrop(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Drop what");
 });
 
-Deno.test("@drop — drops a thing from inventory to room", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Tester" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "RedBall" }, location: ACTOR_ID });
+Deno.test("drop — drops a thing from inventory to room", OPTS, async () => {
+  const modifyCalls: ModifyCall[] = [];
+  // thing.location === ACTOR_ID → it's in inventory
+  const thing: IDBObj = { id: THING_ID, name: "RedBall", flags: new Set(["thing"]), state: {}, location: ACTOR_ID, contents: [] };
+  const u = makeU({ cmdName: "drop", args: ["RedBall"], targetSeq: [thing], modifyCalls });
+  await execDrop(u);
 
-  const ctx = await makeCtx(ACTOR_ID, "drop", ["RedBall"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_DROP), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "drop");
-
-  const updated = await dbojs.queryOne({ id: THING_ID });
-  assertEquals((updated as { location?: string } | undefined)?.location, ROOM_ID);
-
-  await cleanup(ACTOR_ID, THING_ID);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "drop");
+  assertEquals(modifyCalls[0][0], THING_ID);
+  assertEquals((modifyCalls[0][2] as Record<string, unknown>).location, ROOM_ID);
 });
 
-Deno.test("@drop — thing not in inventory sends 'aren't carrying that'", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Tester" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "GreenBall" }, location: ROOM_ID });
-
-  const ctx = await makeCtx(ACTOR_ID, "drop", ["GreenBall"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_DROP), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "aren't carrying");
-
-  await cleanup(ACTOR_ID, THING_ID);
+Deno.test("drop — thing not in inventory sends 'aren't carrying that'", OPTS, async () => {
+  // thing.location === ROOM_ID (not actor) → not in inventory
+  const thing: IDBObj = { id: THING_ID, name: "GreenBall", flags: new Set(["thing"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ cmdName: "drop", args: ["GreenBall"], targetSeq: [thing] });
+  await execDrop(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "aren't carrying");
 });
 
 // ===========================================================================
-// give.ts — give
+// execGive — give
 // ===========================================================================
 
-Deno.test("@give — no args sends 'Give what to whom?'", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Giver" }, location: ROOM_ID });
-  const ctx = await makeCtx(ACTOR_ID, "give", []);
-  const result = await sandboxService.runScript(wrapScript(RAW_GIVE), ctx, SLOW) as { msg: string }[];
-  assertStringIncludes(result[0]?.msg ?? "", "Give what to whom");
-  await cleanup(ACTOR_ID);
+Deno.test("give — no args sends 'Give what to whom?'", OPTS, async () => {
+  const u = makeU({ cmdName: "give", args: [] });
+  await execGive(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Give what to whom");
 });
 
-Deno.test("@give — receiver not in same room sends 'aren't here'", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Giver" }, location: ROOM_ID });
-  await dbojs.create({ id: RECV_ID,  flags: "player connected", data: { name: "FarAway" }, location: "si_room2" });
-
-  const ctx = await makeCtx(ACTOR_ID, "give", ["something", "FarAway"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_GIVE), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "aren't here");
-
-  await cleanup(ACTOR_ID, RECV_ID);
+Deno.test("give — receiver not in same room sends 'aren't here'", OPTS, async () => {
+  const farAway: IDBObj = { id: RECV_ID, name: "FarAway", flags: new Set(["player", "connected"]), state: {}, location: "si_room2", contents: [] };
+  const u = makeU({ cmdName: "give", args: ["something", "FarAway"], targetSeq: [farAway] });
+  await execGive(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "aren't here");
 });
 
-Deno.test("@give — can only give things to players (not objects)", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Giver" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "Box" }, location: ROOM_ID });
-
-  const ctx = await makeCtx(ACTOR_ID, "give", ["something", "Box"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_GIVE), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "can only give things to players");
-
-  await cleanup(ACTOR_ID, THING_ID);
+Deno.test("give — can only give things to players (not objects)", OPTS, async () => {
+  const box: IDBObj = { id: THING_ID, name: "Box", flags: new Set(["thing"]), state: {}, location: ROOM_ID, contents: [] };
+  const u = makeU({ cmdName: "give", args: ["something", "Box"], targetSeq: [box] });
+  await execGive(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "can only give things to players");
 });
 
-Deno.test("@give — give an object transfers it to receiver", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Giver" }, location: ROOM_ID });
-  await dbojs.create({ id: RECV_ID,  flags: "player connected", data: { name: "Receiver" }, location: ROOM_ID });
-  await dbojs.create({ id: THING_ID, flags: "thing", data: { name: "Gem" }, location: ACTOR_ID });
+Deno.test("give — give an object transfers it to receiver", OPTS, async () => {
+  const modifyCalls: ModifyCall[] = [];
+  const receiver: IDBObj = { id: RECV_ID, name: "Receiver", flags: new Set(["player", "connected"]), state: {}, location: ROOM_ID, contents: [] };
+  const gem: IDBObj     = { id: THING_ID, name: "Gem", flags: new Set(["thing"]), state: {}, location: ACTOR_ID, contents: [] };
+  // first target() call → receiver; second → gem
+  const u = makeU({ cmdName: "give", args: ["Gem", "Receiver"], targetSeq: [receiver, gem], modifyCalls });
+  await execGive(u);
 
-  const ctx = await makeCtx(ACTOR_ID, "give", ["Gem", "Receiver"]);
-  await sandboxService.runScript(wrapScript(RAW_GIVE), ctx, SLOW);
-
-  const updated = await dbojs.queryOne({ id: THING_ID });
-  assertEquals((updated as { location?: string } | undefined)?.location, RECV_ID);
-
-  await cleanup(ACTOR_ID, RECV_ID, THING_ID);
+  assertEquals(modifyCalls[0][0], THING_ID);
+  assertEquals((modifyCalls[0][2] as Record<string, unknown>).location, RECV_ID);
 });
 
-Deno.test("@give — give money sends confirmation message", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Giver", money: 100 }, location: ROOM_ID });
-  await dbojs.create({ id: RECV_ID,  flags: "player connected", data: { name: "Receiver", money: 10 }, location: ROOM_ID });
-
-  const ctx = await makeCtx(ACTOR_ID, "give", ["50", "Receiver"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_GIVE), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "coins");
-
-  await cleanup(ACTOR_ID, RECV_ID);
+Deno.test("give — give money sends confirmation message", OPTS, async () => {
+  const receiver: IDBObj = { id: RECV_ID, name: "Receiver", flags: new Set(["player", "connected"]), state: { money: 10 }, location: ROOM_ID, contents: [] };
+  const u = makeU({ cmdName: "give", args: ["50", "Receiver"], actorState: { name: "Giver", money: 100 }, targetSeq: [receiver] });
+  await execGive(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "coins");
 });
 
-Deno.test("@give — give money with insufficient funds fails", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Giver", money: 5 }, location: ROOM_ID });
-  await dbojs.create({ id: RECV_ID,  flags: "player connected", data: { name: "Receiver2", money: 0 }, location: ROOM_ID });
-
-  // money is in actor.state (from DB data)
-  const ctx = await makeCtx(ACTOR_ID, "give", ["100", "Receiver2"]);
-  const result = await sandboxService.runScript(wrapScript(RAW_GIVE), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "don't have that much money");
-
-  await cleanup(ACTOR_ID, RECV_ID);
+Deno.test("give — give money with insufficient funds fails", OPTS, async () => {
+  const receiver2: IDBObj = { id: RECV_ID, name: "Receiver2", flags: new Set(["player", "connected"]), state: { money: 0 }, location: ROOM_ID, contents: [] };
+  const u = makeU({ cmdName: "give", args: ["100", "Receiver2"], actorState: { name: "Giver", money: 5 }, targetSeq: [receiver2] });
+  await execGive(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "don't have that much money");
 });
 
 // ===========================================================================
-// home.ts — go home
+// execHome — go home
 // ===========================================================================
 
-Deno.test("home — sends 'home' message", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Traveler", home: ROOM_ID }, location: "si_other" });
+Deno.test("home — sends 'home' message and calls teleport", OPTS, async () => {
+  const teleportCalls: string[][] = [];
+  const u = makeU({ cmdName: "home", args: [], actorState: { home: ROOM_ID }, teleportCalls });
+  execHome(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "home");
+  assertEquals(teleportCalls.length, 1);
+});
 
-  const ctx: SDKContext = {
-    id: ACTOR_ID,
-    state: { home: ROOM_ID },
-    me: { id: ACTOR_ID, name: "Traveler", flags: new Set(["player", "connected"]), location: "si_other", state: { home: ROOM_ID } },
-    here: { id: "si_other", name: "Somewhere Else", flags: new Set(["room"]), state: {} },
-    cmd: { name: "home", original: "home", args: [], switches: [] },
-    socketId: `sock-${ACTOR_ID}`,
+// ===========================================================================
+// execTrigger — @trigger
+// ===========================================================================
+
+Deno.test("@trigger — missing authorization vulnerability (security guard)", OPTS, async () => {
+  const adminPlayer: IDBObj = {
+    id: THING_ID, name: "AdminPlayer",
+    flags: new Set(["player", "admin"]),
+    state: {}, location: ROOM_ID, contents: [],
   };
-
-  // Stub u.teleport so we don't actually trigger a teleport message handler
-  const extra = `const _origTeleport = u.teleport; u.teleport = () => {};`;
-  const result = await sandboxService.runScript(wrapScript(RAW_HOME, extra), ctx, SLOW) as { msg: string }[];
-
-  assertStringIncludes(result[0]?.msg ?? "", "home");
-
-  await cleanup(ACTOR_ID);
-});
-
-// ===========================================================================
-// trigger.ts — trigger an attribute
-// ===========================================================================
-
-Deno.test("@trigger — missing authorization vulnerability (RED phase)", OPTS, async () => {
-  await dbojs.create({ id: ACTOR_ID, flags: "player connected", data: { name: "Attacker" }, location: ROOM_ID });
-  // Target owned by someone else (make it an admin player so the fallback power check fails)
-  await dbojs.create({ id: THING_ID, flags: "player admin", data: { name: "AdminPlayer", owner: "admin_id" }, location: ROOM_ID });
-
-  const ctx = await makeCtx(ACTOR_ID, "trigger", ["AdminPlayer/EXPLODE"]);
-  ctx.permissions = { [THING_ID]: false };
-  
-  // Try to trigger the attribute
-  const result = await sandboxService.runScript(wrapScript(RAW_TRIGGER), ctx, SLOW) as { msg: string }[];
-  
-  const msgs = result.map(r => r.msg).join(" ");
-  // If the vulnerability exists, the script will silently execute the trigger
-  // and NOT send "Permission denied."
-  // By asserting it DOES include "Permission denied.", this test should FAIL in the RED phase.
-  assertStringIncludes(msgs, "Permission denied.");
-
-  await cleanup(ACTOR_ID, THING_ID);
+  // canEdit returns false → must send Permission denied
+  const u = makeU({
+    cmdName: "@trigger",
+    args: ["AdminPlayer/EXPLODE"],
+    searchSeq: [[adminPlayer]],
+    canEditFn: () => false,
+  });
+  await execTrigger(u);
+  assertStringIncludes(u.msgs.map((m) => m.msg).join(" "), "Permission denied");
 });
 
 // H5 — negative / overflow amounts must be rejected (regression guard)
 Deno.test("H5 — give money guards reject negative and overflow amounts", OPTS, () => {
-  // /^\d+$/ rejects '-5' — negative strings never enter the money path
   const regex = /^\d+$/;
   assertEquals(regex.test("-5"), false);
   assertEquals(regex.test("-999999999999"), false);
-  // Very large value is parsed > 999999999 — caught by upper bound
   const big = parseInt("99999999999999999999", 10);
   assertEquals(big > 999_999_999, true);
-  // Zero is caught by <= 0 guard
   assertEquals(parseInt("0", 10) <= 0, true);
-});
-
-// Close the DB after all tests
-Deno.test("cleanup — close DB", OPTS, async () => {
-  await DBO.close();
 });

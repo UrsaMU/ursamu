@@ -100,6 +100,8 @@ export interface IUrsamuSDK {
   };
   attr: {
     get(id: string, name: string): Promise<string | null>;
+    set(id: string, name: string, value: string, type?: string): Promise<void>;
+    clear(id: string, name: string): Promise<boolean>;
   };
   setFlags(target: string | IDBObj, flags: string): Promise<void>;
   trigger(target: string, attr: string, args?: string[]): Promise<void>;
@@ -112,5 +114,6 @@ export interface IUrsamuSDK {
     on(event: string, handler: string): Promise<string>;
   };
   eval(targetId: string, attr: string, args?: string[]): Promise<string>;
+  evalString(str: string): Promise<string>;
 }
 

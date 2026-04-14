@@ -82,6 +82,7 @@ export const initializeEngine = async (
     autoCreateDefaultChannels?: boolean;
     customCommandsPath?: string;
     customTextPath?: string;
+    pluginsDir?: string;
   } = {},
   // deno-lint-ignore no-explicit-any
 ): Promise<any> => {
@@ -93,6 +94,7 @@ export const initializeEngine = async (
     autoCreateDefaultChannels = true,
     customCommandsPath,
     customTextPath,
+    pluginsDir: pluginsDirOverride,
   } = options;
 
   // Initialize the configuration system
@@ -147,7 +149,7 @@ export const initializeEngine = async (
   // Load plugins from the plugins directory
   // If local source, plugins is in ./plugins (relative to src)
   // If JSR, plugins is expected in ./src/plugins (relative to project root/CWD)
-  const pluginsDir = isLocal ? dpath.join(__dirname, "./plugins") : dpath.join(Deno.cwd(), "src", "plugins");
+  const pluginsDir = pluginsDirOverride ?? (isLocal ? dpath.join(__dirname, "./plugins") : dpath.join(Deno.cwd(), "src", "plugins"));
   
   // Only try to load if directory exists
   let loadedPlugins: IPlugin[] = [];
