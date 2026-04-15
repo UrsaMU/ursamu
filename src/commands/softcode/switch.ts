@@ -1,6 +1,6 @@
 import { addCmd } from "../../services/commands/index.ts";
 import { softcodeService } from "../../services/Softcode/index.ts";
-import { splitSoftcodeList } from "./shared.ts";
+import { splitSoftcodeList, splitActionCommands, switchWildcard } from "./shared.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
 addCmd({
@@ -32,20 +32,26 @@ Examples:
     const parts = splitSoftcodeList(rest);
     const exec  = u.execute as unknown as (cmd: string) => Promise<void>;
 
+    // Execute action string, splitting on semicolons for multi-command support.
+    const execAction = async (rawAction: string) => {
+      const action = await softcodeService.runSoftcode(rawAction.trim(), ctx);
+      for (const cmd of splitActionCommands(action)) {
+        await exec(cmd);
+      }
+    };
+
     let matched = false;
     for (let i = 0; i + 1 < parts.length; i += 2) {
       const caseVal = await softcodeService.runSoftcode(parts[i].trim(), ctx);
-      if (caseVal === value) {
-        const action = await softcodeService.runSoftcode(parts[i + 1].trim(), ctx);
-        await exec(action);
+      if (switchWildcard(value, caseVal)) {
+        await execAction(parts[i + 1]);
         matched = true;
         if (!all) return;
       }
     }
 
     if (!matched && parts.length % 2 === 1) {
-      const def = await softcodeService.runSoftcode(parts[parts.length - 1].trim(), ctx);
-      await exec(def);
+      await execAction(parts[parts.length - 1]);
     }
   },
 });

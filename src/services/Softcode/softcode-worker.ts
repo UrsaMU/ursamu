@@ -97,6 +97,8 @@ function makeDbAccessor(): DbAccessor {
     queueLength:  (eid)     => dbRequest<number>       ("queueLength",  { executorId: eid }),
     getIdleSecs:  (pid)     => dbRequest<number>       ("getIdleSecs",  { playerId: pid }),
     getUserFn:    (name)    => dbRequest<string | null>("getUserFn",    { name }),
+    createObj: (name, _cost, actorId) =>
+      dbRequest<string | null>("createObj", { name, actorId }),
   };
 }
 

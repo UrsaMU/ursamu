@@ -1,20 +1,18 @@
 /**
  * tests/softcode_evaluator.test.ts
  *
- * Unit tests for the MUX softcode evaluator core.
+ * Unit tests for the UrsaMU softcode evaluator core (post-EvalEngine migration).
  * Tests cover: literal text, substitutions, function calls, recursion
- * limits, timeouts, and basic control flow.
+ * limits, and basic control flow.
  *
- * These tests run entirely in-process — no Deno Worker is spawned.
+ * These tests run entirely in-process via runSoftcode() — no Deno Worker is spawned.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { parse }    from "../src/services/Softcode/parser.ts";
-import { evaluate } from "../src/services/Softcode/evaluator.ts";
-import { isTooDeep } from "../src/services/Softcode/context.ts";
-import type { EvalContext, DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
+import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
+import { isTooDeep, isTimedOut } from "../src/services/Softcode/ursamu-context.ts";
+import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+import type { DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
-// Import stdlib so functions get registered
-import "../src/services/Softcode/stdlib/index.ts";
 
 // ── Test helpers ──────────────────────────────────────────────────────────
 
@@ -58,27 +56,29 @@ const noOutput: OutputAccessor = {
   broadcast:     () => {},
 };
 
-function makeCtx(overrides: Partial<EvalContext> = {}): EvalContext {
+function makeCtx(overrides: Partial<UrsaEvalContext> = {}): UrsaEvalContext {
   const actor = makeActor();
   return {
+    enactor:      actor.id,
+    executor:     actor,
+    caller:       null,
     actor,
-    executor:  actor,
-    caller:    null,
-    args:      [],
-    registers: new Map(),
-    iterStack: [],
-    depth:     0,
-    deadline:  Date.now() + 1000,
-    db:        makeDb(),
-    output:    noOutput,
+    args:         [],
+    registers:    new Map(),
+    iterStack:    [],
+    depth:        0,
+    maxDepth:     50,
+    maxOutputLen: 65_536,
+    deadline:     Date.now() + 5000,
+    db:           makeDb(),
+    output:       noOutput,
+    _engine:      softcodeEngine,
     ...overrides,
   };
 }
 
-// deno-lint-ignore require-await
-async function run(code: string, overrides: Partial<EvalContext> = {}): Promise<string> {
-  const ast = parse(code, { startRule: "Start" });
-  return evaluate(ast as Parameters<typeof evaluate>[0], makeCtx(overrides));
+function run(code: string, overrides: Partial<UrsaEvalContext> = {}): Promise<string> {
+  return runSoftcode(code, makeCtx(overrides));
 }
 
 // ── Literal text ──────────────────────────────────────────────────────────
@@ -106,8 +106,7 @@ Deno.test("evaluator — %! returns executor dbref", async () => {
 });
 
 Deno.test("evaluator — %0 returns first positional arg", async () => {
-  const result = await run("%0", { args: ["hello"] });
-  assertEquals(result, "hello");
+  assertEquals(await run("%0", { args: ["hello"] }), "hello");
 });
 
 Deno.test("evaluator — %0 returns empty when no args", async () => {
@@ -135,8 +134,7 @@ Deno.test("evaluator — %b produces space", async () => {
 Deno.test("evaluator — %q0 reads from register", async () => {
   const ctx = makeCtx();
   ctx.registers.set("0", "myvalue");
-  const ast = parse("%q0", { startRule: "Start" });
-  assertEquals(await evaluate(ast as Parameters<typeof evaluate>[0], ctx), "myvalue");
+  assertEquals(await runSoftcode("%q0", ctx), "myvalue");
 });
 
 // ── Function calls ────────────────────────────────────────────────────────
@@ -194,9 +192,7 @@ Deno.test("evaluator — setq multi-register", async () => {
 // ── localize ──────────────────────────────────────────────────────────────
 
 Deno.test("evaluator — localize isolates register changes", async () => {
-  // Set %q0=outer, then localize sets it to inner, outer should be restored
-  const result = await run("[setq(0,outer)][localize([setq(0,inner)])][r(0)]");
-  assertEquals(result, "outer");
+  assertEquals(await run("[setq(0,outer)][localize([setq(0,inner)])][r(0)]"), "outer");
 });
 
 // ── iter ──────────────────────────────────────────────────────────────────
@@ -210,20 +206,24 @@ Deno.test("evaluator — iter #@ gives position", async () => {
 });
 
 // ── depth guard ───────────────────────────────────────────────────────────
-// Depth limit only applies inside callAttr() (u() / ulocal()) — plain
-// function calls are not depth-gated. Verify the guard exists on the context.
 
-Deno.test("evaluator — isTooDeep helper returns true at depth 50", () => {
+Deno.test("evaluator — isTooDeep helper returns true at maxDepth", () => {
   const ctx = makeCtx({ depth: 50 });
   assertEquals(isTooDeep(ctx), true);
   assertEquals(isTooDeep(makeCtx({ depth: 49 })), false);
 });
 
-// ── timeout guard ─────────────────────────────────────────────────────────
+// ── deadline helpers (used by legacy stdlib) ──────────────────────────────
 
-Deno.test("evaluator — past deadline returns timeout string", async () => {
-  const ctx = makeCtx({ deadline: Date.now() - 1 });
-  const ast = parse("hello", { startRule: "Start" });
-  const result = await evaluate(ast as Parameters<typeof evaluate>[0], ctx);
-  assertStringIncludes(result, "#-1 TIMEOUT");
+Deno.test("evaluator — isTimedOut helper detects past deadline", () => {
+  assertEquals(isTimedOut(makeCtx({ deadline: Date.now() - 1 })), true);
+  assertEquals(isTimedOut(makeCtx({ deadline: Date.now() + 10_000 })), false);
+});
+
+// ── engine depth limit ────────────────────────────────────────────────────
+
+Deno.test("evaluator — engine returns depth-exceeded when depth > maxDepth", async () => {
+  // depth starts at 1, maxDepth = 0 → immediately exceeds limit
+  const result = await run("[add(1,2)]", { depth: 1, maxDepth: 0 });
+  assertStringIncludes(result, "#-1");
 });

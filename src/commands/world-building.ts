@@ -46,6 +46,23 @@ Examples:
   exec: execFlags,
 });
 
+// @set is the classic MUSH alias for @flags.
+addCmd({
+  name: "@set",
+  pattern: /^@set\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@set <target>=<flag>  — Set or clear a flag on an object (alias for @flags).
+
+Use ! to clear a flag.
+
+Examples:
+  @set me=quiet
+  @set me=!quiet
+  @set #5=dark`,
+  exec: execFlags,
+});
+
 addCmd({
   name: "@teleport",
   pattern: /^@?teleport\s+(.*)/i,

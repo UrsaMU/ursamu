@@ -52,6 +52,11 @@ export interface DbAccessor {
    * Returns the softcode string, or null if no such function exists.
    */
   getUserFn(name: string): Promise<string | null>;
+  /**
+   * Create a new THING object owned by actorId.
+   * Returns the new object's id string, or null on failure.
+   */
+  createObj?: (name: string, cost: number, actorId: string) => Promise<string | null>;
 }
 
 // ── OutputAccessor ────────────────────────────────────────────────────────

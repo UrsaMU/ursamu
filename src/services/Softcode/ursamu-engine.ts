@@ -88,6 +88,37 @@ function wrapFn(fn: StdlibFn): FunctionImpl {
 
 // ── Override lazy functions with proper lazy FunctionImpl ─────────────────────
 
+/**
+ * switch(str, pat1, val1, [pat2, val2, ...] [, default])
+ *
+ * Classic MUSH switch(): lazy evaluation + glob wildcard matching.
+ * The new lib's built-in switch uses exact case-insensitive matching only,
+ * which breaks patterns like "0*", "hel*", ">5" that MUSH code relies on.
+ */
+function switchWildcard(str: string, pattern: string): boolean {
+  if (pattern.startsWith("<")) return parseFloat(str) < parseFloat(pattern.slice(1));
+  if (pattern.startsWith(">")) return parseFloat(str) > parseFloat(pattern.slice(1));
+  const re = "^" + pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".") + "$";
+  return new RegExp(re, "i").test(str);
+}
+
+_engine.registerFunction("switch", {
+  eval: "lazy",
+  minArgs: 3,
+  maxArgs: Infinity,
+  async exec(args, _ctx) {
+    const thunks = args as EvalThunk[];
+    const str = await thunks[0]();
+    for (let i = 1; i + 1 < thunks.length; i += 2) {
+      const pattern = await thunks[i]();
+      if (switchWildcard(str, pattern)) return await thunks[i + 1]();
+    }
+    // Odd trailing arg = default
+    if (thunks.length % 2 === 0) return await thunks[thunks.length - 1]();
+    return "";
+  },
+});
+
 // localize(expr) — evaluates expr but restores registers afterward.
 _engine.registerFunction("localize", {
   eval: "lazy",
@@ -130,8 +161,9 @@ const SKIP_NAMES = new Set([
   // Pure comparison — new lib covers these exactly
   "eq", "neq", "gt", "gte", "lt", "lte",
 
-  // Logic — new lib handles lazy short-circuit evaluation correctly
-  "if", "ifelse", "switch", "and", "or", "not", "t",
+  // Logic — new lib handles lazy short-circuit evaluation correctly.
+  // switch is NOT skipped: UrsaMU registers its own lazy+glob version above.
+  "if", "ifelse", "and", "or", "not", "t",
 
   // Register — new lib's r/setr are fine; setq is skipped because UrsaMU's
   // version supports variadic pairs: setq(r1,v1,r2,v2,...) which new lib does not.

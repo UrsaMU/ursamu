@@ -1,7 +1,7 @@
 /**
  * tests/softcode_tag.test.ts
  *
- * Tests for the @tag / @ltag registry system:
+ * Tests for the @tag / @ltag registry system (post-EvalEngine migration):
  *   - tag(), istag(), listtags(), tagmatch() stdlib functions
  *   - ltag(), isltag(), listltags(), ltagmatch() stdlib functions
  *   - #tagname resolution in resolveObj()
@@ -9,12 +9,11 @@
  */
 // deno-lint-ignore-file require-await
 import { assertEquals } from "@std/assert";
-import { parse }    from "../src/services/Softcode/parser.ts";
-import { evaluate } from "../src/services/Softcode/evaluator.ts";
-import type { EvalContext, DbAccessor } from "../src/services/Softcode/context.ts";
+import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
+import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+import type { DbAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
 import { DBO, serverTags, playerTags } from "../src/services/Database/index.ts";
-import "../src/services/Softcode/stdlib/index.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -24,16 +23,19 @@ function makeObj(id: string, name: string, flags: string[] = ["thing"]): IDBObj 
   return { id, name, flags: new Set(flags), location: "0", state: {}, contents: [] };
 }
 
-function makeCtx(actor: IDBObj, db: Partial<DbAccessor> = {}): EvalContext {
+function makeCtx(actor: IDBObj, db: Partial<DbAccessor> = {}): UrsaEvalContext {
   return {
+    enactor:      actor.id,
+    executor:     actor,
+    caller:       null,
     actor,
-    executor:  actor,
-    caller:    null,
-    args:      [],
-    registers: new Map(),
-    iterStack: [],
-    depth:     0,
-    deadline:  Date.now() + 2000,
+    args:         [],
+    registers:    new Map(),
+    iterStack:    [],
+    depth:        0,
+    maxDepth:     50,
+    maxOutputLen: 65_536,
+    deadline:     Date.now() + 2000,
     db: {
       queryById:        async () => null,
       queryByName:      async () => null,
@@ -53,13 +55,9 @@ function makeCtx(actor: IDBObj, db: Partial<DbAccessor> = {}): EvalContext {
       getUserFn:        async () => null,
       ...db,
     },
-    output: { send: () => {}, roomBroadcast: () => {}, broadcast: () => {} },
+    output:  { send: () => {}, roomBroadcast: () => {}, broadcast: () => {} },
+    _engine: softcodeEngine,
   };
-}
-
-async function run(code: string, ctx: EvalContext): Promise<string> {
-  const ast = parse(code, { startRule: "Start" });
-  return evaluate(ast as Parameters<typeof evaluate>[0], ctx);
 }
 
 async function cleanup(...ids: string[]) {
@@ -80,26 +78,26 @@ Deno.test("softcode/tag — tag() returns dbref when tag exists", OPTS, async ()
   const ctx = makeCtx(actor, {
     getTagById: async (name) => name === tagName ? "42" : null,
   });
-  assertEquals(await run(`[tag(${tagName})]`, ctx), "#42");
+  assertEquals(await runSoftcode(`[tag(${tagName})]`, ctx), "#42");
   await cleanup(tagName);
 });
 
 Deno.test("softcode/tag — tag() returns #-1 when tag missing", OPTS, async () => {
   const actor = makeObj("1", "Wizard", ["player", "wizard"]);
   const ctx = makeCtx(actor, { getTagById: async () => null });
-  assertEquals(await run("[tag(no_such_tag)]", ctx), "#-1");
+  assertEquals(await runSoftcode("[tag(no_such_tag)]", ctx), "#-1");
 });
 
 Deno.test("softcode/tag — istag() returns 1 when set", OPTS, async () => {
   const actor = makeObj("1", "Wizard", ["player", "wizard"]);
   const ctx = makeCtx(actor, { getTagById: async (n) => n === "myroom" ? "5" : null });
-  assertEquals(await run("[istag(myroom)]", ctx), "1");
+  assertEquals(await runSoftcode("[istag(myroom)]", ctx), "1");
 });
 
 Deno.test("softcode/tag — istag() returns 0 when not set", OPTS, async () => {
   const actor = makeObj("1", "Wizard", ["player", "wizard"]);
   const ctx = makeCtx(actor, { getTagById: async () => null });
-  assertEquals(await run("[istag(noroom)]", ctx), "0");
+  assertEquals(await runSoftcode("[istag(noroom)]", ctx), "0");
 });
 
 Deno.test("softcode/tag — tagmatch() returns 1 when obj matches tag", OPTS, async () => {
@@ -108,8 +106,8 @@ Deno.test("softcode/tag — tagmatch() returns 1 when obj matches tag", OPTS, as
     getTagById:  async (n) => n === "home" ? "99" : null,
     queryByName: async () => null,
   });
-  // me resolves to actor id "99", tag "home" maps to "99"
-  assertEquals(await run("[tagmatch(me,home)]", ctx), "1");
+  // me resolves to actor id "99"; tag "home" maps to "99"
+  assertEquals(await runSoftcode("[tagmatch(me,home)]", ctx), "1");
 });
 
 Deno.test("softcode/tag — tagmatch() returns 0 when no match", OPTS, async () => {
@@ -118,7 +116,7 @@ Deno.test("softcode/tag — tagmatch() returns 0 when no match", OPTS, async () 
     getTagById:  async (n) => n === "home" ? "50" : null,
     queryByName: async () => null,
   });
-  assertEquals(await run("[tagmatch(me,home)]", ctx), "0");
+  assertEquals(await runSoftcode("[tagmatch(me,home)]", ctx), "0");
 });
 
 // ── ltag() / isltag() ─────────────────────────────────────────────────────
@@ -128,13 +126,13 @@ Deno.test("softcode/ltag — ltag() returns dbref when personal tag exists", OPT
   const ctx = makeCtx(actor, {
     getPlayerTagById: async (aid, name) => (aid === "10" && name === "safehouse") ? "77" : null,
   });
-  assertEquals(await run("[ltag(safehouse)]", ctx), "#77");
+  assertEquals(await runSoftcode("[ltag(safehouse)]", ctx), "#77");
 });
 
 Deno.test("softcode/ltag — ltag() returns #-1 when not set", OPTS, async () => {
   const actor = makeObj("10", "Player", ["player"]);
   const ctx = makeCtx(actor, { getPlayerTagById: async () => null });
-  assertEquals(await run("[ltag(nope)]", ctx), "#-1");
+  assertEquals(await runSoftcode("[ltag(nope)]", ctx), "#-1");
 });
 
 Deno.test("softcode/ltag — isltag() returns 1 when set", OPTS, async () => {
@@ -142,13 +140,13 @@ Deno.test("softcode/ltag — isltag() returns 1 when set", OPTS, async () => {
   const ctx = makeCtx(actor, {
     getPlayerTagById: async (aid, name) => (aid === "10" && name === "base") ? "5" : null,
   });
-  assertEquals(await run("[isltag(base)]", ctx), "1");
+  assertEquals(await runSoftcode("[isltag(base)]", ctx), "1");
 });
 
 Deno.test("softcode/ltag — isltag() returns 0 when not set", OPTS, async () => {
   const actor = makeObj("10", "Player", ["player"]);
   const ctx = makeCtx(actor, { getPlayerTagById: async () => null });
-  assertEquals(await run("[isltag(nowhere)]", ctx), "0");
+  assertEquals(await runSoftcode("[isltag(nowhere)]", ctx), "0");
 });
 
 // ── #tagname resolution in object functions ───────────────────────────────
@@ -161,7 +159,7 @@ Deno.test("softcode/tag — #tagname in name() resolves via global tag", OPTS, a
     getPlayerTagById: async () => null,
     queryById:        async (id) => id === "55" ? tagged : null,
   });
-  assertEquals(await run("[name(#citadel)]", ctx), "TheCitadel");
+  assertEquals(await runSoftcode("[name(#citadel)]", ctx), "TheCitadel");
 });
 
 Deno.test("softcode/tag — personal tag shadows global tag in #tagname", OPTS, async () => {
@@ -177,8 +175,7 @@ Deno.test("softcode/tag — personal tag shadows global tag in #tagname", OPTS, 
       return null;
     },
   });
-  // Personal tag should win
-  assertEquals(await run("[name(#myplace)]", ctx), "PersonalTarget");
+  assertEquals(await runSoftcode("[name(#myplace)]", ctx), "PersonalTarget");
 });
 
 // ── Tag cleanup on object:destroyed ──────────────────────────────────────
@@ -186,19 +183,15 @@ Deno.test("softcode/tag — personal tag shadows global tag in #tagname", OPTS, 
 Deno.test("softcode/tag — object:destroyed removes global and personal tags", OPTS, async () => {
   const objId = "tag_cleanup_test_obj";
 
-  // Seed a global tag and a personal tag pointing to the same object
   await serverTags.create({ id: "cleanup_gtag", name: "cleanup_gtag", objectId: objId, setterId: "1", createdAt: Date.now() });
   await playerTags.create({ id: `p1:cleanup_ltag`, name: "cleanup_ltag", ownerId: "p1", objectId: objId, createdAt: Date.now() });
 
-  // Verify they exist
   const before_g = await serverTags.queryOne({ id: "cleanup_gtag" });
   const before_p = await playerTags.queryOne({ id: "p1:cleanup_ltag" });
   assertEquals(before_g?.objectId, objId);
   assertEquals(before_p?.objectId, objId);
 
-  // Fire the object:destroyed event
   const { gameHooks } = await import("../src/services/Hooks/GameHooks.ts");
-  // Importing hooks/index.ts triggers the listener registration
   await import("../src/services/Hooks/index.ts");
   await gameHooks.emit("object:destroyed", {
     objectId:   objId,
@@ -208,7 +201,6 @@ Deno.test("softcode/tag — object:destroyed removes global and personal tags", 
     actorName:  "Wizard",
   });
 
-  // Small delay for async cleanup
   await new Promise(r => setTimeout(r, 50));
 
   const after_g = await serverTags.queryOne({ id: "cleanup_gtag" });
