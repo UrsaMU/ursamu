@@ -24,3 +24,8 @@ export function register(names: string | string[], fn: StdlibFn): void {
 export function lookup(name: string): StdlibFn | undefined {
   return _registry.get(name.toLowerCase());
 }
+
+/** Iterate all registered function names and their implementations. */
+export function entries(): IterableIterator<[string, StdlibFn]> {
+  return _registry.entries();
+}

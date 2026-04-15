@@ -1,8 +1,8 @@
 // deno-lint-ignore-file require-await
 import { register } from "./registry.ts";
 import type { EvalContext } from "../context.ts";
-import { evaluate } from "../evaluator.ts";
-import { parse } from "../parser.ts";
+import type { UrsaEvalContext } from "../ursamu-context.ts";
+import { toLibCtx } from "../ursamu-context.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────
 
@@ -36,7 +36,8 @@ register("corbool", async (a) => a.some(truthy) ? "1" : "0");
 
 register("andflags", async (_a, ctx: EvalContext) => {
   // andflags(obj, flaglist) — all flags present?
-  const obj = await ctx.db.queryById(_a[0]?.replace(/^#/,"") ?? "");
+  const uctx = ctx as unknown as UrsaEvalContext;
+  const obj = await uctx.db.queryById(_a[0]?.replace(/^#/,"") ?? "");
   if (!obj) return "0";
   const flags = _a[1] ?? "";
   for (const f of flags.split("")) {
@@ -45,7 +46,8 @@ register("andflags", async (_a, ctx: EvalContext) => {
   return "1";
 });
 register("orflags", async (_a, ctx: EvalContext) => {
-  const obj = await ctx.db.queryById(_a[0]?.replace(/^#/,"") ?? "");
+  const uctx = ctx as unknown as UrsaEvalContext;
+  const obj = await uctx.db.queryById(_a[0]?.replace(/^#/,"") ?? "");
   if (!obj) return "0";
   const flags = _a[1] ?? "";
   for (const f of flags.split("")) {
@@ -97,8 +99,9 @@ register("null",    async () => "");
 async function reeval(str: string, ctx: EvalContext): Promise<string> {
   if (!str) return "";
   try {
-    const ast = parse(str);
-    return await evaluate(ast as Parameters<typeof evaluate>[0], { ...ctx, depth: ctx.depth + 1 });
+    const uctx = ctx as unknown as UrsaEvalContext;
+    const subCtx: UrsaEvalContext = { ...uctx, depth: uctx.depth + 1 };
+    return await uctx._engine.evalString(str, toLibCtx(subCtx));
   } catch {
     return "";
   }
