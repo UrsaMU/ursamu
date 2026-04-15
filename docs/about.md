@@ -163,7 +163,7 @@ The WebSocket hub enforces **10 commands per second** per connection. Excess com
 | Web framework | Hono / Oak |
 | Database | dbojs (embedded, file-backed) |
 | Scripting | Web Workers (sandboxed ESM) |
-| Testing | `deno test` — 450 tests, 0 failures |
+| Testing | `deno test` — 1141 tests, 0 failures |
 | Docs | Lume (static site generator) |
 | CI | GitHub Actions |
 
@@ -183,10 +183,10 @@ The WebSocket hub enforces **10 commands per second** per connection. Excess com
 
 ## Project Status
 
-UrsaMU is at **v1.4.3**.
+UrsaMU is at **v2.0.0**.
 
-- **Test suite**: 450 passing, 0 failing
-- **Core systems**: complete (commands, sandbox, WebSocket, Discord, scenes, channels, security hardening)
+- **Test suite**: 1141 passing, 0 failing
+- **Core systems**: complete (commands, sandbox, WebSocket, Discord, scenes, channels, softcode engine, zone system, security hardening)
 - **Status**: actively maintained, published on JSR
 
 The project is open-source under the MIT License. Contributions are welcome!

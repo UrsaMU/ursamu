@@ -10,7 +10,7 @@ templateEngine: [vto, md]
 
   <div class="version-badge" style="cursor:default">
     <svg width="10" height="10" viewBox="0 0 10 10" fill="var(--primary-light)"><circle cx="5" cy="5" r="5"/></svg>
-    v1.5.0 &nbsp;&bull;&nbsp; MIT License
+    v2.0.0 &nbsp;&bull;&nbsp; MIT License
   </div>
 
   <h1>A Modern MUSH Server</h1>

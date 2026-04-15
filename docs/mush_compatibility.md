@@ -9,6 +9,8 @@ description: What UrsaMU supports compared to traditional MUSH servers like Penn
 UrsaMU is **not a drop-in replacement** for PennMUSH, TinyMUSH, or MUX2. It is a fresh platform with a different architecture — WebSocket-native, TypeScript, sandboxed scripts instead of MUSHcode.
 
 If you are migrating from a traditional MUSH or hosting your first server, this page tells you exactly what works today and what is planned.
+
+> Updated for v2.0.0.
 ---
 
 ## What Works Today
@@ -64,6 +66,18 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | `@tag` / `@ltag` | ✅ Working | Global and personal named-object registry (RhostMUSH-style) |
 | `@switch` | ✅ Working | Eval value as softcode, compare cases, execute matching action |
 | `@dolist` | ✅ Working | Iterate a softcode list, execute action per item with `##`/`#@` |
+| `@if <expr>=<true>[,<false>]` | ✅ Working | Conditional action command |
+| `@while <expr>=<action>` | ✅ Working | Loop while expression is true (100ms timeout enforced) |
+| `@break` | ✅ Working | Exit current `@dolist` or `@while` |
+| `@wait <seconds>=<action>` | ✅ Working | Delay an action |
+| `@function <name>=<obj>/<attr>` | ✅ Working | Define a global softcode user function |
+| `@cpattr` / `@mvattr` | ✅ Working | Copy / move attributes between objects |
+| `@grep <obj>=<pattern>` | ✅ Working | Search object attributes by name pattern |
+| `@decompile <obj>` | ✅ Working | Dump object as copyable `@name`/`&ATTR` lines |
+| `@ps` | ✅ Working | List pending `@wait` jobs |
+| `@drain <obj>` | ✅ Working | Cancel all pending `@wait` jobs on an object |
+| `@notify <obj>[/<sem>][=<count>]` | ✅ Working | Signal a semaphore |
+| Zone system (`@zone`) | ✅ Working | Assign objects to a zone master for shared `$`-pattern routing |
 | `$pattern` attrs | ✅ Working | Objects respond to player input via `$<glob>:<action>` attributes; captures map to `%0`–`%9` |
 | `^pattern` attrs (MONITOR) | ✅ Working | MONITOR-flagged objects listen to room speech/poses via `^<glob>` attributes; captures map to `%0`–`%9` |
 ---
