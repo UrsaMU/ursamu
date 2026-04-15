@@ -1,7 +1,8 @@
 /**
  * @module commands/world-building
  *
- * Builder-level world commands: @find, @flags, @teleport, @stats, @time, @entrances
+ * Builder-level world commands: @find, @flags, @teleport, @stats, @time, @entrances,
+ * @desc, @parent, @link, @clone, @dest, @aconnect, @adisconnect, @startup, @daily, @log
  * Registered via the default export; exec functions live in world.ts.
  */
 
@@ -13,6 +14,16 @@ import {
   execStats,
   execTime,
   execEntrances,
+  execDesc,
+  execParent,
+  execLink,
+  execClone,
+  execDest,
+  execAconnect,
+  execAdisconnect,
+  execStartup,
+  execDaily,
+  execLog,
 } from "./world.ts";
 
 addCmd({
@@ -121,4 +132,136 @@ Examples:
   @entrances
   @entrances Lobby`,
   exec: execEntrances,
+});
+
+addCmd({
+  name: "@desc",
+  pattern: /^@?desc(?:ribe)?\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@desc <target>=<description>  — Set the description of an object.
+
+Examples:
+  @desc me=A tall figure in dark robes.
+  @desc here=A cozy room lit by firelight.`,
+  exec: execDesc,
+});
+
+addCmd({
+  name: "@parent",
+  pattern: /^@?parent\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@parent <target>=<parent>  — Set the parent object for attribute inheritance.
+
+Use an empty value to clear the parent.
+
+Examples:
+  @parent #5=#10
+  @parent widget=ParentObj
+  @parent #5=`,
+  exec: execParent,
+});
+
+addCmd({
+  name: "@link",
+  pattern: /^@?link\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@link <target>=<destination>  — Set the home/destination of an object or exit.
+
+Examples:
+  @link me=Lobby
+  @link north exit=#5`,
+  exec: execLink,
+});
+
+addCmd({
+  name: "@clone",
+  pattern: /^@?clone\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@clone <target>[=<new name>]  — Clone an object with all its attributes.
+
+The clone is placed in your inventory. Owner is set to you.
+
+Examples:
+  @clone Sword
+  @clone #5=Vorpal Sword`,
+  exec: execClone,
+});
+
+addCmd({
+  name: "@dest",
+  pattern: /^@?dest(?:ruct)?(?:\/(\w+))?\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@dest <target>          — Destroy an object immediately (no confirmation).
+@dest/instant <target>  — Same as @dest (instant flag accepted for compatibility).
+
+Examples:
+  @dest #15
+  @dest/instant BadObject`,
+  exec: execDest,
+});
+
+addCmd({
+  name: "@aconnect",
+  pattern: /^@?aconnect\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@aconnect <target>=<action>  — Set action executed when a player connects.
+
+Examples:
+  @aconnect me=@pemit me=Welcome back!`,
+  exec: execAconnect,
+});
+
+addCmd({
+  name: "@adisconnect",
+  pattern: /^@?adisconnect\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@adisconnect <target>=<action>  — Set action executed when a player disconnects.
+
+Examples:
+  @adisconnect me=@pemit me=Goodbye!`,
+  exec: execAdisconnect,
+});
+
+addCmd({
+  name: "@startup",
+  pattern: /^@?startup\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@startup <target>=<action>  — Set action executed when the server starts.
+
+Examples:
+  @startup #5=@pemit me=System ready.`,
+  exec: execStartup,
+});
+
+addCmd({
+  name: "@daily",
+  pattern: /^@?daily\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@daily <target>=<action>  — Set action executed once per day.
+
+Examples:
+  @daily #5=@trigger me/RESET`,
+  exec: execDaily,
+});
+
+addCmd({
+  name: "@log",
+  pattern: /^@?log(?:\/\S+)?\s+(.*)/i,
+  lock: "connected",
+  category: "Information",
+  help: `@log [<object>=]<message>  — Write a message to the server log.
+
+Examples:
+  @log Something happened.
+  @log reqlog=Player requested item.`,
+  exec: execLog,
 });

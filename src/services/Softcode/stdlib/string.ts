@@ -454,3 +454,28 @@ function spellNumber(n: number): string {
   if (n < 1_000_000) return spellNumber(Math.floor(n/1000)) + " thousand" + (n%1000 ? " " + spellNumber(n%1000) : "");
   return String(n);
 }
+
+// ── align ─────────────────────────────────────────────────────────────────────
+// align(widths, cols...) — columnar layout. widths is a space-separated list of
+// column widths. Positive = left-justified, negative = right-justified.
+// e.g. align(10 -8, "Name", "Value")
+
+register("align", async (a) => {
+  const widthSpecs = (a[0] ?? "").trim().split(/\s+/);
+  const cols       = a.slice(1);
+  const parts: string[] = [];
+  for (let i = 0; i < widthSpecs.length; i++) {
+    const w    = int(widthSpecs[i] ?? "0");
+    const text = stripAnsi(cols[i] ?? "");
+    if (w === 0) { parts.push(text); continue; }
+    const abs  = Math.abs(w);
+    if (text.length >= abs) {
+      parts.push(text.slice(0, abs));
+    } else if (w > 0) {
+      parts.push(text + " ".repeat(abs - text.length));   // left-justify
+    } else {
+      parts.push(" ".repeat(abs - text.length) + text);   // right-justify
+    }
+  }
+  return parts.join("");
+});

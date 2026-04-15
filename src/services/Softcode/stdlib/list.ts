@@ -362,3 +362,35 @@ async function callUserAttr(attr: string, args: string[], ctx: EvalContext): Pro
   const subCtx = makeSubCtx(uctx, obj, args, false);
   return uctx._engine.evalString(code, toLibCtx(subCtx));
 }
+
+// ── iter context accessors ────────────────────────────────────────────────────
+// itext(n) — current item at iter depth n (0 = innermost)
+// inum(n)  — 1-based position counter at iter depth n (0 = innermost)
+
+register("itext", async (a, ctx) => {
+  const uctx  = ctx as unknown as UrsaEvalContext;
+  const n     = int(a[0] ?? "0");
+  const stack = uctx.iterStack;
+  const frame = stack[stack.length - 1 - n];
+  return frame?.item ?? "";
+});
+
+register("inum", async (a, ctx) => {
+  const uctx  = ctx as unknown as UrsaEvalContext;
+  const n     = int(a[0] ?? "0");
+  const stack = uctx.iterStack;
+  const frame = stack[stack.length - 1 - n];
+  return frame ? String((frame as unknown as { index?: number }).index ?? 0) : "0";
+});
+
+// ── elist ─────────────────────────────────────────────────────────────────────
+// elist(list, conj, delim) → "A, B, and C"  (Oxford comma style)
+
+register("elist", async (a) => {
+  const items = split(a[0] ?? "", a[2]).filter(s => s.trim() !== "");
+  const conj  = a[1] ?? "and";
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} ${conj} ${items[1]}`;
+  return items.slice(0, -1).join(", ") + `, ${conj} ` + items[items.length - 1];
+});

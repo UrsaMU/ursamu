@@ -173,6 +173,14 @@ register("objeval", async (a, ctx) => {
   subCtx.depth = uctx.depth + 1;
   return uctx._engine.evalString(code, toLibCtx(subCtx));
 });
+// hasattrval(obj, attr) — 1 if attr is set and non-empty, 0 otherwise
+register("hasattrval", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  const val = await (ctx as unknown as UrsaEvalContext).db.getAttribute(obj, (a[1] ?? "").toUpperCase());
+  return val !== null && val !== "" ? "1" : "0";
+});
+
 register("zfun", async (a, ctx) => {
   // zfun(attr, args...) — call attr on zone master object
   const uctx   = ctx as unknown as UrsaEvalContext;
