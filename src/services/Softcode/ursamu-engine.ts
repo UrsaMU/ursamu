@@ -112,13 +112,33 @@ if (_iterImpl) {
 }
 
 // ── Register all UrsaMU stdlib functions ──────────────────────────────────────
-// Override generic ones where UrsaMU has richer implementations.
-// Skip functions handled specially above (lazy or custom thunk-based).
+// Skip any function already correctly provided by registerStdlib() above.
+// UrsaMU only needs to add functions that are absent from the new lib or that
+// require IDBObj context / richer semantics (u, get, name, hasattr, hasflag, setq).
 const SKIP_NAMES = new Set([
-  "iter",      // handled by new lib with lazy thunks
-  "parse",     // aliased to iter above
-  "localize",  // registered as lazy FunctionImpl above
-  // setq/setr/r: UrsaMU's setq supports multi-register pairs, override generic
+  // Already handled as lazy FunctionImpl above
+  "iter", "parse", "localize",
+
+  // Pure math — new lib covers these exactly
+  "add", "sub", "mul", "div", "mod", "abs", "round", "floor", "ceil",
+  "max", "min", "power", "sqrt",
+
+  // Pure string — new lib covers these exactly
+  "strlen", "mid", "left", "right", "trim",
+  "ljust", "rjust", "center", "ucstr", "lcstr", "capstr", "cat", "space", "repeat",
+
+  // Pure comparison — new lib covers these exactly
+  "eq", "neq", "gt", "gte", "lt", "lte",
+
+  // Logic — new lib handles lazy short-circuit evaluation correctly
+  "if", "ifelse", "switch", "and", "or", "not", "t",
+
+  // Register — new lib's r/setr are fine; setq is skipped because UrsaMU's
+  // version supports variadic pairs: setq(r1,v1,r2,v2,...) which new lib does not.
+  "r", "setr",
+
+  // Iter list helpers — new lib covers these exactly
+  "words", "word", "first", "last", "rest",
 ]);
 
 for (const [name, fn] of entries()) {
