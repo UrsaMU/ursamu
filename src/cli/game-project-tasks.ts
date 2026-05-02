@@ -14,7 +14,8 @@ export const GAME_PROJECT_TASKS: Record<string, string> = {
   "update":  "deno run -A jsr:@ursamu/ursamu/cli update",
   "server":  "deno run -A --watch --unstable-detect-cjs --unstable-kv --unstable-net ./src/main.ts",
   "telnet":  "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/telnet.ts",
-  "test":    "deno test --allow-all --unstable-kv --no-check",
+  "test":     "deno test --allow-all --unstable-kv --no-check",
+  "showcase": "deno run -A ./src/cli/showcase.ts",
 };
 
 /** Default plugins.manifest.json written into new projects and restored by update. */

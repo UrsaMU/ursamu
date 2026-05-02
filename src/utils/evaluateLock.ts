@@ -1,4 +1,6 @@
 import { sandboxService } from "../services/Sandbox/SandboxService.ts";
+
+const MAX_LOCK_DEPTH = 10;
 import { flags } from "../services/flags/flags.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IDBObj } from "../@types/UrsamuSDK.ts";
@@ -10,7 +12,7 @@ export const evaluateLock = async (
   target: IDBObj,
   depth = 0
 ): Promise<boolean> => {
-  if (depth > 10) return false; // Prevent infinite recursion
+  if (depth > MAX_LOCK_DEPTH) return false;
   return await parseLock(lockStr, enactor, target, false, depth);
 };
 

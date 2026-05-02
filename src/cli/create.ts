@@ -64,6 +64,16 @@ if (args._[0]?.toString() === "plugin") {
 
 // ── game project scaffold ──────────────────────────────────────────────────────
 const projectName = args._[0].toString();
+
+// Reject names that could create paths outside cwd or break deno.json task strings.
+if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(projectName)) {
+  console.error(
+    `Error: Invalid project name "${projectName}". ` +
+    `Use only letters, numbers, hyphens, underscores, and dots.`
+  );
+  Deno.exit(1);
+}
+
 const targetDir   = join(currentDir, projectName);
 const isLocal     = Boolean(args["local"]);
 

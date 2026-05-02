@@ -8,7 +8,6 @@
 import { EvalEngine, registerStdlib } from "@ursamu/mushcode/eval";
 import type {
   ObjectAccessor,
-  EvalContext,
   FunctionImpl,
   EvalThunk,
 } from "@ursamu/mushcode/eval";
@@ -17,7 +16,6 @@ import {
   snapshotRegisters,
   restoreRegisters,
   toLibCtx,
-  makeSubCtx,
 } from "./ursamu-context.ts";
 
 // Import all UrsaMU stdlib modules (side-effect registrations into _registry).
@@ -310,7 +308,7 @@ _engine.registerSub(
 
 // ── @command fallback — all @commands forward to main thread via sentinel ─────
 
-_engine.registerCommandFallback(async (name, switches, object, value, ctx) => {
+_engine.registerCommandFallback((name, switches, object, value, ctx) => {
   const uctx = ctx as unknown as UrsaEvalContext;
   const sw   = switches.map((s) => `/${s}`).join("");
   const body = value !== null ? `${object ?? ""}=${value}` : (object ?? "");
@@ -321,7 +319,7 @@ _engine.registerCommandFallback(async (name, switches, object, value, ctx) => {
 // ── &ATTR handler — attribute setting sentinel ────────────────────────────────
 
 _engine.registerCommand("&", {
-  async exec(_switches, object, value, ctx) {
+  exec(_switches, object, value, ctx) {
     const uctx = ctx as unknown as UrsaEvalContext;
     // value = "ATTRNAME=attrvalue" (from AttributeSet node), object = objectref
     const eqIdx   = (value ?? "").indexOf("=");

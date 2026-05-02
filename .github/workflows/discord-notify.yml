@@ -14,68 +14,105 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Collect event metadata
+        id: meta
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          COMMIT_AUTHOR: ${{ github.event.head_commit.author.name }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "commit_msg<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$COMMIT_MSG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "commit_author=$COMMIT_AUTHOR" >> "$GITHUB_OUTPUT"
+          echo "commit_url=$COMMIT_URL" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
+          echo "release_body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$RELEASE_BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "issue_title=$ISSUE_TITLE" >> "$GITHUB_OUTPUT"
+          echo "issue_url=$ISSUE_URL" >> "$GITHUB_OUTPUT"
+          echo "issue_body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$ISSUE_BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "pr_title=$PR_TITLE" >> "$GITHUB_OUTPUT"
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "pr_body<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$PR_BODY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
       - name: Push to main
         if: github.event_name == 'push'
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
           title: "🔨 New commit on main"
           description: |
-            **${{ github.event.head_commit.message }}**
-            by ${{ github.event.head_commit.author.name }}
-          url: ${{ github.event.head_commit.url }}
+            **${{ steps.meta.outputs.commit_msg }}**
+            by ${{ steps.meta.outputs.commit_author }}
+          url: ${{ steps.meta.outputs.commit_url }}
           color: 0x5865F2
           nodetail: true
 
       - name: Release published
         if: github.event_name == 'release'
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "🚀 UrsaMU ${{ github.event.release.tag_name }} released"
-          description: ${{ github.event.release.body }}
-          url: ${{ github.event.release.html_url }}
+          title: "🚀 UrsaMU ${{ steps.meta.outputs.release_tag }} released"
+          description: ${{ steps.meta.outputs.release_body }}
+          url: ${{ steps.meta.outputs.release_url }}
           color: 0x57F287
           nodetail: true
 
       - name: Issue opened
         if: github.event_name == 'issues' && github.event.action == 'opened'
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "🐛 Issue opened: ${{ github.event.issue.title }}"
-          description: ${{ github.event.issue.body }}
-          url: ${{ github.event.issue.html_url }}
+          title: "🐛 Issue opened: ${{ steps.meta.outputs.issue_title }}"
+          description: ${{ steps.meta.outputs.issue_body }}
+          url: ${{ steps.meta.outputs.issue_url }}
           color: 0xED4245
           nodetail: true
 
       - name: Issue closed
         if: github.event_name == 'issues' && github.event.action == 'closed'
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "✅ Issue closed: ${{ github.event.issue.title }}"
-          url: ${{ github.event.issue.html_url }}
+          title: "✅ Issue closed: ${{ steps.meta.outputs.issue_title }}"
+          url: ${{ steps.meta.outputs.issue_url }}
           color: 0x57F287
           nodetail: true
 
       - name: PR opened
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "📬 PR opened: ${{ github.event.pull_request.title }}"
-          description: ${{ github.event.pull_request.body }}
-          url: ${{ github.event.pull_request.html_url }}
+          title: "📬 PR opened: ${{ steps.meta.outputs.pr_title }}"
+          description: ${{ steps.meta.outputs.pr_body }}
+          url: ${{ steps.meta.outputs.pr_url }}
           color: 0xFEE75C
           nodetail: true
 
       - name: PR merged
         if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
-        uses: sarisia/actions-status-discord@v1
+        uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "🔀 PR merged: ${{ github.event.pull_request.title }}"
-          url: ${{ github.event.pull_request.html_url }}
+          title: "🔀 PR merged: ${{ steps.meta.outputs.pr_title }}"
+          url: ${{ steps.meta.outputs.pr_url }}
           color: 0x57F287
           nodetail: true

@@ -370,7 +370,7 @@ export async function execDest(u: IUrsamuSDK): Promise<void> {
 
 // ── @log ──────────────────────────────────────────────────────────────────────
 // @log[/<file>] [<object>=]<message>
-export async function execLog(u: IUrsamuSDK): Promise<void> {
+export function execLog(u: IUrsamuSDK): void {
   const raw = (u.cmd.args[0] || "").trim();
   // Support both "@log msg" and "@log obj=msg" forms; just log the message.
   const eqIdx = raw.indexOf("=");

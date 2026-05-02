@@ -30,9 +30,9 @@ export function formatString(input: string, length = 30): string {
 
 /** Format a stat label + numeric value as a MUSH-colored key...value line. */
 export const formatStat = (stat: string, value: unknown, width = 24, right = false): string => {
-  const valStr    = String(value ?? "") || "";
-  const hasVal    = +valStr ? "" : `%ch%cx`;
-  const valDisplay = +valStr !== 0 ? `%ch${valStr}%cn` : `%ch%cx0%cn`;
+  const valStr     = String(value ?? "");
+  const hasVal     = valStr !== "" && valStr !== "0" ? "" : "%ch%cx";
+  const valDisplay = valStr !== "" && valStr !== "0" ? `%ch${valStr}%cn` : "%ch%cx0%cn";
   if (!right) {
     return ljust(`${hasVal}${capString(stat)}`, width - (valStr.length || 1), "%ch%cx.%cn") + valDisplay;
   }
@@ -108,30 +108,30 @@ export const ljust = (string = "", length: number, filler = " ") => {
 };
 
 export const center = (string = "", length: number, filler = " ") => {
-  const left = Math.floor(
-    (length - parser.stripSubs("telnet", string).length) / 2
-  );
-  const right = length - parser.stripSubs("telnet", string).length - left;
+  const strLen = parser.stripSubs("telnet", string).length;
+  const left   = Math.floor((length - strLen) / 2);
+  const right  = length - strLen - left;
   return repeatString(filler, left) + string + repeatString(filler, right);
 };
 
-export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
-  const truncate = (input: string, size: number, fill: string) => {
-    if (size <= 3) return input.substring(0, size);
-    const length = parser.stripSubs("telnet", input).length;
-    return length > size - 3
-      ? `${input.substring(0, size - 3)}...`
-      : input + fill.repeat(size - length);
-  };
+/** Pad or truncate `input` to exactly `size` visible characters, using `fill` for padding. */
+function truncateCell(input: string, size: number, fill: string): string {
+  if (size <= 3) return input.substring(0, size);
+  const length = parser.stripSubs("telnet", input).length;
+  return length > size - 3
+    ? `${input.substring(0, size - 3)}...`
+    : input + fill.repeat(size - length);
+}
 
+export const columns = (list: string[], width = 78, cols = 3, fill = " ") => {
   const cell = Math.floor(width / cols);
   let counter = 0;
   let output = "%r%b";
   for (const item of list) {
     if (counter < cols) {
-      output += truncate(item, cell, fill);
+      output += truncateCell(item, cell, fill);
     } else {
-      output += "%r%b" + truncate(item, cell, fill);
+      output += "%r%b" + truncateCell(item, cell, fill);
       counter = 0;
     }
     counter++;
@@ -146,21 +146,13 @@ export const threeColumn = (...lists: string[][]) => {
   // exhausted.  If the list is shorter than the longest list, pad it with empty
   // strings.
 
-  const truncate = (input: string, size: number, fill: string) => {
-    if (size <= 3) return input.substring(0, size);
-    const length = parser.stripSubs("telnet", input).length;
-    return length > size - 3
-      ? `${input.substring(0, size - 3)}...`
-      : input + fill.repeat(size - length);
-  };
-
   const cols = lists.length;
   const cell = Math.floor(78 / cols);
   const longest = Math.max(...lists.map((list) => list.length));
   let output = "%r%b";
   for (let i = 0; i < longest; i++) {
     for (let j = 0; j < cols; j++) {
-      output += truncate(lists[j][i] || "", cell, " ");
+      output += truncateCell(lists[j][i] || "", cell, " ");
     }
     output += "%r%b";
   }

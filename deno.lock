@@ -3,6 +3,7 @@
   "specifiers": {
     "jsr:@std/assert@*": "0.224.0",
     "jsr:@std/assert@0.224": "0.224.0",
+    "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.17": "1.0.19",
     "jsr:@std/collections@0.224": "0.224.2",
     "jsr:@std/dotenv@0.224": "0.224.0",
@@ -13,11 +14,13 @@
     "jsr:@std/front-matter@0.224.0": "0.224.0",
     "jsr:@std/fs@0.224": "0.224.0",
     "jsr:@std/fs@0.224.0": "0.224.0",
+    "jsr:@std/fs@1": "1.0.23",
     "jsr:@std/internal@0.224": "0.224.0",
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/path@*": "1.1.4",
     "jsr:@std/path@0.224": "0.224.0",
     "jsr:@std/path@0.224.0": "0.224.0",
+    "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@std/semver@1": "1.0.8",
     "jsr:@std/testing@*": "1.0.17",
     "jsr:@std/testing@^1.0.17": "1.0.17",
@@ -37,12 +40,13 @@
     "npm:@ursamu/parser@1.2.4": "1.2.4",
     "npm:autoprefixer@10.4.16": "10.4.16_postcss@8.4.38",
     "npm:autoprefixer@10.4.19": "10.4.19_postcss@8.4.38",
+    "npm:bcrypt@*": "6.0.0",
     "npm:bcryptjs@2.4.3": "2.4.3",
     "npm:date-fns@2.30.0": "2.30.0",
     "npm:date-fns@3.6.0": "3.6.0",
     "npm:discordeno@18.0.1": "18.0.1",
     "npm:estree-walker@3.0.3": "3.0.3",
-    "npm:lodash@^4.18.1": "4.18.1",
+    "npm:lodash@4.17.21": "4.17.21",
     "npm:markdown-it-attrs@4.1.6": "4.1.6_markdown-it@14.1.0",
     "npm:markdown-it-deflist@3.0.0": "3.0.0",
     "npm:markdown-it@13.0.2": "13.0.2",
@@ -105,6 +109,13 @@
       "dependencies": [
         "jsr:@std/assert@0.224",
         "jsr:@std/path@0.224"
+      ]
+    },
+    "@std/fs@1.0.23": {
+      "integrity": "3ecbae4ce4fee03b180fa710caff36bb5adb66631c46a6460aaad49515565a37",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.12",
+        "jsr:@std/path@^1.1.4"
       ]
     },
     "@std/internal@0.224.0": {
@@ -472,6 +483,14 @@
       "integrity": "sha512-Sg0xJUNDU1sJNGdfGWhVHX0kkZ+HWcvmVymJbj6NSgZZmW/8S9Y2HQ5euytnIgakgxN6papOAWiwDo1ctFDcoQ==",
       "bin": true
     },
+    "bcrypt@6.0.0": {
+      "integrity": "sha512-cU8v/EGSrnH+HnxV2z0J7/blxH8gq7Xh2JFT6Aroax7UohdmiJJlxApMxtKfuI7z68NvvVcmR78k2LbT6efhRg==",
+      "dependencies": [
+        "node-addon-api",
+        "node-gyp-build"
+      ],
+      "scripts": true
+    },
     "bcryptjs@2.4.3": {
       "integrity": "sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ=="
     },
@@ -741,8 +760,8 @@
         "uc.micro@2.1.0"
       ]
     },
-    "lodash@4.18.1": {
-      "integrity": "sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q=="
+    "lodash@4.17.21": {
+      "integrity": "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
     },
     "lru-cache@10.4.3": {
       "integrity": "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="
@@ -817,6 +836,13 @@
     },
     "nanoid@3.3.11": {
       "integrity": "sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==",
+      "bin": true
+    },
+    "node-addon-api@8.7.0": {
+      "integrity": "sha512-9MdFxmkKaOYVTV+XVRG8ArDwwQ77XIgIPyKASB1k3JPq3M8fGQQQE3YpMOrKm6g//Ktx8ivZr8xo1Qmtqub+GA=="
+    },
+    "node-gyp-build@4.8.4": {
+      "integrity": "sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==",
       "bin": true
     },
     "node-releases@2.0.27": {
@@ -2995,7 +3021,7 @@
       "npm:@digibear/tags@1.0.0",
       "npm:@ursamu/parser@1.2.4",
       "npm:bcryptjs@2.4.3",
-      "npm:lodash@^4.18.1",
+      "npm:lodash@4.17.21",
       "npm:quickjs-emscripten@0.29.0"
     ]
   }

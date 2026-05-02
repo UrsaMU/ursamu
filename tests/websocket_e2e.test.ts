@@ -246,11 +246,14 @@ Deno.test("WS — rate limit resets after window expires", OPTS, async () => {
 // ---------------------------------------------------------------------------
 
 Deno.test("WS — disconnect(cid) closes the matching socket", OPTS, async () => {
+  const { sign } = await import("../src/services/jwt/index.ts");
+  const token = await sign({ id: "ws_test_player_99" });
+
   const mock = makeMock("web");
 
-  // Simulate a logged-in player by setting cid via a message
-  mock.simulateMessage({ data: { cid: "ws_test_player_99" } });
-  await tick();
+  // Authenticate via JWT auth message (the only legitimate auth path)
+  mock.simulateMessage({ type: "auth", token });
+  await tick(100);
 
   wsService.disconnect("ws_test_player_99");
   await tick();

@@ -1,5 +1,4 @@
 import { register } from "./registry.ts";
-import type { EvalContext } from "../context.ts";
 
 /**
  * setq(register, value) — set a local register, return empty string.

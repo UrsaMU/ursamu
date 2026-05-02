@@ -10,10 +10,16 @@ import { existsSync } from "jsr:@std/fs@^0.224.0";
 import {
   standalonePluginIndexTs,
   standalonePluginTestTs,
-  inTreePluginDbTs,
+  inTreePluginSchemasTs,
   inTreePluginCommandsTs,
+  inTreeCommandFamilyTs,
   inTreePluginRouterTs,
   inTreePluginIndexTs,
+  inTreeHelpMd,
+  inTreePluginTestTs,
+  showcaseExampleJson,
+  standaloneShowcaseTs,
+  pluginClaude,
 } from "./create-templates.ts";
 
 export interface PluginScaffoldOpts {
@@ -66,7 +72,13 @@ async function scaffoldStandalone(
 
   await Deno.writeTextFile(
     join(targetDir, "deno.json"),
-    JSON.stringify({ tasks: { test: "deno test -A --unstable-kv" }, imports: { ursamu: "jsr:@ursamu/ursamu" } }, null, 2),
+    JSON.stringify({
+      tasks: {
+        test:     "deno test -A --unstable-kv",
+        showcase: "deno run -A tools/showcase.ts",
+      },
+      imports: { ursamu: "jsr:@ursamu/ursamu" },
+    }, null, 2),
   );
   console.log("  Created deno.json");
 
@@ -77,6 +89,17 @@ async function scaffoldStandalone(
   await Deno.writeTextFile(join(targetDir, "tests", "plugin.test.ts"), standalonePluginTestTs(name, version));
   console.log("  Created tests/plugin.test.ts");
 
+  await Deno.mkdir(join(targetDir, "showcases"));
+  await Deno.writeTextFile(join(targetDir, "showcases", `${name}.json`), showcaseExampleJson(name));
+  console.log("  Created showcases/" + name + ".json");
+
+  await Deno.mkdir(join(targetDir, "tools"));
+  await Deno.writeTextFile(join(targetDir, "tools", "showcase.ts"), standaloneShowcaseTs());
+  console.log("  Created tools/showcase.ts");
+
+  await Deno.writeTextFile(join(targetDir, "CLAUDE.md"), pluginClaude(name, true));
+  console.log("  Created CLAUDE.md");
+
   await Deno.writeTextFile(join(targetDir, ".gitignore"), `.deno/\nnode_modules/\n`);
   console.log("  Created .gitignore");
 
@@ -84,7 +107,9 @@ async function scaffoldStandalone(
 Standalone plugin "${name}" created at ./${name}/
 
   cd ${name}
-  deno task test
+  npx @lhi/ursamu-dev          # install the dev skill (do this first)
+  deno task test               # run tests
+  deno task showcase --list    # preview showcases
 
 Ship ursamu.plugin.json at the repo root so users can install via:
   ursamu plugin install https://github.com/you/${name}
@@ -109,23 +134,56 @@ async function scaffoldInTree(name: string, currentDir: string): Promise<void> {
   const varName     = toCamel(name);
   const handlerName = `${varName}RouteHandler`;
 
-  await Deno.writeTextFile(join(pluginDir, "db.ts"),       inTreePluginDbTs(name, title));
-  console.log("  Created db.ts");
-  await Deno.writeTextFile(join(pluginDir, "commands.ts"), inTreePluginCommandsTs(name));
+  // db/schemas.ts — types only, no DBO instances
+  await Deno.mkdir(join(pluginDir, "db"));
+  await Deno.writeTextFile(join(pluginDir, "db", "schemas.ts"), inTreePluginSchemasTs(name, title));
+  console.log("  Created db/schemas.ts");
+
+  // commands.ts barrel + commands/<name>.ts family stub
+  await Deno.mkdir(join(pluginDir, "commands"));
+  await Deno.writeTextFile(join(pluginDir, "commands.ts"),                   inTreePluginCommandsTs(name));
   console.log("  Created commands.ts");
-  await Deno.writeTextFile(join(pluginDir, "router.ts"),   inTreePluginRouterTs(name, handlerName));
+  await Deno.writeTextFile(join(pluginDir, "commands", `${name}.ts`),        inTreeCommandFamilyTs(name, title));
+  console.log(`  Created commands/${name}.ts`);
+
+  await Deno.writeTextFile(join(pluginDir, "router.ts"),                     inTreePluginRouterTs(name, handlerName));
   console.log("  Created router.ts");
-  await Deno.writeTextFile(join(pluginDir, "index.ts"),    inTreePluginIndexTs(name, handlerName, varName));
+  await Deno.writeTextFile(join(pluginDir, "index.ts"),                      inTreePluginIndexTs(name, handlerName, varName));
   console.log("  Created index.ts");
+
+  // help/ directory — served by help-plugin FileProvider
+  await Deno.mkdir(join(pluginDir, "help"));
+  await Deno.writeTextFile(join(pluginDir, "help", `${name}.md`), inTreeHelpMd(name));
+  console.log(`  Created help/${name}.md`);
+
+  // tests/ directory
+  await Deno.mkdir(join(pluginDir, "tests"));
+  await Deno.writeTextFile(join(pluginDir, "tests", "plugin.test.ts"), inTreePluginTestTs(name));
+  console.log("  Created tests/plugin.test.ts");
+
+  // showcases/
+  await Deno.mkdir(join(pluginDir, "showcases"));
+  await Deno.writeTextFile(join(pluginDir, "showcases", `${name}.json`), showcaseExampleJson(name));
+  console.log("  Created showcases/" + name + ".json");
+
+  await Deno.writeTextFile(join(pluginDir, "CLAUDE.md"), pluginClaude(name, false));
+  console.log("  Created CLAUDE.md");
 
   console.log(`
 Plugin '${name}' scaffolded at src/plugins/${name}/
 
-  index.ts      — plugin entry point (init, remove)
-  commands.ts   — in-game +${name} command (addCmd)
-  router.ts     — REST handler for /api/v1/${name}
-  db.ts         — custom DBO database collection
+  CLAUDE.md                   — plugin context + dev skill setup
+  index.ts                    — plugin entry point (init, remove, registerHelpDir)
+  commands.ts                 — barrel: one import per command family
+  commands/${name}.ts         — addCmd() registrations for the ${name} family
+  router.ts                   — REST handler for /api/v1/${name}
+  db/schemas.ts               — type definitions (DBO instances go in command files)
+  help/${name}.md             — in-game help text (served by help-plugin)
+  tests/plugin.test.ts        — Deno unit tests
+  showcases/${name}.json      — showcase / demo steps
 
+Next: npx @lhi/ursamu-dev  (install the dev skill)
+      deno task showcase ${name}-basic
 The plugin is auto-discovered — no registration needed.
 `);
 }

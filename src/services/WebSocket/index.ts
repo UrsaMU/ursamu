@@ -25,6 +25,8 @@ export class WebSocketService {
     // Rate limiting: max commands per window per socket
     private static readonly RATE_LIMIT = 10;
     private static readonly RATE_WINDOW_MS = 1000;
+    // Max inbound message size: 64 KiB — rejects oversized payloads before JSON.parse
+    private static readonly MAX_MSG_BYTES = 65536;
     private rateLimits: Map<string, { count: number; resetAt: number }> = new Map();
     // Per-IP connection tracking
     private connectionsPerIp: Map<string, Set<WebSocket>> = new Map();
@@ -135,6 +137,9 @@ export class WebSocketService {
 
         socket.addEventListener("message", async (event) => {
             try {
+                if (typeof event.data === "string" && event.data.length > WebSocketService.MAX_MSG_BYTES) {
+                    return;
+                }
                 const data = JSON.parse(event.data);
                 const sockData = this.socketData.get(socket);
 
@@ -159,19 +164,6 @@ export class WebSocketService {
                         // Invalid token — silently reject, socket stays unauthenticated
                     }
                     return;
-                }
-
-                // Update cid if provided (handling migration from socket.io logic)
-                // Security: only allow cid to be set when the socket has no cid yet,
-                // preventing CID spoofing/impersonation of other players.
-                if (data.data?.cid && !sockData.cid) {
-                    sockData.cid = data.data.cid;
-                    // Restore connected flag if missing
-                    const player = await playerForSocket(sockData);
-                    if (player && !player.flags.includes("connected")) {
-                        await setFlags(player, "connected");
-                        console.log(`[WS] Restored session for ${moniker(player)}`);
-                    }
                 }
 
                 // Handle disconnect request

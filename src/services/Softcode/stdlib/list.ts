@@ -2,7 +2,7 @@
 import { register } from "./registry.ts";
 import type { EvalContext } from "../context.ts";
 import type { UrsaEvalContext } from "../ursamu-context.ts";
-import { makeSubCtx, toLibCtx, isTimedOut } from "../ursamu-context.ts";
+import { makeSubCtx, toLibCtx } from "../ursamu-context.ts";
 import { int, splitList as split, joinList as join } from "./helpers.ts";
 
 // ── basic list access ─────────────────────────────────────────────────────

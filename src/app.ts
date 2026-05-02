@@ -154,6 +154,8 @@ const API_RATE_LIMIT = 30;        // max requests per window
 const API_RATE_WINDOW_MS = 10000; // 10 second window
 // Hard cap on tracked IPs — prevents memory exhaustion from IP-cycling attacks.
 const MAX_API_TRACKED_IPS = 10_000;
+// One-time flag — logs CORS wildcard warning only on first request to avoid noise.
+let _corsWildcardWarned = false;
 
 function isApiRateLimited(ip: string): boolean {
   const now = Date.now();
@@ -207,6 +209,10 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
   const origin = req.headers.get("Origin") ?? "";
   let allowOrigin: string | null = null;
   if (configured === "*") {
+    if (!_corsWildcardWarned) {
+      _corsWildcardWarned = true;
+      console.warn("[CORS] WARNING: Access-Control-Allow-Origin is set to '*' — all origins accepted. Set server.corsOrigins to an explicit origin in production.");
+    }
     allowOrigin = "*";
   } else if (configured) {
     const allowed = Array.isArray(configured) ? configured : [configured];

@@ -19,21 +19,8 @@ export async function execConnect(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  const match = await u.auth.verify(name, password);
-  if (!match) {
-    u.send("I can't find a character by that name!");
-    return;
-  }
-
-  const esc = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const results = await u.db.search({
-    $or: [
-      { "data.name": new RegExp(`^${esc}$`, "i") },
-      { "data.alias": new RegExp(`^${esc}$`, "i") },
-    ],
-  });
-
-  const player = results[0];
+  // Single lookup: verify returns the player object on success, false on failure
+  const player = await u.auth.verify(name, password);
   if (!player) {
     u.send("I can't find a character by that name!");
     return;
@@ -41,15 +28,17 @@ export async function execConnect(u: IUrsamuSDK): Promise<void> {
 
   await u.auth.login(player.id);
 
-  // Failsafe: promote first player to superuser if none exist
+  // Failsafe: promote first player to superuser if none exist.
+  // Short-circuit if this player is already a superuser, then use a targeted query.
   try {
-    const all = await u.db.search({});
-    const superusers = all.filter((o) => o.flags?.has("superuser"));
-    if (!superusers.length && !player.flags.has("superuser")) {
-      await u.setFlags(player.id, "superuser");
-      u.send("%ch%cyYou are the first user — superuser access granted.%cn");
+    if (!player.flags.has("superuser")) {
+      const superusers = await u.db.search({ flags: /superuser/ });
+      if (!superusers.length) {
+        await u.setFlags(player.id, "superuser");
+        u.send("%ch%cyYou are the first user — superuser access granted.%cn");
+      }
     }
-  } catch (e) {
+  } catch (e: unknown) {
     console.warn("auth: superuser check failed:", e);
   }
 

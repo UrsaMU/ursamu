@@ -19,14 +19,14 @@ function makeCtx(overrides: Partial<UrsaEvalContext> = {}): UrsaEvalContext {
     depth: 0, maxDepth: 50, maxOutputLen: 65_536,
     deadline: Date.now() + 5_000,
     db: {
-      getAttribute: async () => null,
-      queryById: async () => null, queryByName: async () => null,
-      lcon: async () => [], lwho: async () => [], lattr: async () => [],
-      getTagById: async () => null, getPlayerTagById: async () => null,
-      lsearch: async () => [], children: async () => [],
-      lchannels: async () => "", channelsFor: async () => "",
-      mailCount: async () => 0, queueLength: async () => 0,
-      getIdleSecs: async () => 0, getUserFn: async () => null,
+      getAttribute: () => null,
+      queryById: () => null, queryByName: () => null,
+      lcon: () => [], lwho: () => [], lattr: () => [],
+      getTagById: () => null, getPlayerTagById: () => null,
+      lsearch: () => [], children: () => [],
+      lchannels: () => "", channelsFor: () => "",
+      mailCount: () => 0, queueLength: () => 0,
+      getIdleSecs: () => 0, getUserFn: () => null,
     },
     output: { send() {}, roomBroadcast() {}, broadcast() {} },
     _engine: softcodeEngine,
@@ -108,14 +108,14 @@ Deno.test("jobs/hasattrval — returns 0 when attr missing", async () => {
 Deno.test("jobs/hasattrval — returns 1 when attr present and non-empty", async () => {
   const ctx = makeCtx({
     db: {
-      getAttribute: async (_obj, attr) => attr === "DESC" ? "A description." : null,
-      queryById: async () => null, queryByName: async () => null,
-      lcon: async () => [], lwho: async () => [], lattr: async () => [],
-      getTagById: async () => null, getPlayerTagById: async () => null,
-      lsearch: async () => [], children: async () => [],
-      lchannels: async () => "", channelsFor: async () => "",
-      mailCount: async () => 0, queueLength: async () => 0,
-      getIdleSecs: async () => 0, getUserFn: async () => null,
+      getAttribute: (_obj, attr) => attr === "DESC" ? "A description." : null,
+      queryById: () => null, queryByName: () => null,
+      lcon: () => [], lwho: () => [], lattr: () => [],
+      getTagById: () => null, getPlayerTagById: () => null,
+      lsearch: () => [], children: () => [],
+      lchannels: () => "", channelsFor: () => "",
+      mailCount: () => 0, queueLength: () => 0,
+      getIdleSecs: () => 0, getUserFn: () => null,
     },
   });
   assertEquals(await runSoftcode("[hasattrval(me,DESC)]", ctx), "1");
@@ -124,14 +124,14 @@ Deno.test("jobs/hasattrval — returns 1 when attr present and non-empty", async
 Deno.test("jobs/hasattrval — returns 0 when attr is empty string", async () => {
   const ctx = makeCtx({
     db: {
-      getAttribute: async (_obj, attr) => attr === "DESC" ? "" : null,
-      queryById: async () => null, queryByName: async () => null,
-      lcon: async () => [], lwho: async () => [], lattr: async () => [],
-      getTagById: async () => null, getPlayerTagById: async () => null,
-      lsearch: async () => [], children: async () => [],
-      lchannels: async () => "", channelsFor: async () => "",
-      mailCount: async () => 0, queueLength: async () => 0,
-      getIdleSecs: async () => 0, getUserFn: async () => null,
+      getAttribute: (_obj, attr) => attr === "DESC" ? "" : null,
+      queryById: () => null, queryByName: () => null,
+      lcon: () => [], lwho: () => [], lattr: () => [],
+      getTagById: () => null, getPlayerTagById: () => null,
+      lsearch: () => [], children: () => [],
+      lchannels: () => "", channelsFor: () => "",
+      mailCount: () => 0, queueLength: () => 0,
+      getIdleSecs: () => 0, getUserFn: () => null,
     },
   });
   assertEquals(await runSoftcode("[hasattrval(me,DESC)]", ctx), "0");
