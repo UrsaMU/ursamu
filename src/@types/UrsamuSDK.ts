@@ -73,7 +73,7 @@ export interface IUrsamuSDK {
   checkLock(target: string | IDBObj, lock: string): Promise<boolean>;
   intercept?(intent: { name: string, actorId: string, targetId?: string, args: string[] }): boolean | void;
   auth: {
-    verify(name: string, password: string): Promise<boolean>;
+    verify(name: string, password: string): Promise<IDBObj | false>;
     login(id: string): Promise<void>;
     hash(password: string): Promise<string>;
     setPassword(id: string, password: string): Promise<void>;

@@ -11,6 +11,99 @@ interface WithId {
   id: string;
 }
 
+// ---------------------------------------------------------------------------
+// ShadowIndex — in-memory index for hot query patterns on dbojs
+// ---------------------------------------------------------------------------
+
+interface IndexedRecord {
+  id: string;
+  flags?: string;
+  location?: string;
+}
+
+class ShadowIndex {
+  private byLocation = new Map<string, Set<string>>();  // location id → Set<object id>
+  private connected = new Set<string>();               // ids with "connected" in flags
+  private idToLocation = new Map<string, string>();    // id → current location
+  private _isBuilt = false;
+
+  get isBuilt(): boolean { return this._isBuilt; }
+
+  build(records: IndexedRecord[]): void {
+    this.byLocation.clear();
+    this.connected.clear();
+    this.idToLocation.clear();
+    for (const rec of records) this._index(rec);
+    this._isBuilt = true;
+  }
+
+  onWrite(rec: IndexedRecord): void {
+    // Remove stale location entry
+    const oldLoc = this.idToLocation.get(rec.id);
+    if (oldLoc !== undefined) this.byLocation.get(oldLoc)?.delete(rec.id);
+
+    if (rec.location) {
+      this.idToLocation.set(rec.id, rec.location);
+      if (!this.byLocation.has(rec.location)) this.byLocation.set(rec.location, new Set());
+      this.byLocation.get(rec.location)!.add(rec.id);
+    } else {
+      this.idToLocation.delete(rec.id);
+    }
+
+    if (/connected/i.test(rec.flags ?? "")) {
+      this.connected.add(rec.id);
+    } else {
+      this.connected.delete(rec.id);
+    }
+  }
+
+  onDelete(id: string): void {
+    const loc = this.idToLocation.get(id);
+    if (loc) { this.byLocation.get(loc)?.delete(id); this.idToLocation.delete(id); }
+    this.connected.delete(id);
+  }
+
+  /** Returns candidate IDs for location/connected query patterns, or null if pattern unrecognised. */
+  getCandidateIds(location?: string, needsConnected?: boolean): Set<string> | null {
+    if (!this._isBuilt) return null;
+    let candidates: Set<string> | null = null;
+
+    if (location !== undefined) {
+      candidates = new Set(this.byLocation.get(location) ?? []);
+    }
+    if (needsConnected) {
+      if (candidates === null) {
+        candidates = new Set(this.connected);
+      } else {
+        for (const id of [...candidates]) {
+          if (!this.connected.has(id)) candidates.delete(id);
+        }
+      }
+    }
+    return candidates;
+  }
+
+  private _index(rec: IndexedRecord): void {
+    if (rec.location) {
+      this.idToLocation.set(rec.id, rec.location);
+      if (!this.byLocation.has(rec.location)) this.byLocation.set(rec.location, new Set());
+      this.byLocation.get(rec.location)!.add(rec.id);
+    }
+    if (/connected/i.test(rec.flags ?? "")) this.connected.add(rec.id);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Query result cache — cleared on every write, 500 ms TTL
+// ---------------------------------------------------------------------------
+
+interface CacheEntry<T> {
+  data: T[];
+  expiresAt: number;
+}
+
+const QUERY_CACHE_TTL_MS = 500;
+
 /**
  * Generic key-value database backed by Deno KV.
  *
@@ -23,9 +116,12 @@ interface WithId {
 export class DBO<T extends WithId> implements IDatabase<T> {
   private static kv: Deno.Kv | null = null;
   private pathOrKey: string;
+  private shadowIndex: ShadowIndex | null = null;
+  private queryCache = new Map<string, CacheEntry<T>>();
 
-  constructor(pathOrKey: string) {
+  constructor(pathOrKey: string, useIndex = false) {
     this.pathOrKey = pathOrKey;
+    if (useIndex) this.shadowIndex = new ShadowIndex();
   }
 
   private get prefix(): string {
@@ -90,19 +186,93 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const kv = await this.getKv();
     const plainData = { ...data };
     await kv.set(this.getKey(data.id), plainData);
+    this.clearCache();
+    this.shadowIndex?.onWrite(data as unknown as IndexedRecord);
     return data;
   }
 
+  private cacheKey(query?: Query<T>): string {
+    if (!query) return "__all__";
+    try {
+      return JSON.stringify(query, (_k, v) => {
+        if (v instanceof RegExp) return `__re__${v.source}__${v.flags}`;
+        if (v instanceof Set) return `__set__${[...v].join(",")}`;
+        return v;
+      });
+    } catch {
+      return "__nocache__" + Math.random();
+    }
+  }
+
+  private clearCache(): void { this.queryCache.clear(); }
+
+  /** Detect { location: X }, { flags: /connected/i }, or $and combinations. */
+  private tryIndexLookup(query?: Query<T>): Set<string> | null {
+    if (!query || !this.shadowIndex?.isBuilt) return null;
+    let location: string | undefined;
+    let needsConnected = false;
+
+    if ("$and" in query && Array.isArray(query.$and)) {
+      for (const cond of query.$and as Record<string, unknown>[]) {
+        if (typeof cond.location === "string") location = cond.location;
+        if (cond.flags instanceof RegExp && cond.flags.source.includes("connected")) needsConnected = true;
+      }
+    } else if ("flags" in query && (query as Record<string, unknown>).flags instanceof RegExp) {
+      if (((query as Record<string, unknown>).flags as RegExp).source.includes("connected")) needsConnected = true;
+    } else if ("location" in query && typeof (query as Record<string, unknown>).location === "string") {
+      location = (query as Record<string, unknown>).location as string;
+    }
+
+    if (location !== undefined || needsConnected) {
+      return this.shadowIndex!.getCandidateIds(location, needsConnected);
+    }
+    return null;
+  }
+
   async query(query?: Query<T>): Promise<T[]> {
+    // Check query cache first
+    const key = this.cacheKey(query);
+    const now = Date.now();
+    const cached = this.queryCache.get(key);
+    if (cached && now < cached.expiresAt) return cached.data;
+
     const kv = await this.getKv();
+
+    // Try shadow index for hot patterns
+    const candidates = this.tryIndexLookup(query);
+    if (candidates !== null) {
+      const results: T[] = [];
+      for (const id of candidates) {
+        const entry = await kv.get<T>([this.prefix, id]);
+        if (entry.value && this.matchesQuery(entry.value, query)) {
+          results.push(entry.value);
+          // Self-heal: if a candidate wasn't in KV the index is stale — rebuild
+        } else if (!entry.value) {
+          this.shadowIndex!.onDelete(id);
+        }
+      }
+      this.queryCache.set(key, { data: results, expiresAt: now + QUERY_CACHE_TTL_MS });
+      return results;
+    }
+
+    // Full scan fallback (also builds shadow index on first run)
     const entries = kv.list({ prefix: [this.prefix] });
     const results: T[] = [];
+    const allRecords: IndexedRecord[] = [];
     for await (const entry of entries) {
       const value = entry.value as T;
+      if (this.shadowIndex && !this.shadowIndex.isBuilt) {
+        allRecords.push(value as unknown as IndexedRecord);
+      }
       if (this.matchesQuery(value, query)) {
         results.push(value);
       }
     }
+    // Build index from this scan if not yet built
+    if (this.shadowIndex && !this.shadowIndex.isBuilt) {
+      this.shadowIndex.build(allRecords);
+    }
+    this.queryCache.set(key, { data: results, expiresAt: now + QUERY_CACHE_TTL_MS });
     return results;
   }
 
@@ -223,7 +393,9 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       }
       const plainData = { ...updated };
       await kv.set(this.getKey(item.id), plainData);
+      this.shadowIndex?.onWrite(updated as unknown as IndexedRecord);
     }
+    this.clearCache();
     return await this.query(query);
   }
 
@@ -232,7 +404,9 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const kv = await this.getKv();
     for (const item of items) {
       await kv.delete(this.getKey(item.id));
+      this.shadowIndex?.onDelete(item.id);
     }
+    this.clearCache();
     return items;
   }
 
@@ -297,7 +471,11 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       if (entry.value === null) throw new Error(`[DBO] Record not found: ${id}`);
       const updated = transform({ ...entry.value });
       const result = await kv.atomic().check(entry).set(key, updated).commit();
-      if (result.ok) return updated;
+      if (result.ok) {
+        this.clearCache();
+        this.shadowIndex?.onWrite(updated as unknown as IndexedRecord);
+        return updated;
+      }
     }
     throw new Error(`[DBO] atomicModify failed after ${retries + 1} attempts on "${id}"`);
   }
@@ -325,6 +503,8 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const cv = await this.getKv();
     const plainData = { ...data };
     await cv.set(this.getKey(data.id), plainData);
+    this.clearCache();
+    this.shadowIndex?.onWrite(data as unknown as IndexedRecord);
     return data;
   }
 
@@ -344,8 +524,8 @@ export interface ICounters extends WithId {
 
 /** Shared counter store (job IDs, object IDs, etc.). */
 export const counters: DBO<ICounters> = new DBO<ICounters>("server.counters");
-/** Primary game-object store (rooms, players, exits, items). */
-export const dbojs: DBO<IDBOBJ> = new DBO<IDBOBJ>("server.db");
+/** Primary game-object store (rooms, players, exits, items). Index enabled for location/connected queries. */
+export const dbojs: DBO<IDBOBJ> = new DBO<IDBOBJ>("server.db", true);
 /** Channel definitions store. */
 export const chans: DBO<IChannel> = new DBO<IChannel>("server.chans");
 /** Server text entries (welcome screen, MOTD, etc.). */

@@ -1,8 +1,8 @@
 // deno-lint-ignore-file require-await
 import { register } from "./registry.ts";
 import type { EvalContext } from "../context.ts";
-import { evaluate } from "../evaluator.ts";
-import { parse } from "../parser.ts";
+import type { UrsaEvalContext } from "../ursamu-context.ts";
+import { makeSubCtx, toLibCtx } from "../ursamu-context.ts";
 import { int, splitList as split, joinList as join } from "./helpers.ts";
 
 // ── basic list access ─────────────────────────────────────────────────────
@@ -212,29 +212,8 @@ register("land",  async (a) => split(a[0] ?? "", a[1]).every(x => x !== "0" && x
 register("lor",   async (a) => split(a[0] ?? "", a[1]).some(x => x !== "0" && x !== "") ? "1" : "0");
 
 // ── iter / map / filter ───────────────────────────────────────────────────
-
-register(["iter","parse"], async (a, ctx, raw) => {
-  const list    = split(a[0] ?? "", a[2]);
-  // Use raw expression text so ## / #@ are re-bound per iteration, not pre-evaluated.
-  const evalStr = raw[1] ?? a[1] ?? "";
-  const outDelim = a[3] ?? a[2] ?? " ";
-  const results: string[] = [];
-
-  ctx.iterStack.push({ item: "", pos: 0 });
-  const stackIdx = ctx.iterStack.length - 1;
-
-  for (let i = 0; i < list.length; i++) {
-    if (Date.now() >= ctx.deadline) break;
-    ctx.iterStack[stackIdx] = { item: list[i], pos: i + 1 };
-    // Parse and evaluate the expression with ## and #@ bound.
-    const ast = safeParse(evalStr);
-    if (ast) results.push(await evaluate(ast as Parameters<typeof evaluate>[0], ctx));
-    else results.push(evalStr.replace(/##/g, list[i]).replace(/#@/g, String(i + 1)));
-  }
-
-  ctx.iterStack.pop();
-  return join(results, outDelim === " " ? undefined : outDelim);
-});
+// Note: iter and parse are handled as lazy FunctionImpl by the engine factory
+// (ursamu-engine.ts). They are NOT registered here to avoid double registration.
 
 register("map", async (a, ctx) => {
   const list = split(a[1] ?? "", a[2]);
@@ -367,37 +346,51 @@ function globRe(pattern: string): RegExp {
   return new RegExp(re, "i");
 }
 
-function safeParse(code: string): ReturnType<typeof parse> | null {
-  try {
-    const trimmed = code.trim();
-    return parse(`[${trimmed}]`) as ReturnType<typeof parse>;
-  }
-  catch { return null; }
-}
-
 async function callUserAttr(attr: string, args: string[], ctx: EvalContext): Promise<string> {
   // attr may be "obj/attr" or just "attr" (defaults to executor).
-  // Simplified: just evaluate the attr string as softcode with args bound.
-  // Full u() implementation is in stdlib/object.ts.
-  const parts = attr.split("/");
+  const uctx     = ctx as unknown as UrsaEvalContext;
+  const parts    = attr.split("/");
   const attrName = parts.length > 1 ? parts[1] : parts[0];
-  const objId    = parts.length > 1 ? parts[0].replace(/^#/,"") : ctx.executor.id;
+  const objId    = parts.length > 1 ? parts[0].replace(/^#/,"") : uctx.executor.id;
 
-  const obj = await ctx.db.queryById(objId);
+  const obj = await uctx.db.queryById(objId);
   if (!obj) return "";
 
-  const code = await ctx.db.getAttribute(obj, attrName);
+  const code = await uctx.db.getAttribute(obj, attrName);
   if (!code) return "";
 
-  const ast = safeParse(code);
-  if (!ast) return code;
-
-  const subCtx = {
-    ...ctx,
-    executor: obj,
-    caller:   ctx.executor,
-    args,
-    depth:    ctx.depth + 1,
-  };
-  return evaluate(ast as Parameters<typeof evaluate>[0], subCtx);
+  const subCtx = makeSubCtx(uctx, obj, args, false);
+  return uctx._engine.evalString(code, toLibCtx(subCtx));
 }
+
+// ── iter context accessors ────────────────────────────────────────────────────
+// itext(n) — current item at iter depth n (0 = innermost)
+// inum(n)  — 1-based position counter at iter depth n (0 = innermost)
+
+register("itext", async (a, ctx) => {
+  const uctx  = ctx as unknown as UrsaEvalContext;
+  const n     = int(a[0] ?? "0");
+  const stack = uctx.iterStack;
+  const frame = stack[stack.length - 1 - n];
+  return frame?.item ?? "";
+});
+
+register("inum", async (a, ctx) => {
+  const uctx  = ctx as unknown as UrsaEvalContext;
+  const n     = int(a[0] ?? "0");
+  const stack = uctx.iterStack;
+  const frame = stack[stack.length - 1 - n];
+  return frame ? String((frame as unknown as { index?: number }).index ?? 0) : "0";
+});
+
+// ── elist ─────────────────────────────────────────────────────────────────────
+// elist(list, conj, delim) → "A, B, and C"  (Oxford comma style)
+
+register("elist", async (a) => {
+  const items = split(a[0] ?? "", a[2]).filter(s => s.trim() !== "");
+  const conj  = a[1] ?? "and";
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} ${conj} ${items[1]}`;
+  return items.slice(0, -1).join(", ") + `, ${conj} ` + items[items.length - 1];
+});

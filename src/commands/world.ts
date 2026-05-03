@@ -238,6 +238,147 @@ export async function execEntrances(u: IUrsamuSDK): Promise<void> {
       for (const line of matches) u.send(line);
 }
 
+// ── Simple attribute-setter helper ───────────────────────────────────────────
+
+async function execAttrSetter(
+  u: IUrsamuSDK,
+  attrKey: string,
+  cmdUsage: string,
+): Promise<void> {
+  const raw    = (u.cmd.args[0] || "").trim();
+  const eqIdx  = raw.indexOf("=");
+  if (eqIdx === -1) { u.send(`Usage: ${cmdUsage}`); return; }
+  const targetStr = raw.slice(0, eqIdx).trim();
+  const value     = raw.slice(eqIdx + 1);                  // preserve spaces
+  const tar       = await u.util.target(u.me, targetStr);
+  if (!tar) { u.send("I can't find that."); return; }
+  if (!(await u.canEdit(u.me, tar))) { u.send("Permission denied."); return; }
+  await u.db.modify(tar.id, "$set", { [`data.${attrKey}`]: value });
+  u.send(`${attrKey.toUpperCase()} set on ${u.util.displayName(tar, u.me)}.`);
+}
+
+// ── @desc ─────────────────────────────────────────────────────────────────────
+export async function execDesc(u: IUrsamuSDK): Promise<void> {
+  await execAttrSetter(u, "desc", "@desc <target>=<description>");
+}
+
+// ── @aconnect / @adisconnect / @startup / @daily ─────────────────────────────
+export async function execAconnect(u: IUrsamuSDK): Promise<void> {
+  await execAttrSetter(u, "aconnect", "@aconnect <target>=<action>");
+}
+export async function execAdisconnect(u: IUrsamuSDK): Promise<void> {
+  await execAttrSetter(u, "adisconnect", "@adisconnect <target>=<action>");
+}
+export async function execStartup(u: IUrsamuSDK): Promise<void> {
+  await execAttrSetter(u, "startup", "@startup <target>=<action>");
+}
+export async function execDaily(u: IUrsamuSDK): Promise<void> {
+  await execAttrSetter(u, "daily", "@daily <target>=<action>");
+}
+
+// ── @parent ───────────────────────────────────────────────────────────────────
+export async function execParent(u: IUrsamuSDK): Promise<void> {
+  const raw    = (u.cmd.args[0] || "").trim();
+  const eqIdx  = raw.indexOf("=");
+  if (eqIdx === -1) { u.send("Usage: @parent <target>=<parent>"); return; }
+  const targetStr = raw.slice(0, eqIdx).trim();
+  const parentStr = raw.slice(eqIdx + 1).trim();
+  const tar       = await u.util.target(u.me, targetStr);
+  if (!tar) { u.send("I can't find that."); return; }
+  if (!(await u.canEdit(u.me, tar))) { u.send("Permission denied."); return; }
+
+  if (!parentStr) {
+    // Clear parent
+    await u.db.modify(tar.id, "$unset", { "data.parent": "" });
+    u.send(`Parent cleared on ${u.util.displayName(tar, u.me)}.`);
+    return;
+  }
+
+  const parent = await u.util.target(u.me, parentStr);
+  if (!parent) { u.send(`I can't find parent '${parentStr}'.`); return; }
+  await u.db.modify(tar.id, "$set", { "data.parent": parent.id });
+  u.send(`Parent of ${u.util.displayName(tar, u.me)} set to ${u.util.displayName(parent, u.me)}.`);
+}
+
+// ── @link ─────────────────────────────────────────────────────────────────────
+// @link <target>=<dest> — sets the home/destination of an object.
+export async function execLink(u: IUrsamuSDK): Promise<void> {
+  const raw    = (u.cmd.args[0] || "").trim();
+  const eqIdx  = raw.indexOf("=");
+  if (eqIdx === -1) { u.send("Usage: @link <target>=<destination>"); return; }
+  const targetStr = raw.slice(0, eqIdx).trim();
+  const destStr   = raw.slice(eqIdx + 1).trim();
+  const tar       = await u.util.target(u.me, targetStr);
+  if (!tar) { u.send("I can't find that."); return; }
+  if (!(await u.canEdit(u.me, tar))) { u.send("Permission denied."); return; }
+
+  if (!destStr) {
+    await u.db.modify(tar.id, "$unset", { "data.home": "" });
+    u.send(`Link cleared on ${u.util.displayName(tar, u.me)}.`);
+    return;
+  }
+
+  const dest = await u.util.target(u.me, destStr);
+  if (!dest) { u.send(`I can't find '${destStr}'.`); return; }
+  const field = tar.flags.has("exit") ? "data.destination" : "data.home";
+  await u.db.modify(tar.id, "$set", { [field]: dest.id });
+  u.send(`${u.util.displayName(tar, u.me)} linked to ${u.util.displayName(dest, u.me)}.`);
+}
+
+// ── @clone ────────────────────────────────────────────────────────────────────
+// @clone <target>[=<new name>]
+export async function execClone(u: IUrsamuSDK): Promise<void> {
+  const raw     = (u.cmd.args[0] || "").trim();
+  const eqIdx   = raw.indexOf("=");
+  const srcStr  = eqIdx >= 0 ? raw.slice(0, eqIdx).trim() : raw;
+  const newName = eqIdx >= 0 ? raw.slice(eqIdx + 1).trim() : "";
+  const src     = await u.util.target(u.me, srcStr);
+  if (!src) { u.send("I can't find that."); return; }
+  if (src.flags.has("player")) { u.send("You can't clone players."); return; }
+  if (!(await u.canEdit(u.me, src))) { u.send("Permission denied."); return; }
+
+  const cloneName = newName || src.name || "Clone";
+  const cloneState: Record<string, unknown> = { ...((src.state as Record<string, unknown>) || {}) };
+  cloneState.name = cloneName;
+  cloneState.owner = u.me.id;
+  // Clear attributes that shouldn't be inherited by default
+  delete (cloneState as Record<string, unknown>).lock;
+
+  const clone = await u.db.create({
+    flags:    src.flags,
+    location: u.me.id,
+    state:    cloneState,
+    name:     cloneName,
+    contents: [],
+  });
+  u.send(`Cloned ${u.util.displayName(src, u.me)} as ${cloneName} (#${clone.id}).`);
+}
+
+// ── @dest ─────────────────────────────────────────────────────────────────────
+// @dest[/instant] <target> — destroy an object without confirmation prompt.
+export async function execDest(u: IUrsamuSDK): Promise<void> {
+  const targetStr = (u.cmd.args[0] || "").trim();
+  if (!targetStr) { u.send("Usage: @dest <target>"); return; }
+  const tar = await u.util.target(u.me, targetStr);
+  if (!tar) { u.send("I can't find that."); return; }
+  if (tar.flags.has("player")) { u.send("You can't destroy players."); return; }
+  if (!(await u.canEdit(u.me, tar))) { u.send("Permission denied."); return; }
+  const name = u.util.displayName(tar, u.me);
+  await u.db.destroy(tar.id);
+  u.send(`${name} destroyed.`);
+}
+
+// ── @log ──────────────────────────────────────────────────────────────────────
+// @log[/<file>] [<object>=]<message>
+export function execLog(u: IUrsamuSDK): void {
+  const raw = (u.cmd.args[0] || "").trim();
+  // Support both "@log msg" and "@log obj=msg" forms; just log the message.
+  const eqIdx = raw.indexOf("=");
+  const msg   = eqIdx >= 0 ? raw.slice(eqIdx + 1) : raw;
+  console.log(`[MUSH LOG] ${msg}`);
+  // No user-visible output (silent, as in standard MUSH @log behavior).
+}
+
 export async function execSweep(u: IUrsamuSDK): Promise<void> {
       const actor = u.me;
       const isAdmin = actor.flags.has("admin") || actor.flags.has("wizard") || actor.flags.has("superuser");

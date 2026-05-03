@@ -20,13 +20,10 @@
  *   main → worker: { type: "db:error",    msgId, message }
  */
 
-import { parse }    from "./parser.ts";
-import { evaluate } from "./evaluator.ts";
-import type { EvalContext, DbAccessor, OutputAccessor } from "./context.ts";
+import { softcodeEngine, runSoftcode } from "./ursamu-engine.ts";
+import type { DbAccessor, OutputAccessor } from "./context.ts";
+import type { UrsaEvalContext } from "./ursamu-context.ts";
 import type { IDBObj } from "../../@types/UrsamuSDK.ts";
-
-// Import all stdlib modules (side-effect registrations).
-import "./stdlib/index.ts";
 
 // ── Serialised context shape sent by SoftcodeService ─────────────────────
 
@@ -100,6 +97,8 @@ function makeDbAccessor(): DbAccessor {
     queueLength:  (eid)     => dbRequest<number>       ("queueLength",  { executorId: eid }),
     getIdleSecs:  (pid)     => dbRequest<number>       ("getIdleSecs",  { playerId: pid }),
     getUserFn:    (name)    => dbRequest<string | null>("getUserFn",    { name }),
+    createObj: (name, _cost, actorId) =>
+      dbRequest<string | null>("createObj", { name, actorId }),
   };
 }
 
@@ -144,21 +143,26 @@ self.onmessage = async (e: MessageEvent) => {
   };
 
   try {
-    const ctx: EvalContext = {
-      actor:     deserializeObj(raw.actor),
-      executor:  deserializeObj(raw.executor),
-      caller:    raw.caller ? deserializeObj(raw.caller) : null,
-      args:      raw.args ?? [],
-      registers: new Map(raw.registers ?? []),
-      iterStack: [],
-      depth:     0,
-      deadline:  Date.now() + 500,
-      db:        makeDbAccessor(),
-      output:    makeOutputAccessor(),
+    const actor    = deserializeObj(raw.actor);
+    const executor = deserializeObj(raw.executor);
+    const ctx: UrsaEvalContext = {
+      enactor:      actor.id,
+      executor,
+      caller:       raw.caller ? deserializeObj(raw.caller) : null,
+      actor,
+      args:         raw.args ?? [],
+      registers:    new Map(raw.registers ?? []),
+      iterStack:    [],
+      depth:        0,
+      maxDepth:     50,
+      maxOutputLen: 65_536,
+      deadline:     Date.now() + 500,
+      db:           makeDbAccessor(),
+      output:       makeOutputAccessor(),
+      _engine:      softcodeEngine,
     };
 
-    const ast    = parse(code, { startRule: "Start" });
-    const result = await evaluate(ast as Parameters<typeof evaluate>[0], ctx);
+    const result = await runSoftcode(code, ctx);
     self.postMessage({ type: "result", msgId, value: result });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

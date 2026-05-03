@@ -55,9 +55,13 @@ export const idle = (secs: number): string => {
   else if (snds < 29030400) time = `${Math.floor(snds / 2592000)}mo`;
   else                      time = `${Math.floor(snds / 31536000)}y`;
 
-  if (snds < 600)  return `%ch%cg${time}%cn`;
-  if (snds < 1500) return `%ch%cy${time}%cn`;
-  if (snds < 3600) return `%ch%cr${time}%cn`;
+  const IDLE_GREEN  = 600;   // 10 minutes
+  const IDLE_YELLOW = 1500;  // 25 minutes
+  const IDLE_RED    = 3600;  // 1 hour
+
+  if (snds < IDLE_GREEN)  return `%ch%cg${time}%cn`;
+  if (snds < IDLE_YELLOW) return `%ch%cy${time}%cn`;
+  if (snds < IDLE_RED)    return `%ch%cr${time}%cn`;
   return `%ch%cx${time}%cn`;
 };
 

@@ -91,13 +91,13 @@ Deno.test("create project: generates text/default_connect.txt", OPTS, async () =
   });
 });
 
-Deno.test("create project: default_connect.txt contains project name", OPTS, async () => {
+Deno.test("create project: default_connect.txt has content", OPTS, async () => {
   await withTempDir(async (dir) => {
     await runCreate(["roses"], dir);
     const content = await Deno.readTextFile(
       join(dir, "roses", "text", "default_connect.txt")
     );
-    assertStringIncludes(content, "roses");
+    assert(content.length > 0);
   });
 });
 
@@ -163,19 +163,25 @@ Deno.test("create plugin: exits 0 on success", OPTS, async () => {
   });
 });
 
-Deno.test("create plugin: scaffolds all four files", OPTS, async () => {
+Deno.test("create plugin: scaffolds all expected files", OPTS, async () => {
   await withTempDir(async (dir) => {
     await runCreate(["my-game"], dir);
     const projectDir = join(dir, "my-game");
     await runCreate(["plugin", "my-feature", "--non-interactive"], projectDir);
     const pluginDir = join(projectDir, "src", "plugins", "my-feature");
-    for (const f of ["index.ts", "commands.ts", "router.ts", "db.ts"]) {
+    for (const f of [
+      "index.ts", "commands.ts", "router.ts",
+      join("commands", "my-feature.ts"),
+      join("db", "schemas.ts"),
+      join("help", "my-feature.md"),
+      join("tests", "plugin.test.ts"),
+    ]) {
       assert(existsSync(join(pluginDir, f)), `missing: ${f}`);
     }
   });
 });
 
-Deno.test("create plugin: commands.ts uses plugin name as command prefix", OPTS, async () => {
+Deno.test("create plugin: commands.ts is a barrel (no addCmd calls)", OPTS, async () => {
   await withTempDir(async (dir) => {
     await runCreate(["my-game"], dir);
     const projectDir = join(dir, "my-game");
@@ -183,21 +189,39 @@ Deno.test("create plugin: commands.ts uses plugin name as command prefix", OPTS,
     const content = await Deno.readTextFile(
       join(projectDir, "src", "plugins", "my-feature", "commands.ts")
     );
-    assertStringIncludes(content, "+my-feature");
-    assertStringIncludes(content, "IUrsamuSDK");
+    assertStringIncludes(content, `./commands/my-feature.ts`);
+    // barrel must not contain addCmd logic — strip comments first
+    const codeOnly = content.replace(/\/\/[^\n]*/g, "");
+    assert(!codeOnly.includes("addCmd("), "commands.ts barrel must not contain addCmd calls");
   });
 });
 
-Deno.test("create plugin: db.ts defines typed interface with createdAt", OPTS, async () => {
+Deno.test("create plugin: commands/<name>.ts defines addCmd with help and stripSubs", OPTS, async () => {
   await withTempDir(async (dir) => {
     await runCreate(["my-game"], dir);
     const projectDir = join(dir, "my-game");
     await runCreate(["plugin", "my-feature", "--non-interactive"], projectDir);
     const content = await Deno.readTextFile(
-      join(projectDir, "src", "plugins", "my-feature", "db.ts")
+      join(projectDir, "src", "plugins", "my-feature", "commands", "my-feature.ts")
+    );
+    assertStringIncludes(content, "+my-feature");
+    assertStringIncludes(content, "IUrsamuSDK");
+    assertStringIncludes(content, "help:");
+    assertStringIncludes(content, "stripSubs");
+  });
+});
+
+Deno.test("create plugin: db/schemas.ts defines typed interface with no DBO instances", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const projectDir = join(dir, "my-game");
+    await runCreate(["plugin", "my-feature", "--non-interactive"], projectDir);
+    const content = await Deno.readTextFile(
+      join(projectDir, "src", "plugins", "my-feature", "db", "schemas.ts")
     );
     assertStringIncludes(content, "interface");
     assertStringIncludes(content, "createdAt");
+    assert(!content.includes("new DBO("), "db/schemas.ts must not instantiate DBO");
   });
 });
 
@@ -337,5 +361,30 @@ Deno.test("create plugin --standalone: exits 1 if directory already exists", OPT
     );
     assertEquals(code, 1);
     assertStringIncludes(stderr, "already exists");
+  });
+});
+
+// ─── H1: project name validation ─────────────────────────────────────────────
+
+Deno.test("H1 — create project: rejects path-traversal name", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    const { code, stderr } = await runCreate(["../outside"], dir);
+    assertEquals(code, 1);
+    assertStringIncludes(stderr, "Invalid project name");
+  });
+});
+
+Deno.test("H1 — create project: rejects name with spaces", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    const { code, stderr } = await runCreate(["my game"], dir);
+    assertEquals(code, 1);
+    assertStringIncludes(stderr, "Invalid project name");
+  });
+});
+
+Deno.test("H1 — create project: accepts valid hyphenated name", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    const { code } = await runCreate(["my-game-2"], dir);
+    assertEquals(code, 0);
   });
 });

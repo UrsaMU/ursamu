@@ -389,6 +389,25 @@ export class SoftcodeService {
         } catch { respond(null); }
         break;
       }
+      case "createObj": {
+        const name    = (msg.name    as string) || "Thing";
+        const actorId = (msg.actorId as string);
+        try {
+          const newId = crypto.randomUUID();
+          await db.create({
+            id:       newId,
+            flags:    "thing",
+            location: actorId,
+            data: {
+              name,
+              owner: actorId,
+              pennies: 0,
+            },
+          });
+          respond(newId);
+        } catch { respond(null); }
+        break;
+      }
       default:
         worker.postMessage({
           type:    "db:error",

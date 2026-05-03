@@ -211,3 +211,17 @@ register("lrooms", async (_a, ctx) => {
   return rooms.join(" ");
 });
 register("lastcreate", async () => "#-1");
+
+/**
+ * create(name[, cost]) — create a new THING owned by the enactor.
+ * Returns the new object's dbref, or #-1 on failure.
+ * Cost is accepted for MUSH compatibility but currently ignored.
+ */
+register("create", async (a, ctx) => {
+  const uctx = ctx as unknown as import("../ursamu-context.ts").UrsaEvalContext;
+  const name = (a[0] ?? "").trim();
+  if (!name) return "#-1 INVALID OBJECT NAME";
+  const cost = parseInt(a[1] ?? "0", 10) || 0;
+  const id = await uctx.db.createObj?.(name, cost, uctx.enactor);
+  return id ? `#${id}` : "#-1";
+});

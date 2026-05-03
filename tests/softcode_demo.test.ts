@@ -2,11 +2,10 @@
 /**
  * tests/softcode_demo.test.ts
  *
- * End-to-end demo of the UrsaMU softcode engine.
+ * End-to-end demo of the UrsaMU softcode engine (post-EvalEngine migration).
  *
- * Each group walks through a meaningful scenario rather than
- * micro-testing a single function.  Together they show the engine
- * "going through its paces":
+ * Each group walks through a meaningful scenario rather than micro-testing a
+ * single function. Together they show the engine going through its paces:
  *
  *   1. Substitutions  — %N %# %0-%9 %q0-%qz %r %b pronouns
  *   2. Registers      — setq/setr/r, localize isolation
@@ -19,25 +18,12 @@
  *   9. Output side effects — pemit/remit/emit/oemit capture
  *  10. Time functions — secs, digittime, singletime, etimefmt
  *  11. Complex composed expressions — real-world MUSH patterns
- *
- * Notes on iter / map / filter:
- *   - Function calls inside iter() must be wrapped in [eval blocks].
- *     Bare `func(args)` in the iter expression is treated as literal text
- *     by safeParse() (Start rule is command context, not expression context).
- *   - map() / filter() / fold() arg 0 is marked lazy, but the stdlib
- *     implementations currently read a[0] rather than raw[0], so those
- *     helpers are exercised here via iter + u() equivalents instead.
  */
 import { assertEquals, assertMatch, assertStringIncludes } from "@std/assert";
-import { parse }    from "../src/services/Softcode/parser.ts";
-import { evaluate } from "../src/services/Softcode/evaluator.ts";
-import type {
-  EvalContext,
-  DbAccessor,
-  OutputAccessor,
-} from "../src/services/Softcode/context.ts";
+import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
+import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+import type { DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
-import "../src/services/Softcode/stdlib/index.ts";
 
 // ── Test infrastructure ───────────────────────────────────────────────────────
 
@@ -51,7 +37,7 @@ function obj(
 }
 
 /**
- * Five-object world used by the DB / object / composed tests:
+ * Five-object world:
  *   1  Alice  (player, connected)   location: 10
  *   2  Bob    (player, connected)   location: 10
  *   3  Widget (thing)               location: 10
@@ -64,7 +50,6 @@ const WIDGET = obj("3",  "Widget", ["thing"],               { location: "10" });
 const LOBBY  = obj("10", "Lobby",  ["room"],                { contents: [ALICE, BOB, WIDGET] });
 const MERLIN = obj("99", "Merlin", ["player", "wizard"],    { location: "10" });
 
-/** Attribute store simulates &ATTR on objects. */
 const ATTRS: Record<string, Record<string, string>> = {
   "1": {
     DOING:    "exploring the demo",
@@ -72,40 +57,27 @@ const ATTRS: Record<string, Record<string, string>> = {
     GREETING: "Hello, %0!  %S %s glad to meet you.",
   },
   "99": {
-    // Fibonacci — lookup table (ifelse is eager, so recursive binary fib
-    // causes depth-limit explosion; a table attr is idiomatic MUX practice)
     FIB:    "[word(0 1 1 2 3 5 8 13 21 34,add(%0,1))]",
-    // Factorial — linear recursion (one recursive branch only, no blowup)
     FACT:   "[ifelse(lte(%0,1),1,mul(%0,u(#99/FACT,dec(%0))))]",
-    // Simple UDFs used by iter tests
     DOUBLE: "[mul(%0,2)]",
     ISEVEN: "[not(mod(%0,2))]",
     PLUS:   "[add(%0,%1)]",
   },
 };
 
-function mockDb(): DbAccessor & {
-  lsearch(o: { type?: string }): Promise<string[]>;
-  children(id: string): Promise<IDBObj[]>;
-  lchannels(): Promise<string>;
-  channelsFor(id: string): Promise<string>;
-  mailCount(id: string): Promise<number>;
-  queueLength(id: string): Promise<number>;
-  getIdleSecs(id: string): Promise<number>;
-  getUserFn(name: string): Promise<string | null>;
-} {
+function mockDb(): DbAccessor {
   const all = [ALICE, BOB, WIDGET, LOBBY, MERLIN];
   return {
-    queryById:        async (id) => all.find(o => o.id === id) ?? null,
-    queryByName:      async (n)  => all.find(o => (o.name ?? "").toLowerCase() === n.toLowerCase()) ?? null,
-    lcon:             async (id) => id === "10" ? [ALICE, BOB, WIDGET] : [],
-    lwho:             async ()   => [ALICE, BOB, MERLIN],
-    lattr:            async (id) => Object.keys(ATTRS[id] ?? {}),
-    getAttribute:     async (o, attr) => ATTRS[o.id]?.[attr.toUpperCase()] ?? null,
-    getTagById:       async () => null,
-    getPlayerTagById: async () => null,
-    getUserFn:        async () => null,
-    lsearch:  async (opts) => {
+    queryById:        async (id)   => all.find(o => o.id === id) ?? null,
+    queryByName:      async (n)    => all.find(o => (o.name ?? "").toLowerCase() === n.toLowerCase()) ?? null,
+    lcon:             async (id)   => id === "10" ? [ALICE, BOB, WIDGET] : [],
+    lwho:             async ()     => [ALICE, BOB, MERLIN],
+    lattr:            async (id)   => Object.keys(ATTRS[id] ?? {}),
+    getAttribute:     async (o, a) => ATTRS[o.id]?.[a.toUpperCase()] ?? null,
+    getTagById:       async ()     => null,
+    getPlayerTagById: async ()     => null,
+    getUserFn:        async ()     => null,
+    lsearch: async (opts) => {
       if (opts.type === "ROOM")   return ["#10"];
       if (opts.type === "PLAYER") return ["#1", "#2", "#99"];
       if (opts.type === "THING")  return ["#3"];
@@ -132,35 +104,35 @@ function makeOutput(): {
   return {
     sent, rooms, broadcasts,
     accessor: {
-      send:          (msg, to)           => { sent.push({ msg, to }); },
+      send:          (msg, to)            => { sent.push({ msg, to }); },
       roomBroadcast: (msg, room, exclude) => { rooms.push({ msg, room, exclude }); },
-      broadcast:     (msg)               => { broadcasts.push(msg); },
+      broadcast:     (msg)                => { broadcasts.push(msg); },
     },
   };
 }
 
-function makeCtx(overrides: Partial<EvalContext> = {}): EvalContext {
+function makeCtx(overrides: Partial<UrsaEvalContext> = {}): UrsaEvalContext {
   return {
-    actor:     ALICE,
-    executor:  ALICE,
-    caller:    null,
-    args:      [],
-    registers: new Map(),
-    iterStack: [],
-    depth:     0,
-    deadline:  Date.now() + 5000,
-    db:        mockDb(),
-    output:    makeOutput().accessor,
+    enactor:      ALICE.id,
+    executor:     ALICE,
+    caller:       null,
+    actor:        ALICE,
+    args:         [],
+    registers:    new Map(),
+    iterStack:    [],
+    depth:        0,
+    maxDepth:     50,
+    maxOutputLen: 65_536,
+    deadline:     Date.now() + 5000,
+    db:           mockDb(),
+    output:       makeOutput().accessor,
+    _engine:      softcodeEngine,
     ...overrides,
   };
 }
 
-async function run(
-  code: string,
-  overrides: Partial<EvalContext> = {},
-): Promise<string> {
-  const ast = parse(code, { startRule: "Start" });
-  return evaluate(ast as Parameters<typeof evaluate>[0], makeCtx(overrides));
+function run(code: string, overrides: Partial<UrsaEvalContext> = {}): Promise<string> {
+  return runSoftcode(code, makeCtx(overrides));
 }
 
 // ── 1. Substitutions ──────────────────────────────────────────────────────────
@@ -207,11 +179,11 @@ Deno.test("demo/subs — %L gives actor location dbref", async () => {
 Deno.test("demo/subs — %q0 reads a pre-set register", async () => {
   const ctx = makeCtx();
   ctx.registers.set("0", "stored");
-  assertEquals(await run("%q0", ctx), "stored");
+  assertEquals(await runSoftcode("%q0", ctx), "stored");
 });
 
 Deno.test("demo/subs — female pronouns from SEX attr on actor", async () => {
-  // Alice has SEX=female in the mock attribute store.
+  // ALICE has SEX=female in the mock attribute store.
   assertEquals(await run("%s"), "she");
   assertEquals(await run("%S"), "She");
   assertEquals(await run("%o"), "her");
@@ -233,12 +205,10 @@ Deno.test("demo/registers — multi-setq in one call", async () => {
 });
 
 Deno.test("demo/registers — chained calculation using registers", async () => {
-  // sum = (3 * 7) + 10 = 31
   assertEquals(await run("[setq(0,3)][setq(1,7)][setq(2,10)][add(mul(%q0,%q1),%q2)]"), "31");
 });
 
 Deno.test("demo/registers — localize isolates inner setq changes", async () => {
-  // %q0 = "outer" before and after the localize block
   assertEquals(await run("[setq(0,outer)][localize([setq(0,inner)])][r(0)]"), "outer");
 });
 
@@ -253,7 +223,6 @@ Deno.test("demo/strings — upcase → center → ljust pipeline", async () => {
 });
 
 Deno.test("demo/strings — edit to build a slug", async () => {
-  // 'Hello World' → lowercase → spaces replaced with hyphens
   assertEquals(await run("[edit([lowcase(Hello World)], ,[-])]"), "hello-world");
 });
 
@@ -273,7 +242,7 @@ Deno.test("demo/strings — strmatch with glob wildcards", async () => {
 
 Deno.test("demo/strings — regmatch / regmatchi return 1 or 0", async () => {
   assertEquals(await run("[regmatch(hello123,hello)]"),  "1");
-  assertEquals(await run("[regmatchi(HELLO,hello)]"),    "1");  // case-insensitive
+  assertEquals(await run("[regmatchi(HELLO,hello)]"),    "1");
   assertEquals(await run("[regmatch(hello,xyz)]"),       "0");
 });
 
@@ -306,9 +275,9 @@ Deno.test("demo/math — baseconv: hex ff → decimal 255 → binary", async () 
 });
 
 Deno.test("demo/math — bitwise AND / OR / XOR (decimal inputs)", async () => {
-  assertEquals(await run("[band(12,10)]"), `${12 & 10}`);  // 8
-  assertEquals(await run("[bor(12,10)]"),  `${12 | 10}`);  // 14
-  assertEquals(await run("[bxor(12,10)]"), `${12 ^ 10}`);  // 6
+  assertEquals(await run("[band(12,10)]"), `${12 & 10}`);
+  assertEquals(await run("[bor(12,10)]"),  `${12 | 10}`);
+  assertEquals(await run("[bxor(12,10)]"), `${12 ^ 10}`);
 });
 
 Deno.test("demo/math — roman numeral conversion", async () => {
@@ -336,12 +305,10 @@ Deno.test("demo/lists — set union and intersection", async () => {
 });
 
 Deno.test("demo/lists — revwords then ldelete", async () => {
-  // "a b c d" reversed → "d c b a", delete pos 2 → "d b a"
   assertEquals(await run("[ldelete([revwords(a b c d)],2)]"), "d b a");
 });
 
 Deno.test("demo/lists — splice two lists", async () => {
-  // insert "b c" at pos 2 of "a d e" → "a b c d e"
   assertEquals(await run("[splice(a d e,b c,2)]"), "a b c d e");
 });
 
@@ -349,58 +316,45 @@ Deno.test("demo/lists — graball with wildcard", async () => {
   assertEquals(await run("[graball(apple apricot banana avocado,a*)]"), "apple apricot avocado");
 });
 
-// ── 6. iter — function calls, position, and nested iteration ──────────────────
-//
-// IMPORTANT: function calls inside iter() must be wrapped in [eval blocks].
-// Bare func(##) in the expression arg is in command-parse context and is
-// treated as literal text by safeParse(); only [func(##)] triggers evaluation.
+// ── 6. iter ───────────────────────────────────────────────────────────────────
 
 Deno.test("demo/iter — [mul(##,##)] squares each number", async () => {
   assertEquals(await run("[iter(1 2 3 4 5,[mul(##,##)])]"), "1 4 9 16 25");
 });
 
 Deno.test("demo/iter — #@ gives 1-based position", async () => {
-  // #@ alone in the iter body is correctly replaced with each position.
   assertEquals(await run("[iter(a b c,#@)]"), "1 2 3");
 });
 
 Deno.test("demo/iter — ## gives current item", async () => {
-  // ## alone works as an uneval'd substitution from safeParse.
   assertEquals(await run("[iter(a b c,##)]"), "a b c");
 });
 
 Deno.test("demo/iter — [u()] UDF call for each item (map pattern)", async () => {
-  // DOUBLE = [mul(%0,2)]
   assertEquals(await run("[iter(1 2 3 4 5,[u(#99/DOUBLE,##)])]"), "2 4 6 8 10");
 });
 
 Deno.test("demo/iter — fold-style sum via register accumulator", async () => {
-  // setq() returns "" so iter output is all spaces — trim to assert the register value.
   const code = "[setq(0,0)][iter(1 2 3 4 5,[setq(0,[add(%q0,##)])])][r(0)]";
   assertEquals((await run(code)).trim(), "15");
 });
 
 Deno.test("demo/iter — filter-style evens via iter + if + squish", async () => {
-  // [if(even,##)] returns the number or "" — squish collapses the gaps
   const code = "[squish([iter(1 2 3 4 5 6,[if([not([mod(##,2)])],##)])])]";
   assertEquals(await run(code), "2 4 6");
 });
 
 Deno.test("demo/iter — custom output delimiter (pipe-separated)", async () => {
-  // iter(list, expr, iDelim, oDelim) — 4-arg form, space input delim, | output delim
   assertEquals(await run("[iter(a b c,[upcase(##)], ,|)]"), "A|B|C");
 });
 
 Deno.test("demo/iter — nested iter with %i1 accesses outer item", async () => {
-  // Outer iterates 1..2; inner iterates 1..2; %i1 = outer item
-  // Results: mul(1,1) mul(1,2) mul(2,1) mul(2,2) = "1 2 2 4"
   assertEquals(await run("[iter(1 2,[iter(1 2,[mul(%i1,##)])])]"), "1 2 2 4");
 });
 
 // ── 7. User functions — u() / ulocal() ───────────────────────────────────────
 
 Deno.test("demo/udf — u() calls an attribute on another object", async () => {
-  // #99/DOUBLE = [mul(%0,2)]
   assertEquals(await run("[u(#99/DOUBLE,7)]"), "14");
 });
 
@@ -411,30 +365,25 @@ Deno.test("demo/udf — factorial via linear-recursive u()", async () => {
 });
 
 Deno.test("demo/udf — fibonacci lookup via u() (0..7)", async () => {
-  // FIB uses word() on a precomputed list — demonstrates u() arg passing.
   const cases: [number, string][] = [
     [0, "0"], [1, "1"], [2, "1"], [3, "2"], [4, "3"], [5, "5"], [6, "8"], [7, "13"],
   ];
   for (const [n, expected] of cases) {
-    const result = await run(`[u(#99/FIB,${n})]`);
-    assertEquals(result, expected, `fib(${n})`);
+    assertEquals(await run(`[u(#99/FIB,${n})]`), expected, `fib(${n})`);
   }
 });
 
 Deno.test("demo/udf — ulocal does not pollute outer registers", async () => {
-  // Set %q0=outer before the call; ulocal should not change it
   const ctx = makeCtx();
   ctx.registers.set("0", "outer");
-  const ast = parse("[ulocal(#99/DOUBLE,5)]%q0", { startRule: "Start" });
-  const result = await evaluate(ast as Parameters<typeof evaluate>[0], ctx);
-  assertEquals(result, "10outer"); // ulocal result = 10, %q0 still = "outer"
+  const result = await runSoftcode("[ulocal(#99/DOUBLE,5)]%q0", ctx);
+  assertEquals(result, "10outer");
 });
 
 Deno.test("demo/udf — u() with pronoun substitution attribute", async () => {
-  // Alice has GREETING = "Hello, %0!  %S %s glad to meet you."
   const result = await run("[u(#1/GREETING,Bob)]");
   assertStringIncludes(result, "Hello, Bob!");
-  assertStringIncludes(result, "She");   // female pronoun from SEX attr
+  assertStringIncludes(result, "She");
 });
 
 // ── 8. Object / DB functions ──────────────────────────────────────────────────
@@ -487,15 +436,14 @@ Deno.test("demo/objects — get retrieves an attribute value", async () => {
 });
 
 Deno.test("demo/objects — hasattr / lattr / default", async () => {
-  assertEquals(await run("[hasattr(#1,DOING)]"),              "1");
-  assertEquals(await run("[hasattr(#1,NOSUCH)]"),             "0");
-  assertEquals(await run("[default(#1/NOSUCH,fallback)]"),    "fallback");
-  assertEquals(await run("[default(#1/DOING,fallback)]"),     "exploring the demo");
+  assertEquals(await run("[hasattr(#1,DOING)]"),          "1");
+  assertEquals(await run("[hasattr(#1,NOSUCH)]"),         "0");
+  assertEquals(await run("[default(#1/NOSUCH,fallback)]"), "fallback");
+  assertEquals(await run("[default(#1/DOING,fallback)]"), "exploring the demo");
   assertStringIncludes(await run("[lattr(#99)]"), "FIB");
 });
 
 Deno.test("demo/objects — moniker falls back to name", async () => {
-  // Alice has no MONIKER attribute → returns name
   assertEquals(await run("[moniker(#1)]"), "Alice");
 });
 
@@ -503,8 +451,7 @@ Deno.test("demo/objects — moniker falls back to name", async () => {
 
 Deno.test("demo/output — pemit sends to a specific object", async () => {
   const cap = makeOutput();
-  const ctx = makeCtx({ output: cap.accessor });
-  await run("[pemit(#1,Hello Alice!)]", ctx);
+  await runSoftcode("[pemit(#1,Hello Alice!)]", makeCtx({ output: cap.accessor }));
   assertEquals(cap.sent.length, 1);
   assertEquals(cap.sent[0].msg, "Hello Alice!");
   assertEquals(cap.sent[0].to,  "1");
@@ -512,7 +459,7 @@ Deno.test("demo/output — pemit sends to a specific object", async () => {
 
 Deno.test("demo/output — remit broadcasts to a room", async () => {
   const cap = makeOutput();
-  await run("[remit(#10,The room shakes.)]", makeCtx({ output: cap.accessor }));
+  await runSoftcode("[remit(#10,The room shakes.)]", makeCtx({ output: cap.accessor }));
   assertEquals(cap.rooms.length, 1);
   assertEquals(cap.rooms[0].msg,  "The room shakes.");
   assertEquals(cap.rooms[0].room, "10");
@@ -520,14 +467,14 @@ Deno.test("demo/output — remit broadcasts to a room", async () => {
 
 Deno.test("demo/output — oemit broadcasts excluding the target player", async () => {
   const cap = makeOutput();
-  await run("[oemit(#1,Alice does something.)]", makeCtx({ output: cap.accessor }));
+  await runSoftcode("[oemit(#1,Alice does something.)]", makeCtx({ output: cap.accessor }));
   assertEquals(cap.rooms.length, 1);
   assertEquals(cap.rooms[0].exclude, "1");
 });
 
 Deno.test("demo/output — emit broadcasts to executor's room", async () => {
   const cap = makeOutput();
-  await run("[emit(A sound echoes.)]", makeCtx({ output: cap.accessor }));
+  await runSoftcode("[emit(A sound echoes.)]", makeCtx({ output: cap.accessor }));
   assertEquals(cap.rooms.length, 1);
   assertEquals(cap.rooms[0].room, "10");
 });
@@ -545,7 +492,7 @@ Deno.test("demo/time — secs() returns a real unix timestamp", async () => {
 
 Deno.test("demo/time — msecs() is in millisecond range", async () => {
   const ms = parseInt(await run("[msecs()]"), 10);
-  assertEquals(ms > 1_000_000_000_000, true); // > year 2001 timestamp
+  assertEquals(ms > 1_000_000_000_000, true);
 });
 
 Deno.test("demo/time — digittime formats seconds as HH:MM:SS", async () => {
@@ -562,8 +509,6 @@ Deno.test("demo/time — singletime gives compact human-readable duration", asyn
 });
 
 Deno.test("demo/time — etimefmt formats elapsed seconds (escape %% in format)", async () => {
-  // %H/%M/%S inside a softcode string must be escaped as %%H/%%M/%%S
-  // so they reach etimefmt as literal format tokens rather than substitutions.
   assertEquals(await run("[etimefmt(%%H:%%M:%%S,3661)]"), "01:01:01");
   assertEquals(await run("[etimefmt(%%H:%%M:%%S,0)]"),    "00:00:00");
 });
@@ -571,7 +516,6 @@ Deno.test("demo/time — etimefmt formats elapsed seconds (escape %% in format)"
 // ── 11. Complex composed expressions ──────────────────────────────────────────
 
 Deno.test("demo/composed — format WHO list using iter + [name(##)]", async () => {
-  // lwho() returns dbrefs; iter maps each to its name
   const result = await run("[iter([lwho()],[name(##)])]");
   assertStringIncludes(result, "Alice");
   assertStringIncludes(result, "Bob");
@@ -584,8 +528,8 @@ Deno.test("demo/composed — sort all online player names alphabetically", async
 
 Deno.test("demo/composed — conditional greeting based on wizard flag", async () => {
   const code = "[ifelse(hasflag(%#,wizard),Welcome archmage,Hello [name(%#)])]";
-  assertEquals(await run(code),                                     "Hello Alice");
-  assertEquals(await run(code, { actor: MERLIN, executor: MERLIN }), "Welcome archmage");
+  assertEquals(await run(code), "Hello Alice");
+  assertEquals(await run(code, { actor: MERLIN, executor: MERLIN, enactor: MERLIN.id }), "Welcome archmage");
 });
 
 Deno.test("demo/composed — register accumulator across iter (sum 1..5)", async () => {
@@ -599,13 +543,10 @@ Deno.test("demo/composed — switch dispatch on object type", async () => {
 });
 
 Deno.test("demo/composed — nested iter builds a 2×2 multiplication table", async () => {
-  // Outer iter: 1 2.  Inner iter: 1 2.  %i1 = outer item.
-  const result = await run("[iter(1 2,[iter(1 2,[mul(%i1,##)])])]");
-  assertEquals(result, "1 2 2 4");
+  assertEquals(await run("[iter(1 2,[iter(1 2,[mul(%i1,##)])])]"), "1 2 2 4");
 });
 
 Deno.test("demo/composed — fibonacci sequence 0..7 via iter + u()", async () => {
-  // lnum(0,7) = "0 1 2 3 4 5 6 7"  →  iter maps each n to u(FIB,n)
   assertEquals(
     await run("[iter([lnum(0,7)],[u(#99/FIB,##)])]"),
     "0 1 1 2 3 5 8 13",

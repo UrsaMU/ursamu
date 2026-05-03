@@ -7,8 +7,6 @@
  */
 import type { SDKContext } from "./SDKService.ts";
 import { wsService } from "../WebSocket/index.ts";
-import { send as broadcastSend, broadcast as broadcastAll } from "../broadcast/index.ts";
-import type { IDBObj } from "../../@types/UrsamuSDK.ts";
 
 type Msg    = Record<string, unknown>;
 type Worker = globalThis.Worker;
@@ -57,6 +55,12 @@ export async function handleForceMessage(
     if (!msg.targetId || !msg.command) { respond(worker, msgId, null); return; }
     const { force }     = await import("../commands/index.ts");
     const { dbojs: db } = await import("../Database/index.ts");
+    // Privilege check: only wizard/admin/superuser may force-execute as another object
+    const actorId = await resolveSocket(context);
+    if (!actorId) { respond(worker, msgId, null); return; }
+    const actor = await db.queryOne({ id: actorId });
+    const { isStaff } = await import("../../utils/isStaff.ts");
+    if (!actor || !isStaff(actor.flags)) { respond(worker, msgId, null); return; }
     const en = await db.queryOne({ id: msg.targetId as string });
     if (en) {
       const socket  = wsService.getConnectedSockets().find(s => s.cid === en.id);
@@ -84,13 +88,14 @@ export async function handleEvalMessage(
 
   if (type === "eval:attr") {
     const { dbojs: db } = await import("../Database/index.ts");
+    const { escapeRegex } = await import("../../utils/escapeRegex.ts");
     // deno-lint-ignore no-explicit-any
-    let tarObj: any = await db.queryOne({ id: msg.targetStr as string });
-    if (!tarObj) {
-      tarObj = await db.queryOne({
-        "data.name": new RegExp(`^${String(msg.targetStr).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
-      });
-    }
+    const tarObj: any = await db.queryOne({
+      $or: [
+        { id: msg.targetStr as string },
+        { "data.name": new RegExp(`^${escapeRegex(String(msg.targetStr))}$`, "i") },
+      ],
+    });
     if (!tarObj) { respond(worker, msgId, ""); return; }
 
     const attrs    = ((tarObj.data?.attributes as Array<{ name: string; value: string; type?: string }>) || []);
@@ -128,66 +133,16 @@ export async function handleEvalMessage(
     const code = String(msg.code || "");
     if (!code) { respond(worker, msgId, ""); return; }
     try {
-      const { parse }    = await import("../Softcode/parser.ts");
-      const { evaluate } = await import("../Softcode/evaluator.ts");
-      await import("../Softcode/stdlib/index.ts");
-
-      const me = context?.me as { id?: string; name?: string; flags?: unknown; location?: string; state?: Record<string, unknown> } | undefined;
-      const actorFlags: Set<string> = me?.flags instanceof Set
-        ? (me.flags as Set<string>)
-        : new Set<string>(Array.isArray(me?.flags) ? (me.flags as string[]) : []);
-      const actor: IDBObj = {
-        id:       me?.id ?? String(context?.id ?? "0"),
-        name:     me?.name ?? "Unknown",
-        flags:    actorFlags,
-        location: me?.location,
-        state:    me?.state ?? {},
-        contents: [],
-      };
-
-      const { dbojs: _db } = await import("../Database/index.ts");
-      const hydrateRaw = (r: { id: string; flags?: unknown; location?: string; data?: Record<string, unknown> }): IDBObj => ({
-        id:       r.id,
-        name:     (r.data?.name as string) ?? "Unknown",
-        flags:    new Set(String(r.flags ?? "").split(" ").filter(Boolean)),
-        location: r.location,
-        state:    r.data ?? {},
-        contents: [],
+      const actorId = await resolveSocket(context);
+      if (!actorId) { respond(worker, msgId, code); return; }
+      const { softcodeService } = await import("../Softcode/index.ts");
+      const result = await softcodeService.runSoftcode(code, {
+        actorId,
+        executorId: actorId,
+        args:       [],
+        socketId:   context?.socketId as string | undefined,
       });
-
-      // deno-lint-ignore no-explicit-any
-      const evalCtx: any = {
-        actor, executor: actor, caller: null, args: [], registers: new Map<string, string>(),
-        iterStack: [], depth: 0, deadline: Date.now() + 2000,
-        db: {
-          queryById:        async (id: string) => { const r = await _db.queryOne({ id }); return r ? hydrateRaw(r as Parameters<typeof hydrateRaw>[0]) : null; },
-          queryByName:      async (name: string) => { const all = await _db.query({ flags: /connected/i }); const f = all.find(p => ((p.data?.name as string) ?? "").toLowerCase() === name.toLowerCase()); return f ? hydrateRaw(f as Parameters<typeof hydrateRaw>[0]) : null; },
-          lcon:             async (locId: string) => { const r = await _db.query({ location: locId }); return r.map(o => hydrateRaw(o as Parameters<typeof hydrateRaw>[0])); },
-          lwho:             async () => { const r = await _db.query({ flags: /connected/i }); return r.map(o => hydrateRaw(o as Parameters<typeof hydrateRaw>[0])); },
-          lattr:            async (objId: string) => { const r = await _db.queryOne({ id: objId }); if (!r) return []; return Object.keys(r.data ?? {}).filter(k => typeof (r.data as Record<string, unknown>)[k] === "string").map(k => k.toUpperCase()); },
-          getAttribute:     async (obj: IDBObj, attrName: string) => { const r = await _db.queryOne({ id: obj.id }); if (!r) return null; const v = (r.data ?? {})[attrName.toLowerCase()]; return typeof v === "string" ? v : null; },
-          getTagById: () => Promise.resolve(null), getPlayerTagById: () => Promise.resolve(null),
-          lsearch: () => Promise.resolve([]), children: () => Promise.resolve([]),
-          lchannels: () => Promise.resolve(""), channelsFor: () => Promise.resolve(""),
-          mailCount: () => Promise.resolve(0), queueLength: () => Promise.resolve(0),
-          getIdleSecs: () => Promise.resolve(0), getUserFn: () => Promise.resolve(null),
-        },
-        output: {
-          send: (outMsg: string, targetId?: string) => {
-            const targets = targetId
-              ? wsService.getConnectedSockets().filter(s => s.cid === targetId).map(s => s.id)
-              : (context?.socketId ? [context.socketId as string] : []);
-            if (targets.length) broadcastSend(targets, outMsg, {});
-          },
-          roomBroadcast: (_m: string, _r: string, _ex?: string) => {},
-          broadcast: (outMsg: string) => broadcastAll(outMsg, {}),
-        },
-      };
-
-      // deno-lint-ignore no-explicit-any
-      const ast    = parse(code, { startRule: "Start" }) as any;
-      const result = await evaluate(ast, evalCtx);
-      respond(worker, msgId, result ?? code);
+      respond(worker, msgId, result);
     } catch (_err) {
       console.error("[SandboxHandlers eval:string]", _err);
       respond(worker, msgId, code);

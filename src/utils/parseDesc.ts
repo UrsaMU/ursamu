@@ -31,10 +31,9 @@ export async function parseDesc(
   // Find and replace [u(objId/attrName, arg0, arg1, ...)] patterns
   // Pattern: [u(target/attr)] or [u(target/attr, arg0)] or [u(target/attr, arg0, arg1, ...)]
   // Determine if the actor is privileged (admin/wizard/superuser)
-  const actorFlagStr = Array.from(actor.flags || []).join(" ").toLowerCase();
-  const isPrivileged = actorFlagStr.includes("wizard") ||
-    actorFlagStr.includes("admin") ||
-    actorFlagStr.includes("superuser");
+  const isPrivileged = actor.flags.has("wizard") ||
+    actor.flags.has("admin") ||
+    actor.flags.has("superuser");
 
   const uPattern = /\[u\(([^)]+)\)\]/g;
   const allMatches = [...result.matchAll(uPattern)];

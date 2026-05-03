@@ -113,10 +113,14 @@ export default () =>
         // DNS resolution failure is not fatal — let fetch surface the error naturally.
       }
 
-      // Fetch
+      // Fetch — redirect:error prevents redirect-based SSRF bypass after DNS check;
+      // AbortSignal.timeout guards against slow-loris DoS from remote servers.
       let res: Response;
       try {
-        res = await fetch(url.toString());
+        res = await fetch(url.toString(), {
+          redirect: "error",
+          signal: AbortSignal.timeout(10_000),
+        });
       } catch {
         u.send("Could not fetch that URL.");
         return;

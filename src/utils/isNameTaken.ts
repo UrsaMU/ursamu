@@ -1,17 +1,10 @@
 import { dbojs } from "../services/Database/index.ts";
+import { escapeRegex } from "./escapeRegex.ts";
 
-/**
- * Check if a name or alias is already taken.
- * @param name The name to check.
- * @returns The object that has the name or alias, or false if not found.
- */
-const escRx = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
+/** Returns the matching object if the name or alias is already taken, otherwise falsy. */
 export const isNameTaken = async (name: string) => {
+  const rx = new RegExp(`^${escapeRegex(name)}$`, "i");
   return await dbojs.findOne({
-    $or: [
-      { "data.name": new RegExp(`^${escRx(name)}$`, "i") },
-      { "data.alias": new RegExp(`^${escRx(name)}$`, "i") },
-    ],
+    $or: [{ "data.name": rx }, { "data.alias": rx }],
   });
 };

@@ -155,7 +155,21 @@ Requires `admin` or `wizard` flag unless noted.
 | `@entrances [<object>]` | List all objects that link to an object |
 | `@halt [<player>]` | Cancel queued actions (own or target's if admin) |
 | `@switch[/first] <val>=<case>,<cmd>,...` | Case-branch command execution |
+| `@dolist <list>=<action>` | Iterate a space-delimited list; execute action per item (`##` = item, `#@` = index) |
+| `@if <expr>=<true>[,<false>]` | Conditional execution |
+| `@while <expr>=<action>` | Loop while expression is true |
+| `@break` | Exit the current `@dolist` or `@while` loop |
+| `@wait <seconds>=<action>` | Delay an action by N seconds |
 | `@assert <condition>` | Abort trigger chain if condition is false |
+| `@zone <object>=<zone master>` | Assign an object to a zone master |
+| `@zone <object>=` | Clear zone assignment |
+| `@function <name>=<obj>/<attr>` | Define a global softcode user function |
+| `@cpattr <src>/<attr>=<dst>[/<newname>]` | Copy an attribute to another object |
+| `@mvattr <src>/<attr>=<dst>[/<newname>]` | Move an attribute to another object |
+| `@grep <obj>=<pattern>` | Search object attributes by name pattern |
+| `@ps` | List all pending `@wait` jobs |
+| `@drain <obj>` | Cancel all pending `@wait` jobs on an object |
+| `@notify <obj>[/<sem>][=<count>]` | Signal a semaphore (`@wait/until`) |
 | `@reboot` | Restart the server |
 | `@shutdown` | Shut down the server |
 | `@site <key>=<value>` | Set a server configuration value |

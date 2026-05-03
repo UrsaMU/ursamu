@@ -1,6 +1,6 @@
 import { addCmd } from "../../services/commands/index.ts";
 import { softcodeService } from "../../services/Softcode/index.ts";
-import { BreakSignal } from "./shared.ts";
+import { BreakSignal, splitActionCommands } from "./shared.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
 addCmd({
@@ -46,8 +46,11 @@ Examples:
         const substituted = action
           .replaceAll("##", items[i])
           .replaceAll("#@", String(i + 1));
-        const cmd = await softcodeService.runSoftcode(substituted, ctx);
-        await exec(cmd);
+        const evaluated = await softcodeService.runSoftcode(substituted, ctx);
+        // Support multi-command actions: {cmd1;cmd2;...}
+        for (const cmd of splitActionCommands(evaluated)) {
+          await exec(cmd);
+        }
       }
     } catch (e) {
       if (!(e instanceof BreakSignal)) throw e;

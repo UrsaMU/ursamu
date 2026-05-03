@@ -163,6 +163,39 @@ Admins and wizards can create, configure, and destroy communication channels:
 @chanset <name>/masking=true|false   -- Toggle name masking
 ```
 
+### Master Room & Zones
+
+#### Master Room
+
+UrsaMU supports a single designated *master room*. Commands and `$`-pattern attributes set on objects in the master room are checked globally — any player anywhere on the game can trigger them, as if those objects were in the same room.
+
+The master room ID is configured via `game.masterRoom` in `config.json`:
+
+```json
+{
+  "game": {
+    "masterRoom": "1"
+  }
+}
+```
+
+`ACONNECT` and `ADISCONNECT` attributes fire on both the connected player's own object and on objects in the master room, allowing global connection hooks without touching the player object.
+
+#### Zone System
+
+Zones allow a *zone master* object to share `$`-pattern commands across all objects assigned to it.
+
+```
+@zone <object>=<zone master>   -- assign object to a zone
+@zone <object>=                -- clear zone assignment
+```
+
+Objects in a zone inherit `$`-pattern command dispatch from the zone master, making it easy to share a command set across many rooms or items without duplicating attributes on each one.
+
+To see what zone an object belongs to, use `examine <object>` — the zone master dbref is listed in the output.
+
+---
+
 ### Rate Limiting
 
 The server enforces a WebSocket command rate limit of **10 commands per second**

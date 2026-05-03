@@ -55,10 +55,12 @@ export function resolveScriptName(
     }
   }
 
+  const stripSigil = (s: string) =>
+    s.startsWith("@") || s.startsWith("+") ? s.slice(1) : s;
+
   // Strip @ or + sigil and resolve alias
   if (!usedPrefix) {
-    const bare = (intentName.startsWith("@") || intentName.startsWith("+"))
-      ? intentName.slice(1) : intentName;
+    const bare = stripSigil(intentName);
     scriptName = aliases[bare] || bare;
   }
 
@@ -70,8 +72,7 @@ export function resolveScriptName(
 
   // Extract /switches from the intent token
   let cmdSwitches: string[] = [];
-  const baseLookup = (intentName.startsWith("@") || intentName.startsWith("+"))
-    ? intentName.slice(1) : intentName;
+  const baseLookup = stripSigil(intentName);
   if (baseLookup.includes("/") && !scriptName.includes("/")) {
     cmdSwitches = baseLookup.slice(baseLookup.indexOf("/") + 1).split("/").filter(Boolean);
   }

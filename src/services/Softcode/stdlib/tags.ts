@@ -13,103 +13,84 @@
  */
 import { register } from "./registry.ts";
 import type { EvalContext } from "../context.ts";
+import type { UrsaEvalContext } from "../ursamu-context.ts";
+import { resolveObj } from "./object-shared.ts";
 
-// ── Global tags ───────────────────────────────────────────────────────────
+// Cast helper — at runtime ctx is always UrsaEvalContext.
+function ursa(ctx: EvalContext): UrsaEvalContext {
+  return ctx as unknown as UrsaEvalContext;
+}
 
-/**
- * tag(tagname) — return the dbref of the globally-tagged object, or #-1.
- */
-register("tag", async (a, ctx: EvalContext) => {
+// ── Global tags ───────────────────────────────────────────────────────────────
+
+/** tag(tagname) — return the dbref of the globally-tagged object, or #-1. */
+register("tag", async (a, ctx) => {
   const name = (a[0] ?? "").trim().toLowerCase();
   if (!name) return "#-1 INVALID TAG NAME";
-  const id = await ctx.db.getTagById(name);
+  const id = await ursa(ctx).db.getTagById(name);
   return id ? `#${id}` : "#-1";
 });
 
-/**
- * istag(tagname) — 1 if the global tag exists, 0 if not.
- */
-register("istag", async (a, ctx: EvalContext) => {
+/** istag(tagname) — 1 if the global tag exists, 0 if not. */
+register("istag", async (a, ctx) => {
   const name = (a[0] ?? "").trim().toLowerCase();
   if (!name) return "0";
-  const id = await ctx.db.getTagById(name);
+  const id = await ursa(ctx).db.getTagById(name);
   return id ? "1" : "0";
 });
 
 /**
- * listtags([delim]) — space-separated (or delim-separated) list of all global
- * tag names. Returns empty string if no tags are set.
- *
- * Note: requires full scan of the server.tags collection; use sparingly.
+ * listtags([delim]) — space-separated (or delim-separated) list of all global tag names.
+ * Uses the "__listtags__" sentinel so the worker can serve the full list.
  */
-register("listtags", async (a, ctx: EvalContext) => {
+register("listtags", async (a, ctx) => {
   const delim = a[0] ?? " ";
-  // We resolve all tags by querying via a broad DB scan.
-  // The DbAccessor doesn't expose list-all directly, so we use a convention:
-  // getTagById("") returns null; we use a sentinel "__listtags__" request.
-  // For now delegate to the worker's db module — the worker exposes lattr for
-  // objects; tag listing is handled via a dedicated db op in _handleDbQuery.
-  const raw = await ctx.db.getTagById("__listtags__");
+  const raw = await ursa(ctx).db.getTagById("__listtags__");
   if (!raw) return "";
   return raw.split(",").join(delim);
 });
 
 /**
- * tagmatch(obj, tagname) — 1 if the given object reference is the target of
- * the named global tag, 0 otherwise.
+ * tagmatch(obj, tagname) — 1 if the given object reference points to the
+ * same object as the named global tag, 0 otherwise.
  */
-register("tagmatch", async (a, ctx: EvalContext) => {
+register("tagmatch", async (a, ctx) => {
   const objRef  = (a[0] ?? "").trim();
   const tagName = (a[1] ?? "").trim().toLowerCase();
   if (!objRef || !tagName) return "0";
 
-  const tagId = await ctx.db.getTagById(tagName);
+  const tagId = await ursa(ctx).db.getTagById(tagName);
   if (!tagId) return "0";
 
-  // Resolve the object reference
-  let resolvedId: string | null = null;
-  if (objRef.toLowerCase() === "me")      resolvedId = ctx.executor.id;
-  else if (objRef.toLowerCase() === "here") {
-    resolvedId = ctx.executor.location ?? null;
-  } else if (/^#(\d+)$/.test(objRef)) {
-    resolvedId = objRef.slice(1);
-  } else {
-    const obj = await ctx.db.queryByName(objRef);
-    resolvedId = obj?.id ?? null;
-  }
-
-  return resolvedId === tagId ? "1" : "0";
+  const obj = await resolveObj(objRef, ctx);
+  return obj?.id === tagId ? "1" : "0";
 });
 
-// ── Personal (ltag) tags ──────────────────────────────────────────────────
+// ── Personal (ltag) tags ──────────────────────────────────────────────────────
 
-/**
- * ltag(tagname) — return the dbref of the actor's personal tag, or #-1.
- */
-register("ltag", async (a, ctx: EvalContext) => {
+/** ltag(tagname) — return the dbref of the actor's personal tag, or #-1. */
+register("ltag", async (a, ctx) => {
   const name = (a[0] ?? "").trim().toLowerCase();
   if (!name) return "#-1 INVALID TAG NAME";
-  const id = await ctx.db.getPlayerTagById(ctx.actor.id, name);
+  const id = await ursa(ctx).db.getPlayerTagById(ursa(ctx).enactor, name);
   return id ? `#${id}` : "#-1";
 });
 
-/**
- * isltag(tagname) — 1 if the actor has a personal tag by this name, 0 if not.
- */
-register("isltag", async (a, ctx: EvalContext) => {
+/** isltag(tagname) — 1 if the actor has a personal tag by this name, 0 if not. */
+register("isltag", async (a, ctx) => {
   const name = (a[0] ?? "").trim().toLowerCase();
   if (!name) return "0";
-  const id = await ctx.db.getPlayerTagById(ctx.actor.id, name);
+  const id = await ursa(ctx).db.getPlayerTagById(ursa(ctx).enactor, name);
   return id ? "1" : "0";
 });
 
 /**
  * listltags([delim]) — list of the actor's personal tag names.
+ * Uses the "__listltags__" sentinel so the worker can serve the full list.
  */
-register("listltags", async (a, ctx: EvalContext) => {
+register("listltags", async (a, ctx) => {
   const delim = a[0] ?? " ";
-  // Use the sentinel pattern for ltag listing
-  const raw = await ctx.db.getPlayerTagById(ctx.actor.id, "__listltags__");
+  const raw = await ursa(ctx).db.getPlayerTagById(ursa(ctx).enactor, "__listltags__");
   if (!raw) return "";
   return raw.split(",").join(delim);
 });
@@ -117,22 +98,14 @@ register("listltags", async (a, ctx: EvalContext) => {
 /**
  * ltagmatch(obj, tagname) — 1 if obj matches the actor's personal tag.
  */
-register("ltagmatch", async (a, ctx: EvalContext) => {
+register("ltagmatch", async (a, ctx) => {
   const objRef  = (a[0] ?? "").trim();
   const tagName = (a[1] ?? "").trim().toLowerCase();
   if (!objRef || !tagName) return "0";
 
-  const tagId = await ctx.db.getPlayerTagById(ctx.actor.id, tagName);
+  const tagId = await ursa(ctx).db.getPlayerTagById(ursa(ctx).enactor, tagName);
   if (!tagId) return "0";
 
-  let resolvedId: string | null = null;
-  if (objRef.toLowerCase() === "me")        resolvedId = ctx.executor.id;
-  else if (objRef.toLowerCase() === "here") resolvedId = ctx.executor.location ?? null;
-  else if (/^#(\d+)$/.test(objRef))         resolvedId = objRef.slice(1);
-  else {
-    const obj = await ctx.db.queryByName(objRef);
-    resolvedId = obj?.id ?? null;
-  }
-
-  return resolvedId === tagId ? "1" : "0";
+  const obj = await resolveObj(objRef, ctx);
+  return obj?.id === tagId ? "1" : "0";
 });

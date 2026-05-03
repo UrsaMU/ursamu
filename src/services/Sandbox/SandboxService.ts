@@ -22,6 +22,13 @@ import {
 import { handleForceMessage, handleEvalMessage } from "./sandbox-handlers-exec.ts";
 
 // ---------------------------------------------------------------------------
+// Transpile cache — source-keyed, avoids re-transpiling identical scripts
+// ---------------------------------------------------------------------------
+
+const _transpileCache = new Map<string, string>();
+const _TRANSPILE_CACHE_MAX = 200;
+
+// ---------------------------------------------------------------------------
 // Exported helpers
 // ---------------------------------------------------------------------------
 
@@ -154,14 +161,20 @@ export class SandboxService {
     const sandbox = await this.getSandbox();
     const timeout = config?.timeout || this.defaultTimeout;
 
-    let execCode = code;
-    try {
-      const { transform } = await import("npm:sucrase@3.35.0");
-      execCode = transform(code, { transforms: ["typescript"] }).code;
-      execCode = execCode.replace(/^import\s+.*?;?\s*$/gm, "");
-    } catch (e) {
-      console.warn("[Sandbox] Transpilation failed, stripping imports:", e);
-      execCode = code.replace(/^import\s+.*?;?\s*$/gm, "");
+    let execCode = _transpileCache.get(code);
+    if (execCode === undefined) {
+      let compiled: string;
+      try {
+        const { transform } = await import("npm:sucrase@3.35.0");
+        compiled = transform(code, { transforms: ["typescript"] }).code;
+        compiled = compiled.replace(/^import\s+.*?;?\s*$/gm, "");
+      } catch (e) {
+        console.warn("[Sandbox] Transpilation failed, stripping imports:", e);
+        compiled = code.replace(/^import\s+.*?;?\s*$/gm, "");
+      }
+      if (_transpileCache.size >= _TRANSPILE_CACHE_MAX) _transpileCache.clear();
+      _transpileCache.set(code, compiled);
+      execCode = compiled;
     }
 
     const sdkData = SDKService.prepareSDK(context);

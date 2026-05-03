@@ -13,6 +13,7 @@ import { center, ljust, rjust } from "../../utils/format.ts";
 import parser from "../parser/parser.ts";
 import { setConfig } from "../Config/mod.ts";
 import { hash, compare } from "../../../deps.ts";
+import { escapeRegex } from "../../utils/escapeRegex.ts";
 import { sandboxService } from "../Sandbox/SandboxService.ts";
 import { buildContext, type GameContext } from "../../engine/context.ts";
 import { sprintf, templateFn } from "./formatting.ts";
@@ -147,9 +148,12 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
     },
 
     teleport: async (targetStr: string, destination: string) => {
-      const tarObj =
-        (await dbojs.queryOne({ id: targetStr })) ||
-        (await dbojs.queryOne({ "data.name": new RegExp(`^${targetStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i") }));
+      const tarObj = await dbojs.queryOne({
+        $or: [
+          { id: targetStr },
+          { "data.name": new RegExp(`^${escapeRegex(targetStr)}$`, "i") },
+        ],
+      });
       if (!tarObj) return;
       tarObj.location = destination;
       await dbojs.modify({ id: tarObj.id }, "$set", tarObj);
@@ -165,11 +169,14 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
     auth: {
       verify: async (name: string, password: string) => {
         const player = await dbojs.queryOne({
-          "data.name": new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, "i"),
+          "data.name": new RegExp(`^${escapeRegex(name)}$`, "i"),
           flags: /player/i,
         });
         if (!player || !player.data?.password) return false;
-        return await compare(String(player.data.password), password);
+        // plaintext first, stored hash second — bcryptjs compare(data, hash)
+        const ok = await compare(password, String(player.data.password));
+        if (!ok) return false;
+        return hydrate(player);
       },
       login: async (id: string) => {
         const playerResult = await dbojs.queryOne({ id });
@@ -357,7 +364,8 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
           args:       [],
           socketId,
         });
-      } catch {
+      } catch (err) {
+        console.error("[evalString] failed for actor", me.id, ":", err);
         return str;
       }
     },

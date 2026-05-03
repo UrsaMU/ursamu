@@ -61,24 +61,19 @@ export default () =>
         },
       };
       await dbojs.create(newPlayer);
-      const player = await dbojs.queryOne({ id });
-      if (!player) {
-        u.send("Unable to create player!");
-        return;
-      }
 
       // Login the player (sets socket.cid and joins rooms)
-      await u.auth.login(player.id);
+      await u.auth.login(newPlayer.id);
 
       await u.send(
         `Welcome to ${getConfig<string>("game.name")}!`,
         u.socketId,
-        { cid: player.id }
+        { cid: newPlayer.id }
       );
 
       // Send connection message to everyone in the room
-      if (player.location) {
-        u.send(`${moniker(player)} has connected.`, `#${player.location}`);
+      if (newPlayer.location) {
+        u.send(`${moniker(newPlayer)} has connected.`, `#${newPlayer.location}`);
       }
 
       await u.force("look");

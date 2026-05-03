@@ -56,7 +56,7 @@ export type { UserSocket } from "./src/@types/IMSocket.ts";
 import { wsService as _wsService } from "./src/services/WebSocket/index.ts";
 
 // Export command registration and plugin type — available to all plugins and game projects
-export { addCmd, registerScript, registerCmdMiddleware } from "./src/services/commands/cmdParser.ts";
+export { addCmd, cmds, registerScript, registerCmdMiddleware } from "./src/services/commands/cmdParser.ts";
 
 // Engine execution context — the substrate that all command handling builds on
 export type { GameContext } from "./src/engine/context.ts";

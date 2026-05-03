@@ -231,10 +231,7 @@ export async function execAddcom(u: IUrsamuSDK): Promise<void> {
       if (!alias) { u.send("Usage: @comtitle <alias>=<title>"); return; }
 
       type ChanEntry = { id: string; channel: string; alias: string; title?: string; active: boolean };
-      const playerObj = await u.db.search(u.me.id);
-      const me = playerObj[0];
-      if (!me) return;
-      const channels = ((me.state as Record<string, unknown>).channels as ChanEntry[] | undefined) ?? [];
+      const channels = ((u.me.state as Record<string, unknown>).channels as ChanEntry[] | undefined) ?? [];
       const entry = channels.find((c: ChanEntry) => c.alias === alias);
       if (!entry) { u.send(`No channel alias "${alias}" found.`); return; }
       entry.title = title || undefined;

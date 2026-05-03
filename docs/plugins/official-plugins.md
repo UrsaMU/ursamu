@@ -29,6 +29,7 @@ To disable auto-install for a specific plugin, remove its entry from the manifes
 | **wiki** | [UrsaMU/wiki-plugin](https://github.com/UrsaMU/wiki-plugin) | `>=1.9.0` | File-based markdown wiki — pages, search, history, backlinks |
 | **mail** | [UrsaMU/mail-plugin](https://github.com/UrsaMU/mail-plugin) | `>=1.9.3` | In-game mail — drafts, reply/forward, folders, attachments, quota, REST API |
 | **builder** | [UrsaMU/builder-plugin](https://github.com/UrsaMU/builder-plugin) | `>=1.9.5` | World-building commands — `@dig`, `@open`, `@link`, `@describe`, `@examine`, REST API |
+| **chargen** | Bundled — `src/plugins/chargen/` | `>=1.8.0` | Character generation scaffolding — hooks into the connection flow to guide new players through stat selection |
 | **help** | [UrsaMU/help-plugin](https://github.com/UrsaMU/help-plugin) | `>=1.9.0` | API-first help system — file + DB + command providers, `+help/set`/`+help/del`, REST API, per-plugin help dirs |
 ---
 

@@ -5,7 +5,7 @@
 ![ursamu header](https://raw.githubusercontent.com/ursamu/ursamu/main/ursamu_github_banner.png)
 
 [![JSR](https://jsr.io/badges/@ursamu/ursamu)](https://jsr.io/@ursamu/ursamu)
-[![Version](https://img.shields.io/badge/version-1.9.29-blue)](https://github.com/UrsaMU/ursamu/releases)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/UrsaMU/ursamu/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Deno](https://img.shields.io/badge/deno-2.x-black)](https://deno.land)
 
@@ -86,7 +86,11 @@ deno task start
 - **Tiered permissions** — flag-based access control: `player` → `builder` → `wizard` → `admin` → `superuser`
 - **MXP support** — MXP negotiation and `%mxp[cmd|text]` substitutions for rich Telnet clients
 - **GameClock** — pluggable in-game calendar and time system
-- **Hot reload** — `@reload` reloads commands, config, scripts, and plugins without restarting the server
+- **TinyMUX 2.x softcode engine** — full evaluator with ~250 functions (math, string, list, logic, object, registers, output); softcode attributes flagged with `/softcode`; action commands `@switch`, `@dolist`, `@if`, `@while`, `@break`, `@trigger`, `@wait`
+- **$-pattern / ^-pattern dispatch** — `$<glob>:<action>` attributes fire on command match; `^<pattern>:<action>` attributes fire as monitors; `%0`–`%9` capture groups supported
+- **Zone system** — `@zone` assigns objects to a zone master; zones share `$`-pattern commands across all member objects without duplicating attributes
+- **Channel admin** — `@chancreate`, `@chandestroy`, `@chanset` for in-game channel management (admin/wizard only)
+- **Hot reload** — `@reload` hot-reloads commands, config, scripts, and plugins without restarting the server
 - **Rate limiting** — WebSocket rate limiting (10 cmds/sec per socket) and HTTP rate limiting on auth endpoints
 
 ---

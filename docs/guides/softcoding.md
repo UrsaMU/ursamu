@@ -371,3 +371,50 @@ export default async (u) => {
   u.send(`Price: ${price} credits  (${uses} use${uses === "1" ? "" : "s"} remaining)`);
 };
 ```
+---
+
+## Softcode Evaluator (TinyMUX Compatible)
+
+As of v2.0.0, UrsaMU ships a full TinyMUX 2.x-compatible softcode evaluator. Any attribute flagged `/softcode` is run through the evaluator rather than executed as TypeScript.
+
+### Enabling softcode on an attribute
+
+```
+&GREET/softcode me=[name(%#)] greets you!
+```
+
+The `/softcode` switch tells the engine to evaluate the value as MUSH softcode rather than TypeScript. It persists on the attribute — you only need to specify it when first setting the attribute.
+
+Attributes that contain MUX substitution syntax (`%N`, `[func()]`) and no TypeScript keywords are also auto-detected as softcode.
+
+### Action commands
+
+| Command | Purpose |
+|---------|---------|
+| `@switch <expr>=<case>,<action>[,<default>]` | Branch on value |
+| `@dolist <list>=<action>` | Iterate over space-delimited list (`##` = item, `#@` = index) |
+| `@if <expr>=<true>[,<false>]` | Conditional execution |
+| `@while <expr>=<action>` | Loop while true (100ms wall-clock timeout enforced) |
+| `@break` | Exit the current `@dolist` or `@while` |
+| `@trigger <obj>/<attr>[=<args>]` | Fire an attribute as a trigger |
+| `@wait <seconds>=<action>` | Delay an action |
+
+### $-pattern dispatch
+
+```
+&CMD_GREET object=$greet *:@pemit %#=Hello, %0!
+```
+
+Attributes beginning with `$` fire when their glob pattern matches a typed command. `%0`–`%9` are capture groups. Objects in the same room as the player, or in the master room, or in the player's zone master are checked.
+
+### ^-pattern listeners (monitors)
+
+```
+&LISTEN_HELLO object=^*hello*:@pemit %#=I heard a hello!
+```
+
+Attributes beginning with `^` fire when their pattern matches anything broadcast in the room. The object must have the `MONITOR` flag set.
+
+### Softcode function reference
+
+See [MUSH Compatibility](../mush_compatibility.md) for the full list of ~250 supported functions, substitutions, and compatibility stubs.

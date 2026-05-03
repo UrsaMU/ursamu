@@ -9,18 +9,12 @@
 
 import { register } from "./registry.ts";
 import type { EvalContext } from "../context.ts";
-import { snapshotRegisters, restoreRegisters, isTooDeep } from "../context.ts";
-import { evaluate } from "../evaluator.ts";
-import { parse } from "../parser.ts";
 import type { IDBObj } from "../../../@types/UrsamuSDK.ts";
 import { resolveObj } from "./object-shared.ts";
+import type { UrsaEvalContext } from "../ursamu-context.ts";
+import { isTooDeep, makeSubCtx, toLibCtx, snapshotRegisters, restoreRegisters } from "../ursamu-context.ts";
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
-
-function safeParse(code: string): ReturnType<typeof parse> | null {
-  try { return parse(code) as ReturnType<typeof parse>; }
-  catch { return null; }
-}
 
 function globRe(pattern: string): RegExp {
   const re = "^" + pattern
@@ -33,24 +27,14 @@ function globRe(pattern: string): RegExp {
 async function callAttrOnObj(
   obj: IDBObj, attrName: string, args: string[], ctx: EvalContext, local: boolean
 ): Promise<string> {
-  if (isTooDeep(ctx)) return "#-1 TOO DEEP";
-  const code = await ctx.db.getAttribute(obj, attrName);
+  const uctx = ctx as unknown as UrsaEvalContext;
+  if (isTooDeep(uctx)) return "#-1 TOO DEEP";
+  const code = await uctx.db.getAttribute(obj, attrName);
   if (code === null) return "";
-  const ast = safeParse(code);
-  if (!ast) return code;
-
-  const snapshot = local ? snapshotRegisters(ctx) : null;
-  const subCtx = {
-    ...ctx,
-    executor:  obj,
-    caller:    ctx.executor,
-    args,
-    depth:     ctx.depth + 1,
-    registers: local ? new Map(ctx.registers) : ctx.registers,
-  };
-
-  const result = await evaluate(ast as Parameters<typeof evaluate>[0], subCtx);
-  if (local && snapshot) restoreRegisters(ctx, snapshot);
+  const snapshot = local ? snapshotRegisters(uctx) : null;
+  const subCtx = makeSubCtx(uctx, obj, args, local);
+  const result = await uctx._engine.evalString(code, toLibCtx(subCtx));
+  if (local && snapshot) restoreRegisters(uctx, snapshot);
   return result;
 }
 
@@ -63,6 +47,11 @@ async function callAttr(
   const obj      = await resolveObj(objRef, ctx);
   if (!obj) return "#-1 NOT FOUND";
   return callAttrOnObj(obj, attrName, args, ctx, local);
+}
+
+async function evalCode(code: string, ctx: EvalContext): Promise<string> {
+  const uctx = ctx as unknown as UrsaEvalContext;
+  return uctx._engine.evalString(code, toLibCtx(uctx));
 }
 
 // ── Attribute query ───────────────────────────────────────────────────────────
@@ -120,42 +109,44 @@ register("xget", async (a, ctx) => {
   return (await ctx.db.getAttribute(obj, a[1] ?? "")) ?? "";
 });
 register("get_eval", async (a, ctx) => {
+  const uctx   = ctx as unknown as UrsaEvalContext;
   const spec   = a[0] ?? "";
   const slashI = spec.indexOf("/");
   const objRef = slashI >= 0 ? spec.slice(0, slashI) : "me";
   const attr   = slashI >= 0 ? spec.slice(slashI + 1) : (a[1] ?? "");
   const obj    = await resolveObj(objRef, ctx);
   if (!obj) return "#-1 NOT FOUND";
-  const code = (await ctx.db.getAttribute(obj, attr)) ?? "";
-  const ast  = safeParse(code);
-  return ast ? await evaluate(ast as Parameters<typeof evaluate>[0], ctx) : code;
+  const code = (await uctx.db.getAttribute(obj, attr)) ?? "";
+  return evalCode(code, ctx);
 });
 
 // ── v() / default / edefault / udefault ──────────────────────────────────────
 
 register("v", async (a, ctx) => {
-  return (await ctx.db.getAttribute(ctx.executor, a[0] ?? "")) ?? "";
+  const uctx = ctx as unknown as UrsaEvalContext;
+  return (await uctx.db.getAttribute(uctx.executor, a[0] ?? "")) ?? "";
 });
 register("default", async (a, ctx) => {
+  const uctx   = ctx as unknown as UrsaEvalContext;
   const spec   = a[0] ?? "";
   const slashI = spec.indexOf("/");
   const objRef = slashI >= 0 ? spec.slice(0, slashI) : "me";
   const attr   = slashI >= 0 ? spec.slice(slashI + 1) : spec;
   const obj    = await resolveObj(objRef, ctx);
-  const val    = obj ? (await ctx.db.getAttribute(obj, attr)) : null;
+  const val    = obj ? (await uctx.db.getAttribute(obj, attr)) : null;
   return val ?? (a[1] ?? "");
 });
 register("edefault", async (a, ctx) => {
+  const uctx   = ctx as unknown as UrsaEvalContext;
   const spec   = a[0] ?? "";
   const slashI = spec.indexOf("/");
   const objRef = slashI >= 0 ? spec.slice(0, slashI) : "me";
   const attr   = slashI >= 0 ? spec.slice(slashI + 1) : spec;
   const obj    = await resolveObj(objRef, ctx);
   if (!obj) return a[1] ?? "";
-  const code = await ctx.db.getAttribute(obj, attr);
+  const code = await uctx.db.getAttribute(obj, attr);
   if (code === null) return a[1] ?? "";
-  const ast = safeParse(code);
-  return ast ? await evaluate(ast as Parameters<typeof evaluate>[0], ctx) : code;
+  return evalCode(code, ctx);
 });
 register("udefault", async (a, ctx) => {
   const spec   = a[0] ?? "";
@@ -169,35 +160,33 @@ register("udefault", async (a, ctx) => {
 
 register("u",       async (a, ctx) => callAttr(a[0] ?? "", a.slice(1), ctx, false));
 register("ulocal",  async (a, ctx) => callAttr(a[0] ?? "", a.slice(1), ctx, true));
-register("eval",    async (a, ctx) => {
-  const code = a[0] ?? "";
-  const ast  = safeParse(code);
-  return ast ? await evaluate(ast as Parameters<typeof evaluate>[0], ctx) : code;
-});
-register("subeval", async (a, ctx) => {
-  const code = a[0] ?? "";
-  const ast  = safeParse(code);
-  return ast ? await evaluate(ast as Parameters<typeof evaluate>[0], ctx) : code;
-});
+register("eval",    async (a, ctx) => evalCode(a[0] ?? "", ctx));
+register("subeval", async (a, ctx) => evalCode(a[0] ?? "", ctx));
 // s() is the TinyMUX alias for eval/subeval — overrides the logic.ts stub.
-register("s", async (a, ctx) => {
-  const code = a[0] ?? "";
-  const ast  = safeParse(code);
-  return ast ? await evaluate(ast as Parameters<typeof evaluate>[0], ctx) : code;
-});
+register("s",       async (a, ctx) => evalCode(a[0] ?? "", ctx));
 register("objeval", async (a, ctx) => {
+  const uctx = ctx as unknown as UrsaEvalContext;
   const obj  = await resolveObj(a[0] ?? "me", ctx);
   const code = a[1] ?? "";
   if (!obj) return "#-1 NOT FOUND";
-  const ast    = safeParse(code);
-  const subCtx = { ...ctx, executor: obj, depth: ctx.depth + 1 };
-  return ast ? await evaluate(ast as Parameters<typeof evaluate>[0], subCtx) : code;
+  const subCtx = makeSubCtx(uctx, obj, uctx.args, false);
+  subCtx.depth = uctx.depth + 1;
+  return uctx._engine.evalString(code, toLibCtx(subCtx));
 });
+// hasattrval(obj, attr) — 1 if attr is set and non-empty, 0 otherwise
+register("hasattrval", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  if (!obj) return "0";
+  const val = await (ctx as unknown as UrsaEvalContext).db.getAttribute(obj, (a[1] ?? "").toUpperCase());
+  return val !== null && val !== "" ? "1" : "0";
+});
+
 register("zfun", async (a, ctx) => {
   // zfun(attr, args...) — call attr on zone master object
-  const zoneId = (ctx.executor as unknown as { zone?: string }).zone;
+  const uctx   = ctx as unknown as UrsaEvalContext;
+  const zoneId = (uctx.executor as unknown as { zone?: string }).zone;
   if (!zoneId) return "#-1 NO ZONE";
-  const zmo = await ctx.db.queryById(zoneId);
+  const zmo = await uctx.db.queryById(zoneId);
   if (!zmo) return "#-1 ZONE NOT FOUND";
   return callAttrOnObj(zmo, a[0] ?? "", a.slice(1), ctx, false);
 });

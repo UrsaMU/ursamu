@@ -57,18 +57,21 @@ export default () => {
     help: "Show server statistics",
     category: "info",
     exec: async (u: IUrsamuSDK) => {
-      const total = (await dbojs.all()).length;
-      const players = (await dbojs.query({ flags: /player/i })).length;
-      const rooms = (await dbojs.query({ flags: /room/i })).length;
-      const exits = (await dbojs.query({ flags: /exit/i })).length;
-      const calcThings = total - players - rooms - exits;
+      const [allObjs, players, rooms, exits] = await Promise.all([
+        dbojs.all(),
+        dbojs.query({ flags: /player/i }),
+        dbojs.query({ flags: /room/i }),
+        dbojs.query({ flags: /exit/i }),
+      ]);
+      const total = allObjs.length;
+      const calcThings = total - players.length - rooms.length - exits.length;
 
       u.send(center(" Server Statistics ", 78, "="));
       u.send(`Total Objects: ${total}`);
-      u.send(`Rooms: ${rooms}`);
-      u.send(`Exits: ${exits}`);
+      u.send(`Rooms: ${rooms.length}`);
+      u.send(`Exits: ${exits.length}`);
       u.send(`Things: ${calcThings}`);
-      u.send(`Players: ${players}`);
+      u.send(`Players: ${players.length}`);
       u.send(center("", 78, "="));
     },
   });

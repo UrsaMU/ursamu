@@ -3,7 +3,7 @@
 // then imports all stdlib modules as side effects so their register()
 // calls populate the shared Map.
 
-export { register, lookup } from "./registry.ts";
+export { register, lookup, entries } from "./registry.ts";
 export type { StdlibFn } from "./registry.ts";
 
 // ── Load all modules (side-effect imports register their functions) ────────
