@@ -28,7 +28,7 @@
     "jsr:@std/toml@0.224.0": "0.224.0",
     "jsr:@std/yaml@0.224": "0.224.0",
     "jsr:@std/yaml@0.224.0": "0.224.0",
-    "jsr:@ursamu/mushcode@~0.3.4": "0.3.4",
+    "jsr:@ursamu/mushcode@0.6": "0.6.0",
     "jsr:@zaubrik/djwt@^3.0.2": "3.0.2",
     "npm:@deno/kv@*": "0.13.0",
     "npm:@deno/sandbox@0.10.0": "0.10.0",
@@ -158,8 +158,8 @@
     "@std/yaml@0.224.0": {
       "integrity": "9bd99c6beb4d2db98de81c50853f15e68d4c95f38d737934b0e909bbeeff2b6d"
     },
-    "@ursamu/mushcode@0.3.4": {
-      "integrity": "d365d0e5d0993a6788ee768591a57c1a0c3ef8af846aea5c7fb503dd1cfb1f62"
+    "@ursamu/mushcode@0.6.0": {
+      "integrity": "0503df5a0b1a16b3335739ae7d335cf142746527f5be47f41711b6639ad88ee5"
     },
     "@zaubrik/djwt@3.0.2": {
       "integrity": "8070adaa49cd9e5d2b8ae82fd461132c966ef2f8ff8378db4a4da8df4f17c664",
@@ -2931,6 +2931,19 @@
     "https://esm.sh/sucrase@3.35.0?exports=transform": "c270712d6d38f7dd913580b361c3dc6afead12578ac8c0ab7df06f305daed26b",
     "https://esm.sh/ts-interface-checker@0.1.13/denonext/ts-interface-checker.mjs": "57e2bc505712870da497f71ba862fce4006d86fc350bfd9264a4fd562f35b122",
     "https://esm.sh/ts-interface-checker@0.1.13?target=denonext": "b1c4bedafbacf4fc6ca1b02c22601fe4e3dee3d3dc14ca3e8fb6f8656a368e72",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/parser/mod.ts": "d8f3bbc74524d624486b547c1ff88db966b8fed5dcc52a650b807b46875fd9c7",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/parser/mux-softcode.mjs": "2b16eeda1e94b99be633da3c5af1c4f1de4333aff5627bcd4ca2d55b87d2f5d8",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/context.ts": "6cca3163a5921231b8847d1016beb4c93bea82f50a99e58f82dfb6fe173932cb",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/engine.ts": "286606b1d527a911a0f58d925531201fffaffbd67e5b05261219edaec6130eda",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/mod.ts": "78b1e3a91a54a509b0fa65290ea79f8b6c18c53705bbc69a9458cb4f201c404f",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/stdlib/compare.ts": "8e84af0422e1080d58b703fd41fd96e6b0b57e97fb3fb41f82fb1d9a8f47369e",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/stdlib/db.ts": "1fc8d9dd207c900449902973a0ca9e5871eab41d738de1b202c480d537842cec",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/stdlib/iter.ts": "4f7d34d385fda917b95024edbf93e7ba2c9f19fb0b2f80c5bae86bfca86c82eb",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/stdlib/logic.ts": "8529916b206a1aefdf5594167a7fa8782b10c24d9a7e2f61b162931663a0c82b",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/stdlib/math.ts": "8e7e19b4607fcab9afdcb178d75e9f558bc84a288a74460d4793429fa2b78afa",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/stdlib/mod.ts": "069486e0d8bbcfadaec05119bf5b8a7b825782bf357196e9cb7ecf63a7f48371",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/stdlib/register.ts": "23f404e7fb43fd90a8c1d33a9ec9f22240180683cdb31a6e9f23e55bbf55f928",
+    "https://raw.githubusercontent.com/UrsaMU/mushcode/8e10447d5e345677b3f395854f33af0f491eb91e/src/eval/stdlib/string.ts": "3ba128972f6fc3fa9ce00a5624b525d0e0c30a5f3f164768c6c4adb1091c65a1",
     "https://raw.githubusercontent.com/UrsaMU/ursamu/main/deps.ts": "78fb9020c7f1ea2e1220cfc5fe550e1e7c787ded74755e2bcbde1a874a9f2fc5",
     "https://raw.githubusercontent.com/UrsaMU/ursamu/main/mod.ts": "a8adbb6c5dd9640496a50fc9bb35c25af64484d1a6a0a7775488ccc63644b945",
     "https://raw.githubusercontent.com/UrsaMU/ursamu/main/src/@types/Channels.ts": "5faf9fc102e68a9fbd76485804b745f26fab15f84580c251c46aa6b3eccddaa2",
@@ -3015,7 +3028,7 @@
       "jsr:@std/semver@1",
       "jsr:@std/std@0.224",
       "jsr:@std/testing@^1.0.17",
-      "jsr:@ursamu/mushcode@~0.3.4",
+      "jsr:@ursamu/mushcode@0.6",
       "jsr:@ursamu/ursamu@2",
       "jsr:@zaubrik/djwt@^3.0.2",
       "npm:@digibear/tags@1.0.0",

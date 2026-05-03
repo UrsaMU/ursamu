@@ -189,9 +189,9 @@ See also: +help widget (overview)
 ### File format
 
 ```
-TOPIC TITLE
++TOPIC-NAME
 
-One-sentence description.
+One-sentence description of what **+topic-name** does; use `value` for examples.
 
 SYNTAX
   +command[/switch] <required> [<optional>]
@@ -206,11 +206,22 @@ EXAMPLES
 SEE ALSO: +help related-topic
 ```
 
-- No decorative header or footer lines — the help system renderer handles presentation.
+- Title is `+TOPIC-NAME` ALL CAPS, flush left — no decorative border lines.
 - Section labels (`SYNTAX`, `SWITCHES`, `EXAMPLES`, `SEE ALSO`) are ALL CAPS, flush left.
 - Body text is indented 2 spaces.
 - Exactly 1 blank line between sections.
 - No line may exceed 78 characters — wrap prose at word boundaries.
+
+### Markdown in body text
+
+Help files are rendered as markdown — use subtle formatting that looks good on the
+web and degrades to terminal color decoration via the MUSH renderer:
+
+- `**bold**` → `%ch` — use for key terms, command names, important values.
+- `` `backtick` `` → `%ch%cg` — use for inline code, slugs, paths, exact-match strings.
+- Keep it subtle: one or two highlights per paragraph, not every noun.
+- **Do not use** `_italic_` (terminal rendering is lost), `### headings` inside body
+  text (use ALL CAPS section labels instead), HTML, or tables.
 
 ### Audit checklist additions
 
@@ -219,6 +230,7 @@ Add to the existing audit checklist:
 - [ ] Every help file line ≤ 78 characters
 - [ ] Multi-page topics linked with `SEE ALSO:`
 - [ ] Sub-files open with a back-reference to the parent topic
+- [ ] Help file body uses subtle markdown (bold for key terms, backticks for values) — no headings, no HTML
 
 ---
 

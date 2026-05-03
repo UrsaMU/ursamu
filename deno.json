@@ -1,7 +1,7 @@
 {
   "name": "@ursamu/ursamu",
 
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",
@@ -43,6 +43,7 @@
     "create:local": "deno run -A ./src/cli/create.ts --local",
     "cli": "deno run -A ./src/cli/ursamu.ts",
     "install-cli": "deno install --allow-all --name ursamu --global --force ./src/cli/ursamu.ts",
+    "client": "deno run -A src/cli/client.ts",
     "test": "deno test --allow-all --unstable-kv --unstable-detect-cjs --no-check",
     "showcase": "deno run -A ./src/cli/showcase.ts",
     "upgrade": "deno run -A ./src/cli/ursamu.ts update",
@@ -73,9 +74,9 @@
     "lodash": "npm:lodash@4.17.21",
     "djwt": "jsr:@zaubrik/djwt@^3.0.2",
     "quickjs-emscripten": "npm:quickjs-emscripten@0.29.0",
-    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.3.4",
-    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.3.4/eval",
-    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.3.4/parse",
+    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.6.0",
+    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.6.0/eval",
+    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.6.0/parse",
     "dotenv": "jsr:@std/dotenv@^0.224.0",
     "dotenv/": "jsr:@std/dotenv@^0.224.0/",
     "dotenv/load": "jsr:@std/dotenv@^0.224.0/load",

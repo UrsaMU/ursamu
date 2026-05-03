@@ -30,6 +30,12 @@ export interface UrsaEvalContext {
   maxDepth:     number;
   maxOutputLen: number;
   signal?:      AbortSignal;
+  /** Command context for %w/%W/%| substitutions — set when a command triggers softcode. */
+  commandContext?: {
+    lastCommand?: string;
+    lastArgs?:    string;
+    pipedOutput?: string;
+  };
 
   // ── UrsaMU-specific additions ─────────────────────────────────────────────
   /** The enactor as a full IDBObj (same object as enactor, for identity/output stdlib) */

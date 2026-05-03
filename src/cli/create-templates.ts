@@ -739,6 +739,62 @@ Rules:
 
 ---
 
+## Help file conventions (help-plugin FileProvider)
+
+Help is served by [help-plugin](https://github.com/UrsaMU/help-plugin). The FileProvider
+scans every registered \`help/\` directory and derives topics from filenames.
+
+### Hidden files
+
+Files whose basename starts with \`_\` are **hidden** — they are loaded and searchable, but
+excluded from the \`+help index\` listing. Use this for internal reference material that
+players shouldn't see in the table of contents:
+
+\`\`\`
+help/
+├── widget.md          # visible in +help index
+├── _widget-admin.md   # hidden — admins can still +help _widget-admin
+└── widget/
+    ├── syntax.md      # visible under "widget" section
+    └── _internals.md  # hidden sub-file
+\`\`\`
+
+### index.md / README.md
+
+A file named \`index.md\` (or \`readme.md\`) in a subdirectory becomes the **section overview**
+— its slug is the parent directory name, not the filename:
+
+\`\`\`
+help/widget/index.md   →  +help widget  (same slug as the directory)
+help/widget/syntax.md  →  +help widget/syntax
+\`\`\`
+
+Use \`index.md\` for the overview page of a multi-file topic.
+
+### Wiring your plugin's help directory
+
+Call \`registerHelpDir\` inside your plugin's \`init()\` so the FileProvider scans your folder:
+
+\`\`\`typescript
+import { registerHelpDir } from "jsr:@ursamu/help-plugin";
+
+export const plugin: IPlugin = {
+  init: async () => {
+    registerHelpDir(
+      new URL("../help", import.meta.url).pathname,
+      "${name}",  // section name shown in +help index
+    );
+    return true;
+  },
+};
+\`\`\`
+
+For full games (not standalone plugins) install help-plugin from
+[github.com/UrsaMU/help-plugin](https://github.com/UrsaMU/help-plugin) and add it to
+\`plugins.manifest.json\`.
+
+---
+
 ## Full API reference
 
 \`~/.claude/skills/ursamu-dev/references/api-reference.md\` — every type, SDK method, event payload, and lock expression. Read it before writing any code.

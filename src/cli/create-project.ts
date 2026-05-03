@@ -158,9 +158,9 @@ export async function scaffoldProject(
           "@std/testing/bdd":          "jsr:@std/testing@^1.0.17/bdd",
           "@std/testing/mock":         "jsr:@std/testing@^1.0.17/mock",
           // ── ursamu transitive deps ────────────────────────────────────────
-          "@ursamu/mushcode":          "jsr:@ursamu/mushcode@^0.3.4",
-          "@ursamu/mushcode/eval":     "jsr:@ursamu/mushcode@^0.3.4/eval",
-          "@ursamu/mushcode/parse":    "jsr:@ursamu/mushcode@^0.3.4/parse",
+          "@ursamu/mushcode":          "jsr:@ursamu/mushcode@^0.6.0",
+          "@ursamu/mushcode/eval":     "jsr:@ursamu/mushcode@^0.6.0/eval",
+          "@ursamu/mushcode/parse":    "jsr:@ursamu/mushcode@^0.6.0/parse",
           "@ursamu/parser":            "npm:@ursamu/parser@1.2.4",
           "@digibear/tags":            "npm:@digibear/tags@1.0.0",
           "bcrypt":                    "npm:bcryptjs@2.4.3",

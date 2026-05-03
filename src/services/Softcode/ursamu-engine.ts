@@ -64,6 +64,72 @@ const bridgeAccessor: ObjectAccessor = {
     const obj = await ctx.db.queryById(id);
     return obj?.flags.has(flag.toLowerCase()) ?? false;
   },
+  async getMoniker(id: string): Promise<string | null> {
+    const ctx = _activeCtx;
+    if (!ctx) return null;
+    const obj = await ctx.db.queryById(id);
+    return (obj?.state?.moniker as string | undefined) ?? null;
+  },
+  async getLocation(id: string): Promise<string> {
+    const ctx = _activeCtx;
+    if (!ctx) return "";
+    const obj = await ctx.db.queryById(id);
+    return obj?.location ?? "";
+  },
+  async getContents(id: string): Promise<string[]> {
+    const ctx = _activeCtx;
+    if (!ctx) return [];
+    const objs = await ctx.db.lcon(id);
+    return objs.map((o) => o.id);
+  },
+  async getConnectedPlayers(): Promise<string[]> {
+    const ctx = _activeCtx;
+    if (!ctx) return [];
+    const objs = await ctx.db.lwho();
+    return objs.map((o) => o.id);
+  },
+  async getParentChain(id: string): Promise<string[]> {
+    const ctx = _activeCtx;
+    if (!ctx) return [id];
+    const chain: string[] = [id];
+    let current = id;
+    for (let i = 0; i < 20; i++) {
+      const obj = await ctx.db.queryById(current);
+      const parentId = obj?.state?.parent as string | undefined;
+      if (!parentId) break;
+      chain.push(parentId);
+      current = parentId;
+    }
+    return chain;
+  },
+  async findPlayer(partial: string): Promise<string | null> {
+    const ctx = _activeCtx;
+    if (!ctx) return null;
+    const obj = await ctx.db.queryByName(partial);
+    return obj?.id ?? null;
+  },
+  listAttrs(objectId: string): Promise<string[]> {
+    const ctx = _activeCtx;
+    if (!ctx) return Promise.resolve([]);
+    return ctx.db.lattr(objectId);
+  },
+  async getType(id: string): Promise<string> {
+    const ctx = _activeCtx;
+    if (!ctx) return "THING";
+    const obj = await ctx.db.queryById(id);
+    if (!obj) return "THING";
+    if (obj.flags.has("room"))   return "ROOM";
+    if (obj.flags.has("exit"))   return "EXIT";
+    if (obj.flags.has("player")) return "PLAYER";
+    return "THING";
+  },
+  async findObject(_from: string, expr: string): Promise<string | null> {
+    const ctx = _activeCtx;
+    if (!ctx) return null;
+    if (/^#(-?\d+)$/.test(expr)) return expr.slice(1);
+    const obj = await ctx.db.queryByName(expr);
+    return obj?.id ?? null;
+  },
 };
 
 // ── Engine construction ───────────────────────────────────────────────────────
@@ -259,10 +325,6 @@ _engine.registerSub(
   (_code, ctx) => ctx.args[ctx.args.length - 1] ?? "",
 );
 
-// %w and %| — stubs
-_engine.registerSub("w", () => "");
-_engine.registerSub("|", () => "");
-
 // ANSI codes — %xr, %cb, %ch, %cn, %x<#RRGGBB>, etc.
 // Override the new lib's passthrough behavior with actual ANSI resolution.
 const ANSI_RESET = "\x1b[0m";
@@ -314,6 +376,7 @@ _engine.registerCommandFallback((name, switches, object, value, ctx) => {
   const body = value !== null ? `${object ?? ""}=${value}` : (object ?? "");
   const cmd  = `@${name}${sw}${body ? " " + body : ""}`;
   uctx.output.send(`\x00atcmd\x00${cmd}`, uctx.actor.id);
+  return Promise.resolve();
 });
 
 // ── &ATTR handler — attribute setting sentinel ────────────────────────────────
