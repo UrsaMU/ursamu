@@ -67,6 +67,10 @@ export { register as registerSoftcodeFunc } from "./src/services/Softcode/stdlib
 export { registerSub as registerSoftcodeSub } from "./src/services/Softcode/stdlib/subRegistry.ts";
 export type { StdlibFn as SoftcodeFn } from "./src/services/Softcode/stdlib/registry.ts";
 export type { SubHandler as SoftcodeSubHandler } from "./src/services/Softcode/stdlib/subRegistry.ts";
+// Lock function registry — register custom lock functions from plugins
+export { registerLockFunc } from "./src/utils/lockFuncs.ts";
+export type { LockFunc } from "./src/utils/lockFuncs.ts";
+export { evaluateLock, validateLock } from "./src/utils/evaluateLock.ts";
 // Plugin lifecycle management — available to external plugins that need to read their config
 export { PluginConfigManager } from "./src/services/Config/plugin.ts";
 export type { IMiddlewareFunction } from "./src/@types/IMiddlewareFunction.ts";

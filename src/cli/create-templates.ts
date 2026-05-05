@@ -614,6 +614,52 @@ u.send("Message.", target.id);  // optional second arg = recipient socket id
 
 ---
 
+## Lock expressions & lockfuncs
+
+The \`lock:\` field on every \`addCmd\` is evaluated against the acting player before \`exec()\` runs.
+
+**String-level locks (privilege):**
+
+\`\`\`
+""                  login screen (unauthenticated)
+"connected"         any logged-in player
+"connected builder+" builder flag or higher
+"connected admin+"  admin flag or higher
+"connected wizard"  wizard only
+\`\`\`
+
+**Lockfunc expressions** — callable functions combined with \`&&\`, \`||\`, \`!\`, \`()\`:
+
+\`\`\`
+"flag(wizard)"                    enactor has wizard flag
+"attr(tribe, glasswaler)"         enactor.state.tribe === "glasswaler"
+"attr(sphere)"                    enactor has own-property "sphere" in state
+"type(player)"                    enactor has player type flag
+"is(#5)"                          enactor.id === "5"
+"holds(#12)"                      enactor's inventory contains #12
+"perm(admin)"                     enactor passes admin privilege check
+"attr(mortal) || !tribe(glasswaler)"  compound expression
+\`\`\`
+
+**Registering a custom lockfunc in your plugin:**
+
+\`\`\`typescript
+import { registerLockFunc } from "jsr:@ursamu/ursamu";
+
+// Call in your plugin's module scope (alongside addCmd — NOT inside init())
+registerLockFunc("tribe", (enactor, _target, args) =>
+  String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
+);
+
+// Now usable anywhere: lock: "connected && tribe(glasswaler)"
+\`\`\`
+
+Built-in names (\`flag\`, \`attr\`, \`type\`, \`is\`, \`holds\`, \`perm\`) are protected and cannot
+be overwritten. Locks are fail-closed: unknown func → false, thrown error → false.
+Max lock string: 4096 chars / 256 tokens.
+
+---
+
 ## Showcase — executes real commands in-process
 
 \`\`\`bash
@@ -700,6 +746,7 @@ Add a \`tests/security/\` directory for exploit→fix tests; one file per bug fo
 - [ ] REST route returns 401 before any work when \`userId\` is null
 - [ ] \`init()\` returns \`true\`
 - [ ] Every \`addCmd\` has \`help:\` with syntax line + examples
+- [ ] Custom lockfuncs use \`registerLockFunc\` — never overwrite built-in names (\`flag\`, \`attr\`, \`type\`, \`is\`, \`holds\`, \`perm\`)
 - [ ] Every help file ≤ 22 content lines
 - [ ] Every help file line ≤ 78 characters
 - [ ] Multi-page topics linked with \`SEE ALSO:\`

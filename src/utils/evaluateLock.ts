@@ -5,6 +5,9 @@ import { flags } from "../services/flags/flags.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IDBObj } from "../@types/UrsamuSDK.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
+import { callLockFunc } from "./lockFuncs.ts";
+
+const MAX_LOCK_LENGTH = 4096;
 
 export const evaluateLock = async (
   lockStr: string,
@@ -13,6 +16,7 @@ export const evaluateLock = async (
   depth = 0
 ): Promise<boolean> => {
   if (depth > MAX_LOCK_DEPTH) return false;
+  if (lockStr.length > MAX_LOCK_LENGTH) return false;
   return await parseLock(lockStr, enactor, target, false, depth);
 };
 
@@ -20,7 +24,7 @@ export const validateLock = async (lockStr: string): Promise<boolean> => {
     try {
         await parseLock(lockStr, null, null, true, 0);
         return true;
-    } catch {
+    } catch (_e: unknown) {
         return false;
     }
 };
@@ -35,11 +39,12 @@ const parseLock = async (
   if (!lockStr) return true;
 
   const tokens = tokenize(lockStr);
+  if (tokens.length > 256) return validationMode ? true : false;
   let pos = 0;
 
   const parseOr = async (): Promise<boolean> => {
     let left = await parseAnd();
-    while (pos < tokens.length && tokens[pos] === "|") {
+    while (pos < tokens.length && (tokens[pos] === "|" || tokens[pos] === "||")) {
         pos++;
         const right = await parseAnd();
         if (validationMode) left = true;
@@ -50,7 +55,7 @@ const parseLock = async (
 
   const parseAnd = async (): Promise<boolean> => {
     let left = await parseNot();
-    while (pos < tokens.length && tokens[pos] === "&") {
+    while (pos < tokens.length && (tokens[pos] === "&" || tokens[pos] === "&&")) {
       pos++;
       const right = await parseNot();
       if (validationMode) left = true;
@@ -99,7 +104,7 @@ const parseLock = async (
     // Direct Check (Flag, ID, etc)
     if (validationMode) return true;
     if (!enactor || !target) return false;
-    return checkAtom(token, enactor, target, depth);
+    return checkAtom(token, enactor, target, depth, validationMode);
   };
 
   return await parseOr();
@@ -125,7 +130,38 @@ const tokenize = (str: string): string[] => {
       }
     } else if (depth > 0) {
       current += char;
-    } else if (["&", "|", "!", "(", ")"].includes(char)) {
+    } else if (char === "&" || char === "|") {
+      if (current.trim()) tokens.push(current.trim());
+      if (str[i + 1] === char) {
+        tokens.push(char + char);
+        i++;
+      } else {
+        tokens.push(char);
+      }
+      current = "";
+    } else if (char === "(") {
+      const trimmed = current.trim();
+      if (trimmed && /^[a-z_][a-z0-9_]*$/i.test(trimmed)) {
+        // funcname( — consume until matching ) as a single token
+        current = trimmed + char;
+        let pd = 1;
+        i++;
+        while (i < str.length && pd > 0) {
+          const c = str[i];
+          current += c;
+          if (c === "(") pd++;
+          else if (c === ")") pd--;
+          i++;
+        }
+        i--;
+        tokens.push(current.trim());
+        current = "";
+      } else {
+        if (trimmed) tokens.push(trimmed);
+        tokens.push("(");
+        current = "";
+      }
+    } else if (["!", ")"].includes(char)) {
       if (current.trim()) tokens.push(current.trim());
       tokens.push(char);
       current = "";
@@ -137,9 +173,17 @@ const tokenize = (str: string): string[] => {
   return tokens;
 };
 
-const checkAtom = async (atom: string, enactor: IDBObj, _target: IDBObj, depth: number): Promise<boolean> => {
-  if (depth > 10) return false; // Prevent deep recursion in atom checks
+const checkAtom = async (atom: string, enactor: IDBObj, target: IDBObj, depth: number, validationMode: boolean): Promise<boolean> => {
+  if (depth > 10) return false;
   atom = atom.trim();
+
+  const funcMatch = atom.match(/^([a-z_][a-z0-9_]*)\(([^)]*)\)$/i);
+  if (funcMatch) {
+    if (validationMode) return true;
+    const name = funcMatch[1].toLowerCase();
+    const args = funcMatch[2].split(",").map((s) => s.trim()).filter(Boolean);
+    return callLockFunc(name, enactor, target, args);
+  }
 
   // Power/Flag Check
   if (atom.startsWith("+") || atom.match(/^[a-zA-Z0-9_+]+$/)) { 
