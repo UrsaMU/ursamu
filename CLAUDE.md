@@ -95,6 +95,33 @@ Examples:
 | Switch + arg | `/^\+cmd(?:\/(\S+))?\s*(.*)/i` | `[0]`=sw, `[1]`=rest |
 | Two parts (=) | `/^@name\s+(.+)=(.+)/i` | `[0]`, `[1]` |
 
+### Catch-all switch pattern — critical gotcha
+
+When a command uses the catch-all switch pattern `/^\+cmd(?:\/(\S+))?\s*(.*)/i`,
+**any more-specific `addCmd` registered for the same prefix will never match**.
+The catch-all pattern consumes `+cmd/anything` before the engine reaches the
+specific pattern.
+
+```typescript
+// WRONG — +cmd/sub addCmd is DEAD CODE; main +cmd handler matches first
+addCmd({ name: "+cmd", pattern: /^\+cmd(?:\/(\S+))?\s*(.*)/i, exec: ... });
+addCmd({ name: "+cmd/sub", pattern: /^\+cmd\/sub$/i, exec: ... }); // never reached
+
+// CORRECT — handle sub-commands as switch branches inside the main exec
+addCmd({
+  name: "+cmd",
+  pattern: /^\+cmd(?:\/(\S+))?\s*(.*)/i,
+  exec: async (u) => {
+    const sw = (u.cmd.args[0] ?? "").toLowerCase().trim();
+    if (sw === "sub") { /* handle sub */ return; }
+    // ...
+  },
+});
+```
+
+Only use separate `addCmd` registrations when the command prefixes are
+**distinct** (e.g. `+jobs` vs `+job` — different command roots).
+
 ### Lock levels
 
 | String | Who can use it |
@@ -104,6 +131,41 @@ Examples:
 | `"connected builder+"` | Builder flag or higher |
 | `"connected admin+"` | Admin flag or higher |
 | `"connected wizard"` | Wizard only |
+
+### Lockfunc system
+
+Lock strings support callable functions: `funcname(arg1, arg2)` combined with
+`&&`, `||`, `!`, and `()` grouping. Legacy `&` / `|` still work.
+
+**Built-in lockfuncs**
+
+| Lockfunc | Example | Passes when |
+|----------|---------|-------------|
+| `flag(name)` | `flag(wizard)` | enactor has the named flag |
+| `attr(name)` | `attr(tribe)` | enactor.state has own-property `name` |
+| `attr(name, val)` | `attr(tribe, glasswaler)` | enactor.state[name] === val |
+| `type(name)` | `type(player)` | enactor has the type flag |
+| `is(#id)` | `is(#5)` | enactor.id === "5" |
+| `holds(#id)` | `holds(#12)` | enactor.contents includes #12 |
+| `perm(level)` | `perm(admin)` | enactor passes privilege check |
+
+**Registering a custom lockfunc (plugins)**
+
+```typescript
+import { registerLockFunc } from "jsr:@ursamu/ursamu";
+
+registerLockFunc("tribe", (enactor, _target, args) =>
+  String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
+);
+
+// lock: "tribe(glasswaler)"
+// lock: "attr(mortal) || !tribe(glasswaler)"
+// lock: "connected && perm(builder)"
+```
+
+Built-in names (`flag`, `attr`, `type`, `is`, `holds`, `perm`) are protected
+and cannot be overwritten. Locks are fail-closed: unknown func → false,
+error → false. Max lock string: 4096 chars / 256 tokens.
 
 ---
 
@@ -376,6 +438,7 @@ function mockU(opts: {
 - [ ] DBO collection names prefixed with `<pluginName>.`
 - [ ] REST route handlers return 401 before any work when `userId` is null
 - [ ] `init()` returns `true`
+- [ ] Custom lockfuncs registered via `registerLockFunc` — never overwrite built-in names
 
 ---
 
