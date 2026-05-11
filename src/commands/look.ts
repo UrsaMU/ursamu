@@ -1,5 +1,6 @@
 import { addCmd } from "../services/commands/cmdParser.ts";
 import type { IUrsamuSDK, IDBObj } from "../@types/UrsamuSDK.ts";
+import { resolveFormat } from "../utils/resolveFormat.ts";
 
 export async function execLook(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
@@ -27,7 +28,7 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
   const showContents = !isOpaque || canEditTarget;
 
   const rawDesc = (target.state.description as string) || "You see nothing special.";
-  const description = u.util.parseDesc
+  const parsedDesc = u.util.parseDesc
     ? await (u.util.parseDesc as (d: string, a: IDBObj, t: IDBObj) => Promise<string>)(rawDesc, actor, target)
     : rawDesc;
 
@@ -40,26 +41,55 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
   );
   const exits = contents.filter((obj) => obj.flags.has("exit"));
 
-  const nameStr = canEditTarget
+  // Section spacing rule: overrides are emitted exactly as produced — any
+  // blank lines must come from the attr/handler itself. Built-in defaults
+  // carry their own trailing/leading newlines to preserve historical layout.
+
+  // NAMEFORMAT — replaces the header line. %0 = default rendered name.
+  const defaultName = canEditTarget
     ? `${u.util.displayName(target, actor)}(#${target.id})`
     : u.util.displayName(target, actor);
-  let out = `%ch${nameStr}%cn\n${description}\n`;
+  const nameOverride = await resolveFormat(u, target, "NAMEFORMAT", defaultName);
+  const nameBlock = nameOverride != null ? nameOverride : `%ch${defaultName}%cn\n`;
 
+  // DESCFORMAT — wraps/replaces the description. %0 = post-parseDesc text.
+  const descOverride = await resolveFormat(u, target, "DESCFORMAT", parsedDesc);
+  const descBlock = descOverride != null ? descOverride : `${parsedDesc}\n`;
+
+  let out = nameBlock + descBlock;
+
+  // CONFORMAT — replaces combined characters+objects block. %0 = space-separated #ids.
   if (showContents) {
-    if (characters.length > 0) {
-      out += "\n%chCharacters:%cn\n";
-      for (const c of characters) out += `  ${u.util.displayName(c, actor)}\n`;
-    }
-    if (objects.length > 0) {
-      out += "\n%chContents:%cn\n";
-      for (const o of objects) out += `  ${u.util.displayName(o, actor)}\n`;
+    const visible = [...characters, ...objects];
+    if (visible.length > 0) {
+      const idList = visible.map((o) => `#${o.id}`).join(" ");
+      const conOverride = await resolveFormat(u, target, "CONFORMAT", idList);
+      if (conOverride != null) {
+        out += conOverride;
+      } else {
+        if (characters.length > 0) {
+          out += "\n%chCharacters:%cn\n";
+          for (const c of characters) out += `  ${u.util.displayName(c, actor)}\n`;
+        }
+        if (objects.length > 0) {
+          out += "\n%chContents:%cn\n";
+          for (const o of objects) out += `  ${u.util.displayName(o, actor)}\n`;
+        }
+      }
     }
   }
 
+  // EXITFORMAT — replaces the exits block. %0 = space-separated exit #ids.
   if (exits.length > 0) {
-    out += "\n%chExits:%cn\n";
-    const exitNames = exits.map((e) => ((e.state.name as string) || e.name || "").split(";")[0]);
-    out += `  ${exitNames.join("  ")}\n`;
+    const idList = exits.map((e) => `#${e.id}`).join(" ");
+    const exitOverride = await resolveFormat(u, target, "EXITFORMAT", idList);
+    if (exitOverride != null) {
+      out += exitOverride;
+    } else {
+      const exitNames = exits.map((e) => ((e.state.name as string) || e.name || "").split(";")[0]);
+      out += "\n%chExits:%cn\n";
+      out += `  ${exitNames.join("  ")}\n`;
+    }
   }
 
   u.send(out);

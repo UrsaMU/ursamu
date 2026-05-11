@@ -71,6 +71,20 @@ export type { SubHandler as SoftcodeSubHandler } from "./src/services/Softcode/s
 export { registerLockFunc } from "./src/utils/lockFuncs.ts";
 export type { LockFunc } from "./src/utils/lockFuncs.ts";
 export { evaluateLock, validateLock } from "./src/utils/evaluateLock.ts";
+// Format handlers — register plugin-level NAMEFORMAT/DESCFORMAT/CONFORMAT/EXITFORMAT
+// fallbacks (priority: softcode attr > plugin handler > built-in default)
+export {
+  registerFormatHandler,
+  unregisterFormatHandler,
+} from "./src/utils/formatHandlers.ts";
+export type { FormatHandler, FormatSlot } from "./src/utils/formatHandlers.ts";
+// Native layout helpers (TS-side) — block-style header/divider/footer rules for
+// command output. Distinct from the inline softcode helpers of the same name
+// registered in src/services/Softcode/stdlib/string.ts.
+export { header, divider, footer } from "./src/utils/format.ts";
+// resolveFormat — shared helper for commands that want format-attr / plugin-handler /
+// built-in default rendering (used by `look`; reusable by `who`, `@ps`, external plugins).
+export { resolveFormat, resolveFormatOr } from "./src/utils/resolveFormat.ts";
 // Plugin lifecycle management — available to external plugins that need to read their config
 export { PluginConfigManager } from "./src/services/Config/plugin.ts";
 export type { IMiddlewareFunction } from "./src/@types/IMiddlewareFunction.ts";
