@@ -165,19 +165,19 @@ export const threeColumn = (...lists: string[][]) => {
 // these TS forms are multi-line block decorators tailored to native command
 // output (plain `=`/`-` rules with a bold title sandwiched between).
 
-export const header = (string = "", filler = "=", width = 78) => {
+export const header = (string = "", filler = "=", width = 78): string => {
   const rule = filler.repeat(width);
   if (!string) return rule;
   return `${rule}\n${center(`%ch${string}%cn`, width)}\n${rule}`;
 };
 
-export const divider = (string = "", filler = "-", width = 78) => {
+export const divider = (string = "", filler = "-", width = 78): string => {
   const rule = filler.repeat(width);
   if (!string) return rule;
   return `\n%ch${string}%cn\n${rule}`;
 };
 
-export const footer = (string = "", filler = "=", width = 78) => {
+export const footer = (string = "", filler = "=", width = 78): string => {
   const rule = filler.repeat(width);
   if (!string) return rule;
   return `${rule}\n${center(`%ch${string}%cn`, width)}\n${rule}`;
