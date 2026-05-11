@@ -1,13 +1,10 @@
 // deno-lint-ignore-file require-await
 import { addCmd } from "../services/commands/cmdParser.ts";
+import { divider, footer, header } from "../utils/format.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
-const HR = "=".repeat(78);
-const hr = "-".repeat(78);
-
-function section(title: string): string {
-  return `\n%ch${title}%cn\n${hr}`;
-}
+const HR = footer();
+const section = (title: string): string => divider(title);
 
 function fmtSecs(secs: number): string {
   const d = Math.floor(secs / 86400);
@@ -24,9 +21,7 @@ async function demoOverview(u: IUrsamuSDK) {
   const me = u.me;
   const name = (me.state.moniker as string) || me.name || "Unknown";
   const uptime = await u.sys.uptime();
-  let out = `${HR}\n`;
-  out += u.util.center("%ch UrsaMU Script Engine Demo %cn", 78) + "\n";
-  out += `${HR}\n`;
+  let out = header(" UrsaMU Script Engine Demo ") + "\n";
   out += `\nYou are: %ch${name}%cn  (#${me.id})`;
   out += `\nHere:    %ch${u.here.name ?? "Void"}%cn  (#${u.here.id})`;
   out += `\nUptime:  ${fmtSecs(uptime)}`;

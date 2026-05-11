@@ -2,6 +2,12 @@
 import { register } from "./registry.ts";
 import { int, stripAnsi } from "./helpers.ts";
 
+// Hard cap on any softcode-controlled width / repeat-count to prevent DoS
+// via memory blowup (e.g. `[repeat(x,99999999)]`). 10 000 chars is well
+// above any sane terminal width (max ~250) yet bounded to ~10 KB per call.
+const MAX_LEN = 10_000;
+const clampLen = (n: number) => Math.min(Math.max(0, n | 0), MAX_LEN);
+
 // ── concatenation ─────────────────────────────────────────────────────────
 
 register("cat",    async (a) => a.join(" "));
@@ -58,38 +64,68 @@ register("strtrunc", async (a) => {
 // ── padding / justification ───────────────────────────────────────────────
 
 register("ljust",  async (a) => {
-  const s = a[0] ?? ""; const w = int(a[1]); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
   return s.padEnd(w, fill).slice(0, Math.max(w, s.length));
 });
 register("rjust",  async (a) => {
-  const s = a[0] ?? ""; const w = int(a[1]); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
   return s.padStart(w, fill).slice(-Math.max(w, s.length));
 });
 register("center", async (a) => {
-  const s = a[0] ?? ""; const w = int(a[1]); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
   const total = Math.max(w - s.length, 0);
   const left  = Math.floor(total / 2);
   const right = total - left;
   return fill.repeat(left) + s + fill.repeat(right);
 });
 register("lpad", async (a) => {
-  const s = a[0] ?? ""; const w = int(a[1]); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
   return s.padStart(w, fill);
 });
 register("rpad", async (a) => {
-  const s = a[0] ?? ""; const w = int(a[1]); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
   return s.padEnd(w, fill);
 });
 register("cpad", async (a) => {
-  const s = a[0] ?? ""; const w = int(a[1]);
+  const s = a[0] ?? ""; const w = clampLen(int(a[1]));
   const total = Math.max(w - s.length, 0);
   return " ".repeat(Math.floor(total/2)) + s + " ".repeat(total - Math.floor(total/2));
 });
 
+// ── header / divider / footer ─────────────────────────────────────────────
+// Layout helpers so attribute authors can write [header(The Void)] instead
+// of [ljust(===== %0 ,78,=)]. Shape: 5 fill + space + title + space + pad.
+
+register("header", async (a) => {
+  const title = a[0] ?? "";
+  const width = clampLen(int(a[1] ?? "78") || 78);
+  const fill  = (a[2] ?? "=")[0] || "=";
+  if (title.length === 0) return fill.repeat(width);
+  const prefix = fill.repeat(5) + " " + title + " ";
+  return prefix.length >= width ? prefix.slice(0, width)
+    : prefix + fill.repeat(width - prefix.length);
+});
+
+register("divider", async (a) => {
+  const title = a[0] ?? "";
+  const width = clampLen(int(a[1] ?? "78") || 78);
+  const fill  = (a[2] ?? "-")[0] || "-";
+  if (title.length === 0) return fill.repeat(width);
+  const prefix = fill.repeat(5) + " " + title + " ";
+  return prefix.length >= width ? prefix.slice(0, width)
+    : prefix + fill.repeat(width - prefix.length);
+});
+
+register("footer", async (a) => {
+  const width = clampLen(int(a[0] ?? "78") || 78);
+  const fill  = (a[1] ?? "=")[0] || "=";
+  return fill.repeat(width);
+});
+
 // ── space / repeat ────────────────────────────────────────────────────────
 
-register("space",  async (a) => " ".repeat(Math.max(0, int(a[0]))));
-register("repeat", async (a) => (a[0] ?? "").repeat(Math.max(0, int(a[1]))));
+register("space",  async (a) => " ".repeat(clampLen(int(a[0]))));
+register("repeat", async (a) => (a[0] ?? "").repeat(clampLen(int(a[1]))));
 
 // ── reverse ───────────────────────────────────────────────────────────────
 

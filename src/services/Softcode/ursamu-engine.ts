@@ -220,7 +220,9 @@ const SKIP_NAMES = new Set([
 
   // Pure string — new lib covers these exactly
   "strlen", "mid", "left", "right", "trim",
-  "ljust", "rjust", "center", "ucstr", "lcstr", "capstr", "cat", "space", "repeat",
+  "ucstr", "lcstr", "capstr", "cat",
+  // NOTE: ljust/rjust/center/space/repeat NOT skipped — UrsaMU's versions
+  // clamp width/count to MAX_LEN to prevent DoS (see stdlib/string.ts).
 
   // Pure comparison — new lib covers these exactly
   "eq", "neq", "gt", "gte", "lt", "lte",

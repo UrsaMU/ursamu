@@ -159,18 +159,26 @@ export const threeColumn = (...lists: string[][]) => {
   return output;
 };
 
-export const header = (string = "", filler = "%cr=%cn", width = 78) => {
-  return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler);
+// NOTE: TS header/divider/footer diverge from the softcode versions in
+// src/services/Softcode/stdlib/string.ts. The softcode forms are inline
+// single-line layouts (e.g. `===== Title ===…`) for use in attribute strings;
+// these TS forms are multi-line block decorators tailored to native command
+// output (plain `=`/`-` rules with a bold title sandwiched between).
+
+export const header = (string = "", filler = "=", width = 78) => {
+  const rule = filler.repeat(width);
+  if (!string) return rule;
+  return `${rule}\n${center(`%ch${string}%cn`, width)}\n${rule}`;
 };
 
-export const divider = (string = "", filler = "%cr-%cn", width = 78) => {
-  return center(` %ch${string}%cn `, width, filler);
+export const divider = (string = "", filler = "-", width = 78) => {
+  const rule = filler.repeat(width);
+  if (!string) return rule;
+  return `\n%ch${string}%cn\n${rule}`;
 };
 
-export const footer = (string = "", filler = "%cr=%cn", width = 78) => {
-  if (string) {
-    return center(`%cy[%cn %ch${string}%cn %cy]%cn`, width, filler);
-  }
-
-  return repeatString(filler, width);
+export const footer = (string = "", filler = "=", width = 78) => {
+  const rule = filler.repeat(width);
+  if (!string) return rule;
+  return `${rule}\n${center(`%ch${string}%cn`, width)}\n${rule}`;
 };

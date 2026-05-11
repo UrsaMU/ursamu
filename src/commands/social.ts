@@ -1,5 +1,33 @@
 import { addCmd } from "../services/commands/cmdParser.ts";
-import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
+import type { IUrsamuSDK, IDBObj } from "../@types/UrsamuSDK.ts";
+import { resolveFormat, type FormatSlot } from "../utils/resolveFormat.ts";
+import { dbojs } from "../services/Database/database.ts";
+import { hydrate } from "../utils/evaluateLock.ts";
+
+/**
+ * Two-tier lookup for global-list format slots (e.g. WHO):
+ *   1. attr on #0 (game-wide skin) — wins if set.
+ *   2. attr on the enactor (per-player skin).
+ *   3. null → caller renders built-in default.
+ *
+ * Mirrors TinyMUX/PennMUSH precedent for WHO-style commands. Kept inline
+ * here until a third caller appears; then promote to src/utils/.
+ */
+async function resolveGlobalFormat(
+  u: IUrsamuSDK,
+  slot: FormatSlot,
+  defaultArg: string,
+): Promise<string | null> {
+  // Only consult #0 if it actually exists — otherwise plugin handlers would
+  // be invoked with a phantom target.id="0" (latent bug, M1 in TDD audit).
+  const root = await dbojs.queryOne({ id: "0" });
+  if (root) {
+    const rootObj = hydrate(root as unknown as Parameters<typeof hydrate>[0]) as IDBObj;
+    const onRoot = await resolveFormat(u, rootObj, slot, defaultArg);
+    if (onRoot != null) return onRoot;
+  }
+  return await resolveFormat(u, u.me, slot, defaultArg);
+}
 
 export async function execWho(u: IUrsamuSDK): Promise<void> {
   const players = (await u.db.search({ flags: /connected/i }))
@@ -17,18 +45,31 @@ export async function execWho(u: IUrsamuSDK): Promise<void> {
     return `${Math.floor(hrs / 24)}d`;
   };
 
-  let telnet = `%chWho's Online%cn\n`;
-  telnet += `${"Player".padEnd(24)}${"Idle".padEnd(8)}Doing\n`;
-  telnet += `${"-".repeat(width)}\n`;
-  for (const p of players) {
+  const renderRow = (p: IDBObj): string => {
     const pName = (p.state.moniker as string) || (p.state.name as string) || p.name || "Unknown";
     const idle = formatIdle(p.state.lastCommand);
     const doing = (p.state.doing as string) || "";
-    telnet += `${pName.padEnd(24)}${idle.padEnd(8)}${doing}\n`;
+    return `${pName.padEnd(24)}${idle.padEnd(8)}${doing}`;
+  };
+
+  // Build per-player rows, with optional WHOROWFORMAT override.
+  const rows: string[] = [];
+  for (const p of players) {
+    const defaultRow = renderRow(p);
+    const rowOverride = await resolveGlobalFormat(u, "WHOROWFORMAT", defaultRow);
+    rows.push(rowOverride != null ? rowOverride : defaultRow);
   }
-  telnet += `${"-".repeat(width)}\n`;
-  telnet += `${players.length} player${players.length === 1 ? "" : "s"} online.\n`;
-  u.send(telnet);
+
+  // Default block — used both as the fallback output and as %0 for WHOFORMAT.
+  let defaultBlock = `%chWho's Online%cn\n`;
+  defaultBlock += `${"Player".padEnd(24)}${"Idle".padEnd(8)}Doing\n`;
+  defaultBlock += `${"-".repeat(width)}\n`;
+  for (const r of rows) defaultBlock += `${r}\n`;
+  defaultBlock += `${"-".repeat(width)}\n`;
+  defaultBlock += `${players.length} player${players.length === 1 ? "" : "s"} online.\n`;
+
+  const blockOverride = await resolveGlobalFormat(u, "WHOFORMAT", defaultBlock);
+  u.send(blockOverride != null ? blockOverride : defaultBlock);
 }
 
 export function execScore(u: IUrsamuSDK): void {
@@ -109,6 +150,10 @@ export default () => {
     lock: "",
     category: "Information",
     help: `who  — List all connected players.
+
+Override hooks (attr on #0 first, else enactor):
+  @whoformat     Replaces the entire WHO block; %0 = default block.
+  @whorowformat  Replaces one player row; %0 = default rendered row.
 
 Examples:
   who`,
