@@ -194,6 +194,9 @@ export function accumulateNaws(
 async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: string) {
   let sock: WebSocket | null = null;
   let cid: string | undefined;
+  // Session token issued by the engine on successful login. Persisted across
+  // WS reconnects so the player doesn't have to log in again after @restart.
+  let sessionToken: string | undefined;
   const msgBuffer: string[] = [];
   let isReconnecting = false;
   let manuallyClosed = false;
@@ -228,15 +231,15 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
       sock.onopen = () => {
         if (isReconnecting) {
-            write(parser.substitute("telnet", "%chGame>%cn Server is back! Reconnected.\r\n"));
-
-            if (cid) {
-               sock?.send(JSON.stringify({
-                   msg: "look",
-                   data: { cid }
-               }));
+            // Re-authenticate first so the engine restores the player's cid
+            // before any buffered commands are dispatched.
+            if (sessionToken) {
+              sock?.send(JSON.stringify({ type: "auth", token: sessionToken }));
+              write(parser.substitute("telnet", "%chGame>%cn Server is back! Reconnected.\r\n"));
+              if (cid) sock?.send(JSON.stringify({ msg: "look", data: { cid } }));
+            } else {
+              write(parser.substitute("telnet", "%chGame>%cn Server is back. Please reconnect.\r\n"));
             }
-
             isReconnecting = false;
         }
 
@@ -251,6 +254,7 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
         try {
           const payload = JSON.parse(event.data);
           if (payload.data?.cid) cid = payload.data.cid;
+          if (typeof payload.data?.token === "string") sessionToken = payload.data.token;
 
           // If message is meant for Telnet, it should be in 'msg' (formatted ANSI)
           if (payload.msg) {

@@ -1,5 +1,6 @@
 import { addCmd } from "../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
+import { sign } from "../services/jwt/jwt.ts";
 
 export async function execConnect(u: IUrsamuSDK): Promise<void> {
   const pieces = (u.cmd.args[0] || "").split(" ");
@@ -27,6 +28,15 @@ export async function execConnect(u: IUrsamuSDK): Promise<void> {
   }
 
   await u.auth.login(player.id);
+
+  // Issue a session token so telnet (or any client) can re-authenticate
+  // after a server restart without forcing the player to log in again.
+  try {
+    const token = await sign({ id: player.id });
+    u.send("", undefined, { token });
+  } catch (e) {
+    console.warn("[auth] Failed to issue session token:", e);
+  }
 
   // Failsafe: promote first player to superuser if none exist.
   // Short-circuit if this player is already a superuser, then use a targeted query.
