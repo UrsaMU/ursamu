@@ -112,67 +112,65 @@ export async function execShutdown(u: IUrsamuSDK): Promise<void> {
   await u.sys.shutdown();
 }
 
-export default () => {
-  addCmd({
-    name: "@boot",
-    pattern: /^@boot\s+(.*)/i,
-    lock: "connected & admin+",
-    help: "Disconnect a player",
-    category: "admin",
-    exec: execBoot,
-  });
+addCmd({
+  name: "@boot",
+  pattern: /^@boot\s+(.*)/i,
+  lock: "connected & admin+",
+  help: "Disconnect a player",
+  category: "admin",
+  exec: execBoot,
+});
 
-  addCmd({
-    name: "@toad",
-    pattern: /^@toad\s+(.*)/i,
-    lock: "connected & admin+",
-    help: "Destroy a player",
-    category: "admin",
-    exec: execToad,
-  });
+addCmd({
+  name: "@toad",
+  pattern: /^@toad\s+(.*)/i,
+  lock: "connected & admin+",
+  help: "Destroy a player",
+  category: "admin",
+  exec: execToad,
+});
 
-  addCmd({
-    name: "@newpassword",
-    pattern: /^@newpass(?:word)?\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected & admin+",
-    help: "Change a player's password",
-    category: "admin",
-    exec: execNewpassword,
-  });
+addCmd({
+  name: "@newpassword",
+  pattern: /^@newpass(?:word)?\s+(.*)\s*=\s*(.*)/i,
+  lock: "connected & admin+",
+  help: "Change a player's password",
+  category: "admin",
+  exec: execNewpassword,
+});
 
-  addCmd({
-    name: "@chown",
-    pattern: /^@chown\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected & admin+",
-    help: "Change ownership of an object",
-    category: "admin",
-    exec: execChown,
-  });
+addCmd({
+  name: "@chown",
+  pattern: /^@chown\s+(.*)\s*=\s*(.*)/i,
+  lock: "connected & admin+",
+  help: "Change ownership of an object",
+  category: "admin",
+  exec: execChown,
+});
 
-  addCmd({
-    name: "@resettoken",
-    pattern: /^@resettoken\s+(.*)/i,
-    lock: "connected & admin+",
-    help: "Generate a one-time password-reset token for a player",
-    category: "admin",
-    exec: execResetToken,
-  });
+addCmd({
+  name: "@resettoken",
+  pattern: /^@resettoken\s+(.*)/i,
+  lock: "connected & admin+",
+  help: "Generate a one-time password-reset token for a player",
+  category: "admin",
+  exec: execResetToken,
+});
 
-  addCmd({
-    name: "@site",
-    pattern: /^@site\s+(.*)\s*=\s*(.*)/i,
-    lock: "connected & admin+",
-    help: "Set site configuration",
-    category: "admin",
-    exec: execSite,
-  });
+addCmd({
+  name: "@site",
+  pattern: /^@site\s+(.*)\s*=\s*(.*)/i,
+  lock: "connected & admin+",
+  help: "Set site configuration",
+  category: "admin",
+  exec: execSite,
+});
 
-  addCmd({
-    name: "@shutdown",
-    pattern: /^@shutdown$/i,
-    lock: "connected & admin+",
-    help: "Shut down the server",
-    category: "admin",
-    exec: execShutdown,
-  });
-};
+addCmd({
+  name: "@shutdown",
+  pattern: /^@shutdown$/i,
+  lock: "connected & admin+",
+  help: "Shut down the server",
+  category: "admin",
+  exec: execShutdown,
+});

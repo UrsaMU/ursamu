@@ -4,9 +4,8 @@ import { playerTags, serverTags } from "../services/Database/index.ts";
 
 const MAX_TAGS = 50;
 
-export default () => {
-  // @ltag — personal object tags
-  addCmd({
+// @ltag — personal object tags
+addCmd({
     name: "@ltag",
     pattern: /^@?ltag(?:\/(remove|list))?\s*(.*)?$/i,
     lock: "connected",
@@ -91,8 +90,8 @@ Examples:
     },
   });
 
-  // @tag — global server tags (wizard+)
-  addCmd({
+// @tag — global server tags (wizard+)
+addCmd({
     name: "@tag",
     pattern: /^@?tag(?:\/(remove))?\s*(.*)?$/i,
     lock: "connected admin+",
@@ -160,4 +159,3 @@ Examples:
       }
     },
   });
-};

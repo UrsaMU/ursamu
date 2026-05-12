@@ -5,8 +5,7 @@ import { send } from "../services/broadcast/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
-export default () => {
-  addCmd({
+addCmd({
     name: "@halt",
     pattern: /^@halt(?:\s+(.+))?$/i,
     lock: "connected",
@@ -30,5 +29,4 @@ export default () => {
         send([u.socketId || ""], `Halted ${count} queued action${count === 1 ? "" : "s"}.`);
       }
     },
-  });
-};
+});

@@ -12,8 +12,7 @@ import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
  * silent.  In native context the literal condition string is inspected; when
  * called from softcode the argument will already be an evaluated string.
  */
-export default () =>
-  addCmd({
+addCmd({
     name: "@assert",
     pattern: /^@assert\s+(.*?)(?:\s*=\s*(.*))?$/i,
     lock: "connected",

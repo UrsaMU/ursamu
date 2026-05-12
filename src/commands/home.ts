@@ -23,31 +23,29 @@ export function execInventory(u: IUrsamuSDK): void {
   u.send(telnet);
 }
 
-export default () => {
-  addCmd({
-    name: "home",
-    pattern: /^home$/i,
-    lock: "connected",
-    category: "Navigation",
-    help: `home  — Go to your home location.
+addCmd({
+  name: "home",
+  pattern: /^home$/i,
+  lock: "connected",
+  category: "Navigation",
+  help: `home  — Go to your home location.
 
 Examples:
   home`,
-    exec: execHome,
-  });
+  exec: execHome,
+});
 
-  addCmd({
-    name: "inventory",
-    pattern: /^(?:inventory|inv|i)$/i,
-    lock: "connected",
-    category: "Information",
-    help: `inventory  — List what you are carrying.
+addCmd({
+  name: "inventory",
+  pattern: /^(?:inventory|inv|i)$/i,
+  lock: "connected",
+  category: "Information",
+  help: `inventory  — List what you are carrying.
 
 Aliases: inv, i
 
 Examples:
   inventory
   inv`,
-    exec: execInventory,
-  });
-};
+  exec: execInventory,
+});

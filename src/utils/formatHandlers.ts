@@ -53,6 +53,41 @@ export function unregisterFormatHandler(slot: FormatSlot, fn: FormatHandler): vo
   if (idx >= 0) list.splice(idx, 1);
 }
 
+/**
+ * Register a MUSH-softcode template as a format handler for a slot. The engine
+ * evaluates `mushSource` whenever the slot is resolved, with `%0` bound to the
+ * default rendering and the resolver's target as the executor — so the
+ * template can call attribute and object functions on the target directly.
+ *
+ * Returns the underlying handler so callers can pass it to
+ * `unregisterFormatHandler` from their plugin `remove()`.
+ *
+ * @example
+ * ```ts
+ * registerFormatTemplate(
+ *   "NAMEFORMAT",
+ *   "[center(strcat(%cy[ ,name(%0), ]%cn),78,=)]",
+ * );
+ * ```
+ */
+export function registerFormatTemplate(
+  slot: FormatSlot,
+  mushSource: string,
+): FormatHandler {
+  const handler: FormatHandler = async (u, target, defaultArg) => {
+    const { softcodeService } = await import("../services/Softcode/index.ts");
+    const out = await softcodeService.runSoftcode(mushSource, {
+      actorId:    u.me.id,
+      executorId: target.id,
+      args:       [defaultArg],
+      socketId:   u.socketId,
+    });
+    return out ?? null;
+  };
+  registerFormatHandler(slot, handler);
+  return handler;
+}
+
 /** First registered handler that returns a non-null string wins. */
 export async function runPluginFormatHandlers(
   slot: FormatSlot,

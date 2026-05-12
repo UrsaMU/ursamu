@@ -14,8 +14,7 @@ const SYSTEM_ATTRS = new Set([
   "quota", "money", "channels",
 ]);
 
-export default () =>
-  addCmd({
+addCmd({
     name: "@include",
     pattern: /^@include\s+([^=]+)=([^/\r\n]+)(?:\/(.+))?/i,
     lock: "connected builder+",

@@ -1,23 +1,37 @@
 import { djwt } from "../../../deps.ts";
 
 // Generate a per-process fallback so there is no known static secret.
-// Tokens will be invalidated on restart. Set JWT_SECRET in production.
+// Tokens signed with it will be invalidated on restart — set JWT_SECRET in
+// production (or in .env for development) for cross-restart auto-reauth.
 const _FALLBACK_SECRET = crypto.randomUUID() + crypto.randomUUID();
-const _JWT_SECRET_ENV = Deno.env.get("JWT_SECRET");
-if (!_JWT_SECRET_ENV) {
-  if (Deno.env.get("DENO_ENV") === "production") {
-    console.error("[jwt] FATAL: JWT_SECRET must be set in production. Exiting.");
-    Deno.exit(1);
+
+let _resolvedSecret: string | null = null;
+let _warned = false;
+
+const resolveSecret = (): string => {
+  if (_resolvedSecret) return _resolvedSecret;
+  const env = Deno.env.get("JWT_SECRET");
+  if (env) {
+    _resolvedSecret = env;
+    return env;
   }
-  console.warn(
-    "[jwt] WARNING: JWT_SECRET not set. Using a random per-process secret — tokens will be invalidated on restart.",
-  );
-}
+  if (!_warned) {
+    _warned = true;
+    if (Deno.env.get("DENO_ENV") === "production") {
+      console.error("[jwt] FATAL: JWT_SECRET must be set in production. Exiting.");
+      Deno.exit(1);
+    }
+    console.warn(
+      "[jwt] WARNING: JWT_SECRET not set. Using a random per-process secret — tokens will be invalidated on restart.",
+    );
+  }
+  _resolvedSecret = _FALLBACK_SECRET;
+  return _FALLBACK_SECRET;
+};
 
 const getSecretKey = async () => {
-  const secret = _JWT_SECRET_ENV || _FALLBACK_SECRET;
   const encoder = new TextEncoder();
-  const keyData = encoder.encode(secret);
+  const keyData = encoder.encode(resolveSecret());
   return await crypto.subtle.importKey(
     "raw",
     keyData,

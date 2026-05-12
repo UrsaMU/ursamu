@@ -79,6 +79,7 @@ export { evaluateLock, validateLock } from "./src/utils/evaluateLock.ts";
 // fallbacks (priority: softcode attr > plugin handler > built-in default)
 export {
   registerFormatHandler,
+  registerFormatTemplate,
   unregisterFormatHandler,
 } from "./src/utils/formatHandlers.ts";
 export type { FormatHandler, FormatSlot } from "./src/utils/formatHandlers.ts";

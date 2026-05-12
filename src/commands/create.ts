@@ -4,11 +4,11 @@ import { getConfig } from "../services/Config/mod.ts";
 import { getNextId } from "../utils/getNextId.ts";
 import { moniker } from "../utils/moniker.ts";
 import { isNameTaken } from "../utils/isNameTaken.ts";
+import { sign } from "../services/jwt/jwt.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
-export default () =>
-  addCmd({
+addCmd({
     name: "create",
     pattern: /^(?:create|cr)\s+(.*)/i,
     exec: async (u: IUrsamuSDK) => {
@@ -65,10 +65,19 @@ export default () =>
       // Login the player (sets socket.cid and joins rooms)
       await u.auth.login(newPlayer.id);
 
+      // Issue a session token so telnet (or any client) can re-authenticate
+      // after a server restart without forcing the player to log in again.
+      let token: string | undefined;
+      try {
+        token = await sign({ id: newPlayer.id });
+      } catch (e) {
+        console.warn("[create] Failed to issue session token:", e);
+      }
+
       await u.send(
         `Welcome to ${getConfig<string>("game.name")}!`,
         u.socketId,
-        { cid: newPlayer.id }
+        token ? { cid: newPlayer.id, token } : { cid: newPlayer.id },
       );
 
       // Send connection message to everyone in the room

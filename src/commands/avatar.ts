@@ -61,8 +61,7 @@ async function removeExistingAvatar(id: string): Promise<void> {
   }
 }
 
-export default () =>
-  addCmd({
+addCmd({
     name: "avatar",
     pattern: /^[@+]?avatar(?:\s+(.*))?$/i,
     lock: "connected",

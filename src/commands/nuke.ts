@@ -6,8 +6,7 @@ import { send } from "../services/broadcast/index.ts";
 import { broadcast } from "../services/broadcast/index.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
-export default () =>
-  addCmd({
+addCmd({
     name: "nuke",
     pattern: /^@nuke(?:\s+(.*))?$/i,
     lock: "superuser",

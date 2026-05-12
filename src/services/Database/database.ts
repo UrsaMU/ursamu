@@ -208,7 +208,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
 
   /** Detect { location: X }, { flags: /connected/i }, or $and combinations. */
   private tryIndexLookup(query?: Query<T>): Set<string> | null {
-    if (!query || !this.shadowIndex?.isBuilt) return null;
+    if (!query || typeof query !== "object" || !this.shadowIndex?.isBuilt) return null;
     let location: string | undefined;
     let needsConnected = false;
 
@@ -412,6 +412,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
 
   private matchesQuery(value: T, query?: Query<T>): boolean {
     if (!query) return true;
+    if (typeof query !== "object") return value === query;
 
     if ('$or' in query && Array.isArray(query.$or)) {
       return (query.$or as QueryCondition[]).some((cond: QueryCondition) => this.matchesQuery(value, cond));

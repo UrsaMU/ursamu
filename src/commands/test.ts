@@ -9,8 +9,7 @@ import { evaluateLock, hydrate } from "../utils/evaluateLock.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
-export default () =>
-  addCmd({
+addCmd({
     name: "test",
     pattern: /^@test(?:\s+(.*))?$/i,
     lock: "superuser",

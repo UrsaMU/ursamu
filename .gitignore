@@ -21,3 +21,4 @@ config/*.json
 
 # Fresh build directory
 _fresh/
+games/

@@ -24,8 +24,7 @@ export async function execMoniker(u: IUrsamuSDK): Promise<void> {
   u.send(`Set moniker for ${tar.name} to ${moniker.trim()}.`);
 }
 
-export default () =>
-  addCmd({
+addCmd({
     name: "@moniker",
     pattern: /^[@+]?moniker\s+(.*)/i,
     lock: "connected & admin+",

@@ -1,7 +1,7 @@
 {
   "name": "@ursamu/ursamu",
 
-  "version": "2.3.4",
+  "version": "2.4.0",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",
@@ -92,6 +92,6 @@
   "exclude": ["docs/_site", "config", ".claude"],
   "lint": {
     "rules": { "tags": ["recommended"] },
-    "exclude": ["src/services/Softcode/parser.cjs"]
+    "exclude": ["src/services/Softcode/parser.cjs", "legends"]
   }
 }

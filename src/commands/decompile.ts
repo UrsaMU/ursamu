@@ -14,8 +14,7 @@ const SKIP_KEYS = new Set([
   "quota", "money", "channels",
 ]);
 
-export default () =>
-  addCmd({
+addCmd({
     name: "@decompile",
     pattern: /^@decompile(?:\/(tf))?\s+(.*)/i,
     lock: "connected",

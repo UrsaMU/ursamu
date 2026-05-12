@@ -6,8 +6,7 @@ import { target } from "../utils/target.ts";
 import { canEdit } from "../utils/canEdit.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
-export default () => {
-  addCmd({
+addCmd({
     name: "@edit",
     pattern: /^@edit\s+(.*)\/(.*)\s*=\s*(.*)\/(.*)/i,
     lock: "connected",
@@ -42,5 +41,4 @@ export default () => {
         send([u.socketId || ""], "Attribute not found.");
       }
     },
-  });
-};
+});

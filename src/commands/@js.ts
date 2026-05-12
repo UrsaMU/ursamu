@@ -2,8 +2,7 @@ import { getQuickJS } from "../../deps.ts";
 import { addCmd, send } from "../services/index.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
-export default () =>
-  addCmd({
+addCmd({
     name: "js",
     pattern: /^[+@]?js\s+(.*)/i,
     lock: "connected & admin+",

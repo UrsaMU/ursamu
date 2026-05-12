@@ -98,8 +98,7 @@ export async function execPs(u: IUrsamuSDK): Promise<void> {
  * @ps — list queued processes on the time-delay and semaphore queues.
  * Switches: /brief (default), /long, /summary, /all
  */
-export default () =>
-  addCmd({
+addCmd({
     name: "@ps",
     pattern: /^@ps(?:\/([\w]+))?\s*(.*)?/i,
     lock: "connected",

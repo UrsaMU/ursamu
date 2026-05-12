@@ -155,8 +155,15 @@ export class WebSocketService {
                         if (decoded && typeof decoded.id === "string") {
                             sockData.cid = decoded.id;
                             const player = await playerForSocket(sockData);
-                            if (player && !player.flags.includes("connected")) {
-                                await setFlags(player, "connected");
+                            if (player) {
+                                if (!player.flags.includes("connected")) {
+                                    await setFlags(player, "connected");
+                                }
+                                // Re-subscribe to broadcast channels — same as u.auth.login.
+                                // Without these, u.here.broadcast / room messages never
+                                // reach the reconnected socket.
+                                sockData.join(`#${sockData.cid}`);
+                                if (player.location) sockData.join(`#${player.location}`);
                             }
                             console.log(`[WS] Authenticated socket via auth message (cid: ${sockData.cid})`);
                         }
