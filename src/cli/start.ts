@@ -78,18 +78,26 @@ try {
 
 const REBOOT_CODE = 75;
 
-// Main server restart loop — exit code 75 means "please restart me" (@reboot).
-// Any other exit code means a permanent stop (@shutdown or crash).
+// SIGUSR2 is the "no-disconnect restart" signal: scripts/restart.sh sends it.
+// The supervisor kills the current main child, but treats the exit as a
+// reboot rather than a shutdown so telnet stays up and clients auto-reauth.
+let rebootRequested = false;
+let currentMain: Deno.ChildProcess | null = null;
+
 const runMain = async () => {
   while (true) {
-    const proc = spawnInherit("src/main.ts");
-    const { code } = await proc.status;
-    if (code !== REBOOT_CODE) break;
-    console.log("\n🔄 Restarting main server...");
+    currentMain = spawnInherit("src/main.ts");
+    const { code } = await currentMain.status;
+    currentMain = null;
+    if (code === REBOOT_CODE || rebootRequested) {
+      rebootRequested = false;
+      console.log("\n🔄 Restarting main server...");
+      continue;
+    }
+    break;
   }
 };
 
-// Hard shutdown cleanup — only reached when main exits permanently or on SIGINT.
 const cleanup = () => {
   console.log("\nShutting down servers...");
   try { telnetProc.kill(); } catch { /* ignore */ }
@@ -99,6 +107,20 @@ const cleanup = () => {
 Deno.addSignalListener("SIGINT", () => {
   cleanup();
   Deno.exit(0);
+});
+
+// SIGTERM = clean shutdown (matches stop.sh semantics — disconnects everyone).
+Deno.addSignalListener("SIGTERM", () => {
+  cleanup();
+  try { currentMain?.kill("SIGTERM"); } catch { /* ignore */ }
+  Deno.exit(0);
+});
+
+// SIGUSR2 = no-disconnect restart. Equivalent to in-game @reboot.
+Deno.addSignalListener("SIGUSR2", () => {
+  console.log("\n🛰  SIGUSR2 received — restarting main without dropping telnet.");
+  rebootRequested = true;
+  try { currentMain?.kill("SIGTERM"); } catch { /* ignore */ }
 });
 
 await runMain();

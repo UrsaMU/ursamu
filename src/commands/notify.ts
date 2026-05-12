@@ -9,8 +9,7 @@ import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
  * @notify — release semaphore-blocked commands for an object.
  * If no blocked commands exist, stores a pre-notify (future @wait fires immediately).
  */
-export default () =>
-  addCmd({
+addCmd({
     name: "@notify",
     pattern: /^@notify(?:\/([\w]+))?\s*(.*?)(?:=(\d+))?$/i,
     lock: "connected",

@@ -8,8 +8,7 @@ export async function execReboot(u: IUrsamuSDK): Promise<void> {
   await u.sys.reboot();
 }
 
-export default () =>
-  addCmd({
+addCmd({
     name: "reboot",
     pattern: /^@reboot|^@restart/i,
     lock: "connected & admin+",

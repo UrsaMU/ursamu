@@ -676,3 +676,77 @@ import { dbojs } from "jsr:@ursamu/ursamu";
 const players = await dbojs.queryAll((o) => o.flags.has("player"));
 const room    = await dbojs.queryOne((o) => o.id === "1");
 ```
+
+---
+
+## Format handlers
+
+Pluggable display formatters for engine and plugin output. Used by `look`,
+`who`, `+ps`, `+mail`, and anywhere that resolves a `*FORMAT` slot. Resolution
+priority is fixed: per-object softcode attribute → registered TS handler →
+registered MUSH-softcode template → built-in default.
+
+```typescript
+import {
+  registerFormatHandler,
+  registerFormatTemplate,
+  unregisterFormatHandler,
+} from "jsr:@ursamu/ursamu";
+import type { FormatHandler, FormatSlot } from "jsr:@ursamu/ursamu";
+```
+
+### `registerFormatHandler(slot, fn)`
+
+Install a TypeScript handler for a `FormatSlot`. Slot is an open `UPPERCASE`
+string union — the eight engine-known literals (`NAMEFORMAT`, `DESCFORMAT`,
+`CONFORMAT`, `EXITFORMAT`, `WHOFORMAT`, `WHOROWFORMAT`, `PSFORMAT`,
+`PSROWFORMAT`) get IDE autocomplete; plugin-defined slots like `"MAILFORMAT"`
+are accepted without casts. Return a string to render, or `null` to fall
+through to the next handler / built-in default. The first non-null handler
+wins.
+
+```typescript
+registerFormatHandler("NAMEFORMAT", (u, target, defaultName) => {
+  if (!target.flags.has("room")) return null;
+  return `%ch%cy[${defaultName}]%cn\n`;
+});
+```
+
+### `registerFormatTemplate(slot, mushSource)`
+
+Shortcut for plugins that want to install a MUSH-softcode template as a
+handler. The engine runs `mushSource` whenever the slot resolves; `%0` is
+bound to the default rendering and the resolver's target is the executor —
+so `name(%0)`, `get(%0/<attr>)`, and friends work directly. Returns the
+underlying handler so callers can pass it to `unregisterFormatHandler` from
+plugin `remove()`.
+
+```typescript
+const handler = registerFormatTemplate(
+  "NAMEFORMAT",
+  "[center(strcat(%cy[ ,%0, ]%cn),78,=)]",
+);
+// later, in plugin remove():
+unregisterFormatHandler("NAMEFORMAT", handler);
+```
+
+### `unregisterFormatHandler(slot, fn)`
+
+Remove a previously registered handler. Same reference identity that
+`registerFormatHandler` / `registerFormatTemplate` returned at registration.
+
+### Type: `FormatHandler`
+
+```typescript
+type FormatHandler = (
+  u:          IUrsamuSDK,
+  target:     IDBObj,
+  defaultArg: string,
+) => Promise<string | null> | string | null;
+```
+
+### Type: `FormatSlot`
+
+Open `UPPERCASE` string union — see `registerFormatHandler` above. Use one
+of the engine literals for autocomplete or any custom slot your plugin
+defines.

@@ -303,9 +303,8 @@ export async function execFsay(u: IUrsamuSDK): Promise<void> {
   }
 }
 
-export default () => {
-  addCmd({
-    name: "say",
+addCmd({
+  name: "say",
     pattern: /^(?:say\s+|["'])(.*)/is,
     lock: "connected",
     category: "Communication",
@@ -480,4 +479,3 @@ Examples:
   fpose NPC=bows deeply.`,
     exec: execFsay,
   });
-};

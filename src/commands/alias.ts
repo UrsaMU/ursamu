@@ -27,16 +27,14 @@ export async function execAlias(u: IUrsamuSDK): Promise<void> {
   }
 }
 
-export default () => {
-  addCmd({
-    name: "@alias",
-    pattern: /^[@/+]?alias\s+(.*)/i,
-    lock: "connected",
-    help: `@alias <target>=<alias>  — Set or clear an alias for an object.
+addCmd({
+  name: "@alias",
+  pattern: /^[@/+]?alias\s+(.*)/i,
+  lock: "connected",
+  help: `@alias <target>=<alias>  — Set or clear an alias for an object.
 
 Examples:
   @alias lamp=lantern
   @alias lamp=`,
-    exec: execAlias,
-  });
-};
+  exec: execAlias,
+});

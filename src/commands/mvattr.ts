@@ -7,8 +7,7 @@ import type { IAttribute } from "../@types/IAttribute.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
-export default () =>
-  addCmd({
+addCmd({
     name: "@mvattr",
     pattern: /^@mvattr\s+(.+?)=(.+)/i,
     lock: "connected",

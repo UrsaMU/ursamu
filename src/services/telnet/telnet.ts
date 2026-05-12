@@ -191,6 +191,34 @@ export function accumulateNaws(
   return { naws: null, carry: new Uint8Array(0) };
 }
 
+/**
+ * Strip all Telnet IAC (Interpret As Command) sequences from a byte chunk.
+ * Handles: IAC IAC (escaped 0xFF → 0xFF), IAC WILL/WONT/DO/DONT <opt> (3-byte),
+ * IAC SB ... IAC SE (subnegotiation), and single-byte commands like IAC NOP/GA.
+ * Anything else after a lone IAC is dropped along with the following byte.
+ */
+export function stripIacBytes(chunk: Uint8Array): Uint8Array {
+  const out = new Uint8Array(chunk.length);
+  let w = 0;
+  for (let i = 0; i < chunk.length; i++) {
+    const b = chunk[i];
+    if (b !== IAC) { out[w++] = b; continue; }
+    const next = chunk[i + 1];
+    if (next === undefined) break; // trailing lone IAC — drop
+    if (next === IAC) { out[w++] = IAC; i += 1; continue; } // escaped 0xFF
+    if (next === SB) {
+      // Skip until IAC SE (handles double-IAC inside payload safely enough).
+      let j = i + 2;
+      while (j < chunk.length - 1 && !(chunk[j] === IAC && chunk[j + 1] === SE)) j++;
+      i = j + 1; // skip past SE (or jump to end if not found in this chunk)
+      continue;
+    }
+    if (next >= 0xFB && next <= 0xFE) { i += 2; continue; } // WILL/WONT/DO/DONT <opt>
+    i += 1; // any other 2-byte IAC sequence
+  }
+  return out.subarray(0, w);
+}
+
 async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: string) {
   let sock: WebSocket | null = null;
   let cid: string | undefined;
@@ -349,17 +377,16 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
         }
       }
 
-      const raw = new TextDecoder().decode(chunk);
+      // Strip Telnet IAC sequences at the byte level. We can't do this after
+      // UTF-8 decoding because lone 0xFF bytes become U+FFFD replacement chars
+      // and the byte-level patterns no longer match.
+      const cleaned = stripIacBytes(chunk);
+      const raw = new TextDecoder().decode(cleaned);
 
-         // Filter Telnet IAC sequences and non-printable chars
-        // IAC sequences start with 0xFF (\xff)
-        const msg = raw
-          .replace(/\xff[\xfb-\xfe]./g, "") // IAC DO/DONT/WILL/WONT <opt>
-          .replace(/\xff[\xf0-\xfa].*/g, "") // IAC SB/SE/etc (strip remainder of subneg)
-          .replace(/\xff\xff/g, "\xff")    // Escaped IAC
-          // deno-lint-ignore no-control-regex
-          .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // Non-printable ASCII
-          .trim();
+      const msg = raw
+        // deno-lint-ignore no-control-regex
+        .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // non-printable ASCII
+        .trim();
 
       if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) {
         if (msg) {

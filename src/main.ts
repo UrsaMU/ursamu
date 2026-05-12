@@ -3,6 +3,7 @@
  * @module ursamu-core
  * @description The core engine initialization and management module.
  */
+import "dotenv/load";
 import { handleRequest } from "./app.ts";
 import "./reboot.ts";
 import { plugins } from "./utils/loadDIr.ts";
@@ -88,7 +89,7 @@ export const initializeEngine = async (
 ): Promise<any> => {
   // Set default options
   const {
-    loadDefaultCommands = false,
+    loadDefaultCommands = true,
     loadDefaultTextFiles = true,
     autoCreateDefaultRooms = true,
     autoCreateDefaultChannels = true,

@@ -150,13 +150,12 @@ async function demoUI(u: IUrsamuSDK) {
   u.send(section("UI — panel types") + "\n  Sending structured layout — check your web client.\n");
 }
 
-export default () => {
-  addCmd({
-    name: "demo",
-    pattern: /^demo(?:\/(basics|format|db|sys|chan|ui))?\s*$/i,
-    lock: "connected",
-    category: "System",
-    help: `demo[/<switch>]  — Walk through the UrsaMU script engine SDK.
+addCmd({
+  name: "demo",
+  pattern: /^demo(?:\/(basics|format|db|sys|chan|ui))?\s*$/i,
+  lock: "connected",
+  category: "System",
+  help: `demo[/<switch>]  — Walk through the UrsaMU script engine SDK.
 
 Switches:
   /basics   Actor & room, state, flags
@@ -170,17 +169,16 @@ Examples:
   demo
   demo/basics
   demo/db`,
-    exec: async (u: IUrsamuSDK) => {
-      const sw = (u.cmd.args[0] || "").toLowerCase().trim();
-      switch (sw) {
-        case "basics": await demoBasics(u); break;
-        case "format": await demoFormat(u); break;
-        case "db":     await demoDB(u);     break;
-        case "sys":    await demoSys(u);    break;
-        case "chan":   await demoChan(u);   break;
-        case "ui":     await demoUI(u);     break;
-        default:       await demoOverview(u); break;
-      }
-    },
-  });
-};
+  exec: async (u: IUrsamuSDK) => {
+    const sw = (u.cmd.args[0] || "").toLowerCase().trim();
+    switch (sw) {
+      case "basics": await demoBasics(u); break;
+      case "format": await demoFormat(u); break;
+      case "db":     await demoDB(u);     break;
+      case "sys":    await demoSys(u);    break;
+      case "chan":   await demoChan(u);   break;
+      case "ui":     await demoUI(u);     break;
+      default:       await demoOverview(u); break;
+    }
+  },
+});

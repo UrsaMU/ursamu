@@ -10,6 +10,11 @@ import {
   gameMainTs,
   gameTelnetTs,
   gameRunSh,
+  gameDaemonSh,
+  gameStopSh,
+  gameRestartSh,
+  gameStatusSh,
+  gameEnvFile,
   gameConnectTxt,
   gameWikiHome,
   gameGitignore,
@@ -101,92 +106,95 @@ export async function scaffoldProject(
     console.log(`Created directory: ${dir}`);
   }
 
-  if (!isLocal) {
-    await Deno.writeTextFile(
-      join(targetDir, "src", "plugins", "plugins.manifest.json"),
-      JSON.stringify(DEFAULT_PLUGINS_MANIFEST, null, 2),
-    );
-    console.log("Created src/plugins/plugins.manifest.json");
-  }
+  await Deno.writeTextFile(
+    join(targetDir, "src", "plugins", "plugins.manifest.json"),
+    JSON.stringify(DEFAULT_PLUGINS_MANIFEST, null, 2),
+  );
+  console.log("Created src/plugins/plugins.manifest.json");
 
   await Deno.writeTextFile(join(targetDir, "wiki", "home.md"), gameWikiHome(name));
   console.log("Created wiki/home.md");
 
-  if (!isLocal) await copySystemScripts(targetDir);
+  await copySystemScripts(targetDir);
 
   await Deno.writeTextFile(join(targetDir, "src", "main.ts"),   gameMainTs(name));
   console.log("Created src/main.ts");
   await Deno.writeTextFile(join(targetDir, "src", "telnet.ts"), gameTelnetTs());
   console.log("Created src/telnet.ts");
-  await Deno.writeTextFile(join(targetDir, "scripts", "run.sh"), gameRunSh(name));
-  console.log("Created scripts/run.sh");
-  try {
-    await Deno.chmod(join(targetDir, "scripts", "run.sh"), 0o755);
-  } catch { /* non-fatal on some platforms */ }
+  const shellScripts: Array<[string, string]> = [
+    ["run.sh",     gameRunSh(name)],
+    ["daemon.sh",  gameDaemonSh()],
+    ["stop.sh",    gameStopSh()],
+    ["restart.sh", gameRestartSh()],
+    ["status.sh",  gameStatusSh()],
+  ];
+  for (const [file, content] of shellScripts) {
+    const path = join(targetDir, "scripts", file);
+    await Deno.writeTextFile(path, content);
+    try { await Deno.chmod(path, 0o755); } catch { /* non-fatal */ }
+    console.log(`Created scripts/${file}`);
+  }
+
+  // Stable JWT secret so telnet auto-reauth survives main-server restarts.
+  const jwtBytes = new Uint8Array(32);
+  crypto.getRandomValues(jwtBytes);
+  const jwtSecret = Array.from(jwtBytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  await Deno.writeTextFile(
+    join(targetDir, ".env"),
+    gameEnvFile().replace("__JWT_SECRET__", jwtSecret),
+  );
+  console.log("Created .env (with generated JWT_SECRET)");
 
   await writeConnectTxt(targetDir, name);
   console.log("Created text/default_connect.txt");
 
-  const denoJson = isLocal
-    ? JSON.stringify({
-        tasks: {
-          "start":  "bash ./scripts/run.sh",
-          "server": "deno run -A --watch --unstable-detect-cjs --unstable-kv --unstable-net ./src/main.ts",
-          "telnet": "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/telnet.ts",
-          "test":   "deno test --allow-all --unstable-kv --no-check",
-        },
-        imports: {
-          // ── local engine paths ───────────────────────────────────────────
-          "ursamu":                    `${engineRelPath}/mod.ts`,
-          "ursamu/":                   `${engineRelPath}/`,
-          "@ursamu/ursamu":            `${engineRelPath}/mod.ts`,
-          // Subpath exports — must point into the local engine tree so Deno
-          // resolves them even though they are bare specifiers in engine source.
-          "@ursamu/ursamu/app":        `${engineRelPath}/src/app.ts`,
-          "@ursamu/ursamu/channels":   `${engineRelPath}/src/services/channel-events.ts`,
-          "@ursamu/ursamu/chargen":    `${engineRelPath}/src/services/Chargen/index.ts`,
-          "@ursamu/ursamu/jobs":       `${engineRelPath}/src/plugins/jobs/mod.ts`,
-          // ── std ──────────────────────────────────────────────────────────
-          "@std/assert":               "jsr:@std/assert@^0.224.0",
-          "@std/flags":                "jsr:@std/flags@^0.224.0",
-          "@std/fmt":                  "jsr:@std/fmt@^0.224.0",
-          "@std/fmt/":                 "jsr:@std/fmt@^0.224.0/",
-          "@std/fs":                   "jsr:@std/fs@^0.224.0",
-          "@std/path":                 "jsr:@std/path@^0.224.0",
-          "@std/semver":               "jsr:@std/semver@^1.0.0",
-          "@std/testing":              "jsr:@std/testing@^1.0.17",
-          "@std/testing/bdd":          "jsr:@std/testing@^1.0.17/bdd",
-          "@std/testing/mock":         "jsr:@std/testing@^1.0.17/mock",
-          // ── ursamu transitive deps ────────────────────────────────────────
-          "@ursamu/mushcode":          "jsr:@ursamu/mushcode@^0.6.0",
-          "@ursamu/mushcode/eval":     "jsr:@ursamu/mushcode@^0.6.0/eval",
-          "@ursamu/mushcode/parse":    "jsr:@ursamu/mushcode@^0.6.0/parse",
-          "@ursamu/parser":            "npm:@ursamu/parser@1.2.4",
-          "@digibear/tags":            "npm:@digibear/tags@1.0.0",
-          "bcrypt":                    "npm:bcryptjs@2.4.3",
-          "djwt":                      "jsr:@zaubrik/djwt@^3.0.2",
-          "dotenv":                    "jsr:@std/dotenv@^0.224.0",
-          "dotenv/":                   "jsr:@std/dotenv@^0.224.0/",
-          "dotenv/load":               "jsr:@std/dotenv@^0.224.0/load",
-          "lodash":                    "npm:lodash@^4.18.1",
-          "quickjs-emscripten":        "npm:quickjs-emscripten@0.29.0",
-        },
-      }, null, 2)
-    : `{
-  "nodeModulesDir": "auto",
-  "tasks": ${JSON.stringify(GAME_PROJECT_TASKS, null, 2).replace(/\n/g, "\n  ")},
-  "compilerOptions": {
-    "lib": ["deno.window"],
-    "types": ["./node_modules/@types/node/index.d.ts"]
-  },
-  "imports": {
-    "ursamu": "jsr:@ursamu/ursamu",
+  const localImports = {
+    "ursamu":                  `${engineRelPath}/mod.ts`,
+    "ursamu/":                 `${engineRelPath}/`,
+    "@ursamu/ursamu":          `${engineRelPath}/mod.ts`,
+    "@ursamu/ursamu/app":      `${engineRelPath}/src/app.ts`,
+    "@ursamu/ursamu/channels": `${engineRelPath}/src/services/channel-events.ts`,
+    "@ursamu/ursamu/chargen":  `${engineRelPath}/src/services/Chargen/index.ts`,
+    "@ursamu/ursamu/jobs":     `${engineRelPath}/src/plugins/jobs/mod.ts`,
+    "@std/assert":             "jsr:@std/assert@^0.224.0",
+    "@std/flags":              "jsr:@std/flags@^0.224.0",
+    "@std/fmt":                "jsr:@std/fmt@^0.224.0",
+    "@std/fmt/":               "jsr:@std/fmt@^0.224.0/",
+    "@std/fs":                 "jsr:@std/fs@^0.224.0",
+    "@std/path":               "jsr:@std/path@^0.224.0",
+    "@std/semver":             "jsr:@std/semver@^1.0.0",
+    "@std/testing":            "jsr:@std/testing@^1.0.17",
+    "@std/testing/bdd":        "jsr:@std/testing@^1.0.17/bdd",
+    "@std/testing/mock":       "jsr:@std/testing@^1.0.17/mock",
+    "@ursamu/mushcode":        "jsr:@ursamu/mushcode@^0.6.0",
+    "@ursamu/mushcode/eval":   "jsr:@ursamu/mushcode@^0.6.0/eval",
+    "@ursamu/mushcode/parse":  "jsr:@ursamu/mushcode@^0.6.0/parse",
+    "@ursamu/parser":          "npm:@ursamu/parser@1.2.4",
+    "@digibear/tags":          "npm:@digibear/tags@1.0.0",
+    "bcrypt":                  "npm:bcryptjs@2.4.3",
+    "djwt":                    "jsr:@zaubrik/djwt@^3.0.2",
+    "dotenv":                  "jsr:@std/dotenv@^0.224.0",
+    "dotenv/":                 "jsr:@std/dotenv@^0.224.0/",
+    "dotenv/load":             "jsr:@std/dotenv@^0.224.0/load",
+    "lodash":                  "npm:lodash@^4.18.1",
+    "quickjs-emscripten":      "npm:quickjs-emscripten@0.29.0",
+  };
+  const jsrImports = {
+    "ursamu":         "jsr:@ursamu/ursamu",
     "@ursamu/ursamu": "jsr:@ursamu/ursamu",
-    "@std/path": "jsr:@std/path@^0.224.0",
-    "@std/assert": "jsr:@std/assert@^0.224.0",
-    "@std/fs": "jsr:@std/fs@^0.224.0"
-  }
-}`;
+    "@std/path":      "jsr:@std/path@^0.224.0",
+    "@std/assert":    "jsr:@std/assert@^0.224.0",
+    "@std/fs":        "jsr:@std/fs@^0.224.0",
+  };
+  const denoJson = JSON.stringify({
+    nodeModulesDir: "auto",
+    tasks: GAME_PROJECT_TASKS,
+    compilerOptions: {
+      lib: ["deno.window"],
+      types: ["./node_modules/@types/node/index.d.ts"],
+    },
+    imports: isLocal ? localImports : jsrImports,
+  }, null, 2);
 
   await Deno.writeTextFile(join(targetDir, "deno.json"), denoJson);
   console.log("Created deno.json");

@@ -116,13 +116,12 @@ export async function execLast(u: IUrsamuSDK): Promise<void> {
   u.send(`Status:       ${target.flags.has("connected") ? "%chOnline%cn" : "Offline"}`);
 }
 
-export default () => {
-  addCmd({
-    name: "who",
-    pattern: /^who$/i,
-    lock: "",
-    category: "Information",
-    help: `who  — List all connected players.
+addCmd({
+  name: "who",
+  pattern: /^who$/i,
+  lock: "",
+  category: "Information",
+  help: `who  — List all connected players.
 
 Override hooks (attr on #0 first, else enactor):
   @whoformat     Replaces the entire WHO block; %0 = default block.
@@ -130,57 +129,57 @@ Override hooks (attr on #0 first, else enactor):
 
 Examples:
   who`,
-    exec: execWho,
-  });
+  exec: execWho,
+});
 
-  addCmd({
-    name: "score",
-    pattern: /^score$/i,
-    lock: "connected",
-    category: "Information",
-    help: `score  — Display your character scorecard.
+addCmd({
+  name: "score",
+  pattern: /^score$/i,
+  lock: "connected",
+  category: "Information",
+  help: `score  — Display your character scorecard.
 
 Examples:
   score`,
-    exec: execScore,
-  });
+  exec: execScore,
+});
 
-  addCmd({
-    name: "@doing",
-    pattern: /^@doing(?:\s+(.*))?$/i,
-    lock: "connected",
-    category: "Information",
-    help: `@doing [<message>]  — Set or clear your WHO-list description.
+addCmd({
+  name: "@doing",
+  pattern: /^@doing(?:\s+(.*))?$/i,
+  lock: "connected",
+  category: "Information",
+  help: `@doing [<message>]  — Set or clear your WHO-list description.
 
 Without a message, clears your doing.
 
 Examples:
   @doing Adventuring in the Shadowlands
   @doing`,
-    exec: execDoing,
-  });
+  exec: execDoing,
+});
 
-  addCmd({
-    name: "@poll",
-    pattern: /^@poll(?:\s+(.*))?$/i,
-    lock: "connected",
-    category: "Information",
-    help: `@poll [<message>]  — Set or clear your WHO-list doing blurb.
+addCmd({
+  name: "@poll",
+  pattern: /^@poll(?:\s+(.*))?$/i,
+  lock: "connected",
+  category: "Information",
+  help: `@poll [<message>]  — Set or clear your WHO-list doing blurb.
 
 @poll is like @doing but without the room announcement.
 
 Examples:
   @poll Exploring the northern ruins
   @poll`,
-    exec: execPoll,
-  });
+  exec: execPoll,
+});
 
-  addCmd({
-    name: "@away",
-    pattern: /^@away(?:\s+(.*))?$/i,
-    lock: "connected",
-    category: "Communication",
-    help: `@away [<message>]  — Set or clear your away message.
+addCmd({
+  name: "@away",
+  pattern: /^@away(?:\s+(.*))?$/i,
+  lock: "connected",
+  category: "Communication",
+  help: `@away [<message>]  — Set or clear your away message.
 
 When someone pages you while an away message is set, they see the message
 in addition to receiving the page.
@@ -188,15 +187,15 @@ in addition to receiving the page.
 Examples:
   @away At dinner, back in 30 min.
   @away`,
-    exec: execAway,
-  });
+  exec: execAway,
+});
 
-  addCmd({
-    name: "@last",
-    pattern: /^@last(?:\s+(.*))?$/i,
-    lock: "connected",
-    category: "Information",
-    help: `@last [<player>]  — Show last login/logout times.
+addCmd({
+  name: "@last",
+  pattern: /^@last(?:\s+(.*))?$/i,
+  lock: "connected",
+  category: "Information",
+  help: `@last [<player>]  — Show last login/logout times.
 
 Without an argument, shows your own times.
 Admin/wizard can look up any player.
@@ -204,6 +203,5 @@ Admin/wizard can look up any player.
 Examples:
   @last
   @last Alice`,
-    exec: execLast,
-  });
-};
+  exec: execLast,
+});

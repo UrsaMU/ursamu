@@ -15,8 +15,7 @@ import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
  *   - zoneMemberships DBO: { id: "${zmId}:${memberId}", zmId, memberId }
  *   - Indexed by both zmId and memberId for O(1) lookups in both directions.
  */
-export default () =>
-  addCmd({
+addCmd({
     name: "@zone",
     pattern: /^@zone(?:\/([\w]+))?\s+(.+?)(?:=(.+))?$/i,
     lock: "connected",

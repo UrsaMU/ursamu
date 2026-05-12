@@ -142,43 +142,41 @@ export async function execCreateObject(u: IUrsamuSDK): Promise<void> {
   u.send(`You create ${objName} (#${thing.id}).`);
 }
 
-export default () => {
-  addCmd({
-    name: "get",
-    pattern: /^get\s+(.*)/i,
-    lock: "connected",
-    category: "Object",
-    help: `get <object>  — Pick up an object from the room.
+addCmd({
+  name: "get",
+  pattern: /^get\s+(.*)/i,
+  lock: "connected",
+  category: "Object",
+  help: `get <object>  — Pick up an object from the room.
 
 Examples:
   get sword
   get #5`,
-    exec: execGet,
-  });
+  exec: execGet,
+});
 
-  addCmd({
-    name: "drop",
-    pattern: /^drop\s+(.*)/i,
-    lock: "connected",
-    category: "Object",
-    help: `drop <object>  — Drop an object from your inventory.
+addCmd({
+  name: "drop",
+  pattern: /^drop\s+(.*)/i,
+  lock: "connected",
+  category: "Object",
+  help: `drop <object>  — Drop an object from your inventory.
 
 Examples:
   drop sword`,
-    exec: execDrop,
-  });
+  exec: execDrop,
+});
 
-  addCmd({
-    name: "give",
-    pattern: /^give\s+(.+)\s*=\s*(.*)/i,
-    lock: "connected",
-    category: "Object",
-    help: `give <item>=<player>    — Give an item to a player.
+addCmd({
+  name: "give",
+  pattern: /^give\s+(.+)\s*=\s*(.*)/i,
+  lock: "connected",
+  category: "Object",
+  help: `give <item>=<player>    — Give an item to a player.
 give <amount>=<player>  — Give coins to a player.
 
 Examples:
   give sword=Alice
   give 50=Bob`,
-    exec: execGive,
-  });
-};
+  exec: execGive,
+});

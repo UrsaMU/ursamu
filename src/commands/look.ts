@@ -104,13 +104,12 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
   }
 }
 
-export default () => {
-  addCmd({
-    name: "look",
-    pattern: /^(?:look|l)(?:\s+(.*))?$/i,
-    lock: "connected",
-    category: "Navigation",
-    help: `look [<object>]  — Look at your surroundings, or examine a specific object.
+addCmd({
+  name: "look",
+  pattern: /^(?:look|l)(?:\s+(.*))?$/i,
+  lock: "connected",
+  category: "Navigation",
+  help: `look [<object>]  — Look at your surroundings, or examine a specific object.
 
 Without an argument, looks at the room you are in.
 Aliases: l
@@ -119,6 +118,5 @@ Examples:
   look
   look sword
   look Alice`,
-    exec: execLook,
-  });
-};
+  exec: execLook,
+});

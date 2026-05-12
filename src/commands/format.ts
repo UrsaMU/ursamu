@@ -48,9 +48,7 @@ const addFormatCommand = (cmdName: string, attrName: string) => {
   });
 };
 
-export default () => {
-  addFormatCommand("@nameformat", "NAMEFORMAT");
-  addFormatCommand("@descformat", "DESCFORMAT");
-  addFormatCommand("@conformat", "CONFORMAT");
-  addFormatCommand("@exitformat", "EXITFORMAT");
-};
+addFormatCommand("@nameformat", "NAMEFORMAT");
+addFormatCommand("@descformat", "DESCFORMAT");
+addFormatCommand("@conformat", "CONFORMAT");
+addFormatCommand("@exitformat", "EXITFORMAT");

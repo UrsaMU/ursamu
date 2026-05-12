@@ -21,13 +21,12 @@ function parseDest(s: string): { objRef: string; newName?: string } {
   return { objRef: s.slice(0, i).trim(), newName: s.slice(i + 1).trim() || undefined };
 }
 
-export default () =>
-  addCmd({
-    name: "@cpattr",
-    pattern: /^@cpattr(?:\/(\S+))?\s+(.*)/i,
-    lock: "connected",
-    category: "Building",
-    help: `@cpattr[/<switches>] <obj>/<attr>=<dest>[/<newname>][,<dest2>[/<newname2>],...]
+addCmd({
+  name: "@cpattr",
+  pattern: /^@cpattr(?:\/(\S+))?\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@cpattr[/<switches>] <obj>/<attr>=<dest>[/<newname>][,<dest2>[/<newname2>],...]
 
 Copy attributes from one object to one or more destinations.
 Both source and destination must be objects you control.
@@ -44,96 +43,96 @@ Examples:
   @cpattr me/DESC=box/ALTDESC       Copy me/DESC to box/ALTDESC.
   @cpattr/clear me/TEMP=archive     Move me/TEMP to archive/TEMP.
   @cpattr me/SKILL_*=puppet         Copy all SKILL_* attrs to puppet.`,
-    exec: async (u: IUrsamuSDK) => {
-      const swRaw = (u.cmd.args[0] ?? "").toLowerCase();
-      const rest  = (u.cmd.args[1] ?? "").trim();
+  exec: async (u: IUrsamuSDK) => {
+    const swRaw = (u.cmd.args[0] ?? "").toLowerCase();
+    const rest  = (u.cmd.args[1] ?? "").trim();
 
-      const doClear   = swRaw.includes("clear");
-      const doVerbose = swRaw.includes("verbose");
-      const doVerify  = swRaw.includes("verify");
+    const doClear   = swRaw.includes("clear");
+    const doVerbose = swRaw.includes("verbose");
+    const doVerify  = swRaw.includes("verify");
 
-      const eqIdx = rest.indexOf("=");
-      if (eqIdx === -1) return u.send("Usage: @cpattr[/switches] <obj>/<attr>=<dest>[/<newname>][,...]");
+    const eqIdx = rest.indexOf("=");
+    if (eqIdx === -1) return u.send("Usage: @cpattr[/switches] <obj>/<attr>=<dest>[/<newname>][,...]");
 
-      const srcStr  = rest.slice(0, eqIdx).trim();
-      const destStr = rest.slice(eqIdx + 1).trim();
-      if (!srcStr || !destStr) return u.send("Usage: @cpattr[/switches] <obj>/<attr>=<dest>[/<newname>][,...]");
+    const srcStr  = rest.slice(0, eqIdx).trim();
+    const destStr = rest.slice(eqIdx + 1).trim();
+    if (!srcStr || !destStr) return u.send("Usage: @cpattr[/switches] <obj>/<attr>=<dest>[/<newname>][,...]");
 
-      const { objRef: srcRef, attrGlob } = parseSrc(srcStr);
+    const { objRef: srcRef, attrGlob } = parseSrc(srcStr);
 
-      const en = await dbojs.queryOne({ id: u.me.id });
-      if (!en) return;
+    const en = await dbojs.queryOne({ id: u.me.id });
+    if (!en) return;
 
-      const srcResult = await target(en as unknown as IDBOBJ, srcRef);
-      if (!srcResult) return send([u.socketId ?? ""], `I can't find '${srcRef}'.`);
-      if (!await canEdit(en as unknown as IDBOBJ, srcResult)) return u.send("Permission denied on source.");
+    const srcResult = await target(en as unknown as IDBOBJ, srcRef);
+    if (!srcResult) return send([u.socketId ?? ""], `I can't find '${srcRef}'.`);
+    if (!await canEdit(en as unknown as IDBOBJ, srcResult)) return u.send("Permission denied on source.");
 
-      const srcObj = await Obj.get(srcResult.id);
-      if (!srcObj) return u.send("Source object not found.");
-      const srcAttrs: IAttribute[] = (srcObj.data?.attributes as IAttribute[] | undefined) ?? [];
+    const srcObj = await Obj.get(srcResult.id);
+    if (!srcObj) return u.send("Source object not found.");
+    const srcAttrs: IAttribute[] = (srcObj.data?.attributes as IAttribute[] | undefined) ?? [];
 
-      const _isStaff = isStaff(u.me.flags);
+    const _isStaff = isStaff(u.me.flags);
 
-      // Match source attributes by glob
-      const attrRe   = globToRegex(attrGlob);
-      const matched  = srcAttrs.filter(a => attrRe.test(a.name));
-      if (matched.length === 0) return u.send(`No attributes matching '${attrGlob}' on ${srcObj.name}.`);
+    // Match source attributes by glob
+    const attrRe   = globToRegex(attrGlob);
+    const matched  = srcAttrs.filter(a => attrRe.test(a.name));
+    if (matched.length === 0) return u.send(`No attributes matching '${attrGlob}' on ${srcObj.name}.`);
 
-      // Parse comma-separated destinations
-      const dests = destStr.split(",").map(s => parseDest(s.trim())).filter(d => d.objRef);
+    // Parse comma-separated destinations
+    const dests = destStr.split(",").map(s => parseDest(s.trim())).filter(d => d.objRef);
 
-      let totalCopied = 0;
-      const saves: Promise<void>[] = [];
+    let totalCopied = 0;
+    const saves: Promise<void>[] = [];
 
-      for (const { objRef: destRef, newName } of dests) {
-        const destResult = await target(en as unknown as IDBOBJ, destRef);
-        if (!destResult) { u.send(`I can't find destination '${destRef}'.`); continue; }
-        if (!await canEdit(en as unknown as IDBOBJ, destResult)) { u.send(`Permission denied on '${destRef}'.`); continue; }
+    for (const { objRef: destRef, newName } of dests) {
+      const destResult = await target(en as unknown as IDBOBJ, destRef);
+      if (!destResult) { u.send(`I can't find destination '${destRef}'.`); continue; }
+      if (!await canEdit(en as unknown as IDBOBJ, destResult)) { u.send(`Permission denied on '${destRef}'.`); continue; }
 
-        const destObj = await Obj.get(destResult.id);
-        if (!destObj) { u.send(`Destination object '${destRef}' not found.`); continue; }
+      const destObj = await Obj.get(destResult.id);
+      if (!destObj) { u.send(`Destination object '${destRef}' not found.`); continue; }
 
-        if (!destObj.dbobj.data) destObj.dbobj.data = { attributes: [] };
-        const destAttrs: IAttribute[] = (destObj.data?.attributes as IAttribute[] | undefined) ?? [];
+      if (!destObj.dbobj.data) destObj.dbobj.data = { attributes: [] };
+      const destAttrs: IAttribute[] = (destObj.data?.attributes as IAttribute[] | undefined) ?? [];
 
-        for (const srcAttr of matched) {
-          // Block copying attributes set by another player (unless staff or legacy attr).
-          if (srcAttr.setter && srcAttr.setter !== u.me.id && !_isStaff) {
-            if (doVerbose) u.send(`Skipped: ${srcObj.name}/${srcAttr.name} — set by another player.`);
-            continue;
-          }
-
-          const targetName = matched.length === 1 && newName ? newName : (newName ?? srcAttr.name);
-
-          // /verify: skip if destination attr name would be invalid
-          if (doVerify && !/^[A-Z0-9_]+$/i.test(targetName)) {
-            if (doVerbose) u.send(`Skipped: '${targetName}' is not a valid attribute name.`);
-            continue;
-          }
-
-          const existingIdx = destAttrs.findIndex(a => a.name.toLowerCase() === targetName.toLowerCase());
-          const newAttr: IAttribute = { name: targetName.toUpperCase(), value: srcAttr.value, setter: u.me.id, type: srcAttr.type };
-
-          if (existingIdx >= 0) destAttrs[existingIdx] = newAttr;
-          else destAttrs.push(newAttr);
-
-          if (doVerbose) u.send(`Copied: ${srcObj.name}/${srcAttr.name} → ${destObj.name}/${targetName.toUpperCase()}`);
-          totalCopied++;
+      for (const srcAttr of matched) {
+        // Block copying attributes set by another player (unless staff or legacy attr).
+        if (srcAttr.setter && srcAttr.setter !== u.me.id && !_isStaff) {
+          if (doVerbose) u.send(`Skipped: ${srcObj.name}/${srcAttr.name} — set by another player.`);
+          continue;
         }
 
-        destObj.dbobj.data.attributes = destAttrs;
-        saves.push(destObj.save());
+        const targetName = matched.length === 1 && newName ? newName : (newName ?? srcAttr.name);
+
+        // /verify: skip if destination attr name would be invalid
+        if (doVerify && !/^[A-Z0-9_]+$/i.test(targetName)) {
+          if (doVerbose) u.send(`Skipped: '${targetName}' is not a valid attribute name.`);
+          continue;
+        }
+
+        const existingIdx = destAttrs.findIndex(a => a.name.toLowerCase() === targetName.toLowerCase());
+        const newAttr: IAttribute = { name: targetName.toUpperCase(), value: srcAttr.value, setter: u.me.id, type: srcAttr.type };
+
+        if (existingIdx >= 0) destAttrs[existingIdx] = newAttr;
+        else destAttrs.push(newAttr);
+
+        if (doVerbose) u.send(`Copied: ${srcObj.name}/${srcAttr.name} → ${destObj.name}/${targetName.toUpperCase()}`);
+        totalCopied++;
       }
 
-      await Promise.all(saves);
+      destObj.dbobj.data.attributes = destAttrs;
+      saves.push(destObj.save());
+    }
 
-      if (doClear && totalCopied > 0) {
-        const remaining = srcAttrs.filter(a => !matched.some(m => m.name === a.name));
-        srcObj.dbobj.data!.attributes = remaining;
-        await srcObj.save();
-        u.send(`Copied ${totalCopied} attribute${totalCopied === 1 ? "" : "s"} and cleared from source.`);
-      } else {
-        u.send(`Copied ${totalCopied} attribute${totalCopied === 1 ? "" : "s"}.`);
-      }
-    },
-  });
+    await Promise.all(saves);
+
+    if (doClear && totalCopied > 0) {
+      const remaining = srcAttrs.filter(a => !matched.some(m => m.name === a.name));
+      srcObj.dbobj.data!.attributes = remaining;
+      await srcObj.save();
+      u.send(`Copied ${totalCopied} attribute${totalCopied === 1 ? "" : "s"} and cleared from source.`);
+    } else {
+      u.send(`Copied ${totalCopied} attribute${totalCopied === 1 ? "" : "s"}.`);
+    }
+  },
+});

@@ -10,13 +10,12 @@ import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
  * Without semaphore support: acts as @halt for a named object.
  * With semaphore support: also clears the semaphore queue and pre-notify counter.
  */
-export default () =>
-  addCmd({
-    name: "@drain",
-    pattern: /^@drain(?:\/(quiet))?\s*(.*)?/i,
-    lock: "connected",
-    category: "Softcode",
-    help: `@drain[/quiet] [<object>]
+addCmd({
+  name: "@drain",
+  pattern: /^@drain(?:\/(quiet))?\s*(.*)?/i,
+  lock: "connected",
+  category: "Softcode",
+  help: `@drain[/quiet] [<object>]
 
 Discard all commands waiting on the semaphore queue for <object> and reset
 its pre-notify counter to zero. Also cancels any time-delayed commands
@@ -32,32 +31,32 @@ Examples:
   @drain           Cancel all your own queued commands.
   @drain here      Drain the semaphore queue on the current room (admin+).
   @drain #5        Drain all queued commands for object #5 (admin+).`,
-    exec: async (u: IUrsamuSDK) => {
-      const quiet   = (u.cmd.args[0] ?? "").toLowerCase() === "quiet";
-      const ref     = (u.cmd.args[1] ?? "").trim();
-      const staff = isStaff(u.me.flags);
+  exec: async (u: IUrsamuSDK) => {
+    const quiet   = (u.cmd.args[0] ?? "").toLowerCase() === "quiet";
+    const ref     = (u.cmd.args[1] ?? "").trim();
+    const staff = isStaff(u.me.flags);
 
-      let targetId = u.me.id;
-      if (ref) {
-        if (!staff) return send([u.socketId ?? ""], "Permission denied.");
-        const found = (await dbojs.query({ id: ref }))[0]
-          ?? (await dbojs.query({ "data.name": ref }))[0];
-        if (!found) return send([u.socketId ?? ""], `I can't find '${ref}'.`);
-        targetId = found.id;
+    let targetId = u.me.id;
+    if (ref) {
+      if (!staff) return send([u.socketId ?? ""], "Permission denied.");
+      const found = (await dbojs.query({ id: ref }))[0]
+        ?? (await dbojs.query({ "data.name": ref }))[0];
+      if (!found) return send([u.socketId ?? ""], `I can't find '${ref}'.`);
+      targetId = found.id;
+    }
+
+    const [timeCancelled, semCancelled] = await Promise.all([
+      queue.cancelAll(targetId),
+      queue.drainSemaphore(targetId),
+    ]);
+
+    const total = timeCancelled + semCancelled;
+    if (!quiet) {
+      if (total === 0) {
+        u.send("No queued actions to drain.");
+      } else {
+        u.send(`Drained: ${timeCancelled} time-delayed, ${semCancelled} semaphore-blocked (total: ${total}).`);
       }
-
-      const [timeCancelled, semCancelled] = await Promise.all([
-        queue.cancelAll(targetId),
-        queue.drainSemaphore(targetId),
-      ]);
-
-      const total = timeCancelled + semCancelled;
-      if (!quiet) {
-        if (total === 0) {
-          u.send("No queued actions to drain.");
-        } else {
-          u.send(`Drained: ${timeCancelled} time-delayed, ${semCancelled} semaphore-blocked (total: ${total}).`);
-        }
-      }
-    },
-  });
+    }
+  },
+});

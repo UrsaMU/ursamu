@@ -1,8 +1,7 @@
 import { addCmd } from "../services/commands/index.ts";
 import { send } from "../services/broadcast/index.ts";
 
-export default () =>
-  addCmd({
+addCmd({
     name: "@version",
     pattern: /^@version$/i,
     lock: "connected",

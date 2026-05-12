@@ -344,6 +344,144 @@ cleanup
 `;
 }
 
+export function gameDaemonSh(): string {
+  return `#!/bin/bash
+# Start the UrsaMU supervisor (start.ts) in the background. The supervisor
+# spawns the telnet sidecar and the main server, and re-spawns main on
+# exit code 75 — so in-game @reboot just works. SIGUSR2 also triggers a
+# no-disconnect restart (scripts/restart.sh).
+set -e
+cd "\$(dirname "\$0")/.."
+
+mkdir -p run logs
+
+if [ -f run/supervisor.pid ] && kill -0 "\$(cat run/supervisor.pid)" 2>/dev/null; then
+  echo "supervisor already running (pid \$(cat run/supervisor.pid))"
+  exit 1
+fi
+
+for port in 4201 4202 4203; do
+  pids=\$(lsof -ti ":\$port" 2>/dev/null || true)
+  [ -n "\$pids" ] && echo "\$pids" | xargs kill -9 2>/dev/null || true
+done
+
+DENO_FLAGS="--allow-all --unstable-detect-cjs --unstable-kv --unstable-net"
+
+# Local-link projects (\`ursamu create --local\`) have the engine checkout
+# somewhere above this directory; walk upward looking for mod.ts + start.ts.
+# Falls back to JSR when no engine checkout is found.
+ENTRY="jsr:@ursamu/ursamu/start"
+probe="\$(pwd)"
+while [ "\$probe" != "/" ]; do
+  if [ -f "\$probe/mod.ts" ] && [ -f "\$probe/src/cli/start.ts" ]; then
+    ENTRY="\$probe/src/cli/start.ts"
+    break
+  fi
+  probe="\$(dirname "\$probe")"
+done
+
+echo "Starting UrsaMU supervisor (\$ENTRY)..."
+nohup deno run \$DENO_FLAGS "\$ENTRY" >>logs/main.log 2>&1 &
+echo \$! > run/supervisor.pid
+
+sleep 1
+echo "supervisor pid: \$(cat run/supervisor.pid)"
+echo "logs:           logs/main.log"
+echo "@reboot in-game (or scripts/restart.sh) respawns main without dropping telnet."
+`;
+}
+
+export function gameStopSh(): string {
+  return `#!/bin/bash
+# Stop the supervisor (and with it, main + telnet). Disconnects all telnet
+# clients. For a no-disconnect restart, use scripts/restart.sh or @reboot.
+cd "\$(dirname "\$0")/.."
+
+pidfile="run/supervisor.pid"
+if [ ! -f "\$pidfile" ]; then
+  echo "Nothing to stop."
+  exit 0
+fi
+
+pid=\$(cat "\$pidfile")
+if kill -0 "\$pid" 2>/dev/null; then
+  echo "Stopping supervisor (pid \$pid)..."
+  kill "\$pid" 2>/dev/null || true
+  for _ in 1 2 3 4 5 6 7 8 9 10; do
+    kill -0 "\$pid" 2>/dev/null || break
+    sleep 0.5
+  done
+  kill -0 "\$pid" 2>/dev/null && kill -9 "\$pid" 2>/dev/null || true
+fi
+rm -f "\$pidfile"
+
+for port in 4201 4202 4203; do
+  pids=\$(lsof -ti ":\$port" 2>/dev/null || true)
+  [ -n "\$pids" ] && echo "\$pids" | xargs kill -9 2>/dev/null || true
+done
+`;
+}
+
+export function gameRestartSh(): string {
+  return `#!/bin/bash
+# No-disconnect restart. Tells the supervisor to re-spawn main; telnet stays up
+# and connected players auto-reauth via their JWT session token. Equivalent to
+# typing @reboot in-game. For a full stop (disconnect everyone), use stop.sh
+# or @shutdown.
+cd "\$(dirname "\$0")/.."
+
+if [ ! -f run/supervisor.pid ]; then
+  echo "Supervisor not running — start with scripts/daemon.sh."
+  exit 1
+fi
+
+pid=\$(cat run/supervisor.pid)
+if ! kill -0 "\$pid" 2>/dev/null; then
+  echo "Stale supervisor pidfile (pid \$pid). Run scripts/daemon.sh."
+  exit 1
+fi
+
+echo "Signaling supervisor (pid \$pid) — main will respawn, telnet stays up."
+kill -USR2 "\$pid"
+`;
+}
+
+export function gameStatusSh(): string {
+  return `#!/bin/bash
+# Report supervisor status and port bindings.
+cd "\$(dirname "\$0")/.."
+
+pidfile="run/supervisor.pid"
+if [ ! -f "\$pidfile" ]; then
+  echo "supervisor  not running"
+else
+  pid=\$(cat "\$pidfile")
+  if kill -0 "\$pid" 2>/dev/null; then
+    echo "supervisor  running (pid \$pid)"
+  else
+    echo "supervisor  stale pidfile (pid \$pid, no process)"
+  fi
+fi
+
+for port in 4201:telnet 4202:ws 4203:http; do
+  p=\${port%:*}; label=\${port#*:}
+  bound=\$(lsof -ti ":\$p" 2>/dev/null || true)
+  if [ -n "\$bound" ]; then
+    printf "%-11s bound on :%s (pid %s)\\n" "\$label" "\$p" "\$bound"
+  else
+    printf "%-11s :%s free\\n" "\$label" "\$p"
+  fi
+done
+`;
+}
+
+export function gameEnvFile(): string {
+  return `# Stable JWT secret — required for telnet auto-reauth across server restarts.
+# Generated at scaffold time. Treat as a secret; do not commit.
+JWT_SECRET=__JWT_SECRET__
+`;
+}
+
 export function gameConnectTxt(name: string): string {
   return `%ch%cc==================================%cn
 %ch%cw Welcome to %cy${name}%cn
@@ -396,6 +534,8 @@ export function gameGitignore(): string {
 data/*.db
 config/config.json
 node_modules/
+run/
+logs/
 `;
 }
 

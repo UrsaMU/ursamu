@@ -13,8 +13,7 @@ export function setLoadedPlugins(plugins: import("../@types/IPlugin.ts").IPlugin
   _loadedPlugins = plugins;
 }
 
-export default () =>
-  addCmd({
+addCmd({
     name: "reload",
     pattern: /^@reload(?:\/(\S+))?(?:\s+(.*))?$/i,
     lock: "connected & admin+",

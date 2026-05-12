@@ -242,13 +242,12 @@ export async function execAddcom(u: IUrsamuSDK): Promise<void> {
   }
 }
 
-export default () => {
-  addCmd({
-    name: "@channel",
-    pattern: /^@?channels?(?:\/(join|leave|list))?\s*(.*)?$/i,
-    lock: "connected",
-    category: "Channel",
-    help: `@channel              — List available channels.
+addCmd({
+  name: "@channel",
+  pattern: /^@?channels?(?:\/(join|leave|list))?\s*(.*)?$/i,
+  lock: "connected",
+  category: "Channel",
+  help: `@channel              — List available channels.
 @channel/join <chan>=<alias>  — Join a channel with an alias.
 @channel/leave <alias>        — Leave a channel.
 
@@ -258,44 +257,44 @@ Examples:
   @channel
   @channel/join Public=pub
   @channel/leave pub`,
-    exec: execChannel,
-  });
+  exec: execChannel,
+});
 
-  addCmd({
-    name: "@chanhistory",
-    pattern: /^(?:@chanhistory|\+channel\/history)\s+(.*)/i,
-    lock: "connected",
-    category: "Channel",
-    help: `@chanhistory <name>[=<lines>]  — Show recent channel history.
+addCmd({
+  name: "@chanhistory",
+  pattern: /^(?:@chanhistory|\+channel\/history)\s+(.*)/i,
+  lock: "connected",
+  category: "Channel",
+  help: `@chanhistory <name>[=<lines>]  — Show recent channel history.
 
 Aliases: +channel/history
 
 Examples:
   @chanhistory Public
   @chanhistory Public=50`,
-    exec: execChanhistory,
-  });
+  exec: execChanhistory,
+});
 
-  addCmd({
-    name: "@chantranscript",
-    pattern: /^(?:@chantranscript|\+channel\/transcript)\s+(.*)/i,
-    lock: "connected",
-    category: "Channel",
-    help: `@chantranscript <name>=<lines>  — Export channel history as plain text.
+addCmd({
+  name: "@chantranscript",
+  pattern: /^(?:@chantranscript|\+channel\/transcript)\s+(.*)/i,
+  lock: "connected",
+  category: "Channel",
+  help: `@chantranscript <name>=<lines>  — Export channel history as plain text.
 
 Aliases: +channel/transcript
 
 Examples:
   @chantranscript Public=100`,
-    exec: execChantranscript,
-  });
+  exec: execChantranscript,
+});
 
-  addCmd({
-    name: "@chancreate",
-    pattern: /^@?chancreate(?:\/(hidden|lock))?\s+(.*)/i,
-    lock: "connected",
-    category: "Channel",
-    help: `@chancreate <name>[=<header>]          — Create a channel (admin+).
+addCmd({
+  name: "@chancreate",
+  pattern: /^@?chancreate(?:\/(hidden|lock))?\s+(.*)/i,
+  lock: "connected",
+  category: "Channel",
+  help: `@chancreate <name>[=<header>]          — Create a channel (admin+).
 @chancreate/hidden <name>[=<header>]   — Create a hidden channel.
 @chancreate/lock <name>=<lock>         — Create a channel with a lock.
 
@@ -303,27 +302,27 @@ Examples:
   @chancreate Staff
   @chancreate/hidden Admin=[ADMIN]
   @chancreate/lock Guild=member+`,
-    exec: execChancreate,
-  });
+  exec: execChancreate,
+});
 
-  addCmd({
-    name: "@chandestroy",
-    pattern: /^@?chandestroy\s+(.*)/i,
-    lock: "connected",
-    category: "Channel",
-    help: `@chandestroy <name>  — Destroy a channel (admin+).
+addCmd({
+  name: "@chandestroy",
+  pattern: /^@?chandestroy\s+(.*)/i,
+  lock: "connected",
+  category: "Channel",
+  help: `@chandestroy <name>  — Destroy a channel (admin+).
 
 Examples:
   @chandestroy Staff`,
-    exec: execChandestroy,
-  });
+  exec: execChandestroy,
+});
 
-  addCmd({
-    name: "@chanset",
-    pattern: /^@?chanset\s+(.*)/i,
-    lock: "connected",
-    category: "Channel",
-    help: `@chanset <name>/<property>=<value>  — Modify a channel property (admin+).
+addCmd({
+  name: "@chanset",
+  pattern: /^@?chanset\s+(.*)/i,
+  lock: "connected",
+  category: "Channel",
+  help: `@chanset <name>/<property>=<value>  — Modify a channel property (admin+).
 
 Properties: header, lock, hidden (on/off), masking (on/off), log (on/off), historyLimit (<n>)
 
@@ -331,15 +330,15 @@ Examples:
   @chanset public/header=[PUB]
   @chanset public/lock=player+
   @chanset public/hidden=on`,
-    exec: execChanset,
-  });
+  exec: execChanset,
+});
 
-  addCmd({
-    name: "@addcom",
-    pattern: /^@?(?:addcom|delcom|allcom|clearcom|comtitle)(?:\s+(.*))?$/i,
-    lock: "connected",
-    category: "Channel",
-    help: `@addcom <alias>=<channel>     — Add a channel alias (join if needed).
+addCmd({
+  name: "@addcom",
+  pattern: /^@?(?:addcom|delcom|allcom|clearcom|comtitle)(?:\s+(.*))?$/i,
+  lock: "connected",
+  category: "Channel",
+  help: `@addcom <alias>=<channel>     — Add a channel alias (join if needed).
 @delcom <alias>               — Remove a channel alias.
 @allcom                       — List all your channel aliases.
 @clearcom                     — Remove all channel aliases.
@@ -349,6 +348,5 @@ Examples:
   @addcom pub=Public
   @delcom pub
   @comtitle pub=Lord`,
-    exec: execAddcom,
-  });
-};
+  exec: execAddcom,
+});

@@ -106,7 +106,20 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
 
     db: {
       search: async (query: string | Record<string, unknown>) => {
-        const results = await dbojs.query(query as Record<string, unknown>);
+        let q: Record<string, unknown>;
+        if (typeof query === "string") {
+          const trimmed = query.trim();
+          if (!trimmed) return [];
+          if (/^#?\d+$/.test(trimmed)) {
+            q = { id: trimmed.replace(/^#/, "") };
+          } else {
+            const rx = new RegExp(`^${escapeRegex(trimmed)}$`, "i");
+            q = { $or: [{ "data.name": rx }, { "data.alias": rx }] };
+          }
+        } else {
+          q = query;
+        }
+        const results = await dbojs.query(q);
         return results.map(hydrate);
       },
       create: async (template: Partial<IDBObj>) => {
@@ -204,6 +217,8 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
         socket.cid = id;
         socket.join(`#${id}`);
         if (player.location) socket.join(`#${player.location}`);
+        const { setFlags } = await import("../../utils/setFlags.ts");
+        await setFlags(player, "connected");
       },
       hash: async (password: string) => {
         try { return await hash(password, 10); }

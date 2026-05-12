@@ -45,13 +45,12 @@ async function collectWithParents(
   return results;
 }
 
-export default () =>
-  addCmd({
-    name: "@grep",
-    pattern: /^@grep(?:\/(\S+))?\s+(.*)/i,
-    lock: "connected",
-    category: "Building",
-    help: `@grep[/<switches>] <object>=<attrglob>,<string>
+addCmd({
+  name: "@grep",
+  pattern: /^@grep(?:\/(\S+))?\s+(.*)/i,
+  lock: "connected",
+  category: "Building",
+  help: `@grep[/<switches>] <object>=<attrglob>,<string>
 
 Search the attributes of <object> whose names match <attrglob> for <string>.
 Wildcards (* and ?) are allowed in <attrglob>. Outputs matching attr names.
@@ -66,67 +65,67 @@ Examples:
   @grep box=DESC*,sword       Find DESC* attrs on box containing "sword".
   @grep/regexp me=*,^say      Find attrs on me whose value starts with "say".
   @grep/parent me=*,attack    Search me and all parents for "attack".`,
-    exec: async (u: IUrsamuSDK) => {
-      const swRaw = (u.cmd.args[0] ?? "").toLowerCase();
-      const rest  = (u.cmd.args[1] ?? "").trim();
+  exec: async (u: IUrsamuSDK) => {
+    const swRaw = (u.cmd.args[0] ?? "").toLowerCase();
+    const rest  = (u.cmd.args[1] ?? "").trim();
 
-      const doQuiet  = swRaw.includes("quiet");
-      const doRegexp = swRaw.includes("regexp");
-      const doParent = swRaw.includes("parent");
+    const doQuiet  = swRaw.includes("quiet");
+    const doRegexp = swRaw.includes("regexp");
+    const doParent = swRaw.includes("parent");
 
-      const eqIdx = rest.indexOf("=");
-      if (eqIdx === -1) return u.send("Usage: @grep[/switches] <object>=<attrglob>,<string>");
+    const eqIdx = rest.indexOf("=");
+    if (eqIdx === -1) return u.send("Usage: @grep[/switches] <object>=<attrglob>,<string>");
 
-      const objRef    = rest.slice(0, eqIdx).trim();
-      const afterEq   = rest.slice(eqIdx + 1);
-      const commaIdx  = afterEq.indexOf(",");
-      if (commaIdx === -1) return u.send("Usage: @grep[/switches] <object>=<attrglob>,<string>");
+    const objRef    = rest.slice(0, eqIdx).trim();
+    const afterEq   = rest.slice(eqIdx + 1);
+    const commaIdx  = afterEq.indexOf(",");
+    if (commaIdx === -1) return u.send("Usage: @grep[/switches] <object>=<attrglob>,<string>");
 
-      const attrGlob  = afterEq.slice(0, commaIdx).trim() || "*";
-      const searchStr = afterEq.slice(commaIdx + 1);
-      if (!searchStr) return u.send("Search string cannot be empty.");
+    const attrGlob  = afterEq.slice(0, commaIdx).trim() || "*";
+    const searchStr = afterEq.slice(commaIdx + 1);
+    if (!searchStr) return u.send("Search string cannot be empty.");
 
-      const en = await dbojs.queryOne({ id: u.me.id });
-      if (!en) return;
+    const en = await dbojs.queryOne({ id: u.me.id });
+    if (!en) return;
 
-      const result = await target(en as unknown as IDBOBJ, objRef);
-      if (!result) return send([u.socketId ?? ""], `I can't find '${objRef}'.`);
-      if (!await canEdit(en as unknown as IDBOBJ, result)) return u.send("Permission denied.");
+    const result = await target(en as unknown as IDBOBJ, objRef);
+    if (!result) return send([u.socketId ?? ""], `I can't find '${objRef}'.`);
+    if (!await canEdit(en as unknown as IDBOBJ, result)) return u.send("Permission denied.");
 
-      const obj = await Obj.get(result.id);
-      if (!obj) return u.send("Object not found.");
+    const obj = await Obj.get(result.id);
+    if (!obj) return u.send("Object not found.");
 
-      // Build matchers — compile once for efficiency
-      const attrRe   = globToRegex(attrGlob);
-      let valueRe: RegExp;
-      try {
-        if (doRegexp) {
-          if (isReDoSProne(searchStr)) {
-            return u.send(`Unsafe regular expression (nested quantifiers or excessive length): ${searchStr}`);
-          }
-          valueRe = new RegExp(searchStr, "i");
-        } else {
-          valueRe = new RegExp(searchStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+    // Build matchers — compile once for efficiency
+    const attrRe   = globToRegex(attrGlob);
+    let valueRe: RegExp;
+    try {
+      if (doRegexp) {
+        if (isReDoSProne(searchStr)) {
+          return u.send(`Unsafe regular expression (nested quantifiers or excessive length): ${searchStr}`);
         }
-      } catch {
-        return u.send(`Invalid regular expression: ${searchStr}`);
+        valueRe = new RegExp(searchStr, "i");
+      } else {
+        valueRe = new RegExp(searchStr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       }
+    } catch {
+      return u.send(`Invalid regular expression: ${searchStr}`);
+    }
 
-      const sources = doParent ? await collectWithParents(obj) : [{ objName: obj.name ?? obj.id, objId: obj.id, attrs: (obj.data?.attributes as IAttribute[] | undefined) ?? [] }];
+    const sources = doParent ? await collectWithParents(obj) : [{ objName: obj.name ?? obj.id, objId: obj.id, attrs: (obj.data?.attributes as IAttribute[] | undefined) ?? [] }];
 
-      let found = 0;
-      for (const { objName, objId, attrs } of sources) {
-        const header = doParent ? `${objName}(#${objId})` : null;
-        const hits = attrs.filter(a => attrRe.test(a.name) && valueRe.test(a.value));
-        if (hits.length === 0) continue;
-        if (header) u.send(`%ch${header}:%cn`);
-        for (const a of hits) {
-          u.send(`  ${a.name.toUpperCase()}`);
-          found++;
-        }
+    let found = 0;
+    for (const { objName, objId, attrs } of sources) {
+      const header = doParent ? `${objName}(#${objId})` : null;
+      const hits = attrs.filter(a => attrRe.test(a.name) && valueRe.test(a.value));
+      if (hits.length === 0) continue;
+      if (header) u.send(`%ch${header}:%cn`);
+      for (const a of hits) {
+        u.send(`  ${a.name.toUpperCase()}`);
+        found++;
       }
+    }
 
-      if (found === 0) u.send(`No matching attributes found.`);
-      if (!doQuiet) u.send("Grep: Done.");
-    },
-  });
+    if (found === 0) u.send(`No matching attributes found.`);
+    if (!doQuiet) u.send("Grep: Done.");
+  },
+});

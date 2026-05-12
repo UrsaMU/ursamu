@@ -467,6 +467,7 @@ function mockU(opts: {
 - No Claude/AI attribution in PR titles, commit messages, or code comments.
 - Use squash-merge for feature PRs.
 - Tag versions after squash-merge: `git tag v<version> && git push --tags`.
+- **Before every commit, update `README.md` and `docs/` to match the current code.** Touched a public API, command, config field, script, or scaffold output? Update the corresponding section before staging. A commit that lands behavior changes with stale docs is incomplete.
 
 ---
 
