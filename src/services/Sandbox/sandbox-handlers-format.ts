@@ -104,3 +104,33 @@ export async function handleUtilResolveFormatOrMessage(
   );
   respond(worker, msgId, out);
 }
+
+export async function handleUtilResolveGlobalFormatMessage(
+  msg:    Msg,
+  worker: Worker,
+): Promise<void> {
+  const { msgId } = msg;
+  const m = msg as FormatMsg;
+  if (!m.slot) { respond(worker, msgId, null); return; }
+
+  const { resolveGlobalFormat } = await import("../../utils/resolveGlobalFormat.ts");
+  const u = await buildBoundSDK(m.actorId, m.socketId);
+  const out = await resolveGlobalFormat(u, m.slot as FormatSlot, m.defaultArg ?? "");
+  respond(worker, msgId, out);
+}
+
+export async function handleUtilResolveGlobalFormatOrMessage(
+  msg:    Msg,
+  worker: Worker,
+): Promise<void> {
+  const { msgId } = msg;
+  const m = msg as FormatMsg;
+  if (!m.slot) { respond(worker, msgId, m.fallback ?? ""); return; }
+
+  const { resolveGlobalFormatOr } = await import("../../utils/resolveGlobalFormat.ts");
+  const u = await buildBoundSDK(m.actorId, m.socketId);
+  const out = await resolveGlobalFormatOr(
+    u, m.slot as FormatSlot, m.defaultArg ?? "", m.fallback ?? "",
+  );
+  respond(worker, msgId, out);
+}

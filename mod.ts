@@ -89,6 +89,9 @@ export { header, divider, footer } from "./src/utils/format.ts";
 // resolveFormat — shared helper for commands that want format-attr / plugin-handler /
 // built-in default rendering (used by `look`; reusable by `who`, `@ps`, external plugins).
 export { resolveFormat, resolveFormatOr } from "./src/utils/resolveFormat.ts";
+// resolveGlobalFormat — two-tier lookup (#0 → enactor) for global-list commands
+// (WHO, @ps, +event/list, +mail, +bb, etc.) that aren't bound to a specific target.
+export { resolveGlobalFormat, resolveGlobalFormatOr } from "./src/utils/resolveGlobalFormat.ts";
 // Plugin lifecycle management — available to external plugins that need to read their config
 export { PluginConfigManager } from "./src/services/Config/plugin.ts";
 export type { IMiddlewareFunction } from "./src/@types/IMiddlewareFunction.ts";
