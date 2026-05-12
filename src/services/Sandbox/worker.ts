@@ -308,6 +308,21 @@ self.onmessage = async (e: MessageEvent) => {
           actorId:    sdkData.id,
           socketId:   sdkData.socketId,
         }),
+      resolveGlobalFormat: (slot: string, defaultArg: string) =>
+        request<string | null>("util:resolveGlobalFormat", {
+          slot,
+          defaultArg: defaultArg ?? "",
+          actorId:    sdkData.id,
+          socketId:   sdkData.socketId,
+        }),
+      resolveGlobalFormatOr: (slot: string, defaultArg: string, fallback: string) =>
+        request<string>("util:resolveGlobalFormatOr", {
+          slot,
+          defaultArg: defaultArg ?? "",
+          fallback:   fallback ?? "",
+          actorId:    sdkData.id,
+          socketId:   sdkData.socketId,
+        }),
       ...sdkData.util
     },
     db: {

@@ -61,6 +61,15 @@ export interface IUrsamuSDK {
     resolveFormat?(target: IDBObj, slot: string, defaultArg: string): Promise<string | null>;
     /** As `resolveFormat`, but returns `fallback` when the resolver yields null. */
     resolveFormatOr?(target: IDBObj, slot: string, defaultArg: string, fallback: string): Promise<string>;
+    /**
+     * Two-tier lookup for global-list format slots (WHO, @ps, +event/list,
+     * @mail, +bb, etc.). Consults `#0` (game-wide skin) first, falls back to
+     * the enactor (`u.me`) for per-player skin, then null. `#0` is only
+     * consulted if it exists in the DB.
+     */
+    resolveGlobalFormat?(slot: string, defaultArg: string): Promise<string | null>;
+    /** As `resolveGlobalFormat`, but returns `fallback` when the resolver yields null. */
+    resolveGlobalFormatOr?(slot: string, defaultArg: string, fallback: string): Promise<string>;
     [key: string]: unknown;
   };
   db: {

@@ -3,29 +3,8 @@ import { isStaff } from "../utils/index.ts";
 import { queue } from "../services/Queue/index.ts";
 import { dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
-import { resolveFormat } from "../utils/resolveFormat.ts";
-import { hydrate } from "../utils/evaluateLock.ts";
+import { resolveGlobalFormat } from "../utils/resolveGlobalFormat.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
-import type { FormatSlot } from "../utils/formatHandlers.ts";
-
-/**
- * Two-tier format lookup: check `#0` (root) for game-wide skin first, then
- * the enactor (`u.me`) for per-player skin. Returns null if neither yields
- * a non-null override.
- */
-async function resolveGlobalFormat(
-  u: IUrsamuSDK,
-  slot: FormatSlot,
-  defaultArg: string,
-): Promise<string | null> {
-  const root = await dbojs.queryOne({ id: "0" });
-  if (root) {
-    const rootObj = hydrate(root as unknown as Parameters<typeof hydrate>[0]);
-    const out = await resolveFormat(u, rootObj, slot, defaultArg);
-    if (out != null) return out;
-  }
-  return await resolveFormat(u, u.me, slot, defaultArg);
-}
 
 export async function execPs(u: IUrsamuSDK): Promise<void> {
       const sw  = (u.cmd.args[0] ?? "").toLowerCase().trim();
@@ -147,4 +126,3 @@ Examples:
     exec: execPs,
   });
 
-export { resolveGlobalFormat };

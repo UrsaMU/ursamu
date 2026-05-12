@@ -102,6 +102,16 @@ class LocalSandbox {
           await handleUtilResolveFormatOrMessage(msg, worker);
           return;
         }
+        if (type === "util:resolveGlobalFormat") {
+          const { handleUtilResolveGlobalFormatMessage } = await import("./sandbox-handlers-format.ts");
+          await handleUtilResolveGlobalFormatMessage(msg, worker);
+          return;
+        }
+        if (type === "util:resolveGlobalFormatOr") {
+          const { handleUtilResolveGlobalFormatOrMessage } = await import("./sandbox-handlers-format.ts");
+          await handleUtilResolveGlobalFormatOrMessage(msg, worker);
+          return;
+        }
         if (type === "trigger:attr")     { await handleTriggerMessage(msg, worker, context); return; }
         if (type.startsWith("events:")) { await handleEventsMessage(msg, worker, context); return; }
 

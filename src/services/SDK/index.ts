@@ -94,6 +94,14 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
         const { resolveFormatOr } = await import("../../utils/resolveFormat.ts");
         return await resolveFormatOr(u, target, slot as Parameters<typeof resolveFormatOr>[2], defaultArg, fallback);
       },
+      resolveGlobalFormat: async (slot: string, defaultArg: string): Promise<string | null> => {
+        const { resolveGlobalFormat } = await import("../../utils/resolveGlobalFormat.ts");
+        return await resolveGlobalFormat(u, slot as Parameters<typeof resolveGlobalFormat>[1], defaultArg);
+      },
+      resolveGlobalFormatOr: async (slot: string, defaultArg: string, fallback: string): Promise<string> => {
+        const { resolveGlobalFormatOr } = await import("../../utils/resolveGlobalFormat.ts");
+        return await resolveGlobalFormatOr(u, slot as Parameters<typeof resolveGlobalFormatOr>[1], defaultArg, fallback);
+      },
     },
 
     db: {

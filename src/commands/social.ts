@@ -1,33 +1,6 @@
 import { addCmd } from "../services/commands/cmdParser.ts";
 import type { IUrsamuSDK, IDBObj } from "../@types/UrsamuSDK.ts";
-import { resolveFormat, type FormatSlot } from "../utils/resolveFormat.ts";
-import { dbojs } from "../services/Database/database.ts";
-import { hydrate } from "../utils/evaluateLock.ts";
-
-/**
- * Two-tier lookup for global-list format slots (e.g. WHO):
- *   1. attr on #0 (game-wide skin) — wins if set.
- *   2. attr on the enactor (per-player skin).
- *   3. null → caller renders built-in default.
- *
- * Mirrors TinyMUX/PennMUSH precedent for WHO-style commands. Kept inline
- * here until a third caller appears; then promote to src/utils/.
- */
-async function resolveGlobalFormat(
-  u: IUrsamuSDK,
-  slot: FormatSlot,
-  defaultArg: string,
-): Promise<string | null> {
-  // Only consult #0 if it actually exists — otherwise plugin handlers would
-  // be invoked with a phantom target.id="0" (latent bug, M1 in TDD audit).
-  const root = await dbojs.queryOne({ id: "0" });
-  if (root) {
-    const rootObj = hydrate(root as unknown as Parameters<typeof hydrate>[0]) as IDBObj;
-    const onRoot = await resolveFormat(u, rootObj, slot, defaultArg);
-    if (onRoot != null) return onRoot;
-  }
-  return await resolveFormat(u, u.me, slot, defaultArg);
-}
+import { resolveGlobalFormat } from "../utils/resolveGlobalFormat.ts";
 
 export async function execWho(u: IUrsamuSDK): Promise<void> {
   const players = (await u.db.search({ flags: /connected/i }))
