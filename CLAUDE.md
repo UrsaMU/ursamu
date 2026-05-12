@@ -224,6 +224,13 @@ format-attr authors most often (`NAMEFORMAT`, `DESCFORMAT`, row templates) —
 write `<<%0>>` or `ROW(%0)` rather than `[%0]` when the brackets must appear
 in output.
 
+**Plugin slot names**: `FormatSlot` is an open union — plugin authors can pass
+any `"UPPERCASE"` slot name (e.g. `"MAILFORMAT"`, `"BBROWFORMAT"`,
+`"CHANNELLISTFORMAT"`) directly to `registerFormatHandler` / `resolveFormat` /
+`resolveGlobalFormat` without `as FormatSlot` casts. The eight engine-known
+literals (NAMEFORMAT, DESCFORMAT, CONFORMAT, EXITFORMAT, WHOFORMAT,
+WHOROWFORMAT, PSFORMAT, PSROWFORMAT) still get IDE autocomplete.
+
 ---
 
 ## Help file standards (non-negotiable)

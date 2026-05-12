@@ -88,19 +88,19 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
       // u is captured by closure — plugin handlers see the same SDK instance.
       resolveFormat: async (target: IDBObj, slot: string, defaultArg: string): Promise<string | null> => {
         const { resolveFormat } = await import("../../utils/resolveFormat.ts");
-        return await resolveFormat(u, target, slot as Parameters<typeof resolveFormat>[2], defaultArg);
+        return await resolveFormat(u, target, slot, defaultArg);
       },
       resolveFormatOr: async (target: IDBObj, slot: string, defaultArg: string, fallback: string): Promise<string> => {
         const { resolveFormatOr } = await import("../../utils/resolveFormat.ts");
-        return await resolveFormatOr(u, target, slot as Parameters<typeof resolveFormatOr>[2], defaultArg, fallback);
+        return await resolveFormatOr(u, target, slot, defaultArg, fallback);
       },
       resolveGlobalFormat: async (slot: string, defaultArg: string): Promise<string | null> => {
         const { resolveGlobalFormat } = await import("../../utils/resolveGlobalFormat.ts");
-        return await resolveGlobalFormat(u, slot as Parameters<typeof resolveGlobalFormat>[1], defaultArg);
+        return await resolveGlobalFormat(u, slot, defaultArg);
       },
       resolveGlobalFormatOr: async (slot: string, defaultArg: string, fallback: string): Promise<string> => {
         const { resolveGlobalFormatOr } = await import("../../utils/resolveGlobalFormat.ts");
-        return await resolveGlobalFormatOr(u, slot as Parameters<typeof resolveGlobalFormatOr>[1], defaultArg, fallback);
+        return await resolveGlobalFormatOr(u, slot, defaultArg, fallback);
       },
     },
 
