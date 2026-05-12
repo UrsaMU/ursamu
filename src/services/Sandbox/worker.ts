@@ -291,6 +291,23 @@ self.onmessage = async (e: MessageEvent) => {
         };
         return request<string>("util:parseDesc", { desc, actor: ser(actor), target: ser(target) });
       },
+      resolveFormat: (target: import("../../@types/UrsamuSDK.ts").IDBObj, slot: string, defaultArg: string) =>
+        request<string | null>("util:resolveFormat", {
+          target:     { id: target.id },
+          slot,
+          defaultArg: defaultArg ?? "",
+          actorId:    sdkData.id,
+          socketId:   sdkData.socketId,
+        }),
+      resolveFormatOr: (target: import("../../@types/UrsamuSDK.ts").IDBObj, slot: string, defaultArg: string, fallback: string) =>
+        request<string>("util:resolveFormatOr", {
+          target:     { id: target.id },
+          slot,
+          defaultArg: defaultArg ?? "",
+          fallback:   fallback ?? "",
+          actorId:    sdkData.id,
+          socketId:   sdkData.socketId,
+        }),
       ...sdkData.util
     },
     db: {

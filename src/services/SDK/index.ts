@@ -85,6 +85,15 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
         const { parseDesc: parseFn } = await import("../../utils/parseDesc.ts");
         return parseFn(desc, actor, target);
       },
+      // u is captured by closure — plugin handlers see the same SDK instance.
+      resolveFormat: async (target: IDBObj, slot: string, defaultArg: string): Promise<string | null> => {
+        const { resolveFormat } = await import("../../utils/resolveFormat.ts");
+        return await resolveFormat(u, target, slot as Parameters<typeof resolveFormat>[2], defaultArg);
+      },
+      resolveFormatOr: async (target: IDBObj, slot: string, defaultArg: string, fallback: string): Promise<string> => {
+        const { resolveFormatOr } = await import("../../utils/resolveFormat.ts");
+        return await resolveFormatOr(u, target, slot as Parameters<typeof resolveFormatOr>[2], defaultArg, fallback);
+      },
     },
 
     db: {
