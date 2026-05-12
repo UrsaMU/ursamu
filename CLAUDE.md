@@ -213,6 +213,19 @@ Use `u.util.center(title, 78, "=")` for section headers.
 
 ---
 
+## Escaping `[` and `]` in softcode attributes
+
+Square brackets are reserved by the TinyMUX evaluator as function-call
+delimiters (`[func(args)]`). Storing literal `[` or `]` inside an attribute
+value will be parsed as a function call and either error or produce surprising
+output. To embed literal brackets, use `lit([)` / `lit(])`, or `chr(91)` /
+`chr(93)`, or pick a different delimiter such as `<>` or `<<…>>`. This bites
+format-attr authors most often (`NAMEFORMAT`, `DESCFORMAT`, row templates) —
+write `<<%0>>` or `ROW(%0)` rather than `[%0]` when the brackets must appear
+in output.
+
+---
+
 ## Help file standards (non-negotiable)
 
 Help files live in `src/plugins/<name>/help/*.md` and are served in-game by the help-plugin FileProvider.
