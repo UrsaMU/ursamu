@@ -433,7 +433,7 @@ export class SoftcodeService {
   }
 }
 
-export const softcodeService = SoftcodeService.getInstance();
+export const softcodeService: SoftcodeService = SoftcodeService.getInstance();
 
 // Re-export types consumed by other modules.
 export type { EvalContext, DbAccessor, OutputAccessor } from "./context.ts";
