@@ -19,7 +19,14 @@ export type FormatSlot =
   | "EXITFORMAT"
   | "WHOFORMAT"
   | "WHOROWFORMAT"
-  | "PSFORMAT" | "PSROWFORMAT";
+  | "PSFORMAT"
+  | "PSROWFORMAT"
+  // Open the union so plugin authors can use their own UPPERCASE slot names
+  // (MAILFORMAT, BBROWFORMAT, CHANNELLISTFORMAT, ...) without casting. The
+  // `& {}` is intentional — it keeps IDE autocomplete on the known literals
+  // above; using bare `string` would collapse the union and lose the hints.
+  // deno-lint-ignore ban-types
+  | (string & {});
 
 /**
  * Plugin handler signature.

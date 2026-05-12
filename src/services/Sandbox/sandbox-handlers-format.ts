@@ -10,7 +10,6 @@
  * could not consult format-attribute overrides.
  */
 import type { IDBObj, IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
-import type { FormatSlot } from "../../utils/formatHandlers.ts";
 
 type Msg = Record<string, unknown>;
 
@@ -75,7 +74,7 @@ export async function handleUtilResolveFormatMessage(
   if (!tarRaw) { respond(worker, msgId, null); return; }
   const target = hydrate(tarRaw as unknown as Parameters<typeof hydrate>[0]) as IDBObj;
 
-  const out = await resolveFormat(u, target, m.slot as FormatSlot, m.defaultArg ?? "");
+  const out = await resolveFormat(u, target, m.slot, m.defaultArg ?? "");
   respond(worker, msgId, out);
 }
 
@@ -100,7 +99,7 @@ export async function handleUtilResolveFormatOrMessage(
   const target = hydrate(tarRaw as unknown as Parameters<typeof hydrate>[0]) as IDBObj;
 
   const out = await resolveFormatOr(
-    u, target, m.slot as FormatSlot, m.defaultArg ?? "", m.fallback ?? "",
+    u, target, m.slot, m.defaultArg ?? "", m.fallback ?? "",
   );
   respond(worker, msgId, out);
 }
@@ -115,7 +114,7 @@ export async function handleUtilResolveGlobalFormatMessage(
 
   const { resolveGlobalFormat } = await import("../../utils/resolveGlobalFormat.ts");
   const u = await buildBoundSDK(m.actorId, m.socketId);
-  const out = await resolveGlobalFormat(u, m.slot as FormatSlot, m.defaultArg ?? "");
+  const out = await resolveGlobalFormat(u, m.slot, m.defaultArg ?? "");
   respond(worker, msgId, out);
 }
 
@@ -130,7 +129,7 @@ export async function handleUtilResolveGlobalFormatOrMessage(
   const { resolveGlobalFormatOr } = await import("../../utils/resolveGlobalFormat.ts");
   const u = await buildBoundSDK(m.actorId, m.socketId);
   const out = await resolveGlobalFormatOr(
-    u, m.slot as FormatSlot, m.defaultArg ?? "", m.fallback ?? "",
+    u, m.slot, m.defaultArg ?? "", m.fallback ?? "",
   );
   respond(worker, msgId, out);
 }
