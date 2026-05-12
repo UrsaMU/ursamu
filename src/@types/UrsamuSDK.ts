@@ -49,6 +49,18 @@ export interface IUrsamuSDK {
     sprintf(format: string, ...args: unknown[]): string;
     stripSubs(str: string): string;
     parseDesc?(desc: string, actor: IDBObj, target: IDBObj): Promise<string>;
+    /**
+     * Resolve a format-attribute slot on `target`. Priority chain:
+     *   1. softcode attribute on target (evaluated via softcodeService)
+     *   2. plugin-registered handler for the slot
+     *   3. null → caller falls back to its own built-in default rendering
+     *
+     * Available in both native and sandbox contexts. `defaultArg` is exposed
+     * to softcode as `%0`.
+     */
+    resolveFormat?(target: IDBObj, slot: string, defaultArg: string): Promise<string | null>;
+    /** As `resolveFormat`, but returns `fallback` when the resolver yields null. */
+    resolveFormatOr?(target: IDBObj, slot: string, defaultArg: string, fallback: string): Promise<string>;
     [key: string]: unknown;
   };
   db: {

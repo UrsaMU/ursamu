@@ -92,6 +92,16 @@ class LocalSandbox {
         if (type === "flags:set")        { await handleFlagsMessage(msg, worker, context); return; }
         if (type === "util:target")      { await handleUtilTargetMessage(msg, worker, context); return; }
         if (type === "util:parseDesc")   { await handleUtilParseDescMessage(msg, worker); return; }
+        if (type === "util:resolveFormat") {
+          const { handleUtilResolveFormatMessage } = await import("./sandbox-handlers-format.ts");
+          await handleUtilResolveFormatMessage(msg, worker);
+          return;
+        }
+        if (type === "util:resolveFormatOr") {
+          const { handleUtilResolveFormatOrMessage } = await import("./sandbox-handlers-format.ts");
+          await handleUtilResolveFormatOrMessage(msg, worker);
+          return;
+        }
         if (type === "trigger:attr")     { await handleTriggerMessage(msg, worker, context); return; }
         if (type.startsWith("events:")) { await handleEventsMessage(msg, worker, context); return; }
 
