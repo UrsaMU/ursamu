@@ -4,6 +4,7 @@ import type { EvalContext } from "../context.ts";
 import type { UrsaEvalContext } from "../ursamu-context.ts";
 import { makeSubCtx, toLibCtx } from "../ursamu-context.ts";
 import { int, splitList as split, joinList as join } from "./helpers.ts";
+import { random as rngRandom } from "./rng.ts";
 
 // ── basic list access ─────────────────────────────────────────────────────
 
@@ -153,7 +154,7 @@ register("lrand", async (a) => {
   const lo = int(a[0]); const hi = int(a[1]); const n = int(a[2] ?? "1");
   if (hi < lo) return "";
   const out: string[] = [];
-  for (let i = 0; i < n; i++) out.push(String(lo + Math.floor(Math.random() * (hi - lo + 1))));
+  for (let i = 0; i < n; i++) out.push(String(lo + Math.floor(rngRandom() * (hi - lo + 1))));
   return join(out, a[3]);
 });
 
