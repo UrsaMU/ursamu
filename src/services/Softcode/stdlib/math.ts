@@ -132,17 +132,39 @@ register("baseconv", async (a) => {
 
 // ── distance ─────────────────────────────────────────────────────────────
 
-register("dist2d", async (a) => {
-  const dx = num(a[0]) - num(a[2]);
-  const dy = num(a[1]) - num(a[3]);
-  return fmt(Math.sqrt(dx*dx + dy*dy));
-});
-register("dist3d", async (a) => {
-  const dx = num(a[0]) - num(a[3]);
-  const dy = num(a[1]) - num(a[4]);
-  const dz = num(a[2]) - num(a[5]);
-  return fmt(Math.sqrt(dx*dx + dy*dy + dz*dz));
-});
+export function dist2d(x1: number, y1: number, x2: number, y2: number): number {
+  const dx = x1 - x2, dy = y1 - y2;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+export function dist3d(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number): number {
+  const dx = x1 - x2, dy = y1 - y2, dz = z1 - z2;
+  return Math.sqrt(dx*dx + dy*dy + dz*dz);
+}
+export function distSq2d(x1: number, y1: number, x2: number, y2: number): number {
+  const dx = x1 - x2, dy = y1 - y2;
+  return dx*dx + dy*dy;
+}
+export function distSq3d(x1: number, y1: number, z1: number, x2: number, y2: number, z2: number): number {
+  const dx = x1 - x2, dy = y1 - y2, dz = z1 - z2;
+  return dx*dx + dy*dy + dz*dz;
+}
+export function manhattan(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+export function chebyshev(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.max(Math.abs(x1 - x2), Math.abs(y1 - y2));
+}
+export function angle2d(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.atan2(y2 - y1, x2 - x1);
+}
+// bearing — MUSH convention: 0 = N (+Y), clockwise, degrees in [0, 360).
+export function bearing(x1: number, y1: number, x2: number, y2: number): number {
+  const deg = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  return ((90 - deg) % 360 + 360) % 360;
+}
+
+register("dist2d", async (a) => fmt(dist2d(num(a[0]), num(a[1]), num(a[2]), num(a[3]))));
+register("dist3d", async (a) => fmt(dist3d(num(a[0]), num(a[1]), num(a[2]), num(a[3]), num(a[4]), num(a[5]))));
 
 // ── vector ────────────────────────────────────────────────────────────────
 
@@ -215,76 +237,67 @@ register("asinh",  async (a) => fmt(Math.asinh(num(a[0]))));
 register("acosh",  async (a) => { const v = num(a[0]); return v < 1 ? "#-1 ARGUMENT OUT OF RANGE" : fmt(Math.acosh(v)); });
 register("atanh",  async (a) => { const v = num(a[0]); return v <= -1 || v >= 1 ? "#-1 ARGUMENT OUT OF RANGE" : fmt(Math.atanh(v)); });
 
-register("clamp", async (a) => {
-  const x  = num(a[0]);
-  const b1 = num(a[1]);
-  const b2 = num(a[2]);
-  const lo = Math.min(b1, b2);
-  const hi = Math.max(b1, b2);
-  return fmt(Math.min(hi, Math.max(lo, x)));
-});
+// ── interpolation & clamp ─────────────────────────────────────────────────
 
-// ── interpolation ─────────────────────────────────────────────────────────
+export function clamp(x: number, lo: number, hi: number): number {
+  const a = Math.min(lo, hi), b = Math.max(lo, hi);
+  return Math.min(b, Math.max(a, x));
+}
+export function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+/** Returns 0 when a === b (degenerate) rather than NaN/Infinity. */
+export function inverseLerp(a: number, b: number, value: number): number {
+  if (a === b) return 0;
+  return (value - a) / (b - a);
+}
+export function remap(x: number, inMin: number, inMax: number, outMin: number, outMax: number): number {
+  if (inMin === inMax) return outMin;
+  return outMin + ((x - inMin) * (outMax - outMin)) / (inMax - inMin);
+}
+export function smoothstep(edge0: number, edge1: number, x: number): number {
+  if (edge0 === edge1) return 0;
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+export function smootherstep(edge0: number, edge1: number, x: number): number {
+  if (edge0 === edge1) return 0;
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * t * (t * (t * 6 - 15) + 10);
+}
 
-register("lerp", async (a) => {
-  const x = num(a[0]), y = num(a[1]), t = num(a[2]);
-  return fmt(x + (y - x) * t);
-});
+register("clamp", async (a) => fmt(clamp(num(a[0]), num(a[1]), num(a[2]))));
+
+register("lerp", async (a) => fmt(lerp(num(a[0]), num(a[1]), num(a[2]))));
 register("inverselerp", async (a) => {
-  const x = num(a[0]), y = num(a[1]), v = num(a[2]);
+  const x = num(a[0]), y = num(a[1]);
   if (x === y) return "#-1 DIVISION BY ZERO";
-  return fmt((v - x) / (y - x));
+  return fmt(inverseLerp(x, y, num(a[2])));
 });
 register("remap", async (a) => {
-  const x = num(a[0]), iMin = num(a[1]), iMax = num(a[2]);
-  const oMin = num(a[3]), oMax = num(a[4]);
+  const iMin = num(a[1]), iMax = num(a[2]);
   if (iMin === iMax) return "#-1 DIVISION BY ZERO";
-  return fmt(oMin + ((x - iMin) * (oMax - oMin)) / (iMax - iMin));
+  return fmt(remap(num(a[0]), iMin, iMax, num(a[3]), num(a[4])));
 });
 register("smoothstep", async (a) => {
-  const e0 = num(a[0]), e1 = num(a[1]), x = num(a[2]);
+  const e0 = num(a[0]), e1 = num(a[1]);
   if (e0 === e1) return "#-1 DIVISION BY ZERO";
-  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
-  return fmt(t * t * (3 - 2 * t));
+  return fmt(smoothstep(e0, e1, num(a[2])));
 });
 register("smootherstep", async (a) => {
-  const e0 = num(a[0]), e1 = num(a[1]), x = num(a[2]);
+  const e0 = num(a[0]), e1 = num(a[1]);
   if (e0 === e1) return "#-1 DIVISION BY ZERO";
-  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
-  return fmt(t * t * t * (t * (t * 6 - 15) + 10));
+  return fmt(smootherstep(e0, e1, num(a[2])));
 });
 
 // ── spatial scalars ───────────────────────────────────────────────────────
 
-register("distsq2d", async (a) => {
-  const dx = num(a[0]) - num(a[2]);
-  const dy = num(a[1]) - num(a[3]);
-  return fmt(dx*dx + dy*dy);
-});
-register("distsq3d", async (a) => {
-  const dx = num(a[0]) - num(a[3]);
-  const dy = num(a[1]) - num(a[4]);
-  const dz = num(a[2]) - num(a[5]);
-  return fmt(dx*dx + dy*dy + dz*dz);
-});
-register("manhattan", async (a) => {
-  return fmt(Math.abs(num(a[0]) - num(a[2])) + Math.abs(num(a[1]) - num(a[3])));
-});
-register("chebyshev", async (a) => {
-  return fmt(Math.max(Math.abs(num(a[0]) - num(a[2])), Math.abs(num(a[1]) - num(a[3]))));
-});
-register("angle2d", async (a) => {
-  const dx = num(a[2]) - num(a[0]);
-  const dy = num(a[3]) - num(a[1]);
-  return fmt(Math.atan2(dy, dx));
-});
-// bearing — MUSH convention: 0 = N (+Y), clockwise, degrees in [0, 360).
-register("bearing", async (a) => {
-  const dx = num(a[2]) - num(a[0]);
-  const dy = num(a[3]) - num(a[1]);
-  const deg = Math.atan2(dy, dx) * 180 / Math.PI;
-  return fmt(((90 - deg) % 360 + 360) % 360);
-});
+register("distsq2d", async (a) => fmt(distSq2d(num(a[0]), num(a[1]), num(a[2]), num(a[3]))));
+register("distsq3d", async (a) => fmt(distSq3d(num(a[0]), num(a[1]), num(a[2]), num(a[3]), num(a[4]), num(a[5]))));
+register("manhattan", async (a) => fmt(manhattan(num(a[0]), num(a[1]), num(a[2]), num(a[3]))));
+register("chebyshev", async (a) => fmt(chebyshev(num(a[0]), num(a[1]), num(a[2]), num(a[3]))));
+register("angle2d", async (a) => fmt(angle2d(num(a[0]), num(a[1]), num(a[2]), num(a[3]))));
+register("bearing", async (a) => fmt(bearing(num(a[0]), num(a[1]), num(a[2]), num(a[3]))));
 
 // ── seedable RNG ──────────────────────────────────────────────────────────
 //
@@ -312,46 +325,80 @@ register("randseed", async (a) => {
 
 const ARGMISS = "#-1 ARGUMENT MISSING";
 
+export type Vec = readonly number[];
+
+export function vsize(v: Vec): number {
+  let s = 0;
+  for (const x of v) s += x * x;
+  return Math.sqrt(s);
+}
+export function vsizeSq(v: Vec): number {
+  let s = 0;
+  for (const x of v) s += x * x;
+  return s;
+}
+export function vdistance(a: Vec, b: Vec): number {
+  const n = Math.max(a.length, b.length);
+  let s = 0;
+  for (let i = 0; i < n; i++) {
+    const d = (a[i] ?? 0) - (b[i] ?? 0);
+    s += d * d;
+  }
+  return Math.sqrt(s);
+}
+export function vdistanceSq(a: Vec, b: Vec): number {
+  const n = Math.max(a.length, b.length);
+  let s = 0;
+  for (let i = 0; i < n; i++) {
+    const d = (a[i] ?? 0) - (b[i] ?? 0);
+    s += d * d;
+  }
+  return s;
+}
+export function vlerp(a: Vec, b: Vec, t: number): number[] {
+  const n = Math.max(a.length, b.length);
+  const out: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const av = a[i] ?? 0, bv = b[i] ?? 0;
+    out.push(av + (bv - av) * t);
+  }
+  return out;
+}
+export function vclamp(v: Vec, lo: number, hi: number): number[] {
+  const a = Math.min(lo, hi), b = Math.max(lo, hi);
+  return v.map(x => Math.min(b, Math.max(a, x)));
+}
+
 register("vsize", async (a) => {
   if (!a[0]) return ARGMISS;
-  const v = a[0].split(" ").map(num);
-  return fmt(Math.sqrt(v.reduce((s,x) => s+x*x, 0)));
+  return fmt(vsize(a[0].split(" ").map(num)));
 });
 register("vsizesq", async (a) => {
   if (!a[0]) return ARGMISS;
-  const v = a[0].split(" ").map(num);
-  return fmt(v.reduce((s,x) => s+x*x, 0));
+  return fmt(vsizeSq(a[0].split(" ").map(num)));
 });
 register("vdistance", async (a) => {
   if (!a[0] || !a[1]) return ARGMISS;
-  const [x1,y1,z1] = a[0].split(" ").map(num);
-  const [x2,y2,z2] = a[1].split(" ").map(num);
-  const dx = x1-x2, dy = y1-y2, dz = (z1||0)-(z2||0);
-  return fmt(Math.sqrt(dx*dx + dy*dy + dz*dz));
+  // Legacy softcode behavior: treat 2D vectors as having z=0 (pad to 3D).
+  const va = a[0].split(" ").map(num); while (va.length < 3) va.push(0);
+  const vb = a[1].split(" ").map(num); while (vb.length < 3) vb.push(0);
+  return fmt(vdistance(va, vb));
 });
 register("vdistsquared", async (a) => {
   if (!a[0] || !a[1]) return ARGMISS;
-  const [x1,y1,z1] = a[0].split(" ").map(num);
-  const [x2,y2,z2] = a[1].split(" ").map(num);
-  const dx = x1-x2, dy = y1-y2, dz = (z1||0)-(z2||0);
-  return fmt(dx*dx + dy*dy + dz*dz);
+  const va = a[0].split(" ").map(num); while (va.length < 3) va.push(0);
+  const vb = a[1].split(" ").map(num); while (vb.length < 3) vb.push(0);
+  return fmt(vdistanceSq(va, vb));
 });
 register("vlerp", async (a) => {
   if (!a[0] || !a[1] || a[2] === undefined) return ARGMISS;
   const va = a[0].split(" ").map(num);
   const vb = a[1].split(" ").map(num);
-  const t  = num(a[2]);
-  const n  = Math.max(va.length, vb.length);
-  const out: string[] = [];
-  for (let i = 0; i < n; i++) out.push(fmt((va[i] ?? 0) + ((vb[i] ?? 0) - (va[i] ?? 0)) * t));
-  return out.join(" ");
+  return vlerp(va, vb, num(a[2])).map(fmt).join(" ");
 });
 register("vclamp", async (a) => {
   if (!a[0] || a[1] === undefined || a[2] === undefined) return ARGMISS;
-  const v  = a[0].split(" ").map(num);
-  const b1 = num(a[1]), b2 = num(a[2]);
-  const lo = Math.min(b1, b2), hi = Math.max(b1, b2);
-  return v.map(x => fmt(Math.min(hi, Math.max(lo, x)))).join(" ");
+  return vclamp(a[0].split(" ").map(num), num(a[1]), num(a[2])).map(fmt).join(" ");
 });
 
 register("bittype",    async () => "0");
