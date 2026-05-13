@@ -296,27 +296,48 @@ register("randseed", async (a) => {
     const s = rngGetSeed();
     return s === null ? "" : String(s);
   }
+  // L3 audit fix — explicit "clear" arg reverts to Math.random() fallback.
+  if (a[0].trim().toLowerCase() === "clear") {
+    rngSetSeed(null);
+    return "";
+  }
   rngSetSeed(int(a[0]));
   return String(int(a[0]));
 });
 
 // ── Unreal-style vector aliases ───────────────────────────────────────────
+// All vector aliases require their args to be non-empty space-separated
+// numeric vectors. Missing or empty args return the MUSH "#-1 ARGUMENT
+// MISSING" string instead of throwing (M2 audit fix).
 
-register("vsize",    async (a) => { const v = a[0].split(" ").map(num); return fmt(Math.sqrt(v.reduce((s,x) => s+x*x, 0))); });
-register("vsizesq",  async (a) => { const v = a[0].split(" ").map(num); return fmt(v.reduce((s,x) => s+x*x, 0)); });
+const ARGMISS = "#-1 ARGUMENT MISSING";
+
+register("vsize", async (a) => {
+  if (!a[0]) return ARGMISS;
+  const v = a[0].split(" ").map(num);
+  return fmt(Math.sqrt(v.reduce((s,x) => s+x*x, 0)));
+});
+register("vsizesq", async (a) => {
+  if (!a[0]) return ARGMISS;
+  const v = a[0].split(" ").map(num);
+  return fmt(v.reduce((s,x) => s+x*x, 0));
+});
 register("vdistance", async (a) => {
+  if (!a[0] || !a[1]) return ARGMISS;
   const [x1,y1,z1] = a[0].split(" ").map(num);
   const [x2,y2,z2] = a[1].split(" ").map(num);
   const dx = x1-x2, dy = y1-y2, dz = (z1||0)-(z2||0);
   return fmt(Math.sqrt(dx*dx + dy*dy + dz*dz));
 });
 register("vdistsquared", async (a) => {
+  if (!a[0] || !a[1]) return ARGMISS;
   const [x1,y1,z1] = a[0].split(" ").map(num);
   const [x2,y2,z2] = a[1].split(" ").map(num);
   const dx = x1-x2, dy = y1-y2, dz = (z1||0)-(z2||0);
   return fmt(dx*dx + dy*dy + dz*dz);
 });
 register("vlerp", async (a) => {
+  if (!a[0] || !a[1] || a[2] === undefined) return ARGMISS;
   const va = a[0].split(" ").map(num);
   const vb = a[1].split(" ").map(num);
   const t  = num(a[2]);
@@ -326,6 +347,7 @@ register("vlerp", async (a) => {
   return out.join(" ");
 });
 register("vclamp", async (a) => {
+  if (!a[0] || a[1] === undefined || a[2] === undefined) return ARGMISS;
   const v  = a[0].split(" ").map(num);
   const b1 = num(a[1]), b2 = num(a[2]);
   const lo = Math.min(b1, b2), hi = Math.max(b1, b2);

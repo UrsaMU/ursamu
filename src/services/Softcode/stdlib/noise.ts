@@ -224,10 +224,14 @@ function ridged2(x: number, y: number, octaves: number, persistence: number): nu
 // ── registrations ─────────────────────────────────────────────────────────
 
 register("noiseseed", async (a) => {
-  const seed = num(a[0]);
-  const prev = _seedInitialized ? _noiseSeed : "";
-  setSeed(seed);
-  return prev === "" ? "" : fmt(prev as number);
+  // No-arg or empty: read-only. Returns current seed, or "" if unseeded.
+  // M1 audit fix — previously coerced to setSeed(NaN) → seed 0 silently.
+  if (a[0] === undefined || a[0].trim() === "") {
+    return _seedInitialized ? fmt(_noiseSeed) : "";
+  }
+  const prev = _seedInitialized ? _noiseSeed : null;
+  setSeed(num(a[0]));
+  return prev === null ? "" : fmt(prev);
 });
 
 register("perlin1", async (a) => {
