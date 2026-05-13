@@ -1,6 +1,7 @@
 // deno-lint-ignore-file require-await
 import { register } from "./registry.ts";
 import { num, int, fmt } from "./helpers.ts";
+import { random as rngRandom, setSeed as rngSetSeed, getSeed as rngGetSeed } from "./rng.ts";
 
 // ── arithmetic ────────────────────────────────────────────────────────────
 
@@ -81,10 +82,13 @@ register("atan2",async (a) => fmt(Math.atan2(num(a[0]), num(a[1]))));
 
 // ── random ────────────────────────────────────────────────────────────────
 
+// rand() draws from the shared stdlib RNG (see ./rng.ts). When randseed()
+// has been called, results are deterministic; otherwise it falls through to
+// Math.random() for backwards compatibility.
 register("rand",  async (a) => {
   const n = int(a[0]);
   if (n <= 0) return "#-1 ARGUMENT MUST BE POSITIVE INTEGER";
-  return fmt(Math.floor(Math.random() * n));
+  return fmt(Math.floor(rngRandom() * n));
 });
 
 // ── comparison ────────────────────────────────────────────────────────────
@@ -194,6 +198,138 @@ register("distribute", async (a) => {
   const base  = Math.floor(total / slots);
   const extra = total % slots;
   return Array.from({ length: slots }, (_, i) => base + (i < extra ? 1 : 0)).join(delim);
+});
+
+// ── extended math (v2.5.0) ────────────────────────────────────────────────
+
+register("hypot",  async (a) => fmt(Math.hypot(...a.map(x => parseFloat(x) || 0))));
+register("cbrt",   async (a) => fmt(Math.cbrt(num(a[0]))));
+register("log2",   async (a) => { const v = num(a[0]); return v <= 0 ? "#-1 ARGUMENT OUT OF RANGE" : fmt(Math.log2(v)); });
+register("log10",  async (a) => { const v = num(a[0]); return v <= 0 ? "#-1 ARGUMENT OUT OF RANGE" : fmt(Math.log10(v)); });
+register("log1p",  async (a) => { const v = num(a[0]); return v <= -1 ? "#-1 ARGUMENT OUT OF RANGE" : fmt(Math.log1p(v)); });
+register("expm1",  async (a) => fmt(Math.expm1(num(a[0]))));
+register("sinh",   async (a) => fmt(Math.sinh(num(a[0]))));
+register("cosh",   async (a) => fmt(Math.cosh(num(a[0]))));
+register("tanh",   async (a) => fmt(Math.tanh(num(a[0]))));
+register("asinh",  async (a) => fmt(Math.asinh(num(a[0]))));
+register("acosh",  async (a) => { const v = num(a[0]); return v < 1 ? "#-1 ARGUMENT OUT OF RANGE" : fmt(Math.acosh(v)); });
+register("atanh",  async (a) => { const v = num(a[0]); return v <= -1 || v >= 1 ? "#-1 ARGUMENT OUT OF RANGE" : fmt(Math.atanh(v)); });
+
+register("clamp", async (a) => {
+  const x  = num(a[0]);
+  const b1 = num(a[1]);
+  const b2 = num(a[2]);
+  const lo = Math.min(b1, b2);
+  const hi = Math.max(b1, b2);
+  return fmt(Math.min(hi, Math.max(lo, x)));
+});
+
+// ── interpolation ─────────────────────────────────────────────────────────
+
+register("lerp", async (a) => {
+  const x = num(a[0]), y = num(a[1]), t = num(a[2]);
+  return fmt(x + (y - x) * t);
+});
+register("inverselerp", async (a) => {
+  const x = num(a[0]), y = num(a[1]), v = num(a[2]);
+  if (x === y) return "#-1 DIVISION BY ZERO";
+  return fmt((v - x) / (y - x));
+});
+register("remap", async (a) => {
+  const x = num(a[0]), iMin = num(a[1]), iMax = num(a[2]);
+  const oMin = num(a[3]), oMax = num(a[4]);
+  if (iMin === iMax) return "#-1 DIVISION BY ZERO";
+  return fmt(oMin + ((x - iMin) * (oMax - oMin)) / (iMax - iMin));
+});
+register("smoothstep", async (a) => {
+  const e0 = num(a[0]), e1 = num(a[1]), x = num(a[2]);
+  if (e0 === e1) return "#-1 DIVISION BY ZERO";
+  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+  return fmt(t * t * (3 - 2 * t));
+});
+register("smootherstep", async (a) => {
+  const e0 = num(a[0]), e1 = num(a[1]), x = num(a[2]);
+  if (e0 === e1) return "#-1 DIVISION BY ZERO";
+  const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0)));
+  return fmt(t * t * t * (t * (t * 6 - 15) + 10));
+});
+
+// ── spatial scalars ───────────────────────────────────────────────────────
+
+register("distsq2d", async (a) => {
+  const dx = num(a[0]) - num(a[2]);
+  const dy = num(a[1]) - num(a[3]);
+  return fmt(dx*dx + dy*dy);
+});
+register("distsq3d", async (a) => {
+  const dx = num(a[0]) - num(a[3]);
+  const dy = num(a[1]) - num(a[4]);
+  const dz = num(a[2]) - num(a[5]);
+  return fmt(dx*dx + dy*dy + dz*dz);
+});
+register("manhattan", async (a) => {
+  return fmt(Math.abs(num(a[0]) - num(a[2])) + Math.abs(num(a[1]) - num(a[3])));
+});
+register("chebyshev", async (a) => {
+  return fmt(Math.max(Math.abs(num(a[0]) - num(a[2])), Math.abs(num(a[1]) - num(a[3]))));
+});
+register("angle2d", async (a) => {
+  const dx = num(a[2]) - num(a[0]);
+  const dy = num(a[3]) - num(a[1]);
+  return fmt(Math.atan2(dy, dx));
+});
+// bearing — MUSH convention: 0 = N (+Y), clockwise, degrees in [0, 360).
+register("bearing", async (a) => {
+  const dx = num(a[2]) - num(a[0]);
+  const dy = num(a[3]) - num(a[1]);
+  const deg = Math.atan2(dy, dx) * 180 / Math.PI;
+  return fmt(((90 - deg) % 360 + 360) % 360);
+});
+
+// ── seedable RNG ──────────────────────────────────────────────────────────
+//
+// randseed() — get/set the shared RNG seed. Once set, rand() and lrand()
+// produce deterministic sequences. Call with no args to read the seed,
+// or pass an integer to (re)seed. There is no way to unseed via softcode.
+register("randseed", async (a) => {
+  if (a[0] === undefined || a[0].trim() === "") {
+    const s = rngGetSeed();
+    return s === null ? "" : String(s);
+  }
+  rngSetSeed(int(a[0]));
+  return String(int(a[0]));
+});
+
+// ── Unreal-style vector aliases ───────────────────────────────────────────
+
+register("vsize",    async (a) => { const v = a[0].split(" ").map(num); return fmt(Math.sqrt(v.reduce((s,x) => s+x*x, 0))); });
+register("vsizesq",  async (a) => { const v = a[0].split(" ").map(num); return fmt(v.reduce((s,x) => s+x*x, 0)); });
+register("vdistance", async (a) => {
+  const [x1,y1,z1] = a[0].split(" ").map(num);
+  const [x2,y2,z2] = a[1].split(" ").map(num);
+  const dx = x1-x2, dy = y1-y2, dz = (z1||0)-(z2||0);
+  return fmt(Math.sqrt(dx*dx + dy*dy + dz*dz));
+});
+register("vdistsquared", async (a) => {
+  const [x1,y1,z1] = a[0].split(" ").map(num);
+  const [x2,y2,z2] = a[1].split(" ").map(num);
+  const dx = x1-x2, dy = y1-y2, dz = (z1||0)-(z2||0);
+  return fmt(dx*dx + dy*dy + dz*dz);
+});
+register("vlerp", async (a) => {
+  const va = a[0].split(" ").map(num);
+  const vb = a[1].split(" ").map(num);
+  const t  = num(a[2]);
+  const n  = Math.max(va.length, vb.length);
+  const out: string[] = [];
+  for (let i = 0; i < n; i++) out.push(fmt((va[i] ?? 0) + ((vb[i] ?? 0) - (va[i] ?? 0)) * t));
+  return out.join(" ");
+});
+register("vclamp", async (a) => {
+  const v  = a[0].split(" ").map(num);
+  const b1 = num(a[1]), b2 = num(a[2]);
+  const lo = Math.min(b1, b2), hi = Math.max(b1, b2);
+  return v.map(x => fmt(Math.min(hi, Math.max(lo, x)))).join(" ");
 });
 
 register("bittype",    async () => "0");
