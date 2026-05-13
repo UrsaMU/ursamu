@@ -14,7 +14,7 @@ let _noiseSeed = 0;
 let _seedInitialized = false;
 const PERM = new Uint8Array(512);
 
-function setSeed(seed: number): void {
+export function seedNoise(seed: number): void {
   // FNV-1a hash → seeded shuffle of 0..255 into PERM
   let h = 2166136261 >>> 0;
   const bytes = new Uint8Array(new Float64Array([seed]).buffer);
@@ -39,16 +39,16 @@ function setSeed(seed: number): void {
 }
 
 function ensureSeed(): void {
-  if (!_seedInitialized) setSeed(0);
+  if (!_seedInitialized) seedNoise(0);
 }
 
 function withSeed<T>(args: string[], idx: number, fn: () => T): T {
   if (args[idx] !== undefined && args[idx] !== "") {
     const prev = _noiseSeed;
     const prevInit = _seedInitialized;
-    setSeed(num(args[idx]));
+    seedNoise(num(args[idx]));
     try { return fn(); } finally {
-      if (prevInit) setSeed(prev); else { _seedInitialized = false; }
+      if (prevInit) seedNoise(prev); else { _seedInitialized = false; }
     }
   }
   ensureSeed();
@@ -79,7 +79,8 @@ function grad3(hash: number, x: number, y: number, z: number): number {
 }
 
 // ── perlin ────────────────────────────────────────────────────────────────
-function perlin1(x: number): number {
+export function perlin1(x: number): number {
+  ensureSeed();
   const xi = Math.floor(x) & 255;
   const xf = x - Math.floor(x);
   const u  = fade(xf);
@@ -88,7 +89,8 @@ function perlin1(x: number): number {
   return lerp(u, grad1(a, xf), grad1(b, xf - 1));
 }
 
-function perlin2(x: number, y: number): number {
+export function perlin2(x: number, y: number): number {
+  ensureSeed();
   const xi = Math.floor(x) & 255;
   const yi = Math.floor(y) & 255;
   const xf = x - Math.floor(x);
@@ -105,7 +107,8 @@ function perlin2(x: number, y: number): number {
   return lerp(v, x1, x2) / 3;
 }
 
-function perlin3(x: number, y: number, z: number): number {
+export function perlin3(x: number, y: number, z: number): number {
+  ensureSeed();
   const xi = Math.floor(x) & 255;
   const yi = Math.floor(y) & 255;
   const zi = Math.floor(z) & 255;
@@ -136,7 +139,8 @@ function perlin3(x: number, y: number, z: number): number {
 const F2 = 0.5 * (Math.sqrt(3) - 1);
 const G2 = (3 - Math.sqrt(3)) / 6;
 
-function simplex2(xin: number, yin: number): number {
+export function simplex2(xin: number, yin: number): number {
+  ensureSeed();
   const s = (xin + yin) * F2;
   const i = Math.floor(xin + s);
   const j = Math.floor(yin + s);
@@ -169,7 +173,8 @@ function simplex2(xin: number, yin: number): number {
 }
 
 // ── worley 2D (cellular F1 distance) ──────────────────────────────────────
-function worley2(x: number, y: number): number {
+export function worley2(x: number, y: number): number {
+  ensureSeed();
   const xi = Math.floor(x);
   const yi = Math.floor(y);
   let min = Infinity;
@@ -192,7 +197,7 @@ function worley2(x: number, y: number): number {
 }
 
 // ── fbm / ridged ──────────────────────────────────────────────────────────
-function fbm2(x: number, y: number, octaves: number, persistence: number): number {
+export function fbm2(x: number, y: number, octaves: number, persistence: number): number {
   let total = 0;
   let freq = 1;
   let amp = 1;
@@ -206,7 +211,7 @@ function fbm2(x: number, y: number, octaves: number, persistence: number): numbe
   return maxAmp === 0 ? 0 : total / maxAmp;
 }
 
-function ridged2(x: number, y: number, octaves: number, persistence: number): number {
+export function ridged2(x: number, y: number, octaves: number, persistence: number): number {
   let total = 0;
   let freq = 1;
   let amp = 1;
@@ -221,16 +226,55 @@ function ridged2(x: number, y: number, octaves: number, persistence: number): nu
   return maxAmp === 0 ? 0 : total / maxAmp;
 }
 
+// ── public grid generator ─────────────────────────────────────────────────
+export function noiseGrid(
+  seed: number,
+  width: number,
+  height: number,
+  scale: number,
+  fn?: "perlin2" | "simplex2" | "worley2",
+): number[] {
+  let w = Math.max(0, Math.floor(width) | 0);
+  let h = Math.max(0, Math.floor(height) | 0);
+  const s = scale || 1;
+  // DoS clamp: w*h ≤ MAX_LEN (preserve aspect by truncating rows)
+  if (w * h > MAX_LEN) {
+    const rows = Math.max(1, Math.floor(MAX_LEN / Math.max(1, w)));
+    w = Math.min(w, MAX_LEN);
+    h = rows;
+  }
+  const name = (fn ?? "perlin2").toLowerCase().trim();
+  let pick: (x: number, y: number) => number;
+  if (name === "simplex2") pick = simplex2;
+  else if (name === "worley2") pick = worley2;
+  else pick = perlin2; // default + fail-soft on unknown
+
+  const prevInit = _seedInitialized;
+  const prevSeed = _noiseSeed;
+  seedNoise(seed);
+  try {
+    const out: number[] = [];
+    for (let j = 0; j < h; j++) {
+      for (let i = 0; i < w; i++) {
+        out.push(pick(i * s, j * s));
+      }
+    }
+    return out;
+  } finally {
+    if (prevInit) seedNoise(prevSeed); else _seedInitialized = false;
+  }
+}
+
 // ── registrations ─────────────────────────────────────────────────────────
 
 register("noiseseed", async (a) => {
   // No-arg or empty: read-only. Returns current seed, or "" if unseeded.
-  // M1 audit fix — previously coerced to setSeed(NaN) → seed 0 silently.
+  // M1 audit fix — previously coerced to seedNoise(NaN) → seed 0 silently.
   if (a[0] === undefined || a[0].trim() === "") {
     return _seedInitialized ? fmt(_noiseSeed) : "";
   }
   const prev = _seedInitialized ? _noiseSeed : null;
-  setSeed(num(a[0]));
+  seedNoise(num(a[0]));
   return prev === null ? "" : fmt(prev);
 });
 
@@ -278,35 +322,7 @@ register("noisegrid", async (a) => {
   const w = Math.max(0, int(a[1]) | 0);
   const h = Math.max(0, int(a[2]) | 0);
   const scale = num(a[3]) || 1;
-  const fn = (a[4] ?? "perlin2").toLowerCase().trim();
-  const total = w * h;
-  if (total > MAX_LEN) {
-    // clamp to MAX_LEN cells (preserve aspect by truncating rows)
-    const rows = Math.max(1, Math.floor(MAX_LEN / Math.max(1, w)));
-    return generateGrid(seed, Math.min(w, MAX_LEN), rows, scale, fn);
-  }
-  return generateGrid(seed, w, h, scale, fn);
+  const fn = (a[4] ?? "perlin2").toLowerCase().trim() as
+    | "perlin2" | "simplex2" | "worley2";
+  return noiseGrid(seed, w, h, scale, fn).map(fmt).join(" ");
 });
-
-function generateGrid(
-  seed: number, w: number, h: number, scale: number, fn: string,
-): string {
-  const prevInit = _seedInitialized;
-  const prevSeed = _noiseSeed;
-  setSeed(seed);
-  try {
-    const out: string[] = [];
-    let pick: (x: number, y: number) => number;
-    if (fn === "simplex2") pick = simplex2;
-    else if (fn === "worley2") pick = worley2;
-    else pick = perlin2; // default + fail-soft
-    for (let j = 0; j < h; j++) {
-      for (let i = 0; i < w; i++) {
-        out.push(fmt(pick(i * scale, j * scale)));
-      }
-    }
-    return out.join(" ");
-  } finally {
-    if (prevInit) setSeed(prevSeed); else _seedInitialized = false;
-  }
-}
