@@ -99,7 +99,9 @@ export { resolveGlobalFormat, resolveGlobalFormatOr } from "./src/utils/resolveG
 // weren't reachable from TypeScript. Now plugin authors can drop
 // npm:simplex-noise / npm:alea and use these directly.
 
-// Noise (deterministic given seed)
+// Noise (deterministic given seed). Singleton-backed functions + per-instance
+// `Noise` class for plugins that need an independent noise stream without
+// stomping the module-level PERM (v2.5.2 — closes #148).
 export {
   seedNoise,
   perlin1, perlin2, perlin3,
@@ -107,6 +109,8 @@ export {
   worley2,
   fbm2, ridged2,
   noiseGrid,
+  Noise, createNoise,
+  buildPerm,
 } from "./src/services/Softcode/stdlib/noise.ts";
 
 // Per-instance seedable PRNG (mulberry32). Independent of the softcode singleton.
