@@ -93,6 +93,38 @@ export { resolveFormat, resolveFormatOr } from "./src/utils/resolveFormat.ts";
 // resolveGlobalFormat — two-tier lookup (#0 → enactor) for global-list commands
 // (WHO, @ps, +event/list, +mail, +bb, etc.) that aren't bound to a specific target.
 export { resolveGlobalFormat, resolveGlobalFormatOr } from "./src/utils/resolveGlobalFormat.ts";
+
+// ── Stdlib TS exports (v2.5.1) — pure functions usable from plugin TS code ──
+// These were already registered as softcode (perlin2 etc.) in v2.5.0 but
+// weren't reachable from TypeScript. Now plugin authors can drop
+// npm:simplex-noise / npm:alea and use these directly.
+
+// Noise (deterministic given seed)
+export {
+  seedNoise,
+  perlin1, perlin2, perlin3,
+  simplex2,
+  worley2,
+  fbm2, ridged2,
+  noiseGrid,
+} from "./src/services/Softcode/stdlib/noise.ts";
+
+// Per-instance seedable PRNG (mulberry32). Independent of the softcode singleton.
+export { Rng, createRng } from "./src/services/Softcode/stdlib/rng.ts";
+
+// Physics primitives (typed Vec3 tuples)
+export { vreflect, pointInAabb, rayAabb } from "./src/services/Softcode/stdlib/physics.ts";
+export type { Vec3 } from "./src/services/Softcode/stdlib/physics.ts";
+
+// Spatial scalars + interpolation + vector ops
+export {
+  dist2d, dist3d, distSq2d, distSq3d,
+  manhattan, chebyshev, angle2d, bearing,
+  lerp, inverseLerp, remap, smoothstep, smootherstep, clamp,
+  vsize, vsizeSq, vdistance, vdistanceSq, vlerp, vclamp,
+} from "./src/services/Softcode/stdlib/math.ts";
+export type { Vec } from "./src/services/Softcode/stdlib/math.ts";
+
 // Plugin lifecycle management — available to external plugins that need to read their config
 export { PluginConfigManager } from "./src/services/Config/plugin.ts";
 export type { IMiddlewareFunction } from "./src/@types/IMiddlewareFunction.ts";
