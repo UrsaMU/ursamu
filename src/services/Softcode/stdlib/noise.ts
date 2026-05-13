@@ -14,8 +14,12 @@ let _noiseSeed = 0;
 let _seedInitialized = false;
 const PERM = new Uint8Array(512);
 
-export function seedNoise(seed: number): void {
-  // FNV-1a hash → seeded shuffle of 0..255 into PERM
+/**
+ * Build a fresh 512-byte permutation table deterministically from `seed`.
+ * Used by both the singleton `seedNoise()` and the per-instance `Noise` class.
+ */
+export function buildPerm(seed: number): Uint8Array {
+  // FNV-1a hash → seeded shuffle of 0..255
   let h = 2166136261 >>> 0;
   const bytes = new Uint8Array(new Float64Array([seed]).buffer);
   for (const b of bytes) {
@@ -33,7 +37,13 @@ export function seedNoise(seed: number): void {
     const j = s % (i + 1);
     const tmp = p[i]; p[i] = p[j]; p[j] = tmp;
   }
-  for (let i = 0; i < 512; i++) PERM[i] = p[i & 255];
+  const out = new Uint8Array(512);
+  for (let i = 0; i < 512; i++) out[i] = p[i & 255];
+  return out;
+}
+
+export function seedNoise(seed: number): void {
+  PERM.set(buildPerm(seed));
   _noiseSeed = seed;
   _seedInitialized = true;
 }
@@ -78,37 +88,31 @@ function grad3(hash: number, x: number, y: number, z: number): number {
   return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
 }
 
-// ── perlin ────────────────────────────────────────────────────────────────
-export function perlin1(x: number): number {
-  ensureSeed();
+// ── perlin (PERM-parameterized internals) ────────────────────────────────
+function _perlin1(perm: Uint8Array, x: number): number {
   const xi = Math.floor(x) & 255;
   const xf = x - Math.floor(x);
   const u  = fade(xf);
-  const a  = PERM[xi];
-  const b  = PERM[xi + 1];
-  return lerp(u, grad1(a, xf), grad1(b, xf - 1));
+  return lerp(u, grad1(perm[xi], xf), grad1(perm[xi + 1], xf - 1));
 }
 
-export function perlin2(x: number, y: number): number {
-  ensureSeed();
+function _perlin2(perm: Uint8Array, x: number, y: number): number {
   const xi = Math.floor(x) & 255;
   const yi = Math.floor(y) & 255;
   const xf = x - Math.floor(x);
   const yf = y - Math.floor(y);
   const u  = fade(xf);
   const v  = fade(yf);
-  const aa = PERM[PERM[xi] + yi];
-  const ab = PERM[PERM[xi] + yi + 1];
-  const ba = PERM[PERM[xi + 1] + yi];
-  const bb = PERM[PERM[xi + 1] + yi + 1];
+  const aa = perm[perm[xi] + yi];
+  const ab = perm[perm[xi] + yi + 1];
+  const ba = perm[perm[xi + 1] + yi];
+  const bb = perm[perm[xi + 1] + yi + 1];
   const x1 = lerp(u, grad2(aa, xf, yf),     grad2(ba, xf - 1, yf));
   const x2 = lerp(u, grad2(ab, xf, yf - 1), grad2(bb, xf - 1, yf - 1));
-  // grad2 magnitude is up to ~3, scale to roughly [-1,1]
   return lerp(v, x1, x2) / 3;
 }
 
-export function perlin3(x: number, y: number, z: number): number {
-  ensureSeed();
+function _perlin3(perm: Uint8Array, x: number, y: number, z: number): number {
   const xi = Math.floor(x) & 255;
   const yi = Math.floor(y) & 255;
   const zi = Math.floor(z) & 255;
@@ -116,31 +120,38 @@ export function perlin3(x: number, y: number, z: number): number {
   const yf = y - Math.floor(y);
   const zf = z - Math.floor(z);
   const u = fade(xf), v = fade(yf), w = fade(zf);
-  const A  = PERM[xi]   + yi;
-  const AA = PERM[A]    + zi;
-  const AB = PERM[A + 1] + zi;
-  const B  = PERM[xi + 1] + yi;
-  const BA = PERM[B]    + zi;
-  const BB = PERM[B + 1] + zi;
+  const A  = perm[xi]   + yi;
+  const AA = perm[A]    + zi;
+  const AB = perm[A + 1] + zi;
+  const B  = perm[xi + 1] + yi;
+  const BA = perm[B]    + zi;
+  const BB = perm[B + 1] + zi;
   return lerp(w,
     lerp(v,
-      lerp(u, grad3(PERM[AA],     xf,     yf,     zf),
-              grad3(PERM[BA],     xf - 1, yf,     zf)),
-      lerp(u, grad3(PERM[AB],     xf,     yf - 1, zf),
-              grad3(PERM[BB],     xf - 1, yf - 1, zf))),
+      lerp(u, grad3(perm[AA],     xf,     yf,     zf),
+              grad3(perm[BA],     xf - 1, yf,     zf)),
+      lerp(u, grad3(perm[AB],     xf,     yf - 1, zf),
+              grad3(perm[BB],     xf - 1, yf - 1, zf))),
     lerp(v,
-      lerp(u, grad3(PERM[AA + 1], xf,     yf,     zf - 1),
-              grad3(PERM[BA + 1], xf - 1, yf,     zf - 1)),
-      lerp(u, grad3(PERM[AB + 1], xf,     yf - 1, zf - 1),
-              grad3(PERM[BB + 1], xf - 1, yf - 1, zf - 1))));
+      lerp(u, grad3(perm[AA + 1], xf,     yf,     zf - 1),
+              grad3(perm[BA + 1], xf - 1, yf,     zf - 1)),
+      lerp(u, grad3(perm[AB + 1], xf,     yf - 1, zf - 1),
+              grad3(perm[BB + 1], xf - 1, yf - 1, zf - 1))));
+}
+
+// Singleton-backed public wrappers (back-compat surface)
+export function perlin1(x: number): number              { ensureSeed(); return _perlin1(PERM, x); }
+export function perlin2(x: number, y: number): number   { ensureSeed(); return _perlin2(PERM, x, y); }
+export function perlin3(x: number, y: number, z: number): number {
+  ensureSeed();
+  return _perlin3(PERM, x, y, z);
 }
 
 // ── simplex 2D (Gustavson reference impl, public domain) ──────────────────
 const F2 = 0.5 * (Math.sqrt(3) - 1);
 const G2 = (3 - Math.sqrt(3)) / 6;
 
-export function simplex2(xin: number, yin: number): number {
-  ensureSeed();
+function _simplex2(perm: Uint8Array, xin: number, yin: number): number {
   const s = (xin + yin) * F2;
   const i = Math.floor(xin + s);
   const j = Math.floor(yin + s);
@@ -157,9 +168,9 @@ export function simplex2(xin: number, yin: number): number {
   const y2 = y0 - 1 + 2 * G2;
   const ii = i & 255;
   const jj = j & 255;
-  const gi0 = PERM[ii + PERM[jj]] & 7;
-  const gi1 = PERM[ii + i1 + PERM[jj + j1]] & 7;
-  const gi2 = PERM[ii + 1 + PERM[jj + 1]] & 7;
+  const gi0 = perm[ii + perm[jj]] & 7;
+  const gi1 = perm[ii + i1 + perm[jj + j1]] & 7;
+  const gi2 = perm[ii + 1 + perm[jj + 1]] & 7;
   let n0 = 0, n1 = 0, n2 = 0;
   let t0 = 0.5 - x0 * x0 - y0 * y0;
   if (t0 >= 0) { t0 *= t0; n0 = t0 * t0 * grad2(gi0, x0, y0); }
@@ -167,14 +178,16 @@ export function simplex2(xin: number, yin: number): number {
   if (t1 >= 0) { t1 *= t1; n1 = t1 * t1 * grad2(gi1, x1, y1); }
   let t2 = 0.5 - x2 * x2 - y2 * y2;
   if (t2 >= 0) { t2 *= t2; n2 = t2 * t2 * grad2(gi2, x2, y2); }
-  // Scaling factor ~70 in Gustavson; with our grad2 magnitude ~3 the
-  // empirical scale is ~40 to land in [-1, 1].
   return 40 * (n0 + n1 + n2);
 }
 
-// ── worley 2D (cellular F1 distance) ──────────────────────────────────────
-export function worley2(x: number, y: number): number {
+export function simplex2(xin: number, yin: number): number {
   ensureSeed();
+  return _simplex2(PERM, xin, yin);
+}
+
+// ── worley 2D (cellular F1 distance) ──────────────────────────────────────
+function _worley2(perm: Uint8Array, x: number, y: number): number {
   const xi = Math.floor(x);
   const yi = Math.floor(y);
   let min = Infinity;
@@ -182,9 +195,8 @@ export function worley2(x: number, y: number): number {
     for (let dy = -1; dy <= 1; dy++) {
       const cx = xi + dx;
       const cy = yi + dy;
-      // Feature point inside this cell: jittered by hashed offsets in [0, 1).
-      const h1 = PERM[(cx & 255) + PERM[cy & 255]];
-      const h2 = PERM[(cx & 255) + PERM[(cy + 1) & 255]];
+      const h1 = perm[(cx & 255) + perm[cy & 255]];
+      const h2 = perm[(cx & 255) + perm[(cy + 1) & 255]];
       const px = cx + (h1 / 255);
       const py = cy + (h2 / 255);
       const ex = px - x;
@@ -196,14 +208,16 @@ export function worley2(x: number, y: number): number {
   return Math.sqrt(min);
 }
 
+export function worley2(x: number, y: number): number {
+  ensureSeed();
+  return _worley2(PERM, x, y);
+}
+
 // ── fbm / ridged ──────────────────────────────────────────────────────────
-export function fbm2(x: number, y: number, octaves: number, persistence: number): number {
-  let total = 0;
-  let freq = 1;
-  let amp = 1;
-  let maxAmp = 0;
+function _fbm2(perm: Uint8Array, x: number, y: number, octaves: number, persistence: number): number {
+  let total = 0, freq = 1, amp = 1, maxAmp = 0;
   for (let i = 0; i < octaves; i++) {
-    total += perlin2(x * freq, y * freq) * amp;
+    total += _perlin2(perm, x * freq, y * freq) * amp;
     maxAmp += amp;
     amp *= persistence;
     freq *= 2;
@@ -211,19 +225,26 @@ export function fbm2(x: number, y: number, octaves: number, persistence: number)
   return maxAmp === 0 ? 0 : total / maxAmp;
 }
 
-export function ridged2(x: number, y: number, octaves: number, persistence: number): number {
-  let total = 0;
-  let freq = 1;
-  let amp = 1;
-  let maxAmp = 0;
+function _ridged2(perm: Uint8Array, x: number, y: number, octaves: number, persistence: number): number {
+  let total = 0, freq = 1, amp = 1, maxAmp = 0;
   for (let i = 0; i < octaves; i++) {
-    const n = 1 - Math.abs(perlin2(x * freq, y * freq));
-    total += (n * 2 - 1) * amp; // remap [0,1] to [-1,1]
+    const n = 1 - Math.abs(_perlin2(perm, x * freq, y * freq));
+    total += (n * 2 - 1) * amp;
     maxAmp += amp;
     amp *= persistence;
     freq *= 2;
   }
   return maxAmp === 0 ? 0 : total / maxAmp;
+}
+
+export function fbm2(x: number, y: number, octaves: number, persistence: number): number {
+  ensureSeed();
+  return _fbm2(PERM, x, y, octaves, persistence);
+}
+
+export function ridged2(x: number, y: number, octaves: number, persistence: number): number {
+  ensureSeed();
+  return _ridged2(PERM, x, y, octaves, persistence);
 }
 
 // ── public grid generator ─────────────────────────────────────────────────
@@ -326,3 +347,81 @@ register("noisegrid", async (a) => {
     | "perlin2" | "simplex2" | "worley2";
   return noiseGrid(seed, w, h, scale, fn).map(fmt).join(" ");
 });
+
+// ── per-instance Noise class (v2.5.2) ────────────────────────────────────
+//
+// Holds its own PERM table so multiple plugins can each carry an independent
+// seeded noise stream without stomping the singleton. Mirrors the Rng class.
+//
+//   import { createNoise } from "jsr:@ursamu/ursamu";
+//   const n = createNoise(42);
+//   n.perlin2(0.5, 0.5);  // independent of seedNoise() and any other Noise instance
+
+export class Noise {
+  private _perm: Uint8Array;
+  private _seed: number;
+
+  constructor(seed: number) {
+    this._seed = seed;
+    this._perm = buildPerm(seed);
+  }
+
+  setSeed(seed: number): void {
+    this._seed = seed;
+    this._perm = buildPerm(seed);
+  }
+
+  getSeed(): number {
+    return this._seed;
+  }
+
+  perlin1(x: number): number                    { return _perlin1(this._perm, x); }
+  perlin2(x: number, y: number): number         { return _perlin2(this._perm, x, y); }
+  perlin3(x: number, y: number, z: number): number {
+    return _perlin3(this._perm, x, y, z);
+  }
+  simplex2(x: number, y: number): number        { return _simplex2(this._perm, x, y); }
+  worley2(x: number, y: number): number         { return _worley2(this._perm, x, y); }
+  fbm2(x: number, y: number, octaves: number, persistence: number): number {
+    return _fbm2(this._perm, x, y, octaves, persistence);
+  }
+  ridged2(x: number, y: number, octaves: number, persistence: number): number {
+    return _ridged2(this._perm, x, y, octaves, persistence);
+  }
+
+  /**
+   * Generate a width*height grid of noise values. Applies the same MAX_LEN
+   * (10 000) DoS clamp as the module-level `noiseGrid`. Does not mutate
+   * `this._perm` — each cell is sampled against the instance's PERM.
+   */
+  grid(
+    width: number, height: number, scale: number,
+    fn?: "perlin2" | "simplex2" | "worley2",
+  ): number[] {
+    let w = Math.max(0, Math.floor(width) | 0);
+    let h = Math.max(0, Math.floor(height) | 0);
+    const s = scale || 1;
+    if (w * h > MAX_LEN) {
+      const rows = Math.max(1, Math.floor(MAX_LEN / Math.max(1, w)));
+      w = Math.min(w, MAX_LEN);
+      h = rows;
+    }
+    const name = (fn ?? "perlin2").toLowerCase();
+    let pick: (x: number, y: number) => number;
+    if (name === "simplex2")      pick = (x, y) => _simplex2(this._perm, x, y);
+    else if (name === "worley2")  pick = (x, y) => _worley2(this._perm, x, y);
+    else                          pick = (x, y) => _perlin2(this._perm, x, y);
+    const out: number[] = [];
+    for (let j = 0; j < h; j++) {
+      for (let i = 0; i < w; i++) {
+        out.push(pick(i * s, j * s));
+      }
+    }
+    return out;
+  }
+}
+
+/** Convenience factory: `createNoise(42)` is equivalent to `new Noise(42)`. */
+export function createNoise(seed: number): Noise {
+  return new Noise(seed);
+}
