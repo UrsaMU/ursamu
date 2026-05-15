@@ -133,11 +133,18 @@ manifest at the plugin root:
   "ursamu": ">=1.0.0",
   "author": "Your Name",
   "license": "MIT",
-  "main": "index.ts"
+  "main": "index.ts",
+  "deps": [
+    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+  ]
 }
 ```
 
-This is the file `ursamu plugin install` reads to confirm what it is installing,
-display details, and populate the local registry. See the
-[Plugin Manager](./index.md#installing-community-plugins) docs for the full
-install/update/remove workflow.
+Each `deps[]` entry may include an optional `version` semver range
+(`"^1.2.0"`, `">=1.0.0 <2.0.0"`). When present, the installer reads the
+dep's own manifest `version` and aborts the whole install if it does not
+satisfy the range. Omit `version` to install the dep without a check
+(backwards compatible). See the
+[Plugin Manager](./index.md#installing-community-plugins) and the
+[`deps[]` reference](./index.md#deps-entries) for the full install,
+update, remove, and atomic-rollback semantics.

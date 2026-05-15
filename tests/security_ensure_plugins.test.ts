@@ -129,7 +129,9 @@ Deno.test("[INT] ensurePlugins — malicious name does not create dir outside pl
       plugins: [{ name: "../../escape-attempt", url: "https://github.com/foo/bar" }],
     }));
 
-    await ensurePlugins(pluginsDir);
+    let threw = false;
+    try { await ensurePlugins(pluginsDir); } catch { threw = true; }
+    assertEquals(threw, true, "manifest install should throw on invalid name");
 
     // The escaped path would land one level above pluginsDir's parent
     const escapedPath = join(pluginsDir, "../../escape-attempt");
@@ -217,13 +219,89 @@ Deno.test("[REF] ensurePlugins — removes plugin dir when manifest ref has chan
       plugins: [{ name: "my-plugin", url: "https://github.com/foo/my-plugin", ref: "v1.1.0" }],
     }));
 
-    // ensurePlugins will remove the dir then attempt git clone (which will fail for a fake URL — that's fine)
-    await ensurePlugins(pluginsDir);
+    // ensurePlugins removes the dir, then the clone fails (fake URL).
+    // The new transactional installer re-throws PluginCloneError after rollback.
+    let threw = false;
+    try { await ensurePlugins(pluginsDir); } catch { threw = true; }
+    assertEquals(threw, true, "clone failure should propagate");
 
     // The marker file must be gone — dir was removed for the update
     let markerExists = false;
     try { await Deno.stat(join(pluginDir, "marker.txt")); markerExists = true; } catch { /* expected */ }
     assertEquals(markerExists, false, "Old plugin dir must be removed when ref changes");
+  } finally {
+    await Deno.remove(pluginsDir, { recursive: true }).catch(() => {});
+  }
+});
+
+// ─── Manifest-level rollback: whole run aborts atomically on any failure ─────
+//
+// Note: ensurePlugins does not expose a runStep seam (it hard-wires
+// runGitStep). These cases use the validation-failure path — a top-level
+// plugin with an unsafe URL or invalid name — which throws inside the
+// manifest loop and triggers `txn.rollback(reg)` + the surrounding catch.
+// The assertion in both cases: no leftover dirs in pluginsDir and no
+// registry entries for either P1 or P2.
+
+Deno.test("[ROLLBACK] manifest install aborts whole run on dep-URL failure", OPTS, async () => {
+  const pluginsDir = await Deno.makeTempDir({ prefix: "ursamu-rollback-" });
+  try {
+    // P1 fails fast on URL validation; P2 is well-formed but must never be
+    // reached because the manifest loop aborts at the first failure.
+    await Deno.writeTextFile(join(pluginsDir, "plugins.manifest.json"), JSON.stringify({
+      plugins: [
+        { name: "p1", url: "file:///etc/passwd" },
+        { name: "p2", url: "https://github.com/foo/p2" },
+      ],
+    }));
+
+    let threw = false;
+    try { await ensurePlugins(pluginsDir); } catch { threw = true; }
+    assertEquals(threw, true, "manifest install should throw on bad URL");
+
+    // Neither plugin installed.
+    let p1Exists = false, p2Exists = false;
+    try { await Deno.stat(join(pluginsDir, "p1")); p1Exists = true; } catch { /* */ }
+    try { await Deno.stat(join(pluginsDir, "p2")); p2Exists = true; } catch { /* */ }
+    assertEquals(p1Exists, false, "P1 must not exist");
+    assertEquals(p2Exists, false, "P2 must not exist");
+
+    // Registry must also have no entries (file written, but empty).
+    const regPath = join(pluginsDir, ".registry.json");
+    let regContents = "{}";
+    try { regContents = await Deno.readTextFile(regPath); } catch { /* file may not exist */ }
+    const reg = JSON.parse(regContents);
+    assertEquals(reg["p1"], undefined);
+    assertEquals(reg["p2"], undefined);
+  } finally {
+    await Deno.remove(pluginsDir, { recursive: true }).catch(() => {});
+  }
+});
+
+Deno.test("[ROLLBACK] manifest install aborts on invalid plugin name", OPTS, async () => {
+  const pluginsDir = await Deno.makeTempDir({ prefix: "ursamu-rollback-" });
+  try {
+    await Deno.writeTextFile(join(pluginsDir, "plugins.manifest.json"), JSON.stringify({
+      plugins: [
+        { name: "../escape", url: "https://github.com/foo/x" },
+        { name: "p2",        url: "https://github.com/foo/p2" },
+      ],
+    }));
+
+    let threw = false;
+    try { await ensurePlugins(pluginsDir); } catch { threw = true; }
+    assertEquals(threw, true);
+
+    let p2Exists = false;
+    try { await Deno.stat(join(pluginsDir, "p2")); p2Exists = true; } catch { /* */ }
+    assertEquals(p2Exists, false, "P2 must not be installed when P1 fails");
+
+    const regPath = join(pluginsDir, ".registry.json");
+    let regContents = "{}";
+    try { regContents = await Deno.readTextFile(regPath); } catch { /* */ }
+    const reg = JSON.parse(regContents);
+    assertEquals(reg["p2"], undefined);
+    assertEquals(reg["../escape"], undefined);
   } finally {
     await Deno.remove(pluginsDir, { recursive: true }).catch(() => {});
   }
@@ -236,7 +314,9 @@ Deno.test("[INT] ensurePlugins — unsafe URL scheme does not invoke git clone",
       plugins: [{ name: "evil-plugin", url: "file:///etc/passwd" }],
     }));
 
-    await ensurePlugins(pluginsDir);
+    let threw = false;
+    try { await ensurePlugins(pluginsDir); } catch { threw = true; }
+    assertEquals(threw, true, "unsafe URL should throw");
 
     // If git clone had run it would have failed (file:// not a git repo here),
     // but more importantly the plugin dir must not exist at all.

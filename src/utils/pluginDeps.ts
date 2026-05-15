@@ -1,26 +1,41 @@
 /**
  * @module utils/pluginDeps
  *
- * Plugin dependency resolver for the plugin installer.
- * Reads `ursamu.plugin.json` from installed plugins and recursively clones
- * any missing dependencies.
- *
- * Consumed by ensurePlugins.ts.
+ * Fail-fast, semver-aware, conflict-detecting, transactional plugin dependency
+ * resolver. Reads `ursamu.plugin.json` from installed plugins and recursively
+ * clones any missing deps. Every failure throws a typed PluginInstallError —
+ * the caller wraps in an InstallTxn and calls rollback() on throw.
  */
 
 import { dpath } from "../../deps.ts";
-import { exists }  from "jsr:@std/fs@^0.224.0";
+import { exists } from "jsr:@std/fs@^0.224.0";
 
 import {
+  type PluginDep,
+  type PluginManifest,
   type Registry,
+  PluginConflictError,
+  PluginDepNameError,
+  PluginDepUrlError,
+  PluginVersionError,
+  PluginSemverError,
   isSafePluginName,
   isSafePluginUrl,
-  buildCloneSteps,
   runGitStep,
 } from "./pluginSecurity.ts";
-import type { PluginManifest } from "./pluginSecurity.ts";
+import { checkSatisfies } from "./pluginSemver.ts";
+import type { InstallTxn } from "./pluginTxn.ts";
+import { cloneAndMove } from "./pluginDepsInstall.ts";
 
-// ── Shared helpers (also used by ensurePlugins.ts) ────────────────────────────
+export interface ResolveDepsCtx {
+  pluginsDir: string;
+  reg:        Registry;
+  txn:        InstallTxn;
+  resolving:  Set<string>;
+  requests:   Map<string, Array<{ range?: string; requester: string }>>;
+  installed:  string[];
+  runStep:    (args: string[], env: Record<string, string>) => Promise<{ success: boolean; stderr: string }>;
+}
 
 export async function readPluginMeta(dir: string): Promise<PluginManifest> {
   try {
@@ -35,90 +50,127 @@ export async function readPluginVersion(dir: string): Promise<string> {
   return (await readPluginMeta(dir)).version ?? "unknown";
 }
 
-// ── Dependency resolver ───────────────────────────────────────────────────────
+/** Build a ResolveDepsCtx with `runStep` defaulted to `runGitStep`. */
+export function makeDefaultCtx(
+  base: Omit<ResolveDepsCtx, "runStep"> & Partial<Pick<ResolveDepsCtx, "runStep">>,
+): ResolveDepsCtx {
+  return { ...base, runStep: base.runStep ?? runGitStep };
+}
 
-/**
- * Read a plugin's declared deps from its `ursamu.plugin.json` and install any
- * that are absent.  Recurses into each newly-installed dep's own deps.
- * `resolving` tracks names currently being processed to break circular chains.
- */
 export async function resolveDeps(
-  pluginsDir: string,
-  pluginDir:  string,
-  reg:        Registry,
-  resolving:  Set<string>,
-  installed:  string[],
+  ctx:           ResolveDepsCtx,
+  pluginDir:     string,
+  requesterName: string,
 ): Promise<void> {
   const meta = await readPluginMeta(pluginDir);
   if (!meta.deps?.length) return;
-
   for (const dep of meta.deps) {
-    if (!isSafePluginName(dep.name)) {
-      console.warn(`[ensurePlugins] Skipping dep "${dep.name}": invalid name`);
-      continue;
-    }
-    if (!isSafePluginUrl(dep.url)) {
-      console.warn(`[ensurePlugins] Skipping dep "${dep.name}": unsafe URL`);
-      continue;
-    }
-    if (resolving.has(dep.name)) continue; // already installed or in-flight
-    resolving.add(dep.name);
+    await processDep(ctx, dep, requesterName);
+  }
+}
 
-    const depDir = dpath.join(pluginsDir, dep.name);
-    if (await exists(depDir)) {
-      // Dep already on disk — still recurse in case it has its own deps.
-      await resolveDeps(pluginsDir, depDir, reg, resolving, installed);
-      continue;
-    }
-
-    console.log(
-      `[ensurePlugins] Installing dep "${dep.name}" ` +
-      `(required by ${dpath.basename(pluginDir)})...`,
+async function processDep(
+  ctx:           ResolveDepsCtx,
+  dep:           PluginDep,
+  requesterName: string,
+): Promise<void> {
+  if (!isSafePluginName(dep.name)) {
+    throw new PluginDepNameError(
+      `Dep "${dep.name}" requested by "${requesterName}" has an invalid name`,
     );
-    const tempBase = await Deno.makeTempDir({ prefix: "ursamu-plugin-" });
-    const tempDir  = dpath.join(tempBase, "plugin");
+  }
+  if (!isSafePluginUrl(dep.url)) {
+    throw new PluginDepUrlError(
+      `Dep "${dep.name}" requested by "${requesterName}" has an unsafe URL "${dep.url}"`,
+    );
+  }
+  const reqList = ctx.requests.get(dep.name) ?? [];
+  reqList.push({ range: dep.version, requester: requesterName });
+  ctx.requests.set(dep.name, reqList);
+
+  if (ctx.resolving.has(dep.name)) return;
+  ctx.resolving.add(dep.name);
+
+  const depDir = dpath.join(ctx.pluginsDir, dep.name);
+  if (await exists(depDir)) {
+    const version = await readPluginVersion(depDir);
+    verifyDepRanges(dep.name, version, reqList);
+    await resolveDeps(ctx, depDir, dep.name);
+    return;
+  }
+  await installDep(ctx, dep, requesterName, depDir, reqList);
+}
+
+async function installDep(
+  ctx:           ResolveDepsCtx,
+  dep:           PluginDep,
+  requesterName: string,
+  depDir:        string,
+  reqList:       Array<{ range?: string; requester: string }>,
+): Promise<void> {
+  await cloneAndMove({ runStep: ctx.runStep }, dep, requesterName, depDir);
+  ctx.txn.recordDir(depDir);
+
+  const version = await readPluginVersion(depDir);
+  verifyDepRanges(dep.name, version, reqList);
+
+  ctx.txn.recordRegistry(dep.name, ctx.reg[dep.name]);
+  const now = new Date().toISOString();
+  ctx.reg[dep.name] = {
+    name:        dep.name,
+    version,
+    description: "",
+    source:      dep.url,
+    author:      "unknown",
+    ref:         dep.ref,
+    installedAt: now,
+    updatedAt:   now,
+  };
+  ctx.installed.push(`${dep.name}@${version}`);
+
+  await resolveDeps(ctx, depDir, dep.name);
+}
+
+export function verifyDepRanges(
+  depName:          string,
+  installedVersion: string,
+  requests:         Array<{ range?: string; requester: string }>,
+): void {
+  const ranged = requests.filter((r): r is { range: string; requester: string } =>
+    typeof r.range === "string" && r.range.length > 0
+  );
+  for (const req of ranged) {
+    if (!installedVersion || installedVersion === "unknown") {
+      throw new PluginVersionError(
+        `Dep "${depName}" required by "${req.requester}" with range "${req.range}" has no valid installed version`,
+      );
+    }
     try {
-      const gitEnv = { ...Deno.env.toObject(), GIT_TERMINAL_PROMPT: "0" };
-      let failed   = false;
-      for (const stepArgs of buildCloneSteps(dep.url, tempDir, dep.ref)) {
-        const { success, stderr } = await runGitStep(stepArgs, gitEnv);
-        if (!success) {
-          console.error(`[ensurePlugins] Failed to install dep "${dep.name}": ${stderr.trim()}`);
-          failed = true;
-          break;
-        }
-      }
-      if (failed) {
-        await Deno.remove(tempBase, { recursive: true }).catch(() => {});
-        continue;
-      }
-
-      const gitDir = dpath.join(tempDir, ".git");
-      if (await exists(gitDir)) await Deno.remove(gitDir, { recursive: true });
-
-      try {
-        await Deno.rename(tempDir, depDir);
-      } catch (e) {
-        await Deno.remove(tempBase, { recursive: true }).catch(() => {});
-        console.warn(`[ensurePlugins] Could not move dep "${dep.name}" into place: ${e}`);
-        continue;
-      }
-      await Deno.remove(tempBase, { recursive: true }).catch(() => {});
-
-      const version = await readPluginVersion(depDir);
-      const now     = new Date().toISOString();
-      reg[dep.name] = {
-        name: dep.name, version, description: "", source: dep.url,
-        author: "unknown", ref: dep.ref,
-        installedAt: now, updatedAt: now,
-      };
-      installed.push(`${dep.name}@${version}`);
-
-      // Recurse into the newly-installed dep's own deps.
-      await resolveDeps(pluginsDir, depDir, reg, resolving, installed);
-    } catch (err) {
-      await Deno.remove(tempBase, { recursive: true }).catch(() => {});
-      console.error(`[ensurePlugins] Failed to install dep "${dep.name}":`, err);
+      checkSatisfies(depName, installedVersion, req.range);
+    } catch (e: unknown) {
+      throw rewrapSemverFailure(depName, installedVersion, ranged, req.range, e);
     }
   }
+}
+
+function rewrapSemverFailure(
+  depName:           string,
+  installedVersion:  string,
+  ranged:            Array<{ range: string; requester: string }>,
+  failingRange:      string,
+  cause:             unknown,
+): Error {
+  if (ranged.length < 2) {
+    if (cause instanceof PluginSemverError || cause instanceof PluginVersionError) return cause;
+    return new PluginSemverError(
+      `Plugin "${depName}" version ${installedVersion} does not satisfy "${failingRange}"`,
+      cause,
+    );
+  }
+  const pairs = ranged.map(r => `${r.requester} wants ${r.range}`).join(", ");
+  return new PluginConflictError(
+    `Plugin "${depName}" version ${installedVersion} conflict: ${pairs}, ` +
+    `version does not satisfy ${failingRange}`,
+    cause,
+  );
 }

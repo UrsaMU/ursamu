@@ -293,6 +293,28 @@ inline so you can see which component (if any) didn't reload cleanly.
 > engine reads and compiles them on each invocation — so they never need a
 > reload.
 
+### Plugin Install Behavior
+
+On startup the engine resolves and installs every plugin declared in
+`src/plugins/plugins.manifest.json` (plus their transitive `deps[]`). Two
+things to know when editing the manifest:
+
+- **Optional `deps[].version` semver range** — each dep entry may set
+  `"version": "^1.2.0"` (or `">=1.0.0 <2.0.0"`, etc.). The installer
+  reads the dep's own `ursamu.plugin.json` `version` and aborts the run
+  if it doesn't satisfy the range. Entries without `version` install
+  unconditionally — backwards compatible.
+- **Fail-fast, whole-manifest rollback** — if any plugin or transitive
+  dep fails to clone, has an unsafe name or URL, violates a `version`
+  range, or has incompatible ranges from multiple requesters, the entire
+  install run aborts. Disk and `src/plugins/.registry.json` are left
+  exactly as they were before the run — your previously installed
+  plugins are not touched. The error names which entry failed and why.
+
+In practice: after editing the manifest, restart the server. If the run
+aborts, fix the offending entry and restart again — there is no partial
+state to clean up.
+
 ### Updating from Git (`@update`)
 
 Admins and wizards can update the running server from in-game without touching

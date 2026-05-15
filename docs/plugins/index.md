@@ -244,7 +244,10 @@ display details and populate the local registry.
   "ursamu": ">=1.0.0",
   "author": "Your Name",
   "license": "MIT",
-  "main": "index.ts"
+  "main": "index.ts",
+  "deps": [
+    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+  ]
 }
 ```
 
@@ -257,6 +260,42 @@ display details and populate the local registry.
 | `author` | no | Author name or contact |
 | `license` | no | SPDX license identifier, e.g. `"MIT"` |
 | `main` | no | Entry-point file, defaults to `"index.ts"` |
+| `deps` | no | Array of transitive plugin dependencies — see below |
+
+### `deps[]` entries
+
+Each entry declares a plugin this one needs at runtime. The installer
+resolves the full graph before writing anything.
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | yes | Plugin slug — install folder name |
+| `url` | yes | Git URL the installer will clone |
+| `ref` | no | Git ref (tag, branch, commit) |
+| `version` | no | Semver range (e.g. `"^1.2.0"`, `">=1.0.0 <2.0.0"`) checked against the dep's own manifest `version` |
+
+The `version` field is optional and opt-in. When omitted, the dep installs
+as before with no version check. When present, the installer reads the
+dep's `ursamu.plugin.json` after clone and aborts if its `version` does
+not satisfy the range — or if two requesters ask for incompatible ranges.
+
+### Atomic installs
+
+`ensurePlugins` (and the bulk install path used on first startup) is
+fail-fast across the entire manifest. If any plugin or transitive dep
+fails for any of these reasons, the whole run aborts and rolls back:
+
+- Clone failure or rename failure
+- Unsafe plugin name (path traversal, reserved characters)
+- Unsafe or unsupported clone URL
+- Manifest version does not satisfy a requested `version:` range
+- Two requesters declare incompatible `version:` ranges for the same dep
+- Malformed semver in any range or manifest version
+
+On abort, nothing from the failed run is left on disk or in
+`.registry.json`. Plugins installed in previous successful runs are not
+touched. The installer throws a `PluginInstallError` (or one of its
+subclasses) describing which entry failed and why.
 
 The `ursamu create plugin <name> --standalone` command generates this file
 automatically when scaffolding a new publishable plugin project.
