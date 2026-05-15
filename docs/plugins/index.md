@@ -132,7 +132,6 @@ import "./commands.ts";
 | `u.send(msg)` | Send a message to the current player |
 | `u.broadcast(msg)` | Send a message to everyone in the room |
 | `u.db.search(query)` | Query the main object database |
-| `u.bb.*` | Bulletin board SDK |
 | `u.chan.*` | Channel SDK |
 | `u.events.*` | Pub/sub EventsService SDK |
 | `u.auth.*` | Auth SDK (hash, setPassword) |
@@ -345,3 +344,19 @@ The bundled plugins demonstrate every capability:
 | `src/plugins/example/` | Minimal template — commands, REST, database, config |
 | `src/plugins/jobs/` | Full CRUD REST API, staff permission checks, in-game commands with switches |
 | `src/plugins/events/` | Sequential IDs, RSVP capacity enforcement, cancelled-event visibility rules, REST + in-game commands |
+---
+
+## Plugin Docs Index
+
+| Page | Topic |
+|------|-------|
+| [basics.md](./basics.md) | `IPlugin` interface, lifecycle, auto-discovery, file layout |
+| [first-plugin.md](./first-plugin.md) | Step-by-step walkthrough of a complete plugin |
+| [commands.md](./commands.md) | `addCmd` reference, patterns, switches, lockfuncs |
+| [database.md](./database.md) | `DBO<T>` collections, queries, namespacing rules |
+| [configuration.md](./configuration.md) | Default config values, `getConfig`, env vars for secrets |
+| [hooks.md](./hooks.md) | `gameHooks` event bus, scene/wiki/event/chargen hooks, `EventsService` |
+| [dependencies.md](./dependencies.md) | Sharing code between plugins, `deps[]` manifest entries |
+| [official-plugins.md](./official-plugins.md) | Plugin registry — channel, discord, jobs, events, bbs, wiki, mail, builder, chargen, help |
+| [chargen.md](./chargen.md) | Bundled chargen plugin — commands, hooks, REST API |
+| [events.md](./events.md) | Bundled events plugin — calendar, RSVPs, REST API |

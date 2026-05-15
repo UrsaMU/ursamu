@@ -34,9 +34,21 @@ docker compose up -d
 docker compose logs -f
 ```
 
-On first startup the server will initialize the database and be ready to accept
-connections immediately (no interactive setup in Docker mode — create a superuser
-from the Telnet prompt or the REST API after the container starts).
+On first startup the server initializes the database and prints a one-time
+message inviting you to create the first player via Telnet:
+
+```
+Fresh database detected — no players exist yet.
+
+Connect via telnet and run:
+  create <name> <password>
+
+The first player created is automatically given superuser access.
+```
+
+Connect with `telnet localhost 4201` and run `create <name> <password>` —
+that first account is granted the `superuser` flag automatically. After
+that, all subsequent `create` calls produce regular players.
 
 ---
 

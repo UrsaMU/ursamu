@@ -1,650 +1,87 @@
 ---
 layout: layout.vto
 title: Core API Reference
-description: ICmd, IUrsamuSDK, IPlugin, IDBObj — the complete type reference for UrsaMU plugin and script authors.
+description: Complete type and function reference for UrsaMU plugin and script authors — exports of jsr:@ursamu/ursamu as of v2.6.0.
 ---
 
 # Core API Reference
 
-This page documents the types and functions available to plugin and script authors.
-All of these are exported from `jsr:@ursamu/ursamu`.
+Everything documented here is exported from `jsr:@ursamu/ursamu`. Last
+verified against `mod.ts` for v2.6.0.
+
+## Contents
+
+- [Imports](#imports)
+- [Engine entry points](#engine-entry-points) — `mu`, `startTelnetServer`, `createObj`, `checkAndCreateSuperuser`
+- [Commands](#commands) — `addCmd`, `cmds`, `registerScript`, `registerCmdMiddleware`
+- [Plugin SDK (IUrsamuSDK)](#plugin-sdk-iursamusdk) — the `u` object
+- [Database](#database) — `DBO`, `dbojs`
+- [Locks & permissions](#locks--permissions) — `registerLockFunc`, `evaluateLock`, `validateLock`
+- [Format handlers](#format-handlers) — `registerFormatHandler`, `registerFormatTemplate`, `resolveFormat`, `resolveGlobalFormat`, `header`/`divider`/`footer`
+- [Softcode extension](#softcode-extension) — `registerSoftcodeFunc`, `registerSoftcodeSub`, `softcodeService`
+- [Hooks & events](#hooks--events) — `gameHooks`, `GameHookMap`
+- [REST & UI](#rest--ui) — `registerPluginRoute`, `registerUIComponent`
+- [Stat systems](#stat-systems) — `registerStatSystem`
+- [WebSocket](#websocket) — `wsService`, `joinSocketToRoom`, `send`
+- [Engine context](#engine-context) — `buildContext`, `GameContext`
+- [Plugin config](#plugin-config) — `PluginConfigManager`
+- [Stdlib (TS)](#stdlib-ts) — Noise, Rng, physics, spatial, interpolation, vectors
+- [Types](#types)
+- [Internal: plugin install errors](#internal-plugin-install-errors)
+
 ---
 
 ## Imports
 
 ```typescript
-// Functions and classes
-import { addCmd, registerPluginRoute, mu, createObj, DBO, dbojs } from "jsr:@ursamu/ursamu";
+import {
+  mu, startTelnetServer, createObj, checkAndCreateSuperuser,
+  addCmd, cmds, registerScript, registerCmdMiddleware,
+  DBO, dbojs, send, joinSocketToRoom, wsService,
+  gameHooks,
+  registerLockFunc, evaluateLock, validateLock,
+  registerFormatHandler, registerFormatTemplate, unregisterFormatHandler,
+  resolveFormat, resolveFormatOr, resolveGlobalFormat, resolveGlobalFormatOr,
+  header, divider, footer,
+  registerSoftcodeFunc, registerSoftcodeSub, softcodeService,
+  registerPluginRoute, registerUIComponent, unregisterUIComponent, getRegisteredUIComponents,
+  registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames,
+  buildContext, PluginConfigManager,
+} from "jsr:@ursamu/ursamu";
 
-// Types (import type — zero runtime cost)
-import type { ICmd, IPlugin, IDBObj, IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import type {
+  IUrsamuSDK, IDBObj, IDBOBJ, ICmd, IPlugin, IPluginDependency,
+  IContext, IMiddlewareFunction, IStatSystem, IUIComponent,
+  GameHookMap, SessionEvent, SayEvent, PoseEvent, PageEvent, MoveEvent,
+  ChannelMessageEvent, ObjectCreatedEvent, ObjectDestroyedEvent, ObjectModifiedEvent,
+  SceneCreatedEvent, ScenePoseEvent, SceneSetEvent, SceneTitleEvent, SceneClearEvent,
+  MailReceivedEvent, FormatHandler, FormatSlot, GameContext, UserSocket,
+  LockFunc, SoftcodeFn, SoftcodeSubHandler, SoftcodeContext,
+} from "jsr:@ursamu/ursamu";
 ```
+
 ---
 
-## IDBObj
-
-Every object in the game database — players, rooms, exits, things — is an
-`IDBObj`.
-
-```typescript
-interface IDBObj {
-  id: string;                    // Numeric DB ID, e.g. "1", "42"
-  name?: string;                 // Display name (top-level shortcut to state.name)
-  flags: Set<string>;            // Flag set, e.g. Set { "player", "connected" }
-  location?: string;             // ID of containing room or object
-  state: Record<string, unknown>; // All stored data — desc, stats, attrs, etc.
-  contents: IDBObj[];            // Objects contained by this object
-}
-```
-
-| Field | Description |
-|-------|-------------|
-| `id` | Numeric string, e.g. `"1"`. Use this when calling DB methods or `u.teleport()`. |
-| `flags` | Use `flags.has("wizard")`, not array methods. |
-| `state` | Arbitrary key-value store. Cast values on read: `obj.state.gold as number`. |
-| `contents` | Populated at query time — may be empty even if the object has contents depending on context. |
----
-
-## ICmd
-
-Passed to `addCmd()` to register a command.
-
-```typescript
-interface ICmd {
-  name:     string;
-  pattern:  string | RegExp;
-  lock?:    string;
-  exec:     (u: IUrsamuSDK) => void | Promise<void>;
-  help?:    string;
-  hidden?:  boolean;
-  category?: string;
-}
-```
-
-| Field | Description |
-|-------|-------------|
-| `name` | Human-readable name; appears in `help` listings unless `hidden` is true. |
-| `pattern` | RegExp (or string converted to RegExp) matched against raw player input. Capture groups map to `u.cmd.args[0]`, `u.cmd.args[1]`, … |
-| `lock` | Lock expression evaluated before `exec`. If the check fails the command silently does nothing. See the [Lock Expressions guide](../guides/lock-expressions.md). |
-| `exec` | Async-safe — you can `await` inside freely. |
-| `help` | Shown when a player runs `help <name>`. |
-| `hidden` | Hides the command from `help` and `@commands` listings. |
-| `category` | Groups related commands together in listings. |
-
-### Example
-
-```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
-
-addCmd({
-  name: "+greet",
-  pattern: /^\+greet\s+(.+)/i,
-  lock: "connected",
-  exec: (u: IUrsamuSDK) => {
-    u.send(`Hello, ${u.cmd.args[0]}!`);
-  },
-  help: "+greet <name>\nSays hello.",
-});
-```
----
-
-## IUrsamuSDK
-
-The `u` object injected into every command's `exec()` function and into
-sandbox scripts. It provides everything the command needs — actor info, DB
-access, messaging, and utility helpers.
-
-```typescript
-interface IUrsamuSDK {
-  state:    Record<string, unknown>;   // Shared state bag for the command run
-  socketId?: string;                   // WebSocket ID of the connected player
-  me:       IDBObj;                    // The actor who triggered the command
-  here:     IDBObj & { broadcast(msg: string): void };  // Actor's current room
-  target?:  IDBObj & { broadcast(msg: string): void };  // Optional pre-resolved target
-  cmd:      { name: string; args: string[]; switches?: string[]; original?: string };
-  // ... namespaces below
-}
-```
----
-
-## u.me / u.here
-
-```typescript
-u.me.id          // "42"
-u.me.name        // "Alice"
-u.me.location    // room ID
-u.me.flags       // Set<string>
-u.me.state       // all stored player data
-u.me.contents    // inventory
-
-u.here.id        // room ID
-u.here.name      // room name
-u.here.state     // room data (desc, exits, etc.)
-u.here.contents  // everyone and everything in the room
-u.here.broadcast("Message to everyone in the room.");
-```
-
-Check flags:
-
-```typescript
-u.me.flags.has("superuser")   // first player ever created
-u.me.flags.has("admin")       // or "wizard" — equivalent
-u.me.flags.has("builder")
-u.me.flags.has("player")
-u.me.flags.has("connected")   // currently online
-```
----
-
-## u.db
-
-Database operations. All methods are async.
-
-### `u.db.search(query)`
-
-```typescript
-const results: IDBObj[] = await u.db.search(query);
-```
-
-`query` can be:
-- A string — searched against name, ID, and flags
-- An object — field filter, e.g. `{ flags: ["room"] }`
-
-```typescript
-// Find all rooms
-const rooms = await u.db.search({ flags: ["room"] });
-
-// Find by name fragment
-const matches = await u.db.search("Town Square");
-```
-
-### `u.db.create(template)`
-
-```typescript
-const obj: IDBObj = await u.db.create({
-  name: "Magic Sword",
-  flags: new Set(["thing"]),
-  location: u.me.id,
-  state: { desc: "A gleaming sword.", damage: 5 },
-  contents: [],
-});
-```
-
-### `u.db.modify(id, op, data)`
-
-Updates fields on an object. The `op` argument **must** be one of `"$set"`, `"$unset"`, or `"$inc"` — any other value is rejected.
-
-```typescript
-// Merge one field (preferred — precise, no full-object rewrite)
-await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
-
-// Replace full state (always spread to preserve other fields)
-await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: 100 } });
-
-// Increment a number field
-await u.db.modify(u.me.id, "$inc", { "data.deaths": 1 });
-
-// Remove a field
-await u.db.modify(u.me.id, "$unset", { "data.tempFlag": "" });
-
-// Update name or location (these are top-level fields)
-await u.db.modify(obj.id, "$set", { name: "New Name" });
-await u.db.modify(obj.id, "$set", { location: destinationId });
-```
-
-### `u.db.destroy(id)`
-
-```typescript
-await u.db.destroy(obj.id);
-```
----
-
-## u.util
-
-Utility helpers.
-
-### `u.util.target(actor, query, global?)`
-
-Resolves a name or `#id` reference to an `IDBObj`. Searches the actor's
-inventory then the current room. Pass `global: true` to search the whole DB.
-
-```typescript
-const obj = await u.util.target(u.me, u.cmd.args[0]);
-if (!obj) return u.send("I don't see that here.");
-```
-
-### `u.util.displayName(obj, actor)`
-
-Returns the display name of `obj` as seen by `actor`, applying moniker
-substitutions if set.
-
-```typescript
-u.send(`You see ${u.util.displayName(target, u.me)}.`);
-```
-
-### `u.util.stripSubs(str)`
-
-Strips MUSH color codes (`%cX`, `%n`, `%r`, `%t`, `%b`) and raw ANSI escapes.
-Useful for measuring the true display length of a string.
-
-```typescript
-const plain = u.util.stripSubs("%chBold text%cn");
-// → "Bold text"
-```
-
-### `u.util.center(str, length, filler?)`
-
-Centers `str` within `length` characters, optionally padding with `filler`.
-
-```typescript
-u.send(u.util.center("TITLE", 78, "-"));
-// → "--------------------------------TITLE---------------------------------"
-```
-
-### `u.util.ljust(str, length, filler?)` / `u.util.rjust(str, length, filler?)`
-
-Left-pads or right-pads a string.
-
-```typescript
-u.send(u.util.ljust("Name", 20) + u.util.rjust("100", 10));
-```
-
-### `u.util.sprintf(format, ...args)`
-
-Printf-style formatting.
-
-```typescript
-u.send(u.util.sprintf("%-20s %5d gp", player.name, gold));
-```
----
-
-## u.cmd
-
-Populated by the command parser before `exec` is called.
-
-```typescript
-u.cmd.name       // "look"
-u.cmd.args       // string[] — capture groups from the pattern RegExp
-u.cmd.switches   // string[] — e.g. ["quiet"] from "@set/quiet ..."
-u.cmd.original   // The raw input string the player typed
-```
----
-
-## u.auth
-
-Authentication helpers for scripts that need to verify or change passwords.
-
-```typescript
-// Verify a password
-const ok: boolean = await u.auth.verify(u.me.name!, "mypassword");
-
-// Hash a password (bcrypt)
-const hashed: string = await u.auth.hash("newpassword");
-
-// Change a player's password (use carefully — no confirmation prompt)
-await u.auth.setPassword(u.me.id, "newpassword");
-
-// Log in a player (rarely needed in scripts)
-await u.auth.login(u.me.id);
-```
----
-
-## u.sys
-
-Server administration methods. Most are locked behind the `wizard` or
-`superuser` flag in system scripts.
-
-```typescript
-// Set a config value (only keys whitelisted in the engine are accepted)
-await u.sys.setConfig("server.name", "My Game");
-
-// Disconnect a player by socket ID
-await u.sys.disconnect(socketId);
-
-// Server uptime in milliseconds
-const ms: number = await u.sys.uptime();
-
-// Reboot or shut down (DANGEROUS — confirms nothing)
-await u.sys.reboot();
-await u.sys.shutdown();
-
-// In-game calendar
-const t: IGameTime = await u.sys.gameTime();
-// t.year, t.month (1-12), t.day (1-28), t.hour (0-23), t.minute (0-59)
-
-await u.sys.setGameTime({ year: 1340, month: 6, day: 15, hour: 8, minute: 0 });
-```
----
-
-## u.chan
-
-Channel management. Players can join/leave channels and admins can create and
-configure them.
-
-```typescript
-// Join a channel (alias is the local shorthand, e.g. "pub")
-await u.chan.join("Public", "pub");
-
-// Leave by alias
-await u.chan.leave("pub");
-
-// List all channels the actor is a member of
-const channels = await u.chan.list();
-
-// Admin — create a channel
-await u.chan.create("Staff", { header: "%ch[STAFF]%cn", hidden: true });
-
-// Admin — destroy a channel
-await u.chan.destroy("Staff");
-
-// Admin — update channel settings
-await u.chan.set("Public", { header: "%ch[PUB]%cn", masking: false });
-
-// Get recent channel messages
-const history = await u.chan.history("public");        // last 20 messages (default)
-const history = await u.chan.history("public", 50);    // last 50 messages
-// → [{ id: string, playerName: string, message: string, timestamp: number }, ...]
-```
----
-
-## u.bb
-
-Bulletin board access.
-
-```typescript
-// List all boards
-const boards = await u.bb.listBoards();
-// → [{ id, name, description, order, postCount, newCount }, ...]
-
-// List posts on a board
-const posts = await u.bb.listPosts(boardId);
-// → [{ id, num, subject, authorName, date, edited? }, ...]
-
-// Read a post (by board + post number)
-const post = await u.bb.readPost(boardId, postNum);
-// → { id, subject, body, authorName, date, edited? } | null
-
-// Post a message
-await u.bb.post(boardId, "Subject line", "Body text.");
-
-// Edit a post you authored
-await u.bb.editPost(boardId, postNum, "New body text.");
-
-// Delete a post (owner or admin)
-await u.bb.deletePost(boardId, postNum);
-
-// Count unread posts
-const total: number = await u.bb.totalNewCount();
-```
----
-
-## u.events
-
-Emit custom events and register handlers by attribute name.
-
-```typescript
-// Emit an event (other scripts can listen)
-await u.events.emit("game:levelup", { playerId: u.me.id, level: 5 });
-
-// Register a listener (stores a script key to call when the event fires)
-const handlerId = await u.events.on("game:levelup", "scripts/levelup-handler");
-```
----
-
-## u.attr
-
-Reads soft-coded `&ATTR` values stored on objects.
-
-```typescript
-// Returns the string value, or null if not set
-const bio: string | null = await u.attr.get(u.me.id, "FINGER-INFO");
-const desc = await u.attr.get(objectId, "SHORT-DESC");
-
-// Attribute names are case-insensitive
-const val = await u.attr.get(objectId, "onenter");   // same as "ONENTER"
-```
----
-
-## u.mail *(sandbox scripts only)*
-
-Mail system access. Available in `system/scripts/` sandbox context.
-For native `addCmd` handlers, import `mail` from the database service directly.
-
-```typescript
-// Send a message
-await u.mail.send({
-  from:    `#${u.me.id}`,           // dbref format: "#42"
-  to:      [`#${recipientId}`],     // array of dbrefs
-  cc:      [`#${ccId}`],            // optional
-  subject: "Guild meeting",
-  message: "Tonight at 8pm.",
-  read:    false,
-  date:    Date.now(),
-});
-
-// Notify recipient in-game
-u.send(`%chMAIL:%cn You have new mail from ${u.util.displayName(u.me, u.me)}.`, recipientId);
-
-// Read inbox
-const inbox = await u.mail.read({ to: { $in: [`#${u.me.id}`] } });
-inbox.sort((a, b) => b.date - a.date);
-
-// Delete
-await u.mail.delete(messageId);
-
-// Update (e.g. mark as read)
-await u.mail.modify({ id: messageId }, "$set", { read: true });
-```
-
-**IMail shape:**
-```typescript
-{
-  id?:      string;
-  from:     string;     // "#42"
-  to:       string[];   // ["#7", "#8"]
-  cc?:      string[];
-  bcc?:     string[];
-  subject:  string;
-  message:  string;
-  read:     boolean;
-  date:     number;     // Date.now() timestamp
-}
-```
----
-
-## u.eval
-
-Evaluates a stored `&ATTR` as a script and returns its output as a string.
-
-```typescript
-// Evaluate &FORMULA on object #42
-const result = await u.eval("#42", "FORMULA", ["arg1", "arg2"]);
-u.send(`Result: ${result}`);
-
-// Evaluate an attribute on the actor
-const score = await u.eval(u.me.id, "SCORE-FORMULA");
-```
----
-
-## u.forceAs
-
-Executes a command as another object. Requires wizard or admin privilege — enforce
-this in your script; the SDK does not check automatically.
-
-```typescript
-if (!u.me.flags.has("wizard") && !u.me.flags.has("admin") && !u.me.flags.has("superuser")) {
-  u.send("Permission denied.");
-  return;
-}
-
-await u.forceAs(npcId, "say Welcome, traveler!");
-await u.forceAs(roomId, "look");
-```
----
-
-## Top-level methods
-
-These are direct properties on `u`, not namespaced.
-
-### `u.send(message, target?, options?)`
-
-Sends `message` to the actor, or to `target` (DB ID) if provided.
-
-```typescript
-u.send("You say, \"Hello!\"");
-u.send("Whispered message.", otherPlayerId);
-```
-
-### `u.broadcast(message, options?)`
-
-Sends `message` to everyone in the actor's current room.
-
-```typescript
-u.broadcast(`${u.me.name} waves.`);
-```
-
-### `u.setFlags(target, flags)`
-
-Sets or clears flags on a target. Prefix with `!` to remove.
-
-```typescript
-await u.setFlags(u.me.id, "builder");      // add "builder"
-await u.setFlags(u.me.id, "!builder");     // remove "builder"
-await u.setFlags(obj.id, "dark");
-```
-
-### `u.checkLock(target, lock)`
-
-Evaluates a lock expression against a target. Returns `true` if the lock passes.
-
-```typescript
-const canEnter = await u.checkLock(u.me, "builder|wizard");
-```
-
-See the [Lock Expressions guide](../guides/lock-expressions.md) for syntax.
-
-### `u.teleport(target, destination)`
-
-Moves `target` (DB ID) to `destination` (DB ID).
-
-```typescript
-await u.teleport(u.me.id, "1");  // send actor to room #1
-```
-
-### `u.force(command)`
-
-Executes `command` as if the actor typed it.
-
-```typescript
-u.force("look");
-```
-
-### `u.execute(command)`
-
-Executes `command` as the server (no actor context).
-
-```typescript
-u.execute("@pemit #3=Server message.");
-```
-
-### `u.trigger(target, attr, args?)`
-
-Triggers an attribute script on `target`.
-
-```typescript
-await u.trigger(room.id, "onEnter", [u.me.id]);
-```
-
-### `u.canEdit(actor, target)`
-
-Returns `true` if `actor` has permission to edit `target`.
-
-```typescript
-const ok = await u.canEdit(u.me, target);
-if (!ok) return u.send("Permission denied.");
-```
----
-
-## IPlugin
-
-The interface your plugin's exported object must satisfy.
-
-```typescript
-interface IPlugin {
-  name:         string;
-  version:      string;
-  description?: string;
-  init?:        () => boolean | Promise<boolean>;
-  remove?:      () => void   | Promise<void>;
-}
-```
-
-```typescript
-import type { IPlugin } from "jsr:@ursamu/ursamu";
-import "./commands.ts";
-
-export const plugin: IPlugin = {
-  name:        "my-plugin",
-  version:     "1.0.0",
-  description: "Does cool things.",
-  init: async () => {
-    // Startup logic — seed data, connect to external services, etc.
-    return true;   // return false to abort loading
-  },
-};
-```
----
-
-## Exported functions
-
-These are the top-level exports you import from `jsr:@ursamu/ursamu`.
-
-### `addCmd(...cmds: ICmd[])`
-
-Registers one or more commands. Safe to call at module level.
-
-```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
-
-addCmd(
-  { name: "cmd1", pattern: /^cmd1$/i, exec: (u) => u.send("one") },
-  { name: "cmd2", pattern: /^cmd2$/i, exec: (u) => u.send("two") },
-);
-```
-
-### `registerPluginRoute(prefix, handler)`
-
-Registers a custom HTTP route handled by your plugin.
-
-```typescript
-import { registerPluginRoute } from "jsr:@ursamu/ursamu";
-
-registerPluginRoute("/api/v1/my-plugin", async (req, userId) => {
-  return Response.json({ ok: true, userId });
-});
-```
-
-`handler` signature: `(req: Request, userId: string | null) => Promise<Response>`
+## Engine entry points
 
 ### `mu(config?)`
 
-Starts the UrsaMU engine. Called once in your game's `src/main.ts`. Returns
-a Deno `Deno.HttpServer` instance.
+Boots the engine. Call once from `src/main.ts`.
 
 ```typescript
 import { mu } from "jsr:@ursamu/ursamu";
 await mu();
 ```
 
+### `startTelnetServer(port?)`
+
+Spawn a standalone Telnet listener that talks to the same hub.
+
 ### `createObj(template)`
 
-Creates a new object directly in the DB. Useful in startup scripts or
-migrations that run outside a command handler (where `u.db.create()` isn't
-available).
+Create a DB object outside of a command handler (migrations, seeders).
 
 ```typescript
-import { createObj } from "jsr:@ursamu/ursamu";
-
 const room = await createObj({
   name: "The Void",
   flags: new Set(["room"]),
@@ -653,57 +90,274 @@ const room = await createObj({
 });
 ```
 
-### `DBO`
+### `checkAndCreateSuperuser()`
 
-The raw Deno KV database wrapper. Use `dbojs` for most game-data access — `DBO`
-is for low-level or plugin-specific storage.
+Idempotent — ensures `#1` exists with the `superuser` flag.
+
+---
+
+## Commands
+
+### `addCmd(...cmds)`
+
+Registers one or more `ICmd` objects. Safe at module load.
+
+```typescript
+addCmd({
+  name: "+greet",
+  pattern: /^\+greet\s+(.+)/i,
+  lock: "connected",
+  category: "Social",
+  help: "+greet <name> — Say hello.",
+  exec: (u) => u.send(`Hello, ${u.cmd.args[0]}!`),
+});
+```
+
+`ICmd` shape:
+
+```typescript
+interface ICmd {
+  name: string;
+  pattern: string | RegExp;
+  lock?: string;
+  category?: string;
+  help?: string;
+  hidden?: boolean;
+  exec: (u: IUrsamuSDK) => void | Promise<void>;
+}
+```
+
+Capture groups in `pattern` populate `u.cmd.args[0]`, `[1]`, etc.
+
+### `cmds`
+
+The registered command map. Use to introspect or override an existing
+command:
+
+```typescript
+import { cmds } from "jsr:@ursamu/ursamu";
+const existing = cmds.get("look");
+```
+
+### `registerScript(name, content)`
+
+Register a softcode/system script. Lookup order: local file override →
+plugin registry → engine bundled.
+
+```typescript
+registerScript("custom-look", "say You ran the custom look script.");
+```
+
+### `registerCmdMiddleware(fn)`
+
+Insert middleware into the command pipeline. Runs before `exec`. Return
+`false` to abort dispatch.
+
+```typescript
+registerCmdMiddleware(async (u) => {
+  if (u.me.flags.has("frozen")) { u.send("You're frozen."); return false; }
+});
+```
+
+---
+
+## Plugin SDK (`IUrsamuSDK`)
+
+The `u` object passed to every `addCmd` `exec` and every sandbox script.
+
+```typescript
+interface IUrsamuSDK {
+  state: Record<string, unknown>;
+  socketId?: string;
+  me: IDBObj;
+  here: IDBObj & { broadcast(msg: string): void };
+  target?: IDBObj & { broadcast(msg: string): void };
+  cmd: { name: string; original?: string; args: string[]; switches?: string[] };
+
+  send(message: string, target?: string): void;
+  broadcast(message: string): void;
+  execute(command: string): Promise<void>;
+  force(command: string): Promise<void>;
+  forceAs(targetId: string, command: string): Promise<void>;
+  canEdit(actor: IDBObj, target: IDBObj): Promise<boolean>;
+  checkLock(target: IDBObj, lock: string): Promise<boolean>;
+  setFlags(targetId: string, flags: string): Promise<void>;
+  trigger(targetId: string, attr: string, args?: string[]): Promise<void>;
+  eval(targetId: string, attr: string, args?: string[]): Promise<string>;
+  evalString(source: string): Promise<string>;
+  intercept?: (input: string) => Promise<boolean>;
+
+  db:    { search, create, modify, destroy };
+  util:  { target, displayName, stripSubs, center, ljust, rjust, sprintf,
+           template, parseDesc, resolveFormat, resolveFormatOr,
+           resolveGlobalFormat, resolveGlobalFormatOr };
+  auth:  { verify, login, hash, setPassword };
+  sys:   { setConfig, disconnect, reboot, shutdown, uptime, update,
+           gameTime, setGameTime };
+  chan:  { join, leave, list, create, destroy, set, history };
+  attr:  { get, set, clear };
+  events:{ emit, on };
+  ui:    { panel, render, layout };
+}
+```
+
+### `u.db`
+
+All async. `op` must be `"$set"`, `"$inc"`, `"$unset"`, or `"$push"`.
+
+```typescript
+const list = await u.db.search({ flags: ["room"] });
+const sword = await u.db.create({ name: "Sword", flags: new Set(["thing"]),
+  location: u.me.id, state: {}, contents: [] });
+await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
+await u.db.modify(u.me.id, "$inc", { "data.deaths": 1 });
+await u.db.modify(u.me.id, "$unset", { "data.tempFlag": "" });
+await u.db.modify(u.here.id, "$push", { "data.log": "Alice arrived." });
+await u.db.destroy(sword.id);
+```
+
+### `u.util`
+
+```typescript
+const obj = await u.util.target(u.me, u.cmd.args[0], true);
+const name = u.util.displayName(target, u.me);
+const plain = u.util.stripSubs("%chBold%cn");
+u.send(u.util.center("TITLE", 78, "="));
+u.send(u.util.ljust("Name", 20) + u.util.rjust("100", 10));
+u.send(u.util.sprintf("%-20s %5d gp", player.name!, gold));
+const text = await u.util.resolveFormat(u.me, "NAMEFORMAT", defaultName);
+```
+
+### `u.auth` / `u.sys` / `u.chan` / `u.attr` / `u.events`
+
+```typescript
+await u.auth.verify(u.me.name!, "pw");
+await u.auth.setPassword(u.me.id, "newpw");
+
+await u.sys.setConfig("server.name", "My Game");
+const t = await u.sys.gameTime();
+
+await u.chan.join("Public", "pub");
+await u.chan.create("Staff", { header: "%ch[STAFF]%cn", hidden: true });
+
+const bio = await u.attr.get(u.me.id, "FINGER-INFO");
+await u.attr.set(u.me.id, "BIO", "Tall and lanky.");
+
+await u.events.emit("game:levelup", { id: u.me.id, lvl: 5 });
+```
+
+### `u.eval` / `u.evalString` / `u.trigger`
+
+```typescript
+const score = await u.eval(u.me.id, "SCORE-FORMULA");
+const rendered = await u.evalString("[name(me)] is here.");
+await u.trigger(u.here.id, "ONENTER", [u.me.id]);
+```
+
+### `u.force` / `u.forceAs` / `u.execute`
+
+```typescript
+await u.force("look");
+await u.forceAs(npcId, "say Welcome.");
+await u.execute("@pemit #3=Server message.");
+```
+
+`u.forceAs` is privileged — guard with `u.me.flags.has("wizard")` etc.
+
+---
+
+## Database
+
+### `DBO<T>`
+
+Generic Deno KV collection. Use for plugin-scoped storage. Always prefix
+the namespace with your plugin name.
 
 ```typescript
 import { DBO } from "jsr:@ursamu/ursamu";
 
-const db = new DBO<{ score: number }>("server.highscores");
-await db.create({ score: 100 });
-const all = await db.all();
+const scores = new DBO<{ player: string; score: number }>("myplugin.scores");
+await scores.create({ player: "Alice", score: 100 });
+const all = await scores.all();
+const top = await scores.queryOne({ player: "Alice" });
+await scores.modify({ player: "Alice" }, "$inc", { score: 1 });
+await scores.modify({ player: "Alice" }, "$push", { history: Date.now() });
 ```
+
+Ops: `$set`, `$inc`, `$unset`, `$push` (atomic CAS append).
 
 ### `dbojs`
 
-The game-object database accessor. Lets you query `IDBObj` records directly.
+The shared game-object collection (`IDBOBJ`).
 
 ```typescript
 import { dbojs } from "jsr:@ursamu/ursamu";
 
-const players = await dbojs.queryAll((o) => o.flags.has("player"));
-const room    = await dbojs.queryOne((o) => o.id === "1");
+const players = await dbojs.find({ flags: { $in: ["player"] } });
+const room = await dbojs.queryOne({ id: "1" });
 ```
+
+---
+
+## Locks & permissions
+
+Lock strings combine **lockfuncs** with the operators `&&`, `||`, `!`, and
+`()`. Legacy `&` / `|` still work. Max length 4096 chars / 256 tokens.
+
+Built-in lockfuncs:
+
+| Func | Example | Passes when |
+|------|---------|-------------|
+| `flag(name)` | `flag(wizard)` | enactor has the flag |
+| `attr(name)` | `attr(tribe)` | enactor.state has own property `name` |
+| `attr(name, val)` | `attr(tribe, glasswalker)` | `state[name] === val` |
+| `type(name)` | `type(player)` | enactor has the type flag |
+| `is(#id)` | `is(#5)` | `enactor.id === "5"` |
+| `holds(#id)` | `holds(#12)` | enactor.contents includes `#12` |
+| `perm(level)` | `perm(admin)` | passes privilege ladder check |
+
+### `registerLockFunc(name, fn)`
+
+Register a custom lockfunc. Built-in names are protected.
+
+```typescript
+import { registerLockFunc } from "jsr:@ursamu/ursamu";
+
+registerLockFunc("tribe", (enactor, _target, args) =>
+  String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
+);
+
+// lock: "tribe(glasswalker) || perm(admin)"
+```
+
+### `evaluateLock(lock, enactor, target?)`
+
+Returns `Promise<boolean>`. Fail-closed on unknown funcs or parse errors.
+
+### `validateLock(lock)`
+
+Throws on syntax error. Use to validate user-supplied lock strings.
 
 ---
 
 ## Format handlers
 
-Pluggable display formatters for engine and plugin output. Used by `look`,
-`who`, `+ps`, `+mail`, and anywhere that resolves a `*FORMAT` slot. Resolution
-priority is fixed: per-object softcode attribute → registered TS handler →
-registered MUSH-softcode template → built-in default.
+Pluggable display formatters for engine and plugin output. Resolution
+priority: per-object softcode attribute → registered TS handler →
+registered MUSH template → built-in default.
 
-```typescript
-import {
-  registerFormatHandler,
-  registerFormatTemplate,
-  unregisterFormatHandler,
-} from "jsr:@ursamu/ursamu";
-import type { FormatHandler, FormatSlot } from "jsr:@ursamu/ursamu";
+`FormatSlot` is an **open union** (v2.3.4+). The eight engine-known slots
+get IDE autocomplete:
+
+```
+NAMEFORMAT  DESCFORMAT  CONFORMAT   EXITFORMAT
+WHOFORMAT   WHOROWFORMAT  PSFORMAT  PSROWFORMAT
 ```
 
-### `registerFormatHandler(slot, fn)`
+Plugins may register any `UPPERCASE` slot (e.g. `"MAILFORMAT"`,
+`"BBROWFORMAT"`) without casts.
 
-Install a TypeScript handler for a `FormatSlot`. Slot is an open `UPPERCASE`
-string union — the eight engine-known literals (`NAMEFORMAT`, `DESCFORMAT`,
-`CONFORMAT`, `EXITFORMAT`, `WHOFORMAT`, `WHOROWFORMAT`, `PSFORMAT`,
-`PSROWFORMAT`) get IDE autocomplete; plugin-defined slots like `"MAILFORMAT"`
-are accepted without casts. Return a string to render, or `null` to fall
-through to the next handler / built-in default. The first non-null handler
-wins.
+### `registerFormatHandler(slot, fn)`
 
 ```typescript
 registerFormatHandler("NAMEFORMAT", (u, target, defaultName) => {
@@ -712,41 +366,383 @@ registerFormatHandler("NAMEFORMAT", (u, target, defaultName) => {
 });
 ```
 
-### `registerFormatTemplate(slot, mushSource)`
+Return `null` to fall through. First non-null handler wins. Returns the
+registered function so `unregisterFormatHandler` can remove it.
 
-Shortcut for plugins that want to install a MUSH-softcode template as a
-handler. The engine runs `mushSource` whenever the slot resolves; `%0` is
-bound to the default rendering and the resolver's target is the executor —
-so `name(%0)`, `get(%0/<attr>)`, and friends work directly. Returns the
-underlying handler so callers can pass it to `unregisterFormatHandler` from
-plugin `remove()`.
+### `registerFormatTemplate(slot, mushSource)` *(v2.4.0)*
+
+Install a MUSH-softcode template. `%0` binds to the default rendering.
 
 ```typescript
-const handler = registerFormatTemplate(
+const fn = registerFormatTemplate(
   "NAMEFORMAT",
   "[center(strcat(%cy[ ,%0, ]%cn),78,=)]",
 );
-// later, in plugin remove():
-unregisterFormatHandler("NAMEFORMAT", handler);
+// remove() ...
+unregisterFormatHandler("NAMEFORMAT", fn);
 ```
 
 ### `unregisterFormatHandler(slot, fn)`
 
-Remove a previously registered handler. Same reference identity that
-`registerFormatHandler` / `registerFormatTemplate` returned at registration.
+Remove a handler by reference identity.
 
-### Type: `FormatHandler`
+### `resolveFormat(target, slot, defaultArg)`
+
+Two-step lookup for target-bound formats: softcode attr on `target` →
+registered handler. Returns `string | null`.
+
+### `resolveFormatOr(target, slot, defaultArg, fallback)`
+
+As above, but always returns a string.
+
+### `resolveGlobalFormat(enactor, slot, defaultArg)` *(v2.3.3)*
+
+Two-tier lookup for global-list formats (WHO, @ps, +mail, +bb): `#0` →
+enactor. Returns `string | null`.
+
+### `resolveGlobalFormatOr(enactor, slot, defaultArg, fallback)`
+
+Always returns a string.
+
+### `header(title, width?)` / `divider(width?)` / `footer(width?)`
+
+Native TS layout helpers for block-style section rules. Distinct from the
+softcode helpers of the same name.
+
+```typescript
+u.send(header("Stats", 78));
+u.send(divider(78));
+u.send(footer(78));
+```
+
+### Types
 
 ```typescript
 type FormatHandler = (
-  u:          IUrsamuSDK,
-  target:     IDBObj,
+  u: IUrsamuSDK,
+  target: IDBObj,
   defaultArg: string,
 ) => Promise<string | null> | string | null;
+
+type FormatSlot = "NAMEFORMAT" | "DESCFORMAT" | "CONFORMAT" | "EXITFORMAT"
+  | "WHOFORMAT" | "WHOROWFORMAT" | "PSFORMAT" | "PSROWFORMAT"
+  | (string & {});
 ```
 
-### Type: `FormatSlot`
+---
 
-Open `UPPERCASE` string union — see `registerFormatHandler` above. Use one
-of the engine literals for autocomplete or any custom slot your plugin
-defines.
+## Softcode extension
+
+### `registerSoftcodeFunc(name, fn)`
+
+Register a custom stdlib function callable from softcode as `name(args)`.
+
+```typescript
+import { registerSoftcodeFunc } from "jsr:@ursamu/ursamu";
+
+registerSoftcodeFunc("double", (_ctx, args) =>
+  String(Number(args[0]) * 2)
+);
+```
+
+### `registerSoftcodeSub(char, handler)`
+
+Register a custom `%X` substitution.
+
+```typescript
+registerSoftcodeSub("$", (ctx) => `[$${ctx.enactor.id}]`);
+```
+
+### `softcodeService`
+
+The evaluator instance. Exposed for plugin integration tests.
+
+```typescript
+import { softcodeService } from "jsr:@ursamu/ursamu";
+const out = await softcodeService.eval({ enactor, executor, source: "[add(2,3)]" });
+```
+
+---
+
+## Hooks & events
+
+```typescript
+import { gameHooks } from "jsr:@ursamu/ursamu";
+import type { SessionEvent, SayEvent } from "jsr:@ursamu/ursamu";
+
+const onLogin = (e: SessionEvent) => console.log(`${e.player.name} logged in`);
+gameHooks.on("player:login", onLogin);
+
+// In plugin remove() — same function reference required:
+gameHooks.off("player:login", onLogin);
+```
+
+`GameHookMap` event names:
+
+```
+player:login      player:logout
+say               pose             page             move
+channel:message
+object:created    object:destroyed object:modified
+scene:created     scene:pose       scene:set
+scene:title       scene:clear
+mail:received
+```
+
+Each has a typed payload (`SessionEvent`, `SayEvent`, `PoseEvent`,
+`PageEvent`, `MoveEvent`, `ChannelMessageEvent`, `ObjectCreatedEvent`,
+`ObjectDestroyedEvent`, `ObjectModifiedEvent`, `SceneCreatedEvent`,
+`ScenePoseEvent`, `SceneSetEvent`, `SceneTitleEvent`, `SceneClearEvent`,
+`MailReceivedEvent`).
+
+---
+
+## REST & UI
+
+### `registerPluginRoute(prefix, handler)`
+
+Attach a REST handler. Always return 401 before doing work when `userId`
+is null on a protected route.
+
+```typescript
+registerPluginRoute("/api/v1/my-plugin", async (req, userId) => {
+  if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  return Response.json({ ok: true, userId });
+});
+```
+
+Handler signature: `(req: Request, userId: string | null) => Promise<Response>`.
+
+### `registerUIComponent(component)` / `unregisterUIComponent(id)` / `getRegisteredUIComponents()`
+
+Expose a UI element via `GET /api/v1/ui-manifest`.
+
+```typescript
+import type { IUIComponent } from "jsr:@ursamu/ursamu";
+
+const comp: IUIComponent = {
+  id: "myplugin.panel",
+  type: "panel",
+  title: "My Panel",
+  url: "/plugins/myplugin/panel.html",
+  requires: { flag: "builder" },
+};
+registerUIComponent(comp);
+```
+
+---
+
+## Stat systems
+
+Plugins can register a pluggable stat/skill system, queryable by name.
+
+```typescript
+import { registerStatSystem, getDefaultStatSystem } from "jsr:@ursamu/ursamu";
+import type { IStatSystem } from "jsr:@ursamu/ursamu";
+
+const system: IStatSystem = { name: "wod5", /* ...impl */ };
+registerStatSystem(system, { default: true });
+
+const def = getDefaultStatSystem();
+```
+
+Also: `getStatSystem(name)`, `getStatSystemNames(): string[]`.
+
+---
+
+## WebSocket
+
+### `wsService`
+
+Direct access to the WebSocket hub. Used by channel/notification plugins.
+
+### `joinSocketToRoom(socketId, room)`
+
+Subscribe a connected socket to a broadcast room.
+
+### `send(message, target?, options?)`
+
+Module-level broadcast — sends to a socket ID, room ID, or DB object ID.
+Same semantics as `u.send` but importable from anywhere.
+
+```typescript
+import { send } from "jsr:@ursamu/ursamu";
+send("Server reboot in 5 minutes.", "#all");
+```
+
+`UserSocket` is the typed socket metadata exported for plugin authors.
+
+---
+
+## Engine context
+
+`GameContext` is the substrate every command runs on (actor, location,
+helpers). Most plugin code uses `IUrsamuSDK` instead — `GameContext` is
+exposed for low-level integrations.
+
+```typescript
+import { buildContext } from "jsr:@ursamu/ursamu";
+const ctx = await buildContext({ socketId, actorId });
+```
+
+---
+
+## Plugin config
+
+`PluginConfigManager` reads per-plugin scoped values from `config.json`.
+
+```typescript
+import { PluginConfigManager } from "jsr:@ursamu/ursamu";
+
+const cfg = new PluginConfigManager("myplugin");
+const apiKey = cfg.get<string>("apiKey");
+await cfg.set("lastRun", Date.now());
+```
+
+---
+
+## Stdlib (TS)
+
+All functions are pure and deterministic. v2.5.1 promoted these from
+softcode-only to TS-importable. v2.5.2 added per-instance `Noise`.
+
+### Noise
+
+```typescript
+import {
+  seedNoise, perlin1, perlin2, perlin3,
+  simplex2, worley2, fbm2, ridged2, noiseGrid,
+  Noise, createNoise, buildPerm,
+} from "jsr:@ursamu/ursamu";
+
+seedNoise(42);
+const v = perlin2(0.5, 1.7);
+
+const n = createNoise(123);
+const v2 = n.perlin2(0.5, 1.7);
+```
+
+| Function | Purpose |
+|----------|---------|
+| `seedNoise(seed)` | Reseed the singleton noise stream |
+| `perlin1/2/3` | Classic Perlin noise (1D/2D/3D), range ~[-1, 1] |
+| `simplex2` | 2D simplex noise |
+| `worley2` | 2D Worley/cellular noise, returns distance to nearest feature |
+| `fbm2` | Fractional Brownian Motion (octave-summed Perlin) |
+| `ridged2` | Ridged multifractal noise |
+| `noiseGrid(w,h,fn)` | Sample a function over a grid → `number[][]` |
+| `buildPerm(seed)` | Build a permutation table for a custom noise impl |
+| `Noise` class | Per-instance independent noise stream |
+| `createNoise(seed)` | Construct a `Noise` |
+
+### PRNG (`Rng`)
+
+```typescript
+import { Rng, createRng } from "jsr:@ursamu/ursamu";
+
+const r = createRng(123);
+r.next();        // [0, 1)
+r.int(1, 6);     // dice roll
+r.pick(["a", "b", "c"]);
+```
+
+Per-instance mulberry32 — independent of the softcode RNG.
+
+### Physics
+
+```typescript
+import { vreflect, pointInAabb, rayAabb } from "jsr:@ursamu/ursamu";
+import type { Vec3 } from "jsr:@ursamu/ursamu";
+
+const reflected = vreflect([1, 0, 0], [0, 1, 0]);
+const inside = pointInAabb([5, 5, 5], [0, 0, 0], [10, 10, 10]);
+const hit = rayAabb(origin, dir, min, max);
+```
+
+### Spatial scalars
+
+```typescript
+import {
+  dist2d, dist3d, distSq2d, distSq3d,
+  manhattan, chebyshev, angle2d, bearing,
+} from "jsr:@ursamu/ursamu";
+
+dist2d(0, 0, 3, 4);     // 5
+manhattan(0, 0, 3, 4);  // 7
+bearing(0, 0, 1, 1);    // radians
+```
+
+### Interpolation
+
+```typescript
+import { lerp, inverseLerp, remap, smoothstep, smootherstep, clamp }
+  from "jsr:@ursamu/ursamu";
+
+lerp(0, 100, 0.5);          // 50
+inverseLerp(0, 100, 75);    // 0.75
+remap(0, 100, 0, 1, 50);    // 0.5
+smoothstep(0, 1, 0.5);      // 0.5 (Hermite curve)
+clamp(150, 0, 100);         // 100
+```
+
+### Vector ops
+
+```typescript
+import { vsize, vsizeSq, vdistance, vdistanceSq, vlerp, vclamp }
+  from "jsr:@ursamu/ursamu";
+import type { Vec } from "jsr:@ursamu/ursamu";
+
+const a: Vec = [3, 4];
+vsize(a);              // 5
+vdistance([0, 0], a);  // 5
+vlerp([0, 0], a, 0.5); // [1.5, 2]
+```
+
+---
+
+## Types
+
+| Type | Purpose |
+|------|---------|
+| `IUrsamuSDK` | The `u` object — full surface |
+| `IDBObj` | Hydrated game object (Set flags, populated contents) |
+| `IDBOBJ` | Raw DB record shape |
+| `ICmd` | Command registration |
+| `IPlugin` | Plugin module export |
+| `IPluginDependency` | Entry in `ursamu.plugin.json` deps |
+| `IContext` | Low-level command context (legacy) |
+| `IMiddlewareFunction` | `(u: IUrsamuSDK) => boolean \| Promise<boolean>` |
+| `IStatSystem` | Pluggable stat system |
+| `IUIComponent` | UI manifest entry |
+| `GameHookMap` | Event-name → payload mapping |
+| `FormatHandler` | TS format-handler signature |
+| `FormatSlot` | Open uppercase-string union |
+| `GameContext` | Engine substrate |
+| `UserSocket` | WebSocket metadata |
+| `LockFunc` | Custom lockfunc signature |
+| `SoftcodeFn` | Custom stdlib function signature |
+| `SoftcodeSubHandler` | Custom `%X` handler signature |
+| `SoftcodeContext` | Evaluator context |
+
+---
+
+## Internal: plugin install errors
+
+The v2.6.0 plugin installer throws typed errors on failure. They live in
+`src/utils/pluginErrors.ts` and are **not currently exported from
+`mod.ts`** — they are used internally by the `ursamu plugin install`
+flow. Listed here for diagnostic visibility.
+
+```
+PluginInstallError              base class
+├─ PluginDepNameError           invalid/missing name in deps entry
+├─ PluginDepUrlError            invalid/missing url
+├─ PluginCloneError             git clone failed
+├─ PluginRenameError            move into plugins/ failed
+├─ PluginVersionError           installed plugin missing version manifest
+├─ PluginSemverError            installed version doesn't satisfy dep range
+└─ PluginConflictError          two deps disagree on resolved version
+```
+
+On any throw the installer's `InstallTxn` rolls back every directory and
+registry mutation made during the run.

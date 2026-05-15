@@ -209,7 +209,7 @@ deno task server
 
 ```bash
 # Get a token first
-TOKEN=$(curl -s -X POST http://localhost:4203/api/v1/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:4203/api/v1/auth \
   -H "Content-Type: application/json" \
   -d '{"name":"Admin","password":"yourpassword"}' | jq -r .token)
 

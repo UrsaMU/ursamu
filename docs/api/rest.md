@@ -1,37 +1,65 @@
 ---
 layout: layout.vto
 title: REST API Reference
-description: Complete reference for all UrsaMU HTTP endpoints — auth, players, channels, objects, scenes, mail, building, wiki, help, and health.
+description: Complete reference for UrsaMU's built-in HTTP endpoints — auth, players, channels, DB objects, scenes, config, and UI manifest.
 ---
 
 # REST API Reference
 
-The UrsaMU REST API runs on the same port as the WebSocket hub (default `4203`).
+The UrsaMU HTTP API runs on the same port as the WebSocket hub (default
+`4203`). This document covers only the **engine-built-in** endpoints —
+plugins (mail, jobs, bbs, help, wiki, builder, events) register their own
+routes via `registerPluginRoute()` and document them in their own repos.
+
+Verified against `src/routes/` and `src/app.ts` for v2.6.0.
+
+## Contents
+
+- [Auth model](#auth-model)
+- [Error responses](#error-responses)
+- [WebSocket connection](#websocket-connection)
+- [Auth router](#auth-router) — `/api/v1/auth/*`
+- [Players & channels](#players--channels) — `/api/v1/me`, `/api/v1/players/*`, `/api/v1/channels/*`
+- [DB Objects](#db-objects) — `/api/v1/dbos`, `/api/v1/dbobj/:id`
+- [Scenes](#scenes) — `/api/v1/scenes/*`
+- [Config & text](#config--text) — `/api/v1/config`, `/api/v1/connect`, `/api/v1/welcome`
+- [UI manifest](#ui-manifest) — `/api/v1/ui-manifest`
+- [Avatars](#avatars) — `/avatars/:id`
+- [Health](#health) — `/health`
+- [Plugin endpoints](#plugin-endpoints)
 
 ---
 
-## Authentication
+## Auth model
 
-All endpoints require a `Bearer` JWT in the `Authorization` header unless marked **None**.
+All protected endpoints require a JWT in the `Authorization` header:
 
-Obtain a token via `POST /api/v1/auth/login`. Tokens are signed with `JWT_SECRET` — set this in production.
-
-```bash
+```
 Authorization: Bearer <token>
 ```
 
-### Error responses
+Obtain a token via `POST /api/v1/auth` or `POST /api/v1/auth/register`.
+Tokens are signed with `JWT_SECRET` (set in `.env`). If `JWT_SECRET` is
+unset in production the engine exits at boot. In dev a random per-process
+secret is used and tokens are invalidated on every restart.
+
+A global API rate limit applies per IP (`apiRateLimits` map in
+`src/app.ts`). Auth endpoints have an additional per-IP brute-force
+guard.
+
+## Error responses
 
 | Status | Meaning |
 |--------|---------|
-| `400` | Bad request — missing or invalid body fields |
-| `401` | Missing or invalid token |
-| `403` | Valid token, insufficient permissions (flag check failed) |
-| `404` | Resource not found |
-| `429` | Rate limited |
-| `500` | Internal server error |
+| 400 | Bad request — missing or invalid body |
+| 401 | Missing or invalid token |
+| 403 | Valid token, insufficient permissions |
+| 404 | Resource not found |
+| 405 | Method not allowed |
+| 429 | Rate limited (`Retry-After` header set) |
+| 500 | Internal server error |
 
-All error bodies follow the same shape:
+Error body shape:
 
 ```json
 { "error": "Human-readable message" }
@@ -39,498 +67,317 @@ All error bodies follow the same shape:
 
 ---
 
-## WebSocket Connection
+## WebSocket connection
 
-The WebSocket hub is on the same port as HTTP (`4203`). Two connection modes are supported:
+The hub shares the HTTP port. Two connection modes:
 
 ### JWT pre-auth (web clients)
-
-Attach a token as a query parameter. The player is authenticated immediately — no
-`connect name password` prompt needed.
 
 ```
 ws://localhost:4203?token=<jwt>&client=web
 ```
 
+The player is authenticated immediately. On JWT reauth the engine
+re-applies the `connected` flag and re-joins the player's `#cid` and
+`#location` rooms (v2.4.0 fix).
+
 ### Classic connect (Telnet-style)
 
-Connect without a token. The server sends the connect screen. Authenticate with:
-
-```
-connect <name> <password>
-```
+Connect without a token, then send `connect <name> <password>`.
 
 ### Rate limiting
 
-Each WebSocket connection is limited to **10 commands per second**. Excess commands
-are silently dropped (a warning is logged server-side). This cannot be changed per
-connection — if you need higher throughput, batch commands or use the REST API.
+Each WebSocket is limited to **10 commands/sec**. Excess commands are
+silently dropped (warning logged server-side).
 
 ---
 
-## Auth Endpoints
+## Auth router
+
+Defined in `src/routes/authRouter.ts`. All endpoints accept `POST` only.
+Path is matched by suffix on `/api/v1/auth*`.
+
+### POST /api/v1/auth
+
+Login. Returns a JWT.
+
+Body:
+
+```json
+{ "username": "Alice", "password": "hunter2" }
+```
+
+Response 200:
+
+```json
+{ "token": "<jwt>", "id": "5", "name": "Alice" }
+```
+
+Errors: 401 invalid credentials, 429 rate-limited.
 
 ### POST /api/v1/auth/register
 
-Create a new character account. Returns a JWT.
+Create a new character. Returns a JWT.
 
-```bash
-curl -X POST http://localhost:4203/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Alice", "password": "hunter2"}'
-```
+Body:
 
 ```json
-{ "token": "<jwt>" }
+{ "username": "Alice", "email": "alice@example.com", "password": "hunter2" }
 ```
 
-### POST /api/v1/auth/login
-
-Authenticate and receive a JWT.
-
-```bash
-curl -X POST http://localhost:4203/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Alice", "password": "hunter2"}'
-```
+Response 201:
 
 ```json
-{ "token": "<jwt>" }
+{ "token": "<jwt>", "id": "5", "name": "Alice" }
 ```
 
 ### POST /api/v1/auth/reset-password
 
-Consume a one-time reset token and set a new password.
+Consume a one-time reset token and set a new password. Token comparison
+is constant-time (v2.0.0 hardening). Expired tokens are cleaned up
+opportunistically.
 
-```bash
-curl -X POST http://localhost:4203/api/v1/auth/reset-password \
-  -H "Content-Type: application/json" \
-  -d '{"token": "<one-time-token>", "password": "newpassword"}'
-```
+Body:
 
 ```json
-{ "message": "Password reset successfully." }
+{ "token": "<one-time-token>", "newPassword": "newpw" }
+```
+
+Response 200:
+
+```json
+{ "message": "Password updated successfully." }
 ```
 
 ---
 
-## Players & Channels
+## Players & channels
+
+Routed from `src/app.ts`; handlers in `src/routes/playersRouter.ts`.
 
 ### GET /api/v1/me
 
-Current player profile (requires auth).
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" http://localhost:4203/api/v1/me
-```
+Current player profile. Requires auth.
 
 ```json
 {
-  "id": "p-1",
+  "id": "5",
   "name": "Alice",
   "flags": ["connected", "player"],
-  "data": { "description": "A mysterious figure.", "avatar": "/avatars/alice.png" }
+  "data": { "description": "...", "avatar": "/avatars/5" }
 }
 ```
 
 ### GET /api/v1/players/online
 
-List connected players. No auth required.
-
-```bash
-curl http://localhost:4203/api/v1/players/online
-```
+List currently connected players. Requires auth.
 
 ```json
 [
-  { "id": "p-1", "name": "Alice", "location": "The Lobby" },
-  { "id": "p-2", "name": "Bob",   "location": "The Library" }
+  { "id": "5", "name": "Alice", "location": "The Lobby" },
+  { "id": "8", "name": "Bob",   "location": "The Library" }
 ]
 ```
 
 ### GET /api/v1/channels
 
-List all channels.
-
-```bash
-curl http://localhost:4203/api/v1/channels
-```
+List all channels. No auth required.
 
 ```json
 [
-  { "name": "Public", "header": "[Public]", "members": 4 },
-  { "name": "Staff",  "header": "[Staff]",  "members": 2 }
+  { "name": "Public", "header": "[Public]", "members": 4 }
 ]
 ```
 
 ### GET /api/v1/channels/:name/history
 
-Recent message history for a channel (requires auth).
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:4203/api/v1/channels/Public/history?limit=20"
-```
+Recent messages. Requires auth. Query param `?limit=N` (default 20, max
+500).
 
 ```json
 [
-  { "sender": "Alice", "message": "Hello everyone!", "timestamp": 1750536000000 },
-  { "sender": "Bob",   "message": "Hey Alice.",       "timestamp": 1750536010000 }
+  { "sender": "Alice", "message": "Hi!", "timestamp": 1750536000000 }
 ]
 ```
 
 ---
 
-## Database Objects
+## DB Objects
+
+`src/routes/dbObjRouter.ts`. All endpoints require auth.
 
 ### GET /api/v1/dbos
 
-List accessible objects. Optional `?flags=` filter.
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:4203/api/v1/dbos?flags=room"
-```
+List accessible objects. Optional `?flags=room` filter.
 
 ### GET /api/v1/dbobj/:id
 
-Fetch a single game object by its DB id.
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" http://localhost:4203/api/v1/dbobj/p-1
-```
+Fetch a single object.
 
 ```json
 {
-  "id": "p-1",
+  "id": "5",
   "name": "Alice",
-  "location": "room-1",
+  "location": "1",
   "flags": ["connected", "player"],
-  "data": { "description": "…", "state": {} },
+  "data": { "description": "..." },
   "contents": []
 }
 ```
 
 ### PATCH /api/v1/dbobj/:id
 
-Update object data, name, or description (requires ownership or admin).
+Update object data, name, or description. Requires ownership or admin.
 
-```bash
-curl -X PATCH \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"data": {"description": "A tall figure in a green cloak."}}' \
-  http://localhost:4203/api/v1/dbobj/p-1
+Body:
+
+```json
+{ "data": { "description": "A tall figure in a green cloak." } }
 ```
+
+> The engine does not currently expose `PUT` / `DELETE` for `/dbobj/:id`
+> or any `/attrs` sub-routes. Edit attributes via the `&attr` command or
+> a custom plugin route.
 
 ---
 
 ## Scenes
 
+`src/routes/sceneRouter.ts`. All endpoints require auth.
+
 ### GET /api/v1/scenes
 
-List active scenes (requires auth).
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" http://localhost:4203/api/v1/scenes
-```
-
-```json
-[
-  {
-    "id": "sc-1",
-    "name": "The Heist",
-    "status": "active",
-    "type": "action",
-    "roomId": "room-5",
-    "participants": ["Alice", "Bob"],
-    "createdAt": 1750536000000
-  }
-]
-```
+List active scenes the caller can see.
 
 ### POST /api/v1/scenes
 
-Create a new scene (requires auth).
+Create a scene.
 
-```bash
-curl -X POST \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "The Heist", "type": "action", "roomId": "room-5"}' \
-  http://localhost:4203/api/v1/scenes
+Body:
+
+```json
+{ "name": "The Heist", "type": "action", "roomId": "room-5" }
 ```
+
+### GET /api/v1/scenes/locations
+
+List rooms that currently host scenes.
 
 ### GET /api/v1/scenes/:id
 
-Get scene details with pose log and participants.
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" http://localhost:4203/api/v1/scenes/sc-1
-```
+Fetch a scene with its pose log and participants.
 
 ### PATCH /api/v1/scenes/:id
 
-Update scene metadata (owner or admin).
+Update scene metadata (owner or admin; ownerless scenes are adopted by
+the patcher — v2.0.0 fix).
 
-```bash
-curl -X PATCH \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"status": "closed"}' \
-  http://localhost:4203/api/v1/scenes/sc-1
+### POST /api/v1/scenes/:id/pose
+
+Add a pose, OOC line, or scene-set.
+
+Body:
+
+```json
+{ "msg": "Alice steps through the door.", "type": "pose" }
+```
+
+`type`: `"pose"` (default), `"ooc"`, `"set"`. When type is not `"set"`,
+`msg` is required (400 otherwise).
+
+### PATCH /api/v1/scenes/:id/pose/:poseId
+
+Edit an existing pose. Owner or admin.
+
+### POST /api/v1/scenes/:id/join
+
+Join a scene.
+
+### POST /api/v1/scenes/:id/invite
+
+Invite a player. Owner only.
+
+Body:
+
+```json
+{ "playerId": "8" }
 ```
 
 ### GET /api/v1/scenes/:id/export
 
-Export a scene as Markdown or JSON.
-
-```bash
-# Markdown (for copy-paste into a wiki or Google Doc)
-curl -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:4203/api/v1/scenes/sc-1/export?format=markdown"
-
-# JSON (for external tools)
-curl -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:4203/api/v1/scenes/sc-1/export?format=json"
-```
-
-### POST /api/v1/scenes/:id/pose
-
-Add a pose, OOC comment, or scene-set to a scene.
-
-```bash
-curl -X POST \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"msg": "Alice steps through the door.", "type": "pose"}' \
-  http://localhost:4203/api/v1/scenes/sc-1/pose
-```
-
-`type` values: `"pose"` (default), `"ooc"`, `"set"` (scene description).
-
-### POST /api/v1/scenes/:id/join
-
-Join a scene (requires auth).
-
-```bash
-curl -X POST \
-  -H "Authorization: Bearer $TOKEN" \
-  http://localhost:4203/api/v1/scenes/sc-1/join
-```
-
-### POST /api/v1/scenes/:id/invite
-
-Invite a player to a scene (owner only).
-
-```bash
-curl -X POST \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"playerId": "p-3"}' \
-  http://localhost:4203/api/v1/scenes/sc-1/invite
-```
+Export as Markdown or JSON. Query: `?format=markdown` (default) or
+`?format=json`.
 
 ---
 
-## Mail
+## Config & text
 
-Provided by the [mail-plugin](https://github.com/UrsaMU/mail-plugin).
-
-### GET /api/v1/mail
-
-Inbox (requires auth).
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" http://localhost:4203/api/v1/mail
-```
-
-```json
-[
-  {
-    "id": "ml-1",
-    "from": "Bob",
-    "subject": "Meeting tonight",
-    "read": false,
-    "receivedAt": 1750536000000
-  }
-]
-```
-
-### POST /api/v1/mail
-
-Send a new message.
-
-```bash
-curl -X POST \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"to": "Bob", "subject": "Re: Meeting", "body": "I will be there!"}' \
-  http://localhost:4203/api/v1/mail
-```
-
-### GET /api/v1/mail/:id
-
-Read a message (marks as read).
-
-```bash
-curl -H "Authorization: Bearer $TOKEN" http://localhost:4203/api/v1/mail/ml-1
-```
-
-### DELETE /api/v1/mail/:id
-
-Delete a message.
-
-```bash
-curl -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  http://localhost:4203/api/v1/mail/ml-1
-```
-
----
-
-## Help
-
-Provided by the [help-plugin](https://github.com/UrsaMU/help-plugin).
-
-### GET /api/v1/help
-
-List all help sections and topics. No auth required.
-
-```bash
-curl http://localhost:4203/api/v1/help
-```
-
-```json
-{
-  "sections": {
-    "building": ["dig", "open", "link", "describe", "examine"],
-    "mail":     ["send", "reply", "delete", "folders"],
-    "social":   ["say", "pose", "page"]
-  }
-}
-```
-
-### GET /api/v1/help/:topic
-
-Fetch a single topic. Use `?format=md` for raw Markdown.
-
-```bash
-# Rendered (MUSH color codes stripped)
-curl http://localhost:4203/api/v1/help/dig
-
-# Raw Markdown
-curl "http://localhost:4203/api/v1/help/dig?format=md"
-```
-
-### POST /api/v1/help/:topic
-
-Create or update a help entry (admin).
-
-```bash
-curl -X POST \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"content": "# DIG\n\nCreates a new room.", "section": "building"}' \
-  http://localhost:4203/api/v1/help/dig
-```
-
-### DELETE /api/v1/help/:topic
-
-Delete a help entry (admin). Restores the underlying file entry if one exists.
-
-```bash
-curl -X DELETE \
-  -H "Authorization: Bearer $TOKEN" \
-  http://localhost:4203/api/v1/help/dig
-```
-
----
-
-## Building
-
-Provided by the [builder-plugin](https://github.com/UrsaMU/builder-plugin). Requires `builder+` flag.
-
-### POST /api/v1/building/room
-
-Create a new room.
-
-```bash
-curl -X POST \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "The Library", "description": "Shelves of ancient tomes."}' \
-  http://localhost:4203/api/v1/building/room
-```
-
----
-
-## Wiki
-
-Provided by the [wiki-plugin](https://github.com/UrsaMU/wiki-plugin).
-
-### GET /api/v1/wiki
-
-List all wiki topics. No auth required.
-
-```bash
-curl http://localhost:4203/api/v1/wiki
-```
-
-### GET /api/v1/wiki/:topic
-
-Retrieve a wiki page. No auth required.
-
-```bash
-curl http://localhost:4203/api/v1/wiki/lore/history
-```
-
----
-
-## Config & Text
+`src/routes/config.ts`. No auth required.
 
 ### GET /api/v1/config
 
-Server config (name, version, ports, theme). No auth required.
-
-```bash
-curl http://localhost:4203/api/v1/config
-```
+Server config (name, version, ports, theme).
 
 ```json
 {
-  "game": { "name": "My Game", "version": "0.0.1" },
-  "server": { "http": 4203, "telnet": 4201 }
+  "game":   { "name": "My Game", "version": "0.0.1" },
+  "server": { "http": 4203, "telnet": 4201 },
+  "theme":  { "primary": "#...", "backgroundImage": "..." }
 }
 ```
 
 ### GET /api/v1/connect
 
-Connect-screen text (raw, suitable for display in a login screen).
-
-```bash
-curl http://localhost:4203/api/v1/connect
-```
+Connect-screen text (Markdown). Reads
+`config.game.text.connect` (default `text/default_connect.txt`) with a
+path-traversal guard.
 
 ### GET /api/v1/welcome
 
-Welcome text shown after login.
+Post-login welcome text (from the `texts` DBO, id `welcome`).
 
-```bash
-curl http://localhost:4203/api/v1/welcome
+### GET /api/v1/404
+
+Site 404 page content (from `texts` DBO, id `404`). Falls back to a
+default if no entry exists.
+
+---
+
+## UI manifest
+
+### GET /api/v1/ui-manifest
+
+Returns the list of UI components registered by plugins via
+`registerUIComponent()`. Optionally authenticated — if a JWT is
+presented, results are filtered by the caller's privileges
+(`requires.flag`, etc.).
+
+```json
+[
+  { "element": "myplugin-panel", "title": "My Panel", "url": "..." }
+]
 ```
+
+External script URLs are rejected at registration time (v1.9.3
+hardening).
+
+---
+
+## Avatars
+
+### GET /avatars/:id
+
+Public avatar image. `:id` must match `^[a-zA-Z0-9_-]+$` — dots and
+slashes are rejected. Looks for `data/avatars/<id>.{png,jpg,gif,webp}`.
+Cached for 1 hour.
 
 ---
 
 ## Health
 
-### GET /health
+### GET /health (or GET /)
 
-No auth required. Returns immediately; useful for load balancer health checks.
-
-```bash
-curl http://localhost:4203/health
-```
+Liveness probe. No auth.
 
 ```json
 { "status": "ok", "engine": "UrsaMU" }
@@ -538,14 +385,23 @@ curl http://localhost:4203/health
 
 ---
 
-## Plugin Endpoints
+## Plugin endpoints
 
-Official plugins add versioned routes on install:
+Plugins register routes via `registerPluginRoute(prefix, handler)`. The
+engine matches by `startsWith(prefix)` and forwards the request along
+with the authenticated `userId` (or `null`).
 
-| Plugin | Base path | Full docs |
-|--------|-----------|-----------|
-| **jobs** | `/api/v1/jobs` | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin) |
-| **events** | `/api/v1/events` | [Events plugin](./events.md) |
-| **bbs** | `/api/v1/bbs` | [UrsaMU/bbs-plugin](https://github.com/UrsaMU/bbs-plugin) |
+Official plugins:
 
-Custom plugins register routes via `registerPluginRoute(path, handler)` — see [Plugin Development](../plugins/index.md).
+| Plugin | Base path | Repo |
+|--------|-----------|------|
+| jobs   | `/api/v1/jobs`   | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin) |
+| events | `/api/v1/events` | [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin) |
+| bbs    | `/api/v1/bbs`    | [UrsaMU/bbs-plugin](https://github.com/UrsaMU/bbs-plugin) |
+| mail   | `/api/v1/mail`   | [UrsaMU/mail-plugin](https://github.com/UrsaMU/mail-plugin) |
+| help   | `/api/v1/help`   | [UrsaMU/help-plugin](https://github.com/UrsaMU/help-plugin) |
+| wiki   | `/api/v1/wiki`   | [UrsaMU/wiki-plugin](https://github.com/UrsaMU/wiki-plugin) |
+| builder| `/api/v1/building` | [UrsaMU/builder-plugin](https://github.com/UrsaMU/builder-plugin) |
+
+Custom plugins register their own routes — see
+[Plugin Development](../plugins/index.md).
