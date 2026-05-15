@@ -2,6 +2,9 @@
 
 > Machine-optimized reference for code generation. Covers all public APIs,
 > types, patterns, and conventions. For human-readable guides see docs/guides/.
+> **Current version: v2.6.0.** Authoritative API surface lives at
+> `src/@types/UrsamuSDK.ts` and is mirrored in
+> `.claude/skills/ursamu-dev/references/api-reference.md`.
 ---
 
 ## Overview
@@ -20,9 +23,26 @@ UrsaMU is a TypeScript/Deno MUSH-style multiplayer game server. Key characterist
 ## Import Paths
 
 ```typescript
-// All public APIs
+// All public APIs (v2.6.0)
 import {
-  addCmd, registerPluginRoute, mu, createObj, DBO, dbojs, gameHooks
+  addCmd, cmds, registerScript, registerCmdMiddleware,
+  registerPluginRoute, registerUIComponent, unregisterUIComponent,
+  getRegisteredUIComponents,
+  mu, createObj, DBO, dbojs, gameHooks, send, joinSocketToRoom,
+  softcodeService, registerSoftcodeFunc, registerSoftcodeSub,
+  evaluateLock, validateLock, registerLockFunc,
+  registerFormatHandler, registerFormatTemplate, unregisterFormatHandler,
+  resolveFormat, resolveFormatOr, resolveGlobalFormat, resolveGlobalFormatOr,
+  header, divider, footer,
+  registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames,
+  // Stdlib (v2.5.1+): Noise, PRNG, physics, spatial, interpolation, vector
+  Noise, createNoise, seedNoise, perlin1, perlin2, perlin3, simplex2,
+  worley2, fbm2, ridged2, noiseGrid, buildPerm,
+  Rng, createRng,
+  vreflect, pointInAabb, rayAabb,
+  dist2d, dist3d, distSq2d, distSq3d, manhattan, chebyshev, angle2d, bearing,
+  lerp, inverseLerp, remap, smoothstep, smootherstep, clamp,
+  vsize, vsizeSq, vdistance, vdistanceSq, vlerp, vclamp,
 } from "jsr:@ursamu/ursamu";
 
 // Types (zero runtime cost)
@@ -886,4 +906,4 @@ Result: discord no longer declares a `jobs` dependency. It reacts to job
 events whether or not it knows jobs is installed.
 ---
 
-*Generated from `src/@types/UrsamuSDK.ts`, `src/services/Sandbox/worker.ts`, and source review. Last updated: 2026-03-22.*
+*Generated from `src/@types/UrsamuSDK.ts`, `src/services/Sandbox/worker.ts`, and source review. Last updated: 2026-05-15 (v2.6.0).*

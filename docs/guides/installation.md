@@ -13,8 +13,8 @@ on your system.
 
 Before installing UrsaMU, ensure you have the following:
 
-- [**Deno**](https://deno.land/) version 1.32.0 or higher
-- Git (for cloning the repository)
+- [**Deno**](https://deno.land/) v1.40 or higher
+- Git (for cloning the repository and plugin installs)
 
 ## Installation Methods
 
@@ -105,15 +105,19 @@ This will:
 
 ### Development Mode
 
-For development with individual servers:
+For development with auto-restart on file changes:
 
 ```bash
-# Main server only with watch mode
-deno task server
-
-# Telnet server only with watch mode
-deno task telnet
+deno task dev
 ```
+
+### Production / Supervised Daemon
+
+Game projects scaffolded with `ursamu create` include `scripts/daemon.sh`,
+`scripts/restart.sh`, `scripts/status.sh`, and `scripts/stop.sh`. These run
+the server as a supervised background process with signal-driven
+no-disconnect restarts. See [Production Deployment](./deployment.md#supervised-daemon-mode)
+for details.
 
 ## Connecting
 
@@ -154,34 +158,30 @@ socket.send(JSON.stringify({ msg: "look", data: {} }));
 
 ## First Admin
 
-UrsaMU handles first-run setup automatically. On the very first `deno task start`
-when the database is empty, the server pauses and prompts you interactively:
+When the database is empty, UrsaMU prints:
 
 ```
-No players found in the database.
-Welcome! Let's set up your superuser account.
+Fresh database detected — no players exist yet.
 
-Enter email address: admin@example.com
-Enter username: Admin
-Enter password: ••••••••
+Connect via telnet and run:
+  create <name> <password>
+
+The first player created is automatically given superuser access.
 ```
 
-This creates your account with the **superuser** flag (level 10 — the highest
-permission level). Once done, the Hub and Telnet sidecar start automatically.
+Connect with a Telnet client (`telnet localhost 4201`) and create your first
+account. That first player receives the **superuser** flag (level 10 — the
+highest permission level) automatically.
 
 After that, use `@set <player>=admin` in-game to grant admin rights to other
-trusted staff. The `superuser` flag itself can only be created at the database
-level via this first-run flow — it cannot be granted from inside the game.
-
-> **Tip**: If you run `deno task start` non-interactively (e.g. inside a script
-> without a TTY), the prompt is skipped and you'll see a message suggesting you
-> run `deno task server` directly to complete setup.
+trusted staff. The `superuser` flag itself can only be created via this
+first-run flow — it cannot be granted from inside the game.
 
 ## Next Steps
 
 Now that you have UrsaMU installed and running, you might want to:
 
-- [**User Guide**](./user-guide) - Learn how to use UrsaMU as a player
+- [**User Guide**](./user-guide.md) - Learn how to use UrsaMU as a player
 - [**Configuration**](../configuration/) - Explore detailed configuration
   options
 - [**Plugin Development**](../plugins/index.md) - Learn how to create plugins to

@@ -10,7 +10,7 @@ UrsaMU is **not a drop-in replacement** for PennMUSH, TinyMUSH, or MUX2. It is a
 
 If you are migrating from a traditional MUSH or hosting your first server, this page tells you exactly what works today and what is planned.
 
-> Updated for v2.0.0.
+> Updated for v2.6.0.
 ---
 
 ## What Works Today
@@ -178,6 +178,39 @@ The `#tagname` shorthand works anywhere an object reference is accepted in softc
 | `@tr` / `@trigger` | `@trigger <obj>/<attr>` command + `u.trigger()` SDK method |
 | `@pemit` / `@remit` | `@pemit` and `@remit` — both implemented |
 | No named-object registry | `@tag` / `@ltag` provide global and personal registries |
+| Lock ops `&` / `\|` only | `&&` / `\|\|` / `!` with parens, plus legacy `&`/`\|` (v2.2.0) |
+| Hard-coded format attrs | 8-slot format pipeline: register TS handlers or raw softcode templates (v2.3.0+) |
+
+## Format-Attribute Pipeline
+
+Eight engine-known format slots route through both softcode attributes on the
+object and plugin-registered handlers (priority: softcode attr → plugin handler
+→ fallback):
+
+`NAMEFORMAT`, `DESCFORMAT`, `CONFORMAT`, `EXITFORMAT`, `WHOFORMAT`,
+`WHOROWFORMAT`, `PSFORMAT`, `PSROWFORMAT`.
+
+Plugins may also register arbitrary uppercase slot names (e.g. `MAILFORMAT`,
+`BBROWFORMAT`) — `FormatSlot` is an open union as of v2.3.4.
+
+```typescript
+// TS handler
+registerFormatHandler("WHOROWFORMAT", (ctx) => `${ctx.name} - idle ${ctx.idle}`);
+
+// Softcode template (v2.4.0)
+registerFormatTemplate("WHOFORMAT", "[center(===,78,=)]%r[u(#1/HEADER)]");
+```
+
+## Lock Expressions (v2.2.0+)
+
+Locks support `&&`, `||`, `!` with `()` grouping plus the legacy `&`/`|`
+operators. Built-in lockfuncs: `flag(name)`, `attr(name[, val])`, `type(name)`,
+`is(#id)`, `holds(#id)`, `perm(level)`. Custom lockfuncs register via
+`registerLockFunc(name, fn)`.
+
+```
+lock: "connected && (flag(wizard) || attr(tribe, glasswalker))"
+```
 
 ---
 

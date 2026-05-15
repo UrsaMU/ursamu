@@ -122,6 +122,26 @@ Fires when a player speaks on a channel.
 ```typescript
 gameHooks.on("channel:message", ({ channelName, senderId, senderName, message }) => {});
 ```
+
+### Object Events
+
+Fire when DBOs in the main `dbojs` collection are created, modified, or
+destroyed. Useful for cache invalidation, audit logs, or reacting to
+builder-plugin operations.
+
+```typescript
+gameHooks.on("object:created",   ({ id, obj }) => {});
+gameHooks.on("object:modified",  ({ id, before, after }) => {});
+gameHooks.on("object:destroyed", ({ id }) => {});
+```
+
+#### `mail:received`
+
+Fires when in-game mail is delivered to a recipient.
+
+```typescript
+gameHooks.on("mail:received", ({ recipientId, senderId, subject }) => {});
+```
 ---
 
 ### Scene Events

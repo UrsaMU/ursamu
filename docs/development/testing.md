@@ -7,8 +7,10 @@ description: How to run the UrsaMU test suite and write tests for commands, scri
 # Testing
 
 UrsaMU uses [Deno's built-in test runner](https://docs.deno.com/runtime/fundamentals/testing/).
-The test suite has 58 test files covering authentication, command parsing, scripting, plugin
-lifecycle, WebSocket rate limiting, scene export, and more.
+The v2.6.0 suite is **1141+ passing, 0 failing** across 348 lint-clean files —
+covering authentication, command parsing, sandbox scripting, softcode evaluation,
+plugin lifecycle, WebSocket rate limiting, scene export, format handlers,
+plugin install atomicity, and security regression tests.
 ---
 
 ## Running Tests
@@ -290,18 +292,16 @@ Tests must pass before a PR can be merged.
 
 ---
 
-## Known Pre-existing Failures
+## Pre-Commit Gauntlet
 
-A small set of tests have pre-existing failures inherited from earlier versions.
-These are **not introduced by new code** — they reflect commands that were
-partially extracted to plugins. If you see failures in any of these, skip them:
-
-`@set`, `@examine`, `@describe`, `@flags`, `@name`, `@moniker`, `@alias`,
-`@drop`, `@give`, `@trigger`, `@get`, `@chown`, `target()`, `Core Migration: flags`
-
-Run with `--filter` to exclude them while working on unrelated code:
+These four steps mirror CI and must pass before every commit:
 
 ```bash
-deno test --allow-all --unstable-kv --no-check \
-  --filter "^(?!.*(examine|describe|@flags|moniker|alias|chown)).*"
+deno check --unstable-kv mod.ts
+deno lint
+deno test tests/ --allow-all --unstable-kv --no-check
+deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
 ```
+
+The full suite is green on `main` — there are no expected failures. If a test
+fails on your branch, fix it before submitting a PR.

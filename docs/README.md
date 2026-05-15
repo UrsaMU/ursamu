@@ -1,17 +1,25 @@
-# UrsaMU Documentation
+# UrsaMU Documentation (v2.6.0)
 
-Welcome to the UrsaMU documentation. All documentation is written in Markdown
-and can be viewed directly here on GitHub.
+Welcome to the UrsaMU documentation. All pages are written in Markdown and
+rendered by the Lume static-site generator — they also read cleanly directly
+on GitHub.
 
-## 🧭 Navigation
+## Navigation
 
-- [**Home (index.md)**](./index.md) - Main documentation index.
-- [**Guides**](./guides/) - User and installation guides.
-- [**API Reference**](./api/) - Developer API documentation.
-- [**Configuration**](./configuration/) - Server configuration details.
-- [**Plugins**](./plugins/) - Plugin developer resources.
+- [Home](./index.md) — landing page, features, quick install
+- [About](./about.md) — what UrsaMU is and how it compares to other MU* servers
+- [MUSH Compatibility](./mush_compatibility.md) — TinyMUX 2.x parity matrix
+- [Guides](./guides/) — installation, player, and admin guides
+- [API Reference](./api/) — core, database, hooks, commands, formats
+- [Configuration](./configuration/) — `config.json` shape and `JWT_SECRET`
+- [Plugins](./plugins/) — plugin authoring and the v2.6.0 manifest format
+- [Development](./development/) — pre-commit gauntlet, testing, contributing
+- [LLM Reference](./llms.md) — machine-optimized API summary
 
-## 📄 How to read these docs
+## Building the Site Locally
 
-Simply click on the links above or browse the directories to read the
-documentation files. GitHub will automatically render them for you.
+```bash
+deno task docs
+```
+
+This serves the site at `http://localhost:3000` with hot reload.

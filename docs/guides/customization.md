@@ -274,6 +274,83 @@ registerPluginRoute("/api/v1/leaderboard", async (_req, _userId) => {
 ```
 ---
 
+## Format Handlers
+
+The format-handler pipeline lets you replace the rendering of any "labelled
+display slot" — the name shown at the top of `look`, the contents list, the
+exit line, the WHO row, the @ps row, and more — without rewriting the command.
+
+### The eight engine-known slots
+
+| Slot | Used by |
+|------|---------|
+| `NAMEFORMAT` | Header line of `look` / `examine` |
+| `DESCFORMAT` | Description block of `look` |
+| `CONFORMAT` | The "Contents:" list in `look` |
+| `EXITFORMAT` | The "Exits:" list in `look` |
+| `WHOFORMAT` | Outer wrapper of the `who` command |
+| `WHOROWFORMAT` | One row of `who` |
+| `PSFORMAT` | Outer wrapper of `@ps` |
+| `PSROWFORMAT` | One row of `@ps` |
+
+Plugins can also register handlers for any uppercase slot name they invent
+(e.g. `MAILFORMAT`, `BBROWFORMAT`) and resolve them from their own commands.
+
+### Resolution priority
+
+For any slot, the engine resolves in this order:
+
+1. A stored `&SLOTNAME` softcode attribute on the target object (or, for
+   global-list slots, on `#0`).
+2. The most recently registered plugin format handler for that slot.
+3. `null` (caller falls back to its default rendering).
+
+This means builders can override a single object's display with `&NAMEFORMAT`
+in-game **without** the plugin needing to know they exist.
+
+### Register a TypeScript handler
+
+```typescript
+import { registerFormatHandler } from "jsr:@ursamu/ursamu";
+
+registerFormatHandler("NAMEFORMAT", (target, viewer) => {
+  const star = target.flags.has("admin") ? "%ch%cy*%cn " : "";
+  return `${star}%ch${target.state.name}%cn`;
+});
+```
+
+The handler receives the target, the viewer, and optional slot-specific
+extras (for row-format slots, the row data). Return `null` to fall through
+to the default.
+
+### Register a MUSH-softcode template (v2.4.0)
+
+If your handler is just a softcode string, use `registerFormatTemplate` —
+the shortcut compiles the source once and wraps it in a TS handler for you.
+
+```typescript
+import { registerFormatTemplate } from "jsr:@ursamu/ursamu";
+
+registerFormatTemplate(
+  "EXITFORMAT",
+  "[ansi(hy,<)] [name(%0)] [ansi(hy,>)]"
+);
+```
+
+### Unregister
+
+```typescript
+import { unregisterFormatHandler } from "jsr:@ursamu/ursamu";
+unregisterFormatHandler("NAMEFORMAT");
+```
+
+### Resolving from a script
+
+Scripts use `u.util.resolveFormat[Or]` and `u.util.resolveGlobalFormat[Or]`
+to render through the pipeline. See the
+[SDK Cookbook](./sdk-cookbook.md#resolveformat--resolveformator).
+---
+
 ## External Integrations
 
 ### Fetching data in a command

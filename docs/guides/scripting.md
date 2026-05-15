@@ -404,7 +404,17 @@ u.util.template(
 
 // Strip MUSH color codes and ANSI escapes (for storage/validation)
 u.util.stripSubs("%chHello %cgWorld%cn")  // → "Hello World"
+
+// Resolve a format-attr through the format-handler pipeline (v2.3.2+)
+//   priority: stored &NAMEFORMAT attribute → plugin handler → null
+const line = await u.util.resolveFormat(target, "NAMEFORMAT", u.me);
+const row  = await u.util.resolveGlobalFormat("WHOROWFORMAT", u.me, [player]);
 ```
+
+See the [SDK Cookbook](./sdk-cookbook.md#resolveformat--resolveformator) for the
+full format-resolve API and the
+[Customization guide](./customization.md#format-handlers) for the eight slots
+and how to register handlers.
 ---
 
 ## Structured UI (`u.ui`)

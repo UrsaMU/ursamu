@@ -243,14 +243,16 @@ await u.setFlags(u.me, "builder");
 ## Permission Check (`u.canEdit`)
 
 ```typescript
-if (!u.canEdit(u.me, target)) {
+if (!(await u.canEdit(u.me, target))) {
   u.send("Permission denied.");
   return;
 }
 // proceed with edit
 ```
 
-Returns `true` if the actor owns the target, or is admin/wizard/superuser.
+Returns `Promise<boolean>` — `true` if the actor owns the target, or is
+admin / wizard / superuser. Always `await` the call; omitting `await`
+truthy-tests the Promise object and silently bypasses the check.
 ---
 
 ## Locks (`u.checkLock`)
@@ -529,6 +531,39 @@ const out = u.util.template(
 );
 // → "[ 42] [Post title          ] Alice"
 ```
+
+### resolveFormat / resolveFormatOr
+
+Sandbox-accessible helpers (since v2.3.2) for looking up a format-attr value
+on a target, walking the format-handler pipeline.
+
+```typescript
+// Look up a per-object NAMEFORMAT. Priority:
+//   1. Stored &NAMEFORMAT attribute on the target
+//   2. Plugin-registered format handler for that slot
+//   3. null
+const formatted = await u.util.resolveFormat(target, "NAMEFORMAT", u.me);
+
+// With a fallback string if nothing returns
+const line = await u.util.resolveFormatOr(target, "EXITFORMAT", u.me, "[exit]");
+```
+
+### resolveGlobalFormat / resolveGlobalFormatOr
+
+Two-tier lookup (since v2.3.3) for "global list" formats like WHO and @ps.
+Checks `#0` (the master room object) first, then the enactor.
+
+```typescript
+// e.g. inside a WHO script
+const row = await u.util.resolveGlobalFormat("WHOROWFORMAT", u.me, [player]);
+const fallback = await u.util.resolveGlobalFormatOr("WHOFORMAT", u.me, "");
+```
+
+The eight engine-known slots are `NAMEFORMAT`, `DESCFORMAT`, `CONFORMAT`,
+`EXITFORMAT`, `WHOFORMAT`, `WHOROWFORMAT`, `PSFORMAT`, `PSROWFORMAT`.
+Plugin authors can pass any uppercase slot name (e.g. `"MAILFORMAT"`,
+`"BBROWFORMAT"`) without casting. See
+[Customization → Format Handlers](./customization.md#format-handlers).
 
 ### stripSubs
 

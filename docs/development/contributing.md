@@ -1,133 +1,120 @@
 ---
 layout: layout.vto
-description: Learn how to contribute to the UrsaMU project
+description: How to contribute to UrsaMU — branching, PRs, commits, and the pre-commit gauntlet.
 ---
 
 # Contributing to UrsaMU
 
-Thank you for your interest in contributing to UrsaMU! This guide will help you get started with contributing to the project.
+Thanks for your interest in contributing to UrsaMU. This page captures the
+ground rules for v2.6.0.
 
-## Code of Conduct
+## Prerequisites
 
-UrsaMU has adopted a Code of Conduct that we expect project participants to adhere to. Please read [the full text](./code-of-conduct.md) so that you can understand what actions will and will not be tolerated.
-
-## Getting Started
-
-### Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- [Deno](https://deno.land/) (version 1.37.0 or higher)
+- [Deno](https://deno.land/) 1.45+ (for `--unstable-kv`)
 - [Git](https://git-scm.com/)
-- A code editor (we recommend [VS Code](https://code.visualstudio.com/) with the Deno extension)
+- An editor with the Deno extension (VS Code recommended)
 
-### Setting Up Your Development Environment
-
-1. Fork the [UrsaMU repository](https://github.com/lcanady/ursamu) on GitHub
-2. Clone your fork to your local machine:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/ursamu.git
-   cd ursamu
-   ```
-3. Add the original repository as a remote:
-   ```bash
-   git remote add upstream https://github.com/lcanady/ursamu.git
-   ```
-4. Install dependencies:
-   ```bash
-   deno task setup
-   ```
-
-## Development Process
-
-### Branching Strategy
-
-- `main` - The main development branch
-- `release/*` - Release branches
-- `feature/*` - Feature branches
-- `bugfix/*` - Bug fix branches
-
-Always create a new branch for your changes:
+## Initial Setup
 
 ```bash
-git checkout -b feature/your-feature-name
+git clone https://github.com/lcanady/ursamu.git
+cd ursamu
+deno task test   # confirm clean baseline
 ```
 
-### Development Workflow
+If you plan to send PRs, fork on GitHub and add your fork as `origin`,
+keeping `upstream` pointed at `lcanady/ursamu`.
 
-1. Make sure your branch is up to date with the latest changes:
-   ```bash
-   git fetch upstream
-   git rebase upstream/main
-   ```
-2. Make your changes
-3. Run tests to ensure your changes don't break anything:
-   ```bash
-   deno task test
-   ```
-4. Commit your changes with a descriptive commit message:
-   ```bash
-   git commit -m "Add feature: your feature description"
-   ```
-5. Push your changes to your fork:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+## Branching
+
+Always work on a topic branch off `main`:
+
+```bash
+git fetch upstream
+git checkout -b feature/short-description upstream/main
+```
+
+There is no long-lived `develop` branch — `main` is the release line.
+
+## Pre-Commit Gauntlet
+
+Run these four steps in order before every commit. They mirror CI:
+
+```bash
+deno check --unstable-kv mod.ts
+deno lint
+deno test tests/ --allow-all --unstable-kv --no-check
+deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
+```
+
+A commit isn't ready until all four pass.
+
+## Docs Stay in Sync
+
+If you touch a public API, command, config key, script, scaffold output, or
+plugin surface — update `README.md` and the relevant page under `docs/` in the
+same commit. Stale docs ship as broken docs.
+
+## Commits
+
+- Write descriptive, present-tense subject lines: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`.
+- One logical change per commit.
+- **No AI/Claude attribution.** Do not add `Co-Authored-By: Claude …`, do not
+  reference AI tools in commit messages, PR descriptions, or code comments.
+- Never amend a commit that failed a pre-commit hook — fix and create a new
+  commit instead.
 
 ## Pull Requests
 
-When you're ready to submit your changes, create a pull request:
+1. Push your branch to your fork.
+2. Open a PR against `lcanady/ursamu:main`.
+3. Keep PRs scoped — one feature or fix per PR.
+4. Fill in the description: what changed, why, and how it was tested.
+5. Make sure CI is green.
 
-1. Go to your fork on GitHub
-2. Select your branch
-3. Click "Pull Request"
-4. Fill out the pull request template with details about your changes
-5. Submit the pull request
+PRs are **squash-merged**. After merge, maintainers tag the release:
 
-### Pull Request Guidelines
+```bash
+git tag v<version>
+git push --tags
+```
 
-- Keep pull requests focused on a single feature or bug fix
-- Make sure all tests pass
-- Update documentation as needed
-- Follow the coding standards
-- Be responsive to feedback and questions
+No AI attribution in PR titles or bodies either.
 
 ## Coding Standards
 
-UrsaMU follows a set of coding standards to maintain consistency across the codebase:
+- TypeScript only. Follow the
+  [Deno style guide](https://docs.deno.com/runtime/contributing/style_guide/).
+- Early return over nested conditionals.
+- No function longer than ~50 lines; no file longer than ~200 lines — decompose.
+- `catch (e: unknown)` — never bare `catch`.
+- Library-first: if the SDK does it, use the SDK.
+- No comments unless the *why* is non-obvious (hidden invariant, bug workaround).
 
-- Use TypeScript for all code
-- Follow the [Deno Style Guide](https://deno.land/manual/contributing/style_guide)
-- Use meaningful variable and function names
-- Write comments for complex logic
-- Include JSDoc comments for public APIs
-- Write tests for new features and bug fixes
+## Testing
 
-## Documentation
+- All new commands need tests in `tests/`.
+- See [Testing](./testing.md) for `mockPlayer` / `mockU` helpers and DB
+  cleanup conventions.
 
-Documentation is a crucial part of UrsaMU. When contributing, please:
+## Plugin Audit Checklist
 
-- Update the documentation for any changes to APIs or features
-- Use clear, concise language
-- Include examples where appropriate
-- Follow the [documentation guidelines](./documentation-guidelines.md)
+Mental pass before opening a PR that touches plugins or core commands:
 
-### Building Documentation
-
-To build and preview the documentation locally:
-
-```bash
-deno task docs
-```
-
-This will start a local server where you can preview the documentation.
+- `u.util.stripSubs()` on user strings before DB ops or length checks
+- `await u.canEdit(u.me, target)` before modifying any object not owned by `u.me`
+- DB writes use `"$set"` / `"$inc"` / `"$unset"` / `"$push"` — never raw overwrite
+- `u.util.target()` result null-checked
+- Admin-only paths gate on `u.me.flags` explicitly
+- `system/scripts/` files use no Deno APIs, no `fetch`, no non-`u` globals
+- All `%c*` color codes closed with `%cn`
+- `gameHooks.on()` in `init()` paired with `gameHooks.off()` in `remove()` (same named ref)
+- DBO collection names prefixed with `<pluginName>.`
+- REST handlers return 401 before any work when `userId` is null
+- `init()` returns `true`
 
 ## Getting Help
 
-If you need help with contributing to UrsaMU, you can:
-
-- Join the [UrsaMU Discord server](#)
-- Open an issue on GitHub
-- Reach out to the maintainers
-
-Thank you for contributing to UrsaMU! Your efforts help make the project better for everyone. 
+- File an issue on GitHub
+- Join the Discord linked from the project README
+- Reach out to maintainers in the PR thread
