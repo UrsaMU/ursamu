@@ -27,6 +27,8 @@ export interface PluginDep {
   name: string;
   url:  string;
   ref?: string;
+  /** Optional semver range, e.g. "^1.2.0". When set, installed dep version must satisfy. */
+  version?: string;
 }
 
 export interface PluginManifest {
@@ -147,3 +149,16 @@ export async function runGitStep(
   }
   return { success: result.success, stderr: await stderrText.catch(() => "") };
 }
+
+// ── Typed errors (re-exported from pluginErrors.ts) ───────────────────────────
+
+export {
+  PluginCloneError,
+  PluginConflictError,
+  PluginDepNameError,
+  PluginDepUrlError,
+  PluginInstallError,
+  PluginRenameError,
+  PluginSemverError,
+  PluginVersionError,
+} from "./pluginErrors.ts";

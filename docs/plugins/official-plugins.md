@@ -14,6 +14,8 @@ They are listed in `src/plugins/plugins.manifest.json` and installed automatical
 
 On startup, the engine reads `plugins.manifest.json` and fetches any plugin whose `ref` differs from the installed copy. No manual install step is required.
 
+The install run is **atomic across the whole manifest**: if any plugin or transitive dep fails to clone, has an unsafe name/URL, or violates a `version` semver range from its requester, the entire run aborts and rolls back. Disk and `src/plugins/.registry.json` are left exactly as they were — previously installed plugins are not touched.
+
 To disable auto-install for a specific plugin, remove its entry from the manifest.
 ---
 
@@ -45,11 +47,16 @@ Any GitHub repo can be added to the manifest:
       "url": "https://github.com/example/my-plugin",
       "ref": "v1.0.0",
       "description": "What this plugin does.",
-      "ursamu": ">=1.9.27"
+      "ursamu": ">=1.9.27",
+      "deps": [
+        { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+      ]
     }
   ]
 }
 ```
+
+Each `deps[]` entry may include an optional `version` semver range (e.g. `"^1.2.0"`, `">=1.0.0 <2.0.0"`) — the installer cross-checks it against the dep's own manifest `version` and aborts the run on mismatch. Omit `version` for backwards-compatible behavior.
 
 Or use the CLI:
 

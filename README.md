@@ -256,9 +256,27 @@ To add a community plugin, append it to `plugins.manifest.json`:
   "url": "https://github.com/example/my-plugin",
   "ref": "v1.0.0",
   "description": "What this plugin does.",
-  "ursamu": ">=1.9.0"
+  "ursamu": ">=1.9.0",
+  "deps": [
+    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" },
+    { "name": "channel", "url": "https://github.com/UrsaMU/channel-plugin" }
+  ]
 }
 ```
+
+Each `deps[]` entry may include an optional `version` semver range (e.g.
+`"^1.2.0"`, `">=1.0.0 <2.0.0"`). When present, the installer reads the
+dependency's own `ursamu.plugin.json` `version` and verifies it satisfies
+the range. Entries without `version` install unconditionally — backwards
+compatible with existing manifests.
+
+**Atomic installs.** `ensurePlugins` is fail-fast across the whole manifest:
+if any plugin or transitive dep fails to clone, has an unsafe name or URL,
+declares a version that violates a requested range, or has conflicting
+ranges from multiple requesters, the entire install run aborts and rolls
+back. Nothing from the failed run is left on disk or in
+`src/plugins/.registry.json` — your previously installed plugins are
+untouched.
 
 ---
 

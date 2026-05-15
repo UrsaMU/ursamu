@@ -7,12 +7,15 @@ description: Sharing code and utilities between UrsaMU plugins
 
 ## Overview
 
-UrsaMU does not have a formal runtime dependency resolver — there is no
-`dependencies` array on `IPlugin` and no `app.plugins.get()` API. Instead,
-plugins share code the same way any TypeScript modules do: **direct imports**.
+UrsaMU resolves plugin **install order** through the `deps[]` array in
+`ursamu.plugin.json` (see [ursamu.plugin.json Dependencies](#ursamuplug-injson-dependencies)
+below), but there is no `app.plugins.get()` API for cross-plugin code
+access at runtime. Plugins share code the same way any TypeScript modules
+do: **direct imports**.
 
 This keeps things simple and type-safe. If plugin B needs something from
-plugin A, it imports it.
+plugin A, it declares plugin A in `deps[]` so the installer fetches it,
+then imports from it directly.
 ---
 
 ## Sharing Utilities
@@ -123,8 +126,9 @@ Plugin B to work even if Plugin A is not installed.
 
 ## ursamu.plugin.json Dependencies
 
-While there is no runtime dependency resolver, you can document required
-plugins in `ursamu.plugin.json` for human readers and future tooling:
+Declare transitive plugin dependencies in the `deps[]` array of your
+`ursamu.plugin.json`. `ensurePlugins` resolves and installs the graph on
+startup:
 
 ```json
 {
@@ -134,9 +138,18 @@ plugins in `ursamu.plugin.json` for human readers and future tooling:
   "ursamu": ">=1.0.0",
   "author": "Your Name",
   "license": "MIT",
-  "requires": ["jobs"]
+  "deps": [
+    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+  ]
 }
 ```
 
-The `requires` field is informational only — `ursamu plugin install` displays
-it so operators know what to install first. It does not affect load order.
+Each entry needs `name` and `url`. The `ref` (git ref) and `version`
+(semver range checked against the dep's manifest) fields are optional.
+Omit `version` to install the dep without a check — backwards compatible
+with manifests written before the range feature shipped.
+
+If any dep fails to clone, fails its `version` range, or has incompatible
+ranges across requesters, the entire install run aborts and rolls back —
+disk and `.registry.json` are left exactly as they were before the run.
+See the [`deps[]` reference](./index.md#deps-entries) for full semantics.
