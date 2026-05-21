@@ -38,7 +38,7 @@ export async function execChanhistory(u: IUrsamuSDK): Promise<void> {
 
   const [chanName, limitStr] = input.split("=");
   const name = chanName.trim().toLowerCase();
-  const limit = Math.min(parseInt(limitStr || "20") || 20, 500);
+  const limit = Math.max(Math.min(parseInt(limitStr || "20", 10) || 20, 500), 1);
 
   const history = await u.chan.history(name, limit);
   if (!Array.isArray(history) || (history as { error?: string }).error) {
@@ -61,7 +61,7 @@ export async function execChantranscript(u: IUrsamuSDK): Promise<void> {
   if (!match) { u.send("Usage: @chantranscript <name>=<lines>"); return; }
 
   const name = match[1].trim().toLowerCase();
-  const lines = Math.min(parseInt(match[2]) || 20, 500);
+  const lines = Math.max(Math.min(parseInt(match[2], 10) || 20, 500), 1);
 
   const history = await u.chan.history(name, lines);
   if (!Array.isArray(history) || (history as { error?: string }).error) {
@@ -158,7 +158,7 @@ export async function execChanset(u: IUrsamuSDK): Promise<void> {
     case "log":
     case "loghistory":   options.logHistory = onOff(value); break;
     case "historylimit": {
-      const n = parseInt(value);
+      const n = parseInt(value, 10);
       if (isNaN(n) || n < 1 || n > 5000) {
         u.send("historyLimit must be a number between 1 and 5000.");
         return;
