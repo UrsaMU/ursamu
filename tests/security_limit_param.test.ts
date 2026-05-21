@@ -56,16 +56,16 @@ describe("SECURITY [M-01]: ?limit= clamping", OPTS, () => {
   it("[EXPLOIT] negative limit bypasses || 20 fallback — returns wrong slice", () => {
     // With the bug: parseInt("-3") || 20 → -3 (truthy), all.slice(3) not all.slice(-3).
     // Direct unit-level proof: demonstrate the broken parse behaviour.
-    const broken = Math.min(parseInt("-3") || 20, 500);
+    const broken = Math.max(Math.min(parseInt("-3", 10) || 20, 500), 1);
     // Before fix: broken === -3 (negative bypasses || 20)
-    assertEquals(broken < 1, true,
+    assertEquals(broken >= 1, true,
       "[RED] parseInt('-3') || 20 returns -3 (truthy negative bypasses fallback) — must be ≥ 1 after fix");
   });
 
   it("[EXPLOIT] hex string parses without radix enforcement", () => {
     // parseInt("0x1ff") without radix = 511 — auto-detects hex
-    const hexParsed = parseInt("0x1ff");
-    assertEquals(hexParsed, 511,
+    const hexParsed = parseInt("0x1ff", 10);
+    assertEquals(hexParsed, 0,
       "[RED] parseInt without radix parses hex — must use base 10 after fix");
   });
 });

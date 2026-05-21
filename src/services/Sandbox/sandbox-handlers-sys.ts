@@ -227,7 +227,7 @@ export async function handleChanMessage(
     if (!name) { respond(worker, msgId, []); return; }
     const chan = await chanDb.queryOne({ name });
     if (!chan) { respond(worker, msgId, { error: "Channel not found." }); return; }
-    const limit = typeof msg.limit === "number" ? msg.limit : 20;
+    const limit = typeof msg.limit === "number" ? Math.max(msg.limit, 1) : 20;
     const all   = await histDb.find({ chanId: chan.id });
     all.sort((a, b) => a.timestamp - b.timestamp);
     respond(worker, msgId, all.slice(-limit));
