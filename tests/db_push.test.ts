@@ -13,7 +13,7 @@ import type { IDBOBJ } from "../src/@types/IDBObj.ts";
 
 // Reuse the in-memory KV store from other db tests (patched at module level)
 const kv = await Deno.openKv(":memory:");
-Deno.openKv = () => Promise.resolve(kv);
+Object.defineProperty(Deno, "openKv", { value: () => Promise.resolve(kv), configurable: true });
 // deno-lint-ignore no-explicit-any
 (DBO as any).kv = null;
 

@@ -4,7 +4,7 @@ import type { IDBOBJ } from "../src/@types/IDBObj.ts";
 
 // Mock Deno.KV with in-memory store
 const kv = await Deno.openKv(":memory:");
-Deno.openKv = () => Promise.resolve(kv);
+Object.defineProperty(Deno, "openKv", { value: () => Promise.resolve(kv), configurable: true });
 // deno-lint-ignore no-explicit-any
 (DBO as any).kv = null;
 
