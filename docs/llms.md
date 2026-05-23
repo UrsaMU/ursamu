@@ -197,6 +197,11 @@ u.util.rjust("100",  20)              // "                 100"
 u.util.center("TITLE", 40, "-")       // "-------------------TITLE------------------"
 u.util.center("TITLE", 40)            // "                 TITLE                  "
 
+// Block-style decorators (78-col default; %ch/%cn applied automatically)
+u.util.header("Title")                // "===…===\n        %chTitle%cn        \n===…==="
+u.util.divider("Section")             // "\n%chSection%cn\n---…---"
+u.util.footer("")                     // "===…===" (rule only when label is empty)
+
 // Printf formatting
 u.util.sprintf("%-10s %5d", "Alice", 1200)   // "Alice       1200"
 u.util.sprintf("%05d", 42)                   // "00042"

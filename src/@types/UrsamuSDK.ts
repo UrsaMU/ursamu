@@ -42,6 +42,9 @@ export interface IUrsamuSDK {
     center(string: string, length: number, filler?: string): string;
     ljust(string: string, length: number, filler?: string): string;
     rjust(string: string, length: number, filler?: string): string;
+    header(string?: string, filler?: string, width?: number): string;
+    divider(string?: string, filler?: string, width?: number): string;
+    footer(string?: string, filler?: string, width?: number): string;
     template(
       string: string,
       data?: Record<string, string | string[] | { value: string | string[]; align?: "left" | "right" | "center" }>
@@ -86,6 +89,13 @@ export interface IUrsamuSDK {
   };
   canEdit(actor: IDBObj, target: IDBObj): Promise<boolean>;
   send(message: string, target?: string, options?: Record<string, unknown>): void;
+  /**
+   * Deliver a message to a specific online actor by id (regardless of room).
+   * Returns true if the actor had at least one live socket; false if offline.
+   * Use this from plugin code when you need to message a third party — the
+   * caller's `u.send` is for `u.me`, and `here.broadcast` is room-scoped.
+   */
+  notify(actorId: string, message: string, options?: Record<string, unknown>): Promise<boolean>;
   broadcast(message: string, options?: Record<string, unknown>): void;
   execute(command: string): void;
   force(command: string): void;

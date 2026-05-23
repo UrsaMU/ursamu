@@ -158,6 +158,22 @@ const ljust = (str = "", width: number, fill = " "): string => _padStr(str, widt
 const rjust = (str = "", width: number, fill = " "): string => _padStr(str, width, "right", fill);
 const center = (str = "", width: number, fill = " "): string => _padStr(str, width, "center", fill);
 
+const header = (str = "", filler = "=", width = 78): string => {
+  const rule = filler.repeat(width);
+  if (!str) return rule;
+  return `${rule}\n${center(`%ch${str}%cn`, width)}\n${rule}`;
+};
+const divider = (str = "", filler = "-", width = 78): string => {
+  const rule = filler.repeat(width);
+  if (!str) return rule;
+  return `\n%ch${str}%cn\n${rule}`;
+};
+const footer = (str = "", filler = "=", width = 78): string => {
+  const rule = filler.repeat(width);
+  if (!str) return rule;
+  return `${rule}\n${center(`%ch${str}%cn`, width)}\n${rule}`;
+};
+
 /** Strip MUSH-style substitution codes (%ch, %cn, etc.) and raw ANSI escapes. */
 const stripSubs = (str = ""): string =>
   // deno-lint-ignore no-control-regex
@@ -279,6 +295,9 @@ self.onmessage = async (e: MessageEvent) => {
       center,
       ljust,
       rjust,
+      header,
+      divider,
+      footer,
       template,
       sprintf,
       stripSubs,
@@ -338,6 +357,8 @@ self.onmessage = async (e: MessageEvent) => {
     canEdit: (_a: IDBObj, t: IDBObj) => (sdkData.permissions?.[t?.id] as boolean) ?? true,
     send: (msg: string, target?: string, options?: Record<string, unknown>) =>
       self.postMessage({ type: "send", message: msg, target, data: options }),
+    notify: (actorId: string, msg: string, options?: Record<string, unknown>) =>
+      request<boolean>("notify", { actorId, message: msg, data: options }),
     broadcast: (msg: string, options?: Record<string, unknown>) =>
       self.postMessage({ type: "broadcast", message: msg, data: options }),
     execute: (command: string) =>

@@ -165,6 +165,9 @@ u.util.stripSubs(str)     // strip MUSH color codes and ANSI escapes
 u.util.ljust(str, width)  // left-pad to width
 u.util.rjust(str, width)  // right-pad to width
 u.util.center(str, width) // center in width
+u.util.header(label)      // bordered 78-col block header (===… / centered %ch/cn / ===…)
+u.util.divider(label)     // labelled section rule (\n%chlabel%cn\n---…)
+u.util.footer(label)      // bordered 78-col block footer (empty label → rule only)
 ```
 
 ### u.mail, u.attr, u.eval, u.forceAs
