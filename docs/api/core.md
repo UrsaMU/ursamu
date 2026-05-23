@@ -483,7 +483,7 @@ gameHooks.off("player:login", onLogin);
 player:login      player:logout
 say               pose             page             move
 channel:message
-object:created    object:destroyed object:modified
+object:created    object:destroyed object:modified  object:moved
 scene:created     scene:pose       scene:set
 scene:title       scene:clear
 mail:received
@@ -491,7 +491,7 @@ mail:received
 
 Each has a typed payload (`SessionEvent`, `SayEvent`, `PoseEvent`,
 `PageEvent`, `MoveEvent`, `ChannelMessageEvent`, `ObjectCreatedEvent`,
-`ObjectDestroyedEvent`, `ObjectModifiedEvent`, `SceneCreatedEvent`,
+`ObjectDestroyedEvent`, `ObjectModifiedEvent`, `ObjectMovedEvent`, `SceneCreatedEvent`,
 `ScenePoseEvent`, `SceneSetEvent`, `SceneTitleEvent`, `SceneClearEvent`,
 `MailReceivedEvent`).
 
@@ -568,6 +568,38 @@ Same semantics as `u.send` but importable from anywhere.
 ```typescript
 import { send } from "jsr:@ursamu/ursamu";
 send("Server reboot in 5 minutes.", "#all");
+```
+
+### `notify(actorId, message, options?)`
+
+Deliver a message to a single online actor by id. Available as both
+`u.notify(actorId, msg)` (Promise<boolean>) on the SDK and a standalone
+`notify` import for `gameHooks` handlers that don't have a `u`. Returns
+`true` if at least one live socket was found for the actor, `false` if the
+actor is offline — callers can branch on the result to queue or drop.
+
+Use this when you need to message a third party. `u.send` addresses the
+caller (`u.me`); `here.broadcast` is room-scoped; `notify` is the right
+tool when a plugin command boots another player from a seat, or a hook
+handler wants to tell the moved actor _why_ something just happened.
+
+```typescript
+// In a plugin command:
+const delivered = await u.notify(target.id, "You have been booted from your post.");
+if (!delivered) {
+  // queue a job / mark unread / fall back to email
+}
+
+// In a gameHooks handler (no `u` in scope):
+import { notify, gameHooks } from "jsr:@ursamu/ursamu";
+gameHooks.on("player:move", (e) => {
+  notify(e.actorId, "Station unmanned — you left the post.");
+});
+
+// In a system script (sandboxed) — same shape, also returns a Promise<boolean>:
+export default async (u) => {
+  await u.notify(targetId, "Heads up.");
+};
 ```
 
 `UserSocket` is the typed socket metadata exported for plugin authors.

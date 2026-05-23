@@ -3,7 +3,7 @@
 ![ursamu header](https://raw.githubusercontent.com/ursamu/ursamu/main/ursamu_github_banner.png)
 
 [![JSR](https://jsr.io/badges/@ursamu/ursamu)](https://jsr.io/@ursamu/ursamu)
-[![Version](https://img.shields.io/badge/version-2.6.0-blue)](https://github.com/UrsaMU/ursamu/releases)
+[![Version](https://img.shields.io/badge/version-2.7.0-blue)](https://github.com/UrsaMU/ursamu/releases)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Deno](https://img.shields.io/badge/deno-2.x-black)](https://deno.land)
 

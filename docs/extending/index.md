@@ -108,7 +108,7 @@ reference is non-negotiable (see `CLAUDE.md`). Typed events
 - `player:login`, `player:logout`
 - `say`, `pose`, `page`, `move`
 - `channel:message`
-- `object:created`, `object:destroyed`, `object:modified`
+- `object:created`, `object:destroyed`, `object:modified`, `object:moved`
 - `scene:created`, `scene:pose`, `scene:set`, `scene:title`, `scene:clear`
 - `mail:received`
 

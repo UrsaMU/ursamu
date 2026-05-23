@@ -2,6 +2,18 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [2.7.0] — 2026-05-23
+
+### New
+
+- **`object:moved` gameHook** (closes #155) — fires whenever an object changes location through native engine flow: `get`, `drop`, `give`, sandbox `u.db.create` (with location), and `u.db.destroy`. Payload `{ objectId, from, to, cause, actorId? }` with `from: null` on create and `to: null` on destroy. Plugins can now react to object movement regardless of which verb the player typed (no more reimplementing `get`/`drop`/`give` to track ammo stacks, encumbrance, scene triggers, etc.).
+- **`u.notify(actorId, message, options?)` SDK helper** (closes #153) — typed per-actor delivery returning `Promise<boolean>` (true if a live socket exists for the actor, false if offline). Standalone `notify` also exported from `mod.ts` for `gameHooks` handlers that have no `u` in scope. Wired through the sandbox bridge so system scripts can call `await u.notify(id, msg)`.
+- **`u.util.header / divider / footer`** surfaced in sandbox — block-style decorators (78-col default, `%ch/%cn` applied automatically) now available to system scripts and plugin code, not just the engine.
+
+### Improved
+
+- **`look` header format** — bare moniker plus `(#id)` when the viewer can edit, without flag codes. Examine remains the place for flag detail. Fixes the double-dbref artifact that produced `Name(#1RSV)(#1)` in earlier renderings.
+
 ## [1.9.4] — 2026-03-22
 
 ### Breaking

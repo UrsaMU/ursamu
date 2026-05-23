@@ -75,6 +75,16 @@ export async function handleDbMessage(
       data:     tpl.state || {},
     };
     const created = await db.create(newObj);
+    if (tpl.location) {
+      const { gameHooks } = await import("../Hooks/GameHooks.ts");
+      await gameHooks.emit("object:moved", {
+        objectId: created.id,
+        from:     null,
+        to:       tpl.location,
+        cause:    "create",
+        actorId:  context?.id as string | undefined,
+      });
+    }
     const sdkObj  = SDKService.prepareSDK({
       id:    created.id,
       me:    { ...created, flags: new Set(created.flags.split(" ")), state: created.data || {} },
@@ -87,7 +97,17 @@ export async function handleDbMessage(
   if (type === "db:destroy") {
     if (!msg.id) return;
     const { dbojs: db } = await import("../Database/index.ts");
+    const prev = await db.queryOne({ id: msg.id as string });
+    const prevLocation = prev ? (prev.location ?? null) : null;
     await db.delete({ id: msg.id as string });
+    const { gameHooks } = await import("../Hooks/GameHooks.ts");
+    await gameHooks.emit("object:moved", {
+      objectId: msg.id as string,
+      from:     prevLocation,
+      to:       null,
+      cause:    "destroy",
+      actorId:  context?.id as string | undefined,
+    });
     respond(worker, msgId, null);
     return;
   }

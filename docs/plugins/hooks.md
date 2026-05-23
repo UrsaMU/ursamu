@@ -135,6 +135,19 @@ gameHooks.on("object:modified",  ({ id, before, after }) => {});
 gameHooks.on("object:destroyed", ({ id }) => {});
 ```
 
+#### `object:moved`
+
+Fires whenever an object changes location through the engine: `get`, `drop`,
+`give`, `u.db.create` (with a location), and `u.db.destroy`. `from` is `null`
+for fresh creation; `to` is `null` for destruction. `cause` is the verb
+("get", "drop", "give", "create", "destroy", or a plugin-defined string).
+
+```typescript
+gameHooks.on("object:moved", ({ objectId, from, to, cause, actorId }) => {
+  // e.g. merge ammo stacks when a magazine lands in a new carrier
+});
+```
+
 #### `mail:received`
 
 Fires when in-game mail is delivered to a recipient.
