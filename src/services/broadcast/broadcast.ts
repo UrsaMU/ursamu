@@ -24,6 +24,21 @@ export const send = (targets: string[], msg: string, data?: data, exclude: strin
   }
 };
 
+/**
+ * Deliver a message to a single online actor by id.
+ * Returns true if at least one socket was found for the actor.
+ * Returns false if the actor is offline (no socket carries that cid).
+ */
+export const notify = (actorId: string, msg: string, data?: data): boolean => {
+  const online = wsService.getConnectedSockets().some(s => s.cid === actorId);
+  if (!online) return false;
+  wsService.send([actorId], {
+    event: "message",
+    payload: { msg, data },
+  });
+  return true;
+};
+
 export const broadcast = (msg: string, data?: data) => {
   wsService.broadcast({
     event: "message",

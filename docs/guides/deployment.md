@@ -32,7 +32,10 @@ source ~/.bashrc
 ## Environment Variables
 
 Set these before starting the server. The simplest approach is a `.env` file in
-your game project root (UrsaMU loads it via `@std/dotenv` at startup):
+your game project root — UrsaMU loads it via `dotenv/load` at the top of
+`src/main.ts`, so anything defined there is visible to the engine before any
+config is read. Scaffolded projects (`ursamu create`) write a fresh
+`JWT_SECRET` into `.env` automatically.
 
 ```bash
 # .env  — DO NOT commit this file
@@ -95,40 +98,40 @@ The first player created receives the `superuser` flag automatically.
 After that, switch to daemon mode for normal operation.
 ---
 
-## Daemon Mode
+## Supervised Daemon Mode
 
-UrsaMU includes built-in daemon scripts that start both processes in the
-background, write logs to `logs/`, and track PIDs.
+Game projects scaffolded with `ursamu create` ship four shell wrappers in
+`scripts/` that run the server as a supervised background process. They use
+the engine's signal-driven restart loop so `@reboot` and config reloads do
+**not** disconnect Telnet sidecar clients.
 
 ```bash
-# Start in background
-deno task daemon
-
-# Check status
-deno task status
-
-# Follow live logs
-deno task logs
-
-# Stop
-deno task stop
-
-# Stop and restart
-deno task restart
+bash scripts/daemon.sh    # Start the supervisor in the background
+bash scripts/status.sh    # Show pid + uptime
+bash scripts/restart.sh   # No-disconnect restart of the main process
+bash scripts/stop.sh      # Graceful stop (disconnects everyone)
 ```
 
-**What `deno task daemon` does:**
+What happens:
 
-1. Starts `src/telnet.ts` in the background → logs to `logs/telnet.log`
-2. Starts `src/main.ts` in the background → logs to `logs/main.log`
-3. Writes PIDs to `.ursamu.pid`
+1. `daemon.sh` spawns `deno task start` under a supervisor loop. The
+   supervisor PID is written to `.ursamu.pid`; the running `deno` child PID
+   is written to `.ursamu-deno.pid`.
+2. The supervisor watches the deno exit code:
+   - `75` → restart (default after `@reboot`, `@update`, crash)
+   - `0` → clean stop (`@shutdown`)
+   - other → unexpected crash; the supervisor stops and logs
+3. `restart.sh` sends **SIGUSR2** to the main process. The engine catches
+   it, finishes in-flight handlers, and restarts the main loop **without
+   disconnecting the Telnet sidecar**. Clients keep their JWT and auto-
+   reauthenticate on the new main.
+4. `stop.sh` sends SIGTERM and waits for clean shutdown.
 
-The PIDs file is cleaned up automatically on `deno task stop`.
+The same restart semantics back the in-game `@reboot` and `@update` commands.
 
-> **Development vs production:** Use `deno task start` during development — it
-> enables file watching so both servers restart on code changes. Use
-> `deno task daemon` in production where you want the servers to stay up
-> without reloading on filesystem events.
+> **Development vs production:** Use `deno task dev` during development — it
+> enables file watching so the main server restarts on code changes. Use
+> `bash scripts/daemon.sh` in production.
 ---
 
 ## systemd
@@ -320,7 +323,7 @@ UrsaMU writes three log files to `logs/`:
 Follow live:
 
 ```bash
-deno task logs          # tails main.log and telnet.log
+tail -f logs/main.log logs/telnet.log
 tail -f logs/security.log
 ```
 
@@ -360,8 +363,8 @@ deno run -A jsr:@ursamu/ursamu/cli update
 After updating, restart the servers:
 
 ```bash
-deno task restart           # if using daemon mode
-sudo systemctl restart ursamu-main ursamu-telnet  # if using systemd
+bash scripts/restart.sh                              # if using the daemon scaffold
+sudo systemctl restart ursamu-main ursamu-telnet     # if using systemd
 ```
 
 Check the [changelog](https://github.com/ursamu/ursamu/releases) before

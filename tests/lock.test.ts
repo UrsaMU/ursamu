@@ -6,7 +6,7 @@ import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
 
 // Mock Deno.KV
 const kv = await Deno.openKv(":memory:");
-Deno.openKv = () => Promise.resolve(kv);
+Object.defineProperty(Deno, "openKv", { value: () => Promise.resolve(kv), configurable: true });
 // deno-lint-ignore no-explicit-any
 (DBO as any).kv = null;
 

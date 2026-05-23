@@ -10,7 +10,7 @@ import type { ISandboxConfig } from "../../@types/ISandboxConfig.ts";
 import { SDKService, type SDKContext } from "./SDKService.ts";
 import { runInWorker } from "./workerRunner.ts";
 import {
-  handleSend, handleBroadcast, handleRoomBroadcast, handlePatch,
+  handleSend, handleBroadcast, handleNotify, handleRoomBroadcast, handlePatch,
   handleTeleport, emitResultHooks,
 } from "./sandbox-handlers-output.ts";
 import { handleDbMessage, handleAuthMessage } from "./sandbox-handlers-db.ts";
@@ -72,6 +72,7 @@ class LocalSandbox {
 
         // Output routing
         if (type === "send")           { handleSend(msg, context); return; }
+        if (type === "notify")         { handleNotify(msg, worker); return; }
         if (type === "broadcast")      { handleBroadcast(msg); return; }
         if (type === "room:broadcast") { await handleRoomBroadcast(msg); return; }
         if (type === "teleport")       { handleTeleport(msg, context); return; }
@@ -198,7 +199,7 @@ export class SandboxService {
     }
 
     const sdkData = SDKService.prepareSDK(context);
-    let timeoutId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     try {
       const result = await Promise.race([
         (sandbox as LocalSandbox).eval(execCode, { sdk: sdkData, context }),

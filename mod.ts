@@ -23,7 +23,7 @@ export { mu, checkAndCreateSuperuser } from "./src/main.ts";
 export { startTelnetServer } from "./src/services/telnet/telnet.ts";
 
 // Export Plugin API — available to game projects and external plugins
-export { send } from "./src/services/broadcast/broadcast.ts";
+export { send, notify } from "./src/services/broadcast/broadcast.ts";
 export { DBO } from "./src/services/Database/database.ts";
 export { registerPluginRoute, registerUIComponent, unregisterUIComponent, getRegisteredUIComponents } from "./src/app.ts";
 export type { IUIComponent } from "./src/app.ts";
@@ -48,6 +48,7 @@ export type {
   ObjectCreatedEvent,
   ObjectDestroyedEvent,
   ObjectModifiedEvent,
+  ObjectMovedEvent,
 } from "./src/services/Hooks/GameHooks.ts";
 
 // Export WebSocket service — available to plugins that need to reach connected sockets

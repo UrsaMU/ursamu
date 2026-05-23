@@ -21,20 +21,20 @@ Run the server for the first time:
 deno task start
 ```
 
-When the database is empty, the startup script pauses and prompts you:
+When the database is empty, the engine prints:
 
 ```
-No players found in the database.
-Welcome! Let's set up your superuser account.
+Fresh database detected — no players exist yet.
 
-Enter email address: you@example.com
-Enter username: Admin
-Enter password: ••••••••
+Connect via telnet and run:
+  create <name> <password>
 
-Superuser 'Admin' created successfully!
+The first player created is automatically given superuser access.
 ```
 
-After setup completes, the Hub and Telnet sidecar start automatically.
+Connect with a Telnet client (`telnet localhost 4201`) and create your
+account. The first player created on a fresh database is automatically
+granted the `superuser` flag.
 
 ### Permission levels
 
@@ -58,10 +58,8 @@ From inside the game, grant admin rights with:
 The `superuser` flag cannot be granted via `@set` — it can only be created
 through the first-run interactive prompt.
 
-> **Non-interactive environments**: If you run `deno task start` without a TTY,
-> the prompt is skipped. Run `deno task server` directly in an interactive
-> terminal to complete first-run setup, then switch back to `deno task start`
-> for normal operation.
+The `superuser` flag itself cannot be granted via `@set` from inside the
+game — it can only be created via this first-run flow.
 ---
 
 ## User Management
@@ -254,13 +252,20 @@ From in-game (admin or wizard required):
 @update      -- Pull latest code from git and restart (see below)
 ```
 
-From the terminal, use `Ctrl+C` to stop a running process, then restart with:
+From the terminal:
 
 ```bash
-deno task start     # Hub only (no watch)
-deno task dev       # Hub + Telnet with file watching (development)
-deno task daemon    # Background service with restart loop (production)
+deno task start           # Start Hub + Telnet sidecar (foreground)
+deno task dev             # Same, with file watching (development)
+bash scripts/daemon.sh    # Supervised background process (production)
+bash scripts/restart.sh   # No-disconnect restart of the supervised main
+bash scripts/stop.sh      # Graceful stop (disconnects everyone)
 ```
+
+The supervised scaffold is created automatically by `ursamu create`. See
+[Production Deployment](./deployment.md#supervised-daemon-mode) for the
+signal model (SIGUSR2 = no-disconnect restart; Telnet sidecar persists
+across `@reboot` and JWT auto-reauth).
 
 ### Hot-Reload (`@reload`)
 
@@ -494,13 +499,13 @@ curl -H "Authorization: Bearer <token>" \
 
 All endpoints are served on the Hub's HTTP port (default `4203`). Most require
 a `Bearer` JWT token in the `Authorization` header, obtained from
-`POST /api/v1/auth/login`.
+`POST /api/v1/auth`.
 
 ### Authentication
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/v1/auth/login` | Returns `{ token }` |
+| `POST` | `/api/v1/auth` | Returns `{ token }` |
 | `POST` | `/api/v1/auth/register` | Create a new character |
 | `POST` | `/api/v1/auth/reset-password` | Consume a reset token and set a new password |
 | `GET` | `/api/v1/me` | Current user profile |
@@ -647,7 +652,7 @@ warning is printed. This means all sessions are invalidated on restart.
 
 ### Brute-Force Login Protection
 
-The login endpoint (`POST /api/v1/auth/login`) enforces a per-IP rate limit of
+The login endpoint (`POST /api/v1/auth`) enforces a per-IP rate limit of
 **10 failed attempts per minute**. After that threshold is reached the server
 returns `429 Too Many Requests` and logs the event to `logs/security.log`.
 

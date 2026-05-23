@@ -71,6 +71,23 @@ Controls who can run the command. The player must satisfy the lock expression.
 | `"connected admin+"` | Connected + admin flag or higher |
 | `"connected wizard"` | Connected + wizard flag |
 
+Lock expressions also support callable **lockfuncs** combined with `&&`,
+`||`, `!`, and `()` (v2.2.0+). Built-ins include `flag(name)`, `attr(name,
+val)`, `type(name)`, `is(#id)`, `holds(#id)`, and `perm(level)`. Plugins
+can register custom lockfuncs:
+
+```typescript
+import { registerLockFunc } from "jsr:@ursamu/ursamu";
+
+registerLockFunc("tribe", (enactor, _target, args) =>
+  String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
+);
+
+// lock: "connected && tribe(glasswaler)"
+```
+
+See [Lock Expressions](../guides/lock-expressions.md) for the full grammar.
+
 ### `exec`
 
 The function called on match. Receives `u: IUrsamuSDK` — the same SDK object
@@ -148,6 +165,9 @@ u.util.stripSubs(str)     // strip MUSH color codes and ANSI escapes
 u.util.ljust(str, width)  // left-pad to width
 u.util.rjust(str, width)  // right-pad to width
 u.util.center(str, width) // center in width
+u.util.header(label)      // bordered 78-col block header (===… / centered %ch/cn / ===…)
+u.util.divider(label)     // labelled section rule (\n%chlabel%cn\n---…)
+u.util.footer(label)      // bordered 78-col block footer (empty label → rule only)
 ```
 
 ### u.mail, u.attr, u.eval, u.forceAs
@@ -310,3 +330,25 @@ addCmd({
   },
 });
 ```
+---
+
+## Related Registrations
+
+Beyond `addCmd`, plugins can register several other engine extensions from
+`init()`:
+
+| API | Purpose |
+|-----|---------|
+| `registerPluginRoute(method, path, handler)` | Mount a REST handler on the main Express app |
+| `registerUIComponent(component)` | Surface a UI panel via `GET /api/v1/ui-manifest` |
+| `unregisterUIComponent(name)` | Remove a UI panel (call from `remove()`) |
+| `registerFormatHandler(slot, handler)` | TS-function format handler (NAMEFORMAT, DESCFORMAT, WHOFORMAT, etc.) |
+| `registerFormatTemplate(slot, mushSource)` | MUSH-softcode shortcut for format handlers (v2.4.0+) |
+| `registerLockFunc(name, fn)` | Custom lockfunc usable in `lock:` strings |
+| `registerSoftcodeFunc(name, fn)` | Custom stdlib function callable from softcode |
+| `registerScript(name, content)` | Override or add a sandbox script by name |
+
+Each of these has a corresponding teardown — `gameHooks.off`,
+`unregisterUIComponent`, `unregisterFormatHandler` — that should run in
+`remove()` so reload is clean. See [API: Core](../api/core.md) for full
+signatures.

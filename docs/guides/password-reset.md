@@ -85,7 +85,7 @@ curl -X POST https://yourgame.example.com/api/v1/auth/reset-password \
 ```
 
 After a successful reset the player can log in with their new password using the
-normal `POST /api/v1/auth/login` endpoint.
+normal `POST /api/v1/auth` endpoint.
 ---
 
 ## API Reference

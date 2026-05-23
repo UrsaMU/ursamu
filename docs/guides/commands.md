@@ -36,6 +36,8 @@ All built-in commands available in UrsaMU. Commands marked **admin+** require th
 | `@name <object>=<name>` | Rename an object |
 | `whisper <player>=<msg>` | Private in-room message; others see attribution only |
 | `quit` | Disconnect from the server |
+| `@version` | Show the engine version |
+| `@poll` | Show the current poll, if any |
 | `help [<topic>]` | Display help text (provided by [help-plugin](https://github.com/UrsaMU/help-plugin)) |
 ---
 

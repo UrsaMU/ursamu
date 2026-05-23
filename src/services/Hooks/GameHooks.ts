@@ -142,6 +142,18 @@ export interface ObjectModifiedEvent {
   actorName:  string;
 }
 
+export interface ObjectMovedEvent {
+  objectId:  string;
+  /** Previous location id, or null for fresh creation. */
+  from:      string | null;
+  /** New location id, or null when destroyed. */
+  to:        string | null;
+  /** Verb that caused the move: "get" | "drop" | "give" | "create" | "destroy" | "teleport" | plugin-defined. */
+  cause:     string;
+  /** Actor that triggered the move, if any. */
+  actorId?:  string;
+}
+
 // ─── hook map ─────────────────────────────────────────────────────────────────
 // Declared as an interface so plugins can extend it via declaration merging:
 //
@@ -184,6 +196,8 @@ export interface GameHookMap {
   "object:destroyed": (e: ObjectDestroyedEvent) => void | Promise<void>;
   /** A world object's field was modified by a builder. */
   "object:modified":  (e: ObjectModifiedEvent)  => void | Promise<void>;
+  /** A world object changed location (get/drop/give/create/destroy/teleport). */
+  "object:moved":     (e: ObjectMovedEvent)     => void | Promise<void>;
   /** The engine has fully initialized and all plugins are loaded. */
   "engine:ready":     ()                        => void | Promise<void>;
 };

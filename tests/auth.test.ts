@@ -6,7 +6,7 @@ import { hash } from "../deps.ts";
 // Mock KV
 const kv = await Deno.openKv(":memory:");
 // @ts-ignore: Mocking openKv
-Deno.openKv = () => Promise.resolve(kv);
+Object.defineProperty(Deno, "openKv", { value: () => Promise.resolve(kv), configurable: true });
 
 Deno.test("Auth Route", async (t) => {
   // Setup: Create a test user

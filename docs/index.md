@@ -10,7 +10,7 @@ templateEngine: [vto, md]
 
   <div class="version-badge" style="cursor:default">
     <svg width="10" height="10" viewBox="0 0 10 10" fill="var(--primary-light)"><circle cx="5" cy="5" r="5"/></svg>
-    v2.0.0 &nbsp;&bull;&nbsp; MIT License
+    v2.6.0 &nbsp;&bull;&nbsp; MIT License
   </div>
 
   <h1>A Modern MUSH Server</h1>
@@ -117,8 +117,32 @@ templateEngine: [vto, md]
     <div class="feature-card-icon">
       <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
     </div>
-    <h3>Wiki &amp; Content</h3>
-    <p>File-based markdown wiki with folder-driven routing, YAML frontmatter, full REST API, and in-game read/search/write commands.</p>
+    <h3>TinyMUX 2.x Softcode</h3>
+    <p>Full 250+ function softcode evaluator: math, string, list, logic, object, register, and output families with all TinyMUX substitutions and ANSI codes.</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
+    <h3>Stdlib Primitives</h3>
+    <p>Noise (Perlin/Simplex/Worley/FBM), per-instance PRNG, physics, spatial, interpolation, and vector ops re-exported from mod.ts (v2.5.1+).</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <h3>Atomic Plugin Installs</h3>
+    <p>Fail-fast plugin manifests with semver constraints and InstallTxn rollback — every dir and registry mutation rolls back on any error (v2.6.0).</p>
+  </div>
+
+  <div class="feature-card">
+    <div class="feature-card-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h3>Format Handler Pipeline</h3>
+    <p>Eight format slots (NAMEFORMAT, DESCFORMAT, CONFORMAT, EXITFORMAT, WHOFORMAT, WHOROWFORMAT, PSFORMAT, PSROWFORMAT) — register TS handlers or raw softcode templates.</p>
   </div>
 
 </div>

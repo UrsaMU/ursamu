@@ -9,7 +9,7 @@ import { displayName as displayNameFn } from "../../utils/displayName.ts";
 import { setFlags as setFlagsFn } from "../../utils/setFlags.ts";
 import { getAttribute } from "../../utils/getAttribute.ts";
 import { getNextId } from "../../utils/getNextId.ts";
-import { center, ljust, rjust } from "../../utils/format.ts";
+import { center, ljust, rjust, header, divider, footer } from "../../utils/format.ts";
 import parser from "../parser/parser.ts";
 import { setConfig } from "../Config/mod.ts";
 import { hash, compare } from "../../../deps.ts";
@@ -78,6 +78,9 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
       center: (str: string, len: number, filler?: string) => center(str, len, filler),
       ljust: (str: string, len: number, filler?: string) => ljust(str, len, filler),
       rjust: (str: string, len: number, filler?: string) => rjust(str, len, filler),
+      header: (str?: string, filler?: string, width?: number) => header(str, filler, width),
+      divider: (str?: string, filler?: string, width?: number) => divider(str, filler, width),
+      footer: (str?: string, filler?: string, width?: number) => footer(str, filler, width),
       template: templateFn,
       sprintf,
       stripSubs: (str: string) => parser.stripSubs("telnet", str),
@@ -132,12 +135,32 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
           data: { name: template.name, ...template.state },
         });
         const created = await dbojs.queryOne({ id });
+        if (template.location) {
+          const { gameHooks } = await import("../Hooks/GameHooks.ts");
+          await gameHooks.emit("object:moved", {
+            objectId: id,
+            from: null,
+            to: template.location,
+            cause: "create",
+            actorId: me.id,
+          });
+        }
         return created
           ? hydrate(created)
           : { id, flags: new Set<string>(), state: {}, contents: [] };
       },
       destroy: async (id: string) => {
+        const prev = await dbojs.queryOne({ id });
+        const prevLocation = prev ? (prev.location ?? null) : null;
         await dbojs.delete({ id });
+        const { gameHooks } = await import("../Hooks/GameHooks.ts");
+        await gameHooks.emit("object:moved", {
+          objectId: id,
+          from: prevLocation,
+          to: null,
+          cause: "destroy",
+          actorId: me.id,
+        });
       },
       modify: async (id: string, op: string, data: unknown) => {
         await dbojs.modify({ id }, op, data as Partial<import("../../@types/IDBObj.ts").IDBOBJ>);
@@ -150,6 +173,11 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
       await canEditFn(toRaw(actor), toRaw(target)),
 
     send: ctx.send,
+
+    notify: async (actorId: string, message: string, options?: Record<string, unknown>) => {
+      const { notify } = await import("../broadcast/broadcast.ts");
+      return notify(actorId, message, options);
+    },
 
     broadcast: ctx.broadcast,
 

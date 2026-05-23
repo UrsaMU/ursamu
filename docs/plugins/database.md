@@ -27,8 +27,11 @@ export interface IMyRecord {
   createdAt: number;   // ms timestamp
 }
 
-// The string key must be globally unique — prefix with "server." by convention
-export const myRecords = new DBO<IMyRecord>("server.my-plugin-records");
+// The collection key must be globally unique — prefix with your plugin name
+// (e.g. "my-plugin.records") so it cannot collide with engine collections or
+// other plugins. The legacy "server." prefix is reserved for core engine
+// collections like dbojs, counters, chans, mail, etc.
+export const myRecords = new DBO<IMyRecord>("my-plugin.records");
 ```
 
 Import the collection wherever you need it:

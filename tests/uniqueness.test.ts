@@ -5,7 +5,7 @@ import { isNameTaken } from "../src/utils/isNameTaken.ts";
 // Mock KV
 const kv = await Deno.openKv(":memory:");
 // @ts-ignore: Mocking openKv
-Deno.openKv = () => Promise.resolve(kv);
+Object.defineProperty(Deno, "openKv", { value: () => Promise.resolve(kv), configurable: true });
 
 Deno.test("Name and Alias Uniqueness", async (t) => {
   // Clear the database for tests

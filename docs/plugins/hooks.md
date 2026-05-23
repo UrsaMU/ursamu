@@ -122,6 +122,39 @@ Fires when a player speaks on a channel.
 ```typescript
 gameHooks.on("channel:message", ({ channelName, senderId, senderName, message }) => {});
 ```
+
+### Object Events
+
+Fire when DBOs in the main `dbojs` collection are created, modified, or
+destroyed. Useful for cache invalidation, audit logs, or reacting to
+builder-plugin operations.
+
+```typescript
+gameHooks.on("object:created",   ({ id, obj }) => {});
+gameHooks.on("object:modified",  ({ id, before, after }) => {});
+gameHooks.on("object:destroyed", ({ id }) => {});
+```
+
+#### `object:moved`
+
+Fires whenever an object changes location through the engine: `get`, `drop`,
+`give`, `u.db.create` (with a location), and `u.db.destroy`. `from` is `null`
+for fresh creation; `to` is `null` for destruction. `cause` is the verb
+("get", "drop", "give", "create", "destroy", or a plugin-defined string).
+
+```typescript
+gameHooks.on("object:moved", ({ objectId, from, to, cause, actorId }) => {
+  // e.g. merge ammo stacks when a magazine lands in a new carrier
+});
+```
+
+#### `mail:received`
+
+Fires when in-game mail is delivered to a recipient.
+
+```typescript
+gameHooks.on("mail:received", ({ recipientId, senderId, subject }) => {});
+```
 ---
 
 ### Scene Events

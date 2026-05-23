@@ -50,6 +50,20 @@ methods. The interface is intentionally minimal.
 > `addCmd` and `new DBO<T>()` are called at **module-load time**, not inside
 > `init()`. Import `"./commands.ts"` from `index.ts` and the registrations
 > happen automatically.
+
+> **Named handler refs.** Any `gameHooks.on(event, handler)` registered in
+> `init()` must be paired with `gameHooks.off(event, handler)` in `remove()`
+> using the **same named function reference**. Inline arrow functions cannot
+> be unsubscribed. See [hooks.md](./hooks.md#full-example).
+
+> **DBO namespacing.** Collection names must be prefixed with your plugin
+> name to avoid colliding with the core engine or other plugins:
+> `new DBO<T>("my-plugin.records")`. See [database.md](./database.md).
+
+> **Stdlib primitives.** Plugins written in TypeScript can import
+> `Noise`, `Rng`, vector/spatial helpers, interpolation, and physics
+> primitives directly from `jsr:@ursamu/ursamu` (v2.5.1+). No need to vendor
+> `simplex-noise` or `alea`.
 ---
 
 ## A Minimal Plugin

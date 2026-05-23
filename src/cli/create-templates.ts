@@ -272,6 +272,7 @@ Deno.test("${name} — placeholder (replace with real tests)", OPTS, () => {
 
 export function gameMainTs(name: string): string {
   return `import { mu } from "ursamu";
+import { join } from "@std/path";
 
 const config = {
   server: {
@@ -293,7 +294,9 @@ const config = {
   },
 };
 
-const game = await mu(config);
+const game = await mu(config, undefined, {
+  pluginsDir: join(Deno.cwd(), "src", "plugins"),
+});
 
 console.log(\`\${game.config.get("game.name")} main server is running!\`);
 `;

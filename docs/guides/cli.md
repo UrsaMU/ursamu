@@ -101,6 +101,25 @@ deno run -A jsr:@ursamu/ursamu/cli plugin info <name>
 ```
 
 Displays metadata, installed version, and available update.
+
+### Search
+
+```bash
+deno run -A jsr:@ursamu/ursamu/cli plugin search <query>
+```
+
+Search the public plugin registry for plugins matching `<query>`.
+
+### Plugin install behavior (v2.6.0)
+
+The plugin installer is **fail-fast with whole-manifest atomic rollback**.
+If any plugin (or transitive `deps[]` entry) fails to clone, has an unsafe
+name or URL, violates a `version` semver range, or conflicts with another
+dep's range, the entire install run aborts. Disk and the plugin registry
+are left exactly as they were before the run — your previously installed
+plugins are not touched. See
+[Admin Guide → Plugin Install Behavior](./admin-guide.md#plugin-install-behavior)
+for the full list of error classes.
 ---
 
 ## update
@@ -115,6 +134,17 @@ Preview changes without writing:
 
 ```bash
 deno run -A jsr:@ursamu/ursamu/cli update --dry-run
+```
+---
+
+## scripts
+
+List the names and aliases of every script the engine and its plugins
+register at startup. Useful for discovering what's already registered before
+you write an override.
+
+```bash
+deno run -A jsr:@ursamu/ursamu/cli scripts list
 ```
 ---
 

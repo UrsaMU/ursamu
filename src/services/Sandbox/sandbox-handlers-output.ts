@@ -4,7 +4,7 @@
  * Handles worker messages that route output to players:
  *   send, broadcast, room:broadcast, teleport, patch
  */
-import { send as broadcastSend, broadcast as broadcastAll } from "../broadcast/index.ts";
+import { send as broadcastSend, broadcast as broadcastAll, notify as broadcastNotify } from "../broadcast/index.ts";
 import { wsService } from "../WebSocket/index.ts";
 import type { SDKContext } from "./SDKService.ts";
 import { gameHooks } from "../Hooks/GameHooks.ts";
@@ -26,6 +26,16 @@ export function handleSend(msg: Msg, context: SDKContext | undefined): void {
     const sock = wsService.getConnectedSockets().find(s => s.id === context.socketId);
     if (sock?.cid) wsService.disconnect(sock.cid);
   }
+}
+
+/** Route a "notify" request to a single actor by id; reply with delivery boolean. */
+export function handleNotify(msg: Msg, worker: globalThis.Worker): void {
+  const actorId = msg.actorId as string | undefined;
+  const message = msg.message as string | undefined;
+  const data    = msg.data    as Record<string, unknown> | undefined;
+  const msgId   = msg.msgId;
+  const ok = actorId && message ? broadcastNotify(actorId, message, data) : false;
+  worker.postMessage({ type: "response", msgId, data: ok });
 }
 
 /** Route a "broadcast" message to all connected sockets. */

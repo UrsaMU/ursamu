@@ -1,5 +1,6 @@
 import { addCmd } from "../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
+import { gameHooks } from "../services/Hooks/GameHooks.ts";
 
 export async function execGet(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
@@ -11,7 +12,15 @@ export async function execGet(u: IUrsamuSDK): Promise<void> {
   if (thing.flags.has("player")) { u.send("You can't pick up players!"); return; }
   if (thing.flags.has("room") || thing.flags.has("exit")) { u.send("You can't pick that up."); return; }
 
+  const prevLocation = thing.location ?? null;
   await u.db.modify(thing.id, "$set", { location: actor.id });
+  await gameHooks.emit("object:moved", {
+    objectId: thing.id,
+    from: prevLocation,
+    to: actor.id,
+    cause: "get",
+    actorId: actor.id,
+  });
 
   const thingName = u.util.displayName(thing, actor);
   const actorName = u.util.displayName(actor, actor);
@@ -38,6 +47,13 @@ export async function execDrop(u: IUrsamuSDK): Promise<void> {
   if (!thing || thing.location !== actor.id) { u.send("You aren't carrying that."); return; }
 
   await u.db.modify(thing.id, "$set", { location: actor.location });
+  await gameHooks.emit("object:moved", {
+    objectId: thing.id,
+    from: actor.id,
+    to: actor.location ?? null,
+    cause: "drop",
+    actorId: actor.id,
+  });
 
   const thingName = u.util.displayName(thing, actor);
   const actorName = u.util.displayName(actor, actor);
@@ -92,6 +108,13 @@ export async function execGive(u: IUrsamuSDK): Promise<void> {
   if (!thing || thing.location !== actor.id) { u.send("You aren't carrying that."); return; }
 
   await u.db.modify(thing.id, "$set", { location: receiver.id });
+  await gameHooks.emit("object:moved", {
+    objectId: thing.id,
+    from: actor.id,
+    to: receiver.id,
+    cause: "give",
+    actorId: actor.id,
+  });
 
   const thingName = u.util.displayName(thing, actor);
   const actorName = u.util.displayName(actor, actor);

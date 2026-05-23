@@ -6,126 +6,55 @@ description: User guides and tutorials for UrsaMU
 
 # UrsaMU Guides
 
-This section contains comprehensive guides and tutorials to help you get started
-with UrsaMU, whether you're installing it for the first time, learning how to
-use it as a player, or administering your own server.
+User guides and tutorials for UrsaMU v2.6.0 — installation, day-to-day play,
+admin operations, plugin development, and softcoding.
 
-## Installation Guide
+## Getting Started
 
-Learn how to install and set up UrsaMU on your system:
+- [**Installation**](./installation.md) — Prerequisites, install methods,
+  first-run setup, and connecting.
+- [**User Guide**](./user-guide.md) — Connecting and playing as a player.
+- [**CLI Reference**](./cli.md) — `ursamu create`, `plugin`, `update`, `scripts`.
 
-- [Prerequisites](./installation.md#prerequisites)
-- [Installation Methods](./installation.md#installation-methods)
-- [Configuration](./installation.md#configuration)
-- [Running the Server](./installation.md#running-the-server)
+## Operating a Server
 
-## User Guide
+- [**Admin Guide**](./admin-guide.md) — Permissions, user management,
+  configuration, `@reload`, plugin install behavior, security.
+- [**Production Deployment**](./deployment.md) — `.env` and `JWT_SECRET`,
+  `scripts/daemon.sh`, systemd, nginx + TLS, log rotation, updates.
+- [**Docker**](./docker.md) — Containerized deployment with `docker compose`.
+- [**Password Reset**](./password-reset.md) — Admin tokens, player flow,
+  REST API.
+- [**Debugging**](./debugging.md) — Common runtime errors and how to fix them.
 
-Learn how to use UrsaMU as a player:
+## Customizing the Game
 
-- [Getting Started](./user-guide.md#getting-started)
-- [Basic Commands](./user-guide.md#basic-commands)
-- [Character Creation](./user-guide.md#character-creation)
-- [Communication](./user-guide.md#communication)
+- [**Customization**](./customization.md) — Color codes, custom commands,
+  attributes, plugins, REST routes, format handlers, external integrations.
+- [**Lock Expressions**](./lock-expressions.md) — Lockfunc syntax, boolean
+  operators, custom lockfuncs via `registerLockFunc`.
+- [**Command Reference**](./commands.md) — All built-in commands.
+- [**Help Authoring**](./help-authoring.md) — Writing help files, directory
+  structure, conventions.
 
-## Admin Guide
+## Writing Code
 
-Learn how to administer an UrsaMU server:
+- [**Scripting**](./scripting.md) — Sandbox model, the `u` SDK, ESM vs legacy
+  blocks, aliases and switches.
+- [**Build Your First Script**](./first-script.md) — Step-by-step walkthrough.
+- [**SDK Cookbook**](./sdk-cookbook.md) — Every `u.*` namespace with examples.
+- [**Soft-Coding**](./softcoding.md) — Storing scripts in attributes, parent
+  inheritance, `@trigger` / `u.trigger` / `u.eval`.
+- [**Recipes**](./recipes.md) — Copy-paste patterns for common tasks.
+- [**Game Clock**](./gameclock.md) — `u.sys.gameTime` and the in-game calendar.
 
-- [User Management](./admin-guide.md#user-management)
-- [Server Configuration](./admin-guide.md#server-configuration)
-- [Backup and Restore](./admin-guide.md#backup-and-restore)
-- [Troubleshooting](./admin-guide.md#troubleshooting)
+## Game Systems
 
-## Scripting Guide
-
-Write TypeScript/JS scripts that run in the sandboxed SDK:
-
-- [How scripting works](./scripting.md#how-scripting-works)
-- [The SDK (`u`)](./scripting.md#the-sdk-u)
-- [Writing a script](./scripting.md#writing-a-script)
-- [Testing scripts](./scripting.md#testing-scripts)
+- [**Scenes**](./scenes.md) — Collaborative RP logs: create, pose, export.
+- [**Wiki**](./wiki.md) — File-based Markdown wiki with frontmatter and REST.
 
 ## MUSH Compatibility
 
-Coming from PennMUSH, TinyMUSH, or MUX2? See what works today and what's planned:
-
-- [What works today](../mush_compatibility/#what-works-today)
-- [What's different](../mush_compatibility/#whats-different-from-traditional-mush)
-- [Planned enhancements](../mush_compatibility/#planned-enhancements)
-- [Connecting with MU* clients](../mush_compatibility/#connecting-with-a-traditional-mu-client)
-
-## Docker
-
-Run UrsaMU in a container:
-
-- [Quick start](./docker.md#quick-start)
-- [docker-compose.yaml reference](./docker.md#docker-composeyaml)
-- [Environment & volumes](./docker.md#environment-variables)
-- [Behind a reverse proxy](./docker.md#behind-a-reverse-proxy)
-- [Troubleshooting](./docker.md#troubleshooting)
-
-## Production Deployment
-
-Get UrsaMU running reliably in production:
-
-- [Environment variables](./deployment.md#environment-variables)
-- [Daemon mode](./deployment.md#daemon-mode)
-- [systemd service](./deployment.md#systemd)
-- [Nginx + TLS](./deployment.md#nginx-and-tls)
-- [Firewall & log rotation](./deployment.md#firewall)
-
-## Scenes
-
-Create, write in, and export collaborative roleplay logs:
-
-- [Creating a scene](./scenes.md#creating-a-scene)
-- [Writing poses](./scenes.md#writing-poses)
-- [Private scenes & invitations](./scenes.md#private-scenes)
-- [Exporting a scene](./scenes.md#exporting-a-scene)
-- [Full API reference](./scenes.md#api-reference)
-
-## Wiki
-
-Build and manage your game wiki with file-based Markdown:
-
-- [Directory structure](./wiki.md#directory-structure)
-- [Frontmatter](./wiki.md#frontmatter)
-- [In-game commands](./wiki.md#in-game-commands)
-- [REST API](./wiki.md#rest-api)
-- [Hooks](./wiki.md#hooks)
-
-## Writing Help Files
-
-Create and organize in-game help files for your players:
-
-- [Directory structure](./help-authoring.md#directory-structure)
-- [File naming conventions](./help-authoring.md#file-naming)
-- [Markdown support & tables](./help-authoring.md#markdown-support)
-- [How players access help](./help-authoring.md#how-players-access-help)
-
-## Password Reset
-
-How admins generate reset tokens and players consume them:
-
-- [Admin steps](./password-reset.md#admin-steps)
-- [Player steps & API](./password-reset.md#player-steps)
-- [Error responses](./password-reset.md#error-responses)
-
-## Lock Expressions
-
-Control access to commands, exits, and objects with lock expressions:
-
-- [Flag checks](./lock-expressions.md#flag-checks)
-- [Boolean operators](./lock-expressions.md#boolean-operators)
-- [Attribute checks](./lock-expressions.md#attribute-checks)
-- [Using locks in scripts](./lock-expressions.md#using-locks-in-scripts)
-
-## Customization
-
-Learn how to customize your UrsaMU server:
-
-- [Themes](./customization.md#themes)
-- [Commands](./customization.md#commands)
-- [Game Mechanics](./customization.md#game-mechanics)
-- [Integration](./customization.md#integration)
+Coming from PennMUSH, TinyMUSH, or MUX2? See
+[mush compatibility](../mush_compatibility.md) for what works today, what
+differs, and how to connect with traditional MU* clients.
