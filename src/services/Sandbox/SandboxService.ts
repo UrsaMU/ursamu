@@ -199,7 +199,7 @@ export class SandboxService {
     }
 
     const sdkData = SDKService.prepareSDK(context);
-    let timeoutId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     try {
       const result = await Promise.race([
         (sandbox as LocalSandbox).eval(execCode, { sdk: sdkData, context }),
