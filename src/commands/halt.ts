@@ -9,6 +9,15 @@ addCmd({
     name: "@halt",
     pattern: /^@halt(?:\s+(.+))?$/i,
     lock: "connected",
+    category: "Softcode",
+    help: `@halt [<object>]  — Cancel all queued @wait actions for an object.
+
+Without an argument, cancels your own queue. Admin+ may target any object
+by dbref or name.
+
+Examples:
+  @halt
+  @halt #12`,
     exec: async (u: IUrsamuSDK) => {
       const staff = isStaff(u.me.flags);
       const ref = (u.cmd.args[0] || "").trim();

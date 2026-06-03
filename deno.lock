@@ -3036,6 +3036,27 @@
       "npm:bcryptjs@2.4.3",
       "npm:lodash@4.17.21",
       "npm:quickjs-emscripten@0.29.0"
-    ]
+    ],
+    "members": {
+      "packages/core": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/semver@1",
+          "jsr:@zaubrik/djwt@^3.0.2"
+        ]
+      },
+      "packages/mush": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@ursamu/mushcode@0.6",
+          "jsr:@zaubrik/djwt@^3.0.2",
+          "npm:@digibear/tags@1.0.0",
+          "npm:bcryptjs@2.4.3"
+        ]
+      }
+    }
   }
 }

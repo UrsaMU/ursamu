@@ -1,5 +1,5 @@
 import { intentRegistry } from "./IntentRegistry.ts";
-import { sandboxService } from "../Sandbox/SandboxService.ts";
+import { sandboxService } from "@ursamu/mush";
 
 export interface Intent {
   name: string;

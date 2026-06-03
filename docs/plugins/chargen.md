@@ -329,7 +329,7 @@ chargenHooks.on("chargen:submitted", async (app) => {
 
 ```typescript
 chargenHooks.on("chargen:approved", async (app) => {
-  const { createObj } = await import("jsr:@ursamu/ursamu");
+  const { createObj } = await import("jsr:@ursamu/mush");
 
   await createObj({
     name: "Starting Pack",

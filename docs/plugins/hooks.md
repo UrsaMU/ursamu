@@ -22,7 +22,7 @@ for 12 built-in engine events and is the correct way to react to player and
 scene activity without modifying core command files.
 
 ```typescript
-import { gameHooks } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
 
 // Subscribe
 gameHooks.on("player:login", ({ actorId, actorName }) => {
@@ -336,9 +336,9 @@ player logins:
 ```typescript
 // src/plugins/gm-assist/index.ts
 import type { IPlugin } from "../../@types/IPlugin.ts";
-import { gameHooks } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
 import { send } from "../../services/broadcast/index.ts";
-import type { SceneSetEvent, SessionEvent } from "jsr:@ursamu/ursamu";
+import type { SceneSetEvent, SessionEvent } from "jsr:@ursamu/mush";
 
 const onSceneSet = async ({ sceneId, sceneName, roomId, description }: SceneSetEvent) => {
   // Narrate the scene to the room in GM voice

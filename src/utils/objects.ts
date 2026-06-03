@@ -6,7 +6,7 @@
 import type { IAttribute } from "../@types/IAttribute.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import { dbojs, counters } from "../services/Database/index.ts";
-import { flags } from "../services/flags/flags.ts";
+import { flags } from "@ursamu/mush";
 import { moniker as _moniker } from "./session.ts";
 
 // ---------------------------------------------------------------------------
@@ -47,19 +47,18 @@ export const target = async (
   if (tar.startsWith("#")) return await dbojs.queryOne({ id: tar.slice(1) });
   if (["me", "self"].includes(tar.toLowerCase())) return en;
 
-  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-  const candidates = await dbojs.query({
-    $where: function () {
-      const searchPat = new RegExp(`^${escapeRegex(tar)}`, "i");
-      const nameParts = (this.data?.name || "").split(";").map((p: string) => p.trim());
-      return (
-        nameParts.some((p) => searchPat.test(p)) ||
-        this.id === tar ||
-        (this.data?.alias as string | undefined)?.toLowerCase() === tar.toLowerCase()
+  // Use regex-based query instead of $where (which is removed as a security measure).
+  const namePat = new RegExp(`^${tar.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i");
+  const all = await dbojs.query({ "data.name": namePat });
+  const byAlias = tar.toLowerCase();
+  const candidates = all.length
+    ? all
+    : await dbojs.query({}).then((objs) =>
+        objs.filter((o) =>
+          o.id === tar ||
+          (o.data?.alias as string | undefined)?.toLowerCase() === byAlias
+        )
       );
-    },
-  });
 
   if (!candidates.length) return undefined;
   if (global) return candidates[0];

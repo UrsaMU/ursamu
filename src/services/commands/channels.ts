@@ -4,7 +4,7 @@ import { moniker } from "../../utils/moniker.ts";
 import { chans, dbojs, chanHistory } from "../Database/index.ts";
 import { getNextId } from "../../utils/getNextId.ts";
 import { send } from "../broadcast/index.ts";
-import { flags } from "../flags/flags.ts";
+import { flags } from "@ursamu/mush";
 import { force } from "./force.ts";
 import { channelEvents } from "../channel-events.ts";
 import { gameHooks } from "../Hooks/GameHooks.ts";

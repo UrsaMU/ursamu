@@ -14,7 +14,7 @@ import parser from "../parser/parser.ts";
 import { setConfig } from "../Config/mod.ts";
 import { hash, compare } from "../../../deps.ts";
 import { escapeRegex } from "../../utils/escapeRegex.ts";
-import { sandboxService } from "../Sandbox/SandboxService.ts";
+import { sandboxService } from "@ursamu/mush";
 import { buildContext, type GameContext } from "../../engine/context.ts";
 import { sprintf, templateFn } from "./formatting.ts";
 
@@ -286,11 +286,11 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
       uptime: () => Promise.resolve(performance.now()),
       update: (_branch?: string) => Promise.resolve(),
       gameTime: async () => {
-        const { gameClock } = await import("../GameClock/index.ts");
+        const { gameClock } = await import("@ursamu/mush");
         return gameClock.now();
       },
       setGameTime: async (t: import("../../@types/UrsamuSDK.ts").IGameTime) => {
-        const { gameClock } = await import("../GameClock/index.ts");
+        const { gameClock } = await import("@ursamu/mush");
         gameClock.set(t);
         await gameClock.save();
       },

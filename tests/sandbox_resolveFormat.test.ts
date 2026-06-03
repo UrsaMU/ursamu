@@ -127,5 +127,61 @@ Deno.test("sandbox: u.util.resolveFormatOr returns fallback when null", { ...OPT
   assertEquals(result, "FALLBACK_USED");
 
   await cleanup(ROOM_ID, ACTOR_ID);
-  await DBO.close();
 });
+
+Deno.test("sandbox: u.util.resolveFormat hydrates target contents for handlers", { ...OPTS, ...SLOW }, async () => {
+  const { registerFormatHandler, _clearFormatHandlers } = await import(
+    "../src/utils/formatHandlers.ts"
+  );
+
+  const ITEM_ID = "rf_item1";
+  await dbojs.create({
+    id: ROOM_ID,
+    flags: "room",
+    data: { name: "RoomWithContents", attributes: [] },
+  });
+  await dbojs.create({
+    id: ITEM_ID,
+    flags: "thing",
+    data: { name: "A red rose" },
+    location: ROOM_ID,
+  });
+  await dbojs.create({
+    id: ACTOR_ID,
+    flags: "player connected",
+    data: { name: "Tester" },
+    location: ROOM_ID,
+  });
+
+  registerFormatHandler("TEST_HYDRATION", (_u, target, _arg) => {
+    const contents = target.contents || [];
+    return contents.map((c) => c.name).join(",");
+  });
+
+  const script = `
+    u.ui = { ...u.ui, layout: () => {}, panel: (o) => o };
+    const room = { id: "${ROOM_ID}", flags: new Set(["room"]), state: {}, contents: [] };
+    return await u.util.resolveFormat(room, "TEST_HYDRATION", "");
+  `;
+
+  const ctx: SDKContext = {
+    id: ACTOR_ID,
+    state: {},
+    me: { id: ACTOR_ID, name: "Tester", flags: new Set(["player", "connected"]), state: {}, location: ROOM_ID },
+    here: { id: ROOM_ID, name: "RoomWithContents", flags: new Set(["room"]), state: {} },
+    cmd: { name: "test", args: [] },
+    socketId: "sock-rf-4",
+  };
+
+  try {
+    const result = await sandboxService.runScript(script, ctx, SLOW);
+    const items = String(result).split(",");
+    assertEquals(items.includes("A red rose"), true);
+    assertEquals(items.includes("Tester"), true);
+  } finally {
+    _clearFormatHandlers();
+    await cleanup(ROOM_ID, ACTOR_ID, ITEM_ID);
+    await DBO.close();
+  }
+});
+

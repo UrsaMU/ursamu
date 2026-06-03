@@ -77,7 +77,7 @@ async function scaffoldStandalone(
         test:     "deno test -A --unstable-kv",
         showcase: "deno run -A tools/showcase.ts",
       },
-      imports: { ursamu: "jsr:@ursamu/ursamu" },
+      imports: { ursamu: "jsr:@ursamu/mush", "@ursamu/mush": "jsr:@ursamu/mush", "@ursamu/ursamu": "jsr:@ursamu/ursamu" },
     }, null, 2),
   );
   console.log("  Created deno.json");

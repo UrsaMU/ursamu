@@ -1,1 +1,1 @@
-export * from "./flags.ts";
+export { flags } from "@ursamu/mush";

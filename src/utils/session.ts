@@ -10,7 +10,7 @@ import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { UserSocket } from "../@types/IMSocket.ts";
 import { chans, dbojs } from "../services/Database/index.ts";
 import { send } from "../services/broadcast/index.ts";
-import { flags } from "../services/flags/flags.ts";
+import { flags } from "@ursamu/mush";
 import { wsService } from "../services/WebSocket/index.ts";
 
 // ---------------------------------------------------------------------------
@@ -98,18 +98,18 @@ export const joinChans = async (ctx: IContext): Promise<void> => {
 
   for (const channel of channels) {
     if (!channel.alias) continue;
-    const hasAccess = flags.check(player.flags || "", channel.lock || "");
+    const hasAccess = flags.check(player.flags || "", (channel.lock as string) || "");
     const existing  = userChans.find(ch => ch.channel === channel.name);
 
     if (hasAccess && !existing) {
-      userChans.push({ id: channel.id, channel: channel.name, alias: channel.alias, active: true });
+      userChans.push({ id: channel.id, channel: channel.name, alias: channel.alias as string, active: true });
       changed = true;
-      send([ctx.socket.id], `You have joined ${channel.name} with the alias '${channel.alias}'.`);
+      send([ctx.socket.id], `You have joined ${channel.name} with the alias '${channel.alias as string}'.`);
     } else if (!hasAccess && existing) {
       userChans = userChans.filter(c => c.channel !== channel.name);
       ctx.socket.leave(channel.name);
       changed = true;
-      send([ctx.socket.id], `You have left ${channel.name} with the alias '${channel.alias}'.`);
+      send([ctx.socket.id], `You have left ${channel.name} with the alias '${channel.alias as string}'.`);
     }
   }
 

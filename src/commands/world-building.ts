@@ -212,8 +212,12 @@ addCmd({
   category: "Building",
   help: `@aconnect <target>=<action>  — Set action executed when a player connects.
 
+The action is evaluated as softcode with the connecting player as executor.
+Clear with an empty value.
+
 Examples:
-  @aconnect me=@pemit me=Welcome back!`,
+  @aconnect me=@pemit me=Welcome back!
+  @aconnect me=`,
   exec: execAconnect,
 });
 
@@ -222,10 +226,13 @@ addCmd({
   pattern: /^@?adisconnect\s+(.*)/i,
   lock: "connected",
   category: "Building",
-  help: `@adisconnect <target>=<action>  — Set action executed when a player disconnects.
+  help: `@adisconnect <target>=<action>  — Set action when a player disconnects.
+
+Evaluated as softcode with the disconnecting player as executor.
 
 Examples:
-  @adisconnect me=@pemit me=Goodbye!`,
+  @adisconnect me=@pemit me=Goodbye!
+  @adisconnect me=`,
   exec: execAdisconnect,
 });
 
@@ -236,8 +243,11 @@ addCmd({
   category: "Building",
   help: `@startup <target>=<action>  — Set action executed when the server starts.
 
+Useful for seeding state, announcing readiness, or triggering init sequences.
+
 Examples:
-  @startup #5=@pemit me=System ready.`,
+  @startup #5=@pemit me=System ready.
+  @startup #5=@trigger me/INIT`,
   exec: execStartup,
 });
 
@@ -246,10 +256,11 @@ addCmd({
   pattern: /^@?daily\s+(.*)/i,
   lock: "connected",
   category: "Building",
-  help: `@daily <target>=<action>  — Set action executed once per day.
+  help: `@daily <target>=<action>  — Set action executed once per day at midnight.
 
 Examples:
-  @daily #5=@trigger me/RESET`,
+  @daily #5=@trigger me/RESET
+  @daily #5=`,
   exec: execDaily,
 });
 

@@ -150,6 +150,27 @@ deno task start
 
 ## Architecture
 
+### Packages (monorepo)
+
+The engine is split into two first-class packages:
+
+| Package | JSR | Purpose |
+|---------|-----|---------|
+| `@ursamu/core` | `jsr:@ursamu/core` | Generic server infrastructure — transport, DB (Deno KV), plugin lifecycle, events |
+| `@ursamu/mush` | `jsr:@ursamu/mush` | MUSH world layer — `IDBObj`, flags, locks, softcode evaluator, `addCmd`, `IUrsamuSDK` |
+| `@ursamu/ursamu` | `jsr:@ursamu/ursamu` | Backwards-compat shim that re-exports everything from `@ursamu/mush` |
+
+**New projects** should import from `jsr:@ursamu/mush`. Existing plugins using
+`jsr:@ursamu/ursamu` continue to work without changes.
+
+```
+packages/
+├── core/    @ursamu/core — transport, DB, plugin loader, event bus
+└── mush/    @ursamu/mush — MUSH engine (world layer built on core)
+```
+
+### Source layout
+
 ```
 src/
 ├── @types/          TypeScript interfaces (IDBObj, IUrsamuSDK, IPlugin, …)
@@ -260,7 +281,7 @@ Run with `deno task <name>`.
 | `daemon` | Start both processes in background (managed restart loop). |
 | `stop` / `restart` / `status` | Daemon control. |
 | `logs` | Tail `logs/main.log` and `logs/telnet.log`. |
-| `test` | Run the full test suite (1141+ tests). |
+| `test` | Run the full test suite (1464+ tests). |
 | `test:coverage` | Run tests with LCOV coverage. |
 | `config` | Interactive configuration tool. |
 | `create` | Scaffold a new game project or plugin. |
@@ -344,8 +365,9 @@ src/plugins/my-feature/
 Minimal plugin:
 
 ```ts
-import type { IPlugin } from "jsr:@ursamu/ursamu";
-import { addCmd, gameHooks } from "jsr:@ursamu/ursamu";
+import type { IPlugin } from "jsr:@ursamu/mush";
+import { addCmd, gameHooks } from "jsr:@ursamu/mush";
+// Note: jsr:@ursamu/ursamu is a backwards-compat shim and still works.
 
 const onLogin = (e: { id: string }) => { /* … */ };
 
@@ -425,7 +447,7 @@ import {
   dist2d, dist3d, angle2d, bearing,
   vreflect, pointInAabb, rayAabb,
   fbm2, ridged2, perlin2, simplex2, worley2,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 
 const rng = new Rng(12345);             // per-instance seedable mulberry32
 const noise = new Noise(rng.next());    // per-instance Perlin/Simplex/Worley
@@ -521,7 +543,7 @@ deno test tests/ --allow-all --unstable-kv --no-check
 deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
 ```
 
-1141+ tests, 0 failures; 348 files lint-clean.
+1464 tests, 0 failures; 480 files lint-clean.
 
 ---
 

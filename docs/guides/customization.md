@@ -55,8 +55,8 @@ Register new in-game commands with `addCmd()`. Call it at module level — it
 runs once when your file is imported at server startup.
 
 ```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "jsr:@ursamu/mush";
+import type { IUrsamuSDK } from "jsr:@ursamu/mush";
 
 addCmd({
   name: "+roll",
@@ -198,7 +198,7 @@ src/plugins/my-plugin/
 ### `index.ts`
 
 ```typescript
-import type { IPlugin } from "jsr:@ursamu/ursamu";
+import type { IPlugin } from "jsr:@ursamu/mush";
 import "./commands.ts";   // importing triggers addCmd() registrations
 
 export const plugin: IPlugin = {
@@ -242,7 +242,7 @@ Register custom HTTP endpoints with `registerPluginRoute()`. Routes are
 mounted alongside the built-in `/api/v1/` routes.
 
 ```typescript
-import { registerPluginRoute } from "jsr:@ursamu/ursamu";
+import { registerPluginRoute } from "jsr:@ursamu/mush";
 
 registerPluginRoute("/api/v1/my-plugin", async (req, userId) => {
   if (req.method !== "GET") {
@@ -311,7 +311,7 @@ in-game **without** the plugin needing to know they exist.
 ### Register a TypeScript handler
 
 ```typescript
-import { registerFormatHandler } from "jsr:@ursamu/ursamu";
+import { registerFormatHandler } from "jsr:@ursamu/mush";
 
 registerFormatHandler("NAMEFORMAT", (target, viewer) => {
   const star = target.flags.has("admin") ? "%ch%cy*%cn " : "";
@@ -329,7 +329,7 @@ If your handler is just a softcode string, use `registerFormatTemplate` —
 the shortcut compiles the source once and wraps it in a TS handler for you.
 
 ```typescript
-import { registerFormatTemplate } from "jsr:@ursamu/ursamu";
+import { registerFormatTemplate } from "jsr:@ursamu/mush";
 
 registerFormatTemplate(
   "EXITFORMAT",
@@ -340,7 +340,7 @@ registerFormatTemplate(
 ### Unregister
 
 ```typescript
-import { unregisterFormatHandler } from "jsr:@ursamu/ursamu";
+import { unregisterFormatHandler } from "jsr:@ursamu/mush";
 unregisterFormatHandler("NAMEFORMAT");
 ```
 

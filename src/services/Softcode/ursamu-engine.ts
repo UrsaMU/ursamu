@@ -199,6 +199,25 @@ _engine.registerFunction("localize", {
   },
 });
 
+// while(cond, body) — iterate while cond is truthy; returns last body result.
+// Capped at 1000 iterations to prevent runaway loops.
+_engine.registerFunction("while", {
+  eval: "lazy",
+  minArgs: 2,
+  maxArgs: 2,
+  async exec(args, _ctx) {
+    const thunks = args as EvalThunk[];
+    const MAX = 1000;
+    let result = "";
+    for (let i = 0; i < MAX; i++) {
+      const cond = await thunks[0]();
+      if (!cond || cond === "0") break;
+      result = await thunks[1]();
+    }
+    return result;
+  },
+});
+
 // iter alias: "parse" is a TinyMUX alias for iter.
 // Get the iter impl registered by registerStdlib and alias it.
 const _iterImpl = ((_engine as unknown as { functions: Map<string, FunctionImpl> }).functions).get("iter");
@@ -212,7 +231,7 @@ if (_iterImpl) {
 // require IDBObj context / richer semantics (u, get, name, hasattr, hasflag, setq).
 const SKIP_NAMES = new Set([
   // Already handled as lazy FunctionImpl above
-  "iter", "parse", "localize",
+  "iter", "parse", "localize", "while",
 
   // Pure math — new lib covers these exactly
   "add", "sub", "mul", "div", "mod", "abs", "round", "floor", "ceil",

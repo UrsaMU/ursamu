@@ -32,16 +32,16 @@ export function handleSend(msg: Msg, context: SDKContext | undefined): void {
 export function handleNotify(msg: Msg, worker: globalThis.Worker): void {
   const actorId = msg.actorId as string | undefined;
   const message = msg.message as string | undefined;
-  const data    = msg.data    as Record<string, unknown> | undefined;
+  const _data   = msg.data    as Record<string, unknown> | undefined; void _data;
   const msgId   = msg.msgId;
-  const ok = actorId && message ? broadcastNotify(actorId, message, data) : false;
+  const ok = actorId && message ? broadcastNotify(actorId, message) : false;
   worker.postMessage({ type: "response", msgId, data: ok });
 }
 
 /** Route a "broadcast" message to all connected sockets. */
 export function handleBroadcast(msg: Msg): void {
   const message = msg.message as string | undefined;
-  if (message) broadcastAll(message, msg.data as Record<string, unknown> | undefined);
+  if (message) broadcastAll(message);
 }
 
 /** Broadcast a message to all players in a specific room. */

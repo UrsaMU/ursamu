@@ -333,11 +333,11 @@ Every scene mutation fires a typed event on `gameHooks`, allowing plugins
 (AI GM assistants, logging systems, etc.) to react without touching the
 scene REST router.
 
-Import `gameHooks` from `jsr:@ursamu/ursamu`:
+Import `gameHooks` from `jsr:@ursamu/mush`:
 
 ```typescript
-import { gameHooks } from "jsr:@ursamu/ursamu";
-import type { SceneSetEvent, SceneClearEvent } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
+import type { SceneSetEvent, SceneClearEvent } from "jsr:@ursamu/mush";
 ```
 
 ### Hook reference
@@ -357,9 +357,9 @@ handlers that only care about scene descriptions.
 ### Example: AI GM assistant
 
 ```typescript
-import { gameHooks } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
 import { send } from "../../services/broadcast/index.ts";
-import type { SceneSetEvent, SceneTitleEvent, SceneClearEvent } from "jsr:@ursamu/ursamu";
+import type { SceneSetEvent, SceneTitleEvent, SceneClearEvent } from "jsr:@ursamu/mush";
 
 // Narrate the new setting in the GM's voice
 gameHooks.on("scene:set", ({ roomId, description }: SceneSetEvent) => {

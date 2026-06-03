@@ -151,7 +151,9 @@ export async function scaffoldProject(
   const localImports = {
     "ursamu":                  `${engineRelPath}/mod.ts`,
     "ursamu/":                 `${engineRelPath}/`,
-    "@ursamu/ursamu":          `${engineRelPath}/mod.ts`,
+    "@ursamu/mush":            `${engineRelPath}/packages/mush/mod.ts`,
+    "@ursamu/core":            `${engineRelPath}/packages/core/mod.ts`,
+    "@ursamu/ursamu":          `${engineRelPath}/mod.ts`,          // shim → @ursamu/mush
     "@ursamu/ursamu/app":      `${engineRelPath}/src/app.ts`,
     "@ursamu/ursamu/channels": `${engineRelPath}/src/services/channel-events.ts`,
     "@ursamu/ursamu/chargen":  `${engineRelPath}/src/services/Chargen/index.ts`,
@@ -180,11 +182,13 @@ export async function scaffoldProject(
     "quickjs-emscripten":      "npm:quickjs-emscripten@0.29.0",
   };
   const jsrImports = {
-    "ursamu":         "jsr:@ursamu/ursamu",
-    "@ursamu/ursamu": "jsr:@ursamu/ursamu",
-    "@std/path":      "jsr:@std/path@^0.224.0",
-    "@std/assert":    "jsr:@std/assert@^0.224.0",
-    "@std/fs":        "jsr:@std/fs@^0.224.0",
+    "ursamu":          "jsr:@ursamu/mush",      // preferred entry point
+    "@ursamu/mush":    "jsr:@ursamu/mush",
+    "@ursamu/core":    "jsr:@ursamu/core",
+    "@ursamu/ursamu":  "jsr:@ursamu/ursamu",    // shim — kept for plugin compat
+    "@std/path":       "jsr:@std/path@^0.224.0",
+    "@std/assert":     "jsr:@std/assert@^0.224.0",
+    "@std/fs":         "jsr:@std/fs@^0.224.0",
   };
   const denoJson = JSON.stringify({
     nodeModulesDir: "auto",

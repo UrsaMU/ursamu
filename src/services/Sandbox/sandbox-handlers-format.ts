@@ -74,6 +74,9 @@ export async function handleUtilResolveFormatMessage(
   if (!tarRaw) { respond(worker, msgId, null); return; }
   const target = hydrate(tarRaw as unknown as Parameters<typeof hydrate>[0]) as IDBObj;
 
+  const rawContents = await dbojs.query({ location: target.id });
+  target.contents = rawContents.map((c) => hydrate(c as unknown as Parameters<typeof hydrate>[0]) as IDBObj);
+
   const out = await resolveFormat(u, target, m.slot, m.defaultArg ?? "");
   respond(worker, msgId, out);
 }
@@ -97,6 +100,9 @@ export async function handleUtilResolveFormatOrMessage(
   const tarRaw = await dbojs.queryOne({ id: m.target.id });
   if (!tarRaw) { respond(worker, msgId, m.fallback ?? ""); return; }
   const target = hydrate(tarRaw as unknown as Parameters<typeof hydrate>[0]) as IDBObj;
+
+  const rawContents = await dbojs.query({ location: target.id });
+  target.contents = rawContents.map((c) => hydrate(c as unknown as Parameters<typeof hydrate>[0]) as IDBObj);
 
   const out = await resolveFormatOr(
     u, target, m.slot, m.defaultArg ?? "", m.fallback ?? "",

@@ -30,8 +30,12 @@ addCmd({
   category: "Navigation",
   help: `home  — Go to your home location.
 
+Use \`@link me=<room>\` to change where home sends you.
+Use \`@link <exit>=<room>\` to set an exit's destination.
+
 Examples:
-  home`,
+  home
+  @link me=Lobby`,
   exec: execHome,
 });
 

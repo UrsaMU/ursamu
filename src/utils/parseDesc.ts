@@ -102,7 +102,7 @@ export async function parseDesc(
         continue;
       }
 
-      const { sandboxService } = await import("../services/Sandbox/SandboxService.ts");
+      const { sandboxService } = await import("@ursamu/mush");
       const evalResult = await sandboxService.runScript(attrData.value, {
         id: tarObj.id,
         location: tarObj.location || "limbo",

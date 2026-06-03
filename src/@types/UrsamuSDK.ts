@@ -51,6 +51,9 @@ export interface IUrsamuSDK {
     ): string;
     sprintf(format: string, ...args: unknown[]): string;
     stripSubs(str: string): string;
+    renderHeader?(title: string, width?: number): Promise<string>;
+    renderDivider?(label: string | null, width?: number): Promise<string>;
+    renderFooter?(width?: number): Promise<string>;
     parseDesc?(desc: string, actor: IDBObj, target: IDBObj): Promise<string>;
     /**
      * Resolve a format-attribute slot on `target`. Priority chain:

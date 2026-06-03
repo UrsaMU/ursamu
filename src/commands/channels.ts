@@ -282,10 +282,12 @@ addCmd({
   category: "Channel",
   help: `@chantranscript <name>=<lines>  — Export channel history as plain text.
 
-Aliases: +channel/transcript
+Output is sent directly to you as unformatted messages, suitable for
+copy-pasting. Aliases: +channel/transcript
 
 Examples:
-  @chantranscript Public=100`,
+  @chantranscript Public=100
+  @chantranscript Staff=50`,
   exec: execChantranscript,
 });
 
@@ -310,10 +312,13 @@ addCmd({
   pattern: /^@?chandestroy\s+(.*)/i,
   lock: "connected",
   category: "Channel",
-  help: `@chandestroy <name>  — Destroy a channel (admin+).
+  help: `@chandestroy <name>  — Destroy a channel and its history (admin+).
+
+All subscribers are removed. This cannot be undone.
 
 Examples:
-  @chandestroy Staff`,
+  @chandestroy Staff
+  @chandestroy temp-ooc`,
   exec: execChandestroy,
 });
 

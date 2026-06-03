@@ -66,7 +66,7 @@ Examples:
           const memberMap = new Map(memberObjs.map(o => [o.id, o]));
           u.send(`%chMembers of zone master #${objResult.id}:%cn`);
           for (const m of asZM) {
-            const member = memberMap.get(m.memberId);
+            const member = memberMap.get(m.memberId as string);
             u.send(`  ${member?.data?.name ?? m.memberId}(#${m.memberId})`);
           }
         } else {
@@ -80,7 +80,7 @@ Examples:
             const zmMap = new Map(zmObjs.map(o => [o.id, o]));
             u.send(`%chZones for #${objResult.id}:%cn`);
             for (const z of zones) {
-              const zm = zmMap.get(z.zmId);
+              const zm = zmMap.get(z.zmId as string);
               u.send(`  ${zm?.data?.name ?? z.zmId}(#${z.zmId})`);
             }
           }

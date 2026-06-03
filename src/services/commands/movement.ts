@@ -1,12 +1,39 @@
 import type { IContext } from "../../@types/IContext.ts";
+import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database/index.ts";
 import { send } from "../broadcast/index.ts";
-import { flags } from "../flags/flags.ts";
+import { flags } from "@ursamu/mush";
 import { force } from "./force.ts";
 import { gameHooks } from "../Hooks/GameHooks.ts";
 import { wsService } from "../WebSocket/index.ts";
 import { isSoftcode } from "../../utils/isSoftcode.ts";
+
+// Read a raw attribute value from an IDBOBJ without softcode evaluation.
+function getRawAttr(obj: IDBOBJ, name: string): string | undefined {
+  const attrs = obj.data?.attributes as Array<{ name: string; value: string }> | undefined;
+  return attrs?.find((a) => a.name.toUpperCase() === name.toUpperCase())?.value;
+}
+
+// Fire FAIL/OFAIL on an object to the actor and room.
+function fireRawFail(
+  actorSocketId: string,
+  en: IDBOBJ,
+  obj: IDBOBJ,
+  players: IDBOBJ[],
+  defaultMsg: string,
+  defaultOmsg: string,
+): void {
+  const fail = getRawAttr(obj, "FAIL");
+  send([actorSocketId], fail || defaultMsg);
+  const ofail = getRawAttr(obj, "OFAIL");
+  if (players.length > 0) {
+    send(
+      players.map((p) => p.id),
+      ofail ? `${moniker(en)} ${ofail}` : defaultOmsg,
+    );
+  }
+}
 
 export const matchExits = async (ctx: IContext) => {
   if (ctx.socket.cid) {
@@ -51,7 +78,9 @@ export const matchExits = async (ctx: IContext) => {
               const { evaluateLock, hydrate } = await import("../../utils/evaluateLock.ts");
               const allowed = await evaluateLock(leaveLock, hydrate(en), hydrate(currentRoom));
               if (!allowed) {
-                send([ctx.socket.id], "You can't leave here.");
+                fireRawFail(ctx.socket.id, en, currentRoom, players,
+                  "You can't leave here.",
+                  `${moniker(en)} tries to leave, but can't.`);
                 return true;
               }
             }
@@ -63,7 +92,9 @@ export const matchExits = async (ctx: IContext) => {
             const { evaluateLock, hydrate } = await import("../../utils/evaluateLock.ts");
             const allowed = await evaluateLock(enterLock, hydrate(en), hydrate(dest));
             if (!allowed) {
-              send([ctx.socket.id], "You can't go that way.");
+              fireRawFail(ctx.socket.id, en, dest, players,
+                "You can't go that way.",
+                `${moniker(en)} tries to enter, but can't.`);
               return true;
             }
           }
@@ -155,13 +186,18 @@ export const matchExits = async (ctx: IContext) => {
           await force(ctx, "look");
           return true;
         } else {
-          send([ctx.socket.id], "You can't go that way.");
-
-          if (players.length > 0) {
-            send(
-              players.map((p) => p.id),
-              `${moniker(en)} tries to go ${exit.data?.name}, but fails.`
-            );
+          // Exit lock failed — fire FAIL/OFAIL/AFAIL on the exit.
+          fireRawFail(ctx.socket.id, en, exit, players,
+            "You can't go that way.",
+            `${moniker(en)} tries to go ${exit.data?.name as string || "there"}, but fails.`);
+          // AFAIL to exit owner
+          const ownerId = exit.data?.owner as string | undefined;
+          if (ownerId) {
+            const ownerSocket = wsService.getConnectedSockets().find((s) => s.cid === ownerId);
+            if (ownerSocket) {
+              const afail = getRawAttr(exit, "AFAIL");
+              if (afail) send([ownerSocket.id], afail);
+            }
           }
           return true;
         }

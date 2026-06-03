@@ -1,6 +1,27 @@
 import { addCmd } from "../services/commands/cmdParser.ts";
-import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
+import type { IUrsamuSDK, IDBObj } from "../@types/UrsamuSDK.ts";
 import { gameHooks } from "../services/Hooks/GameHooks.ts";
+import { evaluateLock } from "../utils/evaluateLock.ts";
+
+// Fire the FAIL/OFAIL/AFAIL triple on a target object.
+async function fireFailAttrs(
+  u: IUrsamuSDK,
+  thing: IDBObj,
+  actor: IDBObj,
+  defaultMsg: string,
+  defaultOmsg: string,
+): Promise<void> {
+  const actorName = u.util.displayName(actor, actor);
+  const fail = await u.eval(thing.id, "FAIL");
+  u.send(fail || defaultMsg);
+  const ofail = await u.eval(thing.id, "OFAIL");
+  u.here.broadcast(
+    ofail ? `${actorName} ${ofail}` : defaultOmsg,
+    { exclude: [actor.id] } as Record<string, unknown>,
+  );
+  const afail = await u.eval(thing.id, "AFAIL");
+  if (afail && thing.state.owner) u.send(afail, thing.state.owner as string);
+}
 
 export async function execGet(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
@@ -11,6 +32,20 @@ export async function execGet(u: IUrsamuSDK): Promise<void> {
   if (!thing || thing.location !== actor.location) { u.send("I don't see that here."); return; }
   if (thing.flags.has("player")) { u.send("You can't pick up players!"); return; }
   if (thing.flags.has("room") || thing.flags.has("exit")) { u.send("You can't pick that up."); return; }
+
+  // Check the object's basic lock (@lock obj=expr) — if set and fails, fire FAIL attrs.
+  const basicLock = (thing.state?.locks as Record<string, string>)?.basic;
+  if (basicLock) {
+    const allowed = await evaluateLock(basicLock, actor, thing);
+    if (!allowed) {
+      const thingName = u.util.displayName(thing, actor);
+      const actorName = u.util.displayName(actor, actor);
+      await fireFailAttrs(u, thing, actor,
+        `You can't pick up ${thingName}.`,
+        `${actorName} tries to pick up ${thingName}, but can't.`);
+      return;
+    }
+  }
 
   const prevLocation = thing.location ?? null;
   await u.db.modify(thing.id, "$set", { location: actor.id });
@@ -134,6 +169,42 @@ export async function execGive(u: IUrsamuSDK): Promise<void> {
   if (asucc && thing.state.owner) u.send(asucc, thing.state.owner as string);
 }
 
+export async function execUse(u: IUrsamuSDK): Promise<void> {
+  const actor = u.me;
+  const arg = (u.cmd.args[0] || "").trim();
+  if (!arg) { u.send("Use what?"); return; }
+
+  const thing = await u.util.target(actor, arg);
+  if (!thing) { u.send("I don't see that here."); return; }
+
+  const thingName = u.util.displayName(thing, actor);
+  const actorName = u.util.displayName(actor, actor);
+
+  // Check the USE lock if set.
+  const useLock = (thing.state?.locks as Record<string, string>)?.use;
+  if (useLock) {
+    const allowed = await evaluateLock(useLock, actor, thing);
+    if (!allowed) {
+      await fireFailAttrs(u, thing, actor,
+        `You can't use ${thingName}.`,
+        `${actorName} tries to use ${thingName}, but can't.`);
+      return;
+    }
+  }
+
+  const use = await u.eval(thing.id, "USE");
+  u.send(use || `You use ${thingName}.`);
+
+  const ouse = await u.eval(thing.id, "OUSE");
+  u.here.broadcast(
+    ouse ? `${actorName} ${ouse}` : `${actorName} uses ${thingName}.`,
+    { exclude: [actor.id] } as Record<string, unknown>,
+  );
+
+  const ause = await u.eval(thing.id, "AUSE");
+  if (ause && thing.state.owner) u.send(ause, thing.state.owner as string);
+}
+
 export async function execCreateObject(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
   const input = (u.cmd.args[0] || "").trim();
@@ -183,10 +254,11 @@ addCmd({
   pattern: /^drop\s+(.*)/i,
   lock: "connected",
   category: "Object",
-  help: `drop <object>  — Drop an object from your inventory.
+  help: `drop <object>  — Drop an object from your inventory into the room.
 
 Examples:
-  drop sword`,
+  drop sword
+  drop #12`,
   exec: execDrop,
 });
 
@@ -202,4 +274,21 @@ Examples:
   give sword=Alice
   give 50=Bob`,
   exec: execGive,
+});
+
+addCmd({
+  name: "use",
+  pattern: /^use\s+(.*)/i,
+  lock: "connected",
+  category: "Object",
+  help: `use <object>  — Use an object, triggering its USE/OUSE/AUSE attributes.
+
+The object's USE attribute is shown to you, OUSE to the room,
+and AUSE to the object's owner.  The object's USE lock controls
+whether you are allowed to use it at all.
+
+Examples:
+  use lever
+  use #12`,
+  exec: execUse,
 });

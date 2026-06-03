@@ -31,6 +31,9 @@ interface IUrsamuSDK {
   util: {
     displayName(obj: IDBObj, actor: IDBObj): string;
     target(actor: IDBObj, query: string): Promise<IDBObj | undefined>;
+    renderHeader(title: string, width?: number): Promise<string>;
+    renderDivider(label: string | null, width?: number): Promise<string>;
+    renderFooter(width?: number): Promise<string>;
     [key: string]: unknown;
   };
   db: {
@@ -342,6 +345,12 @@ self.onmessage = async (e: MessageEvent) => {
           actorId:    sdkData.id,
           socketId:   sdkData.socketId,
         }),
+      renderHeader: (title: string, width?: number) =>
+        request<string>("util:renderHeader", { title, width }),
+      renderDivider: (label: string | null, width?: number) =>
+        request<string>("util:renderDivider", { label, width }),
+      renderFooter: (width?: number) =>
+        request<string>("util:renderFooter", { width }),
       ...sdkData.util
     },
     db: {

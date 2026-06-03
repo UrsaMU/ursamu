@@ -231,7 +231,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           const fmtDate = (ts: number) => new Date(ts).toISOString().slice(0, 10);
 
           const locName = scene.locationDetails?.name ?? scene.location;
-          const participantNames = scene.participantsDetails?.map(p => strip(p.moniker || p.name)).join(", ")
+          const participantNames = scene.participantsDetails?.map((p: Record<string, unknown>) => strip((p.moniker || p.name) as string)).join(", ")
               ?? scene.participants.join(", ");
 
           const lines: string[] = [
@@ -377,7 +377,7 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           const user = await Obj.get(userId);
           if (!user) return new Response("Unauthorized", { status: 401 });
           
-          const poseIndex = scene.poses.findIndex(p => p.id === poseId);
+          const poseIndex = scene.poses.findIndex((p: Record<string, unknown>) => p.id === poseId);
           if (poseIndex === -1) return new Response("Pose Not Found", { status: 404 });
 
           const existingPose = scene.poses[poseIndex];

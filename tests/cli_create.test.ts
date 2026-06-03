@@ -78,7 +78,7 @@ Deno.test("create project: generates deno.json with ursamu import", OPTS, async 
     const json = JSON.parse(
       await Deno.readTextFile(join(dir, "my-game", "deno.json"))
     );
-    assertEquals(json.imports["ursamu"], "jsr:@ursamu/ursamu");
+    assertEquals(json.imports["ursamu"], "jsr:@ursamu/mush");
     assert(json.tasks?.start, "missing start task");
     assert(json.tasks?.server, "missing server task");
   });
@@ -312,7 +312,7 @@ Deno.test("create plugin --standalone: generates deno.json with ursamu import", 
     const json = JSON.parse(
       await Deno.readTextFile(join(dir, "cool-plugin", "deno.json"))
     );
-    assertEquals(json.imports["ursamu"], "jsr:@ursamu/ursamu");
+    assertEquals(json.imports["ursamu"], "jsr:@ursamu/mush");
   });
 });
 

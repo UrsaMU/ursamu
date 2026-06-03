@@ -1,0 +1,118 @@
+/**
+ * addCmd — register a MUSH command.
+ *
+ * Wraps each registration with:
+ *   1. Pattern match on raw input
+ *   2. MUSH lock evaluation (evaluateLock)
+ *   3. SDK construction (createNativeSDK)
+ *   4. exec(u) call
+ *
+ * loadDefaultCommands() wires the built-in verb modules; call it from the
+ * application entry point (after the DB is ready).
+ */
+import { addHandler, send } from "@ursamu/core";
+import type { ICoreContext } from "@ursamu/core";
+import type { ICmd } from "./types.ts";
+import { evaluateLock } from "../world/locks.ts";
+import { createNativeSDK } from "./sdk.ts";
+
+export const cmds: ICmd[] = [];
+
+// Script registry: name → softcode source.  Filled by registerScript() and
+// read by matchSandboxScript() in the dispatch pipeline.
+const _scriptRegistry = new Map<string, string>();
+
+export function addCmd(...toAdd: ICmd[]): void {
+  cmds.push(...toAdd);
+  ensureHandlersRegistered();
+}
+
+export function clearCmds(): void {
+  cmds.length = 0;
+}
+
+export function registerScript(name: string, content: string): void {
+  _scriptRegistry.set(name, content);
+}
+
+export function getScript(name: string): string | null {
+  return _scriptRegistry.get(name) ?? null;
+}
+
+export function scriptRegistry(): Map<string, string> {
+  return _scriptRegistry;
+}
+
+let _handlersRegistered = false;
+
+/**
+ * Wire the command list into core's addHandler dispatch pipeline.
+ * Safe to call multiple times — only registers once.
+ */
+function ensureHandlersRegistered(): void {
+  if (_handlersRegistered) return;
+  _handlersRegistered = true;
+
+  addHandler({
+    name: "mush:commands",
+    pattern: /.*/,
+    exec: async (ctx: ICoreContext) => {
+      const socketId = ctx.socketId;
+      const actorId  = ctx.sessionId ?? "";
+      const msg      = ctx.input;
+      if (!msg) return;
+
+      const rawMsg = msg.trim();
+      const strippedMsg = rawMsg.replace(/^[@+]/, "");
+
+      // Build a minimal actor for lock evaluation before the full SDK is ready
+      const { dbojs, hydrate } = await import("../world/dbobjs.ts");
+      const rawActor = actorId ? await dbojs.queryOne({ id: actorId }) : null;
+      const actor = rawActor
+        ? hydrate(rawActor)
+        : { id: "#-1", flags: new Set<string>(), state: {}, contents: [] };
+
+      for (const cmd of cmds) {
+        const match =
+          rawMsg.match(cmd.pattern) ??
+          (strippedMsg !== rawMsg ? strippedMsg.match(cmd.pattern) : null);
+        if (!match) continue;
+        if (!(await evaluateLock(cmd.lock || "", actor, actor))) continue;
+
+        const u = await createNativeSDK(socketId, actorId || "#-1", {
+          name: cmd.name,
+          original: msg,
+          args: match.slice(1),
+        });
+
+        await (cmd.exec(u) as Promise<void>)?.catch((e: Error) => {
+          console.error(e);
+          send(
+            [socketId],
+            `Uh oh! You've run into an error! Please contact staff with the following info!%r%r%chError:%cn ${e}`,
+          );
+        });
+        return;
+      }
+    },
+  });
+}
+
+let _defaultsLoaded = false;
+
+/**
+ * Load the built-in MUSH verbs. Idempotent — safe to call multiple times.
+ * Calling this at startup ensures look/say/pose/etc. are registered.
+ */
+export async function loadDefaultCommands(): Promise<void> {
+  if (_defaultsLoaded) return;
+  _defaultsLoaded = true;
+
+  ensureHandlersRegistered();
+
+  await import("../verbs/look.ts");
+  await import("../verbs/say.ts");
+  await import("../verbs/home.ts");
+  await import("../verbs/social.ts");
+  await import("../verbs/manipulation.ts");
+}

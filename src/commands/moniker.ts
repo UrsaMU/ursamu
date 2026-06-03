@@ -30,7 +30,11 @@ addCmd({
     lock: "connected & admin+",
     help: `@moniker <target>=<moniker>  — Set the display name (moniker) for an object.
 
+The moniker is a free-form display name (MUSH codes allowed) shown instead
+of the object's real name. Clear it with an empty value.
+
 Examples:
-  @moniker Alice=%chAlicia%cn`,
+  @moniker Alice=%chAlicia%cn
+  @moniker Alice=`,
     exec: execMoniker,
   });

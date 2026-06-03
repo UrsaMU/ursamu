@@ -1,103 +1,47 @@
-import { ConfigManager } from "./index.ts";
-import { PluginConfigManager } from "./plugin.ts";
-import { merge } from "./utils.ts";
+/**
+ * Bridge: re-exports config functions from @ursamu/core.
+ * initConfig, initializePlugins, registerPlugin retain their original
+ * implementations below since they handle plugin loading state.
+ */
+export { getConfig, setConfig, getAllConfig } from "@ursamu/core";
+
+import { getConfig, setConfig } from "@ursamu/core";
 import type { IConfig } from "../../@types/IConfig.ts";
-import defaultConfig from "./defaultConfig.ts";
-
-// Initialize the ConfigManager with the default configuration
-const configManager = ConfigManager.init(defaultConfig);
-
-// Initialize the PluginConfigManager with the ConfigManager
-const pluginManager = PluginConfigManager.init(configManager);
-
-/**
- * Initialize the configuration system
- * This should be called at the start of the application
- */
-export async function initConfig(config?: IConfig): Promise<void> {
-  // Ensure config file exists
-  const configPath = "config/config.json";
-
-  try {
-    const fileInfo = await Deno.stat(configPath);
-    if (!fileInfo.isFile) {
-     // throw new Error("Config is directory?");
-    }
-  } catch (e) {
-    if (e instanceof Deno.errors.NotFound) {
-      console.log("Config file not found.");
-      // ConfigManager will handle creating the default config
-    }
-  }
-
-  if (config) {
-    // Merge the provided config with the default config
-    const mergedConfig = merge(defaultConfig, config);
-    let changed = false;
-
-    // Set the merged config in the ConfigManager only if it differs
-    Object.entries(mergedConfig).forEach(([key, value]) => {
-      const current = configManager.get(key);
-      if (JSON.stringify(current) !== JSON.stringify(value)) {
-        configManager.set(key, value);
-        changed = true;
-      }
-    });
-
-    // Save the configuration only if something changed
-    if (changed) {
-      configManager.saveConfig();
-    }
-  }
-}
-
-/**
- * Get a configuration value
- * @param key The configuration key (supports dot notation)
- * @returns The configuration value
- */
-export function getConfig<T>(key: string): T {
-  return configManager.get<T>(key);
-}
-
-/**
- * Set a configuration value
- * @param key The configuration key (supports dot notation)
- * @param value The value to set
- */
-export function setConfig(key: string, value: unknown): void {
-  configManager.set(key, value);
-  configManager.saveConfig();
-}
-
-/**
- * Get the entire configuration object
- */
-export function getAllConfig(): Record<string, unknown> {
-  return configManager.getAll();
-}
-
 import type { IPlugin } from "../../@types/IPlugin.ts";
 
-/**
- * Initialize all registered plugins
- */
-export async function initializePlugins(): Promise<void> {
-  await pluginManager.initializePlugins();
-}
+// ── Plugin initialization (kept local — manages the plugin registry state) ──
 
-/**
- * Register a plugin with the system
- */
+const _pending: IPlugin[] = [];
+let _initialized = false;
+
 export function registerPlugin(plugin: IPlugin): void {
-  pluginManager.registerPlugin(plugin);
+  _pending.push(plugin);
 }
 
-// Export everything
-export {
-  ConfigManager,
-  PluginConfigManager,
-  merge,
-  configManager,
-  pluginManager
-}; 
+export async function initializePlugins(): Promise<void> {
+  if (_initialized) return;
+  _initialized = true;
+  for (const plugin of _pending) {
+    try {
+      const ok = await plugin.init?.();
+      if (!ok && ok !== undefined) {
+        console.warn(`[plugins] "${plugin.name}" init() returned false`);
+      }
+    } catch (e: unknown) {
+      console.error(`[plugins] "${plugin.name}" init() threw:`, e);
+    }
+  }
+}
+
+export async function initConfig(cfg?: IConfig): Promise<void> {
+  // Merge into @ursamu/core config so all code shares one store.
+  const { initConfig: coreInit } = await import("@ursamu/core");
+  await coreInit(cfg as Record<string, unknown> | undefined);
+}
+
+// Legacy exports some code still references
+export const configManager = { get: getConfig, set: setConfig };
+export const pluginManager = { register: registerPlugin };
+export { merge } from "./utils.ts";
+export { ConfigManager } from "./index.ts";
+export { PluginConfigManager } from "./plugin.ts";

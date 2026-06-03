@@ -1,7 +1,9 @@
 {
+  "workspace": ["packages/core", "packages/mush"],
+
   "name": "@ursamu/ursamu",
 
-  "version": "2.7.0",
+  "version": "3.0.0",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",
@@ -52,7 +54,11 @@
     "docker:build": "docker build -t ursamu .",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f"
+    "docker:logs": "docker-compose logs -f",
+    "boundaries": "deno run -A tools/check-boundaries.ts",
+    "packages:test": "deno test packages/*/tests/ --allow-all --unstable-kv --no-check",
+    "packages:check": "deno check packages/core/mod.ts packages/mush/mod.ts --unstable-kv",
+    "packages:lint": "deno lint packages/"
   },
   "compilerOptions": {
     "lib": ["deno.window", "deno.unstable"]

@@ -2,6 +2,7 @@ import { addCmd } from "../services/commands/cmdParser.ts";
 import type { IUrsamuSDK, IDBObj } from "../@types/UrsamuSDK.ts";
 import { header, divider, footer } from "../utils/format.ts";
 import { resolveFormat } from "../utils/resolveFormat.ts";
+import { registerFormatHandler } from "../utils/formatHandlers.ts";
 
 const WIDTH = 78;
 const NO_DESCRIPTION = "You see nothing special.";
@@ -76,15 +77,23 @@ async function renderRoom(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCont
   lines.push(nameOverride ?? header(displayName, "=", WIDTH));
   lines.push("");
 
-  const rawDesc = (target.state.description as string) || NO_DESCRIPTION;
+  // Use IDESC when the viewer is standing inside this room/container.
+  const idescRaw = actor.location === target.id ? await u.attr.get(target.id, "IDESC") : null;
+  const rawDesc = idescRaw || (target.state.description as string) || NO_DESCRIPTION;
   const parsedDesc = u.util.parseDesc
     ? await u.util.parseDesc(rawDesc, actor, target)
     : rawDesc;
   const descOverride = await resolveFormat(u, target, "DESCFORMAT", parsedDesc);
-  lines.push(descOverride ?? wordWrap(parsedDesc, WIDTH));
+  if (descOverride != null) {
+    lines.push(descOverride);
+  } else {
+    const wrapped = wordWrap(parsedDesc, WIDTH - 1);
+    const indented = wrapped.split("\n").map((line) => line.trim() ? " " + line : "").join("\n");
+    lines.push(indented);
+  }
 
   const contents = target.contents || [];
-  const characters = contents.filter((o) => o.flags.has("player") && o.flags.has("connected") && o.id !== actor.id);
+  const characters = contents.filter((o) => o.flags.has("player") && o.flags.has("connected"));
   const objects = contents.filter((o) => !o.flags.has("player") && !o.flags.has("exit") && !o.flags.has("room"));
   const exits = contents.filter((o) => o.flags.has("exit"));
 
@@ -131,12 +140,20 @@ async function renderSingle(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCo
   lines.push(nameOverride ?? header(displayName, "=", WIDTH));
   lines.push("");
 
-  const rawDesc = (target.state.description as string) || NO_DESCRIPTION;
+  // Use IDESC when the viewer is inside the object (looking from inside a container).
+  const idescRaw = actor.location === target.id ? await u.attr.get(target.id, "IDESC") : null;
+  const rawDesc = idescRaw || (target.state.description as string) || NO_DESCRIPTION;
   const parsedDesc = u.util.parseDesc
     ? await u.util.parseDesc(rawDesc, actor, target)
     : rawDesc;
   const descOverride = await resolveFormat(u, target, "DESCFORMAT", parsedDesc);
-  lines.push(descOverride ?? wordWrap(parsedDesc, WIDTH));
+  if (descOverride != null) {
+    lines.push(descOverride);
+  } else {
+    const wrapped = wordWrap(parsedDesc, WIDTH - 1);
+    const indented = wrapped.split("\n").map((line) => line.trim() ? " " + line : "").join("\n");
+    lines.push(indented);
+  }
 
   if (showContents && target.contents && target.contents.length > 0) {
     const players = target.contents.filter((c) => c.flags.has("player"));
@@ -178,7 +195,7 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
     const results = await u.db.search(arg);
     const found = results.find((r) =>
       r.id === u.here.id ||
-      u.here.contents?.some((c) => c.id === r.id) ||
+      u.here.contents?.some((c) => c.id === r.id || (c.contents as { id: string }[])?.some((sub) => sub.id === r.id)) ||
       actor.contents?.some((c) => c.id === r.id)
     );
     if (!found) { u.send("I can't find that here."); return; }
@@ -220,3 +237,93 @@ Examples:
   look Alice`,
   exec: execLook,
 });
+
+const ROLE_TAGS = [
+  { flag: "wizard",    display: "(Wizard)" },
+  { flag: "superuser", display: "(Root)"   },
+  { flag: "admin",     display: "(Admin)"  },
+  { flag: "staff",     display: "(Staff)"  },
+];
+
+const SHORTDESC_PROMPT = "%ch%cxUse '&short-desc me=<desc>' to set.%cn";
+
+function coloredName(obj: IDBObj): string {
+  const moniker = (obj.state?.moniker as string) || "";
+  if (moniker) return moniker;
+
+  const rawName = (obj.state?.name as string) || obj.name || "Unknown";
+  const nameColor = (obj.state?.name_color as string) || "";
+  if (nameColor && rawName.length > 0) {
+    return `${nameColor}${rawName[0]}%cn%ch%cw${rawName.slice(1)}%cn`;
+  }
+  return rawName;
+}
+
+function formatIdle(lastCommand: number | undefined): string {
+  if (lastCommand === undefined || isNaN(lastCommand)) return "%ch%cx0s%cn";
+  const diff = Math.floor((Date.now() - lastCommand) / 1000);
+  if (diff <= 0) return "%ch%cx0s%cn";
+  if (diff < 60) return `%cg${diff}s%cn`;
+  if (diff < 600) return `%cg${Math.floor(diff / 60)}m%cn`;
+  if (diff < 3600) return `%cy${Math.floor(diff / 60)}m%cn`;
+  if (diff < 86400) return `%cy${Math.floor(diff / 3600)}h%cn`;
+  return `%ch%cx${Math.floor(diff / 86400)}d%cn`;
+}
+
+function getShortDesc(obj: IDBObj): string {
+  const attrs = (obj.state?.attributes as { name?: string; value?: string }[]) || [];
+  const sd = attrs.find(
+    (a) =>
+      a.name?.toLowerCase() === "short-desc" ||
+      a.name?.toLowerCase() === "shortdesc",
+  );
+  return sd?.value || "";
+}
+
+function roleTag(obj: IDBObj): string {
+  for (const t of ROLE_TAGS) if (obj.flags?.has(t.flag)) return t.display;
+  return "";
+}
+
+export const defaultConformatHandler = (
+  u: IUrsamuSDK,
+  target: IDBObj,
+  idList: string,
+): string | null => {
+  const ids = idList.split(" ").map((id) => id.replace("#", "").trim()).filter(Boolean);
+  const contents = target.contents || [];
+  const visibleObjs = ids.map((id) => contents.find((c) => c.id === id)).filter((o): o is IDBObj => o != null);
+
+  const actor = u.me;
+  const characters = visibleObjs.filter((o) => o.flags.has("player") && o.flags.has("connected"));
+  const objects = visibleObjs.filter((o) => !o.flags.has("player") && !o.flags.has("exit") && !o.flags.has("room"));
+
+  const lines: string[] = [];
+
+  if (characters.length > 0) {
+    lines.push(divider("Players", "-", WIDTH));
+    for (const c of characters) {
+      const cName = coloredName(c);
+      const idle = formatIdle(c.state?.lastCommand as number);
+      const role = roleTag(c);
+      const desc = getShortDesc(c) || SHORTDESC_PROMPT;
+
+      const namePad = " ".repeat(Math.max(1, 21 - visualLen(cName)));
+      const rolePad = " ".repeat(Math.max(1, 13 - visualLen(role)));
+      const idlePad = " ".repeat(Math.max(1, 4 - visualLen(idle)));
+
+      lines.push(` ${cName}${namePad}${role}${rolePad}${idle}${idlePad}${desc}`.replace(/\s+$/, ""));
+    }
+  }
+
+  if (objects.length > 0) {
+    lines.push(divider("Contents", "-", WIDTH));
+    for (const o of objects) {
+      lines.push(` ${o.name || u.util.displayName(o, actor)}`);
+    }
+  }
+
+  return lines.join("\n");
+};
+
+registerFormatHandler("CONFORMAT", defaultConformatHandler);

@@ -95,6 +95,11 @@ export async function buildContext(
     ? hydrate(rawRoom)
     : { id: "limbo", flags: new Set<string>(), state: {}, contents: [] };
 
+  if (rawRoom) {
+    const rawContents = await dbojs.query({ location: roomBase.id });
+    roomBase.contents = rawContents.map((c) => hydrate(c));
+  }
+
   const room = {
     ...roomBase,
     broadcast: (message: string, options?: Record<string, unknown>) => {

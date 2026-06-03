@@ -1,11 +1,11 @@
 import { events } from "../Database/index.ts";
-import { sandboxService } from "../Sandbox/SandboxService.ts";
+import { sandboxService } from "@ursamu/mush";
 import { SDKService } from "../Sandbox/SDKService.ts";
-import { Obj } from "../DBObjs/DBObjs.ts";
+import { dbojs } from "@ursamu/mush";
 
 export class EventsService {
   private static instance: EventsService;
-  
+
   private constructor() {}
 
   static getInstance(): EventsService {
@@ -15,62 +15,37 @@ export class EventsService {
     return EventsService.instance;
   }
 
-  /**
-   * Emit an event to all subscribers.
-   * @param event The name of the event.
-   * @param data Data associated with the event.
-   * @param context Additional context (e.g., actor, room).
-   */
   async emit(event: string, data: unknown, context?: Record<string, unknown>) {
     const subs = await events.query({ name: event });
-    
+
     for (const sub of subs) {
       try {
-        const subscriber = await Obj.get(sub.subscriber);
+        const subscriber = await dbojs.queryOne({ id: (sub as Record<string, unknown>).subscriber as string });
         if (!subscriber) continue;
 
-        // Run the handler in the sandbox
-        // We wrap the handler code to make 'data' available
         const code = `
           const data = ${JSON.stringify(data)};
-          ${sub.handler}
+          ${(sub as Record<string, unknown>).handler}
         `;
 
         await sandboxService.runScript(code, {
-            id: subscriber.id,
-            me: await SDKService.hydrate(subscriber),
-            state: subscriber.data?.state as Record<string, unknown> || {},
-            ...context
+          id: subscriber.id,
+          me: await SDKService.hydrate(subscriber as never),
+          state: (subscriber.data?.state as Record<string, unknown>) || {},
+          ...context,
         });
-
-      } catch (e) {
-        console.error(`[Events] Error executing handler for ${event} (sub: ${sub.id}):`, e);
+      } catch (e: unknown) {
+        console.error(`[Events] Error executing handler for ${event} (sub: ${(sub as Record<string, unknown>).id}):`, e);
       }
     }
   }
 
-  /**
-   * Subscribe to an event.
-   * @param event Event name.
-   * @param handler Script code to execute.
-   * @param subscriber DBRef of the object subscribing.
-   * @returns The subscription ID.
-   */
   async subscribe(event: string, handler: string, subscriber: string): Promise<string> {
     const id = crypto.randomUUID();
-    await events.create({
-      id,
-      name: event,
-      subscriber,
-      handler
-    });
+    await events.create({ id, name: event, subscriber, handler } as Record<string, unknown> & { id: string });
     return id;
   }
 
-  /**
-   * Unsubscribe from an event.
-   * @param id Subscription ID.
-   */
   async unsubscribe(id: string): Promise<void> {
     await events.delete({ id });
   }

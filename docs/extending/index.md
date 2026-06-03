@@ -5,7 +5,7 @@ description: Extension points exposed by the UrsaMU engine
 
 # Extending UrsaMU
 
-UrsaMU exposes a small set of named registries through `jsr:@ursamu/ursamu`
+UrsaMU exposes a small set of named registries through `jsr:@ursamu/mush`
 (`mod.ts`). Each one is a stable extension point intended for plugins and
 child-game code. Plugins are still the preferred packaging unit — these
 registries are what plugins use under the hood.
@@ -13,7 +13,7 @@ registries are what plugins use under the hood.
 All examples assume the JSR import path used by external plugins:
 
 ```typescript
-import { /* ... */ } from "jsr:@ursamu/ursamu";
+import { /* ... */ } from "jsr:@ursamu/mush";
 ```
 
 ## Commands
@@ -21,7 +21,7 @@ import { /* ... */ } from "jsr:@ursamu/ursamu";
 `addCmd({ name, pattern, lock, category, help, exec })` registers a command.
 The `exec` handler receives an `IUrsamuSDK` (`u`) with `u.me`, `u.here`,
 `u.cmd`, `u.send`, `u.db`, `u.util`, `u.canEdit`, and the other SDK
-namespaces listed in `docs/api/sdk.md`. See `CLAUDE.md` for the `addCmd`
+namespaces listed in `docs/api/core.md`. See `CLAUDE.md` for the `addCmd`
 skeleton and pattern cheat-sheet (catch-all switch gotcha included).
 
 ## Format handlers
@@ -120,8 +120,8 @@ import {
   gameHooks,
   registerFormatTemplate,
   registerLockFunc,
-} from "jsr:@ursamu/ursamu";
-import type { IPlugin, SessionEvent } from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
+import type { IPlugin, SessionEvent } from "jsr:@ursamu/mush";
 
 const onLogin = (e: SessionEvent) => { /* ... */ };
 
@@ -143,5 +143,15 @@ export const plugin: IPlugin = {
 };
 ```
 
-See `docs/api/core.md` for full signatures and `docs/api/sdk.md` for the
-`IUrsamuSDK` surface.
+See `docs/api/core.md` for full signatures and the complete `IUrsamuSDK`
+surface.
+
+## Building non-MUSH servers
+
+If you want to use the same transport/session infrastructure without the MUSH
+command model, import from `jsr:@ursamu/core` instead. It exposes
+`createServer`, `websocketTransport`, `telnetTransport`, `httpTransport`,
+`registerFallback`, `addHandler`, `runPipeline`, `sessions`, and
+`registerSender` — the primitives `@ursamu/mush` is built on — without
+pulling in any MUSH-specific concepts (softcode, flags, locks, format slots,
+etc.).

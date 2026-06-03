@@ -459,8 +459,11 @@ Examples:
     category: "Communication",
     help: `@cemit <channel>=<message>  — Emit a raw message to a channel (admin+).
 
+Unlike talking on a channel, @cemit bypasses the speaker header entirely.
+
 Examples:
-  @cemit Public=The game will restart soon.`,
+  @cemit Public=The game will restart soon.
+  @cemit Staff=[name(me)] just connected from a new location.`,
     exec: execCemit,
   });
 

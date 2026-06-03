@@ -1,13 +1,40 @@
 ---
 layout: layout.vto
 title: Core API Reference
-description: Complete type and function reference for UrsaMU plugin and script authors — exports of jsr:@ursamu/ursamu as of v2.6.0.
+description: Complete type and function reference for UrsaMU plugin and script authors — exports of jsr:@ursamu/mush.
 ---
 
 # Core API Reference
 
-Everything documented here is exported from `jsr:@ursamu/ursamu`. Last
-verified against `mod.ts` for v2.6.0.
+Everything documented here is exported from `jsr:@ursamu/mush`.
+
+## Package Structure
+
+UrsaMU ships three packages on JSR:
+
+| Package | Purpose |
+|---------|---------|
+| `jsr:@ursamu/mush` | Full MUSH engine API — the preferred import for plugins and game projects |
+| `jsr:@ursamu/core` | Raw server infrastructure only (transports, pipeline, sessions) — no MUSH concepts; use this when building a custom game engine on top of the same infrastructure |
+| `jsr:@ursamu/mush` | Backwards-compatibility shim — re-exports everything from `@ursamu/mush`; existing plugins using this import continue to work unchanged |
+
+### `@ursamu/core` exports
+
+`@ursamu/core` provides the low-level primitives that `@ursamu/mush` builds on:
+
+```typescript
+import {
+  createServer,
+  websocketTransport, telnetTransport, httpTransport,
+  registerFallback, addHandler, runPipeline,
+  sessions, registerSender,
+} from "jsr:@ursamu/core";
+```
+
+Use `@ursamu/core` directly only when you are building a non-MUSH server
+(custom protocol, alternative command syntax, etc.) on the UrsaMU
+infrastructure. For standard MUSH game development import from
+`jsr:@ursamu/mush`.
 
 ## Contents
 
@@ -47,7 +74,7 @@ import {
   registerPluginRoute, registerUIComponent, unregisterUIComponent, getRegisteredUIComponents,
   registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames,
   buildContext, PluginConfigManager,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 
 import type {
   IUrsamuSDK, IDBObj, IDBOBJ, ICmd, IPlugin, IPluginDependency,
@@ -57,7 +84,7 @@ import type {
   SceneCreatedEvent, ScenePoseEvent, SceneSetEvent, SceneTitleEvent, SceneClearEvent,
   MailReceivedEvent, FormatHandler, FormatSlot, GameContext, UserSocket,
   LockFunc, SoftcodeFn, SoftcodeSubHandler, SoftcodeContext,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 ```
 
 ---
@@ -69,7 +96,7 @@ import type {
 Boots the engine. Call once from `src/main.ts`.
 
 ```typescript
-import { mu } from "jsr:@ursamu/ursamu";
+import { mu } from "jsr:@ursamu/mush";
 await mu();
 ```
 
@@ -135,7 +162,7 @@ The registered command map. Use to introspect or override an existing
 command:
 
 ```typescript
-import { cmds } from "jsr:@ursamu/ursamu";
+import { cmds } from "jsr:@ursamu/mush";
 const existing = cmds.get("look");
 ```
 
@@ -274,7 +301,7 @@ Generic Deno KV collection. Use for plugin-scoped storage. Always prefix
 the namespace with your plugin name.
 
 ```typescript
-import { DBO } from "jsr:@ursamu/ursamu";
+import { DBO } from "jsr:@ursamu/mush";
 
 const scores = new DBO<{ player: string; score: number }>("myplugin.scores");
 await scores.create({ player: "Alice", score: 100 });
@@ -291,7 +318,7 @@ Ops: `$set`, `$inc`, `$unset`, `$push` (atomic CAS append).
 The shared game-object collection (`IDBOBJ`).
 
 ```typescript
-import { dbojs } from "jsr:@ursamu/ursamu";
+import { dbojs } from "jsr:@ursamu/mush";
 
 const players = await dbojs.find({ flags: { $in: ["player"] } });
 const room = await dbojs.queryOne({ id: "1" });
@@ -321,7 +348,7 @@ Built-in lockfuncs:
 Register a custom lockfunc. Built-in names are protected.
 
 ```typescript
-import { registerLockFunc } from "jsr:@ursamu/ursamu";
+import { registerLockFunc } from "jsr:@ursamu/mush";
 
 registerLockFunc("tribe", (enactor, _target, args) =>
   String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
@@ -438,7 +465,7 @@ type FormatSlot = "NAMEFORMAT" | "DESCFORMAT" | "CONFORMAT" | "EXITFORMAT"
 Register a custom stdlib function callable from softcode as `name(args)`.
 
 ```typescript
-import { registerSoftcodeFunc } from "jsr:@ursamu/ursamu";
+import { registerSoftcodeFunc } from "jsr:@ursamu/mush";
 
 registerSoftcodeFunc("double", (_ctx, args) =>
   String(Number(args[0]) * 2)
@@ -458,7 +485,7 @@ registerSoftcodeSub("$", (ctx) => `[$${ctx.enactor.id}]`);
 The evaluator instance. Exposed for plugin integration tests.
 
 ```typescript
-import { softcodeService } from "jsr:@ursamu/ursamu";
+import { softcodeService } from "jsr:@ursamu/mush";
 const out = await softcodeService.eval({ enactor, executor, source: "[add(2,3)]" });
 ```
 
@@ -467,8 +494,8 @@ const out = await softcodeService.eval({ enactor, executor, source: "[add(2,3)]"
 ## Hooks & events
 
 ```typescript
-import { gameHooks } from "jsr:@ursamu/ursamu";
-import type { SessionEvent, SayEvent } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
+import type { SessionEvent, SayEvent } from "jsr:@ursamu/mush";
 
 const onLogin = (e: SessionEvent) => console.log(`${e.player.name} logged in`);
 gameHooks.on("player:login", onLogin);
@@ -518,7 +545,7 @@ Handler signature: `(req: Request, userId: string | null) => Promise<Response>`.
 Expose a UI element via `GET /api/v1/ui-manifest`.
 
 ```typescript
-import type { IUIComponent } from "jsr:@ursamu/ursamu";
+import type { IUIComponent } from "jsr:@ursamu/mush";
 
 const comp: IUIComponent = {
   id: "myplugin.panel",
@@ -537,8 +564,8 @@ registerUIComponent(comp);
 Plugins can register a pluggable stat/skill system, queryable by name.
 
 ```typescript
-import { registerStatSystem, getDefaultStatSystem } from "jsr:@ursamu/ursamu";
-import type { IStatSystem } from "jsr:@ursamu/ursamu";
+import { registerStatSystem, getDefaultStatSystem } from "jsr:@ursamu/mush";
+import type { IStatSystem } from "jsr:@ursamu/mush";
 
 const system: IStatSystem = { name: "wod5", /* ...impl */ };
 registerStatSystem(system, { default: true });
@@ -566,7 +593,7 @@ Module-level broadcast — sends to a socket ID, room ID, or DB object ID.
 Same semantics as `u.send` but importable from anywhere.
 
 ```typescript
-import { send } from "jsr:@ursamu/ursamu";
+import { send } from "jsr:@ursamu/mush";
 send("Server reboot in 5 minutes.", "#all");
 ```
 
@@ -591,7 +618,7 @@ if (!delivered) {
 }
 
 // In a gameHooks handler (no `u` in scope):
-import { notify, gameHooks } from "jsr:@ursamu/ursamu";
+import { notify, gameHooks } from "jsr:@ursamu/mush";
 gameHooks.on("player:move", (e) => {
   notify(e.actorId, "Station unmanned — you left the post.");
 });
@@ -613,7 +640,7 @@ helpers). Most plugin code uses `IUrsamuSDK` instead — `GameContext` is
 exposed for low-level integrations.
 
 ```typescript
-import { buildContext } from "jsr:@ursamu/ursamu";
+import { buildContext } from "jsr:@ursamu/mush";
 const ctx = await buildContext({ socketId, actorId });
 ```
 
@@ -624,7 +651,7 @@ const ctx = await buildContext({ socketId, actorId });
 `PluginConfigManager` reads per-plugin scoped values from `config.json`.
 
 ```typescript
-import { PluginConfigManager } from "jsr:@ursamu/ursamu";
+import { PluginConfigManager } from "jsr:@ursamu/mush";
 
 const cfg = new PluginConfigManager("myplugin");
 const apiKey = cfg.get<string>("apiKey");
@@ -645,7 +672,7 @@ import {
   seedNoise, perlin1, perlin2, perlin3,
   simplex2, worley2, fbm2, ridged2, noiseGrid,
   Noise, createNoise, buildPerm,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 
 seedNoise(42);
 const v = perlin2(0.5, 1.7);
@@ -670,7 +697,7 @@ const v2 = n.perlin2(0.5, 1.7);
 ### PRNG (`Rng`)
 
 ```typescript
-import { Rng, createRng } from "jsr:@ursamu/ursamu";
+import { Rng, createRng } from "jsr:@ursamu/mush";
 
 const r = createRng(123);
 r.next();        // [0, 1)
@@ -683,8 +710,8 @@ Per-instance mulberry32 — independent of the softcode RNG.
 ### Physics
 
 ```typescript
-import { vreflect, pointInAabb, rayAabb } from "jsr:@ursamu/ursamu";
-import type { Vec3 } from "jsr:@ursamu/ursamu";
+import { vreflect, pointInAabb, rayAabb } from "jsr:@ursamu/mush";
+import type { Vec3 } from "jsr:@ursamu/mush";
 
 const reflected = vreflect([1, 0, 0], [0, 1, 0]);
 const inside = pointInAabb([5, 5, 5], [0, 0, 0], [10, 10, 10]);
@@ -697,7 +724,7 @@ const hit = rayAabb(origin, dir, min, max);
 import {
   dist2d, dist3d, distSq2d, distSq3d,
   manhattan, chebyshev, angle2d, bearing,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 
 dist2d(0, 0, 3, 4);     // 5
 manhattan(0, 0, 3, 4);  // 7
@@ -708,7 +735,7 @@ bearing(0, 0, 1, 1);    // radians
 
 ```typescript
 import { lerp, inverseLerp, remap, smoothstep, smootherstep, clamp }
-  from "jsr:@ursamu/ursamu";
+  from "jsr:@ursamu/mush";
 
 lerp(0, 100, 0.5);          // 50
 inverseLerp(0, 100, 75);    // 0.75
@@ -721,8 +748,8 @@ clamp(150, 0, 100);         // 100
 
 ```typescript
 import { vsize, vsizeSq, vdistance, vdistanceSq, vlerp, vclamp }
-  from "jsr:@ursamu/ursamu";
-import type { Vec } from "jsr:@ursamu/ursamu";
+  from "jsr:@ursamu/mush";
+import type { Vec } from "jsr:@ursamu/mush";
 
 const a: Vec = [3, 4];
 vsize(a);              // 5

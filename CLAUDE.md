@@ -12,8 +12,8 @@ TypeScript/Deno MUSH-like game server. Current version: **2.0.0** (full TinyMUX 
 ## Commands
 
 ```bash
-deno task test          # full suite — must stay green (1141 passed, 0 failed)
-deno lint               # must be clean across all 348 files
+deno task test          # full suite — must stay green (1451 passed, 0 failed)
+deno lint               # must be clean across all files
 deno task start         # run server
 deno task dev           # dev mode with auto-restart
 deno task test:coverage # coverage report
@@ -197,6 +197,25 @@ const isStaff = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flag
 u.send("Message for target.", target.id);
 ```
 
+### Player-inline state pattern (plugins)
+
+Per-player data lives under `state.<pluginName>`. Always read with a default and
+spread on write so sibling namespaces are not overwritten.
+
+```typescript
+// Reading — always provide a typed default
+const ps = (u.me.state.myplugin ?? {}) as IMyPluginState;
+
+// Writing — always spread to preserve other fields under state.myplugin
+await u.db.modify(u.me.id, "$set", {
+  "state.myplugin": { ...ps, field: newValue },
+});
+```
+
+Use `state.<plugin>` for per-character condition (chargen stage, HP, active flags).
+Use `new DBO("myplugin.records")` for records that have their own lifecycle
+(NPC rosters, job queues, market state).
+
 ---
 
 ## MUSH color codes
@@ -305,6 +324,47 @@ web and degrades to terminal color decoration via the MUSH renderer:
 - **Do not use** `_italic_` (terminal rendering is lost), `### headings` inside body
   text (use ALL CAPS section labels instead), HTML, or tables.
 
+### Directory organisation for plugins with many commands
+
+When a plugin has more than ~6 help files, organise into named subdirectories
+by functional area rather than a flat list. Group by player-facing function
+(reading, posting, social, management, staff) — not internal module names.
+
+```
+help/
+├── myplugin.md        ← top-level index; TOPICS section lists every group
+├── chargen/
+│   ├── index.md       ← group index; COMMANDS + SEE ALSO: +help myplugin
+│   └── <cmd>.md       ← per-command; SEE ALSO links back to group index
+├── rolling/
+│   ├── index.md
+│   └── <cmd>.md
+└── staff/
+    ├── index.md
+    └── <cmd>.md
+```
+
+### Hidden/dark help files
+
+To hide a file from the help index while keeping it reachable by direct path:
+
+- **Single file**: prefix filename with `_` (e.g. `_draft.md`) — hidden from index,
+  still reachable via `+help _draft`.
+- **Entire section**: prefix folder name with `_` (e.g. `help/_dev/`) — all files
+  inside hidden from listing.
+- **Frontmatter**: add `dark: true` to a file's YAML front matter — hidden from
+  index listing but reachable via `+help <topic>`. Useful for sub-topic files
+  that should not appear at the top level.
+
+```markdown
+---
+dark: true
+---
+# +market — Black Market
+
+Hidden from the index but reachable via: +help market/black-market
+```
+
 ### Audit checklist additions
 
 Add to the existing audit checklist:
@@ -313,6 +373,7 @@ Add to the existing audit checklist:
 - [ ] Multi-page topics linked with `SEE ALSO:`
 - [ ] Sub-files open with a back-reference to the parent topic
 - [ ] Help file body uses subtle markdown (bold for key terms, backticks for values) — no headings, no HTML
+- [ ] Plugins with >6 help files use named subdirectories, not a flat list
 
 ---
 
@@ -347,6 +408,92 @@ export const plugin: IPlugin = {
 const records = new DBO<IRecord>("myplugin.records");  // correct
 const records = new DBO<IRecord>("records");            // wrong — collides
 ```
+
+### Plugin dependencies
+
+Declare required peer plugins in `IPlugin.dependencies`. The engine refuses to
+start the plugin if a declared dependency is missing or below the stated semver.
+
+```typescript
+export const plugin: IPlugin = {
+  name: "myplugin",
+  version: "1.0.0",
+  dependencies: [
+    { name: "help", version: ">=1.0.0" },
+    { name: "jobs", version: ">=1.2.0" },
+  ],
+  init:   () => { /* ... */ return true; },
+  remove: () => { /* ... */ },
+};
+```
+
+Built-in engine modules (`bbs`, channels) are accessed via `u.bb.*` / `u.chan.*`
+and do not need a dependency entry.
+
+### `engine:ready` hook
+
+Use `engine:ready` for deferred one-time initialization (seeding data, registering
+help directories, validating JSON tables) that must run *after all plugins load*:
+
+```typescript
+const onReady = async () => {
+  registerHelpDir(new URL("./help", import.meta.url).pathname, "myplugin");
+  // seed boards, validate config, etc.
+};
+
+export const plugin: IPlugin = {
+  init:   () => { gameHooks.on("engine:ready", onReady); return true; },
+  remove: () => { gameHooks.off("engine:ready", onReady); },
+};
+```
+
+### Soft hooks for optional dependencies
+
+When subscribing to a hook that may not exist (e.g. an optional AI-GM plugin),
+wrap defensively to avoid TS errors if the event is not on GameHookMap:
+
+```typescript
+// deno-lint-ignore no-explicit-any
+(gameHooks as any).on?.("gm:system:register", onGmReg);
+
+// remove() must mirror:
+// deno-lint-ignore no-explicit-any
+(gameHooks as any).off?.("gm:system:register", onGmReg);
+```
+
+### Augmenting GameHookMap for custom events
+
+Plugins with many custom events should extend `GameHookMap` in a dedicated
+`game-hooks-augment.ts` file. This enables IDE autocomplete and type-safety
+for any plugin that declares a dependency on yours:
+
+```typescript
+// src/game-hooks-augment.ts
+declare module "jsr:@ursamu/ursamu" {
+  interface GameHookMap {
+    "myplugin:action": (e: { actorId: string; at: number }) => void | Promise<void>;
+    "myplugin:result": (e: { actorId: string; success: boolean; at: number }) => void | Promise<void>;
+  }
+}
+```
+
+Import this file once (side-effect) in `index.ts`. AI-GM and bridge plugins then
+get full type-safe access to your events without importing your internals.
+
+**Decoupling rule**: your plugin must never import from an optional consumer
+(e.g. the AI-GM plugin). Coupling is hooks-out only — if the subscriber is absent,
+every command still works and the events simply have no listeners.
+
+### REST route versioning
+
+All plugin REST endpoints must be under `/api/v1/<pluginName>/`:
+
+```typescript
+registerPluginRoute("/api/v1/myplugin/sheet/:id", handler);
+```
+
+Every handler returns 401 *before* any work when `userId` is null. Register routes
+in `init()` via `registerPluginRoute` — never at module load time.
 
 ---
 
@@ -421,6 +568,19 @@ function mockU(opts: {
 - `dbojs.queryOne()` returns `IDBOBJ | undefined | false` — cast with `as any` in tests when needed
 - Close DB in the last test of a file: `await DBO.close()`
 
+### Security test directory
+
+Any security finding gets its own test file in `tests/security/`:
+
+```
+tests/
+└── security_softcode_injection.test.ts   ← one file per bug; name matches finding
+```
+
+Each file: exploit test first (Red — must fail without the fix), then the patch,
+then the passing test (Green). This prevents regressions and documents the attack
+vector permanently.
+
 ### Required test cases for every command
 
 - Happy path — correct output and DB call
@@ -471,6 +631,38 @@ function mockU(opts: {
 
 ---
 
+## Plugin data layer — JSON tables
+
+Static game data (weapons, skills, items, rules tables) belongs in `data/*.json`,
+not in TypeScript source. Use Deno's JSON import attribute:
+
+```typescript
+// src/data.ts
+import weapons from "../data/weapons.json" with { type: "json" };
+import type { IWeapon } from "./types.ts";
+
+export const WEAPONS: readonly IWeapon[] = weapons as IWeapon[];
+```
+
+Rules:
+- **One table per file.** No nesting of unrelated tables.
+- **Slug-keyed.** Every entry has `slug: string` (lowercase-kebab) as the canonical reference. Sheets, market lookups, and hooks all reference by slug, never by display name.
+- **Cite the source.** Every entry includes `book: "p.NN"` so mechanics can be verified against the rulebook.
+- **Type in `src/types.ts`.** Each table has a TypeScript interface. Add shape assertions in tests.
+- **Include in publish.** `deno.json` `publish.include` must list `"data"` so JSR ships the JSON files.
+
+```json
+{
+  "slug": "combat-knife",
+  "name": "Combat Knife",
+  "damage": "1d6",
+  "cost": 50,
+  "book": "p.42"
+}
+```
+
+---
+
 ## Softcode / system scripts
 
 Scripts in `system/scripts/` run inside the Web Worker sandbox. Rules:
@@ -478,6 +670,28 @@ Scripts in `system/scripts/` run inside the Web Worker sandbox. Rules:
 - ESM style preferred: `export default async (u: IUrsamuSDK) => { ... }`
 - `export const aliases = ["alt-name"]` for command aliases
 - `u.util.stripSubs(str)` — strips `%cX`, `%n/%r/%t/%b/%R`, and raw ANSI escapes
+
+### Import rules for sandbox scripts
+
+Before evaluation the sandbox transpiles the script with sucrase, then
+**regex-strips every top-level `import` statement**:
+
+```js
+compiled = compiled.replace(/^import\s+.*?;?\s*$/gm, "");
+```
+
+Consequences for script authors:
+
+| Import form | Runtime result |
+|-------------|----------------|
+| `import type { IUrsamuSDK }` | ✅ Safe — type-only, elided at TS→JS compile |
+| `import { helper } from "../../helpers.ts"` | ❌ Deleted — `helper` is `undefined` at runtime |
+| `import { addCmd } from "jsr:@ursamu/ursamu"` | ❌ Deleted — same |
+
+**All runtime capabilities come through the injected `u` SDK.** If a helper the
+script needs is not on the SDK, add it to the engine SDK first, then consume it as
+`u.<namespace>.<helper>`. Scripts cannot share modules with each other — inline
+shared code or generate it at install time.
 
 ### wrapScript pattern (tests only)
 

@@ -12,6 +12,8 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { softcodeService } from "../src/services/Softcode/index.ts";
 import { dbojs, DBO } from "../src/services/Database/database.ts";
+// resetNoiseState targets the mush package's noise module — the same one evalCode uses.
+import { resetNoiseState } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 15000 };
 
@@ -46,11 +48,13 @@ Deno.test("M1: noiseseed() with no arg reads current seed without resetting", OP
 });
 
 Deno.test("M1: noiseseed() with no arg on fresh worker returns empty (unseeded)", OPTS, async () => {
+  resetNoiseState(); // clear state set by the previous test
   const out = await evalCode("[noiseseed()]");
   assertEquals(out, "", "fresh worker has no seed; read should be empty");
 });
 
 Deno.test("M1: noiseseed() with explicit numeric arg returns prev seed and updates state", OPTS, async () => {
+  resetNoiseState(); // requires no prior seed
   // After noiseseed(42), call noiseseed(99) → returns "42" (prev). Then a
   // read returns "99". Final concat: "4299" — three chars from prev plus
   // empty from the noop set return.

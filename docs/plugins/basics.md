@@ -62,7 +62,7 @@ methods. The interface is intentionally minimal.
 
 > **Stdlib primitives.** Plugins written in TypeScript can import
 > `Noise`, `Rng`, vector/spatial helpers, interpolation, and physics
-> primitives directly from `jsr:@ursamu/ursamu` (v2.5.1+). No need to vendor
+> primitives directly from `jsr:@ursamu/mush` (v2.5.1+). No need to vendor
 > `simplex-noise` or `alea`.
 ---
 

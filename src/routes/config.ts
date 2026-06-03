@@ -1,5 +1,5 @@
 import { resolve, join } from "@std/path";
-import { ConfigManager } from "../services/Config/index.ts";
+import { getAllConfig } from "@ursamu/core";
 import { texts } from "../services/Database/index.ts";
 
 
@@ -9,7 +9,7 @@ export const configHandler = async (req: Request) => {
 
   if (path.endsWith("/config")) {
     // deno-lint-ignore no-explicit-any
-    const config = ConfigManager.getInstance().getAll() as any;
+    const config = getAllConfig() as any;
 
     // Return safe subset of config
     const safeConfig = {
@@ -45,7 +45,7 @@ export const configHandler = async (req: Request) => {
   if (path.endsWith("/connect")) {
      try {
         // deno-lint-ignore no-explicit-any
-        const config = ConfigManager.getInstance().getAll() as any;
+        const config = getAllConfig() as any;
         const connectFile: string = config.game?.text?.connect || "text/default_connect.txt";
 
         // Path traversal guard — resolve and verify the file stays inside ./text/

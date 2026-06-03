@@ -2,7 +2,7 @@ import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { getNextId } from "../../utils/getNextId.ts";
 import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "../Database/index.ts";
-import { flags } from "../flags/flags.ts";
+import { flags } from "@ursamu/mush";
 import type { IEntity } from "../../interfaces/IEntity.ts";
 
 import type { IAttribute } from "../../@types/IAttribute.ts";

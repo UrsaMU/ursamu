@@ -12,7 +12,7 @@
 UrsaMU is a TypeScript/Deno MUSH-style multiplayer game server. Key characteristics:
 
 - Runtime: **Deno** with Deno KV storage
-- Public package: **`jsr:@ursamu/ursamu`**
+- Public package: **`jsr:@ursamu/mush`**
 - Scripts run in isolated **Web Workers** (no Deno APIs, no network, no filesystem)
 - Commands registered with `addCmd()` run in native Deno context (full APIs available)
 - Configuration in `config/` — JSON or TOML
@@ -43,7 +43,7 @@ import {
   dist2d, dist3d, distSq2d, distSq3d, manhattan, chebyshev, angle2d, bearing,
   lerp, inverseLerp, remap, smoothstep, smootherstep, clamp,
   vsize, vsizeSq, vdistance, vdistanceSq, vlerp, vclamp,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 
 // Types (zero runtime cost)
 import type {
@@ -51,7 +51,7 @@ import type {
   SayEvent, PoseEvent, PageEvent, MoveEvent, SessionEvent,
   ChannelMessageEvent, SceneCreatedEvent, ScenePoseEvent,
   SceneSetEvent, SceneTitleEvent, SceneClearEvent,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 ```
 
 Internal plugin imports (use only within src/plugins/):
@@ -489,7 +489,7 @@ interface IPlugin {
 
 // index.ts
 import "./commands.ts";     // register addCmd at module-load time
-import type { IPlugin } from "jsr:@ursamu/ursamu";
+import type { IPlugin } from "jsr:@ursamu/mush";
 
 export const plugin: IPlugin = {
   name: "my-plugin",
@@ -514,14 +514,14 @@ Plugin is auto-discovered when placed in `src/plugins/<name>/index.ts`.
 Registers commands. Call at module level in `commands.ts`, not inside `init()`.
 
 ```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
+import { addCmd } from "jsr:@ursamu/mush";
 addCmd({ name: "+foo", pattern: /^\+foo/i, exec: (u) => u.send("foo") });
 ```
 
 ### `registerPluginRoute(prefix, handler)`
 
 ```typescript
-import { registerPluginRoute } from "jsr:@ursamu/ursamu";
+import { registerPluginRoute } from "jsr:@ursamu/mush";
 registerPluginRoute("/api/v1/myplugin", async (req, userId) => {
   return Response.json({ ok: true });
 });
@@ -531,7 +531,7 @@ registerPluginRoute("/api/v1/myplugin", async (req, userId) => {
 ### `DBO<T>` — Plugin database collections
 
 ```typescript
-import { DBO } from "jsr:@ursamu/ursamu";
+import { DBO } from "jsr:@ursamu/mush";
 
 interface INote { id: string; playerId: string; text: string; date: number; }
 const notes = new DBO<INote>("myplugin.notes");
@@ -547,7 +547,7 @@ const all = await notes.all();
 ### `dbojs` — Game objects
 
 ```typescript
-import { dbojs } from "jsr:@ursamu/ursamu";
+import { dbojs } from "jsr:@ursamu/mush";
 
 const players = await dbojs.queryAll((o) => o.flags.has("player"));
 const room    = await dbojs.queryOne((o) => o.id === "1");
@@ -556,7 +556,7 @@ const room    = await dbojs.queryOne((o) => o.id === "1");
 ### `createObj(template)` — Outside command context
 
 ```typescript
-import { createObj } from "jsr:@ursamu/ursamu";
+import { createObj } from "jsr:@ursamu/mush";
 const room = await createObj({
   name: "The Void", flags: new Set(["room"]),
   state: { desc: "Empty." }, contents: [],
@@ -566,7 +566,7 @@ const room = await createObj({
 ### `mu()` — Start the server
 
 ```typescript
-import { mu } from "jsr:@ursamu/ursamu";
+import { mu } from "jsr:@ursamu/mush";
 await mu();
 ```
 ---
@@ -590,7 +590,7 @@ Once imported, all `gameHooks.on/off/emit` calls become fully typed for the
 new event across the entire codebase.
 
 ```typescript
-import { gameHooks } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
 
 gameHooks.on("player:login", ({ actorId, actorName }) => { /* ... */ });
 gameHooks.off("player:login", handler);
@@ -642,7 +642,7 @@ u.send(`You have ${gold} gold.`);
 
 Workers support standard ESM imports BUT:
 - JSR sub-path imports (`jsr:@std/fmt/printf`) do NOT work — use u.util.sprintf instead
-- Cannot import from `jsr:@ursamu/ursamu` inside scripts — use the `u` global
+- Cannot import from `jsr:@ursamu/mush` inside scripts — use the `u` global
 ---
 
 ## MUSH Color Codes
@@ -779,8 +779,8 @@ registerPluginRoute("/api/v1/myplugin", async (req, userId) => {
 ### Listen for a game hook in a plugin
 
 ```typescript
-import { gameHooks } from "jsr:@ursamu/ursamu";
-import type { SessionEvent } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
+import type { SessionEvent } from "jsr:@ursamu/mush";
 
 const onLogin = ({ actorId, actorName }: SessionEvent) => {
   console.log(`[myplugin] ${actorName} connected`);

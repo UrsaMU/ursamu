@@ -11,7 +11,7 @@ The UrsaMU CLI requires no install — run it directly from JSR with `deno run`.
 ## Running the CLI
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli <command> [options]
+deno run -A jsr:@ursamu/mush/cli <command> [options]
 ```
 
 Or install it locally for convenience (see [install-cli](#install-cli)).
@@ -24,7 +24,7 @@ Scaffold a new game project or plugin.
 ### New game project
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli create <project-name>
+deno run -A jsr:@ursamu/mush/cli create <project-name>
 ```
 
 Creates a new directory with a fully-configured UrsaMU game project:
@@ -37,7 +37,7 @@ Creates a new directory with a fully-configured UrsaMU game project:
 ### In-tree plugin (inside an existing project)
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli create plugin <name>
+deno run -A jsr:@ursamu/mush/cli create plugin <name>
 ```
 
 Run from your game project root. Generates `src/plugins/<name>/` with:
@@ -48,7 +48,7 @@ Run from your game project root. Generates `src/plugins/<name>/` with:
 ### Standalone publishable plugin
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli create plugin <name> --standalone
+deno run -A jsr:@ursamu/mush/cli create plugin <name> --standalone
 ```
 
 Generates a self-contained plugin repo at `./<name>/` ready for publishing to JSR or GitHub.
@@ -61,13 +61,13 @@ Manage the plugin registry (`src/plugins/plugins.manifest.json`).
 ### List installed plugins
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli plugin list
+deno run -A jsr:@ursamu/mush/cli plugin list
 ```
 
 ### Install a plugin
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli plugin install <github-url>
+deno run -A jsr:@ursamu/mush/cli plugin install <github-url>
 ```
 
 Adds the plugin to the manifest and downloads it into `src/plugins/`.
@@ -75,13 +75,13 @@ Adds the plugin to the manifest and downloads it into `src/plugins/`.
 Pin to a specific tag or commit:
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli plugin install <github-url> --ref v1.2.0
+deno run -A jsr:@ursamu/mush/cli plugin install <github-url> --ref v1.2.0
 ```
 
 ### Update a plugin
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli plugin update <name>
+deno run -A jsr:@ursamu/mush/cli plugin update <name>
 ```
 
 Fetches the latest ref for the plugin and updates the manifest.
@@ -89,7 +89,7 @@ Fetches the latest ref for the plugin and updates the manifest.
 ### Remove a plugin
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli plugin remove <name>
+deno run -A jsr:@ursamu/mush/cli plugin remove <name>
 ```
 
 Removes the plugin from the manifest and deletes its directory.
@@ -97,7 +97,7 @@ Removes the plugin from the manifest and deletes its directory.
 ### Show plugin info
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli plugin info <name>
+deno run -A jsr:@ursamu/mush/cli plugin info <name>
 ```
 
 Displays metadata, installed version, and available update.
@@ -105,7 +105,7 @@ Displays metadata, installed version, and available update.
 ### Search
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli plugin search <query>
+deno run -A jsr:@ursamu/mush/cli plugin search <query>
 ```
 
 Search the public plugin registry for plugins matching `<query>`.
@@ -127,13 +127,13 @@ for the full list of error classes.
 Update the UrsaMU engine in an existing game project.
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli update
+deno run -A jsr:@ursamu/mush/cli update
 ```
 
 Preview changes without writing:
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli update --dry-run
+deno run -A jsr:@ursamu/mush/cli update --dry-run
 ```
 ---
 
@@ -144,7 +144,7 @@ register at startup. Useful for discovering what's already registered before
 you write an override.
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli scripts list
+deno run -A jsr:@ursamu/mush/cli scripts list
 ```
 ---
 

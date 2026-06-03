@@ -15,10 +15,13 @@ import type { IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 import { initConfig, initializePlugins, getConfig, registerPlugin } from "./services/Config/mod.ts";
 import { loadPlugins } from "./utils/loadPlugins.ts";
-import { wsService } from "./services/WebSocket/index.ts";
 import { queue } from "./services/Queue/index.ts";
 import { runStartupAttrs } from "./services/startup/index.ts";
 import { gameHooks } from "./services/Hooks/GameHooks.ts";
+import {
+  createServer, websocketTransport, telnetTransport, httpTransport,
+  registerFallback,
+} from "@ursamu/core";
 
 let __dirname;
 try {
@@ -101,6 +104,18 @@ export const initializeEngine = async (
   // Initialize the configuration system
   await initConfig(cfg);
 
+  // Clear stale `connected` flags from the previous run. SIGINT clears them
+  // cleanly, but crashes, kill -9, and SIGTERM (supervisor restart) do not —
+  // sweeping at startup makes recovery robust regardless of shutdown path.
+  // Players are re-flagged on WebSocket reconnect via JWT auto-reauth.
+  const staleConnected = await dbojs.query({ flags: /connected/i });
+  for (const player of staleConnected) {
+    await setFlags(player, "!connected");
+  }
+  if (staleConnected.length > 0) {
+    console.log(`[startup] Cleared stale 'connected' flag on ${staleConnected.length} player(s).`);
+  }
+
   // Load substitutions from config
   const substitutions = getConfig<Record<string, string>>("substitutions");
   if (substitutions) {
@@ -178,44 +193,26 @@ export const initializeEngine = async (
     }
   }
 
-  // Start the consolidated Deno.serve for HTTP and WebSockets
-  const httpPort = getConfig<number>("server.http") || 4203;
+  // Boot the server via @ursamu/core transports.
+  // Align config keys: old engine used server.http for the combined WS+HTTP port.
+  const wsPort   = getConfig<number>("server.http")    || getConfig<number>("server.wsPort")     || 4203;
+  const httpPort = getConfig<number>("server.apiPort") || getConfig<number>("server.port")        || 4201;
+  const tnPort   = getConfig<number>("server.telnet")  || getConfig<number>("server.telnetPort")  || 4202;
 
-  Deno.serve({ port: httpPort, reusePort: true }, async (req, info) => {
-    try {
-      const trustedProxy = getConfig<boolean>("server.trustedProxy") ?? false;
-      // Handle WebSocket upgrade
-      if (req.headers.get("upgrade") === "websocket") {
-        const remoteIp = trustedProxy
-          ? (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown"
-          : info.remoteAddr.hostname;
-        const maxPerIp = getConfig<number>("server.maxConnectionsPerIp") || 20;
-        if (!wsService.canConnect(remoteIp, maxPerIp)) {
-          return new Response("Too many connections from this address", { status: 429 });
-        }
-        const { socket, response } = Deno.upgradeWebSocket(req);
-        const url = new URL(req.url);
-        const clientType = url.searchParams.get("client") || "telnet";
-        // C1 fix: JWT is no longer read from the query parameter (?token=...).
-        // Authentication happens via the first WebSocket message: { type: "auth", token }.
-        // This prevents token leakage into server logs, browser history, and proxy caches.
-        wsService.handleConnection(socket, clientType, undefined, remoteIp);
-        return response;
-      }
+  // Patch config so the transport reads the right port values.
+  const { setConfig } = await import("@ursamu/core");
+  setConfig("server.wsPort",      wsPort);
+  setConfig("server.port",        httpPort);
+  setConfig("server.telnetPort",  tnPort);
 
-      // Handle standard HTTP requests
-      const remoteAddr = trustedProxy
-        ? (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || "unknown"
-        : info.remoteAddr.hostname;
-      return await handleRequest(req, remoteAddr);
-    } catch (error) {
-      console.error("Error handling request:", error);
-      return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-  });
+  // Register app.ts handleRequest as the HTTP fallback for all REST routes.
+  registerFallback(handleRequest);
+
+  const server = createServer();
+  server.addTransport(websocketTransport);
+  server.addTransport(httpTransport);
+  server.addTransport(telnetTransport);
+  await server.start();
 
   // Initialize all registered plugins
   await initializePlugins();
@@ -230,13 +227,13 @@ export const initializeEngine = async (
 
   await initializeDefaultTexts();
 
-  console.log(`Server started on port ${httpPort} (HTTP & WebSockets).`);
+  console.log(`Server started — WS:${wsPort}  HTTP:${httpPort}  Telnet:${tnPort}`);
   
   // Initialize Queue
   queue.init();
 
   // Initialize in-game clock (load persisted time, then tick every real minute)
-  const { gameClock } = await import("./services/GameClock/index.ts");
+  const { gameClock } = await import("@ursamu/mush");
   await gameClock.load();
   setInterval(() => gameClock.tick(60_000), 60_000);
   console.log(`[GameClock] Loaded. Current game time: ${gameClock.format()}`);
@@ -296,7 +293,7 @@ async function initializeDefaultRooms() {
   const rooms = await dbojs.query({ flags: /room/i });
 
   if (!(await counters.query({ id: "objid" })).length) {
-    await counters.create({ id: "objid", seq: 1 });
+    await counters.create({ id: "objid", value: 1 });
   }
 
   if (!rooms.length) {

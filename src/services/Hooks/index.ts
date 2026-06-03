@@ -1,6 +1,6 @@
 import { dbojs } from "../Database/index.ts";
 import { getAttribute } from "../../utils/getAttribute.ts";
-import { sandboxService } from "../Sandbox/SandboxService.ts";
+import { sandboxService } from "@ursamu/mush";
 import { getConfig } from "../Config/mod.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { gameHooks } from "./GameHooks.ts";

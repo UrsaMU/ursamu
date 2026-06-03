@@ -52,7 +52,7 @@ Examples:
         const name = arg.toLowerCase();
         const existing = await playerTags.queryOne({ id: ltagId(name) });
         if (!existing) { u.send(`You have no personal tag named '${name}'.`); return; }
-        const results = await u.db.search(existing.objectId);
+        const results = await u.db.search(existing.objectId as string);
         const obj = results[0];
         u.send(`Tag '${name}' → ${obj ? `${obj.name}(#${existing.objectId})` : `#${existing.objectId} (not found)`}`);
         return;
@@ -127,7 +127,7 @@ Examples:
         const name = arg.toLowerCase();
         const existing = await serverTags.queryOne({ id: name });
         if (!existing) { u.send(`No tag named '${name}' is set.`); return; }
-        const results = await u.db.search(existing.objectId);
+        const results = await u.db.search(existing.objectId as string);
         const obj = results[0];
         u.send(`Tag '${name}' → ${obj ? `${obj.name}(#${existing.objectId})` : `#${existing.objectId} (not found)`}`);
         return;
