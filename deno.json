@@ -76,7 +76,7 @@
     "@ursamu/ursamu": "jsr:@ursamu/ursamu@^2.0.0",
     "@ursamu/ursamu/app": "./src/app.ts",
     "@ursamu/ursamu/channels": "./src/services/channel-events.ts",
-    "@ursamu/ursamu/jobs": "./src/plugins/jobs/mod.ts",
+    "@ursamu/ursamu/jobs": "./packages/jobs/mod.ts",
     "@ursamu/ursamu/chargen": "./src/services/Chargen/index.ts",
     "ursamu": "./mod.ts",
     "ursamu/": "./",

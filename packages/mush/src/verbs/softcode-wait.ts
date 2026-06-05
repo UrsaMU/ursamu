@@ -1,10 +1,7 @@
-import { addCmd } from "@ursamu/mush";
-import { dbojs } from "@ursamu/mush";
-import { isStaff } from "../../utils/index.ts";
-import { target } from "../../utils/target.ts";
+import { addCmd } from "../commands/addCmd.ts";
+import { dbojs } from "../world/dbobjs.ts";
 import { queue } from "@ursamu/core";
-import type { IDBOBJ } from "../../@types/IDBObj.ts";
-import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import type { IUrsamuSDK } from "../commands/types.ts";
 
 addCmd({
   name: "@wait",
@@ -43,17 +40,18 @@ Examples:
       return;
     }
 
-    const en = await dbojs.queryOne({ id: u.me.id });
-    if (!en) return;
-    const sem = await target(en as unknown as IDBOBJ, token);
+    const sem = await u.util.target(u.me, token);
     if (!sem) return u.send(`I can't find semaphore object '${token}'.`);
 
-    const staff      = isStaff(u.me.flags);
-    const semOwner   = (sem.data?.owner as string | undefined);
+    const isStaff = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+    const semOwner = (sem.state?.owner as string | undefined);
     const semOwnedByMe = semOwner === u.me.id || sem.id === u.me.id;
-    if (!semOwnedByMe && !staff) {
+    if (!semOwnedByMe && !isStaff) {
       return u.send("Permission denied. You can only @wait on objects you control.");
     }
+
+    const en = await dbojs.queryOne({ id: u.me.id });
+    if (!en) return;
 
     const pid = await queue.enqueueSemaphore(
       { command: cmd, executor: u.me.id, enactor: u.me.id },

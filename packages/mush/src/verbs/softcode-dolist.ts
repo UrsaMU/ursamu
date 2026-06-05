@@ -1,7 +1,7 @@
-import { addCmd } from "@ursamu/mush";
-import { runSoftcodeSimple } from "@ursamu/mush";
-import { BreakSignal, splitActionCommands } from "./shared.ts";
-import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import { addCmd } from "../commands/addCmd.ts";
+import { runSoftcodeSimple } from "../softcode/engine.ts";
+import { BreakSignal, splitActionCommands } from "./softcode-shared.ts";
+import type { IUrsamuSDK } from "../commands/types.ts";
 
 addCmd({
   name: "@dolist",
@@ -47,7 +47,6 @@ Examples:
           .replaceAll("##", items[i])
           .replaceAll("#@", String(i + 1));
         const evaluated = await runSoftcodeSimple(substituted, ctx);
-        // Support multi-command actions: {cmd1;cmd2;...}
         for (const cmd of splitActionCommands(evaluated)) {
           await exec(cmd);
         }

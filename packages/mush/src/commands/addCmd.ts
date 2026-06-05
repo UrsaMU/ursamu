@@ -143,4 +143,9 @@ export async function loadDefaultCommands(): Promise<void> {
   await import("../verbs/world-sweep.ts");
   await import("../verbs/js-eval.ts");
   await import("../verbs/avatar.ts");
+  await import("../verbs/softcode-trigger.ts");
+  await import("../verbs/softcode-wait.ts");
+  await import("../verbs/softcode-dolist.ts");
+  await import("../verbs/softcode-switch.ts");
+  await import("../verbs/softcode-flow.ts");
 }

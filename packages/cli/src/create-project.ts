@@ -157,7 +157,7 @@ export async function scaffoldProject(
     "@ursamu/ursamu/app":      `${engineRelPath}/src/app.ts`,
     "@ursamu/ursamu/channels": `${engineRelPath}/src/services/channel-events.ts`,
     "@ursamu/ursamu/chargen":  `${engineRelPath}/src/services/Chargen/index.ts`,
-    "@ursamu/ursamu/jobs":     `${engineRelPath}/src/plugins/jobs/mod.ts`,
+    "@ursamu/ursamu/jobs":     `${engineRelPath}/packages/jobs/mod.ts`,
     "@std/assert":             "jsr:@std/assert@^0.224.0",
     "@std/flags":              "jsr:@std/flags@^0.224.0",
     "@std/fmt":                "jsr:@std/fmt@^0.224.0",

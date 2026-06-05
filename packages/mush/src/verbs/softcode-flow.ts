@@ -1,7 +1,7 @@
-import { addCmd } from "@ursamu/mush";
-import { runSoftcodeSimple } from "@ursamu/mush";
-import { BreakSignal } from "./shared.ts";
-import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import { addCmd } from "../commands/addCmd.ts";
+import { runSoftcodeSimple } from "../softcode/engine.ts";
+import { BreakSignal } from "./softcode-shared.ts";
+import type { IUrsamuSDK } from "../commands/types.ts";
 
 addCmd({
   name: "@break",

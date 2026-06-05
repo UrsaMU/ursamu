@@ -1,3 +1,3 @@
-import "./softcode.ts";
-import "./test.ts";
-import "./demo.ts";
+// Game commands registered at startup.
+// Softcode action commands (@trigger, @wait, @dolist, @switch, @if, @while, @break)
+// are registered via loadDefaultCommands() in @ursamu/mush.

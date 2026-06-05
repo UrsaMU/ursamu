@@ -1,7 +1,7 @@
-import { addCmd } from "@ursamu/mush";
-import { runSoftcodeSimple } from "@ursamu/mush";
-import { splitSoftcodeList, splitActionCommands, switchWildcard } from "./shared.ts";
-import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+import { addCmd } from "../commands/addCmd.ts";
+import { runSoftcodeSimple } from "../softcode/engine.ts";
+import { splitSoftcodeList, splitActionCommands, switchWildcard } from "./softcode-shared.ts";
+import type { IUrsamuSDK } from "../commands/types.ts";
 
 addCmd({
   name: "@switch",
@@ -32,7 +32,6 @@ Examples:
     const parts = splitSoftcodeList(rest);
     const exec  = u.execute as unknown as (cmd: string) => Promise<void>;
 
-    // Execute action string, splitting on semicolons for multi-command support.
     const execAction = async (rawAction: string) => {
       const action = await runSoftcodeSimple(rawAction.trim(), ctx);
       for (const cmd of splitActionCommands(action)) {
