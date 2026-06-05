@@ -1,5 +1,4 @@
 export * from "./canEdit.ts";
-export * from "./evaluateLock.ts";
 export * from "./getAttribute.ts";
 export * from "./getSocket.ts";
 export * from "./globToRegex.ts";

@@ -14,7 +14,8 @@
  * the helper is not yet available — which is the RED state).
  */
 import { assertEquals } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const PREFIX = "ssb";
@@ -39,7 +40,7 @@ Deno.test("#30 — failedAttempts update must not clobber unrelated fields", OPT
     data: { name: "TestPlayer30", password: "hashed", sentinel: "keep-me", failedAttempts: 0 },
   });
 
-  const { scopedUpdate } = await import("../src/services/Sandbox/SandboxService.ts");
+  const { scopedUpdate } = await import("@ursamu/mush");
   await scopedUpdate(playerId, { "data.failedAttempts": 1 });
 
   const after = await dbojs.queryOne({ id: playerId });
@@ -57,7 +58,7 @@ Deno.test("#31 — lastLogin update must not clobber unrelated fields", OPTS, as
     data: { name: "TestPlayer31", password: "hashed", sentinel: "keep-me31" },
   });
 
-  const { scopedUpdate } = await import("../src/services/Sandbox/SandboxService.ts");
+  const { scopedUpdate } = await import("@ursamu/mush");
   const ts = Date.now();
   await scopedUpdate(playerId, { "data.lastLogin": ts });
 
@@ -76,7 +77,7 @@ Deno.test("#32 — setPassword update must not clobber unrelated fields", OPTS, 
     data: { name: "TestPlayer32", password: "old-hash", sentinel: "keep-me32" },
   });
 
-  const { scopedUpdate } = await import("../src/services/Sandbox/SandboxService.ts");
+  const { scopedUpdate } = await import("@ursamu/mush");
   await scopedUpdate(playerId, { "data.password": "new-hash" });
 
   const after = await dbojs.queryOne({ id: playerId });
@@ -94,7 +95,7 @@ Deno.test("#33 — chan:join update must not clobber unrelated fields", OPTS, as
     data: { name: "TestPlayer33", sentinel: "keep-me33", channels: [] },
   });
 
-  const { scopedUpdate } = await import("../src/services/Sandbox/SandboxService.ts");
+  const { scopedUpdate } = await import("@ursamu/mush");
   const newChans = [{ channel: "public", alias: "+pub", active: true }];
   await scopedUpdate(playerId, { "data.channels": newChans });
 
@@ -117,7 +118,7 @@ Deno.test("#34 — chan:leave update must not clobber unrelated fields", OPTS, a
     },
   });
 
-  const { scopedUpdate } = await import("../src/services/Sandbox/SandboxService.ts");
+  const { scopedUpdate } = await import("@ursamu/mush");
   await scopedUpdate(playerId, { "data.channels": [] });
 
   const after = await dbojs.queryOne({ id: playerId });
@@ -136,7 +137,7 @@ Deno.test("#35 — bb:markRead update must not clobber unrelated fields", OPTS, 
     data: { name: "TestPlayer35", sentinel: "keep-me35", bbLastRead: {} },
   });
 
-  const { scopedUpdate } = await import("../src/services/Sandbox/SandboxService.ts");
+  const { scopedUpdate } = await import("@ursamu/mush");
   await scopedUpdate(playerId, { "data.bbLastRead": { "board1": 5 } });
 
   const after = await dbojs.queryOne({ id: playerId });

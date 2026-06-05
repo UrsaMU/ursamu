@@ -7,14 +7,11 @@
  *   3. null fallback (caller renders default)
  */
 import { assertEquals } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 import { createNativeSDK } from "../src/services/SDK/index.ts";
-import { resolveFormat, resolveFormatOr } from "../src/utils/resolveFormat.ts";
-import {
-  _clearFormatHandlers,
-  registerFormatHandler,
-} from "../src/utils/formatHandlers.ts";
-import { hydrate } from "../src/utils/evaluateLock.ts";
+import { resolveFormat, _clearFormatHandlers, registerFormatHandler, hydrate } from "@ursamu/mush";
+import { resolveFormatOr } from "../src/utils/resolveFormat.ts";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

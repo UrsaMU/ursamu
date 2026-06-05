@@ -11,14 +11,15 @@
  * Fix: only resolve against #0 when #0 actually exists in the DB.
  */
 import { assertEquals } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { execWho } from "../src/commands/social.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
+import { execWho } from "@ursamu/mush";
 import {
   registerFormatHandler,
   unregisterFormatHandler,
   _clearFormatHandlers,
   type FormatHandler,
-} from "../src/utils/formatHandlers.ts";
+} from "@ursamu/mush";
 import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 15000 };

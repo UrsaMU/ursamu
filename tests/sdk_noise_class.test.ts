@@ -9,7 +9,7 @@ import { assertEquals, assert } from "@std/assert";
 import {
   createNoise,
   perlin2, seedNoise, buildPerm,
-} from "../src/services/Softcode/stdlib/noise.ts";
+} from "../packages/mush/src/softcode/stdlib/noise.ts";
 
 Deno.test("Noise: createNoise(42) is deterministic across instances", () => {
   const a = createNoise(42);
@@ -44,7 +44,7 @@ Deno.test("Noise: instance survives singleton seedNoise() between samples", () =
 });
 
 Deno.test("Noise: instance vs singleton with same seed produce same output", async () => {
-  const { simplex2 } = await import("../src/services/Softcode/stdlib/noise.ts");
+  const { simplex2 } = await import("../packages/mush/src/softcode/stdlib/noise.ts");
   const n = createNoise(42);
   seedNoise(42);
   assertEquals(n.perlin2(0.5, 0.5), perlin2(0.5, 0.5));

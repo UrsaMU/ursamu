@@ -1,4 +1,4 @@
-import { dbojs } from "../../services/Database/index.ts";
+import { dbojs } from "@ursamu/mush";
 import { notes } from "./db.ts";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────

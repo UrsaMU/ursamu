@@ -1,5 +1,5 @@
 
-import { dbojs } from "../Database/index.ts";
+import { dbojs } from "@ursamu/mush";
 
 export interface IMapNode {
   id: string;

@@ -1,5 +1,5 @@
 import { assertEquals, assertNotEquals } from "@std/assert";
-import { dbojs } from "../src/services/Database/index.ts";
+import { dbojs } from "@ursamu/mush";
 import { isNameTaken } from "../src/utils/isNameTaken.ts";
 
 // Mock KV

@@ -8,14 +8,14 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
-import { execPs } from "../src/commands/ps.ts";
-import { queue } from "../src/services/Queue/index.ts";
+import { execPs } from "@ursamu/mush";
+import { queue } from "@ursamu/core";
 import {
   registerFormatHandler,
   unregisterFormatHandler,
   _clearFormatHandlers,
   type FormatHandler,
-} from "../src/utils/formatHandlers.ts";
+} from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const SLOW = { timeout: 15000 };
@@ -179,7 +179,8 @@ Deno.test("ps: handler throw is swallowed; default rendering wins", OPTS, async 
 
 // ── Integration tests (real softcode + dbojs) ─────────────────────────────
 
-const { dbojs, DBO } = await import("../src/services/Database/database.ts");
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 const { createNativeSDK } = await import("../src/services/SDK/index.ts");
 
 const ROOT = "0";

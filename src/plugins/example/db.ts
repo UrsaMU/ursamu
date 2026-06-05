@@ -1,4 +1,4 @@
-import { DBO } from "../../services/Database/database.ts";
+import { DBO } from "@ursamu/core";
 
 // ─── types ────────────────────────────────────────────────────────────────────
 

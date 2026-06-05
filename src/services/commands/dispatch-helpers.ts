@@ -4,7 +4,7 @@
  * Pure, stateless helpers used by the command dispatch pipeline.
  * No I/O, no DB access, no side-effects — safe to test without a live server.
  */
-import type { Intent } from "../Intents/InterceptorService.ts";
+import type { Intent } from "@ursamu/mush";
 
 /** Single-character shortcut prefixes → script name. */
 export const PREFIX_MAP: Record<string, string> = {

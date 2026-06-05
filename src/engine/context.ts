@@ -11,9 +11,9 @@
  */
 import type { IDBObj } from "../@types/UrsamuSDK.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
-import { dbojs } from "../services/Database/index.ts";
+import { dbojs } from "@ursamu/mush";
 import { send as sendFn } from "../services/broadcast/index.ts";
-import { hydrate } from "../utils/evaluateLock.ts";
+import { hydrate } from "@ursamu/mush";
 
 /**
  * The resolved, hydrated execution context for a single command dispatch.

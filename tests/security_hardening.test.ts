@@ -12,8 +12,8 @@ import { assertEquals, assertStringIncludes, assert } from "@std/assert";
 import { describe, it, beforeEach, afterEach } from "@std/testing/bdd";
 import { handleRequest } from "../src/app.ts";
 import { wsService } from "../src/services/WebSocket/index.ts";
-import { DBO } from "../src/services/Database/database.ts";
-import { dbojs } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

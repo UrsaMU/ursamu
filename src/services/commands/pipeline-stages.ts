@@ -13,17 +13,12 @@ import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { ICmd } from "../../@types/ICmd.ts";
 import type { IDBObj } from "../../@types/UrsamuSDK.ts";
 import { send } from "../broadcast/index.ts";
-import { dbojs } from "../Database/index.ts";
-import { Obj } from "../DBObjs/DBObjs.ts";
-import { InterceptorService, type Intent } from "../Intents/InterceptorService.ts";
-import { sandboxService } from "@ursamu/mush";
-import { SDKService, type SDKObject } from "../Sandbox/SDKService.ts";
+import { dbojs, Obj, InterceptorService, type Intent, sandboxService, SDKService, type SDKObject, evaluateLock, hydrate } from "@ursamu/mush";
+import { getConfig } from "@ursamu/core";
 import { getAttribute } from "../../utils/getAttribute.ts";
-import { evaluateLock, hydrate } from "../../utils/evaluateLock.ts";
 import { target } from "../../utils/target.ts";
-import { getConfig } from "../Config/mod.ts";
 import { findDollarPattern } from "../../utils/dollarPatterns.ts";
-import { createNativeSDK } from "../SDK/index.ts";
+import { createNativeSDK } from "@ursamu/mush";
 import {
   CONNECT_SCREEN,
   PREFIX_MAP,

@@ -7,8 +7,8 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execBoot, execToad, execNewpassword, execChown, execSite, execShutdown } from "../src/commands/admin.ts";
-import { execReboot } from "../src/commands/restart.ts";
+import { execBoot, execToad, execNewpassword, execChown, execSite, execShutdown } from "@ursamu/mush";
+import { execReboot } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

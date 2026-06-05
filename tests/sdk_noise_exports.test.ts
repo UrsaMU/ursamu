@@ -6,7 +6,7 @@ import {
   fbm2,
   noiseGrid,
   seedNoise,
-} from "../src/services/Softcode/stdlib/noise.ts";
+} from "../packages/mush/src/softcode/stdlib/noise.ts";
 
 Deno.test("perlin2: deterministic given seed", () => {
   seedNoise(42);

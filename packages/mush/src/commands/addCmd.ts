@@ -115,4 +115,32 @@ export async function loadDefaultCommands(): Promise<void> {
   await import("../verbs/home.ts");
   await import("../verbs/social.ts");
   await import("../verbs/manipulation.ts");
+  await import("../verbs/admin-reload.ts");
+  await import("../verbs/admin.ts");
+  await import("../verbs/alias.ts");
+  await import("../verbs/assert.ts");
+  await import("../verbs/auth-cmds.ts");
+  await import("../verbs/auth.ts");
+  // Building commands moved to @ursamu/builder — load via builderPlugin.init()
+  // Channel commands moved to @ursamu/channels — load via channelsPlugin.init()
+  await import("../verbs/emit-exec.ts");
+  await import("../verbs/emit.ts");
+  await import("../verbs/exits.ts");
+  await import("../verbs/locks.ts");
+  await import("../verbs/messages.ts");
+  await import("../verbs/queue-ps.ts");
+  await import("../verbs/queue.ts");
+  await import("../verbs/search.ts");
+  await import("../verbs/set-flags.ts");
+  await import("../verbs/softcode-tools-2.ts");
+  await import("../verbs/softcode-tools-3.ts");
+  await import("../verbs/softcode-tools-attrs.ts");
+  await import("../verbs/softcode-tools.ts");
+  await import("../verbs/tags.ts");
+  await import("../verbs/world.ts");
+  await import("../verbs/world-find.ts");
+  await import("../verbs/world-info.ts");
+  await import("../verbs/world-sweep.ts");
+  await import("../verbs/js-eval.ts");
+  await import("../verbs/avatar.ts");
 }

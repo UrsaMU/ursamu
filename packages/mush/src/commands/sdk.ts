@@ -510,3 +510,21 @@ export async function createNativeSDK(
 
   return u;
 }
+
+// Wire session:auth → decode JWT → set session.actorId so disconnect/cid lookup works.
+// This runs once at module-load time (side-effect).
+import { verifyToken } from "@ursamu/core";
+gameHooks.on("session:auth", async (e) => {
+  try {
+    const payload = await verifyToken(e.sessionId);
+    const userId = payload.id as string;
+    if (!userId) return;
+    const session = sessions.get(e.socketId);
+    if (session) ((session as unknown) as Record<string, unknown>).actorId = userId;
+    const player = await dbojs.queryOne({ id: userId });
+    if (player) {
+      const fstr = flagsUtil.set(player.flags, player.data || {}, "connected");
+      await dbojs.modify({ id: userId }, "$set", { flags: fstr.tags } as Partial<IDBOBJ>);
+    }
+  } catch { /* invalid JWT — ignore */ }
+});

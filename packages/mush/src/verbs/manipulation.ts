@@ -255,3 +255,49 @@ Examples:
   use #12`,
   exec: execUse,
 });
+
+export async function execCreateObject(u: IUrsamuSDK): Promise<void> {
+  const actor = u.me;
+  const input = (u.cmd.args[0] || "").trim();
+  if (!input) { u.send("Usage: @create <name>[=<cost>]"); return; }
+
+  const eqIdx  = input.indexOf("=");
+  const objName = (eqIdx === -1 ? input : input.slice(0, eqIdx)).trim();
+  const objCost = eqIdx === -1 ? 0 : parseInt(input.slice(eqIdx + 1).trim(), 10) || 0;
+
+  const isStaff = actor.flags.has("wizard") || actor.flags.has("admin") || actor.flags.has("superuser");
+  const quota   = (actor.state.quota as number) || 0;
+  const cost    = 1;
+
+  if (!isStaff && quota < cost) {
+    u.send(`You don't have enough quota. Cost: ${cost}, You have: ${quota}.`);
+    return;
+  }
+
+  const thing = await u.db.create({
+    flags:    new Set(["thing"]),
+    location: actor.id,
+    state:    { name: objName, owner: actor.id, value: objCost },
+  });
+
+  if (!isStaff) {
+    await u.db.modify(actor.id, "$set", { "data.quota": quota - cost });
+  }
+
+  u.send(`You create ${objName} (#${thing.id}).`);
+}
+
+addCmd({
+  name: "@create",
+  pattern: /^@create\s+(.*)/i,
+  lock: "connected",
+  category: "Object",
+  help: `@create <name>[=<cost>]  — Create a new object.
+
+Objects cost 1 quota. Staff (wizard/admin/superuser) ignore quota.
+
+Examples:
+  @create Sword
+  @create Magic Orb=5`,
+  exec: execCreateObject,
+});

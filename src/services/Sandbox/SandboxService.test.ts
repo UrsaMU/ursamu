@@ -1,5 +1,5 @@
 import { assertEquals, assertRejects } from "@std/assert";
-import { sandboxService } from "./SandboxService.ts";
+import { sandboxService } from "@ursamu/mush";
 
 Deno.test({ name: "SandboxService Tests", sanitizeOps: false, sanitizeResources: false, fn: async (t) => {
   await t.step("Pool Initialization", async () => {

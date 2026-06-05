@@ -6,7 +6,8 @@
  *       runs must survive untouched after the call.
  */
 import { assertEquals } from "@std/assert";
-import { dbojs, chans, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs, chans } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

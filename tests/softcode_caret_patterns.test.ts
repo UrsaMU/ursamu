@@ -5,7 +5,7 @@
  * Unit tests for ^-pattern listener dispatch (MONITOR-flagged objects).
  */
 import { assertEquals } from "@std/assert";
-import { findCaretMatches } from "../src/utils/caretPatterns.ts";
+import { findCaretMatches } from "@ursamu/mush";
 import type { IDBOBJ } from "../src/@types/IDBObj.ts";
 
 function makeObj(

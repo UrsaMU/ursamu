@@ -6,9 +6,10 @@
  * script via sandboxService.runScript, and assert the rendered softcode result.
  */
 import { assertEquals } from "@std/assert";
-import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
+import { sandboxService } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
+import type { SDKContext } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const SLOW = { timeout: 20000 };
@@ -131,7 +132,7 @@ Deno.test("sandbox: u.util.resolveFormatOr returns fallback when null", { ...OPT
 
 Deno.test("sandbox: u.util.resolveFormat hydrates target contents for handlers", { ...OPTS, ...SLOW }, async () => {
   const { registerFormatHandler, _clearFormatHandlers } = await import(
-    "../src/utils/formatHandlers.ts"
+    "@ursamu/mush"
   );
 
   const ITEM_ID = "rf_item1";

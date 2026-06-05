@@ -1,5 +1,5 @@
-import { addCmd } from "../../services/commands/index.ts";
-import { softcodeService } from "../../services/Softcode/index.ts";
+import { addCmd } from "@ursamu/mush";
+import { runSoftcodeSimple } from "@ursamu/mush";
 import { BreakSignal, splitActionCommands } from "./shared.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
@@ -32,8 +32,8 @@ Examples:
       else return u.send("@dolist: /delim requires exactly one character.");
     }
 
-    const ctx     = { actorId: u.me.id, socketId: u.socketId };
-    const listVal = await softcodeService.runSoftcode(listExpr, ctx);
+    const ctx     = { actorId: u.me.id, executorId: u.me.id, socketId: u.socketId };
+    const listVal = await runSoftcodeSimple(listExpr, ctx);
     const items   = delim === " "
       ? listVal.trim().split(/\s+/).filter(Boolean)
       : listVal.split(delim);
@@ -46,7 +46,7 @@ Examples:
         const substituted = action
           .replaceAll("##", items[i])
           .replaceAll("#@", String(i + 1));
-        const evaluated = await softcodeService.runSoftcode(substituted, ctx);
+        const evaluated = await runSoftcodeSimple(substituted, ctx);
         // Support multi-command actions: {cmd1;cmd2;...}
         for (const cmd of splitActionCommands(evaluated)) {
           await exec(cmd);

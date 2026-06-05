@@ -1,7 +1,8 @@
-import { events } from "../Database/index.ts";
-import { sandboxService } from "@ursamu/mush";
-import { SDKService } from "../Sandbox/SDKService.ts";
+import { DBO } from "@ursamu/core";
+import { sandboxService, SDKService } from "@ursamu/mush";
 import { dbojs } from "@ursamu/mush";
+
+const events = new DBO<{ id: string } & Record<string, unknown>>("server.events");
 
 export class EventsService {
   private static instance: EventsService;

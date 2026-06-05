@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertNotStrictEquals } from "jsr:@std/assert@^1";
-import { createRng, Rng } from "../src/services/Softcode/stdlib/rng.ts";
+import { createRng, Rng } from "../packages/mush/src/softcode/stdlib/rng.ts";
 
 Deno.test("createRng(42) produces deterministic sequence", () => {
   const a = createRng(42);

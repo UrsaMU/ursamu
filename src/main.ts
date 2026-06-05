@@ -8,16 +8,16 @@ import { handleRequest } from "./app.ts";
 import "./reboot.ts";
 import { plugins } from "./utils/loadDIr.ts";
 import { loadTxtDir } from "./utils/loadTxtDir.ts";
-import { chans, counters, dbojs, texts } from "./services/Database/index.ts";
+import { chans, counters, dbojs, texts } from "@ursamu/mush";
 import { setFlags } from "./utils/setFlags.ts";
 import { broadcast } from "./services/broadcast/index.ts";
 import type { IConfig, IPlugin } from "./@types/index.ts";
 import { dpath } from "../deps.ts";
 import { initConfig, initializePlugins, getConfig, registerPlugin } from "./services/Config/mod.ts";
 import { loadPlugins } from "./utils/loadPlugins.ts";
-import { queue } from "./services/Queue/index.ts";
+import { queue } from "@ursamu/core";
 import { runStartupAttrs } from "./services/startup/index.ts";
-import { gameHooks } from "./services/Hooks/GameHooks.ts";
+import { gameHooks } from "@ursamu/mush";
 import {
   createServer, websocketTransport, telnetTransport, httpTransport,
   registerFallback,
@@ -180,7 +180,7 @@ export const initializeEngine = async (
 
   // Share loaded plugins with @reload command for hot-reload
   try {
-    const { setLoadedPlugins } = await import("./commands/reload.ts");
+    const { setLoadedPlugins } = await import("@ursamu/mush");
     setLoadedPlugins(loadedPlugins);
   } catch { /* reload command may not be loaded yet */ }
 

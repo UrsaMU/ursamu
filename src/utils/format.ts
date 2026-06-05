@@ -1,4 +1,6 @@
-import parser from "../services/parser/parser.ts";
+// Bridge: use inline strip (parser.stripSubs replaced)
+const _stripAnsi = (s: string) => s.replace(/[[0-9;]*m/g, "").replace(/%c[a-zA-Z]/gi, "").replace(/%[nrtbR]/g, "");
+const parser = { stripSubs: (_mode: string, s: string) => _stripAnsi(s) };
 
 // ---------------------------------------------------------------------------
 // String utilities

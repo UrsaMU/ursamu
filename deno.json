@@ -1,5 +1,5 @@
 {
-  "workspace": ["packages/core", "packages/mush"],
+  "workspace": ["packages/core", "packages/mush", "packages/channels", "packages/builder", "packages/cli"],
 
   "name": "@ursamu/ursamu",
 
@@ -64,6 +64,8 @@
     "lib": ["deno.window", "deno.unstable"]
   },
   "imports": {
+    "@ursamu/cli":            "./packages/cli/mod.ts",
+    "@ursamu/cli/templates":  "./packages/cli/src/create-templates.ts",
     "@ursamu/ursamu": "jsr:@ursamu/ursamu@^2.0.0",
     "@ursamu/ursamu/app": "./src/app.ts",
     "@ursamu/ursamu/channels": "./src/services/channel-events.ts",

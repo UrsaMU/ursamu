@@ -10,7 +10,11 @@ export const texts      = new DBO<{ id: string; content: string }>("server.texts
 // deno-lint-ignore no-explicit-any
 export const scenes      = new DBO<any & { id: string }>("server.scenes");
 // deno-lint-ignore no-explicit-any
-export const chanHistory = new DBO<any & { id: string }>("server.chan_history");
+export const chanHistory     = new DBO<any & { id: string }>("server.chan_history");
+export const zoneMemberships = new DBO<{ id: string } & Record<string, unknown>>("server.zones");
+export const userFuncs       = new DBO<{ id: string; name: string; code: string; owner: string }>("server.userfuncs");
+export const serverTags      = new DBO<{ id: string } & Record<string, unknown>>("server.tags");
+export const playerTags      = new DBO<{ id: string } & Record<string, unknown>>("server.ltags");
 
 /** Get the next numeric object ID from the counters collection. */
 async function getNextId(name: string): Promise<string> {

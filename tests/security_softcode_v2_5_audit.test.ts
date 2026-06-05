@@ -10,8 +10,9 @@
  *     and randseed("clear") must restore Math.random() fallback.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { softcodeService } from "../src/services/Softcode/index.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { runSoftcodeSimple } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 // resetNoiseState targets the mush package's noise module — the same one evalCode uses.
 import { resetNoiseState } from "@ursamu/mush";
 
@@ -20,7 +21,7 @@ const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 15000 };
 const ACTOR = "audit_v2_5";
 
 async function evalCode(code: string): Promise<string> {
-  return await softcodeService.runSoftcode(code, {
+  return await runSoftcodeSimple(code, {
     actorId:    ACTOR,
     executorId: ACTOR,
     args:       [],

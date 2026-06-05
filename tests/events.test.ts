@@ -3,9 +3,10 @@
  */
 import { assertEquals, assertExists } from "@std/assert";
 import { EventsService } from "../src/services/Events/index.ts";
-import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { SDKContext } from "../src/services/Sandbox/SDKService.ts";
+import { sandboxService } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
+import type { SDKContext } from "@ursamu/mush";
 import { hash, compare } from "../deps.ts";
 
 const SLOW = { timeout: 8000 };

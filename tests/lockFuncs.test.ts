@@ -1,10 +1,6 @@
 import { assertEquals } from "jsr:@std/assert@^1";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
-import {
-  callLockFunc,
-  registerLockFunc,
-} from "../src/utils/lockFuncs.ts";
-import { evaluateLock } from "../src/utils/evaluateLock.ts";
+import { callLockFunc, registerLockFunc, evaluateLock } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

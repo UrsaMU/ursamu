@@ -1,13 +1,13 @@
 import type { IChanEntry } from "../../@types/Channels.ts";
 import type { IContext } from "../../@types/IContext.ts";
 import { moniker } from "../../utils/moniker.ts";
-import { chans, dbojs, chanHistory } from "../Database/index.ts";
+import { chans, dbojs, chanHistory } from "@ursamu/mush";
 import { getNextId } from "../../utils/getNextId.ts";
 import { send } from "../broadcast/index.ts";
 import { flags } from "@ursamu/mush";
 import { force } from "./force.ts";
 import { channelEvents } from "../channel-events.ts";
-import { gameHooks } from "../Hooks/GameHooks.ts";
+import { gameHooks } from "@ursamu/mush";
 
 export const matchChannel = async (ctx: IContext) => {
   if (!ctx.socket.cid) {

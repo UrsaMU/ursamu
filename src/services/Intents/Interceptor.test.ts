@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { intentRegistry } from "./IntentRegistry.ts";
-import { InterceptorService } from "./InterceptorService.ts";
+import { intentRegistry } from "@ursamu/mush";
+import { InterceptorService } from "@ursamu/mush";
 
 Deno.test("Intent Registry Tests", () => {
   const say = intentRegistry.getIntent("say");

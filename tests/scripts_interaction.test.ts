@@ -11,8 +11,8 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execGet, execDrop, execGive } from "../src/commands/manipulation.ts";
-import { execHome } from "../src/commands/home.ts";
+import { execGet, execDrop, execGive } from "@ursamu/mush";
+import { execHome } from "@ursamu/mush";
 import { execTrigger } from "../src/commands/softcode/trigger.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

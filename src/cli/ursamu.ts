@@ -10,9 +10,15 @@
  */
 import { parse } from "jsr:@std/flags@^0.224.0";
 import { join, dirname, fromFileUrl } from "jsr:@std/path@^0.224.0";
-import parser from "../services/parser/parser.ts";
 
-const fmt = (str: string) => parser.substitute("telnet", str);
+// Lazy-import parser only when the interactive menu is actually needed.
+// Top-level import would pull in @ursamu/mush (KV + QuickJS) before --version/--help can exit.
+async function getParser() {
+  const { default: p } = await import("../services/parser/parser.ts");
+  return p;
+}
+
+const fmt = async (str: string) => (await getParser()).substitute("telnet", str);
 
 const getRes = (text: string, defaultValue?: string) => {
   const promptText = defaultValue ? `${text} [${defaultValue}]: ` : `${text}: `;
@@ -39,7 +45,7 @@ if (args.help) {
 // ─── interactive menu ─────────────────────────────────────────────────────────
 
 if (args._.length === 0) {
-  console.log(fmt(`
+  console.log(await fmt(`
 %ch%cc==================================================%cn
 %ch%cw        Welcome to the %cyUrsaMU%cw CLI%cn
 %ch%cc==================================================%cn

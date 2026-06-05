@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
-import { authHandler } from "../src/routes/authRouter.ts";
-import { dbojs } from "../src/services/Database/index.ts";
+import { authHandler } from "@ursamu/mush";
+import { dbojs } from "@ursamu/mush";
 import { hash } from "../deps.ts";
 
 // Mock KV

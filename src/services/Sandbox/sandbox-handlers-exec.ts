@@ -5,7 +5,7 @@
  *   execute, force, force:as
  *   eval:attr, eval:string
  */
-import type { SDKContext } from "./SDKService.ts";
+import type { SDKContext } from "@ursamu/mush";
 import { wsService } from "../WebSocket/index.ts";
 
 type Msg    = Record<string, unknown>;
@@ -35,7 +35,7 @@ export async function handleForceMessage(
   if (type === "execute" || type === "force") {
     if (!msg.command) { respond(worker, msgId, null); return; }
     const { force }     = await import("../commands/index.ts");
-    const { dbojs: db } = await import("../Database/index.ts");
+    const { dbojs: db } = await import("@ursamu/mush");
     const actorId = await resolveSocket(context);
     const en = actorId ? await db.queryOne({ id: actorId }) : undefined;
     if (en) {
@@ -54,7 +54,7 @@ export async function handleForceMessage(
   if (type === "force:as") {
     if (!msg.targetId || !msg.command) { respond(worker, msgId, null); return; }
     const { force }     = await import("../commands/index.ts");
-    const { dbojs: db } = await import("../Database/index.ts");
+    const { dbojs: db } = await import("@ursamu/mush");
     // Privilege check: only wizard/admin/superuser may force-execute as another object
     const actorId = await resolveSocket(context);
     if (!actorId) { respond(worker, msgId, null); return; }
@@ -87,7 +87,7 @@ export async function handleEvalMessage(
   const { type, msgId } = msg;
 
   if (type === "eval:attr") {
-    const { dbojs: db } = await import("../Database/index.ts");
+    const { dbojs: db } = await import("@ursamu/mush");
     const { escapeRegex } = await import("../../utils/escapeRegex.ts");
     // deno-lint-ignore no-explicit-any
     const tarObj: any = await db.queryOne({
@@ -115,7 +115,7 @@ export async function handleEvalMessage(
         socketId:   context?.socketId as string | undefined,
       });
     } else if (attrData.type === "attribute") {
-      const { sandboxService } = await import("./SandboxService.ts");
+      const { sandboxService } = await import("@ursamu/mush");
       const raw = await sandboxService.runScript(attrData.value, {
         id:    tarObj.id,
         state: (tarObj.data?.state as Record<string, unknown>) || {},

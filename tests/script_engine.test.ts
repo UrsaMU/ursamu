@@ -1,6 +1,7 @@
-import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
+import { sandboxService } from "@ursamu/mush";
 import { cmdParser } from "../src/services/commands/cmdParser.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 
 Deno.test({ name: "Script Engine - Hello World via Sandbox", sanitizeResources: false, sanitizeOps: false }, async () => {
   const _result = await sandboxService.runScript('u.send("Hello World")', { 

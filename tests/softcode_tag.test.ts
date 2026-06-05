@@ -9,11 +9,12 @@
  */
 // deno-lint-ignore-file require-await
 import { assertEquals } from "@std/assert";
-import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
-import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+import { runSoftcode, softcodeEngine } from "@ursamu/mush";
+import type { UrsaEvalContext } from "@ursamu/mush";
 import type { DbAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
-import { DBO, serverTags, playerTags } from "../src/services/Database/index.ts";
+import { DBO } from "@ursamu/core";
+import { serverTags, playerTags } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -191,7 +192,7 @@ Deno.test("softcode/tag — object:destroyed removes global and personal tags", 
   assertEquals(before_g?.objectId, objId);
   assertEquals(before_p?.objectId, objId);
 
-  const { gameHooks } = await import("../src/services/Hooks/GameHooks.ts");
+  const { gameHooks } = await import("@ursamu/mush");
   await import("../src/services/Hooks/index.ts");
   await gameHooks.emit("object:destroyed", {
     objectId:   objId,

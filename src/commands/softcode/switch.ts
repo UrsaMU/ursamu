@@ -1,5 +1,5 @@
-import { addCmd } from "../../services/commands/index.ts";
-import { softcodeService } from "../../services/Softcode/index.ts";
+import { addCmd } from "@ursamu/mush";
+import { runSoftcodeSimple } from "@ursamu/mush";
 import { splitSoftcodeList, splitActionCommands, switchWildcard } from "./shared.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
@@ -27,14 +27,14 @@ Examples:
     if (!valExpr || !rest) return u.send("Usage: @switch <value>=<case>,<action>[,...]");
 
     const all   = sw === "all";
-    const ctx   = { actorId: u.me.id, socketId: u.socketId };
-    const value = await softcodeService.runSoftcode(valExpr, ctx);
+    const ctx   = { actorId: u.me.id, executorId: u.me.id, socketId: u.socketId };
+    const value = await runSoftcodeSimple(valExpr, ctx);
     const parts = splitSoftcodeList(rest);
     const exec  = u.execute as unknown as (cmd: string) => Promise<void>;
 
     // Execute action string, splitting on semicolons for multi-command support.
     const execAction = async (rawAction: string) => {
-      const action = await softcodeService.runSoftcode(rawAction.trim(), ctx);
+      const action = await runSoftcodeSimple(rawAction.trim(), ctx);
       for (const cmd of splitActionCommands(action)) {
         await exec(cmd);
       }
@@ -42,7 +42,7 @@ Examples:
 
     let matched = false;
     for (let i = 0; i + 1 < parts.length; i += 2) {
-      const caseVal = await softcodeService.runSoftcode(parts[i].trim(), ctx);
+      const caseVal = await runSoftcodeSimple(parts[i].trim(), ctx);
       if (switchWildcard(value, caseVal)) {
         await execAction(parts[i + 1]);
         matched = true;

@@ -8,10 +8,11 @@
  *   - Things rendered in a separate "Objects" section
  *   - Exits with name;alias convention rendered as "[<alias>] <name>"
  */
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 import { createNativeSDK } from "../src/services/SDK/index.ts";
-import { execLook } from "../src/commands/look.ts";
-import { hydrate } from "../src/utils/evaluateLock.ts";
+import { execLook } from "@ursamu/mush";
+import { hydrate } from "@ursamu/mush";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 20000 };

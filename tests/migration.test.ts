@@ -9,8 +9,8 @@
  * infrastructure itself, not a specific command.
  */
 import { assertEquals } from "@std/assert";
-import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
-import type { SDKContext } from "../src/services/Sandbox/SDKService.ts";
+import { sandboxService } from "@ursamu/mush";
+import type { SDKContext } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

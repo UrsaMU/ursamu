@@ -15,7 +15,7 @@ interface RunResult { stdout: string; stderr: string; code: number }
 
 async function runCLI(args: string[], cwd?: string): Promise<RunResult> {
   const cmd = new Deno.Command(Deno.execPath(), {
-    args: ["run", "-A", URSAMU_TS, ...args],
+    args: ["run", "-A", "--unstable-kv", URSAMU_TS, ...args],
     cwd: cwd ?? Deno.cwd(),
     stdout: "piped",
     stderr: "piped",

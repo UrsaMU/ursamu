@@ -3,7 +3,8 @@ export * from "./@types/index.ts";
 
 // Export services
 export * from "./services/Config/mod.ts";
-export * from "./services/Database/index.ts";
+export { DBO } from "@ursamu/core";
+export { dbojs, counters, chans, texts, scenes, chanHistory, Obj, userFuncs, serverTags, playerTags, zoneMemberships } from "@ursamu/mush";
 export * from "./services/broadcast/index.ts";
 export * from "./services/commands/index.ts";
 

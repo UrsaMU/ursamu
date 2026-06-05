@@ -9,12 +9,12 @@
  */
 // deno-lint-ignore-file require-await
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
-import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+import { runSoftcode, softcodeEngine } from "@ursamu/mush";
+import type { UrsaEvalContext } from "@ursamu/mush";
 import type { DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
-import { execGet, execUse } from "../src/commands/manipulation.ts";
-import { flagsHandler, functionsHandler } from "../src/routes/objectsRouter.ts";
+import { execGet, execUse } from "@ursamu/mush";
+import { flagsHandler, functionsHandler } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -330,7 +330,7 @@ Deno.test("REST/flags — GET /api/v1/flags returns flag list", OPTS, async () =
 });
 
 Deno.test("REST/functions — GET /api/v1/functions returns sorted function list", OPTS, async () => {
-  const res = functionsHandler(new Request("http://localhost/api/v1/functions"));
+  const res = await functionsHandler(new Request("http://localhost/api/v1/functions"));
   assertEquals(res.status, 200);
   const body = await res.json() as { functions: string[] };
   assertEquals(Array.isArray(body.functions), true);

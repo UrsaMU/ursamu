@@ -155,6 +155,17 @@ async function handleClose(socketId: string): Promise<void> {
   log("info", "ws:close", { socketId });
 }
 
+/** Close an active websocket by socketId. No-op if not found. */
+export function closeSocket(socketId: string): void {
+  const meta = _sockets.get(socketId);
+  meta?.socket.close(1000, "disconnected");
+}
+
+/** Return all active socket IDs. */
+export function listSocketIds(): string[] {
+  return [..._sockets.keys()];
+}
+
 export function handleWebSocketConnection(
   socket: WebSocket,
   remoteIp = "",

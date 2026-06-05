@@ -67,10 +67,10 @@ export function stripIacBytes(chunk: Uint8Array): Uint8Array {
 }
 
 export function accumulateNaws(
-  carry: Uint8Array<ArrayBuffer>,
+  carry: Uint8Array,
   chunk: Uint8Array,
-): { naws: Uint8Array<ArrayBuffer> | null; carry: Uint8Array<ArrayBuffer> } {
-  const merged = new Uint8Array(carry.length + chunk.length) as Uint8Array<ArrayBuffer>;
+): { naws: Uint8Array | null; carry: Uint8Array } {
+  const merged = new Uint8Array(carry.length + chunk.length);
   merged.set(carry);
   merged.set(chunk, carry.length);
   for (let i = 0; i < merged.length; i++) {
@@ -136,8 +136,8 @@ async function handleTelnetConnection(conn: Deno.TcpConn): Promise<void> {
       if (n === null) break;
       const chunk = buf.subarray(0, n);
 
-      const { naws: nawsSeq, carry } = accumulateNaws(nawsCarry, chunk);
-      nawsCarry = carry;
+      const { naws: nawsSeq, carry } = accumulateNaws(nawsCarry, chunk as Uint8Array<ArrayBuffer>);
+      nawsCarry = carry as Uint8Array<ArrayBuffer>;
       if (nawsSeq !== null) {
         const parsed = parseNawsBytes(nawsSeq);
         if (parsed) {

@@ -7,11 +7,11 @@
  * directly, which is the same gate the WebSocket layer hits for every command.
  */
 import { assertEquals } from "jsr:@std/assert@^1";
-import { dbojs } from "../src/services/Database/index.ts";
-import { DBO } from "../src/services/Database/database.ts";
-import { Obj } from "../src/services/DBObjs/DBObjs.ts";
+import { dbojs } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
+import { Obj } from "@ursamu/mush";
 import { matchNativeCmd } from "../src/services/commands/pipeline-stages.ts";
-import { registerLockFunc } from "../src/utils/lockFuncs.ts";
+import { registerLockFunc } from "@ursamu/mush";
 import type { ICmd } from "../src/@types/ICmd.ts";
 import type { IContext } from "../src/@types/IContext.ts";
 import type { IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";

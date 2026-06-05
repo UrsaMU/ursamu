@@ -1,6 +1,6 @@
 import type { IDBObj } from "../@types/UrsamuSDK.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
-import { dbojs } from "../services/Database/index.ts";
+import { dbojs } from "@ursamu/mush";
 import { getAttribute } from "./getAttribute.ts";
 
 /**

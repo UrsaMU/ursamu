@@ -9,8 +9,8 @@
  */
 import { assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execGet, execDrop } from "../src/commands/manipulation.ts";
-import { execLook } from "../src/commands/look.ts";
+import { execGet, execDrop } from "@ursamu/mush";
+import { execLook } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

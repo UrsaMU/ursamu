@@ -9,7 +9,8 @@
  *   - Multiple objects each get their own STARTUP command executed
  */
 import { assertEquals } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 import { addCmd, clearCmds } from "../src/services/commands/cmdParser.ts";
 import { runStartupAttrs } from "../src/services/startup/index.ts";
 

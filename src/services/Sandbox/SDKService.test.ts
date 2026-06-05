@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { sandboxService } from "./SandboxService.ts";
+import { sandboxService } from "@ursamu/mush";
 
 Deno.test({ name: "SDK & State Interaction Tests", sanitizeOps: false, sanitizeResources: false, fn: async (t) => {
   const mockCtx = {

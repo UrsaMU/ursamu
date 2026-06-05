@@ -11,9 +11,9 @@ import {
   pointInAabb,
   rayAabb,
   vreflect,
-} from "../src/services/Softcode/stdlib/physics.ts";
-import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
-import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+} from "../packages/mush/src/softcode/stdlib/physics.ts";
+import { runSoftcode, softcodeEngine } from "@ursamu/mush";
+import type { UrsaEvalContext } from "@ursamu/mush";
 import type { DbAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
 

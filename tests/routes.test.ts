@@ -8,10 +8,11 @@
  * Note: building routes moved to UrsaMU/builder-plugin.
  */
 import { assertEquals } from "@std/assert";
-import { authHandler } from "../src/routes/authRouter.ts";
-import { dbObjHandler } from "../src/routes/dbObjRouter.ts";
+import { authHandler } from "@ursamu/mush";
+import { dbObjHandler } from "@ursamu/mush";
 import { txtFiles } from "../src/services/commands/cmdParser.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 import { hash, genSalt } from "../deps.ts";
 import { sign } from "../src/services/jwt/index.ts";
 

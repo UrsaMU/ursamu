@@ -12,7 +12,7 @@
 import { join } from "jsr:@std/path@^0.224.0";
 import { checkAndCreateSuperuser } from "../main.ts";
 import { initConfig } from "../services/Config/mod.ts";
-import { DBO } from "../services/Database/database.ts";
+import { DBO } from "@ursamu/core";
 
 /**
  * Orchestrator script to start UrsaMU

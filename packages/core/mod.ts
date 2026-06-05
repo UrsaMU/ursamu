@@ -9,8 +9,8 @@
 
 // Server / transports
 export { createServer }                    from "./src/server/index.ts";
-export { websocketTransport }              from "./src/server/websocket.ts";
-export { telnetTransport }                 from "./src/server/telnet.ts";
+export { websocketTransport, closeSocket, listSocketIds, isRateLimitedForAuth, clampTermWidth, handleWebSocketConnection } from "./src/server/websocket.ts";
+export { telnetTransport, parseNawsBytes, stripIacBytes, accumulateNaws, IAC, WILL, DO, DONT, WONT, SB, SE, NAWS_OPTION } from "./src/server/telnet.ts";
 export { httpTransport, registerRoute, registerFallback } from "./src/server/http.ts";
 export type { ICoreServer, ITransport }    from "./src/server/types.ts";
 
@@ -38,7 +38,7 @@ export { createToken, verifyToken }        from "./src/session/jwt.ts";
 export type { ISession }                   from "./src/session/types.ts";
 
 // Broadcast
-export { send, broadcastAll, notify }      from "./src/broadcast/send.ts";
+export { send, broadcastAll, notify, registerSender, trackSocket, untrackSocket, trackedSockets } from "./src/broadcast/send.ts";
 export { rooms }                           from "./src/broadcast/rooms.ts";
 
 // Queue

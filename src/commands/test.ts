@@ -1,12 +1,13 @@
 // deno-lint-ignore-file no-explicit-any require-await
-import { addCmd } from "../services/commands/index.ts";
-import { dbojs, chans, DBO } from "../services/Database/index.ts";
+import { addCmd } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
+import { dbojs, chans } from "@ursamu/mush";
 // mail-plugin owns "mail.messages" — access via DBO directly to avoid plugin import coupling
 const mail = new DBO<{ id: string; from: string; to: string[]; subject: string; message: string; date: number; read: boolean }>("mail.messages");
 import { send } from "../services/broadcast/index.ts";
 import { setFlags } from "../utils/setFlags.ts";
-import { evaluateLock, hydrate } from "../utils/evaluateLock.ts";
-import { Obj } from "../services/DBObjs/DBObjs.ts";
+import { evaluateLock, hydrate } from "@ursamu/mush";
+import { Obj } from "@ursamu/mush";
 import type { IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 
 addCmd({

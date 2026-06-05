@@ -1,11 +1,11 @@
 import type { IContext } from "../../@types/IContext.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import { moniker } from "../../utils/moniker.ts";
-import { dbojs } from "../Database/index.ts";
+import { dbojs } from "@ursamu/mush";
 import { send } from "../broadcast/index.ts";
 import { flags } from "@ursamu/mush";
 import { force } from "./force.ts";
-import { gameHooks } from "../Hooks/GameHooks.ts";
+import { gameHooks } from "@ursamu/mush";
 import { wsService } from "../WebSocket/index.ts";
 import { isSoftcode } from "../../utils/isSoftcode.ts";
 
@@ -75,7 +75,7 @@ export const matchExits = async (ctx: IContext) => {
           if (currentRoom) {
             const leaveLock = (currentRoom.data?.locks as Record<string, string>)?.leave;
             if (leaveLock) {
-              const { evaluateLock, hydrate } = await import("../../utils/evaluateLock.ts");
+              const { evaluateLock, hydrate } = await import("@ursamu/mush");
               const allowed = await evaluateLock(leaveLock, hydrate(en), hydrate(currentRoom));
               if (!allowed) {
                 fireRawFail(ctx.socket.id, en, currentRoom, players,
@@ -89,7 +89,7 @@ export const matchExits = async (ctx: IContext) => {
           // Check enter lock on destination room
           const enterLock = (dest.data?.locks as Record<string, string>)?.enter;
           if (enterLock) {
-            const { evaluateLock, hydrate } = await import("../../utils/evaluateLock.ts");
+            const { evaluateLock, hydrate } = await import("@ursamu/mush");
             const allowed = await evaluateLock(enterLock, hydrate(en), hydrate(dest));
             if (!allowed) {
               fireRawFail(ctx.socket.id, en, dest, players,

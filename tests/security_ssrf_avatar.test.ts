@@ -13,7 +13,7 @@
  * GREEN: export + guard added — test passes.
  */
 import { assertEquals } from "@std/assert";
-import { isPrivateHost } from "../src/commands/avatar.ts";
+import { isPrivateHost } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

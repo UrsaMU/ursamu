@@ -1,5 +1,5 @@
-import { addCmd } from "../../services/commands/index.ts";
-import { softcodeService } from "../../services/Softcode/index.ts";
+import { addCmd } from "@ursamu/mush";
+import { runSoftcodeSimple } from "@ursamu/mush";
 import { BreakSignal } from "./shared.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
@@ -34,8 +34,8 @@ Examples:
     const rest     = (u.cmd.args[1] ?? "").trim();
     if (!condExpr || !rest) return u.send("Usage: @if <condition>=<action>[/<else>]");
 
-    const ctx     = { actorId: u.me.id, socketId: u.socketId };
-    const condVal = await softcodeService.runSoftcode(condExpr, ctx);
+    const ctx     = { actorId: u.me.id, executorId: u.me.id, socketId: u.socketId };
+    const condVal = await runSoftcodeSimple(condExpr, ctx);
     const truthy  = condVal !== "" && condVal !== "0" && condVal !== "#-1";
 
     const slashIdx    = rest.indexOf("/");
@@ -44,10 +44,10 @@ Examples:
 
     const exec = u.execute as unknown as (cmd: string) => Promise<void>;
     if (truthy) {
-      const cmd = await softcodeService.runSoftcode(trueBranch.trim(), ctx);
+      const cmd = await runSoftcodeSimple(trueBranch.trim(), ctx);
       if (cmd.trim()) await exec(cmd);
     } else if (falseBranch.trim()) {
-      const cmd = await softcodeService.runSoftcode(falseBranch.trim(), ctx);
+      const cmd = await runSoftcodeSimple(falseBranch.trim(), ctx);
       if (cmd.trim()) await exec(cmd);
     }
   },
@@ -80,15 +80,15 @@ A safety cap of 1000 iterations is applied by default. Raise up to
       if (!isNaN(n) && n > 0) cap = Math.min(n, MAX_CAP);
     }
 
-    const ctx  = { actorId: u.me.id, socketId: u.socketId };
+    const ctx  = { actorId: u.me.id, executorId: u.me.id, socketId: u.socketId };
     const exec = u.execute as unknown as (cmd: string) => Promise<void>;
     let iters  = 0;
 
     try {
       while (iters < cap) {
-        const condVal = await softcodeService.runSoftcode(condExpr, ctx);
+        const condVal = await runSoftcodeSimple(condExpr, ctx);
         if (condVal === "" || condVal === "0" || condVal === "#-1") break;
-        const cmd = await softcodeService.runSoftcode(action, ctx);
+        const cmd = await runSoftcodeSimple(action, ctx);
         if (cmd.trim()) await exec(cmd);
         iters++;
       }

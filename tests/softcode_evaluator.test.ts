@@ -8,9 +8,9 @@
  * These tests run entirely in-process via runSoftcode() — no Deno Worker is spawned.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
-import { isTooDeep, isTimedOut } from "../src/services/Softcode/ursamu-context.ts";
-import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+import { runSoftcode, softcodeEngine } from "@ursamu/mush";
+import { isTooDeep, isTimedOut } from "@ursamu/mush";
+import type { UrsaEvalContext } from "@ursamu/mush";
 import type { DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
 

@@ -1,4 +1,4 @@
-import { dbojs } from "../services/Database/index.ts";
+import { dbojs } from "@ursamu/mush";
 import { escapeRegex } from "./escapeRegex.ts";
 
 /** Returns the matching object if the name or alias is already taken, otherwise falsy. */

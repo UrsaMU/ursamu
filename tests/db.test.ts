@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
 import type { IDBOBJ } from "../src/@types/IDBObj.ts";
 
 // Mock Deno.KV

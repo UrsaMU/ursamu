@@ -10,9 +10,9 @@
  */
 import { assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execConnect } from "../src/commands/auth.ts";
-import { execFlags } from "../src/commands/world.ts";
-import { execChannel } from "../src/commands/channels.ts";
+import { execConnect } from "@ursamu/mush";
+import { execFlags } from "@ursamu/mush";
+import { execChannel } from "@ursamu/channels";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

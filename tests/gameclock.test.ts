@@ -4,8 +4,8 @@
  * Tests for the persistent in-game clock (GameClock service).
  */
 import { assertEquals, assertMatch, assertGreater } from "@std/assert";
-import { DBO } from "../src/services/Database/database.ts";
-import { gameClock } from "../src/services/GameClock/index.ts";
+import { DBO } from "@ursamu/core";
+import { gameClock } from "@ursamu/mush";
 import { setConfig } from "../src/services/Config/mod.ts";
 
 // ---------------------------------------------------------------------------

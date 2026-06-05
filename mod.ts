@@ -23,4 +23,4 @@ export * from "@ursamu/mush";
 // continue to work without changes.
 export { mu, initializeEngine, checkAndCreateSuperuser } from "./src/main.ts";
 export { startTelnetServer } from "./src/services/telnet/mod.ts";
-export { createObj } from "./src/services/DBObjs/DBObjs.ts";
+export { createObj } from "@ursamu/mush";

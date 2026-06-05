@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import type { IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execLook } from "../src/commands/look.ts";
+import { execLook } from "@ursamu/mush";
 
 Deno.test({
   name: "Look Command - Refined Dbref Display Format",

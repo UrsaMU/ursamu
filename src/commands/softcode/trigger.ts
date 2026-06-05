@@ -1,6 +1,6 @@
-import { addCmd } from "../../services/commands/index.ts";
+import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
-import { dbojs } from "../../services/Database/index.ts";
+import { dbojs } from "@ursamu/mush";
 import { hooks } from "../../services/Hooks/index.ts";
 import { splitArgs } from "../../utils/splitArgs.ts";
 import { send } from "../../services/broadcast/index.ts";
@@ -59,7 +59,7 @@ Examples:
 
     const useLock = (tar.data?.locks as Record<string, string>)?.use;
     if (useLock) {
-      const { evaluateLock, hydrate } = await import("../../utils/evaluateLock.ts");
+      const { evaluateLock, hydrate } = await import("@ursamu/mush");
       const allowed = await evaluateLock(
         useLock,
         hydrate(en as unknown as IDBOBJ),

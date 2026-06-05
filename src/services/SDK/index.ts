@@ -1,8 +1,9 @@
 import type { IUrsamuSDK, IDBObj } from "../../@types/UrsamuSDK.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
-import { dbojs, chans, chanHistory, texts } from "../Database/index.ts";
+import { dbojs, chans, chanHistory, texts, hydrate } from "@ursamu/mush";
+import { setConfig } from "@ursamu/core";
 import { wsService } from "../WebSocket/index.ts";
-import { hydrate, evaluateLock } from "../../utils/evaluateLock.ts";
+import { evaluateLock } from "@ursamu/mush";
 import { canEdit as canEditFn } from "../../utils/canEdit.ts";
 import { target as targetFn } from "../../utils/target.ts";
 import { displayName as displayNameFn } from "../../utils/displayName.ts";
@@ -10,8 +11,7 @@ import { setFlags as setFlagsFn } from "../../utils/setFlags.ts";
 import { getAttribute } from "../../utils/getAttribute.ts";
 import { getNextId } from "../../utils/getNextId.ts";
 import { center, ljust, rjust, header, divider, footer } from "../../utils/format.ts";
-import parser from "../parser/parser.ts";
-import { setConfig } from "../Config/mod.ts";
+import { parser } from "@ursamu/mush";
 import { hash, compare } from "../../../deps.ts";
 import { escapeRegex } from "../../utils/escapeRegex.ts";
 import { sandboxService } from "@ursamu/mush";
@@ -90,7 +90,7 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
       },
       // u is captured by closure — plugin handlers see the same SDK instance.
       resolveFormat: async (target: IDBObj, slot: string, defaultArg: string): Promise<string | null> => {
-        const { resolveFormat } = await import("../../utils/resolveFormat.ts");
+        const { resolveFormat } = await import("@ursamu/mush");
         return await resolveFormat(u, target, slot, defaultArg);
       },
       resolveFormatOr: async (target: IDBObj, slot: string, defaultArg: string, fallback: string): Promise<string> => {
@@ -98,11 +98,11 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
         return await resolveFormatOr(u, target, slot, defaultArg, fallback);
       },
       resolveGlobalFormat: async (slot: string, defaultArg: string): Promise<string | null> => {
-        const { resolveGlobalFormat } = await import("../../utils/resolveGlobalFormat.ts");
+        const { resolveGlobalFormat } = await import("@ursamu/mush");
         return await resolveGlobalFormat(u, slot, defaultArg);
       },
       resolveGlobalFormatOr: async (slot: string, defaultArg: string, fallback: string): Promise<string> => {
-        const { resolveGlobalFormatOr } = await import("../../utils/resolveGlobalFormat.ts");
+        const { resolveGlobalFormatOr } = await import("@ursamu/mush");
         return await resolveGlobalFormatOr(u, slot, defaultArg, fallback);
       },
     },
@@ -136,7 +136,7 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
         });
         const created = await dbojs.queryOne({ id });
         if (template.location) {
-          const { gameHooks } = await import("../Hooks/GameHooks.ts");
+          const { gameHooks } = await import("@ursamu/mush");
           await gameHooks.emit("object:moved", {
             objectId: id,
             from: null,
@@ -153,7 +153,7 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
         const prev = await dbojs.queryOne({ id });
         const prevLocation = prev ? (prev.location ?? null) : null;
         await dbojs.delete({ id });
-        const { gameHooks } = await import("../Hooks/GameHooks.ts");
+        const { gameHooks } = await import("@ursamu/mush");
         await gameHooks.emit("object:moved", {
           objectId: id,
           from: prevLocation,

@@ -1,8 +1,8 @@
-import { addCmd } from "../../services/commands/index.ts";
-import { dbojs } from "../../services/Database/index.ts";
+import { addCmd } from "@ursamu/mush";
+import { dbojs } from "@ursamu/mush";
 import { isStaff } from "../../utils/index.ts";
 import { target } from "../../utils/target.ts";
-import { queue } from "../../services/Queue/index.ts";
+import { queue } from "@ursamu/core";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 

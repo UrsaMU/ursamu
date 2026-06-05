@@ -12,8 +12,8 @@
  */
 // deno-lint-ignore-file require-await
 import { assertEquals } from "@std/assert";
-import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
-import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+import { runSoftcode, softcodeEngine } from "@ursamu/mush";
+import type { UrsaEvalContext } from "@ursamu/mush";
 import type { DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
 
@@ -214,19 +214,19 @@ Deno.test("compat/string — regeditalli case-insensitive all", async () =>
 Deno.test("compat/string — regeditlit literal replacement no capture group sub", async () => {
   // Without 'lit': regeditall(hello,(l+),$1) → replaces 'll' with captured group 'l'
   // With 'lit':    $1 is treated as a literal string, not a capture group reference
-  const fn = (await import("../src/services/Softcode/stdlib/index.ts")).lookup("regeditlit")!;
+  const fn = (await import("../packages/mush/src/softcode/stdlib/index.ts")).lookup("regeditlit")!;
   // (l+) matches 'll' (positions 2-3) → replaced by literal "$1-$1"
   assertEquals(await fn(["hello", "(l+)", "$1-$1"], {} as never, []), "he$1-$1o");
 });
 Deno.test("compat/string — regeditalllit replaces all, literal replacement", async () => {
   // regeditall(hello,l,$0) without lit → $0 is not a valid JS capture ref (literal)
   // regeditalllit(hello,l,$0) → replaces each 'l' with literal "$0"
-  const fn = (await import("../src/services/Softcode/stdlib/index.ts")).lookup("regeditalllit")!;
+  const fn = (await import("../packages/mush/src/softcode/stdlib/index.ts")).lookup("regeditalllit")!;
   assertEquals(await fn(["hello", "l", "$0"], {} as never, []), "he$0$0o");
 });
 Deno.test("compat/string — regedit bad regex returns original string unchanged", async () => {
   // Use lookup() directly to avoid MUSH parser interpreting the test string
-  const fn = (await import("../src/services/Softcode/stdlib/index.ts")).lookup("regedit")!;
+  const fn = (await import("../packages/mush/src/softcode/stdlib/index.ts")).lookup("regedit")!;
   assertEquals(await fn(["safe input", "[invalid", "x"], {} as never, []), "safe input");
 });
 
@@ -263,7 +263,7 @@ Deno.test("compat/string — regrepi case-insensitive", async () =>
   assertEquals(await run("[regrepi(Foo BAR baz,^ba)]"), "BAR baz")
 );
 Deno.test("compat/string — regrep invalid regex returns empty", async () => {
-  const fn = (await import("../src/services/Softcode/stdlib/index.ts")).lookup("regrep")!;
+  const fn = (await import("../packages/mush/src/softcode/stdlib/index.ts")).lookup("regrep")!;
   assertEquals(await fn(["a b c", "[bad"], {} as never, []), "");
 });
 
@@ -616,11 +616,11 @@ Deno.test("compat/object — wipe() returns 1 and emits @wipe sentinel", async (
 
 Deno.test("compat/security — regedit invalid regex returns original string unchanged", async () => {
   // Use lookup() to avoid MUSH parser treating '[' as function-call opener
-  const fn = (await import("../src/services/Softcode/stdlib/index.ts")).lookup("regedit")!;
+  const fn = (await import("../packages/mush/src/softcode/stdlib/index.ts")).lookup("regedit")!;
   assertEquals(await fn(["safe input", "[invalid", "x"], {} as never, []), "safe input");
 });
 Deno.test("compat/security — reswitch bad regex pattern is skipped safely", async () => {
-  const fn = (await import("../src/services/Softcode/stdlib/index.ts")).lookup("reswitch")!;
+  const fn = (await import("../packages/mush/src/softcode/stdlib/index.ts")).lookup("reswitch")!;
   assertEquals(await fn(["foo", "[bad", "oops", "default"], {} as never, []), "default");
 });
 Deno.test("compat/security — printf missing args uses empty string", async () => {

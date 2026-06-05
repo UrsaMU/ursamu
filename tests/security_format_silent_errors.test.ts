@@ -10,13 +10,14 @@
  * diagnose. Default behavior remains the same (don't crash the caller).
  */
 import { assertEquals } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 import {
   registerFormatHandler,
   _clearFormatHandlers,
-  runPluginFormatHandlers,
-} from "../src/utils/formatHandlers.ts";
-import { resolveFormat } from "../src/utils/resolveFormat.ts";
+  resolveFormat,
+} from "@ursamu/mush";
+import { runPluginFormatHandlers } from "../src/utils/formatHandlers.ts";
 import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 15000 };

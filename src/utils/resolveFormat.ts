@@ -1,12 +1,6 @@
 /**
- * Bridge: re-exports resolve-format utilities from @ursamu/mush.
+ * Local resolve-format helpers — bridge re-exports removed; callers use @ursamu/mush directly.
  */
-export {
-  resolveFormat,
-  resolveGlobalFormat,
-} from "@ursamu/mush";
-export type { FormatSlot } from "@ursamu/mush";
-
 import type { IDBObj, IUrsamuSDK } from "../@types/UrsamuSDK.ts";
 import { resolveFormat as _resolveFormat } from "@ursamu/mush";
 import type { FormatSlot } from "@ursamu/mush";

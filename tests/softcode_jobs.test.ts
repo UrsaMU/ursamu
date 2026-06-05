@@ -3,8 +3,8 @@
  * itext, inum, elist, align, hasattrval
  */
 import { assertEquals } from "@std/assert";
-import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
-import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
+import { runSoftcode, softcodeEngine } from "@ursamu/mush";
+import type { UrsaEvalContext } from "@ursamu/mush";
 
 const ACTOR = {
   id: "1", name: "Alice",

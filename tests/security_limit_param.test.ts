@@ -15,7 +15,7 @@
 
 import { describe, it, beforeEach, afterEach } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
-import { chanHistory, dbojs } from "../src/services/Database/index.ts";
+import { chanHistory, dbojs } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

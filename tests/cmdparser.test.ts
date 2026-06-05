@@ -13,7 +13,8 @@ import {
 } from "../src/services/commands/cmdParser.ts";
 import { matchExits } from "../src/services/commands/movement.ts";
 import { matchChannel } from "../src/services/commands/channels.ts";
-import { dbojs, chans, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs, chans } from "@ursamu/mush";
 import type { IContext } from "../src/@types/IContext.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

@@ -15,9 +15,9 @@
  */
 import { assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execThink, execSay, execPose } from "../src/commands/comms.ts";
-import { execWho, execScore } from "../src/commands/social.ts";
-import { execChannel, execChancreate, execChandestroy, execChanset } from "../src/commands/channels.ts";
+import { execThink, execSay, execPose } from "@ursamu/mush";
+import { execWho, execScore } from "@ursamu/mush";
+import { execChannel, execChancreate, execChandestroy, execChanset } from "@ursamu/channels";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

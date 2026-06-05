@@ -11,8 +11,8 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execMoniker } from "../src/commands/moniker.ts";
-import { execAlias } from "../src/commands/alias.ts";
+import { execMoniker } from "@ursamu/mush";
+import { execAlias } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

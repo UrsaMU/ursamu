@@ -1,9 +1,9 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 import { createNativeSDK } from "../src/services/SDK/index.ts";
-import { execLook, defaultConformatHandler } from "../src/commands/look.ts";
-import { _clearFormatHandlers, registerFormatHandler } from "../src/utils/formatHandlers.ts";
-import { hydrate } from "../src/utils/evaluateLock.ts";
+import { execLook, defaultConformatHandler } from "@ursamu/mush";
+import { _clearFormatHandlers, registerFormatHandler, hydrate } from "@ursamu/mush";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

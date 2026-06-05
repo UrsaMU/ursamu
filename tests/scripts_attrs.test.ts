@@ -9,7 +9,7 @@
  */
 import { assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execInventory } from "../src/commands/home.ts";
+import { execInventory } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

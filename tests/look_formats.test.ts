@@ -7,14 +7,14 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
-import { execLook } from "../src/commands/look.ts";
+import { execLook } from "@ursamu/mush";
 import {
   registerFormatHandler,
   unregisterFormatHandler,
   _clearFormatHandlers,
   type FormatSlot,
   type FormatHandler,
-} from "../src/utils/formatHandlers.ts";
+} from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

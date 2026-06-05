@@ -11,7 +11,8 @@
 import { assertEquals } from "@std/assert";
 import { target } from "../src/utils/target.ts";
 import { getAttribute } from "../src/utils/getAttribute.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 import type { IDBOBJ } from "../src/@types/IDBObj.ts";
 
 // ---------------------------------------------------------------------------

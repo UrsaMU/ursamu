@@ -1,18 +1,15 @@
-import { dbojs } from "../Database/index.ts";
+import { dbojs, sandboxService, fireCaretPatterns, gameHooks, SDKService, Obj } from "@ursamu/mush";
+import { getConfig } from "@ursamu/core";
 import { getAttribute } from "../../utils/getAttribute.ts";
-import { sandboxService } from "@ursamu/mush";
-import { getConfig } from "../Config/mod.ts";
 import type { IDBOBJ } from "../../@types/IDBObj.ts";
-import { gameHooks } from "./GameHooks.ts";
-import type { ObjectDestroyedEvent, SayEvent, PoseEvent } from "./GameHooks.ts";
+import type { ObjectDestroyedEvent, SayEvent, PoseEvent } from "@ursamu/mush";
 import { isSoftcode } from "../../utils/isSoftcode.ts";
-import { fireCaretPatterns } from "../../utils/caretPatterns.ts";
 
 // ── Tag cleanup on object destroy ─────────────────────────────────────────
 
 const _onObjectDestroyed = async (e: ObjectDestroyedEvent) => {
   try {
-    const { serverTags, playerTags } = await import("../Database/index.ts");
+    const { serverTags, playerTags } = await import("@ursamu/mush");
     const globalTags = await serverTags.find({ objectId: e.objectId });
     for (const t of globalTags) await serverTags.delete({ id: t.id });
 
@@ -74,8 +71,8 @@ export const hooks = {
     const actor = enactor || obj;
 
     if (isSoftcode(attr)) {
-      const { softcodeService } = await import("../Softcode/index.ts");
-      await softcodeService.runSoftcode(attr.value, {
+      const { runSoftcodeSimple } = await import("@ursamu/mush");
+      await runSoftcodeSimple(attr.value, {
         actorId:    actor.id,
         executorId: obj.id,
         args,
@@ -84,8 +81,7 @@ export const hooks = {
       return;
     }
 
-    const { SDKService } = await import("../Sandbox/SDKService.ts");
-    const { Obj } = await import("../DBObjs/DBObjs.ts");
+    // SDKService and Obj are already imported at the top level
 
     const meObj   = await Obj.get(actor.id);
     const hereObj = actor.location ? await Obj.get(actor.location) : null;

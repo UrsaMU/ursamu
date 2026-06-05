@@ -5,7 +5,8 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { parseDesc } from "../src/utils/parseDesc.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

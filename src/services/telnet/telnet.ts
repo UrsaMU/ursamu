@@ -1,48 +1,21 @@
 import { dpath } from "../../../deps.ts";
 import { getConfig, initConfig } from "../Config/mod.ts";
-import parser from "../parser/parser.ts";
+import { parser } from "@ursamu/mush";
+import {
+  IAC, WILL, DO, DONT, WONT, NAWS_OPTION,
+  parseNawsBytes, stripIacBytes, accumulateNaws,
+} from "@ursamu/core";
 
-// Telnet protocol constants (RFC 854 / RFC 1073)
-const IAC = 255;
-const WILL = 251;
-const DO = 253;
-const DONT = 254;
-const SB = 250;
-const SE = 240;
-const WONT = 252;
-const NAWS_OPTION = 31;
-const MXP_OPTION  = 91; // MUD eXtension Protocol (option 91)
+const MXP_OPTION = 91; // MUD eXtension Protocol (option 91)
 
 // Suppress unused-variable warnings — kept for readability/completeness
 const _WILL = WILL;
 const _DONT = DONT;
 const _WONT = WONT;
 
-/**
- * Parse a NAWS subnegotiation byte sequence.
- *
- * Expects the full IAC SB 31 ... IAC SE sequence.
- * Returns { width, height } or null if the sequence is malformed or out of range.
- */
-export function parseNawsBytes(bytes: Uint8Array): { width: number; height: number } | null {
-  // Minimum valid sequence: IAC SB NAWS_OPTION w-hi w-lo h-hi h-lo IAC SE = 9 bytes
-  if (bytes.length < 9) return null;
-  if (bytes[0] !== IAC || bytes[1] !== SB || bytes[2] !== NAWS_OPTION) return null;
-  if (bytes[bytes.length - 2] !== IAC || bytes[bytes.length - 1] !== SE) return null;
-
-  const widthHi = bytes[3];
-  const widthLo = bytes[4];
-  const heightHi = bytes[5];
-  const heightLo = bytes[6];
-
-  const width = (widthHi << 8) | widthLo;
-  const height = (heightHi << 8) | heightLo;
-
-  if (width < 40 || width > 250) return null;
-  if (height < 1 || height > 255) return null;
-
-  return { width, height };
-}
+// parseNawsBytes, stripIacBytes, accumulateNaws are imported from @ursamu/core above.
+// Re-export them so callers of this file get them without a separate import.
+export { parseNawsBytes, stripIacBytes, accumulateNaws } from "@ursamu/core";
 
 interface ITelnetSocket {
   cid?: string;
@@ -160,64 +133,6 @@ A modern MUSH-like engine written in TypeScript.
 
 /** Maximum number of commands buffered during a WS reconnect (prevents heap exhaustion). */
 export const MAX_MSG_BUFFER_SIZE = 200;
-
-/**
- * Accumulate bytes across TCP reads to detect NAWS sequences that span chunk boundaries.
- *
- * @param carry - leftover bytes from the previous read (may be empty)
- * @param chunk - the new bytes just read
- * @returns { naws: complete NAWS sequence bytes | null, carry: bytes to carry into next call }
- */
-export function accumulateNaws(
-  carry: Uint8Array,
-  chunk: Uint8Array,
-): { naws: Uint8Array | null; carry: Uint8Array } {
-  const merged = new Uint8Array(carry.length + chunk.length);
-  merged.set(carry);
-  merged.set(chunk, carry.length);
-
-  for (let i = 0; i < merged.length; i++) {
-    if (merged[i] === 255 && merged[i + 1] === 250 && merged[i + 2] === 31) {
-      // Found IAC SB NAWS — look for the closing IAC SE
-      for (let j = i + 3; j < merged.length - 1; j++) {
-        if (merged[j] === 255 && merged[j + 1] === 240) {
-          return { naws: merged.subarray(i, j + 2), carry: new Uint8Array(0) };
-        }
-      }
-      // Closing IAC SE not yet arrived — carry the partial sequence forward
-      return { naws: null, carry: merged.subarray(i) };
-    }
-  }
-  return { naws: null, carry: new Uint8Array(0) };
-}
-
-/**
- * Strip all Telnet IAC (Interpret As Command) sequences from a byte chunk.
- * Handles: IAC IAC (escaped 0xFF → 0xFF), IAC WILL/WONT/DO/DONT <opt> (3-byte),
- * IAC SB ... IAC SE (subnegotiation), and single-byte commands like IAC NOP/GA.
- * Anything else after a lone IAC is dropped along with the following byte.
- */
-export function stripIacBytes(chunk: Uint8Array): Uint8Array {
-  const out = new Uint8Array(chunk.length);
-  let w = 0;
-  for (let i = 0; i < chunk.length; i++) {
-    const b = chunk[i];
-    if (b !== IAC) { out[w++] = b; continue; }
-    const next = chunk[i + 1];
-    if (next === undefined) break; // trailing lone IAC — drop
-    if (next === IAC) { out[w++] = IAC; i += 1; continue; } // escaped 0xFF
-    if (next === SB) {
-      // Skip until IAC SE (handles double-IAC inside payload safely enough).
-      let j = i + 2;
-      while (j < chunk.length - 1 && !(chunk[j] === IAC && chunk[j + 1] === SE)) j++;
-      i = j + 1; // skip past SE (or jump to end if not found in this chunk)
-      continue;
-    }
-    if (next >= 0xFB && next <= 0xFE) { i += 2; continue; } // WILL/WONT/DO/DONT <opt>
-    i += 1; // any other 2-byte IAC sequence
-  }
-  return out.subarray(0, w);
-}
 
 async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: string) {
   let sock: WebSocket | null = null;
@@ -341,7 +256,7 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
 
   // Read from Telnet
   const buffer = new Uint8Array(16384);
-  let nawsCarry: Uint8Array = new Uint8Array(0); // carry-over for NAWS sequences that span chunk boundaries
+  let nawsCarry: Uint8Array<ArrayBuffer> = new Uint8Array(0); // carry-over for NAWS sequences that span chunk boundaries
   try {
     while (true) {
       const n = await conn.read(buffer);
@@ -350,8 +265,8 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
       const chunk = buffer.subarray(0, n);
 
       // --- NAWS subnegotiation detection (handles split TCP frames) ---
-      const { naws: nawsSeq, carry } = accumulateNaws(nawsCarry, chunk);
-      nawsCarry = carry;
+      const { naws: nawsSeq, carry } = accumulateNaws(nawsCarry, chunk as Uint8Array<ArrayBuffer>);
+      nawsCarry = carry as Uint8Array<ArrayBuffer>;
       if (nawsSeq !== null) {
         const parsed = parseNawsBytes(nawsSeq);
         if (parsed && cid) {

@@ -3038,6 +3038,25 @@
       "npm:quickjs-emscripten@0.29.0"
     ],
     "members": {
+      "packages/builder": {
+        "dependencies": [
+          "jsr:@std/assert@0.224"
+        ]
+      },
+      "packages/channels": {
+        "dependencies": [
+          "jsr:@std/assert@0.224"
+        ]
+      },
+      "packages/cli": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/flags@0.224",
+          "jsr:@std/fmt@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224"
+        ]
+      },
       "packages/core": {
         "dependencies": [
           "jsr:@std/assert@0.224",
@@ -3050,11 +3069,14 @@
       "packages/mush": {
         "dependencies": [
           "jsr:@std/assert@0.224",
+          "jsr:@std/fs@0.224",
           "jsr:@std/path@0.224",
           "jsr:@ursamu/mushcode@0.6",
           "jsr:@zaubrik/djwt@^3.0.2",
           "npm:@digibear/tags@1.0.0",
-          "npm:bcryptjs@2.4.3"
+          "npm:@ursamu/parser@1.2.4",
+          "npm:bcryptjs@2.4.3",
+          "npm:quickjs-emscripten@0.29.0"
         ]
       }
     }
