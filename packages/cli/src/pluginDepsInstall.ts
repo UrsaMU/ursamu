@@ -1,19 +1,18 @@
 /**
- * @module utils/pluginDepsInstall
+ * @module cli/pluginDepsInstall
  *
- * Clone-and-install half of the dep resolver. Split from pluginDeps.ts to
- * keep both files under the 200-line cap.
+ * Clone-and-install half of the dep resolver.
  */
 
-import { dpath } from "../../deps.ts";
-import { exists } from "jsr:@std/fs@^0.224.0";
+import { join } from "@std/path";
+import { exists } from "@std/fs";
 
 import {
   buildCloneSteps,
   PluginCloneError,
   PluginRenameError,
   type PluginDep,
-} from "./pluginSecurity.ts";
+} from "./plugin-security.ts";
 
 export interface CloneAndMoveCtx {
   runStep: (args: string[], env: Record<string, string>) => Promise<{ success: boolean; stderr: string }>;
@@ -28,7 +27,7 @@ export async function cloneAndMove(
   depDir:        string,
 ): Promise<void> {
   const tempBase = await Deno.makeTempDir({ prefix: "ursamu-plugin-" });
-  const tempDir  = dpath.join(tempBase, "plugin");
+  const tempDir  = join(tempBase, "plugin");
   try {
     await runCloneSteps(ctx, dep, requesterName, tempDir);
     await stripDotGit(tempDir);
@@ -55,7 +54,7 @@ async function runCloneSteps(
 }
 
 async function stripDotGit(tempDir: string): Promise<void> {
-  const gitDir = dpath.join(tempDir, ".git");
+  const gitDir = join(tempDir, ".git");
   if (await exists(gitDir)) await Deno.remove(gitDir, { recursive: true });
 }
 

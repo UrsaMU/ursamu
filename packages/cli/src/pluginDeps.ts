@@ -1,19 +1,16 @@
 /**
- * @module utils/pluginDeps
+ * @module cli/pluginDeps
  *
  * Fail-fast, semver-aware, conflict-detecting, transactional plugin dependency
- * resolver. Reads `ursamu.plugin.json` from installed plugins and recursively
- * clones any missing deps. Every failure throws a typed PluginInstallError —
- * the caller wraps in an InstallTxn and calls rollback() on throw.
+ * resolver.
  */
 
-import { dpath } from "../../deps.ts";
-import { exists } from "jsr:@std/fs@^0.224.0";
+import { join } from "@std/path";
+import { exists } from "@std/fs";
 
 import {
   type PluginDep,
   type PluginManifest,
-  type Registry,
   PluginConflictError,
   PluginDepNameError,
   PluginDepUrlError,
@@ -22,7 +19,8 @@ import {
   isSafePluginName,
   isSafePluginUrl,
   runGitStep,
-} from "./pluginSecurity.ts";
+} from "./plugin-security.ts";
+import type { Registry } from "./types.ts";
 import { checkSatisfies } from "./pluginSemver.ts";
 import type { InstallTxn } from "./pluginTxn.ts";
 import { cloneAndMove } from "./pluginDepsInstall.ts";
@@ -39,7 +37,7 @@ export interface ResolveDepsCtx {
 
 export async function readPluginMeta(dir: string): Promise<PluginManifest> {
   try {
-    const raw = await Deno.readTextFile(dpath.join(dir, "ursamu.plugin.json"));
+    const raw = await Deno.readTextFile(join(dir, "ursamu.plugin.json"));
     return JSON.parse(raw) as PluginManifest;
   } catch {
     return {};
@@ -91,7 +89,7 @@ async function processDep(
   if (ctx.resolving.has(dep.name)) return;
   ctx.resolving.add(dep.name);
 
-  const depDir = dpath.join(ctx.pluginsDir, dep.name);
+  const depDir = join(ctx.pluginsDir, dep.name);
   if (await exists(depDir)) {
     const version = await readPluginVersion(depDir);
     verifyDepRanges(dep.name, version, reqList);

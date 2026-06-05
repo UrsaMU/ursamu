@@ -5,17 +5,17 @@
 import { assertEquals, assertRejects, assertStringIncludes, assert } from "@std/assert";
 import { join } from "@std/path";
 
-import { resolveDeps, type ResolveDepsCtx } from "../src/utils/pluginDeps.ts";
-import { InstallTxn } from "../src/utils/pluginTxn.ts";
+import { resolveDeps, type ResolveDepsCtx } from "@ursamu/cli";
+import { InstallTxn } from "@ursamu/cli";
 import {
   PluginCloneError,
   PluginConflictError,
   PluginDepNameError,
   PluginDepUrlError,
   PluginSemverError,
-} from "../src/utils/pluginErrors.ts";
-import type { Registry } from "../src/cli/types.ts";
-import type { PluginDep, PluginManifest } from "../src/utils/pluginSecurity.ts";
+} from "@ursamu/cli";
+import type { Registry } from "@ursamu/cli";
+import type { PluginDep, PluginManifest } from "@ursamu/cli";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

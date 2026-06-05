@@ -23,7 +23,7 @@ import { parse } from "jsr:@std/flags@^0.224.0";
 import { join, basename } from "jsr:@std/path@^0.224.0";
 import { exists } from "jsr:@std/fs@^0.224.0";
 import type { PluginManifest, Registry, RegistryEntry, RemoteRegistry, RemotePluginEntry } from "./types.ts";
-import { buildCloneSteps } from "../utils/ensurePlugins.ts";
+import { buildCloneSteps } from "@ursamu/cli";
 
 const args = parse(Deno.args, {
   boolean: ["help", "force", "all"],

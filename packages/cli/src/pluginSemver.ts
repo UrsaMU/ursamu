@@ -2,7 +2,7 @@ import { parse as parseSemver, parseRange, satisfies, type Range, type SemVer } 
 import {
   PluginSemverError,
   PluginVersionError,
-} from "./pluginSecurity.ts";
+} from "./pluginErrors.ts";
 
 /** Parse a semver range, throwing PluginSemverError with the dep name on failure. */
 export function parseRangeOrThrow(depName: string, range: string): Range {

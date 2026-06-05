@@ -6,11 +6,11 @@ import {
   parseRangeOrThrow,
   parseVersionOrThrow,
   checkSatisfies,
-} from "../src/utils/pluginSemver.ts";
+} from "@ursamu/cli";
 import {
   PluginSemverError,
   PluginVersionError,
-} from "../src/utils/pluginErrors.ts";
+} from "@ursamu/cli";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

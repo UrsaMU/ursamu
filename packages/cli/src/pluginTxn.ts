@@ -1,4 +1,4 @@
-import type { Registry, RegistryEntry } from "../cli/types.ts";
+import type { Registry, RegistryEntry } from "./types.ts";
 
 export interface TxnDirRecord {
   kind: "dir";

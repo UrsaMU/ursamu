@@ -1,5 +1,5 @@
 /**
- * @module utils/pluginErrors
+ * @module cli/pluginErrors
  *
  * Typed errors for the plugin installer pipeline.
  */
