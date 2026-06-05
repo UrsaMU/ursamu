@@ -81,6 +81,8 @@ export {
   registerMushRoutes, handleRequest, setAuthenticator,
   avatarServe, MAX_API_TRACKED_IPS,
 } from "./src/routes/index.ts";
+export { registerPluginRoute } from "./src/routes/plugin.ts";
+export type { PluginRouteHandler } from "./src/routes/plugin.ts";
 export { meHandler, onlinePlayersHandler, channelsHandler, channelHistoryHandler } from "./src/routes/players.ts";
 export { MAX_TRACKED_IPS } from "./src/routes/auth.ts";
 

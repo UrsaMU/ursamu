@@ -29,6 +29,7 @@ export { sceneHandler }                    from "./scenes.ts";
 export { objectsHandler, flagsHandler, functionsHandler } from "./objects.ts";
 
 import { registerRoute, registerFallback } from "@ursamu/core";
+import { dispatchPluginRoute } from "./plugin.ts";
 import { authHandler }    from "./auth.ts";
 import { configHandler }  from "./config.ts";
 import { dbObjHandler }   from "./dbobj.ts";
@@ -119,6 +120,10 @@ export function registerMushRoutes(authenticate: Authenticator): void {
       return avatarServe(path);
     }
 
+    // Plugin routes (registered via registerPluginRoute)
+    const pluginRes = await dispatchPluginRoute(req, authenticate);
+    if (pluginRes) return pluginRes;
+
     return new Response("Not Found", { status: 404 });
   });
 }
@@ -207,6 +212,10 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
   }
 
   if (path.startsWith("/avatars/")) return avatarServe(path);
+
+  // Plugin routes (registered via registerPluginRoute)
+  const pluginRes = await dispatchPluginRoute(req, _authenticate);
+  if (pluginRes) return pluginRes;
 
   return new Response("Not found", { status: 404 });
 }

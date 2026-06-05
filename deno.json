@@ -1,5 +1,5 @@
 {
-  "workspace": ["packages/core", "packages/mush", "packages/channels", "packages/builder", "packages/cli"],
+  "workspace": ["packages/core", "packages/mush", "packages/channels", "packages/builder", "packages/cli", "packages/mail", "packages/events", "packages/discord", "packages/help", "packages/jobs", "packages/bbs", "packages/wiki"],
 
   "name": "@ursamu/ursamu",
 
@@ -64,8 +64,15 @@
     "lib": ["deno.window", "deno.unstable"]
   },
   "imports": {
+    "@ursamu/bbs":            "./packages/bbs/mod.ts",
+    "@ursamu/wiki":           "./packages/wiki/mod.ts",
     "@ursamu/cli":            "./packages/cli/mod.ts",
     "@ursamu/cli/templates":  "./packages/cli/src/create-templates.ts",
+    "@ursamu/help":           "./packages/help/mod.ts",
+    "@ursamu/jobs":           "./packages/jobs/mod.ts",
+    "@ursamu/mail":           "./packages/mail/mod.ts",
+    "@ursamu/events":         "./packages/events/mod.ts",
+    "@ursamu/discord":        "./packages/discord/mod.ts",
     "@ursamu/ursamu": "jsr:@ursamu/ursamu@^2.0.0",
     "@ursamu/ursamu/app": "./src/app.ts",
     "@ursamu/ursamu/channels": "./src/services/channel-events.ts",

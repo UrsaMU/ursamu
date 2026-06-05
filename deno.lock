@@ -29,6 +29,7 @@
     "jsr:@std/yaml@0.224": "0.224.0",
     "jsr:@std/yaml@0.224.0": "0.224.0",
     "jsr:@ursamu/mushcode@0.6": "0.6.0",
+    "jsr:@ursamu/ursamu@^2.7.0": "2.7.0",
     "jsr:@zaubrik/djwt@^3.0.2": "3.0.2",
     "npm:@deno/kv@*": "0.13.0",
     "npm:@deno/sandbox@0.10.0": "0.10.0",
@@ -160,6 +161,26 @@
     },
     "@ursamu/mushcode@0.6.0": {
       "integrity": "0503df5a0b1a16b3335739ae7d335cf142746527f5be47f41711b6639ad88ee5"
+    },
+    "@ursamu/ursamu@2.7.0": {
+      "integrity": "80af2e54afd2ee14cc7214a74913675c0b82432da676df565aea4e2426ea82ac",
+      "dependencies": [
+        "jsr:@std/dotenv@0.224",
+        "jsr:@std/flags",
+        "jsr:@std/fs@0.224",
+        "jsr:@std/fs@0.224.0",
+        "jsr:@std/path@0.224",
+        "jsr:@std/path@0.224.0",
+        "jsr:@std/semver",
+        "jsr:@zaubrik/djwt",
+        "npm:@deno/sandbox",
+        "npm:@digibear/tags",
+        "npm:@ursamu/parser",
+        "npm:bcryptjs",
+        "npm:lodash",
+        "npm:quickjs-emscripten",
+        "npm:sucrase"
+      ]
     },
     "@zaubrik/djwt@3.0.2": {
       "integrity": "8070adaa49cd9e5d2b8ae82fd461132c966ef2f8ff8378db4a4da8df4f17c664",
@@ -3038,6 +3059,11 @@
       "npm:quickjs-emscripten@0.29.0"
     ],
     "members": {
+      "packages/bbs": {
+        "dependencies": [
+          "jsr:@std/assert@0.224"
+        ]
+      },
       "packages/builder": {
         "dependencies": [
           "jsr:@std/assert@0.224"
@@ -3066,6 +3092,34 @@
           "jsr:@zaubrik/djwt@^3.0.2"
         ]
       },
+      "packages/discord": {
+        "dependencies": [
+          "jsr:@std/assert@0.224"
+        ]
+      },
+      "packages/events": {
+        "dependencies": [
+          "jsr:@std/assert@0.224"
+        ]
+      },
+      "packages/help": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/testing@^1.0.17"
+        ]
+      },
+      "packages/jobs": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/testing@^1.0.17"
+        ]
+      },
+      "packages/mail": {
+        "dependencies": [
+          "jsr:@std/assert@0.224"
+        ]
+      },
       "packages/mush": {
         "dependencies": [
           "jsr:@std/assert@0.224",
@@ -3077,6 +3131,13 @@
           "npm:@ursamu/parser@1.2.4",
           "npm:bcryptjs@2.4.3",
           "npm:quickjs-emscripten@0.29.0"
+        ]
+      },
+      "packages/wiki": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224"
         ]
       }
     }
