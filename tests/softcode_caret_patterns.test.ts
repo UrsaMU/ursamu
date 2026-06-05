@@ -6,7 +6,7 @@
  */
 import { assertEquals } from "@std/assert";
 import { findCaretMatches } from "@ursamu/mush";
-import type { IDBOBJ } from "../src/@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 
 function makeObj(
   id: string,

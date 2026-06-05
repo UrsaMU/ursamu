@@ -10,7 +10,7 @@
  * Tests for that command live in the builder-plugin repo.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execMoniker } from "@ursamu/mush";
 import { execAlias } from "@ursamu/mush";
 

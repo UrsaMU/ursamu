@@ -66,6 +66,12 @@ export {
   resolveGlobalFormat,
   resolveGlobalFormatOr,
   _clearFormatHandlers,
+  center,
+  ljust,
+  rjust,
+  header,
+  divider,
+  footer,
 } from "./src/format/handlers.ts";
 export type { FormatHandler } from "./src/format/handlers.ts";
 

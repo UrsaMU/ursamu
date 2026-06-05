@@ -1,5 +1,5 @@
 import type { IContext } from "../../@types/IContext.ts";
-import type { IDBOBJ } from "../../@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 import { moniker } from "../../utils/moniker.ts";
 import { dbojs } from "@ursamu/mush";
 import { send } from "../broadcast/index.ts";

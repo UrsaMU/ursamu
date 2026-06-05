@@ -20,7 +20,7 @@ import {
   _clearFormatHandlers,
   type FormatHandler,
 } from "@ursamu/mush";
-import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 15000 };
 

@@ -1,5 +1,4 @@
-import type { IAttribute } from "../@types/IAttribute.ts";
-import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IAttribute, IDBOBJ } from "@ursamu/mush";
 import { dbojs } from "@ursamu/mush";
 
 /**

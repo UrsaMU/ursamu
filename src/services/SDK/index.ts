@@ -1,5 +1,4 @@
-import type { IUrsamuSDK, IDBObj } from "../../@types/UrsamuSDK.ts";
-import type { IDBOBJ } from "../../@types/IDBObj.ts";
+import type { IUrsamuSDK, IDBObj, IDBOBJ } from "@ursamu/mush";
 import { dbojs, chans, chanHistory, texts, hydrate } from "@ursamu/mush";
 import { setConfig } from "@ursamu/core";
 import { wsService } from "../WebSocket/index.ts";
@@ -10,7 +9,7 @@ import { displayName as displayNameFn } from "../../utils/displayName.ts";
 import { setFlags as setFlagsFn } from "../../utils/setFlags.ts";
 import { getAttribute } from "../../utils/getAttribute.ts";
 import { getNextId } from "../../utils/getNextId.ts";
-import { center, ljust, rjust, header, divider, footer } from "../../utils/format.ts";
+import { center, ljust, rjust, header, divider, footer } from "@ursamu/mush";
 import { parser } from "@ursamu/mush";
 import { hash, compare } from "../../../deps.ts";
 import { escapeRegex } from "../../utils/escapeRegex.ts";
@@ -163,7 +162,7 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
         });
       },
       modify: async (id: string, op: string, data: unknown) => {
-        await dbojs.modify({ id }, op, data as Partial<import("../../@types/IDBObj.ts").IDBOBJ>);
+        await dbojs.modify({ id }, op, data as Partial<IDBOBJ>);
       },
     },
 

@@ -9,9 +9,7 @@
  * Wired together in cmdParser.ts. Do NOT import from cmdParser.ts here.
  */
 import type { IContext } from "../../@types/IContext.ts";
-import type { IDBOBJ } from "../../@types/IDBObj.ts";
-import type { ICmd } from "../../@types/ICmd.ts";
-import type { IDBObj } from "../../@types/UrsamuSDK.ts";
+import type { IDBOBJ, ICmd, IDBObj } from "@ursamu/mush";
 import { send } from "../broadcast/index.ts";
 import { dbojs, Obj, InterceptorService, type Intent, sandboxService, SDKService, type SDKObject, evaluateLock, hydrate } from "@ursamu/mush";
 import { getConfig } from "@ursamu/core";

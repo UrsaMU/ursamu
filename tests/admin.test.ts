@@ -6,7 +6,7 @@
  * @reboot, @shutdown, and permission enforcement.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execBoot, execToad, execNewpassword, execChown, execSite, execShutdown } from "@ursamu/mush";
 import { execReboot } from "@ursamu/mush";
 

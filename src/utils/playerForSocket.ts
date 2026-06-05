@@ -1,4 +1,4 @@
-import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 import type { UserSocket } from "../@types/IMSocket.ts";
 import { dbojs } from "@ursamu/mush";
 

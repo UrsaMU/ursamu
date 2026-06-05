@@ -13,7 +13,7 @@ import { target } from "../src/utils/target.ts";
 import { getAttribute } from "../src/utils/getAttribute.ts";
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
-import type { IDBOBJ } from "../src/@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 
 // ---------------------------------------------------------------------------
 // Shared IDs — prefixed with "ta_" to avoid collisions with other test files

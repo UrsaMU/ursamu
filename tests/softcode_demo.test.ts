@@ -23,7 +23,7 @@ import { assertEquals, assertMatch, assertStringIncludes } from "@std/assert";
 import { runSoftcode, softcodeEngine } from "@ursamu/mush";
 import type { UrsaEvalContext } from "@ursamu/mush";
 import type { DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
-import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj } from "@ursamu/mush";
 
 // ── Test infrastructure ───────────────────────────────────────────────────────
 

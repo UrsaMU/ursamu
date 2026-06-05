@@ -10,7 +10,7 @@
  *   [NOROOM]  Admin targets a non-existent room → not-found message
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execEmit } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

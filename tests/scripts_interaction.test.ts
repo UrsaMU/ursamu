@@ -10,7 +10,7 @@
  *   - execTrigger  (@trigger — fire a stored attribute)
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execGet, execDrop, execGive } from "@ursamu/mush";
 import { execHome } from "@ursamu/mush";
 import { execTrigger } from "../packages/mush/src/verbs/softcode-trigger.ts";

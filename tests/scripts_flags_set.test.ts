@@ -11,7 +11,7 @@
  * Tests for those commands live in the builder-plugin repo.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execFlags } from "@ursamu/mush";
 import { execDoing } from "@ursamu/mush";
 import { execCreateObject } from "@ursamu/mush";

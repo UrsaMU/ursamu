@@ -13,7 +13,7 @@ import {
   unregisterFormatHandler,
   hydrate,
 } from "@ursamu/mush";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const SLOW = { timeout: 15000 };

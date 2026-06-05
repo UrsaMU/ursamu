@@ -1,6 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { divider, footer, header } from "../src/utils/format.ts";
-import { center } from "../src/utils/format.ts";
+import { divider, footer, header, center } from "@ursamu/mush";
 
 // Snapshot the byte-for-byte output that the demo command previously built
 // inline (HR / hr / section). The TS layout helpers in src/utils/format.ts

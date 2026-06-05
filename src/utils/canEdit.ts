@@ -1,4 +1,4 @@
-import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 
 export const canEdit = async (en: IDBOBJ, tar: IDBOBJ): Promise<boolean> => {
   if (!en || !tar) return false;

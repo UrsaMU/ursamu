@@ -1,5 +1,4 @@
-import type { IDBObj } from "../@types/UrsamuSDK.ts";
-import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBObj, IDBOBJ } from "@ursamu/mush";
 import { dbojs } from "@ursamu/mush";
 import { getAttribute } from "./getAttribute.ts";
 

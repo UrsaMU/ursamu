@@ -8,7 +8,7 @@
  *   - execLook  — ODESC fires to room when looking at non-room object
  */
 import { assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execGet, execDrop } from "@ursamu/mush";
 import { execLook } from "@ursamu/mush";
 

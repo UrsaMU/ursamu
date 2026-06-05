@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import type { IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IUrsamuSDK } from "@ursamu/mush";
 import { execLook } from "@ursamu/mush";
 
 Deno.test({

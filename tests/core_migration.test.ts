@@ -9,7 +9,7 @@
  * Deeper coverage lives in scripts_flags_set.test.ts and scripts_comms.test.ts.
  */
 import { assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execConnect } from "@ursamu/mush";
 import { execFlags } from "@ursamu/mush";
 import { execChannel } from "@ursamu/channels";

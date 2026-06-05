@@ -6,7 +6,7 @@
  * Integration-style tests use the real dbojs + softcodeService.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { execWho } from "@ursamu/mush";
 import {
   registerFormatHandler,

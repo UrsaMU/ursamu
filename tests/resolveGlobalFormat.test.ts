@@ -16,7 +16,7 @@ import {
 } from "@ursamu/mush";
 import { sandboxService } from "@ursamu/mush";
 import type { SDKContext } from "@ursamu/mush";
-import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const SLOW = { timeout: 20000 };

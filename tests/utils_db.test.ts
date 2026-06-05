@@ -15,7 +15,7 @@ import { checkFlags } from "../src/utils/checkFlags.ts";
 import { isAdmin } from "../src/utils/isAdmin.ts";
 import { canEdit } from "../src/utils/canEdit.ts";
 import { displayName } from "../src/utils/displayName.ts";
-import type { IDBOBJ } from "../src/@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

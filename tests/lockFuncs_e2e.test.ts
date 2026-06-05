@@ -12,9 +12,8 @@ import { DBO } from "@ursamu/core";
 import { Obj } from "@ursamu/mush";
 import { matchNativeCmd } from "../src/services/commands/pipeline-stages.ts";
 import { registerLockFunc } from "@ursamu/mush";
-import type { ICmd } from "../src/@types/ICmd.ts";
+import type { ICmd, IUrsamuSDK } from "@ursamu/mush";
 import type { IContext } from "../src/@types/IContext.ts";
-import type { IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

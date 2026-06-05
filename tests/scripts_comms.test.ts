@@ -14,7 +14,7 @@
  *   - execChanset    (src/commands/channels.ts)
  */
 import { assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execThink, execSay, execPose } from "@ursamu/mush";
 import { execWho, execScore } from "@ursamu/mush";
 import { execChannel, execChancreate, execChandestroy, execChanset } from "@ursamu/channels";

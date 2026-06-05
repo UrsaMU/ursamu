@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { addCmd, cmds } from "../src/services/commands/cmdParser.ts";
-import type { IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IUrsamuSDK } from "@ursamu/mush";
 
 Deno.test("addCmd registers command with new IUrsamuSDK signature", () => {
   const before = cmds.length;

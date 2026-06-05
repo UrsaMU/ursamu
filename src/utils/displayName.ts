@@ -1,4 +1,4 @@
-import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 import { flags } from "@ursamu/mush";
 import { moniker as _moniker } from "./moniker.ts";
 

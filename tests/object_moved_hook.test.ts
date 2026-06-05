@@ -9,7 +9,7 @@ import { assertEquals } from "https://deno.land/std@0.220.0/assert/mod.ts";
 import { gameHooks } from "@ursamu/mush";
 import type { ObjectMovedEvent } from "@ursamu/mush";
 import { execGet, execDrop, execGive } from "@ursamu/mush";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

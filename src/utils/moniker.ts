@@ -1,4 +1,4 @@
-import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 
 /** Return the object's moniker (custom display name), falling back to its data name. */
 export const moniker = (obj: IDBOBJ): string =>

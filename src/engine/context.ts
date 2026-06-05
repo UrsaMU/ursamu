@@ -9,8 +9,7 @@
  * Every other layer (SDK, pipeline stages, tests) should derive what it needs
  * from a `GameContext` rather than re-fetching the actor independently.
  */
-import type { IDBObj } from "../@types/UrsamuSDK.ts";
-import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBObj, IDBOBJ } from "@ursamu/mush";
 import { dbojs } from "@ursamu/mush";
 import { send as sendFn } from "../services/broadcast/index.ts";
 import { hydrate } from "@ursamu/mush";

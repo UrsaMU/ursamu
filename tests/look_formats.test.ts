@@ -6,7 +6,7 @@
  * covered by tests/look_formats_integration.test.ts (real worker).
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { execLook } from "@ursamu/mush";
 import {
   registerFormatHandler,

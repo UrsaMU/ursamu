@@ -9,7 +9,7 @@
 import { assertEquals, assertRejects } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { assertSpyCalls, spy } from "@std/testing/mock";
-import type { IPlugin } from "../src/@types/IPlugin.ts";
+import type { IPlugin } from "@ursamu/mush";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 

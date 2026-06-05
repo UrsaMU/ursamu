@@ -7,7 +7,7 @@
  * `resolveGlobalFormat` lookup (#0 then enactor).
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 import { execPs } from "@ursamu/mush";
 import { queue } from "@ursamu/core";
 import {

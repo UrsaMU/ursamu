@@ -13,7 +13,7 @@ import { dbojs } from "@ursamu/mush";
 import { createNativeSDK } from "../src/services/SDK/index.ts";
 import { execLook } from "@ursamu/mush";
 import { hydrate } from "@ursamu/mush";
-import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
+import type { IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 20000 };
 

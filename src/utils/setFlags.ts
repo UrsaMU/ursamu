@@ -1,4 +1,4 @@
-import type { IDBOBJ } from "../@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 import { dbojs } from "@ursamu/mush";
 
 export const setFlags = async (obj: IDBOBJ, flagStr: string, _actor?: IDBOBJ): Promise<void> => {

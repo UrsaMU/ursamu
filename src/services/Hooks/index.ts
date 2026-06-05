@@ -1,7 +1,7 @@
 import { dbojs, sandboxService, fireCaretPatterns, gameHooks, SDKService, Obj } from "@ursamu/mush";
 import { getConfig } from "@ursamu/core";
 import { getAttribute } from "../../utils/getAttribute.ts";
-import type { IDBOBJ } from "../../@types/IDBObj.ts";
+import type { IDBOBJ } from "@ursamu/mush";
 import type { ObjectDestroyedEvent, SayEvent, PoseEvent } from "@ursamu/mush";
 import { isSoftcode } from "../../utils/isSoftcode.ts";
 
