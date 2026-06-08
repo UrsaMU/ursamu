@@ -11,6 +11,7 @@ import { registryAdd, registryGet, registryHas, registryList, registryRemove } f
 import { log } from "../logging/index.ts";
 
 const _pending: IPlugin[] = [];
+let _initialized = false;
 
 /** Stage a plugin for loading. Call loadPlugins() to actually init them. */
 export function registerPlugin(plugin: IPlugin): void {
@@ -19,6 +20,13 @@ export function registerPlugin(plugin: IPlugin): void {
 
 /** Init all staged plugins in dependency order. Fails fast on missing deps. */
 export async function loadPlugins(): Promise<void> {
+  if (_initialized) return;
+  _initialized = true;
+  await forceLoadPlugins();
+}
+
+/** Internal: actually run the load logic without checking _initialized. */
+export async function forceLoadPlugins(): Promise<void> {
   const sorted = topoSort(_pending);
   _pending.length = 0;
 
@@ -27,12 +35,17 @@ export async function loadPlugins(): Promise<void> {
     if (err) throw new Error(`Plugin "${plugin.name}": ${err}`);
 
     const ok = await plugin.init();
-    if (!ok) throw new Error(`Plugin "${plugin.name}" init() returned false.`);
+    if (!ok && ok !== undefined) {
+      console.warn(`[plugins] "${plugin.name}" init() returned false`);
+    }
 
     registryAdd(plugin);
     log("info", "plugin:loaded", { name: plugin.name, version: plugin.version });
   }
 }
+
+/** Legacy alias for loadPlugins() used by some consumers. */
+export const initializePlugins = loadPlugins;
 
 /** Remove and call remove() on a loaded plugin. */
 export async function unloadPlugin(name: string): Promise<void> {
@@ -90,4 +103,4 @@ function topoSort(plugins: IPlugin[]): IPlugin[] {
   return sorted;
 }
 
-export { registryList as listPlugins, registryGet as getPlugin };
+export { registryList as listPlugins, registryGet as getPlugin, registryRemove as _registryRemove };

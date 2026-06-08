@@ -220,8 +220,8 @@ export async function matchSoftcodePattern(ctx: IContext): Promise<boolean> {
   const hit = await findDollarPattern(actor, ctx.msg.trim(), masterRoomId, dbojs as any);
   if (!hit) return false;
 
-  const { softcodeService } = await import("../Softcode/index.ts");
-  const result = await softcodeService.runSoftcode(hit.attr.value, {
+  const { runSoftcodeSimple } = await import("@ursamu/mush");
+  const result = await runSoftcodeSimple(hit.attr.value, {
     actorId: actor.id,
     executorId: hit.obj.id,
     args: hit.captures,

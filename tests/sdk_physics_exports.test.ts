@@ -14,7 +14,7 @@ import {
 } from "../packages/mush/src/softcode/stdlib/physics.ts";
 import { runSoftcode, softcodeEngine } from "@ursamu/mush";
 import type { UrsaEvalContext } from "@ursamu/mush";
-import type { DbAccessor } from "../src/services/Softcode/context.ts";
+import type { DbAccessor } from "@ursamu/mush";
 import type { IDBObj } from "@ursamu/mush";
 
 // ── vreflect ──────────────────────────────────────────────────────────────

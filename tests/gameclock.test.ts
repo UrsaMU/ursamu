@@ -6,7 +6,7 @@
 import { assertEquals, assertMatch, assertGreater } from "@std/assert";
 import { DBO } from "@ursamu/core";
 import { gameClock } from "@ursamu/mush";
-import { setConfig } from "../src/services/Config/mod.ts";
+import { setConfig } from "@ursamu/core";
 
 // ---------------------------------------------------------------------------
 // Shared KV (in-memory) — must be set before any DBO operation

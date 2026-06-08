@@ -416,8 +416,8 @@ function buildSDKFromContext(ctx: GameContext): IUrsamuSDK {
       if (!str) return "";
       if (!me.id || me.id === "#-1") return str;
       try {
-        const { softcodeService } = await import("../Softcode/index.ts");
-        return await softcodeService.runSoftcode(str, {
+        const { runSoftcodeSimple } = await import("@ursamu/mush");
+        return await runSoftcodeSimple(str, {
           actorId:    me.id,
           executorId: me.id,
           args:       [],
