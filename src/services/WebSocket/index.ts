@@ -24,8 +24,7 @@ gameHooks.on("session:auth", async (e: { socketId: string; sessionId: string }) 
     const payload = await verifyToken(e.sessionId);
     const userId = payload.id as string;
     if (!userId) return;
-    const session = sessions.get(e.socketId);
-    if (session) ((session as unknown) as Record<string, unknown>).actorId = userId;
+    sessions.setActorId(e.socketId, userId);
   } catch { /* invalid JWT — ignore */ }
 });
 
@@ -58,11 +57,10 @@ function makeSocketProxy(socketId: string): UserSocket {
   Object.defineProperty(proxy, "cid", {
     get() {
       const s = sessions.get(socketId);
-      return ((s as unknown as Record<string, unknown>)?.actorId as string) ?? "";
+      return s?.actorId ?? "";
     },
     set(v: string | undefined) {
-      const s = sessions.get(socketId);
-      if (s) ((s as unknown) as Record<string, unknown>).actorId = v;
+      if (v) sessions.setActorId(socketId, v);
     },
     enumerable: true, configurable: true,
   });
@@ -92,10 +90,10 @@ class WsServiceShim {
       if (ws?.readyState === 1) { try { ws.send(payload); } catch { /* closing */ } }
       // Also try cid-based lookup
       else {
-        for (const [sid, ws2] of _localSockets) {
-          const sess = sessions.get(sid);
-          const actorId = ((sess as unknown as Record<string, unknown>)?.actorId as string);
-          if (actorId === id && ws2.readyState === 1) {
+        const sess = sessions.getBySession(id);
+        if (sess) {
+          const ws2 = _localSockets.get(sess.socketId);
+          if (ws2?.readyState === 1) {
             try { ws2.send(payload); } catch { /* closing */ }
           }
         }
@@ -113,24 +111,23 @@ class WsServiceShim {
   }
 
   disconnect(cid: string): void {
-    for (const [socketId, ws] of _localSockets) {
-      const sess = sessions.get(socketId);
-      const actorId = ((sess as unknown as Record<string, unknown>)?.actorId as string);
-      if (actorId === cid) { ws.close(); _localSockets.delete(socketId); }
+    const sess = sessions.getBySession(cid);
+    if (sess) {
+      const ws = _localSockets.get(sess.socketId);
+      if (ws) {
+        ws.close();
+        _localSockets.delete(sess.socketId);
+        coreCloseSocket(sess.socketId);
+      }
     }
   }
 
   joinSocketToRoom(_socketId: string, _room: string): void {}
 
   getIdleSecs(playerId: string): number {
-    for (const socketId of listSocketIds()) {
-      const session = sessions.get(socketId);
-      if (!session) continue;
-      const actorId = ((session as unknown as Record<string, unknown>)?.actorId as string);
-      if (actorId !== playerId) continue;
-      return Math.floor((Date.now() - session.lastInputAt) / 1000);
-    }
-    return -1;
+    const session = sessions.getBySession(playerId);
+    if (!session) return -1;
+    return Math.floor((Date.now() - session.lastInputAt) / 1000);
   }
 
   handleConnection(socket: WebSocket, _clientType?: string, _preAuthUserId?: string, remoteIp = ""): string | null {

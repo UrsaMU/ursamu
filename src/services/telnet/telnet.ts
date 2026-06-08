@@ -1,5 +1,5 @@
 import { dpath } from "../../../deps.ts";
-import { getConfig, initConfig } from "../Config/mod.ts";
+import { getConfig, initConfig } from "@ursamu/core";
 import { parser } from "@ursamu/mush";
 import {
   IAC, WILL, DO, DONT, WONT, NAWS_OPTION,

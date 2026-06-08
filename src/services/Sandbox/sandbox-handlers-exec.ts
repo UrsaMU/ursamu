@@ -107,8 +107,8 @@ export async function handleEvalMessage(
     let result: string;
 
     if (isSoftcode(attrData)) {
-      const { softcodeService } = await import("../Softcode/index.ts");
-      result = await softcodeService.runSoftcode(attrData.value, {
+      const { runSoftcodeSimple } = await import("@ursamu/mush");
+      result = await runSoftcodeSimple(attrData.value, {
         actorId:    String(context?.id || tarObj.id),
         executorId: tarObj.id,
         args:       evalArgs,
@@ -135,8 +135,8 @@ export async function handleEvalMessage(
     try {
       const actorId = await resolveSocket(context);
       if (!actorId) { respond(worker, msgId, code); return; }
-      const { softcodeService } = await import("../Softcode/index.ts");
-      const result = await softcodeService.runSoftcode(code, {
+      const { runSoftcodeSimple } = await import("@ursamu/mush");
+      const result = await runSoftcodeSimple(code, {
         actorId,
         executorId: actorId,
         args:       [],

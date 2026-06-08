@@ -77,11 +77,41 @@ export class DBO<T extends WithId> implements IDatabase<T> {
 
     const kv = await this.getKv();
     const results: T[] = [];
-    for await (const entry of kv.list<T>({ prefix: [this.namespace] })) {
+
+    // Optimization: if querying by a specific ID string, use kv.get() O(1)
+    if (query && "id" in query && typeof query.id === "string") {
+      const entry = await kv.get<T>(this.key(query.id));
       if (entry.value && matchesQuery(entry.value, query)) {
         results.push(entry.value);
       }
+    } // Optimization: if querying by an $or list of specific ID strings, use kv.getMany()
+    else if (
+      query &&
+      "$or" in query &&
+      Array.isArray(query.$or) &&
+      query.$or.every((q) => typeof q.id === "string")
+    ) {
+      const ids = (query.$or as { id: string }[]).map((q) => q.id);
+      const entries = await kv.getMany<T[]>(ids.map((id) => this.key(id)));
+      // Note: kv.getMany<T[]> returns a list of entries where each entry.value is T.
+      // The type parameter T[] to getMany refers to the return array shape in some KV implementations,
+      // but here we want to ensure we treat the results correctly.
+      for (const entry of entries) {
+        // deno-lint-ignore no-explicit-any
+        const val = entry.value as any;
+        if (val && matchesQuery(val, query)) {
+          results.push(val);
+        }
+      }
+    } else {
+      // Fallback to full namespace scan O(N)
+      for await (const entry of kv.list<T>({ prefix: [this.namespace] })) {
+        if (entry.value && matchesQuery(entry.value, query)) {
+          results.push(entry.value);
+        }
+      }
     }
+
     this.queryCache.set(ck, { data: results, expiresAt: now + CACHE_TTL_MS });
     return results;
   }

@@ -1,6 +1,6 @@
 import { dfs, dpath } from "../../deps.ts";
 import type { IPlugin } from "../@types/IPlugin.ts";
-import { registerPlugin } from "../services/Config/mod.ts";
+import { registerPlugin } from "@ursamu/core";
 import { ensurePlugins } from "@ursamu/cli";
 
 /**

@@ -110,8 +110,8 @@ export const matchExits = async (ctx: IContext) => {
             if (!attr) return null;
             if (isSoftcode(attr)) {
               try {
-                const { softcodeService } = await import("../Softcode/index.ts");
-                return await softcodeService.runSoftcode(attr.value, {
+                const { runSoftcodeSimple } = await import("@ursamu/mush");
+                return await runSoftcodeSimple(attr.value, {
                   actorId,
                   executorId: exit.id,
                   socketId:   ctx.socket.id,

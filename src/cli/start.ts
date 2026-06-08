@@ -11,7 +11,7 @@
 
 import { join } from "jsr:@std/path@^0.224.0";
 import { checkAndCreateSuperuser } from "../main.ts";
-import { initConfig } from "../services/Config/mod.ts";
+import { initConfig } from "@ursamu/core";
 import { DBO } from "@ursamu/core";
 
 /**
