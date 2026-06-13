@@ -23,3 +23,5 @@ config/*.json
 _fresh/
 games/
 scratch/
+types/deno.d.ts
+types/@std/

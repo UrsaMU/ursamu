@@ -88,7 +88,7 @@ function ensureHandlersRegistered(): void {
       const { intentName, intent } = parseIntent(rawMsg, actorId);
 
       // 1. Check AOP interceptors
-      const allowed = await checkInterceptors(actor.location, actorId, intent);
+      const allowed = await checkInterceptors(actor.location ?? null, actorId, intent);
       if (!allowed) return;
 
       // 2. Run SCRIPT_NODE commands

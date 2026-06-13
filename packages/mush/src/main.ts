@@ -6,13 +6,7 @@
 import "dotenv/load";
 import { handleRequest } from "./app.ts";
 import "./reboot.ts";
-import { plugins } from "./utils/loadDIr.ts";
-import { loadTxtDir } from "./utils/loadTxtDir.ts";
-import { setFlags } from "./utils/setFlags.ts";
-import { broadcast } from "./services/broadcast/index.ts";
-import type { IConfig, IPlugin } from "./@types/index.ts";
-import { dpath } from "../deps.ts";
-import { loadPlugins as loadPluginFiles } from "./utils/loadPlugins.ts";
+import { plugins, loadTxtDir, setFlags, loadPlugins } from "./main_utils.ts";
 import {
   queue,
   initConfig,
@@ -24,9 +18,16 @@ import {
   telnetTransport,
   httpTransport,
   registerFallback,
+  broadcastAll,
+  gameHooks,
+  log,
+  runPipeline,
 } from "@ursamu/core";
-import { runStartupAttrs } from "./services/startup/index.ts";
-import { gameHooks, dbojs, chans, counters, texts } from "@ursamu/mush";
+import type { IPlugin } from "@ursamu/core";
+import * as dpath from "@std/path";
+import { runStartupAttrs } from "./world/startup.ts";
+import { runSoftcodeSimple } from "./softcode/engine.ts";
+import { dbojs, chans, counters, texts } from "./world/dbobjs.ts";
 
 let __dirname;
 try {
@@ -82,7 +83,7 @@ async function initializeDefaultTexts() {
  * @returns References to the initialized services (db, broadcast, etc.).
  */
 export const initializeEngine = async (
-  cfg?: IConfig,
+  cfg?: Record<string, unknown>,
   customPlugins?: IPlugin[],
   options: {
     loadDefaultCommands?: boolean;
@@ -124,7 +125,7 @@ export const initializeEngine = async (
   // Load substitutions from config
   const substitutions = getConfig<Record<string, string>>("substitutions");
   if (substitutions) {
-      const { updateParserSubs } = await import("./services/parser/parser.ts");
+      const { updateParserSubs } = await import("./render/parser.ts");
       updateParserSubs(substitutions);
   }
 
@@ -137,7 +138,9 @@ export const initializeEngine = async (
     if (isLocal) {
       await plugins(dpath.join(__dirname, "./commands"));
     } else {
-      // On JSR, we import the build-time generated index
+      // On JSR, we import the build-time generated index (does not exist in source)
+      // deno-lint-ignore no-explicit-any
+      // @ts-ignore - commands/index.ts is generated at publish time for JSR only
       await import("./commands/index.ts");
     }
   }
@@ -185,7 +188,7 @@ export const initializeEngine = async (
 
   // Share loaded plugins with @reload command for hot-reload
   try {
-    const { setLoadedPlugins } = await import("@ursamu/mush");
+    const { setLoadedPlugins } = await import("./verbs/admin-reload.ts");
     setLoadedPlugins(loadedPlugins);
   } catch { /* reload command may not be loaded yet */ }
 
@@ -238,7 +241,7 @@ export const initializeEngine = async (
   queue.init();
 
   // Initialize in-game clock (load persisted time, then tick every real minute)
-  const { gameClock } = await import("@ursamu/mush");
+  const { gameClock } = await import("./world/game-clock.ts");
   await gameClock.load();
   setInterval(() => gameClock.tick(60_000), 60_000);
   console.log(`[GameClock] Loaded. Current game time: ${gameClock.format()}`);
@@ -248,7 +251,10 @@ export const initializeEngine = async (
   // signals "engine is up and all plugins are loaded", not "STARTUP attrs ran
   // cleanly".  Catching first converts any rejection into a resolution so the
   // chained .then() always executes.
-  runStartupAttrs()
+  runStartupAttrs(
+    async (ctx, cmd) => { await runPipeline({ ...ctx, raw: cmd, cmd: "" }); },
+    (code, opts) => runSoftcodeSimple(code, { actorId: opts.actorId, executorId: opts.actorId }),
+  )
     .catch((err) => console.error("[startup] runStartupAttrs failed:", err))
     .then(() => gameHooks.emit("engine:ready"));
 
@@ -259,7 +265,7 @@ export const initializeEngine = async (
       await setFlags(player, "!connected");
     }
 
-    await broadcast("Server shutting down.");
+    broadcastAll("Server shutting down.");
     Deno.exit(0);
   });
 
@@ -279,7 +285,7 @@ export const initializeEngine = async (
       counters,
       texts,
     },
-    broadcast,
+    broadcast: broadcastAll,
     setFlags,
   };
 };
@@ -364,17 +370,15 @@ const config = {
 
 // Start the game engine
 if (import.meta.main) {
-  const { logError } = await import("./utils/logger.ts");
-
   // Global Error Handlers
   globalThis.addEventListener("unhandledrejection", (e) => {
     e.preventDefault();
-    logError(e.reason, "Unhandled Rejection");
+    log("error", "Unhandled Rejection", e.reason);
   });
 
   globalThis.addEventListener("error", (e) => {
     e.preventDefault();
-    logError(e.error, "Uncaught Exception");
+    log("error", "Uncaught Exception", e.error);
   });
 
   try {
@@ -382,7 +386,7 @@ if (import.meta.main) {
     await checkAndCreateSuperuser();
     console.log(`${game.config.get("game.name")} main server is running!`);
   } catch (error) {
-    await logError(error, "Fatal Initialization Error");
+    log("error", "Fatal Initialization Error", error);
     Deno.exit(1);
   }
 }

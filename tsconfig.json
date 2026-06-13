@@ -14,14 +14,18 @@
       "@ursamu/mail": ["./packages/mail/mod.ts"],
       "@ursamu/events": ["./packages/events/mod.ts"],
       "@ursamu/discord": ["./packages/discord/mod.ts"],
-      "@ursamu/ai-gm": ["./packages/ai-gm/mod.ts"]
+      "@ursamu/ai-gm": ["./packages/ai-gm/mod.ts"],
+      "@std/path": ["./types/@std/path.d.ts"],
+      "@std/fs": ["./types/@std/fs.d.ts"]
     },
     "jsx": "react",
-    "lib": ["deno.window", "deno.unstable", "ES2022"],
+    "lib": ["ES2022", "DOM"],
+    "typeRoots": ["./types"],
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "target": "ESNext",
     "downlevelIteration": true,
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "module": "ESNext"
   }
 }
