@@ -1,0 +1,254 @@
+{
+  "key": "combat-grapple",
+  "title": "+grapple -- grab, hold, damage, restrain, break free",
+  "description": "Demonstrates the full grapple lifecycle: initial grab, hold move, damage move, restrain, and break free. Two fighters, both mortal.",
+  "vars": {
+    "player": "Jax"
+  },
+  "setup": {
+    "targets": {
+      "Marcus": {
+        "flags": [
+          "player",
+          "connected"
+        ],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 2,
+              "dexterity": 2,
+              "stamina": 2,
+              "intelligence": 2,
+              "wits": 2,
+              "resolve": 2,
+              "presence": 2,
+              "manipulation": 2,
+              "composure": 2
+            },
+            "skills": {
+              "brawl": 2,
+              "athletics": 2
+            },
+            "health": {
+              "max": 7,
+              "bashing": 0,
+              "lethal": 0,
+              "aggravated": 0
+            },
+            "willpower": {
+              "max": 4,
+              "current": 4
+            }
+          }
+        }
+      }
+    },
+    "character": {
+      "flags": [
+        "player",
+        "connected"
+      ],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 5,
+            "dexterity": 3,
+            "stamina": 3,
+            "intelligence": 2,
+            "wits": 2,
+            "resolve": 2,
+            "presence": 2,
+            "manipulation": 2,
+            "composure": 2
+          },
+          "skills": {
+            "brawl": 5,
+            "athletics": 2
+          },
+          "health": {
+            "max": 7,
+            "bashing": 0,
+            "lethal": 0,
+            "aggravated": 0
+          },
+          "willpower": {
+            "max": 4,
+            "current": 4
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Setup: Open and Join"
+    },
+    {
+      "cmd": "+combat/start",
+      "as": "admin",
+      "label": "open encounter"
+    },
+    {
+      "expect": "encounter"
+    },
+    {
+      "cmd": "+combat/join",
+      "label": "Jax joins"
+    },
+    {
+      "expect": "joined"
+    },
+    {
+      "cmd": "+combat/join",
+      "as": "Marcus",
+      "label": "Marcus joins"
+    },
+    {
+      "expect": "joined"
+    },
+    {
+      "cmd": "+combat/begin",
+      "as": "admin",
+      "label": "roll initiative"
+    },
+    {
+      "expect": "Round 1"
+    },
+    {
+      "sub": "Initial Grab"
+    },
+    {
+      "note": "Grab pool: Strength + Brawl - target Defense = 3+3-2 = 4 dice. Success means both are now grappling."
+    },
+    {
+      "cmd": "+grapple Marcus",
+      "label": "Jax attempts to grab Marcus"
+    },
+    {
+      "expect": "succeed"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Jax's turn"
+    },
+    {
+      "expect": "turn"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Marcus's turn; round 2"
+    },
+    {
+      "expect": "round"
+    },
+    {
+      "sub": "Round 2 -- Hold Move"
+    },
+    {
+      "note": "Jax wins contested roll. Applies Hold: neither combatant can use Defense against outside attacks."
+    },
+    {
+      "cmd": "+grapple/hold",
+      "label": "Jax applies Hold"
+    },
+    {
+      "expect": "hold"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Jax's turn"
+    },
+    {
+      "expect": "turn"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Marcus's turn; round 3"
+    },
+    {
+      "expect": "round"
+    },
+    {
+      "sub": "Round 3 -- Damage Move"
+    },
+    {
+      "note": "Jax wins again. Deals bashing damage equal to rolled successes."
+    },
+    {
+      "cmd": "+grapple/damage",
+      "label": "Jax damages Marcus"
+    },
+    {
+      "expect": "bashing"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Jax's turn"
+    },
+    {
+      "expect": "turn"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Marcus's turn; round 4"
+    },
+    {
+      "expect": "round"
+    },
+    {
+      "sub": "Round 4 -- Restrain (requires prior Hold)"
+    },
+    {
+      "note": "Jax already succeeded at Hold earlier. Now applies the Immobilized Tilt."
+    },
+    {
+      "cmd": "+grapple/restrain",
+      "label": "Jax restrains Marcus"
+    },
+    {
+      "expect": "restrain"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Jax's turn"
+    },
+    {
+      "expect": "turn"
+    },
+    {
+      "sub": "Marcus Breaks Free"
+    },
+    {
+      "note": "Marcus wins the contested roll. Break-free is reflexive; he can still act this turn."
+    },
+    {
+      "cmd": "+grapple/break-free",
+      "as": "Marcus",
+      "label": "Marcus escapes"
+    },
+    {
+      "expect": "break free"
+    },
+    {
+      "sub": "Close the Encounter"
+    },
+    {
+      "cmd": "+combat/end",
+      "as": "admin",
+      "label": "end fight"
+    },
+    {
+      "expect": "ended"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

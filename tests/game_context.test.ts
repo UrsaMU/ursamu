@@ -9,8 +9,8 @@
  * it correctly (backward compat).
  */
 import { assertEquals, assertInstanceOf, assertExists } from "@std/assert";
-import { buildContext } from "../src/engine/context.ts";
-import { createNativeSDK } from "../src/services/SDK/index.ts";
+import { buildContext } from "@ursamu/mush";
+import { createNativeSDK } from "@ursamu/mush";
 import { dbojs } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

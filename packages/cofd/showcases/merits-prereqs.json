@@ -1,0 +1,80 @@
+{
+  "key": "merits-prereqs",
+  "title": "Merits -- prerequisites & validation",
+  "description": "Demonstrates merit validation: setting valid merits, rejecting invalid dot counts, and blocking merits whose prerequisites are not met.",
+  "vars": { "player": "Tester" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Test Character",
+          "virtue": "Prudence",
+          "vice": "Sloth",
+          "attributes": {
+            "strength": 2, "dexterity": 2, "stamina": 2,
+            "intelligence": 2, "wits": 2, "resolve": 2,
+            "presence": 2, "manipulation": 2, "composure": 2
+          },
+          "skills": {
+            "athletics": 0, "brawl": 0, "drive": 0, "firearms": 0, "larceny": 0,
+            "stealth": 0, "survival": 0, "weaponry": 0,
+            "academics": 0, "computer": 0, "crafts": 0, "investigation": 0,
+            "medicine": 0, "occult": 0, "politics": 0, "science": 0,
+            "animal_ken": 0, "empathy": 0, "expression": 0, "intimidation": 0,
+            "persuasion": 0, "socialize": 0, "streetwise": 0, "subterfuge": 0
+          },
+          "specialties": {},
+          "merits": {},
+          "advantages": {
+            "size": 5, "speed": 9, "initiative": 4, "defense": 2,
+            "armor": 0, "health": 7, "healthCurrent": 7,
+            "willpower": 4, "willpowerCurrent": 4, "integrity": 7
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Valid Merit -- Simple" },
+    { "note": "Contacts ** is a Social merit with no prerequisites. Setting it to 2 dots succeeds." },
+    { "cmd": "+sheet/set contacts(police)=2", "label": "Contacts (Police) **" },
+    { "expect": "Set trait" },
+
+    { "sub": "Valid Merit -- Multi-dot Range" },
+    { "note": "Resources has allowedDots [1,2,3,4,5]. Setting to 3 is fine." },
+    { "cmd": "+sheet/set resources=3", "label": "Resources ***" },
+    { "expect": "Set trait" },
+
+    { "sub": "Invalid Merit -- Dot Count Out of Range" },
+    { "note": "Direction Sense only has allowedDots [1]. Requesting 2 dots is rejected." },
+    { "cmd": "+sheet/set direction sense=2", "label": "Direction Sense only goes to 1 dot" },
+    { "expect": "Error" },
+
+    { "sub": "Merit With Attribute Prerequisite -- Blocked" },
+    { "note": "Indomitable requires Resolve >=3. Our character has Resolve 2, so this is blocked." },
+    { "cmd": "+sheet/set indomitable=2", "label": "Resolve 2 < 3 required" },
+    { "expect": "Error" },
+
+    { "sub": "Merit With Attribute Prerequisite -- Allowed" },
+    { "note": "Raise Resolve to 3 first, then Indomitable **  can be set." },
+    { "cmd": "+sheet/set resolve=3", "label": "raise Resolve to 3" },
+    { "expect": "Set trait" },
+    { "cmd": "+sheet/set indomitable=2", "label": "now prereq is satisfied" },
+    { "expect": "Set trait" },
+
+    { "sub": "Unseen Sense -- Template Prerequisite" },
+    { "note": "Unseen Sense requires template=mortal. As a Mortal, this character qualifies." },
+    { "cmd": "+sheet/set unseen sense=3", "label": "template=mortal -- prereq met" },
+    { "expect": "Set trait" },
+
+    { "sub": "OR Prerequisite" },
+    { "note": "Fast Reflexes prereq: wits>=3 OR dexterity>=3. Our character has neither yet." },
+    { "cmd": "+sheet/set fast reflexes=1", "label": "neither Wits nor Dex >= 3 yet" },
+    { "expect": "Error" },
+    { "cmd": "+sheet/set dexterity=3", "label": "raise Dexterity to 3" },
+    { "expect": "Set trait" },
+    { "cmd": "+sheet/set fast reflexes=1", "label": "now Dex >= 3 -- prereq met" },
+    { "expect": "Set trait" }
+  ]
+}

@@ -6,7 +6,7 @@
 import { assertEquals, assertMatch, assertGreater } from "@std/assert";
 import { DBO } from "@ursamu/core";
 import { gameClock } from "@ursamu/mush";
-import { setConfig } from "../src/services/Config/mod.ts";
+import { setConfig } from "@ursamu/core";
 
 // ---------------------------------------------------------------------------
 // Shared KV (in-memory) — must be set before any DBO operation
@@ -101,7 +101,7 @@ Deno.test("gameClock.save() and load() round-trip", OPTS, async () => {
 Deno.test("u.sys.gameTime() via createNativeSDK returns current game time", OPTS, async () => {
   gameClock.set({ year: 2, month: 6, day: 3, hour: 10, minute: 20 });
 
-  const { createNativeSDK } = await import("../src/services/SDK/index.ts");
+  const { createNativeSDK } = await import("@ursamu/mush");
   const u = await createNativeSDK("sock-gc1", "gc_actor1", { name: "@time", args: [] });
 
   const gt = await u.sys.gameTime();

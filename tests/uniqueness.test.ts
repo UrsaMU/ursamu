@@ -1,6 +1,5 @@
 import { assertEquals, assertNotEquals } from "@std/assert";
-import { dbojs } from "@ursamu/mush";
-import { isNameTaken } from "../src/utils/isNameTaken.ts";
+import { dbojs, isNameTaken } from "@ursamu/mush";
 
 // Mock KV
 const kv = await Deno.openKv(":memory:");

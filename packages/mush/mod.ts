@@ -18,6 +18,8 @@ export { flags }                             from "./src/world/flags.ts";
 export { evaluateLock, validateLock, registerLockFunc, registerLockEvaluator, callLockFunc } from "./src/world/locks.ts";
 export type { LockFunc } from "./src/world/locks.ts";
 export { hydrate }                           from "./src/world/dbobjs.ts";
+export { buildContext }                      from "./src/world/context.ts";
+export type { GameContext }                  from "./src/world/context.ts";
 export { gameClock }                         from "./src/world/game-clock.ts";
 export { InterceptorService }                from "./src/world/interceptor-service.ts";
 export { intentRegistry }                   from "./src/world/intent-registry.ts";
@@ -63,6 +65,8 @@ export {
   unregisterFormatHandler,
   registerFormatTemplate,
   resolveFormat,
+  resolveFormatOr,
+  runPluginFormatHandlers,
   resolveGlobalFormat,
   resolveGlobalFormatOr,
   _clearFormatHandlers,
@@ -72,8 +76,14 @@ export {
   header,
   divider,
   footer,
+  registerHeader,
+  registerDivider,
+  registerFooter,
+  unregisterHeader,
+  unregisterDivider,
+  unregisterFooter,
 } from "./src/format/handlers.ts";
-export type { FormatHandler } from "./src/format/handlers.ts";
+export type { FormatHandler, LayoutFn } from "./src/format/handlers.ts";
 
 // Re-export GameHookMap augmentation so consumers get mush event types
 export type { MushHookMap }                  from "./src/events/types.ts";
@@ -84,13 +94,19 @@ export type { IChargenApp, ChargenHookMap }  from "./src/events/chargen.ts";
 export {
   authHandler, dbObjHandler, configHandler, sceneHandler,
   objectsHandler, flagsHandler, functionsHandler,
-  registerMushRoutes, handleRequest, setAuthenticator,
-  avatarServe, MAX_API_TRACKED_IPS,
+  registerMushRoutes, handleRequest as mushHandleRequest, setAuthenticator,
+  avatarServe, MAX_API_TRACKED_IPS, authenticate,
 } from "./src/routes/index.ts";
 export { registerPluginRoute } from "./src/routes/plugin.ts";
 export type { PluginRouteHandler } from "./src/routes/plugin.ts";
 export { meHandler, onlinePlayersHandler, channelsHandler, channelHistoryHandler } from "./src/routes/players.ts";
 export { MAX_TRACKED_IPS } from "./src/routes/auth.ts";
+
+// Entrypoints
+export { initializeEngine, mu, checkAndCreateSuperuser } from "./src/main.ts";
+export { startTelnetServer } from "./src/telnet.ts";
+export { handleRequest, registerUIComponent, unregisterUIComponent } from "./src/app.ts";
+export type { IUIComponent } from "./src/app.ts";
 
 // Verbs barrel — all registered commands (loaded by loadDefaultCommands)
 export { setLoadedPlugins }                  from "./src/verbs/admin-reload.ts";
@@ -123,3 +139,21 @@ export { execMoniker }                                             from "./src/v
 export { default as parser, resetJsCallCount, updateParserSubs }   from "./src/render/parser.ts";
 export { Presenter }                                               from "./src/render/presenter.ts";
 export type { IState as IRenderState }                             from "./src/render/types.ts";
+
+// Event Hooks
+export { hooks }                                                   from "./src/events/hooks.ts";
+
+// Utilities
+export { target, getAttribute, isNameTaken }                          from "./src/main_utils.ts";
+
+// Backwards-compat shim — plugins that imported `wsService` before the monorepo split
+import { sessions } from "@ursamu/core";
+export const wsService = {
+  getConnectedSockets(): Array<{ cid: string | undefined; id: string }> {
+    return sessions.list().map((s) => ({
+      id: s.socketId,
+      cid: (((s as unknown as Record<string, unknown>).actorId as string | undefined) ?? (s.sessionId || undefined)),
+    }));
+  },
+};
+

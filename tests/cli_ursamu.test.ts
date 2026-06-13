@@ -8,7 +8,7 @@ import { assertEquals, assertStringIncludes, assert } from "@std/assert";
 import { join } from "@std/path";
 import { existsSync } from "@std/fs";
 
-const URSAMU_TS = new URL("../src/cli/ursamu.ts", import.meta.url).pathname;
+const URSAMU_TS = new URL("../packages/cli/src/ursamu.ts", import.meta.url).pathname;
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 interface RunResult { stdout: string; stderr: string; code: number }

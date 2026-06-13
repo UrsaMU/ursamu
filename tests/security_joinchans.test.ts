@@ -36,10 +36,9 @@ Deno.test("#9 — joinChans must not clobber unrelated player fields", OPTS, asy
     send: () => {},
     disconnect: () => {},
   };
-  const ctx = { socket: mockSocket as unknown as Parameters<typeof joinChans>[0]["socket"], msg: "" };
 
-  const { joinChans } = await import("../src/utils/joinChans.ts");
-  await joinChans(ctx);
+  const { joinChans } = await import("../packages/channels/mod.ts");
+  await joinChans(playerId, mockSocket.id);
 
   // sentinel field must still be present
   const after = await dbojs.queryOne({ id: playerId });

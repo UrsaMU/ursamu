@@ -1,0 +1,58 @@
+{
+  "ammo": [
+    {
+      "key": "magazine-9mm-light",
+      "name": "Magazine, 9mm (Light Pistol)",
+      "forWeaponKeys": ["pistol-light", "smg-small", "smg-large"],
+      "rounds": 18,
+      "availability": 1,
+      "size": 1,
+      "concealed": true
+    },
+    {
+      "key": "magazine-9mm-heavy",
+      "name": "Magazine, .45 ACP (Heavy Pistol)",
+      "forWeaponKeys": ["pistol-heavy"],
+      "rounds": 8,
+      "availability": 1,
+      "size": 1,
+      "concealed": true
+    },
+    {
+      "key": "magazine-shotgun-12g",
+      "name": "Shells, 12-gauge",
+      "forWeaponKeys": ["shotgun"],
+      "rounds": 6,
+      "availability": 1,
+      "size": 1,
+      "concealed": false
+    },
+    {
+      "key": "magazine-rifle-308",
+      "name": "Magazine, .308 Rifle",
+      "forWeaponKeys": ["rifle", "assault-rifle"],
+      "rounds": 20,
+      "availability": 2,
+      "size": 1,
+      "concealed": false
+    },
+    {
+      "key": "speedloader-revolver",
+      "name": "Speedloader, Revolver",
+      "forWeaponKeys": ["revolver-light", "revolver-heavy"],
+      "rounds": 6,
+      "availability": 1,
+      "size": 1,
+      "concealed": true
+    },
+    {
+      "key": "arrows-broadhead",
+      "name": "Arrows, Broadhead",
+      "forWeaponKeys": ["bow-short", "bow-long", "crossbow"],
+      "rounds": 12,
+      "availability": 1,
+      "size": 2,
+      "concealed": false
+    }
+  ]
+}

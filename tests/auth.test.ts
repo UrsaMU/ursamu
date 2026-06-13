@@ -2,6 +2,7 @@ import { assertEquals } from "@std/assert";
 import { authHandler } from "@ursamu/mush";
 import { dbojs } from "@ursamu/mush";
 import { hash } from "../deps.ts";
+import { DBO } from "@ursamu/core";
 
 // Mock KV
 const kv = await Deno.openKv(":memory:");
@@ -50,4 +51,8 @@ Deno.test("Auth Route", async (t) => {
     const body = await res.json();
     assertEquals(body.error, "Invalid username or password.");
   });
+
+  // Clean up PGlite database timers
+  await DBO.close();
 });
+

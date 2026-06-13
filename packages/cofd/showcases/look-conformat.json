@@ -1,0 +1,76 @@
+{
+  "key": "look-conformat",
+  "title": "+look -- room, player, thing, and exit formatting",
+  "description": "Demonstrates the new pluggable default CONFORMAT room occupant and contents formatting (inspired by Rhost Vision style).",
+  "vars": { "player": "Alice" },
+  "setup": {
+    "character": {
+      "state": {
+        "moniker": "Alice",
+        "attributes": [
+          { "name": "short-desc", "value": "A smart detective in a beige coat." }
+        ]
+      }
+    },
+    "targets": {
+      "Bob": {
+        "flags": ["player", "connected"],
+        "location": "mock-room",
+        "state": {
+          "name": "Bob",
+          "name_color": "%cg",
+          "description": "A tall, rugged ranger.",
+          "attributes": [
+            { "name": "short-desc", "value": "A tall, rugged ranger." }
+          ]
+        }
+      },
+      "Iron Sword": {
+        "flags": ["thing"],
+        "location": "mock-bob",
+        "state": {
+          "name": "Iron Sword",
+          "kind": "weapon",
+          "wielded": true,
+          "concealed": false,
+          "description": "A finely crafted blade of cold iron, perfectly balanced."
+        }
+      }
+    },
+    "room": {
+      "name": "OOC Polis",
+      "desc": "A quiet, dimly lit room in the city, smelling of paper and old books.",
+      "exits": [
+        { "name": "North;n", "description": "A dark pathway leading north towards the archives." }
+      ]
+    }
+  },
+  "steps": [
+    { "sub": "Looking at the Room" },
+    { "note": "Running 'look' with no arguments displays the room name, description, room occupants (sorted/padded using our custom pluggable default CONFORMAT handler), and exits." },
+    { "cmd": "look", "label": "look at room" },
+    { "expect": "OOC Polis" },
+    { "expect": "Players" },
+    { "expect": "ranger" },
+    { "expect": "Exits" },
+    { "expect": "North" },
+
+    { "sub": "Looking at a Player" },
+    { "note": "Looking at another player displays their description and any carrying contents." },
+    { "cmd": "look Bob", "label": "look at bob" },
+    { "expect": "Bob" },
+    { "expect": "A tall, rugged ranger." },
+
+    { "sub": "Looking at a Thing" },
+    { "note": "Looking at a thing/object displays its description." },
+    { "cmd": "look Iron Sword", "label": "look at weapon" },
+    { "expect": "Iron Sword" },
+    { "expect": "finely crafted blade" },
+
+    { "sub": "Looking at an Exit" },
+    { "note": "Looking at an exit displays its alias and description." },
+    { "cmd": "look North", "label": "look at exit" },
+    { "expect": "North" },
+    { "expect": "dark pathway leading north" }
+  ]
+}

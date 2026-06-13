@@ -8,7 +8,7 @@ import { assertEquals, assertStringIncludes, assert } from "@std/assert";
 import { join } from "@std/path";
 import { existsSync } from "@std/fs";
 
-const CREATE_TS = new URL("../src/cli/create.ts", import.meta.url).pathname;
+const CREATE_TS = new URL("../packages/cli/src/create.ts", import.meta.url).pathname;
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 interface RunResult { stdout: string; stderr: string; code: number }

@@ -290,7 +290,12 @@ export async function matchExits(
     const fromId = actor.location;
     const exitName = aliases[0] || rawName;
 
-    await dbojs.modify({ id: actorId }, "$set", { location: destination } as Partial<typeof actor>);
+    actor.data ||= {};
+    actor.data.lastCommand = Date.now();
+    await dbojs.modify({ id: actorId }, "$set", {
+      location: destination,
+      data: actor.data,
+    } as Partial<typeof actor>);
 
     const actorName = (actor.data?.moniker as string) || (actor.data?.name as string) || "Someone";
     const fromRoom = await dbojs.queryOne({ id: fromId });

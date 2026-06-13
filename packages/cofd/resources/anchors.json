@@ -1,0 +1,52 @@
+{
+  "version": "cofd-2e-core",
+  "rules": {
+    "willpower": "Acting on a Virtue restores all spent Willpower (once per scene). Acting on a Vice restores one Willpower point (once per scene).",
+    "selection": "Pick one Virtue and one Vice from these canonical CoFD 2e corebook examples.",
+    "sharedNames": "The word 'Competitive' legitimately appears as both a Virtue and a Vice in the corebook; a character may choose either, but not both."
+  },
+  "virtues": [
+    {
+      "name": "Competitive",
+      "description": "Your character always pushes herself to excel and be the best at whatever she does. It is not about defeating others, but about the rush she gets from honest competition, and the thrill of knowing that she pushed herself further and faster to stay ahead of her rivals.",
+      "willpowerTrigger": "Regain Willpower when your character honestly competes with someone who outclasses her, for stakes that she will feel if she loses."
+    },
+    {
+      "name": "Generous",
+      "description": "Your character feels at his best when giving to others. He may give to charity or simply lend items to friends with no questions asked. A generous character may be taken advantage of sometimes, but he is not in it for thanks or hope of repayment. He gives because other people need.",
+      "willpowerTrigger": "Regain Willpower when your character is deprived of an important resource or put at risk because of his Generous nature."
+    },
+    {
+      "name": "Just",
+      "description": "A Just character is driven by a sense of fairness and justice. She wants everyone to get what they deserve, and will stick her neck out to make sure it happens.",
+      "willpowerTrigger": "Regain Willpower when the character sets her own goals aside in order to make certain that justice is done."
+    },
+    {
+      "name": "Loyal",
+      "description": "Loyalty to a person or a group is your character's guide. This group could be other PCs, a company, a mentor or family member, their country, or any other group that makes sense. The character is not necessarily foolish or blind to the flaws of their chosen group.",
+      "willpowerTrigger": "Regain Willpower when refusing to act against the group's interests puts him at risk."
+    }
+  ],
+  "vices": [
+    {
+      "name": "Ambitious",
+      "description": "Your character wants to get ahead, to move up the ladder -- no matter what the cost. She wants advancement, rank, and authority in advance of what she actually has earned.",
+      "willpowerTrigger": "Regain Willpower when your character jockeys for position or tries to advance socially instead of pursuing a more useful activity."
+    },
+    {
+      "name": "Arrogant",
+      "description": "Your character is good at something, and makes sure everyone knows it. He defines himself by being 'better' than those around him. This goes beyond justifiable pride in an ability.",
+      "willpowerTrigger": "Regain Willpower when the character takes an opportunity to lord his superiority over someone else."
+    },
+    {
+      "name": "Competitive",
+      "description": "Your character needs to win. Nothing makes her happier than crossing the finish line first, and nothing makes her angrier than losing. She may even be willing to cheat in order to get her victory.",
+      "willpowerTrigger": "Regain Willpower when the character indulges in a competition that distracts from other, more pressing, matters."
+    },
+    {
+      "name": "Greedy",
+      "description": "Your character wants to hoard resources, keeping them for himself in case they are useful someday.",
+      "willpowerTrigger": "Regain Willpower when you take an advantage for yourself, denying it to another character."
+    }
+  ]
+}

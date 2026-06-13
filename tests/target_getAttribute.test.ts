@@ -9,8 +9,8 @@
  * DB fixtures for each test group and clean them up afterwards.
  */
 import { assertEquals } from "@std/assert";
-import { target } from "../src/utils/target.ts";
-import { getAttribute } from "../src/utils/getAttribute.ts";
+import { target } from "@ursamu/mush";
+import { getAttribute } from "@ursamu/mush";
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
 import type { IDBOBJ } from "@ursamu/mush";

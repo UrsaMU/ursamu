@@ -1,5 +1,66 @@
 import type { IUrsamuSDK } from "../commands/types.ts";
 import { createToken } from "@ursamu/core";
+import { getConfig } from "@ursamu/core";
+
+export async function execCreate(u: IUrsamuSDK): Promise<void> {
+  const pieces = (u.cmd.args[0] || "").split(" ");
+  let name = "";
+  let password = "";
+
+  if (pieces.length === 2) {
+    [name, password] = pieces;
+  } else {
+    password = pieces.pop() || "";
+    name = pieces.join(" ");
+  }
+
+  name = name.trim();
+  if (!name || !password) {
+    u.send("Usage: create <name> <password>");
+    return;
+  }
+  if (password.length < 5) {
+    u.send("Password must be at least 5 characters.");
+    return;
+  }
+
+  const existing = await u.db.search(name);
+  if (existing.some((o) => o.flags.has("player"))) {
+    u.send("A character with that name already exists.");
+    return;
+  }
+
+  const playerStart = getConfig<string>("game.playerStart") || "1";
+  const player = await u.db.create({
+    name,
+    flags: new Set(["player"]),
+    location: playerStart,
+    contents: [],
+    state: { name, password },
+  });
+
+  await u.auth.login(player.id);
+
+  try {
+    const token = await createToken({ id: player.id });
+    u.send("", undefined, { token });
+  } catch (e: unknown) {
+    console.warn("[create] Failed to issue session token:", e);
+  }
+
+  try {
+    const superusers = await u.db.search({ flags: /superuser/ });
+    if (!superusers.length) {
+      await u.setFlags(player.id, "superuser");
+      u.send("%ch%cyYou are the first user — superuser access granted.%cn");
+    }
+  } catch (e: unknown) {
+    console.warn("[create] superuser check failed:", e);
+  }
+
+  u.send(`Welcome, ${name}! Your character has been created.`);
+  u.execute("look");
+}
 
 export async function execConnect(u: IUrsamuSDK): Promise<void> {
   const pieces = (u.cmd.args[0] || "").split(" ");

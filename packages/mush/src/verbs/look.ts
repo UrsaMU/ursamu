@@ -1,6 +1,7 @@
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK, IDBObj } from "../commands/types.ts";
 import { resolveFormat, header, divider, footer, registerFormatHandler } from "../format/handlers.ts";
+import { getConfig } from "@ursamu/core";
 
 const WIDTH = 78;
 const NO_DESCRIPTION = "You see nothing special.";
@@ -61,7 +62,7 @@ function exitDisplay(e: IDBObj): string {
   const name = parts[0] || "???";
   const alias = parts[1] || "";
   if (alias && alias.toLowerCase() !== name.toLowerCase()) {
-    return `<%cc${alias}%cn> ${name}`;
+    return `<%cc${alias.toUpperCase()}%cn> ${name}`;
   }
   return name;
 }
@@ -103,11 +104,19 @@ async function renderRoom(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCont
       } else {
         if (characters.length > 0) {
           lines.push(divider("Players", "-", WIDTH));
-          for (const c of characters) lines.push(` ${u.util.displayName(c, actor)}`);
+          for (const c of characters) {
+            const disp = u.util.displayName(c, actor);
+            const canEditChar = await u.canEdit(actor, c);
+            lines.push(` ${canEditChar ? `${disp}(#${c.id})` : disp}`);
+          }
         }
         if (objects.length > 0) {
           lines.push(divider("Contents", "-", WIDTH));
-          for (const o of objects) lines.push(` ${u.util.displayName(o, actor)}`);
+          for (const o of objects) {
+            const disp = u.util.displayName(o, actor);
+            const canEditObj = await u.canEdit(actor, o);
+            lines.push(` ${canEditObj ? `${disp}(#${o.id})` : disp}`);
+          }
         }
       }
     }
@@ -120,7 +129,12 @@ async function renderRoom(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCont
       lines.push(exitOverride);
     } else {
       lines.push(divider("Exits", "-", WIDTH));
-      lines.push(nColumn(exits.map(exitDisplay), 3, WIDTH));
+      const exitStrings = await Promise.all(exits.map(async (e) => {
+        const disp = exitDisplay(e);
+        const canEditExit = await u.canEdit(actor, e);
+        return canEditExit ? `${disp}(#${e.id})` : disp;
+      }));
+      lines.push(nColumn(exitStrings, 3, WIDTH));
     }
   }
 
@@ -162,11 +176,19 @@ async function renderSingle(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCo
       } else {
         if (players.length > 0) {
           lines.push(divider("Players", "-", WIDTH));
-          for (const c of players) lines.push(` ${u.util.displayName(c, actor)}`);
+          for (const c of players) {
+            const disp = u.util.displayName(c, actor);
+            const canEditChar = await u.canEdit(actor, c);
+            lines.push(` ${canEditChar ? `${disp}(#${c.id})` : disp}`);
+          }
         }
         if (things.length > 0) {
           lines.push(divider("Carrying", "-", WIDTH));
-          for (const o of things) lines.push(` ${u.util.displayName(o, actor)}`);
+          for (const o of things) {
+            const disp = u.util.displayName(o, actor);
+            const canEditObj = await u.canEdit(actor, o);
+            lines.push(` ${canEditObj ? `${disp}(#${o.id})` : disp}`);
+          }
         }
       }
     }
@@ -277,15 +299,16 @@ function getShortDesc(obj: IDBObj): string {
 }
 
 function roleTag(obj: IDBObj): string {
-  for (const t of ROLE_TAGS) if (obj.flags?.has(t.flag)) return t.display;
+  const configured = getConfig<Array<{ flag: string; display: string }>>("plugins.globals.theme.look.roleTags") || ROLE_TAGS;
+  for (const t of configured) if (obj.flags?.has(t.flag)) return t.display;
   return "";
 }
 
-export const defaultConformatHandler = (
+export const defaultConformatHandler = async (
   u: IUrsamuSDK,
   target: IDBObj,
   idList: string,
-): string | null => {
+): Promise<string | null> => {
   const ids = idList.split(" ").map((id) => id.replace("#", "").trim()).filter(Boolean);
   const contents = target.contents || [];
   const visibleObjs = ids
@@ -305,19 +328,23 @@ export const defaultConformatHandler = (
       const idle = formatIdle(c.state?.lastCommand as number);
       const role = roleTag(c);
       const desc = getShortDesc(c) || SHORTDESC_PROMPT;
+      const canEditChar = await u.canEdit(actor, c);
+      const nameWithRef = canEditChar ? `${cName}(#${c.id})` : cName;
 
-      const namePad = " ".repeat(Math.max(1, 21 - visualLen(cName)));
+      const namePad = " ".repeat(Math.max(1, 21 - visualLen(nameWithRef)));
       const rolePad = " ".repeat(Math.max(1, 13 - visualLen(role)));
       const idlePad = " ".repeat(Math.max(1, 4 - visualLen(idle)));
 
-      lines.push(` ${cName}${namePad}${role}${rolePad}${idle}${idlePad}${desc}`.replace(/\s+$/, ""));
+      lines.push(` ${nameWithRef}${namePad}${role}${rolePad}${idle}${idlePad}${desc}`.replace(/\s+$/, ""));
     }
   }
 
   if (objects.length > 0) {
     lines.push(divider("Contents", "-", WIDTH));
     for (const o of objects) {
-      lines.push(` ${o.name || u.util.displayName(o, actor)}`);
+      const disp = o.name || u.util.displayName(o, actor);
+      const canEditObj = await u.canEdit(actor, o);
+      lines.push(` ${canEditObj ? `${disp}(#${o.id})` : disp}`);
     }
   }
 

@@ -12,7 +12,7 @@ import type { IUrsamuSDK } from "./types.ts";
 import { dbojs, hydrate } from "../world/dbobjs.ts";
 import { evaluateLock } from "../world/locks.ts";
 import { flags as flagsUtil } from "../world/flags.ts";
-import { send, sessions, gameHooks, setConfig } from "@ursamu/core";
+import { send, sendPayload, sessions, gameHooks, setConfig } from "@ursamu/core";
 import "../events/types.ts";
 import { resolveFormat, resolveFormatOr, resolveGlobalFormat, resolveGlobalFormatOr, header, divider, footer, center, ljust, rjust } from "../format/handlers.ts";
 
@@ -64,9 +64,15 @@ async function resolveRoom(roomId: string | undefined): Promise<IDBObj & { broad
     ...room,
     broadcast: (msg: string, opts?: Record<string, unknown>) => {
       const exclude = (opts?.exclude as string[]) ?? [];
+      const allSessions = sessions.list();
       room.contents
         .filter((o) => o.flags.has("connected") && !exclude.includes(o.id))
-        .forEach((o) => send([o.id], msg));
+        .forEach((o) => {
+          const socketIds = allSessions
+            .filter((s) => ((s as unknown as Record<string, unknown>).actorId as string | undefined) === o.id)
+            .map((s) => s.socketId);
+          if (socketIds.length) send(socketIds, msg);
+        });
     },
   };
 }
@@ -164,13 +170,24 @@ export async function createNativeSDK(
       },
       sprintf: (fmt: string, ...args: unknown[]) => {
         let i = 0;
-        return fmt.replace(/%[sdifx%]/g, (m) => {
-          if (m === "%%") return "%";
+        return fmt.replace(/%(-)?(\d+)?([sdifx%])/g, (_, left, width, type) => {
+          if (type === "%") return "%";
           const a = args[i++];
-          if (m === "%d" || m === "%i") return String(Math.trunc(Number(a)));
-          if (m === "%f") return String(Number(a));
-          if (m === "%x") return Number(a).toString(16);
-          return String(a ?? "");
+          let val = "";
+          if (type === "d" || type === "i") val = String(Math.trunc(Number(a)));
+          else if (type === "f") val = String(Number(a));
+          else if (type === "x") val = Number(a).toString(16);
+          else val = String(a ?? "");
+
+          if (width) {
+            const w = parseInt(width, 10);
+            const pad = w - val.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").length;
+            if (pad > 0) {
+              if (left) val = val + " ".repeat(pad);
+              else val = " ".repeat(pad) + val;
+            }
+          }
+          return val;
         });
       },
       stripSubs,
@@ -245,9 +262,26 @@ export async function createNativeSDK(
 
     canEdit,
 
-    send: (message: string, targetId?: string) => {
-      const dest = targetId ?? socketId;
-      send([dest], message);
+    send: (message: string, targetId?: string, options?: Record<string, unknown>) => {
+      if (targetId && targetId !== socketId) {
+        // targetId is a player DB ID — resolve to socket IDs via session store
+        const socketIds = sessions.list()
+          .filter((s) => ((s as unknown as Record<string, unknown>).actorId as string | undefined) === targetId)
+          .map((s) => s.socketId);
+        const dests = socketIds.length ? socketIds : [targetId];
+        if (options && Object.keys(options).length > 0) {
+          dests.forEach((d) => sendPayload(d, message, options));
+        } else {
+          send(dests, message);
+        }
+      } else {
+        const dest = socketId;
+        if (options && Object.keys(options).length > 0) {
+          sendPayload(dest, message, options);
+        } else {
+          send([dest], message);
+        }
+      }
     },
 
     notify: async (actorId: string, message: string, _opts?: Record<string, unknown>) => {
@@ -261,18 +295,37 @@ export async function createNativeSDK(
     },
 
     broadcast: (message: string, opts?: Record<string, unknown>) => {
-      here.broadcast(message, opts);
+      (async () => {
+        const liveActorId =
+          ((sessions.get(socketId) as unknown as Record<string, unknown>)?.actorId as string | undefined)
+          ?? actorId;
+        let loc: string | undefined = me.location;
+        if (liveActorId && liveActorId !== "#-1" && liveActorId !== actorId) {
+          const liveActor = await dbojs.queryOne({ id: liveActorId });
+          if (liveActor) loc = liveActor.location;
+        }
+        const liveRoom = await resolveRoom(loc);
+        liveRoom.broadcast(message, opts);
+      })().catch(console.error);
     },
 
     execute: async (command: string) => {
       const { cmds } = await import("./addCmd.ts");
       const rawMsg = command.trim();
+      // Re-read actorId from the live session — login() may have updated it
+      // after the SDK was constructed (e.g. execCreate / execConnect).
+      const liveActorId =
+        ((sessions.get(socketId) as unknown as Record<string, unknown>)?.actorId as string | undefined)
+        ?? actorId;
+      const { dbojs: db2, hydrate: hy2 } = await import("../world/dbobjs.ts");
+      const rawActor2 = liveActorId ? await db2.queryOne({ id: liveActorId }) : null;
+      const actor2 = rawActor2 ? hy2(rawActor2) : me;
       for (const c of cmds) {
         const match = rawMsg.match(c.pattern);
         if (!match) continue;
-        const ok = await evaluateLock(c.lock || "", me, me);
+        const ok = await evaluateLock(c.lock || "", actor2, actor2);
         if (!ok) break;
-        const eu = await createNativeSDK(socketId, actorId, {
+        const eu = await createNativeSDK(socketId, liveActorId, {
           name: c.name,
           original: command,
           args: match.slice(1),
@@ -347,7 +400,10 @@ export async function createNativeSDK(
           ((session as unknown) as Record<string, unknown>).actorId = id;
         }
         const fstr = flagsUtil.set(playerResult.flags, playerResult.data || {}, "connected");
-        await dbojs.modify({ id }, "$set", { flags: fstr.tags } as Partial<IDBOBJ>);
+        await dbojs.modify({ id }, "$set", {
+          flags: fstr.tags,
+          "data.lastCommand": Date.now(),
+        } as Partial<IDBOBJ>);
       },
       hash: async (password: string) => {
         const bcrypt = await import("bcrypt");

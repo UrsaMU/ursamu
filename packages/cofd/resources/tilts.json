@@ -1,0 +1,162 @@
+{
+  "arm-wrack": {
+    "name": "Arm Wrack",
+    "scope": "personal",
+    "description": "An arm is dislocated, sprained, or broken; the limb won't respond.",
+    "effect": "One arm: drop anything held, suffer off-hand penalties for manual-dexterity rolls. Both arms: chance die on manual-dexterity rolls, -3 to other Physical actions.",
+    "causing": "Targeted blow to the arm (-2 penalty) that deals more damage than the target's Stamina. A targeted hand blow inflicts on any damage.",
+    "ending": "Mark an X under the leftmost Health box affected by the attack. Ends when that damage heals. Aggravated damage = permanent loss of limb."
+  },
+  "beaten-down": {
+    "name": "Beaten Down",
+    "scope": "personal",
+    "description": "The fight has been knocked out of the character.",
+    "effect": "Cannot take violent action in combat without spending a Willpower point each turn. May still run, Dodge, and apply Defense.",
+    "causing": "Bashing damage in excess of Stamina, or any lethal damage.",
+    "ending": "Character surrenders and gives the aggressor what they want. Regain 1 Willpower and take a Beat, but take no further fight action."
+  },
+  "blinded": {
+    "name": "Blinded",
+    "scope": "personal",
+    "description": "The character's eyes are damaged or removed.",
+    "effect": "One eye: -3 to vision-based rolls (including attacks) and half Defense. Both eyes: -5 and lose all Defense.",
+    "causing": "Specified attack to the eyes at -5 (single eye normally; exceptional success blinds both). Temporary blinding via sand/dirt: Dex + Athletics -3 vs Defense; one turn.",
+    "ending": "If an eye-targeted attack deals damage, mark an X under the leftmost Health box. Ends when that damage heals. Aggravated = permanent loss of that eye."
+  },
+  "deafened": {
+    "name": "Deafened",
+    "scope": "personal",
+    "description": "Hearing is impaired -- tinnitus, blood-roar, gunshot deafness.",
+    "effect": "One ear: -3 to hearing Perception. Both ears: chance die on hearing Perception, -2 to all combat rolls.",
+    "causing": "Loud noise within 10 ft, or a targeted blow to the ear (-4 penalty). Supernatural hearing extends the noise range.",
+    "ending": "Noise-induced deafness fades after (10 - Stamina + Resolve) turns. Wound-induced deafness ends when that Health damage heals. Aggravated = permanent."
+  },
+  "drugged": {
+    "name": "Drugged",
+    "scope": "personal",
+    "description": "The character's mind is addled by mind-altering substances.",
+    "effect": "-2 Speed (and static Defense if used), -3 to all combat rolls including Defense and Perception. Ignores wound penalties.",
+    "causing": "Voluntary use, or Dex + Weaponry attack at -1 (improvised weapon) to administer. Targeted body part may require a specified attack.",
+    "ending": "Generic narcotic lasts (10 - Stamina + Resolve) hours. Medical intervention halves the time."
+  },
+  "earthquake": {
+    "name": "Earthquake",
+    "scope": "environmental",
+    "description": "Everything shudders and shakes; the ground tears open.",
+    "effect": "-1 to -5 to Dexterity-based pools (and Defense) by severity. 1 to 3 lethal damage per turn (reflexive Stamina + Athletics downgrades to bashing or cancels on exceptional success).",
+    "causing": "Without tremendous supernatural power, all but impossible; large explosives can simulate the effect for seconds.",
+    "ending": "Earthquakes rarely last more than a minute (~20 turns). Waiting it out is usually the only option."
+  },
+  "extreme-cold": {
+    "name": "Extreme Cold",
+    "scope": "environmental",
+    "description": "Bone-chilling temperatures (below 0 C / 32 F). Can be personal via hypothermia or supernatural cause.",
+    "effect": "Bashing damage does not heal (heals at the same rate it would accrue). -1 to all rolls per hour exposed, increasing to -5; further hours after that deal 1 lethal/hour.",
+    "causing": "Freezing environment; lake/freezer immersion long enough to develop hypothermia.",
+    "ending": "Find warmth (heated shelter, warm clothing). Hypothermia needs medical care."
+  },
+  "extreme-heat": {
+    "name": "Extreme Heat",
+    "scope": "environmental",
+    "description": "Temperatures above 40 C / 104 F. Can be personal via debilitating fever.",
+    "effect": "Bashing damage does not heal. -1 to all rolls per hour exposed, increasing to -5; further hours after that deal 1 lethal/hour.",
+    "causing": "Environmental -- desert sun, boiler room, sauna. Forced via restraint near a heat source or stranding.",
+    "ending": "Get out of the heat. In a desert, find shade; otherwise escape the source."
+  },
+  "flooded": {
+    "name": "Flooded",
+    "scope": "environmental",
+    "description": "Brackish water, mud, sewage, or gore impedes movement.",
+    "effect": "-2 to all Physical pools per foot of liquid. Over-head requires Dex + Athletics to swim or Sta + Composure to hold breath.",
+    "causing": "Heavy rain, snowmelt, broken main; smashing a water heater or breaching a small dam; some supernatural creatures.",
+    "ending": "Reach high ground. Long-term: drain the floodwaters."
+  },
+  "heavy-rain": {
+    "name": "Heavy Rain",
+    "scope": "environmental",
+    "description": "Torrential rain hammers visibility and sound.",
+    "effect": "-3 dice to visual and aural Perception. Hour+ of sustained rain risks the Flooded Tilt; often paired with Heavy Winds or Extreme Cold.",
+    "causing": "Natural weather patterns, supernatural powers, or fleets of cloud-seeders.",
+    "ending": "Get indoors or wait the weather out."
+  },
+  "heavy-winds": {
+    "name": "Heavy Winds",
+    "scope": "environmental",
+    "description": "Howling winds buffet streets and structures.",
+    "effect": "-3 to aural Perception. Wind grade 1-5 (1 ~ tropical storm, 3 ~ hurricane, 5 ~ tornado) applies as a penalty to Physical rolls and deals bashing per turn equal to the grade. Reflexive Dex + Athletics to avoid damage.",
+    "causing": "Natural weather, supernatural powers.",
+    "ending": "Get out of the wind. Buildings or vehicles offer shelter."
+  },
+  "ice": {
+    "name": "Ice",
+    "scope": "environmental",
+    "description": "The ground is mirror-slick with ice or a similar slippery surface.",
+    "effect": "Half Speed, -2 to Physical rolls and Defense. Moving at full Speed worsens the penalty to -4. Dramatic failure on a Physical roll = Knocked Down. Drive rolls at -5, half Acceleration.",
+    "causing": "Icy conditions, industrial lubricant spill, polished floor. Dex + Crafts can spread cleaner or chemicals; Extreme Cold + water also works.",
+    "ending": "Get off the ice. Heat/fire melts it; salt or grit restores traction."
+  },
+  "immobilized": {
+    "name": "Immobilized",
+    "scope": "personal",
+    "description": "Something holds the character fast -- grapple, straitjacket, coffin, restraint.",
+    "effect": "Cannot apply Defense or take combat actions. If grappled, may spend Willpower for a head-butt that may not free them.",
+    "causing": "Restrain grappling move, duct tape/zip ties, locked into tight space, painful joint locks.",
+    "ending": "Escape a grapple (Break Free only on success), or Strength + Athletics - item Durability (-2 if arms and legs bound, -4 if hogtied). Each attempt deals 1 bashing."
+  },
+  "insane": {
+    "name": "Insane",
+    "scope": "personal",
+    "description": "Panic attack, sudden imbalance, or full psychotic break.",
+    "effect": "+1 to combat rolls but act after everyone else; -3 to Social rolls; cannot spend Willpower in combat.",
+    "causing": "Resolve + Composure to resist gnawing anxiety (fail = gain Tilt). Witnessing horrific events; mind-affecting supernatural powers; deliberate gaslighting/drug swapping.",
+    "ending": "Normally lasts only the scene. Forcing balance: Resolve + Composure (instant) contested by (10 - Willpower); cannot take other actions or apply Defense that turn."
+  },
+  "insensate": {
+    "name": "Insensate",
+    "scope": "personal",
+    "description": "Shut down from extreme fear or pleasure; staring, cringing, lost in waves.",
+    "effect": "Cannot take any actions. Can apply Defense. Taking damage from an attack knocks the character free and ends the Tilt.",
+    "causing": "Mind-affecting vampire powers, werewolf-induced terror, heroic alcohol or hallucinogens (Dex + Weaponry attack at -1 to administer).",
+    "ending": "Ends at scene end, by spending Willpower to act normally for one turn, or by being struck. If drug-induced, the Drugged Tilt replaces it."
+  },
+  "knocked-down": {
+    "name": "Knocked Down",
+    "scope": "personal",
+    "description": "Driven to the floor by a blow or a leg sweep.",
+    "effect": "Lose this turn's action (if not yet taken). Prone: can still apply Defense; attacks from the ground are at -2.",
+    "causing": "Melee +2 or firearm +3 damage modifier; or targeted leg attack at -2 with declared intent (halve damage on success).",
+    "ending": "Standing up costs an action. A character who hasn't acted yet can roll Dex + Athletics - weapon mod to avoid the Tilt entirely (failure = falls and the Tilt applies)."
+  },
+  "leg-wrack": {
+    "name": "Leg Wrack",
+    "scope": "personal",
+    "description": "A leg is broken, sprained, or dislocated.",
+    "effect": "One leg: half Speed, -2 on movement-based Physical rolls (and Defense). Both legs: Knocked Down, cannot stand; Speed 1 (only if forfeiting other actions); movement Physical rolls become chance dice.",
+    "causing": "Targeted blow to the leg (-2) that deals more damage than the target's Stamina.",
+    "ending": "Mark an X under the leftmost Health box affected. Ends when that damage heals. Aggravated = permanent loss of limb."
+  },
+  "poisoned": {
+    "name": "Poisoned",
+    "scope": "personal",
+    "description": "Poison burns through the body, fogging the head and twisting the gut.",
+    "effect": "Moderate: 1 bashing per turn of combat. Grave: 1 lethal per turn of combat.",
+    "causing": "Ingestion (swapped drink, carbon monoxide leak), or Dex + Weaponry at -1 to inject. Long-term toxin rules apply outside combat.",
+    "ending": "Short of immediate medical care, only struggle. Each turn: reflexive Stamina + Resolve (-3 if also acting). Success counteracts that turn's damage."
+  },
+  "sick": {
+    "name": "Sick",
+    "scope": "personal",
+    "description": "A churning illness -- fever, ache, sweats, hot/cold flushes.",
+    "effect": "Moderate: -1 to all actions in combat, increasing by 1 every two turns to a maximum of -5. Grave: same penalties plus 1 bashing per turn of combat.",
+    "causing": "Hard to deliberately inflict -- vials of pathogen, supernatural disease powers, or long-term exposure days before the fight.",
+    "ending": "Penalties fade at 1/turn once the character rests; damage inflicted remains until healed normally."
+  },
+  "stunned": {
+    "name": "Stunned",
+    "scope": "personal",
+    "description": "Dazed, blurred vision, possibly concussed.",
+    "effect": "Loses next action and halves Defense until next able to act.",
+    "causing": "Head-targeted attack dealing at least Size in damage (target counts Size as one lower for the check). Weapons with the Stun special double their damage modifier for this check only.",
+    "ending": "Normally lasts one turn. May spend a Willpower point reflexively to gather wits early, at -3 to actions taken that turn."
+  }
+}

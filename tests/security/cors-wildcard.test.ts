@@ -6,7 +6,7 @@ import { assertEquals } from "jsr:@std/assert@^1";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
-const SRC = new URL("../../src/app.ts", import.meta.url);
+const SRC = new URL("../../packages/mush/src/app.ts", import.meta.url);
 
 Deno.test(
   "app.ts emits a warning when CORS wildcard (*) is configured",

@@ -181,7 +181,7 @@ Deno.test("ps: handler throw is swallowed; default rendering wins", OPTS, async 
 
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
-const { createNativeSDK } = await import("../src/services/SDK/index.ts");
+const { createNativeSDK } = await import("@ursamu/mush");
 
 const ROOT = "0";
 const ACTOR = "920001";

@@ -5,7 +5,7 @@
 import { assertEquals } from "@std/assert";
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
-import { createNativeSDK } from "../src/services/SDK/index.ts";
+import { createNativeSDK } from "@ursamu/mush";
 import {
   resolveFormat,
   _clearFormatHandlers,

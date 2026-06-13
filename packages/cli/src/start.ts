@@ -1,0 +1,127 @@
+/**
+ * @module start
+ * @description The orchestrator script for the UrsaMU engine.
+ *
+ * This module handles the "zero-config" startup flow:
+ * 1. Initializes configuration.
+ * 2. Checks for (or interactively creates) a superuser.
+ * 3. Spawns the main game server and telnet server as child processes.
+ * 4. Manages process lifecycles and graceful shutdown.
+ */
+
+import { join, dirname, fromFileUrl } from "@std/path";
+import { checkAndCreateSuperuser } from "../../mush/src/main.ts";
+import { initConfig, DBO } from "@ursamu/core";
+
+// 1. Initialize Config (needed for DB connection)
+await initConfig();
+
+// 2. Run Superuser Setup (Interactive)
+try {
+  await checkAndCreateSuperuser();
+  // Close DB connection to release locks/flush for child processes
+  await DBO.close();
+} catch (e) {
+  console.error("Error during startup check:", e);
+  try { await DBO.close(); } catch { /* ignore close errors */ }
+  Deno.exit(1);
+}
+
+// 3. Spawn Processes
+console.log("\n🚀 Starting UrsaMU Servers...");
+
+const getProjectRoot = () => {
+  return Deno.cwd();
+};
+
+const spawnInherit = (scriptSpecifier: string) => {
+  const cmd = new Deno.Command(Deno.execPath(), {
+    args: [
+      "run", 
+      "-A", 
+      "--unstable-detect-cjs",
+      "--unstable-kv",
+      "--unstable-net",
+      scriptSpecifier
+    ],
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+  return cmd.spawn();
+};
+
+// Telnet runs as a long-lived independent process — it only goes down on hard shutdown (SIGINT).
+const telnetProc = spawnInherit(import.meta.resolve("../../mush/src/telnet.ts"));
+
+// Spawn Web Client (optional — only if src/web-client exists)
+const webClientDir = join(getProjectRoot(), "src", "web-client");
+let webProc: Deno.ChildProcess | null = null;
+try {
+  const stat = await Deno.stat(webClientDir);
+  if (stat.isDirectory) {
+    console.log("Starting Web Client...");
+    webProc = new Deno.Command(Deno.execPath(), {
+      args: ["task", "start"],
+      cwd: webClientDir,
+      stdout: "inherit",
+      stderr: "inherit",
+    }).spawn();
+  }
+} catch {
+  // No web client directory — skip silently
+}
+
+const REBOOT_CODE = 75;
+
+let rebootRequested = false;
+let currentMain: Deno.ChildProcess | null = null;
+
+let mainScript = import.meta.resolve("../../mush/src/main.ts");
+try {
+  const stat = Deno.statSync(join(Deno.cwd(), "src", "main.ts"));
+  if (stat.isFile) {
+    mainScript = join(Deno.cwd(), "src", "main.ts");
+  }
+} catch {
+  // Fall back to engine default
+}
+
+const runMain = async () => {
+  while (true) {
+    currentMain = spawnInherit(mainScript);
+    const { code } = await currentMain.status;
+    currentMain = null;
+    if (code === REBOOT_CODE || rebootRequested) {
+      rebootRequested = false;
+      console.log("\n🔄 Restarting main server...");
+      continue;
+    }
+    break;
+  }
+};
+
+const cleanup = () => {
+  console.log("\nShutting down servers...");
+  try { telnetProc.kill(); } catch { /* ignore */ }
+  try { webProc?.kill(); } catch { /* ignore */ }
+};
+
+Deno.addSignalListener("SIGINT", () => {
+  cleanup();
+  Deno.exit(0);
+});
+
+Deno.addSignalListener("SIGTERM", () => {
+  cleanup();
+  try { currentMain?.kill("SIGTERM"); } catch { /* ignore */ }
+  Deno.exit(0);
+});
+
+Deno.addSignalListener("SIGUSR2", () => {
+  console.log("\n🛰  SIGUSR2 received — restarting main without dropping telnet.");
+  rebootRequested = true;
+  try { currentMain?.kill("SIGTERM"); } catch { /* ignore */ }
+});
+
+await runMain();
+cleanup();

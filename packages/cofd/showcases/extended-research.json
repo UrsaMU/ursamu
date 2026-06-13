@@ -1,0 +1,104 @@
+{
+  "key": "extended-research",
+  "title": "+extended -- researching an occult mystery",
+  "description": "A mortal scholar opens an Extended Action to decipher a grimoire (Intelligence + Occult, target 6), rolls a few attempts, abandons or resolves, and demonstrates /list and /status panels.",
+  "vars": {
+    "player": "Lyra"
+  },
+  "setup": {
+    "character": {
+      "flags": [
+        "player",
+        "connected"
+      ],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 2,
+            "dexterity": 2,
+            "stamina": 2,
+            "intelligence": 4,
+            "wits": 3,
+            "resolve": 3,
+            "presence": 2,
+            "manipulation": 2,
+            "composure": 3
+          },
+          "skills": {
+            "occult": 3,
+            "academics": 2
+          },
+          "health": {
+            "max": 7,
+            "bashing": 0,
+            "lethal": 0,
+            "aggravated": 0
+          },
+          "advantages": {
+            "size": 5,
+            "willpowerMax": 6,
+            "willpowerCurrent": 6
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Open the Extended Action"
+    },
+    {
+      "note": "Lyra opens an Extended Action to decipher a grimoire. Default maxRolls is Resolve+Composure = 6. We override to 4 to keep the showcase short."
+    },
+    {
+      "cmd": "+extended/start intelligence+occult=6/4 Decipher the grimoire",
+      "label": "Open action"
+    },
+    {
+      "expect": "Opened"
+    },
+    {
+      "sub": "Inspect status"
+    },
+    {
+      "cmd": "+extended/status",
+      "label": "Owner status"
+    },
+    {
+      "expect": "Pool"
+    },
+    {
+      "sub": "Roll attempts"
+    },
+    {
+      "cmd": "+extended/roll",
+      "label": "First attempt"
+    },
+    {
+      "expect": "Attempt"
+    },
+    {
+      "cmd": "+extended/roll/wp",
+      "label": "Second attempt, spend WP"
+    },
+    {
+      "expect": "Accumulated"
+    },
+    {
+      "sub": "List the owner's actions"
+    },
+    {
+      "cmd": "+extended/list mine",
+      "label": "List mine"
+    },
+    {
+      "expect": "Scope: mine"
+    },
+    {
+      "sub": "Abandon if still active"
+    },
+    {
+      "note": "If the action has not auto-resolved, abandon it. The /list mine line above shows the id needed by /abandon. Skipping in the showcase to avoid dynamic ids."
+    }
+  ]
+}

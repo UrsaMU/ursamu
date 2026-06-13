@@ -1,0 +1,78 @@
+{
+  "key": "integrity-break",
+  "title": "+integrity -- Breaking Points and the Integrity track",
+  "description": "Demonstrates +integrity view, /break (self and ST-initiated), and /set. Conditions granted feed into the +condition catalog.",
+  "vars": { "player": "Katya" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Rookie",
+          "virtue": "Just",
+          "vice": "Wrathful",
+          "attributes": {
+            "strength": 2, "dexterity": 2, "stamina": 2,
+            "intelligence": 2, "wits": 2, "resolve": 3,
+            "presence": 2, "manipulation": 2, "composure": 3
+          },
+          "skills": {
+            "athletics": 0, "brawl": 0, "drive": 0, "firearms": 0, "larceny": 0,
+            "stealth": 0, "survival": 0, "weaponry": 0,
+            "academics": 0, "computer": 0, "crafts": 0, "investigation": 0,
+            "medicine": 0, "occult": 0, "politics": 0, "science": 0,
+            "animal_ken": 0, "empathy": 0, "expression": 0, "intimidation": 0,
+            "persuasion": 0, "socialize": 0, "streetwise": 0, "subterfuge": 0
+          },
+          "specialties": {},
+          "merits": {},
+          "moralityValue": 7,
+          "powerStatValue": 0,
+          "energyCurrent": 0,
+          "customFields": {},
+          "powers": {},
+          "advantages": {
+            "willpowerMax": 6, "willpowerCurrent": 4, "size": 5
+          },
+          "health": { "bashing": 0, "lethal": 0, "aggravated": 0 },
+          "conditions": [],
+          "aspirations": [],
+          "beats": 0,
+          "experience": 0,
+          "arcaneBeats": 0,
+          "arcaneExperience": 0,
+          "touchstones": {},
+          "tempStats": {},
+          "tilts": [],
+          "equipment": { "equippedWeapon": null, "equippedArmor": null }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Viewing Integrity" },
+    { "note": "Starts at 7 dots for mortals (CoFD 2e default). Display is N/10 plus a dot bar." },
+    { "cmd": "+integrity", "label": "view own Integrity" },
+    { "expect": "Integrity: 7/10" },
+
+    { "sub": "Self-triggered Breaking Point" },
+    { "note": "+integrity/break <reason> rolls Resolve + Composure + Integrity-mod. Witnessing a murder is -3 per RAW p.74." },
+    { "cmd": "+integrity/break Saw a man stabbed in an alley -3", "label": "breaking point with -3 situational mod" },
+    { "expect": "Outcome" },
+
+    { "sub": "Direct ST adjustment" },
+    { "note": "+integrity/set <n> -- staff override. Self-edit allowed; cross-player requires canEdit (builder+)." },
+    { "cmd": "+integrity/set 5", "label": "drop yourself to Integrity 5" },
+    { "expect": "Integrity set to 5/10" },
+    { "cmd": "+integrity", "label": "confirm" },
+    { "expect": "Integrity: 5/10" },
+
+    { "sub": "Invalid input" },
+    { "cmd": "+integrity/set 12", "label": "out of range" },
+    { "expect": "0 to 10" },
+
+    { "sub": "Unknown switch" },
+    { "cmd": "+integrity/xyzzy", "label": "unknown" },
+    { "expect": "Unknown" }
+  ]
+}

@@ -27,6 +27,7 @@ export { dbObjHandler }                    from "./dbobj.ts";
 export { meHandler, onlinePlayersHandler, channelsHandler, channelHistoryHandler } from "./players.ts";
 export { sceneHandler }                    from "./scenes.ts";
 export { objectsHandler, flagsHandler, functionsHandler } from "./objects.ts";
+export { authenticate } from "./authMiddleware.ts";
 
 import { registerRoute, registerFallback } from "@ursamu/core";
 import { dispatchPluginRoute } from "./plugin.ts";

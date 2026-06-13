@@ -1,0 +1,67 @@
+{
+  "key": "unapprove-flow",
+  "title": "+unapprove -- staff returns a submitted sheet for revision",
+  "description": "Demonstrates the staff return path. The player is pre-seeded at chargen Stage 6 with a complete sheet; +cg/submit files a CGEN job, then admin runs +unapprove with a reason -- the job is reopened with a staff comment, the submittedJob marker is cleared, and the player can edit chargen and resubmit. The chargen state is preserved; the live sheet is unchanged.",
+  "vars": { "player": "Rookie" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd_cg": {
+          "stage": 6,
+          "isSubmitted": false,
+          "isApproved": false,
+          "sheet": {
+            "template": "mortal",
+            "concept": "Cynical reporter",
+            "virtue": "Hope",
+            "vice": "Pride",
+            "attributes": {
+              "strength": 2, "dexterity": 3, "stamina": 3,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 1, "composure": 2
+            },
+            "skills": {
+              "athletics": 2, "brawl": 0, "drive": 1, "firearms": 0, "larceny": 0,
+              "stealth": 0, "survival": 0, "weaponry": 0,
+              "academics": 3, "computer": 2, "crafts": 0, "investigation": 3,
+              "medicine": 3, "occult": 0, "politics": 0, "science": 2,
+              "animal_ken": 0, "empathy": 3, "expression": 0, "intimidation": 0,
+              "persuasion": 2, "socialize": 0, "streetwise": 0, "subterfuge": 2
+            },
+            "specialties": {
+              "investigation": ["Crime Scenes"],
+              "medicine": ["Emergency Care"]
+            },
+            "merits": {
+              "contacts": 2,
+              "resources": 2,
+              "trained observer": 1,
+              "holistic awareness": 1,
+              "fast reflexes": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Player Submits at Stage 6" },
+    { "cmd": "+cg/submit", "label": "submit for review" },
+    { "expect": "Submitted" },
+
+    { "sub": "Reason Is Required" },
+    { "note": "+unapprove without a reason is refused -- staff must justify a return so the player knows what to fix." },
+    { "cmd": "+unapprove Rookie", "as": "admin", "label": "no reason -> refused" },
+    { "expect": "reason is required" },
+
+    { "sub": "Staff Returns the Submission" },
+    { "note": "+unapprove <player>=<reason> reopens the CGEN job with a staff comment carrying the reason, clears the submittedJob marker so the player can resubmit, and mails the player. The chargen workspace is preserved." },
+    { "cmd": "+unapprove Rookie=Concept needs more detail -- please flesh out the backstory before resubmitting.", "as": "admin", "label": "admin returns" },
+    { "expect": "Character Returned" },
+
+    { "sub": "Live Sheet Untouched" },
+    { "note": "Because no approval ever happened, the player has no live sheet to revert -- and any prior approved sheet would have been unaffected." },
+    { "cmd": "+sheet" },
+    { "expect": "does not have an approved character sheet" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@ursamu/mekton-zeta",
+  "version": "0.1.0",
+  "exports": "./index.ts",
+  "tasks": {
+    "test": "deno test tests/ --allow-net --allow-read --allow-env --allow-write --unstable-kv",
+    "demo": "deno run --allow-env --allow-net --allow-read --allow-write --unstable-kv tests/chargen-demo.ts",
+    "showcase": "deno run -A --unstable-kv --import-map=showcase.importmap.json tools/showcase.ts"
+  },
+  "imports": {
+    "ursamu": "../mush/mod.ts",
+    "@ursamu/ursamu": "../mush/mod.ts",
+    "jsr:@ursamu/ursamu": "../mush/mod.ts",
+    "@ursamu/help-plugin": "../help/mod.ts",
+    "jsr:@ursamu/help-plugin": "../help/mod.ts",
+    "jsr:@std/testing": "jsr:@std/testing",
+    "jsr:@std/assert": "jsr:@std/assert"
+  }
+}

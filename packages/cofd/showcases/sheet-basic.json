@@ -1,0 +1,55 @@
+{
+  "key": "sheet-basic",
+  "title": "+sheet -- character sheet viewer",
+  "description": "Demonstrates viewing a Chronicles of Darkness character sheet for a Mortal with filled-in attributes, skills, and advantages.",
+  "vars": { "player": "Katya" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Street Detective",
+          "virtue": "Justice",
+          "vice": "Envy",
+          "attributes": {
+            "strength": 2, "dexterity": 3, "stamina": 2,
+            "intelligence": 3, "wits": 3, "resolve": 2,
+            "presence": 2, "manipulation": 2, "composure": 3
+          },
+          "skills": {
+            "athletics": 2, "brawl": 1, "drive": 1, "firearms": 2, "larceny": 1,
+            "stealth": 2, "survival": 0, "weaponry": 0,
+            "academics": 2, "computer": 1, "crafts": 0, "investigation": 3,
+            "medicine": 1, "occult": 0, "politics": 0, "science": 0,
+            "animal_ken": 0, "empathy": 2, "expression": 0, "intimidation": 1,
+            "persuasion": 1, "socialize": 2, "streetwise": 2, "subterfuge": 3
+          },
+          "specialties": { "investigation": ["Crime Scenes"], "firearms": ["Pistols"] },
+          "merits": { "trained observer": 1, "contacts": 2, "resources": 2 },
+          "advantages": {
+            "size": 5, "speed": 10, "initiative": 6, "defense": 3,
+            "armor": 0, "health": 7, "healthCurrent": 7,
+            "willpower": 5, "willpowerCurrent": 5,
+            "integrity": 7
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Viewing Your Own Sheet" },
+    { "note": "+sheet with no argument shows your own character sheet. All attributes, skills, merits, and derived advantages are displayed." },
+    { "cmd": "+sheet", "label": "view own sheet" },
+    { "expect": "Katya" },
+
+    { "sub": "Viewing Another Player's Sheet" },
+    { "note": "Admins and the character's owner can view anyone's sheet by passing a name." },
+    { "cmd": "+sheet Katya", "label": "view sheet by name" },
+    { "expect": "Street Detective" },
+
+    { "sub": "Fallback to Self" },
+    { "note": "If the named player can't be resolved, +sheet falls back to showing your own sheet." },
+    { "cmd": "+sheet Ghostly", "label": "unknown name -- shows Katya" },
+    { "expect": "Katya" }
+  ]
+}

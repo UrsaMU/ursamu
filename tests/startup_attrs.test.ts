@@ -11,8 +11,8 @@
 import { assertEquals } from "@std/assert";
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
-import { addCmd, clearCmds } from "../src/services/commands/cmdParser.ts";
-import { runStartupAttrs } from "../src/services/startup/index.ts";
+import { addCmd, clearCmds } from "@ursamu/mush";
+import { runStartupAttrs } from "@ursamu/mush";
 
 // H4 IDs
 const H4_PLAIN_ID   = "st_h4_plain";

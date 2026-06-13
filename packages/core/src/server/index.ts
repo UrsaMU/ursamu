@@ -15,8 +15,12 @@ function makeServer(): ICoreServer {
           await t.start();
           log("info", "server:transport-started", { name: t.name });
         } catch (e: unknown) {
-          log("error", "server:transport-start-failed", { name: t.name, error: String(e) });
-          throw e;
+          if (t.optional) {
+            log("warn", "server:transport-start-skipped", { name: t.name, error: String(e) });
+          } else {
+            log("error", "server:transport-start-failed", { name: t.name, error: String(e) });
+            throw e;
+          }
         }
       }
     },

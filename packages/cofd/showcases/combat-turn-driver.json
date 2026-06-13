@@ -1,0 +1,95 @@
+{
+  "key": "combat-turn-driver",
+  "title": "+combat -- turn driver, delay, move, run, reflexive",
+  "description": "Demonstrates the interactive turn driver: initiative, advancing turns, holding (/delay) and reclaiming (/act), free movement (/move), sprinting (/run), reflexive narration, and one-instant-per-turn enforcement.",
+  "vars": {
+    "player": "Jax"
+  },
+  "setup": {
+    "targets": {
+      "Marcus": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 3, "dexterity": 2, "stamina": 2,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 2, "composure": 2
+            },
+            "skills": { "brawl": 2, "athletics": 2 },
+            "health": { "max": 7, "bashing": 0, "lethal": 0, "aggravated": 0 },
+            "willpower": { "max": 4, "current": 4 }
+          }
+        }
+      }
+    },
+    "character": {
+      "flags": ["player", "connected"],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 3, "dexterity": 4, "stamina": 2,
+            "intelligence": 2, "wits": 3, "resolve": 2,
+            "presence": 2, "manipulation": 2, "composure": 3
+          },
+          "skills": { "brawl": 2, "athletics": 2 },
+          "health": { "max": 7, "bashing": 0, "lethal": 0, "aggravated": 0 },
+          "willpower": { "max": 5, "current": 5 }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Open and Roll Initiative" },
+    { "cmd": "+combat/start", "as": "admin", "label": "ST opens encounter" },
+    { "expect": "encounter" },
+    { "cmd": "+combat/join", "label": "Jax joins" },
+    { "cmd": "+combat/join", "as": "Marcus", "label": "Marcus joins" },
+    { "cmd": "+combat/begin", "as": "admin", "label": "Roll initiative" },
+    { "expect": "I N I T I A T I V E" },
+
+    { "sub": "Free Movement and a Reflexive Beat" },
+    { "note": "On Jax's turn he moves up to Speed yards (free). The /reflexive announcement does not consume the instant action." },
+    { "cmd": "+combat/move", "label": "Jax moves to flank" },
+    { "expect": "MOVE>>" },
+    { "cmd": "+combat/reflexive draws a knife from his belt", "label": "Jax draws a knife" },
+    { "expect": "REFLEX>>" },
+
+    { "sub": "Delay the Action" },
+    { "note": "Jax holds his action so Marcus moves first. /delay sets him Delayed and advances the turn pointer." },
+    { "cmd": "+combat/delay", "label": "Jax delays" },
+    { "expect": "DELAY>>" },
+    { "expect": "TURN>>" },
+
+    { "sub": "Marcus Acts, Then Jax Reclaims" },
+    { "cmd": "+attack Jax", "as": "Marcus", "label": "Marcus swings at Jax" },
+    { "expect": "ATTACK>>" },
+    { "cmd": "+combat/act", "label": "Jax takes his held action" },
+    { "expect": "ACT>>" },
+
+    { "sub": "Action-Economy Enforcement" },
+    { "note": "Jax attacks once. A second attack in the same turn is refused." },
+    { "cmd": "+attack Marcus", "label": "Jax strikes back" },
+    { "expect": "ATTACK>>" },
+    { "cmd": "+attack Marcus", "label": "Jax tries to attack twice" },
+    { "expect": "already used your instant action" },
+
+    { "sub": "Round Wrap Resets the Slot" },
+    { "cmd": "+combat/next", "as": "admin", "label": "End Jax's turn -> Marcus" },
+    { "expect": "TURN>>" },
+    { "cmd": "+combat/next", "as": "admin", "label": "End Marcus's turn -> round 2 Jax" },
+    { "expect": "TURN>>" },
+
+    { "sub": "Sprint Consumes the Slot" },
+    { "note": "On the next turn, Jax /runs. This costs his instant action -- no /attack possible afterward." },
+    { "cmd": "+combat/run", "label": "Jax sprints across the room" },
+    { "expect": "RUN>>" },
+    { "cmd": "+attack Marcus", "label": "Jax tries to attack after running" },
+    { "expect": "already used your instant action" },
+
+    { "sub": "Close the Encounter" },
+    { "cmd": "+combat/end", "as": "admin", "label": "ST closes the fight" },
+    { "expect": "ended" },
+    { "reset": true }
+  ]
+}

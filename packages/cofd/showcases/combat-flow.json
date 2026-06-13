@@ -1,0 +1,89 @@
+{
+  "key": "combat-flow",
+  "title": "+combat -- encounter lifecycle: start, join, begin, order, next, end",
+  "description": "Demonstrates opening a combat encounter, two players joining, rolling initiative, viewing the initiative table, advancing turns through a round wrap, and closing the encounter.",
+  "vars": { "player": "Alice" },
+  "setup": {
+    "targets": {
+      "Bob": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "template": "mortal",
+            "concept": "Brawler",
+            "virtue": "Justice",
+            "vice": "Wrath",
+            "attributes": {
+              "Intelligence": 2, "Wits": 2, "Resolve": 2,
+              "Strength": 3, "Dexterity": 3, "Stamina": 2,
+              "Presence": 2, "Manipulation": 1, "Composure": 2
+            },
+            "skills": {
+              "Academics": 0, "Computer": 0, "Crafts": 0, "Investigation": 0,
+              "Medicine": 0, "Occult": 0, "Politics": 0, "Science": 0,
+              "Athletics": 2, "Brawl": 3, "Drive": 0, "Firearms": 0,
+              "Larceny": 0, "Stealth": 1, "Survival": 0, "Weaponry": 0,
+              "Animal Ken": 0, "Empathy": 1, "Expression": 0, "Intimidation": 2,
+              "Persuasion": 0, "Socialize": 0, "Streetwise": 1, "Subterfuge": 0
+            },
+            "specialties": {},
+            "merits": {},
+            "moralityValue": 7,
+            "powerStatValue": 0,
+            "energyCurrent": 0,
+            "customFields": {},
+            "powers": {},
+            "advantages": { "willpowerMax": 4, "willpowerCurrent": 4, "size": 5 }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "No Encounter Yet" },
+    { "note": "+combat with no switch shows status. No encounter exists yet." },
+    { "cmd": "+combat", "label": "status (empty)" },
+    { "expect": "No active encounter" },
+
+    { "sub": "Start" },
+    { "cmd": "+combat/start", "label": "open encounter" },
+    { "expect": "encounter started" },
+
+    { "note": "Duplicate start in the same room is an error." },
+    { "cmd": "+combat/start", "label": "duplicate start (error)" },
+    { "expect": "already active" },
+
+    { "sub": "Join" },
+    { "cmd": "+combat/join", "label": "Alice joins" },
+    { "expect": "joined the encounter" },
+
+    { "cmd": "+combat/join for Bob", "as": "admin", "label": "admin adds Bob" },
+    { "expect": "joined the encounter" },
+
+    { "sub": "Roll Initiative" },
+    { "cmd": "+combat/begin", "label": "begin (roll initiative)" },
+    { "expect": "Round 1" },
+
+    { "sub": "Initiative Table" },
+    { "cmd": "+combat/order", "label": "view order" },
+    { "expect": "Status: active" },
+
+    { "sub": "Advance Turns" },
+    { "cmd": "+combat/next", "label": "advance (turn 2)" },
+    { "expect": "turn" },
+
+    { "note": "Advancing past the last participant wraps to Round 2." },
+    { "cmd": "+combat/next", "label": "advance (wrap to round 2)" },
+    { "expect": "Round 2" },
+
+    { "sub": "End" },
+    { "cmd": "+combat/end", "label": "end encounter" },
+    { "expect": "ended" },
+
+    { "note": "After ending the room has no active encounter." },
+    { "cmd": "+combat", "label": "status after end" },
+    { "expect": "No active encounter" },
+
+    { "reset": true }
+  ]
+}

@@ -10,30 +10,11 @@ import { assertEquals } from "jsr:@std/assert@^1";
 import { dbojs } from "@ursamu/mush";
 import { DBO } from "@ursamu/core";
 import { Obj } from "@ursamu/mush";
-import { matchNativeCmd } from "../src/services/commands/pipeline-stages.ts";
+import { matchNativeCmd } from "../packages/mush/src/commands/pipeline-stages.ts";
 import { registerLockFunc } from "@ursamu/mush";
 import type { ICmd, IUrsamuSDK } from "@ursamu/mush";
-import type { IContext } from "../src/@types/IContext.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
-
-// ── Minimal socket mock ────────────────────────────────────────────────────
-
-function mockSocket(id: string): IContext["socket"] {
-  return {
-    id,
-    cid: id,
-    join: () => {},
-    leave: () => {},
-    disconnect: () => {},
-    on: () => {},
-    send: () => {},
-  } as unknown as IContext["socket"];
-}
-
-function mockCtx(socketId: string): IContext {
-  return { socket: mockSocket(socketId) };
-}
 
 // ── Test command builder ───────────────────────────────────────────────────
 
@@ -88,8 +69,8 @@ Deno.test(
 
     // Player with matching tribe — command should execute
     const hitWith = await matchNativeCmd(
-      mockCtx("e2e_p1"),
-      withTribe,
+      "e2e_p1",
+      withTribe.id,
       "+e2e-tribe",
       cmds,
     );
@@ -98,8 +79,8 @@ Deno.test(
 
     // Player without tribe — command should be denied by lock
     const hitWithout = await matchNativeCmd(
-      mockCtx("e2e_p2"),
-      noTribe,
+      "e2e_p2",
+      noTribe.id,
       "+e2e-tribe",
       cmds,
     );
@@ -122,8 +103,8 @@ Deno.test(
     const cmds: ICmd[] = [makeCmd("attr(sphere, vampire)", received)];
 
     const hitMatch = await matchNativeCmd(
-      mockCtx("e2e_p3"),
-      withSphere,
+      "e2e_p3",
+      withSphere.id,
       "+e2e-tribe",
       cmds,
     );
@@ -131,8 +112,8 @@ Deno.test(
     assertEquals(received.includes("e2e_p3"), true);
 
     const hitWrong = await matchNativeCmd(
-      mockCtx("e2e_p4"),
-      wrongSphere,
+      "e2e_p4",
+      wrongSphere.id,
       "+e2e-tribe",
       cmds,
     );
@@ -157,15 +138,15 @@ Deno.test(
     const cmds: ICmd[] = [makeCmd("attr(mortal) || !tribe(glasswaler)", received)];
 
     // mortal → passes via attr(mortal)
-    await matchNativeCmd(mockCtx("e2e_p5"), mortal, "+e2e-tribe", cmds);
+    await matchNativeCmd("e2e_p5", mortal.id, "+e2e-tribe", cmds);
     assertEquals(received.includes("e2e_p5"), true, "mortal player should pass");
 
     // glasswaler + no mortal → fails (!tribe(glasswaler) is false, attr(mortal) is false)
-    await matchNativeCmd(mockCtx("e2e_p6"), glasswaler, "+e2e-tribe", cmds);
+    await matchNativeCmd("e2e_p6", glasswaler.id, "+e2e-tribe", cmds);
     assertEquals(received.includes("e2e_p6"), false, "glasswaler-only player should be denied");
 
     // plain player (no tribe, no mortal) → passes via !tribe(glasswaler)
-    await matchNativeCmd(mockCtx("e2e_p7"), plain, "+e2e-tribe", cmds);
+    await matchNativeCmd("e2e_p7", plain.id, "+e2e-tribe", cmds);
     assertEquals(received.includes("e2e_p7"), true, "plain player passes via !tribe(glasswaler)");
 
     await destroyTestPlayer("e2e_p5");

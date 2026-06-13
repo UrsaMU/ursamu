@@ -1,0 +1,46 @@
+{
+  "key": "mekton-combat-gear",
+  "label": "Mekton Zeta Combat and Gear Flow",
+  "vars": { "player": "Rookie Pilot" },
+  "setup": {
+    "character": {
+      "state": {
+        "mekton": {
+          "stats": {
+            "att": 5, "bod": 6, "cl": 5, "emp": 5, "int": 5, "luck": 5, "ma": 6, "ref": 7, "tech": 6, "edu": 5
+          },
+          "skills": {
+            "First Aid": 3,
+            "Handgun": 4
+          },
+          "cash": 1000,
+          "chargenStatus": "approved"
+        }
+      }
+    },
+    "targets": {
+      "dummy": {
+        "flags": ["player", "connected"]
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Gear Management" },
+    { "note": "Browse the equipment catalog." },
+    { "cmd": "+gear/catalog", "label": "Browse catalog" },
+    { "note": "Purchase a Combat Pistol." },
+    { "cmd": "+gear/buy Combat Pistol", "label": "Buy Combat Pistol" },
+    { "cmd": "+gear", "label": "List current inventory" },
+    { "cmd": "+encumbrance", "label": "Check weight load, EV, and effective MA" },
+    
+    { "sub": "Combat Resolution" },
+    { "note": "Attack a target with a weapon (e.g. Combat Pistol)." },
+    { "cmd": "+attack dummy=Combat Pistol", "label": "Attack target with Combat Pistol" },
+    { "note": "Apply damage to a location on your own character." },
+    { "cmd": "+damage head=2", "label": "Apply 2 points of damage to head" },
+    { "cmd": "+sheet", "label": "Show character sheet with wounds" },
+    { "note": "Roll First Aid on a location to heal." },
+    { "cmd": "+heal head", "label": "Heal head location" },
+    { "cmd": "+stun", "label": "Check stun state" }
+  ]
+}

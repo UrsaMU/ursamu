@@ -16,8 +16,8 @@ import {
   registerFormatHandler,
   _clearFormatHandlers,
   resolveFormat,
+  runPluginFormatHandlers,
 } from "@ursamu/mush";
-import { runPluginFormatHandlers } from "../src/utils/formatHandlers.ts";
 import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 15000 };

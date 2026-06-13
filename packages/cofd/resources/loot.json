@@ -1,0 +1,9 @@
+{
+  "beshilu-swarmer": [],
+  "azlu-stalker": [],
+  "spirit-ridden-feral": [],
+  "hunter-cell-shooter": [
+    { "key": "pistol-light", "count": 1 },
+    { "key": "magazine-9mm-light", "count": 2 }
+  ]
+}

@@ -232,6 +232,16 @@ Use `u.util.center(title, 78, "=")` for section headers.
 
 ---
 
+## Mekton Zeta Formatting and Color Standards
+
+For the Mekton Zeta plugin, adhere to these strict visual formatting rules:
+- **Sci-Fi Theme Layout**: The headers, dividers, and footers use the custom layout functions (`sciFiHeader`, `sciFiDivider`, `sciFiFooter`) registered in `index.ts`. Always use `u.util.header(...)` and `u.util.footer()` rather than raw border strings.
+- **Unified Highlights**: Use standard dark yellow (`%cy`) instead of bold (`%ch` or `%ch%cy`) for all sheet labels, stat names, location names, lifepath fields, rookie template names, profession/career names, command suggestions/names, and step highlights. Do not mix `%ch` with yellow.
+- **Layout Width**: Max column width is 78 characters. Use columns of 3 for lists (like skills and professions) with 4-space left indentation and 24-character column width padding to prevent layout wrapping or overflow.
+- **Terminal Screen Limit**: Commands whose output would significantly exceed a standard 24-line terminal screen limit must be broken up (e.g., using sub-commands, categories, pagination, or requiring filters like `+chargen/list <topic>` or `+gear/catalog <category>`).
+
+---
+
 ## Escaping `[` and `]` in softcode attributes
 
 Square brackets are reserved by the TinyMUX evaluator as function-call

@@ -1,0 +1,17 @@
+{
+  "version": "cofd-2e-core",
+  "conversion": {
+    "beatsPerExperience": 5,
+    "arcaneBeatsPerArcaneExperience": 5
+  },
+  "costs": {
+    "attribute":          { "costPerDot": 4, "arcane": false },
+    "skill":              { "costPerDot": 2, "arcane": false },
+    "specialty":          { "costFlat":   1, "arcane": false },
+    "merit":              { "costPerDot": 1, "arcane": false },
+    "willpower":          { "costPerDot": 2, "arcane": false },
+    "integrity":          { "costPerDot": 2, "arcane": false },
+    "supernatural-power": { "costPerDot": 4, "arcane": true  },
+    "power-stat":         { "costPerDot": 5, "arcane": true  }
+  }
+}

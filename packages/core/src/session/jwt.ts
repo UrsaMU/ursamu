@@ -1,5 +1,7 @@
 import * as djwt from "djwt";
 
+import { getConfig } from "../config/mod.ts";
+
 const _FALLBACK_SECRET = crypto.randomUUID() + crypto.randomUUID();
 
 let _resolvedSecret: string | null = null;
@@ -12,6 +14,34 @@ function resolveSecret(): string {
     _resolvedSecret = env;
     return env;
   }
+  try {
+    const cfg = getConfig<string>("server.jwtSecret");
+    if (cfg) {
+      _resolvedSecret = cfg;
+      return cfg;
+    }
+  } catch {
+    // Config not yet initialized
+  }
+
+  const file = ".jwt_secret";
+  try {
+    const persistent = Deno.readTextFileSync(file).trim();
+    if (persistent) {
+      _resolvedSecret = persistent;
+      return persistent;
+    }
+  } catch {
+    const generated = crypto.randomUUID() + crypto.randomUUID();
+    try {
+      Deno.writeTextFileSync(file, generated);
+      _resolvedSecret = generated;
+      return generated;
+    } catch {
+      // Ignore write errors (e.g., read-only filesystem)
+    }
+  }
+
   if (!_warned) {
     _warned = true;
     if (Deno.env.get("DENO_ENV") === "production") {
@@ -19,7 +49,7 @@ function resolveSecret(): string {
       Deno.exit(1);
     }
     console.warn(
-      "[jwt] WARNING: JWT_SECRET not set. Using a random per-process secret — tokens will be invalidated on restart.",
+      "[jwt] WARNING: JWT_SECRET not set and could not be persisted. Using a random per-process secret — tokens will be invalidated on restart.",
     );
   }
   _resolvedSecret = _FALLBACK_SECRET;

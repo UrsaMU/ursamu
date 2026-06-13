@@ -9,9 +9,7 @@
 import { assertEquals } from "@std/assert";
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
-import { createNativeSDK } from "../src/services/SDK/index.ts";
-import { resolveFormat, _clearFormatHandlers, registerFormatHandler, hydrate } from "@ursamu/mush";
-import { resolveFormatOr } from "../src/utils/resolveFormat.ts";
+import { resolveFormat, resolveFormatOr, _clearFormatHandlers, registerFormatHandler, hydrate, createNativeSDK } from "@ursamu/mush";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

@@ -1,0 +1,14 @@
+{
+  "name": "cofd",
+  "version": "1.0.0",
+  "description": "Chronicles of Darkness 2e plugin for UrsaMU — character sheets, guided chargen, and d10 dice with 10/9/8-again, rote, and Willpower spend.",
+  "ursamu": ">=2.6.0",
+  "author": "Lem Canady <lem.canady@gmail.com>",
+  "license": "MIT",
+  "main": "index.ts",
+  "dependencies": [
+    { "name": "help", "version": ">=1.0.0" },
+    { "name": "jobs", "version": ">=1.4.0" },
+    { "name": "mail", "version": ">=2.0.0" }
+  ]
+}

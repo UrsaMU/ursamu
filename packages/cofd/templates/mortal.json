@@ -1,0 +1,10 @@
+{
+  "key": "mortal",
+  "name": "Mortal",
+  "moralityName": "Integrity",
+  "powerStatName": "None",
+  "energyName": "None",
+  "customFields": [],
+  "validPowers": [],
+  "energyMaxFormulaType": "none"
+}

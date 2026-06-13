@@ -1,11 +1,24 @@
 import { addCmd } from "../commands/addCmd.ts";
 import {
+  execCreate,
   execConnect,
   execMotd,
   execPassword,
   execQuit,
   execUpdate,
 } from "./auth.ts";
+
+addCmd({
+  name: "create",
+  pattern: /^create\s+(.*)/i,
+  lock: "",
+  category: "Authentication",
+  help: `create <name> <password>  — Create a new character and log in.
+
+Examples:
+  create Alice mypassword`,
+  exec: execCreate,
+});
 
 addCmd({
   name: "connect",

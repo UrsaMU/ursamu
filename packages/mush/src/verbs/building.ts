@@ -37,7 +37,7 @@ addCmd({
 EXAMPLES
   @desc me=A tall figure in dark robes.
   @desc here=A cozy room lit by firelight.`,
-  exec: (u) => setAttr(u, "desc", "@desc <target>=<description>"),
+  exec: (u) => setAttr(u, "description", "@desc <target>=<description>"),
 });
 
 // ── @parent ───────────────────────────────────────────────────────────────────

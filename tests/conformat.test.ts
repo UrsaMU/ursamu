@@ -1,7 +1,7 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
-import { createNativeSDK } from "../src/services/SDK/index.ts";
+import { createNativeSDK } from "@ursamu/mush";
 import { execLook, defaultConformatHandler } from "@ursamu/mush";
 import { _clearFormatHandlers, registerFormatHandler, hydrate } from "@ursamu/mush";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";

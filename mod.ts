@@ -17,10 +17,3 @@
  */
 
 export * from "@ursamu/mush";
-
-// mu() / initializeEngine — the primary engine entry point lives in src/main.ts.
-// Re-exported here so existing game projects using `import { mu } from "@ursamu/ursamu"`
-// continue to work without changes.
-export { mu, initializeEngine, checkAndCreateSuperuser } from "./src/main.ts";
-export { startTelnetServer } from "./src/services/telnet/mod.ts";
-export { createObj } from "@ursamu/mush";

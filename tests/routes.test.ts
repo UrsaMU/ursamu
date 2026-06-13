@@ -10,11 +10,11 @@
 import { assertEquals } from "@std/assert";
 import { authHandler } from "@ursamu/mush";
 import { dbObjHandler } from "@ursamu/mush";
-import { txtFiles } from "../src/services/commands/cmdParser.ts";
+import { txtFiles } from "../packages/mush/src/main_utils.ts";
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
 import { hash, genSalt } from "../deps.ts";
-import { sign } from "../src/services/jwt/index.ts";
+import { createToken as sign } from "@ursamu/core";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -171,7 +171,7 @@ Deno.test("PATCH /dbobj/:id — updates data fields", OPTS, async () => {
 // ===========================================================================
 
 Deno.test("sign — generates verifiable JWT token", OPTS, async () => {
-  const { verify } = await import("../src/services/jwt/index.ts");
+  const { verifyToken: verify } = await import("@ursamu/core");
   const token = await sign({ id: "test123" });
   assertEquals(typeof token, "string");
   const payload = await verify(token);

@@ -63,7 +63,7 @@ export function registerFormatTemplate(
   return handler;
 }
 
-async function runPluginFormatHandlers(
+export async function runPluginFormatHandlers(
   slot: FormatSlot,
   u: IUrsamuSDK,
   target: IDBObj,
@@ -182,23 +182,42 @@ export const rjust = (s = "", len: number, fill = " "): string => {
   return pad < 0 ? s.substring(0, len - 3) + "..." : repeatStr(fill, pad) + s;
 };
 
-export const header = (string = "", filler = "=", width = 78): string => {
+export type LayoutFn = (label?: string, filler?: string, width?: number) => string;
+
+const _defaultHeader: LayoutFn = (string = "", filler = "=", width = 78) => {
   const rule = filler.repeat(width);
   if (!string) return rule;
   return `${rule}\n${center(`%ch${string}%cn`, width)}\n${rule}`;
 };
-
-export const divider = (string = "", filler = "-", width = 78): string => {
+const _defaultDivider: LayoutFn = (string = "", filler = "-", width = 78) => {
   const rule = filler.repeat(width);
   if (!string) return rule;
   return `\n%ch${string}%cn\n${rule}`;
 };
-
-export const footer = (string = "", filler = "=", width = 78): string => {
+const _defaultFooter: LayoutFn = (string = "", filler = "=", width = 78) => {
   const rule = filler.repeat(width);
   if (!string) return rule;
   return `${rule}\n${center(`%ch${string}%cn`, width)}\n${rule}`;
 };
+
+const _headerStack: LayoutFn[] = [_defaultHeader];
+const _dividerStack: LayoutFn[] = [_defaultDivider];
+const _footerStack: LayoutFn[] = [_defaultFooter];
+
+export function registerHeader(fn: LayoutFn): void  { _headerStack.push(fn); }
+export function registerDivider(fn: LayoutFn): void { _dividerStack.push(fn); }
+export function registerFooter(fn: LayoutFn): void  { _footerStack.push(fn); }
+
+export function unregisterHeader(fn: LayoutFn): void  { const i = _headerStack.lastIndexOf(fn);  if (i > 0) _headerStack.splice(i, 1); }
+export function unregisterDivider(fn: LayoutFn): void { const i = _dividerStack.lastIndexOf(fn); if (i > 0) _dividerStack.splice(i, 1); }
+export function unregisterFooter(fn: LayoutFn): void  { const i = _footerStack.lastIndexOf(fn);  if (i > 0) _footerStack.splice(i, 1); }
+
+export const header  = (string = "", filler = "=", width = 78): string =>
+  _headerStack[_headerStack.length - 1](string, filler, width);
+export const divider = (string = "", filler = "-", width = 78): string =>
+  _dividerStack[_dividerStack.length - 1](string, filler, width);
+export const footer  = (string = "", filler = "=", width = 78): string =>
+  _footerStack[_footerStack.length - 1](string, filler, width);
 
 /** Test-only: drop all registered handlers. */
 export function _clearFormatHandlers(): void {

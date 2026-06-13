@@ -58,42 +58,50 @@ function ensureHandlersRegistered(): void {
     pattern: /.*/,
     exec: async (ctx: ICoreContext) => {
       const socketId = ctx.socketId;
-      const actorId  = ctx.sessionId ?? "";
       const msg      = ctx.input;
       if (!msg) return;
 
-      const rawMsg = msg.trim();
-      const strippedMsg = rawMsg.replace(/^[@+]/, "");
+      // session.actorId is set by the session:auth hook (JWT decoded → player DB ID).
+      // ctx.sessionId is the raw JWT — do not use it as a DB lookup key.
+      const { sessions } = await import("@ursamu/core");
+      const session = sessions.get(socketId);
+      const actorId = ((session as unknown as Record<string, unknown>)?.actorId as string | undefined)
+        ?? "";
 
-      // Build a minimal actor for lock evaluation before the full SDK is ready
+      const rawMsg = msg.trim();
+
       const { dbojs, hydrate } = await import("../world/dbobjs.ts");
       const rawActor = actorId ? await dbojs.queryOne({ id: actorId }) : null;
       const actor = rawActor
         ? hydrate(rawActor)
         : { id: "#-1", flags: new Set<string>(), state: {}, contents: [] };
 
-      for (const cmd of cmds) {
-        const match =
-          rawMsg.match(cmd.pattern) ??
-          (strippedMsg !== rawMsg ? strippedMsg.match(cmd.pattern) : null);
-        if (!match) continue;
-        if (!(await evaluateLock(cmd.lock || "", actor, actor))) continue;
+      const {
+        parseIntent,
+        checkInterceptors,
+        runScriptNode,
+        matchNativeCmd,
+        matchSoftcodePattern,
+        matchExits,
+      } = await import("./pipeline-stages.ts");
 
-        const u = await createNativeSDK(socketId, actorId || "#-1", {
-          name: cmd.name,
-          original: msg,
-          args: match.slice(1),
-        });
+      const { intentName, intent } = parseIntent(rawMsg, actorId);
 
-        await (cmd.exec(u) as Promise<void>)?.catch((e: Error) => {
-          console.error(e);
-          send(
-            [socketId],
-            `Uh oh! You've run into an error! Please contact staff with the following info!%r%r%chError:%cn ${e}`,
-          );
-        });
-        return;
-      }
+      // 1. Check AOP interceptors
+      const allowed = await checkInterceptors(actor.location, actorId, intent);
+      if (!allowed) return;
+
+      // 2. Run SCRIPT_NODE commands
+      if (await runScriptNode(socketId, actorId, intentName)) return;
+
+      // 3. Match native commands (addCmds)
+      if (await matchNativeCmd(socketId, actorId, rawMsg, cmds)) return;
+
+      // 4. Match dollar-patterns ($)
+      if (await matchSoftcodePattern(socketId, actorId, rawMsg)) return;
+
+      // 5. Match local exits
+      if (await matchExits(socketId, actorId, rawMsg)) return;
     },
   });
 }
@@ -143,6 +151,7 @@ export async function loadDefaultCommands(): Promise<void> {
   await import("../verbs/world-sweep.ts");
   await import("../verbs/js-eval.ts");
   await import("../verbs/avatar.ts");
+  await import("../verbs/moniker.ts");
   await import("../verbs/softcode-trigger.ts");
   await import("../verbs/softcode-wait.ts");
   await import("../verbs/softcode-dolist.ts");

@@ -1,0 +1,68 @@
+{
+  "key": "sheet-wp-size-specialty",
+  "title": "+sheet -- Willpower regen, Size, and specialty descriptions",
+  "description": "Demonstrates the +sheet/virtue, /vice, /rest switches; staff-gated +sheet/set size; and the new 'name: description' specialty syntax.",
+  "vars": { "player": "Mara" },
+  "setup": {
+    "character": {
+      "flags": ["player", "connected", "builder"],
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Field Reporter",
+          "virtue": "Hopeful",
+          "vice": "Greedy",
+          "attributes": {
+            "strength": 2, "dexterity": 3, "stamina": 2,
+            "intelligence": 3, "wits": 3, "resolve": 3,
+            "presence": 2, "manipulation": 2, "composure": 3
+          },
+          "skills": {
+            "athletics": 1, "brawl": 1, "drive": 0, "firearms": 0, "larceny": 0,
+            "stealth": 1, "survival": 0, "weaponry": 0,
+            "academics": 2, "computer": 2, "crafts": 0, "investigation": 3,
+            "medicine": 0, "occult": 0, "politics": 1, "science": 0,
+            "animal_ken": 0, "empathy": 2, "expression": 2, "intimidation": 0,
+            "persuasion": 2, "socialize": 1, "streetwise": 2, "subterfuge": 1
+          },
+          "specialties": {},
+          "specialtyDescriptions": {},
+          "merits": {},
+          "moralityValue": 7,
+          "powerStatValue": 0,
+          "energyCurrent": 0,
+          "customFields": {},
+          "powers": {},
+          "advantages": { "willpowerMax": 6, "willpowerCurrent": 2, "size": 5 }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Specialty with description" },
+    { "note": "name: description -- description is shown inline on the sheet." },
+    { "cmd": "+sheet/set specialty/investigation=Crime Scenes: forensics focus", "label": "specialty with description" },
+    { "expect": "Added specialty 'Crime Scenes' (forensics focus)" },
+
+    { "sub": "Renaming a specialty preserves its description" },
+    { "note": "Setting the same name without ': <desc>' preserves the existing description." },
+    { "cmd": "+sheet/set specialty/investigation=Crime Scenes", "label": "no description -- preserved" },
+    { "expect": "(forensics focus)" },
+
+    { "sub": "Size is staff-only" },
+    { "cmd": "+sheet/set size=6", "label": "builder may set Size" },
+    { "expect": "Set trait 'size' to '6'" },
+
+    { "sub": "Vice indulgence -- +1 Willpower" },
+    { "cmd": "+sheet/vice = Took a bribe at the gala", "label": "vice indulged" },
+    { "expect": "Willpower is now 3/6" },
+
+    { "sub": "Virtue trigger -- full Willpower" },
+    { "cmd": "+sheet/virtue = Stood up to the editor", "label": "virtue triggered" },
+    { "expect": "restored to 6/6" },
+
+    { "sub": "Full night's rest -- already full" },
+    { "cmd": "+sheet/rest", "label": "already at max" },
+    { "expect": "already has full Willpower" }
+  ]
+}

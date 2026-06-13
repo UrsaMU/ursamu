@@ -10,8 +10,7 @@
 
 import { assertEquals, assertStringIncludes, assert } from "@std/assert";
 import { describe, it, beforeEach, afterEach } from "@std/testing/bdd";
-import { handleRequest } from "../src/app.ts";
-import { wsService } from "../src/services/WebSocket/index.ts";
+import { handleRequest, wsService } from "@ursamu/mush";
 import { DBO } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
 
@@ -55,7 +54,7 @@ describe("H2 — CSP header", () => {
 
 // ── M1: Wizard privilege level ─────────────────────────────────────────────────
 
-import { registerUIComponent, unregisterUIComponent } from "../src/app.ts";
+import { registerUIComponent, unregisterUIComponent } from "@ursamu/mush";
 
 const M1_ROOM = "m1_room1";
 const M1_WIZ  = "m1_wiz1";
@@ -83,7 +82,7 @@ describe("M1 — wizard privilege level", OPTS, () => {
     // Components with lock:"connected admin+" require level ≥ 3.
     // Before fix: wizard = level 2 → admin+ components hidden.
     // After fix:  wizard = level 4 → admin+ components visible.
-    const { sign } = await import("../src/services/jwt/index.ts");
+    const { createToken: sign } = await import("@ursamu/core");
     const token = await sign({ id: M1_WIZ });
     const res  = await handleRequest(new Request("http://localhost/api/v1/ui-manifest", {
       headers: { Authorization: `Bearer ${token}` },

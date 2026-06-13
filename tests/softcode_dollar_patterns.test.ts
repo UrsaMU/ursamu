@@ -4,7 +4,7 @@
  * Unit tests for matchGlob and findDollarPattern ($-pattern dispatch).
  */
 import { assertEquals } from "@std/assert";
-import { matchGlob, findDollarPattern } from "../src/utils/dollarPatterns.ts";
+import { matchGlob, findDollarPattern } from "@ursamu/mush";
 import type { IDBOBJ } from "@ursamu/mush";
 
 // ── matchGlob ────────────────────────────────────────────────────────────────

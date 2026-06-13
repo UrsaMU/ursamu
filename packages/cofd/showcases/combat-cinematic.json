@@ -1,0 +1,149 @@
+{
+  "key": "combat-cinematic",
+  "title": "+combat -- cinematic encounter with autofire, cover, specified headshot, and grenade",
+  "description": "A high-intensity, multi-round combat showcase. Jax is ambushed in a dark alley. He takes substantial cover, active-dodges a melee attack, fires an SMG short burst, lands a precise headshot that stuns a goon, and ends the encounter with a tactical fragment grenade.",
+  "vars": { "player": "Jax" },
+  "setup": {
+    "character": {
+      "flags": ["player", "connected"],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 10, "dexterity": 4, "stamina": 3,
+            "intelligence": 2, "wits": 9, "resolve": 3,
+            "presence": 2, "manipulation": 2, "composure": 2
+          },
+          "skills": { "firearms": 4, "brawl": 5, "athletics": 3 },
+          "advantages": { "size": 5, "willpowerMax": 6, "willpowerCurrent": 6 },
+          "health": { "max": 8, "bashing": 0, "lethal": 0, "aggravated": 0 }
+        }
+      }
+    },
+    "targets": {
+      "Marcus": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 3, "dexterity": 5, "stamina": 3,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 2, "composure": 3
+            },
+            "skills": { "brawl": 3, "firearms": 2, "athletics": 2, "stealth": 0 },
+            "advantages": { "size": 5, "willpowerMax": 4, "willpowerCurrent": 4 },
+            "health": { "max": 8, "bashing": 0, "lethal": 0, "aggravated": 0 }
+          }
+        }
+      },
+      "Goon": {
+        "flags": ["npc"],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 4, "dexterity": 1, "stamina": 5,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 2, "composure": 2
+            },
+            "skills": { "brawl": 2, "athletics": 2, "firearms": 1 },
+            "advantages": { "size": 5, "willpowerMax": 4, "willpowerCurrent": 4 },
+            "health": { "max": 8, "bashing": 0, "lethal": 0, "aggravated": 0 },
+            "npc": { "aiArchetype": "spirit-ridden-feral" }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Equip Jax with Weapons and Ammo" },
+    { "note": "Jax prepares for the alley ambush with a large SMG (MP-5), spare magazine, and a fragmentation grenade." },
+    { "cmd": "+gear/add smg-large", "label": "buy SMG" },
+    { "cmd": "+gear/add magazine-9mm-light", "label": "buy spare mag" },
+    { "cmd": "+gear/equip 1", "label": "equip SMG" },
+    { "cmd": "+gear/add grenade-frag-standard", "label": "buy fragmentation grenade" },
+
+    { "sub": "Equip Marcus with Weapons and Ammo" },
+    { "note": "Marcus prepares to ambush Jax with a light pistol." },
+    { "cmd": "+gear/add pistol-light", "as": "Marcus", "label": "Marcus buys pistol" },
+    { "cmd": "+gear/add magazine-9mm-light", "as": "Marcus", "label": "Marcus buys spare mag" },
+    { "cmd": "+gear/equip 1", "as": "Marcus", "label": "Marcus equips pistol" },
+
+    { "sub": "Round 1 -- Ambush and Joining Encounter" },
+    { "note": "Marcus attempts to ambush Jax in the rain-slicked alleyway before initiative is formally rolled." },
+    { "cmd": "+combat/start", "as": "admin", "label": "open encounter" },
+    { "cmd": "+combat/join", "label": "Jax joins" },
+    { "cmd": "+combat/join", "as": "Marcus", "label": "Marcus joins" },
+    { "cmd": "+combat/join", "as": "Goon", "label": "Goon joins" },
+    { "cmd": "+npc/aggro Goon=Jax", "as": "admin", "label": "ST spikes Goon's threat toward Jax" },
+    { "expect": "Spiked Goon threat toward Jax" },
+    { "cmd": "+combat/ambush Jax", "as": "Marcus", "label": "resolve ambush check" },
+    { "expect": "AMBUSH" },
+
+    { "sub": "Round 1 -- Roll Initiative" },
+    { "cmd": "+combat/begin", "as": "admin", "label": "kicks off round 1" },
+    { "expect": "Round 1" },
+    { "cmd": "+combat/order", "label": "view the turn order" },
+
+    { "sub": "Jax Takes Substantial Cover" },
+    { "note": "To protect himself from Marcus's incoming fire, Jax reflexively dives behind a metal dumpster, declaring substantial cover." },
+    { "cmd": "+combat/cover substantial", "label": "Jax takes cover" },
+    { "expect": "COVER" },
+
+    { "sub": "Marcus Attacks Jax Behind Cover" },
+    { "note": "Since it is Marcus's turn (Initiative 11), Marcus fires at Jax. The substantial cover imposes a -2 modifier to Marcus's pool." },
+    { "cmd": "+attack/ranged Jax", "as": "Marcus", "label": "Marcus fires pistol" },
+    { "expect": "cover -2" },
+
+    { "sub": "Round 1 -- Goon Attacks Jax" },
+    { "note": "ST advances the turn to the Goon. Since the Goon is an NPC, they automatically execute their attack against Jax on their turn." },
+    { "cmd": "+combat/next", "as": "admin", "label": "advance turn" },
+    { "expect": "Goon attacks Jax" },
+
+    { "sub": "Round 1 -- Jax Retaliates with an SMG Short Burst" },
+    { "note": "Now it is Jax's turn (Initiative 2). With Marcus exposed, Jax leans out from cover (-2 concealment) and fires a short burst (+1 pool, consumes 3 rounds) using a Willpower spend (+3 pool) for maximum precision." },
+    { "cmd": "+attack/burst-short/wp Marcus", "label": "Jax fires short burst" },
+    { "expect": "ATTACK" },
+
+    { "sub": "Round 2 -- Marcus Continues His Assault" },
+    { "note": "ST advances the turn to Round 2. It is Marcus's turn (Initiative 11) again. Marcus continues shooting at Jax." },
+    { "cmd": "+combat/next", "as": "admin", "label": "advance to Round 2" },
+    { "expect": "Round 2" },
+    { "cmd": "+attack/ranged Jax", "as": "Marcus", "label": "Marcus shoots at Jax again" },
+    { "expect": "ATTACK" },
+
+    { "sub": "Round 2 -- Goon Turn" },
+    { "note": "ST advances the turn to the Goon (Initiative 4). The Goon automatically attacks Jax." },
+    { "cmd": "+combat/next", "as": "admin", "label": "advance turn" },
+    { "expect": "Goon attacks Jax" },
+
+    { "sub": "Round 2 -- Jax Delivers a Specified Headshot" },
+    { "note": "Now it is Jax's turn (Initiative 2). With the Goon right on top of him, Jax executes a specified unarmed blow to the Goon's head (-3 penalty) and spends Willpower (+3). Dealing 4+ damage triggers the Stunned Tilt." },
+    { "cmd": "+attack/unarmed/head/wp Goon", "label": "Jax lands a heavy headshot" },
+    { "expect": "stunned" },
+
+    { "sub": "Checking the Goon's Status" },
+    { "cmd": "+combat/status Goon", "label": "ST checks Goon's Tilts" },
+    { "expect": "stunned" },
+
+    { "sub": "Round 3 -- ST advances the turn to Marcus" },
+    { "note": "ST advances the turn to Round 3. It is Marcus's turn (Initiative 11)." },
+    { "cmd": "+combat/next", "as": "admin", "label": "advance to Round 3" },
+    { "expect": "Round 3" },
+    { "cmd": "+attack/ranged Jax", "as": "Marcus", "label": "Marcus fires again" },
+    { "expect": "ATTACK" },
+
+    { "sub": "Round 3 -- ST advances from Stunned Goon" },
+    { "note": "ST advances the turn. Goon is stunned, so their action is automatically resolved without acting." },
+    { "cmd": "+combat/next", "as": "admin", "label": "advance turn" },
+
+    { "sub": "Round 3 -- Ending it with a Fragment Grenade" },
+    { "note": "Both Marcus and the Goon are close together in the alley. Jax pulls the pin on a standard fragmentation grenade and tosses it at their feet, diving for safety." },
+    { "cmd": "+throw grenade-frag-standard", "label": "Jax tosses the grenade" },
+    { "expect": "THROW" },
+
+    { "sub": "Close the Scene" },
+    { "note": "The encounter draws to a close with both opponents injured and knocked down." },
+    { "cmd": "+combat/end", "as": "admin", "label": "ST ends combat" },
+    { "expect": "ended" },
+    { "reset": true }
+  ]
+}

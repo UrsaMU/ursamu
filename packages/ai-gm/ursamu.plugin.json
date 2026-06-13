@@ -1,0 +1,10 @@
+{
+  "name": "ai-gm",
+  "version": "0.2.2",
+  "description": "Agentic AI Game Master for UrsaMU — game-book ingestion, guided setup, monetization, and social features",
+  "author": "UrsaMU",
+  "license": "MIT",
+  "main": "index.ts",
+  "ursamu": ">=1.5.7",
+  "tags": ["gm", "ai", "langgraph", "gemini"]
+}

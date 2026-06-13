@@ -1,10 +1,11 @@
 type SenderFn = (socketId: string, msg: string) => void;
 
-let _sender: SenderFn = (_socketId, _msg) => {};
+const _senders: SenderFn[] = [];
 const _sockets = new Set<string>();
 
+/** Register a transport sender. Multiple transports may register; all are tried. */
 export function registerSender(fn: SenderFn): void {
-  _sender = fn;
+  _senders.push(fn);
 }
 
 export function trackSocket(socketId: string): void {
@@ -32,19 +33,19 @@ export function send(targets: string[], msg: string, dataOrExclude?: string[] | 
     return;
   }
   for (const id of targets) {
-    if (!excludeSet.has(id)) _sender(id, msg);
+    if (!excludeSet.has(id)) _senders.forEach((fn) => fn(id, msg));
   }
 }
 
 export function notify(socketId: string, msg: string): boolean {
   if (!_sockets.has(socketId)) return false;
-  _sender(socketId, msg);
+  _senders.forEach((fn) => fn(socketId, msg));
   return true;
 }
 
 export function broadcastAll(msg: string, exclude?: string[]): void {
   const excludeSet = new Set(exclude ?? []);
   for (const id of _sockets) {
-    if (!excludeSet.has(id)) _sender(id, msg);
+    if (!excludeSet.has(id)) _senders.forEach((fn) => fn(id, msg));
   }
 }

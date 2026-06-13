@@ -1,0 +1,77 @@
+{
+  "key": "tilts-flow",
+  "title": "+tilt -- Personal and Environmental Tilts",
+  "description": "Demonstrates +tilt: catalog browsing, show, apply (personal + environmental), remove, and end-of-scene /clear. Verifies no Beats are awarded.",
+  "vars": { "player": "Lyra" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Ambulance medic",
+          "virtue": "Hopeful",
+          "vice": "Reckless",
+          "attributes": {
+            "strength": 2, "dexterity": 3, "stamina": 2,
+            "intelligence": 3, "wits": 3, "resolve": 2,
+            "presence": 2, "manipulation": 2, "composure": 3
+          },
+          "skills": {
+            "athletics": 2, "brawl": 1, "drive": 2, "firearms": 0, "larceny": 0,
+            "stealth": 1, "survival": 1, "weaponry": 0,
+            "academics": 1, "computer": 1, "crafts": 1, "investigation": 1,
+            "medicine": 3, "occult": 0, "politics": 0, "science": 1,
+            "animal_ken": 0, "empathy": 2, "expression": 1, "intimidation": 0,
+            "persuasion": 1, "socialize": 2, "streetwise": 1, "subterfuge": 1
+          },
+          "specialties": {},
+          "merits": {},
+          "advantages": {
+            "size": 5, "willpowerMax": 5, "willpowerCurrent": 5
+          },
+          "moralityValue": 7,
+          "powerStatValue": 0,
+          "energyCurrent": 0,
+          "customFields": {},
+          "powers": {},
+          "equipment": { "items": [], "equippedWeapon": null, "equippedArmor": null },
+          "tilts": [],
+          "beats": 2
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Browse the Catalog" },
+    { "note": "+tilt/list shows every Tilt; /list personal or /list environmental filters." },
+    { "cmd": "+tilt/list personal", "label": "personal tilts" },
+    { "expect": "Stunned" },
+
+    { "sub": "Inspect One Tilt" },
+    { "cmd": "+tilt/show stunned", "label": "show stunned" },
+    { "expect": "Effect" },
+
+    { "sub": "Inflict a Personal Tilt" },
+    { "note": "+tilt/add inflicts the Tilt with no Beats movement on the sheet." },
+    { "cmd": "+tilt/add stunned", "label": "stun self" },
+    { "expect": "Stunned" },
+
+    { "sub": "Stack an Environmental Tilt" },
+    { "cmd": "+tilt/add ice/Icy alley", "label": "icy alley" },
+    { "expect": "Ice" },
+
+    { "sub": "View Active Tilts" },
+    { "cmd": "+tilt", "label": "view" },
+    { "expect": "[E]" },
+
+    { "sub": "Remove One" },
+    { "note": "Removing a Tilt awards no Beats -- Beats are unchanged." },
+    { "cmd": "+tilt/remove stunned", "label": "shrug it off" },
+    { "expect": "no Beats" },
+
+    { "sub": "Scene End" },
+    { "note": "/clear sweeps every active Tilt. Use this at the end of the scene." },
+    { "cmd": "+tilt/clear", "label": "scene end" },
+    { "expect": "cleared" }
+  ]
+}

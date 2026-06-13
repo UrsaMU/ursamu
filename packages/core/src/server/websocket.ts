@@ -51,6 +51,17 @@ function sendToSocket(socketId: string, msg: string): void {
   }
 }
 
+/** Send a structured payload {msg, data} directly to a socket. */
+export function sendPayload(socketId: string, msg: string, data: Record<string, unknown>): void {
+  const meta = _sockets.get(socketId);
+  if (!meta) return;
+  try {
+    meta.socket.send(JSON.stringify({ msg, data }));
+  } catch (e: unknown) {
+    log("warn", "ws:send-failed", { socketId, error: String(e) });
+  }
+}
+
 function isRateLimited(socketId: string): boolean {
   const now = Date.now();
   const entry = _rateLimits.get(socketId);

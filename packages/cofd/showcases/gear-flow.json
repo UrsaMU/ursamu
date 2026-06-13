@@ -1,0 +1,118 @@
+{
+  "key": "gear-flow",
+  "title": "+gear -- equipment catalog, inventory, and equipped slots",
+  "description": "Demonstrates +gear: catalog browsing, item show, add/equip/unequip/remove, and integration with sheet Defense/Speed and +roll/weapon.",
+  "vars": { "player": "Marcus" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Hired muscle",
+          "virtue": "Loyal",
+          "vice": "Wrathful",
+          "attributes": {
+            "strength": 3, "dexterity": 3, "stamina": 2,
+            "intelligence": 2, "wits": 2, "resolve": 2,
+            "presence": 2, "manipulation": 2, "composure": 3
+          },
+          "skills": {
+            "athletics": 2, "brawl": 2, "drive": 1, "firearms": 2, "larceny": 0,
+            "stealth": 1, "survival": 1, "weaponry": 3,
+            "academics": 0, "computer": 0, "crafts": 1, "investigation": 1,
+            "medicine": 0, "occult": 0, "politics": 0, "science": 0,
+            "animal_ken": 0, "empathy": 1, "expression": 0, "intimidation": 2,
+            "persuasion": 1, "socialize": 1, "streetwise": 2, "subterfuge": 1
+          },
+          "specialties": {},
+          "merits": {},
+          "advantages": {
+            "size": 5, "willpowerMax": 5, "willpowerCurrent": 5
+          },
+          "moralityValue": 7,
+          "powerStatValue": 0,
+          "energyCurrent": 0,
+          "customFields": {},
+          "powers": {},
+          "equipment": { "items": [], "equippedWeapon": null, "equippedArmor": null },
+          "tilts": []
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Browse the Catalog" },
+    { "note": "+gear/list shows the whole Appendix One catalog. /list <category> narrows it." },
+    { "cmd": "+gear/list armor", "label": "armor table" },
+    { "expect": "Kevlar Vest" },
+
+    { "sub": "Inspect One Item" },
+    { "note": "+gear/show pulls up the full stat block." },
+    { "cmd": "+gear/show kevlar-vest", "label": "show kevlar" },
+    { "expect": "Rating" },
+
+    { "sub": "Add to Inventory" },
+    { "note": "+gear/add stores a stable id with the item so equip/remove survive reorderings." },
+    { "cmd": "+gear/add kevlar-vest", "label": "buy armor" },
+    { "cmd": "+gear/add pistol-light", "label": "buy pistol" },
+    { "expect": "Pistol, Light" },
+
+    { "sub": "Equip -- Armor Penalties Apply to the Sheet" },
+    { "note": "+gear/equip moves an item into its natural slot. Armor immediately applies its Defense/Speed penalty." },
+    { "cmd": "+gear/equip 1", "label": "wear armor" },
+    { "expect": "wears" },
+    { "cmd": "+gear/equip 1", "label": "wield pistol" },
+    { "expect": "wields" },
+
+    { "sub": "View Your Loadout" },
+    { "note": "Bare +gear shows the inventory + equipped marks." },
+    { "cmd": "+gear", "label": "loadout" },
+    { "expect": "equipped" },
+
+    { "sub": "Roll With the Weapon" },
+    { "note": "+roll/weapon adds equipped weapon damage as bonus successes on a hit." },
+    { "cmd": "+roll/weapon Dexterity+Weaponry", "label": "stab" },
+
+    { "sub": "Unequip" },
+    { "cmd": "+gear/unequip armor", "label": "drop armor" },
+    { "expect": "remove the armor" },
+
+    { "sub": "Remove" },
+    { "cmd": "+gear/remove 1", "label": "discard kevlar" },
+    { "expect": "Removed" },
+
+    { "sub": "Ammo as Real Objects" },
+    { "note": "Magazines are real Things you can carry, drop, give, hide, or take from a fallen NPC. Same-key stacks auto-merge on +gear/add." },
+    { "cmd": "+gear/add pistol-light", "label": "buy pistol" },
+    { "cmd": "+gear/add magazine-9mm-light", "label": "buy first mag" },
+    { "cmd": "+gear/add magazine-9mm-light", "label": "second mag merges into stack" },
+    { "expect": "x2" },
+    { "cmd": "+gear/add magazine-9mm-light", "label": "third mag" },
+    { "expect": "x3" },
+    { "cmd": "+gear", "label": "loadout with ammo section" },
+    { "expect": "Ammo" },
+
+    { "sub": "Split a Stack" },
+    { "note": "Split off N rounds into a separate stack -- e.g. to give one mag away or hide one." },
+    { "cmd": "+gear/split 2=1", "label": "split off one mag" },
+    { "expect": "split" },
+
+    { "sub": "Reload Consumes a Stack" },
+    { "note": "+gear/reload pulls one magazine from inventory and refills the equipped weapon's clip. No more free reloads." },
+    { "cmd": "+gear/equip 1", "label": "wield pistol" },
+    { "cmd": "+gear/reload", "label": "reload from spare mag" },
+    { "expect": "reload" },
+
+    { "sub": "Name-Fallback Ambiguity" },
+    { "note": "Substring matches that hit multiple items list all candidates with their slot numbers so the staff knows to disambiguate." },
+    { "cmd": "+gear/damage pistol=2 for Marcus", "as": "admin", "label": "ambiguous: pistol matches gun AND magazines" },
+    { "expect": "Multiple matches" },
+
+    { "sub": "Durability and Structure (Staff Only)" },
+    { "note": "Items have Durability (soak) and Structure (hp). /damage and /repair are builder+. Damage soaks against Durability; whatever gets through chips Structure. At 0 the item is broken and force-unequipped." },
+    { "cmd": "+gear/damage Pistol, Light=2 for Marcus", "as": "admin", "label": "chip the pistol with full name" },
+    { "expect": "hp" },
+    { "cmd": "+gear/repair Pistol, Light=1 for Marcus", "as": "admin", "label": "patch the pistol" },
+    { "expect": "hp" }
+  ]
+}
