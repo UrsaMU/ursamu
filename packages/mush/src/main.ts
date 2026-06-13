@@ -1,3 +1,4 @@
+
 /**
  * @module ursamu-core
  * @description The core engine initialization and management module.
@@ -5,20 +6,41 @@
 import "dotenv/load";
 import { handleRequest } from "./app.ts";
 import "./reboot.ts";
-import { chans, counters, dbojs, texts } from "./world/dbobjs.ts";
-import { runStartupAttrs } from "./world/startup.ts";
-import { broadcastAll as broadcast, gameHooks } from "@ursamu/core";
-import type { IPlugin } from "@ursamu/core";
-import * as dpath from "@std/path";
-import { initConfig, loadPlugins as initializePlugins, getConfig, setConfig, registerPlugin } from "@ursamu/core";
-import { plugins, loadTxtDir, setFlags, loadPlugins } from "./main_utils.ts";
-import { queue } from "@ursamu/core";
+import { plugins } from "./utils/loadDIr.ts";
+import { loadTxtDir } from "./utils/loadTxtDir.ts";
+import { setFlags } from "./utils/setFlags.ts";
+import { broadcast } from "./services/broadcast/index.ts";
+import type { IConfig, IPlugin } from "./@types/index.ts";
+import { dpath } from "../deps.ts";
+import { loadPlugins as loadPluginFiles } from "./utils/loadPlugins.ts";
 import {
-  createServer, websocketTransport, telnetTransport, httpTransport,
+  queue,
+  initConfig,
+  loadPlugins as initializePlugins,
+  getConfig,
+  registerPlugin,
+  createServer,
+  websocketTransport,
+  telnetTransport,
+  httpTransport,
   registerFallback,
 } from "@ursamu/core";
+import { runStartupAttrs } from "./services/startup/index.ts";
+import { gameHooks, dbojs, chans, counters, texts } from "@ursamu/mush";
+
+let __dirname;
+try {
+  if (import.meta.url.startsWith("file://")) {
+    __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+  } else {
+    __dirname = Deno.cwd();
+  }
+} catch {
+  __dirname = Deno.cwd();
+}
 
 async function initializeDefaultTexts() {
+  // Always try to read from file to keep DB in sync with local dev changes
   try {
       const fileContent = await Deno.readTextFile("text/welcome.md");
       const current = await texts.queryOne({ id: "welcome" });
@@ -36,22 +58,31 @@ async function initializeDefaultTexts() {
           }
       }
   } catch (_e) {
-      const welcome = await texts.queryOne({ id: "welcome" });
-      if (!welcome) {
-         console.log("No welcome text found in file or DB. Creating default.");
-          await texts.create({
-              id: "welcome",
-              content: "# Welcome to UrsaMU\n\nYour journey begins here."
-          });
-      }
+     // File doesn't exist? Check if DB has it
+     const welcome = await texts.queryOne({ id: "welcome" });
+     if (!welcome) {
+        console.log("No welcome text found in file or DB. Creating default.");
+         await texts.create({
+             id: "welcome",
+             content: "# Welcome to UrsaMU\n\nYour journey begins here."
+         });
+     }
   }
 }
 
 /**
  * Initialize and start the UrsaMU engine.
+ *
+ * Loads configuration, seeds default rooms and channels, registers built-in
+ * and custom plugins, and starts the HTTP and WebSocket servers.
+ *
+ * @param cfg - Optional configuration overrides (merged with defaults and `config.json`).
+ * @param customPlugins - Additional plugins to load before the default plugin directory.
+ * @param options - Fine-grained control over which defaults are loaded.
+ * @returns References to the initialized services (db, broadcast, etc.).
  */
 export const initializeEngine = async (
-  cfg?: Record<string, unknown>,
+  cfg?: IConfig,
   customPlugins?: IPlugin[],
   options: {
     loadDefaultCommands?: boolean;
@@ -64,6 +95,7 @@ export const initializeEngine = async (
   } = {},
   // deno-lint-ignore no-explicit-any
 ): Promise<any> => {
+  // Set default options
   const {
     loadDefaultCommands = true,
     loadDefaultTextFiles = true,
@@ -74,8 +106,13 @@ export const initializeEngine = async (
     pluginsDir: pluginsDirOverride,
   } = options;
 
+  // Initialize the configuration system
   await initConfig(cfg);
 
+  // Clear stale `connected` flags from the previous run. SIGINT clears them
+  // cleanly, but crashes, kill -9, and SIGTERM (supervisor restart) do not —
+  // sweeping at startup makes recovery robust regardless of shutdown path.
+  // Players are re-flagged on WebSocket reconnect via JWT auto-reauth.
   const staleConnected = await dbojs.query({ flags: /connected/i });
   for (const player of staleConnected) {
     await setFlags(player, "!connected");
@@ -84,32 +121,40 @@ export const initializeEngine = async (
     console.log(`[startup] Cleared stale 'connected' flag on ${staleConnected.length} player(s).`);
   }
 
+  // Load substitutions from config
   const substitutions = getConfig<Record<string, string>>("substitutions");
   if (substitutions) {
-      const { updateParserSubs } = await import("./render/parser.ts");
+      const { updateParserSubs } = await import("./services/parser/parser.ts");
       updateParserSubs(substitutions);
   }
 
+  // Determine the project root and current directory context
   const isLocal = import.meta.url.startsWith("file://") &&
     !Deno.env.get("URSAMU_JSR_MODE");
   
+  // Load default commands if enabled
   if (loadDefaultCommands) {
-    const { loadDefaultCommands: mushLoad } = await import("./commands/addCmd.ts");
-    await mushLoad();
+    if (isLocal) {
+      await plugins(dpath.join(__dirname, "./commands"));
+    } else {
+      // On JSR, we import the build-time generated index
+      await import("./commands/index.ts");
+    }
   }
 
+  // Load custom commands if path provided
   if (customCommandsPath) {
     await plugins(customCommandsPath);
   }
 
+  // Load default text files if enabled
   if (loadDefaultTextFiles) {
-    const __dirname = import.meta.url.startsWith("file://")
-      ? dpath.dirname(dpath.fromFileUrl(import.meta.url))
-      : Deno.cwd();
-    // If local source, text is in CWD/text or packages/mush/text. We fall back to CWD text
-    const textDir = dpath.join(Deno.cwd(), "text");
+    // If local source, text is one level up (../text)
+    // If JSR, text is expected in project root (./text)
+    const textDir = isLocal ? dpath.join(__dirname, "../text") : dpath.join(Deno.cwd(), "text");
+    // Only try to load if directory exists to avoid crash
     try {
-      if (await Deno.stat(textDir).then(() => true).catch(() => false)) {
+      if (isLocal || (await Deno.stat(textDir).then(() => true).catch(() => false))) {
           await loadTxtDir(textDir);
       }
     } catch (e) {
@@ -117,14 +162,20 @@ export const initializeEngine = async (
     }
   }
 
+  // Load custom text files if path provided
   if (customTextPath) {
     await loadTxtDir(customTextPath);
   }
 
-  const pluginsDir = pluginsDirOverride ?? dpath.join(Deno.cwd(), "plugins");
+  // Load plugins from the plugins directory
+  // If local source, plugins is in ./plugins (relative to src)
+  // If JSR, plugins is expected in ./src/plugins (relative to project root/CWD)
+  const pluginsDir = pluginsDirOverride ?? (isLocal ? dpath.join(__dirname, "./plugins") : dpath.join(Deno.cwd(), "src", "plugins"));
   
+  // Only try to load if directory exists
   let loadedPlugins: IPlugin[] = [];
   try {
+     // Check if directory exists before loading
      if (await Deno.stat(pluginsDir).then(info => info.isDirectory).catch(() => false)) {
         loadedPlugins = await loadPlugins(pluginsDir);
      }
@@ -132,11 +183,13 @@ export const initializeEngine = async (
     console.warn(`Could not load plugins from ${pluginsDir}:`, e);
   }
 
+  // Share loaded plugins with @reload command for hot-reload
   try {
-    const { setLoadedPlugins } = await import("./verbs/admin-reload.ts");
+    const { setLoadedPlugins } = await import("@ursamu/mush");
     setLoadedPlugins(loadedPlugins);
   } catch { /* reload command may not be loaded yet */ }
 
+  // Add any custom plugins and register them so initializePlugins() will call init()
   if (customPlugins && customPlugins.length > 0) {
     console.log(`Loading ${customPlugins.length} custom plugins...`);
     for (const plugin of customPlugins) {
@@ -145,22 +198,20 @@ export const initializeEngine = async (
     }
   }
 
+  // Boot the server via @ursamu/core transports.
+  // Align config keys: old engine used server.http for the combined WS+HTTP port.
   const wsPort   = getConfig<number>("server.http")    || getConfig<number>("server.wsPort")     || 4203;
   const httpPort = getConfig<number>("server.apiPort") || getConfig<number>("server.port")        || 4201;
   const tnPort   = getConfig<number>("server.telnet")  || getConfig<number>("server.telnetPort")  || 4202;
 
+  // Patch config so the transport reads the right port values.
+  const { setConfig } = await import("@ursamu/core");
   setConfig("server.wsPort",      wsPort);
   setConfig("server.port",        httpPort);
   setConfig("server.telnetPort",  tnPort);
 
+  // Register app.ts handleRequest as the HTTP fallback for all REST routes.
   registerFallback(handleRequest);
-
-  // Seed world data BEFORE opening ports — prevents race where a player
-  // connects and creates a character before the starting room exists.
-  if (autoCreateDefaultRooms) await initializeDefaultRooms();
-  if (autoCreateDefaultChannels) await initializeDefaultChannels();
-
-  await initializePlugins();
 
   const server = createServer();
   server.addTransport(websocketTransport);
@@ -168,21 +219,36 @@ export const initializeEngine = async (
   server.addTransport(telnetTransport);
   await server.start();
 
+  // Initialize all registered plugins
+  await initializePlugins();
+
+  if (autoCreateDefaultRooms) {
+    await initializeDefaultRooms();
+  }
+
+  if (autoCreateDefaultChannels) {
+    await initializeDefaultChannels();
+  }
+
   await initializeDefaultTexts();
 
   console.log(`Server started — WS:${wsPort}  HTTP:${httpPort}  Telnet:${tnPort}`);
   
+  // Initialize Queue
   queue.init();
 
-  const { gameClock } = await import("./world/game-clock.ts");
+  // Initialize in-game clock (load persisted time, then tick every real minute)
+  const { gameClock } = await import("@ursamu/mush");
   await gameClock.load();
   setInterval(() => gameClock.tick(60_000), 60_000);
   console.log(`[GameClock] Loaded. Current game time: ${gameClock.format()}`);
 
-  const { runSoftcodeSimple } = await import("./softcode/engine.ts");
-  // deno-lint-ignore no-explicit-any
-  const forceCmd = async (ctx: any, cmd: string) => { ctx; cmd; };
-  runStartupAttrs(forceCmd, (code, opts) => runSoftcodeSimple(code, { actorId: opts.actorId, executorId: opts.actorId }))
+  // Fire STARTUP attributes on all objects that have one (fire-and-forget)
+  // engine:ready fires regardless of whether runStartupAttrs succeeds — it
+  // signals "engine is up and all plugins are loaded", not "STARTUP attrs ran
+  // cleanly".  Catching first converts any rejection into a resolution so the
+  // chained .then() always executes.
+  runStartupAttrs()
     .catch((err) => console.error("[startup] runStartupAttrs failed:", err))
     .then(() => gameHooks.emit("engine:ready"));
 
@@ -197,6 +263,7 @@ export const initializeEngine = async (
     Deno.exit(0);
   });
 
+  // Return an object with references to important components
   return {
     config: {
       get: getConfig,
@@ -217,30 +284,38 @@ export const initializeEngine = async (
   };
 };
 
+/**
+ * Alias for `initializeEngine` — the primary entry point for starting UrsaMU.
+ *
+ * @see {@link initializeEngine} for the full parameter list.
+ */
 export const mu = initializeEngine;
 
+/**
+ * Initialize default rooms if they don't exist
+ */
 async function initializeDefaultRooms() {
   const rooms = await dbojs.query({ flags: /room/i });
 
   if (!(await counters.query({ id: "objid" })).length) {
-    await counters.create({ id: "objid", value: 0 });
+    await counters.create({ id: "objid", value: 1 });
   }
 
   if (!rooms.length) {
-    const id = String(await counters.atomicIncrement("objid"));
     await dbojs.create({
-      id,
+      id: "1",
       flags: "room safe void",
       data: {
         name: "The Void",
         description: "A featureless void, stretching endlessly in all directions."
       }
     });
-    setConfig("game.playerStart", id);
-    console.log(`[startup] Created starting room #${id}`);
   }
 }
 
+/**
+ * Initialize default channels if they don't exist
+ */
 async function initializeDefaultChannels() {
   const channels = await chans.all();
 
@@ -262,6 +337,9 @@ async function initializeDefaultChannels() {
   }
 }
 
+
+
+// Initialize the UrsaMU engine with custom configuration
 const config = {
   server: {
     telnet: 4201,
@@ -284,13 +362,11 @@ const config = {
   }
 };
 
+// Start the game engine
 if (import.meta.main) {
-  const { log } = await import("@ursamu/core");
-  const logError = async (error: unknown, context = "Error"): Promise<void> => {
-    const msg = error instanceof Error ? error.message : String(error);
-    log("error", context, { message: msg });
-  };
+  const { logError } = await import("./utils/logger.ts");
 
+  // Global Error Handlers
   globalThis.addEventListener("unhandledrejection", (e) => {
     e.preventDefault();
     logError(e.reason, "Unhandled Rejection");
@@ -311,10 +387,16 @@ if (import.meta.main) {
   }
 }
 
+/**
+ * Check if any players exist, and if not, print first-run instructions.
+ * The first player to run `create <name> <password>` via telnet is
+ * automatically granted superuser by src/commands/create.ts.
+ */
 export async function checkAndCreateSuperuser() {
   const players = await dbojs.query({ flags: /player/i });
 
   if (players.length === 0) {
+    // Fresh database — print first-run instructions
     console.log("\n┌─────────────────────────────────────────────────────┐");
     console.log("│  Fresh database detected — no players exist yet.    │");
     console.log("│                                                     │");
@@ -327,6 +409,7 @@ export async function checkAndCreateSuperuser() {
     return;
   }
 
+  // Players exist but no superuser — promote the first player (lowest id)
   const superusers = await dbojs.query({ flags: /superuser/i });
   if (superusers.length === 0) {
     const sorted = players.slice().sort((a, b) => Number(a.id) - Number(b.id));

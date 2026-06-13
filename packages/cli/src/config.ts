@@ -1,7 +1,8 @@
 #!/usr/bin/env -S deno run -A
 
 import { parse } from "jsr:@std/flags@^0.224.0";
-import { join } from "jsr:@std/path@^0.224.0";
+import { ConfigManager } from "../services/Config/mod.ts";
+import { getAllConfig } from "@ursamu/core";
 
 // Parse command line arguments
 const args = parse(Deno.args, {
@@ -16,8 +17,11 @@ const args = parse(Deno.args, {
   },
 });
 
-const configDir = join(Deno.cwd(), "config");
-const configPath = join(configDir, "config.json");
+// Get the existing config manager instance
+const configManager = ConfigManager.getInstance();
+
+// Get the config directory
+const configDir = configManager.getConfigDir();
 
 // Show help
 if (args.help) {
@@ -44,49 +48,6 @@ Examples:
   Deno.exit(0);
 }
 
-async function readConfig(): Promise<Record<string, unknown>> {
-  try {
-    const text = await Deno.readTextFile(configPath);
-    return JSON.parse(text);
-  } catch {
-    return {};
-  }
-}
-
-async function writeConfig(config: Record<string, unknown>): Promise<void> {
-  try {
-    await Deno.mkdir(configDir, { recursive: true });
-    await Deno.writeTextFile(configPath, JSON.stringify(config, null, 2));
-  } catch (error) {
-    console.error("Error saving configuration:", error);
-  }
-}
-
-function getValueByPath(obj: Record<string, unknown>, path: string): unknown {
-  const parts = path.split('.');
-  let current: unknown = obj;
-  for (const part of parts) {
-    if (current === undefined || current === null || typeof current !== 'object') {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
-
-function setValueByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
-  const parts = path.split('.');
-  let current = obj;
-  for (let i = 0; i < parts.length - 1; i++) {
-    const part = parts[i];
-    if (!(part in current) || typeof current[part] !== 'object' || current[part] === null) {
-      current[part] = {};
-    }
-    current = current[part] as Record<string, unknown>;
-  }
-  current[parts[parts.length - 1]] = value;
-}
-
 // Reset the configuration
 if (args.reset) {
   const answer = prompt("Are you sure? This will reset all settings. (y/N)");
@@ -94,16 +55,14 @@ if (args.reset) {
     console.log("Reset cancelled.");
     Deno.exit(0);
   }
-  await writeConfig({});
+  configManager.reset();
   console.log("Configuration reset to default values");
   Deno.exit(0);
 }
 
-const config = await readConfig();
-
 // Get a configuration value
 if (args.get) {
-  const value = getValueByPath(config, args.get);
+  const value = configManager.get(args.get);
   if (value === undefined) {
     console.log(`Configuration key '${args.get}' not found`);
   } else {
@@ -128,11 +87,11 @@ if (args.set) {
     // If it's not valid JSON, use it as a string
   }
 
-  setValueByPath(config, args.set, value);
-  await writeConfig(config);
+  configManager.set(args.set, value);
+  configManager.saveConfig();
   console.log(`Configuration key '${args.set}' set to:`, value);
   Deno.exit(0);
 }
 
 // If no command is provided, show the entire configuration
-console.log(JSON.stringify(config, null, 2));
+console.log(JSON.stringify(getAllConfig(), null, 2)); 
