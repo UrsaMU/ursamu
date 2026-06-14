@@ -115,32 +115,58 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
   }
 
   async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
-    const items = await this.query(query);
     const store = await TypeGraphAdapter.getStore();
-    
     const { applyInc, applyPush, applySet, applyUnset } = await import("./operators.ts");
 
-    for (const item of items) {
-      let updated: T;
-      if (operator === "$push") {
-        updated = applyPush(item, data);
-      } else if (operator === "$set") {
-        updated = applySet(item, data);
-      } else if (operator === "$unset") {
-        updated = applyUnset(item, data);
-      } else if (operator === "$inc") {
-        updated = applyInc(item, data);
-      } else {
-        updated = item;
-      }
-      
-      await store.nodes.Document.upsertById(this.docId(item.id), {
-        namespace: this.namespace,
-        originalId: item.id,
-        content: JSON.stringify(updated),
+    return await store.transaction(async (tx: any) => {
+      const docs = await tx.nodes.Document.find({
+        where: (d: any) => d.namespace.eq(this.namespace),
+        limit: 10000,
       });
-    }
-    return this.query(query);
+
+      const items: T[] = [];
+      for (const doc of docs) {
+        const val = JSON.parse(doc.content) as T;
+        if (matchesQuery(val, query)) {
+          items.push(val);
+        }
+      }
+
+      for (const item of items) {
+        let updated: T;
+        if (operator === "$push") {
+          updated = applyPush(item, data);
+        } else if (operator === "$set") {
+          updated = applySet(item, data);
+        } else if (operator === "$unset") {
+          updated = applyUnset(item, data);
+        } else if (operator === "$inc") {
+          updated = applyInc(item, data);
+        } else {
+          updated = item;
+        }
+
+        await tx.nodes.Document.upsertById(this.docId(item.id), {
+          namespace: this.namespace,
+          originalId: item.id,
+          content: JSON.stringify(updated),
+        });
+      }
+
+      const finalDocs = await tx.nodes.Document.find({
+        where: (d: any) => d.namespace.eq(this.namespace),
+        limit: 10000,
+      });
+
+      const results: T[] = [];
+      for (const doc of finalDocs) {
+        const val = JSON.parse(doc.content) as T;
+        if (matchesQuery(val, query)) {
+          results.push(val);
+        }
+      }
+      return results;
+    });
   }
 
   async delete(query: Query<T>): Promise<T[]> {

@@ -11,7 +11,7 @@
 import { assertEquals, assertStringIncludes, assert } from "@std/assert";
 import { describe, it, beforeEach, afterEach } from "@std/testing/bdd";
 import { handleRequest, wsService } from "@ursamu/mush";
-import { DBO } from "@ursamu/core";
+import { DBO, handleWebSocketConnection } from "@ursamu/core";
 import { dbojs } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
@@ -107,7 +107,7 @@ Deno.test("M2 — WS rate-limiter cleans up on socket close [M2 Red → Green]",
 
   for (let i = 0; i < SOCKETS; i++) {
     const m = new MockWS();
-    wsService.handleConnection(m as unknown as WebSocket, "web");
+    handleWebSocketConnection(m as unknown as WebSocket, "", "web");
     mocks.push(m);
   }
 

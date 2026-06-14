@@ -55,7 +55,7 @@ export { SDKService }                                    from "./src/softcode/sd
 export type { SDKContext, SDKObject }                    from "./src/softcode/sdk-service.ts";
 
 // Command API
-export { addCmd, cmds, loadDefaultCommands, registerScript, getScript } from "./src/commands/addCmd.ts";
+export { addCmd, clearCmds, cmds, loadDefaultCommands, registerScript, getScript } from "./src/commands/addCmd.ts";
 export { createNativeSDK }                   from "./src/commands/sdk.ts";
 export type { ICmd, IUrsamuSDK, DbAccessor, OutputAccessor, FormatSlot } from "./src/commands/types.ts";
 

@@ -45,7 +45,7 @@ async function resolveActor(actorId: string): Promise<IDBObj> {
 
 async function resolveRoom(roomId: string | undefined): Promise<IDBObj & { broadcast(msg: string, opts?: Record<string, unknown>): void }> {
   const fallback = {
-    id: "0",
+    id: "limbo",
     flags: new Set<string>(["room"]),
     state: {},
     contents: [],
