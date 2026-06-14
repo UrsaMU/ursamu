@@ -224,6 +224,7 @@ export const isNameTaken = async (name: string): Promise<IDBOBJ | undefined> => 
       { "data.name": rx },
       { "data.alias": rx }
     ]
+    // deno-lint-ignore no-explicit-any
   } as any);
   return results.length ? results[0] : undefined;
 };

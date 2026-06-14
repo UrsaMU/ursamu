@@ -136,7 +136,7 @@ A modern MUSH-like engine written in TypeScript.
 /** Maximum number of commands buffered during a WS reconnect (prevents heap exhaustion). */
 export const MAX_MSG_BUFFER_SIZE = 200;
 
-async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: string) {
+async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome: string) {
   let sock: WebSocket | null = null;
   let cid: string | undefined;
   // Session token issued by the engine on successful login. Persisted across

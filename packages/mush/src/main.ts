@@ -144,7 +144,6 @@ export const initializeEngine = async (
       await loadCmds();
     } else {
       // On JSR, we import the build-time generated index (does not exist in source)
-      // deno-lint-ignore no-explicit-any
       // @ts-ignore - commands/index.ts is generated at publish time for JSR only
       await import("./commands/index.ts");
     }
@@ -274,7 +273,7 @@ export const initializeEngine = async (
     if (actorId) {
       // Check if this player has other active sessions (multiple connections)
       const otherSessions = sessions.list().filter(
-        (s) => s.socketId !== socketId && (s as any).actorId === actorId
+        (s) => s.socketId !== socketId && (s as { actorId?: string | null }).actorId === actorId
       );
 
       console.log(`[session:close] Other sessions for actorId ${actorId}:`, otherSessions.length);

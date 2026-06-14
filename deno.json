@@ -76,6 +76,8 @@
     "@ursamu/ai-gm":          "./packages/ai-gm/mod.ts",
     "@ursamu/ursamu":         "./mod.ts",
     "@ursamu/globals":        "https://raw.githubusercontent.com/UrsaMU/ursamu-sgp-plugin/master/mod.ts",
+    "@nicia-ai/typegraph":    "npm:@nicia-ai/typegraph@^0.31.0",
+    "@nicia-ai/typegraph/postgres/pglite": "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
     "@ursamu/help-plugin":    "./packages/help/mod.ts",
     "@ursamu/jobs-plugin":    "./packages/jobs/mod.ts",
     "@ursamu/mail-plugin":    "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v2.3.1/index.ts",

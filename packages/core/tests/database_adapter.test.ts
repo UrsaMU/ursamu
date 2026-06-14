@@ -14,23 +14,28 @@ class MockAdapter implements IDatabase<MockItem> {
   public counter = 0;
 
   async create(data: MockItem): Promise<MockItem> {
+    await Promise.resolve();
     this.store.set(data.id, data);
     return data;
   }
 
-  async query(query?: Query<MockItem>): Promise<MockItem[]> {
+  async query(_query?: Query<MockItem>): Promise<MockItem[]> {
+    await Promise.resolve();
     return Array.from(this.store.values());
   }
 
-  async queryOne(query?: Query<MockItem>): Promise<MockItem | undefined> {
+  async queryOne(_query?: Query<MockItem>): Promise<MockItem | undefined> {
+    await Promise.resolve();
     return Array.from(this.store.values())[0];
   }
 
   async all(): Promise<MockItem[]> {
+    await Promise.resolve();
     return Array.from(this.store.values());
   }
 
-  async modify(query: Query<MockItem>, operator: string, data: Partial<MockItem>): Promise<MockItem[]> {
+  async modify(_query: Query<MockItem>, _operator: string, data: Partial<MockItem>): Promise<MockItem[]> {
+    await Promise.resolve();
     const item = Array.from(this.store.values())[0];
     if (item) {
       const updated = { ...item, ...data };
@@ -39,17 +44,20 @@ class MockAdapter implements IDatabase<MockItem> {
     return Array.from(this.store.values());
   }
 
-  async delete(query: Query<MockItem>): Promise<MockItem[]> {
+  async delete(_query: Query<MockItem>): Promise<MockItem[]> {
+    await Promise.resolve();
     const deleted = Array.from(this.store.values());
     this.store.clear();
     return deleted;
   }
 
   async clear(): Promise<void> {
+    await Promise.resolve();
     this.store.clear();
   }
 
   async atomicModify(id: string, transform: (current: MockItem) => MockItem): Promise<MockItem> {
+    await Promise.resolve();
     const current = this.store.get(id);
     if (!current) throw new Error("Not found");
     const updated = transform(current);
@@ -57,7 +65,8 @@ class MockAdapter implements IDatabase<MockItem> {
     return updated;
   }
 
-  async atomicIncrement(id: string): Promise<number> {
+  async atomicIncrement(_id: string): Promise<number> {
+    await Promise.resolve();
     this.counter++;
     return this.counter;
   }

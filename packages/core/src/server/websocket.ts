@@ -156,7 +156,7 @@ async function handleClose(socketId: string): Promise<void> {
   if (!meta) return;
   const session = sessions.get(socketId);
   const sessionId = session?.sessionId ?? null;
-  const actorId = (session as any)?.actorId ?? null;
+  const actorId = (session as { actorId?: string | null })?.actorId ?? null;
   _sockets.delete(socketId);
   _rateLimits.delete(socketId);
   _authRateLimits.delete(socketId);

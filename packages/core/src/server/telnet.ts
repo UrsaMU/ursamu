@@ -161,7 +161,7 @@ async function handleTelnetConnection(conn: Deno.TcpConn): Promise<void> {
     untrackSocket(socketId);
     const session = sessions.get(socketId);
     const sessionId = session?.sessionId ?? null;
-    const actorId = (session as any)?.actorId ?? null;
+    const actorId = (session as { actorId?: string | null })?.actorId ?? null;
     await gameHooks.emit("session:close", { socketId, sessionId, actorId });
     sessions.close(socketId);
     log("info", "telnet:close", { socketId });

@@ -1,7 +1,7 @@
 import type { IDatabase, Query } from "./types.ts";
-import { z } from "npm:zod";
-import { defineNode, defineGraph, createStore } from "npm:@nicia-ai/typegraph";
-import { createLocalPgliteBackend } from "npm:@nicia-ai/typegraph/postgres/pglite";
+import { z } from "zod";
+import { defineNode, defineGraph, createStore } from "@nicia-ai/typegraph";
+import { createLocalPgliteBackend } from "@nicia-ai/typegraph/postgres/pglite";
 import { matchesQuery } from "./operators.ts";
 
 interface WithId {
@@ -38,9 +38,13 @@ function checkIsTest(): boolean {
 }
 
 export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
+  // deno-lint-ignore no-explicit-any
   private static backend: any = null;
+  // deno-lint-ignore no-explicit-any
   private static client: any = null;
+  // deno-lint-ignore no-explicit-any
   private static store: any = null;
+  // deno-lint-ignore no-explicit-any
   private static initPromise: Promise<any> | null = null;
   private readonly namespace: string;
 
@@ -48,9 +52,10 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
     this.namespace = namespace;
   }
 
+  // deno-lint-ignore no-explicit-any
   private static async getStore(): Promise<any> {
     if (TypeGraphAdapter.store) return TypeGraphAdapter.store;
-    if (TypeGraphAdapter.initPromise) return TypeGraphAdapter.initPromise;
+    if (TypeGraphAdapter.initPromise) return await TypeGraphAdapter.initPromise;
 
     TypeGraphAdapter.initPromise = (async () => {
       const isTest = checkIsTest();
@@ -92,6 +97,7 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
   async query(query?: Query<T>): Promise<T[]> {
     const store = await TypeGraphAdapter.getStore();
     const docs = await store.nodes.Document.find({
+      // deno-lint-ignore no-explicit-any
       where: (d: any) => d.namespace.eq(this.namespace),
       limit: 10000,
     });
@@ -110,7 +116,7 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
     return results[0];
   }
 
-  async all(): Promise<T[]> {
+  all(): Promise<T[]> {
     return this.query();
   }
 
@@ -118,8 +124,10 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
     const store = await TypeGraphAdapter.getStore();
     const { applyInc, applyPush, applySet, applyUnset } = await import("./operators.ts");
 
+    // deno-lint-ignore no-explicit-any
     return await store.transaction(async (tx: any) => {
       const docs = await tx.nodes.Document.find({
+        // deno-lint-ignore no-explicit-any
         where: (d: any) => d.namespace.eq(this.namespace),
         limit: 10000,
       });
@@ -154,6 +162,7 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
       }
 
       const finalDocs = await tx.nodes.Document.find({
+        // deno-lint-ignore no-explicit-any
         where: (d: any) => d.namespace.eq(this.namespace),
         limit: 10000,
       });
@@ -185,9 +194,10 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
     await client.query("DELETE FROM typegraph_nodes WHERE props->>'namespace' = $1;", [this.namespace]);
   }
 
-  async atomicModify(id: string, transform: (current: T) => T, retries = 3): Promise<T> {
+  async atomicModify(id: string, transform: (current: T) => T, _retries = 3): Promise<T> {
     const store = await TypeGraphAdapter.getStore();
     const docId = this.docId(id);
+    // deno-lint-ignore no-explicit-any
     return await store.transaction(async (tx: any) => {
       const doc = await tx.nodes.Document.getById(docId);
       if (!doc) throw new Error(`[TypeGraphAdapter] Record not found: ${id}`);
@@ -205,6 +215,7 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
   async atomicIncrement(id: string): Promise<number> {
     const store = await TypeGraphAdapter.getStore();
     const docId = this.docId(id);
+    // deno-lint-ignore no-explicit-any
     return await store.transaction(async (tx: any) => {
       const doc = await tx.nodes.Document.getById(docId);
       const currentVal = doc ? (JSON.parse(doc.content) as { id: string; seq: number }) : { id, seq: 0 };

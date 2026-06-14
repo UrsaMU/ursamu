@@ -10,11 +10,9 @@
  * loadDefaultCommands() wires the built-in verb modules; call it from the
  * application entry point (after the DB is ready).
  */
-import { addHandler, send } from "@ursamu/core";
+import { addHandler } from "@ursamu/core";
 import type { ICoreContext } from "@ursamu/core";
 import type { ICmd } from "./types.ts";
-import { evaluateLock } from "../world/locks.ts";
-import { createNativeSDK } from "./sdk.ts";
 
 export const cmds: ICmd[] = [];
 

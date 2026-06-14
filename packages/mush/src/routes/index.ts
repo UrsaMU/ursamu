@@ -50,13 +50,13 @@ type Authenticator = (req: Request) => Promise<string | null>;
 export function registerMushRoutes(authenticate: Authenticator): void {
   // Public config / text routes (no auth required)
   for (const suffix of ["config", "connect", "welcome", "404"]) {
-    registerRoute("GET", `/api/v1/${suffix}`, async (req) => configHandler(req));
+    registerRoute("GET", `/api/v1/${suffix}`, (req) => configHandler(req));
   }
 
   // Auth routes (no JWT required — they produce JWT)
-  registerRoute("POST", "/api/v1/login",          async (req, _p) => authHandler(req));
-  registerRoute("POST", "/api/v1/register",        async (req, _p) => authHandler(req));
-  registerRoute("POST", "/api/v1/reset-password",  async (req, _p) => authHandler(req));
+  registerRoute("POST", "/api/v1/login",          (req, _p) => authHandler(req));
+  registerRoute("POST", "/api/v1/register",        (req, _p) => authHandler(req));
+  registerRoute("POST", "/api/v1/reset-password",  (req, _p) => authHandler(req));
 
   // Public catalog routes
   registerRoute("GET", "/api/v1/flags",     (req) => Promise.resolve(flagsHandler(req)));
@@ -222,7 +222,7 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
 }
 
 // Lazy-loaded authenticator (avoids circular import with src/app.ts)
-let _authenticate: (req: Request) => Promise<string | null> = async () => null;
+let _authenticate: (req: Request) => Promise<string | null> = () => Promise.resolve(null);
 export function setAuthenticator(fn: (req: Request) => Promise<string | null>): void {
   _authenticate = fn;
 }

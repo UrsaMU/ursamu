@@ -8,7 +8,7 @@
  */
 
 import type { IDBOBJ } from "../world/types.ts";
-import { dbojs, flags, hydrate, Obj } from "@ursamu/mush";
+import { dbojs, flags, Obj } from "@ursamu/mush";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 

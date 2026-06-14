@@ -6,7 +6,7 @@
  */
 
 import { mu, type IConfig } from "../mod.ts";
-import * as dpath from "@std/path";
+
 
 const config: IConfig = {
   server: {
@@ -37,6 +37,7 @@ export default config;
 if (import.meta.main) {
   const { log } = await import("@ursamu/core");
   const logError = async (error: unknown, context = "Error"): Promise<void> => {
+    await Promise.resolve();
     const msg = error instanceof Error ? error.message : String(error);
     log("error", context, { message: msg });
   };

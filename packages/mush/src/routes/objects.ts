@@ -99,7 +99,6 @@ export function flagsHandler(_req: Request): Response {
 
 const ENGINE_LAZY_FUNCS = ["if", "ifelse", "iter", "localize", "parse", "switch", "while"];
 
-// deno-lint-ignore require-await
 export async function functionsHandler(_req: Request): Promise<Response> {
   const { entries } = await import("../softcode/stdlib/index.ts");
   const all = new Set<string>([
