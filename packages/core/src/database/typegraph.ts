@@ -1,5 +1,5 @@
 import type { IDatabase, Query } from "./types.ts";
-import { z } from "zod";
+import { z } from "npm:zod@4.4.3";
 import { defineNode, defineGraph, createStore } from "@nicia-ai/typegraph";
 import { createLocalPgliteBackend } from "@nicia-ai/typegraph/postgres/pglite";
 import { matchesQuery } from "./operators.ts";
