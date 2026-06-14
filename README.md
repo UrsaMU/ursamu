@@ -1,4 +1,5 @@
 # UrsaMU
+[![tdd-audit](https://img.shields.io/badge/tdd--audit-6%20critical-red)](https://www.npmjs.com/package/@lhi/tdd-audit) <!-- tdd-audit-badge -->
 
 ![ursamu header](https://raw.githubusercontent.com/ursamu/ursamu/main/ursamu_github_banner.png)
 

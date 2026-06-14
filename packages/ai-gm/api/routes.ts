@@ -30,11 +30,22 @@ import { getPlans } from "../monetization/plans.ts";
 
 const API_SECRET = Deno.env.get("GM_API_SECRET") ?? "";
 
+function timingSafeEqual(a: string, b: string): boolean {
+  let diff = a.length ^ b.length;
+  const maxLength = Math.max(a.length, b.length);
+  for (let i = 0; i < maxLength; i++) {
+    const charCodeA = i < a.length ? a.charCodeAt(i) : 0;
+    const charCodeB = i < b.length ? b.charCodeAt(i) : 0;
+    diff |= charCodeA ^ charCodeB;
+  }
+  return diff === 0;
+}
+
 function authorized(req: Request): boolean {
   if (!API_SECRET) return true; // dev mode — no secret set
   const auth = req.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  return token === API_SECRET;
+  return timingSafeEqual(token, API_SECRET);
 }
 
 function forbidden(): Response {
