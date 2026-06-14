@@ -1,5 +1,5 @@
 import { assertEquals, assertExists, assertStringIncludes } from "@std/assert";
-import { describe, it, afterAll } from "@std/testing/bdd";
+import { describe, it } from "@std/testing/bdd";
 import { rollInterlock, rollDamage } from "../roll.ts";
 import { derivedStats, skillPointsSpent, effectiveMA } from "../derived.ts";
 import { validateStat, validateSkillLevel, validateStatPool } from "../validation.ts";
@@ -10,9 +10,6 @@ import { findProfession } from "../professions.ts";
 import { applyDamage, combatStatus } from "../combat.ts";
 import { mektonSystem } from "../game-system.ts";
 import type { IMektonChar } from "../schema.ts";
-
-// Force-exit after all suites — prevents hang from open gameHooks/KV handles.
-afterAll(() => Deno.exit(0));
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

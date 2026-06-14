@@ -157,3 +157,42 @@ export const wsService = {
   },
 };
 
+/**
+ * PluginConfigManager — minimal stub exported for compatibility with
+ * external plugins (e.g. ursamu-sgp-plugin) that import this class from
+ * `@ursamu/ursamu`. The real implementation lives inside those plugins;
+ * this stub satisfies the named-export requirement so Deno's module loader
+ * does not abort on import.
+ */
+export class PluginConfigManager<T extends Record<string, unknown> = Record<string, unknown>> {
+  private _data: Partial<T>;
+
+  constructor(
+    _pluginName: string,
+    _defaults: Partial<T> = {},
+    _configDir?: string,
+  ) {
+    this._data = { ..._defaults };
+  }
+
+  get<K extends keyof T>(key: K): T[K] | undefined {
+    return this._data[key] as T[K] | undefined;
+  }
+
+  set<K extends keyof T>(key: K, value: T[K]): void {
+    this._data[key] = value;
+  }
+
+  getAll(): Partial<T> {
+    return { ...this._data };
+  }
+
+  async load(): Promise<void> {
+    // no-op stub — real persistence lives in the plugin
+  }
+
+  async save(): Promise<void> {
+    // no-op stub — real persistence lives in the plugin
+  }
+}
+
