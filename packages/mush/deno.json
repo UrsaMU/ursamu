@@ -12,6 +12,7 @@
   },
   "imports": {
     "@ursamu/core":           "../core/mod.ts",
+    "@ursamu/mush":           "./mod.ts",
     "@ursamu/mushcode":       "jsr:@ursamu/mushcode@^0.6.0",
     "@ursamu/mushcode/eval":  "jsr:@ursamu/mushcode@^0.6.0/eval",
     "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.6.0/parse",

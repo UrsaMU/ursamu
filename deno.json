@@ -66,6 +66,8 @@
   "imports": {
     "@ursamu/bbs":            "./packages/bbs/mod.ts",
     "@ursamu/wiki":           "./packages/wiki/mod.ts",
+    "@ursamu/core":           "./packages/core/mod.ts",
+    "@ursamu/mush":           "./packages/mush/mod.ts",
     "@ursamu/cli":            "./packages/cli/mod.ts",
     "@ursamu/cli/templates":  "./packages/cli/src/create-templates.ts",
     "@ursamu/help":           "./packages/help/mod.ts",
