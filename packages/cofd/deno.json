@@ -32,7 +32,7 @@
     "@ursamu/mush": "../mush/mod.ts",
     "@ursamu/core": "../core/mod.ts",
     "@ursamu/cli": "../cli/mod.ts",
-    "@ursamu/globals": "../../../ursamu-sgp-plugin/mod.ts",
+    "@ursamu/globals": "https://raw.githubusercontent.com/UrsaMU/ursamu-sgp-plugin/master/mod.ts",
     "@ursamu/help-plugin": "../help/mod.ts",
     "@ursamu/jobs-plugin": "../jobs/mod.ts",
     "@ursamu/mail-plugin": "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v2.3.1/index.ts",

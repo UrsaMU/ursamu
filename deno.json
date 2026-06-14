@@ -75,7 +75,7 @@
     "@ursamu/discord":        "./packages/discord/mod.ts",
     "@ursamu/ai-gm":          "./packages/ai-gm/mod.ts",
     "@ursamu/ursamu":         "./mod.ts",
-    "@ursamu/globals":        "../ursamu-sgp-plugin/mod.ts",
+    "@ursamu/globals":        "https://raw.githubusercontent.com/UrsaMU/ursamu-sgp-plugin/master/mod.ts",
     "@ursamu/help-plugin":    "./packages/help/mod.ts",
     "@ursamu/jobs-plugin":    "./packages/jobs/mod.ts",
     "@ursamu/mail-plugin":    "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v2.3.1/index.ts",
