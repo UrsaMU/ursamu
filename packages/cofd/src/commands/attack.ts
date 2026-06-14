@@ -463,7 +463,7 @@ export async function attackExec(u: IUrsamuSDK) {
     const finalTargetGrapple = finalTarget.state?.cofd_grapple as { grappleWith: string | null } | undefined;
     const finalPartnerId = finalTargetGrapple?.grappleWith;
     const finalPartnerParticipant = finalPartnerId ? encounter.participants.find((p) => p.actorId === finalPartnerId) : null;
-    const isPartnerHolding = finalPartnerParticipant?.hasHold === true;
+    const isPartnerHolding = !!finalPartnerParticipant?.hasHold;
 
     if (finalTp?.surprised || finalTp?.isRestrained || finalTp?.hasHold || isPartnerHolding) {
       targetDefense = 0;

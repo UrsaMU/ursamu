@@ -138,11 +138,11 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
 
   while ((match = regex.exec(cleanExpr)) !== null) {
     const sign = match[1] || "+";
-    const token = match[2];
+    const traitToken = match[2];
 
     // Check if numeric modifier
-    if (/^\d+$/.test(token)) {
-      const modifier = parseInt(token, 10);
+    if (/^\d+$/.test(traitToken)) {
+      const modifier = parseInt(traitToken, 10);
       const value = sign === "-" ? -modifier : modifier;
       pool += value;
       terms.push(`${sign}${modifier}`);
@@ -150,8 +150,8 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
     }
 
     // Check if skill with specialty (e.g. "crafts/automotive")
-    if (token.includes("/")) {
-      const parts = token.split("/");
+    if (traitToken.includes("/")) {
+      const parts = traitToken.split("/");
       const skillName = parts[0];
       const specName = parts.slice(1).join("/");
 
@@ -186,26 +186,26 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
     }
 
     // Check if pure Attribute
-    if ((COFD_ATTRIBUTES as readonly string[]).includes(token)) {
-      const dots = sheet.attributes[token as CofdAttribute] || 1;
+    if ((COFD_ATTRIBUTES as readonly string[]).includes(traitToken)) {
+      const dots = sheet.attributes[traitToken as CofdAttribute] || 1;
       pool += sign === "-" ? -dots : dots;
-      terms.push(`${token}(${dots})`);
+      terms.push(`${traitToken}(${dots})`);
       continue;
     }
 
     // Check if pure Skill
-    if ((COFD_SKILLS as readonly string[]).includes(token)) {
-      const dots = sheet.skills[token as CofdSkill] || 0;
+    if ((COFD_SKILLS as readonly string[]).includes(traitToken)) {
+      const dots = sheet.skills[traitToken as CofdSkill] || 0;
       let termVal = dots;
 
       if (dots === 0) {
-        const isMental = (COFD_MENTAL_SKILLS as readonly string[]).includes(token);
+        const isMental = (COFD_MENTAL_SKILLS as readonly string[]).includes(traitToken);
         const penalty = isMental ? -3 : -1;
         untrainedPenaltyApplied += penalty;
         termVal += penalty;
-        terms.push(`${token}(0, Untrained ${penalty})`);
+        terms.push(`${traitToken}(0, Untrained ${penalty})`);
       } else {
-        terms.push(`${token}(${dots})`);
+        terms.push(`${traitToken}(${dots})`);
       }
 
       pool += sign === "-" ? -termVal : termVal;
@@ -216,7 +216,7 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
     const powerAliases = [tmpl.powerStatName.toLowerCase()];
     if (tmpl.powerStatName === "Blood Potency") powerAliases.push("bp");
     if (tmpl.powerStatName === "Primal Urge") powerAliases.push("pu");
-    if (powerAliases.includes(token)) {
+    if (powerAliases.includes(traitToken)) {
       const dots = sheet.powerStatValue || 0;
       pool += sign === "-" ? -dots : dots;
       terms.push(`${tmpl.powerStatName}(${dots})`);
@@ -224,7 +224,7 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
     }
 
     // Check if active template's Morality trait name
-    if (token === tmpl.moralityName.toLowerCase()) {
+    if (traitToken === tmpl.moralityName.toLowerCase()) {
       const dots = sheet.moralityValue || 0;
       pool += sign === "-" ? -dots : dots;
       terms.push(`${tmpl.moralityName}(${dots})`);
@@ -232,15 +232,15 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
     }
 
     // Check if active template's valid Powers (e.g. vigor, forces)
-    if (tmpl.validPowers.includes(token)) {
-      const dots = sheet.powers[token] || 0;
+    if (tmpl.validPowers.includes(traitToken)) {
+      const dots = sheet.powers[traitToken] || 0;
       pool += sign === "-" ? -dots : dots;
-      const powerTitle = token.replace(/\b\w/g, c => c.toUpperCase());
+      const powerTitle = traitToken.replace(/\b\w/g, c => c.toUpperCase());
       terms.push(`${powerTitle}(${dots})`);
       continue;
     }
 
-    return { pool: 0, terms: [], appliedSpecialties: [], untrainedPenaltyApplied: 0, error: `Unknown trait: '${token}'.` };
+    return { pool: 0, terms: [], appliedSpecialties: [], untrainedPenaltyApplied: 0, error: `Unknown trait: '${traitToken}'.` };
   }
 
   if (terms.length === 0) {

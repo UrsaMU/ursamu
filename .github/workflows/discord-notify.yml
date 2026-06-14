@@ -14,6 +14,24 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Safely extract event fields
+        run: |
+          node -e '
+            const fs = require("fs");
+            const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+            const writeEnv = (key, val) => {
+              fs.appendFileSync(process.env.GITHUB_ENV, `${key}<<EOF\n${val}\nEOF\n`);
+            };
+            if (event.issue) {
+              writeEnv("ISSUE_TITLE", event.issue.title);
+              writeEnv("ISSUE_BODY", event.issue.body || "");
+            }
+            if (event.pull_request) {
+              writeEnv("PR_TITLE", event.pull_request.title);
+              writeEnv("PR_BODY", event.pull_request.body || "");
+            }
+          '
+
       - name: Push to main
         if: github.event_name == 'push'
         uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
@@ -43,8 +61,8 @@ jobs:
         uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "🐛 Issue opened: ${{ github.event.issue.title }}"
-          description: ${{ github.event.issue.body }}
+          title: "🐛 Issue opened: ${{ env.ISSUE_TITLE }}"
+          description: ${{ env.ISSUE_BODY }}
           url: ${{ github.event.issue.html_url }}
           color: 0xED4245
           nodetail: true
@@ -54,7 +72,7 @@ jobs:
         uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "✅ Issue closed: ${{ github.event.issue.title }}"
+          title: "✅ Issue closed: ${{ env.ISSUE_TITLE }}"
           url: ${{ github.event.issue.html_url }}
           color: 0x57F287
           nodetail: true
@@ -64,8 +82,8 @@ jobs:
         uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "📬 PR opened: ${{ github.event.pull_request.title }}"
-          description: ${{ github.event.pull_request.body }}
+          title: "📬 PR opened: ${{ env.PR_TITLE }}"
+          description: ${{ env.PR_BODY }}
           url: ${{ github.event.pull_request.html_url }}
           color: 0xFEE75C
           nodetail: true
@@ -75,7 +93,7 @@ jobs:
         uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
-          title: "🔀 PR merged: ${{ github.event.pull_request.title }}"
+          title: "🔀 PR merged: ${{ env.PR_TITLE }}"
           url: ${{ github.event.pull_request.html_url }}
           color: 0x57F287
           nodetail: true

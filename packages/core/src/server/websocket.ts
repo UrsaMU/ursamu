@@ -208,10 +208,10 @@ export function handleWebSocketConnection(
     socket.addEventListener("open", open);
   }
 
-  socket.addEventListener("message", async (event) => {
+  socket.onmessage = async (event) => {
     if (typeof event.data !== "string") return;
     await handleMessage(socketId, event.data);
-  });
+  };
 
   socket.addEventListener("close", () => { handleClose(socketId); });
 
