@@ -382,9 +382,22 @@ export async function createNativeSDK(
 
     auth: {
       verify: async (name: string, password: string) => {
+        const cleaned = name.trim();
+        const esc = cleaned.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const rx = new RegExp(`^${esc}$`, "i");
+        const conditions: Record<string, unknown>[] = [
+          { "data.name": rx },
+          { "data.alias": rx },
+        ];
+        const dbrefMatch = cleaned.match(/^#?(\d+)$/);
+        if (dbrefMatch) {
+          conditions.push({ id: dbrefMatch[1] });
+        }
         const player = await dbojs.queryOne({
-          "data.name": new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i"),
-          flags: /player/i,
+          $and: [
+            { flags: /player/i },
+            { $or: conditions }
+          ]
         });
         if (!player || !player.data?.password) return false;
         // Simple comparison — production systems should use bcrypt

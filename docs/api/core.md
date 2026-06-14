@@ -297,8 +297,13 @@ await u.execute("@pemit #3=Server message.");
 
 ### `DBO<T>`
 
-Generic Deno KV collection. Use for plugin-scoped storage. Always prefix
+Generic database collection. Use for plugin-scoped storage. Always prefix
 the namespace with your plugin name.
+
+By default, UrsaMU uses **TypeGraph (built on Postgres/PGlite)** to store document records inside a local or in-memory PostgreSQL database, with a fallback `DenoKvAdapter` available.
+
+- **Environment Variable**: `URSAMU_TYPEGRAPH_DB` can be set to customize the database storage file/directory (defaults to `${Deno.cwd()}/data/typegraph.db` for production/development, and `memory://` during test runs).
+- **Methods**: Supports standard query and modification operators.
 
 ```typescript
 import { DBO } from "jsr:@ursamu/mush";

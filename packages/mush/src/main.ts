@@ -6,7 +6,7 @@
 import "dotenv/load";
 import { handleRequest } from "./app.ts";
 import "./reboot.ts";
-import { plugins, loadTxtDir, setFlags, loadPlugins } from "./main_utils.ts";
+import { plugins, loadTxtDir, setFlags, loadPlugins, txtFiles } from "./main_utils.ts";
 import {
   queue,
   initConfig,
@@ -22,12 +22,16 @@ import {
   gameHooks,
   log,
   runPipeline,
+  send,
+  setFormatter,
+  sessions,
 } from "@ursamu/core";
 import type { IPlugin } from "@ursamu/core";
 import * as dpath from "@std/path";
 import { runStartupAttrs } from "./world/startup.ts";
 import { runSoftcodeSimple } from "./softcode/engine.ts";
 import { dbojs, chans, counters, texts } from "./world/dbobjs.ts";
+import parser from "./render/parser.ts";
 
 let __dirname;
 try {
@@ -136,7 +140,8 @@ export const initializeEngine = async (
   // Load default commands if enabled
   if (loadDefaultCommands) {
     if (isLocal) {
-      await plugins(dpath.join(__dirname, "./commands"));
+      const { loadDefaultCommands: loadCmds } = await import("./commands/addCmd.ts");
+      await loadCmds();
     } else {
       // On JSR, we import the build-time generated index (does not exist in source)
       // deno-lint-ignore no-explicit-any
@@ -152,12 +157,14 @@ export const initializeEngine = async (
 
   // Load default text files if enabled
   if (loadDefaultTextFiles) {
-    // If local source, text is one level up (../text)
-    // If JSR, text is expected in project root (./text)
-    const textDir = isLocal ? dpath.join(__dirname, "../text") : dpath.join(Deno.cwd(), "text");
+    const localTextDir = dpath.join(__dirname, "../text");
+    const cwdTextDir = dpath.join(Deno.cwd(), "text");
+    const textDir = (await Deno.stat(cwdTextDir).then(() => true).catch(() => false))
+      ? cwdTextDir
+      : (isLocal ? localTextDir : cwdTextDir);
     // Only try to load if directory exists to avoid crash
     try {
-      if (isLocal || (await Deno.stat(textDir).then(() => true).catch(() => false))) {
+      if (await Deno.stat(textDir).then(() => true).catch(() => false)) {
           await loadTxtDir(textDir);
       }
     } catch (e) {
@@ -239,6 +246,49 @@ export const initializeEngine = async (
   
   // Initialize Queue
   queue.init();
+
+  // Configure outgoing message formatter
+  setFormatter((socketId, msg) => {
+    const session = sessions.get(socketId);
+    const clientType = (session?.meta?.clientType as string) || "telnet";
+    return parser.substitute(clientType === "web" ? "html" : "telnet", msg);
+  });
+
+  // Send welcome screen on new session
+  gameHooks.on("session:open", async ({ socketId }) => {
+    const session = sessions.get(socketId);
+    if (session?.meta?.reconnect) return;
+
+    let welcome = txtFiles.get("default_connect.txt");
+    if (!welcome) {
+      const entry = await texts.queryOne({ id: "welcome" });
+      welcome = entry?.content || "Welcome to UrsaMU!";
+    }
+    // We can send raw message; it will be formatted by the setFormatter hook
+    send([socketId], welcome);
+  });
+
+  // Handle session close (cleanup connected flag and run adisconnect)
+  gameHooks.on("session:close", async ({ socketId, actorId }) => {
+    console.log(`[session:close] Closed socketId: ${socketId}, actorId: ${actorId}`);
+    if (actorId) {
+      // Check if this player has other active sessions (multiple connections)
+      const otherSessions = sessions.list().filter(
+        (s) => s.socketId !== socketId && (s as any).actorId === actorId
+      );
+
+      console.log(`[session:close] Other sessions for actorId ${actorId}:`, otherSessions.length);
+      if (otherSessions.length === 0) {
+        const rawPlayer = await dbojs.queryOne({ id: actorId });
+        if (rawPlayer) {
+          console.log(`[session:close] Unsetting connected flag and running adisconnect for ${rawPlayer.data?.name || actorId}`);
+          await setFlags(rawPlayer, "!connected");
+          const { hooks: mushHooks } = await import("./events/hooks.ts");
+          await mushHooks.adisconnect(rawPlayer, socketId);
+        }
+      }
+    }
+  });
 
   // Initialize in-game clock (load persisted time, then tick every real minute)
   const { gameClock } = await import("./world/game-clock.ts");

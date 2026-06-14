@@ -7,7 +7,7 @@
  * DELETE /api/v1/help/:topic       → 204                    (admin only)
  */
 
-import { registerRoute, dbojs } from "@ursamu/mush";
+import { registerPluginRoute, dbojs } from "@ursamu/mush";
 import { helpRegistry, slugify } from "./registry.ts";
 import { upsertEntry, deleteEntry } from "./providers/database.ts";
 import { emitHelp } from "./hooks.ts";
@@ -23,7 +23,7 @@ async function isAdmin(userId: string): Promise<boolean> {
   return flagSet.has("admin") || flagSet.has("wizard") || flagSet.has("superuser");
 }
 
-registerRoute("/api/v1/help", async (req, _userId) => {
+registerPluginRoute("/api/v1/help", async (req, _userId) => {
   // Route: GET /api/v1/help
   if (req.method === "GET") {
     const sections = await helpRegistry.sections();
@@ -34,7 +34,7 @@ registerRoute("/api/v1/help", async (req, _userId) => {
   return Response.json({ error: "Method not allowed" }, { status: 405 });
 });
 
-registerRoute("/api/v1/help/:topic", async (req, userId) => {
+registerPluginRoute("/api/v1/help/:topic", async (req, userId) => {
   const url    = new URL(req.url);
   // Extract topic from path: /api/v1/help/<topic>
   const topic  = slugify(url.pathname.replace(/^\/api\/v1\/help\//, ""));

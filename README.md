@@ -8,9 +8,9 @@
 [![Deno](https://img.shields.io/badge/deno-2.x-black)](https://deno.land)
 
 A modern MUSH-like server in TypeScript/Deno. Full TinyMUX 2.x softcode
-engine, sandboxed scripting in Web Workers, plugin-first architecture,
-versioned REST API, and zero external database dependencies — Deno KV is
-the only persistence layer.
+versioned REST API, and zero external database dependencies — uses TypeGraph
+with PGlite (PostgreSQL running locally or in-memory) as the default database system,
+with Deno KV as a fallback option.
 
 ---
 
@@ -81,8 +81,9 @@ deno task start
   with the full `IUrsamuSDK`. A bad script cannot crash the server.
 - **Native command surface** — 102 built-in commands (admin, building,
   comms, channels, queries, status, auth) registered via `addCmd`.
-- **Zero external deps** — Deno KV is the only datastore. No Postgres,
-  Redis, or Mongo.
+- **Zero external database dependencies** — TypeGraph (built on Postgres/PGlite)
+  running locally or in-memory is the default datastore, with a fallback Deno KV adapter
+  available. No external database server setup required.
 - **Hot reload** — `@reload` swaps commands, config, scripts, and
   plugins without disconnecting players. `@reboot` and `@update` send
   `SIGUSR2` to the supervised parent for no-disconnect restarts; the
@@ -156,7 +157,7 @@ The engine is split into two first-class packages:
 
 | Package | JSR | Purpose |
 |---------|-----|---------|
-| `@ursamu/core` | `jsr:@ursamu/core` | Generic server infrastructure — transport, DB (Deno KV), plugin lifecycle, events |
+| `@ursamu/core` | `jsr:@ursamu/core` | Generic server infrastructure — transport, DB (TypeGraph/PGlite or Deno KV), plugin lifecycle, events |
 | `@ursamu/mush` | `jsr:@ursamu/mush` | MUSH world layer — `IDBObj`, flags, locks, softcode evaluator, `addCmd`, `IUrsamuSDK` |
 | `@ursamu/ursamu` | `jsr:@ursamu/ursamu` | Backwards-compat shim that re-exports everything from `@ursamu/mush` |
 
@@ -183,7 +184,7 @@ src/
 │   ├── broadcast/   send() / room broadcast
 │   ├── commands/    cmdParser — parse and dispatch
 │   ├── Config/      Config loader + cache
-│   ├── Database/    Deno KV wrapper (DBO, dbojs, events)
+│   ├── Database/    TypeGraph & Deno KV adapters (DBO, dbojs, events)
 │   ├── DBObjs/      Object CRUD (createObj, hydrate, Obj)
 │   ├── GameClock/   In-game calendar
 │   ├── Hooks/       gameHooks (player:login, say, move, …)
@@ -220,8 +221,9 @@ Player input
 
 ### Persistence
 
-Everything lives in Deno KV. Each plugin gets a namespaced `DBO<T>`
-instance keyed by `<plugin>.<collection>`.
+Everything lives in the database. Each plugin gets a namespaced `DBO<T>`
+instance keyed by `<plugin>.<collection>`. By default, UrsaMU uses `TypeGraphAdapter`
+(storing records inside a local/in-memory PGlite PostgreSQL database), with a fallback `DenoKvAdapter`.
 
 ```ts
 const notes = new DBO<Note>("myplugin.notes");
@@ -471,7 +473,7 @@ The Compose stack mounts three volumes:
 
 ```yaml
 volumes:
-  - ./data:/app/data      # Deno KV database
+  - ./data:/app/data      # Database storage directory (TypeGraph/PGlite or Deno KV)
   - ./config:/app/config  # Game configuration
   - ./logs:/app/logs      # Server logs
 ```

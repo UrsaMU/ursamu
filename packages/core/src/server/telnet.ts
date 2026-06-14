@@ -2,7 +2,7 @@ import type { ITransport } from "./types.ts";
 import type { ICoreContext } from "../dispatch/types.ts";
 import { runPipeline } from "../dispatch/pipeline.ts";
 import { sessions } from "../session/store.ts";
-import { trackSocket, untrackSocket } from "../broadcast/send.ts";
+import { trackSocket, untrackSocket, registerSender } from "../broadcast/send.ts";
 import { gameHooks } from "../events/hooks.ts";
 import { getConfig } from "../config/mod.ts";
 import { log } from "../logging/index.ts";
@@ -100,7 +100,8 @@ async function handleTelnetConnection(conn: Deno.TcpConn): Promise<void> {
   const send = makeSend(conn);
   _senders.set(socketId, send);
   trackSocket(socketId);
-  sessions.open(socketId, "");
+  const session = sessions.open(socketId, "");
+  session.meta.clientType = "telnet";
   await gameHooks.emit("session:open", { socketId });
   log("info", "telnet:open", { socketId });
 
@@ -160,8 +161,9 @@ async function handleTelnetConnection(conn: Deno.TcpConn): Promise<void> {
     untrackSocket(socketId);
     const session = sessions.get(socketId);
     const sessionId = session?.sessionId ?? null;
+    const actorId = (session as any)?.actorId ?? null;
+    await gameHooks.emit("session:close", { socketId, sessionId, actorId });
     sessions.close(socketId);
-    await gameHooks.emit("session:close", { socketId, sessionId });
     log("info", "telnet:close", { socketId });
     try { conn.close(); } catch { /* already closed */ }
   }
@@ -177,6 +179,10 @@ export const telnetTransport: ITransport = {
     const port = getConfig<number>("server.telnetPort", 4202);
     _listener = Deno.listen({ port } as Deno.ListenOptions) as Deno.TcpListener;
     log("info", "telnet:start", { port });
+    registerSender((socketId, msg) => {
+      const send = _senders.get(socketId);
+      if (send) send(msg);
+    });
     (async () => {
       if (!_listener) return;
       for await (const conn of _listener) {

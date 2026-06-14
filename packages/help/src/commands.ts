@@ -56,9 +56,16 @@ Examples:
 });
 
 async function showIndex(u: IUrsamuSDK): Promise<void> {
+  const all = await helpRegistry.all();
   const sections = await helpRegistry.sections();
-  const all      = await helpRegistry.all();
-  u.send(renderIndex(sections, all.length));
+  const filteredSections = sections.filter((s) => s !== "general");
+  const generalTopics = all
+    .filter((e) => e.section === "general")
+    .map((e) => e.name);
+  const combined = [...filteredSections, ...generalTopics].sort((a, b) =>
+    a.localeCompare(b)
+  );
+  u.send(renderIndex(combined, all.length));
 }
 
 async function showSection(u: IUrsamuSDK, section: string): Promise<void> {

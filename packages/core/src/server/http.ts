@@ -90,8 +90,9 @@ function closeSse(socketId: string): void {
   untrackSocket(socketId);
   const session = sessions.get(socketId);
   const sessionId = session?.sessionId ?? null;
+  const actorId = (session as any)?.actorId ?? null;
+  gameHooks.emit("session:close", { socketId, sessionId, actorId });
   sessions.close(socketId);
-  gameHooks.emit("session:close", { socketId, sessionId });
   log("info", "sse:close", { socketId });
 }
 

@@ -59,7 +59,7 @@ config/              Runtime configuration (config.json, text/)
 The engine is organized as a monorepo with two published packages:
 
 - **`@ursamu/core`** (`packages/core/`) — generic server infrastructure: transport
-  abstraction, Deno KV database layer, plugin lifecycle, and the event bus. Has no
+  abstraction, database layer (TypeGraph/PGlite and Deno KV adapters), plugin lifecycle, and the event bus. Has no
   MUSH-specific concepts and can be reused for other game types.
 - **`@ursamu/mush`** (`packages/mush/`) — the MUSH world layer built on top of core:
   `IDBObj`, flag system, lock evaluation, TinyMUX softcode engine, `addCmd`, and the

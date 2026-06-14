@@ -10,7 +10,7 @@
  */
 
 import { join } from "jsr:@std/path@^0.224.0";
-import { checkAndCreateSuperuser } from "../main.ts";
+import { checkAndCreateSuperuser } from "@ursamu/mush";
 import { initConfig } from "@ursamu/core";
 import { DBO } from "@ursamu/core";
 

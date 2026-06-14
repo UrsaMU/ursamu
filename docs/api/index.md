@@ -263,7 +263,7 @@ const room    = await dbojs.queryOne((o) => o.id === "1");
 
 ## DBO\<T\>
 
-Typed plugin-specific database collections backed by Deno KV.
+Typed plugin-specific database collections backed by TypeGraph / Postgres (PGlite) or Deno KV.
 
 ```typescript
 import { DBO } from "jsr:@ursamu/mush";

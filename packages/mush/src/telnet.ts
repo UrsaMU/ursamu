@@ -69,7 +69,9 @@ export const startTelnetServer = async (options?: {
     const possiblePaths = [
       // Absolute path
       welcomeFile.startsWith('/') ? welcomeFile : null,
-      // Relative to project root
+      // Relative to CWD (where the game process is launched from — highest priority)
+      dpath.join(Deno.cwd(), welcomeFile),
+      // Relative to project root (engine monorepo root)
       dpath.join(projectRoot, welcomeFile),
       // Relative to text directory in project root
       dpath.join(projectRoot, 'text', welcomeFile.split('/').pop() || ''),
@@ -166,10 +168,8 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, welcome: 
   let mxpEnabled = false;
   await write(new Uint8Array([IAC, WILL, MXP_OPTION]));
 
-  await write(parser.substitute("telnet", welcome) + "\r\n");
-
   const connect = () => {
-      const wsUrl = `ws://localhost:${wsPort}`;
+      const wsUrl = `ws://localhost:${wsPort}?clientType=telnet${isReconnecting ? "&reconnect=true" : ""}`;
       sock = new WebSocket(wsUrl);
 
       sock.onopen = () => {

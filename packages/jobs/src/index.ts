@@ -1,7 +1,7 @@
 // ─── Jobs plugin entry point ──────────────────────────────────────────────────
 
 import "./commands.ts";
-import { registerRoute } from "@ursamu/mush";
+import { registerPluginRoute } from "@ursamu/mush";
 import { getAllBuckets, getBucketStaffIds, jobAccess } from "./db.ts";
 import type { IPlugin } from "@ursamu/mush";
 import { jobsRouteHandler } from "./router.ts";
@@ -25,7 +25,7 @@ const jobsPlugin: IPlugin = {
   description: "Anomaly-style jobs system — player requests, staff commands, bucket access, archive, REST API.",
 
   init: async () => {
-    registerRoute("/api/v1/jobs", jobsRouteHandler);
+    registerPluginRoute("/api/v1/jobs", jobsRouteHandler);
     registerNotifyHooks();
 
     // Seed per-bucket staff access for any buckets registered with staffIds.

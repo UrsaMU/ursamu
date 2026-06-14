@@ -156,13 +156,14 @@ async function handleClose(socketId: string): Promise<void> {
   if (!meta) return;
   const session = sessions.get(socketId);
   const sessionId = session?.sessionId ?? null;
+  const actorId = (session as any)?.actorId ?? null;
   _sockets.delete(socketId);
   _rateLimits.delete(socketId);
   _authRateLimits.delete(socketId);
   untrackSocket(socketId);
   if (meta.remoteIp) untrackIp(socketId, meta.remoteIp);
+  await gameHooks.emit("session:close", { socketId, sessionId, actorId });
   sessions.close(socketId);
-  await gameHooks.emit("session:close", { socketId, sessionId });
   log("info", "ws:close", { socketId });
 }
 
@@ -180,6 +181,8 @@ export function listSocketIds(): string[] {
 export function handleWebSocketConnection(
   socket: WebSocket,
   remoteIp = "",
+  clientType = "web",
+  reconnect = false,
 ): string | null {
   if (!canConnect(remoteIp)) {
     socket.close(1008, "Too many connections");
@@ -192,9 +195,11 @@ export function handleWebSocketConnection(
   if (remoteIp) trackIp(socketId, remoteIp);
 
   const open = async () => {
-    sessions.open(socketId, "");
+    const session = sessions.open(socketId, "");
+    session.meta.clientType = clientType;
+    if (reconnect) session.meta.reconnect = true;
     await gameHooks.emit("session:open", { socketId });
-    log("info", "ws:open", { socketId, remoteIp });
+    log("info", "ws:open", { socketId, remoteIp, clientType, reconnect });
   };
 
   if (socket.readyState === WebSocket.OPEN) {
@@ -231,8 +236,11 @@ export const websocketTransport: ITransport = {
         return new Response("Upgrade required", { status: 426 });
       }
       const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "";
+      const url = new URL(req.url);
+      const clientType = url.searchParams.get("clientType") || "web";
+      const reconnect = url.searchParams.get("reconnect") === "true";
       const { socket, response } = Deno.upgradeWebSocket(req);
-      handleWebSocketConnection(socket, ip);
+      handleWebSocketConnection(socket, ip, clientType, reconnect);
       return response;
     });
     log("info", "ws:start", { port });
