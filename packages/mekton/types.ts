@@ -1,4 +1,4 @@
-// Local interface definitions for types not yet in jsr:@ursamu/ursamu v2.x.
+// Local interface definitions for types not yet in @ursamu/ursamu v2.x.
 // Structurally compatible with ai-gm IGameSystem.
 
 export interface IStatSystem {

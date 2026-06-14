@@ -1,4 +1,4 @@
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 import type { IMektonChar, WoundLocation } from "./schema.ts";
 import { derivedStats, skillPointsSpent, effectiveMA } from "./derived.ts";
 import { combatStatus, LOCATION_LABELS } from "./combat.ts";
@@ -9,7 +9,7 @@ function sectionHead(u: IUrsamuSDK, title: string): string {
   return `%ch%cw${u.util.ljust(title, W)}%cn`;
 }
 
-function row(u: IUrsamuSDK, label: string, value: string | number, pad = 20): string {
+function _row(u: IUrsamuSDK, label: string, value: string | number, pad = 20): string {
   return `  ${u.util.ljust(label, pad)} ${value}`;
 }
 
@@ -43,10 +43,6 @@ export function formatSheet(u: IUrsamuSDK, char: IMektonChar): string {
 
   // Skills by stat
   lines.push("", sectionHead(u, "SKILLS"));
-  const STAT_LABELS: Record<string, string> = {
-    att: "ATT", cl: "CL", emp: "EMP", int: "INT",
-    ref: "REF", tech: "TECH",
-  };
   const skillsByStat: Record<string, string[]> = {};
   for (const [sk, lv] of Object.entries(char.skills)) {
     if (lv === 0) continue;

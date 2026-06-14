@@ -235,17 +235,17 @@ function wordWrap(text: string, width: number): string {
  * Custom DESCFORMAT handler.
  * Ensures the description has a %r (newline) after it.
  */
-export const cofdDescformatHandler = async (
+export const cofdDescformatHandler = (
   _u: IUrsamuSDK,
   _target: IDBObj,
   desc: string,
 ): Promise<string | null> => {
-  if (!desc) return null;
+  if (!desc) return Promise.resolve(null);
   const wrapped = wordWrap(desc, 77); // WIDTH (78) - 1
   const indented = wrapped
     .split("\n")
     .map((line) => (line.trim() ? " " + line : ""))
     .join("\n");
-  return `${indented}%r`;
+  return Promise.resolve(`${indented}%r`);
 };
 

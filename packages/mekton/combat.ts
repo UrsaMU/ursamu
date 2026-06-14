@@ -1,6 +1,6 @@
-import { gameHooks } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "@ursamu/ursamu";
 import type { IMektonChar, IMektonWounds, WoundLocation } from "./schema.ts";
-import { maxWounds, derivedStats } from "./derived.ts";
+import { derivedStats } from "./derived.ts";
 import { rollInterlock, rollDamage } from "./roll.ts";
 import type { IEquipmentItem } from "./schema.ts";
 
@@ -67,7 +67,6 @@ export function applyDamage(
 
 /** Describe combat status for a character. */
 export function combatStatus(char: IMektonChar): string {
-  const max = maxWounds(char);
   if (char.wounds.head <= 0) return "DEAD";
   if (char.wounds.torso <= 0) return "INCAPACITATED";
   const parts: string[] = [];

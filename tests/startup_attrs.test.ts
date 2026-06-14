@@ -14,7 +14,7 @@ import { dbojs } from "@ursamu/mush";
 import { addCmd, clearCmds, cmds, createNativeSDK } from "@ursamu/mush";
 import { runStartupAttrs } from "@ursamu/mush";
 
-const mockForce = async (ctx: any, cmd: string) => {
+const mockForce = async (ctx: { socket: { id: string; cid: string } }, cmd: string) => {
   const u = await createNativeSDK(ctx.socket.id, ctx.socket.cid, {
     name: cmd.split(" ")[0],
     original: cmd,
@@ -31,7 +31,7 @@ const mockForce = async (ctx: any, cmd: string) => {
   }
 };
 
-const mockRunSoftcode = async (code: string) => code;
+const mockRunSoftcode = (code: string) => Promise.resolve(code);
 
 // H4 IDs
 const H4_PLAIN_ID   = "st_h4_plain";

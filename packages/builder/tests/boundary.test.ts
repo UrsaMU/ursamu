@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 /**
  * Boundary-validation exploit tests — tdd-audit remediation
  *
@@ -12,8 +13,8 @@
  *          [GREEN] same test PASSES after patch.
  */
 
-import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
-import { describe, it, beforeEach } from "jsr:@std/testing/bdd";
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { describe, it, beforeEach } from "@std/testing/bdd";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 // ─── mock helpers (mirrors builder.test.ts pattern) ───────────────────────────

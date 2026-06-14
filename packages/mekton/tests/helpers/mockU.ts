@@ -1,5 +1,5 @@
 // deno-lint-ignore-file require-await
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 
 // IDBObj mirrors the internal shape from @ursamu/ursamu — not yet in public exports.
 type IDBObj = {

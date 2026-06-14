@@ -1,11 +1,12 @@
+// deno-lint-ignore-file require-await
 /**
  * TinyMUX compliance tests — verifies builder-plugin follows TinyMUX rules exactly.
  * Reference: /Users/kumakun/github/tinymux/mux/game/text/help.txt
  *
  * Each describe block documents the specific TinyMUX rule being enforced.
  */
-import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 // ─── mock helpers ─────────────────────────────────────────────────────────────
@@ -40,7 +41,6 @@ function mockThing(overrides: Partial<IDBObj> = {}): IDBObj {
   };
 }
 
-// deno-lint-ignore no-explicit-any
 function mockU(opts: {
   me?: Partial<IDBObj>;
   args?: string[];

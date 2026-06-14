@@ -7,7 +7,7 @@
  * during this run.
  */
 
-import { join, resolve, basename } from "@std/path";
+import { join, resolve } from "@std/path";
 import { exists } from "@std/fs";
 
 import {

@@ -6,7 +6,7 @@
  */
 
 import { addCmd, dbojs } from "@ursamu/mush";
-import { join } from "jsr:@std/path";
+import { join } from "@std/path";
 import type { IUrsamuSDK } from "@ursamu/mush";
 
 // ─── constants ────────────────────────────────────────────────────────────────
@@ -264,9 +264,9 @@ Examples:
       const sw  = (u.cmd.args[0] ?? "").toLowerCase().trim();
       const arg = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
 
-      if (sw === "save")   return handleSave(u, arg);
-      if (sw === "run")    return handleRun(u, arg);
-      if (sw === "list")   return handleList(u);
+      if (sw === "save")   return await handleSave(u, arg);
+      if (sw === "run")    return await handleRun(u, arg);
+      if (sw === "list")   return await handleList(u);
 
       u.send(
         "Usage:%r" +

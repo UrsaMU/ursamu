@@ -1,8 +1,8 @@
-import { assertEquals, assertExists, assertStringIncludes } from "jsr:@std/assert";
-import { describe, it, afterAll } from "jsr:@std/testing/bdd";
+import { assertEquals, assertExists, assertStringIncludes } from "@std/assert";
+import { describe, it, afterAll } from "@std/testing/bdd";
 import { rollInterlock, rollDamage } from "../roll.ts";
 import { derivedStats, skillPointsSpent, effectiveMA } from "../derived.ts";
-import { validateStat, validateSkillLevel, validateStatPool, checkRequired } from "../validation.ts";
+import { validateStat, validateSkillLevel, validateStatPool } from "../validation.ts";
 import { rollBasicLifepath, rollProfessionalEvent } from "../lifepath.ts";
 import { findGearByName, gearByCategory } from "../catalog.ts";
 import { findTemplate } from "../templates.ts";

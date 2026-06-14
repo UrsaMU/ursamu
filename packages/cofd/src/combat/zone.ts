@@ -610,7 +610,6 @@ async function spawnOneMob(
       state: { cofd: sheet },
       contents: [],
     });
-    // deno-lint-ignore no-explicit-any
     const npcObj = (created as unknown as Array<{ id: string }>)?.[0];
     return npcObj?.id ?? null;
   } catch { return null; }

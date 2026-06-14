@@ -1,5 +1,5 @@
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 import { chars } from "../schema.ts";
 import { derivedStats, skillPointsSpent } from "../derived.ts";
 import { SKILL_CATALOG } from "../catalog.ts";

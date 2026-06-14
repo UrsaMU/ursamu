@@ -1,5 +1,5 @@
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 import { chars, reviews } from "../schema.ts";
 import { checkRequired } from "../validation.ts";
 import { maxWounds } from "../derived.ts";

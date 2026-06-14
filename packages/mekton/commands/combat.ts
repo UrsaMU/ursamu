@@ -1,5 +1,5 @@
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 import { chars } from "../schema.ts";
 import type { IMektonChar, WoundLocation } from "../schema.ts";
 import { applyDamage, combatStatus, LOCATION_LABELS, resolveAttack, emitCombatEvent } from "../combat.ts";
@@ -150,7 +150,7 @@ Examples:
     const targetArg = u.cmd.args[0] ? u.util.stripSubs(u.cmd.args[0]).trim() : null;
     const locRaw    = u.util.stripSubs(u.cmd.args[1] ?? "").trim() || (targetArg ? "" : "torso");
 
-    let healer: IMektonChar | null = await chars.findOne({ playerId: u.me.id });
+    const healer: IMektonChar | null = await chars.findOne({ playerId: u.me.id });
     let patient: IMektonChar | null = healer;
 
     if (targetArg) {

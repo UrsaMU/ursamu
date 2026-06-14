@@ -6,7 +6,6 @@ import {
   COFD_VICES,
   COFD_MERITS,
   CTL_SEEMINGS,
-  CTL_KITHS,
   CTL_COURTS,
   kithsForSeeming,
   findSeeming,

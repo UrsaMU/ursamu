@@ -6,7 +6,6 @@ import {
   registerGameSystem,
 } from "../systems/store.ts";
 import type { IStoredGameSystem } from "../systems/store.ts";
-import { urbanShadowsSystem } from "../systems/urban-shadows.ts";
 import { genericSystem } from "../systems/generic.ts";
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────

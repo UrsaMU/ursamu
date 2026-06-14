@@ -1,6 +1,7 @@
-import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
-import { describe, it, beforeEach, afterEach } from "jsr:@std/testing/bdd";
-import { join } from "jsr:@std/path";
+// deno-lint-ignore-file require-await
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { describe, it, beforeEach, afterEach } from "@std/testing/bdd";
+import { join } from "@std/path";
 
 // ─── mock helpers ─────────────────────────────────────────────────────────────
 

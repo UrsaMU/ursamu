@@ -1,4 +1,4 @@
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 
 /**
  * @destroy[/override][/instant] <object>
@@ -44,7 +44,7 @@ export default async (u: IUrsamuSDK) => {
   const isHolding = target.location === actor.id;
   const isThingLike = !target.flags.has("room") && !target.flags.has("exit") && !target.flags.has("player");
 
-  let effectiveDestroyOk = destroyOk;
+  const effectiveDestroyOk = destroyOk;
   if (effectiveDestroyOk && isThingLike && !isHolding) {
     // DESTROY_OK but actor isn't holding it — fall back to canEdit
     if (!(await u.canEdit(actor, target))) {

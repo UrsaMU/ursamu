@@ -1,4 +1,4 @@
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 
 /**
  * @zone[/<switch>] [<args>]
@@ -32,12 +32,12 @@ export default async (u: IUrsamuSDK) => {
                     u.me.flags.has("wizard")   || u.me.flags.has("superuser");
   if (!isBuilder) { u.send("Permission denied."); return; }
 
-  if (!sw || sw === "list") return handleList(u, arg);
-  if (sw === "create")      return handleCreate(u, arg);
-  if (sw === "destroy")     return handleDestroy(u, arg);
-  if (sw === "add")         return handleAdd(u, arg);
-  if (sw === "remove")      return handleRemove(u, arg);
-  if (sw === "info")        return handleInfo(u, arg);
+  if (!sw || sw === "list") return await handleList(u, arg);
+  if (sw === "create")      return await handleCreate(u, arg);
+  if (sw === "destroy")     return await handleDestroy(u, arg);
+  if (sw === "add")         return await handleAdd(u, arg);
+  if (sw === "remove")      return await handleRemove(u, arg);
+  if (sw === "info")        return await handleInfo(u, arg);
 
   u.send(`Unknown switch "/${sw}". See %ch@zone%cn for usage.`);
 };

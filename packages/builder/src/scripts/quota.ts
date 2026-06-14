@@ -1,4 +1,4 @@
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 
 /**
  * @quota                     — show your current quota

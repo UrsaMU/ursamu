@@ -16,7 +16,7 @@ import {
   encounterDb,
   getEncounterForRoom,
 } from "./encounter.ts";
-import type { Encounter, Participant } from "./types.ts";
+import type { Encounter } from "./types.ts";
 import { getArchetype } from "./ai/index.ts";
 import { executeAttack } from "../commands/attack.ts";
 import { gearReload } from "../commands/gear.ts";

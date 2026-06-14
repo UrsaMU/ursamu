@@ -40,7 +40,6 @@ import { applyAttackDamage } from "../combat/damage.ts";
 import { checkSpecifiedTargetTilts } from "../combat/tilts.ts";
 import { addTilt } from "../subsystems/tilts.ts";
 import {
-  ensureParticipant,
   getEncounterForRoom,
   applyDefense,
   applySuppression,

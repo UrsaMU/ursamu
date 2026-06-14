@@ -1,11 +1,10 @@
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 import { chars } from "../schema.ts";
 import type { ICareerTerm } from "../schema.ts";
 import { PROFESSIONS, findProfession } from "../professions.ts";
 import { ROOKIE_TEMPLATES, findTemplate } from "../templates.ts";
 import { checkApproved } from "../validation.ts";
-import { wrapText } from "../display.ts";
 
 addCmd({
   name: "+chargen/type",

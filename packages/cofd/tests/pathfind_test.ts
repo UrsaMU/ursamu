@@ -4,7 +4,7 @@
 // To test in isolation we monkey-patch the engine's dbojs.query for the
 // duration of the test.
 
-import { assert, assertEquals } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import { nextHopToward } from "../src/combat/pathfind.ts";
 import { dbojs } from "@ursamu/ursamu";
 
@@ -34,13 +34,13 @@ function withExitGraph(
   // deno-lint-ignore no-explicit-any
   const original = (dbojs as any).query;
   // deno-lint-ignore no-explicit-any
-  (dbojs as any).query = async (q: any) => {
-    if (!q) return [];
+  (dbojs as any).query = (q: any) => {
+    if (!q) return Promise.resolve([]);
     const loc = q.location ?? q["data.location"];
     if (typeof loc === "string") {
-      return byRoom.get(loc) ?? [];
+      return Promise.resolve(byRoom.get(loc) ?? []);
     }
-    return [];
+    return Promise.resolve([]);
   };
   return (async () => {
     try { await fn(); } finally {
@@ -95,7 +95,7 @@ Deno.test("nextHopToward routes around a high-cost room", OPTS, () =>
     async () => {
       const hop = await nextHopToward("A", "D", ["A", "B", "X", "D"], {
         maxDepth: 6,
-        costOf: async (rid) => (rid === "X" ? 1000 : 1),
+        costOf: (rid) => Promise.resolve(rid === "X" ? 1000 : 1),
       });
       assertEquals(hop, "B", "should avoid X due to high cost");
     },
@@ -107,7 +107,7 @@ Deno.test("nextHopToward treats Infinity-cost rooms as blocked", OPTS, () =>
     async () => {
       const hop = await nextHopToward("A", "D", ["A", "B", "X", "D"], {
         maxDepth: 6,
-        costOf: async (rid) => (rid === "B" ? Infinity : 1),
+        costOf: (rid) => Promise.resolve(rid === "B" ? Infinity : 1),
       });
       // B is blocked, so must route via X.
       assertEquals(hop, "X");

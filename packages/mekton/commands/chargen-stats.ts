@@ -1,5 +1,5 @@
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "@ursamu/ursamu";
+import type { IUrsamuSDK } from "@ursamu/ursamu";
 import { chars } from "../schema.ts";
 import type { IMektonChar, IMektonStats } from "../schema.ts";
 import { derivedStats, maxWounds, skillPointsSpent } from "../derived.ts";
@@ -7,7 +7,6 @@ import { STAT_KEYS, validateStat, validateStatPool, checkApproved } from "../val
 
 function defaultChar(playerId: string, playerName: string): IMektonChar {
   const stats: IMektonStats = { att: 5, bod: 5, cl: 5, emp: 5, int: 5, luck: 5, ma: 5, ref: 5, tech: 5, edu: 5 };
-  const d = derivedStats({ stats } as IMektonChar);
   return {
     id: crypto.randomUUID(),
     playerId,

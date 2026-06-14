@@ -11,7 +11,7 @@ import { findGearByName } from "../catalog.ts";
 import { combatStatus, LOCATION_LABELS, applyDamage } from "../combat.ts";
 import { rollInterlock, difficultyLabel } from "../roll.ts";
 import { mektonSystem } from "../game-system.ts";
-import type { IMektonChar, IMektonStats, ICareerTerm, IEquipmentItem, WoundLocation } from "../schema.ts";
+import type { IMektonChar, IMektonStats, IEquipmentItem, WoundLocation } from "../schema.ts";
 
 // -- ANSI helpers --------------------------------------------------------------
 const R    = "\x1b[0m";
@@ -26,6 +26,7 @@ const RD   = (s: string) => `\x1b[31m${s}${R}`;
 const WH   = (s: string) => `\x1b[1;37m${s}${R}`;
 const W    = 72;
 
+// deno-lint-ignore no-control-regex
 function stripAnsi(s: string) { return s.replace(/\x1b\[[0-9;]*m/g, ""); }
 
 // ===[ LABEL ]=== section divider

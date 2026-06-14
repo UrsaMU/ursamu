@@ -1,5 +1,6 @@
-import { assertEquals, assertStringIncludes } from "jsr:@std/assert";
-import { describe, it } from "jsr:@std/testing/bdd";
+// deno-lint-ignore-file require-await
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { describe, it } from "@std/testing/bdd";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 // ─── mock helpers ─────────────────────────────────────────────────────────────
@@ -63,7 +64,7 @@ function mockU(opts: {
     setFlags: async () => {},
     db: {
       modify: async (...a: unknown[]) => { dbCalls.push(a); },
-      search: async (q: unknown) => {
+      search: async (_q: unknown) => {
         if (opts.searchResults) return opts.searchResults;
         if (opts.targetResult !== undefined) return opts.targetResult ? [opts.targetResult] : [];
         return [];

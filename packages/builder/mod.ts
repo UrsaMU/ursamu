@@ -35,7 +35,7 @@ async function loadScript(name: string): Promise<string | null> {
   const base = new URL(`./src/scripts/${name}.ts`, import.meta.url);
   try {
     if (base.protocol === "file:") {
-      const { fromFileUrl } = await import("jsr:@std/path");
+      const { fromFileUrl } = await import("@std/path");
       return await Deno.readTextFile(fromFileUrl(base));
     }
     const res = await fetch(base.toString());

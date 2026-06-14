@@ -20,6 +20,7 @@ const checkFlags = (tar: { flags: string }, flgs: string): boolean =>
 const isAdmin = (en: IDBOBJ): boolean => /wizard|admin|superuser|storyteller/i.test(en.flags);
 
 const canEdit = async (en: IDBOBJ, tar: IDBOBJ): Promise<boolean> => {
+  await Promise.resolve();
   if (!en || !tar) return false;
   if (/superuser/i.test(en.flags)) return true;
   if (/admin|wizard/i.test(en.flags)) return true;

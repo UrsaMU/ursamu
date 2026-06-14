@@ -1,7 +1,7 @@
 import "./commands.ts";
-import { gameHooks, registerPluginRoute, registerHeader, registerDivider, registerFooter, unregisterHeader, unregisterDivider, unregisterFooter } from "jsr:@ursamu/ursamu";
-import type { IPlugin, SessionEvent, LayoutFn } from "jsr:@ursamu/ursamu";
-import { registerHelpDir } from "jsr:@ursamu/help-plugin";
+import { gameHooks, registerPluginRoute, registerHeader, registerDivider, registerFooter, unregisterHeader, unregisterDivider, unregisterFooter } from "@ursamu/ursamu";
+import type { IPlugin, SessionEvent, LayoutFn } from "@ursamu/ursamu";
+import { registerHelpDir } from "@ursamu/help-plugin";
 import { mektonSystem } from "./game-system.ts";
 import { chars } from "./schema.ts";
 import { routeHandler } from "./routes.ts";
