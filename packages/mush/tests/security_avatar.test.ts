@@ -31,38 +31,41 @@ Deno.test("execAvatar pins resolved IP to prevent DNS Rebinding", OPTS, async ()
     cmd: { name: "@avatar", original: "@avatar http://attacker.com/pic.png", args: ["http://attacker.com/pic.png"], switches: [] },
     send: (msg: string) => { sentMessages.push(msg); },
     broadcast: () => {},
-    eval: async () => "",
-    attr: { get: async () => null, set: async () => {} },
+    eval: () => Promise.resolve(""),
+    attr: { get: () => Promise.resolve(null), set: () => Promise.resolve() },
     db: {
-      modify: async () => {},
-      search: async () => [],
-      create: async (d: any) => ({ ...d, id: "99", flags: new Set(), contents: [] }),
-      destroy: async () => {},
+      modify: () => Promise.resolve(),
+      search: () => Promise.resolve([]),
+      create: (d: Record<string, unknown>) => Promise.resolve({ ...d, id: "99", flags: new Set(), contents: [] }),
+      destroy: () => Promise.resolve(),
     },
     util: {
-      target: async () => null,
-      displayName: (o: any) => o.name ?? "Unknown",
+      target: () => Promise.resolve(null),
+      displayName: (o: Record<string, unknown>) => String(o.name ?? "Unknown"),
       stripSubs: (s: string) => s,
       parseDesc: (s: string) => s,
       center: (s: string) => s,
       ljust: (s: string, _w: number) => s,
       rjust: (s: string, _w: number) => s,
     },
-    canEdit: async () => true,
+    canEdit: () => Promise.resolve(true),
   } as unknown as IUrsamuSDK;
 
   // Mock resolveDns and fetch
   const originalResolveDns = Deno.resolveDns;
   const originalFetch = globalThis.fetch;
 
-  Deno.resolveDns = (hostname: string, recordType: string): Promise<any[]> => {
+  Deno.resolveDns = (
+    hostname: string,
+    recordType: "A" | "AAAA" | "CAA" | "CNAME" | "MX" | "NS" | "PTR" | "SRV" | "TXT",
+  ): Promise<string[] | Deno.CAARecord[] | Deno.MXRecord[] | Deno.NSRecord[] | Deno.SRVRecord[][] | string[][]> => {
     if (hostname === "attacker.com") {
       return Promise.resolve(["8.8.8.8"]); // return safe public IP
     }
-    return originalResolveDns(hostname, recordType as any);
+    return originalResolveDns(hostname, recordType);
   };
 
-  globalThis.fetch = (input: string | Request | URL, init?: RequestInit): Promise<Response> => {
+  globalThis.fetch = (input: string | Request | URL, _init?: RequestInit): Promise<Response> => {
     const urlStr = input.toString();
     fetchedUrls.push(urlStr);
     return Promise.resolve(new Response(new Uint8Array([1, 2, 3]), {
