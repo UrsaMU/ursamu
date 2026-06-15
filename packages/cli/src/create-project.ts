@@ -5,7 +5,7 @@
  */
 
 import { join, fromFileUrl } from "@std/path";
-import { GAME_PROJECT_TASKS, DEFAULT_PLUGINS_MANIFEST, LOCAL_PLUGINS_MANIFEST } from "./game-project-tasks.ts";
+import { GAME_PROJECT_TASKS, LOCAL_PLUGINS_MANIFEST } from "./game-project-tasks.ts";
 import {
   gameMainTs,
   gameTelnetTs,
