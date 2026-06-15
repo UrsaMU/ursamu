@@ -19,7 +19,7 @@ export type Query<T> = QueryCondition | QueryOperator<T>;
  *
  * @see https://github.com/UrsaMU/ursamu/issues/157
  */
-export type DottedSetData<T> = Partial<T> & { [dottedPath: string]: unknown };
+export type DottedSetData<T> = Partial<T> & Record<string, any>;
 
 export interface IDatabase<T> {
   create(data: T): Promise<T>;

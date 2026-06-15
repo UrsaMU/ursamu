@@ -45,7 +45,7 @@ export type {
   DbAccessor as SoftcodeDbAccessor,
   OutputAccessor as SoftcodeOutputAccessor,
 } from "./src/softcode/context.ts";
-export { resetNoiseState } from "./src/softcode/stdlib/noise.ts";
+export { resetNoiseState, createNoise } from "./src/softcode/stdlib/noise.ts";
 export { entries, lookup, register } from "./src/softcode/stdlib/registry.ts";
 export type { StdlibFn }             from "./src/softcode/stdlib/registry.ts";
 export { lookupSub, registerSub }    from "./src/softcode/stdlib/subRegistry.ts";

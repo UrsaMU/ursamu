@@ -100,9 +100,22 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   // ── Backwards-compat aliases ─────────────────────────────────────────────────
   find(q?: Query<T>): Promise<T[]> { return this.query(q); }
   findOne(q?: Query<T>): Promise<T | undefined> { return this.queryOne(q); }
-  update(q: Query<T>, opOrData: string | DottedSetData<T>, data?: DottedSetData<T>): Promise<T[]> {
-    if (typeof opOrData === "string") return this.modify(q, opOrData, data ?? {} as DottedSetData<T>);
-    return this.modify(q, "$set", opOrData);
+  async update(q: Query<T>, opOrData: string | DottedSetData<T>, data?: DottedSetData<T>): Promise<T[]> {
+    let results: T[];
+    if (typeof opOrData === "string") {
+      results = await this.modify(q, opOrData, data ?? {} as DottedSetData<T>);
+    } else {
+      results = await this.modify(q, "$set", opOrData);
+    }
+    if (results.length === 0 && q && "id" in q && typeof q.id === "string") {
+      const payload = typeof opOrData === "string"
+        ? (opOrData === "$set" ? data : {})
+        : opOrData;
+      const record = { id: q.id, ...(payload as Record<string, unknown>) } as unknown as T;
+      await this.create(record);
+      return [record];
+    }
+    return results;
   }
 
   static async close(): Promise<void> {
