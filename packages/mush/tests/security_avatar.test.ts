@@ -55,10 +55,8 @@ Deno.test("execAvatar pins resolved IP to prevent DNS Rebinding", OPTS, async ()
   const originalResolveDns = Deno.resolveDns;
   const originalFetch = globalThis.fetch;
 
-  Deno.resolveDns = (
-    hostname: string,
-    recordType: "A" | "AAAA" | "CAA" | "CNAME" | "MX" | "NS" | "PTR" | "SRV" | "TXT",
-  ): Promise<string[] | Deno.CAARecord[] | Deno.MXRecord[] | Deno.NSRecord[] | Deno.SRVRecord[][] | string[][]> => {
+  // deno-lint-ignore no-explicit-any
+  (Deno as any).resolveDns = (hostname: string, recordType: any): Promise<any> => {
     if (hostname === "attacker.com") {
       return Promise.resolve(["8.8.8.8"]); // return safe public IP
     }
