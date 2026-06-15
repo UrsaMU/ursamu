@@ -3736,7 +3736,7 @@
       "npm:quickjs-emscripten@0.29.0",
       "npm:stripe@17",
       "npm:unpdf@0.11",
-      "npm:zod@^3.23.0"
+      "npm:zod@4.4.3"
     ],
     "members": {
       "games/roses": {

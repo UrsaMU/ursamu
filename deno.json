@@ -115,7 +115,7 @@
     "@langchain/langgraph": "npm:@langchain/langgraph@^0.2.0",
     "@langchain/langgraph/prebuilt": "npm:@langchain/langgraph@^0.2.0/prebuilt",
     "@langchain/core": "npm:@langchain/core@^0.3.0",
-    "zod": "npm:zod@^3.23.0",
+    "zod": "npm:zod@4.4.3",
     "stripe": "npm:stripe@^17.0.0",
     "unpdf": "npm:unpdf@^0.11.0"
   },
