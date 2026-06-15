@@ -106,19 +106,19 @@ export async function scaffoldProject(
     console.log(`Created directory: ${dir}`);
   }
 
-  const pluginsManifest = isLocal ? LOCAL_PLUGINS_MANIFEST : DEFAULT_PLUGINS_MANIFEST;
+  const pluginsManifest = isLocal ? LOCAL_PLUGINS_MANIFEST : { plugins: [] };
   await Deno.writeTextFile(
     join(targetDir, "src", "plugins", "plugins.manifest.json"),
     JSON.stringify(pluginsManifest, null, 2),
   );
-  console.log(`Created src/plugins/plugins.manifest.json (${isLocal ? "local symlinks" : "remote"} mode)`);
+  console.log(`Created src/plugins/plugins.manifest.json (${isLocal ? "local symlinks" : "empty remote"} mode)`);
 
   await Deno.writeTextFile(join(targetDir, "wiki", "home.md"), gameWikiHome(name));
   console.log("Created wiki/home.md");
 
   await copySystemScripts(targetDir);
 
-  await Deno.writeTextFile(join(targetDir, "src", "main.ts"),   gameMainTs(name));
+  await Deno.writeTextFile(join(targetDir, "src", "main.ts"),   gameMainTs(name, isLocal));
   console.log("Created src/main.ts");
   await Deno.writeTextFile(join(targetDir, "src", "telnet.ts"), gameTelnetTs());
   console.log("Created src/telnet.ts");
@@ -182,13 +182,19 @@ export async function scaffoldProject(
     "quickjs-emscripten":      "npm:quickjs-emscripten@0.29.0",
   };
   const jsrImports = {
-    "ursamu":          "jsr:@ursamu/mush",      // preferred entry point
-    "@ursamu/mush":    "jsr:@ursamu/mush",
-    "@ursamu/core":    "jsr:@ursamu/core",
-    "@ursamu/ursamu":  "jsr:@ursamu/ursamu",    // shim — kept for plugin compat
-    "@std/path":       "jsr:@std/path@^0.224.0",
-    "@std/assert":     "jsr:@std/assert@^0.224.0",
-    "@std/fs":         "jsr:@std/fs@^0.224.0",
+    "ursamu":                  "jsr:@ursamu/mush",      // preferred entry point
+    "@ursamu/mush":            "jsr:@ursamu/mush",
+    "@ursamu/core":            "jsr:@ursamu/core",
+    "@ursamu/ursamu":          "jsr:@ursamu/ursamu",    // shim — kept for plugin compat
+    "@std/path":               "jsr:@std/path@^0.224.0",
+    "@std/assert":             "jsr:@std/assert@^0.224.0",
+    "@std/fs":                 "jsr:@std/fs@^0.224.0",
+    "@ursamu/builder-plugin":  "https://raw.githubusercontent.com/UrsaMU/builder-plugin/v1.4.0/index.ts",
+    "@ursamu/channel-plugin":  "https://raw.githubusercontent.com/UrsaMU/channel-plugin/v1.0.0/index.ts",
+    "@ursamu/help-plugin":     "https://raw.githubusercontent.com/UrsaMU/help-plugin/v1.0.2/index.ts",
+    "@ursamu/bbs-plugin":      "https://raw.githubusercontent.com/UrsaMU/bbs-plugin/v1.0.1/index.ts",
+    "@ursamu/mail-plugin":     "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v1.0.1/index.ts",
+    "@ursamu/wiki-plugin":     "https://raw.githubusercontent.com/UrsaMU/wiki-plugin/v1.0.0/index.ts",
   };
   const denoJson = JSON.stringify({
     nodeModulesDir: "auto",

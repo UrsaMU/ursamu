@@ -270,8 +270,9 @@ Deno.test("${name} — placeholder (replace with real tests)", OPTS, () => {
 
 // ─── game project templates ────────────────────────────────────────────────────
 
-export function gameMainTs(name: string): string {
-  return `import { mu } from "ursamu";
+export function gameMainTs(name: string, isLocal = false): string {
+  if (isLocal) {
+    return `import { mu } from "ursamu";
 import { join } from "@std/path";
 
 const config = {
@@ -300,6 +301,48 @@ const game = await mu(config, undefined, {
 
 console.log(\`\${game.config.get("game.name")} main server is running!\`);
 `;
+  } else {
+    return `import { mu } from "ursamu";
+import { join } from "@std/path";
+
+import builderPlugin from "@ursamu/builder-plugin";
+import channelPlugin from "@ursamu/channel-plugin";
+import helpPlugin from "@ursamu/help-plugin";
+import mailPlugin from "@ursamu/mail-plugin";
+import bbsPlugin from "@ursamu/bbs-plugin";
+import wikiPlugin from "@ursamu/wiki-plugin";
+
+const config = {
+  server: {
+    telnet: 4201,
+    ws: 4202,
+    http: 4203,
+    db: "data/ursamu.db",
+    counters: "counters",
+    chans: "chans",
+    mail: "mail",
+    bboard: "bboard",
+  },
+  game: {
+    name: "${name}",
+    description: "A custom UrsaMU game",
+    version: "0.0.1",
+    text: { connect: "text/default_connect.txt" },
+    playerStart: "1",
+  },
+};
+
+const game = await mu(
+  config,
+  [builderPlugin, channelPlugin, helpPlugin, mailPlugin, bbsPlugin, wikiPlugin],
+  {
+    pluginsDir: join(Deno.cwd(), "src", "plugins"),
+  }
+);
+
+console.log(\`\${game.config.get("game.name")} main server is running!\`);
+`;
+  }
 }
 
 export function gameTelnetTs(): string {
