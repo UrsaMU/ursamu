@@ -16,7 +16,8 @@
       "@ursamu/discord": ["./packages/discord/mod.ts"],
       "@ursamu/ai-gm": ["./packages/ai-gm/mod.ts"],
       "@std/path": ["./types/@std/path.d.ts"],
-      "@std/fs": ["./types/@std/fs.d.ts"]
+      "@std/fs": ["./types/@std/fs.d.ts"],
+      "@std/assert": ["./types/@std/assert.d.ts"]
     },
     "jsx": "react",
     "lib": ["ES2022", "DOM"],
