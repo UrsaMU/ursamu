@@ -19,6 +19,7 @@ export type Query<T> = QueryCondition | QueryOperator<T>;
  *
  * @see https://github.com/UrsaMU/ursamu/issues/157
  */
+// deno-lint-ignore no-explicit-any
 export type DottedSetData<T> = Partial<T> & Record<string, any>;
 
 export interface IDatabase<T> {
