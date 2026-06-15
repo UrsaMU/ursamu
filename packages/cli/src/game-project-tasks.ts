@@ -65,3 +65,56 @@ export const DEFAULT_PLUGINS_MANIFEST = {
     },
   ],
 };
+
+/**
+ * Local-dev variant of the plugins manifest for `ursamu create <name> --local`.
+ * Uses the `local` field so `ensurePlugins` symlinks from the monorepo instead
+ * of cloning from GitHub. Paths are relative to the game project root.
+ */
+export const LOCAL_PLUGINS_MANIFEST = {
+  plugins: [
+    {
+      name: "builder",
+      url: "https://github.com/UrsaMU/builder-plugin",
+      description: "World-building commands (@dig, @open, @link, @describe, @examine, and more) plus REST API.",
+      ursamu: ">=1.9.5",
+      local: "../../packages/builder",
+    },
+    {
+      name: "channel",
+      url: "https://github.com/UrsaMU/channel-plugin",
+      description: "Channel system — alias dispatch, auto-join on login, @chancreate/@chandestroy/@chanset/@channel, message history.",
+      ursamu: ">=1.9.27",
+      local: "../../packages/channels",
+    },
+    {
+      name: "help",
+      url: "https://github.com/UrsaMU/help-plugin",
+      description: "API-first help system — aggregates command help, per-plugin help folders, and runtime DB entries.",
+      ursamu: ">=1.9.0",
+      local: "../../packages/help",
+    },
+    {
+      name: "bbs",
+      url: "https://github.com/UrsaMU/bbs-plugin",
+      description: "Full-featured Myrddin-style BBS — boards, threading, categories, and more.",
+      ursamu: ">=1.9.0",
+      local: "../../packages/bbs",
+    },
+    {
+      name: "mail",
+      url: "https://github.com/UrsaMU/mail-plugin",
+      description: "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry.",
+      ursamu: ">=1.9.3",
+      local: "../../packages/mail",
+    },
+    {
+      name: "wiki",
+      url: "https://github.com/UrsaMU/wiki-plugin",
+      description: "File-based markdown wiki — pages, search, history, access control, backlinks.",
+      ursamu: ">=1.9.0",
+      local: "../../packages/wiki",
+    },
+  ],
+};
+

@@ -5,7 +5,7 @@
  */
 
 import { join, fromFileUrl } from "@std/path";
-import { GAME_PROJECT_TASKS, DEFAULT_PLUGINS_MANIFEST } from "./game-project-tasks.ts";
+import { GAME_PROJECT_TASKS, DEFAULT_PLUGINS_MANIFEST, LOCAL_PLUGINS_MANIFEST } from "./game-project-tasks.ts";
 import {
   gameMainTs,
   gameTelnetTs,
@@ -106,11 +106,12 @@ export async function scaffoldProject(
     console.log(`Created directory: ${dir}`);
   }
 
+  const pluginsManifest = isLocal ? LOCAL_PLUGINS_MANIFEST : DEFAULT_PLUGINS_MANIFEST;
   await Deno.writeTextFile(
     join(targetDir, "src", "plugins", "plugins.manifest.json"),
-    JSON.stringify(DEFAULT_PLUGINS_MANIFEST, null, 2),
+    JSON.stringify(pluginsManifest, null, 2),
   );
-  console.log("Created src/plugins/plugins.manifest.json");
+  console.log(`Created src/plugins/plugins.manifest.json (${isLocal ? "local symlinks" : "remote"} mode)`);
 
   await Deno.writeTextFile(join(targetDir, "wiki", "home.md"), gameWikiHome(name));
   console.log("Created wiki/home.md");

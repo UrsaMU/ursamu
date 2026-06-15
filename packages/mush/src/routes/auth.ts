@@ -8,7 +8,7 @@
  * for reset flows, and input length guards.
  */
 
-import { dbojs, Obj }         from "@ursamu/mush";
+import { dbojs, Obj, counters } from "../world/dbobjs.ts";
 import { createToken, getConfig, log } from "@ursamu/core";
 import bcrypt                 from "bcrypt";
 
@@ -19,9 +19,14 @@ const escRx = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // ── brute-force protection ────────────────────────────────────────────────────
 
 const loginAttempts = new Map<string, { count: number; resetAt: number }>();
-const MAX_LOGIN_ATTEMPTS = 10;
-const LOGIN_WINDOW_MS    = 60_000;
 export const MAX_TRACKED_IPS = 10_000;
+
+function getMaxLoginAttempts(): number {
+  return getConfig<number>("server.maxLoginAttempts", 10);
+}
+function getLoginWindowMs(): number {
+  return getConfig<number>("server.loginWindowMs", 60_000);
+}
 
 function evictExpiredLoginAttempts(now: number): void {
   for (const [ip, entry] of loginAttempts) {
@@ -30,29 +35,31 @@ function evictExpiredLoginAttempts(now: number): void {
 }
 
 function isLoginRateLimited(ip: string): boolean {
-  const now   = Date.now();
-  const entry = loginAttempts.get(ip);
+  const now    = Date.now();
+  const window = getLoginWindowMs();
+  const entry  = loginAttempts.get(ip);
   if (!entry || now >= entry.resetAt) {
     if (!entry) {
       evictExpiredLoginAttempts(now);
       if (loginAttempts.size >= MAX_TRACKED_IPS) return true;
     }
-    loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    loginAttempts.set(ip, { count: 1, resetAt: now + window });
     return false;
   }
   entry.count++;
-  return entry.count > MAX_LOGIN_ATTEMPTS;
+  return entry.count > getMaxLoginAttempts();
 }
 
 function recordLoginFailure(ip: string): void {
-  const now   = Date.now();
-  const entry = loginAttempts.get(ip);
+  const now    = Date.now();
+  const window = getLoginWindowMs();
+  const entry  = loginAttempts.get(ip);
   if (!entry || now >= entry.resetAt) {
     if (!entry) {
       evictExpiredLoginAttempts(now);
       if (loginAttempts.size >= MAX_TRACKED_IPS) return;
     }
-    loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    loginAttempts.set(ip, { count: 1, resetAt: now + window });
   } else {
     entry.count++;
   }
@@ -63,7 +70,7 @@ setInterval(() => {
   for (const [ip, entry] of loginAttempts) {
     if (now >= entry.resetAt) loginAttempts.delete(ip);
   }
-}, 60_000);
+}, getLoginWindowMs());
 
 // ── input limits ──────────────────────────────────────────────────────────────
 
@@ -82,9 +89,10 @@ function jsonResp(body: unknown, status = 200): Response {
 }
 
 function rateLimitResp(message: string): Response {
+  const retryAfter = Math.ceil(getLoginWindowMs() / 1_000).toString();
   return new Response(
     JSON.stringify({ error: message }),
-    { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } },
+    { status: 429, headers: { "Content-Type": "application/json", "Retry-After": retryAfter } },
   );
 }
 
@@ -193,7 +201,6 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
         return jsonResp({ error: "Username or email already taken." }, 409);
       }
 
-      const counters = (await import("@ursamu/mush")).counters;
       const counter  = await counters.queryOne({ id: "objid" });
       const id       = String((counter?.value ?? 0) + 1);
       await counters.modify({ id: "objid" }, "$set", { id: "objid", value: parseInt(id, 10) });
