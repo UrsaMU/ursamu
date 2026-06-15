@@ -64,9 +64,15 @@ async function resolveRoom(roomId: string | undefined): Promise<IDBObj & { broad
     ...room,
     broadcast: (msg: string, opts?: Record<string, unknown>) => {
       const exclude = (opts?.exclude as string[]) ?? [];
+      const reality = opts?.reality as string | undefined;
       const allSessions = sessions.list();
       room.contents
-        .filter((o) => o.flags.has("connected") && !exclude.includes(o.id))
+        .filter((o) => {
+          if (!o.flags.has("connected") || exclude.includes(o.id)) return false;
+          if (reality === undefined) return true;
+          const plane = (o.state.reality as string | undefined) ?? "material";
+          return plane === reality;
+        })
         .forEach((o) => {
           const socketIds = allSessions
             .filter((s) => ((s as unknown as Record<string, unknown>).actorId as string | undefined) === o.id)

@@ -26,7 +26,8 @@ export async function execSay(u: IUrsamuSDK): Promise<void> {
 
   const message = await u.evalString(raw);
   const name = (actor.state.moniker as string) || (actor.state.name as string) || actor.name;
-  u.here.broadcast(`%ch${name}%cn says, "${message}"`);
+  const reality = (actor.state.reality as string | undefined) ?? "material";
+  u.here.broadcast(`%ch${name}%cn says, "${message}"`, { reality });
 
   try {
     const roomContents = await u.db.search({ location: u.here.id });
@@ -56,7 +57,8 @@ export async function execPose(u: IUrsamuSDK): Promise<void> {
   const name = (actor.state.moniker as string) || (actor.state.name as string) || actor.name;
   const isSemipose = u.cmd.original?.trimStart().startsWith(";") ?? false;
   const content = isSemipose ? `${name}${input}` : `${name} ${input}`;
-  u.here.broadcast(`%ch${content}%cn`);
+  const reality = (actor.state.reality as string | undefined) ?? "material";
+  u.here.broadcast(`%ch${content}%cn`, { reality });
 }
 
 export async function execThink(u: IUrsamuSDK): Promise<void> {

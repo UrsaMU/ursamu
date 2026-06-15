@@ -1,20 +1,23 @@
 import type { IUrsamuSDK } from "../commands/types.ts";
 
-async function connectedInRoom(u: IUrsamuSDK, roomId: string) {
-  return (await u.db.search({ location: roomId })).filter((p) =>
+async function connectedInRoom(u: IUrsamuSDK, roomId: string, reality?: string) {
+  const all = (await u.db.search({ location: roomId })).filter((p) =>
     p.flags.has("connected")
   );
+  if (reality === undefined) return all;
+  return all.filter((p) => ((p.state.reality as string | undefined) ?? "material") === reality);
 }
 
 export async function execEmit(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
   const arg = u.cmd.args[0] || "";
   const eqIdx = arg.indexOf("=");
+  const reality = (actor.state.reality as string | undefined) ?? "material";
 
   if (eqIdx === -1) {
     const message = await u.evalString(arg.trim());
     if (!message) { u.send("Usage: @emit [<room>=]<message>"); return; }
-    for (const occ of await connectedInRoom(u, u.here.id)) u.send(message, occ.id);
+    for (const occ of await connectedInRoom(u, u.here.id, reality)) u.send(message, occ.id);
     await u.events.emit("room:text", { roomId: u.here.id, text: message, speakerId: actor.id });
     return;
   }
@@ -35,7 +38,7 @@ export async function execEmit(u: IUrsamuSDK): Promise<void> {
   const room = roomResults.find((r) => r.flags.has("room"));
   if (!room) { u.send(`I can't find a room called '${roomRef}'.`); return; }
 
-  const connected = await connectedInRoom(u, room.id);
+  const connected = await connectedInRoom(u, room.id, reality);
   if (connected.length === 0) { u.send(`No connected players in ${room.name || room.id}.`); return; }
   for (const p of connected) u.send(message, p.id);
   u.send(`Emitted to ${connected.length} player(s) in ${room.name || room.id}.`);
@@ -44,7 +47,8 @@ export async function execEmit(u: IUrsamuSDK): Promise<void> {
 export async function execLemit(u: IUrsamuSDK): Promise<void> {
   const message = await u.evalString((u.cmd.args[0] ?? "").trim());
   if (!message) { u.send("Usage: @lemit <message>"); return; }
-  for (const occ of await connectedInRoom(u, u.here.id)) u.send(message, occ.id);
+  const reality = (u.me.state.reality as string | undefined) ?? "material";
+  for (const occ of await connectedInRoom(u, u.here.id, reality)) u.send(message, occ.id);
   await u.events.emit("room:text", { roomId: u.here.id, text: message, speakerId: u.me.id });
 }
 

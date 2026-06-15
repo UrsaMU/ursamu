@@ -432,3 +432,63 @@ Deno.test("L1 — who with NaN lastCommand shows '---' not 'NaN'", OPTS, async (
     throw new Error(`L1 BUG: who output contains "NaN": ${output}`);
   }
 });
+
+// ===========================================================================
+// reality-plane filtering — say / pose pass state.reality to here.broadcast
+// ===========================================================================
+
+function makeRealityU(opts: { actorReality?: string; args?: string[]; original?: string } = {}) {
+  const sent: string[] = [];
+  const broadcastCalls: Array<[string, Record<string, unknown> | undefined]> = [];
+  const me: IDBObj = {
+    id: "rp_actor1", name: "Garou",
+    flags: new Set(["player", "connected"]),
+    state: { name: "Garou", ...(opts.actorReality ? { reality: opts.actorReality } : {}) },
+    location: "rp_room1", contents: [],
+  };
+  const here = {
+    id: "rp_room1", name: "Forest",
+    flags: new Set(["room"]), state: {}, location: "", contents: [] as IDBObj[],
+    broadcast: (m: string, o?: Record<string, unknown>) => broadcastCalls.push([m, o]),
+  };
+  const u = {
+    me, here,
+    cmd: { name: "say", original: opts.original ?? "say hi", args: opts.args ?? ["hi"], switches: [] },
+    send: (m: string) => sent.push(m),
+    broadcast: () => {},
+    canEdit: () => Promise.resolve(true),
+    db: { search: () => Promise.resolve([]), modify: () => Promise.resolve(), create: (d: unknown) => Promise.resolve(d as IDBObj), destroy: () => Promise.resolve() },
+    util: { target: () => Promise.resolve(null), displayName: (o: IDBObj) => o.name, stripSubs: (s: string) => s, center: (s: string) => s },
+    evalString: (s: string) => Promise.resolve(s),
+    events: { emit: () => Promise.resolve(), on: () => Promise.resolve("") },
+    trigger: () => Promise.resolve(),
+  } as unknown as IUrsamuSDK;
+  return Object.assign(u, { _sent: sent, _broadcasts: broadcastCalls });
+}
+
+Deno.test("say — default reality is 'material' when state.reality absent", OPTS, async () => {
+  const u = makeRealityU({ args: ["Hello"] });
+  await execSay(u);
+  const [, opts] = u._broadcasts[0] ?? [];
+  if ((opts as Record<string, unknown>)?.reality !== "material") {
+    throw new Error(`Expected reality="material", got: ${JSON.stringify(opts)}`);
+  }
+});
+
+Deno.test("say — passes state.reality to here.broadcast", OPTS, async () => {
+  const u = makeRealityU({ args: ["Umbra call"], actorReality: "penumbra" });
+  await execSay(u);
+  const [, opts] = u._broadcasts[0] ?? [];
+  if ((opts as Record<string, unknown>)?.reality !== "penumbra") {
+    throw new Error(`Expected reality="penumbra", got: ${JSON.stringify(opts)}`);
+  }
+});
+
+Deno.test("pose — passes state.reality to here.broadcast", OPTS, async () => {
+  const u = makeRealityU({ args: ["waves"], original: ":waves", actorReality: "penumbra" });
+  await execPose(u);
+  const [, opts] = u._broadcasts[0] ?? [];
+  if ((opts as Record<string, unknown>)?.reality !== "penumbra") {
+    throw new Error(`Expected reality="penumbra", got: ${JSON.stringify(opts)}`);
+  }
+});
