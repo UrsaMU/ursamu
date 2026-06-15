@@ -120,7 +120,7 @@
     "stripe": "npm:stripe@^17.0.0",
     "unpdf": "npm:unpdf@^0.11.0"
   },
-  "exclude": ["docs/_site", "config", ".claude"],
+  "exclude": ["docs/_site", "config", ".claude", ".agents"],
   "lint": {
     "rules": { "tags": ["recommended"] },
     "exclude": ["src/services/Softcode/parser.cjs", "legends"]
