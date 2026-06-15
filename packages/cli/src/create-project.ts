@@ -144,7 +144,7 @@ export async function scaffoldProject(
     join(targetDir, ".env"),
     gameEnvFile().replace("__JWT_SECRET__", jwtSecret),
   );
-  console.log("Created .env (with generated JWT_SECRET)");
+  console.log("Created .env configuration file");
 
   await writeConnectTxt(targetDir, name);
   console.log("Created text/default_connect.txt");

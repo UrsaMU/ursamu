@@ -454,7 +454,7 @@ export async function checkAndCreateSuperuser() {
     console.log("│  Fresh database detected — no players exist yet.    │");
     console.log("│                                                     │");
     console.log("│  Connect via telnet and run:                        │");
-    console.log("│    create <name> <password>                         │");
+    console.log("│    create <name> <passphrase>                       │");
     console.log("│                                                     │");
     console.log("│  The first player created is automatically given    │");
     console.log("│  superuser access.                                  │");

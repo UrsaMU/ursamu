@@ -12,9 +12,10 @@ const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
  * internal (SSRF guard).
  */
 export function isPrivateHost(hostname: string): boolean {
-  const h = hostname.toLowerCase();
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, "");
   if (h === "localhost") return true;
-  if (h === "::1" || h.startsWith("fc") || h.startsWith("fd")) return true;
+  if (/^::ffff:/i.test(h)) return isPrivateHost(h.slice(7));
+  if (h === "::1" || h.startsWith("fc") || h.startsWith("fd") || h.startsWith("fe80")) return true;
   const parts = h.split(".").map(Number);
   if (parts.length !== 4 || parts.some(isNaN)) return false;
   const [a, b] = parts;
@@ -47,23 +48,47 @@ async function removeExistingAvatar(id: string): Promise<void> {
   }
 }
 
+/**
+ * Returns a copy of `originalUrl` with its hostname replaced by `resolvedIp`.
+ */
+export function buildPinnedFetchUrl(originalUrl: string, resolvedIp: string): string {
+  const parsed = new URL(originalUrl);
+  if (resolvedIp.includes(":")) {
+    const portPart = parsed.port ? `:${parsed.port}` : "";
+    parsed.host = `[${resolvedIp}]${portPart}`;
+  } else {
+    parsed.hostname = resolvedIp;
+  }
+  return parsed.toString();
+}
+
 async function fetchAndValidate(url: URL, u: IUrsamuSDK): Promise<Uint8Array | null> {
-  const hostname = url.hostname.toLowerCase();
+  const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   if (isPrivateHost(hostname)) { u.send("URL resolves to a private or internal address."); return null; }
+  
+  let resolvedIp = "";
   try {
     const aRecords    = await Deno.resolveDns(hostname, "A").catch(() => [] as string[]);
     const aaaaRecords = await Deno.resolveDns(hostname, "AAAA").catch(() => [] as string[]);
-    if ([...aRecords, ...aaaaRecords].some(isPrivateHost)) {
+    const allRecords  = [...aRecords, ...aaaaRecords];
+    if (allRecords.some(isPrivateHost)) {
       u.send("URL resolves to a private or internal address.");
       return null;
     }
+    resolvedIp = allRecords[0];
   } catch {
     // DNS resolution failure is not fatal
   }
 
+  const targetUrl = resolvedIp ? buildPinnedFetchUrl(url.toString(), resolvedIp) : url.toString();
+
   let res: Response;
   try {
-    res = await fetch(url.toString(), { redirect: "error", signal: AbortSignal.timeout(10_000) });
+    res = await fetch(targetUrl, {
+      redirect: "error",
+      signal: AbortSignal.timeout(10_000),
+      headers: resolvedIp ? { "Host": hostname } : {},
+    });
   } catch { u.send("Could not fetch that URL."); return null; }
   if (!res.ok) { u.send(`Request failed (${res.status}). Check the URL and try again.`); return null; }
 
