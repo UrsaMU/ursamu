@@ -23,6 +23,7 @@ export interface IDBOBJ {
     quota?: number;
     [key: string]: unknown;
   };
+  [key: string]: unknown;
 }
 
 /** Object attribute shape. */

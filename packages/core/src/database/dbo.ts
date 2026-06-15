@@ -1,4 +1,4 @@
-import type { IDatabase, Query } from "./types.ts";
+import type { IDatabase, Query, DottedSetData } from "./types.ts";
 import { TypeGraphAdapter } from "./typegraph.ts";
 import { DenoKvAdapter } from "./denokv.ts";
 
@@ -77,7 +77,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     return this.adapter.all();
   }
 
-  modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
+  modify(query: Query<T>, operator: string, data: DottedSetData<T>): Promise<T[]> {
     return this.adapter.modify(query, operator, data);
   }
 
@@ -100,10 +100,9 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   // ── Backwards-compat aliases ─────────────────────────────────────────────────
   find(q?: Query<T>): Promise<T[]> { return this.query(q); }
   findOne(q?: Query<T>): Promise<T | undefined> { return this.queryOne(q); }
-  update(q: Query<T>, opOrData: string | Partial<T>, data?: Partial<T>): Promise<T[]> {
-    if (typeof opOrData === "string") return this.modify(q, opOrData, data ?? {} as Partial<T>);
-    // deno-lint-ignore no-explicit-any
-    return this.modify(q, "$set", opOrData as any);
+  update(q: Query<T>, opOrData: string | DottedSetData<T>, data?: DottedSetData<T>): Promise<T[]> {
+    if (typeof opOrData === "string") return this.modify(q, opOrData, data ?? {} as DottedSetData<T>);
+    return this.modify(q, "$set", opOrData);
   }
 
   static async close(): Promise<void> {

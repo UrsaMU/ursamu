@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { DBO } from "../src/database/dbo.ts";
-import type { IDatabase, Query } from "../src/database/types.ts";
+import type { IDatabase, Query, DottedSetData } from "../src/database/types.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -34,7 +34,7 @@ class MockAdapter implements IDatabase<MockItem> {
     return Array.from(this.store.values());
   }
 
-  async modify(_query: Query<MockItem>, _operator: string, data: Partial<MockItem>): Promise<MockItem[]> {
+  async modify(_query: Query<MockItem>, _operator: string, data: DottedSetData<MockItem>): Promise<MockItem[]> {
     await Promise.resolve();
     const item = Array.from(this.store.values())[0];
     if (item) {

@@ -1,4 +1,4 @@
-import type { IDatabase, Query } from "./types.ts";
+import type { IDatabase, Query, DottedSetData } from "./types.ts";
 import { z } from "npm:zod@4.4.3";
 import { defineNode, defineGraph, createStore } from "@nicia-ai/typegraph";
 import { createLocalPgliteBackend } from "@nicia-ai/typegraph/postgres/pglite";
@@ -120,7 +120,7 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
     return this.query();
   }
 
-  async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
+  async modify(query: Query<T>, operator: string, data: DottedSetData<T>): Promise<T[]> {
     const store = await TypeGraphAdapter.getStore();
     const { applyInc, applyPush, applySet, applyUnset } = await import("./operators.ts");
 

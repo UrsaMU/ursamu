@@ -120,8 +120,8 @@ export const hooks = {
 
     await sandboxService.runScript(attr.value, {
       id:       actor.id,
-      me:       meObj ? await SDKService.hydrate(meObj) : { id: actor.id, flags: new Set(actor.flags.split(" ")), state: actor.data || {} },
-      here:     hereObj ? await SDKService.hydrate(hereObj, true) : undefined,
+      me:       meObj ? await SDKService.hydrate(meObj.dbobj) : { id: actor.id, flags: new Set(actor.flags.split(" ")), state: actor.data || {} },
+      here:     hereObj ? await SDKService.hydrate(hereObj.dbobj, true) : undefined,
       location: actor.location || "limbo",
       state:    actor.data?.state as Record<string, unknown> || {},
       cmd:      { name: attrName.toLowerCase(), args },

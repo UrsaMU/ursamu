@@ -1,4 +1,4 @@
-import type { IDatabase, Query } from "./types.ts";
+import type { IDatabase, Query, DottedSetData } from "./types.ts";
 import {
   applyInc,
   applyPush,
@@ -100,7 +100,7 @@ export class DenoKvAdapter<T extends WithId> implements IDatabase<T> {
     return results;
   }
 
-  async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
+  async modify(query: Query<T>, operator: string, data: DottedSetData<T>): Promise<T[]> {
     const items = await this.query(query);
     const kv = await this.getKv();
     for (const item of items) {
