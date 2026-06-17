@@ -1,7 +1,10 @@
 {
   "name": "@ursamu/mush",
   "version": "0.1.0",
-  "exports": "./mod.ts",
+  "exports": {
+    ".": "./mod.ts",
+    "./app": "./src/app.ts"
+  },
   "tasks": {
     "test":  "deno test tests/ --allow-all --unstable-kv --no-check",
     "lint":  "deno lint",

@@ -9,7 +9,8 @@
     "./plugin": "./src/plugin.ts",
     "./update": "./src/update.ts",
     "./scripts": "./src/scripts.ts",
-    "./client": "./src/client.ts"
+    "./client": "./src/client.ts",
+    "./start": "./src/start.ts"
   },
   "tasks": {
     "test":  "deno test tests/ --allow-all --unstable-kv --no-check",
