@@ -1,6 +1,6 @@
 import { dirname, fromFileUrl, join } from "@std/path";
 import { getConfig, initConfig } from "@ursamu/core";
-import { parser } from "@ursamu/mush";
+import parser from "./render/parser.ts";
 import {
   IAC, WILL, DO, DONT, WONT, NAWS_OPTION,
   parseNawsBytes, stripIacBytes, accumulateNaws,

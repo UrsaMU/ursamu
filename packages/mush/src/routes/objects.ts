@@ -22,7 +22,8 @@
 
 import type { IDBOBJ }    from "../world/types.ts";
 import type { IAttribute } from "../world/types.ts";
-import { dbojs, flags }   from "@ursamu/mush";
+import { dbojs } from "../world/dbobjs.ts";
+import { flags } from "../world/flags.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -290,7 +291,7 @@ async function evalRoute(req: Request, userId: string, target: IDBOBJ): Promise<
   if (!code) return json({ error: "code is required" }, 400);
 
   try {
-    const { runSoftcodeSimple } = await import("@ursamu/mush");
+    const { runSoftcodeSimple } = await import("../softcode/engine.ts");
     const result = await runSoftcodeSimple(code, {
       actorId:    userId,
       executorId: target.id,

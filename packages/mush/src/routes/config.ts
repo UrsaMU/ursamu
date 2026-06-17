@@ -10,7 +10,7 @@
 
 import { resolve, join } from "@std/path";
 import { getAllConfig }   from "@ursamu/core";
-import { texts }         from "@ursamu/mush";
+import { texts }         from "../world/dbobjs.ts";
 
 export async function configHandler(req: Request): Promise<Response> {
   const url  = new URL(req.url);

@@ -8,7 +8,8 @@
  */
 
 import type { IDBOBJ } from "../world/types.ts";
-import { dbojs, flags, Obj } from "@ursamu/mush";
+import { dbojs, Obj } from "../world/dbobjs.ts";
+import { flags } from "../world/flags.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
