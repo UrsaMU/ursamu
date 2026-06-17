@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 /**
  * TSServer declaration shim for jsr:@ursamu/mushcode
  *
