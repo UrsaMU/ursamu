@@ -9,9 +9,29 @@
  *   - Multiple objects each get their own STARTUP command executed
  */
 import { assertEquals } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { addCmd, clearCmds } from "../src/services/commands/cmdParser.ts";
-import { runStartupAttrs } from "../src/services/startup/index.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
+import { addCmd, clearCmds, cmds, createNativeSDK } from "@ursamu/mush";
+import { runStartupAttrs } from "@ursamu/mush";
+
+const mockForce = async (ctx: { socket: { id: string; cid: string } }, cmd: string) => {
+  const u = await createNativeSDK(ctx.socket.id, ctx.socket.cid, {
+    name: cmd.split(" ")[0],
+    original: cmd,
+    args: cmd.split(" ").slice(1),
+  });
+  for (const c of cmds) {
+    if (c.pattern.test(cmd)) {
+      const match = cmd.match(c.pattern);
+      if (match) {
+        u.cmd.args = Array.from(match).slice(1);
+      }
+      await c.exec(u);
+    }
+  }
+};
+
+const mockRunSoftcode = (code: string) => Promise.resolve(code);
 
 // H4 IDs
 const H4_PLAIN_ID   = "st_h4_plain";
@@ -54,7 +74,7 @@ Deno.test(
       data: { name: "PingObj", STARTUP: "st-ping" },
     });
 
-    await runStartupAttrs();
+    await runStartupAttrs(mockForce, mockRunSoftcode);
 
     // The custom command should have been invoked once
     assertEquals(called.length >= 1, true);
@@ -90,7 +110,7 @@ Deno.test(
     });
 
     // Should complete without throwing
-    await runStartupAttrs();
+    await runStartupAttrs(mockForce, mockRunSoftcode);
 
     // The test command should not have been invoked for this object
     assertEquals(called.length, 0);
@@ -130,7 +150,7 @@ Deno.test(
       data: { name: "Gamma", STARTUP: "st-mark" },
     });
 
-    await runStartupAttrs();
+    await runStartupAttrs(mockForce, mockRunSoftcode);
 
     // At least two invocations — one per object
     assertEquals(invocations.length >= 2, true);
@@ -164,7 +184,7 @@ Deno.test(
       data: { name: "WhitespaceObj", STARTUP: "   " },
     });
 
-    await runStartupAttrs();
+    await runStartupAttrs(mockForce, mockRunSoftcode);
 
     assertEquals(called.length, 0);
 
@@ -196,7 +216,7 @@ Deno.test(
       data: { name: "PlainThing", STARTUP: "h4-ping" },
     });
 
-    await runStartupAttrs();
+    await runStartupAttrs(mockForce, mockRunSoftcode);
 
     // A plain thing (no wizard/admin/superuser) must NOT have STARTUP executed
     if (fired.length > 0) {
@@ -226,7 +246,7 @@ Deno.test(
       data: { name: "WizardThing", STARTUP: "h4-wizping" },
     });
 
-    await runStartupAttrs();
+    await runStartupAttrs(mockForce, mockRunSoftcode);
 
     assertEquals(fired.length, 1, "wizard object STARTUP should fire");
 

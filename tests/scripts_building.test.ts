@@ -10,8 +10,8 @@
  * Tests for those commands live in the builder-plugin repo.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execCreateObject } from "../src/commands/manipulation.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
+import { execCreateObject } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

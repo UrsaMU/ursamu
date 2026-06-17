@@ -9,10 +9,10 @@
  * Deeper coverage lives in scripts_flags_set.test.ts and scripts_comms.test.ts.
  */
 import { assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execConnect } from "../src/commands/auth.ts";
-import { execFlags } from "../src/commands/world.ts";
-import { execChannel } from "../src/commands/channels.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
+import { execConnect } from "@ursamu/mush";
+import { execFlags } from "@ursamu/mush";
+import { execChannel } from "@ursamu/channels";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

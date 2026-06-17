@@ -4,8 +4,8 @@
  */
 import { assert, assertEquals } from "@std/assert";
 import { join } from "@std/path";
-import { InstallTxn } from "../src/utils/pluginTxn.ts";
-import type { Registry, RegistryEntry } from "../src/cli/types.ts";
+import { InstallTxn } from "@ursamu/cli";
+import type { Registry, RegistryEntry } from "@ursamu/cli";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

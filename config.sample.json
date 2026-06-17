@@ -9,7 +9,9 @@
     "mail": "data/mail.db",
     "bboard": "data/bboard.db",
     "corsOrigins": "*",
-    "maxConnectionsPerIp": 20
+    "maxConnectionsPerIp": 20,
+    "maxLoginAttempts": 10,
+    "loginWindowMs": 60000
   },
   "game": {
     "name": "Ursamu",

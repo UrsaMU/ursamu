@@ -10,7 +10,7 @@ import { assertEquals } from "jsr:@std/assert@^1";
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 const SRC = new URL(
-  "../../src/services/Sandbox/sandbox-handlers-exec.ts",
+  "../../packages/mush/src/softcode/handlers/exec.ts",
   import.meta.url,
 );
 

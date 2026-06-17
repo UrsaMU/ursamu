@@ -7,7 +7,8 @@
  * These tests exercise parseNawsBytes() directly without starting a server.
  */
 import { assertEquals, assertExists } from "@std/assert";
-import { parseNawsBytes, MAX_MSG_BUFFER_SIZE } from "../src/services/telnet/telnet.ts";
+import { parseNawsBytes } from "@ursamu/core";
+import { MAX_MSG_BUFFER_SIZE } from "../packages/mush/src/telnet.ts";
 
 // Telnet protocol constants (mirrors telnet.ts)
 const IAC = 255;
@@ -141,7 +142,7 @@ Deno.test("H2 — MAX_MSG_BUFFER_SIZE is exported and is a reasonable cap", () =
 Deno.test("M1 — negative termWidth from WS must be rejected", { sanitizeResources: false, sanitizeOps: false }, async () => {
   // Simulate what the WebSocket handler should do before writing to DB
   // The handler currently has no bounds check — import the validator when added
-  const { clampTermWidth } = await import("../src/services/WebSocket/index.ts");
+  const { clampTermWidth } = await import("@ursamu/core");
   assertEquals(clampTermWidth(-1), null, "negative termWidth must be rejected");
   assertEquals(clampTermWidth(0), null, "zero termWidth must be rejected");
   assertEquals(clampTermWidth(39), null, "too-narrow termWidth must be rejected");
@@ -155,7 +156,7 @@ Deno.test("M1 — negative termWidth from WS must be rejected", { sanitizeResour
 // ---------------------------------------------------------------------------
 
 Deno.test("M3 — split NAWS sequence is handled via exported accumulator", { sanitizeResources: false, sanitizeOps: false }, async () => {
-  const { accumulateNaws } = await import("../src/services/telnet/telnet.ts");
+  const { accumulateNaws } = await import("@ursamu/core");
 
   const IAC = 255, SB = 250, SE = 240, NAWS = 31;
   const full = new Uint8Array([IAC, SB, NAWS, 0, 80, 0, 24, IAC, SE]);

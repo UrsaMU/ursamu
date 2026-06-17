@@ -15,7 +15,7 @@ Deno.test(
   OPTS,
   async () => {
     const src = await Deno.readTextFile(
-      new URL("../../src/services/WebSocket/index.ts", import.meta.url),
+      new URL("../../packages/core/src/server/websocket.ts", import.meta.url),
     );
 
     // The vulnerable pattern: setting sockData.cid from data.data.cid without JWT.

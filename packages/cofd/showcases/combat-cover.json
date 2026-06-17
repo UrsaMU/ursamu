@@ -1,0 +1,221 @@
+{
+  "key": "combat-cover",
+  "title": "+combat/cover -- declaring cover and seeing the attack penalty",
+  "description": "Two mortals enter a brawl. Jax declares partial cover (-1 to Marcus's attack pool). Then Marcus declares full cover (-3 to Jax's attack pool). The ROLL DETAIL line on +attack shows the cover penalty so the source is auditable.",
+  "vars": {
+    "player": "Jax"
+  },
+  "setup": {
+    "targets": {
+      "Marcus": {
+        "flags": [
+          "player",
+          "connected"
+        ],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 3,
+              "dexterity": 2,
+              "stamina": 2,
+              "intelligence": 2,
+              "wits": 2,
+              "resolve": 2,
+              "presence": 2,
+              "manipulation": 2,
+              "composure": 2
+            },
+            "skills": {
+              "brawl": 2,
+              "athletics": 2
+            },
+            "health": {
+              "max": 7,
+              "bashing": 0,
+              "lethal": 0,
+              "aggravated": 0
+            },
+            "willpower": {
+              "max": 4,
+              "current": 4
+            }
+          }
+        }
+      }
+    },
+    "character": {
+      "flags": [
+        "player",
+        "connected"
+      ],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 3,
+            "dexterity": 2,
+            "stamina": 2,
+            "intelligence": 2,
+            "wits": 2,
+            "resolve": 2,
+            "presence": 2,
+            "manipulation": 2,
+            "composure": 2
+          },
+          "skills": {
+            "brawl": 2,
+            "athletics": 2
+          },
+          "health": {
+            "max": 7,
+            "bashing": 0,
+            "lethal": 0,
+            "aggravated": 0
+          },
+          "willpower": {
+            "max": 4,
+            "current": 4
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Open the Encounter"
+    },
+    {
+      "cmd": "+combat/start",
+      "as": "admin",
+      "label": "ST opens encounter"
+    },
+    {
+      "expect": "encounter"
+    },
+    {
+      "sub": "Combatants Join"
+    },
+    {
+      "cmd": "+combat/join",
+      "label": "Jax joins"
+    },
+    {
+      "expect": "joined"
+    },
+    {
+      "cmd": "+combat/join",
+      "as": "Marcus",
+      "label": "Marcus joins"
+    },
+    {
+      "expect": "joined"
+    },
+    {
+      "sub": "Roll Initiative"
+    },
+    {
+      "cmd": "+combat/begin",
+      "as": "admin",
+      "label": "Roll initiative"
+    },
+    {
+      "expect": "Round 1"
+    },
+    {
+      "sub": "Jax Declares Partial Cover"
+    },
+    {
+      "note": "Partial cover = Durability 1. All attacks against Jax lose 1 die."
+    },
+    {
+      "cmd": "+combat/cover partial",
+      "label": "Jax slips behind a low wall"
+    },
+    {
+      "expect": "COVER"
+    },
+    {
+      "sub": "Check Jax's Combat Status"
+    },
+    {
+      "cmd": "+combat/status Jax",
+      "label": "Inspect Jax"
+    },
+    {
+      "expect": "partial"
+    },
+    {
+      "sub": "Marcus Dives For Full Cover"
+    },
+    {
+      "note": "Full cover = Durability 3. Marcus is essentially behind a concrete pillar."
+    },
+    {
+      "cmd": "+combat/cover full",
+      "as": "Marcus",
+      "label": "Marcus takes full cover"
+    },
+    {
+      "expect": "full cover"
+    },
+    {
+      "sub": "Jax Attacks Marcus In Full Cover"
+    },
+    {
+      "note": "Pool = Str 3 + Brawl 2 - Defense 2 - Cover 3 = 0 dice (chance die)."
+    },
+    {
+      "cmd": "+attack Marcus",
+      "label": "Jax swings at the well-covered Marcus"
+    },
+    {
+      "expect": "cover -3"
+    },
+    {
+      "sub": "Advance to Marcus's Turn"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "ST advances the turn"
+    },
+    {
+      "sub": "Marcus Attacks Jax Through Cover"
+    },
+    {
+      "note": "Pool = Str 3 + Brawl 2 - Defense 2 - Cover 1 = 2 dice. The ROLL DETAIL line tags the [cover -1] penalty."
+    },
+    {
+      "cmd": "+attack Jax",
+      "as": "Marcus",
+      "label": "Marcus punches at Jax in cover"
+    },
+    {
+      "expect": "cover -1"
+    },
+    {
+      "sub": "Clear Cover"
+    },
+    {
+      "cmd": "+combat/cover none",
+      "as": "Marcus",
+      "label": "Marcus steps out"
+    },
+    {
+      "expect": "COVER"
+    },
+    {
+      "sub": "Close the Encounter"
+    },
+    {
+      "cmd": "+combat/end",
+      "as": "admin",
+      "label": "ST closes the fight"
+    },
+    {
+      "expect": "ended"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

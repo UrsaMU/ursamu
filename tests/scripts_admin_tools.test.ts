@@ -10,8 +10,8 @@
  *   - execTime      (@time / @time/set)
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK, IGameTime } from "../src/@types/UrsamuSDK.ts";
-import { execTel, execForce, execSweep, execEntrances, execTime } from "../src/commands/world.ts";
+import type { IDBObj, IUrsamuSDK, IGameTime } from "@ursamu/mush";
+import { execTel, execForce, execSweep, execEntrances, execTime } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

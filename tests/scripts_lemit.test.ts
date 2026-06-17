@@ -6,8 +6,8 @@
  * and fires the room:text event for ^-pattern listeners.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execLemit } from "../src/commands/comms.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
+import { execLemit } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

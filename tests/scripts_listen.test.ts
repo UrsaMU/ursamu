@@ -8,8 +8,8 @@
  * room with a matching LISTEN attribute has its AHEAR attribute triggered.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execSay } from "../src/commands/comms.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
+import { execSay } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -9,9 +9,9 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { join } from "@std/path";
-import type { Registry } from "../src/cli/types.ts";
+import type { Registry } from "../packages/cli/src/types.ts";
 
-const PLUGIN_TS = new URL("../src/cli/plugin.ts", import.meta.url).pathname;
+const PLUGIN_TS = new URL("../packages/cli/src/plugin.ts", import.meta.url).pathname;
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 interface RunResult { stdout: string; stderr: string; code: number }

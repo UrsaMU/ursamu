@@ -1,0 +1,75 @@
+{
+  "key": "prove-flow",
+  "title": "+prove -- show trait values to other players",
+  "description": "Demonstrates +prove: broadcasting traits to the room, whispering specific traits to one player, specialty rendering, and quiet skip-handling for unknown tokens.",
+  "vars": { "player": "Katya" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Detective",
+          "virtue": "Justice",
+          "vice": "Envy",
+          "attributes": {
+            "strength": 2, "dexterity": 3, "stamina": 2,
+            "intelligence": 3, "wits": 3, "resolve": 2,
+            "presence": 2, "manipulation": 2, "composure": 3
+          },
+          "skills": {
+            "athletics": 2, "brawl": 2, "drive": 1, "firearms": 2, "larceny": 1,
+            "stealth": 2, "survival": 0, "weaponry": 0,
+            "academics": 2, "computer": 1, "crafts": 0, "investigation": 3,
+            "medicine": 1, "occult": 0, "politics": 0, "science": 0,
+            "animal_ken": 0, "empathy": 2, "expression": 0, "intimidation": 1,
+            "persuasion": 1, "socialize": 2, "streetwise": 2, "subterfuge": 3
+          },
+          "specialties": { "brawl": ["Boxing"], "investigation": ["Crime Scenes"] },
+          "merits": {},
+          "advantages": { "size": 5, "willpowerMax": 5, "willpowerCurrent": 5 },
+          "moralityValue": 7,
+          "powerStatValue": 0,
+          "energyCurrent": 0,
+          "customFields": {},
+          "powers": {},
+          "equipment": { "items": [], "equippedWeapon": null, "equippedArmor": null },
+          "tilts": []
+        }
+      }
+    },
+    "targets": {
+      "Marcus": { "flags": ["player", "connected"], "state": {} }
+    }
+  },
+  "steps": [
+    { "sub": "Single Trait, Broadcast" },
+    { "note": "Bare +prove broadcasts to the room. Output starts with PROVE>>." },
+    { "cmd": "+prove strength", "label": "broadcast strength" },
+    { "expect": "PROVE>>" },
+
+    { "sub": "Multiple Traits at Once" },
+    { "note": "Commas separate the list. Up to 8 traits per command." },
+    { "cmd": "+prove strength,dexterity,stamina", "label": "physical attributes" },
+    { "expect": "Stamina" },
+
+    { "sub": "Specialty Rendering" },
+    { "note": "Skill/specialty shows as base+1 so the reader sees the proof." },
+    { "cmd": "+prove brawl/boxing", "label": "with specialty" },
+    { "expect": "(2+1)" },
+
+    { "sub": "Targeted Whisper" },
+    { "note": "=<player> sends to just that player plus a confirmation to you." },
+    { "cmd": "+prove subterfuge=Marcus", "label": "whisper to Marcus" },
+    { "expect": "You show" },
+
+    { "sub": "Unknown Token Is Skipped, Not Fatal" },
+    { "note": "Unknown traits surface in a quiet (skipped: ...) tail; valid traits still send." },
+    { "cmd": "+prove strength, fluffiness", "label": "mixed valid/invalid" },
+    { "expect": "skipped" },
+
+    { "sub": "Explicit /here" },
+    { "note": "Use /here to make broadcast intent explicit, even with =<player> absent." },
+    { "cmd": "+prove/here resolve,composure", "label": "table check" },
+    { "expect": "Resolve" }
+  ]
+}

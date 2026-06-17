@@ -1,0 +1,74 @@
+{
+  "key": "roll-basic",
+  "title": "+roll -- D10 10-again roller",
+  "description": "Demonstrates the +roll command: attribute+skill combos, raw dice pools, modifiers, specialties, and Willpower spending.",
+  "vars": { "player": "Katya" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Detective",
+          "virtue": "Justice",
+          "vice": "Envy",
+          "attributes": {
+            "strength": 2, "dexterity": 3, "stamina": 2,
+            "intelligence": 3, "wits": 3, "resolve": 2,
+            "presence": 2, "manipulation": 2, "composure": 3
+          },
+          "skills": {
+            "athletics": 2, "brawl": 1, "drive": 1, "firearms": 2, "larceny": 1,
+            "stealth": 2, "survival": 0, "weaponry": 0,
+            "academics": 2, "computer": 1, "crafts": 0, "investigation": 3,
+            "medicine": 1, "occult": 0, "politics": 0, "science": 0,
+            "animal_ken": 0, "empathy": 2, "expression": 0, "intimidation": 1,
+            "persuasion": 1, "socialize": 2, "streetwise": 2, "subterfuge": 3
+          },
+          "specialties": { "investigation": ["Crime Scenes"], "firearms": ["Pistols"] },
+          "merits": {},
+          "advantages": {
+            "size": 5, "speed": 10, "initiative": 6, "defense": 3,
+            "armor": 0, "health": 7, "healthCurrent": 7,
+            "willpower": 5, "willpowerCurrent": 5, "integrity": 7
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Raw Dice Pool" },
+    { "note": "A bare number rolls that many dice." },
+    { "cmd": "+roll 5", "label": "roll 5 dice" },
+    { "expect": "success" },
+
+    { "sub": "Attribute + Skill" },
+    { "note": "Attribute+Skill sums their values. Names are case-insensitive." },
+    { "cmd": "+roll Wits+Investigation", "label": "Wits 3 + Investigation 3 = 6 dice" },
+    { "expect": "success" },
+
+    { "sub": "With a Modifier" },
+    { "note": "Append a positive or negative integer modifier." },
+    { "cmd": "+roll Dexterity+Firearms+2", "label": "Dex 3 + Firearms 2 + 2 = 7 dice" },
+    { "expect": "success" },
+
+    { "sub": "With a Specialty Bonus" },
+    { "note": "Append the specialty name after a slash -- grants +1 die (8-again quality)." },
+    { "cmd": "+roll Wits+Investigation/Crime Scenes", "label": "uses Crime Scenes specialty for +1" },
+    { "expect": "success" },
+
+    { "sub": "Spending Willpower" },
+    { "note": "+roll/wp deducts 1 current Willpower and adds 3 dice to the pool." },
+    { "cmd": "+roll/wp Resolve+Composure", "label": "spend Willpower for +3" },
+    { "expect": "+WP" },
+
+    { "sub": "Untrained Penalty" },
+    { "note": "Using a Mental or Social skill at 0 dots incurs a -3 penalty." },
+    { "cmd": "+roll Intelligence+Occult", "label": "Occult is 0 -- untrained penalty applies" },
+    { "expect": "success" },
+
+    { "sub": "Chance Die" },
+    { "note": "If the pool is <= 0 after penalties, a single chance die is rolled (only 10 succeeds)." },
+    { "cmd": "+roll 0", "label": "zero-pool triggers chance die" },
+    { "expect": "chance" }
+  ]
+}

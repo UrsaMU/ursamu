@@ -9,7 +9,7 @@
  *   [NODANGLE] stderrText Promise has no dangling rejection after kill (M1 fix)
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { runGitStep } from "../src/utils/ensurePlugins.ts";
+import { runGitStep } from "@ursamu/cli";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const env  = { PATH: Deno.env.get("PATH") ?? "" };

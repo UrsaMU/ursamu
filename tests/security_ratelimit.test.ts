@@ -8,9 +8,8 @@
  * We test the exported size-cap constants and verify the Maps enforce them.
  */
 import { assertEquals } from "@std/assert";
-import { handleRequest } from "../src/app.ts";
-import { authHandler } from "../src/routes/authRouter.ts";
-import { DBO } from "../src/services/Database/database.ts";
+import { handleRequest, authHandler } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -38,7 +37,7 @@ Deno.test("#8 — apiRateLimits: 1001 unique IPs do not cause unbounded growth (
 // ---------------------------------------------------------------------------
 
 Deno.test("#4 — authHandler: exported MAX_TRACKED_IPS constant exists", OPTS, async () => {
-  const mod = await import("../src/routes/authRouter.ts");
+  const mod = await import("@ursamu/mush");
   // The module must export MAX_TRACKED_IPS so we can verify the cap is set
   const maxTracked = (mod as Record<string, unknown>)["MAX_TRACKED_IPS"];
   assertEquals(typeof maxTracked, "number");

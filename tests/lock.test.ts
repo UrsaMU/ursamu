@@ -1,8 +1,8 @@
 /// <reference lib="deno.unstable" />
 import { assertEquals } from "@std/assert";
-import { evaluateLock } from "../src/utils/evaluateLock.ts";
-import { DBO } from "../src/services/Database/database.ts";
-import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
+import { evaluateLock } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
+import type { IDBObj } from "@ursamu/mush";
 
 // Mock Deno.KV
 const kv = await Deno.openKv(":memory:");

@@ -1,0 +1,68 @@
+{
+  "key": "sheet-set",
+  "title": "+sheet/set -- modify traits and specialties",
+  "description": "Demonstrates the +sheet/set command: setting attributes, skills, merits, and specialties on an approved sheet.",
+  "vars": { "player": "Katya" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "Rookie",
+          "virtue": "Prudence",
+          "vice": "Sloth",
+          "attributes": {
+            "strength": 1, "dexterity": 1, "stamina": 1,
+            "intelligence": 1, "wits": 1, "resolve": 1,
+            "presence": 1, "manipulation": 1, "composure": 1
+          },
+          "skills": {
+            "athletics": 0, "brawl": 0, "drive": 0, "firearms": 0, "larceny": 0,
+            "stealth": 0, "survival": 0, "weaponry": 0,
+            "academics": 0, "computer": 0, "crafts": 0, "investigation": 0,
+            "medicine": 0, "occult": 0, "politics": 0, "science": 0,
+            "animal_ken": 0, "empathy": 0, "expression": 0, "intimidation": 0,
+            "persuasion": 0, "socialize": 0, "streetwise": 0, "subterfuge": 0
+          },
+          "specialties": {},
+          "merits": {},
+          "advantages": {
+            "size": 5, "speed": 7, "initiative": 2, "defense": 1,
+            "armor": 0, "health": 6, "healthCurrent": 6,
+            "willpower": 2, "willpowerCurrent": 2, "integrity": 7
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Setting an Attribute" },
+    { "note": "+sheet/set <trait>=<value> updates any trait by name (case-insensitive). Derived stats recalculate automatically." },
+    { "cmd": "+sheet/set Strength=3", "label": "raise Strength to 3" },
+    { "expect": "Set trait" },
+
+    { "sub": "Setting a Skill" },
+    { "cmd": "+sheet/set Investigation=2", "label": "raise Investigation to 2" },
+    { "expect": "Set trait" },
+
+    { "sub": "Adding a Specialty" },
+    { "note": "specialty/<skill>=<name> adds a specialty. Case of the skill name is normalised." },
+    { "cmd": "+sheet/set specialty/investigation=Crime Scenes", "label": "add specialty" },
+    { "expect": "Added specialty" },
+
+    { "sub": "Clearing a Specialty" },
+    { "note": "An empty value clears all specialties on the skill (matches the trait reset convention)." },
+    { "cmd": "+sheet/set specialty/investigation=", "label": "clear specialties" },
+    { "expect": "Cleared all specialties" },
+
+    { "sub": "Setting a Merit" },
+    { "note": "Merit names are looked up in resources/merits.json. Invalid dot values are rejected." },
+    { "cmd": "+sheet/set contacts(police)=2", "label": "set instanced Contacts merit" },
+    { "expect": "Set trait" },
+
+    { "sub": "Rejection -- Instanced Merit Without Qualifier" },
+    { "note": "Instanced merits (Contacts, Allies, Status) require a qualifier in parentheses." },
+    { "cmd": "+sheet/set contacts=2", "label": "missing qualifier -- should error" },
+    { "expect": "qualifier" }
+  ]
+}

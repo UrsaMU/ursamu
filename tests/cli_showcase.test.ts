@@ -3,8 +3,8 @@ import {
   mushToAnsi,
   interpolate,
   renderShowcase,
-} from "../src/cli/showcase.ts";
-import type { ShowcaseFile } from "../src/@types/Showcase.ts";
+  type ShowcaseFile,
+} from "../packages/cli/src/showcase.ts";
 
 // showcase.ts has top-level imports from @std/fs (expandGlob) — prevent resource warnings
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

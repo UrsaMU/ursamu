@@ -8,8 +8,8 @@
  *   - execStats     (@stats)
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execTeleport, execFind, execStats } from "../src/commands/world.ts";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
+import { execTeleport, execFind, execStats } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

@@ -1,0 +1,3 @@
+{
+  "notice": "DEPRECATED: Template data is now modularly split into individual JSON files inside the 'templates/' folder (e.g., templates/mortal.json, templates/vampire.json)."
+}

@@ -26,8 +26,8 @@ import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 
 // From a child game (outside src/):
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "jsr:@ursamu/mush";
+import type { IUrsamuSDK } from "jsr:@ursamu/mush";
 
 addCmd({
   name: "+myplugin",          // unique identifier — shown in logs
@@ -77,7 +77,7 @@ val)`, `type(name)`, `is(#id)`, `holds(#id)`, and `perm(level)`. Plugins
 can register custom lockfuncs:
 
 ```typescript
-import { registerLockFunc } from "jsr:@ursamu/ursamu";
+import { registerLockFunc } from "jsr:@ursamu/mush";
 
 registerLockFunc("tribe", (enactor, _target, args) =>
   String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()

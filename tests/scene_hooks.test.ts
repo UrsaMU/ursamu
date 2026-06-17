@@ -11,14 +11,14 @@ import {
   assertEquals,
   assertExists,
 } from "https://deno.land/std@0.220.0/assert/mod.ts";
-import { gameHooks } from "../src/services/Hooks/GameHooks.ts";
+import { gameHooks } from "@ursamu/mush";
 import type {
   SceneCreatedEvent,
   ScenePoseEvent,
   SceneSetEvent,
   SceneTitleEvent,
   SceneClearEvent,
-} from "../src/services/Hooks/GameHooks.ts";
+} from "@ursamu/mush";
 
 // ─── lightweight mock layer ────────────────────────────────────────────────────
 

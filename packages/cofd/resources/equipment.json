@@ -1,0 +1,1930 @@
+{
+  "weapons": {
+    "ranged": [
+      {
+        "key": "revolver-light",
+        "name": "Revolver, Light",
+        "damage": 1,
+        "ranges": "Long",
+        "clip": 6,
+        "initiative": 0,
+        "strength": 2,
+        "size": 1,
+        "availability": 2,
+        "example": "SW M640 (.38 Special)",
+        "capacity": "Low"
+      },
+      {
+        "key": "revolver-heavy",
+        "name": "Revolver, Heavy",
+        "damage": 2,
+        "ranges": "Long",
+        "clip": 6,
+        "initiative": -2,
+        "strength": 3,
+        "size": 1,
+        "availability": 2,
+        "example": "SW M29 (.44 Magnum)",
+        "capacity": "Low"
+      },
+      {
+        "key": "pistol-light",
+        "name": "Pistol, Light",
+        "damage": 1,
+        "ranges": "Long",
+        "clip": 18,
+        "initiative": 0,
+        "strength": 2,
+        "size": 1,
+        "availability": 3,
+        "example": "Glock 17 (9mm)",
+        "capacity": "Medium"
+      },
+      {
+        "key": "pistol-heavy",
+        "name": "Pistol, Heavy",
+        "damage": 2,
+        "ranges": "Long",
+        "clip": 8,
+        "initiative": -2,
+        "strength": 3,
+        "size": 1,
+        "availability": 3,
+        "example": "Colt M1911A1 (.45 ACP)",
+        "capacity": "Medium"
+      },
+      {
+        "key": "smg-small",
+        "name": "SMG, Small",
+        "damage": 1,
+        "ranges": "Medium",
+        "clip": 31,
+        "initiative": -2,
+        "strength": 2,
+        "size": 1,
+        "availability": 3,
+        "example": "Ingram Mac-10 (9mm)",
+        "special": "autofire",
+        "capacity": "High"
+      },
+      {
+        "key": "smg-large",
+        "name": "SMG, Large",
+        "damage": 2,
+        "ranges": "Medium",
+        "clip": 31,
+        "initiative": -3,
+        "strength": 3,
+        "size": 2,
+        "availability": 3,
+        "example": "HK MP-5 (9mm)",
+        "special": "autofire",
+        "capacity": "High"
+      },
+      {
+        "key": "rifle",
+        "name": "Rifle",
+        "damage": 4,
+        "ranges": "Extreme",
+        "clip": 6,
+        "initiative": -5,
+        "strength": 2,
+        "size": 3,
+        "availability": 2,
+        "example": "Remington M-700 (30.06)",
+        "capacity": "Low"
+      },
+      {
+        "key": "assault-rifle",
+        "name": "Assault Rifle",
+        "damage": 3,
+        "ranges": "Long",
+        "clip": 43,
+        "initiative": -3,
+        "strength": 3,
+        "size": 3,
+        "availability": 3,
+        "example": "Steyr-AUG (5.56mm)",
+        "special": "autofire",
+        "capacity": "High"
+      },
+      {
+        "key": "shotgun",
+        "name": "Shotgun",
+        "damage": 3,
+        "ranges": "Medium",
+        "clip": 6,
+        "initiative": -4,
+        "strength": 3,
+        "size": 2,
+        "availability": 2,
+        "example": "Remington M870 (12-gauge)",
+        "special": "9-again",
+        "capacity": "Low"
+      },
+      {
+        "key": "crossbow",
+        "name": "Crossbow",
+        "damage": 2,
+        "ranges": "Long",
+        "clip": 1,
+        "initiative": -5,
+        "strength": 3,
+        "size": 3,
+        "availability": 3,
+        "example": "",
+        "special": "3-turn reload; can stake (-3 to attack, 5+ dmg required)",
+        "capacity": "Low"
+      },
+      {
+        "key": "bow-short",
+        "name": "Short Bow",
+        "damage": 2,
+        "ranges": "Medium",
+        "capacity": "Low",
+        "clip": 1,
+        "initiative": -3,
+        "strength": 2,
+        "size": 3,
+        "availability": 2,
+        "example": "",
+        "special": "Can stake (-3 to attack, 5+ dmg required)"
+      },
+      {
+        "key": "bow-long",
+        "name": "Long Bow",
+        "damage": 3,
+        "ranges": "Medium",
+        "capacity": "Low",
+        "clip": 1,
+        "initiative": -4,
+        "strength": 3,
+        "size": 4,
+        "availability": 2,
+        "example": "",
+        "special": "Can stake (-3 to attack, 5+ dmg required)"
+      },
+      {
+        "key": "pepper-spray-ranged",
+        "name": "Pepper Spray",
+        "damage": 0,
+        "ranges": "Close",
+        "capacity": "Low",
+        "clip": 6,
+        "initiative": 0,
+        "strength": 1,
+        "size": 1,
+        "availability": 1,
+        "example": "",
+        "special": "Slow; inflicts Stun Tilt"
+      },
+      {
+        "key": "stun-gun-ranged",
+        "name": "Stun Gun (ranged)",
+        "damage": 0,
+        "ranges": "Close",
+        "capacity": "Medium",
+        "clip": 5,
+        "initiative": -1,
+        "strength": 1,
+        "size": 1,
+        "availability": 1,
+        "example": "",
+        "special": "Slow, Stun; bonus successes don't add to damage"
+      },
+      {
+        "key": "flamethrower-civilian",
+        "name": "Flamethrower, Civilian",
+        "damage": 0,
+        "ranges": "Short",
+        "capacity": "High",
+        "clip": 10,
+        "initiative": -4,
+        "strength": 3,
+        "size": 4,
+        "availability": 3,
+        "example": "",
+        "special": "Special damage; Incendiary; -2 without Heavy Weapons Spec"
+      },
+      {
+        "key": "flamethrower-military",
+        "name": "Flamethrower, Military",
+        "damage": 0,
+        "ranges": "Medium",
+        "capacity": "High",
+        "clip": 10,
+        "initiative": -5,
+        "strength": 3,
+        "size": 4,
+        "availability": 5,
+        "example": "",
+        "special": "Special damage; Incendiary; -2 without Heavy Weapons Spec"
+      },
+      {
+        "key": "grenade-frag-standard",
+        "name": "Grenade, Frag (Standard)",
+        "damage": 2,
+        "ranges": "Thrown",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 2,
+        "size": 1,
+        "availability": 4,
+        "example": "M67",
+        "special": "Blast 10, Force 3; Aerodynamic; Knockdown, Stun"
+      },
+      {
+        "key": "grenade-frag-heavy",
+        "name": "Grenade, Frag (Heavy)",
+        "damage": 3,
+        "ranges": "Thrown",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": -1,
+        "strength": 2,
+        "size": 1,
+        "availability": 4,
+        "example": "M61",
+        "special": "Blast 5, Force 4; Aerodynamic; Knockdown, Stun"
+      },
+      {
+        "key": "grenade-molotov",
+        "name": "Grenade, Molotov",
+        "damage": 1,
+        "ranges": "Thrown",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": -2,
+        "strength": 2,
+        "size": 2,
+        "availability": 1,
+        "example": "",
+        "special": "Blast 3, Force 2; Incendiary"
+      },
+      {
+        "key": "grenade-pipe-bomb",
+        "name": "Grenade, Pipe Bomb",
+        "damage": 1,
+        "ranges": "Thrown",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": -1,
+        "strength": 2,
+        "size": 1,
+        "availability": 1,
+        "example": "",
+        "special": "Blast 5, Force 2; Inaccurate, Stun"
+      },
+      {
+        "key": "grenade-smoke",
+        "name": "Grenade, Smoke",
+        "damage": 0,
+        "ranges": "Thrown",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 2,
+        "size": 1,
+        "availability": 2,
+        "example": "",
+        "special": "Blast 10; Aerodynamic; Concealment; Smoke"
+      },
+      {
+        "key": "grenade-stun",
+        "name": "Grenade, Stun (Flashbang)",
+        "damage": 0,
+        "ranges": "Thrown",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 2,
+        "size": 1,
+        "availability": 2,
+        "example": "M84",
+        "special": "Blast 5, Force 2; Aerodynamic; Knockdown, Stun"
+      },
+      {
+        "key": "grenade-thermite",
+        "name": "Grenade, Thermite",
+        "damage": 3,
+        "ranges": "Thrown",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 2,
+        "size": 1,
+        "availability": 4,
+        "example": "",
+        "special": "Blast 5, Force 4; Aerodynamic; AP 8, Incendiary"
+      },
+      {
+        "key": "grenade-white-phos",
+        "name": "Grenade, White Phosphorus",
+        "damage": 3,
+        "ranges": "Thrown",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 2,
+        "size": 1,
+        "availability": 4,
+        "example": "",
+        "special": "Blast 5, Force 4; Aerodynamic; AP 3, Incendiary, Concealment"
+      },
+      {
+        "key": "grenade-launcher-standalone",
+        "name": "Grenade Launcher, Stand-Alone",
+        "damage": 0,
+        "ranges": "Long",
+        "capacity": "Low",
+        "clip": 1,
+        "initiative": -3,
+        "strength": 3,
+        "size": 3,
+        "availability": 4,
+        "example": "M79",
+        "special": "Heavy recoil; uses launched-grenade ammo"
+      },
+      {
+        "key": "grenade-launcher-underbarrel",
+        "name": "Grenade Launcher, Under-Barrel",
+        "damage": 0,
+        "ranges": "Long",
+        "capacity": "Low",
+        "clip": 1,
+        "initiative": -3,
+        "strength": 2,
+        "size": 2,
+        "availability": 4,
+        "example": "M203",
+        "special": "Attaches to rifle; uses launched-grenade ammo"
+      },
+      {
+        "key": "grenade-launcher-automatic",
+        "name": "Grenade Launcher, Automatic",
+        "damage": 0,
+        "ranges": "Extreme",
+        "capacity": "High",
+        "clip": 32,
+        "initiative": -5,
+        "strength": 0,
+        "size": 4,
+        "availability": 5,
+        "example": "Mk19",
+        "special": "Tripod/vehicle mount; autofire; uses launched-grenade ammo"
+      },
+      {
+        "key": "grenade-ammo-baton",
+        "name": "Launched Grenade, Baton",
+        "damage": 1,
+        "ranges": "Long",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 0,
+        "size": 1,
+        "availability": 2,
+        "example": "",
+        "special": "No explosion; Knockdown, Stun"
+      },
+      {
+        "key": "grenade-ammo-buckshot",
+        "name": "Launched Grenade, Buckshot",
+        "damage": 1,
+        "ranges": "Long",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 0,
+        "size": 1,
+        "availability": 4,
+        "example": "",
+        "special": "Blast 10, Force 4; Knockdown"
+      },
+      {
+        "key": "grenade-ammo-he",
+        "name": "Launched Grenade, HE",
+        "damage": 3,
+        "ranges": "Long",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 0,
+        "size": 1,
+        "availability": 4,
+        "example": "",
+        "special": "Blast 10, Force 4; Knockdown"
+      },
+      {
+        "key": "grenade-ammo-hedp",
+        "name": "Launched Grenade, HEDP",
+        "damage": 2,
+        "ranges": "Long",
+        "capacity": "n/a",
+        "clip": 1,
+        "initiative": 0,
+        "strength": 0,
+        "size": 1,
+        "availability": 4,
+        "example": "",
+        "special": "Blast 10, Force 3; Knockdown, AP 4"
+      }
+    ],
+    "melee": [
+      {
+        "key": "sap",
+        "name": "Sap",
+        "damage": 0,
+        "initiative": -1,
+        "strength": 1,
+        "size": 1,
+        "availability": 1,
+        "special": "Stun"
+      },
+      {
+        "key": "brass-knuckles",
+        "name": "Brass Knuckles",
+        "damage": 0,
+        "initiative": 0,
+        "strength": 1,
+        "size": 1,
+        "availability": 1,
+        "special": "Uses Brawl to attack"
+      },
+      {
+        "key": "baton",
+        "name": "Baton",
+        "damage": 1,
+        "initiative": -1,
+        "strength": 2,
+        "size": 2,
+        "availability": 0,
+        "special": ""
+      },
+      {
+        "key": "crowbar",
+        "name": "Crowbar",
+        "damage": 2,
+        "initiative": -2,
+        "strength": 2,
+        "size": 2,
+        "availability": 1,
+        "special": ""
+      },
+      {
+        "key": "tire-iron",
+        "name": "Tire Iron",
+        "damage": 1,
+        "initiative": -3,
+        "strength": 2,
+        "size": 2,
+        "availability": 2,
+        "special": "+1 Defense"
+      },
+      {
+        "key": "chain",
+        "name": "Chain",
+        "damage": 1,
+        "initiative": -3,
+        "strength": 2,
+        "size": 2,
+        "availability": 1,
+        "special": "Grapple"
+      },
+      {
+        "key": "shield-small",
+        "name": "Shield, Small",
+        "damage": 0,
+        "initiative": -2,
+        "strength": 2,
+        "size": 2,
+        "availability": 2,
+        "special": "Concealed"
+      },
+      {
+        "key": "shield-large",
+        "name": "Shield, Large",
+        "damage": 2,
+        "initiative": -4,
+        "strength": 3,
+        "size": 3,
+        "availability": 2,
+        "special": "Concealed"
+      },
+      {
+        "key": "knife",
+        "name": "Knife",
+        "damage": 0,
+        "initiative": -1,
+        "strength": 1,
+        "size": 1,
+        "availability": 1,
+        "special": ""
+      },
+      {
+        "key": "rapier",
+        "name": "Rapier",
+        "damage": 1,
+        "initiative": -2,
+        "strength": 1,
+        "size": 2,
+        "availability": 2,
+        "special": "Armor piercing 1"
+      },
+      {
+        "key": "machete",
+        "name": "Machete",
+        "damage": 2,
+        "initiative": -2,
+        "strength": 2,
+        "size": 2,
+        "availability": 2,
+        "special": ""
+      },
+      {
+        "key": "hatchet",
+        "name": "Hatchet",
+        "damage": 1,
+        "initiative": -2,
+        "strength": 1,
+        "size": 1,
+        "availability": 1,
+        "special": ""
+      },
+      {
+        "key": "fire-axe",
+        "name": "Fire Axe",
+        "damage": 3,
+        "initiative": -4,
+        "strength": 3,
+        "size": 3,
+        "availability": 2,
+        "special": "9-again, two-handed"
+      },
+      {
+        "key": "chainsaw",
+        "name": "Chainsaw",
+        "damage": 5,
+        "initiative": -6,
+        "strength": 4,
+        "size": 3,
+        "availability": 3,
+        "special": "9-again, two-handed"
+      },
+      {
+        "key": "stake",
+        "name": "Stake",
+        "damage": 0,
+        "initiative": -4,
+        "strength": 1,
+        "size": 1,
+        "availability": 0,
+        "special": "Must hit heart (-3); 5+ dmg required"
+      },
+      {
+        "key": "spear",
+        "name": "Spear",
+        "damage": 2,
+        "initiative": -2,
+        "strength": 2,
+        "size": 4,
+        "availability": 1,
+        "special": "+1 Defense vs unarmed/Size 1, two-handed"
+      },
+      {
+        "key": "stun-gun-melee",
+        "name": "Stun Gun (melee)",
+        "damage": 1,
+        "initiative": -1,
+        "strength": 1,
+        "size": 1,
+        "availability": 1,
+        "special": "Stun; bonus successes don't add to damage modifier"
+      },
+      {
+        "key": "battle-axe",
+        "name": "Battle Axe",
+        "damage": 3,
+        "initiative": -4,
+        "strength": 3,
+        "size": 3,
+        "availability": 3,
+        "special": "9-again, two-handed"
+      },
+      {
+        "key": "great-sword",
+        "name": "Great Sword",
+        "damage": 4,
+        "initiative": -5,
+        "strength": 4,
+        "size": 3,
+        "availability": 4,
+        "special": "9-again, two-handed"
+      },
+      {
+        "key": "knife-small",
+        "name": "Knife, Small",
+        "damage": 0,
+        "initiative": 0,
+        "strength": 1,
+        "size": 1,
+        "availability": 1,
+        "special": "Thrown (aerodynamic)"
+      },
+      {
+        "key": "knife-hunting",
+        "name": "Knife, Hunting",
+        "damage": 1,
+        "initiative": -1,
+        "strength": 1,
+        "size": 2,
+        "availability": 2,
+        "special": "Enhance: Crafts or Survival"
+      },
+      {
+        "key": "sword",
+        "name": "Sword",
+        "damage": 3,
+        "initiative": -3,
+        "strength": 2,
+        "size": 3,
+        "availability": 3,
+        "special": "+1 Initiative"
+      },
+      {
+        "key": "metal-club",
+        "name": "Metal Club",
+        "damage": 2,
+        "initiative": -2,
+        "strength": 2,
+        "size": 2,
+        "availability": 1,
+        "special": "Stun"
+      },
+      {
+        "key": "nightstick",
+        "name": "Nightstick",
+        "damage": 1,
+        "initiative": -1,
+        "strength": 2,
+        "size": 2,
+        "availability": 2,
+        "special": "Stun"
+      },
+      {
+        "key": "nunchaku",
+        "name": "Nunchaku",
+        "damage": 1,
+        "initiative": 1,
+        "strength": 2,
+        "size": 2,
+        "availability": 2,
+        "special": "Stun; -1 dmg/init without Dex 3+"
+      },
+      {
+        "key": "sledgehammer",
+        "name": "Sledgehammer",
+        "damage": 3,
+        "initiative": -4,
+        "strength": 3,
+        "size": 3,
+        "availability": 1,
+        "special": "Knockdown, Stun"
+      },
+      {
+        "key": "catchpole",
+        "name": "Catchpole",
+        "damage": 0,
+        "initiative": -3,
+        "strength": 2,
+        "size": 2,
+        "availability": 1,
+        "special": "Grapple, Reach"
+      },
+      {
+        "key": "kusari-gama",
+        "name": "Kusari-Gama",
+        "damage": 1,
+        "initiative": -3,
+        "strength": 2,
+        "size": 2,
+        "availability": 2,
+        "special": "Chain end: Grapple/Inaccurate/Reach; sickle end: as small knife"
+      },
+      {
+        "key": "tiger-claws",
+        "name": "Tiger Claws",
+        "damage": 1,
+        "initiative": -1,
+        "strength": 2,
+        "size": 2,
+        "availability": 2,
+        "special": "Uses Brawl"
+      },
+      {
+        "key": "whip",
+        "name": "Whip",
+        "damage": 0,
+        "initiative": -2,
+        "strength": 1,
+        "size": 2,
+        "availability": 1,
+        "special": "Grapple, Stun; Dex+Weaponry; bashing unless metal-tipped"
+      },
+      {
+        "key": "blowtorch",
+        "name": "Blowtorch",
+        "damage": 0,
+        "initiative": -2,
+        "strength": 2,
+        "size": 2,
+        "availability": 2,
+        "special": "Incendiary, Piercing 2; Blinded Tilt risk"
+      },
+      {
+        "key": "board-with-nail",
+        "name": "Board with Nail",
+        "damage": 1,
+        "initiative": -3,
+        "strength": 2,
+        "size": 2,
+        "availability": 0,
+        "special": "Fragile, Stun"
+      },
+      {
+        "key": "improvised-shield",
+        "name": "Improvised Shield",
+        "damage": 0,
+        "initiative": -4,
+        "strength": 2,
+        "size": 2,
+        "availability": 1,
+        "special": "Concealed"
+      },
+      {
+        "key": "nail-gun",
+        "name": "Nail Gun",
+        "damage": 0,
+        "initiative": -2,
+        "strength": 2,
+        "size": 2,
+        "availability": 1,
+        "special": "Inaccurate, Piercing 1; Str+Firearms; can pin"
+      },
+      {
+        "key": "shovel",
+        "name": "Shovel",
+        "damage": 1,
+        "initiative": -3,
+        "strength": 2,
+        "size": 2,
+        "availability": 1,
+        "special": "Knockdown"
+      },
+      {
+        "key": "staff",
+        "name": "Staff",
+        "damage": 1,
+        "initiative": -1,
+        "strength": 2,
+        "size": 4,
+        "availability": 1,
+        "special": "Knockdown, Reach, two-handed"
+      }
+    ]
+  },
+  "armor": [
+    {
+      "key": "reinforced-clothing",
+      "name": "Reinforced Clothing",
+      "ratingGeneral": 1,
+      "ratingBallistic": 0,
+      "strength": 1,
+      "defensePenalty": 0,
+      "speedPenalty": 0,
+      "availability": 1,
+      "coverage": "Torso, arms, legs",
+      "concealed": true,
+      "era": "modern"
+    },
+    {
+      "key": "kevlar-vest",
+      "name": "Kevlar Vest",
+      "ratingGeneral": 1,
+      "ratingBallistic": 3,
+      "strength": 1,
+      "defensePenalty": 0,
+      "speedPenalty": 0,
+      "availability": 1,
+      "coverage": "Torso",
+      "concealed": true,
+      "era": "modern"
+    },
+    {
+      "key": "flak-jacket",
+      "name": "Flak Jacket",
+      "ratingGeneral": 2,
+      "ratingBallistic": 4,
+      "strength": 1,
+      "defensePenalty": -1,
+      "speedPenalty": 0,
+      "availability": 2,
+      "coverage": "Torso, arms",
+      "concealed": false,
+      "era": "modern"
+    },
+    {
+      "key": "full-riot-gear",
+      "name": "Full Riot Gear",
+      "ratingGeneral": 3,
+      "ratingBallistic": 5,
+      "strength": 2,
+      "defensePenalty": -2,
+      "speedPenalty": -1,
+      "availability": 3,
+      "coverage": "Torso, arms, legs",
+      "concealed": false,
+      "era": "modern"
+    },
+    {
+      "key": "leather-hard",
+      "name": "Leather (hard)",
+      "ratingGeneral": 2,
+      "ratingBallistic": 0,
+      "strength": 2,
+      "defensePenalty": -1,
+      "speedPenalty": 0,
+      "availability": 1,
+      "coverage": "Torso, arms",
+      "concealed": false,
+      "era": "archaic"
+    },
+    {
+      "key": "chainmail",
+      "name": "Chainmail",
+      "ratingGeneral": 3,
+      "ratingBallistic": 1,
+      "strength": 3,
+      "defensePenalty": -2,
+      "speedPenalty": -2,
+      "availability": 2,
+      "coverage": "Torso, arms",
+      "concealed": false,
+      "era": "archaic"
+    },
+    {
+      "key": "plate",
+      "name": "Plate",
+      "ratingGeneral": 4,
+      "ratingBallistic": 2,
+      "strength": 3,
+      "defensePenalty": -2,
+      "speedPenalty": -3,
+      "availability": 4,
+      "coverage": "Torso, arms, legs",
+      "concealed": false,
+      "era": "archaic"
+    },
+    {
+      "key": "sports-gear",
+      "name": "Sports Gear",
+      "ratingGeneral": 2,
+      "ratingBallistic": 0,
+      "strength": 2,
+      "defensePenalty": -1,
+      "speedPenalty": -1,
+      "availability": 1,
+      "coverage": "Torso, arms, legs",
+      "concealed": false,
+      "era": "modern"
+    },
+    {
+      "key": "bomb-suit",
+      "name": "Bomb Suit",
+      "ratingGeneral": 4,
+      "ratingBallistic": 6,
+      "strength": 3,
+      "defensePenalty": -5,
+      "speedPenalty": -4,
+      "availability": 5,
+      "coverage": "Torso, arms, head",
+      "concealed": false,
+      "era": "modern",
+      "special": "Absorbs one explosion before degrading to half value"
+    },
+    {
+      "key": "helmet-modern",
+      "name": "Helmet (Modern)",
+      "ratingGeneral": 0,
+      "ratingBallistic": 0,
+      "strength": 2,
+      "defensePenalty": -1,
+      "speedPenalty": 0,
+      "availability": 3,
+      "coverage": "Head",
+      "concealed": false,
+      "era": "modern",
+      "special": "Extends parent armor to head at half rating (round up); -1 Perception"
+    },
+    {
+      "key": "lorica-segmentata",
+      "name": "Lorica Segmentata",
+      "ratingGeneral": 2,
+      "ratingBallistic": 2,
+      "strength": 3,
+      "defensePenalty": -2,
+      "speedPenalty": -3,
+      "availability": 4,
+      "coverage": "Torso",
+      "concealed": false,
+      "era": "archaic"
+    },
+    {
+      "key": "helmet-archaic",
+      "name": "Helmet (Archaic)",
+      "ratingGeneral": 0,
+      "ratingBallistic": 0,
+      "strength": 2,
+      "defensePenalty": -1,
+      "speedPenalty": 0,
+      "availability": 3,
+      "coverage": "Head",
+      "concealed": false,
+      "era": "archaic",
+      "special": "Extends parent armor to head at half rating (round up); -1 Perception"
+    }
+  ],
+  "gear": {
+    "mental": [
+      {
+        "key": "automotive-tools-basic",
+        "name": "Automotive Tools (Basic)",
+        "diceBonus": 1,
+        "durability": 2,
+        "size": 2,
+        "structure": 3,
+        "availability": 1,
+        "effect": "Toolkit for routine auto repairs; trained Specialty can skip rolls for mundane fixes."
+      },
+      {
+        "key": "cache",
+        "name": "Cache",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 3,
+        "structure": 5,
+        "availability": 2,
+        "effect": "Hidden storage that adds to concealment rolls and penalizes searches inside it."
+      },
+      {
+        "key": "comms-headset",
+        "name": "Communications Headset",
+        "diceBonus": 2,
+        "durability": 0,
+        "size": 1,
+        "structure": 1,
+        "availability": 2,
+        "effect": "200 ft range; teamwork bonus on coordinated efforts when practiced."
+      },
+      {
+        "key": "crime-scene-kit",
+        "name": "Crime Scene Kit",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 3,
+        "structure": 2,
+        "availability": 2,
+        "effect": "Bonus to Investigation; lets evidence be moved offsite for unhurried analysis."
+      },
+      {
+        "key": "code-kit",
+        "name": "Code Kit",
+        "diceBonus": 5,
+        "durability": 1,
+        "size": 2,
+        "structure": 1,
+        "availability": 1,
+        "effect": "Bonus to make/break specific cyphers; dice bonus penalizes anyone cracking without the key."
+      },
+      {
+        "key": "cracking-software",
+        "name": "Cracking Software",
+        "diceBonus": 2,
+        "durability": 0,
+        "size": 0,
+        "structure": 0,
+        "availability": 3,
+        "effect": "Bonus to breach passwords/firewalls; buffers the hacker from tracebacks."
+      },
+      {
+        "key": "digital-recorder",
+        "name": "Digital Recorder",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 2,
+        "effect": "Bonus to record/identify words or sounds; contested by Int + Computer to obscure."
+      },
+      {
+        "key": "duct-tape",
+        "name": "Duct Tape",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Adds 1 Durability or restrains targets (-3 to escape; must beat its Structure)."
+      },
+      {
+        "key": "first-aid-kit",
+        "name": "First-Aid Kit",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 2,
+        "structure": 3,
+        "availability": 2,
+        "effect": "Stabilizes injuries; +1 to Medicine rolls to treat damage (1-dot has no bonus)."
+      },
+      {
+        "key": "flashlight",
+        "name": "Flashlight",
+        "diceBonus": 1,
+        "durability": 2,
+        "size": 1,
+        "structure": 3,
+        "availability": 1,
+        "effect": "Offsets darkness penalties; can blind a target on Dex + Athletics vs Stamina."
+      },
+      {
+        "key": "glowstick",
+        "name": "Glowstick",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 1,
+        "structure": 1,
+        "availability": 1,
+        "effect": "Sustained chemical light; safe underwater. Cannot blind targets."
+      },
+      {
+        "key": "gps-tracker",
+        "name": "GPS Tracker",
+        "diceBonus": 3,
+        "durability": 2,
+        "size": 2,
+        "structure": 2,
+        "availability": 2,
+        "effect": "Track a target's movements (not in caves/tunnels/sewers)."
+      },
+      {
+        "key": "keylogging-software",
+        "name": "Keylogging Software",
+        "diceBonus": 2,
+        "durability": 0,
+        "size": 0,
+        "structure": 0,
+        "availability": 2,
+        "effect": "Logs keystrokes; install difficulty depends on physical access."
+      },
+      {
+        "key": "luminol",
+        "name": "Luminol",
+        "diceBonus": 2,
+        "durability": 0,
+        "size": 1,
+        "structure": 1,
+        "availability": 1,
+        "effect": "Reveals traces of blood/bodily fluids; bonus to track or reconstruct scenes."
+      },
+      {
+        "key": "multi-tool",
+        "name": "Multi-Tool",
+        "diceBonus": 1,
+        "durability": 3,
+        "size": 1,
+        "structure": 4,
+        "availability": 1,
+        "effect": "Modest bonus on Crafts; enables rolls when no proper tool is available."
+      },
+      {
+        "key": "personal-computer",
+        "name": "Personal Computer",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 3,
+        "structure": 2,
+        "availability": 2,
+        "effect": "Standard household PC; +1 to +4 depending on Availability tier."
+      },
+      {
+        "key": "smartphone",
+        "name": "Smartphone",
+        "diceBonus": 1,
+        "durability": 2,
+        "size": 1,
+        "structure": 1,
+        "availability": 1,
+        "effect": "Calls, web, GPS, camera; +1 to +2 depending on Availability tier."
+      },
+      {
+        "key": "special-effects",
+        "name": "Special Effects",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 5,
+        "structure": 3,
+        "availability": 3,
+        "effect": "Stage-magic and illusion props; first witness usually falls for the trick."
+      },
+      {
+        "key": "surveillance-equipment",
+        "name": "Surveillance Equipment",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 2,
+        "structure": 2,
+        "availability": 3,
+        "effect": "Cameras/sensors; Int + Computer (or Crafts) contested by intruder's Dex + Stealth."
+      },
+      {
+        "key": "survival-gear-basic",
+        "name": "Survival Gear (Basic)",
+        "diceBonus": 1,
+        "durability": 2,
+        "size": 2,
+        "structure": 3,
+        "availability": 1,
+        "effect": "Reduces effective Environment level by 1."
+      },
+      {
+        "key": "survival-gear-advanced",
+        "name": "Survival Gear (Advanced)",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 3,
+        "structure": 3,
+        "availability": 3,
+        "effect": "Reduces effective Environment level by 2 (specialized to one environment)."
+      },
+      {
+        "key": "talcum-powder",
+        "name": "Talcum Powder",
+        "diceBonus": 2,
+        "durability": 0,
+        "size": 1,
+        "structure": 1,
+        "availability": 1,
+        "effect": "Reveals unseen presence; 5 successes on Dex + Stealth to cross unobserved."
+      },
+      {
+        "key": "ultraviolet-ink",
+        "name": "Ultraviolet Ink",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Invisible to the naked eye without a UV light; for covert messages."
+      }
+    ],
+    "physical": [
+      {
+        "key": "battering-ram",
+        "name": "Battering Ram",
+        "diceBonus": 4,
+        "durability": 3,
+        "size": 4,
+        "structure": 8,
+        "availability": 2,
+        "effect": "Teamwork (up to 4); ignores 2 Durability on doors/barricades."
+      },
+      {
+        "key": "bear-trap",
+        "name": "Bear Trap",
+        "diceBonus": 2,
+        "durability": 3,
+        "size": 2,
+        "structure": 5,
+        "availability": 2,
+        "effect": "3 lethal, ignores 2 armor/Durability. Trapped escape = Str + Sta - dice bonus."
+      },
+      {
+        "key": "caltrops",
+        "name": "Caltrops",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 2,
+        "structure": 3,
+        "availability": 2,
+        "effect": "1 lethal to anyone crossing; ignores 1 armor/Durability. Half Speed to bypass safely."
+      },
+      {
+        "key": "camouflage-clothing",
+        "name": "Camouflage Clothing",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 2,
+        "structure": 3,
+        "availability": 2,
+        "effect": "Bonus to remain unnoticed in matching terrain."
+      },
+      {
+        "key": "climbing-gear",
+        "name": "Climbing Gear",
+        "diceBonus": 2,
+        "durability": 3,
+        "size": 2,
+        "structure": 2,
+        "availability": 2,
+        "effect": "Bonus to Str + Athletics climbs; prevents falls greater than 10 feet."
+      },
+      {
+        "key": "crowbar-tool",
+        "name": "Crowbar (tool)",
+        "diceBonus": 2,
+        "durability": 3,
+        "size": 2,
+        "structure": 4,
+        "availability": 1,
+        "effect": "Ignores 2 Durability on locks/barricades when prying. (For combat use, see weapons.)"
+      },
+      {
+        "key": "firearm-suppressor",
+        "name": "Firearm Suppressor",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 1,
+        "structure": 2,
+        "availability": 2,
+        "effect": "-1 damage but +2 dice at short range. Conceals shot tells; identifier rolls at -2."
+      },
+      {
+        "key": "gas-mask",
+        "name": "Gas Mask",
+        "diceBonus": 5,
+        "durability": 1,
+        "size": 2,
+        "structure": 3,
+        "availability": 2,
+        "effect": "Defends against airborne toxins; +5 dice vs powerful toxin rolls."
+      },
+      {
+        "key": "handcuffs",
+        "name": "Handcuffs",
+        "diceBonus": 2,
+        "durability": 4,
+        "size": 1,
+        "structure": 4,
+        "availability": 1,
+        "effect": "Str + Sta - 4 to break (1 bashing per attempt; reduces Structure)."
+      },
+      {
+        "key": "lockpicking-kit",
+        "name": "Lockpicking Kit",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 2,
+        "structure": 2,
+        "availability": 2,
+        "effect": "With 1+ Larceny, picks locks without a roll when unhurried; +2 to timed Dex + Larceny."
+      },
+      {
+        "key": "night-vision-goggles",
+        "name": "Night Vision Goggles",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 2,
+        "structure": 1,
+        "availability": 2,
+        "effect": "Removes blind-action penalties in low light; bright lights flashbang the wearer."
+      },
+      {
+        "key": "pepper-spray",
+        "name": "Pepper Spray",
+        "diceBonus": 1,
+        "durability": 2,
+        "size": 1,
+        "structure": 1,
+        "availability": 1,
+        "effect": "First hit inflicts Stun Tilt and -5 to all actions (reducible by rinsing)."
+      },
+      {
+        "key": "rope",
+        "name": "Rope",
+        "diceBonus": 1,
+        "durability": 2,
+        "size": 3,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Climbing/binding aid; effective binding Durability = user's Crafts (+1 with Specialty)."
+      },
+      {
+        "key": "stun-gun",
+        "name": "Stun Gun",
+        "diceBonus": 0,
+        "durability": 2,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Handheld (Weaponry) or ranged (Firearms); 1 lethal + successes subtract from victim's next pool."
+      },
+      {
+        "key": "bipod",
+        "name": "Bipod",
+        "diceBonus": 0,
+        "durability": 2,
+        "size": 2,
+        "structure": 4,
+        "availability": 1,
+        "effect": "Reduces medium/long range penalty by 1; reduces autofire multi-target penalty by 1."
+      },
+      {
+        "key": "ear-protection",
+        "name": "Ear Protection",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Prevents deafening from gunfire; -3 to sound-based Perception while worn."
+      },
+      {
+        "key": "gunsmithing-kit",
+        "name": "Gunsmithing Kit",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 2,
+        "structure": 4,
+        "availability": 2,
+        "effect": "Dex+Crafts to clean/repair/modify firearms; cleaning needs 5 successes."
+      },
+      {
+        "key": "light-mount",
+        "name": "Light Mount",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Offsets darkness penalty; can blind target. Halogen/LED variant +2 (Avail 2)."
+      },
+      {
+        "key": "reloading-bench",
+        "name": "Reloading Bench",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 5,
+        "structure": 6,
+        "availability": 2,
+        "effect": "Permits home loading of bullets; needed to avoid -5 on Dex+Crafts reloading."
+      },
+      {
+        "key": "sighting-tools",
+        "name": "Sighting Tools",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 2,
+        "structure": 3,
+        "availability": 2,
+        "effect": "Wits+Firearms extended (10 successes) to sight in a gun; +1 to medium/long-range attacks for 2x Damage uses."
+      },
+      {
+        "key": "sight-fiber-optic",
+        "name": "Sight, Fiber Optic",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "+1 when aiming; works day or night."
+      },
+      {
+        "key": "sight-laser",
+        "name": "Sight, Laser",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 2,
+        "effect": "+1 at short/medium range; visible red dot may warn targets."
+      },
+      {
+        "key": "sight-laser-infrared",
+        "name": "Sight, Laser (Infrared)",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 3,
+        "effect": "As laser sight; beam only visible through night vision."
+      },
+      {
+        "key": "scope-telescopic",
+        "name": "Scope, Telescopic",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 2,
+        "structure": 3,
+        "availability": 1,
+        "effect": "Ignore medium-range penalty; halve long-range penalty."
+      },
+      {
+        "key": "scope-night-vision",
+        "name": "Scope, Night Vision",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 2,
+        "structure": 3,
+        "availability": 3,
+        "effect": "Ignore darkness penalty at short/medium; -1 reduction at long range. Day/night variant Avail 4."
+      },
+      {
+        "key": "scope-thermal",
+        "name": "Scope, Thermal",
+        "diceBonus": 0,
+        "durability": 2,
+        "size": 2,
+        "structure": 4,
+        "availability": 5,
+        "effect": "No medium/short penalty vs warm targets; long-range capped at -1. No effect on cold/undead."
+      },
+      {
+        "key": "speedloader",
+        "name": "Speedloader",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Quick reload of revolver or action-fed rifle/shotgun without sacrificing Defense."
+      },
+      {
+        "key": "collapsible-stock",
+        "name": "Collapsible Stock",
+        "diceBonus": 0,
+        "durability": 2,
+        "size": 0,
+        "structure": 3,
+        "availability": 2,
+        "effect": "Reduces weapon Size by 1 (min 2). Retrofit: Dex+Crafts, 5 successes."
+      },
+      {
+        "key": "suppressor",
+        "name": "Suppressor",
+        "diceBonus": 0,
+        "durability": 3,
+        "size": 1,
+        "structure": 4,
+        "availability": 3,
+        "effect": "-4 Perception to hear shot (subsonic); -2 (supersonic); -3 to locate shooter."
+      },
+      {
+        "key": "binoculars",
+        "name": "Binoculars",
+        "diceBonus": 0,
+        "durability": 2,
+        "size": 1,
+        "structure": 3,
+        "availability": 1,
+        "effect": "Clear vision to extreme range; -1 long, -3 extreme on sight Perception. Night vision variant Avail 3."
+      },
+      {
+        "key": "bug-listening-device",
+        "name": "Bug (Listening Device)",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 2,
+        "effect": "Transmits audio to ~1/4 mile. Wits+Larceny to plant. Smaller bugs Avail 3 (-1 to find)."
+      },
+      {
+        "key": "bug-sweeper",
+        "name": "Bug Sweeper",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 3,
+        "effect": "+2 to Wits+Investigation rolls to find audio/video recorders."
+      },
+      {
+        "key": "disguised-camera",
+        "name": "Disguised Camera",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 2,
+        "structure": 3,
+        "availability": 2,
+        "effect": "Hidden cam in everyday object; ~2 hr internal recording. Smaller cams Avail 3."
+      },
+      {
+        "key": "tracking-device",
+        "name": "Tracking Device",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 3,
+        "effect": "Trace target location via GPS or phone. Wits+Larceny +2 to conceal (size)."
+      },
+      {
+        "key": "keystroke-logger",
+        "name": "Keystroke Logger",
+        "diceBonus": 2,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Captures all keystrokes including BIOS passwords. Wits+Computer to install covertly."
+      },
+      {
+        "key": "reverse-peephole",
+        "name": "Reverse Peephole",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "View through a door's existing peephole; Wits+Investigation at -4."
+      },
+      {
+        "key": "spyware",
+        "name": "Spyware",
+        "diceBonus": 2,
+        "durability": 0,
+        "size": 0,
+        "structure": 0,
+        "availability": 2,
+        "effect": "Logs keystrokes, browsing, chat. Install via hacking attempt or physical media."
+      },
+      {
+        "key": "wifi-sniffer",
+        "name": "Wi-Fi Sniffer",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Scans for wireless networks within medium range; more discrete than a laptop."
+      },
+      {
+        "key": "wiretap",
+        "name": "Wiretap",
+        "diceBonus": 0,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 2,
+        "effect": "Int+Larceny to install on phone/line; contested by Wits+Investigation."
+      },
+      {
+        "key": "nbc-suit",
+        "name": "NBC Suit",
+        "diceBonus": 5,
+        "durability": 1,
+        "size": 5,
+        "structure": 6,
+        "availability": 2,
+        "effect": "+5 vs nuclear/biological/chemical agents and radiation. Punctured suit loses all protection."
+      },
+      {
+        "key": "potassium-iodide",
+        "name": "Potassium Iodide",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 1,
+        "structure": 2,
+        "availability": 2,
+        "effect": "+1 to resist up to level-3 radiation; must be taken 4 hours before exposure."
+      },
+      {
+        "key": "survival-kit-basic",
+        "name": "Survival Kit (Basic)",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 2,
+        "structure": 3,
+        "availability": 1,
+        "effect": "Wilderness day-pack. +1 to Survival and Sta+Res vs exposure."
+      },
+      {
+        "key": "survival-kit-advanced",
+        "name": "Survival Kit (Advanced)",
+        "diceBonus": 2,
+        "durability": 2,
+        "size": 2,
+        "structure": 4,
+        "availability": 2,
+        "effect": "Compass, tent, multi-tool, etc. +2 Survival/exposure; negates level-2 environment."
+      },
+      {
+        "key": "survival-kit-superior",
+        "name": "Survival Kit (Superior)",
+        "diceBonus": 3,
+        "durability": 2,
+        "size": 3,
+        "structure": 5,
+        "availability": 3,
+        "effect": "GPS, water filter, week of food/water. +3 Survival/exposure; negates level-3 environment."
+      },
+      {
+        "key": "survival-kit-urban",
+        "name": "Survival Kit (Urban)",
+        "diceBonus": 3,
+        "durability": 2,
+        "size": 2,
+        "structure": 4,
+        "availability": 2,
+        "effect": "'Go Bag' for urban disasters. +3 Survival/exposure; +1 only when used in wilderness."
+      }
+    ],
+    "social": [
+      {
+        "key": "cash",
+        "name": "Cash",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 2,
+        "structure": 1,
+        "availability": 1,
+        "effect": "Bribe bonus equal to its Availability rating; or buys items of equal Availability."
+      },
+      {
+        "key": "disguise",
+        "name": "Disguise",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 3,
+        "structure": 2,
+        "availability": 1,
+        "effect": "Bonus to blend in; emulates the first dot of one situational Social Merit."
+      },
+      {
+        "key": "fashion",
+        "name": "Fashion",
+        "diceBonus": 1,
+        "durability": 1,
+        "size": 2,
+        "structure": 1,
+        "availability": 1,
+        "effect": "Bonus = ceil(Availability / 2) when properly dressed for the venue; penalty if not."
+      }
+    ]
+  },
+  "services": [
+    {
+      "key": "research-assistance",
+      "name": "Research Assistance (grad students)",
+      "skill": "Academics",
+      "availability": 2,
+      "diceBonus": 2
+    },
+    {
+      "key": "translation-dead-lang",
+      "name": "Translation of a Dead Language",
+      "skill": "Academics",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "historical-consult",
+      "name": "Historical Specialist Consulting",
+      "skill": "Academics",
+      "availability": 3,
+      "diceBonus": 3
+    },
+    {
+      "key": "personal-trainer",
+      "name": "Personal Trainer",
+      "skill": "Athletics",
+      "availability": 3,
+      "diceBonus": 3
+    },
+    {
+      "key": "self-defense-classes",
+      "name": "Self-Defense Classes",
+      "skill": "Brawl",
+      "availability": 1,
+      "diceBonus": 1
+    },
+    {
+      "key": "bodyguard-service",
+      "name": "Bodyguard Service",
+      "skill": "Brawl",
+      "availability": 3,
+      "diceBonus": 3
+    },
+    {
+      "key": "custom-phone-app",
+      "name": "Custom Phone Application",
+      "skill": "Computer",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "graphic-design-forgery",
+      "name": "Graphic Design / Forgery",
+      "skill": "Computer",
+      "availability": 2,
+      "diceBonus": 2
+    },
+    {
+      "key": "auto-repair",
+      "name": "Auto Repair",
+      "skill": "Crafts",
+      "availability": 2,
+      "diceBonus": 3
+    },
+    {
+      "key": "antiquities-restoration",
+      "name": "Antiquities Restoration",
+      "skill": "Crafts",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "chauffeur",
+      "name": "Chauffeur",
+      "skill": "Drive",
+      "availability": 2,
+      "diceBonus": 2
+    },
+    {
+      "key": "stunt-performance",
+      "name": "Stunt Performance / Mock Crash",
+      "skill": "Drive",
+      "availability": 3,
+      "diceBonus": 3
+    },
+    {
+      "key": "antique-gun-repair",
+      "name": "Antique Gun Repair",
+      "skill": "Firearms",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "smuggled-arms",
+      "name": "Procuring Smuggled Military Arms",
+      "skill": "Firearms",
+      "availability": 4,
+      "diceBonus": 2
+    },
+    {
+      "key": "evidence-consultation",
+      "name": "Consultation on Evidence",
+      "skill": "Investigation",
+      "availability": 3,
+      "diceBonus": 3
+    },
+    {
+      "key": "private-investigation",
+      "name": "Private Investigation / Background",
+      "skill": "Investigation",
+      "availability": 2,
+      "diceBonus": 2
+    },
+    {
+      "key": "breaking-entering",
+      "name": "Breaking and Entering",
+      "skill": "Larceny",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "black-market-surgeon",
+      "name": "Black Market Surgeon",
+      "skill": "Medicine",
+      "availability": 4,
+      "diceBonus": 3
+    },
+    {
+      "key": "exorcist",
+      "name": "Exorcist",
+      "skill": "Occult",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "esoteric-sage",
+      "name": "Esoteric Consultant / Sage",
+      "skill": "Occult",
+      "availability": 4,
+      "diceBonus": 3
+    },
+    {
+      "key": "campaign-assistant",
+      "name": "Campaign Assistant",
+      "skill": "Politics",
+      "availability": 3,
+      "diceBonus": 3
+    },
+    {
+      "key": "cutting-red-tape",
+      "name": "Cutting Red Tape (Bribe)",
+      "skill": "Politics",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "lab-access",
+      "name": "Lab Access",
+      "skill": "Science",
+      "availability": 2,
+      "diceBonus": 2
+    },
+    {
+      "key": "trail-guide",
+      "name": "Trail Guide",
+      "skill": "Survival",
+      "availability": 2,
+      "diceBonus": 3
+    },
+    {
+      "key": "trained-animal",
+      "name": "Buy a Trained Animal",
+      "skill": "Animal Ken",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "good-cop-interrogator",
+      "name": "\"Good Cop\" Interrogator",
+      "skill": "Empathy",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "bad-cop-interrogator",
+      "name": "\"Bad Cop\" Interrogator",
+      "skill": "Intimidation",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "anti-interrogation",
+      "name": "Anti-Interrogation Training",
+      "skill": "Intimidation",
+      "availability": 4,
+      "diceBonus": 3
+    },
+    {
+      "key": "ghostwriting",
+      "name": "Ghostwriting",
+      "skill": "Expression",
+      "availability": 2,
+      "diceBonus": 2
+    },
+    {
+      "key": "defense-attorney",
+      "name": "Defense Attorney",
+      "skill": "Persuasion",
+      "availability": 3,
+      "diceBonus": 3
+    },
+    {
+      "key": "hostage-negotiator",
+      "name": "Hostage Negotiator",
+      "skill": "Persuasion",
+      "availability": 4,
+      "diceBonus": 3
+    },
+    {
+      "key": "catering",
+      "name": "Catering",
+      "skill": "Socialize",
+      "availability": 3,
+      "diceBonus": 1
+    },
+    {
+      "key": "escort",
+      "name": "Escort",
+      "skill": "Socialize",
+      "availability": 3,
+      "diceBonus": 2
+    },
+    {
+      "key": "black-market-access",
+      "name": "Black Market Access",
+      "skill": "Streetwise",
+      "availability": 2,
+      "diceBonus": 2
+    },
+    {
+      "key": "smuggling-contraband",
+      "name": "Smuggling Contraband",
+      "skill": "Streetwise",
+      "availability": 3,
+      "diceBonus": 1
+    },
+    {
+      "key": "con-artistry",
+      "name": "Con Artistry",
+      "skill": "Subterfuge",
+      "availability": 3,
+      "diceBonus": 2
+    }
+  ]
+}

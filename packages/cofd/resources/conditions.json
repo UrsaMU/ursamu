@@ -1,0 +1,517 @@
+{
+  "addicted": {
+    "name": "Addicted",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character is hooked on a substance or behavior and suffers when deprived.",
+    "effect": "Without a fix, suffer -2 to all rolls and lose 1 Willpower per scene of withdrawal; must spend Willpower to resist using.",
+    "resolution": "Successfully complete a sustained recovery arc, or hit rock bottom in a scene.",
+    "beats": 1
+  },
+  "blind": {
+    "name": "Blind",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character cannot see (one or both eyes, temporary or permanent).",
+    "effect": "All visual Perception rolls fail; physical actions vs sighted foes suffer -3 (half-blind: -2).",
+    "resolution": "Regain sight via medicine or magic, or accept the loss permanently and take it as a character trait.",
+    "beats": 1
+  },
+  "bonded": {
+    "name": "Bonded",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character is supernaturally or emotionally bonded to a specific person or entity.",
+    "effect": "+2 to social rolls supporting the bonded party; -2 to act against their interests.",
+    "resolution": "The bond is broken (death, betrayal, ritual).",
+    "beats": 1
+  },
+  "broken": {
+    "name": "Broken",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character has been emotionally shattered by trauma.",
+    "effect": "Lose 1 Willpower from any failed action against the trauma's source; cannot regain Willpower from low Virtue.",
+    "resolution": "Confront and overcome the source of trauma in a significant scene.",
+    "beats": 1
+  },
+  "charmed": {
+    "name": "Charmed",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character is favorably disposed to a specific person.",
+    "effect": "Cannot take hostile action against the charmer; suffers -2 to disbelieve their lies.",
+    "resolution": "The charmer betrays the character, or the scene/effect ends.",
+    "beats": 1
+  },
+  "competitive": {
+    "name": "Competitive",
+    "category": "condition",
+    "persistent": false,
+    "description": "A specific rivalry has the character's full focus.",
+    "effect": "+2 to actions taken directly against the rival in the current contest.",
+    "resolution": "Win or lose the contest decisively.",
+    "beats": 1
+  },
+  "confused": {
+    "name": "Confused",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character cannot make sense of the situation.",
+    "effect": "-2 to Mental and Social rolls relying on clear thought; cannot benefit from teamwork.",
+    "resolution": "Step away from the source of confusion for a scene, or have the situation explained clearly.",
+    "beats": 1
+  },
+  "connected": {
+    "name": "Connected",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character has just made a useful inroad with a group or faction.",
+    "effect": "+2 to Social rolls with that faction for the duration.",
+    "resolution": "Use the connection on a significant roll (spends the Condition).",
+    "beats": 1
+  },
+  "cowed": {
+    "name": "Cowed",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character has been intimidated into submission.",
+    "effect": "Cannot take aggressive action against the intimidator while present; -2 to resist their further Social pressure.",
+    "resolution": "The intimidator leaves the scene, or the character spends Willpower to defy them.",
+    "beats": 1
+  },
+  "delusional": {
+    "name": "Delusional",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character believes something untrue with conviction.",
+    "effect": "-2 to Mental rolls about the delusion's subject; may act on false premises.",
+    "resolution": "Encounter incontrovertible proof in a dramatic scene.",
+    "beats": 1
+  },
+  "demoralized": {
+    "name": "Demoralized",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character has lost faith in a cause or themself.",
+    "effect": "Cannot spend Willpower on actions related to the cause.",
+    "resolution": "Re-affirm or abandon the cause through play.",
+    "beats": 1
+  },
+  "deprived": {
+    "name": "Deprived",
+    "category": "condition",
+    "persistent": false,
+    "description": "Lacking a normal need (food, sleep, vice).",
+    "effect": "-1 to all rolls; cannot regain Willpower from the lacking source.",
+    "resolution": "Acquire and indulge in the missing need.",
+    "beats": 1
+  },
+  "disabled": {
+    "name": "Disabled",
+    "category": "condition",
+    "persistent": true,
+    "description": "Lasting physical impairment (lost limb, chronic pain).",
+    "effect": "Specific roll penalties tied to the disability (Storyteller sets).",
+    "resolution": "Resolve once when the character incorporates it into identity, or is healed.",
+    "beats": 1
+  },
+  "embarrassing-secret": {
+    "name": "Embarrassing Secret",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character has something they desperately don't want known.",
+    "effect": "Anyone with the secret can leverage it (+2 to coerce or blackmail).",
+    "resolution": "The secret is exposed publicly, or rendered moot.",
+    "beats": 1
+  },
+  "fugue": {
+    "name": "Fugue",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character periodically blacks out and acts out a buried compulsion.",
+    "effect": "Lose narrative control to Storyteller during a fugue episode; no memory after.",
+    "resolution": "Discover and address the underlying trauma.",
+    "beats": 1
+  },
+  "guilty": {
+    "name": "Guilty",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character is wracked with guilt over a recent act.",
+    "effect": "-2 to Resolve+Composure rolls; cannot regain Willpower from low Virtue this scene.",
+    "resolution": "Confess, atone, or rationalize the act away in play.",
+    "beats": 1
+  },
+  "hungry": {
+    "name": "Hungry",
+    "category": "condition",
+    "persistent": false,
+    "description": "Needs a specific feeding (food, blood, essence, etc.).",
+    "effect": "-1 to rolls; supernatural feeders may roll to resist frenzy.",
+    "resolution": "Feed.",
+    "beats": 1
+  },
+  "inspired": {
+    "name": "Inspired",
+    "category": "condition",
+    "persistent": false,
+    "description": "Struck by a flash of insight or creative drive.",
+    "effect": "Spend to gain +2 dice on a single roll related to the inspiration.",
+    "resolution": "Spend the bonus on a roll.",
+    "beats": 1
+  },
+  "informed": {
+    "name": "Informed",
+    "category": "condition",
+    "persistent": false,
+    "description": "Possesses specific timely intelligence.",
+    "effect": "Spend to add +2 dice to a single Mental or Investigation roll on the topic.",
+    "resolution": "Spend the bonus on a roll.",
+    "beats": 1
+  },
+  "leveraged": {
+    "name": "Leveraged",
+    "category": "condition",
+    "persistent": false,
+    "description": "Someone has blackmail or coercive material on the character.",
+    "effect": "The leverager can compel a single action; refusing it costs Willpower.",
+    "resolution": "Resolve the leverage (pay, expose, eliminate).",
+    "beats": 1
+  },
+  "lost": {
+    "name": "Lost",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character is geographically or spiritually disoriented.",
+    "effect": "-2 to navigation, tracking, and orientation rolls.",
+    "resolution": "Reach a known landmark or have someone guide them out.",
+    "beats": 1
+  },
+  "madness": {
+    "name": "Madness",
+    "category": "condition",
+    "persistent": true,
+    "description": "A deep, lasting derangement.",
+    "effect": "Triggers under specific circumstances; imposes other Conditions or Willpower loss.",
+    "resolution": "Long-term therapy or quest arc, or accept as permanent.",
+    "beats": 1
+  },
+  "mute": {
+    "name": "Mute",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character cannot speak.",
+    "effect": "Cannot make rolls requiring speech; -3 to most Social.",
+    "resolution": "Cure (medical or magical) or fully adapt to alternate communication.",
+    "beats": 1
+  },
+  "notoriety": {
+    "name": "Notoriety",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character is publicly infamous for some deed.",
+    "effect": "-2 to Social rolls with people who know; +2 to Intimidation about the deed.",
+    "resolution": "Publicly redeem oneself, or the story is buried or forgotten.",
+    "beats": 1
+  },
+  "obsession": {
+    "name": "Obsession",
+    "category": "condition",
+    "persistent": true,
+    "description": "A specific subject dominates the character's thoughts.",
+    "effect": "Must spend Willpower to focus on anything else for a scene.",
+    "resolution": "Achieve the obsession's goal, or be forced to walk away in a dramatic scene.",
+    "beats": 1
+  },
+  "shadow-soul": {
+    "name": "Shadow Soul",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character carries a fragment of darkness or possessing presence.",
+    "effect": "Periodically must act on the shadow's urges or spend Willpower.",
+    "resolution": "Exorcism, integration, or destruction of the shadow.",
+    "beats": 1
+  },
+  "shaken": {
+    "name": "Shaken",
+    "category": "condition",
+    "persistent": false,
+    "description": "Recent fright has rattled the character.",
+    "effect": "Lose 1 Willpower point if forced to confront the source again this scene.",
+    "resolution": "Confront the source successfully, or flee the scene entirely.",
+    "beats": 1
+  },
+  "spooked": {
+    "name": "Spooked",
+    "category": "condition",
+    "persistent": false,
+    "description": "Brushed against the supernatural and unsettled by it.",
+    "effect": "Choose: flee/avoid (no roll possible against source) or investigate (Beat when resolved).",
+    "resolution": "Successfully investigate and rationalize the experience, or flee permanently.",
+    "beats": 1
+  },
+  "steadfast": {
+    "name": "Steadfast",
+    "category": "condition",
+    "persistent": false,
+    "description": "Bolstered by conviction.",
+    "effect": "Spend to gain +2 dice on a roll resisting fear, doubt, or coercion.",
+    "resolution": "Spend the bonus on a roll.",
+    "beats": 1
+  },
+  "stigmata": {
+    "name": "Stigmata",
+    "category": "condition",
+    "persistent": true,
+    "description": "The character bleeds from supernatural wounds at meaningful times.",
+    "effect": "Lose 1 lethal damage when the Condition triggers in a scene.",
+    "resolution": "Address the spiritual cause.",
+    "beats": 1
+  },
+  "stumbled": {
+    "name": "Stumbled",
+    "category": "condition",
+    "persistent": false,
+    "description": "Off balance physically or socially.",
+    "effect": "-2 to the character's next relevant action.",
+    "resolution": "Make the next relevant action.",
+    "beats": 1
+  },
+  "stunned": {
+    "name": "Stunned",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character lost initiative to a blow or shock.",
+    "effect": "Lose next instant action (or next turn in combat).",
+    "resolution": "One turn passes.",
+    "beats": 1
+  },
+  "swooning": {
+    "name": "Swooning",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character is romantically or sexually fixated on someone.",
+    "effect": "Cannot take direct hostile action against the target; -2 to resist their Social rolls.",
+    "resolution": "The target spurns them, or the relationship is consummated or resolved.",
+    "beats": 1
+  },
+  "wanton": {
+    "name": "Wanton",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character is in a state of reckless indulgence.",
+    "effect": "+1 to actions taken in pursuit of indulgence; -2 to caution-based rolls (Stealth, Subterfuge).",
+    "resolution": "Indulgence ends in consequence; scene closes.",
+    "beats": 1
+  },
+  "guarded": {
+    "name": "Guarded",
+    "category": "condition",
+    "persistent": false,
+    "description": "On heightened defensive footing socially.",
+    "effect": "+2 to resist Social maneuvering for the scene.",
+    "resolution": "Resolve at end of scene, or when the character lowers their guard.",
+    "beats": 1
+  },
+  "guilty-pleasure": {
+    "name": "Guilty Pleasure",
+    "category": "condition",
+    "persistent": false,
+    "description": "The character has indulged in a vice they feel ashamed of.",
+    "effect": "-1 to Resolve+Composure when the pleasure is referenced or tempted again.",
+    "resolution": "Either fully embrace or fully renounce the pleasure in play.",
+    "beats": 1
+  },
+
+  "arm-wrack": {
+    "name": "Arm Wrack",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "One arm is disabled by injury or restraint.",
+    "effect": "Cannot use two-handed actions with that arm; -2 to actions with the affected limb.",
+    "resolution": "Scene ends, or the arm is healed or freed.",
+    "beats": 0
+  },
+  "beaten-down": {
+    "name": "Beaten Down",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "The character has been worked over and is reluctant to fight on.",
+    "effect": "Must spend Willpower to take violent action.",
+    "resolution": "Scene ends, or the character rests.",
+    "beats": 0
+  },
+  "blinded": {
+    "name": "Blinded",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "The character cannot see for the scene (one or both eyes).",
+    "effect": "-3 to sight-based actions, or auto-fail.",
+    "resolution": "Scene ends, or sight is restored.",
+    "beats": 0
+  },
+  "deafened": {
+    "name": "Deafened",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "The character cannot hear for the scene.",
+    "effect": "-3 to hearing-based Perception; surprised more easily.",
+    "resolution": "Scene ends, or hearing is restored.",
+    "beats": 0
+  },
+  "drugged": {
+    "name": "Drugged",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "Under the influence of a chemical agent.",
+    "effect": "-2 to Mental and Physical rolls; sleepy or euphoric per drug.",
+    "resolution": "Scene ends, or the drug wears off.",
+    "beats": 0
+  },
+  "insane": {
+    "name": "Insane",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "Brief psychotic break.",
+    "effect": "Storyteller takes control of the character briefly.",
+    "resolution": "Scene ends, or the break passes.",
+    "beats": 0
+  },
+  "insensate": {
+    "name": "Insensate",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "Knocked out or otherwise unable to act.",
+    "effect": "Cannot take actions until the Tilt ends.",
+    "resolution": "Scene ends, or the character revives.",
+    "beats": 0
+  },
+  "knocked-down": {
+    "name": "Knocked Down",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "The character is prone.",
+    "effect": "-2 to attack; close-combat attackers gain +2. Spend an action to stand.",
+    "resolution": "Scene ends, or character spends an action to stand.",
+    "beats": 0
+  },
+  "leg-wrack": {
+    "name": "Leg Wrack",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "One leg is disabled by injury or restraint.",
+    "effect": "Speed halved; -2 to Physical rolls needing footing.",
+    "resolution": "Scene ends, or the leg is healed or freed.",
+    "beats": 0
+  },
+  "poisoned": {
+    "name": "Poisoned",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "Toxin is working in the character's system.",
+    "effect": "Lose Health per interval per toxicity.",
+    "resolution": "Scene ends, the toxin is purged, or antitoxin is applied.",
+    "beats": 0
+  },
+  "sick": {
+    "name": "Sick",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "Ill or weakened by disease.",
+    "effect": "-2 to Physical actions; may worsen.",
+    "resolution": "Scene ends, or the character recovers.",
+    "beats": 0
+  },
+  "stunned-tilt": {
+    "name": "Stunned",
+    "category": "tilt-personal",
+    "persistent": false,
+    "description": "Lose next action (scene-bound Tilt counterpart to the Condition).",
+    "effect": "Lose the next instant action or turn.",
+    "resolution": "Scene ends, or the character acts again.",
+    "beats": 0
+  },
+
+  "blizzard": {
+    "name": "Blizzard",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "Heavy snow and wind reduce visibility and slow movement.",
+    "effect": "-3 to ranged attacks and Perception; movement halved.",
+    "resolution": "Scene ends or weather clears.",
+    "beats": 0
+  },
+  "earthquake": {
+    "name": "Earthquake",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "The ground shakes violently.",
+    "effect": "Dexterity+Athletics or fall (Knocked Down).",
+    "resolution": "Scene ends or the tremors stop.",
+    "beats": 0
+  },
+  "extreme-cold": {
+    "name": "Extreme Cold",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "Lethal cold threatens exposure injuries.",
+    "effect": "Lose Stamina-based resistance roll or take Bashing.",
+    "resolution": "Scene ends or the cold abates.",
+    "beats": 0
+  },
+  "extreme-heat": {
+    "name": "Extreme Heat",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "Lethal heat threatens exposure injuries.",
+    "effect": "As Extreme Cold but heat-based; dehydration imposes Deprived.",
+    "resolution": "Scene ends or the heat abates.",
+    "beats": 0
+  },
+  "flooded": {
+    "name": "Flooded",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "Standing or rushing water covers the scene.",
+    "effect": "Speed halved or swim rolls required.",
+    "resolution": "Scene ends or the water recedes.",
+    "beats": 0
+  },
+  "heavy-rain": {
+    "name": "Heavy Rain",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "Driving rain reduces visibility and grip.",
+    "effect": "-2 to Perception and ranged attacks; surfaces slippery.",
+    "resolution": "Scene ends or the rain stops.",
+    "beats": 0
+  },
+  "heavy-winds": {
+    "name": "Heavy Winds",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "Strong winds disrupt the scene.",
+    "effect": "-2 to ranged attacks; light objects become hazards.",
+    "resolution": "Scene ends or the wind dies down.",
+    "beats": 0
+  },
+  "ice": {
+    "name": "Ice",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "Slippery footing covers the ground.",
+    "effect": "Dexterity+Athletics to avoid Knocked Down on sudden moves.",
+    "resolution": "Scene ends or the ice melts.",
+    "beats": 0
+  },
+  "darkness": {
+    "name": "Darkness",
+    "category": "tilt-environmental",
+    "persistent": false,
+    "description": "Heavy or total darkness covers the scene.",
+    "effect": "-3 or auto-fail sight rolls; combat at penalty.",
+    "resolution": "Scene ends or light is introduced.",
+    "beats": 0
+  }
+}

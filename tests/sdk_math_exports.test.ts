@@ -6,7 +6,7 @@ import {
   dist2d, dist3d, distSq2d, distSq3d, manhattan, chebyshev, angle2d, bearing,
   lerp, inverseLerp, remap, smoothstep, smootherstep, clamp,
   vsize, vsizeSq, vdistance, vdistanceSq, vlerp, vclamp,
-} from "../src/services/Softcode/stdlib/math.ts";
+} from "../packages/mush/src/softcode/stdlib/math.ts";
 
 Deno.test("dist2d 3-4-5 triangle", () => {
   assertEquals(dist2d(0, 0, 3, 4), 5);

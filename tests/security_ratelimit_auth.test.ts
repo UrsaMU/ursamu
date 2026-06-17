@@ -15,8 +15,8 @@
  * GREEN: isLoginRateLimited guard added to both branches — test passes.
  */
 import { assertEquals } from "@std/assert";
-import { authHandler } from "../src/routes/authRouter.ts";
-import { DBO } from "../src/services/Database/database.ts";
+import { authHandler } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

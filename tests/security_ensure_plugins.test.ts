@@ -15,7 +15,7 @@ import {
   isShaRef,
   buildCloneSteps,
   ensurePlugins,
-} from "../src/utils/ensurePlugins.ts";
+} from "@ursamu/cli";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

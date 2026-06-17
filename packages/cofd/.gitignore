@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+.deno/
+deno.lock.bak
+.ursamu-stage
+.claude/
+data/
+
+# Source rulebooks (not distributed; used for data extraction only)
+books/

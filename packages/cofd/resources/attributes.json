@@ -1,0 +1,5 @@
+{
+  "mental": ["intelligence", "wits", "resolve"],
+  "physical": ["strength", "dexterity", "stamina"],
+  "social": ["presence", "manipulation", "composure"]
+}

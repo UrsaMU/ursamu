@@ -354,10 +354,10 @@ UrsaMU is a JSR package — your game project depends on a version pinned in
 
 ```bash
 # Preview what would change
-deno run -A jsr:@ursamu/ursamu/cli update --dry-run
+deno run -A jsr:@ursamu/mush/cli update --dry-run
 
 # Apply the update
-deno run -A jsr:@ursamu/ursamu/cli update
+deno run -A jsr:@ursamu/mush/cli update
 ```
 
 After updating, restart the servers:

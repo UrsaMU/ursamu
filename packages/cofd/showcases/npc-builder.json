@@ -1,0 +1,68 @@
+{
+  "key": "npc-builder",
+  "title": "+npc/build -- tiered NPC builder with dread powers",
+  "description": "Storyteller browses archetypes and powers, builds a minor mook and a storyteller-tier nemesis, attaches a dread power, and views the stat block.",
+  "vars": { "player": "Jax" },
+  "setup": {
+    "targets": {
+      "Jax": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "template": "mortal",
+            "attributes": {
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "strength": 3, "dexterity": 2, "stamina": 2,
+              "presence": 2, "manipulation": 2, "composure": 2
+            },
+            "skills": { "brawl": 2, "athletics": 2 },
+            "advantages": { "willpowerMax": 4, "willpowerCurrent": 4, "size": 5 },
+            "health": { "bashing": 0, "lethal": 0, "aggravated": 0 },
+            "equipment": { "equippedWeapon": null, "equippedArmor": null }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Browse the Dread Power Catalog" },
+    { "note": "Any connected player can list powers; the catalog is read-only reference." },
+    { "cmd": "+npc/powers", "label": "Jax flips through powers" },
+    { "expect": "Telekinesis" },
+
+    { "sub": "Storyteller Spawns a Minor Mook" },
+    { "note": "/build at archetype default tier (thug = minor). One trait pool, no merits." },
+    { "cmd": "+npc/build Goon=thug", "as": "admin", "label": "ST drops in a thug" },
+    { "expect": "minor" },
+
+    { "sub": "Inspect the Stat Block" },
+    { "cmd": "+npc/show Goon", "label": "ST checks the sheet" },
+    { "expect": "Defense" },
+
+    { "sub": "Spawn a Storyteller-Tier Nemesis" },
+    { "note": "/build with /tier overrides the archetype default. Hunter becomes a PC-equivalent." },
+    { "cmd": "+npc/build Karl=hunter/storyteller", "as": "admin", "label": "ST builds the big bad" },
+    { "expect": "storyteller" },
+
+    { "sub": "Attach a Dread Power" },
+    { "note": "Tier gating: Possession requires major+. Mortal Mask works at any tier." },
+    { "cmd": "+npc/addpower Karl=possession", "as": "admin", "label": "Add Possession (major+ only)" },
+    { "expect": "Attached" },
+
+    { "sub": "Confirm Power Shows in Stat Block" },
+    { "cmd": "+npc/show Karl", "label": "ST verifies" },
+    { "expect": "Possession" },
+
+    { "sub": "Mooks Can't Carry Major Powers" },
+    { "cmd": "+npc/addpower Goon=possession", "as": "admin", "label": "Try to overscale the mook" },
+    { "expect": "cannot take" },
+
+    { "sub": "Clean Up" },
+    { "cmd": "+npc/destroy Goon", "as": "admin", "label": "Remove mook" },
+    { "expect": "Destroyed" },
+    { "cmd": "+npc/destroy Karl", "as": "admin", "label": "Remove nemesis" },
+    { "expect": "Destroyed" },
+
+    { "reset": true }
+  ]
+}

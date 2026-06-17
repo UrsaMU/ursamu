@@ -7,8 +7,8 @@
  * message to the room, and calls u.sys.update(branch).
  */
 import { assertEquals } from "https://deno.land/std@0.220.0/assert/mod.ts";
-import type { IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
-import { execUpdate } from "../src/commands/auth.ts";
+import type { IUrsamuSDK } from "@ursamu/mush";
+import { execUpdate } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

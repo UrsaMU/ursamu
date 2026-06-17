@@ -1,0 +1,79 @@
+{
+  "key": "combat-action-economy",
+  "title": "+combat action economy -- suppress, recover, surrender",
+  "description": "Demonstrates suppressive fire (no damage, pins others), Beaten Down recovery via Willpower, and surrender as a deliberate non-violence flag that blocks targeting.",
+  "vars": { "player": "Jax" },
+  "setup": {
+    "targets": {
+      "Jax": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 2, "dexterity": 5, "stamina": 2,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 2, "composure": 5
+            },
+            "skills": { "firearms": 3, "brawl": 2, "athletics": 2 },
+            "advantages": {
+              "size": 5, "speed": 9, "defense": 4,
+              "initiativeMod": 4, "willpowerMax": 4, "willpowerCurrent": 4,
+              "integrity": 7, "armor": { "general": 0, "ballistic": 0 }
+            },
+            "health": { "max": 7, "bashing": 0, "lethal": 0, "aggravated": 0 }
+          }
+        }
+      },
+      "Marcus": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 3, "dexterity": 1, "stamina": 2,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 2, "composure": 1
+            },
+            "skills": { "brawl": 2, "athletics": 2 },
+            "advantages": {
+              "size": 5, "speed": 11, "defense": 4,
+              "initiativeMod": 6, "willpowerMax": 4, "willpowerCurrent": 4,
+              "integrity": 7, "armor": { "general": 0, "ballistic": 0 }
+            },
+            "health": { "max": 7, "bashing": 0, "lethal": 0, "aggravated": 0 }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Setup the Encounter" },
+    { "cmd": "+combat/start", "as": "admin", "label": "ST opens encounter" },
+    { "expect": "encounter" },
+    { "cmd": "+combat/join", "label": "Jax joins" },
+    { "cmd": "+combat/join", "as": "Marcus", "label": "Marcus joins" },
+    { "cmd": "+combat/begin", "as": "admin", "label": "ST rolls initiative" },
+    { "expect": "Round 1" },
+
+    { "sub": "Surrender -- Marcus drops his guard" },
+    { "note": "Marcus declares surrender. While surrendered, attackers cannot target him without Storyteller approval." },
+    { "cmd": "+combat/surrender", "as": "Marcus", "label": "Marcus surrenders" },
+    { "note": "The +attack command refuses surrendered targets up front, regardless of turn order. Only Storyteller approval can override." },
+    { "cmd": "+attack Marcus", "label": "Jax tries to attack surrendered Marcus" },
+    { "expect": "surrender" },
+
+    { "sub": "Beaten Down Recovery -- gated by Willpower" },
+    { "note": "Recovery requires the Beaten Down flag; without it the command refuses." },
+    { "cmd": "+combat/recover", "label": "Jax tries recover" },
+    { "expect": "not Beaten Down" },
+
+    { "sub": "Suppressive Fire -- gated by autofire weapon" },
+    { "note": "Suppressive fire requires an autofire-capable firearm. Without one the command refuses." },
+    { "cmd": "+attack Marcus/suppress", "label": "Jax tries suppress (no firearm)" },
+
+    { "sub": "End" },
+    { "cmd": "+combat/end", "as": "admin", "label": "ST closes encounter" },
+    { "expect": "ended" },
+
+    { "reset": true }
+  ]
+}

@@ -50,7 +50,7 @@ templateEngine: [vto, md]
 <span class="cmd">deno install -A --global -n deno-x jsr:@dx/dx</span>
 <span class="cmd">deno x --install-alias</span>
 <span class="comment"># Initialize a new world</span>
-<span class="cmd">dx jsr:@ursamu/ursamu init</span></pre>
+<span class="cmd">dx jsr:@ursamu/mush init</span></pre>
   </div>
 </div>
 

@@ -76,8 +76,8 @@ u.emit.broadcast(here.id, `${en.name} waves hello!`);
 Everything in UrsaMU is extensible via plugins:
 
 ```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "jsr:@ursamu/mush";
+import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/mush";
 
 const myPlugin: IPlugin = {
   name: "my-game-plugin",
@@ -163,7 +163,7 @@ The WebSocket hub enforces **10 commands per second** per connection. Excess com
 | Web framework | Hono / Oak |
 | Database | dbojs (embedded, file-backed) |
 | Scripting | Web Workers (sandboxed ESM) |
-| Testing | `deno test` — 1141+ tests, 0 failures |
+| Testing | `deno test` — 1464 tests, 0 failures |
 | Docs | Lume (static site generator) |
 | CI | GitHub Actions |
 
@@ -185,7 +185,7 @@ The WebSocket hub enforces **10 commands per second** per connection. Excess com
 
 UrsaMU is at **v2.6.0** — production-ready since v2.0.0.
 
-- **Test suite**: 1141+ passing, 0 failing across 348 lint-clean files
+- **Test suite**: 1464 passing, 0 failing across 480 lint-clean files
 - **Core systems**: complete — 102 native commands, full TinyMUX 2.x softcode (250+ functions), sandbox, WebSocket, Telnet sidecar, Discord bridge, scenes, channels, zone system, format-handler pipeline, security hardening
 - **Plugin system**: atomic fail-fast installs with semver constraints and rollback (v2.6.0); typed `IPlugin` lifecycle and `gameHooks` declaration merging
 - **Stdlib (v2.5.1+)**: Noise, PRNG, physics, spatial, interpolation, vector primitives re-exported from `mod.ts`

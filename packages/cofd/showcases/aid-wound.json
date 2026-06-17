@@ -1,0 +1,91 @@
+{
+  "key": "aid-wound",
+  "title": "+aid -- wound penalty + first aid",
+  "description": "Marcus takes lethal damage to drop into the wound-penalty band, suffers a visible -2 dice penalty on a +roll, then Jax stabilises him with +aid (Dexterity + Medicine, lethal -> bashing).",
+  "vars": { "player": "Jax" },
+  "setup": {
+    "targets": {
+      "Jax": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "template": "mortal",
+            "concept": "Medic",
+            "virtue": "Hopeful",
+            "vice": "Stubborn",
+            "attributes": {
+              "strength": 2, "dexterity": 3, "stamina": 2,
+              "intelligence": 3, "wits": 3, "resolve": 2,
+              "presence": 2, "manipulation": 2, "composure": 2
+            },
+            "skills": { "medicine": 3, "athletics": 1, "brawl": 1 },
+            "specialties": {},
+            "merits": {},
+            "moralityValue": 7,
+            "powerStatValue": 0,
+            "energyCurrent": 0,
+            "customFields": {},
+            "powers": {},
+            "advantages": { "willpowerMax": 4, "willpowerCurrent": 4, "size": 5 },
+            "health": { "bashing": 0, "lethal": 0, "aggravated": 0 }
+          }
+        }
+      },
+      "Marcus": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "template": "mortal",
+            "concept": "Bystander",
+            "virtue": "Loyal",
+            "vice": "Reckless",
+            "attributes": {
+              "strength": 3, "dexterity": 2, "stamina": 2,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 2, "composure": 2
+            },
+            "skills": { "brawl": 2, "athletics": 2 },
+            "specialties": {},
+            "merits": {},
+            "moralityValue": 7,
+            "powerStatValue": 0,
+            "energyCurrent": 0,
+            "customFields": {},
+            "powers": {},
+            "advantages": { "willpowerMax": 4, "willpowerCurrent": 4, "size": 5 },
+            "health": { "bashing": 0, "lethal": 5, "aggravated": 0 }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Marcus Starts the Scene Wounded" },
+    { "note": "Marcus has stamina 2 + size 5 = 7 health boxes. He enters this scene already at 5 lethal -- damaged into the -2 wound band." },
+
+    { "sub": "Wound Penalty Visible on Marcus's Sheet" },
+    { "cmd": "+health Marcus", "label": "view Marcus's track" },
+    { "expect": "Wound Penalty" },
+
+    { "sub": "Wound Penalty Shown in ROLL DETAIL" },
+    { "note": "Marcus tries to flail back: Strength 3 + Brawl 2 - 2 wound = 3 dice. The Wound(-2) term prints in the terms list." },
+    { "cmd": "+roll Strength+Brawl", "as": "Marcus", "label": "Marcus rolls wounded" },
+    { "expect": "Wound(-2)" },
+
+    { "sub": "Jax Renders First Aid" },
+    { "note": "Pool: Dex 3 + Medicine 3 = 6 dice. Each success converts 1 lethal -> 1 bashing on Marcus." },
+    { "cmd": "+aid Marcus", "label": "Jax stabilises Marcus" },
+    { "expect": "AID" },
+
+    { "sub": "Inspect Marcus's Track After Aid" },
+    { "cmd": "+health Marcus", "label": "view post-aid track" },
+    { "expect": "Health" },
+
+    { "sub": "Scene-Cap Reset" },
+    { "note": "Once per scene per patient. A second +aid is refused until +aid/reset is run by staff (or the encounter ends)." },
+    { "cmd": "+aid/reset Marcus", "as": "admin", "label": "ST clears the aid lock for the next scene" },
+    { "expect": "cleared" },
+
+    { "reset": true }
+  ]
+}

@@ -13,7 +13,7 @@ import {
   inTreePluginIndexTs,
   standaloneShowcaseTs,
   gameClaude,
-} from "../src/cli/create-templates.ts";
+} from "../packages/cli/src/create-templates.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

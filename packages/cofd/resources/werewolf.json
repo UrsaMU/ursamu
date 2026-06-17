@@ -1,0 +1,411 @@
+{
+  "version": "wtf-2e-core",
+  "notes": {
+    "auspices": "Each auspice is tied to a moon phase and grants an Auspice Renown (marked at one dot at creation), a Hunter's Aspect, three Auspice Skills, and an auspice benefit. A character's auspice is fixed by the moon under which she had her First Change.",
+    "tribes": "Each tribe follows a Firstborn, grants a Tribal Renown (marked at one dot at creation), and offers three Shadow Gift affinities. Ghost Wolves are tribeless: no Firstborn, no Tribal Renown, no Gift affinities, and they begin play with one fewer Renown dot.",
+    "renown": "The five Renown are Cunning, Glory, Honor, Purity, and Wisdom. At creation a werewolf has three Renown dots (one auspice, one tribal, one free), but may not place a third dot in any single Renown at this stage. Ghost Wolves get two.",
+    "forms": "Every Uratha shifts between five forms, from fully human (Hishu) to fully wolf (Urhan). Form changes alter Attributes, Size, Health, Speed, Defense, and which Lunacy a werewolf inflicts.",
+    "gifts": "Gifts come in three kinds: Moon Gifts (one per auspice, facets bought in order and capped by auspice Renown), Shadow Gifts (granted by spirits; five facets, one per Renown), and Wolf Gifts (innate; always unlocked). A facet requires at least one dot in its associated Renown.",
+    "rites": "Rites are spiritual rituals divided into Wolf Rites (a lone werewolf may perform) and Pack Rites (require the whole pack). Rank is shown in dots (1-5). A character begins play with two dots of rites; one dot costs one Merit dot.",
+    "accuracy": "Gift, facet, and rite text is summarized for in-game listing. Consult Werewolf: The Forsaken 2e for full mechanical text, dice pools, and roll results before adjudicating an effect."
+  },
+  "auspices": [
+    {
+      "name": "Cahalith",
+      "moon": "Gibbous Moon",
+      "renown": "Glory",
+      "hunterAspect": "Monstrous",
+      "skills": ["Crafts", "Expression", "Persuasion"],
+      "benefit": "Prophetic Dreams. A Cahalith's sleep brings visions; the Storyteller may grant prophetic dreams, and following one grants a +3 modifier (or an automatic failure to be warned away) once per chapter.",
+      "description": "The visionary and lore-keeper, sworn to Glory. The Cahalith is the pack's storyteller, prophet, and living memory, and her hunts are loud, memorable, and inevitable."
+    },
+    {
+      "name": "Elodoth",
+      "moon": "Half Moon",
+      "renown": "Honor",
+      "hunterAspect": "Isolating",
+      "skills": ["Empathy", "Investigation", "Politics"],
+      "benefit": "Darkness Into Light. The Elodoth is a born arbiter, mediating between flesh and spirit and rendering binding judgments between feuding parties.",
+      "description": "The walker between worlds, sworn to Honor. The Elodoth judges disputes, brokers oaths, and stands at the border of the physical and the spiritual to keep the balance."
+    },
+    {
+      "name": "Irraka",
+      "moon": "New Moon",
+      "renown": "Cunning",
+      "hunterAspect": "Blissful",
+      "skills": ["Larceny", "Stealth", "Subterfuge"],
+      "benefit": "Closer Than You Thought. Under cover of darkness the Irraka strikes from where the prey least expects, the unseen knife at the hunt's edge.",
+      "description": "The stalker and trickster, sworn to Cunning. The Irraka scouts, infiltrates, and ambushes; the prey never knows she was there until it is far too late."
+    },
+    {
+      "name": "Ithaeur",
+      "moon": "Crescent Moon",
+      "renown": "Wisdom",
+      "hunterAspect": "Mystical",
+      "skills": ["Animal Ken", "Medicine", "Occult"],
+      "benefit": "Spirit Howl. The Ithaeur commands the respect of spirits, calling on the denizens of the Shadow and reading the symbolic truths buried in their hearts.",
+      "description": "The spirit-master and shaman, sworn to Wisdom. The Ithaeur deals with the Hisil, binds and bargains with spirits, and tends the pack's relationship with the world unseen."
+    },
+    {
+      "name": "Rahu",
+      "moon": "Full Moon",
+      "renown": "Purity",
+      "hunterAspect": "Dominant",
+      "skills": ["Brawl", "Intimidation", "Survival"],
+      "benefit": "Tenacious. Once engaged in battle the Rahu refuses to yield, shrugging off the penalties that would break a lesser hunter.",
+      "description": "The warrior and war-leader, sworn to Purity. The Rahu is the tip of the pack's spear, the Full Moon's chosen, born to dominate and destroy the prey."
+    }
+  ],
+  "tribes": [
+    {
+      "name": "Blood Talons",
+      "firstborn": "Suthar Anzuth, the Destroyer Wolf",
+      "renown": "Glory",
+      "gifts": ["Inspiration", "Rage", "Strength"],
+      "ban": "Honor the warrior's code: a Blood Talon exists for the kill and revels in the violent end of the hunt, refusing to let the People fall to weakness or wasted slaughter.",
+      "description": "The Suthar Anzuth are warriors who live for the kill. They study the art of violence, hunt other Uratha gone astray, and keep their packs from falling into Kuruth."
+    },
+    {
+      "name": "Bone Shadows",
+      "firstborn": "Kamduis-Ur, the Death Wolf",
+      "renown": "Wisdom",
+      "gifts": ["Death", "Elementals", "Insight"],
+      "ban": "Pay the spirits their due: the Hirfathra Hissu take to heart Father Wolf's duty to shepherd the Hisil, and never leave a debt to the dead or the spirit-courts unpaid.",
+      "description": "The Hirfathra Hissu are occultists and shepherds of the spirit world. They strike at the causes of imbalance between flesh and ephemera, and their hunt ranges into another world."
+    },
+    {
+      "name": "Hunters in Darkness",
+      "firstborn": "Hikaon-Ur, the Black Wolf",
+      "renown": "Purity",
+      "gifts": ["Nature", "Stealth", "Warding"],
+      "ban": "Hold the territory: the Meninna watch the edges of their land, treat their territory as sacred as the darkness in which they wrap themselves, and let nothing trespass unchallenged.",
+      "description": "The Meninna are guardians of place. They keep the boundaries of territory, ward the gates between worlds, and hunt anything that violates the land in their keeping."
+    },
+    {
+      "name": "Iron Masters",
+      "firstborn": "Sagrim-Ur",
+      "renown": "Cunning",
+      "gifts": ["Knowledge", "Shaping", "Technology"],
+      "ban": "Adapt and endure: the children of Sagrim-Ur are like water, flowing to fit the situation, and never cling to old ways when the hunt demands something new.",
+      "description": "The Iron Masters hunt in the modern world, masters of the city, the machine, and the changing tide. Versatility is their greatest weapon and adaptation their creed."
+    },
+    {
+      "name": "Storm Lords",
+      "firstborn": "Skolis-Ur, the Winter Wolf",
+      "renown": "Honor",
+      "gifts": ["Evasion", "Dominance", "Weather"],
+      "ban": "Show no weakness: the Storm Lords endure where others would give in and roll over, and never let another witness their frailty or failure.",
+      "description": "The Storm Lords are leaders and endurers. Their strength is in pushing on when all others would surrender, gathering in high places to test themselves against the storm."
+    },
+    {
+      "name": "Ghost Wolves",
+      "firstborn": "None",
+      "renown": "None",
+      "gifts": [],
+      "ban": "No tribal oath binds the tribeless, but the Oath of the Moon still holds: a Ghost Wolf who would join a tribe must earn its Firstborn's favor.",
+      "description": "The tribeless. Ghost Wolves swear to no Firstborn and claim no Tribal Renown. They are flexible and unbound, but begin play with one fewer Renown dot and only a single Shadow Gift."
+    }
+  ],
+  "renown": [
+    { "name": "Cunning", "auspice": "Irraka", "tribe": "Iron Masters", "description": "The Renown of cleverness, stealth, adaptation, and the unseen approach. Earned by outwitting the prey and surviving by guile." },
+    { "name": "Glory", "auspice": "Cahalith", "tribe": "Blood Talons", "description": "The Renown of legend, courage, and inspiration. Earned by deeds worthy of the songs the Cahalith will sing of them." },
+    { "name": "Honor", "auspice": "Elodoth", "tribe": "Storm Lords", "description": "The Renown of fairness, oaths, judgment, and self-command. Earned by keeping one's word and rendering true justice." },
+    { "name": "Purity", "auspice": "Rahu", "tribe": "Hunters in Darkness", "description": "The Renown of conviction, tradition, and the sanctity of territory. Earned by holding the line and never wavering from the hunt." },
+    { "name": "Wisdom", "auspice": "Ithaeur", "tribe": "Bone Shadows", "description": "The Renown of spirit-lore, balance, and insight. Earned by understanding the Hisil and keeping the scales of flesh and spirit level." }
+  ],
+  "forms": [
+    { "name": "Hishu", "label": "Human", "description": "The birth form, indistinguishable from a normal human. No combat bonuses, no Lunacy. The face the Uratha wears among people." },
+    { "name": "Dalu", "label": "Near-Human", "description": "The unsettling wolf-man: taller, broader, and feral. +1 Strength, +1 Stamina, +1 Size, +2 to intimidating Presence. Inflicts mild Lunacy." },
+    { "name": "Gauru", "label": "War-Form", "description": "The towering nine-foot killing machine. Massive Attribute boosts, lethal natural weapons, and regeneration. Inflicts full Lunacy and risks Death Rage; can be held only a few turns." },
+    { "name": "Urshul", "label": "Near-Wolf", "description": "The dire-wolf: a monstrous wolf the size of a horse. Fast, powerful, and deadly, with bite and claw. Inflicts Lunacy." },
+    { "name": "Urhan", "label": "Wolf", "description": "The true wolf form, indistinguishable from a large natural wolf. Swift, keen-scented, and able to pass unremarked among real wolves. No Lunacy." }
+  ],
+  "gifts": [
+    {
+      "name": "Crescent Moon's Gift",
+      "type": "moon",
+      "auspice": "Ithaeur",
+      "renownAffinity": "Wisdom",
+      "facets": [
+        { "name": "Shadow Gaze", "dots": 1, "renown": "Wisdom", "cost": "1 Essence", "dicePool": "Wits + Occult + Wisdom vs Resistance", "action": "Instant, may be Contested", "duration": "1 scene", "summary": "Forces a spirit to spill its secrets, learning its ban and bane, and adds Wisdom to Empathy with spirits and the Ridden." },
+        { "name": "Spirit Whispers", "dots": 2, "renown": "Wisdom", "cost": "1 Essence", "dicePool": "Presence + Persuasion + Wisdom", "action": "Instant", "duration": "—", "summary": "Stirs the sleeping spirit of a mundane object to answer a single short question about its immediate area." },
+        { "name": "Shadow Hunter", "dots": 3, "renown": "Wisdom", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "Full duration of Siskur-Dah", "summary": "On the Sacred Hunt, adds Wisdom to Perception, to resisting Numina and Dread Powers, and to chasing prey through the Shadow." },
+        { "name": "Shadow Masquerade", "dots": 4, "renown": "Wisdom", "cost": "2 Essence", "dicePool": "Manipulation + Occult + Wisdom vs Resistance", "action": "Instant", "duration": "1 hour per success", "summary": "Dons a spirit's Essence like a mask to pass among the denizens of the Shadow as one of their own." },
+        { "name": "Panopticon", "dots": 5, "renown": "Wisdom", "cost": "Essence equal to the spirit's max Rank", "dicePool": "Intelligence + Occult + Wisdom", "action": "Extended (10 successes, 1/minute)", "duration": "1 scene", "summary": "Leashes the denizens of the Shadow to serve as the Ithaeur's eyes and ears across her domain." }
+      ]
+    },
+    {
+      "name": "Full Moon's Gift",
+      "type": "moon",
+      "auspice": "Rahu",
+      "renownAffinity": "Purity",
+      "facets": [
+        { "name": "Killer Instinct", "dots": 1, "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "1 scene", "summary": "Brings the Rahu's deadly instincts to the fore, granting 8-again on Brawl and Weaponry pools." },
+        { "name": "Warrior's Hide", "dots": 2, "renown": "Purity", "cost": "—", "dicePool": "—", "action": "—", "duration": "Permanent", "summary": "Adds Purity Renown to Health, gaining a point of Health with each increase of Purity." },
+        { "name": "Bloody-Handed Hunter", "dots": 3, "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "Full duration of Siskur-Dah", "summary": "A blood-spattered Rahu adds Purity to attacks against anyone obstructing the hunt." },
+        { "name": "Butchery", "dots": 4, "renown": "Purity", "cost": "2 Essence", "dicePool": "Wits + Brawl + Purity", "action": "Reflexive", "duration": "1 turn per success", "summary": "Facing many foes, the Rahu paints the scene red, inflicting Tilts on his enemies." },
+        { "name": "Crimson Spasm", "dots": 5, "renown": "Purity", "cost": "1 Essence per turn", "dicePool": "Stamina + Survival + Purity", "action": "Instant", "duration": "—", "summary": "The full lunacy of the Moon warps the Rahu's flesh into a primal engine of destruction." }
+      ]
+    },
+    {
+      "name": "Gibbous Moon's Gift",
+      "type": "moon",
+      "auspice": "Cahalith",
+      "renownAffinity": "Glory",
+      "facets": [
+        { "name": "War Howl", "dots": 1, "renown": "Glory", "cost": "1 Essence", "dicePool": "Presence + Expression + Glory", "action": "Instant", "duration": "1 turn per success", "summary": "Howls defiance to spur the pack to greater heights of violence and fury." },
+        { "name": "Voice of Glory", "dots": 2, "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "The Cahalith's commanding voice holds audiences in thrall, adding Glory to Expression and Persuasion." },
+        { "name": "Dream Hunter", "dots": 3, "renown": "Glory", "cost": "1 Essence", "dicePool": "Manipulation + Empathy + Glory vs Composure + Primal Urge", "action": "Contested", "duration": "Full duration of Siskur-Dah", "summary": "Tracks sleeping prey through the moonlit dreamscape to come for them in their dreams." },
+        { "name": "Thousand-Throat Howl", "dots": 4, "renown": "Glory", "cost": "2 Essence", "dicePool": "Presence + Intimidate + Glory vs Resolve + Primal Urge", "action": "Contested", "duration": "—", "summary": "Howls with a thousand voices, throwing the prey into confusion and disarray." },
+        { "name": "End of Story", "dots": 5, "renown": "Glory", "cost": "3 Essence", "dicePool": "Presence + Persuasion + Glory vs Composure + Primal Urge", "action": "Contested", "duration": "1 day", "summary": "Names the doomed prey and relates its impending fate, sealing the story's end." }
+      ]
+    },
+    {
+      "name": "Half Moon's Gift",
+      "type": "moon",
+      "auspice": "Elodoth",
+      "renownAffinity": "Honor",
+      "facets": [
+        { "name": "Scent Beneath the Surface", "dots": 1, "renown": "Honor", "cost": "1 Essence", "dicePool": "Wits + Empathy + Honor vs Composure + Primal Urge", "action": "Contested", "duration": "1 scene", "summary": "Threshes truth from lies, sensing whether a character's words and actions are deceptive." },
+        { "name": "Binding Oath", "dots": 2, "renown": "Honor", "cost": "1 Essence", "dicePool": "Resolve + Persuasion + Honor vs Resolve + Primal Urge", "action": "Contested", "duration": "1 month", "summary": "Binds two consenting parties to a sworn oath, enforced with Essence." },
+        { "name": "Sly Hunter", "dots": 3, "renown": "Honor", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "Full duration of Siskur-Dah", "summary": "Hunts with a net of connections and favors, adding Honor to social pools used to ensnare prey." },
+        { "name": "Ties of Word and Promise", "dots": 4, "renown": "Honor", "cost": "1 Essence per Merit dot", "dicePool": "Manipulation + Persuasion + Honor", "action": "Extended (10 successes, 1/minute)", "duration": "1 day", "summary": "Draws on the Elodoth's web of promises to temporarily gain a social Merit." },
+        { "name": "Ties of Blood and Bone", "dots": 5, "renown": "Honor", "cost": "3 Essence", "dicePool": "Stamina + Empathy + Honor vs Stamina + Primal Urge", "action": "Instant, may be Contested", "duration": "—", "summary": "The Elodoth and a chosen packmate exchange places in a shiver of fleshy metamorphosis." }
+      ]
+    },
+    {
+      "name": "New Moon's Gift",
+      "type": "moon",
+      "auspice": "Irraka",
+      "renownAffinity": "Cunning",
+      "facets": [
+        { "name": "Eviscerate", "dots": 1, "renown": "Cunning", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "Turns an attack against an unaware or surprised opponent into a rote action." },
+        { "name": "Slip Away", "dots": 2, "renown": "Cunning", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "Leaves no memory of her passing, making the Irraka extremely hard to recall." },
+        { "name": "Relentless Hunter", "dots": 3, "renown": "Cunning", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "Full duration of Siskur-Dah", "summary": "However well the prey hides, the Irraka adds Cunning to the pools used to pursue them." },
+        { "name": "Divide and Conquer", "dots": 4, "renown": "Cunning", "cost": "1 Essence", "dicePool": "Manipulation + Subterfuge + Cunning vs Composure + Primal Urge", "action": "Contested", "duration": "—", "summary": "Pulls strong, numerous prey apart with lures and distractions to pick them off one by one." },
+        { "name": "Breach", "dots": 5, "renown": "Cunning", "cost": "3 Essence", "dicePool": "Wits + Stealth + Cunning", "action": "Instant", "duration": "—", "summary": "Slips across the Gauntlet like a shadow between worlds, with no need of a locus." }
+      ]
+    },
+    {
+      "name": "Gift of Death",
+      "type": "shadow",
+      "facets": [
+        { "name": "Cold Embrace", "renown": "Cunning", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "—", "summary": "Stills the heart and chills the flesh so the Uratha appears dead." },
+        { "name": "Bone Gnaw", "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "—", "summary": "Gnawing human or werewolf bone yields knowledge of the dead or a temporary dot in their highest Skill or Renown." },
+        { "name": "Eyes of the Dead", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "Wits + Occult + Wisdom", "action": "Instant", "duration": "—", "summary": "Reads the last moments of life reflected in the eyes of any remains that still have eyes." }
+      ]
+    },
+    {
+      "name": "Gift of Dominance",
+      "type": "shadow",
+      "facets": [
+        { "name": "Primal Allure", "renown": "Cunning", "cost": "1 Essence", "dicePool": "Manipulation + Subterfuge + Cunning vs Resolve + Primal Urge", "action": "Contested", "duration": "1 scene", "summary": "Predatory magnetism beguiles prey into following the Uratha's immediate desires." },
+        { "name": "Glorious Lunacy", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "1 scene", "summary": "Radiating Luna's might, inflicts the Awestruck Condition on all prey instead of another Lunacy Condition." },
+        { "name": "Lay Low the Challenger", "renown": "Honor", "cost": "1 Essence", "dicePool": "Presence + Intimidate + Honor vs Composure + Primal Urge", "action": "Reflexive and Contested", "duration": "—", "summary": "On a damaging Brawl or Weaponry hit, establishes dominance through blood and violence." },
+        { "name": "Snarl of the Predator", "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "—", "summary": "A snarled demand reduces the penalty for remaining Doors in a Social maneuver by Purity." },
+        { "name": "Lead the Lesser Pack", "renown": "Wisdom", "cost": "1 Essence per character", "dicePool": "—", "action": "Instant", "duration": "1 day", "summary": "Brings a willing outsider into the fold of the hunt as a packmate for one day." }
+      ]
+    },
+    {
+      "name": "Gift of the Elementals",
+      "type": "shadow",
+      "facets": [
+        { "name": "Breath of Air", "renown": "Cunning", "cost": "Varies", "dicePool": "Wits + Athletics + Cunning", "action": "—", "duration": "—", "summary": "Grants Influence (Air) equal to Cunning to command the howling, dancing winds." },
+        { "name": "Catastrophe", "renown": "Glory", "cost": "5 Essence per level of Influence used", "dicePool": "Presence + Survival + Glory", "action": "Extended (15 successes, 1/hour)", "duration": "—", "summary": "Augments another Elemental facet to call down cataclysmic destruction over a vast area." },
+        { "name": "Flesh of Earth", "renown": "Honor", "cost": "Varies", "dicePool": "Strength + Survival + Honor", "action": "—", "duration": "—", "summary": "Grants Influence (Earth) equal to Honor as rock and ground become extensions of the will." },
+        { "name": "Tongue of Flame", "renown": "Purity", "cost": "Varies", "dicePool": "Presence + Empathy + Purity", "action": "—", "duration": "—", "summary": "Grants Influence (Fire) equal to Purity as a fire-walker to whom the blaze bows." },
+        { "name": "Heart of Water", "renown": "Wisdom", "cost": "Varies", "dicePool": "Manipulation + Occult + Wisdom", "action": "—", "duration": "—", "summary": "Grants Influence (Water) equal to Wisdom to make water surge, strengthen, or recede." }
+      ]
+    },
+    {
+      "name": "Gift of Evasion",
+      "type": "shadow",
+      "facets": [
+        { "name": "Feet of Mist", "renown": "Cunning", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 hour", "summary": "Erases all trace of passing, foiling every attempt to track or locate the Uratha." },
+        { "name": "Fog of War", "renown": "Glory", "cost": "1 Essence", "dicePool": "Wits + Subterfuge + Glory vs Composure + Primal Urge", "action": "Reflexive and Contested", "duration": "—", "summary": "Amid chaos, causes a specific delivery — a bullet or package — to reach the wrong target." },
+        { "name": "Deny Everything", "renown": "Honor", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "Elevates evasiveness to an art, adding Honor to a single roll to resist a Social maneuver or Manipulation-based action." },
+        { "name": "Hit and Run", "renown": "Purity", "cost": "1 Essence", "dicePool": "Dexterity + Stealth + Purity vs Composure + Primal Urge", "action": "Reflexive", "duration": "—", "summary": "Interrupts an attack to disengage and move full Speed away, leaving prey in confusion." },
+        { "name": "Exit Strategy", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "Wits + Streetwise + Wisdom", "action": "Instant", "duration": "—", "summary": "Instantly maps every viable escape route and bolthole, and which apparent routes are false." }
+      ]
+    },
+    {
+      "name": "Gift of Insight",
+      "type": "shadow",
+      "facets": [
+        { "name": "Prey on Weakness", "renown": "Cunning", "cost": "1 Essence", "dicePool": "Presence + Empathy + Cunning vs Composure + Primal Urge", "action": "Instant", "duration": "—", "summary": "Reveals an observed target's frailties, Conditions, and emotional state for a +3 social bonus." },
+        { "name": "Read the World's Loom", "renown": "Glory", "cost": "5 Essence (3 in pack territory)", "dicePool": "Wits + Streetwise + Glory", "action": "Instant", "duration": "—", "summary": "Gleans insight into a chosen topic — threats, the supernatural, violence, or weather nearby." },
+        { "name": "Echo Dream", "renown": "Honor", "cost": "1 Essence", "dicePool": "Wits + Investigation + Honor", "action": "Instant", "duration": "—", "summary": "Touching an object or place, receives a symbolic vision of a potent past event lingering there." },
+        { "name": "Scent the Unnatural", "renown": "Purity", "cost": "1 Essence", "dicePool": "Wits + Occult + Purity", "action": "Instant", "duration": "—", "summary": "Smells supernatural creatures and active powers within 10 yards per dot of Purity." },
+        { "name": "One Step Ahead", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "—", "summary": "Perceiving the prey or its location, gains insight into its likely next moves in the hunt." }
+      ]
+    },
+    {
+      "name": "Gift of Inspiration",
+      "type": "shadow",
+      "facets": [
+        { "name": "Lunatic Inspiration", "renown": "Cunning", "cost": "1 Essence", "dicePool": "Manipulation + Empathy + Cunning vs Composure", "action": "Instant", "duration": "Until next full moon", "summary": "Infects a human or Wolf-Blooded with Moon-granted inspiration, driving them to create art that may carry Luna's message." },
+        { "name": "Fearless Hunter", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "Adds Glory to pools and to resisting fear and mind-influence; packmates who see her succeed resist too." },
+        { "name": "Pack Triumphs Together", "renown": "Honor", "cost": "1 Essence per packmate (min 1)", "dicePool": "—", "action": "Reflexive", "duration": "1 scene", "summary": "On Initiative, packmates raise their roll to the pack's highest, or gain 8-again on teamwork outside combat." },
+        { "name": "Unity", "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "—", "summary": "During a Social maneuver against a packmate, adds Purity to the Doors the prey must break through." },
+        { "name": "Still Small Voice", "renown": "Wisdom", "cost": "1 Essence per Uratha", "dicePool": "Presence + Persuasion + Wisdom vs Resolve + Primal Urge", "action": "Instant", "duration": "—", "summary": "Calming words drag any Wasu-Im who can hear her out of Death Rage and back to themselves." }
+      ]
+    },
+    {
+      "name": "Gift of Knowledge",
+      "type": "shadow",
+      "facets": [
+        { "name": "Needle", "renown": "Cunning", "cost": "1 Essence", "dicePool": "Manipulation + Subterfuge + Cunning vs Composure + Primal Urge", "action": "Contested", "duration": "1 month", "summary": "Causes the prey to lose a copy of targeted information and penalizes all attempts to rediscover it." },
+        { "name": "This Story Is True", "renown": "Glory", "cost": "2 Essence", "dicePool": "Presence + Academics + Glory", "action": "Instant", "duration": "1 hour per success", "summary": "A fitting story grants the Uratha or a packmate temporary dots in a single low-rated Skill." },
+        { "name": "Know Thy Prey", "renown": "Honor", "cost": "1 Essence", "dicePool": "Wits + Socialize + Honor", "action": "Instant", "duration": "—", "summary": "Reveals every name the prey is known by, plus Alternate Identity, Fame, and social Merits." },
+        { "name": "Lore of the Land", "renown": "Purity", "cost": "2 Essence", "dicePool": "Intelligence + Survival + Purity", "action": "Instant", "duration": "1 scene", "summary": "Reveals rites, resonance, and widespread effects on the territory, and nearby threats within the pack's land." },
+        { "name": "Sift the Sands", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "Intelligence + Academics + Wisdom", "action": "Extended (10 successes, 1/minute)", "duration": "—", "summary": "Sets spirits to find sought knowledge in a store of data and deliver it past any lock or encryption." }
+      ]
+    },
+    {
+      "name": "Gift of Nature",
+      "type": "shadow",
+      "facets": [
+        { "name": "Nature's Lure", "renown": "Cunning", "cost": "1 Essence", "dicePool": "Manipulation + Survival + Cunning vs Composure + Primal Urge", "action": "Instant", "duration": "1 scene", "summary": "Draws an isolated person or small group at the edge of wilderness into its clutches, inflicting the Lured Condition." },
+        { "name": "Black Earth, Red Hunger", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "Until next sunrise", "summary": "A few drops of blood erupt rampant vegetation across an area, consuming corpses and granting free regeneration when blood is spilled there." },
+        { "name": "Knotted Paths", "renown": "Honor", "cost": "1 Essence per prey", "dicePool": "Wits + Survival + Honor vs Composure + Primal Urge", "action": "Contested", "duration": "1 day", "summary": "Traps perceived prey within an area of wilderness so every path they flee down only leads back." },
+        { "name": "Pack Kin", "renown": "Purity", "cost": "1 Essence", "dicePool": "Presence + Animal Ken + Purity", "action": "Extended (5 successes, 30 min each)", "duration": "—", "summary": "Brings a tolerant predatory animal into the pack as a full and loyal packmate." },
+        { "name": "Beast Ride", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "Wits + Animal Ken + Wisdom − animal's Resolve", "action": "Instant", "duration": "—", "summary": "Rides the mind and senses of a single mammal, fish, bird, or reptile while the Uratha's body sleeps." }
+      ]
+    },
+    {
+      "name": "Gift of Rage",
+      "type": "shadow",
+      "facets": [
+        { "name": "Incite Fury", "renown": "Cunning", "cost": "2 Essence", "dicePool": "Manipulation + Subterfuge + Cunning vs Composure + Primal Urge", "action": "Instant", "duration": "—", "summary": "A supernaturally stinging snarl goads a target into Wasu-Im or the Berserk Condition." },
+        { "name": "Berserker's Might", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "Once per turn in Dalu, Gauru, or Urshul, reduces damage by Glory or heals one physical Tilt." },
+        { "name": "Perfected Rage", "renown": "Honor", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "On entering Gauru, adds Honor to the number of turns the form can be maintained." },
+        { "name": "Slaughterer", "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "On a Brawl hit in Gauru, adds Purity to the damage inflicted." },
+        { "name": "Raging Lunacy", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "1 scene", "summary": "On entering a Lunacy-inflicting form, inflicts the Berserk Condition instead of another Lunacy Condition." }
+      ]
+    },
+    {
+      "name": "Gift of Shaping",
+      "type": "shadow",
+      "facets": [
+        { "name": "Moldywarp", "renown": "Cunning", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "In Dalu, the hands become burrowing claws, granting tunneling Speed equal to Strength + Cunning." },
+        { "name": "Shield-Breaker", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "On a Brawl or Weaponry hit, grants the attack armor-piercing equal to Glory." },
+        { "name": "Entropy's Toll", "renown": "Honor", "cost": "1 Essence", "dicePool": "Presence + Expression + Honor", "action": "Instant", "duration": "—", "summary": "An audible howl of entropy deals two Structure damage per success, ignoring Durability." },
+        { "name": "Perfection of Form", "renown": "Purity", "cost": "1 Essence", "dicePool": "Wits + Crafts + Purity", "action": "Instant", "duration": "1 day or until used", "summary": "Hones a held tool, raising its equipment bonus by successes the next time it is used." },
+        { "name": "Sculpt", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "Intelligence + Crafts + Wisdom", "action": "Instant", "duration": "30 minutes", "summary": "Makes a touched object up to Wisdom in Size malleable as clay, to be twisted and reshaped." }
+      ]
+    },
+    {
+      "name": "Gift of Stealth",
+      "type": "shadow",
+      "facets": [
+        { "name": "Shadow Pelt", "renown": "Cunning", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "The shadows mask the hunter, treating Cunning-many Stealth rolls as rote actions." },
+        { "name": "Predator's Shadow", "renown": "Glory", "cost": "1 Essence per prey", "dicePool": "Presence + Intimidation + Glory vs Composure + Primal Urge", "action": "Instant", "duration": "—", "summary": "Instills dread, inflicting the Shadow Paranoia Condition on outrolled prey." },
+        { "name": "Pack Stalks the Prey", "renown": "Honor", "cost": "1 Essence per packmate", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "When the Uratha succeeds at Stealth but a packmate fails, the packmate succeeds instead." },
+        { "name": "The Hunter Waits", "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "While still and hidden, penalizes rolls to spot him by Purity and adds Purity to Initiative on a surprise attack." },
+        { "name": "Running Silent", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "Reduces falling damage and terrain penalties by Wisdom and allows Stealth even at full speed." }
+      ]
+    },
+    {
+      "name": "Gift of Strength",
+      "type": "shadow",
+      "facets": [
+        { "name": "Unchained", "renown": "Cunning", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "Tears free of any binding regardless of material and adds Cunning to grappling rolls." },
+        { "name": "Predator's Unmatched Pursuit", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "Multiplies jump distance by 1 + Glory, adds Glory to base Speed, and lets her double Speed for a turn." },
+        { "name": "Crushing Blow", "renown": "Honor", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "On a Brawl hit, penalizes the prey's Defense by Honor against the next attack from her or a packmate." },
+        { "name": "Primal Strength", "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "1 scene", "summary": "Adds Purity Renown to Strength for the duration." },
+        { "name": "Rending Claws", "renown": "Wisdom", "cost": "—", "dicePool": "—", "action": "—", "duration": "Permanent", "summary": "In Gauru or Urshul, ignores Wisdom-many Durability and deals extra Structure damage equal to Wisdom." }
+      ]
+    },
+    {
+      "name": "Gift of Technology",
+      "type": "shadow",
+      "facets": [
+        { "name": "Garble", "renown": "Cunning", "cost": "1 Essence", "dicePool": "Intelligence + Science + Cunning − Composure", "action": "Instant", "duration": "1 scene", "summary": "Turns a target's technology against them so it hinders rather than helps." },
+        { "name": "Unmake", "renown": "Glory", "cost": "1 Essence", "dicePool": "Wits + Crafts + Glory vs Resolve + Primal Urge", "action": "Instant, may be Contested", "duration": "—", "summary": "A snarled command condemns a device with moving parts (Size up to 5 × Glory) to disassemble itself." },
+        { "name": "Command Artifice", "renown": "Honor", "cost": "1 Essence", "dicePool": "Intelligence + Science + Honor", "action": "Instant", "duration": "—", "summary": "A whispered, Essence-laced command makes a single device obey a one-sentence order." },
+        { "name": "Shutdown", "renown": "Purity", "cost": "2 Essence", "dicePool": "Presence + Intimidate + Purity", "action": "Instant", "duration": "1 scene", "summary": "All lights, cameras, security, and phones in the area go dark, denying the prey technological sanctuary." },
+        { "name": "Iron Slave", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "Wits + Crafts + Wisdom", "action": "Instant", "duration": "1 scene", "summary": "Immerses the senses into a vehicle or large machine, perceiving through it and taking control." }
+      ]
+    },
+    {
+      "name": "Gift of Warding",
+      "type": "shadow",
+      "facets": [
+        { "name": "Maze Ward", "renown": "Cunning", "cost": "5 Essence", "dicePool": "—", "action": "Instant", "duration": "1 month", "summary": "Twists the geometry of a place so intruders are penalized by Cunning and end up back at the edge." },
+        { "name": "Ward the Wolf's Den", "renown": "Glory", "cost": "5 Essence", "dicePool": "—", "action": "Instant", "duration": "1 month", "summary": "Penalizes crossings of the Gauntlet and portals by Glory; the Uratha can force a Clash of Wills to close breaches." },
+        { "name": "All Doors Locked", "renown": "Honor", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "Senses and seals or opens every door, window, and entryway in a touched building or vehicle." },
+        { "name": "Predator's Claim", "renown": "Purity", "cost": "5 Essence", "dicePool": "—", "action": "Instant", "duration": "1 month", "summary": "Marks an area with Essence, raising the Uratha's honorary Spirit Rank by +2 for attacking spirits within it." },
+        { "name": "Boundary Ward", "renown": "Wisdom", "cost": "5 Essence", "dicePool": "—", "action": "Instant", "duration": "1 month", "summary": "Designates a type of being and alerts the Uratha whenever such a being crosses into the warded area." }
+      ]
+    },
+    {
+      "name": "Gift of Weather",
+      "type": "shadow",
+      "facets": [
+        { "name": "Cloak of Mist and Haze", "renown": "Cunning", "cost": "1 Essence", "dicePool": "Dexterity + Stealth + Cunning", "action": "Extended (5 successes, 1/minute)", "duration": "1 hour per success", "summary": "Howls up haze, mist, or sandstorm that penalizes Perception and ranged attacks by Cunning." },
+        { "name": "Heavens Unleashed", "renown": "Glory", "cost": "5 Essence", "dicePool": "Presence + Survival + Glory", "action": "Extended (10 successes, 1/minute)", "duration": "1 hour per success", "summary": "Summons a thunderstorm whose rain and lightning penalize Speed and Initiative by Glory." },
+        { "name": "Hunt Under Iron Skies", "renown": "Honor", "cost": "None", "dicePool": "—", "action": "—", "duration": "Permanent", "summary": "Reduces weather and environment penalties by Honor and ignores the Uratha's own Weather facets." },
+        { "name": "Grasp of Howling Winds", "renown": "Purity", "cost": "2 Essence", "dicePool": "Manipulation + Survival + Purity − Stamina", "action": "Instant", "duration": "1 turn per success", "summary": "A blast of Essence-laced wind penalizes a prey's Speed and Physical pools by Purity." },
+        { "name": "Hunt of Fire and Ice", "renown": "Wisdom", "cost": "5 Essence", "dicePool": "Intelligence + Occult + Wisdom", "action": "Extended (10 successes, 1/minute)", "duration": "1 hour per success", "summary": "Subjects an area up to Wisdom miles across to the Extreme Cold or Extreme Heat Environmental Tilt." }
+      ]
+    },
+    {
+      "name": "Gift of Change",
+      "type": "wolf",
+      "facets": [
+        { "name": "Skin Thief", "renown": "Cunning", "cost": "5 Essence", "dicePool": "—", "action": "Instant", "duration": "—", "summary": "In Hishu, skins a similar human or animal and dons the hide to become a perfect copy until shed." },
+        { "name": "Gaze of the Moon", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "—", "summary": "Subjects a human who sees his silver eyes to full Gauru-strength Lunacy, choosing the Condition." },
+        { "name": "Luna's Embrace", "renown": "Honor", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "—", "summary": "Changes sex in a biologically complete way until used again, appearing as a twin of the old self." },
+        { "name": "The Father's Form", "renown": "Purity", "cost": "None", "dicePool": "—", "action": "—", "duration": "—", "summary": "Shifts to Gauru outside combat without Kuruth, ending if he attacks or takes more than Purity in lethal." },
+        { "name": "Quicksilver Flesh", "renown": "Wisdom", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 scene", "summary": "Shifts part of the current form to another shape's single benefit, such as Honed Senses or Razor Talons." }
+      ]
+    },
+    {
+      "name": "Gift of Hunting",
+      "type": "wolf",
+      "facets": [
+        { "name": "Honed Senses", "renown": "Cunning", "cost": "None", "dicePool": "—", "action": "—", "duration": "Permanent", "summary": "Achieves an exceptional success on Perception rolls with three successes instead of five." },
+        { "name": "Cow the Prey", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "Spending Essence on the hunter's aspect makes its Condition Persistent; turning a hit into a dramatic failure grants the prey a Beat." },
+        { "name": "Beast Talker", "renown": "Honor", "cost": "None", "dicePool": "—", "action": "—", "duration": "Permanent", "summary": "Communicates with and understands any known animal and may run Social maneuvers against it." },
+        { "name": "Tireless Hunter", "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Instant", "duration": "1 day", "summary": "While on the hunt, ignores Purity-many penalties from fatigue and poor morale and Conditions blocking Willpower spends." },
+        { "name": "Impossible Spoor", "renown": "Wisdom", "cost": "None or 1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "Scene", "summary": "Adds two successes to every Tracking roll and can spend Essence to ignore an old or degraded trail." }
+      ]
+    },
+    {
+      "name": "Gift of Pack",
+      "type": "wolf",
+      "facets": [
+        { "name": "Reflected Facets", "renown": "Cunning", "cost": "+1 Essence", "dicePool": "—", "action": "—", "duration": "Special", "summary": "Spending extra Essence, uses Gifts against prey a packmate senses or transfers self-buffs to a packmate within Cunning miles." },
+        { "name": "Down the Prey", "renown": "Glory", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "On hitting an enemy a packmate has injured, applies a penalty, a Defense bonus, or the Knockdown Tilt." },
+        { "name": "Totem's Wrath", "renown": "Honor", "cost": "5 Essence", "dicePool": "Presence + Occult + Honor vs Power + Finesse + Resistance", "action": "Contested", "duration": "—", "summary": "Forces the pack totem into a raging materialized shell that fights as a werewolf until its Essence runs out." },
+        { "name": "Maw of Madness", "renown": "Purity", "cost": "1 Essence", "dicePool": "—", "action": "Reflexive", "duration": "—", "summary": "On a damaging bite against a living non-Uratha, inflicts the Moon Taint Condition." },
+        { "name": "Pack Awareness", "renown": "Wisdom", "cost": "None or 1 Essence", "dicePool": "—", "action": "—", "duration": "—", "summary": "Permanently senses each packmate's location and wellbeing within Wisdom miles; cannot be surprised by foes they see." }
+      ]
+    }
+  ],
+  "rites": [
+    { "name": "Chain Rage", "type": "wolf", "rank": 1, "cost": "—", "dicePool": "Stamina + Survival", "action": "Extended (10 successes, 1/minute)", "duration": "1 month", "summary": "Binds a focus to each participant that forestalls a werewolf's rage until the focus is broken or taken." },
+    { "name": "Messenger", "type": "wolf", "rank": 1, "cost": "—", "dicePool": "Strength + Brawl", "action": "Extended (10 successes, 1/5 minutes)", "duration": "—", "summary": "Sends Lunes to deliver a short spoken message instantly to any named werewolf anywhere in the world." },
+    { "name": "Bottle Spirit", "type": "wolf", "rank": 2, "cost": "—", "dicePool": "Intelligence + Occult", "action": "Extended (5 successes per spirit Rank, 1/10 minutes)", "duration": "—", "summary": "Turns a bottle into a container that draws in and binds the nearest spirit when opened." },
+    { "name": "Sacred Hunt", "type": "wolf", "rank": 2, "cost": "—", "dicePool": "Dexterity + Athletics", "action": "Extended (10 successes, 1/minute)", "duration": "—", "summary": "The Siskur-Dah: binds the pack as hunters of a chosen prey, granting the Siskur-Dah Condition and rights to its Essence." },
+    { "name": "Kindle Fury", "type": "wolf", "rank": 3, "cost": "—", "dicePool": "Presence + Expression", "action": "Extended (10 successes, 1/10 minutes)", "duration": "1 month", "summary": "Grants all participants the Destroyer Blood archetype, or doubles its Willpower gain if already held." },
+    { "name": "Shadowbind", "type": "wolf", "rank": 3, "cost": "—", "dicePool": "Intelligence + Science", "action": "Extended (10 successes, 1/minute); may be contested", "duration": "—", "summary": "Confines a spirit within a binding space so it cannot leave, cross the Gauntlet, or use Numina beyond it." },
+    { "name": "Fetish", "type": "wolf", "rank": 4, "cost": "1 Essence per fetish dot", "dicePool": "Strength + Crafts", "action": "Extended (20 successes, 1/minute)", "duration": "—", "summary": "Binds a spirit into a sacred receptacle to create a fetish." },
+    { "name": "Twilight Purge", "type": "wolf", "rank": 4, "cost": "3 Essence", "dicePool": "Wits + Science", "action": "Extended (5 successes, 1/minute)", "duration": "—", "summary": "Tears all Twilight creatures within 100 yards into the flesh world with the Stunned Tilt, barring re-entry for an hour." },
+    { "name": "Forge Alliance", "type": "wolf", "rank": 5, "cost": "1 Essence per pack joined", "dicePool": "Presence + Persuasion", "action": "Extended (10 successes, 1/minute)", "duration": "1 month", "summary": "Joins several packs into one alliance treated as a single pack for most supernatural effects." },
+    { "name": "Veil", "type": "wolf", "rank": 5, "cost": "5 Essence", "dicePool": "Presence + Occult", "action": "Extended (20 successes, 1/10 minutes)", "duration": "—", "summary": "Sends spirits to erase all recordings of a recent supernatural event, leaving human memories intact." },
+    { "name": "Urfarah's Bane", "type": "wolf", "rank": 5, "cost": "5 Essence", "dicePool": "Wits + Empathy", "action": "Extended (15 successes, 1/10 minutes)", "duration": "Until sunrise", "summary": "Enhances an Uratha's natural weapons to deal aggravated to other werewolves, at the cost of severing her pack-ties." },
+    { "name": "Banish", "type": "pack", "rank": 1, "cost": "—", "dicePool": "Manipulation + Subterfuge", "action": "Extended (5 successes, 1/minute); spirits contest", "duration": "—", "summary": "Casts a targeted spirit or out-of-place creature from one world into its appropriate realm." },
+    { "name": "Harness the Cycle", "type": "pack", "rank": 1, "cost": "—", "dicePool": "Presence + Socialize", "action": "Extended (10 successes, 1/half hour)", "duration": "—", "summary": "Draws Essence from the changing seasons, refilling pools and granting humans and Wolf-Blooded healing benefits." },
+    { "name": "Totemic Empowerment", "type": "pack", "rank": 1, "cost": "—", "dicePool": "Stamina + Medicine", "action": "Extended (10 successes, 1/minute)", "duration": "Until next sunrise", "summary": "Makes a pack member a vessel for the totem, granting its powers and Essence at the cost of a breaking point." },
+    { "name": "Hunting Ground", "type": "pack", "rank": 2, "cost": "—", "dicePool": "Strength + Occult", "action": "Extended (10 successes, 1/half hour)", "duration": "1 season", "summary": "Sanctifies the pack's territory, granting bonuses to chases, tracking, and social rolls against its inhabitants." },
+    { "name": "Moon's Mad Love", "type": "pack", "rank": 2, "cost": "—", "dicePool": "Presence + Academics", "action": "Extended (15 successes, 1/minute)", "duration": "1 month", "summary": "Invests Luna's presence into humans so they resist and remember through Lunacy, but risk Madness." },
+    { "name": "Wellspring", "type": "pack", "rank": 2, "cost": "—", "dicePool": "Dexterity + Occult", "action": "Extended (20 successes, 1/10 minutes)", "duration": "1 month", "summary": "Amplifies a locus so its Resonance pervades the territory, granting Influence but imposing a Ban on the pack." },
+    { "name": "Raiment of the Storm", "type": "pack", "rank": 3, "cost": "—", "dicePool": "Wits + Occult", "action": "Extended (15 successes, 1/minute)", "duration": "Until the storm ceases", "summary": "During a storm, grants armor, immunity to electricity, and bonuses against supernatural attacks." },
+    { "name": "Shadowcall", "type": "pack", "rank": 3, "cost": "—", "dicePool": "Intelligence + Computer", "action": "Extended (20 successes, 1/minute); may be contested", "duration": "—", "summary": "Summons a named or nearest desired spirit through ancient law to a prepared summoning spot." },
+    { "name": "Supplication", "type": "pack", "rank": 3, "cost": "—", "dicePool": "Presence + Crafts", "action": "Extended (10 successes, 1/half hour)", "duration": "1 season", "summary": "Offerings improve a spirit type's impression of the pack while imposing a Ban on the ritemaster." },
+    { "name": "Hidden Path", "type": "pack", "rank": 4, "cost": "—", "dicePool": "Wits + Survival", "action": "Extended (15 successes, 1/10 minutes)", "duration": "—", "summary": "Opens a path between Flesh and Shadow that lets the pack reach a destination in a tenth the normal time." },
+    { "name": "Expel", "type": "pack", "rank": 4, "cost": "—", "dicePool": "Presence + Intimidate", "action": "Extended (10 successes, 1/minute); contested", "duration": "—", "summary": "Lays the pack's claim on a possessed person or object to break a possessing spirit's hold." },
+    { "name": "Great Hunt", "type": "pack", "rank": 5, "cost": "—", "dicePool": "Presence + Occult", "action": "Extended (20 successes, 1/minute)", "duration": "Until next sunrise", "summary": "Empowers the pack's humans and Wolf-Blooded into Urhan form to hunt the pack's chosen prey." }
+  ]
+}

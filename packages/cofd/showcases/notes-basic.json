@@ -1,0 +1,87 @@
+{
+  "key": "notes-basic",
+  "title": "+notes -- character notes with public/private visibility",
+  "description": "Demonstrates +notes: list, view, add, edit, set visibility, delete. Includes a staff edit of another player's note via the <player>/<name> syntax and the private-note visibility filter.",
+  "vars": { "player": "Lyra" },
+  "setup": {
+    "targets": {
+      "Bob": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd_notes": {
+            "backstory": {
+              "name": "Backstory",
+              "text": "Bob was born in a quiet seaside town.",
+              "visibility": "public",
+              "createdAt": 1000,
+              "updatedAt": 1000,
+              "createdBy": "Bob"
+            },
+            "secret": {
+              "name": "Secret",
+              "text": "Bob is hiding a stolen relic in the floorboards.",
+              "visibility": "private",
+              "createdAt": 1000,
+              "updatedAt": 1000,
+              "createdBy": "Bob"
+            }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Empty List" },
+    { "note": "+notes with no arguments shows your own notes. Fresh characters start with none." },
+    { "cmd": "+notes", "label": "view own list (empty)" },
+    { "expect": "no notes" },
+
+    { "sub": "Add a Public Note" },
+    { "note": "+notes/add <name>=<text> creates a public note by default. Names are case-insensitive (stored under a slug)." },
+    { "cmd": "+notes/add Backstory=I trained as a thief in the old quarter before the Hollow took my eye.", "label": "add Backstory" },
+    { "expect": "added on Lyra" },
+
+    { "sub": "List Now Shows the Note" },
+    { "cmd": "+notes" },
+    { "expect": "Backstory" },
+
+    { "sub": "View One Note in Full" },
+    { "cmd": "+notes Lyra/Backstory", "label": "view by name" },
+    { "expect": "trained as a thief" },
+
+    { "sub": "Edit Replaces the Text" },
+    { "note": "/edit overwrites text but preserves visibility and creation metadata." },
+    { "cmd": "+notes/edit Backstory=Born in the old quarter; lost an eye to the Hollow at sixteen.", "label": "edit Backstory" },
+    { "expect": "updated on Lyra" },
+
+    { "sub": "Mark Private" },
+    { "note": "Private notes are visible only to the owner and staff (admin+ / wizard)." },
+    { "cmd": "+notes/priv Backstory=private", "label": "flip to private" },
+    { "expect": "now private" },
+
+    { "sub": "Delete" },
+    { "cmd": "+notes/del Backstory" },
+    { "expect": "Deleted note" },
+
+    { "sub": "Viewing Another Player's Notes -- Public Only" },
+    { "note": "Bob has a public Backstory and a private Secret. As a non-staff non-owner, Lyra sees only the public one." },
+    { "cmd": "+notes Bob",            "label": "Lyra views Bob's notes" },
+    { "expect": "Backstory" },
+    { "cmd": "+notes Bob/Secret",     "label": "Bob's private note is hidden" },
+    { "expect": "No such note" },
+
+    { "sub": "Staff Can See Private Notes" },
+    { "cmd": "+notes Bob/Secret", "as": "admin", "label": "admin reads Bob's secret" },
+    { "expect": "stolen relic" },
+
+    { "sub": "Staff Can Add Notes to Other Players" },
+    { "note": "+notes/add <player>/<name>=<text> writes onto another character. Requires canEdit (admin+ has it by default)." },
+    { "cmd": "+notes/add Bob/Sanction=Three days probation for unauthorised theft in the West Market.", "as": "admin", "label": "staff annotation" },
+    { "expect": "added on Bob" },
+
+    { "sub": "Length and Format Limits" },
+    { "note": "Names are <= 40 chars and alphanumeric + spaces/underscores/hyphens. Text is <= 8000 chars." },
+    { "cmd": "+notes/add Bad!Name=text", "label": "bad characters" },
+    { "expect": "letters, numbers" }
+  ]
+}

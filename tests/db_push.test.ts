@@ -8,8 +8,8 @@
  *   - handles concurrent pushes without lost updates (CAS)
  */
 import { assertEquals } from "@std/assert";
-import { DBO } from "../src/services/Database/database.ts";
-import type { IDBOBJ } from "../src/@types/IDBObj.ts";
+import { DBO } from "@ursamu/core";
+import type { IDBOBJ } from "@ursamu/mush";
 
 // Reuse the in-memory KV store from other db tests (patched at module level)
 const kv = await Deno.openKv(":memory:");

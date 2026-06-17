@@ -13,7 +13,7 @@
 
 import { describe, it } from "@std/testing/bdd";
 import { assertNotMatch } from "@std/assert";
-import { handleRequest } from "../src/app.ts";
+import { handleRequest } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

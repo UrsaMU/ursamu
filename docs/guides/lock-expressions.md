@@ -115,7 +115,7 @@ names (`flag`, `attr`, `type`, `is`, `holds`, `perm`) are protected and cannot
 be overwritten.
 
 ```typescript
-import { registerLockFunc } from "jsr:@ursamu/ursamu";
+import { registerLockFunc } from "jsr:@ursamu/mush";
 
 registerLockFunc("tribe", (enactor, _target, args) =>
   String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()

@@ -1,0 +1,247 @@
+{
+  "key": "combat-basic",
+  "title": "+combat -- mortal vs mortal brawl",
+  "description": "Two mortals with Str 3, Brawl 2, Athletics 2, Dex 2, Composure 2 enter a brawl. Demonstrates opening an encounter, joining, rolling initiative, attacking, and closing.",
+  "vars": {
+    "player": "Jax"
+  },
+  "setup": {
+    "targets": {
+      "Marcus": {
+        "flags": [
+          "player",
+          "connected"
+        ],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 3,
+              "dexterity": 2,
+              "stamina": 2,
+              "intelligence": 2,
+              "wits": 2,
+              "resolve": 2,
+              "presence": 2,
+              "manipulation": 2,
+              "composure": 2
+            },
+            "skills": {
+              "brawl": 2,
+              "athletics": 2
+            },
+            "health": {
+              "max": 7,
+              "bashing": 0,
+              "lethal": 0,
+              "aggravated": 0
+            },
+            "willpower": {
+              "max": 4,
+              "current": 4
+            }
+          }
+        }
+      }
+    },
+    "character": {
+      "flags": [
+        "player",
+        "connected"
+      ],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 3,
+            "dexterity": 2,
+            "stamina": 2,
+            "intelligence": 2,
+            "wits": 2,
+            "resolve": 2,
+            "presence": 2,
+            "manipulation": 2,
+            "composure": 2
+          },
+          "skills": {
+            "brawl": 2,
+            "athletics": 2
+          },
+          "health": {
+            "max": 7,
+            "bashing": 0,
+            "lethal": 0,
+            "aggravated": 0
+          },
+          "willpower": {
+            "max": 4,
+            "current": 4
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Open the Encounter"
+    },
+    {
+      "note": "The storyteller opens an encounter in the room. Any connected character can then join."
+    },
+    {
+      "cmd": "+combat/start",
+      "as": "admin",
+      "label": "ST opens encounter"
+    },
+    {
+      "expect": "encounter"
+    },
+    {
+      "sub": "Both Combatants Join"
+    },
+    {
+      "cmd": "+combat/join",
+      "label": "Jax joins"
+    },
+    {
+      "expect": "joined"
+    },
+    {
+      "cmd": "+combat/join",
+      "as": "Marcus",
+      "label": "Marcus joins"
+    },
+    {
+      "expect": "joined"
+    },
+    {
+      "sub": "Roll Initiative"
+    },
+    {
+      "note": "Initiative = 1d10 + Dexterity + Composure. Both combatants have Dex 2, Composure 2."
+    },
+    {
+      "cmd": "+combat/begin",
+      "as": "admin",
+      "label": "ST kicks off round 1"
+    },
+    {
+      "expect": "Round 1"
+    },
+    {
+      "sub": "Check Turn Order"
+    },
+    {
+      "cmd": "+combat/order",
+      "label": "view the initiative table"
+    },
+    {
+      "expect": "Jax"
+    },
+    {
+      "sub": "Round 1 -- First Combatant Attacks"
+    },
+    {
+      "note": "Pool: Strength 3 + Brawl 2 - Marcus Defense 2 = 3 dice. Successes + 0 weapon mod = bashing damage."
+    },
+    {
+      "cmd": "+attack Marcus",
+      "label": "Jax punches Marcus"
+    },
+    {
+      "expect": "attack"
+    },
+    {
+      "sub": "Advance Turn"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Jax's turn"
+    },
+    {
+      "expect": "turn"
+    },
+    {
+      "sub": "Round 1 -- Second Combatant Attacks"
+    },
+    {
+      "cmd": "+attack Jax",
+      "as": "Marcus",
+      "label": "Marcus punches Jax"
+    },
+    {
+      "expect": "attack"
+    },
+    {
+      "sub": "End of Round 1 -- Advance to Round 2"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Marcus's turn; round 2 begins"
+    },
+    {
+      "expect": "round"
+    },
+    {
+      "sub": "Check Health After Round 1"
+    },
+    {
+      "cmd": "+sheet",
+      "label": "Jax checks own health"
+    },
+    {
+      "expect": "Track:"
+    },
+    {
+      "sub": "Round 2 -- All-Out Attack"
+    },
+    {
+      "note": "+attack/allout grants +2 dice but Jax loses all Defense this turn."
+    },
+    {
+      "cmd": "+attack/allout Marcus",
+      "label": "Jax all-out attacks Marcus"
+    },
+    {
+      "expect": "attack"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end Jax's turn"
+    },
+    {
+      "expect": "turn"
+    },
+    {
+      "cmd": "+attack Jax",
+      "as": "Marcus",
+      "label": "Marcus attacks undefended Jax"
+    },
+    {
+      "expect": "attack"
+    },
+    {
+      "cmd": "+combat/next",
+      "as": "admin",
+      "label": "end round 2"
+    },
+    {
+      "expect": "round"
+    },
+    {
+      "sub": "Close the Encounter"
+    },
+    {
+      "cmd": "+combat/end",
+      "as": "admin",
+      "label": "ST ends the fight"
+    },
+    {
+      "expect": "ended"
+    },
+    {
+      "reset": true
+    }
+  ]
+}

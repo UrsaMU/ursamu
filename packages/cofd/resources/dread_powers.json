@@ -1,0 +1,110 @@
+[
+  {
+    "key": "telekinesis",
+    "label": "Telekinesis",
+    "kind": "dread",
+    "tierMin": "minor",
+    "cost": "1 Willpower",
+    "pool": "Power + Finesse vs Resistance",
+    "description": "Move objects at a distance with mind alone. Heft equals the rating in dots."
+  },
+  {
+    "key": "possession",
+    "label": "Possession",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "1 Willpower per scene",
+    "pool": "Power + Finesse - target Resolve",
+    "description": "Inhabit a mortal body and act as that character. Target keeps memories on success."
+  },
+  {
+    "key": "mortal-mask",
+    "label": "Mortal Mask",
+    "kind": "dread",
+    "tierMin": "minor",
+    "cost": "Free / reflexive",
+    "pool": "n/a",
+    "description": "The creature appears human to mundane senses. Defeated by Investigation versus Power + Finesse."
+  },
+  {
+    "key": "innocuous",
+    "label": "Innocuous",
+    "kind": "dread",
+    "tierMin": "minor",
+    "cost": "Free",
+    "pool": "Contested by Wits + Composure",
+    "description": "Witnesses overlook or rationalize the creature's presence until directly confronted."
+  },
+  {
+    "key": "mind-speech",
+    "label": "Mind Speech",
+    "kind": "numen",
+    "tierMin": "minor",
+    "cost": "1 Essence",
+    "pool": "Power + Finesse",
+    "description": "Project thoughts to one target within line of sight."
+  },
+  {
+    "key": "wall-crawl",
+    "label": "Wall Crawl",
+    "kind": "dread",
+    "tierMin": "minor",
+    "cost": "Free",
+    "pool": "n/a",
+    "description": "Move across vertical surfaces and ceilings at normal Speed."
+  },
+  {
+    "key": "regeneration",
+    "label": "Regeneration",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "1 Essence per box",
+    "pool": "Reflexive",
+    "description": "Heal one bashing or lethal box per turn. Aggravated requires the creature's bane."
+  },
+  {
+    "key": "frenzy",
+    "label": "Frenzy",
+    "kind": "dread",
+    "tierMin": "minor",
+    "cost": "Free / triggered",
+    "pool": "Resolve + Composure to resist",
+    "description": "Loss of control. +2 to attack pools, -2 Defense, attacks the nearest living thing."
+  },
+  {
+    "key": "materialize",
+    "label": "Materialize",
+    "kind": "numen",
+    "tierMin": "major",
+    "cost": "1 Essence per turn",
+    "pool": "Power + Finesse",
+    "description": "Ephemeral being takes physical form, vulnerable to mundane attacks while material."
+  },
+  {
+    "key": "phantasm",
+    "label": "Phantasm",
+    "kind": "numen",
+    "tierMin": "minor",
+    "cost": "1 Essence",
+    "pool": "Power + Finesse vs Composure + Resolve",
+    "description": "Create a vivid sensory illusion. Disbelief requires contested resolve."
+  },
+  {
+    "key": "dread-aura",
+    "label": "Dread Aura",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "1 Willpower",
+    "pool": "Power + Finesse vs Resolve + Composure",
+    "description": "All within sight gain the Shaken Condition for the scene."
+  },
+  {
+    "key": "awe",
+    "label": "Awe",
+    "kind": "numen",
+    "tierMin": "minor",
+    "cost": "1 Essence",
+    "pool": "Power + Finesse - Composure",
+    "description": "Witnesses are paralyzed with awe or terror for one turn."
+  }
+]

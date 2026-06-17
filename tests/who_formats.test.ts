@@ -6,14 +6,14 @@
  * Integration-style tests use the real dbojs + softcodeService.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
-import { execWho } from "../src/commands/social.ts";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
+import { execWho } from "@ursamu/mush";
 import {
   registerFormatHandler,
   unregisterFormatHandler,
   _clearFormatHandlers,
   type FormatHandler,
-} from "../src/utils/formatHandlers.ts";
+} from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const SLOW = { timeout: 15000 };
@@ -121,8 +121,9 @@ Deno.test("who: handler throw is swallowed; default rendering wins", OPTS, async
 
 // ── Integration tests (real softcode + dbojs) ─────────────────────────────
 
-const { dbojs, DBO } = await import("../src/services/Database/database.ts");
-const { createNativeSDK } = await import("../src/services/SDK/index.ts");
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
+const { createNativeSDK } = await import("@ursamu/mush");
 
 const ROOT = "0";
 const ACTOR = "910001";

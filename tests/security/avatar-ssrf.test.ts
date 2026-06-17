@@ -7,7 +7,7 @@ import { assertEquals } from "jsr:@std/assert@^1";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
-const SRC = new URL("../../src/commands/avatar.ts", import.meta.url);
+const SRC = new URL("../../packages/mush/src/verbs/avatar.ts", import.meta.url);
 
 Deno.test(
   "avatar fetch uses redirect:error to prevent redirect-based SSRF bypass",

@@ -3,16 +3,17 @@
  * format-handler registry.
  */
 import { assertEquals } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { createNativeSDK } from "../src/services/SDK/index.ts";
-import { resolveFormat } from "../src/utils/resolveFormat.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
+import { createNativeSDK } from "@ursamu/mush";
 import {
+  resolveFormat,
   _clearFormatHandlers,
   registerFormatTemplate,
   unregisterFormatHandler,
-} from "../src/utils/formatHandlers.ts";
-import { hydrate } from "../src/utils/evaluateLock.ts";
-import type { IDBObj, IUrsamuSDK } from "../src/@types/UrsamuSDK.ts";
+  hydrate,
+} from "@ursamu/mush";
+import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const SLOW = { timeout: 15000 };

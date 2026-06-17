@@ -8,7 +8,7 @@ import { assertEquals } from "jsr:@std/assert@^1";
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
 const WS_SRC = new URL(
-  "../../src/services/WebSocket/index.ts",
+  "../../packages/core/src/server/websocket.ts",
   import.meta.url,
 );
 

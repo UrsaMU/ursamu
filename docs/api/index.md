@@ -16,7 +16,7 @@ each section, see [Core API Reference](./core.md).
 // All public APIs
 import {
   addCmd, registerPluginRoute, mu, createObj, DBO, dbojs, gameHooks
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 
 // Types (zero runtime cost)
 import type {
@@ -24,7 +24,7 @@ import type {
   SayEvent, PoseEvent, PageEvent, MoveEvent, SessionEvent,
   ChannelMessageEvent, SceneCreatedEvent, ScenePoseEvent,
   SceneSetEvent, SceneTitleEvent, SceneClearEvent,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 ```
 
 Internal plugins may use direct paths:
@@ -52,8 +52,8 @@ See [Core API Reference](./core.md) for full type definitions.
 Registers one or more in-game commands at module-load time.
 
 ```typescript
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
+import { addCmd } from "jsr:@ursamu/mush";
+import type { IUrsamuSDK } from "jsr:@ursamu/mush";
 
 addCmd({
   name:    "+greet",
@@ -253,7 +253,7 @@ All namespaces on the `u` SDK object. Every method is `async` (returns a Promise
 Direct game-object database access (for plugins and startup code, not scripts).
 
 ```typescript
-import { dbojs } from "jsr:@ursamu/ursamu";
+import { dbojs } from "jsr:@ursamu/mush";
 
 const players = await dbojs.queryAll((o) => o.flags.has("player"));
 const room    = await dbojs.queryOne((o) => o.id === "1");
@@ -263,10 +263,10 @@ const room    = await dbojs.queryOne((o) => o.id === "1");
 
 ## DBO\<T\>
 
-Typed plugin-specific database collections backed by Deno KV.
+Typed plugin-specific database collections backed by TypeGraph / Postgres (PGlite) or Deno KV.
 
 ```typescript
-import { DBO } from "jsr:@ursamu/ursamu";
+import { DBO } from "jsr:@ursamu/mush";
 
 interface INote { id: string; playerId: string; text: string; date: number; }
 const notes = new DBO<INote>("myplugin.notes");
@@ -284,7 +284,7 @@ await notes.delete({ id: noteId });
 Typed event bus for the 12 built-in engine events.
 
 ```typescript
-import { gameHooks } from "jsr:@ursamu/ursamu";
+import { gameHooks } from "jsr:@ursamu/mush";
 
 const handler = ({ actorId, actorName }: SessionEvent) => { /* ... */ };
 gameHooks.on("player:login", handler);

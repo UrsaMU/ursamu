@@ -1,4 +1,5 @@
 # UrsaMU
+[![tdd-audit](https://img.shields.io/badge/tdd--audit-passing-brightgreen)](https://www.npmjs.com/package/@lhi/tdd-audit) <!-- tdd-audit-badge -->
 
 ![ursamu header](https://raw.githubusercontent.com/ursamu/ursamu/main/ursamu_github_banner.png)
 
@@ -8,9 +9,9 @@
 [![Deno](https://img.shields.io/badge/deno-2.x-black)](https://deno.land)
 
 A modern MUSH-like server in TypeScript/Deno. Full TinyMUX 2.x softcode
-engine, sandboxed scripting in Web Workers, plugin-first architecture,
-versioned REST API, and zero external database dependencies — Deno KV is
-the only persistence layer.
+versioned REST API, and zero external database dependencies — uses TypeGraph
+with PGlite (PostgreSQL running locally or in-memory) as the default database system,
+with Deno KV as a fallback option.
 
 ---
 
@@ -81,8 +82,9 @@ deno task start
   with the full `IUrsamuSDK`. A bad script cannot crash the server.
 - **Native command surface** — 102 built-in commands (admin, building,
   comms, channels, queries, status, auth) registered via `addCmd`.
-- **Zero external deps** — Deno KV is the only datastore. No Postgres,
-  Redis, or Mongo.
+- **Zero external database dependencies** — TypeGraph (built on Postgres/PGlite)
+  running locally or in-memory is the default datastore, with a fallback Deno KV adapter
+  available. No external database server setup required.
 - **Hot reload** — `@reload` swaps commands, config, scripts, and
   plugins without disconnecting players. `@reboot` and `@update` send
   `SIGUSR2` to the supervised parent for no-disconnect restarts; the
@@ -150,6 +152,27 @@ deno task start
 
 ## Architecture
 
+### Packages (monorepo)
+
+The engine is split into two first-class packages:
+
+| Package | JSR | Purpose |
+|---------|-----|---------|
+| `@ursamu/core` | `jsr:@ursamu/core` | Generic server infrastructure — transport, DB (TypeGraph/PGlite or Deno KV), plugin lifecycle, events |
+| `@ursamu/mush` | `jsr:@ursamu/mush` | MUSH world layer — `IDBObj`, flags, locks, softcode evaluator, `addCmd`, `IUrsamuSDK` |
+| `@ursamu/ursamu` | `jsr:@ursamu/ursamu` | Backwards-compat shim that re-exports everything from `@ursamu/mush` |
+
+**New projects** should import from `jsr:@ursamu/mush`. Existing plugins using
+`jsr:@ursamu/ursamu` continue to work without changes.
+
+```
+packages/
+├── core/    @ursamu/core — transport, DB, plugin loader, event bus
+└── mush/    @ursamu/mush — MUSH engine (world layer built on core)
+```
+
+### Source layout
+
 ```
 src/
 ├── @types/          TypeScript interfaces (IDBObj, IUrsamuSDK, IPlugin, …)
@@ -162,7 +185,7 @@ src/
 │   ├── broadcast/   send() / room broadcast
 │   ├── commands/    cmdParser — parse and dispatch
 │   ├── Config/      Config loader + cache
-│   ├── Database/    Deno KV wrapper (DBO, dbojs, events)
+│   ├── Database/    TypeGraph & Deno KV adapters (DBO, dbojs, events)
 │   ├── DBObjs/      Object CRUD (createObj, hydrate, Obj)
 │   ├── GameClock/   In-game calendar
 │   ├── Hooks/       gameHooks (player:login, say, move, …)
@@ -199,8 +222,9 @@ Player input
 
 ### Persistence
 
-Everything lives in Deno KV. Each plugin gets a namespaced `DBO<T>`
-instance keyed by `<plugin>.<collection>`.
+Everything lives in the database. Each plugin gets a namespaced `DBO<T>`
+instance keyed by `<plugin>.<collection>`. By default, UrsaMU uses `TypeGraphAdapter`
+(storing records inside a local/in-memory PGlite PostgreSQL database), with a fallback `DenoKvAdapter`.
 
 ```ts
 const notes = new DBO<Note>("myplugin.notes");
@@ -260,7 +284,7 @@ Run with `deno task <name>`.
 | `daemon` | Start both processes in background (managed restart loop). |
 | `stop` / `restart` / `status` | Daemon control. |
 | `logs` | Tail `logs/main.log` and `logs/telnet.log`. |
-| `test` | Run the full test suite (1141+ tests). |
+| `test` | Run the full test suite (1464+ tests). |
 | `test:coverage` | Run tests with LCOV coverage. |
 | `config` | Interactive configuration tool. |
 | `create` | Scaffold a new game project or plugin. |
@@ -344,8 +368,9 @@ src/plugins/my-feature/
 Minimal plugin:
 
 ```ts
-import type { IPlugin } from "jsr:@ursamu/ursamu";
-import { addCmd, gameHooks } from "jsr:@ursamu/ursamu";
+import type { IPlugin } from "jsr:@ursamu/mush";
+import { addCmd, gameHooks } from "jsr:@ursamu/mush";
+// Note: jsr:@ursamu/ursamu is a backwards-compat shim and still works.
 
 const onLogin = (e: { id: string }) => { /* … */ };
 
@@ -425,7 +450,7 @@ import {
   dist2d, dist3d, angle2d, bearing,
   vreflect, pointInAabb, rayAabb,
   fbm2, ridged2, perlin2, simplex2, worley2,
-} from "jsr:@ursamu/ursamu";
+} from "jsr:@ursamu/mush";
 
 const rng = new Rng(12345);             // per-instance seedable mulberry32
 const noise = new Noise(rng.next());    // per-instance Perlin/Simplex/Worley
@@ -449,7 +474,7 @@ The Compose stack mounts three volumes:
 
 ```yaml
 volumes:
-  - ./data:/app/data      # Deno KV database
+  - ./data:/app/data      # Database storage directory (TypeGraph/PGlite or Deno KV)
   - ./config:/app/config  # Game configuration
   - ./logs:/app/logs      # Server logs
 ```
@@ -521,7 +546,7 @@ deno test tests/ --allow-all --unstable-kv --no-check
 deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
 ```
 
-1141+ tests, 0 failures; 348 files lint-clean.
+1464 tests, 0 failures; 480 files lint-clean.
 
 ---
 

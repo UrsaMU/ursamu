@@ -1,0 +1,73 @@
+{
+  "key": "approval-flow",
+  "title": "+approve -- staff approves a submitted chargen sheet",
+  "description": "Demonstrates the staff-side approval path. The player is pre-seeded at chargen Stage 6 with a complete Mortal sheet; +cg/submit files a CGEN job, then admin runs +approve which copies the sheet to the live record, closes the job, and mails the player.",
+  "vars": { "player": "Hopeful" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd_cg": {
+          "stage": 6,
+          "isSubmitted": false,
+          "isApproved": false,
+          "sheet": {
+            "template": "mortal",
+            "concept": "Burned-out nurse seeking redemption",
+            "virtue": "Justice",
+            "vice": "Sloth",
+            "attributes": {
+              "strength": 2, "dexterity": 3, "stamina": 3,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 1, "composure": 2
+            },
+            "skills": {
+              "athletics": 2, "brawl": 0, "drive": 1, "firearms": 0, "larceny": 0,
+              "stealth": 0, "survival": 0, "weaponry": 0,
+              "academics": 3, "computer": 2, "crafts": 0, "investigation": 3,
+              "medicine": 3, "occult": 0, "politics": 0, "science": 2,
+              "animal_ken": 0, "empathy": 3, "expression": 0, "intimidation": 0,
+              "persuasion": 2, "socialize": 0, "streetwise": 0, "subterfuge": 2
+            },
+            "specialties": {
+              "investigation": ["Crime Scenes"],
+              "medicine": ["Emergency Care"]
+            },
+            "merits": {
+              "contacts": 2,
+              "resources": 2,
+              "trained observer": 1,
+              "holistic awareness": 1,
+              "fast reflexes": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Player Submits at Stage 6" },
+    { "note": "+cg/submit files a CGEN job in the jobs queue and stores the job number on the chargen state. The live sheet (state.cofd) is NOT created yet." },
+    { "cmd": "+cg/submit", "label": "submit for review" },
+    { "expect": "Submitted" },
+
+    { "sub": "Resubmit While Pending Is Refused" },
+    { "note": "Idempotency guard: a second /submit while the CGEN job is still 'new' or 'open' is refused so staff aren't spammed with duplicates." },
+    { "cmd": "+cg/submit", "label": "second submit refused" },
+    { "expect": "pending staff review" },
+
+    { "sub": "Staff Reviews and Approves" },
+    { "note": "+approve runs as admin: closes the CGEN job, copies the submitted sheet onto the live character record, mails the player, and announces success. Optional notes (after =) are surfaced in both the announcement and the mail." },
+    { "cmd": "+approve Hopeful=Welcome to the chronicle. Watch your touchstones.", "as": "admin", "label": "admin approves" },
+    { "expect": "Character Approved" },
+
+    { "sub": "Approval Refused When Nothing Is Pending" },
+    { "note": "After approval, the cofd_cg state is cleared and the job is closed; a second +approve has nothing to act on." },
+    { "cmd": "+approve Hopeful", "as": "admin", "label": "second approve refused" },
+    { "expect": "no submitted character pending approval" },
+
+    { "sub": "Live Sheet Is Now Active" },
+    { "note": "+sheet now renders the approved character. The concept, attributes, skills, and merits all carried over from the submission." },
+    { "cmd": "+sheet" },
+    { "expect": "Hopeful" }
+  ]
+}

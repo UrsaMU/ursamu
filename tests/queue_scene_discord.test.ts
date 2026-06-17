@@ -6,9 +6,10 @@
  *  - Scene router (CRUD, /locations, fail-closed lock)
  */
 import { assertEquals, assertExists } from "@std/assert";
-import { queue } from "../src/services/Queue/index.ts";
-import { sceneHandler } from "../src/routes/sceneRouter.ts";
-import { dbojs, scenes, DBO } from "../src/services/Database/database.ts";
+import { queue } from "@ursamu/core";
+import { sceneHandler } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
+import { dbojs, scenes } from "@ursamu/mush";
 import { hash } from "../deps.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

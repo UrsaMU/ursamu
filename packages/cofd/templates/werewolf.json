@@ -1,0 +1,21 @@
+{
+  "key": "werewolf",
+  "name": "Werewolf: The Forsaken",
+  "moralityName": "Harmony",
+  "powerStatName": "Primal Urge",
+  "energyName": "Essence",
+  "customFields": [
+    "auspice",
+    "tribe",
+    "blood",
+    "bone"
+  ],
+  "validPowers": [
+    "cunning",
+    "glory",
+    "honor",
+    "purity",
+    "wisdom"
+  ],
+  "energyMaxFormulaType": "standard"
+}

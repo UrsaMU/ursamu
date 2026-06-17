@@ -1,0 +1,3654 @@
+[
+  {
+    "key": "a shot rings out",
+    "name": "A Shot Rings Out",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "alternate identity",
+    "name": "Alternate Identity",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "always be closing",
+    "name": "Always Be Closing",
+    "category": "Social",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "ambidextrous",
+    "name": "Ambidextrous",
+    "category": "Physical",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "allies",
+    "name": "Allies",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "anonymity",
+    "name": "Anonymity",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "area of expertise",
+    "name": "Area of Expertise",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "resolve>=2"
+    ]
+  },
+  {
+    "key": "armored coffin",
+    "name": "Armored Coffin",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "automotive genius",
+    "name": "Automotive Genius",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "barfly",
+    "name": "Barfly",
+    "category": "Social",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "biokinesis",
+    "name": "Biokinesis",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=psychic"
+    ]
+  },
+  {
+    "key": "breaking point",
+    "name": "Breaking Point",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "cheap shot",
+    "name": "Cheap Shot",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "choke hold",
+    "name": "Choke Hold",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "clairvoyance",
+    "name": "Clairvoyance",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "template=psychic"
+    ]
+  },
+  {
+    "key": "closed book",
+    "name": "Closed Book",
+    "category": "Mental",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "common sense",
+    "name": "Common Sense",
+    "category": "Mental",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "compliance hold",
+    "name": "Compliance Hold",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "contacts",
+    "name": "Contacts",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "crack driver",
+    "name": "Crack Driver",
+    "category": "Physical",
+    "allowedDots": [
+      2,
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "cursed",
+    "name": "Cursed",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "danger sense",
+    "name": "Danger Sense",
+    "category": "Mental",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "defensive strike",
+    "name": "Defensive Strike",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "direction sense",
+    "name": "Direction Sense",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "duck and weave",
+    "name": "Duck and Weave",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "eidetic memory",
+    "name": "Eidetic Memory",
+    "category": "Mental",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "encyclopedic knowledge",
+    "name": "Encyclopedic Knowledge",
+    "category": "Mental",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": [
+      "intelligence>=3"
+    ]
+  },
+  {
+    "key": "expert traceur",
+    "name": "Expert Traceur",
+    "category": "Physical",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "eye for the strange",
+    "name": "Eye for the Strange",
+    "category": "Mental",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "resolve>=2",
+      "occult>=1"
+    ]
+  },
+  {
+    "key": "fame",
+    "name": "Fame",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "fast reflexes",
+    "name": "Fast Reflexes",
+    "category": "Physical",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "wits>=3|dexterity>=3"
+    ]
+  },
+  {
+    "key": "feint",
+    "name": "Feint",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "firing lines",
+    "name": "Firing Lines",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "fixer",
+    "name": "Fixer",
+    "category": "Social",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "fleet of foot",
+    "name": "Fleet of Foot",
+    "category": "Physical",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "athletics>=2"
+    ]
+  },
+  {
+    "key": "focused attack",
+    "name": "Focused Attack",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "freeflow",
+    "name": "Freeflow",
+    "category": "Fighting Style",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "ghost",
+    "name": "Ghost",
+    "category": "Social",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "giant",
+    "name": "Giant",
+    "category": "Physical",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "good time management",
+    "name": "Good Time Management",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "academics>=2|science>=2"
+    ]
+  },
+  {
+    "key": "greyhound",
+    "name": "Greyhound",
+    "category": "Physical",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "hard surfaces",
+    "name": "Hard Surfaces",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "hardy",
+    "name": "Hardy",
+    "category": "Physical",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "stamina>=3"
+    ]
+  },
+  {
+    "key": "hobbyist clique",
+    "name": "Hobbyist Clique",
+    "category": "Social",
+    "allowedDots": [
+      2
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "holistic awareness",
+    "name": "Holistic Awareness",
+    "category": "Physical",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "indomitable",
+    "name": "Indomitable",
+    "category": "Mental",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "resolve>=3"
+    ]
+  },
+  {
+    "key": "inspiring",
+    "name": "Inspiring",
+    "category": "Social",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "interdisciplinary specialty",
+    "name": "Interdisciplinary Specialty",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "investigative aide",
+    "name": "Investigative Aide",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "investigative prodigy",
+    "name": "Investigative Prodigy",
+    "category": "Mental",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "wits>=3",
+      "investigation>=2"
+    ]
+  },
+  {
+    "key": "iron guard",
+    "name": "Iron Guard",
+    "category": "Fighting Style",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "iron skin",
+    "name": "Iron Skin",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2,
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "iron stamina",
+    "name": "Iron Stamina",
+    "category": "Physical",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "stamina>=3|resolve>=3"
+    ]
+  },
+  {
+    "key": "iron stomach",
+    "name": "Iron Stomach",
+    "category": "Physical",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "stamina>=3"
+    ]
+  },
+  {
+    "key": "jargon",
+    "name": "Jargon",
+    "category": "Social",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "joint lock",
+    "name": "Joint Lock",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "joint strike",
+    "name": "Joint Strike",
+    "category": "Fighting Style",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "knocking the wind out",
+    "name": "Knocking the Wind Out",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "language",
+    "name": "Language",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "last-ditch effort",
+    "name": "Last-Ditch Effort",
+    "category": "Fighting Style",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "laying on hands",
+    "name": "Laying on Hands",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "template=psychic"
+    ]
+  },
+  {
+    "key": "library",
+    "name": "Library",
+    "category": "Mental",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "like a book",
+    "name": "Like a Book",
+    "category": "Social",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "like the breeze",
+    "name": "Like the Breeze",
+    "category": "Fighting Style",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "meditative mind",
+    "name": "Meditative Mind",
+    "category": "Mental",
+    "allowedDots": [
+      1,
+      2,
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "mentor",
+    "name": "Mentor",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "multilingual",
+    "name": "Multilingual",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "numbing touch",
+    "name": "Numbing Touch",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=psychic"
+    ]
+  },
+  {
+    "key": "omen sensitivity",
+    "name": "Omen Sensitivity",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "one-two punch",
+    "name": "One-Two Punch",
+    "category": "Fighting Style",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "parkour",
+    "name": "Parkour",
+    "category": "Physical",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "patient",
+    "name": "Patient",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "press the advantage",
+    "name": "Press the Advantage",
+    "category": "Fighting Style",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "professional training",
+    "name": "Professional Training",
+    "category": "Mental",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "psychokinesis",
+    "name": "Psychokinesis",
+    "category": "Supernatural",
+    "allowedDots": [
+      3,
+      5
+    ],
+    "prereqs": [
+      "template=psychic"
+    ]
+  },
+  {
+    "key": "pusher",
+    "name": "Pusher",
+    "category": "Social",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "quick draw",
+    "name": "Quick Draw",
+    "category": "Physical",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "rapidity",
+    "name": "Rapidity",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "redirect",
+    "name": "Redirect",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "relentless",
+    "name": "Relentless",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "rending",
+    "name": "Rending",
+    "category": "Fighting Style",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "resources",
+    "name": "Resources",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "safe place",
+    "name": "Safe Place",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "safehouse",
+    "name": "Safehouse",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "salting",
+    "name": "Salting",
+    "category": "Supernatural",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "secondary target",
+    "name": "Secondary Target",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "seizing the edge",
+    "name": "Seizing the Edge",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "shoot first",
+    "name": "Shoot First",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "sleight of hand",
+    "name": "Sleight of Hand",
+    "category": "Physical",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "small unit tactics",
+    "name": "Small Unit Tactics",
+    "category": "Social",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "small-framed",
+    "name": "Small-Framed",
+    "category": "Physical",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "spin doctor",
+    "name": "Spin Doctor",
+    "category": "Social",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "sprawl",
+    "name": "Sprawl",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "staff",
+    "name": "Staff",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "status",
+    "name": "Status",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": []
+  },
+  {
+    "key": "striking looks",
+    "name": "Striking Looks",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "strong back",
+    "name": "Strong Back",
+    "category": "Physical",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "strong lungs",
+    "name": "Strong Lungs",
+    "category": "Physical",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "stunt driver",
+    "name": "Stunt Driver",
+    "category": "Physical",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "studied style",
+    "name": "Studied Style",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "suppressive fire",
+    "name": "Suppressive Fire",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "sure strike",
+    "name": "Sure Strike",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "sympathetic",
+    "name": "Sympathetic",
+    "category": "Social",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "table turner",
+    "name": "Table Turner",
+    "category": "Social",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "takedown",
+    "name": "Takedown",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "telekinesis",
+    "name": "Telekinesis",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=psychic"
+    ]
+  },
+  {
+    "key": "the hand as weapon",
+    "name": "The Hand As Weapon",
+    "category": "Fighting Style",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "the nigerian scam",
+    "name": "The Nigerian Scam",
+    "category": "Social",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "the touch of death",
+    "name": "The Touch of Death",
+    "category": "Fighting Style",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "thief of fate",
+    "name": "Thief of Fate",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "threat range",
+    "name": "Threat Range",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "thrust",
+    "name": "Thrust",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "tolerance for biology",
+    "name": "Tolerance for Biology",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "resolve>=3"
+    ]
+  },
+  {
+    "key": "toxin resistance",
+    "name": "Toxin Resistance",
+    "category": "Physical",
+    "allowedDots": [
+      2,
+      4
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "trained observer",
+    "name": "Trained Observer",
+    "category": "Mental",
+    "allowedDots": [
+      1,
+      3
+    ],
+    "prereqs": [
+      "wits>=3|composure>=3"
+    ]
+  },
+  {
+    "key": "true friend",
+    "name": "True Friend",
+    "category": "Social",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "turnabout",
+    "name": "Turnabout",
+    "category": "Fighting Style",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "untouchable",
+    "name": "Untouchable",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "unseen sense",
+    "name": "Unseen Sense",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "template=mortal"
+    ]
+  },
+  {
+    "key": "weapon retention",
+    "name": "Weapon Retention",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "whirlwind strike",
+    "name": "Whirlwind Strike",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "vice-ridden",
+    "name": "Vice-Ridden",
+    "category": "Mental",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": []
+  },
+  {
+    "key": "fighting finesse",
+    "name": "Fighting Finesse",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "dexterity>=3",
+      "weaponry>=2"
+    ],
+    "source": "CofD core p.46"
+  },
+  {
+    "key": "smile through it",
+    "name": "Smile Through It",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "composure+resolve>=5"
+    ],
+    "source": "Hurt Locker p.16",
+    "tags": [
+      "integrity-by-attrition"
+    ]
+  },
+  {
+    "key": "choke it down",
+    "name": "Choke It Down",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "composure+resolve>=5"
+    ],
+    "source": "Hurt Locker p.16",
+    "tags": [
+      "integrity-by-attrition"
+    ]
+  },
+  {
+    "key": "organization size",
+    "name": "Organization Size",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [],
+    "source": "Hurt Locker p.30",
+    "tags": [
+      "violence-group"
+    ]
+  },
+  {
+    "key": "air of menace",
+    "name": "Air of Menace",
+    "category": "Social",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "intimidation>=2"
+    ],
+    "source": "Hurt Locker p.41"
+  },
+  {
+    "key": "body as weapon",
+    "name": "Body as Weapon",
+    "category": "Physical",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "stamina>=3",
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.41"
+  },
+  {
+    "key": "cohesive unit",
+    "name": "Cohesive Unit",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "presence>=3"
+    ],
+    "source": "Hurt Locker p.42"
+  },
+  {
+    "key": "defender",
+    "name": "Defender",
+    "category": "Mental",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [],
+    "source": "Hurt Locker p.42"
+  },
+  {
+    "key": "empath",
+    "name": "Empath",
+    "category": "Social",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "empathy>=2"
+    ],
+    "source": "Hurt Locker p.42"
+  },
+  {
+    "key": "object fetishism",
+    "name": "Object Fetishism",
+    "category": "Mental",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": [],
+    "source": "Hurt Locker p.42"
+  },
+  {
+    "key": "peacemaker",
+    "name": "Peacemaker",
+    "category": "Social",
+    "allowedDots": [
+      2,
+      3
+    ],
+    "prereqs": [
+      "wits>=3",
+      "empathy>=3"
+    ],
+    "source": "Hurt Locker p.42"
+  },
+  {
+    "key": "punch drunk",
+    "name": "Punch Drunk",
+    "category": "Physical",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "willpower>=6"
+    ],
+    "source": "Hurt Locker p.43"
+  },
+  {
+    "key": "scarred",
+    "name": "Scarred",
+    "category": "Mental",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "integrity<=5"
+    ],
+    "source": "Hurt Locker p.43"
+  },
+  {
+    "key": "support network",
+    "name": "Support Network",
+    "category": "Social",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": [
+      "merit:allies>=1|merit:mentor>=1|merit:retainer>=1|merit:true friend>=1|merit:empath>=2"
+    ],
+    "source": "Hurt Locker p.43"
+  },
+  {
+    "key": "survivalist",
+    "name": "Survivalist",
+    "category": "Physical",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "survival>=3",
+      "merit:iron stamina>=3"
+    ],
+    "source": "Hurt Locker p.43"
+  },
+  {
+    "key": "avoidance",
+    "name": "Avoidance",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "manipulation>=3",
+      "athletics>=2",
+      "stealth>=2"
+    ],
+    "source": "Hurt Locker p.46",
+    "tags": [
+      "fighting-style",
+      "Insignificance",
+      "Coattails",
+      "Whack-a-Mole",
+      "Play Dead"
+    ]
+  },
+  {
+    "key": "berserker",
+    "name": "Berserker",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "strength>=3",
+      "merit:iron stamina>=3"
+    ],
+    "source": "Hurt Locker p.46",
+    "tags": [
+      "fighting-style",
+      "The Red Mist",
+      "War Cry",
+      "Manic Brutality"
+    ]
+  },
+  {
+    "key": "bowmanship",
+    "name": "Bowmanship",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "dexterity>=3",
+      "firearms>=2",
+      "merit:trained observer>=1"
+    ],
+    "source": "Hurt Locker p.47",
+    "tags": [
+      "fighting-style",
+      "Arcing Fire",
+      "Bullseye",
+      "Out of Nowhere",
+      "Death from Above"
+    ]
+  },
+  {
+    "key": "boxing",
+    "name": "Boxing",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "strength>=2",
+      "dexterity>=2",
+      "stamina>=2",
+      "brawl>=2",
+      "athletics>=2"
+    ],
+    "source": "Hurt Locker p.47",
+    "tags": [
+      "fighting-style",
+      "Head Protection",
+      "Defensive Jab",
+      "Knockout Artist",
+      "Combination",
+      "Out for the Count"
+    ]
+  },
+  {
+    "key": "combat archery",
+    "name": "Combat Archery",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "strength>=3",
+      "athletics>=2",
+      "merit:quick draw>=1"
+    ],
+    "source": "Hurt Locker p.47",
+    "tags": [
+      "fighting-style",
+      "Rapid Nock",
+      "Reflex Aiming",
+      "Parthian Shot",
+      "Rain of Arrows",
+      "Trick Shot"
+    ]
+  },
+  {
+    "key": "chain weapons",
+    "name": "Chain Weapons",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2
+    ],
+    "prereqs": [
+      "strength>=3",
+      "dexterity>=3",
+      "athletics>=2",
+      "weaponry>=2"
+    ],
+    "source": "Hurt Locker p.48",
+    "tags": [
+      "fighting-style",
+      "Imposing Defense",
+      "Bring Down the House"
+    ]
+  },
+  {
+    "key": "falconry",
+    "name": "Falconry",
+    "category": "Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "wits>=3",
+      "animal ken>=3"
+    ],
+    "source": "Hurt Locker p.48",
+    "tags": [
+      "style",
+      "Predator's Vigil",
+      "Flyby",
+      "Retrieve Item",
+      "Rake the Eyes"
+    ]
+  },
+  {
+    "key": "grappling",
+    "name": "Grappling",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "stamina>=3",
+      "strength>=2",
+      "athletics>=2",
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.49",
+    "tags": [
+      "fighting-style",
+      "Standing Throw",
+      "Small Joint Manipulation",
+      "Ippon",
+      "Dynamic Guard",
+      "Lock Flow",
+      "Tap or Snap",
+      "Positional Dominance"
+    ]
+  },
+  {
+    "key": "k-9",
+    "name": "K-9",
+    "category": "Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "wits>=3",
+      "animal ken>=3"
+    ],
+    "source": "Hurt Locker p.49",
+    "tags": [
+      "style",
+      "Detection",
+      "Targeted Bite",
+      "Tactical Positioning",
+      "Takedown Bite"
+    ]
+  },
+  {
+    "key": "kino mutai",
+    "name": "Kino Mutai",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "dexterity>=2",
+      "resolve>=3",
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.49",
+    "tags": [
+      "fighting-style",
+      "Trained Bite",
+      "Ripping",
+      "Trained Gouge",
+      "Continuous Bite"
+    ]
+  },
+  {
+    "key": "martial arts",
+    "name": "Martial Arts",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "resolve>=3",
+      "dexterity>=3",
+      "athletics>=2",
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.50",
+    "tags": [
+      "fighting-style",
+      "Leg Kick",
+      "Cutting Elbow",
+      "Trapping",
+      "Inch Force",
+      "High Momentum Strike"
+    ]
+  },
+  {
+    "key": "mounted combat",
+    "name": "Mounted Combat",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "dexterity>=3",
+      "athletics>=2",
+      "animal ken>=2"
+    ],
+    "source": "Hurt Locker p.51",
+    "tags": [
+      "fighting-style",
+      "Steady Saddle",
+      "Fixed Charge",
+      "Skirmishing",
+      "Rearing Beast"
+    ]
+  },
+  {
+    "key": "powered projectile",
+    "name": "Powered Projectile",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "dexterity>=3",
+      "athletics>=2",
+      "firearms>=2"
+    ],
+    "source": "Hurt Locker p.51",
+    "tags": [
+      "fighting-style",
+      "Quick Reload",
+      "Intercept Shot",
+      "Penetration",
+      "Skewer"
+    ]
+  },
+  {
+    "key": "spear and bayonet",
+    "name": "Spear and Bayonet",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "strength>=3",
+      "dexterity>=2",
+      "weaponry>=2"
+    ],
+    "source": "Hurt Locker p.51",
+    "tags": [
+      "fighting-style",
+      "Firm Footing",
+      "Keep at Bay",
+      "Strike and Develop"
+    ]
+  },
+  {
+    "key": "staff fighting",
+    "name": "Staff Fighting",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "strength>=2",
+      "dexterity>=3",
+      "weaponry>=2"
+    ],
+    "source": "Hurt Locker p.51",
+    "tags": [
+      "fighting-style",
+      "Short Grip",
+      "Thwack Weapon",
+      "Vaulting Defense",
+      "Tornado Strike"
+    ]
+  },
+  {
+    "key": "strength performance",
+    "name": "Strength Performance",
+    "category": "Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "strength>=3",
+      "stamina>=2",
+      "athletics>=2"
+    ],
+    "source": "Hurt Locker p.52",
+    "tags": [
+      "style",
+      "Strength Tricks",
+      "Lifting",
+      "Push/Pull",
+      "Stronger Than You"
+    ]
+  },
+  {
+    "key": "systema",
+    "name": "Systema",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "dexterity>=3",
+      "athletics>=3",
+      "wits>=2"
+    ],
+    "source": "Hurt Locker p.52",
+    "tags": [
+      "fighting-style",
+      "Rolling",
+      "Balance",
+      "Combat Posture"
+    ]
+  },
+  {
+    "key": "thrown weapons",
+    "name": "Thrown Weapons",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2
+    ],
+    "prereqs": [
+      "dexterity>=3",
+      "athletics>=2",
+      "merit:quick draw>=1"
+    ],
+    "source": "Hurt Locker p.52",
+    "tags": [
+      "fighting-style",
+      "Practiced Toss",
+      "Impalement Arts"
+    ]
+  },
+  {
+    "key": "two weapon fighting",
+    "name": "Two Weapon Fighting",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "wits>=3",
+      "merit:fighting finesse>=2",
+      "weaponry>=3"
+    ],
+    "source": "Hurt Locker p.53",
+    "tags": [
+      "fighting-style",
+      "Balanced Grip",
+      "Protective Striking",
+      "Dual Swipe",
+      "Double Strike"
+    ]
+  },
+  {
+    "key": "weapon and shield",
+    "name": "Weapon and Shield",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "strength>=3",
+      "stamina>=3",
+      "weaponry>=2"
+    ],
+    "source": "Hurt Locker p.53",
+    "tags": [
+      "fighting-style",
+      "Shield Bash",
+      "Boar's Snout",
+      "Pin Weapon",
+      "Tortoise Shell"
+    ]
+  },
+  {
+    "key": "aggressive driving",
+    "name": "Aggressive Driving",
+    "category": "Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "resolve>=3",
+      "merit:fast reflexes>=3",
+      "drive>=3"
+    ],
+    "source": "Hurt Locker p.55",
+    "tags": [
+      "style",
+      "Powerslide",
+      "Bump and Run",
+      "J-turn",
+      "Swoop and Squat"
+    ]
+  },
+  {
+    "key": "drone control",
+    "name": "Drone Control",
+    "category": "Style",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "intelligence>=3",
+      "computer>=3",
+      "drive>=2"
+    ],
+    "source": "Hurt Locker p.55",
+    "tags": [
+      "style",
+      "Remote Immersion",
+      "Interface",
+      "Overclock"
+    ]
+  },
+  {
+    "key": "armed restraint",
+    "name": "Armed Restraint",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "merit:staff fighting>=3"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "boot party",
+    "name": "Boot Party",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "clinch strike",
+    "name": "Clinch Strike",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "covert operative",
+    "name": "Covert Operative",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "wits>=3",
+      "dexterity>=3",
+      "stealth>=2"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "ground and pound",
+    "name": "Ground and Pound",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "ground fighter",
+    "name": "Ground Fighter",
+    "category": "Fighting Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "wits>=3",
+      "dexterity>=3",
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "headbutt",
+    "name": "Headbutt",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "iron chin",
+    "name": "Iron Chin",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2,
+      4
+    ],
+    "prereqs": [
+      "resolve>=3",
+      "stamina>=3"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "phalanx fighter",
+    "name": "Phalanx Fighter",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "merit:weapon and shield>=2",
+      "merit:spear and bayonet>=1"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "transfer maneuver",
+    "name": "Transfer Maneuver",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "intelligence>=2",
+      "wits>=3"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "trunk squeeze",
+    "name": "Trunk Squeeze",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "retain weapon",
+    "name": "Retain Weapon",
+    "category": "Fighting Style",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "wits>=2",
+      "brawl>=2"
+    ],
+    "source": "Hurt Locker p.54"
+  },
+  {
+    "key": "roadkill",
+    "name": "Roadkill",
+    "category": "Style",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "merit:aggressive driving>=2"
+    ],
+    "source": "Hurt Locker p.55"
+  },
+  {
+    "key": "animal possession",
+    "name": "Animal Possession",
+    "category": "Supernatural",
+    "allowedDots": [
+      2,
+      4
+    ],
+    "prereqs": [
+      "animal ken>=3"
+    ],
+    "source": "Hurt Locker p.72"
+  },
+  {
+    "key": "apportation",
+    "name": "Apportation",
+    "category": "Supernatural",
+    "allowedDots": [
+      3,
+      5
+    ],
+    "prereqs": [
+      "template=psychic"
+    ],
+    "source": "Hurt Locker p.72"
+  },
+  {
+    "key": "assertive implement",
+    "name": "Assertive Implement",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "manipulation>=3",
+      "occult>=3",
+      "weaponry>=2|firearms>=2"
+    ],
+    "source": "Hurt Locker p.72"
+  },
+  {
+    "key": "biomimicry",
+    "name": "Biomimicry",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "merit:biokinesis>=1"
+    ],
+    "source": "Hurt Locker p.72"
+  },
+  {
+    "key": "bless amulet",
+    "name": "Bless Amulet",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "occult>=3"
+    ],
+    "source": "Hurt Locker p.72"
+  },
+  {
+    "key": "camera obscura",
+    "name": "Camera Obscura",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "merit:unseen sense>=2"
+    ],
+    "source": "Hurt Locker p.73"
+  },
+  {
+    "key": "consecrate weapon",
+    "name": "Consecrate Weapon",
+    "category": "Supernatural",
+    "allowedDots": [
+      4
+    ],
+    "prereqs": [
+      "resolve>=3",
+      "occult>=4"
+    ],
+    "source": "Hurt Locker p.73"
+  },
+  {
+    "key": "curse effigy",
+    "name": "Curse Effigy",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [],
+    "source": "Hurt Locker p.73"
+  },
+  {
+    "key": "dark passenger",
+    "name": "Dark Passenger",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [],
+    "source": "Hurt Locker p.73"
+  },
+  {
+    "key": "doppelganger",
+    "name": "Doppelganger",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "merit:biokinesis>=1",
+      "subterfuge>=3"
+    ],
+    "source": "Hurt Locker p.73"
+  },
+  {
+    "key": "evil eye",
+    "name": "Evil Eye",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [],
+    "source": "Hurt Locker p.73"
+  },
+  {
+    "key": "fated ferocity",
+    "name": "Fated Ferocity",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "merit:cursed>=2",
+      "stamina>=2",
+      "resolve>=3"
+    ],
+    "source": "Hurt Locker p.73",
+    "tags": [
+      "fighting-style",
+      "Bucket List",
+      "Die with Dignity",
+      "Limitless",
+      "Not Today",
+      "Don't Go Gently"
+    ]
+  },
+  {
+    "key": "hardened exorcist",
+    "name": "Hardened Exorcist",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [],
+    "source": "Hurt Locker p.74"
+  },
+  {
+    "key": "hidden variable",
+    "name": "Hidden Variable",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "merit:unseen sense>=2"
+    ],
+    "source": "Hurt Locker p.74"
+  },
+  {
+    "key": "incite ecosystem",
+    "name": "Incite Ecosystem",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "animal ken>=3"
+    ],
+    "source": "Hurt Locker p.74"
+  },
+  {
+    "key": "invoke spirit",
+    "name": "Invoke Spirit",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "resolve>=3",
+      "merit:medium>=3"
+    ],
+    "source": "Hurt Locker p.74"
+  },
+  {
+    "key": "mind control",
+    "name": "Mind Control",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "template=psychic"
+    ],
+    "source": "Hurt Locker p.74"
+  },
+  {
+    "key": "phantasmagoria",
+    "name": "Phantasmagoria",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "merit:telepathy>=5",
+      "expression>=2"
+    ],
+    "source": "Hurt Locker p.74"
+  },
+  {
+    "key": "psychic concealment",
+    "name": "Psychic Concealment",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "merit:mind control>=3",
+      "stealth>=3"
+    ],
+    "source": "Hurt Locker p.75"
+  },
+  {
+    "key": "psychic onslaught",
+    "name": "Psychic Onslaught",
+    "category": "Supernatural",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": [
+      "merit:telekinesis>=1|merit:psychokinesis>=3"
+    ],
+    "source": "Hurt Locker p.75"
+  },
+  {
+    "key": "psychic poltergeist",
+    "name": "Psychic Poltergeist",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "merit:telekinesis>=1"
+    ],
+    "source": "Hurt Locker p.75"
+  },
+  {
+    "key": "psychokinetic combat",
+    "name": "Psychokinetic Combat",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "merit:psychokinesis>=3"
+    ],
+    "source": "Hurt Locker p.76",
+    "tags": [
+      "fighting-style",
+      "Corona",
+      "Mind Over Matter",
+      "Trapped Potential",
+      "Imbue Weapon",
+      "Harvest Psyche"
+    ]
+  },
+  {
+    "key": "psychokinetic resistance",
+    "name": "Psychokinetic Resistance",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "merit:psychokinesis>=3"
+    ],
+    "source": "Hurt Locker p.76"
+  },
+  {
+    "key": "sacrificial offering",
+    "name": "Sacrificial Offering",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "occult>=3",
+      "merit:mystery cult initiation>=5"
+    ],
+    "source": "Hurt Locker p.76"
+  },
+  {
+    "key": "sojourner",
+    "name": "Sojourner",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "merit:apportation>=3"
+    ],
+    "source": "Hurt Locker p.76"
+  },
+  {
+    "key": "tactical telepathy",
+    "name": "Tactical Telepathy",
+    "category": "Fighting Style",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "merit:telepathy>=5"
+    ],
+    "source": "Hurt Locker p.76",
+    "tags": [
+      "fighting-style",
+      "Of One Mind",
+      "White Noise",
+      "Unison",
+      "Derail Thought",
+      "Shared Struggle"
+    ]
+  },
+  {
+    "key": "technopathy",
+    "name": "Technopathy",
+    "category": "Supernatural",
+    "allowedDots": [
+      2,
+      3
+    ],
+    "prereqs": [],
+    "source": "Hurt Locker p.76"
+  },
+  {
+    "key": "telekinetic evasion",
+    "name": "Telekinetic Evasion",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "merit:telekinesis>=1"
+    ],
+    "source": "Hurt Locker p.76"
+  },
+  {
+    "key": "vengeful soul",
+    "name": "Vengeful Soul",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [],
+    "source": "Hurt Locker p.76"
+  },
+  {
+    "key": "damn lucky",
+    "name": "Damn Lucky",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=atariya"
+    ],
+    "source": "Hurt Locker p.80",
+    "tags": [
+      "minor-template:atariya"
+    ]
+  },
+  {
+    "key": "mr lucky",
+    "name": "Mr. Lucky",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=atariya",
+      "merit:damn lucky>=1"
+    ],
+    "source": "Hurt Locker p.80",
+    "tags": [
+      "minor-template:atariya"
+    ]
+  },
+  {
+    "key": "nine lives",
+    "name": "Nine Lives",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=atariya",
+      "merit:damn lucky>=1"
+    ],
+    "source": "Hurt Locker p.80",
+    "tags": [
+      "minor-template:atariya"
+    ]
+  },
+  {
+    "key": "count down",
+    "name": "Count Down",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=atariya",
+      "merit:nine lives>=1"
+    ],
+    "source": "Hurt Locker p.80",
+    "tags": [
+      "minor-template:atariya"
+    ]
+  },
+  {
+    "key": "see the flow",
+    "name": "See the Flow",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=atariya",
+      "merit:damn lucky>=1"
+    ],
+    "source": "Hurt Locker p.81",
+    "tags": [
+      "minor-template:atariya"
+    ]
+  },
+  {
+    "key": "luck flows up",
+    "name": "Luck Flows Up",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "template=atariya",
+      "merit:damn lucky>=1"
+    ],
+    "source": "Hurt Locker p.81",
+    "tags": [
+      "minor-template:atariya"
+    ]
+  },
+  {
+    "key": "easy come easy go",
+    "name": "Easy Come, Easy Go",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=atariya",
+      "merit:damn lucky>=1"
+    ],
+    "source": "Hurt Locker p.81",
+    "tags": [
+      "minor-template:atariya"
+    ]
+  },
+  {
+    "key": "all-in",
+    "name": "All-In",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "template=atariya",
+      "resolve>=3",
+      "merit:damn lucky>=1"
+    ],
+    "source": "Hurt Locker p.81",
+    "tags": [
+      "minor-template:atariya"
+    ]
+  },
+  {
+    "key": "subliminal conditioning",
+    "name": "Subliminal Conditioning",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=dreamer"
+    ],
+    "source": "Hurt Locker p.83",
+    "tags": [
+      "minor-template:dreamer",
+      "Basic Control",
+      "Extended Awareness",
+      "Steady on Target",
+      "Between the Lines",
+      "New Parameters"
+    ]
+  },
+  {
+    "key": "a word from our sponsor",
+    "name": "A Word from Our Sponsor",
+    "category": "Supernatural",
+    "allowedDots": [
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=dreamer",
+      "merit:subliminal conditioning>=1"
+    ],
+    "source": "Hurt Locker p.84",
+    "tags": [
+      "minor-template:dreamer"
+    ]
+  },
+  {
+    "key": "realpolitik",
+    "name": "Realpolitik",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=dreamer",
+      "merit:subliminal conditioning>=1"
+    ],
+    "source": "Hurt Locker p.84",
+    "tags": [
+      "minor-template:dreamer"
+    ]
+  },
+  {
+    "key": "memory palace",
+    "name": "Memory Palace",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=dreamer",
+      "merit:subliminal conditioning>=1"
+    ],
+    "source": "Hurt Locker p.84",
+    "tags": [
+      "minor-template:dreamer"
+    ]
+  },
+  {
+    "key": "the treatment",
+    "name": "The Treatment",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=dreamer",
+      "merit:subliminal conditioning>=1"
+    ],
+    "source": "Hurt Locker p.84",
+    "tags": [
+      "minor-template:dreamer"
+    ]
+  },
+  {
+    "key": "not a bug but a feature",
+    "name": "Not A Bug But A Feature",
+    "category": "Supernatural",
+    "allowedDots": [
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=dreamer",
+      "merit:subliminal conditioning>=1",
+      "merit:the treatment>=1"
+    ],
+    "source": "Hurt Locker p.85",
+    "tags": [
+      "minor-template:dreamer"
+    ]
+  },
+  {
+    "key": "mephistopheles",
+    "name": "Mephistopheles",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "template=dreamer",
+      "merit:subliminal conditioning>=1"
+    ],
+    "source": "Hurt Locker p.85",
+    "tags": [
+      "minor-template:dreamer"
+    ]
+  },
+  {
+    "key": "deja vu",
+    "name": "Deja Vu",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=dreamer",
+      "merit:subliminal conditioning>=1"
+    ],
+    "source": "Hurt Locker p.85",
+    "tags": [
+      "minor-template:dreamer"
+    ]
+  },
+  {
+    "key": "field handler",
+    "name": "Field Handler",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": [
+      "template=dreamer",
+      "merit:subliminal conditioning>=1"
+    ],
+    "source": "Hurt Locker p.85",
+    "tags": [
+      "minor-template:dreamer",
+      "Pencil Pusher",
+      "Clock Watcher",
+      "Company Man",
+      "Bought Out",
+      "Friend Inside"
+    ]
+  },
+  {
+    "key": "infection",
+    "name": "Infection",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=infected"
+    ],
+    "source": "Hurt Locker p.88",
+    "tags": [
+      "minor-template:infected"
+    ]
+  },
+  {
+    "key": "carrier",
+    "name": "Carrier",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=infected"
+    ],
+    "source": "Hurt Locker p.88",
+    "tags": [
+      "minor-template:infected"
+    ]
+  },
+  {
+    "key": "bulletman syndrome",
+    "name": "Bulletman Syndrome",
+    "category": "Supernatural",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": [
+      "template=infected",
+      "merit:carrier>=1"
+    ],
+    "source": "Hurt Locker p.88",
+    "tags": [
+      "minor-template:infected"
+    ]
+  },
+  {
+    "key": "the new flesh",
+    "name": "The New Flesh",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      3,
+      5
+    ],
+    "prereqs": [
+      "template=infected",
+      "merit:carrier>=1"
+    ],
+    "source": "Hurt Locker p.89",
+    "tags": [
+      "minor-template:infected"
+    ]
+  },
+  {
+    "key": "patient zero",
+    "name": "Patient Zero",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "template=infected",
+      "merit:carrier>=1"
+    ],
+    "source": "Hurt Locker p.90",
+    "tags": [
+      "minor-template:infected"
+    ]
+  },
+  {
+    "key": "proud parent",
+    "name": "Proud Parent",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=infected",
+      "merit:carrier>=1"
+    ],
+    "source": "Hurt Locker p.90",
+    "tags": [
+      "minor-template:infected"
+    ]
+  },
+  {
+    "key": "bloodkin",
+    "name": "Bloodkin",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=infected",
+      "merit:carrier>=1"
+    ],
+    "source": "Hurt Locker p.90",
+    "tags": [
+      "minor-template:infected"
+    ]
+  },
+  {
+    "key": "virulent",
+    "name": "Virulent",
+    "category": "Supernatural",
+    "allowedDots": [
+      2,
+      3,
+      4
+    ],
+    "prereqs": [
+      "template=infected",
+      "merit:carrier>=1"
+    ],
+    "source": "Hurt Locker p.90",
+    "tags": [
+      "minor-template:infected"
+    ]
+  },
+  {
+    "key": "plain reader",
+    "name": "Plain Reader",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=plain"
+    ],
+    "source": "Hurt Locker p.92",
+    "tags": [
+      "minor-template:plain"
+    ]
+  },
+  {
+    "key": "you are being recorded",
+    "name": "You Are Being Recorded",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=plain",
+      "merit:plain reader>=1"
+    ],
+    "source": "Hurt Locker p.93",
+    "tags": [
+      "minor-template:plain"
+    ]
+  },
+  {
+    "key": "i'm bleeding on you",
+    "name": "I'm Bleeding on You",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=plain",
+      "merit:plain reader>=1"
+    ],
+    "source": "Hurt Locker p.93",
+    "tags": [
+      "minor-template:plain"
+    ]
+  },
+  {
+    "key": "most infected thing i've ever seen",
+    "name": "Most Infected Thing I've Ever Seen",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "template=plain",
+      "merit:plain reader>=1"
+    ],
+    "source": "Hurt Locker p.94",
+    "tags": [
+      "minor-template:plain"
+    ]
+  },
+  {
+    "key": "over before it started",
+    "name": "Over Before it Started",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=plain",
+      "merit:plain reader>=1"
+    ],
+    "source": "Hurt Locker p.94",
+    "tags": [
+      "minor-template:plain"
+    ]
+  },
+  {
+    "key": "phantom pain",
+    "name": "Phantom Pain",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=plain",
+      "merit:plain reader>=1",
+      "merit:i'm bleeding on you>=1"
+    ],
+    "source": "Hurt Locker p.94",
+    "tags": [
+      "minor-template:plain"
+    ]
+  },
+  {
+    "key": "the consequences of violence",
+    "name": "The Consequences of Violence",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=plain",
+      "merit:plain reader>=1"
+    ],
+    "source": "Hurt Locker p.94",
+    "tags": [
+      "minor-template:plain"
+    ]
+  },
+  {
+    "key": "the push",
+    "name": "The Push",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=plain",
+      "merit:plain reader>=1"
+    ],
+    "source": "Hurt Locker p.94",
+    "tags": [
+      "minor-template:plain"
+    ]
+  },
+  {
+    "key": "the protocol",
+    "name": "The Protocol",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=lost-boy"
+    ],
+    "source": "Hurt Locker p.96",
+    "tags": [
+      "minor-template:lost-boy",
+      "Mk 1",
+      "Mk 2",
+      "Mk 3",
+      "Mk 4",
+      "Mk 5"
+    ]
+  },
+  {
+    "key": "protocol fixer",
+    "name": "Protocol Fixer",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.97",
+    "tags": [
+      "minor-template:lost-boy"
+    ]
+  },
+  {
+    "key": "lost boys network status",
+    "name": "Lost Boys Network Status",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.97",
+    "tags": [
+      "minor-template:lost-boy"
+    ]
+  },
+  {
+    "key": "archangel system",
+    "name": "Archangel System",
+    "category": "Supernatural",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=5"
+    ],
+    "source": "Hurt Locker p.97",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "augmented resilience",
+    "name": "Augmented Resilience",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.98",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "augmented speed",
+    "name": "Augmented Speed",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.98",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "cloaking device",
+    "name": "Cloaking Device",
+    "category": "Supernatural",
+    "allowedDots": [
+      3
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=3"
+    ],
+    "source": "Hurt Locker p.99",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "holdout storage",
+    "name": "Holdout Storage",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.99",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "implanted interface",
+    "name": "Implanted Interface",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=2"
+    ],
+    "source": "Hurt Locker p.99",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "jumper",
+    "name": "Jumper",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.99",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "last-chance",
+    "name": "Last-Chance",
+    "category": "Supernatural",
+    "allowedDots": [
+      5
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=5"
+    ],
+    "source": "Hurt Locker p.99",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "pulse generator",
+    "name": "Pulse Generator",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.99",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "strength augmentation",
+    "name": "Strength Augmentation",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.100",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "sub-dermal armor",
+    "name": "Sub-Dermal Armor",
+    "category": "Supernatural",
+    "allowedDots": [
+      2,
+      4
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=2"
+    ],
+    "source": "Hurt Locker p.100",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "uncanny perception",
+    "name": "Uncanny Perception",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.100",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "voice box",
+    "name": "Voice Box",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=lost-boy",
+      "merit:the protocol>=1"
+    ],
+    "source": "Hurt Locker p.100",
+    "tags": [
+      "minor-template:lost-boy",
+      "augmentation"
+    ]
+  },
+  {
+    "key": "psychic vampirism",
+    "name": "Psychic Vampirism",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=psychic-vampire"
+    ],
+    "source": "Hurt Locker p.101",
+    "tags": [
+      "minor-template:psychic-vampire",
+      "Amateur",
+      "Dilettante",
+      "Practiced",
+      "Accomplished",
+      "Virtuoso"
+    ]
+  },
+  {
+    "key": "breath stealer",
+    "name": "Breath Stealer",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.103",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "burst of speed",
+    "name": "Burst of Speed",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.103",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "ephemeral battery",
+    "name": "Ephemeral Battery",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.103",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "euphoric touch",
+    "name": "Euphoric Touch",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.103",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "nocturnal supremacy",
+    "name": "Nocturnal Supremacy",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.103",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "psychic infection",
+    "name": "Psychic Infection",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.103",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "psychic seduction",
+    "name": "Psychic Seduction",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.104",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "psychic transference",
+    "name": "Psychic Transference",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.104",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "shapechanging",
+    "name": "Shapechanging",
+    "category": "Supernatural",
+    "allowedDots": [
+      2,
+      3
+    ],
+    "instanced": true,
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.104",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "soul eater",
+    "name": "Soul Eater",
+    "category": "Supernatural",
+    "allowedDots": [
+      2
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.104",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "unearthly beauty",
+    "name": "Unearthly Beauty",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2
+    ],
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.104",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  },
+  {
+    "key": "vampiric potency",
+    "name": "Vampiric Potency",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": [
+      "template=psychic-vampire",
+      "merit:psychic vampirism>=1"
+    ],
+    "source": "Hurt Locker p.104",
+    "tags": [
+      "minor-template:psychic-vampire"
+    ]
+  }
+]

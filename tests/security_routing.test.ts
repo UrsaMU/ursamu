@@ -6,8 +6,8 @@
  * after the corresponding fix is applied.
  */
 import { assertEquals } from "@std/assert";
-import { handleRequest } from "../src/app.ts";
-import { DBO } from "../src/services/Database/database.ts";
+import { handleRequest } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

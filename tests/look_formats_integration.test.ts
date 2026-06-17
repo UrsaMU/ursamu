@@ -5,12 +5,12 @@
  * %0 is the default rendered string passed in by execLook.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
-import { createNativeSDK } from "../src/services/SDK/index.ts";
-import { execLook } from "../src/commands/look.ts";
-import { hydrate } from "../src/utils/evaluateLock.ts";
-import { _clearFormatHandlers } from "../src/utils/formatHandlers.ts";
-import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
+import { createNativeSDK } from "@ursamu/mush";
+import { execLook } from "@ursamu/mush";
+import { hydrate, _clearFormatHandlers } from "@ursamu/mush";
+import type { IDBObj } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 const SLOW = { timeout: 15000 };
@@ -134,7 +134,7 @@ Deno.test("softcode: @exitformat — iter() over exit ids", { ...OPTS, ...SLOW }
 
 Deno.test("softcode: priority — @nameformat attr wins over plugin handler", { ...OPTS, ...SLOW }, async () => {
   const { registerFormatHandler, unregisterFormatHandler } = await import(
-    "../src/utils/formatHandlers.ts"
+    "@ursamu/mush"
   );
   await seed({ attrs: { NAMEFORMAT: "ATTR:%0" } });
   const handler = () => "HANDLER";
@@ -151,7 +151,7 @@ Deno.test("softcode: priority — @nameformat attr wins over plugin handler", { 
 
 Deno.test("softcode: priority — plugin handler runs when no attr set", { ...OPTS, ...SLOW }, async () => {
   const { registerFormatHandler, unregisterFormatHandler } = await import(
-    "../src/utils/formatHandlers.ts"
+    "@ursamu/mush"
   );
   await seed();
   const handler = (_u: unknown, _t: unknown, arg: string) => `PLUGIN[${arg}]`;

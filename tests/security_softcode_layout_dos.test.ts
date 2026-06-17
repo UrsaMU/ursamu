@@ -9,8 +9,9 @@
  * Fix: clamp width/count to a sane ceiling.
  */
 import { assertEquals } from "@std/assert";
-import { softcodeService } from "../src/services/Softcode/index.ts";
-import { dbojs, DBO } from "../src/services/Database/database.ts";
+import { runSoftcodeSimple } from "@ursamu/mush";
+import { DBO } from "@ursamu/core";
+import { dbojs } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false, timeout: 15000 };
 
@@ -28,7 +29,7 @@ async function seedActor() {
 }
 
 async function evalCode(code: string): Promise<string> {
-  return await softcodeService.runSoftcode(code, {
+  return await runSoftcodeSimple(code, {
     actorId:    ACTOR,
     executorId: ACTOR,
     args:       [],

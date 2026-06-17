@@ -1,0 +1,5 @@
+{
+  "mental": ["academics", "computer", "crafts", "investigation", "medicine", "occult", "politics", "science"],
+  "physical": ["athletics", "brawl", "drive", "firearms", "larceny", "stealth", "survival", "weaponry"],
+  "social": ["animal ken", "empathy", "expression", "intimidation", "persuasion", "socialize", "streetwise", "subterfuge"]
+}

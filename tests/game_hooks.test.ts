@@ -6,15 +6,15 @@
  * and emit with no handlers.
  */
 import { assertEquals } from "https://deno.land/std@0.220.0/assert/mod.ts";
-import {
-  gameHooks,
-  type SayEvent,
-  type PoseEvent,
-  type PageEvent,
-  type MoveEvent,
-  type SessionEvent,
-  type ChannelMessageEvent,
-} from "../src/services/Hooks/GameHooks.ts";
+import { gameHooks } from "@ursamu/mush";
+import type {
+  SayEvent,
+  PoseEvent,
+  PageEvent,
+  MoveEvent,
+  SessionEvent,
+  ChannelMessageEvent,
+} from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

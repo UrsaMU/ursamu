@@ -12,9 +12,9 @@ import {
   registerUIComponent,
   unregisterUIComponent,
   handleRequest,
-} from "../src/app.ts";
+} from "@ursamu/mush";
 
-import type { IUIComponent } from "../src/@types/IUIComponent.ts";
+import type { IUIComponent } from "@ursamu/mush";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

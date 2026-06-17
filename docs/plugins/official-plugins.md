@@ -61,7 +61,7 @@ Each `deps[]` entry may include an optional `version` semver range (e.g. `"^1.2.
 Or use the CLI:
 
 ```bash
-deno run -A jsr:@ursamu/ursamu/cli plugin install https://github.com/example/my-plugin
+deno run -A jsr:@ursamu/mush/cli plugin install https://github.com/example/my-plugin
 ```
 
 See [Building a Plugin](./first-plugin.md) to publish your own.

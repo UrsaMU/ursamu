@@ -6,15 +6,15 @@
  * covered by tests/look_formats_integration.test.ts (real worker).
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { IUrsamuSDK, IDBObj } from "../src/@types/UrsamuSDK.ts";
-import { execLook } from "../src/commands/look.ts";
+import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
+import { execLook } from "@ursamu/mush";
 import {
   registerFormatHandler,
   unregisterFormatHandler,
   _clearFormatHandlers,
   type FormatSlot,
   type FormatHandler,
-} from "../src/utils/formatHandlers.ts";
+} from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

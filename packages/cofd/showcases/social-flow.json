@@ -1,0 +1,144 @@
+{
+  "key": "social-flow",
+  "title": "+social -- Stacy maneuvers Erickson for the grimoire",
+  "description": "Demonstrates Social Maneuvering: opening a maneuver, raising impression, applying soft leverage (aspiration), attempting doors, applying hard leverage, and resolution.",
+  "vars": {
+    "player": "Stacy"
+  },
+  "setup": {
+    "targets": {
+      "Erickson": {
+        "flags": [
+          "player",
+          "connected"
+        ],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 2,
+              "dexterity": 2,
+              "stamina": 2,
+              "intelligence": 4,
+              "wits": 3,
+              "resolve": 3,
+              "presence": 2,
+              "manipulation": 2,
+              "composure": 4
+            },
+            "skills": {
+              "academics": 4,
+              "occult": 3
+            }
+          }
+        }
+      }
+    },
+    "character": {
+      "flags": [
+        "player",
+        "connected"
+      ],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 2,
+            "dexterity": 3,
+            "stamina": 2,
+            "intelligence": 4,
+            "wits": 3,
+            "resolve": 3,
+            "presence": 3,
+            "manipulation": 4,
+            "composure": 3
+          },
+          "skills": {
+            "academics": 3,
+            "occult": 3,
+            "persuasion": 3,
+            "expression": 2,
+            "subterfuge": 2
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Open the Maneuver"
+    },
+    {
+      "note": "Stacy declares her goal against Erickson (Resolve 3, Composure 4). Base doors = min(3,4) = 3."
+    },
+    {
+      "cmd": "+social/start Erickson=Loan me the grimoire",
+      "label": "Stacy opens the maneuver"
+    },
+    {
+      "expect": "Opened social maneuver"
+    },
+    {
+      "sub": "Raise Impression"
+    },
+    {
+      "note": "Stacy impresses Erickson with esoteric funerary rites at a conference. ST bumps impression to good."
+    },
+    {
+      "cmd": "+social/impression good for Erickson",
+      "as": "admin",
+      "label": "ST sets impression to good"
+    },
+    {
+      "expect": "good"
+    },
+    {
+      "sub": "Soft Leverage: Aspiration"
+    },
+    {
+      "note": "Stacy learns Erickson's Aspiration -- become a respected academic -- and offers to help. One door opens automatically."
+    },
+    {
+      "cmd": "+social/soft aspiration=Help him achieve academic glory for Erickson",
+      "label": "Stacy applies soft leverage"
+    },
+    {
+      "expect": "door"
+    },
+    {
+      "sub": "Open the Next Door"
+    },
+    {
+      "note": "Stacy makes a Manipulation+Persuasion roll vs Erickson's Composure. Outcome varies by dice."
+    },
+    {
+      "cmd": "+social/door Pitch the grimoire request for Erickson",
+      "label": "Stacy rolls to open a door"
+    },
+    {
+      "sub": "Status Panel"
+    },
+    {
+      "cmd": "+social/status Erickson",
+      "label": "Inspect the maneuver"
+    },
+    {
+      "expect": "Doors"
+    },
+    {
+      "sub": "Force the Doors"
+    },
+    {
+      "note": "Stacy gets impatient and forces the remaining doors. High risk: on failure, Erickson becomes immune."
+    },
+    {
+      "cmd": "+social/force for Erickson",
+      "label": "Stacy forces it"
+    },
+    {
+      "sub": "Close Out"
+    },
+    {
+      "cmd": "+social/list",
+      "label": "List active maneuvers"
+    }
+  ]
+}

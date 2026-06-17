@@ -11,11 +11,39 @@
  * service layer triggers an async CmdParser file-read at module init time.
  */
 import { assertEquals } from "@std/assert";
-import { checkFlags } from "../src/utils/checkFlags.ts";
-import { isAdmin } from "../src/utils/isAdmin.ts";
-import { canEdit } from "../src/utils/canEdit.ts";
-import { displayName } from "../src/utils/displayName.ts";
-import type { IDBOBJ } from "../src/@types/IDBObj.ts";
+import { flags as _flags } from "@ursamu/mush";
+import type { IDBOBJ } from "@ursamu/mush";
+
+const checkFlags = (tar: { flags: string }, flgs: string): boolean =>
+  _flags.check(tar.flags, flgs);
+
+const isAdmin = (en: IDBOBJ): boolean => /wizard|admin|superuser|storyteller/i.test(en.flags);
+
+const canEdit = async (en: IDBOBJ, tar: IDBOBJ): Promise<boolean> => {
+  await Promise.resolve();
+  if (!en || !tar) return false;
+  if (/superuser/i.test(en.flags)) return true;
+  if (/admin|wizard/i.test(en.flags)) return true;
+  const owner = tar.data?.owner as string | undefined;
+  if (owner && owner === en.id) return true;
+  return en.id === tar.id;
+};
+
+const moniker = (obj: IDBOBJ): string => String(obj.data?.moniker || obj.data?.name || obj.id);
+
+const displayName = (en: IDBOBJ, tar: IDBOBJ, controls = false): string => {
+  if (
+    controls ||
+    en.flags.includes("superuser") ||
+    en.flags.includes("admin") ||
+    en.id === tar.id ||
+    String(tar.data?.owner || "").replace(/^#/, "") === String(en.id).replace(/^#/, "")
+  ) {
+    return `${moniker(tar)}(#${tar.id}${_flags.codes(tar.flags).toUpperCase()})`;
+  }
+  return moniker(tar);
+};
+
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

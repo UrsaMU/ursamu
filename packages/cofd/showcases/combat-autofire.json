@@ -1,0 +1,126 @@
+{
+  "key": "combat-autofire",
+  "title": "+attack autofire -- burst modes and reload",
+  "description": "Demonstrates short burst (+1 pool, one target), medium burst (+2 pool, up to three targets), and reloading. One player with a pistol and SMG, two targets.",
+  "vars": { "player": "Jax" },
+  "setup": {
+    "character": {
+      "flags": ["player", "connected"],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 2,
+            "dexterity": 3,
+            "stamina": 2,
+            "intelligence": 2,
+            "wits": 2,
+            "resolve": 2,
+            "presence": 2,
+            "manipulation": 2,
+            "composure": 2
+          },
+          "skills": {
+            "firearms": 3,
+            "athletics": 2
+          },
+          "health": { "max": 7, "bashing": 0, "lethal": 0, "aggravated": 0 },
+          "willpower": { "max": 4, "current": 4 }
+        }
+      }
+    },
+    "targets": {
+      "Marcus": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 2,
+              "dexterity": 2,
+              "stamina": 2,
+              "intelligence": 2,
+              "wits": 2,
+              "resolve": 2,
+              "presence": 2,
+              "manipulation": 2,
+              "composure": 2
+            },
+            "skills": { "brawl": 2 },
+            "health": { "max": 7, "bashing": 0, "lethal": 0, "aggravated": 0 },
+            "willpower": { "max": 4, "current": 4 }
+          }
+        }
+      },
+      "Cass": {
+        "flags": ["player", "connected"],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 2,
+              "dexterity": 2,
+              "stamina": 2,
+              "intelligence": 2,
+              "wits": 2,
+              "resolve": 2,
+              "presence": 2,
+              "manipulation": 2,
+              "composure": 2
+            },
+            "skills": { "brawl": 2 },
+            "health": { "max": 7, "bashing": 0, "lethal": 0, "aggravated": 0 },
+            "willpower": { "max": 4, "current": 4 }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Equip Jax with an SMG and Spare Magazine" },
+    { "note": "An SMG (HK MP-5, 31-round clip) is required for autofire bursts. A spare 9mm magazine is needed to reload after the bursts drain the chamber." },
+    { "cmd": "+gear/add smg-large", "label": "buy SMG" },
+    { "cmd": "+gear/add magazine-9mm-light", "label": "buy spare mag" },
+    { "cmd": "+gear/equip 1", "label": "wield SMG" },
+
+    { "sub": "Setup: Open and Join" },
+    { "cmd": "+combat/start", "as": "admin", "label": "open encounter" },
+    { "expect": "encounter" },
+    { "cmd": "+combat/join", "label": "Jax joins" },
+    { "expect": "joined" },
+    { "cmd": "+combat/join", "as": "Marcus", "label": "Marcus joins" },
+    { "expect": "joined" },
+    { "cmd": "+combat/join", "as": "Cass", "label": "Cass joins" },
+    { "expect": "joined" },
+    { "cmd": "+combat/begin", "as": "admin", "label": "roll initiative" },
+    { "expect": "Round 1" },
+    { "cmd": "+combat/order", "label": "review turn order" },
+    { "expect": "Jax" },
+
+    { "sub": "Short Burst -- One Target" },
+    { "note": "Short burst: +1 to pool, 3 rounds expended. Defense does not apply to ranged. Init order: Marcus, Cass, Jax." },
+    { "cmd": "+combat/next", "as": "admin", "label": "advance to Cass" },
+    { "cmd": "+combat/next", "as": "admin", "label": "advance to Jax" },
+    { "cmd": "+attack/burst-short Marcus", "label": "Jax fires short burst at Marcus" },
+    { "expect": "ATTACK" },
+
+    { "sub": "Medium Burst -- Two Targets" },
+    { "note": "Medium burst: +2 pool minus 1 per extra target = net +1 here. 10 rounds expended. One roll per target." },
+    { "cmd": "+combat/next", "as": "admin", "label": "round 2: Marcus" },
+    { "cmd": "+combat/next", "as": "admin", "label": "skip to Cass" },
+    { "cmd": "+combat/next", "as": "admin", "label": "skip to Jax" },
+    { "cmd": "+attack/burst-med Marcus=Cass", "label": "Jax fires medium burst at Marcus and Cass" },
+    { "expect": "ATTACK" },
+
+    { "sub": "Reload" },
+    { "note": "Reloading an SMG is a single instant action and does not cost Defense. +gear/reload consumes one spare magazine stack from inventory." },
+    { "cmd": "+combat/next", "as": "admin", "label": "round 3: Marcus" },
+    { "cmd": "+combat/next", "as": "admin", "label": "skip to Cass" },
+    { "cmd": "+combat/next", "as": "admin", "label": "skip to Jax" },
+    { "cmd": "+gear/reload", "label": "Jax reloads SMG" },
+    { "expect": "reload" },
+
+    { "sub": "Close the Encounter" },
+    { "cmd": "+combat/end", "as": "admin", "label": "end fight" },
+    { "expect": "ended" },
+
+    { "reset": true }
+  ]
+}

@@ -1,6 +1,6 @@
 
 import { assertEquals } from "@std/assert";
-import { SandboxService } from "../src/services/Sandbox/SandboxService.ts";
+import { SandboxService } from "@ursamu/mush";
 
 Deno.test({
   name: "Formatting Utilities in Sandbox",

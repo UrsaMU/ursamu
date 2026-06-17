@@ -1,0 +1,78 @@
+{
+  "key": "attributes-skills",
+  "title": "Attributes & Skills -- data reference showcase",
+  "description": "Visual tour of how attributes and skills are structured, validated, and displayed on the sheet. Shows the three-by-three attribute layout and all five skill groups.",
+  "vars": { "player": "Demo" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "concept": "All-Rounder",
+          "virtue": "Hope",
+          "vice": "Pride",
+          "attributes": {
+            "strength": 4, "dexterity": 3, "stamina": 3,
+            "intelligence": 4, "wits": 3, "resolve": 3,
+            "presence": 3, "manipulation": 2, "composure": 3
+          },
+          "skills": {
+            "athletics": 3, "brawl": 2, "drive": 2, "firearms": 3, "larceny": 1,
+            "stealth": 2, "survival": 2, "weaponry": 1,
+            "academics": 3, "computer": 3, "crafts": 2, "investigation": 3,
+            "medicine": 2, "occult": 2, "politics": 1, "science": 3,
+            "animal_ken": 1, "empathy": 3, "expression": 2, "intimidation": 2,
+            "persuasion": 3, "socialize": 2, "streetwise": 2, "subterfuge": 2
+          },
+          "specialties": {
+            "athletics": ["Sprinting"],
+            "investigation": ["Puzzles"],
+            "academics": ["History"],
+            "firearms": ["Rifles"],
+            "persuasion": ["Negotiation"]
+          },
+          "merits": { "contacts": 2, "resources": 3, "language": 1 },
+          "advantages": {
+            "size": 5, "speed": 12, "initiative": 6, "defense": 3,
+            "armor": 0, "health": 8, "healthCurrent": 8,
+            "willpower": 6, "willpowerCurrent": 6, "integrity": 7
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Full Sheet Layout" },
+    { "note": "The sheet header lists the character name, template, concept, virtue, and vice. Attributes appear in the Power/Finesse/Resistance columns across three categories." },
+    { "cmd": "+sheet", "label": "full sheet with all traits filled in" },
+    { "expect": "Demo" },
+
+    { "sub": "Attribute Set" },
+    { "note": "Core attributes accept integer dot values. The post-approval setter is permissive (admin XP/repair use); chargen enforces 1-5 caps." },
+    { "cmd": "+sheet/set strength=5", "label": "set Strength to 5" },
+    { "expect": "Set trait" },
+    { "cmd": "+sheet/set strength=1", "label": "reset to 1" },
+    { "expect": "Set trait" },
+
+    { "sub": "Skill Range Validation" },
+    { "note": "Skills run from 0 to 5. Setting to 0 resets the skill." },
+    { "cmd": "+sheet/set athletics=0", "label": "reset Athletics to untrained" },
+    { "expect": "Set trait" },
+    { "cmd": "+sheet/set athletics=3", "label": "re-train Athletics" },
+    { "expect": "Set trait" },
+
+    { "sub": "Specialty Display" },
+    { "note": "Specialties appear after their parent skill in parentheses." },
+    { "cmd": "+sheet/set specialty/athletics=Rock Climbing", "label": "add second specialty" },
+    { "expect": "Added specialty" },
+    { "cmd": "+sheet", "label": "verify specialty appears in sheet" },
+    { "expect": "Sprinting" },
+
+    { "sub": "Roll Using Attribute + Skill" },
+    { "note": "Any combination of the 9 attributes and 24 skills can be rolled." },
+    { "cmd": "+roll Intelligence+Academics", "label": "4+3 = 7 dice" },
+    { "expect": "Successes" },
+    { "cmd": "+roll Strength+Athletics",     "label": "1+3 = 4 dice after Strength was reset to 1" },
+    { "expect": "Successes" }
+  ]
+}

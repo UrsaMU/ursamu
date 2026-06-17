@@ -1,0 +1,165 @@
+{
+  "version": "ctl-2e-core",
+  "notes": {
+    "seemings": "Each seeming has a Blessing (a creation-time bonus) and a Curse (a Clarity-damage trigger added to breaking points). The dice pool for the Curse is half Wyrd rounded up.",
+    "kiths": "Each kith provides a Blessing — a specific supernatural ability. A changeling may take any kith regardless of seeming, but each seeming's kiths are most thematically aligned.",
+    "courts": "The four seasonal courts. Most freeholds in the published setting use the seasonal-court structure.",
+    "needles_threads": "Needles and Threads are free-form personal expressions of identity, not enumerated. See Changeling: The Lost 2e p.95.",
+    "kithBlessingsAccuracy": "Kith Blessing text is summarized for in-game listing. Consult Changeling: The Lost 2e for full mechanical text before adjudicating an effect."
+  },
+  "seemings": [
+    {
+      "name": "Beast",
+      "favoredRegalia": "Steed",
+      "blessing": "Gain +1 to one Resistance Attribute (Stamina, Resolve, or Composure) at creation.",
+      "curse": "Suffers Clarity damage when forced to act against an animal nature — caged, denied instinct, kept from prey or pack. Pool: half Wyrd, round up.",
+      "description": "Stolen and remade to resemble or behave as an animal. Predators, prey, companions, mounts — whatever beast the Keeper needed."
+    },
+    {
+      "name": "Darkling",
+      "favoredRegalia": "Mirror",
+      "blessing": "Gain +1 to one Finesse Attribute (Dexterity, Wits, or Manipulation) at creation.",
+      "curse": "Suffers Clarity damage when exposed to bright, sustained, scrutinizing light — interrogation lamps, daylight on a stage, the unblinking sun. Pool: half Wyrd, round up.",
+      "description": "Hidden in shadow, silence, and secret. Servants of moonless courts, librarians of forbidden lore, the things that go bump in the night."
+    },
+    {
+      "name": "Elemental",
+      "favoredRegalia": "Sword",
+      "blessing": "Gain +1 to one Resistance Attribute (Stamina, Resolve, or Composure) at creation.",
+      "curse": "Suffers Clarity damage when wounded by their opposing element, or when forced to remain long apart from their own. Pool: half Wyrd, round up.",
+      "description": "Embodiments of elemental forces — fire, water, stone, air, metal, weather. Made from the raw stuff of Faerie."
+    },
+    {
+      "name": "Fairest",
+      "favoredRegalia": "Crown",
+      "blessing": "Gain +1 to one Power Attribute (Strength, Intelligence, or Presence) at creation.",
+      "curse": "Suffers Clarity damage when slighted, ignored, or treated as unwanted — a wound to the vanity their Keeper carved into them. Pool: half Wyrd, round up.",
+      "description": "Made for beauty, art, and influence. Trophies and courtiers, performers and seducers. Their grace cuts as deeply as their wounds."
+    },
+    {
+      "name": "Ogre",
+      "favoredRegalia": "Shield",
+      "blessing": "Gain +1 to one Power Attribute (Strength, Intelligence, or Presence) at creation.",
+      "curse": "Suffers Clarity damage when bullied, browbeaten, or forced to back down from a confrontation they could otherwise win. Pool: half Wyrd, round up.",
+      "description": "Built to break and crush — soldiers, executioners, monsters, brawlers. Their bodies bear the marks of the violence they were made for."
+    },
+    {
+      "name": "Wizened",
+      "favoredRegalia": "Jewels",
+      "blessing": "Gain +1 to one Finesse Attribute (Dexterity, Wits, or Manipulation) at creation.",
+      "curse": "Suffers Clarity damage when their craft is dismissed, devalued, or visibly outdone by an amateur or a machine. Pool: half Wyrd, round up.",
+      "description": "Made small and skilled — craftspeople, servants, scholars, performers. Twisted into useful shapes for tedious work."
+    }
+  ],
+  "kiths": [
+    { "name": "Broadback",      "seeming": "Beast",     "blessing": "Treat Size as one higher than normal for Encumbrance and Stamina-vs-fatigue rolls.",                   "description": "Beasts of burden — patient, enduring, slow to anger but devastating when roused." },
+    { "name": "Cleareyes",      "seeming": "Beast",     "blessing": "Ignore visibility penalties in darkness, smoke, or low light; +2 to perception rolls involving sight.", "description": "Hunters with preternatural senses; bird-of-prey or wolf-keen vision." },
+    { "name": "Coldscale",      "seeming": "Beast",     "blessing": "Resist environmental cold and toxins; treat Stamina as +1 for resisting poison.",                       "description": "Reptilian and amphibian shapes — calculating, cold-blooded, patient." },
+    { "name": "Helldiver",      "seeming": "Beast",     "blessing": "Hold breath far longer than human; suffer no penalty for working in deep, dark, or pressurized spaces.", "description": "Deep-sea or subterranean creatures — silent, lightless places." },
+    { "name": "Hunterheart",    "seeming": "Beast",     "blessing": "Gain a natural attack (claw, bite, or talons) that deals lethal damage at Strength + Brawl.",            "description": "Predator-touched — wolves, big cats, raptors. Quick to strike." },
+    { "name": "Roteater",       "seeming": "Beast",     "blessing": "Eat spoiled, rotten, or poisoned food without ill effect; +2 to resist disease.",                       "description": "Carrion eaters — vultures, hyenas, rats. Thrive on what others discard." },
+    { "name": "Skitterskulk",   "seeming": "Beast",     "blessing": "Climb sheer surfaces at half speed without a Dexterity + Athletics roll; +2 to stealth in tight spaces.", "description": "Insectile and arachnid — many legs, chitinous shells, swarming." },
+    { "name": "Steepscrambler", "seeming": "Beast",     "blessing": "Halve the difficulty of climb and leap rolls; never suffer falling damage from less than 3 stories.",   "description": "Climbers — goats, monkeys, lizards. At home on cliffs and rooftops." },
+    { "name": "Swimmerskin",    "seeming": "Beast",     "blessing": "Swim at full Speed; hold breath three times longer than normal.",                                      "description": "Aquatic — fish, otters, seals. Most at ease in water." },
+    { "name": "Truefriend",     "seeming": "Beast",     "blessing": "Gain +2 to Social rolls intended to comfort, calm, or earn loyalty from a single chosen companion.",   "description": "Domesticated companions — dogs, cats, horses. Loyalty is their nature." },
+    { "name": "Venombite",      "seeming": "Beast",     "blessing": "Once per scene, deliver a venomous bite or touch — Toxicity equals Wyrd.",                              "description": "Venomous — snakes, spiders, jellyfish. Their touch carries poison." },
+    { "name": "Windwing",       "seeming": "Beast",     "blessing": "Glide short distances safely; +2 to Athletics rolls involving balance, leaping, or falling.",          "description": "Birds — flight, sharp eyes, song. Free in a way few Beasts are." },
+
+    { "name": "Antiquarian",    "seeming": "Darkling",  "blessing": "Once per scene, recall a relevant piece of obscure lore; gain +2 to research-oriented rolls.",         "description": "Keepers of forgotten lore — librarians, archivists, scholars of the dead." },
+    { "name": "Gravewight",     "seeming": "Darkling",  "blessing": "+2 to Social rolls with the recently dead, the dying, or those who deal in death.",                    "description": "Touched by death — pale, cold, comfortable in cemeteries and morgues." },
+    { "name": "Leechfinger",    "seeming": "Darkling",  "blessing": "Spend Glamour to drain Willpower from a willing or restrained target on touch — 1 Glamour : 1 WP.",     "description": "Their touch drains warmth, vitality, or memory." },
+    { "name": "Lurker",         "seeming": "Darkling",  "blessing": "+2 to Stealth in any environment with cover, shadow, or crowd.",                                       "description": "Unnoticed watchers — the eyes you never see, the listener in the hall." },
+    { "name": "Lurkglider",     "seeming": "Darkling",  "blessing": "Drop safely from any height under 4 stories; +2 to Stealth when attacking from above.",                "description": "Silent gliders — flying squirrels, bats. Drop from above without warning." },
+    { "name": "Mirrorskin",     "seeming": "Darkling",  "blessing": "Spend 1 Glamour to alter your Mask to resemble any human you have seen, for one scene.",               "description": "Reflective and changeable — impersonators, infiltrators, faces that aren't theirs." },
+    { "name": "Nightsinger",    "seeming": "Darkling",  "blessing": "Spend 1 Glamour to lull a listener to sleep with song; resist with Composure + Wyrd of singer.",       "description": "Voices in the dark — lullabies, dirges, whispers that compel." },
+    { "name": "Palewraith",     "seeming": "Darkling",  "blessing": "Pass through narrow gaps as if size 1; +2 to Stealth in low light.",                                   "description": "Ghost-like — translucent, drifting, half-here." },
+    { "name": "Razorhand",      "seeming": "Darkling",  "blessing": "Natural weapon (claws) deals lethal damage at Strength + Brawl; ignore 1 point of armor.",             "description": "Blade-fingered — fingers as knives, claws, talons." },
+    { "name": "Tunnelgrub",     "seeming": "Darkling",  "blessing": "Burrow through soft earth at half Speed without tools; +2 to escape restraints.",                      "description": "Burrowing things — moles, worms, sewer-dwellers. At home below." },
+    { "name": "Whisperwisp",    "seeming": "Darkling",  "blessing": "Once per session, recall a relevant rumor or secret about a person, place, or event.",                "description": "Carry secrets and rumors — every Whisperwisp knows something useful." },
+
+    { "name": "Airtouched",     "seeming": "Elemental", "blessing": "Move without slowing through wind, dust, or smoke; +2 to Speed when on open ground.",                  "description": "Wind, storm, and breath. Hair that streams, voices that howl." },
+    { "name": "Earthbones",     "seeming": "Elemental", "blessing": "+2 Size against being moved, knocked down, or thrown; reduce bashing damage by 1.",                    "description": "Stone, mountain, soil. Slow, solid, patient as continents." },
+    { "name": "Fireheart",      "seeming": "Elemental", "blessing": "Resist fire damage; spend 1 Glamour to ignite a small object on touch.",                                "description": "Flame and forge. Warm to touch, quick to rage, slow to forgive." },
+    { "name": "Levinquick",     "seeming": "Elemental", "blessing": "Once per scene, add +3 Initiative; resist electrical damage.",                                          "description": "Lightning and electricity. Quick-tempered, charge in the air around them." },
+    { "name": "Manikin",        "seeming": "Elemental", "blessing": "Take only bashing damage from non-magical attacks; need not eat or sleep but suffer at lower Glamour.","description": "Living constructs — clockwork, wood, porcelain. Made, not born." },
+    { "name": "Metalflesh",     "seeming": "Elemental", "blessing": "Treat unarmored skin as Armor 1/0; ignore the first point of lethal damage per scene.",                "description": "Metal-bodied — iron, copper, gold. Hard, heavy, dense." },
+    { "name": "Snowskin",       "seeming": "Elemental", "blessing": "Resist cold environments and ice; spend 1 Glamour to chill a touched object or person.",               "description": "Cold and ice — pale skin, frost-breath, winter in their bones." },
+    { "name": "Sunwhisper",     "seeming": "Elemental", "blessing": "Shed light equal to a lantern at will; +2 to rolls to dispel illusion or reveal hidden things.",        "description": "Sunlight and warmth. They glow faintly in mortal sight." },
+    { "name": "Waterborn",      "seeming": "Elemental", "blessing": "Hold breath three times longer; swim at full Speed; cannot drown in calm water.",                       "description": "Rivers, seas, rain. Fluid, persistent, shaping what they touch." },
+    { "name": "Woodblood",      "seeming": "Elemental", "blessing": "Heal lethal damage at the bashing rate while in contact with living plant matter.",                    "description": "Trees, vines, growing things. Patient, rooted, green in the veins." },
+
+    { "name": "Bright One",     "seeming": "Fairest",   "blessing": "Spend 1 Glamour to fill a room with light; +2 to Presence rolls when first seen.",                     "description": "Radiant — they shine with an inner light. Drawing eyes wherever they go." },
+    { "name": "Dancer",         "seeming": "Fairest",   "blessing": "Spend 1 Glamour to add +3 Defense for one turn; +2 to Athletics rolls involving balance or grace.",     "description": "Grace incarnate — movement that compels, performance that enchants." },
+    { "name": "Draconic",       "seeming": "Fairest",   "blessing": "+2 to Intimidation rolls; once per scene, treat Size as one higher for fear effects.",                 "description": "Dragon-touched — regal, proud, faintly scaled. Commanding presence." },
+    { "name": "Flamesiren",     "seeming": "Fairest",   "blessing": "Spend 1 Glamour to compel a romantically interested target to remain in your presence for one scene.","description": "Beauty edged with danger — those drawn to them often burn." },
+    { "name": "Flowering",      "seeming": "Fairest",   "blessing": "Spend 1 Glamour to release a scent that calms (+2 to Social) or intoxicates (-2 Resolve) at choice.",  "description": "Blossom-touched — fragrant, delicate, briefly perfect." },
+    { "name": "Gandharva",      "seeming": "Fairest",   "blessing": "+2 to Expression rolls involving music or song; song can carry minor magical effects at Storyteller discretion.","description": "Musical spirits — voice, instrument, song. They move others to tears or war." },
+    { "name": "Larcenist",      "seeming": "Fairest",   "blessing": "+2 to Larceny and Subterfuge; once per scene, palm a small object unnoticed.",                          "description": "Thieves of hearts and treasures. They take what they want with a smile." },
+    { "name": "Muse",           "seeming": "Fairest",   "blessing": "Spend 1 Glamour to grant a target +2 to their next Expression or Crafts roll.",                        "description": "Inspirers — their presence kindles creativity in others." },
+    { "name": "Playmate",       "seeming": "Fairest",   "blessing": "+2 to Social rolls with children or those of childlike disposition; resist age-related effects.",      "description": "Eternally youthful — companions, confidants, dolls grown into something." },
+    { "name": "Polychromatic",  "seeming": "Fairest",   "blessing": "Spend 1 Glamour to shift color of self or worn items; +2 to Stealth in visually busy environments.",   "description": "Iridescent — colors shift across skin, hair, eyes. Always changing, never the same." },
+    { "name": "Romancer",       "seeming": "Fairest",   "blessing": "+2 to Persuasion rolls in intimate or one-on-one contexts; recover Willpower from successful seductions.","description": "Born to be loved — and to love. Their affection is intoxicating, dangerous." },
+    { "name": "Shadowsoul",     "seeming": "Fairest",   "blessing": "+2 to Social rolls under moonlight or in twilight; spend 1 Glamour to dim ambient light briefly.",     "description": "Beautiful and dark — twilight grace, cold elegance, the chill of the moon." },
+    { "name": "Telluric",       "seeming": "Fairest",   "blessing": "Once per session, ask the Storyteller a yes/no question about an impending event; receive a partial answer.","description": "Star-touched — astrological, distant, fated. The cosmos in their eyes." },
+    { "name": "Treasured",      "seeming": "Fairest",   "blessing": "+2 to resist Mind-affecting effects when defending a personal token or oath.",                          "description": "Made to be owned and displayed — gemlike, perfect, often miserable." },
+
+    { "name": "Bloodbrute",     "seeming": "Ogre",      "blessing": "Once per scene, ignore the first point of wound penalty in combat.",                                  "description": "Slaughterers — built for raw, bloody violence." },
+    { "name": "Cyclopean",      "seeming": "Ogre",      "blessing": "+2 to ranged-attack rolls with thrown weapons; ignore the off-hand penalty.",                          "description": "One-eyed and giant — towering, single-minded, terrible." },
+    { "name": "Farwalker",      "seeming": "Ogre",      "blessing": "+2 Speed when traveling overland; never fatigue from long marches without combat.",                    "description": "Wandering giants — long legs, longer roads. Hard to outrun." },
+    { "name": "Gargantuan",     "seeming": "Ogre",      "blessing": "Treat Size as one higher than normal; +1 Health.",                                                    "description": "Simply enormous — they stoop in doorways, fold to sit in chairs." },
+    { "name": "Gristlegrinder", "seeming": "Ogre",      "blessing": "Bite attack deals lethal damage at Strength + Brawl; consume bone and gristle harmlessly.",            "description": "Eaters of flesh and bone — cannibals, butchers, things with too many teeth." },
+    { "name": "Mottled",        "seeming": "Ogre",      "blessing": "Spend 1 Glamour to shift visible skin pattern for camouflage; +2 to Stealth.",                          "description": "Patchwork — many skins stitched together, many sources, many smells." },
+    { "name": "Render",         "seeming": "Ogre",      "blessing": "Unarmed attacks deal lethal damage; +1 to damage rolls when grappling.",                                "description": "Tearers — claws, tusks, hooks. They unmake what they touch." },
+    { "name": "Stonebones",     "seeming": "Ogre",      "blessing": "Treat unarmored skin as Armor 1/1; reduce knockback by half.",                                          "description": "Made of stone — heavy, slow, nearly unkillable." },
+    { "name": "Trollkith",      "seeming": "Ogre",      "blessing": "+2 to Resolve rolls to hold ground; recover bashing damage at the lethal rate.",                       "description": "Bridge-keepers and toll-takers — ugly, loud, oddly hospitable on their terms." },
+    { "name": "Water-Dweller",  "seeming": "Ogre",      "blessing": "Hold breath three times longer; deal lethal damage in grapples performed underwater.",                "description": "Brutish things from deep, dark water — kelpies, drowners, river-haunts." },
+    { "name": "Witchtooth",     "seeming": "Ogre",      "blessing": "Once per scene, curse a touched target — they suffer -1 to their next significant roll.",              "description": "Hags and crones — sharp teeth, sharper magic, oldest tricks." },
+
+    { "name": "Artist",         "seeming": "Wizened",   "blessing": "+2 to one chosen Crafts or Expression specialty; finished works briefly hold a glamour.",              "description": "Made to create art for a Keeper's pleasure — painters, sculptors, weavers." },
+    { "name": "Author",         "seeming": "Wizened",   "blessing": "+2 to Academics rolls involving the written word; can read in any human-derived script.",              "description": "Made to write — scribes, copyists, the keepers of records nobody reads." },
+    { "name": "Brewer",         "seeming": "Wizened",   "blessing": "+2 to Crafts rolls involving brewing/distilling; can taste-identify a poison instantly.",              "description": "Distillers and apothecaries — wine, beer, potion, poison." },
+    { "name": "Chatelaine",     "seeming": "Wizened",   "blessing": "+2 to Social rolls within a household or establishment they are trusted within.",                       "description": "Household managers — servants of grand houses, keepers of keys and ledgers." },
+    { "name": "Chirurgeon",     "seeming": "Wizened",   "blessing": "+2 to Medicine rolls; spend 1 Glamour to downgrade 1 point of damage on a touched patient.",            "description": "Surgeons of the Hedge — they cut, stitch, replace. Sometimes they improve." },
+    { "name": "Drudge",         "seeming": "Wizened",   "blessing": "+2 to Stamina rolls to endure exhaustion, hunger, or thirst.",                                          "description": "Worn to nubs by endless labor — porters, scrubbers, diggers." },
+    { "name": "Fatemaker",      "seeming": "Wizened",   "blessing": "Once per session, force a re-roll on your own failed roll (the second result stands).",                "description": "Spinners of luck — gamblers, fortune-tellers, makers of small miracles." },
+    { "name": "Gameplayer",     "seeming": "Wizened",   "blessing": "+2 to Subterfuge rolls in games, contests, or wagers; cheat once per scene undetected.",                "description": "Tricksters — riddles, contests, wagers. They cheat, but elegantly." },
+    { "name": "Gremlin",        "seeming": "Wizened",   "blessing": "Once per scene, cause a non-magical mechanical or electronic device to malfunction on touch.",         "description": "Breakers of machines — saboteurs, vandals, things that go wrong." },
+    { "name": "Inventor",       "seeming": "Wizened",   "blessing": "+2 to Crafts rolls for original creation; spend 1 Glamour to jury-rig a tool from scrap in one minute.","description": "Tinkerers and engineers — clockwork, gears, impossible engines." },
+    { "name": "Mirror",         "seeming": "Wizened",   "blessing": "Spend 1 Glamour to mimic a person's voice and mannerisms for one scene after observing them briefly.","description": "Impersonators — they wore many faces in Faerie, and the habit didn't break." },
+    { "name": "Notary",         "seeming": "Wizened",   "blessing": "Detect when a sworn promise is broken; +2 to Persuasion in contractual or legal contexts.",            "description": "Witnesses, scribes, certifiers — every contract bears their seal." },
+    { "name": "Oracle",         "seeming": "Wizened",   "blessing": "Once per session, glimpse a brief omen about a chosen subject (Storyteller defines).",                  "description": "Diviners — entrails, cards, dreams. They see truths better forgotten." },
+    { "name": "Smith",          "seeming": "Wizened",   "blessing": "Crafted items by the Smith last longer and resist damage; +2 to Crafts (metalworking).",               "description": "Forgers — iron, gold, glass. Their tools never break, and their bargains hold." },
+    { "name": "Soldier",        "seeming": "Wizened",   "blessing": "+2 to one chosen Weaponry or Firearms specialty; resist combat-related fear effects.",                 "description": "Tiny but trained — generations of war-craft compressed into small bodies." },
+    { "name": "Woodwalker",     "seeming": "Wizened",   "blessing": "+2 to Survival and Animal Ken rolls in any wilderness; track at half normal difficulty.",              "description": "Foresters — keepers of paths, gardeners of wild places, friends of beasts." }
+  ],
+  "courts": [
+    {
+      "name": "Spring",
+      "emotion": "Desire",
+      "mantleNotes": "Mantle manifests as fresh blossoms, warmth, sweet scents.",
+      "contractDiscount": "Spring Court members buy Contracts of the Spring Court at full cost; affinity for emotional and persuasive Contracts.",
+      "description": "Court of desire and renewal. Spring courtiers chase joy, beauty, and new beginnings as armor against the despair of capture."
+    },
+    {
+      "name": "Summer",
+      "emotion": "Wrath",
+      "mantleNotes": "Mantle manifests as heat, dry winds, the smell of dust and smoke.",
+      "contractDiscount": "Summer Court members buy Contracts of the Summer Court at full cost; affinity for combat and forceful Contracts.",
+      "description": "Court of wrath and endurance. Summer's heat is a forge; its anger is a shield against fear."
+    },
+    {
+      "name": "Autumn",
+      "emotion": "Fear",
+      "mantleNotes": "Mantle manifests as cold winds, falling leaves, a deepening of shadows.",
+      "contractDiscount": "Autumn Court members buy Contracts of the Autumn Court at full cost; affinity for knowledge, fear, and goblin Contracts.",
+      "description": "Court of fear and knowledge. Autumn studies what terrifies it — the Fae most of all — and wields that knowledge as power."
+    },
+    {
+      "name": "Winter",
+      "emotion": "Sorrow",
+      "mantleNotes": "Mantle manifests as creeping cold, frost on glass, hushed quiet.",
+      "contractDiscount": "Winter Court members buy Contracts of the Winter Court at full cost; affinity for stealth, mourning, and silence Contracts.",
+      "description": "Court of sorrow and silence. Winter survives by hiding, by mourning, by becoming small and unseen."
+    }
+  ]
+}

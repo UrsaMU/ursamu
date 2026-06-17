@@ -5,10 +5,10 @@
  * Exercises them through the real UrsaMU softcode engine.
  */
 import { assertEquals } from "@std/assert";
-import { runSoftcode, softcodeEngine } from "../src/services/Softcode/ursamu-engine.ts";
-import type { UrsaEvalContext } from "../src/services/Softcode/ursamu-context.ts";
-import type { DbAccessor, OutputAccessor } from "../src/services/Softcode/context.ts";
-import type { IDBObj } from "../src/@types/UrsamuSDK.ts";
+import { runSoftcode, softcodeEngine } from "@ursamu/mush";
+import type { UrsaEvalContext } from "@ursamu/mush";
+import type { DbAccessor, OutputAccessor } from "@ursamu/mush";
+import type { IDBObj } from "@ursamu/mush";
 
 function makeActor(overrides: Partial<IDBObj> = {}): IDBObj {
   return {

@@ -7,7 +7,7 @@ description: How to run the UrsaMU test suite and write tests for commands, scri
 # Testing
 
 UrsaMU uses [Deno's built-in test runner](https://docs.deno.com/runtime/fundamentals/testing/).
-The v2.6.0 suite is **1141+ passing, 0 failing** across 348 lint-clean files —
+The v2.6.0 suite is **1464 passing, 0 failing** across 480 lint-clean files —
 covering authentication, command parsing, sandbox scripting, softcode evaluation,
 plugin lifecycle, WebSocket rate limiting, scene export, format handlers,
 plugin install atomicity, and security regression tests.
@@ -31,6 +31,33 @@ deno test --allow-all --unstable-kv --no-check --filter "auth login"
 
 > Always use `--no-check` — the suite is large and type-checking adds significant overhead
 > with no benefit for test runs.
+
+### Running package tests
+
+The monorepo packages each have their own test directories. Run them directly
+to isolate failures to a specific layer:
+
+```bash
+# core infrastructure tests (includes 12 security tests)
+deno test packages/core/tests/ --allow-all --unstable-kv --no-check
+
+# MUSH engine tests
+deno test packages/mush/tests/ --allow-all --unstable-kv --no-check
+
+# both together
+deno test packages/core/tests/ packages/mush/tests/ --allow-all --unstable-kv --no-check
+```
+
+### Checking package boundaries
+
+The `tools/check-boundaries.ts` script verifies that `@ursamu/core` does not
+import from `@ursamu/mush` (enforcing the one-way dependency):
+
+```bash
+deno run -A tools/check-boundaries.ts
+```
+
+Run this before committing changes that touch `packages/`.
 
 ---
 

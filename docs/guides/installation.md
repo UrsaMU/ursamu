@@ -13,7 +13,7 @@ on your system.
 
 Before installing UrsaMU, ensure you have the following:
 
-- [**Deno**](https://deno.land/) v1.40 or higher
+- [**Deno**](https://deno.land/) v2.x
 - Git (for cloning the repository and plugin installs)
 
 ## Installation Methods
@@ -21,17 +21,6 @@ Before installing UrsaMU, ensure you have the following:
 UrsaMU can be installed in multiple ways. Choose the method that works best for
 your environment.
 
-### ⚡ The UrsaMU DX Experience (Recommended)
-
-The easiest way to set up and manage your UrsaMU world is using the **UrsaMU
-DX** one-liner. This interactive wizard will walk you through naming your
-project, configuring ports, and setting up your first administrator account.
-
-```bash
-deno install -A --global -n deno-x jsr:@dx/dx
-deno x --install-alias
-dx jsr:@ursamu/ursamu init
-```
 ---
 
 ### Method 1: Direct from GitHub
@@ -59,6 +48,10 @@ deno task install-cli
 ursamu create my-game
 cd my-game
 ```
+
+> **Package names**: The primary import is now `jsr:@ursamu/mush`. The legacy
+> package `jsr:@ursamu/mush` still works as a shim that re-exports everything
+> from `@ursamu/mush`.
 
 ## Configuration
 

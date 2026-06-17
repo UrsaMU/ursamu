@@ -22,3 +22,6 @@ config/*.json
 # Fresh build directory
 _fresh/
 games/
+scratch/
+types/deno.d.ts
+types/@std/

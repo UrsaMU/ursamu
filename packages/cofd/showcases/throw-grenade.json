@@ -1,0 +1,188 @@
+{
+  "key": "throw-grenade",
+  "title": "+throw grenade -- frag grenade AoE in a 3-person encounter",
+  "description": "Jax pulls the pin on a fragmentation grenade in a room with Marcus and Cass. Each non-thrower participant rolls Stamina against the throw successes; ties take half force, beats take full force lethal. Knockdown tilt applies when blast damage >= Size.",
+  "vars": {
+    "player": "Jax"
+  },
+  "setup": {
+    "targets": {
+      "Marcus": {
+        "flags": [
+          "player",
+          "connected"
+        ],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 2,
+              "dexterity": 2,
+              "stamina": 2,
+              "intelligence": 2,
+              "wits": 2,
+              "resolve": 2,
+              "presence": 2,
+              "manipulation": 2,
+              "composure": 2
+            },
+            "skills": {
+              "brawl": 2,
+              "athletics": 1
+            },
+            "advantages": {
+              "size": 5
+            },
+            "health": {
+              "max": 7,
+              "bashing": 0,
+              "lethal": 0,
+              "aggravated": 0
+            }
+          }
+        }
+      },
+      "Cass": {
+        "flags": [
+          "player",
+          "connected"
+        ],
+        "state": {
+          "cofd": {
+            "attributes": {
+              "strength": 2,
+              "dexterity": 2,
+              "stamina": 1,
+              "intelligence": 2,
+              "wits": 2,
+              "resolve": 2,
+              "presence": 2,
+              "manipulation": 2,
+              "composure": 2
+            },
+            "skills": {
+              "brawl": 1,
+              "athletics": 1
+            },
+            "advantages": {
+              "size": 5
+            },
+            "health": {
+              "max": 6,
+              "bashing": 0,
+              "lethal": 0,
+              "aggravated": 0
+            }
+          }
+        }
+      }
+    },
+    "character": {
+      "flags": [
+        "player",
+        "connected"
+      ],
+      "state": {
+        "cofd": {
+          "attributes": {
+            "strength": 2,
+            "dexterity": 4,
+            "stamina": 2,
+            "intelligence": 2,
+            "wits": 2,
+            "resolve": 2,
+            "presence": 2,
+            "manipulation": 2,
+            "composure": 2
+          },
+          "skills": {
+            "athletics": 3
+          },
+          "advantages": {
+            "size": 5,
+            "willpowerCurrent": 4,
+            "willpowerMax": 4
+          },
+          "health": {
+            "max": 7,
+            "bashing": 0,
+            "lethal": 0,
+            "aggravated": 0
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    {
+      "sub": "Arm Jax with a frag grenade"
+    },
+    {
+      "cmd": "+gear/add grenade-frag-standard",
+      "label": "buy a frag grenade"
+    },
+    {
+      "expect": "grenade"
+    },
+    {
+      "sub": "Open encounter and join"
+    },
+    {
+      "cmd": "+combat/start",
+      "as": "admin",
+      "label": "open encounter"
+    },
+    {
+      "expect": "encounter"
+    },
+    {
+      "cmd": "+combat/join",
+      "label": "Jax joins"
+    },
+    {
+      "cmd": "+combat/join",
+      "as": "Marcus",
+      "label": "Marcus joins"
+    },
+    {
+      "cmd": "+combat/join",
+      "as": "Cass",
+      "label": "Cass joins"
+    },
+    {
+      "cmd": "+combat/begin",
+      "as": "admin",
+      "label": "roll initiative"
+    },
+    {
+      "expect": "initiative"
+    },
+    {
+      "sub": "Throw the grenade"
+    },
+    {
+      "note": "Jax throws Dex 4 + Athletics 3 = 7 dice. No Defense applies (AoE). Marcus and Cass each contest with Stamina. Thrower is excluded from the blast by default."
+    },
+    {
+      "cmd": "+throw grenade-frag-standard",
+      "as": "Jax",
+      "label": "Jax pulls the pin"
+    },
+    {
+      "expect": "THROW"
+    },
+    {
+      "sub": "Close the encounter"
+    },
+    {
+      "cmd": "+combat/end",
+      "as": "admin",
+      "label": "end fight"
+    },
+    {
+      "expect": "ended"
+    },
+    {
+      "reset": true
+    }
+  ]
+}
