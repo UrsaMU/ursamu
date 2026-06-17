@@ -1,7 +1,10 @@
 {
   "name": "@ursamu/channels",
   "version": "0.1.0",
-  "exports": "./mod.ts",
+  "exports": {
+    ".": "./mod.ts",
+    "./channel-events": "./src/channel-events.ts"
+  },
   "tasks": {
     "test":  "deno test tests/ --allow-all --unstable-kv --no-check",
     "lint":  "deno lint",
