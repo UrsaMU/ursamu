@@ -22,7 +22,7 @@ const onEdited = async (page: WikiPageRef): Promise<void> => {
   const subs = await subscriptions.find({ path: page.path });
   for (const s of subs) {
     const title = (page.meta.title as string) || page.path;
-    send(s.playerId, `%ch>Wiki:%cn '%cc${title}%cn' (${page.path}) was updated.`);
+    send([s.playerId], `%ch>Wiki:%cn '%cc${title}%cn' (${page.path}) was updated.`);
   }
 };
 
@@ -39,7 +39,7 @@ const onRenamed = async (page: WikiPageRef): Promise<void> => {
   if (page.oldPath) {
     const subs = await subscriptions.find({ path: page.oldPath });
     for (const s of subs) {
-      send(s.playerId, `%ch>Wiki:%cn '%cc${page.oldPath}%cn' was moved to '%cc${page.path}%cn'.`);
+      send([s.playerId], `%ch>Wiki:%cn '%cc${page.oldPath}%cn' was moved to '%cc${page.path}%cn'.`);
     }
   }
 };

@@ -53,7 +53,14 @@ interface IClockRecord { id: string; epoch: number; }
 let _epoch = 0;
 const _db = new DBO<IClockRecord>("server.gameclock");
 
-export const gameClock = {
+export const gameClock: {
+  now(): IGameTime;
+  tick(realMs: number): void;
+  format(t?: IGameTime): string;
+  set(partial: Partial<IGameTime>): void;
+  save(): Promise<void>;
+  load(): Promise<void>;
+} = {
   now(): IGameTime {
     return epochToGameTime(_epoch);
   },

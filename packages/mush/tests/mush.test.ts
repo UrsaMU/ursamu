@@ -132,7 +132,7 @@ Deno.test("dbojs: create, queryOne, modify, delete", OPTS, async () => {
 
 Deno.test("dbojs: queryOne returns undefined for missing id", OPTS, async () => {
   const result = await dbojs.queryOne({ id: "mush_test_nonexistent_zxzx" });
-  assertEquals(result == null || result === false, true);
+  assertEquals(result, undefined);
 });
 
 // ─── Area 4: gameClock ────────────────────────────────────────────────────────
@@ -173,7 +173,7 @@ function mockU(): IUrsamuSDK {
     db: {
       modify: async () => {},
       search: async () => [],
-      create: async (d) => ({ ...(d as object), id: "99", flags: new Set(), contents: [] } as IDBObj),
+      create: async (d: unknown) => ({ ...(d as object), id: "99", flags: new Set(), state: {}, contents: [] } as unknown as IDBObj),
       destroy: async () => {},
     },
     util: {

@@ -113,7 +113,7 @@ Examples:
     const locRaw    = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
     const hits      = parseInt(u.cmd.args[2] ?? "0", 10);
 
-    let charRecord: IMektonChar | null;
+    let charRecord: IMektonChar | undefined;
     if (playerArg) {
       const isAdmin = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
       if (!isAdmin) { u.send("Permission denied."); return; }
@@ -150,13 +150,13 @@ Examples:
     const targetArg = u.cmd.args[0] ? u.util.stripSubs(u.cmd.args[0]).trim() : null;
     const locRaw    = u.util.stripSubs(u.cmd.args[1] ?? "").trim() || (targetArg ? "" : "torso");
 
-    const healer: IMektonChar | null = await chars.findOne({ playerId: u.me.id });
+    const healer: IMektonChar | null = await chars.findOne({ playerId: u.me.id }) ?? null;
     let patient: IMektonChar | null = healer;
 
     if (targetArg) {
       const target = await u.util.target(u.me, targetArg, true);
       if (!target) { u.send(`Target "${targetArg}" not found.`); return; }
-      patient = await chars.findOne({ playerId: target.id });
+      patient = await chars.findOne({ playerId: target.id }) ?? null;
     }
     if (!healer || !patient) { u.send("No character found."); return; }
 

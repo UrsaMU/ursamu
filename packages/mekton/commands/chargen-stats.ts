@@ -136,7 +136,7 @@ Examples:
       u.send("You already have a character in progress. Use %cy+chargen%cn to check status.");
       return;
     }
-    const char = defaultChar(u.me.id, u.me.name);
+    const char = defaultChar(u.me.id, u.me.name ?? "Unknown");
     await chars.create(char);
     u.send(`%cyChargen started!%cn Use %cy+chargen/next%cn for step-by-step guided instructions, or %cy+chargen%cn to view the full checklist.`);
   },
@@ -246,7 +246,7 @@ Examples:
       }
     } while (total < 40);
 
-    await chars.update({ id: char.id }, { stats: stats as IMektonStats });
+    await chars.update({ id: char.id }, { stats: stats as unknown as IMektonStats });
     const line = STAT_KEYS.map((k) => `${k.toUpperCase()}:${stats[k]}`).join("  ");
     u.send(`%cyStats rolled (total: ${total}):%cn%r  ${line}`);
   },

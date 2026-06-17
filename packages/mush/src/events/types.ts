@@ -83,25 +83,3 @@ export interface MailReceivedEvent { to: string; from: string; subject: string; 
 /** Marker type — imported from mod.ts to signal that MushHookMap augmentation is active. */
 // deno-lint-ignore no-empty-interface
 export interface MushHookMap {}
-
-declare module "@ursamu/core" {
-  interface CoreHookMap {
-    "player:say":        (e: SayEvent)            => void | Promise<void>;
-    "player:pose":       (e: PoseEvent)            => void | Promise<void>;
-    "player:page":       (e: PageEvent)            => void | Promise<void>;
-    "player:move":       (e: MoveEvent)            => void | Promise<void>;
-    "player:login":      (e: SessionEvent)         => void | Promise<void>;
-    "player:logout":     (e: SessionEvent)         => void | Promise<void>;
-    "channel:message":   (e: ChannelMessageEvent)  => void | Promise<void>;
-    "object:created":    (e: ObjectEvent)          => void | Promise<void>;
-    "object:destroyed":  (e: ObjectEvent)          => void | Promise<void>;
-    "object:modified":   (e: ObjectEvent)          => void | Promise<void>;
-    "object:moved":      (e: ObjectMovedEvent)     => void | Promise<void>;
-    "mail:received":     (e: MailReceivedEvent)    => void | Promise<void>;
-    "scene:created":     (e: SceneCreatedEvent)    => void | Promise<void>;
-    "scene:pose":        (e: ScenePoseEvent)       => void | Promise<void>;
-    "scene:set":         (e: SceneSetEvent)        => void | Promise<void>;
-    "scene:title":       (e: SceneTitleEvent)      => void | Promise<void>;
-    "scene:clear":       (e: SceneClearEvent)      => void | Promise<void>;
-  }
-}

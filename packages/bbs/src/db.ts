@@ -36,7 +36,7 @@ export interface IPost {
   replies: IReply[];
   sticky: boolean;
   icTag?: "ic" | "ooc";
-  sceneId?: string;
+  sceneId?: string | null;
   tags: string[];
   flags: IFlag[];
   /** Player IDs subscribed to reply notifications. Capped at 50. */

@@ -42,6 +42,6 @@ class IntentRegistry {
   }
 }
 
-export const intentRegistry = IntentRegistry.getInstance();
+export const intentRegistry: IntentRegistry = IntentRegistry.getInstance();
 
 export type { IntentRegistry };

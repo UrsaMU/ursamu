@@ -3,7 +3,15 @@ import { broadcastAll, send } from "./send.ts";
 const _rooms = new Map<string, Set<string>>();
 const _membership = new Map<string, Set<string>>();
 
-export const rooms = {
+export const rooms: {
+  join(socketId: string, room: string): void;
+  leave(socketId: string, room: string): void;
+  leaveAll(socketId: string): void;
+  broadcast(room: string, msg: string, exclude?: string[]): void;
+  members(room: string): string[];
+  roomsOf(socketId: string): string[];
+  broadcastAll(msg: string, exclude?: string[]): void;
+} = {
   join(socketId: string, room: string): void {
     if (!_rooms.has(room)) _rooms.set(room, new Set());
     _rooms.get(room)!.add(socketId);

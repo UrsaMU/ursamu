@@ -27,7 +27,7 @@ async function canAccessBoard(userId: string, board: IBoard): Promise<boolean> {
   if (String(player.flags ?? "").match(/admin|wizard|superuser/)) return true;
   if (board.readLock === "faction" && board.ownerId) {
     const faction = await dbojs.queryOne({ id: board.ownerId });
-    return (faction?.contents ?? []).includes(userId);
+    return ((faction?.contents as string[] | undefined) ?? []).includes(userId);
   }
   return false;
 }
@@ -148,7 +148,7 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
     const num     = await getNextPostNum(board.num);
     const post: IPost = {
       id: crypto.randomUUID(), boardId: board.num, num, subject, body: text,
-      authorId: userId, authorName: player?.name ?? "Unknown",
+      authorId: userId, authorName: (player?.data?.name as string | undefined) ?? "Unknown",
       createdAt: Date.now(), timeout: 0, editCount: 0,
       replies: [], sticky: false, tags: [], flags: [], watchers: [],
     };

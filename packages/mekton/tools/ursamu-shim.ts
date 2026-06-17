@@ -13,13 +13,13 @@
 // straight from @ursamu/mush.
 // deno-lint-ignore-file no-explicit-any
 
-globalThis.__cmds ??= [];
+(globalThis as any).__cmds ??= [];
 
-export const cmds: any[] = globalThis.__cmds;
+export const cmds: any[] = (globalThis as any).__cmds;
 
 export function addCmd(cmd: any): void {
-  globalThis.__cmds ??= [];
-  globalThis.__cmds.push(cmd);
+  (globalThis as any).__cmds ??= [];
+  (globalThis as any).__cmds.push(cmd);
 }
 
 export * from "../../mush/mod.ts";

@@ -100,7 +100,7 @@ Examples:
     const wounds = maxWounds(char);
     await chars.update({ id: char.id }, { chargenStatus: "approved", approvedAt: Date.now(), wounds, luckRemaining: char.stats.luck });
 
-    await reviews.create({ id: crypto.randomUUID(), charId: char.id, reviewerId: u.me.id, reviewerName: u.me.name, action: "approved", timestamp: Date.now() });
+    await reviews.create({ id: crypto.randomUUID(), charId: char.id, reviewerId: u.me.id, reviewerName: u.me.name ?? "Unknown", action: "approved", timestamp: Date.now() });
     u.send(`%cy${target.name}%cn has been %cgapproved%cn.`);
     u.send(`Your character has been %cyapproved!%cn Welcome to the game.`, target.id);
   },
@@ -127,7 +127,7 @@ Examples:
     if (!char) { u.send(`${target.name} has no chargen record.`); return; }
 
     await chars.update({ id: char.id }, { chargenStatus: "revision", reviewNote: note });
-    await reviews.create({ id: crypto.randomUUID(), charId: char.id, reviewerId: u.me.id, reviewerName: u.me.name, action: "rejected", note, timestamp: Date.now() });
+    await reviews.create({ id: crypto.randomUUID(), charId: char.id, reviewerId: u.me.id, reviewerName: u.me.name ?? "Unknown", action: "rejected", note, timestamp: Date.now() });
     u.send(`%cy${target.name}%cn returned for revision.`);
     u.send(`Your character requires revision.%r  Staff note: %cy${note}%cn%r  Fix and re-submit with %cy+chargen/submit%cn.`, target.id);
   },

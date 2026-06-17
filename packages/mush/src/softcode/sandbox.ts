@@ -220,4 +220,4 @@ export class SandboxService {
   }
 }
 
-export const sandboxService = SandboxService.getInstance();
+export const sandboxService: SandboxService = SandboxService.getInstance();

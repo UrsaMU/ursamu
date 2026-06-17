@@ -611,7 +611,7 @@ async function runShowcase(chosen: ShowcaseFile): Promise<void> {
       await chars.create({
         id: "char-" + player.id,
         playerId: player.id,
-        playerName: player.name,
+        playerName: player.name ?? "Unknown",
         stats,
         skills: ch.state?.mekton?.skills ?? {},
         lifepath: ch.state?.mekton?.lifepath ?? {

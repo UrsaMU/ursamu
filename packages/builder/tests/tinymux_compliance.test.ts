@@ -96,7 +96,7 @@ function mockU(opts: {
       target:      async (_me: IDBObj, name: string) => {
         if (name === "me"   || name === me.id)   return me;
         if (name === "here" || name === here.id) return here;
-        return null;
+        return undefined;
       },
       displayName: (o: IDBObj) => o.name ?? o.id ?? "Unknown",
       stripSubs:   (s: string) => s.replace(/%c[a-z]/gi, "").replace(/%[rntb]/gi, ""),
@@ -271,7 +271,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
   it("canonical form obj=ATTR:value sets attribute", async () => {
     const widget = mockThing({ id: "5", state: { owner: "1" } });
     const u = mockU({ args: ["widget=COLOR:red"] });
-    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : null;
+    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : undefined;
     await execSet(u);
     const setCall = u._dbCalls.find(
       (c: unknown[]) => c[1] === "$set" && (c[2] as Record<string, unknown>)["data.COLOR"] === "red",
@@ -283,7 +283,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
   it("canonical form obj=ATTR: (empty value) clears attribute", async () => {
     const widget = mockThing({ id: "5", state: { owner: "1", COLOR: "red" } });
     const u = mockU({ args: ["widget=COLOR:"] });
-    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : null;
+    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : undefined;
     await execSet(u);
     const unsetCall = u._dbCalls.find(
       (c: unknown[]) => c[1] === "$unset" && (c[2] as Record<string, unknown>)["data.COLOR"] !== undefined,
@@ -295,7 +295,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
   it("backward-compat form obj/ATTR=value still works", async () => {
     const widget = mockThing({ id: "5", state: { owner: "1" } });
     const u = mockU({ args: ["widget/COLOR=blue"] });
-    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : null;
+    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : undefined;
     await execSet(u);
     const setCall = u._dbCalls.find(
       (c: unknown[]) => c[1] === "$set" && (c[2] as Record<string, unknown>)["data.COLOR"] === "blue",
@@ -311,7 +311,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
     u.util.target = async (_me: IDBObj, ref: string) => {
       if (ref === "widget") return widget;
       if (ref === "other")  return other;
-      return null;
+      return undefined;
     };
     u.db.search = async () => {
       targetCall++;
@@ -328,7 +328,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
   it("attribute flag form obj/ATTR=hidden stores attrflag", async () => {
     const widget = mockThing({ id: "5", state: { owner: "1" } });
     const u = mockU({ args: ["widget/COLOR=hidden"] });
-    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : null;
+    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : undefined;
     await execSet(u);
     const flagCall = u._dbCalls.find(
       (c: unknown[]) => c[1] === "$set" && JSON.stringify(c[2]).includes("_attrflags"),
@@ -343,7 +343,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
       state: { owner: "1", _attrflags: { COLOR: ["hidden"] } },
     });
     const u = mockU({ args: ["widget/COLOR=!hidden"] });
-    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : null;
+    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : undefined;
     await execSet(u);
     const flagCall = u._dbCalls.find(
       (c: unknown[]) => c[1] === "$set" && JSON.stringify(c[2]).includes("_attrflags"),
@@ -355,7 +355,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
   it("flag mode outputs 'Set.'", async () => {
     const widget = mockThing({ id: "5", state: { owner: "1" } });
     const u = mockU({ args: ["widget=DARK"] });
-    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : null;
+    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : undefined;
     u.setFlags = async () => {};
     await execSet(u);
     assertEquals(u._sent[0], "Set.");
@@ -364,7 +364,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
   it("/quiet suppresses 'Set.' for attribute mode", async () => {
     const widget = mockThing({ id: "5", state: { owner: "1" } });
     const u = mockU({ args: ["widget=COLOR:red"], switches: ["quiet"] });
-    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : null;
+    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : undefined;
     await execSet(u);
     assertEquals(u._sent.length, 0, "/quiet must produce no output");
   });
@@ -372,7 +372,7 @@ describe("@set — TinyMUX: colon syntax, /quiet, copy form, attribute flags, 'S
   it("/quiet suppresses 'Set.' for flag mode", async () => {
     const widget = mockThing({ id: "5", state: { owner: "1" } });
     const u = mockU({ args: ["widget=DARK"], switches: ["quiet"] });
-    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : null;
+    u.util.target = async (_me: IDBObj, ref: string) => ref === "widget" ? widget : undefined;
     u.setFlags = async () => {};
     await execSet(u);
     assertEquals(u._sent.length, 0, "/quiet must suppress output in flag mode");

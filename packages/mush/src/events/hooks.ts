@@ -96,7 +96,7 @@ export const hooks = {
     args:     string[] = [],
     enactor?: IDBOBJ,
     socketId?: string,
-  ) => {
+  ): Promise<void> => {
     const attr = await getAttribute(obj, attrName);
     if (!attr) return;
 
@@ -129,7 +129,7 @@ export const hooks = {
     });
   },
 
-  aconnect: async (player: IDBOBJ, socketId?: string) => {
+  aconnect: async (player: IDBOBJ, socketId?: string): Promise<void> => {
     try {
       await hooks.executeAttribute(player, "ACONNECT", [], player, socketId);
 
@@ -150,7 +150,7 @@ export const hooks = {
     }).catch(e => console.error("[GameHooks] player:login:", e));
   },
 
-  adisconnect: async (player: IDBOBJ, socketId?: string) => {
+  adisconnect: async (player: IDBOBJ, socketId?: string): Promise<void> => {
     try {
       await hooks.executeAttribute(player, "ADISCONNECT", [], player, socketId);
 

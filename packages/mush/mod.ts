@@ -148,7 +148,9 @@ export { target, getAttribute, isNameTaken }                          from "./sr
 
 // Backwards-compat shim — plugins that imported `wsService` before the monorepo split
 import { sessions } from "@ursamu/core";
-export const wsService = {
+export const wsService: {
+  getConnectedSockets(): Array<{ cid: string | undefined; id: string }>;
+} = {
   getConnectedSockets(): Array<{ cid: string | undefined; id: string }> {
     return sessions.list().map((s) => ({
       id: s.socketId,

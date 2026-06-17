@@ -23,7 +23,17 @@ function _unindex(key: string | undefined, socketId: string) {
   }
 }
 
-export const sessions = {
+export const sessions: {
+  open(socketId: string, sessionId: string): ISession;
+  close(socketId: string): void;
+  get(socketId: string): ISession | undefined;
+  getBySession(sessionId: string): ISession | undefined;
+  authenticate(socketId: string, sessionId: string, meta?: Record<string, unknown>): void;
+  setActorId(socketId: string, actorId: string): void;
+  touch(socketId: string): void;
+  list(): ISession[];
+  count(): number;
+} = {
   open(socketId: string, sessionId: string): ISession {
     const s = makeSession(socketId, sessionId);
     _store.set(socketId, s);

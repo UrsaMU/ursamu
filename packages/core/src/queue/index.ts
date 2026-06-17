@@ -162,7 +162,7 @@ export const queue = {
     return n;
   },
 
-  init: () => {
+  init: (): void => {
     kv.listenQueue(async (msg: unknown) => {
       const { pid } = msg as { pid: number };
       const res = await kv.get<IQueueEntry>(["queue", pid]);

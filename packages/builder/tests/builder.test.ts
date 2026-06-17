@@ -70,7 +70,7 @@ function mockU(opts: {
         return [];
       },
       create: async (d: unknown) => {
-        const obj = { ...(d as object), id: "99", name: (d as Record<string, unknown>).state?.name ?? "New", flags: new Set(), contents: [], state: (d as Record<string, unknown>).state ?? {} };
+        const obj = { ...(d as object), id: "99", name: ((d as Record<string, unknown>).state as Record<string, unknown> | undefined)?.name ?? "New", flags: new Set(), contents: [], state: (d as Record<string, unknown>).state ?? {} };
         dbCreated.push(obj);
         return obj;
       },

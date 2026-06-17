@@ -13,21 +13,21 @@
 // straight from @ursamu/mush.
 // deno-lint-ignore-file no-explicit-any
 
-globalThis.__cmds ??= [];
+(globalThis as any).__cmds ??= [];
 
-export const cmds: any[] = globalThis.__cmds;
+export const cmds: any[] = (globalThis as any).__cmds;
 
 export function addCmd(cmd: any): void {
-  globalThis.__cmds ??= [];
-  globalThis.__cmds.push(cmd);
+  (globalThis as any).__cmds ??= [];
+  (globalThis as any).__cmds.push(cmd);
 }
 
-export * from "../../ursamu/packages/mush/mod.ts";
+export * from "../../mush/mod.ts";
 export { header, divider, footer } from "../src/support/format.ts";
 
 import { setTheme } from "@ursamu/globals";
 import { cofdGlobalsOverlay } from "../src/support/theme.ts";
-import { registerFormatHandler } from "../../ursamu/packages/mush/mod.ts";
+import { registerFormatHandler } from "../../mush/mod.ts";
 import { cofdConformatHandler, cofdDescformatHandler } from "../src/support/look_format.ts";
 
 // Apply the CoFD Red/Gold theme overlay.
@@ -38,8 +38,8 @@ registerFormatHandler("CONFORMAT", cofdConformatHandler, { prepend: true });
 registerFormatHandler("DESCFORMAT", cofdDescformatHandler, { prepend: true });
 
 // Load look command from local ursamu core so it's registered for look-conformat showcase.
-import "../../ursamu/packages/mush/src/verbs/look.ts";
-import { cmds as coreCmds } from "../../ursamu/packages/mush/src/commands/addCmd.ts";
+import "../../mush/src/verbs/look.ts";
+import { cmds as coreCmds } from "../../mush/src/commands/addCmd.ts";
 
 for (const c of coreCmds) {
   if (!cmds.includes(c)) cmds.push(c);

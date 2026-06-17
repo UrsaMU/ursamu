@@ -5,10 +5,10 @@
  * Copy this file to your project and modify it to suit your needs.
  */
 
-import { mu, type IConfig } from "../mod.ts";
+import { mu } from "../mod.ts";
 
 
-const config: IConfig = {
+const config: Record<string, unknown> = {
   server: {
     telnet: 4201,
     ws: 4202,

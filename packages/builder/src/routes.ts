@@ -37,7 +37,7 @@ function hasBuilderAccess(flags: string): boolean {
   return f.has("builder") || f.has("admin") || f.has("wizard") || f.has("superuser");
 }
 
-export async function buildingRouteHandler(req: Request, userId: string): Promise<Response> {
+export async function buildingRouteHandler(req: Request, userId: string | null): Promise<Response> {
   if (!userId) return json({ error: "Unauthorized" }, 401);
   const actor = await dbojs.queryOne({ id: userId });
   if (!actor) return json({ error: "Unauthorized" }, 401);

@@ -7,7 +7,7 @@ import { Parser } from "@ursamu/parser";
 import { getQuickJS } from "quickjs-emscripten";
 import type { QuickJSWASMModule } from "quickjs-emscripten";
 
-const parser = new Parser();
+const parser: Parser = new Parser();
 const quickJs: QuickJSWASMModule = await getQuickJS();
 
 let _jsCallCount = 0;
@@ -23,16 +23,17 @@ const evalSafe = (code: string) => {
     vm.runtime.setInterruptHandler(() => Date.now() - start > 50);
     vm.runtime.setMemoryLimit(1024 * 1024);
     const result = vm.evalCode(code);
-    if (result.error) {
+    if ("value" in result) {
+      const value = vm.dump(result.value);
+      result.value.dispose();
+      vm.dispose();
+      return String(value);
+    } else {
       const err = vm.dump(result.error);
       result.error.dispose();
       vm.dispose();
       return `[JS Error: ${(err as any).message || String(err)}]`;
     }
-    const value = vm.dump(result.value);
-    result.value.dispose();
-    vm.dispose();
-    return String(value);
   } catch (e) {
     return `[JS Error: ${e}]`;
   }
@@ -117,7 +118,7 @@ parser.addSubs("html",
   { before: /<#([0-9a-fA-F]{6})>|%[xc]<#([0-9a-fA-F]{6})>/g, after: "<span style='color: #$1$2'>", strip: "" },
 );
 
-export const updateParserSubs = (subs: Record<string, string>) => {
+export const updateParserSubs = (subs: Record<string, string>): void => {
   Object.entries(subs).forEach(([key, value]) => {
     const pattern = new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
     parser.addSubs("telnet", { before: pattern, after: value });

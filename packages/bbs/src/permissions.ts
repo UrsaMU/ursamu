@@ -51,7 +51,7 @@ async function isFactionMember(
   try {
     const faction = await dbojs.queryOne({ id: factionId });
     if (!faction) return false;
-    const contents: string[] = faction.contents ?? [];
+    const contents = (faction?.contents as string[] | undefined) ?? [];
     return contents.includes(playerId);
   } catch {
     return false;

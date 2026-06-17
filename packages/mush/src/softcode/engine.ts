@@ -132,7 +132,7 @@ const bridgeAccessor: ObjectAccessor = {
 
 // ── Engine construction ───────────────────────────────────────────────────────
 
-const _engine = new EvalEngine(bridgeAccessor);
+const _engine: EvalEngine = new EvalEngine(bridgeAccessor);
 
 // Register generic stdlib (math, string, compare, logic, register, iter, db).
 registerStdlib(_engine);

@@ -1,6 +1,6 @@
 import { Tags } from "@digibear/tags";
 
-export const flags = new Tags(
+export const flags: Tags = new Tags(
   { name: "superuser", code: "su",  lvl: 10, lock: "superuser" },
   { name: "admin",     code: "a",   lvl: 9,  lock: "superuser" },
   { name: "wizard",    code: "wiz", lvl: 9,  lock: "superuser" },

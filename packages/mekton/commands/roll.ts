@@ -69,7 +69,7 @@ Examples:
     const summary = `${u.me.name} rolled ${statKey.toUpperCase()}(${statValue})+${skillName}(${skillValue})+d10 = ${result.total}${difficulty ? ` vs ${difficulty} — ${success ? "SUCCESS" : "FAIL"}` : ""}.`;
     emitRollEvent({
       playerId: u.me.id,
-      playerName: u.me.name,
+      playerName: u.me.name ?? "Unknown",
       roomId: u.me.location ?? u.me.id,
       statName: statKey,
       skillName,

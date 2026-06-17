@@ -14,7 +14,7 @@ export const jobAccess = new DBO<IJobAccess>("server.jobs_access");
 // Access the shared server.counters KV collection for atomic job-number generation.
 // Creating a DBO handle here is safe — atomicIncrement uses Deno KV atomics
 // and multiple handles on the same collection key are guaranteed consistent.
-const _counters = new DBO<Record<string, unknown>>("server.counters");
+const _counters = new DBO<{ id: string; value: number }>("server.counters");
 
 /** Atomically increment and return the next sequential job number (1, 2, 3, …). */
 export function getNextJobNumber(): Promise<number> {
