@@ -1,4 +1,4 @@
-import { dpath } from "../../../deps.ts";
+import { dirname, fromFileUrl, join } from "@std/path";
 import { getConfig, initConfig } from "@ursamu/core";
 import { parser } from "@ursamu/mush";
 import {
@@ -53,7 +53,7 @@ export const startTelnetServer = async (options?: {
   let __dirname;
   try {
     if (import.meta.url.startsWith("file://")) {
-      __dirname = dpath.dirname(dpath.fromFileUrl(import.meta.url));
+      __dirname = dirname(fromFileUrl(import.meta.url));
     } else {
       __dirname = Deno.cwd();
     }
@@ -62,7 +62,7 @@ export const startTelnetServer = async (options?: {
   }
   
   const projectRoot = import.meta.url.startsWith("file://") ? 
-    dpath.dirname(dpath.dirname(dpath.dirname(__dirname))) : Deno.cwd();
+    dirname(dirname(dirname(__dirname))) : Deno.cwd();
 
   try {
     // Try multiple possible locations for the welcome file
@@ -70,15 +70,15 @@ export const startTelnetServer = async (options?: {
       // Absolute path
       welcomeFile.startsWith('/') ? welcomeFile : null,
       // Relative to CWD (where the game process is launched from — highest priority)
-      dpath.join(Deno.cwd(), welcomeFile),
+      join(Deno.cwd(), welcomeFile),
       // Relative to project root (engine monorepo root)
-      dpath.join(projectRoot, welcomeFile),
+      join(projectRoot, welcomeFile),
       // Relative to text directory in project root
-      dpath.join(projectRoot, 'text', welcomeFile.split('/').pop() || ''),
+      join(projectRoot, 'text', welcomeFile.split('/').pop() || ''),
       // Default fallback
-      dpath.join(projectRoot, 'text/default_connect.txt'),
+      join(projectRoot, 'text/default_connect.txt'),
       // Another fallback
-      dpath.join(__dirname, '../../../text/default_connect.txt')
+      join(__dirname, '../../../text/default_connect.txt')
     ].filter(Boolean) as string[];
 
     let welcomePath: string | null = null;
