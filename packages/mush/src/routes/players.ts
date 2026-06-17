@@ -8,7 +8,7 @@
  *   GET /api/v1/channels/:id/history        — channel message history (auth required)
  */
 
-import { dbojs, chans, chanHistory, Obj } from "@ursamu/mush";
+import { dbojs, chans, chanHistory, Obj } from "../world/dbobjs.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 

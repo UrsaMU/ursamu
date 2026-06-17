@@ -14,8 +14,9 @@
  *   PATCH  /api/v1/scenes/:id         — update scene metadata / status
  */
 
-import { dbojs, scenes, Obj, evaluateLock, hydrate, gameHooks } from "@ursamu/mush";
-import { send } from "@ursamu/core";
+import { dbojs, scenes, Obj, hydrate } from "../world/dbobjs.ts";
+import { evaluateLock } from "../world/locks.ts";
+import { send, gameHooks } from "@ursamu/core";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -123,7 +124,7 @@ export async function sceneHandler(req: Request, userId: string): Promise<Respon
     const user = await Obj.get(userId);
     if (!user) return new Response("Unauthorized", { status: 401 });
 
-    const { counters } = await import("@ursamu/mush");
+    const { counters } = await import("../world/dbobjs.ts");
     const counter = await counters.queryOne({ id: "sceneid" });
     const id      = String((counter?.value ?? 0) + 1);
     await counters.modify({ id: "sceneid" }, "$set", { id: "sceneid", value: parseInt(id, 10) });
