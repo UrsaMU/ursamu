@@ -7,7 +7,10 @@
     "test": "deno test -A --unstable-kv",
     "showcase": "deno run -A --unstable-kv --import-map=showcase.importmap.json tools/showcase.ts"
   },
-  "exclude": [".claude/", "data/"],
+  "exclude": [
+    ".claude/",
+    "data/"
+  ],
   "publish": {
     "include": [
       "src",
@@ -24,17 +27,15 @@
       "ursamu.plugin.json",
       "README.md"
     ],
-    "exclude": ["tests", "tools", "showcases", "docs"]
+    "exclude": [
+      "tests",
+      "tools",
+      "showcases",
+      "docs"
+    ]
   },
   "imports": {
     "ursamu": "../mush/mod.ts",
-    "@ursamu/ursamu": "../mush/mod.ts",
-    "@ursamu/mush": "../mush/mod.ts",
-    "@ursamu/core": "../core/mod.ts",
-    "@ursamu/cli": "../cli/mod.ts",
-    "@ursamu/globals": "./tests/helpers/globals-shim.ts",
-    "@ursamu/help-plugin": "../help/mod.ts",
-    "@ursamu/jobs-plugin": "../jobs/mod.ts",
     "@ursamu/mail-plugin": "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v2.3.1/index.ts",
     "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.6.0",
     "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.6.0/eval",

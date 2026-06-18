@@ -61,7 +61,8 @@
     "boundaries": "deno run -A tools/check-boundaries.ts",
     "packages:test": "deno test packages/*/tests/ --allow-all --unstable-kv --no-check",
     "packages:check": "deno check packages/core/mod.ts packages/mush/mod.ts --unstable-kv",
-    "packages:lint": "deno lint packages/"
+    "packages:lint": "deno lint packages/",
+    "publish:all": "deno run -A scripts/publish-all.ts"
   },
   "compilerOptions": {
     "lib": ["deno.window", "deno.unstable"]
