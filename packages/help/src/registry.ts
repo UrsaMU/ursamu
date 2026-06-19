@@ -106,7 +106,7 @@ export class HelpRegistry {
 }
 
 /** Singleton registry shared across all providers and commands. */
-export const helpRegistry = new HelpRegistry();
+export const helpRegistry: HelpRegistry = new HelpRegistry();
 
 /**
  * Register a single help entry at runtime (does not persist — use DbProvider
