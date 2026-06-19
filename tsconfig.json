@@ -7,6 +7,7 @@
       "ursamu/jobs": ["./packages/jobs/mod.ts"],
       "@ursamu/jobs": ["./packages/jobs/mod.ts"],
       "@ursamu/core": ["./packages/core/mod.ts"],
+      "@ursamu/mush": ["./packages/mush/mod.ts"],
       "@ursamu/bbs": ["./packages/bbs/mod.ts"],
       "@ursamu/wiki": ["./packages/wiki/mod.ts"],
       "@ursamu/cli": ["./packages/cli/mod.ts"],
