@@ -22,18 +22,34 @@ export class InterceptorService {
    * @returns Promise<boolean> True if the intent should proceed, false if it was halted.
    */
   static async intercept(intent: Intent, candidates: InterceptorCandidate[]): Promise<boolean> {
+    // Fast path: most commands have no interceptors — do no work (and no
+    // serialization) when there are none.
+    if (!candidates.length) return true;
+
     const order = intentRegistry.getInterceptorOrder();
     const sortedCandidates = order === "FIFO" ? candidates : [...candidates].reverse();
 
+    // Serialize the intent ONCE — it is loop-invariant. JSON.stringify already
+    // drops `undefined` and rejects BigInt, so the old parse(stringify())+
+    // stringify() round-trip (run per candidate) was redundant. Guard it so a
+    // non-serializable intent doesn't throw past the loop.
+    let intentJson: string;
+    try {
+      intentJson = JSON.stringify(intent ?? null);
+    } catch (err) {
+      console.error("Interceptor: intent is not JSON-serializable, skipping interceptors:", err);
+      return true;
+    }
+    const targetArg = intent.targetId ? { id: intent.targetId } : undefined;
+
     for (const candidate of sortedCandidates) {
-      // We run the script in the sandbox. 
-      // The script should return 'false' or call a specific u method to halt.
-      
+      // Run the script in the sandbox; it should return 'false' or call a
+      // specific u method to halt the intent.
       const wrapperCode = `
         ${candidate.script}
         // If an intercept function is defined, call it.
         if (typeof u.intercept === 'function') {
-          return u.intercept(${JSON.stringify(intent)});
+          return u.intercept(${intentJson});
         }
       `;
 
@@ -41,7 +57,7 @@ export class InterceptorService {
         const result = await sandboxService.runScript(wrapperCode, {
           id: candidate.id,
           state: candidate.state,
-          target: intent.targetId ? { id: intent.targetId } : undefined
+          target: targetArg,
         });
 
         // If any interceptor returns exactly 'false', the intent is halted.

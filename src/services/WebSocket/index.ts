@@ -153,18 +153,35 @@ export class WebSocketService {
                         const { verify } = await import("../jwt/index.ts");
                         const decoded = await verify(data.token);
                         if (decoded && typeof decoded.id === "string") {
-                            sockData.cid = decoded.id;
-                            const player = await playerForSocket(sockData);
-                            if (player) {
-                                if (!player.flags.includes("connected")) {
-                                    await setFlags(player, "connected");
-                                }
-                                // Re-subscribe to broadcast channels — same as u.auth.login.
-                                // Without these, u.here.broadcast / room messages never
-                                // reach the reconnected socket.
-                                sockData.join(`#${sockData.cid}`);
-                                if (player.location) sockData.join(`#${player.location}`);
+                            // Verify the user still exists before accepting the
+                            // cid — otherwise a token signed for a deleted account
+                            // permanently authenticates the socket.
+                            //
+                            // cid is assigned LAST — only after the player is
+                            // verified, flagged `connected`, and joined to its
+                            // rooms. Assigning it earlier opens a race: frames
+                            // sent back-to-back on the same socket on reconnect
+                            // (e.g. the telnet sidecar's auto-`look`) can dispatch
+                            // while cid is already truthy but the player is not yet
+                            // `connected`, failing the command's `connected` lock
+                            // and surfacing as "Huh? Type 'help' for help." Until
+                            // cid is set, any racing frame sees an empty cid and is
+                            // silently ignored (the Huh guard requires a cid).
+                            const { dbojs } = await import("../Database/index.ts");
+                            const player = await dbojs.queryOne({ id: decoded.id });
+                            if (!player) {
+                                console.warn(`[WS] JWT for nonexistent user ${decoded.id} — rejected`);
+                                return;
                             }
+                            if (!player.flags.includes("connected")) {
+                                await setFlags(player, "connected");
+                            }
+                            sockData.cid = decoded.id;
+                            // Re-subscribe to broadcast channels — same as u.auth.login.
+                            // Without these, u.here.broadcast / room messages never
+                            // reach the reconnected socket.
+                            sockData.join(`#${sockData.cid}`);
+                            if (player.location) sockData.join(`#${player.location}`);
                             console.log(`[WS] Authenticated socket via auth message (cid: ${sockData.cid})`);
                         }
                     } catch {
@@ -172,6 +189,13 @@ export class WebSocketService {
                     }
                     return;
                 }
+
+                // NOTE: the legacy `data.data.cid` session-restore path was
+                // removed in v2.7.0. It let any client claim an arbitrary cid
+                // without authentication. Session restore now goes exclusively
+                // through the JWT auth message above ({ type: "auth", token });
+                // the telnet sidecar replays its issued sessionToken on
+                // reconnect, so no unauthenticated cid claim is ever accepted.
 
                 // Handle disconnect request
                 if (data.data?.disconnect) {
@@ -238,7 +262,7 @@ export class WebSocketService {
 
                     if (player.location) {
                         const roomPlayers = await dbojs.query({
-                            $and: [{ location: player.location }, { flags: /connected/i }, { id: { $ne: player.id } }]
+                            $and: [{ location: player.location }, { flags: /\bconnected\b/i }, { id: { $ne: player.id } }]
                         });
 
                         this.send(
@@ -358,6 +382,17 @@ export class WebSocketService {
             if (meta.cid === cid) {
                 socket.close();
             }
+        }
+    }
+
+    /**
+     * Close every connected socket with a clean close frame. Used on graceful
+     * shutdown so clients detect the drop and reconnect, instead of being left
+     * with a half-open (frozen) WebSocket after a restart.
+     */
+    closeAll(): void {
+        for (const [socket] of this.socketData.entries()) {
+            try { socket.close(1001, "Server restarting"); } catch { /* already closing */ }
         }
     }
 }

@@ -63,31 +63,37 @@ register("strtrunc", async (a) => {
 
 // ── padding / justification ───────────────────────────────────────────────
 
+// Cap user-controlled widths so a single softcode call can't allocate
+// hundreds of MB. 8 KiB is far larger than any realistic MUSH output line
+// but small enough to bound memory.
+const MAX_PAD_WIDTH = 10_000;
+const capW = (w: number) => Math.max(0, Math.min(w, MAX_PAD_WIDTH));
+
 register("ljust",  async (a) => {
-  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = capW(int(a[1])); const fill = a[2]?.[0] ?? " ";
   return s.padEnd(w, fill).slice(0, Math.max(w, s.length));
 });
 register("rjust",  async (a) => {
-  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = capW(int(a[1])); const fill = a[2]?.[0] ?? " ";
   return s.padStart(w, fill).slice(-Math.max(w, s.length));
 });
 register("center", async (a) => {
-  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = capW(int(a[1])); const fill = a[2]?.[0] ?? " ";
   const total = Math.max(w - s.length, 0);
   const left  = Math.floor(total / 2);
   const right = total - left;
   return fill.repeat(left) + s + fill.repeat(right);
 });
 register("lpad", async (a) => {
-  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = capW(int(a[1])); const fill = a[2]?.[0] ?? " ";
   return s.padStart(w, fill);
 });
 register("rpad", async (a) => {
-  const s = a[0] ?? ""; const w = clampLen(int(a[1])); const fill = a[2]?.[0] ?? " ";
+  const s = a[0] ?? ""; const w = capW(int(a[1])); const fill = a[2]?.[0] ?? " ";
   return s.padEnd(w, fill);
 });
 register("cpad", async (a) => {
-  const s = a[0] ?? ""; const w = clampLen(int(a[1]));
+  const s = a[0] ?? ""; const w = capW(int(a[1]));
   const total = Math.max(w - s.length, 0);
   return " ".repeat(Math.floor(total/2)) + s + " ".repeat(total - Math.floor(total/2));
 });
@@ -124,8 +130,16 @@ register("footer", async (a) => {
 
 // ── space / repeat ────────────────────────────────────────────────────────
 
-register("space",  async (a) => " ".repeat(clampLen(int(a[0]))));
-register("repeat", async (a) => (a[0] ?? "").repeat(clampLen(int(a[1]))));
+register("space",  async (a) => " ".repeat(capW(int(a[0]))));
+register("repeat", async (a) => {
+  // Cap on OUTPUT bytes, not on count: the source string can be large and
+  // the count cap alone would otherwise allow a huge allocation.
+  const src   = a[0] ?? "";
+  const count = capW(int(a[1]));
+  if (!src) return "";
+  const maxRepetitions = Math.max(0, Math.floor(MAX_PAD_WIDTH / Math.max(1, src.length)));
+  return src.repeat(Math.min(count, maxRepetitions));
+});
 
 // ── reverse ───────────────────────────────────────────────────────────────
 
@@ -234,7 +248,11 @@ register("regrab",    async (a) => {
   const m = safeRegexExec(a[0], a[1], false);
   return m ? m[int(a[2] ?? "0")] ?? "" : "";
 });
-register("regraball", async (a) => {
+// Cap match count: a regex like `regraball("a".repeat(1e6), "a")` would
+// otherwise allocate a million-entry array from a single call.
+const REGRABALL_MAX = 10_000;
+
+register("regraball", async (a, ctx) => {
   const matches: string[] = [];
   const re = buildRe(a[1], false);
   if (!re) return "";
@@ -243,10 +261,12 @@ register("regraball", async (a) => {
   while ((m = re.exec(src)) !== null) {
     matches.push(m[int(a[2] ?? "0")] ?? "");
     if (!re.global) break;
+    if (matches.length >= REGRABALL_MAX) break;
+    if ((matches.length & 0x3ff) === 0 && Date.now() >= ctx.deadline) break;
   }
   return matches.join(a[3] ?? " ");
 });
-register("regraballi", async (a) => {
+register("regraballi", async (a, ctx) => {
   const matches: string[] = [];
   const re = buildRe(a[1], true);
   if (!re) return "";
@@ -255,6 +275,8 @@ register("regraballi", async (a) => {
   while ((m = re.exec(src)) !== null) {
     matches.push(m[int(a[2] ?? "0")] ?? "");
     if (!re.global) break;
+    if (matches.length >= REGRABALL_MAX) break;
+    if ((matches.length & 0x3ff) === 0 && Date.now() >= ctx.deadline) break;
   }
   return matches.join(a[3] ?? " ");
 });
@@ -378,12 +400,29 @@ register("beep", async () => "");  // no-op in WebSocket context
 
 // ── internal helpers ──────────────────────────────────────────────────────
 
+// Compiled-regex cache shared by the stateless (no "g" flag) softcode regex
+// helpers below — softcode matches the same patterns repeatedly. Caches compile
+// FAILURES (null) too so invalid patterns aren't retried. Bounded to cap growth.
+// NOTE: buildRe() is deliberately NOT cached — it uses the global flag, whose
+// lastIndex state must not be shared across calls.
+const _reCache = new Map<string, RegExp | null>();
+function compileCached(source: string, flags: string): RegExp | null {
+  const key = flags + " " + source;
+  if (_reCache.has(key)) return _reCache.get(key) ?? null;
+  let re: RegExp | null;
+  try { re = new RegExp(source, flags); } catch { re = null; }
+  if (_reCache.size >= 1000) _reCache.clear();
+  _reCache.set(key, re);
+  return re;
+}
+
 function globMatch(s: string, pat: string, caseInsensitive: boolean): boolean {
-  const re = "^" + pat
+  const src = "^" + pat
     .replace(/[.+^${}()|[\]\\]/g, "\\$&")
     .replace(/\*/g, ".*")
     .replace(/\?/g, ".") + "$";
-  return new RegExp(re, caseInsensitive ? "i" : "").test(s);
+  const re = compileCached(src, caseInsensitive ? "i" : "");
+  return re ? re.test(s) : false;
 }
 
 function buildRe(pattern: string, i: boolean): RegExp | null {
@@ -392,13 +431,13 @@ function buildRe(pattern: string, i: boolean): RegExp | null {
 }
 
 function safeRegex(s: string, pattern: string, i: boolean): boolean {
-  try { return new RegExp(pattern, i ? "i" : "").test(s); }
-  catch { return false; }
+  const re = compileCached(pattern, i ? "i" : "");
+  return re ? re.test(s) : false;
 }
 
 function safeRegexExec(s: string, pattern: string, i: boolean): RegExpExecArray | null {
-  try { return new RegExp(pattern, i ? "i" : "").exec(s); }
-  catch { return null; }
+  const re = compileCached(pattern, i ? "i" : "");
+  return re ? re.exec(s) : null;
 }
 
 // ── Phonetic matching ─────────────────────────────────────────────────────

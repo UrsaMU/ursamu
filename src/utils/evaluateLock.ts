@@ -1,12 +1,11 @@
 import { sandboxService } from "../services/Sandbox/SandboxService.ts";
-
-const MAX_LOCK_DEPTH = 10;
 import { flags } from "../services/flags/flags.ts";
 import type { IDBOBJ } from "../@types/IDBObj.ts";
 import type { IDBObj } from "../@types/UrsamuSDK.ts";
 import { Obj } from "../services/DBObjs/DBObjs.ts";
 import { callLockFunc } from "./lockFuncs.ts";
 
+const MAX_LOCK_DEPTH = 10;
 const MAX_LOCK_LENGTH = 4096;
 
 export const evaluateLock = async (
@@ -15,9 +14,16 @@ export const evaluateLock = async (
   target: IDBObj,
   depth = 0
 ): Promise<boolean> => {
-  if (depth > MAX_LOCK_DEPTH) return false;
+  if (depth > MAX_LOCK_DEPTH) return false; // Prevent infinite recursion
   if (lockStr.length > MAX_LOCK_LENGTH) return false;
-  return await parseLock(lockStr, enactor, target, false, depth);
+  try {
+    return await parseLock(lockStr, enactor, target, false, depth);
+  } catch (_e: unknown) {
+    // Fail closed: any error during evaluation (e.g. a throwing `[...]` lock
+    // script) denies access rather than escaping as a rejected promise into
+    // the command-dispatch path. Mirrors callLockFunc's fail-closed contract.
+    return false;
+  }
 };
 
 export const validateLock = async (lockStr: string): Promise<boolean> => {
@@ -41,14 +47,24 @@ const parseLock = async (
   const tokens = tokenize(lockStr);
   if (tokens.length > 256) return validationMode ? true : false;
   let pos = 0;
+  // Mutable skip flag: when true, parsers walk tokens to advance `pos` but
+  // suppress side-effects (script execution, atom checks). Used by
+  // parseAnd/parseOr to short-circuit the right operand once the left has
+  // settled the result. Without short-circuiting, a lock string like
+  // `wizard | [evil_script]` would always run the script even when
+  // `wizard` already passed.
+  let skip = false;
 
   const parseOr = async (): Promise<boolean> => {
     let left = await parseAnd();
     while (pos < tokens.length && (tokens[pos] === "|" || tokens[pos] === "||")) {
-        pos++;
-        const right = await parseAnd();
-        if (validationMode) left = true;
-        else left = left || right;
+      pos++;
+      const wasSkip = skip;
+      if (left && !validationMode) skip = true;
+      const right = await parseAnd();
+      skip = wasSkip;
+      if (validationMode) left = true;
+      else if (!skip) left = left || right;
     }
     return left;
   };
@@ -57,9 +73,12 @@ const parseLock = async (
     let left = await parseNot();
     while (pos < tokens.length && (tokens[pos] === "&" || tokens[pos] === "&&")) {
       pos++;
+      const wasSkip = skip;
+      if (!left && !validationMode) skip = true;
       const right = await parseNot();
+      skip = wasSkip;
       if (validationMode) left = true;
-      else left = left && right;
+      else if (!skip) left = left && right;
     }
     return left;
   };
@@ -74,7 +93,7 @@ const parseLock = async (
 
   const parsePrimary = async (): Promise<boolean> => {
     if (pos >= tokens.length) return false;
-    
+
     // Trim the token to handle leading whitespace from tokenizer
     const token = tokens[pos].trim();
     pos++;
@@ -88,7 +107,7 @@ const parseLock = async (
     }
 
     if (token.startsWith("[")) {
-      if (validationMode) return true;
+      if (validationMode || skip) return true;
       // Script Engine evaluation
       if (!enactor || !target) return false;
 
@@ -98,11 +117,11 @@ const parseLock = async (
         state: enactor.state || {},
         target: target ? { id: target.id } : undefined
       });
-      return !!result && result !== "0" && result !== ""; 
+      return !!result && result !== "0" && result !== "";
     }
 
     // Direct Check (Flag, ID, etc)
-    if (validationMode) return true;
+    if (validationMode || skip) return true;
     if (!enactor || !target) return false;
     return checkAtom(token, enactor, target, depth, validationMode);
   };
@@ -117,16 +136,25 @@ const tokenize = (str: string): string[] => {
 
   for (let i = 0; i < str.length; i++) {
     const char = str[i];
-    
+
     if (char === "[") {
       depth++;
       current += char;
     } else if (char === "]") {
-      depth--;
-      current += char;
-      if (depth === 0) {
-        tokens.push(current);
-        current = "";
+      // Clamp depth at 0 so a stray `]` (unbalanced lock string from a
+      // user-set @lock) doesn't make depth go negative — the previous
+      // code's `depth === 0` then `depth > 0` checks both failed for
+      // negative values, so subsequent operators (`&|!()`) were treated
+      // as literals and the lock parsed wrong.
+      if (depth > 0) {
+        depth--;
+        current += char;
+        if (depth === 0) {
+          tokens.push(current);
+          current = "";
+        }
+      } else {
+        current += char;
       }
     } else if (depth > 0) {
       current += char;
@@ -173,8 +201,8 @@ const tokenize = (str: string): string[] => {
   return tokens;
 };
 
-const checkAtom = async (atom: string, enactor: IDBObj, target: IDBObj, depth: number, validationMode: boolean): Promise<boolean> => {
-  if (depth > 10) return false;
+const checkAtom = async (atom: string, enactor: IDBObj, _target: IDBObj, depth: number, validationMode: boolean): Promise<boolean> => {
+  if (depth > 10) return false; // Prevent deep recursion in atom checks
   atom = atom.trim();
 
   const funcMatch = atom.match(/^([a-z_][a-z0-9_]*)\(([^)]*)\)$/i);
@@ -182,11 +210,11 @@ const checkAtom = async (atom: string, enactor: IDBObj, target: IDBObj, depth: n
     if (validationMode) return true;
     const name = funcMatch[1].toLowerCase();
     const args = funcMatch[2].split(",").map((s) => s.trim()).filter(Boolean);
-    return callLockFunc(name, enactor, target, args);
+    return callLockFunc(name, enactor, _target, args);
   }
 
   // Power/Flag Check
-  if (atom.startsWith("+") || atom.match(/^[a-zA-Z0-9_+]+$/)) { 
+  if (atom.startsWith("+") || atom.match(/^[a-zA-Z0-9_+]+$/)) {
     const flagName = atom.startsWith("+") ? atom.slice(1) : atom;
     // Check if it's a flag/power/tag.
     // The tags/flags system usually checks the actor.
@@ -197,13 +225,13 @@ const checkAtom = async (atom: string, enactor: IDBObj, target: IDBObj, depth: n
   if (atom.startsWith("#")) {
     return enactor.id === atom.slice(1);
   }
-  
+
   // Attribute Check (attr:value)
   if (atom.includes(":")) {
     const [attr, val] = atom.split(":");
     const actualVal = enactor.state?.[attr.toLowerCase()];
     if (actualVal === undefined) return false;
-    
+
     // Comparison operators: attr:>5, attr:>=10, attr:<3, attr:<=100
     const cmpMatch = val.match(/^(>=|<=|>|<)(.+)$/);
     if (cmpMatch) {
@@ -219,9 +247,9 @@ const checkAtom = async (atom: string, enactor: IDBObj, target: IDBObj, depth: n
     }
     return String(actualVal) === val;
   }
-  
+
   // Indirect Lock (@#123) - Check the lock ON #123 (uses #123's Basic Lock)
-  if (atom.startsWith("@#") || (atom.startsWith("@") && !atom.includes("/"))) { 
+  if (atom.startsWith("@#") || (atom.startsWith("@") && !atom.includes("/"))) {
       const id = atom.startsWith("@#") ? atom.slice(2) : atom.slice(1);
       const tarObj = await Obj.get(id);
       if (tarObj) {
@@ -239,7 +267,7 @@ const checkAtom = async (atom: string, enactor: IDBObj, target: IDBObj, depth: n
             return await evaluateLock(lock, enactor, hydratedTar, depth + 1);
           }
       }
-      return false; 
+      return false;
   }
 
   return false;

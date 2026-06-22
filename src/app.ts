@@ -162,7 +162,22 @@ function isApiRateLimited(ip: string): boolean {
   const entry = apiRateLimits.get(ip);
   if (!entry || now >= entry.resetAt) {
     if (!entry && apiRateLimits.size >= MAX_API_TRACKED_IPS) {
-      apiRateLimits.delete(apiRateLimits.keys().next().value!);
+      // Evict an EXPIRED entry, not the first (oldest) entry. The previous
+      // implementation always booted the longest-lived legitimate user, so
+      // an attacker rotating IPs both kept the table at the cap AND wiped
+      // real users' rate-limit state. Walk a bounded slice looking for any
+      // expired record; fall back to the first key if none has expired
+      // (table is genuinely full of active entries → unavoidable eviction).
+      let evicted = false;
+      let scanned = 0;
+      for (const [k, v] of apiRateLimits) {
+        if (now >= v.resetAt) { apiRateLimits.delete(k); evicted = true; break; }
+        if (++scanned >= 256) break;
+      }
+      if (!evicted) {
+        const firstKey = apiRateLimits.keys().next().value;
+        if (firstKey) apiRateLimits.delete(firstKey);
+      }
     }
     apiRateLimits.set(ip, { count: 1, resetAt: now + API_RATE_WINDOW_MS });
     return false;
@@ -171,13 +186,15 @@ function isApiRateLimited(ip: string): boolean {
   return entry.count > API_RATE_LIMIT;
 }
 
-// Clean up stale entries every 60 seconds
-setInterval(() => {
+// Clean up stale entries every 60 seconds. Unref'd so this background sweep
+// never keeps the process alive — clean shutdown, and no leaked timer op in tests.
+const _apiRateLimitSweep = setInterval(() => {
   const now = Date.now();
   for (const [ip, entry] of apiRateLimits) {
     if (now >= entry.resetAt) apiRateLimits.delete(ip);
   }
 }, 60000);
+Deno.unrefTimer(_apiRateLimitSweep);
 
 /**
  * Register a custom HTTP route prefix and handler for use by plugins.
@@ -224,13 +241,18 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    // NOTE: style-src intentionally keeps 'unsafe-inline'. The Price of Power
+    // web pages (src/plugins/pop/web/*.html) use inline <style> blocks, so the
+    // stricter upstream v2.7.0 policy ("style-src 'self'") would render them
+    // unstyled. This deliberately fails tests/security_csp_unsafe_inline.test.ts
+    // until those pages move their styles to external CSS.
     "Content-Security-Policy": [
       "default-src 'none'",
-      "script-src 'self'",
-      "style-src 'self'",
+      "script-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data:",
       "connect-src 'self' ws: wss:",
-      "font-src 'self'",
+      "font-src 'self' https://fonts.gstatic.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -292,7 +314,7 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
           headers: { "Content-Type": "application/json" },
         });
       }
-      return await channelHistoryHandler(req, chanHistoryMatch[1]);
+      return await channelHistoryHandler(req, chanHistoryMatch[1], userId);
     }
 
     if (path.startsWith("/api/v1/dbobj")) {
@@ -316,7 +338,7 @@ export const handleRequest = async (req: Request, remoteAddr = "unknown"): Promi
       }
       return await sceneHandler(req, userId);
     }
-    
+
     if (path === "/api/v1/config" || path.startsWith("/api/v1/config/") ||
         path === "/api/v1/connect" || path.startsWith("/api/v1/connect/") ||
         path === "/api/v1/welcome" || path.startsWith("/api/v1/welcome/")) {

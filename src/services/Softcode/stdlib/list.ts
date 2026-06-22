@@ -30,6 +30,10 @@ register("extract", async (a) => {
   const list  = split(a[0] ?? "", a[3]);
   const start = int(a[1]) - 1;
   const len   = int(a[2] ?? "1");
+  // Positions are 1-based; a position < 1 (start < 0) is invalid. Guard it so
+  // it returns empty rather than letting Array.slice's negative-index
+  // semantics extract from the END of the list. (Matches ldelete/insert.)
+  if (start < 0 || len <= 0) return "";
   return join(list.slice(start, start + len), a[3]);
 });
 register("elements", async (a) => {
@@ -43,12 +47,19 @@ register("member", async (a) => {
   const i    = list.findIndex(x => x.toLowerCase() === el.toLowerCase());
   return String(i === -1 ? 0 : i + 1);
 });
-register("lnum", async (a) => {
+register("lnum", async (a, ctx) => {
   const start = a[1] !== undefined ? int(a[0]) : 0;
   const end   = a[1] !== undefined ? int(a[1]) : int(a[0]) - 1;
   const step  = int(a[2] ?? "1") || 1;
+  // Cap output count: an unbounded `lnum(0, 1000000000)` would allocate a
+  // billion strings before the worker's 100ms deadline fires. The deadline
+  // check below adds a fast-bail when the budget is already exhausted.
+  const MAX_LNUM = 10_000;
   const out: string[] = [];
-  for (let i = start; i <= end; i += step) out.push(String(i));
+  for (let i = start; i <= end && out.length < MAX_LNUM; i += step) {
+    if ((out.length & 0x3ff) === 0 && Date.now() >= ctx.deadline) break;
+    out.push(String(i));
+  }
   return join(out, a[3]);
 });
 

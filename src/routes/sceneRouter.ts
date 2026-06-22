@@ -32,10 +32,9 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
       const user = await Obj.get(userId);
       if (!user) return new Response("Unauthorized", { status: 401 });
 
-      // Fetch all rooms - broadening query to debug
-      // Regex query might be failing?
-      const allObjects = await dbojs.query({});
-      const rooms = allObjects.filter(o => hasFlag(o.flags, "room"));
+      // Fetch only rooms. (Was a full object-table scan + JS filter per
+      // request; query by the room flag so the DB layer narrows + caches it.)
+      const rooms = await dbojs.query({ flags: /\broom\b/i });
       
       
       const accessibleRooms: {id: string, name: string, type: "public" | "private"}[] = [];
@@ -177,21 +176,30 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
               }
           }
 
+          // Build a response copy — DON'T mutate the live `scene` reference.
+          // The previous direct assignments to scene.participantsDetails /
+          // scene.locationDetails polluted the DB query cache (those fields
+          // would persist on the next full-object writeback).
+          const sceneResponse: IScene & {
+              participantsDetails?: { id: string; name: string; moniker?: string; }[];
+              locationDetails?: { name: string; id: string };
+          } = { ...scene };
+
           // Populate participant names
           const participantsDetails: { id: string; name: string; moniker?: string; }[] = [];
           if (scene.participants) {
               for (const pId of scene.participants) {
                   const pObj = await Obj.get(pId);
                   if (pObj) {
-                      participantsDetails.push({ 
-                          id: pObj.dbref, 
+                      participantsDetails.push({
+                          id: pObj.dbref,
                           name: pObj.name || "Unknown",
-                          moniker: pObj.data?.moniker as string | undefined 
+                          moniker: pObj.data?.moniker as string | undefined
                       });
                   }
               }
           }
-          scene.participantsDetails = participantsDetails;
+          sceneResponse.participantsDetails = participantsDetails;
 
           // Populate location details
           if (scene.location) {
@@ -201,14 +209,14 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
               }
               const locObj = await Obj.get(locId);
               if (locObj) {
-                  scene.locationDetails = {
+                  sceneResponse.locationDetails = {
                       name: locObj.name || "Unknown Location",
                       id: locObj.dbref
                   };
               }
           }
 
-          return new Response(JSON.stringify(scene), {
+          return new Response(JSON.stringify(sceneResponse), {
               status: 200,
               headers: { "Content-Type": "application/json" }
           });
@@ -302,20 +310,16 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
               timestamp: Date.now()
           };
 
-          // Add pose to scene
-          if (!scene.poses) scene.poses = [];
-          if (!scene.participants) scene.participants = [];
-          scene.poses.push(newPose);
-          // Add participant if not already there
-          if (!scene.participants.includes(user.dbref)) {
-              scene.participants.push(user.dbref);
+          // Atomic append — two simultaneous poses on the same scene used to
+          // race read-modify-write on `scene.poses` and lose one. $push uses
+          // a CAS retry loop so concurrent writers serialize.
+          await scenes.modify({ id: sceneId }, "$push", { poses: newPose } as never);
+          // Participant list is low-traffic; only $push if missing. The
+          // small window between query and push can yield a duplicate entry,
+          // which consumers should dedupe on read.
+          if (!scene.participants?.includes(user.dbref)) {
+              await scenes.modify({ id: sceneId }, "$push", { participants: user.dbref } as never);
           }
-
-          // Update DB
-          await scenes.modify({ id: sceneId }, "$set", { 
-              poses: scene.poses, 
-              participants: scene.participants 
-          });
 
           // Broadcast to Grid Room if location is valid
           // If location is just "123", convert to "#123". If "#123", keep it.
@@ -376,28 +380,38 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           const poseId = poseMatch[1];
           const user = await Obj.get(userId);
           if (!user) return new Response("Unauthorized", { status: 401 });
-          
+
           const poseIndex = scene.poses.findIndex(p => p.id === poseId);
           if (poseIndex === -1) return new Response("Pose Not Found", { status: 404 });
 
           const existingPose = scene.poses[poseIndex];
-          
+
           // Verify ownership (or admin/scene owner?)
           if (existingPose.charId !== user.dbref && scene.owner !== user.dbref) {
               return new Response("Forbidden", { status: 403 });
           }
 
           const body = await req.json();
-          if (body.msg) {
-              if (body.msg.length > 4000) return new Response("Pose message too long (max 4000 characters).", { status: 400 });
-              existingPose.msg = body.msg;
+          if (body.msg && body.msg.length > 4000) {
+              return new Response("Pose message too long (max 4000 characters).", { status: 400 });
           }
-          // Don't allow changing type/timestamp broadly?
 
-          scene.poses[poseIndex] = existingPose;
-          
-          await scenes.modify({ id: sceneId }, "$set", { poses: scene.poses });
-          return new Response(JSON.stringify(existingPose), { status: 200, headers: { "Content-Type": "application/json" }});
+          // CAS edit: re-find the pose by id inside the transform so we don't
+          // clobber a concurrent $push'd pose written between our read above
+          // and the commit below. Returns the up-to-date pose, or 404 if it
+          // disappeared (e.g. scene was rebuilt) under us.
+          let updated = existingPose;
+          await scenes.atomicModify(sceneId, (cur) => {
+              const idx = (cur.poses ?? []).findIndex(p => p.id === poseId);
+              if (idx === -1) return cur;
+              const nextPose = { ...cur.poses[idx] };
+              if (body.msg) nextPose.msg = body.msg;
+              const nextPoses = [...cur.poses];
+              nextPoses[idx] = nextPose;
+              updated = nextPose;
+              return { ...cur, poses: nextPoses };
+          }, 20);
+          return new Response(JSON.stringify(updated), { status: 200, headers: { "Content-Type": "application/json" }});
       }
 
       // POST /api/v1/scenes/:id/join
@@ -410,14 +424,15 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
               return new Response("This scene is private.", { status: 403 });
           }
 
+          // Atomic $push: two players joining the same scene concurrently
+          // used to lose one because of read-modify-write on the array. The
+          // pre-check below is best-effort dedupe; the canonical "is this
+          // player here" check happens at read time.
           if (!scene.participants.includes(user.dbref)) {
-              scene.participants.push(user.dbref);
-              // Ensure they are in allowed if they joined (implicit allow)
-              if (scene.private && scene.allowed && !scene.allowed.includes(user.dbref)) {
-                  scene.allowed.push(user.dbref);
-                  await scenes.modify({ id: sceneId }, "$set", { allowed: scene.allowed });
+              if (scene.private && !scene.allowed?.includes(user.dbref)) {
+                  await scenes.modify({ id: sceneId }, "$push", { allowed: user.dbref } as never);
               }
-              await scenes.modify({ id: sceneId }, "$set", { participants: scene.participants });
+              await scenes.modify({ id: sceneId }, "$push", { participants: user.dbref } as never);
           }
 
           return new Response(JSON.stringify({ success: true, scene }), {
@@ -441,7 +456,15 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
           const body = await req.json();
           const { target } = body; // target can be dbref or name
 
-          if (!target) return new Response("Missing target", { status: 400 });
+          // Strict string check — `target.replace(...)` later would throw
+          // TypeError on a non-string body field (object, number) and
+          // surface as 500 to the client.
+          if (typeof target !== "string" || !target.trim()) {
+              return new Response("Missing or invalid target", { status: 400 });
+          }
+          if (target.length > 200) {
+              return new Response("Target too long", { status: 400 });
+          }
 
           // Resolve target
           let targetObj = await Obj.get(target);
@@ -454,14 +477,15 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
 
           if (!targetObj) return new Response("Target user not found", { status: 404 });
 
-          if (!scene.allowed) scene.allowed = [scene.owner];
-          
-          if (!scene.allowed.includes(targetObj.dbref)) {
-              scene.allowed.push(targetObj.dbref);
-              await scenes.modify({ id: sceneId }, "$set", { allowed: scene.allowed });
+          // Atomic $push so two staff inviting concurrently can't lose
+          // one of the invites. Pre-check is just a UX optimisation.
+          if (!scene.allowed?.includes(targetObj.dbref)) {
+              await scenes.modify({ id: sceneId }, "$push", { allowed: targetObj.dbref } as never);
           }
 
-          return new Response(JSON.stringify({ success: true, allowed: scene.allowed }), {
+          // Re-fetch so the response reflects the actual committed state.
+          const fresh = await scenes.queryOne({ id: sceneId });
+          return new Response(JSON.stringify({ success: true, allowed: fresh?.allowed ?? [] }), {
                status: 200,
                headers: { "Content-Type": "application/json" }
           });
@@ -485,8 +509,28 @@ export const sceneHandler = async (req: Request, userId: string): Promise<Respon
                if (!isAdmin) {
                    return new Response("Forbidden: Only staff can claim ownerless scenes.", { status: 403 });
                }
-               scene.owner = user.dbref;
-               await scenes.modify({ id: sceneId }, "$set", { owner: scene.owner });
+               // CAS-protected adopt: two staff hitting PATCH at the same
+               // moment used to both see scene.owner empty and both write
+               // themselves as owner; the transform refuses to overwrite a
+               // claim that landed first.
+               try {
+                   const claimed = await scenes.atomicModify(sceneId, (cur) => {
+                       if (cur.owner) return cur; // someone else got there first
+                       return { ...cur, owner: user.dbref };
+                   }, 20);
+                   scene.owner = claimed.owner;
+                   if (claimed.owner !== user.dbref) {
+                       // Lost the claim race. Proceed (admin can edit anyway)
+                       // but make the outcome traceable so the operator can
+                       // tell why their PATCH didn't make them owner.
+                       console.warn(`[scene] owner claim race lost on ${sceneId} by ${user.dbref} — owner is ${claimed.owner}`);
+                   }
+               } catch (_e) {
+                   // atomicModify exhausted retries — refresh local view so
+                   // downstream code sees real owner state, not "".
+                   const fresh = await scenes.queryOne({ id: sceneId });
+                   if (fresh) scene.owner = fresh.owner;
+               }
            }
 
            // White list updates

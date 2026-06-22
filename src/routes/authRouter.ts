@@ -52,12 +52,14 @@ function recordLoginFailure(ip: string): void {
   }
 }
 
-setInterval(() => {
+// Unref'd so this background sweep never keeps the process alive.
+const _loginAttemptSweep = setInterval(() => {
   const now = Date.now();
   for (const [ip, entry] of loginAttempts) {
     if (now >= entry.resetAt) loginAttempts.delete(ip);
   }
 }, 60_000);
+Deno.unrefTimer(_loginAttemptSweep);
 
 // --- Input length limits ---
 const MIN_PASSWORD = 8;
@@ -120,20 +122,27 @@ export const authHandler = async (req: Request, remoteAddr = "unknown"): Promise
 
       if (!user || !tokensMatch || expired) {
         // Clean up an expired token while still returning the same error.
+        // Dot-path $unset so we don't replace the whole `data` blob and
+        // clobber other concurrent writes.
         if (user && expired) {
-          delete user.data!.resetToken;
-          delete user.data!.resetTokenExpiry;
-          await dbojs.modify({ id: user.id }, "$set", { data: user.data });
+          await dbojs.modify({ id: user.id }, "$unset", {
+            "data.resetToken":       "",
+            "data.resetTokenExpiry": "",
+          } as never);
         }
         return new Response(JSON.stringify({ error: "Invalid or expired reset token." }), {
           status: 400, headers: { "Content-Type": "application/json" },
         });
       }
       const hashed = await hash(newPassword, await genSalt(10));
-      user.data!.password = hashed;
-      delete user.data!.resetToken;
-      delete user.data!.resetTokenExpiry;
-      await dbojs.modify({ id: user.id }, "$set", { data: user.data });
+      // Dot-path $set + $unset: only the password and reset-token fields
+      // change. Replacing the whole `data` blob would clobber concurrent
+      // writes to channels, lastCommand, etc.
+      await dbojs.modify({ id: user.id }, "$set",   { "data.password": hashed } as never);
+      await dbojs.modify({ id: user.id }, "$unset", {
+        "data.resetToken":       "",
+        "data.resetTokenExpiry": "",
+      } as never);
       await logSecurity("PASSWORD_RESET", { userId: user.id, ip: clientIp });
       return new Response(JSON.stringify({ message: "Password updated successfully." }), {
         status: 200, headers: { "Content-Type": "application/json" },

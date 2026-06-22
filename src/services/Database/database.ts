@@ -11,99 +11,6 @@ interface WithId {
   id: string;
 }
 
-// ---------------------------------------------------------------------------
-// ShadowIndex — in-memory index for hot query patterns on dbojs
-// ---------------------------------------------------------------------------
-
-interface IndexedRecord {
-  id: string;
-  flags?: string;
-  location?: string;
-}
-
-class ShadowIndex {
-  private byLocation = new Map<string, Set<string>>();  // location id → Set<object id>
-  private connected = new Set<string>();               // ids with "connected" in flags
-  private idToLocation = new Map<string, string>();    // id → current location
-  private _isBuilt = false;
-
-  get isBuilt(): boolean { return this._isBuilt; }
-
-  build(records: IndexedRecord[]): void {
-    this.byLocation.clear();
-    this.connected.clear();
-    this.idToLocation.clear();
-    for (const rec of records) this._index(rec);
-    this._isBuilt = true;
-  }
-
-  onWrite(rec: IndexedRecord): void {
-    // Remove stale location entry
-    const oldLoc = this.idToLocation.get(rec.id);
-    if (oldLoc !== undefined) this.byLocation.get(oldLoc)?.delete(rec.id);
-
-    if (rec.location) {
-      this.idToLocation.set(rec.id, rec.location);
-      if (!this.byLocation.has(rec.location)) this.byLocation.set(rec.location, new Set());
-      this.byLocation.get(rec.location)!.add(rec.id);
-    } else {
-      this.idToLocation.delete(rec.id);
-    }
-
-    if (/connected/i.test(rec.flags ?? "")) {
-      this.connected.add(rec.id);
-    } else {
-      this.connected.delete(rec.id);
-    }
-  }
-
-  onDelete(id: string): void {
-    const loc = this.idToLocation.get(id);
-    if (loc) { this.byLocation.get(loc)?.delete(id); this.idToLocation.delete(id); }
-    this.connected.delete(id);
-  }
-
-  /** Returns candidate IDs for location/connected query patterns, or null if pattern unrecognised. */
-  getCandidateIds(location?: string, needsConnected?: boolean): Set<string> | null {
-    if (!this._isBuilt) return null;
-    let candidates: Set<string> | null = null;
-
-    if (location !== undefined) {
-      candidates = new Set(this.byLocation.get(location) ?? []);
-    }
-    if (needsConnected) {
-      if (candidates === null) {
-        candidates = new Set(this.connected);
-      } else {
-        for (const id of [...candidates]) {
-          if (!this.connected.has(id)) candidates.delete(id);
-        }
-      }
-    }
-    return candidates;
-  }
-
-  private _index(rec: IndexedRecord): void {
-    if (rec.location) {
-      this.idToLocation.set(rec.id, rec.location);
-      if (!this.byLocation.has(rec.location)) this.byLocation.set(rec.location, new Set());
-      this.byLocation.get(rec.location)!.add(rec.id);
-    }
-    if (/connected/i.test(rec.flags ?? "")) this.connected.add(rec.id);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Query result cache — cleared on every write, 500 ms TTL
-// ---------------------------------------------------------------------------
-
-interface CacheEntry<T> {
-  data: T[];
-  expiresAt: number;
-}
-
-const QUERY_CACHE_TTL_MS = 500;
-
 /**
  * Generic key-value database backed by Deno KV.
  *
@@ -113,54 +20,235 @@ const QUERY_CACHE_TTL_MS = 500;
  *
  * @template T - The record type stored in this collection. Must have an `id: string` field.
  */
+// ============================================================================
+// SHADOW INDEX — verified lookup for location and flags
+// ============================================================================
+
+class ShadowIndex {
+  // location -> Set of object IDs at that location
+  private byLocation = new Map<string, Set<string>>();
+  // ID -> current location (for efficient removal without scanning all locations)
+  private idToLocation = new Map<string, string>();
+  // Set of object IDs that have "connected" in their flags
+  private connected = new Set<string>();
+  // All indexed object IDs (for quick "is this ID indexed?" check)
+  private allIds = new Set<string>();
+  // Whether the index has been built at least once
+  private built = false;
+  // Fallback counter — logs how often we rebuild
+  private rebuildCount = 0;
+
+  /** Build the index from a full scan result. */
+  build(records: Array<{ id: string; flags?: string; location?: string }>) {
+    this.byLocation.clear();
+    this.idToLocation.clear();
+    this.connected.clear();
+    this.allIds.clear();
+    for (const rec of records) {
+      this.allIds.add(rec.id);
+      this._indexRecord(rec);
+    }
+    this.built = true;
+  }
+
+  /** Index a single record (add or update). */
+  private _indexRecord(rec: { id: string; flags?: string; location?: string }) {
+    const flags = typeof rec.flags === "string" ? rec.flags : "";
+    if (/\bconnected\b/i.test(flags)) {
+      this.connected.add(rec.id);
+    } else {
+      this.connected.delete(rec.id);
+    }
+    // Remove from old location (O(1) via reverse map instead of scanning all locations)
+    const oldLoc = this.idToLocation.get(rec.id);
+    if (oldLoc) {
+      const oldSet = this.byLocation.get(oldLoc);
+      if (oldSet) oldSet.delete(rec.id);
+    }
+    // Add to new location
+    if (rec.location) {
+      let locSet = this.byLocation.get(rec.location);
+      if (!locSet) { locSet = new Set(); this.byLocation.set(rec.location, locSet); }
+      locSet.add(rec.id);
+      this.idToLocation.set(rec.id, rec.location);
+    } else {
+      this.idToLocation.delete(rec.id);
+    }
+  }
+
+  /** Update index for a single record after a write. */
+  onWrite(rec: { id: string; flags?: string; location?: string }) {
+    if (!this.built) return;
+    this.allIds.add(rec.id);
+    this._indexRecord(rec);
+  }
+
+  /** Remove a record from the index. */
+  onDelete(id: string) {
+    if (!this.built) return;
+    this.allIds.delete(id);
+    this.connected.delete(id);
+    const oldLoc = this.idToLocation.get(id);
+    if (oldLoc) {
+      const oldSet = this.byLocation.get(oldLoc);
+      if (oldSet) oldSet.delete(id);
+    }
+    this.idToLocation.delete(id);
+  }
+
+  /** Get candidate IDs for connected objects at a location. Returns null if index not built. */
+  getCandidateIds(location?: string, requireConnected?: boolean): Set<string> | null {
+    if (!this.built) return null;
+
+    if (location && requireConnected) {
+      const locIds = this.byLocation.get(location);
+      if (!locIds) return new Set();
+      const result = new Set<string>();
+      for (const id of locIds) {
+        if (this.connected.has(id)) result.add(id);
+      }
+      return result;
+    }
+    if (location) {
+      return this.byLocation.get(location) || new Set();
+    }
+    if (requireConnected) {
+      return new Set(this.connected);
+    }
+    return null; // can't help with this query
+  }
+
+  get isBuilt() { return this.built; }
+  get rebuilds() { return this.rebuildCount; }
+  incrementRebuilds() { this.rebuildCount++; }
+}
+
+// ============================================================================
+// DBO CLASS
+// ============================================================================
+
 export class DBO<T extends WithId> implements IDatabase<T> {
   private static kv: Deno.Kv | null = null;
   private pathOrKey: string;
+
+  // Query result cache — cleared on every write, 500ms TTL.
+  // Static-by-prefix: ALL DBO handles to the same collection share one cache,
+  // so a write through one `new DBO(prefix)` invalidates reads through any
+  // other handle on the same prefix (otherwise two handles serve each other
+  // stale reads within the TTL window).
+  private static CACHE_TTL_MS = 500;
+  private static _queryCaches = new Map<string, Map<string, { results: unknown[]; expiresAt: number }>>();
+  private get queryCache(): Map<string, { results: unknown[]; expiresAt: number }> {
+    let cache = DBO._queryCaches.get(this.prefix);
+    if (!cache) { cache = new Map(); DBO._queryCaches.set(this.prefix, cache); }
+    return cache;
+  }
+
+  // Shadow index — only active when useIndex is true (dbojs)
   private shadowIndex: ShadowIndex | null = null;
-  private queryCache = new Map<string, CacheEntry<T>>();
+
+  private _cachedPrefix: string | null = null;
 
   constructor(pathOrKey: string, useIndex = false) {
     this.pathOrKey = pathOrKey;
     if (useIndex) this.shadowIndex = new ShadowIndex();
   }
 
-  private get prefix(): string {
-    // overload: if the path contains dots and doesn't look like a file path, try to get it from config
-    // Actually, we passed the config key directly in the exports below. 
-    // So we should try to get the config value. If that fails or returns the same key, assume it's a path.
-    // Ideally, we check if it is a known config key.
-    
-    const configValue = getConfig<string>(this.pathOrKey);
-    // If getConfig returns the key itself (default behavior if missing?) or undefined, we might fall back.
-    // But getConfig usually returns the value.
-    if (configValue && typeof configValue === 'string') {
-        return configValue.replace('.', '_');
+  /** Serialize a query to a stable cache key. */
+  private cacheKey(query?: Query<T>): string {
+    if (!query) return "__all__";
+    try {
+      return JSON.stringify(query, (_key, val) => {
+        if (val instanceof RegExp) return `__re__${val.source}__${val.flags}`;
+        if (val instanceof Set) return `__set__${[...val].join(",")}`;
+        return val;
+      });
+    } catch {
+      return "__nocache__" + Math.random();
     }
-    return this.pathOrKey.replace('.', '_');
+  }
+
+  /** Clear the query cache. Called on every write. */
+  clearCache(): void {
+    this.queryCache.clear();
+  }
+
+  /**
+   * Try to use the shadow index to answer a query.
+   * Returns candidate IDs or null if the index can't help.
+   */
+  private tryIndexLookup(query?: Query<T>): Set<string> | null {
+    if (!query || typeof query !== "object" || !this.shadowIndex?.isBuilt) return null;
+    // deno-lint-ignore no-explicit-any
+    const q = query as any;
+
+    // Detect common query patterns
+    let location: string | undefined;
+    let needsConnected = false;
+
+    // Pattern: { $and: [{ location: X }, { flags: /connected/i }, ...] }
+    if ("$and" in query && Array.isArray(query.$and)) {
+      for (const cond of query.$and as Record<string, unknown>[]) {
+        if (typeof cond.location === "string") location = cond.location;
+        if (cond.flags instanceof RegExp && cond.flags.source.includes("connected")) needsConnected = true;
+      }
+    }
+    // Pattern: { flags: /connected/i }
+    else if (q.flags instanceof RegExp && (q.flags as RegExp).source.includes("connected")) {
+      needsConnected = true;
+    }
+    // Pattern: { location: X }
+    else if (typeof q.location === "string") {
+      location = q.location as string;
+    }
+
+    if (!location && !needsConnected) return null;
+    return this.shadowIndex?.getCandidateIds(location, needsConnected);
+  }
+
+  private get prefix(): string {
+    if (this._cachedPrefix) return this._cachedPrefix;
+    const configValue = getConfig<string>(this.pathOrKey);
+    if (configValue && typeof configValue === 'string') {
+      this._cachedPrefix = configValue.replace('.', '_');
+    } else {
+      this._cachedPrefix = this.pathOrKey.replace('.', '_');
+    }
+    return this._cachedPrefix;
   }
 
   private async getKv(): Promise<Deno.Kv> {
-    if (!DBO.kv) {
-      // Resolve the KV store file path.
-      // URSAMU_DB env var overrides everything. Otherwise, always place the database
-      // in the game project's own data/ folder (relative to Deno.cwd()), never inside
-      // the engine package. The server.db config key is a KV namespace prefix, not a path.
-      const dbPath = Deno.env.get("URSAMU_DB") || dpath.join(Deno.cwd(), "data", "ursamu.db");
-      const dbDir = dpath.dirname(dbPath);
-
-      // Create the data directory if it doesn't exist
-      try {
-        await Deno.mkdir(dbDir, { recursive: true, mode: 0o700 });
-      } catch (error) {
-        if (!(error instanceof Deno.errors.AlreadyExists)) {
-          throw error;
-        }
-      }
-
-      console.log(`Opening KV database at: ${dbPath}`);
-      DBO.kv = await Deno.openKv(dbPath);
-    }
+    if (!DBO.kv) DBO.kv = await DBO.openSharedKv();
     return DBO.kv;
+  }
+
+  /**
+   * Open (or return) the engine's shared KV handle. Other modules that
+   * previously called `Deno.openKv` directly (Queue, etc.) should call this
+   * helper instead — Deno KV holds an exclusive file lock per process, so
+   * opening the same file twice can throw or produce inconsistent reads.
+   */
+  public static async getSharedKv(): Promise<Deno.Kv> {
+    if (!DBO.kv) DBO.kv = await DBO.openSharedKv();
+    return DBO.kv;
+  }
+
+  private static async openSharedKv(): Promise<Deno.Kv> {
+    // URSAMU_DB env var overrides everything. Otherwise, always place the
+    // database in the game project's own data/ folder (relative to
+    // Deno.cwd()), never inside the engine package. The server.db config key
+    // is a KV namespace prefix, not a path.
+    const dbPath = Deno.env.get("URSAMU_DB") || dpath.join(Deno.cwd(), "data", "ursamu.db");
+    const dbDir = dpath.dirname(dbPath);
+
+    try {
+      await Deno.mkdir(dbDir, { recursive: true, mode: 0o700 });
+    } catch (error) {
+      if (!(error instanceof Deno.errors.AlreadyExists)) throw error;
+    }
+
+    console.log(`Opening KV database at: ${dbPath}`);
+    return await Deno.openKv(dbPath);
   }
 
   async clear() {
@@ -169,6 +257,8 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     for await (const entry of entries) {
       await kv.delete(entry.key);
     }
+    this.clearCache();
+    this.shadowIndex?.build([]);
   }
 
   public static async close() {
@@ -187,93 +277,89 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const plainData = { ...data };
     await kv.set(this.getKey(data.id), plainData);
     this.clearCache();
-    this.shadowIndex?.onWrite(data as unknown as IndexedRecord);
+    this.shadowIndex?.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
     return data;
   }
 
-  private cacheKey(query?: Query<T>): string {
-    if (!query) return "__all__";
-    try {
-      return JSON.stringify(query, (_k, v) => {
-        if (v instanceof RegExp) return `__re__${v.source}__${v.flags}`;
-        if (v instanceof Set) return `__set__${[...v].join(",")}`;
-        return v;
-      });
-    } catch {
-      return "__nocache__" + Math.random();
-    }
-  }
-
-  private clearCache(): void { this.queryCache.clear(); }
-
-  /** Detect { location: X }, { flags: /connected/i }, or $and combinations. */
-  private tryIndexLookup(query?: Query<T>): Set<string> | null {
-    if (!query || typeof query !== "object" || !this.shadowIndex?.isBuilt) return null;
-    let location: string | undefined;
-    let needsConnected = false;
-
-    if ("$and" in query && Array.isArray(query.$and)) {
-      for (const cond of query.$and as Record<string, unknown>[]) {
-        if (typeof cond.location === "string") location = cond.location;
-        if (cond.flags instanceof RegExp && cond.flags.source.includes("connected")) needsConnected = true;
-      }
-    } else if ("flags" in query && (query as Record<string, unknown>).flags instanceof RegExp) {
-      if (((query as Record<string, unknown>).flags as RegExp).source.includes("connected")) needsConnected = true;
-    } else if ("location" in query && typeof (query as Record<string, unknown>).location === "string") {
-      location = (query as Record<string, unknown>).location as string;
-    }
-
-    if (location !== undefined || needsConnected) {
-      return this.shadowIndex!.getCandidateIds(location, needsConnected);
-    }
-    return null;
-  }
-
   async query(query?: Query<T>): Promise<T[]> {
-    // Check query cache first
+    // Check cache first
     const key = this.cacheKey(query);
-    const now = Date.now();
     const cached = this.queryCache.get(key);
-    if (cached && now < cached.expiresAt) return cached.data;
-
-    const kv = await this.getKv();
-
-    // Try shadow index for hot patterns
-    const candidates = this.tryIndexLookup(query);
-    if (candidates !== null) {
-      const results: T[] = [];
-      for (const id of candidates) {
-        const entry = await kv.get<T>([this.prefix, id]);
-        if (entry.value && this.matchesQuery(entry.value, query)) {
-          results.push(entry.value);
-          // Self-heal: if a candidate wasn't in KV the index is stale — rebuild
-        } else if (!entry.value) {
-          this.shadowIndex!.onDelete(id);
-        }
-      }
-      this.queryCache.set(key, { data: results, expiresAt: now + QUERY_CACHE_TTL_MS });
-      return results;
+    if (cached && Date.now() < cached.expiresAt) {
+      return [...cached.results] as T[];
     }
 
-    // Full scan fallback (also builds shadow index on first run)
+    // Try shadow index for fast lookup
+    const candidateIds = this.tryIndexLookup(query);
+    if (candidateIds !== null && candidateIds.size < 200) {
+      // Fetch only the candidate records, then filter by full query
+      const kv = await this.getKv();
+      const results: T[] = [];
+      let indexValid = true;
+
+      for (const id of candidateIds) {
+        const entry = await kv.get<T>(this.getKey(id));
+        if (!entry.value) {
+          // Index pointed to a nonexistent record — stale index
+          indexValid = false;
+          break;
+        }
+        // Apply the full query filter — candidates are a superset, not exact
+        if (this.matchesQuery(entry.value, query)) {
+          results.push(entry.value);
+        }
+        // NOT a mismatch if the record exists but doesn't match the full query —
+        // the index only narrows by location/connected, other conditions (player flag,
+        // $ne, etc.) are applied as a post-filter. That's expected.
+      }
+
+      if (indexValid) {
+        // Index was correct — cache and return
+        this.cacheSet(key, results);
+        return results;
+      }
+
+      // Index pointed to nonexistent records — rebuild from full scan
+      console.warn(`[DBO] Shadow index stale record, rebuilding (rebuild #${(this.shadowIndex?.rebuilds ?? 0) + 1})`);
+      this.shadowIndex?.incrementRebuilds();
+    }
+
+    // Full scan (original behavior)
+    const kv = await this.getKv();
     const entries = kv.list({ prefix: [this.prefix] });
     const results: T[] = [];
-    const allRecords: IndexedRecord[] = [];
+    const allRecords: Array<{ id: string; flags?: string; location?: string }> = [];
     for await (const entry of entries) {
       const value = entry.value as T;
-      if (this.shadowIndex && !this.shadowIndex.isBuilt) {
-        allRecords.push(value as unknown as IndexedRecord);
-      }
+      // Collect data for index rebuild
+      const rec = value as unknown as { id: string; flags?: string; location?: string };
+      allRecords.push(rec);
       if (this.matchesQuery(value, query)) {
         results.push(value);
       }
     }
-    // Build index from this scan if not yet built
-    if (this.shadowIndex && !this.shadowIndex.isBuilt) {
-      this.shadowIndex.build(allRecords);
-    }
-    this.queryCache.set(key, { data: results, expiresAt: now + QUERY_CACHE_TTL_MS });
+
+    // Rebuild shadow index from the full scan
+    this.shadowIndex?.build(allRecords);
+
+    // Store in cache
+    this.cacheSet(key, results);
     return results;
+  }
+
+  /**
+   * Insert into the query cache with FIFO eviction. The previous behaviour
+   * was to wipe the entire 500-entry cache on overflow, which under heavy
+   * distinct-query load (every 501st query is a new key) drops cache hit
+   * rate to ~0% in a thundering-herd pattern. Maps preserve insertion
+   * order, so deleting the first key evicts the oldest entry.
+   */
+  private cacheSet(key: string, results: T[]): void {
+    if (this.queryCache.size >= 500) {
+      const firstKey = this.queryCache.keys().next().value;
+      if (firstKey !== undefined) this.queryCache.delete(firstKey);
+    }
+    this.queryCache.set(key, { results: [...results], expiresAt: Date.now() + DBO.CACHE_TTL_MS });
   }
 
   async queryOne(query?: Query<T>): Promise<T | undefined> {
@@ -292,13 +378,37 @@ export class DBO<T extends WithId> implements IDatabase<T> {
   }
 
   /** Check if a key or any segment of a dot-notation path is a prototype pollution vector. */
+  private static readonly _dangerousKeys = new Set(["__proto__", "constructor", "prototype"]);
   private static isDangerousKey(key: string): boolean {
-    const dangerous = new Set(["__proto__", "constructor", "prototype"]);
-    if (dangerous.has(key)) return true;
+    if (DBO._dangerousKeys.has(key)) return true;
     if (key.includes(".")) {
-      return key.split(".").some(seg => dangerous.has(seg));
+      return key.split(".").some(seg => DBO._dangerousKeys.has(seg));
     }
     return false;
+  }
+
+  /**
+   * $pull match predicate. Returns true if `el` should be removed.
+   *   - Primitive criteria (string/number/boolean/null): strict equality.
+   *   - Object criteria: el must be an object and every (k,v) in criteria
+   *     must match el[k] by strict equality. Extra keys on el are fine.
+   *
+   * Object-criteria values match RECURSIVELY by value (not object identity),
+   * so `$pull: { arr: { meta: { x: 1 } } }` matches an element whose
+   * `meta.x === 1`. Primitive leaves compare with strict `===`.
+   */
+  private static pullMatches(el: unknown, criteria: unknown): boolean {
+    if (criteria === null || typeof criteria !== "object") {
+      return el === criteria;
+    }
+    if (el === null || typeof el !== "object") return false;
+    const elObj = el as Record<string, unknown>;
+    const critObj = criteria as Record<string, unknown>;
+    for (const [k, v] of Object.entries(critObj)) {
+      // Recurse so nested-object criteria match by value, not identity.
+      if (!DBO.pullMatches(elObj[k], v)) return false;
+    }
+    return true;
   }
 
   /**
@@ -311,92 +421,130 @@ export class DBO<T extends WithId> implements IDatabase<T> {
    * | `$inc`   | Increment numeric field(s) by the supplied amount           |
    * | `$push`  | Atomically append a value to an array field (CAS-backed);   |
    * |          | creates the array if the field is absent; dot-notation ok   |
+   * | `$pull`  | Atomically remove array elements matching a criteria.       |
+   * |          | Criteria is a primitive (strict equality) or an object      |
+   * |          | (every key in criteria must match the element); dot-path ok |
    *
    * @example
    * // Atomic append — safe under concurrent writes
    * await col.modify({ id: roundId }, "$push", { "data.poses": poseText });
+   * // Atomic remove — drop note with id===5 from the notes array
+   * await col.modify({ id: playerId }, "$pull", { "data.notes": { id: 5 } });
    */
   async modify(query: Query<T>, operator: string, data: Partial<T>): Promise<T[]> {
     const items = await this.query(query);
-    const kv = await this.getKv();
-    for (const item of items) {
-      if (operator === "$push") {
-        // Atomic CAS append — prevents TOCTOU races when two callers push
-        // to the same array field concurrently.  Each record is committed via
-        // atomicModify() so concurrent writers serialize on the version check.
-        // Allow up to 20 retries — $push fields are designed for concurrent
-        // access (e.g. two players posing simultaneously), so contention is
-        // expected and the default 3 retries is insufficient under load.
-        await this.atomicModify(item.id, (current) => {
-          const rec = { ...current } as Record<string, unknown>;
-          for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
-            if (DBO.isDangerousKey(key)) continue;
-            if (key.includes(".")) {
-              const arr = (get(rec, key) ?? []) as unknown[];
-              lodashSet(rec, key, [...arr, value]);
-            } else {
-              const arr = (rec[key] ?? []) as unknown[];
-              rec[key] = [...arr, value];
-            }
-          }
-          return rec as T;
-        }, 20);
-        continue; // skip the plain kv.set() below
-      }
-
-      const updated = { ...item };
-      if (operator === "$set") {
-        for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
-          if (DBO.isDangerousKey(key)) continue;
-          if (key.includes(".")) {
-            // Dot-notation: navigate into nested object (e.g. "data.name" → updated.data.name)
-            lodashSet(updated, key, value);
-          } else {
-            (updated as Record<string, unknown>)[key] = value;
-          }
-        }
-      } else if (operator === "$unset") {
-        for (const key of Object.keys(data as Record<string, unknown>)) {
-          if (DBO.isDangerousKey(key)) continue;
-          if (key.includes(".")) {
-            // Dot-notation: navigate to parent and delete the final key
-            const parts = key.split(".");
-            const last = parts.pop()!;
-            let obj: Record<string, unknown> = updated as Record<string, unknown>;
-            for (const part of parts) {
-              if (obj[part] && typeof obj[part] === "object") {
-                obj = obj[part] as Record<string, unknown>;
-              } else {
-                obj = null as unknown as Record<string, unknown>;
-                break;
-              }
-            }
-            if (obj != null) delete obj[last];
-          } else {
-            delete (updated as Record<string, unknown>)[key];
-          }
-        }
-      } else if (operator === "$inc") {
-        for (const [key, value] of Object.entries(data)) {
-          if (typeof value !== "number" || isNaN(value)) {
-            console.warn(`[Database] $inc: skipping key "${key}" — value is not a valid number:`, value);
-            continue;
-          }
-          if (key.includes(".")) {
-            const current = get(updated, key, 0) as number;
-            lodashSet(updated, key, current + (value as number));
-          } else {
-            const currentValue = ((updated as unknown) as Record<string, number>)[key] || 0;
-            ((updated as unknown) as Record<string, number>)[key] = currentValue + (value as number);
-          }
-        }
-      }
-      const plainData = { ...updated };
-      await kv.set(this.getKey(item.id), plainData);
-      this.shadowIndex?.onWrite(updated as unknown as IndexedRecord);
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      // Every operator runs through atomicModify (CAS-backed). Without this,
+      // two concurrent writers to the same row both read the same version,
+      // both apply their change, and the second commit silently overwrites
+      // the first — even when they're touching different dot-paths. Retry
+      // budget is generous (20) because hot rows like player records get
+      // hit by many concurrent writers (commands, hooks, scripts).
+      const updated = await this.atomicModify(item.id, (current) =>
+        DBO.applyOperator(operator, current, data) as T, 20);
+      items[i] = updated;
     }
-    this.clearCache();
-    return await this.query(query);
+    return items;
+  }
+
+  /**
+   * Pure transform that applies one of the modify() operators to a record.
+   * Lives outside `modify()` so it can be plugged into `atomicModify()`'s
+   * retry loop without re-reading the row each time.
+   */
+  private static applyOperator(
+    operator: string,
+    current:  unknown,
+    data:     unknown,
+  ): unknown {
+    const dataRec = data as Record<string, unknown>;
+
+    if (operator === "$push") {
+      const rec = { ...(current as Record<string, unknown>) };
+      for (const [key, value] of Object.entries(dataRec)) {
+        if (DBO.isDangerousKey(key)) continue;
+        if (key.includes(".")) {
+          const arr = (get(rec, key) ?? []) as unknown[];
+          lodashSet(rec, key, [...arr, value]);
+        } else {
+          const arr = (rec[key] ?? []) as unknown[];
+          rec[key] = [...arr, value];
+        }
+      }
+      return rec;
+    }
+
+    if (operator === "$pull") {
+      const rec = { ...(current as Record<string, unknown>) };
+      for (const [key, criteria] of Object.entries(dataRec)) {
+        if (DBO.isDangerousKey(key)) continue;
+        const arr = (key.includes(".") ? get(rec, key) : rec[key]) as unknown;
+        if (!Array.isArray(arr)) continue;
+        const filtered = arr.filter((el) => !DBO.pullMatches(el, criteria));
+        if (key.includes(".")) {
+          lodashSet(rec, key, filtered);
+        } else {
+          rec[key] = filtered;
+        }
+      }
+      return rec;
+    }
+
+    const updated = { ...(current as Record<string, unknown>) };
+
+    if (operator === "$set") {
+      for (const [key, value] of Object.entries(dataRec)) {
+        if (DBO.isDangerousKey(key)) continue;
+        if (key.includes(".")) {
+          lodashSet(updated, key, value);
+        } else {
+          updated[key] = value;
+        }
+      }
+    } else if (operator === "$unset") {
+      for (const key of Object.keys(dataRec)) {
+        if (DBO.isDangerousKey(key)) continue;
+        if (key.includes(".")) {
+          const parts = key.split(".");
+          const last  = parts.pop()!;
+          let obj: Record<string, unknown> | null = updated;
+          for (const part of parts) {
+            if (obj && obj[part] && typeof obj[part] === "object") {
+              obj = obj[part] as Record<string, unknown>;
+            } else {
+              obj = null;
+              break;
+            }
+          }
+          if (obj != null) delete obj[last];
+        } else {
+          delete updated[key];
+        }
+      }
+    } else if (operator === "$inc") {
+      for (const [key, value] of Object.entries(dataRec)) {
+        if (DBO.isDangerousKey(key)) continue;
+        if (typeof value !== "number" || isNaN(value)) {
+          console.warn(`[Database] $inc: skipping key "${key}" — value is not a valid number:`, value);
+          continue;
+        }
+        // Coerce the CURRENT stored value to a number. Without this, a field
+        // that is accidentally a string ("5") makes `cur + value` concatenate
+        // ("5" + 1 = "51") and silently corrupt the record.
+        if (key.includes(".")) {
+          const raw = get(updated, key, 0);
+          const cur = typeof raw === "number" ? raw : (Number(raw) || 0);
+          lodashSet(updated, key, cur + value);
+        } else {
+          const raw = updated[key];
+          const cur = typeof raw === "number" ? raw : (Number(raw) || 0);
+          updated[key] = cur + value;
+        }
+      }
+    }
+
+    return updated;
   }
 
   async delete(query: Query<T>): Promise<T[]> {
@@ -431,7 +579,9 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       const val = key.includes('.') ? get(value, key) : value[key as keyof T];
 
       if (condition instanceof RegExp) {
-        if (!condition.test(val as string)) {
+        // A missing/null field never matches a regex — don't test the literal
+        // string "undefined"/"null", which can cause spurious matches.
+        if (val == null || !condition.test(String(val))) {
           return false;
         }
       } else if (typeof condition === "object" && condition !== null && !Array.isArray(condition)) {
@@ -474,7 +624,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
       const result = await kv.atomic().check(entry).set(key, updated).commit();
       if (result.ok) {
         this.clearCache();
-        this.shadowIndex?.onWrite(updated as unknown as IndexedRecord);
+        this.shadowIndex?.onWrite(updated as unknown as { id: string; flags?: string; location?: string });
         return updated;
       }
     }
@@ -505,7 +655,7 @@ export class DBO<T extends WithId> implements IDatabase<T> {
     const plainData = { ...data };
     await cv.set(this.getKey(data.id), plainData);
     this.clearCache();
-    this.shadowIndex?.onWrite(data as unknown as IndexedRecord);
+    this.shadowIndex?.onWrite(plainData as unknown as { id: string; flags?: string; location?: string });
     return data;
   }
 

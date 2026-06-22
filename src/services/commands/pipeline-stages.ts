@@ -100,6 +100,10 @@ export async function runScriptNode(
  * Match input against native addCmd() registrations.
  * Returns true if a command matched and executed (stop processing).
  */
+// How often a player's lastCommand timestamp is persisted (idle display only
+// needs coarse granularity; see the throttle in matchNativeCmd).
+const LAST_COMMAND_THROTTLE_MS = 5000;
+
 export async function matchNativeCmd(
   ctx: IContext,
   char: Obj | null,
@@ -120,10 +124,22 @@ export async function matchNativeCmd(
     if (!(await evaluateLock(cmd.lock || "", actor, actor))) continue;
 
     if (char) {
-      // Update lastCommand before building SDK (SDK re-fetches actor from DB)
+      // Update lastCommand before building SDK (SDK re-fetches actor from DB).
+      // Dot-path $set so concurrent writers (hooks, sandbox scripts, other
+      // commands) don't get clobbered by writing back the full object.
+      //
+      // THROTTLED: lastCommand only feeds the WHO idle display, which needs
+      // only a few seconds of granularity. Writing on every command floods the
+      // hottest path with CAS writes that also clear the query cache (defeating
+      // it during active play). Persist at most once per LAST_COMMAND_THROTTLE_MS;
+      // the in-memory value is always kept fresh for this dispatch.
+      const now = Date.now();
       char.dbobj.data ||= {};
-      char.dbobj.data.lastCommand = Date.now();
-      await dbojs.modify({ id: char.id }, "$set", char.dbobj);
+      const prevLast = char.dbobj.data.lastCommand as number | undefined;
+      char.dbobj.data.lastCommand = now;
+      if (!prevLast || now - prevLast >= LAST_COMMAND_THROTTLE_MS) {
+        await dbojs.modify({ id: char.id }, "$set", { "data.lastCommand": now } as never);
+      }
     }
 
     const u = await createNativeSDK(ctx.socket.id, char?.id || "#-1", {
@@ -169,9 +185,12 @@ export async function matchSandboxScript(
     if (!char && !CONNECT_SCREEN.has(scriptName)) return false;
 
     if (char) {
+      // Dot-path $set so concurrent writers don't get clobbered by writing
+      // back the full character row.
+      const now = Date.now();
       char.dbobj.data ||= {};
-      char.dbobj.data.lastCommand = Date.now();
-      await dbojs.modify({ id: char.id }, "$set", char.dbobj);
+      char.dbobj.data.lastCommand = now;
+      await dbojs.modify({ id: char.id }, "$set", { "data.lastCommand": now } as never);
     }
 
     const isPrefixCmd = Object.keys(PREFIX_MAP).some(
