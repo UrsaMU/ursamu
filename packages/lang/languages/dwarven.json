@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "dwarven",
+  "mode": "markov",
+  "description": "Harsh, gutteral Dwarven tongue (Khuzdul).",
+  "markovCorpus": [
+    "khazad", "dum", "gabilgathol", "belegost", "nogrod", "kibil",
+    "nala", "baraz", "ziril", "bundushathur", "shathur",
+    "azanulbizar", "nurn", "erebor", "thorin", "balin", "dwalin",
+    "fili", "kili", "oin", "gloin", "gimli", "durin", "thrain",
+    "thror", "dain", "nain", "fundin", "groin", "bofur", "bifur",
+    "bombur", "khuzdul", "mahal", "agh", "baruk", "khazadai"
+  ],
+  "markovOrder": 2,
+  "capitalize": "first"
+}

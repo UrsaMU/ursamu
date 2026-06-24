@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "elvish",
+  "mode": "phoneme",
+  "description": "Flowing Elven speech — soft consonants, musical vowels.",
+  "onsets": ["l", "th", "v", "s", "f", "r", "m", "n", "ch", "h", "y"],
+  "nuclei": ["ae", "ia", "e", "i", "o", "a", "u", "ea"],
+  "codas": ["th", "s", "l", "r", "n", "m", "th", ""],
+  "syllablePatterns": ["CV", "CV", "CVC", "CCV"],
+  "wordLenWeights": [0, 1, 4, 3, 2, 1],
+  "capitalize": "first",
+  "accentSubs": { "r": "lh", "s": "th" }
+}

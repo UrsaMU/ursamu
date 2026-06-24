@@ -24,7 +24,9 @@ Deno.test("syllableCountFor — buckets by word length", () => {
 
 Deno.test("genWord — uses only configured phonemes", () => {
   const rng = mulberry32(42);
-  const allowed = new Set([...lang.onsets, ...lang.nuclei, ...lang.codas].join(""));
+  const allowed = new Set(
+    [...lang.onsets!, ...lang.nuclei!, ...lang.codas!].join(""),
+  );
   for (let i = 0; i < 100; i++) {
     const w = genWord(lang, rng);
     assert(w.length > 0, "word must be non-empty");

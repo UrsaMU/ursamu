@@ -36,7 +36,10 @@ function _skillIn(o: IDBObj, name: string): number {
 export default async (u: IUrsamuSDK) => {
   const rawArg = (u.cmd.args[0] ?? u.cmd.original ?? "").toString();
   const msg = u.util.stripSubs(rawArg).trim();
-  if (!msg) { u.send("Say what?"); return; }
+  if (!msg) {
+    u.send("Say what?");
+    return;
+  }
 
   const speakerName = u.util.displayName(u.me, u.me);
   const active = _readActive(u.me);
@@ -64,5 +67,21 @@ export default async (u: IUrsamuSDK) => {
     const skill = _skillIn(listener, active);
     const text = garble(msg, def, skill);
     u.send(`${speakerName} says in ${active}, "${text}"`, listener.id);
+
+    // Passive learning: 10% chance to gain 1 skill point, up to 50
+    if (skill < 50 && Math.random() < 0.10) {
+      const newSkill = skill + 1;
+      const key = active.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+      if (key) {
+        // deno-lint-ignore no-explicit-any
+        const state = listener.state as Record<string, any>;
+        if (!state.languages) state.languages = { known: {} };
+        if (!state.languages.known) state.languages.known = {};
+        state.languages.known[key] = newSkill;
+        await u.db.modify(listener.id, "$set", {
+          [`data.languages.known.${key}`]: newSkill,
+        });
+      }
+    }
   }
 };

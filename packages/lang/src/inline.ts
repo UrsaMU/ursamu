@@ -1,7 +1,13 @@
 import * as dpath from "@std/path";
 import { listLangs } from "./langStore.ts";
 
-const SRC_FILES = ["schema.ts", "rng.ts", "phonemes.ts", "garble.ts"] as const;
+const SRC_FILES = [
+  "schema.ts",
+  "rng.ts",
+  "markov.ts",
+  "phonemes.ts",
+  "garble.ts",
+] as const;
 
 function stripModuleSyntax(src: string): string {
   return src

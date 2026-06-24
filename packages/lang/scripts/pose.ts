@@ -34,15 +34,23 @@ function _skillIn(o: IDBObj, name: string): number {
 }
 
 function _renderQuoted(text: string, def: unknown, skill: number): string {
-  return text.replace(/"([^"]*)"/g, (_, inner) => `"${garble(inner, def as Parameters<typeof garble>[1], skill)}"`);
+  return text.replace(
+    /"([^"]*)"/g,
+    (_, inner) =>
+      `"${garble(inner, def as Parameters<typeof garble>[1], skill)}"`,
+  );
 }
 
 export default async (u: IUrsamuSDK) => {
   const rawArg = (u.cmd.args[0] ?? u.cmd.original ?? "").toString();
   const msg = u.util.stripSubs(rawArg);
-  if (!msg.trim()) { u.send("Pose what?"); return; }
+  if (!msg.trim()) {
+    u.send("Pose what?");
+    return;
+  }
 
-  const isSemi = (u.cmd.name === ";" || (u.cmd.original ?? "").startsWith(";"));
+  const isSemi =
+    u.cmd.name === ";" || (u.cmd.original ?? "").startsWith(";");
   const join = isSemi ? "" : " ";
   const speakerName = u.util.displayName(u.me, u.me);
   const active = _readActive(u.me);
@@ -71,5 +79,21 @@ export default async (u: IUrsamuSDK) => {
     const skill = _skillIn(listener, active);
     const rendered = _renderQuoted(msg.trim(), def, skill);
     u.send(`${speakerName}${join}${rendered}`, listener.id);
+
+    // Passive learning: 10% chance to gain 1 skill point, up to 50
+    if (skill < 50 && Math.random() < 0.10) {
+      const newSkill = skill + 1;
+      const key = active.toLowerCase().replace(/[^a-z0-9_-]/g, "");
+      if (key) {
+        // deno-lint-ignore no-explicit-any
+        const state = listener.state as Record<string, any>;
+        if (!state.languages) state.languages = { known: {} };
+        if (!state.languages.known) state.languages.known = {};
+        state.languages.known[key] = newSkill;
+        await u.db.modify(listener.id, "$set", {
+          [`data.languages.known.${key}`]: newSkill,
+        });
+      }
+    }
   }
 };

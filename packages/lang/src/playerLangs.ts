@@ -1,4 +1,5 @@
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/ursamu";
 
 export interface PlayerLangs {
   known: Record<string, number>;
@@ -17,7 +18,8 @@ export function getPlayerLangs(dbo: IDBObj): PlayerLangs {
       }
     }
   }
-  const active = typeof r.active === "string" ? r.active.toLowerCase() : undefined;
+  const active =
+    typeof r.active === "string" ? r.active.toLowerCase() : undefined;
   return { known, active };
 }
 
@@ -52,7 +54,14 @@ export async function setSkill(
   const value = clampSkill(skill);
   const langs = mirrorLocal(dbo);
   langs.known[key] = value;
-  await u.db.modify(dbo.id, "$set", { [`data.languages.known.${key}`]: value });
+  await u.db.modify(dbo.id, "$set", {
+    [`data.languages.known.${key}`]: value,
+  });
+  await gameHooks.emit("language:skill_changed", {
+    player: dbo,
+    language: key,
+    skill: value,
+  });
 }
 
 export async function setActive(
@@ -64,10 +73,18 @@ export async function setActive(
   if (langName === null) {
     delete langs.active;
     await u.db.modify(dbo.id, "$unset", { "data.languages.active": "" });
+    await gameHooks.emit("language:active_changed", {
+      player: dbo,
+      active: null,
+    });
     return;
   }
   const key = safeKey(langName);
   if (!key) return;
   langs.active = key;
   await u.db.modify(dbo.id, "$set", { "data.languages.active": key });
+  await gameHooks.emit("language:active_changed", {
+    player: dbo,
+    active: key,
+  });
 }
