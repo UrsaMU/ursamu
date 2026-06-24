@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "huttese",
+  "mode": "phoneme",
+  "description": "Slow, drawled trade language — open syllables, sibilants.",
+  "onsets": ["b", "p", "t", "d", "k", "g", "ch", "sh", "m", "n", "w", "y"],
+  "nuclei": ["a", "o", "u", "ee", "i", "ai", "oo"],
+  "codas": ["", "", "", "k", "n", "sh", "ta"],
+  "syllablePatterns": ["CV", "CV", "CVC", "V"],
+  "wordLenWeights": [0, 1, 4, 4, 2, 1],
+  "capitalize": "first",
+  "accentSubs": { "s": "sh", "th": "t", "f": "p" }
+}

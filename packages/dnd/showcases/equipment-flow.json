@@ -1,0 +1,86 @@
+{
+  "key": "dnd-equip",
+  "label": "+inv & +wield -- D&D Weapons and Equipment",
+  "description": "Demonstrates spawning weapons/armor/shields, wielding/wearing them, dynamic AC updates on sheet, rolls, and dropping locks.",
+  "vars": { "player": "Almaric" },
+  "setup": {
+    "character": {
+      "flags": ["connected", "player"],
+      "state": {
+        "dnd": {
+          "class": "Fighter",
+          "level": 1,
+          "species": "Human",
+          "abilities": {
+            "strength": 16,
+            "dexterity": 14,
+            "constitution": 14,
+            "intelligence": 10,
+            "wisdom": 12,
+            "charisma": 8
+          },
+          "hp": { "max": 12, "current": 12, "temp": 0 },
+          "skillProficiency": {},
+          "savingThrowProficiency": []
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Stage 1: Verify Initial Sheet & AC" },
+    { "note": "View character sheet. Base AC should be 12 (10 + Dex mod of +2)." },
+    { "cmd": "+sheet", "label": "View character sheet" },
+    { "expect": "AC: 12" },
+
+    { "sub": "Stage 2: Spawning Weapons, Armor & Shields" },
+    { "note": "Spawn a Longsword, Scale Mail (medium armor, base AC 14), and Steel Shield." },
+    { "cmd": "+item/create Longsword=weapon:1d8:slashing", "label": "Spawn Longsword" },
+    { "expect": "Created item" },
+    { "cmd": "+item/create Scale Mail=armor:14:medium", "label": "Spawn Scale Mail" },
+    { "expect": "Created item" },
+    { "cmd": "+item/create Steel Shield=shield:2", "label": "Spawn Steel Shield" },
+    { "expect": "Created item" },
+
+    { "sub": "Stage 3: Wielding and Wearing Equipment" },
+    { "note": "Wield the Longsword, wear the Scale Mail, and equip the Shield." },
+    { "cmd": "+wield longsword", "label": "Wield longsword" },
+    { "expect": "wield" },
+    { "cmd": "+wear scale mail", "label": "Wear scale mail" },
+    { "expect": "wear" },
+    { "cmd": "+wear steel shield", "label": "Equip steel shield" },
+    { "expect": "wear" },
+
+    { "sub": "Stage 4: Checking Inventory and Sheet" },
+    { "note": "Verify inventory status shows wielded and equipped items." },
+    { "cmd": "+inv", "label": "Check inventory" },
+    { "expect": "Longsword" },
+    { "expect": "Scale Mail" },
+    { "expect": "Steel Shield" },
+    { "expect": "[Wielded]" },
+    { "expect": "[Equipped]" },
+
+    { "note": "Verify sheet AC recalculated: Scale Mail (14) + Dex (max 2) + Shield (2) = 18." },
+    { "cmd": "+sheet", "label": "View sheet with gear" },
+    { "expect": "AC: 18" },
+
+    { "sub": "Stage 5: Rolling Attack and Damage" },
+    { "note": "Roll weapon attack (1d20 + Str + Prof = d20 + 3 + 2 = d20 + 5)." },
+    { "cmd": "+roll attack", "label": "Roll attack" },
+    { "expect": "attacks with Longsword" },
+
+    { "note": "Roll weapon damage (1d8 + Str = 1d8 + 3)." },
+    { "cmd": "+roll damage", "label": "Roll damage" },
+    { "expect": "+3 (Str) = " },
+
+    { "sub": "Stage 6: Lock Protections & Unequipping" },
+    { "note": "Try to drop an equipped item (should fail)." },
+    { "cmd": "drop longsword", "label": "Try drop" },
+    { "expect": "cannot drop equipped" },
+
+    { "note": "Unequip items and drop them successfully." },
+    { "cmd": "+unwield longsword", "label": "Stop wielding" },
+    { "expect": "stop wielding" },
+    { "cmd": "drop longsword", "label": "Drop item" },
+    { "expect": "You drop Longsword" }
+  ]
+}

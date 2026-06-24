@@ -1,0 +1,81 @@
+{
+  "key": "dnd-roll",
+  "label": "+roll -- Checks, saves, and advantage",
+  "description": "Demonstrates the +roll command including ability checks, skills, saves, advantage/disadvantage, and initiative.",
+  "vars": { "player": "Almaric" },
+  "setup": {
+    "character": {
+      "state": {
+        "dnd": {
+          "class": "Wizard",
+          "subclass": "",
+          "level": 1,
+          "species": "Elf",
+          "background": "Sage",
+          "abilities": {
+            "strength": 10,
+            "dexterity": 14,
+            "constitution": 13,
+            "intelligence": 16,
+            "wisdom": 12,
+            "charisma": 8
+          },
+          "skillProficiency": {
+            "arcana": "proficient",
+            "perception": "expert"
+          },
+          "savingThrowProficiency": ["intelligence", "wisdom"],
+          "hp": {
+            "max": 7,
+            "current": 7,
+            "temp": 0
+          },
+          "ac": 12,
+          "speed": 30,
+          "equipment": []
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Bare Ability Check" },
+    { "note": "Rolls a d20 + the ability score modifier." },
+    { "cmd": "+roll Strength", "label": "Str check: d20 + 0" },
+    { "expect": "ROLL>>" },
+
+    { "sub": "Skill Check with Proficiency" },
+    { "note": "Rolls d20 + Int modifier (+3) + Proficiency bonus (+2) = +5." },
+    { "cmd": "+roll Arcana", "label": "Arcana check with +5 modifier" },
+    { "expect": "ROLL>>" },
+
+    { "sub": "Skill Check with Expertise" },
+    { "note": "Rolls d20 + Wis modifier (+1) + Double Proficiency bonus (+4) = +5." },
+    { "cmd": "+roll Perception", "label": "Perception with Expertise (+5)" },
+    { "expect": "Expert" },
+
+    { "sub": "Advantage Check" },
+    { "note": "Rolls 2 d20s and keeps the higher value." },
+    { "cmd": "+roll/adv Stealth", "label": "Stealth check with Advantage" },
+    { "expect": "d20[Adv]" },
+
+    { "sub": "Disadvantage Check" },
+    { "note": "Rolls 2 d20s and keeps the lower value." },
+    { "cmd": "+roll/dis Stealth", "label": "Stealth check with Disadvantage" },
+    { "expect": "d20[Dis]" },
+
+    { "sub": "Saving Throw with Proficiency" },
+    { "note": "Rolls d20 + Int modifier (+3) + Proficiency bonus (+2) = +5." },
+    { "cmd": "+roll save Intelligence", "label": "Intelligence saving throw" },
+    { "expect": "Saving Throw" },
+
+    { "sub": "Initiative" },
+    { "note": "Rolls d20 + Dex modifier (+2)." },
+    { "cmd": "+roll/init", "label": "Roll Initiative" },
+    { "expect": "Initiative" },
+
+    { "sub": "Custom Dice Formula" },
+    { "note": "Rolls arbitrary dice blocks and adds static modifiers." },
+    { "cmd": "+roll 2d6+3", "label": "Roll 2d6 + 3 damage" },
+    { "expect": "2d6" }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "workspace": ["packages/core", "packages/mush", "packages/channels", "packages/builder", "packages/cli", "packages/mail", "packages/events", "packages/discord", "packages/help", "packages/jobs", "packages/bbs", "packages/wiki", "packages/cofd", "packages/mekton", "packages/ai-gm", "packages/map", "games/roses"],
+  "workspace": ["packages/core", "packages/mush", "packages/channels", "packages/builder", "packages/cli", "packages/mail", "packages/events", "packages/discord", "packages/help", "packages/jobs", "packages/bbs", "packages/wiki", "packages/cofd", "packages/mekton", "packages/ai-gm", "packages/map", "packages/lang", "packages/dnd", "packages/vendor", "games/roses"],
   "nodeModulesDir": "auto",
 
   "name": "@ursamu/ursamu",
@@ -72,7 +72,9 @@
     "@nicia-ai/typegraph":    "npm:@nicia-ai/typegraph@^0.31.0",
     "@nicia-ai/typegraph/postgres/pglite": "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
     "@ursamu/help-plugin":    "./packages/help/mod.ts",
+    "@ursamu/lang-plugin":    "./packages/lang/mod.ts",
     "@ursamu/jobs-plugin":    "./packages/jobs/mod.ts",
+    "@ursamu/vendor-plugin":  "./packages/vendor/mod.ts",
     "@ursamu/mail-plugin":    "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v2.3.1/index.ts",
     "@ursamu/ursamu/app": "./packages/mush/src/app.ts",
     "@ursamu/ursamu/channels": "./packages/channels/src/channel-events.ts",

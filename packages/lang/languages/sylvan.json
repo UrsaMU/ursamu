@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "sylvan",
+  "mode": "phoneme",
+  "description": "Sylvan elven — flowing liquids and long vowels.",
+  "onsets": ["l", "n", "m", "v", "th", "f", "s", "el", "an", "y", "br", "gl"],
+  "nuclei": ["a", "e", "i", "o", "ae", "ia", "io", "ea"],
+  "codas": ["", "l", "n", "r", "s", "th", "el", "il"],
+  "syllablePatterns": ["CV", "CVC", "V", "CV"],
+  "wordLenWeights": [0, 1, 3, 5, 3, 1],
+  "capitalize": "first",
+  "accentSubs": { "k": "c", "w": "v" }
+}

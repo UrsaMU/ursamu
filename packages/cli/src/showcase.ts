@@ -70,7 +70,12 @@ export async function discoverShowcases(root: string, filterPath?: string): Prom
         continue;
       }
       try {
-        files.push(JSON.parse(await Deno.readTextFile(entry.path)) as ShowcaseFile);
+        const fileContent = JSON.parse(await Deno.readTextFile(entry.path)) as ShowcaseFile;
+        // Determine packageDir
+        const packageDir = dirname(dirname(entry.path));
+        fileContent.filePath = entry.path;
+        fileContent.packageDir = packageDir;
+        files.push(fileContent);
       } catch { /* skip malformed */ }
     }
   }
@@ -114,6 +119,39 @@ export function renderShowcase(showcase: ShowcaseFile): void {
   console.log(`${BOLD}${ruler("═")}${RESET}`);
   for (const step of showcase.steps) renderStep(step, vars);
   console.log(`\n${DIM}${ruler()}${RESET}\n`);
+}
+
+async function runOrRender(showcase: ShowcaseFile): Promise<void> {
+  if (showcase.packageDir) {
+    const showcaseScript = join(showcase.packageDir, "tools", "showcase.ts");
+    try {
+      const stat = await Deno.stat(showcaseScript);
+      if (stat.isFile) {
+        const cmd = new Deno.Command("deno", {
+          args: [
+            "run",
+            "-A",
+            "--unstable-kv",
+            "--import-map=showcase.importmap.json",
+            "tools/showcase.ts",
+            showcase.key,
+          ],
+          cwd: showcase.packageDir,
+          stdout: "inherit",
+          stderr: "inherit",
+          stdin: "inherit",
+        });
+        const status = await cmd.spawn().status;
+        if (!status.success) {
+          Deno.exit(status.code);
+        }
+        return;
+      }
+    } catch {
+      // Fallback if tools/showcase.ts doesn't exist
+    }
+  }
+  renderShowcase(showcase);
 }
 
 // ── CLI entry — only runs when invoked directly ───────────────────────────────
@@ -175,7 +213,7 @@ Examples:
   if (key) {
     const showcase = all.find((s) => s.key === key);
     if (!showcase) { console.error(`Showcase '${key}' not found. Run --list to see keys.`); Deno.exit(1); }
-    renderShowcase(showcase);
+    await runOrRender(showcase);
     Deno.exit(0);
   }
 
@@ -186,5 +224,5 @@ Examples:
   const choice = prompt("Enter number or key: ")?.trim() ?? "";
   const chosen = all[parseInt(choice, 10) - 1] ?? all.find((s) => s.key === choice);
   if (!chosen) { console.error(`Invalid selection: '${choice}'`); Deno.exit(1); }
-  renderShowcase(chosen);
+  await runOrRender(chosen);
 }

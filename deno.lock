@@ -3814,6 +3814,24 @@
           "jsr:@std/assert@0.224"
         ]
       },
+      "packages/dnd": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/dotenv@0.224",
+          "jsr:@std/flags@0.224",
+          "jsr:@std/fmt@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/semver@1",
+          "jsr:@std/testing@0.224",
+          "jsr:@ursamu/mushcode@0.6",
+          "jsr:@zaubrik/djwt@^3.0.2",
+          "npm:@digibear/tags@1.0.0",
+          "npm:@ursamu/parser@1.2.4",
+          "npm:bcryptjs@2.4.3",
+          "npm:quickjs-emscripten@0.29.0"
+        ]
+      },
       "packages/events": {
         "dependencies": [
           "jsr:@std/assert@0.224"
@@ -3830,6 +3848,14 @@
         "dependencies": [
           "jsr:@std/assert@0.224",
           "jsr:@std/testing@^1.0.17"
+        ]
+      },
+      "packages/lang": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/testing@0.224"
         ]
       },
       "packages/mail": {
@@ -3859,6 +3885,14 @@
           "npm:@ursamu/parser@1.2.4",
           "npm:bcryptjs@2.4.3",
           "npm:quickjs-emscripten@0.29.0"
+        ]
+      },
+      "packages/vendor": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/testing@^1.0.17"
         ]
       },
       "packages/wiki": {

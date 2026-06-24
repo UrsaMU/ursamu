@@ -1,0 +1,65 @@
+{
+  "key": "dnd-vendor",
+  "label": "+shop & +buy -- D&D Shop Vendors and Economy",
+  "description": "Demonstrates spawning shop vendors, listing stock, buying items using gp, verifying gold on sheets, and selling items back.",
+  "vars": { "player": "Almaric" },
+  "setup": {
+    "character": {
+      "flags": ["connected", "player"],
+      "state": {
+        "dnd": {
+          "class": "Fighter",
+          "level": 1,
+          "species": "Human",
+          "abilities": {
+            "strength": 16,
+            "dexterity": 14,
+            "constitution": 14,
+            "intelligence": 10,
+            "wisdom": 12,
+            "charisma": 8
+          },
+          "hp": { "max": 12, "current": 12, "temp": 0 },
+          "gold": 100,
+          "skillProficiency": {},
+          "savingThrowProficiency": []
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Stage 1: Creating a Shop Vendor" },
+    { "note": "Spawn a Blacksmith vendor selling a Longsword (15 gp) and Scale Mail (50 gp)." },
+    { "cmd": "+vendor/create Blacksmith=Longsword:15:weapon:1d8:slashing|Scale Mail:50:armor:14:medium", "label": "Create Blacksmith" },
+    { "expect": "Created vendor Blacksmith" },
+
+    { "sub": "Stage 2: Listing Shop Stock" },
+    { "note": "Use +list or +shop to see what wares are available in the room." },
+    { "cmd": "+list", "label": "View shop wares" },
+    { "expect": "BLACKSMITH'S SHOP" },
+    { "expect": "Longsword" },
+    { "expect": "15 gp" },
+    { "expect": "Scale Mail" },
+    { "expect": "50 gp" },
+
+    { "sub": "Stage 3: Purchasing an Item" },
+    { "note": "Purchase the Longsword for 15 gp. Character starting gold is 100 gp." },
+    { "cmd": "+buy Longsword", "label": "Buy Longsword" },
+    { "expect": "You buy Longsword from Blacksmith for 15 gp" },
+    { "expect": "Remaining: 85 gp" },
+
+    { "note": "Verify sheet AC and gold have updated." },
+    { "cmd": "+sheet", "label": "View character sheet" },
+    { "expect": "Gold: 85 gp" },
+
+    { "sub": "Stage 4: Selling an Item" },
+    { "note": "Sell the Longsword back to the Blacksmith for half its price (15 gp * 0.5 = 7 gp)." },
+    { "cmd": "+sell Longsword", "label": "Sell Longsword" },
+    { "expect": "You sell Longsword to Blacksmith for 7 gp" },
+    { "expect": "New Total: 92 gp" },
+
+    { "note": "Verify gold updated on sheet again." },
+    { "cmd": "+sheet", "label": "Check sheet after sale" },
+    { "expect": "Gold: 92 gp" }
+  ]
+}

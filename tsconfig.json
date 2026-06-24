@@ -20,6 +20,7 @@
       "@std/fs": ["./types/@std/fs.d.ts"],
       "@std/assert": ["./types/@std/assert.d.ts"],
       "@std/flags": ["./types/@std/flags.d.ts"],
+      "@std/testing/bdd": ["./types/@std/testing.d.ts"],
       "@ursamu/mushcode/eval": ["./types/@ursamu/mushcode.d.ts"]
     },
     "jsx": "react",

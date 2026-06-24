@@ -1,0 +1,154 @@
+{
+  "key": "dnd-combat",
+  "label": "+combat -- D&D NPC Spawning and Turn-Based Combat",
+  "description": "Demonstrates spawning NPCs, starting combat, attacking, executing unconscious targets, and looting corpses.",
+  "vars": { "player": "Almaric" },
+  "setup": {
+    "character": {
+      "flags": ["connected", "player"],
+      "state": {
+        "dnd": {
+          "class": "Fighter",
+          "level": 1,
+          "species": "Human",
+          "abilities": {
+            "strength": 16,
+            "dexterity": 14,
+            "constitution": 14,
+            "intelligence": 10,
+            "wisdom": 12,
+            "charisma": 8
+          },
+          "hp": { "max": 30, "current": 30, "temp": 0 },
+          "xp": 0,
+          "skillProficiency": {},
+          "savingThrowProficiency": []
+        }
+      }
+    },
+    "targets": {
+      "Boran": {
+        "flags": ["connected", "player"],
+        "state": {
+          "dnd": {
+            "class": "Cleric",
+            "level": 1,
+            "species": "Dwarf",
+            "abilities": {
+              "strength": 14,
+              "dexterity": 10,
+              "constitution": 16,
+              "intelligence": 10,
+              "wisdom": 16,
+              "charisma": 8
+            },
+            "hp": { "max": 30, "current": 30, "temp": 0 },
+            "xp": 0,
+            "spells": ["Cure Wounds", "Guiding Bolt"],
+            "spellSlotsMax": { "1": 2 },
+            "spellSlotsCurrent": { "1": 2 },
+            "skillProficiency": {},
+            "savingThrowProficiency": []
+          }
+        }
+      },
+      "Greatsword": {
+        "flags": ["thing"],
+        "location": "mock-almaric",
+        "state": {
+          "name": "Greatsword",
+          "dnd": {
+            "type": "weapon",
+            "damage": "2d6",
+            "damageType": "slashing",
+            "properties": ["heavy", "two-handed"],
+            "equipped": false
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Stage 1: Creating NPCs and Wielding Weapons" },
+    { "note": "Spawn a Goblin and Orc in the room from templates." },
+    {
+      "cmd": "+npc/create Goblin=goblin",
+      "label": "Create Goblin"
+    },
+    { "expect": "Created NPC Goblin" },
+    {
+      "cmd": "+npc/create Orc=orc",
+      "label": "Create Orc"
+    },
+    { "expect": "Created NPC Orc" },
+    { "note": "Wield the Greatsword." },
+    {
+      "cmd": "+wield Greatsword",
+      "label": "Wield Greatsword"
+    },
+    { "expect": "You wield Greatsword" },
+
+    { "sub": "Stage 2: Starting Combat" },
+    { "note": "Initialize combat in the current room." },
+    { "cmd": "+combat/start", "label": "Start combat" },
+    { "expect": "COMBAT STARTED" },
+    { "expect": "Initiative Order" },
+
+    { "sub": "Stage 3: Turn Progression & Attacking" },
+    { "note": "Check status, then Boran casts Cure Wounds on Almaric." },
+    { "cmd": "+combat/status", "label": "Check status" },
+    { "expect": "Goblin" },
+    { "expect": "Orc" },
+    {
+      "as": "Boran",
+      "cmd": "+cast Cure Wounds on Almaric",
+      "label": "Boran heals Almaric"
+    },
+    { "expect": "casts Cure Wounds" },
+    { "expect": "HP healed" },
+    { "cmd": "+attack Orc", "label": "Almaric attacks Orc" },
+    { "expect": "attacks Orc" },
+
+    { "note": "Round 2: Boran weakens Goblin, Almaric knocks Orc out." },
+    {
+      "as": "Boran",
+      "cmd": "+attack goblin",
+      "label": "Boran attacks goblin"
+    },
+    { "expect": "attacks Goblin" },
+    { "cmd": "+attack Orc", "label": "Almaric attacks Orc" },
+    { "expect": "attacks Orc" },
+    { "expect": "Unconscious" },
+
+    { "note": "Round 3: Boran knocks Goblin out, Almaric executes Orc." },
+    {
+      "as": "Boran",
+      "cmd": "+attack goblin",
+      "label": "Boran finishes Goblin"
+    },
+    { "expect": "attacks Goblin" },
+    { "expect": "Unconscious" },
+    { "cmd": "+kill Orc", "label": "Almaric executes Orc" },
+    { "expect": "executing Orc" },
+    { "expect": "left on the ground" },
+
+    { "sub": "Stage 4: Executing and Looting" },
+    { "note": "Round 4: Boran executes Goblin, ending combat." },
+    { "as": "Boran", "cmd": "+kill Goblin", "label": "Boran executes Goblin" },
+    { "expect": "executing Goblin" },
+    { "expect": "You gain 50 XP" },
+    { "expect": "All enemies have been defeated! Combat has ended" },
+
+    { "note": "Loot the corpses." },
+    { "as": "Boran", "cmd": "+loot corpse of goblin", "label": "Loot goblin" },
+    { "expect": "You loot Dagger, Gold Ring, 5 gp" },
+    { "as": "Boran", "cmd": "+loot corpse of orc", "label": "Loot orc" },
+    { "expect": "nothing to loot" },
+
+    { "sub": "Stage 5: Verifying XP and Gold Sheet Status" },
+    { "note": "Verify final character sheet status." },
+    { "as": "Boran", "cmd": "+sheet", "label": "Boran character sheet" },
+    { "expect": "XP: 50" },
+    { "expect": "Gold: 105 gp" }
+  ]
+}
