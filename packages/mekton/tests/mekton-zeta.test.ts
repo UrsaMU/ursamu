@@ -240,14 +240,27 @@ describe("findProfession", () => {
 describe("applyDamage", () => {
   it("clamps at 0 — cannot go negative", () => {
     const wounds = { head: 3, torso: 12, rArm: 9, lArm: 9, rLeg: 9, lLeg: 9 };
-    applyDamage(wounds, "head", 99);
+    const applied = applyDamage(wounds, "head", 99);
     assertEquals(wounds.head, 0);
+    assertEquals(applied, 3);
   });
   it("returns actual damage applied", () => {
     const wounds = { head: 4, torso: 12, rArm: 9, lArm: 9, rLeg: 9, lLeg: 9 };
     const applied = applyDamage(wounds, "head", 2);
     assertEquals(applied, 2);
     assertEquals(wounds.head, 2);
+  });
+  it("ignores negative damage (no healing)", () => {
+    const wounds = { head: 4, torso: 12, rArm: 9, lArm: 9, rLeg: 9, lLeg: 9 };
+    const applied = applyDamage(wounds, "head", -2);
+    assertEquals(applied, 0);
+    assertEquals(wounds.head, 4);
+  });
+  it("applies 0 damage correctly", () => {
+    const wounds = { head: 4, torso: 12, rArm: 9, lArm: 9, rLeg: 9, lLeg: 9 };
+    const applied = applyDamage(wounds, "head", 0);
+    assertEquals(applied, 0);
+    assertEquals(wounds.head, 4);
   });
 });
 
