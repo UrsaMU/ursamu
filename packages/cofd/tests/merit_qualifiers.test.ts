@@ -6,6 +6,7 @@ import { describe, it } from "@std/testing/bdd";
 import {
   parseMeritRef,
   formatMeritLabel,
+  formatQualifier,
   splitMeritStorageKey,
 } from "../src/dictionary/merits.ts";
 import { defaultSheet } from "../src/stats/sheet.ts";
@@ -37,6 +38,21 @@ describe("parseMeritRef", () => {
     assertEquals(r.merit, "giant");
     assertEquals(r.qualifier, "");
     assertEquals(r.storageKey, "giant");
+  });
+});
+
+describe("formatQualifier", () => {
+  it("returns empty string for empty input", () => {
+    assertEquals(formatQualifier(""), "");
+  });
+
+  it("title-cases a single word", () => {
+    assertEquals(formatQualifier("spanish"), "Spanish");
+  });
+
+  it("title-cases and replaces hyphens with spaces for multi-word slugs", () => {
+    assertEquals(formatQualifier("black-market"), "Black Market");
+    assertEquals(formatQualifier("very-black-market"), "Very Black Market");
   });
 });
 
