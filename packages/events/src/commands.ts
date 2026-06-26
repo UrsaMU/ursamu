@@ -90,10 +90,17 @@ Examples:
       );
       u.send("%ch" + "-".repeat(68) + "%cn");
 
+      const visibleIds = visible.map(e => e.id);
+      const allRsvps = await eventRsvps.find({ eventId: { $in: visibleIds }, status: "attending" });
+      const rsvpCounts = allRsvps.reduce((acc, rsvp) => {
+        acc[rsvp.eventId] = (acc[rsvp.eventId] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
       for (const e of visible) {
-        const rsvps   = await eventRsvps.find({ eventId: e.id, status: "attending" });
-        const cap     = e.maxAttendees > 0 ? `${rsvps.length}/${e.maxAttendees}` : String(rsvps.length);
-        const sc      = statusColor(e.status);
+        const rsvpCount = rsvpCounts[e.id] || 0;
+        const cap       = e.maxAttendees > 0 ? `${rsvpCount}/${e.maxAttendees}` : String(rsvpCount);
+        const sc        = statusColor(e.status);
         u.send(
           u.util.rjust(String(e.number), 4) + "  " +
           u.util.ljust(e.title.slice(0, 27), 28) +
@@ -408,10 +415,17 @@ Examples:
     );
     u.send("%ch" + "-".repeat(68) + "%cn");
 
+    const visibleIds = visible.map(e => e.id);
+    const allRsvps = await eventRsvps.find({ eventId: { $in: visibleIds }, status: "attending" });
+    const rsvpCounts = allRsvps.reduce((acc, rsvp) => {
+      acc[rsvp.eventId] = (acc[rsvp.eventId] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
     for (const e of visible) {
-      const rsvps = await eventRsvps.find({ eventId: e.id, status: "attending" });
-      const cap   = e.maxAttendees > 0 ? `${rsvps.length}/${e.maxAttendees}` : String(rsvps.length);
-      const sc    = statusColor(e.status);
+      const rsvpCount = rsvpCounts[e.id] || 0;
+      const cap       = e.maxAttendees > 0 ? `${rsvpCount}/${e.maxAttendees}` : String(rsvpCount);
+      const sc        = statusColor(e.status);
       u.send(
         u.util.rjust(String(e.number), 4) + "  " +
         u.util.ljust(e.title.slice(0, 27), 28) +
