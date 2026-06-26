@@ -19,6 +19,7 @@ import {
   contractPackage,
   contractCatalogSize,
 } from "../src/chargen/contracts.ts";
+import { kithsForSeeming } from "../src/dictionary/changeling.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -202,5 +203,30 @@ describe("Changeling Stage 7 -- Contracts", OPTS, () => {
     const res = validateCurrentStage(s);
     assertEquals(res.valid, false);
     assertStringIncludes(res.error ?? "", "differ");
+  });
+});
+
+describe("kithsForSeeming", () => {
+  it("returns the correct kiths for a valid seeming", () => {
+    const kiths = kithsForSeeming("Beast");
+    assert(kiths.length > 0);
+    const kithNames = kiths.map(k => k.name);
+    assert(kithNames.includes("Broadback"));
+    assert(kithNames.includes("Cleareyes"));
+    assert(kithNames.includes("Coldscale"));
+    assert(kithNames.includes("Helldiver"));
+    assert(kithNames.includes("Hunterheart"));
+  });
+
+  it("is case-insensitive and handles surrounding whitespace", () => {
+    const kiths = kithsForSeeming("  beAsT  ");
+    assert(kiths.length > 0);
+    const kithNames = kiths.map(k => k.name);
+    assert(kithNames.includes("Broadback"));
+  });
+
+  it("returns an empty array for an invalid seeming", () => {
+    const kiths = kithsForSeeming("InvalidSeeming");
+    assertEquals(kiths, []);
   });
 });
