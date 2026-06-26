@@ -1733,7 +1733,8 @@
         "minizlib",
         "mkdirp",
         "yallist"
-      ]
+      ],
+      "deprecated": true
     },
     "thenify-all@1.6.0": {
       "integrity": "sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==",
@@ -1797,6 +1798,7 @@
     },
     "uuid@10.0.0": {
       "integrity": "sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==",
+      "deprecated": true,
       "bin": true
     },
     "uuid@11.1.0": {
@@ -1805,6 +1807,7 @@
     },
     "uuid@9.0.1": {
       "integrity": "sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==",
+      "deprecated": true,
       "bin": true
     },
     "vm2@3.9.19": {
@@ -3739,23 +3742,6 @@
       "npm:zod@4.4.3"
     ],
     "members": {
-      "games/roses": {
-        "dependencies": [
-          "jsr:@std/assert@0.224",
-          "jsr:@std/dotenv@0.224",
-          "jsr:@std/flags@0.224",
-          "jsr:@std/fmt@0.224",
-          "jsr:@std/fs@0.224",
-          "jsr:@std/path@0.224",
-          "jsr:@std/semver@1",
-          "jsr:@ursamu/mushcode@0.6",
-          "jsr:@zaubrik/djwt@^3.0.2",
-          "npm:@digibear/tags@1.0.0",
-          "npm:@ursamu/parser@1.2.4",
-          "npm:bcryptjs@2.4.3",
-          "npm:quickjs-emscripten@0.29.0"
-        ]
-      },
       "packages/ai-gm": {
         "dependencies": [
           "jsr:@std/assert@0.224",
