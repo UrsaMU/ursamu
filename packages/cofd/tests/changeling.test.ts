@@ -10,6 +10,7 @@ import {
   maxStageFor,
   type CofdCgState,
 } from "../src/chargen/state.ts";
+import { findCourt, findKith, findSeeming, kithsForSeeming } from "../src/dictionary/changeling.ts";
 import { validateCurrentStage } from "../src/chargen/validate.ts";
 import {
   addContract,
@@ -202,5 +203,40 @@ describe("Changeling Stage 7 -- Contracts", OPTS, () => {
     const res = validateCurrentStage(s);
     assertEquals(res.valid, false);
     assertStringIncludes(res.error ?? "", "differ");
+  });
+});
+
+describe("Changeling Dictionary Lookups", OPTS, () => {
+  it("findCourt handles exact matches, case-insensitivity, and misses", () => {
+    assertEquals(findCourt("Spring")?.name, "Spring");
+    assertEquals(findCourt("  aUtUmN  ")?.name, "Autumn");
+    assertEquals(findCourt("Summer")?.name, "Summer");
+    assertEquals(findCourt("Winter")?.name, "Winter");
+    assertEquals(findCourt("NonExistent"), null);
+    assertEquals(findCourt(""), null);
+  });
+
+  it("findKith handles exact matches, case-insensitivity, and misses", () => {
+    assertEquals(findKith("Broadback")?.name, "Broadback");
+    assertEquals(findKith("  cLeArEyEs  ")?.name, "Cleareyes");
+    assertEquals(findKith("NotAKith"), null);
+    assertEquals(findKith(""), null);
+  });
+
+  it("findSeeming handles exact matches, case-insensitivity, and misses", () => {
+    assertEquals(findSeeming("Beast")?.name, "Beast");
+    assertEquals(findSeeming("  dArKlInG  ")?.name, "Darkling");
+    assertEquals(findSeeming("NotASeeming"), null);
+    assertEquals(findSeeming(""), null);
+  });
+
+  it("kithsForSeeming returns correct kiths", () => {
+    const beastKiths = kithsForSeeming("Beast");
+    assert(beastKiths.length > 0, "Beast should have kiths");
+    assert(beastKiths.some(k => k.name === "Broadback"));
+    assert(beastKiths.some(k => k.name === "Hunterheart"));
+    assert(!beastKiths.some(k => k.name === "Airtouched")); // Elemental kith
+
+    assertEquals(kithsForSeeming("NotASeeming").length, 0);
   });
 });
