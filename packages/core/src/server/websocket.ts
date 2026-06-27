@@ -38,7 +38,7 @@ export function isRateLimitedForAuth(socketId: string): boolean {
 export function clampTermWidth(w: unknown): number | null {
   if (typeof w !== "number" || !Number.isFinite(w)) return null;
   if (w < 40 || w > 250) return null;
-  return w;
+  return Math.floor(w);
 }
 
 function sendToSocket(socketId: string, msg: string): void {
