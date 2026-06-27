@@ -2,13 +2,13 @@
 // Dynamically loads all template definitions from JSON files within the templates/ subdirectory.
 
 export interface CofdTemplate {
-  key: string;                 // e.g. "vampire"
-  name: string;                // e.g. "Vampire: The Requiem"
-  moralityName: string;        // e.g. "Humanity"
-  powerStatName: string;       // e.g. "Blood Potency"
-  energyName: string;          // e.g. "Vitae"
-  customFields: string[];      // e.g. ["clan", "covenant"]
-  validPowers: string[];       // list of lowercase power ratings
+  key: string; // e.g. "vampire"
+  name: string; // e.g. "Vampire: The Requiem"
+  moralityName: string; // e.g. "Humanity"
+  powerStatName: string; // e.g. "Blood Potency"
+  energyName: string; // e.g. "Vitae"
+  customFields: string[]; // e.g. ["clan", "covenant"]
+  validPowers: string[]; // list of lowercase power ratings
   energyMaxFormula: (powerStatValue: number) => number;
 }
 
@@ -39,24 +39,31 @@ export const COFD_TEMPLATES: Record<string, CofdTemplate> = {};
 // Resolve the templates directory URL dynamically (walk up two levels to project root)
 const templatesDirUrl = new URL("../../templates", import.meta.url);
 
-// Synchronously scan the templates/ folder and load all JSON template definitions
+// Asynchronously scan the templates/ folder and load all JSON template definitions concurrently
+const promises: Promise<void>[] = [];
+
 for (const entry of Deno.readDirSync(templatesDirUrl)) {
   if (entry.isFile && entry.name.endsWith(".json")) {
     const fileUrl = new URL(`../../templates/${entry.name}`, import.meta.url);
-    const fileContent = Deno.readTextFileSync(fileUrl);
-    const data = JSON.parse(fileContent);
 
-    COFD_TEMPLATES[data.key] = {
-      key: data.key,
-      name: data.name,
-      moralityName: data.moralityName,
-      powerStatName: data.powerStatName,
-      energyName: data.energyName,
-      customFields: data.customFields,
-      validPowers: data.validPowers,
-      energyMaxFormula: data.energyMaxFormulaType === "standard"
-        ? getStandardMaxEnergy
-        : () => 0,
-    };
+    const promise = Deno.readTextFile(fileUrl).then((fileContent) => {
+      const data = JSON.parse(fileContent);
+      COFD_TEMPLATES[data.key] = {
+        key: data.key,
+        name: data.name,
+        moralityName: data.moralityName,
+        powerStatName: data.powerStatName,
+        energyName: data.energyName,
+        customFields: data.customFields,
+        validPowers: data.validPowers,
+        energyMaxFormula: data.energyMaxFormulaType === "standard"
+          ? getStandardMaxEnergy
+          : () => 0,
+      };
+    });
+
+    promises.push(promise);
   }
 }
+
+await Promise.all(promises);
