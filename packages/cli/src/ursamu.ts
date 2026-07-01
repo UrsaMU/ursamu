@@ -59,7 +59,8 @@ Select an action:
   console.log("4. Manage installed Plugins (install, update, list, remove)");
   console.log("5. Update ursamu engine to latest version");
   console.log("6. Manage game shell scripts (daemon.sh, run.sh, etc.)");
-  console.log("7. Exit");
+  console.log("7. Select & Configure UrsaMU JSR Packages");
+  console.log("8. Exit");
 
   const choice = getRes("Selection", "1");
 
@@ -156,6 +157,9 @@ Select an action:
       break;
     }
     case "7":
+      await runCommand("packages.ts", []);
+      break;
+    case "8":
       Deno.exit(0);
       break;
     default:
@@ -187,6 +191,11 @@ switch (command) {
 
   case "scripts":
     await runCommand("scripts.ts", restArgs);
+    break;
+
+  case "packages":
+  case "add":
+    await runCommand("packages.ts", restArgs);
     break;
 
   case "help":
@@ -223,6 +232,7 @@ Commands:
   update --dry-run             Preview the update without writing changes
   scripts list                 List game shell scripts (shows which are present)
   scripts update <name...>     Pull named shell script(s) from the engine
+  packages                     Configure optional UrsaMU JSR packages
   help                         Show this help message
 
 Options:

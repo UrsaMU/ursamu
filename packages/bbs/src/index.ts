@@ -1,5 +1,6 @@
 import type { IPlugin } from "@ursamu/mush";
 import { registerPluginRoute } from "@ursamu/mush";
+import { registerHelpDir } from "@ursamu/help-plugin";
 import { bboardsRouteHandler } from "./router.ts";
 import { startCleanupInterval } from "./cleanup.ts";
 import "./commands/reading.ts";
@@ -15,7 +16,12 @@ const plugin: IPlugin = {
     "Full-featured BBS — boards, threading, categories, IC/OOC tags, sticky posts, board moderators, post flagging, reply watching, Discord webhooks, scene linking, and archive boards.",
 
   init: () => {
+    registerHelpDir(
+      new URL("../help", import.meta.url).pathname,
+      "bbs",
+    );
     registerPluginRoute("/api/v1/boards", bboardsRouteHandler);
+
     startCleanupInterval();
     console.log("[bbs] Plugin initialized — +bb commands active, /api/v1/boards registered.");
     return true;

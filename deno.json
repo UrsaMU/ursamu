@@ -1,5 +1,26 @@
 {
-  "workspace": ["packages/core", "packages/mush", "packages/channels", "packages/builder", "packages/cli", "packages/mail", "packages/events", "packages/discord", "packages/help", "packages/jobs", "packages/bbs", "packages/wiki", "packages/cofd", "packages/mekton", "packages/ai-gm", "packages/map", "packages/lang", "packages/dnd", "packages/vendor", "games/roses"],
+  "workspace": [
+    "packages/core",
+    "packages/mush",
+    "packages/channels",
+    "packages/builder",
+    "packages/cli",
+    "packages/mail",
+    "packages/events",
+    "packages/discord",
+    "packages/help",
+    "packages/jobs",
+    "packages/bbs",
+    "packages/wiki",
+    "packages/cofd",
+    "packages/mekton",
+    "packages/ai-gm",
+    "packages/map",
+    "packages/lang",
+    "packages/dnd",
+    "packages/vendor",
+    "games/roses"
+  ],
   "nodeModulesDir": "auto",
 
   "name": "@ursamu/ursamu",

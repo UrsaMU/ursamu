@@ -5,6 +5,7 @@ import { join, dirname, fromFileUrl, relative } from "@std/path";
 import { existsSync } from "@std/fs";
 import { scaffoldPlugin } from "./create-plugin.ts";
 import { scaffoldProject } from "./create-project.ts";
+import { optionalPackages } from "./packages.ts";
 
 const __dirname = import.meta.url.startsWith("file://")
   ? dirname(fromFileUrl(import.meta.url))
@@ -91,4 +92,61 @@ if (isLocal) {
   engineRelPath = relative(targetDir, engineRoot) || ".";
 }
 
-await scaffoldProject(projectName, { isLocal, engineRelPath, targetDir });
+let selectedPackages: string[] | undefined = undefined;
+
+if (!args["non-interactive"]) {
+  const ask = prompt(
+    "Would you like to select optional packages? (y/N)"
+  );
+  if (ask?.toLowerCase() === "y") {
+    const selections = new Set<string>();
+    while (true) {
+      console.clear();
+      console.log("==================================================");
+      console.log("      Select Optional Packages for New MUSH       ");
+      console.log("==================================================");
+      console.log("  [x] Core (Required, automatically included)");
+      console.log("  [x] Mush (Required, automatically included)");
+      console.log("");
+      for (let i = 0; i < optionalPackages.length; i++) {
+        const opt = optionalPackages[i];
+        const isSelected = selections.has(opt.pkgName);
+        const box = isSelected ? "[x]" : "[ ]";
+        console.log(`${box} ${i + 1}. ${opt.name} (${opt.pkgName})`);
+        console.log(`    ${opt.description}`);
+      }
+      console.log("");
+      console.log(
+        "Enter a number to toggle, or press Enter to confirm."
+      );
+      const input = prompt("Selection:")?.trim();
+      if (!input) {
+        break;
+      }
+      const index = parseInt(input, 10) - 1;
+      if (
+        isNaN(index) ||
+        index < 0 ||
+        index >= optionalPackages.length
+      ) {
+        console.log("Invalid option. Press any key to continue...");
+        prompt("");
+        continue;
+      }
+      const pkg = optionalPackages[index].pkgName;
+      if (selections.has(pkg)) {
+        selections.delete(pkg);
+      } else {
+        selections.add(pkg);
+      }
+    }
+    selectedPackages = Array.from(selections);
+  }
+}
+
+await scaffoldProject(projectName, {
+  isLocal,
+  engineRelPath,
+  targetDir,
+  selectedPackages,
+});

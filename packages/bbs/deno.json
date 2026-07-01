@@ -19,6 +19,7 @@
   "publish": {
     "include": [
       "src",
+      "help",
       "mod.ts",
       "deno.json",
       "README.md"
