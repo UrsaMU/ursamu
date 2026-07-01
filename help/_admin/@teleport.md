@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @TELEPORT
 
 Moves an object to a specific location.

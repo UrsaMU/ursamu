@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 social impression  -- Impression levels and time-per-roll.
 
 Impression sets how often you may attempt a door roll. Hostile

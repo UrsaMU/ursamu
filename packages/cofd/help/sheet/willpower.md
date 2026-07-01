@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 sheet willpower  -- Willpower regeneration (CoFD 2e core).
 
 Three core regen paths drive Willpower recovery:

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 @LOCK
 
 COMMAND: @lock[/<switch>] <object>=<key>

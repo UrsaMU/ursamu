@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 social doors  -- Doors and contested door rolls.
 
 Doors are the subject's mental defences against persuasion. Knocking

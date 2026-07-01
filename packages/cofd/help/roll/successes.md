@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 roll/successes  -- Counting, n-again, chance dice, outcomes.
 
 See also: help roll (overview).

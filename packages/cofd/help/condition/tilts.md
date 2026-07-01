@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 condition/tilts  -- Conditions vs Tilts: persistence, keys, and Beats.
 
 See also: help condition (overview).

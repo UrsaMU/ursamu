@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 cofd/character  -- Character sheet and chargen commands.
 
 See also: help cofd (overview).

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat action-economy  -- Instant, reflexive, and movement slots per turn.
 
 Each turn a combatant gets one instant action, any number of reflexive

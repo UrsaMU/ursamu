@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat range  -- Range modifiers for ranged attacks.
 
 Each ranged weapon has three range bands printed on its catalog

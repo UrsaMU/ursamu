@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat tilt-effects  -- Summary of body-part Tilt effects.
 
 When a specified-target attack triggers a Tilt, these are the

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 integrity anchors  -- Virtue/Vice interaction with Breaking Points.
 
 A character's Virtue and Vice both colour Breaking Point rolls. Acting

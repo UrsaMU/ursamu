@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @DESCRIBE
 
 Sets the description of an object.

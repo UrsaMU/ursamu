@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # MAIL SEND
 
 Sends the current draft message to its recipient.

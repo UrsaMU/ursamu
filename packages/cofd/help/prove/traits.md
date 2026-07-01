@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 prove traits  -- Accepted trait vocabulary for +prove.
 
 Trait list is comma-separated. Accepted vocabulary mirrors +roll:

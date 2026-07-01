@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 extended pool  -- Pool expressions, targets, and attempt caps.
 
 Configuring an Extended Action with /start:

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 merit-combat/storage  -- Storage keys for +sheet/set.
 
 See also: help merit-combat (overview).

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @DROP
 
 Sets the Drop message.

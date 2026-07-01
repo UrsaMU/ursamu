@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # STATS
 
 Shows server statistics.

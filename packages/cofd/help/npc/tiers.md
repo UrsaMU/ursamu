@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 npc tiers  -- Tier capacities for dread powers and merits.
 
 Each NPC carries a tier that caps the number of dread powers and

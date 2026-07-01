@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat/order  -- Reading the initiative table and turn order.
 
 See also: help combat (overview).

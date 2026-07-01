@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # ADDCOM
 
 Joins a channel and sets an alias.

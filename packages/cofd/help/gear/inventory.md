@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 gear inventory  -- Slot model and equip/unequip mechanics.
 
 Inventory:

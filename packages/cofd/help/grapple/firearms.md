@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 grapple firearms  -- Shooting into a grapple.
 
 Shooting into a grapple is markedly riskier than shooting into a

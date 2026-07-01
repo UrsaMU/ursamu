@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE SUBSTITUTIONS
 
 Substitutions are % codes expanded before (or during) softcode evaluation.

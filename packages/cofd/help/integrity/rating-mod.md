@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 integrity rating-mod  -- Integrity-rating dice modifier (RAW p.73).
 
 The character's current Integrity rating contributes a flat modifier to

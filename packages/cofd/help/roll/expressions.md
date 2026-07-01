@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 roll/expressions  -- Dice-pool expression grammar.
 
 See also: help roll (overview).

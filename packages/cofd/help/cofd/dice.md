@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 cofd/dice  -- Dice and progression commands.
 
 See also: help cofd (overview).

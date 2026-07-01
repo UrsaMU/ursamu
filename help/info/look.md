@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # LOOK
 
 Examines the current location or a specific object.

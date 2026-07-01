@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 npc archetypes  -- Archetype catalog and default loadouts.
 
 Each archetype prepopulates an NPC's attributes, skills, and starting

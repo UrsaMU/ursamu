@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 social leverage  -- Soft vs hard leverage rules.
 
 Leverage is information or pressure used to bypass a door directly,

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 social force  -- Forcing the doors: a high-risk one-shot.
 
 Forced doors (CoFD 2e p.83) collapse the entire maneuver into a

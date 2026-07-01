@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat conceal-mods  -- Concealment penalties to the attacker's pool.
 
 Concealment imposes a penalty on the attacker's pool. Full cover

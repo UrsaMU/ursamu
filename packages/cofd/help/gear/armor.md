@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 +gear armor  -- Armor mechanics for CoFD 2e.
 
 Ratings:

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat modifiers  -- Attack pool modifier reference (CoFD core p.92).
 
 Attack pool modifiers (add or subtract dice before rolling):

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 +extended intervals  -- Time-step labels for Extended Actions.
 
 The interval describes how much narrative time one attempt represents.

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 extended/syntax  -- /start expression and switch details.
 
 See also: help extended (overview).

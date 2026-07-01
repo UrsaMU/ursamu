@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 cofd/reference  -- Reference catalogs.
 
 See also: help cofd (overview).

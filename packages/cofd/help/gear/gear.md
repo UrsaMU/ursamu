@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 +gear gear  -- Mental, Physical, and Social equipment.
 
 Categories:

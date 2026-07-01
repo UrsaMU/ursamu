@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat situational  -- Prone, into-melee, Willpower, surprise modifiers.
 
 Prone target:

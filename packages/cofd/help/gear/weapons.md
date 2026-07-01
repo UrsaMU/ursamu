@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 +gear weapons  -- Weapon mechanics for CoFD 2e.
 
 Ranged Weapons:

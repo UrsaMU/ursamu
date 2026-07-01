@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat/switches  -- Per-switch behavior for +combat. See help combat.
 
 LIFECYCLE

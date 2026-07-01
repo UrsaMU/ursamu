@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 npc derived  -- Computed stats on an NPC stat block.
 
 Derived stats are recomputed from the NPC's sheet at render time.

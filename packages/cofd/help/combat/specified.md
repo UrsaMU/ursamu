@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat specified  -- Targeting a specific body part: penalties and Tilt
                     thresholds.
 

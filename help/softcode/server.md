@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE SERVER FUNCTIONS
 
 These functions return server-level information. Most are read-only.

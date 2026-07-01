@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 grapple moves  -- Full list of grapple moves and their effects.
 
 When you win the contested control roll (or got an exceptional on the

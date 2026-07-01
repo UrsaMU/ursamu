@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 +gear durability  -- Item Durability, Structure, and broken state.
 
 Every CoFD item has two values:

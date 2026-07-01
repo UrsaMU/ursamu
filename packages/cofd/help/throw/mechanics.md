@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 throw/mechanics  -- Grenade and thrown-weapon resolution.
 
 See also: help throw (overview).

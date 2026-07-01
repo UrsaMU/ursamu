@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # NAME
 
 Renames an object.

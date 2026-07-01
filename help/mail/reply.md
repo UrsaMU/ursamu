@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # MAIL REPLY
 
 Start a reply to a message.

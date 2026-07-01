@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # POSE
 
 Perform an action.

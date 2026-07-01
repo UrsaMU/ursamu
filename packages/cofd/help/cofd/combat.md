@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 cofd/combat  -- Combat, equipment, and NPCs.
 
 See also: help cofd (overview).

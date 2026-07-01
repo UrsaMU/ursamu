@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @DESTROY
 
 Destroys an object.

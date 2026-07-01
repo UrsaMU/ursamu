@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @FAIL
 
 Sets the Fail message.

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 cofd/social  -- Social Maneuvering.
 
 See also: help cofd (overview).

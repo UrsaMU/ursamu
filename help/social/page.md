@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # PAGE
 
 Send a private message.

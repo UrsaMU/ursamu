@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 extended cumulative  -- The /cum cumulative-penalty modifier.
 
 Adding /cum to /start applies a cumulative penalty: each attempt

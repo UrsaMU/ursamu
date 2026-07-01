@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # WHO
 
 Lists connected players.

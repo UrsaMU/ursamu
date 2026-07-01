@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 sheet specialties  -- Skill specialties: syntax and description notes.
 
 Specialties grant +1 die to rolls that fall within the specialty's

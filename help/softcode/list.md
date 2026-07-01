@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE LIST FUNCTIONS
 
 Lists are space-separated strings by default. Most functions accept an

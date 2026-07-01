@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @SET
 
 Sets a flag or attribute on an object.

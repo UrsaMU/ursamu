@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # CREATE
 
 Creates a new character.

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 attack defense  -- How Defense applies and degrades.
 
 Defense is the standing defensive trait. It is automatically subtracted

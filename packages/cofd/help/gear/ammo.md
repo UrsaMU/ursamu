@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 +gear ammo  -- Magazines and ammunition stacks.
 
 Ammo items are first-class CoFD objects. They live in the carrier's

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @OSUCC
 
 Sets the Other Success message.

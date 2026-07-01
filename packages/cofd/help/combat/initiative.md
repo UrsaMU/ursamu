@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat/initiative  -- Initiative scores and what affects them.
 
 See also: help combat (overview).

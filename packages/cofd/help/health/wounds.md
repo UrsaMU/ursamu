@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 health wounds  -- Track sizing, damage type cascade, wound penalty,
                 unconscious/dying/dead states.
 

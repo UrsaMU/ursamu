@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 xp costs  -- CoFD 2e Experience cost table and spending rules.
 
 Cost table:

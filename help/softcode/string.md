@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE STRING FUNCTIONS
 
 See also: softcode/index, softcode/list, softcode/math

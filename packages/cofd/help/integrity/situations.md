@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 integrity situations  -- Sample situational modifiers (RAW p.74).
 
 Pass a signed integer at the end of /break to apply a situational

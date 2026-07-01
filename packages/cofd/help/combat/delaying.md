@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 combat delaying  -- Holding an action and reclaiming it with /act.
 
 Use /delay when you want to wait and see what the rest of the order

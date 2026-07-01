@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 +extended contested  -- Two characters racing toward conflicting goals.
 
 A contested Extended Action pairs two actions so the first to resolve as

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 attack damage  -- Damage formula and lethal vs bashing.
 
 Damage:

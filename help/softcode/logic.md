@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE LOGIC FUNCTIONS
 
 See also: softcode/index, softcode/registers, softcode/math

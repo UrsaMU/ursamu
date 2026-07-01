@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # CHANNELS
 
 Lists available communication channels.

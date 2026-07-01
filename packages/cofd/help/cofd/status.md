@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 cofd/status  -- Health, conditions, tilts, integrity, aspirations.
 
 See also: help cofd (overview).

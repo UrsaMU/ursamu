@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # SAY
 
 Speak to others in the room.

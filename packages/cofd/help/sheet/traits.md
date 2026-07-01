@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 sheet traits  -- Settable trait categories for +sheet/set.
 
 Identity      concept, virtue, vice

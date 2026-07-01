@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @FLAGS
 
 Lists available flags.

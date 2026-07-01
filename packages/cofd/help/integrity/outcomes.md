@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 integrity outcomes  -- Success tiers and Conditions on a Breaking Point.
 
 Each result tier of the Resolve + Composure roll has a different

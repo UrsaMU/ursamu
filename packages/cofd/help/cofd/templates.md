@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 cofd/templates  -- Supernatural templates and overlays.
 
 See also: help cofd (overview).

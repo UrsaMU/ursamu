@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 gear/reload  -- Reload an equipped or carried firearm from an ammo stack.
 
 See also: help gear (overview).

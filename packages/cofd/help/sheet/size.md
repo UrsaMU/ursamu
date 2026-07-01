@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 sheet size  -- Size, Speed, and Health track math.
 
 Size is a staff-only trait (admin or builder). Default Size is 5

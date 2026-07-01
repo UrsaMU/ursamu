@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 @UNLOCK
 
 COMMAND: @unlock[/<switch>] <object>

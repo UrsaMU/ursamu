@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 attack/switches  -- Full switch reference for +attack.
 
 See also: help attack (overview).

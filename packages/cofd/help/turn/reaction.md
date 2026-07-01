@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 +turn/reaction  -- Set a reaction posture for the coming round.
 
 Syntax:
