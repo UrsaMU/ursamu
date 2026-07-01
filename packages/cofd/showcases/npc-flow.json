@@ -47,7 +47,7 @@
     { "cmd": "+combat/join", "as": "Goon", "label": "Goon (NPC) joins the order" },
     { "expect": "joined" },
     { "cmd": "+combat/begin", "as": "admin", "label": "Roll initiative" },
-    { "expect": "initiative" },
+    { "expect": "Round 1" },
 
     { "sub": "Round 1 -- Combat Plays Out" },
     { "note": "Goon attacks Jax. Initiative was random; Goon may not have been first, so we advance to whichever turn order produced this." },

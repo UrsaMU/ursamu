@@ -45,6 +45,27 @@ for (const c of coreCmds) {
   if (!cmds.includes(c)) cmds.push(c);
 }
 
+import {
+  dbojs, counters, chans, texts, scenes, chanHistory,
+  zoneMemberships, userFuncs, serverTags, playerTags
+} from "../../mush/mod.ts";
+import { encounterDb } from "../src/combat/encounter.ts";
+import { zoneDb } from "../src/combat/zone.ts";
+import { maneuverDb } from "../src/social/maneuver.ts";
+import { extendedDb } from "../src/subsystems/extended.ts";
+import { npcDb } from "../src/npc/directory.ts";
+
+export async function __shimClearDbs(): Promise<void> {
+  const dbs = [
+    dbojs, counters, chans, texts, scenes, chanHistory,
+    zoneMemberships, userFuncs, serverTags, playerTags,
+    encounterDb, zoneDb, maneuverDb, extendedDb, npcDb
+  ];
+  for (const db of dbs) {
+    try { await db.clear(); } catch { /* ignore */ }
+  }
+}
+
 // -- In-memory object store ----------------------------------------------------
 // Populated by the runner via __shimSeed() so that any dbojs queries
 // the command handlers make find the mock players / objects.

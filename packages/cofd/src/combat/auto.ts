@@ -150,6 +150,11 @@ export async function endTurnAndWalk(
   u: IUrsamuSDK,
   encounterId: string,
 ): Promise<void> {
+  // If the actor is an NPC, do not auto-advance or walk. NPCs are driven
+  // by the ST's +combat/next walker, and calling endTurnAndWalk here
+  // causes nested/double turn advancement.
+  if (u.me.flags.has("npc")) return;
+
   try {
     await advanceTurnSmart(encounterId, u);
   } catch {

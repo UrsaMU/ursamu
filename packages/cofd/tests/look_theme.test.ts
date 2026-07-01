@@ -3,7 +3,11 @@
 import { assert, assertEquals } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { cofdGlobalsOverlay } from "../src/support/theme.ts";
-import { currentTheme, setTheme, resetTheme } from "@ursamu/globals";
+import {
+  currentTheme,
+  resetTheme,
+  setTheme,
+} from "./helpers/globals-shim.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 

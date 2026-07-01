@@ -120,7 +120,22 @@ async function loadManeuver(
     u.send(`Subject '${targetName}' not found.`);
     return null;
   }
-  const m = await findActive(u.me.id, subject.id);
+  let m = await findActive(u.me.id, subject.id);
+  if (!m) {
+    try {
+      if (await u.canEdit(u.me, subject)) {
+        const all = await maneuverDb.find({} as Q);
+        m = all.find(
+          (x: SocialManeuver) =>
+            x.subjectId === subject.id &&
+            !x.resolved &&
+            !x.immune,
+        ) ?? null;
+      }
+    } catch {
+      // canEdit can fail in test/mock environments
+    }
+  }
   if (!m) {
     u.send(`No active maneuver against ${subject.name}. Use +social/start.`);
     return null;

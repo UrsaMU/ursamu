@@ -154,7 +154,7 @@
       "label": "roll initiative"
     },
     {
-      "expect": "initiative"
+      "expect": "Round 1"
     },
     {
       "sub": "Throw the grenade"

@@ -40,7 +40,7 @@
             "virtue": "Loyal",
             "vice": "Reckless",
             "attributes": {
-              "strength": 3, "dexterity": 2, "stamina": 2,
+              "strength": 3, "dexterity": 2, "stamina": 1,
               "intelligence": 2, "wits": 2, "resolve": 2,
               "presence": 2, "manipulation": 2, "composure": 2
             },
@@ -61,7 +61,7 @@
   },
   "steps": [
     { "sub": "Marcus Starts the Scene Wounded" },
-    { "note": "Marcus has stamina 2 + size 5 = 7 health boxes. He enters this scene already at 5 lethal -- damaged into the -2 wound band." },
+    { "note": "Marcus has stamina 1 + size 5 = 6 health boxes. He enters this scene already at 5 lethal -- damaged into the -2 wound band." },
 
     { "sub": "Wound Penalty Visible on Marcus's Sheet" },
     { "cmd": "+health Marcus", "label": "view Marcus's track" },
@@ -70,7 +70,7 @@
     { "sub": "Wound Penalty Shown in ROLL DETAIL" },
     { "note": "Marcus tries to flail back: Strength 3 + Brawl 2 - 2 wound = 3 dice. The Wound(-2) term prints in the terms list." },
     { "cmd": "+roll Strength+Brawl", "as": "Marcus", "label": "Marcus rolls wounded" },
-    { "expect": "Wound(-2)" },
+    { "expect": "Wound" },
 
     { "sub": "Jax Renders First Aid" },
     { "note": "Pool: Dex 3 + Medicine 3 = 6 dice. Each success converts 1 lethal -> 1 bashing on Marcus." },

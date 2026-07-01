@@ -27,7 +27,7 @@
       },
       "Iron Sword": {
         "flags": ["thing"],
-        "location": "mock-bob",
+        "location": "mock-room",
         "state": {
           "name": "Iron Sword",
           "kind": "weapon",

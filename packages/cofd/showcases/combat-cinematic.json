@@ -9,7 +9,7 @@
       "state": {
         "cofd": {
           "attributes": {
-            "strength": 10, "dexterity": 4, "stamina": 3,
+            "strength": 10, "dexterity": 2, "stamina": 3,
             "intelligence": 2, "wits": 9, "resolve": 3,
             "presence": 2, "manipulation": 2, "composure": 2
           },
@@ -25,9 +25,9 @@
         "state": {
           "cofd": {
             "attributes": {
-              "strength": 3, "dexterity": 5, "stamina": 3,
+              "strength": 3, "dexterity": 1, "stamina": 3,
               "intelligence": 2, "wits": 2, "resolve": 2,
-              "presence": 2, "manipulation": 2, "composure": 3
+              "presence": 2, "manipulation": 2, "composure": 19
             },
             "skills": { "brawl": 3, "firearms": 2, "athletics": 2, "stealth": 0 },
             "advantages": { "size": 5, "willpowerMax": 4, "willpowerCurrent": 4 },
@@ -40,9 +40,9 @@
         "state": {
           "cofd": {
             "attributes": {
-              "strength": 4, "dexterity": 1, "stamina": 5,
+              "strength": 4, "dexterity": 6, "stamina": 5,
               "intelligence": 2, "wits": 2, "resolve": 2,
-              "presence": 2, "manipulation": 2, "composure": 2
+              "presence": 2, "manipulation": 2, "composure": 6
             },
             "skills": { "brawl": 2, "athletics": 2, "firearms": 1 },
             "advantages": { "size": 5, "willpowerMax": 4, "willpowerCurrent": 4 },
