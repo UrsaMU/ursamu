@@ -275,25 +275,97 @@ export async function cgSetExec(u: IUrsamuSDK, state: CgState, args: string) {
 }
 
 export function cgListExec(u: IUrsamuSDK, topic: string) {
-  const t = topic.toLowerCase().trim();
+  const parts = topic.toLowerCase().trim().split(/\s+/);
+  const t = parts[0];
+  const sub = parts[1] ?? "";
+  const state = getCgState(u);
+
   if (t === "occupations") {
     u.send(header("OCCUPATIONS"));
-    for (const key of Object.keys(OCCUPATIONS)) {
-      const data = OCCUPATIONS[key];
-      u.send(` %cy${key.toUpperCase()}%cn (Wealth +${data.wealth})`);
-      u.send(`   Skills: ${data.skills.join(", ")}`);
+    const keys = Object.keys(OCCUPATIONS).map(k => k.toUpperCase());
+    const lines: string[] = [];
+    for (let i = 0; i < keys.length; i += 3) {
+      const c1 = keys[i] ?? "";
+      const c2 = keys[i + 1] ?? "";
+      const c3 = keys[i + 2] ?? "";
+      const col1 = `%cy${c1.padEnd(24)}%cn`;
+      const col2 = c2 ? `%cy${c2.padEnd(24)}%cn` : "";
+      const col3 = c3 ? `%cy${c3}%cn` : "";
+      lines.push(`    ${col1}${col2}${col3}`);
     }
+    u.send(lines.join("\n"));
+    u.send(footer());
+  } else if (t === "classes") {
+    u.send(header("CLASSES"));
+    const keys = Object.keys(CLASSES).map(k => k.toUpperCase());
+    const lines: string[] = [];
+    for (let i = 0; i < keys.length; i += 3) {
+      const c1 = keys[i] ?? "";
+      const c2 = keys[i + 1] ?? "";
+      const c3 = keys[i + 2] ?? "";
+      const col1 = `%cy${c1.padEnd(24)}%cn`;
+      const col2 = c2 ? `%cy${c2.padEnd(24)}%cn` : "";
+      const col3 = c3 ? `%cy${c3}%cn` : "";
+      lines.push(`    ${col1}${col2}${col3}`);
+    }
+    u.send(lines.join("\n"));
     u.send(footer());
   } else if (t === "skills") {
     u.send(header("SKILLS"));
-    u.send(" " + MODERN_SKILLS.join(", "));
+    const keys = MODERN_SKILLS.map(k => k.toUpperCase());
+    const lines: string[] = [];
+    for (let i = 0; i < keys.length; i += 3) {
+      const c1 = keys[i] ?? "";
+      const c2 = keys[i + 1] ?? "";
+      const c3 = keys[i + 2] ?? "";
+      const col1 = `%cy${c1.padEnd(24)}%cn`;
+      const col2 = c2 ? `%cy${c2.padEnd(24)}%cn` : "";
+      const col3 = c3 ? `%cy${c3}%cn` : "";
+      lines.push(`    ${col1}${col2}${col3}`);
+    }
+    u.send(lines.join("\n"));
     u.send(footer());
   } else if (t === "feats") {
     u.send(header("FEATS"));
-    u.send(" " + FEATS.join(", "));
+    const keys = FEATS.map(f => f.toUpperCase());
+    const lines: string[] = [];
+    for (let i = 0; i < keys.length; i += 3) {
+      const c1 = keys[i] ?? "";
+      const c2 = keys[i + 1] ?? "";
+      const c3 = keys[i + 2] ?? "";
+      const col1 = `%cy${c1.padEnd(24)}%cn`;
+      const col2 = c2 ? `%cy${c2.padEnd(24)}%cn` : "";
+      const col3 = c3 ? `%cy${c3}%cn` : "";
+      lines.push(`    ${col1}${col2}${col3}`);
+    }
+    u.send(lines.join("\n"));
     u.send(footer());
+  } else if (t === "talents") {
+    const cls = sub || state.class.toLowerCase();
+    if (cls && TALENTS[cls]) {
+      u.send(header(`TALENTS: ${cls.toUpperCase()}`));
+      const keys = TALENTS[cls].map(k => k.toUpperCase());
+      const lines: string[] = [];
+      for (let i = 0; i < keys.length; i += 3) {
+        const c1 = keys[i] ?? "";
+        const c2 = keys[i + 1] ?? "";
+        const c3 = keys[i + 2] ?? "";
+        const col1 = `%cy${c1.padEnd(24)}%cn`;
+        const col2 = c2 ? `%cy${c2.padEnd(24)}%cn` : "";
+        const col3 = c3 ? `%cy${c3}%cn` : "";
+        lines.push(`    ${col1}${col2}${col3}`);
+      }
+      u.send(lines.join("\n"));
+      u.send(footer());
+    } else {
+      u.send(header("TALENTS BY CLASS"));
+      for (const c of Object.keys(TALENTS)) {
+        u.send(`  %cy${c.toUpperCase()}%cn: ${TALENTS[c].join(", ")}`);
+      }
+      u.send(footer());
+    }
   } else {
-    u.send("Available lists: occupations, skills, feats");
+    u.send("Available lists: occupations, classes, skills, feats, talents");
   }
 }
 
