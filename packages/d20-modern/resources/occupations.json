@@ -1,0 +1,17 @@
+{
+  "academic": { "skills": ["computer_use", "knowledge", "research"], "wealth": 3 },
+  "athlete": { "skills": ["athletics", "acrobatics"], "wealth": 1 },
+  "blue_collar": { "skills": ["drive", "athletics"], "wealth": 2 },
+  "corporate": { "skills": ["diplomacy", "bluff"], "wealth": 5 },
+  "creative": { "skills": ["performance", "bluff"], "wealth": 2 },
+  "criminal": { "skills": ["stealth", "sleight_of_hand"], "wealth": 1 },
+  "dilettante": { "skills": ["diplomacy", "pilot"], "wealth": 8 },
+  "doctor": { "skills": ["treat_injury", "computer_use"], "wealth": 4 },
+  "emergency_services": { "skills": ["treat_injury", "drive"], "wealth": 2 },
+  "investigative": { "skills": ["search", "research"], "wealth": 2 },
+  "law_enforcement": { "skills": ["drive", "intimidate"], "wealth": 2 },
+  "military": { "skills": ["athletics", "survival"], "wealth": 1 },
+  "religious": { "skills": ["insight", "diplomacy"], "wealth": 2 },
+  "rural": { "skills": ["navigate", "survival"], "wealth": 1 },
+  "technician": { "skills": ["computer_use", "search"], "wealth": 3 }
+}

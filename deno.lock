@@ -3900,6 +3900,15 @@
           "jsr:@zaubrik/djwt@^3.0.2"
         ]
       },
+      "packages/d20-modern": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/flags@0.224",
+          "jsr:@std/fs@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@std/testing@0.224"
+        ]
+      },
       "packages/discord": {
         "dependencies": [
           "jsr:@std/assert@0.224"

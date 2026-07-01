@@ -90,6 +90,12 @@ export const optionalPackages: PackageOption[] = [
     description: "Mekton Zeta RPG rules integration",
   },
   {
+    name: "d20 Modern Rules",
+    pkgName: "@ursamu/d20-modern-plugin",
+    jsrUrl: "jsr:@ursamu/d20-modern-plugin@^1.0.0",
+    description: "d20 Modern sheets, rolls, & chargen",
+  },
+  {
     name: "Shop Vendor",
     pkgName: "@ursamu/vendor-plugin",
     jsrUrl: "jsr:@ursamu/vendor-plugin@^1.0.0",
