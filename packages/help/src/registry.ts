@@ -26,6 +26,8 @@ export interface HelpEntry {
   source: HelpSource;
   /** Alternate names that resolve to this topic. */
   tags: string[];
+  /** Whether to hide this entry from index/section listings. */
+  hidden?: boolean;
 }
 
 /** Implement this interface to add a custom help source. */
@@ -92,16 +94,18 @@ export class HelpRegistry {
   /** All distinct section names, sorted alphabetically. */
   async sections(): Promise<string[]> {
     const entries = await this.all();
-    const names = new Set(entries.map((e) => e.section));
+    const names = new Set(
+      entries.filter((e) => !e.hidden).map((e) => e.section),
+    );
     return Array.from(names).sort();
   }
 
   /** All entries in a given section, sorted by name. */
   async inSection(section: string): Promise<HelpEntry[]> {
     const entries = await this.all();
-    return entries.filter((e) => e.section === section).sort((a, b) =>
-      a.name.localeCompare(b.name)
-    );
+    return entries
+      .filter((e) => e.section === section && !e.hidden)
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 }
 

@@ -136,13 +136,45 @@ async function scanDir(
       continue;
     }
 
+    let hidden = false;
+    let tags: string[] = [];
+
+    // Parse simple frontmatter if present
+    if (content.startsWith("---")) {
+      const fmMatch = content.match(
+        /^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/,
+      );
+      if (fmMatch) {
+        const yaml = fmMatch[1];
+        content = fmMatch[2];
+
+        for (const line of yaml.split("\n")) {
+          const parts = line.split(":");
+          if (parts.length >= 2) {
+            const key = parts[0].trim().toLowerCase();
+            const value = parts.slice(1).join(":").trim();
+            if (key === "hidden" && value === "true") {
+              hidden = true;
+            } else if (key === "tags") {
+              tags = value
+                .replace(/[\[\]]/g, "")
+                .split(",")
+                .map((t) => slugify(t.trim()))
+                .filter(Boolean);
+            }
+          }
+        }
+      }
+    }
+
     if (isIndex) {
       entries.push({
         name: slugify(prefix || section),
         section,
         content,
         source: "file",
-        tags: [],
+        tags,
+        hidden,
       });
     } else {
       entries.push({
@@ -150,7 +182,8 @@ async function scanDir(
         section,
         content,
         source: "file",
-        tags: [],
+        tags,
+        hidden,
       });
     }
   }

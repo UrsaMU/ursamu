@@ -57,15 +57,16 @@ Examples:
 
 async function showIndex(u: IUrsamuSDK): Promise<void> {
   const all = await helpRegistry.all();
+  const visible = all.filter((e) => !e.hidden);
   const sections = await helpRegistry.sections();
   const filteredSections = sections.filter((s) => s !== "general");
-  const generalTopics = all
+  const generalTopics = visible
     .filter((e) => e.section === "general")
     .map((e) => e.name);
   const combined = [...filteredSections, ...generalTopics].sort((a, b) =>
     a.localeCompare(b)
   );
-  u.send(renderIndex(combined, all.length));
+  u.send(renderIndex(combined, visible.length));
 }
 
 async function showSection(u: IUrsamuSDK, section: string): Promise<void> {

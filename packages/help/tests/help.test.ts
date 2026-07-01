@@ -17,7 +17,12 @@ import { describe, it, beforeEach } from "@std/testing/bdd";
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 import type { HelpEntry, HelpProvider } from "../src/registry.ts";
-import { HelpRegistry, slugify, registerHelpEntry } from "../src/registry.ts";
+import {
+  HelpRegistry,
+  registerHelpEntry,
+  slugify,
+  helpRegistry,
+} from "../src/registry.ts";
 
 function makeProvider(entries: HelpEntry[], priority: number): HelpProvider {
   return {
@@ -317,5 +322,34 @@ describe("registerHelpEntry", () => {
       source: "command",
       tags: ["alias"],
     });
+  });
+});
+
+describe("hidden entries in registry", () => {
+  it("excludes hidden entries from sections and inSection", async () => {
+    const entry1 = {
+      name: "visible-topic",
+      section: "test-hidden",
+      content: "Content 1",
+      source: "database" as const,
+      tags: [],
+    };
+    const entry2 = {
+      name: "hidden-topic",
+      section: "test-hidden",
+      content: "Content 2",
+      source: "database" as const,
+      tags: [],
+      hidden: true,
+    };
+    registerHelpEntry(entry1);
+    registerHelpEntry(entry2);
+
+    const sections = await helpRegistry.sections();
+    assertStringIncludes(JSON.stringify(sections), "test-hidden");
+
+    const inSect = await helpRegistry.inSection("test-hidden");
+    assertEquals(inSect.length, 1);
+    assertEquals(inSect[0].name, "visible-topic");
   });
 });
