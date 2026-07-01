@@ -601,5 +601,7 @@ gameHooks.on("session:auth", async (e) => {
       const fstr = flagsUtil.set(player.flags, player.data || {}, "connected");
       await dbojs.modify({ id: userId }, "$set", { flags: fstr.tags } as Partial<IDBOBJ>);
     }
-  } catch { /* invalid JWT — ignore */ }
+  } catch (err) {
+    console.error("[session:auth] Re-authentication failed:", err);
+  }
 });

@@ -103,7 +103,7 @@ function parseInput(raw: string): string {
   }
 }
 
-function handleAuth(socketId: string, raw: string): boolean {
+async function handleAuth(socketId: string, raw: string): Promise<boolean> {
   try {
     const data = JSON.parse(raw);
     if (data.type !== "auth" || typeof data.token !== "string") return false;
@@ -113,7 +113,7 @@ function handleAuth(socketId: string, raw: string): boolean {
       return true; // consume message, send no response
     }
     sessions.authenticate(socketId, data.token);
-    gameHooks.emit("session:auth", { socketId, sessionId: data.token });
+    await gameHooks.emit("session:auth", { socketId, sessionId: data.token });
     log("info", "ws:auth", { socketId });
     return true;
   } catch {
@@ -124,7 +124,7 @@ function handleAuth(socketId: string, raw: string): boolean {
 async function handleMessage(socketId: string, raw: string): Promise<void> {
   if (raw.length > MAX_MSG_BYTES) return;
 
-  if (handleAuth(socketId, raw)) return;
+  if (await handleAuth(socketId, raw)) return;
 
   const input = parseInput(raw).trim();
   if (!input) return;

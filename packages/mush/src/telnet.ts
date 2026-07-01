@@ -1,3 +1,4 @@
+import "dotenv/load";
 import { dirname, fromFileUrl, join } from "@std/path";
 import { getConfig, initConfig } from "@ursamu/core";
 import parser from "./render/parser.ts";
