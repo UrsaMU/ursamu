@@ -7,6 +7,13 @@ TypeScript/Deno MUSH-like game server. Current version: **2.0.0** (full TinyMUX 
 - **Skill**: Always load `/ursamu-dev` before working on this codebase.
 - **API reference**: `/Users/kumakun/.claude/skills/ursamu-dev/references/api-reference.md` is authoritative for every type, method, import path, and event payload. Read it before writing code. Never guess signatures.
 
+## Development Constraints
+- **Line Length**: Enforce a maximum line width of 78 characters on all
+  code/text modifications. Try to make all outputs, layouts, and code fit
+  the 78-character space as well as possible. Formatting is key.
+- **Deno / TypeScript**: Ensure code passes type checking (`deno task test`
+  / `deno check`) and runs cleanly.
+
 ---
 
 ## Commands
@@ -710,3 +717,19 @@ shared code or generate it at install time.
 // For UI-emitting scripts, see tests/scripts_comms.test.ts for the extended pattern
 // that captures _sent, _broadcast, and stubs u.ui.layout
 ```
+
+---
+
+## Showcase Standards
+
+Every plugin package under `packages/` should support in-process interactive showcases to preview commands and flows. To make a showcase function correctly:
+
+- **`showcases/` folder**: Contains one or more JSON flow descriptions (e.g. `chargen-flow.json`).
+- **`tools/showcase.ts`**: The showcase execution driver script. Copy the standard runner from `packages/dnd/tools/showcase.ts` or `packages/cofd/tools/showcase.ts`. It intercepts `addCmd` and `send` so the commands run in-process against a mock/shim SDK.
+- **`tools/ursamu-shim.ts`**: Re-exports core modules and shims `addCmd` and `send` for local runner execution.
+- **`showcase.importmap.json`**: An import map that intercepts `"ursamu"` and `"@ursamu/ursamu"`, mapping them to `./tools/ursamu-shim.ts`.
+- **`deno.json` showcase task**: Register the showcase task:
+  ```json
+  "showcase": "deno run -A --unstable-kv --import-map=showcase.importmap.json tools/showcase.ts"
+  ```
+
