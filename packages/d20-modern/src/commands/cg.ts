@@ -4,11 +4,13 @@ import {
   type ModernSkill,
   MODERN_ABILITIES,
   MODERN_SKILLS,
-  getAbilityMod
+  getAbilityMod,
+  type ModernSheet
 } from "../stats/modern_sheet.ts";
 import occupationsData from "../../resources/occupations.json" with { type: "json" };
 import classesData from "../../resources/classes.json" with { type: "json" };
 import featsData from "../../resources/feats.json" with { type: "json" };
+import talentsData from "../../resources/talents.json" with { type: "json" };
 
 export interface CgState {
   stage: number;
@@ -17,6 +19,8 @@ export interface CgState {
   abilities: Record<ModernAbility, number>;
   skills: ModernSkill[];
   feats: string[];
+  talent: string;
+  allegiances: string[];
 }
 
 const POINT_BUY_COSTS: Record<number, number> = {
@@ -26,16 +30,25 @@ const POINT_BUY_COSTS: Record<number, number> = {
 export const OCCUPATIONS: Record<string, { skills: ModernSkill[]; wealth: number }> = occupationsData;
 export const CLASSES: Record<string, { skills: ModernSkill[]; count: number; hp: number; rep: number }> = classesData;
 export const FEATS: string[] = featsData;
-
+export const TALENTS: Record<string, string[]> = talentsData;
 
 export function getCgState(u: IUrsamuSDK): CgState {
   const defaults: CgState = {
     stage: 1,
     class: "",
     occupation: "",
-    abilities: { strength: 8, dexterity: 8, constitution: 8, intelligence: 8, wisdom: 8, charisma: 8 },
+    abilities: {
+      strength: 8,
+      dexterity: 8,
+      constitution: 8,
+      intelligence: 8,
+      wisdom: 8,
+      charisma: 8
+    },
     skills: [],
-    feats: []
+    feats: [],
+    talent: "",
+    allegiances: []
   };
   return { ...defaults, ...(u.me.state.d20_modern_cg ?? {}) };
 }
@@ -66,7 +79,7 @@ function showStage1(u: IUrsamuSDK, state: CgState) {
 function showStage2(u: IUrsamuSDK, state: CgState) {
   u.send(header("STAGE 2: HERO BASE CLASS"));
   u.send(" Choose a Hero Base Class.");
-  u.send(" Classes: Strong, Fast, Tough, Smart, Wise, Charismatic");
+  u.send(" Classes: Strong, Fast, Tough, Smart, Dedicated, Charismatic");
   u.send(" To set: %ch+cg/set class=<name>%cn");
   if (state.class) {
     u.send(` %cyCurrent Choice:%cn ${state.class.toUpperCase()}`);
@@ -77,7 +90,7 @@ function showStage2(u: IUrsamuSDK, state: CgState) {
 function showStage3(u: IUrsamuSDK, state: CgState) {
   u.send(header("STAGE 3: ABILITY SCORES (POINT BUY)"));
   u.send(" Distribute 25 points. Abilities start at 8 (cost 0).");
-  u.send(" Cost Table: 8=0, 9=1, 10=2, 11=3, 12=4, 13=5, 14=6, 15=8, 16=10, 17=13, 18=16");
+  u.send(" Cost Table: 8=0, 9=1, 10=2, 11=3, 12=4, 13=5, 14=6, 15=8, 16=10...");
   u.send(" To set: %ch+cg/set <ability>=<score>%cn");
   const cost = calculatePointBuy(state);
   u.send(` %cyPoints Spent:%cn ${cost} / 25`);
@@ -87,12 +100,25 @@ function showStage3(u: IUrsamuSDK, state: CgState) {
 }
 
 function showStage4(u: IUrsamuSDK, state: CgState) {
-  u.send(header("STAGE 4: SKILL SELECTION"));
+  u.send(header("STAGE 4: TALENT SELECTION"));
+  const cls = state.class.toLowerCase();
+  const list = TALENTS[cls] ?? [];
+  u.send(" Choose a starting talent from your Hero Class talent tree.");
+  u.send(` Available for ${state.class.toUpperCase()}: ${list.join(", ")}`);
+  u.send(" To set: %ch+cg/set talent=<talent_name>%cn");
+  if (state.talent) {
+    u.send(` %cyCurrent Choice:%cn ${state.talent.toUpperCase()}`);
+  }
+  u.send(footer());
+}
+
+function showStage5(u: IUrsamuSDK, state: CgState) {
+  u.send(header("STAGE 5: SKILL SELECTION"));
   const clsData = CLASSES[state.class.toLowerCase()];
   const occData = OCCUPATIONS[state.occupation.toLowerCase()];
   const intMod = getAbilityMod(state.abilities.intelligence);
   const totalAllowed = clsData ? clsData.count + intMod : 0;
-  
+
   u.send(` Choose skill proficiencies. Your class allows %ch${totalAllowed}%cn skills.`);
   u.send(" Occupation skills are automatically granted (indicated with [X]).");
   u.send(" To toggle a skill: %ch+cg/set skill=<skill_name>%cn");
@@ -111,8 +137,8 @@ function showStage4(u: IUrsamuSDK, state: CgState) {
   u.send(footer());
 }
 
-function showStage5(u: IUrsamuSDK, state: CgState) {
-  u.send(header("STAGE 5: STARTING FEATS"));
+function showStage6(u: IUrsamuSDK, state: CgState) {
+  u.send(header("STAGE 6: STARTING FEATS"));
   u.send(" Select 1 starting feat.");
   u.send(" Simple Weapons Proficiency is automatically granted.");
   u.send(" To toggle a feat: %ch+cg/set feat=<feat_name>%cn");
@@ -121,14 +147,25 @@ function showStage5(u: IUrsamuSDK, state: CgState) {
   u.send(footer());
 }
 
-function showStage6(u: IUrsamuSDK, state: CgState) {
-  u.send(header("STAGE 6: REVIEW & SUBMIT"));
+function showStage7(u: IUrsamuSDK, state: CgState) {
+  u.send(header("STAGE 7: ALLEGIANCES"));
+  u.send(" Select up to 3 allegiances (e.g. Good, Lawful, Department-7).");
+  u.send(" Add an allegiance with: %ch+cg/set allegiance=<name>%cn");
+  u.send(" Clear all with: %ch+cg/set allegiance=clear%cn");
+  u.send(` %cyCurrent Choice:%cn ${state.allegiances.join(", ") || "None"}`);
+  u.send(footer());
+}
+
+function showStage8(u: IUrsamuSDK, state: CgState) {
+  u.send(header("STAGE 8: REVIEW & SUBMIT"));
   u.send(" Review your character data:");
   u.send(` Occupation: ${state.occupation.toUpperCase()}`);
   u.send(` Class: ${state.class.toUpperCase()}`);
   u.send(` Abilities: STR ${state.abilities.strength}, DEX ${state.abilities.dexterity}, CON ${state.abilities.constitution}, INT ${state.abilities.intelligence}, WIS ${state.abilities.wisdom}, CHA ${state.abilities.charisma}`);
+  u.send(` Talent: ${state.talent.toUpperCase()}`);
   u.send(` Skills: ${state.skills.join(", ")}`);
   u.send(` Feats: Simple Weapons Proficiency, ${state.feats.join(", ")}`);
+  u.send(` Allegiances: ${state.allegiances.join(", ") || "None"}`);
   u.send(" If correct, finalize with: %ch+cg/submit%cn");
   u.send(footer());
 }
@@ -166,7 +203,15 @@ export async function cgSetExec(u: IUrsamuSDK, state: CgState, args: string) {
       return;
     }
     state.abilities[key as ModernAbility] = num;
-  } else if (state.stage === 4 && key === "skill") {
+  } else if (state.stage === 4 && key === "talent") {
+    const cls = state.class.toLowerCase();
+    const list = TALENTS[cls] ?? [];
+    if (!list.includes(val)) {
+      u.send(`Invalid talent. Select from: ${list.join(", ")}`);
+      return;
+    }
+    state.talent = val;
+  } else if (state.stage === 5 && key === "skill") {
     const skVal = val.replace(/\s+/g, "_") as ModernSkill;
     if (!MODERN_SKILLS.includes(skVal)) {
       u.send("Invalid skill.");
@@ -190,7 +235,7 @@ export async function cgSetExec(u: IUrsamuSDK, state: CgState, args: string) {
       }
       state.skills.push(skVal);
     }
-  } else if (state.stage === 5 && key === "feat") {
+  } else if (state.stage === 6 && key === "feat") {
     const ftVal = val.replace(/\s+/g, "_");
     if (!FEATS.includes(ftVal)) {
       u.send("Invalid feat.");
@@ -205,6 +250,20 @@ export async function cgSetExec(u: IUrsamuSDK, state: CgState, args: string) {
         return;
       }
       state.feats.push(ftVal);
+    }
+  } else if (state.stage === 7 && key === "allegiance") {
+    if (val === "clear") {
+      state.allegiances = [];
+    } else {
+      if (state.allegiances.length >= 3) {
+        u.send("You can only have up to 3 allegiances.");
+        return;
+      }
+      if (state.allegiances.includes(val)) {
+        u.send("You already have this allegiance.");
+        return;
+      }
+      state.allegiances.push(val);
     }
   } else {
     u.send("Invalid trait for this stage.");
@@ -239,7 +298,7 @@ export function cgListExec(u: IUrsamuSDK, topic: string) {
 }
 
 export async function cgSubmitExec(u: IUrsamuSDK, state: CgState) {
-  if (state.stage !== 6) {
+  if (state.stage !== 8) {
     u.send("You must complete all stages before submitting.");
     return;
   }
@@ -247,7 +306,6 @@ export async function cgSubmitExec(u: IUrsamuSDK, state: CgState) {
   const occData = OCCUPATIONS[state.occupation.toLowerCase()];
   const clsData = CLASSES[state.class.toLowerCase()];
 
-  // Calculate stats
   const conMod = getAbilityMod(state.abilities.constitution);
   const startHp = (clsData?.hp ?? 6) + conMod;
   const wealthRoll = Math.floor(Math.random() * 4) + Math.floor(Math.random() * 4) + 2; // 2d4
@@ -260,6 +318,8 @@ export async function cgSubmitExec(u: IUrsamuSDK, state: CgState) {
     abilities: state.abilities,
     skills: [...state.skills, ...(occData?.skills ?? [])],
     feats: ["simple_weapons_proficiency", ...state.feats],
+    talent: state.talent,
+    allegiances: state.allegiances,
     hp: { max: startHp, current: startHp },
     wealth: startWealth,
     reputation: clsData?.rep ?? 0,
@@ -308,7 +368,11 @@ export async function modernCgExec(u: IUrsamuSDK) {
         return;
       }
     }
-    if (state.stage < 6) {
+    if (state.stage === 4 && !state.talent) {
+      u.send("Please select a starting talent first.");
+      return;
+    }
+    if (state.stage < 8) {
       state.stage += 1;
       await saveCgState(u, state);
     }
@@ -330,6 +394,8 @@ export async function modernCgExec(u: IUrsamuSDK) {
     case 4: showStage4(u, state); break;
     case 5: showStage5(u, state); break;
     case 6: showStage6(u, state); break;
+    case 7: showStage7(u, state); break;
+    case 8: showStage8(u, state); break;
   }
 }
 

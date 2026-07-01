@@ -72,6 +72,10 @@ export function renderSheetText(
   }
 
   const featStr = s.feats && s.feats.length > 0 ? s.feats.join(", ") : "None";
+  const talentStr = s.talent || "None";
+  const allegianceStr = s.allegiances && s.allegiances.length > 0
+    ? s.allegiances.join(", ")
+    : "None";
 
   return `${header("D20 MODERN CHARACTER SHEET")}
 ${row1}
@@ -84,6 +88,9 @@ ${abRow2}
 ${abRow3}
 ${divider("S K I L L S")}
 ${skillLines.join("\n")}
+${divider("T A L E N T S  &  A L L E G I A N C E S")}
+  %cyTalent:%cn ${talentStr}
+  %cyAllegiances:%cn ${allegianceStr}
 ${divider("F E A T S")}
   %cyFeats:%cn ${featStr}
 ${footer()}`;
@@ -182,6 +189,23 @@ export async function modernSheetExec(u: IUrsamuSDK) {
         return;
       }
       sheet.actionPoints = val;
+    } else if (traitName === "talent") {
+      sheet.talent = traitVal;
+    } else if (traitName === "allegiance") {
+      const idx = sheet.allegiances.indexOf(traitVal);
+      if (idx === -1) {
+        if (sheet.allegiances.length >= 3) {
+          u.send("You can only have up to 3 allegiances.");
+          return;
+        }
+        sheet.allegiances.push(traitVal);
+      }
+    } else if (traitName === "allegiances") {
+      sheet.allegiances = traitVal
+        .split(",")
+        .map(a => a.trim())
+        .filter(Boolean)
+        .slice(0, 3);
     } else {
       u.send(`Invalid or uneditable trait: '${traitName}'.`);
       return;

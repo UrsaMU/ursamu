@@ -90,6 +90,8 @@ export interface ModernSheet {
   abilities: Record<ModernAbility, number>;
   skills: ModernSkill[]; // Proficient skills
   feats: string[];
+  talent: string;
+  allegiances: string[];
   hp: {
     max: number;
     current: number;
@@ -122,6 +124,8 @@ export function migrateSheet(data: any): ModernSheet {
     abilities,
     skills: Array.isArray(data?.skills) ? data.skills : [],
     feats: Array.isArray(data?.feats) ? data.feats : [],
+    talent: data?.talent ?? "",
+    allegiances: Array.isArray(data?.allegiances) ? data.allegiances : [],
     hp: {
       max: Number(data?.hp?.max ?? 10),
       current: Number(data?.hp?.current ?? 10)

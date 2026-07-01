@@ -55,6 +55,17 @@ describe("d20 Modern Sheet stats", () => {
     assertEquals(s.level, 1);
     assertEquals(s.abilities.strength, 8);
     assertEquals(s.actionPoints, 5);
+    assertEquals(s.talent, "");
+    assertEquals(s.allegiances, []);
+  });
+
+  it("migrates talents and allegiances", () => {
+    const s = migrateSheet({
+      talent: "melee_smash",
+      allegiances: ["good", "lawful"]
+    });
+    assertEquals(s.talent, "melee_smash");
+    assertEquals(s.allegiances, ["good", "lawful"]);
   });
 });
 
@@ -64,11 +75,13 @@ describe("d20 Modern Chargen Commands", () => {
     const state = getCgState(u);
     assertEquals(state.stage, 1);
     assertEquals(state.abilities.strength, 8);
+    assertEquals(state.talent, "");
+    assertEquals(state.allegiances, []);
   });
 
-  it("lists available occupations", async () => {
+  it("lists available occupations", () => {
     const u = mockU();
-    await cgListExec(u, "occupations");
+    cgListExec(u, "occupations");
     const output = u._sent.join("\n");
     assertStringIncludes(output, "ACADEMIC");
     assertStringIncludes(output, "ATHLETE");

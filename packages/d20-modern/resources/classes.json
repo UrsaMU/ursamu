@@ -23,7 +23,7 @@
     "hp": 6,
     "rep": 1
   },
-  "wise": {
+  "dedicated": {
     "skills": ["treat_injury", "survival", "perception", "insight", "concentration", "navigate"],
     "count": 7,
     "hp": 6,
