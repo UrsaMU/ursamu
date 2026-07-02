@@ -2,6 +2,7 @@ import { assertEquals, assertStringIncludes, assert } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { defaultSheet, setTrait, validateTraitValue } from "../cofd.ts";
 import { changelingSection } from "../src/sheet/sections/changeling.ts";
+import { findKith } from "../src/dictionary/changeling.ts";
 import type { SheetContext } from "../src/sheet/sections/types.ts";
 import { COFD_TEMPLATES } from "../src/gamelines/templates.ts";
 import {
@@ -106,6 +107,27 @@ describe("Changeling: The Lost Template", OPTS, () => {
     assertStringIncludes(fullText, "Believer");
     assertStringIncludes(fullText, "3  (Glamour max 12)");
     assertStringIncludes(fullText, "12 / 12");
+  });
+});
+
+describe("Changeling Dictionary", OPTS, () => {
+  it("findKith matches exactly", () => {
+    const kith = findKith("Broadback");
+    assert(kith !== null);
+    assertEquals(kith.name, "Broadback");
+    assertEquals(kith.seeming, "Beast");
+  });
+
+  it("findKith matches case-insensitively and trims whitespace", () => {
+    const kith = findKith(" brOadBack  ");
+    assert(kith !== null);
+    assertEquals(kith.name, "Broadback");
+    assertEquals(kith.seeming, "Beast");
+  });
+
+  it("findKith returns null for unknown kith", () => {
+    const kith = findKith("NotAKith");
+    assertEquals(kith, null);
   });
 });
 
