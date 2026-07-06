@@ -6,15 +6,15 @@
  * import these directly without going through the softcode engine.
  */
 // deno-lint-ignore-file require-await
-import { assertEquals, assertStrictEquals } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import {
   pointInAabb,
   rayAabb,
   vreflect,
-} from "../packages/mush/src/softcode/stdlib/physics.ts";
+} from "@ursamu/mushcode/eval";
 import { runSoftcode, softcodeEngine } from "@ursamu/mush";
 import type { UrsaEvalContext } from "@ursamu/mush";
-import type { DbAccessor } from "@ursamu/mush";
+import type { SoftcodeDbAccessor as DbAccessor } from "@ursamu/mush";
 import type { IDBObj } from "@ursamu/mush";
 
 // ── vreflect ──────────────────────────────────────────────────────────────
@@ -34,28 +34,28 @@ Deno.test("vreflect — perpendicular to normal is unchanged", () => {
 // ── pointInAabb ───────────────────────────────────────────────────────────
 
 Deno.test("pointInAabb — center of unit cube is inside", () => {
-  assertStrictEquals(pointInAabb([0.5, 0.5, 0.5], [0, 0, 0], [1, 1, 1]), true);
+  assertEquals(pointInAabb([0.5, 0.5, 0.5], [0, 0, 0], [1, 1, 1]), true);
 });
 
 Deno.test("pointInAabb — corner exactly on min is inside (inclusive)", () => {
-  assertStrictEquals(pointInAabb([0, 0, 0], [0, 0, 0], [1, 1, 1]), true);
+  assertEquals(pointInAabb([0, 0, 0], [0, 0, 0], [1, 1, 1]), true);
 });
 
 Deno.test("pointInAabb — epsilon outside a face is outside", () => {
-  assertStrictEquals(
+  assertEquals(
     pointInAabb([1 + 1e-6, 0.5, 0.5], [0, 0, 0], [1, 1, 1]),
     false,
   );
 });
 
 Deno.test("pointInAabb — empty box (min > max) is always outside", () => {
-  assertStrictEquals(pointInAabb([0, 0, 0], [1, 0, 0], [0, 1, 1]), false);
+  assertEquals(pointInAabb([0, 0, 0], [1, 0, 0], [0, 1, 1]), false);
 });
 
 // ── rayAabb ───────────────────────────────────────────────────────────────
 
 Deno.test("rayAabb — hit from outside returns positive t", () => {
-  assertStrictEquals(
+  assertEquals(
     rayAabb([0, 0, 0], [1, 0, 0], [5, -1, -1], [6, 1, 1]),
     5,
   );
@@ -63,21 +63,21 @@ Deno.test("rayAabb — hit from outside returns positive t", () => {
 
 Deno.test("rayAabb — parallel offset misses, returns -1", () => {
   // ray along +x at y=5, box at y in [-1,1] — never hits.
-  assertStrictEquals(
+  assertEquals(
     rayAabb([0, 5, 0], [1, 0, 0], [5, -1, -1], [6, 1, 1]),
     -1,
   );
 });
 
 Deno.test("rayAabb — origin inside the box returns 0", () => {
-  assertStrictEquals(
+  assertEquals(
     rayAabb([0, 0, 0], [1, 0, 0], [-1, -1, -1], [1, 1, 1]),
     0,
   );
 });
 
 Deno.test("rayAabb — pointing away from the box returns -1", () => {
-  assertStrictEquals(
+  assertEquals(
     rayAabb([0, 0, 0], [-1, 0, 0], [5, -1, -1], [6, 1, 1]),
     -1,
   );
@@ -86,7 +86,7 @@ Deno.test("rayAabb — pointing away from the box returns -1", () => {
 Deno.test("rayAabb — axis-parallel grazing a face returns small positive t", () => {
   // ray at y=1 (top face) traveling +x — grazes box top, slab math returns t=5.
   const t = rayAabb([0, 1, 0], [1, 0, 0], [5, -1, -1], [6, 1, 1]);
-  assertStrictEquals(t, 5);
+  assertEquals(t, 5);
 });
 
 // ── parity: TS vreflect matches softcode [vreflect(...)] ──────────────────

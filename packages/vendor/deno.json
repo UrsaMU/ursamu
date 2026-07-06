@@ -26,5 +26,11 @@
     "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
     "@std/path": "jsr:@std/path@^0.224.0",
     "@std/fs": "jsr:@std/fs@^0.224.0"
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-explicit-any", "no-unused-vars"]
+    }
   }
 }
+

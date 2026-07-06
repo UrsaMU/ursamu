@@ -1,8 +1,0 @@
-{
-  "strong": ["extreme_effort", "ignore_hardness", "melee_smash"],
-  "fast": ["evasion", "increased_speed"],
-  "tough": ["remain_conscious", "robust", "second_wind", "acid_resistance", "cold_resistance", "electricity_resistance", "fire_resistance", "sonic_resistance"],
-  "smart": ["savant", "linguist"],
-  "dedicated": ["empathy", "healing_knack", "skill_emphasis"],
-  "charismatic": ["charm", "fast_talk", "coordinate"]
-}

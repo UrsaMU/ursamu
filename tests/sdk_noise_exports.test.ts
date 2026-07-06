@@ -1,4 +1,4 @@
-import { assertEquals, assert } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { assertEquals, assert } from "@std/assert";
 import {
   perlin2,
   simplex2,
@@ -6,7 +6,7 @@ import {
   fbm2,
   noiseGrid,
   seedNoise,
-} from "../packages/mush/src/softcode/stdlib/noise.ts";
+} from "@ursamu/mushcode/eval";
 
 Deno.test("perlin2: deterministic given seed", () => {
   seedNoise(42);

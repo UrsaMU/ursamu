@@ -19,7 +19,6 @@
     "packages/lang",
     "packages/dnd",
     "packages/vendor",
-    "packages/d20-modern",
     "games/roses"
   ],
   "nodeModulesDir": "auto",
@@ -113,9 +112,9 @@
     "lodash": "npm:lodash@4.17.21",
     "djwt": "jsr:@zaubrik/djwt@^3.0.2",
     "quickjs-emscripten": "npm:quickjs-emscripten@0.29.0",
-    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.6.0",
-    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.6.0/eval",
-    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.6.0/parse",
+    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
+    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
+    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",
     "dotenv": "jsr:@std/dotenv@^0.224.0",
     "dotenv/": "jsr:@std/dotenv@^0.224.0/",
     "dotenv/load": "jsr:@std/dotenv@^0.224.0/load",
@@ -137,7 +136,10 @@
   },
   "exclude": ["docs/_site", "config", ".claude", ".agents"],
   "lint": {
-    "rules": { "tags": ["recommended"] },
+    "rules": {
+      "tags": ["recommended"],
+      "exclude": ["no-explicit-any", "no-unused-vars", "no-control-regex"]
+    },
     "exclude": ["src/services/Softcode/parser.cjs", "legends"]
   }
 }

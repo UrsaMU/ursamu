@@ -8,15 +8,12 @@ export type { StdlibFn } from "./registry.ts";
 
 // ── Load all modules (side-effect imports register their functions) ────────
 import "./math.ts";
-import "./noise.ts";
-import "./physics.ts";
 import "./logic.ts";
 import "./string.ts";
 import "./list.ts";
 import "./object.ts";
 import "./register.ts";
 import "./output.ts";
-import "./tags.ts";
 import "./string-compat.ts";
 import "./list-compat.ts";
 import "./object-compat.ts";

@@ -128,6 +128,16 @@ const bridgeAccessor: ObjectAccessor = {
     const obj = await ctx.db.queryByName(expr);
     return obj?.id ?? null;
   },
+  async getTag(name: string): Promise<string | null> {
+    const ctx = _activeCtx;
+    if (!ctx) return null;
+    return await ctx.db.getTagById(name);
+  },
+  async getPlayerTag(playerId: string, name: string): Promise<string | null> {
+    const ctx = _activeCtx;
+    if (!ctx) return null;
+    return await ctx.db.getPlayerTagById(playerId, name);
+  },
 };
 
 // ── Engine construction ───────────────────────────────────────────────────────

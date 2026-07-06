@@ -8,7 +8,7 @@
 import { assertEquals } from "@std/assert";
 import { runSoftcode, softcodeEngine } from "@ursamu/mush";
 import type { UrsaEvalContext } from "@ursamu/mush";
-import type { DbAccessor } from "@ursamu/mush";
+import type { SoftcodeDbAccessor as DbAccessor } from "@ursamu/mush";
 import type { IDBObj } from "@ursamu/mush";
 
 function actor(): IDBObj {
