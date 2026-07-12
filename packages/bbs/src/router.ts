@@ -32,8 +32,17 @@ async function canAccessBoard(userId: string, board: IBoard): Promise<boolean> {
   return false;
 }
 
-function getReadSet(player: Record<string, unknown>, boardNum: number): Set<string> {
-  const bbRead = (player.bb_read as Record<string, string[]>) ?? {};
+/** Read-tracking from state.bb_read, with legacy data.bb_read fallback. */
+function getReadSet(
+  player: Record<string, unknown>,
+  boardNum: number,
+): Set<string> {
+  const state = (player.state as Record<string, unknown> | undefined) ?? {};
+  const data  = (player.data as Record<string, unknown> | undefined) ?? {};
+  const bbRead =
+    (state.bb_read as Record<string, string[]> | undefined) ??
+    (data.bb_read as Record<string, string[]> | undefined) ??
+    {};
   return new Set(bbRead[String(boardNum)] ?? []);
 }
 
@@ -58,7 +67,9 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
     const result    = await Promise.all(
       allBoards.filter(async (b) => await canAccessBoard(userId, b)).map(async (b) => {
         const bPosts  = await getBoardPosts(b.num);
-        const readSet = player ? getReadSet(player.data as Record<string, unknown>, b.num) : new Set<string>();
+        const readSet = player
+          ? getReadSet(player as unknown as Record<string, unknown>, b.num)
+          : new Set<string>();
         const unread  = bPosts.filter((p) => !readSet.has(String(p.num))).length;
         return { ...b, postCount: bPosts.length, unreadCount: unread };
       }),
@@ -70,7 +81,11 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
   if (path === "/api/v1/boards" && method === "POST") {
     if (!(await isStaffUser(userId))) return json({ error: "Forbidden" }, 403);
     let body: Record<string, unknown>;
-    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+    try {
+      body = await req.json();
+    } catch (_e: unknown) {
+      return json({ error: "Invalid JSON" }, 400);
+    }
     const title = typeof body.name === "string" ? body.name.trim() : "";
     if (!title) return json({ error: "name is required" }, 400);
     const existing = await boards.queryOne({ title });
@@ -102,8 +117,15 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
     const board = await boards.queryOne({ id: boardMatch[1] });
     if (!board || board.id === "bbconfig") return json({ error: "Not found" }, 404);
     let body: Record<string, unknown>;
-    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
-    const allowed: (keyof IBoard)[] = ["title", "readLock", "writeLock", "timeout", "anonymous", "category", "type", "webhookUrl", "archiveTo"];
+    try {
+      body = await req.json();
+    } catch (_e: unknown) {
+      return json({ error: "Invalid JSON" }, 400);
+    }
+    const allowed: (keyof IBoard)[] = [
+      "title", "readLock", "writeLock", "timeout", "anonymous",
+      "category", "type", "webhookUrl", "archiveTo",
+    ];
     const patch: Partial<IBoard> = {};
     for (const k of allowed) { if (k in body) (patch as Record<string, unknown>)[k] = body[k]; }
     await boards.modify({ id: board.id }, "$set", patch);
@@ -140,7 +162,11 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
     if (board.type === "archive") return json({ error: "Archive boards are read-only" }, 400);
     if (!(await canAccessBoard(userId, board))) return json({ error: "Forbidden" }, 403);
     let body: Record<string, unknown>;
-    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+    try {
+      body = await req.json();
+    } catch (_e: unknown) {
+      return json({ error: "Invalid JSON" }, 400);
+    }
     const subject = typeof body.subject === "string" ? body.subject.trim() : "";
     const text    = typeof body.body    === "string" ? body.body.trim()    : "";
     if (!subject || !text) return json({ error: "subject and body are required" }, 400);
@@ -174,7 +200,11 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
       const canEdit = isOwner || isBoardModUser(userId, board) || (await isStaffUser(userId));
       if (!canEdit) return json({ error: "Forbidden" }, 403);
       let body: Record<string, unknown>;
-      try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+      try {
+        body = await req.json();
+      } catch (_e: unknown) {
+        return json({ error: "Invalid JSON" }, 400);
+      }
       const patch: Partial<IPost> = {};
       if (typeof body.subject === "string") patch.subject = body.subject.trim();
       if (typeof body.body    === "string") patch.body    = body.body.trim();
@@ -230,9 +260,17 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
     if (!player) return json({ error: "Not found" }, 404);
     const bPosts = await getBoardPosts(board.num);
     const keys   = bPosts.map((p) => String(p.num));
-    const bbRead = ((player.data?.bb_read) as Record<string, string[]>) ?? {};
+    const st = (player.state ?? {}) as Record<string, unknown>;
+    const dt = (player.data ?? {}) as Record<string, unknown>;
+    const fromState = st.bb_read as Record<string, string[]> | undefined;
+    const fromData  = dt.bb_read as Record<string, string[]> | undefined;
+    const bbRead = { ...(fromState ?? fromData ?? {}) };
     bbRead[String(board.num)] = keys;
-    await dbojs.modify({ id: userId }, "$set", { "data.bb_read": bbRead });
+    await dbojs.modify(
+      { id: userId },
+      "$set",
+      { "state.bb_read": bbRead },
+    );
     return json({ read: true });
   }
 

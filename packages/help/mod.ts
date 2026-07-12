@@ -34,7 +34,11 @@
 export { plugin } from "./src/index.ts";
 
 // Registry — for advanced use (custom providers, direct lookup)
-export { helpRegistry, registerHelpEntry } from "./src/registry.ts";
+export {
+  helpRegistry,
+  registerHelpEntry,
+  slugify,
+} from "./src/registry.ts";
 export type { HelpEntry, HelpProvider, HelpSource } from "./src/registry.ts";
 
 // File provider registration — for per-plugin help directories

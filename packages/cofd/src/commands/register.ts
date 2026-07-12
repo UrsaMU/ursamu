@@ -32,6 +32,7 @@ import { integrityExec } from "./integrity.ts";
 import { extendedExec } from "./extended.ts";
 import { turnExec } from "./turn.ts";
 import { zoneExec } from "./zone.ts";
+import { districtExec } from "./district.ts";
 
 addCmd({
   name: "+extended",
@@ -802,4 +803,25 @@ Examples:
   +zone/flavor deepwood=on
   +zone/wander deepwood=on`,
   exec: zoneExec,
+});
+
+addCmd({
+  name: "+district",
+  pattern: /^\+district(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+district[/sw] [args]  -- Show or configure district traits and limits.
+
+Switches:
+  /show [<target>]                       Show district details (default: here).
+  /set [<target>/]<trait>=<val>          Set trait value (e.g. Access, Safety).
+  /type [<target>/]<archetype>          Set archetype type/name.
+  /create-parent <name>[=<archetype>]   Create a district parent object.
+
+Examples:
+  +district
+  +district/set safety=2
+  +district/set #10/sizemax=3
+  +district/create-parent ParentSlums=slums`,
+  exec: districtExec,
 });

@@ -70,6 +70,8 @@ const isDivider = (line: string): boolean => {
   const stripped = line
     .replace(/%c[a-zA-Z]/g, "")
     .replace(/%[nrtbR]/g, "")
+    .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "")
+    .replace(/<#[0-9a-fA-F]{6}>/g, "")
     .trim();
   if (stripped.length === 0) return false;
   return /^(.)\1{4,}$/.test(stripped);
@@ -81,7 +83,9 @@ export function wordWrap(text: string, width = 78): string {
     .map((line) => {
       const cleanLine = line
         .replace(/%c[a-zA-Z]/g, "")
-        .replace(/%[nrtbR]/g, "");
+        .replace(/%[nrtbR]/g, "")
+        .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "")
+        .replace(/<#[0-9a-fA-F]{6}>/g, "");
       if (cleanLine.length <= width || isDivider(line)) {
         return line;
       }
@@ -98,7 +102,9 @@ export function wordWrap(text: string, width = 78): string {
         const candidate = current ? `${current} ${word}` : word;
         const cleanCandidate = (indent + candidate)
           .replace(/%c[a-zA-Z]/g, "")
-          .replace(/%[nrtbR]/g, "");
+          .replace(/%[nrtbR]/g, "")
+          .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "")
+          .replace(/<#[0-9a-fA-F]{6}>/g, "");
         if (cleanCandidate.length <= width) {
           current = candidate;
         } else {

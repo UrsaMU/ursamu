@@ -93,6 +93,10 @@ export interface ISeedBoardOptions {
 // ---------------------------------------------------------------------------
 // Collections
 // ---------------------------------------------------------------------------
+// Namespace exception: these predate the <pluginName>.* DBO rule and ship
+// as "server.bboard*". Renaming to "bbs.boards" / "bbs.posts" would orphan
+// existing deployments. Keep the legacy names; uniqueness is preserved by
+// the server.bboard_* prefix.
 
 export const boards: DBO<IBoard> = new DBO<IBoard>("server.bboards");
 export const posts: DBO<IPost> = new DBO<IPost>("server.bboard_posts");

@@ -1,26 +1,37 @@
-import { dbojs, DBO, gameHooks } from "@ursamu/mush";
-import { send, rooms } from "@ursamu/core";
+import { dbojs, DBO, evaluateLock, hydrate } from "@ursamu/mush";
+import { send, rooms, sessions } from "@ursamu/core";
 import type { ICoreContext } from "@ursamu/core";
 import type { IChannel, IChanEntry, IChanMessage } from "../types.ts";
+import { channelEvents } from "../channel-events.ts";
 
 const chans = new DBO<IChannel>("server.chans");
 const chanHistory = new DBO<IChanMessage>("server.chan_history");
 
-function moniker(obj: { data?: Record<string, unknown>; id: string }): string {
-  return (obj.data?.moniker as string) || (obj.data?.name as string) || obj.id;
+function moniker(obj: {
+  data?: Record<string, unknown>;
+  id: string;
+}): string {
+  return (
+    (obj.data?.moniker as string) ||
+    (obj.data?.name as string) ||
+    obj.id
+  );
 }
 
-function flagsMatch(flags: string, lock: string): boolean {
-  if (!lock) return true;
-  const flagSet = new Set(flags.toLowerCase().split(/\s+/).filter(Boolean));
-  return lock.toLowerCase().split(/\s+/).filter(Boolean).every((l) => flagSet.has(l));
-}
-
-function chanSend(chanName: string, header: string, text: string): void {
+function chanSend(
+  chanName: string,
+  header: string,
+  text: string,
+): void {
   rooms.broadcast(chanName, `${header} ${text}`);
 }
 
-async function persistMessage(chan: IChannel, actorId: string, name: string, msg: string): Promise<void> {
+async function persistMessage(
+  chan: IChannel,
+  actorId: string,
+  name: string,
+  msg: string,
+): Promise<void> {
   if (!chan.logHistory) return;
   const limit = chan.historyLimit ?? 500;
   await chanHistory.create({
@@ -33,7 +44,9 @@ async function persistMessage(chan: IChannel, actorId: string, name: string, msg
     timestamp: Date.now(),
   });
   const all = await chanHistory.find({ chanId: chan.id });
-  all.sort((a: IChanMessage, b: IChanMessage) => a.timestamp - b.timestamp);
+  all.sort(
+    (a: IChanMessage, b: IChanMessage) => a.timestamp - b.timestamp,
+  );
   if (all.length > limit) {
     for (const entry of all.slice(0, all.length - limit)) {
       await chanHistory.delete({ id: entry.id });
@@ -41,10 +54,52 @@ async function persistMessage(chan: IChannel, actorId: string, name: string, msg
   }
 }
 
-export async function matchChannel(ctx: ICoreContext): Promise<boolean> {
-  if (!ctx.sessionId) return false;
+async function getChannelMembers(
+  channelName: string,
+): Promise<{ players: string[]; objects: string[] }> {
+  const sockets = rooms.members(channelName);
+  const playerIds = new Set<string>();
 
-  const en = await dbojs.queryOne({ id: ctx.sessionId });
+  for (const socketId of sockets) {
+    const s = sessions.get(socketId);
+    const actorId = (s as any)?.actorId;
+    if (actorId) {
+      playerIds.add(actorId);
+    }
+  }
+
+  const players: string[] = [];
+  const objects: string[] = [];
+
+  for (const id of playerIds) {
+    const dbObj = await dbojs.queryOne({ id });
+    if (dbObj) {
+      const name = (dbObj.data?.name as string) || dbObj.id;
+      // IDBOBJ.flags is a space-delimited string
+      const isPlayer = String(dbObj.flags ?? "")
+        .split(/\s+/)
+        .includes("player");
+      if (isPlayer) {
+        players.push(name);
+      } else {
+        objects.push(name);
+      }
+    }
+  }
+
+  players.sort();
+  objects.sort();
+  return { players, objects };
+}
+
+export async function matchChannel(
+  ctx: ICoreContext,
+): Promise<boolean> {
+  const session = sessions.get(ctx.socketId);
+  const actorId = (session as any)?.actorId ?? ctx.sessionId;
+  if (!actorId) return false;
+
+  const en = await dbojs.queryOne({ id: actorId });
   if (!en || !en.data?.channels) return false;
 
   const parts = ctx.input?.split(" ") || [];
@@ -60,29 +115,78 @@ export async function matchChannel(ctx: ICoreContext): Promise<boolean> {
   const chan = await chans.queryOne({ name: channel.channel });
   if (!chan) return false;
 
-  if (!flagsMatch(en.flags || "", chan.lock || "")) return false;
+  const enHydrated = hydrate(en);
+  if (!(await evaluateLock(chan.lock || "", enHydrated, enHydrated))) {
+    return false;
+  }
 
   const displayName = channel.mask ?? moniker(en);
   const titlePrefix = channel.title ? channel.title + " " : "";
   let msg = rawRest;
 
-  if (msg.toLowerCase() === "on" && channel.active === false) {
-    channel.active = true;
-    rooms.join(ctx.socketId, channel.channel);
-    // deno-lint-ignore no-explicit-any
-    await dbojs.modify({ id: en.id }, "$set", en as any);
-    chanSend(channel.channel, chan.header, `${displayName} has joined the channel.`);
-    send([ctx.socketId], `You have joined channel ${channel.channel}.`);
+  if (msg.toLowerCase() === "on") {
+    if (!channel.active) {
+      channel.active = true;
+      rooms.join(ctx.socketId, channel.channel);
+      // deno-lint-ignore no-explicit-any
+      await dbojs.modify({ id: en.id }, "$set", {
+        "data.channels": en.data.channels,
+      } as any);
+      chanSend(
+        channel.channel,
+        chan.header,
+        `${displayName} has joined the channel.`,
+      );
+      send(
+        [ctx.socketId],
+        `You have joined channel ${channel.channel}.`,
+      );
+    } else {
+      send(
+        [ctx.socketId],
+        `You are already on channel ${channel.channel}.`,
+      );
+    }
     return true;
   }
 
-  if (msg.toLowerCase() === "off" && channel.active === true) {
-    chanSend(channel.channel, chan.header, `${displayName} has left the channel.`);
-    channel.active = false;
-    rooms.leave(ctx.socketId, channel.channel);
-    // deno-lint-ignore no-explicit-any
-    await dbojs.modify({ id: en.id }, "$set", en as any);
-    send([ctx.socketId], `You have left channel ${channel.channel}.`);
+  if (msg.toLowerCase() === "off") {
+    if (channel.active) {
+      chanSend(
+        channel.channel,
+        chan.header,
+        `${displayName} has left the channel.`,
+      );
+      channel.active = false;
+      rooms.leave(ctx.socketId, channel.channel);
+      // deno-lint-ignore no-explicit-any
+      await dbojs.modify({ id: en.id }, "$set", {
+        "data.channels": en.data.channels,
+      } as any);
+      send(
+        [ctx.socketId],
+        `You have left channel ${channel.channel}.`,
+      );
+    } else {
+      send(
+        [ctx.socketId],
+        `You are already off channel ${channel.channel}.`,
+      );
+    }
+    return true;
+  }
+
+  if (msg.toLowerCase() === "who") {
+    const { players, objects } = await getChannelMembers(channel.channel);
+    send([ctx.socketId], "-- Players --");
+    for (const p of players) {
+      send([ctx.socketId], p);
+    }
+    send([ctx.socketId], "-- Objects --");
+    for (const o of objects) {
+      send([ctx.socketId], o);
+    }
+    send([ctx.socketId], `-- ${channel.channel} --`);
     return true;
   }
 
@@ -98,12 +202,17 @@ export async function matchChannel(ctx: ICoreContext): Promise<boolean> {
 
   chanSend(chan.name, chan.header, msg);
 
-  gameHooks.emit("channel:message", {
-    channelName: chan.name,
-    senderId:    en.id,
-    senderName:  moniker(en),
-    message:     msg,
-  }).catch((e: unknown) => console.error("[channels] channel:message:", e));
+  channelEvents
+    .emit("channel:message", {
+      channelName: chan.name,
+      senderId: en.id,
+      senderName: moniker(en),
+      message: msg,
+      source: "game",
+    })
+    .catch((e: unknown) =>
+      console.error("[channels] channel:message:", e)
+    );
 
   await persistMessage(chan, en.id, moniker(en), msg);
   return true;

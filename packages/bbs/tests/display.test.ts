@@ -1,9 +1,19 @@
 /**
- * Tests for display.ts — bbDate, formatTimeFull, formatPost, header.
+ * Tests for display.ts — bbDate, formatTimeFull, formatPost, header/divider/footer.
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
-import { bbDate, formatTimeFull, formatPost, header, WIDTH, EQ_LINE, DASH_LINE } from "../src/display.ts";
+import {
+  bbDate,
+  formatTimeFull,
+  formatPost,
+  header,
+  divider,
+  footer,
+  WIDTH,
+  EQ_LINE,
+  DASH_LINE,
+} from "../src/display.ts";
 import type { IBoard, IPost } from "../src/db.ts";
 
 // ---------------------------------------------------------------------------
@@ -62,36 +72,71 @@ describe("formatTimeFull", () => {
   });
 });
 
-describe("header", () => {
-  it("produces a string of length WIDTH", () => {
+describe("header / divider / footer (cofd LayoutFn style)", () => {
+  it("header with title uses red rule + yellow title", () => {
     const h = header("Test");
-    assertEquals(h.length, WIDTH);
+    assertStringIncludes(h, "Test");
+    assertStringIncludes(h, "%cr");
+    assertStringIncludes(h, "%ch%cy");
+    assertStringIncludes(h, "=");
   });
 
-  it("contains the title text", () => {
-    assertStringIncludes(header("My Board"), "My Board");
+  it("header with no title is a solid red = rule", () => {
+    const h = header();
+    assertEquals(h, `%cr${"=".repeat(WIDTH)}%cn`);
   });
 
-  it("pads with = characters", () => {
-    assertStringIncludes(header("X"), "=");
+  it("divider with title uses - filler", () => {
+    const d = divider("General");
+    assertStringIncludes(d, "General");
+    assertStringIncludes(d, "-");
+    assertStringIncludes(d, "%cr");
+  });
+
+  it("divider with no title is a solid red - rule", () => {
+    assertEquals(divider(), `%cr${"-".repeat(WIDTH)}%cn`);
+  });
+
+  it("footer with no title matches header plain rule", () => {
+    assertEquals(footer(), header());
+  });
+
+  it("footer with title matches header style", () => {
+    assertEquals(footer("Done"), header("Done"));
+  });
+
+  it("accepts width as second arg (LayoutFn number overload)", () => {
+    const h = header("X", 40);
+    assertStringIncludes(h, "X");
+    // 5 filler + space + title + space + rightPad = 40 visible-ish structure
+    assertStringIncludes(h, "%cr=====");
   });
 });
 
 describe("constants", () => {
-  it("EQ_LINE is 77 = chars", () => {
-    assertEquals(EQ_LINE.length, 77);
+  it("EQ_LINE is WIDTH = chars", () => {
+    assertEquals(EQ_LINE.length, WIDTH);
     assertEquals(EQ_LINE[0], "=");
   });
-  it("DASH_LINE is 77 - chars", () => {
-    assertEquals(DASH_LINE.length, 77);
+  it("DASH_LINE is WIDTH - chars", () => {
+    assertEquals(DASH_LINE.length, WIDTH);
     assertEquals(DASH_LINE[0], "-");
+  });
+  it("WIDTH matches cofd default (78)", () => {
+    assertEquals(WIDTH, 78);
   });
 });
 
 describe("formatPost", () => {
-  it("includes board title", () => {
+  it("includes board title via header()", () => {
     const result = formatPost(makeBoard(), makePost());
     assertStringIncludes(result, "General");
+    assertStringIncludes(result, "%ch%cyGeneral%cn");
+  });
+
+  it("uses footer rule at end", () => {
+    const result = formatPost(makeBoard(), makePost());
+    assertStringIncludes(result, footer());
   });
 
   it("includes author name on non-anonymous board", () => {

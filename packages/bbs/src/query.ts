@@ -151,7 +151,12 @@ export async function renumberPosts(boardNum: number): Promise<void> {
   try {
     const allPlayers = await dbojs.query({ flags: /player/ });
     for (const player of allPlayers) {
-      const readData = (player.data?.bb_read as Record<string, string[]>) ?? {};
+      // Prefer state.bb_read; fall back to legacy data.bb_read.
+      const st = (player.state ?? {}) as Record<string, unknown>;
+      const dt = (player.data ?? {}) as Record<string, unknown>;
+      const fromState = st.bb_read as Record<string, string[]> | undefined;
+      const fromData  = dt.bb_read as Record<string, string[]> | undefined;
+      const readData  = { ...(fromState ?? fromData ?? {}) };
       const boardKey = String(boardNum);
       const oldKeys  = readData[boardKey];
       if (!oldKeys?.length) continue;
@@ -165,9 +170,13 @@ export async function renumberPosts(boardNum: number): Promise<void> {
         const newP = numMap.get(parseInt(key, 10));
         return newP !== undefined ? String(newP) : key;
       });
-      await dbojs.modify({ id: player.id }, "$set", { "data.bb_read": readData });
+      await dbojs.modify(
+        { id: player.id },
+        "$set",
+        { "state.bb_read": readData },
+      );
     }
-  } catch {
+  } catch (_e: unknown) {
     // Migration failure is non-fatal
   }
 }

@@ -100,6 +100,20 @@ function ensureHandlersRegistered(): void {
 
       // 5. Match local exits
       if (await matchExits(socketId, actorId, rawMsg)) return;
+
+      // 6. Emit command:fail hook and fallback message
+      const failEvent = {
+        socketId,
+        actorId,
+        input: rawMsg,
+        handled: false,
+      };
+      const { gameHooks, send } = await import("@ursamu/core");
+      await gameHooks.emit("command:fail", failEvent);
+
+      if (!failEvent.handled) {
+        send([socketId], "Huh?  Type 'help' for help.");
+      }
     },
   });
 }

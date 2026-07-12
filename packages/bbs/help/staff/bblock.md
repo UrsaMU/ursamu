@@ -5,6 +5,16 @@ hidden: true
 ---
 +BBLOCK
 
-  Set the read lock on a BBS board.
+Set the read lock on a board. Staff only.
 
-SEE ALSO: +help bbs/staff
+SYNTAX
+  +bblock <#>=<lock>
+
+  Locks: `all()` (open), `faction`
+  (ownerId-based), empty (also open).
+
+EXAMPLES
+  +bblock 2=all()
+  +bblock 2=faction
+
+SEE ALSO: +help bbs/staff, +help bbwritelock

@@ -3,6 +3,16 @@ tags: [bbarchive]
 ---
 +BBARCHIVE
 
-  Toggle read-only archive mode on a board.
+Toggle archive mode on a board. Staff only.
+Archive boards are read-only. Expired posts
+from other boards can migrate here.
 
-SEE ALSO: +help bbs/management
+SYNTAX
+  +bbarchive <#>
+
+  Run again to restore normal mode.
+
+EXAMPLES
+  +bbarchive 4    Toggle board 4 archive mode.
+
+SEE ALSO: +help bbs/management, +help bbs/staff

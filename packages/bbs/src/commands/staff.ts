@@ -6,7 +6,7 @@ import { getAllBoards, findBoard, getPost, getBoardPosts } from "../query.ts";
 import { isWebhookUrlSafe } from "../url-safety.ts";
 import { isStaff, isBoardMod } from "../permissions.ts";
 import { getConfig, setConfig } from "../tracking.ts";
-import { bbDate, EQ_LINE, DASH_LINE } from "../display.ts";
+import { bbDate, header, divider, footer } from "../display.ts";
 
 // ─── +bbnewgroup ─────────────────────────────────────────────────────────────
 
@@ -316,7 +316,7 @@ Examples:
       ? [(await findBoard(boardStr)).board].filter(Boolean)
       : await getAllBoards();
 
-    const lines: string[] = ["%cb" + EQ_LINE + "%cn", "%ch  Flagged Posts%cn", "%cb" + DASH_LINE + "%cn"];
+    const lines: string[] = [header("Flagged Posts"), divider()];
     let count = 0;
 
     for (const board of allBoards) {
@@ -333,7 +333,7 @@ Examples:
     }
 
     if (count === 0) { u.send("%ch>BBS:%cn No flagged posts."); return; }
-    lines.push("%cb" + EQ_LINE + "%cn");
+    lines.push(footer());
     u.send(lines.join("\n"));
   },
 });

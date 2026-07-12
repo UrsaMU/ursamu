@@ -1,13 +1,38 @@
 /**
  * @module @ursamu/discord
  *
- * Webhook-based Discord integration for UrsaMU — mirrors job events, channel talk,
- * player presence, and chargen activity.
+ * Discord bridge for UrsaMU — webhooks, two-way channel chat, /help.
  */
 
 export { default as discordPlugin, default } from "./src/index.ts";
-export type { IDiscordConfig } from "./src/config.ts";
-export { getDiscordConfig, getWebhookUrl, setWebhook, clearWebhook, setPublicUrl } from "./src/config.ts";
+export type {
+  IDiscordConfig,
+  IDiscordBotCredentials,
+} from "./src/config.ts";
+export {
+  getDiscordConfig,
+  getWebhookUrl,
+  setWebhook,
+  clearWebhook,
+  setChannelLink,
+  clearChannelLink,
+  gameChannelForDiscord,
+  setPublicUrl,
+  getBotCredentials,
+} from "./src/config.ts";
 export { postWebhook } from "./src/webhook.ts";
 export type { WebhookPayload, DiscordEmbed } from "./src/webhook.ts";
 export { clean, resolveAvatar, COLORS } from "./src/helpers.ts";
+export {
+  formatDiscordChannelBody,
+  injectChannelMessage,
+  onGameChannelMessage,
+} from "./src/channel-bridge.ts";
+export type { IChannelMessageEvent } from "./src/channel-bridge.ts";
+export {
+  markdownToDiscord,
+  truncateDiscord,
+  embedForEntry,
+  embedForIndex,
+  embedForSection,
+} from "./src/help-embed.ts";

@@ -3,6 +3,15 @@ tags: [bbtoss]
 ---
 +BBTOSS
 
-  Discard your current BBS draft.
+Discard your current BBS draft.
 
-SEE ALSO: +help bbs/posting
+SYNTAX
+  +bbtoss
+
+  Permanently clears the open draft. There
+  is no undo. Start over with +bbpost.
+
+EXAMPLES
+  +bbtoss    Throw away the draft.
+
+SEE ALSO: +help bbs/posting, +help bbpost

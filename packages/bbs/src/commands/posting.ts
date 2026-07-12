@@ -6,7 +6,6 @@ import { findBoard, getPost, getNextReplyNum } from "../query.ts";
 import { canRead, canWrite } from "../permissions.ts";
 import { getDraft, setDraft, clearDraft, getSig } from "../tracking.ts";
 import { fireWebhook } from "../webhook.ts";
-import { formatPost } from "../display.ts";
 
 // ─── +bbpost ─────────────────────────────────────────────────────────────────
 
@@ -139,7 +138,13 @@ async function createPost(
 
   const icLabel = icTag ? ` [${icTag.toUpperCase()}]` : "";
   u.send(`%ch>BBS:%cn Post ${boardNum}/${num} (${subject})${icLabel} created.`);
-  try { u.broadcast(`%ch>BBS:%cn New message on board ${boardNum}: %cc${subject}%cn.`); } catch { /* non-fatal */ }
+  try {
+    u.broadcast(
+      `%ch>BBS:%cn New message on board ${boardNum}: %cc${subject}%cn.`,
+    );
+  } catch (_e: unknown) {
+    // non-fatal
+  }
 }
 
 // ─── +bb (append to draft) ───────────────────────────────────────────────────
@@ -330,5 +335,3 @@ function parseBoardPostArg(s: string): { boardStr: string; postStr: string } | n
 function canEditPost(u: IUrsamuSDK, _post: IPost): boolean {
   return u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
 }
-
-void formatPost;

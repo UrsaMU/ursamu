@@ -423,6 +423,8 @@ export async function createNativeSDK(
           flags: fstr.tags,
           "data.lastCommand": Date.now(),
         } as Partial<IDBOBJ>);
+        const { hooks } = await import("../events/hooks.ts");
+        await hooks.aconnect(playerResult, socketId);
       },
       hash: async (password: string) => {
         const bcrypt = await import("bcrypt");
@@ -464,19 +466,168 @@ export async function createNativeSDK(
     },
 
     chan: {
-      join: async (_channel: string, _alias: string) => { await Promise.resolve(); },
-      leave: async (_alias: string) => { await Promise.resolve(); },
+      join: async (channelName: string, alias: string) => {
+        const { chans, dbojs } = await import("../world/dbobjs.ts");
+        const all = await chans.query({});
+        const channel = all.find(
+          (c) =>
+            c.name.toLowerCase() === channelName.toLowerCase() ||
+            c.id.toLowerCase() === channelName.toLowerCase(),
+        );
+        if (!channel) throw new Error(`No channel named "${channelName}".`);
+
+        const playerObj = await dbojs.queryOne({ id: me.id });
+        if (!playerObj) return;
+
+        playerObj.data ||= {};
+        playerObj.data.channels ||= [];
+        const chs = playerObj.data.channels as Array<{
+          id: string;
+          channel: string;
+          alias: string;
+          active: boolean;
+        }>;
+
+        const existingIdx = chs.findIndex(
+          (c) => c.channel.toLowerCase() === channel.name.toLowerCase(),
+        );
+        const entry = {
+          id: channel.id,
+          channel: channel.name,
+          alias,
+          active: true,
+        };
+        if (existingIdx >= 0) {
+          chs[existingIdx] = entry;
+        } else {
+          chs.push(entry);
+        }
+
+        await dbojs.modify(
+          { id: me.id },
+          "$set",
+          { "data.channels": chs } as unknown as Partial<IDBOBJ>,
+        );
+
+        const { sessions, rooms } = await import("@ursamu/core");
+        const playerSessions = sessions.list().filter(
+          (s) => s.sessionId === me.id || (s as any).actorId === me.id,
+        );
+        for (const s of playerSessions) {
+          rooms.join(s.socketId, channel.name);
+        }
+      },
+
+      leave: async (alias: string) => {
+        const { dbojs } = await import("../world/dbobjs.ts");
+        const playerObj = await dbojs.queryOne({ id: me.id });
+        if (!playerObj || !playerObj.data?.channels) return;
+
+        const chs = playerObj.data.channels as Array<{
+          id: string;
+          channel: string;
+          alias: string;
+          active: boolean;
+        }>;
+        const found = chs.find((c) => c.alias === alias);
+        if (!found) return;
+
+        const updated = chs.filter((c) => c.alias !== alias);
+        await dbojs.modify(
+          { id: me.id },
+          "$set",
+          { "data.channels": updated } as unknown as Partial<IDBOBJ>,
+        );
+
+        const { sessions, rooms } = await import("@ursamu/core");
+        const playerSessions = sessions.list().filter(
+          (s) => s.sessionId === me.id || (s as any).actorId === me.id,
+        );
+        for (const s of playerSessions) {
+          rooms.leave(s.socketId, found.channel);
+        }
+      },
+
       list: async () => {
         const { chans } = await import("../world/dbobjs.ts");
         return chans.query({});
       },
-      create: async (name: string, options?: { header?: string; lock?: string; hidden?: boolean }) => {
-        void options;
-        return { name };
+
+      create: async (
+        name: string,
+        options?: { header?: string; lock?: string; hidden?: boolean },
+      ) => {
+        const { chans } = await import("../world/dbobjs.ts");
+        const id = name.toLowerCase();
+        const existing = await chans.queryOne({ id });
+        if (existing) {
+          return { error: `Channel "${name}" already exists.` };
+        }
+        const created = {
+          id,
+          name,
+          header: options?.header || `[${name.toUpperCase()}]`,
+          lock: options?.lock || "",
+          hidden: !!options?.hidden,
+          owner: me.id,
+        };
+        await chans.create(created);
+        return created;
       },
-      destroy: async (_name: string) => null,
-      set: async (_name: string, _options: Record<string, unknown>) => null,
-      history: async (_name: string, _limit?: number) => [],
+
+      destroy: async (name: string) => {
+        const { chans, dbojs } = await import("../world/dbobjs.ts");
+        const id = name.toLowerCase();
+        const existing = await chans.queryOne({ id });
+        if (!existing) {
+          return { error: `Channel "${name}" not found.` };
+        }
+        await chans.delete({ id });
+
+        // Remove from all players
+        const players = await dbojs.query({
+          "data.channels": { $exists: true },
+        });
+        for (const player of players) {
+          const chs = (player.data?.channels || []) as Array<{
+            channel: string;
+          }>;
+          const filtered = chs.filter(
+            (c) => c.channel.toLowerCase() !== name.toLowerCase(),
+          );
+          if (filtered.length !== chs.length) {
+            await dbojs.modify(
+              { id: player.id },
+              "$set",
+              { "data.channels": filtered } as unknown as Partial<IDBOBJ>,
+            );
+          }
+        }
+        return { ok: true };
+      },
+
+      set: async (name: string, options: Record<string, unknown>) => {
+        const { chans } = await import("../world/dbobjs.ts");
+        const id = name.toLowerCase();
+        const existing = await chans.queryOne({ id });
+        if (!existing) {
+          return { error: `Channel "${name}" not found.` };
+        }
+        const update: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(options)) {
+          update[k] = v;
+        }
+        await chans.modify({ id }, "$set", update);
+        return { ok: true };
+      },
+
+      history: async (name: string, limit = 20) => {
+        const { chanHistory } = await import("../world/dbobjs.ts");
+        const all = await chanHistory.query({ chanName: name });
+        return all
+          .sort((a: any, b: any) => b.timestamp - a.timestamp)
+          .slice(0, limit);
+      },
     },
 
     attr: {
@@ -600,6 +751,8 @@ gameHooks.on("session:auth", async (e) => {
     if (player) {
       const fstr = flagsUtil.set(player.flags, player.data || {}, "connected");
       await dbojs.modify({ id: userId }, "$set", { flags: fstr.tags } as Partial<IDBOBJ>);
+      const { hooks } = await import("../events/hooks.ts");
+      await hooks.aconnect(player, e.socketId);
     }
   } catch (err) {
     console.error("[session:auth] Re-authentication failed:", err);

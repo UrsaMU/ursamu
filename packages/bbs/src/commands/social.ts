@@ -2,8 +2,11 @@ import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
 import { getAllBoards, findBoard, getBoardPosts } from "../query.ts";
 import { canRead } from "../permissions.ts";
-import { isMember, setMembership, getNotify, setNotify, getSig, setSig, clearSig, getUnreadCount } from "../tracking.ts";
-import { bbDate, EQ_LINE, DASH_LINE } from "../display.ts";
+import {
+  isMember, setMembership, getNotify, setNotify,
+  setSig, clearSig, getUnreadCount,
+} from "../tracking.ts";
+import { bbDate, header, divider, footer } from "../display.ts";
 import { posts } from "../db.ts";
 import { getPost } from "../query.ts";
 
@@ -35,10 +38,9 @@ Examples:
       cats.get(cat)!.push(b);
     }
 
-    const lines = ["%cb" + EQ_LINE + "%cn"];
+    const lines = [header("BBS Boards")];
     for (const [cat, catBoards] of cats) {
-      lines.push(`%ch%cc  ${cat}%cn`);
-      lines.push("%cb" + DASH_LINE + "%cn");
+      lines.push(divider(cat));
       for (const board of catBoards) {
         const member  = isMember(u, board.num);
         const notify  = getNotify(u, board.num);
@@ -49,9 +51,9 @@ Examples:
         lines.push(`  ${String(board.num).padStart(3)} [${flags}] %cc${board.title.padEnd(30)}%cn  ${bbDate(Date.now()).padEnd(9)} ${String(total).padStart(4)} posts  (${unreadLabel} new)`);
       }
     }
-    lines.push("%cb" + DASH_LINE + "%cn");
+    lines.push(divider());
     lines.push("  Flags: J=Joined  N=Notifications on  M=Moderator");
-    lines.push("%cb" + EQ_LINE + "%cn");
+    lines.push(footer());
     u.send(lines.join("\n"));
   },
 });
@@ -228,5 +230,3 @@ Examples:
     u.send(lines.join("\n"));
   },
 });
-
-void getSig;

@@ -2,11 +2,15 @@ import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   getDiscordConfig,
+  getBotCredentials,
   setWebhook,
   clearWebhook,
   setPublicUrl,
+  setChannelLink,
+  clearChannelLink,
 } from "./config.ts";
 import { postWebhook } from "./webhook.ts";
+import { registerSlashCommands } from "./register-commands.ts";
 
 export default () => {
   // ── @discord/set <topic>=<url|""> ─────────────────────────────────────────
@@ -15,7 +19,7 @@ export default () => {
     pattern: /^[@+]?discord\/set\s+(.*?)=(.*)/i,
     lock: "connected admin+",
     category: "Admin",
-    help: `@discord/set <topic>=<webhook-url>  — Map a Discord webhook URL to a topic.
+    help: `@discord/set <topic>=<webhook-url>  — Map webhook URL to a topic.
   Set url to empty to clear the webhook.
 
   Built-in topics: jobs, presence (login/logout), staff (chargen events).
@@ -26,8 +30,8 @@ Examples:
   @discord/set ooc=https://discord.com/api/webhooks/...
   @discord/set jobs=    (clears the jobs webhook)`,
     exec: async (u: IUrsamuSDK) => {
-      const topic = (u.cmd.args[0] || "").trim().toLowerCase();
-      const url   = (u.cmd.args[1] || "").trim();
+      const topic = u.util.stripSubs(u.cmd.args[0] || "").trim().toLowerCase();
+      const url   = u.util.stripSubs(u.cmd.args[1] || "").trim();
 
       if (!topic) {
         u.send("Usage: @discord/set <topic>=<webhook-url>");
@@ -62,13 +66,14 @@ Examples:
     pattern: /^[@+]?discord\/publicurl\s+(.*)/i,
     lock: "connected admin+",
     category: "Admin",
-    help: `@discord/publicurl <url>  — Set the public base URL used for player avatar links.
-  Must be https. Used to construct avatar URLs when players have uploaded images.
+    help: `@discord/publicurl <url>  — Set public base URL for avatar links.
+  Must be https. Used to construct avatar URLs when players have uploaded
+  images.
 
 Examples:
   @discord/publicurl https://mygame.com`,
     exec: async (u: IUrsamuSDK) => {
-      const url = (u.cmd.args[0] || "").trim();
+      const url = u.util.stripSubs(u.cmd.args[0] || "").trim();
       if (!url) {
         u.send("Usage: @discord/publicurl <https://your-game-host>");
         return;
@@ -90,23 +95,38 @@ Examples:
     pattern: /^[@+]?discord\/list$/i,
     lock: "connected admin+",
     category: "Admin",
-    help: `@discord/list  — Show all configured Discord webhook topics and the public URL.
+    help: `@discord/list  — Show configured Discord webhooks and public URL.
 
 Examples:
   @discord/list    Show configured webhooks.`,
     exec: async (u: IUrsamuSDK) => {
-      const cfg    = await getDiscordConfig();
+      const cfg = await getDiscordConfig();
       const topics = Object.keys(cfg.webhooks);
+      const links = Object.keys(cfg.links ?? {});
+      const bot = getBotCredentials();
 
-      const lines: string[] = [`Public URL: ${cfg.publicUrl || "(not set)"}`];
+      const lines: string[] = [
+        `Public URL: ${cfg.publicUrl || "(not set)"}`,
+        `Bot env: ${bot ? "configured" : "missing DISCORD_*"}`,
+      ];
       if (topics.length === 0) {
         lines.push("No webhooks configured.");
       } else {
-        lines.push("Webhooks:");
+        lines.push("Webhooks (game → Discord):");
         for (const t of topics) {
-          const raw       = cfg.webhooks[t];
-          const truncated = raw.length > 52 ? raw.slice(0, 49) + "..." : raw;
+          const raw = cfg.webhooks[t];
+          const truncated = raw.length > 52
+            ? raw.slice(0, 49) + "..."
+            : raw;
           lines.push(`  ${t}: ${truncated}`);
+        }
+      }
+      if (links.length === 0) {
+        lines.push("No channel links (Discord → game).");
+      } else {
+        lines.push("Links (Discord → game):");
+        for (const g of links) {
+          lines.push(`  ${g}: ${cfg.links[g]}`);
         }
       }
       u.send(lines.join("\r\n"));
@@ -119,15 +139,15 @@ Examples:
     pattern: /^[@+]?discord\/test\s+(.*)/i,
     lock: "connected admin+",
     category: "Admin",
-    help: `@discord/test <topic>  — Send a test message to a configured webhook topic.
+    help: `@discord/test <topic>  — Send a test message to a webhook topic.
 
 Examples:
   @discord/test jobs
   @discord/test ooc`,
     exec: async (u: IUrsamuSDK) => {
-      const topic = (u.cmd.args[0] || "").trim().toLowerCase();
-      const cfg   = await getDiscordConfig();
-      const url   = cfg.webhooks[topic];
+      const topic = u.util.stripSubs(u.cmd.args[0] || "").trim().toLowerCase();
+      const cfg = await getDiscordConfig();
+      const url = cfg.webhooks[topic];
 
       if (!url) {
         u.send(`No webhook configured for topic "${topic}".`);
@@ -136,9 +156,75 @@ Examples:
 
       postWebhook(url, {
         username: "UrsaMU",
-        content:  `**Test** from topic \`${topic}\` — webhook is working!`,
+        content:
+          `**Test** from topic \`${topic}\` — webhook is working!`,
       });
       u.send(`Test message sent to "${topic}".`);
+    },
+  });
+
+  // ── @discord/link <gameChannel>=<discordChannelId> ────────────────────────
+  addCmd({
+    name: "@discord/link",
+    pattern: /^[@+]?discord\/link\s+(.*?)=(.*)/i,
+    lock: "connected admin+",
+    category: "Admin",
+    help: `@discord/link <gameChannel>=<discordChannelId>
+  Map a game channel to a Discord channel for two-way chat.
+  Empty id clears the link. Pair with @discord/set for outbound.
+
+Examples:
+  @discord/link ooc=123456789012345678
+  @discord/link ooc=`,
+    exec: async (u: IUrsamuSDK) => {
+      const game = u.util.stripSubs(u.cmd.args[0] || "")
+        .trim().toLowerCase();
+      const disc = u.util.stripSubs(u.cmd.args[1] || "").trim();
+      if (!game) {
+        u.send("Usage: @discord/link <gameChannel>=<discordId>");
+        return;
+      }
+      if (!disc) {
+        await clearChannelLink(game);
+        u.send(`Discord link for "${game}" cleared.`);
+        return;
+      }
+      if (!/^\d{5,25}$/.test(disc)) {
+        u.send("Discord channel id must be a numeric snowflake.");
+        return;
+      }
+      await setChannelLink(game, disc);
+      u.send(
+        `Linked game channel "${game}" ↔ Discord #${disc}.`,
+      );
+    },
+  });
+
+  // ── @discord/register-commands ────────────────────────────────────────────
+  addCmd({
+    name: "@discord/register-commands",
+    pattern: /^[@+]?discord\/register-commands$/i,
+    lock: "connected admin+",
+    category: "Admin",
+    help: `@discord/register-commands
+  Re-register Discord slash commands (/help) using env credentials.
+
+Examples:
+  @discord/register-commands`,
+    exec: async (u: IUrsamuSDK) => {
+      const creds = getBotCredentials();
+      if (!creds) {
+        u.send(
+          "Missing DISCORD_APPLICATION_ID / BOT_TOKEN / PUBLIC_KEY.",
+        );
+        return;
+      }
+      const result = await registerSlashCommands(creds);
+      u.send(
+        result.ok
+          ? `Slash commands registered (${result.scope}).`
+          : `Register failed: ${result.detail}`,
+      );
     },
   });
 };

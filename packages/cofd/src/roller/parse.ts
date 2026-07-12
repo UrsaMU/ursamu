@@ -107,7 +107,11 @@ export interface ParsedRoll {
  * Parses a dice pool expression against the template-driven sheet.
  * Supports rolling dynamic attributes, skills, specialties, custom fields, power stats, and supernatural powers.
  */
-export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll {
+export function parseRollExpression(
+  expr: string,
+  sheet: CofdSheet,
+  districtTraits?: Record<string, number>,
+): ParsedRoll {
   sheet = migrateSheet(sheet);
   const cleanExpr = expr.toLowerCase().replace(/\s+/g, "");
   if (!cleanExpr) {
@@ -240,7 +244,33 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
       continue;
     }
 
-    return { pool: 0, terms: [], appliedSpecialties: [], untrainedPenaltyApplied: 0, error: `Unknown trait: '${traitToken}'.` };
+    // Check if district trait
+    if (
+      districtTraits &&
+      [
+        "access",
+        "safety",
+        "information",
+        "awareness",
+        "prestige",
+        "stability",
+      ].includes(traitToken)
+    ) {
+      const val = districtTraits[traitToken] || 0;
+      pool += sign === "-" ? -val : val;
+      const traitTitle =
+        traitToken.charAt(0).toUpperCase() + traitToken.slice(1);
+      terms.push(`${traitTitle}(${val})`);
+      continue;
+    }
+
+    return {
+      pool: 0,
+      terms: [],
+      appliedSpecialties: [],
+      untrainedPenaltyApplied: 0,
+      error: `Unknown trait: '${traitToken}'.`,
+    };
   }
 
   if (terms.length === 0) {

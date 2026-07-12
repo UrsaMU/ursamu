@@ -12,6 +12,7 @@ import type { IUrsamuSDK } from "@ursamu/ursamu";
 import { defaultSheet, type CofdSheet } from "../stats/index.ts";
 import { parseRollExpression, executeRoll, type AgainThreshold } from "../roller/index.ts";
 import { equippedWeaponEntry } from "../equipment/index.ts";
+import { resolveDistrictTraits } from "../support/index.ts";
 
 /** Short forms used for compact broadcast lines (under 78 cols). */
 const COMPACT_ABBREV: Record<string, string> = {
@@ -99,7 +100,20 @@ export async function rollExec(u: IUrsamuSDK) {
     await u.db.modify(u.me.id, "$set", { "data.cofd": sheet });
   }
 
-  const parsed = parseRollExpression(expr, sheet);
+  const dTraits = u.here?.id
+    ? await resolveDistrictTraits(u, u.here.id)
+    : null;
+  const dTraitsMap: Record<string, number> = dTraits
+    ? {
+      access: dTraits.access,
+      safety: dTraits.safety,
+      information: dTraits.information,
+      awareness: dTraits.awareness,
+      prestige: dTraits.prestige,
+      stability: dTraits.stability,
+    }
+    : {};
+  const parsed = parseRollExpression(expr, sheet, dTraitsMap);
   if (parsed.error) {
     u.send(`Error: ${parsed.error}`);
     return;

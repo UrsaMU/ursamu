@@ -19,7 +19,9 @@ export function isBoardMod(u: IUrsamuSDK, board: IBoard): boolean {
 
 /**
  * Returns true if the caller can read the board.
- * Supports: "all()" (open), "" (open), "faction" (ownerId-based), staff bypass.
+ * Supports: "all()" / "" (open), "faction" (ownerId-based).
+ * Any other lock string (e.g. "admin+") is staff-only —
+ * non-staff are denied; staff always bypass above.
  */
 export async function canRead(u: IUrsamuSDK, board: IBoard): Promise<boolean> {
   if (isStaff(u)) return true;
@@ -53,7 +55,7 @@ async function isFactionMember(
     if (!faction) return false;
     const contents = (faction?.contents as string[] | undefined) ?? [];
     return contents.includes(playerId);
-  } catch {
+  } catch (_e: unknown) {
     return false;
   }
 }

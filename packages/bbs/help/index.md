@@ -2,8 +2,13 @@
 
 Full-featured in-game Bulletin Board System (BBS) plugin.
 
+DEFAULT BOARDS (seeded on install)
+  Announcements — players read; staff post.
+  OOC           — open player board.
+  Jobs          — staff only; mirrors job events.
+
 GROUPS
-  Type `+help bbs/<group>` to view commands in each category:
+  Type `+help bbs/<group>` for each category:
 
   reading      — List boards, topics, and read posts.
   posting      — Draft, preview, post, and edit messages.

@@ -1,10 +1,9 @@
 import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
-import { posts, boards } from "../db.ts";
+import { posts } from "../db.ts";
 import type { IFlag } from "../db.ts";
 import { findBoard, getPost, getBoardPosts, renumberPosts } from "../query.ts";
 import { canRead, isBoardMod, isStaff } from "../permissions.ts";
-import { formatPost } from "../display.ts";
 
 // ─── +bbremove ───────────────────────────────────────────────────────────────
 
@@ -202,6 +201,3 @@ Examples:
     u.send(`%ch>BBS:%cn Post ${board.num}/${post.num} flagged for review.`);
   },
 });
-
-void boards;
-void formatPost;
