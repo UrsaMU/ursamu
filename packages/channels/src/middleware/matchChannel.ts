@@ -1,11 +1,18 @@
-import { dbojs, DBO, evaluateLock, hydrate } from "@ursamu/mush";
+import { dbojs, DBO, evaluateLock, hydrate, getConfig } from "@ursamu/mush";
 import { send, rooms, sessions } from "@ursamu/core";
 import type { ICoreContext } from "@ursamu/core";
 import type { IChannel, IChanEntry, IChanMessage } from "../types.ts";
 import { channelEvents } from "../channel-events.ts";
 
-const chans = new DBO<IChannel>("server.chans");
-const chanHistory = new DBO<IChanMessage>("server.chan_history");
+const chans = new DBO<IChannel>(() =>
+  getConfig<string>("plugins.channels.db", "server.chans"),
+);
+const chanHistory = new DBO<IChanMessage>(() =>
+  getConfig<string>(
+    "plugins.channels.historyDb",
+    "server.chan_history",
+  ),
+);
 
 function moniker(obj: {
   data?: Record<string, unknown>;

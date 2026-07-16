@@ -21,6 +21,9 @@ import {
   gameGitignore,
   gameReadme,
   gameClaude,
+  gameConfigJson,
+  gameAgents,
+  gameGemini,
 } from "./create-templates.ts";
 
 async function writeConnectTxt(targetDir: string, name: string): Promise<void> {
@@ -103,7 +106,18 @@ export async function scaffoldProject(
   console.log(`Creating new UrsaMU ${isLocal ? "test " : ""}project: ${name}`);
   await Deno.mkdir(targetDir);
 
-  for (const dir of ["config","data","src","src/plugins","text","help","scripts","system/scripts","wiki"]) {
+  for (const dir of [
+    ".agents",
+    "config",
+    "data",
+    "src",
+    "src/plugins",
+    "text",
+    "help",
+    "scripts",
+    "system/scripts",
+    "wiki",
+  ]) {
     await Deno.mkdir(join(targetDir, dir), { recursive: true });
     console.log(`Created directory: ${dir}`);
   }
@@ -160,6 +174,19 @@ export async function scaffoldProject(
     "@ursamu/wiki",
   ];
   const selections = opts.selectedPackages ?? defaultPkgs;
+
+  const configJson = gameConfigJson(name, selections);
+  await Deno.writeTextFile(
+    join(targetDir, "config", "config.json"),
+    configJson,
+  );
+  await Deno.writeTextFile(
+    join(targetDir, "config", "config.sample.json"),
+    configJson,
+  );
+  console.log(
+    "Created config/config.json and config/config.sample.json",
+  );
 
   const localImports: Record<string, string> = {
     "ursamu":                  `${engineRelPath}/mod.ts`,
@@ -227,7 +254,7 @@ export async function scaffoldProject(
     nodeModulesDir: "auto",
     tasks: GAME_PROJECT_TASKS,
     compilerOptions: {
-      lib: ["deno.window"],
+      lib: ["deno.window", "deno.unstable"],
       types: ["./node_modules/@types/node/index.d.ts"],
     },
     imports: isLocal ? localImports : jsrImports,
@@ -240,6 +267,13 @@ export async function scaffoldProject(
   console.log("Created README.md");
   await Deno.writeTextFile(join(targetDir, "CLAUDE.md"), gameClaude(name));
   console.log("Created CLAUDE.md");
+  await Deno.writeTextFile(join(targetDir, "GEMINI.md"), gameGemini(name));
+  console.log("Created GEMINI.md");
+  await Deno.writeTextFile(
+    join(targetDir, ".agents", "AGENTS.md"),
+    gameAgents(name),
+  );
+  console.log("Created .agents/AGENTS.md");
   await Deno.writeTextFile(join(targetDir, ".gitignore"), gameGitignore());
   console.log("Created .gitignore");
 

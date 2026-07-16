@@ -1,5 +1,4 @@
-import { DBO } from "@ursamu/mush";
-import { dbojs } from "@ursamu/mush";
+import { DBO, getConfig, dbojs } from "@ursamu/mush";
 
 // ─── subscriptions ────────────────────────────────────────────────────────────
 
@@ -12,7 +11,9 @@ export interface IWikiSubscription {
 }
 
 /** Per-player wiki page watch subscriptions. */
-export const subscriptions = new DBO<IWikiSubscription>("wiki.subscriptions");
+export const subscriptions = new DBO<IWikiSubscription>(() =>
+  getConfig<string>("plugins.wiki.db", "wiki.subscriptions")
+);
 
 /** Maximum number of pages a single player may watch simultaneously. */
 export const MAX_PLAYER_SUBS = 200;

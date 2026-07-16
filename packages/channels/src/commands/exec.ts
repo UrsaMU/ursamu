@@ -1,4 +1,4 @@
-import { DBO } from "@ursamu/mush";
+import { DBO, getConfig } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
 import type { IChanEntry } from "../types.ts";
 
@@ -582,7 +582,9 @@ export async function execCemit(u: IUrsamuSDK): Promise<void> {
   const chanName = input.slice(0, eqIdx).trim().toLowerCase();
   const msg = input.slice(eqIdx + 1).trim();
 
-  const chans = new DBO<any>("server.chans");
+  const chans = new DBO<any>(() =>
+    getConfig<string>("plugins.channels.db", "server.chans"),
+  );
   const chan = await chans.queryOne({ name: chanName });
   if (!chan) {
     u.send(`Channel not found: ${chanName}`);
@@ -618,7 +620,9 @@ export async function execCboot(u: IUrsamuSDK): Promise<void> {
   const chanName = input.slice(0, eqIdx).trim().toLowerCase();
   const targetName = input.slice(eqIdx + 1).trim();
 
-  const chans = new DBO<any>("server.chans");
+  const chans = new DBO<any>(() =>
+    getConfig<string>("plugins.channels.db", "server.chans"),
+  );
   const chan = await chans.queryOne({ name: chanName });
   if (!chan) {
     u.send(`Channel not found: ${chanName}`);
@@ -699,7 +703,9 @@ export async function execCwho(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  const chans = new DBO<any>("server.chans");
+  const chans = new DBO<any>(() =>
+    getConfig<string>("plugins.channels.db", "server.chans"),
+  );
   const chan = await chans.queryOne({ name: chanName });
   if (!chan) {
     u.send(`Channel not found: ${chanName}`);

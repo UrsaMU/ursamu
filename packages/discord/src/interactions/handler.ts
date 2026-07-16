@@ -71,6 +71,23 @@ export async function handleInteraction(req: Request): Promise<Response> {
     if (name === "help") {
       return await handleHelpCommand(options);
     }
+    
+    // Resolve Discord User ID from member or direct user payload
+    const discordUserId = String(interaction.member?.user?.id || interaction.user?.id || "");
+
+    if (name === "jobs") {
+      const { handleJobsSlash } = await import("./jobs-commands.ts");
+      return await handleJobsSlash(discordUserId, options);
+    }
+    if (name === "request") {
+      const { handleRequestSlash } = await import("./jobs-commands.ts");
+      return await handleRequestSlash(discordUserId, options);
+    }
+    if (name === "scenes") {
+      const { handleScenesSlash } = await import("./scenes-commands.ts");
+      return await handleScenesSlash(discordUserId, options, String(interaction.channel_id ?? ""), creds.botToken);
+    }
+
     return ephemeralText(`Unknown command: \`${name ?? "?"}\``);
   }
 

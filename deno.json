@@ -19,7 +19,8 @@
     "packages/lang",
     "packages/dnd",
     "packages/vendor",
-    "games/roses"
+    "games/roses",
+    "games/cor"
   ],
   "nodeModulesDir": "auto",
 

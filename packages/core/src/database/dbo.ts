@@ -45,12 +45,20 @@ let _adapterFactory: AdapterFactory = <T extends WithId>(namespace: string) => {
 };
 
 export class DBO<T extends WithId> implements IDatabase<T> {
-  private readonly namespace: string;
-  private readonly adapter: IDatabase<T>;
+  private readonly namespace: string | (() => string);
 
-  constructor(namespace: string) {
+  constructor(namespace: string | (() => string)) {
     this.namespace = namespace;
-    this.adapter = DBO.getAdapterFactory()<T>(namespace);
+  }
+
+  private getDbNamespace(): string {
+    return typeof this.namespace === "function"
+      ? this.namespace()
+      : this.namespace;
+  }
+
+  private get adapter(): IDatabase<T> {
+    return DBO.getAdapterFactory()<T>(this.getDbNamespace());
   }
 
   static getAdapterFactory(): AdapterFactory {

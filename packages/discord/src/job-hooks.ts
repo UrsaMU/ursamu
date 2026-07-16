@@ -2,7 +2,7 @@
 // discord package still works when jobs is not installed.
 
 import { dbojs } from "@ursamu/mush";
-import { getDiscordConfig, getWebhookUrl } from "./config.ts";
+import { getDiscordConfig, getWebhookUrl, getBotCredentials } from "./config.ts";
 import { postWebhook } from "./webhook.ts";
 import { clean, resolveAvatar, COLORS } from "./helpers.ts";
 
@@ -40,10 +40,50 @@ function bucketLabel(job: IJob): string {
   return job.bucket ?? job.category ?? "General";
 }
 
+import { DBO } from "@ursamu/mush";
+
+const jobThreads = new DBO<{ id: string; threadId: string }>("discord.job_threads");
+const API = "https://discord.com/api/v10";
+
+/** Post a message directly to a thread, or fallback to the main channel if thread isn't configured. */
+async function postToThread(opts: {
+  url: string;
+  jobNumber: number;
+  payload: any;
+}): Promise<void> {
+  const { url, jobNumber, payload } = opts;
+  const cfg = await getDiscordConfig();
+  const creds = await getBotCredentials();
+  
+  if (creds?.botToken) {
+    const saved = await jobThreads.queryOne({ id: String(jobNumber) });
+    if (saved?.threadId) {
+      try {
+        await fetch(`${API}/channels/${saved.threadId}/messages`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bot ${creds.botToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+        return;
+      } catch (e: unknown) {
+        console.error(`[discord] Failed to post update to thread ${saved.threadId}:`, e);
+      }
+    }
+  }
+
+  // Fallback to standard webhook message
+  postWebhook(url, payload);
+}
+
 const onJobCreated = async (job: IJob): Promise<void> => {
   const url = await getWebhookUrl("jobs");
   if (!url) return;
   const cfg = await getDiscordConfig();
+  const creds = await getBotCredentials();
+  
   const avatar = await resolveAvatar(
     job.submittedBy,
     job.submitterName,
@@ -52,7 +92,8 @@ const onJobCreated = async (job: IJob): Promise<void> => {
   const priorityNote = job.priority && job.priority !== "normal"
     ? ` • Priority: **${job.priority}**`
     : "";
-  postWebhook(url, {
+  
+  const payload = {
     username: clean(job.submitterName),
     avatar_url: avatar,
     embeds: [{
@@ -63,7 +104,50 @@ const onJobCreated = async (job: IJob): Promise<void> => {
         text: `Bucket: ${bucketLabel(job)}${priorityNote}`,
       },
     }],
-  });
+  };
+
+  if (creds?.botToken) {
+    try {
+      // Post webhook with wait=true to get the message payload back
+      const res = await fetch(`${url}?wait=true`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        const msg = await res.json();
+        const msgId = msg.id;
+        const channelId = msg.channel_id;
+
+        if (msgId && channelId) {
+          // Start a thread on the posted message
+          const threadRes = await fetch(`${API}/channels/${channelId}/messages/${msgId}/threads`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bot ${creds.botToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: `Job #${job.number} — ${job.title.slice(0, 80)}`,
+              auto_archive_duration: 10080, // 1 week
+            }),
+          });
+          
+          if (threadRes.ok) {
+            const thread = await threadRes.json();
+            await jobThreads.create({ id: String(job.number), threadId: thread.id });
+            console.log(`[discord] Created thread ${thread.id} for Job #${job.number}`);
+            return;
+          }
+        }
+      }
+    } catch (e: unknown) {
+      console.error("[discord] Failed to auto-thread job creation:", e);
+    }
+  }
+
+  // Fallback to normal webhook if bot credentials or threads API fails
+  postWebhook(url, payload);
 };
 
 const onJobAssigned = async (job: IJob): Promise<void> => {
@@ -75,14 +159,18 @@ const onJobAssigned = async (job: IJob): Promise<void> => {
   const assignedName = assigneeObj
     ? ((assigneeObj.data?.name as string | undefined) ?? job.assignedTo)
     : (job.assignedTo ?? "Unassigned");
-  postWebhook(url, {
-    username: "Jobs",
-    embeds: [{
-      color: COLORS.blue,
-      title: `Job #${job.number} Assigned`,
-      description:
-        `**${job.title}** assigned to **${clean(assignedName ?? "")}**`,
-    }],
+  
+  await postToThread({
+    url,
+    jobNumber: job.number,
+    payload: {
+      username: "Jobs",
+      embeds: [{
+        color: COLORS.blue,
+        title: "Job Assigned",
+        description: `Assigned to **${clean(assignedName ?? "")}**`,
+      }],
+    }
   });
 };
 
@@ -98,14 +186,19 @@ const onJobCommented = async (
     comment.authorName,
     cfg.publicUrl,
   );
-  postWebhook(url, {
-    username: clean(comment.authorName),
-    avatar_url: avatar,
-    embeds: [{
-      color: COLORS.blurple,
-      title: `Comment on Job #${job.number} — ${job.title}`,
-      description: comment.text.slice(0, 1024),
-    }],
+
+  await postToThread({
+    url,
+    jobNumber: job.number,
+    payload: {
+      username: clean(comment.authorName),
+      avatar_url: avatar,
+      embeds: [{
+        color: COLORS.blurple,
+        title: "New Comment",
+        description: comment.text.slice(0, 1024),
+      }],
+    }
   });
 };
 
@@ -115,14 +208,18 @@ const onJobStatusChanged = async (
 ): Promise<void> => {
   const url = await getWebhookUrl("jobs");
   if (!url) return;
-  postWebhook(url, {
-    username: "Jobs",
-    embeds: [{
-      color: COLORS.orange,
-      title: `Job #${job.number} Status Changed`,
-      description: `**${job.title}**\n${oldStatus} → **${job.status}**`,
-      footer: { text: `Bucket: ${bucketLabel(job)}` },
-    }],
+  
+  await postToThread({
+    url,
+    jobNumber: job.number,
+    payload: {
+      username: "Jobs",
+      embeds: [{
+        color: COLORS.orange,
+        title: "Status Changed",
+        description: `${oldStatus} → **${job.status}**`,
+      }],
+    }
   });
 };
 
@@ -132,68 +229,90 @@ const onJobPriorityChanged = async (
 ): Promise<void> => {
   const url = await getWebhookUrl("jobs");
   if (!url) return;
-  postWebhook(url, {
-    username: "Jobs",
-    embeds: [{
-      color: COLORS.yellow,
-      title: `Job #${job.number} Priority Changed`,
-      description:
-        `**${job.title}**\n${oldPriority} → **${job.priority ?? "normal"}**`,
-    }],
+  
+  await postToThread({
+    url,
+    jobNumber: job.number,
+    payload: {
+      username: "Jobs",
+      embeds: [{
+        color: COLORS.yellow,
+        title: "Priority Changed",
+        description: `${oldPriority} → **${job.priority ?? "normal"}**`,
+      }],
+    }
   });
 };
 
 const onJobResolved = async (job: IJob): Promise<void> => {
   const url = await getWebhookUrl("jobs");
   if (!url) return;
-  postWebhook(url, {
-    username: "Jobs",
-    embeds: [{
-      color: COLORS.teal,
-      title: `Job #${job.number} Resolved`,
-      description: `**${job.title}**`,
-      footer: { text: `Bucket: ${bucketLabel(job)}` },
-    }],
+  
+  await postToThread({
+    url,
+    jobNumber: job.number,
+    payload: {
+      username: "Jobs",
+      embeds: [{
+        color: COLORS.teal,
+        title: "Job Resolved",
+        description: "This job has been marked resolved.",
+      }],
+    }
   });
 };
 
 const onJobReopened = async (job: IJob): Promise<void> => {
   const url = await getWebhookUrl("jobs");
   if (!url) return;
-  postWebhook(url, {
-    username: "Jobs",
-    embeds: [{
-      color: COLORS.orange,
-      title: `Job #${job.number} Reopened`,
-      description: `**${job.title}**`,
-    }],
+  
+  await postToThread({
+    url,
+    jobNumber: job.number,
+    payload: {
+      username: "Jobs",
+      embeds: [{
+        color: COLORS.orange,
+        title: "Job Reopened",
+        description: "This job has been reopened.",
+      }],
+    }
   });
 };
 
 const onJobClosed = async (job: IJob): Promise<void> => {
   const url = await getWebhookUrl("jobs");
   if (!url) return;
-  postWebhook(url, {
-    username: "Jobs",
-    embeds: [{
-      color: COLORS.gray,
-      title: `Job #${job.number} Closed`,
-      description: `**${job.title}**`,
-      footer: { text: `Bucket: ${bucketLabel(job)}` },
-    }],
+  
+  await postToThread({
+    url,
+    jobNumber: job.number,
+    payload: {
+      username: "Jobs",
+      embeds: [{
+        color: COLORS.gray,
+        title: "Job Closed",
+        description: "This job has been closed.",
+      }],
+    }
   });
 };
 
 const onJobDeleted = async (job: IJob): Promise<void> => {
   const url = await getWebhookUrl("jobs");
   if (!url) return;
-  postWebhook(url, {
-    username: "Jobs",
-    embeds: [{
-      color: COLORS.red,
-      title: `Job #${job.number} Deleted`,
-      description: `**${job.title}**`,
-    }],
+  
+  await postToThread({
+    url,
+    jobNumber: job.number,
+    payload: {
+      username: "Jobs",
+      embeds: [{
+        color: COLORS.red,
+        title: "Job Deleted",
+        description: "This job has been deleted.",
+      }],
+    }
   });
 };
 

@@ -4,6 +4,8 @@
 
 import type { IDiscordBotCredentials } from "./config.ts";
 import { HELP_COMMAND_JSON } from "./interactions/help-command.ts";
+import { JOBS_COMMAND_JSON, REQUEST_COMMAND_JSON } from "./interactions/jobs-commands.ts";
+import { SCENES_COMMAND_JSON } from "./interactions/scenes-commands.ts";
 
 const API = "https://discord.com/api/v10";
 
@@ -14,7 +16,7 @@ const API = "https://discord.com/api/v10";
 export async function registerSlashCommands(
   creds: IDiscordBotCredentials,
 ): Promise<{ ok: boolean; scope: string; detail: string }> {
-  const body = JSON.stringify([HELP_COMMAND_JSON]);
+  const body = JSON.stringify([HELP_COMMAND_JSON, JOBS_COMMAND_JSON, REQUEST_COMMAND_JSON, SCENES_COMMAND_JSON]);
   const path = creds.guildId
     ? `/applications/${creds.applicationId}/guilds/${creds.guildId}/commands`
     : `/applications/${creds.applicationId}/commands`;

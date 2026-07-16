@@ -227,4 +227,37 @@ Examples:
       );
     },
   });
+
+  // ── @discord/register ─────────────────────────────────────────────────────
+  addCmd({
+    name: "@discord/register",
+    pattern: /^[@+]?discord\/register$/i,
+    lock: "connected",
+    category: "General",
+    help: `@discord/register  — Link your in-game character to your Discord account.
+  Generates a one-time PIN to verify your Discord ID.
+
+Examples:
+  @discord/register    Generates a link PIN.`,
+    exec: async (u: IUrsamuSDK) => {
+      const pin = Math.floor(100000 + Math.random() * 900000).toString();
+      const expires = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+      // Spread player state to preserve other fields
+      const ps = u.me.state || {};
+      await u.db.modify(u.me.id, "$set", {
+        "state": {
+          ...ps,
+          discordTempPin: pin,
+          discordPinExpires: expires,
+        },
+      });
+
+      u.send(
+        `%cgDiscord Registration PIN:%cn %ch${pin}%cn\r\n` +
+        `This PIN is valid for 15 minutes.\r\n` +
+        `Send a DM to the Discord bot saying: %ch+register ${pin}%cn`,
+      );
+    },
+  });
 };

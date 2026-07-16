@@ -55,10 +55,10 @@ export function embedForIndex(
     description: truncateDiscord(
       `**${totalCount}** topics in **${sections.length}** sections.\n\n` +
         `${list}\n\n` +
-        "Use `/help topic:<slug>` or `/help section:<name>`.\n" +
-        "Examples: `/help topic:bbpost`, `/help section:bbs`",
+        "Use `/help <topic>` to view a specific topic.\n" +
+        "Example: `/help bbpost` or `/help bbs/reading`",
     ),
-    footer: { text: "Private · only you can see this" },
+    footer: { text: "Use +help <topic> to browse topics." },
   };
 }
 
@@ -87,6 +87,6 @@ export function embedNotFound(topic: string): DiscordEmbed {
     title: "Topic not found",
     description:
       `No help entry for \`${topic}\`.\n` +
-      "Try `/help` for sections or check the slug.",
+      "Try `/help` to browse all available topics.",
   };
 }

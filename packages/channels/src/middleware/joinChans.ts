@@ -1,8 +1,10 @@
-import { dbojs, DBO, evaluateLock, hydrate } from "@ursamu/mush";
+import { dbojs, DBO, evaluateLock, hydrate, getConfig } from "@ursamu/mush";
 import { send, rooms } from "@ursamu/core";
 import type { IChannel, IChanEntry } from "../types.ts";
 
-const chans = new DBO<IChannel>("server.chans");
+const chans = new DBO<IChannel>(() =>
+  getConfig<string>("plugins.channels.db", "server.chans"),
+);
 
 /**
  * Subscribe a socket to channels the player is eligible for.

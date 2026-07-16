@@ -27,27 +27,15 @@ export async function handleHelpCommand(
   options: Array<{ name: string; value?: string }>,
 ): Promise<Response> {
   const topicOpt = options.find((o) => o.name === "topic");
-  const sectionOpt = options.find((o) => o.name === "section");
 
   const topic = typeof topicOpt?.value === "string"
     ? slugify(topicOpt.value)
-    : "";
-  const section = typeof sectionOpt?.value === "string"
-    ? sectionOpt.value.trim().toLowerCase()
     : "";
 
   if (topic) {
     const entry = await helpRegistry.lookup(topic);
     if (!entry) return ephemeralEmbeds([embedNotFound(topic)]);
     return ephemeralEmbeds([embedForEntry(entry)]);
-  }
-
-  if (section) {
-    const entries = await helpRegistry.inSection(section);
-    if (!entries.length) {
-      return ephemeralEmbeds([embedNotFound(`section:${section}`)]);
-    }
-    return ephemeralEmbeds([embedForSection(section, entries)]);
   }
 
   const sections = await helpRegistry.sections();
@@ -92,12 +80,6 @@ export const HELP_COMMAND_JSON = {
       type: 3, // STRING
       required: false,
       autocomplete: true,
-    },
-    {
-      name: "section",
-      description: "List topics in a help section",
-      type: 3,
-      required: false,
     },
   ],
 };

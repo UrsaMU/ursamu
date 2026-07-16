@@ -5,7 +5,7 @@
  */
 
 import { DBO, rooms } from "@ursamu/core";
-import { clean } from "./helpers.ts";
+import { clean, toLatin1 } from "./helpers.ts";
 import { getWebhookUrl } from "./config.ts";
 import { postWebhook } from "./webhook.ts";
 
@@ -85,11 +85,15 @@ export async function injectChannelMessage(opts: {
   displayName: string;
   text: string;
 }): Promise<boolean> {
-  const name = opts.channelName.toLowerCase().trim();
+  // Query by `id` (always lowercase) — `name` preserves input case
+  // and may not match a lowercased lookup.
+  const id = opts.channelName.toLowerCase().trim();
   const chans = new DBO<IChanRow>("server.chans");
-  const chan = await chans.queryOne({ name });
+  const allChans = await chans.all();
+  console.log(`[discord] All channels in DB:`, JSON.stringify(allChans));
+  const chan = await chans.queryOne({ id });
   if (!chan) {
-    console.warn(`[discord] inject: unknown channel "${name}"`);
+    console.warn(`[discord] inject: unknown channel "${id}"`);
     return false;
   }
 

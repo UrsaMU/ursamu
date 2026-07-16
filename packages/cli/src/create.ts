@@ -85,9 +85,9 @@ if (existsSync(targetDir)) {
 
 let engineRelPath = "..";
 if (isLocal) {
-  // src/cli/create.ts → src/cli → src → engine root (3 levels up)
+  // packages/cli/src/create.ts → packages/cli/src → packages/cli → packages → engine root (4 levels up)
   const engineRoot = import.meta.url.startsWith("file://")
-    ? dirname(dirname(dirname(fromFileUrl(import.meta.url))))
+    ? dirname(dirname(dirname(dirname(fromFileUrl(import.meta.url)))))
     : currentDir;
   engineRelPath = relative(targetDir, engineRoot) || ".";
 }

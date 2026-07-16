@@ -271,84 +271,55 @@ Deno.test("${name} — placeholder (replace with real tests)", OPTS, () => {
 // ─── game project templates ────────────────────────────────────────────────────
 
 export function gameMainTs(name: string, isLocal = false): string {
-  if (isLocal) {
-    return `import { mu } from "ursamu";
-import { join } from "@std/path";
+  return `// Main entry point for ${name}
+import { mu } from "ursamu";
 
-const config = {
-  server: {
-    telnet: 4201,
-    ws: 4202,
-    http: 4203,
-    db: "data/ursamu.db",
-    counters: "counters",
-    chans: "chans",
-    mail: "mail",
-    bboard: "bboard",
-  },
-  game: {
-    name: "${name}",
-    description: "A custom UrsaMU game",
-    version: "0.0.1",
-    text: { connect: "text/default_connect.txt" },
-    playerStart: "1",
-  },
-};
-
-const game = await mu(config, undefined, {
-  pluginsDir: join(Deno.cwd(), "src", "plugins"),
+const game = await mu(undefined, undefined, {
+  pluginsDir: "",
 });
 
 console.log(\`\${game.config.get("game.name")} main server is running!\`);
 `;
-  } else {
-    return `import { mu } from "ursamu";
-import { join } from "@std/path";
-
-import builderPlugin from "@ursamu/builder-plugin";
-import channelPlugin from "@ursamu/channel-plugin";
-import helpPlugin from "@ursamu/help-plugin";
-import mailPlugin from "@ursamu/mail-plugin";
-import bbsPlugin from "@ursamu/bbs-plugin";
-import wikiPlugin from "@ursamu/wiki-plugin";
-
-const config = {
-  server: {
-    telnet: 4201,
-    ws: 4202,
-    http: 4203,
-    db: "data/ursamu.db",
-    counters: "counters",
-    chans: "chans",
-    mail: "mail",
-    bboard: "bboard",
-  },
-  game: {
-    name: "${name}",
-    description: "A custom UrsaMU game",
-    version: "0.0.1",
-    text: { connect: "text/default_connect.txt" },
-    playerStart: "1",
-  },
-};
-
-const game = await mu(
-  config,
-  [builderPlugin, channelPlugin, helpPlugin, mailPlugin, bbsPlugin, wikiPlugin],
-  {
-    pluginsDir: join(Deno.cwd(), "src", "plugins"),
-  }
-);
-
-console.log(\`\${game.config.get("game.name")} main server is running!\`);
-`;
-  }
 }
+
+export function gameConfigJson(
+  name: string,
+  selections: string[],
+): string {
+  const config = {
+    server: {
+      telnet: 4201,
+      http: 4202,
+      apiPort: 4203,
+      db: "data/ursamu.db",
+      plugins: selections,
+    },
+    game: {
+      name,
+      description: "A custom UrsaMU game",
+      version: "0.0.1",
+      playerStart: "1",
+      text: {
+        connect: "text/default_connect.txt",
+      },
+    },
+    plugins: {
+      channels: {
+        defaults: [
+          { name: "Public", alias: "pub", lock: "connected" },
+          { name: "Admin", alias: "ad", lock: "connected admin+" },
+        ],
+      },
+    },
+  };
+  return JSON.stringify(config, null, 2);
+}
+
 
 export function gameTelnetTs(): string {
   return `import { startTelnetServer } from "ursamu";
 
-startTelnetServer({ welcomeFile: "text/default_connect.txt", wsPort: 4202 });
+startTelnetServer();
 
 console.log("Telnet server is running!");
 `;
@@ -1253,6 +1224,35 @@ await main();
 `;
 }
 
+export function gameAgents(name: string): string {
+  return `# ${name} — AI Agent Instructions
+
+This repository contains game-specific files for an UrsaMU server built on
+jsr:@ursamu/ursamu.
+
+## Development Constraints
+- **Line Length**: Enforce a maximum line width of 78 characters on all
+  code and text modifications.
+- **Type Checking**: Ensure all TypeScript files check out cleanly. Run
+  \`deno task test\` or \`deno check\`.
+
+## Commands
+\`\`\`bash
+deno task start   # Run server in production
+deno task dev     # Run server + telnet sidecar in watch mode
+deno task test    # Run project tests
+\`\`\`
+
+## Key Guidelines
+- **Softcode Sandboxing**: Do not import Deno fs/net APIs in
+  \`system/scripts/\`. All communication goes through the \`u\` SDK object.
+- **Color Codes**: Ensure MUSH color codes (%cr, %cy, etc.) are always closed
+  with %cn.
+- **Database Ops**: Only write to DB via \`$set\`, \`$inc\`, and \`$unset\` operators.
+- **Help Files**: Keep help files under 22 lines and 78 character columns.
+`;
+}
+
 export function gameClaude(name: string): string {
   return `# ${name} — UrsaMU Game Server
 
@@ -1490,3 +1490,13 @@ Copy \`config/config.sample.json\` → \`config/config.json\`. Never commit
 \`config.json\` (it is gitignored). Never hardcode credentials.
 `;
 }
+
+export function gameGemini(name: string): string {
+  return gameClaude(name)
+    .replace(
+      `# ${name} — UrsaMU Game Server`,
+      `# ${name} — UrsaMU Game Server (Gemini Instructions)`,
+    )
+    .replace("Claude Code", "Gemini");
+}
+

@@ -1,4 +1,4 @@
-import { DBO } from "@ursamu/mush";
+import { DBO, getConfig } from "@ursamu/mush";
 
 /** Maximum inbox messages per player before deliveries are skipped. */
 export const MAIL_QUOTA = 100;
@@ -36,4 +36,6 @@ export interface IMail {
   attachments?: string[];
 }
 
-export const mailDb = new DBO<IMail>("mail.messages");
+export const mailDb = new DBO<IMail>(() =>
+  getConfig<string>("plugins.mail.db", "mail.messages")
+);

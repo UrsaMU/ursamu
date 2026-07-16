@@ -26,7 +26,11 @@ function emptyCfg(): IDiscordConfig {
 
 async function load(): Promise<IDiscordConfig> {
   const cfg = await db.queryOne({ id: "discord" });
-  if (!cfg) return emptyCfg();
+  if (!cfg) {
+    console.log("[discord] config: no config found in database, returning empty config.");
+    return emptyCfg();
+  }
+  console.log("[discord] config loaded:", JSON.stringify({ webhooks: cfg.webhooks, links: cfg.links }));
   return {
     id: "discord",
     webhooks: cfg.webhooks ?? {},

@@ -249,6 +249,9 @@ export async function avatarServe(urlPath: string): Promise<Response> {
           headers: {
             "Content-Type":  EXT_MIME[ext] ?? "application/octet-stream",
             "Cache-Control": "public, max-age=3600",
+            // Bypass interstitial warning pages on ngrok and localtunnel
+            "ngrok-skip-browser-warning": "true",
+            "bypass-tunnel-reminder": "true",
           },
         });
       }

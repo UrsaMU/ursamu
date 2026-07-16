@@ -14,6 +14,7 @@ import { handleInteraction } from "./interactions/handler.ts";
 import { registerSlashCommands } from "./register-commands.ts";
 import { startGateway, stopGateway } from "./gateway.ts";
 import setupCommands from "./commands.ts";
+import { subscribeSceneDiscordHooks, unsubscribeSceneDiscordHooks } from "./scene-bridge.ts";
 
 // ─── channel event handler (game → Discord webhooks) ─────────────────────────
 
@@ -64,6 +65,7 @@ const discordPlugin: IPlugin = {
 
     subscribeJobHooks();
     subscribePresenceHooks();
+    subscribeSceneDiscordHooks();
     channelEvents.on("channel:message", onChannelMessage);
 
     const creds = getBotCredentials();
@@ -88,6 +90,7 @@ const discordPlugin: IPlugin = {
   remove: () => {
     unsubscribeJobHooks();
     unsubscribePresenceHooks();
+    unsubscribeSceneDiscordHooks();
     channelEvents.off("channel:message", onChannelMessage);
     stopGateway();
     console.log("[discord] Plugin removed");

@@ -9,7 +9,10 @@
  * 4. Manages process lifecycles and graceful shutdown.
  */
 
-import { join } from "jsr:@std/path@^0.224.0";
+import { join } from "@std/path";
+
+const sleep = (ms: number) =>
+  new Promise<void>((r) => setTimeout(r, ms));
 import { checkAndCreateSuperuser } from "@ursamu/mush";
 import { initConfig } from "@ursamu/core";
 import { DBO } from "@ursamu/core";
@@ -19,6 +22,17 @@ import { DBO } from "@ursamu/core";
  * 1. Checks/Creates Superuser (interactive)
  * 2. Spawns Game Server and Telnet Server
  */
+
+// Clean up any stale postmaster.pid lock files left from previous crashes
+const pgliteDbDir = Deno.env.get("URSAMU_TYPEGRAPH_DB") ??
+  join(Deno.cwd(), "data", "typegraph.db");
+if (pgliteDbDir !== "memory://") {
+  try {
+    Deno.removeSync(join(pgliteDbDir, "postmaster.pid"));
+  } catch {
+    // Ignore if not present
+  }
+}
 
 // 1. Initialize Config (needed for DB connection)
 await initConfig();
@@ -54,8 +68,19 @@ const spawnInherit = (script: string) => {
   return cmd.spawn();
 }
 
+let telnetScript = "packages/mush/src/telnet.ts";
+let mainScript = "packages/mush/src/main.ts";
+
+try {
+  Deno.statSync(join(Deno.cwd(), "src/telnet.ts"));
+  telnetScript = "src/telnet.ts";
+  mainScript = "src/main.ts";
+} catch {
+  // Fall back to engine defaults
+}
+
 // Telnet runs as a long-lived independent process — it only goes down on hard shutdown (SIGINT).
-const telnetProc = spawnInherit("src/telnet.ts");
+const telnetProc = spawnInherit(telnetScript);
 
 // Spawn Web Client (optional — only if src/web-client exists)
 const webClientDir = join(Deno.cwd(), "src", "web-client");
@@ -86,7 +111,17 @@ let currentMain: Deno.ChildProcess | null = null;
 
 const runMain = async () => {
   while (true) {
-    currentMain = spawnInherit("src/main.ts");
+    if (pgliteDbDir !== "memory://") {
+      try {
+        Deno.removeSync(join(pgliteDbDir, "postmaster.pid"));
+      } catch {
+        // Ignore if not present
+      }
+      // Wait for PGlite WASM to fully release file locks
+      // before the next process opens the same DB directory.
+      await sleep(500);
+    }
+    currentMain = spawnInherit(mainScript);
     const { code } = await currentMain.status;
     currentMain = null;
     if (code === REBOOT_CODE || rebootRequested) {
@@ -98,30 +133,40 @@ const runMain = async () => {
   }
 };
 
-const cleanup = () => {
+const cleanup = async () => {
   console.log("\nShutting down servers...");
   try { telnetProc.kill(); } catch { /* ignore */ }
   try { webProc?.kill(); } catch { /* ignore */ }
+  if (currentMain) {
+    try {
+      currentMain.kill("SIGTERM");
+      await currentMain.status;
+    } catch { /* ignore */ }
+  }
 };
 
-Deno.addSignalListener("SIGINT", () => {
-  cleanup();
+Deno.addSignalListener("SIGINT", async () => {
+  await cleanup();
   Deno.exit(0);
 });
 
 // SIGTERM = clean shutdown (matches stop.sh semantics — disconnects everyone).
-Deno.addSignalListener("SIGTERM", () => {
-  cleanup();
-  try { currentMain?.kill("SIGTERM"); } catch { /* ignore */ }
+Deno.addSignalListener("SIGTERM", async () => {
+  await cleanup();
   Deno.exit(0);
 });
 
 // SIGUSR2 = no-disconnect restart. Equivalent to in-game @reboot.
-Deno.addSignalListener("SIGUSR2", () => {
+Deno.addSignalListener("SIGUSR2", async () => {
   console.log("\n🛰  SIGUSR2 received — restarting main without dropping telnet.");
   rebootRequested = true;
-  try { currentMain?.kill("SIGTERM"); } catch { /* ignore */ }
+  if (currentMain) {
+    try {
+      currentMain.kill("SIGTERM");
+      await currentMain.status;
+    } catch { /* ignore */ }
+  }
 });
 
 await runMain();
-cleanup();
+await cleanup();
