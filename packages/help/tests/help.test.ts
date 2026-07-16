@@ -223,29 +223,70 @@ describe("DbProvider", () => {
 
 import { renderEntry, renderIndex, renderSection } from "../src/renderer.ts";
 
+import {
+  clearLayoutTemplates,
+  setLayoutTemplates,
+} from "@ursamu/mush";
+
+const TMUX_RULE = "-".repeat(78);
+
 describe("renderEntry", () => {
+  beforeEach(() => {
+    clearLayoutTemplates();
+  });
+
   it("includes the topic name uppercased in header", () => {
-    assertStringIncludes(renderEntry(makeEntry("mail", "general", "Send mail.")), "MAIL");
+    assertStringIncludes(
+      renderEntry(makeEntry("mail", "general", "Send mail.")),
+      "MAIL",
+    );
   });
 
   it("renders markdown body content", () => {
-    assertStringIncludes(renderEntry(makeEntry("mail", "general", "Send mail to a player.")), "Send mail");
+    assertStringIncludes(
+      renderEntry(
+        makeEntry("mail", "general", "Send mail to a player."),
+      ),
+      "Send mail",
+    );
   });
 
   it("shows fallback message when content is empty", () => {
-    assertStringIncludes(renderEntry(makeEntry("nodoc", "general", "")), "No detailed help");
+    assertStringIncludes(
+      renderEntry(makeEntry("nodoc", "general", "")),
+      "No detailed help",
+    );
   });
 
-  it("output starts with a header and ends with a footer", () => {
+  it("TinyMUX fallback: plain dash rules + title", () => {
     const out = renderEntry(makeEntry("test"));
-    // Header contains [ TEST ]
     assertStringIncludes(out, "TEST");
-    // Footer is repeated = chars (color-coded)
-    assertStringIncludes(out, "%cr=%cn");
+    assertEquals(out.startsWith(TMUX_RULE + "\nTEST"), true);
+    assertEquals(out.endsWith(TMUX_RULE), true);
+    assertEquals(out.includes("%cr"), false);
+  });
+
+  it("honors game.layout header/footer templates", () => {
+    setLayoutTemplates({
+      header: "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+      footer: "[repeat(%cg=%cn,%1)]",
+    });
+    try {
+      const out = renderEntry(makeEntry("sheet"));
+      assertStringIncludes(out, "%cy");
+      assertStringIncludes(out, "SHEET");
+      assertStringIncludes(out, "%cg=%cn");
+    } finally {
+      clearLayoutTemplates();
+    }
   });
 });
 
 describe("renderIndex", () => {
+  beforeEach(() => {
+    clearLayoutTemplates();
+  });
+
   it("includes all section names uppercased", () => {
     const out = renderIndex(["general", "combat", "admin"], 42);
     assertStringIncludes(out, "GENERAL");
@@ -260,16 +301,30 @@ describe("renderIndex", () => {
   it("includes browse instruction", () => {
     assertStringIncludes(renderIndex([], 0), "help <topic>");
   });
+
+  it("TinyMUX fallback uses plain dash rules", () => {
+    const out = renderIndex(["general"], 1);
+    assertStringIncludes(out, TMUX_RULE);
+    assertStringIncludes(out, "HELP SYSTEM");
+    assertEquals(out.includes("%cr"), false);
+  });
 });
 
 describe("renderSection", () => {
+  beforeEach(() => {
+    clearLayoutTemplates();
+  });
+
   it("includes section name uppercased in header", () => {
-    assertStringIncludes(renderSection("combat", [makeEntry("dodge", "combat")]), "COMBAT");
+    assertStringIncludes(
+      renderSection("combat", [makeEntry("dodge", "combat")]),
+      "COMBAT",
+    );
   });
 
   it("lists topic names", () => {
     const out = renderSection("combat", [
-      makeEntry("dodge",  "combat"),
+      makeEntry("dodge", "combat"),
       makeEntry("attack", "combat"),
     ]);
     assertStringIncludes(out, "DODGE");

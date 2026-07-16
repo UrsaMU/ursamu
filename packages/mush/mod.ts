@@ -3,10 +3,12 @@
  *
  * MUSH world layer built on @ursamu/core.
  *
- * Provides: IDBObj world model, flag/lock system, TinyMUX softcode engine,
- * addCmd/IUrsamuSDK command API, format pipeline, and essential MUSH verbs.
+ * Provides: IDBObj world model, flag/lock system, TinyMUX softcode
+ * engine, addCmd/IUrsamuSDK command API, format pipeline, configurable
+ * layout chrome (game.layout.*), and essential MUSH verbs.
  *
- * Re-exports everything from @ursamu/core so game code only needs one import.
+ * Re-exports everything from @ursamu/core so game code only needs one
+ * import.
  */
 
 export * from "@ursamu/core";
