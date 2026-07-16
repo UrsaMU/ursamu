@@ -184,6 +184,152 @@ export const rjust = (s = "", len: number, fill = " "): string => {
 
 export type LayoutFn = (label?: string, filler?: string, width?: number) => string;
 
+export type LayoutTemplates = {
+  header?: string;
+  divider?: string;
+  footer?: string;
+};
+
+const MAX_TPL_LEN = 10_000;
+const MAX_TPL_DEPTH = 16;
+
+/**
+ * Config-driven mushcode templates for layout helpers.
+ * Keys: game.layout.header / .divider / .footer
+ *
+ * Positional args substituted before eval:
+ *   %0  label/title
+ *   %1  width  (string)
+ *   %2  filler
+ *
+ * Supported bracket functions (sync subset):
+ *   center, ljust, rjust, repeat, space, cat, lit, strlen
+ * Color codes and %r/%t/%b pass through.
+ *
+ * Example:
+ *   "header": "[center(%ch%cy%0%cn,%1,%cg=%cn)]"
+ */
+let _layoutTemplates: LayoutTemplates = {};
+
+export function setLayoutTemplates(t: LayoutTemplates): void {
+  _layoutTemplates = {
+    header:  typeof t.header  === "string" ? t.header  : undefined,
+    divider: typeof t.divider === "string" ? t.divider : undefined,
+    footer:  typeof t.footer  === "string" ? t.footer  : undefined,
+  };
+}
+
+export function getLayoutTemplates(): LayoutTemplates {
+  return { ..._layoutTemplates };
+}
+
+export function hasLayoutTemplate(
+  slot: keyof LayoutTemplates,
+): boolean {
+  const v = _layoutTemplates[slot];
+  return typeof v === "string" && v.length > 0;
+}
+
+export function clearLayoutTemplates(): void {
+  _layoutTemplates = {};
+}
+
+/** Load game.layout.* from a config-shaped object (or getConfig slice). */
+export function applyLayoutFromConfig(
+  layout?: LayoutTemplates | null,
+): void {
+  if (!layout || typeof layout !== "object") {
+    clearLayoutTemplates();
+    return;
+  }
+  setLayoutTemplates(layout);
+}
+
+function splitArgs(s: string): string[] {
+  const out: string[] = [];
+  let cur = "";
+  let depth = 0;
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (ch === "[") depth++;
+    else if (ch === "]") depth = Math.max(0, depth - 1);
+    if (ch === "," && depth === 0) {
+      out.push(cur);
+      cur = "";
+      continue;
+    }
+    cur += ch;
+  }
+  if (cur.length || out.length) out.push(cur);
+  return out;
+}
+
+function clampTpl(n: number): number {
+  return Math.min(Math.max(0, n | 0), MAX_TPL_LEN);
+}
+
+function callLayoutFn(name: string, args: string[]): string {
+  const n = name.toLowerCase();
+  if (n === "center") {
+    const w = clampTpl(parseInt(args[1] ?? "78", 10) || 78);
+    return center(args[0] ?? "", w, args[2] ?? " ");
+  }
+  if (n === "ljust") {
+    const w = clampTpl(parseInt(args[1] ?? "78", 10) || 78);
+    return ljust(args[0] ?? "", w, args[2] ?? " ");
+  }
+  if (n === "rjust") {
+    const w = clampTpl(parseInt(args[1] ?? "78", 10) || 78);
+    return rjust(args[0] ?? "", w, args[2] ?? " ");
+  }
+  if (n === "repeat") {
+    const c = clampTpl(parseInt(args[1] ?? "0", 10) || 0);
+    return (args[0] ?? "").repeat(c);
+  }
+  if (n === "space") {
+    const c = clampTpl(parseInt(args[0] ?? "0", 10) || 0);
+    return " ".repeat(c);
+  }
+  if (n === "cat") return args.join("");
+  if (n === "lit") return args[0] ?? "";
+  if (n === "strlen") return String(visLen(args[0] ?? ""));
+  return "";
+}
+
+/**
+ * Expand a layout mushcode template with %0/%1/%2 and a safe
+ * bracket-function subset. Sync — safe for header()/divider()/footer().
+ */
+export function expandLayoutTemplate(
+  template: string,
+  args: string[],
+): string {
+  if (!template) return "";
+  if (template.length > MAX_TPL_LEN) {
+    template = template.slice(0, MAX_TPL_LEN);
+  }
+
+  let s = template
+    .replace(/%([0-9]+)/g, (_, n) => args[Number(n)] ?? "")
+    .replace(/%r/gi, "\n")
+    .replace(/%t/gi, "\t")
+    .replace(/%b/gi, " ");
+
+  for (let depth = 0; depth < MAX_TPL_DEPTH; depth++) {
+    const next = s.replace(
+      /\[([a-zA-Z_][a-zA-Z0-9_]*)\(([^[\]]*)\)\]/g,
+      (_m, fn: string, rawArgs: string) => {
+        const parts = splitArgs(rawArgs).map((p) => p.trim());
+        return callLayoutFn(fn, parts);
+      },
+    );
+    if (next === s) break;
+    s = next;
+    if (s.length > MAX_TPL_LEN) s = s.slice(0, MAX_TPL_LEN);
+  }
+  return s;
+}
+
 const _defaultHeader: LayoutFn = (string = "", filler = "=", width = 78) => {
   const rule = filler.repeat(width);
   if (!string) return rule;
@@ -212,14 +358,48 @@ export function unregisterHeader(fn: LayoutFn): void  { const i = _headerStack.l
 export function unregisterDivider(fn: LayoutFn): void { const i = _dividerStack.lastIndexOf(fn); if (i > 0) _dividerStack.splice(i, 1); }
 export function unregisterFooter(fn: LayoutFn): void  { const i = _footerStack.lastIndexOf(fn);  if (i > 0) _footerStack.splice(i, 1); }
 
-export const header  = (string = "", filler = "=", width = 78): string =>
-  _headerStack[_headerStack.length - 1](string, filler, width);
-export const divider = (string = "", filler = "-", width = 78): string =>
-  _dividerStack[_dividerStack.length - 1](string, filler, width);
-export const footer  = (string = "", filler = "=", width = 78): string =>
-  _footerStack[_footerStack.length - 1](string, filler, width);
+export const header  = (string = "", filler = "=", width = 78): string => {
+  const tpl = _layoutTemplates.header;
+  if (tpl) {
+    return expandLayoutTemplate(tpl, [
+      string,
+      String(width),
+      filler,
+    ]);
+  }
+  return _headerStack[_headerStack.length - 1](
+    string, filler, width,
+  );
+};
+export const divider = (string = "", filler = "-", width = 78): string => {
+  const tpl = _layoutTemplates.divider;
+  if (tpl) {
+    return expandLayoutTemplate(tpl, [
+      string,
+      String(width),
+      filler,
+    ]);
+  }
+  return _dividerStack[_dividerStack.length - 1](
+    string, filler, width,
+  );
+};
+export const footer  = (string = "", filler = "=", width = 78): string => {
+  const tpl = _layoutTemplates.footer;
+  if (tpl) {
+    return expandLayoutTemplate(tpl, [
+      string,
+      String(width),
+      filler,
+    ]);
+  }
+  return _footerStack[_footerStack.length - 1](
+    string, filler, width,
+  );
+};
 
 /** Test-only: drop all registered handlers. */
 export function _clearFormatHandlers(): void {
   registry.clear();
+  clearLayoutTemplates();
 }

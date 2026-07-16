@@ -82,8 +82,18 @@ export {
   unregisterHeader,
   unregisterDivider,
   unregisterFooter,
+  setLayoutTemplates,
+  getLayoutTemplates,
+  clearLayoutTemplates,
+  applyLayoutFromConfig,
+  expandLayoutTemplate,
+  hasLayoutTemplate,
 } from "./src/format/handlers.ts";
-export type { FormatHandler, LayoutFn } from "./src/format/handlers.ts";
+export type {
+  FormatHandler,
+  LayoutFn,
+  LayoutTemplates,
+} from "./src/format/handlers.ts";
 
 // Re-export GameHookMap augmentation so consumers get mush event types
 export type { MushHookMap }                  from "./src/events/types.ts";

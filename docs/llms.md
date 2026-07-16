@@ -198,9 +198,10 @@ u.util.center("TITLE", 40, "-")       // "-------------------TITLE--------------
 u.util.center("TITLE", 40)            // "                 TITLE                  "
 
 // Block-style decorators (78-col default; %ch/%cn applied automatically)
-u.util.header("Title")                // "===…===\n        %chTitle%cn        \n===…==="
-u.util.divider("Section")             // "\n%chSection%cn\n---…---"
-u.util.footer("")                     // "===…===" (rule only when label is empty)
+// Override via config game.layout.header / .divider / .footer (mushcode)
+u.util.header("Title")                // default or game.layout.header template
+u.util.divider("Section")             // default or game.layout.divider template
+u.util.footer("")                     // default or game.layout.footer template
 
 // Printf formatting
 u.util.sprintf("%-10s %5d", "Alice", 1200)   // "Alice       1200"

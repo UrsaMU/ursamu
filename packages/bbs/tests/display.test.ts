@@ -1,8 +1,13 @@
 /**
- * Tests for display.ts — bbDate, formatTimeFull, formatPost, header/divider/footer.
+ * Tests for display.ts — bbDate, formatTimeFull, formatPost,
+ * header/divider/footer (engine chrome / game.layout).
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
+import {
+  clearLayoutTemplates,
+  setLayoutTemplates,
+} from "@ursamu/mush";
 import {
   bbDate,
   formatTimeFull,
@@ -72,44 +77,65 @@ describe("formatTimeFull", () => {
   });
 });
 
-describe("header / divider / footer (cofd LayoutFn style)", () => {
-  it("header with title uses red rule + yellow title", () => {
+describe("header / divider / footer (engine chrome)", () => {
+  it("header with title uses engine default block", () => {
+    clearLayoutTemplates();
     const h = header("Test");
     assertStringIncludes(h, "Test");
-    assertStringIncludes(h, "%cr");
-    assertStringIncludes(h, "%ch%cy");
+    assertStringIncludes(h, "%ch");
     assertStringIncludes(h, "=");
   });
 
-  it("header with no title is a solid red = rule", () => {
+  it("header with no title is a solid = rule", () => {
+    clearLayoutTemplates();
     const h = header();
-    assertEquals(h, `%cr${"=".repeat(WIDTH)}%cn`);
+    assertEquals(h, "=".repeat(WIDTH));
   });
 
-  it("divider with title uses - filler", () => {
+  it("divider with title includes label", () => {
+    clearLayoutTemplates();
     const d = divider("General");
     assertStringIncludes(d, "General");
     assertStringIncludes(d, "-");
-    assertStringIncludes(d, "%cr");
   });
 
-  it("divider with no title is a solid red - rule", () => {
-    assertEquals(divider(), `%cr${"-".repeat(WIDTH)}%cn`);
+  it("divider with no title is a solid - rule", () => {
+    clearLayoutTemplates();
+    assertEquals(divider(), "-".repeat(WIDTH));
   });
 
   it("footer with no title matches header plain rule", () => {
+    clearLayoutTemplates();
     assertEquals(footer(), header());
   });
 
   it("footer with title matches header style", () => {
+    clearLayoutTemplates();
     assertEquals(footer("Done"), header("Done"));
   });
 
-  it("accepts width as second arg (LayoutFn number overload)", () => {
+  it("accepts width as second arg (number overload)", () => {
+    clearLayoutTemplates();
     const h = header("X", 40);
     assertStringIncludes(h, "X");
-    // 5 filler + space + title + space + rightPad = 40 visible-ish structure
-    assertStringIncludes(h, "%cr=====");
+    assertStringIncludes(h, "=".repeat(40));
+  });
+
+  it("honors game.layout mushcode templates", () => {
+    setLayoutTemplates({
+      header: "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+    });
+    try {
+      const h = header("Sheet", "=", 24);
+      assertStringIncludes(h, "%cy");
+      assertStringIncludes(h, "Sheet");
+      const vis = h
+        .replace(/%c[a-zA-Z]/g, "")
+        .replace(/%[nrtbR]/g, "");
+      assertEquals(vis.length, 24);
+    } finally {
+      clearLayoutTemplates();
+    }
   });
 });
 
@@ -122,60 +148,88 @@ describe("constants", () => {
     assertEquals(DASH_LINE.length, WIDTH);
     assertEquals(DASH_LINE[0], "-");
   });
-  it("WIDTH matches cofd default (78)", () => {
+  it("WIDTH matches engine default (78)", () => {
     assertEquals(WIDTH, 78);
   });
 });
 
 describe("formatPost", () => {
   it("includes board title via header()", () => {
+    clearLayoutTemplates();
     const result = formatPost(makeBoard(), makePost());
     assertStringIncludes(result, "General");
-    assertStringIncludes(result, "%ch%cyGeneral%cn");
   });
 
   it("uses footer rule at end", () => {
+    clearLayoutTemplates();
     const result = formatPost(makeBoard(), makePost());
     assertStringIncludes(result, footer());
   });
 
   it("includes author name on non-anonymous board", () => {
-    assertStringIncludes(formatPost(makeBoard(), makePost()), "Alice");
+    assertStringIncludes(
+      formatPost(makeBoard(), makePost()),
+      "Alice",
+    );
   });
 
   it("hides author on anonymous board", () => {
-    const result = formatPost(makeBoard({ anonymous: true }), makePost());
+    const result = formatPost(
+      makeBoard({ anonymous: true }),
+      makePost(),
+    );
     assertStringIncludes(result, "Anonymous");
     assertEquals(result.includes("Alice"), false);
   });
 
   it("includes [IC] prefix when icTag is ic", () => {
-    assertStringIncludes(formatPost(makeBoard(), makePost({ icTag: "ic" })), "[IC]");
+    assertStringIncludes(
+      formatPost(makeBoard(), makePost({ icTag: "ic" })),
+      "[IC]",
+    );
   });
 
   it("includes [OOC] prefix when icTag is ooc", () => {
-    assertStringIncludes(formatPost(makeBoard(), makePost({ icTag: "ooc" })), "[OOC]");
+    assertStringIncludes(
+      formatPost(makeBoard(), makePost({ icTag: "ooc" })),
+      "[OOC]",
+    );
   });
 
   it("includes [STICKY] prefix for sticky posts", () => {
-    assertStringIncludes(formatPost(makeBoard(), makePost({ sticky: true })), "[STICKY]");
+    assertStringIncludes(
+      formatPost(makeBoard(), makePost({ sticky: true })),
+      "[STICKY]",
+    );
   });
 
   it("includes tags when present", () => {
-    const result = formatPost(makeBoard(), makePost({ tags: ["lore", "history"] }));
+    const result = formatPost(
+      makeBoard(),
+      makePost({ tags: ["lore", "history"] }),
+    );
     assertStringIncludes(result, "lore");
     assertStringIncludes(result, "history");
   });
 
   it("includes scene link when sceneId present", () => {
-    assertStringIncludes(formatPost(makeBoard(), makePost({ sceneId: "abc123" })), "abc123");
+    assertStringIncludes(
+      formatPost(makeBoard(), makePost({ sceneId: "abc123" })),
+      "abc123",
+    );
   });
 
   it("includes (edited xN) when editCount > 0", () => {
-    assertStringIncludes(formatPost(makeBoard(), makePost({ editCount: 2 })), "(edited x2)");
+    assertStringIncludes(
+      formatPost(makeBoard(), makePost({ editCount: 2 })),
+      "(edited x2)",
+    );
   });
 
   it("includes post body", () => {
-    assertStringIncludes(formatPost(makeBoard(), makePost()), "This is the body.");
+    assertStringIncludes(
+      formatPost(makeBoard(), makePost()),
+      "This is the body.",
+    );
   });
 });

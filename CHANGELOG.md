@@ -2,6 +2,18 @@
 
 All notable changes to UrsaMU are documented here.
 
+## [Unreleased]
+
+### New
+
+- **`game.layout` mushcode templates** — set `game.layout.header`,
+  `.divider`, and `.footer` in `config/config.json` to theme
+  `header()` / `divider()` / `footer()`, sandbox `u.util.*`, and
+  softcode `[header()]` with TinyMUX-style templates
+  (e.g. `"[center(%ch%cy%0%cn,%1,%cg=%cn)]"`). Args: `%0` title,
+  `%1` width, `%2` filler. Config templates override plugin
+  `registerHeader` / etc. for that slot.
+
 ## [2.7.0] — 2026-05-23
 
 ### New

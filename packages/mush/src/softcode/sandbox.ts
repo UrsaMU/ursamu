@@ -105,6 +105,13 @@ class LocalSandbox {
           await handleUtilResolveGlobalFormatOrMessage(msg, worker);
           return;
         }
+        if (type === "util:layout") {
+          const { handleUtilLayoutMessage } = await import(
+            "./handlers/format.ts"
+          );
+          handleUtilLayoutMessage(msg, worker);
+          return;
+        }
 
         if (type === "trigger:attr")     { await handleTriggerMessage(msg, worker, context); return; }
         if (type.startsWith("events:")) { await handleEventsMessage(msg, worker, context); return; }

@@ -134,6 +134,16 @@ export const initializeEngine = async (
       updateParserSubs(substitutions);
   }
 
+  // Load layout mushcode templates (header / divider / footer)
+  const { applyLayoutFromConfig } = await import("./format/handlers.ts");
+  applyLayoutFromConfig(
+    getConfig<{
+      header?: string;
+      divider?: string;
+      footer?: string;
+    }>("game.layout"),
+  );
+
   // Determine the project root and current directory context
   const isLocal = import.meta.url.startsWith("file://") &&
     !Deno.env.get("URSAMU_JSR_MODE");

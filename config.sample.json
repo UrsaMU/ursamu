@@ -20,7 +20,12 @@
     "text": {
       "connect": "../text/default_connect.txt"
     },
-    "playerStart": "1"
+    "playerStart": "1",
+    "layout": {
+      "header":  "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+      "divider": "[center(%ch%cy%0%cn,%1,%cg-%cn)]",
+      "footer":  "[repeat(%cg=%cn,%1)]"
+    }
   },
   "plugins": {
     "example": {

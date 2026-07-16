@@ -1,29 +1,15 @@
-import type { IPlugin, LayoutFn } from "@ursamu/mush";
-import {
-  registerPluginRoute,
-  registerHeader,
-  registerDivider,
-  registerFooter,
-  unregisterHeader,
-  unregisterDivider,
-  unregisterFooter,
-} from "@ursamu/mush";
+import type { IPlugin } from "@ursamu/mush";
+import { registerPluginRoute } from "@ursamu/mush";
 import { registerHelpDir } from "@ursamu/help-plugin";
 import { bboardsRouteHandler } from "./router.ts";
 import { startCleanupInterval, stopCleanupInterval } from "./cleanup.ts";
 import { seedDefaultBoards } from "./seed.ts";
 import { registerJobBridge, removeJobBridge } from "./job-bridge.ts";
-import { header as bbsHeaderFn, divider as bbsDividerFn, footer as bbsFooterFn } from "./display.ts";
 import "./commands/reading.ts";
 import "./commands/posting.ts";
 import "./commands/social.ts";
 import "./commands/management.ts";
 import "./commands/staff.ts";
-
-// Same LayoutFn contract as cofd — red rule + bold yellow title.
-const bbsHeader = bbsHeaderFn as LayoutFn;
-const bbsDivider = bbsDividerFn as LayoutFn;
-const bbsFooter = bbsFooterFn as LayoutFn;
 
 /**
  * Seed boards + wire job bridge. Runs from init() so we do not
@@ -57,23 +43,18 @@ const plugin: IPlugin = {
       "bbs",
     );
     registerPluginRoute("/api/v1/boards", bboardsRouteHandler);
-    registerHeader(bbsHeader);
-    registerDivider(bbsDivider);
-    registerFooter(bbsFooter);
     startCleanupInterval();
     // Fire-and-forget — init must stay sync-friendly for the loader.
     void bootstrapBoards();
     console.log(
       "[bbs] Plugin initialized — +bb commands active, " +
-        "/api/v1/boards registered, layout handlers registered.",
+        "/api/v1/boards registered " +
+        "(layout via engine game.layout).",
     );
     return true;
   },
 
   remove: () => {
-    unregisterHeader(bbsHeader);
-    unregisterDivider(bbsDivider);
-    unregisterFooter(bbsFooter);
     removeJobBridge();
     stopCleanupInterval();
     console.log("[bbs] Plugin removed.");

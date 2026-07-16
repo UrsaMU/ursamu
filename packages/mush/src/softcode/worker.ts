@@ -187,17 +187,19 @@ const ljust = (str = "", width: number, fill = " "): string => _padStr(str, widt
 const rjust = (str = "", width: number, fill = " "): string => _padStr(str, width, "right", fill);
 const center = (str = "", width: number, fill = " "): string => _padStr(str, width, "center", fill);
 
-const header = (str = "", filler = "=", width = 78): string => {
+// Local fallbacks used only if host RPC is unavailable (should not happen
+// in production — util:layout is handled by the main-thread sandbox).
+const _localHeader = (str = "", filler = "=", width = 78): string => {
   const rule = filler.repeat(width);
   if (!str) return rule;
   return `${rule}\n${center(`%ch${str}%cn`, width)}\n${rule}`;
 };
-const divider = (str = "", filler = "-", width = 78): string => {
+const _localDivider = (str = "", filler = "-", width = 78): string => {
   const rule = filler.repeat(width);
   if (!str) return rule;
   return `\n%ch${str}%cn\n${rule}`;
 };
-const footer = (str = "", filler = "=", width = 78): string => {
+const _localFooter = (str = "", filler = "=", width = 78): string => {
   const rule = filler.repeat(width);
   if (!str) return rule;
   return `${rule}\n${center(`%ch${str}%cn`, width)}\n${rule}`;
@@ -324,9 +326,40 @@ self.onmessage = async (e: MessageEvent) => {
       center,
       ljust,
       rjust,
-      header,
-      divider,
-      footer,
+      // Host-side layout honors game.layout.* mushcode templates.
+      header: (
+        str = "",
+        filler = "=",
+        width = 78,
+      ): Promise<string> =>
+        request<string>("util:layout", {
+          slot: "header",
+          label: str,
+          filler,
+          width,
+        }).catch(() => _localHeader(str, filler, width)),
+      divider: (
+        str = "",
+        filler = "-",
+        width = 78,
+      ): Promise<string> =>
+        request<string>("util:layout", {
+          slot: "divider",
+          label: str,
+          filler,
+          width,
+        }).catch(() => _localDivider(str, filler, width)),
+      footer: (
+        str = "",
+        filler = "=",
+        width = 78,
+      ): Promise<string> =>
+        request<string>("util:layout", {
+          slot: "footer",
+          label: str,
+          filler,
+          width,
+        }).catch(() => _localFooter(str, filler, width)),
       template,
       sprintf,
       stripSubs,
