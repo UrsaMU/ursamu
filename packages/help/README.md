@@ -37,15 +37,17 @@ In `config/config.json`:
 Help output uses the same chrome as the rest of the game
 (requires `@ursamu/mush` ≥ 0.1.1):
 
-1. **`game.layout.header` / `.divider` / `.footer`** mushcode templates
+1. **`game.layout.header` / `.footer`** mushcode templates
 2. **TinyMUX plushelp fallback** — plain 78-column dash rules
+
+The index is header → section columns → footer (no mid-page
+"SECTIONS" divider). Topic entries use the same header/footer.
 
 ```json
 {
   "game": {
     "layout": {
       "header":  "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
-      "divider": "[center(%ch%cy%0%cn,%1,%cg-%cn)]",
       "footer":  "[repeat(%cg=%cn,%1)]"
     }
   }

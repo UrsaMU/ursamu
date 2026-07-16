@@ -15,7 +15,6 @@
 import type { HelpEntry } from "./registry.ts";
 import {
   header as engHeader,
-  divider as engDivider,
   footer as engFooter,
   hasLayoutTemplate,
 } from "@ursamu/mush";
@@ -85,18 +84,6 @@ function helpHeader(title: string): string {
 }
 
 /**
- * Section divider (sub-header on index).
- * Config template when set; else TinyMUX dash rule + optional label.
- */
-function helpDivider(title = ""): string {
-  if (hasLayoutTemplate("divider")) {
-    return engDivider(title, "-", WIDTH);
-  }
-  if (!title) return TMUX_RULE;
-  return `${TMUX_RULE}\n${title}`;
-}
-
-/**
  * Closing rule.
  * Config template when set; else TinyMUX plain dash rule.
  */
@@ -138,27 +125,26 @@ export function renderEntry(entry: HelpEntry): string {
   );
 }
 
-/** Render the top-level help index. */
+/**
+ * Top-level help index — header, section columns, footer.
+ * No mid-page "SECTIONS / topics" divider (keeps the list short).
+ */
 export function renderIndex(
   sections: string[],
   totalCount: number,
 ): string {
   const top = helpHeader("HELP SYSTEM");
-  const sub = hasLayoutTemplate("divider")
-    ? helpDivider(`SECTIONS (${totalCount} topics)`)
-    : `Index of help (${totalCount} topics)\n`;
-
   const cols = topicColumns(sections);
   const foot = helpFooter();
+  const count = totalCount > 0 ? ` (${totalCount} topics)` : "";
 
   return (
     `${top}\n` +
-    `${sub}` +
-    (hasLayoutTemplate("divider") ? "\n" : "") +
     `${cols}` +
     `${foot}\n` +
     "Type '%chhelp <topic>%cn' or " +
-    "'%chhelp/section <name>%cn' to browse."
+    "'%chhelp/section <name>%cn' to browse." +
+    count
   );
 }
 

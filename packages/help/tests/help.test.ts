@@ -294,12 +294,29 @@ describe("renderIndex", () => {
     assertStringIncludes(out, "ADMIN");
   });
 
-  it("includes the total topic count", () => {
-    assertStringIncludes(renderIndex(["general"], 7), "7");
+  it("includes the total topic count in the browse line", () => {
+    assertStringIncludes(renderIndex(["general"], 7), "7 topics");
   });
 
   it("includes browse instruction", () => {
     assertStringIncludes(renderIndex([], 0), "help <topic>");
+  });
+
+  it("omits SECTIONS mid-page divider", () => {
+    setLayoutTemplates({
+      header: "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+      divider: "[center(%ch%cy%0%cn,%1,%cg-%cn)]",
+      footer: "[repeat(%cg=%cn,%1)]",
+    });
+    try {
+      const out = renderIndex(["admin", "bbs"], 10);
+      assertEquals(out.includes("SECTIONS"), false);
+      assertStringIncludes(out, "HELP SYSTEM");
+      assertStringIncludes(out, "ADMIN");
+      assertStringIncludes(out, "10 topics");
+    } finally {
+      clearLayoutTemplates();
+    }
   });
 
   it("TinyMUX fallback uses plain dash rules", () => {
@@ -307,6 +324,7 @@ describe("renderIndex", () => {
     assertStringIncludes(out, TMUX_RULE);
     assertStringIncludes(out, "HELP SYSTEM");
     assertEquals(out.includes("%cr"), false);
+    assertEquals(out.includes("SECTIONS"), false);
   });
 });
 
