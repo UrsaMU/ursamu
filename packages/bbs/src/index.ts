@@ -1,6 +1,6 @@
 import type { IPlugin } from "@ursamu/mush";
 import { registerPluginRoute } from "@ursamu/mush";
-import { registerHelpDir } from "@ursamu/help-plugin";
+import { registerHelpDir } from "@ursamu/help";
 import { bboardsRouteHandler } from "./router.ts";
 import { startCleanupInterval, stopCleanupInterval } from "./cleanup.ts";
 import { seedDefaultBoards } from "./seed.ts";

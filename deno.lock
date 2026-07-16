@@ -1744,7 +1744,8 @@
         "minizlib",
         "mkdirp",
         "yallist"
-      ]
+      ],
+      "deprecated": true
     },
     "thenify-all@1.6.0": {
       "integrity": "sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==",
@@ -1811,6 +1812,7 @@
     },
     "uuid@10.0.0": {
       "integrity": "sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==",
+      "deprecated": true,
       "bin": true
     },
     "uuid@11.1.0": {
@@ -1819,6 +1821,7 @@
     },
     "uuid@9.0.1": {
       "integrity": "sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==",
+      "deprecated": true,
       "bin": true
     },
     "vm2@3.9.19": {
@@ -3884,7 +3887,10 @@
       "packages/bbs": {
         "dependencies": [
           "jsr:@std/assert@0.224",
-          "jsr:@std/testing@^1.0.17"
+          "jsr:@std/testing@^1.0.17",
+          "jsr:@ursamu/help@0.1",
+          "jsr:@ursamu/jobs@0.1",
+          "jsr:@ursamu/mush@0.1"
         ]
       },
       "packages/builder": {
