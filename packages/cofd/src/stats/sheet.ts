@@ -166,6 +166,21 @@ export interface CofdSheet {
     };
     fruit?: { slug: string; gotAt: number }[];
     fruitFlags?: { key: string; until: number }[];
+    /** Goblin Market debts (CtL). */
+    debts?: {
+      id: string;
+      to: string;
+      marketId?: string;
+      marketName?: string;
+      listingSlug?: string;
+      amount: number;
+      note: string;
+      status: "open" | "called" | "paid";
+      owedAt: number;
+      calledAt?: number;
+      calledNote?: string;
+      paidAt?: number;
+    }[];
   };
 }
 
@@ -303,6 +318,9 @@ export function migrateSheet(sheet: any): CofdSheet {
             until: Number(x.until) || 0,
           }))
           .filter((x: { key: string }) => x.key)
+        : undefined,
+      debts: Array.isArray(sheet.hedgeState.debts)
+        ? sheet.hedgeState.debts
         : undefined,
     }
     : undefined;

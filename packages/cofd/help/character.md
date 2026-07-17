@@ -9,6 +9,8 @@ COMMANDS
   help notes       Public/private notes.
   help shift       Mask / mien / Chrysalis.
   help contract    Invoke Contracts.
+  help market      Goblin Markets.
+  help debt        Goblin Debts.
   help perception  Fae flag and dual look.
 
 SEE ALSO: help cofd, help sheet, help cg

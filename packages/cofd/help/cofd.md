@@ -16,6 +16,6 @@ TOPIC GROUPS
 
 CHANGELING
   help shift · help contract · help hedge
-  help perception
+  help market · help debt · help perception
 
 SEE ALSO: help cg, help sheet, help roll

@@ -36,6 +36,8 @@ import { districtExec } from "./district.ts";
 import { shiftExec } from "./shift.ts";
 import { contractExec } from "./contract.ts";
 import { hedgeExec } from "./hedge.ts";
+import { marketExec } from "./market.ts";
+import { debtCommand } from "./debt.ts";
 
 addCmd({
   name: "+extended",
@@ -873,6 +875,56 @@ Examples:
   +hedge/setway Gate/maskName=Old cellar door
   +shift mien`,
   exec: hedgeExec,
+});
+
+addCmd({
+  name: "+market",
+  pattern: /^\+market(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+market[/sw] [args]  -- Goblin Markets (CtL).
+
+Player (in a market room):
+  (none)              Browse stalls and prices.
+  /catalog [filter]   Full goods catalog.
+  /buy <slug> [debt]  Pay Glamour (or take Debt).
+  /credit <slug>      Buy on credit (Goblin Debt).
+
+Builder+:
+  /create <name>      Open a market in this room.
+  /stock <slug> <n>   Set stock (−1 = unlimited).
+  /open /close        Toggle market open.
+  /destroy [id]       Remove market.
+  /list               All markets.
+
+Debt: +debt, +debt/pay <id>, staff +debt/call.
+
+Examples:
+  +market
+  +market/buy amaranthine
+  +market/credit trifle-token
+  +market/create Night Bazaar`,
+  exec: marketExec,
+});
+
+addCmd({
+  name: "+debt",
+  pattern: /^\+debt(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+debt[/sw] [args]  -- Goblin Debts from market credit.
+
+Switches:
+  (none) / list       Your open and called debts.
+  /pay <id>           Mark a debt paid (service done).
+  /call <p> <id>=msg  Staff: call in a debt.
+  /clear <p> <id>     Staff: force clear.
+
+Examples:
+  +debt
+  +debt/pay debt-1234
+  +debt/call Alice abc12345=Bring three teeth by dawn`,
+  exec: debtCommand,
 });
 
 addCmd({

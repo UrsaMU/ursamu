@@ -1,0 +1,93 @@
+{
+  "version": "ctl-2e-goblin-market",
+  "notes": {
+    "source": "Changeling: The Lost 2e — Goblin Markets",
+    "debt": "Buying on credit adds Goblin Debt; called debts demand service."
+  },
+  "goods": [
+    {
+      "slug": "common-fruit",
+      "name": "Common Goblin Fruit",
+      "kind": "fruit",
+      "fruitSlug": "common-fruit",
+      "description": "A basket of ordinary Hedge fruit.",
+      "priceGlamour": 1,
+      "priceDebt": 1,
+      "defaultStock": 12,
+      "book": "CtL p.207"
+    },
+    {
+      "slug": "amaranthine",
+      "name": "Amaranthine",
+      "kind": "fruit",
+      "fruitSlug": "amaranthine",
+      "description": "Soft red fruit that mends aggravated wounds.",
+      "priceGlamour": 3,
+      "priceDebt": 2,
+      "defaultStock": 2,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "faerie-peach",
+      "name": "Faerie Peach",
+      "kind": "fruit",
+      "fruitSlug": "faerie-peach",
+      "description": "Softens Thorns; nearby fae sense the eater.",
+      "priceGlamour": 3,
+      "priceDebt": 2,
+      "defaultStock": 2,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "liars-apple",
+      "name": "Liar's Apple",
+      "kind": "fruit",
+      "fruitSlug": "liars-apple",
+      "description": "Sweet fruit that binds the tongue from truth.",
+      "priceGlamour": 2,
+      "priceDebt": 2,
+      "defaultStock": 3,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "trifle-token",
+      "name": "Trifle Token",
+      "kind": "token",
+      "description": "A minor Token: one scene of minor luck (+1 to a roll, ST).",
+      "priceGlamour": 2,
+      "priceDebt": 1,
+      "defaultStock": 4,
+      "book": "CtL Tokens (simplified)"
+    },
+    {
+      "slug": "hedge-compass",
+      "name": "Hedge Compass",
+      "kind": "oddment",
+      "description": "Points toward a named goal once (nav +1, ST).",
+      "priceGlamour": 2,
+      "priceDebt": 2,
+      "defaultStock": 2,
+      "book": "CtL oddments (simplified)"
+    },
+    {
+      "slug": "goblin-favor",
+      "name": "Goblin Favor Ticket",
+      "kind": "service",
+      "description": "A vendor owes you one minor service later (RP).",
+      "priceGlamour": 4,
+      "priceDebt": 0,
+      "defaultStock": 1,
+      "book": "CtL Goblin Markets"
+    },
+    {
+      "slug": "cold-iron-nail",
+      "name": "Cold Iron Nail",
+      "kind": "oddment",
+      "description": "Cold iron: useful against the Gentry (RP/ST).",
+      "priceGlamour": 3,
+      "priceDebt": 2,
+      "defaultStock": 3,
+      "book": "CtL iron"
+    }
+  ]
+}

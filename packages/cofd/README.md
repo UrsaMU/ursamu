@@ -30,8 +30,9 @@ GMCCG-inspired module layout, file-driven supernatural templates.
 - **Changeling: The Lost overlay.** Seeming, Kith, Court, Needle, Thread,
   Wyrd, Glamour, and Clarity on sheets; Mask/mien and Chrysalis (`+shift`);
   Contracts (`+contract`); Hedge travel, navigation, and goblin fruit as
-  real inventory objects (`+hedge`); dual look via `fae` flag
-  (`maskName` / FAEDESC — see `docs/fae-perception-spec.md`).
+  real inventory objects (`+hedge`); Goblin Markets and Debt
+  (`+market`, `+debt`); dual look via `fae` flag (`maskName` /
+  FAEDESC — see `docs/fae-perception-spec.md`).
 
 ---
 

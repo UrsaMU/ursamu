@@ -15,4 +15,5 @@ DUAL LOOK
   **fae** sees the true gate name. Room flavor /
   maskflavor on +hedge status. See help perception.
 
-SEE ALSO: help hedge/staff, help perception, help shift
+SEE ALSO: help hedge/staff, help market, help debt,
+  help perception, help shift
