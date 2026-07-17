@@ -214,13 +214,18 @@ export async function getStageInstructions(
       lines.push(
         `  Configure details for the %ch${tmpl.name}%cn template.`,
       );
-      if (tmpl.customFields.length === 0) {
+      // mask/mien/animals are post-chargen optional prose (+sheet/set).
+      const optionalCg = new Set(["mask", "mien", "animals"]);
+      const requiredFields = tmpl.customFields.filter(
+        (f) => !optionalCg.has(f),
+      );
+      if (requiredFields.length === 0) {
         lines.push("");
         lines.push("    No template-specific details required for Mortals!");
         lines.push("");
       } else {
         lines.push("");
-        for (const f of tmpl.customFields) {
+        for (const f of requiredFields) {
           const title = f.replace(/\b\w/g, (c) => c.toUpperCase());
           const val = sheet.customFields[f] || "Not Set";
           lines.push(`    %ch%cc${ljust(title + ":", 12)}%cn ${val}`);
@@ -229,8 +234,8 @@ export async function getStageInstructions(
       }
       lines.push(await divider(""));
       lines.push("  %chCommands:%cn");
-      if (tmpl.customFields.length > 0) {
-        for (const f of tmpl.customFields) {
+      if (requiredFields.length > 0) {
+        for (const f of requiredFields) {
           lines.push(
             `    +cg/set ${f}=<value>    -- Set ${f}.`,
           );

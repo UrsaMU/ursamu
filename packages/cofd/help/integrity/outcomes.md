@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help integrity (overview)
+
 integrity outcomes  -- Success tiers and Conditions on a Breaking Point.
 
 Each result tier of the Resolve + Composure roll has a different
@@ -21,4 +23,4 @@ Condition selection:
   Conditions feed into +condition. They resolve normally (1 Beat on
   resolution) and follow the standard persistent-vs-resolved rules.
 
-See also: integrity, condition, beat
+SEE ALSO: integrity, condition, beat

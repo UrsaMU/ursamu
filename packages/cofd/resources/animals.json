@@ -1,0 +1,190 @@
+{
+  "version": "ctl-2e-chrysalis",
+  "notes": {
+    "source": "Changeling: The Lost 2e — Chrysalis (Royal Steed). Physical form only; no mythical powers.",
+    "size": "Default Size 1-7. Ogre seeming clause allows up to Size 15."
+  },
+  "animals": [
+    {
+      "slug": "wolf",
+      "name": "Wolf",
+      "size": 4,
+      "strength": 3,
+      "dexterity": 3,
+      "stamina": 3,
+      "speedFactor": 8,
+      "senses": ["scent", "low-light"],
+      "movement": ["run"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "hawk",
+      "name": "Hawk",
+      "size": 2,
+      "strength": 1,
+      "dexterity": 4,
+      "stamina": 2,
+      "speedFactor": 12,
+      "senses": ["keen-sight"],
+      "movement": ["fly", "glide"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "cat",
+      "name": "Cat",
+      "size": 2,
+      "strength": 1,
+      "dexterity": 4,
+      "stamina": 2,
+      "speedFactor": 10,
+      "senses": ["low-light", "scent"],
+      "movement": ["run", "climb"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "hound",
+      "name": "Hound",
+      "size": 3,
+      "strength": 2,
+      "dexterity": 3,
+      "stamina": 3,
+      "speedFactor": 9,
+      "senses": ["scent"],
+      "movement": ["run"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "raven",
+      "name": "Raven",
+      "size": 1,
+      "strength": 1,
+      "dexterity": 4,
+      "stamina": 1,
+      "speedFactor": 12,
+      "senses": ["keen-sight"],
+      "movement": ["fly"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "horse",
+      "name": "Horse",
+      "size": 7,
+      "strength": 4,
+      "dexterity": 3,
+      "stamina": 4,
+      "speedFactor": 12,
+      "senses": [],
+      "movement": ["run"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "bear",
+      "name": "Bear",
+      "size": 6,
+      "strength": 5,
+      "dexterity": 2,
+      "stamina": 5,
+      "speedFactor": 6,
+      "senses": ["scent"],
+      "movement": ["run"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "fox",
+      "name": "Fox",
+      "size": 2,
+      "strength": 1,
+      "dexterity": 4,
+      "stamina": 2,
+      "speedFactor": 10,
+      "senses": ["scent", "low-light"],
+      "movement": ["run"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "serpent",
+      "name": "Serpent",
+      "size": 2,
+      "strength": 1,
+      "dexterity": 3,
+      "stamina": 2,
+      "speedFactor": 4,
+      "senses": ["scent"],
+      "movement": ["slither", "swim"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "stag",
+      "name": "Stag",
+      "size": 6,
+      "strength": 3,
+      "dexterity": 3,
+      "stamina": 4,
+      "speedFactor": 12,
+      "senses": [],
+      "movement": ["run"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "otter",
+      "name": "Otter",
+      "size": 2,
+      "strength": 1,
+      "dexterity": 3,
+      "stamina": 2,
+      "speedFactor": 8,
+      "senses": [],
+      "movement": ["swim", "run"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "rat",
+      "name": "Rat",
+      "size": 1,
+      "strength": 1,
+      "dexterity": 4,
+      "stamina": 2,
+      "speedFactor": 8,
+      "senses": ["scent"],
+      "movement": ["run", "climb", "swim"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "boar",
+      "name": "Boar",
+      "size": 4,
+      "strength": 4,
+      "dexterity": 2,
+      "stamina": 4,
+      "speedFactor": 7,
+      "senses": ["scent"],
+      "movement": ["run"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "owl",
+      "name": "Owl",
+      "size": 2,
+      "strength": 1,
+      "dexterity": 3,
+      "stamina": 2,
+      "speedFactor": 10,
+      "senses": ["low-light", "keen-sight"],
+      "movement": ["fly", "glide"],
+      "book": "CtL p.145"
+    },
+    {
+      "slug": "dragon",
+      "name": "Dragon (mundane form)",
+      "size": 7,
+      "strength": 5,
+      "dexterity": 3,
+      "stamina": 5,
+      "speedFactor": 8,
+      "senses": ["keen-sight"],
+      "movement": ["fly", "run"],
+      "book": "CtL p.145",
+      "notes": "Physical only — no breath weapon or magic."
+    }
+  ]
+}

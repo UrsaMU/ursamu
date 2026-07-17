@@ -1,67 +1,116 @@
 {
   "key": "npc-flow",
   "title": "+npc -- spawn, fight, and destroy NPC antagonists",
-  "description": "Admin spawns a Thug NPC, joins it to a combat encounter, attacks it, then destroys the NPC at scene end.",
+  "description": "Staff spawns a Thug from the JSON catalog, opens combat, Jax and Goon exchange blows (Jax first by initiative), then the ST ends the scene and cleans up.",
   "vars": { "player": "Jax" },
   "setup": {
-    "targets": {
-      "Jax": {
-        "flags": ["player", "connected"],
-        "state": {
-          "cofd": {
-            "template": "mortal",
-            "attributes": {
-              "intelligence": 2, "wits": 2, "resolve": 2,
-              "strength": 3, "dexterity": 2, "stamina": 2,
-              "presence": 2, "manipulation": 2, "composure": 2
-            },
-            "skills": { "brawl": 2, "athletics": 2 },
-            "advantages": { "willpowerMax": 4, "willpowerCurrent": 4, "size": 5 },
-            "health": { "bashing": 0, "lethal": 0, "aggravated": 0 },
-            "equipment": { "equippedWeapon": null, "equippedArmor": null }
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "mortal",
+          "attributes": {
+            "intelligence": 2,
+            "wits": 2,
+            "resolve": 2,
+            "strength": 3,
+            "dexterity": 2,
+            "stamina": 2,
+            "presence": 2,
+            "manipulation": 2,
+            "composure": 2
+          },
+          "skills": { "brawl": 2, "athletics": 2 },
+          "advantages": {
+            "willpowerMax": 4,
+            "willpowerCurrent": 4,
+            "size": 5
+          },
+          "health": { "bashing": 0, "lethal": 0, "aggravated": 0 },
+          "equipment": {
+            "equippedWeapon": null,
+            "equippedArmor": null
           }
         }
       }
+    },
+    "room": {
+      "name": "Back Alley",
+      "desc": "Wet brick and a single sodium light."
     }
   },
   "steps": [
     { "sub": "Browse NPC List in an Empty Room" },
-    { "note": "Anyone connected can /list; it shows available archetypes if the room has no NPCs." },
-    { "cmd": "+npc", "label": "Jax checks the room" },
-    { "expect": "Archetypes" },
+    {
+      "note": "Anyone can +npc list. Empty rooms show JSON template slugs in columns."
+    },
+    { "cmd": "+npc", "label": "Jax checks the alley" },
+    { "expect": "Templates:" },
+    { "expect": "thug" },
 
     { "sub": "Staff Spawns a Thug" },
-    { "note": "Only admin/builder can /create. The NPC becomes a real IDBObj flagged 'npc'." },
-    { "cmd": "+npc/create Goon=thug", "as": "admin", "label": "ST drops in a thug" },
+    {
+      "note": "Only staff may /create. The NPC is a real object flagged npc from resources/npcs/thug.json."
+    },
+    {
+      "cmd": "+npc/create Goon=thug",
+      "as": "admin",
+      "label": "ST drops in a thug"
+    },
     { "expect": "Created" },
+    { "expect": "Thug" },
 
     { "sub": "List Shows the New NPC" },
     { "cmd": "+npc/list", "label": "Jax sees Goon in the room" },
     { "expect": "Goon" },
 
-    { "sub": "Open Combat and Bring the NPC In" },
-    { "cmd": "+combat/start", "as": "admin", "label": "ST opens the encounter" },
+    { "sub": "Open Combat" },
+    {
+      "note": "+combat/start auto-joins room NPCs. Jax still joins as a PC."
+    },
+    {
+      "cmd": "+combat/start",
+      "as": "admin",
+      "label": "ST opens the encounter"
+    },
     { "expect": "encounter" },
     { "cmd": "+combat/join", "label": "Jax joins" },
     { "expect": "joined" },
-    { "cmd": "+combat/join", "as": "Goon", "label": "Goon (NPC) joins the order" },
-    { "expect": "joined" },
-    { "cmd": "+combat/begin", "as": "admin", "label": "Roll initiative" },
+    {
+      "cmd": "+combat/begin",
+      "as": "admin",
+      "label": "Roll initiative"
+    },
     { "expect": "Round 1" },
+    { "expect": "Jax" },
+    { "expect": "Goon" },
 
-    { "sub": "Round 1 -- Combat Plays Out" },
-    { "note": "Goon attacks Jax. Initiative was random; Goon may not have been first, so we advance to whichever turn order produced this." },
-    { "cmd": "+attack Jax", "as": "Goon", "label": "Goon attacks (no-op if not their turn)" },
+    { "sub": "Round 1 -- Jax Acts; NPC AI Auto-Walks" },
+    {
+      "note": "After +attack, endTurnAndWalk runs NPC turns automatically until the next PC. No +combat/next needed. (Use +combat/next only to pass or end a non-attack turn.)"
+    },
+    {
+      "cmd": "+attack Goon",
+      "label": "Jax punches Goon"
+    },
     { "expect": "attack" },
-    { "cmd": "+combat/next", "as": "admin", "label": "ST advances the turn" },
+    { "expect": "Goon" },
+    {
+      "note": "Goon's AI turn and the advance to Round 2 appear in the same attack output."
+    },
     { "expect": "turn" },
-    { "cmd": "+attack Goon", "label": "Jax retaliates (no-op if not their turn)" },
-    { "expect": "attack" },
 
     { "sub": "Close the Scene and Clean Up" },
-    { "cmd": "+combat/end", "as": "admin", "label": "ST ends the fight" },
+    {
+      "cmd": "+combat/end",
+      "as": "admin",
+      "label": "ST ends the fight"
+    },
     { "expect": "ended" },
-    { "cmd": "+npc/destroy Goon", "as": "admin", "label": "ST removes the NPC" },
+    {
+      "cmd": "+npc/destroy Goon",
+      "as": "admin",
+      "label": "ST removes the NPC"
+    },
     { "expect": "Destroyed" },
 
     { "reset": true }

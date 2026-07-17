@@ -1,35 +1,20 @@
 ---
-hidden: true
+dark: true
 ---
-combat specified  -- Targeting a specific body part: penalties and Tilt
-                    thresholds.
+SEE ALSO: help combat (overview)
 
-Syntax (via +attack):
++COMBAT SPECIFIED  -- Body-part targeting via +attack.
+
+SYNTAX
   +attack/specified <target>=<bodypart>
 
-Body part penalties and thresholds:
+BODY PARTS
+  Torso −1. Arm/Leg −2 → Wrack if dmg > Stamina.
+  Head −3 → Stunned if dmg ≥ Size.
+  Heart −3 (special at 5+ dmg).
+  Hand −4 / Eye −5 → Wrack / Blinded on any hit.
 
-  Target    Pool Penalty   Tilt Triggered         Threshold
-  --------  ------------   ---------------------  --------------------
-  Torso     -1             none                   --
-  Arm       -2             Arm Wrack              damage > Stamina
-  Leg       -2             Leg Wrack              damage > Stamina
-  Head      -3             Stunned                damage >= target Size
-  Heart     -3             (special)              5+ damage points
-  Hand      -4             Arm Wrack              any damaging hit
-  Eye       -5             Blinded                any damaging hit
+AFTER COMBAT
+  Some Tilts become Conditions (e.g. Blinded→Blind).
 
-Heart shots:
-  Dealing 5 or more points of damage to the heart has special effects
-  for certain monstrous targets. Consult the relevant template rules.
-
-Persistent Conditions after combat:
-  Tilts are in-combat only. When combat ends, some Tilts upgrade to
-  lasting Conditions:
-    Blinded Tilt -> Blind Condition (awards 1 Beat when resolved).
-  Other Tilts end with the scene unless the Storyteller rules otherwise.
-
-More:
-  help combat tilt-effects     Summary of body-part Tilt effects.
-
-See also: combat modifiers, attack, health, condition
+SEE ALSO: help combat/tilt-effects, help attack

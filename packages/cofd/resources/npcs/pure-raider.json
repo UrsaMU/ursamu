@@ -1,0 +1,78 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "pure-raider",
+  "name": "Pure Raider",
+  "blurb": "Fire-Touched raider. Zealous, brutal, hunts the Forsaken.",
+  "book": "WtF 2e",
+  "tier": "major",
+  "lineage": "werewolf",
+  "tags": ["pure", "fire-touched", "antagonist", "urban"],
+  "attributes": {
+    "intelligence": 2,
+    "wits": 3,
+    "resolve": 4,
+    "strength": 4,
+    "dexterity": 3,
+    "stamina": 4,
+    "presence": 3,
+    "manipulation": 2,
+    "composure": 2
+  },
+  "skills": {
+    "brawl": 3,
+    "athletics": 3,
+    "stealth": 2,
+    "survival": 3,
+    "intimidation": 3,
+    "occult": 2,
+    "weaponry": 2
+  },
+  "merits": {
+    "iron stamina": 2,
+    "fast reflexes": 1
+  },
+  "specialties": {
+    "brawl": ["Claws"],
+    "intimidation": ["Zealotry"]
+  },
+  "integrity": 4,
+  "size": 5,
+  "shortDesc": [
+    "Something large moves just beyond the streetlight.",
+    "A tall silhouette waits where the alley goes dark.",
+    "Wet breath steams in the cold; claws click on concrete."
+  ],
+  "description": [
+    "When the flesh fails: lean muscle, wolf eyes, ash-smeared war paint and the stink of burnt offerings.",
+    "Urshul bulk fills the space — scarred hide, heat-warped brands of the Fire-Touched, a snarl that is almost prayer.",
+    "Half-man, half-wolf, all zealot. Smoke and blood. He came for the Forsaken."
+  ],
+  "ai": {
+    "archetype": "spirit-ridden-feral",
+    "startRevealed": false,
+    "fleeAtHealth": 0.15
+  },
+  "defaults": {
+    "aggro": "hunter",
+    "presence": "ambush",
+    "wanderRange": 2
+  },
+  "werewolf": {
+    "faction": "pure",
+    "tribe": "Fire-Touched",
+    "form": "urshul",
+    "primalUrge": 3,
+    "essence": 8,
+    "renown": {
+      "glory": 2,
+      "purity": 3,
+      "cunning": 1
+    },
+    "gifts": [
+      "Partial Change",
+      "Crushing Blow"
+    ],
+    "blood": "Challenger",
+    "bone": "Monster"
+  }
+}

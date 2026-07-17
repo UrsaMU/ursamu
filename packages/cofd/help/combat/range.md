@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help combat (overview)
+
 combat range  -- Range modifiers for ranged attacks.
 
 Each ranged weapon has three range bands printed on its catalog
@@ -22,4 +24,4 @@ attacker declares the band in the room as part of the +attack
 narrative and the ST applies the modifier through the situational
 modifier on the +attack command line.
 
-See also: combat modifiers, combat conceal-mods, attack
+SEE ALSO: combat modifiers, combat conceal-mods, attack

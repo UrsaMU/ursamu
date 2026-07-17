@@ -1,9 +1,9 @@
 ---
-hidden: true
+dark: true
 ---
 combat/order  -- Reading the initiative table and turn order.
 
-See also: help combat (overview).
+SEE ALSO: help combat (overview).
 
 DISPLAY
   +combat/order shows each participant in descending init order:

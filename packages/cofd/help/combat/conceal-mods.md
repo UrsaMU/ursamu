@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help combat (overview)
+
 combat conceal-mods  -- Concealment penalties to the attacker's pool.
 
 Concealment imposes a penalty on the attacker's pool. Full cover
@@ -19,4 +21,4 @@ combat conceal for declaring concealment with +combat/conceal. The
 engine subtracts cover Durability from damage automatically when the
 cover level is set on the target.
 
-See also: combat modifiers, combat cover, combat conceal
+SEE ALSO: combat modifiers, combat cover, combat conceal

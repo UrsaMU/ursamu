@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help combat (overview)
+
 combat/switches  -- Per-switch behavior for +combat. See help combat.
 
 LIFECYCLE

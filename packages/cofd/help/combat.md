@@ -15,10 +15,13 @@ CORE SYNTAX
 NPC AI is automatic after PC attacks and on /next. Opt out per NPC with
 +npc/ai <name>=manual (or off/none) so the ST plays that slot.
 
-For ambush, cover, conceal, delay, move, run, and reflexive switches,
-see help combat/switches.
+RELATED
+  help attack · grapple · throw · dodge · gear
+  help reload · npc · zone · turn · district
 
-SEE ALSO: help combat/switches, help combat/initiative,
-          help combat/order, help combat/action-economy,
-          help combat/modifiers, help combat/specified,
-          help attack, help grapple, help dodge
+MORE
+  help combat/switches, help combat/initiative,
+  help combat/order, help combat/action-economy,
+  help combat/modifiers, help combat/specified
+
+SEE ALSO: help attack, help grapple, help dodge

@@ -1,9 +1,9 @@
 ---
-hidden: true
+dark: true
 ---
 attack/switches  -- Full switch reference for +attack.
 
-See also: help attack (overview).
+SEE ALSO: help attack (overview).
 
   /brawl          Strength + Brawl - target Defense (default unarmed).
   /melee          Strength + Weaponry - target Defense.

@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help sheet (overview)
+
 sheet willpower  -- Willpower regeneration (CoFD 2e core).
 
 Three core regen paths drive Willpower recovery:
@@ -22,4 +24,4 @@ Limits:
   Each switch caps Willpower at the character's permanent rating
   (Resolve + Composure). Excess regen is silently dropped.
 
-See also: sheet, virtues, vices, integrity
+SEE ALSO: sheet, virtues, vices, integrity

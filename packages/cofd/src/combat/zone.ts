@@ -581,33 +581,40 @@ async function spawnOneMob(
   aggro: MobAggro,
 ): Promise<string | null> {
   if (zone.roomIds.length === 0) return null;
-  const { getArchetype, sheetFromArchetype } = await import(
-    "../npc/archetypes.ts"
-  );
-  const archetype = getArchetype(archetypeKey);
-  if (!archetype) return null;
+  const {
+    getNpcTemplate,
+    sheetFromTemplate,
+    objectStateFromSheet,
+  } = await import("../npc/index.ts");
+  const template = getNpcTemplate(archetypeKey);
+  if (!template) return null;
 
   const homeRoomId = pickRandom(zone.roomIds)!;
-  const sheet = sheetFromArchetype(archetype, archetype.tier, {
-    aiArchetype: "beshilu-swarmer",
-  });
+  const sheet = sheetFromTemplate(template, template.tier);
   // deno-lint-ignore no-explicit-any
   (sheet.npc as any).zoneId = zone.id;
+  // Zone rule aggro wins; fall back to template default.
   // deno-lint-ignore no-explicit-any
-  (sheet.npc as any).aggro = aggro;
+  (sheet.npc as any).aggro = aggro ??
+    template.defaults?.aggro ??
+    "territorial";
   // deno-lint-ignore no-explicit-any
   (sheet.npc as any).homeRoomId = homeRoomId;
   // deno-lint-ignore no-explicit-any
-  (sheet.npc as any).wanderRange = 1;
+  (sheet.npc as any).wanderRange =
+    template.defaults?.wanderRange ?? 1;
+
+  const built = objectStateFromSheet(sheet, template.name);
+  const flagStr = built.flags.join(" ");
 
   // createObj signature: (flagsStr, data) -> IDBOBJ[]. It generates the id
   // and emits the proper engine events. Swallows failures so a single bad
   // spawn doesn't break a respawn pass.
   try {
-    const created = await createObj("npc thing", {
-      name: archetype.label,
+    const created = await createObj(flagStr, {
+      name: built.name,
       location: homeRoomId,
-      state: { cofd: sheet },
+      state: built.state,
       contents: [],
     });
     const npcObj = (created as unknown as Array<{ id: string }>)?.[0];

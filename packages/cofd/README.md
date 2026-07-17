@@ -27,9 +27,11 @@ GMCCG-inspired module layout, file-driven supernatural templates.
   Conditions plus 21 Tilts catalogued in `resources/conditions.json`.
   Resolving a Condition or fulfilling an Aspiration awards Beats
   automatically.
-- **Changeling: The Lost overlay.** Fully implements CtL support. Renders
-  Seeming, Kith, Court, Needle, Thread, Wyrd, Glamour, and Clarity on
-  character sheets, and supports starting power dots in chargen.
+- **Changeling: The Lost overlay.** Seeming, Kith, Court, Needle, Thread,
+  Wyrd, Glamour, and Clarity on sheets; Mask/mien and Chrysalis (`+shift`);
+  Contracts (`+contract`); Hedge travel, navigation, and goblin fruit as
+  real inventory objects (`+hedge`); dual look via `fae` flag
+  (`maskName` / FAEDESC — see `docs/fae-perception-spec.md`).
 
 ---
 
@@ -69,11 +71,16 @@ GMCCG-inspired module layout, file-driven supernatural templates.
 +aspiration/add[/long] <text> [for <player>]
 +aspiration/remove <#> [for <player>]
 +aspiration/fulfill <#> [for <player>]      Awards 1 Beat.
+
++shift [<form>]                             Mask/mien or animal form (CtL).
++contract [<name>]                          List/invoke Changeling Contracts.
++hedge[/open|/exit|/claim|...]              Hedgeways, portaling, Hollows.
 ```
 
-Full per-command help: `help cofd`, `help cg`, `help sheet`, `help roll`,
-`help health`, `help beat`, `help xp`, `help condition`,
-`help aspiration`.
+Full per-command help: `help cofd`, then topic groups
+`help character`, `help dice`, `help status`, `help combat`,
+`help social`, `help reference`, `help templates` — or any
+command name (`help sheet`, `help hedge`, `help perception`).
 
 ---
 

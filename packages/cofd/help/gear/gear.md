@@ -1,33 +1,21 @@
 ---
-hidden: true
+dark: true
 ---
-+gear gear  -- Mental, Physical, and Social equipment.
+SEE ALSO: help gear (overview)
 
-Categories:
-  Mental    Toolkits and tech that turn Mental Skill rolls from
-            impossible to possible (first-aid kit, lockpicks, computer).
-  Physical  Restraints, traps, climbing gear, suppressors, gas masks.
-  Social    Cash, disguises, fashionable clothing.
++GEAR GEAR  -- Mental, Physical, Social equipment.
 
-Every gear entry carries:
-  Dice Bonus  Adds to the relevant Skill pool when used appropriately.
-              Some items only enable a roll that would otherwise be
-              impossible without the listed equipment.
-  Durability  How tough the item is against damage and abuse.
-  Size        Storage footprint (and concealment difficulty).
-  Structure   Total hit points before destruction.
-  Availability  Resources/Social Merit cost.
+CATEGORIES
+  Mental     Toolkits, tech, lockpicks.
+  Physical   Restraints, traps, climbing gear.
+  Social     Cash, disguises, fashion.
 
-Notes:
-  Adding a gear item to inventory carries the catalog dice bonus only
-  as data -- it does not auto-apply to rolls (you cite the bonus
-  manually with a +N modifier in +roll). Equipped weapons and armor do
-  auto-integrate via +roll/weapon and the sheet Defense/Speed lines.
+FIELDS
+  Dice bonus, Durability, Size, Structure,
+  Availability. Bonus is cited in +roll manually;
+  only weapon/armor auto-integrate on sheet.
 
-Services:
-  Hired-help (mechanic, surgeon, defense attorney, etc.) carry an
-  Availability and dice bonus like equipment. They typically take a
-  week to procure at the listed Availability; +1 Availability for a
-  one-day turnaround.
+SERVICES
+  Hired help: Availability + dice; usually 1 week.
 
-See also: gear, gear weapons, gear armor, sheet, roll
+SEE ALSO: help gear, help roll

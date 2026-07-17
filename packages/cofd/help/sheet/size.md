@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help sheet (overview)
+
 sheet size  -- Size, Speed, and Health track math.
 
 Size is a staff-only trait (admin or builder). Default Size is 5
@@ -20,4 +22,4 @@ Children, scaled creatures, and certain templates may legitimately
 sit outside the default. The 1-10 range is enforced; out-of-range
 input is rejected.
 
-See also: sheet, sheet traits, health
+SEE ALSO: sheet, sheet traits, health

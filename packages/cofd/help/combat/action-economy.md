@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help combat (overview)
+
 combat action-economy  -- Instant, reflexive, and movement slots per turn.
 
 Each turn a combatant gets one instant action, any number of reflexive
@@ -23,4 +25,4 @@ Speed:
   Speed = Strength + Dexterity + Size. Armor and certain Tilts modify
   it. /run uses 2 x Speed yards and consumes the instant slot.
 
-See also: combat, combat delaying, attack, dodge
+SEE ALSO: combat, combat delaying, attack, dodge

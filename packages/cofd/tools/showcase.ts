@@ -247,7 +247,19 @@ function buildMockSDK(player: IDBObj, cmdName: string, args: (string | undefined
         return Promise.resolve();
       },
     },
-    canEdit: () => Promise.resolve(true),
+    // Staff and self always edit; strangers do not (look concealment).
+    canEdit: (a: IDBObj, t: IDBObj) => {
+      if (
+        a.flags.has("wizard") ||
+        a.flags.has("admin") ||
+        a.flags.has("superuser")
+      ) {
+        return Promise.resolve(true);
+      }
+      if (a.id === t.id) return Promise.resolve(true);
+      if (t.state?.owner === a.id) return Promise.resolve(true);
+      return Promise.resolve(false);
+    },
     setFlags: (target: string | IDBObj, flags: string) => {
       const id = typeof target === "string" ? target : target.id;
       const obj = allObjs.find((o) => o.id === id);
@@ -350,14 +362,25 @@ interface RunState {
 function actorFor(step: ShowcaseStep, state: RunState): IDBObj {
   if (!step.as) return state.player;
   if (step.as === "admin") return state.admin;
-  return state.targets.get(step.as) ?? state.player;
+  // Named setup targets first, then runtime-spawned objects (NPCs).
+  const fromTargets = state.targets.get(step.as);
+  if (fromTargets) return fromTargets;
+  const spawned = findByName(state, step.as);
+  if (spawned) return spawned;
+  return state.player;
 }
 
 function findByName(state: RunState, name: string): IDBObj | undefined {
   const lc = name.toLowerCase();
   if (state.player.name?.toLowerCase() === lc) return state.player;
   if (state.admin.name?.toLowerCase() === lc) return state.admin;
-  for (const t of state.targets.values()) if (t.name?.toLowerCase() === lc) return t;
+  for (const t of state.targets.values()) {
+    if (t.name?.toLowerCase() === lc) return t;
+  }
+  // NPCs / objects created mid-showcase via u.db.create.
+  for (const o of state.dynamic) {
+    if (o.name?.toLowerCase() === lc) return o;
+  }
   return undefined;
 }
 

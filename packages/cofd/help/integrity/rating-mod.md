@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help integrity (overview)
+
 integrity rating-mod  -- Integrity-rating dice modifier (RAW p.73).
 
 The character's current Integrity rating contributes a flat modifier to
@@ -19,4 +21,4 @@ The engine reads the live sheet rating at the moment of /break and
 folds the modifier into the pool automatically. You only need to
 supply the situational modifier on the command line.
 
-See also: integrity, integrity situations, integrity outcomes
+SEE ALSO: integrity, integrity situations, integrity outcomes

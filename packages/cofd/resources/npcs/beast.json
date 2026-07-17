@@ -1,0 +1,44 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "beast",
+  "name": "Beast",
+  "blurb": "Feral predator. Powerful, fast, no finesse.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "minor",
+  "lineage": "mortal",
+  "tags": ["mortal", "feral", "predator"],
+  "attributes": {
+    "intelligence": 1,
+    "wits": 3,
+    "resolve": 2,
+    "strength": 4,
+    "dexterity": 3,
+    "stamina": 4,
+    "presence": 3,
+    "manipulation": 1,
+    "composure": 2
+  },
+  "skills": {
+    "brawl": 3,
+    "athletics": 3,
+    "stealth": 2,
+    "survival": 2
+  },
+  "integrity": 3,
+  "size": 5,
+  "shortDesc": [
+    "Something low and hungry watches from the brush.",
+    "A scarred predator pacing the edge of the light."
+  ],
+  "description": [
+    "Muscle and teeth. Breath steams; eyes reflect wrong in the dark."
+  ],
+  "ai": {
+    "archetype": "spirit-ridden-feral",
+    "preferMelee": true
+  },
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible"
+  }
+}

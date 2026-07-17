@@ -15,7 +15,12 @@
 //   /take-cover     -- use opponent as cover
 
 import type { IUrsamuSDK } from "@ursamu/ursamu";
-import { type CofdSheet, defaultSheet } from "../stats/index.ts";
+import {
+  type CofdSheet,
+  defaultSheet,
+  effectiveAttr,
+  effectiveSkill,
+} from "../stats/index.ts";
 import { computeDefense } from "../combat/pools.ts";
 import { applyAttackDamage } from "../combat/damage.ts";
 import {
@@ -61,11 +66,11 @@ const VALID_MOVES = [
 type GrappleMove = typeof VALID_MOVES[number];
 
 function attr(sheet: CofdSheet, name: string): number {
-  return (sheet.attributes as Record<string, number>)[name] ?? 1;
+  return effectiveAttr(sheet, name);
 }
 
 function skill(sheet: CofdSheet, name: string): number {
-  return (sheet.skills as Record<string, number>)[name] ?? 0;
+  return effectiveSkill(sheet, name);
 }
 
 export async function grappleExec(u: IUrsamuSDK) {

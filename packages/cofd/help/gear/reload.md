@@ -1,9 +1,9 @@
 ---
-hidden: true
+dark: true
 ---
 gear/reload  -- Reload an equipped or carried firearm from an ammo stack.
 
-See also: help gear (overview).
+SEE ALSO: help gear (overview).
 
 SYNTAX
   +gear/reload                      Reload equipped firearm.

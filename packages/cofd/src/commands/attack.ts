@@ -32,7 +32,12 @@
 //  12. Output
 
 import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
-import { type CofdSheet, defaultSheet } from "../stats/index.ts";
+import {
+  type CofdSheet,
+  defaultSheet,
+  effectiveAttr,
+  effectiveSize,
+} from "../stats/index.ts";
 import type { AttackOptions } from "../combat/modifiers.ts";
 import { heavyHitterBonus } from "../combat/modifiers.ts";
 import { buildPool, computeDefense, type AttackPoolType } from "../combat/pools.ts";
@@ -326,17 +331,23 @@ export async function attackExec(u: IUrsamuSDK) {
   for (const name of targetNames) {
     const t = await resolveOrSpawnTarget(u, u.me, name);
     if (!t) { u.send(`Target '${name}' not found.`); return; }
+    // No self-harm via +attack (typos / bad target resolution).
+    if (t.id === u.me.id) {
+      u.send("You cannot attack yourself.");
+      return;
+    }
     await autoJoinTarget(u, encounter, t);
     // Surrender refusal: cannot target a participant who has surrendered.
     const tp = encounter.participants.find((p) => p.actorId === t.id);
     if (tp?.surrendered) {
-      u.send(`${t.name ?? "Target"} has surrendered; deliberate violation requires Storyteller approval.`);
+      u.send(
+        `${t.name ?? "Target"} has surrendered; deliberate ` +
+          `violation requires Storyteller approval.`,
+      );
       return;
     }
-    if (!(await u.canEdit(u.me, t))) {
-      u.send(`You do not have permission to apply damage to ${name}.`);
-      return;
-    }
+    // Combat damage is not a canEdit op — participants may strike any
+    // valid target in the scene (PCs, NPCs). canEdit is for sheet edits.
     targets.push(t);
   }
 
@@ -555,8 +566,8 @@ export async function attackExec(u: IUrsamuSDK) {
       if (netDamage > 0) {
         await u.db.modify(finalTarget.id, "$set", { "data.cofd": dmgResult.sheet });
 
-        const stamina = targetSheet.attributes?.stamina ?? 1;
-        const size = targetSheet.advantages?.size ?? 5;
+        const stamina = effectiveAttr(targetSheet, "stamina");
+        const size = effectiveSize(targetSheet);
         appliedTilts = checkSpecifiedTargetTilts(netDamage, stamina, size, specified);
 
         // Weapon-property tilts: Stun applies on any hit; Knockdown when net damage >= Size.

@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help social (overview)
+
 social leverage  -- Soft vs hard leverage rules.
 
 Leverage is information or pressure used to bypass a door directly,
@@ -23,4 +25,4 @@ Limits:
   Each soft-leverage kind may be used once per maneuver. Hard
   leverage may be used repeatedly but the impression cost compounds.
 
-See also: social, social doors, social impression, integrity
+SEE ALSO: social, social doors, social impression, integrity

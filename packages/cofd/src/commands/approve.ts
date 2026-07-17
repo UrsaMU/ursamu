@@ -4,6 +4,7 @@ import { header, footer, type IUrsamuSDK } from "@ursamu/ursamu";
 import { jobs, type IJobComment } from "@ursamu/jobs-plugin";
 import type { CofdCgState } from "../chargen/index.ts";
 import { sendCofdMail } from "../integrations/mail.ts";
+import { syncSightFlags } from "../support/sight.ts";
 
 function parseTargetAndNotes(arg: string): { who: string; notes: string } {
   const eq = arg.indexOf("=");
@@ -48,6 +49,9 @@ export async function approveExec(u: IUrsamuSDK) {
   // Order matters: write sheet first, then clear cg state, then close job.
   await u.db.modify(target.id, "$set", { "data.cofd": sheet });
   await u.db.modify(target.id, "$unset", { "data.cofd_cg": "" });
+  // Template → sight flags (fae / forsaken). Sticky extras kept.
+  target.state = { ...target.state, cofd: sheet };
+  await syncSightFlags(u, target, sheet);
 
   const staffName = u.util.displayName(u.me, u.me);
   const now = Date.now();

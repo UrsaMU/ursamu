@@ -60,8 +60,7 @@ export class MockObjectStore {
     if (!obj) return;
     if (op === "$set") {
       for (const [k, v] of Object.entries(data)) {
-        if (k === "data.location") {
-          // Special case: update the object's physical location
+        if (k === "location" || k === "data.location") {
           obj.location = v as string;
         } else if (k.startsWith("data.")) {
           // "data.X" maps to state.X
@@ -71,6 +70,16 @@ export class MockObjectStore {
         }
       }
     }
+  }
+
+  /** Upsert by id (tests that need a fixed actor id). */
+  put(obj: IDBObj): void {
+    this.store.set(obj.id, {
+      ...obj,
+      flags: obj.flags ?? new Set(),
+      state: obj.state ?? {},
+      contents: obj.contents ?? [],
+    });
   }
 
   setFlags(id: string, flagStr: string): void {

@@ -4,6 +4,7 @@
 // attack options, returns the final dice count to pass to executeRoll().
 
 import type { CofdSheet } from "../stats/sheet.ts";
+import { effectiveAttr, effectiveSkill } from "../stats/effective.ts";
 import type { WeaponEntry } from "../equipment/catalog.ts";
 import { woundPenalty, healthMax } from "../health/index.ts";
 import { type AttackOptions, type ModifierSet, buildModifiers } from "./modifiers.ts";
@@ -27,11 +28,11 @@ export interface BuiltPool {
 }
 
 function attr(sheet: CofdSheet, name: string): number {
-  return (sheet.attributes as Record<string, number>)[name] ?? 1;
+  return effectiveAttr(sheet, name);
 }
 
 function skill(sheet: CofdSheet, name: string): number {
-  return (sheet.skills as Record<string, number>)[name] ?? 0;
+  return effectiveSkill(sheet, name);
 }
 
 /**

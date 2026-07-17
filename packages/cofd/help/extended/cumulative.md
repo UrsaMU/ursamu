@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help extended (overview)
+
 extended cumulative  -- The /cum cumulative-penalty modifier.
 
 Adding /cum to /start applies a cumulative penalty: each attempt
@@ -24,4 +26,4 @@ all stack normally on top.
 Example:
   +extended/start strength+stamina=15/6/hour/cum Force the cell door
 
-See also: extended, extended pool
+SEE ALSO: extended, extended pool

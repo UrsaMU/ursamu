@@ -1,32 +1,20 @@
 ---
-hidden: true
+dark: true
 ---
-social impression  -- Impression levels and time-per-roll.
+SEE ALSO: help social (overview)
 
-Impression sets how often you may attempt a door roll. Hostile
-impression cannot roll at all -- improve it (or apply soft leverage)
-first.
++SOCIAL IMPRESSION  -- Levels and time-per-roll.
 
-Levels (set with +social/impression):
-  hostile      Cannot roll. Soft leverage may bump it.
-  average      One door roll per week.
-  good         One door roll per day.
-  excellent    One door roll per hour.
-  perfect      One door roll per turn.
+LEVELS
+  hostile     Cannot roll.
+  average     1 door / week
+  good        1 door / day
+  excellent   1 door / hour
+  perfect     1 door / turn
 
-Time per roll by impression:
-  perfect      one turn
-  excellent    one hour
-  good         one day
-  average      one week
-  hostile      cannot roll
+NOTES
+  Engine does not clock real time — ST narrates.
+  Set impression: canEdit (builder+). Soft leverage
+  may raise hostile.
 
-The engine does not enforce real-world time. Time is narrative -- the
-Storyteller decides when enough has passed for the next roll.
-
-Permissions:
-  Setting impression requires canEdit on the subject (ST/builder+).
-  Players cannot move their own impression up; they earn it via play
-  and soft leverage.
-
-See also: social, social doors, social leverage
+SEE ALSO: help social, help social/doors

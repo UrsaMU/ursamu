@@ -23,7 +23,8 @@ import {
   stopWander,
   type Zone,
 } from "../combat/zone.ts";
-import { archetypeKeys, getArchetype } from "../npc/archetypes.ts";
+import { archetypeKeys } from "../npc/archetypes.ts";
+import { getNpcTemplate } from "../npc/catalog.ts";
 import {
   pickThemeSpawns,
   type SpawnSize,
@@ -267,7 +268,7 @@ async function zonePopulate(u: IUrsamuSDK, rest: string): Promise<void> {
     const picks = pickThemeSpawns(theme, size);
     let total = 0;
     for (const pick of picks) {
-      if (!getArchetype(pick.archetype)) continue;
+      if (!getNpcTemplate(pick.archetype)) continue;
       const finalAggro: MobAggro = overrideAggro ?? pick.aggro;
       const ids = await spawnMobs(u, z, pick.archetype, 1, finalAggro);
       total += ids.length;
@@ -295,8 +296,10 @@ async function zonePopulate(u: IUrsamuSDK, rest: string): Promise<void> {
     u.send("Count must be 1-50.");
     return;
   }
-  if (!getArchetype(archKey)) {
-    u.send(`Unknown archetype '${archKey}'. Valid: ${archetypeKeys().join(", ")}`);
+  if (!getNpcTemplate(archKey)) {
+    u.send(
+      `Unknown archetype '${archKey}'. Valid: ${archetypeKeys().join(", ")}`,
+    );
     return;
   }
 

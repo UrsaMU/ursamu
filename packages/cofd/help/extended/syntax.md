@@ -1,9 +1,9 @@
 ---
-hidden: true
+dark: true
 ---
 extended/syntax  -- /start expression and switch details.
 
-See also: help extended (overview).
+SEE ALSO: help extended (overview).
 
 START EXPRESSION
   +extended/start <pool>=<target>[/<n>][/<int>][/cum] <desc>

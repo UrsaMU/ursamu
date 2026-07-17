@@ -9,13 +9,14 @@
 // applicable applies; penalties do NOT stack.
 
 import type { CofdSheet, HealthTrack } from "../stats/sheet.ts";
+import { effectiveAttr, effectiveSize } from "../stats/effective.ts";
 
 export type DamageType = "bashing" | "lethal" | "aggravated";
 
 /** Returns max boxes on the health track for a sheet (stamina + size). */
 export function healthMax(sheet: CofdSheet): number {
-  const stam = sheet.attributes?.stamina ?? 1;
-  const size = sheet.advantages?.size ?? 5;
+  const stam = effectiveAttr(sheet, "stamina");
+  const size = effectiveSize(sheet);
   return stam + size;
 }
 
@@ -141,8 +142,6 @@ export function woundPenalty(track: HealthTrack, max: number): number {
  */
 export function sheetWoundPenalty(sheet: CofdSheet): number {
   const track = sheet.health ?? { bashing: 0, lethal: 0, aggravated: 0 };
-  const stam = sheet.attributes?.stamina ?? 1;
-  const size = sheet.advantages?.size ?? 5;
-  const max = stam + size;
+  const max = healthMax(sheet);
   return -woundPenalty(track, max);
 }

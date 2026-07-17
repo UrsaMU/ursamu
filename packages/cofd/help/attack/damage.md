@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help attack (overview)
+
 attack damage  -- Damage formula and lethal vs bashing.
 
 Damage:
@@ -26,4 +28,4 @@ Damage resolution:
   bashing to lethal. Lethal fills from the right. The Health track is
   written automatically; see help health for the wound penalty table.
 
-See also: attack, attack defense, health, combat specified
+SEE ALSO: attack, attack defense, health, combat specified

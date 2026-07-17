@@ -25,12 +25,18 @@ import {
 // Per-instance data stored on the object's state field
 // -------------------------------------------------------------------
 
-export type ItemKind = "weapon" | "armor" | "gear" | "ammo" | "service";
+export type ItemKind =
+  | "weapon"
+  | "armor"
+  | "gear"
+  | "ammo"
+  | "service"
+  | "goblin-fruit";
 
 export type CapacityTag = "high" | "medium" | "low" | "single";
 
 export interface CofdItemData {
-  /** Catalog reference key, e.g. "pistol-light". */
+  /** Catalog reference key, e.g. "pistol-light" or fruit slug. */
   key: string;
   /** Coarse classification used for sectioning and attack-vs-object soak. */
   kind?: ItemKind;
@@ -54,6 +60,13 @@ export interface CofdItemData {
   capacityTag?: CapacityTag;
   /** Stack size for ammo items. Undefined for non-ammo. */
   count?: number;
+  /** Goblin fruit: harvest epoch ms (carry-cap rot order). */
+  gotAt?: number;
+  /**
+   * Mortal / Mask-facing name (perception backlog). True name is
+   * customLabel or fruit catalog name.
+   */
+  maskName?: string;
 }
 
 /** Return true when the game object is a CoFD item. */

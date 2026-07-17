@@ -197,7 +197,7 @@ describe("Chronicles of Darkness look layout (CONFORMAT override)", OPTS, () => 
     assertEquals(result.includes("[concealed]"), false);
   });
 
-  it("item short-desc shows when set, omitted when missing", async () => {
+  it("room floor items show classic short-desc flavor", async () => {
     const me = mockPlayer({ id: "1", name: "Alice" });
     const u = mockU({ me });
 
@@ -220,35 +220,51 @@ describe("Chronicles of Darkness look layout (CONFORMAT override)", OPTS, () => 
       },
       contents: [],
     };
-    const bare: IDBObj = {
-      id: "11",
-      name: "Rock",
-      flags: new Set(["thing"]),
-      state: {
-        cofd_item: {
-          key: "flashlight",
-          kind: "gear",
-          customLabel: "Rock",
-        },
-      },
-      contents: [],
-    };
 
     const room = mockPlayer({
       id: "room1",
       name: "OOC Polis",
       flags: new Set(["room"]),
-      contents: [withDesc, bare],
+      contents: [withDesc],
     });
 
-    const out = await cofdConformatHandler(u, room, "#10 #11");
+    const out = await cofdConformatHandler(u, room, "#10");
     const result = out ?? "";
 
     assertStringIncludes(result, "Iron Sword");
-    assertStringIncludes(result, "A finely balanced cold-iron blade.");
-    assertStringIncludes(result, "Rock");
-    // No player-style short-desc prompt on things.
-    assertEquals(result.includes("short-desc me="), false);
+    assertStringIncludes(result, "finely balanced cold-iron blade");
+  });
+
+  it("inventory rows still omit short-desc", async () => {
+    const me = mockPlayer({ id: "1", name: "Alice" });
+    const u = mockU({ me });
+
+    const withDesc: IDBObj = {
+      id: "10",
+      name: "Flashlight",
+      flags: new Set(["thing"]),
+      state: {
+        attributes: [
+          {
+            name: "short-desc",
+            value: "A heavy Maglite on his belt.",
+          },
+        ],
+        cofd_item: {
+          key: "flashlight",
+          kind: "gear",
+          customLabel: "Flashlight",
+        },
+      },
+      contents: [],
+    };
+
+    me.contents = [withDesc];
+    const out = await cofdConformatHandler(u, me, "#10");
+    const result = out ?? "";
+
+    assertStringIncludes(result, "Flashlight");
+    assertEquals(result.includes("heavy Maglite"), false);
   });
 
   it("room floor items never show wielded/worn from stale flags", async () => {

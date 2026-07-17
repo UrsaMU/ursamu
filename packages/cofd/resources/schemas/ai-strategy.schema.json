@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ursamu.dev/schemas/cofd/ai-strategy.schema.json",
+  "title": "CoFD NPC AI Strategy",
+  "description": "Declarative combat AI for NPCs. One file per strategy under resources/ai/. Rules are evaluated each turn: matching rules are collected, highest priority wins; ties break by weight (weighted random).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["slug", "name", "rules"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Pointer to this schema for editor autocomplete."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "minLength": 2,
+      "maxLength": 48,
+      "description": "Key used in NPC template ai.archetype / +npc/ai."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Human-readable label for ST tools."
+    },
+    "blurb": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "One-line summary of the playstyle."
+    },
+    "book": {
+      "type": "string",
+      "description": "Optional cite / design note."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      "uniqueItems": true
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordered for authoring only; runtime uses priority + weight.",
+      "items": { "$ref": "#/$defs/rule" }
+    },
+    "fallback": {
+      "$ref": "#/$defs/action",
+      "description": "If no rule matches. Default: wait."
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "when", "then", "priority"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "Stable id for logs and tests."
+        },
+        "when": {
+          "$ref": "#/$defs/condition",
+          "description": "All listed fields must match (AND). Empty object always matches."
+        },
+        "then": {
+          "$ref": "#/$defs/action"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "Higher runs first among matching rules."
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": true,
+          "default": 1,
+          "description": "Among matching rules at the same priority, pick weighted-random. Default 1."
+        },
+        "reason": {
+          "type": "string",
+          "maxLength": 120,
+          "description": "Optional log line; defaults to rule id."
+        }
+      }
+    },
+    "condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "AND of all present keys. Fractions are 0–1 of remaining health.",
+      "properties": {
+        "selfHealthBelow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "True when remaining health fraction < value."
+        },
+        "selfHealthAtMost": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "selfHealthAbove": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "selfHealthAtLeast": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "unrevealed": {
+          "type": "boolean",
+          "description": "aiState.revealed is falsy."
+        },
+        "revealed": {
+          "type": "boolean"
+        },
+        "frenzied": {
+          "type": "boolean",
+          "description": "aiState.frenzied."
+        },
+        "damagedThisRound": {
+          "type": "boolean",
+          "description": "aiState.damagedThisRound."
+        },
+        "noRecentDamage": {
+          "type": "boolean",
+          "description": "No threat damage recorded this round (sum of threat == 0)."
+        },
+        "hasThreat": {
+          "type": "boolean",
+          "description": "Threat table has at least one entry."
+        },
+        "packMateDown": {
+          "type": "boolean",
+          "description": "Another NPC in the encounter is isOut."
+        },
+        "livingPackMatesAtLeast": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Other living NPCs in the encounter (not counting self)."
+        },
+        "enemyCountAtLeast": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "enemyCountAtMost": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "enemyCountEquals": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Exact live non-NPC enemy count (e.g. 1 = isolated)."
+        },
+        "hasEnemies": {
+          "type": "boolean"
+        },
+        "hasCover": {
+          "type": "boolean",
+          "description": "Encounter has terrain with kind cover and structure > 0."
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": ["attack", "move", "reload", "flee", "posture", "wait"],
+          "description": "Walker action."
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "highest-threat",
+            "weakest",
+            "first",
+            "random",
+            "isolated"
+          ],
+          "description": "Target pick for attack. Default first."
+        },
+        "posture": {
+          "type": "string",
+          "enum": [
+            "ambush",
+            "overwatch",
+            "guard",
+            "first-fire-on-adjacent"
+          ],
+          "description": "Required when action is posture."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "action": { "const": "posture" } },
+            "required": ["action"]
+          },
+          "then": { "required": ["posture"] }
+        }
+      ]
+    }
+  }
+}

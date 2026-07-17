@@ -1,9 +1,9 @@
 ---
-hidden: true
+dark: true
 ---
 condition/tilts  -- Conditions vs Tilts: persistence, keys, and Beats.
 
-See also: help condition (overview).
+SEE ALSO: help condition (overview).
 
 CONDITIONS VS TILTS
   Conditions persist beyond scene; award Beats on resolution.

@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help combat (overview)
+
 combat tilt-effects  -- Summary of body-part Tilt effects.
 
 When a specified-target attack triggers a Tilt, these are the
@@ -28,4 +30,4 @@ Blinded (one eye)
 Blinded (both eyes)
   -5 to vision-related rolls. Lose all Defense.
 
-See also: combat specified, combat modifiers, condition tilts
+SEE ALSO: combat specified, combat modifiers, condition tilts

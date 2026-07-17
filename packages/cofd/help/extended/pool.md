@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help extended (overview)
+
 extended pool  -- Pool expressions, targets, and attempt caps.
 
 Configuring an Extended Action with /start:
@@ -27,4 +29,4 @@ Modifiers per attempt:
   +extended/roll/8again          Lower again-threshold to 8.
   +extended/roll/job=N           Post the roll results directly to Job #N.
 
-See also: extended, extended cumulative, roll
+SEE ALSO: extended, extended cumulative, roll

@@ -1,0 +1,43 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "cultist",
+  "name": "Cultist",
+  "blurb": "Devoted believer. Zealous, occult-savvy, expendable.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "minor",
+  "lineage": "mortal",
+  "tags": ["mortal", "cult", "mook"],
+  "attributes": {
+    "intelligence": 2,
+    "wits": 2,
+    "resolve": 3,
+    "strength": 2,
+    "dexterity": 2,
+    "stamina": 2,
+    "presence": 2,
+    "manipulation": 3,
+    "composure": 2
+  },
+  "skills": {
+    "occult": 3,
+    "weaponry": 2,
+    "expression": 2
+  },
+  "integrity": 4,
+  "size": 5,
+  "defaultWeapon": "knife",
+  "shortDesc": [
+    "A wide-eyed believer clutching a worn holy symbol.",
+    "Robed figure muttering under their breath.",
+    "Someone whose smile never quite reaches their eyes."
+  ],
+  "description": [
+    "Ink-stained fingers, frayed cuffs, and a knife that has seen ritual use.",
+    "They speak of the Cause as if it already owns tomorrow."
+  ],
+  "ai": "beshilu-swarmer",
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible"
+  }
+}

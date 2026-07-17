@@ -25,11 +25,16 @@ import {
   setSurprised,
 } from "../combat/encounter.ts";
 import { computeDefense } from "../combat/pools.ts";
-import { type CofdSheet, defaultSheet } from "../stats/index.ts";
+import {
+  type CofdSheet,
+  defaultSheet,
+  migrateSheet,
+} from "../stats/index.ts";
 import type { Encounter } from "../combat/types.ts";
 import { getCoverDurability } from "../combat/types.ts";
 import { advanceTurnSmart } from "../combat/walker.ts";
 import { lookupTilt } from "../subsystems/tilts.ts";
+import { restoreMaskAtSceneEnd } from "../form/index.ts";
 
 const COVER_LEVELS: Record<string, number> = {
   none: 0,
@@ -521,9 +526,28 @@ async function combatEnd(u: IUrsamuSDK) {
 
   // Clear the +aid once-per-scene cap for every participant. Scene boundary
   // is "encounter end" for our purposes; +aid runs in scenes, not outside.
+  // Also free-raise CtL Mask / leave animal form (no Glamour).
   for (const p of enc.participants) {
     // deno-lint-ignore no-explicit-any
-    await u.db.modify(p.actorId, "$unset", { "data.cofd.aidedThisScene": "" } as any);
+    await u.db.modify(p.actorId, "$unset", {
+      "data.cofd.aidedThisScene": "",
+    } as any);
+
+    try {
+      const objs = await u.db.search({ id: p.actorId });
+      const obj = Array.isArray(objs) ? objs[0] : undefined;
+      const raw = obj?.state?.cofd;
+      if (!raw || typeof raw !== "object") continue;
+      const sheet = migrateSheet(raw);
+      const restored = restoreMaskAtSceneEnd(sheet);
+      if (restored) {
+        await u.db.modify(p.actorId, "$set", {
+          "data.cofd": restored,
+        });
+      }
+    } catch {
+      // Non-fatal: participant may already be gone.
+    }
   }
 
   u.send("The encounter has ended. All participants are dismissed.");

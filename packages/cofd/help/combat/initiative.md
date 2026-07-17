@@ -1,9 +1,9 @@
 ---
-hidden: true
+dark: true
 ---
 combat/initiative  -- Initiative scores and what affects them.
 
-See also: help combat (overview).
+SEE ALSO: help combat (overview).
 
 FORMULA
   Init = 1d10 + Dexterity + Composure + weapon Init modifier

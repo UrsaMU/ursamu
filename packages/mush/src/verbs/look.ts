@@ -344,7 +344,15 @@ export const defaultConformatHandler = async (
     for (const o of objects) {
       const disp = o.name || u.util.displayName(o, actor);
       const canEditObj = await u.canEdit(actor, o);
-      lines.push(` ${canEditObj ? `${disp}(#${o.id})` : disp}`);
+      const name = canEditObj ? `${disp}(#${o.id})` : disp;
+      // Classic MUSH: room things show short-desc after the name.
+      const sd = getShortDesc(o);
+      if (sd) {
+        const pad = " ".repeat(Math.max(1, 40 - visualLen(` ${name}`)));
+        lines.push(` ${name}${pad}${sd}`.replace(/\s+$/, ""));
+      } else {
+        lines.push(` ${name}`);
+      }
     }
   }
 

@@ -1,0 +1,63 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "mastermind",
+  "name": "Mastermind",
+  "blurb": "Storyteller-tier nemesis. PC-equivalent, layered powers.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "storyteller",
+  "lineage": "mortal",
+  "tags": ["mortal", "nemesis", "storyteller"],
+  "attributes": {
+    "intelligence": 5,
+    "wits": 4,
+    "resolve": 4,
+    "strength": 2,
+    "dexterity": 3,
+    "stamina": 3,
+    "presence": 4,
+    "manipulation": 5,
+    "composure": 4
+  },
+  "skills": {
+    "academics": 3,
+    "occult": 4,
+    "politics": 3,
+    "investigation": 3,
+    "firearms": 2,
+    "weaponry": 2,
+    "stealth": 2,
+    "intimidation": 4,
+    "persuasion": 4,
+    "subterfuge": 4,
+    "expression": 3
+  },
+  "merits": {
+    "fast reflexes": 2,
+    "iron stamina": 3
+  },
+  "specialties": {
+    "occult": ["Rituals", "Cults"],
+    "subterfuge": ["Lies"]
+  },
+  "dreadPowers": [
+    "mortal-mask",
+    "innocuous",
+    "mind-speech",
+    "dread-aura"
+  ],
+  "integrity": 3,
+  "size": 5,
+  "defaultWeapon": "pistol-light",
+  "shortDesc": [
+    "A charming stranger who already knows your name.",
+    "Unassuming until you notice everyone else is listening to them."
+  ],
+  "description": [
+    "Every word is a lever. They lose only when the story needs it."
+  ],
+  "ai": "azlu-stalker",
+  "defaults": {
+    "aggro": "hunter",
+    "presence": "visible"
+  }
+}

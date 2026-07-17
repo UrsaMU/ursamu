@@ -1,0 +1,48 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "thug",
+  "name": "Thug",
+  "blurb": "Street muscle. Fists and fury, light on tactics.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "minor",
+  "lineage": "mortal",
+  "tags": ["mortal", "urban", "mook"],
+  "attributes": {
+    "intelligence": 2,
+    "wits": 2,
+    "resolve": 2,
+    "strength": 3,
+    "dexterity": 2,
+    "stamina": 3,
+    "presence": 2,
+    "manipulation": 2,
+    "composure": 2
+  },
+  "skills": {
+    "brawl": 3,
+    "weaponry": 2,
+    "intimidation": 2,
+    "streetwise": 2
+  },
+  "integrity": 5,
+  "size": 5,
+  "defaultWeapon": "metal-club",
+  "shortDesc": [
+    "A thick-necked bruiser in a stained hoodie.",
+    "A wiry fighter with taped knuckles and a hard stare.",
+    "A heavy-set man blocking the alley like he owns it."
+  ],
+  "description": [
+    "He smells of cheap beer and motor oil. Knuckles are scarred; eyes stay on the exits.",
+    "Faded team jacket, scuffed boots, a cheap chain that has seen better nights. He rolls his shoulders when he talks.",
+    "Someone paid him to be here. He does not care about the why — only the who and how hard."
+  ],
+  "ai": {
+    "archetype": "beshilu-swarmer",
+    "preferMelee": true
+  },
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible"
+  }
+}

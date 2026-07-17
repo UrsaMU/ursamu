@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help npc (overview)
+
 npc tiers  -- Tier capacities for dread powers and merits.
 
 Each NPC carries a tier that caps the number of dread powers and
@@ -20,4 +22,4 @@ Promotion:
   There is no in-place tier promotion. Destroy the NPC and rebuild
   at the higher tier if you need more power/merit slots.
 
-See also: npc, npc archetypes, npc derived
+SEE ALSO: npc, npc archetypes, npc derived

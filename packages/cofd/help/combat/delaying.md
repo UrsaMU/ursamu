@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help combat (overview)
+
 combat delaying  -- Holding an action and reclaiming it with /act.
 
 Use /delay when you want to wait and see what the rest of the order
@@ -23,4 +25,4 @@ Edge cases:
   You cannot /delay if you have already acted this turn. /act is a
   no-op outside of an active encounter or if you are not Delayed.
 
-See also: combat, combat order, combat action-economy
+SEE ALSO: combat, combat order, combat action-economy

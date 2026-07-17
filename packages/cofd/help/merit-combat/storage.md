@@ -1,9 +1,9 @@
 ---
-hidden: true
+dark: true
 ---
 merit-combat/storage  -- Storage keys for +sheet/set.
 
-See also: help merit-combat (overview).
+SEE ALSO: help merit-combat (overview).
 
   fast reflexes
   killer instinct

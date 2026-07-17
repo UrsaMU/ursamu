@@ -196,10 +196,11 @@ export async function throwExec(u: IUrsamuSDK) {
       u.send(`Target '${targetName}' not found.`);
       return;
     }
-    if (!(await u.canEdit(u.me, target))) {
-      u.send("You do not have permission to apply damage to that target.");
+    if (target.id === u.me.id) {
+      u.send("You cannot throw at yourself.");
       return;
     }
+    // Combat damage is not a canEdit op (same rule as +attack).
 
     await autoJoinTarget(u, encounter, target);
 

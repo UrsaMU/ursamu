@@ -121,22 +121,44 @@ export async function resolveOrSpawnTarget(
   const roomId = u.here?.id;
   if (!roomId) return null;
 
-  const archetype = getArchetype(name.toLowerCase());
-  if (!archetype) return null;
+  const { getNpcTemplate } = await import("../npc/catalog.ts");
+  const {
+    sheetFromTemplate,
+    objectStateFromSheet,
+  } = await import("../npc/sheet_from_template.ts");
+  const template = getNpcTemplate(name.toLowerCase());
+  if (!template) {
+    // Fall back to legacy getArchetype path for any non-catalog keys.
+    const archetype = getArchetype(name.toLowerCase());
+    if (!archetype) return null;
+    const sheet = sheetFromArchetype(archetype, archetype.tier);
+    const spawnName = archetype.label;
+    const npcObj = await u.db.create({
+      name: spawnName,
+      flags: new Set(["npc", "thing"]),
+      location: roomId,
+      state: { cofd: sheet },
+      contents: [],
+    });
+    u.broadcast(
+      `%cyCOMBAT>>%cn ${spawnName} appears! ` +
+        `(auto-spawned by ${actor.name ?? "staff"})`,
+    );
+    return npcObj;
+  }
 
-  const sheet = sheetFromArchetype(archetype, archetype.tier, {
-    aiArchetype: "beshilu-swarmer",
-  });
-  const spawnName = archetype.label;
+  const sheet = sheetFromTemplate(template, template.tier);
+  const built = objectStateFromSheet(sheet, template.name);
   const npcObj = await u.db.create({
-    name: spawnName,
-    flags: new Set(["npc", "thing"]),
+    name: built.name,
+    flags: new Set(built.flags),
     location: roomId,
-    state: { cofd: sheet },
+    state: built.state,
     contents: [],
   });
   u.broadcast(
-    `%cyCOMBAT>>%cn ${spawnName} appears! (auto-spawned by ${actor.name ?? "staff"})`,
+    `%cyCOMBAT>>%cn ${built.name} appears! ` +
+      `(auto-spawned by ${actor.name ?? "staff"})`,
   );
   return npcObj;
 }

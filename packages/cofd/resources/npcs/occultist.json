@@ -1,0 +1,46 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "occultist",
+  "name": "Occultist",
+  "blurb": "Mortal practitioner. Rituals, lore, minor numina.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "major",
+  "lineage": "mortal",
+  "tags": ["mortal", "occult", "ritual"],
+  "attributes": {
+    "intelligence": 4,
+    "wits": 3,
+    "resolve": 3,
+    "strength": 2,
+    "dexterity": 2,
+    "stamina": 2,
+    "presence": 3,
+    "manipulation": 3,
+    "composure": 3
+  },
+  "skills": {
+    "occult": 4,
+    "academics": 3,
+    "expression": 2,
+    "persuasion": 2,
+    "investigation": 2
+  },
+  "specialties": {
+    "occult": ["Rituals"]
+  },
+  "dreadPowers": ["mind-speech", "phantasm"],
+  "integrity": 5,
+  "size": 5,
+  "shortDesc": [
+    "Ink and incense cling to a figure lost in a book.",
+    "A scholar whose jewelry is not jewelry at all."
+  ],
+  "description": [
+    "Symbols under the cuffs. Voice soft; knowledge sharp."
+  ],
+  "ai": "azlu-stalker",
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible"
+  }
+}

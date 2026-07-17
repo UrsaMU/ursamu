@@ -7,6 +7,7 @@ import {
   parseMeritRef,
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
+import { normalizeAnimalsField } from "../form/animals.ts";
 import { migrateSheet, refreshAdvantages, type CofdSheet } from "./sheet.ts";
 
 /**
@@ -99,6 +100,16 @@ export function setTrait(sheet: CofdSheet, trait: string, value: string | number
 
   if (tmpl.customFields.includes(key)) {
     const valStr = value as string;
+    if (key === "animals") {
+      const norm = normalizeAnimalsField(
+        valStr,
+        sheet.customFields?.seeming,
+      );
+      if (!norm.ok) throw new Error(norm.error);
+      if (!norm.value) delete sheet.customFields.animals;
+      else sheet.customFields.animals = norm.value;
+      return sheet;
+    }
     if (valStr === "Not Set" || valStr === "") {
       delete sheet.customFields[key];
     } else {

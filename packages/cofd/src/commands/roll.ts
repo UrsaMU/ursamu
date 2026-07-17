@@ -13,6 +13,10 @@ import { defaultSheet, type CofdSheet } from "../stats/index.ts";
 import { parseRollExpression, executeRoll, type AgainThreshold } from "../roller/index.ts";
 import { equippedWeaponEntry } from "../equipment/index.ts";
 import { resolveDistrictTraits } from "../support/index.ts";
+import {
+  animalPerceptionBonus,
+  isPerceptionRoll,
+} from "../form/senses.ts";
 
 /** Short forms used for compact broadcast lines (under 78 cols). */
 const COMPACT_ABBREV: Record<string, string> = {
@@ -119,7 +123,14 @@ export async function rollExec(u: IUrsamuSDK) {
     return;
   }
 
-  const finalPool = parsed.pool + wpBonus;
+  // Chrysalis animal senses: +2 on Perception (Wits+Composure) pools.
+  let senseBonus = 0;
+  if (isPerceptionRoll(expr)) {
+    senseBonus = animalPerceptionBonus(sheet);
+    if (senseBonus > 0) parsed.terms.push(`Senses(+${senseBonus})`);
+  }
+
+  const finalPool = parsed.pool + wpBonus + senseBonus;
   const result = executeRoll(finalPool, { again, rote });
 
   // /weapon: add equipped weapon damage as bonus successes on a hit (>=1

@@ -33,6 +33,9 @@ import { extendedExec } from "./extended.ts";
 import { turnExec } from "./turn.ts";
 import { zoneExec } from "./zone.ts";
 import { districtExec } from "./district.ts";
+import { shiftExec } from "./shift.ts";
+import { contractExec } from "./contract.ts";
+import { hedgeExec } from "./hedge.ts";
 
 addCmd({
   name: "+extended",
@@ -816,6 +819,93 @@ Examples:
   +zone/flavor deepwood=on
   +zone/wander deepwood=on`,
   exec: zoneExec,
+});
+
+addCmd({
+  name: "+contract",
+  pattern: /^\+contract(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+contract [<name>]  -- List or invoke a Changeling Contract.
+
+Switches:
+  (none) / list          Contracts on your sheet.
+  /info <name>           Catalog detail for a Contract.
+  <name>                 Invoke (pay cost; roll pool if any).
+
+While Mask is down (+shift mien), successful Contract rolls count
+as exceptional (successes floored at Wyrd). Requires the Contract
+on your sheet (chargen or staff).
+
+Examples:
+  +contract
+  +contract/info Chrysalis
+  +contract Mask of Superiority
+  +contract Chrysalis`,
+  exec: contractExec,
+});
+
+addCmd({
+  name: "+hedge",
+  pattern: /^\+hedge(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+hedge[/sw] [args]  -- CtL Hedge travel, fruit, gates.
+
+Player:
+  (none)              Realm, trail, gates, path, fruit count.
+  /list               Gates in this room (dual names).
+  /open|/enter [name] Portal (1 Glamour if closed).
+  /exit [name]        Leave via linked gate.
+  /claim              Claim unclaimed Hollow.
+  /travel <goal>      Navigate (chase vs Hedge).
+  /forage|/fruit|/eat Goblin fruit as real items.
+
+Builder+:
+  /create /link /set /setway /destroy /ways /season
+  Room: flavor + maskflavor. Gate: /setway n/maskName=.
+  Mortals see mask names; fae flag sees true names.
+
+Examples:
+  +hedge/open ThicketDoor
+  +hedge/forage
+  +hedge/eat amaranthine
+  +hedge/setway Gate/maskName=Old cellar door
+  +shift mien`,
+  exec: hedgeExec,
+});
+
+addCmd({
+  name: "+shift",
+  pattern: /^\+shift(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+shift [<form>]  -- Change form or Mask state (template-routed).
+
+Changeling (CtL):
+  +shift                 Status (Mask / animal / Glamour).
+  +shift mien            Drop Mask (1 Glamour). True face shows.
+  +shift mask            Raise Mask (1 Glamour).
+  +shift <animal>        Chrysalis form (2 Glamour; need Contract).
+  +shift human           Leave animal form (free).
+  +shift/list [animals]  Legal forms or full animal catalog.
+  +shift/info <form>     Mechanics summary.
+  +shift <form> for <x>  Staff/canEdit: shift an NPC or other PC.
+
+Prose: +sheet/set mask=... and +sheet/set mien=...
+Animals: +sheet/set animals=wolf,hawk (with Chrysalis on sheet).
+Combat end free-raises Mask / ends animal form.
+
+Werewolf forms are not online yet.
+
+Examples:
+  +shift
+  +shift mien
+  +shift wolf
+  +shift human
+  +shift/list animals
+  +shift mien for Goon`,
+  exec: shiftExec,
 });
 
 addCmd({

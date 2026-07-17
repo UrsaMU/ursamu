@@ -89,6 +89,11 @@ export interface CofdSheet {
   rites?: string[];
   /** Discrete Contract picks selected by name (Changeling: The Lost). */
   contracts?: string[];
+  /**
+   * Sight flags (fae, forsaken) kept after template no longer requires
+   * them — staff-granted fetch / fae-touched, etc.
+   */
+  sightSticky?: string[];
   advantages: {
     willpowerMax: number;
     willpowerCurrent: number;
@@ -118,16 +123,50 @@ export interface CofdSheet {
   /** Touchstones (M6 -- Vampire Mask/Dirge; also general-use). */
   touchstones?: Touchstones;
   /**
-   * Temporary stat overrides keyed by stat name (lowercase). Used to render
-   * the sheet as `Base(Temp)` when a scene-bound buff is active
-   * (Vitae boost, Willpower-spend specialty, etc.). Renderer only shows the
-   * parenthetical when the value differs from the base trait.
+   * Temporary stat overrides keyed by stat name (lowercase). Absolute
+   * effective values (not deltas). Form shifts, Vitae boosts, etc. write
+   * here; combat/roller use effectiveAttr/effectiveSkill. Renderer shows
+   * Base(Temp) when the value differs from the base trait.
    */
   tempStats?: Record<string, number>;
+  /**
+   * Active form / Mask identity. Numeric mods live in tempStats; this
+   * records which system and form is current (mask, mien, dalu, ...).
+   */
+  formState?: {
+    system: "none" | "mask" | "werewolf" | "animal";
+    current: string;
+    since?: number;
+    source?: string;
+    tempKeys?: string[];
+    /** Animal form: Mask state to restore on exit. */
+    priorMask?: "mask" | "mien";
+  };
   /** Active Tilts. Personal + environmental are both stored here. */
   tilts?: TiltInstance[];
   /** Carried gear, equipped weapon, equipped armor. */
   equipment?: EquipmentState;
+  /**
+   * CtL Hedge travel: last way used, Mask-down trail, prior Mask on enter.
+   * Optional so older sheets remain valid.
+   */
+  hedgeState?: {
+    lastHedgewayId?: string;
+    trailUntil?: number;
+    priorMaskOnEnter?: "mask" | "mien";
+    inHedge?: boolean;
+    nav?: {
+      goal: string;
+      progress: number;
+      hedgeProgress: number;
+      target: number;
+      turns: number;
+      hedgeEdge: boolean;
+      startedAt: number;
+    };
+    fruit?: { slug: string; gotAt: number }[];
+    fruitFlags?: { key: string; until: number }[];
+  };
 }
 
 /** Builds a fresh, empty `EquipmentState`. */
@@ -181,6 +220,29 @@ export function migrateSheet(sheet: any): CofdSheet {
   const tempStats: Record<string, number> = sheet.tempStats && typeof sheet.tempStats === "object"
     ? sheet.tempStats
     : {};
+  const formState = sheet.formState && typeof sheet.formState === "object"
+    ? {
+      system: (sheet.formState.system as
+        | "none"
+        | "mask"
+        | "werewolf"
+        | "animal") ?? "none",
+      current: String(sheet.formState.current ?? ""),
+      since: typeof sheet.formState.since === "number"
+        ? sheet.formState.since
+        : undefined,
+      source: typeof sheet.formState.source === "string"
+        ? sheet.formState.source
+        : undefined,
+      tempKeys: Array.isArray(sheet.formState.tempKeys)
+        ? sheet.formState.tempKeys as string[]
+        : undefined,
+      priorMask: sheet.formState.priorMask === "mien" ||
+          sheet.formState.priorMask === "mask"
+        ? sheet.formState.priorMask as "mask" | "mien"
+        : undefined,
+    }
+    : { system: "none" as const, current: "" };
   const tilts: TiltInstance[] = Array.isArray(sheet.tilts) ? sheet.tilts : [];
   // Specialty descriptions: optional sibling map, never overwrites the legacy
   // string[] shape. Missing entries render as no description.
@@ -198,9 +260,56 @@ export function migrateSheet(sheet: any): CofdSheet {
       equippedArmor: sheet.equipment.equippedArmor ?? null,
     }
     : emptyEquipment();
+  const hedgeState = sheet.hedgeState && typeof sheet.hedgeState === "object"
+    ? {
+      lastHedgewayId: typeof sheet.hedgeState.lastHedgewayId === "string"
+        ? sheet.hedgeState.lastHedgewayId
+        : undefined,
+      trailUntil: typeof sheet.hedgeState.trailUntil === "number"
+        ? sheet.hedgeState.trailUntil
+        : undefined,
+      priorMaskOnEnter: sheet.hedgeState.priorMaskOnEnter === "mien" ||
+          sheet.hedgeState.priorMaskOnEnter === "mask"
+        ? sheet.hedgeState.priorMaskOnEnter as "mask" | "mien"
+        : undefined,
+      inHedge: sheet.hedgeState.inHedge === true ? true : undefined,
+      nav: sheet.hedgeState.nav &&
+          typeof sheet.hedgeState.nav === "object" &&
+          typeof sheet.hedgeState.nav.goal === "string"
+        ? {
+          goal: String(sheet.hedgeState.nav.goal),
+          progress: Number(sheet.hedgeState.nav.progress) || 0,
+          hedgeProgress: Number(sheet.hedgeState.nav.hedgeProgress) || 0,
+          target: Number(sheet.hedgeState.nav.target) || 8,
+          turns: Number(sheet.hedgeState.nav.turns) || 0,
+          hedgeEdge: sheet.hedgeState.nav.hedgeEdge === true,
+          startedAt: Number(sheet.hedgeState.nav.startedAt) || 0,
+        }
+        : undefined,
+      fruit: Array.isArray(sheet.hedgeState.fruit)
+        ? sheet.hedgeState.fruit
+          .filter((x: unknown) => x && typeof x === "object")
+          .map((x: { slug?: string; gotAt?: number }) => ({
+            slug: String(x.slug ?? ""),
+            gotAt: Number(x.gotAt) || 0,
+          }))
+          .filter((x: { slug: string }) => x.slug)
+        : undefined,
+      fruitFlags: Array.isArray(sheet.hedgeState.fruitFlags)
+        ? sheet.hedgeState.fruitFlags
+          .filter((x: unknown) => x && typeof x === "object")
+          .map((x: { key?: string; until?: number }) => ({
+            key: String(x.key ?? ""),
+            until: Number(x.until) || 0,
+          }))
+          .filter((x: { key: string }) => x.key)
+        : undefined,
+    }
+    : undefined;
 
   return {
     ...sheet,
+    hedgeState,
     template,
     moralityValue,
     powerStatValue,
@@ -222,6 +331,7 @@ export function migrateSheet(sheet: any): CofdSheet {
     arcaneExperience,
     touchstones,
     tempStats,
+    formState,
     tilts,
     equipment,
     specialtyDescriptions,
@@ -270,6 +380,7 @@ export function defaultSheet(): CofdSheet {
     arcaneExperience: 0,
     touchstones: {},
     tempStats: {},
+    formState: { system: "none", current: "" },
     tilts: [],
     equipment: emptyEquipment(),
     specialtyDescriptions: {},
@@ -303,7 +414,14 @@ export function refreshAdvantages(sheet: CofdSheet): CofdSheet {
   if (!sheet.health) {
     sheet.health = emptyHealth();
   } else {
-    const maxHealth = (sheet.attributes.stamina || 1) + sheet.advantages.size;
+    // Prefer tempStats overrides (form shifts) when present.
+    const stam = typeof sheet.tempStats?.stamina === "number"
+      ? sheet.tempStats.stamina
+      : (sheet.attributes.stamina || 1);
+    const size = typeof sheet.tempStats?.size === "number"
+      ? sheet.tempStats.size
+      : sheet.advantages.size;
+    const maxHealth = stam + size;
     const total = sheet.health.bashing + sheet.health.lethal + sheet.health.aggravated;
     if (total > maxHealth) {
       // Trim from the least-severe bucket first (bashing -> lethal -> aggravated).

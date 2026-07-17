@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help npc (overview)
+
 npc derived  -- Computed stats on an NPC stat block.
 
 Derived stats are recomputed from the NPC's sheet at render time.
@@ -13,7 +15,7 @@ skills and let the engine fold them in.
   Initiative     Dex + Composure
   Speed          Strength + Dexterity + Size
 
-Notes:
+NOTES
   Size defaults to 5 for human-scale NPCs. Beasts, spirits, and
   certain ghost archetypes may legitimately sit outside that
   default; +npc/build sets Size automatically from the archetype.
@@ -22,4 +24,4 @@ Equipped gear modifies the derived stats the same way it does for
 PCs. Armor lowers Speed and contributes its rating; weapons feed
 attack pools through +attack.
 
-See also: npc, npc archetypes, sheet, attack
+SEE ALSO: npc, npc archetypes, sheet, attack

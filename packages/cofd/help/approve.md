@@ -1,24 +1,19 @@
-+approve  -- Approve a pending Chronicles of Darkness chargen submission.
++APPROVE  -- Approve a pending chargen submission.
 
-Syntax:
-  +approve <player>             Approve with no notes.
-  +approve <player>=<notes>     Approve and attach a staff note.
+SYNTAX
+  +approve <player>
+  +approve <player>=<notes>
 
-Permissions:
-  Run            connected + admin+.
-  Target         any player with a CGEN job in 'new' or 'open' status.
+PERMISSIONS
+  Connected + admin+. Target CGEN job new or open.
 
-Mechanics:
-  Copies the player's submitted sheet onto the live character record,
-  clears their chargen workspace, and closes the CGEN job as 'closed'
-  with a staff comment. The player is notified inline.
+MECHANICS
+  Copies sheet live, clears chargen, closes job.
+  Syncs sight flags: changeling → `fae`,
+  werewolf → `forsaken`.
 
-  If the CGEN job is missing or already in a terminal status (closed,
-  cancelled, resolved), the approval is refused so nothing is silently
-  overwritten.
-
-Examples:
+EXAMPLES
   +approve Alice
-  +approve Alice=Welcome to the chronicle. Watch your touchstones.
+  +approve Alice=Welcome. Watch your touchstones.
 
-See also: unapprove, cg, sheet
+SEE ALSO: help unapprove, help cg, help perception

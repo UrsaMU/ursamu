@@ -1,0 +1,48 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "boss",
+  "name": "Boss",
+  "blurb": "Major antagonist. Top of the food chain, dangerous on all axes.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "major",
+  "lineage": "mortal",
+  "tags": ["mortal", "urban", "boss"],
+  "attributes": {
+    "intelligence": 3,
+    "wits": 3,
+    "resolve": 4,
+    "strength": 3,
+    "dexterity": 3,
+    "stamina": 3,
+    "presence": 4,
+    "manipulation": 4,
+    "composure": 4
+  },
+  "skills": {
+    "firearms": 3,
+    "weaponry": 3,
+    "intimidation": 4,
+    "persuasion": 3,
+    "subterfuge": 3,
+    "occult": 2
+  },
+  "merits": {
+    "fast reflexes": 2,
+    "iron stamina": 2
+  },
+  "integrity": 4,
+  "size": 5,
+  "defaultWeapon": "pistol-heavy",
+  "shortDesc": [
+    "Someone who owns the room without raising their voice.",
+    "Immaculate suit, cold smile, bodyguards at a polite distance."
+  ],
+  "description": [
+    "Power wears a human face. Everything about them says: you are already late."
+  ],
+  "ai": "azlu-stalker",
+  "defaults": {
+    "aggro": "hunter",
+    "presence": "visible"
+  }
+}

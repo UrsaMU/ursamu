@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help integrity (overview)
+
 integrity anchors  -- Virtue/Vice interaction with Breaking Points.
 
 A character's Virtue and Vice both colour Breaking Point rolls. Acting
@@ -15,4 +17,4 @@ help vices for catalogs.
 These anchor modifiers stack with the situational modifier passed on
 the command line, up to the +/-5 RAW cap.
 
-See also: integrity, integrity situations, sheet, virtues, vices
+SEE ALSO: integrity, integrity situations, sheet, virtues, vices

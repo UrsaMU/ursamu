@@ -1,15 +1,24 @@
-// NPC AI archetype registry.
+// NPC AI strategy registry.
 //
-// Each archetype is a pure function that, given the engine context, returns
-// an AiDecision describing what the NPC wants to do this turn. The walker
-// (advanceTurnSmart) is responsible for executing the decision against the
-// live game state.
+// Strategies are JSON under resources/ai/*.json (see
+// resources/schemas/ai-strategy.schema.json). The walker resolves
+// sheet.npc.aiArchetype → strategy slug → evaluateStrategy().
 
 import type { IDBObj } from "@ursamu/ursamu";
-import type { Encounter, Participant, ReactionPosture } from "../types.ts";
-import { beshiluSwarmer } from "./archetypes/beshilu-swarmer.ts";
-import { azluStalker } from "./archetypes/azlu-stalker.ts";
-import { spiritRiddenFeral } from "./archetypes/spirit-ridden-feral.ts";
+import type {
+  Encounter,
+  Participant,
+  ReactionPosture,
+} from "../types.ts";
+import {
+  AI_STRATEGY_ERRORS,
+  AI_STRATEGIES,
+  aiStrategyKeys,
+  getAiStrategy,
+  listAiStrategies,
+} from "./strategy_catalog.ts";
+import { evaluateStrategy, strategyAsFn } from "./evaluate.ts";
+import type { AiStrategy } from "./strategy_types.ts";
 
 export interface AiDecision {
   action: "attack" | "move" | "reload" | "flee" | "posture" | "wait";
@@ -27,17 +36,29 @@ export interface AiContext {
 
 export type ArchetypeFn = (ctx: AiContext) => AiDecision;
 
-const ARCHETYPES: Record<string, ArchetypeFn> = {
-  "beshilu-swarmer": beshiluSwarmer,
-  "azlu-stalker": azluStalker,
-  "spirit-ridden-feral": spiritRiddenFeral,
+export {
+  AI_STRATEGY_ERRORS,
+  AI_STRATEGIES,
+  aiStrategyKeys,
+  evaluateStrategy,
+  getAiStrategy,
+  listAiStrategies,
+  strategyAsFn,
 };
+export type { AiStrategy };
 
+/**
+ * Resolve AI by strategy slug. Unknown → null (walker treats as manual).
+ */
 export function getArchetype(key: string): ArchetypeFn | null {
   if (!key) return null;
-  return ARCHETYPES[key.toLowerCase().trim()] ?? null;
+  const k = key.toLowerCase().trim();
+  if (k === "manual" || k === "off" || k === "none") return null;
+  const strategy = getAiStrategy(k);
+  if (!strategy) return null;
+  return strategyAsFn(strategy);
 }
 
 export function listArchetypes(): string[] {
-  return Object.keys(ARCHETYPES);
+  return aiStrategyKeys();
 }

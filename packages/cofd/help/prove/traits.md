@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help prove (overview)
+
 prove traits  -- Accepted trait vocabulary for +prove.
 
 Trait list is comma-separated. Accepted vocabulary mirrors +roll:
@@ -20,4 +22,4 @@ Limits:
   Max 8 traits per command. Unknown tokens are skipped with a quiet
   note appended to your confirmation line.
 
-See also: prove, sheet, roll
+SEE ALSO: prove, sheet, roll

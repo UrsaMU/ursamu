@@ -10,6 +10,7 @@ import {
 import { COFD_SKILLS } from "../dictionary/index.ts";
 import { formatSheet } from "../sheet/index.ts";
 import type { CofdCgState } from "../chargen/state.ts";
+import { syncSightFlags } from "../support/sight.ts";
 
 const SPECIALTY_NAME_MAX = 40;
 const SPECIALTY_DESC_MAX = 80;
@@ -257,6 +258,10 @@ export async function sheetSetExec(u: IUrsamuSDK) {
     const updatedSheet = setTrait(sheet, trait, validatedValue);
 
     await u.db.modify(target.id, "$set", { "data.cofd": updatedSheet });
+    if (trait.toLowerCase().trim() === "template") {
+      target.state = { ...target.state, cofd: updatedSheet };
+      await syncSightFlags(u, target, updatedSheet);
+    }
     u.send(`Set trait '${trait}' to '${validatedValue}' on ${target.name}'s sheet.`);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

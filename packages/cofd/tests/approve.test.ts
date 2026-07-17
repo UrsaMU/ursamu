@@ -45,19 +45,36 @@ async function seedJob(num: number, submittedBy: string): Promise<IJob> {
 describe("+approve", OPTS, () => {
   it("copies submitted sheet, clears cg state, closes the job", async () => {
     const num = 9001;
-    const target = mockPlayer({ id: "5", name: "Alice", state: { cofd_cg: fakeCgState(num) } });
+    const target = mockPlayer({
+      id: "5",
+      name: "Alice",
+      state: { cofd_cg: fakeCgState(num) },
+    });
     await seedJob(num, target.id);
 
-    const me = mockPlayer({ id: "1", name: "Wiz", flags: new Set(["player", "connected", "admin"]) });
+    const me = mockPlayer({
+      id: "1",
+      name: "Wiz",
+      flags: new Set(["player", "connected", "admin"]),
+    });
     const u = mockU({
       me,
       args: ["", "Alice=Welcome aboard."],
     });
+    u._store.put(target);
     u.util.target = () => Promise.resolve(target);
     u.util.displayName = (o) => o.name ?? "Unknown";
-    u.db.modify = (_id: string, op: string, data: Record<string, unknown>) => {
-      if (op === "$set" && data["data.cofd"] !== undefined) target.state.cofd = data["data.cofd"];
-      if (op === "$unset" && "data.cofd_cg" in data) delete target.state.cofd_cg;
+    u.db.modify = (
+      _id: string,
+      op: string,
+      data: Record<string, unknown>,
+    ) => {
+      if (op === "$set" && data["data.cofd"] !== undefined) {
+        target.state.cofd = data["data.cofd"];
+      }
+      if (op === "$unset" && "data.cofd_cg" in data) {
+        delete target.state.cofd_cg;
+      }
       return Promise.resolve();
     };
 
@@ -65,12 +82,54 @@ describe("+approve", OPTS, () => {
 
     assertStringIncludes(u._sent.join("\n"), "Character Approved");
     assertEquals(target.state.cofd_cg, undefined);
-    assertEquals((target.state.cofd as { concept: string }).concept, "Test Subject");
+    assertEquals(
+      (target.state.cofd as { concept: string }).concept,
+      "Test Subject",
+    );
 
     const job = await jobs.findOne({ number: num });
     assertEquals(job?.status, "closed");
     assertEquals(job?.comments.length, 1);
     assertStringIncludes(job!.comments[0].text, "Welcome aboard");
+  });
+
+  it("grants fae flag for changeling template", async () => {
+    const num = 9010;
+    const cg = fakeCgState(num);
+    (cg.sheet as { template: string }).template = "changeling";
+    const target = mockPlayer({
+      id: "ctl5",
+      name: "Pix",
+      state: { cofd_cg: cg },
+    });
+    await seedJob(num, target.id);
+    const u = mockU({
+      me: mockPlayer({
+        id: "1",
+        name: "Wiz",
+        flags: new Set(["player", "connected", "admin"]),
+      }),
+      args: ["", "Pix"],
+    });
+    u._store.put(target);
+    u.util.target = () => Promise.resolve(target);
+    u.util.displayName = (o) => o.name ?? "Unknown";
+    u.db.modify = (
+      _id: string,
+      op: string,
+      data: Record<string, unknown>,
+    ) => {
+      if (op === "$set" && data["data.cofd"] !== undefined) {
+        target.state.cofd = data["data.cofd"];
+      }
+      if (op === "$unset" && "data.cofd_cg" in data) {
+        delete target.state.cofd_cg;
+      }
+      return Promise.resolve();
+    };
+
+    await approveExec(u);
+    assertEquals(target.flags.has("fae"), true);
   });
 
   it("refuses when no submitted job exists", async () => {

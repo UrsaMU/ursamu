@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help attack (overview)
+
 attack defense  -- How Defense applies and degrades.
 
 Defense is the standing defensive trait. It is automatically subtracted
@@ -23,4 +25,4 @@ Reducing your own Defense:
   /run          -1 Defense until your next turn.
   Aiming        Defense lost mid-aim cancels the aim bonus.
 
-See also: attack, attack damage, combat modifiers, dodge
+SEE ALSO: attack, attack damage, combat modifiers, dodge

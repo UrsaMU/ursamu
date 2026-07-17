@@ -1,33 +1,22 @@
 ---
-hidden: true
+dark: true
 ---
-+gear armor  -- Armor mechanics for CoFD 2e.
+SEE ALSO: help gear (overview)
 
-Ratings:
-  Listed as general/ballistic. General armor reduces non-firearm damage;
-  ballistic reduces firearm damage. Both stack against the attack type.
++GEAR ARMOR  -- General/ballistic ratings and penalties.
 
-Penalties:
-  When equipped (via +gear/equip), armor applies to the sheet:
-    Defense  Reduced by the listed Defense penalty (floor 0).
-    Speed    Reduced by the listed Speed penalty (no floor).
-  Penalties apply automatically -- no separate trait to track.
+RATINGS
+  General vs non-firearms; ballistic vs firearms.
 
-Strength requirement:
-  If your Strength is below the armor's listed minimum, your Brawl and
-  Weaponry pools are at -1 while wearing it.
+PENALTIES
+  Equipped: Defense and Speed penalties auto-apply.
+  Strength below min: −1 Brawl and Weaponry.
 
-Coverage:
-  Unless an attacker targets an unarmored location (Specified Targets,
-  core p.92), the armor's protection applies. Helmets add the head.
+COVERAGE
+  Applies unless specified unarmored location.
+  Some armor is concealed until first hit.
 
-Concealed armor:
-  Reinforced Clothing and Kevlar Vest are concealed (worn as normal
-  clothing or under a baggy shirt). Attackers do not learn the target
-  is armored until after they land a hit.
+AP
+  Close-combat AP only reduces general armor.
 
-Armor-piercing attacks:
-  In close combat, armor-piercing weapons subtract only from general
-  armor, never from ballistic.
-
-See also: gear, gear weapons, gear gear, sheet
+SEE ALSO: help gear, help gear/weapons

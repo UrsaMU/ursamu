@@ -9,6 +9,7 @@ import {
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
 import { migrateSheet, type CofdSheet } from "../stats/sheet.ts";
+import { effectiveAttr, effectiveSkill } from "../stats/effective.ts";
 import { healthMax, woundPenalty } from "../health/index.ts";
 
 /** A single resolved trait token (attribute / skill / power / morality / etc). */
@@ -44,7 +45,7 @@ export function resolveTrait(token: string, sheet: CofdSheet): ResolvedTrait | n
     const [skillName, ...rest] = t.split("/");
     const specName = rest.join("/");
     if (!(COFD_SKILLS as readonly string[]).includes(skillName)) return null;
-    const base = sheet.skills[skillName as CofdSkill] || 0;
+    const base = effectiveSkill(sheet, skillName);
     const owned = (sheet.specialties[skillName] || []).find((s) =>
       s.toLowerCase() === specName
     );
@@ -58,11 +59,11 @@ export function resolveTrait(token: string, sheet: CofdSheet): ResolvedTrait | n
   }
 
   if ((COFD_ATTRIBUTES as readonly string[]).includes(t)) {
-    const v = sheet.attributes[t as CofdAttribute] || 1;
+    const v = effectiveAttr(sheet, t);
     return { label: titleCase(t), base: v, value: v };
   }
   if ((COFD_SKILLS as readonly string[]).includes(t)) {
-    const v = sheet.skills[t as CofdSkill] || 0;
+    const v = effectiveSkill(sheet, t);
     return { label: titleCase(t), base: v, value: v };
   }
 
@@ -191,7 +192,7 @@ export function parseRollExpression(
 
     // Check if pure Attribute
     if ((COFD_ATTRIBUTES as readonly string[]).includes(traitToken)) {
-      const dots = sheet.attributes[traitToken as CofdAttribute] || 1;
+      const dots = effectiveAttr(sheet, traitToken);
       pool += sign === "-" ? -dots : dots;
       terms.push(`${traitToken}(${dots})`);
       continue;
@@ -199,7 +200,7 @@ export function parseRollExpression(
 
     // Check if pure Skill
     if ((COFD_SKILLS as readonly string[]).includes(traitToken)) {
-      const dots = sheet.skills[traitToken as CofdSkill] || 0;
+      const dots = effectiveSkill(sheet, traitToken);
       let termVal = dots;
 
       if (dots === 0) {

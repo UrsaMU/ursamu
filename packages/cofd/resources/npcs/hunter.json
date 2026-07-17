@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "hunter",
+  "name": "Hunter",
+  "blurb": "Monster hunter. Investigative, armed, prepared.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "major",
+  "lineage": "mortal",
+  "tags": ["mortal", "hunter", "armed"],
+  "attributes": {
+    "intelligence": 3,
+    "wits": 4,
+    "resolve": 3,
+    "strength": 3,
+    "dexterity": 3,
+    "stamina": 3,
+    "presence": 2,
+    "manipulation": 2,
+    "composure": 3
+  },
+  "skills": {
+    "firearms": 3,
+    "occult": 3,
+    "investigation": 3,
+    "weaponry": 2,
+    "stealth": 2,
+    "survival": 2
+  },
+  "merits": {
+    "fast reflexes": 2
+  },
+  "specialties": {
+    "occult": ["Strigoi"],
+    "firearms": ["Shotguns"]
+  },
+  "integrity": 5,
+  "size": 5,
+  "defaultWeapon": "shotgun",
+  "shortDesc": [
+    "A tired professional with silver on the belt and salt in the pockets.",
+    "Weathered coat, scarred hands, eyes that never stop scanning."
+  ],
+  "description": [
+    "They have seen too much and brought the right tools anyway."
+  ],
+  "ai": "azlu-stalker",
+  "defaults": {
+    "aggro": "hunter",
+    "presence": "visible",
+    "lootTable": "hunter-cell-shooter"
+  }
+}

@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help social (overview)
+
 social force  -- Forcing the doors: a high-risk one-shot.
 
 Forced doors (CoFD 2e p.83) collapse the entire maneuver into a
@@ -22,4 +24,4 @@ Use /force when time pressure makes the slow drip of door rolls
 untenable. The risk is real: a failure ends the entire maneuver and
 all the leverage you have spent is gone.
 
-See also: social, social doors
+SEE ALSO: social, social doors

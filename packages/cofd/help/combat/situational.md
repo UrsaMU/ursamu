@@ -1,6 +1,8 @@
 ---
-hidden: true
+dark: true
 ---
+See also: help combat (overview)
+
 combat situational  -- Prone, into-melee, Willpower, surprise modifiers.
 
 Prone target:
@@ -26,4 +28,4 @@ These modifiers stack with the base attack modifiers, range, and
 concealment in the natural way. Mid-attack switches like /aim and
 /allout fold in automatically through their +attack switches.
 
-See also: combat modifiers, combat range, combat conceal-mods, attack
+SEE ALSO: combat modifiers, combat range, combat conceal-mods, attack

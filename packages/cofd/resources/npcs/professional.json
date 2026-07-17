@@ -1,0 +1,47 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "professional",
+  "name": "Professional",
+  "blurb": "Operator. Clinical, well-equipped, hard to surprise.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "major",
+  "lineage": "mortal",
+  "tags": ["mortal", "operator", "urban"],
+  "attributes": {
+    "intelligence": 3,
+    "wits": 3,
+    "resolve": 3,
+    "strength": 2,
+    "dexterity": 4,
+    "stamina": 3,
+    "presence": 2,
+    "manipulation": 3,
+    "composure": 4
+  },
+  "skills": {
+    "firearms": 4,
+    "larceny": 3,
+    "stealth": 3,
+    "drive": 2,
+    "investigation": 2
+  },
+  "merits": {
+    "quick draw": 1,
+    "fast reflexes": 2
+  },
+  "integrity": 5,
+  "size": 5,
+  "defaultWeapon": "pistol-light",
+  "shortDesc": [
+    "Anonymous dark clothing; moves like they practice for this.",
+    "A quiet professional who does not introduce themselves."
+  ],
+  "description": [
+    "No logos, no tells. Only competence and a clean exit plan."
+  ],
+  "ai": "azlu-stalker",
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible"
+  }
+}
