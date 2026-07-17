@@ -854,28 +854,27 @@ addCmd({
   pattern: /^\+hedge(?:\/(\S+))?\s*(.*)/i,
   lock: "connected",
   category: "Cofd",
-  help: `+hedge[/sw] [args]  -- CtL Hedge travel, fruit, gates.
+  help: `+hedge[/sw] [args]  -- CtL Hedge, Hollows, keys, fruit.
 
 Player:
-  (none)              Realm, trail, gates, path, fruit count.
-  /list               Gates in this room (dual names).
-  /open|/enter [name] Portal (1 Glamour if closed).
-  /exit [name]        Leave via linked gate.
-  /claim              Claim unclaimed Hollow.
-  /travel <goal>      Navigate (chase vs Hedge).
-  /forage|/fruit|/eat Goblin fruit as real items.
+  (none)                 Realm, Hollow budget, gates, path.
+  /open|/exit [n][=key]  Portal; key phrase free-opens.
+  /claim                 Claim unclaimed Hollow.
+  /hollow [list|slug]    Hollow Merit enhancements.
+  /escape                Escape Route out of Hollow.
+  /access                Easy Access into home Hollow (1G).
+  /travel|/forage|/fruit|/eat
 
 Builder+:
   /create /link /set /setway /destroy /ways /season
-  Room: flavor + maskflavor. Gate: /setway n/maskName=.
-  Mortals see mask names; fae flag sees true names.
+  /setway n/key=phrase   Shared open key.
+  Room: flavor, maskflavor, hollowrating, hollowowner.
 
 Examples:
-  +hedge/open ThicketDoor
-  +hedge/forage
-  +hedge/eat amaranthine
-  +hedge/setway Gate/maskName=Old cellar door
-  +shift mien`,
+  +hedge/open Gate=three red leaves
+  +hedge/hollow size-2
+  +hedge/access
+  +hedge/setway Gate/maskName=Old cellar door`,
   exec: hedgeExec,
 });
 

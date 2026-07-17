@@ -13,6 +13,8 @@ COMMANDS
   help debt        Goblin Debts.
   help icon        Icons (lost pieces of self).
   help spin        Hedgespinning.
+  help hollow      Hollow enhancements.
+  help key         Hedgeway key phrases.
   help perception  Fae flag and dual look.
 
 SEE ALSO: help cofd, help sheet, help cg

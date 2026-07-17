@@ -39,8 +39,14 @@ import {
   hedgeForage,
   hedgeFruitList,
 } from "./hedge_fruit.ts";
+import { hedgeHollow } from "./hedge_hollow.ts";
+import {
+  hedgeAccess,
+  hedgeEscape,
+} from "./hedge_hollow_travel.ts";
 import {
   countFruitObjects,
+  freeHollowDots,
   readNavState,
 } from "../hedge/index.ts";
 
@@ -62,6 +68,12 @@ export async function hedgeExec(u: IUrsamuSDK): Promise<void> {
       return await hedgeExit(u, rest);
     case "claim":
       return await hedgeClaim(u, rest);
+    case "hollow":
+      return await hedgeHollow(u, rest);
+    case "escape":
+      return await hedgeEscape(u, rest);
+    case "access":
+      return await hedgeAccess(u, rest);
     case "travel":
       return await hedgeTravel(u, rest);
     case "forage":
@@ -99,10 +111,17 @@ async function hedgeStatus(u: IUrsamuSDK): Promise<void> {
   const flavor = resolveRoomFlavor(u.me, hr);
   if (flavor) lines.push(`  Flavor:  ${flavor}`);
   if (hr?.hollow) {
+    const free = freeHollowDots(hr);
     lines.push(
       `  Hollow:  rating ${hr.hollow.rating}  ` +
-        `owners ${hr.hollow.owners.length}`,
+        `owners ${hr.hollow.owners.length}  ` +
+        `free ${free}`,
     );
+    if (hr.hollow.enhancements.length > 0) {
+      lines.push(
+        `  Enhance: ${hr.hollow.enhancements.join(", ")}`,
+      );
+    }
   }
   lines.push(`  Season:  ${season}`);
   const sheet = getSheet(u.me);
@@ -143,10 +162,13 @@ async function hedgeStatus(u: IUrsamuSDK): Promise<void> {
   }
   if (isInHedge(hr)) {
     lines.push(
-      "  Hint: +hedge/forage  |  +hedge/travel  |  +hedge/exit",
+      "  Hint: +hedge/forage | /travel | /exit | " +
+        "/hollow | /escape",
     );
   } else {
-    lines.push("  Hint: +hedge/open [name]  to portal (1 G).");
+    lines.push(
+      "  Hint: +hedge/open [name][=key]  or /access",
+    );
   }
   u.send(lines.join("\n"));
 }

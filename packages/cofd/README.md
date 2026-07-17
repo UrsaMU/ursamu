@@ -32,8 +32,9 @@ GMCCG-inspired module layout, file-driven supernatural templates.
   Contracts (`+contract`); Hedge travel, navigation, and goblin fruit as
   real inventory objects (`+hedge`); Goblin Markets and Debt
   (`+market`, `+debt`); Icons (`+icon`); Hedgespinning (`+spin`);
-  dual look via `fae` flag (`maskName` / FAEDESC — see
-  `docs/fae-perception-spec.md`).
+  Hollow Merit depth (`+hedge/hollow`, `/escape`, `/access`);
+  gate key phrases; dual look via `fae` flag (`maskName` /
+  FAEDESC — see `docs/fae-perception-spec.md`).
 
 ---
 
@@ -76,7 +77,7 @@ GMCCG-inspired module layout, file-driven supernatural templates.
 
 +shift [<form>]                             Mask/mien or animal form (CtL).
 +contract [<name>]                          List/invoke Changeling Contracts.
-+hedge[/open|/exit|/claim|...]              Hedgeways, portaling, Hollows.
++hedge[/open|/exit|/claim|/hollow|...]      Hedgeways, Hollows, keys, fruit.
 +market[/buy|/credit|...]                   Goblin Markets (Glamour or debt).
 +debt[/pay|/call]                           Goblin Debts.
 +icon[/grant|/spend]                        Icons (lost pieces of self).

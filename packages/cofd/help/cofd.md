@@ -16,7 +16,8 @@ TOPIC GROUPS
 
 CHANGELING
   help shift · help contract · help hedge
-  help market · help debt · help icon
-  help spin · help perception
+  help hollow · help key · help market
+  help debt · help icon · help spin
+  help perception
 
 SEE ALSO: help cg, help sheet, help roll

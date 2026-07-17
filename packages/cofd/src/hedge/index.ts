@@ -22,6 +22,26 @@ export {
   roomRealmLabel,
 } from "./room.ts";
 export {
+  addHollowEnhancement,
+  enhancementDotsUsed,
+  findHollowEnhancement,
+  freeHollowDots,
+  hollowAnonymityPenalty,
+  hollowHas,
+  homeTurfBonus,
+  HOLLOW_ENHANCEMENTS,
+  isHollowOwner,
+  removeHollowEnhancement,
+  type HollowEnhancementDef,
+} from "./hollow.ts";
+// hollow.ts re-exports catalog
+export {
+  canOpenWithKey,
+  keyPhraseMatches,
+  normalizeKeyPhrase,
+  wayHasKey,
+} from "./keys.ts";
+export {
   createHedgeway,
   destroyHedgeway,
   findHedgewayById,

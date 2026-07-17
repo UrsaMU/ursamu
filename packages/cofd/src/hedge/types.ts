@@ -14,8 +14,18 @@ export interface HedgeRoom {
   trodRating?: number;
   hollow?: {
     owners: string[];
+    /** Hollow Merit dots 0–5 (enhancement budget). */
     rating: number;
+    /**
+     * Enhancement slugs (hob-alarm, size-2, …).
+     * Dot cost must sum ≤ rating.
+     */
     enhancements: string[];
+    /**
+     * Mortal room for Escape Route egress
+     * (+hedge/escape).
+     */
+    escapeRoomId?: string;
   };
   /** Optional look / status flavor (fae / true layer). */
   flavor?: string;
@@ -37,7 +47,10 @@ export interface Hedgeway {
   maskName?: string;
   mortalRoomId: string;
   hedgeRoomId: string;
-  /** Optional Key phrase for non-changeling open later. */
+  /**
+   * Key phrase: anyone who speaks it may open/enter
+   * without Lost Glamour (see +hedge/open name=key).
+   */
   keyPhrase?: string;
   state: HedgewayState;
   /** Epoch ms when open expires → dormant. */
@@ -75,6 +88,8 @@ export interface HedgeSheetState {
   fruit?: { slug: string; gotAt: number }[];
   /** Timed fruit buffs (faeriePeach, ogrePepper, …). */
   fruitFlags?: { key: string; until: number }[];
+  /** Primary Hollow room id (Easy Access / status). */
+  homeHollowId?: string;
 }
 
 /** Global season for dormant free-open (cofd.hedge_config). */

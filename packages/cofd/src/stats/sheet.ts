@@ -197,6 +197,8 @@ export interface CofdSheet {
       calledNote?: string;
       paidAt?: number;
     }[];
+    /** Primary Hollow room id (Easy Access). */
+    homeHollowId?: string;
   };
 }
 
@@ -338,6 +340,10 @@ export function migrateSheet(sheet: any): CofdSheet {
       debts: Array.isArray(sheet.hedgeState.debts)
         ? sheet.hedgeState.debts
         : undefined,
+      homeHollowId:
+        typeof sheet.hedgeState.homeHollowId === "string"
+          ? sheet.hedgeState.homeHollowId
+          : undefined,
     }
     : undefined;
   const icons = Array.isArray(sheet.icons)

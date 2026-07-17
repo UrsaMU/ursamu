@@ -46,10 +46,16 @@ export async function hedgeExit(
     return;
   }
 
-  const key = u.util.stripSubs(rest).trim();
+  // +hedge/exit [<gate>][=keyphrase]
+  const raw = u.util.stripSubs(rest).trim();
+  const eq = raw.indexOf("=");
+  const gateArg = (eq >= 0 ? raw.slice(0, eq) : raw).trim();
+  const spokenKey = eq >= 0
+    ? raw.slice(eq + 1).trim()
+    : undefined;
   let way: Hedgeway | null = null;
-  if (key) {
-    way = await resolveWay(roomId, key);
+  if (gateArg) {
+    way = await resolveWay(roomId, gateArg);
   } else {
     const hs = readHedgeState(sheet);
     if (hs.lastHedgewayId) {
@@ -86,6 +92,7 @@ export async function hedgeExit(
     way,
     season,
     fromMortal,
+    spokenKey,
   );
   if (!check.ok) {
     u.send(check.reason ?? "Cannot exit.");
@@ -183,11 +190,25 @@ export async function hedgeClaim(
       owners,
       rating: hr.hollow?.rating ?? 1,
       enhancements: hr.hollow?.enhancements ?? [],
+      escapeRoomId: hr.hollow?.escapeRoomId,
     },
   };
   await persistRoomHedge(u, roomId, hr);
+
+  // Remember home Hollow on sheet.
+  const hs = readHedgeState(sheet);
+  await persistSheet(
+    u,
+    u.me.id,
+    writeHedgeState(sheet, {
+      ...hs,
+      homeHollowId: roomId,
+    }),
+  );
+
   u.send(
     `You claim this Hollow (owners: ${owners.length}, ` +
-      `rating ${hr.hollow?.rating ?? 1}).`,
+      `rating ${hr.hollow?.rating ?? 1}). ` +
+      `Enhance: +hedge/hollow <slug>`,
   );
 }

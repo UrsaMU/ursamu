@@ -44,7 +44,16 @@ export function parseHedgeRoom(raw: unknown): HedgeRoom | null {
     const enhancements = Array.isArray(h.enhancements)
       ? h.enhancements.map((x) => String(x)).filter(Boolean)
       : [];
-    out.hollow = { owners, rating, enhancements };
+    const escapeRoomId =
+      typeof h.escapeRoomId === "string" && h.escapeRoomId.trim()
+        ? h.escapeRoomId.trim()
+        : undefined;
+    out.hollow = {
+      owners,
+      rating,
+      enhancements,
+      escapeRoomId,
+    };
   }
   return out;
 }

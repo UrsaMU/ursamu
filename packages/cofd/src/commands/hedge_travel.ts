@@ -65,8 +65,14 @@ export async function hedgeOpen(
     u.send("No current room.");
     return;
   }
-  const key = u.util.stripSubs(rest).trim();
-  let way = await resolveWay(roomId, key);
+  // +hedge/open <gate>[=keyphrase]
+  const raw = u.util.stripSubs(rest).trim();
+  const eq = raw.indexOf("=");
+  const gateArg = (eq >= 0 ? raw.slice(0, eq) : raw).trim();
+  const spokenKey = eq >= 0
+    ? raw.slice(eq + 1).trim()
+    : undefined;
+  let way = await resolveWay(roomId, gateArg);
   if (!way) {
     const ways = await waysForRoom(roomId);
     if (ways.length === 0) {
@@ -79,7 +85,7 @@ export async function hedgeOpen(
     u.send(
       "Which gate? " +
         ways.map((w) => w.name).join(", ") +
-        " — +hedge/open <name>",
+        " — +hedge/open <name>[=key]",
     );
     return;
   }
@@ -91,6 +97,7 @@ export async function hedgeOpen(
     way,
     season,
     fromMortal,
+    spokenKey,
   );
   if (!check.ok) {
     u.send(check.reason ?? "Cannot open.");

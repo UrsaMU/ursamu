@@ -16,10 +16,12 @@ SYNTAX
 
 TRAITS (/set)
   realm, danger, trod 1-5, flavor, maskflavor,
-  hollowrating 0-5.
+  hollowrating 0-5, hollowowner=<player>.
 
 GATES (/setway)
   maskName (mortal), name (true), key (phrase).
   Default maskName: Strange passage.
+  Key: +hedge/open <gate>=phrase (see help key).
 
-SEE ALSO: help hedge, help perception
+SEE ALSO: help hedge, help hollow, help key,
+  help perception

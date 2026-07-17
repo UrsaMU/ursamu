@@ -14,31 +14,47 @@ export interface PortalCheck {
 }
 
 /**
- * Can this sheet open or enter a hedgeway from the mortal side?
- * Open: closed or new season → pay Glamour.
- * Enter open/dormant same-season: free for Lost.
+ * Can this sheet open or enter a hedgeway?
+ * - Already open: free for anyone.
+ * - Correct key phrase: free for anyone (opens if closed).
+ * - Lost + free season stamp: free.
+ * - Lost otherwise: 1 Glamour to open.
+ * - Mortal/non-Lost closed: need key or open gate.
  */
 export function checkPortalEnter(
   sheet: CofdSheet | null,
   way: Hedgeway,
   season: string,
   fromMortal: boolean,
+  spokenKey?: string,
 ): PortalCheck {
+  if (way.state === "open") {
+    return { ok: true, glamourCost: 0, needsOpen: false };
+  }
+
+  const keyOk = Boolean(
+    spokenKey &&
+      spokenKey.trim() &&
+      way.keyPhrase &&
+      way.keyPhrase.trim() &&
+      spokenKey.trim().toLowerCase().replace(/\s+/g, " ") ===
+        way.keyPhrase.trim().toLowerCase().replace(/\s+/g, " "),
+  );
+  if (keyOk) {
+    return { ok: true, glamourCost: 0, needsOpen: true };
+  }
+
   if (!sheet || !isChangelingSheet(sheet)) {
-    if (way.state === "open") {
-      return { ok: true, glamourCost: 0, needsOpen: false };
-    }
+    const hint = way.keyPhrase
+      ? " Speak the key: +hedge/open <gate>=phrase"
+      : "";
     return {
       ok: false,
-      reason: "Only the Lost can open a closed Hedgeway " +
-        "(or wait for one already open).",
+      reason: "Only the Lost can open a closed Hedgeway" +
+        " (or use a key / wait until open)." + hint,
       glamourCost: 0,
       needsOpen: true,
     };
-  }
-
-  if (way.state === "open") {
-    return { ok: true, glamourCost: 0, needsOpen: false };
   }
 
   if (freeOpenForLost(way, season)) {
@@ -46,17 +62,17 @@ export function checkPortalEnter(
   }
 
   // Closed or dormant wrong season: pay to open.
-  if (!fromMortal && way.state === "closed") {
-    // Leaving Hedge through closed side still costs Glamour
-    // (portaling reverse).
-  }
+  void fromMortal;
 
   const g = sheet.energyCurrent ?? 0;
   if (g < PORTAL_GLAMOUR_COST) {
     return {
       ok: false,
       reason:
-        `Not enough Glamour (need ${PORTAL_GLAMOUR_COST}, have ${g}).`,
+        `Not enough Glamour (need ${PORTAL_GLAMOUR_COST}, have ${g}).` +
+        (way.keyPhrase
+          ? " Or: +hedge/open <gate>=keyphrase"
+          : ""),
       glamourCost: PORTAL_GLAMOUR_COST,
       needsOpen: true,
     };
@@ -75,25 +91,18 @@ export function readHedgeState(
     hedgeState?: HedgeSheetState;
   }).hedgeState;
   if (!raw || typeof raw !== "object") return {};
-  return {
-    lastHedgewayId: raw.lastHedgewayId,
-    trailUntil: raw.trailUntil,
-    priorMaskOnEnter: raw.priorMaskOnEnter === "mien" ||
-        raw.priorMaskOnEnter === "mask"
-      ? raw.priorMaskOnEnter
-      : undefined,
-    inHedge: raw.inHedge === true ? true : undefined,
-  };
+  // Preserve full hedgeState (nav, fruit, debts, homeHollow).
+  return { ...raw };
 }
 
 export function writeHedgeState(
   sheet: CofdSheet,
   hs: HedgeSheetState,
 ): CofdSheet {
+  const prev = readHedgeState(sheet);
   return {
     ...sheet,
-    // hedgeState is optional runtime field (migrate preserves via spread)
-    hedgeState: hs,
+    hedgeState: { ...prev, ...hs },
   } as CofdSheet;
 }
 

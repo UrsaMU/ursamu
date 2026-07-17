@@ -31,7 +31,7 @@ export async function hedgeSet(
     u.send(
       "Usage: +hedge/set <trait>=<value>  " +
         "(realm|danger|trod|flavor|maskflavor|" +
-        "hollowrating)",
+        "hollowrating|hollowowner)",
     );
     return;
   }
@@ -95,12 +95,34 @@ export async function hedgeSet(
         owners: cur.hollow?.owners ?? [],
         rating: n,
         enhancements: cur.hollow?.enhancements ?? [],
+        escapeRoomId: cur.hollow?.escapeRoomId,
+      },
+    };
+  } else if (
+    trait === "hollowowner" || trait === "owner"
+  ) {
+    // +hedge/set hollowowner=<player id or name>
+    const t = await u.util.target(u.me, val, true);
+    if (!t) {
+      u.send(`No player matches '${val}'.`);
+      return;
+    }
+    const owners = [...(cur.hollow?.owners ?? [])];
+    if (!owners.includes(t.id)) owners.push(t.id);
+    cur = {
+      ...cur,
+      realm: "hollow",
+      hollow: {
+        owners,
+        rating: cur.hollow?.rating ?? 1,
+        enhancements: cur.hollow?.enhancements ?? [],
+        escapeRoomId: cur.hollow?.escapeRoomId,
       },
     };
   } else {
     u.send(
       "Unknown trait. Use realm|danger|trod|flavor|" +
-        "maskflavor|hollowrating",
+        "maskflavor|hollowrating|hollowowner",
     );
     return;
   }
