@@ -11,7 +11,7 @@
  */
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
-import { execGet, execDrop, execGive } from "@ursamu/mush";
+import { execGet, execPut, execDrop, execGive } from "@ursamu/mush";
 import { execHome } from "@ursamu/mush";
 import { execTrigger } from "../packages/mush/src/verbs/softcode-trigger.ts";
 
@@ -21,6 +21,7 @@ const ROOM_ID  = "si_room1";
 const ACTOR_ID = "si_actor1";
 const RECV_ID  = "si_recv1";
 const THING_ID = "si_thing1";
+const BAG_ID   = "si_bag1";
 
 type Msg = { msg: string; target?: string };
 type ModifyCall = [string, string, unknown];
@@ -136,6 +137,120 @@ Deno.test("get — thing not in same room returns 'don't see that here'", OPTS, 
   const u = makeU({ args: ["FarBall"], targetSeq: [farThing] });
   await execGet(u);
   assertStringIncludes(u.msgs[0]?.msg ?? "", "don't see");
+});
+
+Deno.test("get from — takes item out of held container", OPTS, async () => {
+  const modifyCalls: ModifyCall[] = [];
+  const bag: IDBObj = {
+    id: BAG_ID,
+    name: "Backpack",
+    flags: new Set(["thing"]),
+    state: { name: "Backpack" },
+    location: ACTOR_ID,
+    contents: [],
+  };
+  const knife: IDBObj = {
+    id: THING_ID,
+    name: "Knife",
+    flags: new Set(["thing"]),
+    state: { name: "Knife" },
+    location: BAG_ID,
+    contents: [],
+  };
+  const u = makeU({
+    args: ["knife from backpack"],
+    targetSeq: [bag],
+    searchSeq: [[knife]],
+    modifyCalls,
+  });
+  await execGet(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "take");
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "from");
+  assertEquals(modifyCalls[0]?.[0], THING_ID);
+  assertEquals(
+    (modifyCalls[0]?.[2] as Record<string, unknown>).location,
+    ACTOR_ID,
+  );
+});
+
+Deno.test("get from — denied without enter_ok on room container", OPTS, async () => {
+  const locker: IDBObj = {
+    id: BAG_ID,
+    name: "Locker",
+    flags: new Set(["thing"]),
+    state: { name: "Locker" },
+    location: ROOM_ID,
+    contents: [],
+  };
+  const u = makeU({
+    args: ["ammo from locker"],
+    targetSeq: [locker],
+    canEditFn: () => false,
+  });
+  await execGet(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "can't get anything from");
+});
+
+// ===========================================================================
+// execPut — put in container
+// ===========================================================================
+
+Deno.test("put — no args prompts usage", OPTS, async () => {
+  const u = makeU({ cmdName: "put", args: [] });
+  await execPut(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "Put what where");
+});
+
+Deno.test("put — puts carried item into held bag", OPTS, async () => {
+  const modifyCalls: ModifyCall[] = [];
+  const knife: IDBObj = {
+    id: THING_ID,
+    name: "Knife",
+    flags: new Set(["thing"]),
+    state: { name: "Knife" },
+    location: ACTOR_ID,
+    contents: [],
+  };
+  const bag: IDBObj = {
+    id: BAG_ID,
+    name: "Backpack",
+    flags: new Set(["thing"]),
+    state: { name: "Backpack" },
+    location: ACTOR_ID,
+    contents: [],
+  };
+  // target order: item, then container
+  const u = makeU({
+    cmdName: "put",
+    args: ["knife in backpack"],
+    targetSeq: [knife, bag],
+    modifyCalls,
+  });
+  await execPut(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "put");
+  assertEquals(modifyCalls[0]?.[0], THING_ID);
+  assertEquals(
+    (modifyCalls[0]?.[2] as Record<string, unknown>).location,
+    BAG_ID,
+  );
+});
+
+Deno.test("put — cannot put into self", OPTS, async () => {
+  const bag: IDBObj = {
+    id: BAG_ID,
+    name: "Bag",
+    flags: new Set(["thing"]),
+    state: { name: "Bag" },
+    location: ACTOR_ID,
+    contents: [],
+  };
+  const u = makeU({
+    cmdName: "put",
+    args: ["bag in bag"],
+    targetSeq: [bag, bag],
+  });
+  await execPut(u);
+  assertStringIncludes(u.msgs[0]?.msg ?? "", "inside itself");
 });
 
 // ===========================================================================

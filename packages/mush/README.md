@@ -91,10 +91,24 @@ Theme headers, dividers, and footers with TinyMUX-style templates in
 | `%0` | Title / label |
 | `%1` | Width (default `78`) |
 | `%2` | Filler |
+| `%b` | Space (use around `%0` for padding) |
 
-Supported bracket functions: `center`, `ljust`, `rjust`, `repeat`,
-`space`, `cat`, `lit`, `strlen`. Color codes and `%r` / `%t` / `%b`
+Title padding is intentional — e.g. `%b%0%b` or ` %0 ` keeps a
+gap between the label and the fill characters. Layout arg splitting
+does **not** trim those spaces.
+
+Supported functions (nested ok): `center`, `ljust`, `rjust`,
+`repeat`, `space`, `cat`, `lit`, `strlen`, `words`, `if`, `eq`,
+`neq`, `and`, `or`, `not`, `gt`/`lt`/`gte`/`lte`, `add`/`sub`/
+`mul`/`div`, `min`/`max`/`abs`, `first`/`rest`, `mid`/`left`/
+`right`, `strip`/`trim`. Color codes and `%r` / `%t` / `%b`
 pass through.
+
+Conditional divider example (title line or nothing):
+
+```json
+"divider": "[if(words(%0),center(%ch%cy%0%cn,%1,%cg-%cn),)]"
+```
 
 Config templates apply to:
 

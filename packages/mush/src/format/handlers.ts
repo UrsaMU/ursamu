@@ -202,12 +202,16 @@ const MAX_TPL_DEPTH = 16;
  *   %1  width  (string)
  *   %2  filler
  *
- * Supported bracket functions (sync subset):
- *   center, ljust, rjust, repeat, space, cat, lit, strlen
+ * Supported functions (sync subset, nested ok):
+ *   center, ljust, rjust, repeat, space, cat, lit, strlen,
+ *   words, strlen (alias), if, eq, neq, and, or, not, gt, lt,
+ *   gte, lte, add, sub, mul, div, min, max, abs, first, rest,
+ *   mid, left, right, strip, trim
  * Color codes and %r/%t/%b pass through.
  *
  * Example:
- *   "header": "[center(%ch%cy%0%cn,%1,%cg=%cn)]"
+ *   "header":  "[center(%ch%cy%0%cn,%1,%cg=%cn)]"
+ *   "divider": "[if(words(%0),center(%ch%cy%0%cn,%1,%cg-%cn),)]"
  */
 let _layoutTemplates: LayoutTemplates = {};
 
@@ -251,8 +255,8 @@ function splitArgs(s: string): string[] {
   let depth = 0;
   for (let i = 0; i < s.length; i++) {
     const ch = s[i];
-    if (ch === "[") depth++;
-    else if (ch === "]") depth = Math.max(0, depth - 1);
+    if (ch === "(" || ch === "[") depth++;
+    else if (ch === ")" || ch === "]") depth = Math.max(0, depth - 1);
     if (ch === "," && depth === 0) {
       out.push(cur);
       cur = "";
@@ -268,37 +272,245 @@ function clampTpl(n: number): number {
   return Math.min(Math.max(0, n | 0), MAX_TPL_LEN);
 }
 
+function truthy(s: string): boolean {
+  const t = s.trim().toLowerCase();
+  return t !== "" && t !== "0" && t !== "#-1" && t !== "false";
+}
+
+function num(s: string): number {
+  const n = parseFloat(String(s).trim());
+  return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * Split args for a layout fn call. Leading/trailing spaces on each
+ * arg are KEPT — they are intentional padding around titles (%b / " ").
+ * Only peel a single optional space that is purely a softcode style
+ * separator after a comma when the rest of the arg is a nested call
+ * or empty? No — keep everything; callers that need numbers use num().
+ */
+function layoutArgs(raw: string): string[] {
+  return splitArgs(raw);
+}
+
 function callLayoutFn(name: string, args: string[]): string {
-  const n = name.toLowerCase();
+  const n = name.toLowerCase().trim();
   if (n === "center") {
-    const w = clampTpl(parseInt(args[1] ?? "78", 10) || 78);
+    const w = clampTpl(parseInt((args[1] ?? "78").trim(), 10) || 78);
+    // Preserve spaces in the title (arg 0) and filler (arg 2).
     return center(args[0] ?? "", w, args[2] ?? " ");
   }
   if (n === "ljust") {
-    const w = clampTpl(parseInt(args[1] ?? "78", 10) || 78);
+    const w = clampTpl(parseInt((args[1] ?? "78").trim(), 10) || 78);
     return ljust(args[0] ?? "", w, args[2] ?? " ");
   }
   if (n === "rjust") {
-    const w = clampTpl(parseInt(args[1] ?? "78", 10) || 78);
+    const w = clampTpl(parseInt((args[1] ?? "78").trim(), 10) || 78);
     return rjust(args[0] ?? "", w, args[2] ?? " ");
   }
   if (n === "repeat") {
-    const c = clampTpl(parseInt(args[1] ?? "0", 10) || 0);
+    const c = clampTpl(parseInt((args[1] ?? "0").trim(), 10) || 0);
     return (args[0] ?? "").repeat(c);
   }
   if (n === "space") {
-    const c = clampTpl(parseInt(args[0] ?? "0", 10) || 0);
+    const c = clampTpl(parseInt((args[0] ?? "0").trim(), 10) || 0);
     return " ".repeat(c);
   }
   if (n === "cat") return args.join("");
   if (n === "lit") return args[0] ?? "";
   if (n === "strlen") return String(visLen(args[0] ?? ""));
+  if (n === "words") {
+    // words() ignores leading/trailing spaces on the text (MUX-like)
+    // but does not alter the original title used in center().
+    const text = (args[0] ?? "").trim();
+    if (!text) return "0";
+    const delim = (args[1] ?? " ");
+    if (delim === " " || delim.trim() === "") {
+      return String(text.split(/\s+/).filter(Boolean).length);
+    }
+    return String(
+      text.split(delim).filter((p) => p.length > 0).length,
+    );
+  }
+  if (n === "if") {
+    return truthy(args[0] ?? "")
+      ? (args[1] ?? "")
+      : (args[2] ?? "");
+  }
+  if (n === "eq") {
+    return (args[0] ?? "") === (args[1] ?? "") ? "1" : "0";
+  }
+  if (n === "neq") {
+    return (args[0] ?? "") !== (args[1] ?? "") ? "1" : "0";
+  }
+  if (n === "and") {
+    return args.every((a) => truthy(a)) ? "1" : "0";
+  }
+  if (n === "or") {
+    return args.some((a) => truthy(a)) ? "1" : "0";
+  }
+  if (n === "not") {
+    return truthy(args[0] ?? "") ? "0" : "1";
+  }
+  if (n === "gt") {
+    return num(args[0] ?? "") > num(args[1] ?? "") ? "1" : "0";
+  }
+  if (n === "lt") {
+    return num(args[0] ?? "") < num(args[1] ?? "") ? "1" : "0";
+  }
+  if (n === "gte") {
+    return num(args[0] ?? "") >= num(args[1] ?? "") ? "1" : "0";
+  }
+  if (n === "lte") {
+    return num(args[0] ?? "") <= num(args[1] ?? "") ? "1" : "0";
+  }
+  if (n === "add") {
+    return String(args.reduce((a, b) => a + num(b), 0));
+  }
+  if (n === "sub") {
+    const a = num(args[0] ?? "0");
+    return String(args.slice(1).reduce((x, b) => x - num(b), a));
+  }
+  if (n === "mul") {
+    return String(args.reduce((a, b) => a * num(b), 1));
+  }
+  if (n === "div") {
+    const a = num(args[0] ?? "0");
+    const b = num(args[1] ?? "1");
+    return b === 0 ? "0" : String(Math.trunc(a / b));
+  }
+  if (n === "min") {
+    return String(Math.min(...args.map((a) => num(a))));
+  }
+  if (n === "max") {
+    return String(Math.max(...args.map((a) => num(a))));
+  }
+  if (n === "abs") return String(Math.abs(num(args[0] ?? "0")));
+  if (n === "first") {
+    const text = args[0] ?? "";
+    const delim = args[1] ?? " ";
+    return text.split(delim)[0] ?? "";
+  }
+  if (n === "rest") {
+    const text = args[0] ?? "";
+    const delim = args[1] ?? " ";
+    const i = text.indexOf(delim);
+    return i < 0 ? "" : text.slice(i + delim.length);
+  }
+  if (n === "mid") {
+    const s = args[0] ?? "";
+    const start = Math.max(0, Math.trunc(num(args[1] ?? "0")));
+    const len = clampTpl(
+      Math.trunc(num(args[2] ?? String(s.length))),
+    );
+    return s.slice(start, start + len);
+  }
+  if (n === "left") {
+    const s = args[0] ?? "";
+    return s.slice(0, clampTpl(Math.trunc(num(args[1] ?? "0"))));
+  }
+  if (n === "right") {
+    const s = args[0] ?? "";
+    const c = clampTpl(Math.trunc(num(args[1] ?? "0")));
+    return c <= 0 ? "" : s.slice(-c);
+  }
+  if (n === "strip" || n === "trim") {
+    return (args[0] ?? "").trim();
+  }
   return "";
 }
 
 /**
+ * Find the matching ')' for an open '(' at `openIdx`, tracking
+ * nested parens. Returns -1 if unbalanced.
+ */
+function matchingParen(s: string, openIdx: number): number {
+  let depth = 0;
+  for (let i = openIdx; i < s.length; i++) {
+    if (s[i] === "(") depth++;
+    else if (s[i] === ")") {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Expand nested bare function calls: name(arg,arg) — innermost first.
+ * Handles if(neq(words(%0),0), center(...),) style templates.
+ */
+function expandBareCalls(s: string): string {
+  for (let depth = 0; depth < MAX_TPL_DEPTH; depth++) {
+    // Rightmost open-paren that is not itself nested inside another
+    // open call's still-unresolved args would be fragile; instead pick
+    // any call whose arg list contains no further name(...).
+    const re = /([a-zA-Z_][a-zA-Z0-9_]*)\(/g;
+    let m: RegExpExecArray | null;
+    let found = false;
+    let bestStart = -1;
+    let bestEnd = -1;
+    let bestName = "";
+    while ((m = re.exec(s)) !== null) {
+      const nameStart = m.index;
+      const openIdx = nameStart + m[1].length;
+      const closeIdx = matchingParen(s, openIdx);
+      if (closeIdx < 0) continue;
+      const rawArgs = s.slice(openIdx + 1, closeIdx);
+      // Innermost: no nested name( inside the arg list
+      if (/[a-zA-Z_][a-zA-Z0-9_]*\(/.test(rawArgs)) continue;
+      bestStart = nameStart;
+      bestEnd = closeIdx;
+      bestName = m[1];
+      found = true;
+      // keep scanning so we take the rightmost innermost (stable)
+    }
+    if (!found) break;
+    const rawArgs = s.slice(
+      bestStart + bestName.length + 1,
+      bestEnd,
+    );
+    // Keep arg whitespace (%b / spaces around titles are design).
+    const parts = layoutArgs(rawArgs);
+    const result = callLayoutFn(bestName, parts);
+    s = s.slice(0, bestStart) + result + s.slice(bestEnd + 1);
+    if (s.length > MAX_TPL_LEN) s = s.slice(0, MAX_TPL_LEN);
+  }
+  return s;
+}
+
+/** Peel outer `[` `]` pairs that wrap the entire string. */
+function stripOuterBrackets(input: string): string {
+  let s = input.trim();
+  for (let n = 0; n < MAX_TPL_DEPTH; n++) {
+    if (!s.startsWith("[") || !s.endsWith("]")) break;
+    let depth = 0;
+    let wrapsAll = true;
+    for (let i = 0; i < s.length; i++) {
+      if (s[i] === "[") depth++;
+      else if (s[i] === "]") {
+        depth--;
+        if (depth === 0 && i !== s.length - 1) {
+          wrapsAll = false;
+          break;
+        }
+        if (depth < 0) {
+          wrapsAll = false;
+          break;
+        }
+      }
+    }
+    if (!wrapsAll || depth !== 0) break;
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
+/**
  * Expand a layout mushcode template with %0/%1/%2 and a safe
- * bracket-function subset. Sync — safe for header()/divider()/footer().
+ * function subset. Sync — safe for header()/divider()/footer().
+ * Accepts both [fn(args)] and bare nested fn(args) forms, e.g.
+ *   [if(words(%0),center(%ch%cy%0%cn,%1,%cg-%cn),)]
  */
 export function expandLayoutTemplate(
   template: string,
@@ -315,18 +527,12 @@ export function expandLayoutTemplate(
     .replace(/%t/gi, "\t")
     .replace(/%b/gi, " ");
 
-  for (let depth = 0; depth < MAX_TPL_DEPTH; depth++) {
-    const next = s.replace(
-      /\[([a-zA-Z_][a-zA-Z0-9_]*)\(([^[\]]*)\)\]/g,
-      (_m, fn: string, rawArgs: string) => {
-        const parts = splitArgs(rawArgs).map((p) => p.trim());
-        return callLayoutFn(fn, parts);
-      },
-    );
-    if (next === s) break;
-    s = next;
-    if (s.length > MAX_TPL_LEN) s = s.slice(0, MAX_TPL_LEN);
-  }
+  s = stripOuterBrackets(s);
+  s = expandBareCalls(s);
+  // Leftover outer brackets after partial eval (rare)
+  s = stripOuterBrackets(s);
+
+  if (s.length > MAX_TPL_LEN) s = s.slice(0, MAX_TPL_LEN);
   return s;
 }
 

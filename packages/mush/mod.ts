@@ -125,7 +125,14 @@ export { setLoadedPlugins }                  from "./src/verbs/admin-reload.ts";
 export { runStartupAttrs }                   from "./src/world/startup.ts";
 
 // Verb exec functions (re-exported for tests and bridge files)
-export { execGet, execDrop, execGive, execUse, execCreateObject } from "./src/verbs/manipulation.ts";
+export {
+  execGet,
+  execPut,
+  execDrop,
+  execGive,
+  execUse,
+  execCreateObject,
+} from "./src/verbs/manipulation.ts";
 export { execLook, defaultConformatHandler }                       from "./src/verbs/look.ts";
 export { execHome, execInventory }                                 from "./src/verbs/home.ts";
 export { execSay, execPose, execThink, execPage, execWhisper }     from "./src/verbs/say.ts";
