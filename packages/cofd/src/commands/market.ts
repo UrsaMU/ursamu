@@ -135,7 +135,7 @@ async function marketBuy(
   mode: "glamour" | "debt",
 ): Promise<void> {
   const sheet = getSheet(u.me);
-  const err = requireChangeling(sheet);
+  const err = requireChangeling(sheet, "Goblin Markets");
   if (err) {
     u.send(err);
     return;

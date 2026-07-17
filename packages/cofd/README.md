@@ -31,8 +31,9 @@ GMCCG-inspired module layout, file-driven supernatural templates.
   Wyrd, Glamour, and Clarity on sheets; Mask/mien and Chrysalis (`+shift`);
   Contracts (`+contract`); Hedge travel, navigation, and goblin fruit as
   real inventory objects (`+hedge`); Goblin Markets and Debt
-  (`+market`, `+debt`); dual look via `fae` flag (`maskName` /
-  FAEDESC — see `docs/fae-perception-spec.md`).
+  (`+market`, `+debt`); Icons (`+icon`); Hedgespinning (`+spin`);
+  dual look via `fae` flag (`maskName` / FAEDESC — see
+  `docs/fae-perception-spec.md`).
 
 ---
 
@@ -76,6 +77,10 @@ GMCCG-inspired module layout, file-driven supernatural templates.
 +shift [<form>]                             Mask/mien or animal form (CtL).
 +contract [<name>]                          List/invoke Changeling Contracts.
 +hedge[/open|/exit|/claim|...]              Hedgeways, portaling, Hollows.
++market[/buy|/credit|...]                   Goblin Markets (Glamour or debt).
++debt[/pay|/call]                           Goblin Debts.
++icon[/grant|/spend]                        Icons (lost pieces of self).
++spin <effect>                              Hedgespinning (reshape the Hedge).
 ```
 
 Full per-command help: `help cofd`, then topic groups

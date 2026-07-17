@@ -1,14 +1,15 @@
 +DEBT  -- Goblin Debts from market credit (CtL).
 
 SYNTAX
-  +debt                      List open / called debts.
+  +debt                      List open / called / paid.
   +debt/pay <id>             Mark paid after service.
   +debt/call <p> <id>=msg    Staff: call the debt in.
   +debt/clear <p> <id>       Staff: force clear.
 
 NOTES
-  Severity 1–5 stacks. Called debts show the demand.
-  Paying is RP-trust; ST may enforce via +debt/call.
+  Severity is **1–5**. Open and called both count.
+  Called debts show the demand text. Paying is
+  RP-trust; staff enforce with **+debt/call**.
 
 EXAMPLES
   +debt

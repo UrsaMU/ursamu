@@ -90,6 +90,22 @@ export interface CofdSheet {
   /** Discrete Contract picks selected by name (Changeling: The Lost). */
   contracts?: string[];
   /**
+   * Icons — lost pieces of self (CtL). Full records, not catalog names.
+   */
+  icons?: {
+    id: string;
+    name: string;
+    kind: string;
+    heldBy: string;
+    description: string;
+    status: string;
+    skillKey?: string;
+    createdAt: number;
+    spentAt?: number;
+    recoveredAt?: number;
+    spentNote?: string;
+  }[];
+  /**
    * Sight flags (fae, forsaken) kept after template no longer requires
    * them — staff-granted fetch / fae-touched, etc.
    */
@@ -324,10 +340,37 @@ export function migrateSheet(sheet: any): CofdSheet {
         : undefined,
     }
     : undefined;
+  const icons = Array.isArray(sheet.icons)
+    ? sheet.icons
+      .filter((x: unknown) => x && typeof x === "object")
+      .map((x: Record<string, unknown>) => ({
+        id: String(x.id ?? ""),
+        name: String(x.name ?? ""),
+        kind: String(x.kind ?? "other"),
+        heldBy: String(x.heldBy ?? "Unknown"),
+        description: String(x.description ?? ""),
+        status: String(x.status ?? "lost"),
+        skillKey: x.skillKey
+          ? String(x.skillKey)
+          : undefined,
+        createdAt: Number(x.createdAt) || 0,
+        spentAt: x.spentAt ? Number(x.spentAt) : undefined,
+        recoveredAt: x.recoveredAt
+          ? Number(x.recoveredAt)
+          : undefined,
+        spentNote: x.spentNote
+          ? String(x.spentNote)
+          : undefined,
+      }))
+      .filter((x: { id: string; name: string }) =>
+        x.id && x.name
+      )
+    : undefined;
 
   return {
     ...sheet,
     hedgeState,
+    icons,
     template,
     moralityValue,
     powerStatValue,

@@ -11,6 +11,8 @@ COMMANDS
   help contract    Invoke Contracts.
   help market      Goblin Markets.
   help debt        Goblin Debts.
+  help icon        Icons (lost pieces of self).
+  help spin        Hedgespinning.
   help perception  Fae flag and dual look.
 
 SEE ALSO: help cofd, help sheet, help cg

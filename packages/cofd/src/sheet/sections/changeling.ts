@@ -2,10 +2,11 @@
 //
 // Identity (Seeming/Kith/Court/Favored/Needle/Thread) and pool stats
 // (Wyrd/Glamour/Clarity) already render in the header and Advantages
-// sections. This section only lists Contracts.
+// sections. This section lists Contracts and active Icons.
 
 import { divider } from "@ursamu/ursamu";
 import type { SheetContext, SheetSection } from "./types.ts";
+import { activeIcons, readIcons } from "../../icon/index.ts";
 
 // Render "Label: a, b, c" wrapped to <= 78 visible cols, continuation
 // lines aligned under the first value. Color codes don't count.
@@ -40,11 +41,27 @@ export const changelingSection: SheetSection = {
     }
 
     const contracts = sheet.contracts ?? [];
-    if (contracts.length === 0) return [];
+    const icons = readIcons(sheet);
+    if (contracts.length === 0 && icons.length === 0) return [];
 
     const lines: string[] = [];
-    lines.push(await divider("C O N T R A C T S"));
-    lines.push(...wrapField("Contracts", contracts));
+    if (contracts.length > 0) {
+      lines.push(await divider("C O N T R A C T S"));
+      lines.push(...wrapField("Contracts", contracts));
+    }
+    const active = activeIcons(sheet);
+    if (icons.length > 0) {
+      lines.push(await divider("I C O N S"));
+      if (active.length === 0) {
+        lines.push("  (none active — spent/recovered)");
+      } else {
+        const names = active.map(
+          (i) =>
+            `${i.name}(${i.status[0]})`,
+        );
+        lines.push(...wrapField("Active", names));
+      }
+    }
     return lines;
   },
 };

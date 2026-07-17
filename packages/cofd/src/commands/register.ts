@@ -38,6 +38,8 @@ import { contractExec } from "./contract.ts";
 import { hedgeExec } from "./hedge.ts";
 import { marketExec } from "./market.ts";
 import { debtCommand } from "./debt.ts";
+import { iconCommand } from "./icon.ts";
+import { spinCommand } from "./spin.ts";
 
 addCmd({
   name: "+extended",
@@ -925,6 +927,54 @@ Examples:
   +debt/pay debt-1234
   +debt/call Alice abc12345=Bring three teeth by dawn`,
   exec: debtCommand,
+});
+
+addCmd({
+  name: "+icon",
+  pattern: /^\+icon(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+icon[/sw] [args]  -- Icons: lost pieces of self (CtL).
+
+Switches:
+  (none) / list       List your Icons.
+  /info <id|name>     Full Icon detail.
+  /spend <id> [=note] Burn an Icon for Glamour surge.
+  /grant <p>=name/... Staff: grant Icon.
+  /recover <p> <id>   Staff: mark recovered.
+  /hold <p> <id>=who  Staff: set holder.
+  /remove <p> <id>    Staff: delete Icon.
+
+Examples:
+  +icon
+  +icon/spend childhood-laugh=face the Huntsman
+  +icon/grant Pix=Mother's Song/memory/The Keeper`,
+  exec: iconCommand,
+});
+
+addCmd({
+  name: "+spin",
+  pattern: /^\+spin(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+spin[/sw] [args]  -- Hedgespinning (reshape the Hedge).
+
+Must be in a Hedge or Hollow room. Costs Glamour;
+rolls Wits + Crafts|Occult + Wyrd vs effect target.
+
+Switches:
+  (none) / list       Effect catalog.
+  /info <effect>      Effect detail.
+  /path|/shelter|...  Spin that effect.
+  path [text]         Same without slash.
+  /veil <mask text>   Set mortal-facing room veil.
+
+Examples:
+  +spin
+  +spin path
+  +spin/veil A quiet suburban park
+  +spin fruit`,
+  exec: spinCommand,
 });
 
 addCmd({

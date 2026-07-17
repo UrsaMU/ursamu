@@ -177,6 +177,10 @@ export function buildNavPools(
     playerPool -= 2;
     mods.push("−2 Lost");
   }
+  if (hasFruitFlag(sheet, "spinPath")) {
+    playerPool += 2;
+    mods.push("+2 Hedgespun path");
+  }
   playerPool = Math.max(0, playerPool);
   const hedgePool = hedgeDice(
     sheet,

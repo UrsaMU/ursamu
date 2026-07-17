@@ -41,10 +41,11 @@ export async function persistSheet(
 
 export function requireChangeling(
   sheet: CofdSheet | null,
+  feature = "This",
 ): string | null {
   if (!sheet) return "No character sheet.";
   if (!isChangelingSheet(sheet)) {
-    return "Goblin Markets are for the Lost (changeling).";
+    return `${feature} is for the Lost (changeling).`;
   }
   return null;
 }

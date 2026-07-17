@@ -16,4 +16,4 @@ DUAL LOOK
   maskflavor on +hedge status. See help perception.
 
 SEE ALSO: help hedge/staff, help market, help debt,
-  help perception, help shift
+  help icon, help spin, help perception, help shift

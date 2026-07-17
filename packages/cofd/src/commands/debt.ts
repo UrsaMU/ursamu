@@ -59,7 +59,7 @@ async function debtList(
     target = t;
   }
   const sheet = getSheet(target);
-  const err = requireChangeling(sheet);
+  const err = requireChangeling(sheet, "Goblin Debts");
   if (err && target.id === u.me.id) {
     u.send(err);
     return;
@@ -111,7 +111,7 @@ async function debtPay(
   rest: string,
 ): Promise<void> {
   const sheet = getSheet(u.me);
-  const err = requireChangeling(sheet);
+  const err = requireChangeling(sheet, "Goblin Debts");
   if (err) {
     u.send(err);
     return;
