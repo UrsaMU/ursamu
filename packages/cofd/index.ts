@@ -6,16 +6,28 @@
 import "./commands.ts";
 
 import type { IDBObj, IPlugin, MoveEvent, ObjectMovedEvent } from "@ursamu/ursamu";
-import { registerPluginRoute, gameHooks, dbojs, send, sessions, registerFormatHandler, unregisterFormatHandler, registerHeader, unregisterHeader, registerDivider, unregisterDivider, registerFooter, unregisterFooter } from "@ursamu/ursamu";
-import type { LayoutFn } from "@ursamu/ursamu";
+import {
+  registerPluginRoute,
+  gameHooks,
+  dbojs,
+  send,
+  sessions,
+  registerFormatHandler,
+  unregisterFormatHandler,
+} from "@ursamu/ursamu";
 import { itemData } from "./src/equipment/objects.ts";
-import { cofdConformatHandler, cofdDescformatHandler } from "./src/support/index.ts";
-import { header as cofdHeaderFn, divider as cofdDividerFn, footer as cofdFooterFn } from "./src/support/format.ts";
+import {
+  cofdConformatHandler,
+  cofdDescformatHandler,
+} from "./src/support/index.ts";
 import { registerHelpDir } from "@ursamu/help-plugin";
 import { registerJobBuckets } from "@ursamu/jobs-plugin";
 import { routeHandler } from "./routes.ts";
 import { getEncounterForRoom, setMoved } from "./src/combat/encounter.ts";
-import { enforceMoveLock, type MoveLockActor } from "./src/combat/move_lock.ts";
+import {
+  enforceMoveLock,
+  type MoveLockActor,
+} from "./src/combat/move_lock.ts";
 import {
   aggroMobsInRoom,
   makeHookSdk,
@@ -151,13 +163,20 @@ export const plugin: IPlugin = {
     gameHooks.on("player:move", onPlayerMove);
     gameHooks.on("object:moved", onObjectMoved);
     gameHooks.on("engine:ready", onEngineReady);
-    registerHeader(cofdHeaderFn as LayoutFn);
-    registerDivider(cofdDividerFn as LayoutFn);
-    registerFooter(cofdFooterFn as LayoutFn);
+    // Layout chrome comes from game.layout / engine defaults —
+    // do not register a CoFD-specific header stack.
     // deno-lint-ignore no-explicit-any
-    (registerFormatHandler as any)("CONFORMAT", cofdConformatHandler, { prepend: true });
+    (registerFormatHandler as any)(
+      "CONFORMAT",
+      cofdConformatHandler,
+      { prepend: true },
+    );
     // deno-lint-ignore no-explicit-any
-    (registerFormatHandler as any)("DESCFORMAT", cofdDescformatHandler, { prepend: true });
+    (registerFormatHandler as any)(
+      "DESCFORMAT",
+      cofdDescformatHandler,
+      { prepend: true },
+    );
     return true;
   },
 
@@ -166,9 +185,6 @@ export const plugin: IPlugin = {
     gameHooks.off("object:moved", onObjectMoved);
     gameHooks.off("engine:ready", onEngineReady);
     stopAllWanderers();
-    unregisterHeader(cofdHeaderFn as LayoutFn);
-    unregisterDivider(cofdDividerFn as LayoutFn);
-    unregisterFooter(cofdFooterFn as LayoutFn);
     unregisterFormatHandler("CONFORMAT", cofdConformatHandler);
     unregisterFormatHandler("DESCFORMAT", cofdDescformatHandler);
   },

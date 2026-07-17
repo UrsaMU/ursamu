@@ -14,8 +14,10 @@ DISPLAY
   '!' next to name = Beaten Down.
 
 TURN FLOW
-  Highest init acts first. /next moves the marker. After the last
-  actor, round counter loops and Defense resets.
+  Highest init acts first. /next ends the current turn; any following
+  NPCs act via AI until a PC (or a manual NPC) is up. After the last
+  actor, the round counter loops and Defense resets. /next/manual
+  advances one slot with no AI.
 
 DELAY / DROP
   /delay pushes your action later; /act reclaims.

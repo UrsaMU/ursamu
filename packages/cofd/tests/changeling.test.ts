@@ -77,7 +77,7 @@ describe("Changeling: The Lost Template", OPTS, () => {
     }
   });
 
-  it("renders changelingSection correctly with set values", async () => {
+  it("renders changelingSection as Contracts only (no identity dupes)", async () => {
     let sheet = defaultSheet();
     sheet = setTrait(sheet, "template", "changeling");
     sheet = setTrait(sheet, "seeming", "Fairest");
@@ -85,8 +85,9 @@ describe("Changeling: The Lost Template", OPTS, () => {
     sheet = setTrait(sheet, "court", "Spring");
     sheet = setTrait(sheet, "needle", "Protector");
     sheet = setTrait(sheet, "thread", "Believer");
-    sheet = setTrait(sheet, "wyrd", 3); // Wyrd 3
-    sheet = setTrait(sheet, "glamour", 12); // Glamour 12 max
+    sheet = setTrait(sheet, "wyrd", 3);
+    sheet = setTrait(sheet, "glamour", 12);
+    sheet.contracts = ["Mask of Superiority", "Hostile Takeover"];
 
     const ctx: SheetContext = {
       playerName: "Arthur",
@@ -98,14 +99,30 @@ describe("Changeling: The Lost Template", OPTS, () => {
     const renderedLines = await changelingSection.render(ctx);
 
     const fullText = renderedLines.join("\n");
-    assertStringIncludes(fullText, "C H A N G E L I N G :   T H E   L O S T");
-    assertStringIncludes(fullText, "Fairest");
-    assertStringIncludes(fullText, "Dancer");
-    assertStringIncludes(fullText, "Spring");
-    assertStringIncludes(fullText, "Protector");
-    assertStringIncludes(fullText, "Believer");
-    assertStringIncludes(fullText, "3  (Glamour max 12)");
-    assertStringIncludes(fullText, "12 / 12");
+    // Contracts only -- identity/pools live in header + advantages.
+    assertStringIncludes(fullText, "C O N T R A C T S");
+    assertStringIncludes(fullText, "Mask of Superiority");
+    assertStringIncludes(fullText, "Hostile Takeover");
+    // No duplicated identity fields.
+    if (fullText.includes("Seeming:")) {
+      throw new Error("Seeming should not appear in changelingSection");
+    }
+    if (fullText.includes("Wyrd:")) {
+      throw new Error("Wyrd should not appear in changelingSection");
+    }
+  });
+
+  it("renders nothing when changeling has no contracts", async () => {
+    let sheet = defaultSheet();
+    sheet = setTrait(sheet, "template", "changeling");
+    const ctx: SheetContext = {
+      playerName: "Arthur",
+      actorId: "1",
+      sheet,
+      template: COFD_TEMPLATES.changeling,
+      width: 78,
+    };
+    assertEquals((await changelingSection.render(ctx)).length, 0);
   });
 });
 

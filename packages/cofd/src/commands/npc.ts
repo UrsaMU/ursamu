@@ -448,19 +448,25 @@ async function npcAi(u: IUrsamuSDK, rest: string): Promise<void> {
     return;
   }
   const eqIdx = rest.indexOf("=");
+  const valid = [...listArchetypes(), "manual", "off", "none"];
   if (eqIdx < 0) {
-    u.send(`Syntax: +npc/ai <name>=<archetype>. Valid: ${listArchetypes().join(", ")}.`);
+    u.send(
+      `Syntax: +npc/ai <name>=<archetype>. Valid: ${valid.join(", ")}.`,
+    );
     return;
   }
   const name = u.util.stripSubs(rest.slice(0, eqIdx)).trim();
   const archetype = u.util.stripSubs(rest.slice(eqIdx + 1)).trim().toLowerCase();
   if (!name || !archetype) {
-    u.send(`Syntax: +npc/ai <name>=<archetype>. Valid: ${listArchetypes().join(", ")}.`);
+    u.send(
+      `Syntax: +npc/ai <name>=<archetype>. Valid: ${valid.join(", ")}.`,
+    );
     return;
   }
-  const valid = listArchetypes();
   if (!valid.includes(archetype)) {
-    u.send(`Unknown AI archetype '${archetype}'. Valid: ${valid.join(", ")}.`);
+    u.send(
+      `Unknown AI archetype '${archetype}'. Valid: ${valid.join(", ")}.`,
+    );
     return;
   }
   const npc = await findNpcObj(u, name);

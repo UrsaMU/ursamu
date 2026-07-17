@@ -13,6 +13,7 @@
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
 import {
   addParticipant,
+  advanceTurn,
   createEncounter,
   ensureParticipant,
   getEncounterForRoom,
@@ -142,21 +143,31 @@ export async function resolveOrSpawnTarget(
 
 /**
  * Called by +attack / +throw / +grapple after the PC's instant action has
- * been recorded with setActionUsed. Runs the AI walker so NPC turns play
- * out without a manual +combat/next, halting at the next live PC or scene
- * resolution.
+ * been recorded with setActionUsed.
+ *
+ * Steps past the PC who just acted, then runs the AI walker so every
+ * following NPC acts automatically until the next live PC turn (or the
+ * scene resolves). NPC actors skip this to avoid nested walks.
  */
 export async function endTurnAndWalk(
   u: IUrsamuSDK,
   encounterId: string,
 ): Promise<void> {
-  // If the actor is an NPC, do not auto-advance or walk. NPCs are driven
-  // by the ST's +combat/next walker, and calling endTurnAndWalk here
-  // causes nested/double turn advancement.
+  // NPCs are driven by the walker itself; never nest a walk from here.
   if (u.me.flags.has("npc")) return;
 
   try {
-    await advanceTurnSmart(encounterId, u);
+    // Leave the PC who just spent their instant action.
+    await advanceTurn(encounterId, u);
+    const after = await advanceTurnSmart(encounterId, u);
+    if (!after || after.status !== "active") return;
+    const cur = after.participants[after.turnIdx];
+    if (!cur) return;
+    const msg =
+      `%cyTURN>>%cn Round ${after.round} -- It is now ${cur.name}'s turn ` +
+      `(Initiative ${cur.initiative}).`;
+    u.send(msg);
+    u.broadcast(msg);
   } catch {
     // Walker failures should never break the player's command.
   }

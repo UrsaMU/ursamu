@@ -26,36 +26,50 @@ export function center(s: string, w: number): string {
 }
 
 /**
- * Render a stat line with a dotted leader. The label sits flush-left,
- * the value sits flush-right within `width`, and dots fill the space
- * between. When `temp` is provided and differs from `base`, the trailing
- * value renders as `base(temp)`.
+ * Fixed 6-slot trait track. PC attrs/skills/merits cap at 5 in
+ * normal play; the 6th slot covers rare temps or edge cases.
+ * Power stats (Primal Urge 1–10) use numeric lines, not this.
+ */
+export const DOT_TRACK_MAX = 6;
+
+/**
+ * Left-filled CofD track: `*.....` at 1, `******` at 6.
+ * Clamped to 0..maxDots. Visible length is always maxDots.
+ */
+export function formatDotTrack(
+  val: number,
+  maxDots = DOT_TRACK_MAX,
+): string {
+  const v = Math.max(0, Math.min(maxDots, Math.floor(val)));
+  return "%ch%cy" + "*".repeat(v) + "%cn%cx" +
+    ".".repeat(maxDots - v) + "%cn";
+}
+
+/**
+ * Trait line: `Label: *.....1` padded to `width` visible columns.
+ * Temp differs: `Label: **....2(3)`.
  *
- *   formatDottedStatLine("Intelligence", 3, undefined, 44)
- *     -> "Intelligence:..............................3"
- *
- *   formatDottedStatLine("Wits", 2, 3, 44)
- *     -> "Wits:.....................................2(3)"
- *
- * Color codes are applied: label is %ch, dots are %cx (dim), value is
- * %ch%cy. The width is the visible-character width AFTER color codes
- * are stripped.
+ * Color: label %ch; track yellow/dim; digits %ch%cy; parens plain.
  */
 export function formatDottedStatLine(
   label: string,
   base: number,
   temp: number | undefined,
   width: number,
-  ): string {
+): string {
   const labelStr = label + ":";
+  const track = formatDotTrack(base);
   const valueStr = (temp !== undefined && temp !== base)
     ? `${base}(${temp})`
     : `${base}`;
-
-  const dotsNeeded = width - labelStr.length - valueStr.length;
-  const dots = ".".repeat(Math.max(1, dotsNeeded));
-
-  return `%ch${labelStr}%cn%cx${dots}%cn%ch%cy${valueStr}%cn`;
+  const visibleLen = labelStr.length + DOT_TRACK_MAX +
+    valueStr.length;
+  const pad = Math.max(0, width - visibleLen);
+  const valueColored = (temp !== undefined && temp !== base)
+    ? `%ch%cy${base}%cn(%ch%cy${temp}%cn)`
+    : `%ch%cy${base}%cn`;
+  return `%ch${labelStr}%cn${" ".repeat(pad)}${track}` +
+    valueColored;
 }
 
 /**
@@ -74,55 +88,14 @@ export function formatDottedLine(
   return `%ch${labelStr}%cn%cx${dots}%cn%ch%cy${value}%cn`;
 }
 
-export function header(title = "", _filler = "=", width = 78): string {
-  let actualWidth = width;
-  let actualFiller = "=";
-  if (typeof _filler === "number") {
-    actualWidth = _filler;
-  } else if (typeof _filler === "string") {
-    actualFiller = _filler;
-  }
-  if (!title) {
-    return `%cr${actualFiller.repeat(actualWidth)}%cn`;
-  }
-  const rightPad = Math.max(0, actualWidth - 7 - title.length);
-  return `%cr${actualFiller.repeat(5)}%cn %ch%cy${title}%cn %cr${actualFiller.repeat(rightPad)}%cn`;
-}
-
-export function divider(title = "", _filler = "-", width = 78): string {
-  let actualWidth = width;
-  let actualFiller = "-";
-  if (typeof _filler === "number") {
-    actualWidth = _filler;
-  } else if (typeof _filler === "string") {
-    actualFiller = _filler;
-  }
-  if (!title) {
-    return `%cr${actualFiller.repeat(actualWidth)}%cn`;
-  }
-  const rightPad = Math.max(0, actualWidth - 7 - title.length);
-  return `%cr${actualFiller.repeat(5)}%cn %ch%cy${title}%cn %cr${actualFiller.repeat(rightPad)}%cn`;
-}
-
-export function footer(title = "", _filler = "=", width = 78): string {
-  let actualWidth = width;
-  let actualTitle = title;
-  let actualFiller = "=";
-  if (typeof title === "number") {
-    actualWidth = title;
-    actualTitle = "";
-  } else if (typeof title === "string") {
-    actualTitle = title;
-    if (typeof _filler === "number") {
-      actualWidth = _filler;
-    } else if (typeof _filler === "string") {
-      actualFiller = _filler;
-    }
-  }
-  if (!actualTitle) {
-    return `%cr${actualFiller.repeat(actualWidth)}%cn`;
-  }
-  const rightPad = Math.max(0, actualWidth - 7 - actualTitle.length);
-  return `%cr${actualFiller.repeat(5)}%cn %ch%cy${actualTitle}%cn %cr${actualFiller.repeat(rightPad)}%cn`;
-}
+// Engine layout chrome — honors game.layout.* mushcode templates
+// first, then registerHeader stacks / defaults. Same path as help,
+// bbs, and native commands. Do not hardcode a CoFD color theme here.
+// Import from @ursamu/mush (not @ursamu/ursamu) so showcase shims
+// that re-export this module cannot create a circular import.
+export {
+  header,
+  divider,
+  footer,
+} from "@ursamu/mush";
 

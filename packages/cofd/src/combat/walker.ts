@@ -128,13 +128,21 @@ export async function advanceTurnSmart(
     const sheet = npc.state?.cofd as
       | (CofdSheet & { npc?: { aiArchetype?: string } })
       | undefined;
-    const archetypeKey = sheet?.npc?.aiArchetype ?? "beshilu-swarmer";
+    const archetypeKey = (
+      sheet?.npc?.aiArchetype ?? "beshilu-swarmer"
+    ).toLowerCase().trim();
+    // Opt-out: ST-controlled NPCs halt the walker like a PC would.
+    if (
+      archetypeKey === "manual" ||
+      archetypeKey === "off" ||
+      archetypeKey === "none"
+    ) {
+      return enc;
+    }
     const archetype = getArchetype(archetypeKey);
     if (!archetype) {
-      // Unknown archetype -- just wait.
-      await advanceTurn(enc.id, u);
-      walked += 1;
-      continue;
+      // Unknown key -- treat as manual so ST can act, don't spin.
+      return enc;
     }
 
     const others = enc.participants.filter((p) => p.actorId !== slot.actorId);

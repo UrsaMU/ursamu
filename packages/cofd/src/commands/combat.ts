@@ -298,11 +298,22 @@ async function combatLeave(u: IUrsamuSDK, rest: string) {
   const label = actor.id === u.me.id ? "You have" : `${u.util.displayName(actor, u.me)} has`;
   u.send(`${label} left the encounter.`);
   if (result.wasActive) {
-    // Advance was already handled structurally by removeParticipant's turnIdx fix.
-    const fresh = await getEncounterForRoom(roomId);
-    if (fresh && fresh.participants.length > 0) {
-      const cur = fresh.participants[fresh.turnIdx];
-      u.send(`Turn advances to ${cur.name}.`);
+    // removeParticipant already fixed turnIdx. If an NPC is now up,
+    // auto-resolve them until the next PC (or scene end).
+    let fresh = await getEncounterForRoom(roomId);
+    if (!fresh || fresh.participants.length === 0) return;
+    const cur0 = fresh.participants[fresh.turnIdx];
+    if (cur0?.kind === "npc" && !cur0.isOut) {
+      fresh = (await advanceTurnSmart(fresh.id, u)) ?? fresh;
+    }
+    if (fresh.status !== "active") return;
+    const cur = fresh.participants[fresh.turnIdx];
+    if (cur) {
+      const msg =
+        `%cyTURN>>%cn Round ${fresh.round} -- It is now ${cur.name}'s turn ` +
+        `(Initiative ${cur.initiative}).`;
+      u.send(msg);
+      u.broadcast(msg);
     }
   }
 }
@@ -321,13 +332,29 @@ async function combatBegin(u: IUrsamuSDK) {
     u.send("No participants to roll initiative for. Use +combat/join.");
     return;
   }
-  const updated = await rollInitiative(enc.id, u);
+  let updated = await rollInitiative(enc.id, u);
   if (!updated) { u.send("Failed to roll initiative."); return; }
   const lines: string[] = [];
   lines.push(await divider("I N I T I A T I V E"));
   lines.push(renderOrder(updated));
   lines.push(`  Round 1 -- ${updated.participants[0].name} acts first.`);
   u.send(lines.join("\n"));
+
+  // If an NPC won initiative, run their AI immediately until a PC turn.
+  const first = updated.participants[updated.turnIdx];
+  if (first?.kind === "npc" && !first.isOut) {
+    updated = (await advanceTurnSmart(updated.id, u)) ?? updated;
+    if (updated.status === "active") {
+      const cur = updated.participants[updated.turnIdx];
+      if (cur) {
+        const msg =
+          `%cyTURN>>%cn Round ${updated.round} -- It is now ${cur.name}'s turn ` +
+          `(Initiative ${cur.initiative}).`;
+        u.send(msg);
+        u.broadcast(msg);
+      }
+    }
+  }
 }
 
 async function combatNext(u: IUrsamuSDK, manual = false) {
@@ -338,7 +365,7 @@ async function combatNext(u: IUrsamuSDK, manual = false) {
     u.send("No active encounter. Use +combat/begin to start the round.");
     return;
   }
-  // Single-step (legacy) advance when /manual is supplied.
+  // Single-step advance when /manual is supplied (no AI).
   if (manual) {
     const updated = await advanceTurn(enc.id);
     if (!updated) { u.send("Failed to advance turn."); return; }
@@ -350,11 +377,29 @@ async function combatNext(u: IUrsamuSDK, manual = false) {
     u.broadcast(msg);
     return;
   }
-  // Default: smart walker -- step one slot then pump AI until a PC turn.
-  const stepped = await advanceTurn(enc.id);
-  if (!stepped) { u.send("Failed to advance turn."); return; }
-  const after = await advanceTurnSmart(enc.id, u);
-  if (!after) return;
+  // Default: NPC AI is automatic. If an AI-driven NPC is up, let them act;
+  // otherwise end the current (PC) turn, then pump following NPCs until a
+  // live PC (or a manual-controlled NPC) is up. Manual NPCs halt the
+  // walker without advancing -- step once so /next is never a no-op.
+  const cur0 = enc.participants[enc.turnIdx];
+  const startIdx = enc.turnIdx;
+  let after: Encounter | null;
+  if (cur0?.kind === "npc" && !cur0.isOut) {
+    after = await advanceTurnSmart(enc.id, u);
+    if (
+      after &&
+      after.status === "active" &&
+      after.turnIdx === startIdx
+    ) {
+      after = await advanceTurn(enc.id, u);
+      if (after) after = await advanceTurnSmart(enc.id, u);
+    }
+  } else {
+    const stepped = await advanceTurn(enc.id, u);
+    if (!stepped) { u.send("Failed to advance turn."); return; }
+    after = await advanceTurnSmart(enc.id, u);
+  }
+  if (!after || after.status !== "active") return;
   const cur = after.participants[after.turnIdx];
   if (cur) {
     const msg =

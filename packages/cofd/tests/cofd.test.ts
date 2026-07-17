@@ -32,6 +32,38 @@ describe("+sheet command", _OPTS_LEAK, () => {
     await sheetExec(u);
     assertStringIncludes(u._sent[0], "Player 'UnknownPlayer' not found");
   });
+
+  it("shows a blank draft when self has no sheet or cg yet", async () => {
+    const u = mockU({
+      me: mockPlayer({ name: "Novice", state: {} }),
+      args: [""],
+    });
+    await sheetExec(u);
+    const out = u._sent.join("\n");
+    assertStringIncludes(out, "DRAFT");
+    assertStringIncludes(out, "blank");
+    assertStringIncludes(out, "Novice");
+  });
+
+  it("shows chargen draft mid-build", async () => {
+    const draft = defaultSheet();
+    draft.concept = "Burned-out nurse";
+    draft.virtue = "Just";
+    const u = mockU({
+      me: mockPlayer({
+        name: "Novice",
+        state: {
+          cofd_cg: { stage: 3, sheet: draft, isSubmitted: false, isApproved: false },
+        },
+      }),
+      args: [""],
+    });
+    await sheetExec(u);
+    const out = u._sent.join("\n");
+    assertStringIncludes(out, "DRAFT");
+    assertStringIncludes(out, "Stage 3");
+    assertStringIncludes(out, "Burned-out nurse");
+  });
 });
 
 describe("+sheet/set command", () => {

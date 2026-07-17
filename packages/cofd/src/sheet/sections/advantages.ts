@@ -4,7 +4,7 @@
 // Row 3 (if applicable): <Power Stat> | <Energy pool current/max> | empty
 
 import { divider } from "@ursamu/ursamu";
-import { formatDottedLine, formatDottedStatLine } from "../../support/format.ts";
+import { formatDottedLine } from "../../support/format.ts";
 import { equippedArmorEntry } from "../../equipment/index.ts";
 import type { SheetSection, SheetContext } from "./types.ts";
 
@@ -42,9 +42,13 @@ export const advantagesSection: SheetSection = {
       "  " + a + SEP + b + SEP + c;
 
     lines.push(row(
-      formatDottedStatLine("Willpower",   wpCur, wpMax,                    cw),
-      formatDottedLine(tmpl.moralityName, String(sheet.moralityValue),     cw),
-      formatDottedLine("Size",            String(sheet.advantages.size),   cw),
+      formatDottedLine(
+        "Willpower",
+        `${wpCur}/${wpMax}`,
+        cw,
+      ),
+      formatDottedLine(tmpl.moralityName, String(sheet.moralityValue), cw),
+      formatDottedLine("Size", String(sheet.advantages.size), cw),
     ));
     lines.push(row(
       formatDottedLine("Initiative", String(initiative), cw),
@@ -55,8 +59,16 @@ export const advantagesSection: SheetSection = {
     if (tmpl.powerStatName !== "None" || tmpl.energyName !== "None") {
       const energyMax = tmpl.energyMaxFormula(sheet.powerStatValue);
       lines.push(row(
-        formatDottedLine(tmpl.powerStatName, String(sheet.powerStatValue), cw),
-        formatDottedStatLine(tmpl.energyName, sheet.energyCurrent, energyMax, cw),
+        formatDottedLine(
+          tmpl.powerStatName,
+          String(sheet.powerStatValue),
+          cw,
+        ),
+        formatDottedLine(
+          tmpl.energyName,
+          `${sheet.energyCurrent}/${energyMax}`,
+          cw,
+        ),
         emptyCell(cw),
       ));
     }

@@ -21,7 +21,7 @@ import {
   type WtfFacet,
   type WtfRite,
 } from "../dictionary/index.ts";
-import { header, divider, footer } from "../support/format.ts";
+import { header, divider, footer } from "@ursamu/mush";
 
 const WIDTH = 78;
 const INDENT = "  ";

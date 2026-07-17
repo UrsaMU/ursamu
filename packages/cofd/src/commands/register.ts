@@ -75,8 +75,13 @@ addCmd({
   category: "Cofd",
   help: `+sheet [<player>]  -- View a character's Chronicles of Darkness sheet.
 
+During chargen, +sheet shows your draft (or a blank Mortal base if you
+have not started +cg yet). After approval it shows the live sheet.
+Viewing another player's draft requires canEdit (builder+).
+
 Switches:
-  /set <trait>=<value>             Modify a trait. Specialty descriptions use
+  /set <trait>=<value>             Modify a trait (live sheet only). Specialty
+                                   descriptions use
                                    'specialty/<skill>=<name>: <description>'.
                                    Size is staff-only (admin/builder).
   /virtue [<player>] [= <reason>]  Restore full Willpower -- Virtue triggered
@@ -470,10 +475,13 @@ addCmd({
   pattern: /^\+turn(?:\/(\S+))?\s*(.*)/i,
   lock: "connected",
   category: "Cofd",
-  help: `+turn[/sw] [args]  -- Per-actor turn helpers built on the AI walker.
+  help: `+turn[/sw] [args]  -- Reaction postures and staff auto-pump.
+
+NPC AI is automatic on +combat/next and after PC attacks. These switches
+are helpers, not a second turn system.
 
 Switches:
-  /done                       Alias for +combat/next (smart walker).
+  /done                       Alias for +combat/next (NPC AI on).
   /auto [<max-rounds>]        Builder+: pump until PC turn / all NPCs down /
                               cap. Default 10, hard cap 50.
   /reaction <posture> [target=<name>]
@@ -482,7 +490,7 @@ Switches:
                               first-fire-on-adjacent.
 
 Examples:
-  +turn/done                       End your turn; AI takes over.
+  +turn/done                       End your turn; NPCs act automatically.
   +turn/auto 5                     Builder: pump up to 5 rounds.
   +turn/reaction ambush            Set ambush posture.
   +turn/reaction overwatch target=Marcus
@@ -504,7 +512,8 @@ Switches:
   /leave [for <player>]    Remove yourself (or another player) from the encounter.
   /begin                   Roll initiative for all participants and begin.
                            Auto-opens and adds you if none exists.
-  /next                    Advance to the next participant's turn.
+  /next [/manual]          Advance turn. Default: NPCs act via AI until the
+                           next PC (or a manual NPC). /manual = one slot only.
   /end                     Resolve the encounter and dismiss participants.
   /order                   Show the current initiative table.
   /ambush <target>         Contested Dex+Stealth vs Wits+Composure ambush check.
@@ -515,7 +524,9 @@ Switches:
   /conceal <level> [for <player>]  Declare concealment. Level: light|medium|heavy|none.
   /status [<player>]       Show a participant's cover, conceal, dodge, and Defense.
 
-Cross-player /join, /leave, /cover, /conceal require canEdit (builder+).
+NPC AI runs automatically after PC attacks and on /next. Opt out per NPC
+with +npc/ai <name>=manual (or off/none). Cross-player /join, /leave,
+/cover, /conceal require canEdit (builder+).
 
 Examples:
   +combat                   Show the current encounter status.
@@ -523,7 +534,8 @@ Examples:
   +combat/join              Add yourself to the initiative order.
   +combat/begin             Roll initiative and announce the order.
   +combat/order             Display the initiative table.
-  +combat/next              Advance the turn.
+  +combat/next              End turn; NPCs act automatically.
+  +combat/next/manual       Advance one slot with no AI.
   +combat/ambush Marcus     Try to ambush Marcus.
   +combat/cover partial     Take partial cover (-1 to attackers).
   +combat/conceal heavy     Hide in heavy concealment (-3 to attackers).
@@ -642,9 +654,10 @@ Switches:
   /powers                            List the Dread Powers / Numina catalog.
   /addpower <npc>=<key>              Attach a dread power to an NPC (staff).
   /rmpower <npc>=<key>               Detach a dread power (staff).
-  /ai <name>=<ai-archetype>          Set NPC AI archetype (staff). Valid:
+  /ai <name>=<ai-archetype>          Set NPC AI (staff). Default on:
                                      beshilu-swarmer, azlu-stalker,
-                                     spirit-ridden-feral.
+                                     spirit-ridden-feral. Use manual|off|none
+                                     for ST-controlled (pauses AI on their turn).
   /aggro <name>=<target>             Spike NPC threat toward target (staff).
   /aggro-mode <name>=<mode>          Builder+: override a single mob's aggro (passive|territorial|hunter). Persists on the sheet; zone wander/aggro hooks read it live.
   /destroy <name-or-id>              Remove an NPC (staff only).

@@ -4,10 +4,10 @@
 // and ensures NPCs show up correctly formatted in the Players section.
 
 import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
+import { divider } from "@ursamu/mush";
 import { getConfig } from "@ursamu/core";
 import { itemData, displayName } from "../equipment/objects.ts";
 import { lookupItem } from "../equipment/catalog.ts";
-import { divider } from "./format.ts";
 
 const SHORTDESC_PROMPT = "%ch%cxUse '&short-desc me=<desc>' to set.%cn";
 
@@ -123,8 +123,22 @@ export const cofdConformatHandler = async (
   }
 
   // 2. Items/Contents Section (+eq/show layout)
-  const sheet = target.state?.cofd as { equipment?: { equippedWeapon?: string | null; equippedArmor?: string | null } } | undefined;
-  const eqState = sheet?.equipment ?? { equippedWeapon: null, equippedArmor: null };
+  // Equip tags only when the *container* is the wielder/wearer:
+  // sheet slot id match, or cofd_item.equippedBy === target.id.
+  // Free-floating state.wielded/worn is ignored — floor loot and
+  // stale flags must not show "(wielded)" in a room.
+  const sheet = target.state?.cofd as {
+    equipment?: {
+      equippedWeapon?: string | null;
+      equippedArmor?: string | null;
+    };
+  } | undefined;
+  const eqState = sheet?.equipment ?? {
+    equippedWeapon: null,
+    equippedArmor: null,
+  };
+  const isCharacterContainer =
+    target.flags.has("player") || target.flags.has("npc");
 
   const finalItems: string[] = [];
   let slot = 0;
@@ -132,49 +146,54 @@ export const cofdConformatHandler = async (
   for (const obj of rawItems) {
     const d = itemData(obj);
 
-    // Worn / wielded state checks:
-    const isWielded = obj.state?.wielded === true ||
-      obj.state?.wielded === "yes" ||
+    const isWielded = isCharacterContainer && (
       eqState.equippedWeapon === obj.id ||
-      (d?.kind === "weapon" && d?.equippedBy === target.id);
+      (d?.kind === "weapon" && d?.equippedBy === target.id)
+    );
 
-    const isWorn = obj.state?.worn === true ||
-      obj.state?.worn === "yes" ||
+    const isWorn = isCharacterContainer && (
       eqState.equippedArmor === obj.id ||
-      (d?.kind === "armor" && d?.equippedBy === target.id);
+      (d?.kind === "armor" && d?.equippedBy === target.id)
+    );
 
     const isEquipped = isWielded || isWorn;
 
-    // Concealment logic:
+    // Concealment: explicit only. Looking at a person shows carried
+    // gear that is not hidden, plus anything passively visible
+    // (wielded/worn). Room loot is never auto-concealed.
     let isConcealed = false;
     if (obj.state?.concealed === true || obj.state?.concealed === "yes") {
       isConcealed = true;
     } else if (d?.key) {
       const resolved = lookupItem(d.key);
-      if (resolved && (resolved.entry as { concealed?: boolean }).concealed === true) {
+      if (
+        resolved &&
+        (resolved.entry as { concealed?: boolean }).concealed === true
+      ) {
         isConcealed = true;
       }
     }
-
-    // Unequipped inventory rule: if looking at a player/NPC, any item they carry that is not equipped is concealed.
-    const isCharacterContainer = target.flags.has("player") || target.flags.has("npc");
-    if (isCharacterContainer && !isEquipped) {
+    // Unequipped "dark" objects (e.g. spare mags) stay hidden in bags.
+    if (!isEquipped && obj.flags?.has("dark")) {
       isConcealed = true;
     }
 
-    // Equipped weapons and armor are never concealed.
+    // Passively visible: equipped weapon/armor always shows on look.
     if (isEquipped) {
       isConcealed = false;
     }
 
     if (isConcealed) {
-      const hasConcealedPermission = (looker.id === target.id) || (await u.canEdit(looker, target));
+      const hasConcealedPermission =
+        looker.id === target.id || (await u.canEdit(looker, target));
       if (!hasConcealedPermission) {
         continue; // Hide completely from looker
       }
     }
 
     // Item is visible; format row:
+    // short-desc (attribute) works like players — only when set.
+    // No "use &short-desc" prompt for things.
     slot += 1;
     const canEditObj = await u.canEdit(looker, obj);
     let label = displayName(obj);
@@ -186,7 +205,9 @@ export const cofdConformatHandler = async (
       label = `${label} x${count}`;
     }
 
-    const ammoClip = d && typeof d.currentClip === "number" ? ` [ammo ${d.currentClip}]` : "";
+    const ammoClip = d && typeof d.currentClip === "number"
+      ? ` [ammo ${d.currentClip}]`
+      : "";
 
     let tag = "";
     if (isWielded) tag = " (wielded)";
@@ -195,10 +216,19 @@ export const cofdConformatHandler = async (
     const struct = structuralTag(d);
     const concealedTag = isConcealed ? " [concealed]" : "";
     const note = d?.note ? ` -- ${d.note}` : "";
+    const shortDesc = getShortDesc(obj);
 
-    finalItems.push(
-      `  ${String(slot).padStart(2)}. ${label}${ammoClip}${tag}${struct}${concealedTag}${note}`.trimEnd()
-    );
+    const left =
+      `  ${String(slot).padStart(2)}. ${label}` +
+      `${ammoClip}${tag}${struct}${concealedTag}`;
+
+    if (shortDesc) {
+      // Align blurb roughly like the player short-desc column.
+      const pad = " ".repeat(Math.max(1, 40 - visualLen(left)));
+      finalItems.push(`${left}${pad}${shortDesc}${note}`.trimEnd());
+    } else {
+      finalItems.push(`${left}${note}`.trimEnd());
+    }
   }
 
   if (finalItems.length > 0) {

@@ -1,18 +1,19 @@
-// Werewolf: The Forsaken (WtF) identity section.
+// Werewolf: The Forsaken (WtF) sheet extras.
 //
-// Renders Auspice, Tribe, Blood, Bone, Primal Urge, Essence, and Harmony.
-// (Renown dots are rendered by the shared powers section.)
+// Identity (Auspice/Tribe/Blood/Bone) and pool stats (Primal Urge /
+// Essence / Harmony) already render in the header and Advantages
+// sections. Renown dots live in the shared powers section. This
+// section only lists Gifts and Rites.
 
 import { divider } from "@ursamu/ursamu";
-import { getStandardMaxEnergy } from "../../gamelines/templates.ts";
 import type { SheetContext, SheetSection } from "./types.ts";
 
-// Render "Label: a, b, c" wrapped to <= 78 visible columns, with continuation
-// lines aligned under the first value. Color codes don't count toward width.
+// Render "Label: a, b, c" wrapped to <= 78 visible columns, with
+// continuation lines aligned under the first value.
 function wrapField(label: string, items: string[], width = 78): string[] {
   const head = `  %ch${label}:%cn`;
   const headVis = 2 + label.length + 1; // "  " + label + ":"
-  const pad = headVis + 9 - label.length; // align values like the other rows
+  const pad = headVis + 9 - label.length;
   const indent = " ".repeat(pad);
   const out: string[] = [];
   let line = head + " ".repeat(pad - headVis) + items[0];
@@ -40,39 +41,14 @@ export const werewolfSection: SheetSection = {
       return [];
     }
 
-    const auspice = sheet.customFields?.auspice || "(unset)";
-    const tribe = sheet.customFields?.tribe || "(unset)";
-    const blood = sheet.customFields?.blood || "(unset)";
-    const bone = sheet.customFields?.bone || "(unset)";
-
-    const primalUrge = sheet.powerStatValue ?? 1;
-    const maxEssence = getStandardMaxEnergy(primalUrge);
-    const essence = sheet.energyCurrent ?? 0;
-    const harmony = sheet.moralityValue ?? 7;
-
-    const lines: string[] = [];
-    lines.push(await divider("W E R E W O L F :   T H E   F O R S A K E N"));
-    lines.push(
-      `  %chAuspice:%cn       ${auspice.padEnd(20)} %chTribe:%cn        ${tribe}`
-    );
-    lines.push(
-      `  %chBlood:%cn         ${blood.padEnd(20)} %chBone:%cn         ${bone}`
-    );
-    lines.push(
-      `  %chPrimal Urge:%cn   ${primalUrge}  (Essence max ${maxEssence})`
-    );
-    lines.push(
-      `  %chEssence:%cn       ${essence} / ${maxEssence}`
-    );
-    lines.push(
-      `  %chHarmony:%cn       ${harmony}`
-    );
-
     const gifts = sheet.gifts ?? [];
     const rites = sheet.rites ?? [];
+    if (gifts.length === 0 && rites.length === 0) return [];
+
+    const lines: string[] = [];
+    lines.push(await divider("G I F T S   &   R I T E S"));
     if (gifts.length > 0) lines.push(...wrapField("Gifts", gifts));
     if (rites.length > 0) lines.push(...wrapField("Rites", rites));
-
     return lines;
   },
 };

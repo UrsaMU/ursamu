@@ -1,9 +1,12 @@
-// +turn command -- per-actor turn helpers built on the AI walker.
+// +turn command -- reaction postures and staff auto-pump helpers.
+//
+// NPC AI runs automatically on +combat/next and after PC attacks; these
+// switches are convenience aliases, not a separate turn system.
 //
 // Subcommands:
-//   /done                       Alias for the smart +combat/next walker.
-//   /auto [<max>]               Builder+: pump the encounter until a PC turn,
-//                               all NPCs down, or <max> rounds (cap 50).
+//   /done                       Alias for +combat/next (AI on by default).
+//   /auto [<max>]               Builder+: pump until a PC turn, all NPCs
+//                               down, or <max> rounds (cap 50).
 //   /reaction <posture> [target=<name>]
 //                               Set the actor's reaction posture for the
 //                               coming round. Postures: ambush | overwatch |
@@ -11,6 +14,7 @@
 
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
 import {
+  advanceTurn,
   encounterDb,
   getEncounterForRoom,
 } from "../combat/encounter.ts";
@@ -34,6 +38,7 @@ function isStaff(actor: IDBObj): boolean {
 }
 
 async function turnDone(u: IUrsamuSDK): Promise<void> {
+  // Same path as +combat/next: end current turn, auto-run NPC AI.
   const roomId = u.here?.id;
   if (!roomId) { u.send("You are not in a room."); return; }
   const enc = await getEncounterForRoom(roomId);
@@ -41,8 +46,27 @@ async function turnDone(u: IUrsamuSDK): Promise<void> {
     u.send("No active encounter here.");
     return;
   }
-  const after = await advanceTurnSmart(enc.id, u);
-  if (!after) { u.send("Failed to advance."); return; }
+  const cur0 = enc.participants[enc.turnIdx];
+  const startIdx = enc.turnIdx;
+  let after;
+  if (cur0?.kind === "npc" && !cur0.isOut) {
+    after = await advanceTurnSmart(enc.id, u);
+    // Manual/unknown AI halts without advancing -- step once so /done
+    // is never a no-op on an ST-controlled slot.
+    if (
+      after &&
+      after.status === "active" &&
+      after.turnIdx === startIdx
+    ) {
+      after = await advanceTurn(enc.id, u);
+      if (after) after = await advanceTurnSmart(enc.id, u);
+    }
+  } else {
+    const stepped = await advanceTurn(enc.id, u);
+    if (!stepped) { u.send("Failed to advance."); return; }
+    after = await advanceTurnSmart(enc.id, u);
+  }
+  if (!after || after.status !== "active") return;
   const cur = after.participants[after.turnIdx];
   if (cur) {
     const msg =

@@ -1,9 +1,20 @@
 {
   "key": "chargen-changeling",
   "title": "+cg -- guided Changeling: The Lost character generation",
-  "description": "Full guided chargen walkthrough for a Changeling: The Lost (CtL) template: Core Identity, Template, Template Specifics, Attributes (5/4/3), Skills (11/9/7), Merits (7 dots), and Powers (3 dots of Spring/Summer/Autumn/Winter/Royal/Eternal) -- then submit for staff approval.",
+  "description": "Full guided chargen walkthrough for a Changeling: The Lost (CtL) template: Core Identity, Template, Template Specifics, Attributes (5/4/3), Skills (11/9/7), Merits (7 dots), and Contracts (4 Common + 2 Royal) -- then submit for staff approval. Demonstrates compact list indexes and seeming/court/contract drilldowns.",
   "vars": { "player": "Novice" },
   "steps": [
+    { "sub": "Browsing Seemings and Courts Before Starting" },
+    { "note": "+cg/list seemings shows a compact index (≤22 lines). Add a name for full detail." },
+    { "cmd": "+cg/list seemings",                            "label": "compact seemings index" },
+    { "expect": "Seeming" },
+    { "cmd": "+cg/list seemings Fairest",                    "label": "drilldown: Fairest detail" },
+    { "expect": "Crown" },
+    { "cmd": "+cg/list courts",                              "label": "compact courts index" },
+    { "expect": "Court" },
+    { "cmd": "+cg/list courts Spring",                       "label": "drilldown: Spring Court detail" },
+    { "expect": "Spring" },
+
     { "sub": "Starting Changeling: The Lost Character Generation" },
     { "note": "+cg with no prior state opens a fresh session and shows Stage 1." },
     { "cmd": "+cg",                                          "label": "start chargen" },
@@ -28,6 +39,8 @@
 
     { "sub": "Stage 3 -- Template Specifics" },
     { "note": "CtL requires Seeming, Kith, Court, a second favored Regalia, Needle, and Thread. Each seeming has its own favored Regalia (Fairest = Crown); the second must differ." },
+    { "cmd": "+cg/list kiths Fairest",                       "label": "browse Fairest kiths" },
+    { "expect": "Kith" },
     { "cmd": "+cg/set seeming=Fairest",                      "label": "set seeming (favors Crown)" },
     { "expect": "Successfully set" },
     { "cmd": "+cg/set kith=Dancer",                          "label": "set kith" },
@@ -58,7 +71,7 @@
     { "expect": "Stage" },
 
     { "sub": "Stage 5 -- Skills (11/9/7 priority)" },
-    { "note": "Per-category totals must hit 11/9/7 in some permutation." },
+    { "note": "Stage 5 uses the same Name: ***.. (N) 3-col layout as Attributes." },
     { "cmd": "+cg/set academics=3",      "label": "Mental group (11)" },
     { "cmd": "+cg/set investigation=3" },
     { "cmd": "+cg/set computer=2" },
@@ -75,7 +88,7 @@
     { "expect": "Stage" },
 
     { "sub": "Stage 6 -- Merits (7 dots)" },
-    { "note": "Stage 6 is dedicated exclusively to merits. Allocate exactly 7 dots of merits." },
+    { "note": "Stage 6 is dedicated exclusively to merits. Allocate exactly 7 dots." },
     { "cmd": "+cg/set contacts(goblins)=2",   "label": "instanced merit" },
     { "expect": "Successfully set" },
     { "cmd": "+cg/set resources=3",           "label": "set resources merit" },
@@ -87,9 +100,11 @@
 
     { "sub": "Stage 7 -- Contracts" },
     { "note": "Discrete gated selection: 4 Common (>=2 from a favored Regalia, <=2 Goblin) + 2 Royal (Royal Arcadian from a favored Regalia, or your Court). Favored Regalia here are Crown (seeming) and Mirror (chosen)." },
-    { "note": "Browse the catalog: +cg/list contracts, then by group, e.g. +cg/list contracts crown." },
+    { "note": "Stage 7 now shows a compact 1-line status bar and 2-col contract list." },
     { "cmd": "+cg/list contracts crown",                     "label": "browse Crown Regalia" },
     { "expect": "Crown" },
+    { "cmd": "+cg/list contracts spring",                    "label": "browse Spring Court contracts" },
+    { "expect": "Spring" },
     { "cmd": "+cg/contract Mask of Superiority",             "label": "Common, favored (Crown)" },
     { "expect": "Added Contract" },
     { "cmd": "+cg/contract Hostile Takeover",               "label": "Common, favored (Crown)" },
@@ -102,6 +117,9 @@
     { "expect": "Added Contract" },
     { "cmd": "+cg/contract Blessing of Spring",             "label": "Royal, Spring Court" },
     { "expect": "Added Contract" },
+    { "note": "After 6 contracts, view the compact Stage 7 screen to confirm the status bar is correct." },
+    { "cmd": "+cg",                                          "label": "view compact contracts screen" },
+    { "expect": "Stage 7" },
 
     { "sub": "Submit for Staff Approval" },
     { "note": "/submit at Stage 7 files a CGEN job. See approval-flow for what happens next." },

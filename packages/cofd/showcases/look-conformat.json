@@ -30,10 +30,17 @@
         "location": "mock-room",
         "state": {
           "name": "Iron Sword",
-          "kind": "weapon",
-          "wielded": true,
-          "concealed": false,
-          "description": "A finely crafted blade of cold iron, perfectly balanced."
+          "description": "A finely crafted blade of cold iron, perfectly balanced.",
+          "attributes": [
+            {
+              "name": "short-desc",
+              "value": "A finely balanced cold-iron blade."
+            }
+          ],
+          "cofd_item": {
+            "key": "sword",
+            "kind": "weapon"
+          }
         }
       }
     },

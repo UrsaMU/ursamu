@@ -188,7 +188,11 @@ export async function attackExec(u: IUrsamuSDK) {
   // which short-circuits below before reaching the resolver, or to
   // reflexive actions handled by +combat.
   if (currentActor.actionUsed) {
-    u.send("You already used your instant action this turn. Use +combat/next to end your turn.");
+    u.send(
+      "You already used your instant action this turn. " +
+        "NPCs act automatically after your attack; use +combat/next " +
+        "only if you passed or need to end a non-attack turn.",
+    );
     return;
   }
 

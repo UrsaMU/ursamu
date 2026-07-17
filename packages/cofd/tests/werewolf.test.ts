@@ -89,7 +89,7 @@ describe("Werewolf: The Forsaken Template", OPTS, () => {
     }
   });
 
-  it("renders werewolfSection correctly with set values", async () => {
+  it("renders werewolfSection as Gifts/Rites only (no identity dupes)", async () => {
     let sheet = defaultSheet();
     sheet = setTrait(sheet, "template", "werewolf");
     sheet = setTrait(sheet, "auspice", "Ithaeur");
@@ -98,6 +98,8 @@ describe("Werewolf: The Forsaken Template", OPTS, () => {
     sheet = setTrait(sheet, "bone", "Crusader");
     sheet = setTrait(sheet, "primal urge", 3);
     sheet = setTrait(sheet, "essence", 12);
+    sheet.gifts = ["Shadow Gaze", "Killer Instinct"];
+    sheet.rites = ["Sacred Hunt"];
 
     const ctx: SheetContext = {
       playerName: "Arthur",
@@ -109,13 +111,29 @@ describe("Werewolf: The Forsaken Template", OPTS, () => {
     const renderedLines = await werewolfSection.render(ctx);
 
     const fullText = renderedLines.join("\n");
-    assertStringIncludes(fullText, "W E R E W O L F :   T H E   F O R S A K E N");
-    assertStringIncludes(fullText, "Ithaeur");
-    assertStringIncludes(fullText, "Bone Shadows");
-    assertStringIncludes(fullText, "Wreath");
-    assertStringIncludes(fullText, "Crusader");
-    assertStringIncludes(fullText, "3  (Essence max 12)");
-    assertStringIncludes(fullText, "12 / 12");
+    // Gifts/Rites only -- identity/pools live in header + advantages.
+    assertStringIncludes(fullText, "G I F T S");
+    assertStringIncludes(fullText, "Shadow Gaze");
+    assertStringIncludes(fullText, "Sacred Hunt");
+    if (fullText.includes("Auspice:")) {
+      throw new Error("Auspice should not appear in werewolfSection");
+    }
+    if (fullText.includes("Primal Urge:")) {
+      throw new Error("Primal Urge should not appear in werewolfSection");
+    }
+  });
+
+  it("renders nothing when werewolf has no gifts or rites", async () => {
+    let sheet = defaultSheet();
+    sheet = setTrait(sheet, "template", "werewolf");
+    const ctx: SheetContext = {
+      playerName: "Arthur",
+      actorId: "1",
+      sheet,
+      template: COFD_TEMPLATES.werewolf,
+      width: 78,
+    };
+    assertEquals((await werewolfSection.render(ctx)).length, 0);
   });
 
   it("renders nothing for non-werewolf templates", async () => {
@@ -340,7 +358,10 @@ describe("Werewolf +cg/list and +info", OPTS, () => {
     assertStringIncludes(renderCgList("tribes"), "Ghost Wolves");
     assertStringIncludes(renderCgList("renown"), "Wisdom");
     assertStringIncludes(renderCgList("gifts"), "Shadow Gifts");
-    assertStringIncludes(renderCgList("rites"), "Wolf Rites");
+    // Rites top index points at wolf/pack filters; names live under them.
+    assertStringIncludes(renderCgList("rites"), "wolf");
+    assertStringIncludes(renderCgList("rites"), "pack");
+    assertStringIncludes(renderCgList("rites wolf"), "Sacred Hunt");
   });
 
   it("fuzzy-matches a gift name for its facets", () => {
