@@ -23,10 +23,8 @@
     "games/cor"
   ],
   "nodeModulesDir": "auto",
-
   "name": "@ursamu/ursamu",
-
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A modern, high-performance MUSH-like engine built with TypeScript and Deno.",
   "exports": {
     ".": "./mod.ts",
@@ -51,7 +49,10 @@
       "text",
       "help"
     ],
-    "exclude": ["tests", "data"]
+    "exclude": [
+      "tests",
+      "data"
+    ]
   },
   "tasks": {
     "start": "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./packages/cli/src/start.ts",
@@ -87,19 +88,22 @@
     "publish:all": "deno run -A scripts/publish-all.ts"
   },
   "compilerOptions": {
-    "lib": ["deno.window", "deno.unstable"]
+    "lib": [
+      "deno.window",
+      "deno.unstable"
+    ]
   },
   "imports": {
-    "@ursamu/globals":        "https://raw.githubusercontent.com/UrsaMU/ursamu-sgp-plugin/master/mod.ts",
-    "@nicia-ai/typegraph":    "npm:@nicia-ai/typegraph@^0.31.0",
+    "@ursamu/globals": "https://raw.githubusercontent.com/UrsaMU/ursamu-sgp-plugin/master/mod.ts",
+    "@nicia-ai/typegraph": "npm:@nicia-ai/typegraph@^0.31.0",
     "@nicia-ai/typegraph/postgres/pglite": "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
-    "@ursamu/help-plugin":    "./packages/help/mod.ts",
-    "@ursamu/help":           "./packages/help/mod.ts",
-    "@ursamu/lang-plugin":    "./packages/lang/mod.ts",
-    "@ursamu/jobs-plugin":    "./packages/jobs/mod.ts",
-    "@ursamu/vendor-plugin":  "./packages/vendor/mod.ts",
+    "@ursamu/help-plugin": "./packages/help/mod.ts",
+    "@ursamu/help": "./packages/help/mod.ts",
+    "@ursamu/lang-plugin": "./packages/lang/mod.ts",
+    "@ursamu/jobs-plugin": "./packages/jobs/mod.ts",
+    "@ursamu/vendor-plugin": "./packages/vendor/mod.ts",
     "@ursamu/d20-modern-plugin": "./packages/d20-modern/index.ts",
-    "@ursamu/mail-plugin":    "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v2.3.1/index.ts",
+    "@ursamu/mail-plugin": "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v2.3.1/index.ts",
     "@ursamu/ursamu": "./mod.ts",
     "@ursamu/ursamu/": "./",
     "@ursamu/ursamu/app": "./packages/mush/src/app.ts",
@@ -129,9 +133,9 @@
     "@std/fmt": "jsr:@std/fmt@^0.224.0",
     "@std/fmt/": "jsr:@std/fmt@^0.224.0/",
     "@std/semver": "jsr:@std/semver@^1.0.0",
-        "@std/testing": "jsr:@std/testing@^1.0.17",
-        "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
-        "@std/testing/mock": "jsr:@std/testing@^1.0.17/mock",
+    "@std/testing": "jsr:@std/testing@^1.0.17",
+    "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
+    "@std/testing/mock": "jsr:@std/testing@^1.0.17/mock",
     "@langchain/google-genai": "npm:@langchain/google-genai@^0.2.0",
     "@langchain/langgraph": "npm:@langchain/langgraph@^0.2.0",
     "@langchain/langgraph/prebuilt": "npm:@langchain/langgraph@^0.2.0/prebuilt",
@@ -140,12 +144,26 @@
     "stripe": "npm:stripe@^17.0.0",
     "unpdf": "npm:unpdf@^0.11.0"
   },
-  "exclude": ["docs/_site", "config", ".claude", ".agents"],
+  "exclude": [
+    "docs/_site",
+    "config",
+    ".claude",
+    ".agents"
+  ],
   "lint": {
     "rules": {
-      "tags": ["recommended"],
-      "exclude": ["no-explicit-any", "no-unused-vars", "no-control-regex"]
+      "tags": [
+        "recommended"
+      ],
+      "exclude": [
+        "no-explicit-any",
+        "no-unused-vars",
+        "no-control-regex"
+      ]
     },
-    "exclude": ["src/services/Softcode/parser.cjs", "legends"]
+    "exclude": [
+      "src/services/Softcode/parser.cjs",
+      "legends"
+    ]
   }
 }

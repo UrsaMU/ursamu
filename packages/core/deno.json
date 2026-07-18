@@ -1,11 +1,12 @@
 {
   "name": "@ursamu/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "exports": "./mod.ts",
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
     "lint": "deno lint",
-    "check": "deno check mod.ts --unstable-kv"
+    "check": "deno check mod.ts --unstable-kv",
+    "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types --no-check"
   },
   "compilerOptions": {
     "lib": [

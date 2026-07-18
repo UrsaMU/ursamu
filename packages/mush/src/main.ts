@@ -3,7 +3,18 @@
  * @module ursamu-core
  * @description The core engine initialization and management module.
  */
-import "dotenv/load";
+// Load .env if present; skip .env.example key enforcement so plugin
+// packages with their own examples do not break engine boot / tests.
+import { loadSync as loadEnvSync } from "@std/dotenv";
+try {
+  loadEnvSync({
+    export: true,
+    allowEmptyValues: true,
+    examplePath: null,
+  });
+} catch {
+  /* no .env — fine for tests and fresh installs */
+}
 import { handleRequest } from "./app.ts";
 import "./reboot.ts";
 import { plugins, loadTxtDir, setFlags, loadPlugins, txtFiles } from "./main_utils.ts";

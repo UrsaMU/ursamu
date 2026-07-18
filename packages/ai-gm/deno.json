@@ -1,13 +1,14 @@
 {
   "name": "@ursamu/ai-gm",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "exports": {
     ".": "./mod.ts"
   },
   "tasks": {
     "test": "deno test --allow-all --unstable-kv --no-check tests/",
     "check": "deno check mod.ts index.ts",
-    "lint": "deno lint"
+    "lint": "deno lint",
+    "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types --no-check"
   },
   "imports": {
     "@std/dotenv": "jsr:@std/dotenv@^0.224.0",
@@ -32,6 +33,39 @@
     "lib": [
       "deno.window",
       "deno.unstable"
+    ]
+  },
+  "publish": {
+    "include": [
+      "api",
+      "commands.ts",
+      "context",
+      "db.ts",
+      "docs",
+      "game-hooks-augment.ts",
+      "graphs",
+      "hooks.ts",
+      "index.ts",
+      "ingestion",
+      "mod.ts",
+      "monetization",
+      "prompts",
+      "providers.ts",
+      "rag.ts",
+      "round-manager.ts",
+      "schema.ts",
+      "social",
+      "systems",
+      "tools.ts",
+      "ursamu.plugin.json",
+      "deno.json",
+      "README.md",
+      "LICENSE"
+    ],
+    "exclude": [
+      "tests",
+      ".env",
+      ".env.example"
     ]
   }
 }

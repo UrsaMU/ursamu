@@ -44,7 +44,7 @@ export async function hedgeHollow(
   return await hollowAdd(u, rest.trim());
 }
 
-async function hollowList(u: IUrsamuSDK): Promise<void> {
+function hollowList(u: IUrsamuSDK): void {
   const lines = [
     "Hollow enhancements (dots ≤ rating):",
   ];
@@ -66,7 +66,7 @@ async function hollowList(u: IUrsamuSDK): Promise<void> {
   u.send(lines.join("\n"));
 }
 
-async function hollowStatus(u: IUrsamuSDK): Promise<void> {
+function hollowStatus(u: IUrsamuSDK): void {
   const hr = roomHedge(u.here ?? {});
   if (!hr || hr.realm !== "hollow" || !hr.hollow) {
     u.send("This room is not a Hollow.");
@@ -108,7 +108,7 @@ async function hollowAdd(
     u.send("No current room.");
     return;
   }
-  let hr = roomHedge(u.here);
+  const hr = roomHedge(u.here);
   if (!hr || hr.realm !== "hollow") {
     u.send("Stand in a Hollow room.");
     return;
@@ -148,19 +148,19 @@ async function hollowRemove(
     u.send("No current room.");
     return;
   }
-  let hr = roomHedge(u.here);
-  if (!hr || hr.realm !== "hollow") {
+  const hr0 = roomHedge(u.here);
+  if (!hr0 || hr0.realm !== "hollow") {
     u.send("Stand in a Hollow room.");
     return;
   }
   if (
-    !isHollowOwner(hr, u.me.id) &&
+    !isHollowOwner(hr0, u.me.id) &&
     !(await u.canEdit(u.me, u.here!))
   ) {
     u.send("Only Hollow owners (or staff) remove.");
     return;
   }
-  hr = removeHollowEnhancement(hr, slug);
+  const hr = removeHollowEnhancement(hr0, slug);
   await persistRoomHedge(u, roomId, hr);
   u.send(`Removed enhancement %cy${slug}%cn.`);
 }
@@ -180,19 +180,19 @@ async function hollowSetEscape(
     u.send("No current room.");
     return;
   }
-  let hr = roomHedge(u.here);
-  if (!hr?.hollow || hr.realm !== "hollow") {
+  const hr0 = roomHedge(u.here);
+  if (!hr0?.hollow || hr0.realm !== "hollow") {
     u.send("Stand in a Hollow.");
     return;
   }
   if (
-    !isHollowOwner(hr, u.me.id) &&
+    !isHollowOwner(hr0, u.me.id) &&
     !(await u.canEdit(u.me, u.here!))
   ) {
     u.send("Permission denied.");
     return;
   }
-  if (!hollowHas(hr, "escape-route")) {
+  if (!hollowHas(hr0, "escape-route")) {
     u.send(
       "Need Escape Route enhancement first " +
         "(+hedge/hollow escape-route).",
@@ -204,10 +204,10 @@ async function hollowSetEscape(
     u.send(`No room matches '${roomRef}'.`);
     return;
   }
-  hr = {
-    ...hr,
+  const hr = {
+    ...hr0,
     hollow: {
-      ...hr.hollow!,
+      ...hr0.hollow!,
       escapeRoomId: dest.id,
     },
   };

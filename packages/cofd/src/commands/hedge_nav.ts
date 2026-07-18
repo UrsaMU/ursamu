@@ -136,7 +136,7 @@ export async function hedgeTravel(
 
   if (pools.autoSuccess) {
     const r = resolveNavTurn(goal, prior, pools, 0, 0);
-    let sheet = writeNavState(sheet0, null);
+    const sheet = writeNavState(sheet0, null);
     await persistSheet(u, u.me.id, sheet);
     u.send(
       `${r.message}\n  (${pools.mods.join("; ")})`,

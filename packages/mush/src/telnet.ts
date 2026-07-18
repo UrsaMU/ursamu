@@ -1,4 +1,13 @@
-import "dotenv/load";
+import { loadSync as loadEnvSync } from "@std/dotenv";
+try {
+  loadEnvSync({
+    export: true,
+    allowEmptyValues: true,
+    examplePath: null,
+  });
+} catch {
+  /* no .env */
+}
 import { dirname, fromFileUrl, join } from "@std/path";
 import { getConfig, initConfig } from "@ursamu/core";
 import parser from "./render/parser.ts";
