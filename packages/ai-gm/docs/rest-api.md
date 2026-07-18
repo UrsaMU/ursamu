@@ -6,7 +6,8 @@ All routes are under `/api/gm`. Authenticate with:
 Authorization: Bearer <GM_API_SECRET>
 ```
 
-Leave `GM_API_SECRET` unset to run open in development.
+Set `GM_API_OPEN=1` only for local development without a secret.
+Without a secret (and without `GM_API_OPEN=1`) all routes return 401.
 
 ## Endpoints
 

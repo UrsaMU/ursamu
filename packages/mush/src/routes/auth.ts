@@ -209,7 +209,8 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
 
       await dbojs.create({
         id,
-        flags: "player connected",
+        // "connected" is session state — set on login, not at register.
+        flags: "player",
         data: { name: username, alias: username, email, password: hashedPassword, home: "1" },
         location: "1",
       } as Parameters<typeof dbojs.create>[0]);

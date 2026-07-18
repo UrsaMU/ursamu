@@ -107,7 +107,7 @@ export {
   authHandler, dbObjHandler, configHandler, sceneHandler,
   objectsHandler, flagsHandler, functionsHandler,
   registerMushRoutes, handleRequest as mushHandleRequest, setAuthenticator,
-  avatarServe, MAX_API_TRACKED_IPS, authenticate,
+  avatarServe, MAX_API_TRACKED_IPS, API_RATE_LIMIT, authenticate,
 } from "./src/routes/index.ts";
 export { registerPluginRoute } from "./src/routes/plugin.ts";
 export type { PluginRouteHandler } from "./src/routes/plugin.ts";

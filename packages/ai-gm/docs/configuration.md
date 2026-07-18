@@ -16,7 +16,8 @@ cp .env.example .env
 | `STRIPE_SECRET_KEY`     | No       | —                       | Enables Stripe payments                           |
 | `STRIPE_WEBHOOK_SECRET` | No       | —                       | Stripe webhook signature secret                   |
 | `DISCORD_WEBHOOK_URL`   | No       | —                       | Mirror GM output to a Discord channel             |
-| `GM_API_SECRET`         | No       | _(open)_                | Bearer token for the REST API; leave unset in dev |
+| `GM_API_SECRET`         | Yes*     | —                       | Bearer token for the REST API                     |
+| `GM_API_OPEN`           | No       | —                       | Set to `1` only for local dev without a secret    |
 | `GAME_URL`              | No       | —                       | Base URL for Stripe payment redirect links        |
 | `WIKI_BASE_URL`         | No       | `http://localhost:4201` | Base URL for wiki lore tools                      |
 
