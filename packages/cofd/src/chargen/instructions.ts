@@ -304,9 +304,14 @@ export async function getStageInstructions(
       lines.push("");
       lines.push(await divider(""));
       lines.push("  %chCommands:%cn");
-      lines.push("    +cg/set <attribute>=<dots>  -- Set a rating (1-5).");
-      lines.push("    +cg/back                    -- Go back to Stage 3.");
-      lines.push("    +cg/next                    -- Validate & advance.");
+      lines.push(
+        "    +cg/set <attr>=<dots>  -- Set rating (1-5).",
+      );
+      lines.push(
+        "      Partial names ok: int, str, dex, man, com...",
+      );
+      lines.push("    +cg/back               -- Go back to Stage 3.");
+      lines.push("    +cg/next               -- Validate & advance.");
       break;
     }
 
@@ -336,10 +341,11 @@ export async function getStageInstructions(
       );
       const totalSkills = mSum + pSum + sSum;
 
+      // No group is fixed to 11 — the 11/9/7 split can be any permutation.
       const W = 24;
       lines.push(
         "  " +
-          vljust(`%ch%ccMental%cn (${mSum}/11)`, W) +
+          vljust(`%ch%ccMental%cn (${mSum})`, W) +
           " " +
           vljust(`%ch%ccPhysical%cn (${pSum})`, W) +
           " " +
@@ -365,7 +371,10 @@ export async function getStageInstructions(
       lines.push(await divider(""));
       lines.push("  %chCommands:%cn");
       lines.push(
-        "    +cg/set <skill>=<dots>  -- Set a skill rating (0-5).",
+        "    +cg/set <skill>=<dots>  -- Set rating (0-5).",
+      );
+      lines.push(
+        "      Partial names ok: ath, inv, brawl, animal...",
       );
       lines.push("    +cg/back                -- Go back to Stage 4.");
       lines.push("    +cg/next                -- Validate & advance.");

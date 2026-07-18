@@ -3,8 +3,9 @@
 COMMANDS
   help cg          Six-stage chargen.
   help sheet       View and edit sheets.
-  help approve     Staff: approve submission.
-  help unapprove   Staff: return for revision.
+  help approve     Staff: +sheet then +approve.
+  help deny        Staff: return draft (+deny).
+  help unapprove   Alias for +deny.
   help prove       Broadcast trait values.
   help notes       Public/private notes.
   help changeling  CtL Lost command map.

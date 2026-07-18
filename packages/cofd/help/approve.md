@@ -1,20 +1,26 @@
-+APPROVE  -- Approve a pending chargen submission.
++APPROVE  -- Promote a chargen draft to a live sheet.
 
 SYNTAX
   +approve <player>
   +approve <player>=<notes>
 
 PERMISSIONS
-  Connected + admin+. Target CGEN job new or open.
+  Connected + admin+.
+
+WORKFLOW
+  1. +sheet <player>      Review the draft.
+  2. +approve <player>   Make it live.
 
 MECHANICS
-  Copies sheet live, clears chargen, closes job.
-  Syncs sight flags: changeling → `fae`,
-  werewolf → `forsaken`.
+  Copies chargen draft to the live sheet, clears
+  +cg, syncs sight flags (changeling → `fae`,
+  werewolf → `forsaken`). Completes the open CGEN
+  job (archives it like +job/close). Player gets a
+  live message and @mail.
 
 EXAMPLES
   +approve Alice
   +approve Alice=Welcome. Watch your touchstones.
 
-SEE ALSO: help unapprove, help cg, help perception,
-  help changeling
+SEE ALSO: help deny, help sheet, help cg,
+  help perception

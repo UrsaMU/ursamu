@@ -293,8 +293,32 @@ function layoutArgs(raw: string): string[] {
   return splitArgs(raw);
 }
 
-function callLayoutFn(name: string, args: string[]): string {
+/** Layout softcode subset recognized by expandBareCalls. */
+const LAYOUT_FNS = new Set([
+  "center", "ljust", "rjust", "repeat", "space", "cat", "lit",
+  "strlen", "words", "if", "eq", "neq", "and", "or", "not",
+  "gt", "lt", "gte", "lte", "add", "sub", "mul", "div",
+  "min", "max", "abs", "first", "rest", "mid", "left",
+  "right", "strip", "trim",
+]);
+
+function isLayoutFn(name: string): boolean {
+  return LAYOUT_FNS.has(name.toLowerCase().trim());
+}
+
+/** True if `raw` contains a nested known-layout-fn call. */
+function hasNestedLayoutCall(raw: string): boolean {
+  const re = /([a-zA-Z_][a-zA-Z0-9_]*)\(/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(raw)) !== null) {
+    if (isLayoutFn(m[1])) return true;
+  }
+  return false;
+}
+
+function callLayoutFn(name: string, args: string[]): string | null {
   const n = name.toLowerCase().trim();
+  if (!isLayoutFn(n)) return null;
   if (n === "center") {
     const w = clampTpl(parseInt((args[1] ?? "78").trim(), 10) || 78);
     // Preserve spaces in the title (arg 0) and filler (arg 2).
@@ -417,7 +441,7 @@ function callLayoutFn(name: string, args: string[]): string {
   if (n === "strip" || n === "trim") {
     return (args[0] ?? "").trim();
   }
-  return "";
+  return null;
 }
 
 /**
@@ -439,6 +463,10 @@ function matchingParen(s: string, openIdx: number): number {
 /**
  * Expand nested bare function calls: name(arg,arg) — innermost first.
  * Handles if(neq(words(%0),0), center(...),) style templates.
+ *
+ * Only known layout fns are expanded. Unknown word(...) sequences are
+ * left literal so titles like "Foo Bar Baz(#1)" (look header with
+ * editable dbref suffix) are not eaten as fake function calls.
  */
 function expandBareCalls(s: string): string {
   for (let depth = 0; depth < MAX_TPL_DEPTH; depth++) {
@@ -453,15 +481,18 @@ function expandBareCalls(s: string): string {
     let bestName = "";
     while ((m = re.exec(s)) !== null) {
       const nameStart = m.index;
-      const openIdx = nameStart + m[1].length;
+      const fnName = m[1];
+      // Skip unknown names so "Baz(#1)" stays literal text.
+      if (!isLayoutFn(fnName)) continue;
+      const openIdx = nameStart + fnName.length;
       const closeIdx = matchingParen(s, openIdx);
       if (closeIdx < 0) continue;
       const rawArgs = s.slice(openIdx + 1, closeIdx);
-      // Innermost: no nested name( inside the arg list
-      if (/[a-zA-Z_][a-zA-Z0-9_]*\(/.test(rawArgs)) continue;
+      // Innermost: no nested *known* name( inside the arg list
+      if (hasNestedLayoutCall(rawArgs)) continue;
       bestStart = nameStart;
       bestEnd = closeIdx;
-      bestName = m[1];
+      bestName = fnName;
       found = true;
       // keep scanning so we take the rightmost innermost (stable)
     }
@@ -473,6 +504,7 @@ function expandBareCalls(s: string): string {
     // Keep arg whitespace (%b / spaces around titles are design).
     const parts = layoutArgs(rawArgs);
     const result = callLayoutFn(bestName, parts);
+    if (result === null) break;
     s = s.slice(0, bestStart) + result + s.slice(bestEnd + 1);
     if (s.length > MAX_TPL_LEN) s = s.slice(0, MAX_TPL_LEN);
   }

@@ -12,7 +12,7 @@
 // Reads u.me.state.cofd; writes "data.cofd" for Willpower spend.
 
 import { divider, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
-import { jobs, type IJobComment } from "@ursamu/jobs-plugin";
+import { jobs, type IJobComment } from "@ursamu/jobs";
 import { defaultSheet, type CofdSheet } from "../stats/index.ts";
 import { parseRollExpression, executeRoll, type AgainThreshold } from "../roller/index.ts";
 import {

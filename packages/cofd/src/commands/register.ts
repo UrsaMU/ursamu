@@ -16,7 +16,11 @@ import { beatExec } from "./beat.ts";
 import { xpExec } from "./xp.ts";
 import { conditionExec } from "./condition.ts";
 import { aspirationExec } from "./aspiration.ts";
-import { approveExec, unapproveExec } from "./approve.ts";
+import {
+  approveExec,
+  denyExec,
+  unapproveExec,
+} from "./approve.ts";
 import { notesExec } from "./notes.ts";
 import { gearExec, gearReload } from "./gear.ts";
 import { tiltExec } from "./tilt.ts";
@@ -310,15 +314,34 @@ addCmd({
   pattern: /^\+approve(?:\/(\S+))?\s*(.*)/i,
   lock: "connected admin+",
   category: "Cofd",
-  help: `+approve <player>[=<notes>]  -- Approve a pending Chronicles of Darkness chargen submission.
+  help: `+approve <player>[=<notes>]  -- Promote a chargen draft to a live sheet.
 
-Closes the player's CGEN job, copies their submitted sheet onto the live
-character record, and notifies them.
+Staff workflow:
+  1. +sheet <player>     Review the draft.
+  2. +approve <player>  Make it live (clears +cg).
+
+A CGEN job is optional; approve works from the draft alone.
 
 Examples:
   +approve Alice
-  +approve Alice=Welcome to the chronicle. Watch your touchstones.`,
+  +approve Alice=Welcome. Watch your touchstones.`,
   exec: approveExec,
+});
+
+addCmd({
+  name: "+deny",
+  pattern: /^\+deny(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected admin+",
+  category: "Cofd",
+  help: `+deny <player>=<reason>  -- Return a chargen draft for revision.
+
+Keeps the player's +cg draft, clears the submitted marker, notifies
+them with your reason. They fix with +cg and +cg/submit again.
+
+Examples:
+  +deny Alice=Concept needs more detail.
+  +deny Bob=Attribute totals are off by one.`,
+  exec: denyExec,
 });
 
 addCmd({
@@ -326,14 +349,12 @@ addCmd({
   pattern: /^\+unapprove(?:\/(\S+))?\s*(.*)/i,
   lock: "connected admin+",
   category: "Cofd",
-  help: `+unapprove <player>=<reason>  -- Return a pending Chronicles of Darkness submission for revision.
+  help: `+unapprove <player>=<reason>  -- Alias for +deny.
 
-Reopens the player's CGEN job with a staff comment and clears the
-submitted-job marker so the player can edit and resubmit. The CG state
-is preserved; the live sheet is unchanged.
+Prefer +deny. Same behavior: return draft for revision with a reason.
 
 Examples:
-  +unapprove Alice=Concept needs more detail; please flesh out the backstory.`,
+  +unapprove Alice=Concept needs more detail.`,
   exec: unapproveExec,
 });
 

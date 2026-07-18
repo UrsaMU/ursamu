@@ -17,7 +17,9 @@ STAGES
   5. Skills       Distribute {11, 9, 7} dots.
   6. Powers       Mortal 0, Changeling 3.
 
-After stage-6 /submit the sheet finalizes; edit via +sheet/set.
+AFTER FINAL /SUBMIT
+  Staff reviews with +sheet <you>, then +approve or
+  +deny=<reason>. Until approved, edit via +cg.
 
-SEE ALSO: help sheet, help roll, help templates,
-  help changeling
+SEE ALSO: help sheet, help approve, help deny,
+  help templates, help changeling

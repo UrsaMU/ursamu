@@ -353,19 +353,46 @@ describe("Werewolf Stage 8 -- Gifts & Rites", OPTS, () => {
 });
 
 describe("Werewolf +cg/list and +info", OPTS, () => {
+  function wwSheet() {
+    let s = defaultSheet();
+    s = setTrait(s, "template", "werewolf");
+    s = setTrait(s, "auspice", "Rahu");
+    s = setTrait(s, "tribe", "Blood Talons");
+    return s;
+  }
+
   it("lists auspices, tribes, renown, gifts, and rites", () => {
-    assertStringIncludes(renderCgList("auspices"), "Cahalith");
-    assertStringIncludes(renderCgList("tribes"), "Ghost Wolves");
-    assertStringIncludes(renderCgList("renown"), "Wisdom");
-    assertStringIncludes(renderCgList("gifts"), "Shadow Gifts");
+    const s = wwSheet();
+    assertStringIncludes(renderCgList("auspices", s), "Cahalith");
+    assertStringIncludes(renderCgList("tribes", s), "Ghost Wolves");
+    assertStringIncludes(renderCgList("renown", s), "Wisdom");
+    assertStringIncludes(renderCgList("gifts", s), "Shadow Gifts");
     // Rites top index points at wolf/pack filters; names live under them.
-    assertStringIncludes(renderCgList("rites"), "wolf");
-    assertStringIncludes(renderCgList("rites"), "pack");
-    assertStringIncludes(renderCgList("rites wolf"), "Sacred Hunt");
+    assertStringIncludes(renderCgList("rites", s), "wolf");
+    assertStringIncludes(renderCgList("rites", s), "pack");
+    assertStringIncludes(
+      renderCgList("rites wolf", s),
+      "Sacred Hunt",
+    );
+  });
+
+  it("hides werewolf topics for non-werewolf sheets", () => {
+    const mortal = defaultSheet();
+    assertStringIncludes(
+      renderCgList("auspices", mortal),
+      "only listed for Werewolf",
+    );
+    assertStringIncludes(
+      renderCgList("gifts", mortal),
+      "only listed for Werewolf",
+    );
+    const idx = renderCgList("", mortal);
+    assertEquals(idx.includes("auspices"), false);
+    assertEquals(idx.includes("gifts"), false);
   });
 
   it("fuzzy-matches a gift name for its facets", () => {
-    const out = renderCgList("gifts rage");
+    const out = renderCgList("gifts rage", wwSheet());
     assertStringIncludes(out, "Gift of Rage");
     assertStringIncludes(out, "Incite Fury");
   });

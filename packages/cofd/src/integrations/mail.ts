@@ -20,7 +20,7 @@ export interface CofdMailOptions {
 /**
  * Insert a single system-sent mail into `mail.messages`. Failures are
  * logged but never thrown -- a missing mail plugin must not break the
- * caller (approve/unapprove/beat-award stay functional).
+ * caller (approve/deny/beat-award stay functional).
  */
 export async function sendCofdMail(opts: CofdMailOptions): Promise<void> {
   const now = Date.now();

@@ -143,3 +143,29 @@ Deno.test(
     }
   },
 );
+
+Deno.test(
+  "header keeps multi-word titles with (#dbref) suffix",
+  OPTS,
+  () => {
+    // look appends (#id) for editors. expandBareCalls must not treat
+    // the last word + (#id) as a softcode function call.
+    try {
+      applyLayoutFromConfig({
+        header: "[center(%ch%cy%b%0%b%cn,%1,%cg=%cn)]",
+        divider:
+          "[if(neq(words(%0),0), center(%ch%cy%b%0%b%cn,%1,%cg-%cn),)]",
+        footer: "[repeat(%cg=%cn,%1)]",
+      });
+      const plain = (s: string) =>
+        s.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "");
+      const h = plain(header("Foo Bar Baz(#1)", "=", 78));
+      assertStringIncludes(h, "Foo Bar Baz(#1)");
+      assertEquals(h.includes("Foo Bar  "), false);
+      const h2 = plain(header("OOC Lounge(#7)", "=", 78));
+      assertStringIncludes(h2, "OOC Lounge(#7)");
+    } finally {
+      clearLayoutTemplates();
+    }
+  },
+);

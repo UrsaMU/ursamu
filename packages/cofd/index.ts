@@ -21,7 +21,7 @@ import {
   cofdDescformatHandler,
 } from "./src/support/index.ts";
 import { registerHelpDir } from "@ursamu/help-plugin";
-import { registerJobBuckets } from "@ursamu/jobs-plugin";
+import { registerJobBuckets } from "@ursamu/jobs";
 import { routeHandler } from "./routes.ts";
 import { getEncounterForRoom, setMoved } from "./src/combat/encounter.ts";
 import {

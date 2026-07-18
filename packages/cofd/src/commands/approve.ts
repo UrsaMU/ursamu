@@ -1,15 +1,32 @@
-// +approve / +unapprove -- staff close-out of a pending CGEN job.
+// +approve -- promote chargen draft to live sheet; complete CGEN job.
+// Player always gets a live send and @mail.
 
 import { header, footer, type IUrsamuSDK } from "@ursamu/ursamu";
-import { jobs, type IJobComment } from "@ursamu/jobs-plugin";
 import type { CofdCgState } from "../chargen/index.ts";
 import { sendCofdMail } from "../integrations/mail.ts";
 import { syncSightFlags } from "../support/sight.ts";
+import {
+  parseTargetAndNotes,
+  completeCgenJob,
+  type JobTouchResult,
+} from "./approve_job.ts";
+export { denyExec, unapproveExec } from "./deny.ts";
 
-function parseTargetAndNotes(arg: string): { who: string; notes: string } {
-  const eq = arg.indexOf("=");
-  if (eq < 0) return { who: arg.trim(), notes: "" };
-  return { who: arg.slice(0, eq).trim(), notes: arg.slice(eq + 1).trim() };
+function jobLines(job: JobTouchResult): string[] {
+  if (job.completed && job.number != null) {
+    return [`CGEN job #${job.number} completed and archived.`];
+  }
+  if (job.error) return [`%crJob: ${job.error}%cn`];
+  if (job.number != null) {
+    return [
+      `%crCGEN job #${job.number} was not closed.%cn ` +
+        `Use %ch+job/close ${job.number}%cn.`,
+    ];
+  }
+  return [
+    `%cyNo open CGEN job found.%cn ` +
+      `Sheet is live; close leftovers with +job/close.`,
+  ];
 }
 
 export async function approveExec(u: IUrsamuSDK) {
@@ -18,6 +35,7 @@ export async function approveExec(u: IUrsamuSDK) {
 
   if (!who) {
     u.send("Usage: +approve <player>[=<notes>]");
+    u.send("Review first with +sheet <player>.");
     return;
   }
 
@@ -27,160 +45,63 @@ export async function approveExec(u: IUrsamuSDK) {
     return;
   }
 
+  const name = u.util.displayName(target, u.me);
   const cgState = target.state?.cofd_cg as CofdCgState | undefined;
-  if (!cgState || !cgState.submittedJob) {
-    u.send(`${u.util.displayName(target, u.me)} has no submitted character pending approval.`);
+  if (!cgState?.sheet) {
+    u.send(
+      `${name} has no chargen draft to approve. ` +
+        `They need to finish +cg first.`,
+    );
     return;
   }
 
-  const job = await jobs.findOne({ number: cgState.submittedJob });
-  if (!job) {
-    u.send(`Job #${cgState.submittedJob} is missing from the queue; sheet cannot be approved cleanly.`);
-    return;
-  }
-  if (job.status !== "new" && job.status !== "open") {
-    u.send(`Job #${job.number} is already ${job.status}; nothing to approve.`);
-    return;
-  }
-
-  const sheet = cgState.sheet;
+  const sheet = { ...cgState.sheet };
   if (!sheet.specialties) sheet.specialties = {};
 
-  // Order matters: write sheet first, then clear cg state, then close job.
   await u.db.modify(target.id, "$set", { "data.cofd": sheet });
   await u.db.modify(target.id, "$unset", { "data.cofd_cg": "" });
-  // Template → sight flags (fae / forsaken). Sticky extras kept.
   target.state = { ...target.state, cofd: sheet };
+  delete target.state.cofd_cg;
   await syncSightFlags(u, target, sheet);
 
   const staffName = u.util.displayName(u.me, u.me);
-  const now = Date.now();
-  const comment: IJobComment = {
-    authorId: u.me.id,
-    authorName: staffName,
-    text: notes ? `Approved by ${staffName}: ${notes}` : `Approved by ${staffName}.`,
-    timestamp: now,
-    staffOnly: false,
-  };
-  await jobs.update({ id: job.id }, {
-    ...job,
-    status: "closed",
-    closedByName: staffName,
-    assignedTo: u.me.id,
-    assigneeName: staffName,
-    comments: [...job.comments, comment],
-    updatedAt: now,
-  });
+  const job = await completeCgenJob(
+    cgState.submittedJob,
+    target.id,
+    u.me.id,
+    staffName,
+    notes,
+  );
 
-  const lines: string[] = [];
-  lines.push(await header("Character Approved"));
-  lines.push(`${u.util.displayName(target, u.me)}'s sheet is now active. Job #${job.number} closed.`);
+  const lines = [
+    await header("Character Approved"),
+    `${name}'s sheet is now live.`,
+    ...jobLines(job),
+  ];
   if (notes) lines.push(`Notes: ${notes}`);
   lines.push(await footer());
   u.send(lines.join("\n"));
 
   u.send(
-    `%chYour Chronicles of Darkness sheet has been approved by ${staffName}.%cn` +
-      (notes ? ` Notes: ${notes}` : ""),
+    `%chYour Chronicles of Darkness sheet has been ` +
+      `approved by ${staffName}.%cn` +
+      (notes ? ` Notes: ${notes}` : "") +
+      `  Use %ch+sheet%cn to view it.`,
     target.id,
   );
 
   await sendCofdMail({
     to: target.id,
-    subject: `Character approved: ${u.util.displayName(target, u.me)}`,
+    subject: `Character approved: ${name}`,
     body: [
-      `Your Chronicles of Darkness character sheet was approved by ${staffName}.`,
-      `CGEN job: #${job.number}`,
+      `Your Chronicles of Darkness character sheet ` +
+        `was approved by ${staffName}.`,
+      job.number != null
+        ? `CGEN job: #${job.number} (completed)`
+        : "",
       notes ? `\nStaff notes:\n${notes}` : "",
       ``,
-      `Your live sheet is now active. Use +sheet to view it.`,
+      `Your live sheet is active. Use +sheet to view it.`,
     ].filter(Boolean).join("\n"),
-  });
-}
-
-export async function unapproveExec(u: IUrsamuSDK) {
-  const arg = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
-  const { who, notes } = parseTargetAndNotes(arg);
-
-  if (!who) {
-    u.send("Usage: +unapprove <player>=<reason>");
-    return;
-  }
-  if (!notes) {
-    u.send("A reason is required when returning a submission: +unapprove <player>=<reason>");
-    return;
-  }
-
-  const target = await u.util.target(u.me, who, true);
-  if (!target) {
-    u.send(`No player matches '${who}'.`);
-    return;
-  }
-
-  const cgState = target.state?.cofd_cg as CofdCgState | undefined;
-  if (!cgState || !cgState.submittedJob) {
-    u.send(`${u.util.displayName(target, u.me)} has no submitted character to return.`);
-    return;
-  }
-
-  const job = await jobs.findOne({ number: cgState.submittedJob });
-  if (!job) {
-    u.send(`Job #${cgState.submittedJob} is missing from the queue.`);
-    return;
-  }
-  if (job.status !== "new" && job.status !== "open") {
-    u.send(`Job #${job.number} is already ${job.status}; cannot return.`);
-    return;
-  }
-
-  const staffName = u.util.displayName(u.me, u.me);
-  const now = Date.now();
-  const comment: IJobComment = {
-    authorId: u.me.id,
-    authorName: staffName,
-    text: `Returned by ${staffName}: ${notes}`,
-    timestamp: now,
-    staffOnly: false,
-  };
-  await jobs.update({ id: job.id }, {
-    ...job,
-    status: "open",
-    assignedTo: u.me.id,
-    assigneeName: staffName,
-    comments: [...job.comments, comment],
-    updatedAt: now,
-  });
-
-  const cleared: CofdCgState = { ...cgState };
-  delete cleared.submittedJob;
-  delete cleared.submittedAt;
-  await u.db.modify(target.id, "$set", { "data.cofd_cg": cleared });
-
-  const lines: string[] = [];
-  lines.push(await header("Character Returned"));
-  lines.push(`${u.util.displayName(target, u.me)}'s submission was returned. Job #${job.number} remains open.`);
-  lines.push(`Reason: ${notes}`);
-  lines.push(await footer());
-  u.send(lines.join("\n"));
-
-  u.send(
-    `%chYour Chronicles of Darkness sheet was returned for revision by ${staffName}.%cn\n` +
-      `Reason: ${notes}\n` +
-      `Use %ch+cg%cn to make changes and %ch+cg/submit%cn to resubmit.`,
-    target.id,
-  );
-
-  await sendCofdMail({
-    to: target.id,
-    subject: `Character returned for revision: ${u.util.displayName(target, u.me)}`,
-    body: [
-      `Your Chronicles of Darkness submission was returned by ${staffName}.`,
-      `CGEN job: #${job.number} (reopened)`,
-      ``,
-      `Reason:`,
-      notes,
-      ``,
-      `Use +cg to make changes and +cg/submit to resubmit.`,
-    ].join("\n"),
   });
 }

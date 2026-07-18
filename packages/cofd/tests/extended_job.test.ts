@@ -2,7 +2,7 @@ import { assert, assertEquals, assertStringIncludes } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { mockPlayer, mockU } from "./helpers/mockU.ts";
 import { extendedExec } from "../src/commands/extended.ts";
-import { jobs, type IJob } from "@ursamu/jobs-plugin";
+import { jobs, type IJob } from "@ursamu/jobs";
 import { createExtendedAction } from "../src/subsystems/extended.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };

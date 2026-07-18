@@ -7,29 +7,39 @@
 import {
   COFD_VIRTUES,
   COFD_VICES,
-  COFD_MERITS,
-  CTL_SEEMINGS,
   CTL_COURTS,
-  kithsForSeeming,
   findSeeming,
-  findCourt,
-  WTF_AUSPICES,
-  WTF_TRIBES,
-  WTF_RENOWN,
-  WTF_GIFTS,
-  WTF_RITES,
-  giftsByType,
   findGift,
   type WtfGift,
   CTL_REGALIA,
-  CTL_CONTRACTS,
   contractsByRegalia,
   contractsByCourt,
   goblinContracts,
   type CtlContract,
+  type MeritDefinition,
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
 import { header, divider, footer } from "@ursamu/mush";
+import type { CofdSheet } from "../stats/index.ts";
+import {
+  listSheetOrDefault,
+  eligibleMerits,
+  eligibleSeemings,
+  eligibleKiths,
+  eligibleCourts,
+  eligibleRegalia,
+  eligibleAuspices,
+  eligibleTribes,
+  eligibleRenown,
+  eligibleGifts,
+  eligibleRites,
+  eligibleContracts,
+  eligibleListTopics,
+  wrongTemplateMsg,
+  isChangeling,
+  isWerewolf,
+  type ListSheet,
+} from "./list_eligible.ts";
 
 const WIDTH = 78;
 const INDENT = "  ";
@@ -122,22 +132,47 @@ const INDEX = [
   { key: "merits", note: "Merits by category — or filter by category name" },
 ];
 
-function renderIndex(): string {
+function renderIndex(sheet: CofdSheet): string {
+  const allowed = eligibleListTopics(sheet);
   const out: string[] = [];
   out.push(header("Chargen — Available Lists"));
   out.push("");
-  out.push(...body("Use +cg/list <topic> to see options for that field."));
+  out.push(
+    ...body(
+      "Use +cg/list <topic> to see options you can take " +
+        "with your current sheet.",
+    ),
+  );
   out.push("");
   for (const e of INDEX) {
+    if (!allowed.has(e.key)) continue;
     out.push(`${INDENT}%ch${e.key.padEnd(11)}%cn  ${e.note}`);
   }
   out.push("");
   out.push(`${INDENT}Examples:`);
   out.push(`${INDENT}  +cg/list virtues`);
-  out.push(`${INDENT}  +cg/list kiths beast     (kiths for Beast only)`);
-  out.push(`${INDENT}  +cg/list auspices Rahu   (detail for one auspice)`);
-  out.push(`${INDENT}  +cg/list gifts rage      (facets of Gift of Rage)`);
+  out.push(`${INDENT}  +cg/list merits physical`);
+  if (isChangeling(sheet)) {
+    out.push(
+      `${INDENT}  +cg/list kiths beast     (kiths for Beast)`,
+    );
+  }
+  if (isWerewolf(sheet)) {
+    out.push(
+      `${INDENT}  +cg/list gifts rage      (facets of Gift of Rage)`,
+    );
+  }
   out.push("");
+  out.push(footer());
+  return out.join("\n");
+}
+
+function lockedTopic(
+  title: string,
+  need: "changeling" | "werewolf",
+): string {
+  const out: string[] = [header(title), ""];
+  out.push(...body(wrongTemplateMsg(title, need)));
   out.push(footer());
   return out.join("\n");
 }
@@ -251,14 +286,18 @@ function renderTemplates(): string {
 
 // ── Seemings ──────────────────────────────────────────────────────────────────
 
-function renderSeemings(filter?: string): string {
+function renderSeemings(sheet: CofdSheet, filter?: string): string {
+  if (!isChangeling(sheet)) {
+    return lockedTopic("Seemings", "changeling");
+  }
+  const pool = eligibleSeemings(sheet);
   if (filter) {
     const seeming = findSeeming(filter);
-    if (!seeming) {
+    if (!seeming || !pool.some((s) => s.name === seeming.name)) {
       const out: string[] = [header("Changeling — Seemings"), ""];
       out.push(...body(`No seeming named '${filter}'.`));
       out.push(
-        ...body(`Try: ${CTL_SEEMINGS.map((s) => s.name).join(", ")}`),
+        ...body(`Try: ${pool.map((s) => s.name).join(", ")}`),
       );
       out.push(footer());
       return out.join("\n");
@@ -293,7 +332,7 @@ function renderSeemings(filter?: string): string {
   );
   out.push("");
   const colW = 38;
-  for (const s of CTL_SEEMINGS) {
+  for (const s of pool) {
     const left = `%ch%cy${s.name}%cn (${s.favoredRegalia})`;
     const leftVis = visualLen(left);
     const pad = Math.max(1, colW - leftVis);
@@ -311,25 +350,63 @@ function renderSeemings(filter?: string): string {
 
 // ── Kiths ─────────────────────────────────────────────────────────────────────
 
-function renderKiths(filter?: string): string {
+function renderKiths(sheet: CofdSheet, filter?: string): string {
+  if (!isChangeling(sheet)) {
+    return lockedTopic("Kiths", "changeling");
+  }
+  const takeable = eligibleKiths(sheet);
+  const sheetSeeming = (sheet.customFields?.seeming ?? "")
+    .trim();
+  // When seeming is set, only that seeming's kiths are takeable.
+  const seemings = sheetSeeming
+    ? eligibleSeemings(sheet).filter(
+      (s) =>
+        s.name.toLowerCase() === sheetSeeming.toLowerCase(),
+    )
+    : eligibleSeemings(sheet);
+
   if (filter) {
     const seeming = findSeeming(filter);
-    if (!seeming) {
-      const out: string[] = [header("Changeling — Kiths"), ""];
-      out.push(...body(`No seeming named '${filter}'.`));
-      out.push(
-        ...body(`Try: ${CTL_SEEMINGS.map((s) => s.name).join(", ")}`),
+    const ok = seeming &&
+      seemings.some(
+        (s) => s.name.toLowerCase() === seeming.name.toLowerCase(),
       );
+    if (!seeming || !ok) {
+      const out: string[] = [header("Changeling — Kiths"), ""];
+      if (sheetSeeming) {
+        out.push(
+          ...body(
+            `Your seeming is ${sheetSeeming}. ` +
+              `Only its kiths are listed.`,
+          ),
+        );
+        out.push(
+          ...body(
+            `Try: +cg/list kiths ${sheetSeeming}`,
+          ),
+        );
+      } else {
+        out.push(...body(`No seeming named '${filter}'.`));
+        out.push(
+          ...body(
+            `Try: ${seemings.map((s) => s.name).join(", ")}`,
+          ),
+        );
+      }
       out.push("");
       out.push(...body("Or omit the filter: +cg/list kiths"));
       out.push(footer());
       return out.join("\n");
     }
+    const list = takeable.filter(
+      (k) =>
+        k.seeming.toLowerCase() === seeming.name.toLowerCase(),
+    );
     const out: string[] = [
       header(`Changeling — Kiths of the ${seeming.name}`),
       "",
     ];
-    for (const k of kithsForSeeming(seeming.name)) {
+    for (const k of list) {
       out.push(`${INDENT}%ch%cy${k.name}%cn`);
       out.push(...body(k.description));
       out.push("");
@@ -341,31 +418,51 @@ function renderKiths(filter?: string): string {
   }
 
   const out: string[] = [header("Changeling — Kiths"), ""];
-  for (const s of CTL_SEEMINGS) {
-    const ks = kithsForSeeming(s.name);
+  if (sheetSeeming) {
+    out.push(
+      ...body(
+        `Kiths for your seeming (${sheetSeeming}).`,
+      ),
+    );
+    out.push("");
+  }
+  for (const s of seemings) {
+    const ks = takeable.filter(
+      (k) =>
+        k.seeming.toLowerCase() === s.name.toLowerCase(),
+    );
     if (ks.length === 0) continue;
     out.push(divider(s.name));
     out.push(...columns(ks.map((k) => `%ch%cy${k.name}%cn`), 3));
     out.push("");
   }
-  out.push(
-    ...body("For details on a seeming's kiths:  +cg/list kiths <seeming>"),
-  );
+  if (!sheetSeeming) {
+    out.push(
+      ...body(
+        "For details on a seeming's kiths:  " +
+          "+cg/list kiths <seeming>",
+      ),
+    );
+  }
   out.push(footer());
   return out.join("\n");
 }
 
 // ── Courts ────────────────────────────────────────────────────────────────────
 
-function renderCourts(filter?: string): string {
+function renderCourts(sheet: CofdSheet, filter?: string): string {
+  if (!isChangeling(sheet)) {
+    return lockedTopic("Courts", "changeling");
+  }
+  const pool = eligibleCourts(sheet);
   if (filter) {
     const q = filter.trim().toLowerCase();
-    const court = CTL_COURTS.find((c) => c.name.toLowerCase() === q);
+    const court = pool.find((c) => c.name.toLowerCase() === q);
     if (!court) {
       const out: string[] = [header("Changeling — Courts"), ""];
       out.push(...body(`No court named '${filter}'.`));
       out.push(
-        ...body(`Try: ${CTL_COURTS.map((c) => c.name).join(", ")}`),
+        ...body(`Try: ${pool.map((c) => c.name).join(", ")}`),
       );
       out.push(footer());
       return out.join("\n");
@@ -392,7 +489,7 @@ function renderCourts(filter?: string): string {
     ...body("Four seasonal courts. Add a name for full detail."),
   );
   out.push("");
-  for (const c of CTL_COURTS) {
+  for (const c of pool) {
     out.push(
       `${INDENT}%ch%cy${c.name}%cn  (${c.emotion})`,
     );
@@ -409,15 +506,19 @@ function renderCourts(filter?: string): string {
 
 // ── Auspices ─────────────────────────────────────────────────────────────────
 
-function renderAuspices(filter?: string): string {
+function renderAuspices(sheet: CofdSheet, filter?: string): string {
+  if (!isWerewolf(sheet)) {
+    return lockedTopic("Auspices", "werewolf");
+  }
+  const pool = eligibleAuspices(sheet);
   if (filter) {
     const q = filter.trim().toLowerCase();
-    const a = WTF_AUSPICES.find((x) => x.name.toLowerCase() === q);
+    const a = pool.find((x) => x.name.toLowerCase() === q);
     if (!a) {
       const out: string[] = [header("Werewolf — Auspices"), ""];
       out.push(...body(`No auspice named '${filter}'.`));
       out.push(
-        ...body(`Try: ${WTF_AUSPICES.map((x) => x.name).join(", ")}`),
+        ...body(`Try: ${pool.map((x) => x.name).join(", ")}`),
       );
       out.push(footer());
       return out.join("\n");
@@ -455,7 +556,7 @@ function renderAuspices(filter?: string): string {
     `Renown`;
   out.push(`%ch${hdr}%cn`);
   out.push(`${INDENT}${"-".repeat(WIDTH - INDENT.length)}`);
-  for (const a of WTF_AUSPICES) {
+  for (const a of pool) {
     const name = a.name.padEnd(COL);
     const moon = a.moon.padEnd(COL);
     out.push(`${INDENT}%cy${name}%cn${moon}${a.renown}`);
@@ -468,15 +569,19 @@ function renderAuspices(filter?: string): string {
 
 // ── Tribes ────────────────────────────────────────────────────────────────────
 
-function renderTribes(filter?: string): string {
+function renderTribes(sheet: CofdSheet, filter?: string): string {
+  if (!isWerewolf(sheet)) {
+    return lockedTopic("Tribes", "werewolf");
+  }
+  const pool = eligibleTribes(sheet);
   if (filter) {
     const q = filter.trim().toLowerCase();
-    const t = WTF_TRIBES.find((x) => x.name.toLowerCase() === q);
+    const t = pool.find((x) => x.name.toLowerCase() === q);
     if (!t) {
       const out: string[] = [header("Werewolf — Tribes"), ""];
       out.push(...body(`No tribe named '${filter}'.`));
       out.push(
-        ...body(`Try: ${WTF_TRIBES.map((x) => x.name).join(", ")}`),
+        ...body(`Try: ${pool.map((x) => x.name).join(", ")}`),
       );
       out.push(footer());
       return out.join("\n");
@@ -508,7 +613,7 @@ function renderTribes(filter?: string): string {
     ),
   );
   out.push("");
-  for (const t of WTF_TRIBES) {
+  for (const t of pool) {
     const renown = t.renown || "—";
     out.push(
       `${INDENT}%ch%cy${t.name}%cn  Renown: ${renown}`,
@@ -523,9 +628,13 @@ function renderTribes(filter?: string): string {
 
 // ── Renown ────────────────────────────────────────────────────────────────────
 
-function renderRenown(): string {
+function renderRenown(sheet: CofdSheet): string {
+  if (!isWerewolf(sheet)) {
+    return lockedTopic("Renown", "werewolf");
+  }
+  const pool = eligibleRenown(sheet);
   const out: string[] = [header("Werewolf — Renown"), ""];
-  for (const r of WTF_RENOWN) {
+  for (const r of pool) {
     out.push(`${INDENT}%ch%cy${r.name}%cn`);
     out.push(...body(r.description));
     out.push("");
@@ -549,11 +658,27 @@ function dotMark(n: number): string {
   return "*".repeat(Math.max(0, Math.min(6, n)));
 }
 
-function findGiftFuzzy(filter: string): WtfGift | WtfGift[] | null {
+function findGiftFuzzy(
+  filter: string,
+  pool: WtfGift[],
+): WtfGift | WtfGift[] | null {
   const q = filter.trim().toLowerCase();
-  const exact = findGift(filter);
+  const catalog = findGift(filter);
+  if (
+    catalog &&
+    pool.some(
+      (g) =>
+        g.name.toLowerCase() === catalog.name.toLowerCase(),
+    )
+  ) {
+    return pool.find(
+      (g) =>
+        g.name.toLowerCase() === catalog.name.toLowerCase(),
+    )!;
+  }
+  const exact = pool.find((g) => g.name.toLowerCase() === q);
   if (exact) return exact;
-  const matches = WTF_GIFTS.filter((g) => {
+  const matches = pool.filter((g) => {
     const core = g.name
       .toLowerCase()
       .replace(/^gift of (the )?/, "")
@@ -578,9 +703,13 @@ function giftShortName(name: string): string {
     .replace(/ Moon$/, "");
 }
 
-function renderGifts(filter?: string): string {
+function renderGifts(sheet: CofdSheet, filter?: string): string {
+  if (!isWerewolf(sheet)) {
+    return lockedTopic("Gifts", "werewolf");
+  }
+  const pool = eligibleGifts(sheet);
   if (filter) {
-    const found = findGiftFuzzy(filter);
+    const found = findGiftFuzzy(filter, pool);
     if (Array.isArray(found)) {
       const out: string[] = [header("Werewolf — Gifts")];
       out.push(
@@ -598,7 +727,9 @@ function renderGifts(filter?: string): string {
       out.push(...body(`No gift named '${filter}'.`));
       out.push(
         ...body(
-          "Tip: short name works, e.g. 'rage' for Gift of Rage.",
+          "Only gifts you can take are listed. " +
+            "Set auspice/tribe first; short names work " +
+            "(e.g. 'rage').",
         ),
       );
       out.push(...body("Or omit the filter: +cg/list gifts"));
@@ -636,11 +767,24 @@ function renderGifts(filter?: string): string {
   }
 
   // Compact index: thin kind labels + 3-col short names (≤22 lines).
-  // Avoid mush divider() chrome — it costs 2–3 lines per section.
   const out: string[] = [header("Werewolf — Gifts")];
-  out.push(...body("Gifts by kind. Add a name for facets."));
+  out.push(
+    ...body(
+      "Gifts you can take (by kind). Add a name for facets.",
+    ),
+  );
+  if (pool.length === 0) {
+    out.push(
+      ...body(
+        "Set your auspice (and tribe) in Stage 3 to unlock " +
+          "Moon and Shadow Gifts.",
+      ),
+    );
+    out.push(footer());
+    return out.join("\n");
+  }
   for (const kind of ["moon", "shadow", "wolf"] as const) {
-    const list = giftsByType(kind);
+    const list = pool.filter((g) => g.type === kind);
     if (list.length === 0) continue;
     out.push(`${INDENT}%ch${GIFT_KIND_LABELS[kind]}:%cn`);
     out.push(
@@ -661,13 +805,14 @@ function renderGifts(filter?: string): string {
 
 // ── Rites ─────────────────────────────────────────────────────────────────────
 
-function findRiteFuzzy(filter: string) {
+function findRiteFuzzy(
+  filter: string,
+  pool: ReturnType<typeof eligibleRites>,
+) {
   const q = filter.trim().toLowerCase();
-  const exact = WTF_RITES.find(
-    (r) => r.name.toLowerCase() === q,
-  );
+  const exact = pool.find((r) => r.name.toLowerCase() === q);
   if (exact) return exact;
-  const matches = WTF_RITES.filter((r) =>
+  const matches = pool.filter((r) =>
     r.name.toLowerCase().includes(q),
   );
   if (matches.length === 1) return matches[0];
@@ -675,8 +820,12 @@ function findRiteFuzzy(filter: string) {
   return null;
 }
 
-function ritesOfKind(kind: "wolf" | "pack") {
-  return WTF_RITES.filter((r) => r.type === kind)
+function ritesOfKind(
+  kind: "wolf" | "pack",
+  pool: ReturnType<typeof eligibleRites>,
+) {
+  return pool
+    .filter((r) => r.type === kind)
     .slice()
     .sort(
       (a, b) =>
@@ -685,8 +834,11 @@ function ritesOfKind(kind: "wolf" | "pack") {
 }
 
 /** Compact kind list: Name [***] in 2 cols (fits ≤22 lines). */
-function renderRiteKindList(kind: "wolf" | "pack"): string {
-  const list = ritesOfKind(kind);
+function renderRiteKindList(
+  kind: "wolf" | "pack",
+  pool: ReturnType<typeof eligibleRites>,
+): string {
+  const list = ritesOfKind(kind, pool);
   const title = kind === "wolf" ? "Wolf Rites" : "Pack Rites";
   const out: string[] = [header(`Werewolf — ${title}`)];
   out.push(
@@ -706,18 +858,22 @@ function renderRiteKindList(kind: "wolf" | "pack"): string {
   return out.join("\n");
 }
 
-function renderRites(filter?: string): string {
+function renderRites(sheet: CofdSheet, filter?: string): string {
+  if (!isWerewolf(sheet)) {
+    return lockedTopic("Rites", "werewolf");
+  }
+  const pool = eligibleRites(sheet);
   if (filter) {
     const q = filter.trim().toLowerCase();
     // Kind index first so "pack" / "wolf" are not fuzzy name hits.
     if (q === "wolf" || q === "wolves") {
-      return renderRiteKindList("wolf");
+      return renderRiteKindList("wolf", pool);
     }
     if (q === "pack" || q === "packs") {
-      return renderRiteKindList("pack");
+      return renderRiteKindList("pack", pool);
     }
 
-    const found = findRiteFuzzy(filter);
+    const found = findRiteFuzzy(filter, pool);
     if (Array.isArray(found)) {
       const out: string[] = [header("Werewolf — Rites")];
       out.push(...body(`Several rites match '${filter}':`));
@@ -765,8 +921,8 @@ function renderRites(filter?: string): string {
   }
 
   // Top index only — full lists are under wolf / pack filters.
-  const wolfN = ritesOfKind("wolf").length;
-  const packN = ritesOfKind("pack").length;
+  const wolfN = ritesOfKind("wolf", pool).length;
+  const packN = ritesOfKind("pack", pool).length;
   const out: string[] = [header("Werewolf — Rites")];
   out.push(
     ...body(
@@ -790,22 +946,34 @@ function renderRites(filter?: string): string {
 
 // ── Regalia ───────────────────────────────────────────────────────────────────
 
-function renderRegalia(): string {
+function renderRegalia(sheet: CofdSheet): string {
+  if (!isChangeling(sheet)) {
+    return lockedTopic("Regalia", "changeling");
+  }
+  const pool = eligibleRegalia(sheet);
+  const takeable = eligibleContracts(sheet);
   const out: string[] = [header("Changeling — Regalia"), ""];
   out.push(
     ...body(
-      "The six Arcadian Regalia. Each seeming has one favored Regalia; " +
-        "you choose a second for the 'favored' field in chargen.",
+      "The six Arcadian Regalia. Each seeming has one favored " +
+        "Regalia; you choose a second for the 'favored' field.",
     ),
   );
   out.push("");
-  for (const r of CTL_REGALIA) {
-    out.push(`${INDENT}%ch%cy${r.name}%cn  (favored by ${r.favoredBy})`);
+  for (const r of pool) {
+    const n = takeable.filter(
+      (c) =>
+        c.type === "arcadian" &&
+        (c.regalia ?? "").toLowerCase() === r.name.toLowerCase(),
+    ).length;
+    out.push(
+      `${INDENT}%ch%cy${r.name}%cn  (favored by ${r.favoredBy})`,
+    );
     out.push(...body(r.description));
     out.push(
       ...fieldBlock(
         "Contracts",
-        `${contractsByRegalia(r.name).length}` +
+        `${n} you can take` +
           ` — see +cg/list contracts ${r.name.toLowerCase()}`,
       ),
     );
@@ -823,59 +991,111 @@ function contractEntry(c: CtlContract): string {
   return `%ch%cy${c.name}%cn${tag}`;
 }
 
-function renderContracts(filter?: string): string {
+function renderContracts(
+  sheet: CofdSheet,
+  filter?: string,
+): string {
+  if (!isChangeling(sheet)) {
+    return lockedTopic("Contracts", "changeling");
+  }
+  const takeable = eligibleContracts(sheet);
+  const takeSet = new Set(
+    takeable.map((c) => c.name.toLowerCase()),
+  );
+  const filterTakeable = (
+    list: readonly CtlContract[],
+  ): CtlContract[] =>
+    list.filter((c) => takeSet.has(c.name.toLowerCase()));
+
   if (filter) {
     const q = filter.trim().toLowerCase();
-    const reg = CTL_REGALIA.find((r) => r.name.toLowerCase() === q);
+    const reg = CTL_REGALIA.find(
+      (r) => r.name.toLowerCase() === q,
+    );
     if (reg) {
-      const list = contractsByRegalia(reg.name);
+      const list = filterTakeable(
+        contractsByRegalia(reg.name),
+      );
       const out: string[] = [
         header(`Contracts — ${reg.name} Regalia`),
         "",
       ];
       out.push(...body(reg.description));
       out.push("");
-      out.push(...columns(list.map(contractEntry), 2));
+      if (list.length === 0) {
+        out.push(
+          ...body(
+            "No contracts from this Regalia that you can " +
+              "take right now (check favored Regalia).",
+          ),
+        );
+      } else {
+        out.push(...columns(list.map(contractEntry), 2));
+      }
       out.push("");
-      out.push(...body("* = Royal.  +info <name> for full detail."));
+      out.push(
+        ...body("* = Royal.  +info <name> for full detail."),
+      );
       out.push(footer());
       return out.join("\n");
     }
     if (q === "goblin") {
+      const list = filterTakeable(goblinContracts());
       const out: string[] = [header("Contracts — Goblin"), ""];
-      out.push(...columns(goblinContracts().map(contractEntry), 2));
+      out.push(...columns(list.map(contractEntry), 2));
       out.push("");
       out.push(
         ...body(
-          "+ = Goblin (incurs Goblin Debt).  +info <name> for full detail.",
+          "+ = Goblin (incurs Goblin Debt).  " +
+            "+info <name> for full detail.",
         ),
       );
       out.push(footer());
       return out.join("\n");
     }
-    const court = CTL_COURTS.find((c) => c.name.toLowerCase() === q);
+    const court = CTL_COURTS.find(
+      (c) => c.name.toLowerCase() === q,
+    );
     if (court) {
-      const list = contractsByCourt(court.name);
+      const list = filterTakeable(
+        contractsByCourt(court.name),
+      );
       const out: string[] = [
         header(`Contracts — ${court.name} Court`),
         "",
       ];
-      out.push(...columns(list.map(contractEntry), 2));
+      if (list.length === 0) {
+        out.push(
+          ...body(
+            "No Court Contracts here that you can take " +
+              "(must match your own court).",
+          ),
+        );
+      } else {
+        out.push(...columns(list.map(contractEntry), 2));
+      }
       out.push("");
-      out.push(...body("* = Royal.  +info <name> for full detail."));
+      out.push(
+        ...body("* = Royal.  +info <name> for full detail."),
+      );
       out.push(footer());
       return out.join("\n");
     }
     const out: string[] = [header("Contracts"), ""];
     out.push(
-      ...body(`No Regalia, Court, or 'goblin' named '${filter}'.`),
-    );
-    out.push(
-      ...body(`Regalia: ${CTL_REGALIA.map((r) => r.name).join(", ")}.`),
+      ...body(
+        `No Regalia, Court, or 'goblin' named '${filter}'.`,
+      ),
     );
     out.push(
       ...body(
-        `Courts: ${CTL_COURTS.map((c) => c.name).join(", ")}.  Plus: goblin.`,
+        `Regalia: ${CTL_REGALIA.map((r) => r.name).join(", ")}.`,
+      ),
+    );
+    out.push(
+      ...body(
+        `Courts: ${CTL_COURTS.map((c) => c.name).join(", ")}. ` +
+          `Plus: goblin.`,
       ),
     );
     out.push(footer());
@@ -885,35 +1105,45 @@ function renderContracts(filter?: string): string {
   const out: string[] = [header("Contracts"), ""];
   out.push(
     ...body(
-      "Contracts come in three kinds. Filter with +cg/list contracts <group>.",
+      "Only contracts you can take. Filter with " +
+        "+cg/list contracts <group>.",
     ),
   );
   out.push("");
   out.push(divider("Arcadian Regalia"));
   for (const r of CTL_REGALIA) {
+    const n = filterTakeable(
+      contractsByRegalia(r.name),
+    ).length;
+    if (n === 0) continue;
     out.push(
       `${INDENT}%ch${r.name.padEnd(8)}%cn ` +
-        `${contractsByRegalia(r.name).length} contracts` +
+        `${n} contracts` +
         `  (favored by ${r.favoredBy})`,
     );
   }
   out.push("");
   out.push(divider("Courts"));
   for (const c of CTL_COURTS) {
+    const n = filterTakeable(
+      contractsByCourt(c.name),
+    ).length;
+    if (n === 0) continue;
     out.push(
       `${INDENT}%ch${c.name.padEnd(8)}%cn ` +
-        `${contractsByCourt(c.name).length} contracts`,
+        `${n} contracts`,
     );
   }
   out.push("");
-  out.push(divider("Goblin"));
-  out.push(
-    `${INDENT}%chgoblin%cn   ${goblinContracts().length} contracts`,
-  );
-  out.push("");
+  const gobN = filterTakeable(goblinContracts()).length;
+  if (gobN > 0) {
+    out.push(divider("Goblin"));
+    out.push(`${INDENT}%chgoblin%cn   ${gobN} contracts`);
+    out.push("");
+  }
   out.push(
     ...body(
-      `${CTL_CONTRACTS.length} Contracts total.` +
+      `${takeable.length} Contracts you can take.` +
         `  Example: +cg/list contracts crown`,
     ),
   );
@@ -930,9 +1160,13 @@ function dots(allowed: number[]): string {
   return `${sorted[0]}-${sorted[sorted.length - 1]}`;
 }
 
-function renderMerits(filter?: string): string {
-  const cats = new Map<string, typeof COFD_MERITS>();
-  for (const m of COFD_MERITS) {
+function renderMerits(
+  sheet: CofdSheet,
+  filter?: string,
+): string {
+  const takeable = eligibleMerits(sheet);
+  const cats = new Map<string, MeritDefinition[]>();
+  for (const m of takeable) {
     if (!cats.has(m.category)) cats.set(m.category, []);
     cats.get(m.category)!.push(m);
   }
@@ -944,8 +1178,20 @@ function renderMerits(filter?: string): string {
     );
     if (!match) {
       const out: string[] = [header("Merits"), ""];
-      out.push(...body(`No merit category named '${filter}'.`));
-      out.push(...body(`Try: ${Array.from(cats.keys()).join(", ")}`));
+      out.push(
+        ...body(`No merit category named '${filter}'.`),
+      );
+      const keys = Array.from(cats.keys());
+      if (keys.length > 0) {
+        out.push(...body(`Try: ${keys.join(", ")}`));
+      } else {
+        out.push(
+          ...body(
+            "No merits match your current sheet " +
+              "(check template and attributes).",
+          ),
+        );
+      }
       out.push("");
       out.push(...body("Or omit the filter: +cg/list merits"));
       out.push(footer());
@@ -962,6 +1208,13 @@ function renderMerits(filter?: string): string {
       return `%ch%cy${m.name}%cn${dotStr}${inst}`;
     });
     const out: string[] = [header(`Merits — ${match}`), ""];
+    out.push(
+      ...body(
+        "Only merits you qualify for right now " +
+          "(prereqs met).",
+      ),
+    );
+    out.push("");
     out.push(...columns(entries, 2));
     out.push("");
     out.push(
@@ -975,6 +1228,23 @@ function renderMerits(filter?: string): string {
   }
 
   const out: string[] = [header("Merits"), ""];
+  out.push(
+    ...body(
+      `Merits you can take (${takeable.length}). ` +
+        `Filtered by your current sheet prereqs.`,
+    ),
+  );
+  out.push("");
+  if (cats.size === 0) {
+    out.push(
+      ...body(
+        "None qualify yet. Raise attributes/skills " +
+          "or set template, then list again.",
+      ),
+    );
+    out.push(footer());
+    return out.join("\n");
+  }
   for (const cat of Array.from(cats.keys()).sort()) {
     out.push(divider(cat));
     out.push(
@@ -987,7 +1257,8 @@ function renderMerits(filter?: string): string {
   }
   out.push(
     ...body(
-      "Use +cg/list merits <category> to see merit names and dot ranges.",
+      "Use +cg/list merits <category> to see names " +
+        "and dot ranges.",
     ),
   );
   out.push(footer());
@@ -997,64 +1268,72 @@ function renderMerits(filter?: string): string {
 // ── Public router ─────────────────────────────────────────────────────────────
 
 /**
- * Render the +cg/list output. `arg` is the raw text after `/list ` —
- * `""` shows the index; otherwise it's a topic name with optional filter.
+ * Render the +cg/list output. `arg` is the raw text after `/list `.
+ * `sheet` is the active chargen (or live) sheet used for eligibility.
+ * `""` shows the index; otherwise a topic name with optional filter.
  */
-export function renderCgList(arg: string): string {
+export function renderCgList(
+  arg: string,
+  sheet?: ListSheet,
+): string {
+  const s = listSheetOrDefault(sheet);
   const trimmed = arg.trim();
-  if (!trimmed) return renderIndex();
+  if (!trimmed) return renderIndex(s);
 
   const parts = trimmed.split(/\s+/);
   const topic = parts[0].toLowerCase();
   const filter = parts.slice(1).join(" ");
+  const f = filter || undefined;
 
   switch (topic) {
     case "virtue":
     case "virtues":
-      return renderVirtues(filter || undefined);
+      return renderVirtues(f);
     case "vice":
     case "vices":
-      return renderVices(filter || undefined);
+      return renderVices(f);
     case "template":
     case "templates":
       return renderTemplates();
     case "seeming":
     case "seemings":
-      return renderSeemings(filter || undefined);
+      return renderSeemings(s, f);
     case "kith":
     case "kiths":
-      return renderKiths(filter || undefined);
+      return renderKiths(s, f);
     case "court":
     case "courts":
-      return renderCourts(filter || undefined);
+      return renderCourts(s, f);
     case "regalia":
-      return renderRegalia();
+      return renderRegalia(s);
     case "contract":
     case "contracts":
-      return renderContracts(filter || undefined);
+      return renderContracts(s, f);
     case "auspice":
     case "auspices":
-      return renderAuspices(filter || undefined);
+      return renderAuspices(s, f);
     case "tribe":
     case "tribes":
-      return renderTribes(filter || undefined);
+      return renderTribes(s, f);
     case "renown":
-      return renderRenown();
+      return renderRenown(s);
     case "gift":
     case "gifts":
-      return renderGifts(filter || undefined);
+      return renderGifts(s, f);
     case "rite":
     case "rites":
-      return renderRites(filter || undefined);
+      return renderRites(s, f);
     case "merit":
     case "merits":
-      return renderMerits(filter || undefined);
+      return renderMerits(s, f);
     default: {
       const out: string[] = [header("Chargen — List"), ""];
       out.push(...body(`Unknown topic '${trimmed}'.`));
       out.push("");
       out.push(
-        ...body("Try: +cg/list  (no arg)  to see the available topics."),
+        ...body(
+          "Try: +cg/list  (no arg)  to see available topics.",
+        ),
       );
       out.push(footer());
       return out.join("\n");

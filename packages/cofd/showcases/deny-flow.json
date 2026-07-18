@@ -1,20 +1,20 @@
 {
-  "key": "approval-flow",
-  "title": "+approve -- staff promotes a chargen draft",
-  "description": "Staff reviews with +sheet, then +approve. A CGEN job is optional; approve works from the draft alone.",
-  "vars": { "player": "Hopeful" },
+  "key": "deny-flow",
+  "title": "+deny -- staff returns a chargen draft",
+  "description": "Staff reviews with +sheet, then +deny with a reason. Draft is kept; player fixes with +cg.",
+  "vars": { "player": "Rookie" },
   "setup": {
     "character": {
       "state": {
         "cofd_cg": {
           "stage": 6,
-          "isSubmitted": false,
+          "isSubmitted": true,
           "isApproved": false,
           "sheet": {
             "template": "mortal",
-            "concept": "Burned-out nurse seeking redemption",
-            "virtue": "Justice",
-            "vice": "Sloth",
+            "concept": "Cynical reporter",
+            "virtue": "Hope",
+            "vice": "Pride",
             "attributes": {
               "strength": 2, "dexterity": 3, "stamina": 3,
               "intelligence": 2, "wits": 2, "resolve": 2,
@@ -48,38 +48,24 @@
     }
   },
   "steps": [
-    { "sub": "Staff Reviews the Draft" },
+    { "sub": "Reason Is Required" },
     {
-      "note": "Staff opens the draft with +sheet. No job required."
-    },
-    {
-      "cmd": "+sheet Hopeful",
+      "cmd": "+deny Rookie",
       "as": "admin",
-      "label": "review draft"
+      "label": "no reason -> refused"
     },
-    { "expect": "DRAFT" },
+    { "expect": "reason is required" },
 
-    { "sub": "Staff Approves" },
+    { "sub": "Staff Denies" },
     {
-      "note": "+approve copies the draft live and clears +cg."
-    },
-    {
-      "cmd": "+approve Hopeful=Welcome. Watch your touchstones.",
+      "cmd": "+deny Rookie=Concept needs more detail.",
       "as": "admin",
-      "label": "admin approves"
+      "label": "admin denies"
     },
-    { "expect": "Character Approved" },
+    { "expect": "Character Denied" },
 
-    { "sub": "Nothing Left to Approve" },
-    {
-      "cmd": "+approve Hopeful",
-      "as": "admin",
-      "label": "second approve refused"
-    },
-    { "expect": "no chargen draft" },
-
-    { "sub": "Live Sheet Is Active" },
+    { "sub": "Draft Still There" },
     { "cmd": "+sheet" },
-    { "expect": "Hopeful" }
+    { "expect": "DRAFT" }
   ]
 }
