@@ -87,7 +87,7 @@ Deno.test("spendIcon refuses already spent", OPTS, () => {
 });
 
 Deno.test("recoverIcon marks recovered", OPTS, () => {
-  let sheet = ctlSheet();
+  const sheet = ctlSheet();
   const a = addIcon(sheet, {
     name: "Home Key",
     kind: "memory",

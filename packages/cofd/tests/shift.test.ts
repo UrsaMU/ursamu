@@ -1,6 +1,6 @@
 // +shift / Mask / Chrysalis tests (CtL).
 
-import { assertEquals, assert } from "jsr:@std/assert";
+import { assertEquals, assert } from "jsr:@std/assert@1";
 import {
   defaultSheet,
   migrateSheet,
@@ -165,7 +165,7 @@ Deno.test("applyAnimalShift: denied if not unlocked", OPTS, () => {
 });
 
 Deno.test("applyAnimalShift: leave human restores mask", OPTS, () => {
-  let sheet = changelingSheet();
+  const sheet = changelingSheet();
   const into = applyAnimalShift(sheet, "wolf");
   assert(into.sheet);
   const out = applyAnimalShift(into.sheet, "human");
@@ -177,7 +177,7 @@ Deno.test("applyAnimalShift: leave human restores mask", OPTS, () => {
 });
 
 Deno.test("applyAnimalShift: leave preserves prior mien", OPTS, () => {
-  let sheet = changelingSheet();
+  const sheet = changelingSheet();
   const mien = applyMaskShift(sheet, "mien");
   assert(mien.sheet);
   const into = applyAnimalShift(mien.sheet, "wolf");

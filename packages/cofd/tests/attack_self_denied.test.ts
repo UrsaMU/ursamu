@@ -74,7 +74,7 @@ Deno.test("+attack refuses self as target", OPTS, async () => {
   (u as unknown as { here: { id: string } }).here = {
     id: "room-self",
   };
-  u.util.target = async () => me as never;
+  u.util.target = () => Promise.resolve(me as never);
   u.cmd.args = ["", "Jax"];
 
   await attackExec(u);
