@@ -1,7 +1,7 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { DBO } from "@ursamu/ursamu";
-import type { IMail } from "@ursamu/mail-plugin";
+import type { IMail } from "../src/integrations/mail.ts";
 import { mockU, mockPlayer } from "./helpers/mockU.ts";
 import { approveExec, denyExec } from "../src/commands/approve.ts";
 import { sendCofdMail } from "../src/integrations/mail.ts";

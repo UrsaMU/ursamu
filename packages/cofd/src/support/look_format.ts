@@ -2,8 +2,7 @@
 // Fae sight uses maskName via resolveItemLookName.
 
 import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
-import { divider } from "@ursamu/mush";
-import { getConfig } from "@ursamu/core";
+import { divider, getConfig } from "@ursamu/mush";
 import { formatContentItems } from "./look_format_items.ts";
 
 export { cofdDescformatHandler } from "./look_desc.ts";

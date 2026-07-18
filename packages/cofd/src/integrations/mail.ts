@@ -1,10 +1,24 @@
 // Cross-plugin glue: deliver a system mail message to a player via the
-// mail-plugin's `mail.messages` collection. Loose-coupled: we construct
+// mail plugin's `mail.messages` collection. Loose-coupled: we construct
 // our own DBO referencing the same collection name rather than importing
 // the plugin's private mailDb singleton.
+//
+// IMail is duplicated here (not imported from @ursamu/mail) so this
+// package publishes without a hard JSR dep on mail, which is optional.
 
 import { DBO } from "@ursamu/ursamu";
-import type { IMail } from "@ursamu/mail-plugin";
+
+/** Subset of mail-plugin IMail used for system deliveries. */
+export interface IMail {
+  id: string;
+  from: string;
+  to: string[];
+  subject: string;
+  message: string;
+  date: number;
+  read: boolean;
+  folder?: "inbox" | "trash";
+}
 
 const mailDb = new DBO<IMail>("mail.messages");
 

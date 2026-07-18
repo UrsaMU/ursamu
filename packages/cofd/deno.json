@@ -6,7 +6,7 @@
   "tasks": {
     "test": "deno test -A --unstable-kv",
     "showcase": "deno run -A --unstable-kv --import-map=showcase.importmap.json tools/showcase.ts",
-    "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types --no-check"
+    "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types"
   },
   "exclude": [
     ".claude/",
@@ -36,16 +36,14 @@
     ]
   },
   "imports": {
-    "ursamu": "../mush/mod.ts",
-    "@ursamu/ursamu": "../mush/mod.ts",
-    "@ursamu/mush": "../mush/mod.ts",
-    "@ursamu/core": "../core/mod.ts",
-    "@ursamu/help-plugin": "../help/mod.ts",
-    "@ursamu/help": "../help/mod.ts",
-    "@ursamu/jobs-plugin": "../jobs/mod.ts",
-    "@ursamu/jobs": "../jobs/mod.ts",
-    "@ursamu/mail-plugin": "../mail/mod.ts",
-    "@ursamu/mail": "../mail/mod.ts",
+    "ursamu": "jsr:@ursamu/mush@^0.1.3",
+    "@ursamu/ursamu": "jsr:@ursamu/mush@^0.1.3",
+    "@ursamu/mush": "jsr:@ursamu/mush@^0.1.3",
+    "@ursamu/core": "jsr:@ursamu/core@^0.1.0",
+    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.2",
+    "@ursamu/help": "jsr:@ursamu/help@^0.1.2",
+    "@ursamu/jobs-plugin": "jsr:@ursamu/jobs@^0.1.0",
+    "@ursamu/jobs": "jsr:@ursamu/jobs@^0.1.0",
     "@ursamu/globals": "./tests/helpers/globals-shim.ts",
     "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
     "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
