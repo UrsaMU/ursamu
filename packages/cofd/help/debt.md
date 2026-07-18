@@ -2,14 +2,15 @@
 
 SYNTAX
   +debt                      List open / called / paid.
+  +debt/list                 Same.
   +debt/pay <id>             Mark paid after service.
   +debt/call <p> <id>=msg    Staff: call the debt in.
   +debt/clear <p> <id>       Staff: force clear.
 
 NOTES
-  Severity is **1–5**. Open and called both count.
-  Called debts show the demand text. Paying is
-  RP-trust; staff enforce with **+debt/call**.
+  Severity **1–5**. Open and called both count.
+  Paying is RP-trust; staff enforce with /call.
+  Also: +market/debt routes here.
 
 EXAMPLES
   +debt

@@ -16,4 +16,5 @@ EXAMPLES
   +approve Alice
   +approve Alice=Welcome. Watch your touchstones.
 
-SEE ALSO: help unapprove, help cg, help perception
+SEE ALSO: help unapprove, help cg, help perception,
+  help changeling

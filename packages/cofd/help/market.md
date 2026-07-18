@@ -5,7 +5,7 @@ SYNTAX
   +market/catalog [filter]   Full goods catalog.
   +market/buy <slug>         Pay Glamour.
   +market/buy <slug> debt    Same as /credit.
-  +market/credit <slug>      Buy on credit (Goblin Debt).
+  +market/credit <slug>      Buy on credit (Debt).
 
 BUILDER
   +market/create <name>      Open market here.
@@ -15,12 +15,12 @@ BUILDER
   +market/list
 
 NOTES
-  Prices show as `NG` (Glamour) and optional `debtN`.
-  Credit adds a debt on your sheet; see **help debt**.
+  Prices: `NG` Glamour, optional `debtN`. Credit
+  writes Goblin Debt on your sheet.
 
 EXAMPLES
   +market
   +market/buy amaranthine
   +market/credit trifle-token
 
-SEE ALSO: help debt, help hedge, help perception
+SEE ALSO: help debt, help hedge, help fruit

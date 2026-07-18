@@ -18,4 +18,4 @@ EXAMPLES
   +notes/add Backstory=I was born in a small town...
   +notes/priv Backstory=private
 
-SEE ALSO: help sheet, help finger, help cg
+SEE ALSO: help sheet, help cg, help character

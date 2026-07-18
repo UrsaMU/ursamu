@@ -2,8 +2,11 @@
 
 SYNTAX
   +spin                      Effect catalog.
+  +spin/list                 Same.
   +spin/info <effect>        Effect detail.
   +spin <effect> [text]      Attempt (costs Glamour).
+  +spin/path | /shelter | /barrier | /veil
+  +spin/fruit | /trap
 
 EFFECTS
   path      +2 next travel (~1h). 1G, need 2.
@@ -14,11 +17,11 @@ EFFECTS
   trap      Snare (ST). 2G, need 3.
 
 NOTES
-  Only in **Hedge** or **Hollow**. Pool is Wits +
-  Crafts or Occult (higher) + Wyrd.
+  Hedge or Hollow only. Pool: Wits + Crafts or
+  Occult (higher) + Wyrd.
 
 EXAMPLES
   +spin path
   +spin/veil An empty parking lot
 
-SEE ALSO: help hedge, help icon, help market
+SEE ALSO: help hedge, help fruit, help icon

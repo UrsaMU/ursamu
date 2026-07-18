@@ -24,4 +24,4 @@ EXAMPLES
   +shift wolf
   +shift human
 
-SEE ALSO: help shift, help contract
+SEE ALSO: help shift, help contract, help changeling

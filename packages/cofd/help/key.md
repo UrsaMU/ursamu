@@ -6,13 +6,13 @@ SYNTAX
   +hedge/exit <gate>=<phrase>         Same.
 
 NOTES
-  Anyone who speaks the **exact** key may open
-  a closed gate without Glamour (Lost still may
-  pay 1 Glamour without a key). Phrase match is
-  case-insensitive; spaces collapse.
+  Exact key opens a closed gate free (no Glamour).
+  Lost may still pay **1 Glamour** without a key.
+  Match is case-insensitive; spaces collapse.
 
 EXAMPLES
   +hedge/setway Night Gate/key=three red leaves
   +hedge/open Night Gate=three red leaves
+  +hedge/exit Night Gate=three red leaves
 
-SEE ALSO: help hedge, help hedge/staff
+SEE ALSO: help hedge, help hedge/staff, help perception

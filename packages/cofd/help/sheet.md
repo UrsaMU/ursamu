@@ -21,4 +21,5 @@ EXAMPLES
   +sheet/set mask=A quiet barista.
 
 SEE ALSO: help sheet/traits, help sheet/willpower,
-  help sheet/size, help sheet/specialties, help cg
+  help sheet/size, help sheet/specialties, help cg,
+  help changeling

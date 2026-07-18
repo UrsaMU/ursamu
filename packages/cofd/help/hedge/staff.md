@@ -9,7 +9,7 @@ SYNTAX
   +hedge/create [mortal|hedge|hollow]
   +hedge/link <name> <mortalRoom>=<hedgeRoom>
   +hedge/set <trait>=<value>
-  +hedge/setway <gate>/maskName=<label>
+  +hedge/setway <gate>/<field>=<value>
   +hedge/season <season>
   +hedge/destroy <name|id>
   +hedge/ways
@@ -19,9 +19,13 @@ TRAITS (/set)
   hollowrating 0-5, hollowowner=<player>.
 
 GATES (/setway)
-  maskName (mortal), name (true), key (phrase).
-  Default maskName: Strange passage.
-  Key: +hedge/open <gate>=phrase (see help key).
+  maskName, name, key. Default maskName:
+  Strange passage. Keys: help key.
+
+EXAMPLES
+  +hedge/create hollow
+  +hedge/set hollowrating=3
+  +hedge/setway Gate/key=three red leaves
 
 SEE ALSO: help hedge, help hollow, help key,
   help perception

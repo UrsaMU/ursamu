@@ -13,11 +13,11 @@ TOPIC GROUPS
   help social        Social Maneuvering.
   help reference     Virtues, Vices, merits.
   help templates     Mortal, Changeling fields.
+  help changeling    Full CtL command map.
 
 CHANGELING
-  help shift · help contract · help hedge
-  help hollow · help key · help market
-  help debt · help icon · help spin
+  help shift · contract · hedge · hollow · key
+  help market · debt · fruit · icon · spin
   help perception
 
 SEE ALSO: help cg, help sheet, help roll

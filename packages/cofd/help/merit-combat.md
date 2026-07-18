@@ -14,4 +14,5 @@ MERITS
 
 For storage key syntax under +sheet/set, see merit-combat/storage.
 
-SEE ALSO: help merits, help attack, help combat, help roll
+SEE ALSO: help merit-combat/storage, help attack,
+  help combat, help roll, help reference

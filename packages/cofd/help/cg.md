@@ -19,4 +19,5 @@ STAGES
 
 After stage-6 /submit the sheet finalizes; edit via +sheet/set.
 
-SEE ALSO: help cg/examples, help sheet, help roll
+SEE ALSO: help sheet, help roll, help templates,
+  help changeling

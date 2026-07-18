@@ -3,17 +3,18 @@
 SYNTAX
   +shift                     Status (form / Glamour).
   +shift <form>              Shift into that form.
-  +shift/list [animals]      Legal forms or animal catalog.
+  +shift/list [animals]      Legal forms or catalog.
   +shift/info <form>         Mechanics for one form.
-  +shift <form> for <name>   Staff/canEdit: shift another.
+  +shift <form> for <name>   Staff/canEdit: other.
 
 MASK (CtL)
-  **mask** / **mien** — 1 Glamour each way. Free raise on
-  **+combat/end**. Prose: +sheet/set mask=… / mien=…
-  Mien: exceptional Contracts; Huntsman trail; Hedgeways.
+  **mask** / **mien** — 1 Glamour each way. Free
+  raise on **+combat/end**. Prose: +sheet/set
+  mask=… / mien=…  Mien: exceptional Contracts;
+  Huntsman trail; Hedgeways.
 
 CHRYSALIS
-  Needs Contract Chrysalis + animals list. Cost 2 G enter.
+  Contract Chrysalis + animals list. Cost 2G enter.
   Details: help shift/chrysalis
 
 EXAMPLES
@@ -21,4 +22,5 @@ EXAMPLES
   +shift wolf
   +shift human
 
-SEE ALSO: help shift/chrysalis, help contract, help hedge
+SEE ALSO: help shift/chrysalis, help contract,
+  help hedge, help changeling

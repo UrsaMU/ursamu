@@ -86,8 +86,9 @@ GMCCG-inspired module layout, file-driven supernatural templates.
 
 Full per-command help: `help cofd`, then topic groups
 `help character`, `help dice`, `help status`, `help combat`,
-`help social`, `help reference`, `help templates` — or any
-command name (`help sheet`, `help hedge`, `help perception`).
+`help social`, `help reference`, `help templates`, or
+`help changeling` for the CtL map — or any command name
+(`help sheet`, `help hedge`, `help hollow`, `help key`).
 
 ---
 
