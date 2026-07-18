@@ -22,7 +22,7 @@ import { registerNotifyHooks, removeNotifyHooks } from "./notify.ts";
  */
 const jobsPlugin: IPlugin = {
   name: "jobs",
-  version: "1.0.0",
+  version: "0.1.1",
   description: "Anomaly-style jobs system — player requests, staff commands, bucket access, archive, REST API.",
 
   init: async () => {

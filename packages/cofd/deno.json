@@ -44,6 +44,8 @@
     "@ursamu/help": "jsr:@ursamu/help@^0.1.2",
     "@ursamu/jobs-plugin": "jsr:@ursamu/jobs@^0.1.0",
     "@ursamu/jobs": "jsr:@ursamu/jobs@^0.1.0",
+    "@ursamu/mail": "jsr:@ursamu/mail@^2.4.0",
+    "@ursamu/mail-plugin": "jsr:@ursamu/mail@^2.4.0",
     "@ursamu/globals": "./tests/helpers/globals-shim.ts",
     "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
     "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",

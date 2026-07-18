@@ -3934,6 +3934,7 @@
           "jsr:@ursamu/core@0.1",
           "jsr:@ursamu/help@~0.1.2",
           "jsr:@ursamu/jobs@0.1",
+          "jsr:@ursamu/mail@^2.4.0",
           "jsr:@ursamu/mush@~0.1.3",
           "jsr:@ursamu/mushcode@0.7",
           "jsr:@zaubrik/djwt@^3.0.2",
@@ -3993,7 +3994,11 @@
       "packages/jobs": {
         "dependencies": [
           "jsr:@std/assert@0.224",
-          "jsr:@std/testing@^1.0.17"
+          "jsr:@std/testing@^1.0.17",
+          "jsr:@ursamu/core@0.1",
+          "jsr:@ursamu/help@~0.1.2",
+          "jsr:@ursamu/mail@^2.4.0",
+          "jsr:@ursamu/mush@~0.1.3"
         ]
       },
       "packages/lang": {

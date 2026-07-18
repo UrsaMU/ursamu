@@ -16,11 +16,9 @@ import {
   type IJob,
 } from "@ursamu/jobs";
 import type { CofdCgState } from "../src/chargen/index.ts";
-import { DBO } from "@ursamu/ursamu";
-import type { IMail } from "../src/integrations/mail.ts";
+import { mailDb, type IMail } from "@ursamu/mail";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
-const mailDb = new DBO<IMail>("mail.messages");
 
 function fakeCgState(
   opts: { job?: number } = {},

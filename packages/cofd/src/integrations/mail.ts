@@ -1,28 +1,11 @@
-// Cross-plugin glue: deliver a system mail message to a player via the
-// mail plugin's `mail.messages` collection. Loose-coupled: we construct
-// our own DBO referencing the same collection name rather than importing
-// the plugin's private mailDb singleton.
-//
-// IMail is duplicated here (not imported from @ursamu/mail) so this
-// package publishes without a hard JSR dep on mail, which is optional.
+// Cross-plugin glue: deliver a system mail message via @ursamu/mail.
+// Failures are swallowed so approve/deny still work if mail is offline.
 
-import { DBO } from "@ursamu/ursamu";
+import { mailDb, type IMail } from "@ursamu/mail";
 
-/** Subset of mail-plugin IMail used for system deliveries. */
-export interface IMail {
-  id: string;
-  from: string;
-  to: string[];
-  subject: string;
-  message: string;
-  date: number;
-  read: boolean;
-  folder?: "inbox" | "trash";
-}
+export type { IMail };
 
-const mailDb = new DBO<IMail>("mail.messages");
-
-/** Sentinel "from" id used when the sender is the engine, not a player. */
+/** Sentinel "from" id when the sender is the engine, not a player. */
 const SYSTEM_SENDER = "#0";
 
 export interface CofdMailOptions {
@@ -36,7 +19,9 @@ export interface CofdMailOptions {
  * logged but never thrown -- a missing mail plugin must not break the
  * caller (approve/deny/beat-award stay functional).
  */
-export async function sendCofdMail(opts: CofdMailOptions): Promise<void> {
+export async function sendCofdMail(
+  opts: CofdMailOptions,
+): Promise<void> {
   const now = Date.now();
   const mail: IMail = {
     id: `mail-cofd-${now}-${Math.floor(Math.random() * 1e6)}`,

@@ -56,7 +56,7 @@ export const optionalPackages: PackageOption[] = [
   {
     name: "In-Game Mail",
     pkgName: "@ursamu/mail",
-    jsrUrl: "jsr:@ursamu/mail@^0.1.0",
+    jsrUrl: "jsr:@ursamu/mail@^2.4.0",
     description: "Offline mail (post/inbox) messaging",
   },
   {
