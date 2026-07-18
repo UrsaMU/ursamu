@@ -46,4 +46,4 @@ function resolveMailNs(): string {
   }
 }
 
-export const mailDb = new DBO<IMail>(resolveMailNs());
+export const mailDb: DBO<IMail> = new DBO<IMail>(resolveMailNs());
