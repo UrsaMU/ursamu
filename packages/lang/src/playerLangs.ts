@@ -1,5 +1,5 @@
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
-import { gameHooks } from "@ursamu/ursamu";
+import { emitLang } from "./hooks.ts";
 
 export interface PlayerLangs {
   known: Record<string, number>;
@@ -57,7 +57,7 @@ export async function setSkill(
   await u.db.modify(dbo.id, "$set", {
     [`data.languages.known.${key}`]: value,
   });
-  await gameHooks.emit("language:skill_changed", {
+  await emitLang("language:skill_changed", {
     player: dbo,
     language: key,
     skill: value,
@@ -73,7 +73,7 @@ export async function setActive(
   if (langName === null) {
     delete langs.active;
     await u.db.modify(dbo.id, "$unset", { "data.languages.active": "" });
-    await gameHooks.emit("language:active_changed", {
+    await emitLang("language:active_changed", {
       player: dbo,
       active: null,
     });
@@ -83,7 +83,7 @@ export async function setActive(
   if (!key) return;
   langs.active = key;
   await u.db.modify(dbo.id, "$set", { "data.languages.active": key });
-  await gameHooks.emit("language:active_changed", {
+  await emitLang("language:active_changed", {
     player: dbo,
     active: key,
   });

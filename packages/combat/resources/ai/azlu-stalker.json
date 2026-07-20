@@ -1,0 +1,55 @@
+{
+  "$schema": "../schemas/ai-strategy.schema.json",
+  "slug": "azlu-stalker",
+  "name": "Azlu Stalker",
+  "blurb": "Spider-host: ambush while hidden, seek cover when hurt, pick isolated prey.",
+  "book": "WtF Hosts flavor",
+  "tags": ["host", "azlu", "ambush", "stalker"],
+  "rules": [
+    {
+      "id": "hold-ambush",
+      "priority": 100,
+      "weight": 1,
+      "when": {
+        "unrevealed": true,
+        "noRecentDamage": true
+      },
+      "then": {
+        "action": "posture",
+        "posture": "ambush"
+      },
+      "reason": "unrevealed -- set ambush"
+    },
+    {
+      "id": "seek-cover",
+      "priority": 80,
+      "weight": 1,
+      "when": { "selfHealthBelow": 0.5 },
+      "then": { "action": "move" },
+      "reason": "seek cover"
+    },
+    {
+      "id": "isolated-prey",
+      "priority": 60,
+      "weight": 1,
+      "when": { "enemyCountEquals": 1 },
+      "then": {
+        "action": "attack",
+        "target": "isolated"
+      },
+      "reason": "target isolated"
+    },
+    {
+      "id": "closest",
+      "priority": 40,
+      "weight": 1,
+      "when": { "hasEnemies": true },
+      "then": {
+        "action": "attack",
+        "target": "first"
+      },
+      "reason": "closest target"
+    }
+  ],
+  "fallback": { "action": "wait" }
+}

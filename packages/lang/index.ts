@@ -5,6 +5,10 @@ import * as dpath from "@std/path";
 import denoConfig from "./deno.json" with { type: "json" };
 import { loadLanguages, setLanguagesDir } from "./src/langStore.ts";
 import { installScripts, restoreScripts } from "./src/install.ts";
+import {
+  installSpeechCmds,
+  restoreSpeechCmds,
+} from "./src/speech.ts";
 import { registerHelp } from "./src/help.ts";
 
 interface LanguagePluginConfig {
@@ -39,6 +43,9 @@ export const plugin: IPlugin = {
         console.warn(`[sgp-language] Errors:\n  ${report.errors.join("\n  ")}`);
       }
       await installScripts();
+      // Native cmds — system/scripts overrides are not dispatched by
+      // the current pipeline (stock addCmd wins). Replace say/pose.
+      installSpeechCmds();
       registerHelp();
     } catch (e: unknown) {
       console.error(`[sgp-language] init failed:`, e);
@@ -47,6 +54,7 @@ export const plugin: IPlugin = {
   },
 
   remove: async () => {
+    restoreSpeechCmds();
     await restoreScripts();
   },
 };

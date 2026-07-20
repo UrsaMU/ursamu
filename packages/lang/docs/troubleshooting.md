@@ -33,6 +33,23 @@ the others still load. Fix the file and run `+language/reload`.
 
 ## In-game
 
+### `+speak` works but `say` looks unchanged
+
+You should see `You say in <language>, "..."` on your own
+output when a language is active. If you still see the stock
+`Name says, "..."` line, the language plugin did not replace
+the stock say/pose commands.
+
+1. Confirm boot log has `[sgp-language] Loaded N language(s)`.
+2. Restart the game after enabling the plugin so `init()` runs
+   `installSpeechCmds()`.
+3. Check you actually have skill > 0 (or a CofD Language
+   merit) — `+speak` refuses unknown languages.
+
+**Note:** You always hear your own words clearly. Garbling is
+per-listener. Have a second character with 0 skill in the room
+to hear garbled text. Skill 100 listeners hear clear speech.
+
 ### `Your active language "x" is not configured here.`
 
 The language was set as active for the player, but the def isn't

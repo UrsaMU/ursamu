@@ -339,7 +339,10 @@ async function extRoll(u: IUrsamuSDK, swList: string[], rest: string): Promise<v
     sheet.advantages.willpowerCurrent -= 1;
     wpBonus = 3;
     spentWp = true;
-    await u.db.modify(u.me.id, "$set", { "data.cofd": sheet });
+    await u.db.modify(u.me.id, "$set", {
+      "state.cofd": sheet,
+      "data.cofd": sheet,
+    });
   }
 
   const parsed = parseRollExpression(action.pool, sheet);

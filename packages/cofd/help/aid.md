@@ -14,9 +14,4 @@ MECHANICS
   bashing. No agg. Exceptional also clears 1 bashing.
   Dramatic failure: +1 lethal. Once per scene/patient.
 
-EXAMPLES
-  +aid Marcus
-  +aid
-  +aid/reset Marcus
-
-SEE ALSO: help health, help condition
+SEE ALSO: help health, help condition, help aid/examples

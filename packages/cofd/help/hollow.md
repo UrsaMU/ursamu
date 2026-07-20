@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +HOLLOW  -- Hollow Merit enhancements (CtL p.116).
 
 SYNTAX
@@ -15,9 +18,4 @@ NOTES
   size[-2], escape-route[-2], easy-access (3),
   home-turf (3). Full list: +hedge/hollow list.
 
-EXAMPLES
-  +hedge/claim
-  +hedge/hollow size-2
-  +hedge/access
-
-SEE ALSO: help hedge, help key, help hedge/staff
+SEE ALSO: help hedge, help key, help hedge/staff, help hollow/examples

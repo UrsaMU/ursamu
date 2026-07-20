@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "russian",
+  "mode": "phoneme",
+  "description": "East Slavic — dense clusters, palatals, hard kh/shch.",
+  "onsets": [
+    "b", "v", "g", "d", "zh", "z", "k", "k", "l", "m", "n", "p",
+    "r", "s", "s", "t", "t", "f", "kh", "ts", "ch", "sh", "shch",
+    "y", "bl", "br", "vl", "vr", "gl", "gr", "dl", "dr", "kl",
+    "kr", "pl", "pr", "sl", "sm", "sn", "sp", "st", "sv", "tr",
+    "tv", "sk", "skv", "str"
+  ],
+  "nuclei": [
+    "a", "a", "e", "i", "i", "o", "o", "o", "u", "y", "ya", "ye",
+    "yu", "yo", "ai", "oi"
+  ],
+  "codas": [
+    "", "n", "n", "t", "t", "k", "k", "v", "r", "l", "s", "sh",
+    "kh", "m", "p", "st", "sk"
+  ],
+  "syllablePatterns": [
+    "CV", "CV", "CVC", "CVC", "CCV", "CCV", "CCVC", "V"
+  ],
+  "wordLenWeights": [0, 2, 4, 3, 2, 1],
+  "capitalize": "first",
+  "accentSubs": {
+    "th": "z",
+    "w": "v",
+    "h": "kh",
+    "j": "zh",
+    "x": "ks"
+  }
+}

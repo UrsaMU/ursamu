@@ -6,6 +6,7 @@
     "jsr:@std/assert@1": "1.0.19",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/collections@0.224": "0.224.2",
+    "jsr:@std/data-structures@^1.1.0": "1.1.1",
     "jsr:@std/dotenv@0.224": "0.224.2",
     "jsr:@std/dotenv@0.224.0": "0.224.0",
     "jsr:@std/encoding@0.224.0": "0.224.0",
@@ -15,12 +16,14 @@
     "jsr:@std/fs@0.224": "0.224.0",
     "jsr:@std/fs@0.224.0": "0.224.0",
     "jsr:@std/fs@1": "1.0.23",
+    "jsr:@std/fs@^1.0.24": "1.0.24",
     "jsr:@std/internal@0.224": "0.224.0",
     "jsr:@std/internal@^1.0.12": "1.0.14",
     "jsr:@std/internal@^1.0.14": "1.0.14",
     "jsr:@std/path@0.224": "0.224.0",
     "jsr:@std/path@0.224.0": "0.224.0",
     "jsr:@std/path@^1.1.4": "1.1.5",
+    "jsr:@std/path@^1.1.5": "1.1.5",
     "jsr:@std/semver@1": "1.0.8",
     "jsr:@std/testing@0.224": "0.224.0",
     "jsr:@std/testing@^1.0.17": "1.0.19",
@@ -98,6 +101,9 @@
     "@std/collections@0.224.2": {
       "integrity": "e77819455294e92d4e7ddad1dbfd46f94174c09318e541e6621fac4a4d0ab326"
     },
+    "@std/data-structures@1.1.1": {
+      "integrity": "7e1fcf19771fb9c6dbcd7f65039d6d42ef8dc023cfbc0c4cdc74b24e09229380"
+    },
     "@std/dotenv@0.224.0": {
       "integrity": "d9234cdf551507dcda60abb6c474289843741d8c07ee8ce540c60f5c1b220a1d"
     },
@@ -137,6 +143,13 @@
         "jsr:@std/path@^1.1.4"
       ]
     },
+    "@std/fs@1.0.24": {
+      "integrity": "f3061b45b81673a2bece689da041df32d174be064c89eb6397fb5718d3fb7877",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.14",
+        "jsr:@std/path@^1.1.5"
+      ]
+    },
     "@std/internal@0.224.0": {
       "integrity": "afc50644f9cdf4495eeb80523a8f6d27226b4b36c45c7c195dfccad4b8509291",
       "dependencies": [
@@ -168,7 +181,10 @@
       "integrity": "f4236172365b216728dc3cc8b5e80a9f4c33083d1e4ede7613d5b25b4014898e",
       "dependencies": [
         "jsr:@std/assert@^1.0.19",
-        "jsr:@std/internal@^1.0.14"
+        "jsr:@std/data-structures",
+        "jsr:@std/fs@^1.0.24",
+        "jsr:@std/internal@^1.0.14",
+        "jsr:@std/path@^1.1.5"
       ]
     },
     "@std/toml@0.224.0": {
@@ -3903,12 +3919,17 @@
       },
       "packages/builder": {
         "dependencies": [
-          "jsr:@std/assert@0.224"
+          "jsr:@std/assert@0.224",
+          "jsr:@ursamu/help@~0.1.2",
+          "jsr:@ursamu/mush@~0.1.3"
         ]
       },
       "packages/channels": {
         "dependencies": [
-          "jsr:@std/assert@0.224"
+          "jsr:@std/assert@0.224",
+          "jsr:@ursamu/core@0.1",
+          "jsr:@ursamu/help@~0.1.2",
+          "jsr:@ursamu/mush@~0.1.3"
         ]
       },
       "packages/cli": {
@@ -3933,15 +3954,20 @@
           "jsr:@std/testing@0.224",
           "jsr:@ursamu/core@0.1",
           "jsr:@ursamu/help@~0.1.2",
-          "jsr:@ursamu/jobs@0.1",
-          "jsr:@ursamu/mail@^2.4.0",
-          "jsr:@ursamu/mush@~0.1.3",
           "jsr:@ursamu/mushcode@0.7",
           "jsr:@zaubrik/djwt@^3.0.2",
           "npm:@digibear/tags@1.0.0",
           "npm:@ursamu/parser@1.2.4",
           "npm:bcryptjs@2.4.3",
           "npm:quickjs-emscripten@0.29.0"
+        ]
+      },
+      "packages/combat": {
+        "dependencies": [
+          "jsr:@std/assert@0.224",
+          "jsr:@std/path@0.224",
+          "jsr:@ursamu/core@0.1",
+          "jsr:@ursamu/mush@~0.1.3"
         ]
       },
       "packages/core": {
@@ -3957,6 +3983,7 @@
         "dependencies": [
           "jsr:@std/assert@0.224",
           "jsr:@std/testing@^1.0.17",
+          "jsr:@ursamu/help@~0.1.2",
           "npm:tweetnacl@1.0.3"
         ]
       },
@@ -3970,6 +3997,7 @@
           "jsr:@std/path@0.224",
           "jsr:@std/semver@1",
           "jsr:@std/testing@0.224",
+          "jsr:@ursamu/help@~0.1.2",
           "jsr:@ursamu/mushcode@0.7",
           "jsr:@zaubrik/djwt@^3.0.2",
           "npm:@digibear/tags@1.0.0",
@@ -4006,7 +4034,9 @@
           "jsr:@std/assert@0.224",
           "jsr:@std/fs@0.224",
           "jsr:@std/path@0.224",
-          "jsr:@std/testing@0.224"
+          "jsr:@std/testing@0.224",
+          "jsr:@ursamu/help@~0.1.2",
+          "jsr:@ursamu/mush@~0.1.3"
         ]
       },
       "packages/mail": {
@@ -4026,7 +4056,8 @@
       "packages/mekton": {
         "dependencies": [
           "jsr:@std/assert@0.224",
-          "jsr:@std/testing@0.224"
+          "jsr:@std/testing@0.224",
+          "jsr:@ursamu/help@~0.1.2"
         ]
       },
       "packages/mush": {

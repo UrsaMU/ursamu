@@ -337,8 +337,12 @@ export async function attackExec(u: IUrsamuSDK) {
       return;
     }
     await autoJoinTarget(u, encounter, t);
-    // Surrender refusal: cannot target a participant who has surrendered.
     const tp = encounter.participants.find((p) => p.actorId === t.id);
+    if (tp?.isOut) {
+      u.send(`${t.name ?? "Target"} is already incapacitated.`);
+      return;
+    }
+    // Surrender refusal: cannot target a participant who has surrendered.
     if (tp?.surrendered) {
       u.send(
         `${t.name ?? "Target"} has surrendered; deliberate ` +
@@ -564,7 +568,10 @@ export async function attackExec(u: IUrsamuSDK) {
       unconscious = dmgResult.unconscious;
 
       if (netDamage > 0) {
-        await u.db.modify(finalTarget.id, "$set", { "data.cofd": dmgResult.sheet });
+        await u.db.modify(finalTarget.id, "$set", {
+          "state.cofd": dmgResult.sheet,
+          "data.cofd": dmgResult.sheet,
+        });
 
         const stamina = effectiveAttr(targetSheet, "stamina");
         const size = effectiveSize(targetSheet);
@@ -583,7 +590,10 @@ export async function attackExec(u: IUrsamuSDK) {
           for (const key of appliedTilts) {
             if (key !== "heart-strike") tiltSheet = addTilt(tiltSheet, key);
           }
-          await u.db.modify(finalTarget.id, "$set", { "data.cofd": tiltSheet });
+          await u.db.modify(finalTarget.id, "$set", {
+            "state.cofd": tiltSheet,
+            "data.cofd": tiltSheet,
+          });
         }
 
         await applyDefense(encounter.id, finalTarget.id);
@@ -592,15 +602,44 @@ export async function attackExec(u: IUrsamuSDK) {
 
     // ---- Output (per target) ------------------------------------------
     const targetName2 = finalTarget.name ?? "Unknown";
-    const hitWord = finalSuccesses > 0 ? "hits" : "misses";
     const poolDesc = `${built.formula}=${finalPool > 0 ? finalPool : "chance"}d`;
     const diceStr = result.rolls.join(" ");
-    const dmgPart = netDamage > 0 ? ` ${netDamage} ${damageType}` : "";
+    const dmgPart = netDamage > 0 ? `, ${netDamage} ${damageType}` : "";
     const dodgeNote = dodging ? ` (dodging; active Dodge rolled ${dodgeSuccesses} success${dodgeSuccesses === 1 ? "" : "es"})` : "";
 
+    let verb = "";
+    if (finalSuccesses === 0) {
+      if (isFirearm) {
+        verb = "fires at target, but the shot goes wide";
+      } else {
+        verb = "swings wildly at target and misses";
+      }
+    } else if (finalSuccesses === 1) {
+      verb = isFirearm
+        ? "clips target with a grazing shot"
+        : "grazes target with a shallow strike";
+    } else if (finalSuccesses === 2) {
+      verb = isFirearm
+        ? "shoots target, drawing a splatter of blood"
+        : "strikes target hard, bruising flesh";
+    } else if (finalSuccesses === 3) {
+      verb = isFirearm
+        ? "blasts target with a heavy round"
+        : "smashes target with a heavy blow";
+    } else if (finalSuccesses === 4) {
+      verb = isFirearm
+        ? "riddles target with a devastating shot"
+        : "devastates target with a brutal strike";
+    } else {
+      verb = isFirearm
+        ? "executes a savage, point-blank shot that tears target apart"
+        : "brutally mauls target with a savage assault";
+    }
+    const finalVerb = verb.replace("target", `%cw${targetName2}%cn`);
+    const successWord = `(${finalSuccesses} success${finalSuccesses === 1 ? "" : "es"}${dmgPart})`;
+
     u.broadcast(
-      `%cyATTACK>>%cn ${attackerName} attacks ${targetName2}${dodgeNote}: ` +
-        `%cw${finalSuccesses}%cn success${finalSuccesses === 1 ? "" : "es"} ${hitWord}${dmgPart}.`,
+      `%cyATTACK>>%cn ${attackerName} ${finalVerb}${dodgeNote} ${successWord}.`,
     );
 
     u.send(
@@ -620,11 +659,11 @@ export async function attackExec(u: IUrsamuSDK) {
     }
 
     if (beatenDown) {
-      u.broadcast(`%cr${targetName2} is Beaten Down!%cn`);
+      u.broadcast(`%cr${targetName2} collapses under the pain, Beaten Down!%cn`);
       await setBeatenDown(encounter.id, finalTarget.id, true);
     }
     if (unconscious) {
-      u.broadcast(`%cr${targetName2} is Incapacitated!%cn`);
+      u.broadcast(`%cr${targetName2} falls to the ground, Incapacitated!%cn`);
       await handleTargetIncapacitated(u, encounter.id, finalTarget.id);
     }
     for (const tiltKey of appliedTilts) {

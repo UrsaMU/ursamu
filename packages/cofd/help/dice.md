@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +DICE  -- Rolls, Beats, Experience, extended actions.
 
 COMMANDS

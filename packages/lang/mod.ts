@@ -22,3 +22,11 @@ export {
   skillIn,
 } from "./src/playerLangs.ts";
 export type { PlayerLangs } from "./src/playerLangs.ts";
+export type {
+  LangGetActiveCtx,
+  LangGetSkillCtx,
+  LangGetKnownCtx,
+  LangSkillChangedEvent,
+  LangActiveChangedEvent,
+} from "./src/hooks.ts";
+export { emitLang } from "./src/hooks.ts";

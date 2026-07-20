@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +FRUIT  -- Goblin fruit (carry, forage, eat).
 
 SYNTAX

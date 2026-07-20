@@ -22,6 +22,41 @@ const visualLen = (s: string): number =>
     .replace(/%c[a-zA-Z]/g, "")
     .replace(/%[nrtbR]/g, "").length;
 
+function visualTruncate(s: string, maxLen: number): string {
+  const visLen = visualLen(s);
+  if (visLen <= maxLen) return s;
+
+  const limit = Math.max(0, maxLen - 3);
+  let visualCount = 0;
+  let result = "";
+  let i = 0;
+
+  while (i < s.length && visualCount < limit) {
+    if (s[i] === "%" && i + 1 < s.length) {
+      const next = s[i + 1];
+      if (/[a-zA-Z]/.test(next) || /[nrtbR]/.test(next)) {
+        result += s.slice(i, i + 2);
+        i += 2;
+        continue;
+      }
+    }
+    if (s[i] === "<") {
+      const match = s.slice(i).match(/^<#[0-9a-fA-F]{6}>/);
+      if (match) {
+        result += match[0];
+        i += match[0].length;
+        continue;
+      }
+    }
+
+    result += s[i];
+    visualCount++;
+    i++;
+  }
+
+  return `${result}...%cn`;
+}
+
 function coloredName(obj: IDBObj): string {
   const moniker = (obj.state?.moniker as string) || "";
   if (moniker) return moniker;
@@ -164,9 +199,16 @@ export const cofdConformatHandler = async (
         Math.max(1, 4 - visualLen(idle)),
       );
 
+      const prefixVisualLen = 1 +
+        visualLen(nameWithRef) + namePad.length +
+        visualLen(role) + rolePad.length +
+        visualLen(idle) + idlePad.length;
+      const maxDescLen = 78 - prefixVisualLen;
+      const finalDesc = visualTruncate(desc, maxDescLen);
+
       lines.push(
         ` ${nameWithRef}${namePad}${role}${rolePad}` +
-          `${idle}${idlePad}${desc}`.replace(/\s+$/, ""),
+          `${idle}${idlePad}${finalDesc}`.replace(/\s+$/, ""),
       );
     }
   }

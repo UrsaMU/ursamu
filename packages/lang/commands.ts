@@ -9,6 +9,7 @@ import {
 } from "./src/playerLangs.ts";
 import { installScripts } from "./src/install.ts";
 import { garble } from "./src/garble.ts";
+import { emitLang } from "./src/hooks.ts";
 
 const HEADER = "%ch%cw=== Languages ===%cn";
 
@@ -47,9 +48,14 @@ Examples:
   },
 });
 
-export function cmdShow(u: IUrsamuSDK): void {
+export async function cmdShow(u: IUrsamuSDK): Promise<void> {
   const langs = getPlayerLangs(u.me);
-  const entries = Object.entries(langs.known);
+  const known = { ...langs.known };
+  
+  const ctx = { player: u.me, known };
+  await emitLang("language:get_known", ctx);
+
+  const entries = Object.entries(ctx.known);
   if (entries.length === 0) {
     u.send(`${HEADER}\nYou do not know any languages.`);
     return;
@@ -97,15 +103,20 @@ export async function cmdSpeak(u: IUrsamuSDK, name: string): Promise<void> {
     u.send("You are no longer speaking any language.");
     return;
   }
+  
+  const langKey = name.toLowerCase().trim();
   const langs = getPlayerLangs(u.me);
-  if (!(name.toLowerCase() in langs.known)) {
+  let skill = langs.known[langKey] ?? 0;
+  
+  const ctx = { player: u.me, language: langKey, skill };
+  await emitLang("language:get_skill", ctx);
+  skill = ctx.skill;
+
+  if (skill <= 0) {
     u.send(`You do not know ${name}.`);
     return;
   }
-  if (!getLang(name)) {
-    u.send(`Language "${name}" is not configured.`);
-    return;
-  }
+
   await setActive(u, u.me, name);
   u.send(`You are now speaking ${name.toLowerCase()}.`);
 }
@@ -153,3 +164,23 @@ export function cmdGarble(u: IUrsamuSDK, arg: string): void {
   const output = garble(text, def, skill);
   u.send(`[Garbled at skill ${skill}]: ${output}`);
 }
+
+addCmd({
+  name: "+speak",
+  pattern: /^\+speak\s*(.*)/i,
+  lock: "connected",
+  category: "Language",
+  help: `+speak <language>  — Speak in the specified language.
+  
+Examples:
+  +speak spanish      Starts speaking spanish.
+  +speak clear        Stops speaking any language.`,
+  exec: (u: IUrsamuSDK) => {
+    const arg = u.util.stripSubs(u.cmd.args[0] ?? "").trim();
+    if (arg.toLowerCase() === "clear") {
+      return cmdSpeak(u, "");
+    }
+    return cmdSpeak(u, arg);
+  },
+});
+

@@ -17,6 +17,7 @@
     "packages/ai-gm",
     "packages/map",
     "packages/lang",
+    "packages/combat",
     "packages/dnd",
     "packages/vendor",
     "games/roses",
@@ -166,5 +167,9 @@
       "src/services/Softcode/parser.cjs",
       "legends"
     ]
+  },
+  "allowScripts": {
+    "allow": [],
+    "deny": ["npm:bcrypt@6.0.0", "npm:canvas@2.11.2", "npm:fsevents@2.3.3"]
   }
 }

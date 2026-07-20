@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "italian",
+  "mode": "phoneme",
+  "description": "Italo-Romance — musical open vowels, soft c/g, vowel endings.",
+  "onsets": [
+    "b", "c", "ch", "d", "f", "g", "gh", "l", "l", "m", "m", "n",
+    "n", "p", "p", "qu", "r", "r", "s", "s", "sc", "t", "t", "v",
+    "z", "br", "bl", "cr", "cl", "dr", "fr", "fl", "gr", "gl",
+    "pr", "pl", "tr", "str", "spr"
+  ],
+  "nuclei": [
+    "a", "a", "a", "e", "e", "e", "i", "i", "o", "o", "o", "u",
+    "ia", "ie", "io", "iu", "ua", "ue", "uo", "ai", "ei", "oi"
+  ],
+  "codas": [
+    "", "", "", "", "n", "n", "r", "l", "s", "t", "o", "a", "e",
+    "i"
+  ],
+  "syllablePatterns": ["CV", "CV", "CV", "CV", "CVC", "V", "CCV"],
+  "wordLenWeights": [0, 1, 3, 4, 3, 2],
+  "capitalize": "first",
+  "accentSubs": {
+    "th": "t",
+    "w": "v",
+    "sh": "sc",
+    "x": "s",
+    "y": "i"
+  }
+}

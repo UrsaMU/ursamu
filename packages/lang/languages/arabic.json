@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "arabic",
+  "mode": "phoneme",
+  "description": "Semitic — guttural kh/gh/q, triliteral CVC feel.",
+  "onsets": [
+    "b", "t", "th", "j", "h", "kh", "d", "dh", "r", "r", "z", "s",
+    "s", "sh", "s", "d", "t", "z", "gh", "f", "q", "q", "k", "k",
+    "l", "l", "m", "m", "n", "n", "h", "w", "y", "ham"
+  ],
+  "nuclei": [
+    "a", "a", "a", "i", "i", "u", "u", "aa", "aa", "ii", "uu",
+    "ai", "au", "ay", "aw"
+  ],
+  "codas": [
+    "", "b", "t", "d", "r", "z", "s", "sh", "f", "q", "k", "l",
+    "m", "m", "n", "n", "h", "w", "y", "kh"
+  ],
+  "syllablePatterns": ["CV", "CVC", "CVC", "CV", "V", "CVCC"],
+  "wordLenWeights": [0, 2, 4, 3, 2, 1],
+  "capitalize": "first",
+  "accentSubs": {
+    "p": "b",
+    "v": "f",
+    "g": "gh",
+    "c": "k",
+    "x": "ks"
+  }
+}

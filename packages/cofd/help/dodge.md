@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +DODGE  -- Defense and dodging (reference; no +dodge cmd).
 
 MECHANICS

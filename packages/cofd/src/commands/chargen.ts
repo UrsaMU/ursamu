@@ -23,6 +23,7 @@ import {
 } from "../chargen/index.ts";
 import { renderCgList } from "../chargen/list.ts";
 import { renderInfo } from "../info/index.ts";
+import { formatSheet } from "../sheet/index.ts";
 
 export async function cgExec(u: IUrsamuSDK) {
   const sw = (u.cmd.args[0] ?? "").toLowerCase().trim();
@@ -55,9 +56,14 @@ export async function cgExec(u: IUrsamuSDK) {
   let cgState = target.state?.cofd_cg as CofdCgState | undefined;
 
   // Reset switch
-  if (sw === "reset") {
+  if (sw === "reset" || sw === "restart") {
+    if (target.state?.cofd) {
+      u.send("You already have an approved character sheet.");
+      return;
+    }
     cgState = initCgState();
     await u.db.modify(target.id, "$set", { "data.cofd_cg": cgState });
+    await u.db.modify(target.id, "$unset", { "data.cofd": "" });
     u.send(await header("Character Generation: Reset"));
     u.send(
       "Your character generation state has been reset " +
@@ -80,8 +86,7 @@ export async function cgExec(u: IUrsamuSDK) {
       u.send(
         "You already have an approved character sheet. " +
           "If you want to start over, run '%ch+cg/reset%cn'. " +
-          "WARNING: This will NOT delete your approved sheet " +
-          "unless you submit and complete the new one.",
+          "%chWARNING:%cn This will immediately delete your approved sheet.",
       );
       return;
     }
@@ -196,13 +201,17 @@ export async function cgExec(u: IUrsamuSDK) {
       const now = Date.now();
       const template = (sheet.template ?? "Mortal").toString();
       const concept = (sheet.concept ?? "(none)").toString();
+      const formatted = await formatSheet(submitterName, target.id, sheet);
       const snapshot = [
         `Character: ${submitterName}`,
         `Template:  ${template}`,
         `Concept:   ${concept}`,
         ``,
         `Sheet snapshot:`,
-        "```",
+        formatted,
+        ``,
+        `Raw JSON snapshot:`,
+        "```json",
         JSON.stringify(sheet, null, 2),
         "```",
       ].join("\n");

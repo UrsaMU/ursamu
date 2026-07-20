@@ -159,7 +159,10 @@ export async function healthExec(u: IUrsamuSDK) {
 
   // Persist the new track. Spread to preserve every other sheet field.
   const updated: CofdSheet = { ...sheetRaw, health: newTrack };
-  await u.db.modify(target.id, "$set", { "data.cofd": updated });
+  await u.db.modify(target.id, "$set", {
+    "state.cofd": updated,
+    "data.cofd": updated,
+  });
 
   // Confirmation + re-rendered summary.
   const typeLabel = parsed.type === "any" ? "damage" : parsed.type;

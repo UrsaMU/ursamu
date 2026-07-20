@@ -513,5 +513,32 @@
     "effect": "-3 or auto-fail sight rolls; combat at penalty.",
     "resolution": "Scene ends or light is introduced.",
     "beats": 0
+  },
+  "oathbreaker": {
+    "name": "Oathbreaker",
+    "category": "condition",
+    "persistent": true,
+    "description": "Has violated a magical oath bound by the Wyrd.",
+    "effect": "-2 to Contract rolls and social interactions with fae.",
+    "resolution": "Earn forgiveness and make recompense to offended parties.",
+    "beats": 1
+  },
+  "obliged": {
+    "name": "Obliged",
+    "category": "condition",
+    "persistent": true,
+    "description": "Bound by a bargain with a mortal.",
+    "effect": "Allows hiding from Huntsmen; must fulfill the ongoing task.",
+    "resolution": "The bargain ends naturally or is broken.",
+    "beats": 1
+  },
+  "paranoid": {
+    "name": "Paranoid",
+    "category": "condition",
+    "persistent": false,
+    "description": "Highly paranoid after dealing with a Huntsman.",
+    "effect": "-2 to social rolls with anyone you do not know well.",
+    "resolution": "Confront source of paranoia or spend a scene in safety.",
+    "beats": 1
   }
 }

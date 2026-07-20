@@ -2,6 +2,7 @@
 // into them without creating a circular import (walker.ts imports
 // executeAttack from attack.ts).
 
+import { healthMax } from "../health/index.ts";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
 import { encounterDb } from "./encounter.ts";
 import type { Encounter, Participant } from "./types.ts";
@@ -25,10 +26,11 @@ export async function patchParticipant(
 ): Promise<Encounter | null> {
   const enc = await encounterDb.findOne({ id: encounterId } as Q);
   if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, ...patch } : p
-  );
-  const updated: Encounter = { ...enc, participants };
+  const idx = enc.participants.findIndex((p) => p.actorId === actorId);
+  if (idx < 0) return enc;
+  const participants = [...enc.participants];
+  participants[idx] = { ...participants[idx], ...patch };
+  const updated = { ...enc, participants };
   await encounterDb.update({ id: encounterId } as Q, updated);
   return updated;
 }
@@ -100,6 +102,11 @@ export async function resolveScene(
     if (key) {
       try { await dropLoot(u, key, enc.roomId); } catch { /* swallow */ }
     }
+
+    // Despawn the NPC object.
+    try {
+      await u.db.destroy(p.actorId);
+    } catch { /* swallow */ }
   }
 
   // Beats.
@@ -123,14 +130,11 @@ export async function syncIsOut(
   if (!actor) return;
   const sheet = actor.state?.cofd as CofdSheet | undefined;
   if (!sheet) return;
-  const size = sheet.advantages?.size ?? 5;
-  const stamina = sheet.attributes?.stamina ?? sheet.attributes?.Stamina ?? 1;
-  const max = size + stamina;
+  const max = healthMax(sheet);
   const h = sheet.health ?? { bashing: 0, lethal: 0, aggravated: 0 };
   const filled = (h.bashing ?? 0) + (h.lethal ?? 0) + (h.aggravated ?? 0);
-  if (filled >= max) {
-    await patchParticipant(encounterId, actorId, { isOut: true });
-  }
+  const isOut = filled >= max;
+  await patchParticipant(encounterId, actorId, { isOut });
 }
 
 /**
@@ -146,6 +150,25 @@ export async function handleTargetIncapacitated(
   await syncIsOut(u, encounterId, targetActorId);
   const enc = await encounterDb.findOne({ id: encounterId } as Q);
   if (!enc) return false;
+
+  // Auto-destroy the downed NPC immediately.
+  const p = enc.participants.find((x) => x.actorId === targetActorId);
+  if (p && p.kind === "npc") {
+    const actor = await loadActor(u, targetActorId);
+    if (actor) {
+      const sheet = actor.state?.cofd as
+        | (CofdSheet & { npc?: { aiArchetype?: string; lootTable?: string } })
+        | undefined;
+      const key = sheet?.npc?.lootTable ?? sheet?.npc?.aiArchetype;
+      if (key) {
+        try { await dropLoot(u, key, enc.roomId); } catch { /* swallow */ }
+      }
+      try {
+        await u.db.destroy(targetActorId);
+      } catch { /* swallow */ }
+    }
+  }
+
   if (allNpcsDown(enc)) {
     const resolved = await resolveScene(u, encounterId);
     return resolved !== null;

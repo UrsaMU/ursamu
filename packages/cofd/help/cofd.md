@@ -16,8 +16,5 @@ TOPIC GROUPS
   help changeling    Full CtL command map.
 
 CHANGELING
-  help shift · contract · hedge · hollow · key
-  help market · debt · fruit · icon · spin
-  help perception
-
+  help shift · contract · hedge · hollow · key · market · debt · fruit · icon · spin · perception
 SEE ALSO: help cg, help sheet, help roll

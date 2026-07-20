@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +DENY  -- Return a chargen draft for revision.
 
 SYNTAX
@@ -17,8 +20,4 @@ MECHANICS
   that job; does not close it. Player gets a live
   message and @mail. Live sheet is not changed.
 
-EXAMPLES
-  +deny Alice=Concept needs more detail.
-  +deny Bob=Attribute totals are off by one.
-
-SEE ALSO: help approve, help sheet, help cg
+SEE ALSO: help approve, help sheet, help cg, help deny/examples

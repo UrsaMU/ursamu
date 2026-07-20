@@ -1,13 +1,12 @@
 // Evaluate a declarative AiStrategy against combat context.
 // Matching rules: highest priority wins; same priority → weighted random.
 
-import type { IDBObj } from "@ursamu/ursamu";
-import type { CofdSheet } from "../../stats/index.ts";
 import type {
   Encounter,
   Participant,
   ReactionPosture,
 } from "../types.ts";
+import type { CombatActorView } from "../ports.ts";
 import type { AiDecision } from "./index.ts";
 import type {
   AiActionSpec,
@@ -20,33 +19,21 @@ import type {
 export interface EvalCtx {
   self: Participant;
   enc: Encounter;
-  selfActor: IDBObj;
+  selfView: CombatActorView;
   others: Participant[];
+  /** Optional map for weakest-target / multi-actor health. */
+  views?: Map<string, CombatActorView>;
 }
 
 function structureFraction(
   p: Participant,
-  actor: IDBObj | undefined,
+  view: CombatActorView | undefined,
 ): number {
-  if (!actor || p.isOut) return 0;
-  const sheet = actor.state?.cofd as CofdSheet | undefined;
-  if (!sheet) return 1;
-  const size = sheet.advantages?.size ?? 5;
-  const stamina =
-    sheet.attributes?.stamina ??
-    // deno-lint-ignore no-explicit-any
-    (sheet.attributes as any)?.Stamina ??
-    1;
-  const max = size + stamina;
-  const h = sheet.health ?? {
-    bashing: 0,
-    lethal: 0,
-    aggravated: 0,
-  };
-  const taken =
-    (h.bashing ?? 0) + (h.lethal ?? 0) + (h.aggravated ?? 0);
-  if (max <= 0) return 1;
-  return Math.max(0, Math.min(1, (max - taken) / max));
+  if (p.isOut) return 0;
+  if (view) {
+    return Math.max(0, Math.min(1, view.healthFrac));
+  }
+  return 1;
 }
 
 function liveEnemies(ctx: EvalCtx): Participant[] {
@@ -83,23 +70,13 @@ function hasCover(enc: Encounter): boolean {
   );
 }
 
-function actorMap(ctx: EvalCtx): Map<string, IDBObj> {
-  // Optional test hook used by legacy archetypes.
-  // deno-lint-ignore no-explicit-any
-  const m = (ctx as any)._actors as Map<string, IDBObj> | undefined;
-  return m ?? new Map();
-}
-
-function matchCondition(
-  when: AiCondition,
-  ctx: EvalCtx,
-): boolean {
+function matchCondition(when: AiCondition, ctx: EvalCtx): boolean {
   const state = (ctx.self.aiState ?? {}) as Record<
     string,
     unknown
   >;
   const enemies = liveEnemies(ctx);
-  const selfFrac = structureFraction(ctx.self, ctx.selfActor);
+  const selfFrac = structureFraction(ctx.self, ctx.selfView);
   const threat = !!ctx.self.threat &&
     Object.keys(ctx.self.threat).length > 0;
 
@@ -209,14 +186,14 @@ function pickTarget(
     return enemies[0].actorId;
   }
   if (mode === "weakest") {
-    const actors = actorMap(ctx);
+    const views = ctx.views ?? new Map();
     let best = enemies[0];
     let bestFrac = structureFraction(
       best,
-      actors.get(best.actorId),
+      views.get(best.actorId),
     );
     for (const e of enemies.slice(1)) {
-      const f = structureFraction(e, actors.get(e.actorId));
+      const f = structureFraction(e, views.get(e.actorId));
       if (f < bestFrac) {
         best = e;
         bestFrac = f;
@@ -237,11 +214,7 @@ function actionToDecision(
 
   if (spec.action === "attack") {
     const targetId = pickTarget(spec.target, enemies, ctx, rng);
-    return {
-      action: "attack",
-      targetId,
-      reason,
-    };
+    return { action: "attack", targetId, reason };
   }
   if (spec.action === "posture") {
     const posture: ReactionPosture = {
@@ -278,12 +251,7 @@ export function evaluateStrategy(
   );
   if (matched.length === 0) {
     const fb = strategy.fallback ?? { action: "wait" as const };
-    return actionToDecision(
-      fb,
-      ctx,
-      "fallback",
-      rng,
-    );
+    return actionToDecision(fb, ctx, "fallback", rng);
   }
   const maxP = Math.max(...matched.map((r) => r.priority));
   const band = matched.filter((r) => r.priority === maxP);
@@ -292,7 +260,7 @@ export function evaluateStrategy(
   return actionToDecision(chosen.then, ctx, reason, rng);
 }
 
-/** Bind a strategy into an ArchetypeFn for the walker registry. */
+/** Bind a strategy into an ArchetypeFn. */
 export function strategyAsFn(
   strategy: AiStrategy,
   rng: () => number = Math.random,

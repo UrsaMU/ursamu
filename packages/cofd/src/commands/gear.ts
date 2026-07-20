@@ -20,6 +20,7 @@ import {
   isAmbiguousMatch,
   itemData,
   lookupItem,
+  orderedCarriedItems,
   parseWeaponTags,
   repairItem,
   resolveItemRef,
@@ -208,24 +209,38 @@ async function gearAdd(u: IUrsamuSDK, rest: string) {
 
 async function gearRemove(u: IUrsamuSDK, rest: string) {
   const { body, target: targetName } = splitForTarget(rest);
-  const idx = parseInt(body.trim(), 10);
-  if (!Number.isInteger(idx) || idx < 1) { u.send("Usage: +gear/remove <#> [for <player>]"); return; }
+  const ref = body.trim();
+  if (!ref) { u.send("Usage: +gear/remove <#|name|id> [for <player>]"); return; }
   const ctx = await resolveTarget(u, targetName);
   if (!ctx) return;
-  const inv = await inventoryItems(u, ctx.target.id);
-  if (idx > inv.length) { u.send(`No inventory slot ${idx}.`); return; }
-  const item = inv[idx - 1];
-  await destroyItem(u, item.id);
+  const resolved = await resolveItemRef(u, ctx.target.id, ref);
+  if (!resolved) { u.send(`No item matching '${ref}' in inventory.`); return; }
+  if (isAmbiguousMatch(resolved)) {
+    const inv = await orderedCarriedItems(u, ctx.target.id);
+    u.send(formatAmbiguous(ref, resolved.matches, inv));
+    return;
+  }
+  await destroyItem(u, resolved.id);
   const who = ctx.sameTarget ? "your" : `${u.util.displayName(ctx.target, u.me)}'s`;
-  u.send(`Removed %ch${displayName(item)}%cn from ${who} inventory.`);
+  u.send(`Removed %ch${displayName(resolved)}%cn from ${who} inventory.`);
 }
 
-async function gearEquip(u: IUrsamuSDK, rest: string) {
+export async function gearEquip(u: IUrsamuSDK, rest: string) {
   const { body, target: targetName } = splitForTarget(rest);
-  const idx = parseInt(body.trim(), 10);
-  if (!Number.isInteger(idx) || idx < 1) { u.send("Usage: +gear/equip <#> [for <player>]"); return; }
+  const query = body.trim();
+  if (!query) { u.send("Usage: +gear/equip <#|name|id> [for <player>]"); return; }
   const ctx = await resolveTarget(u, targetName);
   if (!ctx) return;
+  const resolved = await resolveItemRef(u, ctx.target.id, query);
+  if (!resolved) { u.send(`No item matching '${query}' in inventory.`); return; }
+  if (isAmbiguousMatch(resolved)) {
+    const inv = await orderedCarriedItems(u, ctx.target.id);
+    u.send(formatAmbiguous(query, resolved.matches, inv));
+    return;
+  }
+  const inv = await inventoryItems(u, ctx.target.id);
+  const idx = inv.findIndex((o) => o.id === resolved.id) + 1;
+  if (idx < 1) { u.send(`Item is no longer in inventory.`); return; }
   const eq = ctx.sheet.equipment ?? { equippedWeapon: null, equippedArmor: null };
   const result = await equipItem(u, ctx.target.id, idx, eq.equippedWeapon, eq.equippedArmor);
   if (result.error) { u.send(result.error); return; }
@@ -266,7 +281,7 @@ async function gearEquip(u: IUrsamuSDK, rest: string) {
   }
 }
 
-async function gearUnequip(u: IUrsamuSDK, rest: string) {
+export async function gearUnequip(u: IUrsamuSDK, rest: string) {
   const { body, target: targetName } = splitForTarget(rest);
   const slot = body.trim().toLowerCase();
   if (slot !== "weapon" && slot !== "armor") {
@@ -305,7 +320,7 @@ export async function gearReload(u: IUrsamuSDK, rest: string) {
   } else {
     const resolved = await resolveItemRef(u, ctx.target.id, ref);
     if (isAmbiguousMatch(resolved)) {
-      const inv = await inventoryItems(u, ctx.target.id);
+      const inv = await orderedCarriedItems(u, ctx.target.id);
       u.send(formatAmbiguous(ref, resolved.matches, inv));
       return;
     }
@@ -346,7 +361,7 @@ function structuralTag(d: ReturnType<typeof itemData>): string {
   return "";
 }
 
-async function gearView(u: IUrsamuSDK, rest: string) {
+export async function gearView(u: IUrsamuSDK, rest: string) {
   // Optional second positional filter: weapons | armor | gear | ammo
   // Form: "[<player>] [<filter>]" where filter is one of the known words.
   const parts = rest.trim().split(/\s+/).filter(Boolean);
@@ -362,7 +377,13 @@ async function gearView(u: IUrsamuSDK, rest: string) {
   if (!target) { u.send(`Player '${targetName}' not found.`); return; }
   const sheet = target.state?.cofd as CofdSheet | undefined;
   if (!sheet) { u.send("That player does not have an approved character sheet yet."); return; }
-  const carried = await carriedItems(u, target.id);
+  const contents = await u.db.search({ location: target.id });
+  const carried = contents.filter(
+    (obj) =>
+      !obj.flags.has("exit") &&
+      !obj.flags.has("room") &&
+      !obj.flags.has("player"),
+  );
   const state = sheet.equipment ?? { equippedWeapon: null, equippedArmor: null };
   const lines: string[] = [];
   lines.push(await divider("G E A R"));
@@ -382,11 +403,11 @@ async function gearView(u: IUrsamuSDK, rest: string) {
     ammo: [],
   };
   for (const obj of carried) {
-    const d = itemData(obj)!;
-    if (d.equippedBy) { buckets.equipped.push(obj); continue; }
-    if (d.kind === "weapon") buckets.weapons.push(obj);
-    else if (d.kind === "armor") buckets.armor.push(obj);
-    else if (d.kind === "ammo") buckets.ammo.push(obj);
+    const d = itemData(obj);
+    if (d && d.equippedBy) { buckets.equipped.push(obj); continue; }
+    if (d && d.kind === "weapon") buckets.weapons.push(obj);
+    else if (d && d.kind === "armor") buckets.armor.push(obj);
+    else if (d && d.kind === "ammo") buckets.ammo.push(obj);
     else buckets.gear.push(obj);
   }
 
@@ -404,20 +425,27 @@ async function gearView(u: IUrsamuSDK, rest: string) {
     lines.push(`%ch${name}%cn`);
     for (const obj of items) {
       slot += 1;
-      const d = itemData(obj)!;
+      const d = itemData(obj);
       const marks: string[] = [];
       if (state.equippedWeapon === obj.id) marks.push("equipped");
       if (state.equippedArmor === obj.id) marks.push("worn");
       const tag = marks.length ? ` (${marks.join(", ")})` : "";
-      const ammoClip = typeof d.currentClip === "number" ? ` [ammo ${d.currentClip}]` : "";
-      const note = d.note ? ` -- ${d.note}` : "";
+      const ammoClip = d && typeof d.currentClip === "number" ? ` [ammo ${d.currentClip}]` : "";
+      const note = d?.note ? ` -- ${d.note}` : "";
       const struct = structuralTag(d);
       let label2 = displayName(obj);
-      if (d.kind === "ammo") {
-        const count = d.count ?? 1;
-        label2 = `${label2} x${count}`;
+      const canEditObj = await u.canEdit(u.me, obj);
+      if (canEditObj) {
+        label2 = `${label2}(#${obj.id})`;
       }
-      const concealed = d.kind === "ammo" && obj.flags.has("dark") ? " [concealed]" : "";
+      if (d && d.kind === "ammo") {
+        const count = d.count ?? 1;
+        const catalog = lookupItem(d.key);
+        const roundsPerStack = (catalog?.entry as { rounds?: number })?.rounds ?? 1;
+        const totalRounds = count * roundsPerStack;
+        label2 = `${label2} x${count} (${totalRounds} rounds)`;
+      }
+      const concealed = d && d.kind === "ammo" && obj.flags.has("dark") ? " [concealed]" : "";
       lines.push(
         `  ${String(slot).padStart(2)}. ${label2}${ammoClip}${tag}${struct}${concealed}${note}`,
       );
@@ -431,27 +459,29 @@ async function gearView(u: IUrsamuSDK, rest: string) {
 async function gearSplit(u: IUrsamuSDK, rest: string) {
   const { body, target: targetName } = splitForTarget(rest);
   const eq = body.indexOf("=");
-  if (eq < 0) { u.send("Usage: +gear/split <#>=<n> [for <player>]"); return; }
+  if (eq < 0) { u.send("Usage: +gear/split <#|name|id>=<n> [for <player>]"); return; }
   const idxStr = body.slice(0, eq).trim();
   const nStr = body.slice(eq + 1).trim();
-  const idx = parseInt(idxStr, 10);
   const n = parseInt(nStr, 10);
-  if (!Number.isInteger(idx) || idx < 1) { u.send("Usage: +gear/split <#>=<n> [for <player>]"); return; }
   if (!Number.isInteger(n) || n < 1) { u.send("Split count must be >= 1."); return; }
   const ctx = await resolveTarget(u, targetName);
   if (!ctx) return;
-  const inv = await inventoryItems(u, ctx.target.id);
-  if (idx > inv.length) { u.send(`No inventory slot ${idx}.`); return; }
-  const item = inv[idx - 1];
-  const d = itemData(item);
-  if (!d || d.kind !== "ammo") { u.send(`${displayName(item)} is not an ammo stack.`); return; }
-  const result = await splitStack(u, item.id, n);
+  const resolved = await resolveItemRef(u, ctx.target.id, idxStr);
+  if (!resolved) { u.send(`No item matching '${idxStr}' in inventory.`); return; }
+  if (isAmbiguousMatch(resolved)) {
+    const inv = await orderedCarriedItems(u, ctx.target.id);
+    u.send(formatAmbiguous(idxStr, resolved.matches, inv));
+    return;
+  }
+  const d = itemData(resolved);
+  if (!d || d.kind !== "ammo") { u.send(`${displayName(resolved)} is not an ammo stack.`); return; }
+  const result = await splitStack(u, resolved.id, n);
   if (typeof result === "object" && "error" in result) {
     u.send(result.error);
     return;
   }
   const who = ctx.sameTarget ? "You" : u.util.displayName(ctx.target, u.me);
-  u.send(`${who} split %ch${displayName(item)}%cn into a stack of ${n}.`);
+  u.send(`${who} split %ch${displayName(resolved)}%cn into a stack of ${n}.`);
 }
 
 // ----- Damage / repair ----------------------------------------------
@@ -505,7 +535,7 @@ async function gearDamage(u: IUrsamuSDK, rest: string) {
   const { ref, n } = parsed as { ref: string; n: number };
   const resolved = await resolveItemRef(u, ctx.target.id, ref);
   if (isAmbiguousMatch(resolved)) {
-    const inv = await inventoryItems(u, ctx.target.id);
+    const inv = await orderedCarriedItems(u, ctx.target.id);
     u.send(formatAmbiguous(ref, resolved.matches, inv));
     return;
   }
@@ -515,7 +545,7 @@ async function gearDamage(u: IUrsamuSDK, rest: string) {
     const fb = await fallbackCarriedMatch(u, ctx.target.id, ref);
     if (!fb) { u.send(`No item matching '${ref}'.`); return; }
     if (isAmbiguousMatch(fb)) {
-      const inv = await inventoryItems(u, ctx.target.id);
+      const inv = await orderedCarriedItems(u, ctx.target.id);
       u.send(formatAmbiguous(ref, fb.matches, inv));
       return;
     }
@@ -565,7 +595,7 @@ async function gearRepair(u: IUrsamuSDK, rest: string) {
   let item: IDBObj | null = null;
   const resolved = await resolveItemRef(u, ctx.target.id, ref);
   if (isAmbiguousMatch(resolved)) {
-    const inv = await inventoryItems(u, ctx.target.id);
+    const inv = await orderedCarriedItems(u, ctx.target.id);
     u.send(formatAmbiguous(ref, resolved.matches, inv));
     return;
   }
@@ -575,7 +605,7 @@ async function gearRepair(u: IUrsamuSDK, rest: string) {
     const fb = await fallbackCarriedMatch(u, ctx.target.id, ref);
     if (!fb) { u.send(`No item matching '${ref}'.`); return; }
     if (isAmbiguousMatch(fb)) {
-      const inv = await inventoryItems(u, ctx.target.id);
+      const inv = await orderedCarriedItems(u, ctx.target.id);
       u.send(formatAmbiguous(ref, fb.matches, inv));
       return;
     }

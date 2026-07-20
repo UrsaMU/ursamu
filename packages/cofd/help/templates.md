@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +TEMPLATES  -- Supernatural overlays on the sheet.
 
 TEMPLATES

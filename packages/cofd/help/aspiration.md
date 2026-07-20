@@ -15,8 +15,4 @@ Beats convert at 5:1 to Experience (see +xp).
 DISPLAY TAGS
   [S]  Short-term.   [L]  Long-term.
 
-EXAMPLES
-  +aspiration/add Win Marco's trust
-  +aspiration/add/long Avenge my sister
-
-SEE ALSO: help condition, help beat, help xp, help sheet
+SEE ALSO: help condition, help beat, help xp, help sheet, help aspiration/examples

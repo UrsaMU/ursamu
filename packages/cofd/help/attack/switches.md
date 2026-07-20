@@ -4,7 +4,6 @@ dark: true
 attack/switches  -- Full switch reference for +attack.
 
 SEE ALSO: help attack (overview).
-
   /brawl          Strength + Brawl - target Defense (default unarmed).
   /melee          Strength + Weaponry - target Defense.
   /ranged         Dexterity + Firearms (Defense does not apply).

@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +UNAPPROVE  -- Alias for +deny.
 
 SYNTAX

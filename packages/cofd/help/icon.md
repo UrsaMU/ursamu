@@ -16,9 +16,4 @@ NOTES
   other. Spend: Glamour up to Wyrd (max 3),
   status **spent**. Recover is plot/staff.
 
-EXAMPLES
-  +icon
-  +icon/spend mothers-song=defy the Huntsman
-  +icon/grant Pix=First Love/emotion/Rival
-
-SEE ALSO: help changeling, help hedge, help spin
+SEE ALSO: help changeling, help hedge, help spin, help icon/examples

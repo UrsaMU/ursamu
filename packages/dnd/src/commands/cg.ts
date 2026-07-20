@@ -1308,6 +1308,10 @@ export async function dndCgExec(u: IUrsamuSDK) {
   let cgState = target.state?.dnd_cg as DndCgState | undefined;
 
   if (sw === "reset") {
+    if (target.state?.dnd) {
+      u.send("You already have an approved character sheet.");
+      return;
+    }
     cgState = initCgState();
     await u.db.modify(target.id, "$set", { "data.dnd_cg": cgState });
     u.send(getStageInstructions(u, u.util.displayName(target, u.me), cgState, "%cgYour character generation state has been reset.%cn"));

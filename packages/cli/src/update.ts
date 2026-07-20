@@ -7,7 +7,7 @@
  */
 
 import { parse } from "@std/flags";
-import { join } from "@std/path";
+import { join, dirname } from "@std/path";
 import { existsSync } from "@std/fs";
 import { bold, cyan, dim, green, red, yellow } from "@std/fmt/colors";
 import { GAME_PROJECT_TASKS, DEFAULT_PLUGINS_MANIFEST } from "./game-project-tasks.ts";
@@ -265,7 +265,10 @@ try {
 
     if (isLocal) {
       // Copy from local ursamu path
-      const localPath = join(cwd, currentSpecifier.replace(/\/$/, ""), "scripts", name);
+      const importDir = currentSpecifier.endsWith(".ts")
+        ? dirname(currentSpecifier)
+        : currentSpecifier;
+      const localPath = join(cwd, importDir.replace(/\/$/, ""), "scripts", name);
       try {
         content = await Deno.readTextFile(localPath);
       } catch {

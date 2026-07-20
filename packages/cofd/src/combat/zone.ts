@@ -247,7 +247,6 @@ function mobMeta(obj: IDBObj): MobMeta | null {
   const sheet = obj.state?.cofd as any;
   if (!sheet?.npc) return null;
   const n = sheet.npc;
-  if (!n.zoneId) return null;
   return {
     zoneId: n.zoneId,
     aggro: n.aggro ?? "passive",

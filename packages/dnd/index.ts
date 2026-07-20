@@ -4,6 +4,10 @@ import type { IPlugin } from "@ursamu/ursamu";
 import { registerHelpDir } from "@ursamu/help-plugin";
 import { cmds, gameHooks } from "@ursamu/ursamu";
 import { migrateSheet } from "./src/stats/dnd_sheet.ts";
+import {
+  initDndCombat,
+  removeDndCombat,
+} from "./src/combat/ports.ts";
 
 export const plugin: IPlugin = {
   name: "dnd",
@@ -11,11 +15,13 @@ export const plugin: IPlugin = {
   description: "D&D 5e/2024 (SRD 5.2) plugin for UrsaMU — character sheets, rolling with advantage/disadvantage, health/resource tracking, and guided chargen.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },
-    { name: "vendor", version: ">=1.0.0" }
+    { name: "vendor", version: ">=1.0.0" },
+    { name: "combat", version: ">=0.2.0" },
   ],
 
   init: () => {
     registerHelpDir(new URL("./help", import.meta.url).pathname, "dnd");
+    initDndCombat();
 
     const dropCmd = cmds.find(c => c.name === "drop");
     if (dropCmd) {
@@ -158,8 +164,8 @@ export const plugin: IPlugin = {
   },
 
   remove: () => {
-    // Teardown logic if any
-  }
+    removeDndCombat();
+  },
 };
 
 export default plugin;

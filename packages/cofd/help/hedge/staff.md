@@ -22,10 +22,4 @@ GATES (/setway)
   maskName, name, key. Default maskName:
   Strange passage. Keys: help key.
 
-EXAMPLES
-  +hedge/create hollow
-  +hedge/set hollowrating=3
-  +hedge/setway Gate/key=three red leaves
-
-SEE ALSO: help hedge, help hollow, help key,
-  help perception
+SEE ALSO: help hedge, help hollow, help key,, help hedge/staff-examples

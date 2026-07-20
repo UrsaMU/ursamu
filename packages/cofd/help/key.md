@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +KEY  -- Hedgeway key phrases (shared open).
 
 SYNTAX

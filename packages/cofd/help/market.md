@@ -18,9 +18,4 @@ NOTES
   Prices: `NG` Glamour, optional `debtN`. Credit
   writes Goblin Debt on your sheet.
 
-EXAMPLES
-  +market
-  +market/buy amaranthine
-  +market/credit trifle-token
-
-SEE ALSO: help debt, help hedge, help fruit
+SEE ALSO: help debt, help hedge, help fruit, help market/examples

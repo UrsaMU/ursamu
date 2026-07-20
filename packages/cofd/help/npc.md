@@ -14,9 +14,4 @@ SYNTAX
 AI runs automatically in combat unless set to manual/off/none.
 Build/add/rm/ai/aggro require staff. Destroy = staff + canEdit.
 
-EXAMPLES
-  +npc/build Goon=thug
-  +npc/addpower Karl=mortal-mask
-  +combat/join for Goon
-
-SEE ALSO: help npc/tiers, help npc/archetypes, help npc/derived
+SEE ALSO: help npc/tiers, help npc/archetypes, help npc/derived, help npc/examples

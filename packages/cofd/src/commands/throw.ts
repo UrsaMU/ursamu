@@ -203,10 +203,14 @@ export async function throwExec(u: IUrsamuSDK) {
     // Combat damage is not a canEdit op (same rule as +attack).
 
     await autoJoinTarget(u, encounter, target);
+    const targetPart = encounter.participants.find((p) => p.actorId === target.id);
+    if (targetPart?.isOut) {
+      u.send(`${target.name ?? "Target"} is already incapacitated.`);
+      return;
+    }
 
     const targetSheet: CofdSheet = (target.state?.cofd as CofdSheet) ?? defaultSheet();
     let defense = computeDefense(targetSheet);
-    const targetPart = encounter.participants.find((p) => p.actorId === target.id);
     if (targetPart) defense = Math.max(0, defense - targetPart.appliedDefense);
     const finalPool = Math.max(0, pool - defense);
 

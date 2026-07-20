@@ -1,5 +1,7 @@
+---
+dark: true
+---
 +CHARACTER  -- Sheet, chargen, approval, and notes.
-
 COMMANDS
   help cg          Six-stage chargen.
   help sheet       View and edit sheets.
@@ -19,5 +21,4 @@ COMMANDS
   help icon        Icons (lost pieces of self).
   help spin        Hedgespinning.
   help perception  Fae flag and dual look.
-
 SEE ALSO: help cofd, help sheet, help cg

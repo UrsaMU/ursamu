@@ -20,7 +20,7 @@ import {
   cofdConformatHandler,
   cofdDescformatHandler,
 } from "./src/support/index.ts";
-import { registerHelpDir } from "@ursamu/help-plugin";
+import { registerHelpDir } from "@ursamu/help";
 import { registerJobBuckets } from "@ursamu/jobs";
 import { routeHandler } from "./routes.ts";
 import { getEncounterForRoom, setMoved } from "./src/combat/encounter.ts";
@@ -38,6 +38,15 @@ import {
   autoJoinTarget,
   ensureEncounter,
 } from "./src/combat/auto.ts";
+import { initLangHooks, removeLangHooks } from "./src/integrations/lang.ts";
+import {
+  initInventoryHooks,
+  removeInventoryHooks,
+} from "./src/integrations/inventory.ts";
+import {
+  initCofdCombat,
+  removeCofdCombat,
+} from "./src/combat/ports.ts";
 
 // Active-combat move-lock: anyone who has joined an active encounter cannot
 // leave the room until the encounter ends or they leave it explicitly. Admins
@@ -153,7 +162,8 @@ export const plugin: IPlugin = {
   description: "Chronicles of Darkness 2e plugin: sheets, chargen, d10 dice with 10/9/8-again, rote, and Willpower spend.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },
-    { name: "jobs", version: ">=1.0.0" },
+    { name: "jobs", version: ">=0.1.0" },
+    { name: "combat", version: ">=0.1.0" },
   ],
 
   init: () => {
@@ -163,6 +173,9 @@ export const plugin: IPlugin = {
     gameHooks.on("player:move", onPlayerMove);
     gameHooks.on("object:moved", onObjectMoved);
     gameHooks.on("engine:ready", onEngineReady);
+    initLangHooks();
+    initInventoryHooks();
+    initCofdCombat();
     // Layout chrome comes from game.layout / engine defaults —
     // do not register a CoFD-specific header stack.
     // deno-lint-ignore no-explicit-any
@@ -184,6 +197,9 @@ export const plugin: IPlugin = {
     gameHooks.off("player:move", onPlayerMove);
     gameHooks.off("object:moved", onObjectMoved);
     gameHooks.off("engine:ready", onEngineReady);
+    removeLangHooks();
+    removeInventoryHooks();
+    removeCofdCombat();
     stopAllWanderers();
     unregisterFormatHandler("CONFORMAT", cofdConformatHandler);
     unregisterFormatHandler("DESCFORMAT", cofdDescformatHandler);

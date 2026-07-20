@@ -22,10 +22,4 @@ MECHANICS
   guard, and first-fire-on-adjacent persist on the participant slot and
   will be consumed by Pass 3 trigger logic.
 
-EXAMPLES
-  +turn/reaction ambush                    Take ambush posture.
-  +turn/reaction overwatch                 Overwatch the room.
-  +turn/reaction guard target=Lia          Guard a specific ally.
-  +turn/reaction first-fire-on-adjacent    Set the trigger.
-
-SEE ALSO: turn, combat, attack
+SEE ALSO: turn, combat, attack, help turn/reaction-examples

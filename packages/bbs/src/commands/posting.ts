@@ -138,12 +138,20 @@ async function createPost(
 
   const icLabel = icTag ? ` [${icTag.toUpperCase()}]` : "";
   u.send(`%ch>BBS:%cn Post ${boardNum}/${num} (${subject})${icLabel} created.`);
-  try {
-    u.broadcast(
-      `%ch>BBS:%cn New message on board ${boardNum}: %cc${subject}%cn.`,
-    );
-  } catch (_e: unknown) {
-    // non-fatal
+  if (board) {
+    try {
+      const connected = await u.db.search({ flags: /connected/i });
+      for (const p of connected) {
+        if (p.id === u.me.id) continue;
+        const n = (p.state?.bb_notify as Record<string, boolean>) ?? {};
+        if (n[String(boardNum)] === false) continue;
+        if (await canRead({ ...u, me: p } as IUrsamuSDK, board)) {
+          u.send(`%ch>BBS:%cn New message on board ${boardNum}: %cc${subject}%cn.`, p.id);
+        }
+      }
+    } catch (_e: unknown) {
+      // non-fatal
+    }
   }
 }
 

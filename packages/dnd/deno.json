@@ -31,7 +31,10 @@
   "imports": {
     "ursamu": "../mush/mod.ts",
     "@ursamu/ursamu": "../mush/mod.ts",
-    "@ursamu/help-plugin": "../help/mod.ts",
+    "@ursamu/mush": "../mush/mod.ts",
+    "@ursamu/combat": "../combat/mod.ts",
+    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.2",
+    "@ursamu/help": "jsr:@ursamu/help@^0.1.2",
     "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
     "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
     "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",

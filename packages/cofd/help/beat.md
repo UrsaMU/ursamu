@@ -15,10 +15,4 @@ SWITCHES
 PERMISSIONS
   Self: connected. Other: canEdit (builder+).
 
-EXAMPLES
-  +beat
-  +beat/add = Resolved Inspired
-  +beat/add Marcus = Took a risk
-  +beat/add/arcane = Frenzy
-
-SEE ALSO: help xp, help sheet
+SEE ALSO: help xp, help sheet, help beat/examples

@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +APPROVE  -- Promote a chargen draft to a live sheet.
 
 SYNTAX
@@ -18,9 +21,4 @@ MECHANICS
   job (archives it like +job/close). Player gets a
   live message and @mail.
 
-EXAMPLES
-  +approve Alice
-  +approve Alice=Welcome. Watch your touchstones.
-
-SEE ALSO: help deny, help sheet, help cg,
-  help perception
+SEE ALSO: help deny, help sheet, help cg,, help approve/examples

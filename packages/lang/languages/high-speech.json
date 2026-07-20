@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "high-speech",
+  "mode": "phoneme",
+  "description": "Flowing, resonant celestial tongue of Atlantis used by Mages to cast Vulgar spells.",
+  "onsets": ["ph", "th", "l", "m", "n", "r", "s", "v", "y", "ch", "h"],
+  "nuclei": ["ae", "ia", "o", "u", "i", "a", "ea"],
+  "codas": ["th", "s", "l", "r", "n", "m", "ph", ""],
+  "syllablePatterns": ["CV", "CV", "CVC", "CCV"],
+  "wordLenWeights": [0, 1, 4, 3, 2, 1],
+  "capitalize": "first",
+  "accentSubs": { "z": "s", "k": "ch" }
+}

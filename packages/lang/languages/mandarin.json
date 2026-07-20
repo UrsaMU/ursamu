@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "mandarin",
+  "mode": "phoneme",
+  "description": "Sinitic — compact CV syllables, retroflex and palatal onsets.",
+  "onsets": [
+    "b", "p", "m", "f", "d", "t", "n", "l", "g", "k", "h", "j",
+    "q", "x", "zh", "ch", "sh", "r", "z", "c", "s", "y", "w",
+    "b", "d", "g", "j", "zh", "sh"
+  ],
+  "nuclei": [
+    "a", "a", "e", "e", "i", "i", "o", "o", "u", "u", "ue", "ai",
+    "ei", "ao", "ou", "an", "en", "ang", "eng", "ong", "ia", "ie",
+    "iao", "iu", "ian", "in", "iang", "ing", "ua", "uo", "uai",
+    "ui", "uan", "un", "uang"
+  ],
+  "codas": ["", "", "", "", "n", "n", "ng", "ng", "r"],
+  "syllablePatterns": ["CV", "CV", "CV", "CVC", "V", "V"],
+  "wordLenWeights": [0, 3, 4, 2, 1],
+  "capitalize": "first",
+  "accentSubs": {
+    "th": "s",
+    "v": "w",
+    "r": "l",
+    "si": "xi",
+    "shi": "xi"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "portuguese",
+  "mode": "phoneme",
+  "description": "Ibero-Romance — nasal diphthongs, lh/nh, open-closed vowels.",
+  "onsets": [
+    "b", "c", "ch", "d", "f", "g", "h", "j", "l", "lh", "m", "m",
+    "n", "nh", "p", "p", "qu", "r", "r", "rr", "s", "s", "t", "t",
+    "v", "x", "z", "br", "bl", "cr", "cl", "dr", "fr", "fl", "gr",
+    "gl", "pr", "pl", "tr"
+  ],
+  "nuclei": [
+    "a", "a", "e", "e", "i", "i", "o", "o", "u", "ao", "ae", "oe",
+    "ai", "ei", "oi", "ui", "ia", "ie", "io", "ua", "ue", "uo",
+    "am", "em", "im", "om", "um", "ao"
+  ],
+  "codas": [
+    "", "", "", "m", "m", "n", "s", "s", "r", "l", "z", "x"
+  ],
+  "syllablePatterns": ["CV", "CV", "CV", "CVC", "V", "CCV"],
+  "wordLenWeights": [0, 1, 3, 4, 3, 1],
+  "capitalize": "first",
+  "accentSubs": {
+    "th": "t",
+    "w": "u",
+    "sh": "x",
+    "y": "i",
+    "ll": "lh"
+  }
+}

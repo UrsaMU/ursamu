@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "greek",
+  "mode": "phoneme",
+  "description": "Hellenic — aspirates, clusters, -os/-on endings.",
+  "onsets": [
+    "b", "g", "d", "th", "k", "l", "m", "n", "x", "p", "r", "s",
+    "t", "ph", "kh", "ps", "z", "br", "bl", "gr", "gl", "dr",
+    "th", "kr", "kl", "pr", "pl", "tr", "sp", "st", "sk", "str",
+    "phr", "khr"
+  ],
+  "nuclei": [
+    "a", "a", "e", "e", "i", "i", "o", "o", "u", "y", "ai", "ei",
+    "oi", "au", "eu", "ou", "ia", "io"
+  ],
+  "codas": [
+    "", "n", "n", "s", "s", "r", "x", "m", "os", "on", "as", "es",
+    "is", "ou"
+  ],
+  "syllablePatterns": ["CV", "CV", "CVC", "CCV", "CCVC", "V"],
+  "wordLenWeights": [0, 1, 3, 4, 3, 1],
+  "capitalize": "first",
+  "accentSubs": {
+    "c": "k",
+    "w": "v",
+    "sh": "s",
+    "j": "i",
+    "qu": "k"
+  }
+}

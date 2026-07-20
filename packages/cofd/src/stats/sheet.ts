@@ -465,7 +465,9 @@ export function refreshAdvantages(sheet: CofdSheet): CofdSheet {
   const newMax = resolve + composure;
 
   sheet.advantages.willpowerMax = newMax;
-  if (oldMax !== newMax) {
+  if (newMax > oldMax) {
+    sheet.advantages.willpowerCurrent += (newMax - oldMax);
+  } else if (newMax < oldMax) {
     sheet.advantages.willpowerCurrent = Math.min(sheet.advantages.willpowerCurrent, newMax);
   }
 

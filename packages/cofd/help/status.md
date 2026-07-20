@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +STATUS  -- Health, conditions, tilts, integrity.
 
 COMMANDS

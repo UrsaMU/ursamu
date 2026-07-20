@@ -188,7 +188,6 @@ export async function endTurnAndWalk(
     const msg =
       `%cyTURN>>%cn Round ${after.round} -- It is now ${cur.name}'s turn ` +
       `(Initiative ${cur.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
   } catch {
     // Walker failures should never break the player's command.

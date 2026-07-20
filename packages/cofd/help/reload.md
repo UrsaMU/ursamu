@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +reload  -- Reload the currently equipped firearm. Also +gear/reload.
             Reloading costs an instant action.
 

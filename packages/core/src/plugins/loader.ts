@@ -64,10 +64,10 @@ export async function unloadPlugin(name: string): Promise<void> {
 function checkDeps(plugin: IPlugin): string | null {
   for (const dep of plugin.dependencies ?? []) {
     const installed = registryGet(dep.name);
-    if (!installed) return `missing dependency "${dep.name}"`;
+    if (!installed) return `missing dependency "${dep.name}". Try running: ursamu plugin install ${dep.name}`;
     try {
       if (!satisfies(parseSemver(installed.version), parseRange(dep.version))) {
-        return `"${dep.name}" v${installed.version} does not satisfy ${dep.version}`;
+        return `"${dep.name}" v${installed.version} does not satisfy ${dep.version}. Try running: ursamu plugin update ${dep.name}`;
       }
     } catch {
       return `invalid semver "${dep.version}" for dep "${dep.name}"`;

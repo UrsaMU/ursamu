@@ -12,7 +12,14 @@ import type { IUrsamuSDK } from "./types.ts";
 import { dbojs, hydrate } from "../world/dbobjs.ts";
 import { evaluateLock } from "../world/locks.ts";
 import { flags as flagsUtil } from "../world/flags.ts";
-import { send, sendPayload, sessions, gameHooks, setConfig } from "@ursamu/core";
+import {
+  send,
+  sendPayload,
+  sessions,
+  gameHooks,
+  setConfig,
+  closeSocket,
+} from "@ursamu/core";
 import "../events/types.ts";
 import { resolveFormat, resolveFormatOr, resolveGlobalFormat, resolveGlobalFormatOr, header, divider, footer, center, ljust, rjust } from "../format/handlers.ts";
 
@@ -737,24 +744,51 @@ export async function createNativeSDK(
   return u;
 }
 
-// Wire session:auth → decode JWT → set session.actorId so disconnect/cid lookup works.
+// Wire session:auth → decode JWT → set session.actorId so disconnect/cid
+// lookup works. Fail closed: invalid/expired tokens drop the socket with a
+// clear message so clients are not left "connected but not logged in".
 // This runs once at module-load time (side-effect).
 import { verifyToken } from "@ursamu/core";
+import { REAUTH_FAIL_MSG } from "../session/reauth.ts";
+
+async function failReauth(socketId: string, reason: string): Promise<void> {
+  console.error(`[session:auth] Re-authentication failed: ${reason}`);
+  try {
+    sendPayload(socketId, REAUTH_FAIL_MSG, { quit: true, auth: false });
+  } catch {
+    /* socket may already be gone */
+  }
+  closeSocket(socketId);
+}
+
 gameHooks.on("session:auth", async (e) => {
   try {
     const payload = await verifyToken(e.sessionId);
     const userId = payload.id as string;
-    if (!userId) return;
-    const session = sessions.get(e.socketId);
-    if (session) ((session as unknown) as Record<string, unknown>).actorId = userId;
-    const player = await dbojs.queryOne({ id: userId });
-    if (player) {
-      const fstr = flagsUtil.set(player.flags, player.data || {}, "connected");
-      await dbojs.modify({ id: userId }, "$set", { flags: fstr.tags } as Partial<IDBOBJ>);
-      const { hooks } = await import("../events/hooks.ts");
-      await hooks.aconnect(player, e.socketId);
+    if (!userId) {
+      await failReauth(e.socketId, "token missing id");
+      return;
     }
+    const session = sessions.get(e.socketId);
+    if (session) {
+      ((session as unknown) as Record<string, unknown>).actorId = userId;
+    }
+    const player = await dbojs.queryOne({ id: userId });
+    if (!player) {
+      await failReauth(e.socketId, `player ${userId} not found`);
+      return;
+    }
+    const fstr = flagsUtil.set(player.flags, player.data || {}, "connected");
+    await dbojs.modify(
+      { id: userId },
+      "$set",
+      { flags: fstr.tags } as Partial<IDBOBJ>,
+    );
+    // Tell the client who they are so telnet can restore cid + look.
+    sendPayload(e.socketId, "", { cid: userId, auth: true });
+    const { hooks } = await import("../events/hooks.ts");
+    await hooks.aconnect(player, e.socketId);
   } catch (err) {
-    console.error("[session:auth] Re-authentication failed:", err);
+    await failReauth(e.socketId, String(err));
   }
 });

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "spanish",
+  "mode": "phoneme",
+  "description": "Iberian Romance — open syllables, rolled r, clear vowels.",
+  "onsets": [
+    "b", "b", "c", "ch", "d", "d", "f", "g", "h", "j", "l", "l",
+    "ll", "m", "m", "n", "n", "ny", "p", "p", "qu", "r", "r", "rr",
+    "s", "s", "s", "t", "t", "v", "y", "z", "br", "bl", "cr", "cl",
+    "dr", "fr", "fl", "gr", "gl", "pr", "pl", "tr"
+  ],
+  "nuclei": [
+    "a", "a", "a", "e", "e", "e", "i", "i", "o", "o", "o", "u",
+    "ia", "ie", "io", "ua", "ue", "uo", "ai", "ei", "oi"
+  ],
+  "codas": [
+    "", "", "", "", "n", "n", "s", "s", "r", "r", "l", "d", "z",
+    "y"
+  ],
+  "syllablePatterns": ["CV", "CV", "CV", "CVC", "V", "CCV"],
+  "wordLenWeights": [0, 1, 3, 4, 3, 1],
+  "capitalize": "first",
+  "accentSubs": {
+    "th": "t",
+    "w": "gu",
+    "sh": "ch",
+    "v": "b",
+    "ph": "f"
+  }
+}

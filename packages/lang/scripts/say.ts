@@ -1,4 +1,6 @@
-import type { IDBObj, IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+/// <reference types="./global.d.ts" />
+import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { gameHooks } from "@ursamu/ursamu";
 
 /**
  * sgp-language: say.ts
@@ -15,22 +17,29 @@ export const aliases = ["say", "\""];
 
 /* {{LANG_DEFS}} */
 
-function _readActive(o: IDBObj): string | undefined {
+async function _readActive(o: IDBObj): Promise<string | undefined> {
   const langs = (o.state as Record<string, unknown>)?.languages as
     | Record<string, unknown>
     | undefined;
   const a = langs?.active;
-  return typeof a === "string" ? a.toLowerCase() : undefined;
+  const ctx = { player: o, active: typeof a === "string" ? a.toLowerCase() : undefined };
+  await gameHooks.emit("language:get_active", ctx);
+  return ctx.active;
 }
 
-function _skillIn(o: IDBObj, name: string): number {
+async function _skillIn(o: IDBObj, name: string): Promise<number> {
   const langs = (o.state as Record<string, unknown>)?.languages as
     | Record<string, unknown>
     | undefined;
   const known = langs?.known as Record<string, unknown> | undefined;
   const v = known?.[name.toLowerCase()];
-  if (typeof v !== "number" || !Number.isFinite(v)) return 0;
-  return Math.max(0, Math.min(100, Math.floor(v)));
+  let baseSkill = 0;
+  if (typeof v === "number" && Number.isFinite(v)) {
+    baseSkill = Math.max(0, Math.min(100, Math.floor(v)));
+  }
+  const ctx = { player: o, language: name.toLowerCase(), skill: baseSkill };
+  await gameHooks.emit("language:get_skill", ctx);
+  return Math.max(0, Math.min(100, Math.floor(ctx.skill)));
 }
 
 export default async (u: IUrsamuSDK) => {
@@ -42,7 +51,7 @@ export default async (u: IUrsamuSDK) => {
   }
 
   const speakerName = u.util.displayName(u.me, u.me);
-  const active = _readActive(u.me);
+  const active = await _readActive(u.me);
 
   if (!active) {
     u.send(`You say, "${msg}"`);
@@ -51,12 +60,20 @@ export default async (u: IUrsamuSDK) => {
   }
 
   // deno-lint-ignore no-explicit-any
-  const def = (LANG_DEFS as Record<string, any>)[active];
+  let def = (LANG_DEFS as Record<string, any>)[active];
   if (!def) {
-    u.send(`(Your active language "${active}" is not configured here.)`);
-    u.send(`You say, "${msg}"`);
-    u.here.broadcast(`${speakerName} says, "${msg}"`, { except: u.me.id });
-    return;
+    def = {
+      schema: 1,
+      name: active,
+      mode: "phoneme",
+      description: `Default generated language for ${active}`,
+      onsets: ["b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r", "s", "t", "v", "w", "y"],
+      nuclei: ["a", "e", "i", "o", "u"],
+      codas: ["t", "s", "n", "r", "m", ""],
+      syllablePatterns: ["CV", "CVC"],
+      wordLenWeights: [0, 1, 4, 3, 2, 1],
+      capitalize: "first"
+    };
   }
 
   u.send(`You say in ${active}, "${msg}"`);
@@ -64,7 +81,7 @@ export default async (u: IUrsamuSDK) => {
     (o: IDBObj) => o.flags.has("connected") && o.id !== u.me.id,
   );
   for (const listener of listeners) {
-    const skill = _skillIn(listener, active);
+    const skill = await _skillIn(listener, active);
     const text = garble(msg, def, skill);
     u.send(`${speakerName} says in ${active}, "${text}"`, listener.id);
 

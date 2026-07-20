@@ -11,7 +11,6 @@ START EXPRESSION
     <target>  Successes needed.
     <n>       Max attempts.   <int> turn|hour|day|scene.
     /cum      Cumulative -1 per attempt.
-
 ROLL STACKING: /wp /rote /9again /8again /job=N can stack on /roll.
 
 PERMISSIONS

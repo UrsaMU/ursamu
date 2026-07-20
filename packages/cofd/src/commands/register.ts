@@ -22,7 +22,7 @@ import {
   unapproveExec,
 } from "./approve.ts";
 import { notesExec } from "./notes.ts";
-import { gearExec, gearReload } from "./gear.ts";
+import { gearExec, gearReload, gearEquip, gearUnequip, gearView } from "./gear.ts";
 import { tiltExec } from "./tilt.ts";
 import { proveExec } from "./prove.ts";
 import { combatExec } from "./combat.ts";
@@ -44,6 +44,8 @@ import { marketExec } from "./market.ts";
 import { debtCommand } from "./debt.ts";
 import { iconCommand } from "./icon.ts";
 import { spinCommand } from "./spin.ts";
+import { infoExec } from "./info.ts";
+import { pledgeCommand } from "./pledge.ts";
 
 addCmd({
   name: "+extended",
@@ -306,7 +308,22 @@ Example usage:
   +cg/submit
   +cg/set Strength=3
   +cg/submit`,
-  exec: cgExec
+  exec: cgExec,
+});
+
+addCmd({
+  name: "+info",
+  pattern: /^\+info(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+info <name>  — Detail lookup for merits, conditions, gifts, tilts,
+                  dread powers, virtues, vices, seemings, kiths, or courts.
+
+Examples:
+  +info giant                 View Giant merit details.
+  +info killer instinct       View Killer Instinct gift facet details.
+  +info Full Moon's Gift      View Full Moon's Gift details.`,
+  exec: infoExec,
 });
 
 addCmd({
@@ -1050,3 +1067,107 @@ Examples:
   +district/create-parent ParentSlums=slums`,
   exec: districtExec,
 });
+
+addCmd({
+  name: "+equip",
+  pattern: /^\+equip\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+equip <#|name> [for <player>]  -- Equip an item in inventory.
+
+Examples:
+  +equip shotgun           Equip shotgun.
+  +equip 1                 Equip inventory slot 1.`,
+  exec: (u) => {
+    const rest = (u.cmd.args[0] ?? "").trim();
+    return gearEquip(u, rest);
+  },
+});
+
+addCmd({
+  name: "+wield",
+  pattern: /^\+wield\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+wield <#|name> [for <player>]  -- Wield a weapon in inventory.
+
+Examples:
+  +wield shotgun           Wield shotgun.
+  +wield 1                 Wield inventory slot 1.`,
+  exec: (u) => {
+    const rest = (u.cmd.args[0] ?? "").trim();
+    return gearEquip(u, rest);
+  },
+});
+
+addCmd({
+  name: "+wear",
+  pattern: /^\+wear\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+wear <#|name> [for <player>]  -- Wear armor in inventory.
+
+Examples:
+  +wear vest               Wear armor.
+  +wear 2                  Wear inventory slot 2.`,
+  exec: (u) => {
+    const rest = (u.cmd.args[0] ?? "").trim();
+    return gearEquip(u, rest);
+  },
+});
+
+addCmd({
+  name: "+unequip",
+  pattern: /^\+unequip\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+unequip <weapon|armor> [for <player>]  -- Unequip weapon or armor.
+
+Examples:
+  +unequip weapon          Unequip your weapon.
+  +unequip armor           Unequip your armor.`,
+  exec: (u) => {
+    const rest = (u.cmd.args[0] ?? "").trim();
+    return gearUnequip(u, rest);
+  },
+});
+
+addCmd({
+  name: "inventory",
+  pattern: /^(?:inventory|i)$/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `inventory  -- View your equipment and carried items.
+
+Synonyms: i, +gear`,
+  exec: (u) => {
+    return gearView(u, "");
+  },
+});
+
+addCmd({
+  name: "+pledge",
+  pattern: /^\+pledge(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+pledge[/sw] [args]  -- Manage Changeling pledges (seals/oaths/bargains).
+
+Switches:
+  /seal <target>=[dur/]<text>/<sanc>  Seal target's words (1 Glamour).
+  /seal/strengthen <target>=...       Strengthen seal (1 Glamour + 1 WP).
+  /oath <type>/<targ>=<text>/<boon>/<sanc>  Propose oath (1 Glamour).
+  /bargain <targ>=<serv>/<pay>        Bargain with mortal (1 Glamour).
+  /accept <id>                        Accept a pending proposed pledge.
+  /refute <id>                        Refute pending proposed seal (1 Glam).
+  /list [<player>]                    List pledges involving player.
+  /view <id>                          View details of a pledge.
+  /release <id>                       Safely release/end a pledge.
+  /break <id>[=reason]                Break pledge & trigger sanction.
+
+Examples:
+  +pledge/seal Bob=scene/I will not fight/1 bashing
+  +pledge/oath personal/Alice=never lie/swap-pools/notoriety
+  +pledge/accept 4a8b7c9e`,
+  exec: pledgeCommand,
+});
+

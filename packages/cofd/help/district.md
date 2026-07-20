@@ -14,9 +14,4 @@ TRAITS
   access, safety, information, awareness, prestige,
   stability, sizemax, securitymin, locationmin
 
-EXAMPLES
-  +district
-  +district/set safety=2
-  +district/create-parent Slums=slums
-
-SEE ALSO: help roll
+SEE ALSO: help roll, help district/examples

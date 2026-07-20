@@ -239,3 +239,25 @@ describe("Resting and Hit Dice", () => {
     assertEquals(sheet.hp.current, 11); // 5 + 6 = 11
   });
 });
+
+import { dndCgExec } from "../src/commands/cg.ts";
+import { mockPlayer, mockU } from "../../cofd/tests/helpers/mockU.ts";
+import { assertStringIncludes } from "@std/assert";
+
+describe("D&D Guided Character Gen Reset Guard", () => {
+  it("blocks resetting when approved", async () => {
+    const me = mockPlayer({
+      id: "1",
+      name: "Arthur",
+      state: { dnd: {} },
+    });
+    const u = mockU({ me });
+    u.cmd.args = ["reset", ""];
+    u._sent.length = 0;
+    await dndCgExec(u);
+    assertStringIncludes(
+      u._sent.join("\n"),
+      "You already have an approved character sheet.",
+    );
+  });
+});

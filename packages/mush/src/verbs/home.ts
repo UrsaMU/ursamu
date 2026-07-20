@@ -1,3 +1,4 @@
+import { gameHooks } from "@ursamu/core";
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK, IDBObj } from "../commands/types.ts";
 
@@ -8,7 +9,16 @@ export function execHome(u: IUrsamuSDK): void {
   u.send("There's no place like home...");
 }
 
-export function execInventory(u: IUrsamuSDK): void {
+/**
+ * Plugins may handle inventory via the soft hook `inventory:show`.
+ * Set ctx.handled = true to skip the stock contents listing.
+ */
+export async function execInventory(u: IUrsamuSDK): Promise<void> {
+  const ctx = { u, handled: false };
+  // deno-lint-ignore no-explicit-any
+  await (gameHooks as any).emit("inventory:show", ctx);
+  if (ctx.handled) return;
+
   const actor = u.me;
   const items = (actor.contents || []).filter(
     (obj) =>
@@ -17,11 +27,14 @@ export function execInventory(u: IUrsamuSDK): void {
       !(obj as IDBObj).flags.has("player"),
   ) as IDBObj[];
 
-  let output = `%ch${u.util.displayName(actor, actor)}'s Inventory%cn\n`;
+  let output =
+    `%ch${u.util.displayName(actor, actor)}'s Inventory%cn\n`;
   if (items.length === 0) {
     output += "You are not carrying anything.\n";
   } else {
-    for (const item of items) output += `  ${u.util.displayName(item, actor)}\n`;
+    for (const item of items) {
+      output += `  ${u.util.displayName(item, actor)}\n`;
+    }
   }
   u.send(output);
 }

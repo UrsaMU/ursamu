@@ -14,10 +14,4 @@ SWITCHES
 PERMISSIONS
   Self: connected. Other: canEdit (builder+).
 
-EXAMPLES
-  +xp
-  +xp/spend strength=3
-  +xp/spend vigor=2 for Marcus
-  +xp/list
-
-SEE ALSO: help xp/costs, help beat, help sheet
+SEE ALSO: help xp/costs, help beat, help sheet, help xp/examples

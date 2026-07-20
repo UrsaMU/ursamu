@@ -15,11 +15,4 @@ EDITING
   Live sheet only via +sheet/set. Build with +cg until
   approved. Size / others' WP: builder+.
 
-EXAMPLES
-  +sheet
-  +sheet/set strength=3
-  +sheet/set mask=A quiet barista.
-
-SEE ALSO: help sheet/traits, help sheet/willpower,
-  help sheet/size, help sheet/specialties, help cg,
-  help changeling
+SEE ALSO: help sheet/traits, help sheet/willpower,, help sheet/examples

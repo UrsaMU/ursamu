@@ -1,3 +1,6 @@
+---
+dark: true
+---
 +REFERENCE  -- Catalogs and merit lists.
 
 COMMANDS

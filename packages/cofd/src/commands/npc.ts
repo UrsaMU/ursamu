@@ -303,6 +303,10 @@ async function findNpcObj(u: IUrsamuSDK, q: string): Promise<IDBObj | null> {
 }
 
 async function npcShow(u: IUrsamuSDK, rest: string): Promise<void> {
+  if (!isStaff(u.me)) {
+    u.send("Permission denied. Only staff may view NPC stat blocks.");
+    return;
+  }
   const q = u.util.stripSubs(rest).trim();
   if (!q) { u.send("Syntax: +npc/show <name-or-id>"); return; }
 
@@ -325,9 +329,15 @@ async function npcShow(u: IUrsamuSDK, rest: string): Promise<void> {
 
   const a = sheet.attributes;
   lines.push("  Attributes:");
-  lines.push(`    Int ${a.intelligence} | Wit ${a.wits} | Res ${a.resolve}`);
-  lines.push(`    Str ${a.strength} | Dex ${a.dexterity} | Sta ${a.stamina}`);
-  lines.push(`    Pre ${a.presence} | Man ${a.manipulation} | Com ${a.composure}`);
+  const attrRow = (m: string, mVal: number, p: string, pVal: number, s: string, sVal: number) => {
+    return "    " +
+      pad(`${m} ${mVal}`, 24) +
+      pad(`${p} ${pVal}`, 24) +
+      pad(`${s} ${sVal}`, 24);
+  };
+  lines.push(attrRow("Intel", a.intelligence ?? 1, "Strength", a.strength ?? 1, "Presence", a.presence ?? 1));
+  lines.push(attrRow("Wits", a.wits ?? 1, "Dexterity", a.dexterity ?? 1, "Manip", a.manipulation ?? 1));
+  lines.push(attrRow("Resolve", a.resolve ?? 1, "Stamina", a.stamina ?? 1, "Composure", a.composure ?? 1));
   lines.push("");
 
   const skills = sheet.skills as Record<string, number>;
@@ -352,9 +362,31 @@ async function npcShow(u: IUrsamuSDK, rest: string): Promise<void> {
     lines.push("");
   }
 
+  const maxHealth = sheetHealthMax(sheet);
+  const track = sheet.health ?? { bashing: 0, lethal: 0, aggravated: 0 };
+  const boxes: string[] = [];
+  let agg = track.aggravated ?? 0;
+  let leth = track.lethal ?? 0;
+  let bash = track.bashing ?? 0;
+  for (let i = 0; i < maxHealth; i++) {
+    if (agg > 0) {
+      boxes.push("[*]");
+      agg -= 1;
+    } else if (leth > 0) {
+      boxes.push("[X]");
+      leth -= 1;
+    } else if (bash > 0) {
+      boxes.push("[/]");
+      bash -= 1;
+    } else {
+      boxes.push("[ ]");
+    }
+  }
+  const healthStr = boxes.join("");
+
   lines.push("  Derived:");
-  lines.push(`    Health:     ${sheetHealthMax(sheet)} (Stamina + Size)`);
-  lines.push(`    Willpower:  ${sheet.advantages.willpowerMax} (Resolve + Composure)`);
+  lines.push(`    Health:     ${healthStr}  (${maxHealth} max)`);
+  lines.push(`    Willpower:  ${sheet.advantages.willpowerCurrent ?? sheet.advantages.willpowerMax}/${sheet.advantages.willpowerMax}`);
   lines.push(`    Defense:    ${sheetDefense(sheet)}`);
   lines.push(`    Initiative: +${sheetInitiative(sheet)}`);
   lines.push(`    Speed:      ${sheetSpeed(sheet)}`);

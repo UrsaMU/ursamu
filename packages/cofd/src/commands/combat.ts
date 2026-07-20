@@ -317,7 +317,6 @@ async function combatLeave(u: IUrsamuSDK, rest: string) {
       const msg =
         `%cyTURN>>%cn Round ${fresh.round} -- It is now ${cur.name}'s turn ` +
         `(Initiative ${cur.initiative}).`;
-      u.send(msg);
       u.broadcast(msg);
     }
   }
@@ -355,7 +354,6 @@ async function combatBegin(u: IUrsamuSDK) {
         const msg =
           `%cyTURN>>%cn Round ${updated.round} -- It is now ${cur.name}'s turn ` +
           `(Initiative ${cur.initiative}).`;
-        u.send(msg);
         u.broadcast(msg);
       }
     }
@@ -378,7 +376,6 @@ async function combatNext(u: IUrsamuSDK, manual = false) {
     const msg =
       `%cyTURN>>%cn Round ${updated.round} -- It is now ${cur.name}'s turn ` +
       `(Initiative ${cur.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
     return;
   }
@@ -410,7 +407,6 @@ async function combatNext(u: IUrsamuSDK, manual = false) {
     const msg =
       `%cyTURN>>%cn Round ${after.round} -- It is now ${cur.name}'s turn ` +
       `(Initiative ${cur.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
   }
 }
@@ -433,14 +429,12 @@ async function combatDelay(u: IUrsamuSDK) {
   if (!result) { u.send("Failed to delay."); return; }
   const name = cur.name;
   const head = `%cyDELAY>>%cn ${name} holds their action.`;
-  u.send(head);
   u.broadcast(head);
   const next = result.encounter.participants[result.encounter.turnIdx];
   if (next) {
     const msg =
       `%cyTURN>>%cn Round ${result.encounter.round} -- It is now ${next.name}'s turn ` +
       `(Initiative ${next.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
   }
 }
@@ -456,7 +450,6 @@ async function combatAct(u: IUrsamuSDK) {
   const updated = await reclaimDelayed(enc.id, u.me.id);
   if (!updated) { u.send("Failed to reclaim your delayed action."); return; }
   const msg = `%cyACT>>%cn ${p.name} takes their held action. It is now their turn.`;
-  u.send(msg);
   u.broadcast(msg);
 }
 
@@ -476,7 +469,6 @@ async function combatMove(u: IUrsamuSDK) {
   const size = sheet?.advantages?.size ?? 5;
   const speed = str + dex + size;
   const msg = `%cyMOVE>>%cn ${cur.name} moves up to Speed ${speed} yards (free, no slot used).`;
-  u.send(msg);
   u.broadcast(msg);
 }
 
@@ -497,7 +489,6 @@ async function combatRun(u: IUrsamuSDK) {
   const speed = str + dex + size;
   const msg =
     `%cyRUN>>%cn ${cur.name} sprints up to ${speed * 2} yards (consumes the instant action; -1 Defense).`;
-  u.send(msg);
   u.broadcast(msg);
 }
 
@@ -511,7 +502,6 @@ async function combatReflexive(u: IUrsamuSDK, rest: string) {
   const what = rest.trim();
   if (!what) { u.send("Usage: +combat/reflexive <description>"); return; }
   const msg = `%cyREFLEX>>%cn ${p.name}: ${what} (reflexive -- no slot used).`;
-  u.send(msg);
   u.broadcast(msg);
 }
 

@@ -6,6 +6,7 @@ import { SDKService } from "../softcode/sdk-service.ts";
 import type { IDBOBJ } from "../world/types.ts";
 import type { ObjectDestroyedEvent, SayEvent, PoseEvent } from "./types.ts";
 import type { IAttribute } from "../world/types.ts";
+import { notifyRoomDisconnect } from "./disconnect-notice.ts";
 
 /**
  * Recursively fetch a named attribute from an object, walking its parent chain.
@@ -158,16 +159,29 @@ export const hooks = {
       if (masterRoomId) {
         const masterRoom = await dbojs.queryOne({ id: masterRoomId });
         if (masterRoom) {
-          await hooks.executeAttribute(masterRoom as IDBOBJ, "ADISCONNECT", [], player, socketId);
+          await hooks.executeAttribute(
+            masterRoom as IDBOBJ,
+            "ADISCONNECT",
+            [],
+            player,
+            socketId,
+          );
         }
       }
     } catch (e) {
       console.error("[Hooks] adisconnect error:", e);
     }
+
+    try {
+      await notifyRoomDisconnect(player);
+    } catch (e: unknown) {
+      console.error("[Hooks] disconnect room notice error:", e);
+    }
+
     gameHooks.emit("player:logout", {
-      actorId:   player.id,
+      actorId: player.id,
       actorName: (player.data?.name as string) || player.id,
       socketId,
-    }).catch(e => console.error("[GameHooks] player:logout:", e));
+    }).catch((e) => console.error("[GameHooks] player:logout:", e));
   },
 };

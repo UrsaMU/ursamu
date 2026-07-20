@@ -11,17 +11,7 @@ CORE SYNTAX
                              next PC. /manual = one slot, no AI.
   +combat/end                Close the encounter and clear state.
   +combat/status [<player>]  Show a participant's combat state.
-
 NPC AI is automatic after PC attacks and on /next. Opt out per NPC with
 +npc/ai <name>=manual (or off/none) so the ST plays that slot.
 
-RELATED
-  help attack · grapple · throw · dodge · gear
-  help reload · npc · zone · turn · district
-
-MORE
-  help combat/switches, help combat/initiative,
-  help combat/order, help combat/action-economy,
-  help combat/modifiers, help combat/specified
-
-SEE ALSO: help attack, help grapple, help dodge
+SEE ALSO: help attack, help grapple, help dodge, help throw, help gear, help reload, help npc, help turn, help zone, help combat/switches, help combat/initiative, help combat/order, help combat/action-economy, help combat/modifiers, help combat/specified, help combat/examples

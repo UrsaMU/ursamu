@@ -505,7 +505,13 @@ function expandBareCalls(s: string): string {
     const parts = layoutArgs(rawArgs);
     const result = callLayoutFn(bestName, parts);
     if (result === null) break;
-    s = s.slice(0, bestStart) + result + s.slice(bestEnd + 1);
+    let start = bestStart;
+    let end = bestEnd;
+    if (bestStart > 0 && s[bestStart - 1] === "[" && s[bestEnd + 1] === "]") {
+      start = bestStart - 1;
+      end = bestEnd + 1;
+    }
+    s = s.slice(0, start) + result + s.slice(end + 1);
     if (s.length > MAX_TPL_LEN) s = s.slice(0, MAX_TPL_LEN);
   }
   return s;

@@ -95,7 +95,10 @@ async function aspirationAdd(u: IUrsamuSDK, rest: string, longTerm: boolean) {
     return;
   }
 
-  await u.db.modify(target.id, "$set", { "data.cofd": updated });
+  await u.db.modify(target.id, "$set", {
+    "state.cofd": updated,
+    "data.cofd": updated,
+  });
 
   const targetLabel = sameTarget ? "your" : `${u.util.displayName(target, u.me)}'s`;
   const kind = longTerm ? "long-term" : "short-term";
@@ -132,7 +135,10 @@ async function aspirationRemove(u: IUrsamuSDK, rest: string) {
   }
 
   const updated = removeAspiration(sheetRaw, idx);
-  await u.db.modify(target.id, "$set", { "data.cofd": updated });
+  await u.db.modify(target.id, "$set", {
+    "state.cofd": updated,
+    "data.cofd": updated,
+  });
 
   const targetLabel = sameTarget ? "your" : `${u.util.displayName(target, u.me)}'s`;
   u.send(`Removed Aspiration ${idx + 1} from ${targetLabel} sheet (no Beat awarded).`);
@@ -169,7 +175,10 @@ async function aspirationFulfill(u: IUrsamuSDK, rest: string) {
 
   const beforeXp = sheetRaw.experience ?? 0;
   const result = fulfillAspiration(sheetRaw, idx);
-  await u.db.modify(target.id, "$set", { "data.cofd": result.sheet });
+  await u.db.modify(target.id, "$set", {
+    "state.cofd": result.sheet,
+    "data.cofd": result.sheet,
+  });
 
   const targetLabel = sameTarget ? "your" : `${u.util.displayName(target, u.me)}'s`;
   if (result.beatsAwarded > 0) {

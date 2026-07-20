@@ -16,8 +16,8 @@
     "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
     "@ursamu/mush": "../mush/mod.ts",
     "@ursamu/core": "../core/mod.ts",
-    "@ursamu/help": "../help/mod.ts",
-    "@ursamu/help-plugin": "../help/mod.ts",
+    "@ursamu/help": "jsr:@ursamu/help@^0.1.2",
+    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.2",
     "@ursamu/channels": "../channels/mod.ts",
     "@ursamu/jobs": "../jobs/mod.ts",
     "tweetnacl": "npm:tweetnacl@1.0.3"

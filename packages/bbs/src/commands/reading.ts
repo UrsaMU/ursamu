@@ -5,6 +5,7 @@ import { canRead } from "../permissions.ts";
 import {
   markRead, markAllRead, markAllBoardsRead,
   getUnreadKeys, getUnreadCount, isMember,
+  getAllMessageKeys,
 } from "../tracking.ts";
 import { bbDate, formatPost, header, divider, footer } from "../display.ts";
 
@@ -63,13 +64,42 @@ async function doBBList(u: IUrsamuSDK): Promise<void> {
     for (const board of catBoards) {
       const bPosts  = await getBoardPosts(board.num);
       const unread  = await getUnreadCount(u, board.num);
-      const total   = bPosts.length;
-      const last    = bPosts.length ? bbDate(Math.max(...bPosts.map((p) => p.createdAt))) : "";
+      const total   = (await getAllMessageKeys(board.num)).length;
+      let lastTime = 0;
+      let lastSubject = "";
+      for (const post of bPosts) {
+        if (post.createdAt > lastTime) {
+          lastTime = post.createdAt;
+          lastSubject = post.subject;
+        }
+        for (const reply of post.replies ?? []) {
+          if (reply.createdAt > lastTime) {
+            lastTime = reply.createdAt;
+            lastSubject = post.subject;
+          }
+        }
+      }
+      const lastDate = lastTime ? bbDate(lastTime) : "";
+      let lastStr = "";
+      if (lastTime) {
+        const datePart = ` (${lastDate})`;
+        const maxSubjectLen = 32 - datePart.length;
+        const subjectPart = lastSubject.length > maxSubjectLen
+          ? lastSubject.slice(0, maxSubjectLen - 3) + "..."
+          : lastSubject;
+        lastStr = (subjectPart + datePart).padEnd(32);
+      } else {
+        lastStr = "".padEnd(32);
+      }
+
       const modMark = (board.moderators ?? []).includes(u.me.id) ? "[M]" : "   ";
-      const num     = String(board.num).padStart(4);
-      const title   = board.title.padEnd(35).slice(0, 35);
+      const num     = String(board.num).padStart(3);
+      const title   = board.title.padEnd(18).slice(0, 18);
       const unreadStr = unread > 0 ? `%ch%cy${unread}%cn` : "0";
-      lines.push(`${num} ${modMark} %cc${title}%cn  ${last.padEnd(10)} ${String(total).padStart(4)}  (${unreadStr} new)`);
+      lines.push(
+        `${num} ${modMark} %cc${title}%cn  ${lastStr}  ` +
+          `${String(total).padStart(4)}  (${unreadStr} new)`,
+      );
     }
   }
   lines.push(divider());

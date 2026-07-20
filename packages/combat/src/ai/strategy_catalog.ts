@@ -2,7 +2,7 @@
 
 import type { AiStrategy } from "./strategy_types.ts";
 
-const AI_DIR = new URL("../../../resources/ai/", import.meta.url);
+const AI_DIR = new URL("../../resources/ai/", import.meta.url);
 
 export interface StrategyLoadError {
   file: string;

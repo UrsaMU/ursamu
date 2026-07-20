@@ -324,7 +324,10 @@ export const initializeEngine = async (
     return parser.substitute(clientType === "web" ? "html" : "telnet", msg);
   });
 
-  // Send welcome screen on new session
+  // Send welcome screen on new session. Reconnects skip the splash only
+  // while JWT reauth is expected; if reauth fails the session is closed
+  // (see session:auth in commands/sdk.ts) so players are never left on a
+  // blank "connected but not logged in" prompt.
   gameHooks.on("session:open", async ({ socketId }) => {
     const session = sessions.get(socketId);
     if (session?.meta?.reconnect) return;

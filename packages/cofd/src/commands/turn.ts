@@ -72,7 +72,6 @@ async function turnDone(u: IUrsamuSDK): Promise<void> {
     const msg =
       `%cyTURN>>%cn Round ${after.round} -- It is now ${cur.name}'s turn ` +
       `(Initiative ${cur.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
   }
 }
@@ -149,7 +148,6 @@ async function turnReaction(u: IUrsamuSDK, rest: string): Promise<void> {
 
   const tgtPart = targetId ? ` (target: ${targetId})` : "";
   const msg = `%cyREACTION>>%cn ${myP.name} takes the ${posture} posture${tgtPart}.`;
-  u.send(msg);
   u.broadcast(msg);
 }
 

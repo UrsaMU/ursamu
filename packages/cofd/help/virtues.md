@@ -1,3 +1,6 @@
+---
+dark: true
+---
 virtues  -- The Virtue anchor in CoFD 2e.
 
 A character's Virtue is who she is at her best. Acting on Virtue is

@@ -17,10 +17,4 @@ CHRYSALIS
   Contract Chrysalis + animals list. Cost 2G enter.
   Details: help shift/chrysalis
 
-EXAMPLES
-  +shift mien
-  +shift wolf
-  +shift human
-
-SEE ALSO: help shift/chrysalis, help contract,
-  help hedge, help changeling
+SEE ALSO: help shift/chrysalis, help contract,, help shift/examples
