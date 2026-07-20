@@ -1,4 +1,6 @@
 // +hedge Hollow depth: enhance, escape, easy-access.
+// Hob Alarm combat cue: see checkHobAlarmOnEnter in
+// hedge_helpers (fires on moveActor into a Hollow).
 
 import type { IUrsamuSDK } from "@ursamu/ursamu";
 import {
@@ -12,10 +14,14 @@ import {
 } from "../hedge/index.ts";
 import { isChangelingSheet } from "../form/index.ts";
 import {
+  checkHobAlarmOnEnter,
   getSheet,
   persistRoomHedge,
   roomHedge,
 } from "./hedge_helpers.ts";
+
+/** Re-export for tests and staff tooling. */
+export { checkHobAlarmOnEnter };
 
 export async function hedgeHollow(
   u: IUrsamuSDK,

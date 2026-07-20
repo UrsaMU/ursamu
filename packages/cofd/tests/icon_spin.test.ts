@@ -73,6 +73,28 @@ Deno.test("spendIcon grants Glamour and marks spent", OPTS, () => {
   assertEquals(activeIcons(r.sheet!).length, 0);
 });
 
+Deno.test(
+  "spendIcon notes Clarity condition when present",
+  OPTS,
+  () => {
+    const sheet = ctlSheet();
+    sheet.conditions = [{ key: "haunted" }];
+    const a = addIcon(sheet, {
+      name: "Old Song",
+      kind: "skill",
+      heldBy: "Keeper",
+      description: "",
+    });
+    const r = spendIcon(a.sheet, a.icon.id);
+    assert(r.ok);
+    assert(
+      r.lines.some((l) =>
+        l.includes("Clarity condition")
+      ),
+    );
+  },
+);
+
 Deno.test("spendIcon refuses already spent", OPTS, () => {
   let sheet = ctlSheet();
   const a = addIcon(sheet, {

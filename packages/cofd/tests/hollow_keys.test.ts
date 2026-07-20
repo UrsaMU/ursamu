@@ -17,6 +17,13 @@ import {
   keyPhraseMatches,
   normalizeKeyPhrase,
 } from "../src/hedge/index.ts";
+import { checkHobAlarmOnEnter } from "../src/commands/hedge_hollow.ts";
+import { hasCondition } from "../src/subsystems/conditions.ts";
+import {
+  mockPlayer,
+  mockU,
+  MockObjectStore,
+} from "./helpers/mockU.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -52,6 +59,84 @@ Deno.test("hollow enhancement budget", OPTS, () => {
   const over = addHollowEnhancement(room, "home-turf");
   assertEquals(over.ok, false);
 });
+
+Deno.test(
+  "hob-alarm triggers for non-owner enter",
+  OPTS,
+  async () => {
+    const store = new MockObjectStore();
+    const sheet = ctlSheet();
+    const player = mockPlayer({
+      id: "intruder",
+      name: "Intruder",
+      state: { cofd: sheet },
+    });
+    let hollow = defaultHedgeRoom("hollow");
+    hollow = {
+      ...hollow,
+      hollow: {
+        owners: ["owner1"],
+        rating: 2,
+        enhancements: ["hob-alarm"],
+      },
+    };
+    const room = mockPlayer({
+      id: "hollow1",
+      name: "Secret Hollow",
+      flags: new Set(["room"]),
+      state: { hedge: hollow },
+    });
+    store.put(player);
+    store.put(room);
+
+    const u = mockU({ me: player, objectStore: store });
+    await checkHobAlarmOnEnter(u, "hollow1", "intruder");
+
+    assert(
+      u._sent.some((m) => m.includes("Hob Alarm")),
+    );
+    const updated = store.get("intruder")!;
+    const next = updated.state.cofd as ReturnType<
+      typeof ctlSheet
+    >;
+    assert(hasCondition(next, "spooked"));
+  },
+);
+
+Deno.test(
+  "hob-alarm skips Hollow owners",
+  OPTS,
+  async () => {
+    const store = new MockObjectStore();
+    const player = mockPlayer({
+      id: "owner1",
+      name: "Owner",
+      state: { cofd: ctlSheet() },
+    });
+    let hollow = defaultHedgeRoom("hollow");
+    hollow = {
+      ...hollow,
+      hollow: {
+        owners: ["owner1"],
+        rating: 2,
+        enhancements: ["hob-alarm"],
+      },
+    };
+    store.put(player);
+    store.put(mockPlayer({
+      id: "hollow1",
+      flags: new Set(["room"]),
+      state: { hedge: hollow },
+    }));
+
+    const u = mockU({ me: player, objectStore: store });
+    await checkHobAlarmOnEnter(u, "hollow1", "owner1");
+    assertEquals(
+      u._sent.some((m) => m.includes("Hob Alarm")),
+      false,
+    );
+  },
+);
 
 Deno.test("key phrase normalize and match", OPTS, () => {
   assertEquals(

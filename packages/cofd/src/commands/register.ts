@@ -46,6 +46,7 @@ import { iconCommand } from "./icon.ts";
 import { spinCommand } from "./spin.ts";
 import { infoExec } from "./info.ts";
 import { pledgeCommand } from "./pledge.ts";
+import { kenningExec } from "./kenning.ts";
 
 addCmd({
   name: "+extended",
@@ -863,6 +864,26 @@ Examples:
   exec: zoneExec,
 });
 
+
+addCmd({
+  name: "+kenning",
+  pattern: /^\+kenning(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+kenning [<target>]  -- Fae perception (Wits + Wyrd).
+
+No target: roll Wits+Wyrd and report a result tier for
+nearby supernatural presence. With a target: mortal
+harvest suitability, fae recognition, or glamour
+signature. Requires a changeling sheet.
+
+Examples:
+  +kenning
+  +kenning Alice
+  +kenning the stranger`,
+  exec: kenningExec,
+});
+
 addCmd({
   name: "+contract",
   pattern: /^\+contract(?:\/(\S+))?\s*(.*)/i,
@@ -873,6 +894,8 @@ addCmd({
 Switches:
   (none) / list          Contracts on your sheet.
   /info <name>           Catalog detail for a Contract.
+  /learn <name>          Learn contract with XP (checks prerequisites).
+  /grant <player>=<name> Staff: Grant a contract directly.
   <name>                 Invoke (pay cost; roll pool if any).
 
 While Mask is down (+shift mien), successful Contract rolls count

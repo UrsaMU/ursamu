@@ -6,10 +6,13 @@ import {
   type CofdSheet,
 } from "../stats/index.ts";
 import {
+  hollowHas,
+  isHollowOwner,
   parseHedgeRoom,
   type HedgeRoom,
   type Hedgeway,
 } from "../hedge/index.ts";
+import { addCondition } from "../subsystems/conditions.ts";
 import { resolveWayName } from "../support/perception.ts";
 
 export function getSheet(
@@ -61,6 +64,50 @@ export async function persistRoomHedge(
   await u.db.modify(roomId, "$set", { "data.hedge": hedge });
 }
 
+/**
+ * Hob Alarm (Hollow enhancement): non-owners who enter
+ * trigger a room-wide ST cue and optional Spooked.
+ * Does not spawn NPCs — staff begin the encounter.
+ */
+export async function checkHobAlarmOnEnter(
+  u: IUrsamuSDK,
+  destRoomId: string,
+  actorId: string,
+): Promise<void> {
+  // Player self-move only (skip NPC/zone synthetic moves).
+  if (!u.me?.id || actorId !== u.me.id) return;
+
+  const room = await loadRoom(u, destRoomId);
+  if (!room) return;
+  const hr = roomHedge(room);
+  if (!hr || hr.realm !== "hollow") return;
+  if (!hollowHas(hr, "hob-alarm")) return;
+  if (isHollowOwner(hr, actorId)) return;
+
+  const msg =
+    "The Hob Alarm triggers! (ST: begin combat encounter)";
+  u.send(msg);
+  try {
+    u.broadcast?.(msg);
+  } catch {
+    // broadcast optional on some SDK shims
+  }
+  if (typeof u.here?.broadcast === "function") {
+    try {
+      u.here.broadcast(msg);
+    } catch {
+      // ignore
+    }
+  }
+
+  const sheet = getSheet(u.me);
+  if (!sheet) return;
+  const next = addCondition(sheet, "spooked");
+  if (next === sheet) return;
+  await persistSheet(u, actorId, next);
+  u.send("You gain the Spooked Condition.");
+}
+
 /** Move actor to room (same path as zone wander). */
 export async function moveActor(
   u: IUrsamuSDK,
@@ -71,6 +118,7 @@ export async function moveActor(
     "data.location": roomId,
     location: roomId,
   });
+  await checkHobAlarmOnEnter(u, roomId, actorId);
 }
 
 export function pad(s: string, n: number): string {

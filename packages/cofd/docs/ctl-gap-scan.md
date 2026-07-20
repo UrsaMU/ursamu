@@ -27,15 +27,15 @@ Book reference: Changeling: The Lost 2e (`packages/cofd/books/ctl.txt`).
 
 | Topic | Gap |
 |-------|-----|
-| **Icons** | No Clarity-box boost / full Icon recovery scenes; spend = Glamour surge only |
+| **Icons** | Spend = Glamour surge + Clarity-condition resolve note; full recovery scenes still ST |
 | **Hedgespinning** | No full Subtle vs Paradigm Shift tables; no contested spin vs Hedge |
-| **Hollow** | Enhancements are tags + Escape/Easy Access moves; Hob Alarm combat dice, Luxury Goods rolls, Shadow Garden fruit, Route Zero WP loop, Hidden Entry clash not fully automated |
-| **Mantle / Court Goodwill** | Not tracked as Merits; court Contracts not gated by Mantle |
-| **Goblin Contracts** | Catalog may include some; full Debt-on-learn + story Debt not complete |
+| **Hollow** | Hob Alarm: room cue + Spooked on non-owner enter (no NPC spawn). Luxury Goods, Route Zero, Hidden Entry still open |
+| **Mantle / Court Goodwill** | Tracked as Merits; court Contracts gated (partial) |
+| **Goblin Contracts** | Debt-on-learn (+1 Goblin Debt) shipped; story Debt spiral still open |
 | **Tokens / Hedgespun** | Market sells simplified tokens; no full Token creation / Master’s Keys |
 | **Fruit catalog** | Subset of book fruits (common, Amaranthine, Peach, Liar’s Apple, …) |
-| **Clarity Conditions** | Core conditions used; full CtL Clarity condition set incomplete |
-| **Kenning** | Not a dedicated command |
+| **Clarity Conditions** | Breakpoint catalog + auto-apply on Clarity loss (simplified) |
+| **Kenning** | `+kenning` / `+kenning <target>` (Wits+Wyrd tiers) |
 
 ## Not implemented (next tiers)
 
@@ -65,8 +65,9 @@ Book reference: Changeling: The Lost 2e (`packages/cofd/books/ctl.txt`).
 ## Command quick map (CtL)
 
 ```
-+cg / +sheet / +shift / +contract
++cg / +sheet / +shift / +contract / +kenning
 +hedge  +hedge/hollow  +hedge/escape  +hedge/access
 +market  +debt  +icon  +spin
 help perception  (fae dual look)
+help kenning
 ```

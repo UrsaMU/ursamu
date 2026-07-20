@@ -1,6 +1,7 @@
 // Spend or recover an Icon (pure).
 
 import type { CofdSheet } from "../stats/sheet.ts";
+import { hasCondition } from "../subsystems/conditions.ts";
 import { findIcon, setIconStatus } from "./store.ts";
 import type { IconRecord } from "./types.ts";
 
@@ -10,6 +11,21 @@ export interface IconActionResult {
   sheet?: CofdSheet;
   icon?: IconRecord;
   lines: string[];
+}
+
+/** Persistent Clarity breakpoint Conditions (CtL catalog). */
+const CLARITY_COND_KEYS = [
+  "haunted",
+  "the-boneyard",
+  "delusional-ctl",
+  "isolated",
+  "unstable",
+  "waking-nightmare",
+  "dream-eaten",
+] as const;
+
+function hasClarityCondition(sheet: CofdSheet): boolean {
+  return CLARITY_COND_KEYS.some((k) => hasCondition(sheet, k));
 }
 
 /**
@@ -53,18 +69,27 @@ export function spendIcon(
       "Spent for a surge of self",
   });
   next = r.sheet;
+  const lines = [
+    `You spend the Icon %cy${icon.name}%cn.`,
+    `  Glamour +${actual} (now ${next.energyCurrent}).`,
+    "  A piece of you burns bright — then is gone.",
+    note
+      ? `  Note: ${note.slice(0, 70)}`
+      : "  (RP the memory or skill you reclaim briefly.)",
+  ];
+  // Clarity-box boost: spending an Icon may resolve a
+  // persistent Clarity Condition (narrative / ST).
+  if (hasClarityCondition(sheet)) {
+    lines.push(
+      "  Spending this Icon may narratively resolve a " +
+        "Clarity condition (ST discretion).",
+    );
+  }
   return {
     ok: true,
     sheet: next,
     icon: r.icon!,
-    lines: [
-      `You spend the Icon %cy${icon.name}%cn.`,
-      `  Glamour +${actual} (now ${next.energyCurrent}).`,
-      "  A piece of you burns bright — then is gone.",
-      note
-        ? `  Note: ${note.slice(0, 70)}`
-        : "  (RP the memory or skill you reclaim briefly.)",
-    ],
+    lines,
   };
 }
 

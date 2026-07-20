@@ -16,5 +16,5 @@ BUILDER
   Room dual: +hedge/set maskflavor=.
   Sticky: `sheet.sightSticky`.
 
-SEE ALSO: help hedge, help key, help approve,
-  help shift, help changeling
+SEE ALSO: help kenning, help hedge, help key,
+  help approve, help shift, help changeling
