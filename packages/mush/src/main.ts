@@ -290,7 +290,9 @@ export const initializeEngine = async (
   const server = createServer();
   server.addTransport(websocketTransport);
   server.addTransport(httpTransport);
-  server.addTransport(telnetTransport);
+  if (getConfig<boolean>("server.standaloneTelnet") !== true && tnPort > 0) {
+    server.addTransport(telnetTransport);
+  }
   await server.start();
 
   // Initialize all registered plugins
