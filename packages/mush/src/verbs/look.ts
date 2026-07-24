@@ -209,14 +209,12 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
 
   let lookTarget: IDBObj = u.here;
   if (arg) {
-    const results = await u.db.search(arg);
-    const found = results.find((r) =>
-      r.id === u.here.id ||
-      u.here.contents?.some((c) => c.id === r.id) ||
-      actor.contents?.some((c) => c.id === r.id)
-    );
-    if (!found) { u.send("I can't find that here."); return; }
-    lookTarget = found;
+    const target = await u.util.target(actor, arg);
+    if (!target) {
+      u.send("I can't find that here.");
+      return;
+    }
+    lookTarget = target;
   }
 
   const canEditTarget = await u.canEdit(actor, lookTarget);
@@ -291,7 +289,9 @@ function formatIdle(lastCommand: number | undefined): string {
 }
 
 function getShortDesc(obj: IDBObj): string {
-  const attrs = (obj.state?.attributes as { name?: string; value?: string }[]) || [];
+  const attrsState = (obj.state?.attributes as { name?: string; value?: string }[]) || [];
+  const attrsData = (obj.data?.attributes as { name?: string; value?: string }[]) || [];
+  const attrs = [...attrsState, ...attrsData];
   const sd = attrs.find((a) =>
     a.name?.toLowerCase() === "short-desc" || a.name?.toLowerCase() === "shortdesc"
   );

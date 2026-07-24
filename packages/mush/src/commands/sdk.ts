@@ -126,31 +126,42 @@ async function targetFn(actor: IDBObj, query: string, _global?: boolean): Promis
   const q = query.trim();
   if (!q) return undefined;
 
-  if (q.toLowerCase() === "me") return actor;
-  if (q.toLowerCase() === "here") {
+  const lowerQ = q.toLowerCase();
+  if (lowerQ === "me" || lowerQ === "self") return actor;
+  if (lowerQ === "here") {
     if (!actor.location) return undefined;
     return resolveRoom(actor.location);
   }
 
-  const idMatch = q.match(/^#(\d+)$/);
+  const idMatch = q.match(/^#?(\d+)$/);
   if (idMatch) {
     const raw = await dbojs.queryOne({ id: idMatch[1] });
-    return raw ? hydrate(raw) : undefined;
+    if (raw) return hydrate(raw);
   }
 
   const rx = new RegExp(`^${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i");
 
-  // Search current room contents
+  // Search current room contents (including self)
   const roomContents = actor.location
     ? await dbojs.query({ location: actor.location })
     : [];
-  const inRoom = roomContents.find((o) => rx.test(o.data?.name as string || o.id));
+  const inRoom = roomContents.find((o) => rx.test((o.data?.name as string) || o.id));
   if (inRoom) return hydrate(inRoom);
+
+  // Check if self name/moniker matches query
+  const selfName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "";
+  if (rx.test(selfName)) return actor;
 
   // Search actor inventory
   const invContents = await dbojs.query({ location: actor.id });
-  const inInv = invContents.find((o) => rx.test(o.data?.name as string || o.id));
+  const inInv = invContents.find((o) => rx.test((o.data?.name as string) || o.id));
   if (inInv) return hydrate(inInv);
+
+  // Global search if _global is true
+  if (_global) {
+    const all = await dbojs.query({ "data.name": rx });
+    if (all.length > 0) return hydrate(all[0]);
+  }
 
   return undefined;
 }
