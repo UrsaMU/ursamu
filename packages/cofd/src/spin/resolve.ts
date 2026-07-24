@@ -1,21 +1,26 @@
-// Pure Hedgespinning resolve (Glamour + successes).
+// Pure Hedgespinning resolve (Glamour + successes + Hedge contest).
 
 import type { CofdSheet } from "../stats/sheet.ts";
 import { findSpinEffect } from "./catalog.ts";
 import type { SpinResult } from "./types.ts";
-import {
-  readFruitFlags,
-  writeFruitFlags,
-} from "../hedge/fruit_inv.ts";
+import { applySpinEffect } from "./apply_effect.ts";
+import { executeRoll } from "../roller/execute.ts";
 
 export interface SpinContext {
-  /** Room realm is hedge or hollow. */
   inHedge: boolean;
-  /** Dice successes from Wits+Crafts/Occult+Wyrd roll. */
   successes: number;
-  /** Optional veil prose for maskFlavor. */
   veilText?: string;
   now?: number;
+  danger?: string;
+  hedgeRoll?: (pool: number) => number;
+}
+
+/** Hedge dice when contesting a paradigm shift. */
+export function hedgeContestPool(danger: string): number {
+  const d = (danger ?? "hedge").toLowerCase();
+  if (d === "trod") return 6;
+  if (d === "thorns") return 10;
+  return 8;
 }
 
 /**
@@ -31,16 +36,14 @@ export function resolveSpin(
   if (!effect) {
     return {
       ok: false,
-      reason: `Unknown spin effect '${effectKey}'. ` +
-        "Try +spin/list",
+      reason: `Unknown spin effect '${effectKey}'. Try +spin/list`,
       lines: [],
     };
   }
   if (effect.needsHedge && !ctx.inHedge) {
     return {
       ok: false,
-      reason:
-        "Hedgespinning only works in the Hedge or a Hollow.",
+      reason: "Hedgespinning only works in the Hedge or a Hollow.",
       lines: [],
     };
   }
@@ -48,8 +51,7 @@ export function resolveSpin(
   if (g < effect.glamour) {
     return {
       ok: false,
-      reason:
-        `Need ${effect.glamour} Glamour (have ${g}).`,
+      reason: `Need ${effect.glamour} Glamour (have ${g}).`,
       lines: [],
     };
   }
@@ -60,10 +62,40 @@ export function resolveSpin(
   };
   const lines: string[] = [
     `You spin the Hedge: %cy${effect.name}%cn ` +
-      `(−${effect.glamour} Glamour).`,
+      `[${effect.kind}] (−${effect.glamour} Glamour).`,
   ];
-  const succ = Math.max(0, Math.floor(ctx.successes));
+  let succ = Math.max(0, Math.floor(ctx.successes));
   const exceptional = succ >= 5;
+
+  let hedgeContested = false;
+  let hedgeSuccesses = 0;
+  if (effect.kind === "paradigm") {
+    hedgeContested = true;
+    const pool = hedgeContestPool(ctx.danger ?? "hedge");
+    hedgeSuccesses = ctx.hedgeRoll
+      ? ctx.hedgeRoll(pool)
+      : executeRoll(pool).successes;
+    lines.push(
+      `  Hedge contests (${pool}d) → ${hedgeSuccesses} ` +
+        `success${hedgeSuccesses === 1 ? "" : "es"}.`,
+    );
+    if (hedgeSuccesses >= succ) {
+      lines.push("  The Hedge rejects your paradigm shift.");
+      return {
+        ok: false,
+        reason: "Hedge won the contest.",
+        sheet: next,
+        effect,
+        successes: succ,
+        exceptional: false,
+        lines,
+        hedgeContested,
+        hedgeSuccesses,
+      };
+    }
+    succ = succ - hedgeSuccesses;
+    lines.push(`  Net successes after contest: ${succ}.`);
+  }
 
   if (succ < effect.target) {
     lines.push(
@@ -78,6 +110,8 @@ export function resolveSpin(
       successes: succ,
       exceptional: false,
       lines,
+      hedgeContested,
+      hedgeSuccesses,
     };
   }
 
@@ -87,58 +121,18 @@ export function resolveSpin(
   );
   lines.push(`  ${effect.description}`);
 
-  const now = ctx.now ?? Date.now();
-  let roomPatch: Record<string, unknown> | undefined;
-  let fruitSlug: string | undefined;
-  let navBonusKey: string | undefined;
-
-  switch (effect.slug) {
-    case "path": {
-      navBonusKey = "spinPath";
-      const until = now + 3600_000;
-      const flags = [
-        ...readFruitFlags(next).filter(
-          (f) => f.key !== "spinPath",
-        ),
-        { key: "spinPath", until },
-      ];
-      next = writeFruitFlags(next, flags);
-      lines.push("  Path bonus active ~1 hour.");
-      break;
-    }
-    case "shelter":
-      roomPatch = { danger: "trod", trodRating: 1 };
-      lines.push(
-        "  Room leans safer (trod-like) until ST resets.",
-      );
-      break;
-    case "barrier":
-      lines.push(
-        "  A barrier of thorns rises (RP / ST).",
-      );
-      break;
-    case "veil": {
-      const text = (ctx.veilText ?? "An ordinary glade.")
-        .slice(0, 200);
-      roomPatch = { maskFlavor: text };
-      lines.push(`  Mortal veil: ${text.slice(0, 60)}`);
-      break;
-    }
-    case "fruit":
-      fruitSlug = "common-fruit";
-      lines.push("  A common goblin fruit ripens for you.");
-      break;
-    case "trap":
-      lines.push(
-        "  Snare set. ST may apply Ambushed to a foe.",
-      );
-      break;
-  }
+  const applied = applySpinEffect(next, effect, {
+    successes: succ,
+    veilText: ctx.veilText,
+    danger: ctx.danger,
+    now: ctx.now ?? Date.now(),
+  });
+  next = applied.sheet;
+  lines.push(...applied.lines);
 
   if (exceptional) {
     lines.push(
-      "  Exceptional: the Hedge remembers your craft " +
-        "(+1 on next spin this scene, ST).",
+      "  Exceptional: bank +1 on next spin this scene (ST).",
     );
   }
 
@@ -149,8 +143,10 @@ export function resolveSpin(
     successes: succ,
     exceptional,
     lines,
-    roomPatch,
-    fruitSlug,
-    navBonusKey,
+    roomPatch: applied.roomPatch,
+    fruitSlug: applied.fruitSlug,
+    navBonusKey: applied.navBonusKey,
+    hedgeContested,
+    hedgeSuccesses,
   };
 }

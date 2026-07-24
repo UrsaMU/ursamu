@@ -105,6 +105,8 @@ export interface CofdSheet {
     recoveredAt?: number;
     spentNote?: string;
   }[];
+  /** Changeling Wyrd frailties (obligations/bans). */
+  frailties?: string[];
   /**
    * Sight flags (fae, forsaken) kept after template no longer requires
    * them — staff-granted fetch / fae-touched, etc.
@@ -199,6 +201,76 @@ export interface CofdSheet {
     }[];
     /** Primary Hollow room id (Easy Access). */
     homeHollowId?: string;
+  };
+  /**
+   * CtL oneiromancy: active dream form / Bastion presence.
+   * Optional so older sheets remain valid.
+   */
+  dreamState?: {
+    active: boolean;
+    gate: "ivory" | "horn";
+    bastionOf: string;
+    bastionName?: string;
+    fortification: number;
+    power: number;
+    finesse: number;
+    resistance: number;
+    dreamHealth: number;
+    dreamHealthMax: number;
+    weavesLeft: number;
+    enteredAt: number;
+    leftOwnBastion?: boolean;
+    role?: string;
+    roadRoomId?: string;
+    roadPath?: string[];
+  };
+  /**
+   * CtL fetch link (on changeling or fetch template sheets).
+   */
+  fetchState?: {
+    fetchId?: string;
+    fetchName?: string;
+    flaw?: string;
+    materials?: string;
+    originalId?: string;
+    originalName?: string;
+    echoes?: string[];
+    normalcyOn?: boolean;
+    metOriginal?: boolean;
+    storyMode?: "adversary" | "other-half" | "hard-lesson" | "unknown";
+  };
+  /**
+   * CtL Wild Hunt — quarry side (changeling being hunted).
+   */
+  huntState?: {
+    active: boolean;
+    hunterId: string;
+    hunterName: string;
+    stage: string;
+    progress: number;
+    startedAt: number;
+    lastTrackAt?: number;
+    note?: string;
+  };
+  /**
+   * CtL Wild Hunt — Huntsman sheet state.
+   */
+  hunterState?: {
+    quarryId?: string;
+    quarryName?: string;
+    powers?: string[];
+    panoply?: string[];
+    heartBastion?: string;
+    title?: string;
+    aspiration?: string;
+    stage?: string;
+    progress?: number;
+  };
+  /** CtL hobgoblin extras. */
+  hobgoblinState?: {
+    concept?: string;
+    dreadPowers?: string[];
+    aspiration?: string;
   };
 }
 
@@ -438,6 +510,7 @@ export function defaultSheet(): CofdSheet {
       willpowerCurrent: 2,
       size: 5,
     },
+    frailties: [],
     health: emptyHealth(),
     conditions: [],
     aspirations: [],

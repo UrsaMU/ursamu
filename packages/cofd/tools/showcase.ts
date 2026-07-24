@@ -327,6 +327,7 @@ async function ensureLoaded(objs: IDBObj[]) {
 async function execCmd(raw: string, actor: IDBObj, allObjs: IDBObj[], roomCfg?: ShowcaseSetup["room"], dynamic?: IDBObj[]): Promise<string[]> {
   await ensureLoaded(allObjs);
   const shim = await import("./ursamu-shim.ts");
+  const { cmds } = await import("ursamu");
   const output: string[] = [];
   shim.__shimSetSendSink((sids, msg) => {
     if (sids.length === 0) return;
@@ -334,7 +335,7 @@ async function execCmd(raw: string, actor: IDBObj, allObjs: IDBObj[], roomCfg?: 
   });
   try {
     // No look-script overrides in this plugin -- fall through to addCmd matching.
-    for (const cmd of shim.cmds) {
+    for (const cmd of cmds) {
       const m = raw.trim().match(cmd.pattern);
       if (!m) continue;
       const u = buildMockSDK(actor, cmd.name, m.slice(1), output, allObjs, roomCfg, dynamic);

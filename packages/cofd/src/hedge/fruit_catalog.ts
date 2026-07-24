@@ -1,10 +1,6 @@
 // Goblin fruit catalog (CtL 2e pp.207–208).
 
-const url = new URL(
-  "../../resources/goblin_fruit.json",
-  import.meta.url,
-);
-const data = JSON.parse(Deno.readTextFileSync(url));
+import data from "../../resources/goblin_fruit.json" with { type: "json" };
 
 export type FruitRarity = "common" | "exceptional" | "oddment";
 

@@ -1,7 +1,12 @@
-// Spend or recover an Icon (pure).
+// Spend or recover an Icon (pure). CtL 2e depth.
 
 import type { CofdSheet } from "../stats/sheet.ts";
-import { hasCondition } from "../subsystems/conditions.ts";
+import {
+  addCondition,
+  hasCondition,
+  removeCondition,
+} from "../subsystems/conditions.ts";
+import { addBeats } from "../xp/beats.ts";
 import { findIcon, setIconStatus } from "./store.ts";
 import type { IconRecord } from "./types.ts";
 
@@ -24,13 +29,19 @@ const CLARITY_COND_KEYS = [
   "dream-eaten",
 ] as const;
 
-function hasClarityCondition(sheet: CofdSheet): boolean {
-  return CLARITY_COND_KEYS.some((k) => hasCondition(sheet, k));
+function firstClarityCondition(
+  sheet: CofdSheet,
+): string | null {
+  for (const k of CLARITY_COND_KEYS) {
+    if (hasCondition(sheet, k)) return k;
+  }
+  return null;
 }
 
 /**
- * Spend a lost/held Icon for a scene benefit (CtL simplified).
- * Grants Glamour equal to min(3, Wyrd) and marks spent.
+ * Spend a lost/held Icon for a scene benefit (CtL).
+ * Grants Glamour equal to min(3, Wyrd), marks spent,
+ * may clear one Clarity Condition, skill Icons buff.
  */
 export function spendIcon(
   sheet: CofdSheet,
@@ -73,18 +84,37 @@ export function spendIcon(
     `You spend the Icon %cy${icon.name}%cn.`,
     `  Glamour +${actual} (now ${next.energyCurrent}).`,
     "  A piece of you burns bright — then is gone.",
-    note
-      ? `  Note: ${note.slice(0, 70)}`
-      : "  (RP the memory or skill you reclaim briefly.)",
   ];
-  // Clarity-box boost: spending an Icon may resolve a
-  // persistent Clarity Condition (narrative / ST).
-  if (hasClarityCondition(sheet)) {
+  if (note) lines.push(`  Note: ${note.slice(0, 70)}`);
+
+  // Skill Icon: temporary +1 to named skill for ~1 hour.
+  if (icon.kind === "skill" && icon.skillKey) {
+    const sk = icon.skillKey.toLowerCase().trim();
+    const base = next.skills?.[sk as keyof typeof next.skills];
+    if (typeof base === "number") {
+      next = {
+        ...next,
+        tempStats: {
+          ...(next.tempStats ?? {}),
+          [sk]: base + 1,
+        },
+      };
+      lines.push(
+        `  Skill surge: ${sk} +1 for the scene ` +
+          `(tempStats).`,
+      );
+    }
+  }
+
+  // Spending an Icon may resolve one Clarity Condition.
+  const cKey = firstClarityCondition(next);
+  if (cKey) {
+    next = removeCondition(next, cKey);
     lines.push(
-      "  Spending this Icon may narratively resolve a " +
-        "Clarity condition (ST discretion).",
+      `  Clarity Condition cleared: %cy${cKey}%cn.`,
     );
   }
+
   return {
     ok: true,
     sheet: next,
@@ -114,17 +144,26 @@ export function recoverIcon(
       lines: [],
     };
   }
-  const r = setIconStatus(sheet, icon.id, "recovered", {
+  let next = setIconStatus(sheet, icon.id, "recovered", {
     recoveredAt: now,
     heldBy: "Self",
-  });
+  }).sheet;
+  // Recovering a piece of self is a Beat (goodwill / healing).
+  next = addBeats(next, 1, false);
+  // Optional: Informed if skill Icon returned knowledge.
+  if (icon.kind === "memory" || icon.kind === "skill") {
+    next = addCondition(next, "informed", icon.name);
+  }
   return {
     ok: true,
-    sheet: r.sheet,
-    icon: r.icon!,
+    sheet: next,
+    icon: findIcon(next, icon.id)!,
     lines: [
       `Icon %cy${icon.name}%cn is recovered.`,
-      "  That piece of self is yours again (RP / ST).",
-    ],
+      "  That piece of self is yours again. +1 Beat.",
+      icon.kind === "memory" || icon.kind === "skill"
+        ? "  Informed Condition (the returned piece)."
+        : "",
+    ].filter(Boolean),
   };
 }

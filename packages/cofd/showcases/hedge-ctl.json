@@ -5,6 +5,7 @@
   "vars": { "player": "Pix" },
   "setup": {
     "character": {
+      "flags": ["connected", "player"],
       "state": {
         "cofd": {
           "template": "changeling",
@@ -17,7 +18,7 @@
             "presence": 2, "manipulation": 2, "composure": 2
           },
           "skills": {
-            "athletics": 1, "survival": 2, "occult": 2,
+            "athletics": 1, "survival": 4, "occult": 2,
             "stealth": 2
           },
           "specialties": {},
@@ -38,6 +39,9 @@
             "willpowerCurrent": 4,
             "size": 5
           },
+          "hedgeState": {
+            "inHedge": true
+          },
           "formState": { "system": "none", "current": "" }
         }
       }
@@ -49,15 +53,13 @@
     { "expect": "Realm" },
 
     { "sub": "Staff setup (builder)" },
-    { "cmd": "+hedge/create hedge", "label": "tag room as hedge" },
-    { "cmd": "+hedge", "label": "status after tag" },
+    { "cmd": "+hedge/create hedge", "as": "admin", "label": "tag room as hedge" },
 
     { "sub": "Mask trail" },
     { "cmd": "+shift mien", "label": "drop Mask (opens local gates)" },
     { "expect": "trail" },
 
-    { "sub": "Navigate (needs Hedge realm)" },
-    { "cmd": "+hedge/set realm=hedge", "label": "tag as hedge for travel" },
+    { "sub": "Navigate inside Hedge" },
     { "cmd": "+hedge/travel nearest Hollow", "label": "start navigation chase" },
     { "expect": "NAV" },
 

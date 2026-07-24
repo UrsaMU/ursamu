@@ -93,13 +93,9 @@ interface RawDreadPower {
   description?: string;
 }
 
-const conditionsUrl = new URL("../../resources/conditions.json", import.meta.url);
-const tiltsUrl      = new URL("../../resources/tilts.json", import.meta.url);
-const dreadUrl      = new URL("../../resources/dread_powers.json", import.meta.url);
-
-const CONDITIONS: Record<string, RawCondition> = JSON.parse(Deno.readTextFileSync(conditionsUrl));
-const TILTS:      Record<string, RawTilt>      = JSON.parse(Deno.readTextFileSync(tiltsUrl));
-const DREAD:      RawDreadPower[]              = JSON.parse(Deno.readTextFileSync(dreadUrl));
+import CONDITIONS from "../../resources/conditions.json" with { type: "json" };
+import TILTS from "../../resources/tilts.json" with { type: "json" };
+import DREAD from "../../resources/dread_powers.json" with { type: "json" };
 
 // --- Renderers per source ---
 

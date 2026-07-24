@@ -27,14 +27,21 @@ GMCCG-inspired module layout, file-driven supernatural templates.
   Conditions plus 21 Tilts catalogued in `resources/conditions.json`.
   Resolving a Condition or fulfilling an Aspiration awards Beats
   automatically.
-- **Changeling: The Lost overlay.** Seeming, Kith, Court, Needle, Thread,
-  Wyrd, Glamour, and Clarity on sheets; Mask/mien and Chrysalis (`+shift`);
-  Contracts (`+contract`); Hedge travel, navigation, and goblin fruit as
-  real inventory objects (`+hedge`); Goblin Markets and Debt
-  (`+market`, `+debt`); Icons (`+icon`); Hedgespinning (`+spin`);
-  Hollow Merit depth (`+hedge/hollow`, `/escape`, `/access`);
-  gate key phrases; dual look via `fae` flag (`maskName` /
-  FAEDESC — see `docs/fae-perception-spec.md`).
+- **Changeling: The Lost overlay (playable Lost v1+).** Identity (Seeming,
+  Kith, Court, Needle, Thread), Wyrd / Glamour / Clarity, Mask/mien and
+  Chrysalis (`+shift`), Contracts with loopholes and seeming clauses
+  (`+contract`), Clash of Wills (`+clash`), Glamour harvest/reap
+  (`+harvest`, `+reap`), Incite Bedlam (`+bedlam`), frailties and cold
+  iron (`+frailty`), pledges (`+pledge`), kenning and dual look
+  (`+kenning`, `fae` flag). Hedge travel, navigation, goblin fruit,
+  Hollows (`+hedge` including `/route` and `/luxury`), Goblin Markets
+  and Debt (`+market`, `+debt`), Icons (`+icon`), Hedgespinning subtle
+  and paradigm (`+spin`), Tokens (`+gear/token`). CtL merits (Mantle,
+  Court Goodwill, Hollow, Stable Trod, Acute Senses, Pandemoniacal).
+  Oneiromancy (`+dream`); Fetches (`+fetch`); Wild Hunt
+  (`+hunt`); Mantle dice + high-dot (`+mantle`); Hobgoblins
+  (`+hob`); Hollow Hidden Entry / Shadow Garden. Status:
+  `docs/ctl-gap-scan.md`.
 
 ---
 
@@ -75,20 +82,36 @@ GMCCG-inspired module layout, file-driven supernatural templates.
 +aspiration/remove <#> [for <player>]
 +aspiration/fulfill <#> [for <player>]      Awards 1 Beat.
 
-+shift [<form>]                             Mask/mien or animal form (CtL).
-+contract [<name>]                          List/invoke Changeling Contracts.
-+hedge[/open|/exit|/claim|/hollow|...]      Hedgeways, Hollows, keys, fruit.
-+market[/buy|/credit|...]                   Goblin Markets (Glamour or debt).
-+debt[/pay|/call]                           Goblin Debts.
-+icon[/grant|/spend]                        Icons (lost pieces of self).
-+spin <effect>                              Hedgespinning (reshape the Hedge).
+# Changeling: The Lost
++shift [<form>]                  Mask/mien or animal form.
++contract [/loophole] <name>     List/invoke Contracts.
++clash <target>                  Clash of Wills.
++harvest [target][=pool]         Harvest Glamour from emotion.
++reap <target>                   Reap (fill Glamour; Ravaged; BP).
++bedlam <emotion> [+G]           Incite Bedlam.
++frailty [/iron]                 Taboos, banes, cold iron.
++pledge[/seal|/oath|/bargain]    Seals, oaths, bargains.
++kenning [<target>]              Fae perception.
++hedge[/open|/travel|/hollow|…]  Hedgeways, Hollows, fruit, /route.
++market[/buy|/credit|…]          Goblin Markets (Glamour or debt).
++debt[/pay|/call]                Goblin Debts.
++icon[/grant|/spend|/recover]    Icons (lost pieces of self).
++spin <effect>                   Hedgespinning (subtle + paradigm).
++gear/token …                    Tokens (activate / catch).
++dream[/ivory|/horn|/weave|…]    Oneiromancy / Bastions.
++fetch[/echo|/create|…]          Fetches and Echoes.
++hunt[/track|/power|/mark|…]     Wild Hunt / Huntsman.
++mantle [/glamour|/debt|/clarity] Court Mantle bonuses.
++hob[/create|/power|…]           Hobgoblins.
 ```
 
 Full per-command help: `help cofd`, then topic groups
 `help character`, `help dice`, `help status`, `help combat`,
 `help social`, `help reference`, `help templates`, or
 `help changeling` for the CtL map — or any command name
-(`help sheet`, `help hedge`, `help hollow`, `help key`).
+(`help sheet`, `help hedge`, `help harvest`, `help bedlam`).
+
+CtL coverage vs the rulebook: **`docs/ctl-gap-scan.md`**.
 
 ---
 
@@ -113,13 +136,14 @@ ursamu-cofd-plugin/
     xp/                 pure beats/experience math + cost loader
     subsystems/         conditions, aspirations
     commands/           one file per command + register.ts (addCmd side effects)
-  resources/            attributes.json, skills.json, merits.json,
-                        conditions.json, xp_costs.json
+  resources/            attributes, skills, merits, conditions,
+                        changeling*.json, goblin_*, xp_costs, …
   templates/            mortal/changeling JSON
+  books/                ctl.txt (CtL 2e reference extract)
   help/                 plain-text MUSH help topics
-  docs/                 design specs (ctl, conditions, xp/beats)
-  tests/                Deno unit + BDD tests
-  showcases/            in-process command demos
+  docs/                 ctl-gap-scan.md + design specs
+  tests/                Deno unit + BDD tests (incl. ctl_partial_depth)
+  showcases/            in-process command demos (hedge/shift/cg CtL)
   deno.json             tasks + import map
   ursamu.plugin.json    plugin manifest
   CLAUDE.md             workspace conventions and game-rule reference

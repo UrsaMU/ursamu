@@ -7,9 +7,9 @@ import {
   advanceTurn,
   applyDefense,
   clearPin,
+  cofdEncounterStore,
   createEncounter,
   delayCurrent,
-  encounterDb,
   ensureParticipant,
   getEncounterForRoom,
   reclaimDelayed,
@@ -24,6 +24,7 @@ import {
   setSurrendered,
   setSurprised,
 } from "../combat/encounter.ts";
+import { endEncounter } from "@ursamu/combat";
 import { computeDefense } from "../combat/pools.ts";
 import {
   type CofdSheet,
@@ -510,9 +511,8 @@ async function combatEnd(u: IUrsamuSDK) {
   if (!roomId) { u.send("You are not in a room."); return; }
   const enc = await getEncounterForRoom(roomId);
   if (!enc) { u.send("No encounter here."); return; }
-  const resolved = { ...enc, status: "resolved" as const };
-  // deno-lint-ignore no-explicit-any
-  await encounterDb.update({ id: enc.id } as any, resolved);
+  // Staff end: status only (no loot/beats). Full resolve uses resolveScene.
+  await endEncounter(enc.id, { store: cofdEncounterStore });
 
   // Clear the +aid once-per-scene cap for every participant. Scene boundary
   // is "encounter end" for our purposes; +aid runs in scenes, not outside.

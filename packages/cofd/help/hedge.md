@@ -13,6 +13,10 @@ SYNTAX
   +hedge/hollow …           Hollow enhancements.
   +hedge/escape             Escape Route out.
   +hedge/access             Easy Access (1 Glamour).
+  +hedge/route              Route Zero (1/day path+WP).
+  +hedge/luxury [item]      Luxury Goods pull (Hollow).
+  +hedge/garden             Shadow Garden harvest.
+  +hedge/find <gate>        Find Hidden Entry (−2).
 
 SEE ALSO: help hollow, help key, help hedge/staff,
-  help market, help spin, help perception
+  help market, help spin, help harvest, help perception

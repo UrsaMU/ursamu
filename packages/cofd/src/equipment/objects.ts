@@ -31,7 +31,8 @@ export type ItemKind =
   | "gear"
   | "ammo"
   | "service"
-  | "goblin-fruit";
+  | "goblin-fruit"
+  | "token";
 
 export type CapacityTag = "high" | "medium" | "low" | "single";
 
@@ -67,6 +68,12 @@ export interface CofdItemData {
    * customLabel or fruit catalog name.
    */
   maskName?: string;
+  /** Token rating in dots (1-5). */
+  tokenRating?: number;
+  /** Token bypass glamour catch condition. */
+  catch?: string;
+  /** Token consequence drawback. */
+  drawback?: string;
 }
 
 /** Return true when the game object is a CoFD item. */
@@ -93,7 +100,7 @@ export function itemData(obj: IDBObj): CofdItemData | null {
 export function displayName(obj: IDBObj): string {
   const d = itemData(obj);
   if (!d) return obj.name ?? "unknown";
-  return d.customLabel ?? lookupItem(d.key)?.entry.name ?? d.key;
+  return d.customLabel ?? lookupItem(d.key)?.entry.name ?? obj.name ?? d.key;
 }
 
 function mapCapacityTag(raw: string | undefined): CapacityTag {

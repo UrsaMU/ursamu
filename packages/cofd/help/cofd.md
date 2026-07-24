@@ -15,6 +15,11 @@ TOPIC GROUPS
   help templates     Mortal, Changeling fields.
   help changeling    Full CtL command map.
 
-CHANGELING
-  help shift · contract · hedge · hollow · key · market · debt · fruit · icon · spin · perception
-SEE ALSO: help cg, help sheet, help roll
+CHANGELING (Lost)
+  help shift · contract · clash · bedlam · harvest
+  help frailty · pledge · kenning · perception
+  help hedge · hollow · key · market · debt · fruit
+  help icon · spin · gear/token · dream · fetch
+  help hunt · mantle · hob
+
+SEE ALSO: help cg, help sheet, help roll, help changeling

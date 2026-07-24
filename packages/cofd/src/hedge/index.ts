@@ -34,6 +34,15 @@ export {
   removeHollowEnhancement,
   type HollowEnhancementDef,
 } from "./hollow.ts";
+export {
+  hiddenEntryActive,
+  hiddenEntryPenalty,
+  queueShadowFruit,
+  readyShadowFruit,
+  readShadowPending,
+  writeShadowPending,
+  type ShadowPending,
+} from "./hollow_effects.ts";
 // hollow.ts re-exports catalog
 export {
   canOpenWithKey,

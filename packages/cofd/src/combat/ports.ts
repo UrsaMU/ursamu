@@ -20,37 +20,25 @@ import {
   type IUrsamuSDK,
 } from "@ursamu/ursamu";
 import {
-  advanceTurn,
-  encounterDb,
+  cofdEncounterStore,
   getEncounterForRoom,
 } from "./encounter.ts";
 import {
-  patchParticipant,
   resolveScene,
   syncIsOut,
 } from "./resolution.ts";
 import { healthFracFromActor } from "./ai/compat.ts";
+import { computeCofdInitiative } from "./initiative.ts";
 import { executeAttack } from "../commands/attack.ts";
 import { gearReload } from "../commands/gear.ts";
 import type { CofdSheet } from "../stats/index.ts";
+
+export { cofdEncounterStore };
 
 // deno-lint-ignore no-explicit-any
 type Q = any;
 
 const DEFAULT_AI = "beshilu-swarmer";
-
-/** Persist encounters in cofd.encounters (legacy collection name). */
-export const cofdEncounterStore: EncounterStore = {
-  async get(id) {
-    return (await encounterDb.findOne({ id } as Q)) ?? null;
-  },
-  async advanceTurn(id) {
-    return await advanceTurn(id);
-  },
-  async patchParticipant(encounterId, actorId, patch) {
-    return await patchParticipant(encounterId, actorId, patch);
-  },
-};
 
 function flagsSet(raw: unknown): Set<string> {
   if (raw instanceof Set) return raw as Set<string>;
@@ -166,6 +154,10 @@ export function makeCofdPorts(u: IUrsamuSDK): CombatPorts {
       return actorToCombatView(actor);
     },
 
+    async rollInitiative(actorId) {
+      return await computeCofdInitiative(u, actorId);
+    },
+
     async executeAction(actorId, action, ctx) {
       const npc = await loadDbActor(u, actorId);
       if (!npc) return { ok: false, message: "NPC missing." };
@@ -179,14 +171,24 @@ export function makeCofdPorts(u: IUrsamuSDK): CombatPorts {
             (p: Participant) => p.actorId === tgtId,
           );
           if (!tgt) return { ok: false };
+          // mode: aimed | melee | … reserved for host attack path
           await executeAttack(npcSdk, tgt.name);
-          return { ok: true };
+          const who = npc.name ?? actorId;
+          return {
+            ok: true,
+            targetId: tgtId,
+            logLine: `${who} attacks ${tgt.name}` +
+              (action.mode ? ` (${action.mode})` : ""),
+          };
         }
         if (action.type === "reload") {
           try {
             await gearReload(npcSdk, "");
           } catch { /* swallow */ }
-          return { ok: true };
+          return {
+            ok: true,
+            logLine: `${npc.name ?? actorId} reloads.`,
+          };
         }
         return { ok: true };
       } catch (e: unknown) {

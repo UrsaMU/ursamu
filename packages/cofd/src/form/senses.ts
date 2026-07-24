@@ -3,6 +3,7 @@
 import type { CofdSheet } from "../stats/sheet.ts";
 import { currentAnimal } from "./animals.ts";
 import { effectiveAttr } from "../stats/effective.ts";
+import { acuteSensesBonus } from "./mantle.ts";
 
 /**
  * Base Speed = Str + Dex + speedFactor.
@@ -25,17 +26,23 @@ export function effectiveSpeed(sheet: CofdSheet): number {
  * +2 if any of scent, low-light, keen-sight.
  */
 export function animalPerceptionBonus(sheet: CofdSheet): number {
+  let bonus = 0;
   const animal = currentAnimal(sheet);
-  if (!animal) return 0;
-  const tags = new Set(animal.senses.map((s) => s.toLowerCase()));
-  if (
-    tags.has("scent") ||
-    tags.has("low-light") ||
-    tags.has("keen-sight")
-  ) {
-    return 2;
+  if (animal) {
+    const tags = new Set(
+      animal.senses.map((s) => s.toLowerCase()),
+    );
+    if (
+      tags.has("scent") ||
+      tags.has("low-light") ||
+      tags.has("keen-sight")
+    ) {
+      bonus += 2;
+    }
   }
-  return 0;
+  // Acute Senses supersedes Clarity perception bonus (book).
+  bonus += acuteSensesBonus(sheet);
+  return bonus;
 }
 
 /**

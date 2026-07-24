@@ -18,4 +18,4 @@ Use native get/drop/give to move items between players and rooms.
 
 SEE ALSO: help gear/ammo, help gear/durability, help gear/reload,
           help gear/weapons, help gear/armor, help gear/inventory,
-          help attack, help reload
+          help gear/token, help attack, help reload

@@ -181,6 +181,16 @@ export function buildNavPools(
     playerPool += 2;
     mods.push("+2 Hedgespun path");
   }
+  // Seize the Edge (Hedgespinning subtle, cost 4).
+  if (hasFruitFlag(sheet, "spinEdge")) {
+    mods.push("spinEdge: auto Edge (player wins tie)");
+  }
+  // Stable Trod: easier travel on secured paths.
+  const trodMerit = sheet.merits?.["stable trod"] ?? 0;
+  if (trodMerit > 0 && (room?.danger === "trod" || trod > 0)) {
+    playerPool += Math.min(3, trodMerit);
+    mods.push(`+${Math.min(3, trodMerit)} Stable Trod`);
+  }
   playerPool = Math.max(0, playerPool);
   const hedgePool = hedgeDice(
     sheet,

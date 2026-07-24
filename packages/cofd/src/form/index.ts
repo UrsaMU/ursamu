@@ -44,13 +44,60 @@ export {
   isPerceptionRoll,
 } from "./senses.ts";
 export {
+  applyLoopholeCost,
   applyMienContractBoost,
   contractHasDicePool,
+  contractHasLoophole,
   contractPoolExpr,
+  courtMantlePoolBonus,
+  matchingSeemingClauses,
   ownsContract,
   parseContractCost,
   resolveOwnedContract,
 } from "./contract_invoke.ts";
+export {
+  applyEffectHooks,
+  applyHooksToTarget,
+  parseEffectHooks,
+  type ApplyHooksResult,
+  type EffectHook,
+} from "./contract_effects.ts";
+export {
+  acuteSensesBonus,
+  goodwillDots,
+  mantleDots,
+  ownMantle,
+  pandemoniacalBonus,
+  stableTrodDots,
+} from "./mantle.ts";
+export {
+  mantleBonusHelp,
+  mantleRollBonus,
+  type MantleBonusResult,
+} from "./mantle_bonus.ts";
+export {
+  isPhysicalRoll,
+  mantleAggravatedDefend,
+  mantleContractGlamourDiscount,
+  mantleConvertClarity,
+  mantleProtectorArmor,
+  mantleWipeDebt,
+  mantleWinterWoundBonus,
+} from "./mantle_high.ts";
+export {
+  buildClashPools,
+  resolveClashOutcome,
+  type ClashPools,
+  type ClashWinner,
+} from "./clash.ts";
+export {
+  coldIronNote,
+  frailtyActPenalty,
+  frailtySummaryLines,
+  listFrailties,
+  parseFrailty,
+  type ParsedFrailty,
+} from "./frailty.ts";
 
 /** Prose helpers for look: mask / mien short lines on the sheet. */
 export function sheetMaskProse(sheet: {

@@ -45,8 +45,20 @@ let _cache: Map<string, HelpEntry> | null = null;
  * // In your plugin's init():
  * registerHelpDir(new URL("./help", import.meta.url).pathname, "mail");
  */
-export function registerHelpDir(path: string, section: string): void {
-  _registeredDirs.push({ path, section });
+export function registerHelpDir(path: string | URL, section: string): void {
+  let resolvedPath = "";
+  if (path instanceof URL) {
+    resolvedPath = path.protocol === "file:" ? path.pathname : path.href;
+  } else if (typeof path === "string" && path.startsWith("file:")) {
+    try {
+      resolvedPath = new URL(path).pathname;
+    } catch {
+      resolvedPath = path;
+    }
+  } else {
+    resolvedPath = String(path);
+  }
+  _registeredDirs.push({ path: resolvedPath, section });
   _cache = null; // invalidate
 }
 

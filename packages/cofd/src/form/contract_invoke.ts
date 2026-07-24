@@ -1,8 +1,13 @@
 // Pure helpers for invoking a Contract (CtL) with mien exceptional.
 
 import type { CofdSheet } from "../stats/sheet.ts";
-import { findContract, type CtlContract } from "../dictionary/changeling.ts";
+import {
+  findContract,
+  type CtlContract,
+  type CtlSeemingClause,
+} from "../dictionary/changeling.ts";
 import { contractExceptionalActive } from "./mien.ts";
+import { ownMantle } from "./mantle.ts";
 
 export interface ParsedContractCost {
   glamour: number;
@@ -28,6 +33,17 @@ export function parseContractCost(cost: string): ParsedContractCost {
   return { glamour, willpower, raw };
 }
 
+/**
+ * Cost after optional loophole (waives Glamour only; WP still paid).
+ */
+export function applyLoopholeCost(
+  cost: ParsedContractCost,
+  useLoophole: boolean,
+): ParsedContractCost {
+  if (!useLoophole) return cost;
+  return { ...cost, glamour: 0 };
+}
+
 export function ownsContract(
   sheet: CofdSheet,
   name: string,
@@ -49,7 +65,6 @@ export function resolveOwnedContract(
 /**
  * After a successful Contract roll while Mask is down, promote to
  * exceptional and floor successes at max(rolled, Wyrd).
- * (Mantle dots not tracked yet.)
  */
 export function applyMienContractBoost(
   sheet: CofdSheet,
@@ -81,10 +96,43 @@ export function contractHasDicePool(c: CtlContract): boolean {
 /**
  * Normalize catalog dice pool for parseRollExpression
  * (e.g. "Presence + Subterfuge + Wyrd").
+ * Court "Mantle" becomes the own-court Mantle trait token.
  */
 export function contractPoolExpr(c: CtlContract): string {
   return (c.dicePool ?? "")
     .replace(/\s+vs\.?\s+.*/i, "")
     .replace(/\s*-\s*\w+.*$/i, "")
     .trim();
+}
+
+/** Seeming clauses matching the sheet's seeming. */
+export function matchingSeemingClauses(
+  sheet: CofdSheet,
+  c: CtlContract,
+): CtlSeemingClause[] {
+  const seem = (sheet.customFields?.seeming ?? "")
+    .toLowerCase()
+    .trim();
+  if (!seem) return [];
+  return (c.seemingClauses ?? []).filter(
+    (sc) => sc.seeming.toLowerCase().trim() === seem,
+  );
+}
+
+/** True when catalog lists a usable loophole string. */
+export function contractHasLoophole(c: CtlContract): boolean {
+  const l = (c.loophole ?? "").trim();
+  return !!l && l !== "—" && l.toLowerCase() !== "none";
+}
+
+/** Bonus dice from Mantle on court Contract pools (dots). */
+export function courtMantlePoolBonus(
+  sheet: CofdSheet,
+  c: CtlContract,
+): number {
+  if (c.type !== "court") return 0;
+  // Catalog pools already include "+ Mantle"; avoid double-count
+  // when the expression contains Mantle as a trait.
+  if (/\bmantle\b/i.test(c.dicePool ?? "")) return 0;
+  return ownMantle(sheet);
 }

@@ -42,12 +42,19 @@ export const changelingSection: SheetSection = {
 
     const contracts = sheet.contracts ?? [];
     const icons = readIcons(sheet);
-    if (contracts.length === 0 && icons.length === 0) return [];
+    const frailties = sheet.frailties ?? [];
+    if (contracts.length === 0 && icons.length === 0 && frailties.length === 0) return [];
 
     const lines: string[] = [];
     if (contracts.length > 0) {
       lines.push(await divider("C O N T R A C T S"));
       lines.push(...wrapField("Contracts", contracts));
+    }
+    if (frailties.length > 0) {
+      lines.push(await divider("F R A I L T I E S"));
+      for (const f of frailties) {
+        lines.push(`  * ${f}`);
+      }
     }
     const active = activeIcons(sheet);
     if (icons.length > 0) {

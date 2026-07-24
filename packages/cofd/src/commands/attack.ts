@@ -222,6 +222,7 @@ export async function attackExec(u: IUrsamuSDK) {
   let wantWillpower = false;
   let skipAmmo = false;
   let doAim = false;
+  let defendAlly = false;
   let specified: AttackOptions["specified"];
   let aimBankVal: number | undefined;
 
@@ -234,6 +235,7 @@ export async function attackExec(u: IUrsamuSDK) {
     else if (sw === "charge") charge = true;
     else if (sw === "aim") doAim = true;
     else if (sw === "offhand") offhand = true;
+    else if (sw === "defend" || sw === "freehold") defendAlly = true;
     else if (sw.startsWith("pull")) {
       const eqIdx = sw.indexOf("=");
       const max = eqIdx >= 0 ? parseIntSwitch(sw.slice(eqIdx + 1), 1, 99, 1) : 1;
@@ -469,6 +471,21 @@ export async function attackExec(u: IUrsamuSDK) {
     }
 
     const targetSheet: CofdSheet = (finalTarget.state?.cofd as CofdSheet) ?? defaultSheet();
+    let finalDamageType: "bashing" | "lethal" | "aggravated" = damageType;
+    if (targetSheet.template === "changeling" && weaponTags.coldIron) {
+      finalDamageType = "aggravated";
+    }
+    // Summer Mantle ••••• defending freehold member
+    try {
+      const { mantleAggravatedDefend } = await import(
+        "../form/mantle_high.ts"
+      );
+      if (mantleAggravatedDefend(mySheet, defendAlly)) {
+        finalDamageType = "aggravated";
+      }
+    } catch {
+      // ignore
+    }
     let targetDefense = computeDefense(targetSheet);
 
     // Applied defense from prior attacks this round.
@@ -557,7 +574,7 @@ export async function attackExec(u: IUrsamuSDK) {
       const dmgResult = applyAttackDamage(
         targetSheet,
         effectiveHits,
-        damageType,
+        finalDamageType,
         armorGeneral,
         armorBallistic,
         isFirearm,
@@ -604,7 +621,7 @@ export async function attackExec(u: IUrsamuSDK) {
     const targetName2 = finalTarget.name ?? "Unknown";
     const poolDesc = `${built.formula}=${finalPool > 0 ? finalPool : "chance"}d`;
     const diceStr = result.rolls.join(" ");
-    const dmgPart = netDamage > 0 ? `, ${netDamage} ${damageType}` : "";
+    const dmgPart = netDamage > 0 ? `, ${netDamage} ${finalDamageType}` : "";
     const dodgeNote = dodging ? ` (dodging; active Dodge rolled ${dodgeSuccesses} success${dodgeSuccesses === 1 ? "" : "es"})` : "";
 
     let verb = "";
@@ -653,7 +670,7 @@ export async function attackExec(u: IUrsamuSDK) {
 
     if (netDamage > 0 && finalTarget.id !== u.me.id) {
       u.send(
-        `%cyINJURED:%cn ${attackerName} dealt ${netDamage} ${damageType} damage to you.`,
+        `%cyINJURED:%cn ${attackerName} dealt ${netDamage} ${finalDamageType} damage to you.`,
         finalTarget.id,
       );
     }

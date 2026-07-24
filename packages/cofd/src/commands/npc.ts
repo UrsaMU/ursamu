@@ -708,20 +708,21 @@ async function npcAggro(u: IUrsamuSDK, rest: string): Promise<void> {
     return;
   }
 
-  // Find this NPC in any active encounter in the room, spike participant.threat[targetId].
-  const { getEncounterForRoom, encounterDb } = await import("../combat/encounter.ts");
+  // Find this NPC in any active encounter in the room, spike threat.
+  const {
+    getEncounterForRoom,
+    setParticipantThreat,
+  } = await import("../combat/encounter.ts");
   const roomId = u.here?.id;
   const enc = roomId ? await getEncounterForRoom(roomId) : null;
-  if (!enc) { u.send("No active encounter here to spike threat in."); return; }
-  const participants = enc.participants.map((p) => {
-    if (p.actorId !== npc.id) return p;
-    const threat = { ...(p.threat ?? {}) };
-    threat[target.id] = 1000;
-    return { ...p, threat };
-  });
-  // deno-lint-ignore no-explicit-any
-  await encounterDb.update({ id: enc.id } as any, { ...enc, participants });
-  u.send(`Spiked ${npc.name ?? "NPC"} threat toward ${target.name ?? "target"}.`);
+  if (!enc) {
+    u.send("No active encounter here to spike threat in.");
+    return;
+  }
+  await setParticipantThreat(enc.id, npc.id, target.id, 1000);
+  u.send(
+    `Spiked ${npc.name ?? "NPC"} threat toward ${target.name ?? "target"}.`,
+  );
 }
 
 // ---------------------------------------------------------------------------

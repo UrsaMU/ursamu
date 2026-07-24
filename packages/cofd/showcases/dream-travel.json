@@ -1,0 +1,95 @@
+{
+  "key": "dream-travel",
+  "title": "+dream -- Gate of Ivory/Horn, Bastions, and Oneiromancy",
+  "description": "Enter your own Bastion, weave dream props and roles, travel the Dreaming Roads via Horn, enter another's Bastion, and wake.",
+  "vars": { "player": "Pix", "target": "Mallow" },
+  "setup": {
+    "character": {
+      "flags": ["connected", "player"],
+      "state": {
+        "cofd": {
+          "template": "changeling",
+          "concept": "Dreamweaver Operative",
+          "virtue": "Hope",
+          "vice": "Curiosity",
+          "attributes": {
+            "intelligence": 3, "wits": 4, "resolve": 4,
+            "strength": 2, "dexterity": 2, "stamina": 2,
+            "presence": 3, "manipulation": 2, "composure": 4
+          },
+          "skills": {
+            "empathy": 3, "occult": 3, "survival": 4, "stealth": 2
+          },
+          "specialties": {},
+          "merits": {},
+          "moralityValue": 6,
+          "powerStatValue": 3,
+          "energyCurrent": 10,
+          "customFields": {
+            "seeming": "Fairest",
+            "kith": "Telluric",
+            "court": "Spring"
+          },
+          "advantages": {
+            "willpowerMax": 8,
+            "willpowerCurrent": 8,
+            "size": 5
+          },
+          "hedgeState": {
+            "inHedge": true
+          }
+        }
+      }
+    },
+    "targets": {
+      "Mallow": {
+        "flags": ["connected", "player"],
+        "state": {
+          "cofd": {
+            "template": "changeling",
+            "concept": "Slumbering Knight",
+            "powerStatValue": 1,
+            "attributes": {
+              "resolve": 1, "composure": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "1. Awake Status & Catalog" },
+    { "cmd": "+dream", "label": "Check dream status while awake" },
+    { "expect": "Awake" },
+    { "cmd": "+dream/weaves", "label": "Browse dreamweave catalog" },
+    { "expect": "D R E A M W E A V E" },
+    { "cmd": "+dream/info calm", "label": "Inspect specific weave" },
+    { "expect": "Soothe Nightmare" },
+
+    { "sub": "2. Gate of Ivory -- Entering Own Bastion" },
+    { "cmd": "+dream/ivory", "label": "Enter Gate of Ivory (Resolve+Composure roll)" },
+    { "expect": "Gate of Ivory" },
+    { "cmd": "+dream", "label": "Check dreaming status in Bastion" },
+    { "expect": "Dreaming" },
+
+    { "sub": "3. Oneiromancy -- Subtle & Paradigm Weaving" },
+    { "cmd": "+dream/weave prop", "label": "Weave a dream prop (Shape Prop)" },
+    { "expect": "WEAVE" },
+    { "cmd": "+dream/role A hooded traveler seeking forbidden knowledge", "label": "Adopt a scene role" },
+    { "expect": "WEAVE" },
+    { "cmd": "+dream/weave calm", "label": "Weave Soothe Nightmare to calm fear" },
+    { "expect": "WEAVE" },
+
+    { "sub": "4. Infiltrating Another's Bastion" },
+    { "cmd": "+dream/enter Mallow", "label": "Breach Mallow's Bastion fortification from dream form" },
+    { "expect": "Bastion" },
+
+    { "sub": "5. Waking & Gate of Horn" },
+    { "cmd": "+dream/wake", "label": "Gently wake from the dreamscape" },
+    { "expect": "wake" },
+    { "cmd": "+dream/horn", "label": "Enter Gate of Horn from Hedge (Wits+Survival onto Dreaming Roads)" },
+    { "expect": "Gate of Horn" },
+    { "cmd": "+dream", "label": "Check status on Dreaming Roads" },
+    { "expect": "Roads" }
+  ]
+}

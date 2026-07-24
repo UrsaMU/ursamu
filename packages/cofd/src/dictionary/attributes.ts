@@ -1,7 +1,5 @@
 // Typed re-exports of attribute names from resources/attributes.json.
-
-const attributesUrl = new URL("../../resources/attributes.json", import.meta.url);
-const attributesData = JSON.parse(Deno.readTextFileSync(attributesUrl));
+import attributesData from "../../resources/attributes.json" with { type: "json" };
 
 export const MENTAL_ATTRIBUTES = [...attributesData.mental] as readonly string[];
 export const PHYSICAL_ATTRIBUTES = [...attributesData.physical] as readonly string[];

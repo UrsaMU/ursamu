@@ -32,18 +32,24 @@ import {
   hedgeSetWay,
 } from "./hedge_staff_set.ts";
 import { hedgeEnter, hedgeOpen } from "./hedge_travel.ts";
+import { hedgeFind } from "./hedge_find.ts";
 import { hedgeClaim, hedgeExit } from "./hedge_exit.ts";
 import { hedgeTravel } from "./hedge_nav.ts";
 import {
   hedgeEat,
   hedgeForage,
   hedgeFruitList,
+  hedgeGarden,
 } from "./hedge_fruit.ts";
 import { hedgeHollow } from "./hedge_hollow.ts";
 import {
   hedgeAccess,
   hedgeEscape,
 } from "./hedge_hollow_travel.ts";
+import {
+  hedgeLuxury,
+  hedgeRouteZero,
+} from "./hedge_route.ts";
 import {
   countFruitObjects,
   freeHollowDots,
@@ -74,6 +80,13 @@ export async function hedgeExec(u: IUrsamuSDK): Promise<void> {
       return await hedgeEscape(u, rest);
     case "access":
       return await hedgeAccess(u, rest);
+    case "route":
+    case "route-zero":
+    case "routezero":
+      return await hedgeRouteZero(u, rest);
+    case "luxury":
+    case "luxury-goods":
+      return await hedgeLuxury(u, rest);
     case "travel":
       return await hedgeTravel(u, rest);
     case "forage":
@@ -82,6 +95,10 @@ export async function hedgeExec(u: IUrsamuSDK): Promise<void> {
       return await hedgeFruitList(u, rest);
     case "eat":
       return await hedgeEat(u, rest);
+    case "garden":
+      return await hedgeGarden(u, rest);
+    case "find":
+      return await hedgeFind(u, rest);
     case "create":
       return await hedgeCreate(u, rest);
     case "link":

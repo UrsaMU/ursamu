@@ -16,11 +16,15 @@ import {
   listFruitObjects,
   listFruits,
   migrateSheetFruitToObjects,
+  queueShadowFruit,
   readHedgeState,
+  readyShadowFruit,
   resolveForage,
+  writeShadowPending,
 } from "../hedge/index.ts";
 import {
   getSheet,
+  persistRoomHedge,
   persistSheet,
   roomHedge,
 } from "./hedge_helpers.ts";
@@ -180,16 +184,98 @@ export async function hedgeEat(
     u.send(`${meta.name} is not eaten that way.`);
     return;
   }
+  // Detect shadow copy before consume (note on stack item)
+  const stacks = await listFruitObjects(u, u.me.id);
+  let isShadow = false;
+  for (const o of stacks) {
+    if (fruitSlug(o) !== key) continue;
+    const d = itemData(o);
+    if (d?.note?.includes("shadow-garden")) {
+      isShadow = true;
+      break;
+    }
+  }
   const consumed = await consumeFruitObject(u, u.me.id, key);
   if (!consumed.ok || !consumed.fruit) {
     u.send(`You are not carrying '${slug}'.`);
     return;
   }
+  if (isShadow) {
+    u.send(
+      [
+        `You eat a shadow ${consumed.fruit.name}.`,
+        "  No Glamour or healing — hunger returns in an hour (ST).",
+      ].join("\n"),
+    );
+    return;
+  }
+
   const r = applyFruitEffects(sheet, consumed.fruit);
   if (!r.ok || !r.sheet) {
     u.send(r.reason ?? "Cannot eat that.");
     return;
   }
   await persistSheet(u, u.me.id, r.sheet);
-  u.send(r.lines.join("\n"));
+  const lines = [...r.lines];
+
+  // Shadow Garden: queue reappear in this Hollow
+  const hr = roomHedge(u.here ?? {});
+  if (hr?.realm === "hollow" && u.here?.id) {
+    const queued = queueShadowFruit(hr, consumed.fruit.slug);
+    if (queued) {
+      await persistRoomHedge(u, u.here.id, queued);
+      lines.push(
+        "  Shadow Garden: a copy will form in ~1 hour " +
+          "(+hedge/garden).",
+      );
+    }
+  }
+  u.send(lines.join("\n"));
+}
+
+/** +hedge/garden — pick ready Shadow Garden copies. */
+export async function hedgeGarden(
+  u: IUrsamuSDK,
+  _rest: string,
+): Promise<void> {
+  const hr = roomHedge(u.here ?? {});
+  if (!hr || hr.realm !== "hollow" || !u.here?.id) {
+    u.send("Shadow Garden only works inside a Hollow.");
+    return;
+  }
+  const { ready, remaining } = readyShadowFruit(hr);
+  if (!ready.length) {
+    const pending = remaining.length;
+    u.send(
+      pending
+        ? `Nothing ripe yet (${pending} growing).`
+        : "No shadow fruit pending. Eat fruit here first.",
+    );
+    return;
+  }
+  const nextRoom = writeShadowPending(hr, remaining);
+  await persistRoomHedge(u, u.here.id, nextRoom);
+  const lines = ["Shadow Garden harvest:"];
+  for (const p of ready) {
+    const obj = await createFruitObject(u, u.me.id, p.slug);
+    // mark as shadow via note on object if possible
+    if (obj?.id) {
+      try {
+        const d = itemData(obj) ?? { key: p.slug };
+        await u.db.modify(obj.id, "$set", {
+          "data.cofd_item": {
+            ...d,
+            note: "shadow-garden copy — no real benefit",
+            key: p.slug,
+            kind: "goblin-fruit",
+          },
+        });
+      } catch {
+        // best-effort
+      }
+    }
+    const name = findFruit(p.slug)?.name ?? p.slug;
+    lines.push(`  %cy${name}%cn (shadow — no benefit if eaten)`);
+  }
+  u.send(lines.join("\n"));
 }

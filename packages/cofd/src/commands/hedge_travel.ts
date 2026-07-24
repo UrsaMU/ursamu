@@ -104,6 +104,33 @@ export async function hedgeOpen(
     return;
   }
 
+  // Hidden Entry: when all Hollow owners are inside, hide the gate
+  if (fromMortal) {
+    const { hiddenEntryActive } = await import(
+      "../hedge/hollow_effects.ts"
+    );
+    const hedgeRoom = await loadRoom(u, way.hedgeRoomId);
+    const hr = roomHedge(hedgeRoom ?? {});
+    if (hr?.realm === "hollow" && hr.hollow) {
+      const occ = await u.db.search({
+        location: way.hedgeRoomId,
+      });
+      const ids = (occ as { id?: string }[])
+        .map((o) => o.id ?? "")
+        .filter(Boolean);
+      if (
+        hiddenEntryActive(hr, ids) &&
+        !hr.hollow.owners.includes(u.me.id)
+      ) {
+        u.send(
+          "The Hollow entrance has vanished (Hidden Entry). " +
+            "+hedge/find <gate> (Wits+Investigation −2).",
+        );
+        return;
+      }
+    }
+  }
+
   let nextSheet = sheet;
   if (check.needsOpen && check.glamourCost > 0) {
     nextSheet = spendGlamour(sheet, check.glamourCost);

@@ -74,7 +74,7 @@ Deno.test("spendIcon grants Glamour and marks spent", OPTS, () => {
 });
 
 Deno.test(
-  "spendIcon notes Clarity condition when present",
+  "spendIcon clears Clarity condition when present",
   OPTS,
   () => {
     const sheet = ctlSheet();
@@ -88,9 +88,13 @@ Deno.test(
     const r = spendIcon(a.sheet, a.icon.id);
     assert(r.ok);
     assert(
-      r.lines.some((l) =>
-        l.includes("Clarity condition")
+      r.lines.some((l) => l.includes("Clarity Condition")),
+    );
+    assertEquals(
+      (r.sheet!.conditions ?? []).some((c) =>
+        c.key === "haunted"
       ),
+      false,
     );
   },
 );
@@ -126,6 +130,7 @@ Deno.test("spin catalog has path and fruit", OPTS, () => {
   assert(listSpinEffects().length >= 5);
   assertEquals(findSpinEffect("path")!.glamour, 1);
   assert(findSpinEffect("Coax Fruit"));
+  assertEquals(findSpinEffect("path")!.kind, "subtle");
 });
 
 Deno.test("resolveSpin path on success sets flag", OPTS, () => {
@@ -140,6 +145,14 @@ Deno.test("resolveSpin path on success sets flag", OPTS, () => {
   assertEquals(r.navBonusKey, "spinPath");
   const flags = r.sheet!.hedgeState?.fruitFlags ?? [];
   assert(flags.some((f) => f.key === "spinPath"));
+});
+
+Deno.test("resolveSpin path target is 1 success", OPTS, () => {
+  const r = resolveSpin(ctlSheet(), "path", {
+    inHedge: true,
+    successes: 1,
+  });
+  assert(r.ok);
 });
 
 Deno.test("resolveSpin fails under target but spends G", OPTS, () => {

@@ -3,16 +3,22 @@
 // Pure ops accept the encounter object and return the mutated copy;
 // each op then persists via the DBO API.
 
-import { DBO, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
-import type { CofdSheet } from "../stats/index.ts";
-import type { Encounter, Participant } from "./types.ts";
 import {
-  isWeaponType,
-  lookupItem,
-  type WeaponEntry,
-} from "../equipment/catalog.ts";
-import { itemData } from "../equipment/objects.ts";
-import { fastReflexesBonus } from "./modifiers.ts";
+  beginEncounter,
+  endEncounter,
+  findRoomEncounter,
+  joinEncounter,
+  leaveEncounter,
+  nextTurn,
+  startEncounter,
+  type CombatPorts,
+  type EncounterStore,
+} from "@ursamu/combat";
+import { DBO, type IDBObj, type IUrsamuSDK } from "@ursamu/ursamu";
+import type { Encounter, Participant } from "./types.ts";
+import { computeCofdInitiative } from "./initiative.ts";
+
+export { roll1d10 } from "./initiative.ts";
 
 // ---------------------------------------------------------------------------
 // DBO collection
@@ -23,58 +29,112 @@ type Q = any;
 
 export const encounterDb = new DBO<Encounter>("cofd.encounters");
 
+/** EncounterStore over cofd.encounters (shared with ports / walker). */
+export const cofdEncounterStore: EncounterStore = {
+  async get(id) {
+    return (await encounterDb.findOne({ id } as Q)) ?? null;
+  },
+  async create(enc) {
+    await encounterDb.create(enc);
+  },
+  async save(enc) {
+    await encounterDb.update({ id: enc.id } as Q, enc);
+  },
+  async findInRoom(roomId) {
+    const rows = await encounterDb.query({
+      roomId,
+      status: { $in: ["intent", "active"] },
+    } as Q);
+    if (!rows.length) return null;
+    return (
+      rows.find((e) => e.status === "active") ?? rows[0] ?? null
+    );
+  },
+  async advanceTurn(id) {
+    return await advanceTurn(id);
+  },
+  async patchParticipant(encounterId, actorId, patch) {
+    const { patchParticipant } = await import("./resolution.ts");
+    return await patchParticipant(encounterId, actorId, patch);
+  },
+};
+
+/** All mutators read/write only through the store (not raw DBO). */
+async function loadEnc(id: string): Promise<Encounter | null> {
+  return await cofdEncounterStore.get(id);
+}
+
+async function saveEnc(enc: Encounter): Promise<void> {
+  await cofdEncounterStore.save(enc);
+}
+
+/**
+ * Map one participant and save. If require and actor missing → null.
+ * If !require and actor missing → enc unchanged (no write).
+ */
+async function mapOne(
+  encounterId: string,
+  actorId: string,
+  fn: (p: Participant) => Participant,
+  require = false,
+): Promise<Encounter | null> {
+  const enc = await loadEnc(encounterId);
+  if (!enc) return null;
+  const found = enc.participants.some((p) => p.actorId === actorId);
+  if (!found) return require ? null : enc;
+  const participants = enc.participants.map((p) =>
+    p.actorId === actorId ? fn(p) : p
+  );
+  const updated: Encounter = { ...enc, participants };
+  await saveEnc(updated);
+  return updated;
+}
+
+/** Ports stub with only rollInitiative — enough for activate/join. */
+function initiativePorts(u: IUrsamuSDK): CombatPorts {
+  return {
+    loadActor: () => Promise.resolve(null),
+    executeAction: () => Promise.resolve({ ok: true }),
+    broadcast: () => {},
+    rollInitiative: (actorId) => computeCofdInitiative(u, actorId),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Creation
 // ---------------------------------------------------------------------------
 
 /** Create a new encounter anchored to roomId. Status begins at "intent". */
 export async function createEncounter(roomId: string): Promise<Encounter> {
-  const now = Date.now();
-  const enc: Encounter = {
-    id: `enc-${now}-${Math.floor(Math.random() * 1e6)}`,
-    roomId,
-    round: 0,
-    turnIdx: 0,
-    participants: [],
-    status: "intent",
-    createdAt: now,
-  };
-  await encounterDb.create(enc);
-  return enc;
+  return await startEncounter(roomId, { store: cofdEncounterStore });
 }
 
 // ---------------------------------------------------------------------------
 // Participant management
 // ---------------------------------------------------------------------------
 
+function kindOf(actor: IDBObj): "pc" | "npc" {
+  const flags = actor.flags as Set<string> | undefined;
+  const isNpc = !!(
+    flags && typeof flags.has === "function" && flags.has("npc")
+  );
+  return isNpc ? "npc" : "pc";
+}
+
 /** Add an actor to an encounter. No-op if already present. */
 export async function addParticipant(
   encounterId: string,
   actor: IDBObj,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  if (enc.participants.some((p) => p.actorId === actor.id)) return enc;
-  // Pass 2: derive participant.kind from actor flags. NPC flag => "npc".
-  const flags = actor.flags as Set<string> | undefined;
-  const isNpc = !!(flags && typeof flags.has === "function" && flags.has("npc"));
-  const updated: Encounter = {
-    ...enc,
-    participants: [
-      ...enc.participants,
-      {
-        actorId: actor.id,
-        name: actor.name ?? actor.id,
-        initiative: 0,
-        appliedDefense: 0,
-        isDodging: false,
-        isOut: false,
-        kind: isNpc ? "npc" : "pc",
-      },
-    ],
-  };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await joinEncounter(
+    encounterId,
+    {
+      actorId: actor.id,
+      name: actor.name ?? actor.id,
+      kind: kindOf(actor),
+    },
+    { store: cofdEncounterStore },
+  );
 }
 
 /** Remove an actor from an encounter. */
@@ -82,182 +142,58 @@ export async function removeParticipant(
   encounterId: string,
   actorId: string,
 ): Promise<{ encounter: Encounter; wasActive: boolean } | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const idx = enc.participants.findIndex((p) => p.actorId === actorId);
-  if (idx < 0) return { encounter: enc, wasActive: false };
-
-  const wasActive = enc.status === "active" && idx === enc.turnIdx;
-  const participants = enc.participants.filter((p) => p.actorId !== actorId);
-
-  // Adjust turnIdx after removal so the pointer stays on the same player.
-  let turnIdx = enc.turnIdx;
-  if (enc.status === "active") {
-    if (idx < turnIdx) {
-      turnIdx = Math.max(0, turnIdx - 1);
-    } else if (turnIdx >= participants.length) {
-      turnIdx = 0;
-    }
-  }
-
-  const updated: Encounter = { ...enc, participants, turnIdx };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return { encounter: updated, wasActive };
+  return await leaveEncounter(encounterId, actorId, {
+    store: cofdEncounterStore,
+  });
 }
 
 /**
  * Add an actor to an encounter, rolling initiative and slotting them into the
  * order if the encounter is already active. No-op if already present.
- * Used for auto-join when an NPC is targeted/attacks mid-encounter, so the
- * command surface doesn't need explicit +combat/join for every NPC.
  */
 export async function ensureParticipant(
   u: IUrsamuSDK,
   encounterId: string,
   actor: IDBObj,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  if (enc.participants.some((p) => p.actorId === actor.id)) return enc;
-
-  const flags = actor.flags as Set<string> | undefined;
-  const isNpc = !!(flags && typeof flags.has === "function" && flags.has("npc"));
-  const base: Participant = {
-    actorId: actor.id,
-    name: actor.name ?? actor.id,
-    initiative: 0,
-    appliedDefense: 0,
-    isDodging: false,
-    isOut: false,
-    kind: isNpc ? "npc" : "pc",
-  };
-
-  if (enc.status !== "active") {
-    const updated: Encounter = { ...enc, participants: [...enc.participants, base] };
-    await encounterDb.update({ id: encounterId } as Q, updated);
-    return updated;
-  }
-
-  // Active encounter: roll initiative and insert sorted.
-  const sheet = actor.state?.cofd as CofdSheet | undefined;
-  const dex = sheet?.attributes?.dexterity ?? sheet?.attributes?.Dexterity ?? 1;
-  const composure = sheet?.attributes?.composure ?? sheet?.attributes?.Composure ?? 1;
-  let weaponMod = 0;
-  const weaponId = sheet?.equipment?.equippedWeapon;
-  if (weaponId) {
-    const arr = await u.db.search({ id: weaponId } as Q);
-    if (arr[0]) {
-      const d = itemData(arr[0]);
-      if (d) {
-        const resolved = lookupItem(d.key);
-        if (resolved && isWeaponType(resolved.type)) {
-          weaponMod = (resolved.entry as WeaponEntry).initiative ?? 0;
-        }
-      }
-    }
-  }
-  const reflexes = fastReflexesBonus(sheet);
-  const initiative = roll1d10() + dex + composure + weaponMod + reflexes;
-  const fresh: Participant = {
-    ...base,
-    initiative,
-    actionUsed: false,
-    delayed: false,
-    ran: false,
-    movedThisRound: false,
-  };
-
-  const ps = enc.participants;
-  let insertAt = ps.length;
-  for (let i = 0; i < ps.length; i++) {
-    if (initiative > ps[i].initiative) { insertAt = i; break; }
-  }
-  const participants = [...ps.slice(0, insertAt), fresh, ...ps.slice(insertAt)];
-  // Keep the current actor on their turn: if we inserted at/before them, bump.
-  let turnIdx = enc.turnIdx;
-  if (insertAt <= turnIdx) turnIdx += 1;
-  const updated: Encounter = { ...enc, participants, turnIdx };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await joinEncounter(
+    encounterId,
+    {
+      actorId: actor.id,
+      name: actor.name ?? actor.id,
+      kind: kindOf(actor),
+    },
+    {
+      store: cofdEncounterStore,
+      ports: initiativePorts(u),
+    },
+  );
 }
 
 // ---------------------------------------------------------------------------
 // Initiative roll
 // ---------------------------------------------------------------------------
 
-/** Roll 1d10. Extracted for easy stubbing in tests. */
-export function roll1d10(): number {
-  return Math.floor(Math.random() * 10) + 1;
-}
-
 /**
- * Roll initiative for all non-out participants in the encounter.
- * Formula: 1d10 + Dexterity + Composure + weapon.initiative (if equipped).
- * Ties broken by Composure first, then Dexterity, then random.
+ * Roll initiative for all participants and activate the encounter.
+ * Formula is CofD (ports.rollInitiative); sort/activate is @ursamu/combat.
  */
 export async function rollInitiative(
   encounterId: string,
   u: IUrsamuSDK,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-
-  const rolled: Participant[] = await Promise.all(
-    enc.participants.map(async (p) => {
-      const actors = await u.db.search({ id: p.actorId } as Q);
-      const actor = actors[0];
-      if (!actor) return { ...p, initiative: 0 };
-
-      const sheet = actor.state?.cofd as CofdSheet | undefined;
-      const dex = sheet?.attributes?.dexterity ?? sheet?.attributes?.Dexterity ?? 1;
-      const composure = sheet?.attributes?.composure ?? sheet?.attributes?.Composure ?? 1;
-
-      // Weapon initiative penalty: look up the equipped weapon in sheet.
-      let weaponMod = 0;
-      const weaponId = sheet?.equipment?.equippedWeapon;
-      if (weaponId) {
-        const weaponObjs = await u.db.search({ id: weaponId } as Q);
-        if (weaponObjs[0]) {
-          const d = itemData(weaponObjs[0]);
-          if (d) {
-            const resolved = lookupItem(d.key);
-            if (resolved && isWeaponType(resolved.type)) {
-              weaponMod = (resolved.entry as WeaponEntry).initiative ?? 0;
-            }
-          }
-        }
-      }
-
-      const die = roll1d10();
-      const reflexes = fastReflexesBonus(sheet);
-      const initiative = die + dex + composure + weaponMod + reflexes;
-      return {
-        ...p,
-        initiative,
-        actionUsed: false,
-        delayed: false,
-        ran: false,
-        movedThisRound: false,
-        appliedDefense: 0,
-      };
-    }),
-  );
-
-  // Sort descending; ties: random tiebreak for simplicity.
-  rolled.sort((a, b) => {
-    if (b.initiative !== a.initiative) return b.initiative - a.initiative;
-    return Math.random() - 0.5;
+  return await beginEncounter(encounterId, {
+    ports: initiativePorts(u),
+    store: cofdEncounterStore,
   });
+}
 
-  const updated: Encounter = {
-    ...enc,
-    participants: rolled,
-    round: 1,
-    turnIdx: 0,
-    status: "active",
-  };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+/** @deprecated use computeCofdInitiative from ./initiative.ts */
+export async function rollActorInitiative(
+  u: IUrsamuSDK,
+  actorId: string,
+): Promise<number> {
+  return await computeCofdInitiative(u, actorId);
 }
 
 // ---------------------------------------------------------------------------
@@ -273,7 +209,7 @@ export async function advanceTurn(
   encounterId: string,
   u?: IUrsamuSDK,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
+  const enc = await loadEnc(encounterId);
   if (!enc || enc.status !== "active") return enc ?? null;
 
   const count = enc.participants.length;
@@ -307,27 +243,36 @@ export async function advanceTurn(
       actionUsed: false,
       delayed: false,
       ran: false,
+      spentEnergy: 0,
     }));
   } else {
     // Clear the per-turn action-economy flags for the actor about to act.
     participants = participants.map((p, i) =>
-      i === nextIdx ? { ...p, actionUsed: false, ran: false } : p
+      i === nextIdx
+        ? { ...p, actionUsed: false, ran: false, spentEnergy: 0 }
+        : p
     );
   }
 
   // Loop to handle surprise skip
   let surpriseSafety = count * 2;
-  while (participants[nextIdx] && participants[nextIdx].surprised && surpriseSafety-- > 0) {
+  while (
+    participants[nextIdx] &&
+    participants[nextIdx].surprised &&
+    surpriseSafety-- > 0
+  ) {
     const surprisedName = participants[nextIdx].name;
     if (u && typeof u.broadcast === "function") {
-      u.broadcast(`%cy${surprisedName} is surprised and loses their turn!%cn`);
+      u.broadcast(
+        `%cy${surprisedName} is surprised and loses their turn!%cn`,
+      );
     }
-    // Mark actionUsed: true, ran: false, surprised: false on the surprised participant
     participants = participants.map((p, i) =>
-      i === nextIdx ? { ...p, actionUsed: true, ran: false, surprised: false } : p
+      i === nextIdx
+        ? { ...p, actionUsed: true, ran: false, surprised: false }
+        : p
     );
 
-    // Now advance past them!
     nextIdx += 1;
     if (nextIdx >= count) {
       nextIdx = 0;
@@ -348,7 +293,6 @@ export async function advanceTurn(
       );
     }
 
-    // Skip delayed actors after advancing
     let delaySafety = count + 1;
     while (
       delaySafety-- > 0 &&
@@ -378,28 +322,29 @@ export async function advanceTurn(
     }
   }
 
-  const updated: Encounter = { ...enc, participants, round, turnIdx: nextIdx };
-  await encounterDb.update({ id: encounterId } as Q, updated);
+  const updated: Encounter = {
+    ...enc,
+    participants,
+    round,
+    turnIdx: nextIdx,
+  };
+  await saveEnc(updated);
   return updated;
 }
 
 // ---------------------------------------------------------------------------
-// Per-turn flags
+// Per-turn flags (all writes via cofdEncounterStore)
 // ---------------------------------------------------------------------------
 
-/** Increment appliedDefense for a participant (called each time they are attacked). */
+/** Increment appliedDefense for a participant (each time they are attacked). */
 export async function applyDefense(
   encounterId: string,
   actorId: string,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, appliedDefense: p.appliedDefense + 1 } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    appliedDefense: p.appliedDefense + 1,
+  }));
 }
 
 /** Set or clear the dodge flag for a participant. */
@@ -408,14 +353,10 @@ export async function setDodge(
   actorId: string,
   dodging: boolean,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, isDodging: dodging } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    isDodging: dodging,
+  }));
 }
 
 /** Clamp a cover/concealment value to 0..3. Negative/NaN coerce to 0. */
@@ -432,16 +373,13 @@ export async function setParticipantCover(
   actorId: string,
   value: number,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  if (!enc.participants.some((p) => p.actorId === actorId)) return null;
   const v = clamp03(value);
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, cover: v } : p
+  return await mapOne(
+    encounterId,
+    actorId,
+    (p) => ({ ...p, cover: v }),
+    true,
   );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
 }
 
 /** Set the concealment level for a participant. Clamped to 0..3. */
@@ -450,16 +388,13 @@ export async function setParticipantConcealment(
   actorId: string,
   value: number,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  if (!enc.participants.some((p) => p.actorId === actorId)) return null;
   const v = clamp03(value);
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, concealment: v } : p
+  return await mapOne(
+    encounterId,
+    actorId,
+    (p) => ({ ...p, concealment: v }),
+    true,
   );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
 }
 
 /**
@@ -470,13 +405,13 @@ export async function applySuppression(
   encounterId: string,
   suppressorId: string,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
+  const enc = await loadEnc(encounterId);
   if (!enc) return null;
   const participants = enc.participants.map((p) =>
     p.actorId === suppressorId ? p : { ...p, pinnedBy: suppressorId }
   );
   const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
+  await saveEnc(updated);
   return updated;
 }
 
@@ -485,14 +420,10 @@ export async function clearPin(
   encounterId: string,
   actorId: string,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, pinnedBy: undefined } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    pinnedBy: undefined,
+  }));
 }
 
 /** Set or clear the Beaten Down flag for a participant. */
@@ -501,14 +432,10 @@ export async function setBeatenDown(
   actorId: string,
   value: boolean,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, beatenDown: value } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    beatenDown: value,
+  }));
 }
 
 /** Set or clear grapple state flags on a participant in the encounter. */
@@ -522,14 +449,7 @@ export async function setParticipantGrappleState(
     isUsingAsCover?: boolean;
   },
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, ...state } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({ ...p, ...state }));
 }
 
 /** Clear all grapple state flags on a participant in the encounter. */
@@ -537,22 +457,13 @@ export async function clearParticipantGrappleState(
   encounterId: string,
   actorId: string,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId
-      ? {
-          ...p,
-          hasHold: undefined,
-          hasControl: undefined,
-          isRestrained: undefined,
-          isUsingAsCover: undefined,
-        }
-      : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    hasHold: undefined,
+    hasControl: undefined,
+    isRestrained: undefined,
+    isUsingAsCover: undefined,
+  }));
 }
 
 /** Set or clear the surprised flag for a participant. */
@@ -561,14 +472,10 @@ export async function setSurprised(
   actorId: string,
   value: boolean,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, surprised: value } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    surprised: value,
+  }));
 }
 
 /** Set or clear surrender on a participant. */
@@ -577,14 +484,10 @@ export async function setSurrendered(
   actorId: string,
   value: boolean,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, surrendered: value } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    surrendered: value,
+  }));
 }
 
 /** Set or clear the actionUsed flag for a participant. */
@@ -593,32 +496,24 @@ export async function setActionUsed(
   actorId: string,
   value: boolean,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, actionUsed: value } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    actionUsed: value,
+  }));
 }
 
-/** Set the ran (sprint) flag for a participant. Also consumes the instant slot. */
+/** Set the ran (sprint) flag. Also consumes the instant slot. */
 export async function setRan(
   encounterId: string,
   actorId: string,
   value: boolean,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
-  if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId
-      ? { ...p, ran: value, movedThisRound: value ? true : p.movedThisRound, actionUsed: value ? true : p.actionUsed }
-      : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
-  return updated;
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    ran: value,
+    movedThisRound: value ? true : p.movedThisRound,
+    actionUsed: value ? true : p.actionUsed,
+  }));
 }
 
 /**
@@ -628,7 +523,7 @@ export async function setRan(
 export async function delayCurrent(
   encounterId: string,
 ): Promise<{ encounter: Encounter; delayedActorId: string | null } | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
+  const enc = await loadEnc(encounterId);
   if (!enc || enc.status !== "active") return null;
   if (enc.participants.length === 0) return null;
   const cur = enc.participants[enc.turnIdx];
@@ -637,30 +532,32 @@ export async function delayCurrent(
     i === enc.turnIdx ? { ...p, delayed: true } : p
   );
   const mid: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, mid);
+  await saveEnc(mid);
   const advanced = await advanceTurn(encounterId);
   return { encounter: advanced ?? mid, delayedActorId: cur.actorId };
 }
 
 /**
- * A delayed participant reclaims their action. We point turnIdx at them and
- * clear the delayed flag so the order resumes from their seat next.
+ * A delayed participant reclaims their action. Point turnIdx at them and
+ * clear delayed so the order resumes from their seat next.
  * Returns null if the actor isn't delayed.
  */
 export async function reclaimDelayed(
   encounterId: string,
   actorId: string,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
+  const enc = await loadEnc(encounterId);
   if (!enc || enc.status !== "active") return null;
   const idx = enc.participants.findIndex((p) => p.actorId === actorId);
   if (idx < 0) return null;
   if (!enc.participants[idx].delayed) return null;
   const participants = enc.participants.map((p, i) =>
-    i === idx ? { ...p, delayed: false, actionUsed: false, ran: false } : p
+    i === idx
+      ? { ...p, delayed: false, actionUsed: false, ran: false }
+      : p
   );
   const updated: Encounter = { ...enc, participants, turnIdx: idx };
-  await encounterDb.update({ id: encounterId } as Q, updated);
+  await saveEnc(updated);
   return updated;
 }
 
@@ -670,13 +567,58 @@ export async function setMoved(
   actorId: string,
   value: boolean,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    movedThisRound: value,
+  }));
+}
+
+/** Add to a participant's spentEnergy this turn (Glamour spend tracking). */
+export async function addSpentEnergy(
+  encounterId: string,
+  actorId: string,
+  amount: number,
+): Promise<Encounter | null> {
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    spentEnergy: (p.spentEnergy ?? 0) + amount,
+  }));
+}
+
+/** Spike or set threat[targetId] on a participant (staff NPC tools). */
+export async function setParticipantThreat(
+  encounterId: string,
+  actorId: string,
+  targetId: string,
+  value: number,
+): Promise<Encounter | null> {
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    threat: { ...(p.threat ?? {}), [targetId]: value },
+  }));
+}
+
+/** Set reaction posture on a participant. */
+export async function setReactionPosture(
+  encounterId: string,
+  actorId: string,
+  posture: Participant["reactionPosture"],
+): Promise<Encounter | null> {
+  return await mapOne(encounterId, actorId, (p) => ({
+    ...p,
+    reactionPosture: posture,
+  }));
+}
+
+/** Patch encounter-level fields (e.g. maxRounds) and save. */
+export async function patchEncounter(
+  encounterId: string,
+  patch: Partial<Encounter>,
+): Promise<Encounter | null> {
+  const enc = await loadEnc(encounterId);
   if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, movedThisRound: value } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
+  const updated: Encounter = { ...enc, ...patch, id: enc.id };
+  await saveEnc(updated);
   return updated;
 }
 
@@ -718,7 +660,26 @@ export function shouldBlockMove(
 export async function getEncounterForRoom(
   roomId: string,
 ): Promise<Encounter | null> {
-  const results = await encounterDb.find({ roomId } as Q);
-  const live = results.filter((e) => e.status !== "resolved");
-  return live[0] ?? null;
+  return await findRoomEncounter(roomId, {
+    store: cofdEncounterStore,
+  });
 }
+
+/** Return the glamour spending limit per turn based on Changeling Wyrd (powerStatValue). */
+export function glamourSpendLimit(wyrd: number): number {
+  const w = Math.max(1, Math.min(10, Math.floor(wyrd)));
+  const limits: Record<number, number> = {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 10,
+    10: 15,
+  };
+  return limits[w] ?? 1;
+}
+

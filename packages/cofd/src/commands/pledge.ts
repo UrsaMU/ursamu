@@ -445,13 +445,17 @@ async function pledgeAccept(u: IUrsamuSDK, id: string): Promise<void> {
         // Detect court name or default
         let courtName = "court";
         const words = pledge.statement.split(" ");
-        const idx = words.findIndex((w) => w.toLowerCase() === "court");
+        const idx = words.findIndex(
+          (w) => w.toLowerCase() === "court",
+        );
         if (idx > 0) courtName = words[idx - 1];
-        const key = `mantle (${courtName.toLowerCase()})`;
+        const key = `mantle:${courtName.toLowerCase()}`;
         if (!sheet.merits[key]) {
           sheet.merits[key] = 1;
           await persistSheet(u, u.me.id, sheet);
-          u.send(`You gained the first dot of %chMantle (${courtName})%cn!`);
+          u.send(
+            `You gained the first dot of %chMantle (${courtName})%cn!`,
+          );
         }
       }
     }
@@ -485,6 +489,10 @@ async function pledgeRefute(u: IUrsamuSDK, id: string): Promise<void> {
   const isFae = sheet ? isChangelingSheet(sheet) : false;
 
   if (isFae && pledge.kind === "seal") {
+    if (!sheet) {
+      u.send("No character sheet.");
+      return;
+    }
     if (sheet.energyCurrent < 1) {
       u.send("Not enough Glamour to refute the seal.");
       return;

@@ -323,7 +323,6 @@
     "resolution": "Either fully embrace or fully renounce the pleasure in play.",
     "beats": 1
   },
-
   "arm-wrack": {
     "name": "Arm Wrack",
     "category": "tilt-personal",
@@ -432,7 +431,6 @@
     "resolution": "Scene ends, or the character acts again.",
     "beats": 0
   },
-
   "blizzard": {
     "name": "Blizzard",
     "category": "tilt-environmental",
@@ -611,6 +609,33 @@
     "description": "Clarity 1 breakpoint. Parts of the self feel hollowed out by dream predators or Arcadia.",
     "effect": "-1 to all dice pools; cannot spend Willpower for +3 until resolved.",
     "resolution": "Recover an Icon, seal a new Touchstone, or complete a major Clarity healing scene.",
+    "beats": 1
+  },
+  "frightened": {
+    "name": "Frightened",
+    "category": "condition",
+    "persistent": false,
+    "description": "Overwhelmed by fear (Bedlam / Autumn).",
+    "effect": "Must flee or freeze; -2 to actions not about escaping the source.",
+    "resolution": "Escape the source of fear or scene ends.",
+    "beats": 1
+  },
+  "lethargic": {
+    "name": "Lethargic",
+    "category": "condition",
+    "persistent": false,
+    "description": "Sorrowful numbness (Bedlam / Winter).",
+    "effect": "-2 to Initiative and physical actions; cannot spend Willpower for dice.",
+    "resolution": "Scene ends or something rekindles strong emotion.",
+    "beats": 1
+  },
+  "ravaged": {
+    "name": "Ravaged",
+    "category": "condition",
+    "persistent": false,
+    "description": "Emotions ripped away by a reaping (CtL p.103).",
+    "effect": "Severe lethargy; -2 to Social and Resolve rolls until rest.",
+    "resolution": "A full night's rest or emotional breakthrough (ST).",
     "beats": 1
   }
 }

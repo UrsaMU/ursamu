@@ -1,6 +1,6 @@
 // Tests for Changeling pledges (seals, oaths, bargains).
 
-import { assertEquals, assert } from "jsr:@std/assert@1";
+import { assertEquals, assert } from "@std/assert";
 import { defaultSheet } from "../src/stats/index.ts";
 import { pledgeCommand } from "../src/commands/pledge.ts";
 import { listPledges, pledgeDb } from "../src/pledges/index.ts";
@@ -198,4 +198,72 @@ Deno.test("Bargain creation - requires mien form", OPTS, async () => {
 
   const alSheet = alice.state.cofd as ReturnType<typeof defaultSheet>;
   assert(alSheet.conditions?.some((c) => c.key === "obliged"));
+});
+
+Deno.test("Seal - non-changeling rejected", OPTS, async () => {
+  await clearDb();
+  const store = new MockObjectStore();
+  const mortal = mockPlayer({
+    id: "1",
+    name: "Mortal",
+    state: { cofd: defaultSheet() },
+  });
+  const bob = mockPlayer({
+    id: "2",
+    name: "Bob",
+    state: { cofd: defaultSheet() },
+  });
+  store.put(mortal);
+  store.put(bob);
+
+  const u = mockU({
+    me: mortal,
+    args: ["seal", "Bob=Keep quiet/1 bashing"],
+    targetResult: bob,
+    objectStore: store,
+  });
+  await pledgeCommand(u);
+
+  assert(u._sent.some((m) => m.includes("Wyrd") || m.includes("changeling")));
+  const plgs = await listPledges();
+  assertEquals(plgs.length, 0);
+});
+
+Deno.test("Oath accept - societal court oath writes mantle:<court>", OPTS, async () => {
+  await clearDb();
+  const store = new MockObjectStore();
+  const alice = mockPlayer({
+    id: "1",
+    name: "Alice",
+    state: { cofd: changelingSheet() },
+  });
+  const charlie = mockPlayer({
+    id: "3",
+    name: "Charlie",
+    state: { cofd: changelingSheet() },
+  });
+  store.put(alice);
+  store.put(charlie);
+
+  const u = mockU({
+    me: alice,
+    args: ["oath", "societal/Charlie=join Spring court/first dance/oathbreaker"],
+    targetResult: charlie,
+    objectStore: store,
+  });
+  await pledgeCommand(u);
+
+  const plgs = await listPledges();
+  assertEquals(plgs.length, 1);
+
+  const u2 = mockU({
+    me: charlie,
+    args: ["accept", plgs[0].id],
+    objectStore: store,
+  });
+  await pledgeCommand(u2);
+
+  const charSheet = charlie.state.cofd as ReturnType<typeof defaultSheet>;
+  // Mantle key must be `mantle:<court>` to match contract prereq checks
+  assertEquals(charSheet.merits["mantle:spring"], 1);
 });

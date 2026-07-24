@@ -19,12 +19,10 @@ export interface TiltCatalogEntry {
   ending: string;
 }
 
-const catalogUrl = new URL("../../resources/tilts.json", import.meta.url);
+import catalogData from "../../resources/tilts.json" with { type: "json" };
 
 /** Catalog of every known Tilt, keyed by lowercase-kebab slug. */
-export const TILTS: Record<string, TiltCatalogEntry> = JSON.parse(
-  Deno.readTextFileSync(catalogUrl),
-);
+export const TILTS: Record<string, TiltCatalogEntry> = catalogData as Record<string, TiltCatalogEntry>;
 
 /** Returns the catalog entry for a key, or undefined if unknown. */
 export function lookupTilt(key: string): TiltCatalogEntry | undefined {

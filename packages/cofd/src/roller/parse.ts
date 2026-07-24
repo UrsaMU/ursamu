@@ -89,6 +89,20 @@ export function resolveTrait(token: string, sheet: CofdSheet): ResolvedTrait | n
       value: sheet.advantages.willpowerCurrent,
     };
   }
+  // CtL Mantle (own court) for Contract dice pools.
+  if (t === "mantle") {
+    const court = (sheet.customFields?.court ?? "")
+      .toLowerCase()
+      .trim();
+    const key = court ? `mantle:${court}` : "mantle";
+    const v = Math.max(
+      0,
+      (sheet.merits ?? {})[key] ??
+        (sheet.merits ?? {})["mantle"] ??
+        0,
+    );
+    return { label: "Mantle", base: v, value: v };
+  }
   return null;
 }
 
@@ -242,6 +256,23 @@ export function parseRollExpression(
       pool += sign === "-" ? -dots : dots;
       const powerTitle = traitToken.replace(/\b\w/g, c => c.toUpperCase());
       terms.push(`${powerTitle}(${dots})`);
+      continue;
+    }
+
+    // CtL Mantle (own court merit dots).
+    if (traitToken === "mantle") {
+      const court = (sheet.customFields?.court ?? "")
+        .toLowerCase()
+        .trim();
+      const key = court ? `mantle:${court}` : "mantle";
+      const dots = Math.max(
+        0,
+        (sheet.merits ?? {})[key] ??
+          (sheet.merits ?? {})["mantle"] ??
+          0,
+      );
+      pool += sign === "-" ? -dots : dots;
+      terms.push(`Mantle(${dots})`);
       continue;
     }
 

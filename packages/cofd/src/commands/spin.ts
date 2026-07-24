@@ -58,13 +58,15 @@ async function spinList(u: IUrsamuSDK): Promise<void> {
     "  Pool: Wits + Crafts|Occult + Wyrd.",
   ];
   for (const e of listSpinEffects()) {
+    const tag = e.kind === "paradigm" ? "%crP%cn" : "S";
     lines.push(
-      `  %cy${e.slug}%cn  ${e.name}  ` +
+      `  ${tag} %cy${e.slug}%cn  ${e.name}  ` +
         `${e.glamour}G  need ${e.target}`,
     );
-    lines.push(`    ${e.description.slice(0, 70)}`);
+    lines.push(`    ${e.description.slice(0, 68)}`);
   }
-  lines.push("  +spin <effect> [veil text]");
+  lines.push("  S=subtle  P=paradigm (Hedge contests)");
+  lines.push("  +spin <effect> [veil/scenery text]");
   lines.push("  +spin/info <effect>");
   u.send(lines.join("\n"));
 }
@@ -85,11 +87,14 @@ async function spinInfo(
   u.send(
     [
       await divider(e.name.toUpperCase()),
-      `  Slug: ${e.slug}  Cost: ${e.glamour} Glamour`,
-      `  Target: ${e.target} successes`,
+      `  Slug: ${e.slug}  Kind: ${e.kind}`,
+      `  Cost: ${e.glamour} Glamour  Target: ${e.target}`,
       `  ${e.description}`,
       `  ${e.book}`,
-    ].join("\n"),
+      e.kind === "paradigm"
+        ? "  Paradigm: Hedge contests your roll."
+        : "",
+    ].filter(Boolean).join("\n"),
   );
 }
 
@@ -167,6 +172,7 @@ async function spinAttempt(
     inHedge,
     successes,
     veilText: extra || undefined,
+    danger: roomMeta?.danger ?? "hedge",
   });
 
   if (r.sheet) {

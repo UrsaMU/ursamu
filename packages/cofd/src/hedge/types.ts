@@ -26,6 +26,14 @@ export interface HedgeRoom {
      * (+hedge/escape).
      */
     escapeRoomId?: string;
+    /**
+     * Shadow Garden: fruit copies pending reappear.
+     */
+    shadowPending?: {
+      slug: string;
+      eatenAt: number;
+      readyAt: number;
+    }[];
   };
   /** Optional look / status flavor (fae / true layer). */
   flavor?: string;

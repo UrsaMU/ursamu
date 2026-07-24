@@ -67,4 +67,9 @@ describe("parseWeaponTags", () => {
   it("parses Slow", () => {
     assertEquals(parseWeaponTags("Slow, Stun").slow, true);
   });
+
+  it("parses cold iron", () => {
+    assertEquals(parseWeaponTags("Cold iron, slow").coldIron, true);
+    assertEquals(parseWeaponTags("coldiron").coldIron, true);
+  });
 });

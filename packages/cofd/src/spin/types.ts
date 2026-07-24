@@ -1,4 +1,4 @@
-// Hedgespinning — reshape the Hedge (CtL 2e, simplified).
+// Hedgespinning — reshape the Hedge (CtL 2e Subtle + Paradigm).
 
 /** Catalog effects players can attempt. */
 export type SpinEffect =
@@ -7,14 +7,31 @@ export type SpinEffect =
   | "barrier"
   | "veil"
   | "fruit"
-  | "trap";
+  | "trap"
+  | "equipment"
+  | "armor"
+  | "weapon"
+  | "guide"
+  | "tilt"
+  | "edge"
+  | "terrain"
+  | "goblin-fruit"
+  | "env-tilt"
+  | "scenery"
+  | "danger-step";
+
+export type SpinKind = "subtle" | "paradigm";
 
 export interface SpinEffectDef {
   slug: SpinEffect;
   name: string;
-  /** Glamour cost. */
+  kind: SpinKind;
+  /** Glamour cost to attempt. */
   glamour: number;
-  /** Target successes (extended-style single roll). */
+  /**
+   * Successes that must be spent from the roll to buy this effect
+   * (book cost table). Target = this value for the resolve check.
+   */
   target: number;
   description: string;
   /** Requires room realm hedge or hollow. */
@@ -36,67 +53,7 @@ export interface SpinResult {
   fruitSlug?: string;
   /** Nav flag key applied on path success. */
   navBonusKey?: string;
+  /** Hedge contested the paradigm shift. */
+  hedgeContested?: boolean;
+  hedgeSuccesses?: number;
 }
-
-export const SPIN_EFFECTS: readonly SpinEffectDef[] = [
-  {
-    slug: "path",
-    name: "Carve a Path",
-    glamour: 1,
-    target: 2,
-    description:
-      "Open a clearer way. Next +hedge/travel gains +2.",
-    needsHedge: true,
-    book: "CtL Hedgespinning",
-  },
-  {
-    slug: "shelter",
-    name: "Raise Shelter",
-    glamour: 2,
-    target: 3,
-    description:
-      "Shape cover. Room danger softens toward trod (ST).",
-    needsHedge: true,
-    book: "CtL Hedgespinning",
-  },
-  {
-    slug: "barrier",
-    name: "Thorn Barrier",
-    glamour: 2,
-    target: 3,
-    description:
-      "Wall of thorns. Block a direction (RP / ST).",
-    needsHedge: true,
-    book: "CtL Hedgespinning",
-  },
-  {
-    slug: "veil",
-    name: "Veil the Glade",
-    glamour: 1,
-    target: 2,
-    description:
-      "Mask room flavor for a scene (maskFlavor set).",
-    needsHedge: true,
-    book: "CtL Hedgespinning",
-  },
-  {
-    slug: "fruit",
-    name: "Coax Fruit",
-    glamour: 2,
-    target: 3,
-    description:
-      "Wring a common goblin fruit from the thorns.",
-    needsHedge: true,
-    book: "CtL Hedgespinning",
-  },
-  {
-    slug: "trap",
-    name: "Snare",
-    glamour: 2,
-    target: 3,
-    description:
-      "Lay a snare. Next foe may take Ambushed (ST).",
-    needsHedge: true,
-    book: "CtL Hedgespinning",
-  },
-];

@@ -1,7 +1,6 @@
 // Chrysalis animal catalog + unlock / apply helpers (CtL 2e).
 
-const url = new URL("../../resources/animals.json", import.meta.url);
-const data = JSON.parse(Deno.readTextFileSync(url));
+import data from "../../resources/animals.json" with { type: "json" };
 
 export interface AnimalForm {
   readonly slug: string;

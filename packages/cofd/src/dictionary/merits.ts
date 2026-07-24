@@ -18,9 +18,9 @@ export interface MeritDefinition {
   tags?: string[];
 }
 
-const meritsUrl = new URL("../../resources/merits.json", import.meta.url);
+import meritsData from "../../resources/merits.json" with { type: "json" };
 
-export const COFD_MERITS: MeritDefinition[] = JSON.parse(Deno.readTextFileSync(meritsUrl));
+export const COFD_MERITS: MeritDefinition[] = meritsData as MeritDefinition[];
 
 /**
  * Result of parsing a merit reference like `language(spanish)` or

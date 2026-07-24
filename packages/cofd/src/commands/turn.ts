@@ -15,8 +15,9 @@
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
 import {
   advanceTurn,
-  encounterDb,
   getEncounterForRoom,
+  patchEncounter,
+  setReactionPosture,
 } from "../combat/encounter.ts";
 import { advanceTurnSmart } from "../combat/walker.ts";
 import type { ReactionPosture } from "../combat/types.ts";
@@ -27,9 +28,6 @@ const VALID_POSTURES: Set<ReactionPosture["type"]> = new Set([
   "guard",
   "first-fire-on-adjacent",
 ]);
-
-// deno-lint-ignore no-explicit-any
-type Q = any;
 
 function isStaff(actor: IDBObj): boolean {
   const f = actor.flags as Set<string> | undefined;
@@ -94,8 +92,7 @@ async function turnAuto(u: IUrsamuSDK, rest: string): Promise<void> {
   if (!isNaN(n) && n > 0) maxRounds = Math.min(50, n);
 
   // Patch maxRounds onto the encounter for the walker's safety check.
-  const patched = { ...enc, maxRounds };
-  await encounterDb.update({ id: enc.id } as Q, patched);
+  await patchEncounter(enc.id, { maxRounds });
 
   await advanceTurnSmart(enc.id, u);
   u.send(`%cyTURN>>%cn Auto-pump complete (max ${maxRounds} rounds).`);
@@ -139,15 +136,14 @@ async function turnReaction(u: IUrsamuSDK, rest: string): Promise<void> {
   const myP = enc.participants.find((p) => p.actorId === u.me.id);
   if (!myP) { u.send("You are not in this encounter."); return; }
 
-  const participants = enc.participants.map((p) =>
-    p.actorId === u.me.id
-      ? { ...p, reactionPosture: { type: posture, ...(targetId ? { targetId } : {}) } }
-      : p
-  );
-  await encounterDb.update({ id: enc.id } as Q, { ...enc, participants });
+  await setReactionPosture(enc.id, u.me.id, {
+    type: posture,
+    ...(targetId ? { targetId } : {}),
+  });
 
   const tgtPart = targetId ? ` (target: ${targetId})` : "";
-  const msg = `%cyREACTION>>%cn ${myP.name} takes the ${posture} posture${tgtPart}.`;
+  const msg =
+    `%cyREACTION>>%cn ${myP.name} takes the ${posture} posture${tgtPart}.`;
   u.broadcast(msg);
 }
 

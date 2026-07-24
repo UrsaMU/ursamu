@@ -1,0 +1,13 @@
+{
+  "key": "huntsman",
+  "name": "Huntsman",
+  "moralityName": "Integrity",
+  "powerStatName": "Wyrd",
+  "energyName": "Glamour",
+  "customFields": [
+    "title",
+    "aspiration"
+  ],
+  "validPowers": [],
+  "energyMaxFormulaType": "standard"
+}

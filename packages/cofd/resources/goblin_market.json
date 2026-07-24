@@ -1,7 +1,7 @@
 {
   "version": "ctl-2e-goblin-market",
   "notes": {
-    "source": "Changeling: The Lost 2e — Goblin Markets",
+    "source": "Changeling: The Lost 2e \u2014 Goblin Markets",
     "debt": "Buying on credit adds Goblin Debt; called debts demand service."
   },
   "goods": [
@@ -88,6 +88,98 @@
       "priceDebt": 2,
       "defaultStock": 3,
       "book": "CtL iron"
+    },
+    {
+      "slug": "odinroot",
+      "name": "Odinroot",
+      "kind": "fruit",
+      "fruitSlug": "odinroot",
+      "description": "Thorn-blood root; Glamour+WP, Clarity risk.",
+      "priceGlamour": 3,
+      "priceDebt": 2,
+      "defaultStock": 2,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "ogre-pepper",
+      "name": "Ogre Pepper",
+      "kind": "fruit",
+      "fruitSlug": "ogre-pepper",
+      "description": "Fiery pepper that steels the tongue.",
+      "priceGlamour": 2,
+      "priceDebt": 2,
+      "defaultStock": 3,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "vines-of-bacchus",
+      "name": "Vines of Bacchus",
+      "kind": "fruit",
+      "fruitSlug": "vines-of-bacchus",
+      "description": "Intoxicating vine-fruit.",
+      "priceGlamour": 2,
+      "priceDebt": 2,
+      "defaultStock": 3,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "jennystone",
+      "name": "Jennystone",
+      "kind": "fruit",
+      "fruitSlug": "jennystone",
+      "description": "Stone-fruit oddment.",
+      "priceGlamour": 2,
+      "priceDebt": 1,
+      "defaultStock": 2,
+      "book": "CtL p.209"
+    },
+    {
+      "slug": "cogleaf",
+      "name": "Cogleaf",
+      "kind": "fruit",
+      "fruitSlug": "cogleaf",
+      "description": "Metallic repair leaf.",
+      "priceGlamour": 2,
+      "priceDebt": 1,
+      "defaultStock": 2,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "lancebeet",
+      "name": "Lancebeet",
+      "kind": "fruit",
+      "fruitSlug": "lancebeet",
+      "description": "Throwable beet or Glamour snack.",
+      "priceGlamour": 2,
+      "priceDebt": 1,
+      "defaultStock": 3,
+      "book": "CtL p.209"
+    },
+    {
+      "slug": "soul-compass",
+      "name": "Soul-Compass",
+      "kind": "token",
+      "description": "Hedge-forged Token: points toward a named Icon or lost thing (ST).",
+      "priceGlamour": 5,
+      "priceDebt": 3,
+      "defaultStock": 1,
+      "book": "CtL p.224",
+      "tokenRating": 3,
+      "catch": "Bleed on the needle",
+      "drawback": "Huntsmen sense the bearing"
+    },
+    {
+      "slug": "seeing-stone",
+      "name": "Seeing Stone",
+      "kind": "token",
+      "description": "Oath-forged Token: pierce one Mask for a scene (ST Clash).",
+      "priceGlamour": 4,
+      "priceDebt": 3,
+      "defaultStock": 1,
+      "book": "CtL p.224",
+      "tokenRating": 2,
+      "catch": "Name a secret of the target",
+      "drawback": "Your eyes glow for a day"
     }
   ]
 }

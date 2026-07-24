@@ -163,7 +163,7 @@ export const plugin: IPlugin = {
   dependencies: [
     { name: "help", version: ">=1.0.0" },
     { name: "jobs", version: ">=0.1.0" },
-    { name: "combat", version: ">=0.1.0" },
+    { name: "combat", version: ">=0.8.0" },
   ],
 
   init: () => {

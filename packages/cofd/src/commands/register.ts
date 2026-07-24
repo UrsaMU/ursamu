@@ -22,7 +22,7 @@ import {
   unapproveExec,
 } from "./approve.ts";
 import { notesExec } from "./notes.ts";
-import { gearExec, gearReload, gearEquip, gearUnequip, gearView } from "./gear.ts";
+import { gearExec, gearReload, gearEquip, gearUnequip, gearView, tokenExec } from "./gear.ts";
 import { tiltExec } from "./tilt.ts";
 import { proveExec } from "./prove.ts";
 import { combatExec } from "./combat.ts";
@@ -47,6 +47,15 @@ import { spinCommand } from "./spin.ts";
 import { infoExec } from "./info.ts";
 import { pledgeCommand } from "./pledge.ts";
 import { kenningExec } from "./kenning.ts";
+import { harvestExec, reapExec } from "./harvest.ts";
+import { bedlamExec } from "./bedlam.ts";
+import { clashExec } from "./clash.ts";
+import { frailtyExec } from "./frailty.ts";
+import { dreamCommand } from "./dream.ts";
+import { fetchCommand } from "./fetch_cmd.ts";
+import { huntCommand } from "./hunt.ts";
+import { mantleCommand } from "./mantle_cmd.ts";
+import { hobCommand } from "./hob.ts";
 
 addCmd({
   name: "+extended",
@@ -429,6 +438,8 @@ Switches:
   /split <#>=<n> [for <player>]          Split <n> rounds off an ammo stack.
   /damage <#|name>[=<n>] [for <player>]  Apply <n> damage; soaks by Durability.
   /repair <#|name>[=<n>] [for <player>]  Repair <n> hp; clamps to max.
+  /token/create <name>=<rating>/<catch>/<drawback> [for <player>] (Staff)
+  /token/activate[/catch] <#|name|id>    Activate token (Glamour cost or Catch).
 
 Native get/drop/give handle moving items between players and the room.
 Firearms track their own ammo; firing decrements, /reload consumes a stack.
@@ -450,6 +461,24 @@ More:
   help gear durability           Soak math, broken state, repair.
   help gear reload               Reload mechanics and ammo consumption.`,
   exec: gearExec,
+});
+
+addCmd({
+  name: "+token",
+  pattern: /^\+token(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+token[/<switch>] <ref>  -- Activate or create Hedgespun Tokens.
+
+Switches:
+  /catch           Activate the token by invoking its Catch (no Glamour cost).
+  /create          Staff: Create a new custom token in player's inventory.
+
+Examples:
+  +token Hedge Ring
+  +token/catch 1
+  +token/create Golden Apple=3/Eat a worm/Get paranoid`,
+  exec: tokenExec,
 });
 
 addCmd({
@@ -864,7 +893,6 @@ Examples:
   exec: zoneExec,
 });
 
-
 addCmd({
   name: "+kenning",
   pattern: /^\+kenning(?:\/(\S+))?\s*(.*)/i,
@@ -894,20 +922,248 @@ addCmd({
 Switches:
   (none) / list          Contracts on your sheet.
   /info <name>           Catalog detail for a Contract.
+  /loophole <name>       Invoke using the listed loophole (0 Glamour).
   /learn <name>          Learn contract with XP (checks prerequisites).
   /grant <player>=<name> Staff: Grant a contract directly.
   <name>                 Invoke (pay cost; roll pool if any).
+  <name> on <target>     Inflict Conditions/Tilts on a target.
 
 While Mask is down (+shift mien), successful Contract rolls count
-as exceptional (successes floored at Wyrd). Requires the Contract
-on your sheet (chargen or staff).
+as exceptional (successes floored at Wyrd). Seeming clauses print
+when your seeming matches. Named Conditions/Tilts in effect text
+auto-apply on success (self or on <target>).
 
 Examples:
   +contract
-  +contract/info Chrysalis
-  +contract Mask of Superiority
-  +contract Chrysalis`,
+  +contract/loophole Hostile Takeover
+  +contract Paralyzing Presence on Bob
+  +contract Tale of the Baba Yaga on Alice`,
   exec: contractExec,
+});
+
+addCmd({
+  name: "+harvest",
+  pattern: /^\+harvest(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+harvest [target][=pool]  -- Harvest Glamour from emotion (CtL).
+
+Roll Presence+Empathy (or =custom pool). Each success = 1 Glamour.
+Cannot harvest fae. Reaping is predatory:
+
+  +harvest/reap <target>  Fill Glamour; target loses WP=Wyrd,
+                          gains Ravaged; you take a breaking point.
+
+Examples:
+  +harvest
+  +harvest Alice
+  +harvest Bob=Manipulation+Subterfuge
+  +harvest/reap Charlie`,
+  exec: harvestExec,
+});
+
+addCmd({
+  name: "+reap",
+  pattern: /^\+reap(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+reap <target>  -- Rip Glamour from a non-fae target (CtL).
+
+Alias of +harvest/reap. Touch required (RP). Fills your Glamour,
+drains Willpower equal to Wyrd, applies Ravaged, breaking point.
+
+Examples:
+  +reap Alice`,
+  exec: async (u) => {
+    const rest = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
+    await reapExec(u, rest);
+  },
+});
+
+addCmd({
+  name: "+bedlam",
+  pattern: /^\+bedlam(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+bedlam <emotion> [+G]  -- Incite Bedlam (CtL p.110).
+
+Cost 1 Glamour + 1 Willpower. Pool Manipulation+Wyrd
+(+Pandemoniacal, +extra Glamour dice up to 5). Contests each
+PC in the room (Composure+Wyrd). Emotions:
+
+  desire/spring → Wanton   wrath/summer → Competitive
+  fear/autumn   → Frightened   sorrow/winter → Lethargic
+
+Examples:
+  +bedlam fear
+  +bedlam desire 2`,
+  exec: bedlamExec,
+});
+
+addCmd({
+  name: "+clash",
+  pattern: /^\+clash(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+clash <target> [reason]  -- Clash of Wills (CtL p.126).
+
+Both sides roll Power Stat + higher of Resolve/Composure.
+Higher successes win; ties cancel.
+
+Examples:
+  +clash Alice
+  +clash Bob masking contest`,
+  exec: clashExec,
+});
+
+addCmd({
+  name: "+frailty",
+  pattern: /^\+frailty(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+frailty  -- List Wyrd frailties (taboos and banes).
+
+  +sheet/set frailty=taboo: never break bread with liars
+  +sheet/set frailty=bane: cold iron
+  +frailty/iron   Cold iron rules summary
+  +frailty/check <text>   Parse a frailty line
+
+Acting against a frailty source costs 1 WP/action and
+−3 dice (−5 major). Cold iron deals aggravated to Lost.
+
+Examples:
+  +frailty
+  +frailty/iron`,
+  exec: frailtyExec,
+});
+
+addCmd({
+  name: "+dream",
+  pattern: /^\+dream(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+dream[/sw]  -- Oneiromancy: Bastions and weaves (CtL).
+
+  (none)              Dream form / Bastion status.
+  /ivory              Gate of Ivory (own Bastion, Res+Com).
+  /horn               Gate of Horn (from Hedge).
+  /enter <name>       Enter another's Bastion vs Fort.
+  /wake [/forced]     Leave the dreamscape.
+  /weaves             Dreamweave catalog.
+  /weave <effect>     Shape the dream (subtle/paradigm).
+  /role <text>        Take a fitting role.
+  /travel <exit>      Move on Dreaming Roads.
+  /road <name>        Staff: tag Roads node.
+  /link <lab>=<room>  Staff: link Roads exits.
+  /linkboth …         Staff: bidirectional link.
+  /bastion <n>[=f]    Staff: tag room as Bastion.
+
+Examples:
+  +dream/ivory
+  +dream/weave memory
+  +dream/travel moon-arch
+  +dream/enter Alice
+  +dream/wake`,
+  exec: dreamCommand,
+});
+
+addCmd({
+  name: "+fetch",
+  pattern: /^\+fetch(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+fetch[/sw]  -- Fetches and Echoes (CtL p.233).
+
+  (none)              Status (link or fetch sheet).
+  /echoes             Echo catalog.
+  /echo <slug> [note] Activate Echo (fetch sheet).
+  /flaw <text>        Set human flaw.
+  /met                Met original face-to-face.
+  /create <ch>=<Name>[/flaw][/mat] [for <p>]  Staff.
+  /link <ch>=<fetch>  Staff link sheets.
+  /mode <p>=adversary|other-half|hard-lesson
+  /grant-echo <p>=<slug>
+
+Examples:
+  +fetch
+  +fetch/echo summon-shard
+  +fetch/create Bob=Bobby/empty smile for FetchBot`,
+  exec: fetchCommand,
+});
+
+addCmd({
+  name: "+hunt",
+  pattern: /^\+hunt(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+hunt[/sw]  -- Wild Hunt and Huntsman powers (CtL).
+
+  (none)              Hunt status (quarry or Huntsman).
+  /powers             Huntsman Dread Power catalog.
+  /power <slug>       Activate a power.
+  /track <quarry>     Advance hunt (Wits+Survival+Wyrd).
+  /read [<quarry>]    Kindred Spirits readout.
+  /mark <ch>=<hunter> Staff: begin a hunt.
+  /end [<who>]        End the hunt.
+  /create <player>    Staff: make Huntsman sheet.
+  /grant <p>=<slug>   Staff: grant a power.
+
+Mask-down quarry adds their Wyrd to track pools.
+Progress 1–10: scent → trail → closing → cornered.
+
+Examples:
+  +hunt/track Alice
+  +hunt/power kindred-spirits
+  +hunt/mark Bob=TheVerderer`,
+  exec: huntCommand,
+});
+
+addCmd({
+  name: "+mantle",
+  pattern: /^\+mantle(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+mantle  -- Court Mantle bonuses (CtL p.117–118).
+
+  (none)                 Show court Mantle dots and bonuses.
+  /glamour <note>        +1 Glamour court emotion (1/scene).
+  /debt                  Autumn•••• wipe Goblin Debt (1/story).
+  /clarity               Spring••••• convert Clarity Cond.
+
+Dice auto on +roll. High-dot:
+  Summer••• /protect armor  Summer••••• /defend agg
+  Autumn••• Contract −1G vs Fae  Winter••••• no wound pen
+
+Examples:
+  +mantle
+  +mantle/debt
+  +mantle/clarity
+  +attack Bob/defend
+  +roll/protect`,
+  exec: mantleCommand,
+});
+
+addCmd({
+  name: "+hob",
+  pattern: /^\+hob(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+hob[/sw]  -- Hobgoblins (CtL p.252 light).
+
+  (none)              Status (if hobgoblin sheet).
+  /concepts           Concept list.
+  /powers             Dread Power catalog keys.
+  /power <key>        Activate a known power.
+  /create <p>=Name/concept[/wyrd]  Staff.
+  /grant <p>=<key>    Staff grant Dread Power.
+
+Concepts: trickster, merchant, predator, guardian,
+crafter, custom. NPC: hobgoblin-trader (+npc).
+
+Examples:
+  +hob/create Bob=Needlegrin/merchant/3
+  +hob/power innocuous`,
+  exec: hobCommand,
 });
 
 addCmd({
@@ -924,6 +1180,10 @@ Player:
   /hollow [list|slug]    Hollow Merit enhancements.
   /escape                Escape Route out of Hollow.
   /access                Easy Access into home Hollow (1G).
+  /route                 Route Zero (1/day path+WP in Hollow).
+  /luxury [item]         Luxury Goods pull (Hollow).
+  /garden                Shadow Garden harvest.
+  /find <gate>           Find Hidden Entry (−2).
   /travel|/forage|/fruit|/eat
 
 Builder+:
@@ -935,6 +1195,8 @@ Examples:
   +hedge/open Gate=three red leaves
   +hedge/hollow size-2
   +hedge/access
+  +hedge/route
+  +hedge/luxury rope and lantern
   +hedge/setway Gate/maskName=Old cellar door`,
   exec: hedgeExec,
 });

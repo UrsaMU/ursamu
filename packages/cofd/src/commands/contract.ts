@@ -8,13 +8,21 @@ import {
 } from "../dictionary/index.ts";
 import { favoredRegalia } from "../chargen/contracts.ts";
 import {
+  applyLoopholeCost,
   applyMienContractBoost,
   contractHasDicePool,
+  contractHasLoophole,
   contractPoolExpr,
+  matchingSeemingClauses,
   ownsContract,
   parseContractCost,
   resolveOwnedContract,
 } from "../form/contract_invoke.ts";
+import {
+  applyEffectHooks,
+  applyHooksToTarget,
+  parseEffectHooks,
+} from "../form/contract_effects.ts";
 import { isChangelingSheet, isMienActive } from "../form/index.ts";
 import {
   migrateSheet,
@@ -60,6 +68,9 @@ async function contractInfo(u: IUrsamuSDK, name: string) {
     u.send(`Unknown Contract '${name}'.`);
     return;
   }
+  const clauses = (c.seemingClauses ?? [])
+    .map((s) => `  ${s.seeming}: ${s.effect}`)
+    .join("\n");
   u.send(
     [
       await divider(c.name.toUpperCase()),
@@ -73,6 +84,8 @@ async function contractInfo(u: IUrsamuSDK, name: string) {
       c.loophole && c.loophole !== "—"
         ? `  Loophole: ${c.loophole}`
         : "",
+      clauses ? `  Seeming clauses:\n${clauses}` : "",
+      "  Invoke free via loophole: +contract/loophole <name>",
     ].filter(Boolean).join("\n"),
   );
 }
@@ -81,18 +94,53 @@ async function contractInvoke(
   u: IUrsamuSDK,
   sheet: CofdSheet,
   name: string,
+  useLoophole = false,
 ): Promise<void> {
-  const c = resolveOwnedContract(sheet, name);
+  // Optional target: "Name on Alice" (not "=" — grant uses =)
+  let contractName = name.trim();
+  let targetName = "";
+  const onM = name.match(/^(.+?)\s+on\s+(.+)$/i);
+  if (onM) {
+    contractName = onM[1].trim();
+    targetName = onM[2].trim();
+  }
+
+  const c = resolveOwnedContract(sheet, contractName);
   if (!c) {
-    if (findContract(name) && !ownsContract(sheet, name)) {
-      u.send(`You do not know '${name}'.`);
+    if (findContract(contractName) && !ownsContract(sheet, contractName)) {
+      u.send(`You do not know '${contractName}'.`);
       return;
     }
-    u.send(`Unknown or unowned Contract '${name}'.`);
+    u.send(`Unknown or unowned Contract '${contractName}'.`);
     return;
   }
 
-  const cost = parseContractCost(c.cost);
+  if (useLoophole && !contractHasLoophole(c)) {
+    u.send(`'${c.name}' has no listed loophole.`);
+    return;
+  }
+
+  const baseCost = parseContractCost(c.cost);
+  let cost = applyLoopholeCost(baseCost, useLoophole);
+  // Autumn Mantle •••: −1 Glamour vs Fae (target changeling/fetch/huntsman)
+  if (targetName && cost.glamour > 0) {
+    try {
+      const { mantleContractGlamourDiscount } = await import(
+        "../form/mantle_high.ts"
+      );
+      const tProbe = await u.util.target(u.me, targetName, true);
+      const tSheet = tProbe ? getSheet(tProbe) : null;
+      const tmpl = (tSheet?.template ?? "").toLowerCase();
+      const vsFae = tmpl === "changeling" || tmpl === "fetch" ||
+        tmpl === "huntsman" || tmpl === "hobgoblin";
+      const disc = mantleContractGlamourDiscount(sheet, vsFae);
+      if (disc > 0) {
+        cost = { ...cost, glamour: Math.max(0, cost.glamour - disc) };
+      }
+    } catch {
+      // ignore
+    }
+  }
   if ((sheet.energyCurrent ?? 0) < cost.glamour) {
     u.send(
       `Not enough Glamour (need ${cost.glamour}, have ` +
@@ -126,7 +174,7 @@ async function contractInvoke(
     }
   }
 
-  const next: CofdSheet = {
+  let next: CofdSheet = {
     ...sheet,
     energyCurrent: (sheet.energyCurrent ?? 0) - cost.glamour,
     advantages: {
@@ -138,6 +186,11 @@ async function contractInvoke(
 
   const lines: string[] = [];
   lines.push(`You invoke %ch${c.name}%cn.`);
+  if (useLoophole) {
+    lines.push(
+      `  Loophole: ${c.loophole} (Glamour waived).`,
+    );
+  }
   if (cost.glamour || cost.willpower) {
     const bits: string[] = [];
     if (cost.glamour) bits.push(`Glamour -${cost.glamour}`);
@@ -146,17 +199,21 @@ async function contractInvoke(
       `  ${bits.join(", ")}  (Glamour ${next.energyCurrent}, ` +
         `WP ${next.advantages.willpowerCurrent}).`,
     );
+  } else if (!useLoophole) {
+    lines.push("  No cost.");
   }
 
+  let succ = 1; // no-pool contracts count as success if paid
   if (contractHasDicePool(c)) {
     const expr = contractPoolExpr(c);
     const parsed = parseRollExpression(expr, next);
     if (parsed.error) {
       lines.push(`  Pool error: ${parsed.error}`);
       lines.push(`  Effect (ST): ${c.effect}`);
+      succ = 0;
     } else {
       const roll = executeRoll(parsed.pool);
-      let succ = roll.successes;
+      succ = roll.successes;
       let exceptional = roll.exceptional;
       let boostNote = "";
       if (succ > 0 && isMienActive(next)) {
@@ -184,6 +241,70 @@ async function contractInvoke(
     lines.push(`  ${c.effect}`);
     if (isMienActive(next)) {
       lines.push("  Mask down: impress Door on witnesses — ST.");
+    }
+  }
+
+  for (const sc of matchingSeemingClauses(next, c)) {
+    lines.push(`  Seeming (${sc.seeming}): ${sc.effect}`);
+  }
+
+  // Auto Conditions/Tilts from effect text
+  const hooks = parseEffectHooks(c.effect);
+  if (hooks.length && succ > 0) {
+    const inflict = /\b(target|victim|foe|enemy|audience)\b/i
+      .test(c.effect);
+    if (inflict && targetName) {
+      const t = await u.util.target(u.me, targetName, true);
+      if (t) {
+        const tSheet = getSheet(t);
+        if (tSheet) {
+          const r = applyHooksToTarget(
+            tSheet,
+            c.effect,
+            succ,
+            c.name,
+          );
+          if (r.applied.length) {
+            await u.db.modify(t.id, "$set", {
+              "data.cofd": r.sheet,
+            });
+            lines.push(
+              `  On ${u.util.displayName(t, u.me)}:`,
+            );
+            lines.push(...r.lines.map((l) => `  ${l}`));
+          }
+        }
+      } else {
+        lines.push(`  Target '${targetName}' not found.`);
+      }
+      // Self-buffs still on enactor
+      const selfR = applyEffectHooks(next, c.effect, {
+        successes: succ,
+        onTarget: false,
+        note: c.name,
+      });
+      next = selfR.sheet;
+      for (const l of selfR.lines) {
+        if (l.includes("Inspired") || l.includes("Steadfast") ||
+          l.includes("Wanton")) {
+          lines.push(l);
+        }
+      }
+    } else if (!inflict) {
+      const r = applyEffectHooks(next, c.effect, {
+        successes: succ,
+        note: c.name,
+      });
+      next = r.sheet;
+      lines.push(...r.lines);
+    } else {
+      // Inflict but no target — list hooks for ST
+      lines.push(
+        "  Effect hooks (name a target: +contract Name on X):",
+      );
+      for (const h of hooks) {
+        lines.push(`    ${h.kind}: ${h.name}`);
+      }
     }
   }
 
@@ -442,6 +563,14 @@ export async function contractExec(u: IUrsamuSDK): Promise<void> {
       return;
     }
     await contractInfo(u, rest);
+    return;
+  }
+  if (sw === "loophole" || sw === "catch") {
+    if (!rest) {
+      u.send("Usage: +contract/loophole <name>");
+      return;
+    }
+    await contractInvoke(u, sheet, rest, true);
     return;
   }
 
