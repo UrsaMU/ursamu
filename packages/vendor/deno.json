@@ -1,16 +1,22 @@
 {
   "name": "@ursamu/vendor-plugin",
-  "version": "1.0.0",
-  "description": "Generic Shop Vendor plugin for UrsaMU.",
+  "version": "1.1.0",
+  "description": "Shop + grab-stall vendor plugin for UrsaMU.",
   "exports": "./index.ts",
   "tasks": {
     "test": "deno test -A --unstable-kv",
-    "check": "deno check index.ts commands.ts"
+    "check": "deno check index.ts commands.ts grab.ts helpers.ts purchase.ts types.ts"
   },
   "publish": {
     "include": [
       "index.ts",
+      "mod.ts",
       "commands.ts",
+      "grab.ts",
+      "helpers.ts",
+      "purchase.ts",
+      "catalog.ts",
+      "types.ts",
       "deno.json",
       "ursamu.plugin.json",
       "README.md"

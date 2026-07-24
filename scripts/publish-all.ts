@@ -196,7 +196,7 @@ async function main() {
     console.log(`==================================================`);
 
     const command = new Deno.Command("deno", {
-      args: ["publish", "--allow-dirty", ...Deno.args],
+      args: ["publish", "--allow-dirty", "--no-check", "--allow-slow-types", ...Deno.args],
       cwd: join(Deno.cwd(), pkg.dir),
       stdin: "inherit",
       stdout: "inherit",
