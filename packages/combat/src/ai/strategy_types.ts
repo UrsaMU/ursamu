@@ -6,7 +6,10 @@ export type AiActionKind =
   | "reload"
   | "flee"
   | "posture"
-  | "wait";
+  | "wait"
+  | "defend"
+  | "aim"
+  | "use";
 
 export type AiTargetPick =
   | "highest-threat"
@@ -39,12 +42,24 @@ export interface AiCondition {
   enemyCountEquals?: number;
   hasEnemies?: boolean;
   hasCover?: boolean;
+  /** Require all of these tags on selfView.tags. */
+  hasTags?: string[];
+  /** Fail if any of these tags are present. */
+  missingTags?: string[];
+  /** resource name → minimum value on selfView.resources. */
+  resourceAtLeast?: Record<string, number>;
+  /** resource name → maximum value. */
+  resourceAtMost?: Record<string, number>;
+  /** Match participant/view side label. */
+  sideIs?: string;
 }
 
 export interface AiActionSpec {
   action: AiActionKind;
   target?: AiTargetPick;
   posture?: AiPostureType;
+  /** Optional host mode string on the resulting CombatAction. */
+  mode?: string;
 }
 
 export interface AiRule {

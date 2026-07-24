@@ -1,7 +1,7 @@
 {
   "name": "@ursamu/combat",
-  "version": "0.3.0",
-  "description": "System-agnostic combat engine for UrsaMU \u2014 encounters, turn walker, JSON AI brains, and ports for game systems.",
+  "version": "0.8.1",
+  "description": "System-agnostic combat engine for UrsaMU \u2014 turn helpers, adapter kit, rich CombatAction/Result, walker, JSON AI, zone pathfind.",
   "exports": {
     ".": "./mod.ts"
   },
@@ -9,7 +9,7 @@
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
     "lint": "deno lint",
     "check": "deno check mod.ts --unstable-kv",
-    "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types --no-check"
+    "preflight": "deno publish --dry-run --allow-dirty"
   },
   "compilerOptions": {
     "lib": [
@@ -33,7 +33,10 @@
       "README.md"
     ],
     "exclude": [
-      "tests"
+      "tests",
+      "docs",
+      "help",
+      "test.importmap.json"
     ]
   }
 }

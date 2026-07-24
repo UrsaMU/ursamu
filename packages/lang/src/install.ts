@@ -12,6 +12,7 @@ function engineScriptsDir(): string {
 }
 
 export async function installScripts(): Promise<void> {
+  if (!import.meta.url.startsWith("file:")) return;
   const srcDir  = pluginScriptsDir();
   const destDir = engineScriptsDir();
   await Deno.mkdir(destDir, { recursive: true });

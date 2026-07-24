@@ -33,6 +33,12 @@ function memStore(initial: Encounter): EncounterStore {
       const e = map.get(id);
       return e ? structuredClone(e) : null;
     },
+    async create(enc) {
+      map.set(enc.id, structuredClone(enc));
+    },
+    async save(enc) {
+      map.set(enc.id, structuredClone(enc));
+    },
     async advanceTurn(id) {
       const enc = map.get(id);
       if (!enc || enc.status !== "active") return enc ?? null;
@@ -105,14 +111,14 @@ function makeSystem(label: string, store: EncounterStore) {
       if (!atk || !def) return { ok: false };
       def.hp = Math.max(0, def.hp - 3);
       log.push(`${label}:${atk.name}->${def.name} hp=${def.hp}`);
-      if (def.hp <= 0) {
-        await store.patchParticipant(
-          ctx.encounter.id,
-          def.id,
-          { isOut: true },
-        );
-      }
-      return { ok: true };
+      const targetOut = def.hp <= 0;
+      return {
+        ok: true,
+        damageApplied: 3,
+        targetId: action.targetId,
+        targetOut,
+        logLine: `${atk.name}->${def.name}`,
+      };
     },
     broadcast(_r, msg) {
       log.push(`${label}:bc:${msg}`);

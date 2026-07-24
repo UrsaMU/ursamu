@@ -138,6 +138,40 @@ function matchCondition(when: AiCondition, ctx: EvalCtx): boolean {
   if (when.hasCover !== undefined) {
     if (hasCover(ctx.enc) !== when.hasCover) return false;
   }
+
+  const tags = new Set(
+    (ctx.selfView.tags ?? []).map((t) => t.toLowerCase()),
+  );
+  if (when.hasTags?.length) {
+    for (const t of when.hasTags) {
+      if (!tags.has(t.toLowerCase())) return false;
+    }
+  }
+  if (when.missingTags?.length) {
+    for (const t of when.missingTags) {
+      if (tags.has(t.toLowerCase())) return false;
+    }
+  }
+
+  const res = ctx.selfView.resources ?? {};
+  if (when.resourceAtLeast) {
+    for (const [k, min] of Object.entries(when.resourceAtLeast)) {
+      if ((res[k] ?? 0) < min) return false;
+    }
+  }
+  if (when.resourceAtMost) {
+    for (const [k, max] of Object.entries(when.resourceAtMost)) {
+      if ((res[k] ?? 0) > max) return false;
+    }
+  }
+
+  if (when.sideIs !== undefined) {
+    const side = (
+      ctx.selfView.side ?? ctx.self.side ?? ""
+    ).toLowerCase();
+    if (side !== when.sideIs.toLowerCase()) return false;
+  }
+
   return true;
 }
 
@@ -211,27 +245,38 @@ function actionToDecision(
   rng: () => number,
 ): AiDecision {
   const enemies = liveEnemies(ctx);
+  const mode = spec.mode;
 
   if (spec.action === "attack") {
     const targetId = pickTarget(spec.target, enemies, ctx, rng);
-    return { action: "attack", targetId, reason };
+    return { action: "attack", targetId, reason, mode };
   }
   if (spec.action === "posture") {
     const posture: ReactionPosture = {
       type: (spec.posture ?? "guard") as ReactionPosture["type"],
     };
-    return { action: "posture", posture, reason };
+    return { action: "posture", posture, reason, mode };
   }
   if (spec.action === "flee") {
-    return { action: "flee", reason };
+    return { action: "flee", reason, mode };
   }
   if (spec.action === "move") {
-    return { action: "move", reason };
+    return { action: "move", reason, mode };
   }
   if (spec.action === "reload") {
-    return { action: "reload", reason };
+    return { action: "reload", reason, mode };
   }
-  return { action: "wait", reason };
+  if (spec.action === "defend") {
+    return { action: "defend", reason, mode };
+  }
+  if (spec.action === "aim") {
+    const targetId = pickTarget(spec.target, enemies, ctx, rng);
+    return { action: "aim", targetId, reason, mode };
+  }
+  if (spec.action === "use") {
+    return { action: "use", reason, mode };
+  }
+  return { action: "wait", reason, mode };
 }
 
 /**

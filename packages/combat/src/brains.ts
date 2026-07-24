@@ -92,27 +92,113 @@ export function isLlmAiKey(key: string | undefined): boolean {
   return LLM_KEYS.has((key ?? "").toLowerCase().trim());
 }
 
-function decisionToAction(d: AiDecision): CombatAction {
+/** Mechanical strategy reasons stay out of room narration. */
+function isMechanicalReason(reason: string): boolean {
+  const r = reason.toLowerCase();
+  return (
+    !reason ||
+    r.includes("first foe") ||
+    r.includes("hasenemies") ||
+    r.startsWith("attack ") ||
+    r.startsWith("rule ") ||
+    /^[a-z0-9_-]+$/.test(r)
+  );
+}
+
+function decisionToAction(
+  d: AiDecision,
+  selfName?: string,
+  weaponName?: string,
+): CombatAction {
+  const mode = d.mode;
+  const who = selfName?.trim() || "They";
+  const wpn = (weaponName ?? "pistol").trim() || "pistol";
+  const reason = (d.reason ?? "").trim();
+  const color = (fallback: string): string =>
+    reason && !isMechanicalReason(reason) ? reason : fallback;
+
   switch (d.action) {
-    case "attack":
+    case "attack": {
+      const tid = d.targetId ?? "";
       return {
         type: "attack",
-        targetId: d.targetId ?? "",
+        targetId: tid,
+        ...(mode ? { mode } : {}),
+        ...(d.weaponId ? { weaponId: d.weaponId } : {}),
+        flavor: color(
+          `${who} brings the ${wpn} on target and fires — ` +
+            `no cover, no hesitation.`,
+        ),
       };
+    }
     case "move":
-      return { type: "move", note: d.reason };
+      return {
+        type: "move",
+        note: d.reason,
+        ...(mode ? { mode } : {}),
+        flavor: color(
+          `${who} slides to new cover, boots scraping wet asphalt.`,
+        ),
+      };
     case "reload":
-      return { type: "reload" };
+      return {
+        type: "reload",
+        ...(mode ? { mode } : {}),
+        flavor: color(
+          `${who} drops a spent mag and seats a fresh one hard.`,
+        ),
+      };
     case "flee":
-      return { type: "flee" };
+      return {
+        type: "flee",
+        note: d.reason,
+        ...(mode ? { mode } : {}),
+        flavor: color(
+          `${who} breaks for the street, chrome glinting as ` +
+            `they run.`,
+        ),
+      };
     case "posture":
       return {
         type: "posture",
         posture: d.posture ?? { type: "guard" },
+        ...(mode ? { mode } : {}),
+        flavor: color(`${who} digs in, watching every angle.`),
+      };
+    case "defend":
+      return {
+        type: "defend",
+        ...(mode ? { mode } : {}),
+        flavor: color(`${who} braces, waiting for the next shot.`),
+      };
+    case "aim":
+      return {
+        type: "aim",
+        targetId: d.targetId,
+        ...(mode ? { mode } : {}),
+        flavor: color(
+          `${who} steadies the weapon, breath thin and cold.`,
+        ),
+      };
+    case "use":
+      return {
+        type: "use",
+        itemId: d.itemId,
+        abilityId: d.abilityId,
+        targetId: d.targetId,
+        ...(mode ? { mode } : {}),
+        flavor: color(`${who} pulls a dirty little trick.`),
       };
     case "wait":
     default:
-      return { type: "wait" };
+      return {
+        type: "wait",
+        note: d.reason,
+        ...(mode ? { mode } : {}),
+        flavor: color(
+          `${who} holds position, optics sweeping the alley.`,
+        ),
+      };
   }
 }
 
@@ -134,7 +220,19 @@ export const jsonStrategyBrain: CombatBrain = {
       others: ctx.others,
       views: ctx.views,
     });
-    return decisionToAction(d);
+    const wpnTag = (ctx.selfView.tags ?? []).find((t) =>
+      t.toLowerCase().startsWith("weapon:")
+    );
+    const wpn = wpnTag
+      ? wpnTag.slice("weapon:".length).trim()
+      : typeof ctx.selfView.meta?.weapon === "string"
+      ? String(ctx.selfView.meta.weapon)
+      : undefined;
+    return decisionToAction(
+      d,
+      ctx.selfView.name ?? ctx.self.name,
+      wpn,
+    );
   },
 };
 
@@ -177,21 +275,69 @@ async function runDecideHook(
   return null;
 }
 
+/** Loose match: same type (+ targetId if both have one). */
+export function actionMatchesLegal(
+  action: CombatAction,
+  legal: CombatAction[],
+): boolean {
+  if (!legal.length) return true;
+  return legal.some((L) => {
+    if (L.type !== action.type) return false;
+    if (
+      "targetId" in action &&
+      "targetId" in L &&
+      action.targetId &&
+      L.targetId &&
+      action.targetId !== L.targetId
+    ) {
+      return false;
+    }
+    if (
+      action.mode &&
+      L.mode &&
+      action.mode !== L.mode
+    ) {
+      return false;
+    }
+    return true;
+  });
+}
+
+/**
+ * If host provided a non-empty legal list and chosen action is
+ * illegal, prefer first legal attack else first legal action.
+ */
+export function constrainToLegalActions(
+  action: CombatAction | null,
+  legal: CombatAction[] | null | undefined,
+): CombatAction | null {
+  if (!action) return null;
+  if (!legal || legal.length === 0) return action;
+  if (actionMatchesLegal(action, legal)) return action;
+  const atk = legal.find((a) => a.type === "attack");
+  return atk ?? legal[0] ?? null;
+}
+
 /**
  * Run decide hook then brains. Returns null if none decide
  * (caller should halt for ST / treat as manual).
  */
 export async function decideAction(
   ctx: BrainCtx,
+  legalActions?: CombatAction[] | null,
 ): Promise<CombatAction | null> {
   if (isManualAiKey(ctx.selfView.aiKey)) return null;
 
   const fromHook = await runDecideHook(ctx);
-  if (fromHook) return fromHook;
+  if (fromHook) {
+    return constrainToLegalActions(fromHook, legalActions);
+  }
 
   for (const brain of orderedBrains()) {
     const action = await brain.decide(ctx);
-    if (action) return action;
+    if (action) {
+      return constrainToLegalActions(action, legalActions);
+    }
   }
   return null;
 }

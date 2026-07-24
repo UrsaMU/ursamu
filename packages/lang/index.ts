@@ -60,6 +60,7 @@ export const plugin: IPlugin = {
 };
 
 async function seedSamples(dir: string): Promise<void> {
+  if (!import.meta.url.startsWith("file:")) return;
   const sampleDir = new URL("./languages", import.meta.url).pathname;
   try {
     for await (const entry of Deno.readDir(sampleDir)) {

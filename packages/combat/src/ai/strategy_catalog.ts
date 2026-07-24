@@ -17,6 +17,9 @@ const ACTIONS = new Set([
   "flee",
   "posture",
   "wait",
+  "defend",
+  "aim",
+  "use",
 ]);
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -101,6 +104,9 @@ function loadAll(): {
 
   let entries: Deno.DirEntry[];
   try {
+    if (AI_DIR.protocol !== "file:") {
+      return { bySlug, errors };
+    }
     entries = [...Deno.readDirSync(AI_DIR)];
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);

@@ -167,6 +167,29 @@
         "hasCover": {
           "type": "boolean",
           "description": "Encounter has terrain with kind cover and structure > 0."
+        },
+        "hasTags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "All must appear on CombatActorView.tags."
+        },
+        "missingTags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "None of these may appear on CombatActorView.tags."
+        },
+        "resourceAtLeast": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "view.resources[name] >= value for each entry."
+        },
+        "resourceAtMost": {
+          "type": "object",
+          "additionalProperties": { "type": "number" }
+        },
+        "sideIs": {
+          "type": "string",
+          "description": "Match participant.side / view.side."
         }
       }
     },
@@ -177,8 +200,22 @@
       "properties": {
         "action": {
           "type": "string",
-          "enum": ["attack", "move", "reload", "flee", "posture", "wait"],
+          "enum": [
+            "attack",
+            "move",
+            "reload",
+            "flee",
+            "posture",
+            "wait",
+            "defend",
+            "aim",
+            "use"
+          ],
           "description": "Walker action."
+        },
+        "mode": {
+          "type": "string",
+          "description": "Host-specific mode on CombatAction (aimed, auto, …)."
         },
         "target": {
           "type": "string",

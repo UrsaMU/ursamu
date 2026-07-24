@@ -15,6 +15,15 @@ type Q = any;
 
 export interface EncounterStore {
   get(id: string): Promise<Encounter | null>;
+  /** Insert a new encounter document. */
+  create(enc: Encounter): Promise<void>;
+  /** Persist a full encounter document (activate, resolve, etc.). */
+  save(enc: Encounter): Promise<void>;
+  /**
+   * Intent or active encounter in room (prefer active).
+   * Optional — lifecycle falls back to null if missing.
+   */
+  findInRoom?(roomId: string): Promise<Encounter | null>;
   advanceTurn(id: string): Promise<Encounter | null>;
   patchParticipant(
     encounterId: string,
@@ -27,6 +36,22 @@ export interface EncounterStore {
 export const defaultEncounterStore: EncounterStore = {
   async get(id) {
     return (await encounterDb.findOne({ id } as Q)) ?? null;
+  },
+  async create(enc) {
+    await encounterDb.create(enc);
+  },
+  async save(enc) {
+    await encounterDb.update({ id: enc.id } as Q, enc);
+  },
+  async findInRoom(roomId) {
+    const rows = await encounterDb.query({
+      roomId,
+      status: { $in: ["intent", "active"] },
+    } as Q);
+    if (!rows.length) return null;
+    return (
+      rows.find((e) => e.status === "active") ?? rows[0] ?? null
+    );
   },
   advanceTurn: defaultAdvanceTurn,
   patchParticipant: defaultPatch,

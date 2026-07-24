@@ -15,6 +15,9 @@ export interface ReactionPosture {
   targetId?: string;
 }
 
+/** Host-only bag — engine never interprets keys. */
+export type CombatMeta = Record<string, unknown>;
+
 /** One actor slot in initiative order. */
 export interface Participant {
   actorId: string;
@@ -33,6 +36,11 @@ export interface Participant {
   delayed?: boolean;
   ran?: boolean;
   kind?: "pc" | "npc";
+  /**
+   * Soft faction / side label for AI targeting
+   * (e.g. "pc", "hunter", "corp"). Optional.
+   */
+  side?: string;
   reactionPosture?: ReactionPosture;
   /** Damage memory: attackerId → total damage. */
   threat?: Record<string, number>;
@@ -43,6 +51,9 @@ export interface Participant {
   hasControl?: boolean;
   isRestrained?: boolean;
   isUsingAsCover?: boolean;
+  spentEnergy?: number;
+  /** Host-only extension bag. */
+  meta?: CombatMeta;
 }
 
 export function getCoverDurability(p: Participant): number {
@@ -62,6 +73,9 @@ export interface TerrainObject {
   name: string;
 }
 
+/** Default max combat log lines retained on an encounter. */
+export const DEFAULT_ENCOUNTER_LOG_CAP = 50;
+
 /** Live combat encounter anchored to a room. */
 export interface Encounter {
   id: string;
@@ -74,4 +88,37 @@ export interface Encounter {
   maxRounds?: number;
   terrain?: TerrainObject[];
   name?: string;
+  /** Actor id who opened the fight (UX / permissions). */
+  startedBy?: string;
+  /** Rolling combat log (newest at end). */
+  log?: string[];
+  /** Host-only extension bag. */
+  meta?: CombatMeta;
+}
+
+/**
+ * Append a log line; trims to `cap` entries (oldest dropped).
+ * Returns a new encounter object (does not persist).
+ */
+export function appendEncounterLog(
+  enc: Encounter,
+  line: string,
+  cap = DEFAULT_ENCOUNTER_LOG_CAP,
+): Encounter {
+  const text = String(line ?? "").trim();
+  if (!text) return enc;
+  const prev = enc.log ?? [];
+  const log = [...prev, text];
+  const max = Math.max(1, Math.floor(cap));
+  const trimmed = log.length > max ? log.slice(-max) : log;
+  return { ...enc, log: trimmed };
+}
+
+/** Merge host meta bags (shallow). */
+export function mergeMeta(
+  base?: CombatMeta,
+  patch?: CombatMeta,
+): CombatMeta | undefined {
+  if (!base && !patch) return undefined;
+  return { ...(base ?? {}), ...(patch ?? {}) };
 }

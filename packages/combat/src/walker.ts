@@ -14,6 +14,7 @@ import {
 import {
   requireCombatPorts,
   type CombatAction,
+  type CombatActionResult,
   type CombatActorView,
   type CombatPorts,
 } from "./ports.ts";
@@ -22,6 +23,7 @@ import {
   type EncounterStore,
 } from "./store.ts";
 import { getCombatConfig } from "./config.ts";
+import { applyActionResult } from "./action-result.ts";
 
 const DEFAULT_MAX_ROUNDS = 50;
 
@@ -42,65 +44,147 @@ async function loadViews(
   return map;
 }
 
-async function applyAction(
+function engineHandledResult(
+  action: CombatAction,
+  slot: Participant,
+): CombatActionResult | null {
+  switch (action.type) {
+    case "flee":
+      return {
+        ok: true,
+        logLine: `${slot.name} flees.`,
+        actorOut: true,
+        actorPatch: {
+          aiState: { ...(slot.aiState ?? {}), fled: true },
+        },
+        endedTurn: action.endsTurn !== false,
+      };
+    case "move":
+      return {
+        ok: true,
+        logLine: action.note
+          ? `${slot.name} moves (${action.note}).`
+          : `${slot.name} moves.`,
+        actorPatch: { movedThisRound: true },
+        endedTurn: action.endsTurn !== false,
+      };
+    case "posture":
+      return {
+        ok: true,
+        logLine: `${slot.name} takes a defensive posture.`,
+        actorPatch: { reactionPosture: action.posture },
+        endedTurn: action.endsTurn !== false,
+      };
+    case "wait":
+      return {
+        ok: true,
+        logLine: action.note
+          ? `${slot.name} waits (${action.note}).`
+          : `${slot.name} waits.`,
+        endedTurn: action.endsTurn !== false,
+      };
+    case "defend":
+      return {
+        ok: true,
+        logLine: `${slot.name} defends.`,
+        actorPatch: { isDodging: true },
+        endedTurn: action.endsTurn !== false,
+      };
+    case "hold":
+    case "delay":
+      return {
+        ok: true,
+        logLine: `${slot.name} holds action.`,
+        actorPatch: { delayed: true },
+        endedTurn: action.endsTurn !== false,
+      };
+    case "aim":
+      return {
+        ok: true,
+        logLine: action.targetId
+          ? `${slot.name} aims.`
+          : `${slot.name} aims carefully.`,
+        endedTurn: action.endsTurn !== false,
+      };
+    default:
+      return null;
+  }
+}
+
+/**
+ * Run one action: engine builtins or ports.executeAction, then
+ * apply CombatActionResult (threat / log / out).
+ * Returns whether the turn should advance.
+ */
+export async function runCombatAction(
   ports: CombatPorts,
   store: EncounterStore,
   enc: Encounter,
   slot: Participant,
   view: CombatActorView,
   action: CombatAction,
-): Promise<void> {
+): Promise<{ enc: Encounter | null; endedTurn: boolean }> {
   const ctx = {
     encounter: enc,
     actor: view,
     participant: slot,
   };
 
-  switch (action.type) {
-    case "flee": {
-      const aiState = { ...(slot.aiState ?? {}), fled: true };
-      await store.patchParticipant(enc.id, slot.actorId, {
-        isOut: true,
-        aiState,
-      });
-      ports.broadcast(enc.roomId, `${slot.name} flees.`);
-      return;
+  // Old-school cadence: banner → intent → crunch block.
+  const flavor = (action.flavor ?? "").trim();
+  const wpnTag = (view.tags ?? []).find((t) =>
+    t.toLowerCase().startsWith("weapon:")
+  );
+  const wpn = wpnTag
+    ? wpnTag.slice("weapon:".length)
+    : typeof view.meta?.weapon === "string"
+    ? String(view.meta.weapon)
+    : "";
+  const banner =
+    `%cw${"=".repeat(60)}%cn\r\n` +
+    `  %ch%cy${slot.name}%cn%cw's turn%cn` +
+    (wpn ? `  %cw[%cn%cc${wpn}%cn%cw]%cn` : "") +
+    `  %cw(R${enc.round})%cn\r\n` +
+    `%cw${"=".repeat(60)}%cn`;
+  ports.broadcast(enc.roomId, banner);
+  if (flavor) {
+    ports.broadcast(enc.roomId, `  %cm${flavor}%cn`);
+  }
+
+  let result: CombatActionResult;
+  const builtin = engineHandledResult(action, slot);
+  if (builtin) {
+    result = builtin;
+    if (builtin.logLine && builtin.logLine !== flavor) {
+      ports.broadcast(enc.roomId, `  %cw*%cn ${builtin.logLine}`);
     }
-    case "move": {
-      await store.patchParticipant(enc.id, slot.actorId, {
-        movedThisRound: true,
-      });
-      ports.broadcast(enc.roomId, `${slot.name} moves.`);
-      return;
-    }
-    case "posture": {
-      await store.patchParticipant(enc.id, slot.actorId, {
-        reactionPosture: action.posture,
-      });
-      ports.broadcast(
-        enc.roomId,
-        `${slot.name} takes a defensive posture.`,
-      );
-      return;
-    }
-    case "wait": {
-      ports.broadcast(enc.roomId, `${slot.name} waits.`);
-      return;
-    }
-    case "attack":
-    case "reload":
-    case "custom":
-    default: {
-      const result = await ports.executeAction(
-        slot.actorId,
-        action,
-        ctx,
-      );
-      if (!result.ok && result.message) {
-        ports.broadcast(enc.roomId, result.message);
-      }
+  } else {
+    result = await ports.executeAction(slot.actorId, action, ctx);
+    const roomBlock = result.meta &&
+        typeof result.meta.roomBlock === "string"
+      ? String(result.meta.roomBlock)
+      : "";
+    if (!result.ok && result.message) {
+      ports.broadcast(enc.roomId, result.message);
+    } else if (roomBlock) {
+      ports.broadcast(enc.roomId, roomBlock);
+    } else if (result.logLine && result.logLine !== flavor) {
+      ports.broadcast(enc.roomId, result.logLine);
+    } else if (result.message && result.message !== flavor) {
+      ports.broadcast(enc.roomId, result.message);
     }
   }
+
+  // Encounter log: short mechanical line only.
+  if (flavor && result.ok && !result.logLine) {
+    result = { ...result, logLine: flavor };
+  }
+
+  return await applyActionResult(enc.id, result, {
+    actorId: slot.actorId,
+    action,
+    store,
+  });
 }
 
 /**
@@ -157,14 +241,43 @@ export async function advanceTurnSmart(
       continue;
     }
 
-    // Merge participant aiState/threat onto view for brains.
     const cfg = getCombatConfig();
+    const metaKey = slot.meta && typeof slot.meta.aiKey === "string"
+      ? String(slot.meta.aiKey)
+      : undefined;
+    const stateKey = slot.aiState &&
+        typeof slot.aiState.aiKey === "string"
+      ? String(slot.aiState.aiKey)
+      : undefined;
+    const mergedMeta = {
+      ...(view.meta ?? {}),
+      ...(slot.meta ?? {}),
+    };
+    const wpnTag = typeof mergedMeta.weapon === "string"
+      ? `weapon:${mergedMeta.weapon}`
+      : undefined;
+    const tags = [
+      ...(view.tags ?? []),
+      ...(wpnTag && !(view.tags ?? []).some((t) =>
+          t.startsWith("weapon:")
+        )
+        ? [wpnTag]
+        : []),
+    ];
+    // Prefer explicit participant meta/aiState over loadActor default
+    // (loadActor may default NPCs to "aggressive").
+    const resolvedKey = metaKey || stateKey || view.aiKey ||
+      cfg.defaultAiKey || undefined;
     const selfView: CombatActorView = {
       ...view,
-      aiKey: view.aiKey || cfg.defaultAiKey || undefined,
+      aiKey: resolvedKey,
       aiState: slot.aiState ?? view.aiState,
       threat: slot.threat ?? view.threat,
       isOut: slot.isOut || view.isOut,
+      side: view.side ?? slot.side,
+      tags: tags.length ? tags : view.tags,
+      resources: view.resources,
+      meta: mergedMeta,
     };
 
     if (isManualAiKey(selfView.aiKey)) return enc;
@@ -182,14 +295,38 @@ export async function advanceTurnSmart(
       views,
     };
 
-    const action = await decideAction(brainCtx);
+    let legal: CombatAction[] | undefined;
+    if (ports.listActions) {
+      try {
+        const listed = await ports.listActions({
+          encounter: enc,
+          actor: selfView,
+          participant: slot,
+        });
+        if (Array.isArray(listed) && listed.length) {
+          legal = listed;
+        }
+      } catch { /* host listActions optional */ }
+    }
+
+    const action = await decideAction(brainCtx, legal);
     if (!action) {
       // No brain claimed this key → ST control.
       return enc;
     }
 
+    let endedTurn = true;
     try {
-      await applyAction(ports, store, enc, slot, selfView, action);
+      const applied = await runCombatAction(
+        ports,
+        store,
+        enc,
+        slot,
+        selfView,
+        action,
+      );
+      endedTurn = applied.endedTurn;
+      if (applied.enc) enc = applied.enc;
     } catch (_err) {
       ports.broadcast(enc.roomId, `${slot.name} hesitates.`);
     }
@@ -207,7 +344,11 @@ export async function advanceTurnSmart(
       return fresh;
     }
 
-    await store.advanceTurn(enc.id);
+    if (endedTurn) {
+      await store.advanceTurn(enc.id);
+    }
+    // If endedTurn is false, same actor may act again (bonus
+    // economy). Safety counter still increments.
     walked += 1;
   }
 

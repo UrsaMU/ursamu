@@ -7,6 +7,8 @@ System-agnostic combat engine for UrsaMU.
 - **JSON AI brains** — declarative strategies under `resources/ai/`
 - **Ports** — game systems supply attack/health/loot
 - **Multi-brain** — ordered brains + optional `combat:decide` hook (ai-gm)
+- **Zone helpers** — pathfind, timer loops, active-encounter room queries
+  (spawn tables and mob sheets stay in the game system)
 
 ## Install
 
@@ -66,11 +68,41 @@ import {
 registerEncounterStore(myStore); // optional; default combat.encounters
 registerCombatPorts({
   async loadActor(id) { /* → CombatActorView */ },
-  async executeAction(id, action, ctx) { /* attack etc */ },
+  async executeAction(id, action, ctx) {
+    // Return CombatActionResult — walker applies threat/log/out
+    return {
+      ok: true,
+      damageApplied: 4,
+      targetId: action.type === "attack" ? action.targetId : undefined,
+      logLine: "Goblin hits Hero",
+      endedTurn: true,
+    };
+  },
   broadcast(roomId, msg) { /* ... */ },
   async onResolved(enc) { /* loot / beats */ },
   async afterAction(id, enc) { /* sync isOut */ },
 });
+```
+
+### CombatAction (0.7+)
+
+System-agnostic actions. Hosts use `mode` / `args` for rule variants:
+
+```ts
+{ type: "attack", targetId, mode: "aimed", weaponId: "rifle" }
+{ type: "use", abilityId: "sandevistan", endsTurn: false }
+{ type: "defend" } | { type: "aim" } | { type: "hold" }
+{ type: "custom", name: "suppress", args: { ... } }
+```
+
+### Encounter extras (Phase A)
+
+```ts
+enc.startedBy = playerId;
+enc.log = ["…"];           // walker appends logLine
+enc.meta = { system: "cpr" };
+participant.side = "corp";
+participant.meta = { … };
 ```
 
 Per-command ports (CofD pattern) are fine when `u` is request-scoped:
@@ -80,6 +112,93 @@ await advanceTurnSmart(encId, {
   ports: makeCofdPorts(u),
   store: cofdEncounterStore,
 });
+```
+
+## Lifecycle
+
+```ts
+const store = myEncounterStore; // or default combat.encounters
+
+await startEncounter(roomId, { store, startedBy: playerId });
+await joinEncounter(encId, { actorId, name, kind: "pc" }, { store });
+await beginEncounter(encId, { ports, store }); // roll init + activate
+await nextTurn(encId, { store });              // no AI
+await leaveEncounter(encId, actorId, { store });
+await endEncounter(encId, { store });
+```
+
+## Turn helpers (0.8+)
+
+```ts
+import {
+  startOrJoin,
+  passTurn,
+  endFight,
+  formatInitiativeLines,
+  runAdapterSmoke,
+  memoryEncounterStore,
+} from "@ursamu/combat";
+
+// +init style
+await startOrJoin({
+  roomId,
+  participant: { actorId, name, kind: "pc" },
+  store,
+  ports,
+  startedBy: actorId,
+  autoBegin: false, // true = roll init immediately
+});
+
+// +pass style (marks acted, nextTurn, walker)
+await passTurn(encId, { actorId, store, ports });
+
+// +combat/end
+await endFight(encId, { store, ports });
+
+// Adapter CI smoke (5 checks)
+const r = await runAdapterSmoke({ store: memoryEncounterStore() });
+// r.ok === true
+```
+
+## Zone helpers (optional)
+
+```ts
+import {
+  nextHopToward,
+  startZoneLoop,
+  stopZoneLoop,
+  roomHasActiveEncounter,
+  findActiveEncounterRoom,
+} from "@ursamu/combat";
+
+// Pathfind: host supplies exits
+const hop = await nextHopToward(from, goal, allowedRooms, {
+  getAdjacent: (id) => exitsFromRoom(id),
+  costOf: async (id) =>
+    (await roomHasActiveEncounter(id, { store })) ? 1000 : 1,
+});
+
+// Timers: host tick body (spawn / move / flavor)
+startZoneLoop(zoneId, 30_000, () => tickMyZone(zoneId));
+stopZoneLoop(zoneId);
+```
+
+**Collections:** each game keeps its own encounter DBO
+(`cofd.encounters`, etc.) via `registerEncounterStore`. Do not rename
+collections without a migrator.
+
+## Initiative
+
+Host supplies the formula; engine sorts and activates:
+
+```ts
+ports.rollInitiative = async (actorId) => {
+  // e.g. CofD: 1d10 + Dex + Composure + weapon
+  return n;
+};
+
+await beginEncounter(encId, { ports, store });
+// = activateEncounter: roll all → sort → active
 ```
 
 ## JSON AI
@@ -95,31 +214,20 @@ const fn = getArchetype("beshilu-swarmer");
 | `manual` / `off` / `none` | Walker halts (ST) |
 | `llm` / `ai-gm` | JSON skips; hook/brain may handle |
 
-## Optional ai-gm (no hard dependency)
+## Optional ai-gm (ships wired)
+
+`@ursamu/ai-gm` ≥ 0.2.4 registers:
+
+1. `gameHooks.on("combat:decide", …)` for `aiKey` `llm` / `ai-gm`
+2. Brain id `ai-gm` (prefer with `"brains": ["ai-gm", "json"]`)
+
+Without `GOOGLE_API_KEY`, the listener still decides via
+weakest-enemy attack fallback so the walker does not hang.
 
 ```ts
-// in ai-gm or a bridge plugin
-import { gameHooks } from "@ursamu/mush";
-import type { CombatDecideHookCtx } from "@ursamu/combat";
-
-gameHooks.on("combat:decide", async (ctx: CombatDecideHookCtx) => {
-  if (ctx.selfView.aiKey !== "llm") return;
-  // ask GM model...
-  ctx.handled = true;
-  ctx.action = { type: "attack", targetId: "..." };
-});
-```
-
-Or register a brain:
-
-```ts
-registerCombatBrain({
-  id: "ai-gm",
-  async decide(ctx) {
-    if (ctx.selfView.aiKey !== "llm") return null;
-    return { type: "wait" }; // or real action
-  },
-});
+// NPC sheet
+state.npc.aiArchetype = "llm"; // CofD
+// or state.dnd.aiKey = "llm";  // D&D
 ```
 
 ## Decide pipeline

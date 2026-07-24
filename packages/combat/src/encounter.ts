@@ -9,7 +9,9 @@ import type { Encounter, Participant } from "./types.ts";
 type Q = any;
 
 /** Shared encounter collection (not cofd.*). */
-export const encounterDb = new DBO<Encounter>("combat.encounters");
+export const encounterDb: DBO<Encounter> = new DBO<Encounter>(
+  "combat.encounters",
+);
 
 export async function createEncounter(
   roomId: string,

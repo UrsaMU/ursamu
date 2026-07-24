@@ -15,10 +15,24 @@ import type { AiStrategy } from "./strategy_types.ts";
 import type { ReactionPosture } from "../types.ts";
 
 export interface AiDecision {
-  action: "attack" | "move" | "reload" | "flee" | "posture" | "wait";
+  action:
+    | "attack"
+    | "move"
+    | "reload"
+    | "flee"
+    | "posture"
+    | "wait"
+    | "defend"
+    | "aim"
+    | "use";
   targetId?: string;
   posture?: ReactionPosture;
   reason: string;
+  /** Host mode (aimed, auto, …) passed through to CombatAction. */
+  mode?: string;
+  weaponId?: string;
+  itemId?: string;
+  abilityId?: string;
 }
 
 export type ArchetypeFn = (ctx: EvalCtx) => AiDecision;
