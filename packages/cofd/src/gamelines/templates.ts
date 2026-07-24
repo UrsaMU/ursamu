@@ -34,36 +34,28 @@ export function getStandardMaxEnergy(powerStat: number): number {
   return table[ps] ?? 10;
 }
 
+import mortalTpl from "../../templates/mortal.json" with { type: "json" };
+import changelingTpl from "../../templates/changeling.json" with { type: "json" };
+import werewolfTpl from "../../templates/werewolf.json" with { type: "json" };
+import fetchTpl from "../../templates/fetch.json" with { type: "json" };
+import hobgoblinTpl from "../../templates/hobgoblin.json" with { type: "json" };
+import huntsmanTpl from "../../templates/huntsman.json" with { type: "json" };
+
 export const COFD_TEMPLATES: Record<string, CofdTemplate> = {};
 
-// Resolve the templates directory URL dynamically (walk up two levels to project root)
-const templatesDirUrl = new URL("../../templates", import.meta.url);
+const rawTemplates = [mortalTpl, changelingTpl, werewolfTpl, fetchTpl, hobgoblinTpl, huntsmanTpl];
 
-// Asynchronously scan the templates/ folder and load all JSON template definitions concurrently
-const promises: Promise<void>[] = [];
-
-for (const entry of Deno.readDirSync(templatesDirUrl)) {
-  if (entry.isFile && entry.name.endsWith(".json")) {
-    const fileUrl = new URL(`../../templates/${entry.name}`, import.meta.url);
-
-    const promise = Deno.readTextFile(fileUrl).then((fileContent) => {
-      const data = JSON.parse(fileContent);
-      COFD_TEMPLATES[data.key] = {
-        key: data.key,
-        name: data.name,
-        moralityName: data.moralityName,
-        powerStatName: data.powerStatName,
-        energyName: data.energyName,
-        customFields: data.customFields,
-        validPowers: data.validPowers,
-        energyMaxFormula: data.energyMaxFormulaType === "standard"
-          ? getStandardMaxEnergy
-          : () => 0,
-      };
-    });
-
-    promises.push(promise);
-  }
+for (const data of rawTemplates) {
+  COFD_TEMPLATES[data.key] = {
+    key: data.key,
+    name: data.name,
+    moralityName: data.moralityName,
+    powerStatName: data.powerStatName,
+    energyName: data.energyName,
+    customFields: data.customFields,
+    validPowers: data.validPowers,
+    energyMaxFormula: (data as any).energyMaxFormulaType === "standard"
+      ? getStandardMaxEnergy
+      : (ps: number) => ps,
+  };
 }
-
-await Promise.all(promises);
