@@ -161,14 +161,8 @@ export const initializeEngine = async (
   
   // Load default commands if enabled
   if (loadDefaultCommands) {
-    if (isLocal) {
-      const { loadDefaultCommands: loadCmds } = await import("./commands/addCmd.ts");
-      await loadCmds();
-    } else {
-      // On JSR, we import the build-time generated index (does not exist in source)
-      // @ts-ignore - commands/index.ts is generated at publish time for JSR only
-      await import("./commands/index.ts");
-    }
+    const { loadDefaultCommands: loadCmds } = await import("./commands/addCmd.ts");
+    await loadCmds();
   }
 
   // Load custom commands if path provided

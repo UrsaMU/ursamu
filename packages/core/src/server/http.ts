@@ -239,7 +239,7 @@ export const httpTransport: ITransport = {
   name: "http",
 
   async start(): Promise<void> {
-    const port = getConfig<number>("server.port", 4201);
+    const port = getConfig<number>("server.apiPort", getConfig<number>("server.port", 4203));
     _server = Deno.serve({ port }, (req, info) =>
       secureRequestHandler(req, info)
     );

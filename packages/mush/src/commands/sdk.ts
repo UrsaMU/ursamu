@@ -34,6 +34,27 @@ const toRaw = (o: IDBObj): IDBOBJ => ({
   location: o.location || "",
 } as unknown as IDBOBJ);
 
+/**
+ * Map plugin write paths from hydrate-facing `state.*` onto storage `data.*`.
+ * Leaves other keys unchanged. Nested plain objects are not rewritten.
+ */
+export function rewriteStatePaths(data: unknown): unknown {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return data;
+  }
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (k === "state") {
+      out["data"] = v;
+    } else if (k.startsWith("state.")) {
+      out["data." + k.slice("state.".length)] = v;
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
 const stripSubs = (s: string) =>
   s.replace(/%c[a-zA-Z]/gi, "").replace(/%[nrtbR]/gi, "").replace(/\x1b\[[0-9;]*m/g, "");
 
@@ -267,7 +288,13 @@ export async function createNativeSDK(
         });
       },
       modify: async (id: string, op: string, data: unknown) => {
-        await dbojs.modify({ id }, op, data as Partial<IDBOBJ>);
+        // Plugins often write "state.foo"; hydrate maps state ← data.
+        // Rewrite state.* → data.* so persistence matches reads.
+        await dbojs.modify(
+          { id },
+          op,
+          rewriteStatePaths(data) as Partial<IDBOBJ>,
+        );
       },
     },
 

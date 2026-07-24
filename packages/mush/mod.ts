@@ -58,8 +58,19 @@ export type { SDKContext, SDKObject }                    from "./src/softcode/sd
 
 // Command API
 export { addCmd, clearCmds, cmds, loadDefaultCommands, registerScript, getScript } from "./src/commands/addCmd.ts";
-export { createNativeSDK }                   from "./src/commands/sdk.ts";
+export { createNativeSDK, rewriteStatePaths } from "./src/commands/sdk.ts";
 export type { ICmd, IUrsamuSDK, DbAccessor, OutputAccessor, FormatSlot } from "./src/commands/types.ts";
+export {
+  registerCmdMiddleware,
+  unregisterCmdMiddleware,
+  clearCmdMiddleware,
+  listCmdMiddleware,
+  runWithCmdMiddleware,
+} from "./src/commands/middleware.ts";
+export type {
+  CmdMiddleware,
+  CmdMiddlewareCtx,
+} from "./src/commands/middleware.ts";
 
 // Format pipeline
 export {

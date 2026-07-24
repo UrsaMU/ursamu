@@ -229,7 +229,7 @@ export const websocketTransport: ITransport = {
 
   start(): Promise<void> {
     registerSender(sendToSocket);
-    const port = getConfig<number>("server.wsPort", 4203);
+    const port = getConfig<number>("server.wsPort", getConfig<number>("server.http", 4202));
     _server = Deno.serve({ port }, (req) => {
       const upgrade = req.headers.get("upgrade");
       if (upgrade?.toLowerCase() !== "websocket") {
