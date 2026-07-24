@@ -274,9 +274,9 @@ export const initializeEngine = async (
 
   // Boot the server via @ursamu/core transports.
   // Align config keys: old engine used server.http for the combined WS+HTTP port.
-  const wsPort   = getConfig<number>("server.http")    || getConfig<number>("server.wsPort")     || 4203;
-  const httpPort = getConfig<number>("server.apiPort") || getConfig<number>("server.port")        || 4201;
-  const tnPort   = getConfig<number>("server.telnet")  || getConfig<number>("server.telnetPort")  || 4202;
+  const wsPort   = getConfig<number>("server.wsPort")   || getConfig<number>("server.ws")      || 4202;
+  const httpPort = getConfig<number>("server.apiPort") || getConfig<number>("server.port")    || 4203;
+  const tnPort   = getConfig<number>("server.telnet")  || getConfig<number>("server.telnetPort") || 4201;
 
   // Patch config so the transport reads the right port values.
   const { setConfig } = await import("@ursamu/core");
