@@ -25,12 +25,19 @@ import {
 // Per-instance data stored on the object's state field
 // -------------------------------------------------------------------
 
-export type ItemKind = "weapon" | "armor" | "gear" | "ammo" | "service";
+export type ItemKind =
+  | "weapon"
+  | "armor"
+  | "gear"
+  | "ammo"
+  | "service"
+  | "goblin-fruit"
+  | "token";
 
 export type CapacityTag = "high" | "medium" | "low" | "single";
 
 export interface CofdItemData {
-  /** Catalog reference key, e.g. "pistol-light". */
+  /** Catalog reference key, e.g. "pistol-light" or fruit slug. */
   key: string;
   /** Coarse classification used for sectioning and attack-vs-object soak. */
   kind?: ItemKind;
@@ -54,6 +61,19 @@ export interface CofdItemData {
   capacityTag?: CapacityTag;
   /** Stack size for ammo items. Undefined for non-ammo. */
   count?: number;
+  /** Goblin fruit: harvest epoch ms (carry-cap rot order). */
+  gotAt?: number;
+  /**
+   * Mortal / Mask-facing name (perception backlog). True name is
+   * customLabel or fruit catalog name.
+   */
+  maskName?: string;
+  /** Token rating in dots (1-5). */
+  tokenRating?: number;
+  /** Token bypass glamour catch condition. */
+  catch?: string;
+  /** Token consequence drawback. */
+  drawback?: string;
 }
 
 /** Return true when the game object is a CoFD item. */
@@ -80,7 +100,7 @@ export function itemData(obj: IDBObj): CofdItemData | null {
 export function displayName(obj: IDBObj): string {
   const d = itemData(obj);
   if (!d) return obj.name ?? "unknown";
-  return d.customLabel ?? lookupItem(d.key)?.entry.name ?? d.key;
+  return d.customLabel ?? lookupItem(d.key)?.entry.name ?? obj.name ?? d.key;
 }
 
 function mapCapacityTag(raw: string | undefined): CapacityTag {
@@ -266,6 +286,53 @@ export function isAmbiguousMatch(v: unknown): v is AmbiguousMatch {
     (v as { ambiguous?: boolean }).ambiguous === true;
 }
 
+/** Get all carried items in the exact display order of the gear command. */
+export async function orderedCarriedItems(
+  u: IUrsamuSDK,
+  ownerId: string,
+): Promise<IDBObj[]> {
+  let sheet: any = null;
+  const targetArr = await u.db.search({ id: ownerId });
+  if (targetArr.length > 0) {
+    sheet = targetArr[0].state?.cofd as any;
+  } else if (u.me && u.me.id === ownerId) {
+    sheet = u.me.state?.cofd as any;
+  }
+  const state = sheet?.equipment ?? { equippedWeapon: null, equippedArmor: null };
+
+  const contents = await u.db.search({ location: ownerId });
+  const carried = contents.filter(
+    (obj) =>
+      !obj.flags.has("exit") &&
+      !obj.flags.has("room") &&
+      !obj.flags.has("player"),
+  );
+
+  const buckets: Record<"equipped" | "weapons" | "armor" | "gear" | "ammo", IDBObj[]> = {
+    equipped: [],
+    weapons: [],
+    armor: [],
+    gear: [],
+    ammo: [],
+  };
+  for (const obj of carried) {
+    const d = itemData(obj);
+    if (d && d.equippedBy) { buckets.equipped.push(obj); continue; }
+    if (d && d.kind === "weapon") buckets.weapons.push(obj);
+    else if (d && d.kind === "armor") buckets.armor.push(obj);
+    else if (d && d.kind === "ammo") buckets.ammo.push(obj);
+    else buckets.gear.push(obj);
+  }
+
+  return [
+    ...buckets.equipped,
+    ...buckets.weapons,
+    ...buckets.armor,
+    ...buckets.gear,
+    ...buckets.ammo,
+  ];
+}
+
 /**
  * Resolve "ref" against the owner's inventory. If ref parses as a positive
  * integer it is a 1-based slot (exact, never ambiguous). Otherwise it is a
@@ -280,12 +347,24 @@ export async function resolveItemRef(
 ): Promise<IDBObj | AmbiguousMatch | null> {
   const trimmed = ref.trim();
   if (!trimmed) return null;
-  const inv = await inventoryItems(u, ownerId);
+  const inv = await orderedCarriedItems(u, ownerId);
   const asInt = parseInt(trimmed, 10);
   if (Number.isInteger(asInt) && String(asInt) === trimmed && asInt >= 1) {
     return inv[asInt - 1] ?? null;
   }
   const needle = trimmed.toLowerCase();
+  const dbref = trimmed.startsWith("#") ? trimmed.slice(1) : trimmed;
+
+  // Try matching by ID first
+  const idMatch = inv.find(
+    (o) =>
+      o.id === trimmed ||
+      o.id === dbref ||
+      o.id.toLowerCase() === needle ||
+      o.id.toLowerCase() === `#${dbref.toLowerCase()}`,
+  );
+  if (idMatch) return idMatch;
+
   const matches: IDBObj[] = [];
   for (const o of inv) {
     if (displayName(o).toLowerCase().includes(needle)) matches.push(o);

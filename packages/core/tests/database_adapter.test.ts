@@ -77,22 +77,33 @@ Deno.test("DBO - Custom adapter registration and delegation", OPTS, async () => 
   const originalFactory = DBO.getAdapterFactory();
 
   const mockInstances = new Map<string, MockAdapter>();
-  
-  // Set custom factory
+
+  // Cache by namespace — factory is lazy (first op), not constructor-time.
   DBO.setAdapterFactory(<T extends { id: string }>(namespace: string) => {
-    const adapter = new MockAdapter();
-    mockInstances.set(namespace, adapter);
+    let adapter = mockInstances.get(namespace);
+    if (!adapter) {
+      adapter = new MockAdapter();
+      mockInstances.set(namespace, adapter);
+    }
     return adapter as unknown as IDatabase<T>;
   });
 
   const db = new DBO<MockItem>("test.mock-namespace");
-  
-  // Verify instantiation registered the mock adapter
-  const adapter = mockInstances.get("test.mock-namespace");
-  assertEquals(!!adapter, true, "Mock adapter should be registered for namespace");
 
-  // Verify delegation works
+  // Constructor is lazy — factory not called until first op.
+  assertEquals(
+    mockInstances.has("test.mock-namespace"),
+    false,
+    "adapter must not be created until first DB op",
+  );
+
   await db.create({ id: "1", name: "Alice" });
+  const adapter = mockInstances.get("test.mock-namespace");
+  assertEquals(
+    !!adapter,
+    true,
+    "Mock adapter should be registered after first op",
+  );
   assertEquals(adapter?.store.get("1")?.name, "Alice");
 
   const results = await db.query();

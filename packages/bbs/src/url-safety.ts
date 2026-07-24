@@ -37,7 +37,7 @@ export function isWebhookUrlSafe(url: string): boolean {
     ) return false;
 
     return true;
-  } catch {
+  } catch (_e: unknown) {
     return false; // malformed URL
   }
 }

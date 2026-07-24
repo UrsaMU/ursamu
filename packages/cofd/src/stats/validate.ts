@@ -11,6 +11,7 @@ import {
   parseMeritRef,
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
+import { normalizeAnimalsField } from "../form/animals.ts";
 import { checkPrerequisites } from "../support/prereq.ts";
 import { defaultSheet, migrateSheet, type CofdSheet } from "./sheet.ts";
 
@@ -46,7 +47,7 @@ export function validateTraitValue(trait: string, valueStr: string, sheet?: Cofd
     if (tmpl.validPowers.includes(key)) {
       return 0;
     }
-    if (["concept", "virtue", "vice"].includes(key)) {
+    if (["concept", "virtue", "vice", "frailty", "frailties"].includes(key)) {
       return "";
     }
     if (tmpl.customFields.includes(key)) {
@@ -184,8 +185,20 @@ export function validateTraitValue(trait: string, valueStr: string, sheet?: Cofd
     return match.name;
   }
 
+  if (key === "frailty" || key === "frailties") {
+    return valueStr.trim();
+  }
+
   // Custom Fields check (e.g. Clan, Covenant, Seeming)
   if (tmpl.customFields.includes(key)) {
+    if (key === "animals") {
+      const norm = normalizeAnimalsField(
+        valueStr,
+        sheet?.customFields?.seeming,
+      );
+      if (!norm.ok) throw new Error(norm.error);
+      return norm.value;
+    }
     return valueStr.trim();
   }
 

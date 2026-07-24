@@ -1,0 +1,30 @@
+{
+  "$schema": "../schemas/ai-strategy.schema.json",
+  "slug": "aggressive",
+  "name": "Aggressive",
+  "blurb": "System-agnostic: attack the first live foe; flee when nearly dead.",
+  "book": "ursamu-combat",
+  "tags": ["generic", "melee"],
+  "rules": [
+    {
+      "id": "flee-dying",
+      "priority": 100,
+      "weight": 1,
+      "when": { "selfHealthBelow": 0.15 },
+      "then": { "action": "flee" },
+      "reason": "nearly dead -- flee"
+    },
+    {
+      "id": "attack-first",
+      "priority": 50,
+      "weight": 1,
+      "when": { "hasEnemies": true },
+      "then": {
+        "action": "attack",
+        "target": "first"
+      },
+      "reason": "attack first foe"
+    }
+  ],
+  "fallback": { "action": "wait" }
+}

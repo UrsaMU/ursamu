@@ -1,32 +1,19 @@
-+prove  -- Show your trait values to another player or the whole room.
-          Players cannot see each others' sheets, so +prove is the
-          tamper-evident way to surface specific traits in play. Output
-          is a PROVE>> system line built from your live sheet and
-          cannot be faked with @emit or pose.
++PROVE  -- Broadcast or whisper sheet trait values.
 
-Syntax:
-  +prove <trait>                         Broadcast one trait to the room.
-  +prove <trait>,<trait>,...             Broadcast a comma-separated list.
-  +prove <trait>[,<trait>]=<player>      Whisper to one player.
-  +prove/here <trait>[,<trait>]          Force a room broadcast.
+SYNTAX
+  +prove <trait>                 Room sees the value.
+  +prove <trait> to <player>     Whisper to one player.
+  +prove/list                    Traits you can prove.
 
-Switches:
-  /here     Always broadcast to the room (default when no =<player>).
+SWITCHES
+  /list     Show allowed trait keys.
 
-Permissions:
-  Use            connected.
-  Cannot prove   another player's sheet -- +prove only reads your own.
+PERMISSIONS
+  Connected with an approved sheet.
 
-Examples:
-  +prove strength                          Broadcast Strength to the room.
-  +prove strength,athletics,brawl/boxing   Broadcast three traits.
-  +prove subterfuge=Marcus                 Whisper Subterfuge to Marcus.
-  +prove vigor,blood potency=Lyra          Whisper two supernatural traits.
-  +prove/here resolve,composure            Explicit room broadcast.
-  +prove weapon                            Show your equipped weapon.
-  +prove armor,gear=Marcus                 Whisper armor and inventory.
+EXAMPLES
+  +prove strength
+  +prove athletics to Marcus
+  +prove/list
 
-More:
-  help prove traits      Accepted trait vocabulary and limits.
-
-See also: sheet, roll, gear, cofd
+SEE ALSO: help prove/traits, help sheet

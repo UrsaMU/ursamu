@@ -103,7 +103,7 @@ function parseInput(raw: string): string {
   }
 }
 
-function handleAuth(socketId: string, raw: string): boolean {
+async function handleAuth(socketId: string, raw: string): Promise<boolean> {
   try {
     const data = JSON.parse(raw);
     if (data.type !== "auth" || typeof data.token !== "string") return false;
@@ -113,7 +113,7 @@ function handleAuth(socketId: string, raw: string): boolean {
       return true; // consume message, send no response
     }
     sessions.authenticate(socketId, data.token);
-    gameHooks.emit("session:auth", { socketId, sessionId: data.token });
+    await gameHooks.emit("session:auth", { socketId, sessionId: data.token });
     log("info", "ws:auth", { socketId });
     return true;
   } catch {
@@ -124,7 +124,7 @@ function handleAuth(socketId: string, raw: string): boolean {
 async function handleMessage(socketId: string, raw: string): Promise<void> {
   if (raw.length > MAX_MSG_BYTES) return;
 
-  if (handleAuth(socketId, raw)) return;
+  if (await handleAuth(socketId, raw)) return;
 
   const input = parseInput(raw).trim();
   if (!input) return;
@@ -229,7 +229,7 @@ export const websocketTransport: ITransport = {
 
   start(): Promise<void> {
     registerSender(sendToSocket);
-    const port = getConfig<number>("server.wsPort", 4203);
+    const port = getConfig<number>("server.wsPort", getConfig<number>("server.ws", 4202));
     _server = Deno.serve({ port }, (req) => {
       const upgrade = req.headers.get("upgrade");
       if (upgrade?.toLowerCase() !== "websocket") {

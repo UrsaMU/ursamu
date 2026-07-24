@@ -23,19 +23,19 @@ export function addCmd(cmd: any): void {
 }
 
 export * from "../../mush/mod.ts";
-export { header, divider, footer } from "../src/support/format.ts";
 
-import { setTheme } from "@ursamu/globals";
-import { cofdGlobalsOverlay } from "../src/support/theme.ts";
 import { registerFormatHandler } from "../../mush/mod.ts";
-import { cofdConformatHandler, cofdDescformatHandler } from "../src/support/look_format.ts";
+import {
+  cofdConformatHandler,
+  cofdDescformatHandler,
+} from "../src/support/look_format.ts";
 
-// Apply the CoFD Red/Gold theme overlay.
-setTheme(cofdGlobalsOverlay).catch(() => {});
-
-// Register the custom look CONFORMAT and DESCFORMAT handlers for the showcase runner.
+// Layout chrome uses engine game.layout / defaults (same as live server).
+// Register CoFD look CONFORMAT / DESCFORMAT for the showcase runner.
 registerFormatHandler("CONFORMAT", cofdConformatHandler, { prepend: true });
-registerFormatHandler("DESCFORMAT", cofdDescformatHandler, { prepend: true });
+registerFormatHandler("DESCFORMAT", cofdDescformatHandler, {
+  prepend: true,
+});
 
 // Load look command from local ursamu core so it's registered for look-conformat showcase.
 import "../../mush/src/verbs/look.ts";
@@ -43,6 +43,27 @@ import { cmds as coreCmds } from "../../mush/src/commands/addCmd.ts";
 
 for (const c of coreCmds) {
   if (!cmds.includes(c)) cmds.push(c);
+}
+
+import {
+  dbojs, counters, chans, texts, scenes, chanHistory,
+  zoneMemberships, userFuncs, serverTags, playerTags
+} from "../../mush/mod.ts";
+import { encounterDb } from "../src/combat/encounter.ts";
+import { zoneDb } from "../src/combat/zone.ts";
+import { maneuverDb } from "../src/social/maneuver.ts";
+import { extendedDb } from "../src/subsystems/extended.ts";
+import { npcDb } from "../src/npc/directory.ts";
+
+export async function __shimClearDbs(): Promise<void> {
+  const dbs = [
+    dbojs, counters, chans, texts, scenes, chanHistory,
+    zoneMemberships, userFuncs, serverTags, playerTags,
+    encounterDb, zoneDb, maneuverDb, extendedDb, npcDb
+  ];
+  for (const db of dbs) {
+    try { await db.clear(); } catch { /* ignore */ }
+  }
 }
 
 // -- In-memory object store ----------------------------------------------------

@@ -49,9 +49,42 @@ Deno.test("create project: exits 0 on success", OPTS, async () => {
 Deno.test("create project: scaffolds all expected directories", OPTS, async () => {
   await withTempDir(async (dir) => {
     await runCreate(["roses"], dir);
-    for (const d of ["config", "data", "src", "src/plugins", "text", "help", "scripts"]) {
-      assert(existsSync(join(dir, "roses", d)), `missing directory: ${d}`);
+    for (const d of [
+      ".agents",
+      "config",
+      "data",
+      "src",
+      "src/plugins",
+      "text",
+      "help",
+      "scripts",
+    ]) {
+      assert(
+        existsSync(join(dir, "roses", d)),
+        `missing directory: ${d}`,
+      );
     }
+  });
+});
+
+Deno.test("create project: generates .agents/AGENTS.md", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const content = await Deno.readTextFile(
+      join(dir, "my-game", ".agents", "AGENTS.md"),
+    );
+    assertStringIncludes(content, "AI Agent Instructions");
+    assertStringIncludes(content, "Line Length");
+  });
+});
+
+Deno.test("create project: generates GEMINI.md", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const content = await Deno.readTextFile(
+      join(dir, "my-game", "GEMINI.md"),
+    );
+    assertStringIncludes(content, "Gemini Instructions");
   });
 });
 

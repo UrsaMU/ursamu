@@ -8,7 +8,7 @@ import type { CofdSheet } from "../stats/sheet.ts";
 import { applyDamage, healthMax, totalDamage } from "../health/index.ts";
 import type { DamageType } from "../health/index.ts";
 
-export type AttackDamageType = "bashing" | "lethal";
+export type AttackDamageType = "bashing" | "lethal" | "aggravated";
 
 export interface DamageResult {
   /** Updated copy of the sheet with the new health track. */

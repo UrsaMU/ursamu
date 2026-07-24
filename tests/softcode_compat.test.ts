@@ -14,7 +14,10 @@
 import { assertEquals } from "@std/assert";
 import { runSoftcode, softcodeEngine } from "@ursamu/mush";
 import type { UrsaEvalContext } from "@ursamu/mush";
-import type { DbAccessor, OutputAccessor } from "@ursamu/mush";
+import type {
+  SoftcodeDbAccessor as DbAccessor,
+  SoftcodeOutputAccessor as OutputAccessor,
+} from "@ursamu/mush";
 import type { IDBObj } from "@ursamu/mush";
 
 // ── shared helpers ────────────────────────────────────────────────────────────

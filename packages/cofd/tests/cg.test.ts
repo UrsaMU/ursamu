@@ -29,13 +29,14 @@ describe("Chronicles of Darkness Guided Character Generation", { sanitizeResourc
       }
     });
 
-    // 1. Initially, player has no sheet or cg state. Viewing sheet is blocked.
+    // 1. No sheet or cg yet: +sheet still shows a blank Mortal draft.
     u.cmd.args = [""];
     u._sent.length = 0;
     await sheetExec(u);
-    assertStringIncludes(u._sent.join("\n"), "does not have an approved character sheet");
+    assertStringIncludes(u._sent.join("\n"), "DRAFT");
+    assertStringIncludes(u._sent.join("\n"), "blank");
 
-    // Try modifying via +sheet/set - blocked
+    // Try modifying via +sheet/set - blocked until approved
     u.cmd.args = ["Strength", "4"];
     u._sent.length = 0;
     await sheetSetExec(u);
@@ -65,6 +66,15 @@ describe("Chronicles of Darkness Guided Character Generation", { sanitizeResourc
     u.cmd.args = ["set", "vice=Greedy"];
     u._sent.length = 0;
     await cgExec(u);
+
+    // Draft sheet is visible mid-chargen with live concept values.
+    u.cmd.args = [""];
+    u._sent.length = 0;
+    await sheetExec(u);
+    const draftOut = u._sent.join("\n");
+    assertStringIncludes(draftOut, "DRAFT");
+    assertStringIncludes(draftOut, "Chargen in progress");
+    assertStringIncludes(draftOut, "Modern Knight");
 
     // Submit Stage 1 -> moves to Stage 2
     u.cmd.args = ["submit", ""];
@@ -241,5 +251,21 @@ describe("Chronicles of Darkness Guided Character Generation", { sanitizeResourc
     const resetState = me.state.cofd_cg as CofdCgState;
     assertEquals(resetState.sheet.concept, "Unknown");
     assertEquals(resetState.stage, 1);
+  });
+
+  it("blocks resetting when approved", async () => {
+    const me = mockPlayer({
+      id: "1",
+      name: "Arthur",
+      state: { cofd: {} },
+    });
+    const u = mockU({ me });
+    u.cmd.args = ["reset", ""];
+    u._sent.length = 0;
+    await cgExec(u);
+    assertStringIncludes(
+      u._sent.join("\n"),
+      "You already have an approved character sheet.",
+    );
   });
 });

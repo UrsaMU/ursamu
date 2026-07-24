@@ -4,7 +4,7 @@
 // registry (src/npc/archetypes.ts). Picks are weighted-random with
 // replacement, so the same archetype can be selected multiple times.
 
-import { getArchetype } from "../npc/archetypes.ts";
+import { getNpcTemplate } from "../npc/catalog.ts";
 
 export type ThemeKey = "forest" | "city" | "urban-decay" | "sewer" | "ruins";
 export type SpawnSize = "small" | "medium" | "large";
@@ -79,7 +79,10 @@ export function registerCustomTheme(
     if (!e || typeof e !== "object") {
       return { ok: false, reason: "entry must be an object" };
     }
-    if (typeof e.archetype !== "string" || !getArchetype(e.archetype)) {
+    if (
+      typeof e.archetype !== "string" ||
+      !getNpcTemplate(e.archetype)
+    ) {
       return { ok: false, reason: `unknown archetype: ${String(e?.archetype)}` };
     }
     if (typeof e.weight !== "number" || e.weight < 1 || e.weight > 100) {

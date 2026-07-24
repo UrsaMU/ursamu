@@ -1,0 +1,46 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "lieutenant",
+  "name": "Lieutenant",
+  "blurb": "Mid-tier antagonist. Smart, capable, leads goons.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "major",
+  "lineage": "mortal",
+  "tags": ["mortal", "urban", "leader"],
+  "attributes": {
+    "intelligence": 3,
+    "wits": 3,
+    "resolve": 3,
+    "strength": 3,
+    "dexterity": 3,
+    "stamina": 3,
+    "presence": 3,
+    "manipulation": 3,
+    "composure": 3
+  },
+  "skills": {
+    "firearms": 2,
+    "weaponry": 3,
+    "intimidation": 3,
+    "persuasion": 2,
+    "investigation": 2
+  },
+  "merits": {
+    "fast reflexes": 2
+  },
+  "integrity": 5,
+  "size": 5,
+  "defaultWeapon": "pistol-light",
+  "shortDesc": [
+    "A sharp-dressed operator who looks like they give the orders.",
+    "Calm posture, expensive coat, eyes that count exits."
+  ],
+  "description": [
+    "Not the muscle — the one who tells the muscle where to stand."
+  ],
+  "ai": "beshilu-swarmer",
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible"
+  }
+}

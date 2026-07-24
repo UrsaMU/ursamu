@@ -1,0 +1,10 @@
+{
+  "name": "vendor",
+  "version": "1.0.0",
+  "description": "Generic Shop Vendor plugin for UrsaMU — supports creating shops and buy/sell transaction hooks.",
+  "ursamu": ">=2.6.0",
+  "author": "Antigravity",
+  "license": "MIT",
+  "main": "index.ts",
+  "dependencies": []
+}

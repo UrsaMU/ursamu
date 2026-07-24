@@ -1,3 +1,7 @@
+---
+dark: true
+---
+See also: help combat (overview)
 combat/switches  -- Per-switch behavior for +combat. See help combat.
 
 LIFECYCLE
@@ -8,7 +12,6 @@ LIFECYCLE
   /order  Show table (name, init, HP, turn marker).
   /next   End current turn; round loops; Defense resets.
   /end    Close encounter. Admin or opener.
-
 PRE-COMBAT
   /ambush  Dex+Stealth vs Wits+Composure. Loser: no act/Defense T1.
 
@@ -18,5 +21,4 @@ ACTION HOLDING
 
 MOVEMENT
   /move  Up to Speed yards. Free.  /run  2x Speed, instant, -1 Def.
-
 SEE ALSO: help combat, help combat/action-economy, help combat/delaying

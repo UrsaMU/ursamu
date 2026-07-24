@@ -106,5 +106,104 @@
     "cost": "1 Essence",
     "pool": "Power + Finesse - Composure",
     "description": "Witnesses are paralyzed with awe or terror for one turn."
+  },
+  {
+    "key": "among-the-sheep",
+    "label": "Among the Sheep",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "2 Glamour",
+    "pool": "n/a",
+    "description": "Huntsman: take any roughly humanoid form (Size 4-6); not a specific person."
+  },
+  {
+    "key": "apex-predator",
+    "label": "Apex Predator",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "1 Glamour",
+    "pool": "n/a",
+    "description": "Huntsman: conjure swarm or command a beast."
+  },
+  {
+    "key": "command-the-herald",
+    "label": "Command the Herald",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "1 Glamour/hour",
+    "pool": "n/a",
+    "description": "Huntsman: remote view via a touched herald creature."
+  },
+  {
+    "key": "heart-of-iron",
+    "label": "Heart of Iron",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "Free",
+    "pool": "n/a",
+    "description": "Huntsman: no fear of cold iron."
+  },
+  {
+    "key": "hungry-heart",
+    "label": "Hungry Heart",
+    "kind": "dread",
+    "tierMin": "storyteller",
+    "cost": "1 Willpower",
+    "pool": "Attack",
+    "description": "Huntsman: steal Glamour = successes on panoply hit vs Lost/Fae."
+  },
+  {
+    "key": "hunters-panoply",
+    "label": "Hunter's Panoply",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "Free",
+    "pool": "n/a",
+    "description": "Huntsman: 8-again with panoply tools."
+  },
+  {
+    "key": "hunters-senses",
+    "label": "Hunter's Senses",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "Free",
+    "pool": "Wits+Survival+Wyrd",
+    "description": "Huntsman: track quarry; +quarry Wyrd if Mask down."
+  },
+  {
+    "key": "inescapable-snare",
+    "label": "Inescapable Snare",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "2 Glamour",
+    "pool": "n/a",
+    "description": "Huntsman: lay a snare (Immobilized ST)."
+  },
+  {
+    "key": "kindred-spirits",
+    "label": "Kindred Spirits",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "1+ Glamour",
+    "pool": "n/a",
+    "description": "Huntsman: learn Needle, Thread, Aspirations, Clarity."
+  },
+  {
+    "key": "surprise-entrance",
+    "label": "Surprise Entrance",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "1 Glamour",
+    "pool": "n/a",
+    "description": "Huntsman: appear via threshold/shadow."
+  },
+  {
+    "key": "watchful-gaze",
+    "label": "Watchful Gaze",
+    "kind": "dread",
+    "tierMin": "major",
+    "cost": "1 Glamour",
+    "pool": "n/a",
+    "description": "Huntsman: sense when quarry speaks their name."
   }
 ]

@@ -1,15 +1,15 @@
-// Scene-resolution helpers. Extracted from walker.ts so attack.ts can call
-// into them without creating a circular import (walker.ts imports
-// executeAttack from attack.ts).
+// Scene-resolution helpers. attack.ts calls these without pulling the walker.
+// Status flip uses combat endEncounter; loot/beats stay CofD (ports.onResolved).
 
+import { allNpcsDown, endEncounter } from "@ursamu/combat";
+import { healthMax } from "../health/index.ts";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
-import { encounterDb } from "./encounter.ts";
+import { cofdEncounterStore } from "./encounter.ts";
 import type { Encounter, Participant } from "./types.ts";
 import { dropLoot } from "./loot.ts";
 import type { CofdSheet } from "../stats/index.ts";
 
-// deno-lint-ignore no-explicit-any
-type Q = any;
+export { allNpcsDown };
 
 async function loadActor(u: IUrsamuSDK, id: string): Promise<IDBObj | null> {
   // deno-lint-ignore no-explicit-any
@@ -17,27 +17,25 @@ async function loadActor(u: IUrsamuSDK, id: string): Promise<IDBObj | null> {
   return found[0] ?? null;
 }
 
-/** Persist changes to a participant by mutating then writing the encounter. */
+/**
+ * Canonical participant patch for cofd.encounters.
+ * cofdEncounterStore.patchParticipant delegates here — do not duplicate.
+ * Persistence goes only through the store.
+ */
 export async function patchParticipant(
   encounterId: string,
   actorId: string,
   patch: Partial<Participant>,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
+  const enc = await cofdEncounterStore.get(encounterId);
   if (!enc) return null;
-  const participants = enc.participants.map((p) =>
-    p.actorId === actorId ? { ...p, ...patch } : p
-  );
-  const updated: Encounter = { ...enc, participants };
-  await encounterDb.update({ id: encounterId } as Q, updated);
+  const idx = enc.participants.findIndex((p) => p.actorId === actorId);
+  if (idx < 0) return enc;
+  const participants = [...enc.participants];
+  participants[idx] = { ...participants[idx], ...patch };
+  const updated = { ...enc, participants };
+  await cofdEncounterStore.save(updated);
   return updated;
-}
-
-/** Are all NPC participants down/fled? */
-export function allNpcsDown(enc: Encounter): boolean {
-  const npcs = enc.participants.filter((p) => p.kind === "npc");
-  if (npcs.length === 0) return false;
-  return npcs.every((p) => p.isOut);
 }
 
 /** Award scene-resolution beats: 1 per surviving PC + 1 if no PC went down. */
@@ -82,13 +80,17 @@ export async function resolveScene(
   u: IUrsamuSDK,
   encounterId: string,
 ): Promise<Encounter | null> {
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
+  const enc = await cofdEncounterStore.get(encounterId);
   if (!enc) return null;
   if (enc.status === "resolved") return enc;
-  const resolved: Encounter = { ...enc, status: "resolved" };
-  await encounterDb.update({ id: encounterId } as Q, resolved);
 
-  // Loot drops.
+  // Engine marks status=resolved; host keeps loot + beats.
+  const resolved = await endEncounter(encounterId, {
+    store: cofdEncounterStore,
+  });
+  if (!resolved) return null;
+
+  // Loot drops + despawn downed NPCs (CofD tables).
   for (const p of enc.participants) {
     if (p.kind !== "npc" || !p.isOut) continue;
     const actor = await loadActor(u, p.actorId);
@@ -98,17 +100,27 @@ export async function resolveScene(
       | undefined;
     const key = sheet?.npc?.lootTable ?? sheet?.npc?.aiArchetype;
     if (key) {
-      try { await dropLoot(u, key, enc.roomId); } catch { /* swallow */ }
+      try {
+        await dropLoot(u, key, enc.roomId);
+      } catch { /* swallow */ }
     }
+    try {
+      await u.db.destroy(p.actorId);
+    } catch { /* swallow */ }
   }
 
-  // Beats.
-  await awardSceneBeats(u, resolved, `Scene resolved: ${enc.name ?? "encounter"}`);
+  await awardSceneBeats(
+    u,
+    resolved,
+    `Scene resolved: ${enc.name ?? "encounter"}`,
+  );
 
   // deno-lint-ignore no-explicit-any
   const here = (u as any).here;
   if (here && typeof here.broadcast === "function") {
-    here.broadcast("The scene resolves. Survivors recover their bearings.");
+    here.broadcast(
+      "The scene resolves. Survivors recover their bearings.",
+    );
   }
   return resolved;
 }
@@ -123,14 +135,11 @@ export async function syncIsOut(
   if (!actor) return;
   const sheet = actor.state?.cofd as CofdSheet | undefined;
   if (!sheet) return;
-  const size = sheet.advantages?.size ?? 5;
-  const stamina = sheet.attributes?.stamina ?? sheet.attributes?.Stamina ?? 1;
-  const max = size + stamina;
+  const max = healthMax(sheet);
   const h = sheet.health ?? { bashing: 0, lethal: 0, aggravated: 0 };
   const filled = (h.bashing ?? 0) + (h.lethal ?? 0) + (h.aggravated ?? 0);
-  if (filled >= max) {
-    await patchParticipant(encounterId, actorId, { isOut: true });
-  }
+  const isOut = filled >= max;
+  await patchParticipant(encounterId, actorId, { isOut });
 }
 
 /**
@@ -144,8 +153,27 @@ export async function handleTargetIncapacitated(
   targetActorId: string,
 ): Promise<boolean> {
   await syncIsOut(u, encounterId, targetActorId);
-  const enc = await encounterDb.findOne({ id: encounterId } as Q);
+  const enc = await cofdEncounterStore.get(encounterId);
   if (!enc) return false;
+
+  // Auto-destroy the downed NPC immediately.
+  const p = enc.participants.find((x) => x.actorId === targetActorId);
+  if (p && p.kind === "npc") {
+    const actor = await loadActor(u, targetActorId);
+    if (actor) {
+      const sheet = actor.state?.cofd as
+        | (CofdSheet & { npc?: { aiArchetype?: string; lootTable?: string } })
+        | undefined;
+      const key = sheet?.npc?.lootTable ?? sheet?.npc?.aiArchetype;
+      if (key) {
+        try { await dropLoot(u, key, enc.roomId); } catch { /* swallow */ }
+      }
+      try {
+        await u.db.destroy(targetActorId);
+      } catch { /* swallow */ }
+    }
+  }
+
   if (allNpcsDown(enc)) {
     const resolved = await resolveScene(u, encounterId);
     return resolved !== null;

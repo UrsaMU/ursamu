@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE OBJECT FUNCTIONS
 
 Object references accepted by most functions:

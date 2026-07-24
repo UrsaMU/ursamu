@@ -38,25 +38,23 @@ Deno.test({
   });
 
   await t.step("u.util.header", async () => {
-    const code = 'return u.util.header("Title", "=", 20);';
+    // Host-side header() strips color for visual width.
+    const code = 'return await u.util.header("Title", "=", 20);';
     const result = await run(code);
-    // Sandbox center() pads by raw char count (same as u.util.center), so the
-    // %ch/%cn codes are counted; native header() in src/utils/format.ts strips
-    // them before padding. Divergence is pre-existing — see worker.ts _padStr.
     assertEquals(
       result,
-      "====================\n    %chTitle%cn     \n====================",
+      "====================\n       %chTitle%cn        \n====================",
     );
   });
 
   await t.step("u.util.divider with label", async () => {
-    const code = 'return u.util.divider("Sect", "-", 10);';
+    const code = 'return await u.util.divider("Sect", "-", 10);';
     const result = await run(code);
     assertEquals(result, "\n%chSect%cn\n----------");
   });
 
   await t.step("u.util.footer (empty → rule only)", async () => {
-    const code = 'return u.util.footer("", "=", 10);';
+    const code = 'return await u.util.footer("", "=", 10);';
     const result = await run(code);
     assertEquals(result, "==========");
   });

@@ -2,10 +2,10 @@
  * @module @ursamu/help
  * @description API-first help system framework for UrsaMU.
  *
- * ## Quick start
+ * Layout chrome prefers `game.layout.*` mushcode when the engine
+ * supports it; otherwise TinyMUX plushelp-style dash rules.
  *
- * Install the plugin in your game's plugin manifest, then optionally
- * register your plugin's help directory from your plugin's init():
+ * ## Quick start
  *
  * ```ts
  * import { registerHelpDir } from "@ursamu/help";
@@ -13,7 +13,10 @@
  * export const plugin: IPlugin = {
  *   name: "myplugin",
  *   init: () => {
- *     registerHelpDir(new URL("./help", import.meta.url).pathname, "myplugin");
+ *     registerHelpDir(
+ *       new URL("./help", import.meta.url).pathname,
+ *       "myplugin",
+ *     );
  *     return true;
  *   },
  * };
@@ -22,11 +25,11 @@
  * ## REST API
  *
  * ```
- * GET    /api/v1/help               → { sections, topics }
- * GET    /api/v1/help/:topic        → { entry }
- * GET    /api/v1/help/:topic?format=md  → raw markdown
- * POST   /api/v1/help/:topic        → create/update (admin, auth required)
- * DELETE /api/v1/help/:topic        → delete       (admin, auth required)
+ * GET    /api/v1/help
+ * GET    /api/v1/help/:topic
+ * GET    /api/v1/help/:topic?format=md
+ * POST   /api/v1/help/:topic        (admin JWT)
+ * DELETE /api/v1/help/:topic        (admin JWT)
  * ```
  */
 
@@ -34,7 +37,11 @@
 export { plugin } from "./src/index.ts";
 
 // Registry — for advanced use (custom providers, direct lookup)
-export { helpRegistry, registerHelpEntry } from "./src/registry.ts";
+export {
+  helpRegistry,
+  registerHelpEntry,
+  slugify,
+} from "./src/registry.ts";
 export type { HelpEntry, HelpProvider, HelpSource } from "./src/registry.ts";
 
 // File provider registration — for per-plugin help directories

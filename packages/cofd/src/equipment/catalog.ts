@@ -76,15 +76,11 @@ interface EquipmentCatalog {
   ammo: AmmoEntry[];
 }
 
-const catalogUrl = new URL("../../resources/equipment.json", import.meta.url);
-const ammoUrl = new URL("../../resources/ammo.json", import.meta.url);
+import catalogData from "../../resources/equipment.json" with { type: "json" };
+import ammoData from "../../resources/ammo.json" with { type: "json" };
 
-const _baseCatalog: Omit<EquipmentCatalog, "ammo"> = JSON.parse(
-  Deno.readTextFileSync(catalogUrl),
-);
-const _ammoFile: { ammo: AmmoEntry[] } = JSON.parse(
-  Deno.readTextFileSync(ammoUrl),
-);
+const _baseCatalog: Omit<EquipmentCatalog, "ammo"> = catalogData as Omit<EquipmentCatalog, "ammo">;
+const _ammoFile: { ammo: AmmoEntry[] } = ammoData as { ammo: AmmoEntry[] };
 
 /** Full Appendix One catalog plus the ammo extension. */
 export const EQUIPMENT: EquipmentCatalog = {

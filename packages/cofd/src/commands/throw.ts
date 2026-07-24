@@ -196,16 +196,21 @@ export async function throwExec(u: IUrsamuSDK) {
       u.send(`Target '${targetName}' not found.`);
       return;
     }
-    if (!(await u.canEdit(u.me, target))) {
-      u.send("You do not have permission to apply damage to that target.");
+    if (target.id === u.me.id) {
+      u.send("You cannot throw at yourself.");
+      return;
+    }
+    // Combat damage is not a canEdit op (same rule as +attack).
+
+    await autoJoinTarget(u, encounter, target);
+    const targetPart = encounter.participants.find((p) => p.actorId === target.id);
+    if (targetPart?.isOut) {
+      u.send(`${target.name ?? "Target"} is already incapacitated.`);
       return;
     }
 
-    await autoJoinTarget(u, encounter, target);
-
     const targetSheet: CofdSheet = (target.state?.cofd as CofdSheet) ?? defaultSheet();
     let defense = computeDefense(targetSheet);
-    const targetPart = encounter.participants.find((p) => p.actorId === target.id);
     if (targetPart) defense = Math.max(0, defense - targetPart.appliedDefense);
     const finalPool = Math.max(0, pool - defense);
 

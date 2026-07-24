@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # MAIL FORWARD
 
 Forward a message to another player.

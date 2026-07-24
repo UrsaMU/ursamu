@@ -1,22 +1,18 @@
-+sheet  -- View and edit Chronicles of Darkness character sheets.
++SHEET  -- View and edit Chronicles of Darkness sheets.
 
 SYNTAX
-  +sheet [<player>]                  View a sheet.
-  +sheet/set <trait>=<value>         Set a trait on your sheet.
-  +sheet/set <player>/<trait>=<v>    Set on another (builder+).
-  +sheet/set specialty/<skill>=<n>   Add a skill specialty.
-  +sheet/set specialty/<skill>=<n>: <description>
-  +sheet/set specialty/<skill>=      Remove all specialties on a skill.
-  +sheet/set <trait>=                Reset trait to template default.
-  +sheet/virtue [<p>] [= <reason>]   Virtue triggered: full WP.
-  +sheet/vice   [<p>] [= <reason>]   Vice indulged: +1 WP.
-  +sheet/rest   [<p>] [= <reason>]   Full rest: full WP.
+  +sheet [<player>]                View (live or draft).
+  +sheet/set <trait>=<value>       Edit your live sheet.
+  +sheet/set <p>/<trait>=<v>       Builder+: edit other.
+  +sheet/set specialty/<sk>=<n>    Add skill specialty.
+  +sheet/virtue|vice|rest [p]      Willpower recovery.
 
-Edit own sheet after chargen submission. Edit others, own Size, or
-regen WP for others requires builder+ (canEdit).
+VIEWING
+  Self always works (draft during +cg). Others' drafts
+  need canEdit. After +approve, live sheet is active.
 
-EXAMPLES: +sheet/set strength=3
-          +sheet/set specialty/athletics=Climbing
+EDITING
+  Live sheet only via +sheet/set. Build with +cg until
+  approved. Size / others' WP: builder+.
 
-SEE ALSO: help sheet/traits, help sheet/willpower, help sheet/size,
-          help sheet/specialties, help cg, help virtues, help vices
+SEE ALSO: help sheet/traits, help sheet/willpower,, help sheet/examples

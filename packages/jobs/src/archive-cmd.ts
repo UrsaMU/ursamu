@@ -8,7 +8,7 @@ import { isStaffFlags, header, divider, footer, formatTimeShort, formatDate } fr
 addCmd({
   name: "+archive",
   pattern: /^\+archive(?:\/(\S+))?\s*(.*)/i,
-  lock: "connected",
+  lock: "connected builder+",
   help: `+archive[/<switch>] [<args>]  — View and manage the job archive (staff only).
 
 Switches:

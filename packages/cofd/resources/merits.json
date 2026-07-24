@@ -3650,5 +3650,157 @@
     "tags": [
       "minor-template:psychic-vampire"
     ]
+  },
+  {
+    "key": "mantle",
+    "name": "Mantle",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": [
+      "template=changeling"
+    ],
+    "source": "CtL 2e p.117",
+    "tags": [
+      "changeling",
+      "court"
+    ]
+  },
+  {
+    "key": "court goodwill",
+    "name": "Court Goodwill",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "instanced": true,
+    "prereqs": [
+      "template=changeling"
+    ],
+    "source": "CtL 2e p.118",
+    "tags": [
+      "changeling",
+      "court"
+    ]
+  },
+  {
+    "key": "hollow",
+    "name": "Hollow",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=changeling"
+    ],
+    "source": "CtL 2e p.116",
+    "tags": [
+      "changeling",
+      "motley",
+      "hedge"
+    ]
+  },
+  {
+    "key": "stable trod",
+    "name": "Stable Trod",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "prereqs": [
+      "template=changeling"
+    ],
+    "source": "CtL 2e Stable Trod",
+    "tags": [
+      "changeling",
+      "motley",
+      "hedge"
+    ]
+  },
+  {
+    "key": "acute senses",
+    "name": "Acute Senses",
+    "category": "Supernatural",
+    "allowedDots": [
+      1
+    ],
+    "prereqs": [
+      "template=changeling"
+    ],
+    "source": "CtL 2e p.111",
+    "tags": [
+      "changeling"
+    ]
+  },
+  {
+    "key": "pandemoniacal",
+    "name": "Pandemoniacal",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=changeling"
+    ],
+    "source": "CtL 2e p.111",
+    "tags": [
+      "changeling",
+      "bedlam"
+    ]
+  },
+  {
+    "key": "faerie affinity",
+    "name": "Faerie Affinity",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=changeling"
+    ],
+    "source": "CtL 2e Changeling Merits",
+    "tags": [
+      "changeling"
+    ]
+  },
+  {
+    "key": "hedgespinning",
+    "name": "Hedgespinning",
+    "category": "Supernatural",
+    "allowedDots": [
+      1,
+      2,
+      3
+    ],
+    "prereqs": [
+      "template=changeling"
+    ],
+    "source": "CtL 2e (style)",
+    "tags": [
+      "changeling",
+      "hedge"
+    ]
   }
 ]

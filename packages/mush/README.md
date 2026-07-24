@@ -60,10 +60,78 @@ Examples:
 | `registerFormatHandler` | Register a display-format handler |
 | `registerFormatTemplate` | Register a MUSH softcode format template |
 | `resolveFormat` / `resolveGlobalFormat` | Render a format slot |
+| `header` / `divider` / `footer` | Layout chrome helpers |
+| `registerHeader` / `registerDivider` / `registerFooter` | Plugin layout stacks |
+| `setLayoutTemplates` / `hasLayoutTemplate` | Config-driven layout mushcode |
+| `applyLayoutFromConfig` | Load `game.layout.*` from config |
 | `createNativeSDK` | Build an `IUrsamuSDK` from a session + actor |
 | `loadDefaultCommands` | Load built-in MUSH verb set |
 | `registerScript` | Register or override a softcode script by name |
 | `gameHooks` + all core exports | Everything from `@ursamu/core` |
+
+## Layout chrome (`game.layout`)
+
+Theme headers, dividers, and footers with TinyMUX-style templates in
+`config/config.json`. Loaded at engine start via `applyLayoutFromConfig`.
+
+```json
+{
+  "game": {
+    "layout": {
+      "header":  "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+      "divider": "[center(%ch%cy%0%cn,%1,%cg-%cn)]",
+      "footer":  "[repeat(%cg=%cn,%1)]"
+    }
+  }
+}
+```
+
+| Placeholder | Meaning |
+|-------------|---------|
+| `%0` | Title / label |
+| `%1` | Width (default `78`) |
+| `%2` | Filler |
+| `%b` | Space (use around `%0` for padding) |
+
+Title padding is intentional — e.g. `%b%0%b` or ` %0 ` keeps a
+gap between the label and the fill characters. Layout arg splitting
+does **not** trim those spaces.
+
+Supported functions (nested ok): `center`, `ljust`, `rjust`,
+`repeat`, `space`, `cat`, `lit`, `strlen`, `words`, `if`, `eq`,
+`neq`, `and`, `or`, `not`, `gt`/`lt`/`gte`/`lte`, `add`/`sub`/
+`mul`/`div`, `min`/`max`/`abs`, `first`/`rest`, `mid`/`left`/
+`right`, `strip`/`trim`. Color codes and `%r` / `%t` / `%b`
+pass through.
+
+Conditional divider example (title line or nothing):
+
+```json
+"divider": "[if(words(%0),center(%ch%cy%0%cn,%1,%cg-%cn),)]"
+```
+
+Config templates apply to:
+
+- native `header()` / `divider()` / `footer()`
+- sandbox `u.util.header` / `divider` / `footer`
+- softcode `[header()]` / `[divider()]` / `[footer()]` when a template
+  is set for that slot
+
+Plugin `registerHeader` / etc. still work when no config template is set
+for that slot. A config template takes priority for its slot.
+
+```typescript
+import {
+  header,
+  setLayoutTemplates,
+  hasLayoutTemplate,
+} from "jsr:@ursamu/mush";
+
+setLayoutTemplates({
+  header: "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+});
+header("Character Sheet"); // uses template when set
+```
 
 ## Lock levels
 

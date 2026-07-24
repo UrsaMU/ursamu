@@ -40,7 +40,7 @@ trap cleanup SIGTERM SIGINT
 
 while true; do
   START_TS=$(date +%s)
-  deno run "${DENO_ARGS[@]}" src/main.ts >> "$MAIN_LOG" 2>&1 &
+  deno run "${DENO_ARGS[@]}" packages/mush/src/main.ts >> "$MAIN_LOG" 2>&1 &
   _deno_pid=$!
   echo "$_deno_pid" > "$DENO_PID_FILE"
 

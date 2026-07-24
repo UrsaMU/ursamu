@@ -209,14 +209,12 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
 
   let lookTarget: IDBObj = u.here;
   if (arg) {
-    const results = await u.db.search(arg);
-    const found = results.find((r) =>
-      r.id === u.here.id ||
-      u.here.contents?.some((c) => c.id === r.id) ||
-      actor.contents?.some((c) => c.id === r.id)
-    );
-    if (!found) { u.send("I can't find that here."); return; }
-    lookTarget = found;
+    const target = await u.util.target(actor, arg);
+    if (!target) {
+      u.send("I can't find that here.");
+      return;
+    }
+    lookTarget = target;
   }
 
   const canEditTarget = await u.canEdit(actor, lookTarget);
@@ -291,7 +289,9 @@ function formatIdle(lastCommand: number | undefined): string {
 }
 
 function getShortDesc(obj: IDBObj): string {
-  const attrs = (obj.state?.attributes as { name?: string; value?: string }[]) || [];
+  const attrsState = (obj.state?.attributes as { name?: string; value?: string }[]) || [];
+  const attrsData = (obj.data?.attributes as { name?: string; value?: string }[]) || [];
+  const attrs = [...attrsState, ...attrsData];
   const sd = attrs.find((a) =>
     a.name?.toLowerCase() === "short-desc" || a.name?.toLowerCase() === "shortdesc"
   );
@@ -344,7 +344,15 @@ export const defaultConformatHandler = async (
     for (const o of objects) {
       const disp = o.name || u.util.displayName(o, actor);
       const canEditObj = await u.canEdit(actor, o);
-      lines.push(` ${canEditObj ? `${disp}(#${o.id})` : disp}`);
+      const name = canEditObj ? `${disp}(#${o.id})` : disp;
+      // Classic MUSH: room things show short-desc after the name.
+      const sd = getShortDesc(o);
+      if (sd) {
+        const pad = " ".repeat(Math.max(1, 40 - visualLen(` ${name}`)));
+        lines.push(` ${name}${pad}${sd}`.replace(/\s+$/, ""));
+      } else {
+        lines.push(` ${name}`);
+      }
     }
   }
 

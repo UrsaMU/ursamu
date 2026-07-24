@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @OPEN
 
 Creates a new exit.

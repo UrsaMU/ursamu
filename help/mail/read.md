@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # MAIL READ
 
 Reads a specific message from your mailbox.

@@ -1,9 +1,12 @@
-// +turn command -- per-actor turn helpers built on the AI walker.
+// +turn command -- reaction postures and staff auto-pump helpers.
+//
+// NPC AI runs automatically on +combat/next and after PC attacks; these
+// switches are convenience aliases, not a separate turn system.
 //
 // Subcommands:
-//   /done                       Alias for the smart +combat/next walker.
-//   /auto [<max>]               Builder+: pump the encounter until a PC turn,
-//                               all NPCs down, or <max> rounds (cap 50).
+//   /done                       Alias for +combat/next (AI on by default).
+//   /auto [<max>]               Builder+: pump until a PC turn, all NPCs
+//                               down, or <max> rounds (cap 50).
 //   /reaction <posture> [target=<name>]
 //                               Set the actor's reaction posture for the
 //                               coming round. Postures: ambush | overwatch |
@@ -11,8 +14,10 @@
 
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
 import {
-  encounterDb,
+  advanceTurn,
   getEncounterForRoom,
+  patchEncounter,
+  setReactionPosture,
 } from "../combat/encounter.ts";
 import { advanceTurnSmart } from "../combat/walker.ts";
 import type { ReactionPosture } from "../combat/types.ts";
@@ -24,9 +29,6 @@ const VALID_POSTURES: Set<ReactionPosture["type"]> = new Set([
   "first-fire-on-adjacent",
 ]);
 
-// deno-lint-ignore no-explicit-any
-type Q = any;
-
 function isStaff(actor: IDBObj): boolean {
   const f = actor.flags as Set<string> | undefined;
   if (!f) return false;
@@ -34,6 +36,7 @@ function isStaff(actor: IDBObj): boolean {
 }
 
 async function turnDone(u: IUrsamuSDK): Promise<void> {
+  // Same path as +combat/next: end current turn, auto-run NPC AI.
   const roomId = u.here?.id;
   if (!roomId) { u.send("You are not in a room."); return; }
   const enc = await getEncounterForRoom(roomId);
@@ -41,14 +44,32 @@ async function turnDone(u: IUrsamuSDK): Promise<void> {
     u.send("No active encounter here.");
     return;
   }
-  const after = await advanceTurnSmart(enc.id, u);
-  if (!after) { u.send("Failed to advance."); return; }
+  const cur0 = enc.participants[enc.turnIdx];
+  const startIdx = enc.turnIdx;
+  let after;
+  if (cur0?.kind === "npc" && !cur0.isOut) {
+    after = await advanceTurnSmart(enc.id, u);
+    // Manual/unknown AI halts without advancing -- step once so /done
+    // is never a no-op on an ST-controlled slot.
+    if (
+      after &&
+      after.status === "active" &&
+      after.turnIdx === startIdx
+    ) {
+      after = await advanceTurn(enc.id, u);
+      if (after) after = await advanceTurnSmart(enc.id, u);
+    }
+  } else {
+    const stepped = await advanceTurn(enc.id, u);
+    if (!stepped) { u.send("Failed to advance."); return; }
+    after = await advanceTurnSmart(enc.id, u);
+  }
+  if (!after || after.status !== "active") return;
   const cur = after.participants[after.turnIdx];
   if (cur) {
     const msg =
       `%cyTURN>>%cn Round ${after.round} -- It is now ${cur.name}'s turn ` +
       `(Initiative ${cur.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
   }
 }
@@ -71,8 +92,7 @@ async function turnAuto(u: IUrsamuSDK, rest: string): Promise<void> {
   if (!isNaN(n) && n > 0) maxRounds = Math.min(50, n);
 
   // Patch maxRounds onto the encounter for the walker's safety check.
-  const patched = { ...enc, maxRounds };
-  await encounterDb.update({ id: enc.id } as Q, patched);
+  await patchEncounter(enc.id, { maxRounds });
 
   await advanceTurnSmart(enc.id, u);
   u.send(`%cyTURN>>%cn Auto-pump complete (max ${maxRounds} rounds).`);
@@ -116,16 +136,14 @@ async function turnReaction(u: IUrsamuSDK, rest: string): Promise<void> {
   const myP = enc.participants.find((p) => p.actorId === u.me.id);
   if (!myP) { u.send("You are not in this encounter."); return; }
 
-  const participants = enc.participants.map((p) =>
-    p.actorId === u.me.id
-      ? { ...p, reactionPosture: { type: posture, ...(targetId ? { targetId } : {}) } }
-      : p
-  );
-  await encounterDb.update({ id: enc.id } as Q, { ...enc, participants });
+  await setReactionPosture(enc.id, u.me.id, {
+    type: posture,
+    ...(targetId ? { targetId } : {}),
+  });
 
   const tgtPart = targetId ? ` (target: ${targetId})` : "";
-  const msg = `%cyREACTION>>%cn ${myP.name} takes the ${posture} posture${tgtPart}.`;
-  u.send(msg);
+  const msg =
+    `%cyREACTION>>%cn ${myP.name} takes the ${posture} posture${tgtPart}.`;
   u.broadcast(msg);
 }
 

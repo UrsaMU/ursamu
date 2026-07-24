@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # Alias
 
 Usage: `@alias <target> = <alias>`

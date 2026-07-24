@@ -53,10 +53,14 @@ export function registerMushRoutes(authenticate: Authenticator): void {
     registerRoute("GET", `/api/v1/${suffix}`, (req) => configHandler(req));
   }
 
-  // Auth routes (no JWT required — they produce JWT)
-  registerRoute("POST", "/api/v1/login",          (req, _p) => authHandler(req));
-  registerRoute("POST", "/api/v1/register",        (req, _p) => authHandler(req));
-  registerRoute("POST", "/api/v1/reset-password",  (req, _p) => authHandler(req));
+  // Auth routes (no JWT required — they produce JWT).
+  // remoteAddr is threaded from Deno.serve connInfo for per-IP rate limits.
+  registerRoute("POST", "/api/v1/login", (req, _p, addr) =>
+    authHandler(req, addr ?? "unknown"));
+  registerRoute("POST", "/api/v1/register", (req, _p, addr) =>
+    authHandler(req, addr ?? "unknown"));
+  registerRoute("POST", "/api/v1/reset-password", (req, _p, addr) =>
+    authHandler(req, addr ?? "unknown"));
 
   // Public catalog routes
   registerRoute("GET", "/api/v1/flags",     (req) => Promise.resolve(flagsHandler(req)));
@@ -133,6 +137,9 @@ export function registerMushRoutes(authenticate: Authenticator): void {
 // Used by src/app.ts for test compatibility and as the registerFallback target.
 
 const MAX_API_TRACKED_IPS = 5_000;
+/** Max REST requests per IP per sliding window (handleRequest path). */
+export const API_RATE_LIMIT = 120;
+const API_RATE_WINDOW_MS = 60_000;
 export { MAX_API_TRACKED_IPS };
 
 const apiRateLimits = new Map<string, { count: number; resetAt: number }>();
@@ -142,7 +149,7 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
   const path   = url.pathname;
   const method = req.method.toUpperCase();
 
-  // Per-IP API rate limiting (prevents map unbounded growth)
+  // Per-IP API rate limiting
   const now = Date.now();
   let entry = apiRateLimits.get(remoteAddr);
   if (!entry || now >= entry.resetAt) {
@@ -150,10 +157,26 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
       const oldest = apiRateLimits.keys().next().value;
       if (oldest) apiRateLimits.delete(oldest);
     }
-    entry = { count: 1, resetAt: now + 60_000 };
+    entry = { count: 1, resetAt: now + API_RATE_WINDOW_MS };
     apiRateLimits.set(remoteAddr, entry);
   } else {
     entry.count++;
+  }
+  if (entry.count > API_RATE_LIMIT) {
+    const retryAfter = Math.max(
+      1,
+      Math.ceil((entry.resetAt - now) / 1000),
+    ).toString();
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Try again later." }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": retryAfter,
+        },
+      },
+    );
   }
 
   if (path === "/health" || path === "/") {
@@ -249,6 +272,9 @@ export async function avatarServe(urlPath: string): Promise<Response> {
           headers: {
             "Content-Type":  EXT_MIME[ext] ?? "application/octet-stream",
             "Cache-Control": "public, max-age=3600",
+            // Bypass interstitial warning pages on ngrok and localtunnel
+            "ngrok-skip-browser-warning": "true",
+            "bypass-tunnel-reminder": "true",
           },
         });
       }

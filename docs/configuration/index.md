@@ -88,6 +88,41 @@ Transport ports and Deno-KV collection prefixes.
 | `text.connect` | path | Pre-auth banner |
 | `text.welcome` | path | Post-create welcome |
 | `text.404` | path | Static-route fallback |
+| `layout.header` | mushcode | Template for `header()` / `u.util.header` |
+| `layout.divider` | mushcode | Template for `divider()` / `u.util.divider` |
+| `layout.footer` | mushcode | Template for `footer()` / `u.util.footer` |
+
+### `game.layout` — header / divider / footer mushcode
+
+Override the engine layout helpers with TinyMUX-style templates. When set,
+these apply to native `header()` / `divider()` / `footer()`, sandbox
+`u.util.*`, and softcode `[header()]` / `[divider()]` / `[footer()]`.
+
+```json
+{
+  "game": {
+    "layout": {
+      "header":  "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+      "divider": "[center(%ch%cy%0%cn,%1,%cg-%cn)]",
+      "footer":  "[repeat(%cg=%cn,%1)]"
+    }
+  }
+}
+```
+
+| Placeholder | Meaning |
+|-------------|---------|
+| `%0` | Title / label |
+| `%1` | Width (default `78`) |
+| `%2` | Filler character(s) |
+
+Supported bracket functions inside templates (sync subset):
+`center`, `ljust`, `rjust`, `repeat`, `space`, `cat`, `lit`, `strlen`.
+Color codes (`%ch`, `%cy`, …) and `%r` / `%t` / `%b` pass through.
+
+Plugin `registerHeader` / `registerDivider` / `registerFooter` still work
+when no config template is set for that slot. A config template for a slot
+takes priority over registered plugin layout functions.
 
 ## `theme`
 

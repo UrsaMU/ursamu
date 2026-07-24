@@ -1,0 +1,59 @@
+{
+  "$schema": "../schemas/ai-strategy.schema.json",
+  "slug": "beshilu-swarmer",
+  "name": "Beshilu Swarmer",
+  "blurb": "Rat-host pack: flee when dying, revenge pack-mates, gang up, then crush the weak.",
+  "book": "WtF Hosts flavor",
+  "tags": ["host", "beshilu", "swarm", "melee"],
+  "rules": [
+    {
+      "id": "flee-wounded",
+      "priority": 100,
+      "weight": 1,
+      "when": { "selfHealthBelow": 0.25 },
+      "then": { "action": "flee" },
+      "reason": "structure < 25% -- flee"
+    },
+    {
+      "id": "pack-revenge",
+      "priority": 80,
+      "weight": 1,
+      "when": {
+        "packMateDown": true,
+        "hasThreat": true,
+        "hasEnemies": true
+      },
+      "then": {
+        "action": "attack",
+        "target": "highest-threat"
+      },
+      "reason": "pack-mate down -- revenge attack"
+    },
+    {
+      "id": "gang-up",
+      "priority": 60,
+      "weight": 1,
+      "when": {
+        "livingPackMatesAtLeast": 1,
+        "hasEnemies": true
+      },
+      "then": {
+        "action": "attack",
+        "target": "first"
+      },
+      "reason": "gang-up"
+    },
+    {
+      "id": "weakest",
+      "priority": 40,
+      "weight": 1,
+      "when": { "hasEnemies": true },
+      "then": {
+        "action": "attack",
+        "target": "weakest"
+      },
+      "reason": "weakest target"
+    }
+  ],
+  "fallback": { "action": "wait" }
+}

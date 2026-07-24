@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "shyriiwook",
+  "mode": "phoneme",
+  "description": "Wookiee speech — growling, throat-heavy syllables.",
+  "onsets": ["k", "g", "r", "rr", "gr", "kr", "wr", "hr", "ng", "h", "w"],
+  "nuclei": ["aa", "uu", "oo", "ah", "rr", "oa", "ow"],
+  "codas": ["k", "rr", "gh", "h", "rk", "ngh", ""],
+  "syllablePatterns": ["CV", "CVC", "CCV", "CCVC", "CV"],
+  "wordLenWeights": [0, 2, 4, 3, 2, 1],
+  "capitalize": "first",
+  "accentSubs": { "s": "rh", "th": "k", "ee": "uu" }
+}

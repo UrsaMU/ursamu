@@ -24,6 +24,7 @@ import {
   validateTraitValue,
   type CofdSheet,
 } from "../stats/index.ts";
+import { matchNameOrThrow } from "../support/match.ts";
 
 export interface CofdCgState {
   stage: number;        // 1 to 6
@@ -143,102 +144,164 @@ export function getStageName(stage: number): string {
 /**
  * Updates traits specific to the current creation stage.
  */
-export function updateCgState(cgState: CofdCgState, trait: string, val: string): CofdCgState {
+export function updateCgState(
+  cgState: CofdCgState,
+  trait: string,
+  val: string,
+): CofdCgState {
   const stage = cgState.stage;
   let sheet = JSON.parse(JSON.stringify(cgState.sheet)) as CofdSheet;
-  const key = trait.toLowerCase().trim();
+  let key = trait.toLowerCase().trim();
+  // Canonical key after partial-name resolve (attrs/skills/powers).
+  let resolvedTrait = trait;
 
   const tKey = sheet.template.toLowerCase().trim();
   const tmpl = COFD_TEMPLATES[tKey] || COFD_TEMPLATES.mortal;
 
-  // 1. Stage-specific trait check
+  // 1. Stage checks (+ partial name resolve where catalogs apply)
   switch (stage) {
     case 1:
       if (!["concept", "virtue", "vice"].includes(key)) {
-        throw new Error("In Stage 1, you can only set concept, virtue, and vice.");
+        throw new Error(
+          "In Stage 1, you can only set concept, virtue, and vice.",
+        );
       }
       break;
 
     case 2:
       if (key !== "template") {
-        throw new Error("In Stage 2, you can only set template (e.g. +cg/set template=changeling).");
+        throw new Error(
+          "In Stage 2, you can only set template " +
+            "(e.g. +cg/set template=changeling).",
+        );
       }
       break;
 
     case 3: {
       if (!tmpl.customFields.includes(key)) {
-        throw new Error(`In Stage 3, you can only set custom fields for '${tmpl.name}': ${tmpl.customFields.join(", ")}.`);
+        throw new Error(
+          `In Stage 3, you can only set custom fields for ` +
+            `'${tmpl.name}': ${tmpl.customFields.join(", ")}.`,
+        );
       }
-      // Fields with a canonical catalog (seeming, kith, court, auspice, tribe)
-      // must match a real value; recognized values are normalized to canonical
-      // casing. Free-form fields (needle, thread, blood, bone) pass through.
-      const res = resolveCustomFieldValue(sheet.template, key, val);
+      // Canonical catalogs (seeming, kith, court, auspice, tribe)
+      // normalize casing; free-form fields pass through.
+      const res = resolveCustomFieldValue(
+        sheet.template,
+        key,
+        val,
+      );
       if (res.kind === "invalid") throw new Error(res.error);
       if (res.kind === "ok") val = res.value;
       break;
     }
 
-    case 4:
-      if (!COFD_ATTRIBUTES.includes(key)) {
-        throw new Error(`In Stage 4, you can only set attributes: ${COFD_ATTRIBUTES.join(", ")}.`);
-      }
+    case 4: {
+      const matched = matchNameOrThrow(
+        key,
+        COFD_ATTRIBUTES,
+        "attribute",
+      );
+      key = matched.toLowerCase();
+      resolvedTrait = matched;
       break;
+    }
 
-    case 5:
-      if (!COFD_SKILLS.includes(key)) {
-        throw new Error(`In Stage 5, you can only set skills: ${COFD_SKILLS.join(", ")}.`);
-      }
+    case 5: {
+      const matched = matchNameOrThrow(
+        key,
+        COFD_SKILLS,
+        "skill",
+      );
+      key = matched.toLowerCase();
+      resolvedTrait = matched;
       break;
+    }
 
     case 6: {
-      // Merits may be qualified ("language(spanish)"). Match on the merit
-      // portion of the key, not the full storage key.
+      // Merits may be qualified ("language(spanish)"). Match on
+      // the merit portion; allow partial / stop-word-tolerant names
+      // ("body as a weapon" → "body as weapon").
       const meritRef = parseMeritRef(key);
-      const meritDef = COFD_MERITS.find(m => m.key === meritRef.merit);
-      if (!meritDef) {
-        throw new Error("In Stage 6, you can only allocate merits.");
-      }
+      const meritKeys = COFD_MERITS.map((m) => m.key);
+      const matchedMerit = matchNameOrThrow(
+        meritRef.merit,
+        meritKeys,
+        "merit",
+        "+cg/list merits",
+      );
+      const q = meritRef.qualifier;
+      resolvedTrait = q
+        ? `${matchedMerit}(${q})`
+        : matchedMerit;
+      key = resolvedTrait.toLowerCase();
       break;
     }
 
     case 7: {
-      // Changeling Stage 7 is discrete Contract selection via +cg/contract.
+      // Changeling Stage 7 uses +cg/contract, not +cg/set.
       if (sheet.template === "changeling") {
-        throw new Error("In Stage 7, choose Contracts with +cg/contract <name>, +cg/uncontract <name>. Browse with +cg/list contracts.");
+        throw new Error(
+          "In Stage 7, choose Contracts with " +
+            "+cg/contract <name>, +cg/uncontract <name>. " +
+            "Browse with +cg/list contracts.",
+        );
       }
-      const isPower = tmpl.validPowers.includes(key);
-      if (!isPower) {
-        throw new Error(`In Stage 7, you can only allocate starting powers (${tmpl.validPowers.join(", ")}).`);
-      }
+      const matched = matchNameOrThrow(
+        key,
+        tmpl.validPowers,
+        "power",
+      );
+      key = matched.toLowerCase();
+      resolvedTrait = matched;
       break;
     }
 
     case 8:
-      // Stage 8 (Werewolf Gifts & Rites) uses discrete +cg/gift and +cg/rite
-      // verbs, not +cg/set.
-      throw new Error("In Stage 8, choose Gifts and Rites with +cg/gift <facet>, +cg/rite <rite> (and /ungift, /unrite).");
+      // Stage 8 (Werewolf Gifts & Rites) uses discrete verbs.
+      throw new Error(
+        "In Stage 8, choose Gifts and Rites with " +
+          "+cg/gift <facet>, +cg/rite <rite> " +
+          "(and /ungift, /unrite).",
+      );
 
     default:
-      throw new Error(`Invalid character generation stage: ${stage}.`);
+      throw new Error(
+        `Invalid character generation stage: ${stage}.`,
+      );
   }
 
-  // 2. Validate and set value using our standardized engine functions
-  const validatedValue = validateTraitValue(trait, val, sheet);
+  // 2. Validate and set via standardized engine helpers
+  const validatedValue = validateTraitValue(
+    resolvedTrait,
+    val,
+    sheet,
+  );
 
-  // Enforce chargen-specific caps (attributes, skills, powers <= 5)
+  // Chargen caps: attributes, skills, powers <= 5
   if (typeof validatedValue === "number") {
-    if (COFD_ATTRIBUTES.includes(key) && (validatedValue < 1 || validatedValue > 5)) {
-      throw new Error("During character generation, attributes must be between 1 and 5.");
+    const v = validatedValue;
+    if (COFD_ATTRIBUTES.includes(key) && (v < 1 || v > 5)) {
+      throw new Error(
+        "During character generation, attributes must " +
+          "be between 1 and 5.",
+      );
     }
-    if (COFD_SKILLS.includes(key) && (validatedValue < 0 || validatedValue > 5)) {
-      throw new Error("During character generation, skills must be between 0 and 5.");
+    if (COFD_SKILLS.includes(key) && (v < 0 || v > 5)) {
+      throw new Error(
+        "During character generation, skills must " +
+          "be between 0 and 5.",
+      );
     }
-    if (tmpl.validPowers.includes(key) && (validatedValue < 0 || validatedValue > 5)) {
-      throw new Error("During character generation, powers must be between 0 and 5.");
+    if (tmpl.validPowers.includes(key) && (v < 0 || v > 5)) {
+      throw new Error(
+        "During character generation, powers must " +
+          "be between 0 and 5.",
+      );
     }
   }
 
-  sheet = setTrait(sheet, trait, validatedValue);
+  sheet = setTrait(sheet, resolvedTrait, validatedValue);
 
   return {
     ...cgState,

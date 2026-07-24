@@ -6,10 +6,10 @@ export type { IGameEvent, IEventRSVP };
 interface ICounters { id: string; seq: number; }
 
 /** Shared counter store — same collection as the engine uses for job IDs etc. */
-export const counters = new DBO<ICounters>("server.counters");
+export const counters: DBO<ICounters> = new DBO<ICounters>("server.counters");
 
-export const gameEvents = new DBO<IGameEvent>("server.game-events");
-export const eventRsvps = new DBO<IEventRSVP>("server.event-rsvps");
+export const gameEvents: DBO<IGameEvent> = new DBO<IGameEvent>("server.game-events");
+export const eventRsvps: DBO<IEventRSVP> = new DBO<IEventRSVP>("server.event-rsvps");
 
 export function getNextEventNumber(): Promise<number> {
   return counters.atomicIncrement("eventid");

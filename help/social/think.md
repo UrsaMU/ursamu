@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # THINK
 
 Think a thought (echo to self).

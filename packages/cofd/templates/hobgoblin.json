@@ -1,0 +1,13 @@
+{
+  "key": "hobgoblin",
+  "name": "Hobgoblin",
+  "moralityName": "Integrity",
+  "powerStatName": "Wyrd",
+  "energyName": "Glamour",
+  "customFields": [
+    "concept",
+    "aspiration"
+  ],
+  "validPowers": [],
+  "energyMaxFormulaType": "standard"
+}

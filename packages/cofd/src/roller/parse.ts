@@ -9,6 +9,7 @@ import {
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
 import { migrateSheet, type CofdSheet } from "../stats/sheet.ts";
+import { effectiveAttr, effectiveSkill } from "../stats/effective.ts";
 import { healthMax, woundPenalty } from "../health/index.ts";
 
 /** A single resolved trait token (attribute / skill / power / morality / etc). */
@@ -44,7 +45,7 @@ export function resolveTrait(token: string, sheet: CofdSheet): ResolvedTrait | n
     const [skillName, ...rest] = t.split("/");
     const specName = rest.join("/");
     if (!(COFD_SKILLS as readonly string[]).includes(skillName)) return null;
-    const base = sheet.skills[skillName as CofdSkill] || 0;
+    const base = effectiveSkill(sheet, skillName);
     const owned = (sheet.specialties[skillName] || []).find((s) =>
       s.toLowerCase() === specName
     );
@@ -58,11 +59,11 @@ export function resolveTrait(token: string, sheet: CofdSheet): ResolvedTrait | n
   }
 
   if ((COFD_ATTRIBUTES as readonly string[]).includes(t)) {
-    const v = sheet.attributes[t as CofdAttribute] || 1;
+    const v = effectiveAttr(sheet, t);
     return { label: titleCase(t), base: v, value: v };
   }
   if ((COFD_SKILLS as readonly string[]).includes(t)) {
-    const v = sheet.skills[t as CofdSkill] || 0;
+    const v = effectiveSkill(sheet, t);
     return { label: titleCase(t), base: v, value: v };
   }
 
@@ -88,6 +89,20 @@ export function resolveTrait(token: string, sheet: CofdSheet): ResolvedTrait | n
       value: sheet.advantages.willpowerCurrent,
     };
   }
+  // CtL Mantle (own court) for Contract dice pools.
+  if (t === "mantle") {
+    const court = (sheet.customFields?.court ?? "")
+      .toLowerCase()
+      .trim();
+    const key = court ? `mantle:${court}` : "mantle";
+    const v = Math.max(
+      0,
+      (sheet.merits ?? {})[key] ??
+        (sheet.merits ?? {})["mantle"] ??
+        0,
+    );
+    return { label: "Mantle", base: v, value: v };
+  }
   return null;
 }
 
@@ -107,7 +122,11 @@ export interface ParsedRoll {
  * Parses a dice pool expression against the template-driven sheet.
  * Supports rolling dynamic attributes, skills, specialties, custom fields, power stats, and supernatural powers.
  */
-export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll {
+export function parseRollExpression(
+  expr: string,
+  sheet: CofdSheet,
+  districtTraits?: Record<string, number>,
+): ParsedRoll {
   sheet = migrateSheet(sheet);
   const cleanExpr = expr.toLowerCase().replace(/\s+/g, "");
   if (!cleanExpr) {
@@ -187,7 +206,7 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
 
     // Check if pure Attribute
     if ((COFD_ATTRIBUTES as readonly string[]).includes(traitToken)) {
-      const dots = sheet.attributes[traitToken as CofdAttribute] || 1;
+      const dots = effectiveAttr(sheet, traitToken);
       pool += sign === "-" ? -dots : dots;
       terms.push(`${traitToken}(${dots})`);
       continue;
@@ -195,7 +214,7 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
 
     // Check if pure Skill
     if ((COFD_SKILLS as readonly string[]).includes(traitToken)) {
-      const dots = sheet.skills[traitToken as CofdSkill] || 0;
+      const dots = effectiveSkill(sheet, traitToken);
       let termVal = dots;
 
       if (dots === 0) {
@@ -240,7 +259,50 @@ export function parseRollExpression(expr: string, sheet: CofdSheet): ParsedRoll 
       continue;
     }
 
-    return { pool: 0, terms: [], appliedSpecialties: [], untrainedPenaltyApplied: 0, error: `Unknown trait: '${traitToken}'.` };
+    // CtL Mantle (own court merit dots).
+    if (traitToken === "mantle") {
+      const court = (sheet.customFields?.court ?? "")
+        .toLowerCase()
+        .trim();
+      const key = court ? `mantle:${court}` : "mantle";
+      const dots = Math.max(
+        0,
+        (sheet.merits ?? {})[key] ??
+          (sheet.merits ?? {})["mantle"] ??
+          0,
+      );
+      pool += sign === "-" ? -dots : dots;
+      terms.push(`Mantle(${dots})`);
+      continue;
+    }
+
+    // Check if district trait
+    if (
+      districtTraits &&
+      [
+        "access",
+        "safety",
+        "information",
+        "awareness",
+        "prestige",
+        "stability",
+      ].includes(traitToken)
+    ) {
+      const val = districtTraits[traitToken] || 0;
+      pool += sign === "-" ? -val : val;
+      const traitTitle =
+        traitToken.charAt(0).toUpperCase() + traitToken.slice(1);
+      terms.push(`${traitTitle}(${val})`);
+      continue;
+    }
+
+    return {
+      pool: 0,
+      terms: [],
+      appliedSpecialties: [],
+      untrainedPenaltyApplied: 0,
+      error: `Unknown trait: '${traitToken}'.`,
+    };
   }
 
   if (terms.length === 0) {

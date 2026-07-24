@@ -1,22 +1,15 @@
-+unapprove  -- Return a pending Chronicles of Darkness submission for revision.
+---
+dark: true
+---
++UNAPPROVE  -- Alias for +deny.
 
-Syntax:
-  +unapprove <player>=<reason>   Return the submission with a required reason.
+SYNTAX
+  +unapprove <player>=<reason>
 
-Permissions:
-  Run            connected + admin+.
-  Target         any player with a CGEN job in 'new' or 'open' status.
+Prefer **+deny**. Same behavior: return the chargen
+draft for revision with a staff reason.
 
-Mechanics:
-  Reopens the player's CGEN job (status 'open') with a staff comment
-  carrying the reason, and clears the submittedJob marker so the player
-  can edit their chargen workspace and resubmit. The live sheet is not
-  touched. The chargen state itself is preserved.
+EXAMPLES
+  +unapprove Alice=Concept needs more detail.
 
-  A reason is required. Returns without a reason are refused.
-
-Examples:
-  +unapprove Alice=Concept needs more detail; please flesh out the backstory.
-  +unapprove Bob=Attribute totals are off by one. Recheck the priority array.
-
-See also: approve, cg, sheet
+SEE ALSO: help deny, help approve, help cg

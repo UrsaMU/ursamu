@@ -1,0 +1,71 @@
+{
+  "key": "deny-flow",
+  "title": "+deny -- staff returns a chargen draft",
+  "description": "Staff reviews with +sheet, then +deny with a reason. Draft is kept; player fixes with +cg.",
+  "vars": { "player": "Rookie" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd_cg": {
+          "stage": 6,
+          "isSubmitted": true,
+          "isApproved": false,
+          "sheet": {
+            "template": "mortal",
+            "concept": "Cynical reporter",
+            "virtue": "Hope",
+            "vice": "Pride",
+            "attributes": {
+              "strength": 2, "dexterity": 3, "stamina": 3,
+              "intelligence": 2, "wits": 2, "resolve": 2,
+              "presence": 2, "manipulation": 1, "composure": 2
+            },
+            "skills": {
+              "athletics": 2, "brawl": 0, "drive": 1,
+              "firearms": 0, "larceny": 0, "stealth": 0,
+              "survival": 0, "weaponry": 0, "academics": 3,
+              "computer": 2, "crafts": 0, "investigation": 3,
+              "medicine": 3, "occult": 0, "politics": 0,
+              "science": 2, "animal_ken": 0, "empathy": 3,
+              "expression": 0, "intimidation": 0,
+              "persuasion": 2, "socialize": 0, "streetwise": 0,
+              "subterfuge": 2
+            },
+            "specialties": {
+              "investigation": ["Crime Scenes"],
+              "medicine": ["Emergency Care"]
+            },
+            "merits": {
+              "contacts": 2,
+              "resources": 2,
+              "trained observer": 1,
+              "holistic awareness": 1,
+              "fast reflexes": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Reason Is Required" },
+    {
+      "cmd": "+deny Rookie",
+      "as": "admin",
+      "label": "no reason -> refused"
+    },
+    { "expect": "reason is required" },
+
+    { "sub": "Staff Denies" },
+    {
+      "cmd": "+deny Rookie=Concept needs more detail.",
+      "as": "admin",
+      "label": "admin denies"
+    },
+    { "expect": "Character Denied" },
+
+    { "sub": "Draft Still There" },
+    { "cmd": "+sheet" },
+    { "expect": "DRAFT" }
+  ]
+}

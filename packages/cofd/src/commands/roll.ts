@@ -12,6 +12,16 @@ import type { IUrsamuSDK } from "@ursamu/ursamu";
 import { defaultSheet, type CofdSheet } from "../stats/index.ts";
 import { parseRollExpression, executeRoll, type AgainThreshold } from "../roller/index.ts";
 import { equippedWeaponEntry } from "../equipment/index.ts";
+import { resolveDistrictTraits } from "../support/index.ts";
+import {
+  animalPerceptionBonus,
+  isPerceptionRoll,
+} from "../form/senses.ts";
+import { mantleRollBonus } from "../form/mantle_bonus.ts";
+import {
+  isPhysicalRoll,
+  mantleWinterWoundBonus,
+} from "../form/mantle_high.ts";
 
 /** Short forms used for compact broadcast lines (under 78 cols). */
 const COMPACT_ABBREV: Record<string, string> = {
@@ -66,6 +76,10 @@ export async function rollExec(u: IUrsamuSDK) {
   let rote = false;
   let useWeapon = false;
   let again: AgainThreshold = 10;
+  let mantleCtx = "";
+  let defendFae = false;
+  let protector = false;
+  let spying = false;
 
   for (const sw of switches) {
     if (sw === "wp" || sw === "willpower") {
@@ -78,8 +92,29 @@ export async function rollExec(u: IUrsamuSDK) {
       again = 9;
     } else if (sw === "8again" || sw === "8-again") {
       again = 8;
+    } else if (sw.startsWith("ctx=") || sw.startsWith("context=")) {
+      mantleCtx = sw.split("=")[1] ?? "";
+    } else if (
+      sw === "defend" || sw === "fae" || sw === "protect" ||
+      sw === "spy" || sw === "seduce" || sw === "intimidate" ||
+      sw === "indulge" || sw === "teamwork" || sw === "fear" ||
+      sw === "lie" || sw === "attract"
+    ) {
+      if (sw === "defend" || sw === "fae") defendFae = true;
+      if (sw === "protect") protector = true;
+      if (sw === "spy") spying = true;
+      if (
+        sw === "seduce" || sw === "intimidate" || sw === "indulge" ||
+        sw === "teamwork" || sw === "fear" || sw === "lie" ||
+        sw === "attract"
+      ) {
+        mantleCtx = sw;
+      }
     } else {
-      u.send(`Error: Unknown switch '/${sw}'. Valid: /wp, /rote, /weapon, /9again, /8again.`);
+      u.send(
+        `Error: Unknown switch '/${sw}'. Valid: /wp, /rote, ` +
+          `/weapon, /9again, /8again, /ctx=<tag>, /spy, /defend.`,
+      );
       return;
     }
   }
@@ -99,13 +134,80 @@ export async function rollExec(u: IUrsamuSDK) {
     await u.db.modify(u.me.id, "$set", { "data.cofd": sheet });
   }
 
-  const parsed = parseRollExpression(expr, sheet);
+  const dTraits = u.here?.id
+    ? await resolveDistrictTraits(u, u.here.id)
+    : null;
+  const dTraitsMap: Record<string, number> = dTraits
+    ? {
+      access: dTraits.access,
+      safety: dTraits.safety,
+      information: dTraits.information,
+      awareness: dTraits.awareness,
+      prestige: dTraits.prestige,
+      stability: dTraits.stability,
+    }
+    : {};
+
+  // Optional #context tag on expression for Mantle matching.
+  const hashCtx = expr.match(/#(\w+)\s*$/);
+  if (hashCtx && !mantleCtx) mantleCtx = hashCtx[1];
+  const rollExpr = expr.replace(/#\w+\s*$/, "").trim() || expr;
+
+  const parsed = parseRollExpression(rollExpr, sheet, dTraitsMap);
   if (parsed.error) {
     u.send(`Error: ${parsed.error}`);
     return;
   }
 
-  const finalPool = parsed.pool + wpBonus;
+  // Chrysalis animal senses: +2 on Perception (Wits+Composure) pools.
+  let senseBonus = 0;
+  if (isPerceptionRoll(rollExpr)) {
+    senseBonus = animalPerceptionBonus(sheet);
+    if (senseBonus > 0) parsed.terms.push(`Senses(+${senseBonus})`);
+  }
+
+  // CtL Mantle seasonal passive dice.
+  let mantleBonus = 0;
+  const mantle = mantleRollBonus(sheet, rollExpr, {
+    context: mantleCtx,
+    defendFae,
+    protector,
+    spying: spying || mantleCtx === "spy",
+  });
+  if (mantle.bonus > 0) {
+    mantleBonus = mantle.bonus;
+    parsed.terms.push(mantle.label);
+  }
+
+  // Winter •••••: ignore wound penalty; +Physical when hurt
+  let winterBonus = 0;
+  const winter = mantleWinterWoundBonus(sheet);
+  if (winter.ignoreWoundPenalty && parsed.terms.some((t) =>
+    t.toLowerCase().startsWith("wound")
+  )) {
+    // strip wound term from pool
+    const wi = parsed.terms.findIndex((t) =>
+      t.toLowerCase().startsWith("wound")
+    );
+    if (wi >= 0) {
+      const m = parsed.terms[wi].match(/Wound\(([-\d]+)\)/i);
+      if (m) {
+        const wp = parseInt(m[1], 10);
+        parsed.pool -= wp; // remove negative wound from pool
+        parsed.terms.splice(wi, 1);
+        parsed.terms.push("Mantle Winter••••• (no wound pen)");
+      }
+    }
+  }
+  if (winter.physicalBonus > 0 && isPhysicalRoll(rollExpr)) {
+    winterBonus = winter.physicalBonus;
+    parsed.terms.push(
+      `Mantle Winter••••• phys(+${winterBonus})`,
+    );
+  }
+
+  const finalPool =
+    parsed.pool + wpBonus + senseBonus + mantleBonus + winterBonus;
   const result = executeRoll(finalPool, { again, rote });
 
   // /weapon: add equipped weapon damage as bonus successes on a hit (>=1

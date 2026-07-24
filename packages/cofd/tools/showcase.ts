@@ -247,7 +247,19 @@ function buildMockSDK(player: IDBObj, cmdName: string, args: (string | undefined
         return Promise.resolve();
       },
     },
-    canEdit: () => Promise.resolve(true),
+    // Staff and self always edit; strangers do not (look concealment).
+    canEdit: (a: IDBObj, t: IDBObj) => {
+      if (
+        a.flags.has("wizard") ||
+        a.flags.has("admin") ||
+        a.flags.has("superuser")
+      ) {
+        return Promise.resolve(true);
+      }
+      if (a.id === t.id) return Promise.resolve(true);
+      if (t.state?.owner === a.id) return Promise.resolve(true);
+      return Promise.resolve(false);
+    },
     setFlags: (target: string | IDBObj, flags: string) => {
       const id = typeof target === "string" ? target : target.id;
       const obj = allObjs.find((o) => o.id === id);
@@ -315,6 +327,7 @@ async function ensureLoaded(objs: IDBObj[]) {
 async function execCmd(raw: string, actor: IDBObj, allObjs: IDBObj[], roomCfg?: ShowcaseSetup["room"], dynamic?: IDBObj[]): Promise<string[]> {
   await ensureLoaded(allObjs);
   const shim = await import("./ursamu-shim.ts");
+  const { cmds } = await import("ursamu");
   const output: string[] = [];
   shim.__shimSetSendSink((sids, msg) => {
     if (sids.length === 0) return;
@@ -322,7 +335,7 @@ async function execCmd(raw: string, actor: IDBObj, allObjs: IDBObj[], roomCfg?: 
   });
   try {
     // No look-script overrides in this plugin -- fall through to addCmd matching.
-    for (const cmd of shim.cmds) {
+    for (const cmd of cmds) {
       const m = raw.trim().match(cmd.pattern);
       if (!m) continue;
       const u = buildMockSDK(actor, cmd.name, m.slice(1), output, allObjs, roomCfg, dynamic);
@@ -350,14 +363,25 @@ interface RunState {
 function actorFor(step: ShowcaseStep, state: RunState): IDBObj {
   if (!step.as) return state.player;
   if (step.as === "admin") return state.admin;
-  return state.targets.get(step.as) ?? state.player;
+  // Named setup targets first, then runtime-spawned objects (NPCs).
+  const fromTargets = state.targets.get(step.as);
+  if (fromTargets) return fromTargets;
+  const spawned = findByName(state, step.as);
+  if (spawned) return spawned;
+  return state.player;
 }
 
 function findByName(state: RunState, name: string): IDBObj | undefined {
   const lc = name.toLowerCase();
   if (state.player.name?.toLowerCase() === lc) return state.player;
   if (state.admin.name?.toLowerCase() === lc) return state.admin;
-  for (const t of state.targets.values()) if (t.name?.toLowerCase() === lc) return t;
+  for (const t of state.targets.values()) {
+    if (t.name?.toLowerCase() === lc) return t;
+  }
+  // NPCs / objects created mid-showcase via u.db.create.
+  for (const o of state.dynamic) {
+    if (o.name?.toLowerCase() === lc) return o;
+  }
   return undefined;
 }
 
@@ -462,6 +486,8 @@ async function main(): Promise<void> {
   const args = parse(Deno.args, { boolean: ["list", "help", "all"], alias: { h: "help", l: "list", a: "all" } });
   if (args.help) { console.log("Usage: deno task showcase [key] [--list] [--all]\n  --list  List all showcases\n  --all   Run every showcase\n  --help  Show help"); return; }
 
+  await ensureLoaded([]);
+
   const files: ShowcaseFile[] = [];
   for await (const e of expandGlob(join(Deno.cwd(), "showcases", "*.json"))) {
     try { files.push(JSON.parse(await Deno.readTextFile(e.path)) as ShowcaseFile); } catch { /* skip */ }
@@ -513,15 +539,10 @@ async function runShowcase(chosen: ShowcaseFile): Promise<void> {
   currentKey = chosen.key;
   lastOut = "";
   __resetRng();
-  // Wipe the KV store at the very start (before any DBO connection is opened).
-  // Without this, DBO collections (combat, extended, social, npc, mail) persist
-  // between runs and break showcases that assume a clean slate. After the first
-  // execCmd, the KV is open and we can't safely remove the file.
-  if (!_loaded) {
-    for (const f of ["data/ursamu.db", "data/ursamu.db-shm", "data/ursamu.db-wal"]) {
-      try { await Deno.remove(join(Deno.cwd(), f)); } catch { /* missing */ }
-    }
-  }
+
+  // Clear all KV databases to isolate this showcase from previous runs.
+  const shim = await import("./ursamu-shim.ts");
+  await shim.__shimClearDbs();
   const player = buildMockPlayer(chosen.vars?.player ?? "Showcase Player");
   const admin  = buildMockPlayer("Admin", ["admin", "wizard"]);
   const vars   = chosen.vars ?? {};
@@ -549,27 +570,32 @@ async function runShowcase(chosen: ShowcaseFile): Promise<void> {
   const targets = new Map<string, IDBObj>();
   if (chosen.setup?.targets) {
     for (const [name, t] of Object.entries(chosen.setup.targets)) {
-      // If the caller's flags list lacks "player", honor it verbatim -- these
-      // are objects/exits, not characters. Otherwise treat as a connected player.
+      if (name.toLowerCase() === player.name?.toLowerCase()) {
+        if (t.flags) for (const f of t.flags) player.flags.add(f);
+        if (t.data) Object.assign(player.data ??= {}, t.data);
+        if (t.state) Object.assign(player.state, t.state);
+        if (t.location) player.location = t.location;
+        targets.set(name, player);
+        continue;
+      }
       const wantsPlayer = (t.flags ?? []).includes("player") || !t.flags;
       const tp = wantsPlayer
         ? buildMockPlayer(name, t.flags ?? [])
         : {
-            id: "mock-" + name.toLowerCase().replace(/\s+/g, "-"),
-            name,
-            flags: new Set<string>(t.flags ?? []),
-            state: { name },
-            contents: [],
-            data: { name },
-            location: "mock-room",
-          } as IDBObj;
-      if (t.data)  Object.assign(tp.data ??= {}, t.data);
+          id: "mock-" + name.toLowerCase().replace(/\s+/g, "-"),
+          name,
+          flags: new Set<string>(t.flags ?? []),
+          state: { name },
+          contents: [],
+          data: { name },
+          location: "mock-room",
+        } as IDBObj;
+      if (t.data) Object.assign(tp.data ??= {}, t.data);
       if (t.state) Object.assign(tp.state, t.state);
       if (t.location) tp.location = t.location;
       targets.set(name, tp);
     }
   }
-
   // Populate parent contents arrays based on object locations
   const objs = [player, admin, ...targets.values()];
   for (const o of objs) {

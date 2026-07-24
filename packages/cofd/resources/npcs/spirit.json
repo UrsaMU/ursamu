@@ -1,0 +1,49 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "spirit",
+  "name": "Spirit",
+  "blurb": "Ephemeral being from the Shadow. Numinous, hungry.",
+  "book": "CoFD 2e / WtF 2e",
+  "tier": "major",
+  "lineage": "spirit",
+  "tags": ["ephemeral", "spirit", "shadow"],
+  "attributes": {
+    "intelligence": 2,
+    "wits": 4,
+    "resolve": 3,
+    "strength": 3,
+    "dexterity": 3,
+    "stamina": 3,
+    "presence": 3,
+    "manipulation": 2,
+    "composure": 3
+  },
+  "skills": {
+    "brawl": 3,
+    "intimidation": 3,
+    "occult": 2,
+    "stealth": 2
+  },
+  "dreadPowers": ["materialize", "awe", "mortal-mask"],
+  "integrity": 4,
+  "size": 5,
+  "shortDesc": [
+    "The air thickens around a shape that is not quite there.",
+    "Shadow peels off the wall and watches."
+  ],
+  "description": [
+    "Essence and appetite. It wears a face only when it must."
+  ],
+  "ai": "spirit-ridden-feral",
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible"
+  },
+  "spirit": {
+    "rank": 2,
+    "influence": "Shadow",
+    "ban": "Must accept a offered name thrice spoken.",
+    "bane": "Cold iron",
+    "numina": ["materialize", "awe", "mortal-mask"]
+  }
+}

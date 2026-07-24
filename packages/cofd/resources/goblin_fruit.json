@@ -1,0 +1,148 @@
+{
+  "version": "ctl-2e-goblin-fruit",
+  "notes": {
+    "source": "Changeling: The Lost 2e pp.207–208",
+    "carry": "Wyrd 1:3, 2–3:7, 4–6:13, 7–8:29, 9:101, 10:unlimited"
+  },
+  "fruits": [
+    {
+      "slug": "common-fruit",
+      "name": "Common Goblin Fruit",
+      "rarity": "common",
+      "edible": true,
+      "description": "A million fancies; most Hedge fruit restores Glamour.",
+      "effect": "Restore 1 Glamour.",
+      "effects": [{ "kind": "glamour", "amount": 1 }],
+      "forageWeight": 60,
+      "book": "CtL p.207"
+    },
+    {
+      "slug": "amaranthine",
+      "name": "Amaranthine",
+      "rarity": "exceptional",
+      "edible": true,
+      "description": "Soft red eggplant of compassion; smells of hope and cinnamon.",
+      "effect": "Heal 1 aggravated. Also restores 1 Glamour.",
+      "effects": [
+        { "kind": "glamour", "amount": 1 },
+        { "kind": "heal", "damage": "aggravated", "amount": 1 }
+      ],
+      "forageWeight": 4,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "faerie-peach",
+      "name": "Faerie Peach",
+      "rarity": "exceptional",
+      "edible": true,
+      "description": "Plump, fragile peach that feeds on True Fae radiance.",
+      "effect": "Treat Thorns as Hedge and Hedge as trod until leave or a day/night. Nearby fae sense you. +1 Glamour.",
+      "effects": [
+        { "kind": "glamour", "amount": 1 },
+        { "kind": "flag", "key": "faeriePeach", "hours": 24 }
+      ],
+      "forageWeight": 5,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "liars-apple",
+      "name": "Liar's Apple",
+      "rarity": "exceptional",
+      "edible": true,
+      "description": "Delicious red apple from deceptively pleasant groves.",
+      "effect": "Cannot tell the truth until sunrise after next. +1 Glamour.",
+      "effects": [
+        { "kind": "glamour", "amount": 1 },
+        { "kind": "flag", "key": "liarsApple", "hours": 36 },
+        { "kind": "note", "text": "Cannot tell the truth until sunrise after next." }
+      ],
+      "forageWeight": 8,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "odinroot",
+      "name": "Odinroot",
+      "rarity": "exceptional",
+      "edible": true,
+      "description": "Grows from bare rock where Thorn-blood fell.",
+      "effect": "+1 Glamour, +1 Willpower; Clarity attack (1 die) — staff resolve.",
+      "effects": [
+        { "kind": "glamour", "amount": 1 },
+        { "kind": "willpower", "amount": 1 },
+        { "kind": "note", "text": "Clarity attack (1-die pool) — resolve with +integrity/break or ST." }
+      ],
+      "forageWeight": 6,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "ogre-pepper",
+      "name": "Ogre Pepper",
+      "rarity": "exceptional",
+      "edible": true,
+      "description": "Jagged chili of wrath and guilt; mouth bleeds but no damage.",
+      "effect": "Fearless until next midnight when pursuing a true goal; −2 self-control. +1 Glamour.",
+      "effects": [
+        { "kind": "glamour", "amount": 1 },
+        { "kind": "flag", "key": "ogrePepper", "hours": 18 },
+        { "kind": "note", "text": "Auto-succeed fear contest; −2 self-control until midnight." }
+      ],
+      "forageWeight": 8,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "vines-of-bacchus",
+      "name": "Vines of Bacchus",
+      "rarity": "exceptional",
+      "edible": true,
+      "description": "Plump cheerful vines; foul to those who wish harm nearby.",
+      "effect": "Restore 1 Glamour. Useful for sniffing out hostile intent (RP).",
+      "effects": [
+        { "kind": "glamour", "amount": 1 },
+        { "kind": "note", "text": "Tastes foul to those who wish harm on people nearby." }
+      ],
+      "forageWeight": 9,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "jennystone",
+      "name": "Jennystone",
+      "rarity": "oddment",
+      "edible": true,
+      "description": "Foul seed-stone; reeks maliciously.",
+      "effect": "Swallow for 1 Glamour (Stamina roll in full rules). Smell: −1 non-reflexive nearby.",
+      "effects": [
+        { "kind": "glamour", "amount": 1 },
+        { "kind": "note", "text": "While carried/smelled: −1 non-reflexive actions (RP/ST)." }
+      ],
+      "forageWeight": 5,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "cogleaf",
+      "name": "Cogleaf",
+      "rarity": "oddment",
+      "edible": false,
+      "description": "Metallic cog-leaf; universal small replacement part.",
+      "effect": "Repair a small hidden broken part (RP). Not eaten for Glamour.",
+      "effects": [
+        { "kind": "note", "text": "Install to repair a small hidden broken part (scene RP)." }
+      ],
+      "forageWeight": 4,
+      "book": "CtL p.208"
+    },
+    {
+      "slug": "lancebeet",
+      "name": "Lancebeet",
+      "rarity": "oddment",
+      "edible": true,
+      "description": "Long thin beet that tapers to a point; throwable once.",
+      "effect": "Eat: 1 Glamour (apple-sweet). Or throw as weapon +3 (then gone).",
+      "effects": [
+        { "kind": "glamour", "amount": 1 },
+        { "kind": "note", "text": "Alt: throw as weapon (+3 dice) then withers." }
+      ],
+      "forageWeight": 5,
+      "book": "CtL p.208"
+    }
+  ]
+}

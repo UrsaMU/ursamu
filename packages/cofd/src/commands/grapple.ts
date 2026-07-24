@@ -15,7 +15,12 @@
 //   /take-cover     -- use opponent as cover
 
 import type { IUrsamuSDK } from "@ursamu/ursamu";
-import { type CofdSheet, defaultSheet } from "../stats/index.ts";
+import {
+  type CofdSheet,
+  defaultSheet,
+  effectiveAttr,
+  effectiveSkill,
+} from "../stats/index.ts";
 import { computeDefense } from "../combat/pools.ts";
 import { applyAttackDamage } from "../combat/damage.ts";
 import {
@@ -61,11 +66,11 @@ const VALID_MOVES = [
 type GrappleMove = typeof VALID_MOVES[number];
 
 function attr(sheet: CofdSheet, name: string): number {
-  return (sheet.attributes as Record<string, number>)[name] ?? 1;
+  return effectiveAttr(sheet, name);
 }
 
 function skill(sheet: CofdSheet, name: string): number {
-  return (sheet.skills as Record<string, number>)[name] ?? 0;
+  return effectiveSkill(sheet, name);
 }
 
 export async function grappleExec(u: IUrsamuSDK) {
@@ -216,7 +221,10 @@ export async function grappleExec(u: IUrsamuSDK) {
         const netDmgAmount = netSuccesses + wpnMod;
         const dmg = applyAttackDamage(oppSheet, netDmgAmount, "bashing", 0, 0, false);
         if (dmg.netDamage > 0) {
-          await u.db.modify(opponent.id, "$set", { "data.cofd": dmg.sheet });
+          await u.db.modify(opponent.id, "$set", {
+            "state.cofd": dmg.sheet,
+            "data.cofd": dmg.sheet,
+          });
           await handleTargetIncapacitated(u, encounter.id, opponent.id);
         }
         u.broadcast(
@@ -235,11 +243,17 @@ export async function grappleExec(u: IUrsamuSDK) {
 
         if (oppSheet.tilts?.some((t) => t.key === "immobilized")) {
           const nextOppSheet = removeTilt(oppSheet, "immobilized");
-          await u.db.modify(opponent.id, "$set", { "data.cofd": nextOppSheet });
+          await u.db.modify(opponent.id, "$set", {
+            "state.cofd": nextOppSheet,
+            "data.cofd": nextOppSheet,
+          });
         }
         if (mySheet.tilts?.some((t) => t.key === "immobilized")) {
           const nextMySheet = removeTilt(mySheet, "immobilized");
-          await u.db.modify(u.me.id, "$set", { "data.cofd": nextMySheet });
+          await u.db.modify(u.me.id, "$set", {
+            "state.cofd": nextMySheet,
+            "data.cofd": nextMySheet,
+          });
         }
 
         u.broadcast(`%cyGRAPPLE>>%cn ${u.me.name ?? "?"} breaks free from ${opponent.name ?? "?"}! (${successes} vs ${oppSuccesses})`);
@@ -252,7 +266,10 @@ export async function grappleExec(u: IUrsamuSDK) {
         await u.db.modify(opponent.id, "$set", { "data.cofd_grapple": { ...oppGrapple, isRestrained: true } });
 
         const oppSheetWithTilt = addTilt(oppSheet, "immobilized");
-        await u.db.modify(opponent.id, "$set", { "data.cofd": oppSheetWithTilt });
+        await u.db.modify(opponent.id, "$set", {
+          "state.cofd": oppSheetWithTilt,
+          "data.cofd": oppSheetWithTilt,
+        });
 
         u.broadcast(`%cyGRAPPLE>>%cn ${u.me.name ?? "?"} fully restrains ${opponent.name ?? "?"}! (${successes} vs ${oppSuccesses})`);
         break;
@@ -269,7 +286,10 @@ export async function grappleExec(u: IUrsamuSDK) {
               equippedWeapon: null,
             },
           };
-          await u.db.modify(opponent.id, "$set", { "data.cofd": nextOppSheet });
+          await u.db.modify(opponent.id, "$set", {
+            "state.cofd": nextOppSheet,
+            "data.cofd": nextOppSheet,
+          });
         }
         u.broadcast(`%cyGRAPPLE>>%cn ${u.me.name ?? "?"} disarms ${opponent.name ?? "?"}! (${successes} vs ${oppSuccesses})`);
         break;
@@ -319,8 +339,13 @@ export async function grappleExec(u: IUrsamuSDK) {
   // Auto-join NPC targets on first involvement.
   await autoJoinTarget(u, encounter, target);
 
-  const targetSheet: CofdSheet = (target.state?.cofd as CofdSheet) ?? defaultSheet();
   const targetParticipant = encounter.participants.find((p) => p.actorId === target.id);
+  if (targetParticipant?.isOut) {
+    u.send(`${target.name ?? "Target"} is already incapacitated.`);
+    return;
+  }
+
+  const targetSheet: CofdSheet = (target.state?.cofd as CofdSheet) ?? defaultSheet();
   let targetDefense = computeDefense(targetSheet);
   if (targetParticipant) {
     targetDefense = Math.max(0, targetDefense - targetParticipant.appliedDefense);

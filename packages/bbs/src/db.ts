@@ -1,4 +1,4 @@
-import { DBO } from "@ursamu/mush";
+import { DBO, getConfig } from "@ursamu/mush";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -93,9 +93,17 @@ export interface ISeedBoardOptions {
 // ---------------------------------------------------------------------------
 // Collections
 // ---------------------------------------------------------------------------
+// Namespace exception: these predate the <pluginName>.* DBO rule and ship
+// as "server.bboard*". Renaming to "bbs.boards" / "bbs.posts" would orphan
+// existing deployments. Keep the legacy names; uniqueness is preserved by
+// the server.bboard_* prefix.
 
-export const boards: DBO<IBoard> = new DBO<IBoard>("server.bboards");
-export const posts: DBO<IPost> = new DBO<IPost>("server.bboard_posts");
+export const boards: DBO<IBoard> = new DBO<IBoard>(() =>
+  getConfig<string>("plugins.bbs.db.bboards", "server.bboards")
+);
+export const posts: DBO<IPost> = new DBO<IPost>(() =>
+  getConfig<string>("plugins.bbs.db.posts", "server.bboard_posts")
+);
 
 // ---------------------------------------------------------------------------
 // Counter helpers (derived from existing data — no external counters dep)

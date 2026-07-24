@@ -1,0 +1,13 @@
+{
+  "key": "fetch",
+  "name": "Fetch",
+  "moralityName": "Integrity",
+  "powerStatName": "Wyrd",
+  "energyName": "Glamour",
+  "customFields": [
+    "flaw",
+    "materials"
+  ],
+  "validPowers": [],
+  "energyMaxFormulaType": "standard"
+}

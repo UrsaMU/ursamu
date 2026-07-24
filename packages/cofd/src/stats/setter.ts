@@ -7,6 +7,7 @@ import {
   parseMeritRef,
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
+import { normalizeAnimalsField } from "../form/animals.ts";
 import { migrateSheet, refreshAdvantages, type CofdSheet } from "./sheet.ts";
 
 /**
@@ -97,8 +98,36 @@ export function setTrait(sheet: CofdSheet, trait: string, value: string | number
     return sheet;
   }
 
+  if (key === "frailty" || key === "frailties") {
+    const valStr = String(value).trim();
+    if (!valStr) {
+      sheet.frailties = [];
+    } else if (valStr.startsWith("-")) {
+      const toRemove = valStr.slice(1).trim().toLowerCase();
+      sheet.frailties = (sheet.frailties ?? []).filter(
+        (f) => f.toLowerCase() !== toRemove,
+      );
+    } else {
+      const arr = sheet.frailties ?? [];
+      if (!arr.some((f) => f.toLowerCase() === valStr.toLowerCase())) {
+        sheet.frailties = [...arr, valStr];
+      }
+    }
+    return sheet;
+  }
+
   if (tmpl.customFields.includes(key)) {
     const valStr = value as string;
+    if (key === "animals") {
+      const norm = normalizeAnimalsField(
+        valStr,
+        sheet.customFields?.seeming,
+      );
+      if (!norm.ok) throw new Error(norm.error);
+      if (!norm.value) delete sheet.customFields.animals;
+      else sheet.customFields.animals = norm.value;
+      return sheet;
+    }
     if (valStr === "Not Set" || valStr === "") {
       delete sheet.customFields[key];
     } else {

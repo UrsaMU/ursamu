@@ -93,30 +93,69 @@ register("cpad", async (a) => {
 });
 
 // ── header / divider / footer ─────────────────────────────────────────────
-// Layout helpers so attribute authors can write [header(The Void)] instead
-// of [ljust(===== %0 ,78,=)]. Shape: 5 fill + space + title + space + pad.
+// Prefer game.layout.* mushcode templates when set; else default pad form.
+// Softcode signature stays TinyMUX-ish:
+//   header(title[,width[,fill]])  divider(title[,width[,fill]])
+//   footer([width[,fill]])  — or footer(title,width,fill) when templated
 
 register("header", async (a) => {
+  const { header: h, hasLayoutTemplate } = await import(
+    "../../format/handlers.ts"
+  );
   const title = a[0] ?? "";
   const width = clampLen(int(a[1] ?? "78") || 78);
-  const fill  = (a[2] ?? "=")[0] || "=";
-  if (title.length === 0) return fill.repeat(width);
-  const prefix = fill.repeat(5) + " " + title + " ";
+  const fill  = a[2] ?? "=";
+  if (hasLayoutTemplate("header")) {
+    return h(title, fill, width);
+  }
+  const ch = fill[0] || "=";
+  if (title.length === 0) return ch.repeat(width);
+  const prefix = ch.repeat(5) + " " + title + " ";
   return prefix.length >= width ? prefix.slice(0, width)
-    : prefix + fill.repeat(width - prefix.length);
+    : prefix + ch.repeat(width - prefix.length);
 });
 
 register("divider", async (a) => {
+  const { divider: d, hasLayoutTemplate } = await import(
+    "../../format/handlers.ts"
+  );
   const title = a[0] ?? "";
   const width = clampLen(int(a[1] ?? "78") || 78);
-  const fill  = (a[2] ?? "-")[0] || "-";
-  if (title.length === 0) return fill.repeat(width);
-  const prefix = fill.repeat(5) + " " + title + " ";
+  const fill  = a[2] ?? "-";
+  if (hasLayoutTemplate("divider")) {
+    return d(title, fill, width);
+  }
+  const ch = fill[0] || "-";
+  if (title.length === 0) return ch.repeat(width);
+  const prefix = ch.repeat(5) + " " + title + " ";
   return prefix.length >= width ? prefix.slice(0, width)
-    : prefix + fill.repeat(width - prefix.length);
+    : prefix + ch.repeat(width - prefix.length);
 });
 
 register("footer", async (a) => {
+  const { footer: f, hasLayoutTemplate } = await import(
+    "../../format/handlers.ts"
+  );
+  // Softcode legacy: footer(width[,fill]). With a config template,
+  // footer(title[,width[,fill]]) when arg0 is not a bare width.
+  if (hasLayoutTemplate("footer")) {
+    const a0 = a[0] ?? "";
+    const a1 = a[1];
+    const a2 = a[2];
+    const a0IsWidth = a0 !== "" && /^\d+$/.test(a0);
+    if (a0IsWidth && a2 === undefined) {
+      return f(
+        "",
+        a1 ?? "=",
+        clampLen(int(a0) || 78),
+      );
+    }
+    return f(
+      a0,
+      a2 ?? "=",
+      clampLen(int(a1 ?? "78") || 78),
+    );
+  }
   const width = clampLen(int(a[0] ?? "78") || 78);
   const fill  = (a[1] ?? "=")[0] || "=";
   return fill.repeat(width);

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @OFAIL
 
 Sets the Other Fail message.

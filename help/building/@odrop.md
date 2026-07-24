@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @ODROP
 
 Sets the Other Drop message.

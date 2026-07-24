@@ -2,6 +2,7 @@
 
 import "./commands.ts";
 import { registerPluginRoute } from "@ursamu/mush";
+import { registerHelpDir } from "@ursamu/help-plugin";
 import { getAllBuckets, getBucketStaffIds, jobAccess } from "./db.ts";
 import type { IPlugin } from "@ursamu/mush";
 import { jobsRouteHandler } from "./router.ts";
@@ -21,12 +22,16 @@ import { registerNotifyHooks, removeNotifyHooks } from "./notify.ts";
  */
 const jobsPlugin: IPlugin = {
   name: "jobs",
-  version: "1.0.0",
+  version: "0.1.1",
   description: "Anomaly-style jobs system — player requests, staff commands, bucket access, archive, REST API.",
 
   init: async () => {
     registerPluginRoute("/api/v1/jobs", jobsRouteHandler);
     registerNotifyHooks();
+    registerHelpDir(
+      new URL("../help", import.meta.url).pathname,
+      "jobs",
+    );
 
     // Seed per-bucket staff access for any buckets registered with staffIds.
     // Idempotent — only creates missing access records.

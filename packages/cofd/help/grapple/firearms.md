@@ -1,3 +1,8 @@
+---
+dark: true
+---
+See also: help grapple (overview)
+
 grapple firearms  -- Shooting into a grapple.
 
 Shooting into a grapple is markedly riskier than shooting into a
@@ -16,4 +21,4 @@ Autofire:
   spraying the whole pile), but every grappling combatant rolls
   Defense against the burst as normal.
 
-See also: grapple, grapple moves, combat modifiers, attack
+SEE ALSO: grapple, grapple moves, combat modifiers, attack

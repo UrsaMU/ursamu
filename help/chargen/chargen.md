@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # Character Generation Commands
 
 Welcome to the character generation system, help. This file acts as both a guide and a help file, for making your character. The commands are listed below, and the order in which you should use them is also listed. If you have any questions, please contact a staff member.

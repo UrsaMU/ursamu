@@ -120,7 +120,7 @@ function meritDots(sheet: CofdSheet | undefined, key: string): number {
 
 /**
  * Fast Reflexes (1-3) -- adds dots to the Initiative formula.
- * Called from `rollInitiative` in encounter.ts.
+ * Used by computeCofdInitiative (combat/initiative.ts).
  */
 export function fastReflexesBonus(sheet: CofdSheet | undefined): number {
   return Math.max(0, Math.min(3, meritDots(sheet, "fast reflexes")));

@@ -52,9 +52,9 @@ export const DEFAULT_PLUGINS_MANIFEST = {
     {
       name: "mail",
       url: "https://github.com/UrsaMU/mail-plugin",
-      ref: "v1.0.1",
+      ref: "v2.4.0",
       description: "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry.",
-      ursamu: ">=1.9.3",
+      ursamu: ">=2.6.0",
     },
     {
       name: "wiki",
@@ -105,7 +105,7 @@ export const LOCAL_PLUGINS_MANIFEST = {
       name: "mail",
       url: "https://github.com/UrsaMU/mail-plugin",
       description: "In-game mail system — drafts, reply/forward, folders, attachments, quota, expiry.",
-      ursamu: ">=1.9.3",
+      ursamu: ">=2.6.0",
       local: "../../packages/mail",
     },
     {

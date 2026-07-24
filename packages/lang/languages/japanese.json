@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "japanese",
+  "mode": "phoneme",
+  "description": "Japonic — strict open CV syllables, light n coda only.",
+  "onsets": [
+    "k", "k", "g", "s", "s", "z", "sh", "j", "t", "t", "d", "ch",
+    "n", "n", "h", "b", "p", "m", "m", "y", "r", "r", "r", "w",
+    "ky", "gy", "sh", "ch", "ny", "hy", "by", "py", "my", "ry"
+  ],
+  "nuclei": [
+    "a", "a", "a", "i", "i", "i", "u", "u", "e", "e", "o", "o",
+    "o", "aa", "ii", "uu", "ee", "oo", "ai", "ei", "ou"
+  ],
+  "codas": ["", "", "", "", "", "n", "n", "n"],
+  "syllablePatterns": ["CV", "CV", "CV", "CV", "V", "CVC"],
+  "wordLenWeights": [0, 1, 3, 4, 3, 2, 1],
+  "capitalize": "first",
+  "accentSubs": {
+    "l": "r",
+    "th": "s",
+    "v": "b",
+    "f": "h",
+    "si": "shi",
+    "ti": "chi",
+    "w": "u"
+  }
+}

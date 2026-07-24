@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # REBOOT
 
 Reboots the server.

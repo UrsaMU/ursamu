@@ -11,6 +11,9 @@ import {
   resolveFormatOr,
   resolveGlobalFormat,
   resolveGlobalFormatOr,
+  header,
+  divider,
+  footer,
 } from "../../format/handlers.ts";
 import type { IDBObj, IUrsamuSDK } from "../../commands/types.ts";
 
@@ -18,6 +21,34 @@ type Msg = Record<string, unknown>;
 
 function respond(worker: Worker, msgId: unknown, data: unknown): void {
   worker.postMessage({ type: "response", msgId, data });
+}
+
+/** Host-side layout so game.layout templates apply in the sandbox. */
+export function handleUtilLayoutMessage(
+  msg: Msg,
+  worker: Worker,
+): void {
+  const { msgId } = msg;
+  const slot = String(msg.slot ?? "");
+  const label = String(msg.label ?? "");
+  const filler = String(msg.filler ?? (slot === "divider" ? "-" : "="));
+  const widthRaw = Number(msg.width);
+  const width = Number.isFinite(widthRaw) && widthRaw > 0
+    ? Math.min(Math.trunc(widthRaw), 10_000)
+    : 78;
+  if (slot === "header") {
+    respond(worker, msgId, header(label, filler, width));
+    return;
+  }
+  if (slot === "divider") {
+    respond(worker, msgId, divider(label, filler, width));
+    return;
+  }
+  if (slot === "footer") {
+    respond(worker, msgId, footer(label, filler, width));
+    return;
+  }
+  respond(worker, msgId, "");
 }
 
 interface FormatMsg extends Msg {

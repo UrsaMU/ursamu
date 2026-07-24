@@ -24,7 +24,7 @@ cd "$(dirname "$0")/.." || exit
 # start.ts does this too, but TTY interaction works better here before backgrounding.
 if [ ! -f "data/ursamu.db" ]; then
   echo "Database not found. Running interactive setup..."
-  deno run -A --unstable-detect-cjs --unstable-kv --unstable-net src/main.ts
+  deno run -A --unstable-detect-cjs --unstable-kv --unstable-net packages/mush/src/main.ts
   echo "Setup complete. Starting in watch mode..."
 fi
 
@@ -40,9 +40,9 @@ echo "Starting UrsaMU (watch mode)..."
 # start.ts supervises both main.ts and telnet.ts as child processes.
 # --watch on src/ and system/ triggers a full restart when source files change.
 deno run --allow-all --unstable-detect-cjs --unstable-kv --unstable-net \
-  --watch=src/,system/ \
+  --watch=packages/,system/ \
   --watch-exclude=config/,data/ \
-  src/cli/start.ts &
+  packages/cli/src/start.ts &
 START_PID=$!
 
 echo "Servers are running. Press Ctrl+C to stop."

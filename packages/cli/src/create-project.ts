@@ -6,6 +6,7 @@
 
 import { join, fromFileUrl } from "@std/path";
 import { GAME_PROJECT_TASKS, LOCAL_PLUGINS_MANIFEST } from "./game-project-tasks.ts";
+import { optionalPackages } from "./packages.ts";
 import {
   gameMainTs,
   gameTelnetTs,
@@ -20,6 +21,9 @@ import {
   gameGitignore,
   gameReadme,
   gameClaude,
+  gameConfigJson,
+  gameAgents,
+  gameGemini,
 } from "./create-templates.ts";
 
 async function writeConnectTxt(targetDir: string, name: string): Promise<void> {
@@ -90,6 +94,7 @@ export interface ProjectScaffoldOpts {
   isLocal: boolean;
   engineRelPath: string;
   targetDir: string;
+  selectedPackages?: string[];
 }
 
 export async function scaffoldProject(
@@ -101,7 +106,18 @@ export async function scaffoldProject(
   console.log(`Creating new UrsaMU ${isLocal ? "test " : ""}project: ${name}`);
   await Deno.mkdir(targetDir);
 
-  for (const dir of ["config","data","src","src/plugins","text","help","scripts","system/scripts","wiki"]) {
+  for (const dir of [
+    ".agents",
+    "config",
+    "data",
+    "src",
+    "src/plugins",
+    "text",
+    "help",
+    "scripts",
+    "system/scripts",
+    "wiki",
+  ]) {
     await Deno.mkdir(join(targetDir, dir), { recursive: true });
     console.log(`Created directory: ${dir}`);
   }
@@ -149,14 +165,38 @@ export async function scaffoldProject(
   await writeConnectTxt(targetDir, name);
   console.log("Created text/default_connect.txt");
 
-  const localImports = {
+  const defaultPkgs = [
+    "@ursamu/builder",
+    "@ursamu/channels",
+    "@ursamu/help",
+    "@ursamu/bbs",
+    "@ursamu/mail",
+    "@ursamu/wiki",
+  ];
+  const selections = opts.selectedPackages ?? defaultPkgs;
+
+  const configJson = gameConfigJson(name, selections);
+  await Deno.writeTextFile(
+    join(targetDir, "config", "config.json"),
+    configJson,
+  );
+  await Deno.writeTextFile(
+    join(targetDir, "config", "config.sample.json"),
+    configJson,
+  );
+  console.log(
+    "Created config/config.json and config/config.sample.json",
+  );
+
+  const localImports: Record<string, string> = {
     "ursamu":                  `${engineRelPath}/mod.ts`,
     "ursamu/":                 `${engineRelPath}/`,
     "@ursamu/mush":            `${engineRelPath}/packages/mush/mod.ts`,
     "@ursamu/core":            `${engineRelPath}/packages/core/mod.ts`,
-    "@ursamu/ursamu":          `${engineRelPath}/mod.ts`,          // shim → @ursamu/mush
+    "@ursamu/ursamu":          `${engineRelPath}/mod.ts`,
     "@ursamu/ursamu/app":      `${engineRelPath}/src/app.ts`,
-    "@ursamu/ursamu/channels": `${engineRelPath}/src/utils/channel-events.ts`,
+    "@ursamu/ursamu/channels":
+      `${engineRelPath}/src/utils/channel-events.ts`,
     "@ursamu/ursamu/jobs":     `${engineRelPath}/packages/jobs/mod.ts`,
     "@std/assert":             "jsr:@std/assert@^0.224.0",
     "@std/flags":              "jsr:@std/flags@^0.224.0",
@@ -181,26 +221,40 @@ export async function scaffoldProject(
     "lodash":                  "npm:lodash@^4.18.1",
     "quickjs-emscripten":      "npm:quickjs-emscripten@0.29.0",
   };
-  const jsrImports = {
-    "ursamu":                  "jsr:@ursamu/mush",      // preferred entry point
+
+  const jsrImports: Record<string, string> = {
+    "ursamu":                  "jsr:@ursamu/mush",
     "@ursamu/mush":            "jsr:@ursamu/mush",
     "@ursamu/core":            "jsr:@ursamu/core",
-    "@ursamu/ursamu":          "jsr:@ursamu/ursamu",    // shim — kept for plugin compat
+    "@ursamu/ursamu":          "jsr:@ursamu/ursamu",
     "@std/path":               "jsr:@std/path@^0.224.0",
     "@std/assert":             "jsr:@std/assert@^0.224.0",
     "@std/fs":                 "jsr:@std/fs@^0.224.0",
-    "@ursamu/builder-plugin":  "https://raw.githubusercontent.com/UrsaMU/builder-plugin/v1.4.0/index.ts",
-    "@ursamu/channel-plugin":  "https://raw.githubusercontent.com/UrsaMU/channel-plugin/v1.0.0/index.ts",
-    "@ursamu/help-plugin":     "https://raw.githubusercontent.com/UrsaMU/help-plugin/v1.0.2/index.ts",
-    "@ursamu/bbs-plugin":      "https://raw.githubusercontent.com/UrsaMU/bbs-plugin/v1.0.1/index.ts",
-    "@ursamu/mail-plugin":     "https://raw.githubusercontent.com/UrsaMU/mail-plugin/v1.0.1/index.ts",
-    "@ursamu/wiki-plugin":     "https://raw.githubusercontent.com/UrsaMU/wiki-plugin/v1.0.0/index.ts",
   };
+
+  function getLocalPath(pkgName: string, engineRelPath: string): string {
+    if (pkgName === "@ursamu/globals") {
+      return "jsr:@ursamu/globals";
+    }
+    const folder = pkgName.replace("@ursamu/", "");
+    const entry =
+      pkgName === "@ursamu/fabula-plugin" ? "index.ts" : "mod.ts";
+    return `${engineRelPath}/packages/${folder}/${entry}`;
+  }
+
+  for (const pkgName of selections) {
+    const matchedOpt = optionalPackages.find((o) => o.pkgName === pkgName);
+    if (isLocal) {
+      localImports[pkgName] = getLocalPath(pkgName, engineRelPath);
+    } else if (matchedOpt) {
+      jsrImports[pkgName] = matchedOpt.jsrUrl;
+    }
+  }
   const denoJson = JSON.stringify({
     nodeModulesDir: "auto",
     tasks: GAME_PROJECT_TASKS,
     compilerOptions: {
-      lib: ["deno.window"],
+      lib: ["deno.window", "deno.unstable"],
       types: ["./node_modules/@types/node/index.d.ts"],
     },
     imports: isLocal ? localImports : jsrImports,
@@ -213,6 +267,13 @@ export async function scaffoldProject(
   console.log("Created README.md");
   await Deno.writeTextFile(join(targetDir, "CLAUDE.md"), gameClaude(name));
   console.log("Created CLAUDE.md");
+  await Deno.writeTextFile(join(targetDir, "GEMINI.md"), gameGemini(name));
+  console.log("Created GEMINI.md");
+  await Deno.writeTextFile(
+    join(targetDir, ".agents", "AGENTS.md"),
+    gameAgents(name),
+  );
+  console.log("Created .agents/AGENTS.md");
   await Deno.writeTextFile(join(targetDir, ".gitignore"), gameGitignore());
   console.log("Created .gitignore");
 

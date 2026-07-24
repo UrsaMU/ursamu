@@ -14,9 +14,4 @@ SWITCHES
   /9again   Reroll any 9 or 10.
   /8again   Reroll any 8, 9, or 10.
 
-EXAMPLES
-  +roll Strength+Brawl
-  +roll/wp Resolve+Composure
-  +roll/rote Wits+Investigation
-
-SEE ALSO: help roll/expressions, help roll/successes, help cg, help sheet
+SEE ALSO: help roll/expressions, help roll/successes, help cg, help sheet, help roll/examples

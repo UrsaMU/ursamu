@@ -31,10 +31,10 @@ export interface XpCostsFile {
   costs: Record<string, XpCostEntry>;
 }
 
-const xpCostsUrl = new URL("../../resources/xp_costs.json", import.meta.url);
+import xpCostsData from "../../resources/xp_costs.json" with { type: "json" };
 
 /** Parsed, typed XP cost table loaded once at module init. */
-export const XP_COSTS: XpCostsFile = JSON.parse(Deno.readTextFileSync(xpCostsUrl));
+export const XP_COSTS: XpCostsFile = xpCostsData as XpCostsFile;
 
 /**
  * Returns the cost to raise a trait of `traitType` from `currentDots` to

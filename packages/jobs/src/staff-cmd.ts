@@ -45,9 +45,16 @@ export async function listStaffJobs(u: IUrsamuSDK, filterBucket?: string): Promi
 }
 
 addCmd({
+  name: "+jobs",
+  pattern: /^\+jobs\s*$/i,
+  lock: "connected builder+",
+  exec: async (u: IUrsamuSDK) => { await listStaffJobs(u); }
+});
+
+addCmd({
   name: "+job",
   pattern: /^\+job(?!s)(?:\/(\S+))?\s*(.*)/i,
-  lock: "connected",
+  lock: "connected builder+",
   help: `+job[/<switch>] [<args>]  — Staff job management commands.
 
 Switches:
@@ -67,11 +74,10 @@ Examples:
   +job/assign 5=Alice       Assign job #5 to Alice.
   +job/close 5=All done.    Close and archive job #5.`,
   exec: async (u: IUrsamuSDK) => {
-    if (u.cmd.original?.trim().match(/^\+jobs\s*$/i)) { await listStaffJobs(u); return; }
     if (!isStaffFlags(u.me.flags)) { u.send(">JOBS: Staff only."); return; }
 
-    const sw  = (u.cmd.args[0] || "").toLowerCase().trim();
-    const arg = (u.cmd.args[1] || "").trim();
+    const sw  = (u.cmd.args[0] ?? "").toLowerCase().trim();
+    const arg = (u.cmd.args[1] ?? "").trim();
 
     if (!sw && arg && !arg.includes("=")) {
       const num = parseInt(arg, 10);

@@ -6,6 +6,13 @@ db
 db
 .pup.*
 logs/
+
+# Runtime secrets — never commit
+.jwt_secret
+.env
+.env.*
+!.env.example
+
 # Ignore config files but keep the directory structure
 config/*.json
 # Don't ignore the README and .gitkeep

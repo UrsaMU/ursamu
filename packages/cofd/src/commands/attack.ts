@@ -32,7 +32,12 @@
 //  12. Output
 
 import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
-import { type CofdSheet, defaultSheet } from "../stats/index.ts";
+import {
+  type CofdSheet,
+  defaultSheet,
+  effectiveAttr,
+  effectiveSize,
+} from "../stats/index.ts";
 import type { AttackOptions } from "../combat/modifiers.ts";
 import { heavyHitterBonus } from "../combat/modifiers.ts";
 import { buildPool, computeDefense, type AttackPoolType } from "../combat/pools.ts";
@@ -188,7 +193,11 @@ export async function attackExec(u: IUrsamuSDK) {
   // which short-circuits below before reaching the resolver, or to
   // reflexive actions handled by +combat.
   if (currentActor.actionUsed) {
-    u.send("You already used your instant action this turn. Use +combat/next to end your turn.");
+    u.send(
+      "You already used your instant action this turn. " +
+        "NPCs act automatically after your attack; use +combat/next " +
+        "only if you passed or need to end a non-attack turn.",
+    );
     return;
   }
 
@@ -213,6 +222,7 @@ export async function attackExec(u: IUrsamuSDK) {
   let wantWillpower = false;
   let skipAmmo = false;
   let doAim = false;
+  let defendAlly = false;
   let specified: AttackOptions["specified"];
   let aimBankVal: number | undefined;
 
@@ -225,6 +235,7 @@ export async function attackExec(u: IUrsamuSDK) {
     else if (sw === "charge") charge = true;
     else if (sw === "aim") doAim = true;
     else if (sw === "offhand") offhand = true;
+    else if (sw === "defend" || sw === "freehold") defendAlly = true;
     else if (sw.startsWith("pull")) {
       const eqIdx = sw.indexOf("=");
       const max = eqIdx >= 0 ? parseIntSwitch(sw.slice(eqIdx + 1), 1, 99, 1) : 1;
@@ -322,17 +333,27 @@ export async function attackExec(u: IUrsamuSDK) {
   for (const name of targetNames) {
     const t = await resolveOrSpawnTarget(u, u.me, name);
     if (!t) { u.send(`Target '${name}' not found.`); return; }
+    // No self-harm via +attack (typos / bad target resolution).
+    if (t.id === u.me.id) {
+      u.send("You cannot attack yourself.");
+      return;
+    }
     await autoJoinTarget(u, encounter, t);
-    // Surrender refusal: cannot target a participant who has surrendered.
     const tp = encounter.participants.find((p) => p.actorId === t.id);
+    if (tp?.isOut) {
+      u.send(`${t.name ?? "Target"} is already incapacitated.`);
+      return;
+    }
+    // Surrender refusal: cannot target a participant who has surrendered.
     if (tp?.surrendered) {
-      u.send(`${t.name ?? "Target"} has surrendered; deliberate violation requires Storyteller approval.`);
+      u.send(
+        `${t.name ?? "Target"} has surrendered; deliberate ` +
+          `violation requires Storyteller approval.`,
+      );
       return;
     }
-    if (!(await u.canEdit(u.me, t))) {
-      u.send(`You do not have permission to apply damage to ${name}.`);
-      return;
-    }
+    // Combat damage is not a canEdit op — participants may strike any
+    // valid target in the scene (PCs, NPCs). canEdit is for sheet edits.
     targets.push(t);
   }
 
@@ -450,6 +471,21 @@ export async function attackExec(u: IUrsamuSDK) {
     }
 
     const targetSheet: CofdSheet = (finalTarget.state?.cofd as CofdSheet) ?? defaultSheet();
+    let finalDamageType: "bashing" | "lethal" | "aggravated" = damageType;
+    if (targetSheet.template === "changeling" && weaponTags.coldIron) {
+      finalDamageType = "aggravated";
+    }
+    // Summer Mantle ••••• defending freehold member
+    try {
+      const { mantleAggravatedDefend } = await import(
+        "../form/mantle_high.ts"
+      );
+      if (mantleAggravatedDefend(mySheet, defendAlly)) {
+        finalDamageType = "aggravated";
+      }
+    } catch {
+      // ignore
+    }
     let targetDefense = computeDefense(targetSheet);
 
     // Applied defense from prior attacks this round.
@@ -538,7 +574,7 @@ export async function attackExec(u: IUrsamuSDK) {
       const dmgResult = applyAttackDamage(
         targetSheet,
         effectiveHits,
-        damageType,
+        finalDamageType,
         armorGeneral,
         armorBallistic,
         isFirearm,
@@ -549,10 +585,13 @@ export async function attackExec(u: IUrsamuSDK) {
       unconscious = dmgResult.unconscious;
 
       if (netDamage > 0) {
-        await u.db.modify(finalTarget.id, "$set", { "data.cofd": dmgResult.sheet });
+        await u.db.modify(finalTarget.id, "$set", {
+          "state.cofd": dmgResult.sheet,
+          "data.cofd": dmgResult.sheet,
+        });
 
-        const stamina = targetSheet.attributes?.stamina ?? 1;
-        const size = targetSheet.advantages?.size ?? 5;
+        const stamina = effectiveAttr(targetSheet, "stamina");
+        const size = effectiveSize(targetSheet);
         appliedTilts = checkSpecifiedTargetTilts(netDamage, stamina, size, specified);
 
         // Weapon-property tilts: Stun applies on any hit; Knockdown when net damage >= Size.
@@ -568,7 +607,10 @@ export async function attackExec(u: IUrsamuSDK) {
           for (const key of appliedTilts) {
             if (key !== "heart-strike") tiltSheet = addTilt(tiltSheet, key);
           }
-          await u.db.modify(finalTarget.id, "$set", { "data.cofd": tiltSheet });
+          await u.db.modify(finalTarget.id, "$set", {
+            "state.cofd": tiltSheet,
+            "data.cofd": tiltSheet,
+          });
         }
 
         await applyDefense(encounter.id, finalTarget.id);
@@ -577,15 +619,44 @@ export async function attackExec(u: IUrsamuSDK) {
 
     // ---- Output (per target) ------------------------------------------
     const targetName2 = finalTarget.name ?? "Unknown";
-    const hitWord = finalSuccesses > 0 ? "hits" : "misses";
     const poolDesc = `${built.formula}=${finalPool > 0 ? finalPool : "chance"}d`;
     const diceStr = result.rolls.join(" ");
-    const dmgPart = netDamage > 0 ? ` ${netDamage} ${damageType}` : "";
+    const dmgPart = netDamage > 0 ? `, ${netDamage} ${finalDamageType}` : "";
     const dodgeNote = dodging ? ` (dodging; active Dodge rolled ${dodgeSuccesses} success${dodgeSuccesses === 1 ? "" : "es"})` : "";
 
+    let verb = "";
+    if (finalSuccesses === 0) {
+      if (isFirearm) {
+        verb = "fires at target, but the shot goes wide";
+      } else {
+        verb = "swings wildly at target and misses";
+      }
+    } else if (finalSuccesses === 1) {
+      verb = isFirearm
+        ? "clips target with a grazing shot"
+        : "grazes target with a shallow strike";
+    } else if (finalSuccesses === 2) {
+      verb = isFirearm
+        ? "shoots target, drawing a splatter of blood"
+        : "strikes target hard, bruising flesh";
+    } else if (finalSuccesses === 3) {
+      verb = isFirearm
+        ? "blasts target with a heavy round"
+        : "smashes target with a heavy blow";
+    } else if (finalSuccesses === 4) {
+      verb = isFirearm
+        ? "riddles target with a devastating shot"
+        : "devastates target with a brutal strike";
+    } else {
+      verb = isFirearm
+        ? "executes a savage, point-blank shot that tears target apart"
+        : "brutally mauls target with a savage assault";
+    }
+    const finalVerb = verb.replace("target", `%cw${targetName2}%cn`);
+    const successWord = `(${finalSuccesses} success${finalSuccesses === 1 ? "" : "es"}${dmgPart})`;
+
     u.broadcast(
-      `%cyATTACK>>%cn ${attackerName} attacks ${targetName2}${dodgeNote}: ` +
-        `%cw${finalSuccesses}%cn success${finalSuccesses === 1 ? "" : "es"} ${hitWord}${dmgPart}.`,
+      `%cyATTACK>>%cn ${attackerName} ${finalVerb}${dodgeNote} ${successWord}.`,
     );
 
     u.send(
@@ -599,17 +670,17 @@ export async function attackExec(u: IUrsamuSDK) {
 
     if (netDamage > 0 && finalTarget.id !== u.me.id) {
       u.send(
-        `%cyINJURED:%cn ${attackerName} dealt ${netDamage} ${damageType} damage to you.`,
+        `%cyINJURED:%cn ${attackerName} dealt ${netDamage} ${finalDamageType} damage to you.`,
         finalTarget.id,
       );
     }
 
     if (beatenDown) {
-      u.broadcast(`%cr${targetName2} is Beaten Down!%cn`);
+      u.broadcast(`%cr${targetName2} collapses under the pain, Beaten Down!%cn`);
       await setBeatenDown(encounter.id, finalTarget.id, true);
     }
     if (unconscious) {
-      u.broadcast(`%cr${targetName2} is Incapacitated!%cn`);
+      u.broadcast(`%cr${targetName2} falls to the ground, Incapacitated!%cn`);
       await handleTargetIncapacitated(u, encounter.id, finalTarget.id);
     }
     for (const tiltKey of appliedTilts) {

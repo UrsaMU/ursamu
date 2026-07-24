@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # COMTITLE
 
 Sets your title on a channel.

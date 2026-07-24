@@ -12,12 +12,11 @@
   },
   "imports": {
     "ursamu": "../mush/mod.ts",
-    "@ursamu/ursamu": "../mush/mod.ts",
-    "@ursamu/mush": "../mush/mod.ts",
-    "@ursamu/core": "../core/mod.ts",
     "@std/assert": "jsr:@std/assert@^1.0.0"
   },
   "lint": {
-    "exclude": ["tools/"]
+    "exclude": [
+      "tools/"
+    ]
   }
 }

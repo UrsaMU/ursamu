@@ -2,6 +2,11 @@ import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK, IDBObj } from "../commands/types.ts";
 import { evaluateLock } from "../world/locks.ts";
 import { gameHooks } from "@ursamu/core";
+import {
+  canAccessContainer,
+  findInContainer,
+  isDescendantOf,
+} from "./container-access.ts";
 
 async function fireFailAttrs(
   u: IUrsamuSDK,
@@ -22,53 +27,243 @@ async function fireFailAttrs(
   if (afail && thing.state.owner) u.send(afail, thing.state.owner as string);
 }
 
+async function emitMoved(
+  objectId: string,
+  from: string | null,
+  to: string | null,
+  cause: string,
+  actorId: string,
+): Promise<void> {
+  await (gameHooks as unknown as {
+    emit(e: string, p: unknown): Promise<void>;
+  }).emit("object:moved", {
+    objectId,
+    from,
+    to,
+    cause,
+    actorId,
+  });
+}
+
+async function checkBasicLock(
+  u: IUrsamuSDK,
+  actor: IDBObj,
+  thing: IDBObj,
+): Promise<boolean> {
+  const basicLock =
+    (thing.state?.locks as Record<string, string> | undefined)?.basic;
+  if (!basicLock) return true;
+  const allowed = await evaluateLock(basicLock, actor, thing);
+  if (allowed) return true;
+  const thingName = u.util.displayName(thing, actor);
+  const actorName = u.util.displayName(actor, actor);
+  await fireFailAttrs(
+    u,
+    thing,
+    actor,
+    `You can't pick up ${thingName}.`,
+    `${actorName} tries to pick up ${thingName}, but can't.`,
+  );
+  return false;
+}
+
+async function takeThing(
+  u: IUrsamuSDK,
+  actor: IDBObj,
+  thing: IDBObj,
+  cause: string,
+  successMsg: string,
+  roomMsg: string,
+): Promise<void> {
+  if (!(await checkBasicLock(u, actor, thing))) return;
+
+  const prevLocation = thing.location ?? null;
+  await u.db.modify(thing.id, "$set", { location: actor.id });
+  await emitMoved(thing.id, prevLocation, actor.id, cause, actor.id);
+
+  const succ = await u.eval(thing.id, "SUCC");
+  u.send(succ || successMsg);
+
+  const actorName = u.util.displayName(actor, actor);
+  const osucc = await u.eval(thing.id, "OSUCC");
+  u.here.broadcast(
+    osucc ? `${actorName} ${osucc}` : roomMsg,
+    { exclude: [actor.id] } as Record<string, unknown>,
+  );
+
+  const asucc = await u.eval(thing.id, "ASUCC");
+  if (asucc && thing.state.owner) {
+    u.send(asucc, thing.state.owner as string);
+  }
+}
+
 export async function execGet(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
   const arg = u.util.stripSubs(u.cmd.args[0] || "").trim();
   if (!arg) { u.send("Get what?"); return; }
 
-  const thing = await u.util.target(actor, arg);
-  if (!thing || thing.location !== actor.location) { u.send("I don't see that here."); return; }
-  if (thing.flags.has("player")) { u.send("You can't pick up players!"); return; }
-  if (thing.flags.has("room") || thing.flags.has("exit")) { u.send("You can't pick that up."); return; }
-
-  const basicLock = (thing.state?.locks as Record<string, string>)?.basic;
-  if (basicLock) {
-    const allowed = await evaluateLock(basicLock, actor, thing);
-    if (!allowed) {
-      const thingName = u.util.displayName(thing, actor);
-      const actorName = u.util.displayName(actor, actor);
-      await fireFailAttrs(u, thing, actor,
-        `You can't pick up ${thingName}.`,
-        `${actorName} tries to pick up ${thingName}, but can't.`);
+  // get <item> from <container>
+  const fromMatch = arg.match(/^(.+?)\s+from\s+(.+)$/i);
+  if (fromMatch) {
+    const itemQ = fromMatch[1].trim();
+    const contQ = fromMatch[2].trim();
+    const container = await u.util.target(actor, contQ);
+    if (!container) {
+      u.send("I don't see that container here.");
       return;
     }
+    if (!(await canAccessContainer(u, actor, container))) {
+      const cName = u.util.displayName(container, actor);
+      const aName = u.util.displayName(actor, actor);
+      await fireFailAttrs(
+        u,
+        container,
+        actor,
+        `You can't get anything from ${cName}.`,
+        `${aName} tries to open ${cName}, but can't.`,
+      );
+      return;
+    }
+    const thing = await findInContainer(u, container.id, itemQ);
+    if (!thing) {
+      u.send("I don't see that in there.");
+      return;
+    }
+    const thingName = u.util.displayName(thing, actor);
+    const contName = u.util.displayName(container, actor);
+    const actorName = u.util.displayName(actor, actor);
+    await takeThing(
+      u,
+      actor,
+      thing,
+      "get",
+      `You take ${thingName} from ${contName}.`,
+      `${actorName} takes ${thingName} from ${contName}.`,
+    );
+    return;
   }
 
-  const prevLocation = thing.location ?? null;
-  await u.db.modify(thing.id, "$set", { location: actor.id });
-  await (gameHooks as unknown as { emit(e: string, p: unknown): Promise<void> }).emit("object:moved", {
-    objectId: thing.id,
-    from: prevLocation,
-    to: actor.id,
-    cause: "get",
-    actorId: actor.id,
-  });
+  const thing = await u.util.target(actor, arg);
+  if (!thing || thing.location !== actor.location) {
+    u.send("I don't see that here.");
+    return;
+  }
+  if (thing.flags.has("player")) {
+    u.send("You can't pick up players!");
+    return;
+  }
+  if (thing.flags.has("room") || thing.flags.has("exit")) {
+    u.send("You can't pick that up.");
+    return;
+  }
 
   const thingName = u.util.displayName(thing, actor);
   const actorName = u.util.displayName(actor, actor);
+  await takeThing(
+    u,
+    actor,
+    thing,
+    "get",
+    `You pick up ${thingName}.`,
+    `${actorName} picks up ${thingName}.`,
+  );
+}
 
-  const succ = await u.eval(thing.id, "SUCC");
-  u.send(succ || `You pick up ${thingName}.`);
+export async function execPut(u: IUrsamuSDK): Promise<void> {
+  const actor = u.me;
+  const raw = u.util.stripSubs(u.cmd.args[0] || "").trim();
+  if (!raw) {
+    u.send("Put what where? (put <item> in <container>)");
+    return;
+  }
 
-  const osucc = await u.eval(thing.id, "OSUCC");
+  let itemQ = "";
+  let contQ = "";
+  const inMatch = raw.match(/^(.+?)\s+(?:in|into)\s+(.+)$/i);
+  if (inMatch) {
+    itemQ = inMatch[1].trim();
+    contQ = inMatch[2].trim();
+  } else {
+    const eq = raw.indexOf("=");
+    if (eq > 0) {
+      itemQ = raw.slice(0, eq).trim();
+      contQ = raw.slice(eq + 1).trim();
+    }
+  }
+  if (!itemQ || !contQ) {
+    u.send("Put what where? (put <item> in <container>)");
+    return;
+  }
+
+  const thing = await u.util.target(actor, itemQ);
+  if (!thing || thing.location !== actor.id) {
+    u.send("You aren't carrying that.");
+    return;
+  }
+  if (
+    thing.flags.has("player") ||
+    thing.flags.has("room") ||
+    thing.flags.has("exit")
+  ) {
+    u.send("You can't put that in a container.");
+    return;
+  }
+
+  const container = await u.util.target(actor, contQ);
+  if (!container) {
+    u.send("I don't see that container here.");
+    return;
+  }
+  if (container.id === thing.id) {
+    u.send("You can't put something inside itself.");
+    return;
+  }
+  if (await isDescendantOf(u, container.id, thing.id)) {
+    u.send("You can't put a container inside its own contents.");
+    return;
+  }
+  if (!(await canAccessContainer(u, actor, container))) {
+    const cName = u.util.displayName(container, actor);
+    const aName = u.util.displayName(actor, actor);
+    await fireFailAttrs(
+      u,
+      container,
+      actor,
+      `You can't put anything in ${cName}.`,
+      `${aName} tries to put something in ${cName}, but can't.`,
+    );
+    return;
+  }
+
+  const prevLocation = thing.location ?? null;
+  await u.db.modify(thing.id, "$set", { location: container.id });
+  await emitMoved(
+    thing.id,
+    prevLocation,
+    container.id,
+    "put",
+    actor.id,
+  );
+
+  const thingName = u.util.displayName(thing, actor);
+  const contName = u.util.displayName(container, actor);
+  const actorName = u.util.displayName(actor, actor);
+
+  const drop = await u.eval(thing.id, "DROP");
+  u.send(drop || `You put ${thingName} in ${contName}.`);
+
+  const odrop = await u.eval(thing.id, "ODROP");
   u.here.broadcast(
-    osucc ? `${actorName} ${osucc}` : `${actorName} picks up ${thingName}.`,
+    odrop
+      ? `${actorName} ${odrop}`
+      : `${actorName} puts ${thingName} in ${contName}.`,
     { exclude: [actor.id] } as Record<string, unknown>,
   );
 
-  const asucc = await u.eval(thing.id, "ASUCC");
-  if (asucc && thing.state.owner) u.send(asucc, thing.state.owner as string);
+  const adrop = await u.eval(thing.id, "ADROP");
+  if (adrop && thing.state.owner) {
+    u.send(adrop, thing.state.owner as string);
+  }
 }
 
 export async function execDrop(u: IUrsamuSDK): Promise<void> {
@@ -206,11 +401,35 @@ addCmd({
   lock: "connected",
   category: "Object",
   help: `get <object>  — Pick up an object from the room.
+get <object> from <container>  — Take an object out of a container.
+
+Containers you hold are always open to you. Room containers need
+enter_ok, @lock/enter, or ownership.
 
 Examples:
   get sword
-  get #5`,
+  get #5
+  get knife from backpack
+  get ammo from locker`,
   exec: execGet,
+});
+
+addCmd({
+  name: "put",
+  pattern: /^put\s+(.*)/i,
+  lock: "connected",
+  category: "Object",
+  help: `put <object> in <container>  — Place a carried object into a container.
+put <object>=<container>      — Same (legacy form).
+
+Also accepts "into". You must be carrying the object. The container
+must be held by you or nearby with enter_ok / @lock/enter / ownership.
+
+Examples:
+  put knife in backpack
+  put ammo into locker
+  put flashlight=duffel`,
+  exec: execPut,
 });
 
 addCmd({

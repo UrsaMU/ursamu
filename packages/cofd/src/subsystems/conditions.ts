@@ -23,12 +23,10 @@ export interface ConditionCatalogEntry {
   beats: number;
 }
 
-const catalogUrl = new URL("../../resources/conditions.json", import.meta.url);
+import catalogData from "../../resources/conditions.json" with { type: "json" };
 
 /** Catalog of every known Condition and Tilt, keyed by lowercase-kebab slug. */
-export const CONDITIONS: Record<string, ConditionCatalogEntry> = JSON.parse(
-  Deno.readTextFileSync(catalogUrl),
-);
+export const CONDITIONS: Record<string, ConditionCatalogEntry> = catalogData as Record<string, ConditionCatalogEntry>;
 
 /** Returns the catalog entry for a key, or undefined if unknown. */
 export function lookupCondition(key: string): ConditionCatalogEntry | undefined {

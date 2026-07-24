@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE OUTPUT FUNCTIONS
 
 These functions send messages to players. They return empty string so they

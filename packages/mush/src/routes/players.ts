@@ -47,13 +47,13 @@ export async function meHandler(_req: Request, userId: string): Promise<Response
 
 export async function onlinePlayersHandler(_req: Request): Promise<Response> {
   const connected = await dbojs.query({ flags: /connected/i });
+  // Public listing — do not expose room location (privacy).
   const players   = connected
     .filter((p) => hasFlag(p.flags, "player"))
     .map((p) => ({
       id:       p.id,
       name:     p.data?.name || "Unknown",
       moniker:  (p.data?.moniker as string | undefined) || null,
-      location: p.location || null,
     }));
 
   return new Response(JSON.stringify(players), {

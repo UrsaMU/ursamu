@@ -1,0 +1,75 @@
+{
+  "key": "hedge-ctl",
+  "title": "+hedge -- CtL portaling and Mask-down gates",
+  "description": "Staff tags Hedge room, links a gate, changeling opens portal, exits, drops Mask to stir gates.",
+  "vars": { "player": "Pix" },
+  "setup": {
+    "character": {
+      "flags": ["connected", "player"],
+      "state": {
+        "cofd": {
+          "template": "changeling",
+          "concept": "Park walker",
+          "virtue": "Hope",
+          "vice": "Curiosity",
+          "attributes": {
+            "intelligence": 2, "wits": 3, "resolve": 2,
+            "strength": 2, "dexterity": 2, "stamina": 2,
+            "presence": 2, "manipulation": 2, "composure": 2
+          },
+          "skills": {
+            "athletics": 1, "survival": 4, "occult": 2,
+            "stealth": 2
+          },
+          "specialties": {},
+          "merits": {},
+          "moralityValue": 6,
+          "powerStatValue": 2,
+          "energyCurrent": 10,
+          "customFields": {
+            "seeming": "Darkling",
+            "kith": "Nightsinger",
+            "court": "Autumn",
+            "mask": "Quiet barista.",
+            "mien": "Shadow-thin, moth eyes."
+          },
+          "contracts": ["Pathfinder"],
+          "advantages": {
+            "willpowerMax": 4,
+            "willpowerCurrent": 4,
+            "size": 5
+          },
+          "hedgeState": {
+            "inHedge": true
+          },
+          "formState": { "system": "none", "current": "" }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Status" },
+    { "cmd": "+hedge", "label": "hedge status" },
+    { "expect": "Realm" },
+
+    { "sub": "Staff setup (builder)" },
+    { "cmd": "+hedge/create hedge", "as": "admin", "label": "tag room as hedge" },
+
+    { "sub": "Mask trail" },
+    { "cmd": "+shift mien", "label": "drop Mask (opens local gates)" },
+    { "expect": "trail" },
+
+    { "sub": "Navigate inside Hedge" },
+    { "cmd": "+hedge/travel nearest Hollow", "label": "start navigation chase" },
+    { "expect": "NAV" },
+
+    { "sub": "Goblin fruit" },
+    { "cmd": "+hedge/forage", "label": "forage fruit" },
+    { "cmd": "+hedge/fruit", "label": "show satchel" },
+    { "cmd": "+hedge/fruit catalog", "label": "catalog" },
+    { "expect": "amaranthine" },
+
+    { "sub": "Raise Mask" },
+    { "cmd": "+shift mask", "label": "raise Mask" }
+  ]
+}

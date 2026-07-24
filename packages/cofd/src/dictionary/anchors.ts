@@ -1,7 +1,5 @@
 // Typed re-exports of the canonical Virtue/Vice catalog from resources/anchors.json.
-
-const anchorsUrl = new URL("../../resources/anchors.json", import.meta.url);
-const anchorsData = JSON.parse(Deno.readTextFileSync(anchorsUrl));
+import anchorsData from "../../resources/anchors.json" with { type: "json" };
 
 export interface CofdAnchor {
   readonly name: string;

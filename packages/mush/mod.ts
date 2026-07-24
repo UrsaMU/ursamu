@@ -3,10 +3,12 @@
  *
  * MUSH world layer built on @ursamu/core.
  *
- * Provides: IDBObj world model, flag/lock system, TinyMUX softcode engine,
- * addCmd/IUrsamuSDK command API, format pipeline, and essential MUSH verbs.
+ * Provides: IDBObj world model, flag/lock system, TinyMUX softcode
+ * engine, addCmd/IUrsamuSDK command API, format pipeline, configurable
+ * layout chrome (game.layout.*), and essential MUSH verbs.
  *
- * Re-exports everything from @ursamu/core so game code only needs one import.
+ * Re-exports everything from @ursamu/core so game code only needs one
+ * import.
  */
 
 export * from "@ursamu/core";
@@ -45,7 +47,7 @@ export type {
   DbAccessor as SoftcodeDbAccessor,
   OutputAccessor as SoftcodeOutputAccessor,
 } from "./src/softcode/context.ts";
-export { resetNoiseState, createNoise } from "./src/softcode/stdlib/noise.ts";
+export { resetNoiseState, createNoise } from "@ursamu/mushcode/eval";
 export { entries, lookup, register } from "./src/softcode/stdlib/registry.ts";
 export type { StdlibFn }             from "./src/softcode/stdlib/registry.ts";
 export { lookupSub, registerSub }    from "./src/softcode/stdlib/subRegistry.ts";
@@ -56,8 +58,19 @@ export type { SDKContext, SDKObject }                    from "./src/softcode/sd
 
 // Command API
 export { addCmd, clearCmds, cmds, loadDefaultCommands, registerScript, getScript } from "./src/commands/addCmd.ts";
-export { createNativeSDK }                   from "./src/commands/sdk.ts";
+export { createNativeSDK, rewriteStatePaths } from "./src/commands/sdk.ts";
 export type { ICmd, IUrsamuSDK, DbAccessor, OutputAccessor, FormatSlot } from "./src/commands/types.ts";
+export {
+  registerCmdMiddleware,
+  unregisterCmdMiddleware,
+  clearCmdMiddleware,
+  listCmdMiddleware,
+  runWithCmdMiddleware,
+} from "./src/commands/middleware.ts";
+export type {
+  CmdMiddleware,
+  CmdMiddlewareCtx,
+} from "./src/commands/middleware.ts";
 
 // Format pipeline
 export {
@@ -82,8 +95,18 @@ export {
   unregisterHeader,
   unregisterDivider,
   unregisterFooter,
+  setLayoutTemplates,
+  getLayoutTemplates,
+  clearLayoutTemplates,
+  applyLayoutFromConfig,
+  expandLayoutTemplate,
+  hasLayoutTemplate,
 } from "./src/format/handlers.ts";
-export type { FormatHandler, LayoutFn } from "./src/format/handlers.ts";
+export type {
+  FormatHandler,
+  LayoutFn,
+  LayoutTemplates,
+} from "./src/format/handlers.ts";
 
 // Re-export GameHookMap augmentation so consumers get mush event types
 export type { MushHookMap }                  from "./src/events/types.ts";
@@ -95,7 +118,7 @@ export {
   authHandler, dbObjHandler, configHandler, sceneHandler,
   objectsHandler, flagsHandler, functionsHandler,
   registerMushRoutes, handleRequest as mushHandleRequest, setAuthenticator,
-  avatarServe, MAX_API_TRACKED_IPS, authenticate,
+  avatarServe, MAX_API_TRACKED_IPS, API_RATE_LIMIT, authenticate,
 } from "./src/routes/index.ts";
 export { registerPluginRoute } from "./src/routes/plugin.ts";
 export type { PluginRouteHandler } from "./src/routes/plugin.ts";
@@ -113,7 +136,14 @@ export { setLoadedPlugins }                  from "./src/verbs/admin-reload.ts";
 export { runStartupAttrs }                   from "./src/world/startup.ts";
 
 // Verb exec functions (re-exported for tests and bridge files)
-export { execGet, execDrop, execGive, execUse, execCreateObject } from "./src/verbs/manipulation.ts";
+export {
+  execGet,
+  execPut,
+  execDrop,
+  execGive,
+  execUse,
+  execCreateObject,
+} from "./src/verbs/manipulation.ts";
 export { execLook, defaultConformatHandler }                       from "./src/verbs/look.ts";
 export { execHome, execInventory }                                 from "./src/verbs/home.ts";
 export { execSay, execPose, execThink, execPage, execWhisper }     from "./src/verbs/say.ts";

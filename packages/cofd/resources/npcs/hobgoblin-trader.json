@@ -1,0 +1,54 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "hobgoblin-trader",
+  "name": "Hobgoblin Trader",
+  "blurb": "Hedge merchant with a grin full of needles (CtL p.252).",
+  "book": "CtL 2e p.252",
+  "tier": "major",
+  "lineage": "hobgoblin",
+  "tags": ["hedge", "market", "hobgoblin"],
+  "attributes": {
+    "intelligence": 2,
+    "wits": 3,
+    "resolve": 2,
+    "strength": 2,
+    "dexterity": 3,
+    "stamina": 2,
+    "presence": 3,
+    "manipulation": 4,
+    "composure": 3
+  },
+  "skills": {
+    "persuasion": 3,
+    "subterfuge": 3,
+    "empathy": 2,
+    "occult": 2,
+    "larceny": 2,
+    "stealth": 1
+  },
+  "integrity": 5,
+  "size": 4,
+  "shortDesc": "A short figure in layered coats jingles with odd coins.",
+  "description": "Always has a deal. Never quite the same face twice.",
+  "ai": {
+    "archetype": "thug",
+    "startRevealed": true
+  },
+  "defaults": {
+    "aggro": "passive",
+    "presence": "visible",
+    "lookMode": "mien"
+  },
+  "changeling": {
+    "seeming": "",
+    "kith": "",
+    "court": "",
+    "wyrd": 3,
+    "glamour": 12,
+    "clarity": 5
+  },
+  "dreadPowers": [
+    "innocuous",
+    "mortal-mask"
+  ]
+}

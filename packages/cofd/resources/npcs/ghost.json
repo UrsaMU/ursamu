@@ -1,0 +1,52 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "ghost",
+  "name": "Ghost",
+  "blurb": "Restless dead. Ephemeral, anchored, haunting.",
+  "book": "CoFD 2e",
+  "tier": "major",
+  "lineage": "ghost",
+  "tags": ["ephemeral", "ghost", "dead"],
+  "attributes": {
+    "intelligence": 2,
+    "wits": 3,
+    "resolve": 3,
+    "strength": 2,
+    "dexterity": 3,
+    "stamina": 2,
+    "presence": 3,
+    "manipulation": 2,
+    "composure": 3
+  },
+  "skills": {
+    "intimidation": 3,
+    "stealth": 3,
+    "occult": 2,
+    "subterfuge": 2
+  },
+  "dreadPowers": ["materialize", "phantasm", "innocuous"],
+  "integrity": 4,
+  "size": 5,
+  "shortDesc": [
+    "A cold draft that almost has a face.",
+    "Something unfinished lingers in the corner."
+  ],
+  "description": [
+    "Translucent grief given shape. Anchors pull; the living are props."
+  ],
+  "ai": {
+    "archetype": "azlu-stalker",
+    "startRevealed": false
+  },
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "hidden"
+  },
+  "spirit": {
+    "rank": 2,
+    "influence": "Death",
+    "ban": "Cannot cross a line of salt.",
+    "bane": "Holy water",
+    "numina": ["materialize", "phantasm", "innocuous"]
+  }
+}

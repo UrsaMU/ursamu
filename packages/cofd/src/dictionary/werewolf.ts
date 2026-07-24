@@ -1,8 +1,7 @@
 // Typed re-exports of the Werewolf: The Forsaken 2e auspices, tribes, renown,
 // forms, gifts, and rites.
 
-const url = new URL("../../resources/werewolf.json", import.meta.url);
-const data = JSON.parse(Deno.readTextFileSync(url));
+import data from "../../resources/werewolf.json" with { type: "json" };
 
 export interface WtfAuspice {
   readonly name: string;

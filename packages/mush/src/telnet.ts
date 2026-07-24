@@ -1,3 +1,13 @@
+import { loadSync as loadEnvSync } from "@std/dotenv";
+try {
+  loadEnvSync({
+    export: true,
+    allowEmptyValues: true,
+    examplePath: null,
+  });
+} catch {
+  /* no .env */
+}
 import { dirname, fromFileUrl, join } from "@std/path";
 import { getConfig, initConfig } from "@ursamu/core";
 import parser from "./render/parser.ts";
@@ -5,6 +15,12 @@ import {
   IAC, WILL, DO, DONT, WONT, NAWS_OPTION,
   parseNawsBytes, stripIacBytes, accumulateNaws,
 } from "@ursamu/core";
+import {
+  REAUTH_OK_MSG,
+  REAUTH_TIMEOUT_MS,
+  decideReconnectOpen,
+  decideEngineAuthFrame,
+} from "./session/reauth.ts";
 
 const MXP_OPTION = 91; // MUD eXtension Protocol (option 91)
 
@@ -144,6 +160,9 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
   let sessionToken: string | undefined;
   const msgBuffer: string[] = [];
   let isReconnecting = false;
+  // True while JWT reauth is in flight — hold cmds until auth:true.
+  let pendingReauth = false;
+  let reauthTimer: number | undefined;
   let manuallyClosed = false;
 
   const encoder = new TextEncoder();
@@ -168,36 +187,108 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
   let mxpEnabled = false;
   await write(new Uint8Array([IAC, WILL, MXP_OPTION]));
 
+  const clearReauthTimer = () => {
+    if (reauthTimer !== undefined) {
+      clearTimeout(reauthTimer);
+      reauthTimer = undefined;
+    }
+  };
+
   const connect = () => {
-      const wsUrl = `ws://localhost:${wsPort}?clientType=telnet${isReconnecting ? "&reconnect=true" : ""}`;
+      // Only skip welcome when we can JWT-reauth. Pre-login WS blips must
+      // open a normal session so the engine still sends the connect screen.
+      const recon = (isReconnecting && sessionToken)
+        ? "&reconnect=true"
+        : "";
+      const wsUrl =
+        `ws://localhost:${wsPort}?clientType=telnet${recon}`;
       sock = new WebSocket(wsUrl);
 
+      const flushBuffer = () => {
+        while (msgBuffer.length > 0) {
+          const msg = msgBuffer.shift();
+          if (msg) sock?.send(msg);
+        }
+      };
+
+      const dropTelnet = (notice?: string) => {
+        clearReauthTimer();
+        if (notice) {
+          write(parser.substitute("telnet", notice + "\r\n"));
+        }
+        sessionToken = undefined;
+        cid = undefined;
+        pendingReauth = false;
+        msgBuffer.length = 0;
+        manuallyClosed = true;
+        try { conn.close(); } catch { /* ignore */ }
+        try { sock?.close(); } catch { /* ignore */ }
+      };
+
       sock.onopen = () => {
-        if (isReconnecting) {
-            // Re-authenticate first so the engine restores the player's cid
-            // before any buffered commands are dispatched.
-            if (sessionToken) {
-              sock?.send(JSON.stringify({ type: "auth", token: sessionToken }));
-              write(parser.substitute("telnet", "%chGame>%cn Server is back! Reconnected.\r\n"));
-              if (cid) sock?.send(JSON.stringify({ msg: "look", data: { cid } }));
-            } else {
-              write(parser.substitute("telnet", "%chGame>%cn Server is back. Please reconnect.\r\n"));
-            }
-            isReconnecting = false;
+        const decision = decideReconnectOpen({
+          isReconnecting,
+          sessionToken,
+          wasAuthenticated: Boolean(sessionToken || cid),
+        });
+        isReconnecting = false;
+
+        if (decision.action === "disconnect") {
+          dropTelnet(decision.notice);
+          return;
         }
 
-        // Flush buffer
-        while(msgBuffer.length > 0) {
-          const msg = msgBuffer.shift();
-          if(msg) sock?.send(msg);
+        if (decision.action === "auth") {
+          // Hold buffer until auth:true; time out so a silent failure
+          // cannot leave the player half-connected forever.
+          pendingReauth = true;
+          sock?.send(JSON.stringify({
+            type: "auth",
+            token: decision.token,
+          }));
+          clearReauthTimer();
+          reauthTimer = setTimeout(() => {
+            if (pendingReauth) {
+              dropTelnet(
+                "%chGame>%cn Reconnect timed out. " +
+                  "Please connect again.",
+              );
+            }
+          }, REAUTH_TIMEOUT_MS);
+          return;
         }
+
+        flushBuffer();
       };
 
       sock.onmessage = (event) => {
         try {
           const payload = JSON.parse(event.data);
           if (payload.data?.cid) cid = payload.data.cid;
-          if (typeof payload.data?.token === "string") sessionToken = payload.data.token;
+          if (typeof payload.data?.token === "string") {
+            sessionToken = payload.data.token;
+          }
+
+          const authAct = decideEngineAuthFrame(
+            payload.data as { auth?: boolean; quit?: boolean; cid?: string },
+          );
+
+          if (authAct.action === "restored") {
+            clearReauthTimer();
+            pendingReauth = false;
+            if (authAct.cid) cid = authAct.cid;
+            write(parser.substitute(
+              "telnet",
+              REAUTH_OK_MSG + "\r\n",
+            ));
+            if (cid) {
+              sock?.send(JSON.stringify({
+                msg: "look",
+                data: { cid },
+              }));
+            }
+            flushBuffer();
+          }
 
           // If message is meant for Telnet, it should be in 'msg' (formatted ANSI)
           if (payload.msg) {
@@ -215,10 +306,12 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
             write(out.replace(/[\r\n]+$/, "") + "\r\n");
           }
 
-          if (payload.data?.quit) {
-            manuallyClosed = true;
-            conn.close();
-            sock?.close();
+          if (authAct.action === "disconnect" || payload.data?.quit) {
+            // Session cannot be restored (expired JWT, missing player).
+            // Drop the telnet link so the player must dial in fresh.
+            // Engine already sent REAUTH_FAIL_MSG when applicable.
+            dropTelnet();
+            return;
           }
 
           if (payload.data?.shutdown) {

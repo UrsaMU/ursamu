@@ -33,7 +33,7 @@ export async function fireWebhook(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-  } catch {
+  } catch (_e: unknown) {
     // Webhook failures never surface to users
   }
 }

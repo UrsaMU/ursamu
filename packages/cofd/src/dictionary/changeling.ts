@@ -1,10 +1,7 @@
 // Typed re-exports of the Changeling: The Lost 2e seemings, kiths, and courts.
 
-const url = new URL("../../resources/changeling.json", import.meta.url);
-const data = JSON.parse(Deno.readTextFileSync(url));
-
-const contractsUrl = new URL("../../resources/changeling-contracts.json", import.meta.url);
-const contractData = JSON.parse(Deno.readTextFileSync(contractsUrl));
+import data from "../../resources/changeling.json" with { type: "json" };
+import contractData from "../../resources/changeling-contracts.json" with { type: "json" };
 
 export interface CtlSeeming {
   readonly name: string;

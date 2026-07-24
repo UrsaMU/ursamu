@@ -101,6 +101,14 @@ Examples:
       if (sw === "create") {
         const slash = arg.indexOf("/");
         if (slash !== -1) { bucket = arg.slice(0, slash).trim().toUpperCase(); rest = arg.slice(slash + 1); }
+      } else {
+        // Support +request bucket/title=text without the /create switch
+        const slash = arg.indexOf("/");
+        const eq = arg.indexOf("=");
+        if (slash !== -1 && eq !== -1 && slash < eq) {
+          bucket = arg.slice(0, slash).trim().toUpperCase();
+          rest = arg.slice(slash + 1);
+        }
       }
       const eq = rest.indexOf("=");
       if (eq === -1) {

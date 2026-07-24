@@ -323,7 +323,6 @@
     "resolution": "Either fully embrace or fully renounce the pleasure in play.",
     "beats": 1
   },
-
   "arm-wrack": {
     "name": "Arm Wrack",
     "category": "tilt-personal",
@@ -432,7 +431,6 @@
     "resolution": "Scene ends, or the character acts again.",
     "beats": 0
   },
-
   "blizzard": {
     "name": "Blizzard",
     "category": "tilt-environmental",
@@ -513,5 +511,131 @@
     "effect": "-3 or auto-fail sight rolls; combat at penalty.",
     "resolution": "Scene ends or light is introduced.",
     "beats": 0
+  },
+  "oathbreaker": {
+    "name": "Oathbreaker",
+    "category": "condition",
+    "persistent": true,
+    "description": "Has violated a magical oath bound by the Wyrd.",
+    "effect": "-2 to Contract rolls and social interactions with fae.",
+    "resolution": "Earn forgiveness and make recompense to offended parties.",
+    "beats": 1
+  },
+  "obliged": {
+    "name": "Obliged",
+    "category": "condition",
+    "persistent": true,
+    "description": "Bound by a bargain with a mortal.",
+    "effect": "Allows hiding from Huntsmen; must fulfill the ongoing task.",
+    "resolution": "The bargain ends naturally or is broken.",
+    "beats": 1
+  },
+  "paranoid": {
+    "name": "Paranoid",
+    "category": "condition",
+    "persistent": false,
+    "description": "Highly paranoid after dealing with a Huntsman.",
+    "effect": "-2 to social rolls with anyone you do not know well.",
+    "resolution": "Confront source of paranoia or spend a scene in safety.",
+    "beats": 1
+  },
+  "haunted": {
+    "name": "Haunted",
+    "category": "condition",
+    "persistent": true,
+    "description": "Clarity 7 breakpoint. The Hedge and old durance bleed into waking life as omens and visitations.",
+    "effect": "Once per scene the ST may introduce a fae omen or echo that distracts (-2 to one contested roll) or forces a choice.",
+    "resolution": "Confront the haunting in a meaningful scene with a Touchstone, or spend an Icon with ST approval.",
+    "beats": 1
+  },
+  "the-boneyard": {
+    "name": "The Boneyard",
+    "category": "condition",
+    "persistent": true,
+    "description": "Clarity 6 breakpoint. The character walks a mental graveyard of people and selves left behind.",
+    "effect": "-1 to Social rolls with mortals; +1 to rolls that lean on past trauma or Arcadian memory.",
+    "resolution": "Lay one memory to rest in play (funeral, apology, Icon scene) with ST approval.",
+    "beats": 1
+  },
+  "delusional-ctl": {
+    "name": "Delusional (Clarity)",
+    "category": "condition",
+    "persistent": true,
+    "description": "Clarity 5 breakpoint. CtL-specific delusion distinct from the core Delusional Condition.",
+    "effect": "-2 to Mental rolls about the delusion's subject; may act on false Arcadian premises.",
+    "resolution": "Encounter incontrovertible proof in a dramatic scene, or resolve via Icon/Touchstone.",
+    "beats": 1
+  },
+  "harvest-boon": {
+    "name": "Harvest Boon",
+    "category": "condition",
+    "persistent": false,
+    "description": "Plot reward: a recent harvest left the changeling flush with stolen emotion.",
+    "effect": "+1 Glamour the next time they would gain any, or +1 die on one Social roll this story (choose once).",
+    "resolution": "Spend the boon or the story ends; no Beat by default (plot tool).",
+    "beats": 0
+  },
+  "isolated": {
+    "name": "Isolated",
+    "category": "condition",
+    "persistent": true,
+    "description": "Clarity 4 breakpoint. Trust frays; the character pulls away from freehold and kin.",
+    "effect": "Cannot regain Willpower from Touchstones until resolved; -1 to teamwork rolls.",
+    "resolution": "Accept genuine help in a scene and act on it, or reconcile with a Touchstone.",
+    "beats": 1
+  },
+  "unstable": {
+    "name": "Unstable",
+    "category": "condition",
+    "persistent": true,
+    "description": "Clarity 3 breakpoint. Emotional control slips; Mask and mien blur under stress.",
+    "effect": "First failed Social or Clarity-related roll each scene also costs 1 Glamour (if any).",
+    "resolution": "Spend a full scene grounded by a Touchstone without using Contracts.",
+    "beats": 1
+  },
+  "waking-nightmare": {
+    "name": "Waking Nightmare",
+    "category": "condition",
+    "persistent": true,
+    "description": "Clarity 2 breakpoint. Dream logic invades the waking world at the worst moments.",
+    "effect": "ST may once per session replace a failure with a nightmare complication (no extra damage).",
+    "resolution": "Survive or master the nightmare in oneiromancy or a Touchstone scene (ST).",
+    "beats": 1
+  },
+  "dream-eaten": {
+    "name": "Dream-Eaten",
+    "category": "condition",
+    "persistent": true,
+    "description": "Clarity 1 breakpoint. Parts of the self feel hollowed out by dream predators or Arcadia.",
+    "effect": "-1 to all dice pools; cannot spend Willpower for +3 until resolved.",
+    "resolution": "Recover an Icon, seal a new Touchstone, or complete a major Clarity healing scene.",
+    "beats": 1
+  },
+  "frightened": {
+    "name": "Frightened",
+    "category": "condition",
+    "persistent": false,
+    "description": "Overwhelmed by fear (Bedlam / Autumn).",
+    "effect": "Must flee or freeze; -2 to actions not about escaping the source.",
+    "resolution": "Escape the source of fear or scene ends.",
+    "beats": 1
+  },
+  "lethargic": {
+    "name": "Lethargic",
+    "category": "condition",
+    "persistent": false,
+    "description": "Sorrowful numbness (Bedlam / Winter).",
+    "effect": "-2 to Initiative and physical actions; cannot spend Willpower for dice.",
+    "resolution": "Scene ends or something rekindles strong emotion.",
+    "beats": 1
+  },
+  "ravaged": {
+    "name": "Ravaged",
+    "category": "condition",
+    "persistent": false,
+    "description": "Emotions ripped away by a reaping (CtL p.103).",
+    "effect": "Severe lethargy; -2 to Social and Resolve rolls until rest.",
+    "resolution": "A full night's rest or emotional breakthrough (ST).",
+    "beats": 1
   }
 }

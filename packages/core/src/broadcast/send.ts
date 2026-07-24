@@ -41,7 +41,8 @@ export function send(targets: string[], msg: string, dataOrExclude?: string[] | 
   for (const id of targets) {
     if (!excludeSet.has(id)) {
       const formatted = _formatter(id, msg);
-      _senders.forEach((fn) => fn(id, formatted));
+      const wrapped = wordWrap(formatted);
+      _senders.forEach((fn) => fn(id, wrapped));
     }
   }
 }
@@ -49,7 +50,8 @@ export function send(targets: string[], msg: string, dataOrExclude?: string[] | 
 export function notify(socketId: string, msg: string): boolean {
   if (!_sockets.has(socketId)) return false;
   const formatted = _formatter(socketId, msg);
-  _senders.forEach((fn) => fn(socketId, formatted));
+  const wrapped = wordWrap(formatted);
+  _senders.forEach((fn) => fn(socketId, wrapped));
   return true;
 }
 
@@ -58,7 +60,60 @@ export function broadcastAll(msg: string, exclude?: string[]): void {
   for (const id of _sockets) {
     if (!excludeSet.has(id)) {
       const formatted = _formatter(id, msg);
-      _senders.forEach((fn) => fn(id, formatted));
+      const wrapped = wordWrap(formatted);
+      _senders.forEach((fn) => fn(id, wrapped));
     }
   }
+}
+
+const isDivider = (line: string): boolean => {
+  const stripped = line
+    .replace(/%c[a-zA-Z]/g, "")
+    .replace(/%[nrtbR]/g, "")
+    .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "")
+    .replace(/<#[0-9a-fA-F]{6}>/g, "")
+    .trim();
+  if (stripped.length === 0) return false;
+  return /^(.)\1{4,}$/.test(stripped);
+};
+
+export function wordWrap(text: string, width = 78): string {
+  return text
+    .split("\n")
+    .map((line) => {
+      const cleanLine = line
+        .replace(/%c[a-zA-Z]/g, "")
+        .replace(/%[nrtbR]/g, "")
+        .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "")
+        .replace(/<#[0-9a-fA-F]{6}>/g, "");
+      if (cleanLine.length <= width || isDivider(line)) {
+        return line;
+      }
+
+      const match = line.match(/^(\s+)/);
+      const indent = match ? match[1] : "";
+      const content = match ? line.slice(indent.length) : line;
+
+      const words = content.split(" ");
+      let current = "";
+      const result: string[] = [];
+
+      for (const word of words) {
+        const candidate = current ? `${current} ${word}` : word;
+        const cleanCandidate = (indent + candidate)
+          .replace(/%c[a-zA-Z]/g, "")
+          .replace(/%[nrtbR]/g, "")
+          .replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "")
+          .replace(/<#[0-9a-fA-F]{6}>/g, "");
+        if (cleanCandidate.length <= width) {
+          current = candidate;
+        } else {
+          if (current) result.push(indent + current);
+          current = word;
+        }
+      }
+      if (current) result.push(indent + current);
+      return result.join("\n");
+    })
+    .join("\n");
 }

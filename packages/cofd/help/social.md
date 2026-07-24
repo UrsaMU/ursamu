@@ -14,9 +14,4 @@ SYNTAX
   +social/status [<target>]              Show panel.
   +social/end [for <t>]                  Abandon.
 
-EXAMPLES
-  +social/start Marcus=Loan me the grimoire
-  +social/soft aspiration=Help him achieve academic glory
-
-SEE ALSO: help social/doors, help social/impression,
-          help social/leverage, help social/force
+SEE ALSO: help cofd, help status, help social/examples

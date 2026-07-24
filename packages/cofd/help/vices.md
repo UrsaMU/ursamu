@@ -1,3 +1,6 @@
+---
+dark: true
+---
 vices  -- The Vice anchor in CoFD 2e.
 
 A character's Vice is her short-term comfort: the easy way out.

@@ -1,6 +1,9 @@
+---
+dark: true
+---
 roll/successes  -- Counting, n-again, chance dice, outcomes.
 
-See also: help roll (overview).
+SEE ALSO: help roll (overview).
 
 SUCCESS AND AGAIN
   Success: any die showing 8, 9, or 10.

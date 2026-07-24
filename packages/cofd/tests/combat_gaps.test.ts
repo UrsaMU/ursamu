@@ -18,11 +18,29 @@ import {
   setSurprised,
   setParticipantGrappleState,
   getEncounterForRoom,
+  encounterDb,
 } from "../src/combat/encounter.ts";
 import { attackExec } from "../src/commands/attack.ts";
 import { grappleExec } from "../src/commands/grapple.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
+
+/** Force actor's turn so multi-move sequences can run in one test. */
+async function forceTurn(roomId: string, actorId: string): Promise<void> {
+  const enc = await getEncounterForRoom(roomId);
+  assert(enc, "encounter missing");
+  const idx = enc.participants.findIndex((p) => p.actorId === actorId);
+  assert(idx >= 0, `actor ${actorId} not in encounter`);
+  const participants = enc.participants.map((p, i) =>
+    i === idx
+      ? { ...p, actionUsed: false, ran: false }
+      : p
+  );
+  await encounterDb.update(
+    { id: enc.id } as Record<string, unknown>,
+    { ...enc, participants, turnIdx: idx },
+  );
+}
 
 // ---- Helper Functions ----------------------------------------------------
 
@@ -375,6 +393,7 @@ describe("Combat Gaps Integration", OPTS, () => {
       );
 
       // Now Alice successfully Holds
+      await forceTurn(roomId, "p-alice");
       u.cmd.args = ["/hold"];
       let broadcastMsg = "";
       u.broadcast = (msg: string) => {
@@ -392,6 +411,7 @@ describe("Combat Gaps Integration", OPTS, () => {
       assertEquals(alicePart?.hasHold, true);
 
       // Now Alice successfully Restrains (since hasHold is true)
+      await forceTurn(roomId, "p-alice");
       u.cmd.args = ["/restrain"];
       broadcastMsg = "";
       await grappleExec(u);
@@ -407,12 +427,14 @@ describe("Combat Gaps Integration", OPTS, () => {
       );
 
       // Alice successfully Controls Weapon
+      await forceTurn(roomId, "p-alice");
       u.cmd.args = ["/control-weapon"];
       broadcastMsg = "";
       await grappleExec(u);
       assertStringIncludes(broadcastMsg, "controls Bob's weapon!");
 
       // Alice successfully Disarms Bob (since hasControl is true)
+      await forceTurn(roomId, "p-alice");
       u.cmd.args = ["/disarm"];
       broadcastMsg = "";
       await grappleExec(u);
@@ -425,6 +447,7 @@ describe("Combat Gaps Integration", OPTS, () => {
       assertEquals(bobSheetAfterDisarm.equipment?.equippedWeapon, null);
 
       // Alice breaks free (releasing both, clearing tilts)
+      await forceTurn(roomId, "p-alice");
       u.cmd.args = ["/break-free"];
       broadcastMsg = "";
       await grappleExec(u);

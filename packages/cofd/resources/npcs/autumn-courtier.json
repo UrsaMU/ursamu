@@ -1,0 +1,77 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "autumn-courtier",
+  "name": "Autumn Courtier",
+  "blurb": "Lost of Autumn. Fear and lore, court manners, sharp contracts.",
+  "book": "CtL 2e",
+  "tier": "major",
+  "lineage": "changeling",
+  "tags": ["lost", "autumn", "court", "urban"],
+  "attributes": {
+    "intelligence": 3,
+    "wits": 3,
+    "resolve": 3,
+    "strength": 2,
+    "dexterity": 3,
+    "stamina": 2,
+    "presence": 3,
+    "manipulation": 4,
+    "composure": 3
+  },
+  "skills": {
+    "occult": 3,
+    "subterfuge": 3,
+    "persuasion": 3,
+    "empathy": 2,
+    "investigation": 2,
+    "stealth": 2,
+    "weaponry": 1
+  },
+  "merits": {
+    "fast reflexes": 1
+  },
+  "specialties": {
+    "occult": ["Hedge"],
+    "subterfuge": ["Court lies"]
+  },
+  "integrity": 6,
+  "size": 5,
+  "defaultWeapon": "knife",
+  "shortDesc": "A thin figure in autumn colors watches from a cafe table.",
+  "description": "Polite smile, cold eyes. Conversation always tilts toward what you fear most.",
+  "ai": {
+    "archetype": "azlu-stalker",
+    "startRevealed": true
+  },
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible",
+    "lookMode": "mask"
+  },
+  "changeling": {
+    "seeming": "Fairest",
+    "kith": "Dancer",
+    "court": "Autumn",
+    "wyrd": 3,
+    "glamour": 8,
+    "clarity": 6,
+    "favoredRegalia": ["Crown", "Mirror"],
+    "needle": "Artist",
+    "thread": "Acceptance",
+    "contracts": [
+      "Mask of Superiority",
+      "Hostile Takeover",
+      "The Royal Court"
+    ],
+    "mask": [
+      "A thin, elegant person in a charcoal suit and rust scarf.",
+      "A soft-spoken academic with leaf-brown glasses and a wool coat.",
+      "A gallery-goer type: tasteful jewelry, careful smile, eyes that measure you."
+    ],
+    "mien": [
+      "Autumn leaves drift through eyes that never quite blink; skin like frost-bitten glass.",
+      "A crown of dry twigs and foxfire; breath fogs with the smell of old libraries and fear.",
+      "Too-long fingers stain the air amber; the smile is beautiful and wrong."
+    ]
+  }
+}

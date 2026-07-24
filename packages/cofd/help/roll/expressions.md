@@ -1,6 +1,9 @@
+---
+dark: true
+---
 roll/expressions  -- Dice-pool expression grammar.
 
-See also: help roll (overview).
+SEE ALSO: help roll (overview).
 
 FORMS
   Strength+Brawl               Attribute + Skill.

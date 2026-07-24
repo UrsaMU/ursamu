@@ -3,7 +3,6 @@ import * as dpath from "@std/path";
 import type { IPlugin } from "@ursamu/core";
 import type { IDBOBJ } from "./world/types.ts";
 import { registerPlugin } from "@ursamu/core";
-import { ensurePlugins } from "@ursamu/cli";
 import { dbojs } from "./world/dbobjs.ts";
 
 // ─── Txt Files loading ─────────────────────────────────────────────────────────
@@ -54,7 +53,13 @@ export async function loadPlugins(dir: string): Promise<IPlugin[]> {
   const loadedPlugins: IPlugin[] = [];
 
   // Auto-install any plugins declared in plugins.manifest.json that are absent.
-  await ensurePlugins(dir);
+  try {
+    const cliPackage = "@ursamu/cli";
+    const { ensurePlugins } = await import(cliPackage);
+    await ensurePlugins(dir);
+  } catch (err) {
+    console.error("Failed to load ensurePlugins from @ursamu/cli:", err);
+  }
 
   try {
     const dirInfo = await Deno.stat(dir);

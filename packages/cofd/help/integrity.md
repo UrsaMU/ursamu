@@ -12,11 +12,4 @@ roll. Modify others requires canEdit (builder+).
 
 Roll pool: Resolve + Composure + rating-mod + situational (cap +/-5).
 
-EXAMPLES
-  +integrity/break Saw a ghost -1
-  +integrity/break Killed in self-defense -4
-  +integrity/set 5 for Marcus
-
-SEE ALSO: help integrity/rating-mod, help integrity/situations,
-          help integrity/outcomes, help integrity/anchors,
-          help condition, help virtues, help vices
+SEE ALSO: help integrity/rating-mod, help integrity/situations,, help integrity/examples

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # DOING
 
 Sets your 'doing' string.

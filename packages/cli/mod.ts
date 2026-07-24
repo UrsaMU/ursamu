@@ -87,3 +87,7 @@ export type { CloneAndMoveCtx }                 from "./src/pluginDepsInstall.ts
 
 // High-level ensure
 export { ensurePlugins }                        from "./src/ensurePlugins.ts";
+
+// Packages JSR Wizard
+export { runPackagesWizard }                     from "./src/packages.ts";
+

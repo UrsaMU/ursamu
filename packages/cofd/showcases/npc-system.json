@@ -1,0 +1,214 @@
+{
+  "key": "npc-system",
+  "title": "+npc -- JSON catalog, lineages, AI, and dread powers",
+  "description": "Full NPC system tour: JSON templates (mortal / changeling / werewolf), random short-desc flavor, AI strategy assignment, aggro mode, dread powers, and cleanup. Templates live in resources/npcs/; AI in resources/ai/.",
+  "vars": { "player": "Jax" },
+  "setup": {
+    "character": {
+      "state": {
+        "name": "Jax",
+        "attributes": [
+          {
+            "name": "short-desc",
+            "value": "A street-smart investigator with ink-stained cuffs."
+          }
+        ],
+        "cofd": {
+          "template": "mortal",
+          "attributes": {
+            "intelligence": 2,
+            "wits": 3,
+            "resolve": 2,
+            "strength": 2,
+            "dexterity": 2,
+            "stamina": 2,
+            "presence": 2,
+            "manipulation": 2,
+            "composure": 2
+          },
+          "skills": { "investigation": 2, "brawl": 1 },
+          "advantages": {
+            "willpowerMax": 4,
+            "willpowerCurrent": 4,
+            "size": 5
+          },
+          "health": { "bashing": 0, "lethal": 0, "aggravated": 0 },
+          "equipment": {
+            "equippedWeapon": null,
+            "equippedArmor": null
+          }
+        }
+      }
+    },
+    "room": {
+      "name": "Back Alley",
+      "desc": "Wet brick, dumpsters, and a single flickering sodium light."
+    }
+  },
+  "steps": [
+    { "sub": "Empty Room -- Catalog Hints" },
+    {
+      "note": "Anyone can +npc list. Empty rooms list valid JSON template slugs."
+    },
+    { "cmd": "+npc", "label": "Jax checks the alley" },
+    { "expect": "Templates:" },
+    { "expect": "thug" },
+
+    { "sub": "Spawn a Mortal Mook (JSON thug)" },
+    {
+      "note": "resources/npcs/thug.json -- minor, random shortDesc array, AI beshilu-swarmer."
+    },
+    {
+      "cmd": "+npc/build Goon=thug",
+      "as": "admin",
+      "label": "ST drops a thug from catalog"
+    },
+    { "expect": "Created" },
+    { "expect": "minor" },
+    { "expect": "Thug" },
+
+    { "sub": "Inspect Mortal Stat Block" },
+    {
+      "note": "Spawn meta shows AI strategy slug, lineage, presence, short-desc pick."
+    },
+    { "cmd": "+npc/show Goon", "as": "admin", "label": "ST opens Goon's block" },
+    { "expect": "Attributes" },
+    { "expect": "AI:" },
+    { "expect": "beshilu-swarmer" },
+    { "expect": "mortal" },
+    { "expect": "Short-desc" },
+
+    { "sub": "Room List" },
+    { "cmd": "+npc/list", "label": "Jax sees Goon listed" },
+    { "expect": "Goon" },
+    { "expect": "thug" },
+
+    { "sub": "Assign AI Strategy" },
+    {
+      "note": "Strategies are resources/ai/*.json. +npc/ai lists valid slugs."
+    },
+    {
+      "cmd": "+npc/ai Goon=azlu-stalker",
+      "as": "admin",
+      "label": "Retarget Goon to stalker AI"
+    },
+    { "expect": "azlu-stalker" },
+    { "cmd": "+npc/show Goon", "as": "admin", "label": "Confirm AI on sheet" },
+    { "expect": "azlu-stalker" },
+
+    { "sub": "Aggro Mode" },
+    {
+      "note": "Zone-style aggro on a single mob: passive | territorial | hunter."
+    },
+    {
+      "cmd": "+npc/aggro-mode Goon=hunter",
+      "as": "admin",
+      "label": "Make Goon aggressive"
+    },
+    { "expect": "hunter" },
+
+    { "sub": "Changeling Template (Lost Courtier)" },
+    {
+      "note": "resources/npcs/autumn-courtier.json -- Mask/Mien arrays, contracts, Wyrd."
+    },
+    {
+      "cmd": "+npc/build Lys=autumn-courtier",
+      "as": "admin",
+      "label": "ST spawns Autumn Courtier"
+    },
+    { "expect": "Created" },
+    { "expect": "major" },
+    {
+      "cmd": "+npc/show Lys",
+      "as": "admin",
+      "label": "Inspect Lost antagonist"
+    },
+    { "expect": "changeling" },
+    { "expect": "Autumn" },
+    { "expect": "Fairest" },
+    { "expect": "Power:" },
+
+    { "sub": "Werewolf Pure Raider (Ambush)" },
+    {
+      "note": "resources/npcs/pure-raider.json -- presence ambush (dark), urshul, Pure."
+    },
+    {
+      "cmd": "+npc/build Raider=pure-raider",
+      "as": "admin",
+      "label": "ST spawns Pure raider"
+    },
+    { "expect": "Created" },
+    {
+      "cmd": "+npc/show Raider",
+      "as": "admin",
+      "label": "Inspect Forsaken antagonist"
+    },
+    { "expect": "werewolf" },
+    { "expect": "ambush" },
+    { "expect": "urshul" },
+    { "expect": "pure" },
+    { "expect": "spirit-ridden-feral" },
+
+    { "sub": "Tier Override + Dread Powers" },
+    {
+      "note": "hunter/storyteller scales stats. Possession requires major+."
+    },
+    {
+      "cmd": "+npc/build Karl=hunter/storyteller",
+      "as": "admin",
+      "label": "ST builds storyteller hunter"
+    },
+    { "expect": "storyteller" },
+    {
+      "cmd": "+npc/addpower Karl=possession",
+      "as": "admin",
+      "label": "Attach Possession"
+    },
+    { "expect": "Attached" },
+    {
+      "cmd": "+npc/show Karl",
+      "as": "admin",
+      "label": "Power on stat block"
+    },
+    { "expect": "Possession" },
+    {
+      "cmd": "+npc/addpower Goon=possession",
+      "as": "admin",
+      "label": "Minor cannot take major power"
+    },
+    { "expect": "cannot take" },
+
+    { "sub": "Browse Dread Catalog" },
+    { "cmd": "+npc/powers", "label": "Anyone can browse powers" },
+    { "expect": "Telekinesis" },
+    { "expect": "Mortal Mask" },
+
+    { "sub": "Clean Up" },
+    {
+      "cmd": "+npc/destroy Goon",
+      "as": "admin",
+      "label": "Remove Goon"
+    },
+    { "expect": "Destroyed" },
+    {
+      "cmd": "+npc/destroy Lys",
+      "as": "admin",
+      "label": "Remove Lys"
+    },
+    { "expect": "Destroyed" },
+    {
+      "cmd": "+npc/destroy Raider",
+      "as": "admin",
+      "label": "Remove Raider"
+    },
+    { "expect": "Destroyed" },
+    {
+      "cmd": "+npc/destroy Karl",
+      "as": "admin",
+      "label": "Remove Karl"
+    },
+    { "expect": "Destroyed" },
+
+    { "reset": true }
+  ]
+}

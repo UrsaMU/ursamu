@@ -67,17 +67,30 @@ export async function cleanupExpiredPosts(): Promise<number> {
   return processed;
 }
 
+let _cleanupTimer: number | undefined;
+
 /** Start the periodic cleanup interval (every 6 hours). */
 export function startCleanupInterval(): void {
   const run = async () => {
     try {
       const n = await cleanupExpiredPosts();
       if (n > 0) console.log(`[bbs] Cleaned up ${n} expired post(s).`);
-    } catch {
+    } catch (_e: unknown) {
       // Non-fatal
     }
   };
 
   run();
-  setInterval(run, 6 * 60 * 60 * 1000);
+  _cleanupTimer = setInterval(
+    run,
+    6 * 60 * 60 * 1000,
+  ) as unknown as number;
+}
+
+/** Stop the cleanup interval — call from plugin.remove(). */
+export function stopCleanupInterval(): void {
+  if (_cleanupTimer !== undefined) {
+    clearInterval(_cleanupTimer);
+    _cleanupTimer = undefined;
+  }
 }

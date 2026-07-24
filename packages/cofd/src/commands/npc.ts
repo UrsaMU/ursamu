@@ -12,13 +12,15 @@ import {
   NPC_ARCHETYPES,
   NPC_TIERS,
   type NpcTier,
+  objectStateFromSheet,
   sheetDefense,
-  sheetFromArchetype,
+  sheetFromTemplate,
   sheetHealthMax,
   sheetInitiative,
   sheetSpeed,
   tierPowerCap,
 } from "../npc/archetypes.ts";
+import { getNpcTemplate } from "../npc/catalog.ts";
 import {
   getDreadPower,
   listDreadPowers,
@@ -42,8 +44,64 @@ function isStaff(actor: IDBObj): boolean {
   return f.has?.("superuser") || f.has?.("admin") || f.has?.("wizard") || f.has?.("builder");
 }
 
+const WIDTH = 78;
+const INDENT = "  ";
+
 function pad(s: string, n: number): string {
   return s.length >= n ? s : s + " ".repeat(n - s.length);
+}
+
+/** Visible length ignoring simple MUSH color codes. */
+function visualLen(s: string): number {
+  return s
+    .replace(/%c[a-zA-Z]/g, "")
+    .replace(/%[nrtbR]/g, "")
+    .length;
+}
+
+/**
+ * Wrap a word list into lines of at most `width` printable columns.
+ * Prefixed lines already include indent in the returned strings.
+ */
+function wrapWords(
+  words: string[],
+  width: number,
+  prefix = INDENT,
+): string[] {
+  if (words.length === 0) return [];
+  const out: string[] = [];
+  let line = prefix + words[0];
+  for (let i = 1; i < words.length; i++) {
+    const next = words[i];
+    if (visualLen(line) + 1 + visualLen(next) > width) {
+      out.push(line);
+      line = prefix + next;
+    } else {
+      line += " " + next;
+    }
+  }
+  if (line.trim()) out.push(line);
+  return out;
+}
+
+/** Multi-column slug list, each row ≤ WIDTH. */
+function formatSlugColumns(
+  slugs: string[],
+  cols = 3,
+): string[] {
+  if (slugs.length === 0) return [];
+  const inner = WIDTH - INDENT.length;
+  const colW = Math.floor(inner / cols);
+  const lines: string[] = [];
+  for (let i = 0; i < slugs.length; i += cols) {
+    const chunk = slugs.slice(i, i + cols);
+    const row = chunk.map((s, idx) => {
+      if (idx === chunk.length - 1) return s;
+      return pad(s, colW);
+    }).join("");
+    lines.push(INDENT + row);
+  }
+  return lines;
 }
 
 function isValidTier(s: string): s is NpcTier {
@@ -107,28 +165,32 @@ async function npcBuild(u: IUrsamuSDK, rest: string): Promise<void> {
   const spec = parseNameSpec(u, rest);
   if (spec.err) { u.send(spec.err); return; }
 
-  const archetype = getArchetype(spec.archetypeKey);
-  if (!archetype) {
-    u.send(`Unknown archetype '${spec.archetypeKey}'. Valid: ${archetypeKeys().join(", ")}.`);
+  const template = getNpcTemplate(spec.archetypeKey);
+  if (!template) {
+    u.send(
+      `Unknown archetype '${spec.archetypeKey}'. ` +
+        `Valid: ${archetypeKeys().join(", ")}.`,
+    );
     return;
   }
 
-  const tier = spec.tier ?? archetype.tier;
-  // Pass 2: default AI archetype = "beshilu-swarmer" (overridable via /ai).
-  const sheet = sheetFromArchetype(archetype, tier, { aiArchetype: "beshilu-swarmer" });
+  const tier = spec.tier ?? template.tier;
+  const sheet = sheetFromTemplate(template, tier);
+  const built = objectStateFromSheet(sheet, spec.name);
+  const flags = new Set(built.flags);
 
   const npcObj = await u.db.create({
-    name: spec.name,
-    flags: new Set(["npc", "thing"]),
+    name: built.name,
+    flags,
     location: roomId,
-    state: { cofd: sheet },
+    state: built.state,
     contents: [],
   });
 
   const record = {
     id: newNpcId(),
     name: spec.name,
-    archetype: archetype.key,
+    archetype: template.slug,
     tier,
     dreadPowers: sheet.npc.dreadPowers,
     aiArchetype: sheet.npc.aiArchetype,
@@ -140,9 +202,12 @@ async function npcBuild(u: IUrsamuSDK, rest: string): Promise<void> {
   try { await saveNpcRecord(record); } catch { /* directory optional */ }
 
   u.send(
-    `Created %ch${spec.name}%cn (${archetype.label}, tier ${tier}, id ${npcObj.id}). ` +
-    `Health ${sheetHealthMax(sheet)}, Willpower ${sheet.advantages.willpowerMax}, ` +
-    `Defense ${sheetDefense(sheet)}, Init +${sheetInitiative(sheet)}, Speed ${sheetSpeed(sheet)}.`,
+    `Created %ch${spec.name}%cn (${template.name}, tier ${tier}, ` +
+      `id ${npcObj.id}). ` +
+      `Health ${sheetHealthMax(sheet)}, ` +
+      `Willpower ${sheet.advantages.willpowerMax}, ` +
+      `Defense ${sheetDefense(sheet)}, ` +
+      `Init +${sheetInitiative(sheet)}, Speed ${sheetSpeed(sheet)}.`,
   );
 }
 
@@ -164,17 +229,24 @@ async function npcList(u: IUrsamuSDK): Promise<void> {
   const lines: string[] = [];
   lines.push(await divider("N P C s"));
   if (npcs.length === 0) {
-    lines.push("  No NPCs in this room. Use +npc/create <name>=<archetype>.");
-    lines.push(`  Archetypes: ${archetypeKeys().join(", ")}`);
+    lines.push(
+      "  No NPCs in this room.",
+    );
+    lines.push(
+      "  Use +npc/build <name>=<archetype>[/<tier>].",
+    );
+    lines.push("  Templates:");
+    lines.push(...formatSlugColumns(archetypeKeys(), 3));
     u.send(lines.join("\n"));
     return;
   }
 
+  // Name 18 | Arch 16 | Tier 8 | HP 8 | Id rest  — fits 78 with indent.
   lines.push(
-    "  " + pad("Name", 20) + pad("Archetype", 14) + pad("Tier", 12) +
-    pad("Health", 12) + "Id",
+    INDENT + pad("Name", 18) + pad("Archetype", 16) +
+      pad("Tier", 8) + pad("Health", 8) + "Id",
   );
-  lines.push("  " + "-".repeat(76));
+  lines.push(INDENT + "-".repeat(WIDTH - INDENT.length));
   for (const o of npcs) {
     const sheet = (o.state?.cofd ?? {}) as CofdSheet & {
       npc?: { archetype: string; tier?: NpcTier };
@@ -184,14 +256,22 @@ async function npcList(u: IUrsamuSDK): Promise<void> {
     const tier = sheet.npc?.tier ?? arch?.tier ?? "minor";
     const hMax = arch
       ? archetypeHealthMax(arch)
-      : (sheet.attributes?.stamina ?? 1) + (sheet.advantages?.size ?? 5);
-    const h = sheet.health ?? { bashing: 0, lethal: 0, aggravated: 0 };
+      : (sheet.attributes?.stamina ?? 1) +
+        (sheet.advantages?.size ?? 5);
+    const h = sheet.health ?? {
+      bashing: 0,
+      lethal: 0,
+      aggravated: 0,
+    };
     const taken = h.bashing + h.lethal + h.aggravated;
     const healthStr = `${hMax - taken}/${hMax}`;
-    lines.push(
-      "  " + pad(String(o.name ?? "?"), 20) + pad(arch?.label ?? archKey, 14) +
-      pad(tier, 12) + pad(healthStr, 12) + o.id,
-    );
+    const name = String(o.name ?? "?").slice(0, 17);
+    const archLabel = (arch?.label ?? archKey).slice(0, 15);
+    const id = String(o.id).slice(0, 24);
+    const row =
+      INDENT + pad(name, 18) + pad(archLabel, 16) +
+      pad(tier, 8) + pad(healthStr, 8) + id;
+    lines.push(row.slice(0, WIDTH));
   }
   u.send(lines.join("\n"));
 }
@@ -223,6 +303,10 @@ async function findNpcObj(u: IUrsamuSDK, q: string): Promise<IDBObj | null> {
 }
 
 async function npcShow(u: IUrsamuSDK, rest: string): Promise<void> {
+  if (!isStaff(u.me)) {
+    u.send("Permission denied. Only staff may view NPC stat blocks.");
+    return;
+  }
   const q = u.util.stripSubs(rest).trim();
   if (!q) { u.send("Syntax: +npc/show <name-or-id>"); return; }
 
@@ -245,9 +329,15 @@ async function npcShow(u: IUrsamuSDK, rest: string): Promise<void> {
 
   const a = sheet.attributes;
   lines.push("  Attributes:");
-  lines.push(`    Int ${a.intelligence} | Wit ${a.wits} | Res ${a.resolve}`);
-  lines.push(`    Str ${a.strength} | Dex ${a.dexterity} | Sta ${a.stamina}`);
-  lines.push(`    Pre ${a.presence} | Man ${a.manipulation} | Com ${a.composure}`);
+  const attrRow = (m: string, mVal: number, p: string, pVal: number, s: string, sVal: number) => {
+    return "    " +
+      pad(`${m} ${mVal}`, 24) +
+      pad(`${p} ${pVal}`, 24) +
+      pad(`${s} ${sVal}`, 24);
+  };
+  lines.push(attrRow("Intel", a.intelligence ?? 1, "Strength", a.strength ?? 1, "Presence", a.presence ?? 1));
+  lines.push(attrRow("Wits", a.wits ?? 1, "Dexterity", a.dexterity ?? 1, "Manip", a.manipulation ?? 1));
+  lines.push(attrRow("Resolve", a.resolve ?? 1, "Stamina", a.stamina ?? 1, "Composure", a.composure ?? 1));
   lines.push("");
 
   const skills = sheet.skills as Record<string, number>;
@@ -272,14 +362,76 @@ async function npcShow(u: IUrsamuSDK, rest: string): Promise<void> {
     lines.push("");
   }
 
+  const maxHealth = sheetHealthMax(sheet);
+  const track = sheet.health ?? { bashing: 0, lethal: 0, aggravated: 0 };
+  const boxes: string[] = [];
+  let agg = track.aggravated ?? 0;
+  let leth = track.lethal ?? 0;
+  let bash = track.bashing ?? 0;
+  for (let i = 0; i < maxHealth; i++) {
+    if (agg > 0) {
+      boxes.push("[*]");
+      agg -= 1;
+    } else if (leth > 0) {
+      boxes.push("[X]");
+      leth -= 1;
+    } else if (bash > 0) {
+      boxes.push("[/]");
+      bash -= 1;
+    } else {
+      boxes.push("[ ]");
+    }
+  }
+  const healthStr = boxes.join("");
+
   lines.push("  Derived:");
-  lines.push(`    Health:     ${sheetHealthMax(sheet)} (Stamina + Size)`);
-  lines.push(`    Willpower:  ${sheet.advantages.willpowerMax} (Resolve + Composure)`);
+  lines.push(`    Health:     ${healthStr}  (${maxHealth} max)`);
+  lines.push(`    Willpower:  ${sheet.advantages.willpowerCurrent ?? sheet.advantages.willpowerMax}/${sheet.advantages.willpowerMax}`);
   lines.push(`    Defense:    ${sheetDefense(sheet)}`);
   lines.push(`    Initiative: +${sheetInitiative(sheet)}`);
   lines.push(`    Speed:      ${sheetSpeed(sheet)}`);
   lines.push(`    Integrity:  ${sheet.moralityValue}`);
   lines.push("");
+
+  // Catalog spawn meta (JSON templates).
+  // deno-lint-ignore no-explicit-any
+  const meta = (sheet.npc ?? {}) as any;
+  const metaLines: string[] = [];
+  if (meta.aiArchetype) {
+    metaLines.push(`    AI:        ${meta.aiArchetype}`);
+  }
+  if (meta.lineage) metaLines.push(`    Lineage:   ${meta.lineage}`);
+  if (meta.presence) metaLines.push(`    Presence:  ${meta.presence}`);
+  if (meta.aggro) metaLines.push(`    Aggro:     ${meta.aggro}`);
+  if (meta.shortDesc) {
+    const sd = String(meta.shortDesc);
+    // Keep short-desc on its own wrapped lines (≤78).
+    const head = "    Short-desc: ";
+    if (visualLen(head + sd) <= WIDTH) {
+      metaLines.push(head + sd);
+    } else {
+      metaLines.push(head.trimEnd());
+      metaLines.push(
+        ...wrapWords(sd.split(/\s+/), WIDTH, "      "),
+      );
+    }
+  }
+  const cf = sheet.customFields ?? {};
+  if (cf.court) metaLines.push(`    Court:     ${cf.court}`);
+  if (cf.seeming) metaLines.push(`    Seeming:   ${cf.seeming}`);
+  if (cf.form) metaLines.push(`    Form:      ${cf.form}`);
+  if (cf.faction) metaLines.push(`    Faction:   ${cf.faction}`);
+  if (cf.tribe) metaLines.push(`    Tribe:     ${cf.tribe}`);
+  if (sheet.powerStatValue) {
+    metaLines.push(
+      `    Power:     ${sheet.powerStatValue}  Energy: ${sheet.energyCurrent}`,
+    );
+  }
+  if (metaLines.length) {
+    lines.push("  Spawn / Template:");
+    lines.push(...metaLines);
+    lines.push("");
+  }
 
   const powers = sheet.npc?.dreadPowers ?? [];
   if (powers.length) {
@@ -448,19 +600,25 @@ async function npcAi(u: IUrsamuSDK, rest: string): Promise<void> {
     return;
   }
   const eqIdx = rest.indexOf("=");
+  const valid = [...listArchetypes(), "manual", "off", "none"];
   if (eqIdx < 0) {
-    u.send(`Syntax: +npc/ai <name>=<archetype>. Valid: ${listArchetypes().join(", ")}.`);
+    u.send(
+      `Syntax: +npc/ai <name>=<archetype>. Valid: ${valid.join(", ")}.`,
+    );
     return;
   }
   const name = u.util.stripSubs(rest.slice(0, eqIdx)).trim();
   const archetype = u.util.stripSubs(rest.slice(eqIdx + 1)).trim().toLowerCase();
   if (!name || !archetype) {
-    u.send(`Syntax: +npc/ai <name>=<archetype>. Valid: ${listArchetypes().join(", ")}.`);
+    u.send(
+      `Syntax: +npc/ai <name>=<archetype>. Valid: ${valid.join(", ")}.`,
+    );
     return;
   }
-  const valid = listArchetypes();
   if (!valid.includes(archetype)) {
-    u.send(`Unknown AI archetype '${archetype}'. Valid: ${valid.join(", ")}.`);
+    u.send(
+      `Unknown AI archetype '${archetype}'. Valid: ${valid.join(", ")}.`,
+    );
     return;
   }
   const npc = await findNpcObj(u, name);
@@ -550,20 +708,21 @@ async function npcAggro(u: IUrsamuSDK, rest: string): Promise<void> {
     return;
   }
 
-  // Find this NPC in any active encounter in the room, spike participant.threat[targetId].
-  const { getEncounterForRoom, encounterDb } = await import("../combat/encounter.ts");
+  // Find this NPC in any active encounter in the room, spike threat.
+  const {
+    getEncounterForRoom,
+    setParticipantThreat,
+  } = await import("../combat/encounter.ts");
   const roomId = u.here?.id;
   const enc = roomId ? await getEncounterForRoom(roomId) : null;
-  if (!enc) { u.send("No active encounter here to spike threat in."); return; }
-  const participants = enc.participants.map((p) => {
-    if (p.actorId !== npc.id) return p;
-    const threat = { ...(p.threat ?? {}) };
-    threat[target.id] = 1000;
-    return { ...p, threat };
-  });
-  // deno-lint-ignore no-explicit-any
-  await encounterDb.update({ id: enc.id } as any, { ...enc, participants });
-  u.send(`Spiked ${npc.name ?? "NPC"} threat toward ${target.name ?? "target"}.`);
+  if (!enc) {
+    u.send("No active encounter here to spike threat in.");
+    return;
+  }
+  await setParticipantThreat(enc.id, npc.id, target.id, 1000);
+  u.send(
+    `Spiked ${npc.name ?? "NPC"} threat toward ${target.name ?? "target"}.`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -611,7 +770,7 @@ export async function npcExec(u: IUrsamuSDK): Promise<void> {
     default:
       u.send(
         `Unknown +npc switch '/${sw}'. Try /build, /list, /show, /powers, ` +
-        `/addpower, /rmpower, or /destroy.`,
+        `/addpower, /rmpower, /ai, /aggro-mode, or /destroy.`,
       );
   }
 }

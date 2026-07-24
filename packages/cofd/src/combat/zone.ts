@@ -5,8 +5,22 @@
 // Wandering pauses in any room with an active encounter, so the turn-based
 // core is never interrupted. Mobs stay inside their zone's roomIds.
 
-import { createObj, DBO, type IDBObj, type IUrsamuSDK, dbojs } from "@ursamu/ursamu";
+import {
+  findActiveEncounterRoom,
+  roomHasActiveEncounter,
+  startZoneLoop,
+  stopAllZoneLoops,
+  stopZoneLoop,
+} from "@ursamu/combat";
+import {
+  createObj,
+  DBO,
+  type IDBObj,
+  type IUrsamuSDK,
+  dbojs,
+} from "@ursamu/ursamu";
 import { exitsFromRoom, queryByLocation } from "./dbo_normalize.ts";
+import { cofdEncounterStore } from "./encounter.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -58,7 +72,7 @@ export const zoneDb = new DBO<Zone>("cofd.zones");
 // deno-lint-ignore no-explicit-any
 type Q = any;
 
-const intervals = new Map<string, number>();
+/** Ambient flavor cadence counters (host-owned; not in combat engine). */
 const flavorTicks = new Map<string, number>();
 
 /** Hard cap on per-tick respawn spawns to bound DBO writes per cycle. */
@@ -247,7 +261,6 @@ function mobMeta(obj: IDBObj): MobMeta | null {
   const sheet = obj.state?.cofd as any;
   if (!sheet?.npc) return null;
   const n = sheet.npc;
-  if (!n.zoneId) return null;
   return {
     zoneId: n.zoneId,
     aggro: n.aggro ?? "passive",
@@ -347,32 +360,25 @@ export async function aggroMobsInRoom(roomId: string): Promise<IDBObj[]> {
 // Wander tick
 // ---------------------------------------------------------------------------
 
-/**
- * Whether a room currently has an active combat encounter. Walker / wander
- * skip these rooms so turn-based combat is never disturbed.
- */
-async function roomHasActiveEncounter(roomId: string): Promise<boolean> {
-  const { getEncounterForRoom } = await import("./encounter.ts");
-  const enc = await getEncounterForRoom(roomId);
-  return !!enc && enc.status === "active";
+/** Active encounter check via cofdEncounterStore (combat zone-query). */
+async function roomBusy(roomId: string): Promise<boolean> {
+  return await roomHasActiveEncounter(roomId, {
+    store: cofdEncounterStore,
+  });
 }
 
 /**
- * Walk the zone's roomIds and return the first room that contains an
- * active encounter with at least one PC participant. Used by hunter-aggro
- * mobs to navigate toward distant fights.
+ * First room in the zone with an active fight that has a PC.
+ * Hunter-aggro mobs path toward this room.
  */
 export async function findActiveEncounterRoomInZone(
   zoneRoomIds: string[],
 ): Promise<string | null> {
-  const { getEncounterForRoom } = await import("./encounter.ts");
-  for (const rid of zoneRoomIds) {
-    const enc = await getEncounterForRoom(rid);
-    if (!enc || enc.status !== "active") continue;
-    const hasPc = enc.participants.some((p) => p.kind === "pc");
-    if (hasPc) return rid;
-  }
-  return null;
+  const hit = await findActiveEncounterRoom(zoneRoomIds, {
+    store: cofdEncounterStore,
+    requirePc: true,
+  });
+  return hit?.roomId ?? null;
 }
 
 function pickRandom<T>(arr: T[]): T | null {
@@ -398,7 +404,7 @@ export async function tickZone(zoneId: string): Promise<void> {
   // Collect all mobs across all zone rooms (excluding those in active combat).
   const candidates: { mob: IDBObj; meta: MobMeta }[] = [];
   for (const rid of z.roomIds) {
-    if (await roomHasActiveEncounter(rid)) continue;
+    if (await roomBusy(rid)) continue;
     const mobs = await mobsInRoomForZone(rid, zoneId);
     for (const m of mobs) {
       const meta = mobMeta(m);
@@ -433,10 +439,9 @@ export async function tickZone(zoneId: string): Promise<void> {
       const hop = await nextHopToward(here, encRoom, z.roomIds, {
         maxDepth: 6,
         costOf: async (rid) => {
-          // The goal room is always traversable. Detours through other
-          // active-combat rooms cost a lot so the path routes around them.
+          // Goal always open; detour around other active fights.
           if (rid === encRoom) return 1;
-          return (await roomHasActiveEncounter(rid)) ? 1000 : 1;
+          return (await roomBusy(rid)) ? 1000 : 1;
         },
       });
       if (hop) dest = hop;
@@ -509,7 +514,7 @@ export async function tickZone(zoneId: string): Promise<void> {
         // Find candidate rooms: have at least one player, no active encounter.
         const candidateRooms: string[] = [];
         for (const rid of z.roomIds) {
-          if (await roomHasActiveEncounter(rid)) continue;
+          if (await roomBusy(rid)) continue;
           const inRoom = await queryByLocation(rid);
           const hasPlayer = inRoom.some((o) => o.flags?.has?.("player"));
           if (hasPlayer) candidateRooms.push(rid);
@@ -535,28 +540,15 @@ export async function tickZone(zoneId: string): Promise<void> {
 }
 
 export function startWander(zoneId: string, intervalMs: number): void {
-  stopWander(zoneId);
-  const handle = setInterval(() => {
-    tickZone(zoneId).catch(() => { /* swallow */ });
-  }, intervalMs);
-  // Allow the Deno process / test runner to exit cleanly even if intervals
-  // are still armed. Deno's timer handles support unref via the global
-  // Deno.unrefTimer helper.
-  try { Deno.unrefTimer(handle); } catch { /* not in Deno or unsupported */ }
-  intervals.set(zoneId, handle);
+  startZoneLoop(zoneId, intervalMs, () => tickZone(zoneId));
 }
 
 export function stopWander(zoneId: string): void {
-  const handle = intervals.get(zoneId);
-  if (handle !== undefined) {
-    clearInterval(handle);
-    intervals.delete(zoneId);
-  }
+  stopZoneLoop(zoneId);
 }
 
 export function stopAllWanderers(): void {
-  for (const h of intervals.values()) clearInterval(h);
-  intervals.clear();
+  stopAllZoneLoops();
 }
 
 /** Re-arm intervals at engine:ready for every enabled zone. */
@@ -581,33 +573,40 @@ async function spawnOneMob(
   aggro: MobAggro,
 ): Promise<string | null> {
   if (zone.roomIds.length === 0) return null;
-  const { getArchetype, sheetFromArchetype } = await import(
-    "../npc/archetypes.ts"
-  );
-  const archetype = getArchetype(archetypeKey);
-  if (!archetype) return null;
+  const {
+    getNpcTemplate,
+    sheetFromTemplate,
+    objectStateFromSheet,
+  } = await import("../npc/index.ts");
+  const template = getNpcTemplate(archetypeKey);
+  if (!template) return null;
 
   const homeRoomId = pickRandom(zone.roomIds)!;
-  const sheet = sheetFromArchetype(archetype, archetype.tier, {
-    aiArchetype: "beshilu-swarmer",
-  });
+  const sheet = sheetFromTemplate(template, template.tier);
   // deno-lint-ignore no-explicit-any
   (sheet.npc as any).zoneId = zone.id;
+  // Zone rule aggro wins; fall back to template default.
   // deno-lint-ignore no-explicit-any
-  (sheet.npc as any).aggro = aggro;
+  (sheet.npc as any).aggro = aggro ??
+    template.defaults?.aggro ??
+    "territorial";
   // deno-lint-ignore no-explicit-any
   (sheet.npc as any).homeRoomId = homeRoomId;
   // deno-lint-ignore no-explicit-any
-  (sheet.npc as any).wanderRange = 1;
+  (sheet.npc as any).wanderRange =
+    template.defaults?.wanderRange ?? 1;
+
+  const built = objectStateFromSheet(sheet, template.name);
+  const flagStr = built.flags.join(" ");
 
   // createObj signature: (flagsStr, data) -> IDBOBJ[]. It generates the id
   // and emits the proper engine events. Swallows failures so a single bad
   // spawn doesn't break a respawn pass.
   try {
-    const created = await createObj("npc thing", {
-      name: archetype.label,
+    const created = await createObj(flagStr, {
+      name: built.name,
       location: homeRoomId,
-      state: { cofd: sheet },
+      state: built.state,
       contents: [],
     });
     const npcObj = (created as unknown as Array<{ id: string }>)?.[0];

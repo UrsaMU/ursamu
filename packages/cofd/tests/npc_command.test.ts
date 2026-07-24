@@ -89,6 +89,28 @@ Deno.test("/list works without staff", OPTS, async () => {
   assert(!msg.includes("Permission denied"), "list must not be staff-gated");
 });
 
+Deno.test("empty /list wraps templates within 78 columns", OPTS, async () => {
+  const u = mockU({
+    me: { flags: new Set(["player", "connected"]) },
+    args: ["list", ""],
+  });
+  await npcExec(u);
+  const msg = u._sent.join("\n");
+  assertStringIncludes(msg, "No NPCs in this room.");
+  assertStringIncludes(msg, "Templates:");
+  assertStringIncludes(msg, "thug");
+  for (const line of msg.split("\n")) {
+    // Strip MUSH color codes before measuring width.
+    const plain = line
+      .replace(/%c[a-zA-Z]/g, "")
+      .replace(/%[nrtbR]/g, "");
+    assert(
+      plain.length <= 78,
+      `line exceeds 78 cols (${plain.length}): ${plain}`,
+    );
+  }
+});
+
 Deno.test("non-staff cannot /destroy", OPTS, async () => {
   const u = mockU({
     me: { flags: new Set(["player", "connected"]) },

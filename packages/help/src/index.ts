@@ -27,10 +27,12 @@ export const plugin: IPlugin = {
 
   init: async () => {
     // Register this plugin's own help/ directory
-    registerHelpDir(
-      fromFileUrl(new URL("../help", import.meta.url)),
-      "help",
-    );
+    if (import.meta.url.startsWith("file:")) {
+      registerHelpDir(
+        fromFileUrl(new URL("../help", import.meta.url)),
+        "help",
+      );
+    }
 
     helpRegistry.addProvider(dbProvider);
     helpRegistry.addProvider(fileProvider);

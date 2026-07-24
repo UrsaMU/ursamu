@@ -49,7 +49,10 @@ export async function resolveNames(ids: string[]): Promise<string> {
   const names: string[] = [];
   for (const ref of ids) {
     const obj = await dbojs.queryOne({ id: ref.replace("#", "") }).catch(() => null);
-    names.push((obj?.data?.name as string | undefined) ?? ref);
+    const data = obj?.data as
+      | { name?: string; moniker?: string }
+      | undefined;
+    names.push(data?.moniker ?? data?.name ?? ref);
   }
   return names.join(", ");
 }

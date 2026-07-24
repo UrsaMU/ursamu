@@ -158,13 +158,25 @@ export async function matchNativeCmd(
       args: match.slice(1),
     });
 
-    await (cmd.exec(u) as Promise<void>)?.catch((e: Error) => {
-      console.error(e);
-      send(
-        [socketId],
-        `Uh oh! You've run into an error! Please contact staff with the following info!%r%r%chError:%cn ${e}`,
-      );
-    });
+    const { runWithCmdMiddleware } = await import("./middleware.ts");
+    await runWithCmdMiddleware(
+      {
+        socketId,
+        actorId: actorId || "#-1",
+        msg,
+        socket: { cid: actorId || undefined, socketId },
+        u,
+      },
+      async () => {
+        await (cmd.exec(u) as Promise<void>)?.catch((e: Error) => {
+          console.error(e);
+          send(
+            [socketId],
+            `Uh oh! You've run into an error! Please contact staff with the following info!%r%r%chError:%cn ${e}`,
+          );
+        });
+      },
+    );
     return true;
   }
   return false;

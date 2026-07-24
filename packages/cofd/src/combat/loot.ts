@@ -5,13 +5,8 @@
 import type { IUrsamuSDK } from "@ursamu/ursamu";
 import { createItem, itemData } from "../equipment/objects.ts";
 
-const lootUrl = new URL("../../resources/loot.json", import.meta.url);
-let LOOT_TABLES: Record<string, Array<{ key: string; count: number }>>;
-try {
-  LOOT_TABLES = JSON.parse(Deno.readTextFileSync(lootUrl));
-} catch {
-  LOOT_TABLES = {};
-}
+import lootData from "../../resources/loot.json" with { type: "json" };
+const LOOT_TABLES: Record<string, Array<{ key: string; count: number }>> = lootData as Record<string, Array<{ key: string; count: number }>>;
 
 /** Return the loot table for an archetype key, or [] if unknown. */
 export function lootFor(

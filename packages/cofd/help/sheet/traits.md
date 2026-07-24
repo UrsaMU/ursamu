@@ -1,25 +1,21 @@
-sheet traits  -- Settable trait categories for +sheet/set.
+---
+dark: true
+---
+SEE ALSO: help sheet (overview)
 
-Identity      concept, virtue, vice
-Template      template (mortal, changeling)
-Attributes    9 CoFD attributes, 1-5
-Skills        24 CoFD skills, 0-5
-Specialties   specialty/<skill>=<name>[: <description>]
-Merits        by merit key. Instanced merits (Language, Contacts,
-              Status, Allies, Mentor, etc.) take a qualifier:
-                +sheet/set language(spanish)=1
-                +sheet/set contacts(police)=2
-              Multiple qualifiers under the same merit stack as
-              separate purchases.
-Morality      clarity or integrity
-Power Stat    wyrd
-Energy        glamour
-Custom        seeming, kith, court, needle, thread
-Other         willpower, size (staff-only; 1-10)
++SHEET TRAITS  -- Categories for +sheet/set.
 
-Resetting:
-  +sheet/set <trait>=  (empty value) resets the trait to its template
-  default. For attributes the default is 1; for skills it is 0.
-  Specialty reset wipes all specialties on the named skill.
+CATEGORIES
+  Identity    concept, virtue, vice
+  Template    mortal, changeling, …
+  Attributes  1–5 · Skills 0–5
+  Specialties specialty/<skill>=name
+  Merits      key or key(qualifier)
+  Power/Energy  wyrd, glamour, …
+  CtL custom  seeming, kith, court, needle,
+              thread, mask, mien, animals
 
-See also: sheet, sheet specialties, sheet willpower, sheet size
+RESET
+  +sheet/set <trait>=  empty → template default.
+
+SEE ALSO: help sheet, help sheet/specialties

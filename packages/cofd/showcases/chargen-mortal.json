@@ -1,9 +1,18 @@
 {
   "key": "chargen-mortal",
   "title": "+cg -- guided Mortal character generation",
-  "description": "Full guided chargen walkthrough for a Mortal template: Core Identity, Template, Template Specifics, Attributes (5/4/3), Skills (11/9/7), and Merits (7 dots) -- then submit for staff approval.",
+  "description": "Full guided chargen walkthrough for a Mortal template: Core Identity, Template, Template Specifics, Attributes (5/4/3), Skills (11/9/7), and Merits (7 dots) -- then submit for staff approval. Demonstrates the compact list screens (≤22 lines) and browse-before-set workflow.",
   "vars": { "player": "Novice" },
   "steps": [
+    { "sub": "Browsing Anchors Before Starting" },
+    { "note": "Use +cg/list to see compact category indexes -- each fits in 24 lines." },
+    { "cmd": "+cg/list virtues",                              "label": "compact virtue index" },
+    { "expect": "Virtue" },
+    { "cmd": "+cg/list virtues Just",                        "label": "drilldown: full virtue detail" },
+    { "expect": "Willpower" },
+    { "cmd": "+cg/list vices Greedy",                        "label": "drilldown: full vice detail" },
+    { "expect": "Willpower" },
+
     { "sub": "Starting Character Generation" },
     { "note": "+cg with no prior state opens a fresh session and shows Stage 1." },
     { "cmd": "+cg",                                          "label": "start chargen" },
@@ -21,6 +30,8 @@
     { "expect": "Stage" },
 
     { "sub": "Stage 2 -- Template" },
+    { "cmd": "+cg/list templates",                           "label": "browse templates" },
+    { "expect": "mortal" },
     { "cmd": "+cg/set template=mortal",                      "label": "Mortal template" },
     { "expect": "Successfully set" },
     { "cmd": "+cg/next",                                     "label": "advance to Stage 3" },
@@ -46,6 +57,9 @@
     { "expect": "Stage" },
 
     { "sub": "Stage 5 -- Skills (11/9/7 priority)" },
+    { "note": "Stage 5 uses the same Name: ***.. (N) 3-col layout as Attributes." },
+    { "cmd": "+cg",                                          "label": "view skills screen" },
+    { "expect": "Skills" },
     { "note": "Per-category totals must hit 11/9/7 in some permutation." },
     { "cmd": "+cg/set academics=3",      "label": "Mental group (11)" },
     { "cmd": "+cg/set investigation=3" },
@@ -63,10 +77,18 @@
     { "expect": "Stage" },
 
     { "sub": "Stage 6 -- Merits (7 dots)" },
-    { "note": "Mortal has no powers; allocate exactly 7 dots of merits. Instanced merits (Contacts, Allies, etc.) need a qualifier in parens." },
+    { "note": "Mortal has no powers; allocate exactly 7 dots of merits. Browse first with +cg/list merits." },
+    { "cmd": "+cg/list merits",                              "label": "browse merit categories" },
+    { "expect": "Merits" },
+    { "cmd": "+cg/list merits social",                       "label": "list social merits" },
+    { "expect": "Striking Looks" },
+    { "note": "Instanced merits (Contacts, Allies, etc.) need a qualifier in parens." },
     { "cmd": "+cg/set contacts(police)=2",   "label": "instanced merit" },
+    { "expect": "Successfully set" },
     { "cmd": "+cg/set resources=3" },
+    { "expect": "Successfully set" },
     { "cmd": "+cg/set striking looks=2" },
+    { "expect": "Successfully set" },
 
     { "sub": "Submit for Staff Approval" },
     { "note": "/submit at Stage 6 files a CGEN job. See approval-flow for what happens next." },

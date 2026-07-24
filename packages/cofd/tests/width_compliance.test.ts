@@ -23,8 +23,8 @@ function visibleLen(s: string): number {
 
 Deno.test("bug 1a: sheet header is Latin-1 and under 78 cols", OPTS, () => {
   // Reproduce the literal header expression from src/sheet/sections/header.ts.
-  const longTemplate = "CHANGELING";
-  const headerText = `CHRONICLES OF DARKNESS -- ${longTemplate}`;
+  const longName = "A".repeat(40);
+  const headerText = `Character Sheet for: ${longName}`;
   // Latin-1 only.
   for (const ch of headerText) {
     const code = ch.charCodeAt(0);

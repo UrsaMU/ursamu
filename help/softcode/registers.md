@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE REGISTERS
 
 Registers are named temporary variables within a single softcode evaluation.

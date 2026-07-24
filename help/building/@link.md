@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @LINK
 
 Links an exit or object to a location.

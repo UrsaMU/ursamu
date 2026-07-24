@@ -1,0 +1,84 @@
+{
+  "key": "shift-ctl",
+  "title": "+shift / +contract -- CtL Mask and Chrysalis",
+  "description": "Changeling drops Mask, sets animals, takes wolf form, perceives, leaves form, raises Mask.",
+  "vars": { "player": "Pix" },
+  "setup": {
+    "character": {
+      "state": {
+        "cofd": {
+          "template": "changeling",
+          "concept": "Escaped hound",
+          "virtue": "Fortitude",
+          "vice": "Wrath",
+          "attributes": {
+            "intelligence": 2, "wits": 3, "resolve": 2,
+            "strength": 2, "dexterity": 3, "stamina": 2,
+            "presence": 2, "manipulation": 2, "composure": 2
+          },
+          "skills": {
+            "athletics": 2, "brawl": 2, "stealth": 2,
+            "survival": 2, "animal_ken": 1, "subterfuge": 2,
+            "occult": 1
+          },
+          "specialties": {},
+          "merits": {},
+          "moralityValue": 6,
+          "powerStatValue": 2,
+          "energyCurrent": 12,
+          "customFields": {
+            "seeming": "Beast",
+            "kith": "Hunterheart",
+            "court": "Summer",
+            "favored": "Sword",
+            "needle": "Survivor",
+            "thread": "Freedom",
+            "mask": "Wiry runner in a hoodie.",
+            "mien": "Too many teeth; eyes like a wolf."
+          },
+          "contracts": ["Chrysalis", "Mask of Superiority"],
+          "advantages": {
+            "willpowerMax": 4,
+            "willpowerCurrent": 4,
+            "size": 5
+          },
+          "tempStats": {},
+          "formState": { "system": "none", "current": "" }
+        }
+      }
+    }
+  },
+  "steps": [
+    { "sub": "Status" },
+    { "cmd": "+shift", "label": "show mask status" },
+    { "expect": "mask" },
+
+    { "sub": "Drop Mask" },
+    { "cmd": "+shift mien", "label": "drop Mask (1 Glamour)" },
+    { "expect": "Mask" },
+
+    { "sub": "Unlock animals" },
+    { "cmd": "+sheet/set animals=wolf,hawk", "label": "Chrysalis list" },
+    { "expect": "Set trait" },
+
+    { "sub": "Animal form" },
+    { "cmd": "+shift wolf", "label": "Chrysalis wolf (2 Glamour)" },
+    { "expect": "wolf" },
+
+    { "sub": "Perception with animal senses" },
+    { "cmd": "+roll Wits+Composure", "label": "senses bonus" },
+    { "expect": "ROLL" },
+
+    { "sub": "Leave animal" },
+    { "cmd": "+shift human", "label": "return to flesh" },
+    { "expect": "Flesh" },
+
+    { "sub": "Raise Mask" },
+    { "cmd": "+shift mask", "label": "raise Mask" },
+    { "expect": "Mask" },
+
+    { "sub": "Contracts list" },
+    { "cmd": "+contract", "label": "list contracts" },
+    { "expect": "Chrysalis" }
+  ]
+}

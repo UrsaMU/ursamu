@@ -1,4 +1,4 @@
-import { DBO } from "@ursamu/mush";
+import { DBO, getConfig } from "@ursamu/mush";
 
 /** Maximum inbox messages per player before deliveries are skipped. */
 export const MAIL_QUOTA = 100;
@@ -36,4 +36,14 @@ export interface IMail {
   attachments?: string[];
 }
 
-export const mailDb = new DBO<IMail>("mail.messages");
+// Resolve once at load. DBO on @ursamu/core@0.1.0 accepts string only
+// (lazy factories need core >=0.1.1). Default matches config.sample.
+function resolveMailNs(): string {
+  try {
+    return getConfig<string>("plugins.mail.db", "mail.messages");
+  } catch {
+    return "mail.messages";
+  }
+}
+
+export const mailDb: DBO<IMail> = new DBO<IMail>(resolveMailNs());

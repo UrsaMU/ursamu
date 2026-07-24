@@ -21,14 +21,14 @@ export async function markRead(
   const arr = bbRead[String(boardNum)] ?? [];
   if (!arr.includes(msgKey)) arr.push(msgKey);
   bbRead[String(boardNum)] = arr;
-  await u.db.modify(u.me.id, "$set", { "data.bb_read": bbRead });
+  await u.db.modify(u.me.id, "$set", { "state.bb_read": bbRead });
 }
 
 export async function markAllRead(u: IUrsamuSDK, boardNum: number): Promise<void> {
   const allKeys = await getAllMessageKeys(boardNum);
   const bbRead  = (u.me.state.bb_read as Record<string, string[]>) ?? {};
   bbRead[String(boardNum)] = allKeys;
-  await u.db.modify(u.me.id, "$set", { "data.bb_read": bbRead });
+  await u.db.modify(u.me.id, "$set", { "state.bb_read": bbRead });
 }
 
 export async function markAllBoardsRead(u: IUrsamuSDK): Promise<void> {
@@ -37,7 +37,7 @@ export async function markAllBoardsRead(u: IUrsamuSDK): Promise<void> {
   for (const board of allBoards.filter((b) => b.id !== "bbconfig")) {
     bbRead[String(board.num)] = await getAllMessageKeys(board.num);
   }
-  await u.db.modify(u.me.id, "$set", { "data.bb_read": bbRead });
+  await u.db.modify(u.me.id, "$set", { "state.bb_read": bbRead });
 }
 
 export async function getAllMessageKeys(boardNum: number): Promise<string[]> {
@@ -79,7 +79,7 @@ export async function setMembership(
 ): Promise<void> {
   const m = (u.me.state.bb_membership as Record<string, boolean>) ?? {};
   m[String(boardNum)] = value;
-  await u.db.modify(u.me.id, "$set", { "data.bb_membership": m });
+  await u.db.modify(u.me.id, "$set", { "state.bb_membership": m });
 }
 
 // ---------------------------------------------------------------------------
@@ -99,7 +99,7 @@ export async function setNotify(
 ): Promise<void> {
   const n = (u.me.state.bb_notify as Record<string, boolean>) ?? {};
   n[String(boardNum)] = value;
-  await u.db.modify(u.me.id, "$set", { "data.bb_notify": n });
+  await u.db.modify(u.me.id, "$set", { "state.bb_notify": n });
 }
 
 // ---------------------------------------------------------------------------
@@ -111,11 +111,11 @@ export function getDraft(u: IUrsamuSDK): IDraft | null {
 }
 
 export async function setDraft(u: IUrsamuSDK, draft: IDraft): Promise<void> {
-  await u.db.modify(u.me.id, "$set", { "data.bb_draft": draft });
+  await u.db.modify(u.me.id, "$set", { "state.bb_draft": draft });
 }
 
 export async function clearDraft(u: IUrsamuSDK): Promise<void> {
-  await u.db.modify(u.me.id, "$set", { "data.bb_draft": null });
+  await u.db.modify(u.me.id, "$set", { "state.bb_draft": null });
 }
 
 // ---------------------------------------------------------------------------
@@ -128,11 +128,11 @@ export function getSig(u: IUrsamuSDK): string | null {
 }
 
 export async function setSig(u: IUrsamuSDK, sig: string): Promise<void> {
-  await u.db.modify(u.me.id, "$set", { "data.bb_sig": sig });
+  await u.db.modify(u.me.id, "$set", { "state.bb_sig": sig });
 }
 
 export async function clearSig(u: IUrsamuSDK): Promise<void> {
-  await u.db.modify(u.me.id, "$set", { "data.bb_sig": null });
+  await u.db.modify(u.me.id, "$set", { "state.bb_sig": null });
 }
 
 // ---------------------------------------------------------------------------

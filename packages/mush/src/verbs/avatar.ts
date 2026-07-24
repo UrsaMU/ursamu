@@ -80,14 +80,17 @@ async function fetchAndValidate(url: URL, u: IUrsamuSDK): Promise<Uint8Array | n
     // DNS resolution failure is not fatal
   }
 
-  const targetUrl = resolvedIp ? buildPinnedFetchUrl(url.toString(), resolvedIp) : url.toString();
-
   let res: Response;
   try {
-    res = await fetch(targetUrl, {
+    const fetchUrl = resolvedIp ? buildPinnedFetchUrl(url.toString(), resolvedIp) : url.toString();
+    const headers: Record<string, string> = {};
+    if (resolvedIp) {
+      headers["Host"] = url.hostname;
+    }
+    res = await fetch(fetchUrl, {
       redirect: "error",
+      headers,
       signal: AbortSignal.timeout(10_000),
-      headers: resolvedIp ? { "Host": hostname } : {},
     });
   } catch { u.send("Could not fetch that URL."); return null; }
   if (!res.ok) { u.send(`Request failed (${res.status}). Check the URL and try again.`); return null; }

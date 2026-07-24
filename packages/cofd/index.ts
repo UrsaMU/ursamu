@@ -6,16 +6,28 @@
 import "./commands.ts";
 
 import type { IDBObj, IPlugin, MoveEvent, ObjectMovedEvent } from "@ursamu/ursamu";
-import { registerPluginRoute, gameHooks, dbojs, send, sessions, registerFormatHandler, unregisterFormatHandler, registerHeader, unregisterHeader, registerDivider, unregisterDivider, registerFooter, unregisterFooter } from "@ursamu/ursamu";
-import type { LayoutFn } from "@ursamu/ursamu";
+import {
+  registerPluginRoute,
+  gameHooks,
+  dbojs,
+  send,
+  sessions,
+  registerFormatHandler,
+  unregisterFormatHandler,
+} from "@ursamu/ursamu";
 import { itemData } from "./src/equipment/objects.ts";
-import { cofdConformatHandler, cofdDescformatHandler } from "./src/support/index.ts";
-import { header as cofdHeaderFn, divider as cofdDividerFn, footer as cofdFooterFn } from "./src/support/format.ts";
-import { registerHelpDir } from "@ursamu/help-plugin";
-import { registerJobBuckets } from "@ursamu/jobs-plugin";
+import {
+  cofdConformatHandler,
+  cofdDescformatHandler,
+} from "./src/support/index.ts";
+import { registerHelpDir } from "@ursamu/help";
+import { registerJobBuckets } from "@ursamu/jobs";
 import { routeHandler } from "./routes.ts";
 import { getEncounterForRoom, setMoved } from "./src/combat/encounter.ts";
-import { enforceMoveLock, type MoveLockActor } from "./src/combat/move_lock.ts";
+import {
+  enforceMoveLock,
+  type MoveLockActor,
+} from "./src/combat/move_lock.ts";
 import {
   aggroMobsInRoom,
   makeHookSdk,
@@ -26,6 +38,15 @@ import {
   autoJoinTarget,
   ensureEncounter,
 } from "./src/combat/auto.ts";
+import { initLangHooks, removeLangHooks } from "./src/integrations/lang.ts";
+import {
+  initInventoryHooks,
+  removeInventoryHooks,
+} from "./src/integrations/inventory.ts";
+import {
+  initCofdCombat,
+  removeCofdCombat,
+} from "./src/combat/ports.ts";
 
 // Active-combat move-lock: anyone who has joined an active encounter cannot
 // leave the room until the encounter ends or they leave it explicitly. Admins
@@ -137,11 +158,12 @@ async function onEngineReady(): Promise<void> {
 
 export const plugin: IPlugin = {
   name: "cofd",
-  version: "1.0.0",
+  version: "1.1.0",
   description: "Chronicles of Darkness 2e plugin: sheets, chargen, d10 dice with 10/9/8-again, rote, and Willpower spend.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },
-    { name: "jobs", version: ">=1.0.0" },
+    { name: "jobs", version: ">=0.1.0" },
+    { name: "combat", version: ">=0.8.0" },
   ],
 
   init: () => {
@@ -151,13 +173,23 @@ export const plugin: IPlugin = {
     gameHooks.on("player:move", onPlayerMove);
     gameHooks.on("object:moved", onObjectMoved);
     gameHooks.on("engine:ready", onEngineReady);
-    registerHeader(cofdHeaderFn as LayoutFn);
-    registerDivider(cofdDividerFn as LayoutFn);
-    registerFooter(cofdFooterFn as LayoutFn);
+    initLangHooks();
+    initInventoryHooks();
+    initCofdCombat();
+    // Layout chrome comes from game.layout / engine defaults —
+    // do not register a CoFD-specific header stack.
     // deno-lint-ignore no-explicit-any
-    (registerFormatHandler as any)("CONFORMAT", cofdConformatHandler, { prepend: true });
+    (registerFormatHandler as any)(
+      "CONFORMAT",
+      cofdConformatHandler,
+      { prepend: true },
+    );
     // deno-lint-ignore no-explicit-any
-    (registerFormatHandler as any)("DESCFORMAT", cofdDescformatHandler, { prepend: true });
+    (registerFormatHandler as any)(
+      "DESCFORMAT",
+      cofdDescformatHandler,
+      { prepend: true },
+    );
     return true;
   },
 
@@ -165,10 +197,10 @@ export const plugin: IPlugin = {
     gameHooks.off("player:move", onPlayerMove);
     gameHooks.off("object:moved", onObjectMoved);
     gameHooks.off("engine:ready", onEngineReady);
+    removeLangHooks();
+    removeInventoryHooks();
+    removeCofdCombat();
     stopAllWanderers();
-    unregisterHeader(cofdHeaderFn as LayoutFn);
-    unregisterDivider(cofdDividerFn as LayoutFn);
-    unregisterFooter(cofdFooterFn as LayoutFn);
     unregisterFormatHandler("CONFORMAT", cofdConformatHandler);
     unregisterFormatHandler("DESCFORMAT", cofdDescformatHandler);
   },

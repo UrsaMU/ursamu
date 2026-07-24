@@ -7,7 +7,11 @@ import { gameHooks } from "../events/hooks.ts";
 import { getConfig } from "../config/mod.ts";
 import { log } from "../logging/index.ts";
 
-type RouteHandler = (req: Request, params: Record<string, string>) => Promise<Response>;
+type RouteHandler = (
+  req: Request,
+  params: Record<string, string>,
+  remoteAddr?: string,
+) => Promise<Response>;
 
 interface RouteEntry { method: string; path: string; handler: RouteHandler; }
 interface RateEntry  { count: number; resetAt: number; }
@@ -27,6 +31,15 @@ let _fallback: FallbackHandler | null = null;
 
 export function registerFallback(fn: FallbackHandler): void {
   _fallback = fn;
+}
+
+/** Format Deno.NetAddr / string into a stable rate-limit key. */
+export function formatRemoteAddr(addr: Deno.Addr | undefined): string {
+  if (!addr) return "unknown";
+  if (addr.transport === "tcp" || addr.transport === "udp") {
+    return `${addr.hostname}:${addr.port}`;
+  }
+  return "unknown";
 }
 
 function isRateLimited(socketId: string): boolean {
@@ -160,7 +173,10 @@ function addSecurityHeaders(res: Response): Response {
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
 }
 
-async function requestHandler(req: Request): Promise<Response> {
+async function requestHandler(
+  req: Request,
+  remoteAddr = "unknown",
+): Promise<Response> {
   const url = new URL(req.url);
   const pathname = url.pathname;
   const method = req.method.toUpperCase();
@@ -168,8 +184,12 @@ async function requestHandler(req: Request): Promise<Response> {
   if (method === "GET" && pathname === "/health") return handleHealth();
 
   if (method === "GET" && pathname === "/events") {
-    // Opt-in auth guard: when requireAuthForSSE is enabled, demand a Bearer token.
-    if (getConfig<boolean>("server.requireAuthForSSE", false)) {
+    // Prefer auth in production; opt-out via requireAuthForSSE: false.
+    const requireAuth = getConfig<boolean>(
+      "server.requireAuthForSSE",
+      Deno.env.get("DENO_ENV") === "production",
+    );
+    if (requireAuth) {
       const authHeader = req.headers.get("authorization") ?? "";
       if (!authHeader.startsWith("Bearer ") || authHeader.length < 8) {
         return new Response("Unauthorized", { status: 401 });
@@ -186,7 +206,7 @@ async function requestHandler(req: Request): Promise<Response> {
   const match = matchRoute(method, pathname);
   if (match) {
     try {
-      return await match.entry.handler(req, match.params);
+      return await match.entry.handler(req, match.params, remoteAddr);
     } catch (e: unknown) {
       log("error", "http:route-error", { pathname, error: String(e) });
       return new Response("Internal error", { status: 500 });
@@ -194,13 +214,17 @@ async function requestHandler(req: Request): Promise<Response> {
   }
 
   // Delegate to the application fallback (e.g. the full REST API router).
-  if (_fallback) return _fallback(req);
+  if (_fallback) return _fallback(req, remoteAddr);
 
   return new Response("Not found", { status: 404 });
 }
 
-async function secureRequestHandler(req: Request): Promise<Response> {
-  const res = await requestHandler(req);
+async function secureRequestHandler(
+  req: Request,
+  info?: Deno.ServeHandlerInfo,
+): Promise<Response> {
+  const remoteAddr = formatRemoteAddr(info?.remoteAddr);
+  const res = await requestHandler(req, remoteAddr);
   // SSE streams must not be rewrapped (body is a ReadableStream).
   if (res.headers.get("content-type")?.startsWith("text/event-stream")) return res;
   return addSecurityHeaders(res);
@@ -215,8 +239,10 @@ export const httpTransport: ITransport = {
   name: "http",
 
   async start(): Promise<void> {
-    const port = getConfig<number>("server.port", 4201);
-    _server = Deno.serve({ port }, secureRequestHandler);
+    const port = getConfig<number>("server.apiPort", getConfig<number>("server.port", 4203));
+    _server = Deno.serve({ port }, (req, info) =>
+      secureRequestHandler(req, info)
+    );
     // Register SSE sender so broadcast/send.ts can reach SSE streams
     const { registerSender } = await import("../broadcast/send.ts");
     registerSender(sendSse);

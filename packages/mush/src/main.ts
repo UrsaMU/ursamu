@@ -3,7 +3,18 @@
  * @module ursamu-core
  * @description The core engine initialization and management module.
  */
-import "dotenv/load";
+// Load .env if present; skip .env.example key enforcement so plugin
+// packages with their own examples do not break engine boot / tests.
+import { loadSync as loadEnvSync } from "@std/dotenv";
+try {
+  loadEnvSync({
+    export: true,
+    allowEmptyValues: true,
+    examplePath: null,
+  });
+} catch {
+  /* no .env — fine for tests and fresh installs */
+}
 import { handleRequest } from "./app.ts";
 import "./reboot.ts";
 import { plugins, loadTxtDir, setFlags, loadPlugins, txtFiles } from "./main_utils.ts";
@@ -25,6 +36,7 @@ import {
   send,
   setFormatter,
   sessions,
+  DBO,
 } from "@ursamu/core";
 import type { IPlugin } from "@ursamu/core";
 import * as dpath from "@std/path";
@@ -133,20 +145,24 @@ export const initializeEngine = async (
       updateParserSubs(substitutions);
   }
 
+  // Load layout mushcode templates (header / divider / footer)
+  const { applyLayoutFromConfig } = await import("./format/handlers.ts");
+  applyLayoutFromConfig(
+    getConfig<{
+      header?: string;
+      divider?: string;
+      footer?: string;
+    }>("game.layout"),
+  );
+
   // Determine the project root and current directory context
   const isLocal = import.meta.url.startsWith("file://") &&
     !Deno.env.get("URSAMU_JSR_MODE");
   
   // Load default commands if enabled
   if (loadDefaultCommands) {
-    if (isLocal) {
-      const { loadDefaultCommands: loadCmds } = await import("./commands/addCmd.ts");
-      await loadCmds();
-    } else {
-      // On JSR, we import the build-time generated index (does not exist in source)
-      // @ts-ignore - commands/index.ts is generated at publish time for JSR only
-      await import("./commands/index.ts");
-    }
+    const { loadDefaultCommands: loadCmds } = await import("./commands/addCmd.ts");
+    await loadCmds();
   }
 
   // Load custom commands if path provided
@@ -178,18 +194,28 @@ export const initializeEngine = async (
 
   // Load plugins from the plugins directory
   // If local source, plugins is in ./plugins (relative to src)
-  // If JSR, plugins is expected in ./src/plugins (relative to project root/CWD)
-  const pluginsDir = pluginsDirOverride ?? (isLocal ? dpath.join(__dirname, "./plugins") : dpath.join(Deno.cwd(), "src", "plugins"));
-  
+  // If JSR, plugins is expected in ./src/plugins (relative to CWD)
+  const pluginsDir = pluginsDirOverride === "" ? "" : (pluginsDirOverride ??
+    (isLocal
+      ? dpath.join(__dirname, "./plugins")
+      : dpath.join(Deno.cwd(), "src", "plugins")));
+
   // Only try to load if directory exists
   let loadedPlugins: IPlugin[] = [];
   try {
-     // Check if directory exists before loading
-     if (await Deno.stat(pluginsDir).then(info => info.isDirectory).catch(() => false)) {
-        loadedPlugins = await loadPlugins(pluginsDir);
-     }
+    // Check if directory exists before loading
+    if (
+      pluginsDir &&
+      (await Deno.stat(pluginsDir).then((info) => info.isDirectory).catch(
+        () => false,
+      ))
+    ) {
+      loadedPlugins = await loadPlugins(pluginsDir);
+    }
   } catch (e) {
-    console.warn(`Could not load plugins from ${pluginsDir}:`, e);
+    if (pluginsDir) {
+      console.warn(`Could not load plugins from ${pluginsDir}:`, e);
+    }
   }
 
   // Share loaded plugins with @reload command for hot-reload
@@ -197,6 +223,45 @@ export const initializeEngine = async (
     const { setLoadedPlugins } = await import("./verbs/admin-reload.ts");
     setLoadedPlugins(loadedPlugins);
   } catch { /* reload command may not be loaded yet */ }
+
+  // Load plugins specified in the config
+  const configPlugins = getConfig<unknown>("server.plugins") ||
+    getConfig<unknown>("plugins");
+  if (Array.isArray(configPlugins)) {
+    for (const pluginSpec of configPlugins) {
+      if (typeof pluginSpec === "string") {
+        try {
+          console.log(`[startup] Loading config plugin: ${pluginSpec}`);
+          let importPath = pluginSpec;
+          if (importPath.startsWith(".")) {
+            importPath = dpath.toFileUrl(
+              dpath.resolve(Deno.cwd(), importPath),
+            ).href;
+          } else if (importPath.startsWith("/")) {
+            importPath = dpath.toFileUrl(importPath).href;
+          }
+          const module = await import(importPath);
+          const candidate = module.default ?? module.plugin;
+          if (candidate && typeof candidate === "object") {
+            const plugin = candidate as IPlugin;
+            registerPlugin(plugin);
+            loadedPlugins.push(plugin);
+          } else {
+            console.warn(
+              `[startup] Plugin at ${pluginSpec} ` +
+                `does not export a default/plugin object`,
+            );
+          }
+        } catch (error) {
+          console.error(
+            `[startup] Error loading plugin from config ` +
+              `spec '${pluginSpec}':`,
+            error,
+          );
+        }
+      }
+    }
+  }
 
   // Add any custom plugins and register them so initializePlugins() will call init()
   if (customPlugins && customPlugins.length > 0) {
@@ -209,9 +274,9 @@ export const initializeEngine = async (
 
   // Boot the server via @ursamu/core transports.
   // Align config keys: old engine used server.http for the combined WS+HTTP port.
-  const wsPort   = getConfig<number>("server.http")    || getConfig<number>("server.wsPort")     || 4203;
-  const httpPort = getConfig<number>("server.apiPort") || getConfig<number>("server.port")        || 4201;
-  const tnPort   = getConfig<number>("server.telnet")  || getConfig<number>("server.telnetPort")  || 4202;
+  const wsPort   = getConfig<number>("server.wsPort")   || getConfig<number>("server.ws")      || 4202;
+  const httpPort = getConfig<number>("server.apiPort") || getConfig<number>("server.port")    || 4203;
+  const tnPort   = getConfig<number>("server.telnet")  || getConfig<number>("server.telnetPort") || 4201;
 
   // Patch config so the transport reads the right port values.
   const { setConfig } = await import("@ursamu/core");
@@ -253,7 +318,10 @@ export const initializeEngine = async (
     return parser.substitute(clientType === "web" ? "html" : "telnet", msg);
   });
 
-  // Send welcome screen on new session
+  // Send welcome screen on new session. Reconnects skip the splash only
+  // while JWT reauth is expected; if reauth fails the session is closed
+  // (see session:auth in commands/sdk.ts) so players are never left on a
+  // blank "connected but not logged in" prompt.
   gameHooks.on("session:open", async ({ socketId }) => {
     const session = sessions.get(socketId);
     if (session?.meta?.reconnect) return;
@@ -307,7 +375,7 @@ export const initializeEngine = async (
     .catch((err) => console.error("[startup] runStartupAttrs failed:", err))
     .then(() => gameHooks.emit("engine:ready"));
 
-  Deno.addSignalListener("SIGINT", async () => {
+  const shutdownGracefully = async (): Promise<void> => {
     const players = await dbojs.query({ flags: /connected/i });
 
     for (const player of players) {
@@ -315,8 +383,12 @@ export const initializeEngine = async (
     }
 
     broadcastAll("Server shutting down.");
+    await DBO.close();
     Deno.exit(0);
-  });
+  };
+
+  Deno.addSignalListener("SIGINT", shutdownGracefully);
+  Deno.addSignalListener("SIGTERM", shutdownGracefully);
 
   // Return an object with references to important components
   return {

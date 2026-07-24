@@ -1,6 +1,9 @@
+---
+dark: true
+---
 throw/mechanics  -- Grenade and thrown-weapon resolution.
 
-See also: help throw (overview).
+SEE ALSO: help throw (overview).
 
 ATTACK ROLL: Dexterity + Athletics.
 

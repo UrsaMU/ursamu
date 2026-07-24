@@ -1,3 +1,4 @@
+import { gameHooks } from "@ursamu/core";
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK } from "../commands/types.ts";
 
@@ -29,6 +30,15 @@ export async function execSay(u: IUrsamuSDK): Promise<void> {
   const reality = (actor.state.reality as string | undefined) ?? "material";
   u.here.broadcast(`%ch${name}%cn says, "${message}"`, { reality });
 
+  // Emit hook for scene logging / trigger handling
+  await gameHooks.emit("player:say", {
+    actorId: actor.id,
+    actorName: name,
+    roomId: u.here.id,
+    message,
+    socketId: u.socketId,
+  });
+
   try {
     const roomContents = await u.db.search({ location: u.here.id });
     const ahearMsg = message.length > MAX_LISTEN_MSG_LEN
@@ -59,6 +69,16 @@ export async function execPose(u: IUrsamuSDK): Promise<void> {
   const content = isSemipose ? `${name}${input}` : `${name} ${input}`;
   const reality = (actor.state.reality as string | undefined) ?? "material";
   u.here.broadcast(`%ch${content}%cn`, { reality });
+
+  // Emit hook for scene logging / trigger handling
+  await gameHooks.emit("player:pose", {
+    actorId: actor.id,
+    actorName: name,
+    roomId: u.here.id,
+    content,
+    isSemipose,
+    socketId: u.socketId,
+  });
 }
 
 export async function execThink(u: IUrsamuSDK): Promise<void> {

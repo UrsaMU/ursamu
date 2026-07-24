@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @UNLINK
 
 Removes the link from an exit.

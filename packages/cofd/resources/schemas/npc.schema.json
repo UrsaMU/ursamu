@@ -1,0 +1,519 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ursamu.dev/schemas/cofd/npc.schema.json",
+  "title": "CoFD NPC Template",
+  "description": "Authorable NPC / antagonist template for Chronicles of Darkness 2e (mortal, Lost, Forsaken, Hosts, spirits, etc.). One file per template under resources/npcs/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "slug",
+    "name",
+    "tier",
+    "lineage",
+    "attributes",
+    "skills",
+    "integrity",
+    "size"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Pointer to this schema for editor autocomplete."
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "minLength": 2,
+      "maxLength": 48,
+      "description": "Canonical key used by +npc/build and zone spawn rules."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40,
+      "description": "Default display name when spawning without a rename."
+    },
+    "blurb": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "One-line ST summary for +npc lists."
+    },
+    "book": {
+      "type": "string",
+      "description": "Rulebook cite, e.g. \"CoFD 2e p.NN\" or \"CtL 2e p.NN\"."
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["minor", "major", "storyteller"],
+      "description": "Antagonist power tier (CoFD 2e guidance)."
+    },
+    "lineage": {
+      "type": "string",
+      "enum": [
+        "mortal",
+        "spirit",
+        "ghost",
+        "host",
+        "werewolf",
+        "claimed",
+        "changeling",
+        "hobgoblin",
+        "huntsman",
+        "fetch",
+        "true-fae",
+        "other"
+      ],
+      "description": "Supernatural / mortal family. Selects which optional block applies."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      "uniqueItems": true,
+      "description": "Freeform filters for themes and ST search (urban, pure, autumn)."
+    },
+    "attributes": {
+      "$ref": "#/$defs/attributes"
+    },
+    "skills": {
+      "type": "object",
+      "description": "Skill dots keyed by lowercase skill name. Omitted skills default to 0.",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 5
+      }
+    },
+    "merits": {
+      "type": "object",
+      "description": "Merit dots keyed by lowercase merit key. Minor tier usually empty.",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5
+      }
+    },
+    "specialties": {
+      "type": "object",
+      "description": "Skill specialties: skill name -> list of specialty labels.",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 },
+        "minItems": 1
+      }
+    },
+    "dreadPowers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      },
+      "uniqueItems": true,
+      "description": "Dread Power / Numina keys from resources/dread_powers.json."
+    },
+    "integrity": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10,
+      "description": "Starting Integrity / Harmony / Clarity / equivalent morality."
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 15,
+      "description": "Body Size (humanoid default 5)."
+    },
+    "defaultWeapon": {
+      "type": "string",
+      "description": "Equipment catalog weapon key (e.g. knife, pistol-light)."
+    },
+    "defaultArmor": {
+      "type": "string",
+      "description": "Equipment catalog armor key, if any."
+    },
+    "shortDesc": {
+      "$ref": "#/$defs/flavorText",
+      "description": "Room Contents line. String or array (random pick at spawn)."
+    },
+    "description": {
+      "$ref": "#/$defs/flavorTextLong",
+      "description": "Full look text. String or array (random pick at spawn)."
+    },
+    "ai": {
+      "description": "Combat AI engine key, or key + optional tuning params.",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "description": "AI archetype key (e.g. beshilu-swarmer, azlu-stalker)."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["archetype"],
+          "properties": {
+            "archetype": {
+              "type": "string",
+              "minLength": 1,
+              "description": "AI strategy slug from resources/ai/*.json (e.g. beshilu-swarmer), or manual/off/none."
+            },
+            "startRevealed": {
+              "type": "boolean",
+              "description": "false = begin unrevealed (ambush AI may hold)."
+            },
+            "preferMelee": {
+              "type": "boolean"
+            },
+            "fleeAtHealth": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Flee when structure/health fraction is below this."
+            },
+            "params": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "Engine-specific freeform params."
+            }
+          }
+        }
+      ]
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Spawn defaults for zone / +npc when not overridden.",
+      "properties": {
+        "aggro": {
+          "type": "string",
+          "enum": ["passive", "territorial", "hunter"],
+          "description": "Zone aggro: ignore / defend space / pursue."
+        },
+        "presence": {
+          "type": "string",
+          "enum": ["visible", "hidden", "ambush"],
+          "description": "Room presence. hidden/ambush use dark + reveal."
+        },
+        "lookMode": {
+          "type": "string",
+          "enum": ["mask", "mien", "auto"],
+          "description": "Changeling Mask/Mien display. auto = mask until pierced."
+        },
+        "lootTable": {
+          "type": "string",
+          "description": "Loot table key from resources/loot.json."
+        },
+        "wanderRange": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Zone wander steps from home room (default 1)."
+        }
+      }
+    },
+    "werewolf": {
+      "$ref": "#/$defs/werewolfBlock",
+      "description": "Werewolf: The Forsaken / Pure antagonist fields."
+    },
+    "changeling": {
+      "$ref": "#/$defs/changelingBlock",
+      "description": "Changeling: The Lost / hob / related fields."
+    },
+    "spirit": {
+      "$ref": "#/$defs/spiritBlock",
+      "description": "Ephemeral spirit / ghost rank fields."
+    },
+    "host": {
+      "$ref": "#/$defs/hostBlock",
+      "description": "Host (Azlu, Beshilu, etc.) fields."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "lineage": { "const": "werewolf" } },
+        "required": ["lineage"]
+      },
+      "then": { "required": ["werewolf"] }
+    },
+    {
+      "if": {
+        "properties": {
+          "lineage": {
+            "enum": [
+              "changeling",
+              "hobgoblin",
+              "huntsman",
+              "fetch",
+              "true-fae"
+            ]
+          }
+        },
+        "required": ["lineage"]
+      },
+      "then": { "required": ["changeling"] }
+    },
+    {
+      "if": {
+        "properties": { "lineage": { "enum": ["spirit", "ghost"] } },
+        "required": ["lineage"]
+      },
+      "then": { "required": ["spirit"] }
+    },
+    {
+      "if": {
+        "properties": { "lineage": { "const": "host" } },
+        "required": ["lineage"]
+      },
+      "then": { "required": ["host"] }
+    }
+  ],
+  "$defs": {
+    "dot1to5": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "dot0to5": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "flavorText": {
+      "description": "Single string, or non-empty array — spawn picks one entry at random.",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "flavorTextLong": {
+      "description": "Full prose. String or array — spawn picks one entry at random.",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "flavorTextOrNull": {
+      "description": "String, array of strings (random pick), or null (e.g. no Mask).",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intelligence",
+        "wits",
+        "resolve",
+        "strength",
+        "dexterity",
+        "stamina",
+        "presence",
+        "manipulation",
+        "composure"
+      ],
+      "properties": {
+        "intelligence": { "$ref": "#/$defs/dot1to5" },
+        "wits": { "$ref": "#/$defs/dot1to5" },
+        "resolve": { "$ref": "#/$defs/dot1to5" },
+        "strength": { "$ref": "#/$defs/dot1to5" },
+        "dexterity": { "$ref": "#/$defs/dot1to5" },
+        "stamina": { "$ref": "#/$defs/dot1to5" },
+        "presence": { "$ref": "#/$defs/dot1to5" },
+        "manipulation": { "$ref": "#/$defs/dot1to5" },
+        "composure": { "$ref": "#/$defs/dot1to5" }
+      }
+    },
+    "werewolfBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "auspice": {
+          "type": "string",
+          "description": "Cahalith, Elodoth, Irraka, Ithaeur, Rahu, or empty for Pure."
+        },
+        "tribe": {
+          "type": "string",
+          "description": "Forsaken tribe, Ghost Wolves, or Pure tribe name."
+        },
+        "faction": {
+          "type": "string",
+          "enum": ["forsaken", "pure", "ghost-wolves", "other"],
+          "description": "Broad faction for filters and AI."
+        },
+        "form": {
+          "type": "string",
+          "enum": ["hishu", "dalu", "gauru", "urshul", "urhan"],
+          "description": "Default form when spawned."
+        },
+        "primalUrge": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "essence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Starting Essence pool."
+        },
+        "renown": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cunning": { "$ref": "#/$defs/dot0to5" },
+            "glory": { "$ref": "#/$defs/dot0to5" },
+            "honor": { "$ref": "#/$defs/dot0to5" },
+            "purity": { "$ref": "#/$defs/dot0to5" },
+            "wisdom": { "$ref": "#/$defs/dot0to5" }
+          }
+        },
+        "gifts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "description": "Gift facet names (as on PC sheets)."
+        },
+        "rites": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "blood": { "type": "string" },
+        "bone": { "type": "string" }
+      }
+    },
+    "changelingBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "seeming": {
+          "type": "string",
+          "description": "Beast, Darkling, Elemental, Fairest, Ogre, Wizened, etc."
+        },
+        "kith": { "type": "string" },
+        "court": {
+          "type": "string",
+          "description": "Spring, Summer, Autumn, Winter, or freehold-specific."
+        },
+        "wyrd": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "glamour": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Starting Glamour."
+        },
+        "clarity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "If set, overrides top-level integrity for Clarity."
+        },
+        "contracts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "description": "Contract names (Common / Royal / Goblin)."
+        },
+        "favoredRegalia": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "maxItems": 4
+        },
+        "needle": { "type": "string" },
+        "thread": { "type": "string" },
+        "mask": {
+          "$ref": "#/$defs/flavorTextOrNull",
+          "description": "Mortal guise. null = no Mask. Array = random pick at spawn."
+        },
+        "mien": {
+          "$ref": "#/$defs/flavorTextLong",
+          "description": "True fae face. String or array (random pick at spawn)."
+        }
+      }
+    },
+    "spiritBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rank"],
+      "properties": {
+        "rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "influence": {
+          "type": "string",
+          "description": "Primary Influence domain."
+        },
+        "ban": { "type": "string" },
+        "bane": { "type": "string" },
+        "numina": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "hostBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["azlu", "beshilu", "other"],
+          "description": "Host species."
+        },
+        "infestation": {
+          "type": "string",
+          "description": "Optional flavor: nest, swarm density, etc."
+        }
+      }
+    }
+  }
+}

@@ -12,16 +12,30 @@ export const COLORS = {
 } as const;
 
 /**
- * Strip MUSH/ANSI codes and clamp to Discord's 80-char username limit.
+ * Filter out characters outside the Latin-1 range (charCode > 255)
+ * and replace common smart quotes/dashes with ASCII equivalents.
+ */
+export function toLatin1(str: string): string {
+  return str
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    .split("")
+    .filter((char) => char.charCodeAt(0) <= 255)
+    .join("");
+}
+
+/**
+ * Strip MUSH/ANSI codes, enforce Latin-1, and clamp to Discord's 80-char username limit.
  */
 export function clean(str: string): string {
-  return str
+  const sanitized = str
     .replace(/%c[a-zA-Z0-9]/gi, "")
     .replace(/%[nrtbR]/g, "")
     // deno-lint-ignore no-control-regex
-    .replace(/\x1b\[[0-9;]*m/g, "")
-    .trim()
-    .slice(0, 80) || "Unknown";
+    .replace(/\x1b\[[0-9;]*m/g, "");
+  
+  return toLatin1(sanitized).trim().slice(0, 80) || "Unknown";
 }
 
 /**

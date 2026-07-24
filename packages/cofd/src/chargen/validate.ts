@@ -65,17 +65,29 @@ export function validateCurrentStage(cgState: CofdCgState): { valid: boolean; er
       // Validated above
       break;
 
-    case 3:
+    case 3: {
+      // Optional prose / lists set after chargen via +sheet/set.
+      const optionalFields = new Set(["mask", "mien", "animals"]);
       for (const f of tmpl.customFields) {
+        if (optionalFields.has(f)) continue;
         const val = sheet.customFields[f];
-        if (!val || val.trim().toLowerCase() === "unknown" || val.trim().toLowerCase() === "not set") {
-          return { valid: false, error: `Template field '${f}' is not set. All custom details are required.` };
+        if (
+          !val ||
+          val.trim().toLowerCase() === "unknown" ||
+          val.trim().toLowerCase() === "not set"
+        ) {
+          return {
+            valid: false,
+            error: `Template field '${f}' is not set. ` +
+              `All custom details are required.`,
+          };
         }
         const res = resolveCustomFieldValue(sheet.template, f, val);
         if (res.kind === "invalid") {
           return { valid: false, error: res.error };
         }
       }
+    }
       // Changeling: the chosen second favored Regalia must differ from the
       // seeming's own favored Regalia.
       if (sheet.template === "changeling") {

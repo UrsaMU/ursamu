@@ -1,0 +1,42 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "soldier",
+  "name": "Soldier",
+  "blurb": "Trained combatant. Disciplined, armed, professional.",
+  "book": "CoFD 2e antagonist guidance",
+  "tier": "minor",
+  "lineage": "mortal",
+  "tags": ["mortal", "military", "mook"],
+  "attributes": {
+    "intelligence": 2,
+    "wits": 3,
+    "resolve": 3,
+    "strength": 3,
+    "dexterity": 3,
+    "stamina": 3,
+    "presence": 2,
+    "manipulation": 2,
+    "composure": 3
+  },
+  "skills": {
+    "firearms": 3,
+    "athletics": 2,
+    "brawl": 2,
+    "weaponry": 2
+  },
+  "integrity": 6,
+  "size": 5,
+  "defaultWeapon": "pistol-light",
+  "shortDesc": [
+    "A uniformed figure with a careful, scanning gaze.",
+    "Tactical vest, short hair, weapon ready but not raised."
+  ],
+  "description": [
+    "Boot polish and gun oil. Movements are economical; no wasted words."
+  ],
+  "ai": "beshilu-swarmer",
+  "defaults": {
+    "aggro": "territorial",
+    "presence": "visible"
+  }
+}

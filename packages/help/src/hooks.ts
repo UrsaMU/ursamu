@@ -14,16 +14,6 @@
 import { gameHooks } from "@ursamu/mush";
 import type { HelpEntry } from "./registry.ts";
 
-declare module "@ursamu/mush" {
-  interface GameHookMap {
-    /** Fires before a topic lookup. */
-    "help:lookup": { topic: string };
-    /** Fires when no provider has an entry for the requested topic. */
-    "help:miss": { topic: string };
-    /** Fires when a DB entry is created or updated. */
-    "help:register": { entry: HelpEntry };
-  }
-}
 
 /**
  * Typed emit wrapper for help system events.

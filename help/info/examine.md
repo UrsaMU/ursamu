@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # EXAMINE
 
 Inspects an object's metadata.

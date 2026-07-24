@@ -45,4 +45,9 @@ export function createServer(): ICoreServer {
 export type { ICoreServer, ITransport } from "./types.ts";
 export { websocketTransport, handleWebSocketConnection, clampTermWidth } from "./websocket.ts";
 export { telnetTransport, parseNawsBytes, stripIacBytes, accumulateNaws } from "./telnet.ts";
-export { httpTransport, registerRoute } from "./http.ts";
+export {
+  httpTransport,
+  registerRoute,
+  registerFallback,
+  formatRemoteAddr,
+} from "./http.ts";

@@ -1,0 +1,64 @@
+{
+  "$schema": "../schemas/ai-strategy.schema.json",
+  "slug": "spirit-ridden-feral",
+  "name": "Spirit-Ridden Feral",
+  "blurb": "Possessed rage: frenzy on wounds, always chase highest threat.",
+  "book": "WtF / CoFD spirit-ridden",
+  "tags": ["spirit", "feral", "frenzy"],
+  "rules": [
+    {
+      "id": "frenzied-threat",
+      "priority": 100,
+      "weight": 1,
+      "when": {
+        "frenzied": true,
+        "hasEnemies": true
+      },
+      "then": {
+        "action": "attack",
+        "target": "highest-threat"
+      },
+      "reason": "frenzied -- highest-threat target"
+    },
+    {
+      "id": "wound-frenzy",
+      "priority": 80,
+      "weight": 1,
+      "when": {
+        "damagedThisRound": true,
+        "hasEnemies": true
+      },
+      "then": {
+        "action": "attack",
+        "target": "highest-threat"
+      },
+      "reason": "wounded -- frenzy on attacker"
+    },
+    {
+      "id": "threat-focus",
+      "priority": 60,
+      "weight": 1,
+      "when": {
+        "hasThreat": true,
+        "hasEnemies": true
+      },
+      "then": {
+        "action": "attack",
+        "target": "highest-threat"
+      },
+      "reason": "threat -- highest-threat target"
+    },
+    {
+      "id": "any-target",
+      "priority": 40,
+      "weight": 1,
+      "when": { "hasEnemies": true },
+      "then": {
+        "action": "attack",
+        "target": "first"
+      },
+      "reason": "random target"
+    }
+  ],
+  "fallback": { "action": "wait" }
+}

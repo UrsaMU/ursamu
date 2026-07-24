@@ -9,6 +9,8 @@ import {
 } from "../stats/index.ts";
 import { COFD_SKILLS } from "../dictionary/index.ts";
 import { formatSheet } from "../sheet/index.ts";
+import type { CofdCgState } from "../chargen/state.ts";
+import { syncSightFlags } from "../support/sight.ts";
 
 const SPECIALTY_NAME_MAX = 40;
 const SPECIALTY_DESC_MAX = 80;
@@ -20,6 +22,36 @@ function isStaff(actor: IDBObj): boolean {
   return f.has?.("admin") || f.has?.("builder") || f.has?.("wizard");
 }
 
+/**
+ * Resolve a sheet for display.
+ *   1. Live approved sheet (state.cofd)
+ *   2. Chargen draft (state.cofd_cg.sheet) — self or canEdit only
+ *   3. For self: a blank default mortal so +sheet always works
+ *
+ * Returns null only when viewing another player who has neither a live
+ * sheet nor a draft the viewer is allowed to see.
+ */
+async function resolveViewSheet(
+  u: IUrsamuSDK,
+  target: IDBObj,
+): Promise<{ sheet: CofdSheet; mode: "live" | "draft" | "empty" } | null> {
+  const live = target.state?.cofd as CofdSheet | undefined;
+  if (live) return { sheet: live, mode: "live" };
+
+  const isSelf = target.id === u.me.id;
+  const maySeeDraft = isSelf || (await u.canEdit(u.me, target));
+  const cg = target.state?.cofd_cg as CofdCgState | undefined;
+  if (maySeeDraft && cg?.sheet) {
+    return { sheet: cg.sheet, mode: "draft" };
+  }
+
+  // Self with no session yet: show a blank base sheet so chargen players
+  // can always open +sheet while building.
+  if (isSelf) return { sheet: defaultSheet(), mode: "empty" };
+
+  return null;
+}
+
 export async function sheetExec(u: IUrsamuSDK) {
   const targetName = (u.cmd.args[0] ?? "").trim();
   const target = targetName ? await u.util.target(u.me, targetName) : u.me;
@@ -29,13 +61,37 @@ export async function sheetExec(u: IUrsamuSDK) {
     return;
   }
 
-  const sheet = target.state?.cofd as CofdSheet | undefined;
-  if (!sheet) {
-    u.send("That player does not have an approved character sheet yet.");
+  const resolved = await resolveViewSheet(u, target);
+  if (!resolved) {
+    u.send(
+      "That player does not have an approved character sheet yet.",
+    );
     return;
   }
 
-  const formatted = await formatSheet(u.util.displayName(target, u.me), target.id, sheet, undefined, u);
+  const { sheet, mode } = resolved;
+  if (mode === "draft") {
+    const stage = (target.state?.cofd_cg as CofdCgState | undefined)
+      ?.stage;
+    const stageNote = stage != null ? ` Stage ${stage}` : "";
+    u.send(
+      `%cyDRAFT%cn  Chargen in progress${stageNote}. ` +
+        `Not staff-approved yet. Use %ch+cg%cn to continue.`,
+    );
+  } else if (mode === "empty") {
+    u.send(
+      `%cyDRAFT%cn  No chargen session yet — showing a blank ` +
+        `Mortal sheet. Start with %ch+cg%cn.`,
+    );
+  }
+
+  const formatted = await formatSheet(
+    u.util.displayName(target, u.me),
+    target.id,
+    sheet,
+    undefined,
+    u,
+  );
   u.send(formatted);
 }
 
@@ -202,6 +258,10 @@ export async function sheetSetExec(u: IUrsamuSDK) {
     const updatedSheet = setTrait(sheet, trait, validatedValue);
 
     await u.db.modify(target.id, "$set", { "data.cofd": updatedSheet });
+    if (trait.toLowerCase().trim() === "template") {
+      target.state = { ...target.state, cofd: updatedSheet };
+      await syncSightFlags(u, target, updatedSheet);
+    }
     u.send(`Set trait '${trait}' to '${validatedValue}' on ${target.name}'s sheet.`);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

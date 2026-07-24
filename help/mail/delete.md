@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # MAIL DELETE
 
 Deletes a message from your mailbox.

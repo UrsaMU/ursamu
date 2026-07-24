@@ -150,11 +150,39 @@ export function rollBreakingPoint(
 }
 
 /**
+ * CtL Clarity breakpoint Conditions (simplified catalog).
+ * Keyed by the Clarity rating *after* a loss.
+ * harvest-boon is plot-only and never auto-applied.
+ */
+const CLARITY_BREAKPOINT: Readonly<Record<number, string>> = {
+  7: "haunted",
+  6: "the-boneyard",
+  5: "delusional-ctl",
+  4: "isolated",
+  3: "unstable",
+  2: "waking-nightmare",
+  1: "dream-eaten",
+};
+
+/** Clarity Condition key for a post-loss Clarity rating, or null. */
+export function clarityConditionForRating(
+  clarity: number,
+): string | null {
+  return CLARITY_BREAKPOINT[clarity | 0] ?? null;
+}
+
+function isChangelingTemplate(sheet: CofdSheet): boolean {
+  return (sheet.template ?? "").toLowerCase().trim() ===
+    "changeling";
+}
+
+/**
  * Apply a BreakingPointResult to a sheet. Returns a new sheet with:
  *   - moralityValue decremented (floor 0) on loss outcomes
  *   - Conditions appended via the conditions subsystem (idempotent)
  *   - willpowerCurrent bumped (capped at willpowerMax) on exceptional
  *   - beats counter advanced on dramatic/exceptional
+ *   - changelings: auto-apply Clarity Condition for new rating
  */
 export function applyBreakingPoint(
   sheet: CofdSheet,
@@ -163,7 +191,15 @@ export function applyBreakingPoint(
   let out: CofdSheet = { ...sheet };
 
   if (result.integrityLoss > 0) {
-    out.moralityValue = Math.max(0, (out.moralityValue | 0) - result.integrityLoss);
+    out.moralityValue = Math.max(
+      0,
+      (out.moralityValue | 0) - result.integrityLoss,
+    );
+    // CtL: Clarity loss at a breakpoint applies that Condition.
+    if (isChangelingTemplate(out)) {
+      const cKey = clarityConditionForRating(out.moralityValue);
+      if (cKey) out = addCondition(out, cKey);
+    }
   }
 
   for (const key of result.conditionsGranted) {

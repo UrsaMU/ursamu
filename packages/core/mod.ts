@@ -11,7 +11,12 @@
 export { createServer }                    from "./src/server/index.ts";
 export { websocketTransport, closeSocket, listSocketIds, isRateLimitedForAuth, clampTermWidth, handleWebSocketConnection, sendPayload } from "./src/server/websocket.ts";
 export { telnetTransport, parseNawsBytes, stripIacBytes, accumulateNaws, IAC, WILL, DO, DONT, WONT, SB, SE, NAWS_OPTION } from "./src/server/telnet.ts";
-export { httpTransport, registerRoute, registerFallback } from "./src/server/http.ts";
+export {
+  httpTransport,
+  registerRoute,
+  registerFallback,
+  formatRemoteAddr,
+} from "./src/server/http.ts";
 export type { ICoreServer, ITransport }    from "./src/server/types.ts";
 
 // Input dispatch

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @DIG
 
 Criteria new rooms.

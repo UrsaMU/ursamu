@@ -1,0 +1,50 @@
+{
+  "$schema": "../schemas/npc.schema.json",
+  "slug": "fetch-double",
+  "name": "Fetch Double",
+  "blurb": "Fae-made double wearing a stolen life (CtL p.233).",
+  "book": "CtL 2e p.233",
+  "tier": "major",
+  "lineage": "fetch",
+  "tags": ["lost", "fetch", "urban"],
+  "attributes": {
+    "intelligence": 2,
+    "wits": 3,
+    "resolve": 2,
+    "strength": 2,
+    "dexterity": 2,
+    "stamina": 2,
+    "presence": 2,
+    "manipulation": 3,
+    "composure": 2
+  },
+  "skills": {
+    "empathy": 1,
+    "persuasion": 2,
+    "subterfuge": 3,
+    "socialize": 2,
+    "athletics": 1,
+    "brawl": 1
+  },
+  "integrity": 6,
+  "size": 5,
+  "shortDesc": "Someone who looks almost exactly like someone you know.",
+  "description": "The smile is right. The eyes are almost right. Something human never quite landed.",
+  "ai": {
+    "archetype": "thug",
+    "startRevealed": true
+  },
+  "defaults": {
+    "aggro": "passive",
+    "presence": "visible",
+    "lookMode": "mask"
+  },
+  "changeling": {
+    "seeming": "",
+    "kith": "",
+    "court": "",
+    "wyrd": 2,
+    "glamour": 12,
+    "clarity": 6
+  }
+}

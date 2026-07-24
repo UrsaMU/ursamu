@@ -17,7 +17,16 @@ import { assertStringIncludes } from "@std/assert";
 import type { IDBObj, IUrsamuSDK } from "@ursamu/mush";
 import { execThink, execSay, execPose } from "@ursamu/mush";
 import { execWho, execScore } from "@ursamu/mush";
-import { execChannel, execChancreate, execChandestroy, execChanset } from "@ursamu/channels";
+import {
+  execChannel,
+  execChancreate,
+  execChandestroy,
+  execChanset,
+  execCemit,
+  execCboot,
+  execCwho,
+  execAddcom,
+} from "@ursamu/channels";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -94,6 +103,8 @@ function makeU(opts: {
       displayName: (o: IDBObj) => (o.state?.name as string) || o.name || "Unknown",
       stripSubs:   (s: string) => s,
       center:      (s: string) => s,
+      ljust:       (s: string, w: number) => s.padEnd(w),
+      rjust:       (s: string, w: number) => s.padStart(w),
     },
     evalString:  (s: string) => Promise.resolve(s),
     events: {
@@ -492,3 +503,152 @@ Deno.test("pose — passes state.reality to here.broadcast", OPTS, async () => {
     throw new Error(`Expected reality="penumbra", got: ${JSON.stringify(opts)}`);
   }
 });
+
+// ===========================================================================
+// New Channel & Comsys aligned tests
+// ===========================================================================
+
+Deno.test("@clist — lists public channels", OPTS, async () => {
+  const u = makeU({
+    cmdName: "clist",
+    args: ["", ""],
+    chan: {
+      list: () =>
+        Promise.resolve([
+          { name: "Public", owner: "God", header: "[PUB]" },
+        ]),
+    },
+  });
+  await execChannel(u);
+  const out = u._sent.join(" ");
+  assertStringIncludes(out, "Channel Owner Description");
+  assertStringIncludes(out, "Public");
+  assertStringIncludes(out, "God");
+});
+
+Deno.test("@clist/full — lists channel stats", OPTS, async () => {
+  const u = makeU({
+    cmdName: "clist",
+    args: ["full", ""],
+    chan: {
+      list: () =>
+        Promise.resolve([
+          {
+            name: "Public",
+            owner: "God",
+            header: "[PUB]",
+            hidden: false,
+          },
+        ]),
+    },
+  });
+  await execChannel(u);
+  const out = u._sent.join(" ");
+  assertStringIncludes(out, "--Flags--");
+  assertStringIncludes(out, "Public");
+});
+
+Deno.test("@clist/headers — lists channel headers", OPTS, async () => {
+  const u = makeU({
+    cmdName: "clist",
+    args: ["headers", ""],
+    chan: {
+      list: () =>
+        Promise.resolve([
+          { name: "Public", owner: "God", header: "[PUB]" },
+        ]),
+    },
+  });
+  await execChannel(u);
+  const out = u._sent.join(" ");
+  assertStringIncludes(out, "Channel Owner Header");
+  assertStringIncludes(out, "[PUB]");
+});
+
+Deno.test("@cemit — sends channel broadcast", OPTS, async () => {
+  const { DBO } = await import("@ursamu/mush");
+  const dbChans = new DBO<any>("server.chans");
+  await dbChans.create({
+    id: "public",
+    name: "public",
+    header: "[PUB]",
+    owner: "sc_actor1",
+  });
+
+  const u = makeU({
+    me: { id: "sc_actor1", flags: new Set(["player", "connected"]) },
+    args: ["", "Public=Hello World"],
+  });
+  await execCemit(u);
+  const out = u._sent.join(" ");
+  if (out.includes("Channel not found") || out.includes("Permission denied")) {
+    throw new Error(`cemit failed: ${out}`);
+  }
+  await dbChans.delete({ id: "public" });
+  await DBO.close();
+});
+
+Deno.test("@cboot — boots target from channel", OPTS, async () => {
+  const { DBO } = await import("@ursamu/mush");
+  const dbChans = new DBO<any>("server.chans");
+  await dbChans.create({
+    id: "public",
+    name: "public",
+    header: "[PUB]",
+    owner: "sc_actor1",
+  });
+
+  const u = makeU({
+    me: { id: "sc_actor1", flags: new Set(["player", "connected"]) },
+    args: ["", "Public=TargetPlayer"],
+  });
+  await execCboot(u);
+  await dbChans.delete({ id: "public" });
+  await DBO.close();
+});
+
+Deno.test("@cwho — lists channel members", OPTS, async () => {
+  const { DBO } = await import("@ursamu/mush");
+  const dbChans = new DBO<any>("server.chans");
+  await dbChans.create({
+    id: "public",
+    name: "public",
+    header: "[PUB]",
+    owner: "sc_actor1",
+  });
+
+  const u = makeU({
+    me: { id: "sc_actor1", flags: new Set(["player", "connected"]) },
+    args: ["", "Public"],
+  });
+  await execCwho(u);
+  const out = u._sent.join(" ");
+  assertStringIncludes(out, "Name Status Player");
+  await dbChans.delete({ id: "public" });
+  await DBO.close();
+});
+
+Deno.test("allcom — lists user aliases", OPTS, async () => {
+  const u = makeU({
+    cmdName: "allcom",
+    args: ["", ""],
+    me: {
+      state: {
+        channels: [
+          {
+            id: "public",
+            channel: "Public",
+            alias: "pub",
+            active: true,
+          },
+        ],
+      },
+    },
+  });
+  await execAddcom(u);
+  const out = u._sent.join(" ");
+  assertStringIncludes(out, "Your Channel Aliases");
+  assertStringIncludes(out, "pub");
+  assertStringIncludes(out, "Public");
+});
+

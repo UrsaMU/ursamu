@@ -36,6 +36,8 @@ export interface WeaponTags {
   burning: boolean;
   /** Hint that this item is normally thrown (knives, shurikens, grenades). */
   thrown: boolean;
+  /** Mystical material that deals aggravated damage to Changelings. */
+  coldIron: boolean;
 }
 
 /** Returns a fresh defaults-only WeaponTags object. */
@@ -59,6 +61,7 @@ const EMPTY: WeaponTags = {
   smoke: false,
   burning: false,
   thrown: false,
+  coldIron: false,
 };
 
 /**
@@ -135,6 +138,10 @@ export function parseWeaponTags(special: string | undefined | null): WeaponTags 
         break;
       case "thrown":
         tags.thrown = true;
+        break;
+      case "cold iron":
+      case "coldiron":
+        tags.coldIron = true;
         break;
     }
   }

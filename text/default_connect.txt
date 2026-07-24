@@ -10,7 +10,7 @@ ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
 >> https://github.com/ursamu/ursamu
 
-Use 'creste <character> <password>' to create.
+Use 'create <character> <password>' to create.
 Use 'connect <character> <password>' to connect.
 
 Use QUIT to quit.

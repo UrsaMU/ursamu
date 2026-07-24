@@ -4,7 +4,7 @@
 // All routes are prefixed with /api/gm.
 //
 // Authentication: Bearer token checked against GM_API_SECRET env var.
-// When GM_API_SECRET is not set, all routes are open (dev mode).
+// Fail-closed when secret is unset, unless GM_API_OPEN=1 (explicit dev).
 //
 // Routes:
 //   GET  /api/gm/status            — health + config summary
@@ -28,7 +28,13 @@ import { getPlans } from "../monetization/plans.ts";
 
 // ─── Auth middleware ──────────────────────────────────────────────────────────
 
-const API_SECRET = Deno.env.get("GM_API_SECRET") ?? "";
+function getApiSecret(): string {
+  return Deno.env.get("GM_API_SECRET") ?? "";
+}
+
+function isExplicitOpen(): boolean {
+  return Deno.env.get("GM_API_OPEN") === "1";
+}
 
 function timingSafeEqual(a: string, b: string): boolean {
   let diff = a.length ^ b.length;
@@ -42,10 +48,14 @@ function timingSafeEqual(a: string, b: string): boolean {
 }
 
 function authorized(req: Request): boolean {
-  if (!API_SECRET) return true; // dev mode — no secret set
+  const secret = getApiSecret();
+  if (!secret) {
+    // Fail closed unless operator explicitly opts into open API.
+    return isExplicitOpen();
+  }
   const auth = req.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  return timingSafeEqual(token, API_SECRET);
+  return timingSafeEqual(token, secret);
 }
 
 function forbidden(): Response {

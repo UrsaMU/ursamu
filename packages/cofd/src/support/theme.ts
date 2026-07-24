@@ -1,4 +1,4 @@
-import type { PartialTheme } from "@ursamu/globals";
+import type { PartialTheme } from "./globals_types.ts";
 
 export const cofdGlobalsOverlay: PartialTheme = {
   headerfmt:  "%qsep[repeat(%qsmaj,5)]%cn %qtitle%0%cn %qsep[ansipad(%qtitle%0%cn ,sub(%2,6),%qsmaj)]%cn",

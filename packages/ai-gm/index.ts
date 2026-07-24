@@ -2,9 +2,18 @@
 //
 // Wires up commands, LangGraph graphs, hook context, and callback bridges.
 
-// Load .env file if present — secrets (API keys, webhook secrets) must live
-// in .env, never in the database or in-game commands.
-import "@std/dotenv/load";
+// Load .env if present — secrets must not live in the DB or softcode.
+// examplePath: null skips .env.example key enforcement (CI / tests).
+import { loadSync } from "@std/dotenv";
+try {
+  loadSync({
+    export: true,
+    allowEmptyValues: true,
+    examplePath: null,
+  });
+} catch {
+  /* no .env in this cwd — fine for tests and JSR consumers */
+}
 
 import { dbojs, mu, send } from "ursamu";
 
@@ -76,7 +85,7 @@ import { nanoid } from "./ingestion/util.ts";
 
 const gmPlugin: IPlugin = {
   name: "urban-shadows-gm",
-  version: "1.0.0",
+  version: "0.2.3",
   description:
     "Urban Shadows AI Game Master -- agentic LangGraph + Gemini Flash GM assistant",
 

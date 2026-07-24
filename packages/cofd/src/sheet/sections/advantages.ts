@@ -4,8 +4,14 @@
 // Row 3 (if applicable): <Power Stat> | <Energy pool current/max> | empty
 
 import { divider } from "@ursamu/ursamu";
-import { formatDottedLine, formatDottedStatLine } from "../../support/format.ts";
+import { formatDottedLine } from "../../support/format.ts";
 import { equippedArmorEntry } from "../../equipment/index.ts";
+import {
+  effectiveAttr,
+  effectiveSize,
+  effectiveSkill,
+} from "../../stats/effective.ts";
+import { effectiveSpeed } from "../../form/senses.ts";
 import type { SheetSection, SheetContext } from "./types.ts";
 
 const SEP = "  ";
@@ -18,8 +24,6 @@ export const advantagesSection: SheetSection = {
   key: "advantages",
   async render(ctx: SheetContext): Promise<string[]> {
     const { sheet, template: tmpl, width } = ctx;
-    const atts = sheet.attributes;
-    const sks = sheet.skills;
     const cw = Math.floor((width - 2 - SEP.length * 2) / 3);
     const lines: string[] = [];
 
@@ -27,24 +31,35 @@ export const advantagesSection: SheetSection = {
 
     const wpCur = sheet.advantages.willpowerCurrent;
     const wpMax = sheet.advantages.willpowerMax;
-    const initiative = (atts.dexterity || 1) + (atts.composure || 1);
-    const baseSpeed = (atts.strength || 1) + (atts.dexterity || 1) + 5;
-    const baseDefense = Math.min(atts.dexterity || 1, atts.wits || 1) + (sks.athletics || 0);
+    const dex = effectiveAttr(sheet, "dexterity");
+    const wit = effectiveAttr(sheet, "wits");
+    const com = effectiveAttr(sheet, "composure");
+    const ath = effectiveSkill(sheet, "athletics");
+    const initiative = dex + com;
+    const baseSpeed = effectiveSpeed(sheet);
+    const baseDefense = Math.min(dex, wit) + ath;
     // Armor: Defense floors at 0; Speed has no floor (CoFD core p.97).
     const armorInfo = ctx.u
       ? await equippedArmorEntry(ctx.u, sheet.equipment?.equippedArmor ?? null)
       : null;
     const armor = armorInfo?.entry ?? null;
-    const defense = armor ? Math.max(0, baseDefense + armor.defensePenalty) : baseDefense;
+    const defense = armor
+      ? Math.max(0, baseDefense + armor.defensePenalty)
+      : baseDefense;
     const speed = armor ? baseSpeed + armor.speedPenalty : baseSpeed;
+    const size = effectiveSize(sheet);
 
     const row = (a: string, b: string, c: string) =>
       "  " + a + SEP + b + SEP + c;
 
     lines.push(row(
-      formatDottedStatLine("Willpower",   wpCur, wpMax,                    cw),
-      formatDottedLine(tmpl.moralityName, String(sheet.moralityValue),     cw),
-      formatDottedLine("Size",            String(sheet.advantages.size),   cw),
+      formatDottedLine(
+        "Willpower",
+        `${wpCur}/${wpMax}`,
+        cw,
+      ),
+      formatDottedLine(tmpl.moralityName, String(sheet.moralityValue), cw),
+      formatDottedLine("Size", String(size), cw),
     ));
     lines.push(row(
       formatDottedLine("Initiative", String(initiative), cw),
@@ -55,8 +70,16 @@ export const advantagesSection: SheetSection = {
     if (tmpl.powerStatName !== "None" || tmpl.energyName !== "None") {
       const energyMax = tmpl.energyMaxFormula(sheet.powerStatValue);
       lines.push(row(
-        formatDottedLine(tmpl.powerStatName, String(sheet.powerStatValue), cw),
-        formatDottedStatLine(tmpl.energyName, sheet.energyCurrent, energyMax, cw),
+        formatDottedLine(
+          tmpl.powerStatName,
+          String(sheet.powerStatValue),
+          cw,
+        ),
+        formatDottedLine(
+          tmpl.energyName,
+          `${sheet.energyCurrent}/${energyMax}`,
+          cw,
+        ),
         emptyCell(cw),
       ));
     }

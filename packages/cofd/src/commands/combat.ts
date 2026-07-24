@@ -7,9 +7,9 @@ import {
   advanceTurn,
   applyDefense,
   clearPin,
+  cofdEncounterStore,
   createEncounter,
   delayCurrent,
-  encounterDb,
   ensureParticipant,
   getEncounterForRoom,
   reclaimDelayed,
@@ -24,12 +24,18 @@ import {
   setSurrendered,
   setSurprised,
 } from "../combat/encounter.ts";
+import { endEncounter } from "@ursamu/combat";
 import { computeDefense } from "../combat/pools.ts";
-import { type CofdSheet, defaultSheet } from "../stats/index.ts";
+import {
+  type CofdSheet,
+  defaultSheet,
+  migrateSheet,
+} from "../stats/index.ts";
 import type { Encounter } from "../combat/types.ts";
 import { getCoverDurability } from "../combat/types.ts";
 import { advanceTurnSmart } from "../combat/walker.ts";
 import { lookupTilt } from "../subsystems/tilts.ts";
+import { restoreMaskAtSceneEnd } from "../form/index.ts";
 
 const COVER_LEVELS: Record<string, number> = {
   none: 0,
@@ -298,11 +304,21 @@ async function combatLeave(u: IUrsamuSDK, rest: string) {
   const label = actor.id === u.me.id ? "You have" : `${u.util.displayName(actor, u.me)} has`;
   u.send(`${label} left the encounter.`);
   if (result.wasActive) {
-    // Advance was already handled structurally by removeParticipant's turnIdx fix.
-    const fresh = await getEncounterForRoom(roomId);
-    if (fresh && fresh.participants.length > 0) {
-      const cur = fresh.participants[fresh.turnIdx];
-      u.send(`Turn advances to ${cur.name}.`);
+    // removeParticipant already fixed turnIdx. If an NPC is now up,
+    // auto-resolve them until the next PC (or scene end).
+    let fresh = await getEncounterForRoom(roomId);
+    if (!fresh || fresh.participants.length === 0) return;
+    const cur0 = fresh.participants[fresh.turnIdx];
+    if (cur0?.kind === "npc" && !cur0.isOut) {
+      fresh = (await advanceTurnSmart(fresh.id, u)) ?? fresh;
+    }
+    if (fresh.status !== "active") return;
+    const cur = fresh.participants[fresh.turnIdx];
+    if (cur) {
+      const msg =
+        `%cyTURN>>%cn Round ${fresh.round} -- It is now ${cur.name}'s turn ` +
+        `(Initiative ${cur.initiative}).`;
+      u.broadcast(msg);
     }
   }
 }
@@ -321,13 +337,28 @@ async function combatBegin(u: IUrsamuSDK) {
     u.send("No participants to roll initiative for. Use +combat/join.");
     return;
   }
-  const updated = await rollInitiative(enc.id, u);
+  let updated = await rollInitiative(enc.id, u);
   if (!updated) { u.send("Failed to roll initiative."); return; }
   const lines: string[] = [];
   lines.push(await divider("I N I T I A T I V E"));
   lines.push(renderOrder(updated));
   lines.push(`  Round 1 -- ${updated.participants[0].name} acts first.`);
   u.send(lines.join("\n"));
+
+  // If an NPC won initiative, run their AI immediately until a PC turn.
+  const first = updated.participants[updated.turnIdx];
+  if (first?.kind === "npc" && !first.isOut) {
+    updated = (await advanceTurnSmart(updated.id, u)) ?? updated;
+    if (updated.status === "active") {
+      const cur = updated.participants[updated.turnIdx];
+      if (cur) {
+        const msg =
+          `%cyTURN>>%cn Round ${updated.round} -- It is now ${cur.name}'s turn ` +
+          `(Initiative ${cur.initiative}).`;
+        u.broadcast(msg);
+      }
+    }
+  }
 }
 
 async function combatNext(u: IUrsamuSDK, manual = false) {
@@ -338,7 +369,7 @@ async function combatNext(u: IUrsamuSDK, manual = false) {
     u.send("No active encounter. Use +combat/begin to start the round.");
     return;
   }
-  // Single-step (legacy) advance when /manual is supplied.
+  // Single-step advance when /manual is supplied (no AI).
   if (manual) {
     const updated = await advanceTurn(enc.id);
     if (!updated) { u.send("Failed to advance turn."); return; }
@@ -346,21 +377,37 @@ async function combatNext(u: IUrsamuSDK, manual = false) {
     const msg =
       `%cyTURN>>%cn Round ${updated.round} -- It is now ${cur.name}'s turn ` +
       `(Initiative ${cur.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
     return;
   }
-  // Default: smart walker -- step one slot then pump AI until a PC turn.
-  const stepped = await advanceTurn(enc.id);
-  if (!stepped) { u.send("Failed to advance turn."); return; }
-  const after = await advanceTurnSmart(enc.id, u);
-  if (!after) return;
+  // Default: NPC AI is automatic. If an AI-driven NPC is up, let them act;
+  // otherwise end the current (PC) turn, then pump following NPCs until a
+  // live PC (or a manual-controlled NPC) is up. Manual NPCs halt the
+  // walker without advancing -- step once so /next is never a no-op.
+  const cur0 = enc.participants[enc.turnIdx];
+  const startIdx = enc.turnIdx;
+  let after: Encounter | null;
+  if (cur0?.kind === "npc" && !cur0.isOut) {
+    after = await advanceTurnSmart(enc.id, u);
+    if (
+      after &&
+      after.status === "active" &&
+      after.turnIdx === startIdx
+    ) {
+      after = await advanceTurn(enc.id, u);
+      if (after) after = await advanceTurnSmart(enc.id, u);
+    }
+  } else {
+    const stepped = await advanceTurn(enc.id, u);
+    if (!stepped) { u.send("Failed to advance turn."); return; }
+    after = await advanceTurnSmart(enc.id, u);
+  }
+  if (!after || after.status !== "active") return;
   const cur = after.participants[after.turnIdx];
   if (cur) {
     const msg =
       `%cyTURN>>%cn Round ${after.round} -- It is now ${cur.name}'s turn ` +
       `(Initiative ${cur.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
   }
 }
@@ -383,14 +430,12 @@ async function combatDelay(u: IUrsamuSDK) {
   if (!result) { u.send("Failed to delay."); return; }
   const name = cur.name;
   const head = `%cyDELAY>>%cn ${name} holds their action.`;
-  u.send(head);
   u.broadcast(head);
   const next = result.encounter.participants[result.encounter.turnIdx];
   if (next) {
     const msg =
       `%cyTURN>>%cn Round ${result.encounter.round} -- It is now ${next.name}'s turn ` +
       `(Initiative ${next.initiative}).`;
-    u.send(msg);
     u.broadcast(msg);
   }
 }
@@ -406,7 +451,6 @@ async function combatAct(u: IUrsamuSDK) {
   const updated = await reclaimDelayed(enc.id, u.me.id);
   if (!updated) { u.send("Failed to reclaim your delayed action."); return; }
   const msg = `%cyACT>>%cn ${p.name} takes their held action. It is now their turn.`;
-  u.send(msg);
   u.broadcast(msg);
 }
 
@@ -426,7 +470,6 @@ async function combatMove(u: IUrsamuSDK) {
   const size = sheet?.advantages?.size ?? 5;
   const speed = str + dex + size;
   const msg = `%cyMOVE>>%cn ${cur.name} moves up to Speed ${speed} yards (free, no slot used).`;
-  u.send(msg);
   u.broadcast(msg);
 }
 
@@ -447,7 +490,6 @@ async function combatRun(u: IUrsamuSDK) {
   const speed = str + dex + size;
   const msg =
     `%cyRUN>>%cn ${cur.name} sprints up to ${speed * 2} yards (consumes the instant action; -1 Defense).`;
-  u.send(msg);
   u.broadcast(msg);
 }
 
@@ -461,7 +503,6 @@ async function combatReflexive(u: IUrsamuSDK, rest: string) {
   const what = rest.trim();
   if (!what) { u.send("Usage: +combat/reflexive <description>"); return; }
   const msg = `%cyREFLEX>>%cn ${p.name}: ${what} (reflexive -- no slot used).`;
-  u.send(msg);
   u.broadcast(msg);
 }
 
@@ -470,15 +511,33 @@ async function combatEnd(u: IUrsamuSDK) {
   if (!roomId) { u.send("You are not in a room."); return; }
   const enc = await getEncounterForRoom(roomId);
   if (!enc) { u.send("No encounter here."); return; }
-  const resolved = { ...enc, status: "resolved" as const };
-  // deno-lint-ignore no-explicit-any
-  await encounterDb.update({ id: enc.id } as any, resolved);
+  // Staff end: status only (no loot/beats). Full resolve uses resolveScene.
+  await endEncounter(enc.id, { store: cofdEncounterStore });
 
   // Clear the +aid once-per-scene cap for every participant. Scene boundary
   // is "encounter end" for our purposes; +aid runs in scenes, not outside.
+  // Also free-raise CtL Mask / leave animal form (no Glamour).
   for (const p of enc.participants) {
     // deno-lint-ignore no-explicit-any
-    await u.db.modify(p.actorId, "$unset", { "data.cofd.aidedThisScene": "" } as any);
+    await u.db.modify(p.actorId, "$unset", {
+      "data.cofd.aidedThisScene": "",
+    } as any);
+
+    try {
+      const objs = await u.db.search({ id: p.actorId });
+      const obj = Array.isArray(objs) ? objs[0] : undefined;
+      const raw = obj?.state?.cofd;
+      if (!raw || typeof raw !== "object") continue;
+      const sheet = migrateSheet(raw);
+      const restored = restoreMaskAtSceneEnd(sheet);
+      if (restored) {
+        await u.db.modify(p.actorId, "$set", {
+          "data.cofd": restored,
+        });
+      }
+    } catch {
+      // Non-fatal: participant may already be gone.
+    }
   }
 
   u.send("The encounter has ended. All participants are dismissed.");

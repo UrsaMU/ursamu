@@ -183,7 +183,7 @@
       "label": "Jax damages Marcus"
     },
     {
-      "expect": "bashing"
+      "expect": "damage"
     },
     {
       "cmd": "+combat/next",
@@ -234,7 +234,7 @@
       "label": "Marcus escapes"
     },
     {
-      "expect": "break free"
+      "expect": "break-free"
     },
     {
       "sub": "Close the Encounter"

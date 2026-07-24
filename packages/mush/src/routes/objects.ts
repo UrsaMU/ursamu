@@ -22,7 +22,7 @@
 
 import type { IDBOBJ }    from "../world/types.ts";
 import type { IAttribute } from "../world/types.ts";
-import { dbojs } from "../world/dbobjs.ts";
+import { dbojs, counters } from "../world/dbobjs.ts";
 import { flags } from "../world/flags.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -60,6 +60,44 @@ async function canEditObj(actorId: string, target: IDBOBJ): Promise<boolean> {
 }
 
 const POISON_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+/** Privilege/session flags blocked on REST object create. */
+const PRIVILEGED_FLAGS = new Set([
+  "superuser", "admin", "wizard", "storyteller", "builder",
+  "player", "connected", "guest",
+]);
+
+/**
+ * Sanitize caller-supplied flags for POST /objects.
+ * Strips privilege flags; non-staff cannot create room/exit.
+ */
+export function sanitizeCreateFlags(
+  raw: string,
+  isStaff: boolean,
+): string {
+  const tokens = raw
+    .toLowerCase()
+    .split(/[\s,]+/)
+    .map((t) => t.trim())
+    .filter((t) => t && /^[a-z][a-z0-9_]*$/.test(t));
+
+  const kept: string[] = [];
+  for (const t of tokens) {
+    if (PRIVILEGED_FLAGS.has(t)) continue;
+    if (!isStaff && (t === "room" || t === "exit")) continue;
+    if (!kept.includes(t)) kept.push(t);
+  }
+
+  const hasType = kept.some(
+    (t) => t === "thing" || t === "room" || t === "exit",
+  );
+  if (!hasType) kept.unshift("thing");
+  return kept.join(" ") || "thing";
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 // ── attribute helpers ─────────────────────────────────────────────────────────
 
@@ -138,13 +176,13 @@ async function searchObjects(url: URL, userId: string): Promise<Response> {
 
   const flagFilter = url.searchParams.get("flags") ?? "";
   const location   = url.searchParams.get("location") ?? "";
-  const nameFilter = url.searchParams.get("name") ?? "";
+  const nameFilter = (url.searchParams.get("name") ?? "").slice(0, 64);
   const limit      = Math.min(Math.max(1, parseInt(url.searchParams.get("limit") ?? "50", 10) || 50), 500);
 
   // deno-lint-ignore no-explicit-any
   const query: Record<string, any> = {};
   if (location)   query.location      = location;
-  if (nameFilter) query["data.name"]  = new RegExp(nameFilter, "i");
+  if (nameFilter) query["data.name"]  = new RegExp(escapeRegExp(nameFilter), "i");
 
   const all     = await dbojs.find(query);
   const visible: IDBOBJ[] = [];
@@ -166,7 +204,6 @@ async function createObject(req: Request, userId: string): Promise<Response> {
   try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
 
   const name     = String(body.name     ?? "New Object").slice(0, 100);
-  const objFlags = String(body.flags    ?? "thing");
   const location = String(body.location ?? actor.id);
 
   const isStaff  = flags.check(actor.flags, "builder+");
@@ -175,14 +212,23 @@ async function createObject(req: Request, userId: string): Promise<Response> {
 
   if (!isStaff && quota < 1) return json({ error: "Insufficient quota" }, 403);
 
+  const objFlags = sanitizeCreateFlags(
+    String(body.flags ?? "thing"),
+    isStaff,
+  );
+  const id = String(await counters.atomicIncrement("objid"));
+
   const created = await dbojs.create({
+    id,
     flags:    objFlags,
     location: finalLoc,
     data:     { name, owner: actor.id },
   } as unknown as IDBOBJ);
 
   if (!isStaff) {
-    await dbojs.modify({ id: actor.id }, "$set", { data: { ...actor.data, quota: quota - 1 } });
+    await dbojs.modify({ id: actor.id }, "$set", {
+      data: { ...actor.data, quota: quota - 1 },
+    });
   }
 
   return json(scrub(created), 201);
@@ -242,8 +288,14 @@ async function subRoute(req: Request, userId: string, id: string, sub: string): 
     return json({ attrs: getAttrs(target) });
   }
 
-  if (sub === "eval"  && req.method === "POST") return await evalRoute(req, userId, target);
-  if (sub === "tree"  && req.method === "GET")  return await treeRoute(target);
+  if (sub === "eval" && req.method === "POST") {
+    if (!await canEditObj(userId, target)) return json({ error: "Forbidden" }, 403);
+    return await evalRoute(req, userId, target);
+  }
+  if (sub === "tree" && req.method === "GET") {
+    if (!await canEditObj(userId, target)) return json({ error: "Forbidden" }, 403);
+    return await treeRoute(target);
+  }
   if (sub === "link"  && req.method === "POST") {
     if (!await canEditObj(userId, target)) return json({ error: "Forbidden" }, 403);
     return await linkRoute(req, target);

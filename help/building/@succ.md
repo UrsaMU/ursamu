@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 # @SUCC
 
 Sets the Success message.

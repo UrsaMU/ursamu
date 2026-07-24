@@ -13,6 +13,7 @@
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
 import {
   addParticipant,
+  advanceTurn,
   createEncounter,
   ensureParticipant,
   getEncounterForRoom,
@@ -120,38 +121,74 @@ export async function resolveOrSpawnTarget(
   const roomId = u.here?.id;
   if (!roomId) return null;
 
-  const archetype = getArchetype(name.toLowerCase());
-  if (!archetype) return null;
+  const { getNpcTemplate } = await import("../npc/catalog.ts");
+  const {
+    sheetFromTemplate,
+    objectStateFromSheet,
+  } = await import("../npc/sheet_from_template.ts");
+  const template = getNpcTemplate(name.toLowerCase());
+  if (!template) {
+    // Fall back to legacy getArchetype path for any non-catalog keys.
+    const archetype = getArchetype(name.toLowerCase());
+    if (!archetype) return null;
+    const sheet = sheetFromArchetype(archetype, archetype.tier);
+    const spawnName = archetype.label;
+    const npcObj = await u.db.create({
+      name: spawnName,
+      flags: new Set(["npc", "thing"]),
+      location: roomId,
+      state: { cofd: sheet },
+      contents: [],
+    });
+    u.broadcast(
+      `%cyCOMBAT>>%cn ${spawnName} appears! ` +
+        `(auto-spawned by ${actor.name ?? "staff"})`,
+    );
+    return npcObj;
+  }
 
-  const sheet = sheetFromArchetype(archetype, archetype.tier, {
-    aiArchetype: "beshilu-swarmer",
-  });
-  const spawnName = archetype.label;
+  const sheet = sheetFromTemplate(template, template.tier);
+  const built = objectStateFromSheet(sheet, template.name);
   const npcObj = await u.db.create({
-    name: spawnName,
-    flags: new Set(["npc", "thing"]),
+    name: built.name,
+    flags: new Set(built.flags),
     location: roomId,
-    state: { cofd: sheet },
+    state: built.state,
     contents: [],
   });
   u.broadcast(
-    `%cyCOMBAT>>%cn ${spawnName} appears! (auto-spawned by ${actor.name ?? "staff"})`,
+    `%cyCOMBAT>>%cn ${built.name} appears! ` +
+      `(auto-spawned by ${actor.name ?? "staff"})`,
   );
   return npcObj;
 }
 
 /**
  * Called by +attack / +throw / +grapple after the PC's instant action has
- * been recorded with setActionUsed. Runs the AI walker so NPC turns play
- * out without a manual +combat/next, halting at the next live PC or scene
- * resolution.
+ * been recorded with setActionUsed.
+ *
+ * Steps past the PC who just acted, then runs the AI walker so every
+ * following NPC acts automatically until the next live PC turn (or the
+ * scene resolves). NPC actors skip this to avoid nested walks.
  */
 export async function endTurnAndWalk(
   u: IUrsamuSDK,
   encounterId: string,
 ): Promise<void> {
+  // NPCs are driven by the walker itself; never nest a walk from here.
+  if (u.me.flags.has("npc")) return;
+
   try {
-    await advanceTurnSmart(encounterId, u);
+    // Leave the PC who just spent their instant action.
+    await advanceTurn(encounterId, u);
+    const after = await advanceTurnSmart(encounterId, u);
+    if (!after || after.status !== "active") return;
+    const cur = after.participants[after.turnIdx];
+    if (!cur) return;
+    const msg =
+      `%cyTURN>>%cn Round ${after.round} -- It is now ${cur.name}'s turn ` +
+      `(Initiative ${cur.initiative}).`;
+    u.broadcast(msg);
   } catch {
     // Walker failures should never break the player's command.
   }

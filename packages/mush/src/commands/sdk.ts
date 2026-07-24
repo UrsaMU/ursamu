@@ -12,7 +12,14 @@ import type { IUrsamuSDK } from "./types.ts";
 import { dbojs, hydrate } from "../world/dbobjs.ts";
 import { evaluateLock } from "../world/locks.ts";
 import { flags as flagsUtil } from "../world/flags.ts";
-import { send, sendPayload, sessions, gameHooks, setConfig } from "@ursamu/core";
+import {
+  send,
+  sendPayload,
+  sessions,
+  gameHooks,
+  setConfig,
+  closeSocket,
+} from "@ursamu/core";
 import "../events/types.ts";
 import { resolveFormat, resolveFormatOr, resolveGlobalFormat, resolveGlobalFormatOr, header, divider, footer, center, ljust, rjust } from "../format/handlers.ts";
 
@@ -26,6 +33,27 @@ const toRaw = (o: IDBObj): IDBOBJ => ({
   data: { name: o.name, ...o.state },
   location: o.location || "",
 } as unknown as IDBOBJ);
+
+/**
+ * Map plugin write paths from hydrate-facing `state.*` onto storage `data.*`.
+ * Leaves other keys unchanged. Nested plain objects are not rewritten.
+ */
+export function rewriteStatePaths(data: unknown): unknown {
+  if (!data || typeof data !== "object" || Array.isArray(data)) {
+    return data;
+  }
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(data as Record<string, unknown>)) {
+    if (k === "state") {
+      out["data"] = v;
+    } else if (k.startsWith("state.")) {
+      out["data." + k.slice("state.".length)] = v;
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
 
 const stripSubs = (s: string) =>
   s.replace(/%c[a-zA-Z]/gi, "").replace(/%[nrtbR]/gi, "").replace(/\x1b\[[0-9;]*m/g, "");
@@ -98,31 +126,42 @@ async function targetFn(actor: IDBObj, query: string, _global?: boolean): Promis
   const q = query.trim();
   if (!q) return undefined;
 
-  if (q.toLowerCase() === "me") return actor;
-  if (q.toLowerCase() === "here") {
+  const lowerQ = q.toLowerCase();
+  if (lowerQ === "me" || lowerQ === "self") return actor;
+  if (lowerQ === "here") {
     if (!actor.location) return undefined;
     return resolveRoom(actor.location);
   }
 
-  const idMatch = q.match(/^#(\d+)$/);
+  const idMatch = q.match(/^#?(\d+)$/);
   if (idMatch) {
     const raw = await dbojs.queryOne({ id: idMatch[1] });
-    return raw ? hydrate(raw) : undefined;
+    if (raw) return hydrate(raw);
   }
 
   const rx = new RegExp(`^${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i");
 
-  // Search current room contents
+  // Search current room contents (including self)
   const roomContents = actor.location
     ? await dbojs.query({ location: actor.location })
     : [];
-  const inRoom = roomContents.find((o) => rx.test(o.data?.name as string || o.id));
+  const inRoom = roomContents.find((o) => rx.test((o.data?.name as string) || o.id));
   if (inRoom) return hydrate(inRoom);
+
+  // Check if self name/moniker matches query
+  const selfName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "";
+  if (rx.test(selfName)) return actor;
 
   // Search actor inventory
   const invContents = await dbojs.query({ location: actor.id });
-  const inInv = invContents.find((o) => rx.test(o.data?.name as string || o.id));
+  const inInv = invContents.find((o) => rx.test((o.data?.name as string) || o.id));
   if (inInv) return hydrate(inInv);
+
+  // Global search if _global is true
+  if (_global) {
+    const all = await dbojs.query({ "data.name": rx });
+    if (all.length > 0) return hydrate(all[0]);
+  }
 
   return undefined;
 }
@@ -260,7 +299,13 @@ export async function createNativeSDK(
         });
       },
       modify: async (id: string, op: string, data: unknown) => {
-        await dbojs.modify({ id }, op, data as Partial<IDBOBJ>);
+        // Plugins often write "state.foo"; hydrate maps state ← data.
+        // Rewrite state.* → data.* so persistence matches reads.
+        await dbojs.modify(
+          { id },
+          op,
+          rewriteStatePaths(data) as Partial<IDBOBJ>,
+        );
       },
     },
 
@@ -423,6 +468,8 @@ export async function createNativeSDK(
           flags: fstr.tags,
           "data.lastCommand": Date.now(),
         } as Partial<IDBOBJ>);
+        const { hooks } = await import("../events/hooks.ts");
+        await hooks.aconnect(playerResult, socketId);
       },
       hash: async (password: string) => {
         const bcrypt = await import("bcrypt");
@@ -464,19 +511,168 @@ export async function createNativeSDK(
     },
 
     chan: {
-      join: async (_channel: string, _alias: string) => { await Promise.resolve(); },
-      leave: async (_alias: string) => { await Promise.resolve(); },
+      join: async (channelName: string, alias: string) => {
+        const { chans, dbojs } = await import("../world/dbobjs.ts");
+        const all = await chans.query({});
+        const channel = all.find(
+          (c) =>
+            c.name.toLowerCase() === channelName.toLowerCase() ||
+            c.id.toLowerCase() === channelName.toLowerCase(),
+        );
+        if (!channel) throw new Error(`No channel named "${channelName}".`);
+
+        const playerObj = await dbojs.queryOne({ id: me.id });
+        if (!playerObj) return;
+
+        playerObj.data ||= {};
+        playerObj.data.channels ||= [];
+        const chs = playerObj.data.channels as Array<{
+          id: string;
+          channel: string;
+          alias: string;
+          active: boolean;
+        }>;
+
+        const existingIdx = chs.findIndex(
+          (c) => c.channel.toLowerCase() === channel.name.toLowerCase(),
+        );
+        const entry = {
+          id: channel.id,
+          channel: channel.name,
+          alias,
+          active: true,
+        };
+        if (existingIdx >= 0) {
+          chs[existingIdx] = entry;
+        } else {
+          chs.push(entry);
+        }
+
+        await dbojs.modify(
+          { id: me.id },
+          "$set",
+          { "data.channels": chs } as unknown as Partial<IDBOBJ>,
+        );
+
+        const { sessions, rooms } = await import("@ursamu/core");
+        const playerSessions = sessions.list().filter(
+          (s) => s.sessionId === me.id || (s as any).actorId === me.id,
+        );
+        for (const s of playerSessions) {
+          rooms.join(s.socketId, channel.name);
+        }
+      },
+
+      leave: async (alias: string) => {
+        const { dbojs } = await import("../world/dbobjs.ts");
+        const playerObj = await dbojs.queryOne({ id: me.id });
+        if (!playerObj || !playerObj.data?.channels) return;
+
+        const chs = playerObj.data.channels as Array<{
+          id: string;
+          channel: string;
+          alias: string;
+          active: boolean;
+        }>;
+        const found = chs.find((c) => c.alias === alias);
+        if (!found) return;
+
+        const updated = chs.filter((c) => c.alias !== alias);
+        await dbojs.modify(
+          { id: me.id },
+          "$set",
+          { "data.channels": updated } as unknown as Partial<IDBOBJ>,
+        );
+
+        const { sessions, rooms } = await import("@ursamu/core");
+        const playerSessions = sessions.list().filter(
+          (s) => s.sessionId === me.id || (s as any).actorId === me.id,
+        );
+        for (const s of playerSessions) {
+          rooms.leave(s.socketId, found.channel);
+        }
+      },
+
       list: async () => {
         const { chans } = await import("../world/dbobjs.ts");
         return chans.query({});
       },
-      create: async (name: string, options?: { header?: string; lock?: string; hidden?: boolean }) => {
-        void options;
-        return { name };
+
+      create: async (
+        name: string,
+        options?: { header?: string; lock?: string; hidden?: boolean },
+      ) => {
+        const { chans } = await import("../world/dbobjs.ts");
+        const id = name.toLowerCase();
+        const existing = await chans.queryOne({ id });
+        if (existing) {
+          return { error: `Channel "${name}" already exists.` };
+        }
+        const created = {
+          id,
+          name,
+          header: options?.header || `[${name.toUpperCase()}]`,
+          lock: options?.lock || "",
+          hidden: !!options?.hidden,
+          owner: me.id,
+        };
+        await chans.create(created);
+        return created;
       },
-      destroy: async (_name: string) => null,
-      set: async (_name: string, _options: Record<string, unknown>) => null,
-      history: async (_name: string, _limit?: number) => [],
+
+      destroy: async (name: string) => {
+        const { chans, dbojs } = await import("../world/dbobjs.ts");
+        const id = name.toLowerCase();
+        const existing = await chans.queryOne({ id });
+        if (!existing) {
+          return { error: `Channel "${name}" not found.` };
+        }
+        await chans.delete({ id });
+
+        // Remove from all players
+        const players = await dbojs.query({
+          "data.channels": { $exists: true },
+        });
+        for (const player of players) {
+          const chs = (player.data?.channels || []) as Array<{
+            channel: string;
+          }>;
+          const filtered = chs.filter(
+            (c) => c.channel.toLowerCase() !== name.toLowerCase(),
+          );
+          if (filtered.length !== chs.length) {
+            await dbojs.modify(
+              { id: player.id },
+              "$set",
+              { "data.channels": filtered } as unknown as Partial<IDBOBJ>,
+            );
+          }
+        }
+        return { ok: true };
+      },
+
+      set: async (name: string, options: Record<string, unknown>) => {
+        const { chans } = await import("../world/dbobjs.ts");
+        const id = name.toLowerCase();
+        const existing = await chans.queryOne({ id });
+        if (!existing) {
+          return { error: `Channel "${name}" not found.` };
+        }
+        const update: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(options)) {
+          update[k] = v;
+        }
+        await chans.modify({ id }, "$set", update);
+        return { ok: true };
+      },
+
+      history: async (name: string, limit = 20) => {
+        const { chanHistory } = await import("../world/dbobjs.ts");
+        const all = await chanHistory.query({ chanName: name });
+        return all
+          .sort((a: any, b: any) => b.timestamp - a.timestamp)
+          .slice(0, limit);
+      },
     },
 
     attr: {
@@ -586,20 +782,51 @@ export async function createNativeSDK(
   return u;
 }
 
-// Wire session:auth → decode JWT → set session.actorId so disconnect/cid lookup works.
+// Wire session:auth → decode JWT → set session.actorId so disconnect/cid
+// lookup works. Fail closed: invalid/expired tokens drop the socket with a
+// clear message so clients are not left "connected but not logged in".
 // This runs once at module-load time (side-effect).
 import { verifyToken } from "@ursamu/core";
+import { REAUTH_FAIL_MSG } from "../session/reauth.ts";
+
+async function failReauth(socketId: string, reason: string): Promise<void> {
+  console.error(`[session:auth] Re-authentication failed: ${reason}`);
+  try {
+    sendPayload(socketId, REAUTH_FAIL_MSG, { quit: true, auth: false });
+  } catch {
+    /* socket may already be gone */
+  }
+  closeSocket(socketId);
+}
+
 gameHooks.on("session:auth", async (e) => {
   try {
     const payload = await verifyToken(e.sessionId);
     const userId = payload.id as string;
-    if (!userId) return;
-    const session = sessions.get(e.socketId);
-    if (session) ((session as unknown) as Record<string, unknown>).actorId = userId;
-    const player = await dbojs.queryOne({ id: userId });
-    if (player) {
-      const fstr = flagsUtil.set(player.flags, player.data || {}, "connected");
-      await dbojs.modify({ id: userId }, "$set", { flags: fstr.tags } as Partial<IDBOBJ>);
+    if (!userId) {
+      await failReauth(e.socketId, "token missing id");
+      return;
     }
-  } catch { /* invalid JWT — ignore */ }
+    const session = sessions.get(e.socketId);
+    if (session) {
+      ((session as unknown) as Record<string, unknown>).actorId = userId;
+    }
+    const player = await dbojs.queryOne({ id: userId });
+    if (!player) {
+      await failReauth(e.socketId, `player ${userId} not found`);
+      return;
+    }
+    const fstr = flagsUtil.set(player.flags, player.data || {}, "connected");
+    await dbojs.modify(
+      { id: userId },
+      "$set",
+      { flags: fstr.tags } as Partial<IDBOBJ>,
+    );
+    // Tell the client who they are so telnet can restore cid + look.
+    sendPayload(e.socketId, "", { cid: userId, auth: true });
+    const { hooks } = await import("../events/hooks.ts");
+    await hooks.aconnect(player, e.socketId);
+  } catch (err) {
+    await failReauth(e.socketId, String(err));
+  }
 });

@@ -5,28 +5,31 @@
  *   "ansi"     MUSH color codes for in-game terminal display
  *   "json"     Plain object (for REST responses)
  *   "markdown" Raw markdown string (REST ?format=md)
+ *
+ * Chrome priority:
+ *   1. game.layout.header / .divider / .footer mushcode (engine)
+ *   2. TinyMUX plushelp style — plain 78-col dash rules
+ *      (https://github.com/brazilofmux/tinymux/.../plushelp.txt)
  */
 
 import type { HelpEntry } from "./registry.ts";
+import {
+  header as engHeader,
+  footer as engFooter,
+  hasLayoutTemplate,
+} from "@ursamu/mush";
+
+const WIDTH = 78;
+/** TinyMUX plushelp rule — plain dashes, no color. */
+const TMUX_RULE = "-".repeat(WIDTH);
 
 // ── MUSH color helpers ──────────────────────────────────────────────────────
 
-const R = "%cr=%cn"; // one colored = char
-
-function repeat(str: string, n: number): string {
-  return str.repeat(n);
-}
-
 function stripColors(text: string): string {
-  return text.replace(/%(ch|cn|c[rgbcmyw]|b[rgbcmyw]|[rnthiub])/gi, "");
-}
-
-function center(text: string, width: number, pad: string): string {
-  const len = stripColors(text).length;
-  if (len >= width) return text;
-  const left = Math.floor((width - len) / 2);
-  const right = width - len - left;
-  return pad.repeat(left) + text + pad.repeat(right);
+  return text.replace(
+    /%(ch|cn|c[rgbcmyw]|b[rgbcmyw]|[rnthiub])/gi,
+    "",
+  );
 }
 
 function wordWrap(text: string, width: number): string {
@@ -55,93 +58,112 @@ function wordWrap(text: string, width: number): string {
 /** Convert markdown to MUSH ANSI color codes. */
 function markdownToAnsi(md: string): string {
   let out = md;
-  // Headers
   out = out.replace(/^# (.+)$/gm, "%ch%cc$1%cn");
   out = out.replace(/^## (.+)$/gm, "%ch%cy$1%cn");
   out = out.replace(/^### (.+)$/gm, "%ch%cw$1%cn");
-  // Bold / italic
   out = out.replace(/\*\*([^*]+)\*\*/g, "%ch$1%cn");
   out = out.replace(/\*([^*]+)\*/g, "%ci$1%cn");
-  // Inline code
   out = out.replace(/`([^`]+)`/g, "%ch%cg$1%cn");
-  // Lists
   out = out.replace(/^\s*-\s+(.+)$/gm, "  • $1");
-  // Word wrap
-  out = wordWrap(out, 78);
+  out = wordWrap(out, WIDTH);
   return out;
+}
+
+// ── Layout chrome ───────────────────────────────────────────────────────────
+
+/**
+ * Topic / section header.
+ * Config template when set; else TinyMUX: rule + title line.
+ */
+function helpHeader(title: string): string {
+  if (hasLayoutTemplate("header")) {
+    return engHeader(title, "=", WIDTH);
+  }
+  if (!title) return TMUX_RULE;
+  return `${TMUX_RULE}\n${title}`;
+}
+
+/**
+ * Closing rule.
+ * Config template when set; else TinyMUX plain dash rule.
+ */
+function helpFooter(title = ""): string {
+  if (hasLayoutTemplate("footer")) {
+    return engFooter(title, "=", WIDTH);
+  }
+  return TMUX_RULE;
+}
+
+function topicColumns(labels: string[]): string {
+  const colWidth = Math.floor(WIDTH / 4);
+  let cols = "";
+  for (let i = 0; i < labels.length; i += 4) {
+    const row = labels.slice(i, i + 4);
+    cols += row
+      .map((label) => {
+        const up = label.toUpperCase();
+        return up + " ".repeat(Math.max(1, colWidth - up.length));
+      })
+      .join("") + "\n";
+  }
+  return cols;
 }
 
 // ── Public render functions ─────────────────────────────────────────────────
 
 /** Render a single topic entry for in-game display. */
 export function renderEntry(entry: HelpEntry): string {
-  const header = center(
-    `%cy[%cn %ch${entry.name.toUpperCase()}%cn %cy]%cn`,
-    78,
-    "%cr-%cn",
-  );
-  const footer = repeat(R, 78);
-
+  const title = entry.name.toUpperCase();
   const body = entry.content
     ? markdownToAnsi(entry.content) + "\n"
     : `%cy(No detailed help available for this topic.)%cn\n`;
 
-  return `${header}\n${body}${footer}`;
+  return (
+    `${helpHeader(title)}\n` +
+    `${body}` +
+    `${helpFooter()}`
+  );
 }
 
-/** Render the top-level help index. */
+/**
+ * Top-level help index — header, section columns, footer.
+ * No mid-page "SECTIONS / topics" divider (keeps the list short).
+ */
 export function renderIndex(
   sections: string[],
   totalCount: number,
 ): string {
-  const header = center("%cy[%cn %chHELP SYSTEM%cn %cy]%cn", 78, "%cr=%cn");
-  const subHeader = center(
-    `%cy[%cn %chSECTIONS%cn %cy(%cn${totalCount} topics%cy)%cn %cy]%cn`,
-    78,
-    "%cr-%cn",
+  const top = helpHeader("HELP SYSTEM");
+  const cols = topicColumns(sections);
+  const foot = helpFooter();
+  const count = totalCount > 0 ? ` (${totalCount} topics)` : "";
+
+  return (
+    `${top}\n` +
+    `${cols}` +
+    `${foot}\n` +
+    "Type '%chhelp <topic>%cn' or " +
+    "'%chhelp/section <name>%cn' to browse." +
+    count
   );
-
-  const colWidth = Math.floor(78 / 4);
-  let cols = "";
-  for (let i = 0; i < sections.length; i += 4) {
-    const row = sections.slice(i, i + 4);
-    cols += row
-      .map((s) => {
-        const label = s.toUpperCase();
-        return label + " ".repeat(Math.max(1, colWidth - label.length));
-      })
-      .join("") + "\n";
-  }
-
-  const footer = repeat(R, 78);
-  return `${header}\n${subHeader}\n${cols}${footer}\n` +
-    "Type '%chhelp <topic>%cn' or '%chhelp/section <name>%cn' to browse.";
 }
 
 /** Render a section listing. */
-export function renderSection(section: string, entries: HelpEntry[]): string {
-  const header = center(
-    `%cy[%cn %ch${section.toUpperCase()}%cn %cy]%cn`,
-    78,
-    "%cr-%cn",
-  );
-  const footer = repeat(R, 78);
+export function renderSection(
+  section: string,
+  entries: HelpEntry[],
+): string {
+  const top = helpHeader(section.toUpperCase());
+  const foot = helpFooter();
 
   if (!entries.length) {
-    return `${header}\n%cy(No topics in this section.)%cn\n${footer}`;
+    return (
+      `${top}\n` +
+      `%cy(No topics in this section.)%cn\n` +
+      `${foot}`
+    );
   }
 
-  const colWidth = Math.floor(78 / 4);
-  let cols = "";
-  for (let i = 0; i < entries.length; i += 4) {
-    const row = entries.slice(i, i + 4);
-    cols += row
-      .map((e) => {
-        const label = e.name.toUpperCase();
-        return label + " ".repeat(Math.max(1, colWidth - label.length));
-      })
-      .join("") + "\n";
-  }
-
-  return `${header}\n${cols}${footer}`;
+  const cols = topicColumns(entries.map((e) => e.name));
+  return `${top}\n${cols}${foot}`;
 }

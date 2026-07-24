@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 @LOCK
 
 Locks are a way to restrict access to objects or commands. They are boolean

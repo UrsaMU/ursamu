@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "german",
+  "mode": "phoneme",
+  "description": "West Germanic — harsh fricatives, compound feel, umlauts.",
+  "onsets": [
+    "b", "d", "f", "g", "h", "j", "k", "k", "l", "m", "n", "p",
+    "r", "s", "s", "t", "t", "v", "w", "z", "ch", "sch", "pf",
+    "ts", "qu", "bl", "br", "dr", "fl", "fr", "gl", "gr", "kl",
+    "kn", "kr", "pl", "pr", "schm", "schn", "schr", "schw",
+    "sp", "st", "str", "tr", "zw"
+  ],
+  "nuclei": [
+    "a", "a", "e", "e", "i", "i", "o", "o", "u", "u", "ie", "ei",
+    "ai", "au", "eu", "ae", "oe", "ue", "aa", "oo"
+  ],
+  "codas": [
+    "", "n", "n", "t", "t", "r", "r", "s", "s", "ch", "ck", "m",
+    "l", "f", "g", "b", "d", "st", "nd", "ng", "cht"
+  ],
+  "syllablePatterns": ["CV", "CV", "CVC", "CVC", "CCV", "CCVC", "V"],
+  "wordLenWeights": [0, 2, 3, 4, 3, 2, 1],
+  "capitalize": "first",
+  "accentSubs": {
+    "th": "d",
+    "v": "f",
+    "w": "v",
+    "sh": "sch",
+    "c": "k"
+  }
+}

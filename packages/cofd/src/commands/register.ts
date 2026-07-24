@@ -16,9 +16,13 @@ import { beatExec } from "./beat.ts";
 import { xpExec } from "./xp.ts";
 import { conditionExec } from "./condition.ts";
 import { aspirationExec } from "./aspiration.ts";
-import { approveExec, unapproveExec } from "./approve.ts";
+import {
+  approveExec,
+  denyExec,
+  unapproveExec,
+} from "./approve.ts";
 import { notesExec } from "./notes.ts";
-import { gearExec, gearReload } from "./gear.ts";
+import { gearExec, gearReload, gearEquip, gearUnequip, gearView, tokenExec } from "./gear.ts";
 import { tiltExec } from "./tilt.ts";
 import { proveExec } from "./prove.ts";
 import { combatExec } from "./combat.ts";
@@ -32,6 +36,26 @@ import { integrityExec } from "./integrity.ts";
 import { extendedExec } from "./extended.ts";
 import { turnExec } from "./turn.ts";
 import { zoneExec } from "./zone.ts";
+import { districtExec } from "./district.ts";
+import { shiftExec } from "./shift.ts";
+import { contractExec } from "./contract.ts";
+import { hedgeExec } from "./hedge.ts";
+import { marketExec } from "./market.ts";
+import { debtCommand } from "./debt.ts";
+import { iconCommand } from "./icon.ts";
+import { spinCommand } from "./spin.ts";
+import { infoExec } from "./info.ts";
+import { pledgeCommand } from "./pledge.ts";
+import { kenningExec } from "./kenning.ts";
+import { harvestExec, reapExec } from "./harvest.ts";
+import { bedlamExec } from "./bedlam.ts";
+import { clashExec } from "./clash.ts";
+import { frailtyExec } from "./frailty.ts";
+import { dreamCommand } from "./dream.ts";
+import { fetchCommand } from "./fetch_cmd.ts";
+import { huntCommand } from "./hunt.ts";
+import { mantleCommand } from "./mantle_cmd.ts";
+import { hobCommand } from "./hob.ts";
 
 addCmd({
   name: "+extended",
@@ -74,8 +98,13 @@ addCmd({
   category: "Cofd",
   help: `+sheet [<player>]  -- View a character's Chronicles of Darkness sheet.
 
+During chargen, +sheet shows your draft (or a blank Mortal base if you
+have not started +cg yet). After approval it shows the live sheet.
+Viewing another player's draft requires canEdit (builder+).
+
 Switches:
-  /set <trait>=<value>             Modify a trait. Specialty descriptions use
+  /set <trait>=<value>             Modify a trait (live sheet only). Specialty
+                                   descriptions use
                                    'specialty/<skill>=<name>: <description>'.
                                    Size is staff-only (admin/builder).
   /virtue [<player>] [= <reason>]  Restore full Willpower -- Virtue triggered
@@ -289,7 +318,22 @@ Example usage:
   +cg/submit
   +cg/set Strength=3
   +cg/submit`,
-  exec: cgExec
+  exec: cgExec,
+});
+
+addCmd({
+  name: "+info",
+  pattern: /^\+info(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+info <name>  — Detail lookup for merits, conditions, gifts, tilts,
+                  dread powers, virtues, vices, seemings, kiths, or courts.
+
+Examples:
+  +info giant                 View Giant merit details.
+  +info killer instinct       View Killer Instinct gift facet details.
+  +info Full Moon's Gift      View Full Moon's Gift details.`,
+  exec: infoExec,
 });
 
 addCmd({
@@ -297,15 +341,34 @@ addCmd({
   pattern: /^\+approve(?:\/(\S+))?\s*(.*)/i,
   lock: "connected admin+",
   category: "Cofd",
-  help: `+approve <player>[=<notes>]  -- Approve a pending Chronicles of Darkness chargen submission.
+  help: `+approve <player>[=<notes>]  -- Promote a chargen draft to a live sheet.
 
-Closes the player's CGEN job, copies their submitted sheet onto the live
-character record, and notifies them.
+Staff workflow:
+  1. +sheet <player>     Review the draft.
+  2. +approve <player>  Make it live (clears +cg).
+
+A CGEN job is optional; approve works from the draft alone.
 
 Examples:
   +approve Alice
-  +approve Alice=Welcome to the chronicle. Watch your touchstones.`,
+  +approve Alice=Welcome. Watch your touchstones.`,
   exec: approveExec,
+});
+
+addCmd({
+  name: "+deny",
+  pattern: /^\+deny(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected admin+",
+  category: "Cofd",
+  help: `+deny <player>=<reason>  -- Return a chargen draft for revision.
+
+Keeps the player's +cg draft, clears the submitted marker, notifies
+them with your reason. They fix with +cg and +cg/submit again.
+
+Examples:
+  +deny Alice=Concept needs more detail.
+  +deny Bob=Attribute totals are off by one.`,
+  exec: denyExec,
 });
 
 addCmd({
@@ -313,14 +376,12 @@ addCmd({
   pattern: /^\+unapprove(?:\/(\S+))?\s*(.*)/i,
   lock: "connected admin+",
   category: "Cofd",
-  help: `+unapprove <player>=<reason>  -- Return a pending Chronicles of Darkness submission for revision.
+  help: `+unapprove <player>=<reason>  -- Alias for +deny.
 
-Reopens the player's CGEN job with a staff comment and clears the
-submitted-job marker so the player can edit and resubmit. The CG state
-is preserved; the live sheet is unchanged.
+Prefer +deny. Same behavior: return draft for revision with a reason.
 
 Examples:
-  +unapprove Alice=Concept needs more detail; please flesh out the backstory.`,
+  +unapprove Alice=Concept needs more detail.`,
   exec: unapproveExec,
 });
 
@@ -377,6 +438,8 @@ Switches:
   /split <#>=<n> [for <player>]          Split <n> rounds off an ammo stack.
   /damage <#|name>[=<n>] [for <player>]  Apply <n> damage; soaks by Durability.
   /repair <#|name>[=<n>] [for <player>]  Repair <n> hp; clamps to max.
+  /token/create <name>=<rating>/<catch>/<drawback> [for <player>] (Staff)
+  /token/activate[/catch] <#|name|id>    Activate token (Glamour cost or Catch).
 
 Native get/drop/give handle moving items between players and the room.
 Firearms track their own ammo; firing decrements, /reload consumes a stack.
@@ -398,6 +461,24 @@ More:
   help gear durability           Soak math, broken state, repair.
   help gear reload               Reload mechanics and ammo consumption.`,
   exec: gearExec,
+});
+
+addCmd({
+  name: "+token",
+  pattern: /^\+token(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+token[/<switch>] <ref>  -- Activate or create Hedgespun Tokens.
+
+Switches:
+  /catch           Activate the token by invoking its Catch (no Glamour cost).
+  /create          Staff: Create a new custom token in player's inventory.
+
+Examples:
+  +token Hedge Ring
+  +token/catch 1
+  +token/create Golden Apple=3/Eat a worm/Get paranoid`,
+  exec: tokenExec,
 });
 
 addCmd({
@@ -469,10 +550,13 @@ addCmd({
   pattern: /^\+turn(?:\/(\S+))?\s*(.*)/i,
   lock: "connected",
   category: "Cofd",
-  help: `+turn[/sw] [args]  -- Per-actor turn helpers built on the AI walker.
+  help: `+turn[/sw] [args]  -- Reaction postures and staff auto-pump.
+
+NPC AI is automatic on +combat/next and after PC attacks. These switches
+are helpers, not a second turn system.
 
 Switches:
-  /done                       Alias for +combat/next (smart walker).
+  /done                       Alias for +combat/next (NPC AI on).
   /auto [<max-rounds>]        Builder+: pump until PC turn / all NPCs down /
                               cap. Default 10, hard cap 50.
   /reaction <posture> [target=<name>]
@@ -481,7 +565,7 @@ Switches:
                               first-fire-on-adjacent.
 
 Examples:
-  +turn/done                       End your turn; AI takes over.
+  +turn/done                       End your turn; NPCs act automatically.
   +turn/auto 5                     Builder: pump up to 5 rounds.
   +turn/reaction ambush            Set ambush posture.
   +turn/reaction overwatch target=Marcus
@@ -503,7 +587,8 @@ Switches:
   /leave [for <player>]    Remove yourself (or another player) from the encounter.
   /begin                   Roll initiative for all participants and begin.
                            Auto-opens and adds you if none exists.
-  /next                    Advance to the next participant's turn.
+  /next [/manual]          Advance turn. Default: NPCs act via AI until the
+                           next PC (or a manual NPC). /manual = one slot only.
   /end                     Resolve the encounter and dismiss participants.
   /order                   Show the current initiative table.
   /ambush <target>         Contested Dex+Stealth vs Wits+Composure ambush check.
@@ -514,7 +599,9 @@ Switches:
   /conceal <level> [for <player>]  Declare concealment. Level: light|medium|heavy|none.
   /status [<player>]       Show a participant's cover, conceal, dodge, and Defense.
 
-Cross-player /join, /leave, /cover, /conceal require canEdit (builder+).
+NPC AI runs automatically after PC attacks and on /next. Opt out per NPC
+with +npc/ai <name>=manual (or off/none). Cross-player /join, /leave,
+/cover, /conceal require canEdit (builder+).
 
 Examples:
   +combat                   Show the current encounter status.
@@ -522,7 +609,8 @@ Examples:
   +combat/join              Add yourself to the initiative order.
   +combat/begin             Roll initiative and announce the order.
   +combat/order             Display the initiative table.
-  +combat/next              Advance the turn.
+  +combat/next              End turn; NPCs act automatically.
+  +combat/next/manual       Advance one slot with no AI.
   +combat/ambush Marcus     Try to ambush Marcus.
   +combat/cover partial     Take partial cover (-1 to attackers).
   +combat/conceal heavy     Hide in heavy concealment (-3 to attackers).
@@ -641,9 +729,10 @@ Switches:
   /powers                            List the Dread Powers / Numina catalog.
   /addpower <npc>=<key>              Attach a dread power to an NPC (staff).
   /rmpower <npc>=<key>               Detach a dread power (staff).
-  /ai <name>=<ai-archetype>          Set NPC AI archetype (staff). Valid:
+  /ai <name>=<ai-archetype>          Set NPC AI (staff). Default on:
                                      beshilu-swarmer, azlu-stalker,
-                                     spirit-ridden-feral.
+                                     spirit-ridden-feral. Use manual|off|none
+                                     for ST-controlled (pauses AI on their turn).
   /aggro <name>=<target>             Spike NPC threat toward target (staff).
   /aggro-mode <name>=<mode>          Builder+: override a single mob's aggro (passive|territorial|hunter). Persists on the sheet; zone wander/aggro hooks read it live.
   /destroy <name-or-id>              Remove an NPC (staff only).
@@ -803,3 +892,567 @@ Examples:
   +zone/wander deepwood=on`,
   exec: zoneExec,
 });
+
+addCmd({
+  name: "+kenning",
+  pattern: /^\+kenning(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+kenning [<target>]  -- Fae perception (Wits + Wyrd).
+
+No target: roll Wits+Wyrd and report a result tier for
+nearby supernatural presence. With a target: mortal
+harvest suitability, fae recognition, or glamour
+signature. Requires a changeling sheet.
+
+Examples:
+  +kenning
+  +kenning Alice
+  +kenning the stranger`,
+  exec: kenningExec,
+});
+
+addCmd({
+  name: "+contract",
+  pattern: /^\+contract(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+contract [<name>]  -- List or invoke a Changeling Contract.
+
+Switches:
+  (none) / list          Contracts on your sheet.
+  /info <name>           Catalog detail for a Contract.
+  /loophole <name>       Invoke using the listed loophole (0 Glamour).
+  /learn <name>          Learn contract with XP (checks prerequisites).
+  /grant <player>=<name> Staff: Grant a contract directly.
+  <name>                 Invoke (pay cost; roll pool if any).
+  <name> on <target>     Inflict Conditions/Tilts on a target.
+
+While Mask is down (+shift mien), successful Contract rolls count
+as exceptional (successes floored at Wyrd). Seeming clauses print
+when your seeming matches. Named Conditions/Tilts in effect text
+auto-apply on success (self or on <target>).
+
+Examples:
+  +contract
+  +contract/loophole Hostile Takeover
+  +contract Paralyzing Presence on Bob
+  +contract Tale of the Baba Yaga on Alice`,
+  exec: contractExec,
+});
+
+addCmd({
+  name: "+harvest",
+  pattern: /^\+harvest(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+harvest [target][=pool]  -- Harvest Glamour from emotion (CtL).
+
+Roll Presence+Empathy (or =custom pool). Each success = 1 Glamour.
+Cannot harvest fae. Reaping is predatory:
+
+  +harvest/reap <target>  Fill Glamour; target loses WP=Wyrd,
+                          gains Ravaged; you take a breaking point.
+
+Examples:
+  +harvest
+  +harvest Alice
+  +harvest Bob=Manipulation+Subterfuge
+  +harvest/reap Charlie`,
+  exec: harvestExec,
+});
+
+addCmd({
+  name: "+reap",
+  pattern: /^\+reap(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+reap <target>  -- Rip Glamour from a non-fae target (CtL).
+
+Alias of +harvest/reap. Touch required (RP). Fills your Glamour,
+drains Willpower equal to Wyrd, applies Ravaged, breaking point.
+
+Examples:
+  +reap Alice`,
+  exec: async (u) => {
+    const rest = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
+    await reapExec(u, rest);
+  },
+});
+
+addCmd({
+  name: "+bedlam",
+  pattern: /^\+bedlam(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+bedlam <emotion> [+G]  -- Incite Bedlam (CtL p.110).
+
+Cost 1 Glamour + 1 Willpower. Pool Manipulation+Wyrd
+(+Pandemoniacal, +extra Glamour dice up to 5). Contests each
+PC in the room (Composure+Wyrd). Emotions:
+
+  desire/spring → Wanton   wrath/summer → Competitive
+  fear/autumn   → Frightened   sorrow/winter → Lethargic
+
+Examples:
+  +bedlam fear
+  +bedlam desire 2`,
+  exec: bedlamExec,
+});
+
+addCmd({
+  name: "+clash",
+  pattern: /^\+clash(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+clash <target> [reason]  -- Clash of Wills (CtL p.126).
+
+Both sides roll Power Stat + higher of Resolve/Composure.
+Higher successes win; ties cancel.
+
+Examples:
+  +clash Alice
+  +clash Bob masking contest`,
+  exec: clashExec,
+});
+
+addCmd({
+  name: "+frailty",
+  pattern: /^\+frailty(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+frailty  -- List Wyrd frailties (taboos and banes).
+
+  +sheet/set frailty=taboo: never break bread with liars
+  +sheet/set frailty=bane: cold iron
+  +frailty/iron   Cold iron rules summary
+  +frailty/check <text>   Parse a frailty line
+
+Acting against a frailty source costs 1 WP/action and
+−3 dice (−5 major). Cold iron deals aggravated to Lost.
+
+Examples:
+  +frailty
+  +frailty/iron`,
+  exec: frailtyExec,
+});
+
+addCmd({
+  name: "+dream",
+  pattern: /^\+dream(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+dream[/sw]  -- Oneiromancy: Bastions and weaves (CtL).
+
+  (none)              Dream form / Bastion status.
+  /ivory              Gate of Ivory (own Bastion, Res+Com).
+  /horn               Gate of Horn (from Hedge).
+  /enter <name>       Enter another's Bastion vs Fort.
+  /wake [/forced]     Leave the dreamscape.
+  /weaves             Dreamweave catalog.
+  /weave <effect>     Shape the dream (subtle/paradigm).
+  /role <text>        Take a fitting role.
+  /travel <exit>      Move on Dreaming Roads.
+  /road <name>        Staff: tag Roads node.
+  /link <lab>=<room>  Staff: link Roads exits.
+  /linkboth …         Staff: bidirectional link.
+  /bastion <n>[=f]    Staff: tag room as Bastion.
+
+Examples:
+  +dream/ivory
+  +dream/weave memory
+  +dream/travel moon-arch
+  +dream/enter Alice
+  +dream/wake`,
+  exec: dreamCommand,
+});
+
+addCmd({
+  name: "+fetch",
+  pattern: /^\+fetch(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+fetch[/sw]  -- Fetches and Echoes (CtL p.233).
+
+  (none)              Status (link or fetch sheet).
+  /echoes             Echo catalog.
+  /echo <slug> [note] Activate Echo (fetch sheet).
+  /flaw <text>        Set human flaw.
+  /met                Met original face-to-face.
+  /create <ch>=<Name>[/flaw][/mat] [for <p>]  Staff.
+  /link <ch>=<fetch>  Staff link sheets.
+  /mode <p>=adversary|other-half|hard-lesson
+  /grant-echo <p>=<slug>
+
+Examples:
+  +fetch
+  +fetch/echo summon-shard
+  +fetch/create Bob=Bobby/empty smile for FetchBot`,
+  exec: fetchCommand,
+});
+
+addCmd({
+  name: "+hunt",
+  pattern: /^\+hunt(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+hunt[/sw]  -- Wild Hunt and Huntsman powers (CtL).
+
+  (none)              Hunt status (quarry or Huntsman).
+  /powers             Huntsman Dread Power catalog.
+  /power <slug>       Activate a power.
+  /track <quarry>     Advance hunt (Wits+Survival+Wyrd).
+  /read [<quarry>]    Kindred Spirits readout.
+  /mark <ch>=<hunter> Staff: begin a hunt.
+  /end [<who>]        End the hunt.
+  /create <player>    Staff: make Huntsman sheet.
+  /grant <p>=<slug>   Staff: grant a power.
+
+Mask-down quarry adds their Wyrd to track pools.
+Progress 1–10: scent → trail → closing → cornered.
+
+Examples:
+  +hunt/track Alice
+  +hunt/power kindred-spirits
+  +hunt/mark Bob=TheVerderer`,
+  exec: huntCommand,
+});
+
+addCmd({
+  name: "+mantle",
+  pattern: /^\+mantle(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+mantle  -- Court Mantle bonuses (CtL p.117–118).
+
+  (none)                 Show court Mantle dots and bonuses.
+  /glamour <note>        +1 Glamour court emotion (1/scene).
+  /debt                  Autumn•••• wipe Goblin Debt (1/story).
+  /clarity               Spring••••• convert Clarity Cond.
+
+Dice auto on +roll. High-dot:
+  Summer••• /protect armor  Summer••••• /defend agg
+  Autumn••• Contract −1G vs Fae  Winter••••• no wound pen
+
+Examples:
+  +mantle
+  +mantle/debt
+  +mantle/clarity
+  +attack Bob/defend
+  +roll/protect`,
+  exec: mantleCommand,
+});
+
+addCmd({
+  name: "+hob",
+  pattern: /^\+hob(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+hob[/sw]  -- Hobgoblins (CtL p.252 light).
+
+  (none)              Status (if hobgoblin sheet).
+  /concepts           Concept list.
+  /powers             Dread Power catalog keys.
+  /power <key>        Activate a known power.
+  /create <p>=Name/concept[/wyrd]  Staff.
+  /grant <p>=<key>    Staff grant Dread Power.
+
+Concepts: trickster, merchant, predator, guardian,
+crafter, custom. NPC: hobgoblin-trader (+npc).
+
+Examples:
+  +hob/create Bob=Needlegrin/merchant/3
+  +hob/power innocuous`,
+  exec: hobCommand,
+});
+
+addCmd({
+  name: "+hedge",
+  pattern: /^\+hedge(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+hedge[/sw] [args]  -- CtL Hedge, Hollows, keys, fruit.
+
+Player:
+  (none)                 Realm, Hollow budget, gates, path.
+  /open|/exit [n][=key]  Portal; key phrase free-opens.
+  /claim                 Claim unclaimed Hollow.
+  /hollow [list|slug]    Hollow Merit enhancements.
+  /escape                Escape Route out of Hollow.
+  /access                Easy Access into home Hollow (1G).
+  /route                 Route Zero (1/day path+WP in Hollow).
+  /luxury [item]         Luxury Goods pull (Hollow).
+  /garden                Shadow Garden harvest.
+  /find <gate>           Find Hidden Entry (−2).
+  /travel|/forage|/fruit|/eat
+
+Builder+:
+  /create /link /set /setway /destroy /ways /season
+  /setway n/key=phrase   Shared open key.
+  Room: flavor, maskflavor, hollowrating, hollowowner.
+
+Examples:
+  +hedge/open Gate=three red leaves
+  +hedge/hollow size-2
+  +hedge/access
+  +hedge/route
+  +hedge/luxury rope and lantern
+  +hedge/setway Gate/maskName=Old cellar door`,
+  exec: hedgeExec,
+});
+
+addCmd({
+  name: "+market",
+  pattern: /^\+market(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+market[/sw] [args]  -- Goblin Markets (CtL).
+
+Player (in a market room):
+  (none)              Browse stalls and prices.
+  /catalog [filter]   Full goods catalog.
+  /buy <slug> [debt]  Pay Glamour (or take Debt).
+  /credit <slug>      Buy on credit (Goblin Debt).
+
+Builder+:
+  /create <name>      Open a market in this room.
+  /stock <slug> <n>   Set stock (−1 = unlimited).
+  /open /close        Toggle market open.
+  /destroy [id]       Remove market.
+  /list               All markets.
+
+Debt: +debt, +debt/pay <id>, staff +debt/call.
+
+Examples:
+  +market
+  +market/buy amaranthine
+  +market/credit trifle-token
+  +market/create Night Bazaar`,
+  exec: marketExec,
+});
+
+addCmd({
+  name: "+debt",
+  pattern: /^\+debt(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+debt[/sw] [args]  -- Goblin Debts from market credit.
+
+Switches:
+  (none) / list       Your open and called debts.
+  /pay <id>           Mark a debt paid (service done).
+  /call <p> <id>=msg  Staff: call in a debt.
+  /clear <p> <id>     Staff: force clear.
+
+Examples:
+  +debt
+  +debt/pay debt-1234
+  +debt/call Alice abc12345=Bring three teeth by dawn`,
+  exec: debtCommand,
+});
+
+addCmd({
+  name: "+icon",
+  pattern: /^\+icon(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+icon[/sw] [args]  -- Icons: lost pieces of self (CtL).
+
+Switches:
+  (none) / list       List your Icons.
+  /info <id|name>     Full Icon detail.
+  /spend <id> [=note] Burn an Icon for Glamour surge.
+  /grant <p>=name/... Staff: grant Icon.
+  /recover <p> <id>   Staff: mark recovered.
+  /hold <p> <id>=who  Staff: set holder.
+  /remove <p> <id>    Staff: delete Icon.
+
+Examples:
+  +icon
+  +icon/spend childhood-laugh=face the Huntsman
+  +icon/grant Pix=Mother's Song/memory/The Keeper`,
+  exec: iconCommand,
+});
+
+addCmd({
+  name: "+spin",
+  pattern: /^\+spin(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+spin[/sw] [args]  -- Hedgespinning (reshape the Hedge).
+
+Must be in a Hedge or Hollow room. Costs Glamour;
+rolls Wits + Crafts|Occult + Wyrd vs effect target.
+
+Switches:
+  (none) / list       Effect catalog.
+  /info <effect>      Effect detail.
+  /path|/shelter|...  Spin that effect.
+  path [text]         Same without slash.
+  /veil <mask text>   Set mortal-facing room veil.
+
+Examples:
+  +spin
+  +spin path
+  +spin/veil A quiet suburban park
+  +spin fruit`,
+  exec: spinCommand,
+});
+
+addCmd({
+  name: "+shift",
+  pattern: /^\+shift(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+shift [<form>]  -- Change form or Mask state (template-routed).
+
+Changeling (CtL):
+  +shift                 Status (Mask / animal / Glamour).
+  +shift mien            Drop Mask (1 Glamour). True face shows.
+  +shift mask            Raise Mask (1 Glamour).
+  +shift <animal>        Chrysalis form (2 Glamour; need Contract).
+  +shift human           Leave animal form (free).
+  +shift/list [animals]  Legal forms or full animal catalog.
+  +shift/info <form>     Mechanics summary.
+  +shift <form> for <x>  Staff/canEdit: shift an NPC or other PC.
+
+Prose: +sheet/set mask=... and +sheet/set mien=...
+Animals: +sheet/set animals=wolf,hawk (with Chrysalis on sheet).
+Combat end free-raises Mask / ends animal form.
+
+Werewolf forms are not online yet.
+
+Examples:
+  +shift
+  +shift mien
+  +shift wolf
+  +shift human
+  +shift/list animals
+  +shift mien for Goon`,
+  exec: shiftExec,
+});
+
+addCmd({
+  name: "+district",
+  pattern: /^\+district(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+district[/sw] [args]  -- Show or configure district traits and limits.
+
+Switches:
+  /show [<target>]                       Show district details (default: here).
+  /set [<target>/]<trait>=<val>          Set trait value (e.g. Access, Safety).
+  /type [<target>/]<archetype>          Set archetype type/name.
+  /create-parent <name>[=<archetype>]   Create a district parent object.
+
+Examples:
+  +district
+  +district/set safety=2
+  +district/set #10/sizemax=3
+  +district/create-parent ParentSlums=slums`,
+  exec: districtExec,
+});
+
+addCmd({
+  name: "+equip",
+  pattern: /^\+equip\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+equip <#|name> [for <player>]  -- Equip an item in inventory.
+
+Examples:
+  +equip shotgun           Equip shotgun.
+  +equip 1                 Equip inventory slot 1.`,
+  exec: (u) => {
+    const rest = (u.cmd.args[0] ?? "").trim();
+    return gearEquip(u, rest);
+  },
+});
+
+addCmd({
+  name: "+wield",
+  pattern: /^\+wield\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+wield <#|name> [for <player>]  -- Wield a weapon in inventory.
+
+Examples:
+  +wield shotgun           Wield shotgun.
+  +wield 1                 Wield inventory slot 1.`,
+  exec: (u) => {
+    const rest = (u.cmd.args[0] ?? "").trim();
+    return gearEquip(u, rest);
+  },
+});
+
+addCmd({
+  name: "+wear",
+  pattern: /^\+wear\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+wear <#|name> [for <player>]  -- Wear armor in inventory.
+
+Examples:
+  +wear vest               Wear armor.
+  +wear 2                  Wear inventory slot 2.`,
+  exec: (u) => {
+    const rest = (u.cmd.args[0] ?? "").trim();
+    return gearEquip(u, rest);
+  },
+});
+
+addCmd({
+  name: "+unequip",
+  pattern: /^\+unequip\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+unequip <weapon|armor> [for <player>]  -- Unequip weapon or armor.
+
+Examples:
+  +unequip weapon          Unequip your weapon.
+  +unequip armor           Unequip your armor.`,
+  exec: (u) => {
+    const rest = (u.cmd.args[0] ?? "").trim();
+    return gearUnequip(u, rest);
+  },
+});
+
+addCmd({
+  name: "inventory",
+  pattern: /^(?:inventory|i)$/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `inventory  -- View your equipment and carried items.
+
+Synonyms: i, +gear`,
+  exec: (u) => {
+    return gearView(u, "");
+  },
+});
+
+addCmd({
+  name: "+pledge",
+  pattern: /^\+pledge(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+pledge[/sw] [args]  -- Manage Changeling pledges (seals/oaths/bargains).
+
+Switches:
+  /seal <target>=[dur/]<text>/<sanc>  Seal target's words (1 Glamour).
+  /seal/strengthen <target>=...       Strengthen seal (1 Glamour + 1 WP).
+  /oath <type>/<targ>=<text>/<boon>/<sanc>  Propose oath (1 Glamour).
+  /bargain <targ>=<serv>/<pay>        Bargain with mortal (1 Glamour).
+  /accept <id>                        Accept a pending proposed pledge.
+  /refute <id>                        Refute pending proposed seal (1 Glam).
+  /list [<player>]                    List pledges involving player.
+  /view <id>                          View details of a pledge.
+  /release <id>                       Safely release/end a pledge.
+  /break <id>[=reason]                Break pledge & trigger sanction.
+
+Examples:
+  +pledge/seal Bob=scene/I will not fight/1 bashing
+  +pledge/oath personal/Alice=never lie/swap-pools/notoriety
+  +pledge/accept 4a8b7c9e`,
+  exec: pledgeCommand,
+});
+

@@ -1,3 +1,6 @@
+---
+hidden: true
+---
 SOFTCODE TIME FUNCTIONS
 
 See also: softcode/index, softcode/server, softcode/math
