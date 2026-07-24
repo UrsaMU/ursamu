@@ -48,7 +48,8 @@ let _cache: Map<string, HelpEntry> | null = null;
 export function registerHelpDir(path: string | URL, section: string): void {
   let resolvedPath = "";
   if (path instanceof URL) {
-    resolvedPath = path.protocol === "file:" ? path.pathname : path.href;
+    if (path.protocol !== "file:") return;
+    resolvedPath = path.pathname;
   } else if (typeof path === "string" && path.startsWith("file:")) {
     try {
       resolvedPath = new URL(path).pathname;
@@ -57,6 +58,9 @@ export function registerHelpDir(path: string | URL, section: string): void {
     }
   } else {
     resolvedPath = String(path);
+    if (resolvedPath.startsWith("/@") || resolvedPath.startsWith("http:") || resolvedPath.startsWith("https:")) {
+      return;
+    }
   }
   _registeredDirs.push({ path: resolvedPath, section });
   _cache = null; // invalidate
