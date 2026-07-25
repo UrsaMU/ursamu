@@ -83,7 +83,13 @@ export async function handleSysMessage(
         if (!pull.success) { coreSend(socketTargets, `%chGame>%cn git pull failed: ${err || out}`); return; }
         coreSend(socketTargets, `%chGame>%cn ${(out || err) || "Already up to date."}`);
         broadcastAll("%chGame>%cn Update complete. Rebooting...");
-        setTimeout(() => Deno.exit(75), 500);
+        setTimeout(async () => {
+          try {
+            const { DBO } = await import("@ursamu/core");
+            await DBO.close();
+          } catch { /* best-effort */ }
+          Deno.exit(75);
+        }, 500);
       } catch (e: unknown) {
         coreSend(socketTargets, `%chGame>%cn Update error: ${e instanceof Error ? e.message : String(e)}`);
       }
@@ -94,14 +100,26 @@ export async function handleSysMessage(
   if (type === "sys:reboot") {
     respond(worker, msgId, null);
     broadcastAll("Server rebooting...");
-    setTimeout(() => Deno.exit(75), 500);
+    setTimeout(async () => {
+      try {
+        const { DBO } = await import("@ursamu/core");
+        await DBO.close();
+      } catch { /* best-effort */ }
+      Deno.exit(75);
+    }, 500);
     return;
   }
 
   if (type === "sys:shutdown") {
     respond(worker, msgId, null);
     broadcastAll("Server shutting down...");
-    setTimeout(() => Deno.exit(0), 500);
+    setTimeout(async () => {
+      try {
+        const { DBO } = await import("@ursamu/core");
+        await DBO.close();
+      } catch { /* best-effort */ }
+      Deno.exit(0);
+    }, 500);
     return;
   }
 

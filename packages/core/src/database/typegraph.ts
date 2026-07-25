@@ -3,6 +3,10 @@ import { z } from "zod";
 import { defineNode, defineGraph, createStore } from "@nicia-ai/typegraph";
 import { createLocalPgliteBackend } from "@nicia-ai/typegraph/postgres/pglite";
 import { matchesQuery } from "./operators.ts";
+import {
+  ensureTypegraphDataDir,
+  resolveTypegraphDbPath,
+} from "./path.ts";
 
 interface WithId {
   id: string;
@@ -24,19 +28,6 @@ const DocumentGraph = defineGraph({
   edges: {},
 });
 
-function checkIsTest(): boolean {
-  if (typeof Deno === "undefined") return false;
-  if (typeof Deno.test !== "function") return false;
-  const main = Deno.mainModule;
-  if (!main) return false;
-  return (
-    main.includes(".test.") ||
-    main.includes("_test.") ||
-    main.includes("/tests/") ||
-    main.includes("/test/")
-  );
-}
-
 export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
   // deno-lint-ignore no-explicit-any
   private static backend: any = null;
@@ -55,20 +46,23 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
   // deno-lint-ignore no-explicit-any
   private static async getStore(): Promise<any> {
     if (TypeGraphAdapter.store) return TypeGraphAdapter.store;
-    if (TypeGraphAdapter.initPromise) return await TypeGraphAdapter.initPromise;
+    if (TypeGraphAdapter.initPromise) {
+      return await TypeGraphAdapter.initPromise;
+    }
 
     TypeGraphAdapter.initPromise = (async () => {
-      const isTest = checkIsTest();
-      const dbDir = Deno.env.get("URSAMU_TYPEGRAPH_DB") ??
-        (isTest ? "memory://" : `${Deno.cwd()}/data/typegraph.db`);
-      console.log(`[TypeGraphAdapter] Initializing database at: ${dbDir} (isTest: ${isTest})`);
-      if (dbDir !== "memory://") {
-        await Deno.mkdir(dbDir.replace(/\/[^/]+$/, ""), { recursive: true }).catch((e) => {
-          if (!(e instanceof Deno.errors.AlreadyExists)) throw e;
-        });
-      }
+      // Config first (server.db), then env, then default.
+      // Callers must run initConfig() before the first DB op.
+      const dbDir = resolveTypegraphDbPath();
+      console.log(
+        `[TypeGraphAdapter] Initializing database at: ${dbDir}`,
+      );
+      await ensureTypegraphDataDir(dbDir);
 
-      const { backend, client } = await createLocalPgliteBackend({ dataDir: dbDir, vector: false });
+      const { backend, client } = await createLocalPgliteBackend({
+        dataDir: dbDir,
+        vector: false,
+      });
       const store = await createStore(DocumentGraph, backend);
 
       TypeGraphAdapter.backend = backend;
@@ -218,9 +212,18 @@ export class TypeGraphAdapter<T extends WithId> implements IDatabase<T> {
     // deno-lint-ignore no-explicit-any
     return await store.transaction(async (tx: any) => {
       const doc = await tx.nodes.Document.getById(docId);
-      const currentVal = doc ? (JSON.parse(doc.content) as { id: string; seq: number }) : { id, seq: 0 };
-      const next = (currentVal.seq ?? 0) + 1;
-      const updated = { ...currentVal, seq: next };
+      // Counters historically use `value`; older KV code used `seq`.
+      // Honor either so id allocation never collapses to 1 forever.
+      const currentVal = doc
+        ? (JSON.parse(doc.content) as {
+          id: string;
+          value?: number;
+          seq?: number;
+        })
+        : { id };
+      const prev = Number(currentVal.value ?? currentVal.seq ?? 0) || 0;
+      const next = prev + 1;
+      const updated = { ...currentVal, id, value: next, seq: next };
       await tx.nodes.Document.upsertById(docId, {
         namespace: this.namespace,
         originalId: id,

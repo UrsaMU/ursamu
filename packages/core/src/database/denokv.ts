@@ -29,13 +29,13 @@ export class DenoKvAdapter<T extends WithId> implements IDatabase<T> {
 
   private async getKv(): Promise<Deno.Kv> {
     if (!DenoKvAdapter.kv) {
-      const dbPath = Deno.env.get("URSAMU_DB") ??
-        `${Deno.cwd()}/data/ursamu.db`;
-      await Deno.mkdir(dbPath.replace(/\/[^/]+$/, ""), { recursive: true }).catch(
-        (e: unknown) => {
-          if (!(e instanceof Deno.errors.AlreadyExists)) throw e;
-        },
-      );
+      const { resolveDenokvDbPath } = await import("./path.ts");
+      const dbPath = resolveDenokvDbPath();
+      await Deno.mkdir(dbPath.replace(/\/[^/]+$/, ""), {
+        recursive: true,
+      }).catch((e: unknown) => {
+        if (!(e instanceof Deno.errors.AlreadyExists)) throw e;
+      });
       DenoKvAdapter.kv = await Deno.openKv(dbPath);
     }
     return DenoKvAdapter.kv;
@@ -155,13 +155,27 @@ export class DenoKvAdapter<T extends WithId> implements IDatabase<T> {
     const kv = await this.getKv();
     const k = this.key(id);
     for (let attempt = 0; attempt < 10; attempt++) {
-      const entry = await kv.get<{ id: string; seq: number }>(k);
-      const next = (entry.value?.seq ?? 0) + 1;
-      const updated = { ...(entry.value ?? { id }), seq: next };
+      const entry = await kv.get<{
+        id: string;
+        value?: number;
+        seq?: number;
+      }>(k);
+      const prev = Number(
+        entry.value?.value ?? entry.value?.seq ?? 0,
+      ) || 0;
+      const next = prev + 1;
+      const updated = {
+        ...(entry.value ?? { id }),
+        id,
+        value: next,
+        seq: next,
+      };
       const result = await kv.atomic().check(entry).set(k, updated).commit();
       if (result.ok) return next;
     }
-    throw new Error(`[DenoKvAdapter] atomicIncrement failed after 10 attempts on "${id}"`);
+    throw new Error(
+      `[DenoKvAdapter] atomicIncrement failed after 10 attempts on "${id}"`,
+    );
   }
 
   static async close(): Promise<void> {

@@ -36,6 +36,15 @@ export type { CoreHookMap }                from "./src/events/types.ts";
 // Database
 export { DBO }                             from "./src/database/dbo.ts";
 export type { Query }                      from "./src/database/types.ts";
+export {
+  DEFAULT_TYPEGRAPH_DB,
+  DEFAULT_DENOKV_DB,
+  absolutizeDbPath,
+  pickTypegraphDbRaw,
+  resolveTypegraphDbPath,
+  resolveDenokvDbPath,
+  ensureTypegraphDataDir,
+} from "./src/database/path.ts";
 
 // Session
 export { sessions }                        from "./src/session/store.ts";

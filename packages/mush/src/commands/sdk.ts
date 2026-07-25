@@ -19,6 +19,7 @@ import {
   gameHooks,
   setConfig,
   closeSocket,
+  DBO,
 } from "@ursamu/core";
 import "../events/types.ts";
 import { resolveFormat, resolveFormatOr, resolveGlobalFormat, resolveGlobalFormatOr, header, divider, footer, center, ljust, rjust } from "../format/handlers.ts";
@@ -497,11 +498,22 @@ export async function createNativeSDK(
         await Promise.resolve();
       },
       reboot: async () => {
-        setTimeout(() => Deno.exit(75), 500);
+        // Close PGlite before exit so the next process can open the DB.
+        setTimeout(async () => {
+          try {
+            await DBO.close();
+          } catch { /* best-effort */ }
+          Deno.exit(75);
+        }, 500);
         await Promise.resolve();
       },
       shutdown: async () => {
-        setTimeout(() => Deno.exit(0), 100);
+        setTimeout(async () => {
+          try {
+            await DBO.close();
+          } catch { /* best-effort */ }
+          Deno.exit(0);
+        }, 500);
         await Promise.resolve();
       },
       uptime: () => Promise.resolve(performance.now()),

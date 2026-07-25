@@ -63,7 +63,13 @@ export const startTelnetServer = async (options?: {
   // Ensure config is loaded so custom ports in config.json are respected
   await initConfig();
   const port = options?.port ?? getConfig<number>("server.telnet") ?? 4201;
-  const wsPort = options?.wsPort ?? getConfig<number>("server.http") ?? 4203;
+  // Hub WebSocket port — NOT server.http/apiPort (those are REST).
+  // Prefer wsPort/ws; fall back to http only for single-port layouts.
+  const wsPort = options?.wsPort
+    ?? getConfig<number>("server.wsPort")
+    ?? getConfig<number>("server.ws")
+    ?? getConfig<number>("server.http")
+    ?? 4202;
   const welcomeFile = options?.welcomeFile || getConfig<string>("game.text.connect") || "text/default_connect.txt";
 
   let __dirname;

@@ -23,6 +23,7 @@ import {
   initConfig,
   loadPlugins as initializePlugins,
   getConfig,
+  setConfig,
   registerPlugin,
   createServer,
   websocketTransport,
@@ -42,7 +43,13 @@ import type { IPlugin } from "@ursamu/core";
 import * as dpath from "@std/path";
 import { runStartupAttrs } from "./world/startup.ts";
 import { runSoftcodeSimple } from "./softcode/engine.ts";
-import { dbojs, chans, counters, texts } from "./world/dbobjs.ts";
+import {
+  dbojs,
+  chans,
+  counters,
+  texts,
+  createObj,
+} from "./world/dbobjs.ts";
 import parser from "./render/parser.ts";
 
 let __dirname;
@@ -424,21 +431,88 @@ export const mu = initializeEngine;
  * Initialize default rooms if they don't exist
  */
 async function initializeDefaultRooms() {
-  const rooms = await dbojs.query({ flags: /room/i });
-
+  // Counter must start at 0 so the first atomicIncrement yields "1".
   if (!(await counters.query({ id: "objid" })).length) {
-    await counters.create({ id: "objid", value: 1 });
+    await counters.create({ id: "objid", value: 0, seq: 0 });
   }
 
+  let rooms = await dbojs.query({ flags: /room/i });
+
   if (!rooms.length) {
-    await dbojs.create({
-      id: "1",
-      flags: "room safe void",
-      data: {
-        name: "The Void",
-        description: "A featureless void, stretching endlessly in all directions."
+    // Prefer id "1" when free — matches game.playerStart default.
+    const idOne = await dbojs.queryOne({ id: "1" });
+    if (!idOne) {
+      await dbojs.create({
+        id: "1",
+        flags: "room safe",
+        data: {
+          name: "OOC Lounge",
+          description:
+            "A comfortable out-of-character lounge. Soft chairs, " +
+            "quiet conversation, and a place to catch your breath " +
+            "between scenes.",
+        },
+      });
+      // Ensure later createObj calls allocate ids > 1.
+      const ctr = await counters.queryOne({ id: "objid" });
+      const n = Math.max(1, Number(ctr?.value ?? ctr?.seq ?? 0) || 0);
+      if (ctr) {
+        await counters.modify({ id: "objid" }, "$set", {
+          value: n,
+          seq: n,
+        });
       }
+    } else {
+      // #1 is occupied (often a mis-seeded player). Allocate a new room.
+      const made = await createObj("room safe", {
+        name: "OOC Lounge",
+        description:
+          "A comfortable out-of-character lounge. Soft chairs, " +
+          "quiet conversation, and a place to catch your breath " +
+          "between scenes.",
+      });
+      const roomId = made[0]?.id;
+      if (roomId && getConfig<string>("game.playerStart", "1") === "1") {
+        setConfig("game.playerStart", roomId);
+        console.log(
+          `[startup] playerStart retargeted to OOC Lounge (#${roomId}).`,
+        );
+      }
+    }
+    rooms = await dbojs.query({ flags: /room/i });
+  }
+
+  // Players whose location is missing or not a room end up "looking at
+  // themselves". Park them in playerStart / first room.
+  await repairPlayerLocations(rooms);
+}
+
+async function repairPlayerLocations(
+  rooms: Awaited<ReturnType<typeof dbojs.query>>,
+): Promise<void> {
+  if (!rooms.length) return;
+
+  const startId =
+    getConfig<string>("game.playerStart") || rooms[0].id;
+  const startRoom =
+    rooms.find((r) => r.id === startId) ?? rooms[0];
+  const roomIds = new Set(rooms.map((r) => r.id));
+
+  const players = await dbojs.query({ flags: /player/i });
+  let moved = 0;
+  for (const p of players) {
+    const loc = p.location;
+    if (loc && roomIds.has(loc) && loc !== p.id) continue;
+    await dbojs.modify({ id: p.id }, "$set", {
+      location: startRoom.id,
     });
+    moved++;
+  }
+  if (moved > 0) {
+    console.log(
+      `[startup] Moved ${moved} player(s) into ` +
+        `${startRoom.data?.name ?? "start room"} (#${startRoom.id}).`,
+    );
   }
 }
 
@@ -471,24 +545,24 @@ async function initializeDefaultChannels() {
 // Initialize the UrsaMU engine with custom configuration
 const config = {
   server: {
+    standaloneTelnet: true,
     telnet: 4201,
+    wsPort: 4202,
     ws: 4202,
     http: 4203,
-    db: "data/ursamu.db",
-    counters: "counters",
-    chans: "chans",
-    mail: "mail",
-    bboard: "bboard"
+    port: 4203,
+    apiPort: 4203,
+    db: "data/typegraph.db",
   },
   game: {
     name: "UrsaMU",
     description: "A custom UrsaMU game",
     version: "0.0.1",
     text: {
-      connect: "text/default_connect.txt"
+      connect: "text/default_connect.txt",
     },
-    playerStart: "1"
-  }
+    playerStart: "1",
+  },
 };
 
 // Start the game engine
