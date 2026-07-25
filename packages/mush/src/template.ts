@@ -10,14 +10,14 @@ import { mu } from "../mod.ts";
 
 const config: Record<string, unknown> = {
   server: {
+    standaloneTelnet: true,
     telnet: 4201,
+    wsPort: 4202,
     ws: 4202,
     http: 4203,
-    db: "data/ursamu.db",
-    counters: "data/counters.db",
-    chans: "data/chans.db",
-    mail: "data/mail.db",
-    bboard: "data/bboard.db",
+    port: 4203,
+    apiPort: 4203,
+    db: "data/typegraph.db",
   },
   game: {
     name: "UrsaMU",

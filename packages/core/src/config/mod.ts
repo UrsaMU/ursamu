@@ -2,7 +2,8 @@ const _defaults: Record<string, unknown> = {
   server: {
     port:           4201,
     telnetPort:     4202,
-    db:             "data/db",
+    // Primary TypeGraph/PGlite data directory (see resolveTypegraphDbPath).
+    db:             "data/typegraph.db",
     jwtSecret:      "",
     maxConnections: 1000,
     rateLimit:      10,

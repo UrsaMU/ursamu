@@ -53,7 +53,8 @@ await server.listen();
 | `addMiddleware` | Add input middleware (runs before handlers) |
 | `runPipeline` | Manually fire the dispatch pipeline |
 | `gameHooks` | Typed EventEmitter for server lifecycle events |
-| `DBO` | Generic typed KV collection — `new DBO<T>("namespace")` |
+| `DBO` | Generic typed collection (TypeGraph/PGlite by default) — `new DBO<T>("namespace")` |
+| `resolveTypegraphDbPath` | Resolve primary DB dir: `server.db` → env → `data/typegraph.db` |
 | `sessions` | Active session store |
 | `createToken` / `verifyToken` | JWT helpers |
 | `send` / `broadcastAll` / `notify` | Output helpers |
