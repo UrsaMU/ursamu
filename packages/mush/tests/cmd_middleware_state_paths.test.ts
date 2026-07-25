@@ -50,7 +50,7 @@ Deno.test("cmd middleware onion order", OPTS, async () => {
       // deno-lint-ignore no-explicit-any
       u: {} as any,
     },
-    async () => {
+    () => {
       order.push(99);
     },
   );

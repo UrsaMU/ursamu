@@ -433,7 +433,7 @@ export const mu = initializeEngine;
 async function initializeDefaultRooms() {
   // Counter must start at 0 so the first atomicIncrement yields "1".
   if (!(await counters.query({ id: "objid" })).length) {
-    await counters.create({ id: "objid", value: 0, seq: 0 });
+    await counters.create({ id: "objid", value: 0 });
   }
 
   let rooms = await dbojs.query({ flags: /room/i });
@@ -455,11 +455,10 @@ async function initializeDefaultRooms() {
       });
       // Ensure later createObj calls allocate ids > 1.
       const ctr = await counters.queryOne({ id: "objid" });
-      const n = Math.max(1, Number(ctr?.value ?? ctr?.seq ?? 0) || 0);
+      const n = Math.max(1, Number(ctr?.value ?? 0) || 0);
       if (ctr) {
         await counters.modify({ id: "objid" }, "$set", {
           value: n,
-          seq: n,
         });
       }
     } else {
