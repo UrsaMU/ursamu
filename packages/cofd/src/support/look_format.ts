@@ -2,7 +2,7 @@
 // Fae sight uses maskName via resolveItemLookName.
 
 import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
-import { divider, getConfig } from "@ursamu/mush";
+import { divider, getConfig, dbrefWithFlags } from "@ursamu/mush";
 import { formatContentItems } from "./look_format_items.ts";
 
 export { cofdDescformatHandler } from "./look_desc.ts";
@@ -16,6 +16,29 @@ const ROLE_TAGS = [
   { flag: "admin", display: "(Admin)" },
   { flag: "staff", display: "(Staff)" },
 ];
+
+/** Staff/builders see (#idFLAGS) on look names. */
+function showDbref(looker: IDBObj, canEdit: boolean): boolean {
+  if (canEdit) return true;
+  return (
+    looker.flags.has("wizard") ||
+    looker.flags.has("admin") ||
+    looker.flags.has("superuser") ||
+    looker.flags.has("staff") ||
+    looker.flags.has("storyteller") ||
+    looker.flags.has("builder")
+  );
+}
+
+function nameWithDbref(
+  display: string,
+  obj: IDBObj,
+  looker: IDBObj,
+  canEdit: boolean,
+): string {
+  if (!showDbref(looker, canEdit)) return display;
+  return `${display}(${dbrefWithFlags(obj.id, obj.flags)})`;
+}
 
 const visualLen = (s: string): number =>
   s.replace(/<#[0-9a-fA-F]{6}>/g, "")
@@ -190,9 +213,12 @@ export const cofdConformatHandler = async (
         : formatIdle(c.state?.lastCommand as number);
       const desc = getCharShortDesc(c) || SHORTDESC_PROMPT;
       const canEditChar = await u.canEdit(looker, c);
-      const nameWithRef = canEditChar
-        ? `${cName}(#${c.id})`
-        : cName;
+      const nameWithRef = nameWithDbref(
+        cName,
+        c,
+        looker,
+        canEditChar,
+      );
 
       const namePad = " ".repeat(
         Math.max(1, 21 - visualLen(nameWithRef)),

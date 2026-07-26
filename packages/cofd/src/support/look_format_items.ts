@@ -1,6 +1,7 @@
 // Item row formatting for CoFD CONFORMAT.
 
 import type { IDBObj, IUrsamuSDK } from "@ursamu/ursamu";
+import { dbrefWithFlags } from "@ursamu/mush";
 import { itemData } from "../equipment/objects.ts";
 import { lookupItem } from "../equipment/catalog.ts";
 import { resolveItemLookName } from "./perception.ts";
@@ -105,7 +106,17 @@ export async function formatContentItems(
     slot += 1;
     const canEditObj = await u.canEdit(looker, obj);
     let label = resolveItemLookName(looker, obj);
-    if (canEditObj) label = `${label}(#${obj.id})`;
+    if (
+      canEditObj ||
+      looker.flags.has("wizard") ||
+      looker.flags.has("admin") ||
+      looker.flags.has("superuser") ||
+      looker.flags.has("staff") ||
+      looker.flags.has("builder")
+    ) {
+      label =
+        `${label}(${dbrefWithFlags(obj.id, obj.flags)})`;
+    }
     if (d?.kind === "ammo" || d?.kind === "goblin-fruit") {
       const count = d.count ?? 1;
       if (count > 1 || d.kind === "ammo") {

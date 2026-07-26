@@ -263,7 +263,7 @@ export async function handleDiscordSceneMessage(token: string, msg: any): Promis
       broadcastMsg = `%ch${charName}%cn says, "${content}"`;
     }
 
-    const { send: coreSend } = await import("@ursamu/core");
+    const { send: coreSend } = await import("@ursamu/mush");
     const inside = await dbojs.query({ location: instancedRoomId });
     const targetIds = inside.map((p) => p.id);
     if (targetIds.length > 0) {
