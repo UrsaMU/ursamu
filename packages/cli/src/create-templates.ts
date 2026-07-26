@@ -1412,7 +1412,8 @@ gameHooks.emit("gm:system:register" as never, { system: myStatSystem });
 **Privilege levels** (for \`@tel\`, \`@force\`, admin commands):
 - \`superuser\` (3) → \`admin\` (2) → \`wizard\` (1) → \`player\` (0)
 
-**Flags:** \`"wizard"\` is level 9, code \`"wiz"\`, locked to superuser.
+**Flags:** \`"wizard"\` is level 9, code \`"W"\`; \`"staff"\` is code \`"w"\`
+(upper/lower codes are distinct). Locked to superuser for wizard.
 Use \`isStaff(flags)\` and \`isWizard(flags)\` utilities (exported from engine).
 
 **Hidden/internal attributes:** prefix with \`_\` to make wiz-only.

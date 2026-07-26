@@ -76,7 +76,8 @@ export function templateToArchetype(t: NpcTemplate): NpcArchetype {
       ? { dreadPowers: [...t.dreadPowers] }
       : {}),
     integrity: t.integrity,
-    size: t.size,
+    // CoD default Size is 5 (adult human) when the template omits it.
+    size: t.size ?? 5,
     ...(t.defaultWeapon
       ? { defaultWeapon: t.defaultWeapon }
       : {}),

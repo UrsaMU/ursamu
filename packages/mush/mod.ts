@@ -16,7 +16,7 @@ export * from "@ursamu/core";
 // World model
 export type { IDBObj, IDBOBJ, IAttribute, IGameTime } from "./src/world/types.ts";
 export { dbojs, counters, chans, texts, scenes, chanHistory, Obj, createObj, userFuncs, serverTags, playerTags, zoneMemberships } from "./src/world/dbobjs.ts";
-export { flags }                             from "./src/world/flags.ts";
+export { flags, flagCodes, dbrefWithFlags } from "./src/world/flags.ts";
 export { evaluateLock, validateLock, registerLockFunc, registerLockEvaluator, callLockFunc } from "./src/world/locks.ts";
 export type { LockFunc } from "./src/world/locks.ts";
 export { hydrate }                           from "./src/world/dbobjs.ts";

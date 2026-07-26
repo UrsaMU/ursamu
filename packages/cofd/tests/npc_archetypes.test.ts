@@ -24,7 +24,8 @@ Deno.test("every archetype has required fields and sane ranges", OPTS, () => {
     assert(a.label.length > 0);
     assert(a.blurb.length > 0);
     assert(["minor", "major", "storyteller"].includes(a.tier), `${key} bad tier ${a.tier}`);
-    assertEquals(a.size, 5);
+    // Adult human default is 5; some templates (e.g. hobs) differ.
+    assert(a.size >= 1 && a.size <= 10, `${key} size ${a.size} out of 1..10`);
 
     // Attributes: 1..5 each
     const attrs = a.attributes;
