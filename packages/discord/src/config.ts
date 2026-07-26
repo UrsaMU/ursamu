@@ -24,18 +24,39 @@ function emptyCfg(): IDiscordConfig {
   return { id: "discord", webhooks: {}, links: {}, publicUrl: "" };
 }
 
+/** Env fallback when DBO publicUrl is empty (court, docker, etc.). */
+function envPublicUrl(): string {
+  const raw =
+    Deno.env.get("DISCORD_PUBLIC_URL")?.trim() ||
+    Deno.env.get("PUBLIC_URL")?.trim() ||
+    Deno.env.get("URSAMU_PUBLIC_URL")?.trim() ||
+    "";
+  return raw.replace(/\/+$/, "");
+}
+
 async function load(): Promise<IDiscordConfig> {
   const cfg = await db.queryOne({ id: "discord" });
   if (!cfg) {
-    console.log("[discord] config: no config found in database, returning empty config.");
-    return emptyCfg();
+    console.log(
+      "[discord] config: no config found in database, " +
+        "returning empty config.",
+    );
+    return { ...emptyCfg(), publicUrl: envPublicUrl() };
   }
-  console.log("[discord] config loaded:", JSON.stringify({ webhooks: cfg.webhooks, links: cfg.links }));
+  const publicUrl = (cfg.publicUrl ?? "").trim() || envPublicUrl();
+  console.log(
+    "[discord] config loaded:",
+    JSON.stringify({
+      webhooks: cfg.webhooks,
+      links: cfg.links,
+      publicUrl: publicUrl || "(not set)",
+    }),
+  );
   return {
     id: "discord",
     webhooks: cfg.webhooks ?? {},
     links: cfg.links ?? {},
-    publicUrl: cfg.publicUrl ?? "",
+    publicUrl,
   };
 }
 

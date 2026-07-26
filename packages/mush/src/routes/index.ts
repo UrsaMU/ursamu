@@ -256,28 +256,39 @@ const EXT_MIME: Record<string, string> = {
   png: "image/png", jpg: "image/jpeg", gif: "image/gif", webp: "image/webp",
 };
 
-/** Public: serve an avatar image by player ID. Used by tests and fallback handler. */
+/**
+ * Public: serve avatar by id or id.ext
+ *   /avatars/2       → data/avatars/2.*
+ *   /avatars/2.jpg   → data/avatars/2.jpg (exact)
+ * Discord webhooks need a path ending in an image extension.
+ */
 export async function avatarServe(urlPath: string): Promise<Response> {
-  const id = urlPath.slice("/avatars/".length);
-  if (!id || !/^[a-zA-Z0-9_-]+$/.test(id)) {
+  const raw = urlPath.slice("/avatars/".length).split("?")[0];
+  // id or id.ext — no path traversal
+  if (!raw || !/^[a-zA-Z0-9_-]+(\.(png|jpe?g|gif|webp))?$/i.test(raw)) {
     return new Response("Not Found", { status: 404 });
   }
+  const wantExact = raw.includes(".");
+  const id = wantExact ? raw.replace(/\.[^.]+$/, "") : raw;
   try {
     for await (const entry of Deno.readDir("data/avatars")) {
-      if (entry.name.startsWith(id + ".")) {
-        const ext  = (entry.name.split(".").pop() ?? "").toLowerCase();
-        const file = await Deno.readFile(`data/avatars/${entry.name}`);
-        return new Response(file, {
-          status: 200,
-          headers: {
-            "Content-Type":  EXT_MIME[ext] ?? "application/octet-stream",
-            "Cache-Control": "public, max-age=3600",
-            // Bypass interstitial warning pages on ngrok and localtunnel
-            "ngrok-skip-browser-warning": "true",
-            "bypass-tunnel-reminder": "true",
-          },
-        });
-      }
+      const hit = wantExact
+        ? entry.name.toLowerCase() === raw.toLowerCase()
+        : entry.name.startsWith(id + ".");
+      if (!hit) continue;
+      const ext = (entry.name.split(".").pop() ?? "").toLowerCase();
+      const file = await Deno.readFile(`data/avatars/${entry.name}`);
+      return new Response(file, {
+        status: 200,
+        headers: {
+          "Content-Type": EXT_MIME[ext] ?? "application/octet-stream",
+          // Short cache — Discord rejects ?query cache-busters on
+          // avatar_url, so replacements rely on re-fetch.
+          "Cache-Control": "public, max-age=300",
+          "ngrok-skip-browser-warning": "true",
+          "bypass-tunnel-reminder": "true",
+        },
+      });
     }
   } catch { /* data/avatars doesn't exist yet */ }
   return new Response("Not Found", { status: 404 });

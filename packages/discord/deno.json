@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/discord",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "exports": "./mod.ts",
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",

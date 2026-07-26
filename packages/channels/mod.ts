@@ -48,7 +48,10 @@ const onReady = async (): Promise<void> => {
 
   for (const def of defaults) {
     const id = def.name.toLowerCase();
-    const existing = await chans.queryOne({ id });
+    // Match by id or name — older engine seeds used id "pub" for Public.
+    const existing =
+      (await chans.queryOne({ id })) ||
+      (await chans.queryOne({ name: def.name }));
     if (!existing) {
       await chans.create({
         id,
@@ -60,6 +63,29 @@ const onReady = async (): Promise<void> => {
         owner: "",
       });
       console.log(`[channels] Seeded default channel: ${def.name}`);
+      continue;
+    }
+    // Heal legacy rows (missing lock, wrong alias, old id "pub").
+    const patch: Record<string, unknown> = {};
+    if (!existing.alias) patch.alias = def.alias;
+    if (existing.lock == null || existing.lock === "") {
+      patch.lock = def.lock || "";
+    }
+    if (
+      def.lock &&
+      existing.lock &&
+      existing.lock !== def.lock &&
+      // Upgrade bare "admin+" → "connected admin+"
+      !String(existing.lock).includes("connected")
+    ) {
+      patch.lock = def.lock;
+    }
+    if (Object.keys(patch).length) {
+      await chans.modify({ id: existing.id }, "$set", patch);
+      console.log(
+        `[channels] Updated channel ${def.name}:`,
+        patch,
+      );
     }
   }
 };
@@ -78,7 +104,7 @@ export const channelsPlugin: IPlugin = {
   init: () => {
     import("./src/commands/verbs.ts");
     registerHelpDir(
-      new URL("./help", import.meta.url).pathname,
+      new URL("./help", import.meta.url),
       "channels",
     );
     gameHooks.on("player:login", onLogin);

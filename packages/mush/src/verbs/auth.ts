@@ -39,6 +39,19 @@ export async function execCreate(u: IUrsamuSDK): Promise<void> {
     state: { name, password },
   });
 
+  // Grant first-user superuser BEFORE login so player:login hooks
+  // (e.g. channel auto-join with admin+ locks) see elevated flags.
+  let firstUser = false;
+  try {
+    const superusers = await u.db.search({ flags: /superuser/ });
+    if (!superusers.length) {
+      await u.setFlags(player.id, "superuser");
+      firstUser = true;
+    }
+  } catch (e: unknown) {
+    console.warn("[create] superuser check failed:", e);
+  }
+
   await u.auth.login(player.id);
 
   try {
@@ -48,14 +61,8 @@ export async function execCreate(u: IUrsamuSDK): Promise<void> {
     console.warn("[create] Failed to issue session token:", e);
   }
 
-  try {
-    const superusers = await u.db.search({ flags: /superuser/ });
-    if (!superusers.length) {
-      await u.setFlags(player.id, "superuser");
-      u.send("%ch%cyYou are the first user — superuser access granted.%cn");
-    }
-  } catch (e: unknown) {
-    console.warn("[create] superuser check failed:", e);
+  if (firstUser) {
+    u.send("%ch%cyYou are the first user — superuser access granted.%cn");
   }
 
   u.send(`Welcome, ${name}! Your character has been created.`);
@@ -86,6 +93,21 @@ export async function execConnect(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
+  // Elevate before login so channel auto-join sees staff locks.
+  let grantedSuper = false;
+  try {
+    if (!player.flags.has("superuser")) {
+      const superusers = await u.db.search({ flags: /superuser/ });
+      if (!superusers.length) {
+        await u.setFlags(player.id, "superuser");
+        player.flags.add("superuser");
+        grantedSuper = true;
+      }
+    }
+  } catch (e: unknown) {
+    console.warn("auth: superuser check failed:", e);
+  }
+
   await u.auth.login(player.id);
 
   try {
@@ -95,16 +117,8 @@ export async function execConnect(u: IUrsamuSDK): Promise<void> {
     console.warn("[auth] Failed to issue session token:", e);
   }
 
-  try {
-    if (!player.flags.has("superuser")) {
-      const superusers = await u.db.search({ flags: /superuser/ });
-      if (!superusers.length) {
-        await u.setFlags(player.id, "superuser");
-        u.send("%ch%cyYou are the first user — superuser access granted.%cn");
-      }
-    }
-  } catch (e: unknown) {
-    console.warn("auth: superuser check failed:", e);
+  if (grantedSuper) {
+    u.send("%ch%cyYou are the first user — superuser access granted.%cn");
   }
 
   u.send(`Welcome back, ${u.util.displayName(player, player)}.`);

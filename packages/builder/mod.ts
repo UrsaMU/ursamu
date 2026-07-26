@@ -55,7 +55,7 @@ const onLogin = (_e: SessionEvent): void => {
 
 export const builderPlugin: IPlugin = {
   name:        "builder",
-  version:     "1.3.0",
+  version:     "1.3.2",
   description: "World-building commands and REST API — @dig, @open, @link, @desc, @examine, and more.",
 
   init: async () => {
@@ -78,7 +78,7 @@ export const builderPlugin: IPlugin = {
     // Soft-register help directory with @ursamu/help (optional dependency)
     try {
       const { registerHelpDir } = await import("@ursamu/help");
-      registerHelpDir(new URL("./help", import.meta.url).pathname, "building");
+      registerHelpDir(new URL("./help", import.meta.url), "building");
     } catch {
       // @ursamu/help not installed
     }

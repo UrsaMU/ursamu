@@ -49,6 +49,20 @@ Deno.test("formatDiscordChannelBody strips MUSH in name", OPTS, () => {
   );
 });
 
+Deno.test(
+  "formatDiscordChannelBody strips truecolor moniker",
+  OPTS,
+  () => {
+    assertEquals(
+      formatDiscordChannelBody(
+        "<#ff0000>B<#00ff00>o<#0000ff>b%cn",
+        "yo",
+      ),
+      `[Discord] Bob says, "yo"`,
+    );
+  },
+);
+
 Deno.test("formatDiscordChannelBody rejects empty", OPTS, () => {
   assertEquals(formatDiscordChannelBody("Alice", "   "), null);
 });

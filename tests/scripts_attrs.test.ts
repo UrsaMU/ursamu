@@ -42,19 +42,19 @@ function makeU(contents: IDBObj[] = []): { u: IUrsamuSDK; sent: string[] } {
 // inventory tests
 // ---------------------------------------------------------------------------
 
-Deno.test("inventory — empty inventory reports nothing carried", OPTS, () => {
+Deno.test("inventory — empty inventory reports nothing carried", OPTS, async () => {
   const { u, sent } = makeU([]);
-  execInventory(u);
+  await execInventory(u);
   assertStringIncludes(sent.join(" "), "not carrying anything");
 });
 
-Deno.test("inventory — with items lists each item name", OPTS, () => {
+Deno.test("inventory — with items lists each item name", OPTS, async () => {
   const items: IDBObj[] = [
     { id: "item1", name: "Lantern", flags: new Set(["thing"]), state: {}, contents: [] },
     { id: "item2", name: "Rope",    flags: new Set(["thing"]), state: {}, contents: [] },
   ];
   const { u, sent } = makeU(items);
-  execInventory(u);
+  await execInventory(u);
   const combined = sent.join("\n");
   assertStringIncludes(combined, "Lantern");
   assertStringIncludes(combined, "Rope");

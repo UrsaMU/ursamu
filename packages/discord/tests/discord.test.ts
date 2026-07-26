@@ -1,6 +1,6 @@
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import { describe, it, beforeAll, afterAll } from "@std/testing/bdd";
-import { clean, resolveAvatar } from "../src/helpers.ts";
+import { clean, stripMushMarkup, resolveAvatar } from "../src/helpers.ts";
 import {
   getDiscordConfig,
   setWebhook,
@@ -20,9 +20,42 @@ describe("Discord Plugin — Helpers", () => {
     assertEquals(clean("   "), "Unknown");
   });
 
-  it("resolveAvatar returns RoboHash fallback when no public url", async () => {
-    const url = await resolveAvatar("p1", "PlayerOne", "");
-    assertStringIncludes(url, "robohash.org/PlayerOne");
+  it("clean strips truecolor moniker tags", () => {
+    const moniker =
+      "<#ff0000>D<#ff1905>i<#ff320a>a%cn";
+    assertEquals(clean(moniker), "Dia");
+  });
+
+  it("stripMushMarkup drops truecolor and keeps text", () => {
+    const raw =
+      "<#ff0000>D<#ff1905>i<#ff320a>a%cn tests.";
+    assertEquals(stripMushMarkup(raw), "Dia tests.");
+  });
+
+  it("resolveAvatar is undefined without public url or file", async () => {
+    assertEquals(await resolveAvatar("p1", "PlayerOne", ""), undefined);
+    assertEquals(
+      await resolveAvatar("missing", "X", "https://game.example"),
+      undefined,
+    );
+  });
+
+  it("resolveAvatar uses public file with extension", async () => {
+    await Deno.mkdir("data/avatars", { recursive: true });
+    const id = "avatar_resolve_test_p1";
+    const path = `data/avatars/${id}.png`;
+    await Deno.writeFile(path, new Uint8Array([1, 2, 3]));
+    try {
+      const url = await resolveAvatar(
+        id,
+        "PlayerOne",
+        "https://game.example/",
+      );
+      // Real filename, no query string (Discord drops those).
+      assertEquals(url, `https://game.example/avatars/${id}.png`);
+    } finally {
+      await Deno.remove(path).catch(() => {});
+    }
   });
 });
 

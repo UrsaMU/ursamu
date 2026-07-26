@@ -12,12 +12,16 @@ interface WithId {
   id: string;
 }
 
+// typegraph peers on zod@4. Cast avoids TS2740 when a monorepo
+// workspace still resolves a second zod major for type-only imports.
+const documentSchema = z.object({
+  namespace: z.string(),
+  originalId: z.string(),
+  content: z.string(),
+});
 const DocumentNode = defineNode("Document", {
-  schema: z.object({
-    namespace: z.string(),
-    originalId: z.string(),
-    content: z.string(),
-  }),
+  // deno-lint-ignore no-explicit-any
+  schema: documentSchema as any,
 });
 
 const DocumentGraph = defineGraph({

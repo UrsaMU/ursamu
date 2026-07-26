@@ -23,88 +23,114 @@ async function isAdmin(userId: string): Promise<boolean> {
   return flagSet.has("admin") || flagSet.has("wizard") || flagSet.has("superuser");
 }
 
-registerPluginRoute("/api/v1/help", async (req, _userId) => {
-  // Route: GET /api/v1/help
-  if (req.method === "GET") {
+/**
+ * Single prefix handler for /api/v1/help and /api/v1/help/<topic>.
+ * dispatchPluginRoute matches by startsWith(prefix+"/"), so a separate
+ * "/api/v1/help/:topic" registration never receives traffic — the bare
+ * "/api/v1/help" handler always wins. Handle both paths here.
+ */
+registerPluginRoute("/api/v1/help", async (req, userId) => {
+  const url = new URL(req.url);
+  const rest = url.pathname
+    .replace(/^\/api\/v1\/help\/?/, "")
+    .replace(/\/+$/, "");
+  const topic = rest ? slugify(rest) : "";
+
+  // GET /api/v1/help — index (hide dark/hidden topics from listings)
+  if (!topic && req.method === "GET") {
     const sections = await helpRegistry.sections();
-    const topics   = await helpRegistry.all();
+    const topics = (await helpRegistry.all()).filter((e) => !e.hidden);
     return Response.json({ sections, topics });
   }
 
-  return Response.json({ error: "Method not allowed" }, { status: 405 });
-});
-
-registerPluginRoute("/api/v1/help/:topic", async (req, userId) => {
-  const url    = new URL(req.url);
-  // Extract topic from path: /api/v1/help/<topic>
-  const topic  = slugify(url.pathname.replace(/^\/api\/v1\/help\//, ""));
-
   if (!topic) {
-    return Response.json({ error: "Topic is required" }, { status: 400 });
+    return Response.json(
+      { error: "Method not allowed" },
+      { status: 405 },
+    );
   }
 
-  // GET — public
+  // GET /api/v1/help/<topic>
   if (req.method === "GET") {
     const entry = await helpRegistry.lookup(topic);
     if (!entry) {
       return Response.json({ error: "Not found" }, { status: 404 });
     }
-    // Support raw markdown via ?format=md
     if (url.searchParams.get("format") === "md") {
       return new Response(entry.content, {
-        headers: { "Content-Type": "text/markdown; charset=utf-8" },
+        headers: {
+          "Content-Type": "text/markdown; charset=utf-8",
+        },
       });
     }
     return Response.json({ entry });
   }
 
-  // Write operations require auth
   if (!userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // POST — create/update (admin only)
+  // POST /api/v1/help/<topic>
   if (req.method === "POST") {
     if (!(await isAdmin(userId))) {
       return Response.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    let body: { content?: unknown; section?: unknown; tags?: unknown };
+    let body: {
+      content?: unknown;
+      section?: unknown;
+      tags?: unknown;
+    };
     try {
       body = await req.json();
     } catch {
-      return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+      return Response.json(
+        { error: "Invalid JSON body" },
+        { status: 400 },
+      );
     }
 
     if (typeof body.content !== "string" || !body.content.trim()) {
-      return Response.json({ error: "content is required" }, { status: 400 });
+      return Response.json(
+        { error: "content is required" },
+        { status: 400 },
+      );
     }
 
-    const section = typeof body.section === "string" && body.section
-      ? body.section.toLowerCase()
-      : (topic.includes("/") ? topic.split("/")[0] : "general");
+    const section =
+      typeof body.section === "string" && body.section
+        ? body.section.toLowerCase()
+        : (topic.includes("/") ? topic.split("/")[0] : "general");
 
-    const tags = Array.isArray(body.tags) && body.tags.every((t) => typeof t === "string")
-      ? body.tags as string[]
-      : [];
+    const tags =
+      Array.isArray(body.tags) &&
+        body.tags.every((t) => typeof t === "string")
+        ? body.tags as string[]
+        : [];
 
     const entry = await upsertEntry({
-      name:      topic,
+      name: topic,
       section,
-      content:   body.content.trim(),
+      content: body.content.trim(),
       tags,
-      source:    "database",
+      source: "database",
       createdBy: userId,
     });
 
     emitHelp("help:register", {
-      entry: { name: entry.name, section: entry.section, content: entry.content, source: "database", tags: entry.tags },
+      entry: {
+        name: entry.name,
+        section: entry.section,
+        content: entry.content,
+        source: "database",
+        tags: entry.tags,
+      },
     });
 
     return Response.json({ entry }, { status: 201 });
   }
 
-  // DELETE (admin only)
+  // DELETE /api/v1/help/<topic>
   if (req.method === "DELETE") {
     if (!(await isAdmin(userId))) {
       return Response.json({ error: "Forbidden" }, { status: 403 });

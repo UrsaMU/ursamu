@@ -1,0 +1,158 @@
+/**
+ * Flag short-codes on staff dbrefs: (#12ed) for exit+dark, etc.
+ */
+import { assertEquals } from "@std/assert";
+import { flagCodes, dbrefWithFlags } from "../src/world/flags.ts";
+import { execLook } from "../src/verbs/look.ts";
+import type { IDBObj, IUrsamuSDK } from "../src/commands/types.ts";
+
+const OPTS = { sanitizeResources: false, sanitizeOps: false };
+
+Deno.test("flagCodes maps known flags", OPTS, () => {
+  assertEquals(flagCodes("dark"), "d");
+  assertEquals(flagCodes("exit dark"), "ed");
+  assertEquals(flagCodes(new Set(["exit", "dark"])), "ed");
+  assertEquals(flagCodes("enter_ok"), "E");
+  assertEquals(flagCodes("builder dark"), "bd");
+});
+
+Deno.test("flagCodes are single-letter and case-distinct", OPTS, () => {
+  // wizard W vs staff w — upper/lower are different flags
+  assertEquals(flagCodes("wizard"), "W");
+  assertEquals(flagCodes("staff"), "w");
+  assertEquals(flagCodes("wizard staff"), "Ww");
+  assertEquals(flagCodes("superuser"), "U");
+  assertEquals(flagCodes("storyteller"), "T");
+  assertEquals(flagCodes("werewolf"), "f");
+  assertEquals(flagCodes("ghoul"), "G");
+  // every emitted code is exactly one character
+  const sample = flagCodes(
+    "superuser admin wizard staff storyteller builder " +
+      "player safe void dark guest room exit connected " +
+      "mortal ghoul vampire werewolf kinfolk " +
+      "link_ok enter_ok visual opaque",
+  );
+  assertEquals([...sample].every((ch) => ch.length === 1), true);
+  assertEquals(sample.includes("wiz"), false);
+  assertEquals(sample.includes("su"), false);
+  assertEquals(sample.includes("["), false);
+});
+
+Deno.test("flagCodes skips unknown flags", OPTS, () => {
+  assertEquals(flagCodes("dark not_a_flag"), "d");
+  assertEquals(flagCodes(""), "");
+  assertEquals(flagCodes(undefined), "");
+});
+
+Deno.test("dbrefWithFlags joins id and codes", OPTS, () => {
+  assertEquals(
+    dbrefWithFlags("12", new Set(["exit", "dark"])),
+    "#12ed",
+  );
+  assertEquals(dbrefWithFlags("5", "room"), "#5r");
+});
+
+function mockObj(
+  id: string,
+  flags: string[],
+  extra: Partial<IDBObj> = {},
+): IDBObj {
+  return {
+    id,
+    name: id,
+    flags: new Set(flags),
+    state: { name: id },
+    location: "room1",
+    contents: [],
+    ...extra,
+  };
+}
+
+function mockU(opts: {
+  meFlags?: string[];
+  here: IDBObj;
+  canEditIds?: string[];
+}): IUrsamuSDK & { _sent: string[] } {
+  const sent: string[] = [];
+  const me = mockObj("p1", opts.meFlags ?? ["player", "connected"]);
+  me.location = opts.here.id;
+  const canEditIds = new Set(opts.canEditIds ?? []);
+  return {
+    me,
+    here: opts.here,
+    cmd: { name: "look", original: "look", args: [], switches: [] },
+    send: (m: string) => {
+      sent.push(m);
+    },
+    broadcast: () => {},
+    canEdit: async (_a: IDBObj, t: IDBObj) => canEditIds.has(t.id),
+    db: {
+      modify: async () => {},
+      search: async () => [],
+      create: async () => mockObj("99", []),
+      destroy: async () => {},
+    },
+    attr: {
+      get: async () => null,
+      set: async () => {},
+      clear: async () => false,
+    },
+    util: {
+      target: async () => null,
+      displayName: (o: IDBObj) =>
+        (o.state?.name as string) || o.name || "?",
+      stripSubs: (s: string) => s,
+      center: (s: string) => s,
+      ljust: (s: string, w: number) => s.padEnd(w),
+      rjust: (s: string, w: number) => s.padStart(w),
+    },
+    _sent: sent,
+  } as unknown as IUrsamuSDK & { _sent: string[] };
+}
+
+Deno.test(
+  "staff look shows flag codes on dark exits",
+  OPTS,
+  async () => {
+    const dark = mockObj("12", ["exit", "dark"], {
+      state: { name: "Secret;s" },
+    });
+    const room = mockObj("1", ["room"], {
+      state: { name: "Hall", description: "A hall." },
+      contents: [dark],
+    });
+    const u = mockU({
+      meFlags: ["player", "connected", "wizard"],
+      here: room,
+      canEditIds: [],
+    });
+    await execLook(u);
+    const out = u._sent[0];
+    // Dark exit visible to staff with #12ed
+    assertEquals(out.includes("Secret"), true);
+    assertEquals(out.includes("(#12ed)"), true);
+  },
+);
+
+Deno.test(
+  "mortal look does not show dbref flag codes",
+  OPTS,
+  async () => {
+    const lit = mockObj("12", ["exit"], {
+      state: { name: "East;e" },
+    });
+    const room = mockObj("1", ["room"], {
+      state: { name: "Hall", description: "A hall." },
+      contents: [lit],
+    });
+    const u = mockU({
+      meFlags: ["player", "connected"],
+      here: room,
+      canEditIds: [],
+    });
+    await execLook(u);
+    const out = u._sent[0];
+    assertEquals(out.includes("East"), true);
+    assertEquals(out.includes("(#12"), false);
+  },
+);

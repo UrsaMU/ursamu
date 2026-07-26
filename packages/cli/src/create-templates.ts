@@ -173,7 +173,7 @@ const ${varName}Plugin: IPlugin = {
 
   init: () => {
     registerPluginRoute("/api/v1/${name}", ${handlerName});
-    registerHelpDir(new URL("./help", import.meta.url).pathname, "${name}");
+    registerHelpDir(new URL("./help", import.meta.url), "${name}");
     // gameHooks.on("player:login", onLogin);
     return true;
   },
@@ -998,7 +998,7 @@ import { registerHelpDir } from "jsr:@ursamu/help-plugin";
 export const plugin: IPlugin = {
   init: async () => {
     registerHelpDir(
-      new URL("../help", import.meta.url).pathname,
+      new URL("../help", import.meta.url),
       "${name}",  // section name shown in +help index
     );
     return true;
@@ -1412,7 +1412,8 @@ gameHooks.emit("gm:system:register" as never, { system: myStatSystem });
 **Privilege levels** (for \`@tel\`, \`@force\`, admin commands):
 - \`superuser\` (3) → \`admin\` (2) → \`wizard\` (1) → \`player\` (0)
 
-**Flags:** \`"wizard"\` is level 9, code \`"wiz"\`, locked to superuser.
+**Flags:** \`"wizard"\` is level 9, code \`"W"\`; \`"staff"\` is code \`"w"\`
+(upper/lower codes are distinct). Locked to superuser for wizard.
 Use \`isStaff(flags)\` and \`isWizard(flags)\` utilities (exported from engine).
 
 **Hidden/internal attributes:** prefix with \`_\` to make wiz-only.

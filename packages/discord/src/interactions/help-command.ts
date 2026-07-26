@@ -1,5 +1,9 @@
 /**
  * Discord /help slash command + autocomplete.
+ *
+ * Payload builders are shared by:
+ *   - HTTP interactions endpoint (public HTTPS)
+ *   - Gateway INTERACTION_CREATE (no inbound HTTP required)
  */
 
 import { helpRegistry, slugify } from "@ursamu/help";
@@ -13,40 +17,72 @@ import type { DiscordEmbed } from "../webhook.ts";
 
 const EPHEMERAL = 1 << 6; // 64
 
-export function ephemeralEmbeds(embeds: DiscordEmbed[]): Response {
-  return Response.json({
+/** Interaction callback body for an ephemeral embed reply. */
+export function helpCommandPayload(
+  embeds: DiscordEmbed[],
+): Record<string, unknown> {
+  return {
     type: 4, // CHANNEL_MESSAGE_WITH_SOURCE
     data: {
       flags: EPHEMERAL,
       embeds,
     },
-  });
+  };
 }
 
-export async function handleHelpCommand(
-  options: Array<{ name: string; value?: string }>,
-): Promise<Response> {
-  const topicOpt = options.find((o) => o.name === "topic");
+export function ephemeralEmbeds(embeds: DiscordEmbed[]): Response {
+  return Response.json(helpCommandPayload(embeds));
+}
 
+/** Build embeds for /help [topic]. */
+export async function buildHelpEmbeds(
+  options: Array<{ name: string; value?: string }>,
+): Promise<DiscordEmbed[]> {
+  const topicOpt = options.find((o) => o.name === "topic");
   const topic = typeof topicOpt?.value === "string"
     ? slugify(topicOpt.value)
     : "";
 
   if (topic) {
     const entry = await helpRegistry.lookup(topic);
-    if (!entry) return ephemeralEmbeds([embedNotFound(topic)]);
-    return ephemeralEmbeds([embedForEntry(entry)]);
+    if (!entry) {
+      // Section name fallback (same as +help gateway path)
+      const sectionEntries = await helpRegistry.inSection(topic);
+      if (sectionEntries.length > 0) {
+        return [embedForSection(topic, sectionEntries)];
+      }
+      return [embedNotFound(topic)];
+    }
+    return [embedForEntry(entry)];
   }
 
   const sections = await helpRegistry.sections();
   const all = await helpRegistry.all();
   const visible = all.filter((e) => !e.hidden);
-  return ephemeralEmbeds([embedForIndex(sections, visible.length)]);
+  return [embedForIndex(sections, visible.length)];
 }
 
-export async function handleHelpAutocomplete(
-  focused: { name: string; value: string } | undefined,
+export async function handleHelpCommand(
+  options: Array<{ name: string; value?: string }>,
 ): Promise<Response> {
+  try {
+    const embeds = await buildHelpEmbeds(options);
+    return ephemeralEmbeds(embeds);
+  } catch (e: unknown) {
+    console.error("[discord] /help failed:", e);
+    return ephemeralEmbeds([{
+      color: 0xe74c3c,
+      title: "Help error",
+      description:
+        "Something went wrong loading help. Try again in a moment.",
+    }]);
+  }
+}
+
+/** Autocomplete choices payload (type 8). */
+export async function buildHelpAutocomplete(
+  focused: { name: string; value: string } | undefined,
+): Promise<Record<string, unknown>> {
   const prefix = (focused?.value ?? "").toLowerCase().trim();
   const all = await helpRegistry.all();
   let names = all
@@ -63,10 +99,21 @@ export async function handleHelpAutocomplete(
     value: n.slice(0, 100),
   }));
 
-  return Response.json({
+  return {
     type: 8, // APPLICATION_COMMAND_AUTOCOMPLETE_RESULT
     data: { choices },
-  });
+  };
+}
+
+export async function handleHelpAutocomplete(
+  focused: { name: string; value: string } | undefined,
+): Promise<Response> {
+  try {
+    return Response.json(await buildHelpAutocomplete(focused));
+  } catch (e: unknown) {
+    console.error("[discord] /help autocomplete failed:", e);
+    return Response.json({ type: 8, data: { choices: [] } });
+  }
 }
 
 /** Slash command JSON body for Discord API registration. */

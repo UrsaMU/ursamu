@@ -167,6 +167,7 @@ Deno.test("look at object with ODESC — room broadcast fires", OPTS, async () =
     args: ["Painting"],
     roomContents: [painting],
     searchResult: [painting],
+    targetResult: painting,
     attrMap: { [`${THING_ID}/ODESC`]: "studies the painting with great interest." },
   });
   await execLook(u);

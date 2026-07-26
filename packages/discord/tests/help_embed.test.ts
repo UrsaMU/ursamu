@@ -21,11 +21,14 @@ dark: true
 ---
 # Title
 %ch%cyBold%cn line
+<#ff00aa>truecolor%cn
 `;
   const out = markdownToDiscord(md);
   assertStringIncludes(out, "**Title**");
   assertEquals(out.includes("%ch"), false);
   assertEquals(out.includes("---"), false);
+  assertEquals(out.includes("<#ff00aa>"), false);
+  assertStringIncludes(out, "truecolor");
 });
 
 Deno.test("truncateDiscord appends marker when over max", OPTS, () => {

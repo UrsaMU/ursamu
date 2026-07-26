@@ -13,8 +13,9 @@
  * export const plugin: IPlugin = {
  *   name: "myplugin",
  *   init: () => {
+ *     // Prefer URL (works for local file: and JSR https://)
  *     registerHelpDir(
- *       new URL("./help", import.meta.url).pathname,
+ *       new URL("./help", import.meta.url),
  *       "myplugin",
  *     );
  *     return true;

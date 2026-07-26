@@ -62,7 +62,7 @@ export const plugin: IPlugin = {
   description: "Mekton Zeta chargen, gear, combat, and AI GM bridge for UrsaMU.",
 
   init: () => {
-    registerHelpDir(new URL("./help", import.meta.url).pathname, "mekton-zeta");
+    registerHelpDir(new URL("./help", import.meta.url), "mekton-zeta");
     gameHooks.on("player:login", onLogin);
     gameHooks.emit("gm:system:register" as never, {
       system: mektonSystem,

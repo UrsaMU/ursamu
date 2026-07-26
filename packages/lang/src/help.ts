@@ -13,12 +13,13 @@
 
 import { registerHelpDir } from "@ursamu/help-plugin";
 
-const HELP_DIR = new URL("../help", import.meta.url).pathname;
+const HELP_DIR = new URL("../help", import.meta.url);
 const SECTION  = "language";
 
 export function registerHelp(): void {
   registerHelpDir(HELP_DIR, SECTION);
   console.log(
-    `[sgp-language] Registered help directory ${HELP_DIR} (section "${SECTION}").`,
+    `[sgp-language] Registered help directory ${HELP_DIR.href} ` +
+      `(section "${SECTION}").`,
   );
 }

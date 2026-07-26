@@ -57,7 +57,7 @@ const discordPlugin: IPlugin = {
   init: () => {
     setupCommands();
     registerHelpDir(
-      new URL("../help", import.meta.url).pathname,
+      new URL("../help", import.meta.url),
       "discord",
     );
     // Single prefix handler: interactions first, then staff REST
