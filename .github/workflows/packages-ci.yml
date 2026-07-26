@@ -1,6 +1,7 @@
 name: Packages CI
 
 on:
+  workflow_dispatch:
   push:
     paths: ["packages/**", "tools/**"]
     branches: [main, master, develop]
