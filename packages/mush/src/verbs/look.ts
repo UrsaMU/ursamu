@@ -45,9 +45,18 @@ function headerName(
 const visualLen = (s: string): number =>
   s.replace(/<#[0-9a-fA-F]{6}>/g, "").replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").length;
 
+/** Turn MUSH %r / %t into real whitespace before wrap. */
+function normalizeDescNewlines(text: string): string {
+  return text
+    .replace(/%r/gi, "\n")
+    .replace(/%t/gi, " ")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+}
+
 function wordWrap(text: string, width: number): string {
   const out: string[] = [];
-  for (const paragraph of text.split("\n")) {
+  for (const paragraph of normalizeDescNewlines(text).split("\n")) {
     if (paragraph.trim() === "") { out.push(""); continue; }
     let i = 0;
     while (i < paragraph.length && (paragraph[i] === " " || paragraph[i] === "\t")) i++;

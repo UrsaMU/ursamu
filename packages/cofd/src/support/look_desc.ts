@@ -8,9 +8,20 @@ const visualLen = (s: string): number =>
     .replace(/%c[a-zA-Z]/g, "")
     .replace(/%[nrtbR]/g, "").length;
 
+/** Turn MUSH %r / %t into real whitespace before wrap. */
+function normalizeDescNewlines(text: string): string {
+  return text
+    .replace(/%r/gi, "\n")
+    .replace(/%t/gi, " ")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+}
+
 function wordWrap(text: string, width: number): string {
   const out: string[] = [];
-  for (const paragraph of text.split("\n")) {
+  for (
+    const paragraph of normalizeDescNewlines(text).split("\n")
+  ) {
     if (paragraph.trim() === "") {
       out.push("");
       continue;
@@ -60,5 +71,6 @@ export const cofdDescformatHandler = (
     .split("\n")
     .map((line) => (line.trim() ? " " + line : ""))
     .join("\n");
-  return Promise.resolve(`${indented}%r`);
+  // Real newlines only — trailing %r re-breaks after wrap.
+  return Promise.resolve(indented);
 };
