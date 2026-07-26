@@ -4,8 +4,8 @@
  * Discord → game uses injectChannelMessage + source flag.
  */
 
-import { DBO, rooms } from "@ursamu/core";
-import { clean, toLatin1 } from "./helpers.ts";
+import { DBO, rooms, sessions, send } from "@ursamu/core";
+import { clean, stripMushMarkup } from "./helpers.ts";
 import { getWebhookUrl } from "./config.ts";
 import { postWebhook } from "./webhook.ts";
 
@@ -21,7 +21,8 @@ export interface IChannelMessageEvent {
 interface IChanRow {
   id: string;
   name: string;
-  header: string;
+  header?: string;
+  alias?: string;
 }
 
 /**
@@ -35,7 +36,6 @@ export async function onGameChannelMessage(
   const url = await getWebhookUrl(ev.channelName.toLowerCase());
   if (!url) return;
 
-  // Dynamic import to avoid circular hard deps in tests
   const { getDiscordConfig } = await import("./config.ts");
   const { resolveAvatar } = await import("./helpers.ts");
   const cfg = await getDiscordConfig();
@@ -44,10 +44,14 @@ export async function onGameChannelMessage(
     ev.senderName,
     cfg.publicUrl,
   );
+  console.log(
+    `[discord] outbound ${ev.channelName} id=${ev.senderId} ` +
+      `avatar=${avatar ?? "(none)"}`,
+  );
   postWebhook(url, {
     username: clean(ev.senderName),
-    avatar_url: avatar,
-    content: ev.message.slice(0, 2000),
+    ...(avatar ? { avatar_url: avatar } : {}),
+    content: stripMushMarkup(ev.message).slice(0, 2000),
   });
 }
 
@@ -76,6 +80,94 @@ export function formatDiscordChannelBody(
   return `[Discord] ${who} says, "${text}"`;
 }
 
+/** Resolve a game channel by id, name, or alias (case-insensitive). */
+export async function resolveGameChannel(
+  raw: string,
+): Promise<IChanRow | null> {
+  const key = raw.toLowerCase().trim();
+  if (!key) return null;
+
+  const chans = new DBO<IChanRow>("server.chans");
+  const all = await chans.all();
+  const hit = all.find((c) => {
+    const id = String(c.id ?? "").toLowerCase();
+    const name = String(c.name ?? "").toLowerCase();
+    const alias = String(c.alias ?? "").toLowerCase();
+    return id === key || name === key || alias === key;
+  });
+  return hit ?? null;
+}
+
+/**
+ * Deliver a line to everyone listening on a game channel.
+ * Tries room membership first; falls back to scanning player
+ * data.channels so Discord traffic is not dropped when the room
+ * key does not match joinChans' room name.
+ */
+async function deliverToGameChannel(
+  chan: IChanRow,
+  line: string,
+): Promise<number> {
+  const roomKeys = new Set<string>([
+    chan.name,
+    chan.id,
+    chan.name.toLowerCase(),
+    chan.id.toLowerCase(),
+  ]);
+  if (chan.alias) roomKeys.add(chan.alias);
+
+  const seen = new Set<string>();
+  for (const key of roomKeys) {
+    for (const sid of rooms.members(key)) {
+      seen.add(sid);
+    }
+  }
+
+  // Fallback: any connected session whose player has this channel.
+  if (seen.size === 0) {
+    try {
+      const { dbojs } = await import("@ursamu/mush");
+      for (const s of sessions.list()) {
+        const actorId = (s as { actorId?: string }).actorId;
+        if (!actorId) continue;
+        const p = await dbojs.queryOne({ id: actorId });
+        if (!p) continue;
+        const list = (p.data?.channels ?? []) as Array<{
+          channel?: string;
+          id?: string;
+          alias?: string;
+          active?: boolean;
+        }>;
+        const on = list.some((e) => {
+          if (e.active === false) return false;
+          const cn = String(e.channel ?? "").toLowerCase();
+          const cid = String(e.id ?? "").toLowerCase();
+          const al = String(e.alias ?? "").toLowerCase();
+          return (
+            cn === chan.name.toLowerCase() ||
+            cid === chan.id.toLowerCase() ||
+            (chan.alias != null && al === chan.alias.toLowerCase())
+          );
+        });
+        if (on) seen.add(s.socketId);
+      }
+    } catch (e: unknown) {
+      console.error("[discord] deliver fallback failed:", e);
+    }
+  }
+
+  if (seen.size === 0) {
+    console.warn(
+      `[discord] inject: no listeners for channel ` +
+        `${chan.name} (${chan.id})`,
+    );
+    return 0;
+  }
+
+  send([...seen], line);
+  return seen.size;
+}
+
 /**
  * Inbound: inject a Discord message into a game channel.
  * Does not re-emit channel:message — caller emits with source:"discord".
@@ -85,15 +177,16 @@ export async function injectChannelMessage(opts: {
   displayName: string;
   text: string;
 }): Promise<boolean> {
-  // Query by `id` (always lowercase) — `name` preserves input case
-  // and may not match a lowercased lookup.
-  const id = opts.channelName.toLowerCase().trim();
-  const chans = new DBO<IChanRow>("server.chans");
-  const allChans = await chans.all();
-  console.log(`[discord] All channels in DB:`, JSON.stringify(allChans));
-  const chan = await chans.queryOne({ id });
+  const chan = await resolveGameChannel(opts.channelName);
   if (!chan) {
-    console.warn(`[discord] inject: unknown channel "${id}"`);
+    const chans = new DBO<IChanRow>("server.chans");
+    const known = (await chans.all()).map(
+      (c) => `${c.id}/${c.name}/${c.alias ?? ""}`,
+    );
+    console.warn(
+      `[discord] inject: unknown channel ` +
+        `"${opts.channelName}" known=[${known.join(", ")}]`,
+    );
     return false;
   }
 
@@ -101,6 +194,11 @@ export async function injectChannelMessage(opts: {
   if (!body) return false;
 
   const header = chan.header ? `${chan.header} ` : "";
-  rooms.broadcast(chan.name, `${header}${body}`);
+  const line = `${header}${body}`;
+  const n = await deliverToGameChannel(chan, line);
+  console.log(
+    `[discord] inject → ${chan.name} ` +
+      `(${n} listener${n === 1 ? "" : "s"})`,
+  );
   return true;
 }

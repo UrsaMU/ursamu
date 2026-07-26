@@ -289,18 +289,34 @@ function formatIdle(lastCommand: number | undefined): string {
 }
 
 function getShortDesc(obj: IDBObj): string {
-  const attrsState = (obj.state?.attributes as { name?: string; value?: string }[]) || [];
-  const attrsData = (obj.data?.attributes as { name?: string; value?: string }[]) || [];
-  const attrs = [...attrsState, ...attrsData];
+  // Hydrated objects expose storage `data` as `state`.
+  const attrs =
+    (obj.state?.attributes as { name?: string; value?: string }[]) ||
+    [];
   const sd = attrs.find((a) =>
-    a.name?.toLowerCase() === "short-desc" || a.name?.toLowerCase() === "shortdesc"
+    a.name?.toLowerCase() === "short-desc" ||
+    a.name?.toLowerCase() === "shortdesc"
   );
-  return sd?.value || "";
+  if (sd?.value) return sd.value;
+  // Flat state keys used by some plugins / set commands.
+  const flat =
+    (obj.state?.["short-desc"] as string | undefined) ||
+    (obj.state?.shortdesc as string | undefined);
+  return flat || "";
 }
 
 function roleTag(obj: IDBObj): string {
-  const configured = getConfig<Array<{ flag: string; display: string }>>("plugins.globals.theme.look.roleTags") || ROLE_TAGS;
-  for (const t of configured) if (obj.flags?.has(t.flag)) return t.display;
+  // Empty array is truthy — treat missing/empty as "use built-in defaults".
+  const configured = getConfig<
+    Array<{ flag: string; display: string }>
+  >("plugins.globals.theme.look.roleTags");
+  const tags =
+    Array.isArray(configured) && configured.length > 0
+      ? configured
+      : ROLE_TAGS;
+  for (const t of tags) {
+    if (obj.flags?.has(t.flag)) return t.display;
+  }
   return "";
 }
 

@@ -516,26 +516,41 @@ async function repairPlayerLocations(
 }
 
 /**
- * Initialize default channels if they don't exist
+ * Initialize default channels if they don't exist.
+ * Prefer plugins.channels.defaults (same shape as @ursamu/channels)
+ * so the engine and plugin seed identical records.
  */
 async function initializeDefaultChannels() {
   const channels = await chans.all();
+  if (channels.length) return;
 
-  if (!channels.length) {
-    await chans.create({
-      id: "pub",
-      name: "Public",
-      header: "%ch%cc[Public]%cn",
-      alias: "pub",
-    });
+  // Skip when @ursamu/channels will seed on engine:ready —
+  // avoids duplicate Public rows (id "pub" vs "public").
+  const pluginList = getConfig<string[]>("server.plugins", []) ?? [];
+  if (pluginList.some((p) => /channels/i.test(p))) {
+    console.log(
+      "[startup] Skipping built-in channel seed — " +
+        "@ursamu/channels will seed from config.",
+    );
+    return;
+  }
 
+  type ChanDef = { name: string; alias: string; lock?: string };
+  const defaults = getConfig<ChanDef[]>("plugins.channels.defaults") ?? [
+    { name: "Public", alias: "pub", lock: "connected" },
+    { name: "Admin", alias: "ad", lock: "connected admin+" },
+  ];
+
+  for (const def of defaults) {
+    const id = def.name.toLowerCase();
     await chans.create({
-      id: "admin",
-      name: "Admin",
-      header: "%ch%cy[Admin]%cn",
-      alias: "ad",
-      lock: "admin+",
+      id,
+      name: def.name,
+      header: `%ch%cc[${def.name}]%cn`,
+      alias: def.alias,
+      lock: def.lock || "",
     });
+    console.log(`[startup] Seeded channel ${def.name} (${def.alias})`);
   }
 }
 

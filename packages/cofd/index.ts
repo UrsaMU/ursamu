@@ -167,7 +167,7 @@ export const plugin: IPlugin = {
   ],
 
   init: () => {
-    registerHelpDir(new URL("./help", import.meta.url).pathname, "cofd");
+    registerHelpDir(new URL("./help", import.meta.url), "cofd");
     registerJobBuckets(["SHEET", "DOWNTIME"]);
     registerPluginRoute("/api/v1/cofd", routeHandler);
     gameHooks.on("player:move", onPlayerMove);

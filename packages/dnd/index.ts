@@ -20,7 +20,7 @@ export const plugin: IPlugin = {
   ],
 
   init: () => {
-    registerHelpDir(new URL("./help", import.meta.url).pathname, "dnd");
+    registerHelpDir(new URL("./help", import.meta.url), "dnd");
     initDndCombat();
 
     const dropCmd = cmds.find(c => c.name === "drop");

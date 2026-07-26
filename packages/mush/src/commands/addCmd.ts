@@ -164,6 +164,7 @@ export async function loadDefaultCommands(): Promise<void> {
   await import("../verbs/js-eval.ts");
   await import("../verbs/avatar.ts");
   await import("../verbs/moniker.ts");
+  await import("../verbs/gradient.ts");
   await import("../verbs/softcode-trigger.ts");
   await import("../verbs/softcode-wait.ts");
   await import("../verbs/softcode-dolist.ts");

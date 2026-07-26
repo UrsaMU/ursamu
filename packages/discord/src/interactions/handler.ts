@@ -69,7 +69,14 @@ export async function handleInteraction(req: Request): Promise<Response> {
       >) ?? [];
 
     if (name === "help") {
-      return await handleHelpCommand(options);
+      try {
+        return await handleHelpCommand(options);
+      } catch (e: unknown) {
+        console.error("[discord] HTTP /help failed:", e);
+        return ephemeralText(
+          "Help failed to load. Try again in a moment.",
+        );
+      }
     }
     
     // Resolve Discord User ID from member or direct user payload

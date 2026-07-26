@@ -173,7 +173,7 @@ const ${varName}Plugin: IPlugin = {
 
   init: () => {
     registerPluginRoute("/api/v1/${name}", ${handlerName});
-    registerHelpDir(new URL("./help", import.meta.url).pathname, "${name}");
+    registerHelpDir(new URL("./help", import.meta.url), "${name}");
     // gameHooks.on("player:login", onLogin);
     return true;
   },
@@ -998,7 +998,7 @@ import { registerHelpDir } from "jsr:@ursamu/help-plugin";
 export const plugin: IPlugin = {
   init: async () => {
     registerHelpDir(
-      new URL("../help", import.meta.url).pathname,
+      new URL("../help", import.meta.url),
       "${name}",  // section name shown in +help index
     );
     return true;

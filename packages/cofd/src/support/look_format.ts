@@ -130,10 +130,15 @@ function getCharShortDesc(obj: IDBObj): string {
 }
 
 function roleTag(obj: IDBObj): string {
+  // Empty array is truthy — treat missing/empty as built-in defaults.
   const configured = getConfig<
     Array<{ flag: string; display: string }>
-  >("plugins.globals.theme.look.roleTags") || ROLE_TAGS;
-  for (const t of configured) {
+  >("plugins.globals.theme.look.roleTags");
+  const tags =
+    Array.isArray(configured) && configured.length > 0
+      ? configured
+      : ROLE_TAGS;
+  for (const t of tags) {
     if (obj.flags?.has(t.flag)) return t.display;
   }
   return "";

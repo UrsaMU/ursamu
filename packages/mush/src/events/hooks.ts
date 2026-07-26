@@ -144,11 +144,17 @@ export const hooks = {
     } catch (e) {
       console.error("[Hooks] aconnect error:", e);
     }
-    gameHooks.emit("player:login", {
-      actorId:   player.id,
-      actorName: (player.data?.name as string) || player.id,
-      socketId,
-    }).catch(e => console.error("[GameHooks] player:login:", e));
+    // Await listeners (channel auto-join, etc.) so login finishes
+    // only after data.channels is updated and rooms are joined.
+    try {
+      await gameHooks.emit("player:login", {
+        actorId: player.id,
+        actorName: (player.data?.name as string) || player.id,
+        socketId,
+      });
+    } catch (e: unknown) {
+      console.error("[GameHooks] player:login:", e);
+    }
   },
 
   adisconnect: async (player: IDBOBJ, socketId?: string): Promise<void> => {

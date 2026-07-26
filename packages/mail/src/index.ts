@@ -78,7 +78,7 @@ export const plugin: IPlugin = {
     registerPluginRoute("/api/v1/mail", mailRouteHandler);
     try {
       registerHelpDir(
-        new URL("../help", import.meta.url).pathname,
+        new URL("../help", import.meta.url),
         "mail",
       );
     } catch (e: unknown) {

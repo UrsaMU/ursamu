@@ -39,7 +39,7 @@ const plugin: IPlugin = {
 
   init: () => {
     registerHelpDir(
-      new URL("../help", import.meta.url).pathname,
+      new URL("../help", import.meta.url),
       "bbs",
     );
     registerPluginRoute("/api/v1/boards", bboardsRouteHandler);

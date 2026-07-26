@@ -90,6 +90,31 @@ async function copySystemScripts(targetDir: string): Promise<void> {
   console.log(`Created system/scripts/ (${copied} scripts)`);
 }
 
+/**
+ * Game-level ./help/ is optional site overrides only.
+ * Plugin topics load from each package's help/ via registerHelpDir
+ * (local file: or JSR https://) — do not vendor package help here.
+ */
+async function noteHelpDir(targetDir: string): Promise<void> {
+  const dest = join(targetDir, "help");
+  await Deno.mkdir(dest, { recursive: true });
+  await Deno.writeTextFile(
+    join(dest, "README.md"),
+    [
+      "# Site help overrides",
+      "",
+      "Put game-specific `.md` topics here only.",
+      "Plugin help lives in each package's `help/` folder and is",
+      "registered with `registerHelpDir` — the FileProvider loads",
+      "it from the package (local checkout or JSR publish).",
+      "",
+    ].join("\n"),
+  );
+  console.log(
+    "Created help/ (overrides only — plugins ship their own help)",
+  );
+}
+
 export interface ProjectScaffoldOpts {
   isLocal: boolean;
   engineRelPath: string;
@@ -133,6 +158,7 @@ export async function scaffoldProject(
   console.log("Created wiki/home.md");
 
   await copySystemScripts(targetDir);
+  await noteHelpDir(targetDir);
 
   await Deno.writeTextFile(join(targetDir, "src", "main.ts"),   gameMainTs(name, isLocal));
   console.log("Created src/main.ts");

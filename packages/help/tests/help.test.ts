@@ -197,6 +197,65 @@ describe("FileProvider", () => {
   it("registerHelpDir() is a function", () => {
     assertEquals(typeof registerHelpDir, "function");
   });
+
+  it("honors dark: true and hidden: true frontmatter", async () => {
+    const dir = await Deno.makeTempDir({ prefix: "help_dark_" });
+    try {
+      await Deno.writeTextFile(
+        `${dir}/visible.md`,
+        "# Visible\n\nShown in index.\n",
+      );
+      await Deno.writeTextFile(
+        `${dir}/staff-only.md`,
+        "---\ndark: true\n---\n# Staff\n\nHidden body.\n",
+      );
+      await Deno.writeTextFile(
+        `${dir}/legacy-hide.md`,
+        "---\nhidden: true\n---\n# Legacy\n\nAlso hidden.\n",
+      );
+      bustCache();
+      registerHelpDir(dir, "test-dark");
+      const entries = await new FileProvider().all();
+      const byName = new Map(entries.map((e) => [e.name, e]));
+
+      assertEquals(byName.get("visible")?.hidden, false);
+      assertEquals(byName.get("staff-only")?.hidden, true);
+      assertEquals(byName.get("legacy-hide")?.hidden, true);
+    } finally {
+      bustCache();
+      await Deno.remove(dir, { recursive: true }).catch(() => {});
+    }
+  });
+
+  it("hides underscore-prefixed files and folders", async () => {
+    const dir = await Deno.makeTempDir({ prefix: "help_us_" });
+    try {
+      await Deno.mkdir(`${dir}/_admin`);
+      await Deno.writeTextFile(
+        `${dir}/_admin/reboot.md`,
+        "# Reboot\n\nAdmin only.\n",
+      );
+      await Deno.writeTextFile(
+        `${dir}/_draft.md`,
+        "# Draft\n\nNot listed.\n",
+      );
+      await Deno.writeTextFile(
+        `${dir}/public.md`,
+        "# Public\n\nListed.\n",
+      );
+      bustCache();
+      registerHelpDir(dir, "test-us");
+      const entries = await new FileProvider().all();
+      const byName = new Map(entries.map((e) => [e.name, e]));
+
+      assertEquals(byName.get("public")?.hidden, false);
+      assertEquals(byName.get("draft")?.hidden, true);
+      assertEquals(byName.get("admin/reboot")?.hidden, true);
+    } finally {
+      bustCache();
+      await Deno.remove(dir, { recursive: true }).catch(() => {});
+    }
+  });
 });
 
 // ── DbProvider ────────────────────────────────────────────────────────────────

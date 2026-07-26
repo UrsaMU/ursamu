@@ -4,17 +4,14 @@
  */
 
 import type { HelpEntry } from "@ursamu/help";
-import { COLORS } from "./helpers.ts";
+import { COLORS, stripMushMarkup } from "./helpers.ts";
 import type { DiscordEmbed } from "./webhook.ts";
 
 const DESC_MAX = 4096;
 
 /** Strip MUSH codes and normalize markdown for Discord embeds. */
 export function markdownToDiscord(md: string): string {
-  let out = md;
-  out = out.replace(/%(ch|cn|c[rgbcmyw]|b[rgbcmyw]|[rnthiub])/gi, "");
-  // deno-lint-ignore no-control-regex
-  out = out.replace(/\x1b\[[0-9;]*m/g, "");
+  let out = stripMushMarkup(md);
   // YAML frontmatter
   out = out.replace(/^---[\s\S]*?---\n?/m, "");
   // ATX headers → bold lines

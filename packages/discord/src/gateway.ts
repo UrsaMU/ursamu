@@ -158,8 +158,15 @@ async function onMessage(token: string, raw: string): Promise<void> {
         _botUserId = payload.d?.user?.id ?? null;
         console.log("[discord] Gateway READY.");
       } else if (t === "MESSAGE_CREATE") {
-        console.log(`[discord] Received MESSAGE_CREATE from ${payload.d?.author?.username}: "${payload.d?.content}"`);
+        console.log(
+          `[discord] Received MESSAGE_CREATE from ` +
+            `${payload.d?.author?.username}: ` +
+            `"${payload.d?.content}"`,
+        );
         await onMessageCreate(token, payload.d);
+      } else if (t === "INTERACTION_CREATE") {
+        // Slash commands without a public HTTPS interactions URL.
+        await onInteractionCreate(token, payload.d);
       }
       break;
     }
@@ -175,6 +182,99 @@ async function onMessage(token: string, raw: string): Promise<void> {
   }
 }
 
+/**
+ * Respond to a slash/autocomplete interaction via REST callback.
+ * Works without a public Interactions Endpoint URL.
+ */
+// deno-lint-ignore no-explicit-any
+async function onInteractionCreate(
+  _token: string,
+  interaction: any,
+): Promise<void> {
+  if (!interaction?.id || !interaction?.token) return;
+
+  const type = interaction.type as number;
+  const name = interaction.data?.name as string | undefined;
+  const callbackUrl =
+    `${API}/interactions/${interaction.id}/${interaction.token}/callback`;
+
+  try {
+    let body: Record<string, unknown>;
+
+    // type 2 APPLICATION_COMMAND, type 4 AUTOCOMPLETE
+    if (type === 2 && name === "help") {
+      const {
+        buildHelpEmbeds,
+        helpCommandPayload,
+      } = await import("./interactions/help-command.ts");
+      const options =
+        (interaction.data?.options as Array<
+          { name: string; value?: string }
+        >) ?? [];
+      const embeds = await buildHelpEmbeds(options);
+      body = helpCommandPayload(embeds);
+    } else if (type === 4 && name === "help") {
+      const { buildHelpAutocomplete } = await import(
+        "./interactions/help-command.ts"
+      );
+      const options =
+        (interaction.data?.options as Array<
+          { name: string; value?: string; focused?: boolean }
+        >) ?? [];
+      const focused = options.find((o) => o.focused) ??
+        options.find((o) => o.name === "topic");
+      body = await buildHelpAutocomplete(
+        focused
+          ? {
+            name: focused.name,
+            value: String(focused.value ?? ""),
+          }
+          : undefined,
+      );
+    } else if (type === 2) {
+      // Unknown slash — acknowledge so Discord doesn't show an error.
+      body = {
+        type: 4,
+        data: {
+          flags: 64,
+          content: `Unknown command: \`${name ?? "?"}\``,
+        },
+      };
+    } else {
+      return;
+    }
+
+    const res = await fetch(callbackUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.error(
+        `[discord] Interaction callback ${res.status}: ${text}`,
+      );
+    }
+  } catch (e: unknown) {
+    console.error("[discord] INTERACTION_CREATE failed:", e);
+    try {
+      await fetch(callbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: 4,
+          data: {
+            flags: 64,
+            content: "Help failed to load. Try `+help` in chat.",
+          },
+        }),
+      });
+    } catch {
+      /* ignore secondary failure */
+    }
+  }
+}
+
 // deno-lint-ignore no-explicit-any
 async function onMessageCreate(token: string, msg: any): Promise<void> {
   if (!msg || msg.webhook_id) return; // loop: ignore webhook posts
@@ -184,50 +284,37 @@ async function onMessageCreate(token: string, msg: any): Promise<void> {
   const channelId = String(msg.channel_id ?? "");
   if (!channelId) return;
 
-  let content = String(msg.content ?? "").trim();
+  const content = String(msg.content ?? "").trim();
 
   // Handle +help trigger directly in Discord chat (works in any channel)
   if (content.toLowerCase().startsWith("+help")) {
-    const topicArg = content.slice(5).trim();
-    const { helpRegistry, slugify } = await import("@ursamu/help");
-    const { embedForEntry, embedForIndex, embedNotFound } = await import("./help-embed.ts");
-    
-    let embed;
-    if (topicArg) {
-      const slug = slugify(topicArg);
-      const entry = await helpRegistry.lookup(slug);
-      if (entry) {
-        embed = embedForEntry(entry);
-      } else {
-        // Fall back to checking if the argument is a section name
-        const { embedForSection } = await import("./help-embed.ts");
-        const sectionEntries = await helpRegistry.inSection(slug);
-        if (sectionEntries.length > 0) {
-          embed = embedForSection(topicArg, sectionEntries);
-        } else {
-          embed = embedNotFound(topicArg);
-        }
-      }
-    } else {
-      const sections = await helpRegistry.sections();
-      const all = await helpRegistry.all();
-      const visible = all.filter((e) => !e.hidden);
-      embed = embedForIndex(sections, visible.length);
-    }
-
-    // Post the reply to the same channel via Discord REST API
     try {
-      await fetch(`${API}/channels/${channelId}/messages`, {
+      const topicArg = content.slice(5).trim();
+      const options = topicArg
+        ? [{ name: "topic", value: topicArg }]
+        : [];
+      const { buildHelpEmbeds } = await import(
+        "./interactions/help-command.ts"
+      );
+      const embeds = await buildHelpEmbeds(options);
+
+      const res = await fetch(`${API}/channels/${channelId}/messages`, {
         method: "POST",
         headers: {
           Authorization: `Bot ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          embeds: [embed],
-          message_reference: { message_id: msg.id }, // Reply to the user's message
+          embeds,
+          message_reference: { message_id: msg.id },
         }),
       });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error(
+          `[discord] +help reply ${res.status}: ${text}`,
+        );
+      }
     } catch (e: unknown) {
       console.error("[discord] Failed to reply with help embed:", e);
     }
@@ -427,8 +514,16 @@ async function onMessageCreate(token: string, msg: any): Promise<void> {
   if (isSceneMsg) return;
 
   const gameChan = await gameChannelForDiscord(channelId);
-  console.log(`[discord] Resolved Discord channel ${channelId} -> Game channel "${gameChan || "(none)"}"`);
-  if (!gameChan) return;
+  if (!gameChan) {
+    console.log(
+      `[discord] No game link for Discord channel ${channelId}`,
+    );
+    return;
+  }
+  console.log(
+    `[discord] ${channelId} → game "${gameChan}" ` +
+      `from ${msg.author?.username}: ${content.slice(0, 80)}`,
+  );
   
   // Append URLs of any attachments (images, videos, files)
   if (Array.isArray(msg.attachments) && msg.attachments.length > 0) {

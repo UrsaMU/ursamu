@@ -119,7 +119,13 @@ export async function matchChannel(
   const channel = userChans.find((c: IChanEntry) => c.alias === trig);
   if (!channel) return false;
 
-  const chan = await chans.queryOne({ name: channel.channel });
+  // Match by display name or id (links/discord use lowercase ids).
+  const allChans = await chans.all();
+  const want = channel.channel.toLowerCase();
+  const chan = allChans.find((c) =>
+    c.name.toLowerCase() === want ||
+    c.id.toLowerCase() === want
+  );
   if (!chan) return false;
 
   const enHydrated = hydrate(en);

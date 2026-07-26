@@ -20,7 +20,7 @@
     "@std/fs": "jsr:@std/fs@^0.224.0",
     "@std/semver": "jsr:@std/semver@^1.0.0",
     "djwt": "jsr:@zaubrik/djwt@^3.0.2",
-    "zod": "npm:zod@^4.4.3",
+    "zod": "npm:zod@4.4.3",
     "@nicia-ai/typegraph": "npm:@nicia-ai/typegraph@^0.31.0",
     "@nicia-ai/typegraph/postgres/pglite":
       "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",

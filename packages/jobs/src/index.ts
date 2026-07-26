@@ -29,7 +29,7 @@ const jobsPlugin: IPlugin = {
     registerPluginRoute("/api/v1/jobs", jobsRouteHandler);
     registerNotifyHooks();
     registerHelpDir(
-      new URL("../help", import.meta.url).pathname,
+      new URL("../help", import.meta.url),
       "jobs",
     );
 

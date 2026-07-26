@@ -95,7 +95,7 @@ const onJobCreated = async (job: IJob): Promise<void> => {
   
   const payload = {
     username: clean(job.submitterName),
-    avatar_url: avatar,
+    ...(avatar ? { avatar_url: avatar } : {}),
     embeds: [{
       color: COLORS.green,
       title: `New Job #${job.number} — ${job.title}`,
@@ -192,7 +192,7 @@ const onJobCommented = async (
     jobNumber: job.number,
     payload: {
       username: clean(comment.authorName),
-      avatar_url: avatar,
+      ...(avatar ? { avatar_url: avatar } : {}),
       embeds: [{
         color: COLORS.blurple,
         title: "New Comment",
