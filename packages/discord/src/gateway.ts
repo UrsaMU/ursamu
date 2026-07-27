@@ -185,6 +185,9 @@ async function onMessage(token: string, raw: string): Promise<void> {
 /**
  * Respond to a slash/autocomplete interaction via REST callback.
  * Works without a public Interactions Endpoint URL.
+ *
+ * Discord requires an ack within 3s. /help loads the full registry
+ * (200+ topics) — DEFER immediately, then PATCH @original.
  */
 // deno-lint-ignore no-explicit-any
 async function onInteractionCreate(
@@ -197,23 +200,50 @@ async function onInteractionCreate(
   const name = interaction.data?.name as string | undefined;
   const callbackUrl =
     `${API}/interactions/${interaction.id}/${interaction.token}/callback`;
+  const appId = String(interaction.application_id ?? "");
+  const iToken = String(interaction.token ?? "");
 
   try {
-    let body: Record<string, unknown>;
-
-    // type 2 APPLICATION_COMMAND, type 4 AUTOCOMPLETE
+    // type 2 APPLICATION_COMMAND
     if (type === 2 && name === "help") {
       const {
-        buildHelpEmbeds,
-        helpCommandPayload,
-      } = await import("./interactions/help-command.ts");
+        deferredEphemeralPayload,
+        followUpEphemeral,
+      } = await import("./interactions/respond.ts");
+      const { buildHelpEmbeds } = await import(
+        "./interactions/help-command.ts"
+      );
+
+      // Ack first — must beat Discord's 3s deadline.
+      const ack = await fetch(callbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(deferredEphemeralPayload()),
+      });
+      if (!ack.ok) {
+        const text = await ack.text().catch(() => "");
+        // 400 "already responded" = HTTP interactions path handled it.
+        if (ack.status !== 400) {
+          console.error(
+            `[discord] /help defer ${ack.status}: ${text.slice(0, 200)}`,
+          );
+        }
+        return;
+      }
+
       const options =
         (interaction.data?.options as Array<
           { name: string; value?: string }
         >) ?? [];
-      const embeds = await buildHelpEmbeds(options);
-      body = helpCommandPayload(embeds);
-    } else if (type === 4 && name === "help") {
+      followUpEphemeral(appId, iToken, async () => {
+        const embeds = await buildHelpEmbeds(options);
+        return { embeds };
+      });
+      return;
+    }
+
+    // type 4 AUTOCOMPLETE — cannot defer
+    if (type === 4 && name === "help") {
       const { buildHelpAutocomplete } = await import(
         "./interactions/help-command.ts"
       );
@@ -223,7 +253,7 @@ async function onInteractionCreate(
         >) ?? [];
       const focused = options.find((o) => o.focused) ??
         options.find((o) => o.name === "topic");
-      body = await buildHelpAutocomplete(
+      const body = await buildHelpAutocomplete(
         focused
           ? {
             name: focused.name,
@@ -231,29 +261,39 @@ async function onInteractionCreate(
           }
           : undefined,
       );
-    } else if (type === 2) {
-      // Unknown slash — acknowledge so Discord doesn't show an error.
-      body = {
-        type: 4,
-        data: {
-          flags: 64,
-          content: `Unknown command: \`${name ?? "?"}\``,
-        },
-      };
-    } else {
+      const res = await fetch(callbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error(
+          `[discord] autocomplete ${res.status}: ${text.slice(0, 200)}`,
+        );
+      }
       return;
     }
 
-    const res = await fetch(callbackUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      console.error(
-        `[discord] Interaction callback ${res.status}: ${text}`,
-      );
+    if (type === 2) {
+      // Unknown slash — acknowledge so Discord doesn't show an error.
+      const res = await fetch(callbackUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: 4,
+          data: {
+            flags: 64,
+            content: `Unknown command: \`${name ?? "?"}\``,
+          },
+        }),
+      });
+      if (!res.ok && res.status !== 400) {
+        const text = await res.text().catch(() => "");
+        console.error(
+          `[discord] Interaction callback ${res.status}: ${text}`,
+        );
+      }
     }
   } catch (e: unknown) {
     console.error("[discord] INTERACTION_CREATE failed:", e);

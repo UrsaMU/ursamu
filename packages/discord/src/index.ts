@@ -47,7 +47,7 @@ async function interactionsRoute(
 
 const discordPlugin: IPlugin = {
   name: "discord",
-  version: "0.2.0",
+  version: "0.2.3",
   description:
     "Discord bridge — webhooks, two-way channel chat, /help slash command",
   dependencies: [

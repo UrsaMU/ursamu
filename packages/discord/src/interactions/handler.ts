@@ -8,9 +8,13 @@ import {
   verifyDiscordSignature,
 } from "./verify.ts";
 import {
-  handleHelpAutocomplete,
-  handleHelpCommand,
+  buildHelpAutocomplete,
+  buildHelpEmbeds,
 } from "./help-command.ts";
+import {
+  deferredEphemeralResponse,
+  followUpEphemeral,
+} from "./respond.ts";
 
 // deno-lint-ignore no-explicit-any
 type Interaction = Record<string, any>;
@@ -55,10 +59,13 @@ export async function handleInteraction(req: Request): Promise<Response> {
     return json({ error: "Invalid JSON" }, 400);
   }
 
-  // type 1 PING
+  // type 1 PING — must be instant
   if (interaction.type === 1) {
     return json({ type: 1 });
   }
+
+  const appId = String(interaction.application_id ?? "");
+  const iToken = String(interaction.token ?? "");
 
   // type 2 APPLICATION_COMMAND
   if (interaction.type === 2) {
@@ -68,19 +75,20 @@ export async function handleInteraction(req: Request): Promise<Response> {
         { name: string; value?: string }
       >) ?? [];
 
+    // /help can scan 200+ topics — defer within 3s, fill later.
     if (name === "help") {
-      try {
-        return await handleHelpCommand(options);
-      } catch (e: unknown) {
-        console.error("[discord] HTTP /help failed:", e);
-        return ephemeralText(
-          "Help failed to load. Try again in a moment.",
-        );
-      }
+      followUpEphemeral(appId, iToken, async () => {
+        const embeds = await buildHelpEmbeds(options);
+        return { embeds };
+      });
+      return deferredEphemeralResponse();
     }
-    
-    // Resolve Discord User ID from member or direct user payload
-    const discordUserId = String(interaction.member?.user?.id || interaction.user?.id || "");
+
+    const discordUserId = String(
+      interaction.member?.user?.id ||
+        interaction.user?.id ||
+        "",
+    );
 
     if (name === "jobs") {
       const { handleJobsSlash } = await import("./jobs-commands.ts");
@@ -92,13 +100,18 @@ export async function handleInteraction(req: Request): Promise<Response> {
     }
     if (name === "scenes") {
       const { handleScenesSlash } = await import("./scenes-commands.ts");
-      return await handleScenesSlash(discordUserId, options, String(interaction.channel_id ?? ""), creds.botToken);
+      return await handleScenesSlash(
+        discordUserId,
+        options,
+        String(interaction.channel_id ?? ""),
+        creds.botToken,
+      );
     }
 
     return ephemeralText(`Unknown command: \`${name ?? "?"}\``);
   }
 
-  // type 4 APPLICATION_COMMAND_AUTOCOMPLETE
+  // type 4 APPLICATION_COMMAND_AUTOCOMPLETE — cannot defer; keep fast
   if (interaction.type === 4) {
     const name = interaction.data?.name as string | undefined;
     if (name === "help") {
@@ -108,11 +121,21 @@ export async function handleInteraction(req: Request): Promise<Response> {
         >) ?? [];
       const focused = options.find((o) => o.focused) ??
         options.find((o) => o.name === "topic");
-      return await handleHelpAutocomplete(
-        focused
-          ? { name: focused.name, value: String(focused.value ?? "") }
-          : undefined,
-      );
+      try {
+        return Response.json(
+          await buildHelpAutocomplete(
+            focused
+              ? {
+                name: focused.name,
+                value: String(focused.value ?? ""),
+              }
+              : undefined,
+          ),
+        );
+      } catch (e: unknown) {
+        console.error("[discord] /help autocomplete failed:", e);
+        return json({ type: 8, data: { choices: [] } });
+      }
     }
     return json({ type: 8, data: { choices: [] } });
   }

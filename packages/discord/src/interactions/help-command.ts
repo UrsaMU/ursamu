@@ -79,16 +79,30 @@ export async function handleHelpCommand(
   }
 }
 
+/** Topic-name cache for autocomplete (must stay under 3s). */
+let _nameCache: { at: number; names: string[] } | null = null;
+const NAME_CACHE_MS = 60_000;
+
+async function cachedTopicNames(): Promise<string[]> {
+  const now = Date.now();
+  if (_nameCache && now - _nameCache.at < NAME_CACHE_MS) {
+    return _nameCache.names;
+  }
+  const all = await helpRegistry.all();
+  const names = all
+    .filter((e) => !e.hidden)
+    .map((e) => e.name)
+    .sort((a, b) => a.localeCompare(b));
+  _nameCache = { at: now, names };
+  return names;
+}
+
 /** Autocomplete choices payload (type 8). */
 export async function buildHelpAutocomplete(
   focused: { name: string; value: string } | undefined,
 ): Promise<Record<string, unknown>> {
   const prefix = (focused?.value ?? "").toLowerCase().trim();
-  const all = await helpRegistry.all();
-  let names = all
-    .filter((e) => !e.hidden)
-    .map((e) => e.name)
-    .sort((a, b) => a.localeCompare(b));
+  let names = await cachedTopicNames();
 
   if (prefix) {
     names = names.filter((n) => n.includes(prefix));
