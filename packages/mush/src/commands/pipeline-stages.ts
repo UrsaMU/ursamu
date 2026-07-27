@@ -267,7 +267,8 @@ export async function matchSoftcodePattern(
 
 /**
  * Match input against exit names in the actor's current room.
- * Returns true if an exit was taken.
+ * Returns true if an exit was taken (or lock-failed).
+ * Messaging: TinyMUX SUCC/OSUCC/ASUCC + DROP/ODROP/ADROP + FAIL/*.
  */
 export async function matchExits(
   socketId: string,
@@ -280,79 +281,22 @@ export async function matchExits(
   if (!actor?.location) return false;
 
   const trimmedMsg = msg.trim().toLowerCase();
-  const exits = await dbojs.query({ location: actor.location, flags: /exit/i });
+  const exits = await dbojs.query({
+    location: actor.location,
+    flags: /exit/i,
+  });
 
   for (const exit of exits) {
     const rawName = (exit.data?.name as string) || exit.id;
-    const aliases = rawName.split(";").map((p) => p.trim().toLowerCase());
-    if (!aliases.some((a) => a === trimmedMsg || trimmedMsg.startsWith(a))) continue;
+    const aliases = rawName
+      .split(";")
+      .map((p) => p.trim().toLowerCase())
+      .filter(Boolean);
+    // Exact alias match only (avoids "n" eating "nowhere").
+    if (!aliases.includes(trimmedMsg)) continue;
 
-    const destination = exit.data?.destination as string | undefined;
-    if (!destination) {
-      send([socketId], "That exit leads nowhere.");
-      return true;
-    }
-
-    const destRoom = await dbojs.queryOne({ id: destination });
-    if (!destRoom) {
-      send([socketId], "That exit leads nowhere.");
-      return true;
-    }
-
-    const fromId = actor.location;
-    const exitName = aliases[0] || rawName;
-
-    actor.data ||= {};
-    actor.data.lastCommand = Date.now();
-    await dbojs.modify({ id: actorId }, "$set", {
-      location: destination,
-      data: actor.data,
-    } as Partial<typeof actor>);
-
-    const actorName = (actor.data?.moniker as string) || (actor.data?.name as string) || "Someone";
-    const fromRoom = await dbojs.queryOne({ id: fromId });
-    const fromContents = await dbojs.query({ location: fromId });
-
-    // Announce departure
-    const odrop = exit.data?.odrop as string | undefined;
-    const departMsg = odrop || `${actorName} has left.`;
-    for (const c of fromContents) {
-      if (c.id !== actorId && c.flags.includes("connected")) {
-        send([c.id], departMsg);
-      }
-    }
-
-    // Announce arrival
-    const destContents = await dbojs.query({ location: destination });
-    const osucc = exit.data?.osucc as string | undefined;
-    const arriveMsg = osucc || `${actorName} has arrived.`;
-    for (const c of destContents) {
-      if (c.id !== actorId && c.flags.includes("connected")) {
-        send([c.id], arriveMsg);
-      }
-    }
-
-    const u = await createNativeSDK(socketId, actorId, {
-      name: exitName,
-      original: msg,
-      args: [],
-    });
-    // Trigger look
-    const { execLook } = await import("../verbs/look.ts");
-    await execLook(u);
-
-    const { gameHooks } = await import("@ursamu/core");
-    await (gameHooks as unknown as { emit(e: string, p: unknown): Promise<void> }).emit("player:move", {
-      actorId,
-      actorName,
-      fromRoomId: fromId,
-      toRoomId: destination,
-      fromRoomName: (fromRoom?.data?.name as string) || fromId,
-      toRoomName: (destRoom.data?.name as string) || destination,
-      exitName,
-    });
-
-    return true;
+    const { traverseExit } = await import("./exit-traverse.ts");
+    return await traverseExit(socketId, actor, exit, msg);
   }
   return false;
 }

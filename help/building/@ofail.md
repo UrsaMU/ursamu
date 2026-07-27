@@ -3,7 +3,7 @@ hidden: true
 ---
 # @OFAIL
 
-Sets the Other Fail message.
+Others-fail message (TinyMUX-style).
 
 ## Syntax
 
@@ -11,9 +11,11 @@ Sets the Other Fail message.
 
 ## Description
 
-Sets the message shown to _others_ in the room when a player fails to use an
-object.
+Shown to others when someone fails a lock (exit or thing). Actor name
+is prepended.
+
+On exits, if unset, defaults to: `tries to leave, but can't.`
 
 ## Example
 
-`@ofail North=tries the door but finds it locked.`
+`@ofail North=rattles the locked door.`
