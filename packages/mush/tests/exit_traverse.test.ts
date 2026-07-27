@@ -10,14 +10,17 @@ import type { IDBOBJ } from "../src/world/types.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
-Deno.test("defaultExitMsgs include exit name (TinyMUX-style)", OPTS, () => {
-  const d = defaultExitMsgs("North");
-  assertEquals(d.succ, "You go North.");
-  assertEquals(d.osucc, "goes North.");
+Deno.test("defaultExitMsgs: enter dest / leaves.", OPTS, () => {
+  const d = defaultExitMsgs({
+    exitName: "Chargen",
+    destName: "Character Generation",
+  });
+  assertEquals(d.succ, "You enter Character Generation.");
+  assertEquals(d.osucc, "leaves.");
   assertEquals(d.fail, "You can't go that way.");
   assertEquals(
     d.ofail,
-    "tries to leave through North, but fails.",
+    "tries to leave through Chargen, but fails.",
   );
   assertEquals(d.odrop, "has arrived.");
 });
