@@ -2,6 +2,7 @@
 
 import type { IUrsamuSDK, IDBObj } from "../commands/types.ts";
 import { evaluateLock } from "../world/locks.ts";
+import { nameMatches as matchName } from "../world/name-match.ts";
 
 /** True when container is in the room or held by the actor. */
 export function isNearbyContainer(
@@ -46,14 +47,7 @@ export async function canAccessContainer(
 }
 
 export function nameMatches(obj: IDBObj, query: string): boolean {
-  const q = query.trim().toLowerCase();
-  if (!q) return false;
-  if (q.startsWith("#") && obj.id === q.slice(1)) return true;
-  if (obj.id === q) return true;
-  const n = String(obj.state?.name ?? obj.name ?? "").toLowerCase();
-  if (n.startsWith(q)) return true;
-  const alias = String(obj.state?.alias ?? "").toLowerCase();
-  return alias === q;
+  return matchName(obj, query);
 }
 
 /** Find a thing by name among objects whose location is containerId. */

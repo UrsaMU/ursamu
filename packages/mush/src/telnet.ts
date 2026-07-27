@@ -287,12 +287,8 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
               "telnet",
               REAUTH_OK_MSG + "\r\n",
             ));
-            if (cid) {
-              sock?.send(JSON.stringify({
-                msg: "look",
-                data: { cid },
-              }));
-            }
+            // Do not force look here: on @restart the softcode/parser
+            // pipeline may still be loading, so look dumps raw %c codes.
             flushBuffer();
           }
 

@@ -12,6 +12,13 @@ import type { IUrsamuSDK } from "./types.ts";
 import { dbojs, hydrate } from "../world/dbobjs.ts";
 import { evaluateLock } from "../world/locks.ts";
 import { flags as flagsUtil } from "../world/flags.ts";
+import { pickNameMatch } from "../world/name-match.ts";
+import {
+  canEditObject,
+  canSeeAttr,
+  canSetAttr,
+  attrFlagsOf,
+} from "../world/permissions.ts";
 import {
   send,
   sendPayload,
@@ -113,17 +120,14 @@ async function resolveRoom(roomId: string | undefined): Promise<IDBObj & { broad
 }
 
 async function canEdit(actor: IDBObj, target: IDBObj): Promise<boolean> {
-  if (!actor || !target) return false;
-  if (actor.flags.has("superuser")) return true;
-  if (actor.flags.has("admin") || actor.flags.has("wizard")) return true;
-  const rawTarget = toRaw(target);
-  const owner = rawTarget.data?.owner as string | undefined;
-  if (owner && owner === actor.id) return true;
-  if (actor.id === target.id) return true;
-  return false;
+  return canEditObject(actor, target);
 }
 
-async function targetFn(actor: IDBObj, query: string, _global?: boolean): Promise<IDBObj | undefined> {
+async function targetFn(
+  actor: IDBObj,
+  query: string,
+  _global?: boolean,
+): Promise<IDBObj | undefined> {
   const q = query.trim();
   if (!q) return undefined;
 
@@ -140,28 +144,32 @@ async function targetFn(actor: IDBObj, query: string, _global?: boolean): Promis
     if (raw) return hydrate(raw);
   }
 
-  const rx = new RegExp(`^${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i");
-
-  // Search current room contents (including self)
+  // Room contents (players, things, exits — ;aliases on exits)
   const roomContents = actor.location
     ? await dbojs.query({ location: actor.location })
     : [];
-  const inRoom = roomContents.find((o) => rx.test((o.data?.name as string) || o.id));
+  const inRoom = pickNameMatch(roomContents, q);
   if (inRoom) return hydrate(inRoom);
 
-  // Check if self name/moniker matches query
-  const selfName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "";
-  if (rx.test(selfName)) return actor;
+  // Self by moniker / name / alias
+  if (pickNameMatch([{
+    id: actor.id,
+    name: actor.name,
+    state: actor.state,
+  }], q)) {
+    return actor;
+  }
 
-  // Search actor inventory
+  // Inventory
   const invContents = await dbojs.query({ location: actor.id });
-  const inInv = invContents.find((o) => rx.test((o.data?.name as string) || o.id));
+  const inInv = pickNameMatch(invContents, q);
   if (inInv) return hydrate(inInv);
 
-  // Global search if _global is true
+  // Global: scan for name / ;alias / data.alias
   if (_global) {
-    const all = await dbojs.query({ "data.name": rx });
-    if (all.length > 0) return hydrate(all[0]);
+    const all = await dbojs.query({});
+    const hit = pickNameMatch(all, q);
+    if (hit) return hydrate(hit);
   }
 
   return undefined;
@@ -691,30 +699,76 @@ export async function createNativeSDK(
       get: async (id: string, name: string): Promise<string | null> => {
         const obj = await dbojs.queryOne({ id });
         if (!obj) return null;
-        const attrs = (obj.data?.attributes as Array<{ name: string; value: string }> | undefined) || [];
-        const found = attrs.find((a) => a.name.toUpperCase() === name.toUpperCase());
-        return found?.value ?? null;
+        const fl = attrFlagsOf({ data: obj.data }, name);
+        if (!canSeeAttr(me.flags, name, fl)) return null;
+        const attrs =
+          (obj.data?.attributes as Array<{ name: string; value: string }> |
+            undefined) || [];
+        const found = attrs.find(
+          (a) => a.name.toUpperCase() === name.toUpperCase(),
+        );
+        if (found) return found.value ?? null;
+        // Flat data.* attrs (builder @set style)
+        const flat = obj.data?.[name] ?? obj.data?.[name.toLowerCase()];
+        return typeof flat === "string" ? flat : null;
       },
-      set: async (id: string, name: string, value: string, type = "attribute"): Promise<void> => {
+      set: async (
+        id: string,
+        name: string,
+        value: string,
+        type = "attribute",
+      ): Promise<void> => {
         const obj = await dbojs.queryOne({ id });
         if (!obj) return;
+        const tar = hydrate(obj);
+        const fl = attrFlagsOf({ data: obj.data }, name);
+        if (!(await canEditObject(me, tar))) return;
+        if (!canSetAttr(me.flags, name, fl)) return;
         obj.data ||= {};
         const attrs = (
-          (obj.data.attributes as Array<{ name: string; value: string; type?: string; setter?: string }>) || []
+          (obj.data.attributes as Array<{
+            name: string;
+            value: string;
+            type?: string;
+            setter?: string;
+          }>) || []
         );
-        const idx = attrs.findIndex((a) => a.name.toUpperCase() === name.toUpperCase());
-        const entry = { name: name.toUpperCase(), value, type, setter: me.id };
+        const idx = attrs.findIndex(
+          (a) => a.name.toUpperCase() === name.toUpperCase(),
+        );
+        const entry = {
+          name: name.toUpperCase(),
+          value,
+          type,
+          setter: me.id,
+        };
         if (idx >= 0) attrs[idx] = entry;
         else attrs.push(entry);
-        await dbojs.modify({ id }, "$set", { "data.attributes": attrs } as unknown as Partial<IDBOBJ>);
+        await dbojs.modify(
+          { id },
+          "$set",
+          { "data.attributes": attrs } as unknown as Partial<IDBOBJ>,
+        );
       },
       clear: async (id: string, name: string): Promise<boolean> => {
         const obj = await dbojs.queryOne({ id });
         if (!obj) return false;
-        const attrs = (obj.data?.attributes as Array<{ name: string }> | undefined) || [];
-        const filtered = attrs.filter((a) => a.name.toUpperCase() !== name.toUpperCase());
+        const tar = hydrate(obj);
+        const fl = attrFlagsOf({ data: obj.data }, name);
+        if (!(await canEditObject(me, tar))) return false;
+        if (!canSetAttr(me.flags, name, fl)) return false;
+        const attrs =
+          (obj.data?.attributes as Array<{ name: string }> | undefined) ||
+          [];
+        const filtered = attrs.filter(
+          (a) => a.name.toUpperCase() !== name.toUpperCase(),
+        );
         if (filtered.length === attrs.length) return false;
-        await dbojs.modify({ id }, "$set", { "data.attributes": filtered } as unknown as Partial<IDBOBJ>);
+        await dbojs.modify(
+          { id },
+          "$set",
+          { "data.attributes": filtered } as unknown as Partial<IDBOBJ>,
+        );
         return true;
       },
     },

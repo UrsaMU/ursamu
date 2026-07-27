@@ -4,10 +4,15 @@
 
 import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK, IDBObj } from "@ursamu/mush";
+import {
+  canSeeAttr,
+  attrFlagsOf,
+} from "@ursamu/mush/permissions";
 
 const SYSTEM_KEYS = new Set([
   "name", "moniker", "alias", "owner", "lock", "description",
   "flags", "id", "location", "home", "password", "channels",
+  "_attrflags", "attributes",
 ]);
 const HIDDEN_KEYS = new Set(["password"]);
 
@@ -72,8 +77,19 @@ EXAMPLES
       ? (rawChans as ChanEntry[]).map((c) => `${c.channel}(${c.alias})${c.active ? "" : " [off]"}`).join(", ")
       : "None";
 
-    const attributes = Object.entries(target.state).filter(
-      ([key]) => !SYSTEM_KEYS.has(key.toLowerCase()) && !HIDDEN_KEYS.has(key.toLowerCase()),
+    const attributes = Object.entries(target.state).filter(([key]) => {
+      const lk = key.toLowerCase();
+      if (SYSTEM_KEYS.has(lk) || HIDDEN_KEYS.has(lk)) return false;
+      const fl = attrFlagsOf(target, key);
+      return canSeeAttr(u.me.flags, key, fl);
+    });
+
+    // Named attributes array (from &ATTR) if present
+    type AttrRow = { name: string; value: string };
+    const attrRows = (
+      (target.state.attributes as AttrRow[] | undefined) ?? []
+    ).filter((a) =>
+      canSeeAttr(u.me.flags, a.name, attrFlagsOf(target, a.name))
     );
 
     let out = `${u.util.center(`${target.name} (#${target.id}) [${type}]`, 78, "=")}%cn\n`;
@@ -96,9 +112,16 @@ EXAMPLES
       out += `\n%chCharacters:%cn\n`;
       characters.forEach((c) => { out += `  ${u.util.displayName(c, u.me)} (#${c.id})\n`; });
     }
-    if (attributes.length > 0) {
+    if (attributes.length > 0 || attrRows.length > 0) {
       out += `\n%chAttributes:%cn\n`;
-      attributes.forEach(([k, v]) => { out += `  %ch${k.toUpperCase()}:%cn ${formatAttrValue(v)}\n`; });
+      attributes.forEach(([k, v]) => {
+        out += `  %ch${k.toUpperCase()}:%cn ${formatAttrValue(v)}\n`;
+      });
+      for (const a of attrRows) {
+        out += `  %ch${a.name.toUpperCase()}:%cn ${
+          formatAttrValue(a.value)
+        }\n`;
+      }
     }
     u.send(out);
   },

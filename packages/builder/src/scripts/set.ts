@@ -1,4 +1,10 @@
 import type { IUrsamuSDK } from "@ursamu/ursamu";
+import {
+  canSetAttr,
+  canSeeAttr,
+  attrFlagsOf,
+  isWizardPlus,
+} from "@ursamu/mush/permissions";
 
 /**
  * TinyMUX @set — four forms:
@@ -54,36 +60,74 @@ export default async (u: IUrsamuSDK) => {
 
     const target = await u.util.target(u.me, targetName);
     if (!target) { u.send(`I can't find "${targetName}" here.`); return; }
-    if (!(await u.canEdit(u.me, target))) { u.send("Permission denied."); return; }
+    if (!(await u.canEdit(u.me, target))) {
+      u.send("Permission denied.");
+      return;
+    }
 
     if (isAttrFlagToken(rhs.trim())) {
-      // ── Attribute flag form ──────────────────────────────────────────────
+      // ── Attribute flag form ──────────────────────────────────────────
       const removing = rhs.trim().startsWith("!");
-      const flag     = rhs.trim().replace(/^!/, "").toLowerCase();
-      const attrflags = ((target.state._attrflags ?? {}) as Record<string, string[]>);
-      const current   = attrflags[attrName] ? [...attrflags[attrName]] : [];
-      const updated   = removing
-        ? current.filter(f => f !== flag)
-        : current.includes(flag) ? current : [...current, flag];
-      await u.db.modify(target.id, "$set", { "data._attrflags": { ...attrflags, [attrName]: updated } });
+      const flag = rhs.trim().replace(/^!/, "").toLowerCase();
+      // Only wizard+ may set/clear the wizard attrflag.
+      if (flag === "wizard" && !isWizardPlus(u.me.flags)) {
+        u.send("Permission denied.");
+        return;
+      }
+      const existing = attrFlagsOf(target, attrName);
+      if (!canSetAttr(u.me.flags, attrName, existing)) {
+        u.send("Permission denied.");
+        return;
+      }
+      const attrflags =
+        ((target.state._attrflags ?? {}) as Record<string, string[]>);
+      const current = attrflags[attrName]
+        ? [...attrflags[attrName]]
+        : [];
+      const updated = removing
+        ? current.filter((f) => f !== flag)
+        : current.includes(flag)
+        ? current
+        : [...current, flag];
+      await u.db.modify(target.id, "$set", {
+        "data._attrflags": { ...attrflags, [attrName]: updated },
+      });
       ack();
       return;
     }
 
-    // ── Legacy backward-compat: obj/ATTR=value ───────────────────────────
+    // ── Legacy backward-compat: obj/ATTR=value ─────────────────────────
     if (!/^[A-Z0-9_]+$/.test(attrName)) {
-      u.send("Invalid attribute name. Use letters, digits, and underscores only.");
+      u.send(
+        "Invalid attribute name. Use letters, digits, and underscores only.",
+      );
+      return;
+    }
+    const fl = attrFlagsOf(target, attrName);
+    if (!canSetAttr(u.me.flags, attrName, fl)) {
+      u.send("Permission denied.");
       return;
     }
     if (rhs === "") {
-      if (["id", "name", "flags", "location"].includes(attrName.toLowerCase())) {
+      if (
+        ["id", "name", "flags", "location"].includes(
+          attrName.toLowerCase(),
+        )
+      ) {
         u.send("Cannot delete internal system properties.");
         return;
       }
-      await u.db.modify(target.id, "$unset", { [`data.${attrName}`]: 1 });
+      await u.db.modify(target.id, "$unset", {
+        [`data.${attrName}`]: 1,
+      });
     } else {
-      if (rhs.length > 4096) { u.send("Value too long (max 4096 characters)."); return; }
-      await u.db.modify(target.id, "$set", { [`data.${attrName}`]: rhs });
+      if (rhs.length > 4096) {
+        u.send("Value too long (max 4096 characters).");
+        return;
+      }
+      await u.db.modify(target.id, "$set", {
+        [`data.${attrName}`]: rhs,
+      });
     }
     ack();
     return;
@@ -104,36 +148,70 @@ export default async (u: IUrsamuSDK) => {
 
     const target = await u.util.target(u.me, targetName);
     if (!target) { u.send(`I can't find "${targetName}" here.`); return; }
-    if (!(await u.canEdit(u.me, target))) { u.send("Permission denied."); return; }
+    if (!(await u.canEdit(u.me, target))) {
+      u.send("Permission denied.");
+      return;
+    }
+    const destFl = attrFlagsOf(target, attrName);
+    if (!canSetAttr(u.me.flags, attrName, destFl)) {
+      u.send("Permission denied.");
+      return;
+    }
 
-    // ── Copy form: obj=ATTR:_fromobj/fromattr ─────────────────────────────
+    // ── Copy form: obj=ATTR:_fromobj/fromattr ───────────────────────────
     const copyMatch = rhs.match(/^_(.+?)\/([A-Za-z][A-Za-z0-9_]*)$/);
     if (copyMatch) {
-      const fromName  = copyMatch[1].trim();
-      const fromAttr  = copyMatch[2].trim().toUpperCase();
+      const fromName = copyMatch[1].trim();
+      const fromAttr = copyMatch[2].trim().toUpperCase();
       const fromResults = await u.db.search(fromName);
-      const fromObj   = fromResults[0];
-      if (!fromObj) { u.send(`Cannot find source object: ${fromName}`); return; }
-      const value = (fromObj.state[fromAttr] as string) ?? (fromObj.state[fromAttr.toLowerCase()] as string);
-      if (value === undefined || value === null) {
-        u.send(`${fromAttr} not set on ${u.util.displayName(fromObj, u.me)}.`);
+      const fromObj = fromResults[0];
+      if (!fromObj) {
+        u.send(`Cannot find source object: ${fromName}`);
         return;
       }
-      await u.db.modify(target.id, "$set", { [`data.${attrName}`]: value });
+      const srcFl = attrFlagsOf(fromObj, fromAttr);
+      if (!canSeeAttr(u.me.flags, fromAttr, srcFl)) {
+        u.send("Permission denied.");
+        return;
+      }
+      const value = (fromObj.state[fromAttr] as string) ??
+        (fromObj.state[fromAttr.toLowerCase()] as string);
+      if (value === undefined || value === null) {
+        u.send(
+          `${fromAttr} not set on ${
+            u.util.displayName(fromObj, u.me)
+          }.`,
+        );
+        return;
+      }
+      await u.db.modify(target.id, "$set", {
+        [`data.${attrName}`]: value,
+      });
       ack();
       return;
     }
 
-    // ── Set / clear ────────────────────────────────────────────────────────
+    // ── Set / clear ────────────────────────────────────────────────────
     if (rhs === "") {
-      if (["id", "name", "flags", "location"].includes(attrName.toLowerCase())) {
+      if (
+        ["id", "name", "flags", "location"].includes(
+          attrName.toLowerCase(),
+        )
+      ) {
         u.send("Cannot delete internal system properties.");
         return;
       }
-      await u.db.modify(target.id, "$unset", { [`data.${attrName}`]: 1 });
+      await u.db.modify(target.id, "$unset", {
+        [`data.${attrName}`]: 1,
+      });
     } else {
-      if (rhs.length > 4096) { u.send("Value too long (max 4096 characters)."); return; }
-      await u.db.modify(target.id, "$set", { [`data.${attrName}`]: rhs });
+      if (rhs.length > 4096) {
+        u.send("Value too long (max 4096 characters).");
+        return;
+      }
+      await u.db.modify(target.id, "$set", {
+        [`data.${attrName}`]: rhs,
+      });
     }
     ack();
     return;

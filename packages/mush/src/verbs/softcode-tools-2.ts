@@ -2,13 +2,18 @@ import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK } from "../commands/types.ts";
 import { dbojs } from "../world/dbobjs.ts";
 import type { IDBOBJ, IAttribute } from "../world/types.ts";
+import {
+  canSeeAttr,
+  canSetAttr,
+  attrFlagsOf,
+} from "../world/permissions.ts";
 
 // ── @decompile ────────────────────────────────────────────────────────────
 
 const SKIP_KEYS = new Set([
   "name", "password", "owner", "lock", "locks", "home",
   "parent", "zone", "moniker", "lastLogout", "termWidth",
-  "quota", "money", "channels",
+  "quota", "money", "channels", "_attrflags",
 ]);
 
 addCmd({
@@ -52,8 +57,17 @@ Examples:
     if (Array.isArray(attrArray)) {
       for (const attr of attrArray) {
         if (!attr.name || !attr.value) continue;
-        if (sw) lines.push(`&${attr.name.toUpperCase()} ${name}=${attr.value}`);
-        else lines.push(`@set ${name}/${attr.name.toUpperCase()}=${attr.value}`);
+        const fl = attrFlagsOf({ data }, attr.name);
+        if (!canSeeAttr(u.me.flags, attr.name, fl)) continue;
+        if (sw) {
+          lines.push(
+            `&${attr.name.toUpperCase()} ${name}=${attr.value}`,
+          );
+        } else {
+          lines.push(
+            `@set ${name}/${attr.name.toUpperCase()}=${attr.value}`,
+          );
+        }
       }
     }
 
@@ -61,6 +75,8 @@ Examples:
       if (SKIP_KEYS.has(key) || key === "attributes") continue;
       if (typeof val !== "string" || !val) continue;
       const attrName = key.toUpperCase();
+      const fl = attrFlagsOf({ data }, attrName);
+      if (!canSeeAttr(u.me.flags, attrName, fl)) continue;
       if (sw) lines.push(`&${attrName} ${name}=${val}`);
       else lines.push(`@set ${name}/${attrName}=${val}`);
     }
@@ -90,19 +106,42 @@ Examples:
 
     const tar = await u.util.target(u.me, objName, true);
     if (!tar) { u.send("I can't find that here!"); return; }
-    if (!await u.canEdit(u.me, tar)) { u.send("Permission denied."); return; }
+    if (!await u.canEdit(u.me, tar)) {
+      u.send("Permission denied.");
+      return;
+    }
 
     const attrUpper = attrName.toUpperCase();
+    const fl = attrFlagsOf(tar, attrUpper);
+    if (
+      !canSeeAttr(u.me.flags, attrUpper, fl) ||
+      !canSetAttr(u.me.flags, attrUpper, fl)
+    ) {
+      u.send("Permission denied.");
+      return;
+    }
+
     const rawObj = await dbojs.queryOne({ id: tar.id });
     if (!rawObj) { u.send("Object not found."); return; }
 
     const objData = rawObj as unknown as IDBOBJ;
-    const attrs = (objData.data?.attributes as Array<{ name: string; value: string }> | undefined) ?? [];
-    const idx = attrs.findIndex((a) => a.name.toUpperCase() === attrUpper);
-    if (idx === -1) { u.send(`Attribute ${attrName} not found on ${objName}.`); return; }
+    const attrs =
+      (objData.data?.attributes as Array<
+        { name: string; value: string }
+      > | undefined) ?? [];
+    const idx = attrs.findIndex(
+      (a) => a.name.toUpperCase() === attrUpper,
+    );
+    if (idx === -1) {
+      u.send(`Attribute ${attrName} not found on ${objName}.`);
+      return;
+    }
 
     const val = attrs[idx].value;
-    if (!val.includes(findStr)) { u.send(`String '${findStr}' not found in ${attrName}.`); return; }
+    if (!val.includes(findStr)) {
+      u.send(`String '${findStr}' not found in ${attrName}.`);
+      return;
+    }
 
     attrs[idx].value = val.replaceAll(findStr, replaceStr);
     if (!objData.data) objData.data = {};

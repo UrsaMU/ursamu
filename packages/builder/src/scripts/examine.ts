@@ -1,4 +1,5 @@
 import type { IUrsamuSDK } from "@ursamu/ursamu";
+import { canSeeAttr, attrFlagsOf } from "@ursamu/mush/permissions";
 
 export const aliases = ["ex"];
 
@@ -6,6 +7,7 @@ export const aliases = ["ex"];
 const SYSTEM_KEYS = new Set([
   "name", "moniker", "alias", "owner", "lock", "description",
   "flags", "id", "location", "home", "password", "channels",
+  "_attrflags", "attributes",
 ]);
 const HIDDEN_KEYS = new Set(["password"]);
 
@@ -81,10 +83,12 @@ export default async (u: IUrsamuSDK) => {
       .join(", ");
   }
 
-  // Generic attributes (excluding system + hidden keys)
-  const attributes = Object.entries(target.state).filter(
-    ([key]) => !SYSTEM_KEYS.has(key.toLowerCase()) && !HIDDEN_KEYS.has(key.toLowerCase()),
-  );
+  // Generic attributes (excluding system + hidden / private keys)
+  const attributes = Object.entries(target.state).filter(([key]) => {
+    const lk = key.toLowerCase();
+    if (SYSTEM_KEYS.has(lk) || HIDDEN_KEYS.has(lk)) return false;
+    return canSeeAttr(actor.flags, key, attrFlagsOf(target, key));
+  });
 
   // Telnet output
   let out = `${u.util.center(`${target.name} (#${target.id}) [${type}]`, 78, "=")}%cn\n`;

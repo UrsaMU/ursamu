@@ -4,6 +4,7 @@ import type { IPlugin } from "@ursamu/core";
 import type { IDBOBJ } from "./world/types.ts";
 import { registerPlugin } from "@ursamu/core";
 import { dbojs } from "./world/dbobjs.ts";
+import { pickNameMatch } from "./world/name-match.ts";
 
 // ─── Txt Files loading ─────────────────────────────────────────────────────────
 export const txtFiles = new Map<string, string>();
@@ -156,7 +157,8 @@ export async function reloadPlugins(dir: string, existingPlugins: IPlugin[]): Pr
 
 /**
  * Resolve a target reference string relative to `en`.
- * Handles: "here", "me", "#dbref", name-prefix search.
+ * Handles: "here", "me", "#dbref", name prefix, data.alias, and
+ * TinyMUX exit aliases (`Primary;sl`).
  * Pass `global = true` to skip the location-proximity filter.
  */
 export const target = async (
@@ -170,28 +172,17 @@ export const target = async (
   if (tar.startsWith("#")) return await dbojs.queryOne({ id: tar.slice(1) });
   if (["me", "self"].includes(tar.toLowerCase())) return en;
 
-  const namePat = new RegExp(`^${tar.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i");
-  const all = await dbojs.query({ "data.name": namePat });
-  const byAlias = tar.toLowerCase();
-  const candidates = all.length
-    ? all
-    : await dbojs.query({}).then((objs) =>
-        objs.filter((o) =>
-          o.id === tar ||
-          (o.data?.alias as string | undefined)?.toLowerCase() === byAlias
-        )
-      );
+  const all = await dbojs.query({});
+  if (global) return pickNameMatch(all, tar);
 
-  if (!candidates.length) return undefined;
-  if (global) return candidates[0];
-
-  const found = candidates.find(obj =>
+  const nearby = all.filter((obj) =>
     obj.location && (
-      (en.location && (obj.location === en.location || obj.id === en.location)) ||
+      (en.location &&
+        (obj.location === en.location || obj.id === en.location)) ||
       obj.location === en.id
-    ),
+    )
   );
-  return found ?? undefined;
+  return pickNameMatch(nearby, tar);
 };
 
 import type { IAttribute } from "./world/types.ts";

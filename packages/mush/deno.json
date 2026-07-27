@@ -1,9 +1,10 @@
 {
   "name": "@ursamu/mush",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "exports": {
     ".": "./mod.ts",
-    "./app": "./src/app.ts"
+    "./app": "./src/app.ts",
+    "./permissions": "./src/world/permissions.ts"
   },
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",

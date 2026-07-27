@@ -1,6 +1,7 @@
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK } from "../commands/types.ts";
 import { DBO } from "@ursamu/core";
+import { canSetAttr, attrFlagsOf } from "../world/permissions.ts";
 
 // ── userFuncs DBO ─────────────────────────────────────────────────────────
 
@@ -108,15 +109,34 @@ Examples:
     if (!attrName) { u.send("Usage: &<attribute> <object>=<value>"); return; }
 
     const target = await u.util.target(u.me, targetRef, true);
-    if (!target) { u.send(`I can't find "${targetRef}".`); return; }
-    if (!await u.canEdit(u.me, target)) { u.send("You can't edit that."); return; }
+    if (!target) {
+      u.send(`I can't find "${targetRef}".`);
+      return;
+    }
+    if (!await u.canEdit(u.me, target)) {
+      u.send("Permission denied.");
+      return;
+    }
+
+    const fl = attrFlagsOf(target, attrName);
+    if (!canSetAttr(u.me.flags, attrName, fl)) {
+      u.send("Permission denied.");
+      return;
+    }
 
     const displayName = target.name || target.id;
 
     if (!value) {
       const removed = await u.attr.clear(target.id, attrName);
-      if (!removed) u.send(`${displayName} doesn't have attribute %ch${attrName}%cn.`);
-      else u.send(`${displayName}'s attribute %ch${attrName}%cn removed.`);
+      if (!removed) {
+        u.send(
+          `${displayName} doesn't have attribute %ch${attrName}%cn.`,
+        );
+      } else {
+        u.send(
+          `${displayName}'s attribute %ch${attrName}%cn removed.`,
+        );
+      }
       return;
     }
 

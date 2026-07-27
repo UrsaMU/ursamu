@@ -19,6 +19,18 @@ export { dbojs, counters, chans, texts, scenes, chanHistory, Obj, createObj, use
 export { flags, flagCodes, dbrefWithFlags } from "./src/world/flags.ts";
 export { evaluateLock, validateLock, registerLockFunc, registerLockEvaluator, callLockFunc } from "./src/world/locks.ts";
 export type { LockFunc } from "./src/world/locks.ts";
+export {
+  privRank,
+  isPrivileged,
+  isWizardPlus,
+  canEditObject,
+  canSeeAttr,
+  canSetAttr,
+  canEditAttr,
+  attrFlagsOf,
+  ownerPrivRank,
+} from "./src/world/permissions.ts";
+export type { FlagSource } from "./src/world/permissions.ts";
 export { hydrate }                           from "./src/world/dbobjs.ts";
 export { buildContext }                      from "./src/world/context.ts";
 export type { GameContext }                  from "./src/world/context.ts";

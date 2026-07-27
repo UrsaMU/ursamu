@@ -10,15 +10,23 @@
 import type { IDBOBJ } from "../world/types.ts";
 import { dbojs, Obj } from "../world/dbobjs.ts";
 import { flags } from "../world/flags.ts";
+import { canEditObject } from "../world/permissions.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
-function canEditSync(actorFlags: Set<string>, actorId: string, targetData: IDBOBJ): boolean {
-  if (actorFlags.has("superuser") || actorFlags.has("admin") || actorFlags.has("wizard")) return true;
-  const owner = targetData.data?.owner as string | undefined;
-  if (owner && owner === actorId) return true;
-  if (actorId === targetData.id) return true;
-  return false;
+async function canEditDbo(
+  actorFlags: Set<string> | string,
+  actorId: string,
+  targetData: IDBOBJ,
+): Promise<boolean> {
+  return canEditObject(
+    { id: actorId, flags: actorFlags },
+    {
+      id: targetData.id,
+      flags: targetData.flags,
+      data: targetData.data,
+    },
+  );
 }
 
 const POISON_KEYS = new Set(["__proto__", "constructor", "prototype"]);
@@ -55,7 +63,7 @@ export async function dbObjHandler(req: Request, userId: string): Promise<Respon
     const result: IDBOBJ[] = [];
 
     for (const dbo of allDbos) {
-      if (!canEditSync(enFlags, en.dbobj.id, dbo)) continue;
+      if (!await canEditDbo(enFlags, en.dbobj.id, dbo)) continue;
       if (flagFilter && !flags.check(dbo.flags, flagFilter)) continue;
       result.push(scrub(dbo));
     }
@@ -77,7 +85,7 @@ export async function dbObjHandler(req: Request, userId: string): Promise<Respon
     const targetObj = await dbojs.queryOne({ id: dbref });
     if (!targetObj) return new Response("Not Found", { status: 404 });
 
-    if (!canEditSync(enFlags, en.dbobj.id, targetObj)) {
+    if (!await canEditDbo(enFlags, en.dbobj.id, targetObj)) {
       return new Response("Forbidden", { status: 403 });
     }
 
