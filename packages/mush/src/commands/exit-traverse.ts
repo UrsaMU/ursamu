@@ -15,18 +15,40 @@ import { send } from "@ursamu/core";
 import { getAttribute } from "../events/hooks.ts";
 import { createNativeSDK } from "./sdk.ts";
 
-/** TinyMUX defaults when the attribute is unset. */
+/**
+ * TinyMUX-style defaults when SUCC/OSUCC/FAIL/OFAIL/ODROP are unset.
+ * OSUCC/OFAIL/ODROP are suffixes after the actor name.
+ */
+export function defaultExitMsgs(exitName: string): {
+  succ: string;
+  osucc: string;
+  fail: string;
+  ofail: string;
+  odrop: string;
+} {
+  const ex = exitName || "that way";
+  return {
+    succ: `You go ${ex}.`,
+    osucc: `goes ${ex}.`,
+    fail: "You can't go that way.",
+    ofail: `tries to leave through ${ex}, but fails.`,
+    odrop: "has arrived.",
+  };
+}
+
+/** @deprecated use defaultExitMsgs(exitName) */
 export const EXIT_DEFAULTS = {
   fail: "You can't go that way.",
-  ofail: "tries to leave, but can't.",
-  osucc: "has left.",
+  ofail: "tries to leave through that way, but fails.",
+  osucc: "goes that way.",
   odrop: "has arrived.",
 } as const;
 
 function actorDisplayName(actor: IDBOBJ): string {
+  // Prefer plain name for room broadcasts (monikers may be colored).
   return (
-    (actor.data?.moniker as string) ||
     (actor.data?.name as string) ||
+    (actor.data?.moniker as string) ||
     actor.id ||
     "Someone"
   );
@@ -122,6 +144,7 @@ export async function traverseExit(
 
   const exitName = exitLabel(exit);
   const actorName = actorDisplayName(actor);
+  const defaults = defaultExitMsgs(exitName);
   const enactor = hydrate(actor);
   const exitObj = hydrate(exit);
 
@@ -138,14 +161,14 @@ export async function traverseExit(
       const fail =
         (await uFail.eval(exit.id, "FAIL").catch(() => "")) ||
         (await resolveExitAttr(exit, "FAIL")) ||
-        EXIT_DEFAULTS.fail;
+        defaults.fail;
       send([socketId], fail);
 
       const ofail =
-        (await resolveExitAttr(exit, "OFAIL")) || EXIT_DEFAULTS.ofail;
+        (await resolveExitAttr(exit, "OFAIL")) || defaults.ofail;
       await sendToConnected(
         fromId,
-        othersMsg(actorName, ofail, EXIT_DEFAULTS.ofail),
+        othersMsg(actorName, ofail, defaults.ofail),
         actorId,
       );
 
@@ -158,7 +181,7 @@ export async function traverseExit(
     }
   }
 
-  // ── Success messages (origin) ─────────────────────────────────────────
+  // ── Success messages (origin) — always fire (attr or default) ─────────
   const u = await createNativeSDK(socketId, actorId, {
     name: exitName,
     original: msg,
@@ -167,13 +190,15 @@ export async function traverseExit(
 
   const succ =
     (await u.eval(exit.id, "SUCC").catch(() => "")) ||
-    (await resolveExitAttr(exit, "SUCC"));
-  if (succ) send([socketId], succ);
+    (await resolveExitAttr(exit, "SUCC")) ||
+    defaults.succ;
+  send([socketId], succ);
 
-  const osucc = await resolveExitAttr(exit, "OSUCC");
+  const osucc =
+    (await resolveExitAttr(exit, "OSUCC")) || defaults.osucc;
   await sendToConnected(
     fromId,
-    othersMsg(actorName, osucc, EXIT_DEFAULTS.osucc),
+    othersMsg(actorName, osucc, defaults.osucc),
     actorId,
   );
 
@@ -204,10 +229,11 @@ export async function traverseExit(
     (await resolveExitAttr(exit, "DROP"));
   if (drop) send([socketId], drop);
 
-  const odrop = await resolveExitAttr(exit, "ODROP");
+  const odrop =
+    (await resolveExitAttr(exit, "ODROP")) || defaults.odrop;
   await sendToConnected(
     destination,
-    othersMsg(actorName, odrop, EXIT_DEFAULTS.odrop),
+    othersMsg(actorName, odrop, defaults.odrop),
     actorId,
   );
 

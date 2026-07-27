@@ -3,18 +3,23 @@
  */
 import { assertEquals } from "@std/assert";
 import {
-  EXIT_DEFAULTS,
+  defaultExitMsgs,
   resolveExitAttr,
 } from "../src/commands/exit-traverse.ts";
 import type { IDBOBJ } from "../src/world/types.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
-Deno.test("EXIT_DEFAULTS match TinyMUX-style leave/arrive", OPTS, () => {
-  assertEquals(EXIT_DEFAULTS.osucc, "has left.");
-  assertEquals(EXIT_DEFAULTS.odrop, "has arrived.");
-  assertEquals(EXIT_DEFAULTS.fail, "You can't go that way.");
-  assertEquals(EXIT_DEFAULTS.ofail, "tries to leave, but can't.");
+Deno.test("defaultExitMsgs include exit name (TinyMUX-style)", OPTS, () => {
+  const d = defaultExitMsgs("North");
+  assertEquals(d.succ, "You go North.");
+  assertEquals(d.osucc, "goes North.");
+  assertEquals(d.fail, "You can't go that way.");
+  assertEquals(
+    d.ofail,
+    "tries to leave through North, but fails.",
+  );
+  assertEquals(d.odrop, "has arrived.");
 });
 
 Deno.test(
