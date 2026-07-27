@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/mush",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "exports": {
     ".": "./mod.ts",
     "./app": "./src/app.ts",

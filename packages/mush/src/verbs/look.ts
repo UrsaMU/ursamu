@@ -94,13 +94,37 @@ function nColumn(items: string[], n: number, width: number): string {
   for (let i = 0; i < items.length; i += n) {
     const row = items.slice(i, i + n);
     const cells = row.map((c, j) => {
-      if (j === row.length - 1) return c;
-      const pad = Math.max(1, colW - visualLen(c));
-      return c + " ".repeat(pad);
+      const cell = visualLen(c) > colW - 1
+        ? truncateVisual(c, Math.max(4, colW - 2)) + "…"
+        : c;
+      if (j === row.length - 1) return cell;
+      const pad = Math.max(1, colW - visualLen(cell));
+      return cell + " ".repeat(pad);
     });
     rows.push(" " + cells.join(""));
   }
   return rows.join("\n");
+}
+
+/** Pick 1–3 columns so every exit fits without overflow. */
+function exitColumns(items: string[], width: number): string {
+  if (items.length === 0) return "";
+  const maxLen = Math.max(...items.map(visualLen));
+  let cols = 3;
+  if (maxLen > 36 || items.length <= 2) cols = 2;
+  if (maxLen > 50 || items.length === 1) cols = 1;
+  return nColumn(items, cols, width);
+}
+
+function truncateVisual(s: string, max: number): string {
+  if (visualLen(s) <= max) return s;
+  let out = "";
+  for (const ch of s) {
+    const next = out + ch;
+    if (visualLen(next) > max) break;
+    out = next;
+  }
+  return out;
 }
 
 function exitDisplay(e: IDBObj): string {
@@ -112,6 +136,13 @@ function exitDisplay(e: IDBObj): string {
     return `<%cc${alias.toUpperCase()}%cn> ${name}`;
   }
   return name;
+}
+
+function isExitObj(o: IDBObj): boolean {
+  for (const f of o.flags) {
+    if (String(f).toLowerCase() === "exit") return true;
+  }
+  return false;
 }
 
 /** Staff+ always see dark exits; others need canEdit (owner/control). */
@@ -172,12 +203,19 @@ async function renderRoom(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCont
 
   const contents = target.contents || [];
   const characters = contents.filter((o) => o.flags.has("player") && o.flags.has("connected"));
-  const objects = contents.filter((o) => !o.flags.has("player") && !o.flags.has("exit") && !o.flags.has("room"));
-  const exits = await visibleExitsForLook(
-    u,
-    actor,
-    contents.filter((o) => o.flags.has("exit")),
+  const objects = contents.filter((o) =>
+    !o.flags.has("player") && !isExitObj(o) && !o.flags.has("room")
   );
+  // Prefer a fresh DB query for exits — contents can lag after @open/@dig.
+  let exitPool = contents.filter(isExitObj);
+  try {
+    const found = await u.db.search({ location: target.id });
+    const fromDb = found.filter(isExitObj);
+    if (fromDb.length >= exitPool.length) exitPool = fromDb;
+  } catch {
+    /* keep contents pool */
+  }
+  const exits = await visibleExitsForLook(u, actor, exitPool);
 
   if (showContents) {
     const visible = [...characters, ...objects];
@@ -227,7 +265,10 @@ async function renderRoom(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCont
       lines.push(exitOverride);
     } else {
       lines.push(divider("Exits", "-", WIDTH));
-      const exitStrings = await Promise.all(exits.map(async (e) => {
+      const sorted = [...exits].sort((a, b) =>
+        exitDisplay(a).localeCompare(exitDisplay(b))
+      );
+      const exitStrings = await Promise.all(sorted.map(async (e) => {
         const disp = exitDisplay(e);
         const canEditExit = await u.canEdit(actor, e);
         return nameWithDbref(
@@ -236,7 +277,7 @@ async function renderRoom(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCont
           showStaffDbref(actor, canEditExit),
         );
       }));
-      lines.push(nColumn(exitStrings, 3, WIDTH));
+      lines.push(exitColumns(exitStrings, WIDTH));
     }
   }
 
