@@ -1,5 +1,7 @@
 ---
-hidden: true
+topic: "locks"
+section: building
+aliases: ["lock-keys", "locking"]
 ---
 +LOCKS
 
@@ -16,6 +18,7 @@ TOPICS
 Operators: `&` / `&&` (and), `|` / `||` (or), `!` (not),
 `( )` grouping. Adjacent atoms imply AND.
 
-On fail: **FAIL** / **OFAIL** / **AFAIL** fire.
+On fail: **FAIL** / **OFAIL** / **AFAIL** fire (see
+action-attrs).
 
 SEE ALSO: +help @lock, +help locks/examples
