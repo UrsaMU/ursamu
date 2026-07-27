@@ -26,8 +26,9 @@ export const flags: Tags = new Tags(
   { name: "staff",       code: "w", lvl: 8,  lock: "admin" },
   { name: "storyteller", code: "T", lvl: 8,  lock: "admin" },
   { name: "builder",     code: "b", lvl: 7,  lock: "admin" },
-  // Chargen complete — staff sets via +approve; blocks +cg for non-staff.
-  { name: "approved",    code: "A", lock: "staff" },
+  // Chargen complete — builder+ only (players cannot self-grant).
+  // +approve sets it; blocks +cg for approved non-staff.
+  { name: "approved",    code: "A", lock: "builder+" },
   { name: "player",      code: "p", lvl: 1,  lock: "superuser" },
   { name: "safe",        code: "s" },
   { name: "void",        code: "z", lock: "superuser" },
