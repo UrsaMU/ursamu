@@ -26,11 +26,16 @@ function mockObj(
 
 function mockU(opts: {
   me?: Partial<IDBObj>;
+  meFlags?: string[];
   here: IDBObj;
   canEditIds?: string[];
 }): IUrsamuSDK & { _sent: string[] } {
   const sent: string[] = [];
-  const me = mockObj("p1", ["player", "connected"], opts.me);
+  const me = mockObj(
+    "p1",
+    opts.meFlags ?? ["player", "connected"],
+    opts.me,
+  );
   me.location = opts.here.id;
   const canEditIds = new Set(opts.canEditIds ?? []);
   return {
@@ -154,5 +159,62 @@ Deno.test(
     assertEquals(out.includes("Exits"), true);
     assertEquals(out.includes("East"), true);
     assertEquals(out.includes("West"), false);
+  },
+);
+
+Deno.test(
+  "dark room hides CONFORMAT for mortals",
+  OPTS,
+  async () => {
+    const other = mockObj("p2", ["player", "connected"], {
+      state: { name: "Alice" },
+    });
+    const thing = mockObj("t1", ["thing"], {
+      state: { name: "Lantern" },
+    });
+    const litExit = mockObj("e1", ["exit"], {
+      state: { name: "Out;o" },
+    });
+    const room = mockObj("r1", ["room", "dark"], {
+      state: { name: "Dark Cell", description: "Black." },
+      contents: [other, thing, litExit],
+    });
+    const u = mockU({
+      meFlags: ["player", "connected"],
+      here: room,
+      canEditIds: [],
+    });
+    await execLook(u);
+    const out = u._sent[0];
+    assertEquals(out.includes("Players"), false);
+    assertEquals(out.includes("Alice"), false);
+    assertEquals(out.includes("Contents"), false);
+    assertEquals(out.includes("Lantern"), false);
+    // Exits still list (non-dark exit)
+    assertEquals(out.includes("Exits"), true);
+    assertEquals(out.includes("Out"), true);
+  },
+);
+
+Deno.test(
+  "dark room shows CONFORMAT to staff",
+  OPTS,
+  async () => {
+    const other = mockObj("p2", ["player", "connected"], {
+      state: { name: "Alice" },
+    });
+    const room = mockObj("r1", ["room", "dark"], {
+      state: { name: "Dark Cell", description: "Black." },
+      contents: [other],
+    });
+    const u = mockU({
+      meFlags: ["player", "connected", "wizard"],
+      here: room,
+      canEditIds: [],
+    });
+    await execLook(u);
+    const out = u._sent[0];
+    assertEquals(out.includes("Players"), true);
+    assertEquals(out.includes("Alice"), true);
   },
 );

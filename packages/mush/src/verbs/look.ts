@@ -322,7 +322,17 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
 
   const canEditTarget = await u.canEdit(actor, lookTarget);
   const isOpaque = lookTarget.flags.has("opaque");
-  const showContents = !isOpaque || canEditTarget;
+  // Opaque: hide contents unless canEdit. Dark room: hide CONFORMAT
+  // (players/things) unless staff or canEdit the room.
+  let showContents = !isOpaque || canEditTarget;
+  if (
+    lookTarget.flags.has("room") &&
+    lookTarget.flags.has("dark") &&
+    !canEditTarget &&
+    !canSeeDark(actor)
+  ) {
+    showContents = false;
+  }
 
   const out = lookTarget.flags.has("room")
     ? await renderRoom(u, actor, lookTarget, showContents, canEditTarget)
