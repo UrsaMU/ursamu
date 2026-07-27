@@ -11,7 +11,7 @@
 import { dbojs, hydrate } from "../world/dbobjs.ts";
 import type { IDBOBJ } from "../world/types.ts";
 import { evaluateLock } from "../world/locks.ts";
-import { send } from "@ursamu/core";
+import { send, sessions } from "@ursamu/core";
 import { getAttribute } from "../events/hooks.ts";
 import { createNativeSDK } from "./sdk.ts";
 
@@ -97,18 +97,35 @@ function othersMsg(
   return `${actorName} ${body}`;
 }
 
+/** Resolve player dbref → live socket ids. */
+function socketsForActor(actorId: string): string[] {
+  return sessions
+    .list()
+    .filter((s) =>
+      ((s as unknown as { actorId?: string }).actorId === actorId) ||
+      s.sessionId === actorId
+    )
+    .map((s) => s.socketId);
+}
+
+/**
+ * Broadcast to live sessions in a room.
+ * `send()` takes socket ids — never raw player dbrefs.
+ */
 async function sendToConnected(
   locationId: string,
   message: string,
   excludeId?: string,
 ): Promise<void> {
   const here = await dbojs.query({ location: locationId });
+  const socketIds = new Set<string>();
   for (const c of here) {
     if (excludeId && c.id === excludeId) continue;
-    if (!String(c.flags || "").includes("connected")) continue;
-    if (!String(c.flags || "").includes("player")) continue;
-    send([c.id], message);
+    const fl = String(c.flags || "");
+    if (fl.includes("exit") || fl.includes("room")) continue;
+    for (const sid of socketsForActor(c.id)) socketIds.add(sid);
   }
+  if (socketIds.size) send([...socketIds], message);
 }
 
 function basicLockKey(exit: IDBOBJ): string {
@@ -184,7 +201,10 @@ export async function traverseExit(
       const afail = await resolveExitAttr(exit, "AFAIL");
       if (afail) {
         const owner = exit.data?.owner as string | undefined;
-        if (owner) send([owner], afail);
+        if (owner) {
+          const socks = socketsForActor(owner);
+          if (socks.length) send(socks, afail);
+        }
       }
       return true;
     }
@@ -214,7 +234,10 @@ export async function traverseExit(
   const asucc = await resolveExitAttr(exit, "ASUCC");
   if (asucc) {
     const owner = exit.data?.owner as string | undefined;
-    if (owner) send([owner], asucc);
+    if (owner) {
+      const socks = socketsForActor(owner);
+      if (socks.length) send(socks, asucc);
+    }
   }
 
   // ── Move ──────────────────────────────────────────────────────────────
@@ -249,7 +272,10 @@ export async function traverseExit(
   const adrop = await resolveExitAttr(exit, "ADROP");
   if (adrop) {
     const owner = exit.data?.owner as string | undefined;
-    if (owner) send([owner], adrop);
+    if (owner) {
+      const socks = socketsForActor(owner);
+      if (socks.length) send(socks, adrop);
+    }
   }
 
   // ── Look + hook ───────────────────────────────────────────────────────
