@@ -65,8 +65,10 @@ addCmd({
   category: "Cofd",
   help: `+ooc  — Leave IC play for the OOC Lounge.
 
-Requires the %chapproved%cn flag. Saves your current IC room so
-%ch+ic%cn can return you later.
+Requires %chapproved%cn. If you are in a room with the %chic%cn
+flag, that room is saved so %ch+ic%cn can return you.
+
+Builders mark rooms: %ch@set here=ic%cn
 
 Examples:
   +ooc`,
@@ -80,8 +82,8 @@ addCmd({
   category: "Cofd",
   help: `+ic[/clear|/status]  — Enter IC play (hub or saved room).
 
-Requires %chapproved%cn. With a marker (set when you +ooc from
-an IC room), returns you there. Otherwise goes to the IC hub.
+Requires %chapproved%cn. Returns to your last IC room (a room
+flagged %chic%cn that you left via +ooc), or the IC hub.
 
 Switches:
   /clear    Forget the marker and go to the hub.

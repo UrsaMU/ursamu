@@ -13,7 +13,7 @@ import { Tags } from "@digibear/tags";
  *   T storyteller d dark           k kinfolk
  *   b builder     s safe
  *   A approved    g guest
- *                 z void
+ *   I ic (room)   z void
  *                 l link_ok
  *                 E enter_ok
  *                 V visual
@@ -35,6 +35,8 @@ export const flags: Tags = new Tags(
   { name: "dark",        code: "d" },
   { name: "guest",       code: "g", lock: "superuser" },
   { name: "room",        code: "r", lvl: 1,  lock: "superuser" },
+  // In-character play space — +ooc bookmarks only rooms with this flag.
+  { name: "ic",          code: "I", lock: "builder+" },
   { name: "exit",        code: "e", lvl: 1,  lock: "superuser" },
   { name: "connected",   code: "c", lock: "superuser" },
   { name: "mortal",      code: "m", lock: "builder+" },

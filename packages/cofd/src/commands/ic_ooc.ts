@@ -1,14 +1,16 @@
 /**
  * +ic / +ooc — move between IC play and the OOC Lounge.
  *
- *   +ooc         Save current IC room, go to OOC Lounge (must be approved).
+ *   +ooc         If here is an IC room (flag), bookmark it; go OOC Lounge.
  *   +ic          Return to saved IC room, or the IC hub if none.
  *   +ic/clear    Forget saved IC room and go to the hub.
+ *
+ * Rooms must carry the %chic%cn flag to count as in-character.
+ * Builders: @set here=ic
  *
  * Config (optional):
  *   plugins.cofd.oocRoom   default "1"
  *   plugins.cofd.icHub     default "14"
- *   plugins.cofd.oocRooms  extra rooms never saved as IC bookmarks
  */
 
 import {
@@ -19,8 +21,6 @@ import {
 
 const DEFAULT_OOC = "1";
 const DEFAULT_HUB = "14";
-/** Rooms that are never stored as an IC return point. */
-const DEFAULT_OOC_ROOMS = ["1", "5", "8", "11"];
 
 function isStaff(actor: IDBObj): boolean {
   const f = actor.flags;
@@ -39,6 +39,11 @@ function isApproved(actor: IDBObj): boolean {
   return !!actor.state?.cofd;
 }
 
+/** Room is IC play space when it has the ic flag. */
+function isIcRoom(room: IDBObj | null | undefined): boolean {
+  return !!room?.flags?.has("ic");
+}
+
 function oocRoomId(): string {
   return String(
     getConfig<string>("plugins.cofd.oocRoom") ??
@@ -55,20 +60,21 @@ function icHubId(): string {
   );
 }
 
-function oocRoomSet(): Set<string> {
-  const extra = getConfig<string[]>("plugins.cofd.oocRooms");
-  const base = Array.isArray(extra) && extra.length
-    ? extra.map(String)
-    : DEFAULT_OOC_ROOMS;
-  return new Set([...base, oocRoomId()]);
-}
-
 function roomLabel(obj: IDBObj | null | undefined): string {
   if (!obj) return "somewhere";
   const raw = String(
     (obj.state?.name as string | undefined) || obj.name || obj.id,
   );
   return raw.split(";")[0]?.trim() || obj.id;
+}
+
+async function loadRoom(
+  u: IUrsamuSDK,
+  id: string,
+): Promise<IDBObj | null> {
+  if (!id) return null;
+  const hit = await u.db.search({ id });
+  return hit[0] ?? null;
 }
 
 function requireApproved(u: IUrsamuSDK): boolean {
@@ -104,10 +110,8 @@ async function moveTo(
   await Promise.resolve(u.teleport(u.me.id, destId));
   u.me.location = destId;
 
-  // Fresh look in the destination (new SDK inside execute).
   await Promise.resolve(u.execute("look"));
 
-  // Arrival to others — look already ran; poke the room if we can.
   try {
     const others = await u.db.search({ location: destId });
     for (const o of others) {
@@ -135,15 +139,18 @@ export async function oocExec(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  // Bookmark IC room unless we are in a known OOC space.
-  if (hereId && !oocRoomSet().has(hereId)) {
+  // Bookmark only when the current room is flagged IC.
+  const hereRoom = await loadRoom(u, hereId);
+  let bookmarked = false;
+  if (hereId && isIcRoom(hereRoom)) {
     await u.db.modify(u.me.id, "$set", {
       "data.icLocation": hereId,
     });
     u.me.state = { ...u.me.state, icLocation: hereId };
+    bookmarked = true;
   }
 
-  const dest = (await u.db.search({ id: oocId }))[0];
+  const dest = await loadRoom(u, oocId);
   if (!dest) {
     u.send("OOC Lounge is missing. Contact staff.");
     return;
@@ -159,12 +166,20 @@ export async function oocExec(u: IUrsamuSDK): Promise<void> {
     u.send("You are already OOC.");
     return;
   }
-  u.send(
-    `%chOOC:%cn You are in the ${roomLabel(dest)}. ` +
-      (u.me.state?.icLocation
-        ? `Your IC marker is set. Use %ch+ic%cn to return.`
-        : `No IC marker — %ch+ic%cn will send you to the hub.`),
-  );
+
+  const mark = String(u.me.state?.icLocation ?? "");
+  let note: string;
+  if (bookmarked) {
+    note = `IC marker set. Use %ch+ic%cn to return.`;
+  } else if (hereId && hereRoom && !isIcRoom(hereRoom)) {
+    note = `That room is not IC (no %chic%cn flag) — ` +
+      `marker unchanged.`;
+  } else if (mark) {
+    note = `IC marker unchanged. Use %ch+ic%cn to return.`;
+  } else {
+    note = `No IC marker — %ch+ic%cn will send you to the hub.`;
+  }
+  u.send(`%chOOC:%cn You are in the ${roomLabel(dest)}. ${note}`);
 }
 
 export async function icExec(u: IUrsamuSDK): Promise<void> {
@@ -172,7 +187,6 @@ export async function icExec(u: IUrsamuSDK): Promise<void> {
   if (!requireApproved(u)) return;
 
   const hubId = icHubId();
-  const oocId = oocRoomId();
 
   if (sw === "clear") {
     await u.db.modify(u.me.id, "$unset", { "data.icLocation": "" });
@@ -185,7 +199,7 @@ export async function icExec(u: IUrsamuSDK): Promise<void> {
       return;
     }
 
-    const hub = (await u.db.search({ id: hubId }))[0];
+    const hub = await loadRoom(u, hubId);
     if (!hub) {
       u.send("IC hub is missing. Contact staff.");
       return;
@@ -217,58 +231,56 @@ export async function icExec(u: IUrsamuSDK): Promise<void> {
       );
       return;
     }
-    const room = (await u.db.search({ id: mark }))[0];
+    const room = await loadRoom(u, mark);
+    const ok = isIcRoom(room);
     u.send(
-      `%chIC:%cn Marker → ${roomLabel(room)} (#${mark}).`,
+      `%chIC:%cn Marker → ${roomLabel(room)} (#${mark})` +
+        (ok ? "." : " %cy(not IC — will fall back to hub)%cn."),
     );
     return;
   }
 
   const mark = String(u.me.state?.icLocation ?? "").trim();
-  const destId = mark || hubId;
+  let destId = mark || hubId;
+  let dest = await loadRoom(u, destId);
 
-  if ((u.me.location ?? "") === destId) {
+  // Stale or non-IC marker → hub.
+  if (mark && (!dest || !isIcRoom(dest))) {
+    await u.db.modify(u.me.id, "$unset", { "data.icLocation": "" });
+    if (u.me.state) delete u.me.state.icLocation;
+    dest = await loadRoom(u, hubId);
+    destId = hubId;
     u.send(
-      mark
+      "%cyYour IC marker was missing or not an IC room " +
+        "— sent to the hub.%cn",
+    );
+  }
+
+  if (!dest) {
+    u.send("IC destination is missing. Contact staff.");
+    return;
+  }
+
+  if ((u.me.location ?? "") === dest.id) {
+    u.send(
+      mark && mark === dest.id
         ? "You are already at your IC location."
         : "You are already at the IC hub.",
     );
     return;
   }
 
-  // Leaving OOC — no special bookmark change.
-  if ((u.me.location ?? "") === oocId) {
-    /* fine */
-  }
-
-  let dest = (await u.db.search({ id: destId }))[0];
-  if (!dest && mark) {
-    // Stale marker — fall back to hub.
-    await u.db.modify(u.me.id, "$unset", { "data.icLocation": "" });
-    if (u.me.state) delete u.me.state.icLocation;
-    dest = (await u.db.search({ id: hubId }))[0];
-    if (!dest) {
-      u.send("IC hub is missing. Contact staff.");
-      return;
-    }
-    u.send("%cyYour IC marker was invalid — sent to the hub.%cn");
-  }
-  if (!dest) {
-    u.send("IC destination is missing. Contact staff.");
-    return;
-  }
-
-  const finalId = dest.id;
+  const usedMark = mark === dest.id;
   await moveTo(
     u,
-    finalId,
+    dest.id,
     "slips into character.",
     "arrives in character.",
   );
   u.send(
     `%chIC:%cn You are at ${roomLabel(dest)}.` +
-      (mark && mark === finalId
+      (usedMark
         ? ""
-        : " (hub — set a marker by going IC from a scene, then +ooc.)"),
+        : " (hub — %ch+ooc%cn from an %chic%cn room sets your marker.)"),
   );
 }
