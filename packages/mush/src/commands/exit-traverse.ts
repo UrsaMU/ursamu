@@ -191,9 +191,16 @@ export async function traverseExit(
     data: actor.data,
   } as Partial<typeof actor>);
 
+  // Rebuild SDK after move so me/here (and look) use the destination.
+  const uDest = await createNativeSDK(socketId, actorId, {
+    name: exitName,
+    original: msg,
+    args: [],
+  });
+
   // ── Arrival messages (destination) ────────────────────────────────────
   const drop =
-    (await u.eval(exit.id, "DROP").catch(() => "")) ||
+    (await uDest.eval(exit.id, "DROP").catch(() => "")) ||
     (await resolveExitAttr(exit, "DROP"));
   if (drop) send([socketId], drop);
 
@@ -212,7 +219,7 @@ export async function traverseExit(
 
   // ── Look + hook ───────────────────────────────────────────────────────
   const { execLook } = await import("../verbs/look.ts");
-  await execLook(u);
+  await execLook(uDest);
 
   const fromRoom = await dbojs.queryOne({ id: fromId });
   const { gameHooks } = await import("@ursamu/core");
