@@ -56,6 +56,43 @@ import { fetchCommand } from "./fetch_cmd.ts";
 import { huntCommand } from "./hunt.ts";
 import { mantleCommand } from "./mantle_cmd.ts";
 import { hobCommand } from "./hob.ts";
+import { icExec, oocExec } from "./ic_ooc.ts";
+
+addCmd({
+  name: "+ooc",
+  pattern: /^\+ooc$/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+ooc  — Leave IC play for the OOC Lounge.
+
+Requires the %chapproved%cn flag. Saves your current IC room so
+%ch+ic%cn can return you later.
+
+Examples:
+  +ooc`,
+  exec: oocExec,
+});
+
+addCmd({
+  name: "+ic",
+  pattern: /^\+ic(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+ic[/clear|/status]  — Enter IC play (hub or saved room).
+
+Requires %chapproved%cn. With a marker (set when you +ooc from
+an IC room), returns you there. Otherwise goes to the IC hub.
+
+Switches:
+  /clear    Forget the marker and go to the hub.
+  /status   Show where your marker points.
+
+Examples:
+  +ic
+  +ic/status
+  +ic/clear`,
+  exec: icExec,
+});
 
 addCmd({
   name: "+extended",
