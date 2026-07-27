@@ -3,7 +3,7 @@ hidden: true
 ---
 # @OSUCC
 
-Sets the Other Success message.
+Sets the Other Success message (TinyMUX-style).
 
 ## Syntax
 
@@ -11,8 +11,11 @@ Sets the Other Success message.
 
 ## Description
 
-Sets the message shown to _others_ in the room when a player successfully uses
-an object/exit.
+Shown to others in the **origin** room when someone successfully uses
+an exit (or picks up a thing). The actor name is prepended:
+`Alice heads north.`
+
+On exits, if unset, defaults to: `has left.`
 
 ## Example
 
