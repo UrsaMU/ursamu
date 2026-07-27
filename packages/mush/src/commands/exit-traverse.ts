@@ -16,31 +16,36 @@ import { getAttribute } from "../events/hooks.ts";
 import { createNativeSDK } from "./sdk.ts";
 
 /**
- * TinyMUX-style defaults when SUCC/OSUCC/FAIL/OFAIL/ODROP are unset.
- * OSUCC/OFAIL/ODROP are suffixes after the actor name.
+ * Defaults when SUCC/OSUCC/FAIL/OFAIL/ODROP are unset.
+ * OSUCC/OFAIL/ODROP are suffixes after the actor name
+ * (e.g. osucc "leaves." → "Diablerie leaves.").
  */
-export function defaultExitMsgs(exitName: string): {
+export function defaultExitMsgs(opts: {
+  exitName?: string;
+  destName?: string;
+}): {
   succ: string;
   osucc: string;
   fail: string;
   ofail: string;
   odrop: string;
 } {
-  const ex = exitName || "that way";
+  const dest = (opts.destName || "").trim() || "the room";
+  const ex = (opts.exitName || "").trim() || "that way";
   return {
-    succ: `You go ${ex}.`,
-    osucc: `goes ${ex}.`,
+    succ: `You enter ${dest}.`,
+    osucc: "leaves.",
     fail: "You can't go that way.",
     ofail: `tries to leave through ${ex}, but fails.`,
     odrop: "has arrived.",
   };
 }
 
-/** @deprecated use defaultExitMsgs(exitName) */
+/** @deprecated use defaultExitMsgs({...}) */
 export const EXIT_DEFAULTS = {
   fail: "You can't go that way.",
   ofail: "tries to leave through that way, but fails.",
-  osucc: "goes that way.",
+  osucc: "leaves.",
   odrop: "has arrived.",
 } as const;
 
@@ -144,7 +149,11 @@ export async function traverseExit(
 
   const exitName = exitLabel(exit);
   const actorName = actorDisplayName(actor);
-  const defaults = defaultExitMsgs(exitName);
+  const destName =
+    (destRoom.data?.name as string) ||
+    destRoom.id ||
+    "the room";
+  const defaults = defaultExitMsgs({ exitName, destName });
   const enactor = hydrate(actor);
   const exitObj = hydrate(exit);
 
