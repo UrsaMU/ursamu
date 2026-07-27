@@ -25,16 +25,27 @@ function showStaffDbref(actor: IDBObj, canEdit: boolean): boolean {
   return canEdit || canSeeDark(actor);
 }
 
+/** Primary display name (strip TinyMUX ;aliases). */
+function primaryName(target: IDBObj): string {
+  const raw =
+    (target.state?.moniker as string | undefined) ||
+    (target.state?.name as string | undefined) ||
+    target.name ||
+    "Unknown";
+  const primary = raw.split(";")[0]?.trim();
+  return primary || raw || "Unknown";
+}
+
 function headerName(
   target: IDBObj,
   actor: IDBObj,
   canEdit: boolean,
 ): string {
-  const base =
-    (target.state?.moniker as string | undefined) ||
-    (target.state?.name as string | undefined) ||
-    target.name ||
-    "Unknown";
+  let base = primaryName(target);
+  // IC rooms: subtle tag in the look header title.
+  if (target.flags.has("room") && target.flags.has("ic")) {
+    base = `${base} %ch%cy[IC]%cn`;
+  }
   return nameWithDbref(
     base,
     target,

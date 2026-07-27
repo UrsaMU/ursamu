@@ -136,6 +136,26 @@ Deno.test(
   },
 );
 
+Deno.test("IC room look title includes [IC] tag", OPTS, async () => {
+  const room = mockObj("14", ["room", "ic"], {
+    state: {
+      name: "Blackfriars Circus;IC;hub",
+      description: "Fog.",
+    },
+    contents: [],
+  });
+  const u = mockU({
+    meFlags: ["player", "connected"],
+    here: room,
+  });
+  await execLook(u);
+  const out = u._sent[0] ?? "";
+  assertEquals(out.includes("Blackfriars Circus"), true);
+  assertEquals(out.includes("[IC]"), true);
+  // aliases stripped from title
+  assertEquals(out.includes("Circus;IC"), false);
+});
+
 Deno.test(
   "mortal look does not show dbref flag codes",
   OPTS,
