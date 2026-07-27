@@ -100,6 +100,72 @@ Deno.test("evaluateLock: OR — 'connected || wizard' passes when actor has conn
   assertEquals(await evaluateLock("connected || wizard", actor, actor), true);
 });
 
+Deno.test("evaluateLock: me passes when enactor owns target", OPTS, async () => {
+  const owner: IDBObj = {
+    id: "10",
+    name: "Owner",
+    flags: new Set(["player", "connected"]),
+    state: { name: "Owner" },
+    contents: [],
+  };
+  const thing: IDBObj = {
+    id: "20",
+    name: "Sword",
+    flags: new Set(["thing"]),
+    state: { owner: "10" },
+    contents: [],
+  };
+  const stranger: IDBObj = {
+    id: "11",
+    name: "Other",
+    flags: new Set(["player", "connected"]),
+    state: { name: "Other" },
+    contents: [],
+  };
+  assertEquals(await evaluateLock("me", owner, thing), true);
+  assertEquals(await evaluateLock("me", stranger, thing), false);
+});
+
+Deno.test("evaluateLock: *Name matches player name", OPTS, async () => {
+  const alice: IDBObj = {
+    id: "30",
+    name: "Alice",
+    flags: new Set(["player", "connected"]),
+    state: { name: "Alice" },
+    contents: [],
+  };
+  assertEquals(await evaluateLock("*Alice", alice, alice), true);
+  assertEquals(await evaluateLock("*Bob", alice, alice), false);
+});
+
+Deno.test("evaluateLock: carries/holds and owner()", OPTS, async () => {
+  const gem: IDBObj = {
+    id: "42",
+    name: "Gem",
+    flags: new Set(["thing"]),
+    state: {},
+    contents: [],
+  };
+  const holder: IDBObj = {
+    id: "31",
+    name: "Holder",
+    flags: new Set(["player", "connected"]),
+    state: { name: "Holder" },
+    contents: [gem],
+  };
+  const box: IDBObj = {
+    id: "50",
+    name: "Box",
+    flags: new Set(["thing"]),
+    state: { owner: "31" },
+    contents: [],
+  };
+  assertEquals(await evaluateLock("holds(#42)", holder, box), true);
+  assertEquals(await evaluateLock("carries(#42)", holder, box), true);
+  assertEquals(await evaluateLock("owner()", holder, box), true);
+  assertEquals(await evaluateLock("holds(#99)", holder, box), false);
+});
+
 // ─── Area 3: dbojs CRUD ───────────────────────────────────────────────────────
 
 Deno.test("dbojs: create, queryOne, modify, delete", OPTS, async () => {

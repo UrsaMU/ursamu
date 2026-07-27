@@ -1,19 +1,28 @@
 ---
 hidden: true
 ---
-@LOCK
++@LOCK
 
-COMMAND: @lock[/<switch>] <object>=<key>
+Set or clear a **lock** (access key) on an object. TinyMUX-style keys.
 
-Sets a lock on <object> to restrict access or usage based on the <key>. The
-<key> is a boolean expression composed of objects, flags, and attributes.
+SYNTAX
+  @lock[/<type>] <target>=<key>
+  @unlock[/<type>] <target>
 
-Switches: /Basic (Default) - Basic lock (pickup/traverse). /Enter - Enter lock.
-/Use - Use lock. /Page - Page lock. /Tell - Tell lock. /Speech - Speech lock.
-/Drop - Drop lock. /Give - Give lock. /User - User-defined lock (requires
-specific checking code).
+TYPES (default: basic)
+  basic   Pickup / exit traverse
+  use     @use / USE
+  enter   Enter object or room
+  leave   Leave object or room
+  drop    Who may drop this
+  give    Who may give to this
+  page    Who may page you
+  link    Who may @link here
 
-Examples: @lock me=*friend @lock/enter home=+friend @lock/use lever = *admin |
-+wizard
+EXAMPLES
+  @lock north=me
+  @lock door=wizard | #2
+  @lock/use lever=flag(builder)
+  @unlock north
 
-Related Topics: @unlock, locks, @flags
+SEE ALSO: +help locks, +help locks/keys, +help locks/examples

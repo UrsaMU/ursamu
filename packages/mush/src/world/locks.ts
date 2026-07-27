@@ -77,15 +77,26 @@ registerBuiltin("is", (enactor, _target, args) => {
   return enactor.id === dbref.replace(/^#/, "");
 });
 
-registerBuiltin("holds", (enactor, _target, args) => {
+const holdsImpl: LockFunc = (enactor, _target, args) => {
   const dbref = (args[0] ?? "").trim().replace(/^#/, "");
   return enactor.contents.some((c) => c.id === dbref);
-});
+};
+registerBuiltin("holds", holdsImpl);
+// TinyMUX alias
+registerBuiltin("carries", holdsImpl);
 
 registerBuiltin("perm", (enactor, _target, args) => {
   const permLevel = (args[0] ?? "").trim();
   const flagStr = Array.from(enactor.flags).join(" ");
   return flags.check(flagStr, permLevel);
+});
+
+/** TinyMUX owner() — enactor owns the locked object (target). */
+registerBuiltin("owner", (enactor, target, _args) => {
+  const owner = String(
+    (target.state?.owner as string | undefined) ?? target.id,
+  ).replace(/^#/, "");
+  return enactor.id === owner || enactor.id === target.id;
 });
 
 // --- Public API ---
@@ -281,35 +292,31 @@ const checkAtom = async (
     return callLockFunc(name, enactor, target, args);
   }
 
-  if (atom.startsWith("+") || atom.match(/^[a-zA-Z0-9_+]+$/)) {
-    const flagName = atom.startsWith("+") ? atom.slice(1) : atom;
-    return flags.check(Array.from(enactor.flags || []).join(" "), flagName);
+  // TinyMUX: me — enactor owns the locked object (or is it).
+  if (atom.toLowerCase() === "me") {
+    if (validationMode) return true;
+    const owner = String(
+      (target.state?.owner as string | undefined) ?? target.id,
+    ).replace(/^#/, "");
+    return enactor.id === owner || enactor.id === target.id;
+  }
+
+  // TinyMUX: *Name — enactor is that player (by name).
+  if (atom.startsWith("*")) {
+    if (validationMode) return true;
+    const want = atom.slice(1).trim().toLowerCase();
+    if (!want) return false;
+    const have = String(
+      enactor.state?.name ?? enactor.name ?? "",
+    ).toLowerCase();
+    return have === want;
   }
 
   if (atom.startsWith("#")) {
     return enactor.id === atom.slice(1);
   }
 
-  if (atom.includes(":")) {
-    const [attr, val] = atom.split(":");
-    const actualVal = enactor.state?.[attr.toLowerCase()];
-    if (actualVal === undefined) return false;
-
-    const cmpMatch = val.match(/^(>=|<=|>|<)(.+)$/);
-    if (cmpMatch) {
-      const [, op, numStr] = cmpMatch;
-      const numVal = parseFloat(numStr);
-      const actualNum = parseFloat(String(actualVal));
-      if (!isNaN(numVal) && !isNaN(actualNum)) {
-        if (op === ">=") return actualNum >= numVal;
-        if (op === "<=") return actualNum <= numVal;
-        if (op === ">") return actualNum > numVal;
-        if (op === "<") return actualNum < numVal;
-      }
-    }
-    return String(actualVal) === val;
-  }
-
+  // TinyMUX: @#dbref / @dbref — evaluate that object's basic lock.
   if (atom.startsWith("@#") || (atom.startsWith("@") && !atom.includes("/"))) {
     const id = atom.startsWith("@#") ? atom.slice(2) : atom.slice(1);
     const tarObj = await Obj.get(id);
@@ -328,6 +335,40 @@ const checkAtom = async (
       }
     }
     return false;
+  }
+
+  // TinyMUX: attr:value (and attr:>N etc.) on enactor state.
+  if (atom.includes(":")) {
+    const colon = atom.indexOf(":");
+    const attr = atom.slice(0, colon);
+    const val = atom.slice(colon + 1);
+    const actualVal =
+      enactor.state?.[attr] ??
+      enactor.state?.[attr.toLowerCase()];
+    if (actualVal === undefined) return false;
+
+    const cmpMatch = val.match(/^(>=|<=|>|<)(.+)$/);
+    if (cmpMatch) {
+      const [, op, numStr] = cmpMatch;
+      const numVal = parseFloat(numStr);
+      const actualNum = parseFloat(String(actualVal));
+      if (!isNaN(numVal) && !isNaN(actualNum)) {
+        if (op === ">=") return actualNum >= numVal;
+        if (op === "<=") return actualNum <= numVal;
+        if (op === ">") return actualNum > numVal;
+        if (op === "<") return actualNum < numVal;
+      }
+    }
+    return String(actualVal) === val;
+  }
+
+  // +FLAG or bare FLAG / power word (wizard, builder+, connected).
+  if (atom.startsWith("+") || atom.match(/^[a-zA-Z0-9_+]+$/)) {
+    const flagName = atom.startsWith("+") ? atom.slice(1) : atom;
+    return flags.check(
+      Array.from(enactor.flags || []).join(" "),
+      flagName,
+    );
   }
 
   return false;

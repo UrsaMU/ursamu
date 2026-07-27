@@ -1,27 +1,31 @@
 ---
 topic: "@lock"
 section: building
-aliases: ["@unlock"]
+aliases: ["@unlock", "lock", "locks"]
 ---
-# @lock / @unlock
++@LOCK
 
-**@lock** sets a key expression on an object. Types: (none)=get,
-`use`, `enter`, `leave`, `link`.
+Set or clear a **lock** (access key) on an object. TinyMUX-style keys.
 
-## Syntax
-  `@lock <target>=<key>`
-  `@lock/<type> <target>=<key>`
-  `@unlock <target>`
-  `@unlock/<type> <target>`
+SYNTAX
+  @lock[/<type>] <target>=<key>
+  @unlock[/<type>] <target>
 
-## Notes
-- On lock failure: `FAIL`, `OFAIL`, `AFAIL` attributes fire.
+TYPES (default: basic)
+  basic   Pickup / exit traverse
+  use     @use / USE
+  enter   Enter object or room
+  leave   Leave object or room
+  drop    Who may drop this
+  give    Who may give to this
+  page    Who may page you
+  link    Who may @link here
 
-## Examples
-  `@lock sword=wizard`
-  `@lock/use lever=WIZARD`
-  `@lock/enter here=flag(admin)`
-  `@unlock sword`
+EXAMPLES
+  @lock north=me
+  @lock door=wizard | #2
+  @lock/use lever=flag(builder)
+  @unlock north
 
-## See Also
-  `action-attrs`, `@set`
+SEE ALSO: +help locks/keys, +help locks/examples,
++help locks/funcs, +help action-attrs
