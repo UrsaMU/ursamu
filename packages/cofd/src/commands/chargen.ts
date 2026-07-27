@@ -1,6 +1,11 @@
 // +cg command implementation: guided 6-stage character creation.
 
-import { header, footer, type IUrsamuSDK } from "@ursamu/ursamu";
+import {
+  header,
+  footer,
+  type IUrsamuSDK,
+  type IDBObj,
+} from "@ursamu/ursamu";
 import {
   getNextJobNumber,
   jobs,
@@ -25,6 +30,28 @@ import { renderCgList } from "../chargen/list.ts";
 import { renderInfo } from "../info/index.ts";
 import { formatSheet } from "../sheet/index.ts";
 
+/** Staff may still use +cg (review / testing). */
+function isStaff(actor: IDBObj): boolean {
+  const f = actor.flags;
+  if (!f) return false;
+  return (
+    f.has("staff") ||
+    f.has("storyteller") ||
+    f.has("wizard") ||
+    f.has("admin") ||
+    f.has("superuser")
+  );
+}
+
+/**
+ * Approved = chargen closed for non-staff.
+ * Flag is canonical; live sheet (state.cofd) is legacy fallback.
+ */
+function isApproved(actor: IDBObj): boolean {
+  if (actor.flags?.has("approved")) return true;
+  return !!actor.state?.cofd;
+}
+
 export async function cgExec(u: IUrsamuSDK) {
   const sw = (u.cmd.args[0] ?? "").toLowerCase().trim();
   // stripSubs first: chargen fields (name, concept, etc.) are persisted to
@@ -34,6 +61,15 @@ export async function cgExec(u: IUrsamuSDK) {
 
   // Find target - self only for character generation
   const target = u.me;
+
+  // Approved non-staff: no +cg (including /list, /set, /submit, /reset).
+  if (isApproved(target) && !isStaff(u.me)) {
+    u.send(
+      "Your character is already %chapproved%cn. " +
+        "Chargen is closed. Contact staff if you need a rework.",
+    );
+    return;
+  }
 
   // List switch — filtered by active cg sheet (or live sheet / blank draft).
   // /list with no arg shows the index of topics available to this sheet.
@@ -55,15 +91,15 @@ export async function cgExec(u: IUrsamuSDK) {
   // Load existing character generation state
   let cgState = target.state?.cofd_cg as CofdCgState | undefined;
 
-  // Reset switch
+  // Reset switch — staff only once approved (non-staff blocked above).
   if (sw === "reset" || sw === "restart") {
-    if (target.state?.cofd) {
-      u.send("You already have an approved character sheet.");
-      return;
-    }
     cgState = initCgState();
     await u.db.modify(target.id, "$set", { "data.cofd_cg": cgState });
     await u.db.modify(target.id, "$unset", { "data.cofd": "" });
+    if (target.flags?.has("approved") && u.setFlags) {
+      await u.setFlags(target.id, "!approved");
+      target.flags.delete("approved");
+    }
     u.send(await header("Character Generation: Reset"));
     u.send(
       "Your character generation state has been reset " +

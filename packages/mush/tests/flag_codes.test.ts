@@ -26,8 +26,9 @@ Deno.test("flagCodes are single-letter and case-distinct", OPTS, () => {
   assertEquals(flagCodes("werewolf"), "f");
   assertEquals(flagCodes("ghoul"), "G");
   // every emitted code is exactly one character
+  assertEquals(flagCodes("approved"), "A");
   const sample = flagCodes(
-    "superuser admin wizard staff storyteller builder " +
+    "superuser admin wizard staff storyteller builder approved " +
       "player safe void dark guest room exit connected " +
       "mortal ghoul vampire werewolf kinfolk " +
       "link_ok enter_ok visual opaque",

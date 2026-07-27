@@ -83,6 +83,14 @@ function wireDb(
     }
     return Promise.resolve();
   };
+  u.setFlags = async (t: string | { id: string; flags?: Set<string> }, fl: string) => {
+    const id = typeof t === "string" ? t : t.id;
+    if (id !== target.id) return;
+    for (const part of fl.split(/\s+/)) {
+      if (part.startsWith("!")) target.flags.delete(part.slice(1));
+      else target.flags.add(part);
+    }
+  };
 }
 
 describe("+approve", OPTS, () => {
@@ -118,6 +126,7 @@ describe("+approve", OPTS, () => {
       (target.state.cofd as { concept: string }).concept,
       "Test Subject",
     );
+    assertEquals(target.flags.has("approved"), true);
 
     // Active queue emptied; archived as closed.
     const active = await jobs.find({});

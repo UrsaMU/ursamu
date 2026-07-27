@@ -111,8 +111,19 @@ export function mockU(opts: {
   const dbCalls: unknown[][] = [];
   const store = opts.objectStore ?? new MockObjectStore();
 
+  const me = mockPlayer(opts.me ?? {});
+  store.put(me);
+
+  const applyFlags = (id: string, flagStr: string) => {
+    store.setFlags(id, flagStr);
+    const obj = store.get(id);
+    if (obj && id === me.id) {
+      me.flags = obj.flags;
+    }
+  };
+
   return Object.assign({
-    me: mockPlayer(opts.me ?? {}),
+    me,
     here: {
       ...mockPlayer({ id: "2", name: "Room", flags: new Set(["room"]) }),
       broadcast: () => {},
@@ -123,7 +134,13 @@ export function mockU(opts: {
     canEdit: async () => opts.canEditResult ?? true,
     setFlags: async (target: string | IDBObj, flags: string) => {
       const id = typeof target === "string" ? target : target.id;
-      store.setFlags(id, flags);
+      applyFlags(id, flags);
+      if (typeof target !== "string" && target.flags) {
+        for (const part of flags.split(/\s+/)) {
+          if (part.startsWith("!")) target.flags.delete(part.slice(1));
+          else target.flags.add(part);
+        }
+      }
     },
     db: {
       modify: async (...a: unknown[]) => {

@@ -62,6 +62,11 @@ export async function approveExec(u: IUrsamuSDK) {
   await u.db.modify(target.id, "$unset", { "data.cofd_cg": "" });
   target.state = { ...target.state, cofd: sheet };
   delete target.state.cofd_cg;
+  // approved flag locks non-staff out of +cg
+  if (u.setFlags) {
+    await u.setFlags(target.id, "approved");
+    target.flags?.add("approved");
+  }
   await syncSightFlags(u, target, sheet);
 
   const staffName = u.util.displayName(u.me, u.me);

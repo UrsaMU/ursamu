@@ -345,8 +345,9 @@ addCmd({
 
 Staff workflow:
   1. +sheet <player>     Review the draft.
-  2. +approve <player>  Make it live (clears +cg).
+  2. +approve <player>  Make it live (sets APPROVED, clears +cg).
 
+Sets the %chapproved%cn flag so the player can no longer use +cg.
 A CGEN job is optional; approve works from the draft alone.
 
 Examples:

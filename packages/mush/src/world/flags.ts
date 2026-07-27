@@ -12,7 +12,7 @@ import { Tags } from "@digibear/tags";
  *   w staff       c connected      f werewolf
  *   T storyteller d dark           k kinfolk
  *   b builder     s safe
- *                 g guest
+ *   A approved    g guest
  *                 z void
  *                 l link_ok
  *                 E enter_ok
@@ -26,6 +26,8 @@ export const flags: Tags = new Tags(
   { name: "staff",       code: "w", lvl: 8,  lock: "admin" },
   { name: "storyteller", code: "T", lvl: 8,  lock: "admin" },
   { name: "builder",     code: "b", lvl: 7,  lock: "admin" },
+  // Chargen complete — staff sets via +approve; blocks +cg for non-staff.
+  { name: "approved",    code: "A", lock: "staff" },
   { name: "player",      code: "p", lvl: 1,  lock: "superuser" },
   { name: "safe",        code: "s" },
   { name: "void",        code: "z", lock: "superuser" },
