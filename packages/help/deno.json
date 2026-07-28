@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/help",
-  "version": "0.1.9",
+  "version": "1.0.0",
   "exports": "./mod.ts",
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
@@ -26,9 +26,11 @@
     "include": [
       "src",
       "help",
+      "docs",
       "mod.ts",
       "deno.json",
       "README.md",
+      "CHANGELOG.md",
       "LICENSE"
     ],
     "exclude": [
