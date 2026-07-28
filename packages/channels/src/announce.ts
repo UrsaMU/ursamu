@@ -35,13 +35,19 @@ export function channelAnnounces(chan: IChannel | null | undefined): boolean {
 
 /**
  * Broadcast a system line to one channel (no Discord / history).
+ * Joins use both name and id room keys — fan out to both.
  */
 export function broadcastAnnounce(
   chan: IChannel,
   text: string,
 ): void {
   if (!channelAnnounces(chan)) return;
-  rooms.broadcast(chan.name, `${headerOf(chan)} ${text}`);
+  const line = `${headerOf(chan)} ${text}`;
+  const keys = new Set<string>([chan.name, chan.id]);
+  if (chan.alias) keys.add(chan.alias);
+  for (const key of keys) {
+    if (key) rooms.broadcast(key, line);
+  }
 }
 
 /**
