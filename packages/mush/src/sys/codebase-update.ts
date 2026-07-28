@@ -7,6 +7,7 @@
 import {
   bumpUrsamuImports,
   fetchLatestJsrVersion,
+  isAppImportKey,
 } from "./jsr-pins.ts";
 
 export type UpdateLog = (line: string) => void;
@@ -19,6 +20,11 @@ export type UpdateOptions = {
   fetchMeta?: (pkg: string) => Promise<string | null>;
   /** Skip network/git (tests). */
   dryRun?: boolean;
+  /**
+   * Report outdated pins only — no git write, no cache, no reboot.
+   * Safe to run on a live game.
+   */
+  checkOnly?: boolean;
 };
 
 export type UpdateOutcome = {
@@ -26,9 +32,12 @@ export type UpdateOutcome = {
   lines: string[];
   bumped: string[];
   pulled: boolean;
+  /** True when deno cache finished successfully (safe to soft-reboot). */
+  cached?: boolean;
 };
 
 export {
+  applyEngineOverrides,
   bumpUrsamuImports,
   formatJsrPin,
   isAppImportKey,
@@ -178,14 +187,14 @@ async function writeBumpedDenoJson(
   lines: string[],
   log: UpdateLog | undefined,
   fetchMeta: (pkg: string) => Promise<string | null>,
-): Promise<string[]> {
+): Promise<{ bumped: string[]; resolved: Map<string, string> }> {
   const path = `${cwd}/deno.json`;
   let raw: string;
   try {
     raw = await Deno.readTextFile(path);
   } catch {
     logLine(lines, log, "No deno.json — skip JSR bump.");
-    return [];
+    return { bumped: [], resolved: new Map() };
   }
 
   let data: {
@@ -197,25 +206,44 @@ async function writeBumpedDenoJson(
     data = JSON.parse(raw);
   } catch {
     logLine(lines, log, "deno.json is not valid JSON.");
-    return [];
+    return { bumped: [], resolved: new Map() };
   }
 
   if (!data.imports || typeof data.imports !== "object") {
     logLine(lines, log, "deno.json has no imports map.");
-    return [];
+    return { bumped: [], resolved: new Map() };
   }
 
-  const { imports, bumped } = await bumpUrsamuImports(
+  const before = JSON.stringify(data.imports);
+  // Exact pins on prepare so lock cannot keep an older caret resolve.
+  const { imports, bumped, resolved } = await bumpUrsamuImports(
     data.imports,
     fetchMeta,
+    { exact: true },
   );
-  let dirty = bumped.length > 0;
   data.imports = imports;
+  let dirty = JSON.stringify(data.imports) !== before ||
+    bumped.length > 0;
 
   if (data.minimumDependencyAge !== 0) {
     data.minimumDependencyAge = 0;
     dirty = true;
     logLine(lines, log, "Set minimumDependencyAge = 0");
+  }
+
+  // Note local vendor pins — only git pull updates those.
+  for (const [key, val] of Object.entries(imports)) {
+    if (!isAppImportKey(key)) continue;
+    if (
+      typeof val === "string" &&
+      (val.startsWith("./") || val.startsWith("../"))
+    ) {
+      logLine(
+        lines,
+        log,
+        `${key} → local ${val} (git only, not JSR)`,
+      );
+    }
   }
 
   if (dirty) {
@@ -224,12 +252,44 @@ async function writeBumpedDenoJson(
       JSON.stringify(data, null, 2) + "\n",
     );
     for (const b of bumped) logLine(lines, log, b);
-    if (bumped.length === 0) {
-      logLine(lines, log, "Updated deno.json");
+  } else if (resolved.size) {
+    logLine(lines, log, "JSR pins already at latest (exact).");
+  }
+  return { bumped, resolved };
+}
+
+/** Drop lock + node_modules so the next cache cannot reuse stale graphs. */
+async function purgeStaleResolutions(
+  cwd: string,
+  lines: string[],
+  log?: UpdateLog,
+): Promise<void> {
+  for (const rel of ["deno.lock", "node_modules"]) {
+    const p = `${cwd}/${rel}`;
+    try {
+      await Deno.remove(p, { recursive: true });
+      logLine(lines, log, `Cleared ${rel} for fresh resolve.`);
+    } catch (e: unknown) {
+      if (e instanceof Deno.errors.NotFound) continue;
+      // best-effort — cache may still succeed
     }
   }
-  // Quiet when pins already current.
-  return bumped;
+}
+
+function entrypoints(cwd: string): Promise<string[]> {
+  const entries = ["src/main.ts", "src/telnet.ts", "mod.ts"];
+  return (async () => {
+    const found: string[] = [];
+    for (const e of entries) {
+      try {
+        await Deno.stat(`${cwd}/${e}`);
+        found.push(e);
+      } catch {
+        /* missing */
+      }
+    }
+    return found;
+  })();
 }
 
 async function denoCacheReload(
@@ -237,19 +297,13 @@ async function denoCacheReload(
   lines: string[],
   log?: UpdateLog,
 ): Promise<boolean> {
-  const entries = ["src/main.ts", "src/telnet.ts", "mod.ts"];
-  const found: string[] = [];
-  for (const e of entries) {
-    try {
-      await Deno.stat(`${cwd}/${e}`);
-      found.push(e);
-    } catch {
-      /* missing */
-    }
-  }
+  const found = await entrypoints(cwd);
   if (!found.length) return true;
 
-  // Quiet while caching — only report failures.
+  // Always purge lock/node_modules so soft-reboot cannot boot an old
+  // graph after pins moved (or after a same-version republish attempt).
+  await purgeStaleResolutions(cwd, lines, log);
+
   const r = await runCmd(cwd, Deno.execPath(), [
     "cache",
     "--reload",
@@ -267,7 +321,51 @@ async function denoCacheReload(
   return true;
 }
 
-/** Run pull → JSR bump → cache. Does not reboot. */
+/** Read jsr:@ursamu/* versions locked after cache (for admin feedback). */
+async function reportLockedUrsamu(
+  cwd: string,
+  lines: string[],
+  log?: UpdateLog,
+): Promise<void> {
+  try {
+    const raw = await Deno.readTextFile(`${cwd}/deno.lock`);
+    const lock = JSON.parse(raw) as {
+      specifiers?: Record<string, string>;
+      packages?: { jsr?: Record<string, unknown> };
+    };
+    const specs = lock.specifiers ?? {};
+    const rows: string[] = [];
+    for (const [spec, ver] of Object.entries(specs)) {
+      if (!spec.includes("@ursamu/")) continue;
+      // jsr:@ursamu/foo@^1.2.3 → 1.2.4
+      const name = spec.replace(/^jsr:/, "").replace(/@[^@]*$/, "");
+      rows.push(`${name}@${ver}`);
+    }
+    rows.sort();
+    // De-dupe by package name (keep last = usually exact).
+    const byPkg = new Map<string, string>();
+    for (const r of rows) {
+      const i = r.lastIndexOf("@");
+      const pkg = r.slice(0, i);
+      const ver = r.slice(i + 1);
+      byPkg.set(pkg, ver);
+    }
+    if (byPkg.size === 0) return;
+    logLine(lines, log, "Resolved @ursamu packages:");
+    for (const [pkg, ver] of [...byPkg.entries()].sort()) {
+      logLine(lines, log, `  ${pkg}@${ver}`);
+    }
+  } catch {
+    /* lock optional */
+  }
+}
+
+/**
+ * Prepare an update while the game stays online:
+ *   git pull → exact JSR pins + dual-package overrides →
+ *   purge lock/node_modules → deno cache --reload
+ * Does NOT reboot. Caller soft-reboots only when ok && cached.
+ */
 export async function runCodebaseUpdate(
   opts: UpdateOptions = {},
 ): Promise<UpdateOutcome> {
@@ -279,26 +377,104 @@ export async function runCodebaseUpdate(
 
   if (opts.dryRun) {
     logLine(lines, log, "dry-run: skip git/network.");
-    return { ok: true, lines, bumped: [], pulled: false };
+    return { ok: true, lines, bumped: [], pulled: false, cached: false };
   }
 
+  if (opts.checkOnly) {
+    // Read-only: report pins behind latest; never write or reboot.
+    try {
+      const raw = await Deno.readTextFile(`${cwd}/deno.json`);
+      const data = JSON.parse(raw) as {
+        imports?: Record<string, string>;
+      };
+      const imports = data.imports ?? {};
+      const { bumped } = await bumpUrsamuImports(
+        imports,
+        fetchMeta,
+        { exact: true },
+      );
+      if (bumped.length === 0) {
+        logLine(
+          lines,
+          log,
+          "All jsr:@ursamu/* app pins match JSR latest.",
+        );
+      } else {
+        logLine(
+          lines,
+          log,
+          "Outdated pins (run @restart to apply):",
+        );
+        for (const b of bumped) logLine(lines, log, `  ${b}`);
+      }
+      // Vendor reminder
+      for (const [key, val] of Object.entries(imports)) {
+        if (
+          typeof val === "string" &&
+          (val.startsWith("./") || val.startsWith("../"))
+        ) {
+          logLine(
+            lines,
+            log,
+            `  ${key} is local (${val}) — update via git.`,
+          );
+        }
+      }
+      return {
+        ok: true,
+        lines,
+        bumped,
+        pulled: false,
+        cached: false,
+      };
+    } catch (e: unknown) {
+      const m = e instanceof Error ? e.message : String(e);
+      logLine(lines, log, `check failed: ${m}`);
+      return {
+        ok: false,
+        lines,
+        bumped: [],
+        pulled: false,
+        cached: false,
+      };
+    }
+  }
+
+  // --- live prepare (game keeps serving) ---------------------------------
   const pulled = await gitPull(cwd, branch, lines, log);
   if (!pulled) {
-    return { ok: false, lines, bumped: [], pulled: false };
+    return {
+      ok: false,
+      lines,
+      bumped: [],
+      pulled: false,
+      cached: false,
+    };
   }
 
-  const bumped = await writeBumpedDenoJson(
+  const { bumped } = await writeBumpedDenoJson(
     cwd,
     lines,
     log,
     fetchMeta,
   );
 
+  // Pre-warm cache while old main still runs — reboot only after this.
   const cached = await denoCacheReload(cwd, lines, log);
   if (!cached) {
-    return { ok: false, lines, bumped, pulled: true };
+    logLine(
+      lines,
+      log,
+      "Cache failed — game left running on previous packages.",
+    );
+    return { ok: false, lines, bumped, pulled: true, cached: false };
   }
 
-  logLine(lines, log, "Update complete.");
-  return { ok: true, lines, bumped, pulled: true };
+  await reportLockedUrsamu(cwd, lines, log);
+  logLine(
+    lines,
+    log,
+    "Update ready (fresh lock + cache). Soft-reboot to load.",
+  );
+  return { ok: true, lines, bumped, pulled: true, cached: true };
 }

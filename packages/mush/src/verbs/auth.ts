@@ -247,13 +247,18 @@ export async function execUpdate(u: IUrsamuSDK): Promise<void> {
       branch,
       log: (line) => u.send(`%chGame>%cn ${line}`),
     });
-    if (!result.ok) {
-      u.send("%crUpdate failed — reboot cancelled.%cn");
+    if (!result.ok || !result.cached) {
+      u.send(
+        "%crUpdate failed — game left running " +
+          "(no reboot).%cn",
+      );
       return;
     }
     await u.sys.reboot({ update: false });
   } catch (e: unknown) {
     const m = e instanceof Error ? e.message : String(e);
-    u.send(`%crUpdate failed:%cn ${m}`);
+    u.send(
+      `%crUpdate failed — game left running:%cn ${m}`,
+    );
   }
 }

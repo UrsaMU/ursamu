@@ -1,14 +1,14 @@
 /**
  * @module @ursamu/mush
  *
- * MUSH world layer built on @ursamu/core.
+ * MUSH world layer built on @ursamu/core (stable 1.0).
  *
  * Provides: IDBObj world model, flag/lock system, TinyMUX softcode
  * engine, addCmd/IUrsamuSDK command API, format pipeline, configurable
  * layout chrome (game.layout.*), and essential MUSH verbs.
  *
  * Re-exports everything from @ursamu/core so game code only needs one
- * import.
+ * import. Stable vs evolving surface: docs/STABLE.md.
  */
 
 export * from "@ursamu/core";
@@ -50,7 +50,7 @@ export { findDollarPattern, matchGlob }      from "./src/world/dollar-patterns.t
 export type { DollarMatch }                  from "./src/world/dollar-patterns.ts";
 export type { Intent, InterceptorCandidate } from "./src/world/interceptor-service.ts";
 export type {
-  SayEvent, PoseEvent, PageEvent, MoveEvent, SessionEvent,
+  SayEvent, PoseEvent, OocEvent, PageEvent, MoveEvent, SessionEvent,
   ChannelMessageEvent, ObjectEvent, ObjectMovedEvent,
   ObjectCreatedEvent, ObjectDestroyedEvent, ObjectModifiedEvent,
   SceneCreatedEvent, ScenePoseEvent, SceneSetEvent, SceneTitleEvent,

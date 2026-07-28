@@ -170,12 +170,33 @@ export async function execReboot(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  // args: [0]=switch (quick|...), [1]=optional branch
+  // args: [0]=switch (quick|check|...), [1]=optional branch
   const sw = (u.cmd.args[0] || "").trim().toLowerCase();
   const branch = (u.cmd.args[1] || "").trim();
   const quick = sw === "quick" || sw === "noreload" ||
     sw === "skip";
+  const check = sw === "check" || sw === "status" || sw === "dry";
   const who = String(u.me.state.name || u.me.name || u.me.id);
+
+  if (check) {
+    try {
+      const { runCodebaseUpdate } = await import(
+        "../sys/codebase-update.ts"
+      );
+      const result = await runCodebaseUpdate({
+        branch,
+        checkOnly: true,
+        log: (line) => u.send(`%chGame>%cn ${line}`),
+      });
+      if (!result.ok) {
+        u.send("%cr@restart/check failed.%cn");
+      }
+    } catch (e: unknown) {
+      const m = e instanceof Error ? e.message : String(e);
+      u.send(`%cr@restart/check failed:%cn ${m}`);
+    }
+    return;
+  }
 
   if (quick) {
     u.here.broadcast(
@@ -190,6 +211,7 @@ export async function execReboot(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
+  // Full update: prepare while live, reboot only if cache warmed.
   u.here.broadcast(
     `%chGame>%cn full @restart by %ch${who}%cn.`,
   );
@@ -201,14 +223,19 @@ export async function execReboot(u: IUrsamuSDK): Promise<void> {
       branch,
       log: (line) => u.send(`%chGame>%cn ${line}`),
     });
-    if (!result.ok) {
-      u.send("%crUpdate failed — reboot cancelled.%cn");
+    if (!result.ok || !result.cached) {
+      u.send(
+        "%crUpdate failed — game left running " +
+          "(no reboot).%cn",
+      );
       return;
     }
     await u.sys.reboot({ update: false });
   } catch (e: unknown) {
     const m = e instanceof Error ? e.message : String(e);
-    u.send(`%crUpdate/reboot failed:%cn ${m}`);
+    u.send(
+      `%crUpdate failed — game left running:%cn ${m}`,
+    );
   }
 }
 
@@ -217,17 +244,22 @@ addCmd({
   pattern: /^@(?:reboot|restart)(?:\/(\S+))?(?:\s+(.*))?$/i,
   lock: "connected & admin+",
   category: "admin",
-  help: `@restart [<branch>]     — Pull code, bump jsr:@ursamu/*,
-                          cache, soft-reboot main (admin+).
-@reboot                  — Same as @restart.
-@reboot/quick            — Soft-reboot only (no git/JSR).
+  help: `@restart              — Prepare packages online, then soft-reboot.
+@restart/check         — List outdated pins (no write, no reboot).
+@restart/quick         — Soft-reboot only (no git/JSR).
+@restart <branch>      — Pull that branch, then prepare + reboot.
 
-Telnet stays up; players auto-reauth. Main exits 75 and
-the daemon loop brings it back.
+Prepare (game stays up):
+  git pull → exact jsr:@ursamu/* pins + dual-package
+  overrides → wipe deno.lock + node_modules →
+  deno cache --reload. Soft-reboot only if cache OK.
+Local ./vendor/* pins update only via git pull.
+Unpublished monorepo code is NOT loaded — publish to
+JSR first. Telnet stays up; failures leave the game up.
 
 Examples:
+  @restart/check
   @restart
-  @restart main
-  @reboot/quick`,
+  @restart/quick`,
   exec: execReboot,
 });

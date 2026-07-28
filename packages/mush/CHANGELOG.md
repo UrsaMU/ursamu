@@ -1,0 +1,61 @@
+# Changelog
+
+All notable changes to `@ursamu/mush` are documented here.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [1.0.1] - 2026-07-28
+
+### Fixed
+
+- `@restart` dual-package overrides cover full mush `0.1.x` /
+  `0.2.x` when host is on `1.x` (plugins still pin `0.1.30`)
+
+## [1.0.0] - 2026-07-28
+
+First stable release of the MUSH world layer on `@ursamu/core@^1.0.0`.
+
+### Added
+
+- `docs/STABLE.md` - stable vs evolving export contract
+- Softcode smoke matrix (math, string, list, logic, registers, `%0`)
+- Speech verb tests (say / pose / think / page usage)
+- Cmd middleware lifecycle test (order + remove by reference)
+- README 1.0 stability tiers and version policy
+
+### Changed
+
+- Version **1.0.0** - breaking changes to stable APIs require a major bump
+- Dual-package and softcode docs aligned to 1.0 host pins
+
+### Security (inherited 0.1.x / 0.2.x)
+
+- Avatar fetch SSRF guards
+- Safer `@restart` (exact pins, lock purge, cache-before-reboot)
+
+## [0.2.0] - 2026-07-28
+
+Pre-1.0 milestone on a stable core floor.
+
+### Added
+
+- Depends on `@ursamu/core@^1.0.0`
+- `docs/DUAL_PACKAGE.md` - single-instance import map guidance
+- `docs/SOFTCODE.md` - evaluator support and non-goals
+- README stability tiers (path to 1.0)
+- CHANGELOG
+
+### Fixed
+
+- `@pcreate` unique-name test uses real dbojs (matches production)
+
+## [0.1.30] - 2026-07-28
+
+### Added
+
+- `ooc` room speech with `OOCFORMAT`
+- Safer `@restart` (exact pins, lock purge, cache-before-reboot)
+- Soft-reboot reauth / connect announce fixes
+
+## [0.1.0] - 2026
+
+Initial JSR line for the extracted mush package (world layer on core).

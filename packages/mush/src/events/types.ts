@@ -20,6 +20,18 @@ export interface PoseEvent {
   socketId?: string;
 }
 
+export interface OocEvent {
+  actorId: string;
+  actorName: string;
+  roomId: string;
+  /** Name + say/pose text (OOCFORMAT %0). */
+  body: string;
+  /** Final broadcast line. */
+  line: string;
+  mode: "say" | "pose" | "semi";
+  socketId?: string;
+}
+
 export interface PageEvent {
   actorId: string;
   actorName: string;

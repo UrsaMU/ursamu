@@ -537,8 +537,12 @@ export async function createNativeSDK(
           const result = await runCodebaseUpdate({
             branch: opts?.branch ?? "",
           });
-          if (!result.ok) {
-            throw new Error("codebase update failed");
+          // Only soft-reboot when cache is warm — leave game up
+          // on pull/bump/cache failure.
+          if (!result.ok || !result.cached) {
+            throw new Error(
+              "codebase update failed (game left running)",
+            );
           }
         }
         // Close PGlite before exit so the next process can open the DB.
@@ -567,9 +571,13 @@ export async function createNativeSDK(
         const { runCodebaseUpdate } = await import(
           "../sys/codebase-update.ts"
         );
-        const result = await runCodebaseUpdate({ branch: branch ?? "" });
-        if (!result.ok) {
-          throw new Error("codebase update failed");
+        const result = await runCodebaseUpdate({
+          branch: branch ?? "",
+        });
+        if (!result.ok || !result.cached) {
+          throw new Error(
+            "codebase update failed (game left running)",
+          );
         }
         const { markSoftReboot } = await import("../sys/reboot-flag.ts");
         markSoftReboot();

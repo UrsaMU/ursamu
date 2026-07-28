@@ -5,6 +5,7 @@ import { assertEquals, assertExists } from "@std/assert";
 import {
   addCmd,
   cmds,
+  dbojs,
   execPcreate,
   loadDefaultCommands,
 } from "../mod.ts";
@@ -105,7 +106,9 @@ Deno.test("loadDefaultCommands registers @pcreate", OPTS, async () => {
 });
 
 Deno.test("@pcreate: creates player with hashed password", OPTS, async () => {
-  const u = mockU({ args: ["Builder=animefan"] });
+  // Unique name: isPlayerNameTaken hits real dbojs, not u.db.search.
+  const name = `PcNew_${Date.now()}`;
+  const u = mockU({ args: [`${name}=animefan`] });
   await execPcreate(u);
   const sent = (u as unknown as { _sent: string[] })._sent;
   const created = (u as unknown as { _created: Partial<IDBObj>[] })._created;
@@ -113,18 +116,21 @@ Deno.test("@pcreate: creates player with hashed password", OPTS, async () => {
 
   assertEquals(hashes, ["animefan"]);
   assertEquals(created.length, 1);
-  assertEquals(created[0].name, "Builder");
+  assertEquals(created[0].name, name);
   assertEquals(created[0].flags?.has("player"), true);
   assertEquals(
     (created[0].state as { password?: string })?.password,
     "$2a$10$hashed_animefan",
   );
-  assertEquals(sent.some((s) => s.includes("Builder") && s.includes("#99")), true);
+  assertEquals(
+    sent.some((s) => s.includes(name) && s.includes("#99")),
+    true,
+  );
 });
 
 Deno.test("@pcreate: rejects non-admin", OPTS, async () => {
   const u = mockU({
-    args: ["Builder=animefan"],
+    args: ["PcDenied=animefan"],
     me: {
       flags: new Set(["player", "connected"]),
     },
@@ -137,26 +143,28 @@ Deno.test("@pcreate: rejects non-admin", OPTS, async () => {
 });
 
 Deno.test("@pcreate: rejects duplicate name", OPTS, async () => {
-  const u = mockU({
-    args: ["Builder=animefan"],
-    searchResult: [
-      mockPlayer({
-        id: "7",
-        name: "Builder",
-        flags: new Set(["player"]),
-        state: { name: "Builder" },
-      }),
-    ],
-  });
-  await execPcreate(u);
-  const sent = (u as unknown as { _sent: string[] })._sent;
-  const created = (u as unknown as { _created: unknown[] })._created;
-  assertEquals(sent[0], "That name is already taken.");
-  assertEquals(created.length, 0);
+  // isPlayerNameTaken uses dbojs (not the mock search).
+  const id = `pc_dup_${Date.now()}`;
+  const name = `PcDup_${Date.now()}`;
+  await dbojs.create({
+    id,
+    flags: "player",
+    data: { name },
+  } as never);
+  try {
+    const u = mockU({ args: [`${name}=animefan`] });
+    await execPcreate(u);
+    const sent = (u as unknown as { _sent: string[] })._sent;
+    const created = (u as unknown as { _created: unknown[] })._created;
+    assertEquals(sent[0], "That name is already taken.");
+    assertEquals(created.length, 0);
+  } finally {
+    await dbojs.delete({ id });
+  }
 });
 
 Deno.test("@pcreate: rejects short password", OPTS, async () => {
-  const u = mockU({ args: ["Builder=ab"] });
+  const u = mockU({ args: ["PcShort=ab"] });
   await execPcreate(u);
   const sent = (u as unknown as { _sent: string[] })._sent;
   assertEquals(sent[0], "Password must be at least 5 characters.");

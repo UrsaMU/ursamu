@@ -94,6 +94,11 @@ Deno.test("bumpUrsamuImports: bumps only app keys", OPTS, async () => {
   );
   assertEquals(imports.lodash, "npm:lodash@^4.18.1");
   assertEquals(bumped.length, 2);
+  // Dual-package overrides present for engine mush
+  assertEquals(
+    imports["jsr:@ursamu/mush@^0.1.1"],
+    "jsr:@ursamu/mush@0.1.22",
+  );
 });
 
 Deno.test("bumpUrsamuImports: no-op when current", OPTS, async () => {
@@ -103,4 +108,14 @@ Deno.test("bumpUrsamuImports: no-op when current", OPTS, async () => {
   );
   assertEquals(imports["@ursamu/mush"], "jsr:@ursamu/mush@^0.1.22");
   assertEquals(bumped.length, 0);
+});
+
+Deno.test("bumpUrsamuImports: exact rewrites caret to pin", OPTS, async () => {
+  const { imports, bumped } = await bumpUrsamuImports(
+    { "@ursamu/mush": "jsr:@ursamu/mush@^0.1.22" },
+    async () => "0.1.22",
+    { exact: true },
+  );
+  assertEquals(imports["@ursamu/mush"], "jsr:@ursamu/mush@0.1.22");
+  assertEquals(bumped.length, 1);
 });

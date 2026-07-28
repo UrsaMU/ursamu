@@ -107,10 +107,11 @@ export async function handleSysMessage(
           log: (line) =>
             coreSend(socketTargets, `%chGame>%cn ${line}`),
         });
-        if (!result.ok) {
+        if (!result.ok || !result.cached) {
           coreSend(
             socketTargets,
-            "%chGame>%cn Update aborted (see messages above).",
+            "%chGame>%cn Update aborted — game left " +
+              "running (see messages above).",
           );
           return;
         }
@@ -122,7 +123,10 @@ export async function handleSysMessage(
         scheduleExit(75);
       } catch (e: unknown) {
         const m = e instanceof Error ? e.message : String(e);
-        coreSend(socketTargets, `%chGame>%cn Update error: ${m}`);
+        coreSend(
+          socketTargets,
+          `%chGame>%cn Update error (game left running): ${m}`,
+        );
       }
     })();
     return;
@@ -144,10 +148,11 @@ export async function handleSysMessage(
             log: (line) =>
               coreSend(socketTargets, `%chGame>%cn ${line}`),
           });
-          if (!result.ok) {
+          if (!result.ok || !result.cached) {
             coreSend(
               socketTargets,
-              "%chGame>%cn Update failed — reboot cancelled.",
+              "%chGame>%cn Update failed — game left " +
+                "running (no reboot).",
             );
             return;
           }
@@ -155,7 +160,8 @@ export async function handleSysMessage(
           const m = e instanceof Error ? e.message : String(e);
           coreSend(
             socketTargets,
-            `%chGame>%cn Update error: ${m} — reboot cancelled.`,
+            `%chGame>%cn Update error: ${m} — game ` +
+              "left running (no reboot).",
           );
           return;
         }

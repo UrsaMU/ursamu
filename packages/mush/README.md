@@ -1,22 +1,44 @@
 # @ursamu/mush
 
-Full MUSH world layer built on `@ursamu/core`. Re-exports everything from
-core, then adds: the `IDBObj` world model (players, rooms, exits, things),
-flag and lock systems, a TinyMUX 2.x softcode evaluator with Web Worker
-sandbox, the `addCmd`/`IUrsamuSDK` command API, a format pipeline
-(CONFORMAT, NAMEFORMAT, etc.), and essential MUSH verbs (look, say, pose,
-get/drop/give, home, who, page). Game code imports from `@ursamu/mush`
-only — no separate core import needed.
+**Version 1.0.1** (stable). Built on **`@ursamu/core@^1.0.0`**.
 
-> `@ursamu/ursamu` is a backwards-compatibility shim that re-exports this
-> package. New projects should import directly from `@ursamu/mush`.
+Full MUSH world layer on core: `IDBObj` world model (players, rooms,
+exits, things), flags and locks, TinyMUX-oriented softcode + Worker
+sandbox, `addCmd` / `IUrsamuSDK`, format pipeline (NAMEFORMAT, …), and
+core verbs (look, say, pose, get/drop/give, home, who, page, ooc, …).
+
+Import from `@ursamu/mush` only for game plugins (core is re-exported).
+
+> `@ursamu/ursamu` is a compatibility shim that re-exports this package.
+> New projects should import `@ursamu/mush`.
+
+See `CHANGELOG.md`, `docs/STABLE.md`, `docs/DUAL_PACKAGE.md`,
+`docs/SOFTCODE.md`.
+
+## Stable API (1.0)
+
+Breaking changes to stable exports require **2.0.0**. Full table:
+`docs/STABLE.md`.
+
+**Stable** — `addCmd`, `IUrsamuSDK`, `dbojs`, locks/flags,
+permissions, `gameHooks`, format resolve, layout chrome,
+`runSoftcode` / stdlib register, `mu` / `initializeEngine`,
+cmd middleware lifecycle.
+
+**Evolving** — `@restart` pin lists, some admin/REST internals,
+compat stubs (`wsService`).
+
+**Not in mush** — full building (builder), channels, mail/bbs/jobs.
+
+**Hosts must force a single mush instance** via import-map overrides
+when plugins pin different ranges. See `docs/DUAL_PACKAGE.md`.
 
 ## Install
 
 ```typescript
 // Deno / JSR
-import { addCmd, dbojs, gameHooks } from "jsr:@ursamu/mush";
-import type { ICmd, IUrsamuSDK, IDBObj } from "jsr:@ursamu/mush";
+import { addCmd, dbojs, gameHooks } from "jsr:@ursamu/mush@^1.0.0";
+import type { ICmd, IUrsamuSDK, IDBObj } from "jsr:@ursamu/mush@^1.0.0";
 ```
 
 ## Quick start
@@ -61,7 +83,7 @@ Examples:
 | `registerFormatTemplate` | Register a MUSH softcode format template |
 | `resolveFormat` / `resolveGlobalFormat` | Render a format slot |
 | `header` / `divider` / `footer` | Layout chrome helpers |
-| `registerHeader` / `registerDivider` / `registerFooter` | Plugin layout stacks |
+| `registerHeader` / `Divider` / `Footer` | Plugin layout stacks |
 | `setLayoutTemplates` / `hasLayoutTemplate` | Config-driven layout mushcode |
 | `applyLayoutFromConfig` | Load `game.layout.*` from config |
 | `createNativeSDK` | Build an `IUrsamuSDK` from a session + actor |
@@ -155,9 +177,32 @@ every MUSH primitive in a single import.
 
 ```typescript
 // Everything you need for a game plugin
-import { addCmd, dbojs, gameHooks, DBO, registerRoute } from "jsr:@ursamu/mush";
-import type { ICmd, IUrsamuSDK, IDBObj, IPlugin } from "jsr:@ursamu/mush";
+import {
+  addCmd, dbojs, gameHooks, DBO, registerRoute,
+} from "jsr:@ursamu/mush";
+import type {
+  ICmd, IUrsamuSDK, IDBObj, IPlugin,
+} from "jsr:@ursamu/mush";
 ```
 
 For the transport-only layer without MUSH concepts, see
-[`@ursamu/core`](../core/README.md).
+[`@ursamu/core`](https://jsr.io/@ursamu/core) (stable **1.0.0**).
+
+## Version policy
+
+| Change | Bump |
+|--------|------|
+| Remove/rename stable export or change documented return semantics | major |
+| New softcode stdlib function, new format slot, additive SDK field | minor |
+| Bugfix, docs, tests | patch |
+
+Softcode is TinyMUX-**oriented**, not a full certified clone. See
+`docs/SOFTCODE.md`.
+
+## Develop
+
+```bash
+deno task test
+deno task check
+deno task preflight
+```
