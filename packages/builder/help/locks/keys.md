@@ -1,28 +1,22 @@
----
-topic: "locks/keys"
-section: locks
-dark: true
----
-+LOCKS/KEYS
-
 See also: +help locks (overview)
 
-ATOMS (TinyMUX-style)
-  me              Enactor owns the locked object
-  #12             Enactor is object #12
-  *Alice          Enactor is player named Alice
-  +wizard         Enactor has flag wizard
-  wizard          Same (bare flag / power word)
-  builder+        Flag or higher (via flag system)
-  tribe:red       state.tribe === "red"
-  power:>=3       Numeric compare on state field
-  @#5             Pass the basic lock on #5
-  [softcode]      Softcode expr (if evaluator set)
++KEYS
 
-OPS
-  a & b    AND          a | b    OR
-  !a       NOT          ( a )    group
+  Building blocks of a lock expression.
 
-Adjacent atoms AND: `connected wizard` = both.
+ATOMS
+  `me`         The enactor
+  `#12`        Object by id
+  `*Name`      Named player
+  `+flag`      Has flag (engine-dependent)
+  `attr:val`   Attribute equals value
+
+  Combine with `&` / `&&`, `|` / `||`, `!`, and parentheses.
+  Adjacent atoms often imply AND.
+
+EXAMPLES
+  me|*Alice
+  !(me)
+  flag(wizard)|is(#5)
 
 SEE ALSO: +help locks/funcs, +help locks/examples

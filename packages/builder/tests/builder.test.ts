@@ -488,10 +488,15 @@ describe("oemit script", () => {
 
 describe("plugin lifecycle", () => {
   it("plugin version matches deno.json", async () => {
-    // Check version without importing the full engine (avoids KV/fetch leaks in test env)
+    // Avoid full engine import (KV/fetch leaks in test env).
     const path = new URL("../deno.json", import.meta.url).pathname;
     const json = JSON.parse(await Deno.readTextFile(path));
-    assertEquals(json.version, "1.3.2");
+    const modSrc = await Deno.readTextFile(
+      new URL("../mod.ts", import.meta.url).pathname,
+    );
+    const m = modSrc.match(/version:\s*"([^"]+)"/);
     assertEquals(json.name, "@ursamu/builder");
+    assertEquals(m?.[1], json.version);
   });
 });
+

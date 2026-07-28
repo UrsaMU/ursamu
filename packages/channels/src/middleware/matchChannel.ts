@@ -146,7 +146,7 @@ export async function matchChannel(
       await dbojs.modify({ id: en.id }, "$set", {
         "data.channels": en.data.channels,
       } as any);
-      // Presence only — never channel:message (Discord-safe).
+      // Presence only, never channel:message (Discord-safe).
       if (channelAnnounces(chan)) {
         broadcastAnnounce(
           chan,

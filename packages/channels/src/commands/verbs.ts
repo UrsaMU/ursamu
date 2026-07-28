@@ -32,12 +32,12 @@ addCmd({
     /^@?(?:channels?|clist)(?:\/(join|leave|list|full|headers))?\s*(.*)?$/i,
   lock: "connected",
   category: "Channel",
-  help: `@channel              — List available channels.
-@channel/join <chan>=<alias>  — Join a channel with an alias.
-@channel/leave <alias>        — Leave a channel.
-@clist                        — List public channels and their owners.
-@clist/full                   — List channels with detailed properties.
-@clist/headers                — List channels with custom headers.
+  help: `@channel              List available channels.
+@channel/join <chan>=<alias>  Join a channel with an alias.
+@channel/leave <alias>        Leave a channel.
+@clist                        List public channels and owners.
+@clist/full                   Name, flags, owner, users online.
+@clist/headers                List channels with custom headers.
 
 Aliases: @channels, @clist
 

@@ -1,30 +1,16 @@
 +CHANNELS
 
-  Chat channels let you communicate across the game. Join a channel
-  with an alias, then use that alias to speak or pose.
+  Chat across the game with short aliases. Join a channel, then
+  type the alias to speak or pose.
 
-  Player Commands:
-    **addcom**    Join a channel with a short alias.
-    **delcom**    Remove a channel alias.
-    **comlist**   List all your channel aliases and status.
-    **allcom**    Toggle or inspect all channels at once.
-    **comtitle**  Set a personal title on a channel.
-    **clearcom**  Remove every channel alias you have.
-    **clist**     List public channels and their owners.
+TOPICS
+  **player**   Join, leave, titles, listing channels.
+  **staff**    Create, configure, moderate channels.
 
-  Using an alias:
-    <alias> <message>     — speak on the channel
-    <alias> :<pose>       — pose on the channel
-    <alias> on/off        — toggle receiving messages
-    <alias> who           — list connected players
-
-EXAMPLES
+QUICK START
   addcom pub=Public
-  pub Hello, world!
+  pub Hello everyone.
   pub :waves.
   allcom off
 
-SEE ALSO: +help alias, +help addcom, +help clist
-
-  Staff: +help chanstaff
-
+SEE ALSO: +help player, +help staff, +help player/alias

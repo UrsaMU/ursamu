@@ -1,7 +1,7 @@
 /**
  * Channel presence announcements (connect / disconnect / join / leave).
  *
- * Uses rooms.broadcast only — never emits channel:message — so Discord
+ * Uses rooms.broadcast only (never channel:message) so Discord
  * channel bridges do not mirror these system lines.
  */
 

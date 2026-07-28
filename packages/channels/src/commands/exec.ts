@@ -58,9 +58,8 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
     const isHeaders = sw === "headers";
 
     if (isFull) {
-      u.send(
-        "*** Channel      --Flags--  Obj   Own   Charge  Balance  Users   Messages",
-      );
+      // Real fields only (no Obj/Charge/Balance/Messages economy stubs).
+      u.send("*** Channel      Flags      Owner          Users");
       for (const chan of list) {
         if (
           chan.hidden &&
@@ -79,13 +78,10 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
         const { rooms } = await import("@ursamu/core");
         const users = rooms.members(chan.name).length;
         u.send(
-          `--- ${u.util.ljust(chan.name, 12)} ${u.util.ljust(
-            flagsStr,
-            10,
-          )} -1    ${u.util.ljust(own, 9)} 0        0     ${u.util.rjust(
-            String(users),
-            5,
-          )}        0`,
+          `--- ${u.util.ljust(chan.name, 12)} ` +
+            `${u.util.ljust(flagsStr, 10)} ` +
+            `${u.util.ljust(own, 14)} ` +
+            `${u.util.rjust(String(users), 5)}`,
         );
       }
     } else if (isHeaders) {
@@ -337,13 +333,15 @@ type ChansetOptions = {
   announce?: boolean;
 };
 
-function buildChansetOptions(
+/** Parse @chanset property/value (exported for unit tests). */
+export function buildChansetOptions(
   property: string,
   value: string,
 ): ChansetOptions | string | null {
+  const prop = property.toLowerCase().trim();
   const onOff = (v: string) =>
     v.toLowerCase() === "on" || v.toLowerCase() === "yes" || v === "1";
-  switch (property) {
+  switch (prop) {
     case "header":
       return { header: value };
     case "lock":

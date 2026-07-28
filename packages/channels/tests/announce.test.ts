@@ -1,5 +1,5 @@
 /**
- * Channel announce helpers — presence lines stay in-game only.
+ * Channel announce helpers: presence lines stay in-game only.
  */
 import { assertEquals } from "@std/assert";
 import { channelAnnounces } from "../src/announce.ts";

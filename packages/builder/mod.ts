@@ -55,8 +55,9 @@ const onLogin = (_e: SessionEvent): void => {
 
 export const builderPlugin: IPlugin = {
   name:        "builder",
-  version:     "1.3.2",
-  description: "World-building commands and REST API — @dig, @open, @link, @desc, @examine, and more.",
+  version:     "1.3.6",
+  description:
+    "World-building commands and REST API: @dig, @open, @link, @desc, @examine, and more.",
 
   init: async () => {
     // Register all builder scripts — they override engine bundled copies

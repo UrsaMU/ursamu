@@ -1,32 +1,20 @@
----
-topic: "locks/examples"
-section: locks
-dark: true
----
-+LOCKS/EXAMPLES
-
 See also: +help locks (overview)
 
++EXAMPLES
+
+  Common patterns.
+
 EXITS
-  @lock north=me
-  @lock vault=wizard | #2
-  @lock portal=+member & !dark
-  @fail north=The way is barred.
-  @ofail north=rattles the gate.
+  @lock North=me
+  @lock Vault=flag(wizard)|*Guard
 
 ITEMS
-  @lock sword=me
-  @lock/use wand=flag(wizard)
-  @lock gem=holds(#9) | me
+  @lock/use Keycard=me|*Owner
+  @lock Chest=holds(#99)
 
-ROOMS / ENTER
-  @lock/enter club=+member
-  @lock/enter office=is(#2) | perm(admin)
+ROOMS
+  @lock/enter Club=member+
 
-INDIRECT / EVAL-STYLE
-  @lock junior=@#10
-    (must pass #10's basic lock)
-  @lock shop=[gt(money(%#),50)]
+  Prefer simple keys. Test with a non-owner alt.
 
-SEE ALSO: +help @lock, +help locks/keys,
-+help action-attrs
+SEE ALSO: +help locks/lock, +help rooms/open
