@@ -140,7 +140,7 @@ const channelMiddleware: IMiddlewareFn = async (ctx, next) => {
 
 export const channelsPlugin: IPlugin = {
   name: "@ursamu/channels",
-  version: "0.1.4",
+  version: "0.1.5",
   description:
     "Channel system — chat channels with aliases, history, and admin tools.",
 
