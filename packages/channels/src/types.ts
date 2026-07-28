@@ -9,6 +9,11 @@ export interface IChannel {
   owner?: string;
   logHistory?: boolean;
   historyLimit?: number;
+  /**
+   * When true, broadcast connect / disconnect / join / leave lines
+   * on this channel. Never mirrored to Discord (no channel:message).
+   */
+  announce?: boolean;
 }
 
 export interface IChanMessage {

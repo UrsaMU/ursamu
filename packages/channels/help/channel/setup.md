@@ -17,10 +17,12 @@ PROPERTIES
   `masking`       Allow player monikers/masks (`on`/`off`).
   `log`           Enable history logging (`on`/`off`).
   `historyLimit`  Maximum history lines to retain (1–5000).
+  `announce`      Connect/disconnect/join/leave (`on`/`off`).
+                  In-game only — never mirrored to Discord.
 
 EXAMPLES
   @chanset Public/header=[PUB]
+  @chanset Public/announce=on
   @chanset Staff/hidden=on
-  @chanset Public/historyLimit=500
 
 SEE ALSO: +help chancreate, +help channel/locks

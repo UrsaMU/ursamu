@@ -16,13 +16,26 @@ import type { IMiddlewareFn } from "@ursamu/core";
 
 import { matchChannel } from "./src/middleware/matchChannel.ts";
 import { joinChans } from "./src/middleware/joinChans.ts";
+import { announcePresence } from "./src/announce.ts";
 import type { IChannel } from "./src/types.ts";
 
 export * from "./src/commands/verbs.ts";
 export { matchChannel } from "./src/middleware/matchChannel.ts";
 export { joinChans } from "./src/middleware/joinChans.ts";
 export { channelEvents } from "./src/channel-events.ts";
+export {
+  announcePresence,
+  announceChannelMember,
+  channelAnnounces,
+} from "./src/announce.ts";
 export type { IChannel, IChanEntry, IChanMessage } from "./src/types.ts";
+
+type ChanDefault = {
+  name: string;
+  alias: string;
+  lock?: string;
+  announce?: boolean;
+};
 
 const onLogin = async ({
   actorId,
@@ -32,18 +45,39 @@ const onLogin = async ({
   await joinChans(actorId, socketId).catch((e: unknown) =>
     console.error("[channels] joinChans error:", e)
   );
+  // After subscriptions are live so announce targets hear them.
+  await announcePresence(actorId, "connect").catch((e: unknown) =>
+    console.error("[channels] announce connect:", e)
+  );
+};
+
+const onLogout = async ({
+  actorId,
+}: SessionEvent): Promise<void> => {
+  if (!actorId) return;
+  await announcePresence(actorId, "disconnect").catch((e: unknown) =>
+    console.error("[channels] announce disconnect:", e)
+  );
 };
 
 const onReady = async (): Promise<void> => {
   const dbName = getConfig<string>("plugins.channels.db", "server.chans");
   const chans = new DBO<IChannel>(dbName);
-  const defaults = getConfig<Array<{
-    name: string;
-    alias: string;
-    lock?: string;
-  }>>("plugins.channels.defaults") || [
-    { name: "Public", alias: "pub", lock: "connected" },
-    { name: "Admin", alias: "ad", lock: "connected admin+" },
+  const defaults = getConfig<ChanDefault[]>(
+    "plugins.channels.defaults",
+  ) || [
+    {
+      name: "Public",
+      alias: "pub",
+      lock: "connected",
+      announce: true,
+    },
+    {
+      name: "Admin",
+      alias: "ad",
+      lock: "connected admin+",
+      announce: false,
+    },
   ];
 
   for (const def of defaults) {
@@ -61,6 +95,7 @@ const onReady = async (): Promise<void> => {
         lock: def.lock || "",
         hidden: false,
         owner: "",
+        announce: def.announce === true,
       });
       console.log(`[channels] Seeded default channel: ${def.name}`);
       continue;
@@ -80,6 +115,14 @@ const onReady = async (): Promise<void> => {
     ) {
       patch.lock = def.lock;
     }
+    // Apply announce from config when the field is still unset.
+    if (
+      def.announce === true &&
+      existing.announce !== true &&
+      existing.announce !== false
+    ) {
+      patch.announce = true;
+    }
     if (Object.keys(patch).length) {
       await chans.modify({ id: existing.id }, "$set", patch);
       console.log(
@@ -97,7 +140,7 @@ const channelMiddleware: IMiddlewareFn = async (ctx, next) => {
 
 export const channelsPlugin: IPlugin = {
   name: "@ursamu/channels",
-  version: "0.1.0",
+  version: "0.1.3",
   description:
     "Channel system — chat channels with aliases, history, and admin tools.",
 
@@ -108,6 +151,7 @@ export const channelsPlugin: IPlugin = {
       "channels",
     );
     gameHooks.on("player:login", onLogin);
+    gameHooks.on("player:logout", onLogout);
     gameHooks.on("engine:ready", onReady);
     addMiddleware(channelMiddleware);
     return true;
@@ -115,6 +159,7 @@ export const channelsPlugin: IPlugin = {
 
   remove: () => {
     gameHooks.off("player:login", onLogin);
+    gameHooks.off("player:logout", onLogout);
     gameHooks.off("engine:ready", onReady);
     // addMiddleware is not reversible — restart required to fully remove.
   },

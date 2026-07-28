@@ -121,13 +121,15 @@ addCmd({
   help: `@chanset <name>/<property>=<value>  — Modify a channel property (admin+).
 
 Properties: header, lock, hidden (on/off), masking (on/off), log (on/off),
-historyLimit (<n>)
+historyLimit (<n>), announce (on/off — connect/disconnect/join/leave;
+in-game only, never Discord).
 Aliases: @cset
 
 Examples:
   @chanset public/header=[PUB]
   @cset public/lock=player+
-  @cset public/hidden=on`,
+  @cset public/hidden=on
+  @cset Public/announce=on`,
   exec: execChanset,
 });
 

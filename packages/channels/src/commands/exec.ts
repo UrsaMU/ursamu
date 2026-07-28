@@ -1,6 +1,7 @@
 import { DBO, getConfig } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
 import type { IChanEntry } from "../types.ts";
+import { announceChannelMember } from "../announce.ts";
 
 export async function execChannel(u: IUrsamuSDK): Promise<void> {
   const sw = (u.cmd.args[0] || "").toLowerCase().trim();
@@ -19,6 +20,8 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
       return;
     }
     await u.chan.join(chan, alias);
+    const who = String(u.me.state.name || u.me.name || u.me.id);
+    await announceChannelMember(chan, who, "join");
     u.send(`You have joined channel ${chan} with alias ${alias}.`);
     return;
   }
@@ -27,6 +30,15 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
     if (!arg) {
       u.send("Usage: @channel/leave <alias>");
       return;
+    }
+    const entries =
+      ((u.me.state as Record<string, unknown>).channels as
+        | IChanEntry[]
+        | undefined) ?? [];
+    const leaving = entries.find((e) => e.alias === arg);
+    const who = String(u.me.state.name || u.me.name || u.me.id);
+    if (leaving) {
+      await announceChannelMember(leaving.channel, who, "leave");
     }
     await u.chan.leave(arg);
     u.send(`You have left the channel with alias ${arg}.`);
@@ -60,7 +72,9 @@ export async function execChannel(u: IUrsamuSDK): Promise<void> {
         }
         const flagsStr = `${chan.hidden ? "H" : "-"}${
           chan.masking ? "M" : "-"
-        }${chan.logHistory ? "L" : "-"}`;
+        }${chan.logHistory ? "L" : "-"}${
+          chan.announce ? "A" : "-"
+        }`;
         const own = chan.owner || "God";
         const { rooms } = await import("@ursamu/core");
         const users = rooms.members(chan.name).length;
@@ -260,7 +274,8 @@ export async function execChanset(u: IUrsamuSDK): Promise<void> {
   if (!match) {
     u.send("Usage: @chanset <name>/<property>=<value>");
     u.send(
-      "  Properties: header, lock, hidden, masking, log, historyLimit",
+      "  Properties: header, lock, hidden, masking, log, " +
+        "historyLimit, announce",
     );
     return;
   }
@@ -292,7 +307,8 @@ export async function execChanset(u: IUrsamuSDK): Promise<void> {
   if (options === null) {
     u.send(
       `Unknown property: ${property}. ` +
-        "Valid: header, lock, hidden, masking, log, historyLimit",
+        "Valid: header, lock, hidden, masking, log, " +
+        "historyLimit, announce",
     );
     return;
   }
@@ -318,6 +334,7 @@ type ChansetOptions = {
   masking?: boolean;
   logHistory?: boolean;
   historyLimit?: number;
+  announce?: boolean;
 };
 
 function buildChansetOptions(
@@ -338,6 +355,8 @@ function buildChansetOptions(
     case "log":
     case "loghistory":
       return { logHistory: onOff(value) };
+    case "announce":
+      return { announce: onOff(value) };
     case "historylimit": {
       const n = parseInt(value, 10);
       if (isNaN(n) || n < 1 || n > 5000) {
@@ -395,6 +414,8 @@ async function doAddcom(u: IUrsamuSDK, arg: string): Promise<void> {
     return;
   }
   await u.chan.join(channel, alias);
+  const who = String(u.me.state.name || u.me.name || u.me.id);
+  await announceChannelMember(channel, who, "join");
   u.send(`Added alias %ch${alias}%cn for channel %ch${channel}%cn.`);
 }
 
@@ -402,6 +423,15 @@ async function doDelcom(u: IUrsamuSDK, arg: string): Promise<void> {
   if (!arg) {
     u.send("Usage: @delcom <alias>");
     return;
+  }
+  const entries =
+    ((u.me.state as Record<string, unknown>).channels as
+      | IChanEntry[]
+      | undefined) ?? [];
+  const leaving = entries.find((e) => e.alias === arg);
+  const who = String(u.me.state.name || u.me.name || u.me.id);
+  if (leaving) {
+    await announceChannelMember(leaving.channel, who, "leave");
   }
   await u.chan.leave(arg);
   u.send(`Removed channel alias %ch${arg}%cn.`);

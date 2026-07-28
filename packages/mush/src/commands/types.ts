@@ -131,6 +131,7 @@ export interface IUrsamuSDK {
       masking?: boolean;
       logHistory?: boolean;
       historyLimit?: number;
+      announce?: boolean;
     }): Promise<unknown>;
     history(name: string, limit?: number): Promise<{ id: string; playerName: string; message: string; timestamp: number }[]>;
   };
