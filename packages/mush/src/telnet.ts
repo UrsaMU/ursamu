@@ -445,21 +445,22 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
         .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "") // non-printable ASCII
         .trim();
 
-      if (sock && (sock as WebSocket).readyState === WebSocket.OPEN) {
-        if (msg) {
-          (sock as WebSocket).send(JSON.stringify({
-            msg,
-            data: { cid }
-          }));
-        }
-      } else {
-        if(msg) {
-          // Cap buffer to prevent heap exhaustion during long disconnects
+      if (msg) {
+        const frame = JSON.stringify({
+          msg,
+          data: { cid },
+        });
+        // Hold input until JWT reauth finishes — otherwise commands
+        // run as unauthenticated #-1 and look like a dead session.
+        if (
+          pendingReauth ||
+          !sock ||
+          (sock as WebSocket).readyState !== WebSocket.OPEN
+        ) {
           if (msgBuffer.length >= MAX_MSG_BUFFER_SIZE) msgBuffer.shift();
-          msgBuffer.push(JSON.stringify({
-            msg,
-            data: { cid }
-          }));
+          msgBuffer.push(frame);
+        } else {
+          (sock as WebSocket).send(frame);
         }
       }
     }

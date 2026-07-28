@@ -67,11 +67,18 @@ async function getSecretKey(): Promise<CryptoKey> {
   );
 }
 
+/** Default session token lifetime: 30 days (soft-reboot reauth). */
+const DEFAULT_TOKEN_SECS = 60 * 60 * 24 * 30;
+
 export async function createToken(payload: Record<string, unknown>): Promise<string> {
   const key = await getSecretKey();
   return await djwt.create(
     { alg: "HS256", typ: "JWT" },
-    { ...payload, exp: (payload.exp as number) || djwt.getNumericDate(60 * 60) },
+    {
+      ...payload,
+      exp: (payload.exp as number) ||
+        djwt.getNumericDate(DEFAULT_TOKEN_SECS),
+    },
     key,
   );
 }
