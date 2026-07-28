@@ -66,7 +66,7 @@ let _expirySweepTimer: ReturnType<typeof setInterval> | null =
 
 export const plugin: IPlugin = {
   name: "mail",
-  version: "2.4.0",
+  version: "2.5.0",
   description:
     "In-game mail system with drafts, folders, attachments, " +
     "quota, and expiry.",

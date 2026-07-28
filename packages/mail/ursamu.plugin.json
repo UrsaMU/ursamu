@@ -1,8 +1,8 @@
 {
   "name": "mail",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "In-game mail — drafts, reply/forward, folders, attachments, quota, expiry, REST API.",
-  "ursamu": ">=2.6.0",
+  "ursamu": ">=1.0.0",
   "author": "UrsaMU",
   "license": "MIT",
   "main": "index.ts",

@@ -1,51 +1,42 @@
 # @ursamu/mail
 
-In-game mail plugin for [UrsaMU](https://jsr.io/@ursamu/mush) —
-drafts, reply/forward, folders, attachments, quota, expiry, and a
-REST API.
+**Version 2.5.0** (stable on mush/help **1.x**).
+
+In-game mail for [UrsaMU](https://jsr.io/@ursamu/mush) — drafts,
+reply/forward, folders, attachments, quota, expiry, and REST.
+
+See `CHANGELOG.md` and `docs/STABLE.md`.
+
+> Already past 1.0 historically (2.x line). **2.5.0** freezes the
+> public surface on the engine 1.0 floor.
+
+## Stable API (2.5)
+
+| Export | Purpose |
+|--------|---------|
+| `mailPlugin` / default | IPlugin bootstrap |
+| `IMail`, `mailDb` | Message type and collection |
+| `getMyMail`, `countPlayerMail` | Inbox helpers |
+| `getDraft` / `setDraft` | Draft state |
+| `mailRouteHandler` | `/api/v1/mail` |
+| `runExpirySweep` | Expiry job |
 
 ## Install
-
-### JSR (recommended)
 
 ```ts
 // deno.json
 {
   "imports": {
-    "@ursamu/mail": "jsr:@ursamu/mail@^2.4.0"
+    "@ursamu/mail": "jsr:@ursamu/mail@^2.5.0"
   }
 }
 ```
 
-Load via your game's plugin loader / `plugins.manifest.json`, or
-import the default export and register it with the engine.
-
-```ts
-import mailPlugin from "@ursamu/mail";
-// engine.loadPlugin(mailPlugin) — or drop into plugins/
-```
-
-### plugins.manifest.json
-
 ```json
 {
-  "plugins": [{
-    "name": "mail",
-    "url": "https://github.com/UrsaMU/mail-plugin",
-    "ref": "v2.4.0",
-    "description": "In-game mail system.",
-    "ursamu": ">=2.6.0"
-  }]
-}
-```
-
-Monorepo local override:
-
-```json
-{
-  "name": "mail",
-  "local": "../../packages/mail",
-  "ursamu": ">=2.6.0"
+  "server": {
+    "plugins": ["@ursamu/mail"]
+  }
 }
 ```
 
@@ -53,8 +44,8 @@ Monorepo local override:
 
 | Package | Role |
 |---------|------|
-| `@ursamu/mush` `^0.1.3` | Engine APIs (`addCmd`, DBO, hooks) |
-| `@ursamu/help` `^0.1.2` | Help file directory registration |
+| `@ursamu/mush` `^1.0.0` | Engine (`addCmd`, DBO, hooks) |
+| `@ursamu/help` `^1.0.0` | Help directory registration |
 
 ## Commands
 
@@ -83,7 +74,7 @@ Monorepo local override:
 
 ## REST
 
-All routes require auth. Base path: `/api/v1/mail`.
+All routes require auth. Base: `/api/v1/mail`.
 
 | Method | Path | Action |
 |--------|------|--------|
@@ -94,28 +85,22 @@ All routes require auth. Base path: `/api/v1/mail`.
 | PATCH | `/:id` | `folder` / `starred` |
 | DELETE | `/:id` | Soft trash or hard delete |
 
-## Library API
+## Version policy
 
-```ts
-import {
-  mailDb,
-  type IMail,
-  getMyMail,
-  countPlayerMail,
-  MAIL_QUOTA,
-} from "@ursamu/mail";
+| Change | Bump |
+|--------|------|
+| Remove/rename stable export or REST path | major (3.0) |
+| New feature, additive field | minor |
+| Bugfix, docs | patch |
+
+## Development
+
+```bash
+deno task test
+deno task check
+deno task preflight
 ```
 
-`IMail` is the shared message shape. Other plugins (e.g. CoFD
-staff tools) may write the same collection without importing
-mail internals.
+## License
 
-## Events
-
-Emits `mail:received` via `gameHooks` with
-`{ to, from, subject, body }` when a message is delivered.
-
-## Version
-
-**2.4.0** — first monorepo JSR release of the in-tree package
-(continues the external `mail-plugin` 2.x line).
+MIT
