@@ -5,7 +5,9 @@ import { assertEquals } from "@std/assert";
 import {
   bumpUrsamuImports,
   formatJsrPin,
+  isAppImportKey,
   parseJsrSpec,
+  rangeVersion,
 } from "../src/sys/codebase-update.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
@@ -44,38 +46,54 @@ Deno.test("formatJsrPin: keeps tilde", OPTS, () => {
   );
 });
 
-Deno.test("formatJsrPin: exact pin becomes caret", OPTS, () => {
+Deno.test("formatJsrPin: exact pin stays exact", OPTS, () => {
   assertEquals(
     formatJsrPin("@ursamu/mail", "2.5.0", "2.4.0"),
-    "jsr:@ursamu/mail@^2.5.0",
+    "jsr:@ursamu/mail@2.5.0",
   );
 });
 
-Deno.test("bumpUrsamuImports: bumps only @ursamu JSR", OPTS, async () => {
+Deno.test("rangeVersion strips prefix", OPTS, () => {
+  assertEquals(rangeVersion("^1.1.8"), "1.1.8");
+  assertEquals(rangeVersion("0.1.6"), "0.1.6");
+  assertEquals(rangeVersion("~0.1.5"), "0.1.5");
+});
+
+Deno.test("isAppImportKey skips jsr remap keys", OPTS, () => {
+  assertEquals(isAppImportKey("@ursamu/help"), true);
+  assertEquals(isAppImportKey("jsr:@ursamu/help@0.1.3"), false);
+  assertEquals(isAppImportKey("ursamu"), true);
+});
+
+Deno.test("bumpUrsamuImports: bumps only app keys", OPTS, async () => {
   const fetchMeta = async (pkg: string) => {
     if (pkg === "@ursamu/cofd-plugin") return "1.1.8";
     if (pkg === "@ursamu/mush") return "0.1.22";
+    if (pkg === "@ursamu/help") return "0.1.6";
     return null;
   };
   const { imports, bumped } = await bumpUrsamuImports(
     {
       "@ursamu/cofd": "jsr:@ursamu/cofd-plugin@^1.1.2",
-      "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.1.2",
       "@ursamu/mush": "jsr:@ursamu/mush@^0.1.17",
+      "@ursamu/help": "jsr:@ursamu/help@^0.1.6",
+      "jsr:@ursamu/help@0.1.3": "jsr:@ursamu/help@0.1.6",
       lodash: "npm:lodash@^4.18.1",
       local: "./vendor/builder/mod.ts",
     },
     fetchMeta,
   );
   assertEquals(imports["@ursamu/cofd"], "jsr:@ursamu/cofd-plugin@^1.1.8");
-  assertEquals(
-    imports["@ursamu/cofd-plugin"],
-    "jsr:@ursamu/cofd-plugin@^1.1.8",
-  );
   assertEquals(imports["@ursamu/mush"], "jsr:@ursamu/mush@^0.1.22");
+  // already on latest — unchanged
+  assertEquals(imports["@ursamu/help"], "jsr:@ursamu/help@^0.1.6");
+  // remap key left alone
+  assertEquals(
+    imports["jsr:@ursamu/help@0.1.3"],
+    "jsr:@ursamu/help@0.1.6",
+  );
   assertEquals(imports.lodash, "npm:lodash@^4.18.1");
-  assertEquals(imports.local, "./vendor/builder/mod.ts");
-  assertEquals(bumped.length, 3);
+  assertEquals(bumped.length, 2);
 });
 
 Deno.test("bumpUrsamuImports: no-op when current", OPTS, async () => {

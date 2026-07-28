@@ -31,7 +31,9 @@ export type UpdateOutcome = {
 export {
   bumpUrsamuImports,
   formatJsrPin,
+  isAppImportKey,
   parseJsrSpec,
+  rangeVersion,
 } from "./jsr-pins.ts";
 
 function logLine(

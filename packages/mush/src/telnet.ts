@@ -168,7 +168,10 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
   let isReconnecting = false;
   // True while JWT reauth is in flight — hold cmds until auth:true.
   let pendingReauth = false;
+  /** Avoid double "Server is back!" when boot retries auth. */
+  let reauthOkSent = false;
   let reauthTimer: ReturnType<typeof setTimeout> | undefined;
+  let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   let manuallyClosed = false;
 
   const encoder = new TextEncoder();
@@ -200,7 +203,30 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
     }
   };
 
+  const clearReconnectTimer = () => {
+    if (reconnectTimer !== undefined) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = undefined;
+    }
+  };
+
+  const scheduleReconnect = () => {
+    clearReconnectTimer();
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = undefined;
+      connect();
+    }, 1000);
+  };
+
   const connect = () => {
+      clearReconnectTimer();
+      // Drop a half-open socket before opening another.
+      if (sock && sock.readyState < 2) {
+        try {
+          sock.onclose = null;
+          sock.close();
+        } catch { /* ignore */ }
+      }
       // Only skip welcome when we can JWT-reauth. Pre-login WS blips must
       // open a normal session so the engine still sends the connect screen.
       const recon = (isReconnecting && sessionToken)
@@ -282,11 +308,15 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
           if (authAct.action === "restored") {
             clearReauthTimer();
             pendingReauth = false;
+            isReconnecting = false;
             if (authAct.cid) cid = authAct.cid;
-            write(parser.substitute(
-              "telnet",
-              REAUTH_OK_MSG + "\r\n",
-            ));
+            if (!reauthOkSent) {
+              reauthOkSent = true;
+              write(parser.substitute(
+                "telnet",
+                REAUTH_OK_MSG + "\r\n",
+              ));
+            }
             // Do not force look here: on @restart the softcode/parser
             // pipeline may still be loading, so look dumps raw %c codes.
             flushBuffer();
@@ -316,7 +346,14 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
               clearReauthTimer();
               pendingReauth = false;
               isReconnecting = true;
-              try { sock?.close(); } catch { /* retry via onclose */ }
+              reauthOkSent = false;
+              try {
+                if (sock) {
+                  sock.onclose = null;
+                  sock.close();
+                }
+              } catch { /* ignore */ }
+              scheduleReconnect();
               return;
             }
             // Session cannot be restored (expired JWT, missing player).
@@ -339,15 +376,15 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
 
       sock.onclose = () => {
         if (!manuallyClosed) {
-             if (!isReconnecting) {
-                 write(parser.substitute("telnet", "%chGame>%cn Server is restarting...\r\n"));
-                 isReconnecting = true;
-             }
-             
-             // Retry connection in 1 second
-             setTimeout(() => {
-                 connect();
-             }, 1000);
+          if (!isReconnecting) {
+            write(parser.substitute(
+              "telnet",
+              "%chGame>%cn Server is restarting...\r\n",
+            ));
+            isReconnecting = true;
+            reauthOkSent = false;
+          }
+          scheduleReconnect();
         }
       };
 

@@ -20,21 +20,37 @@ export function parseJsrSpec(spec: string): {
   };
 }
 
-/** Keep ^/~ prefix from the old pin when writing the new version. */
+/** Strip ^/~/>= from a range and return the leading semver. */
+export function rangeVersion(range: string): string {
+  return range.replace(/^[\^~>=\s]+/, "").split(/[^0-9.]/)[0] ??
+    "";
+}
+
+/** Keep ^/~ / exact style from the old pin when writing the new version. */
 export function formatJsrPin(
   pkg: string,
   version: string,
   oldRange: string,
   suffix = "",
 ): string {
-  const prefix = oldRange.startsWith("~")
-    ? "~"
-    : oldRange.startsWith("^") || oldRange === ""
-    ? "^"
-    : oldRange.startsWith(">=")
-    ? ">="
-    : "^";
+  let prefix = "";
+  if (oldRange.startsWith("~")) prefix = "~";
+  else if (oldRange.startsWith("^") || oldRange === "") prefix = "^";
+  else if (oldRange.startsWith(">=")) prefix = ">=";
+  // bare x.y.z stays exact (no forced caret)
   return `jsr:${pkg}@${prefix}${version}${suffix}`;
+}
+
+/**
+ * App import keys only — skip deno.json remap entries whose key is
+ * itself a jsr:/npm: specifier (those are dual-package shims).
+ */
+export function isAppImportKey(key: string): boolean {
+  const k = key.trim();
+  if (!k) return false;
+  if (k.startsWith("jsr:") || k.startsWith("npm:")) return false;
+  if (k.startsWith("http:") || k.startsWith("https:")) return false;
+  return true;
 }
 
 export async function fetchLatestJsrVersion(
@@ -51,8 +67,8 @@ export async function fetchLatestJsrVersion(
 }
 
 /**
- * Bump every jsr:@ursamu/* import in a deno.json imports map to latest.
- * Returns the new imports object and list of "pkg old→new" strings.
+ * Bump jsr:@ursamu/* app imports to latest.
+ * Skips remap keys and no-ops when the pin already resolves to latest.
  */
 export async function bumpUrsamuImports(
   imports: Record<string, string>,
@@ -64,7 +80,8 @@ export async function bumpUrsamuImports(
   const latestCache = new Map<string, string | null>();
 
   const pkgs = new Set<string>();
-  for (const val of Object.values(imports)) {
+  for (const [key, val] of Object.entries(imports)) {
+    if (!isAppImportKey(key)) continue;
     const p = parseJsrSpec(val);
     if (p) pkgs.add(p.pkg);
   }
@@ -74,10 +91,13 @@ export async function bumpUrsamuImports(
   }
 
   for (const [key, val] of Object.entries(imports)) {
+    if (!isAppImportKey(key)) continue;
     const p = parseJsrSpec(val);
     if (!p) continue;
     const latest = latestCache.get(p.pkg);
     if (!latest) continue;
+    // Already on this version (any range prefix) — leave alone.
+    if (rangeVersion(p.range) === latest) continue;
     const pin = formatJsrPin(p.pkg, latest, p.range, p.suffix);
     if (pin === val) continue;
     next[key] = pin;
