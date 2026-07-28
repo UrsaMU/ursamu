@@ -54,6 +54,10 @@ export function broadcastAnnounce(
   send([...sockets], line);
 }
 
+/** Dedupe rapid double-fires (e.g. duplicate Public rows). */
+const _recent = new Map<string, number>();
+const DEDUPE_MS = 4000;
+
 /**
  * Announce connect or disconnect on every announce-enabled channel
  * the player is actively subscribed to.
@@ -62,6 +66,12 @@ export async function announcePresence(
   playerId: string,
   kind: "connect" | "disconnect",
 ): Promise<void> {
+  const stamp = `${playerId}:${kind}`;
+  const now = Date.now();
+  const prev = _recent.get(stamp) ?? 0;
+  if (now - prev < DEDUPE_MS) return;
+  _recent.set(stamp, now);
+
   const player = await dbojs.queryOne({ id: playerId });
   if (!player) return;
 
@@ -70,9 +80,15 @@ export async function announcePresence(
   if (!entries.length) return;
 
   const all = (await chans.query({})) as IChannel[];
-  const byName = new Map(
-    all.map((c) => [c.name.toLowerCase(), c]),
-  );
+  // Prefer announce-enabled row when duplicate names exist.
+  const byName = new Map<string, IChannel>();
+  for (const c of all) {
+    const k = c.name.toLowerCase();
+    const prevC = byName.get(k);
+    if (!prevC || (c.announce && !prevC.announce)) {
+      byName.set(k, c);
+    }
+  }
 
   const verb = kind === "connect" ? "connected" : "disconnected";
   const line = `${name} has ${verb}.`;

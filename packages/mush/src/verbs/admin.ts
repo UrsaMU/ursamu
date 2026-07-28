@@ -15,7 +15,7 @@ export async function execBoot(u: IUrsamuSDK): Promise<void> {
   if (!isAdmin(u)) { u.send("Permission denied."); return; }
   const arg = (u.cmd.args[0] || "").trim();
   if (!arg) { u.send("Usage: @boot <player>"); return; }
-  const tar = await u.util.target(u.me, arg);
+  const tar = await u.util.target(u.me, arg, true);
   if (!tar) { u.send("Player not found."); return; }
   if (!hasFlag(tar.flags, "player")) { u.send("You can only boot players."); return; }
   if (hasFlag(tar.flags, "superuser")) { u.send("You cannot boot a superuser."); return; }
@@ -27,7 +27,7 @@ export async function execBoot(u: IUrsamuSDK): Promise<void> {
 
 export async function execToad(u: IUrsamuSDK): Promise<void> {
   if (!isAdmin(u)) { u.send("Permission denied."); return; }
-  const tar = await u.util.target(u.me, u.cmd.args[0]);
+  const tar = await u.util.target(u.me, u.cmd.args[0], true);
   if (!tar || !hasFlag(tar.flags, "player")) { u.send("Player not found."); return; }
   if (hasFlag(tar.flags, "superuser")) { u.send("You cannot toad a superuser."); return; }
   await log("warn", "ADMIN_TOAD", { actor: u.me.id, target: tar.id });
@@ -42,7 +42,7 @@ export async function execNewpassword(u: IUrsamuSDK): Promise<void> {
   const name = (u.cmd.args[0] || "").trim();
   const pass = (u.cmd.args[1] || "").trim();
   if (!name || !pass) { u.send("Usage: @newpassword <player>=<password>"); return; }
-  const tar = await u.util.target(u.me, name);
+  const tar = await u.util.target(u.me, name, true);
   if (!tar || !hasFlag(tar.flags, "player")) { u.send("Player not found."); return; }
   await log("warn", "ADMIN_NEWPASSWORD", { actor: u.me.id, target: tar.id });
   await u.auth.setPassword(tar.id, pass);
@@ -55,8 +55,8 @@ export async function execChown(u: IUrsamuSDK): Promise<void> {
   const thingName = (u.cmd.args[0] || "").trim();
   const newOwnerName = (u.cmd.args[1] || "").trim();
   if (!thingName || !newOwnerName) { u.send("Usage: @chown <object>=<player>"); return; }
-  const thing = await u.util.target(u.me, thingName);
-  const newOwner = await u.util.target(u.me, newOwnerName);
+  const thing = await u.util.target(u.me, thingName, true);
+  const newOwner = await u.util.target(u.me, newOwnerName, true);
   if (!thing) { u.send("Object not found."); return; }
   if (!newOwner || !hasFlag(newOwner.flags, "player")) { u.send("New owner not found."); return; }
   await u.db.modify(thing.id, "$set", { "data.owner": newOwner.id });
@@ -65,7 +65,7 @@ export async function execChown(u: IUrsamuSDK): Promise<void> {
 
 export async function execResetToken(u: IUrsamuSDK): Promise<void> {
   if (!isAdmin(u)) { u.send("Permission denied."); return; }
-  const tar = await u.util.target(u.me, u.cmd.args[0]);
+  const tar = await u.util.target(u.me, u.cmd.args[0], true);
   if (!tar || !hasFlag(tar.flags, "player")) { u.send("Player not found."); return; }
   const token = crypto.randomUUID();
   const expiry = Date.now() + 60 * 60 * 1000;

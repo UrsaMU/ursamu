@@ -40,12 +40,14 @@ type ChanDefault = {
 const onLogin = async ({
   actorId,
   socketId,
+  reason,
 }: SessionEvent): Promise<void> => {
   if (!socketId || !actorId) return;
   await joinChans(actorId, socketId).catch((e: unknown) =>
     console.error("[channels] joinChans error:", e)
   );
-  // After subscriptions are live so announce targets hear them.
+  // Soft-reboot JWT restore is not a fresh connect — stay quiet.
+  if (reason === "reauth") return;
   await announcePresence(actorId, "connect").catch((e: unknown) =>
     console.error("[channels] announce connect:", e)
   );
@@ -53,8 +55,11 @@ const onLogin = async ({
 
 const onLogout = async ({
   actorId,
+  reason,
 }: SessionEvent): Promise<void> => {
   if (!actorId) return;
+  // Main exiting for @restart — no disconnect spam.
+  if (reason === "reboot" || reason === "reauth") return;
   await announcePresence(actorId, "disconnect").catch((e: unknown) =>
     console.error("[channels] announce disconnect:", e)
   );
@@ -140,7 +145,7 @@ const channelMiddleware: IMiddlewareFn = async (ctx, next) => {
 
 export const channelsPlugin: IPlugin = {
   name: "@ursamu/channels",
-  version: "0.1.5",
+  version: "0.1.6",
   description:
     "Channel system — chat channels with aliases, history, and admin tools.",
 

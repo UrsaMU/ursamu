@@ -141,6 +141,7 @@ export async function loadDefaultCommands(): Promise<void> {
   await import("../verbs/assert.ts");
   await import("../verbs/auth-cmds.ts");
   await import("../verbs/auth.ts");
+  await import("../verbs/pcreate.ts");
   // Building commands moved to @ursamu/builder — load via builderPlugin.init()
   // Channel commands moved to @ursamu/channels — load via channelsPlugin.init()
   await import("../verbs/emit-exec.ts");

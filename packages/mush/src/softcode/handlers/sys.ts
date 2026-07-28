@@ -22,6 +22,12 @@ import { runCodebaseUpdate } from "../../sys/codebase-update.ts";
 const SERVER_START = Date.now();
 
 function scheduleExit(code: number): void {
+  if (code === 75) {
+    // Soft-reboot: suppress connect/disconnect channel spam.
+    import("../../sys/reboot-flag.ts").then(({ markSoftReboot }) => {
+      markSoftReboot();
+    }).catch(() => { /* ignore */ });
+  }
   setTimeout(async () => {
     try {
       const { DBO: CoreDBO } = await import("@ursamu/core");

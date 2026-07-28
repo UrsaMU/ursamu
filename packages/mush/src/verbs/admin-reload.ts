@@ -138,6 +138,8 @@ export async function execNuke(u: IUrsamuSDK): Promise<void> {
   send([socketId], "%ch%cgDatabase wiped.%cn Server will restart to reinitialize.");
   send([socketId], "You will need to create a new superuser on restart.");
 
+  const { markSoftReboot } = await import("../sys/reboot-flag.ts");
+  markSoftReboot();
   setTimeout(() => Deno.exit(75), 500);
 }
 

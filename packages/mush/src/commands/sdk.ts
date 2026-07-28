@@ -543,6 +543,8 @@ export async function createNativeSDK(
         }
         // Close PGlite before exit so the next process can open the DB.
         // Exit 75 → main-loop soft reboot; telnet sidecar stays up.
+        const { markSoftReboot } = await import("../sys/reboot-flag.ts");
+        markSoftReboot();
         setTimeout(async () => {
           try {
             await DBO.close();
@@ -569,6 +571,8 @@ export async function createNativeSDK(
         if (!result.ok) {
           throw new Error("codebase update failed");
         }
+        const { markSoftReboot } = await import("../sys/reboot-flag.ts");
+        markSoftReboot();
         setTimeout(async () => {
           try {
             await DBO.close();
@@ -941,7 +945,8 @@ gameHooks.on("session:auth", async (e) => {
     // Tell the client who they are so telnet can restore cid + look.
     sendPayload(e.socketId, "", { cid: userId, auth: true });
     const { hooks } = await import("../events/hooks.ts");
-    await hooks.aconnect(player, e.socketId);
+    // JWT restore after soft-reboot — not a fresh connect.
+    await hooks.aconnect(player, e.socketId, { reauth: true });
   } catch (err) {
     await failReauth(e.socketId, String(err));
   }

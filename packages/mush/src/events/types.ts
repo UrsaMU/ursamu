@@ -42,6 +42,15 @@ export interface SessionEvent {
   actorId: string;
   actorName: string;
   socketId?: string;
+  /**
+   * How the session changed:
+   * - login  — fresh connect / create
+   * - reauth — JWT restore after soft-reboot (no presence spam)
+   * - quit   — deliberate quit
+   * - drop   — socket lost
+   * - reboot — main exiting for soft-reboot (exit 75)
+   */
+  reason?: "login" | "reauth" | "quit" | "drop" | "reboot";
 }
 
 export interface ChannelMessageEvent {

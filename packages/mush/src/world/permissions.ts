@@ -11,8 +11,8 @@
  * Edit (canEdit):
  *   - Self always
  *   - Owner always (object-level; attrs may still block)
- *   - Else only if actorRank > ownerRank (higher staff
- *     may edit lower-ranked owners' objects; never the reverse)
+ *   - Else if actorRank >= ownerRank and actor is privileged
+ *     (same ladder tier or higher may edit; never lower)
  *
  * Attributes:
  *   - Names starting with `_` : invisible + locked to rank 0
@@ -139,8 +139,8 @@ export async function canEditObject(
   if (aRank <= 0) return false;
 
   const oRank = await ownerPrivRank(target);
-  // Strictly higher rank may edit lower-ranked owners' objects.
-  return aRank > oRank;
+  // Same or higher rank may edit; lower may not.
+  return aRank >= oRank;
 }
 
 /** Attribute flag list for a name (from data._attrflags). */

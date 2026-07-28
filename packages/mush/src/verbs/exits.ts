@@ -92,26 +92,68 @@ EXAMPLES
     }
 
     if (sw === "add") {
-      if (!zmRef) { u.send("Usage: @zone/add <object>=<zonemaster>"); return; }
-      const zmResult = await u.util.target(u.me, zmRef);
-      if (!zmResult) { u.send(`I can't find zone master '${zmRef}'.`); return; }
+      if (!zmRef) {
+        u.send("Usage: @zone/add <object>=<zonemaster>");
+        return;
+      }
+      const zmResult = await u.util.target(u.me, zmRef, true);
+      if (!zmResult) {
+        u.send(`I can't find zone master '${zmRef}'.`);
+        return;
+      }
       const key = `${zmResult.id}:${objResult.id}`;
       const existing = await zm.findOne({ id: key });
-      if (existing) { u.send(`${objResult.name} is already in zone #${zmResult.id}.`); return; }
-      await zm.create({ id: key, zmId: zmResult.id, memberId: objResult.id });
-      u.send(`${objResult.name}(#${objResult.id}) added to zone ${zmResult.name}(#${zmResult.id}).`);
+      if (existing) {
+        u.send(
+          `${objResult.name} is already in zone #${zmResult.id}.`,
+        );
+        return;
+      }
+      await zm.create({
+        id: key,
+        zmId: zmResult.id,
+        memberId: objResult.id,
+      });
+      // Keep data.zone in sync so softcode zone()/zonename() work.
+      await u.db.modify(objResult.id, "$set", {
+        "data.zone": zmResult.id,
+      });
+      u.send(
+        `${objResult.name}(#${objResult.id}) added to zone ` +
+          `${zmResult.name}(#${zmResult.id}).`,
+      );
       return;
     }
 
     if (sw === "del") {
-      if (!zmRef) { u.send("Usage: @zone/del <object>=<zonemaster>"); return; }
-      const zmResult = await u.util.target(u.me, zmRef);
-      if (!zmResult) { u.send(`I can't find zone master '${zmRef}'.`); return; }
+      if (!zmRef) {
+        u.send("Usage: @zone/del <object>=<zonemaster>");
+        return;
+      }
+      const zmResult = await u.util.target(u.me, zmRef, true);
+      if (!zmResult) {
+        u.send(`I can't find zone master '${zmRef}'.`);
+        return;
+      }
       const key = `${zmResult.id}:${objResult.id}`;
       const existing = await zm.findOne({ id: key });
-      if (!existing) { u.send(`${objResult.name} is not in zone #${zmResult.id}.`); return; }
+      if (!existing) {
+        u.send(
+          `${objResult.name} is not in zone #${zmResult.id}.`,
+        );
+        return;
+      }
       await zm.delete({ id: key });
-      u.send(`${objResult.name}(#${objResult.id}) removed from zone #${zmResult.id}.`);
+      const cur = String(objResult.state?.zone ?? "");
+      if (cur === zmResult.id || cur === `#${zmResult.id}`) {
+        await u.db.modify(objResult.id, "$unset", {
+          "data.zone": "",
+        });
+      }
+      u.send(
+        `${objResult.name}(#${objResult.id}) removed from ` +
+          `zone #${zmResult.id}.`,
+      );
       return;
     }
 

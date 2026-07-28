@@ -89,6 +89,42 @@ Deno.test("canEditObject: wizard cannot edit superuser", OPTS, async () => {
 });
 
 Deno.test(
+  "canEditObject: equal rank peers may edit each other",
+  OPTS,
+  async () => {
+    const suA = { id: "su_a", flags: "superuser player" };
+    const suB = {
+      id: "su_b",
+      flags: "superuser player",
+      data: {},
+    };
+    assertEquals(await canEditObject(suA, suB), true);
+    assertEquals(await canEditObject(suB, suA), true);
+
+    const wizA = { id: "wiz_a", flags: "wizard player" };
+    const wizB = { id: "wiz_b", flags: "wizard player", data: {} };
+    assertEquals(await canEditObject(wizA, wizB), true);
+
+    const builder = { id: "b1", flags: "builder player" };
+    const staffPlayer = {
+      id: "s1",
+      flags: "staff player",
+      data: {},
+    };
+    // Builder (7) cannot edit staff (8); staff can edit builder.
+    assertEquals(await canEditObject(builder, staffPlayer), false);
+    assertEquals(
+      await canEditObject(staffPlayer, {
+        id: "b1",
+        flags: "builder player",
+        data: {},
+      }),
+      true,
+    );
+  },
+);
+
+Deno.test(
   "canEditObject: staff cannot edit wizard-owned thing (DB owner)",
   OPTS,
   async () => {

@@ -19,21 +19,49 @@ export async function execTeleport(u: IUrsamuSDK): Promise<void> {
   const targetName = match[1].trim();
   const destName   = match[2].trim();
 
-  const searchTarget = await u.db.search(targetName);
-  const target = searchTarget[0];
-  if (!target) { u.send(`Could not find target: ${targetName}`); return; }
+  const tName = targetName.toLowerCase();
+  const target = (tName === "me" || tName === "self")
+    ? actor
+    : (await u.util.target(actor, targetName, true));
+  if (!target) {
+    u.send(`Could not find target: ${targetName}`);
+    return;
+  }
 
-  if (!(await u.canEdit(actor, target))) { u.send("Permission denied."); return; }
+  if (!(await u.canEdit(actor, target))) {
+    u.send("Permission denied.");
+    return;
+  }
 
-  const searchDest = await u.db.search(destName);
-  const destination = searchDest[0];
-  if (!destination) { u.send(`Could not find destination: ${destName}`); return; }
+  const dName = destName.toLowerCase();
+  let destination = (dName === "here")
+    ? u.here
+    : (await u.util.target(actor, destName, true));
+  if (!destination && /^#?\d+$/.test(destName.trim())) {
+    const id = destName.trim().replace(/^#/, "");
+    const rows = await u.db.search({ id });
+    destination = rows[0] ?? null;
+  }
+  if (!destination) {
+    u.send(`Could not find destination: ${destName}`);
+    return;
+  }
 
-  const canEnter = (await u.canEdit(actor, destination)) || destination.flags.has("enter_ok");
-  if (!canEnter) { u.send("Permission denied (destination check)."); return; }
+  const canEnter = (await u.canEdit(actor, destination)) ||
+    destination.flags.has("enter_ok") ||
+    actor.flags.has("superuser") ||
+    actor.flags.has("wizard") ||
+    actor.flags.has("admin");
+  if (!canEnter) {
+    u.send("Permission denied (destination check).");
+    return;
+  }
 
   u.teleport(target.id, destination.id);
-  u.send(`You teleport ${u.util.displayName(target, actor)} to ${u.util.displayName(destination, actor)}.`);
+  u.send(
+    `You teleport ${u.util.displayName(target, actor)} to ` +
+      `${u.util.displayName(destination, actor)}.`,
+  );
 }
 
 export async function execTel(u: IUrsamuSDK): Promise<void> {
@@ -49,20 +77,43 @@ export async function execTel(u: IUrsamuSDK): Promise<void> {
   const destName   = input.slice(eqIdx + 1).trim();
   if (!targetName || !destName) { u.send("Usage: @tel <target>=<destination>"); return; }
 
-  const target = await u.util.target(actor, targetName);
-  if (!target) { u.send(`I can't find '${targetName}'.`); return; }
+  const tName = targetName.toLowerCase();
+  const target = (tName === "me" || tName === "self")
+    ? actor
+    : (await u.util.target(actor, targetName, true));
+  if (!target) {
+    u.send(`I can't find '${targetName}'.`);
+    return;
+  }
 
-  if (privLevel(target.flags) >= privLevel(actor.flags)) {
+  // Self-tel always ok for admin; others cannot move equal/higher rank.
+  if (
+    target.id !== actor.id &&
+    privLevel(target.flags) >= privLevel(actor.flags)
+  ) {
     u.send("Permission denied.");
     return;
   }
 
-  const dest = await u.util.target(actor, destName);
-  if (!dest) { u.send(`I can't find destination '${destName}'.`); return; }
+  const dName = destName.toLowerCase();
+  let dest = (dName === "here")
+    ? u.here
+    : (await u.util.target(actor, destName, true));
+  if (!dest && /^#?\d+$/.test(destName.trim())) {
+    const id = destName.trim().replace(/^#/, "");
+    const rows = await u.db.search({ id });
+    dest = rows[0] ?? null;
+  }
+  if (!dest) {
+    u.send(`I can't find destination '${destName}'.`);
+    return;
+  }
 
   await u.db.modify(target.id, "$set", { location: dest.id });
   u.send(`You are teleported to ${dest.name || dest.id}.`, target.id);
-  u.send(`You teleport ${target.name || target.id} to ${dest.name || dest.id}.`);
+  u.send(
+    `You teleport ${target.name || target.id} to ${dest.name || dest.id}.`,
+  );
 }
 
 export async function execEntrances(u: IUrsamuSDK): Promise<void> {

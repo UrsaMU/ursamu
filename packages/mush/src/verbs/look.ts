@@ -42,9 +42,10 @@ function headerName(
   canEdit: boolean,
 ): string {
   let base = primaryName(target);
-  // IC rooms: subtle tag in the look header title.
+  // IC rooms: plain tag so layout/NAMEFORMAT color can wrap the
+  // whole title (including " - zone") without a mid-line %cn reset.
   if (target.flags.has("room") && target.flags.has("ic")) {
-    base = `${base} %ch%cy[IC]%cn`;
+    base = `${base} [IC]`;
   }
   return nameWithDbref(
     base,

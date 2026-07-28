@@ -158,12 +158,47 @@ Deno.test(
         footer: "[repeat(%cg=%cn,%1)]",
       });
       const plain = (s: string) =>
-        s.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "");
+        s
+          .replace(/%c[a-zA-Z]/g, "")
+          .replace(/%[nrtbR]/g, "")
+          .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "");
       const h = plain(header("Foo Bar Baz(#1)", "=", 78));
       assertStringIncludes(h, "Foo Bar Baz(#1)");
       assertEquals(h.includes("Foo Bar  "), false);
       const h2 = plain(header("OOC Lounge(#7)", "=", 78));
       assertStringIncludes(h2, "OOC Lounge(#7)");
+    } finally {
+      clearLayoutTemplates();
+    }
+  },
+);
+
+Deno.test(
+  "header center keeps = fill with gradient moniker title",
+  OPTS,
+  () => {
+    // Court layout: single-line center with %cg=%cn fill. Truecolor
+    // monikers must not inflate visLen or the = padding disappears.
+    try {
+      applyLayoutFromConfig({
+        header: "[center(%ch%cy%b%0%b%cn,%1,%cg=%cn)]",
+      });
+      const g =
+        "<#ff0000>D<#ff4400>i<#ff8800>a<#ffcc00>b" +
+        "<#ffff00>l<#ccff00>e<#88ff00>r<#44ff00>i" +
+        "<#00ff00>e%cn";
+      const title = `Character Sheet for: ${g}`;
+      const h = header(title, "=", 78);
+      const plain = h
+        .replace(/%c[a-zA-Z]/g, "")
+        .replace(/%[nrtbR]/g, "")
+        .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "");
+      assertStringIncludes(plain, "Diablerie");
+      assertStringIncludes(plain, "=");
+      // Full width rule: equals on both sides of title
+      assertEquals(plain.startsWith("="), true);
+      assertEquals(plain.trimEnd().endsWith("="), true);
+      assertEquals(plain.length >= 70, true);
     } finally {
       clearLayoutTemplates();
     }

@@ -1,5 +1,6 @@
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK } from "../commands/types.ts";
+import { isPlayerNameTaken, primaryName } from "../main_utils.ts";
 
 export async function execMoniker(u: IUrsamuSDK): Promise<void> {
   const input = (u.cmd.args[0] || "").trim();
@@ -19,6 +20,23 @@ export async function execMoniker(u: IUrsamuSDK): Promise<void> {
 
   const stripped = u.util.stripSubs(moniker.trim());
   if (!stripped) { u.send("Moniker cannot be empty."); return; }
+
+  // Plain moniker text must not collide with another player's name
+  // (who/look would show two of the same label).
+  const isPlayer = tar.flags instanceof Set
+    ? tar.flags.has("player")
+    : /\bplayer\b/i.test(String(tar.flags ?? ""));
+  if (isPlayer) {
+    const plain = primaryName(stripped);
+    const taken = await isPlayerNameTaken(plain, tar.id);
+    if (taken) {
+      u.send(
+        "That moniker matches another player's name. " +
+          "Choose a different display name.",
+      );
+      return;
+    }
+  }
 
   await u.db.modify(tar.id, "$set", { "data.moniker": moniker.trim() });
   u.send(`Set moniker for ${tar.name} to ${moniker.trim()}.`);

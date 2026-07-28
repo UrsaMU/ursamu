@@ -150,36 +150,81 @@ export async function resolveGlobalFormatOr(
   return (await resolveGlobalFormat(u, slot, defaultArg)) ?? fallback;
 }
 
-// Layout helpers (mirrors src/utils/format.ts without the parser dep)
+// Layout helpers — width is *visible* columns only.
+// MUSH %c codes, truecolor <#rrggbb>, and raw ANSI take no columns.
+const COLOR_TOKEN =
+  /%c[a-zA-Z]|%[nrtbR]|<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>|\x1b\[[0-9;]*m/gi;
+
 const stripAnsi = (s: string) =>
-  s.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "");
+  String(s ?? "").replace(COLOR_TOKEN, "");
 
 const visLen = (s: string) => stripAnsi(s).length;
+
+/** Keep first `keep` visible chars; preserve color tokens. */
+function truncVis(s: string, keep: number): string {
+  if (keep <= 0) return "";
+  if (visLen(s) <= keep) return s;
+  let out = "";
+  let n = 0;
+  let i = 0;
+  while (i < s.length && n < keep) {
+    const rest = s.slice(i);
+    const m = rest.match(
+      /^(?:%c[a-zA-Z]|%[nrtbR]|<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>|\x1b\[[0-9;]*m)/i,
+    );
+    if (m) {
+      out += m[0];
+      i += m[0].length;
+      continue;
+    }
+    const cp = s.codePointAt(i);
+    if (cp === undefined) break;
+    const ch = String.fromCodePoint(cp);
+    out += ch;
+    n++;
+    i += ch.length;
+  }
+  return out;
+}
 
 const repeatStr = (fill: string, n: number) => {
   if (n <= 0 || !fill) return "";
   const stripped = stripAnsi(fill);
   if (stripped.length === 0) return "";
+  // Colored single-char fill (%cg=%cn): repeat the full token.
+  if (stripped.length === 1) return fill.repeat(n);
   const reps = Math.floor(n / stripped.length);
-  const rem  = n % stripped.length;
-  return fill.repeat(reps) + stripped.slice(0, rem);
+  const rem = n % stripped.length;
+  return stripped.repeat(reps) + stripped.slice(0, rem);
 };
 
 export const center = (s = "", len: number, fill = " "): string => {
-  const sl = visLen(s);
-  const l  = Math.floor((len - sl) / 2);
-  const r  = len - sl - l;
-  return repeatStr(fill, l) + s + repeatStr(fill, r);
+  let body = s;
+  let sl = visLen(body);
+  if (sl > len) {
+    // Overlong (e.g. gradient moniker in title): keep visible head.
+    body = truncVis(body, Math.max(0, len - 2)) + "%cn..";
+    sl = visLen(body);
+  }
+  const l = Math.floor((len - sl) / 2);
+  const r = len - sl - l;
+  return repeatStr(fill, l) + body + repeatStr(fill, r);
 };
 
 export const ljust = (s = "", len: number, fill = " "): string => {
-  const pad = len - visLen(s);
-  return pad < 0 ? s.substring(0, len - 3) + "..." : s + repeatStr(fill, pad);
+  const sl = visLen(s);
+  if (sl > len) {
+    return truncVis(s, Math.max(0, len - 3)) + "%cn...";
+  }
+  return s + repeatStr(fill, len - sl);
 };
 
 export const rjust = (s = "", len: number, fill = " "): string => {
-  const pad = len - visLen(s);
-  return pad < 0 ? s.substring(0, len - 3) + "..." : repeatStr(fill, pad) + s;
+  const sl = visLen(s);
+  if (sl > len) {
+    return truncVis(s, Math.max(0, len - 3)) + "%cn...";
+  }
+  return repeatStr(fill, len - sl) + s;
 };
 
 export type LayoutFn = (label?: string, filler?: string, width?: number) => string;
