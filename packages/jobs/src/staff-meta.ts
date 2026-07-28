@@ -212,5 +212,70 @@ export async function handleStaffMeta(
   if (sw === "tag") { await doTag(u, arg); return true; }
   if (sw === "access") { await doAccess(u, arg); return true; }
   if (sw === "delete") { await doDelete(u, arg); return true; }
+  if (sw === "publish") {
+    await doPublish(u, arg);
+    return true;
+  }
+  if (sw === "act") {
+    await doAct(u, arg);
+    return true;
+  }
   return false;
+}
+
+async function doPublish(
+  u: IUrsamuSDK,
+  arg: string,
+): Promise<void> {
+  // +job/publish <#>/<comment#>
+  const m = arg.match(/^(\d+)\s*\/\s*(\d+)\s*$/);
+  if (!m) {
+    u.send("Usage: +job/publish <#>/<comment#>");
+    return;
+  }
+  const job = await getJobByNumber(parseInt(m[1], 10));
+  if (!job) {
+    u.send(`>JOBS: No job #${m[1]} found.`);
+    return;
+  }
+  const idx = parseInt(m[2], 10) - 1;
+  const c = job.comments[idx];
+  if (!c) {
+    u.send(">JOBS: No such comment.");
+    return;
+  }
+  const nowPub = !(c.staffOnly || c.published === false);
+  c.staffOnly = nowPub;
+  c.published = !nowPub;
+  job.updatedAt = Date.now();
+  await jobs.update({ id: job.id }, job);
+  u.send(
+    `>JOBS: Comment ${m[2]} is now ` +
+      `${c.published ? "published (+)" : "staff-only (-)"}.`,
+  );
+}
+
+async function doAct(u: IUrsamuSDK, arg: string): Promise<void> {
+  const num = parseInt(arg.trim(), 10);
+  if (isNaN(num)) {
+    u.send("Usage: +job/act <#>");
+    return;
+  }
+  const job = await getJobByNumber(num);
+  if (!job) {
+    u.send(`>JOBS: No job #${num} found.`);
+    return;
+  }
+  const lines = [`>JOBS: Action log #${num}`];
+  let i = 0;
+  for (const c of job.comments) {
+    i++;
+    const code = c.action || "NOTE";
+    lines.push(
+      `  ${i}. [${code}] ${c.authorName} ` +
+        `${formatDate(c.timestamp)} — ${c.text.slice(0, 50)}`,
+    );
+  }
+  if (i === 0) lines.push("  (no comments)");
+  u.send(lines.join("\n"));
 }

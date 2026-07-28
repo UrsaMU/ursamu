@@ -22,10 +22,10 @@ import { registerNotifyHooks, removeNotifyHooks } from "./notify.ts";
  */
 const jobsPlugin: IPlugin = {
   name: "jobs",
-  version: "1.0.0",
+  version: "1.1.0",
   description:
-    "Anomaly-style jobs — requests, staff lists/lifecycle, " +
-    "buckets, archive, REST.",
+    "Anomaly-style jobs 1.1 — select DSL, reports, jgroups, " +
+    "letters, lists/lifecycle, archive, REST.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },
   ],

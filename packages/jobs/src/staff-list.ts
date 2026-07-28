@@ -16,6 +16,10 @@ import {
   toggleNum,
 } from "./prefs.ts";
 import type { IJob } from "./types.ts";
+import { runSelect } from "./select.ts";
+import { listReports, runReport } from "./reports.ts";
+import { cleanJobs, compressJobs } from "./staff-hygiene.ts";
+import { isOverdue } from "./filter.ts";
 
 async function visibleOpenJobs(u: IUrsamuSDK): Promise<IJob[]> {
   const all = await jobs.find({});
@@ -60,14 +64,14 @@ addCmd({
   help: `+jobs[/<filter>] [<arg>]  — Staff job lists (Anomaly-style).
 
 Filters: all, mine, new, overdue, from, who, list, pri, due,
-date, sort, search, catchup, silence, nospam, credits.
+date, sort, search, select, reports, compress, clean,
+summary, catchup, silence, nospam, credits.
 
 Examples:
   +jobs
-  +jobs/mine
-  +jobs/from Alice
-  +jobs/search dragon
-  +jobs/catchup`,
+  +jobs/select (new | overdue) & mine sort=due
+  +jobs/reports open
+  +jobs/compress`,
   exec: async (u: IUrsamuSDK) => {
     if (!isStaffFlags(u.me.flags)) {
       u.send(">JOBS: Staff only.");
@@ -78,26 +82,16 @@ Examples:
 
     if (sw === "credits") {
       u.send(
-        "%ch>JOBS:%cn UrsaMU jobs — Anomaly-style task " +
-          "tracker. See +help jobs and docs/ANOMALY.md.",
+        "%ch>JOBS:%cn UrsaMU jobs 1.1 — Anomaly-style. " +
+          "+help jobs · docs/ANOMALY.md",
       );
       return;
     }
-
     if (sw === "catchup") {
-      // Mark all visible jobs as "seen" via updatedAt touch on prefs
-      const p = getJobsPrefs(u);
-      await setJobsPrefs(u, {
-        ...p,
-        // store last catchup time
-      });
-      await u.db.modify(u.me.id, "$set", {
-        "state.jobs.lastCatchup": Date.now(),
-      });
+      await setJobsPrefs(u, { lastCatchup: Date.now() });
       u.send(">JOBS: Caught up — new markers cleared.");
       return;
     }
-
     if (sw === "silence") {
       await toggleSilence(u, arg);
       return;
@@ -105,6 +99,48 @@ Examples:
     if (sw === "nospam") {
       await toggleNospam(u, arg);
       return;
+    }
+    if (sw === "select") {
+      await doSelect(u, arg);
+      return;
+    }
+    if (sw === "reports" || sw === "report") {
+      if (!arg) {
+        u.send(listReports());
+        return;
+      }
+      const eq = arg.indexOf("=");
+      const name = eq === -1 ? arg : arg.slice(0, eq).trim();
+      const rarg = eq === -1 ? "" : arg.slice(eq + 1).trim();
+      const base = await visibleOpenJobs(u);
+      const all = await jobs.find({});
+      u.send(runReport(
+        name === "actby" ? all : base,
+        name,
+        rarg,
+      ));
+      return;
+    }
+    if (sw === "compress") {
+      await compressJobs(u);
+      return;
+    }
+    if (sw === "clean") {
+      await cleanJobs(u);
+      return;
+    }
+    if (sw === "summary") {
+      await doSummary(u, arg);
+      return;
+    }
+
+    // bare +jobs with saved JOBSELECT
+    if (!sw && !arg) {
+      const p = getJobsPrefs(u);
+      if (p.jobSelect) {
+        await doSelect(u, p.jobSelect);
+        return;
+      }
     }
 
     const titles: Record<string, string> = {
@@ -132,6 +168,85 @@ Examples:
     );
   },
 });
+
+async function doSelect(
+  u: IUrsamuSDK,
+  arg: string,
+): Promise<void> {
+  const p = getJobsPrefs(u);
+  let expr = arg;
+  // select/save name=expr handled when arg starts with save
+  if (arg.toLowerCase().startsWith("save ")) {
+    const rest = arg.slice(5).trim();
+    const eq = rest.indexOf("=");
+    if (eq === -1) {
+      u.send("Usage: +jobs/select save <name>=<expr>");
+      return;
+    }
+    const name = rest.slice(0, eq).trim().toLowerCase();
+    const e = rest.slice(eq + 1).trim();
+    const named = { ...(p.jobSelectNamed ?? {}), [name]: e };
+    await setJobsPrefs(u, { jobSelectNamed: named });
+    u.send(`>JOBS: Saved select '${name}'.`);
+    return;
+  }
+  if (arg.toLowerCase() === "list") {
+    const named = p.jobSelectNamed ?? {};
+    const keys = Object.keys(named);
+    u.send(
+      keys.length
+        ? ">JOBS: " + keys.join(", ")
+        : ">JOBS: No named selects.",
+    );
+    return;
+  }
+  if (arg.toLowerCase().startsWith("default ")) {
+    const e = arg.slice(8).trim();
+    await setJobsPrefs(u, {
+      jobSelect: e === "clear" || e === "none" ? "" : e,
+    });
+    u.send(">JOBS: Default +jobs select updated.");
+    return;
+  }
+  // named shortcut
+  if (p.jobSelectNamed?.[arg.toLowerCase()]) {
+    expr = p.jobSelectNamed[arg.toLowerCase()];
+  }
+  const base = await visibleOpenJobs(u);
+  const r = runSelect(base, expr, u.me.id);
+  if (r.error) {
+    u.send(`>JOBS: select error: ${r.error}`);
+    return;
+  }
+  if (!r.jobs.length) {
+    u.send(">JOBS: No matching jobs.");
+    return;
+  }
+  u.send(formatJobList(r.jobs, "Select").join("\n"));
+}
+
+async function doSummary(
+  u: IUrsamuSDK,
+  bucket: string,
+): Promise<void> {
+  const b = bucket.toUpperCase().trim();
+  if (!b) {
+    u.send("Usage: +jobs/summary <bucket>");
+    return;
+  }
+  const base = await visibleOpenJobs(u);
+  const list = base.filter(
+    (j) => (j.bucket || j.category || "").toUpperCase() === b,
+  );
+  const od = list.filter((j) => isOverdue(j)).length;
+  const nw = list.filter((j) =>
+    j.status === "new" || j.progress === "new"
+  ).length;
+  u.send(
+    `>JOBS: ${b} — open ${list.length}, new ${nw}, ` +
+      `overdue ${od}`,
+  );
+}
 
 async function toggleSilence(
   u: IUrsamuSDK,

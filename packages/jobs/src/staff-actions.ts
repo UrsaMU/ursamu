@@ -11,6 +11,7 @@ import { getJobByNumber } from "./job-utils.ts";
 import { sendJobMail } from "./mail.ts";
 import { wantsNospam } from "./prefs.ts";
 import { handleStaffMeta } from "./staff-meta.ts";
+import { applyCloseLetters } from "./letters.ts";
 
 function callerName(u: IUrsamuSDK): string {
   return (u.me.state?.moniker as string) ||
@@ -32,6 +33,7 @@ function addComment(
     timestamp: Date.now(),
     published: !staffOnly,
     staffOnly,
+    action: "ADD",
   };
   job.comments.push(c);
   job.updatedAt = Date.now();
@@ -175,7 +177,14 @@ async function doClose(
     return;
   }
   const who = callerName(u);
-  if (reason) addComment(job, u, reason, false);
+  if (reason) {
+    const c = addComment(job, u, reason, false);
+    c.action = mode === "approve"
+      ? "APR"
+      : mode === "deny"
+      ? "DNY"
+      : "COM";
+  }
   job.status = mode === "deny" ? "cancelled" : "closed";
   job.closedByName = who;
   job.updatedAt = Date.now();
@@ -204,5 +213,6 @@ async function doClose(
     `Request #${num} ${label}: ${job.title}`,
     body,
   );
+  await applyCloseLetters(mode, job, who, reason, u.me.id);
 }
 

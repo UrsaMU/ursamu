@@ -15,6 +15,12 @@ export interface IJobsPrefs {
   silenceJobs?: number[];
   /** Job numbers with nospam. */
   nospamJobs?: number[];
+  /** Default +jobs expression (Anomaly JOBSELECT). */
+  jobSelect?: string;
+  /** Named selects JOBSELECT_<name>. */
+  jobSelectNamed?: Record<string, string>;
+  /** Last +jobs/catchup timestamp. */
+  lastCatchup?: number;
 }
 
 export function getJobsPrefs(u: IUrsamuSDK): IJobsPrefs {

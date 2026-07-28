@@ -27,8 +27,19 @@ export { jobs, jobArchive, jobAccess, getNextJobNumber, registerJobBuckets, isVa
 export type { IJobBucketOptions } from "./src/db.ts";
 
 // Event hooks
-export { jobHooks } from "./src/hooks.ts";
+export {
+  jobHooks,
+  registerJobActionHook,
+} from "./src/hooks.ts";
 export type { IJobHooks, JobHookMap } from "./src/hooks.ts";
+
+// Select DSL + jgroups
+export { runSelect } from "./src/select.ts";
+export {
+  expandJobGroup,
+  jobGroups,
+  type IJobGroup,
+} from "./src/jgroups.ts";
 
 // Format helpers (used by other plugins that render job data)
 export { isStaffFlags, header, jobHeader, jobFooter, divider, jobDivider, footer, formatTimeFull, formatTimeShort, formatDate, getEscalation, isNew, formatJobList, WIDTH } from "./src/format.ts";

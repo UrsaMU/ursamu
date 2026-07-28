@@ -1,4 +1,4 @@
-# Stable API contract (jobs 1.0)
+# Stable API contract (jobs 1.1)
 
 Breaking changes to **stable** exports require a **major** bump.
 
@@ -11,6 +11,9 @@ Anomaly Jobs **workflow** parity — see `docs/ANOMALY.md`.
 | default plugin | `init` / `remove` |
 | `registerJobBuckets` | Extend bucket names |
 | `jobHooks` | Lifecycle events |
+| `registerJobActionHook` | CRE/ADD/… aliases |
+| `runSelect` | Select DSL evaluator |
+| `jobGroups`, `expandJobGroup` | jgroups |
 | `jobs`, `jobArchive`, `jobAccess` | DBO collections |
 | Types `IJob`, `IJobComment`, `IJobAccess` | Domain model |
 

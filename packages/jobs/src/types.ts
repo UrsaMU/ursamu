@@ -24,6 +24,8 @@ export interface IJobComment {
   staffOnly?: boolean;
   /** @deprecated Use `staffOnly` instead (`published === !staffOnly`). */
   published?: boolean;
+  /** Anomaly action code (ADD, APR, DNY, COM, …). */
+  action?: string;
 }
 
 /** Anomaly-style progress / hold ladder. */
@@ -76,6 +78,8 @@ export interface IJob {
   dueAt?: number;
   /** Staff tags (names or ids) for +job/tag and +jobs/mine. */
   tags?: string[];
+  /** Optional freeform summary line for select summary= and reports. */
+  summary?: string;
   /** When `true`, this job is only visible to staff (not the submitter). */
   staffOnly?: boolean;
   /** Published for player myjobs visibility (default true). */

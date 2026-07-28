@@ -1,16 +1,16 @@
 +JOBS
 
-Staff job lists (Anomaly-style filters).
+Staff lists and Anomaly 1.1 tools.
 
 SYNTAX
-  +jobs
-  +jobs/all | /mine | /new | /overdue
-  +jobs/from <player>
-  +jobs/who <player|none>
-  +jobs/list <bucket>
-  +jobs/pri | /due | /date | /sort
-  +jobs/search <pattern>
-  +jobs/catchup
-  +jobs/silence | /nospam [<#|bucket>]
+  +jobs[/<filter>] [<arg>]
+  +jobs/select <expr|name>
+  +jobs/select save <name>=<expr>
+  +jobs/select list | default <expr|clear>
+  +jobs/reports [<name>[=arg]]
+  +jobs/compress | /clean | /summary <bucket>
 
-SEE ALSO: +help job, +help request, +help archive
+SELECT e.g.
+  (new | overdue) & mine sort=due
+
+SEE ALSO: +help job, +help request, +help jgroup

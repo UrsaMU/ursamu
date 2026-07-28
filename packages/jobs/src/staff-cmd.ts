@@ -93,8 +93,18 @@ Examples:
         ];
         if (job.comments.length > 0) {
           lines.push("");
+          let i = 0;
           for (const c of job.comments) {
-            lines.push(`%ch%cy${c.authorName}%cn [${formatTimeShort(c.timestamp)}]: ${c.text}`);
+            i++;
+            const pub = c.staffOnly || c.published === false
+              ? "-"
+              : "+";
+            const act = c.action ? ` ${c.action}` : "";
+            lines.push(
+              `%ch[${i}${pub}]%cn %ch%cy${c.authorName}%cn` +
+                `${act} [${formatTimeShort(c.timestamp)}]: ` +
+                c.text,
+            );
           }
         }
         lines.push(jobFooter("End Job"));

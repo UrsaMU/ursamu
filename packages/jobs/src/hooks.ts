@@ -49,6 +49,32 @@ export interface IJobHooks {
   emit<K extends keyof JobHookMap>(event: K, ...args: Parameters<JobHookMap[K]>): Promise<void>;
 }
 
+/** Anomaly action-code aliases → JobHookMap events. */
+const ACTION_MAP: Record<string, keyof JobHookMap> = {
+  CRE: "job:created",
+  ADD: "job:commented",
+  COM: "job:resolved",
+  APR: "job:resolved",
+  DNY: "job:closed",
+  DEL: "job:deleted",
+};
+
+/**
+ * Register a handler under an Anomaly-style action code
+ * (CRE, ADD, COM, APR, DNY, DEL). Does not run softcode.
+ */
+export function registerJobActionHook(
+  code: string,
+  // deno-lint-ignore no-explicit-any
+  handler: (...args: any[]) => void | Promise<void>,
+): void {
+  const ev = ACTION_MAP[code.toUpperCase()];
+  if (!ev) {
+    throw new Error(`unknown action code: ${code}`);
+  }
+  jobHooks.on(ev, handler as JobHookMap[typeof ev]);
+}
+
 export const jobHooks: IJobHooks = {
   /**
    * Register a handler for a job lifecycle event.

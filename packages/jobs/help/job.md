@@ -15,5 +15,9 @@ SYNTAX
   +job/hold <#>
   +job/tag <#>=<player>
   +job/access <#>=<player>
+  +job/publish <#>/<comment#>
+  +job/act <#>
+
+Comments show [n+] published or [n-] staff-only.
 
 SEE ALSO: +help jobs, +help request

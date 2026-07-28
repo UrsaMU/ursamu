@@ -1,42 +1,50 @@
 # @ursamu/jobs
 
-**Version 1.0.0** — Anomaly Jobs **workflow** standards on
-`@ursamu/mush@^1.0.0`.
+**Version 1.1.0** — Anomaly Jobs workflow + advanced tools.
 
-See `docs/ANOMALY.md` (parity matrix) and `docs/STABLE.md`.
+See `docs/ANOMALY.md` and `docs/STABLE.md`.
 
 ```ts
-import jobsPlugin, { registerJobBuckets } from "@ursamu/jobs";
-registerJobBuckets(["PLOT", "BUILD"]);
+import jobsPlugin, {
+  registerJobBuckets,
+  registerJobActionHook,
+  runSelect,
+} from "@ursamu/jobs";
 ```
 
 ## Peers
 
-| Package | Role |
-|---------|------|
-| mush ^1.0 | Engine |
-| help ^1.0 | Help dirs |
-| mail ^2.5 | Optional notify mail |
+mush ^1.0 · help ^1.0 · mail ^2.5 (optional notify)
 
-## Players
+## Highlights
 
-| Command | Role |
-|---------|------|
-| `+request` | Submit / view / comment / cancel |
-| `+myjobs` | Your open requests |
-| `+bug` / `+typo` / `+pitch` | Quick-file presets |
-| `+myjobs/nospam` | Suppress update mail |
+| Area | Commands |
+|------|----------|
+| Lists | +jobs[/mine\|new\|overdue\|…] |
+| Select | +jobs/select (new \| overdue) & mine sort=due |
+| Reports | +jobs/reports open |
+| Hygiene | +jobs/compress, +jobs/clean |
+| Groups | +jgroup/create\|add\|del |
+| Lifecycle | +job/approve\|deny\|complete\|due\|… |
+| Players | +request, +bug, +typo, +pitch |
 
-## Staff
+## Letters config (optional)
 
-| Command | Role |
-|---------|------|
-| `+jobs`[/filter] | Lists (mine, new, overdue, …) |
-| `+job`/`+job/…` | View + lifecycle (Anomaly acts) |
-| `+archive` | Closed jobs |
+```json
+{
+  "plugins": {
+    "jobs": {
+      "letters": {
+        "approve": {
+          "mail": "Approved #%n %t — %c"
+        }
+      }
+    }
+  }
+}
+```
 
-Deferred: full `+jobs/select` DSL, jgroups, form letters,
-reports (1.1+).
+Placeholders: `%n` `%t` `%r` `%s` `%b` `%c`.
 
 ## License
 
