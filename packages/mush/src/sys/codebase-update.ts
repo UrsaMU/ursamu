@@ -63,6 +63,10 @@ async function runCmd(
   };
 }
 
+function cmdText(r: { out: string; err: string }): string {
+  return [r.out, r.err].filter(Boolean).join("\n").trim();
+}
+
 async function gitPull(
   cwd: string,
   branch: string,
@@ -85,13 +89,46 @@ async function gitPull(
     }
   }
 
+  // Local edits (often deno.json from a prior JSR bump) block
+  // --ff-only. Stash tracked changes, pull, then restore.
+  const porcelain = await runCmd(cwd, "git", [
+    "status",
+    "--porcelain",
+  ]);
+  let stashed = false;
+  if (porcelain.ok && porcelain.out.trim()) {
+    logLine(
+      lines,
+      log,
+      "Local changes present — stashing before pull...",
+    );
+    const stash = await runCmd(cwd, "git", [
+      "stash",
+      "push",
+      "-m",
+      "ursamu-@restart-auto",
+    ]);
+    if (!stash.ok) {
+      logLine(
+        lines,
+        log,
+        `git stash failed: ${cmdText(stash)}`,
+      );
+      return false;
+    }
+    stashed = true;
+  }
+
   const fetch = await runCmd(cwd, "git", ["fetch", "--all", "--prune"]);
   if (!fetch.ok) {
     logLine(
       lines,
       log,
-      `git fetch failed: ${fetch.err || fetch.out}`,
+      `git fetch failed: ${cmdText(fetch)}`,
     );
+    if (stashed) {
+      await runCmd(cwd, "git", ["stash", "pop"]);
+    }
     return false;
   }
 
@@ -99,12 +136,41 @@ async function gitPull(
     ? ["pull", "--ff-only", "origin", branch]
     : ["pull", "--ff-only"];
   const pull = await runCmd(cwd, "git", args);
-  const msg = pull.out || pull.err || "Already up to date.";
+  const msg = cmdText(pull) || "Already up to date.";
   if (!pull.ok) {
     logLine(lines, log, `git pull failed: ${msg}`);
+    if (stashed) {
+      const pop = await runCmd(cwd, "git", ["stash", "pop"]);
+      if (!pop.ok) {
+        logLine(
+          lines,
+          log,
+          `stash pop after failed pull: ${cmdText(pop)}`,
+        );
+      }
+    }
     return false;
   }
-  logLine(lines, log, msg);
+  // Prefer the human summary line over noisy fetch stderr.
+  const summary = pull.out.trim() ||
+    (pull.err.includes("Already up to date")
+      ? "Already up to date."
+      : msg);
+  logLine(lines, log, summary);
+
+  if (stashed) {
+    const pop = await runCmd(cwd, "git", ["stash", "pop"]);
+    if (!pop.ok) {
+      logLine(
+        lines,
+        log,
+        `stash pop conflicts (resolve manually): ${cmdText(pop)}`,
+      );
+      // Code was pulled; continue update rather than abort.
+    } else {
+      logLine(lines, log, "Restored stashed local changes.");
+    }
+  }
   return true;
 }
 
