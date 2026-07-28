@@ -1,12 +1,13 @@
 {
   "name": "@ursamu/discord",
-  "version": "0.2.4",
+  "version": "1.0.0",
   "exports": "./mod.ts",
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
     "lint": "deno lint",
     "check": "deno check mod.ts --unstable-kv",
-    "publish:dry": "deno publish --dry-run --allow-slow-types"
+    "publish:dry": "deno publish --dry-run --allow-slow-types --allow-dirty --no-check",
+    "publish": "deno publish --allow-slow-types --no-check"
   },
   "compilerOptions": {
     "lib": ["deno.window", "deno.unstable"]
@@ -16,9 +17,9 @@
     "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
     "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
     "@ursamu/core": "jsr:@ursamu/core@^1.0.0",
-    "@ursamu/help": "jsr:@ursamu/help@^0.1.9",
-    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.9",
-    "@ursamu/channels": "jsr:@ursamu/channels@^0.1.9",
+    "@ursamu/help": "jsr:@ursamu/help@^1.0.0",
+    "@ursamu/help-plugin": "jsr:@ursamu/help@^1.0.0",
+    "@ursamu/channels": "jsr:@ursamu/channels@^1.0.0",
     "@ursamu/jobs": "jsr:@ursamu/jobs@^0.1.1",
     "tweetnacl": "npm:tweetnacl@1.0.3"
   },
@@ -26,9 +27,11 @@
     "include": [
       "src",
       "help",
+      "docs",
       "mod.ts",
       "deno.json",
       "README.md",
+      "CHANGELOG.md",
       "LICENSE"
     ],
     "exclude": ["tests"]

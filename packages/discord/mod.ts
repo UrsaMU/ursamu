@@ -1,7 +1,8 @@
 /**
  * @module @ursamu/discord
  *
- * Discord bridge for UrsaMU — webhooks, two-way channel chat, /help.
+ * Discord bridge for UrsaMU (stable 1.0) — webhooks, two-way
+ * channel chat, /help. Stable surface: docs/STABLE.md.
  */
 
 export { default as discordPlugin, default } from "./src/index.ts";

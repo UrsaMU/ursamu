@@ -47,11 +47,11 @@ async function interactionsRoute(
 
 const discordPlugin: IPlugin = {
   name: "discord",
-  version: "0.2.3",
+  version: "1.0.0",
   description:
     "Discord bridge — webhooks, two-way channel chat, /help slash command",
   dependencies: [
-    { name: "help", version: ">=0.1.0" },
+    { name: "help", version: ">=1.0.0" },
   ],
 
   init: () => {
