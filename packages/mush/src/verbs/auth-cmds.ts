@@ -79,12 +79,15 @@ addCmd({
   pattern: /^@?(?:update|upgrade)(?:\s+(.*))?$/i,
   lock: "connected admin+",
   category: "System",
-  help: `@update [<branch>]  — Pull latest code and reboot (admin+).
+  help: `@update [<branch>]  — Same as @restart: git pull,
+  bump jsr:@ursamu/* pins, deno cache --reload, then
+  soft-reboot main (exit 75). Telnet sessions stay up.
 
 Aliases: @upgrade
 
 Examples:
   @update
-  @update main`,
+  @update main
+  @restart`,
   exec: execUpdate,
 });

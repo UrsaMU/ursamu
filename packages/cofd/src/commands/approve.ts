@@ -4,6 +4,7 @@
 import { header, footer, type IUrsamuSDK } from "@ursamu/ursamu";
 import type { CofdCgState } from "../chargen/index.ts";
 import { sendCofdMail } from "../integrations/mail.ts";
+import { assignDormHome } from "../support/dorm.ts";
 import { syncSightFlags } from "../support/sight.ts";
 import {
   parseTargetAndNotes,
@@ -69,6 +70,17 @@ export async function approveExec(u: IUrsamuSDK) {
   }
   await syncSightFlags(u, target, sheet);
 
+  // Freehold dorm: home + move for splat-configured rooms.
+  const dormId = await assignDormHome(
+    u,
+    target.id,
+    sheet.template,
+    { teleport: true },
+  );
+  if (dormId) {
+    target.state = { ...target.state, home: dormId };
+  }
+
   const staffName = u.util.displayName(u.me, u.me);
   const job = await completeCgenJob(
     cgState.submittedJob,
@@ -83,15 +95,25 @@ export async function approveExec(u: IUrsamuSDK) {
     `${name}'s sheet is now live.`,
     ...jobLines(job),
   ];
+  if (dormId) {
+    lines.push(
+      `Home set to freehold dorm (#${dormId}). ` +
+        `They can type %chhome%cn anytime.`,
+    );
+  }
   if (notes) lines.push(`Notes: ${notes}`);
   lines.push(await footer());
   u.send(lines.join("\n"));
 
+  const dormNote = dormId
+    ? `  Your freehold bunk is ready — type %chhome%cn.`
+    : "";
   u.send(
     `%chYour Chronicles of Darkness sheet has been ` +
       `approved by ${staffName}.%cn` +
       (notes ? ` Notes: ${notes}` : "") +
-      `  Use %ch+sheet%cn to view it.`,
+      `  Use %ch+sheet%cn to view it.` +
+      dormNote,
     target.id,
   );
 
@@ -105,6 +127,9 @@ export async function approveExec(u: IUrsamuSDK) {
         ? `CGEN job: #${job.number} (completed)`
         : "",
       notes ? `\nStaff notes:\n${notes}` : "",
+      dormId
+        ? `\nYour home is the freehold dorm. Type: home`
+        : "",
       ``,
       `Your live sheet is active. Use +sheet to view it.`,
     ].filter(Boolean).join("\n"),

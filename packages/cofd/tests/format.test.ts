@@ -1,13 +1,15 @@
 import { assertEquals } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import {
+  fit,
   formatDotTrack,
   formatDottedStatLine,
+  stripColors,
   trunc,
+  visibleLen,
 } from "../src/support/format.ts";
 
-const vis = (s: string) =>
-  s.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "");
+const vis = (s: string) => stripColors(s);
 
 describe("format support: trunc", () => {
   it("returns the string unchanged if shorter than width", () => {
@@ -19,8 +21,8 @@ describe("format support: trunc", () => {
   });
 
   it("truncates and appends '..' if longer than width", () => {
-    assertEquals(trunc("abcdef", 4), "ab..");
-    assertEquals(trunc("hello world", 7), "hello..");
+    assertEquals(trunc("abcdef", 4), "ab%cn..");
+    assertEquals(trunc("hello world", 7), "hello%cn..");
   });
 
   it("truncates without '..' if width is 2 or less", () => {
@@ -32,6 +34,25 @@ describe("format support: trunc", () => {
   it("handles null and undefined gracefully", () => {
     assertEquals(trunc(null, 5), "");
     assertEquals(trunc(undefined, 5), "");
+  });
+
+  it("counts gradient truecolor as zero width", () => {
+    const g = "<#ff0000>D<#00ff00>i<#0000ff>a%cn";
+    assertEquals(visibleLen(g), 3);
+    assertEquals(stripColors(g), "Dia");
+    // Fits in 26 — no mid-token chop
+    const f = fit(g, 26);
+    assertEquals(visibleLen(f), 26);
+    assertEquals(stripColors(f).trimEnd(), "Dia");
+    assertEquals(f.includes("<#ff"), true);
+  });
+
+  it("truncates long gradient by visible chars", () => {
+    const g = "<#ff0000>A<#00ff00>B<#0000ff>C<#ffffff>D%cn";
+    const t = trunc(g, 3);
+    assertEquals(visibleLen(t), 3);
+    assertEquals(stripColors(t), "A%cn..".replace("%cn", "") || "A..");
+    assertEquals(stripColors(t), "A..");
   });
 });
 

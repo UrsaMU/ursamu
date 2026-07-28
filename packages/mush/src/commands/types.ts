@@ -108,9 +108,11 @@ export interface IUrsamuSDK {
   sys: {
     setConfig(key: string, value: unknown): Promise<void>;
     disconnect(id: string): Promise<void>;
-    reboot(): Promise<void>;
+    /** Soft-reboot main (exit 75). Default runs codebase update first. */
+    reboot(opts?: { update?: boolean; branch?: string }): Promise<void>;
     shutdown(): Promise<void>;
     uptime(): Promise<number>;
+    /** git pull + bump jsr:@ursamu/* + cache, then soft-reboot. */
     update(branch?: string): Promise<void>;
     gameTime(): Promise<IGameTime>;
     setGameTime(t: IGameTime): Promise<void>;

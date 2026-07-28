@@ -160,23 +160,73 @@ addCmd({
 });
 
 export async function execReboot(u: IUrsamuSDK): Promise<void> {
-  const isAdmin = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
-  if (!isAdmin) { u.send("Permission denied."); return; }
-  u.here.broadcast(`%chGame>%cn Server @reboot initiated by ${String(u.me.state.name || u.me.id)}...`);
-  await u.sys.reboot();
+  const isAdmin = u.me.flags.has("admin") ||
+    u.me.flags.has("wizard") ||
+    u.me.flags.has("superuser");
+  if (!isAdmin) {
+    u.send("Permission denied.");
+    return;
+  }
+
+  // args: [0]=switch (quick|...), [1]=optional branch
+  const sw = (u.cmd.args[0] || "").trim().toLowerCase();
+  const branch = (u.cmd.args[1] || "").trim();
+  const quick = sw === "quick" || sw === "noreload" ||
+    sw === "skip";
+  const who = String(u.me.state.name || u.me.name || u.me.id);
+
+  if (quick) {
+    u.here.broadcast(
+      `%chGame>%cn Server @reboot/quick by %ch${who}%cn...`,
+    );
+    try {
+      await u.sys.reboot({ update: false });
+    } catch (e: unknown) {
+      const m = e instanceof Error ? e.message : String(e);
+      u.send(`%crReboot failed:%cn ${m}`);
+    }
+    return;
+  }
+
+  u.here.broadcast(
+    `%chGame>%cn @restart by %ch${who}%cn — ` +
+      `pull, bump JSR, cache, then soft-reboot...`,
+  );
+  try {
+    const { runCodebaseUpdate } = await import(
+      "../sys/codebase-update.ts"
+    );
+    const result = await runCodebaseUpdate({
+      branch,
+      log: (line) => u.send(`%chGame>%cn ${line}`),
+    });
+    if (!result.ok) {
+      u.send("%crUpdate failed — reboot cancelled.%cn");
+      return;
+    }
+    await u.sys.reboot({ update: false });
+  } catch (e: unknown) {
+    const m = e instanceof Error ? e.message : String(e);
+    u.send(`%crUpdate/reboot failed:%cn ${m}`);
+  }
 }
 
 addCmd({
   name: "@reboot",
-  pattern: /^@reboot|^@restart/i,
+  pattern: /^@(?:reboot|restart)(?:\/(\S+))?(?:\s+(.*))?$/i,
   lock: "connected & admin+",
   category: "admin",
-  help: `@reboot  — Reboot the game server (admin only).
+  help: `@restart [<branch>]     — Pull code, bump jsr:@ursamu/*,
+                          cache, soft-reboot main (admin+).
+@reboot                  — Same as @restart.
+@reboot/quick            — Soft-reboot only (no git/JSR).
 
-Broadcasts a reboot message to all connected players before restarting.
+Telnet stays up; players auto-reauth. Main exits 75 and
+the daemon loop brings it back.
 
 Examples:
-  @reboot
-  @restart`,
+  @restart
+  @restart main
+  @reboot/quick`,
   exec: execReboot,
 });

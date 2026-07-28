@@ -104,11 +104,6 @@ async function hollowAdd(
     u.send("Usage: +hedge/hollow <slug>  or /list");
     return;
   }
-  const sheet = getSheet(u.me);
-  if (!sheet || !isChangelingSheet(sheet)) {
-    u.send("Only the Lost enhance Hollows.");
-    return;
-  }
   const roomId = u.here?.id;
   if (!roomId) {
     u.send("No current room.");
@@ -119,12 +114,20 @@ async function hollowAdd(
     u.send("Stand in a Hollow room.");
     return;
   }
-  if (
-    !isHollowOwner(hr, u.me.id) &&
-    !(await u.canEdit(u.me, u.here!))
-  ) {
-    u.send("Only Hollow owners (or staff) enhance.");
-    return;
+  const staffEdit = await u.canEdit(u.me, u.here!);
+  const sheet = getSheet(u.me);
+  const isLost = !!(sheet && isChangelingSheet(sheet));
+  // Staff may enhance any Hollow they can edit (multi-splat STs).
+  // Players need a Lost sheet and ownership.
+  if (!staffEdit) {
+    if (!isLost) {
+      u.send("Only the Lost enhance Hollows.");
+      return;
+    }
+    if (!isHollowOwner(hr, u.me.id)) {
+      u.send("Only Hollow owners (or staff) enhance.");
+      return;
+    }
   }
   const r = addHollowEnhancement(hr, slug);
   if (!r.ok || !r.room) {

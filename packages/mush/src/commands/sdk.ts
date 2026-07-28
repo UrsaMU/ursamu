@@ -63,8 +63,13 @@ export function rewriteStatePaths(data: unknown): unknown {
   return out;
 }
 
+/** Strip MUSH %c codes, truecolor <#rrggbb>, and raw ANSI. */
 const stripSubs = (s: string) =>
-  s.replace(/%c[a-zA-Z]/gi, "").replace(/%[nrtbR]/gi, "").replace(/\x1b\[[0-9;]*m/g, "");
+  s
+    .replace(/%c[a-zA-Z]/gi, "")
+    .replace(/%[nrtbR]/gi, "")
+    .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "")
+    .replace(/\x1b\[[0-9;]*m/g, "");
 
 async function resolveActor(actorId: string): Promise<IDBObj> {
   if (!actorId || actorId === "#-1") {
@@ -128,8 +133,16 @@ async function targetFn(
   query: string,
   _global?: boolean,
 ): Promise<IDBObj | undefined> {
-  const q = query.trim();
+  let q = query.trim();
   if (!q) return undefined;
+
+  // TinyMUX *Name — global lookup by player/object name.
+  let global = !!_global;
+  if (q.startsWith("*")) {
+    q = q.slice(1).trim();
+    global = true;
+    if (!q) return undefined;
+  }
 
   const lowerQ = q.toLowerCase();
   if (lowerQ === "me" || lowerQ === "self") return actor;
@@ -166,7 +179,7 @@ async function targetFn(
   if (inInv) return hydrate(inInv);
 
   // Global: scan for name / ;alias / data.alias
-  if (_global) {
+  if (global) {
     const all = await dbojs.query({});
     const hit = pickNameMatch(all, q);
     if (hit) return hydrate(hit);
@@ -460,8 +473,18 @@ export async function createNativeSDK(
           ]
         });
         if (!player || !player.data?.password) return false;
-        // Simple comparison — production systems should use bcrypt
-        if (String(player.data.password) !== password) return false;
+        const stored = String(player.data.password);
+        // bcrypt hashes ($2a$ / $2b$ / $2y$); legacy create used plaintext.
+        if (/^\$2[aby]\$/.test(stored)) {
+          const bcrypt = await import("bcrypt");
+          const compare = bcrypt.compare ??
+            (bcrypt as unknown as {
+              default: { compare: typeof bcrypt.compare };
+            }).default.compare;
+          const ok = await compare(password, stored);
+          return ok ? hydrate(player) : false;
+        }
+        if (stored !== password) return false;
         return hydrate(player);
       },
       login: async (id: string) => {
@@ -505,8 +528,21 @@ export async function createNativeSDK(
         }
         await Promise.resolve();
       },
-      reboot: async () => {
+      reboot: async (opts?: { update?: boolean; branch?: string }) => {
+        const { runCodebaseUpdate } = await import(
+          "../sys/codebase-update.ts"
+        );
+        const withUpdate = opts?.update !== false;
+        if (withUpdate) {
+          const result = await runCodebaseUpdate({
+            branch: opts?.branch ?? "",
+          });
+          if (!result.ok) {
+            throw new Error("codebase update failed");
+          }
+        }
         // Close PGlite before exit so the next process can open the DB.
+        // Exit 75 → main-loop soft reboot; telnet sidecar stays up.
         setTimeout(async () => {
           try {
             await DBO.close();
@@ -525,7 +561,21 @@ export async function createNativeSDK(
         await Promise.resolve();
       },
       uptime: () => Promise.resolve(performance.now()),
-      update: (_branch?: string) => Promise.resolve(),
+      update: async (branch?: string) => {
+        const { runCodebaseUpdate } = await import(
+          "../sys/codebase-update.ts"
+        );
+        const result = await runCodebaseUpdate({ branch: branch ?? "" });
+        if (!result.ok) {
+          throw new Error("codebase update failed");
+        }
+        setTimeout(async () => {
+          try {
+            await DBO.close();
+          } catch { /* best-effort */ }
+          Deno.exit(75);
+        }, 500);
+      },
       gameTime: async () => gameClock.now(),
       setGameTime: async (t: IGameTime) => { gameClock.set(t); },
     },

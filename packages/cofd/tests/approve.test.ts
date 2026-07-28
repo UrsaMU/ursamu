@@ -78,6 +78,9 @@ function wireDb(
     if (op === "$set" && data["data.cofd_cg"] !== undefined) {
       target.state.cofd_cg = data["data.cofd_cg"];
     }
+    if (op === "$set" && data["data.home"] !== undefined) {
+      target.state.home = data["data.home"];
+    }
     if (op === "$unset" && "data.cofd_cg" in data) {
       delete target.state.cofd_cg;
     }

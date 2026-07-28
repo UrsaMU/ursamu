@@ -104,6 +104,8 @@ export function mockU(opts: {
   args?: string[];
   targetResult?: IDBObj | null;
   canEditResult?: boolean;
+  checkLockResult?: boolean | ((lock: string) => boolean);
+  here?: Partial<IDBObj>;
   dbModify?: (...a: unknown[]) => Promise<void>;
   objectStore?: MockObjectStore;
 } = {}) {
@@ -122,16 +124,32 @@ export function mockU(opts: {
     }
   };
 
+  const hereBase = mockPlayer({
+    id: "2",
+    name: "Room",
+    flags: new Set(["room"]),
+    ...opts.here,
+  });
+  store.put(hereBase);
+
   return Object.assign({
     me,
     here: {
-      ...mockPlayer({ id: "2", name: "Room", flags: new Set(["room"]) }),
+      ...hereBase,
       broadcast: () => {},
     },
     cmd: { name: "", original: "", args: opts.args ?? [], switches: [] },
     send: (m: string) => sent.push(m),
     broadcast: () => {},
     canEdit: async () => opts.canEditResult ?? true,
+    checkLock: async (
+      _t: unknown,
+      lock: string,
+    ) => {
+      const r = opts.checkLockResult;
+      if (typeof r === "function") return r(lock);
+      return r ?? true;
+    },
     setFlags: async (target: string | IDBObj, flags: string) => {
       const id = typeof target === "string" ? target : target.id;
       applyFlags(id, flags);

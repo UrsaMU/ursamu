@@ -22,6 +22,7 @@ import {
   unapproveExec,
 } from "./approve.ts";
 import { notesExec } from "./notes.ts";
+import { viewsExec } from "./views.ts";
 import { gearExec, gearReload, gearEquip, gearUnequip, gearView, tokenExec } from "./gear.ts";
 import { tiltExec } from "./tilt.ts";
 import { proveExec } from "./prove.ts";
@@ -57,6 +58,34 @@ import { huntCommand } from "./hunt.ts";
 import { mantleCommand } from "./mantle_cmd.ts";
 import { hobCommand } from "./hob.ts";
 import { icExec, oocExec } from "./ic_ooc.ts";
+import { staffkitExec } from "./staffkit.ts";
+
+addCmd({
+  name: "+staffkit",
+  pattern: /^\+staffkit(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected builder+",
+  category: "Cofd",
+  help: `+staffkit <splat> [<target>]  — Install a minimal staff splat kit.
+
+Staff-only shortcut so locks and systems accept you as that splat
+without full chargen. Starts with changeling (Lost).
+
+SYNTAX
+  +staffkit <splat> [<target>]
+  +staffkit/<splat> [<target>]
+  +staffkit/list
+  +staffkit/clear [<target>]
+
+SPLATS
+  changeling   Live Lost sheet, approved, fae flag, Glamour.
+
+EXAMPLES
+  +staffkit changeling
+  +staffkit/changeling
+  +staffkit changeling Alice
+  +staffkit/clear`,
+  exec: staffkitExec,
+});
 
 addCmd({
   name: "+ooc",
@@ -583,6 +612,32 @@ Notes:
   Private notes are visible only to their owner and staff. Cross-player
   edits require canEdit. Max name 40 chars; max text 8000 chars.`,
   exec: notesExec,
+});
+
+addCmd({
+  name: "+views",
+  pattern: /^\+views?(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+views [name]  -- Detail views on the current place.
+
+Syntax:
+  +views                     List views you can see here.
+  +views <name>              Read one view.
+  +views/list [<place>]      List views (default: here).
+  +views/add <name>=<text>   Create a view (needs canEdit).
+  +views/edit <name>=<text>  Replace text.
+  +views/del <name>          Delete a view.
+  +views/lock <name>=<lock>  Set lock (empty or ! clears).
+
+Locks use normal lock logic (flag(), perm(), &&, ||, !).
+If any view is visible, look shows a +views Available line.
+
+Examples:
+  +views/add Angel=Green wings drip with rain.
+  +views/lock Angel=flag(approved)
+  +views Angel`,
+  exec: viewsExec,
 });
 
 addCmd({

@@ -80,7 +80,7 @@ interface IUrsamuSDK {
   sys: {
     setConfig(key: string, value: unknown): Promise<void>;
     disconnect(id: string): Promise<void>;
-    reboot(): Promise<void>;
+    reboot(opts?: { update?: boolean; branch?: string }): Promise<void>;
     shutdown(): Promise<void>;
     uptime(): Promise<number>;
     update(branch?: string): Promise<void>;
@@ -205,10 +205,14 @@ const _localFooter = (str = "", filler = "=", width = 78): string => {
   return `${rule}\n${center(`%ch${str}%cn`, width)}\n${rule}`;
 };
 
-/** Strip MUSH-style substitution codes (%ch, %cn, etc.) and raw ANSI escapes. */
+/** Strip MUSH %c codes, truecolor <#rrggbb>, and raw ANSI escapes. */
 const stripSubs = (str = ""): string =>
   // deno-lint-ignore no-control-regex
-  str.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").replace(/\x1b\[[0-9;]*m/g, "");
+  str
+    .replace(/%c[a-zA-Z]/g, "")
+    .replace(/%[nrtbR]/g, "")
+    .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "")
+    .replace(/\x1b\[[0-9;]*m/g, "");
 
 const sprintf = (fmt: string, ...args: unknown[]): string => {
   let i = 0;
@@ -451,10 +455,15 @@ self.onmessage = async (e: MessageEvent) => {
     sys: {
       setConfig: (key: string, value: unknown) => request<void>("sys:setConfig", { key, value }),
       disconnect: (id: string) => request<void>("sys:disconnect", { id }),
-      reboot: () => request<void>("sys:reboot", {}),
+      reboot: (opts?: { update?: boolean; branch?: string }) =>
+        request<void>("sys:reboot", {
+          update: opts?.update,
+          branch: opts?.branch ?? "",
+        }),
       shutdown: () => request<void>("sys:shutdown", {}),
       uptime: () => request<number>("sys:uptime", {}),
-      update: (branch = "") => request<void>("sys:update", { branch }),
+      update: (branch = "") =>
+        request<void>("sys:update", { branch }),
       gameTime: () => request<IGameTime>("sys:gametime", {}),
       setGameTime: (t: IGameTime) => request<void>("sys:setgametime", { t }),
     },
