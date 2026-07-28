@@ -18,8 +18,11 @@ export const RESTART_NO_TOKEN_MSG =
 export const REAUTH_OK_MSG =
   "%chGame>%cn Server is back! Reconnected.";
 
-/** How long to wait for auth:true before dropping the telnet link. */
-export const REAUTH_TIMEOUT_MS = 8_000;
+/**
+ * How long to wait for auth:true before dropping the telnet link.
+ * Long enough for a slow main boot after @restart (plugins + help scan).
+ */
+export const REAUTH_TIMEOUT_MS = 45_000;
 
 export type ReconnectOpenAction =
   | { action: "auth"; token: string }

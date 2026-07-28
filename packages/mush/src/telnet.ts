@@ -309,6 +309,16 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
           }
 
           if (authAct.action === "disconnect" || payload.data?.quit) {
+            // During soft-reboot, a too-early WS open can reject JWT once
+            // while the engine is still booting. Keep the TCP session and
+            // retry WS instead of kicking the player to the login screen.
+            if (pendingReauth && sessionToken && !payload.data?.quit) {
+              clearReauthTimer();
+              pendingReauth = false;
+              isReconnecting = true;
+              try { sock?.close(); } catch { /* retry via onclose */ }
+              return;
+            }
             // Session cannot be restored (expired JWT, missing player).
             // Drop the telnet link so the player must dial in fresh.
             // Engine already sent REAUTH_FAIL_MSG when applicable.
