@@ -24,11 +24,11 @@ export interface IJobComment {
   staffOnly?: boolean;
   /** @deprecated Use `staffOnly` instead (`published === !staffOnly`). */
   published?: boolean;
-  /** Anomaly action code (ADD, APR, DNY, COM, …). */
+  /** action code (ADD, APR, DNY, COM, …). */
   action?: string;
 }
 
-/** Anomaly-style progress / hold ladder. */
+/** full-featured progress / hold ladder. */
 export type JobProgress =
   | "new"
   | "underway"
@@ -38,7 +38,7 @@ export type JobProgress =
   | "75"
   | "100";
 
-/** Explicit escalation color (Anomaly green/yellow/red). */
+/** Explicit escalation color (green/yellow/red). */
 export type JobEsc = "green" | "yellow" | "red";
 
 /** A player request, bug report, or staff ticket. */
@@ -62,7 +62,7 @@ export interface IJob {
    * - `"resolved"` — marked resolved (terminal, distinct from closed)
    */
   status: "new" | "open" | "closed" | "cancelled" | "resolved";
-  /** Anomaly-style progress ladder (optional). */
+  /** full-featured progress ladder (optional). */
   progress?: JobProgress;
   /**
    * REST API category label (e.g. `"request"`, `"bug"`). Optional — the

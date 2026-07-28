@@ -25,7 +25,7 @@ function callerName(u: IUrsamuSDK): string {
  * Non-superusers only see buckets they have access to (per `server.jobs_access`).
  * If no jobs match the filter the player receives a "no open jobs" message.
  *
- * @param u            UrsaMU SDK context.
+ * @param u UrsaMU SDK context.
  * @param filterBucket Optional bucket name (uppercase) to restrict the listing.
  */
 export async function listStaffJobs(u: IUrsamuSDK, filterBucket?: string): Promise<void> {
@@ -49,7 +49,7 @@ addCmd({
   name: "+job",
   pattern: /^\+job(?!s)(?:\/(\S+))?\s*(.*)/i,
   lock: "connected builder+",
-  help: `+job[/<switch>] [<args>]  — Staff job management (Anomaly-style).
+  help: `+job[/<switch>] [<args>]  — Staff job management (full-featured).
 
 Switches:
   /bucket /comment /assign /close /addplayer
@@ -268,6 +268,6 @@ Examples:
 
     if (await handleStaffAction(u, sw, arg)) return;
 
-    u.send(">JOBS: See +help job and +help jobs (Anomaly-style filters).");
+    u.send(">JOBS: See +help job and +help jobs (full-featured filters).");
   },
 });

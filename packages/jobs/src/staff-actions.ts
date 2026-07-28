@@ -1,5 +1,5 @@
 /**
- * Anomaly lifecycle switches for +job (approve/deny/due/status/…).
+ * Lifecycle switches for +job (approve/deny/due/status/…).
  * Called from staff-cmd after built-in switches fail to match.
  */
 import type { IUrsamuSDK } from "@ursamu/mush";

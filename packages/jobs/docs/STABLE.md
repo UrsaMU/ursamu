@@ -2,7 +2,7 @@
 
 Breaking changes to **stable** exports require a **major** bump.
 
-Anomaly Jobs **workflow** parity — see `docs/ANOMALY.md`.
+jobs system **workflow** parity — see `docs/FEATURES.md`.
 
 ## Stable exports
 

@@ -52,58 +52,58 @@ async function resolveJob(idParam: string): Promise<IJob | null> {
  *
  * ---
  * GET /api/v1/jobs
- *   Auth:    Bearer required
- *   Params:  status, category, priority, assignedTo, submittedBy, limit (max 200), offset
- *   200:     IJob[]  (staff: all matching; players: own only, staffOnly comments stripped)
- *   401:     { error: "Unauthorized" }
+ * Auth: Bearer required
+ * Params: status, category, priority, assignedTo, submittedBy, limit (max 200), offset
+ * 200: IJob[] (staff: all matching; players: own only, staffOnly comments stripped)
+ * 401: { error: "Unauthorized" }
  *
  * POST /api/v1/jobs
- *   Auth:    Bearer required
- *   Body:    { title: string, description: string, category?: string,
- *              priority?: string, staffOnly?: boolean }
- *   201:     IJob  (newly created job)
- *   400:     { error: "title and description are required" }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden: staffOnly requires staff privileges" }
+ * Auth: Bearer required
+ * Body: { title: string, description: string, category?: string,
+ * priority?: string, staffOnly?: boolean }
+ * 201: IJob (newly created job)
+ * 400: { error: "title and description are required" }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden: staffOnly requires staff privileges" }
  *
  * GET /api/v1/jobs/stats
- *   Auth:    Bearer required (staff only)
- *   200:     { total, byStatus, byCategory, byPriority, openAssigned, openUnassigned }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
+ * Auth: Bearer required (staff only)
+ * 200: { total, byStatus, byCategory, byPriority, openAssigned, openUnassigned }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
  *
  * GET /api/v1/jobs/:id
- *   Auth:    Bearer required
- *   :id:     job number (e.g. "5") or UUID (e.g. "job-5")
- *   200:     IJob  (staffOnly comments stripped for non-staff)
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
- *   404:     { error: "Not found" }
+ * Auth: Bearer required
+ * :id: job number (e.g. "5") or UUID (e.g. "job-5")
+ * 200: IJob (staffOnly comments stripped for non-staff)
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
+ * 404: { error: "Not found" }
  *
  * PATCH /api/v1/jobs/:id
- *   Auth:    Bearer required (staff only)
- *   Body:    Partial<{ status, priority, assignedTo, title, description }>
- *   200:     IJob  (updated job)
- *   400:     { error: "Invalid JSON body" }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
- *   404:     { error: "Not found" }
+ * Auth: Bearer required (staff only)
+ * Body: Partial<{ status, priority, assignedTo, title, description }>
+ * 200: IJob (updated job)
+ * 400: { error: "Invalid JSON body" }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
+ * 404: { error: "Not found" }
  *
  * DELETE /api/v1/jobs/:id
- *   Auth:    Bearer required (staff only)
- *   204:     { deleted: true }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
- *   404:     { error: "Not found" }
+ * Auth: Bearer required (staff only)
+ * 204: { deleted: true }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
+ * 404: { error: "Not found" }
  *
  * POST /api/v1/jobs/:id/comment
- *   Auth:    Bearer required
- *   Body:    { text: string, staffOnly?: boolean }
- *   201:     IJobComment  (the newly created comment)
- *   400:     { error: "text is required" }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
- *   404:     { error: "Not found" }
+ * Auth: Bearer required
+ * Body: { text: string, staffOnly?: boolean }
+ * 201: IJobComment (the newly created comment)
+ * 400: { error: "text is required" }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
+ * 404: { error: "Not found" }
  * ---
  *
  * Auth: Bearer JWT required (userId supplied by engine router middleware).

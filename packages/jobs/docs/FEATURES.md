@@ -1,9 +1,11 @@
-# Anomaly Jobs parity (UrsaMU `@ursamu/jobs`)
+# jobs system parity (UrsaMU `@ursamu/jobs`)
 
-Reference: Anomaly Jobs ~6.5 softcode help surface.
+Reference: jobs system ~6.5 softcode help surface.
 
-**Goal:** staff/player *workflow* parity with Anomaly.  
-**Non-goal:** softcode objects, JGO installer, evaluating TRIG_* bodies.
+**Goal:** staff/player *workflow* parity with classic
+MUSH job-tracker UX (lists, claim/close, filters, jgroups).
+**Non-goal:** softcode objects, external installers, or
+evaluating TRIG_* bodies.
 
 ## 1.0 — daily workflow
 
@@ -11,7 +13,7 @@ See CHANGELOG 1.0.0: lists, lifecycle, player presets, prefs, archive.
 
 ## 1.1 — advanced (this release)
 
-| Anomaly | UrsaMU 1.1 |
+| | UrsaMU 1.1 |
 |---------|------------|
 | +jobs/select + boolean | +jobs/select (and/or/not, sort=) |
 | JOBSELECT / named | +jobs/select default|save|list |
@@ -36,5 +38,5 @@ See CHANGELOG 1.0.0: lists, lifecycle, player presets, prefs, archive.
 
 ## Standards note
 
-Meet Anomaly **standards** = same *jobs people do*, not
+Meet **standards** = same *jobs people do*, not
 byte-for-byte softcode.

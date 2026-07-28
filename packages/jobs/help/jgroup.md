@@ -1,6 +1,6 @@
 +JGROUP
 
-Named player lists (Anomaly jgroups).
+Named player lists (named player lists).
 
 SYNTAX
   +jgroup/list

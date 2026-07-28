@@ -21,12 +21,25 @@ export type { ICoreServer, ITransport }    from "./src/server/types.ts";
 
 // Input dispatch
 export { addHandler, removeHandler }       from "./src/dispatch/handler.ts";
-export { addMiddleware }                   from "./src/dispatch/middleware.ts";
+export {
+  addMiddleware,
+  removeMiddleware,
+  clearMiddleware,
+  getMiddleware,
+} from "./src/dispatch/middleware.ts";
 export { runPipeline }                     from "./src/dispatch/pipeline.ts";
 export type { ICoreHandler, ICoreContext, IMiddlewareFn } from "./src/dispatch/types.ts";
 
 // Plugin system
-export { registerPlugin, loadPlugins }     from "./src/plugins/loader.ts";
+export {
+  registerPlugin,
+  loadPlugins,
+  unloadPlugin,
+  listPlugins,
+  getPlugin,
+  forceLoadPlugins,
+  initializePlugins,
+} from "./src/plugins/loader.ts";
 export type { IPlugin, IPluginDep }        from "./src/plugins/types.ts";
 
 // Event bus
@@ -56,8 +69,8 @@ export { send, broadcastAll, notify, registerSender, trackSocket, untrackSocket,
 export { rooms }                           from "./src/broadcast/rooms.ts";
 
 // Queue
-export { queue }                           from "./src/queue/index.ts";
-export type { IQueueEntry }                from "./src/queue/index.ts";
+export { queue, registerExecutor }         from "./src/queue/index.ts";
+export type { IQueueEntry, ISemEntry }     from "./src/queue/index.ts";
 
 // Config
 export { getConfig, setConfig, getAllConfig, initConfig } from "./src/config/mod.ts";

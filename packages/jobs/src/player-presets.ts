@@ -1,5 +1,5 @@
 /**
- * Anomaly player shortcuts: +bug, +typo, +pitch, +myjobs/nospam.
+ * Player shortcuts: +bug, +typo, +pitch, +myjobs/nospam.
  */
 import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";

@@ -1,6 +1,6 @@
 /**
  * @module @ursamu/jobs
- * @description Anomaly-style jobs/request system for UrsaMU.
+ * @description full-featured jobs/request system for UrsaMU.
  *
  * Self-contained — provides its own types, database layer, and event hooks.
  * The engine (`@ursamu/mush`) is only used for infrastructure primitives

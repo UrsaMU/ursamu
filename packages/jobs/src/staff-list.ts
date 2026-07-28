@@ -1,5 +1,5 @@
 /**
- * +jobs list switches (Anomaly +jobs/* filters).
+ * +jobs list switches (job list/* filters).
  */
 import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
@@ -61,7 +61,7 @@ addCmd({
   pattern: /^\+jobs(?:\/(\S+))?\s*(.*)/i,
   lock: "connected builder+",
   category: "Jobs",
-  help: `+jobs[/<filter>] [<arg>]  — Staff job lists (Anomaly-style).
+  help: `+jobs[/<filter>] [<arg>]  — Staff job lists (full-featured).
 
 Filters: all, mine, new, overdue, from, who, list, pri, due,
 date, sort, search, select, reports, compress, clean,
@@ -82,8 +82,8 @@ Examples:
 
     if (sw === "credits") {
       u.send(
-        "%ch>JOBS:%cn UrsaMU jobs 1.1 — Anomaly-style. " +
-          "+help jobs · docs/ANOMALY.md",
+        "%ch>JOBS:%cn UrsaMU jobs 1.1 — full-featured. " +
+          "+help jobs · docs/FEATURES.md",
       );
       return;
     }

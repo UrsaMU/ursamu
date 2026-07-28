@@ -1,5 +1,5 @@
 /**
- * Job list filters (Anomaly +jobs/* and simplified select).
+ * Job list filters (job list/* and simplified select).
  */
 import type { IJob } from "./types.ts";
 import { getEscalation, isNew } from "./format.ts";

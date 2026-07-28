@@ -1,6 +1,6 @@
 +JOBS
 
-Staff lists and Anomaly 1.1 tools.
+Staff lists and 1.1 tools.
 
 SYNTAX
   +jobs[/<filter>] [<arg>]

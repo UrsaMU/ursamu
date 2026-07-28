@@ -1,5 +1,5 @@
 /**
- * Player jobs preferences (silence / nospam) — Anomaly JOBS_SILENCE /
+ * Player jobs preferences (silence / nospam) — JOBS_SILENCE /
  * JOBS_NOSPAM equivalents under state.jobs.
  */
 import type { IUrsamuSDK } from "@ursamu/mush";
@@ -15,7 +15,7 @@ export interface IJobsPrefs {
   silenceJobs?: number[];
   /** Job numbers with nospam. */
   nospamJobs?: number[];
-  /** Default +jobs expression (Anomaly JOBSELECT). */
+  /** Default +jobs expression (JOBSELECT). */
   jobSelect?: string;
   /** Named selects JOBSELECT_<name>. */
   jobSelectNamed?: Record<string, string>;

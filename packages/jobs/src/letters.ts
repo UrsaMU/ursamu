@@ -1,5 +1,5 @@
 /**
- * Form-letter templates for approve/deny/complete (Anomaly letters).
+ * Form-letter templates for approve/deny/complete (close-out letters).
  * Config: plugins.jobs.letters — no hard bbs dependency.
  */
 import { getConfig } from "@ursamu/mush";

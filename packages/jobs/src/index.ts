@@ -9,7 +9,7 @@ import { jobsRouteHandler } from "./router.ts";
 import { registerNotifyHooks, removeNotifyHooks } from "./notify.ts";
 
 /**
- * UrsaMU Jobs Plugin — Anomaly-style jobs/request system.
+ * UrsaMU Jobs Plugin — full-featured jobs/request system.
  *
  * Registers +request, +job, +jobs, +archive commands and the /api/v1/jobs
  * REST routes. Staff are notified in-game when new jobs arrive.
@@ -24,7 +24,7 @@ const jobsPlugin: IPlugin = {
   name: "jobs",
   version: "1.1.0",
   description:
-    "Anomaly-style jobs 1.1 — select DSL, reports, jgroups, " +
+    "full-featured jobs 1.1 — select DSL, reports, jgroups, " +
     "letters, lists/lifecycle, archive, REST.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },

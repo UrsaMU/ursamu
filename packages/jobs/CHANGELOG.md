@@ -2,7 +2,7 @@
 
 ## [1.1.0] - 2026-07-28
 
-Anomaly advanced surface on top of 1.0 workflow.
+Advanced surface on top of 1.0 workflow.
 
 ### Added
 
@@ -20,8 +20,8 @@ Anomaly advanced surface on top of 1.0 workflow.
 
 ### Docs
 
-- ANOMALY.md / STABLE.md updated for 1.1
+- FEATURES.md / STABLE.md updated for 1.1
 
 ## [1.0.0] - 2026-07-28
 
-Anomaly daily workflow: lists, lifecycle, presets, prefs.
+Daily workflow: lists, lifecycle, presets, prefs.

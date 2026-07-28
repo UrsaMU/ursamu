@@ -58,7 +58,23 @@ import { huntCommand } from "./hunt.ts";
 import { mantleCommand } from "./mantle_cmd.ts";
 import { hobCommand } from "./hob.ts";
 import { icExec, oocExec } from "./ic_ooc.ts";
+import { timeExec } from "./time.ts";
 import { staffkitExec } from "./staffkit.ts";
+
+addCmd({
+  name: "+time",
+  pattern: /^\+time$/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+time  — Date, clock, season, weather, moon, sun.
+
+London-like climate. Moon phase follows the 28-day month.
+Staff set the game clock with @time.
+
+Examples:
+  +time`,
+  exec: timeExec,
+});
 
 addCmd({
   name: "+staffkit",
@@ -115,7 +131,7 @@ Requires %chapproved%cn. Returns to your last IC room (a room
 flagged %chic%cn that you left via +ooc), or the IC hub.
 
 Switches:
-  /clear    Forget the marker and go to the hub.
+  /clear    Forget the marker (stay put; next +ic → hub).
   /status   Show where your marker points.
 
 Examples:

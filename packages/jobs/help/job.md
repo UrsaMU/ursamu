@@ -1,6 +1,6 @@
 +JOB
 
-Staff job view and actions (Anomaly-style).
+Staff job view and actions (full-featured).
 
 SYNTAX
   +job <#>

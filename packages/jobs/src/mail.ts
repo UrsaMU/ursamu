@@ -9,10 +9,10 @@ import { mailDb, type IMail } from "@ursamu/mail";
  *
  * Silently swallows errors — mail failure must never interrupt jobs.
  *
- * @param fromId  DB id of the sending player (without `#` prefix)
- * @param toId    DB id of the recipient player (without `#` prefix)
+ * @param fromId DB id of the sending player (without `#` prefix)
+ * @param toId DB id of the recipient player (without `#` prefix)
  * @param subject Mail subject line
- * @param body    Mail body text
+ * @param body Mail body text
  */
 export async function sendJobMail(
   fromId: string,

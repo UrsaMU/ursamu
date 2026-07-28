@@ -1,5 +1,5 @@
 /**
- * Named player lists (Anomaly jgroups).
+ * Named player lists (named player lists).
  */
 import { DBO } from "@ursamu/mush";
 

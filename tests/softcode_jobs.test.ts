@@ -1,5 +1,5 @@
 /**
- * Tests for softcode functions needed by the Anomaly Jobs installer:
+ * Tests for softcode functions needed by the jobs softcode installer:
  * itext, inum, elist, align, hasattrval
  */
 import { assertEquals } from "@std/assert";

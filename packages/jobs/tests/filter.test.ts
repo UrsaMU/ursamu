@@ -1,5 +1,5 @@
 /**
- * Anomaly-style job list filters and due parsing.
+ * full-featured job list filters and due parsing.
  */
 import { assertEquals } from "@std/assert";
 import {

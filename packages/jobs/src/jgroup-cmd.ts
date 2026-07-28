@@ -1,5 +1,5 @@
 /**
- * +jgroup commands — Anomaly jgroups CRUD.
+ * +jgroup commands — named player lists CRUD.
  */
 import { addCmd } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";

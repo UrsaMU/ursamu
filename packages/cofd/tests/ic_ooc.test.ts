@@ -87,7 +87,7 @@ describe("+ic / +ooc", OPTS, () => {
     await oocExec(u);
     // Prior marker kept; chargen is not IC.
     assertEquals(me.state.icLocation, "20");
-    assertStringIncludes(u._sent.join("\n"), "not IC");
+    assertStringIncludes(u._sent.join("\n"), "Not IC");
   });
 
   it("+ic uses marker when set on IC room", async () => {
@@ -147,7 +147,7 @@ describe("+ic / +ooc", OPTS, () => {
     assertEquals(teleports[0]?.[1], "14");
   });
 
-  it("+ic/clear goes to hub and unsets marker", async () => {
+  it("+ic/clear unsets marker and stays put", async () => {
     const me = mockPlayer({
       id: "p4",
       flags: new Set(["player", "connected", "approved"]),
@@ -172,15 +172,32 @@ describe("+ic / +ooc", OPTS, () => {
         delete me.state.icLocation;
       }
     };
-    u.db.search = async (q: Record<string, unknown>) => {
-      if (q.id === "14") {
-        return [room("14", "Blackfriars Circus", ["ic"])];
-      }
-      return [];
-    };
     u.cmd.args = ["clear", ""];
     await icExec(u);
     assertEquals(unsets.length, 1);
-    assertEquals(teleports[0]?.[1], "14");
+    assertEquals(teleports.length, 0);
+    assertEquals(me.location, "20");
+    assertEquals(me.state.icLocation, undefined);
+    assertStringIncludes(u._sent.join("\n"), "Marker cleared");
+  });
+
+  it("+ic/clear with no marker stays put", async () => {
+    const me = mockPlayer({
+      id: "p4b",
+      flags: new Set(["player", "connected", "approved"]),
+      location: "8",
+      state: {},
+    });
+    const teleports: string[][] = [];
+    const u = mockU({ me });
+    u.teleport = (id: string, dest: string) => {
+      teleports.push([id, dest]);
+      me.location = dest;
+    };
+    u.cmd.args = ["clear", ""];
+    await icExec(u);
+    assertEquals(teleports.length, 0);
+    assertEquals(me.location, "8");
+    assertStringIncludes(u._sent.join("\n"), "No marker");
   });
 });

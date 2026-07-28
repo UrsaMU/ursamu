@@ -1,8 +1,8 @@
 # @ursamu/jobs
 
-**Version 1.1.0** — Anomaly Jobs workflow + advanced tools.
+**Version 1.1.0** — jobs system workflow + advanced tools.
 
-See `docs/ANOMALY.md` and `docs/STABLE.md`.
+See `docs/FEATURES.md` and `docs/STABLE.md`.
 
 ```ts
 import jobsPlugin, {

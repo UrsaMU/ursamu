@@ -21,7 +21,7 @@ function callerName(u: IUrsamuSDK): string {
  * Sends a formatted view of a single job to the calling player.
  * Only published comments are shown (staff-only comments are hidden).
  *
- * @param u   UrsaMU SDK context — used for `u.send()` and formatting helpers.
+ * @param u UrsaMU SDK context — used for `u.send()` and formatting helpers.
  * @param job The job to display.
  */
 function showRequest(u: IUrsamuSDK, job: IJob): void {
@@ -230,7 +230,7 @@ addCmd({
   pattern: /^\+myjobs?(?:\/(\S+))?\s*(.*)$/i,
   lock: "connected",
   help: `+myjobs  — List your open requests.
-+myjobs/nospam [<#>]  — Toggle auto-mail for job updates.
++myjobs/nospam [<#>] — Toggle auto-mail for job updates.
 
 Examples:
   +myjobs

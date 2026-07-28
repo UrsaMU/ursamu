@@ -153,7 +153,7 @@ const P = [0, 5, 15, 47, 60, 71];
  * Columns: `#` | `Category` | `Title` | `Started` | `Handler` | `Status`
  *
  * @param jobList Jobs to display (pre-filtered and sorted by the caller).
- * @param title   Header title shown in the top border (e.g. `"POP Jobs"`).
+ * @param title Header title shown in the top border (e.g. `"POP Jobs"`).
  */
 export function formatJobList(jobList: IJob[], title: string): string[] {
   const lines: string[] = [];

@@ -49,7 +49,7 @@ export interface IJobHooks {
   emit<K extends keyof JobHookMap>(event: K, ...args: Parameters<JobHookMap[K]>): Promise<void>;
 }
 
-/** Anomaly action-code aliases → JobHookMap events. */
+/** Action-code aliases → JobHookMap events. */
 const ACTION_MAP: Record<string, keyof JobHookMap> = {
   CRE: "job:created",
   ADD: "job:commented",
@@ -60,7 +60,7 @@ const ACTION_MAP: Record<string, keyof JobHookMap> = {
 };
 
 /**
- * Register a handler under an Anomaly-style action code
+ * Register a handler under an full-featured action code
  * (CRE, ADD, COM, APR, DNY, DEL). Does not run softcode.
  */
 export function registerJobActionHook(
