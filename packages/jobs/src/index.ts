@@ -22,8 +22,13 @@ import { registerNotifyHooks, removeNotifyHooks } from "./notify.ts";
  */
 const jobsPlugin: IPlugin = {
   name: "jobs",
-  version: "0.1.1",
-  description: "Anomaly-style jobs system — player requests, staff commands, bucket access, archive, REST API.",
+  version: "1.0.0",
+  description:
+    "Anomaly-style jobs — requests, staff lists/lifecycle, " +
+    "buckets, archive, REST.",
+  dependencies: [
+    { name: "help", version: ">=1.0.0" },
+  ],
 
   init: async () => {
     registerPluginRoute("/api/v1/jobs", jobsRouteHandler);

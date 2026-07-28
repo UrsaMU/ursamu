@@ -8,6 +8,7 @@ import type { IJob, IJobComment, IJobAccess } from "./types.ts";
 import { isStaffFlags, header, jobHeader, jobFooter, jobDivider, formatTimeFull, formatTimeShort, formatDate, getEscalation, isNew, formatJobList } from "./format.ts";
 import { getJobByNumber, canStaffSeeBucket } from "./job-utils.ts";
 import { sendJobMail } from "./mail.ts";
+import { handleStaffAction } from "./staff-actions.ts";
 
 /**
  * Returns the best available display name for the calling player.
@@ -45,34 +46,22 @@ export async function listStaffJobs(u: IUrsamuSDK, filterBucket?: string): Promi
 }
 
 addCmd({
-  name: "+jobs",
-  pattern: /^\+jobs\s*$/i,
-  lock: "connected builder+",
-  exec: async (u: IUrsamuSDK) => { await listStaffJobs(u); }
-});
-
-addCmd({
   name: "+job",
   pattern: /^\+job(?!s)(?:\/(\S+))?\s*(.*)/i,
   lock: "connected builder+",
-  help: `+job[/<switch>] [<args>]  — Staff job management commands.
+  help: `+job[/<switch>] [<args>]  — Staff job management (Anomaly-style).
 
 Switches:
-  /bucket <bucket>              Filter job list by bucket.
-  /comment <#>=<text>           Add a staff comment to a job.
-  /assign <#>=<staff>           Assign a job to a staff member.
-  /close <#>[=<comment>]        Close and archive a job.
-  /addplayer <player> to <#>    Add a viewer to a job.
-  /addaccess <bucket>=<staff>   Grant staff access to a bucket. (superuser)
-  /removeaccess <bucket>=<staff> Revoke bucket access. (superuser)
-  /listaccess                   Show all bucket access settings. (superuser)
-  /renumber                     Re-sequence all job numbers. (superuser)
+  /bucket /comment /assign /close /addplayer
+  /addaccess /removeaccess /listaccess /renumber
+  /add /create /complete /approve /deny /due
+  /status /esc /hold /tag /access /delete
 
 Examples:
-  +job 5                    View job #5.
-  +job/comment 5=On it.     Add a comment to job #5.
-  +job/assign 5=Alice       Assign job #5 to Alice.
-  +job/close 5=All done.    Close and archive job #5.`,
+  +job 5
+  +job/assign 5=Alice
+  +job/approve 5=Looks good.
+  +job/due 5=3d`,
   exec: async (u: IUrsamuSDK) => {
     if (!isStaffFlags(u.me.flags)) { u.send(">JOBS: Staff only."); return; }
 
@@ -267,29 +256,8 @@ Examples:
       return;
     }
 
-    u.send(">JOBS: Staff commands:");
-    u.send("  +jobs                              - list all open jobs");
-    u.send("  +job <#>                           - view a job");
-    u.send("  +job/bucket <bucket>               - filter by bucket");
-    u.send("  +job/comment <#>=<text>            - add comment");
-    u.send("  +job/assign <#>=<staff>            - assign job");
-    u.send("  +job/close <#>[=<comment>]         - close and archive");
-    u.send("  +job/addplayer <player> to <#>     - add viewer");
-    u.send("  +job/addaccess <bucket>=<staff>    - grant bucket access");
-    u.send("  +job/removeaccess <bucket>=<staff> - revoke access");
-    u.send("  +job/listaccess                    - show access map");
-    u.send("  +job/renumber                      - resequence IDs");
+    if (await handleStaffAction(u, sw, arg)) return;
+
+    u.send(">JOBS: See +help job and +help jobs (Anomaly-style filters).");
   },
-});
-
-addCmd({
-  name: "+jobs",
-  pattern: /^\+jobs\s*$/i,
-  lock: "connected",
-  help: `+jobs  — List all open jobs (staff only).
-
-Examples:
-  +jobs   Show all open jobs visible to your role.
-  +jobs   Superusers see every bucket; others only see their permitted buckets.`,
-  exec: async (u: IUrsamuSDK) => { await listStaffJobs(u); },
 });
