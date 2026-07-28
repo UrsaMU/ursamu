@@ -1,5 +1,8 @@
 # Chronicles of Darkness (CoFD) UrsaMU Plugin
 
+**Version 1.2.0** — sheets, chargen, dice, IC/OOC travel, `+time`.
+See `CHANGELOG.md`.
+
 Chronicles of Darkness 2e for **UrsaMU**: guided character generation,
 dynamic ASCII sheets, a CoFD-compliant d10 roller, Health track, Beat/XP
 economy, Conditions and Aspirations, and a Changeling: The Lost overlay.

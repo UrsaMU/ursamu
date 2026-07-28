@@ -158,11 +158,11 @@ async function onEngineReady(): Promise<void> {
 
 export const plugin: IPlugin = {
   name: "cofd",
-  version: "1.1.14",
+  version: "1.2.0",
   description: "Chronicles of Darkness 2e plugin: sheets, chargen, d10 dice with 10/9/8-again, rote, and Willpower spend.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },
-    { name: "jobs", version: ">=0.1.0" },
+    { name: "jobs", version: ">=1.0.0" },
     { name: "combat", version: ">=0.8.0" },
   ],
 
