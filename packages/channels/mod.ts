@@ -9,7 +9,7 @@
  */
 
 import { DBO, gameHooks, getConfig } from "@ursamu/mush";
-import { addMiddleware } from "@ursamu/core";
+import { addMiddleware, sessions } from "@ursamu/core";
 import { registerHelpDir } from "@ursamu/help-plugin";
 import type { IPlugin, SessionEvent } from "@ursamu/mush";
 import type { IMiddlewareFn } from "@ursamu/core";
@@ -18,6 +18,15 @@ import { matchChannel } from "./src/middleware/matchChannel.ts";
 import { joinChans } from "./src/middleware/joinChans.ts";
 import { announcePresence } from "./src/announce.ts";
 import type { IChannel } from "./src/types.ts";
+
+/** JWT soft-reboot restore — telnet opens WS with reconnect=true. */
+function isReauthSession(socketId?: string): boolean {
+  if (!socketId) return false;
+  const s = sessions.get(socketId) as
+    | { meta?: Record<string, unknown> }
+    | undefined;
+  return s?.meta?.reconnect === true;
+}
 
 export * from "./src/commands/verbs.ts";
 export { matchChannel } from "./src/middleware/matchChannel.ts";
@@ -46,8 +55,10 @@ const onLogin = async ({
   await joinChans(actorId, socketId).catch((e: unknown) =>
     console.error("[channels] joinChans error:", e)
   );
-  // Soft-reboot JWT restore is not a fresh connect — stay quiet.
-  if (reason === "reauth") return;
+  // Fresh connect only. Skip JWT soft-reboot restore (reason and/or
+  // session.meta.reconnect) — no Public "has connected" spam.
+  if (reason === "reauth" || isReauthSession(socketId)) return;
+  if (reason != null && reason !== "login") return;
   await announcePresence(actorId, "connect").catch((e: unknown) =>
     console.error("[channels] announce connect:", e)
   );
@@ -145,7 +156,7 @@ const channelMiddleware: IMiddlewareFn = async (ctx, next) => {
 
 export const channelsPlugin: IPlugin = {
   name: "@ursamu/channels",
-  version: "0.1.6",
+  version: "0.1.7",
   description:
     "Channel system — chat channels with aliases, history, and admin tools.",
 

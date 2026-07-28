@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/channels",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "exports": {
     ".": "./mod.ts",
     "./channel-events": "./src/channel-events.ts"

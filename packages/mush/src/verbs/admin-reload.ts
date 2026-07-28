@@ -179,7 +179,7 @@ export async function execReboot(u: IUrsamuSDK): Promise<void> {
 
   if (quick) {
     u.here.broadcast(
-      `%chGame>%cn Server @reboot/quick by %ch${who}%cn...`,
+      `%chGame>%cn quick @restart by %ch${who}%cn.`,
     );
     try {
       await u.sys.reboot({ update: false });
@@ -191,8 +191,7 @@ export async function execReboot(u: IUrsamuSDK): Promise<void> {
   }
 
   u.here.broadcast(
-    `%chGame>%cn @restart by %ch${who}%cn — ` +
-      `pull, bump JSR, cache, then soft-reboot...`,
+    `%chGame>%cn full @restart by %ch${who}%cn.`,
   );
   try {
     const { runCodebaseUpdate } = await import(

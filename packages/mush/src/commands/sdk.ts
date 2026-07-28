@@ -944,6 +944,14 @@ gameHooks.on("session:auth", async (e) => {
     );
     // Tell the client who they are so telnet can restore cid + look.
     sendPayload(e.socketId, "", { cid: userId, auth: true });
+    // Ensure reconnect marker survives for presence hooks even if the
+    // WS open flag was cleared elsewhere.
+    const sess = sessions.get(e.socketId) as
+      | { meta?: Record<string, unknown> }
+      | undefined;
+    if (sess) {
+      sess.meta = { ...(sess.meta ?? {}), reconnect: true, reauth: true };
+    }
     const { hooks } = await import("../events/hooks.ts");
     // JWT restore after soft-reboot — not a fresh connect.
     await hooks.aconnect(player, e.socketId, { reauth: true });

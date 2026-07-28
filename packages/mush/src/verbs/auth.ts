@@ -237,8 +237,7 @@ export async function execUpdate(u: IUrsamuSDK): Promise<void> {
   const branch = (u.cmd.args[0] || "").trim();
   const who = String(u.me.state.name || u.me.name || u.me.id);
   u.here.broadcast(
-    `%chGame>%cn @update by %ch${who}%cn — ` +
-      `pull, bump JSR, cache, soft-reboot...`,
+    `%chGame>%cn full @restart by %ch${who}%cn.`,
   );
   try {
     const { runCodebaseUpdate } = await import(
