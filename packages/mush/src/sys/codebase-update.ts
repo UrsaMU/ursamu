@@ -99,11 +99,7 @@ async function gitPull(
   ]);
   let stashed = false;
   if (porcelain.ok && porcelain.out.trim()) {
-    logLine(
-      lines,
-      log,
-      "Local changes present — stashing before pull...",
-    );
+    // Quiet — stash is routine when deno.json was bumped last time.
     const stash = await runCmd(cwd, "git", [
       "stash",
       "push",
@@ -153,12 +149,14 @@ async function gitPull(
     }
     return false;
   }
-  // Prefer the human summary line over noisy fetch stderr.
-  const summary = pull.out.trim() ||
-    (pull.err.includes("Already up to date")
-      ? "Already up to date."
-      : msg);
-  logLine(lines, log, summary);
+  // Only speak when git actually moved HEAD (skip "Already up to date.").
+  const summary = pull.out.trim();
+  const upToDate = !summary ||
+    /already up to date/i.test(summary) ||
+    /already up to date/i.test(pull.err);
+  if (!upToDate) {
+    logLine(lines, log, summary);
+  }
 
   if (stashed) {
     const pop = await runCmd(cwd, "git", ["stash", "pop"]);
@@ -169,9 +167,8 @@ async function gitPull(
         `stash pop conflicts (resolve manually): ${cmdText(pop)}`,
       );
       // Code was pulled; continue update rather than abort.
-    } else {
-      logLine(lines, log, "Restored stashed local changes.");
     }
+    // Quiet success — restoring local deno.json is expected.
   }
   return true;
 }
@@ -230,9 +227,8 @@ async function writeBumpedDenoJson(
     if (bumped.length === 0) {
       logLine(lines, log, "Updated deno.json");
     }
-  } else {
-    logLine(lines, log, "JSR @ursamu/* pins already current.");
   }
+  // Quiet when pins already current.
   return bumped;
 }
 
@@ -251,12 +247,9 @@ async function denoCacheReload(
       /* missing */
     }
   }
-  if (!found.length) {
-    logLine(lines, log, "No entrypoints to cache.");
-    return true;
-  }
+  if (!found.length) return true;
 
-  logLine(lines, log, `deno cache --reload ${found.join(" ")}`);
+  // Quiet while caching — only report failures.
   const r = await runCmd(cwd, Deno.execPath(), [
     "cache",
     "--reload",
@@ -271,7 +264,6 @@ async function denoCacheReload(
     );
     return false;
   }
-  logLine(lines, log, "Cache refreshed.");
   return true;
 }
 
@@ -290,13 +282,11 @@ export async function runCodebaseUpdate(
     return { ok: true, lines, bumped: [], pulled: false };
   }
 
-  logLine(lines, log, "Pulling latest code...");
   const pulled = await gitPull(cwd, branch, lines, log);
   if (!pulled) {
     return { ok: false, lines, bumped: [], pulled: false };
   }
 
-  logLine(lines, log, "Checking JSR @ursamu/* pins...");
   const bumped = await writeBumpedDenoJson(
     cwd,
     lines,
