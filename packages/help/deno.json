@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/help",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "exports": "./mod.ts",
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
@@ -20,7 +20,7 @@
     "@std/testing": "jsr:@std/testing@^1.0.17",
     "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
     "@std/path": "jsr:@std/path@^0.224.0",
-    "@ursamu/mush": "jsr:@ursamu/mush@^0.1.1"
+    "@ursamu/mush": "jsr:@ursamu/mush@^0.1.28"
   },
   "publish": {
     "include": [
