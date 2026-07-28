@@ -4,6 +4,7 @@ Staff administration commands for board setup and locks.
 
 COMMANDS
   +bbnewgroup <title>=<cat> — Create a new board.
+  +bbanon <#>=on|off        — Anonymous authors on a board.
   +bbcleargroup <#>         — Mark a board for deletion.
   +bbconfirm <#>            — Confirm board deletion.
   +bblock <#>=<lock>        — Set read access lock.

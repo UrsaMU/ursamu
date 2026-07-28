@@ -10,6 +10,8 @@ import "./commands/posting.ts";
 import "./commands/social.ts";
 import "./commands/management.ts";
 import "./commands/staff.ts";
+import "./commands/compat.ts";
+import { BBS_VERSION } from "./version.ts";
 
 /**
  * Seed boards + wire job bridge. Runs from init() so we do not
@@ -30,9 +32,9 @@ const bootstrapBoards = async (): Promise<void> => {
 
 const plugin: IPlugin = {
   name: "bbs",
-  version: "0.1.0",
+  version: BBS_VERSION,
   description:
-    "Full-featured BBS — boards, threading, categories, " +
+    "Myrddin-style BBS — boards, threading, categories, " +
     "IC/OOC tags, sticky posts, board moderators, post " +
     "flagging, reply watching, Discord webhooks, scene " +
     "linking, archive boards, and jobs-bridge.",

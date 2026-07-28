@@ -1,6 +1,9 @@
 # @ursamu/bbs
 
-Full-featured Myrddin-style BBS plugin for UrsaMU.
+**0.1.1** — Full-featured **Myrddin-style** BBS for UrsaMU
+(command UX parity, not softcode clone). See `docs/MYRDDIN.md`.
+
+Requires `@ursamu/mush@^1.0.0` and `@ursamu/help@^1.0.0`.
 
 ## Configuration
 
