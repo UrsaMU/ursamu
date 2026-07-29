@@ -223,7 +223,7 @@ async function fetchCreate(
     );
     return;
   }
-  let left = rest.slice(0, eq).trim();
+  const left = rest.slice(0, eq).trim();
   let right = rest.slice(eq + 1).trim();
   let forPlayer = "";
   const forM = right.match(/\s+for\s+(\S+)\s*$/i);
@@ -324,7 +324,7 @@ async function fetchLink(
   }
   const name = u.util.displayName(b, u.me);
   const linked = linkChangelingToFetch(aS, b.id, name);
-  let fetchSide = writeFetchState(bS, {
+  const fetchSide = writeFetchState(bS, {
     ...(readFetchState(bS) ?? { echoes: [] }),
     originalId: a.id,
     originalName: u.util.displayName(a, u.me),

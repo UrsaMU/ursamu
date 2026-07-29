@@ -163,24 +163,24 @@ Deno.test(
     });
 
     const ports: CombatPorts = {
-      async loadActor(id) {
-        return {
+      loadActor(id) {
+        return Promise.resolve({
           id,
           name: id,
-          kind: id.startsWith("npc") ? "npc" : "pc",
+          kind: id.startsWith("npc") ? "npc" : "pc" as const,
           isOut: false,
           healthFrac: 1,
           aiKey: id.startsWith("npc") ? "aggressive" : undefined,
-        };
+        });
       },
-      async executeAction(_id, action) {
-        if (action.type !== "attack") return { ok: true };
-        return {
+      executeAction(_id, action) {
+        if (action.type !== "attack") return Promise.resolve({ ok: true });
+        return Promise.resolve({
           ok: true,
           damageApplied: 4,
           targetId: action.targetId,
           logLine: `hit ${action.targetId}`,
-        };
+        });
       },
       broadcast() {},
     };

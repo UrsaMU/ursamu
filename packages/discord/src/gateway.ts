@@ -324,7 +324,7 @@ async function onMessageCreate(token: string, msg: any): Promise<void> {
   const channelId = String(msg.channel_id ?? "");
   if (!channelId) return;
 
-  const content = String(msg.content ?? "").trim();
+  let content = String(msg.content ?? "").trim();
 
   // Handle +help trigger directly in Discord chat (works in any channel)
   if (content.toLowerCase().startsWith("+help")) {

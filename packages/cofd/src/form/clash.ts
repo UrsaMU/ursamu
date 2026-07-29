@@ -30,10 +30,10 @@ export function buildClashPools(
     defender.attributes?.composure ?? 1,
   );
   let aPool = aPower + aRes;
-  let dPool = dPower + dRes;
+  const dPool = dPower + dRes;
   let aLab =
     `Power(${aPower})+Res/Com(${aRes})`;
-  let dLab =
+  const dLab =
     `Power(${dPower})+Res/Com(${dRes})`;
   if (opts.useMantle) {
     const m = ownMantle(attacker);

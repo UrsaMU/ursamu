@@ -1,7 +1,7 @@
 /**
  * Freehold dorm home assignment.
  */
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "jsr:@std/assert@^0.224.0";
 import { getConfig, setConfig } from "@ursamu/ursamu";
 import {
   assignDormHome,

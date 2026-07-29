@@ -93,9 +93,10 @@ Deno.test("middleware can short-circuit without next", OPTS, async () => {
   removeHandler("mw-never");
   const order: string[] = [];
 
-  const block = async (ctx: ICoreContext, _next: () => Promise<void>) => {
+  const block = (ctx: ICoreContext, _next: () => Promise<void>) => {
     order.push("block");
     ctx.send("blocked");
+    return Promise.resolve();
   };
   addMiddleware(block);
   addHandler({

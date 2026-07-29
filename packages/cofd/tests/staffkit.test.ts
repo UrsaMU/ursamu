@@ -1,7 +1,7 @@
 /**
  * +staffkit changeling — minimal staff splat setup.
  */
-import { assertEquals, assert } from "jsr:@std/assert";
+import { assertEquals, assert } from "jsr:@std/assert@^0.224.0";
 import { buildChangelingKit, resolveStaffKit } from "../src/staffkit/index.ts";
 import { isChangelingSheet } from "../src/form/mask.ts";
 import { hasFaeSight } from "../src/support/sight.ts";

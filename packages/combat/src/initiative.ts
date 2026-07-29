@@ -40,7 +40,7 @@ export async function rollAllInitiatives(
   ports: CombatPorts,
 ): Promise<Participant[]> {
   const roll = ports.rollInitiative ??
-    (async () => 0);
+    (() => Promise.resolve(0));
   return await Promise.all(
     participants.map(async (p) => {
       if (p.isOut) {
@@ -127,7 +127,7 @@ export async function joinActiveEncounter(
   }
 
   const roll = options.ports.rollInitiative ??
-    (async () => 0);
+    (() => Promise.resolve(0));
   const initiative = await roll(options.participant.actorId);
   const fresh: Participant = {
     appliedDefense: 0,

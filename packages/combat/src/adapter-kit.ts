@@ -51,9 +51,9 @@ export interface AdapterSmokeResult {
 
 function defaultPorts(hooks: AdapterKitHooks): CombatPorts {
   return {
-    async loadActor(id) {
+    loadActor(id) {
       const a = hooks.actors.get(id);
-      if (!a) return null;
+      if (!a) return Promise.resolve(null);
       const view: CombatActorView = {
         id: a.id,
         name: a.name,
@@ -66,9 +66,9 @@ function defaultPorts(hooks: AdapterKitHooks): CombatPorts {
         tags: a.hp < a.maxHp * 0.25 ? ["critical"] : [],
         resources: { ammo: 10 },
       };
-      return view;
+      return Promise.resolve(view);
     },
-    async executeAction(actorId, action) {
+    executeAction(actorId, action) {
       if (action.type !== "attack" || !action.targetId) {
         return { ok: true, endedTurn: true };
       }
@@ -88,13 +88,13 @@ function defaultPorts(hooks: AdapterKitHooks): CombatPorts {
     broadcast(_r, msg) {
       hooks.log.push(`bc:${msg}`);
     },
-    async rollInitiative(id) {
+    rollInitiative(id) {
       const a = hooks.actors.get(id);
-      return a?.kind === "npc" ? 8 : 15;
+      return Promise.resolve(a?.kind === "npc" ? 8 : 15);
     },
-    async onResolved(enc) {
+    onResolved(enc) {
       hooks.log.push("resolved");
-      return { ...enc, status: "resolved" };
+      return Promise.resolve({ ...enc, status: "resolved" });
     },
   };
 }
@@ -398,33 +398,35 @@ export function memoryEncounterStore(
   for (const e of seed ?? []) map.set(e.id, structuredClone(e));
 
   return {
-    async get(id) {
+    get(id) {
       const e = map.get(id);
-      return e ? structuredClone(e) : null;
+      return Promise.resolve(e ? structuredClone(e) : null);
     },
-    async create(enc) {
+    create(enc) {
       map.set(enc.id, structuredClone(enc));
+      return Promise.resolve();
     },
-    async save(enc) {
+    save(enc) {
       map.set(enc.id, structuredClone(enc));
+      return Promise.resolve();
     },
-    async findInRoom(roomId) {
+    findInRoom(roomId) {
       const rows = [...map.values()].filter(
         (e) =>
           e.roomId === roomId &&
           (e.status === "intent" || e.status === "active"),
       );
-      return (
+      return Promise.resolve(
         rows.find((e) => e.status === "active") ??
           rows[0] ??
-          null
+          null,
       );
     },
-    async advanceTurn(id) {
+    advanceTurn(id) {
       const enc = map.get(id);
-      if (!enc || enc.status !== "active") return enc ?? null;
+      if (!enc || enc.status !== "active") return Promise.resolve(enc ?? null);
       const n = enc.participants.length;
-      if (!n) return enc;
+      if (!n) return Promise.resolve(enc);
       let turnIdx = enc.turnIdx + 1;
       let round = enc.round;
       let participants = enc.participants;
@@ -439,17 +441,17 @@ export function memoryEncounterStore(
       }
       const next = { ...enc, turnIdx, round, participants };
       map.set(id, next);
-      return structuredClone(next);
+      return Promise.resolve(structuredClone(next));
     },
-    async patchParticipant(eid, actorId, patch) {
+    patchParticipant(eid, actorId, patch) {
       const enc = map.get(eid);
-      if (!enc) return null;
+      if (!enc) return Promise.resolve(null);
       const participants = enc.participants.map((p) =>
         p.actorId === actorId ? { ...p, ...patch } : p
       );
       const next = { ...enc, participants };
       map.set(eid, next);
-      return structuredClone(next);
+      return Promise.resolve(structuredClone(next));
     },
   };
 }

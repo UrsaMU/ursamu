@@ -527,7 +527,7 @@ export class FileProvider implements HelpProvider {
           throw e;
         });
     }
-    return _build;
+    return await _build;
   }
 
   async get(topic: string): Promise<HelpEntry | null> {

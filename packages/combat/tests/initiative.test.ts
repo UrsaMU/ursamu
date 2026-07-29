@@ -56,10 +56,10 @@ function portsWithRolls(
   rolls: Record<string, number>,
 ): CombatPorts {
   return {
-    loadActor: async () => null,
-    executeAction: async () => ({ ok: true }),
+    loadActor: () => Promise.resolve(null),
+    executeAction: () => Promise.resolve({ ok: true }),
     broadcast: () => {},
-    rollInitiative: async (id) => rolls[id] ?? 0,
+    rollInitiative: (id) => Promise.resolve(rolls[id] ?? 0),
   };
 }
 

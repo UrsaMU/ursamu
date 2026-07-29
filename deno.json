@@ -568,7 +568,8 @@
       "exclude": [
         "no-explicit-any",
         "no-unused-vars",
-        "no-control-regex"
+        "no-control-regex",
+        "require-await"
       ]
     },
     "exclude": [

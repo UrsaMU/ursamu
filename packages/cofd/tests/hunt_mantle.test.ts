@@ -61,7 +61,7 @@ Deno.test("stageFromProgress thresholds", OPTS, () => {
 
 Deno.test("startHunt and track advance", OPTS, () => {
   const q = ctl();
-  let h = initHuntsmanSheet(defaultSheet());
+  const h = initHuntsmanSheet(defaultSheet());
   assert(isHuntsmanSheet(h));
   const pair = startHunt(q, h, {
     hunterId: "h1",
@@ -101,7 +101,7 @@ Deno.test("trackPoolBonus mask down", OPTS, () => {
 Deno.test("huntsman powers catalog and activate", OPTS, () => {
   assert(findHuntsmanPower("kindred-spirits"));
   assert(defaultHuntsmanPowers(4).includes("kindred-spirits"));
-  let h = initHuntsmanSheet(defaultSheet());
+  const h = initHuntsmanSheet(defaultSheet());
   h.energyCurrent = 10;
   const r = activateHuntsmanPower(h, "among-the-sheep");
   assert(r.ok);

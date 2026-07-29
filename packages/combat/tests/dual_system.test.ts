@@ -29,21 +29,23 @@ function memStore(initial: Encounter): EncounterStore {
   map.set(initial.id, structuredClone(initial));
 
   return {
-    async get(id) {
+    get(id) {
       const e = map.get(id);
-      return e ? structuredClone(e) : null;
+      return Promise.resolve(e ? structuredClone(e) : null);
     },
-    async create(enc) {
+    create(enc) {
       map.set(enc.id, structuredClone(enc));
+      return Promise.resolve();
     },
-    async save(enc) {
+    save(enc) {
       map.set(enc.id, structuredClone(enc));
+      return Promise.resolve();
     },
-    async advanceTurn(id) {
+    advanceTurn(id) {
       const enc = map.get(id);
-      if (!enc || enc.status !== "active") return enc ?? null;
+      if (!enc || enc.status !== "active") return Promise.resolve(enc ?? null);
       const count = enc.participants.length;
-      if (!count) return enc;
+      if (!count) return Promise.resolve(enc);
       let nextIdx = enc.turnIdx + 1;
       let round = enc.round;
       let participants = enc.participants;
@@ -67,17 +69,17 @@ function memStore(initial: Encounter): EncounterStore {
         participants,
       };
       map.set(id, updated);
-      return structuredClone(updated);
+      return Promise.resolve(structuredClone(updated));
     },
-    async patchParticipant(encounterId, actorId, patch) {
+    patchParticipant(encounterId, actorId, patch) {
       const enc = map.get(encounterId);
-      if (!enc) return null;
+      if (!enc) return Promise.resolve(null);
       const participants = enc.participants.map((p) =>
         p.actorId === actorId ? { ...p, ...patch } : p
       );
       const updated = { ...enc, participants };
       map.set(encounterId, updated);
-      return structuredClone(updated);
+      return Promise.resolve(structuredClone(updated));
     },
   };
 }
@@ -87,9 +89,9 @@ function makeSystem(label: string, store: EncounterStore) {
   const log: string[] = [];
 
   const ports: CombatPorts = {
-    async loadActor(id) {
+    loadActor(id) {
       const a = actors.get(id);
-      if (!a) return null;
+      if (!a) return Promise.resolve(null);
       const view: CombatActorView = {
         id: a.id,
         name: a.name,
@@ -100,32 +102,32 @@ function makeSystem(label: string, store: EncounterStore) {
           ? (a.aiKey ?? "aggressive")
           : undefined,
       };
-      return view;
+      return Promise.resolve(view);
     },
-    async executeAction(actorId, action, ctx) {
+    executeAction(actorId, action, ctx) {
       if (action.type !== "attack" || !action.targetId) {
-        return { ok: true };
+        return Promise.resolve({ ok: true });
       }
       const atk = actors.get(actorId);
       const def = actors.get(action.targetId);
-      if (!atk || !def) return { ok: false };
+      if (!atk || !def) return Promise.resolve({ ok: false });
       def.hp = Math.max(0, def.hp - 3);
       log.push(`${label}:${atk.name}->${def.name} hp=${def.hp}`);
       const targetOut = def.hp <= 0;
-      return {
+      return Promise.resolve({
         ok: true,
         damageApplied: 3,
         targetId: action.targetId,
         targetOut,
         logLine: `${atk.name}->${def.name}`,
-      };
+      });
     },
     broadcast(_r, msg) {
       log.push(`${label}:bc:${msg}`);
     },
-    async onResolved(enc) {
+    onResolved(enc) {
       log.push(`${label}:resolved`);
-      return { ...enc, status: "resolved" };
+      return Promise.resolve({ ...enc, status: "resolved" });
     },
   };
 
