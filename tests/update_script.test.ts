@@ -43,6 +43,10 @@ function makeSDK(flags: string[], branch = "") {
         updateBranch = b;
         await Promise.resolve();
       },
+      reboot: async (_opts?: Record<string, unknown>) => {
+        updateCalled = true;
+        await Promise.resolve();
+      },
     },
   };
 
