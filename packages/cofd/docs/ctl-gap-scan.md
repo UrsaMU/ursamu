@@ -1,8 +1,8 @@
-# CtL 2e gap scan (vs `books/ctl.txt` + shipped code)
+# CtL 2e gap scan (vs CtL 2e core text + shipped code)
 
 **Scan date:** 2026-07-21  
 **Scope:** CoFD plugin Changeling: The Lost overlay  
-**Book:** Changeling: The Lost 2e (`packages/cofd/books/ctl.txt`)
+**Book:** Changeling: The Lost 2e (local extract only; not in package)
 
 This file is the living status board for Lost support. Update it when
 shipping CtL features.

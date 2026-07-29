@@ -1,7 +1,39 @@
-// Chronicles of Darkness plugin entry point.
-// Phase 1 (commands.ts side-effect import — addCmd() fires at module load).
-// Phase 2 (init: register help dir, REST routes).
-// Phase 3 (remove: tear down anything init() did).
+/**
+ * @module
+ *
+ * Chronicles of Darkness 2e plugin for **UrsaMU**
+ * (`@ursamu/cofd-plugin`).
+ *
+ * Provides character sheets, guided chargen (`+cg`), a CoFD d10
+ * roller, Health / Beats / XP, Conditions, IC/OOC travel, `+time`,
+ * and a Changeling: The Lost overlay. Load as an UrsaMU plugin —
+ * commands register on import; `init` wires help, REST, and hooks.
+ *
+ * @example Install and enable
+ * ```ts
+ * // deno.json
+ * {
+ *   "imports": {
+ *     "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.2.1"
+ *   }
+ * }
+ *
+ * // config: server.plugins includes "@ursamu/cofd-plugin"
+ * // or register at boot:
+ * import cofd from "@ursamu/cofd-plugin";
+ * // engine loadPlugins() picks up the default IPlugin export
+ * ```
+ *
+ * @example Use the plugin object directly
+ * ```ts
+ * import { plugin } from "@ursamu/cofd-plugin";
+ * console.log(plugin.name, plugin.version); // "cofd" "1.2.1"
+ * ```
+ */
+
+// Phase 1 — commands.ts side-effect: addCmd() at module load.
+// Phase 2 — init: help dir, REST, hooks.
+// Phase 3 — remove: tear down init().
 
 import "./commands.ts";
 
@@ -156,10 +188,18 @@ async function onEngineReady(): Promise<void> {
   } catch (_err) { /* swallow */ }
 }
 
+/**
+ * UrsaMU plugin definition for Chronicles of Darkness 2e.
+ *
+ * Side-effect of importing this module registers all `+` commands.
+ * Call `init` via the engine plugin loader (not manually) so help
+ * dirs, REST routes, job buckets, and combat/format hooks attach.
+ */
 export const plugin: IPlugin = {
   name: "cofd",
-  version: "1.2.0",
-  description: "Chronicles of Darkness 2e plugin: sheets, chargen, d10 dice with 10/9/8-again, rote, and Willpower spend.",
+  version: "1.2.1",
+  description:
+    "Chronicles of Darkness 2e plugin: sheets, chargen, d10 dice with 10/9/8-again, rote, and Willpower spend.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },
     { name: "jobs", version: ">=1.0.0" },
@@ -206,4 +246,5 @@ export const plugin: IPlugin = {
   },
 };
 
+/** Default export — same as {@link plugin}; used by UrsaMU loaders. */
 export default plugin;

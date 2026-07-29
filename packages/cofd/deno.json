@@ -1,7 +1,8 @@
 {
   "name": "@ursamu/cofd-plugin",
-  "version": "1.2.0",
-  "description": "Chronicles of Darkness 2e plugin for UrsaMU \u2014 character sheets, guided chargen, and d10 dice with 10/9/8-again, rote, and Willpower spend.",
+  "version": "1.2.1",
+  "description": "Chronicles of Darkness 2e plugin for UrsaMU — sheets, chargen, d10 dice, IC/OOC, +time, CtL overlay.",
+  "license": "MIT",
   "exports": "./index.ts",
   "tasks": {
     "test": "deno test -A --unstable-kv --no-check",
@@ -11,7 +12,8 @@
   },
   "exclude": [
     ".claude/",
-    "data/"
+    "data/",
+    "books/"
   ],
   "publish": {
     "include": [
@@ -35,7 +37,8 @@
       "tests",
       "tools",
       "showcases",
-      "docs"
+      "docs",
+      "books"
     ]
   },
   "imports": {

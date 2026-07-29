@@ -1,8 +1,13 @@
 /**
+ * @module
+ *
+ * HTTP handlers for `/api/v1/cofd/*`, registered from plugin `init`
+ * via `registerPluginRoute`. Auth is gated by the engine `userId`.
+ *
+ * Note: routes persist until server restart and cannot be hot-unloaded.
+ *
  * Handler for all /api/v1/cofd routes.
  * Registered in init() via registerPluginRoute().
- *
- * Note: this route persists until server restart and cannot be hot-unloaded.
  *
  * POLICY (read before adding a sub-route):
  * - Authentication is gated by the outer engine via `userId` -- any
@@ -44,7 +49,17 @@ function hasStaffFlag(flags: Set<string>): boolean {
   return false;
 }
 
-export async function routeHandler(req: Request, userId: string | null): Promise<Response> {
+/**
+ * Dispatch CoFD REST requests.
+ *
+ * @param req - Incoming HTTP request
+ * @param userId - Authenticated actor id, or `null` if anonymous
+ * @returns JSON `Response` (401 when `userId` is null)
+ */
+export async function routeHandler(
+  req: Request,
+  userId: string | null,
+): Promise<Response> {
   if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
   const url    = new URL(req.url);

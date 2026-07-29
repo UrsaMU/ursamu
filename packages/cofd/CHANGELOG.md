@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.1] - 2026-07-28
+
+### Docs / package quality
+
+- Module and symbol JSDoc on the public entrypoint for JSR score
+- README install examples; `license` field; description tightened
+- Explicitly exclude local `books/` from package exclude/publish
+  (rulebook extracts are never shipped)
+
 ## [1.2.0] - 2026-07-28
 
 ### Added
