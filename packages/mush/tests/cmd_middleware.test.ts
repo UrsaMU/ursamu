@@ -38,7 +38,7 @@ Deno.test("cmd middleware: order and remove by reference", OPTS, async () => {
 
   await runWithCmdMiddleware(
     { raw: "test", socketId: "s1" } as CmdMiddlewareCtx,
-    async () => {
+    () => {
       order.push("core");
     },
   );
@@ -50,7 +50,7 @@ Deno.test("cmd middleware: order and remove by reference", OPTS, async () => {
   order.length = 0;
   await runWithCmdMiddleware(
     { raw: "test", socketId: "s1" } as CmdMiddlewareCtx,
-    async () => {
+    () => {
       order.push("core");
     },
   );

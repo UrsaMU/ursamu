@@ -1,7 +1,7 @@
 /**
  * nameMatches / pickNameMatch — exit ;aliases and data.alias.
  */
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "jsr:@std/assert@^0.224.0";
 import {
   nameMatches,
   nameMatchesExact,

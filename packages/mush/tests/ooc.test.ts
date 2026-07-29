@@ -94,17 +94,19 @@ function mockU(opts: {
     },
     socketId: "sock1",
     send: (m: string) => sent.push(m),
-    evalString: async (s: string) => s,
+    evalString: (s: string) => Promise.resolve(s),
     util: {
       displayName: (o: IDBObj) =>
         String(o.state?.name || o.name || "Unknown"),
       stripSubs: (s: string) => s,
     },
     attr: {
-      get: async () =>
-        opts.formatResult === undefined
-          ? null
-          : opts.formatResult,
+      get: () =>
+        Promise.resolve(
+          opts.formatResult === undefined
+            ? null
+            : opts.formatResult,
+        ),
     },
   } as unknown as IUrsamuSDK;
 

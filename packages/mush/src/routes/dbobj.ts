@@ -19,7 +19,7 @@ async function canEditDbo(
   actorId: string,
   targetData: IDBOBJ,
 ): Promise<boolean> {
-  return canEditObject(
+  return await canEditObject(
     { id: actorId, flags: actorFlags },
     {
       id: targetData.id,

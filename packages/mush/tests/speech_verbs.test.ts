@@ -57,14 +57,14 @@ function mockU(opts: {
       sent.push(m);
     },
     broadcast: () => {},
-    evalString: async (s: string) => s,
-    trigger: async () => {},
+    evalString: (s: string) => Promise.resolve(s),
+    trigger: () => Promise.resolve(),
     db: {
-      search: async () => [],
-      modify: async () => {},
+      search: () => Promise.resolve([]),
+      modify: () => Promise.resolve(),
     },
     util: {
-      target: async () => opts.targetResult ?? null,
+      target: () => Promise.resolve(opts.targetResult ?? null),
       displayName: (o: IDBObj) => o.name ?? "Unknown",
       stripSubs: (s: string) => s,
     },

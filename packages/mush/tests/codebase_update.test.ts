@@ -66,11 +66,11 @@ Deno.test("isAppImportKey skips jsr remap keys", OPTS, () => {
 });
 
 Deno.test("bumpUrsamuImports: bumps only app keys", OPTS, async () => {
-  const fetchMeta = async (pkg: string) => {
-    if (pkg === "@ursamu/cofd-plugin") return "1.1.8";
-    if (pkg === "@ursamu/mush") return "0.1.22";
-    if (pkg === "@ursamu/help") return "0.1.6";
-    return null;
+  const fetchMeta = (pkg: string) => {
+    if (pkg === "@ursamu/cofd-plugin") return Promise.resolve("1.1.8");
+    if (pkg === "@ursamu/mush") return Promise.resolve("0.1.22");
+    if (pkg === "@ursamu/help") return Promise.resolve("0.1.6");
+    return Promise.resolve(null);
   };
   const { imports, bumped } = await bumpUrsamuImports(
     {
@@ -104,7 +104,7 @@ Deno.test("bumpUrsamuImports: bumps only app keys", OPTS, async () => {
 Deno.test("bumpUrsamuImports: no-op when current", OPTS, async () => {
   const { imports, bumped } = await bumpUrsamuImports(
     { "@ursamu/mush": "jsr:@ursamu/mush@^0.1.22" },
-    async () => "0.1.22",
+    () => Promise.resolve("0.1.22"),
   );
   assertEquals(imports["@ursamu/mush"], "jsr:@ursamu/mush@^0.1.22");
   assertEquals(bumped.length, 0);
@@ -113,7 +113,7 @@ Deno.test("bumpUrsamuImports: no-op when current", OPTS, async () => {
 Deno.test("bumpUrsamuImports: exact rewrites caret to pin", OPTS, async () => {
   const { imports, bumped } = await bumpUrsamuImports(
     { "@ursamu/mush": "jsr:@ursamu/mush@^0.1.22" },
-    async () => "0.1.22",
+    () => Promise.resolve("0.1.22"),
     { exact: true },
   );
   assertEquals(imports["@ursamu/mush"], "jsr:@ursamu/mush@0.1.22");

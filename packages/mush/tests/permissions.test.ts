@@ -1,7 +1,7 @@
 /**
  * Privilege ranks, canEdit hierarchy, attribute visibility.
  */
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "jsr:@std/assert@^0.224.0";
 import {
   privRank,
   canEditObject,
