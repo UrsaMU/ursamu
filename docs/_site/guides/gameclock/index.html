@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Game Clock | UrsaMU Documentation</title>
+  <meta name="description" content="UrsaMU's persistent in-game time system — calendar, configuration, and scripting patterns.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/gameclock/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,249 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Game Clock</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
-
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
+        <h1>Game Clock</h1>
+<h2>UrsaMU includes a persistent in-game time system called GameClock. It runs<br>
+independently from the real-world clock and can advance faster or slower than<br>
+real time. This lets you run a fantasy calendar, track seasons, and write<br>
+time-aware scripts.</h2>
+<h2>Overview</h2>
+<p>The GameClock stores time as a single integer — <strong>game-minutes</strong> elapsed since<br>
+the fictional epoch (Year 1, Month 1, Day 1, 00:00). Each real-world minute,<br>
+the clock advances by <code>game.timeMultiplier</code> game-minutes. At the default<br>
+multiplier of <code>1.0</code>, game time and real time pass at the same rate.</p>
+<h2>The clock persists across server reboots. Its state is stored in the database<br>
+under the key <code>server.gameclock</code>.</h2>
+<h2>Calendar System</h2>
+<table>
+<thead>
+<tr>
+<th>Unit</th>
+<th>Range</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Year</td>
+<td>1 +</td>
+<td>No upper limit</td>
+</tr>
+<tr>
+<td>Month</td>
+<td>1–12</td>
+<td>12 months per year</td>
+</tr>
+<tr>
+<td>Day</td>
+<td>1–28</td>
+<td>28 days per month</td>
+</tr>
+<tr>
+<td>Hour</td>
+<td>0–23</td>
+<td>24-hour clock</td>
+</tr>
+<tr>
+<td>Minute</td>
+<td>0–59</td>
+<td>60 minutes per hour</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Constants:</strong></p>
+<ul>
+<li>60 minutes per hour</li>
+<li>1,440 minutes per day</li>
+<li>40,320 minutes per month</li>
+<li>483,840 minutes per year</li>
+</ul>
+<h2>Month and day names are not built in — you define them in your game’s scripts.</h2>
+<h2>Configuration</h2>
+<p>Set the time multiplier in <code>config/game.json</code> (or your config file):</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "game": {
+    "timeMultiplier": 2.0
+  }
 }
 </code></pre>
-<hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
+<table>
+<thead>
+<tr>
+<th>Multiplier</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0.5</code></td>
+<td>1 game-minute per 2 real minutes (half speed)</td>
+</tr>
+<tr>
+<td><code>1.0</code></td>
+<td>1 game-minute per 1 real minute (real time)</td>
+</tr>
+<tr>
+<td><code>2.0</code></td>
+<td>2 game-minutes per real minute (double speed)</td>
+</tr>
+<tr>
+<td><code>24.0</code></td>
+<td>1 game-day per real hour</td>
+</tr>
+<tr>
+<td><code>336.0</code></td>
+<td>1 game-year per real day</td>
+</tr>
+</tbody>
+</table>
+<p>The multiplier can also be changed at runtime from an admin script:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.sys.setConfig("game.timeMultiplier", 2.0);
 </code></pre>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Reading Game Time</h2>
+<p>Use <code>u.sys.gameTime()</code> in any script or command handler.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const t = await u.sys.gameTime();
+// t.year:   number (1, 2, 3, …)
+// t.month:  1–12
+// t.day:    1–28
+// t.hour:   0–23
+// t.minute: 0–59
 
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
+// Simple formatted string
+const hh = String(t.hour).padStart(2, "0");
+const mm = String(t.minute).padStart(2, "0");
+u.send(`It is Year ${t.year}, Month ${t.month}, Day ${t.day}, ${hh}:${mm}.`);
 </code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
+<h3>Custom calendar names</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const MONTHS = [
+  "", "Frostmonth", "Snowmelt", "Seedsown", "Bloomtide",
+  "Highsun", "Harvestmoon", "Goldleaf", "Ashfall",
+  "Dimming", "Winterset", "Coldwatch", "Longnight"
+];
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const t = await u.sys.gameTime();
+const dayOfWeek = ((t.day - 1) % 7);  // 0-based, repeating
+const hh = String(t.hour).padStart(2, "0");
+const mm = String(t.minute).padStart(2, "0");
+
+u.send(`${DAYS[dayOfWeek]}, ${MONTHS[t.month]} ${t.day}, Year ${t.year} — ${hh}:${mm}`);
+// → "Tue, Bloomtide 15, Year 340 — 08:00"
+</code></pre>
+<h3>In native plugin commands</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { gameClock } from "../../services/GameClock/index.ts";
+
+const t = gameClock.now();
+const formatted = gameClock.format();   // "Year 340, Month 4, Day 15, 08:00"
 </code></pre>
 <hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
-</code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
-</code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
+<h2>Setting Game Time</h2>
+<p>Requires wizard or admin. <strong>The SDK does not enforce this</strong> — check flags in<br>
+your script.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Guard
+if (!u.me.flags.has("wizard") &amp;&amp; !u.me.flags.has("admin") &amp;&amp; !u.me.flags.has("superuser")) {
   u.send("Permission denied.");
   return;
 }
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
 
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
-</code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
-</code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
-</code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
+// Set the full date/time
+await u.sys.setGameTime({
+  year:   340,
+  month:  6,
+  day:    1,
+  hour:   8,
+  minute: 0,
 });
 
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
+u.broadcast("The calendar has been reset to Midsummer, Year 340.");
+</code></pre>
+<p>You can set partial fields by reading the current time first:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const t = await u.sys.gameTime();
+
+// Jump to the next day, same time
+await u.sys.setGameTime({
+  ...t,
+  day: t.day + 1 &gt; 28 ? 1 : t.day + 1,
+  month: t.day + 1 &gt; 28 ? t.month + 1 : t.month,
+});
+</code></pre>
+<hr>
+<h2>Scripting Patterns</h2>
+<h3>Display time in a score sheet</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const t = await u.sys.gameTime();
+const hh = String(t.hour).padStart(2, "0");
+const mm = String(t.minute).padStart(2, "0");
+const dateLine = u.util.sprintf(
+  "%-20s %s",
+  "In-Game Date:",
+  `Month ${t.month}, Day ${t.day}, Year ${t.year} — ${hh}:${mm}`
+);
+u.send(dateLine);
+</code></pre>
+<h3>Seasonal check</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const t = await u.sys.gameTime();
+
+// Months 12, 1, 2 = Winter; 3-5 = Spring; 6-8 = Summer; 9-11 = Autumn
+function getSeason(month: number): string {
+  if (month === 12 || month &lt;= 2) return "Winter";
+  if (month &lt;= 5) return "Spring";
+  if (month &lt;= 8) return "Summer";
+  return "Autumn";
+}
+
+const season = getSeason(t.month);
+u.send(`It is currently ${season}.`);
+</code></pre>
+<h3>Night vs. day</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const t = await u.sys.gameTime();
+const isNight = t.hour &lt; 6 || t.hour &gt;= 20;
+
+if (isNight) {
+  u.send("The room is lit only by moonlight.");
+} else {
+  u.send("Sunlight streams through the windows.");
+}
+</code></pre>
+<h3>Store a timestamp on an object</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const t = await u.sys.gameTime();
+// Store as a simple object in state
+await u.db.modify(u.me.id, "$set", {
+  "data.lastSeen": { year: t.year, month: t.month, day: t.day }
+});
+</code></pre>
+<h3>Read a stored timestamp</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const ts = u.me.state.lastSeen as { year: number; month: number; day: number } | undefined;
+if (ts) {
+  u.send(`You were last seen on Month ${ts.month}, Day ${ts.day}, Year ${ts.year}.`);
 }
 </code></pre>
 <hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
+<h2>The +time Command</h2>
+<p>Players can check the current game time with:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">+time
 </code></pre>
+<p>Output example:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">The current in-game time is:
+  Year 340, Month 4, Day 15, 08:32
+</code></pre>
+<h2>The system script is at <code>system/scripts/time.ts</code>. To customize the output<br>
+format or add a custom calendar, copy the script and modify it.</h2>
+<h2>Notes</h2>
+<ul>
+<li>The clock only advances while the server is running. It does not catch up<br>
+after downtime.</li>
+<li>Setting <code>game.timeMultiplier</code> to <code>0</code> freezes time.</li>
+<li>The epoch is stored as a single floating-point number, so fractional minutes<br>
+are tracked internally but the <code>IGameTime</code> fields are always integers.</li>
+<li>There is no built-in alarm or cron system — use <code>u.events.emit</code> to trigger<br>
+events at specific game times if you need that behavior.</li>
+</ul>
 
       </article>
 
@@ -643,9 +592,6 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
@@ -654,20 +600,13 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-          
+      
         
       
         
-          
-        
       
         
-          
-          
-        
       
-        
-          
         
       
         
@@ -708,16 +647,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/first-script/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">Build Your First Script</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/help-authoring/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">Writing Help Files</span>
           </a>
         
       </nav>

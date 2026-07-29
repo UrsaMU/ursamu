@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Production Deployment | UrsaMU Documentation</title>
+  <meta name="description" content="How to run UrsaMU in production — environment setup, daemon management, nginx reverse proxy, TLS, and updates.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/deployment/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,308 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Production Deployment</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
-
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
+        <h1>Production Deployment</h1>
+<h2>This guide covers running UrsaMU on a Linux VPS or dedicated server. The<br>
+examples use Ubuntu/Debian and nginx, but the approach works on any Linux<br>
+distribution.</h2>
+<h2>Before You Start</h2>
+<p>You need:</p>
+<ul>
+<li><strong>Deno</strong> — <a href="https://deno.land/">deno.land</a> v1.40+</li>
+<li>A <strong>domain name</strong> pointed at your server’s IP (for TLS)</li>
+<li>Ports <code>4201</code>, <code>4203</code> reachable from the internet (or whatever you configure)</li>
+<li>A strong value ready for <code>JWT_SECRET</code></li>
+</ul>
+<p>Install Deno if you haven’t:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">curl -fsSL https://deno.land/install.sh | sh
+# Add to PATH — follow the printed instructions, then:
+source ~/.bashrc
+</code></pre>
+<hr>
+<h2>Environment Variables</h2>
+<p>Set these before starting the server. The simplest approach is a <code>.env</code> file in<br>
+your game project root — UrsaMU loads it via <code>dotenv/load</code> at the top of<br>
+<code>src/main.ts</code>, so anything defined there is visible to the engine before any<br>
+config is read. Scaffolded projects (<code>ursamu create</code>) write a fresh<br>
+<code>JWT_SECRET</code> into <code>.env</code> automatically.</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># .env  — DO NOT commit this file
+JWT_SECRET=replace-this-with-a-long-random-string
+</code></pre>
+<p>Generate a strong secret:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">openssl rand -base64 48
+</code></pre>
+<blockquote>
+<p><strong>Why this matters:</strong> If <code>JWT_SECRET</code> is not set, a random secret is<br>
+generated at startup — meaning every restart logs all players out. Set it<br>
+once and keep it stable.</p>
+</blockquote>
+<p>You can also override the default ports via environment variables:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">URSAMU_HTTP_PORT=4203    # HTTP + WebSocket hub (default: 4203)
+URSAMU_TELNET_PORT=4201  # Telnet sidecar (default: 4201)
+</code></pre>
+<p>Or set ports in your game’s <code>config/config.json</code>:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "http": 4203,
+    "telnet": 4201,
+    "ws": 4202
+  }
 }
 </code></pre>
 <hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>First Run</h2>
+<p>On a fresh server with an empty database, start the server interactively once<br>
+to complete first-run setup:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task server
+</code></pre>
+<p>The server prints:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">Fresh database detected — no players exist yet.
 
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
+Connect via telnet and run:
+  create &lt;name&gt; &lt;password&gt;
 
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
+The first player created is automatically given superuser access.
+</code></pre>
+<p>Connect with a telnet client (<code>telnet localhost 4201</code>) and create your account.<br>
+The first player created receives the <code>superuser</code> flag automatically.</p>
+<h2>After that, switch to daemon mode for normal operation.</h2>
+<h2>Supervised Daemon Mode</h2>
+<p>Game projects scaffolded with <code>ursamu create</code> ship four shell wrappers in<br>
+<code>scripts/</code> that run the server as a supervised background process. They use<br>
+the engine’s signal-driven restart loop so <code>@reboot</code> and config reloads do<br>
+<strong>not</strong> disconnect Telnet sidecar clients.</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">bash scripts/daemon.sh    # Start the supervisor in the background
+bash scripts/status.sh    # Show pid + uptime
+bash scripts/restart.sh   # No-disconnect restart of the main process
+bash scripts/stop.sh      # Graceful stop (disconnects everyone)
+</code></pre>
+<p>What happens:</p>
+<ol>
+<li><code>daemon.sh</code> spawns <code>deno task start</code> under a supervisor loop. The<br>
+supervisor PID is written to <code>.ursamu.pid</code>; the running <code>deno</code> child PID<br>
+is written to <code>.ursamu-deno.pid</code>.</li>
+<li>The supervisor watches the deno exit code:
+<ul>
+<li><code>75</code> → restart (default after <code>@reboot</code>, <code>@update</code>, crash)</li>
+<li><code>0</code> → clean stop (<code>@shutdown</code>)</li>
+<li>other → unexpected crash; the supervisor stops and logs</li>
+</ul>
+</li>
+<li><code>restart.sh</code> sends <strong>SIGUSR2</strong> to the main process. The engine catches<br>
+it, finishes in-flight handlers, and restarts the main loop <strong>without<br>
+disconnecting the Telnet sidecar</strong>. Clients keep their JWT and auto-<br>
+reauthenticate on the new main.</li>
+<li><code>stop.sh</code> sends SIGTERM and waits for clean shutdown.</li>
+</ol>
+<p>The same restart semantics back the in-game <code>@reboot</code> and <code>@update</code> commands.</p>
+<blockquote>
+<p><strong>Development vs production:</strong> Use <code>deno task dev</code> during development — it<br>
+enables file watching so the main server restarts on code changes. Use<br>
+<code>bash scripts/daemon.sh</code> in production.</p>
+</blockquote>
+<hr>
+<h2>systemd</h2>
+<p>For tighter OS integration (automatic restart on crash, start on boot), run<br>
+UrsaMU as a systemd service instead of using the daemon scripts.</p>
+<p>Create <code>/etc/systemd/system/ursamu-main.service</code>:</p>
+<pre class="language-ini" tabindex="0"><code class="language-ini">[Unit]
+Description=UrsaMU Main Server
+After=network.target
+Wants=ursamu-telnet.service
 
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
+[Service]
+Type=simple
+User=ursamu
+WorkingDirectory=/home/ursamu/my-game
+EnvironmentFile=/home/ursamu/my-game/.env
+ExecStart=/home/ursamu/.deno/bin/deno run --allow-all --unstable-detect-cjs --unstable-kv src/main.ts
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/home/ursamu/my-game/logs/main.log
+StandardError=append:/home/ursamu/my-game/logs/main.log
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>Create <code>/etc/systemd/system/ursamu-telnet.service</code>:</p>
+<pre class="language-ini" tabindex="0"><code class="language-ini">[Unit]
+Description=UrsaMU Telnet Sidecar
+After=network.target
+
+[Service]
+Type=simple
+User=ursamu
+WorkingDirectory=/home/ursamu/my-game
+EnvironmentFile=/home/ursamu/my-game/.env
+ExecStart=/home/ursamu/.deno/bin/deno run --allow-all --unstable-detect-cjs --unstable-kv src/telnet.ts
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/home/ursamu/my-game/logs/telnet.log
+StandardError=append:/home/ursamu/my-game/logs/telnet.log
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<p>Enable and start:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">sudo systemctl daemon-reload
+sudo systemctl enable ursamu-main ursamu-telnet
+sudo systemctl start ursamu-main ursamu-telnet
+sudo systemctl status ursamu-main ursamu-telnet
+</code></pre>
+<p>Adjust <code>User</code>, <code>WorkingDirectory</code>, and <code>EnvironmentFile</code> paths to match your<br>
+setup. Run UrsaMU as a dedicated non-root user — create one with:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">sudo useradd -m -s /bin/bash ursamu
 </code></pre>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Nginx and TLS</h2>
+<p>Place nginx in front of the Hub to terminate TLS. This lets your game use<br>
+<code>wss://</code> (secure WebSocket) and <code>https://</code> without modifying UrsaMU itself.</p>
+<h3>Install nginx and Certbot</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash">sudo apt install nginx certbot python3-certbot-nginx
+sudo certbot --nginx -d yourgame.example.com
+</code></pre>
+<h3>nginx configuration</h3>
+<p>Create <code>/etc/nginx/sites-available/ursamu</code>:</p>
+<pre class="language-nginx" tabindex="0"><code class="language-nginx">server {
+    listen 443 ssl http2;
+    server_name yourgame.example.com;
 
-interface ShopItem { name: string; cost: number; flags: string[] }
+    ssl_certificate     /etc/letsencrypt/live/yourgame.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourgame.example.com/privkey.pem;
+    include             /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
 
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
+    # HTTP REST API
+    location /api/ {
+        proxy_pass         http://127.0.0.1:4203;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
     }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
 
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
+    # Health check
+    location /health {
+        proxy_pass http://127.0.0.1:4203;
+    }
 
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
-</code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
-</code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
-</code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
-</code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
+    # WebSocket
+    location /ws {
+        proxy_pass         http://127.0.0.1:4203;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+    }
 }
 
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
-</code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
+# Redirect HTTP → HTTPS
+server {
+    listen 80;
+    server_name yourgame.example.com;
+    return 301 https://$host$request_uri;
 }
 </code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
+<p>Enable and reload:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">sudo ln -s /etc/nginx/sites-available/ursamu /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
 </code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
-});
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
+<h3>WebSocket connection URL with TLS</h3>
+<p>Clients connecting through the nginx proxy use:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">wss://yourgame.example.com/ws?token=&lt;jwt&gt;&amp;client=web
+</code></pre>
+<p>The proxy forwards the WebSocket upgrade to port 4203. The <code>X-Forwarded-For</code><br>
+header is passed through, so brute-force rate limiting still sees the real<br>
+client IP.</p>
+<h3>Telnet and TLS</h3>
+<h2>Standard Telnet (<code>telnet:4201</code>) does not support TLS. For encrypted Telnet<br>
+connections, clients should use a TLS-capable MU* client (e.g. Mudlet with SSL<br>
+enabled) pointed directly at port 4201, with nginx/stunnel wrapping that port.<br>
+Most game operators leave Telnet unencrypted and direct players to use the<br>
+WebSocket connection for sensitive operations.</h2>
+<h2>Firewall</h2>
+<p>Open only the ports you need. With nginx handling TLS:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># UFW example
+sudo ufw allow 22/tcp    # SSH
+sudo ufw allow 80/tcp    # HTTP (nginx, for redirect + Certbot)
+sudo ufw allow 443/tcp   # HTTPS (nginx)
+sudo ufw allow 4201/tcp  # Telnet (direct)
+sudo ufw enable
+</code></pre>
+<h2>Port <code>4203</code> should <strong>not</strong> be exposed directly — all HTTP/WS traffic should<br>
+flow through nginx on 443. Only Telnet needs a public port of its own.</h2>
+<h2>Logs</h2>
+<p>UrsaMU writes three log files to <code>logs/</code>:</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>logs/main.log</code></td>
+<td>Hub stdout/stderr — server events, errors</td>
+</tr>
+<tr>
+<td><code>logs/telnet.log</code></td>
+<td>Telnet sidecar stdout/stderr</td>
+</tr>
+<tr>
+<td><code>logs/error.log</code></td>
+<td>Unhandled errors logged by <code>logError()</code></td>
+</tr>
+<tr>
+<td><code>logs/security.log</code></td>
+<td>Auth events — login failures, resets, admin actions</td>
+</tr>
+</tbody>
+</table>
+<p>Follow live:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">tail -f logs/main.log logs/telnet.log
+tail -f logs/security.log
+</code></pre>
+<h3>Log rotation</h3>
+<p>Prevent unbounded growth with <code>logrotate</code>. Create<br>
+<code>/etc/logrotate.d/ursamu</code>:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">/home/ursamu/my-game/logs/*.log {
+    daily
+    rotate 14
+    compress
+    missingok
+    notifempty
+    copytruncate
 }
 </code></pre>
-<hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
+<h2><code>copytruncate</code> truncates the file in place rather than moving it, so the<br>
+running server keeps writing without needing a restart.</h2>
+<h2>Updates</h2>
+<p>UrsaMU is a JSR package — your game project depends on a version pinned in<br>
+<code>deno.json</code>. To update to the latest engine:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Preview what would change
+deno run -A jsr:@ursamu/mush/cli update --dry-run
 
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
+# Apply the update
+deno run -A jsr:@ursamu/mush/cli update
 </code></pre>
+<p>After updating, restart the servers:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">bash scripts/restart.sh                              # if using the daemon scaffold
+sudo systemctl restart ursamu-main ursamu-telnet     # if using systemd
+</code></pre>
+<p>Check the <a href="https://github.com/ursamu/ursamu/releases">changelog</a> before<br>
+updating on a live game to catch any breaking changes.</p>
 
       </article>
 
@@ -631,9 +639,6 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
@@ -642,32 +647,19 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
-        
       
-        
-          
-        
-      
-        
-          
-          
-        
-      
-        
-          
         
       
         
@@ -708,16 +700,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/debugging/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">Debugging Scripts</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/docker/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">Docker</span>
           </a>
         
       </nav>

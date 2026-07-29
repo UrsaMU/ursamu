@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Soft-Coding Guide | UrsaMU Documentation</title>
+  <meta name="description" content="How to store scripts and data in object attributes and trigger them with @trigger, u.trigger, and u.eval.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/softcoding/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,421 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Soft-Coding Guide</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
-
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
+        <h1>Soft-Coding Guide</h1>
+<h2>Soft-coding is the practice of storing scripts and data directly on in-game<br>
+objects as <strong>attributes</strong>, rather than writing static files. It lets builders<br>
+and players customize room behavior, object interaction, and NPC responses<br>
+entirely from inside the game — no server restart required.</h2>
+<h2>What is Soft-Coding?</h2>
+<p>Every object in UrsaMU (rooms, players, things, exits) has a <code>data.attributes</code><br>
+array. Each entry is an <code>IAttribute</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IAttribute {
+  name: string;    // e.g. "ONENTER"
+  value: string;   // the script (TypeScript/JS) or plain text
+  setter: string;  // dbref of whoever set it
+  type?: string;
+  hidden?: boolean;
 }
 </code></pre>
+<p>An attribute’s <code>value</code> is a full sandboxed script — the same format as files in<br>
+<code>system/scripts/</code>. When something fires the attribute (a hook, <code>@trigger</code>, or<br>
+<code>u.trigger()</code>), UrsaMU runs the script in a Web Worker with a fresh <code>u</code> object.</p>
+<p><strong>Why use soft-coding instead of a system script?</strong></p>
+<ul>
+<li>Changes take effect immediately — no restart, no redeploy.</li>
+<li>Any builder with edit permission can customize objects they own.</li>
+<li>Behavior stays attached to the object, so copying or moving the object brings<br>
+its behavior with it.</li>
+<li>Inheritance: if an attribute is not found on the object, UrsaMU walks up the<br>
+<code>data.parent</code> chain, allowing shared behavior from parent objects.</li>
+</ul>
 <hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Setting Attributes In-Game</h2>
+<p>Use the <code>&amp;</code> command:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;&lt;ATTR-NAME&gt; &lt;object&gt;=&lt;value&gt;
+</code></pre>
+<p><code>&lt;object&gt;</code> accepts anything the <code>target</code> utility understands: <code>me</code>, <code>here</code>, an<br>
+object name, or a dbref (<code>#42</code>). <code>&lt;ATTR-NAME&gt;</code> is case-insensitive and stored<br>
+as supplied (the lookup is case-insensitive).</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; &amp;ONENTER here=u.send("The door creaks as you enter.");
+Game&gt; Lobby's attribute ONENTER set.
 
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
+&gt; &amp;SHORT-DESC me=A tall woman in a grey cloak.
+Game&gt; Alice's attribute SHORT-DESC set.
+</code></pre>
+<p><strong>Clear an attribute</strong> by omitting the value:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; &amp;ONENTER here=
+Game&gt; Lobby's attribute ONENTER removed.
+</code></pre>
+<p>Constraints:</p>
+<ul>
+<li>You must be able to <strong>edit</strong> the target (be its owner, or have the <code>admin</code>,<br>
+<code>wizard</code>, or <code>superuser</code> flag).</li>
+<li>Attribute names are arbitrary — there is no enforced schema. Conventions are<br>
+listed in <a href="#common-attribute-names">Common Attribute Names</a>.</li>
+</ul>
+<h3>Alternative: <code>@set</code> attribute syntax</h3>
+<p><code>@set</code> also sets soft attributes using the <code>target/ATTR=value</code> form:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;object&gt;/&lt;ATTR&gt;=&lt;value&gt;    -- set attribute
+@set &lt;object&gt;/&lt;ATTR&gt;=           -- clear attribute
+</code></pre>
+<p>This is equivalent to <code>&amp;ATTR obj=value</code> for plain data storage (both write<br>
+to <code>data.ATTR</code>). Use whichever feels natural; <code>&amp;</code> is the traditional MUSH<br>
+syntax, while <code>@set obj/ATTR=value</code> is more explicit.</p>
+<blockquote>
+<p><strong>Note:</strong> <code>@set obj=&lt;FLAG&gt;</code> (without the <code>/</code>) sets or removes a <em>flag</em>, not<br>
+an attribute — see the <a href="/guides/admin-guide#user-roles-and-permissions">Admin Guide</a>.</p>
+</blockquote>
+<hr>
+<h2>Setting Attributes via Scripts</h2>
+<p>From inside any script you can read and write the raw <code>data.attributes</code> array<br>
+directly using <code>u.db.modify</code>. Always spread the existing array to avoid<br>
+clobbering other attributes.</p>
+<h3>Add or replace a single attribute</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  const me = u.me;
+  const existing = (me.state.attributes || []) as Array&lt;{ name: string; value: string; setter: string }&gt;;
 
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
+  // Remove any existing entry with the same name (case-insensitive)
+  const filtered = existing.filter(a =&gt; a.name.toLowerCase() !== "onenter");
 
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
+  await u.db.modify(me.id, "$set", {
+    data: {
+      ...me.state,
+      attributes: [
+        ...filtered,
+        { name: "ONENTER", value: `u.send("Welcome back!");`, setter: "#" + me.id },
+      ],
+    },
+  });
+  u.send("ONENTER set on yourself.");
+};
+</code></pre>
+<blockquote>
+<p><strong>Important:</strong> <code>u.db.modify</code> with <code>"$set"</code> and a <code>data:</code> key replaces the<br>
+whole data block. Always spread <code>me.state</code> (or the target’s state) so you<br>
+don’t wipe other fields. See the <a href="/guides/scripting">Scripting Guide</a> for<br>
+the full <code>u.db.modify</code> pattern.</p>
+</blockquote>
+<h3>Read the raw array</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const attrs = (u.me.state.attributes || []) as Array&lt;{ name: string; value: string }&gt;;
+const found = attrs.find(a =&gt; a.name.toLowerCase() === "short-desc");
+if (found) u.send(`Your short-desc: ${found.value}`);
+</code></pre>
+<h2>For most use cases, prefer <code>u.attr.get()</code> (see below) — it handles<br>
+case-insensitivity and parent inheritance automatically.</h2>
+<h2>Reading Attributes</h2>
+<h3><code>u.attr.get(id, name): Promise&lt;string | null&gt;</code></h3>
+<p>Reads the value of a named attribute from an object. Returns <code>null</code> if not set.<br>
+The name is <strong>case-insensitive</strong>. If the attribute is not on the object itself,<br>
+UrsaMU walks up the <code>data.parent</code> chain.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  const bio = await u.attr.get(u.me.id, "FINGER-INFO");
+  if (bio) {
+    u.send(bio);
+  } else {
+    u.send("No bio set. Use: &amp;finger-info me=&lt;text&gt;");
+  }
+};
+</code></pre>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read from any object by id
+const sd = await u.attr.get(someObjectId, "SHORT-DESC");
+</code></pre>
+<hr>
+<h2>Running Attributes</h2>
+<h3><code>u.trigger(id, attr, args?): Promise&lt;void&gt;</code></h3>
+<p>Runs the attribute as a script. The script executes in its own sandbox with the<br>
+targeted object as context. The actor who called <code>u.trigger</code> does <strong>not</strong> become<br>
+the script’s <code>u.me</code> — the object itself does. Returns when the script completes.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Fire the USE attribute on a chest the actor is looking at
+await u.trigger(chestId, "USE", [u.me.id]);
+</code></pre>
+<p>Args are available in the triggered script as <code>u.cmd.args</code>.</p>
+<h3><code>u.eval(id, attr, args?): Promise&lt;string&gt;</code></h3>
+<p>Like <code>u.trigger</code>, but captures and returns whatever the script sends as a<br>
+string. Useful for computed values.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const formula = await u.eval(u.me.id, "SCORE-FORMULA", ["str"]);
+u.send(`Your STR score: ${formula}`);
+</code></pre>
+<p>If the attribute is not found, <code>u.eval</code> returns <code>""</code>.</p>
+<h3><code>@trigger &lt;object&gt;/&lt;attr&gt;[=&lt;args&gt;]</code></h3>
+<p>The in-game command version of <code>u.trigger</code>. Fires an attribute on any object the<br>
+actor can see or edit.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; @trigger chest/USE
+Triggered script on chest/USE.
+
+&gt; @trigger here/ONENTER=Alice
+Triggered script on here/ONENTER.
+</code></pre>
+<p>Arguments after <code>=</code> are split on whitespace and available as <code>u.cmd.args</code> in<br>
+the triggered script.</p>
+<h3>Automatic hooks</h3>
+<p>Some attributes are fired automatically by the engine — no <code>@trigger</code> needed:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Fired on</th>
+<th>Fired by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ACONNECT</code></td>
+<td>player or master room</td>
+<td>Player connects</td>
+</tr>
+<tr>
+<td><code>ADISCONNECT</code></td>
+<td>player or master room</td>
+<td>Player disconnects</td>
+</tr>
+</tbody>
+</table>
+<h2><code>ACONNECT</code> and <code>ADISCONNECT</code> fire on the connecting player’s own object first,<br>
+then on the master room (configured as <code>game.masterRoom</code>). The script runs with<br>
+the connected player as <code>u.me</code>.</h2>
+<h2>Common Attribute Names</h2>
+<p>These are conventions — UrsaMU does not enforce them (except <code>ACONNECT</code> and<br>
+<code>ADISCONNECT</code>, which are fired by the hooks system). Use them consistently so<br>
+other builders know what to expect.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Set on</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ACONNECT</code></td>
+<td>player, master room</td>
+<td>Script to run when the player connects</td>
+</tr>
+<tr>
+<td><code>ADISCONNECT</code></td>
+<td>player, master room</td>
+<td>Script to run when the player disconnects</td>
+</tr>
+<tr>
+<td><code>ONENTER</code></td>
+<td>room</td>
+<td>Fire when any player enters the room</td>
+</tr>
+<tr>
+<td><code>ONEXIT</code></td>
+<td>room</td>
+<td>Fire when any player leaves the room</td>
+</tr>
+<tr>
+<td><code>USE</code></td>
+<td>thing</td>
+<td>Fire when a player uses/activates the object</td>
+</tr>
+<tr>
+<td><code>OPEN</code></td>
+<td>container/exit</td>
+<td>Fire when the object is opened</td>
+</tr>
+<tr>
+<td><code>CLOSE</code></td>
+<td>container/exit</td>
+<td>Fire when the object is closed</td>
+</tr>
+<tr>
+<td><code>DROP</code></td>
+<td>thing</td>
+<td>Fire when the object is dropped</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td>thing</td>
+<td>Fire when the object is picked up</td>
+</tr>
+<tr>
+<td><code>SHORT-DESC</code></td>
+<td>player, thing</td>
+<td>One-line description for room display and +finger</td>
+</tr>
+<tr>
+<td><code>FINGER-INFO</code></td>
+<td>player</td>
+<td>Free-form bio shown in +finger</td>
+</tr>
+<tr>
+<td><code>SCORE-EXTRA</code></td>
+<td>player</td>
+<td>Extra stat block appended to score output</td>
+</tr>
+<tr>
+<td><code>ODESC</code></td>
+<td>thing</td>
+<td>Message broadcast to others when the thing is examined</td>
+</tr>
+<tr>
+<td><code>SCRIPT</code></td>
+<td>any</td>
+<td>Generic script slot — fired by the command parser when an object handles a command</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><code>ONENTER</code>, <code>ONEXIT</code>, <code>USE</code>, <code>OPEN</code>, <code>CLOSE</code>, <code>DROP</code>, and <code>GET</code> are<br>
+<strong>not</strong> fired automatically by the core engine. They require either<br>
+<code>@trigger</code> from a system script, or your own plugin/script to call<br>
+<code>u.trigger()</code> at the right moment.</p>
+</blockquote>
+<hr>
+<h2>Scripting Inside Attributes</h2>
+<p>Attribute values are full JavaScript/TypeScript scripts. They run inside the<br>
+same Web Worker sandbox as any other UrsaMU script with the full <code>u</code> API<br>
+available.</p>
+<h3>Module format (recommended)</h3>
+<p>Export a default async function. This is the same format used in <code>system/scripts/</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  u.send("Hello from an attribute!");
+};
+</code></pre>
+<h3>Legacy block format</h3>
+<p>If the value does not contain an <code>export</code> statement, UrsaMU runs it as a block<br>
+(the code is executed directly, with <code>u</code> in scope).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send("Hello from a legacy block!");
+</code></pre>
+<p>Both formats have access to the full <code>u</code> API.</p>
+<h3>The <code>u</code> object in triggered attributes</h3>
+<p>When an attribute is fired via <code>u.trigger(id, attr)</code>:</p>
+<ul>
+<li><code>u.me</code> — the object the attribute is set on (not the actor who called<br>
+<code>u.trigger</code>)</li>
+<li><code>u.here</code> — the room that object is in</li>
+<li><code>u.cmd.name</code> — the attribute name in lowercase</li>
+<li><code>u.cmd.args</code> — the args array passed to <code>u.trigger</code> / <code>@trigger</code></li>
+</ul>
+<h2>When an attribute is fired via <code>u.eval(id, attr, args)</code>, the same rules apply<br>
+and the script’s output (via <code>u.send</code>) is captured as the return value.</h2>
+<h2>Practical Examples</h2>
+<h3>Room that greets players on entry</h3>
+<p>Set this on a room. Call <code>u.trigger(room.id, "ONENTER", [actorId])</code> from a<br>
+movement hook or a custom <code>look</code> script:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER The Tavern=#...
+export default async (u) =&gt; {
+  const actorId = u.cmd.args[0];
+  const actor = actorId ? (await u.db.search(actorId))[0] : null;
+  const name = actor ? String(actor.state.moniker || actor.state.name || "Someone") : "Someone";
+  u.here.broadcast(`${name} pushes open the door and steps inside.`);
+  u.send("The warmth of the fire and the smell of roasting meat greet you.");
+};
+</code></pre>
+<h3>Object that does something when used</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;USE Ancient Lever=#...
+export default async (u) =&gt; {
+  const actorId = u.cmd.args[0];
+  u.here.broadcast("The lever grinds against stone with a horrible screech.");
+  await u.teleport("secret-door-id", "open-room-id");
+  u.send("You hear a door grinding open somewhere nearby.");
+};
+</code></pre>
+<h3>Greeting script on player connect</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ACONNECT me=#...  (on a player)
+export default async (u) =&gt; {
+  const unread = (await u.mail.read({ to: { $in: [`#${u.me.id}`] } }))
+    .filter(m =&gt; !m.data?.read).length;
+  if (unread &gt; 0) u.send(`You have ${unread} unread message${unread === 1 ? "" : "s"}.`);
+};
+</code></pre>
+<h3>NPC that responds to being examined</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ODESC Town Guard=#...  (plain text — broadcast when examined)
+// "snaps to attention and eyes you warily."
+// The look script broadcasts: "&lt;actor&gt; snaps to attention and eyes you warily."
+</code></pre>
+<h3>Computed score field</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;SCORE-FORMULA me=#...
+export default (u) =&gt; {
+  const str = Number(u.me.state.str) || 0;
+  const bonus = Math.floor((str - 10) / 2);
+  u.send(`${str} (${bonus &gt;= 0 ? "+" : ""}${bonus})`);
+};
+</code></pre>
+<p>Then from your score script or a <code>+sheet</code> command:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const strDisplay = await u.eval(u.me.id, "SCORE-FORMULA");
+u.send(`STR: ${strDisplay}`);
+</code></pre>
+<h3>Per-object data storage</h3>
+<p>Attributes don’t have to hold scripts — they can hold plain data strings that<br>
+other scripts read with <code>u.attr.get</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;PRICE Healing Potion=#...  (value: "50")
+// &amp;USES Healing Potion=#...   (value: "3")
+
+export default async (u) =&gt; {
+  const price = await u.attr.get(u.target!.id, "PRICE") || "0";
+  const uses  = await u.attr.get(u.target!.id, "USES")  || "1";
+  u.send(`Price: ${price} credits  (${uses} use${uses === "1" ? "" : "s"} remaining)`);
 };
 </code></pre>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
+<h2>Softcode Evaluator (TinyMUX Compatible)</h2>
+<p>As of v2.0.0, UrsaMU ships a full TinyMUX 2.x-compatible softcode evaluator. Any attribute flagged <code>/softcode</code> is run through the evaluator rather than executed as TypeScript.</p>
+<h3>Enabling softcode on an attribute</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;GREET/softcode me=[name(%#)] greets you!
 </code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
+<p>The <code>/softcode</code> switch tells the engine to evaluate the value as MUSH softcode rather than TypeScript. It persists on the attribute — you only need to specify it when first setting the attribute.</p>
+<p>Attributes that contain MUX substitution syntax (<code>%N</code>, <code>[func()]</code>) and no TypeScript keywords are also auto-detected as softcode.</p>
+<h3>Action commands</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@switch &lt;expr&gt;=&lt;case&gt;,&lt;action&gt;[,&lt;default&gt;]</code></td>
+<td>Branch on value</td>
+</tr>
+<tr>
+<td><code>@dolist &lt;list&gt;=&lt;action&gt;</code></td>
+<td>Iterate over space-delimited list (<code>##</code> = item, <code>#@</code> = index)</td>
+</tr>
+<tr>
+<td><code>@if &lt;expr&gt;=&lt;true&gt;[,&lt;false&gt;]</code></td>
+<td>Conditional execution</td>
+</tr>
+<tr>
+<td><code>@while &lt;expr&gt;=&lt;action&gt;</code></td>
+<td>Loop while true (100ms wall-clock timeout enforced)</td>
+</tr>
+<tr>
+<td><code>@break</code></td>
+<td>Exit the current <code>@dolist</code> or <code>@while</code></td>
+</tr>
+<tr>
+<td><code>@trigger &lt;obj&gt;/&lt;attr&gt;[=&lt;args&gt;]</code></td>
+<td>Fire an attribute as a trigger</td>
+</tr>
+<tr>
+<td><code>@wait &lt;seconds&gt;=&lt;action&gt;</code></td>
+<td>Delay an action</td>
+</tr>
+</tbody>
+</table>
+<h3>$-pattern dispatch</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;CMD_GREET object=$greet *:@pemit %#=Hello, %0!
 </code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
+<p>Attributes beginning with <code>$</code> fire when their glob pattern matches a typed command. <code>%0</code>–<code>%9</code> are capture groups. Objects in the same room as the player, or in the master room, or in the player’s zone master are checked.</p>
+<h3>^-pattern listeners (monitors)</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;LISTEN_HELLO object=^*hello*:@pemit %#=I heard a hello!
 </code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
-</code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
-</code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
-</code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
-</code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
-});
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
-</code></pre>
-<hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
-</code></pre>
+<p>Attributes beginning with <code>^</code> fire when their pattern matches anything broadcast in the room. The object must have the <code>MONITOR</code> flag set.</p>
+<h3>Softcode function reference</h3>
+<p>See <a href="/mush_compatibility/">MUSH Compatibility</a> for the full list of ~250 supported functions, substitutions, and compatibility stubs.</p>
 
       </article>
 
@@ -663,6 +784,13 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
+        
+      
+        
+          
+        
+      
+        
           
         
       
@@ -671,11 +799,12 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-      
+          
+          
         
       
         
-      
+          
         
       
         
@@ -708,16 +837,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/sdk-cookbook/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">SDK Cookbook</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/user-guide/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">User Guide</span>
           </a>
         
       </nav>

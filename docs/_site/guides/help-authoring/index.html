@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Writing Help Files | UrsaMU Documentation</title>
+  <meta name="description" content="How to create and organize in-game help files for UrsaMU players using the help-plugin.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/help-authoring/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,317 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Writing Help Files</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
-
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
-}
+        <h1>Writing Help Files</h1>
+<p>The <code>help</code> command is provided by the <strong><a href="https://github.com/UrsaMU/help-plugin">help-plugin</a></strong>, which<br>
+is bundled in the default <code>plugins.manifest.json</code> and installed automatically on first run. It replaces<br>
+the former built-in help command.</p>
+<h2>The plugin reads Markdown (<code>.md</code>) and plain text (<code>.txt</code>) files from the <code>help/</code> directory, merges<br>
+them with any DB-stored entries and inline command help, then renders everything with MUSH color codes<br>
+word-wrapped to 78 characters.</h2>
+<h2>Overview</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">help/
+├── mail/
+│   ├── index.md       ← shown for "help mail"
+│   ├── send.md        ← shown for "help mail/send" or "help send"
+│   └── reply.md
+├── building/
+│   ├── @dig.md        ← shown for "help dig" (@ stripped from lookup)
+│   └── @lock.md
+└── _admin/
+    └── reboot.md      ← shown for "help reboot"
 </code></pre>
 <hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
+<h2>Directory Structure</h2>
+<p>Each subdirectory of <code>help/</code> becomes a <strong>category</strong> listed on the help index.<br>
+Players can type <code>help &lt;category&gt;</code> to see all topics in that category.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">help/
+  social/     ← "help social" lists subtopics
+  building/   ← "help building" lists subtopics
+  mail/       ← "help mail" shows index.md + subtopics
+  info/
+  comsys/
+  chargen/
+  _admin/     ← visible category, underscore is cosmetic only
+</code></pre>
+<h3>Category index file</h3>
+<p>If a directory contains <code>index.md</code> (or <code>readme.md</code>), that file’s content is<br>
+shown when a player types <code>help &lt;category&gt;</code>. Topics in the directory are<br>
+listed automatically below it as sub-topics.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">help/mail/index.md  →  shown for "help mail"
+</code></pre>
+<h2>You don’t need to manually list subtopics — they appear automatically.</h2>
+<h2>File Naming</h2>
+<h3>Basic names</h3>
+<p>Any <code>.md</code> or <code>.txt</code> file in <code>help/</code> or a subdirectory becomes a help topic.<br>
+The filename (without extension) is the topic name.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">help/social/say.md      →  "help say"  or  "help social/say"
+help/building/link.md   →  "help link" or  "help building/link"
+</code></pre>
+<h3><code>@</code> prefix</h3>
+<p>Files named <code>@command.md</code> are accessible as both <code>help @command</code> and<br>
+<code>help command</code> — the <code>@</code> is stripped automatically. Use this for commands<br>
+whose in-game name starts with <code>@</code>.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">help/building/@dig.md   →  "help dig"  or  "help @dig"
+help/building/@lock.md  →  "help lock" or  "help @lock"
+</code></pre>
+<h3><code>help_</code> and <code>topic_</code> prefixes</h3>
+<p>These prefixes are also stripped. <code>help_say.md</code> is the same as <code>say.md</code>.<br>
+Prefer bare names — the prefixes exist for legacy compatibility only.</p>
+<h3>Global vs. scoped lookup</h3>
+<h2>When a player types <code>help send</code>, the system finds the first matching file<br>
+anywhere in the hierarchy. To force a scoped lookup they type <code>help mail/send</code>.<br>
+If two files in different categories share a name, only the first match is<br>
+returned — use scoped paths to avoid ambiguity.</h2>
+<h2>Markdown Support</h2>
+<p>Help files are valid Markdown. The following elements are rendered with MUSH<br>
+color codes before display:</p>
+<h3>Headers</h3>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown"># COMMAND NAME        ← bold cyan — use for the top-level title
+## Section heading    ← bold yellow
+### Subsection        ← bold white
+</code></pre>
+<h3>Inline code and code blocks</h3>
+<p>Inline code (<code>`code`</code>) renders in <strong>green</strong>. Use it for command syntax,<br>
+flag names, and exact strings players should type.</p>
+<p>Fenced code blocks (<code>```</code>) render as an indented green block — ideal for<br>
+multi-line examples:</p>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown">```
+&gt; mail Bob
+Draft started.
+&gt; mail send
+Message sent.
+```
+</code></pre>
+<h3>Lists</h3>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown">- First item
+- Second item
+</code></pre>
+<p>Renders as:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">  • First item
+  • Second item
+</code></pre>
+<h3>Bold and italic</h3>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown">**important thing**   ← bold white
+*emphasized*          ← italic
+</code></pre>
+<h3>Word wrap</h3>
+<h2>All text is automatically word-wrapped at <strong>78 characters</strong>. You do not need<br>
+to manually break lines — write prose naturally and the renderer handles it.<br>
+Indentation on list items is preserved across wrapped lines.</h2>
+<h2>Tables</h2>
+<p>Markdown tables are fully supported and are formatted to fit within 78<br>
+characters. Write them in standard Markdown syntax:</p>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown">| Command | Description |
+|---------|-------------|
+| `mail &lt;player&gt;` | Start a draft to a player |
+| `mail send` | Send the current draft |
+| `mail delete &lt;#&gt;` | Delete a message by number |
+</code></pre>
+<p>The renderer:</p>
+<ul>
+<li>Colors the header row bold yellow</li>
+<li>Colors inline code in cells green</li>
+<li>Distributes column widths proportionally if the natural widths exceed 78 chars</li>
+<li>Word-wraps individual cells that overflow their column</li>
+</ul>
+<h2>For tables with many columns or long content, prefer two-column layouts — they<br>
+give the most readable result at 78 characters.</h2>
+<h2>Color Codes</h2>
+<p>You can use MUSH color codes directly in help files for custom styling:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>%ch</code></td>
+<td>Bold / bright</td>
+</tr>
+<tr>
+<td><code>%cn</code></td>
+<td>Reset to default</td>
+</tr>
+<tr>
+<td><code>%cr</code></td>
+<td>Red</td>
+</tr>
+<tr>
+<td><code>%cg</code></td>
+<td>Green</td>
+</tr>
+<tr>
+<td><code>%cy</code></td>
+<td>Yellow</td>
+</tr>
+<tr>
+<td><code>%cb</code></td>
+<td>Blue</td>
+</tr>
+<tr>
+<td><code>%cm</code></td>
+<td>Magenta</td>
+</tr>
+<tr>
+<td><code>%cc</code></td>
+<td>Cyan</td>
+</tr>
+<tr>
+<td><code>%cw</code></td>
+<td>White</td>
+</tr>
+<tr>
+<td><code>%ci</code></td>
+<td>Italic</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown">%ch%cyWARNING:%cn This destroys the object permanently.
+</code></pre>
+<p>Renders as bold yellow “WARNING:” followed by normal text.</p>
+<blockquote>
+<p><strong>Tip:</strong> Use color sparingly. The Markdown renderer already styles headers,<br>
+code, and lists consistently. Reserve manual color codes for callouts and<br>
+warnings.</p>
+</blockquote>
+<hr>
+<h2>How Players Access Help</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">help                  ← shows all topics in a 4-column index
+help mail             ← shows mail/index.md + subtopic list
+help mail/send        ← shows mail/send.md directly
+help send             ← finds the first file named "send" anywhere
+help @dig             ← finds building/@dig.md
+help dig              ← same result (@ stripped on lookup)
+help/section mail     ← lists all topics in the mail section
 </code></pre>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Admin Commands</h2>
+<p>Admins and wizards can create, update, and delete help entries at runtime<br>
+without touching the filesystem. DB entries take priority over file-based<br>
+entries (priority 100 vs 50).</p>
+<pre class="language-none" tabindex="0"><code class="language-none">+help/set &lt;topic&gt;=&lt;text&gt;   ← create or update a DB help entry
++help/del &lt;topic&gt;          ← delete a DB help entry
++help/reload               ← bust the file cache (pick up new files)
+</code></pre>
+<h2><code>&lt;text&gt;</code> supports the same Markdown syntax as file-based entries. Use <code>\n</code><br>
+for line breaks when typing multi-line content in-game.</h2>
+<h2>REST API</h2>
+<p>The plugin exposes a REST API for reading and managing help entries externally.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/help</code></td>
+<td>public</td>
+<td>List all sections and topics</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/help/:topic</code></td>
+<td>public</td>
+<td>Fetch a single topic (<code>?format=md</code> for raw)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/help/:topic</code></td>
+<td>admin</td>
+<td>Create or update an entry</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/help/:topic</code></td>
+<td>admin</td>
+<td>Delete an entry</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example — fetch a topic as Markdown:</strong></p>
+<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/help/dig?format=md
+Authorization: Bearer &lt;token&gt;
+</code></pre>
+<hr>
+<h2>Per-Plugin Help Folders</h2>
+<p>Plugins can register their own help directories so their topics appear in the<br>
+global index without copying files into the game’s <code>help/</code> folder. Call<br>
+<code>registerHelpDir()</code> inside your plugin’s <code>init()</code>:</p>
+<pre class="language-ts" tabindex="0"><code class="language-ts">import { registerHelpDir } from "jsr:@ursamu/help-plugin";
+import { fromFileUrl } from "@std/path";
 
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
+export default {
+  name: "my-plugin",
+  async init() {
+    registerHelpDir(fromFileUrl(new URL("../help", import.meta.url)));
   }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
+} satisfies IPlugin;
 </code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
+<h2>The directory is scanned on startup (and on <code>+help/reload</code>). Files follow the<br>
+same naming conventions as the main <code>help/</code> folder.</h2>
+<h2>Tips</h2>
+<h3>Structure for commands</h3>
+<p>Follow this pattern for individual command topics — it keeps help consistent<br>
+across the game:</p>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown"># COMMAND NAME
+
+One-sentence description of what the command does.
+
+## Syntax
+
+`command &lt;required&gt; [optional]`
+
+## Description
+
+Longer explanation. What it does, when to use it, any caveats.
+
+## Examples
+
 </code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
+<blockquote>
+<p>command argument<br>
+Result shown here.</p>
+</blockquote>
+<pre class="language-none" tabindex="0"><code class="language-none">
+## See Also
+
+- `related-command` — brief note on why it's related
 </code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
-</code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
-</code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
-</code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
-</code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
-});
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
-</code></pre>
-<hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
-</code></pre>
+<h3>Keep the title uppercase</h3>
+<p>By convention, top-level <code>#</code> headers are ALL CAPS (<code># MAIL SEND</code>, <code># @DIG</code>).<br>
+This matches classic MUSH help style and looks correct after the cyan coloring<br>
+is applied.</p>
+<h3>Avoid deep nesting</h3>
+<p>Two levels of directories (<code>help/category/topic.md</code>) is the practical maximum.<br>
+Three or more levels are not surfaced cleanly in the subtopic listing.</p>
+<h3>Admin-only topics</h3>
+<p>Put topics that should only be visible to staff in a directory prefixed with<br>
+<code>_</code> (e.g., <code>help/_admin/</code>). The underscore is cosmetic — the files are still<br>
+accessible to anyone who knows the topic name. If you need truly restricted<br>
+help, use <code>+help/set</code> to store the entry in the DB and gate display logic via<br>
+a plugin hook on <code>help:lookup</code>.</p>
+<h3>Test your file</h3>
+<p>Connect as a player and type <code>help &lt;yourtopic&gt;</code>. Check that:</p>
+<ul>
+<li>Line lengths fit within 78 characters</li>
+<li>Tables align properly</li>
+<li>Code blocks are indented and green</li>
+<li>No raw Markdown syntax leaks through</li>
+</ul>
 
       </article>
 
@@ -647,9 +664,6 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
@@ -658,16 +672,11 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-          
+      
         
       
         
-          
-          
-        
       
-        
-          
         
       
         
@@ -708,16 +717,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/gameclock/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">Game Clock</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/installation/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">Installation Guide</span>
           </a>
         
       </nav>

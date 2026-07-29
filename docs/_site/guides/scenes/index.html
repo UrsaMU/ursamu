@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Scenes | UrsaMU Documentation</title>
+  <meta name="description" content="How to create, join, write in, and export collaborative roleplay scenes in UrsaMU.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/scenes/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,521 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Scenes</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
+        <h1>Scenes</h1>
+<p>Scenes are collaborative roleplay logs — structured writing sessions between<br>
+players. The scene system tracks who participated, what was written, and where<br>
+it happened, and lets you export the finished log as Markdown or JSON.</p>
+<h2>All scene endpoints require a <code>Bearer</code> JWT token in the <code>Authorization</code> header.</h2>
+<h2>Overview</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">Player A                   Player B                 Server
+────────                   ────────                 ──────
+POST /scenes               POST /scenes/:id/join
+  name, location      ──▶  (joins after creation)
+  ← 201 scene object
 
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
+POST /scenes/:id/pose ──▶                    ──▶  broadcasts to room
+  msg, type=pose
 
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
+                           POST /scenes/:id/pose
+                      ◀──  msg, type=pose      ──▶  broadcasts to room
+
+PATCH /scenes/:id          (close the scene)
+  status=closed
+
+GET /scenes/:id/export
+  ?format=markdown    ──▶  ← Markdown log file
+</code></pre>
+<hr>
+<h2>Creating a Scene</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">POST /api/v1/scenes
+Authorization: Bearer &lt;token&gt;
+Content-Type: application/json
+</code></pre>
+<p><strong>Request body:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Scene title</td>
+</tr>
+<tr>
+<td><code>location</code></td>
+<td>string</td>
+<td>Yes</td>
+<td>Room dbref (e.g. <code>#5</code>)</td>
+</tr>
+<tr>
+<td><code>desc</code></td>
+<td>string</td>
+<td>No</td>
+<td>Scene description or opening set</td>
+</tr>
+<tr>
+<td><code>sceneType</code></td>
+<td>string</td>
+<td>No</td>
+<td><code>social</code>, <code>event</code>, <code>vignette</code>, <code>plot</code>, <code>training</code>, <code>other</code> (default: <code>social</code>)</td>
+</tr>
+<tr>
+<td><code>private</code></td>
+<td>boolean</td>
+<td>No</td>
+<td>If <code>true</code>, only invited players can see or post (default: <code>false</code>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">curl -X POST https://yourgame.example.com/api/v1/scenes \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "A Meeting in the Rain",
+    "location": "#5",
+    "desc": "Two characters cross paths on a wet street corner.",
+    "sceneType": "social"
+  }'
+</code></pre>
+<p><strong>Response (<code>201 Created</code>):</strong></p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "id": "42",
+  "name": "A Meeting in the Rain",
+  "location": "#5",
+  "desc": "Two characters cross paths on a wet street corner.",
+  "owner": "#3",
+  "participants": ["#3"],
+  "allowed": ["#3"],
+  "private": false,
+  "poses": [],
+  "startTime": 1710000000000,
+  "status": "active",
+  "sceneType": "social"
 }
 </code></pre>
-<hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
+<h2>The creator is automatically added as the first participant.</h2>
+<h2>Listing Scenes</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/scenes
+Authorization: Bearer &lt;token&gt;
+</code></pre>
+<p>Returns all scenes visible to the authenticated user, sorted newest first.<br>
+Private scenes are filtered — only scenes where you are the owner, a participant,<br>
+or in the <code>allowed</code> list are returned.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/scenes/locations
+Authorization: Bearer &lt;token&gt;
+</code></pre>
+<p>Returns all rooms you have permission to enter, sorted alphabetically. Useful<br>
+for scene creation UIs that let the player pick a location from a list.</p>
+<pre class="language-json" tabindex="0"><code class="language-json">[
+  { "id": "#1", "name": "The Nexus", "type": "public" },
+  { "id": "#12", "name": "Staff Lounge", "type": "private" }
+]
+</code></pre>
+<h2><code>type</code> is <code>"private"</code> if the room has an enter lock set, <code>"public"</code> otherwise.</h2>
+<h2>Joining a Scene</h2>
+<p>Any player can join a public scene. Private scenes require an invitation first<br>
+(see <a href="#private-scenes">Private Scenes</a>).</p>
+<pre class="language-none" tabindex="0"><code class="language-none">POST /api/v1/scenes/:id/join
+Authorization: Bearer &lt;token&gt;
+</code></pre>
+<p>No body required. If successful, the player is added to <code>participants</code>.</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "success": true, "scene": { ... } }
 </code></pre>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
+<h2>Writing Poses</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">POST /api/v1/scenes/:id/pose
+Authorization: Bearer &lt;token&gt;
+Content-Type: application/json
 </code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
+<p><strong>Request body:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>msg</code></td>
+<td>string</td>
+<td>Yes (except <code>set</code>)</td>
+<td>The pose text</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>string</td>
+<td>No</td>
+<td><code>pose</code> (default), <code>ooc</code>, or <code>set</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pose types:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Use</th>
+<th>Broadcast format</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pose</code></td>
+<td>In-character action or speech</td>
+<td><code>CharName &lt;msg&gt;</code></td>
+</tr>
+<tr>
+<td><code>ooc</code></td>
+<td>Out-of-character comment</td>
+<td><code>[OOC] CharName: &lt;msg&gt;</code></td>
+</tr>
+<tr>
+<td><code>set</code></td>
+<td>Scene description / setter (no <code>msg</code> required)</td>
+<td><code>[Scene Set] &lt;msg&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Poses are broadcast to the scene’s room in real time so players in the grid<br>
+also see them. The maximum pose length is <strong>4000 characters</strong>.</p>
+<p><strong>Example — in-character pose:</strong></p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">curl -X POST https://yourgame.example.com/api/v1/scenes/42/pose \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"msg": "glances up as rain spatters her coat, then freezes.", "type": "pose"}'
 </code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
+<p><strong>Example — scene setter:</strong></p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">curl -X POST https://yourgame.example.com/api/v1/scenes/42/pose \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"msg": "The street is empty except for the two of them.", "type": "set"}'
+</code></pre>
+<p><strong>Response (<code>201 Created</code>):</strong></p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "id": "a1b2c3d4-...",
+  "charId": "#3",
+  "charName": "Talia",
+  "moniker": "%ch%crT%cna%chl%cni%cra%cn",
+  "msg": "glances up as rain spatters her coat, then freezes.",
+  "type": "pose",
+  "timestamp": 1710000060000
 }
 </code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
+<h2>Posting automatically adds you to <code>participants</code> if you weren’t already there.</h2>
+<h2>Editing a Pose</h2>
+<p>You can correct a pose after posting. Only the original author or the scene<br>
+owner can edit a pose.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">PATCH /api/v1/scenes/:id/pose/:poseId
+Authorization: Bearer &lt;token&gt;
+Content-Type: application/json
 </code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
+<p><strong>Request body:</strong></p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "msg": "corrected pose text" }
 </code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
+<p>The <code>type</code> and <code>timestamp</code> cannot be changed after posting. Max 4000 characters.</p>
+<h2><strong>Response (<code>200 OK</code>):</strong> the updated pose object.</h2>
+<h2>Updating a Scene</h2>
+<p>The scene owner (or admin/wizard) can update metadata and status.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">PATCH /api/v1/scenes/:id
+Authorization: Bearer &lt;token&gt;
+Content-Type: application/json
 </code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
+<p><strong>Updatable fields:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>string</td>
+<td>Scene title</td>
+</tr>
+<tr>
+<td><code>desc</code></td>
+<td>string</td>
+<td>Scene description</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>string</td>
+<td><code>active</code>, <code>paused</code>, or <code>closed</code></td>
+</tr>
+<tr>
+<td><code>sceneType</code></td>
+<td>string</td>
+<td><code>social</code>, <code>event</code>, <code>vignette</code>, <code>plot</code>, <code>training</code>, <code>other</code></td>
+</tr>
+<tr>
+<td><code>endTime</code></td>
+<td>number</td>
+<td>Unix timestamp (ms) when the scene ended</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example — close a scene:</strong></p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">curl -X PATCH https://yourgame.example.com/api/v1/scenes/42 \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{"status": "closed", "endTime": 1710003600000}'
 </code></pre>
 <hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
+<h2>Private Scenes</h2>
+<p>Set <code>"private": true</code> when creating a scene to restrict access.</p>
+<table>
+<thead>
+<tr>
+<th>Action</th>
+<th>Who can do it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>View scene</td>
+<td>Owner, participants, <code>allowed</code> list, admin/wizard</td>
+</tr>
+<tr>
+<td>Post a pose</td>
+<td>Owner, participants, <code>allowed</code> list, admin/wizard</td>
+</tr>
+<tr>
+<td>Join</td>
+<td>Only if already in <code>allowed</code> list</td>
+</tr>
+<tr>
+<td>Invite</td>
+<td>Owner, anyone in <code>allowed</code> list, admin/wizard</td>
+</tr>
+</tbody>
+</table>
+<h3>Inviting a player</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">POST /api/v1/scenes/:id/invite
+Authorization: Bearer &lt;token&gt;
+Content-Type: application/json
 </code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
+<pre class="language-json" tabindex="0"><code class="language-json">{ "target": "#7" }
 </code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
+<h2><code>target</code> can be a dbref (<code>#7</code>) or a player name. The player is added to the<br>
+<code>allowed</code> list and can then join the scene.</h2>
+<h2>Exporting a Scene</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/scenes/:id/export
+Authorization: Bearer &lt;token&gt;
+</code></pre>
+<p>Optional query parameter <code>format</code>:</p>
+<table>
+<thead>
+<tr>
+<th><code>format</code></th>
+<th>Content-Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>markdown</code> <em>(default)</em></td>
+<td><code>text/markdown</code></td>
+<td>Formatted log with header and poses</td>
+</tr>
+<tr>
+<td><code>json</code></td>
+<td><code>application/json</code></td>
+<td>Full scene object</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Markdown log
+curl -H "Authorization: Bearer &lt;token&gt;" \
+     https://yourgame.example.com/api/v1/scenes/42/export
+
+# Raw JSON
+curl -H "Authorization: Bearer &lt;token&gt;" \
+     https://yourgame.example.com/api/v1/scenes/42/export?format=json
+</code></pre>
+<p><strong>Markdown export format:</strong></p>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown"># A Meeting in the Rain
+
+**Type:** social | **Status:** closed
+**Location:** The Corner of Fifth and Ash
+**Started:** 2026-03-18
+**Ended:** 2026-03-18
+**Participants:** Talia, Marcus
+---
+
+**Talia** glances up as rain spatters her coat, then freezes.
+
+**Marcus** turns up his collar, not yet noticing her.
+
+*[OOC] Talia: great opener!*
+---
+*Exported 2026-03-18*
+</code></pre>
+<h2>MUSH color codes are stripped from all character names and pose content in the<br>
+export, so the output is clean plain text.</h2>
+<h2>Scene Hooks</h2>
+<p>Every scene mutation fires a typed event on <code>gameHooks</code>, allowing plugins<br>
+(AI GM assistants, logging systems, etc.) to react without touching the<br>
+scene REST router.</p>
+<p>Import <code>gameHooks</code> from <code>jsr:@ursamu/mush</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { gameHooks } from "jsr:@ursamu/mush";
+import type { SceneSetEvent, SceneClearEvent } from "jsr:@ursamu/mush";
+</code></pre>
+<h3>Hook reference</h3>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>When it fires</th>
+<th>Key payload fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>scene:created</code></td>
+<td>New scene opened (<code>POST /scenes</code>)</td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>sceneType</code></td>
+</tr>
+<tr>
+<td><code>scene:pose</code></td>
+<td>Any pose posted (<code>POST /scenes/:id/pose</code>)</td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>msg</code>, <code>type</code></td>
+</tr>
+<tr>
+<td><code>scene:set</code></td>
+<td>Pose with <code>type: "set"</code> posted</td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>description</code></td>
+</tr>
+<tr>
+<td><code>scene:title</code></td>
+<td>Scene renamed (<code>PATCH /scenes/:id</code> with new <code>name</code>)</td>
+<td><code>sceneId</code>, <code>oldName</code>, <code>newName</code>, <code>actorId</code>, <code>actorName</code></td>
+</tr>
+<tr>
+<td><code>scene:clear</code></td>
+<td>Scene closed/finished/archived</td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>actorId</code>, <code>actorName</code>, <code>status</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>scene:set</code> and <code>scene:pose</code> both fire when a <code>"set"</code> pose is posted —<br>
+<code>scene:pose</code> for anything that needs to see all pose types, <code>scene:set</code> for<br>
+handlers that only care about scene descriptions.</p>
+<h3>Example: AI GM assistant</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { gameHooks } from "jsr:@ursamu/mush";
+import { send } from "../../services/broadcast/index.ts";
+import type { SceneSetEvent, SceneTitleEvent, SceneClearEvent } from "jsr:@ursamu/mush";
+
+// Narrate the new setting in the GM's voice
+gameHooks.on("scene:set", ({ roomId, description }: SceneSetEvent) =&gt; {
+  send([roomId], `%ch%cm[GM]%cn ${description}`, {});
 });
 
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
+// Announce title changes
+gameHooks.on("scene:title", ({ roomId, oldName, newName }: SceneTitleEvent) =&gt; {
+  // roomId is not in SceneTitleEvent — look it up from sceneId if needed
+  console.log(`[GM] Scene renamed: "${oldName}" → "${newName}"`);
+});
+
+// Wrap up when a scene closes
+gameHooks.on("scene:clear", ({ sceneName, status }: SceneClearEvent) =&gt; {
+  console.log(`[GM] Scene "${sceneName}" ${status}.`);
+});
 </code></pre>
-<hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
-</code></pre>
+<h2>See <a href="/plugins/hooks/">Plugin Hooks &amp; Events</a> for the complete GameHooks API.</h2>
+<h2>API Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes</code></td>
+<td>Required</td>
+<td>List visible scenes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes</code></td>
+<td>Required</td>
+<td>Create a scene</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/locations</code></td>
+<td>Required</td>
+<td>List accessible rooms</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/:id</code></td>
+<td>Required</td>
+<td>Scene detail with participants</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/scenes/:id</code></td>
+<td>Required</td>
+<td>Update name, desc, status, sceneType, endTime</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/:id/export</code></td>
+<td>Required</td>
+<td>Export as <code>?format=markdown</code> or <code>?format=json</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes/:id/pose</code></td>
+<td>Required</td>
+<td>Add a pose, ooc, or set entry</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/scenes/:id/pose/:poseId</code></td>
+<td>Required</td>
+<td>Edit a pose (author or scene owner)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes/:id/join</code></td>
+<td>Required</td>
+<td>Join a scene</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes/:id/invite</code></td>
+<td>Required</td>
+<td>Add a player to the allowed list</td>
+</tr>
+</tbody>
+</table>
 
       </article>
 
@@ -663,13 +884,15 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
+        
+      
+        
+          
           
         
       
         
           
-        
-      
         
       
         
@@ -708,16 +931,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/recipes/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">Scripting Recipes</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/scripting/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">Scripting Guide</span>
           </a>
         
       </nav>

@@ -3,11 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customization Guide | UrsaMU Documentation</title>
-  <meta name="description" content="Learn how to customize your UrsaMU server">
-  <link rel="stylesheet" href="/ursamu/styles.css">
+  <meta name="description" content="How to customize UrsaMU — MUSH colors, custom commands, plugins, REST routes, and external integrations.">
+  <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/customization/">
+<meta property="og:url" content="http://localhost:3000/guides/customization/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/ursamu/" class="site-logo">
+  <a href="/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link active">
+    <a href="/guides/" class="header-nav-link active">
       Guides
     </a>
     
     
     
-    <a href="/ursamu/api/" class="header-nav-link">
+    <a href="/api/" class="header-nav-link">
       API
     </a>
     
     
     
-    <a href="/ursamu/plugins/" class="header-nav-link">
+    <a href="/plugins/" class="header-nav-link">
       Plugins
     </a>
     
     
     
-    <a href="/ursamu/development/" class="header-nav-link">
+    <a href="/development/" class="header-nav-link">
       Development
     </a>
     
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link">
+      <a href="/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,35 +110,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/ursamu/guides/installation/" class="sidebar-link">
+      <a href="/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
+      <a href="/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
+      <a href="/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/ursamu/guides/customization/" class="sidebar-link active">
+      <a href="/guides/customization/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+      <a href="/guides/scripting/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
-      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+      <a href="/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -150,7 +150,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/ursamu/configuration/" class="sidebar-link">
+      <a href="/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +162,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/ursamu/api/" class="sidebar-link">
+      <a href="/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/ursamu/api/core/" class="sidebar-link">
+      <a href="/api/core/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +178,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/ursamu/plugins/" class="sidebar-link">
+      <a href="/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/ursamu/plugins/basics/" class="sidebar-link">
+      <a href="/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
+      <a href="/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/ursamu/plugins/commands/" class="sidebar-link">
+      <a href="/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
+      <a href="/plugins/hooks/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/ursamu/plugins/database/" class="sidebar-link">
+      <a href="/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
+      <a href="/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
+      <a href="/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +218,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/ursamu/development/" class="sidebar-link">
+      <a href="/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/ursamu/development/contributing/" class="sidebar-link">
+      <a href="/development/contributing/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/ursamu/extending/" class="sidebar-link">
+      <a href="/extending/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/ursamu/child-games/" class="sidebar-link">
+      <a href="/child-games/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,7 +259,7 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/ursamu/">Home</a>
+        <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
         <span class="breadcrumbs-current">Customization Guide</span>
       </nav>
@@ -268,176 +268,489 @@
       <!-- Page content -->
       <article class="prose">
         <h1>Customization Guide</h1>
-<p>This guide covers how to customize your UrsaMU server to create a unique<br>
-experience for your players.</p>
-<h2>Themes</h2>
-<h3>Visual Themes</h3>
-<p>UrsaMU supports customizable visual themes for the web interface:</p>
-<ol>
-<li>Create a new theme directory in <code>themes/</code></li>
-<li>Create CSS files for your theme</li>
-<li>Configure your theme in <code>config.json</code>:<pre class="language-json" tabindex="0"><code class="language-json">"theme": {
-  "name": "your-theme-name",
-  "options": {
-    "primaryColor": "#3498db",
-    "secondaryColor": "#2ecc71"
-  }
-}
+<h2>This guide covers the real extension points for UrsaMU — the patterns you<br>
+actually use to add commands, store per-object data, build plugins, and connect<br>
+to outside services.</h2>
+<h2>Text Formatting</h2>
+<p>UrsaMU uses MUSH-style substitution codes for in-game text. They work in any<br>
+string you pass to <code>u.send()</code>, <code>u.broadcast()</code>, or stored in a help file.</p>
+<h3>Color codes</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Color / Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>%cr</code></td>
+<td>Red</td>
+</tr>
+<tr>
+<td><code>%cg</code></td>
+<td>Green</td>
+</tr>
+<tr>
+<td><code>%cy</code></td>
+<td>Yellow</td>
+</tr>
+<tr>
+<td><code>%cb</code></td>
+<td>Blue</td>
+</tr>
+<tr>
+<td><code>%cm</code></td>
+<td>Magenta</td>
+</tr>
+<tr>
+<td><code>%cw</code></td>
+<td>White</td>
+</tr>
+<tr>
+<td><code>%ch</code></td>
+<td>Bold / bright</td>
+</tr>
+<tr>
+<td><code>%cn</code></td>
+<td>Reset to normal</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example:</strong></p>
+<pre class="language-none" tabindex="0"><code class="language-none">u.send("%ch%crERROR:%cn You can't do that.");
+// → bold red "ERROR:" followed by normal text
 </code></pre>
-</li>
-</ol>
-<h3>Text Formatting</h3>
-<p>You can customize text formatting with ANSI color codes:</p>
-<ul>
-<li><code>%r</code> - Red</li>
-<li><code>%g</code> - Green</li>
-<li><code>%b</code> - Blue</li>
-<li><code>%c</code> - Cyan</li>
-<li><code>%m</code> - Magenta</li>
-<li><code>%y</code> - Yellow</li>
-<li><code>%w</code> - White</li>
-<li><code>%x</code> - Reset to default</li>
-</ul>
-<p>Example: <code>%rThis text is red%x and this is normal.</code></p>
-<h2>Commands</h2>
-<h3>Creating Custom Commands</h3>
-<p>You can create custom commands using the command API:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.commands.add({
-  name: "mycmd",
-  pattern: /^mycmd\s+(.+)$/i,
-  flags: "connected",
-  exec: (match, context) =&gt; {
-    const arg = match[1];
-    context.send(`You used mycmd with argument: ${arg}`);
+<h3>Other substitutions</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Expands to</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>%n</code></td>
+<td>Actor’s name</td>
+</tr>
+<tr>
+<td><code>%r</code></td>
+<td>Newline</td>
+</tr>
+<tr>
+<td><code>%t</code></td>
+<td>Tab</td>
+</tr>
+<tr>
+<td><code>%b</code></td>
+<td>Space</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note:</strong> In the old Customization guide this was listed as <code>%r = Red</code>. That<br>
+was wrong — <code>%r</code> is a <strong>newline</strong>, not red. Red is <code>%cr</code>.</p>
+</blockquote>
+<hr>
+<h2>Custom Commands</h2>
+<p>Register new in-game commands with <code>addCmd()</code>. Call it at module level — it<br>
+runs once when your file is imported at server startup.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/mush";
+import type { IUrsamuSDK } from "jsr:@ursamu/mush";
+
+addCmd({
+  name: "+roll",
+  pattern: /^\+roll(?:\s+(\d+)d(\d+))?/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) =&gt; {
+    const count = parseInt(u.cmd.args[0] || "1");
+    const sides = parseInt(u.cmd.args[1] || "6");
+    const results: number[] = [];
+    for (let i = 0; i &lt; count; i++) {
+      results.push(Math.ceil(Math.random() * sides));
+    }
+    const total = results.reduce((a, b) =&gt; a + b, 0);
+    u.send(`%ch+ROLL:%cn ${results.join(", ")} = %ch${total}%cn`);
   },
+  help: "+roll [&lt;count&gt;d&lt;sides&gt;]\nRolls dice. Default: 1d6.",
 });
 </code></pre>
-<h3>Modifying Existing Commands</h3>
-<p>You can override existing commands by registering a new command with the same<br>
-name:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.commands.add({
+<h3>ICmd fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Display name for help listings</td>
+</tr>
+<tr>
+<td><code>pattern</code></td>
+<td><code>string | RegExp</code></td>
+<td>Yes</td>
+<td>Matched against raw input; capture groups become <code>u.cmd.args</code></td>
+</tr>
+<tr>
+<td><code>lock</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Lock expression evaluated before exec (default: none)</td>
+</tr>
+<tr>
+<td><code>exec</code></td>
+<td><code>(u: IUrsamuSDK) =&gt; void | Promise&lt;void&gt;</code></td>
+<td>Yes</td>
+<td>Command handler</td>
+</tr>
+<tr>
+<td><code>help</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Help text shown by the <code>help</code> command</td>
+</tr>
+<tr>
+<td><code>hidden</code></td>
+<td><code>boolean</code></td>
+<td>No</td>
+<td>If <code>true</code>, omit from help listings</td>
+</tr>
+<tr>
+<td><code>category</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Groups commands under a category in help</td>
+</tr>
+</tbody>
+</table>
+<h3>Overriding built-in commands</h3>
+<p>Register a command with the same name — the last one registered wins.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">addCmd({
   name: "look",
   pattern: /^(?:look|l)(?:\s+(.+))?$/i,
-  flags: "connected",
-  exec: (match, context) =&gt; {
-    // Your custom look implementation
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) =&gt; {
+    const arg = (u.cmd.args[0] || "").trim();
+    if (arg) {
+      const target = await u.util.target(u.me, arg);
+      if (!target) return u.send("I don't see that here.");
+      return u.send(target.state.desc as string || "You see nothing special.");
+    }
+    u.send(u.here.state.desc as string || "You see nothing special.");
   },
 });
 </code></pre>
-<h2>Game Mechanics</h2>
-<h3>Custom Attributes</h3>
-<p>You can define custom attributes for objects and characters:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.attributes.define({
-  name: "strength",
-  defaultValue: 10,
-  min: 1,
-  max: 20,
-  flags: ["character", "numeric"],
-});
-</code></pre>
-<h3>Custom Functions</h3>
-<p>Create custom functions for use in your game:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.functions.add({
-  name: "add",
-  args: ["num1", "num2"],
-  exec: (args, context) =&gt; {
-    return Number(args.num1) + Number(args.num2);
+<h3>Switches</h3>
+<p>Commands can accept <code>/switch</code> syntax — <code>@set/quiet object=flag</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">addCmd({
+  name: "@myset",
+  pattern: /^@myset(?:\/([\w]+))?\s+(.*)/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) =&gt; {
+    const sw  = (u.cmd.args[0] || "").toLowerCase();
+    const arg = u.cmd.args[1] || "";
+    if (sw === "quiet") {
+      // suppress output
+    }
+    u.send(`Set: ${arg}`);
   },
 });
 </code></pre>
-<h3>Custom Flags</h3>
-<p>Define custom flags for objects:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.flags.define({
-  name: "invisible",
-  description: "Object is invisible to normal players",
-  defaultValue: false,
+<hr>
+<h2>Custom Attributes</h2>
+<p>All game objects have a <code>state</code> field (<code>Record&lt;string, unknown&gt;</code>) for storing<br>
+arbitrary data. Use <code>u.db.modify()</code> to write and <code>obj.state</code> to read.</p>
+<h3>Storing a value</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Set "gold" on the actor
+await u.db.modify(u.me.id, "state", { ...u.me.state, gold: 100 });
+</code></pre>
+<h3>Reading a value</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const gold = u.me.state.gold as number || 0;
+u.send(`%chGOLD:%cn You have ${gold} gold.`);
+</code></pre>
+<h3>Storing on another object</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const target = await u.util.target(u.me, u.cmd.args[0]);
+if (!target) return u.send("Not found.");
+await u.db.modify(target.id, "state", { ...target.state, desc: u.cmd.args[1] });
+u.send("Description set.");
+</code></pre>
+<h3>Per-object stats example</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// +stats command
+addCmd({
+  name: "+stats",
+  pattern: /^\+stats(?:\s+(.+))?/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) =&gt; {
+    const who = u.cmd.args[0]
+      ? await u.util.target(u.me, u.cmd.args[0])
+      : u.me;
+    if (!who) return u.send("Not found.");
+    const str = who.state.str as number || 10;
+    const dex = who.state.dex as number || 10;
+    const con = who.state.con as number || 10;
+    u.send(
+      `%ch${who.name}%cn — STR: %ch${str}%cn  DEX: %ch${dex}%cn  CON: %ch${con}%cn`
+    );
+  },
 });
 </code></pre>
-<h2>Integration</h2>
-<h3>External APIs</h3>
-<p>UrsaMU can integrate with external APIs:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">game.hooks.on("command:weather", async (context) =&gt; {
-  const weather = await fetch("https://api.weather.com/...");
-  const data = await weather.json();
-  context.send(`Current weather: ${data.description}`);
-});
-</code></pre>
-<h3>Database Integration</h3>
-<p>Connect to external databases:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const db = new Database({
-  type: "postgres",
-  host: "localhost",
-  port: 5432,
-  username: "user",
-  password: "password",
-  database: "mydb",
-});
-
-game.hooks.on("startup", () =&gt; {
-  db.connect();
-});
-</code></pre>
+<hr>
 <h2>Plugins</h2>
-<h3>Installing Plugins</h3>
-<p>To install a plugin:</p>
-<ol>
-<li>Download the plugin to the <code>plugins/</code> directory</li>
-<li>Add the plugin to your configuration:<pre class="language-json" tabindex="0"><code class="language-json">"plugins": [
-  "my-plugin"
-]
+<p>A plugin is a TypeScript module with an optional <code>init()</code> function. Plugins<br>
+are imported by your game’s <code>src/main.ts</code> at startup.</p>
+<h3>Plugin structure</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">src/plugins/my-plugin/
+├── index.ts        ← IPlugin export (optional init hook)
+└── commands.ts     ← addCmd() registrations
 </code></pre>
-</li>
-<li>Restart your server</li>
-</ol>
-<h3>Creating Plugins</h3>
-<p>Create your own plugins to extend UrsaMU:</p>
-<ol>
-<li>Create a new directory in <code>plugins/</code></li>
-<li>Create a <code>plugin.json</code> file:<pre class="language-json" tabindex="0"><code class="language-json">{
-  "name": "my-plugin",
-  "version": "1.0.0",
-  "description": "My custom plugin",
-  "main": "index.ts"
-}
+<h3><code>index.ts</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import type { IPlugin } from "jsr:@ursamu/mush";
+import "./commands.ts";   // importing triggers addCmd() registrations
+
+export const plugin: IPlugin = {
+  name:        "my-plugin",
+  version:     "1.0.0",
+  description: "Does cool things.",
+  init: async () =&gt; {
+    // One-time setup runs before the first player connects.
+    // Fetch external data, seed DB records, register scheduled jobs, etc.
+    console.log("[my-plugin] Ready.");
+    return true;
+  },
+  remove: () =&gt; {
+    // Optional cleanup if the plugin is ever unloaded.
+  },
+};
 </code></pre>
-</li>
-<li>Create an <code>index.ts</code> file with your plugin code</li>
-<li>See the <a href="/ursamu/plugins/">Plugin Development</a> section for more details</li>
-</ol>
-<h2>Web Interface</h2>
-<h3>Customizing the Web Client</h3>
-<p>The web client can be customized by modifying the templates:</p>
-<ol>
-<li>Copy the default templates from <code>templates/</code> to <code>custom-templates/</code></li>
-<li>Modify the templates as needed</li>
-<li>Configure UrsaMU to use your custom templates:<pre class="language-json" tabindex="0"><code class="language-json">"templates": {
-  "directory": "custom-templates"
-}
+<h3>Loading a plugin in <code>src/main.ts</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { plugin as myPlugin } from "./plugins/my-plugin/index.ts";
+
+if (myPlugin.init) await myPlugin.init();
 </code></pre>
-</li>
-</ol>
-<h3>Custom CSS</h3>
-<p>Add custom CSS to the web interface:</p>
-<ol>
-<li>Create a <code>custom.css</code> file in <code>public/css/</code></li>
-<li>Add your custom styles</li>
-<li>Configure UrsaMU to include your CSS:<pre class="language-json" tabindex="0"><code class="language-json">"webClient": {
-  "customCSS": ["custom.css"]
-}
+<h3>IPlugin fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Unique plugin identifier</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td><code>string</code></td>
+<td>Yes</td>
+<td>Semver version string</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td><code>string</code></td>
+<td>No</td>
+<td>Human-readable description</td>
+</tr>
+<tr>
+<td><code>init</code></td>
+<td><code>() =&gt; boolean | Promise&lt;boolean&gt;</code></td>
+<td>No</td>
+<td>Called once at startup; return <code>false</code> to abort</td>
+</tr>
+<tr>
+<td><code>remove</code></td>
+<td><code>() =&gt; void | Promise&lt;void&gt;</code></td>
+<td>No</td>
+<td>Called when plugin is unloaded</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>REST Routes</h2>
+<p>Register custom HTTP endpoints with <code>registerPluginRoute()</code>. Routes are<br>
+mounted alongside the built-in <code>/api/v1/</code> routes.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerPluginRoute } from "jsr:@ursamu/mush";
+
+registerPluginRoute("/api/v1/my-plugin", async (req, userId) =&gt; {
+  if (req.method !== "GET") {
+    return new Response("Method Not Allowed", { status: 405 });
+  }
+  return Response.json({ message: "Hello from my plugin!", userId });
+});
 </code></pre>
-</li>
-</ol>
-<h3>Custom JavaScript</h3>
-<p>Add custom JavaScript to the web interface:</p>
-<ol>
-<li>Create a <code>custom.js</code> file in <code>public/js/</code></li>
-<li>Add your custom scripts</li>
-<li>Configure UrsaMU to include your JavaScript:<pre class="language-json" tabindex="0"><code class="language-json">"webClient": {
-  "customJS": ["custom.js"]
-}
+<p>The handler receives:</p>
+<ul>
+<li><code>req: Request</code> — the Deno <code>Request</code> object</li>
+<li><code>userId: string | null</code> — the authenticated player’s DB ID, or <code>null</code> if<br>
+the request has no valid JWT</li>
+</ul>
+<blockquote>
+<p><strong>Auth tip:</strong> Check <code>userId</code> and return <code>401</code> for endpoints that require<br>
+authentication. The JWT is decoded for you — you don’t need to re-verify it.</p>
+</blockquote>
+<h3>Returning data from the DB</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerPluginRoute("/api/v1/leaderboard", async (_req, _userId) =&gt; {
+  const players = await dbojs.queryAll((o) =&gt; o.flags.has("player"));
+  const ranked = players
+    .map((p) =&gt; ({ name: p.data?.name, gold: p.data?.state?.gold ?? 0 }))
+    .sort((a, b) =&gt; (b.gold as number) - (a.gold as number))
+    .slice(0, 10);
+  return Response.json(ranked);
+});
 </code></pre>
-</li>
+<hr>
+<h2>Format Handlers</h2>
+<p>The format-handler pipeline lets you replace the rendering of any “labelled<br>
+display slot” — the name shown at the top of <code>look</code>, the contents list, the<br>
+exit line, the WHO row, the @ps row, and more — without rewriting the command.</p>
+<h3>The eight engine-known slots</h3>
+<table>
+<thead>
+<tr>
+<th>Slot</th>
+<th>Used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NAMEFORMAT</code></td>
+<td>Header line of <code>look</code> / <code>examine</code></td>
+</tr>
+<tr>
+<td><code>DESCFORMAT</code></td>
+<td>Description block of <code>look</code></td>
+</tr>
+<tr>
+<td><code>CONFORMAT</code></td>
+<td>The “Contents:” list in <code>look</code></td>
+</tr>
+<tr>
+<td><code>EXITFORMAT</code></td>
+<td>The “Exits:” list in <code>look</code></td>
+</tr>
+<tr>
+<td><code>WHOFORMAT</code></td>
+<td>Outer wrapper of the <code>who</code> command</td>
+</tr>
+<tr>
+<td><code>WHOROWFORMAT</code></td>
+<td>One row of <code>who</code></td>
+</tr>
+<tr>
+<td><code>PSFORMAT</code></td>
+<td>Outer wrapper of <code>@ps</code></td>
+</tr>
+<tr>
+<td><code>PSROWFORMAT</code></td>
+<td>One row of <code>@ps</code></td>
+</tr>
+</tbody>
+</table>
+<p>Plugins can also register handlers for any uppercase slot name they invent<br>
+(e.g. <code>MAILFORMAT</code>, <code>BBROWFORMAT</code>) and resolve them from their own commands.</p>
+<h3>Resolution priority</h3>
+<p>For any slot, the engine resolves in this order:</p>
+<ol>
+<li>A stored <code>&amp;SLOTNAME</code> softcode attribute on the target object (or, for<br>
+global-list slots, on <code>#0</code>).</li>
+<li>The most recently registered plugin format handler for that slot.</li>
+<li><code>null</code> (caller falls back to its default rendering).</li>
 </ol>
+<p>This means builders can override a single object’s display with <code>&amp;NAMEFORMAT</code><br>
+in-game <strong>without</strong> the plugin needing to know they exist.</p>
+<h3>Register a TypeScript handler</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFormatHandler } from "jsr:@ursamu/mush";
+
+registerFormatHandler("NAMEFORMAT", (target, viewer) =&gt; {
+  const star = target.flags.has("admin") ? "%ch%cy*%cn " : "";
+  return `${star}%ch${target.state.name}%cn`;
+});
+</code></pre>
+<p>The handler receives the target, the viewer, and optional slot-specific<br>
+extras (for row-format slots, the row data). Return <code>null</code> to fall through<br>
+to the default.</p>
+<h3>Register a MUSH-softcode template (v2.4.0)</h3>
+<p>If your handler is just a softcode string, use <code>registerFormatTemplate</code> —<br>
+the shortcut compiles the source once and wraps it in a TS handler for you.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFormatTemplate } from "jsr:@ursamu/mush";
+
+registerFormatTemplate(
+  "EXITFORMAT",
+  "[ansi(hy,&lt;)] [name(%0)] [ansi(hy,&gt;)]"
+);
+</code></pre>
+<h3>Unregister</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { unregisterFormatHandler } from "jsr:@ursamu/mush";
+unregisterFormatHandler("NAMEFORMAT");
+</code></pre>
+<h3>Resolving from a script</h3>
+<h2>Scripts use <code>u.util.resolveFormat[Or]</code> and <code>u.util.resolveGlobalFormat[Or]</code><br>
+to render through the pipeline. See the<br>
+<a href="/guides/sdk-cookbook/#resolveformat--resolveformator">SDK Cookbook</a>.</h2>
+<h2>External Integrations</h2>
+<h3>Fetching data in a command</h3>
+<p>Deno has native <code>fetch()</code> — no extra packages needed.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">addCmd({
+  name: "+weather",
+  pattern: /^\+weather\s+(.+)/i,
+  lock: "connected",
+  exec: async (u: IUrsamuSDK) =&gt; {
+    const city = encodeURIComponent(u.cmd.args[0]);
+    try {
+      const resp = await fetch(`https://wttr.in/${city}?format=3`);
+      const text = await resp.text();
+      u.send(`%chWEATHER:%cn ${text.trim()}`);
+    } catch {
+      u.send("%chWEATHER:%cn Could not retrieve weather.");
+    }
+  },
+  help: "+weather &lt;city&gt;\nFetches current weather for a city.",
+});
+</code></pre>
+<h3>Fetching in <code>init()</code></h3>
+<p>If your plugin needs to pre-fetch data or connect to an external service, do<br>
+it in <code>init()</code> so it’s ready before players arrive:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">let motdText = "Welcome!";
+
+export const plugin: IPlugin = {
+  name: "motd-fetcher",
+  version: "1.0.0",
+  init: async () =&gt; {
+    try {
+      const resp = await fetch("https://your-api.example.com/motd");
+      motdText = (await resp.json()).message;
+    } catch {
+      // keep default
+    }
+    return true;
+  },
+};
+
+// In a command handler:
+addCmd({
+  name: "+motd",
+  pattern: /^\+motd$/i,
+  lock: "connected",
+  exec: (u: IUrsamuSDK) =&gt; { u.send(motdText); },
+});
+</code></pre>
+<h3>Discord bridge</h3>
+<p>For a Discord bridge plugin, use the built-in <code>u.chan</code> SDK methods alongside<br>
+a Discord WebSocket client in your plugin’s <code>init()</code>. See the Discord plugin<br>
+in <code>src/plugins/discord/</code> as a reference implementation.</p>
 
       </article>
 
@@ -490,11 +803,53 @@ game.hooks.on("startup", () =&gt; {
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -529,16 +884,16 @@ game.hooks.on("startup", () =&gt; {
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/guides/admin-guide/" class="page-nav-btn prev">
+          <a href="/guides/commands/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Admin Guide</span>
+            <span class="page-nav-title">Command Reference</span>
           </a>
         
 
         
-          <a href="/ursamu/guides/first-script/" class="page-nav-btn next">
+          <a href="/guides/debugging/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Build Your First Script</span>
+            <span class="page-nav-title">Debugging Scripts</span>
           </a>
         
       </nav>
@@ -553,9 +908,9 @@ game.hooks.on("startup", () =&gt; {
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/ursamu/guides/installation/">Installation</a>
-        <a href="/ursamu/api/">API</a>
-        <a href="/ursamu/plugins/">Plugins</a>
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>

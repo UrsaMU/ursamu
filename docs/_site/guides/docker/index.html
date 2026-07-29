@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Docker | UrsaMU Documentation</title>
+  <meta name="description" content="Running UrsaMU with Docker and Docker Compose.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/docker/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,299 +261,263 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Docker</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
+        <h1>Docker</h1>
+<h2>UrsaMU ships a <code>Dockerfile</code> and <code>docker-compose.yaml</code> for containerized deployments.<br>
+Docker is the recommended way to run UrsaMU in production on any VPS or cloud host.</h2>
+<h2>Prerequisites</h2>
+<ul>
+<li><a href="https://docs.docker.com/get-docker/">Docker</a> 24+</li>
+<li><a href="https://docs.docker.com/compose/install/">Docker Compose</a> v2 (ships with Docker Desktop)</li>
+</ul>
+<hr>
+<h2>Quick Start</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Clone the repo (or use your game project)
+git clone https://github.com/UrsaMU/ursamu.git
+cd ursamu
 
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
+# Create your .env file
+echo "JWT_SECRET=$(openssl rand -hex 32)" &gt; .env
 
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
+# Build and start
+docker compose up -d
+
+# Watch the logs
+docker compose logs -f
+</code></pre>
+<p>On first startup the server initializes the database and prints a one-time<br>
+message inviting you to create the first player via Telnet:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">Fresh database detected — no players exist yet.
+
+Connect via telnet and run:
+  create &lt;name&gt; &lt;password&gt;
+
+The first player created is automatically given superuser access.
+</code></pre>
+<p>Connect with <code>telnet localhost 4201</code> and run <code>create &lt;name&gt; &lt;password&gt;</code> —<br>
+that first account is granted the <code>superuser</code> flag automatically. After<br>
+that, all subsequent <code>create</code> calls produce regular players.</p>
+<hr>
+<h2>Ports</h2>
+<table>
+<thead>
+<tr>
+<th>Container port</th>
+<th>Host port</th>
+<th>Protocol</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>4201</code></td>
+<td><code>4201</code></td>
+<td>Telnet</td>
+<td>Legacy MU* clients</td>
+</tr>
+<tr>
+<td><code>4202</code></td>
+<td><code>4202</code></td>
+<td>WebSocket</td>
+<td>Raw WebSocket connections</td>
+</tr>
+<tr>
+<td><code>4203</code></td>
+<td><code>4203</code></td>
+<td>HTTP / WS</td>
+<td>REST API + JWT WebSocket</td>
+</tr>
+</tbody>
+</table>
+<p>Connect with a Telnet client:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">telnet localhost 4201
+</code></pre>
+<p>Or point a web client at:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">ws://localhost:4203?token=&lt;jwt&gt;&amp;client=web
+</code></pre>
+<hr>
+<h2>docker-compose.yaml</h2>
+<p>The file is included in the project root. Full contents for reference:</p>
+<pre class="language-yaml" tabindex="0"><code class="language-yaml">services:
+  ursamu:
+    build: .
+    ports:
+      - "4201:4201"
+      - "4202:4202"
+      - "4203:4203"
+    volumes:
+      - ./data:/app/data       # Deno KV database files
+      - ./config:/app/config   # config.json
+      - ./logs:/app/logs       # main.log, telnet.log, error.log
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    restart: unless-stopped
+</code></pre>
+<h3>Volumes</h3>
+<table>
+<thead>
+<tr>
+<th>Mount</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>./data:/app/data</code></td>
+<td>Deno KV database — <strong>must be persisted</strong> or data is lost on container restart</td>
+</tr>
+<tr>
+<td><code>./config:/app/config</code></td>
+<td><code>config.json</code> — edit game settings without rebuilding</td>
+</tr>
+<tr>
+<td><code>./logs:/app/logs</code></td>
+<td>Server logs — useful for debugging and monitoring</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Environment Variables</h2>
+<p>Create a <code>.env</code> file in the project root before starting:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Required — long random string; changing this logs out all players
+JWT_SECRET=replace-with-a-long-random-string
+
+# Optional overrides
+URSAMU_HTTP_PORT=4203
+URSAMU_TELNET_PORT=4201
+</code></pre>
+<p>Generate a secure secret:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">openssl rand -hex 32
+</code></pre>
+<hr>
+<h2>Configuration</h2>
+<p>Edit <code>config/config.json</code> to change game settings — the volume mount means<br>
+changes take effect on the next restart with no image rebuild needed:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "server": {
+    "telnet": 4201,
+    "ws": 4202,
+    "http": 4203,
+    "db": "data/ursamu.db"
+  },
+  "game": {
+    "name": "My Game",
+    "description": "A UrsaMU-powered MUSH.",
+    "version": "0.0.1",
+    "playerStart": "1"
+  }
 }
 </code></pre>
 <hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Common Commands</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Start (detached)
+docker compose up -d
 
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
+# Stop
+docker compose down
 
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
+# Restart
+docker compose restart
 
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
+# Tail logs
+docker compose logs -f
+
+# Rebuild after code changes
+docker compose up -d --build
+
+# Open a shell in the running container
+docker compose exec ursamu sh
+
+# Inspect the database volume
+ls ./data/
 </code></pre>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Changing Ports</h2>
+<p>To run on different host ports (e.g. behind a firewall that blocks 4201), edit<br>
+the <code>ports</code> section in <code>docker-compose.yaml</code>:</p>
+<pre class="language-yaml" tabindex="0"><code class="language-yaml">ports:
+  - "2323:4201"   # expose Telnet on host port 2323
+  - "4202:4202"
+  - "443:4203"    # expose HTTP/WS directly on 443 (no nginx needed)
+</code></pre>
+<p>The container-internal ports (<code>4201</code>, <code>4202</code>, <code>4203</code>) stay the same —<br>
+only the host-side mappings change.</p>
+<hr>
+<h2>Behind a Reverse Proxy</h2>
+<p>For TLS termination with nginx, expose only port <code>4203</code> to nginx and keep<br>
+<code>4201</code> open directly for Telnet clients:</p>
+<pre class="language-yaml" tabindex="0"><code class="language-yaml">ports:
+  - "4201:4201"     # Telnet — direct
+  # 4202 and 4203 not exposed; nginx handles 443 → 4203
+</code></pre>
+<p>nginx config:</p>
+<pre class="language-nginx" tabindex="0"><code class="language-nginx">server {
+    listen 443 ssl;
+    server_name yourdomain.com;
 
-interface ShopItem { name: string; cost: number; flags: string[] }
+    ssl_certificate     /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
 
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
+    location / {
+        proxy_pass http://127.0.0.1:4203;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
     }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
-</code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
-</code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
-</code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
 }
 </code></pre>
 <hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
+<h2>Updating</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Pull latest image / rebuild
+git pull
+docker compose up -d --build
 </code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
+<p>Or trigger an in-game update from the admin prompt:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@update
 </code></pre>
+<p>This runs <code>git pull</code> inside the container and restarts the server process.<br>
+The container itself stays running.</p>
 <hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
+<h2>Troubleshooting</h2>
+<h3>Container exits immediately</h3>
+<p>Check the logs:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">docker compose logs ursamu
 </code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
+<p>Common causes:</p>
+<ul>
+<li><strong><code>JWT_SECRET</code> not set</strong> — the server will warn but continue; check logs for<br>
+<code>[security] JWT_SECRET not set</code> and add it to <code>.env</code></li>
+<li><strong>Port already in use</strong> — another process is listening on <code>4201</code>, <code>4202</code>, or<br>
+<code>4203</code>. Stop it or remap the port.</li>
+<li><strong>Missing config</strong> — <code>config/config.json</code> not found. Copy <code>config.sample.json</code><br>
+to <code>config/config.json</code>.</li>
+</ul>
+<h3>Data lost after restart</h3>
+<p>Make sure the <code>./data</code> directory exists and is mounted:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">mkdir -p data logs
+docker compose up -d
 </code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
+<p>If the volume is missing from <code>docker-compose.yaml</code>, data is written inside the<br>
+container and lost on every <code>down</code>.</p>
+<h3>Can’t connect on Telnet</h3>
+<p>Verify the container is running and the port is mapped:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">docker compose ps
+docker compose port ursamu 4201
 </code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
-});
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
+<p>If running behind a firewall, open port <code>4201</code>:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># UFW
+sudo ufw allow 4201/tcp
 </code></pre>
-<hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
+<h3>Permission errors on ./data or ./logs</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash">chmod 777 data logs
 </code></pre>
 
       </article>
@@ -635,9 +599,6 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
@@ -646,28 +607,17 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
-        
       
         
-          
-        
       
-        
-          
-          
-        
-      
-        
-          
         
       
         
@@ -708,16 +658,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/deployment/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">Production Deployment</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/first-script/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">Build Your First Script</span>
           </a>
         
       </nav>

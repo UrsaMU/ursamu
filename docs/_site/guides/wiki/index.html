@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Wiki | UrsaMU Documentation</title>
+  <meta name="description" content="How to create, organize, and manage your game wiki in UrsaMU.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/wiki/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,281 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Wiki</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
+        <h1>Wiki</h1>
+<h2>Every UrsaMU game project includes a <code>wiki/</code> directory at the project root.<br>
+Files placed here are immediately available to players via in-game commands and<br>
+to external tools via the REST API. No database setup is required — the wiki is<br>
+file-based Markdown.</h2>
+<h2>Overview</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">wiki/
+├── home.md              ← shown for +wiki home
+├── lore/
+│   ├── index.md         ← shown for +wiki lore
+│   └── factions.md      ← shown for +wiki lore/factions
+├── rules.md
+└── images/
+    └── banner.png       ← served at GET /api/v1/wiki/images/banner.png
+</code></pre>
+<h2>Players read pages with <code>+wiki</code>. Admins and wizards write and edit pages with<br>
+<code>@wiki</code>. All write operations require the <code>admin</code>, <code>wizard</code>, or <code>superuser</code><br>
+flag.</h2>
+<h2>Directory Structure</h2>
+<p>Subdirectories become sections. A directory with an <code>index.md</code> shows that file<br>
+when listed; otherwise the directory listing is shown directly.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">wiki/lore/index.md   →  +wiki lore         (section overview)
+wiki/lore/factions.md →  +wiki lore/factions
+wiki/rules.md         →  +wiki rules
+</code></pre>
+<h2><code>README.md</code> files at any level are ignored by the wiki system — they are for<br>
+human readers of the repository only.</h2>
+<h2>Frontmatter</h2>
+<p>Pages support YAML-ish frontmatter for metadata. The parser supports strings,<br>
+numbers, booleans, and inline arrays.</p>
+<pre class="language-markdown" tabindex="0"><code class="language-markdown">---
+title: The Iron Pact
+author: Storyteller
+date: 2026-03-18
+tags: [lore, factions, politics]
+---
 
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
+The Iron Pact was forged in the aftermath of the Sundering...
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td>string</td>
+<td>Display name shown in listings and page headers</td>
+</tr>
+<tr>
+<td><code>author</code></td>
+<td>string</td>
+<td>Who wrote the page</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>string</td>
+<td>Publication date (any format)</td>
+</tr>
+<tr>
+<td><code>tags</code></td>
+<td>array</td>
+<td>Searchable keywords</td>
+</tr>
+</tbody>
+</table>
+<h2>Any additional keys are stored and returned by the API — use them freely for<br>
+custom metadata.</h2>
+<h2>In-Game Commands</h2>
+<h3>Reading: <code>+wiki</code></h3>
+<pre class="language-none" tabindex="0"><code class="language-none">+wiki                       list root-level pages and directories
++wiki &lt;path&gt;                read a page or list a directory
++wiki/search &lt;query&gt;        full-text search (title, body, tags)
+</code></pre>
+<p><strong>Examples:</strong></p>
+<pre class="language-none" tabindex="0"><code class="language-none">+wiki                       → root listing
++wiki lore                  → lore/index.md or directory listing
++wiki lore/factions         → lore/factions.md
++wiki/search iron pact      → all pages mentioning "iron pact"
+</code></pre>
+<h3>Writing: <code>@wiki</code> (admin/wizard only)</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@wiki/create &lt;path&gt;=&lt;title&gt;/&lt;body&gt;   create a new page
+@wiki/edit   &lt;path&gt;=&lt;new body&gt;       replace the body of an existing page
+@wiki/fetch  &lt;url&gt;=&lt;wiki-path&gt;       download a remote image into wiki/
+</code></pre>
+<p><strong>Examples:</strong></p>
+<pre class="language-none" tabindex="0"><code class="language-none">@wiki/create lore/factions=The Iron Pact/The Iron Pact was forged...
+@wiki/edit lore/factions=Updated text about the Iron Pact...
+@wiki/fetch https://example.com/banner.png=images/banner.png
+</code></pre>
+<h2><code>@wiki/create</code> sets <code>author</code> and <code>date</code> automatically from the acting player.<br>
+<code>@wiki/edit</code> preserves all existing frontmatter and replaces only the body.<br>
+<code>@wiki/fetch</code> blocks private/loopback URLs and enforces a 10 MB limit.</h2>
+<h2>REST API</h2>
+<p>The wiki is exposed at <code>/api/v1/wiki</code>. Write operations (<code>POST</code>, <code>PATCH</code>,<br>
+<code>DELETE</code>, <code>PUT</code>) require a valid session token.</p>
+<h3>List all pages</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/wiki
+</code></pre>
+<p>Returns an array of page stubs:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">[
+  { "path": "home",           "title": "Home",         "type": "page" },
+  { "path": "lore/factions",  "title": "The Iron Pact","type": "page" }
+]
+</code></pre>
+<h3>Search</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/wiki?q=iron+pact
+</code></pre>
+<p>Returns matching stubs (title, body, and tag matches).</p>
+<h3>Read a page</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/wiki/&lt;path&gt;
+</code></pre>
+<p>Returns the page’s frontmatter fields merged with a <code>body</code> key:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "path":   "lore/factions",
+  "title":  "The Iron Pact",
+  "author": "Storyteller",
+  "date":   "2026-03-18",
+  "tags":   ["lore", "factions"],
+  "body":   "The Iron Pact was forged..."
 }
 </code></pre>
-<hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
-</code></pre>
-<hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
-</code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
-</code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
+<p>If <code>&lt;path&gt;</code> is a directory, a listing is returned:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "path": "lore",
+  "type": "directory",
+  "children": [
+    { "path": "lore/factions", "title": "The Iron Pact", "type": "page" }
+  ]
 }
 </code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h3>Create a page</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">POST /api/v1/wiki
+Content-Type: application/json
 
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
+{
+  "path":   "lore/factions",
+  "title":  "The Iron Pact",
+  "tags":   ["lore", "factions"],
+  "body":   "The Iron Pact was forged..."
 }
 </code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
+<p>Returns <code>201</code> on success, <code>409</code> if the page already exists.</p>
+<h3>Update a page</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">PATCH /api/v1/wiki/&lt;path&gt;
+Content-Type: application/json
 
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
+{ "body": "Revised text..." }
 </code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
+<p>Only the fields included in the request are changed. Omit <code>body</code> to update<br>
+metadata only.</p>
+<h3>Delete a page</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">DELETE /api/v1/wiki/&lt;path&gt;
 </code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
+<h2>Removes <code>&lt;path&gt;.md</code> or <code>&lt;path&gt;/index.md</code>. Returns <code>{ "deleted": true }</code>.</h2>
+<h2>Static Assets</h2>
+<p>Images and PDFs can be stored in the wiki directory and served over HTTP.</p>
+<h3>Upload via API</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">PUT /api/v1/wiki/images/banner.png
+Content-Type: image/png
+&lt;binary body&gt;
 </code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
+<p>Maximum upload size is <strong>10 MB</strong>. Supported types:</p>
+<table>
+<thead>
+<tr>
+<th>Extension</th>
+<th>MIME type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.jpg</code> / <code>.jpeg</code></td>
+<td><code>image/jpeg</code></td>
+</tr>
+<tr>
+<td><code>.png</code></td>
+<td><code>image/png</code></td>
+</tr>
+<tr>
+<td><code>.gif</code></td>
+<td><code>image/gif</code></td>
+</tr>
+<tr>
+<td><code>.webp</code></td>
+<td><code>image/webp</code></td>
+</tr>
+<tr>
+<td><code>.svg</code></td>
+<td><code>image/svg+xml</code></td>
+</tr>
+<tr>
+<td><code>.pdf</code></td>
+<td><code>application/pdf</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Upload via in-game command</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@wiki/fetch https://example.com/banner.png=images/banner.png
 </code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
+<p>Fetches the remote URL and saves it at <code>wiki/images/banner.png</code>. Private and<br>
+loopback addresses are blocked.</p>
+<h3>Retrieve</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">GET /api/v1/wiki/images/banner.png
 </code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
+<h2>Returns the raw file with the appropriate <code>Content-Type</code> header and a<br>
+<code>Cache-Control: public, max-age=3600</code> header.</h2>
+<h2>Hooks</h2>
+<p>Plugins can react to wiki changes by subscribing to <code>wikiHooks</code>:</p>
+<pre class="language-ts" tabindex="0"><code class="language-ts">import { wikiHooks } from "ursamu/plugins/wiki";
+
+wikiHooks.on("wiki:created", (page) =&gt; {
+  console.log(`New page: ${page.path} — "${page.meta.title}"`);
 });
 
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
+wikiHooks.on("wiki:edited", (page) =&gt; {
+  console.log(`Updated: ${page.path}`);
+});
+
+wikiHooks.on("wiki:deleted", (page) =&gt; {
+  console.log(`Deleted: ${page.path}`);
+});
 </code></pre>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Fires when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wiki:created</code></td>
+<td>A new page is written (REST or in-game)</td>
+</tr>
+<tr>
+<td><code>wiki:edited</code></td>
+<td>A page’s body or metadata is updated</td>
+</tr>
+<tr>
+<td><code>wiki:deleted</code></td>
+<td>A page or asset is removed</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
+<h2>Tips</h2>
+<h3>Use subdirectories to organize content</h3>
+<p>Flat listings become unwieldy quickly. Group pages by topic:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">wiki/lore/          world background, factions, history
+wiki/rules/         policies, chargen rules, house rules
+wiki/staff/         internal notes, plot threads, NPC rosters
+wiki/news/          IC announcements, session recaps
 </code></pre>
+<h3>Use frontmatter tags for cross-cutting search</h3>
+<p>Tags are searched alongside title and body, so <code>+wiki/search faction</code> finds<br>
+every page tagged <code>factions</code> even if the word doesn’t appear in the body.</p>
+<h3>Version your wiki with git</h3>
+<p>Because the wiki is plain files, it is automatically tracked by git. Staff can<br>
+edit pages in their editor and push; the changes are live immediately after the<br>
+server reloads.</p>
+<h3>The <code>home.md</code> convention</h3>
+<p>The file <code>wiki/home.md</code> is created automatically when you scaffold a new<br>
+project. Treat it as the entry point — link from it to your major sections so<br>
+that <code>+wiki home</code> gives new players an orientation.</p>
 
       </article>
 
@@ -663,6 +644,13 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
+        
+      
+        
+          
+        
+      
+        
           
         
       
@@ -671,15 +659,20 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-      
+          
         
       
         
-      
+          
         
       
         
+          
+          
+        
       
+        
+          
         
       
         
@@ -708,16 +701,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/user-guide/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">User Guide</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/mush_compatibility/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">MUSH Compatibility</span>
           </a>
         
       </nav>

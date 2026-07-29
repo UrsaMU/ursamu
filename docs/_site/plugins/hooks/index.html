@@ -3,11 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> | UrsaMU Documentation</title>
-  <meta name="description" content="Reacting to and emitting game events with EventsService">
-  <link rel="stylesheet" href="/ursamu/styles.css">
+  <meta name="description" content="Typed event hooks for reacting to game, scene, wiki, and custom events">
+  <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/plugins/hooks/">
+<meta property="og:url" content="http://localhost:3000/plugins/hooks/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/ursamu/" class="site-logo">
+  <a href="/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/guides/" class="header-nav-link">
       Guides
     </a>
     
     
     
-    <a href="/ursamu/api/" class="header-nav-link">
+    <a href="/api/" class="header-nav-link">
       API
     </a>
     
     
     
-    <a href="/ursamu/plugins/" class="header-nav-link active">
+    <a href="/plugins/" class="header-nav-link active">
       Plugins
     </a>
     
     
     
-    <a href="/ursamu/development/" class="header-nav-link">
+    <a href="/development/" class="header-nav-link">
       Development
     </a>
     
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link">
+      <a href="/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,35 +110,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/ursamu/guides/installation/" class="sidebar-link">
+      <a href="/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
+      <a href="/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
+      <a href="/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/ursamu/guides/customization/" class="sidebar-link">
+      <a href="/guides/customization/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+      <a href="/guides/scripting/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
-      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+      <a href="/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -150,7 +150,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/ursamu/configuration/" class="sidebar-link">
+      <a href="/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +162,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/ursamu/api/" class="sidebar-link">
+      <a href="/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/ursamu/api/core/" class="sidebar-link">
+      <a href="/api/core/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +178,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/ursamu/plugins/" class="sidebar-link">
+      <a href="/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/ursamu/plugins/basics/" class="sidebar-link">
+      <a href="/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
+      <a href="/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/ursamu/plugins/commands/" class="sidebar-link">
+      <a href="/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/ursamu/plugins/hooks/" class="sidebar-link active">
+      <a href="/plugins/hooks/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/ursamu/plugins/database/" class="sidebar-link">
+      <a href="/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
+      <a href="/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
+      <a href="/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +218,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/ursamu/development/" class="sidebar-link">
+      <a href="/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/ursamu/development/contributing/" class="sidebar-link">
+      <a href="/development/contributing/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/ursamu/extending/" class="sidebar-link">
+      <a href="/extending/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/ursamu/child-games/" class="sidebar-link">
+      <a href="/child-games/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,7 +259,7 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/ursamu/">Home</a>
+        <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
         <span class="breadcrumbs-current"></span>
       </nav>
@@ -267,172 +267,267 @@
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Plugin Events</h1>
-<h2>Overview</h2>
-<p>UrsaMU uses an internal pub/sub system via <code>EventsService</code>. Plugins can<br>
-subscribe to named event channels, emit custom events, and trigger sandbox<br>
-scripts when events fire. This is the correct way to react to things that<br>
-happen in the game world — there is no <code>app.hooks</code> API.</p>
+        <h1>Plugin Hooks &amp; Events</h1>
+<p>UrsaMU ships two complementary event systems. Choose the one that fits your use case:</p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GameHooks</strong></td>
+<td>Reacting to engine-level events (player login, movement, say, scene changes) from TypeScript plugin code</td>
+</tr>
+<tr>
+<td><strong>EventsService</strong></td>
+<td>Running sandbox scripts when custom events fire; in-game <code>u.events.on/emit</code> scripting</td>
+</tr>
+</tbody>
+</table>
+<h2>Both are safe to use together in the same plugin.</h2>
+<h2>GameHooks</h2>
+<p><code>gameHooks</code> is a typed, singleton event bus exported from <code>mod.ts</code>. It fires<br>
+for 12 built-in engine events and is the correct way to react to player and<br>
+scene activity without modifying core command files.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { gameHooks } from "jsr:@ursamu/mush";
+
+// Subscribe
+gameHooks.on("player:login", ({ actorId, actorName }) =&gt; {
+  console.log(`[GM] ${actorName} connected.`);
+});
+
+// Unsubscribe (pass the same function reference)
+gameHooks.off("player:login", myHandler);
+</code></pre>
+<h3>API</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on(event, handler)   // subscribe — idempotent (no double-register)
+gameHooks.off(event, handler)  // unsubscribe
+await gameHooks.emit(event, payload)  // fire all handlers; errors are caught per-handler
+</code></pre>
+<p><strong>Error isolation</strong> — a throwing handler is logged and skipped; subsequent<br>
+handlers still run.</p>
+<p><strong>Fire-and-forget pattern</strong> (used throughout the engine):</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.emit("player:login", payload)
+  .catch((e) =&gt; console.error("[hooks] player:login error:", e));
+</code></pre>
 <hr>
-<h2>Subscribing to Events</h2>
+<h3>Player Events</h3>
+<h4><code>player:say</code></h4>
+<p>Fires when a player speaks in a room via <code>say</code> / <code>"</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("player:say", ({ actorId, actorName, roomId, message }) =&gt; {
+  // actorId   — DB id of the speaker
+  // actorName — display name
+  // roomId    — room where the message was spoken
+  // message   — the spoken text (raw, may contain MUSH codes)
+});
+</code></pre>
+<h4><code>player:pose</code></h4>
+<p>Fires when a player poses/emotes via <code>pose</code> / <code>:</code> / <code>;</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("player:pose", ({ actorId, actorName, roomId, content, isSemipose }) =&gt; {
+  // content    — full formatted content, e.g. "Alice grins."
+  // isSemipose — true when ; shorthand was used (no space between name and text)
+});
+</code></pre>
+<h4><code>player:page</code></h4>
+<p>Fires when a player pages another player.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("player:page", ({ actorId, actorName, targetId, targetName, message }) =&gt; {});
+</code></pre>
+<h4><code>player:move</code></h4>
+<p>Fires when a player traverses an exit.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("player:move", ({
+  actorId, actorName,
+  fromRoomId, toRoomId,
+  fromRoomName, toRoomName,
+  exitName,         // e.g. "North"
+}) =&gt; {});
+</code></pre>
+<h4><code>player:login</code></h4>
+<p>Fires when a player connects and logs in.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("player:login", ({ actorId, actorName }) =&gt; {});
+</code></pre>
+<h4><code>player:logout</code></h4>
+<p>Fires when a player disconnects.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("player:logout", ({ actorId, actorName }) =&gt; {});
+</code></pre>
+<h4><code>channel:message</code></h4>
+<p>Fires when a player speaks on a channel.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("channel:message", ({ channelName, senderId, senderName, message }) =&gt; {});
+</code></pre>
+<h3>Object Events</h3>
+<p>Fire when DBOs in the main <code>dbojs</code> collection are created, modified, or<br>
+destroyed. Useful for cache invalidation, audit logs, or reacting to<br>
+builder-plugin operations.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("object:created",   ({ id, obj }) =&gt; {});
+gameHooks.on("object:modified",  ({ id, before, after }) =&gt; {});
+gameHooks.on("object:destroyed", ({ id }) =&gt; {});
+</code></pre>
+<h4><code>object:moved</code></h4>
+<p>Fires whenever an object changes location through the engine: <code>get</code>, <code>drop</code>,<br>
+<code>give</code>, <code>u.db.create</code> (with a location), and <code>u.db.destroy</code>. <code>from</code> is <code>null</code><br>
+for fresh creation; <code>to</code> is <code>null</code> for destruction. <code>cause</code> is the verb<br>
+(“get”, “drop”, “give”, “create”, “destroy”, or a plugin-defined string).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("object:moved", ({ objectId, from, to, cause, actorId }) =&gt; {
+  // e.g. merge ammo stacks when a magazine lands in a new carrier
+});
+</code></pre>
+<h4><code>mail:received</code></h4>
+<p>Fires when in-game mail is delivered to a recipient.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("mail:received", ({ recipientId, senderId, subject }) =&gt; {});
+</code></pre>
+<hr>
+<h3>Scene Events</h3>
+<p>Scene hooks fire from the REST API (<code>/api/v1/scenes</code>) when scenes are created,<br>
+modified, or closed. They are the integration point for AI GM assistants and<br>
+other scene-aware plugins.</p>
+<h4><code>scene:created</code></h4>
+<p>Fires after a new scene is opened (<code>POST /api/v1/scenes</code>).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("scene:created", ({ sceneId, sceneName, roomId, actorId, actorName, sceneType }) =&gt; {
+  // sceneType — "social" | "action" | "event" | "vignette" | etc.
+});
+</code></pre>
+<h4><code>scene:pose</code></h4>
+<p>Fires when any pose is posted to a scene — type <code>"pose"</code>, <code>"ooc"</code>, or <code>"set"</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("scene:pose", ({ sceneId, sceneName, roomId, actorId, actorName, msg, type }) =&gt; {
+  // type — "pose" | "ooc" | "set"
+});
+</code></pre>
+<h4><code>scene:set</code></h4>
+<p>Fires <strong>additionally</strong> when a pose with <code>type: "set"</code> is posted (the scene<br>
+description hook). This is the primary integration point for an AI narrator —<br>
+it receives the raw description text and can respond with narration, open a new<br>
+round, or page participants.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("scene:set", ({ sceneId, sceneName, roomId, actorId, actorName, description }) =&gt; {
+  // description — the full scene-set text
+});
+</code></pre>
+<h4><code>scene:title</code></h4>
+<p>Fires when a scene is renamed via <code>PATCH /api/v1/scenes/:id</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("scene:title", ({ sceneId, oldName, newName, actorId, actorName }) =&gt; {});
+</code></pre>
+<h4><code>scene:clear</code></h4>
+<p>Fires when a scene is closed or finished (status transitions to <code>"closed"</code>,<br>
+<code>"finished"</code>, or <code>"archived"</code>).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">gameHooks.on("scene:clear", ({ sceneId, sceneName, actorId, actorName, status }) =&gt; {
+  // status — "closed" | "finished" | "archived"
+});
+</code></pre>
+<hr>
+<h2>WikiHooks</h2>
+<p>The wiki plugin exposes its own typed hook bus for reacting to wiki page<br>
+mutations. Import it from the wiki plugin’s public module:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { wikiHooks } from "../../plugins/wiki/mod.ts";
+</code></pre>
+<h3>Events</h3>
+<h4><code>wiki:created</code></h4>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">wikiHooks.on("wiki:created", ({ path, meta, body }) =&gt; {
+  // path — URL path of the new page, e.g. "news/announcement"
+  // meta — frontmatter key/value map
+  // body — page body markdown
+});
+</code></pre>
+<h4><code>wiki:edited</code></h4>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">wikiHooks.on("wiki:edited", ({ path, meta, body }) =&gt; {});
+</code></pre>
+<h4><code>wiki:deleted</code></h4>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">wikiHooks.on("wiki:deleted", ({ path, meta }) =&gt; {});
+</code></pre>
+<h2>Same <code>on/off/emit</code> API and error-isolation semantics as GameHooks.</h2>
+<h2>EventHooks</h2>
+<p>The events plugin (calendar/RSVP system) exposes its own typed bus:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { eventHooks } from "../../plugins/events/hooks.ts";
+
+eventHooks.on("event:created",   ({ eventId, name, startTime, createdBy }) =&gt; {});
+eventHooks.on("event:updated",   ({ eventId, changes }) =&gt; {});
+eventHooks.on("event:deleted",   ({ eventId }) =&gt; {});
+eventHooks.on("event:started",   ({ eventId, name }) =&gt; {});
+eventHooks.on("event:ended",     ({ eventId, name }) =&gt; {});
+eventHooks.on("event:rsvp",      ({ eventId, playerId, status }) =&gt; {});
+eventHooks.on("event:cancelled", ({ eventId, name }) =&gt; {});
+</code></pre>
+<hr>
+<h2>EventsService (pub/sub)</h2>
+<p>For running <strong>sandbox scripts</strong> in response to events, use <code>EventsService</code>.<br>
+This is different from GameHooks — subscribers are script strings that run<br>
+inside Web Workers with full <code>u.*</code> SDK access.</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">import { EventsService } from "../../services/Events/index.ts";
 
 const svc = EventsService.getInstance();
 
 // Subscribe a handler script to run when "player.connect" fires.
-// Returns a subscription UUID — store it so you can unsubscribe later.
 const subId = await svc.subscribe(
-  "player.connect",         // event name
-  `u.send("Welcome back, " + u.me.name + "!");`,  // sandbox script
-  actorId,                  // the DB object that "owns" this subscription
+  "player.connect",
+  `u.send("Welcome back, " + u.me.name + "!");`,
+  actorId,   // DB object that "owns" this subscription
 );
+
+// Unsubscribe
+await svc.unsubscribe(subId);
 </code></pre>
-<p>The script string is run in the sandbox with full <code>u.*</code> SDK access. The<br>
-<code>actorId</code> is the DB object the script runs as (typically the player or a<br>
-world object).</p>
-<h3>Unsubscribing</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await svc.unsubscribe(subId);
+<p>Always unsubscribe in your plugin’s <code>remove()</code> — orphaned subscribers<br>
+accumulate across reloads.</p>
+<h3>Emitting custom events</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await svc.emit("weather.change", { newWeather: "stormy" });
+
+// With actor context (becomes u.me in subscriber scripts)
+await svc.emit("weather.change", { newWeather: "stormy" }, { id: actorId, state: {} });
 </code></pre>
-<p>Always unsubscribe in your plugin’s <code>remove()</code> if you subscribed during<br>
-<code>init()</code> — otherwise orphaned subscribers accumulate across reloads.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">let connectSubId: string;
-
-const myPlugin: IPlugin = {
-  name: "welcome",
-  version: "1.0.0",
-
-  init: async () =&gt; {
-    const svc = EventsService.getInstance();
-    connectSubId = await svc.subscribe(
-      "player.connect",
-      `u.send("%ch%cgWelcome back, " + u.me.name + "!%cn");`,
-      "world",   // run as the world object
-    );
-    return true;
-  },
-
-  remove: async () =&gt; {
-    const svc = EventsService.getInstance();
-    await svc.unsubscribe(connectSubId);
-  },
-};
-</code></pre>
-<hr>
-<h2>Emitting Events</h2>
-<p>Emit any named event from plugin code. All active subscribers for that event<br>
-will receive it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { EventsService } from "../../services/Events/index.ts";
-
-const svc = EventsService.getInstance();
-
-// Emit with optional payload data and actor context
-await svc.emit("weather.change", { newWeather: "stormy" });
-
-// With an actor context (the actor becomes u.me in subscriber scripts)
-await svc.emit(
-  "weather.change",
-  { newWeather: "stormy" },
-  { id: actorId, state: {} },
-);
-</code></pre>
-<hr>
-<h2>In-Game Event Subscriptions</h2>
-<p>Players and world objects can subscribe to events from inside the game using<br>
-<code>u.events.on()</code> and fire them with <code>u.events.emit()</code> in sandbox scripts:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In a sandbox script or system script:
+<h3>In-game event scripting</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In a sandbox or system script:
 const subId = await u.events.on("weather.change", `
   u.send("The weather changed to: " + event.newWeather);
 `);
 
 await u.events.emit("weather.change", { newWeather: "rainy" });
 </code></pre>
-<p>This makes the events system available to in-game scripting without exposing<br>
-server internals.</p>
 <hr>
 <h2>Naming Conventions</h2>
-<p>Use dot-separated namespaces to avoid collisions:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">player.connect          ← core engine event
-player.disconnect       ← core engine event
-weather.change          ← weather plugin event
-my-plugin.item.pickup   ← custom plugin event
+<p>Use dot-separated namespaces for custom events; built-in events use <code>:</code>-separated namespaces:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">player:login          ← built-in GameHook
+scene:set             ← built-in GameHook
+wiki:created          ← built-in WikiHook
+weather.change        ← custom plugin event (EventsService)
+my-plugin.item.pickup ← custom plugin event (EventsService)
 </code></pre>
-<p>Prefix your plugin’s events with its name. Core events use bare namespaces<br>
-(<code>player.*</code>, <code>room.*</code>, etc.).</p>
 <hr>
 <h2>Full Example</h2>
-<p>A weather plugin that broadcasts weather changes to all subscribers:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/weather/index.ts
+<p>A plugin that reacts to scene:set to broadcast a GM narration and also logs<br>
+player logins:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/gm-assist/index.ts
 import type { IPlugin } from "../../@types/IPlugin.ts";
-import { EventsService } from "../../services/Events/index.ts";
-import "./commands.ts";
+import { gameHooks } from "jsr:@ursamu/mush";
+import { send } from "../../services/broadcast/index.ts";
+import type { SceneSetEvent, SessionEvent } from "jsr:@ursamu/mush";
 
-const WEATHER_TYPES = ["sunny", "cloudy", "rainy", "stormy", "snowy"] as const;
-let weatherInterval: number | undefined;
+const onSceneSet = async ({ sceneId, sceneName, roomId, description }: SceneSetEvent) =&gt; {
+  // Narrate the scene to the room in GM voice
+  send([roomId], `%ch%cm[GM]%cn ${description}`, {});
+  console.log(`[GM] Scene "${sceneName}" set in room ${roomId}`);
+};
 
-const weatherPlugin: IPlugin = {
-  name: "weather",
+const onLogin = ({ actorName }: SessionEvent) =&gt; {
+  console.log(`[GM] ${actorName} logged in.`);
+};
+
+const gmPlugin: IPlugin = {
+  name: "gm-assist",
   version: "1.0.0",
-  description: "Rotating weather system with event hooks",
 
-  init: async () =&gt; {
-    let current: string = "sunny";
-
-    weatherInterval = setInterval(async () =&gt; {
-      const options = WEATHER_TYPES.filter(w =&gt; w !== current);
-      current = options[Math.floor(Math.random() * options.length)];
-
-      const svc = EventsService.getInstance();
-      await svc.emit("weather.change", { weather: current });
-    }, 30 * 60 * 1000) as unknown as number;   // every 30 min
-
-    console.log("[weather] initialized — weather cycle started");
+  init: () =&gt; {
+    gameHooks.on("scene:set",     onSceneSet);
+    gameHooks.on("player:login",  onLogin);
     return true;
   },
 
-  remove: async () =&gt; {
-    if (weatherInterval !== undefined) clearInterval(weatherInterval);
-    console.log("[weather] removed");
+  remove: () =&gt; {
+    gameHooks.off("scene:set",    onSceneSet);
+    gameHooks.off("player:login", onLogin);
   },
 };
 
-export default weatherPlugin;
-</code></pre>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/weather/commands.ts
-import { addCmd } from "../../services/commands/cmdParser.ts";
-import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
-import { EventsService } from "../../services/Events/index.ts";
-
-addCmd({
-  name: "+weather",
-  pattern: /^\+weather(?:\/(\S+))?\s*(.*)/i,
-  lock: "connected",
-  exec: async (u: IUrsamuSDK) =&gt; {
-    const sw = (u.cmd.args[0] || "").toLowerCase();
-
-    if (sw === "watch") {
-      // Subscribe this player to weather changes
-      const svc = EventsService.getInstance();
-      const subId = await svc.subscribe(
-        "weather.change",
-        `u.send("%ch%cyWeather report:%cn The weather is now " + event.weather + ".");`,
-        u.me.id,
-      );
-      u.send(`%ch+weather:%cn You will now receive weather updates. (sub: ${subId.slice(-6)})`);
-      return;
-    }
-
-    u.send("Usage: +weather/watch  — subscribe to weather updates");
-  },
-});
-</code></pre>
-<p>Any other plugin can now react to weather changes:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In another plugin's init():
-const svc = EventsService.getInstance();
-await svc.subscribe(
-  "weather.change",
-  `if (event.weather === "stormy") u.broadcast("Thunder rumbles in the distance!");`,
-  "world",
-);
+export default gmPlugin;
 </code></pre>
 
       </article>
@@ -546,6 +641,74 @@ await svc.subscribe(
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
           
         
       
@@ -553,12 +716,17 @@ await svc.subscribe(
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/plugins/first-plugin/" class="page-nav-btn prev">
+          <a href="/plugins/first-plugin/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
             <span class="page-nav-title"></span>
           </a>
         
 
+        
+          <a href="/plugins/official-plugins/" class="page-nav-btn next">
+            <span class="page-nav-label">Next →</span>
+            <span class="page-nav-title">Official Plugins</span>
+          </a>
         
       </nav>
       
@@ -572,9 +740,9 @@ await svc.subscribe(
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/ursamu/guides/installation/">Installation</a>
-        <a href="/ursamu/api/">API</a>
-        <a href="/ursamu/plugins/">Plugins</a>
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>

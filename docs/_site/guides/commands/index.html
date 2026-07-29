@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Command Reference | UrsaMU Documentation</title>
+  <meta name="description" content="Complete reference for all built-in UrsaMU in-game commands — player, channel, mail, bulletin boards, building, and admin.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/commands/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,628 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Command Reference</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
-
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
-}
-</code></pre>
+        <h1>Command Reference</h1>
+<h2>All built-in commands available in UrsaMU. Commands marked <strong>admin+</strong> require the <code>admin</code> or <code>wizard</code> flag. Commands marked <strong>builder+</strong> require <code>builder</code> or above.</h2>
+<h2>Player Commands</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>look</code> / <code>l</code></td>
+<td>Look at your surroundings or a named object</td>
+</tr>
+<tr>
+<td><code>say &lt;msg&gt;</code> / <code>"&lt;msg&gt;</code></td>
+<td>Speak to everyone in the room</td>
+</tr>
+<tr>
+<td><code>pose &lt;action&gt;</code> / <code>:&lt;action&gt;</code></td>
+<td>Emote an action</td>
+</tr>
+<tr>
+<td><code>;</code></td>
+<td>Pose without a space (possessive — <code>Alice;'s phone rings</code>)</td>
+</tr>
+<tr>
+<td><code>think &lt;msg&gt;</code></td>
+<td>Private message visible only to you</td>
+</tr>
+<tr>
+<td><code>page &lt;player&gt;=&lt;msg&gt;</code></td>
+<td>Send a private message to any online player</td>
+</tr>
+<tr>
+<td><code>page &lt;player&gt;=:&lt;pose&gt;</code></td>
+<td>Page with a pose (<code>From afar, Alice waves.</code>)</td>
+</tr>
+<tr>
+<td><code>who</code></td>
+<td>List currently connected players</td>
+</tr>
+<tr>
+<td><code>@doing &lt;text&gt;</code></td>
+<td>Set your status message shown in <code>who</code></td>
+</tr>
+<tr>
+<td><code>@away [&lt;text&gt;]</code></td>
+<td>Set or clear an away message shown when paged</td>
+</tr>
+<tr>
+<td><code>@last [&lt;player&gt;]</code></td>
+<td>Show last login/logout timestamps</td>
+</tr>
+<tr>
+<td><code>inventory</code> / <code>i</code></td>
+<td>List items you are carrying</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td>View your character stats</td>
+</tr>
+<tr>
+<td><code>get &lt;object&gt;</code></td>
+<td>Pick up an object</td>
+</tr>
+<tr>
+<td><code>drop &lt;object&gt;</code></td>
+<td>Drop an object</td>
+</tr>
+<tr>
+<td><code>give &lt;object&gt;=&lt;player&gt;</code></td>
+<td>Give an object to another player</td>
+</tr>
+<tr>
+<td><code>home</code></td>
+<td>Return to your home location</td>
+</tr>
+<tr>
+<td><code>@teleport &lt;destination&gt;</code></td>
+<td>Teleport to a location or object (builder+)</td>
+</tr>
+<tr>
+<td><code>examine &lt;object&gt;</code> / <code>ex</code></td>
+<td>Inspect an object in detail</td>
+</tr>
+<tr>
+<td><code>@desc &lt;object&gt;=&lt;text&gt;</code></td>
+<td>Set an object’s description</td>
+</tr>
+<tr>
+<td><code>@name &lt;object&gt;=&lt;name&gt;</code></td>
+<td>Rename an object</td>
+</tr>
+<tr>
+<td><code>whisper &lt;player&gt;=&lt;msg&gt;</code></td>
+<td>Private in-room message; others see attribution only</td>
+</tr>
+<tr>
+<td><code>quit</code></td>
+<td>Disconnect from the server</td>
+</tr>
+<tr>
+<td><code>@version</code></td>
+<td>Show the engine version</td>
+</tr>
+<tr>
+<td><code>@poll</code></td>
+<td>Show the current poll, if any</td>
+</tr>
+<tr>
+<td><code>help [&lt;topic&gt;]</code></td>
+<td>Display help text (provided by <a href="https://github.com/UrsaMU/help-plugin">help-plugin</a>)</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
-</code></pre>
+<h2>Channel Commands</h2>
+<p>Channels are provided by the <a href="https://github.com/UrsaMU/channel-plugin">channel-plugin</a>.<br>
+Players join channels and get a short alias to speak with.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@channel/list</code></td>
+<td>List all available channels</td>
+</tr>
+<tr>
+<td><code>@channel/join &lt;name&gt;=&lt;alias&gt;</code></td>
+<td>Join a channel and assign a local alias</td>
+</tr>
+<tr>
+<td><code>@channel/leave &lt;alias&gt;</code></td>
+<td>Leave a channel by alias</td>
+</tr>
+<tr>
+<td><code>&lt;alias&gt; &lt;message&gt;</code></td>
+<td>Send a message on that channel</td>
+</tr>
+<tr>
+<td><code>&lt;alias&gt; :&lt;pose&gt;</code></td>
+<td>Pose on the channel</td>
+</tr>
+<tr>
+<td><code>&lt;alias&gt; on</code></td>
+<td>Re-activate a channel you temporarily left</td>
+</tr>
+<tr>
+<td><code>&lt;alias&gt; off</code></td>
+<td>Temporarily stop receiving a channel</td>
+</tr>
+<tr>
+<td><code>@addcom &lt;alias&gt;=&lt;channel&gt;</code></td>
+<td>Add a channel alias (TinyMUX-style)</td>
+</tr>
+<tr>
+<td><code>@delcom &lt;alias&gt;</code></td>
+<td>Remove a channel alias</td>
+</tr>
+<tr>
+<td><code>@allcom</code></td>
+<td>List all your channel aliases</td>
+</tr>
+<tr>
+<td><code>@clearcom</code></td>
+<td>Remove all your channel aliases</td>
+</tr>
+<tr>
+<td><code>@comtitle &lt;alias&gt;=&lt;title&gt;</code></td>
+<td>Set a display title prefix for a channel</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
-</code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
-</code></pre>
+<h2>Mail Commands</h2>
+<p>Mail is provided by the <a href="https://github.com/UrsaMU/mail-plugin">mail-plugin</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@mail</code></td>
+<td>Show your inbox</td>
+</tr>
+<tr>
+<td><code>@mail/send &lt;to&gt;=&lt;subject&gt;/&lt;body&gt;</code></td>
+<td>Send a mail message</td>
+</tr>
+<tr>
+<td><code>@mail/read &lt;num&gt;</code></td>
+<td>Read a message (marks as read)</td>
+</tr>
+<tr>
+<td><code>@mail/reply &lt;num&gt;=&lt;body&gt;</code></td>
+<td>Reply to a message</td>
+</tr>
+<tr>
+<td><code>@mail/replyall &lt;num&gt;=&lt;body&gt;</code></td>
+<td>Reply to all recipients</td>
+</tr>
+<tr>
+<td><code>@mail/forward &lt;num&gt;=&lt;to&gt;</code></td>
+<td>Forward a message</td>
+</tr>
+<tr>
+<td><code>@mail/cc &lt;addr&gt;</code></td>
+<td>Add a CC recipient while composing</td>
+</tr>
+<tr>
+<td><code>@mail/bcc &lt;addr&gt;</code></td>
+<td>Add a BCC recipient while composing</td>
+</tr>
+<tr>
+<td><code>@mail/subject &lt;text&gt;</code></td>
+<td>Set subject while composing</td>
+</tr>
+<tr>
+<td><code>@mail/proof</code></td>
+<td>Preview the message being composed</td>
+</tr>
+<tr>
+<td><code>@mail/abort</code></td>
+<td>Discard the message being composed</td>
+</tr>
+<tr>
+<td><code>@mail/delete &lt;num&gt;</code></td>
+<td>Delete a message</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
-</code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
+<h2>Bulletin Board Commands</h2>
+<p>Bulletin boards are provided by the <a href="https://github.com/UrsaMU/bbs-plugin">bbs-plugin</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+bblist</code></td>
+<td>List all bulletin boards with post and unread counts</td>
+</tr>
+<tr>
+<td><code>+bbread &lt;board&gt;</code></td>
+<td>List posts on a board</td>
+</tr>
+<tr>
+<td><code>+bbread &lt;board&gt;/&lt;num&gt;</code></td>
+<td>Read a specific post</td>
+</tr>
+<tr>
+<td><code>+bbpost &lt;board&gt;=&lt;subject&gt;/&lt;body&gt;</code></td>
+<td>Post to a board</td>
+</tr>
+<tr>
+<td><code>+bbpost/edit &lt;board&gt;/&lt;num&gt;=&lt;body&gt;</code></td>
+<td>Edit your own post</td>
+</tr>
+<tr>
+<td><code>+bbpost/delete &lt;board&gt;/&lt;num&gt;</code></td>
+<td>Delete your own post</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
-</code></pre>
+<h2>Building Commands</h2>
+<p>Building commands are provided by the <a href="https://github.com/UrsaMU/builder-plugin">builder-plugin</a>. Requires <code>builder+</code> flag unless noted.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@dig &lt;name&gt;</code></td>
+<td>Create a new room</td>
+</tr>
+<tr>
+<td><code>@create &lt;name&gt;</code></td>
+<td>Create a new object</td>
+</tr>
+<tr>
+<td><code>@open &lt;exit&gt;=&lt;dest&gt;</code></td>
+<td>Create an exit to another room</td>
+</tr>
+<tr>
+<td><code>@link &lt;object&gt;=&lt;dest&gt;</code></td>
+<td>Link an exit or set home/dropto</td>
+</tr>
+<tr>
+<td><code>@unlink &lt;object&gt;</code></td>
+<td>Remove a link from an object</td>
+</tr>
+<tr>
+<td><code>@clone &lt;object&gt;</code></td>
+<td>Clone an existing object</td>
+</tr>
+<tr>
+<td><code>@destroy &lt;object&gt;</code></td>
+<td>Destroy an object</td>
+</tr>
+<tr>
+<td><code>@alias &lt;object&gt;=&lt;alias&gt;</code></td>
+<td>Set an alias on an object</td>
+</tr>
+<tr>
+<td><code>@parent &lt;object&gt;=&lt;parent&gt;</code></td>
+<td>Set an object’s parent</td>
+</tr>
+<tr>
+<td><code>@parent/clear &lt;object&gt;</code></td>
+<td>Clear an object’s parent</td>
+</tr>
+<tr>
+<td><code>@lock &lt;object&gt;=&lt;expr&gt;</code></td>
+<td>Set a lock expression on an object</td>
+</tr>
+<tr>
+<td><code>@unlock &lt;object&gt;</code></td>
+<td>Remove a lock from an object</td>
+</tr>
+<tr>
+<td><code>@set &lt;object&gt;=&lt;flag&gt;</code></td>
+<td>Set a flag on an object</td>
+</tr>
+<tr>
+<td><code>@set &lt;object&gt;=&lt;attr&gt;:&lt;value&gt;</code></td>
+<td>Set an attribute on an object</td>
+</tr>
+<tr>
+<td><code>&amp;&lt;ATTR&gt; &lt;object&gt;=&lt;value&gt;</code></td>
+<td>Shorthand attribute assignment</td>
+</tr>
+<tr>
+<td><code>@wipe &lt;object&gt;</code></td>
+<td>Remove all attributes from an object</td>
+</tr>
+<tr>
+<td><code>@trigger &lt;object&gt;/&lt;attr&gt;</code></td>
+<td>Execute a stored script attribute</td>
+</tr>
+<tr>
+<td><code>@nameformat &lt;object&gt;=&lt;format&gt;</code></td>
+<td>Custom name format</td>
+</tr>
+<tr>
+<td><code>@descformat &lt;object&gt;=&lt;format&gt;</code></td>
+<td>Custom description format</td>
+</tr>
+<tr>
+<td><code>@conformat &lt;object&gt;=&lt;format&gt;</code></td>
+<td>Custom contents format</td>
+</tr>
+<tr>
+<td><code>@exitformat &lt;object&gt;=&lt;format&gt;</code></td>
+<td>Custom exits format</td>
+</tr>
+<tr>
+<td><code>@decompile[/tf] &lt;object&gt;</code></td>
+<td>Dump object as copyable <code>@name</code>/<code>&amp;ATTR</code> lines</td>
+</tr>
+<tr>
+<td><code>@find [&lt;name&gt;]</code></td>
+<td>Search objects by name or flag</td>
+</tr>
+<tr>
+<td><code>@quota</code></td>
+<td>Show your object creation quota</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
+<h2>Admin Commands</h2>
+<p>Requires <code>admin</code> or <code>wizard</code> flag unless noted.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@boot &lt;player&gt;</code></td>
+<td>Disconnect a player</td>
+</tr>
+<tr>
+<td><code>@toad &lt;player&gt;</code></td>
+<td>Convert a player to an object</td>
+</tr>
+<tr>
+<td><code>@newpassword &lt;player&gt;=&lt;pass&gt;</code></td>
+<td>Reset a player’s password</td>
+</tr>
+<tr>
+<td><code>@chown &lt;object&gt;=&lt;player&gt;</code></td>
+<td>Transfer ownership of an object</td>
+</tr>
+<tr>
+<td><code>@moniker &lt;object&gt;=&lt;name&gt;</code></td>
+<td>Set an alternate display name</td>
+</tr>
+<tr>
+<td><code>@emit &lt;message&gt;</code></td>
+<td>Attributed room-wide message</td>
+</tr>
+<tr>
+<td><code>@remit &lt;message&gt;</code></td>
+<td>Unattributed room-wide message</td>
+</tr>
+<tr>
+<td><code>@pemit &lt;player&gt;=&lt;message&gt;</code></td>
+<td>Send directly to a player</td>
+</tr>
+<tr>
+<td><code>@cemit &lt;channel&gt;=&lt;message&gt;</code></td>
+<td>Unattributed channel broadcast</td>
+</tr>
+<tr>
+<td><code>@fsay &lt;object&gt;=&lt;message&gt;</code></td>
+<td>Force-speak as an owned object</td>
+</tr>
+<tr>
+<td><code>@fpose &lt;object&gt;=&lt;action&gt;</code></td>
+<td>Force-pose as an owned object</td>
+</tr>
+<tr>
+<td><code>@femit &lt;object&gt;=&lt;message&gt;</code></td>
+<td>Force-emit as an owned object</td>
+</tr>
+<tr>
+<td><code>@npemit &lt;player&gt;=&lt;message&gt;</code></td>
+<td>Send to a player with no prefix</td>
+</tr>
+<tr>
+<td><code>@motd</code></td>
+<td>Show the message of the day</td>
+</tr>
+<tr>
+<td><code>@motd/set &lt;text&gt;</code></td>
+<td>Set the message of the day</td>
+</tr>
+<tr>
+<td><code>@motd/clear</code></td>
+<td>Clear the message of the day</td>
+</tr>
+<tr>
+<td><code>@stats [/full]</code></td>
+<td>Show server statistics</td>
+</tr>
+<tr>
+<td><code>@search [&lt;flags&gt;]</code></td>
+<td>Search objects server-wide</td>
+</tr>
+<tr>
+<td><code>@quota &lt;player&gt;=&lt;num&gt;</code></td>
+<td>Set a player’s object quota</td>
+</tr>
+<tr>
+<td><code>@sweep</code></td>
+<td>Remove all non-player objects from a room</td>
+</tr>
+<tr>
+<td><code>@entrances [&lt;object&gt;]</code></td>
+<td>List all objects that link to an object</td>
+</tr>
+<tr>
+<td><code>@halt [&lt;player&gt;]</code></td>
+<td>Cancel queued actions (own or target’s if admin)</td>
+</tr>
+<tr>
+<td><code>@switch[/first] &lt;val&gt;=&lt;case&gt;,&lt;cmd&gt;,...</code></td>
+<td>Case-branch command execution</td>
+</tr>
+<tr>
+<td><code>@dolist &lt;list&gt;=&lt;action&gt;</code></td>
+<td>Iterate a space-delimited list; execute action per item (<code>##</code> = item, <code>#@</code> = index)</td>
+</tr>
+<tr>
+<td><code>@if &lt;expr&gt;=&lt;true&gt;[,&lt;false&gt;]</code></td>
+<td>Conditional execution</td>
+</tr>
+<tr>
+<td><code>@while &lt;expr&gt;=&lt;action&gt;</code></td>
+<td>Loop while expression is true</td>
+</tr>
+<tr>
+<td><code>@break</code></td>
+<td>Exit the current <code>@dolist</code> or <code>@while</code> loop</td>
+</tr>
+<tr>
+<td><code>@wait &lt;seconds&gt;=&lt;action&gt;</code></td>
+<td>Delay an action by N seconds</td>
+</tr>
+<tr>
+<td><code>@assert &lt;condition&gt;</code></td>
+<td>Abort trigger chain if condition is false</td>
+</tr>
+<tr>
+<td><code>@zone &lt;object&gt;=&lt;zone master&gt;</code></td>
+<td>Assign an object to a zone master</td>
+</tr>
+<tr>
+<td><code>@zone &lt;object&gt;=</code></td>
+<td>Clear zone assignment</td>
+</tr>
+<tr>
+<td><code>@function &lt;name&gt;=&lt;obj&gt;/&lt;attr&gt;</code></td>
+<td>Define a global softcode user function</td>
+</tr>
+<tr>
+<td><code>@cpattr &lt;src&gt;/&lt;attr&gt;=&lt;dst&gt;[/&lt;newname&gt;]</code></td>
+<td>Copy an attribute to another object</td>
+</tr>
+<tr>
+<td><code>@mvattr &lt;src&gt;/&lt;attr&gt;=&lt;dst&gt;[/&lt;newname&gt;]</code></td>
+<td>Move an attribute to another object</td>
+</tr>
+<tr>
+<td><code>@grep &lt;obj&gt;=&lt;pattern&gt;</code></td>
+<td>Search object attributes by name pattern</td>
+</tr>
+<tr>
+<td><code>@ps</code></td>
+<td>List all pending <code>@wait</code> jobs</td>
+</tr>
+<tr>
+<td><code>@drain &lt;obj&gt;</code></td>
+<td>Cancel all pending <code>@wait</code> jobs on an object</td>
+</tr>
+<tr>
+<td><code>@notify &lt;obj&gt;[/&lt;sem&gt;][=&lt;count&gt;]</code></td>
+<td>Signal a semaphore (<code>@wait/until</code>)</td>
+</tr>
+<tr>
+<td><code>@reboot</code></td>
+<td>Restart the server</td>
+</tr>
+<tr>
+<td><code>@shutdown</code></td>
+<td>Shut down the server</td>
+</tr>
+<tr>
+<td><code>@site &lt;key&gt;=&lt;value&gt;</code></td>
+<td>Set a server configuration value</td>
+</tr>
+<tr>
+<td><code>@resettoken &lt;player&gt;</code></td>
+<td>Generate a password-reset token for a player</td>
+</tr>
+<tr>
+<td><code>@chancreate &lt;name&gt;[=&lt;header&gt;]</code></td>
+<td>Create a channel</td>
+</tr>
+<tr>
+<td><code>@chandestroy &lt;name&gt;</code></td>
+<td>Destroy a channel</td>
+</tr>
+<tr>
+<td><code>@chanset &lt;name&gt;/&lt;prop&gt;=&lt;value&gt;</code></td>
+<td>Configure a channel</td>
+</tr>
+<tr>
+<td><code>+bbcreate &lt;name&gt;[=&lt;description&gt;]</code></td>
+<td>Create a bulletin board</td>
+</tr>
+<tr>
+<td><code>+bbdestroy &lt;board&gt;</code></td>
+<td>Destroy a bulletin board</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
-</code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
-</code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
-</code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
-});
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
-</code></pre>
-<hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
-</code></pre>
+<h2>Plugin Commands</h2>
+<p>Commands provided by official plugins are documented in their respective repos.</p>
+<table>
+<thead>
+<tr>
+<th>Plugin</th>
+<th>Commands</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>jobs</strong></td>
+<td><code>+job</code>, <code>+jobs</code>, <code>+job/create</code>, etc.</td>
+<td><a href="https://github.com/UrsaMU/jobs-plugin#commands">UrsaMU/jobs-plugin</a></td>
+</tr>
+<tr>
+<td><strong>events</strong></td>
+<td><code>+event</code>, <code>+events</code></td>
+<td><a href="https://github.com/UrsaMU/events-plugin#commands">UrsaMU/events-plugin</a></td>
+</tr>
+<tr>
+<td><strong>discord</strong></td>
+<td>Bridge only — no in-game commands</td>
+<td><a href="https://github.com/UrsaMU/discord-plugin">UrsaMU/discord-plugin</a></td>
+</tr>
+</tbody>
+</table>
 
       </article>
 
@@ -619,9 +947,6 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
@@ -630,44 +955,25 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
-        
       
         
-          
-        
       
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-          
-        
-      
-        
-          
         
       
         
@@ -708,16 +1014,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/cli/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">CLI Reference</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/customization/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">Customization Guide</span>
           </a>
         
       </nav>

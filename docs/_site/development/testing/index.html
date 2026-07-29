@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Testing | UrsaMU Documentation</title>
+  <meta name="description" content="How to run the UrsaMU test suite and write tests for commands, scripts, and plugins.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/development/testing/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -33,7 +33,7 @@
     
     
     
-    <a href="/guides/" class="header-nav-link active">
+    <a href="/guides/" class="header-nav-link">
       Guides
     </a>
     
@@ -51,7 +51,7 @@
     
     
     
-    <a href="/development/" class="header-nav-link">
+    <a href="/development/" class="header-nav-link active">
       Development
     </a>
     
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,262 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Testing</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
+        <h1>Testing</h1>
+<h2>UrsaMU uses <a href="https://docs.deno.com/runtime/fundamentals/testing/">Deno’s built-in test runner</a>.<br>
+The v2.6.0 suite is <strong>1464 passing, 0 failing</strong> across 480 lint-clean files —<br>
+covering authentication, command parsing, sandbox scripting, softcode evaluation,<br>
+plugin lifecycle, WebSocket rate limiting, scene export, format handlers,<br>
+plugin install atomicity, and security regression tests.</h2>
+<h2>Running Tests</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># Full test suite
+deno task test
 
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
+# With LCOV coverage report
+deno task test:coverage
 
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
-}
+# Single file
+deno test --allow-all --unstable-kv --no-check tests/auth.test.ts
+
+# Filter by test name
+deno test --allow-all --unstable-kv --no-check --filter "auth login"
+</code></pre>
+<blockquote>
+<p>Always use <code>--no-check</code> — the suite is large and type-checking adds significant overhead<br>
+with no benefit for test runs.</p>
+</blockquote>
+<h3>Running package tests</h3>
+<p>The monorepo packages each have their own test directories. Run them directly<br>
+to isolate failures to a specific layer:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># core infrastructure tests (includes 12 security tests)
+deno test packages/core/tests/ --allow-all --unstable-kv --no-check
+
+# MUSH engine tests
+deno test packages/mush/tests/ --allow-all --unstable-kv --no-check
+
+# both together
+deno test packages/core/tests/ packages/mush/tests/ --allow-all --unstable-kv --no-check
+</code></pre>
+<h3>Checking package boundaries</h3>
+<p>The <code>tools/check-boundaries.ts</code> script verifies that <code>@ursamu/core</code> does not<br>
+import from <code>@ursamu/mush</code> (enforcing the one-way dependency):</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A tools/check-boundaries.ts
+</code></pre>
+<p>Run this before committing changes that touch <code>packages/</code>.</p>
+<hr>
+<h2>Test Structure</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">tests/
+├── auth.test.ts               # JWT auth, login, rate limiting
+├── gameclock.test.ts          # In-game calendar &amp; time
+├── plugin_deps.test.ts        # Plugin loading &amp; manifest
+├── queue_scene_discord.test.ts# Async queue, scenes, Discord hooks
+├── scripts_attrs.test.ts      # @set, @examine, @describe, @flags, @name
+├── scripts_comms.test.ts      # say, pose, who, score
+├── scripts_identity.test.ts   # connect, create, quit
+├── scripts_interaction.test.ts# drop, give, get, trigger
+├── scripts_world.test.ts      # look, dig, go (exit matching)
+├── websocket_e2e.test.ts      # Lifecycle, rate limit, broadcast, disconnect
+└── …
 </code></pre>
 <hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
+<h2>Required Test Options</h2>
+<p>When a test imports anything from the service layer (e.g. <code>cmdParser</code>, <code>DBO</code>, <code>sandboxService</code>),<br>
+use these options to suppress Deno’s resource-leak and pending-op warnings:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const OPTS = {
+  sanitizeResources: false,
+  sanitizeOps: false,
 };
+
+Deno.test({ name: "my test", ...OPTS, fn: async () =&gt; { … } });
 </code></pre>
+<p><code>cmdParser</code> triggers async file reads at init and never fully closes them, which would<br>
+otherwise cause every test that imports it to fail sanitization.</p>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Testing System Scripts</h2>
+<p>System scripts (<code>system/scripts/*.ts</code>) are TypeScript files that default-export an<br>
+async function <code>(u: IUrsamuSDK) =&gt; void</code>. They can be tested directly by importing<br>
+them and calling them with a mock SDK object.</p>
+<h3>Basic pattern</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import script from "../system/scripts/say.ts";
 
-interface ShopItem { name: string; cost: number; flags: string[] }
+Deno.test({ name: "say", ...OPTS, fn: async () =&gt; {
+  let sent = "";
+  let broadcast = "";
 
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
+  const u = {
+    me: { id: "p1", name: "Alice", flags: new Set(["connected"]), state: {}, contents: [] },
+    cmd: { args: ["Hello world"], switches: [] },
+    send: (msg: string) =&gt; { sent += msg; },
+    emit: (msg: string) =&gt; { broadcast += msg; },
+    // … add other stubs as needed
+  } as any;
 
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
+  await script(u);
 
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
+  if (!sent.includes("You say")) throw new Error("Missing 'You say' echo");
+  if (!broadcast.includes("Alice says")) throw new Error("Missing broadcast");
+}});
 </code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
-</code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
-</code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h3>wrapScript — running scripts as legacy blocks</h3>
+<p>When a script needs access to the full Sandbox (e.g. scripts that call <code>u.db.*</code><br>
+or <code>u.ui.layout()</code>), use <code>wrapScript</code> to strip the <code>import</code>/<code>export</code> declarations<br>
+and run the script as a legacy block inside the Sandbox service:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { sandboxService } from "../src/services/Sandbox/SandboxService.ts";
 
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
-</code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
+function wrapScript(content: string): string {
+  return content
+    .replace(/^import\s.*?;?\s*$/gm, "")
+    .replace(/^export\s+default\s+/m, "const _main = ")
+    .replace(/^export\s+const\s+/gm, "const ")
+    + "\nawait _main(u);";
 }
 
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
-</code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
-</code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
-</code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
+const raw = await Deno.readTextFile("system/scripts/look.ts");
+const result = await sandboxService.runScript(wrapScript(raw), {
+  id: "actor1",
+  me: { id: "actor1", name: "Bob", flags: new Set(["connected"]), state: {}, contents: [] },
+  here: { id: "room1", name: "Lobby", flags: new Set(["room"]), state: {}, contents: [] },
+  location: "room1",
+  state: {},
+  socketId: "sock1",
 });
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
+</code></pre>
+<h3>Scripts that emit <code>u.ui.layout()</code></h3>
+<p>Scripts like <code>who</code> and <code>score</code> call <code>u.ui.layout()</code> which posts a <code>type: "result"</code> message<br>
+that resolves the sandbox early. Use an extended stub that captures both <code>_sent</code> and<br>
+<code>_broadcast</code> and stubs <code>u.ui.layout</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const extra = `
+  const _sent = [];
+  const _broadcast = [];
+  u.send = (msg) =&gt; { _sent.push(msg); };
+  u.emit = (msg) =&gt; { _broadcast.push(msg); };
+  u.ui = { layout: (data) =&gt; { postMessage({ type: "result", data }); } };
+`;
 </code></pre>
 <hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
+<h2>Testing Commands Registered with addCmd()</h2>
+<p>For commands registered via <code>addCmd()</code>, import the command module directly,<br>
+call the <code>exec</code> function, and inspect the mock SDK:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd, cmds } from "../src/services/commands/cmdParser.ts";
 
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
+Deno.test({ name: "greet command", ...OPTS, fn: async () =&gt; {
+  // Register the command
+  addCmd({
+    name: "greet",
+    pattern: /^greet\s+(.+)/i,
+    exec: async (u) =&gt; {
+      u.send(`You wave at ${u.cmd.args[0]}.`);
+    },
+  });
 
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
+  let output = "";
+  const u = {
+    me: { id: "p1", name: "Alice", flags: new Set(["connected"]), state: {}, contents: [] },
+    cmd: { args: ["Bob"], switches: [], original: "greet Bob" },
+    send: (msg: string) =&gt; { output += msg; },
+    emit: () =&gt; {},
+  } as any;
 
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
+  const cmd = cmds.find(c =&gt; c.name === "greet")!;
+  await cmd.exec(u);
 
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
+  if (!output.includes("wave at Bob")) throw new Error(output);
+}});
 </code></pre>
+<hr>
+<h2>Testing Plugins</h2>
+<p>Test a plugin’s <code>init()</code> and <code>remove()</code> in isolation by calling them directly.<br>
+Use a shared DB prefix that won’t collide with other tests.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import myPlugin from "../src/plugins/my-feature/index.ts";
+import { DBO } from "../src/services/Database/index.ts";
+
+const OPTS = { sanitizeResources: false, sanitizeOps: false };
+const db = new DBO&lt;{ title: string }&gt;("test.my-feature");
+
+Deno.test({ name: "my-feature plugin", ...OPTS, fn: async (t) =&gt; {
+  await myPlugin.init();
+
+  await t.step("creates a record", async () =&gt; {
+    await db.create({ title: "hello" });
+    const result = await db.queryOne({ title: "hello" });
+    if (!result || result.title !== "hello") throw new Error("Record not found");
+  });
+
+  // Always clean up
+  await myPlugin.remove?.();
+  await db.deleteAll({});
+}});
+</code></pre>
+<hr>
+<h2>Database IDs</h2>
+<p>Prefix DB IDs in tests to avoid collisions between test files that run in parallel:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Good — unique prefix per test file
+const actor = { id: "sa_actor1", … };  // "sa_" = scripts_attrs
+const room   = { id: "sa_room1",  … };
+
+// Bad — generic IDs collide across test files
+const actor = { id: "actor1", … };
+</code></pre>
+<p>Close the DB in the last test of the file:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { DBO as _DBO } from "../src/services/Database/index.ts";
+
+// Last test in the file:
+Deno.test({ name: "cleanup", ...OPTS, fn: async () =&gt; {
+  await _DBO.close();
+}});
+</code></pre>
+<hr>
+<h2>Stubbing the Sandbox</h2>
+<p>Scripts that reference in-game objects (exits, inventory, rooms) need the sandbox<br>
+stubs set up with inline JavaScript object literals — <strong>not <code>JSON.stringify</code></strong>, which<br>
+breaks <code>Set</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const jsExit = `{ id: "x1", name: "North", flags: new Set(["exit"]), state: {}, contents: [] }`;
+
+// Counter must be defined INSIDE the extra string so it's scoped to the worker:
+const extra = `
+  let _callCount = 0;
+  u.db = {
+    ...u.db,
+    search: async () =&gt; ++_callCount === 1 ? [${jsExit}] : [],
+  };
+`;
+</code></pre>
+<hr>
+<h2>Coverage</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task test:coverage
+</code></pre>
+<p>This runs the full suite, then outputs:</p>
+<ol>
+<li>An LCOV file at <code>coverage/lcov.info</code> — compatible with most CI coverage dashboards</li>
+<li>A summary table in the terminal</li>
+</ol>
+<p>To view HTML coverage (requires <code>genhtml</code> from <code>lcov</code>):</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">genhtml coverage/lcov.info -o coverage/html
+open coverage/html/index.html
+</code></pre>
+<hr>
+<h2>CI</h2>
+<p>The project uses GitHub Actions. The workflow is at <code>.github/workflows/ci.yml</code>.<br>
+Tests run on every push and pull request:</p>
+<pre class="language-yaml" tabindex="0"><code class="language-yaml">- name: Run tests
+  run: deno test --allow-all --unstable-kv --no-check
+</code></pre>
+<p>Tests must pass before a PR can be merged.</p>
+<hr>
+<h2>Pre-Commit Gauntlet</h2>
+<p>These four steps mirror CI and must pass before every commit:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno check --unstable-kv mod.ts
+deno lint
+deno test tests/ --allow-all --unstable-kv --no-check
+deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
+</code></pre>
+<p>The full suite is green on <code>main</code> — there are no expected failures. If a test<br>
+fails on your branch, fix it before submitting a PR.</p>
 
       </article>
 
@@ -599,9 +561,6 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
@@ -610,64 +569,35 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
-        
       
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-          
-        
-      
-        
-          
         
       
         
@@ -708,16 +638,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/development/contributing/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title"></span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/extending/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title"></span>
           </a>
         
       </nav>

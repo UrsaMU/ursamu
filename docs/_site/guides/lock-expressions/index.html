@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Lock Expressions | UrsaMU Documentation</title>
+  <meta name="description" content="Reference guide for UrsaMU's lock expression syntax — built-in lockfuncs, boolean operators, indirect locks, and custom lockfunc registration.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/lock-expressions/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,262 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Lock Expressions</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
-
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
-}
+        <h1>Lock Expressions</h1>
+<p>Lock expressions control access to commands, exits, and objects. They appear in<br>
+three places:</p>
+<ul>
+<li>The <code>lock</code> field of a command definition: <code>lock: "connected &amp;&amp; perm(builder)"</code></li>
+<li>The in-game <code>@lock</code> command: <code>@lock north=flag(admin)</code></li>
+<li>The SDK <code>u.checkLock()</code> method in scripts</li>
+</ul>
+<h2>An empty or absent lock always passes. Locks are <strong>fail-closed</strong>: an unknown<br>
+lockfunc or a runtime error in a lockfunc evaluates to <code>false</code>. Maximum lock<br>
+string length is 4096 characters / 256 tokens.</h2>
+<h2>Quick Examples</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">"connected"                           -- any logged-in actor
+"flag(admin)"                         -- has the admin flag
+"connected &amp;&amp; perm(builder)"          -- logged in AND builder level or higher
+"flag(admin) || flag(wizard)"         -- admin OR wizard
+"!flag(dark)"                         -- does NOT have the dark flag
+"connected &amp;&amp; (flag(admin) || flag(builder))"
+"attr(tribe, glasswalker)"            -- state.tribe === "glasswalker"
+"is(#5)"                              -- actor is object #5
+"holds(#12)"                          -- actor's inventory includes #12
 </code></pre>
 <hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
-</code></pre>
+<h2>Built-in Lockfuncs</h2>
+<p>Lockfuncs are functions called against the enactor. They take zero or more<br>
+arguments and return a boolean.</p>
+<table>
+<thead>
+<tr>
+<th>Lockfunc</th>
+<th>Example</th>
+<th>Passes when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flag(name)</code></td>
+<td><code>flag(wizard)</code></td>
+<td>enactor has the named flag</td>
+</tr>
+<tr>
+<td><code>attr(name)</code></td>
+<td><code>attr(tribe)</code></td>
+<td>enactor.state has own-property <code>name</code></td>
+</tr>
+<tr>
+<td><code>attr(name, value)</code></td>
+<td><code>attr(class, warrior)</code></td>
+<td><code>state[name] === value</code> (case-insensitive key)</td>
+</tr>
+<tr>
+<td><code>type(name)</code></td>
+<td><code>type(player)</code></td>
+<td>enactor has the type flag (player/room/thing/exit)</td>
+</tr>
+<tr>
+<td><code>is(#id)</code></td>
+<td><code>is(#5)</code></td>
+<td>enactor’s dbref is <code>#5</code></td>
+</tr>
+<tr>
+<td><code>holds(#id)</code></td>
+<td><code>holds(#12)</code></td>
+<td>enactor’s inventory includes <code>#12</code></td>
+</tr>
+<tr>
+<td><code>perm(level)</code></td>
+<td><code>perm(admin)</code></td>
+<td>enactor passes the privilege check for <code>level</code></td>
+</tr>
+</tbody>
+</table>
+<p>The legacy plain-flag form is still supported: <code>"admin"</code> is equivalent to<br>
+<code>flag(admin)</code>, and a trailing <code>+</code> (<code>builder+</code>) is equivalent to<br>
+<code>perm(builder)</code>.</p>
+<h3><code>perm()</code> levels</h3>
+<p><code>perm()</code> is the recommended way to check minimum permission level because it<br>
+walks the flag ladder. Higher levels satisfy lower-level checks.</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Passes for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>perm(player)</code></td>
+<td>player, builder, storyteller, admin, wizard, superuser</td>
+</tr>
+<tr>
+<td><code>perm(builder)</code></td>
+<td>builder, storyteller, admin, wizard, superuser</td>
+</tr>
+<tr>
+<td><code>perm(admin)</code></td>
+<td>admin, wizard, superuser</td>
+</tr>
+<tr>
+<td><code>perm(wizard)</code></td>
+<td>wizard, superuser</td>
+</tr>
+<tr>
+<td><code>perm(superuser)</code></td>
+<td>superuser only</td>
+</tr>
+</tbody>
+</table>
+<h3>Special tokens</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>connected</code></td>
+<td>enactor is logged in (has the <code>connected</code> flag)</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
+<h2>Boolean Operators</h2>
+<p>Lock expressions support full boolean algebra. Precedence (highest first):</p>
+<ol>
+<li><code>!</code> — NOT (prefix)</li>
+<li><code>&amp;&amp;</code> — AND</li>
+<li><code>||</code> — OR</li>
+<li><code>( )</code> — Grouping (overrides precedence)</li>
+</ol>
+<pre class="language-none" tabindex="0"><code class="language-none">"!flag(superuser)"
+"connected &amp;&amp; perm(admin)"
+"flag(admin) || flag(wizard)"
+"connected &amp;&amp; (flag(admin) || flag(builder))"
 </code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
+<h3>Legacy <code>&amp;</code> / <code>|</code></h3>
+<h2>The single-character operators <code>&amp;</code> (AND) and <code>|</code> (OR) from earlier UrsaMU<br>
+releases still work as aliases for <code>&amp;&amp;</code> / <code>||</code>. New code should prefer the<br>
+two-character forms — they are unambiguous around lockfunc names that contain<br>
+underscores or dashes.</h2>
+<h2>Indirect Locks</h2>
+<p>Prefix <code>@</code> to delegate the lock check to the lock stored on another object.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">"@#10"     -- evaluate the lock stored on object #10
+"@vault"   -- evaluate the lock on the object named "vault"
 </code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
-</code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Indirect locks are recursion-protected (maximum depth 10).</h2>
+<h2>Registering a Custom Lockfunc</h2>
+<p>Plugins can register their own lockfuncs via <code>registerLockFunc</code>. Built-in<br>
+names (<code>flag</code>, <code>attr</code>, <code>type</code>, <code>is</code>, <code>holds</code>, <code>perm</code>) are protected and cannot<br>
+be overwritten.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerLockFunc } from "jsr:@ursamu/mush";
 
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
-</code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
-</code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
-</code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
-</code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
-});
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
-</code></pre>
-<hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
+registerLockFunc("tribe", (enactor, _target, args) =&gt;
+  String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
 );
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
 </code></pre>
+<p>Once registered, the function is available everywhere locks are evaluated:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">lock: "tribe(glasswalker)"
+lock: "perm(admin) || tribe(glasswalker)"
+lock: "connected &amp;&amp; !tribe(banished)"
+</code></pre>
+<p><strong>Signature:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerLockFunc(
+  name: string,
+  fn: (enactor: IDBObj, target: IDBObj | null, args: string[]) =&gt; boolean
+): void;
+</code></pre>
+<h2>Locks fail closed — return <code>false</code> on missing data or invalid input, and the<br>
+engine itself catches thrown errors.</h2>
+<h2>Using Locks in Scripts</h2>
+<p>The SDK exposes <code>u.checkLock()</code> to evaluate a lock expression from a script:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const canEnter = await u.checkLock(targetRoom, "connected &amp;&amp; perm(builder)");
+if (!canEnter) {
+  u.send("You don't have permission to enter.");
+  return;
+}
+</code></pre>
+<p><strong>Signature:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.checkLock(target: string | IDBObj, lock: string): Promise&lt;boolean&gt;;
+</code></pre>
+<ul>
+<li><code>target</code> — the object whose perspective resolves <code>@indirect</code> locks</li>
+<li><code>lock</code> — any valid lock expression string</li>
+</ul>
+<hr>
+<h2>Quick Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>""</code></td>
+<td>Always passes (open)</td>
+</tr>
+<tr>
+<td><code>"connected"</code></td>
+<td>Actor is logged in</td>
+</tr>
+<tr>
+<td><code>"flag(admin)"</code></td>
+<td>Actor has the admin flag</td>
+</tr>
+<tr>
+<td><code>"perm(builder)"</code></td>
+<td>Builder level or higher</td>
+</tr>
+<tr>
+<td><code>"perm(admin)"</code></td>
+<td>Admin level or higher</td>
+</tr>
+<tr>
+<td><code>"!flag(dark)"</code></td>
+<td>Actor does NOT have the dark flag</td>
+</tr>
+<tr>
+<td><code>"flag(admin) || flag(wizard)"</code></td>
+<td>Admin or wizard</td>
+</tr>
+<tr>
+<td><code>"connected &amp;&amp; perm(admin)"</code></td>
+<td>Logged in AND admin or higher</td>
+</tr>
+<tr>
+<td><code>"connected &amp;&amp; (flag(admin) || flag(builder))"</code></td>
+<td>Logged in AND (admin or builder)</td>
+</tr>
+<tr>
+<td><code>"is(#5)"</code></td>
+<td>Actor is object #5</td>
+</tr>
+<tr>
+<td><code>"holds(#12)"</code></td>
+<td>Actor’s inventory includes #12</td>
+</tr>
+<tr>
+<td><code>"attr(class, warrior)"</code></td>
+<td>Actor’s <code>class</code> attribute is <code>warrior</code></td>
+</tr>
+<tr>
+<td><code>"@#10"</code></td>
+<td>Delegates to the lock on object #10</td>
+</tr>
+</tbody>
+</table>
 
       </article>
 
@@ -655,19 +617,15 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
         
           
-          
         
       
         
-          
+      
         
       
         
@@ -708,16 +666,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/installation/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">Installation Guide</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/password-reset/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">Password Reset</span>
           </a>
         
       </nav>

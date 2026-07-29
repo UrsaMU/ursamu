@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>REST API Reference | UrsaMU Documentation</title>
+  <meta name="description" content="Complete reference for UrsaMU's built-in HTTP endpoints — auth, players, channels, DB objects, scenes, config, and UI manifest.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/api/rest/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -33,13 +33,13 @@
     
     
     
-    <a href="/guides/" class="header-nav-link active">
+    <a href="/guides/" class="header-nav-link">
       Guides
     </a>
     
     
     
-    <a href="/api/" class="header-nav-link">
+    <a href="/api/" class="header-nav-link active">
       API
     </a>
     
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,325 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">REST API Reference</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
-
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
+        <h1>REST API Reference</h1>
+<p>The UrsaMU HTTP API runs on the same port as the WebSocket hub (default<br>
+<code>4203</code>). This document covers only the <strong>engine-built-in</strong> endpoints —<br>
+plugins (mail, jobs, bbs, help, wiki, builder, events) register their own<br>
+routes via <code>registerPluginRoute()</code> and document them in their own repos.</p>
+<p>Verified against <code>src/routes/</code> and <code>src/app.ts</code> for v2.6.0.</p>
+<h2>Contents</h2>
+<ul>
+<li><a href="#auth-model">Auth model</a></li>
+<li><a href="#error-responses">Error responses</a></li>
+<li><a href="#websocket-connection">WebSocket connection</a></li>
+<li><a href="#auth-router">Auth router</a> — <code>/api/v1/auth/*</code></li>
+<li><a href="#players--channels">Players &amp; channels</a> — <code>/api/v1/me</code>, <code>/api/v1/players/*</code>, <code>/api/v1/channels/*</code></li>
+<li><a href="#db-objects">DB Objects</a> — <code>/api/v1/dbos</code>, <code>/api/v1/dbobj/:id</code></li>
+<li><a href="#scenes">Scenes</a> — <code>/api/v1/scenes/*</code></li>
+<li><a href="#config--text">Config &amp; text</a> — <code>/api/v1/config</code>, <code>/api/v1/connect</code>, <code>/api/v1/welcome</code></li>
+<li><a href="#ui-manifest">UI manifest</a> — <code>/api/v1/ui-manifest</code></li>
+<li><a href="#avatars">Avatars</a> — <code>/avatars/:id</code></li>
+<li><a href="#health">Health</a> — <code>/health</code></li>
+<li><a href="#plugin-endpoints">Plugin endpoints</a></li>
+</ul>
+<hr>
+<h2>Auth model</h2>
+<p>All protected endpoints require a JWT in the <code>Authorization</code> header:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">Authorization: Bearer &lt;token&gt;
+</code></pre>
+<p>Obtain a token via <code>POST /api/v1/auth</code> or <code>POST /api/v1/auth/register</code>.<br>
+Tokens are signed with <code>JWT_SECRET</code> (set in <code>.env</code>). If <code>JWT_SECRET</code> is<br>
+unset in production the engine exits at boot. In dev a random per-process<br>
+secret is used and tokens are invalidated on every restart.</p>
+<p>A global API rate limit applies per IP (<code>apiRateLimits</code> map in<br>
+<code>src/app.ts</code>). Auth endpoints have an additional per-IP brute-force<br>
+guard.</p>
+<h2>Error responses</h2>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>400</td>
+<td>Bad request — missing or invalid body</td>
+</tr>
+<tr>
+<td>401</td>
+<td>Missing or invalid token</td>
+</tr>
+<tr>
+<td>403</td>
+<td>Valid token, insufficient permissions</td>
+</tr>
+<tr>
+<td>404</td>
+<td>Resource not found</td>
+</tr>
+<tr>
+<td>405</td>
+<td>Method not allowed</td>
+</tr>
+<tr>
+<td>429</td>
+<td>Rate limited (<code>Retry-After</code> header set)</td>
+</tr>
+<tr>
+<td>500</td>
+<td>Internal server error</td>
+</tr>
+</tbody>
+</table>
+<p>Error body shape:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "error": "Human-readable message" }
+</code></pre>
+<hr>
+<h2>WebSocket connection</h2>
+<p>The hub shares the HTTP port. Two connection modes:</p>
+<h3>JWT pre-auth (web clients)</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">ws://localhost:4203?token=&lt;jwt&gt;&amp;client=web
+</code></pre>
+<p>The player is authenticated immediately. On JWT reauth the engine<br>
+re-applies the <code>connected</code> flag and re-joins the player’s <code>#cid</code> and<br>
+<code>#location</code> rooms (v2.4.0 fix).</p>
+<h3>Classic connect (Telnet-style)</h3>
+<p>Connect without a token, then send <code>connect &lt;name&gt; &lt;password&gt;</code>.</p>
+<h3>Rate limiting</h3>
+<p>Each WebSocket is limited to <strong>10 commands/sec</strong>. Excess commands are<br>
+silently dropped (warning logged server-side).</p>
+<hr>
+<h2>Auth router</h2>
+<p>Defined in <code>src/routes/authRouter.ts</code>. All endpoints accept <code>POST</code> only.<br>
+Path is matched by suffix on <code>/api/v1/auth*</code>.</p>
+<h3>POST /api/v1/auth</h3>
+<p>Login. Returns a JWT.</p>
+<p>Body:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "username": "Alice", "password": "hunter2" }
+</code></pre>
+<p>Response 200:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "token": "&lt;jwt&gt;", "id": "5", "name": "Alice" }
+</code></pre>
+<p>Errors: 401 invalid credentials, 429 rate-limited.</p>
+<h3>POST /api/v1/auth/register</h3>
+<p>Create a new character. Returns a JWT.</p>
+<p>Body:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "username": "Alice", "email": "alice@example.com", "password": "hunter2" }
+</code></pre>
+<p>Response 201:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "token": "&lt;jwt&gt;", "id": "5", "name": "Alice" }
+</code></pre>
+<h3>POST /api/v1/auth/reset-password</h3>
+<p>Consume a one-time reset token and set a new password. Token comparison<br>
+is constant-time (v2.0.0 hardening). Expired tokens are cleaned up<br>
+opportunistically.</p>
+<p>Body:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "token": "&lt;one-time-token&gt;", "newPassword": "newpw" }
+</code></pre>
+<p>Response 200:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "message": "Password updated successfully." }
+</code></pre>
+<hr>
+<h2>Players &amp; channels</h2>
+<p>Routed from <code>src/app.ts</code>; handlers in <code>src/routes/playersRouter.ts</code>.</p>
+<h3>GET /api/v1/me</h3>
+<p>Current player profile. Requires auth.</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "id": "5",
+  "name": "Alice",
+  "flags": ["connected", "player"],
+  "data": { "description": "...", "avatar": "/avatars/5" }
 }
 </code></pre>
-<hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
+<h3>GET /api/v1/players/online</h3>
+<p>List currently connected players. Requires auth.</p>
+<pre class="language-json" tabindex="0"><code class="language-json">[
+  { "id": "5", "name": "Alice", "location": "The Lobby" },
+  { "id": "8", "name": "Bob",   "location": "The Library" }
+]
+</code></pre>
+<h3>GET /api/v1/channels</h3>
+<p>List all channels. No auth required.</p>
+<pre class="language-json" tabindex="0"><code class="language-json">[
+  { "name": "Public", "header": "[Public]", "members": 4 }
+]
+</code></pre>
+<h3>GET /api/v1/channels/:name/history</h3>
+<p>Recent messages. Requires auth. Query param <code>?limit=N</code> (default 20, max<br>
+500).</p>
+<pre class="language-json" tabindex="0"><code class="language-json">[
+  { "sender": "Alice", "message": "Hi!", "timestamp": 1750536000000 }
+]
 </code></pre>
 <hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
-</code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
-</code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
+<h2>DB Objects</h2>
+<p><code>src/routes/dbObjRouter.ts</code>. All endpoints require auth.</p>
+<h3>GET /api/v1/dbos</h3>
+<p>List accessible objects. Optional <code>?flags=room</code> filter.</p>
+<h3>GET /api/v1/dbobj/:id</h3>
+<p>Fetch a single object.</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "id": "5",
+  "name": "Alice",
+  "location": "1",
+  "flags": ["connected", "player"],
+  "data": { "description": "..." },
+  "contents": []
 }
 </code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
+<h3>PATCH /api/v1/dbobj/:id</h3>
+<p>Update object data, name, or description. Requires ownership or admin.</p>
+<p>Body:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "data": { "description": "A tall figure in a green cloak." } }
 </code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
+<blockquote>
+<p>The engine does not currently expose <code>PUT</code> / <code>DELETE</code> for <code>/dbobj/:id</code><br>
+or any <code>/attrs</code> sub-routes. Edit attributes via the <code>&amp;attr</code> command or<br>
+a custom plugin route.</p>
+</blockquote>
 <hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
+<h2>Scenes</h2>
+<p><code>src/routes/sceneRouter.ts</code>. All endpoints require auth.</p>
+<h3>GET /api/v1/scenes</h3>
+<p>List active scenes the caller can see.</p>
+<h3>POST /api/v1/scenes</h3>
+<p>Create a scene.</p>
+<p>Body:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "name": "The Heist", "type": "action", "roomId": "room-5" }
+</code></pre>
+<h3>GET /api/v1/scenes/locations</h3>
+<p>List rooms that currently host scenes.</p>
+<h3>GET /api/v1/scenes/:id</h3>
+<p>Fetch a scene with its pose log and participants.</p>
+<h3>PATCH /api/v1/scenes/:id</h3>
+<p>Update scene metadata (owner or admin; ownerless scenes are adopted by<br>
+the patcher — v2.0.0 fix).</p>
+<h3>POST /api/v1/scenes/:id/pose</h3>
+<p>Add a pose, OOC line, or scene-set.</p>
+<p>Body:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "msg": "Alice steps through the door.", "type": "pose" }
+</code></pre>
+<p><code>type</code>: <code>"pose"</code> (default), <code>"ooc"</code>, <code>"set"</code>. When type is not <code>"set"</code>,<br>
+<code>msg</code> is required (400 otherwise).</p>
+<h3>PATCH /api/v1/scenes/:id/pose/:poseId</h3>
+<p>Edit an existing pose. Owner or admin.</p>
+<h3>POST /api/v1/scenes/:id/join</h3>
+<p>Join a scene.</p>
+<h3>POST /api/v1/scenes/:id/invite</h3>
+<p>Invite a player. Owner only.</p>
+<p>Body:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "playerId": "8" }
+</code></pre>
+<h3>GET /api/v1/scenes/:id/export</h3>
+<p>Export as Markdown or JSON. Query: <code>?format=markdown</code> (default) or<br>
+<code>?format=json</code>.</p>
+<hr>
+<h2>Config &amp; text</h2>
+<p><code>src/routes/config.ts</code>. No auth required.</p>
+<h3>GET /api/v1/config</h3>
+<p>Server config (name, version, ports, theme).</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "game":   { "name": "My Game", "version": "0.0.1" },
+  "server": { "http": 4203, "telnet": 4201 },
+  "theme":  { "primary": "#...", "backgroundImage": "..." }
 }
 </code></pre>
+<h3>GET /api/v1/connect</h3>
+<p>Connect-screen text (Markdown). Reads<br>
+<code>config.game.text.connect</code> (default <code>text/default_connect.txt</code>) with a<br>
+path-traversal guard.</p>
+<h3>GET /api/v1/welcome</h3>
+<p>Post-login welcome text (from the <code>texts</code> DBO, id <code>welcome</code>).</p>
+<h3>GET /api/v1/404</h3>
+<p>Site 404 page content (from <code>texts</code> DBO, id <code>404</code>). Falls back to a<br>
+default if no entry exists.</p>
 <hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
+<h2>UI manifest</h2>
+<h3>GET /api/v1/ui-manifest</h3>
+<p>Returns the list of UI components registered by plugins via<br>
+<code>registerUIComponent()</code>. Optionally authenticated — if a JWT is<br>
+presented, results are filtered by the caller’s privileges<br>
+(<code>requires.flag</code>, etc.).</p>
+<pre class="language-json" tabindex="0"><code class="language-json">[
+  { "element": "myplugin-panel", "title": "My Panel", "url": "..." }
+]
+</code></pre>
+<p>External script URLs are rejected at registration time (v1.9.3<br>
+hardening).</p>
+<hr>
+<h2>Avatars</h2>
+<h3>GET /avatars/:id</h3>
+<p>Public avatar image. <code>:id</code> must match <code>^[a-zA-Z0-9_-]+$</code> — dots and<br>
+slashes are rejected. Looks for <code>data/avatars/&lt;id&gt;.{png,jpg,gif,webp}</code>.<br>
+Cached for 1 hour.</p>
+<hr>
+<h2>Health</h2>
+<h3>GET /health (or GET /)</h3>
+<p>Liveness probe. No auth.</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{ "status": "ok", "engine": "UrsaMU" }
 </code></pre>
 <hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
-  u.send("Permission denied.");
-  return;
-}
-</code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
-  return;
-}
-
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
-
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
-</code></pre>
-<hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
-}
-</code></pre>
-<hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
-
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
-};
-</code></pre>
-<hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
-});
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
-</code></pre>
-<hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
-</code></pre>
+<h2>Plugin endpoints</h2>
+<p>Plugins register routes via <code>registerPluginRoute(prefix, handler)</code>. The<br>
+engine matches by <code>startsWith(prefix)</code> and forwards the request along<br>
+with the authenticated <code>userId</code> (or <code>null</code>).</p>
+<p>Official plugins:</p>
+<table>
+<thead>
+<tr>
+<th>Plugin</th>
+<th>Base path</th>
+<th>Repo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>jobs</td>
+<td><code>/api/v1/jobs</code></td>
+<td><a href="https://github.com/UrsaMU/jobs-plugin">UrsaMU/jobs-plugin</a></td>
+</tr>
+<tr>
+<td>events</td>
+<td><code>/api/v1/events</code></td>
+<td><a href="https://github.com/UrsaMU/events-plugin">UrsaMU/events-plugin</a></td>
+</tr>
+<tr>
+<td>bbs</td>
+<td><code>/api/v1/bbs</code></td>
+<td><a href="https://github.com/UrsaMU/bbs-plugin">UrsaMU/bbs-plugin</a></td>
+</tr>
+<tr>
+<td>mail</td>
+<td><code>/api/v1/mail</code></td>
+<td><a href="https://github.com/UrsaMU/mail-plugin">UrsaMU/mail-plugin</a></td>
+</tr>
+<tr>
+<td>help</td>
+<td><code>/api/v1/help</code></td>
+<td><a href="https://github.com/UrsaMU/help-plugin">UrsaMU/help-plugin</a></td>
+</tr>
+<tr>
+<td>wiki</td>
+<td><code>/api/v1/wiki</code></td>
+<td><a href="https://github.com/UrsaMU/wiki-plugin">UrsaMU/wiki-plugin</a></td>
+</tr>
+<tr>
+<td>builder</td>
+<td><code>/api/v1/building</code></td>
+<td><a href="https://github.com/UrsaMU/builder-plugin">UrsaMU/builder-plugin</a></td>
+</tr>
+</tbody>
+</table>
+<p>Custom plugins register their own routes — see<br>
+<a href="/plugins/">Plugin Development</a>.</p>
 
       </article>
 
@@ -579,9 +604,6 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
@@ -590,84 +612,45 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
-        
       
         
-          
-        
       
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-        
-      
-        
-          
-          
-        
-      
-        
-          
         
       
         
@@ -708,16 +691,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/api/core/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">Core API Reference</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/child-games/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title"></span>
           </a>
         
       </nav>

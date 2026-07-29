@@ -3,11 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> | UrsaMU Documentation</title>
-  <meta name="description" content="Learn how to create a child game using UrsaMU as a library">
-  <link rel="stylesheet" href="/ursamu/styles.css">
+  <meta name="description" content="Scaffold and run a derived game project on top of UrsaMU">
+  <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/child-games/">
+<meta property="og:url" content="http://localhost:3000/child-games/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/ursamu/" class="site-logo">
+  <a href="/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/guides/" class="header-nav-link">
       Guides
     </a>
     
     
     
-    <a href="/ursamu/api/" class="header-nav-link">
+    <a href="/api/" class="header-nav-link">
       API
     </a>
     
     
     
-    <a href="/ursamu/plugins/" class="header-nav-link">
+    <a href="/plugins/" class="header-nav-link">
       Plugins
     </a>
     
     
     
-    <a href="/ursamu/development/" class="header-nav-link">
+    <a href="/development/" class="header-nav-link">
       Development
     </a>
     
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link">
+      <a href="/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,35 +110,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/ursamu/guides/installation/" class="sidebar-link">
+      <a href="/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
+      <a href="/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
+      <a href="/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/ursamu/guides/customization/" class="sidebar-link">
+      <a href="/guides/customization/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+      <a href="/guides/scripting/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
-      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+      <a href="/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -150,7 +150,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/ursamu/configuration/" class="sidebar-link">
+      <a href="/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +162,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/ursamu/api/" class="sidebar-link">
+      <a href="/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/ursamu/api/core/" class="sidebar-link">
+      <a href="/api/core/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +178,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/ursamu/plugins/" class="sidebar-link">
+      <a href="/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/ursamu/plugins/basics/" class="sidebar-link">
+      <a href="/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
+      <a href="/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/ursamu/plugins/commands/" class="sidebar-link">
+      <a href="/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
+      <a href="/plugins/hooks/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/ursamu/plugins/database/" class="sidebar-link">
+      <a href="/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
+      <a href="/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
+      <a href="/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +218,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/ursamu/development/" class="sidebar-link">
+      <a href="/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/ursamu/development/contributing/" class="sidebar-link">
+      <a href="/development/contributing/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/ursamu/extending/" class="sidebar-link">
+      <a href="/extending/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/ursamu/child-games/" class="sidebar-link active">
+      <a href="/child-games/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,7 +259,7 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/ursamu/">Home</a>
+        <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
         <span class="breadcrumbs-current"></span>
       </nav>
@@ -267,267 +267,102 @@
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Creating Child Games with UrsaMU</h1>
-<p>This guide explains how to create a child game using UrsaMU as a library.</p>
-<h2>Overview</h2>
-<p>A “child game” is a complete MU* game built on top of the UrsaMU engine. Unlike plugins, which extend the functionality of UrsaMU, a child game is a standalone application that uses UrsaMU as a library.</p>
-<p>Creating a child game allows you to:</p>
-<ul>
-<li>Create a completely customized MU* experience</li>
-<li>Define your own game world, theme, and mechanics</li>
-<li>Distribute your game as a standalone application</li>
-<li>Maintain your game separately from the UrsaMU core</li>
-</ul>
-<h2>Getting Started</h2>
-<h3>Prerequisites</h3>
-<p>Before creating a child game, ensure you have:</p>
-<ul>
-<li><a href="https://deno.land/">Deno</a> installed (version 1.37.0 or higher)</li>
-<li>Basic knowledge of TypeScript</li>
-<li>Understanding of MU* concepts</li>
-</ul>
-<h3>Installation</h3>
-<ol>
-<li>Create a new directory for your game:</li>
-</ol>
-<pre class="language-bash" tabindex="0"><code class="language-bash">mkdir my-game
+        <h1>Child Games</h1>
+<p>A “child game” is a standalone project that uses <code>@ursamu/ursamu</code> as a<br>
+library — your own config, plugins, system-script overrides, and (usually)<br>
+your own deployment.</p>
+<h2>Scaffold</h2>
+<p>The CLI ships with a generator that lays down a complete supervised<br>
+project, including daemon scripts, telnet sidecar, and a <code>.env</code> with a<br>
+fresh JWT secret (v2.4.0):</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli create my-game
 cd my-game
 </code></pre>
-<ol start="2">
-<li>Initialize a new Deno project:</li>
-</ol>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno init
+<p>The scaffold writes:</p>
+<ul>
+<li><code>deno.json</code> with <code>start</code> / <code>dev</code> / <code>test</code> tasks</li>
+<li><code>config/config.json</code> (see “Configuration” below)</li>
+<li><code>plugins.manifest.json</code> — declared plugin dependencies</li>
+<li><code>system/scripts/</code> — empty, ready for local script overrides</li>
+<li><code>daemon.sh</code>, <code>stop.sh</code>, <code>restart.sh</code>, <code>status.sh</code> — supervised lifecycle</li>
+<li><code>.env</code> containing a generated <code>JWT_SECRET</code></li>
+</ul>
+<p>A <code>--local</code> variant points the import map at a checkout of the engine<br>
+instead of JSR; the tasks, manifest, and scripts are otherwise identical.</p>
+<h2>Running the game</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">./daemon.sh    # start under supervisor (background)
+./status.sh    # show pid / uptime / health
+./restart.sh   # SIGUSR2 → no-disconnect main restart; telnet sidecar persists
+./stop.sh      # graceful shutdown
 </code></pre>
-<ol start="3">
-<li>Install UrsaMU as a dependency:</li>
-</ol>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Add UrsaMU as a dependency in your deps.ts file
+<p>Or run in the foreground:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task start   # initializes config, ensures superuser, spawns server + telnet
+deno task dev     # same, with hot reload
 </code></pre>
-<h2>Project Structure</h2>
-<p>A typical child game project structure looks like this:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">my-game/
-├── config/                  # Configuration files
-│   ├── config.json          # Main configuration
-│   ├── text/                # Text files
-│   └── plugins/             # Plugin configurations
-├── src/                     # Source code
-│   ├── commands/            # Custom commands
-│   ├── plugins/             # Custom plugins
-│   ├── types/               # TypeScript type definitions
-│   └── main.ts              # Entry point
-├── data/                    # Database files (generated)
-├── deps.ts                  # Dependencies
-├── deno.json                # Deno configuration
-└── README.md                # Documentation
-</code></pre>
+<p>In-game <code>@reboot</code> issues the same SIGUSR2 as <code>restart.sh</code>. JWTs are<br>
+re-authenticated automatically; the telnet sidecar stays connected across<br>
+restarts.</p>
 <h2>Configuration</h2>
-<h3>Basic Configuration</h3>
-<p>Create a <code>config/config.json</code> file with your game’s configuration:</p>
+<p><code>config/config.json</code> controls server ports, KV prefixes, game identity,<br>
+theme, and per-plugin scoped config. The shape:</p>
+<ul>
+<li><code>server</code> — telnet / ws / http ports plus KV prefixes (<code>db</code>, <code>channels</code>,<br>
+<code>mail</code>, <code>wiki</code>, <code>bboard</code>, <code>counters</code>)</li>
+<li><code>game</code> — <code>name</code>, <code>description</code>, <code>version</code>, <code>playerStart</code>, text paths,<br>
+<code>timeMultiplier</code></li>
+<li><code>theme</code> — color tokens, glass values, <code>backgroundImage</code></li>
+<li><code>plugins</code> — per-plugin scoped config</li>
+</ul>
+<p><code>.env</code> is loaded via <code>dotenv/load</code> at the top of the entry point. The only<br>
+required variable is <code>JWT_SECRET</code>. Rotate it by replacing the value and<br>
+restarting; existing tokens are invalidated.</p>
+<h2>Plugins</h2>
+<p>External plugins are declared in <code>plugins.manifest.json</code> and resolved on<br>
+startup by <code>ensurePlugins</code>. Each entry:</p>
 <pre class="language-json" tabindex="0"><code class="language-json">{
-  "server": {
-    "port": 4201,
-    "host": "0.0.0.0"
-  },
-  "game": {
-    "name": "My Game",
-    "motd": "Welcome to My Game!",
-    "debug": false
-  },
-  "database": {
-    "path": "./data"
-  }
+  "name": "@ursamu/help-plugin",
+  "url": "https://github.com/UrsaMU/help-plugin",
+  "ref": "v1.0.0",
+  "version": "^1.0.0"
 }
 </code></pre>
-<h3>Text Files</h3>
-<p>UrsaMU uses text files for various game messages. Create a <code>config/text</code> directory and add your custom text files:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">config/text/
-├── connect.txt       # Connection screen
-├── motd.txt          # Message of the day
-└── welcome.txt       # Welcome message for new players
+<p><code>ref</code> is optional (git ref / tag / branch); <code>version</code> is an optional semver<br>
+range checked against the cloned plugin’s manifest. As of v2.6.0 plugin<br>
+installs are fail-fast with atomic rollback — any clone, rename, semver, or<br>
+conflict error throws a typed <code>PluginInstallError</code> and leaves the<br>
+filesystem and registry untouched. Deps without a <code>version:</code> constraint<br>
+remain legacy-compatible.</p>
+<p>Install or update from the CLI:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin install &lt;url&gt; [--ref &lt;ref&gt;]
+deno run -A jsr:@ursamu/mush/cli plugin update
+deno run -A jsr:@ursamu/mush/cli plugin list
 </code></pre>
-<h2>Customization</h2>
-<h3>Creating the Main File</h3>
-<p>Create a <code>src/main.ts</code> file as the entry point for your game:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
-import { config } from "../config/mod.ts";
-
-// Import your custom plugins
-import myPlugin from "./plugins/myPlugin/mod.ts";
-
-// Start the game
-await mu({
-  config,
-  plugins: [
-    myPlugin,
-    // Add more custom plugins here
-  ]
-});
-
-console.log("Game started!");
+<h2>Local script overrides</h2>
+<p>The engine has no bundled <code>system/scripts/</code> — all native commands are<br>
+<code>addCmd</code> registrations in <code>src/commands/</code>. Child games may still place<br>
+sandbox scripts under their own <code>system/scripts/&lt;name&gt;.ts</code> to:</p>
+<ul>
+<li>Override a plugin-supplied or registered script (local file wins).</li>
+<li>Add new in-sandbox commands without writing a plugin.</li>
+</ul>
+<p>Scripts run in a Web Worker — no <code>Deno.*</code>, no <code>fetch</code>, no <code>import</code> other<br>
+than ESM-style <code>export default async (u) =&gt; { ... }</code>. See <code>CLAUDE.md</code><br>
+(“Softcode / system scripts”) for the sandbox contract.</p>
+<h2>Existing child games</h2>
+<p>The following projects use UrsaMU as their engine and can be read as<br>
+working references. Treat the layout as the canonical pattern; treat<br>
+project-specific mechanics as their own.</p>
+<ul>
+<li><code>legends</code> — the in-repo reference game (gitignored under <code>games/</code>)</li>
+<li><code>salem-rentals</code></li>
+<li><code>urban-shadows</code></li>
+</ul>
+<h2>Updating the engine</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli update         # latest stable
+deno run -A jsr:@ursamu/mush/cli update main    # specific branch
 </code></pre>
-<h3>Custom Commands</h3>
-<p>Create custom commands in the <code>src/commands</code> directory:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/commands/hello.ts
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
-
-addCmd({
-  name: "hello",
-  pattern: /^hello\s*(.*)/i,
-  lock: "connected",
-  exec: (u: IUrsamuSDK) =&gt; {
-    const target = u.cmd.args[0]?.trim() || "World";
-    u.send(`Hello, ${target}!`);
-  }
-});
-</code></pre>
-<h3>Custom Plugins</h3>
-<p>Create custom plugins in the <code>src/plugins</code> directory:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/myPlugin/mod.ts
-import { IPlugin } from "ursamu";
-
-const myPlugin: IPlugin = {
-  name: "my-plugin",
-  version: "1.0.0",
-  description: "A custom plugin for my game",
-  
-  init: async () =&gt; {
-    console.log("My plugin initialized!");
-    return true;
-  },
-  
-  remove: async () =&gt; {
-    console.log("My plugin removed!");
-  }
-};
-
-export default myPlugin;
-</code></pre>
-<h2>Deployment</h2>
-<h3>Running Your Game</h3>
-<p>Run your game with Deno:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run --allow-net --allow-read --allow-write --allow-env src/main.ts
-</code></pre>
-<h3>Creating a Startup Script</h3>
-<p>Create a <code>start.sh</code> script for easier startup:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">#!/bin/bash
-deno run --allow-net --allow-read --allow-write --allow-env src/main.ts
-</code></pre>
-<p>Make it executable:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">chmod +x start.sh
-</code></pre>
-<h3>Docker Deployment</h3>
-<p>Create a <code>Dockerfile</code> for containerized deployment:</p>
-<pre class="language-dockerfile" tabindex="0"><code class="language-dockerfile">FROM denoland/deno:1.37.0
-
-WORKDIR /app
-
-COPY . .
-
-RUN deno cache src/main.ts
-
-EXPOSE 4201
-
-CMD ["deno", "run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "src/main.ts"]
-</code></pre>
-<p>Build and run the Docker container:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">docker build -t my-game .
-docker run -p 4201:4201 my-game
-</code></pre>
-<h2>Examples</h2>
-<h3>Basic Child Game</h3>
-<p>Here’s a complete example of a basic child game:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/main.ts
-import { mu } from "jsr:@ursamu/ursamu";
-import welcomePlugin from "./plugins/welcome/mod.ts";
-
-// Define configuration
-const config = {
-  server: {
-    telnet: 4201,
-    ws: 4202,
-    http: 4203,
-  },
-  game: {
-    name: "My First MU",
-    motd: "Welcome to My First MU!"
-  }
-};
-
-// Start the game
-await mu(config, [welcomePlugin]);
-
-console.log(`${config.game.name} is running`);
-
-// src/plugins/welcome/mod.ts
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/ursamu";
-
-const welcomePlugin: IPlugin = {
-  name: "welcome",
-  version: "1.0.0",
-  description: "A welcome plugin for new players",
-
-  init: async () =&gt; {
-    // Register a welcome command
-    addCmd({
-      name: "welcome",
-      pattern: /^welcome\s*(.*)/i,
-      lock: "connected",
-      exec: (u: IUrsamuSDK) =&gt; {
-        const target = u.cmd.args[0]?.trim() || "friend";
-        u.send(`Welcome to our game, ${target}!`);
-      }
-    });
-
-    return true;
-  },
-
-  remove: async () =&gt; {
-    // Cleanup code here
-  }
-};
-
-export default welcomePlugin;
-</code></pre>
-<h3>Advanced Child Game</h3>
-<p>For a more advanced example, see the <a href="https://github.com/UrsaMU/examples">UrsaMU Examples repository</a> which contains complete child game examples with various features.</p>
-<h3>Customizing the Database</h3>
-<p>You can customize how your game uses the database:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/main.ts
-import { mu } from "../deps.ts";
-
-await mu({
-  config: {
-    // ... other config options
-    database: {
-      path: "./custom-data",
-      backupInterval: 3600000 // Backup every hour
-    }
-  }
-});
-</code></pre>
-<h3>Creating a Custom Theme</h3>
-<p>You can create a custom theme by overriding the default text files and adding custom CSS for the web interface:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/theme/mod.ts
-import { IPlugin } from "../../../deps.ts";
-
-const themePlugin: IPlugin = {
-  name: "custom-theme",
-  version: "1.0.0",
-  description: "Custom theme for my game",
-  
-  init: async () =&gt; {
-    // Register custom CSS
-    // Set up custom colors
-    // Override default text files
-    return true;
-  }
-};
-
-export default themePlugin;
-</code></pre>
-<p>By following this guide, you can create a fully customized MU* game using UrsaMU as a foundation, while maintaining the flexibility to extend and modify it to suit your specific needs.</p>
+<p>The updater rewrites the import map and re-runs <code>ensurePlugins</code>. Restart<br>
+the game after an update.</p>
 
       </article>
 
@@ -552,11 +387,47 @@ export default themePlugin;
       
         
           
+        
+      
+        
+          
           
         
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -605,14 +476,14 @@ export default themePlugin;
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/api/core/" class="page-nav-btn prev">
+          <a href="/api/rest/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">REST API Reference</span>
           </a>
         
 
         
-          <a href="/ursamu/configuration/" class="page-nav-btn next">
+          <a href="/configuration/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
             <span class="page-nav-title">Configuration</span>
           </a>
@@ -629,9 +500,9 @@ export default themePlugin;
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/ursamu/guides/installation/">Installation</a>
-        <a href="/ursamu/api/">API</a>
-        <a href="/ursamu/plugins/">Plugins</a>
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>

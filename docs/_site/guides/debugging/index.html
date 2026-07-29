@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Scripting Recipes | UrsaMU Documentation</title>
-  <meta name="description" content="Common patterns and ready-to-use examples for UrsaMU scripts">
+  <title>Debugging Scripts | UrsaMU Documentation</title>
+  <meta name="description" content="How to diagnose and fix issues in UrsaMU scripts and plugins.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/recipes/">
+<meta property="og:url" content="http://localhost:3000/guides/debugging/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -138,7 +138,7 @@
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/guides/recipes/" class="sidebar-link active">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -261,300 +261,243 @@
       <nav class="breadcrumbs" aria-label="Breadcrumb">
         <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current">Scripting Recipes</span>
+        <span class="breadcrumbs-current">Debugging Scripts</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Scripting Recipes</h1>
-<h2>Copy-paste patterns for the most common scripting tasks. Each recipe is a complete, working script.</h2>
-<h2>Room Description with Dynamic Content</h2>
-<p>A room object with an <code>&amp;DESC</code> attribute that shows different text based on time of day:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;DESC on a room object — run via @trigger or u.execute("look")
-const hour = new Date().getHours();
-const timeOfDay = hour &lt; 6 ? "night"
-  : hour &lt; 12 ? "morning"
-  : hour &lt; 18 ? "afternoon"
-  : "evening";
-
-const desc = u.here.state.desc as string || "A nondescript room.";
-u.send(`[${u.here.name}]`);
-u.send(desc);
-u.send(`It is ${timeOfDay}.`);
-
-// List obvious exits
-const exits = u.here.contents.filter(o =&gt; o.flags.has("exit"));
-if (exits.length) {
-  const names = exits.map(e =&gt; e.name || e.id).join(", ");
-  u.send(`Obvious exits: ${names}`);
-}
+        <h1>Debugging Scripts</h1>
+<h2>Scripts run in isolated Web Workers. This means you can’t use the browser<br>
+console, Deno’s <code>--inspect</code> flag, or filesystem access. Here’s how to diagnose<br>
+and fix issues.</h2>
+<h2>Overview</h2>
+<p>When a script fails, the error is:</p>
+<ol>
+<li>Caught by the sandbox</li>
+<li>Sent back as an <code>error</code> message from the worker</li>
+<li>Logged to the server console with <code>[Sandbox] error:</code></li>
+<li>Not shown to the player (the script simply produces no output)</li>
+</ol>
+<h2>So a script that silently does nothing is often one that <strong>threw an exception</strong>.</h2>
+<h2>Common Mistakes</h2>
+<h3>1. Missing <code>await</code> on async methods</h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const gold = u.me.state.gold as number || 0;
+u.db.modify(u.me.id, "$set", { "data.gold": gold + 10 });  // ← missing await!
+u.send(`Gold updated.`);
 </code></pre>
-<hr>
-<h2>Simple Score Sheet</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/score.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default (u: IUrsamuSDK) =&gt; {
-  const s = u.me.state;
-  const name  = u.util.displayName(u.me, u.me);
-  const level = (s.level  as number) || 1;
-  const xp    = (s.xp     as number) || 0;
-  const hp    = (s.hp     as number) || 100;
-  const maxHp = (s.maxHp  as number) || 100;
-  const gold  = (s.gold   as number) || 0;
-
-  const W = 40;
-  const HR = "%ch%cy" + "=".repeat(W) + "%cn";
-  const row = (label: string, value: string) =&gt;
-    u.util.ljust(label, 16) + u.util.rjust(value, W - 16);
-
-  u.send(HR);
-  u.send("%ch%cy" + u.util.center(name, W) + "%cn");
-  u.send(HR);
-  u.send(row("Level:",  String(level)));
-  u.send(row("XP:",     String(xp)));
-  u.send(row("HP:",     `${hp} / ${maxHp}`));
-  u.send(row("Gold:",   String(gold)));
-  u.send(HR);
-};
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const gold = u.me.state.gold as number || 0;
+await u.db.modify(u.me.id, "$set", { "data.gold": gold + 10 });
+u.send(`Gold updated.`);
 </code></pre>
-<hr>
-<h2>Simple Shop</h2>
-<p>An object with a <code>&amp;SHOP</code> attribute listing items for sale. Players use <code>buy &lt;item&gt;</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/buy.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-interface ShopItem { name: string; cost: number; flags: string[] }
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const arg = (u.cmd.args[0] || "").trim().toLowerCase();
-
-  // Find a shop object in the room
-  const shopObj = u.here.contents.find(o =&gt; o.flags.has("shop"));
-  if (!shopObj) {
-    u.send("There is nothing for sale here.");
-    return;
-  }
-
-  const catalog = (shopObj.state.catalog as ShopItem[]) || [];
-
-  if (!arg) {
-    // List items
-    u.send("%ch%cyItems for sale:%cn");
-    for (const item of catalog) {
-      u.send(`  ${u.util.ljust(item.name, 24)} ${item.cost} gold`);
-    }
-    u.send('Type "buy &lt;item name&gt;" to purchase.');
-    return;
-  }
-
-  const item = catalog.find(i =&gt; i.name.toLowerCase().includes(arg));
-  if (!item) {
-    u.send(`No item matching '${arg}' is for sale here.`);
-    return;
-  }
-
-  const gold = (u.me.state.gold as number) || 0;
-  if (gold &lt; item.cost) {
-    u.send(`You need ${item.cost} gold but only have ${gold}.`);
-    return;
-  }
-
-  // Deduct gold and create item in inventory
-  await u.db.modify(u.me.id, "$set", {
-    data: { ...u.me.state, gold: gold - item.cost }
-  });
-
-  await u.db.create({
-    flags: new Set(["thing", ...item.flags]),
-    location: u.me.id,
-    state: { name: item.name, owner: u.me.id }
-  });
-
-  u.send(`You buy ${item.name} for ${item.cost} gold.`);
-  u.here.broadcast(`${u.util.displayName(u.me, u.me)} purchases something.`);
-};
+<p>Missing <code>await</code> means the DB write starts but the script may exit before it<br>
+completes. In practice you’ll often see partial results or no effect.</p>
+<h3>2. Wrong <code>u.db.modify()</code> operator</h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.db.modify(u.me.id, "state", { gold: 100 });    // "state" is not a valid op
+await u.db.modify(u.me.id, "name", "Alice");            // "name" is not a valid op
 </code></pre>
-<p>Set up a shop object:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@create Shop=0
-@set shop=shop
-@set shop.catalog=[{"name":"Iron Sword","cost":50,"flags":["weapon"]},{"name":"Leather Armor","cost":40,"flags":["armor"]}]
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
+await u.db.modify(u.me.id, "$set", { name: "Alice" });
 </code></pre>
-<hr>
-<h2>Announcement Board (Post on Login)</h2>
-<p>Show a sticky announcement to players when they connect, stored as a text entry:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add to system/scripts/connect.ts after auth.login()
-const announcement = await u.text.read("announcement");
-if (announcement) {
-  u.send("%ch%cy[ANNOUNCEMENT]%cn " + announcement);
-}
-</code></pre>
-<p>Admin sets it:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">@motd/set Server maintenance tonight at midnight EST. Back up by 2am.
-</code></pre>
-<p>Or with a dedicated announce script:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/announce.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
-
-export default async (u: IUrsamuSDK) =&gt; {
-  const actor = u.me;
-  if (!actor.flags.has("admin") &amp;&amp; !actor.flags.has("wizard") &amp;&amp; !actor.flags.has("superuser")) {
-    u.send("Permission denied.");
-    return;
-  }
-  const msg = (u.cmd.args[0] || "").trim();
-  if (!msg) { u.send("Usage: @announce &lt;message&gt;"); return; }
-
-  await u.text.set("announcement", msg);
-  u.broadcast(`%ch%cy[ANNOUNCEMENT]%cn ${msg}`);
-  u.send("Announcement set and broadcast.");
-};
-</code></pre>
-<hr>
-<h2>Timed Event (Scheduled Message)</h2>
-<p>Fire a message to all connected players at a specific server time. Trigger via <code>@trigger</code> from a cron or event handler:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;MIDNIGHT_ANNOUNCE on the master room
-const now = new Date();
-const timeStr = now.toLocaleTimeString();
-u.broadcast(`%ch%cy[SERVER]%cn The time is now ${timeStr}. New day begins.`);
-
-// Reset daily quest flags for all players
-const players = await u.db.search({ flags: /player/i });
-for (const p of players) {
-  await u.db.modify(p.id, "$set", {
-    data: { ...p.state, dailyQuestDone: false }
-  });
-}
-</code></pre>
-<hr>
-<h2>Object Lock (Only Owner Can Pick Up)</h2>
-<p>Set a lock on an object so only its owner can get it:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/get.ts addition — check for "owneronly" flag
-const target = await u.util.target(u.me, arg);
-if (!target) { u.send("I don't see that here."); return; }
-
-if (target.flags.has("owneronly") &amp;&amp; target.state.owner !== u.me.id) {
-  u.send("That doesn't belong to you.");
-  return;
-}
-// ... proceed with get
-</code></pre>
-<hr>
-<h2>Permission Guard Pattern</h2>
-<p>The standard pattern for admin-only commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin")
-             || u.me.flags.has("wizard")
-             || u.me.flags.has("superuser");
-
-if (!isAdmin) {
+<p>Valid ops: <code>"$set"</code>, <code>"$unset"</code>, <code>"$inc"</code>. Any other string is silently rejected.</p>
+<h3>3. Missing <code>await</code> on <code>u.canEdit()</code></h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!u.canEdit(u.me, target)) {   // ← returns Promise, not boolean!
   u.send("Permission denied.");
   return;
 }
 </code></pre>
-<hr>
-<h2>Parse <code>&lt;target&gt;=&lt;value&gt;</code> Arguments</h2>
-<p>The most common argument pattern in MUSH-style commands:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const raw = (u.cmd.args[0] || "").trim();
-const eqIdx = raw.indexOf("=");
-
-if (eqIdx === -1) {
-  u.send("Usage: @mycommand &lt;target&gt;=&lt;value&gt;");
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!(await u.canEdit(u.me, target))) {
+  u.send("Permission denied.");
   return;
 }
+</code></pre>
+<h3>4. Clobbering state on modify</h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// This wipes all other fields in data!
+await u.db.modify(u.me.id, "$set", { data: { gold: 100 } });
+</code></pre>
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Spread to preserve existing fields
+await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: 100 } });
+// Or use dot-notation to target one field:
+await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
+</code></pre>
+<h3>5. ESM import that doesn’t work in workers</h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { sprintf } from "jsr:@std/fmt/printf";  // ← JSR sub-path, won't resolve
+</code></pre>
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Use u.util.sprintf instead — it's already in the sandbox
+u.util.sprintf("%-10s %5d", "Score", 100);
+</code></pre>
+<p>Standard ESM imports (<code>import X from "https://..."</code>) work, but <code>jsr:</code> package<br>
+sub-paths do not resolve in Web Worker context. Use <code>u.util</code> helpers instead.</p>
+<h3>6. Assuming <code>u.db.search()</code> returns one item</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = await u.db.search({ "data.name": /alice/i });
+// player is IDBObj[], not IDBObj!
+if (!player) { ... }  // wrong — an empty array is truthy
 
-const targetRef = raw.slice(0, eqIdx).trim();
-const value     = raw.slice(eqIdx + 1).trim();
+// Correct:
+const results = await u.db.search({ "data.name": /alice/i });
+if (!results.length) { u.send("Not found."); return; }
+const player = results[0];
+</code></pre>
+<h3>7. Not checking for null from <code>u.util.target()</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const target = await u.util.target(u.me, u.cmd.args[0]);
+u.send(`Target: ${target.name}`);  // throws if target is undefined!
 
-const target = await u.util.target(u.me, targetRef);
-if (!target) { u.send("Target not found."); return; }
+// Correct:
+const target = await u.util.target(u.me, u.cmd.args[0]);
+if (!target) { u.send("I don't see that."); return; }
+u.send(`Target: ${target.name}`);
 </code></pre>
 <hr>
-<h2>Read and Display a Bulletin Board Post</h2>
-<p>Show the latest post from the announcements board on login:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In connect.ts, after auth.login():
-const posts = await u.bb.listPosts("announcements");
-if (posts.length) {
-  const latest = posts[posts.length - 1] as { num: number; subject: string; authorName: string };
-  u.send(`%ch%cy[BB]%cn Latest: ${latest.subject} (by ${latest.authorName}) — @bbread announcements/${latest.num}`);
+<h2>Script Errors</h2>
+<h3>Script produces no output</h3>
+<p><strong>Causes:</strong></p>
+<ul>
+<li>Unhandled exception (check server console for <code>[Sandbox] error:</code>)</li>
+<li>Script returned early due to a condition check</li>
+<li><code>u.send()</code> called with undefined/null message</li>
+</ul>
+<p><strong>Diagnose:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add a breadcrumb at the start to verify the script is running
+u.send("DEBUG: script started");
+
+// Check every early return
+const target = await u.util.target(u.me, u.cmd.args[0]);
+u.send(`DEBUG: target = ${target?.id ?? "null"}`);
+if (!target) { u.send("Not found."); return; }
+</code></pre>
+<h3>Script times out</h3>
+<p>Scripts have a 5-second execution timeout. If your script makes many DB<br>
+calls in a loop, it may time out.</p>
+<p><strong>Signs:</strong> Server logs <code>Script execution timed out</code></p>
+<p><strong>Fix:</strong> Batch queries instead of looping:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Bad: N sequential queries
+for (const id of playerIds) {
+  const p = await u.db.search({ id });  // one query per player
 }
+
+// Better: one query
+const players = await u.db.search({ location: u.here.id, flags: /player/i });
 </code></pre>
+<h3>Worker crashes silently</h3>
+<p>If the worker throws before any <code>u.send()</code>, the player sees nothing. The server<br>
+console will show the error.</p>
+<p><strong>Watch for:</strong></p>
+<ul>
+<li><code>ReferenceError: X is not defined</code> — JSR import that failed to resolve</li>
+<li><code>TypeError: Cannot read properties of undefined</code> — null/undefined not checked</li>
+<li><code>SyntaxError</code> — TypeScript that failed to transpile</li>
+</ul>
 <hr>
-<h2>Currency Transfer (Give Gold)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/givegold.ts
-import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
+<h2>Debugging Techniques</h2>
+<h3>Use <code>think</code> to echo values</h3>
+<p>The <code>think</code> command (<code>system/scripts/think.ts</code>) sends output to you without<br>
+broadcasting. Use it as a debug probe:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">think [output of a long expression]
+</code></pre>
+<h3>Add temporary <code>u.send()</code> breadcrumbs</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u: IUrsamuSDK) =&gt; {
+  u.send("[DEBUG 1] entering script");
+  const target = await u.util.target(u.me, u.cmd.args[0]);
+  u.send(`[DEBUG 2] target = ${target?.id ?? "null"}`);
+  if (!target) return;
 
-export default async (u: IUrsamuSDK) =&gt; {
-  const raw = (u.cmd.args[0] || "").trim();
-  const eqIdx = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: givegold &lt;player&gt;=&lt;amount&gt;"); return; }
+  const gold = (target.state.gold as number) || 0;
+  u.send(`[DEBUG 3] gold = ${gold}`);
 
-  const targetRef = raw.slice(0, eqIdx).trim();
-  const amount    = parseInt(raw.slice(eqIdx + 1).trim(), 10);
-
-  if (isNaN(amount) || amount &lt;= 0) { u.send("Amount must be a positive number."); return; }
-
-  const target = await u.util.target(u.me, targetRef);
-  if (!target) { u.send("Player not found."); return; }
-  if (target.id === u.me.id) { u.send("You can't give gold to yourself."); return; }
-
-  const myGold = (u.me.state.gold as number) || 0;
-  if (myGold &lt; amount) { u.send(`You only have ${myGold} gold.`); return; }
-
-  // Transfer
-  await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: myGold - amount } });
-  await u.db.modify(target.id, "$set", {
-    data: { ...target.state, gold: ((target.state.gold as number) || 0) + amount }
-  });
-
-  const myName = u.util.displayName(u.me, u.me);
-  u.send(`You give ${amount} gold to ${u.util.displayName(target, u.me)}.`);
-  u.send(`${myName} gives you ${amount} gold.`, target.id);
-  u.here.broadcast(`${myName} gives some gold to ${u.util.displayName(target, u.me)}.`);
+  await u.db.modify(target.id, "$set", { "data.gold": gold + 10 });
+  u.send("[DEBUG 4] db.modify done");
 };
 </code></pre>
+<p>Remove the debug lines before committing.</p>
+<h3>Check the server console</h3>
+<p>The server logs all sandbox errors. Look for lines like:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">[Sandbox] error: TypeError: Cannot read properties of undefined (reading 'id')
+</code></pre>
+<h3>Use <code>@js</code> for quick experiments (wizard/admin only)</h3>
+<p>The <code>@js</code> command runs a JavaScript expression directly (no sandbox — full<br>
+server access). Useful for testing DB queries:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@js await dbojs.queryOne({ id: "1" })
+</code></pre>
 <hr>
-<h2>Persistent Room Counter</h2>
-<p>Track how many times a room has been visited:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER on a room object (fired via @trigger room/ONENTER in look.ts or movement.ts)
-const visits = ((u.here.state.visitCount as number) || 0) + 1;
-await u.db.modify(u.here.id, "$set", {
-  data: { ...u.here.state, visitCount: visits }
+<h2>Testing Scripts Manually</h2>
+<h3>Run the test suite</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task test
+</code></pre>
+<p>This runs tests in <code>tests/</code>, <code>src/services/Intents/</code>, <code>src/services/Sandbox/</code>,<br>
+and <code>src/plugins/events/</code>.</p>
+<h3>Write a script test</h3>
+<p>Tests for scripts follow this pattern — read the file, strip the <code>export</code>,<br>
+inject a stub <code>u</code> object, and run the code:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { assertEquals } from "jsr:@std/assert";
+
+const OPTS = { sanitizeResources: false, sanitizeOps: false };
+
+Deno.test("greet script sends a message", OPTS, async () =&gt; {
+  const sent: string[] = [];
+
+  const u = {
+    me: { id: "1", name: "Alice", flags: new Set(["player"]), state: {}, contents: [] },
+    here: { id: "2", name: "Hall", state: {}, contents: [], flags: new Set(["room"]),
+      broadcast: () =&gt; {} },
+    cmd: { name: "greet", args: ["Bob"], switches: [] },
+    state: {},
+    send: (msg: string) =&gt; { sent.push(msg); },
+    util: {
+      target: async () =&gt; ({ id: "3", name: "Bob", flags: new Set(["player"]),
+        state: {}, contents: [] }),
+      displayName: (obj: { name?: string }) =&gt; obj.name ?? "Unknown",
+    },
+    db: {
+      search: async () =&gt; [],
+      modify: async () =&gt; {},
+    },
+  } as unknown;
+
+  // Load and run the script
+  const src = await Deno.readTextFile("system/scripts/greet.ts");
+  const fn = new Function("u", src.replace(/^export default/, "return"));
+  await fn(u)(u);
+
+  assertEquals(sent[0], "You wave to Bob.");
 });
-
-if (visits % 100 === 0) {
-  u.here.broadcast(`%ch%cy[INFO]%cn This room has been visited ${visits} times!`);
-}
 </code></pre>
 <hr>
-<h2>Formatting a Who List</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/who.ts — abbreviated example
-const online = await u.db.search({ flags: /connected/i });
-const W = 60;
-
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send("%ch%cy" + u.util.center("WHO", W) + "%cn");
-u.send("%ch%cy" + "=".repeat(W) + "%cn");
-u.send(
-  u.util.ljust("%chName%cn", 24) +
-  u.util.ljust("%chLocation%cn", 26) +
-  u.util.rjust("%chIdle%cn", 10)
-);
-u.send("-".repeat(W));
-
-for (const p of online) {
-  const name     = u.util.displayName(p, u.me);
-  const location = (p.state.roomName as string) || `#${p.location}`;
-  const idle     = p.state.lastCommand
-    ? `${Math.floor((Date.now() - (p.state.lastCommand as number)) / 60000)}m`
-    : "0m";
-
-  u.send(u.util.ljust(name, 24) + u.util.ljust(location, 26) + u.util.rjust(idle, 10));
-}
-
-u.send("-".repeat(W));
-u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
+<h2>Plugin Debugging</h2>
+<h3>Check if your plugin loaded</h3>
+<p>Look for your plugin’s init log in the server console:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">[myplugin] Plugin initialized — +myplugin commands active
 </code></pre>
+<p>If missing, the plugin file wasn’t found or threw during import.</p>
+<h3>Verify <code>addCmd</code> was called</h3>
+<p>Add a console.log to your <code>commands.ts</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">console.log("[myplugin] registering commands");
+addCmd({ ... });
+</code></pre>
+<p>This should appear at startup before <code>Plugin initialized</code>.</p>
+<h3>Route not responding</h3>
+<p>If your <code>registerPluginRoute</code> handler isn’t called:</p>
+<ul>
+<li>Verify the path starts with <code>/api/v1/</code></li>
+<li>Check that <code>registerPluginRoute</code> is called inside <code>init()</code>, not at module level</li>
+<li>Confirm the auth header is present (<code>Authorization: Bearer &lt;jwt&gt;</code>)</li>
+</ul>
+<h3>GameHooks not firing</h3>
+<p>If <code>gameHooks.on()</code> isn’t triggering:</p>
+<ul>
+<li>Verify you’re calling <code>on()</code> in <code>init()</code> and storing the handler reference</li>
+<li>Check that <code>off()</code> isn’t being called before the event fires</li>
+<li>Confirm the event name matches exactly (case-sensitive)</li>
+</ul>
 
       </article>
 
@@ -627,9 +570,6 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
         
           
-        
-      
-        
           
         
       
@@ -638,36 +578,21 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
+      
         
       
         
-          
-        
       
         
-          
-        
       
-        
-          
-        
-      
-        
-          
-          
-        
-      
-        
-          
         
       
         
@@ -708,16 +633,16 @@ u.send(`${online.length} player${online.length === 1 ? "" : "s"} connected.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/guides/password-reset/" class="page-nav-btn prev">
+          <a href="/guides/customization/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Password Reset</span>
+            <span class="page-nav-title">Customization Guide</span>
           </a>
         
 
         
-          <a href="/guides/scenes/" class="page-nav-btn next">
+          <a href="/guides/deployment/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Scenes</span>
+            <span class="page-nav-title">Production Deployment</span>
           </a>
         
       </nav>
