@@ -1,8 +1,9 @@
 /**
- * Serve the staff web console under /admin/ (and legacy /admin/wiki/).
+ * Serve the staff web console under /admin/ (and legacy
+ * /admin/wiki/).
  *
- * Prefer packages/web/dist/ (Vue build). Fall back to admin/ if
- * dist is missing (dev before first build).
+ * Prefers dist/ (Vite build); falls back to admin/.
+ * Works for local file:// and JSR https:// modules.
  */
 
 import {
@@ -13,21 +14,26 @@ import {
   isAbsolute,
 } from "@std/path";
 
-const DIST_ROOT = fromFileUrl(
-  new URL("../dist/", import.meta.url),
-);
-const LEGACY_ROOT = fromFileUrl(
-  new URL("../admin/", import.meta.url),
-);
+const DIST_URL = new URL("../dist/", import.meta.url);
+const FALLBACK_URL = new URL("../admin/", import.meta.url);
 
-async function resolveRoot(): Promise<string> {
+function isFileUrl(u: URL): boolean {
+  return u.protocol === "file:";
+}
+
+function fileRoot(u: URL): string {
+  return normalize(fromFileUrl(u));
+}
+
+async function resolveFileRoot(): Promise<string | null> {
+  if (!isFileUrl(DIST_URL)) return null;
+  const dist = fileRoot(DIST_URL);
   try {
-    const st = await Deno.stat(join(DIST_ROOT, "index.html"));
-    if (st.isFile) return normalize(DIST_ROOT);
-  } catch {
-    /* fall through */
-  }
-  return normalize(LEGACY_ROOT);
+    if ((await Deno.stat(join(dist, "index.html"))).isFile) {
+      return dist;
+    }
+  } catch { /* missing */ }
+  return isFileUrl(FALLBACK_URL) ? fileRoot(FALLBACK_URL) : null;
 }
 
 function isInside(base: string, target: string): boolean {
@@ -52,12 +58,10 @@ const MIME: Record<string, string> = {
 };
 
 /**
- * Map /admin or /admin/wiki URL path to a file under the SPA root.
+ * Relative SPA path under /admin/ or /admin/wiki/.
+ * Returns null on traversal / invalid paths.
  */
-export function resolveAdminFile(
-  pathname: string,
-  root: string,
-): string | null {
+export function spaRelPath(pathname: string): string | null {
   let rel = pathname
     .replace(/^\/admin\/wiki\/?/, "")
     .replace(/^\/admin\/?/, "");
@@ -80,9 +84,21 @@ export function resolveAdminFile(
 
   const parts = rel.split("/").filter((p) => p.length > 0);
   if (parts.some((p) => p === ".." || p === ".")) return null;
+  return parts.join("/");
+}
 
+/**
+ * Map /admin or /admin/wiki URL path to a file under SPA root
+ * (local filesystem roots only — used by tests).
+ */
+export function resolveAdminFile(
+  pathname: string,
+  root: string,
+): string | null {
+  const rel = spaRelPath(pathname);
+  if (rel === null) return null;
   const base = normalize(root);
-  const target = normalize(join(root, ...parts));
+  const target = normalize(join(root, ...rel.split("/")));
   if (!isInside(base, target)) return null;
   return target;
 }
@@ -95,6 +111,70 @@ function mimeFor(filePath: string): string {
   return MIME[ext] ?? "application/octet-stream";
 }
 
+function headersFor(pathOrName: string): Headers {
+  return new Headers({
+    "Content-Type": mimeFor(pathOrName),
+    "Cache-Control": "no-cache",
+    "X-Content-Type-Options": "nosniff",
+  });
+}
+
+async function readRemote(
+  base: URL,
+  rel: string,
+): Promise<Uint8Array | null> {
+  const url = new URL(rel, base);
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return new Uint8Array(await res.arrayBuffer());
+  } catch {
+    return null;
+  }
+}
+
+async function readLocal(
+  root: string,
+  rel: string,
+): Promise<Uint8Array | null> {
+  try {
+    return await Deno.readFile(join(root, ...rel.split("/")));
+  } catch {
+    return null;
+  }
+}
+
+async function withSpaFallback(
+  load: (r: string) => Promise<Uint8Array | null>,
+  rel: string,
+): Promise<{ data: Uint8Array; name: string } | null> {
+  const data = await load(rel);
+  if (data) return { data, name: rel };
+  if (rel === "index.html") return null;
+  const idx = await load("index.html");
+  return idx ? { data: idx, name: "index.html" } : null;
+}
+
+async function loadAsset(
+  rel: string,
+): Promise<{ data: Uint8Array; name: string } | null> {
+  const fileRootPath = await resolveFileRoot();
+  if (fileRootPath) {
+    return withSpaFallback(
+      (r) => readLocal(fileRootPath, r),
+      rel,
+    );
+  }
+  for (const base of [DIST_URL, FALLBACK_URL]) {
+    const hit = await withSpaFallback(
+      (r) => readRemote(base, r),
+      rel,
+    );
+    if (hit) return hit;
+  }
+  return null;
+}
+
 export async function adminStaticHandler(
   req: Request,
   _userId: string | null,
@@ -103,10 +183,9 @@ export async function adminStaticHandler(
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  const root = await resolveRoot();
   const url = new URL(req.url);
-  let filePath = resolveAdminFile(url.pathname, root);
-  if (!filePath) {
+  const rel = spaRelPath(url.pathname);
+  if (rel === null) {
     return new Response(
       JSON.stringify({ error: "Invalid path" }),
       {
@@ -116,37 +195,16 @@ export async function adminStaticHandler(
     );
   }
 
-  try {
-    const data = await Deno.readFile(filePath);
-    const headers = new Headers({
-      "Content-Type": mimeFor(filePath),
-      "Cache-Control": filePath.endsWith(".html")
-        ? "no-cache"
-        : "no-cache",
-      "X-Content-Type-Options": "nosniff",
-    });
-    if (req.method === "HEAD") {
-      return new Response(null, { status: 200, headers });
-    }
-    return new Response(data, { status: 200, headers });
-  } catch (e) {
-    if (e instanceof Deno.errors.NotFound) {
-      // Vue history fallback
-      try {
-        const index = join(root, "index.html");
-        const data = await Deno.readFile(index);
-        return new Response(data, {
-          status: 200,
-          headers: {
-            "Content-Type": "text/html; charset=utf-8",
-            "Cache-Control": "no-cache",
-            "X-Content-Type-Options": "nosniff",
-          },
-        });
-      } catch {
-        return new Response("Not Found", { status: 404 });
-      }
-    }
-    throw e;
+  const asset = await loadAsset(rel);
+  if (!asset) {
+    return new Response("Not Found", { status: 404 });
   }
+
+  const headers = headersFor(asset.name);
+  if (req.method === "HEAD") {
+    return new Response(null, { status: 200, headers });
+  }
+  // Copy into a fresh buffer — Response BodyInit typing
+  const body = new Uint8Array(asset.data);
+  return new Response(body, { status: 200, headers });
 }

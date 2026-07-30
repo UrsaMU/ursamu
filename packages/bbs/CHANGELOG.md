@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1] - 2026-07-30
+
+### Changed
+
+- Peer `@ursamu/jobs` ^1.1.2 (staff-nav/badge bridges)
+
+
 ## [1.1.0] - 2026-07-30
 
 ### Added

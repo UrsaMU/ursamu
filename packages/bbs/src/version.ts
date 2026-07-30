@@ -1,5 +1,5 @@
 /** Package identity for +bbversion, staff nav, and freeze docs. */
-export const BBS_VERSION = "1.1.0";
+export const BBS_VERSION = "1.1.1";
 export const BBS_CODENAME = "Myrddin";
 
 /** Technical plugin id (IPlugin.name, routes, DBO prefix). */

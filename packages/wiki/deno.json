@@ -7,7 +7,9 @@
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
     "lint": "deno lint",
-    "check": "deno check mod.ts --unstable-kv"
+    "check": "deno check mod.ts --unstable-kv",
+    "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types --no-check",
+    "publish": "deno publish --allow-slow-types --no-check"
   },
   "compilerOptions": {
     "lib": [
