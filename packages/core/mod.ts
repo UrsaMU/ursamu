@@ -16,6 +16,7 @@ export {
   registerRoute,
   registerFallback,
   formatRemoteAddr,
+  shouldSkipSecurityRewrap,
 } from "./src/server/http.ts";
 export type { ICoreServer, ITransport }    from "./src/server/types.ts";
 

@@ -229,11 +229,27 @@ function entryFromFile(
 
   const fm = parseFrontmatter(raw);
   const hidden = fm.hidden || pathImpliesHidden(cleaned);
-  const name = slugify(
+  let name = slugify(
     fm.topic ||
       (isIndex && !prefix ? section : topicName),
   );
   const resolvedSection = fm.section || section;
+
+  // Plugin dirs register with a section id (e.g. "bbs"). Nested
+  // paths become "staff/…" — prefix so lookups are "bbs/staff"
+  // (as docs/SEE ALSO expect) and plugins do not collide on
+  // bare names like "staff" or "reading".
+  // Root index stays "bbs" (name === section). Explicit fm.topic
+  // that already includes the section is left alone.
+  if (
+    resolvedSection &&
+    name &&
+    name !== resolvedSection &&
+    !name.startsWith(`${resolvedSection}/`)
+  ) {
+    name = slugify(`${resolvedSection}/${name}`);
+  }
+
   const tags = [...new Set([...fm.tags, ...fm.aliases])];
 
   return {

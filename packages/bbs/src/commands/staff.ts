@@ -356,6 +356,9 @@ Examples:
     const post = await getPost(board.num, parseInt(u.cmd.args[1] ?? "", 10));
     if (!post) { u.send("%ch>BBS:%cn Post not found."); return; }
     await posts.modify({ id: post.id }, "$set", { flags: [] });
+    void import("../staff-badge-bridge.ts").then((m) =>
+      m.publishBbsFlaggedBadgeAndBump()
+    );
     u.send(`%ch>BBS:%cn Flags cleared from ${board.num}/${post.num}.`);
   },
 });

@@ -4,6 +4,13 @@ Breaking changes to **stable** exports require a **major** bump.
 
 jobs system **workflow** parity — see `docs/FEATURES.md`.
 
+## Quality bar
+
+- `deno check mod.ts --unstable-kv` must pass
+- `deno task test` must pass
+- REST auth helpers are unit-tested (no substring staff flags;
+  staffOnly comments stripped for players)
+
 ## Stable exports
 
 | Export | Role |
@@ -15,6 +22,8 @@ jobs system **workflow** parity — see `docs/FEATURES.md`.
 | `runSelect` | Select DSL evaluator |
 | `jobGroups`, `expandJobGroup` | jgroups |
 | `jobs`, `jobArchive`, `jobAccess` | DBO collections |
+| `flagSetFromRaw`, `isStaffFlagSet` | Flag normalize |
+| `canViewJob`, `presentJob`, `stripStaffComments` | REST visibility |
 | Types `IJob`, `IJobComment`, `IJobAccess` | Domain model |
 
 ## Commands (1.0)

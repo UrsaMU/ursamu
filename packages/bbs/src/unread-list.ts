@@ -12,6 +12,7 @@ import { canRead } from "./permissions.ts";
 import { getUnreadKeys, isMember } from "./tracking.ts";
 import { bbDate } from "./display.ts";
 import type { IBoard, IPost } from "./db.ts";
+import { trueNameFromId } from "./author.ts";
 
 export async function collectUnreadRows(
   u: IUrsamuSDK,
@@ -24,7 +25,7 @@ export async function collectUnreadRows(
     if (!unread.length) continue;
     const bPosts = await getBoardPosts(board.num);
     for (const key of unread) {
-      const line = formatUnreadLine(board, bPosts, key);
+      const line = await formatUnreadLine(board, bPosts, key);
       if (line) rows.push(line);
     }
   }
@@ -50,15 +51,19 @@ export async function boardsToScan(
   return out;
 }
 
-export function formatUnreadLine(
+export async function formatUnreadLine(
   board: IBoard,
   bPosts: IPost[],
   key: string,
-): string | null {
+): Promise<string | null> {
   const { post, reply } = resolveKey(bPosts, key);
   if (!post) return null;
   const msg = reply ?? post;
-  const author = board.anonymous ? "Anonymous" : msg.authorName;
+  let author = board.anonymous ? "Anonymous" : msg.authorName;
+  // Replies: always true name, never moniker
+  if (reply && !board.anonymous) {
+    author = await trueNameFromId(reply.authorId, reply.authorName);
+  }
   const subj = (msg.subject ?? "").slice(0, 34);
   const id = `${board.num}/${key}`;
   return (

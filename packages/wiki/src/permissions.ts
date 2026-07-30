@@ -19,10 +19,12 @@ export function isAdmin(u: IUrsamuSDK): boolean {
  * Evaluate a page's `readLock` frontmatter field against the caller.
  *
  * Lock values:
- *   (absent / "connected") — any logged-in player
+ *   "public"               — anyone (anonymous web + in-game)
+ *   (absent / "connected") — any logged-in player (REST needs JWT)
  *   "admin" | "staff"      — admin/wizard/superuser only
  *   "faction:<id>"         — player must be in that object's contents
  *
+ * Drafts are always staff-only, regardless of readLock.
  * Returns true if the caller may read the page.
  */
 export async function canReadPage(
@@ -34,7 +36,7 @@ export async function canReadPage(
 
   const lock = (meta.readLock as string | undefined) ?? "connected";
 
-  if (lock === "connected") return true;
+  if (lock === "public" || lock === "connected") return true;
   if (lock === "admin" || lock === "staff") return isAdmin(u);
 
   if (lock.startsWith("faction:")) {
@@ -52,6 +54,8 @@ export async function canReadPage(
 /**
  * REST-context equivalent: evaluate readLock with only a userId string.
  * Returns true if the user may read the page.
+ *
+ * "public" is the only lock that allows userId === null (anonymous).
  */
 export async function canReadPageRest(
   userId: string | null,
@@ -62,12 +66,22 @@ export async function canReadPageRest(
     const player = await dbojs.queryOne({ id: userId });
     if (!player) return false;
     const f = player.flags as unknown;
-    if (f instanceof Set) return (f as Set<string>).has("admin") || (f as Set<string>).has("wizard") || (f as Set<string>).has("superuser");
+    if (f instanceof Set) {
+      return (f as Set<string>).has("admin") ||
+        (f as Set<string>).has("wizard") ||
+        (f as Set<string>).has("superuser");
+    }
     const s = (f as string) || "";
-    return s.includes("admin") || s.includes("wizard") || s.includes("superuser");
+    return s.includes("admin") || s.includes("wizard") ||
+      s.includes("superuser");
   }
 
   const lock = (meta.readLock as string | undefined) ?? "connected";
+
+  // Anonymous web / public site
+  if (lock === "public") return true;
+
+  // Logged-in players only (JWT required)
   if (lock === "connected") return !!userId;
 
   if (lock === "admin" || lock === "staff") {
@@ -75,9 +89,14 @@ export async function canReadPageRest(
     const player = await dbojs.queryOne({ id: userId });
     if (!player) return false;
     const f = player.flags as unknown;
-    if (f instanceof Set) return (f as Set<string>).has("admin") || (f as Set<string>).has("wizard") || (f as Set<string>).has("superuser");
+    if (f instanceof Set) {
+      return (f as Set<string>).has("admin") ||
+        (f as Set<string>).has("wizard") ||
+        (f as Set<string>).has("superuser");
+    }
     const s = (f as string) || "";
-    return s.includes("admin") || s.includes("wizard") || s.includes("superuser");
+    return s.includes("admin") || s.includes("wizard") ||
+      s.includes("superuser");
   }
 
   if (lock.startsWith("faction:")) {
@@ -85,7 +104,9 @@ export async function canReadPageRest(
     const objId = lock.slice("faction:".length);
     const obj   = await dbojs.queryOne({ id: objId });
     if (!obj) return false;
-    const contents = ((obj as unknown as Record<string, unknown>).contents as string[]) ?? [];
+    const contents =
+      ((obj as unknown as Record<string, unknown>).contents as string[]) ??
+        [];
     return contents.includes(userId);
   }
 
@@ -95,9 +116,10 @@ export async function canReadPageRest(
 /** Validate that a readLock string has one of the accepted forms. */
 export function isValidReadLock(lock: string): boolean {
   return (
+    lock === "public" ||
     lock === "connected" ||
     lock === "admin" ||
     lock === "staff" ||
-    lock.startsWith("faction:")
+    (lock.startsWith("faction:") && lock.length > "faction:".length)
   );
 }

@@ -48,8 +48,10 @@ const onRenamed = async (page: WikiPageRef): Promise<void> => {
 
 export const plugin: IPlugin = {
   name: "wiki",
-  version: "0.1.0",
-  description: "File-based markdown wiki with revision history, access control, webhooks, wikilinks, and watch subscriptions.",
+  version: "0.2.1",
+  description:
+    "File-based markdown wiki with history, access control, " +
+    "webhooks. Staff UI lives in @ursamu/web (/admin/).",
 
   init: () => {
     registerPluginRoute("/api/v1/wiki", wikiRouteHandler);
@@ -57,7 +59,10 @@ export const plugin: IPlugin = {
     wikiHooks.on("wiki:edited",  onEdited);
     wikiHooks.on("wiki:deleted", onDeleted);
     wikiHooks.on("wiki:renamed", onRenamed);
-    console.log("[wiki] Plugin initialized — +wiki/+wikiwatch/@wiki commands active, /api/v1/wiki routes registered");
+    console.log(
+      "[wiki] Plugin initialized — +wiki/@wiki, /api/v1/wiki " +
+        "(staff UI: @ursamu/web → /admin/)",
+    );
     return true;
   },
 

@@ -25,3 +25,6 @@ export { scanBacklinks, resolveWikilinks, extractWikilinks } from "./src/backlin
 export { saveSnapshot, listHistory, readSnapshot } from "./src/history.ts";
 export { isWebhookUrlSafe, isPrivateIp } from "./src/url-safety.ts";
 export { loadWebhooks, saveWebhooks, fireWebhook } from "./src/webhook.ts";
+// Staff SPA moved to @ursamu/web (/admin/).
+// admin-static kept in-tree for reference; not registered.
+

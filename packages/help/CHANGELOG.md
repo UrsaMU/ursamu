@@ -3,6 +3,16 @@
 All notable changes to `@ursamu/help` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1] - 2026-07-30
+
+### Fixed
+
+- FileProvider prefixes nested plugin help topics with the
+  `registerHelpDir` section id (e.g. `staff/…` → `bbs/staff/…`)
+  so documented paths like `+help bbs/staff` resolve, and bare
+  names like `staff` no longer collide across plugins
+
+
 ## [1.0.0] - 2026-07-28
 
 First stable release of the API-first help system.

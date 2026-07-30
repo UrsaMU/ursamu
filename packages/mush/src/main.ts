@@ -15,7 +15,7 @@ try {
 } catch {
   /* no .env — fine for tests and fresh installs */
 }
-import { handleRequest } from "./app.ts";
+import { handleRequest, setupRoutes } from "./app.ts";
 import "./reboot.ts";
 import { plugins, loadTxtDir, setFlags, loadPlugins, txtFiles } from "./main_utils.ts";
 import {
@@ -291,7 +291,8 @@ export const initializeEngine = async (
   setConfig("server.port",        httpPort);
   setConfig("server.telnetPort",  tnPort);
 
-  // Register app.ts handleRequest as the HTTP fallback for all REST routes.
+  // Wire REST routes (login/register/me/…) then fallback for the rest.
+  setupRoutes();
   registerFallback(handleRequest);
 
   // Wire session hooks BEFORE accepting connections so soft-reboot

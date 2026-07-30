@@ -9,6 +9,7 @@
  */
 
 import { dbojs, chans, chanHistory, Obj } from "../world/dbobjs.ts";
+import { stripAnsi } from "../softcode/stdlib/helpers.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -17,7 +18,30 @@ const hasFlag = (flagStr: string, ...names: string[]): boolean => {
   return names.some((n) => set.has(n));
 };
 
+/** Plain-text moniker for web / API clients (no %c or ANSI). */
+function plainMoniker(raw: unknown): string | null {
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  const plain = stripAnsi(raw)
+    .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "")
+    .trim();
+  return plain || null;
+}
+
 // ── GET /api/v1/me ────────────────────────────────────────────────────────────
+
+/** Normalize flags from string | Set | string[] → string[]. */
+export function normalizeFlagList(raw: unknown): string[] {
+  if (raw instanceof Set) {
+    return [...raw].map((f) => String(f)).filter(Boolean);
+  }
+  if (Array.isArray(raw)) {
+    return raw.map((f) => String(f)).filter(Boolean);
+  }
+  if (typeof raw === "string") {
+    return raw.split(/[\s,|]+/).map((f) => f.trim()).filter(Boolean);
+  }
+  return [];
+}
 
 export async function meHandler(_req: Request, userId: string): Promise<Response> {
   const user = await Obj.get(userId);
@@ -28,13 +52,24 @@ export async function meHandler(_req: Request, userId: string): Promise<Response
     });
   }
 
+  // Prefer raw dbobj.flags — getter may be Set or string depending on path.
+  const rawFlags = (user.dbobj as { flags?: unknown })?.flags ??
+    user.flags;
+
+  // Plain character name — not moniker (Obj.name prefers moniker).
+  const plainName =
+    String(user.data?.name ?? user.dbobj?.data?.name ?? "").trim() ||
+    "Unknown";
+
   const profile = {
-    id:      user.dbref,
-    name:    user.name || "Unknown",
-    moniker: (user.data?.moniker as string | undefined) || null,
-    flags:   user.flags.split(" ").filter(Boolean),
+    id: user.dbref,
+    // Numeric id for clients that need it (wiki admin JWT is this id)
+    dbId: user.id,
+    name: plainName,
+    moniker: plainMoniker(user.data?.moniker),
+    flags: normalizeFlagList(rawFlags),
     location: user.dbobj.location || null,
-    avatar:  (user.data?.image as string | undefined) || null,
+    avatar: (user.data?.image as string | undefined) || null,
   };
 
   return new Response(JSON.stringify(profile), {
@@ -53,7 +88,7 @@ export async function onlinePlayersHandler(_req: Request): Promise<Response> {
     .map((p) => ({
       id:       p.id,
       name:     p.data?.name || "Unknown",
-      moniker:  (p.data?.moniker as string | undefined) || null,
+      moniker:  plainMoniker(p.data?.moniker),
     }));
 
   return new Response(JSON.stringify(players), {

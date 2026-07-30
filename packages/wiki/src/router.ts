@@ -102,12 +102,30 @@ async function handleSearch(q: string, userId: string | null): Promise<Response>
 }
 
 async function handleList(userId: string | null): Promise<Response> {
-  const pages: WikiStub[] = [];
+  const pages: Array<WikiStub & Record<string, unknown>> = [];
   for await (const { urlPath, absPath } of walkWiki(resolve(WIKI_DIR))) {
     const page = await readPageFile(absPath);
     if (!page || !(await canReadPageRest(userId, page.meta))) continue;
-    pages.push({ path: urlPath, title: (page.meta.title as string) || urlPath, type: "page" });
+    const meta = page.meta ?? {};
+    const tags = Array.isArray(meta.tags)
+      ? (meta.tags as unknown[]).map(String)
+      : [];
+    pages.push({
+      path: urlPath,
+      title: (meta.title as string) || urlPath,
+      type: "page",
+      draft: meta.draft === true,
+      author: typeof meta.author === "string" ? meta.author : "",
+      date: typeof meta.date === "string" ? meta.date : "",
+      readLock: typeof meta.readLock === "string"
+        ? meta.readLock
+        : "connected",
+      tags,
+      // Rough size for dashboard (chars of body)
+      chars: page.body?.length ?? 0,
+    });
   }
+  pages.sort((a, b) => String(a.path).localeCompare(String(b.path)));
   return json(pages);
 }
 

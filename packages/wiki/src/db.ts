@@ -24,15 +24,33 @@ export const MAX_PLAYER_SUBS = 200;
  * Returns true if userId belongs to a player with admin, wizard, or superuser flags.
  * Used by REST routes which only have a userId string (no full SDK context).
  */
+const STAFF_FLAGS = new Set(["admin", "wizard", "superuser"]);
+
+function flagSet(raw: unknown): Set<string> {
+  if (raw instanceof Set) {
+    return new Set([...raw].map((f) => String(f).toLowerCase()));
+  }
+  if (Array.isArray(raw)) {
+    return new Set(raw.map((f) => String(f).toLowerCase()));
+  }
+  const str = String(raw ?? "");
+  return new Set(
+    str.split(/[\s,|]+/).map((f) => f.toLowerCase()).filter(Boolean),
+  );
+}
+
+/** True if flags include admin, wizard, or superuser (admin+). */
+export function flagsAreStaff(raw: unknown): boolean {
+  const set = flagSet(raw);
+  for (const f of STAFF_FLAGS) {
+    if (set.has(f)) return true;
+  }
+  return false;
+}
+
 export async function isStaffUser(userId: string | null): Promise<boolean> {
   if (!userId) return false;
   const player = await dbojs.queryOne({ id: userId });
   if (!player) return false;
-  const flags = player.flags as unknown;
-  // flags may be a Set<string> or a space-separated string depending on version
-  if (flags instanceof Set) {
-    return (flags as Set<string>).has("admin") || (flags as Set<string>).has("wizard") || (flags as Set<string>).has("superuser");
-  }
-  const str = (flags as string) || "";
-  return str.includes("admin") || str.includes("wizard") || str.includes("superuser");
+  return flagsAreStaff(player.flags);
 }

@@ -134,10 +134,14 @@ function parsePrimary(t: TokStream): SelectAst {
     return e;
   }
   if (p.t !== "id") throw new Error("expected criterion");
-  const name = take(t).v!.toLowerCase();
+  const nameTok = take(t);
+  if (nameTok.t !== "id") throw new Error("expected criterion");
+  const name = nameTok.v.toLowerCase();
   const n = peek(t);
   if (n?.t === "op") {
-    const op = take(t).v!;
+    const opTok = take(t);
+    if (opTok.t !== "op") throw new Error("expected operator");
+    const op = opTok.v;
     const vtok = take(t);
     if (vtok.t !== "id" && vtok.t !== "str") {
       throw new Error("expected value");

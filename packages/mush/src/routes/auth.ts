@@ -168,7 +168,19 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
   // ── register / login ──────────────────────────────────────────────────────
 
   try {
-    const { username, password, email } = await req.json();
+    const body = await req.json() as Record<string, unknown>;
+    // Accept `name` as alias for `username` (older / plugin UIs).
+    const username = typeof body.username === "string"
+      ? body.username
+      : typeof body.name === "string"
+      ? body.name
+      : undefined;
+    const password = typeof body.password === "string"
+      ? body.password
+      : undefined;
+    const email = typeof body.email === "string"
+      ? body.email
+      : undefined;
 
     if (isRegister) {
       if (isLoginRateLimited(clientIp)) {
@@ -178,7 +190,7 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
       if (!username || !password || !email) {
         return jsonResp({ error: "Username, email, and password are required." }, 400);
       }
-      if (typeof username !== "string" || username.length > MAX_USERNAME) {
+      if (username.length > MAX_USERNAME) {
         return jsonResp({ error: `Username must be ${MAX_USERNAME} characters or fewer.` }, 400);
       }
       if (typeof password !== "string" || password.length < MIN_PASSWORD || password.length > MAX_PASSWORD) {
@@ -224,6 +236,27 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
         await log("warn", "LOGIN_RATE_LIMITED", { ip: clientIp, username });
         return jsonResp({ error: "Too many login attempts. Try again later." }, 429);
       }
+      if (!username || !password) {
+        return jsonResp(
+          { error: "Username and password are required." },
+          400,
+        );
+      }
+      if (username.length > MAX_USERNAME) {
+        return jsonResp(
+          {
+            error:
+              `Username must be ${MAX_USERNAME} characters or fewer.`,
+          },
+          400,
+        );
+      }
+      if (
+        password.length < MIN_PASSWORD ||
+        password.length > MAX_PASSWORD
+      ) {
+        return jsonResp({ error: "Invalid username or password." }, 401);
+      }
 
       const ob = await dbojs.findOne({
         $or: [
@@ -249,8 +282,21 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
         return jsonResp({ error: "Invalid username or password." }, 401);
       }
 
-      const token = await createToken({ id: obj.dbobj.id });
-      return jsonResp({ token, id: obj.dbobj.id, name: obj.dbobj.data.name || "Unknown" });
+      const id = String(obj.dbobj.id);
+      const token = await createToken({ id });
+      // Include flags so clients can gate UI without a race on /me.
+      const flagsRaw = obj.dbobj.flags as unknown;
+      const flags = flagsRaw instanceof Set
+        ? [...flagsRaw].map(String)
+        : Array.isArray(flagsRaw)
+        ? flagsRaw.map(String)
+        : String(flagsRaw ?? "").split(/[\s,|]+/).filter(Boolean);
+      return jsonResp({
+        token,
+        id,
+        name: obj.dbobj.data.name || "Unknown",
+        flags,
+      });
     }
   } catch {
     return jsonResp({ error: "Internal server error." }, 500);

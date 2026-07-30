@@ -30,7 +30,7 @@ Switches:
   /move <path>=<new-path>          Rename/move a page.
   /tag <path>=<tag1,tag2,...>      Set tags on a page.
   /fetch <url>=<wiki-path>         Download a remote asset into the wiki.
-  /lock <path>=<lock>              Set readLock (connected|admin|staff|faction:<id>).
+  /lock <path>=<lock>              Set readLock (public|connected|admin|staff|faction:<id>).
   /draft <path>=<on|off>           Toggle draft (staff-only visibility).
   /webhook <dir>=<url>             Set Discord webhook for a directory (https:// only).
   /restore <path>=<timestamp>      Restore a page from a history snapshot.

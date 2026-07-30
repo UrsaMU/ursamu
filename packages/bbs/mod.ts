@@ -31,3 +31,39 @@ export type {
   IFlag,
   IDraft,
 } from "./src/db.ts";
+
+// REST auth helpers (stable for tests / consumers)
+export {
+  bareId,
+  canDeletePost,
+  canEditPost,
+  canModerateBoard,
+  canModeratePost,
+  canReadBoard,
+  canWriteBoard,
+  flagSetFromRaw,
+  getReadSet,
+  isBoardModId,
+  isStaffFlagSet,
+  parseModeratorsField,
+} from "./src/rest-auth.ts";
+
+// Live board events (staff console WS)
+export {
+  onBbsBoardUpsert,
+  offBbsBoardUpsert,
+  onBbsBoardDelete,
+  offBbsBoardDelete,
+  onBbsPostUpsert,
+  offBbsPostUpsert,
+  emitBbsBoard,
+  emitBbsBoardDelete,
+  emitBbsPost,
+} from "./src/events.ts";
+export type {
+  BbsBoardEvent,
+  BbsBoardDeleteEvent,
+  BbsPostEvent,
+} from "./src/events.ts";
+
+export { evalBoardLock, flagsPassLevel } from "./src/lock-eval.ts";

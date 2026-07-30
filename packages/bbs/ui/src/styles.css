@@ -1,0 +1,271 @@
+/**
+ * BBS standalone layout only.
+ * Tokens + utilities come from @ursamu/web staff-theme
+ * (runtime /admin/staff-theme.css or vendor fallback).
+ *
+ * Do NOT redefine :root color tokens here.
+ */
+
+/* Page shell when not inside host layout */
+.bbs-app-main {
+  padding: var(--gutter-y) var(--gutter-x) 3rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+/* Topbar (standalone shell) — uses host tokens only */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--header-h);
+  min-height: var(--header-h);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  padding: 0.5rem var(--gutter-x);
+  display: flex;
+  align-items: center;
+}
+
+.top-nav {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: calc(var(--header-h) - 1rem);
+}
+
+.top-nav-left,
+.top-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.brand {
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 0.9375rem;
+  text-decoration: none;
+}
+
+.brand:hover {
+  color: var(--primary-hover);
+}
+
+.top-divider {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.top-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.top-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.top-tab:hover {
+  color: var(--text);
+  background: var(--bg-surface-2);
+}
+
+.top-tab.active {
+  color: var(--text);
+  background: var(--primary-muted);
+  border-color: var(--primary-border);
+}
+
+.top-user {
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.top-signout {
+  min-height: 2.15rem;
+  padding: 0.35rem 0.75rem;
+}
+
+.main-pane {
+  padding: var(--gutter-y) var(--gutter-x) 3rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+/* Gate (login / forbidden) */
+.gate {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background: var(--bg);
+}
+
+.gate-card {
+  width: min(22.5rem, 100%);
+  padding: 2rem 1.75rem 1.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.gate-card h1 {
+  margin: 0.25rem 0 0.4rem;
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+.gate-card .lede {
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.gate-card button.primary,
+.gate-card .staff-btn-primary {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.back-link {
+  margin: 1rem 0 0;
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+/* Legacy aliases mapped to host utilities */
+.muted {
+  color: var(--text-muted) !important;
+}
+
+.error {
+  color: var(--error) !important;
+  font-size: 0.8125rem;
+}
+
+button.primary {
+  background: var(--primary);
+  border: 1px solid transparent;
+  color: var(--text-inverse);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  min-height: var(--control-h);
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+
+button.ghost,
+button.outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  min-height: var(--control-h);
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--control-h);
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-code);
+  color: var(--text);
+}
+
+textarea {
+  min-height: 8rem;
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+#view-app {
+  min-height: 100vh;
+  width: 100%;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}

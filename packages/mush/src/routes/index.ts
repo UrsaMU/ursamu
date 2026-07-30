@@ -183,7 +183,14 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
     return Response.json({ status: "ok", engine: "UrsaMU" });
   }
 
-  if (path === "/api/v1/auth" || path.startsWith("/api/v1/auth/")) {
+  // Auth — login / register / reset (and legacy /api/v1/auth/*)
+  if (
+    path === "/api/v1/login" ||
+    path === "/api/v1/register" ||
+    path === "/api/v1/reset-password" ||
+    path === "/api/v1/auth" ||
+    path.startsWith("/api/v1/auth/")
+  ) {
     return authHandler(req, remoteAddr);
   }
 
@@ -211,9 +218,22 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
   if (path === "/api/v1/flags" && method === "GET")     return flagsHandler(req);
   if (path === "/api/v1/functions" && method === "GET") return functionsHandler(req);
 
-  if (path.startsWith("/api/v1/dbobj")) {
+  // /api/v1/dbos (list) and /api/v1/dbobj/:id (item)
+  if (
+    path === "/api/v1/dbos" ||
+    path.startsWith("/api/v1/dbobj/") ||
+    path === "/api/v1/dbobj"
+  ) {
     const userId = await _authenticate(req);
-    if (!userId) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
     return dbObjHandler(req, userId);
   }
 

@@ -198,6 +198,9 @@ Examples:
     // stripSubs on playerName: a player's display name may contain MUSH codes
     const flag: IFlag = { playerId: u.me.id, playerName: u.util.stripSubs(u.me.name ?? "Unknown"), reason, createdAt: Date.now() };
     await posts.modify({ id: post.id }, "$set", { flags: [...flags, flag] });
+    void import("../staff-badge-bridge.ts").then((m) =>
+      m.publishBbsFlaggedBadgeAndBump()
+    );
     u.send(`%ch>BBS:%cn Post ${board.num}/${post.num} flagged for review.`);
   },
 });

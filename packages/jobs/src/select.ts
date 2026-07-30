@@ -61,16 +61,18 @@ function evalAst(
   meId: string,
   now: number,
 ): boolean {
-  if (a.k === "not") return !evalAst(a.x, j, meId, now);
-  if (a.k === "and") {
-    return evalAst(a.a, j, meId, now) &&
-      evalAst(a.b, j, meId, now);
+  switch (a.k) {
+    case "not":
+      return !evalAst(a.x, j, meId, now);
+    case "and":
+      return evalAst(a.a, j, meId, now) &&
+        evalAst(a.b, j, meId, now);
+    case "or":
+      return evalAst(a.a, j, meId, now) ||
+        evalAst(a.b, j, meId, now);
+    case "atom":
+      return evalAtom(a.name, a.op, a.val, j, meId, now);
   }
-  if (a.k === "or") {
-    return evalAst(a.a, j, meId, now) ||
-      evalAst(a.b, j, meId, now);
-  }
-  return evalAtom(a.name, a.op, a.val, j, meId, now);
 }
 
 function evalAtom(

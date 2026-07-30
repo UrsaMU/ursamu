@@ -8,7 +8,7 @@
  *
  * Install via `plugins.manifest.json`:
  * ```json
- * { "plugins": [{ "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "ref": "v1.1.0" }] }
+ * { "plugins": [{ "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "ref": "v1.1.2" }] }
  * ```
  *
  * Subscribe to job lifecycle events in another plugin:
@@ -40,6 +40,15 @@ export {
   jobGroups,
   type IJobGroup,
 } from "./src/jgroups.ts";
+
+// REST auth helpers (stable for tests / consumers)
+export {
+  canViewJob,
+  flagSetFromRaw,
+  isStaffFlagSet,
+  presentJob,
+  stripStaffComments,
+} from "./src/rest-auth.ts";
 
 // Format helpers (used by other plugins that render job data)
 export { isStaffFlags, header, jobHeader, jobFooter, divider, jobDivider, footer, formatTimeFull, formatTimeShort, formatDate, getEscalation, isNew, formatJobList, WIDTH } from "./src/format.ts";

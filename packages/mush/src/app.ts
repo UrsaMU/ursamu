@@ -86,7 +86,8 @@ export async function handleRequest(req: Request, remoteAddr?: string): Promise<
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
 }
 
-export { registerRoute as registerPluginRoute } from "@ursamu/core";
+// Do NOT alias registerRoute as registerPluginRoute — plugins must use
+// routes/plugin.ts so dispatchPluginRoute sees the same registry.
 export { addCmd } from "./commands/addCmd.ts";
 
 // ── UI component registry ─────────────────────────────────────────────────────

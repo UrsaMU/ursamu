@@ -34,7 +34,7 @@ const onReady = async (): Promise<void> => {
 
 export const plugin: IPlugin = {
   name: "help",
-  version: "1.0.0",
+  version: "1.0.1",
   description:
     "API-first help — command inline help, per-package help/ " +
     "folders via registerHelpDir, and runtime DB entries.",

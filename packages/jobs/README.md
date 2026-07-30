@@ -1,6 +1,6 @@
 # @ursamu/jobs
 
-**Version 1.1.0** — jobs system workflow + advanced tools.
+**Version 1.1.2** — jobs system workflow + staff console nav.
 
 See `docs/FEATURES.md` and `docs/STABLE.md`.
 

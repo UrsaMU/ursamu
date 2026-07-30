@@ -114,9 +114,14 @@ export async function appendJobReply(
 
   const board = await getJobsBoard();
   if (board) {
-    const msg = `%ch>BBS:%cn New reply on %cc${board.title}%cn/${post.num} (${post.subject}) by %cc${SYS_NAME}%cn.`;
+    const msg =
+      `%ch>BBS:%cn New reply on %cc${board.title}%cn/` +
+      `${post.num} (${post.subject}) by %cc${SYS_NAME}%cn.`;
     await notifyBoardReaders(board, msg);
   }
+  void import("./staff-badge-bridge.ts").then((m) =>
+    m.bumpBbsActivityBadge()
+  );
 }
 
 /** Create the root BBS post for a new job (no-op if already posted). */
@@ -145,8 +150,13 @@ export async function createJobPost(job: IBridgeJob): Promise<void> {
   };
   await posts.create(post);
 
-  const msg = `%ch>BBS:%cn New message on board ${board.num}: %cc${post.subject}%cn.`;
+  const msg =
+    `%ch>BBS:%cn New message on board ${board.num}: ` +
+    `%cc${post.subject}%cn.`;
   await notifyBoardReaders(board, msg);
+  void import("./staff-badge-bridge.ts").then((m) =>
+    m.bumpBbsActivityBadge()
+  );
 }
 
 /** Reply to a job post; synthesizes the root post if missing. */
