@@ -2,17 +2,18 @@
 
 File-based markdown wiki plugin for UrsaMU.
 
-**Version 0.2.1** — content + API. Staff UI is **`@ursamu/web`**.
+**Version 0.2.2** — content + API + plugin-owned staff nav.
 
 ## Staff UI
 
-Load **`@ursamu/web`** alongside this plugin, then open:
+Load **`@ursamu/web`** alongside this plugin. Wiki registers the
+topbar tab (`route: "wiki"` → `/admin/wiki`) and a drafts badge.
 
 ```text
-http://localhost:4203/admin/
+http://localhost:4203/admin/wiki
 ```
 
-Wiki section: browse, create, edit. See `@ursamu/web` README.
+Browse, create, edit. See `@ursamu/web` README.
 
 ## Who can read a page (`readLock`)
 

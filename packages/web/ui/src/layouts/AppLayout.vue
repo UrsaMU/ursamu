@@ -189,12 +189,11 @@ function ackSectionBadges(sec: Section): void {
 }
 
 /**
- * Built-in host sections. Plugin tabs (Jobs, Boards, …) register
- * via registerStaffNav — never hard-code them here.
+ * Built-in host sections. Plugin tabs (Wiki, Jobs, Boards, …)
+ * register via registerStaffNav — never hard-code them here.
  */
 const CORE_PRIMARY: Omit<PrimaryItem, "badge" | "badgeTitle">[] = [
   { id: "dashboard", name: "dashboard", label: "Dashboard", order: 10 },
-  { id: "wiki", name: "wiki", label: "Wiki", order: 20 },
   { id: "players", name: "players", label: "Players", order: 30 },
   { id: "db", name: "db", label: "Database", order: 60 },
   { id: "settings", name: "settings", label: "Settings", order: 90 },
@@ -204,9 +203,7 @@ const primary = computed((): PrimaryItem[] => {
   const core: PrimaryItem[] = CORE_PRIMARY.map((c) => {
     let badge = "";
     let badgeTitle: string | undefined;
-    if (c.id === "wiki") {
-      ({ badge, badgeTitle } = badgeForKey("wiki:drafts"));
-    } else if (c.id === "players") {
+    if (c.id === "players") {
       ({ badge, badgeTitle } = badgeForKey("players:online"));
     }
     return { ...c, badge, badgeTitle };

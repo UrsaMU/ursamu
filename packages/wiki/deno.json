@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/wiki",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "File-based markdown wiki for UrsaMU (staff UI via @ursamu/web).",
   "license": "MIT",
   "exports": "./mod.ts",
@@ -32,7 +32,8 @@
       "deno.json",
       "README.md",
       "design.md",
-      "LICENSE"
+      "LICENSE",
+      "CHANGELOG.md"
     ],
     "exclude": [
       "tests"

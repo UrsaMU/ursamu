@@ -59,7 +59,7 @@ re-sends a snapshot on each successful auth.
 | Route | Purpose |
 |-------|---------|
 | `/admin/` | Dashboard |
-| `/admin/wiki` | Wiki list |
+| `/admin/wiki` | Wiki list (`@ursamu/wiki` nav) |
 | `/admin/wiki/new` | Create page |
 | `/admin/wiki/edit/*` | Edit + Ctrl/⌘+S |
 | `/admin/players` | Players |
@@ -70,12 +70,14 @@ re-sends a snapshot on each successful auth.
 ### Plugin nav
 
 Plugins call `registerStaffNav()` from `@ursamu/web`.
-**Jobs** and **Boards** are plugin-owned — not hard-coded host tabs.
+**Wiki**, **Jobs**, and **Boards** are plugin-owned — not
+hard-coded host tabs.
 
 - **`route`** — in-console vue-router name (preferred)
 - **`href`** — link-out SPA fallback when no host page exists
 
 Examples:
+- Wiki → `route: "wiki"` (in-console `/admin/wiki`)
 - Jobs → `route: "jobs"` (in-console `/admin/jobs`)
 - BBS → `route: "bbs"` (in-console `/admin/bbs`)
 
