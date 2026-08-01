@@ -5,16 +5,20 @@
  * so there is a single source of truth for what tasks a game project should have.
  */
 export const GAME_PROJECT_TASKS: Record<string, string> = {
-  "start":   "bash ./scripts/run.sh",
-  "daemon":  "bash ./scripts/daemon.sh",
-  "stop":    "bash ./scripts/stop.sh",
+  "start": "bash ./scripts/run.sh",
+  "daemon": "bash ./scripts/daemon.sh",
+  "stop": "bash ./scripts/stop.sh",
   "restart": "bash ./scripts/restart.sh",
-  "status":  "bash ./scripts/status.sh",
-  "logs":    "tail -f logs/main.log logs/telnet.log",
-  "update":  "deno run -A jsr:@ursamu/ursamu/cli update",
-  "server":  "deno run -A --watch --unstable-detect-cjs --unstable-kv --unstable-net ./src/main.ts",
-  "telnet":  "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/telnet.ts",
-  "test":     "deno test --allow-all --unstable-kv --no-check",
+  "status": "bash ./scripts/status.sh",
+  "logs": "tail -f logs/main.log logs/telnet.log",
+  "update": "deno run -A --minimum-dependency-age=0 jsr:@ursamu/ursamu/cli update",
+  "safe-update": "bash ./scripts/safe-update.sh",
+  "safe-update:reboot": "bash ./scripts/safe-update.sh --reboot",
+  "server":
+    "deno run -A --watch --unstable-detect-cjs --unstable-kv --unstable-net ./src/main.ts",
+  "telnet":
+    "deno run -A --unstable-detect-cjs --unstable-kv --unstable-net ./src/telnet.ts",
+  "test": "deno test --allow-all --unstable-kv --no-check",
   "showcase": "deno run -A ./src/cli/showcase.ts",
 };
 

@@ -362,11 +362,14 @@ stays up through prepare; a soft-reboot happens only after a warm cache.
 Prepare steps (live process keeps serving):
 
 1. `git pull --ff-only` (auto-stash local dirty files, then pop)
-2. Pin every app `jsr:@ursamu/*` import to the **exact** latest on JSR
-3. Write dual-package import overrides so plugins share one mush/core/help
-4. Delete `deno.lock` + `node_modules` (stale graphs cannot survive)
-5. `deno cache --reload` entrypoints (`src/main.ts`, telnet, mod)
-6. Print resolved `@ursamu/*` versions, then soft-reboot if cache OK
+2. **Merge `config/config.sample.json` → live `config/config.json`**
+   (adds new `server.plugins` entries and `plugins.*` blocks such as
+   `map` — live secrets are preserved via deep-merge)
+3. Pin every app `jsr:@ursamu/*` import to the **exact** latest on JSR
+4. Write dual-package import overrides so plugins share one mush/core/help
+5. Delete `deno.lock` + `node_modules` (stale graphs cannot survive)
+6. `deno cache --reload --minimum-dependency-age=0` entrypoints
+7. Print resolved `@ursamu/*` versions, then soft-reboot if cache OK
 
 **Publish first.** `@restart` only loads code that is already on JSR (or
 in the game repo via git / `./vendor/*`). Monorepo edits that were never

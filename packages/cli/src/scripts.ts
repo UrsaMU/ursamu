@@ -44,8 +44,9 @@ const dryRun     = args["dry-run"] as boolean;
 
 // ── Engine script source ──────────────────────────────────────────────────────
 
-// scripts/ sits 2 dirs above src/cli/ in both local and JSR layouts.
-const ENGINE_SCRIPTS_BASE = new URL("../../scripts/", import.meta.url);
+// Monorepo: packages/cli/src → ../../../scripts/
+// Published @ursamu/ursamu: scripts/ next to package root (also tried).
+const ENGINE_SCRIPTS_BASE = new URL("../../../scripts/", import.meta.url);
 
 /**
  * Engine scripts intended for game projects.
@@ -59,6 +60,7 @@ const GAME_SCRIPTS = [
   "run.sh",
   "status.sh",
   "stop.sh",
+  "safe-update.sh",
   "ursamu.sh",
 ];
 

@@ -141,6 +141,17 @@ Deno.test("create project: generates scripts/run.sh", OPTS, async () => {
   });
 });
 
+Deno.test("create project: generates scripts/safe-update.sh", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const path = join(dir, "my-game", "scripts", "safe-update.sh");
+    assert(existsSync(path), "missing scripts/safe-update.sh");
+    const body = await Deno.readTextFile(path);
+    assertStringIncludes(body, "minimum-dependency-age=0");
+    assertStringIncludes(body, "config.sample.json");
+  });
+});
+
 Deno.test("create project: run.sh references project name", OPTS, async () => {
   await withTempDir(async (dir) => {
     await runCreate(["my-game"], dir);

@@ -9,6 +9,7 @@ import {
   fetchLatestJsrVersion,
   isAppImportKey,
 } from "./jsr-pins.ts";
+import { applyConfigSampleMerge } from "./merge-config.ts";
 
 export type UpdateLog = (line: string) => void;
 
@@ -44,6 +45,13 @@ export {
   parseJsrSpec,
   rangeVersion,
 } from "./jsr-pins.ts";
+
+export {
+  applyConfigSampleMerge,
+  deepMerge,
+  ensurePluginsList,
+  mergeConfigFromSample,
+} from "./merge-config.ts";
 
 function logLine(
   lines: string[],
@@ -450,6 +458,34 @@ export async function runCodebaseUpdate(
       pulled: false,
       cached: false,
     };
+  }
+
+  // Live config is often gitignored — pull new plugins/settings from sample.
+  try {
+    const cfg = await applyConfigSampleMerge(cwd);
+    if (cfg.wrote) {
+      if (cfg.addedPlugins.length) {
+        logLine(
+          lines,
+          log,
+          `config plugins added: ${cfg.addedPlugins.join(", ")}`,
+        );
+      }
+      if (cfg.mergedBlocks.length) {
+        logLine(
+          lines,
+          log,
+          `config plugins.* merged: ${cfg.mergedBlocks.join(", ")}`,
+        );
+      }
+      if (!cfg.addedPlugins.length && !cfg.mergedBlocks.length) {
+        logLine(lines, log, "config.json updated from sample.");
+      }
+    }
+  } catch (e: unknown) {
+    const m = e instanceof Error ? e.message : String(e);
+    logLine(lines, log, `config merge warning: ${m}`);
+    // Non-fatal — pins/cache may still succeed.
   }
 
   const { bumped } = await writeBumpedDenoJson(
