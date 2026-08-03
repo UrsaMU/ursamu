@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.1.6
+
+- Wiki: nested paths no longer 404 (`lore/city` was encoded as
+  `lore%2Fcity`). Encode path segments; keep `/`.
+- Wiki index `/wiki/` lists pages instead of stuck "Loading…"
+- Directory API responses render a section listing
+- Wiki mode hides site hero banner; document title is
+  `Page · Site` (not site title alone on every page)
+
+## 0.1.5
+
+- JSR-safe public assets: serve `public/` via `fetch(import.meta.url)`
+  when the package is loaded from `https://jsr.io/…` (no
+  `fromFileUrl` on non-file URLs). Path checkouts still use disk.
+- `listBuiltinSkins` returns shipped names under JSR (no readdir).
+
+## 0.1.4
+
+- Theme hot-reload: `setSiteRuntime` uses process-wide
+  `globalThis` so admin activate reaches the live FE even when
+  `@ursamu/web` and the site plugin resolve different module URLs
+- `liveSkinHref` adds `g=<gen>` cache-bust after each theme swap
+- `site.js` no longer overwrites server `skin` with stale HTML
+  `data-skin` when `skinCss` is empty
+- Import `registerPluginRoute` from `@ursamu/mush` (not bare
+  `ursamu`) to share the game's route registry
+
 ## 0.1.3
 
 - `serveRoot`: SPA at `/`, `/login`, `/profile`, `/wiki/*`

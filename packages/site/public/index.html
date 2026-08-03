@@ -11,10 +11,10 @@
 
     <!-- Base: reset → tokens → layout → components → skin
          ?v= busts sticky browser caches during skin iteration -->
-    <link rel="stylesheet" href="/site/css/reset.css?v=20260802j" />
-    <link rel="stylesheet" href="/site/css/tokens.css?v=20260802j" />
-    <link rel="stylesheet" href="/site/css/layout.css?v=20260802j" />
-    <link rel="stylesheet" href="/site/css/components.css?v=20260802j" />
+    <link rel="stylesheet" href="/site/css/reset.css?v=20260803b" />
+    <link rel="stylesheet" href="/site/css/tokens.css?v=20260803b" />
+    <link rel="stylesheet" href="/site/css/layout.css?v=20260803b" />
+    <link rel="stylesheet" href="/site/css/components.css?v=20260803b" />
     <!--
       Skin stylesheet. Swap via:
         - data-skin="court" | "default" on <html>
@@ -23,7 +23,7 @@
     -->
     <link
       rel="stylesheet"
-      href="/site/css/skins/default.css?v=20260802j"
+      href="/site/css/skins/default.css?v=20260803b"
       data-site-skin
     />
 
@@ -42,7 +42,7 @@
       rel="stylesheet"
     />
 
-    <script src="/site/js/site.js?v=20260802j" defer></script>
+    <script src="/site/js/site.js?v=20260803b" defer></script>
   </head>
   <body>
     <div
@@ -137,13 +137,15 @@
           data-site-main
         >
           <section class="site-section">
-            <h2 class="site-section__title">Welcome</h2>
+            <h2 class="site-section__title" data-site-main-title>&nbsp;</h2>
             <div
               class="site-rule site-rule--image"
               role="presentation"
             ></div>
-            <div class="site-section__body">
-              <p>Loading…</p>
+            <div class="site-section__body site-loading-skeleton">
+              <div class="site-skeleton-line" style="width:70%;"></div>
+              <div class="site-skeleton-line" style="width:90%;"></div>
+              <div class="site-skeleton-line" style="width:45%;"></div>
             </div>
           </section>
 

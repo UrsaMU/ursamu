@@ -298,6 +298,25 @@
   margin: 0 0 2rem;
 }
 
+@keyframes site-skeleton-pulse {
+  0% { opacity: 0.2; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.2; }
+}
+
+.site-loading-skeleton {
+  padding: 0.5rem 0 1rem;
+}
+
+.site-skeleton-line {
+  height: 14px;
+  background: var(--site-accent, #e5c07b);
+  border-radius: 3px;
+  margin-bottom: 1rem;
+  animation: site-skeleton-pulse 1.4s infinite ease-in-out;
+}
+
+
 /* Page title (H1) — Smythe 40 gold */
 .site-section__title {
   font-family: var(--site-font-display);

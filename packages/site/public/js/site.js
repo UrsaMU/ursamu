@@ -96,6 +96,19 @@
     return pubPath(rest ? "wiki/" + rest : "wiki/");
   }
 
+  /**
+   * Encode a wiki path for /api/v1/wiki/<path>.
+   * Keep "/" separators — encodeURIComponent whole-path turns them
+   * into %2F and the API 404s nested pages (lore/city).
+   */
+  function encodeWikiApiPath(path) {
+    return String(path || "")
+      .replace(/^\/+|\/+$/g, "")
+      .split("/")
+      .filter(Boolean)
+      .map(encodeURIComponent)
+      .join("/");
+  }
 
   var MODE     = detectMode();
   var WIKI_PATH = wikiPathFromUrl();
@@ -140,18 +153,8 @@
 
     var heroTitle = String(cfg.title || "").trim();
     var brandTitle = heroTitle || "UrsaMU";
-    document.title = brandTitle;
+    // Nav brand always uses site name; document title set per-mode below
     if (brand) brand.textContent = brandTitle;
-    if (bannerTitle) {
-      if (heroTitle) {
-        bannerTitle.textContent = heroTitle;
-        bannerTitle.hidden = false;
-        bannerTitle.removeAttribute("hidden");
-      } else {
-        bannerTitle.textContent = "";
-        bannerTitle.hidden = true;
-      }
-    }
 
     var href  = String(cfg.skinHref || cfg.skinCss || "").trim();
     var named = String(cfg.skin || "default").trim();
@@ -170,8 +173,11 @@
     }
 
     var bannerSrc = String(cfg.bannerImage || "").trim();
+    // Wiki/login/profile: no site hero — page title lives in main
+    var hideHero = MODE === "wiki" || MODE === "login" ||
+      MODE === "profile";
     if (bannerImg) {
-      if (bannerSrc) {
+      if (!hideHero && bannerSrc) {
         bannerImg.src = bannerSrc;
         bannerImg.hidden = false;
         if (banner) banner.classList.add("has-image");
@@ -181,13 +187,31 @@
         if (banner) banner.classList.remove("has-image");
       }
     }
+    if (bannerTitle) {
+      if (!hideHero && heroTitle) {
+        bannerTitle.textContent = heroTitle;
+        bannerTitle.hidden = false;
+        bannerTitle.removeAttribute("hidden");
+      } else {
+        bannerTitle.textContent = "";
+        bannerTitle.hidden = true;
+      }
+    }
+    if (hideHero) {
+      document.title = brandTitle;
+    } else {
+      document.title = brandTitle;
+    }
 
-    // Compact: no banner image + no hero title → content under nav
+    // Compact: no hero art/title, or wiki reading mode
     if (shell) {
       if (cfg.plainBg) shell.classList.add("is-plain");
       else shell.classList.remove("is-plain");
-      if (!bannerSrc && !heroTitle) shell.classList.add("is-compact");
-      else shell.classList.remove("is-compact");
+      if (hideHero || (!bannerSrc && !heroTitle)) {
+        shell.classList.add("is-compact");
+      } else {
+        shell.classList.remove("is-compact");
+      }
     }
 
     if (Array.isArray(cfg.nav) && navList) {
@@ -389,22 +413,92 @@
 
   // ── Main content injection ─────────────────────────────────────────────────
 
+  function setDocumentTitle(pageTitle) {
+    var siteName = String(
+      (siteConfig && siteConfig.title) || "",
+    ).trim() || "UrsaMU";
+    var t = String(pageTitle || "").trim();
+    document.title = t ? (t + " · " + siteName) : siteName;
+  }
+
+  function articleFooterHtml() {
+    return "<footer class=\"site-footer\" id=\"footer\">" +
+      "<div class=\"site-rule site-rule--image\" role=\"presentation\"></div>" +
+      "<p>Powered by <a href=\"https://github.com/UrsaMU/ursamu\"" +
+      " target=\"_blank\" rel=\"noopener\">UrsaMU</a></p></footer>";
+  }
+
   function injectArticle(page) {
-    if (!mainEl) return;
+    if (!mainEl || !page) return;
     var bodyHtml = renderMarkdown(String(page.body || ""));
-    if (!bodyHtml.trim()) return;
-    var title = String(page.title || "").trim();
+    var title = String(page.title || page.path || "").trim();
+    if (!bodyHtml.trim() && !title) return;
+    setDocumentTitle(title);
     var inner = "<section class=\"site-section\">";
     if (title) {
       inner += "<h2 class=\"site-section__title\">" + esc(title) + "</h2>" +
         "<div class=\"site-rule site-rule--image\" role=\"presentation\"></div>";
     }
-    inner += "<div class=\"site-section__body\">" + bodyHtml + "</div></section>";
-    inner += "<footer class=\"site-footer\" id=\"footer\">" +
-      "<div class=\"site-rule site-rule--image\" role=\"presentation\"></div>" +
-      "<p>Powered by <a href=\"https://github.com/UrsaMU/ursamu\"" +
-      " target=\"_blank\" rel=\"noopener\">UrsaMU</a></p></footer>";
+    inner += "<div class=\"site-section__body\">" +
+      (bodyHtml.trim() || "<p><em>No content.</em></p>") +
+      "</div></section>";
+    inner += articleFooterHtml();
     mainEl.innerHTML = inner;
+  }
+
+  /** Wiki index (/wiki/) or directory listing from API. */
+  function injectWikiListing(opts) {
+    if (!mainEl) return;
+    opts = opts || {};
+    var title = String(opts.title || "Wiki").trim();
+    var items = Array.isArray(opts.items) ? opts.items : [];
+    setDocumentTitle(title);
+    var body = "";
+    if (!items.length) {
+      body = "<p>No pages yet.</p>";
+    } else {
+      body = "<ul class=\"site-wiki-index\">";
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var p = String(it.path || "").trim();
+        if (!p) continue;
+        var lbl = String(it.title || p).trim();
+        var kind = it.type === "directory" ? " (section)" : "";
+        body += "<li><a href=\"" + wikiHref(p) + "\">" +
+          esc(lbl) + "</a>" + esc(kind) + "</li>";
+      }
+      body += "</ul>";
+    }
+    mainEl.innerHTML =
+      "<section class=\"site-section\">" +
+      "<h2 class=\"site-section__title\">" + esc(title) + "</h2>" +
+      "<div class=\"site-rule site-rule--image\" role=\"presentation\"></div>" +
+      "<div class=\"site-section__body\">" + body + "</div></section>" +
+      articleFooterHtml();
+  }
+
+  function injectNotFound(path) {
+    injectArticle({
+      title: "Not found",
+      body: "No wiki page at `" + String(path || "") + "`.\n\n" +
+        "[Browse the wiki](" + wikiHref("") + ").",
+    });
+  }
+
+  function injectLoadingState(title) {
+    if (!mainEl) return;
+    var t = String(title || "Loading…").trim();
+    setDocumentTitle(t);
+    mainEl.innerHTML =
+      "<section class=\"site-section site-section--loading\">" +
+      "<h2 class=\"site-section__title\">" + esc(t) + "</h2>" +
+      "<div class=\"site-rule site-rule--image\" role=\"presentation\"></div>" +
+      "<div class=\"site-section__body site-loading-skeleton\">" +
+      "<div class=\"site-skeleton-line\" style=\"width:70%;\"></div>" +
+      "<div class=\"site-skeleton-line\" style=\"width:90%;\"></div>" +
+      "<div class=\"site-skeleton-line\" style=\"width:45%;\"></div>" +
+      "</div></section>" +
+      articleFooterHtml();
   }
 
   // ── Wiki article index helper ──────────────────────────────────────────────
@@ -441,6 +535,9 @@
   var rightAside = document.getElementById("right");
 
   function updateSidebarAndBannerVisibility() {
+    // Hide site hero on wiki/login/profile — page title is in main
+    var noHero = MODE === "login" || MODE === "profile" ||
+      MODE === "wiki";
     if (MODE === "login") {
       if (leftAside) leftAside.style.display = "none";
       if (rightAside) rightAside.style.display = "none";
@@ -469,10 +566,27 @@
         mainEl.style.justifyContent = "";
         mainEl.style.alignItems = "";
       }
+    } else if (MODE === "wiki") {
+      if (leftAside) leftAside.style.display = "";
+      if (rightAside) rightAside.style.display = "";
+      if (banner) banner.style.display = "none";
+      if (shell) {
+        shell.classList.add("is-mode-no-hero");
+        shell.classList.add("is-compact");
+      }
+      if (mainEl) {
+        mainEl.style.margin = "";
+        mainEl.style.maxWidth = "";
+        mainEl.style.minHeight = "";
+        mainEl.style.display = "";
+        mainEl.style.flexDirection = "";
+        mainEl.style.justifyContent = "";
+        mainEl.style.alignItems = "";
+      }
     } else {
       if (leftAside) leftAside.style.display = "";
       if (rightAside) rightAside.style.display = "";
-      if (banner) banner.style.display = "";
+      if (banner) banner.style.display = noHero ? "none" : "";
       if (shell) shell.classList.remove("is-mode-no-hero");
       if (mainEl) {
         mainEl.style.margin = "";
@@ -1094,9 +1208,19 @@
   var configPromise = fetch(cfgUrl, { credentials: "same-origin" })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (cfg) {
-      var htmlSkin = root.getAttribute("data-skin");
-      if (htmlSkin && htmlSkin !== "custom" && (!cfg || !cfg.skinCss)) {
-        cfg = Object.assign({}, cfg || {}, { skin: htmlSkin });
+      // Server config wins. Only fall back to HTML data-skin when the
+      // config request failed or omitted skin entirely — never overwrite
+      // a live theme with a stale injected data-skin (cached HTML).
+      if (
+        cfg &&
+        !cfg.skin &&
+        !cfg.skinCss &&
+        !cfg.skinHref
+      ) {
+        var htmlSkin = root.getAttribute("data-skin");
+        if (htmlSkin && htmlSkin !== "custom") {
+          cfg = Object.assign({}, cfg, { skin: htmlSkin });
+        }
       }
       applyConfig(cfg || {});
       return cfg || {};
@@ -1117,77 +1241,140 @@
     })
     .catch(function () { return []; });
 
-  // 3. Main content
-  var articlePromise;
-  if (MODE === "wiki" && WIKI_PATH) {
-    // Individual wiki article
-    articlePromise = fetch(
-      "/api/v1/wiki/" + encodeURIComponent(WIKI_PATH),
-      { credentials: "same-origin" }
-    )
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (page) {
-        if (page && page.body) injectArticle(page);
-        return page;
-      })
-      .catch(function () { return null; });
-  } else if (MODE === "home") {
-    // Featured → home wiki page → static welcome (never leave "Loading…")
-    articlePromise = fetch("/api/v1/wiki/featured", {
-      credentials: "same-origin",
-    })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (page) {
-        if (page && page.body) return page;
-        return fetch("/api/v1/wiki/home", { credentials: "same-origin" })
-          .then(function (r2) { return r2.ok ? r2.json() : null; });
-      })
-      .then(function (page) {
-        if (page && page.body) {
-          injectArticle(page);
-          return page;
-        }
-        if (mainEl) {
-          injectArticle({
-            title: "Welcome",
-            body: "Welcome to the game wiki.\n\n" +
-              "Browse **Wiki** in the nav, or ask staff to mark a page " +
-              "`featured: true` for the home article.",
-          });
-        }
-        return null;
-      })
-      .catch(function () {
-        if (mainEl) {
-          injectArticle({
-            title: "Welcome",
-            body: "Welcome. The wiki could not be loaded right now.",
-          });
-        }
-        return null;
-      });
-  } else {
-    articlePromise = Promise.resolve(null);
-  }
-
-  // 4. Auth probe
+  // 3. Auth probe
   var authPromise = probeAuth();
 
-  // 5. Once article + list + config are ready, wire up sidebars
-  Promise.all([listPromise, articlePromise, configPromise])
-    .then(function (results) {
-      var pages = results[0];
-      wireSearch(pages);
-      updateSidebarAndBannerVisibility();
-      renderLeft(pages);
-      return authPromise.then(function (user) {
-        updateNavUser(user);
-        if (MODE === "login" || MODE === "profile") {
-          injectSpecialPage(user);
-        }
-        renderRight(user);
-        wireScrollSpy();
+  // 4. Route loader & SPA navigation
+  function loadCurrentRoute() {
+    WIKI_PATH = wikiPathFromUrl();
+    MODE = modeFromUrl();
+    updateSidebarAndBannerVisibility();
+
+    var articlePromise;
+    if (MODE === "wiki" && WIKI_PATH) {
+      var slug = WIKI_PATH.split("/").pop().replace(/[-_]/g, " ");
+      var loadTitle = slug ? (slug.charAt(0).toUpperCase() + slug.slice(1)) : "Wiki";
+      injectLoadingState(loadTitle);
+
+      articlePromise = fetch(
+        "/api/v1/wiki/" + encodeWikiApiPath(WIKI_PATH),
+        { credentials: "same-origin" }
+      )
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (page) {
+          if (!page) {
+            injectNotFound(WIKI_PATH);
+            return null;
+          }
+          if (page.type === "directory" && Array.isArray(page.children)) {
+            injectWikiListing({
+              title: page.title || page.path || WIKI_PATH,
+              items: page.children,
+            });
+            return page;
+          }
+          if (page.body != null || page.title) {
+            injectArticle(page);
+            return page;
+          }
+          injectNotFound(WIKI_PATH);
+          return page;
+        })
+        .catch(function () {
+          injectNotFound(WIKI_PATH);
+          return null;
+        });
+    } else if (MODE === "wiki" && !WIKI_PATH) {
+      injectLoadingState("Wiki");
+      articlePromise = listPromise.then(function (pages) {
+        var items = (pages || []).slice().sort(function (a, b) {
+          return String(a.path || "").localeCompare(String(b.path || ""));
+        });
+        injectWikiListing({ title: "Wiki", items: items });
+        return { title: "Wiki", items: items };
       });
-    });
+    } else if (MODE === "home") {
+      injectLoadingState("Home");
+      articlePromise = fetch("/api/v1/wiki/featured", {
+        credentials: "same-origin",
+      })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (page) {
+          if (page && page.body) return page;
+          return fetch("/api/v1/wiki/home", { credentials: "same-origin" })
+            .then(function (r2) { return r2.ok ? r2.json() : null; });
+        })
+        .then(function (page) {
+          if (page && page.body) {
+            injectArticle(page);
+            return page;
+          }
+          if (mainEl) {
+            injectArticle({
+              title: "Welcome",
+              body: "Welcome to the game wiki.\n\n" +
+                "Browse **Wiki** in the nav, or ask staff to mark a page " +
+                "`featured: true` for the home article.",
+            });
+          }
+          return null;
+        })
+        .catch(function () {
+          if (mainEl) {
+            injectArticle({
+              title: "Welcome",
+              body: "Welcome. The wiki could not be loaded right now.",
+            });
+          }
+          return null;
+        });
+    } else {
+      articlePromise = Promise.resolve(null);
+    }
+
+    return Promise.all([listPromise, articlePromise, configPromise])
+      .then(function (results) {
+        var pages = results[0];
+        wireSearch(pages);
+        updateSidebarAndBannerVisibility();
+        renderLeft(pages);
+        return authPromise.then(function (user) {
+          updateNavUser(user);
+          if (MODE === "login" || MODE === "profile") {
+            injectSpecialPage(user);
+          }
+          renderRight(user);
+          wireScrollSpy();
+        });
+      });
+  }
+
+  // Intercept internal wiki links for instant SPA navigation without full reloads
+  document.addEventListener("click", function (e) {
+    var a = e.target && e.target.closest ? e.target.closest("a") : null;
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.startsWith("#") || href.startsWith("javascript:") || a.target === "_blank") return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    var targetUrl;
+    try { targetUrl = new URL(href, window.location.href); } catch (_) { return; }
+    if (targetUrl.origin !== window.location.origin) return;
+
+    var p = targetUrl.pathname;
+    if (p.startsWith("/wiki") || p.startsWith("/site/wiki") || p === "/site/" || p === "/site") {
+      e.preventDefault();
+      if (window.location.pathname + window.location.search === targetUrl.pathname + targetUrl.search) return;
+      window.history.pushState({}, "", targetUrl.href);
+      loadCurrentRoute();
+    }
+  });
+
+  window.addEventListener("popstate", function () {
+    loadCurrentRoute();
+  });
+
+  // Initial route load
+  loadCurrentRoute();
 
 })();

@@ -16,9 +16,12 @@ import {
   safeJoinSiteStatic,
 } from "./site-static.ts";
 
-const PUBLIC_DIR = fromFileUrl(
-  new URL("../public/", import.meta.url),
-);
+/**
+ * Base URL for shipped public/ assets.
+ * file: when running from a path checkout; https: when loaded from JSR.
+ * Never call fromFileUrl on the https form.
+ */
+const PUBLIC_BASE = new URL("../public/", import.meta.url);
 
 const MIME: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -68,13 +71,42 @@ export type SiteRuntime = {
   mount: string;
   /** Absolute path to game themeDir, if configured */
   themeRoot: string | null;
+  /**
+   * Bumps on every setSiteRuntime so skinHref cache-busts even when
+   * the path is unchanged (overwrite installed theme CSS in place).
+   */
+  gen: number;
 };
 
-let runtime: SiteRuntime = {
-  cfg: {},
-  mount: "/site",
-  themeRoot: null,
-};
+/**
+ * Process-wide runtime. MUST be globalThis — not a module binding.
+ * `@ursamu/web` may `import("@ursamu/site")` on a different specifier
+ * than the plugin that registered `siteStaticHandler` (vendor path vs
+ * JSR). Separate module instances would otherwise keep two runtimes
+ * and theme changes would write config but never affect the live FE.
+ */
+const RUNTIME_KEY = Symbol.for("ursamu.site.runtime");
+
+type RuntimeHolder = { current: SiteRuntime };
+
+function runtimeHolder(): RuntimeHolder {
+  const g = globalThis as unknown as Record<symbol, RuntimeHolder>;
+  if (!g[RUNTIME_KEY]) {
+    g[RUNTIME_KEY] = {
+      current: {
+        cfg: {},
+        mount: "/site",
+        themeRoot: null,
+        gen: 0,
+      },
+    };
+  }
+  return g[RUNTIME_KEY]!;
+}
+
+function runtime(): SiteRuntime {
+  return runtimeHolder().current;
+}
 
 export function setSiteRuntime(cfg: SitePluginConfig): void {
   let themeRoot: string | null = null;
@@ -89,20 +121,31 @@ export function setSiteRuntime(cfg: SitePluginConfig): void {
       themeRoot = null;
     }
   }
-  runtime = {
+  const prev = runtime();
+  runtimeHolder().current = {
     cfg,
     mount: normalizeMount(cfg.mount),
     themeRoot,
+    gen: (prev.gen || 0) + 1,
   };
 }
 
 export function getSiteRuntime(): SiteRuntime {
-  return runtime;
+  return runtime();
+}
+
+/** Skin href with runtime generation for hard cache bust after theme swap. */
+export function liveSkinHref(cfg: SitePluginConfig = runtime().cfg): string {
+  const base = resolveSkinHref(cfg);
+  const gen = runtime().gen || 0;
+  if (!gen) return base;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}g=${gen}`;
 }
 
 /** Config nav + plugin registerSiteNav (config wins on id). */
 export function resolvedSiteNav(): SiteNavItem[] {
-  return mergeSiteNav(runtime.cfg.nav, listSiteNav());
+  return mergeSiteNav(runtime().cfg.nav, listSiteNav());
 }
 
 /** JSON config consumed by public/js/site.js */
@@ -110,7 +153,7 @@ export async function siteConfigResponse(
   mode = "home",
   wikiPath = "",
 ): Promise<Response> {
-  const c = runtime.cfg;
+  const c = runtime().cfg;
   const nav = resolvedSiteNav();
   const leftMenu = (c.leftMenu ?? DEFAULT_LEFT_MENU).trim() ||
     DEFAULT_LEFT_MENU;
@@ -123,13 +166,15 @@ export async function siteConfigResponse(
     title: c.title ?? "UrsaMU",
     skin: c.skin ?? "default",
     skinCss: c.skinCss,
-    skinHref: resolveSkinHref(c),
+    skinHref: liveSkinHref(c),
     bannerImage: c.bannerImage,
     plainBg: c.plainBg === true,
     nav,
     telnet: c.telnet,
     leftMenu,
     menuBlocks,
+    /** Clients can detect theme swaps without full reload. */
+    gen: runtime().gen,
   };
   return Response.json(body, {
     headers: {
@@ -138,7 +183,9 @@ export async function siteConfigResponse(
   });
 }
 
-async function readFile(path: string): Promise<Uint8Array | null> {
+async function readDiskFile(
+  path: string,
+): Promise<Uint8Array | null> {
   try {
     const data = await Deno.readFile(path);
     return new Uint8Array(data);
@@ -147,21 +194,58 @@ async function readFile(path: string): Promise<Uint8Array | null> {
   }
 }
 
+/**
+ * Read a file under package public/ (disk or JSR https fetch).
+ * `rel` is path-relative (e.g. "index.html", "css/skins/default.css").
+ */
+async function readPublic(
+  rel: string,
+): Promise<Uint8Array | null> {
+  const cleaned = rel.replace(/^\/+/, "").replace(/\\/g, "/");
+  if (
+    !cleaned ||
+    cleaned.includes("\0") ||
+    cleaned.split("/").includes("..")
+  ) {
+    return null;
+  }
+  try {
+    const url = new URL(cleaned, PUBLIC_BASE);
+    if (url.protocol === "file:") {
+      return await readDiskFile(fromFileUrl(url));
+    }
+    // JSR / remote module graph — Deno fetch resolves package assets
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return new Uint8Array(await res.arrayBuffer());
+  } catch {
+    return null;
+  }
+}
+
 async function serveIndexHtml(
   requestPath = "/site/",
 ): Promise<Response> {
-  const idx = safeJoin(PUBLIC_DIR, "index.html");
-  if (!idx) return new Response("Not found", { status: 404 });
-  const bytes = await readFile(idx);
+  const bytes = await readPublic("index.html");
   if (!bytes) return new Response("Not found", { status: 404 });
   const raw = new TextDecoder().decode(bytes);
   const cfg: SitePluginConfig = {
-    ...runtime.cfg,
+    ...runtime().cfg,
     nav: resolvedSiteNav(),
   };
-  const html = injectSiteHtml(raw, cfg, {
+  // injectSiteHtml uses resolveSkinHref; swap to live (gen) bust
+  let html = injectSiteHtml(raw, cfg, {
     path: requestPath,
   });
+  const live = liveSkinHref(cfg);
+  html = html.replace(
+    /(<link\b[^>]*\bdata-site-skin\b[^>]*\bhref\s*=\s*")[^"]*(")/i,
+    `$1${live.replace(/"/g, "&quot;")}$2`,
+  );
+  html = html.replace(
+    /(<link\b[^>]*\bhref\s*=\s*")[^"]*("[^>]*\bdata-site-skin\b)/i,
+    `$1${live.replace(/"/g, "&quot;")}$2`,
+  );
   return new Response(html, {
     headers: {
       "content-type": "text/html; charset=utf-8",
@@ -183,7 +267,7 @@ async function servePluginStatic(
     // try as file first, else index under dir
     const asFile = safeJoinSiteStatic(root, sub);
     if (asFile) {
-      const direct = await readFile(asFile);
+      const direct = await readDiskFile(asFile);
       if (direct) {
         return fileResponse(asFile, direct);
       }
@@ -194,12 +278,12 @@ async function servePluginStatic(
   const filePath = safeJoinSiteStatic(root, sub);
   if (!filePath) return new Response("Not found", { status: 404 });
 
-  const bytes = await readFile(filePath);
+  const bytes = await readDiskFile(filePath);
   if (!bytes) {
     // SPA fallback
     const idx = safeJoinSiteStatic(root, "index.html");
     if (idx) {
-      const ib = await readFile(idx);
+      const ib = await readDiskFile(idx);
       if (ib) return fileResponse(idx, ib);
     }
     return new Response("Not found", { status: 404 });
@@ -241,7 +325,8 @@ export async function siteStaticHandler(
     return new Response("Method not allowed", { status: 405 });
   }
 
-  const mount = runtime.mount;
+  const rt = runtime();
+  const mount = rt.mount;
 
   // Config endpoint
   if (
@@ -259,7 +344,7 @@ export async function siteStaticHandler(
     path = "/index.html";
   } else if (path.startsWith(`${mount}/`)) {
     path = path.slice(mount.length);
-  } else if (runtime.cfg.serveRoot && isPublicRootSpa(path)) {
+  } else if (rt.cfg.serveRoot && isPublicRootSpa(path)) {
     path = "/index.html";
   } else if (path.startsWith("/site/")) {
     path = path.slice("/site".length) || "/index.html";
@@ -287,25 +372,22 @@ export async function siteStaticHandler(
     return await serveIndexHtml(requestPath);
   }
 
-  // Game themeDir → /site/theme/*
+  // Game themeDir → /site/theme/* (always on-disk under game cwd)
   if (
-    runtime.themeRoot &&
+    rt.themeRoot &&
     (path.startsWith("/theme/") || path.startsWith("theme/"))
   ) {
     const rel = path.replace(/^\/?theme\//, "");
-    const filePath = safeJoin(runtime.themeRoot, rel);
+    const filePath = safeJoin(rt.themeRoot, rel);
     if (filePath) {
-      const bytes = await readFile(filePath);
+      const bytes = await readDiskFile(filePath);
       if (bytes) return fileResponse(filePath, bytes);
     }
   }
 
-  const filePath = safeJoin(PUBLIC_DIR, path);
-  if (!filePath) {
-    return new Response("Not found", { status: 404 });
-  }
-
-  const bytes = await readFile(filePath);
+  // Package public/ — disk (path checkout) or fetch (JSR https)
+  const rel = path.replace(/^\/+/, "");
+  const bytes = await readPublic(rel);
   if (!bytes) {
     // SPA-ish: unknown bare paths under mount → index
     if (!extOf(path) || path.endsWith(".html")) {
@@ -314,5 +396,5 @@ export async function siteStaticHandler(
     return new Response("Not found", { status: 404 });
   }
 
-  return fileResponse(filePath, bytes);
+  return fileResponse(rel, bytes);
 }

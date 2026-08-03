@@ -154,6 +154,28 @@
   margin: 0;
 }
 
+/* ── Loading Skeleton ────────────────────────────────────────────── */
+
+@keyframes site-skeleton-pulse {
+  0% { opacity: 0.35; }
+  50% { opacity: 0.75; }
+  100% { opacity: 0.35; }
+}
+
+.site-loading-skeleton {
+  padding: 0.5rem 0 1rem;
+}
+
+.site-skeleton-line {
+  height: 0.85rem;
+  background: currentColor;
+  opacity: 0.15;
+  border-radius: 4px;
+  margin-bottom: 0.85rem;
+  animation: site-skeleton-pulse 1.4s infinite ease-in-out;
+}
+
+
 /* ── Headings ─────────────────────────────────────────────────────── */
 
 .site-section__body h2 {

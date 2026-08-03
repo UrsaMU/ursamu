@@ -4,8 +4,10 @@
  * Serves layout + design.md tokens + swappable skins under /site/.
  */
 
-import { registerPluginRoute } from "ursamu";
-import type { IPlugin } from "ursamu";
+// Prefer @ursamu/mush so registerPluginRoute shares the game's mush
+// graph (not a nested jsr:@ursamu/mush pin from this package's imports).
+import { registerPluginRoute } from "@ursamu/mush";
+import type { IPlugin } from "@ursamu/mush";
 import {
   applySkinDefaults,
   readSiteConfig,
@@ -31,7 +33,7 @@ async function loadGameConfig(): Promise<unknown> {
 
 export const plugin: IPlugin = {
   name: "site",
-  version: "0.1.3",
+  version: "0.1.6",
   description:
     "Public front-end shell — layout framing + design tokens + skins.",
 

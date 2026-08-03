@@ -31,6 +31,7 @@ export {
   getSiteRuntime,
   siteConfigResponse,
   resolvedSiteNav,
+  liveSkinHref,
 } from "./src/static.ts";
 
 // ── Plugin contribution APIs ─────────────────────────────────────
