@@ -179,8 +179,33 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
     );
   }
 
-  if (path === "/health" || path === "/") {
+  // Health stays JSON. Bare "/" — prefer public FE (plugins.site
+  // serveRoot) when registered; else browsers → /admin/.
+  if (path === "/health") {
     return Response.json({ status: "ok", engine: "UrsaMU" });
+  }
+  if (path === "/" && (method === "GET" || method === "HEAD")) {
+    const pluginHome = await dispatchPluginRoute(
+      req,
+      _authenticate,
+    );
+    if (pluginHome && pluginHome.status !== 404) {
+      return pluginHome;
+    }
+    const accept = (req.headers.get("accept") ?? "").toLowerCase();
+    const wantsHtml = accept.includes("text/html");
+    if (wantsHtml) {
+      return new Response(null, {
+        status: 302,
+        headers: { Location: "/admin/" },
+      });
+    }
+    return Response.json({
+      status: "ok",
+      engine: "UrsaMU",
+      admin: "/admin/",
+      site: "/site/",
+    });
   }
 
   // Auth — login / register / reset (and legacy /api/v1/auth/*)

@@ -31,7 +31,7 @@ async function loadGameConfig(): Promise<unknown> {
 
 export const plugin: IPlugin = {
   name: "site",
-  version: "0.1.0",
+  version: "0.1.3",
   description:
     "Public front-end shell — layout framing + design tokens + skins.",
 
@@ -65,12 +65,18 @@ export const plugin: IPlugin = {
       registerPluginRoute("/site", siteStaticHandler);
     }
     if (cfg.serveRoot) {
+      // Exact home + SPA prefixes (must not use bare "/" as
+      // startsWith catch-all — that would steal /admin, /api).
       registerPluginRoute("/", siteStaticHandler);
+      registerPluginRoute("/login", siteStaticHandler);
+      registerPluginRoute("/profile", siteStaticHandler);
+      registerPluginRoute("/wiki", siteStaticHandler);
     }
 
     const skinLabel = cfg.skinCss ?? cfg.skin ?? "default";
+    const rootNote = cfg.serveRoot ? " + / (serveRoot)" : "";
     console.log(
-      `[site] Public FE at ${mount}/ (skin=${skinLabel})`,
+      `[site] Public FE at ${mount}/${rootNote} (skin=${skinLabel})`,
     );
     return true;
   },

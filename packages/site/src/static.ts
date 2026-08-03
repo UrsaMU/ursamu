@@ -40,6 +40,17 @@ function extOf(path: string): string {
   return i >= 0 ? path.slice(i).toLowerCase() : "";
 }
 
+/** Root SPA paths when plugins.site.serveRoot is true. */
+function isPublicRootSpa(path: string): boolean {
+  if (path === "/" || path === "") return true;
+  if (path === "/login" || path.startsWith("/login/")) return true;
+  if (path === "/profile" || path.startsWith("/profile/")) {
+    return true;
+  }
+  if (path === "/wiki" || path.startsWith("/wiki/")) return true;
+  return false;
+}
+
 function safeJoin(root: string, rel: string): string | null {
   const cleaned = rel.replace(/^\/+/, "").replace(/\\/g, "/");
   if (cleaned.includes("\0") || cleaned.split("/").includes("..")) {
@@ -242,17 +253,18 @@ export async function siteStaticHandler(
     return await siteConfigResponse(mode, wikiPath);
   }
 
-  // Strip mount prefix
+  // Strip mount prefix; with serveRoot, public SPA paths at /
+  // (/, /login, /profile, /wiki/…) also serve the shell.
   if (path === mount || path === `${mount}/`) {
     path = "/index.html";
   } else if (path.startsWith(`${mount}/`)) {
     path = path.slice(mount.length);
-  } else if (runtime.cfg.serveRoot && (path === "/" || path === "")) {
+  } else if (runtime.cfg.serveRoot && isPublicRootSpa(path)) {
     path = "/index.html";
-  } else if (!path.startsWith("/site/")) {
-    return new Response("Not found", { status: 404 });
-  } else {
+  } else if (path.startsWith("/site/")) {
     path = path.slice("/site".length) || "/index.html";
+  } else {
+    return new Response("Not found", { status: 404 });
   }
 
   if (path.endsWith("/")) path += "index.html";

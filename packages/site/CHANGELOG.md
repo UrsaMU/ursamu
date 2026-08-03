@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+
+- `serveRoot`: SPA at `/`, `/login`, `/profile`, `/wiki/*`
+  (for apex hosts like court.ursamu.io)
+- Client links honor apex vs `/site` mount
+- Works with mush 1.0.7+ (`/` no longer always → /admin/)
+
 ## 0.1.2
 
 - Compact layout when hero title and banner image are empty

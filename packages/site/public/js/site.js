@@ -36,28 +36,66 @@
 
   // ── Page mode ─────────────────────────────────────────────────────────────
 
-  var pathname = window.location.pathname.replace(/\/+$/, "") || "/site";
+  // Support mount /site and serveRoot apex (court.ursamu.io/)
+  var pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (pathname === "") pathname = "/";
 
   function detectMode() {
-    if (pathname === "/site" || pathname === "/site/index.html") {
+    if (
+      pathname === "/" ||
+      pathname === "/site" ||
+      pathname === "/site/index.html"
+    ) {
       return "home";
     }
-    if (pathname === "/site/login" || pathname === "/site/login.html") {
+    if (
+      pathname === "/login" ||
+      pathname === "/site/login" ||
+      pathname === "/site/login.html"
+    ) {
       return "login";
     }
-    if (pathname === "/site/profile" || pathname === "/site/profile.html") {
+    if (
+      pathname === "/profile" ||
+      pathname === "/site/profile" ||
+      pathname === "/site/profile.html"
+    ) {
       return "profile";
     }
-    if (pathname.startsWith("/site/wiki")) {
+    if (
+      pathname.startsWith("/wiki") ||
+      pathname.startsWith("/site/wiki")
+    ) {
       return "wiki";
     }
     return "generic";
   }
 
-  // "/site/wiki/lore/city" → "lore/city"
+  // "/wiki/lore" or "/site/wiki/lore" → "lore"
   function wikiPathFromUrl() {
-    return pathname.replace(/^\/site\/wiki\/?/, "") || "";
+    return pathname.replace(/^\/(?:site\/)?wiki\/?/, "") || "";
   }
+
+  /** Public path prefix for in-app links ("" at apex, "/site" under mount). */
+  function publicBase() {
+    if (pathname === "/" || pathname === "/login" ||
+      pathname === "/profile" || pathname.startsWith("/wiki")) {
+      return "";
+    }
+    return "/site";
+  }
+  var PUB = publicBase();
+
+  function pubPath(sub) {
+    sub = String(sub || "").replace(/^\/+/, "");
+    if (!sub) return PUB ? PUB + "/" : "/";
+    return (PUB || "") + "/" + sub;
+  }
+  function wikiHref(path) {
+    var rest = String(path || "").replace(/^\/+/, "");
+    return pubPath(rest ? "wiki/" + rest : "wiki/");
+  }
+
 
   var MODE     = detectMode();
   var WIKI_PATH = wikiPathFromUrl();
@@ -196,7 +234,7 @@
       function (_, target, label) {
         var t   = target.trim();
         var lbl = label ? label.trim() : (wikiIndex[t] ? wikiIndex[t].title : t);
-        return '<a href="/site/wiki/' + esc(t) + '">' + esc(lbl) + "</a>";
+        return '<a href="' + wikiHref(t) + '">' + esc(lbl) + "</a>";
       }
     );
     // Bold+italic
@@ -382,7 +420,7 @@
   function wikiLinkHtml(p) {
     var isCurrent = (p.path === WIKI_PATH);
     return "<li" + (isCurrent ? " class=\"is-current\"" : "") + ">" +
-      "<a href=\"/site/wiki/" + esc(p.path) + "\"" +
+      "<a href=\"" + wikiHref(p.path) + "\"" +
       (isCurrent ? " aria-current=\"page\"" : "") + ">" +
       esc(p.title || p.path) + "</a></li>";
   }
@@ -468,7 +506,7 @@
         var it = items[i];
         var cur = it.current ? " class=\"is-current\"" : "";
         var aria = it.current ? " aria-current=\"page\"" : "";
-        var href = it.href || (it.path ? "/site/wiki/" + it.path : "#");
+        var href = it.href || (it.path ? wikiHref(it.path) : "#");
         var label = it.label || it.title || it.path || "Link";
         out += "<li" + cur + "><a href=\"" + esc(href) + "\"" + aria + ">" +
           esc(label) + "</a></li>";
@@ -566,7 +604,7 @@
       var p = list[i];
       items.push({
         label: p.title || p.path,
-        href: "/site/wiki/" + p.path,
+        href: wikiHref(p.path),
         current: p.path === WIKI_PATH,
       });
     }
@@ -681,14 +719,14 @@
   function doSignOut() {
     try { sessionStorage.removeItem("ursamu.webAdmin.token"); } catch (_) {}
     try { localStorage.removeItem("ursamu.webAdmin.token"); } catch (_) {}
-    window.location.href = "/site/";
+    window.location.href = pubPath("");
   }
 
   function safeNextPath(raw) {
     var n = String(raw || "").trim();
-    if (!n || n.charAt(0) !== "/" || n.indexOf("//") === 0) return "/site/";
+    if (!n || n.charAt(0) !== "/" || n.indexOf("//") === 0) return pubPath("");
     if (n.indexOf("/site") !== 0 && n.indexOf("/admin") !== 0) {
-      return "/site/";
+      return pubPath("");
     }
     return n;
   }
@@ -780,7 +818,7 @@
       li.appendChild(wrap);
     } else {
       var loginA = document.createElement("a");
-      loginA.href = "/site/login";
+      loginA.href = pubPath("login");
       loginA.className = "site-nav-login-link" +
         (MODE === "login" ? " is-active" : "");
       loginA.textContent = "Sign in";
@@ -804,7 +842,7 @@
         innerHtml += "<div class=\"site-auth-card\" style=\"text-align:center;\">" +
           "<p>Signed in as <strong>" + esc(user.name) + "</strong>.</p>" +
           "<div class=\"site-profile-actions\" style=\"justify-content:center;margin-top:1rem;\">" +
-          "<a href=\"/site/\" class=\"site-auth-submit\" style=\"display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:0 1.25rem;width:auto;\">Continue to site</a>";
+          "<a href=\"" + pubPath("") + "\" class=\"site-auth-submit\" style=\"display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:0 1.25rem;width:auto;\">Continue to site</a>";
         if (user.isStaff) {
           innerHtml += "<a href=\"/admin/\" class=\"site-auth-logout\" style=\"display:inline-flex;align-items:center;justify-content:center;text-decoration:none;\">Staff console</a>";
         }
@@ -841,7 +879,7 @@
       wireAuthEvents(user);
     } else if (MODE === "profile") {
       // Legacy /site/profile — redirect home (account lives in nav menu)
-      window.location.replace("/site/");
+      window.location.replace(pubPath(""));
       return;
     }
   }
@@ -966,7 +1004,7 @@
             probeAuth().then(function (u) {
               updateNavUser(u);
               var params = new URLSearchParams(window.location.search);
-              var next = safeNextPath(params.get("next") || "/site/");
+              var next = safeNextPath(params.get("next") || pubPath(""));
               window.location.href = next;
             });
           })
@@ -1003,11 +1041,11 @@
         return;
       }
       if (hits.length === 1) {
-        window.location.href = "/site/wiki/" + hits[0].path;
+        window.location.href = wikiHref(hits[0].path);
         return;
       }
       // Multiple results — navigate to wiki index with query
-      window.location.href = "/site/wiki/?q=" + encodeURIComponent(q);
+      window.location.href = pubPath("wiki/") + "?q=" + encodeURIComponent(q);
     });
   }
 

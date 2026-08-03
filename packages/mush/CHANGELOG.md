@@ -1,7 +1,41 @@
 # Changelog
 
+## [1.0.7] - 2026-08-02
+
+### Fixed
+
+- GET `/` tries plugin routes first (public FE `serveRoot`)
+  before redirecting browsers to `/admin/`.
+
 All notable changes to `@ursamu/mush` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [1.0.6] - 2026-07-31
+
+### Fixed
+
+- `/` HTML redirect also handles HEAD.
+
+## [1.0.5] - 2026-07-31
+
+### Changed
+
+- Browser GET `/` redirects to `/admin/` (JSON clients unchanged).
+
+## [1.0.4] - 2026-07-31
+
+### Added
+
+- Engine **`enter` / `leave`** verbs — any non-room/exit object.
+  Default deny; `enter_ok`, `@lock/enter`, or owner/staff.
+  Players stay private without `enter_ok`. Optional
+  `&CAPACITY` / `&MAPCAPACITY`. Leave refused while container
+  location is `map:…` (land first).
+- Exports: `enterObject`, `leaveObject`, `canEnterObject`,
+  `passesEnterLock` (for map-plugin embark aliases).
+- Exit traversal refuses leaving a `map:…` holding for a
+  destination outside that holding (parity with leave).
+  Helper: `mapHoldingOf`.
 
 ## [1.0.1] - 2026-07-28
 

@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/site",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Public UrsaMU front-end shell \u2014 layout framing, design tokens, swappable skins.",
   "license": "MIT",
   "exports": {
