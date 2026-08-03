@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.1.6
+## 0.1.7
+
+- Fix flashing home/Welcome page content during wiki page navigation:
+  - Blank initial section title and skeleton pulse placeholder in `index.html`
+  - Instant loading state injection in `site.js`
+  - SPA router and `popstate` link handler to prevent full browser reloads
+
 
 - Wiki: nested paths no longer 404 (`lore/city` was encoded as
   `lore%2Fcity`). Encode path segments; keep `/`.

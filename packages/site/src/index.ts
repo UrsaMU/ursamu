@@ -33,7 +33,7 @@ async function loadGameConfig(): Promise<unknown> {
 
 export const plugin: IPlugin = {
   name: "site",
-  version: "0.1.6",
+  version: "0.1.7",
   description:
     "Public front-end shell — layout framing + design tokens + skins.",
 
