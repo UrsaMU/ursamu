@@ -30,7 +30,10 @@ export { objectsHandler, flagsHandler, functionsHandler } from "./objects.ts";
 export { authenticate } from "./authMiddleware.ts";
 
 import { registerRoute, registerFallback } from "@ursamu/core";
-import { dispatchPluginRoute } from "./plugin.ts";
+import {
+  dispatchPluginRoute,
+  hasPluginPrefix,
+} from "./plugin.ts";
 import { authHandler }    from "./auth.ts";
 import { configHandler }  from "./config.ts";
 import { dbObjHandler }   from "./dbobj.ts";
@@ -195,9 +198,14 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
     const accept = (req.headers.get("accept") ?? "").toLowerCase();
     const wantsHtml = accept.includes("text/html");
     if (wantsHtml) {
+      // Public FE over staff console when @ursamu/site is loaded
+      const siteHome = hasPluginPrefix("/site") ||
+        hasPluginPrefix("/");
       return new Response(null, {
         status: 302,
-        headers: { Location: "/admin/" },
+        headers: {
+          Location: siteHome ? "/site/" : "/admin/",
+        },
       });
     }
     return Response.json({

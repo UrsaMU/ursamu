@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.8] - 2026-08-02
+
+### Fixed
+
+- `registerPluginRoute("/")` no longer collapses to `""` (which
+  matched every path via `startsWith("/")` and broke public FE).
+- Longest-prefix wins; root `/` is exact-match only.
+- HTML GET `/` falls back to `/site/` when site is loaded, not
+  always `/admin/`.
+
 ## [1.0.7] - 2026-08-02
 
 ### Fixed
