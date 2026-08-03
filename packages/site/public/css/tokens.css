@@ -1,0 +1,80 @@
+/**
+ * @ursamu/site — design tokens (design.md / staff-theme family).
+ *
+ * Skins override these variables. Layout and components only use
+ * var(--site-*). Do not hardcode brand colors in layout.css.
+ *
+ * @see packages/web/design.md
+ * @see packages/web/ui/src/assets/staff-theme.css
+ */
+
+:root {
+  /* Surfaces */
+  --site-bg: #0b0a12;
+  --site-bg-elevated: #12101c;
+  --site-bg-surface: #161422;
+  --site-bg-surface-2: #1c1929;
+  --site-bg-code: #0e0c16;
+
+  /* Borders */
+  --site-border: #3a3554;
+  --site-border-subtle: #2a2640;
+  --site-border-strong: #5a5480;
+
+  /* Text */
+  --site-text: #f0eef8;
+  --site-text-secondary: #c4c0d4;
+  --site-text-muted: #b0a9c4;
+  --site-text-on-accent: #ffffff;
+
+  /* Accent (links, active nav, CTAs) */
+  --site-accent: #a78bfa;
+  --site-accent-hover: #c4b5fd;
+  --site-accent-muted: rgba(167, 139, 250, 0.16);
+  --site-accent-border: rgba(167, 139, 250, 0.45);
+
+  /* Solid CTA */
+  --site-btn-bg: #6d28d9;
+  --site-btn-bg-hover: #7c3aed;
+  --site-btn-fg: var(--site-text-on-accent);
+
+  /* Status */
+  --site-success: #4ade9f;
+  --site-warning: #f0c14d;
+  --site-error: #ff8a8f;
+  --site-info: #8ec5ff;
+
+  /* Geometry */
+  --site-radius-sm: 4px;
+  --site-radius-md: 6px;
+  --site-radius: var(--site-radius-md);
+
+  /* Type */
+  --site-font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+  --site-font-display: var(--site-font-ui);
+  --site-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --site-font-size: 16px;
+  --site-line-height: 1.5;
+
+  /* Chrome — defaults; skins (changeling) override to Figma */
+  --site-nav-h: 60px;
+  --site-max-w: 108rem; /* 1728 @ 16px */
+  --site-main-max: 55.3125rem; /* 885 */
+  --site-aside-width: 20.6875rem; /* 331 */
+  --site-aside-min: 16rem;
+  --site-aside-max: 22.0625rem; /* 353 */
+  --site-col-gap: clamp(1rem, 2.5vw, 2.5rem);
+  --site-main-pad-inline: clamp(1rem, 2vw, 2.5rem);
+  --site-gutter: 2.5rem;
+  --site-banner-offset: 12rem;
+  --site-sticky-top: 7.5rem;
+
+  /* Optional skin art (empty = no image) */
+  --site-bg-image-top: none;
+  --site-bg-image-bottom: none;
+  --site-banner-image: none;
+  --site-rule-image: none;
+  --site-search-icon: none;
+
+  color-scheme: dark;
+}

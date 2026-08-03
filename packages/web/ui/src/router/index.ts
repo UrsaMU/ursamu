@@ -19,6 +19,7 @@ const router = createRouter({
     },
     {
       path: "/",
+      name: "app",
       component: () => import("@/layouts/AppLayout.vue"),
       meta: { requiresAuth: true },
       children: [
@@ -97,6 +98,17 @@ const router = createRouter({
           path: "settings",
           name: "settings",
           component: () => import("@/views/SettingsView.vue"),
+        },
+        {
+          path: "map",
+          name: "map",
+          component: () => import("@/views/MapView.vue"),
+        },
+        {
+          path: "ext/:pluginId",
+          name: "plugin-embed",
+          component: () => import("@/views/PluginEmbedView.vue"),
+          props: true,
         },
       ],
     },

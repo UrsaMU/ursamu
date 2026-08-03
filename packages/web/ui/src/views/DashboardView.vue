@@ -1,33 +1,58 @@
 <script setup lang="ts">
+/**
+ * Staff dashboard — stacked sections (pre-regression layout):
+ * Open jobs → Wiki drafts table → Who's online → Recent wiki table.
+ */
+import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useSessionStore } from "@/stores/session";
 import { useLiveStore } from "@/stores/live";
 import { onlineDisplayName } from "@/utils/text";
+import { isOpenJob } from "@/utils/jobs";
+import type { Job, WikiStub } from "@/api/types";
 
 const session = useSessionStore();
 const live = useLiveStore();
-// Destructure refs so template stays reactive to store updates
 const {
   onlineLoaded,
   onlineCount,
   pagesLoaded,
-  wikiTotal,
   wikiDrafts,
-  wikiPublished,
-  wikiSections,
-  objectsLoaded,
-  objectCount,
-  playerCount,
-  roomCount,
   jobsLoaded,
   jobsOpen,
-  jobsNew,
-  jobsUnassigned,
   onlineSorted,
   recentPages,
+  pages,
+  jobs,
 } = storeToRefs(live);
 const router = useRouter();
+
+const summaryLine = computed(() => {
+  const online = onlineLoaded.value ? String(onlineCount.value) : "—";
+  const open = jobsLoaded.value ? String(jobsOpen.value) : "—";
+  const drafts = pagesLoaded.value ? String(wikiDrafts.value) : "—";
+  return `${online} online · ${open} open jobs · ${drafts} drafts`;
+});
+
+const openJobRows = computed((): Job[] => {
+  return [...jobs.value]
+    .filter((j) => isOpenJob(String(j.status)))
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+    .slice(0, 8);
+});
+
+const draftRows = computed((): WikiStub[] => {
+  return [...pages.value]
+    .filter((p) => p.draft === true)
+    .sort((a, b) => {
+      const da = String(a.date || "");
+      const db = String(b.date || "");
+      if (da !== db) return db.localeCompare(da);
+      return String(a.path).localeCompare(String(b.path));
+    })
+    .slice(0, 12);
+});
 
 async function refresh(): Promise<void> {
   await live.refreshAll();
@@ -40,23 +65,11 @@ function goWiki(filter?: string): void {
   });
 }
 
-function goDb(id?: string): void {
-  if (id) void router.push({ name: "db-detail", params: { id } });
-  else void router.push({ name: "db" });
-}
-
-function goPlayers(id?: string, filter?: string): void {
+function goPlayers(id?: string): void {
   if (id) {
-    void router.push({
-      name: "player-detail",
-      params: { id },
-      query: filter ? { filter } : {},
-    });
+    void router.push({ name: "player-detail", params: { id } });
   } else {
-    void router.push({
-      name: "players",
-      query: filter ? { filter } : {},
-    });
+    void router.push({ name: "players" });
   }
 }
 
@@ -66,10 +79,28 @@ function goJobs(filter?: string): void {
     query: filter ? { filter } : {},
   });
 }
+
+function openWiki(path: string): void {
+  void router.push({
+    name: "wiki-edit",
+    params: { path },
+  });
+}
+
+function openJob(id: string): void {
+  void router.push({ name: "job-detail", params: { id } });
+}
+
+function wikiUpdated(p: WikiStub): string {
+  return [p.date, p.author].filter(Boolean).join(" · ") || "—";
+}
 </script>
 
 <template>
-  <article id="main-dashboard">
+  <article
+    id="main-dashboard"
+    class="dash-browser"
+  >
     <header class="dash-header">
       <div>
         <p class="muted dash-kicker">
@@ -83,44 +114,10 @@ function goJobs(filter?: string): void {
           id="dash-subtitle"
           class="muted"
         >
-          Live game snapshot — wiki, players, and database.
+          {{ summaryLine }}
         </p>
       </div>
       <div class="dash-header-actions">
-        <button
-          type="button"
-          class="secondary"
-          @click="goPlayers()"
-        >
-          Players
-        </button>
-        <button
-          type="button"
-          class="secondary"
-          @click="goJobs()"
-        >
-          Jobs
-        </button>
-        <button
-          type="button"
-          class="secondary"
-          @click="goDb()"
-        >
-          Database
-        </button>
-        <button
-          type="button"
-          class="secondary"
-          @click="goWiki()"
-        >
-          Wiki
-        </button>
-        <button
-          type="button"
-          @click="router.push({ name: 'wiki-new' })"
-        >
-          New page
-        </button>
         <button
           type="button"
           class="secondary outline"
@@ -131,306 +128,374 @@ function goJobs(filter?: string): void {
       </div>
     </header>
 
+    <!-- Open jobs -->
     <section
-      class="stat-grid"
-      aria-label="Live statistics"
+      class="dash-section dash-stack-section"
+      aria-labelledby="dash-jobs-h"
     >
-      <button
-        type="button"
-        class="stat-card stat-card-btn"
-        @click="goPlayers(undefined, 'online')"
-      >
-        <p class="stat-label">
-          Online
-        </p>
-        <p class="stat-value">
-          {{ onlineLoaded ? onlineCount : "—" }}
-        </p>
-        <p class="stat-meta muted">
-          Connected players
-        </p>
-      </button>
-      <button
-        type="button"
-        class="stat-card stat-card-btn"
-        @click="goWiki()"
-      >
-        <p class="stat-label">
-          Wiki pages
-        </p>
-        <p class="stat-value">
-          {{ pagesLoaded ? wikiTotal : "—" }}
-        </p>
-        <p class="stat-meta muted">
-          Readable entries
-        </p>
-      </button>
-      <button
-        type="button"
-        class="stat-card stat-card-btn"
-        @click="goWiki('drafts')"
-      >
-        <p class="stat-label">
-          Drafts
-        </p>
-        <p class="stat-value">
-          {{ pagesLoaded ? wikiDrafts : "—" }}
-        </p>
-        <p class="stat-meta muted">
-          Needs publish
-        </p>
-      </button>
-      <button
-        type="button"
-        class="stat-card stat-card-btn"
-        @click="goDb()"
-      >
-        <p class="stat-label">
-          Objects
-        </p>
-        <p class="stat-value">
-          {{ objectsLoaded ? objectCount : "—" }}
-        </p>
-        <p class="stat-meta muted">
-          {{
-            objectsLoaded
-              ? `${playerCount} players · ${roomCount} rooms`
-              : "In database"
-          }}
-        </p>
-      </button>
-    </section>
-
-    <section
-      class="stat-grid stat-grid-secondary"
-      aria-label="Breakdown"
-    >
-      <div class="stat-card">
-        <p class="stat-label">
-          Published
-        </p>
-        <p class="stat-value">
-          {{ pagesLoaded ? wikiPublished : "—" }}
-        </p>
-        <p class="stat-meta muted">
-          Live wiki
-        </p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">
-          Wiki sections
-        </p>
-        <p class="stat-value">
-          {{ pagesLoaded ? wikiSections : "—" }}
-        </p>
-        <p class="stat-meta muted">
-          Top folders
-        </p>
-      </div>
-      <button
-        type="button"
-        class="stat-card stat-card-btn"
-        @click="goPlayers()"
-      >
-        <p class="stat-label">
-          Players
-        </p>
-        <p class="stat-value">
-          {{ objectsLoaded ? playerCount : "—" }}
-        </p>
-        <p class="stat-meta muted">
-          In DB
-        </p>
-      </button>
-      <button
-        type="button"
-        class="stat-card stat-card-btn"
-        @click="goJobs('open')"
-      >
-        <p class="stat-label">
-          Open jobs
-        </p>
-        <p class="stat-value">
-          {{ jobsLoaded ? jobsOpen : "—" }}
-        </p>
-        <p class="stat-meta muted">
-          {{
-            jobsLoaded
-              ? `${jobsNew} new · ${jobsUnassigned} free`
-              : "Queue"
-          }}
-        </p>
-      </button>
-    </section>
-
-    <section
-      class="dash-section"
-      aria-labelledby="dash-modules-h"
-    >
-      <h2
-        id="dash-modules-h"
-        class="dash-h2"
-      >
-        Modules
-      </h2>
-      <div class="module-grid module-grid-4">
-        <button
-          type="button"
-          class="module-card"
-          @click="goWiki()"
+      <div class="dash-section-head">
+        <h2
+          id="dash-jobs-h"
+          class="dash-h2"
         >
-          <span class="module-card-kicker">Content</span>
-          <span class="module-card-title">Wiki</span>
-          <span class="module-card-desc muted">
-            Browse lore, drafts, and page locks.
-          </span>
-        </button>
+          Open jobs
+        </h2>
         <button
           type="button"
-          class="module-card"
+          class="secondary outline"
+          @click="goJobs('open')"
+        >
+          All open
+        </button>
+      </div>
+      <p
+        v-if="!jobsLoaded"
+        class="muted dash-stack-empty"
+      >
+        Loading…
+      </p>
+      <p
+        v-else-if="!openJobRows.length"
+        class="muted dash-stack-empty"
+      >
+        No open jobs.
+      </p>
+      <div
+        v-else
+        class="table-wrap"
+      >
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th scope="col">
+                Title
+              </th>
+              <th scope="col">
+                Status
+              </th>
+              <th scope="col">
+                Assignee
+              </th>
+              <th scope="col">
+                <span class="sr-only">Open</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="j in openJobRows"
+              :key="j.id"
+              tabindex="0"
+              @click="openJob(j.id)"
+              @keydown.enter.prevent="openJob(j.id)"
+            >
+              <td>
+                <span class="muted">#{{ j.number }}</span>
+                {{ j.title }}
+              </td>
+              <td class="muted">
+                {{ j.status }}
+              </td>
+              <td class="muted">
+                {{ j.assigneeName || "—" }}
+              </td>
+              <td class="row-open">
+                <button
+                  type="button"
+                  class="secondary outline"
+                  @click.stop="openJob(j.id)"
+                >
+                  Open
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Wiki drafts -->
+    <section
+      class="dash-section dash-stack-section"
+      aria-labelledby="dash-drafts-h"
+    >
+      <div class="dash-section-head">
+        <h2
+          id="dash-drafts-h"
+          class="dash-h2"
+        >
+          Wiki drafts
+          <span
+            v-if="pagesLoaded"
+            class="muted"
+          >({{ wikiDrafts }})</span>
+        </h2>
+        <button
+          type="button"
+          class="secondary outline"
+          @click="goWiki('drafts')"
+        >
+          All drafts
+        </button>
+      </div>
+      <p
+        v-if="!pagesLoaded"
+        class="muted dash-stack-empty"
+      >
+        Loading…
+      </p>
+      <p
+        v-else-if="!draftRows.length"
+        class="muted dash-stack-empty"
+      >
+        No wiki drafts.
+      </p>
+      <div
+        v-else
+        class="table-wrap"
+      >
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th scope="col">
+                Title
+              </th>
+              <th scope="col">
+                Path
+              </th>
+              <th scope="col">
+                Updated
+              </th>
+              <th scope="col">
+                <span class="sr-only">Open</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="p in draftRows"
+              :key="p.path"
+              tabindex="0"
+              @click="openWiki(p.path)"
+              @keydown.enter.prevent="openWiki(p.path)"
+            >
+              <td>
+                {{ p.title || p.path }}
+                <span class="badge badge-draft">Draft</span>
+              </td>
+              <td>
+                <code>{{ p.path }}</code>
+              </td>
+              <td class="muted">
+                {{ wikiUpdated(p) }}
+              </td>
+              <td class="row-open">
+                <button
+                  type="button"
+                  class="secondary outline"
+                  @click.stop="openWiki(p.path)"
+                >
+                  Open
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Who's online -->
+    <section
+      class="dash-section dash-stack-section"
+      aria-labelledby="dash-online-h"
+    >
+      <div class="dash-section-head">
+        <h2
+          id="dash-online-h"
+          class="dash-h2"
+        >
+          Who’s online
+          <span
+            v-if="onlineLoaded"
+            class="muted"
+          >({{ onlineCount }})</span>
+        </h2>
+        <button
+          type="button"
+          class="secondary outline"
           @click="goPlayers()"
         >
-          <span class="module-card-kicker">Accounts</span>
-          <span class="module-card-title">Players</span>
-          <span class="module-card-desc muted">
-            Online status, flags, and character data.
-          </span>
+          Players
         </button>
-        <button
-          type="button"
-          class="module-card"
-          @click="goJobs()"
-        >
-          <span class="module-card-kicker">Queue</span>
-          <span class="module-card-title">Jobs</span>
-          <span class="module-card-desc muted">
-            Requests, bugs, and staff tickets.
-          </span>
-        </button>
-        <button
-          type="button"
-          class="module-card"
-          @click="goDb()"
-        >
-          <span class="module-card-kicker">World</span>
-          <span class="module-card-title">Database</span>
-          <span class="module-card-desc muted">
-            Inspect and edit game objects.
-          </span>
-        </button>
+      </div>
+      <p
+        v-if="!onlineLoaded"
+        class="muted dash-stack-empty"
+      >
+        Loading…
+      </p>
+      <p
+        v-else-if="!onlineSorted.length"
+        class="muted dash-stack-empty"
+      >
+        No one connected right now.
+      </p>
+      <div
+        v-else
+        class="table-wrap"
+      >
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th scope="col">
+                Name
+              </th>
+              <th scope="col">
+                Id
+              </th>
+              <th scope="col">
+                <span class="sr-only">Open</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="p in onlineSorted.slice(0, 16)"
+              :key="String(p.id)"
+              tabindex="0"
+              @click="goPlayers(p.id ? String(p.id) : undefined)"
+              @keydown.enter.prevent="
+                goPlayers(p.id ? String(p.id) : undefined)
+              "
+            >
+              <td>{{ onlineDisplayName(p) }}</td>
+              <td class="muted">
+                {{ p.id ? `#${p.id}` : "—" }}
+              </td>
+              <td class="row-open">
+                <button
+                  type="button"
+                  class="secondary outline"
+                  @click.stop="
+                    goPlayers(p.id ? String(p.id) : undefined)
+                  "
+                >
+                  Open
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
-    <div class="dash-two-col dash-two-col-wide">
-      <section
-        class="dash-section"
-        aria-labelledby="dash-online-h"
+    <!-- Recent wiki -->
+    <section
+      class="dash-section dash-stack-section"
+      aria-labelledby="dash-recent-h"
+    >
+      <div class="dash-section-head">
+        <h2
+          id="dash-recent-h"
+          class="dash-h2"
+        >
+          Recent wiki
+        </h2>
+        <button
+          type="button"
+          class="secondary outline"
+          @click="goWiki()"
+        >
+          All pages
+        </button>
+      </div>
+      <p
+        v-if="!pagesLoaded"
+        class="muted dash-stack-empty"
       >
-        <div class="dash-section-head">
-          <h2
-            id="dash-online-h"
-            class="dash-h2"
-          >
-            Who’s online
-          </h2>
-          <button
-            type="button"
-            class="secondary outline"
-            @click="live.refreshOnline()"
-          >
-            Refresh
-          </button>
-        </div>
-        <ul class="dash-recent">
-          <li
-            v-if="!onlineLoaded"
-            class="muted"
-          >
-            Loading…
-          </li>
-          <li
-            v-else-if="!onlineSorted.length"
-            class="muted"
-          >
-            No one connected right now.
-          </li>
-          <li
-            v-for="p in onlineSorted.slice(0, 12)"
-            :key="String(p.id)"
-          >
-            <button
-              type="button"
-              class="dash-recent-link"
-              @click="goPlayers(p.id ? String(p.id) : undefined)"
-            >
-              {{ onlineDisplayName(p) }}
-            </button>
-            <span class="dash-recent-meta">
-              {{ p.id ? `#${p.id}` : "" }}
-            </span>
-          </li>
-        </ul>
-      </section>
-
-      <section
-        class="dash-section"
-        aria-labelledby="dash-recent-h"
+        Loading…
+      </p>
+      <p
+        v-else-if="!recentPages.length"
+        class="muted dash-stack-empty"
       >
-        <div class="dash-section-head">
-          <h2
-            id="dash-recent-h"
-            class="dash-h2"
-          >
-            Recent wiki
-          </h2>
-          <button
-            type="button"
-            class="secondary outline"
-            @click="goWiki()"
-          >
-            All pages
-          </button>
-        </div>
-        <ul class="dash-recent">
-          <li
-            v-if="!pagesLoaded"
-            class="muted"
-          >
-            Loading…
-          </li>
-          <li
-            v-else-if="!recentPages.length"
-            class="muted"
-          >
-            No pages yet — create one to get started.
-          </li>
-          <li
-            v-for="p in recentPages"
-            :key="p.path"
-          >
-            <button
-              type="button"
-              class="dash-recent-link"
-              @click="
-                router.push({
-                  name: 'wiki-edit',
-                  params: { path: p.path },
-                })
-              "
+        No pages yet — create one to get started.
+      </p>
+      <div
+        v-else
+        class="table-wrap"
+      >
+        <table class="dash-table">
+          <thead>
+            <tr>
+              <th scope="col">
+                Title
+              </th>
+              <th scope="col">
+                Path
+              </th>
+              <th scope="col">
+                Updated
+              </th>
+              <th scope="col">
+                <span class="sr-only">Open</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="p in recentPages"
+              :key="p.path"
+              tabindex="0"
+              @click="openWiki(p.path)"
+              @keydown.enter.prevent="openWiki(p.path)"
             >
-              {{ p.title || p.path }}
-            </button>
-            <span
-              v-if="p.draft"
-              class="badge badge-draft"
-            >Draft</span>
-            <code class="muted">{{ p.path }}</code>
-            <span class="dash-recent-meta">
-              {{ [p.date, p.author].filter(Boolean).join(" · ") }}
-            </span>
-          </li>
-        </ul>
-      </section>
-    </div>
+              <td>
+                {{ p.title || p.path }}
+                <span
+                  v-if="p.draft"
+                  class="badge badge-draft"
+                >Draft</span>
+              </td>
+              <td>
+                <code>{{ p.path }}</code>
+              </td>
+              <td class="muted">
+                {{ wikiUpdated(p) }}
+              </td>
+              <td class="row-open">
+                <button
+                  type="button"
+                  class="secondary outline"
+                  @click.stop="openWiki(p.path)"
+                >
+                  Open
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </article>
 </template>
+
+<style scoped>
+.dash-stack-section {
+  margin-bottom: 1.75rem;
+}
+
+.dash-stack-empty {
+  margin: 0.15rem 0 0;
+  font-size: 0.875rem;
+}
+
+#main-dashboard .dash-section-head {
+  margin-bottom: 0.65rem;
+}
+
+#main-dashboard .dash-table .badge {
+  margin-inline-start: 0.4rem;
+  vertical-align: middle;
+}
+</style>

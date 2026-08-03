@@ -1,0 +1,7 @@
+{
+  "name": "site",
+  "version": "0.1.0",
+  "description": "Public front-end shell with swappable CSS skins.",
+  "main": "./mod.ts",
+  "ursamu": ">=1.0.4"
+}

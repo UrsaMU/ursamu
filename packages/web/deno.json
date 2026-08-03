@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/web",
-  "version": "0.2.3",
+  "version": "0.2.37",
   "description": "Staff web console for UrsaMU \u2014 wiki, database, and more.",
   "license": "MIT",
   "exports": "./mod.ts",
@@ -12,6 +12,9 @@
     "ui:build": "cd ui && npm run build:fast",
     "ui:install": "cd ui && npm install",
     "theme:sync": "deno run -A ./scripts/sync-staff-theme.ts",
+    "import-plugin": "deno run -A ./scripts/import-plugin.ts",
+    "preflight:ui": "deno run -A ./scripts/preflight-ui.ts",
+    "example:host-module": "cd examples/host-module && npm run build",
     "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types --no-check",
     "publish": "deno publish --allow-slow-types --no-check"
   },

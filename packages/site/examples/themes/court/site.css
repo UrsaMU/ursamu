@@ -1,0 +1,601 @@
+/**
+ * Court of Miracles — example installable FE theme.
+ * Packaged as theme.zip with theme.json (see examples/themes/court/).
+ *
+ * Install via Admin → Settings → Public site → Upload theme zip,
+ * or copy to theme/installed/court/ with plugins.site.themeDir = "theme".
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Smythe&display=swap");
+
+:root {
+  --site-bg: #020201;
+  --site-bg-elevated: #020201;
+  --site-bg-surface: #0a0908;
+  --site-bg-surface-2: #12100e;
+  --site-bg-code: #020201;
+
+  --site-border: color-mix(in srgb, #f7e4dd 50%, transparent);
+  --site-border-subtle: color-mix(in srgb, #f7e4dd 28%, transparent);
+  --site-border-strong: color-mix(in srgb, #f7e4dd 70%, transparent);
+
+  --site-text: #f7e4dd;
+  --site-text-secondary: #f7e4dd;
+  --site-text-muted: color-mix(in srgb, #f7e4dd 72%, transparent);
+  --site-text-on-accent: #020201;
+
+  --site-accent: #c4944a;
+  --site-accent-hover: #e0b56a;
+  --site-accent-muted: rgba(196, 148, 74, 0.18);
+  --site-accent-border: rgba(196, 148, 74, 0.55);
+
+  --site-btn-bg: #c4944a;
+  --site-btn-bg-hover: #e0b56a;
+  --site-btn-fg: #020201;
+
+  --site-font-ui: "Lato", ui-sans-serif, system-ui, sans-serif;
+  --site-font-display: "Smythe", "smythe", serif;
+
+  --site-nav-h: 60px;
+  --site-banner-offset: 200px;
+  --site-sticky-top: 120px;
+  --site-gutter: 40px;
+  /* Figma Main page (1728): left ~331, main ~885, right ~331 */
+  --site-max-w: 1728px;
+  --site-main-max: 885px;
+  --site-aside-width: 331px;
+  --site-aside-min: 280px;
+  --site-aside-max: 353px;
+  --site-col-gap: clamp(1.25rem, 2vw, 2.75rem);
+  --site-main-pad-inline: clamp(1.25rem, 2vw, 3.125rem);
+
+  --site-bg-image-top: url("imgs/background.png");
+  --site-bg-image-bottom: url("imgs/footer.png");
+  --site-rule-image: url("imgs/hr.svg");
+  --site-search-icon: url("imgs/search.png");
+}
+
+@font-face {
+  font-family: "Smythe";
+  src:
+    url("fonts/smythe-regular.woff2") format("woff2"),
+    url("fonts/smythe-regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "royal majesty";
+  src:
+    url("fonts/your_royal_majesty_fancy.woff2")
+      format("woff2"),
+    url("fonts/your_royal_majesty_fancy.woff")
+      format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Nav (Figma Main: ~60px bar, brand 32 / links 20) ────────────── */
+
+.site-nav {
+  height: var(--site-nav-h);
+  min-height: var(--site-nav-h);
+  max-height: var(--site-nav-h);
+  padding: 0 var(--site-gutter);
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.site-nav::before {
+  height: var(--site-nav-h);
+}
+
+.site-nav.is-scrolled::before {
+  background-color: var(--site-bg);
+}
+
+.site-nav__brand {
+  font-family: var(--site-font-display);
+  font-size: 32px;
+  font-weight: normal;
+  line-height: 1;
+  color: var(--site-text);
+  letter-spacing: 0;
+}
+
+.site-nav__brand:hover {
+  color: var(--site-text);
+}
+
+.site-nav__list {
+  font-family: var(--site-font-display);
+  font-size: 20px;
+  line-height: 1;
+  gap: 0 1.75rem;
+  flex-wrap: nowrap;
+}
+
+.site-nav__list li {
+  margin-right: 0;
+}
+
+/*
+ * Active underline sits under the link glyphs only (not the nav bar).
+ * Pseudo-element keeps width = text and clears base border styles.
+ */
+.site-nav__list a,
+.site-nav__list .site-nav-login-link,
+.site-nav__list .site-nav-user-link {
+  position: relative;
+  display: inline-block;
+  color: var(--site-text);
+  font-family: var(--site-font-display);
+  font-size: 20px;
+  font-weight: normal;
+  line-height: 1;
+  text-decoration: none;
+  border-bottom: 0;
+  padding-bottom: 0;
+  vertical-align: middle;
+}
+
+.site-nav__list a::after,
+.site-nav__list .site-nav-login-link::after,
+.site-nav__list .site-nav-user-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.3em;
+  height: 2px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.site-nav__list a:hover::after,
+.site-nav__list .site-nav-login-link:hover::after,
+.site-nav__list .site-nav-user-link:hover::after {
+  background: color-mix(in srgb, var(--site-accent) 55%, transparent);
+}
+
+.site-nav__list a.is-active,
+.site-nav__list .site-nav-login-link.is-active,
+.site-nav__list .site-nav-user-link.is-active {
+  color: var(--site-text);
+}
+
+.site-nav__list a.is-active::after,
+.site-nav__list .site-nav-login-link.is-active::after,
+.site-nav__list .site-nav-user-link.is-active::after {
+  background: var(--site-accent);
+}
+
+/* ── Banner ──────────────────────────────────────────────────────── */
+
+.site-banner {
+  margin-top: 200px;
+  padding: 0;
+}
+
+.site-banner__title {
+  font-family: var(--site-font-display);
+  font-size: 100px;
+  font-weight: normal;
+  color: var(--site-text);
+  line-height: 1;
+}
+
+.site-banner.has-image .site-banner__title {
+  display: none;
+}
+
+.site-banner__img {
+  max-width: none;
+  width: auto;
+  height: auto;
+}
+
+/* ── Body shell (rails + chrome unchanged; center is the page) ─── */
+
+.site-body {
+  padding: 120px var(--site-gutter) 0;
+  margin-bottom: 50px;
+}
+
+/* No hero image/title — content sits under nav (Figma compact) */
+.site-shell.is-compact .site-body,
+.site-shell.is-mode-no-hero .site-body {
+  padding-top: calc(var(--site-nav-h) + 24px);
+  padding-bottom: 0;
+}
+
+.site-aside {
+  top: var(--site-sticky-top);
+}
+
+/* ── Search (left rail chrome — shared every page) ─────────────── */
+
+.site-search {
+  margin-top: 0;
+  gap: 12px;
+}
+
+.site-search__input {
+  height: 44px;
+  margin-bottom: 0;
+  padding-left: 12px;
+  border-radius: 0;
+  background: var(--site-bg);
+  border-color: color-mix(in srgb, #f7e4dd 50%, transparent);
+  color: var(--site-text);
+  font-size: 14px;
+}
+
+.site-search__btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 0;
+  background: var(--site-bg);
+  border-color: color-mix(in srgb, #f7e4dd 50%, transparent);
+}
+
+.site-search__btn-icon {
+  width: 50%;
+  height: 50%;
+  background: center / contain no-repeat var(--site-search-icon);
+  mask: none;
+  -webkit-mask: none;
+}
+
+.site-search__btn-icon::before {
+  content: none;
+}
+
+/* ── Side menus (shared chrome — titles 24 / links 14) ─────────── */
+
+.site-menu__title {
+  font-family: var(--site-font-display);
+  font-size: 24px;
+  font-weight: normal;
+  color: var(--site-accent);
+  margin: 1.25rem 0 0.5rem;
+  line-height: 1.15;
+}
+
+.site-menu__list a {
+  font-family: var(--site-font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--site-text);
+  padding: 0.2rem 0;
+  line-height: 1.35;
+}
+
+.site-menu__list a:hover {
+  color: #fff;
+}
+
+.site-menu__list a.is-active,
+.site-menu__list .is-current > a {
+  color: var(--site-accent);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   CENTER COLUMN ONLY — Figma Wiki Sample (node 76:65)
+   Frame main x≈448 w≈885. H1 40 / H2 32 Smythe gold, body Lato 16.
+   Top nav + side rails stay the same shell on every page.
+   ══════════════════════════════════════════════════════════════════ */
+
+.site-main {
+  /* no extra side pad — grid already sizes the column */
+  padding-inline: 0;
+  max-width: var(--site-main-max);
+}
+
+.site-section {
+  margin: 0 0 2rem;
+}
+
+/* Page title (H1) — Smythe 40 gold */
+.site-section__title {
+  font-family: var(--site-font-display);
+  font-size: 40px;
+  font-weight: normal;
+  color: var(--site-accent);
+  margin: 0 0 0.35rem;
+  line-height: 1.15;
+}
+
+/*
+ * Ornamental rule — fixed square diamonds + 1px mid line.
+ * Do not stretch hr.svg (preserveAspectRatio=none squashes ends).
+ */
+.site-rule,
+.site-rule--image,
+.site-section__body hr {
+  --site-rule-diamond: 6px;
+  --site-rule-line: color-mix(in srgb, #f7e4dd 50%, transparent);
+  position: relative;
+  display: block;
+  width: 100%;
+  height: var(--site-rule-diamond);
+  margin: 0 0 0.85rem;
+  border: 0;
+  border-radius: 0;
+  /* Kill stretched SVG from .site-rule--image */
+  background-color: transparent;
+  background-image: linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(var(--site-rule-diamond) * 0.75),
+    var(--site-rule-line) calc(var(--site-rule-diamond) * 0.75),
+    var(--site-rule-line)
+      calc(100% - var(--site-rule-diamond) * 0.75),
+    transparent calc(100% - var(--site-rule-diamond) * 0.75),
+    transparent 100%
+  );
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.site-rule::before,
+.site-rule--image::before,
+.site-rule::after,
+.site-rule--image::after,
+.site-section__body hr::before,
+.site-section__body hr::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: var(--site-rule-diamond);
+  height: var(--site-rule-diamond);
+  background: var(--site-rule-line);
+  transform: translateY(-50%) rotate(45deg);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.site-rule::before,
+.site-rule--image::before,
+.site-section__body hr::before {
+  left: 0;
+}
+
+.site-rule::after,
+.site-rule--image::after,
+.site-section__body hr::after {
+  right: 0;
+}
+
+/* Body copy — Lato 16 cream */
+.site-section__body {
+  font-family: var(--site-font-ui);
+  font-size: 16px;
+  color: var(--site-text);
+  line-height: 1.55;
+}
+
+.site-section__body p {
+  margin: 0;
+  padding: 0.35rem 0 0.75rem;
+  color: var(--site-text);
+  line-height: 1.55;
+}
+
+.site-section__body a {
+  color: var(--site-accent);
+  text-decoration: none;
+}
+
+.site-section__body a:hover {
+  color: var(--site-accent-hover);
+  text-decoration: underline;
+}
+
+.site-section__body strong {
+  font-weight: 700;
+  color: var(--site-text);
+}
+
+/* In-body H2 — Smythe 32 gold + rule spacing */
+.site-section__body h2 {
+  font-family: var(--site-font-display);
+  font-size: 32px;
+  font-weight: normal;
+  color: var(--site-accent);
+  margin: 2rem 0 0.35rem;
+  line-height: 1.15;
+}
+
+/* Optional rule after H2 when authors put --- */
+.site-section__body h2 + hr,
+.site-section__body h2 + .site-rule {
+  margin-top: 0.15rem;
+  margin-bottom: 0.85rem;
+}
+
+.site-section__body h3 {
+  font-family: var(--site-font-display);
+  font-size: 24px;
+  font-weight: normal;
+  color: var(--site-accent);
+  margin: 1.5rem 0 0.35rem;
+  line-height: 1.2;
+}
+
+.site-section__body h4,
+.site-section__body h5,
+.site-section__body h6 {
+  font-family: var(--site-font-display);
+  font-size: 20px;
+  font-weight: normal;
+  color: var(--site-text);
+  margin: 1.25rem 0 0.3rem;
+}
+
+.site-section__body ul,
+.site-section__body ol {
+  margin: 0.25rem 0 0.85rem;
+  padding-left: 1.35rem;
+  color: var(--site-text);
+  line-height: 1.55;
+}
+
+.site-section__body li {
+  margin: 0.2rem 0;
+}
+
+.site-section__body hr {
+  margin: 1rem 0 1.25rem;
+}
+
+/* Callout / blockquote panel (Figma muted box) */
+.site-section__body blockquote {
+  margin: 1rem 0 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 0;
+  border-left: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, #f7e4dd 8%, #020201);
+  color: var(--site-text);
+  font-style: normal;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.site-section__body blockquote p {
+  padding: 0.2rem 0;
+  color: var(--site-text);
+}
+
+/* Inline code chips (e.g. create / connect commands) */
+.site-section__body code {
+  font-family: var(--site-font-mono);
+  font-size: 0.875em;
+  padding: 0.12em 0.45em;
+  border-radius: 2px;
+  background: color-mix(in srgb, #f7e4dd 10%, #020201);
+  color: var(--site-accent-hover);
+  border: 1px solid color-mix(in srgb, #f7e4dd 28%, transparent);
+}
+
+.site-section__body pre {
+  margin: 0.85rem 0;
+  padding: 1rem 1.15rem;
+  border-radius: 0;
+  background: color-mix(in srgb, #f7e4dd 8%, #020201);
+  border: 1px solid color-mix(in srgb, #f7e4dd 22%, transparent);
+  overflow-x: auto;
+}
+
+.site-section__body pre code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--site-text);
+  font-size: 0.9rem;
+}
+
+/* Data tables — Figma merit table */
+.site-section__body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0 1.5rem;
+  font-family: var(--site-font-ui);
+  font-size: 16px;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.site-section__body thead {
+  background: transparent;
+}
+
+.site-section__body th {
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-text);
+  border-bottom: 1px solid color-mix(in srgb, #f7e4dd 35%, transparent);
+  background: transparent;
+}
+
+.site-section__body td {
+  padding: 0.85rem 0.65rem;
+  vertical-align: top;
+  color: var(--site-text);
+  border-bottom: 1px solid color-mix(in srgb, #f7e4dd 12%, transparent);
+  line-height: 1.45;
+}
+
+/* Alternating muted rows */
+.site-section__body tbody tr:nth-child(odd) {
+  background: color-mix(in srgb, #f7e4dd 6%, #020201);
+}
+
+.site-section__body tbody tr:nth-child(even) {
+  background: transparent;
+}
+
+/* In-column footer under article */
+.site-main .site-footer {
+  margin-top: 2.5rem;
+  padding: 0;
+  font-size: 14px;
+  color: var(--site-text);
+  text-align: center;
+}
+
+.site-main .site-footer a {
+  color: var(--site-accent);
+  text-decoration: none;
+}
+
+.site-main .site-footer a:hover {
+  color: var(--site-accent-hover);
+  text-decoration: none;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .site-banner {
+    margin-top: 5.5rem;
+  }
+
+  .site-banner__title {
+    font-size: 3rem;
+  }
+
+  .site-nav {
+    height: auto;
+    max-height: none;
+    min-height: var(--site-nav-h);
+    padding: 0.5rem 1.15rem;
+  }
+
+  .site-nav__brand {
+    font-size: 1.5rem;
+  }
+
+  .site-nav__list {
+    font-size: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .site-body {
+    padding: 2.5rem 1.15rem 0;
+  }
+
+  .site-main {
+    padding: 0;
+  }
+}

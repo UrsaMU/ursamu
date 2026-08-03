@@ -8,7 +8,7 @@ export type Me = {
   avatar?: string | null;
 };
 
-/** Plugin topbar contribution (from registerStaffNav). */
+/** Plugin topbar contribution (from registerStaffNav / Page). */
 export type StaffNavItem = {
   id: string;
   /** Human title from the plugin — nav + page H1. */
@@ -17,9 +17,37 @@ export type StaffNavItem = {
   description?: string;
   href?: string;
   route?: string;
+  /** In-console iframe src (route plugin-embed). */
+  embed?: string;
+  /**
+   * Allowed origin for cross-origin embeds (PR5).
+   * Same-origin embeds omit this.
+   */
+  embedOrigin?: string;
+  /** Same-origin ESM Vue default export URL. */
+  module?: string;
   order?: number;
   badgeKey?: string;
   badgeTitle?: string;
+};
+
+/** Plugin left side-nav (registerStaffSideNav). */
+export type StaffSideNavItem = {
+  id: string;
+  label: string;
+  desc?: string;
+  icon?: string;
+  query?: Record<string, string>;
+};
+
+export type StaffSideNavGroup = {
+  title?: string;
+  items: StaffSideNavItem[];
+};
+
+export type StaffSideNavRegistration = {
+  pageId: string;
+  groups: StaffSideNavGroup[];
 };
 
 /** Live badge from setStaffBadge / WS badge:set. */
@@ -34,6 +62,7 @@ export type WikiStub = {
   title: string;
   type?: string;
   draft?: boolean;
+  featured?: boolean;
   author?: string;
   date?: string;
   readLock?: string;

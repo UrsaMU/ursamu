@@ -6,6 +6,8 @@
  * the host has no matching page.
  */
 
+import { notifyStaffChrome } from "./staff-chrome.ts";
+
 export type StaffNavItem = {
   /** Stable id — last register wins for the same id. */
   id: string;
@@ -20,6 +22,15 @@ export type StaffNavItem = {
   href?: string;
   /** In-console vue-router name (Phase 2). */
   route?: string;
+  /**
+   * In-console iframe src when route is plugin-embed
+   * (or used by client to open embed shell).
+   */
+  embed?: string;
+  /** Allowlisted origin for cross-origin embed URLs. */
+  embedOrigin?: string;
+  /** Same-origin ESM Vue component URL (dynamic host route). */
+  module?: string;
   /** Sort key; lower first. Default 100. */
   order?: number;
   /**
@@ -44,27 +55,51 @@ export function registerStaffNav(item: StaffNavItem): void {
   }
   const href = item.href?.trim();
   const route = item.route?.trim();
-  if (!href && !route) return;
+  const embed = item.embed?.trim();
+  const mod = item.module?.trim();
+  let embedOrigin = item.embedOrigin?.trim() || undefined;
+  if (!href && !route && !embed && !mod) return;
+
+  if (embed && /^https?:\/\//i.test(embed)) {
+    try {
+      const u = new URL(embed);
+      if (embedOrigin && embedOrigin !== u.origin) return;
+      embedOrigin = embedOrigin || u.origin;
+    } catch {
+      return;
+    }
+  } else {
+    embedOrigin = undefined;
+  }
 
   const id = item.id.trim();
   const description = item.description?.trim();
+  // Embed without explicit route/module → host plugin-embed shell
+  const resolvedRoute = route ||
+    (mod ? `ext-${id}` : undefined) ||
+    (embed ? "plugin-embed" : undefined);
   _nav.set(id, {
     id,
     label: item.label.trim(),
     description: description || undefined,
     href: href || undefined,
-    route: route || undefined,
+    route: resolvedRoute,
+    embed: embed || undefined,
+    embedOrigin,
+    module: mod || undefined,
     order: typeof item.order === "number" && Number.isFinite(item.order)
       ? item.order
       : 100,
     badgeKey: item.badgeKey?.trim() || undefined,
     badgeTitle: item.badgeTitle?.trim() || undefined,
   });
+  notifyStaffChrome();
 }
 
 export function unregisterStaffNav(id: string): void {
   if (!isNonEmptyString(id)) return;
   _nav.delete(id.trim());
+  notifyStaffChrome();
 }
 
 /** Sorted copy for API / snapshot. */

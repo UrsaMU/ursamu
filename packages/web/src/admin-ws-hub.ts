@@ -40,6 +40,11 @@ export type AdminWsMsg =
     key: string;
     value: string;
     title?: string;
+  }
+  | {
+    type: "staff:chrome";
+    staffNav: unknown;
+    staffSideNav: unknown;
   };
 
 interface Client {

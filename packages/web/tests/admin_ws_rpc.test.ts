@@ -21,6 +21,12 @@ Deno.test("pathAllowed — staff API surfaces", () => {
   assertEquals(pathAllowed("/api/v1/admin/settings"), true);
   assertEquals(pathAllowed("/api/v1/admin/restart"), true);
   assertEquals(pathAllowed("/api/v1/admin/plugins"), true);
+  assertEquals(pathAllowed("/api/v1/map/entities"), true);
+  assertEquals(pathAllowed("/api/v1/map/prune"), true);
+  assertEquals(
+    pathAllowed("/api/v1/map/realm/default/render"),
+    true,
+  );
 });
 
 Deno.test("pathAllowed — rejects escape and foreign APIs", () => {

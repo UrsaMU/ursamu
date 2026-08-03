@@ -25,6 +25,41 @@ type SettingsPayload = {
     divider: string;
     footer: string;
   };
+  site?: {
+    available: boolean;
+    skins: string[];
+    themes?: Array<{
+      id: string;
+      label: string;
+      version?: string;
+      source?: string;
+      skinCss?: string;
+      bannerHref?: string;
+      title?: string;
+      description?: string;
+      active?: boolean;
+    }>;
+    skin: string;
+    skinCss: string;
+    title: string;
+    bannerImage: string;
+    plainBg: boolean;
+    telnet: string;
+    themeDir?: string;
+    previewUrl: string;
+    nav?: Array<{
+      id?: string;
+      label: string;
+      href: string;
+      order: number;
+    }>;
+    pluginNav?: Array<{
+      id?: string;
+      label: string;
+      href: string;
+      order: number;
+    }>;
+  };
   server: {
     telnet: number | null;
     wsPort: number | null;
@@ -50,19 +85,24 @@ type SettingsPayload = {
   restartKeys: string[];
 };
 
-type Tab = "game" | "restart" | "plugins";
+type Tab = "game" | "site" | "restart" | "plugins";
 
 const route = useRoute();
 const router = useRouter();
 
 const tab = computed<Tab>(() => {
   const t = String(route.query.tab ?? "game");
-  if (t === "restart" || t === "plugins") return t;
+  if (t === "restart" || t === "plugins" || t === "site") return t;
   return "game";
 });
 
 const loading = ref(true);
 const saving = ref(false);
+const savingSite = ref(false);
+const uploadingTheme = ref(false);
+const activatingTheme = ref("");
+const themeFile = ref<File | null>(null);
+const themeActivateOnUpload = ref(true);
 const restarting = ref(false);
 const error = ref("");
 const ok = ref("");
@@ -78,6 +118,24 @@ const form = ref({
   divider: "",
   footer: "",
 });
+
+const siteForm = ref({
+  skin: "default",
+  skinCss: "",
+  title: "",
+  bannerImage: "",
+  plainBg: false,
+  telnet: "",
+});
+
+type NavDraft = {
+  id?: string;
+  label: string;
+  href: string;
+};
+
+const siteNav = ref<NavDraft[]>([]);
+const pluginNavHint = ref<NavDraft[]>([]);
 
 const restartConfirm = ref("");
 
@@ -100,6 +158,27 @@ function applyForm(s: SettingsPayload): void {
     divider: s.layout.divider,
     footer: s.layout.footer,
   };
+  const site = s.site;
+  if (site) {
+    siteForm.value = {
+      skin: site.skin || "default",
+      skinCss: site.skinCss || "",
+      title: site.title || "",
+      bannerImage: site.bannerImage || "",
+      plainBg: site.plainBg === true,
+      telnet: site.telnet || "",
+    };
+    siteNav.value = (site.nav ?? []).map((n) => ({
+      id: n.id,
+      label: n.label || "",
+      href: n.href || "",
+    }));
+    pluginNavHint.value = (site.pluginNav ?? []).map((n) => ({
+      id: n.id,
+      label: n.label || "",
+      href: n.href || "",
+    }));
+  }
 }
 
 function normalizePayload(
@@ -124,6 +203,21 @@ function normalizePayload(
   });
   return {
     ...body,
+    site: body.site ?? {
+      available: false,
+      skins: ["default"],
+      themes: [],
+      skin: "default",
+      skinCss: "",
+      title: "",
+      bannerImage: "",
+      plainBg: false,
+      telnet: "",
+      themeDir: "",
+      previewUrl: "/site/",
+      nav: [],
+      pluginNav: [],
+    },
     plugins: {
       inline: plugins.inline ?? [],
       files,
@@ -231,6 +325,127 @@ async function save(): Promise<void> {
   }
 }
 
+async function saveSite(): Promise<void> {
+  savingSite.value = true;
+  error.value = "";
+  ok.value = "";
+  try {
+    const nav = siteNav.value
+      .map((n) => ({
+        id: n.id?.trim() || undefined,
+        label: n.label.trim(),
+        href: n.href.trim(),
+      }))
+      .filter((n) => n.label || n.href);
+
+    const { res, data: body } = await api<{
+      ok?: boolean;
+      error?: string;
+      siteLive?: boolean;
+      settings?: SettingsPayload;
+    }>("/api/v1/admin/settings", {
+      method: "PATCH",
+      body: JSON.stringify({
+        site: {
+          skin: siteForm.value.skin.trim() || "default",
+          skinCss: siteForm.value.skinCss.trim(),
+          title: siteForm.value.title.trim(),
+          bannerImage: siteForm.value.bannerImage.trim(),
+          plainBg: siteForm.value.plainBg === true,
+          telnet: siteForm.value.telnet.trim(),
+          nav,
+        },
+      }),
+    });
+    if (!res.ok) {
+      error.value = body?.error || `Save failed (${res.status})`;
+      return;
+    }
+    ok.value = body.siteLive
+      ? "Site settings saved — live (hard-refresh /site/)."
+      : "Site settings saved to config.json.";
+    if (body.settings) {
+      data.value = normalizePayload(
+        body.settings as SettingsPayload & { error?: string },
+      );
+      applyForm(data.value);
+    }
+  } finally {
+    savingSite.value = false;
+  }
+}
+
+function moveNav(i: number, dir: -1 | 1): void {
+  const j = i + dir;
+  if (j < 0 || j >= siteNav.value.length) return;
+  const next = [...siteNav.value];
+  const tmp = next[i]!;
+  next[i] = next[j]!;
+  next[j] = tmp;
+  siteNav.value = next;
+}
+
+function addNav(): void {
+  siteNav.value = [
+    ...siteNav.value,
+    { label: "New link", href: "/site/" },
+  ];
+}
+
+function removeNav(i: number): void {
+  siteNav.value = siteNav.value.filter((_, idx) => idx !== i);
+}
+
+const dragNavFrom = ref<number | null>(null);
+const dragNavOver = ref<number | null>(null);
+
+function onNavDragStart(i: number, ev: DragEvent): void {
+  dragNavFrom.value = i;
+  dragNavOver.value = i;
+  if (ev.dataTransfer) {
+    ev.dataTransfer.effectAllowed = "move";
+    ev.dataTransfer.setData("text/plain", String(i));
+  }
+}
+
+function onNavDragOver(i: number, ev: DragEvent): void {
+  ev.preventDefault();
+  if (ev.dataTransfer) ev.dataTransfer.dropEffect = "move";
+  dragNavOver.value = i;
+}
+
+function onNavDrop(i: number, ev: DragEvent): void {
+  ev.preventDefault();
+  const from = dragNavFrom.value;
+  dragNavFrom.value = null;
+  dragNavOver.value = null;
+  if (from == null || from === i) return;
+  const next = [...siteNav.value];
+  const [row] = next.splice(from, 1);
+  if (!row) return;
+  next.splice(i, 0, row);
+  siteNav.value = next;
+}
+
+function onNavDragEnd(): void {
+  dragNavFrom.value = null;
+  dragNavOver.value = null;
+}
+
+/** Pull a plugin-only link into the editable config list. */
+function adoptPluginNav(n: NavDraft): void {
+  const exists = siteNav.value.some(
+    (x) =>
+      (n.id && x.id === n.id) ||
+      (x.href === n.href && x.label === n.label),
+  );
+  if (exists) return;
+  siteNav.value = [
+    ...siteNav.value,
+    { id: n.id, label: n.label, href: n.href },
+  ];
+}
+
 async function doRestart(): Promise<void> {
   if (restartConfirm.value !== "restart") {
     error.value = 'Type "restart" to confirm.';
@@ -268,6 +483,136 @@ function setTab(t: Tab): void {
     name: "settings",
     query: t === "game" ? {} : { tab: t },
   });
+}
+
+const siteSkins = computed(() => {
+  const list = data.value?.site?.skins ?? ["default"];
+  const cur = siteForm.value.skin;
+  if (cur && !list.includes(cur)) return [...list, cur];
+  return list;
+});
+
+const siteThemes = computed(() => {
+  return data.value?.site?.themes ?? [];
+});
+
+function onThemeFileChange(ev: Event): void {
+  const input = ev.target as HTMLInputElement;
+  const f = input.files?.[0] ?? null;
+  themeFile.value = f;
+}
+
+async function uploadThemeZip(): Promise<void> {
+  if (!themeFile.value) {
+    error.value = "Choose a .zip theme package first.";
+    return;
+  }
+  uploadingTheme.value = true;
+  error.value = "";
+  ok.value = "";
+  try {
+    const fd = new FormData();
+    fd.append("file", themeFile.value, themeFile.value.name);
+    fd.append(
+      "activate",
+      themeActivateOnUpload.value ? "true" : "false",
+    );
+    const { res, data: body } = await api<{
+      ok?: boolean;
+      error?: string;
+      installed?: boolean;
+      activated?: boolean;
+      siteLive?: boolean;
+      theme?: {
+        id: string;
+        label: string;
+        skinCss?: string;
+        bannerHref?: string;
+        title?: string;
+      };
+      themes?: SettingsPayload["site"] extends
+        | { themes?: infer T }
+        | undefined ? T
+        : never;
+    }>("/api/v1/admin/site/theme", {
+      method: "POST",
+      body: fd,
+    });
+    if (!res.ok) {
+      error.value = body?.error || `Upload failed (${res.status})`;
+      return;
+    }
+    const name = body.theme?.label || body.theme?.id || "theme";
+    ok.value = body.activated
+      ? `Installed and activated “${name}”` +
+        (body.siteLive ? " — live on /site/." : ".")
+      : `Installed “${name}”. Activate it below or Save.`;
+    themeFile.value = null;
+    // Refresh settings so themes list + form update
+    await load();
+    if (body.theme && body.activated) {
+      siteForm.value.skin = body.theme.id;
+      if (body.theme.skinCss) {
+        siteForm.value.skinCss = body.theme.skinCss;
+      }
+      if (body.theme.bannerHref) {
+        siteForm.value.bannerImage = body.theme.bannerHref;
+      }
+      if (body.theme.title) {
+        siteForm.value.title = body.theme.title;
+      }
+    }
+  } finally {
+    uploadingTheme.value = false;
+  }
+}
+
+async function activateTheme(id: string): Promise<void> {
+  if (!id) return;
+  activatingTheme.value = id;
+  error.value = "";
+  ok.value = "";
+  try {
+    const { res, data: body } = await api<{
+      ok?: boolean;
+      error?: string;
+      siteLive?: boolean;
+      theme?: {
+        id: string;
+        label: string;
+        skinCss?: string;
+        bannerHref?: string;
+        title?: string;
+        plainBg?: boolean;
+      };
+    }>("/api/v1/admin/site/theme", {
+      method: "POST",
+      body: JSON.stringify({ activate: id }),
+    });
+    if (!res.ok) {
+      error.value = body?.error || `Activate failed (${res.status})`;
+      return;
+    }
+    const name = body.theme?.label || id;
+    ok.value = body.siteLive
+      ? `Theme “${name}” live on /site/ (hard-refresh).`
+      : `Theme “${name}” written to config.`;
+    await load();
+    if (body.theme) {
+      siteForm.value.skin = body.theme.id;
+      siteForm.value.skinCss = body.theme.skinCss || "";
+      siteForm.value.bannerImage = body.theme.bannerHref ||
+        siteForm.value.bannerImage;
+      if (body.theme.title) {
+        siteForm.value.title = body.theme.title;
+      }
+      if (typeof body.theme.plainBg === "boolean") {
+        siteForm.value.plainBg = body.theme.plainBg;
+      }
+    }
+  } finally {
+    activatingTheme.value = "";
+  }
 }
 
 async function openFile(f: PluginFile): Promise<void> {
@@ -549,6 +894,357 @@ watch(
         </div>
       </section>
 
+      <!-- ── Public site FE ───────────────────────────────── -->
+      <section
+        v-else-if="tab === 'site'"
+        class="settings-panel"
+      >
+        <h2 class="dash-h2">
+          Public site
+        </h2>
+        <p
+          v-if="data.site && !data.site.available"
+          class="warn-banner"
+        >
+          <code>@ursamu/site</code> does not appear loaded.
+          Values still write to
+          <code>plugins.site</code> in config.json.
+        </p>
+        <p class="muted settings-help">
+          Player-facing front-end at
+          <a
+            :href="data.site?.previewUrl || '/site/'"
+            target="_blank"
+            rel="noopener"
+          >/site/</a>.
+          Upload a Court-style theme
+          <code>.zip</code>
+          (theme.json + site.css + assets), or pick a
+          built-in / installed skin below.
+        </p>
+
+        <h2 class="dash-h2">
+          Install theme zip
+        </h2>
+        <p class="muted settings-help">
+          Package layout:
+          <code>theme.json</code>,
+          <code>site.css</code>, optional
+          <code>imgs/</code> and
+          <code>fonts/</code>.
+          Pack with
+          <code>deno task pack-theme</code>
+          in
+          <code>@ursamu/site</code>.
+        </p>
+        <div class="theme-upload-row">
+          <label class="theme-file-label">
+            Theme package
+            <input
+              type="file"
+              accept=".zip,application/zip"
+              :disabled="uploadingTheme"
+              @change="onThemeFileChange"
+            >
+          </label>
+          <label class="chk-row">
+            <input
+              v-model="themeActivateOnUpload"
+              type="checkbox"
+              class="chk"
+              :disabled="uploadingTheme"
+            >
+            <span>Activate after install</span>
+          </label>
+          <button
+            type="button"
+            :disabled="uploadingTheme || !themeFile"
+            @click="uploadThemeZip"
+          >
+            {{
+              uploadingTheme
+                ? "Installing…"
+                : "Upload & install"
+            }}
+          </button>
+        </div>
+        <p
+          v-if="themeFile"
+          class="muted settings-help"
+        >
+          Selected:
+          <code>{{ themeFile.name }}</code>
+          ({{ Math.round(themeFile.size / 1024) }} KB)
+        </p>
+
+        <template v-if="siteThemes.length">
+          <h2 class="dash-h2">
+            Available themes
+          </h2>
+          <ul
+            class="theme-list"
+            aria-label="Installed and built-in themes"
+          >
+            <li
+              v-for="t in siteThemes"
+              :key="t.id"
+              class="theme-list-row"
+              :class="{
+                'is-active':
+                  t.active || t.id === siteForm.skin,
+              }"
+            >
+              <div class="theme-list-meta">
+                <strong>{{ t.label || t.id }}</strong>
+                <span class="muted">
+                  <code>{{ t.id }}</code>
+                  · {{ t.source || "theme" }}
+                  <template v-if="t.version">
+                    · v{{ t.version }}
+                  </template>
+                </span>
+                <span
+                  v-if="t.description"
+                  class="muted theme-desc"
+                >{{ t.description }}</span>
+              </div>
+              <button
+                type="button"
+                class="secondary outline"
+                :disabled="
+                  activatingTheme === t.id ||
+                    t.id === siteForm.skin
+                "
+                @click="activateTheme(t.id)"
+              >
+                {{
+                  t.id === siteForm.skin
+                    ? "Active"
+                    : activatingTheme === t.id
+                    ? "…"
+                    : "Activate"
+                }}
+              </button>
+            </li>
+          </ul>
+        </template>
+
+        <h2 class="dash-h2">
+          Skin & branding
+        </h2>
+        <div class="settings-grid">
+          <label>
+            Skin
+            <select v-model="siteForm.skin">
+              <option
+                v-for="s in siteSkins"
+                :key="s"
+                :value="s"
+              >
+                {{ s }}
+              </option>
+            </select>
+          </label>
+          <label>
+            Site title
+            <input
+              v-model="siteForm.title"
+              type="text"
+              maxlength="200"
+              autocomplete="off"
+              placeholder="Leave blank to hide hero title"
+            >
+            <span class="field-hint muted">
+              Clear this field and save to hide the large
+              hero heading on /site/.
+            </span>
+          </label>
+          <label class="settings-span-2">
+            Custom skin CSS URL
+            <input
+              v-model="siteForm.skinCss"
+              type="text"
+              maxlength="500"
+              class="mono"
+              autocomplete="off"
+              placeholder="/site/theme/my.css (optional)"
+            >
+          </label>
+          <label class="settings-span-2">
+            Banner image URL
+            <input
+              v-model="siteForm.bannerImage"
+              type="text"
+              maxlength="500"
+              class="mono"
+              autocomplete="off"
+              placeholder="/site/skins/changeling/imgs/header.png"
+            >
+          </label>
+          <label>
+            Connect / telnet line
+            <input
+              v-model="siteForm.telnet"
+              type="text"
+              maxlength="120"
+              autocomplete="off"
+              placeholder="host:4201"
+            >
+          </label>
+          <label class="chk-row settings-span-2">
+            <input
+              v-model="siteForm.plainBg"
+              type="checkbox"
+              class="chk"
+            >
+            <span>Plain background (no top art)</span>
+          </label>
+        </div>
+
+        <h2 class="dash-h2">
+          Top nav links
+        </h2>
+        <p class="muted settings-help">
+          Order is top-to-bottom on the public site.
+          Drag rows or use ↑ ↓. Saves to
+          <code>plugins.site.nav</code>.
+        </p>
+        <ul
+          class="site-nav-editor"
+          aria-label="Public site nav links"
+        >
+          <li
+            v-for="(row, i) in siteNav"
+            :key="'nav-' + i"
+            class="site-nav-row"
+            :class="{
+              'is-dragging': dragNavFrom === i,
+              'is-drag-over': dragNavOver === i && dragNavFrom !== i,
+            }"
+            draggable="true"
+            @dragstart="onNavDragStart(i, $event)"
+            @dragover="onNavDragOver(i, $event)"
+            @drop="onNavDrop(i, $event)"
+            @dragend="onNavDragEnd"
+          >
+            <span
+              class="site-nav-grip"
+              title="Drag to reorder"
+              aria-hidden="true"
+            >⋮⋮</span>
+            <span class="site-nav-ord muted">{{ i + 1 }}</span>
+            <input
+              v-model="row.label"
+              type="text"
+              maxlength="80"
+              placeholder="Label"
+              aria-label="Link label"
+              draggable="false"
+              @mousedown.stop
+            >
+            <input
+              v-model="row.href"
+              type="text"
+              maxlength="500"
+              class="mono"
+              placeholder="/site/…"
+              aria-label="Link href"
+              draggable="false"
+              @mousedown.stop
+            >
+            <div class="site-nav-actions">
+              <button
+                type="button"
+                class="secondary outline"
+                :disabled="i === 0"
+                title="Move up"
+                @click="moveNav(i, -1)"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                class="secondary outline"
+                :disabled="i >= siteNav.length - 1"
+                title="Move down"
+                @click="moveNav(i, 1)"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                class="secondary outline"
+                title="Remove"
+                @click="removeNav(i)"
+              >
+                ×
+              </button>
+            </div>
+          </li>
+        </ul>
+        <p
+          v-if="!siteNav.length"
+          class="muted settings-help"
+        >
+          No config nav links yet. Add one, or adopt a plugin
+          link below.
+        </p>
+        <div class="settings-actions">
+          <button
+            type="button"
+            class="secondary outline"
+            @click="addNav"
+          >
+            Add link
+          </button>
+        </div>
+
+        <template v-if="pluginNavHint.length">
+          <h3 class="settings-subh">
+            From plugins
+          </h3>
+          <p class="muted settings-help">
+            Registered at runtime via
+            <code>registerSiteNav</code>. Adopt into config
+            to pin order and label.
+          </p>
+          <ul class="settings-pill-list">
+            <li
+              v-for="(p, i) in pluginNavHint"
+              :key="'pn-' + i"
+            >
+              <code>{{ p.label }}</code>
+              <span class="muted">{{ p.href }}</span>
+              <button
+                type="button"
+                class="secondary outline"
+                @click="adoptPluginNav(p)"
+              >
+                Add to list
+              </button>
+            </li>
+          </ul>
+        </template>
+
+        <div class="settings-actions">
+          <button
+            type="button"
+            :disabled="savingSite"
+            @click="saveSite"
+          >
+            {{ savingSite ? "Saving…" : "Save site settings" }}
+          </button>
+          <a
+            class="secondary outline"
+            :href="data.site?.previewUrl || '/site/'"
+            target="_blank"
+            rel="noopener"
+          >
+            Open /site/
+          </a>
+        </div>
+      </section>
+
       <!-- ── Restart ──────────────────────────────────────── -->
       <section
         v-else-if="tab === 'restart'"
@@ -586,7 +1282,7 @@ watch(
 
       <!-- ── Plugins ──────────────────────────────────────── -->
       <section
-        v-else
+        v-else-if="tab === 'plugins'"
         class="settings-panel"
       >
         <!-- Editor mode -->

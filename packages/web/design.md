@@ -338,6 +338,18 @@ Avoid decorative display fonts. No emoji as structural chrome.
 - **Main:** one article; list **or** detail — prefer full-page
   detail (Wiki edit) over a forever-empty split pane.
 
+### Mobile (≤900px)
+
+- **Hamburger** opens an off-canvas drawer under the topbar.
+- Drawer holds **primary tabs + section shortcuts** (same data as
+  desktop top tabs + side nav). Close via backdrop, Esc, toggle,
+  or navigation.
+- Topbar keeps brand, section chip, live dot, and Sign out.
+- Main column is full width; wide tables scroll and drop secondary
+  columns below 640px. Safe-area insets apply on notched devices.
+- CSS lives in `ui/src/assets/vue-overrides.css` (drawer + topbar);
+  shell state in `AppLayout.vue` (`navOpen`).
+
 ---
 
 ## 6. Components

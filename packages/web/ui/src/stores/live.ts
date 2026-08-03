@@ -14,6 +14,7 @@ import type {
   OnlinePlayer,
   StaffBadge,
   StaffNavItem,
+  StaffSideNavRegistration,
   WikiStub,
 } from "@/api/types";
 import {
@@ -68,6 +69,10 @@ export const useLiveStore = defineStore("live", () => {
   const boards = ref<BbsBoard[]>([]);
   /** Plugin-contributed topbar entries. */
   const staffNav = ref<StaffNavItem[]>([]);
+  /** pageId → side-nav groups (registerStaffSideNav). */
+  const staffSideNav = ref<
+    Record<string, StaffSideNavRegistration>
+  >({});
   /** Live badges from plugins (Phase 3). */
   const staffBadges = ref<Record<string, StaffBadge>>({});
   /**
@@ -227,6 +232,12 @@ export const useLiveStore = defineStore("live", () => {
     boardsLoaded.value = true;
     if (Array.isArray(data.staffNav)) {
       staffNav.value = data.staffNav as StaffNavItem[];
+    }
+    if (data.staffSideNav && typeof data.staffSideNav === "object") {
+      staffSideNav.value = data.staffSideNav as Record<
+        string,
+        StaffSideNavRegistration
+      >;
     }
     if (data.staffBadges && typeof data.staffBadges === "object") {
       staffBadges.value = data.staffBadges as Record<
@@ -445,6 +456,11 @@ export const useLiveStore = defineStore("live", () => {
       onBoardUpsert: (b) => upsertBoard(b),
       onBoardDelete: (id, n) => removeBoard(n ?? id),
       onBadgeSet: (b) => applyBadge(b),
+      onStaffChrome: (data) => {
+        staffNav.value = data.staffNav ?? [];
+        staffSideNav.value = data.staffSideNav ?? {};
+        touch();
+      },
       onOnlineSet: (players) => {
         online.value = players;
         onlineLoaded.value = true;
@@ -538,6 +554,7 @@ export const useLiveStore = defineStore("live", () => {
     jobStats,
     boards,
     staffNav,
+    staffSideNav,
     staffBadges,
     badgeAck,
     displayBadge,

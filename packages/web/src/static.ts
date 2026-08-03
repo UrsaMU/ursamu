@@ -13,6 +13,10 @@ import {
   relative,
   isAbsolute,
 } from "@std/path";
+import {
+  getStaffStaticRoot,
+  safeJoinStaffStatic,
+} from "./staff-static.ts";
 
 const DIST_URL = new URL("../dist/", import.meta.url);
 const FALLBACK_URL = new URL("../admin/", import.meta.url);
@@ -175,6 +179,56 @@ async function loadAsset(
   return null;
 }
 
+/** Serve plugin static registered via registerStaffStatic. */
+async function serveStaffPluginStatic(
+  pathname: string,
+  method: string,
+): Promise<Response | null> {
+  // /admin/<id> or /admin/<id>/…
+  const m = pathname.match(
+    /^\/admin\/([a-z][a-z0-9_-]*)(?:\/(.*))?$/i,
+  );
+  if (!m) return null;
+  const id = m[1]!.toLowerCase();
+  const root = getStaffStaticRoot(id);
+  if (!root) return null;
+
+  let sub = (m[2] ?? "").replace(/\\/g, "/");
+  if (!sub || sub.endsWith("/")) sub += "index.html";
+  if (sub.includes("..") || sub.includes("\0")) {
+    return new Response("Not Found", { status: 404 });
+  }
+
+  let filePath = safeJoinStaffStatic(root, sub);
+  let data: Uint8Array | null = null;
+  if (filePath) {
+    try {
+      data = await Deno.readFile(filePath);
+    } catch {
+      data = null;
+    }
+  }
+  if (!data) {
+    // SPA fallback to plugin index.html
+    filePath = safeJoinStaffStatic(root, "index.html");
+    if (!filePath) return new Response("Not Found", { status: 404 });
+    try {
+      data = await Deno.readFile(filePath);
+    } catch {
+      return new Response("Not Found", { status: 404 });
+    }
+  }
+
+  const headers = headersFor(filePath);
+  if (method === "HEAD") {
+    return new Response(null, { status: 200, headers });
+  }
+  return new Response(new Uint8Array(data), {
+    status: 200,
+    headers,
+  });
+}
+
 export async function adminStaticHandler(
   req: Request,
   _userId: string | null,
@@ -184,6 +238,14 @@ export async function adminStaticHandler(
   }
 
   const url = new URL(req.url);
+
+  // Plugin static before host SPA (so /admin/mytool is not SPA-fallback)
+  const pluginRes = await serveStaffPluginStatic(
+    url.pathname,
+    req.method,
+  );
+  if (pluginRes) return pluginRes;
+
   const rel = spaRelPath(url.pathname);
   if (rel === null) {
     return new Response(

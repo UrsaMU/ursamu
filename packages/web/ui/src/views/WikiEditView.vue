@@ -21,6 +21,7 @@ const session = useSessionStore();
 const title = ref("");
 const body = ref("");
 const draft = ref(false);
+const featured = ref(false);
 const readLock = ref("connected");
 const tags = ref<string[]>([]);
 const loading = ref(true);
@@ -34,6 +35,7 @@ const currentPayload = computed<WikiPagePayload>(() => ({
   title: title.value,
   body: body.value,
   draft: draft.value,
+  featured: featured.value,
   readLock: readLock.value,
   tags: tags.value,
 }));
@@ -54,6 +56,7 @@ async function load(): Promise<void> {
     title?: string;
     body?: string;
     draft?: boolean;
+    featured?: boolean;
     readLock?: string;
     tags?: string[];
     error?: string;
@@ -80,6 +83,7 @@ async function load(): Promise<void> {
   title.value = String(data.title ?? props.path);
   body.value = String(data.body ?? "");
   draft.value = data.draft === true;
+  featured.value = data.featured === true;
   readLock.value = String(data.readLock ?? "connected");
   tags.value = Array.isArray(data.tags)
     ? data.tags.map((t) => String(t).toLowerCase())
@@ -144,6 +148,7 @@ async function save(): Promise<void> {
       title: t,
       body: body.value,
       draft: draft.value,
+      featured: featured.value,
       readLock: readLock.value || "connected",
       tags: [...tags.value],
     };
@@ -174,6 +179,7 @@ async function save(): Promise<void> {
       path: props.path,
       title: t,
       draft: draft.value,
+      featured: featured.value,
       readLock: readLock.value,
       tags: [...tags.value],
       chars: body.value.length,
@@ -302,6 +308,14 @@ onBeforeRouteLeave(() => confirmLeave());
             class="chk"
           >
           <span>Draft (staff-only read)</span>
+        </label>
+        <label class="chk-row">
+          <input
+            v-model="featured"
+            type="checkbox"
+            class="chk"
+          >
+          <span>Featured (site front page)</span>
         </label>
         <label for="edit-lock">
           Who can read

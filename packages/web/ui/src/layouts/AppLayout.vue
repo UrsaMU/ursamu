@@ -15,12 +15,15 @@ import {
 import { storeToRefs } from "pinia";
 import { useSessionStore } from "@/stores/session";
 import { useLiveStore } from "@/stores/live";
+import {
+  ensurePluginModules,
+  resolveNavTarget,
+} from "@/plugin-modules";
 
 const session = useSessionStore();
 const live = useLiveStore();
 const {
   refreshing,
-  lastUpdated,
   onlineLoaded,
   onlineCount,
   objectsLoaded,
@@ -37,32 +40,55 @@ const {
   bbsCategories,
   boards,
   staffNav,
+  staffSideNav,
   staffBadges,
   mode,
   wsConnected,
 } = storeToRefs(live);
 const router = useRouter();
 const route = useRoute();
-const nowTick = ref(Date.now());
-let tickTimer: ReturnType<typeof setInterval> | null = null;
 
-type Section =
-  | "dashboard"
-  | "wiki"
-  | "players"
-  | "jobs"
-  | "bbs"
-  | "db"
-  | "settings";
+// Dynamic same-origin Vue modules from registerStaffPage({ module })
+watch(
+  staffNav,
+  (nav) => {
+    void ensurePluginModules(router, nav);
+  },
+  { immediate: true, deep: true },
+);
+
+/** Off-canvas nav drawer (primary + section links on small screens). */
+const navOpen = ref(false);
+
+function closeNav(): void {
+  navOpen.value = false;
+}
+
+function toggleNav(): void {
+  navOpen.value = !navOpen.value;
+}
+
+function onNavKeydown(e: KeyboardEvent): void {
+  if (e.key === "Escape" && navOpen.value) {
+    e.preventDefault();
+    closeNav();
+  }
+}
+
+type Section = string;
 
 const section = computed<Section>(() => {
   const n = String(route.name ?? "");
+  if (n === "plugin-embed") {
+    return String(route.params.pluginId ?? "").trim() || "plugin";
+  }
   if (n === "dashboard" || n === "") return "dashboard";
   if (n.startsWith("wiki")) return "wiki";
   if (n.startsWith("player")) return "players";
   if (n.startsWith("job")) return "jobs";
   if (n.startsWith("bbs")) return "bbs";
   if (n.startsWith("db")) return "db";
+  if (n === "map" || n.startsWith("map")) return "map";
   if (n === "settings") return "settings";
   return "dashboard";
 });
@@ -72,6 +98,8 @@ const sectionTitle = computed(() => {
   const plug = staffNav.value.find((p) => p.id === section.value);
   if (plug?.label) return plug.label;
   switch (section.value) {
+    case "dashboard":
+      return "Dashboard";
     case "wiki":
       return "Wiki";
     case "players":
@@ -80,16 +108,22 @@ const sectionTitle = computed(() => {
       return "Jobs";
     case "db":
       return "Database";
+    case "map":
+      return "Map";
     case "settings":
       return "Settings";
+    case "bbs":
+      return "Boards";
     default:
-      return "Shortcuts";
+      return plug?.label || "Menu";
   }
 });
 
 type PrimaryItem = {
   id: string;
   name?: string;
+  /** Full router location when name alone is not enough (embed). */
+  to?: { name: string; params?: Record<string, string> };
   label: string;
   href?: string;
   order: number;
@@ -217,13 +251,32 @@ const primary = computed((): PrimaryItem[] => {
 
   const plugins: PrimaryItem[] = staffNav.value.map((p) => {
     const b = badgeForKey(p.badgeKey);
-    // Phase 2: prefer in-console route when set; href is fallback.
-    const hasRoute = Boolean(p.route?.trim());
+    const target = resolveNavTarget(p, (n) => router.hasRoute(n));
+    if (target.to) {
+      return {
+        id: p.id,
+        label: p.label,
+        name: target.to.name,
+        to: target.to,
+        order: p.order ?? 100,
+        badge: b.badge,
+        badgeTitle: p.badgeTitle || b.badgeTitle,
+      };
+    }
+    if (target.name) {
+      return {
+        id: p.id,
+        label: p.label,
+        name: target.name,
+        order: p.order ?? 100,
+        badge: b.badge,
+        badgeTitle: p.badgeTitle || b.badgeTitle,
+      };
+    }
     return {
       id: p.id,
       label: p.label,
-      name: hasRoute ? p.route : undefined,
-      href: hasRoute ? undefined : p.href,
+      href: target.href || p.href,
       order: p.order ?? 100,
       badge: b.badge,
       badgeTitle: p.badgeTitle || b.badgeTitle,
@@ -237,7 +290,13 @@ const primary = computed((): PrimaryItem[] => {
 });
 
 type SideLink = {
-  to: { name: string; query?: Record<string, string> };
+  /** Group header row (not a link) */
+  header?: boolean;
+  to?: {
+    name: string;
+    params?: Record<string, string>;
+    query?: Record<string, string>;
+  };
   label: string;
   desc?: string;
   icon?: string;
@@ -246,8 +305,57 @@ type SideLink = {
     filter?: string;
     tag?: string;
     section?: string;
+    /** Embed plugin side-nav item id */
+    sideId?: string;
   };
 };
+
+/** Plugin registerStaffSideNav → host side entries for this section. */
+function pluginSideLinks(pageId: string): SideLink[] | null {
+  const reg = staffSideNav.value[pageId];
+  if (!reg?.groups?.length) return null;
+  const nav = staffNav.value.find((p) => p.id === pageId);
+  const isEmbed = Boolean(nav?.embed?.trim()) ||
+    nav?.route === "plugin-embed";
+  const hostRoute = nav?.route?.trim();
+  const links: SideLink[] = [];
+  let multi = reg.groups.length > 1 ||
+    reg.groups.some((g) => Boolean(g.title?.trim()));
+
+  for (const g of reg.groups) {
+    if (multi && g.title?.trim()) {
+      links.push({
+        header: true,
+        label: g.title.trim(),
+      });
+    }
+    for (const it of g.items) {
+      const query = it.query ? { ...it.query } : undefined;
+      if (isEmbed) {
+        links.push({
+          to: {
+            name: "plugin-embed",
+            params: { pluginId: pageId },
+            query,
+          },
+          label: it.label,
+          desc: it.desc,
+          icon: it.icon || "·",
+          match: { sideId: it.id },
+        });
+      } else if (hostRoute && hostRoute !== "plugin-embed") {
+        links.push({
+          to: { name: hostRoute, query },
+          label: it.label,
+          desc: it.desc,
+          icon: it.icon || "·",
+          match: { sideId: it.id, ...query },
+        });
+      }
+    }
+  }
+  return links.length ? links : null;
+}
 
 /** Wiki path prefix before first `/`, or `(root)`. */
 function wikiSectionOf(path: string): string {
@@ -360,6 +468,12 @@ const wikiStatusLinks = computed((): SideLink[] => {
   ];
 });
 
+/** Open Tags/Sections dropdown when a filter from that group is active. */
+const wikiTagsOpen = computed(() => Boolean(activeWikiTag.value));
+const wikiSectionsOpen = computed(() =>
+  Boolean(activeWikiSection.value),
+);
+
 const wikiTagLinks = computed((): SideLink[] => {
   const filter = activeWikiFilter.value;
   const cur = activeWikiTag.value;
@@ -398,6 +512,10 @@ const wikiSectionLinks = computed((): SideLink[] => {
 });
 
 const sideLinks = computed((): SideLink[] => {
+  // Plugin-owned side nav wins for that section (embed or host route)
+  const fromPlugin = pluginSideLinks(section.value);
+  if (fromPlugin) return fromPlugin;
+
   switch (section.value) {
     case "wiki":
       return wikiStatusLinks.value;
@@ -502,6 +620,39 @@ const sideLinks = computed((): SideLink[] => {
       }
       return links;
     }
+    case "map":
+      return [
+        {
+          to: { name: "map", query: {} },
+          label: "On the map",
+          desc: "Live vehicles",
+          icon: "◎",
+        },
+        {
+          to: { name: "map", query: { tool: "look" } },
+          label: "Looking at",
+          desc: "Sector view",
+          icon: "◉",
+        },
+        {
+          to: { name: "map", query: { tool: "legend" } },
+          label: "Legend",
+          desc: "Biomes & Perlin bands",
+          icon: "≡",
+        },
+        {
+          to: { name: "map", query: { tool: "mark" } },
+          label: "Mark a tile",
+          desc: "Place / clear",
+          icon: "#",
+        },
+        {
+          to: { name: "map", query: { tool: "cleanup" } },
+          label: "Cleanup",
+          desc: "Orphans & stranded",
+          icon: "⌫",
+        },
+      ];
     case "db":
       return [
         {
@@ -544,6 +695,12 @@ const sideLinks = computed((): SideLink[] => {
           label: "Game & layout",
           desc: "Name, start, chrome",
           icon: "⚙",
+        },
+        {
+          to: { name: "settings", query: { tab: "site" } },
+          label: "Public site",
+          desc: "Skin, banner, nav",
+          icon: "◈",
         },
         {
           to: { name: "settings", query: { tab: "plugins" } },
@@ -596,17 +753,10 @@ const sideLinks = computed((): SideLink[] => {
 
 const liveHint = computed(() => {
   if (!wsConnected.value) {
-    return mode.value === "connecting" ? "connecting…" : "offline";
+    return mode.value === "connecting" ? "Connecting" : "Offline";
   }
-  if (refreshing.value) return "syncing…";
-  if (!lastUpdated.value) return "live";
-  const sec = Math.max(
-    0,
-    Math.floor((nowTick.value - lastUpdated.value) / 1000),
-  );
-  if (sec < 2) return "live · just now";
-  if (sec < 60) return `live · ${sec}s ago`;
-  return `live · ${Math.floor(sec / 60)}m ago`;
+  if (refreshing.value) return "Syncing";
+  return "Live";
 });
 
 function isPrimaryActive(id: string): boolean {
@@ -628,9 +778,28 @@ function routeInSection(target: string, name: string): boolean {
 }
 
 function isSideActive(link: SideLink): boolean {
+  if (link.header || !link.to) return false;
   const name = String(route.name ?? "");
   const target = link.to.name;
   if (target === "wiki-new") return name === "wiki-new";
+
+  // Plugin embed side-nav: match query keys on /admin/ext/:id
+  if (target === "plugin-embed") {
+    if (name !== "plugin-embed") return false;
+    const wantId = String(link.to.params?.pluginId ?? "");
+    const haveId = String(route.params.pluginId ?? "");
+    if (wantId && wantId !== haveId) return false;
+    const lq = link.to.query ?? {};
+    const keys = Object.keys(lq);
+    if (!keys.length) {
+      // "root" item: active when no extra query (or only empty)
+      return Object.keys(route.query).length === 0;
+    }
+    return keys.every(
+      (k) => String(route.query[k] ?? "") === String(lq[k] ?? ""),
+    );
+  }
+
   if (!routeInSection(target, name)) return false;
 
   const haveFilter = String(route.query.filter ?? "");
@@ -642,6 +811,12 @@ function isSideActive(link: SideLink): boolean {
     // BBS category links stash cat in match.section
     if (target === "bbs" && link.match.section) {
       return haveCat === link.match.section;
+    }
+    if (link.match.sideId && link.to.query) {
+      const lq = link.to.query;
+      return Object.keys(lq).every(
+        (k) => String(route.query[k] ?? "") === String(lq[k] ?? ""),
+      );
     }
     return (
       (link.match.filter ?? "") === haveFilter &&
@@ -676,11 +851,35 @@ function isSideActive(link: SideLink): boolean {
     return wantCat === haveCat;
   }
 
+  // Map tools use ?tool=
+  if (target === "map") {
+    const wantTool = String(lq.tool ?? "");
+    const haveTool = String(route.query.tool ?? "");
+    return wantTool === haveTool;
+  }
+
   if (lq.filter) return haveFilter === lq.filter;
   return haveFilter === "";
 }
 
-// Clear topbar chips when the operator opens that section.
+// Close drawer on navigation; keep active top tab in view.
+watch(
+  () => route.fullPath,
+  () => {
+    closeNav();
+    requestAnimationFrame(() => {
+      const el = document.querySelector(
+        ".top-primary a.top-tab.active",
+      ) as HTMLElement | null;
+      el?.scrollIntoView({
+        inline: "nearest",
+        block: "nearest",
+        behavior: "smooth",
+      });
+    });
+  },
+);
+
 watch(
   section,
   (sec) => {
@@ -688,6 +887,10 @@ watch(
   },
   { immediate: true },
 );
+
+watch(navOpen, (open) => {
+  document.body.classList.toggle("nav-drawer-open", open);
+});
 
 // Re-ack if counts settle after snapshot while still on the tab
 // (so a late "3" does not flash after we already opened Boards).
@@ -710,37 +913,96 @@ watch(
 
 onMounted(() => {
   if (!wsConnected.value) live.startPolling();
-  tickTimer = setInterval(() => {
-    nowTick.value = Date.now();
-  }, 1000);
+  window.addEventListener("keydown", onNavKeydown);
 });
 
 onUnmounted(() => {
-  if (tickTimer) clearInterval(tickTimer);
+  window.removeEventListener("keydown", onNavKeydown);
+  document.body.classList.remove("nav-drawer-open");
 });
 
 function signOut(): void {
   session.signOut();
   void router.replace({ name: "login" });
 }
+
+/** Compact icons for drawer primary nav (mobile). */
+function primaryIcon(id: string): string {
+  switch (id) {
+    case "dashboard":
+      return "⌂";
+    case "wiki":
+      return "¶";
+    case "players":
+      return "◎";
+    case "jobs":
+      return "!";
+    case "bbs":
+      return "#";
+    case "map":
+      return "▣";
+    case "db":
+      return "▤";
+    case "settings":
+      return "⚙";
+    case "channels":
+      return "☰";
+    case "mail":
+      return "✉";
+    case "help":
+      return "?";
+    default:
+      return "·";
+  }
+}
 </script>
 
 <template>
-  <div id="view-app">
+  <div
+    id="view-app"
+    :class="{ 'is-nav-open': navOpen }"
+  >
+    <a
+      class="skip-link"
+      href="#main-pane"
+    >Skip to main content</a>
+
     <header class="topbar container-fluid">
       <nav
         class="top-nav"
         aria-label="Staff console"
       >
         <div class="top-nav-left">
+          <button
+            type="button"
+            class="nav-menu-btn"
+            :aria-expanded="navOpen"
+            aria-controls="staff-drawer"
+            :aria-label="navOpen ? 'Close menu' : 'Open menu'"
+            @click="toggleNav"
+          >
+            <span
+              class="nav-menu-icon"
+              aria-hidden="true"
+            >
+              <span />
+              <span />
+              <span />
+            </span>
+          </button>
           <RouterLink
             class="brand"
             :to="{ name: 'dashboard' }"
+            @click="closeNav"
           >
             UrsaMU
           </RouterLink>
           <span
-            class="top-divider"
+            class="top-section-chip"
+            aria-hidden="true"
+          >{{ sectionTitle }}</span>
+          <span
+            class="top-divider top-divider-desktop"
             aria-hidden="true"
           />
           <ul class="top-primary">
@@ -764,7 +1026,7 @@ function signOut(): void {
                 v-else-if="item.name"
                 class="top-tab"
                 :class="{ active: isPrimaryActive(item.id) }"
-                :to="{ name: item.name }"
+                :to="item.to ?? { name: item.name }"
               >
                 <span class="top-tab-label">{{ item.label }}</span>
                 <span
@@ -792,7 +1054,7 @@ function signOut(): void {
                 ws: wsConnected,
               }"
             />
-            {{ liveHint }}
+            <span class="top-live-text">{{ liveHint }}</span>
           </span>
           <span
             class="top-divider top-divider-sm"
@@ -812,11 +1074,81 @@ function signOut(): void {
       </nav>
     </header>
 
+    <div
+      class="nav-backdrop"
+      :class="{ 'is-visible': navOpen }"
+      aria-hidden="true"
+      @click="closeNav"
+    />
+
     <div class="shell container-fluid">
       <aside
+        id="staff-drawer"
         class="side-nav"
+        :class="{ 'is-open': navOpen }"
         :aria-label="`${sectionTitle} menu`"
       >
+        <div class="drawer-primary">
+          <p class="side-nav-label">
+            Sections
+          </p>
+          <nav
+            class="side-nav-list"
+            aria-label="Primary sections"
+          >
+            <template
+              v-for="item in primary"
+              :key="'d-' + item.id"
+            >
+              <a
+                v-if="item.href && !item.name"
+                class="side-nav-item"
+                :class="{ 'is-active': isPrimaryActive(item.id) }"
+                :href="item.href"
+                @click="closeNav"
+              >
+                <span
+                  class="side-nav-icon"
+                  aria-hidden="true"
+                >{{ primaryIcon(item.id) }}</span>
+                <span class="side-nav-text">
+                  <span class="side-nav-title">
+                    {{ item.label }}
+                    <span
+                      v-if="item.badge"
+                      class="top-badge drawer-badge"
+                      :title="item.badgeTitle"
+                    >{{ item.badge }}</span>
+                  </span>
+                </span>
+              </a>
+              <RouterLink
+                v-else-if="item.name"
+                class="side-nav-item"
+                :class="{ 'is-active': isPrimaryActive(item.id) }"
+                :to="{ name: item.name }"
+                @click="closeNav"
+              >
+                <span
+                  class="side-nav-icon"
+                  aria-hidden="true"
+                >{{ primaryIcon(item.id) }}</span>
+                <span class="side-nav-text">
+                  <span class="side-nav-title">
+                    {{ item.label }}
+                    <span
+                      v-if="item.badge"
+                      class="top-badge drawer-badge"
+                      :title="item.badgeTitle"
+                    >{{ item.badge }}</span>
+                  </span>
+                </span>
+              </RouterLink>
+            </template>
+          </nav>
+          <hr class="side-nav-hr">
+        </div>
+
         <p class="side-nav-label">
           {{ sectionTitle }}
         </p>
@@ -824,113 +1156,151 @@ function signOut(): void {
           class="side-nav-list"
           aria-label="Section shortcuts"
         >
-          <RouterLink
+          <template
             v-for="(link, i) in sideLinks"
             :key="'s-' + i"
-            class="side-nav-item"
-            :class="{ 'is-active': isSideActive(link) }"
-            :to="link.to"
           >
-            <span
-              class="side-nav-icon"
-              aria-hidden="true"
-            >{{ link.icon || "·" }}</span>
-            <span class="side-nav-text">
-              <span class="side-nav-title">{{ link.label }}</span>
+            <p
+              v-if="link.header"
+              class="side-nav-label side-nav-group"
+            >
+              {{ link.label }}
+            </p>
+            <RouterLink
+              v-else-if="link.to"
+              class="side-nav-item"
+              :class="{ 'is-active': isSideActive(link) }"
+              :to="link.to"
+              @click="closeNav"
+            >
               <span
-                v-if="link.desc"
-                class="side-nav-desc"
-              >{{ link.desc }}</span>
-            </span>
-          </RouterLink>
+                class="side-nav-icon"
+                aria-hidden="true"
+              >{{ link.icon || "·" }}</span>
+              <span class="side-nav-text">
+                <span class="side-nav-title">{{ link.label }}</span>
+                <span
+                  v-if="link.desc"
+                  class="side-nav-desc"
+                >{{ link.desc }}</span>
+              </span>
+            </RouterLink>
+          </template>
         </nav>
 
         <template v-if="section === 'wiki'">
           <hr class="side-nav-hr">
-          <p class="side-nav-label">
-            Tags
-          </p>
-          <nav
-            class="side-nav-list side-nav-list-compact"
-            aria-label="Wiki tags"
+          <details
+            class="side-nav-drop"
+            v-bind="wikiTagsOpen ? { open: true } : {}"
           >
-            <p
-              v-if="!wikiTagLinks.length"
-              class="side-nav-empty muted"
-            >
-              No tags yet.
-            </p>
-            <RouterLink
-              v-for="(link, i) in wikiTagLinks"
-              :key="'t-' + link.label + i"
-              class="side-nav-item side-nav-item-compact"
-              :class="{ 'is-active': isSideActive(link) }"
-              :to="link.to"
-            >
-              <span
-                class="side-nav-icon"
-                aria-hidden="true"
-              >#</span>
-              <span class="side-nav-text">
-                <span class="side-nav-title">{{
-                  link.label
-                }}</span>
-                <span class="side-nav-desc">{{
-                  link.desc
-                }}</span>
+            <summary class="side-nav-drop-sum">
+              <span class="side-nav-label side-nav-drop-label">
+                Tags
               </span>
-            </RouterLink>
-          </nav>
+              <span
+                class="side-nav-drop-count muted"
+                aria-hidden="true"
+              >{{ wikiTagLinks.length }}</span>
+              <span
+                class="side-nav-drop-chev"
+                aria-hidden="true"
+              />
+            </summary>
+            <nav
+              class="side-nav-list side-nav-list-compact"
+              aria-label="Wiki tags"
+            >
+              <p
+                v-if="!wikiTagLinks.length"
+                class="side-nav-empty muted"
+              >
+                No tags yet.
+              </p>
+              <RouterLink
+                v-for="(link, i) in wikiTagLinks"
+                :key="'t-' + link.label + i"
+                class="side-nav-item side-nav-item-compact"
+                :class="{ 'is-active': isSideActive(link) }"
+                :to="link.to"
+                @click="closeNav"
+              >
+                <span
+                  class="side-nav-icon"
+                  aria-hidden="true"
+                >#</span>
+                <span class="side-nav-text">
+                  <span class="side-nav-title">{{
+                    link.label
+                  }}</span>
+                  <span class="side-nav-desc">{{
+                    link.desc
+                  }}</span>
+                </span>
+              </RouterLink>
+            </nav>
+          </details>
 
-          <hr class="side-nav-hr">
-          <p class="side-nav-label">
-            Sections
-          </p>
-          <nav
-            class="side-nav-list side-nav-list-compact"
-            aria-label="Wiki sections"
+          <details
+            class="side-nav-drop"
+            v-bind="wikiSectionsOpen ? { open: true } : {}"
           >
-            <p
-              v-if="!wikiSectionLinks.length"
-              class="side-nav-empty muted"
-            >
-              No sections yet.
-            </p>
-            <RouterLink
-              v-for="(link, i) in wikiSectionLinks"
-              :key="'sec-' + link.label + i"
-              class="side-nav-item side-nav-item-compact"
-              :class="{ 'is-active': isSideActive(link) }"
-              :to="link.to"
-            >
-              <span
-                class="side-nav-icon"
-                aria-hidden="true"
-              >/</span>
-              <span class="side-nav-text">
-                <span class="side-nav-title">{{
-                  link.label
-                }}</span>
-                <span class="side-nav-desc">{{
-                  link.desc
-                }}</span>
+            <summary class="side-nav-drop-sum">
+              <span class="side-nav-label side-nav-drop-label">
+                Sections
               </span>
-            </RouterLink>
-          </nav>
+              <span
+                class="side-nav-drop-count muted"
+                aria-hidden="true"
+              >{{ wikiSectionLinks.length }}</span>
+              <span
+                class="side-nav-drop-chev"
+                aria-hidden="true"
+              />
+            </summary>
+            <nav
+              class="side-nav-list side-nav-list-compact"
+              aria-label="Wiki sections"
+            >
+              <p
+                v-if="!wikiSectionLinks.length"
+                class="side-nav-empty muted"
+              >
+                No sections yet.
+              </p>
+              <RouterLink
+                v-for="(link, i) in wikiSectionLinks"
+                :key="'sec-' + link.label + i"
+                class="side-nav-item side-nav-item-compact"
+                :class="{ 'is-active': isSideActive(link) }"
+                :to="link.to"
+                @click="closeNav"
+              >
+                <span
+                  class="side-nav-icon"
+                  aria-hidden="true"
+                >/</span>
+                <span class="side-nav-text">
+                  <span class="side-nav-title">{{
+                    link.label
+                  }}</span>
+                  <span class="side-nav-desc">{{
+                    link.desc
+                  }}</span>
+                </span>
+              </RouterLink>
+            </nav>
+          </details>
         </template>
 
         <div class="side-nav-foot">
-          <p class="muted side-nav-hint">
-            <span
-              class="poll-dot"
-              :class="{
-                stale: !wsConnected,
-                spin: refreshing || mode === 'connecting',
-                ws: wsConnected,
-              }"
-            />
-            {{ liveHint }}
-          </p>
+          <button
+            type="button"
+            class="outline secondary drawer-signout"
+            @click="signOut"
+          >
+            Sign out
+          </button>
         </div>
       </aside>
 

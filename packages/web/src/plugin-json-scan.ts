@@ -53,7 +53,7 @@ export function parseResourcesPath(
 ): { plugin: string; rel: string } | null {
   const n = norm(path);
   const marker = "/resources/";
-  let idx = n.toLowerCase().lastIndexOf(marker);
+  const idx = n.toLowerCase().lastIndexOf(marker);
   // Also allow "resources/" at start of a relative path
   if (idx === -1 && n.toLowerCase().startsWith("resources/")) {
     return null; // no plugin parent

@@ -18,6 +18,7 @@ import type {
   OnlinePlayer,
   StaffBadge,
   StaffNavItem,
+  StaffSideNavRegistration,
   WikiStub,
 } from "@/api/types";
 
@@ -36,6 +37,7 @@ export type SnapshotData = {
   boards?: BbsBoard[];
   staffNav?: StaffNavItem[];
   staffBadges?: Record<string, StaffBadge>;
+  staffSideNav?: Record<string, StaffSideNavRegistration>;
 };
 
 export type AdminSocketHandlers = {
@@ -52,6 +54,10 @@ export type AdminSocketHandlers = {
   onBoardDelete: (id: string, num?: number) => void;
   onOnlineSet: (players: OnlinePlayer[]) => void;
   onBadgeSet: (badge: StaffBadge) => void;
+  onStaffChrome?: (data: {
+    staffNav: StaffNavItem[];
+    staffSideNav: Record<string, StaffSideNavRegistration>;
+  }) => void;
   onTouch: () => void;
   onError?: (message: string) => void;
 };
@@ -283,6 +289,20 @@ export class AdminSocket {
           ? msg.title
           : undefined,
       });
+      return;
+    }
+    if (t === "staff:chrome") {
+      const nav = Array.isArray(msg.staffNav)
+        ? msg.staffNav as StaffNavItem[]
+        : [];
+      const side =
+        msg.staffSideNav && typeof msg.staffSideNav === "object"
+          ? msg.staffSideNav as Record<
+            string,
+            StaffSideNavRegistration
+          >
+          : {};
+      h.onStaffChrome?.({ staffNav: nav, staffSideNav: side });
     }
   }
 

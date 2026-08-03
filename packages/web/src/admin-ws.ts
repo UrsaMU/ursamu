@@ -17,6 +17,9 @@ import {
 } from "./admin-ws-hub.ts";
 import { wireAdminWsHooks } from "./admin-ws-hooks.ts";
 import { setStaffBadgePusher } from "./staff-badges.ts";
+import { setStaffChromeNotifier } from "./staff-chrome.ts";
+import { listStaffNav } from "./staff-nav.ts";
+import { listStaffSideNav } from "./staff-sidenav.ts";
 
 export type { AdminWsMsg, OnlineRow } from "./admin-ws-hub.ts";
 export {
@@ -64,13 +67,20 @@ export function startAdminWs(): void {
   setStaffBadgePusher((msg) => {
     broadcastAdmin(msg);
   });
+  setStaffChromeNotifier(() => {
+    broadcastAdmin({
+      type: "staff:chrome",
+      staffNav: listStaffNav(),
+      staffSideNav: listStaffSideNav(),
+    });
+  });
 
   void wireAdminWsHooks().then((off) => {
     _hooksOff = off;
   });
 
   console.log(
-    "[web] Admin WS at /admin/ws (RPC + snapshot + badges)",
+    "[web] Admin WS at /admin/ws (RPC + snapshot + badges + chrome)",
   );
 }
 
@@ -80,6 +90,7 @@ export function stopAdminWs(): void {
     _hooksOff = null;
   }
   setStaffBadgePusher(null);
+  setStaffChromeNotifier(null);
   closeAllClients();
   _wired = false;
 }

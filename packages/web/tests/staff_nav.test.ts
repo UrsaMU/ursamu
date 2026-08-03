@@ -40,6 +40,20 @@ Deno.test("registerStaffNav — rejects empty target", OPTS, () => {
   clearStaffNav();
 });
 
+Deno.test("registerStaffNav — embed alone ok", OPTS, () => {
+  clearStaffNav();
+  registerStaffNav({
+    id: "tool",
+    label: "Tool",
+    embed: "/admin/tool/",
+  });
+  const items = listStaffNav();
+  assertEquals(items.length, 1);
+  assertEquals(items[0]!.route, "plugin-embed");
+  assertEquals(items[0]!.embed, "/admin/tool/");
+  clearStaffNav();
+});
+
 Deno.test("registerStaffNav — last write wins", OPTS, () => {
   clearStaffNav();
   registerStaffNav({

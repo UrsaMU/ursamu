@@ -722,7 +722,7 @@ function searchQuery() {
 
 function filteredPages() {
   const q = searchQuery();
-  let list = applyDashFilters(pages);
+  const list = applyDashFilters(pages);
   if (!q) return list;
   return list.filter(
     (p) =>
@@ -1449,6 +1449,72 @@ function applyEditFormListeners() {
 }
 applyEditFormListeners();
 
+/** Minimal FE-parity markdown for admin body preview. */
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function renderWikiPreview(md) {
+  const lines = String(md || "").split(/\r?\n/);
+  let html = "";
+  let inPara = false;
+  const closePara = () => {
+    if (inPara) {
+      html += "</p>\n";
+      inPara = false;
+    }
+  };
+  const inline = (t) => {
+    let s = escHtml(t);
+    s = s.replace(
+      /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
+      (_m, target, label) => {
+        const lbl = (label || target).trim();
+        return `<a href="/site/wiki/${target.trim()}">${lbl}</a>`;
+      },
+    );
+    s = s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/\*(.+?)\*/g, "<em>$1</em>");
+    s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+    return s;
+  };
+  for (const line of lines) {
+    if (!line.trim()) {
+      closePara();
+      continue;
+    }
+    const h = line.match(/^(#{1,6})\s+(.*)/);
+    if (h) {
+      closePara();
+      const n = h[1].length;
+      html += `<h${n}>${inline(h[2])}</h${n}>\n`;
+      continue;
+    }
+    if (/^[-*_]{3,}\s*$/.test(line)) {
+      closePara();
+      html += "<hr>\n";
+      continue;
+    }
+    const ul = line.match(/^[-*+]\s+(.*)/);
+    if (ul) {
+      closePara();
+      html += `<ul><li>${inline(ul[1])}</li></ul>\n`;
+      continue;
+    }
+    if (!inPara) {
+      html += "<p>";
+      inPara = true;
+    } else html += " ";
+    html += inline(line);
+  }
+  closePara();
+  return html || "<p><em>Nothing to preview yet.</em></p>";
+}
+
 /** @param {"edit"|"preview"} mode */
 function setEditBodyMode(mode) {
   const edit = mode === "edit";
@@ -1461,10 +1527,7 @@ function setEditBodyMode(mode) {
     },
   );
   if (!edit) {
-    editBodyPreview.replaceChildren();
-    const pre = document.createElement("pre");
-    pre.textContent = editBody.value;
-    editBodyPreview.appendChild(pre);
+    editBodyPreview.innerHTML = renderWikiPreview(editBody.value);
   }
 }
 
@@ -1739,10 +1802,9 @@ function setCreateBodyMode(mode) {
     },
   );
   if (!edit) {
-    createBodyPreview.replaceChildren();
-    const pre = document.createElement("pre");
-    pre.textContent = createBody.value;
-    createBodyPreview.appendChild(pre);
+    createBodyPreview.innerHTML = renderWikiPreview(
+      createBody.value,
+    );
   }
 }
 

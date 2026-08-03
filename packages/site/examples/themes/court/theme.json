@@ -1,0 +1,10 @@
+{
+  "id": "court",
+  "label": "Court of Miracles",
+  "version": "1.0.0",
+  "description": "Cream and gold Court brand — reference FE theme package.",
+  "css": "site.css",
+  "bannerImage": "imgs/header.png",
+  "title": "Court of Miracles",
+  "plainBg": false
+}

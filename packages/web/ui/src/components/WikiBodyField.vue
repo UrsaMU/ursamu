@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { useLiveStore } from "@/stores/live";
+import {
+  renderWikiMarkdown,
+  type WikiTitleIndex,
+} from "@/utils/wikiMarkdown";
 
 const body = defineModel<string>({ required: true });
 
@@ -12,9 +18,20 @@ defineProps<{
 const emit = defineEmits<{ change: [] }>();
 const mode = ref<"edit" | "preview">("edit");
 
-watch(body, () => {
-  /* parent dirty tracking via @input */
+const live = useLiveStore();
+const { pages } = storeToRefs(live);
+
+const wikiIndex = computed((): WikiTitleIndex => {
+  const idx: WikiTitleIndex = {};
+  for (const p of pages.value) {
+    if (p.path) idx[String(p.path)] = String(p.title || p.path);
+  }
+  return idx;
 });
+
+const previewHtml = computed(() =>
+  renderWikiMarkdown(body.value || "", wikiIndex.value)
+);
 </script>
 
 <template>
@@ -53,12 +70,12 @@ watch(body, () => {
       :disabled="disabled"
       @input="emit('change')"
     />
+    <!-- FE-parity markdown (same rules as /site wiki reader) -->
     <div
       v-show="mode === 'preview'"
-      class="preview"
+      class="preview wiki-md-preview"
       aria-live="polite"
-    >
-      <pre>{{ body }}</pre>
-    </div>
+      v-html="previewHtml"
+    />
   </fieldset>
 </template>

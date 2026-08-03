@@ -58,8 +58,14 @@ async function httpFetch<T>(
   init: RequestInit = {},
 ): Promise<ApiResult<T>> {
   const headers = new Headers(init.headers ?? {});
-  if (!headers.has("Content-Type") && init.body) {
+  const isForm = typeof FormData !== "undefined" &&
+    init.body instanceof FormData;
+  // Let the browser set multipart boundary for FormData
+  if (!headers.has("Content-Type") && init.body && !isForm) {
     headers.set("Content-Type", "application/json");
+  }
+  if (isForm && headers.has("Content-Type")) {
+    headers.delete("Content-Type");
   }
   const token = getToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
@@ -110,14 +116,22 @@ async function wsFetch<T>(
 }
 
 /**
- * Staff API call. Login is HTTP; everything else prefers WebSocket.
+ * Staff API call. Login + multipart uploads use HTTP;
+ * everything else prefers WebSocket.
  */
 export async function api<T = unknown>(
   path: string,
   init: RequestInit = {},
 ): Promise<ApiResult<T>> {
   const method = (init.method ?? "GET").toUpperCase();
-  if (path === "/api/v1/login" && method === "POST") {
+  const isForm = typeof FormData !== "undefined" &&
+    init.body instanceof FormData;
+  if (
+    (path === "/api/v1/login" && method === "POST") ||
+    isForm ||
+    (path === "/api/v1/admin/site/theme" && method === "POST" &&
+      isForm)
+  ) {
     return httpFetch<T>(path, init);
   }
   const sock = getAdminSocket();

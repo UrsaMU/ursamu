@@ -8,6 +8,7 @@
 import { handleRequest } from "@ursamu/mush";
 import { listStaffNav } from "./staff-nav.ts";
 import { listStaffBadges } from "./staff-badges.ts";
+import { listStaffSideNav } from "./staff-sidenav.ts";
 
 const ALLOWED_PREFIXES = [
   "/api/v1/me",
@@ -19,6 +20,7 @@ const ALLOWED_PREFIXES = [
   "/api/v1/objects",
   "/api/v1/players",
   "/api/v1/admin",
+  "/api/v1/map",
 ];
 
 const ALLOWED_METHODS = new Set([
@@ -118,6 +120,8 @@ export type SnapshotPayload = {
   staffNav: unknown;
   /** Live badge map key → { key, value, title? }. */
   staffBadges: unknown;
+  /** pageId → side-nav groups for plugin pages. */
+  staffSideNav: unknown;
 };
 
 /** Full console snapshot after auth. */
@@ -159,5 +163,6 @@ export async function buildSnapshot(
     boards: Array.isArray(boards.data) ? boards.data : [],
     staffNav: listStaffNav(),
     staffBadges: listStaffBadges(),
+    staffSideNav: listStaffSideNav(),
   };
 }
