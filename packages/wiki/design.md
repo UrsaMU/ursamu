@@ -211,7 +211,7 @@ Disabled: 40% opacity.
 
 - Same surface as code  
 - Border subtle  
-- Preformatted text until real MD render lands  
+- FE-parity markdown (headings, lists, tables, wikilinks)  
 - No card “lift” on hover  
 
 ---

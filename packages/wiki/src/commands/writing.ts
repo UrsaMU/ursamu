@@ -8,7 +8,7 @@ import {
   findPageFile, normalisePath,
 } from "../fs.ts";
 import { isAdmin, isValidReadLock } from "../permissions.ts";
-import { isWebhookUrlSafe, isPrivateIp, buildPinnedFetchUrl } from "../url-safety.ts";
+import { isWebhookUrlSafe, isPrivateIp, buildPinnedFetchUrl, chooseFetchTarget } from "../url-safety.ts";
 import { saveSnapshot, listHistory, readSnapshot, migrateHistory } from "../history.ts";
 import { loadWebhooks, saveWebhooks } from "../webhook.ts";
 import { wikiHooks } from "../hooks.ts";
@@ -234,12 +234,14 @@ async function cmdFetch(u: IUrsamuSDK, arg: string): Promise<void> {
     u.send(`Unsupported file type. Allowed: ${Object.keys(ALLOWED_MEDIA_TYPES).join(", ")}`); return;
   }
 
-  // Pin the fetch to the first resolved IP to prevent DNS rebinding.
-  const pinnedUrl = buildPinnedFetchUrl(fetchUrl, addrs[0]);
+  // Select fetch target (HTTPS retains hostname for TLS; HTTP pins IP with Host header).
+  const { fetchUrl: targetUrl, hostHeader } = chooseFetchTarget(parsedUrl, addrs);
+  const headers: Record<string, string> = {};
+  if (hostHeader) headers["Host"] = hostHeader;
 
   u.send(`Fetching ${fetchUrl} ...`);
   try {
-    const resp = await fetch(pinnedUrl, { signal: AbortSignal.timeout(15_000) });
+    const resp = await fetch(targetUrl, { headers, signal: AbortSignal.timeout(15_000) });
     if (!resp.ok) { u.send(`Fetch failed: ${resp.status} ${resp.statusText}`); return; }
     const contentType  = resp.headers.get("content-type") || "";
     const allowedMimes = Object.values(ALLOWED_MEDIA_TYPES);

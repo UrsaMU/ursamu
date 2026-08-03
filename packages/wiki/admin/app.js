@@ -508,7 +508,7 @@ function searchQuery() {
 
 function filteredPages() {
   const q = searchQuery();
-  let list = applyDashFilters(pages);
+  const list = applyDashFilters(pages);
   if (!q) return list;
   return list.filter(
     (p) =>

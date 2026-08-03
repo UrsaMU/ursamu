@@ -8,7 +8,7 @@
  */
 import { assertEquals } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
-import { isPrivateIp, buildPinnedFetchUrl } from "../src/url-safety.ts";
+import { isPrivateIp, buildPinnedFetchUrl, chooseFetchTarget } from "../src/url-safety.ts";
 
 // ─── H2 — IPv4-mapped IPv6 bypass ────────────────────────────────────────────
 
@@ -66,3 +66,18 @@ describe("buildPinnedFetchUrl — DNS rebinding prevention", () => {
     assertEquals(u.protocol, "https:");
   });
 });
+
+describe("chooseFetchTarget — HTTPS vs HTTP handling", () => {
+  it("retains original hostname for HTTPS so TLS SNI/cert works", () => {
+    const res = chooseFetchTarget(new URL("https://example.com/asset.png"), ["93.184.216.34"]);
+    assertEquals(res.fetchUrl, "https://example.com/asset.png");
+    assertEquals(res.hostHeader, undefined);
+  });
+
+  it("pins IP and sets Host header for HTTP", () => {
+    const res = chooseFetchTarget(new URL("http://example.com/asset.png"), ["93.184.216.34"]);
+    assertEquals(res.fetchUrl, "http://93.184.216.34/asset.png");
+    assertEquals(res.hostHeader, "example.com");
+  });
+});
+

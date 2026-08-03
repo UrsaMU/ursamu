@@ -1,7 +1,6 @@
 /**
- * Soft-register Wiki in the staff console topbar when
- * @ursamu/web is present. Nav is **in-console only**
- * (`route: "wiki"` → /admin/wiki inside AppLayout).
+ * Soft-register Wiki in the staff console when @ursamu/web is present.
+ * In-console only (`route: "wiki"`).
  */
 
 import {
@@ -10,8 +9,7 @@ import {
   WIKI_TITLE,
 } from "./version.ts";
 
-/** In-console vue-router name — lives under AppLayout. */
-const NAV = {
+const PAGE = {
   id: WIKI_PLUGIN_ID,
   label: WIKI_TITLE,
   description: WIKI_DESCRIPTION,
@@ -21,47 +19,57 @@ const NAV = {
   badgeTitle: "Drafts",
 } as const;
 
-type NavApi = {
-  registerStaffNav?: (item: {
-    id: string;
-    label: string;
-    description?: string;
-    href?: string;
-    route?: string;
-    order?: number;
-    badgeKey?: string;
-    badgeTitle?: string;
-  }) => void;
-  unregisterStaffNav?: (id: string) => void;
-};
-
-async function loadWebNav(): Promise<NavApi | null> {
+async function web() {
   try {
-    // Variable specifier — soft peer; must not force JSR dep.
     const spec = "@ursamu/web";
-    const mod = await import(spec) as NavApi;
-    return mod;
+    return await import(spec) as {
+      softRegisterStaffPage?: (
+        p: typeof PAGE,
+      ) => Promise<boolean>;
+      softUnregisterStaffPage?: (id: string) => Promise<boolean>;
+      registerStaffPage?: (p: typeof PAGE) => void;
+      unregisterStaffPage?: (id: string) => void;
+      registerStaffNav?: (p: typeof PAGE) => void;
+      unregisterStaffNav?: (id: string) => void;
+    };
   } catch {
     return null;
   }
 }
 
-/** True when @ursamu/web is loadable (in-console UI available). */
 export async function hasStaffConsole(): Promise<boolean> {
-  const mod = await loadWebNav();
-  return typeof mod?.registerStaffNav === "function";
+  const mod = await web();
+  return !!(
+    mod?.softRegisterStaffPage ||
+    mod?.registerStaffPage ||
+    mod?.registerStaffNav
+  );
 }
 
 export async function registerWikiStaffNav(): Promise<void> {
-  const mod = await loadWebNav();
-  if (typeof mod?.registerStaffNav === "function") {
-    mod.registerStaffNav({ ...NAV });
+  const mod = await web();
+  if (!mod) return;
+  if (typeof mod.softRegisterStaffPage === "function") {
+    await mod.softRegisterStaffPage({ ...PAGE });
+    return;
   }
+  if (typeof mod.registerStaffPage === "function") {
+    mod.registerStaffPage({ ...PAGE });
+    return;
+  }
+  mod.registerStaffNav?.({ ...PAGE });
 }
 
 export async function unregisterWikiStaffNav(): Promise<void> {
-  const mod = await loadWebNav();
-  if (typeof mod?.unregisterStaffNav === "function") {
-    mod.unregisterStaffNav(WIKI_PLUGIN_ID);
+  const mod = await web();
+  if (!mod) return;
+  if (typeof mod.softUnregisterStaffPage === "function") {
+    await mod.softUnregisterStaffPage(WIKI_PLUGIN_ID);
+    return;
   }
+  if (typeof mod.unregisterStaffPage === "function") {
+    mod.unregisterStaffPage(WIKI_PLUGIN_ID);
+    return;
+  }
+  mod.unregisterStaffNav?.(WIKI_PLUGIN_ID);
 }

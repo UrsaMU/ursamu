@@ -34,6 +34,10 @@ export async function wikiRouteHandler(req: Request, userId: string | null): Pro
   // ── /tags ────────────────────────────────────────────────────────────────────
   if (rawPath === "tags" && method === "GET") return await handleTags(userId);
 
+  // ── /featured ────────────────────────────────────────────────────────────────
+  if (rawPath === "featured" && method === "GET")
+    return await handleFeatured(userId);
+
   // ── /<path>/history, /<path>/backlinks, /<path>/watch ────────────────────────
   const subMatch = rawPath.match(/^(.+)\/(history|backlinks|watch)$/);
   if (subMatch) {
@@ -115,6 +119,7 @@ async function handleList(userId: string | null): Promise<Response> {
       title: (meta.title as string) || urlPath,
       type: "page",
       draft: meta.draft === true,
+      featured: meta.featured === true,
       author: typeof meta.author === "string" ? meta.author : "",
       date: typeof meta.date === "string" ? meta.date : "",
       readLock: typeof meta.readLock === "string"
@@ -275,6 +280,22 @@ async function handleDelete(wikiPath: string, guarded: string, userId: string | 
     } catch { /* try next */ }
   }
   return json({ error: "Not found" }, 404);
+}
+
+async function handleFeatured(
+  userId: string | null,
+): Promise<Response> {
+  for await (
+    const { urlPath, absPath } of walkWiki(resolve(WIKI_DIR))
+  ) {
+    const page = await readPageFile(absPath);
+    if (!page) continue;
+    if (page.meta.featured !== true) continue;
+    if (page.meta.draft === true) continue;
+    if (!(await canReadPageRest(userId, page.meta))) continue;
+    return json({ path: urlPath, ...page.meta, body: page.body });
+  }
+  return json({ error: "No featured page" }, 404);
 }
 
 async function handleHistory(wikiPath: string, method: string, userId: string | null): Promise<Response> {
