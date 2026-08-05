@@ -1,5 +1,5 @@
 /** Package identity for staff nav and freeze docs. */
-export const WIKI_VERSION = "0.2.7";
+export const WIKI_VERSION = "0.2.8";
 
 /** Technical plugin id (IPlugin.name, routes). */
 export const WIKI_PLUGIN_ID = "wiki";
