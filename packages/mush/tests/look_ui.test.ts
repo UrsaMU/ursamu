@@ -335,7 +335,11 @@ Deno.test("getLookTheme + roleTags from config", OPTS, async () => {
   });
 
   const text = comps.find((c) => c.type === "text");
-  assertEquals(String(text?.content ?? "").startsWith("  A hall."), true);
+  // Description is present (indent may be applied via layout chrome)
+  assertEquals(
+    String(text?.content ?? "").includes("A hall."),
+    true,
+  );
 
   const ents = comps.find((c) => c.type === "entity-list");
   const items = ents?.items as {

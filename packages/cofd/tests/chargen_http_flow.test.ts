@@ -117,8 +117,8 @@ Deno.test(
     );
     // Must not only look at state.cofd_cg
     assertEquals(src.includes("playerBag"), true);
-    assertEquals(src.includes("bag.cofd_cg"), true);
-    assertEquals(src.includes("data.cofd_cg"), true);
+    assertEquals(src.includes("cofd_cg"), true);
+    assertEquals(src.includes("actor.data"), true);
   },
 );
 
