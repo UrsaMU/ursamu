@@ -101,9 +101,9 @@ addCmd({
   category: "Building",
   help: `@image <object>=<url|clear>  — Set or clear a local image.
 
-Fetches the URL (PNG/JPEG/GIF/WebP, max 2 MB), stores it on the
-server, and shows it on web look. Works for rooms, things, and
-players. Clear with =clear or empty value.
+Fetches the URL (PNG/JPEG/GIF/WebP). Upload max 8 MB; images
+over 2 MB are downsampled before save. Stored for web look on
+rooms, things, and players. Clear with =clear or empty value.
 
 Examples:
   @image here=https://example.com/room.png

@@ -5,8 +5,8 @@ import { join, resolve } from "@std/path";
 /** Root directory for wiki content. Relative to server CWD. */
 export const WIKI_DIR = "./wiki";
 
-/** Maximum size for uploaded static assets. */
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
+/** Hard cap on upload/fetch before downsample. */
+export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8 MB
 
 /** Allowed static asset extensions → MIME types. */
 export const ALLOWED_MEDIA_TYPES: Record<string, string> = {

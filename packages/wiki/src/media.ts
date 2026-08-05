@@ -22,8 +22,13 @@ import {
   isPrivateIp,
   chooseFetchTarget,
 } from "./url-safety.ts";
+import {
+  downsampleIfNeeded,
+  TARGET_SAVE_BYTES,
+} from "./downsample.ts";
 
 export const ASSETS_DIR = "_assets";
+export { TARGET_SAVE_BYTES };
 
 /** Raster + web-friendly types for article images. */
 export const IMAGE_EXTS = new Set([
@@ -205,12 +210,21 @@ export async function listPageMedia(
   return out;
 }
 
+/** Raster types we can downsample (not SVG). */
+const DOWNSAMPLE_EXTS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+]);
+
 export async function savePageMedia(
   pagePath: string,
   name: string,
   data: Uint8Array,
 ): Promise<MediaItem | { error: string; status: number }> {
-  const safe = safeAssetName(name);
+  let safe = safeAssetName(name);
   if (!safe) {
     return {
       error:
@@ -223,22 +237,54 @@ export async function savePageMedia(
     return { error: "Empty file", status: 400 };
   }
   if (data.length > MAX_UPLOAD_BYTES) {
-    return { error: "File too large (max 10 MB)", status: 413 };
+    return {
+      error:
+        "File too large (max 8 MB; over 2 MB is " +
+        "downsampled on save)",
+      status: 413,
+    };
   }
   if (!(await pageExists(pagePath))) {
     return { error: "Page not found", status: 404 };
   }
+
+  let bytes = data;
+  const dot = safe.lastIndexOf(".");
+  const ext = dot >= 0 ? safe.slice(dot).toLowerCase() : "";
+  if (DOWNSAMPLE_EXTS.has(ext) && bytes.length > TARGET_SAVE_BYTES) {
+    const prepared = await downsampleIfNeeded(
+      bytes,
+      ext.slice(1),
+    );
+    if (!prepared.ok) {
+      return { error: prepared.error, status: 413 };
+    }
+    bytes = prepared.bytes;
+    const newExt = `.${prepared.ext}`;
+    if (newExt !== ext) {
+      const base = safe.slice(0, dot);
+      const renamed = safeAssetName(`${base}${newExt}`);
+      if (!renamed) {
+        return {
+          error: "Could not rename downsampled image",
+          status: 500,
+        };
+      }
+      safe = renamed;
+    }
+  }
+
   const rel = assetRelPath(pagePath, safe);
   const abs = safePath(rel);
   if (!abs) return { error: "Invalid path", status: 400 };
   await ensureDir(resolve(join(abs, "..")));
-  await Deno.writeFile(abs, data);
+  await Deno.writeFile(abs, bytes);
   const type = mimeForPath(safe) ?? "application/octet-stream";
   return {
     name: safe,
     path: rel,
     url: publicAssetUrl(pagePath, safe),
-    size: data.length,
+    size: bytes.length,
     type,
   };
 }
@@ -342,7 +388,12 @@ export async function importRemoteMedia(
 
   const data = new Uint8Array(await resp.arrayBuffer());
   if (data.length > MAX_UPLOAD_BYTES) {
-    return { error: "File too large (max 10 MB)", status: 413 };
+    return {
+      error:
+        "File too large (max 8 MB; over 2 MB is " +
+        "downsampled on save)",
+      status: 413,
+    };
   }
 
   let name = preferredName

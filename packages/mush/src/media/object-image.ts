@@ -15,10 +15,16 @@ import {
   MIME_TO_EXT,
 } from "../verbs/avatar-fetch.ts";
 import type { IUrsamuSDK } from "../commands/types.ts";
+import {
+  downsampleIfNeeded,
+  TARGET_SAVE_BYTES,
+} from "./downsample.ts";
+
+export { TARGET_SAVE_BYTES } from "./downsample.ts";
 
 export const IMAGES_DIR = "data/images";
 export const IMAGES_PUBLIC = "/images";
-/** Room banners are often large; 8 MB still SSRF/DoS-safe. */
+/** Hard cap on upload/fetch before downsample. */
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 
 const EXT_RE = /^(png|jpe?g|gif|webp)$/i;
@@ -113,7 +119,9 @@ export function validateImageBytes(
   if (bytes.length > MAX_IMAGE_BYTES) {
     return {
       ok: false,
-      error: "Image must be 8 MB or smaller.",
+      error:
+        "Image must be 8 MB or smaller " +
+        "(over 2 MB is downsampled on save).",
     };
   }
   for (const m of MAGIC) {
@@ -273,8 +281,26 @@ export async function importImageFromUrl(
     };
   }
 
-  const urlOut = await writeObjectImage(id, result.bytes, result.ext);
-  return { ok: true, url: urlOut, ext: result.ext };
+  return await storePreparedImage(id, result.bytes, result.ext);
+}
+
+/** Validate size already done; downsample if > 2 MB, write. */
+async function storePreparedImage(
+  id: string | number,
+  bytes: Uint8Array,
+  ext: string,
+): Promise<
+  | { ok: true; url: string; ext: string }
+  | { ok: false; error: string }
+> {
+  const prepared = await downsampleIfNeeded(bytes, ext);
+  if (!prepared.ok) return prepared;
+  const url = await writeObjectImage(
+    id,
+    prepared.bytes,
+    prepared.ext,
+  );
+  return { ok: true, url, ext: prepared.ext };
 }
 
 /** Store uploaded bytes. */
@@ -288,8 +314,7 @@ export async function importImageFromBytes(
 > {
   const v = validateImageBytes(bytes, mimeHint);
   if (!v.ok) return v;
-  const url = await writeObjectImage(id, bytes, v.ext);
-  return { ok: true, url, ext: v.ext };
+  return await storePreparedImage(id, bytes, v.ext);
 }
 
 /**
