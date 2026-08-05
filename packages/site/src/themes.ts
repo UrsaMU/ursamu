@@ -136,7 +136,7 @@ export function installedThemesRoot(cwd: string = Deno.cwd()): string {
 }
 
 function safeRelPath(name: string): string | null {
-  let n = name.replace(/\\/g, "/").replace(/^\/+/, "");
+  const n = name.replace(/\\/g, "/").replace(/^\/+/, "");
   if (!n || n.includes("\0")) return null;
   if (n.endsWith("/")) return null; // directory entry
   if (n.split("/").some((p) => p === ".." || p === "." || !p)) {

@@ -271,8 +271,9 @@ function entryFromFile(
     content: fm.content,
     source: "file",
     tags,
-    hidden: hidden || undefined,
-    staffOnly: staffOnly || undefined,
+    // Always boolean so callers can assert === false / === true
+    hidden: Boolean(hidden),
+    staffOnly: Boolean(staffOnly) || undefined,
   };
 }
 

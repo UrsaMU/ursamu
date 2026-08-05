@@ -56,7 +56,7 @@ function normalizePage(item: StaffPage): StaffPage | null {
   let kindRoute = route;
   let kindEmbed = embed;
   let kindHref = href;
-  let kindModule = mod;
+  const kindModule = mod;
   if (kindRoute && !kindModule) {
     // host route only
     kindEmbed = undefined;

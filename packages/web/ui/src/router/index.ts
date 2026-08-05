@@ -32,9 +32,8 @@ const router = createRouter({
         {
           path: "play",
           redirect: () => {
-            if (typeof window !== "undefined") {
-              window.location.assign("/play");
-            }
+            const loc = (globalThis as { location?: Location }).location;
+            if (loc?.assign) loc.assign("/play");
             return { name: "dashboard" };
           },
         },

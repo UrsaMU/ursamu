@@ -37,9 +37,12 @@ Deno.test("registerStaffSideNav: stores groups", OPTS, () => {
   });
   const reg = getStaffSideNav("mytool");
   assertEquals(reg?.groups.length, 1);
-  assertEquals(reg?.groups[0]!.items.length, 2);
+  const g0 = reg?.groups[0];
+  assertEquals(g0?.items.length, 2);
+  const first = g0?.items[0];
+  assertEquals(first?.query?.tab, "open");
   assertEquals(
-    listStaffSideNav().mytool?.groups[0]!.items[0]!.query?.tab,
+    listStaffSideNav().mytool?.groups[0]?.items[0]?.query?.tab,
     "open",
   );
   unregisterStaffSideNav("mytool");

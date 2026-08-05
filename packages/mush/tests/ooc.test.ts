@@ -74,7 +74,6 @@ function mockU(opts: {
     id: "p1",
     name: "Tester",
     flags: new Set(["player", "connected"]),
-    state: st,
     location: "r1",
     contents: [],
     ...opts.me,
