@@ -12,7 +12,10 @@ gets a typed SDK object `u` for world interaction.
 
 Looking for classic MUSH softcode (`[func()]`, `%N`,
 `&ATTR/softcode`)? See the
-[Softcode Guide](/guides/softcoding/) instead.
+[Softcode Guide](/guides/softcoding/).
+
+TypeScript stored on objects (not files)? See
+[Attribute Scripts](/guides/attribute-scripts/).
 
 ## How It Works
 

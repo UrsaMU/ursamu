@@ -1,431 +1,554 @@
 ---
 layout: layout.vto
 title: Softcode Guide
-description: TinyMUX softcode and attribute scripts — &ATTR, @trigger, u.eval, $-patterns, and the softcode evaluator.
+description: Pure TinyMUX softcode on UrsaMU — expressions, substitutions, action commands, $-patterns, UDFs, and worked examples.
 ---
 
 # Softcode Guide
 
-UrsaMU supports two ways to put behavior on objects:
+This guide is **only** about TinyMUX-style softcode: the
+expression language builders use in-game with `&ATTR`,
+`think`, `@trigger`, `$commands`, and `^monitors`.
 
-1. **TinyMUX softcode** — classic MUSH expressions
-   (`[add(1,2)]`, `%N`, `@switch`, `$greet *`) via the
-   softcode evaluator.
-2. **TypeScript attributes** — full sandbox scripts stored
-   on objects (same SDK as `system/scripts/`).
-
-Both live as **attributes** on rooms, players, things, and
-exits. Builders can change them in-game with no restart.
-
-For file-based TypeScript commands, see the
-[Scripting Guide](/guides/scripting/). For the full function
-list, see [MUSH Compatibility](/mush_compatibility/).
+It does **not** cover TypeScript. For TS attributes and
+sandbox scripts, see
+[Attribute Scripts](/guides/attribute-scripts/) and the
+[Scripting Guide](/guides/scripting/). For the full
+function inventory and parity notes, see
+[MUSH Compatibility](/mush_compatibility/).
 
 ---
 
-## What is Soft-Coding?
+## What softcode is
 
-Every object in UrsaMU (rooms, players, things, exits) has a `data.attributes`
-array. Each entry is an `IAttribute`:
+Softcode is a string expression language. You store it on
+object attributes. When the engine evaluates it, it expands
+substitutions (`%N`, `%#`, …), runs functions inside
+`[brackets]`, and can fire action commands (`@pemit`,
+`@switch`, …).
 
-```typescript
-interface IAttribute {
-  name: string;    // e.g. "ONENTER"
-  value: string;   // the script (TypeScript/JS) or plain text
-  setter: string;  // dbref of whoever set it
-  type?: string;
-  hidden?: boolean;
-}
+```
+think [add(2,3)]
+→ 5
+
+think [name(me)] greets [name(%#)]
+→ Alice greets Alice
 ```
 
-An attribute's `value` is a full sandboxed script — the same format as files in
-`system/scripts/`. When something fires the attribute (a hook, `@trigger`, or
-`u.trigger()`), UrsaMU runs the script in a Web Worker with a fresh `u` object.
+UrsaMU’s evaluator targets **TinyMUX 2.x** behavior (~250
+stdlib functions, standard subs, action queue commands).
 
-**Why use soft-coding instead of a system script?**
+### Softcode vs TypeScript attributes
 
-- Changes take effect immediately — no restart, no redeploy.
-- Any builder with edit permission can customize objects they own.
-- Behavior stays attached to the object, so copying or moving the object brings
-  its behavior with it.
-- Inheritance: if an attribute is not found on the object, UrsaMU walks up the
-  `data.parent` chain, allowing shared behavior from parent objects.
+| | Softcode | TypeScript attribute |
+|--|----------|----------------------|
+| Opt-in | `&ATTR/softcode` or auto-detect | default when not softcode |
+| Language | MUX expressions | TS/JS in a Web Worker |
+| Test with | `think [expr]` | write + `@trigger` |
+| Timeout | 100ms wall clock | sandbox limits |
+
 ---
 
-## Setting Attributes In-Game
+## Your first softcode
 
-Use the `&` command:
-
-```
-&<ATTR-NAME> <object>=<value>
-```
-
-`<object>` accepts anything the `target` utility understands: `me`, `here`, an
-object name, or a dbref (`#42`). `<ATTR-NAME>` is case-insensitive and stored
-as supplied (the lookup is case-insensitive).
+### 1. Live eval with `think`
 
 ```
-> &ONENTER here=u.send("The door creaks as you enter.");
-Game> Lobby's attribute ONENTER set.
-
-> &SHORT-DESC me=A tall woman in a grey cloak.
-Game> Alice's attribute SHORT-DESC set.
+think [add(2,3)]
+think [strlen(hello)]
+think [ifelse(gt(5,2),yes,no)]
+think [center(Hi,20,=)]
 ```
 
-**Clear an attribute** by omitting the value:
+Only you see the result. Use this as your REPL.
+
+### 2. Store softcode on an attribute
 
 ```
-> &ONENTER here=
-Game> Lobby's attribute ONENTER removed.
+&GREET/softcode me=Hello, [name(%#)]!
+@trigger me/GREET
 ```
 
-Constraints:
-- You must be able to **edit** the target (be its owner, or have the `admin`,
-  `wizard`, or `superuser` flag).
-- Attribute names are arbitrary — there is no enforced schema. Conventions are
-  listed in [Common Attribute Names](#common-attribute-names).
+The `/softcode` switch marks the attribute so every future
+eval uses the softcode engine (not TypeScript).
 
-### Alternative: `@set` attribute syntax
+### Auto-detect
 
-`@set` also sets soft attributes using the `target/ATTR=value` form:
+If you omit `/softcode`, UrsaMU still treats the value as
+softcode when it clearly looks like MUX code:
+
+- value starts with `[` or `@`, or
+- contains MUX substitution / function syntax and no
+  TypeScript keywords
+
+Prefer an explicit `/softcode` on anything you care about.
 
 ```
-@set <object>/<ATTR>=<value>    -- set attribute
-@set <object>/<ATTR>=           -- clear attribute
+&GREET/softcode me=[name(%#)] waves.
 ```
 
-This is equivalent to `&ATTR obj=value` for plain data storage (both write
-to `data.ATTR`). Use whichever feels natural; `&` is the traditional MUSH
-syntax, while `@set obj/ATTR=value` is more explicit.
-
-> **Note:** `@set obj=<FLAG>` (without the `/`) sets or removes a *flag*, not
-> an attribute — see the [Admin Guide](/guides/admin-guide#user-roles-and-permissions).
 ---
 
-## Setting Attributes via Scripts
+## Expression model
 
-From inside any script you can read and write the raw `data.attributes` array
-directly using `u.db.modify`. Always spread the existing array to avoid
-clobbering other attributes.
+### Function calls
 
-### Add or replace a single attribute
+Functions run inside square brackets:
 
-```typescript
-export default async (u) => {
-  const me = u.me;
-  const existing = (me.state.attributes || []) as Array<{ name: string; value: string; setter: string }>;
-
-  // Remove any existing entry with the same name (case-insensitive)
-  const filtered = existing.filter(a => a.name.toLowerCase() !== "onenter");
-
-  await u.db.modify(me.id, "$set", {
-    data: {
-      ...me.state,
-      attributes: [
-        ...filtered,
-        { name: "ONENTER", value: `u.send("Welcome back!");`, setter: "#" + me.id },
-      ],
-    },
-  });
-  u.send("ONENTER set on yourself.");
-};
+```
+[func(arg1,arg2,...)]
 ```
 
-> **Important:** `u.db.modify` with `"$set"` and a `data:` key replaces the
-> whole data block. Always spread `me.state` (or the target's state) so you
-> don't wipe other fields. See the [Scripting Guide](/guides/scripting) for
-> the full `u.db.modify` pattern.
+Nest freely:
 
-### Read the raw array
+```
+[add(mul(2,3),4)]
+→ 10
 
-```typescript
-const attrs = (u.me.state.attributes || []) as Array<{ name: string; value: string }>;
-const found = attrs.find(a => a.name.toLowerCase() === "short-desc");
-if (found) u.send(`Your short-desc: ${found.value}`);
+[ifelse(eq(words(a b),2),ok,bad)]
+→ ok
 ```
 
-For most use cases, prefer `u.attr.get()` (see below) — it handles
-case-insensitivity and parent inheritance automatically.
+### Literal text and brackets
+
+Outside `[…]`, text is returned as-is (after substitutions).
+
+`[` and `]` are **function delimiters**. To emit literal
+brackets in output:
+
+```
+think [chr(91)]hello[chr(93)]
+→ [hello]
+
+think [lit([not a function])]
+→ [not a function]
+```
+
+Or use the demo’s escaped form where supported:
+`%[ … %]` for non-eval bracket text in some contexts.
+
+`@@` is a softcode comment (no output).
+
+```
+@@ this is ignored
+&NOTE me=@@ builder note only
+```
+
+### Truth values
+
+Softcode is stringly-typed. Empty string and `0` are false;
+anything else is true.
+
+```
+[t(hello)]   → 1
+[t(0)]       → 0
+[not(0)]     → 1
+[and(1,1)]   → 1
+[or(0,1)]    → 1
+```
+
 ---
 
-## Reading Attributes
+## Substitutions
 
-### `u.attr.get(id, name): Promise<string | null>`
+Expanded before / during evaluation.
 
-Reads the value of a named attribute from an object. Returns `null` if not set.
-The name is **case-insensitive**. If the attribute is not on the object itself,
-UrsaMU walks up the `data.parent` chain.
+| Sub | Meaning |
+|-----|---------|
+| `%#` | Enactor dbref (`#42`) |
+| `%!` | Executor dbref (object running the code) |
+| `%@` | Caller dbref, or `#-1` |
+| `%N` / `%n` | Enactor name / lowercase name |
+| `%L` | Enactor location dbref |
+| `%0`–`%9` | Positional args (from `$`/`^`/`u()`/`@trigger`) |
+| `%+` | Number of args (where supported) |
+| `%q0`–`%qz` | Register values (see Registers) |
+| `%VA`–`%VZ` | Executor attrs `VA`…`VZ` |
+| `%s` `%S` `%o` `%O` `%p` `%P` `%a` `%A` | Pronouns from enactor `SEX` |
+| `%r` | Newline |
+| `%t` | Tab |
+| `%b` | Space |
+| `%%` | Literal `%` |
+| `##` | Current `@dolist` / `iter()` item |
+| `#@` | Current `@dolist` / `iter()` index |
+| `%ch` `%cr` `%cg` … `%cn` | ANSI color / bold / reset |
+| `%c<#RRGGBB>` | Truecolor (where client supports it) |
 
-```typescript
-export default async (u) => {
-  const bio = await u.attr.get(u.me.id, "FINGER-INFO");
-  if (bio) {
-    u.send(bio);
-  } else {
-    u.send("No bio set. Use: &finger-info me=<text>");
-  }
-};
+Pronouns read the enactor’s `SEX` attribute (`male` /
+`female` / `plural` / default neutral).
+
+```
+think %N (%#) is in %L
+think %ch%crRed%cn then normal
 ```
 
-```typescript
-// Read from any object by id
-const sd = await u.attr.get(someObjectId, "SHORT-DESC");
-```
 ---
 
-## Running Attributes
+## Action commands
 
-### `u.trigger(id, attr, args?): Promise<void>`
-
-Runs the attribute as a script. The script executes in its own sandbox with the
-targeted object as context. The actor who called `u.trigger` does **not** become
-the script's `u.me` — the object itself does. Returns when the script completes.
-
-```typescript
-// Fire the USE attribute on a chest the actor is looking at
-await u.trigger(chestId, "USE", [u.me.id]);
-```
-
-Args are available in the triggered script as `u.cmd.args`.
-
-### `u.eval(id, attr, args?): Promise<string>`
-
-Like `u.trigger`, but captures and returns whatever the script sends as a
-string. Useful for computed values.
-
-```typescript
-const formula = await u.eval(u.me.id, "SCORE-FORMULA", ["str"]);
-u.send(`Your STR score: ${formula}`);
-```
-
-If the attribute is not found, `u.eval` returns `""`.
-
-### `@trigger <object>/<attr>[=<args>]`
-
-The in-game command version of `u.trigger`. Fires an attribute on any object the
-actor can see or edit.
-
-```
-> @trigger chest/USE
-Triggered script on chest/USE.
-
-> @trigger here/ONENTER=Alice
-Triggered script on here/ONENTER.
-```
-
-Arguments after `=` are split on whitespace and available as `u.cmd.args` in
-the triggered script.
-
-### Automatic hooks
-
-Some attributes are fired automatically by the engine — no `@trigger` needed:
-
-| Attribute | Fired on | Fired by |
-|-----------|----------|---------|
-| `ACONNECT` | player or master room | Player connects |
-| `ADISCONNECT` | player or master room | Player disconnects |
-
-`ACONNECT` and `ADISCONNECT` fire on the connecting player's own object first,
-then on the master room (configured as `game.masterRoom`). The script runs with
-the connected player as `u.me`.
----
-
-## Common Attribute Names
-
-These are conventions — UrsaMU does not enforce them (except `ACONNECT` and
-`ADISCONNECT`, which are fired by the hooks system). Use them consistently so
-other builders know what to expect.
-
-| Attribute | Set on | Purpose |
-|-----------|--------|---------|
-| `ACONNECT` | player, master room | Script to run when the player connects |
-| `ADISCONNECT` | player, master room | Script to run when the player disconnects |
-| `ONENTER` | room | Fire when any player enters the room |
-| `ONEXIT` | room | Fire when any player leaves the room |
-| `USE` | thing | Fire when a player uses/activates the object |
-| `OPEN` | container/exit | Fire when the object is opened |
-| `CLOSE` | container/exit | Fire when the object is closed |
-| `DROP` | thing | Fire when the object is dropped |
-| `GET` | thing | Fire when the object is picked up |
-| `SHORT-DESC` | player, thing | One-line description for room display and +finger |
-| `FINGER-INFO` | player | Free-form bio shown in +finger |
-| `SCORE-EXTRA` | player | Extra stat block appended to score output |
-| `ODESC` | thing | Message broadcast to others when the thing is examined |
-| `SCRIPT` | any | Generic script slot — fired by the command parser when an object handles a command |
-
-> `ONENTER`, `ONEXIT`, `USE`, `OPEN`, `CLOSE`, `DROP`, and `GET` are
-> **not** fired automatically by the core engine. They require either
-> `@trigger` from a system script, or your own plugin/script to call
-> `u.trigger()` at the right moment.
----
-
-## Scripting Inside Attributes
-
-Attribute values are full JavaScript/TypeScript scripts. They run inside the
-same Web Worker sandbox as any other UrsaMU script with the full `u` API
-available.
-
-### Module format (recommended)
-
-Export a default async function. This is the same format used in `system/scripts/`.
-
-```typescript
-export default async (u) => {
-  u.send("Hello from an attribute!");
-};
-```
-
-### Legacy block format
-
-If the value does not contain an `export` statement, UrsaMU runs it as a block
-(the code is executed directly, with `u` in scope).
-
-```typescript
-u.send("Hello from a legacy block!");
-```
-
-Both formats have access to the full `u` API.
-
-### The `u` object in triggered attributes
-
-When an attribute is fired via `u.trigger(id, attr)`:
-
-- `u.me` — the object the attribute is set on (not the actor who called
-  `u.trigger`)
-- `u.here` — the room that object is in
-- `u.cmd.name` — the attribute name in lowercase
-- `u.cmd.args` — the args array passed to `u.trigger` / `@trigger`
-
-When an attribute is fired via `u.eval(id, attr, args)`, the same rules apply
-and the script's output (via `u.send`) is captured as the return value.
----
-
-## Practical Examples
-
-### Room that greets players on entry
-
-Set this on a room. Call `u.trigger(room.id, "ONENTER", [actorId])` from a
-movement hook or a custom `look` script:
-
-```typescript
-// &ONENTER The Tavern=#...
-export default async (u) => {
-  const actorId = u.cmd.args[0];
-  const actor = actorId ? (await u.db.search(actorId))[0] : null;
-  const name = actor ? String(actor.state.moniker || actor.state.name || "Someone") : "Someone";
-  u.here.broadcast(`${name} pushes open the door and steps inside.`);
-  u.send("The warmth of the fire and the smell of roasting meat greet you.");
-};
-```
-
-### Object that does something when used
-
-```typescript
-// &USE Ancient Lever=#...
-export default async (u) => {
-  const actorId = u.cmd.args[0];
-  u.here.broadcast("The lever grinds against stone with a horrible screech.");
-  await u.teleport("secret-door-id", "open-room-id");
-  u.send("You hear a door grinding open somewhere nearby.");
-};
-```
-
-### Greeting script on player connect
-
-```typescript
-// &ACONNECT me=#...  (on a player)
-export default async (u) => {
-  const unread = (await u.mail.read({ to: { $in: [`#${u.me.id}`] } }))
-    .filter(m => !m.data?.read).length;
-  if (unread > 0) u.send(`You have ${unread} unread message${unread === 1 ? "" : "s"}.`);
-};
-```
-
-### NPC that responds to being examined
-
-```typescript
-// &ODESC Town Guard=#...  (plain text — broadcast when examined)
-// "snaps to attention and eyes you warily."
-// The look script broadcasts: "<actor> snaps to attention and eyes you warily."
-```
-
-### Computed score field
-
-```typescript
-// &SCORE-FORMULA me=#...
-export default (u) => {
-  const str = Number(u.me.state.str) || 0;
-  const bonus = Math.floor((str - 10) / 2);
-  u.send(`${str} (${bonus >= 0 ? "+" : ""}${bonus})`);
-};
-```
-
-Then from your score script or a `+sheet` command:
-
-```typescript
-const strDisplay = await u.eval(u.me.id, "SCORE-FORMULA");
-u.send(`STR: ${strDisplay}`);
-```
-
-### Per-object data storage
-
-Attributes don't have to hold scripts — they can hold plain data strings that
-other scripts read with `u.attr.get`:
-
-```typescript
-// &PRICE Healing Potion=#...  (value: "50")
-// &USES Healing Potion=#...   (value: "3")
-
-export default async (u) => {
-  const price = await u.attr.get(u.target!.id, "PRICE") || "0";
-  const uses  = await u.attr.get(u.target!.id, "USES")  || "1";
-  u.send(`Price: ${price} credits  (${uses} use${uses === "1" ? "" : "s"} remaining)`);
-};
-```
----
-
-## Softcode Evaluator (TinyMUX Compatible)
-
-As of v2.0.0, UrsaMU ships a full TinyMUX 2.x-compatible softcode evaluator. Any attribute flagged `/softcode` is run through the evaluator rather than executed as TypeScript.
-
-### Enabling softcode on an attribute
-
-```
-&GREET/softcode me=[name(%#)] greets you!
-```
-
-The `/softcode` switch tells the engine to evaluate the value as MUSH softcode rather than TypeScript. It persists on the attribute — you only need to specify it when first setting the attribute.
-
-Attributes that contain MUX substitution syntax (`%N`, `[func()]`) and no TypeScript keywords are also auto-detected as softcode.
-
-### Action commands
+These run as commands (often from attributes or queues),
+not as pure expression returns.
 
 | Command | Purpose |
 |---------|---------|
-| `@switch <expr>=<case>,<action>[,<default>]` | Branch on value |
-| `@dolist <list>=<action>` | Iterate over space-delimited list (`##` = item, `#@` = index) |
-| `@if <expr>=<true>[,<false>]` | Conditional execution |
-| `@while <expr>=<action>` | Loop while true (100ms wall-clock timeout enforced) |
-| `@break` | Exit the current `@dolist` or `@while` |
-| `@trigger <obj>/<attr>[=<args>]` | Fire an attribute as a trigger |
+| `@switch <expr>=<case>,<action>[,…]` | Branch on value / wildcards |
+| `@if <expr>=<true>[,<false>]` | Conditional action |
+| `@dolist <list>=<action>` | Iterate; `##` item, `#@` index |
+| `@while <expr>=<action>` | Loop while true (timeout enforced) |
+| `@break` | Leave current `@dolist` / `@while` |
+| `@trigger <obj>/<attr>[=<args>]` | Fire an attribute |
 | `@wait <seconds>=<action>` | Delay an action |
+| `@ps` | List pending `@wait` jobs |
+| `@drain <obj>` | Cancel waits on an object |
+| `@notify <obj>[/<sem>][=<n>]` | Signal a semaphore |
+| `@pemit <player>=<msg>` | Private message |
+| `@remit <room>=<msg>` | Message everyone in a room |
+| `@emit <msg>` | Message current room |
+| `@function <name>=…` | Global UDF (see below) |
 
-### $-pattern dispatch
+### `@switch` patterns
 
 ```
-&CMD_GREET object=$greet *:@pemit %#=Hello, %0!
+@switch [get(me/COLOR)]=red,@pemit %#=Warm,blue,@pemit %#=Cool,@pemit %#=Other
+@switch [add(2,5)]=<5,small,>5,big,mid
 ```
 
-Attributes beginning with `$` fire when their glob pattern matches a typed command. `%0`–`%9` are capture groups. Objects in the same room as the player, or in the master room, or in the player's zone master are checked.
+Patterns support `*`, `?`, and numeric `<n` / `>n`.
 
-### ^-pattern listeners (monitors)
+### `@dolist`
 
 ```
-&LISTEN_HELLO object=^*hello*:@pemit %#=I heard a hello!
+@dolist one two three=@pemit %#=Item ## (#@)
 ```
 
-Attributes beginning with `^` fire when their pattern matches anything broadcast in the room. The object must have the `MONITOR` flag set.
+### Chaining with `;`
 
-### Softcode function reference
+Multiple actions in one attribute:
 
-See [MUSH Compatibility](../mush_compatibility.md) for the full list of ~250 supported functions, substitutions, and compatibility stubs.
+```
+&BOOT_MSG/softcode me=@pemit %#=Welcome!; @pemit %#=Type +help
+```
+
+---
+
+## Essential functions
+
+Not exhaustive — see
+[MUSH Compatibility](/mush_compatibility/#supported-functions-250-total)
+for the full catalog. Favorites:
+
+### Math
+
+```
+[add(2,3,4)]     [sub(10,3)]    [mul(3,4)]
+[div(10,3)]      [mod(10,3)]    [abs(-7)]
+[max(1,5,3)]     [min(1,5,3)]   [power(2,10)]
+[eq(3,3)]        [gt(5,2)]      [lt(2,5)]
+[rand(100)]      [isnum(42)]
+```
+
+### String
+
+```
+[strlen(hello)]           [upcase(hi)] / [ucstr(hi)]
+[lowcase(HI)] / [lcstr]   [capstr(fOO)]
+[left(abcdef,3)]          [right(abcdef,3)]
+[mid(abcdef,2,3)]         [trim(  z  )]
+[cat(a,b,c)] → a b c      [strcat(a,b,c)] → abc
+[before(a:b,:),]          [after(a:b,:)]
+[edit(a-b-c,-,/)]         [repeat(*,5)]
+[space(3)]                [reverse(abc)]
+[center(Hi,10,=)]         [ljust(Hi,10,.)]  [rjust(Hi,10,.)]
+[ansi(hr,ERROR)]          [stripansi(...)]
+```
+
+### List
+
+```
+[words(a b c)]            [first(a b c)]  [rest(a b c)]
+[last(a b c)]             [extract(a b c,2)]
+[member(a b c,b)]         [lnum(1,5)]
+[sort(b a c)]             [revwords(a b c)]
+[setunion(a b,b c)]       [setinter(a b,b c)]
+[grab(foo bar,b*)]        [match(foo bar,b*)]
+[iter(1 2 3,mul(##,##))]  [parse(...)]  (alias of iter)
+```
+
+### Logic
+
+```
+[if(1,yes)]               [ifelse(0,yes,no)]
+[switch(cat,dog,woof,cat,meow,other)]
+[case(b,a,alpha,b,beta,other)]
+[and(1,1)]  [or(0,1)]  [not(0)]  [xor(1,0)]
+[lit(raw text)]           [null(whatever)]
+```
+
+`if(cond,then)` returns empty when false. Use `ifelse` for
+an else branch. `switch()` is the **function**; `@switch`
+is the **command**.
+
+### Object / world
+
+```
+[name(me)]       [dbref(me)]      [type(me)]
+[flags(me)]      [hasflag(me,wizard)]
+[loc(me)]        [where(me)]      [home(me)]
+[lcon(here)]     [lexits(here)]   [lwho()]
+[pmatch(Alice)]  [nearby(me,obj)]
+[money(me)]      [idle(me)]       [conn(me)]
+[mudname()]      [version()]      [secs()] [time()]
+```
+
+### Attributes from softcode
+
+```
+[get(obj/ATTR)]           [v(ATTR)]          (on executor)
+[default(obj/ATTR,fb)]    [hasattr(obj,ATTR)]
+[lattr(obj,GLOB*)]        [xget(obj,ATTR)]
+```
+
+Set attributes with the usual `&` command (including from
+inside action lists):
+
+```
+&COUNTER/softcode Demo=0
+&COUNTER Demo=[add([get(Demo/COUNTER)],1)]
+```
+
+### User calls
+
+```
+[u(obj/ATTR,arg0,arg1,…)]      call attr; args → %0 %1 …
+[ulocal(obj/ATTR,…)]           like u(), registers restored
+[map(obj/ATTR,list)]           call attr per list word
+[filter(obj/ATTR,list)]        keep words where attr → true
+[fold(obj/ATTR,list,acc)]      reduce
+```
+
+### Output functions
+
+```
+[pemit(%#,Hello)]   [remit(here,Boom)]
+[emit(Hi room)]     [oemit(%#,others see this)]
+[trigger(obj/ATTR,args)]
+```
+
+Prefer `@pemit` / `@emit` as commands in action attributes;
+functions are useful inside expressions.
+
+### Registers
+
+```
+[setq(0,hello)][r(0)]     setq returns empty; r/getq reads
+[setr(1,world)]           set and return value
+[localize([setq(0,x)]…)]  snapshot/restore registers
+```
+
+Also: `%q0` … `%qz` after `setq`.
+
+```
+think [setq(0,10)][setq(1,20)][add(%q0,%q1)]
+→ 30
+```
+
+---
+
+## `$`-commands (input patterns)
+
+Attributes whose values start with `$` register a command
+pattern on that object:
+
+```
+&CMD_GREET/softcode ball=$greet *:@pemit %#=Hello, %0!
+```
+
+When a player types `greet Alice`, matching objects run the
+action. Captures fill `%0`–`%9`.
+
+**Search order:** objects in the same room, master room,
+and the player’s zone master (`@zone`).
+
+```
+&CMD_LOOKIN/softcode box=$look in me:@pemit %#=[get(me/INSIDE-DESC)]
+```
+
+---
+
+## `^`-monitors (listen patterns)
+
+Attributes starting with `^` fire when room text matches.
+The object needs the **MONITOR** flag.
+
+```
+@set listener=MONITOR
+&HEARD/softcode listener=^*hello*:@pemit %#=I heard a hello from %N.
+```
+
+Captures map to `%0`–`%9` like `$` patterns.
+
+---
+
+## User-defined functions
+
+### On an object (`u()`)
+
+```
+&DOUBLE/softcode me=[mul(%0,2)]
+think [u(me/DOUBLE,21)]
+→ 42
+
+&FACT/softcode me=[ifelse(lte(%0,1),1,mul(%0,u(me/FACT,dec(%0))))]
+think [u(me/FACT,5)]
+→ 120
+```
+
+### Global (`@function`)
+
+```
+@function double=[mul(%0,2)]
+think [double(21)]
+→ 42
+
+@function/list
+@function/remove double
+```
+
+Globals are shared; keep names unique and document them.
+
+---
+
+## Format attributes
+
+Display slots can be softcode templates on the object
+(priority over plugin handlers):
+
+`NAMEFORMAT`, `DESCFORMAT`, `CONFORMAT`, `EXITFORMAT`,
+`WHOFORMAT`, `WHOROWFORMAT`, `PSFORMAT`, `PSROWFORMAT`
+
+Plugins may add more uppercase slots. In templates, `%0` is
+the default rendering payload for that slot.
+
+```
+&WHOFORMAT/softcode #0=[center(Who,78,=)]%r%0
+```
+
+---
+
+## Tags (`@tag` / `@ltag`)
+
+Named dbrefs for softcode (Rhost-style):
+
+```
+@tag citygate=here
+think [tag(citygate)]
+think [name(#citygate)]
+
+@ltag home=here
+think [ltag(home)]
+```
+
+`#tagname` works anywhere an object ref is accepted
+(personal `@ltag` shadows global `@tag`).
+
+---
+
+## Worked examples
+
+### Private greeting attribute
+
+```
+&HI/softcode me=@pemit %#=%chHi%cn, %N. You are %# in [name(%L)].
+@trigger me/HI
+```
+
+### Room speech reaction
+
+```
+@create Echo
+@set Echo=MONITOR
+@tel Echo=here
+&LISTEN/softcode Echo=^*said*:@pemit %#=Echo heard %N.
+```
+
+### Simple `$` command object
+
+```
+@create Greeter
+@tel Greeter=here
+&CMD/softcode Greeter=$hello *:@pemit %#=Hello, %0! — from [name(me)]
+```
+
+Type: `hello Bob`
+
+### Queue delay
+
+```
+&LATER/softcode me=@wait 3=@pemit %#=Three seconds later.
+@trigger me/LATER
+```
+
+### Parent inheritance
+
+Softcode attrs resolve up `data.parent` like other
+attributes. Put shared `$` commands or UDFs on a parent
+prototype and `@parent` children to it.
+
+---
+
+## Limits and safety
+
+- Softcode eval has a **100ms** wall-clock timeout.
+- `@while` / long `@dolist` work is capped; prefer finite
+  lists.
+- `sql()`, some terminal probes, etc. are stubs — see
+  [compatibility stubs](/mush_compatibility/#tinymux-compatibility-stubs).
+- Do not put secrets in publicly readable attributes.
+- `think` is private; `@emit` / `@remit` are not.
+
+---
+
+## Installer demo
+
+A full walkthrough object lives in the repo:
+
+[`docs/softcode-demo.mush`](https://github.com/UrsaMU/ursamu/blob/main/docs/softcode-demo.mush)
+
+Paste sections in-game (or load via your preferred
+installer flow), then:
+
+```
+@trigger Demo/DEMO_RUN
+```
+
+Covers subs, strings, math, logic, lists, iter/map/filter,
+objects, registers, UDFs, format helpers, and attr get/set.
+
+---
+
+## Quick reference
+
+```
+think [expr]                     live eval (you only)
+&ATTR/softcode obj=<code>        store softcode
+@trigger obj/ATTR[=args]         run attribute
+$pattern:action                  command on object
+^pattern:action                  room listen (MONITOR)
+[u(obj/ATTR,args)]               call softcode attr
+@function name=[code]            global UDF
+@switch / @if / @dolist / @wait  flow + queue
+@pemit %#=msg                    private output
+```
+
+---
+
+## See also
+
+- [MUSH Compatibility](/mush_compatibility/) — full function
+  tables, stubs, format slots, tags
+- [Command Reference](/guides/commands/) — builder/admin verbs
+- [Lock Expressions](/guides/lock-expressions/) — lockfuncs
+- [Attribute Scripts](/guides/attribute-scripts/) —
+  TypeScript on attributes (not softcode)
+- [Scripting Guide](/guides/scripting/) — file-based TS
+  sandbox commands

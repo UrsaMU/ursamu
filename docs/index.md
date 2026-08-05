@@ -121,7 +121,7 @@ templateEngine: [vto, md]
       <a href="/guides/softcoding/" class="home-stack__link">
         <span class="home-stack__meta">
           <span class="home-stack__label">Softcode</span>
-          <span class="home-stack__desc">TinyMUX attrs, @trigger, functions</span>
+          <span class="home-stack__desc">TinyMUX: think, %, $, @switch, UDFs</span>
         </span>
         <span class="home-stack__path">/guides/softcoding/</span>
       </a>
