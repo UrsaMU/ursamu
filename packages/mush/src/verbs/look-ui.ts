@@ -325,6 +325,29 @@ async function entityItem(
   return item;
 }
 
+/** Resolve a playable image URL for any look target (room/exit/thing). */
+export async function resolveLookMedia(
+  u: IUrsamuSDK,
+  target: IDBObj,
+  alt: string,
+): Promise<UIComponent | null> {
+  const bag = {
+    ...((target as { data?: Record<string, unknown> }).data ?? {}),
+    ...((target.state ?? {}) as Record<string, unknown>),
+  };
+  const fromDisk = await resolveObjectImageUrl(target.id, bag);
+  const fromAttr = await u.attr.get(target.id, "IMAGE");
+  const img = String(
+    fromDisk ||
+      fromAttr ||
+      bag.image ||
+      bag.image_url ||
+      "",
+  ).trim();
+  if (!img || !isPlayableImageUrl(img)) return null;
+  return { type: "media", url: img, alt };
+}
+
 /**
  * Build look components for the web client using theme.look flags.
  */
@@ -340,26 +363,8 @@ export async function buildLookLayout(
     title: ctx.headerTitle,
   });
 
-  const bag = {
-    ...((target as { data?: Record<string, unknown> }).data ?? {}),
-    ...((target.state ?? {}) as Record<string, unknown>),
-  };
-  const fromDisk = await resolveObjectImageUrl(target.id, bag);
-  const fromAttr = await u.attr.get(target.id, "IMAGE");
-  const img = String(
-    fromDisk ||
-      fromAttr ||
-      bag.image ||
-      bag.image_url ||
-      "",
-  ).trim();
-  if (img && isPlayableImageUrl(img)) {
-    components.push({
-      type: "media",
-      url: img,
-      alt: ctx.headerTitle,
-    });
-  }
+  const media = await resolveLookMedia(u, target, ctx.headerTitle);
+  if (media) components.push(media);
 
   components.push({
     type: "text",
@@ -435,7 +440,7 @@ export async function buildLookLayout(
   return components;
 }
 
-/** Non-room look: header + desc + carrying list. */
+/** Non-room look: header + media + desc + carrying list. */
 export async function buildSingleLookLayout(
   ctx: LookUiContext,
 ): Promise<UIComponent[]> {
@@ -443,11 +448,15 @@ export async function buildSingleLookLayout(
   const theme = getLookTheme();
   const components: UIComponent[] = [
     { type: "header", title: ctx.headerTitle },
-    {
-      type: "text",
-      content: webDesc(ctx.description || NO_DESCRIPTION),
-    },
   ];
+
+  const media = await resolveLookMedia(u, target, ctx.headerTitle);
+  if (media) components.push(media);
+
+  components.push({
+    type: "text",
+    content: webDesc(ctx.description || NO_DESCRIPTION),
+  });
 
   if (showContents && target.contents && target.contents.length > 0) {
     const players = target.contents.filter((c) =>

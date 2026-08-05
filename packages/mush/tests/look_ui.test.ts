@@ -4,6 +4,7 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import {
   buildLookLayout,
+  buildSingleLookLayout,
   exitCmd,
   getLookTheme,
   prefersUiLayout,
@@ -41,6 +42,48 @@ function mockU(): IUrsamuSDK {
     canEdit: async () => false,
   } as unknown as IUrsamuSDK;
 }
+
+Deno.test(
+  "buildSingleLookLayout: includes media for exits/things",
+  OPTS,
+  async () => {
+    const exit = mockObj({
+      id: "42",
+      name: "North;n",
+      flags: new Set(["exit"]),
+      state: {
+        name: "North;n",
+        description: "A cold passage.",
+        image: "/images/42.jpg",
+      },
+    });
+    // data bag is also checked
+    (exit as { data?: Record<string, unknown> }).data = {
+      image: "/images/42.jpg",
+    };
+    const u = mockU();
+    const comps = await buildSingleLookLayout({
+      u,
+      actor: u.me,
+      target: exit,
+      showContents: false,
+      canEdit: false,
+      exits: [],
+      headerTitle: "North",
+      description: "A cold passage.",
+    });
+    const types = comps.map((c) => c.type);
+    assertEquals(types[0], "header");
+    assertEquals(types.includes("media"), true);
+    const media = comps.find((c) => c.type === "media") as {
+      url?: string;
+      alt?: string;
+    };
+    assertEquals(media?.url, "/images/42.jpg");
+    assertEquals(media?.alt, "North");
+    assertEquals(types.includes("text"), true);
+  },
+);
 
 Deno.test("exitCmd prefers shortest alias", OPTS, () => {
   const e = mockObj({
