@@ -26,7 +26,7 @@ export const optionalPackages: PackageOption[] = [
   {
     name: "Staff Web Console",
     pkgName: "@ursamu/web",
-    jsrUrl: "jsr:@ursamu/web@^0.2.71",
+    jsrUrl: "jsr:@ursamu/web@^0.2.72",
     description: "Staff admin SPA at /admin (wiki, DB, settings)",
   },
   {
