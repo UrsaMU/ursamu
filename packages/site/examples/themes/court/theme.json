@@ -1,8 +1,8 @@
 {
   "id": "court",
   "label": "Court of Miracles",
-  "version": "1.0.0",
-  "description": "Cream and gold Court brand — reference FE theme package.",
+  "version": "1.1.0",
+  "description": "Court of Miracles brand (cream/gold). Installable theme \u2014 not shipped as a builtin @ursamu/site skin.",
   "css": "site.css",
   "bannerImage": "imgs/header.png",
   "title": "Court of Miracles",

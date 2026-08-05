@@ -60,17 +60,28 @@ function mockU(opts: {
   args?: string[];
   me?: Partial<IDBObj>;
   formatResult?: string | null;
+  webChat?: boolean;
 } = {}) {
   const sent: string[] = [];
   const broadcasts: string[] = [];
+  const broadcastOpts: unknown[] = [];
+  const st = {
+    name: "Tester",
+    ...(opts.webChat === false ? { webChat: false } : {}),
+    ...(opts.me?.state as Record<string, unknown> | undefined),
+  };
   const me = {
     id: "p1",
     name: "Tester",
     flags: new Set(["player", "connected"]),
-    state: { name: "Tester" },
+    state: st,
     location: "r1",
     contents: [],
     ...opts.me,
+    state: {
+      ...st,
+      ...((opts.me?.state as Record<string, unknown>) ?? {}),
+    },
   } as IDBObj;
 
   const u = {
@@ -82,8 +93,9 @@ function mockU(opts: {
       state: {},
       location: "",
       contents: [],
-      broadcast: (m: string) => {
+      broadcast: (m: string, opts?: unknown) => {
         broadcasts.push(m);
+        if (opts !== undefined) broadcastOpts.push(opts);
       },
     },
     cmd: {
@@ -110,7 +122,11 @@ function mockU(opts: {
     },
   } as unknown as IUrsamuSDK;
 
-  return Object.assign(u, { _sent: sent, _broadcasts: broadcasts });
+  return Object.assign(u, {
+    _sent: sent,
+    _broadcasts: broadcasts,
+    _broadcastOpts: broadcastOpts,
+  });
 }
 
 Deno.test("execOoc: default say line", OPTS, async () => {
@@ -137,4 +153,32 @@ Deno.test("execOoc: empty asks for text", OPTS, async () => {
   await execOoc(u);
   assertEquals(u._broadcasts.length, 0);
   assertStringIncludes(u._sent.join("\n"), "OOC what");
+});
+
+Deno.test("execOoc: web chat payload when chat on", OPTS, async () => {
+  const u = mockU({ args: ["brb"] });
+  await execOoc(u);
+  assertEquals(u._broadcasts.length, 1);
+  assertEquals(u._broadcastOpts.length, 1);
+  const opts = u._broadcastOpts[0] as {
+    data?: { ui?: Record<string, unknown> };
+  };
+  const ui = opts?.data?.ui;
+  assertEquals(ui?.type, "chat");
+  assertEquals(ui?.kind, "ooc");
+  assertEquals(ui?.oocMode, "say");
+  assertEquals(ui?.text, "brb");
+  assertEquals(ui?.tag, "OOC");
+});
+
+Deno.test("execOoc: no chat payload when +chat off", OPTS, async () => {
+  const u = mockU({ args: ["hi"], webChat: false });
+  await execOoc(u);
+  assertEquals(u._broadcasts.length, 1);
+  const opts = u._broadcastOpts[0] as {
+    data?: unknown;
+    reality?: string;
+  };
+  assertEquals(opts?.data, undefined);
+  assertEquals(opts?.reality, "material");
 });

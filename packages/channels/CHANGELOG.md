@@ -3,6 +3,15 @@
 All notable changes to `@ursamu/channels` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.0] - 2026-08-04
+
+### Added
+
+- Staff REST `/api/v1/channels` (list, create, get, patch, delete,
+  history, who)
+- Staff nav bridge (`route: "channels"`) for `@ursamu/web`
+- `autoJoin` on channel records
+
 ## [1.0.1] - 2026-07-28
 
 ### Changed

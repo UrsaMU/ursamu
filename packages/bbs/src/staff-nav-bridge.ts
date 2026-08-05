@@ -1,10 +1,6 @@
 /**
- * Soft-register BBS in the staff console topbar when @ursamu/web
- * is present. Labels come from plugin identity (version.ts) —
- * not hard-coded in the host UI.
- *
- * When web is installed, nav is **in-console only** (`route: "bbs"`
- * → /admin/bbs inside AppLayout). No href to the package SPA.
+ * Soft-register BBS in the staff console when @ursamu/web is present.
+ * In-console only (`route: "bbs"`).
  */
 
 import {
@@ -13,59 +9,68 @@ import {
   BBS_TITLE,
 } from "./version.ts";
 
-/** In-console vue-router name — lives under AppLayout. */
-const NAV = {
+const PAGE = {
   id: BBS_PLUGIN_ID,
   label: BBS_TITLE,
   description: BBS_DESCRIPTION,
   route: "bbs",
   order: 45,
-  // Lit on new posts/replies (and flags); clear-on-view in host.
   badgeKey: "bbs:activity",
   badgeTitle: "New BBS activity",
 } as const;
 
-type NavApi = {
-  registerStaffNav?: (item: {
-    id: string;
-    label: string;
-    description?: string;
-    href?: string;
-    route?: string;
-    order?: number;
-    badgeKey?: string;
-    badgeTitle?: string;
-  }) => void;
-  unregisterStaffNav?: (id: string) => void;
-};
-
-async function loadWebNav(): Promise<NavApi | null> {
+async function web() {
   try {
     const spec = "@ursamu/web";
-    const mod = await import(spec) as NavApi;
-    return mod;
+    return await import(spec) as {
+      softRegisterStaffPage?: (
+        p: typeof PAGE,
+      ) => Promise<boolean>;
+      softUnregisterStaffPage?: (id: string) => Promise<boolean>;
+      registerStaffPage?: (p: typeof PAGE) => void;
+      unregisterStaffPage?: (id: string) => void;
+      registerStaffNav?: (p: typeof PAGE) => void;
+      unregisterStaffNav?: (id: string) => void;
+    };
   } catch {
     return null;
   }
 }
 
-/** True when @ursamu/web is loadable (in-console UI available). */
+/** True when @ursamu/web is loadable. */
 export async function hasStaffConsole(): Promise<boolean> {
-  const mod = await loadWebNav();
-  return typeof mod?.registerStaffNav === "function";
+  const mod = await web();
+  return !!(
+    mod?.softRegisterStaffPage ||
+    mod?.registerStaffPage ||
+    mod?.registerStaffNav
+  );
 }
 
 export async function registerBbsStaffNav(): Promise<void> {
-  const mod = await loadWebNav();
-  if (typeof mod?.registerStaffNav === "function") {
-    // route only — never send operators to /admin/bbs-app/
-    mod.registerStaffNav({ ...NAV });
+  const mod = await web();
+  if (!mod) return;
+  if (typeof mod.softRegisterStaffPage === "function") {
+    await mod.softRegisterStaffPage({ ...PAGE });
+    return;
   }
+  if (typeof mod.registerStaffPage === "function") {
+    mod.registerStaffPage({ ...PAGE });
+    return;
+  }
+  mod.registerStaffNav?.({ ...PAGE });
 }
 
 export async function unregisterBbsStaffNav(): Promise<void> {
-  const mod = await loadWebNav();
-  if (typeof mod?.unregisterStaffNav === "function") {
-    mod.unregisterStaffNav(BBS_PLUGIN_ID);
+  const mod = await web();
+  if (!mod) return;
+  if (typeof mod.softUnregisterStaffPage === "function") {
+    await mod.softUnregisterStaffPage(BBS_PLUGIN_ID);
+    return;
   }
+  if (typeof mod.unregisterStaffPage === "function") {
+    mod.unregisterStaffPage(BBS_PLUGIN_ID);
+    return;
+  }
+  mod.unregisterStaffNav?.(BBS_PLUGIN_ID);
 }

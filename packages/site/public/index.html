@@ -11,10 +11,10 @@
 
     <!-- Base: reset → tokens → layout → components → skin
          ?v= busts sticky browser caches during skin iteration -->
-    <link rel="stylesheet" href="/site/css/reset.css?v=20260803b" />
-    <link rel="stylesheet" href="/site/css/tokens.css?v=20260803b" />
-    <link rel="stylesheet" href="/site/css/layout.css?v=20260803b" />
-    <link rel="stylesheet" href="/site/css/components.css?v=20260803b" />
+    <link rel="stylesheet" href="/site/css/reset.css?v=20260804loginctr" />
+    <link rel="stylesheet" href="/site/css/tokens.css?v=20260804loginctr" />
+    <link rel="stylesheet" href="/site/css/layout.css?v=20260804loginctr" />
+    <link rel="stylesheet" href="/site/css/components.css?v=20260804loginctr" />
     <!--
       Skin stylesheet. Swap via:
         - data-skin="court" | "default" on <html>
@@ -23,7 +23,7 @@
     -->
     <link
       rel="stylesheet"
-      href="/site/css/skins/default.css?v=20260803b"
+      href="/site/css/skins/default.css?v=20260804loginctr"
       data-site-skin
     />
 
@@ -42,7 +42,7 @@
       rel="stylesheet"
     />
 
-    <script src="/site/js/site.js?v=20260803b" defer></script>
+    <script src="/site/js/site.js?v=20260804loginctr" defer></script>
   </head>
   <body>
     <div
@@ -58,16 +58,28 @@
         <a
           class="site-nav__brand"
           data-site-brand
-          href="/site/"
+          href="/"
         >UrsaMU</a>
+        <button
+          type="button"
+          class="site-nav__toggle"
+          data-site-nav-toggle
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="site-nav-menu"
+        >
+          <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+          <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+          <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+        </button>
         <ul
           class="site-nav__list"
+          id="site-nav-menu"
           data-site-nav-list
         >
           <li><a href="/site/" class="is-active">Home</a></li>
-          <li><a href="#">Characters</a></li>
-          <li><a href="#">Help</a></li>
           <li><a href="/site/wiki/">Wiki</a></li>
+          <li><a href="/site/help/">Help</a></li>
         </ul>
       </nav>
 
@@ -87,6 +99,12 @@
           alt=""
           hidden
         />
+        <!-- Telnet under hero when title + plugins.site.telnet -->
+        <a
+          class="site-banner__connect"
+          data-site-banner-connect
+          hidden
+        ></a>
       </header>
 
       <div
@@ -142,10 +160,16 @@
               class="site-rule site-rule--image"
               role="presentation"
             ></div>
-            <div class="site-section__body site-loading-skeleton">
-              <div class="site-skeleton-line" style="width:70%;"></div>
-              <div class="site-skeleton-line" style="width:90%;"></div>
-              <div class="site-skeleton-line" style="width:45%;"></div>
+            <div
+              class="site-section__body site-loading-skeleton"
+              role="status"
+              aria-live="polite"
+            >
+              <span class="site-sr-only">Loading content…</span>
+              <div class="site-skeleton-line site-skeleton-line--w72"></div>
+              <div class="site-skeleton-line site-skeleton-line--w94"></div>
+              <div class="site-skeleton-line site-skeleton-line--w58"></div>
+              <div class="site-skeleton-line site-skeleton-line--w81"></div>
             </div>
           </section>
 

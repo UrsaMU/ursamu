@@ -1,55 +1,169 @@
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK, IDBObj } from "../commands/types.ts";
-import { resolveGlobalFormat } from "../format/handlers.ts";
+import {
+  divider,
+  footer,
+  header,
+  resolveGlobalFormat,
+} from "../format/handlers.ts";
+
+function formatIdle(lastCmd: unknown): string {
+  if (typeof lastCmd !== "number" || isNaN(lastCmd)) return "---";
+  const secs = Math.floor((Date.now() - lastCmd) / 1000);
+  if (secs < 60) return `${secs}s`;
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h`;
+  return `${Math.floor(hrs / 24)}d`;
+}
+
+function playerLabel(u: IUrsamuSDK, p: IDBObj): string {
+  if (u.util?.displayName) return u.util.displayName(p, u.me);
+  return String(
+    (p.state?.moniker as string) ||
+      (p.state?.name as string) ||
+      p.name ||
+      "Unknown",
+  );
+}
+
+function plainName(p: IDBObj): string {
+  return String((p.state?.name as string) || p.name || "").trim();
+}
+
+function renderWhoRow(u: IUrsamuSDK, p: IDBObj): string {
+  const pName = playerLabel(u, p);
+  const idle = formatIdle(p.state?.lastCommand);
+  const doing = String((p.state?.doing as string) || "");
+  // Visual pad is approximate when monikers carry color codes
+  return `${pName.padEnd(24)}${idle.padEnd(8)}${doing}`;
+}
+
+/** Default telnet block using game layout chrome. */
+function buildDefaultWhoBlock(
+  u: IUrsamuSDK,
+  players: IDBObj[],
+  rows: string[],
+): string {
+  const width = (u.me.state?.termWidth as number) || 78;
+  const lines: string[] = [];
+  lines.push(header("Who's Online", "=", width));
+  lines.push(
+    `  ${"Player".padEnd(22)}${"Idle".padEnd(8)}Doing`,
+  );
+  lines.push(divider("", "-", width));
+  if (rows.length === 0) {
+    lines.push("  No one is connected.");
+  } else {
+    for (const r of rows) {
+      lines.push(`  ${r}`);
+    }
+  }
+  lines.push(divider("", "-", width));
+  const n = players.length;
+  lines.push(
+    `  ${n} player${n === 1 ? "" : "s"} online.`,
+  );
+  lines.push(footer("", "=", width));
+  return lines.join("\n");
+}
+
+/** Structured who for /play (entity-list + header). */
+function sendWhoWebLayout(
+  u: IUrsamuSDK,
+  players: IDBObj[],
+): void {
+  if (!u.ui?.layout) return;
+  const items = players.map((p) => {
+    const name = plainName(p) || playerLabel(u, p);
+    const idle = formatIdle(p.state?.lastCommand);
+    const doing = String((p.state?.doing as string) || "");
+    return {
+      id: p.id,
+      label: playerLabel(u, p),
+      meta: idle,
+      sublabel: doing || undefined,
+      action: name
+        ? { type: "cmd" as const, cmd: `look ${name}` }
+        : undefined,
+    };
+  });
+  const n = players.length;
+  u.ui.layout({
+    components: [
+      { type: "header", title: "Who's Online" },
+      {
+        type: "entity-list",
+        title: n === 1 ? "1 player" : `${n} players`,
+        items,
+      },
+      {
+        type: "text",
+        content:
+          `${n} player${n === 1 ? "" : "s"} online.`,
+      },
+    ],
+    meta: { type: "who" },
+  });
+}
 
 export async function execWho(u: IUrsamuSDK): Promise<void> {
   const players = (await u.db.search({ flags: /connected/i }))
-    .filter((p) => p.flags.has("player") && !p.flags.has("dark"));
-  const width = (u.me.state?.termWidth as number) || 78;
-
-  const formatIdle = (lastCmd: unknown): string => {
-    if (typeof lastCmd !== "number" || isNaN(lastCmd)) return "---";
-    const secs = Math.floor((Date.now() - lastCmd) / 1000);
-    if (secs < 60) return `${secs}s`;
-    const mins = Math.floor(secs / 60);
-    if (mins < 60) return `${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h`;
-    return `${Math.floor(hrs / 24)}d`;
-  };
-
-  const renderRow = (p: IDBObj): string => {
-    const pName = (p.state.moniker as string) || (p.state.name as string) || p.name || "Unknown";
-    const idle = formatIdle(p.state.lastCommand);
-    const doing = (p.state.doing as string) || "";
-    return `${pName.padEnd(24)}${idle.padEnd(8)}${doing}`;
-  };
+    .filter((p) =>
+      p.flags.has("player") && !p.flags.has("dark")
+    )
+    .sort((a, b) =>
+      plainName(a).localeCompare(plainName(b), undefined, {
+        sensitivity: "base",
+      })
+    );
 
   const rows: string[] = [];
   for (const p of players) {
-    const defaultRow = renderRow(p);
-    const rowOverride = await resolveGlobalFormat(u, "WHOROWFORMAT", defaultRow);
+    const defaultRow = renderWhoRow(u, p);
+    const rowOverride = await resolveGlobalFormat(
+      u,
+      "WHOROWFORMAT",
+      defaultRow,
+    );
     rows.push(rowOverride != null ? rowOverride : defaultRow);
   }
 
-  let defaultBlock = `%chWho's Online%cn\n`;
-  defaultBlock += `${"Player".padEnd(24)}${"Idle".padEnd(8)}Doing\n`;
-  defaultBlock += `${"-".repeat(width)}\n`;
-  for (const r of rows) defaultBlock += `${r}\n`;
-  defaultBlock += `${"-".repeat(width)}\n`;
-  defaultBlock += `${players.length} player${players.length === 1 ? "" : "s"} online.\n`;
+  const defaultBlock = buildDefaultWhoBlock(u, players, rows);
+  const blockOverride = await resolveGlobalFormat(
+    u,
+    "WHOFORMAT",
+    defaultBlock,
+  );
+  const text = blockOverride != null
+    ? blockOverride
+    : defaultBlock;
 
-  const blockOverride = await resolveGlobalFormat(u, "WHOFORMAT", defaultBlock);
-  u.send(blockOverride != null ? blockOverride : defaultBlock);
+  // Custom WHOFORMAT → plain text for all clients
+  const customWho = blockOverride != null &&
+    blockOverride !== defaultBlock;
+  if (!customWho && u.clientType === "web") {
+    sendWhoWebLayout(u, players);
+    return;
+  }
+  u.send(text);
 }
 
 export function execScore(u: IUrsamuSDK): void {
   const me = u.me;
-  const name = (me.state.moniker as string) || (me.state.name as string) || me.name;
+  const name = (me.state.moniker as string) ||
+    (me.state.name as string) || me.name;
   let output = `%chPlayer Scorecard: ${name}%cn\n`;
-  output += `DBRef: #${me.id}  Flags: ${Array.from(me.flags).join(" ")}\n`;
-  output += `Doing: ${(me.state.doing as string) || "Nothing."}\n`;
-  output += `Money: ${(me.state.money as number) || 0} credits\n`;
+  output += `DBRef: #${me.id}  Flags: ${
+    Array.from(me.flags).join(" ")
+  }\n`;
+  output += `Doing: ${
+    (me.state.doing as string) || "Nothing."
+  }\n`;
+  output += `Money: ${
+    (me.state.money as number) || 0
+  } credits\n`;
   u.send(output);
 }
 
@@ -59,13 +173,20 @@ export async function execDoing(u: IUrsamuSDK): Promise<void> {
   if (!message) {
     await u.db.modify(u.me.id, "$unset", { "data.doing": 1 });
     u.send("@doing cleared.");
-    u.here.broadcast(`${actorName} is no longer doing anything special.`,
-      { exclude: [u.me.id] } as Record<string, unknown>);
+    u.here.broadcast(
+      `${actorName} is no longer doing anything special.`,
+      { exclude: [u.me.id] } as Record<string, unknown>,
+    );
   } else {
-    if (message.length > 100) { u.send("Doing message is too long (max 100)."); return; }
+    if (message.length > 100) {
+      u.send("Doing message is too long (max 100).");
+      return;
+    }
     await u.db.modify(u.me.id, "$set", { "data.doing": message });
     u.send(`You are now doing: ${message}`);
-    u.here.broadcast(`${actorName} is now: ${message}`, { exclude: [u.me.id] } as Record<string, unknown>);
+    u.here.broadcast(`${actorName} is now: ${message}`, {
+      exclude: [u.me.id],
+    } as Record<string, unknown>);
   }
 }
 
@@ -91,27 +212,43 @@ export async function execAway(u: IUrsamuSDK): Promise<void> {
 
 export async function execLast(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
-  const isStaff = actor.flags.has("admin") || actor.flags.has("wizard") || actor.flags.has("superuser");
+  const isStaff = actor.flags.has("admin") ||
+    actor.flags.has("wizard") ||
+    actor.flags.has("superuser");
   const query = u.util.stripSubs(u.cmd.args[0] || "").trim();
 
   let target = actor;
   if (query) {
-    if (!isStaff) { u.send("Permission denied."); return; }
+    if (!isStaff) {
+      u.send("Permission denied.");
+      return;
+    }
     const results = await u.db.search(query);
     const found = results.find((r) => r.flags.has("player"));
-    if (!found) { u.send(`No player found: "${query}".`); return; }
+    if (!found) {
+      u.send(`No player found: "${query}".`);
+      return;
+    }
     target = found;
   }
 
-  const name = (target.state.moniker as string) || (target.state.name as string) || target.name || target.id;
+  const name = (target.state.moniker as string) ||
+    (target.state.name as string) ||
+    target.name ||
+    target.id;
   const lastLogin = target.state.lastLogin as number | undefined;
   const lastLogout = target.state.lastLogout as number | undefined;
-  const fmt = (ts: number | undefined) => ts ? new Date(ts).toLocaleString() : "Never";
+  const fmt = (ts: number | undefined) =>
+    ts ? new Date(ts).toLocaleString() : "Never";
 
   u.send(`--- Last for ${name} ---`);
   u.send(`Last login:   ${fmt(lastLogin)}`);
   u.send(`Last logout:  ${fmt(lastLogout)}`);
-  u.send(`Status:       ${target.flags.has("connected") ? "%chOnline%cn" : "Offline"}`);
+  u.send(
+    `Status:       ${
+      target.flags.has("connected") ? "%chOnline%cn" : "Offline"
+    }`,
+  );
 }
 
 addCmd({
@@ -121,9 +258,12 @@ addCmd({
   category: "Information",
   help: `who  — List all connected players.
 
+Uses game layout header / divider / footer on telnet.
+On web play, shows an interactive player list.
+
 Override hooks (attr on #0 first, else enactor):
-  @whoformat     Replaces the entire WHO block; %0 = default block.
-  @whorowformat  Replaces one player row; %0 = default rendered row.
+  @whoformat     Replaces the entire WHO block; %0 = default.
+  @whorowformat  Replaces one player row; %0 = default row.
 
 Examples:
   who`,

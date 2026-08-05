@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { api } from "@/api/client";
 import JsonFormEditor from "@/components/JsonFormEditor.vue";
+import { buildLoginPreviewSrcdoc } from "@/utils/loginSplash";
 
 type PluginFile = {
   plugin: string;
@@ -20,6 +21,8 @@ type SettingsPayload = {
     version: string;
     playerStart: string;
   };
+  /** Web /play pre-auth splash (markdown). */
+  loginMarkdown?: string;
   layout: {
     header: string;
     divider: string;
@@ -117,6 +120,7 @@ const form = ref({
   header: "",
   divider: "",
   footer: "",
+  loginMarkdown: "",
 });
 
 const siteForm = ref({
@@ -136,6 +140,13 @@ type NavDraft = {
 
 const siteNav = ref<NavDraft[]>([]);
 const pluginNavHint = ref<NavDraft[]>([]);
+
+/** Last successfully saved site payload (JSON) — skip no-op autosaves. */
+const lastSiteSnap = ref("");
+/** Last successfully saved game/layout payload. */
+const lastGameSnap = ref("");
+let siteSaveChain: Promise<void> = Promise.resolve();
+let gameSaveChain: Promise<void> = Promise.resolve();
 
 const restartConfirm = ref("");
 
@@ -157,6 +168,7 @@ function applyForm(s: SettingsPayload): void {
     header: s.layout.header,
     divider: s.layout.divider,
     footer: s.layout.footer,
+    loginMarkdown: s.loginMarkdown ?? "",
   };
   const site = s.site;
   if (site) {
@@ -179,6 +191,76 @@ function applyForm(s: SettingsPayload): void {
       href: n.href || "",
     }));
   }
+  lastGameSnap.value = gameSnapshot();
+  lastSiteSnap.value = siteSnapshot();
+}
+
+function gameSnapshot(): string {
+  return JSON.stringify({
+    name: form.value.name.trim(),
+    description: form.value.description.trim(),
+    version: form.value.version.trim(),
+    playerStart: form.value.playerStart.trim(),
+    header: form.value.header,
+    divider: form.value.divider,
+    footer: form.value.footer,
+    loginMarkdown: form.value.loginMarkdown,
+  });
+}
+
+/** Live /play-shaped preview (site tokens + active skin). */
+const loginPreviewSrcdoc = computed(() =>
+  buildLoginPreviewSrcdoc({
+    content: form.value.loginMarkdown || "",
+    skin: siteForm.value.skin || "default",
+    skinCss: siteForm.value.skinCss || "",
+    origin: typeof window !== "undefined"
+      ? window.location.origin
+      : "",
+  })
+);
+
+function siteSnapshot(): string {
+  const nav = siteNav.value
+    .map((n) => ({
+      id: n.id?.trim() || undefined,
+      label: n.label.trim(),
+      href: n.href.trim(),
+    }))
+    .filter((n) => n.label || n.href);
+  return JSON.stringify({
+    skin: siteForm.value.skin.trim() || "default",
+    skinCss: siteForm.value.skinCss.trim(),
+    title: siteForm.value.title.trim(),
+    bannerImage: siteForm.value.bannerImage.trim(),
+    plainBg: siteForm.value.plainBg === true,
+    telnet: siteForm.value.telnet.trim(),
+    nav,
+  });
+}
+
+/** Autosave site on blur/change when dirty. */
+function onSiteFieldBlur(): void {
+  void queueSiteSave();
+}
+
+/** Autosave game/layout on blur when dirty. */
+function onGameFieldBlur(): void {
+  void queueGameSave();
+}
+
+function queueSiteSave(): Promise<void> {
+  siteSaveChain = siteSaveChain
+    .then(() => saveSite({ silent: true }))
+    .catch(() => { /* errors set on error ref */ });
+  return siteSaveChain;
+}
+
+function queueGameSave(): Promise<void> {
+  gameSaveChain = gameSaveChain
+    .then(() => save({ silent: true }))
+    .catch(() => { /* errors set on error ref */ });
+  return gameSaveChain;
 }
 
 function normalizePayload(
@@ -279,10 +361,17 @@ async function load(): Promise<void> {
   }
 }
 
-async function save(): Promise<void> {
+async function save(
+  opts: { silent?: boolean } = {},
+): Promise<void> {
+  const snap = gameSnapshot();
+  if (opts.silent && snap === lastGameSnap.value) return;
+
   saving.value = true;
-  error.value = "";
-  ok.value = "";
+  if (!opts.silent) {
+    error.value = "";
+    ok.value = "";
+  }
   try {
     const { res, data: body } = await api<{
       ok?: boolean;
@@ -304,6 +393,7 @@ async function save(): Promise<void> {
           divider: form.value.divider,
           footer: form.value.footer,
         },
+        loginMarkdown: form.value.loginMarkdown,
       }),
     });
     if (!res.ok) {
@@ -313,8 +403,12 @@ async function save(): Promise<void> {
     needsRestart.value = body.needsRestart === true;
     ok.value = needsRestart.value
       ? "Saved. Soft-restart recommended for some keys."
+      : opts.silent
+      ? "Auto-saved."
       : "Saved.";
-    if (body.settings) {
+    lastGameSnap.value = snap;
+    // Don't clobber fields the user edited during the request
+    if (body.settings && gameSnapshot() === snap) {
       data.value = normalizePayload(
         body.settings as SettingsPayload & { error?: string },
       );
@@ -325,18 +419,27 @@ async function save(): Promise<void> {
   }
 }
 
-async function saveSite(): Promise<void> {
+async function saveSite(
+  opts: { silent?: boolean } = {},
+): Promise<void> {
+  const snap = siteSnapshot();
+  if (opts.silent && snap === lastSiteSnap.value) return;
+
   savingSite.value = true;
-  error.value = "";
-  ok.value = "";
+  if (!opts.silent) {
+    error.value = "";
+    ok.value = "";
+  }
   try {
-    const nav = siteNav.value
-      .map((n) => ({
-        id: n.id?.trim() || undefined,
-        label: n.label.trim(),
-        href: n.href.trim(),
-      }))
-      .filter((n) => n.label || n.href);
+    const parsed = JSON.parse(snap) as {
+      skin: string;
+      skinCss: string;
+      title: string;
+      bannerImage: string;
+      plainBg: boolean;
+      telnet: string;
+      nav: Array<{ id?: string; label: string; href: string }>;
+    };
 
     const { res, data: body } = await api<{
       ok?: boolean;
@@ -345,26 +448,21 @@ async function saveSite(): Promise<void> {
       settings?: SettingsPayload;
     }>("/api/v1/admin/settings", {
       method: "PATCH",
-      body: JSON.stringify({
-        site: {
-          skin: siteForm.value.skin.trim() || "default",
-          skinCss: siteForm.value.skinCss.trim(),
-          title: siteForm.value.title.trim(),
-          bannerImage: siteForm.value.bannerImage.trim(),
-          plainBg: siteForm.value.plainBg === true,
-          telnet: siteForm.value.telnet.trim(),
-          nav,
-        },
-      }),
+      body: JSON.stringify({ site: parsed }),
     });
     if (!res.ok) {
       error.value = body?.error || `Save failed (${res.status})`;
       return;
     }
     ok.value = body.siteLive
-      ? "Site settings saved — live (hard-refresh /site/)."
+      ? opts.silent
+        ? "Auto-saved — live on /site/."
+        : "Site settings saved — live (hard-refresh /site/)."
+      : opts.silent
+      ? "Auto-saved to config.json."
       : "Site settings saved to config.json.";
-    if (body.settings) {
+    lastSiteSnap.value = snap;
+    if (body.settings && siteSnapshot() === snap) {
       data.value = normalizePayload(
         body.settings as SettingsPayload & { error?: string },
       );
@@ -383,6 +481,7 @@ function moveNav(i: number, dir: -1 | 1): void {
   next[i] = next[j]!;
   next[j] = tmp;
   siteNav.value = next;
+  void queueSiteSave();
 }
 
 function addNav(): void {
@@ -390,10 +489,12 @@ function addNav(): void {
     ...siteNav.value,
     { label: "New link", href: "/site/" },
   ];
+  void queueSiteSave();
 }
 
 function removeNav(i: number): void {
   siteNav.value = siteNav.value.filter((_, idx) => idx !== i);
+  void queueSiteSave();
 }
 
 const dragNavFrom = ref<number | null>(null);
@@ -425,6 +526,7 @@ function onNavDrop(i: number, ev: DragEvent): void {
   if (!row) return;
   next.splice(i, 0, row);
   siteNav.value = next;
+  void queueSiteSave();
 }
 
 function onNavDragEnd(): void {
@@ -444,6 +546,7 @@ function adoptPluginNav(n: NavDraft): void {
     ...siteNav.value,
     { id: n.id, label: n.label, href: n.href },
   ];
+  void queueSiteSave();
 }
 
 async function doRestart(): Promise<void> {
@@ -802,6 +905,9 @@ watch(
         <h2 class="dash-h2">
           Game
         </h2>
+        <p class="muted settings-help">
+          Auto-saves when you leave a field.
+        </p>
         <div class="settings-grid">
           <label>
             Name
@@ -810,6 +916,7 @@ watch(
               type="text"
               maxlength="200"
               autocomplete="off"
+              @blur="onGameFieldBlur"
             >
           </label>
           <label>
@@ -819,6 +926,7 @@ watch(
               type="text"
               maxlength="40"
               autocomplete="off"
+              @blur="onGameFieldBlur"
             >
           </label>
           <label class="settings-span-2">
@@ -826,6 +934,7 @@ watch(
             <textarea
               v-model="form.description"
               rows="3"
+              @blur="onGameFieldBlur"
             />
           </label>
           <label>
@@ -835,8 +944,48 @@ watch(
               type="text"
               maxlength="32"
               autocomplete="off"
+              @blur="onGameFieldBlur"
             >
           </label>
+        </div>
+
+        <h2 class="dash-h2">
+          Web login splash
+        </h2>
+        <p class="muted settings-help">
+          Markdown or HTML shown on <code>/play</code> before
+          sign-in. Preview uses the live site skin and play
+          styles. Telnet still uses
+          <code>text/default_connect.txt</code>.
+          HTML is sanitized. Center with
+          <code>&lt;center&gt;</code> if you want — nothing is
+          forced centered.
+        </p>
+        <div class="settings-login-grid">
+          <label class="settings-login-edit">
+            Markdown or HTML
+            <textarea
+              v-model="form.loginMarkdown"
+              rows="12"
+              class="mono"
+              spellcheck="false"
+              @blur="onGameFieldBlur"
+            />
+          </label>
+          <div class="settings-login-preview">
+            <p class="muted dash-kicker">
+              Preview
+              <span class="settings-login-preview__hint">
+                — as on <code>/play</code> with current site skin
+              </span>
+            </p>
+            <iframe
+              class="settings-login-preview__frame"
+              title="Web login splash preview"
+              sandbox="allow-same-origin"
+              :srcdoc="loginPreviewSrcdoc"
+            />
+          </div>
         </div>
 
         <h2 class="dash-h2">
@@ -853,6 +1002,7 @@ watch(
               v-model="form.header"
               rows="2"
               class="mono"
+              @blur="onGameFieldBlur"
             />
           </label>
           <label class="settings-span-2">
@@ -861,6 +1011,7 @@ watch(
               v-model="form.divider"
               rows="2"
               class="mono"
+              @blur="onGameFieldBlur"
             />
           </label>
           <label class="settings-span-2">
@@ -869,6 +1020,7 @@ watch(
               v-model="form.footer"
               rows="2"
               class="mono"
+              @blur="onGameFieldBlur"
             />
           </label>
         </div>
@@ -1029,13 +1181,21 @@ watch(
           </ul>
         </template>
 
+        <p class="muted settings-help">
+          Changes auto-save when you leave a field
+          (or change skin / plain background). No reboot
+          needed for public site settings.
+        </p>
         <h2 class="dash-h2">
           Skin & branding
         </h2>
         <div class="settings-grid">
           <label>
             Skin
-            <select v-model="siteForm.skin">
+            <select
+              v-model="siteForm.skin"
+              @change="onSiteFieldBlur"
+            >
               <option
                 v-for="s in siteSkins"
                 :key="s"
@@ -1053,10 +1213,11 @@ watch(
               maxlength="200"
               autocomplete="off"
               placeholder="Leave blank to hide hero title"
+              @blur="onSiteFieldBlur"
             >
             <span class="field-hint muted">
-              Clear this field and save to hide the large
-              hero heading on /site/.
+              Clear this field to hide the large hero
+              heading on /site/ (auto-saves on blur).
             </span>
           </label>
           <label class="settings-span-2">
@@ -1068,6 +1229,7 @@ watch(
               class="mono"
               autocomplete="off"
               placeholder="/site/theme/my.css (optional)"
+              @blur="onSiteFieldBlur"
             >
           </label>
           <label class="settings-span-2">
@@ -1078,7 +1240,8 @@ watch(
               maxlength="500"
               class="mono"
               autocomplete="off"
-              placeholder="/site/skins/changeling/imgs/header.png"
+              placeholder="/site/theme/installed/court/imgs/header.png"
+              @blur="onSiteFieldBlur"
             >
           </label>
           <label>
@@ -1089,6 +1252,7 @@ watch(
               maxlength="120"
               autocomplete="off"
               placeholder="host:4201"
+              @blur="onSiteFieldBlur"
             >
           </label>
           <label class="chk-row settings-span-2">
@@ -1096,8 +1260,14 @@ watch(
               v-model="siteForm.plainBg"
               type="checkbox"
               class="chk"
+              @change="onSiteFieldBlur"
             >
-            <span>Plain background (no top art)</span>
+            <span>
+              Hide top background art
+              <span class="muted">
+                (off = show theme background)
+              </span>
+            </span>
           </label>
         </div>
 
@@ -1106,7 +1276,7 @@ watch(
         </h2>
         <p class="muted settings-help">
           Order is top-to-bottom on the public site.
-          Drag rows or use ↑ ↓. Saves to
+          Drag rows or use ↑ ↓. Auto-saves to
           <code>plugins.site.nav</code>.
         </p>
         <ul
@@ -1141,6 +1311,7 @@ watch(
               aria-label="Link label"
               draggable="false"
               @mousedown.stop
+              @blur="onSiteFieldBlur"
             >
             <input
               v-model="row.href"
@@ -1151,6 +1322,7 @@ watch(
               aria-label="Link href"
               draggable="false"
               @mousedown.stop
+              @blur="onSiteFieldBlur"
             >
             <div class="site-nav-actions">
               <button
@@ -1232,7 +1404,9 @@ watch(
             :disabled="savingSite"
             @click="saveSite"
           >
-            {{ savingSite ? "Saving…" : "Save site settings" }}
+            {{
+              savingSite ? "Saving…" : "Save now"
+            }}
           </button>
           <a
             class="secondary outline"
@@ -1538,6 +1712,59 @@ watch(
 
 .settings-span-2 {
   grid-column: 1 / -1;
+}
+
+.settings-login-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.25rem;
+  margin-bottom: 1.75rem;
+  width: 100%;
+}
+
+.settings-login-edit,
+.settings-login-preview {
+  min-width: 0;
+}
+
+.settings-login-edit textarea {
+  width: 100%;
+  min-height: 14rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  box-sizing: border-box;
+}
+
+.settings-login-preview {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-code);
+  padding: 0.5rem 0.65rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 14rem;
+  max-height: 28rem;
+  overflow: hidden;
+}
+
+.settings-login-preview__hint {
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.settings-login-preview__frame {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 12rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #020201;
+}
+
+@media (max-width: 900px) {
+  .settings-login-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .settings-grid label,

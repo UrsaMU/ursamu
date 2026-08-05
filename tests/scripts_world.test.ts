@@ -66,6 +66,10 @@ function makeU(opts: {
     db: { search: searchMock },
     util: {
       displayName: (o: IDBObj) => (o.state?.name as string) || o.name || o.id,
+      target: async (_me: IDBObj, name: string) => {
+        const matches = (opts.searchResults ?? []).flat();
+        return matches.find((m) => (m.state?.name as string)?.toLowerCase() === name.toLowerCase() || m.name?.toLowerCase() === name.toLowerCase() || m.id === name.replace("#", "")) ?? null;
+      },
     },
     sys: {
       uptime: async () => 3_661_000,   // 1h 1m 1s
@@ -113,7 +117,7 @@ Deno.test("@teleport — permission denied on target", OPTS, async () => {
 
 Deno.test("@teleport — permission denied on non-enter_ok destination", OPTS, async () => {
   const u = makeU({
-    flags: ["admin", "connected"],
+    flags: ["player", "connected"],
     args: ["Magic Orb=Locked Room"],
     searchResults: [[thing], [locked]],
     canEditFn: (_a, t) => t.id !== "sw_lr1",

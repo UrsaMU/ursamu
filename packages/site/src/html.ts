@@ -4,7 +4,13 @@
  */
 
 import type { SitePluginConfig, SiteNavItem } from "./config.ts";
-import { markNavActive, resolveSkinHref } from "./config.ts";
+import {
+  markNavActive,
+  normalizeMount,
+  resolveSkinHref,
+  SITE_ASSET_V,
+} from "./config.ts";
+import { filterSiteNav } from "./site-nav.ts";
 
 function esc(s: string): string {
   return s
@@ -71,6 +77,13 @@ export function injectSiteHtml(
 
   let out = html;
 
+  // Keep every /site/…?v=… cache-bust in sync with SITE_ASSET_V
+  // (index.html may ship a stale literal between publishes).
+  out = out.replace(
+    /(\/site\/[^"'?\s]+)\?v=[^"'&\s]*/g,
+    `$1?v=${SITE_ASSET_V}`,
+  );
+
   // <html data-skin="…">
   out = out.replace(
     /<html\b([^>]*)>/i,
@@ -104,10 +117,51 @@ export function injectSiteHtml(
     `$1${escAttr(skinHref)}$2`,
   );
 
-  // Nav brand (always has a label)
+  // Nav brand → public home (/ when serveRoot, else mount)
+  const brandHref = cfg.serveRoot === true
+    ? "/"
+    : `${normalizeMount(cfg.mount)}/`;
+  const logoSrc = (cfg.logoImage ?? "").trim();
   out = out.replace(
-    /(<a\b[^>]*\bdata-site-brand\b[^>]*>)[^<]*(<\/a>)/i,
-    `$1${esc(brandTitle)}$2`,
+    /(<a\b)([^>]*\bdata-site-brand\b[^>]*)(>)[\s\S]*?(<\/a>)/i,
+    (_m, open: string, mid: string, gt: string, close: string) => {
+      let m = String(mid);
+      if (/\bhref\s*=/.test(m)) {
+        m = m.replace(
+          /\bhref\s*=\s*"[^"]*"/i,
+          `href="${escAttr(brandHref)}"`,
+        );
+      } else {
+        m += ` href="${escAttr(brandHref)}"`;
+      }
+      // Ensure class list includes has-logo once when image brand
+      if (logoSrc) {
+        if (/\bclass\s*=\s*"/i.test(m)) {
+          m = m.replace(/\bclass\s*=\s*"([^"]*)"/i, (_c, cls: string) => {
+            const parts = String(cls).split(/\s+/).filter(Boolean);
+            if (!parts.includes("has-logo")) parts.push("has-logo");
+            if (!parts.includes("site-nav__brand")) {
+              parts.unshift("site-nav__brand");
+            }
+            return `class="${parts.join(" ")}"`;
+          });
+        } else {
+          m += ` class="site-nav__brand has-logo"`;
+        }
+        const img =
+          `<img class="site-nav__brand-logo" src="${escAttr(logoSrc)}" ` +
+          `alt="${escAttr(brandTitle)}" decoding="async" />`;
+        return `${open}${m}${gt}${img}${close}`;
+      }
+      // Text brand — strip leftover has-logo
+      m = m.replace(/\bclass\s*=\s*"([^"]*)"/i, (_c, cls: string) => {
+        const parts = String(cls).split(/\s+/).filter(
+          (p) => p && p !== "has-logo",
+        );
+        return parts.length ? `class="${parts.join(" ")}"` : "";
+      });
+      return `${open}${m}${gt}${esc(brandTitle)}${close}`;
+    },
   );
 
   // Hero H1 — only when title is set (image-only banners hide via CSS)
@@ -156,6 +210,33 @@ export function injectSiteHtml(
     );
   }
 
+  // Connect host under hero when title + telnet (no right-rail panel)
+  const telnet = (cfg.telnet ?? "").trim();
+  if (heroTitle && telnet) {
+    const href = `telnet://${escAttr(telnet)}`;
+    out = out.replace(
+      /(<a\b[^>]*\bdata-site-banner-connect\b)([^>]*)(>)[\s\S]*?(<\/a>)/i,
+      (_m, open: string, mid: string, gt: string, close: string) => {
+        let m = String(mid).replace(/\s*\bhidden\b/gi, "");
+        if (/\bhref\s*=/.test(m)) {
+          m = m.replace(/\bhref\s*=\s*"[^"]*"/i, `href="${href}"`);
+        } else {
+          m += ` href="${href}"`;
+        }
+        return `${open}${m}${gt}${esc(telnet)}${close}`;
+      },
+    );
+  } else {
+    out = out.replace(
+      /(<a\b[^>]*\bdata-site-banner-connect\b)([^>]*)(>)[\s\S]*?(<\/a>)/i,
+      (_m, open: string, mid: string, gt: string, close: string) => {
+        let m = String(mid);
+        if (!/\bhidden\b/i.test(m)) m += " hidden";
+        return `${open}${m}${gt}${close}`;
+      },
+    );
+  }
+
   // Shell modifiers: plainBg + compact (no image, no title)
   if (cfg.plainBg || compact) {
     out = out.replace(
@@ -169,11 +250,16 @@ export function injectSiteHtml(
     );
   }
 
-  // Nav list — active from request path when provided
+  // Nav list — public items only in first HTML (no session).
+  // site.js re-renders after probeAuth with require gates.
   if (Array.isArray(cfg.nav) && cfg.nav.length > 0) {
+    const publicNav = filterSiteNav(cfg.nav, {
+      connected: false,
+      flags: [],
+    });
     const navItems = opts.path
-      ? markNavActive(cfg.nav, opts.path)
-      : cfg.nav;
+      ? markNavActive(publicNav, opts.path)
+      : publicNav;
     const items = navHtml(navItems);
     out = out.replace(
       /(<ul\b[^>]*\bdata-site-nav-list\b[^>]*>)[\s\S]*?(<\/ul>)/i,

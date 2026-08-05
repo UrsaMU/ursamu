@@ -1,10 +1,25 @@
-/** Strip MUSH color codes / ANSI for plain UI text. */
+/**
+ * Strip MUSH color / substitution codes and ANSI for plain web UI.
+ * Converts layout codes (%r → newline, %t → tab, %b → space)
+ * so sheet snapshots stay readable after color codes are removed.
+ */
 export function stripMushCodes(s: unknown): string {
   return String(s ?? "")
+    // Layout first (before bare %c / %[nrt…] sweeps)
+    .replace(/%r/gi, "\n")
+    .replace(/%t/gi, "\t")
+    .replace(/%b/gi, " ")
+    // %ch %cy %cn %cx … and truecolor
     .replace(/%c[a-zA-Z]/gi, "")
-    .replace(/%[nrtbR]/gi, "")
     .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "")
+    // leftover %n / %N name markers (not used as newline)
+    .replace(/%[nN]/g, "")
+    // raw ANSI SGR
+    // deno-lint-ignore no-control-regex
     .replace(/\u001b\[[0-9;]*m/g, "")
+    // collapse accidental double blank lines from code runs
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]+\n/g, "\n")
     .trim();
 }
 

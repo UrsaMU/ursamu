@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/admin-guide/">
+<meta property="og:url" content="http://localhost:3001/guides/admin-guide/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -560,10 +560,13 @@ stays up through prepare; a soft-reboot happens only after a warm cache.</p>
 <p>Prepare steps (live process keeps serving):</p>
 <ol>
 <li><code>git pull --ff-only</code> (auto-stash local dirty files, then pop)</li>
+<li><strong>Merge <code>config/config.sample.json</code> → live <code>config/config.json</code></strong><br>
+(adds new <code>server.plugins</code> entries and <code>plugins.*</code> blocks such as<br>
+<code>map</code> — live secrets are preserved via deep-merge)</li>
 <li>Pin every app <code>jsr:@ursamu/*</code> import to the <strong>exact</strong> latest on JSR</li>
 <li>Write dual-package import overrides so plugins share one mush/core/help</li>
 <li>Delete <code>deno.lock</code> + <code>node_modules</code> (stale graphs cannot survive)</li>
-<li><code>deno cache --reload</code> entrypoints (<code>src/main.ts</code>, telnet, mod)</li>
+<li><code>deno cache --reload --minimum-dependency-age=0</code> entrypoints</li>
 <li>Print resolved <code>@ursamu/*</code> versions, then soft-reboot if cache OK</li>
 </ol>
 <p><strong>Publish first.</strong> <code>@restart</code> only loads code that is already on JSR (or<br>

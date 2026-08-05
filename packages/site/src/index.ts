@@ -33,7 +33,7 @@ async function loadGameConfig(): Promise<unknown> {
 
 export const plugin: IPlugin = {
   name: "site",
-  version: "0.1.7",
+  version: "0.1.36",
   description:
     "Public front-end shell — layout framing + design tokens + skins.",
 
@@ -73,6 +73,9 @@ export const plugin: IPlugin = {
       registerPluginRoute("/login", siteStaticHandler);
       registerPluginRoute("/profile", siteStaticHandler);
       registerPluginRoute("/wiki", siteStaticHandler);
+      registerPluginRoute("/help", siteStaticHandler);
+      registerPluginRoute("/chargen", siteStaticHandler);
+      registerPluginRoute("/play", siteStaticHandler);
     }
 
     const skinLabel = cfg.skinCss ?? cfg.skin ?? "default";

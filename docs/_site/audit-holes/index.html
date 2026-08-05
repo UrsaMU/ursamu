@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html><head><meta property="og:type" content="website">
+<meta property="og:url" content="http://localhost:3001/audit-holes/">
+<meta name="twitter:card" content="summary">
+</head><body><h1>UrsaMU — Known Holes &amp; Incomplete Implementations</h1>
+<h2>Audit of missing side effects, stub code, and incomplete features found via static analysis.<br>
+Items are ordered by severity within each category.</h2>
+<h2>HIGH — Player Experience Broken</h2>
+<h3>1. Teleport: no auto-look, no room broadcasts</h3>
+<p><strong>Files:</strong> <code>system/scripts/teleport.ts:49</code>, <code>system/scripts/home.ts:13</code>,<br>
+<code>src/services/Sandbox/SandboxService.ts:59-67</code></p>
+<p><code>u.teleport()</code> only updates the location in memory. It does not:</p>
+<ul>
+<li>Broadcast <code>"X has left."</code> to the source room</li>
+<li>Broadcast <code>"X has arrived."</code> to the destination room</li>
+<li>Trigger auto-look for the moved player</li>
+</ul>
+<h2><code>teleport.ts</code> even has a comment claiming “SandboxService handles the actual movements and look” — it doesn’t.<br>
+<code>home.ts</code> has the same gap.</h2>
+<h3>2. Disconnect broadcast targets everyone, with dummy room data</h3>
+<p><strong>File:</strong> <code>src/services/WebSocket/index.ts:132-139</code></p>
+<p>When a player disconnects the <code>close</code> event fires <code>this.broadcast()</code> (all connected clients, not just<br>
+the room) and the payload includes a hardcoded dummy room:</p>
+<pre class="language-ts" tabindex="0"><code class="language-ts">room: { name: "", desc: "", exits: [], players: [], items: [] } // dummy
+</code></pre>
+<h2>Should target only players in the disconnected player’s room and include real room state.</h2>
+<h3>3. Broadcast <code>exclude</code> parameter is silently ignored</h3>
+<p><strong>File:</strong> <code>src/services/broadcast/broadcast.ts</code></p>
+<h2><code>send()</code> accepts <code>_exclude: string[]</code> but never uses it. Commands like <code>get.ts</code> and <code>drop.ts</code><br>
+correctly pass <code>{ exclude: [actor.id] }</code> to avoid double-messaging the actor, but it has no effect —<br>
+the actor sees their own action twice (once from <code>u.send</code>, once from <code>u.broadcast</code>).</h2>
+<h3>4. Give command: money field path wrong, no room broadcast</h3>
+<p><strong>File:</strong> <code>system/scripts/give.ts:39-40</code></p>
+<h2>Money deduction/addition uses <code>"state.money"</code> but the actual DB field is under <code>data</code>. Transfers<br>
+may not persist. Also, room bystanders see nothing — only actor and target receive messages.</h2>
+<h2>MEDIUM — Incomplete Behaviour</h2>
+<h3>5. Movement: failed exit attempt may not reach other players</h3>
+<p><strong>File:</strong> <code>src/services/commands/movement.ts:67-68</code></p>
+<h2>Sends failed-movement messages to players via <code>#&lt;id&gt;</code> strings, but <code>send()</code> expects socket IDs.<br>
+Other players in the room may not receive <code>"X tries to go North, but fails."</code>.</h2>
+<h3>6. Scene invite: only owner can invite (hard-coded “for now”)</h3>
+<p><strong>File:</strong> <code>src/routes/sceneRouter.ts:358</code></p>
+<h2>Comment: <code>// Only owner or allowed can invite? Let's say Owner for now.</code><br>
+The allowed/co-owner list is never checked.</h2>
+<h3>7. DB object API: insufficient update validation</h3>
+<p><strong>File:</strong> <code>src/routes/dbObjRouter.ts:64-67</code></p>
+<h2>Comment acknowledges incomplete field validation:<br>
+<code>// Safe update fields? Allow updating 'data' and 'description' for now.</code><br>
+No permission enforcement on which fields callers may write. Flags and IDs could be overwritten<br>
+via the API.</h2>
+<h3>8. Lock evaluation: only supports exact string equality</h3>
+<p><strong>File:</strong> <code>src/utils/evaluateLock.ts:160</code></p>
+<h2>Comment: <code>// Simple equality for now.</code><br>
+Attribute locks only match exact strings. Comparison operators (<code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>) are not<br>
+implemented, limiting attribute-based lock expressions.</h2>
+<h3>9. Open command: quota write may not persist</h3>
+<p><strong>File:</strong> <code>system/scripts/open.ts:78</code></p>
+<h2>Decrements quota in local state then writes <code>{ data: { ...actor.state } }</code>. If <code>actor.state</code><br>
+is stale the decrement may be lost. Should write only the changed field.</h2>
+<h3>10. Link command: dot-notation field paths in <code>db.modify</code></h3>
+<p><strong>File:</strong> <code>system/scripts/link.ts:44,48,58</code></p>
+<h2>Uses <code>{ "data.dropto": id }</code> style paths in <code>db.modify</code> calls. Whether the database layer<br>
+handles dot-notation is untested — it may silently store a literal key named <code>"data.dropto"</code>.</h2>
+<h2>LOW — Missing Polish / Design Gaps</h2>
+<h3>11. Map service: vertical/relative directions map to (0,0)</h3>
+<p><strong>File:</strong> <code>src/services/Map/index.ts:39</code></p>
+<h2><code>u</code>, <code>d</code>, <code>out</code>, <code>in</code> all map to <code>{ x:0, y:0 }</code>. Multi-level or z-axis maps render incorrectly.<br>
+Needs a z-axis or explicit skip.</h2>
+<h3>12. Doing command: status change is silent</h3>
+<p><strong>File:</strong> <code>system/scripts/doing.ts</code></p>
+<h2>Updates the doing message but does not notify the room. Whether bystanders should see<br>
+<code>"X is now: &lt;doing&gt;"</code> is a design question, but currently there is no option either way.</h2>
+<h3>13. Moniker command: change is silent</h3>
+<p><strong>File:</strong> <code>system/scripts/moniker.ts</code></p>
+<h2>Display name is updated without any room broadcast. Bystanders see the new name with no<br>
+transition message.</h2>
+<h3>14. Script service: legacy placeholder code</h3>
+<p><strong>File:</strong> <code>src/services/Script/index.ts:41-45</code></p>
+<h2>Contains comments like <code>"Simplified: Just evaluating code for now to prove connection."</code> —<br>
+appears to be unreachable/unused legacy code. Should be removed or completed.</h2>
+<h3>15. Pose command: scene search on every pose</h3>
+<p><strong>File:</strong> <code>system/scripts/pose.ts:34-37</code></p>
+<h2>Queries for active scenes matching the current room on every pose. No caching. Could be slow<br>
+in rooms with high pose frequency.</h2>
+<h2>Not a Bug — Confirmed Intentional</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@quit</code> global disconnect</td>
+<td>Handled correctly via WS close event</td>
+</tr>
+<tr>
+<td>Movement auto-look</td>
+<td>Already calls <code>force(ctx, "look")</code> after a successful exit</td>
+</tr>
+<tr>
+<td>Connect auto-look</td>
+<td><code>u.execute("look")</code> at end of <code>connect.ts</code></td>
+</tr>
+<tr>
+<td>Channel talking</td>
+<td>Implemented in <code>channels.ts</code> via <code>matchChannel()</code></td>
+</tr>
+</tbody>
+</table>
+</body></html>

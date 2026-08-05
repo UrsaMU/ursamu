@@ -1,10 +1,9 @@
 /**
- * src/index.ts — IPlugin bootstrap for the help system.
+ * IPlugin bootstrap for the help system.
  *
- * Phase 1 (module load): imports commands.ts — addCmd() at load time.
- * Phase 2 (init):        providers + own help dir; prime on engine:ready
- *                        after every plugin has called registerHelpDir.
- * Phase 3 (remove):      remove providers + ready listener.
+ * Phase 1: commands.ts + routes.ts at load
+ * Phase 2: providers + staff nav
+ * Phase 3: remove providers / nav
  */
 
 import "./commands.ts";
@@ -20,27 +19,34 @@ import {
   bustCache,
 } from "./providers/file.ts";
 import { DbProvider } from "./providers/database.ts";
+import {
+  HELP_DESCRIPTION,
+  HELP_PLUGIN_ID,
+  HELP_TITLE,
+  HELP_VERSION,
+} from "./version.ts";
+import {
+  registerHelpStaffNav,
+  unregisterHelpStaffNav,
+} from "./staff-nav-bridge.ts";
 
 const commandProvider = new CommandProvider();
 const fileProvider = new FileProvider();
 const dbProvider = new DbProvider();
 
-/** After all plugins init, rebuild once from every registerHelpDir. */
 const onReady = async (): Promise<void> => {
   bustCache();
   const n = (await fileProvider.all()).length;
   console.log(`[help] File cache ready (${n} file topic(s)).`);
+  void registerHelpStaffNav();
 };
 
 export const plugin: IPlugin = {
-  name: "help",
-  version: "1.0.1",
-  description:
-    "API-first help — command inline help, per-package help/ " +
-    "folders via registerHelpDir, and runtime DB entries.",
+  name: HELP_PLUGIN_ID,
+  version: HELP_VERSION,
+  description: `${HELP_TITLE} — ${HELP_DESCRIPTION}`,
 
   init: () => {
-    // Own package help/ (file: checkout or JSR https://).
     registerHelpDir(
       new URL("../help", import.meta.url),
       "help",
@@ -51,11 +57,13 @@ export const plugin: IPlugin = {
     helpRegistry.addProvider(commandProvider);
 
     gameHooks.on("engine:ready", onReady);
+    void registerHelpStaffNav();
     return true;
   },
 
   remove: () => {
     gameHooks.off("engine:ready", onReady);
+    void unregisterHelpStaffNav();
     helpRegistry.removeProvider(dbProvider);
     helpRegistry.removeProvider(fileProvider);
     helpRegistry.removeProvider(commandProvider);

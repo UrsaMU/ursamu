@@ -9,6 +9,13 @@ import {
   buildPinnedFetchUrl,
   chooseFetchTarget,
 } from "./avatar-fetch.ts";
+import {
+  clearImageDataFields,
+  importImageFromUrl,
+  removeObjectImage,
+  setImageDataFields,
+  IMAGES_DIR,
+} from "../media/object-image.ts";
 
 export {
   isPrivateHost,
@@ -17,9 +24,10 @@ export {
   fetchAndValidate,
 } from "./avatar-fetch.ts";
 
+/** Legacy path — still written so old /avatars/ links work. */
 const AVATARS_DIR = "data/avatars";
 
-async function removeExistingAvatar(id: string): Promise<void> {
+async function removeLegacyAvatar(id: string): Promise<void> {
   try {
     for await (const entry of Deno.readDir(AVATARS_DIR)) {
       if (entry.name.startsWith(id + ".")) {
@@ -27,7 +35,7 @@ async function removeExistingAvatar(id: string): Promise<void> {
       }
     }
   } catch {
-    // directory doesn't exist yet — nothing to remove
+    /* none */
   }
 }
 
@@ -37,31 +45,31 @@ export async function execAvatar(u: IUrsamuSDK): Promise<void> {
     .trim();
 
   if (!arg || arg.toLowerCase() === "clear") {
-    await removeExistingAvatar(u.me.id);
+    await removeObjectImage(u.me.id);
+    await removeLegacyAvatar(u.me.id);
     const player = await dbojs.queryOne({ id: u.me.id });
     if (player) {
       player.data ||= {};
-      delete player.data.avatarExt;
+      clearImageDataFields(
+        player.data as Record<string, unknown>,
+      );
       await dbojs.modify({ id: player.id }, "$set", player);
     }
     u.send("Avatar cleared.");
     return;
   }
 
-  let url: URL;
-  try {
-    url = new URL(arg);
-  } catch {
-    u.send("Invalid URL.");
+  const result = await importImageFromUrl(u.me.id, arg, u);
+  if (!result.ok) {
+    // importImageFromUrl already messaged via fetchAndValidate
+    if (
+      result.error === "Invalid URL." ||
+      result.error.startsWith("URL must")
+    ) {
+      u.send(result.error);
+    }
     return;
   }
-  if (url.protocol !== "http:" && url.protocol !== "https:") {
-    u.send("URL must use http or https.");
-    return;
-  }
-
-  const result = await fetchAndValidate(url, u);
-  if (!result) return;
 
   const player = await dbojs.queryOne({ id: u.me.id });
   if (!player) {
@@ -69,16 +77,40 @@ export async function execAvatar(u: IUrsamuSDK): Promise<void> {
     return;
   }
 
-  await ensureDir(AVATARS_DIR);
-  await removeExistingAvatar(u.me.id);
-  await Deno.writeFile(
-    join(AVATARS_DIR, `${u.me.id}.${result.ext}`),
-    result.bytes,
-  );
+  // Dual-write legacy /avatars/ (nav + Discord often use this path)
+  const ext = result.ext === "jpeg" ? "jpg" : result.ext;
+  const avPath = `/avatars/${u.me.id}.${ext}`;
+  try {
+    await ensureDir(AVATARS_DIR);
+    await removeLegacyAvatar(u.me.id);
+    const bytes = await Deno.readFile(
+      join(IMAGES_DIR, `${u.me.id}.${result.ext}`),
+    );
+    await Deno.writeFile(
+      join(AVATARS_DIR, `${u.me.id}.${ext}`),
+      bytes,
+    );
+  } catch {
+    /* images path still set below */
+  }
 
   player.data ||= {};
-  player.data.avatarExt = result.ext;
-  await dbojs.modify({ id: player.id }, "$set", player);
+  // Public URL prefers /avatars/ so site nav keeps working
+  const rev = Date.now().toString(36);
+  const publicUrl = `${avPath}?v=${rev}`;
+  setImageDataFields(
+    player.data as Record<string, unknown>,
+    publicUrl,
+    ext,
+  );
+  player.data.image = publicUrl;
+  player.data.avatarExt = ext;
+  await dbojs.modify({ id: player.id }, "$set", {
+    "data.image": publicUrl,
+    "data.imageExt": ext,
+    "data.avatarExt": ext,
+    "data.imageRev": rev,
+  });
   u.send("Avatar saved.");
 }
 
@@ -89,7 +121,8 @@ addCmd({
   category: "General",
   help: `@avatar [<url>|clear]  — Set or clear your player avatar image.
 
-Accepted formats: PNG, JPEG, GIF, WebP. Maximum size: 2 MB.
+Accepted formats: PNG, JPEG, GIF, WebP. Maximum size: 8 MB.
+Stored locally under /images/ (and legacy /avatars/).
 Omit the URL or use "clear" to remove your avatar.
 
 Examples:

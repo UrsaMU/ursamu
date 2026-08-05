@@ -63,6 +63,7 @@ export type WikiStub = {
   type?: string;
   draft?: boolean;
   featured?: boolean;
+  bgImage?: boolean;
   author?: string;
   date?: string;
   readLock?: string;
@@ -136,6 +137,75 @@ export type JobStats = {
   byPriority: Record<string, number>;
   openAssigned: number;
   openUnassigned: number;
+};
+
+/** In-game mail message (from /api/v1/mail). */
+export type MailMessage = {
+  id: string;
+  from: string;
+  to: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject: string;
+  message: string;
+  date: number;
+  read: boolean;
+  replied?: boolean;
+  forwarded?: boolean;
+  starred?: boolean;
+  folder?: "inbox" | "trash";
+  expiresAt?: number;
+  attachments?: string[];
+};
+
+export type MailStats = {
+  total: number;
+  inbox: number;
+  unread: number;
+  trash: number;
+  quota: number;
+};
+
+/** Channel record (+ staff enrich). */
+export type ChannelRow = {
+  id: string;
+  name: string;
+  lock?: string;
+  hidden?: boolean;
+  header: string;
+  alias?: string;
+  masking?: boolean;
+  owner?: string;
+  logHistory?: boolean;
+  historyLimit?: number;
+  announce?: boolean;
+  autoJoin?: boolean;
+  users?: number;
+};
+
+export type ChanHistoryLine = {
+  id: string;
+  chanId: string;
+  chanName: string;
+  playerId: string;
+  playerName: string;
+  message: string;
+  timestamp: number;
+};
+
+/** Help topic from /api/v1/help. */
+export type HelpEntry = {
+  name: string;
+  section: string;
+  content: string;
+  source: "command" | "file" | "database" | string;
+  tags: string[];
+  hidden?: boolean;
+};
+
+export type HelpIndex = {
+  sections: string[];
+  topics: HelpEntry[];
 };
 
 /** BBS board (from /api/v1/boards). */

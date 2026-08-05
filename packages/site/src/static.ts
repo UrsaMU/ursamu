@@ -51,6 +51,13 @@ function isPublicRootSpa(path: string): boolean {
     return true;
   }
   if (path === "/wiki" || path.startsWith("/wiki/")) return true;
+  if (path === "/help" || path.startsWith("/help/")) return true;
+  if (path === "/chargen" || path.startsWith("/chargen/")) {
+    return true;
+  }
+  if (path === "/play" || path.startsWith("/play/")) {
+    return true;
+  }
   return false;
 }
 
@@ -339,7 +346,7 @@ export async function siteStaticHandler(
   }
 
   // Strip mount prefix; with serveRoot, public SPA paths at /
-  // (/, /login, /profile, /wiki/…) also serve the shell.
+  // (/, /login, /profile, /wiki/, /help/…) also serve the shell.
   if (path === mount || path === `${mount}/`) {
     path = "/index.html";
   } else if (path.startsWith(`${mount}/`)) {

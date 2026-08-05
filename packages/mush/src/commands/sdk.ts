@@ -106,19 +106,42 @@ async function resolveRoom(roomId: string | undefined): Promise<IDBObj & { broad
     broadcast: (msg: string, opts?: Record<string, unknown>) => {
       const exclude = (opts?.exclude as string[]) ?? [];
       const reality = opts?.reality as string | undefined;
+      /** Structured payload for web clients (e.g. chat bubbles). */
+      const data = (opts?.data && typeof opts.data === "object")
+        ? opts.data as Record<string, unknown>
+        : null;
       const allSessions = sessions.list();
       room.contents
         .filter((o) => {
-          if (!o.flags.has("connected") || exclude.includes(o.id)) return false;
+          if (!o.flags.has("connected") || exclude.includes(o.id)) {
+            return false;
+          }
           if (reality === undefined) return true;
-          const plane = (o.state.reality as string | undefined) ?? "material";
+          const plane =
+            (o.state.reality as string | undefined) ?? "material";
           return plane === reality;
         })
         .forEach((o) => {
           const socketIds = allSessions
-            .filter((s) => ((s as unknown as Record<string, unknown>).actorId as string | undefined) === o.id)
+            .filter((s) =>
+              ((s as unknown as Record<string, unknown>)
+                .actorId as string | undefined) === o.id
+            )
             .map((s) => s.socketId);
-          if (socketIds.length) send(socketIds, msg);
+          for (const sid of socketIds) {
+            const ct = sessions.get(sid)?.meta?.clientType;
+            // Web chat UI: structured data only (no plain msg line)
+            if (data && ct === "web") {
+              const ui = (data as { ui?: { type?: string } }).ui;
+              if (ui?.type === "chat") {
+                sendPayload(sid, "", data);
+              } else {
+                sendPayload(sid, msg, data);
+              }
+            } else {
+              send([sid], msg);
+            }
+          }
         });
     },
   };
@@ -200,24 +223,88 @@ export async function createNativeSDK(
   const me = await resolveActor(actorId);
   const here = await resolveRoom(me.location);
   const state: Record<string, unknown> = {};
+  const sess = sessions.get(socketId);
+  const clientType =
+    (sess?.meta?.clientType as string | undefined) || "telnet";
 
   const u: IUrsamuSDK = {
     state,
     socketId,
+    clientType,
     me,
     here,
     target: undefined,
 
     ui: {
-      panel: () => null,
+      panel: (options: {
+        type?: "header" | "list" | "grid" | "table" | "panel";
+        title?: string;
+        content: unknown;
+        style?: string;
+      }) => ({
+        type: options.type ?? "panel",
+        title: options.title,
+        content: options.content,
+        style: options.style,
+      }),
       render: (tpl: string, data: Record<string, unknown>) =>
         tpl.replace(/\{\{(.+?)\}\}/g, (_, k) => String(data[k.trim()] ?? "")),
-      layout: () => {},
+      /**
+       * Structured UI for the web game client. Sent as WS payload
+       * `{ msg, data: { ui } }`. Clients without a layout renderer
+       * ignore `data.ui` and show `msg` (if any) as plain text.
+       */
+      layout: (options: {
+        components: unknown[];
+        meta?: Record<string, unknown>;
+      }) => {
+        if (!socketId) return;
+        const ui = {
+          type: "layout",
+          components: options.components ?? [],
+          meta: options.meta ?? {},
+        };
+        sendPayload(socketId, "", { ui });
+      },
     },
 
     util: {
-      displayName: (obj: IDBObj, _actor: IDBObj) =>
-        (obj.state?.moniker as string) || (obj.state?.name as string) || obj.name || "Unknown",
+      /**
+       * Prefer moniker (with color codes) over plain name for all FE/UI.
+       * Order: state/data.moniker → MONIKER attr → name_color+name → name.
+       */
+      displayName: (obj: IDBObj, _actor: IDBObj) => {
+        const bag = {
+          ...((obj as { data?: Record<string, unknown> }).data ??
+            {}),
+          ...(obj.state ?? {}),
+        } as Record<string, unknown>;
+        let moniker = String(bag.moniker ?? "").trim();
+        if (!moniker) {
+          const attrs = (bag.attributes as
+            | { name?: string; value?: string }[]
+            | undefined) ?? [];
+          const hit = attrs.find((a) =>
+            String(a.name ?? "").toUpperCase() === "MONIKER"
+          );
+          moniker = String(hit?.value ?? "").trim();
+        }
+        if (moniker) {
+          return moniker.split(";")[0]?.trim() || moniker;
+        }
+        const rawName = String(
+          bag.name ?? obj.name ?? "Unknown",
+        );
+        const name =
+          rawName.split(";")[0]?.trim() || rawName || "Unknown";
+        const nameColor = String(bag.name_color ?? "").trim();
+        if (nameColor && name.length > 0) {
+          return `${nameColor}${name[0]}%cn%ch%cw${
+            name.slice(1)
+          }%cn`;
+        }
+        return name;
+      },
       target: targetFn,
       center,
       ljust,
@@ -485,6 +572,21 @@ export async function createNativeSDK(
           return ok ? hydrate(player) : false;
         }
         if (stored !== password) return false;
+        // Upgrade legacy plaintext on successful telnet connect
+        try {
+          const bcrypt = await import("bcrypt");
+          const hashFn = bcrypt.hash ??
+            (bcrypt as unknown as {
+              default: { hash: typeof bcrypt.hash };
+            }).default.hash;
+          const hashed = await hashFn(password, 10);
+          await dbojs.modify({ id: player.id }, "$set", {
+            "data.password": hashed,
+          } as Partial<IDBOBJ>);
+          player.data.password = hashed;
+        } catch {
+          /* best-effort */
+        }
         return hydrate(player);
       },
       login: async (id: string) => {

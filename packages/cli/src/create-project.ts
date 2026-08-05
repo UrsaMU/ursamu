@@ -19,6 +19,10 @@ import {
   gameEnvFile,
   gameConnectTxt,
   gameWikiHome,
+  gameWikiRulesApproval,
+  gameWikiRulesConduct,
+  gameWikiCommandsBasic,
+  gameWikiHelpStaff,
   gameGitignore,
   gameReadme,
   gameClaude,
@@ -143,6 +147,9 @@ export async function scaffoldProject(
     "scripts",
     "system/scripts",
     "wiki",
+    "wiki/rules",
+    "wiki/commands",
+    "wiki/help",
   ]) {
     await Deno.mkdir(join(targetDir, dir), { recursive: true });
     console.log(`Created directory: ${dir}`);
@@ -156,7 +163,11 @@ export async function scaffoldProject(
   console.log(`Created src/plugins/plugins.manifest.json (${isLocal ? "local symlinks" : "empty remote"} mode)`);
 
   await Deno.writeTextFile(join(targetDir, "wiki", "home.md"), gameWikiHome(name));
-  console.log("Created wiki/home.md");
+  await Deno.writeTextFile(join(targetDir, "wiki", "rules", "approval.md"), gameWikiRulesApproval(name));
+  await Deno.writeTextFile(join(targetDir, "wiki", "rules", "conduct.md"), gameWikiRulesConduct(name));
+  await Deno.writeTextFile(join(targetDir, "wiki", "commands", "basic.md"), gameWikiCommandsBasic(name));
+  await Deno.writeTextFile(join(targetDir, "wiki", "help", "staff.md"), gameWikiHelpStaff(name));
+  console.log("Created default wiki pages in wiki/");
 
   await copySystemScripts(targetDir);
   await noteHelpDir(targetDir);
@@ -193,6 +204,7 @@ export async function scaffoldProject(
   await writeConnectTxt(targetDir, name);
   console.log("Created text/default_connect.txt");
 
+  // Default “full portal” stack for new games (public site + staff).
   const defaultPkgs = [
     "@ursamu/builder",
     "@ursamu/channels",
@@ -200,6 +212,8 @@ export async function scaffoldProject(
     "@ursamu/bbs",
     "@ursamu/mail",
     "@ursamu/wiki",
+    "@ursamu/web",
+    "@ursamu/site",
   ];
   // Automatically resolve and include required peer dependencies in correct order:
   // - @ursamu/cofd-plugin -> @ursamu/help, @ursamu/jobs, @ursamu/combat
@@ -245,6 +259,8 @@ export async function scaffoldProject(
       "@ursamu/discord",
       "@ursamu/map-plugin",
       "@ursamu/events",
+      "@ursamu/web",
+      "@ursamu/site",
     ];
 
     const result: string[] = [];
@@ -319,10 +335,12 @@ export async function scaffoldProject(
   };
 
   const jsrImports: Record<string, string> = {
-    "ursamu":                  "jsr:@ursamu/mush",
-    "@ursamu/mush":            "jsr:@ursamu/mush",
-    "@ursamu/core":            "jsr:@ursamu/core",
-    "@ursamu/ursamu":          "jsr:@ursamu/ursamu",
+    "ursamu":                  "jsr:@ursamu/mush@^1.0.30",
+    "@ursamu/mush":            "jsr:@ursamu/mush@^1.0.30",
+    "@ursamu/mush/app":        "jsr:@ursamu/mush@^1.0.30/app",
+    "@ursamu/core":            "jsr:@ursamu/core@^1.0.2",
+    "@ursamu/ursamu":          "jsr:@ursamu/mush@^1.0.30",
+    "@ursamu/ursamu/app":      "jsr:@ursamu/mush@^1.0.30/app",
     "@std/path":               "jsr:@std/path@^0.224.0",
     "@std/assert":             "jsr:@std/assert@^0.224.0",
     "@std/fs":                 "jsr:@std/fs@^0.224.0",
@@ -336,8 +354,17 @@ export async function scaffoldProject(
       return `${engineRelPath}/packages/cofd/tests/helpers/globals-shim.ts`;
     }
     const slug = pkgName.replace("@ursamu/", "");
-    const base = slug.replace(/-plugin$/, "").replace(/^mekton-zeta$/, "mekton");
-    const entry = (base === "cofd" || base === "lang" || base === "vendor" || base === "dnd" || base === "discord") ? "index.ts" : "mod.ts";
+    const base = slug
+      .replace(/-plugin$/, "")
+      .replace(/^mekton-zeta$/, "mekton");
+    const entry =
+      (base === "cofd" ||
+          base === "lang" ||
+          base === "vendor" ||
+          base === "dnd" ||
+          base === "discord")
+        ? "index.ts"
+        : "mod.ts";
     return `${engineRelPath}/packages/${base}/${entry}`;
   }
 

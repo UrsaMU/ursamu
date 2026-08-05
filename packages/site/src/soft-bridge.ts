@@ -26,9 +26,13 @@ export {
   listSiteNav,
   clearSiteNav,
   mergeSiteNav,
+  filterSiteNav,
+  siteNavRequireMet,
 } from "./site-nav.ts";
-export type { SiteNavRegistration } from "./site-nav.ts";
-
+export type {
+  SiteNavRegistration,
+  SiteNavAuthCtx,
+} from "./site-nav.ts";
 export {
   registerSiteStatic,
   unregisterSiteStatic,

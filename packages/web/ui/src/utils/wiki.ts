@@ -55,6 +55,9 @@ export type WikiPagePayload = {
   title: string;
   body: string;
   draft: boolean;
+  featured: boolean;
+  /** Public site: theme bg + home-height; default false = compact. */
+  bgImage: boolean;
   readLock: string;
   tags: string[];
 };
@@ -64,6 +67,8 @@ export function pageSnapshot(p: WikiPagePayload): string {
     title: p.title,
     body: p.body,
     draft: p.draft,
+    featured: p.featured === true,
+    bgImage: p.bgImage === true,
     readLock: p.readLock,
     tags: [...p.tags].map((t) => t.toLowerCase()).sort(),
   });

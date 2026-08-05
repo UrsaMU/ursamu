@@ -1,3 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 817 6" fill="none" preserveAspectRatio="none">
-  <path d="M-2.14577e-06 2.88675L2.88675 5.7735L5.7735 2.88675L2.88675 -2.14577e-06L-2.14577e-06 2.88675ZM816.773 2.88682L813.887 6.92623e-05L811 2.88682L813.887 5.77357L816.773 2.88682ZM2.88675 2.88675L2.88675 3.38675L813.887 3.38682L813.887 2.88682L813.887 2.38682L2.88675 2.38675L2.88675 2.88675Z" fill="#F7E4DD" fill-opacity="0.5"/>
+  <!-- Mid stroke only — end diamonds are CSS so they never squash -->
+  <path d="M6 2.5H811V3.5H6V2.5Z" fill="#F7E4DD" fill-opacity="0.5"/>
 </svg>

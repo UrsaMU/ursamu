@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html><head><meta property="og:type" content="website">
+<meta property="og:url" content="http://localhost:3001/llms/">
+<meta name="twitter:card" content="summary">
+</head><body><h1>UrsaMU — AI Reference</h1>
+<blockquote>
+<p>Machine-optimized reference for code generation. Covers all public APIs,<br>
+types, patterns, and conventions. For human-readable guides see docs/guides/.<br>
+<strong>Current version: v2.6.0.</strong> Authoritative API surface lives at<br>
+<code>src/@types/UrsamuSDK.ts</code> and is mirrored in<br>
+<code>.claude/skills/ursamu-dev/references/api-reference.md</code>.</p>
+</blockquote>
+<hr>
+<h2>Overview</h2>
+<p>UrsaMU is a TypeScript/Deno MUSH-style multiplayer game server. Key characteristics:</p>
+<ul>
+<li>Runtime: <strong>Deno</strong> with Deno KV storage</li>
+<li>Public package: <strong><code>jsr:@ursamu/mush</code></strong></li>
+<li>Scripts run in isolated <strong>Web Workers</strong> (no Deno APIs, no network, no filesystem)</li>
+<li>Commands registered with <code>addCmd()</code> run in native Deno context (full APIs available)</li>
+<li>Configuration in <code>config/</code> — JSON or TOML</li>
+<li>Plugins in <code>src/plugins/&lt;name&gt;/</code> — auto-discovered at startup</li>
+<li>System scripts in <code>system/scripts/</code> — one file per command, auto-registered</li>
+</ul>
+<hr>
+<h2>Import Paths</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// All public APIs (v2.6.0)
+import {
+  addCmd, cmds, registerScript, registerCmdMiddleware,
+  registerPluginRoute, registerUIComponent, unregisterUIComponent,
+  getRegisteredUIComponents,
+  mu, createObj, DBO, dbojs, gameHooks, send, joinSocketToRoom,
+  softcodeService, registerSoftcodeFunc, registerSoftcodeSub,
+  evaluateLock, validateLock, registerLockFunc,
+  registerFormatHandler, registerFormatTemplate, unregisterFormatHandler,
+  resolveFormat, resolveFormatOr, resolveGlobalFormat, resolveGlobalFormatOr,
+  header, divider, footer,
+  registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames,
+  // Stdlib (v2.5.1+): Noise, PRNG, physics, spatial, interpolation, vector
+  Noise, createNoise, seedNoise, perlin1, perlin2, perlin3, simplex2,
+  worley2, fbm2, ridged2, noiseGrid, buildPerm,
+  Rng, createRng,
+  vreflect, pointInAabb, rayAabb,
+  dist2d, dist3d, distSq2d, distSq3d, manhattan, chebyshev, angle2d, bearing,
+  lerp, inverseLerp, remap, smoothstep, smootherstep, clamp,
+  vsize, vsizeSq, vdistance, vdistanceSq, vlerp, vclamp,
+} from "jsr:@ursamu/mush";
+
+// Types (zero runtime cost)
+import type {
+  ICmd, IPlugin, IDBObj, IUrsamuSDK,
+  SayEvent, PoseEvent, PageEvent, MoveEvent, SessionEvent,
+  ChannelMessageEvent, SceneCreatedEvent, ScenePoseEvent,
+  SceneSetEvent, SceneTitleEvent, SceneClearEvent,
+} from "jsr:@ursamu/mush";
+</code></pre>
+<p>Internal plugin imports (use only within src/plugins/):</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "../../services/commands/cmdParser.ts";
+import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+</code></pre>
+<hr>
+<h2>IDBObj — Game Object</h2>
+<p>Every room, player, exit, and item in the database.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IDBObj {
+  id: string;                        // Numeric string: "1", "42"
+  name?: string;                     // Display name (shortcut to state.name)
+  flags: Set&lt;string&gt;;                // e.g. Set { "player", "connected" }
+  location?: string;                 // ID of containing room/object
+  state: Record&lt;string, unknown&gt;;    // All stored data (desc, stats, attrs)
+  contents: IDBObj[];                // Objects contained by this object
+}
+</code></pre>
+<p>Common flags:</p>
+<ul>
+<li><code>"superuser"</code> — first player created; highest privilege</li>
+<li><code>"admin"</code> / <code>"wizard"</code> — staff level 9; <code>wizard</code> requires <code>superuser</code> to grant</li>
+<li><code>"builder"</code> — can build rooms/objects</li>
+<li><code>"player"</code> — is a player character</li>
+<li><code>"connected"</code> — currently online</li>
+<li><code>"room"</code> — is a room</li>
+<li><code>"exit"</code> — is an exit</li>
+<li><code>"thing"</code> — is an item</li>
+<li><code>"dark"</code> — hidden from lists</li>
+<li><code>"visual"</code> — others can examine without ownership</li>
+</ul>
+<hr>
+<h2>IUrsamuSDK — The <code>u</code> Object</h2>
+<p>Injected into every command’s <code>exec()</code> and into every sandbox script.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IUrsamuSDK {
+  // Context (read-only, injected)
+  state:    Record&lt;string, unknown&gt;;          // Per-execution scratch state
+  socketId?: string;                          // Caller's WebSocket ID
+  me:       IDBObj;                           // The actor
+  here:     IDBObj &amp; { broadcast(msg: string, opts?: Record&lt;string,unknown&gt;): void };
+  target?:  IDBObj &amp; { broadcast(msg: string, opts?: Record&lt;string,unknown&gt;): void };
+  cmd:      {
+    name:      string;      // matched command name
+    original?: string;      // raw input string
+    args:      string[];    // regex capture groups
+    switches?: string[];    // ["edit"] from "@cmd/edit ..."
+  };
+
+  // Messaging
+  send(message: string, target?: string, options?: Record&lt;string,unknown&gt;): void;
+  broadcast(message: string, options?: Record&lt;string,unknown&gt;): void;
+
+  // Navigation / execution
+  teleport(target: string, destination: string): void;
+  execute(command: string): void;         // as actor, full pipeline
+  force(command: string): void;           // as actor, bypasses some checks
+  forceAs(targetId: string, command: string): Promise&lt;void&gt;;  // as another object
+
+  // Permissions
+  canEdit(actor: IDBObj, target: IDBObj): Promise&lt;boolean&gt;;
+  checkLock(target: string | IDBObj, lock: string): Promise&lt;boolean&gt;;
+  setFlags(target: string | IDBObj, flags: string): Promise&lt;void&gt;;
+  trigger(target: string, attr: string, args?: string[]): Promise&lt;void&gt;;
+  eval(targetId: string, attr: string, args?: string[]): Promise&lt;string&gt;;
+
+  // Namespaces (all methods async)
+  db:     IUrsamuDB;
+  util:   IUrsamuUtil;
+  auth:   IUrsamuAuth;
+  sys:    IUrsamuSys;
+  chan:   IUrsamuChan;
+  bb:     IUrsamuBB;
+  text:   IUrsamuText;
+  attr:   IUrsamuAttr;
+  events: IUrsamuEvents;
+  mail:   IUrsamuMail;   // sandbox scripts only (not in native addCmd)
+  ui:     IUrsamuUI;     // web client only
+}
+</code></pre>
+<hr>
+<h2>u.db — Database</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Search — returns IDBObj[]
+await u.db.search({ flags: /player/i })           // by flag regex
+await u.db.search({ flags: /connected/i })         // connected players
+await u.db.search({ location: u.here.id })         // objects in room
+await u.db.search({ location: u.here.id, flags: /player/i })
+await u.db.search({ "data.name": /alice/i })       // by name (case-insensitive)
+await u.db.search({ $or: [{ "data.name": /a/i }, { "data.alias": /a/i }] })
+await u.db.search("partial name")                  // string search
+
+// Create — returns IDBObj
+const obj = await u.db.create({
+  flags: new Set(["thing"]),
+  location: u.me.id,          // in actor's inventory
+  state: { name: "Sword", damage: 5 },
+  contents: [],
+});
+
+// Modify — op must be "$set", "$unset", or "$inc"
+await u.db.modify(u.me.id, "$set", { "data.gold": 100 });           // one field
+await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: 100 } }); // full state
+await u.db.modify(u.me.id, "$inc", { "data.score": 10 });           // increment
+await u.db.modify(u.me.id, "$unset", { "data.tempFlag": "" });      // remove field
+
+// Destroy
+await u.db.destroy(obj.id);
+</code></pre>
+<blockquote>
+<p><strong>IMPORTANT</strong>: <code>u.db.modify(id, op, data)</code> — <code>op</code> must be <code>"$set"</code>, <code>"$unset"</code>,<br>
+or <code>"$inc"</code>. Passing <code>"name"</code>, <code>"state"</code>, or any other string does nothing.</p>
+</blockquote>
+<hr>
+<h2>u.util — Utilities</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Target resolution (searches inventory → room → global if true)
+const obj = await u.util.target(u.me, "sword");       // by name
+const obj = await u.util.target(u.me, "#42");          // by ID
+const obj = await u.util.target(u.me, "alice", true);  // global search
+if (!obj) { u.send("Not found."); return; }
+
+// Display name (applies moniker if set)
+u.util.displayName(u.me, u.me)        // actor's own display name
+u.util.displayName(target, u.me)      // target's display name as seen by actor
+
+// Strip MUSH codes / ANSI (use before storing or measuring)
+u.util.stripSubs("%ch%crDanger!%cn")  // → "Danger!"
+
+// Text alignment (all honor MUSH color codes as zero-width)
+u.util.ljust("text", 20)              // "text                "
+u.util.rjust("100",  20)              // "                 100"
+u.util.center("TITLE", 40, "-")       // "-------------------TITLE------------------"
+u.util.center("TITLE", 40)            // "                 TITLE                  "
+
+// Block-style decorators (78-col default; %ch/%cn applied automatically)
+// Override via config game.layout.header / .divider / .footer (mushcode)
+u.util.header("Title")                // default or game.layout.header template
+u.util.divider("Section")             // default or game.layout.divider template
+u.util.footer("")                     // default or game.layout.footer template
+
+// Printf formatting
+u.util.sprintf("%-10s %5d", "Alice", 1200)   // "Alice       1200"
+u.util.sprintf("%05d", 42)                   // "00042"
+u.util.sprintf("%.2f%%", 98.6)              // "98.60%"
+
+// Column template
+u.util.template(
+  "[NNN] [TTTTTTTTTTTTTTTTTTTT]",
+  { N: { value: "42", align: "right" }, T: { value: "Title", align: "left" } }
+)  // → "[ 42] [Title               ]"
+
+// Map data (optional, may be undefined)
+u.util.getMapData?.(targetId, radius)
+u.util.parseDesc?.(desc, actor, target)  // async, optional
+</code></pre>
+<hr>
+<h2>u.auth — Authentication</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const ok = await u.auth.verify(name, password);     // boolean
+await u.auth.login(playerId);                         // connect player
+const hash = await u.auth.hash("plaintext");          // bcrypt hash
+await u.auth.setPassword(playerId, "newpassword");    // change password
+</code></pre>
+<hr>
+<h2>u.sys — Server Control</h2>
+<p>Admin/wizard-only. The SDK does NOT enforce privilege — scripts must check flags.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.sys.setConfig("game.masterRoom", "42");   // runtime config change
+await u.sys.disconnect(socketId);                   // kick a socket
+const ms = await u.sys.uptime();                    // uptime in milliseconds
+await u.sys.reboot();                               // exit 75 → daemon restarts
+await u.sys.shutdown();                             // exit 0 → clean stop
+await u.sys.update();                               // git pull origin/main + reboot
+await u.sys.update("develop");                      // pull specific branch
+
+// Game time (in-game calendar)
+const t: IGameTime = await u.sys.gameTime();        // { year, month, day, hour, minute }
+await u.sys.setGameTime({ year: 1340, month: 3, day: 15, hour: 8, minute: 0 });
+
+// IGameTime fields: year, month (1-12), day (1-28), hour (0-23), minute (0-59)
+</code></pre>
+<hr>
+<h2>u.chan — Channels</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.chan.join("public", "pub");                  // join by name, set alias
+await u.chan.leave("pub");                           // leave by alias
+const channels = await u.chan.list();               // all channel memberships
+
+// Admin only:
+await u.chan.create("events", {
+  header: "%ch[EVENTS]%cn",
+  lock: "player+",
+  hidden: false
+});
+await u.chan.destroy("events");
+await u.chan.set("public", {
+  header: "%ch[PUB]%cn",
+  masking: true,        // hide speaker names
+  logHistory: true,
+  historyLimit: 100,
+});
+
+// Get recent history (default 20 messages)
+const history = await u.chan.history("public");          // last 20
+const history = await u.chan.history("public", 50);      // last 50
+// → [{ id, playerName, message, timestamp }, ...]
+</code></pre>
+<hr>
+<h2>u.bb — Bulletin Boards</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read
+const boards = await u.bb.listBoards();
+// → [{ id, name, description?, order, postCount, newCount }, ...]
+
+const posts = await u.bb.listPosts(boardId);
+// → [{ id, num, subject, authorName, date, edited? }, ...]
+
+const post = await u.bb.readPost(boardId, postNum);
+// → { id, subject, body, authorName, date, edited? } | null
+
+// Unread counts
+const n = await u.bb.newPostCount(boardId);
+const total = await u.bb.totalNewCount();
+await u.bb.markRead(boardId);
+
+// Write (player)
+await u.bb.post(boardId, "Subject", "Body text.");
+await u.bb.editPost(boardId, postNum, "Updated body.");
+await u.bb.deletePost(boardId, postNum);
+
+// Admin
+await u.bb.createBoard("General", { description: "General chat", order: 1 });
+await u.bb.destroyBoard(boardId);
+</code></pre>
+<hr>
+<h2>u.text — Named Text Blobs</h2>
+<p>Used for MOTD, help pages, templates.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const motd = await u.text.read("motd");           // → string (empty if not set)
+await u.text.set("motd", "Welcome to the game!");
+await u.text.set("motd", "");                     // clear
+</code></pre>
+<hr>
+<h2>u.attr — Object Attributes</h2>
+<p>Reads soft-coded <code>&amp;ATTR</code> values stored on objects.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const val: string | null = await u.attr.get(objectId, "SHORT-DESC");
+const val = await u.attr.get(u.me.id, "FINGER-INFO");
+// Attribute names are case-insensitive. Returns null if not set.
+</code></pre>
+<hr>
+<h2>u.mail — Player Mail (sandbox scripts only)</h2>
+<blockquote>
+<p><strong>Note:</strong> <code>u.mail</code> is only available in sandbox scripts (system/scripts/).<br>
+Native <code>addCmd</code> handlers should import <code>mail</code> from the database directly.</p>
+</blockquote>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send
+await u.mail.send({
+  from: `#${u.me.id}`,          // dbref format: "#42"
+  to: [`#${recipientId}`],       // array of dbrefs
+  cc: [`#${ccId}`],              // optional
+  subject: "Meeting tonight",
+  message: "At 8pm in the hall.",
+  read: false,
+  date: Date.now(),
+});
+
+// Read inbox
+const inbox = await u.mail.read({ to: { $in: [`#${u.me.id}`] } });
+// → IMail[] — sorted manually by date if needed
+
+// Delete
+await u.mail.delete(messageId);
+
+// Mark read / modify
+await u.mail.modify({ id: messageId }, "$set", { read: true });
+
+// IMail shape:
+// { id?: string, from: string, to: string[], cc?: string[],
+//   bcc?: string[], subject: string, message: string,
+//   read: boolean, date: number }
+</code></pre>
+<hr>
+<h2>u.events — Server-Wide Pub/Sub</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Emit
+await u.events.emit("player.levelup", { id: u.me.id, level: 5 });
+
+// Subscribe a stored &amp;ATTR handler
+const subId = await u.events.on("player.levelup", "LEVELUP_HANDLER");
+// The attribute value is a script that receives event data
+</code></pre>
+<hr>
+<h2>u.ui — Web Client UI (web client only)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Send structured layout to the web client
+u.ui.layout({
+  components: [
+    { type: "header", title: "Character Sheet" },
+    { type: "table", content: [["Name", u.me.name]] },
+  ],
+  meta: { command: "score" }
+});
+
+// Render a template string
+const html = u.ui.render("&lt;b&gt;{{name}}&lt;/b&gt;", { name: "Alice" });
+
+// Build a panel
+u.ui.panel({ type: "list", title: "Who's Online", content: players });
+</code></pre>
+<hr>
+<h2>u.trigger / u.eval</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Fire a stored &amp;ATTR as a script (fire-and-forget)
+await u.trigger(objectId, "ONENTER");
+await u.trigger(objectId, "USE", ["open"]);
+await u.trigger(u.me.id, "ACONNECT");
+
+// Evaluate an attribute and return its output as a string
+const result = await u.eval("#42", "FORMULA", ["arg1", "arg2"]);
+</code></pre>
+<hr>
+<h2>u.forceAs</h2>
+<p>Execute a command as another object (requires wizard/admin).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.forceAs(npcId, "say Welcome, traveler!");
+await u.forceAs(objectId, "look");
+</code></pre>
+<hr>
+<h2>ICmd — Command Registration</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface ICmd {
+  name:      string;                              // unique label
+  pattern:   string | RegExp;                     // matched against raw input
+  lock?:     string;                              // lock expression
+  exec:      (u: IUrsamuSDK) =&gt; void | Promise&lt;void&gt;;
+  help?:     string;                              // shown in `help &lt;name&gt;`
+  hidden?:   boolean;                             // hide from listings
+  category?: string;                              // group in help listings
+}
+
+addCmd({
+  name: "+greet",
+  pattern: /^\+greet\s+(.*)/i,
+  lock: "connected",
+  exec: async (u) =&gt; {
+    const target = await u.util.target(u.me, u.cmd.args[0]);
+    if (!target) { u.send("Who?"); return; }
+    const myName = u.util.displayName(u.me, u.me);
+    u.send(`You wave to ${u.util.displayName(target, u.me)}.`);
+    u.send(`${myName} waves to you.`, target.id);
+    u.here.broadcast(`${myName} waves to ${u.util.displayName(target, u.me)}.`);
+  },
+});
+</code></pre>
+<h3>Pattern conventions</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// No args:        /^inventory$/i
+// One arg:        /^look\s+(.*)/i          → args[0]
+// Switch + arg:   /^\+cmd(?:\/(\S+))?\s*(.*)/i  → args[0]=switch, args[1]=rest
+// Two parts:      /^@name\s+(.+)=(.+)/i    → args[0], args[1]
+</code></pre>
+<h3>Lock expressions</h3>
+<table>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>""</code></td>
+<td>No restriction (login screen)</td>
+</tr>
+<tr>
+<td><code>"connected"</code></td>
+<td>Must be logged in</td>
+</tr>
+<tr>
+<td><code>"connected builder+"</code></td>
+<td>Logged in + builder or higher</td>
+</tr>
+<tr>
+<td><code>"connected admin+"</code></td>
+<td>Logged in + admin or higher</td>
+</tr>
+<tr>
+<td><code>"connected wizard"</code></td>
+<td>Logged in + wizard</td>
+</tr>
+<tr>
+<td><code>"#42"</code></td>
+<td>Must be object #42</td>
+</tr>
+<tr>
+<td><code>"player+"</code></td>
+<td>Has player flag or higher</td>
+</tr>
+<tr>
+<td><code>"!dark"</code></td>
+<td>Must NOT have dark flag</td>
+</tr>
+<tr>
+<td><code>"wizard|admin"</code></td>
+<td>wizard OR admin</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>IPlugin — Plugin Lifecycle</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IPluginDependency {
+  name:    string;   // must match another plugin's IPlugin.name exactly
+  version: string;   // semver range, e.g. "^1.0.0", "&gt;=2.1.0"
+}
+
+interface IPlugin {
+  name:          string;
+  version:       string;
+  description?:  string;
+  dependencies?: IPluginDependency[];  // see Plugin Coupling Patterns below
+  init?:         () =&gt; boolean | Promise&lt;boolean&gt;;  // return false to abort
+  remove?:       () =&gt; void | Promise&lt;void&gt;;
+}
+
+// index.ts
+import "./commands.ts";     // register addCmd at module-load time
+import type { IPlugin } from "jsr:@ursamu/mush";
+
+export const plugin: IPlugin = {
+  name: "my-plugin",
+  version: "1.0.0",
+  init: async () =&gt; {
+    // seed data, connect external services, etc.
+    return true;
+  },
+  remove: async () =&gt; {
+    // cleanup
+  },
+};
+</code></pre>
+<h2>Plugin is auto-discovered when placed in <code>src/plugins/&lt;name&gt;/index.ts</code>.</h2>
+<h2>Exported Functions</h2>
+<h3><code>addCmd(...cmds: ICmd[])</code></h3>
+<p>Registers commands. Call at module level in <code>commands.ts</code>, not inside <code>init()</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/mush";
+addCmd({ name: "+foo", pattern: /^\+foo/i, exec: (u) =&gt; u.send("foo") });
+</code></pre>
+<h3><code>registerPluginRoute(prefix, handler)</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerPluginRoute } from "jsr:@ursamu/mush";
+registerPluginRoute("/api/v1/myplugin", async (req, userId) =&gt; {
+  return Response.json({ ok: true });
+});
+// handler: (req: Request, userId: string | null) =&gt; Promise&lt;Response&gt;
+</code></pre>
+<h3><code>DBO&lt;T&gt;</code> — Plugin database collections</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { DBO } from "jsr:@ursamu/mush";
+
+interface INote { id: string; playerId: string; text: string; date: number; }
+const notes = new DBO&lt;INote&gt;("myplugin.notes");
+
+await notes.create({ id: crypto.randomUUID(), playerId: u.me.id, text: "hello", date: Date.now() });
+const all = await notes.find({ playerId: u.me.id });
+const one = await notes.findOne({ id: noteId });
+await notes.update({ id: noteId }, { text: "updated" });
+await notes.delete({ id: noteId });
+const all = await notes.all();
+</code></pre>
+<h3><code>dbojs</code> — Game objects</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { dbojs } from "jsr:@ursamu/mush";
+
+const players = await dbojs.queryAll((o) =&gt; o.flags.has("player"));
+const room    = await dbojs.queryOne((o) =&gt; o.id === "1");
+</code></pre>
+<h3><code>createObj(template)</code> — Outside command context</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { createObj } from "jsr:@ursamu/mush";
+const room = await createObj({
+  name: "The Void", flags: new Set(["room"]),
+  state: { desc: "Empty." }, contents: [],
+});
+</code></pre>
+<h3><code>mu()</code> — Start the server</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "jsr:@ursamu/mush";
+await mu();
+</code></pre>
+<hr>
+<h2>GameHooks — Engine Event Bus</h2>
+<p><code>GameHookMap</code> is an <strong>interface</strong> — plugins can extend it via TypeScript<br>
+declaration merging to add their own typed events without modifying the engine:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In your plugin's augmentation file:
+import type { IJob } from "./types.ts";
+declare module "../../../services/Hooks/GameHooks.ts" {
+  interface GameHookMap {
+    "job:created": (job: IJob) =&gt; void | Promise&lt;void&gt;;
+  }
+}
+</code></pre>
+<p>Once imported, all <code>gameHooks.on/off/emit</code> calls become fully typed for the<br>
+new event across the entire codebase.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { gameHooks } from "jsr:@ursamu/mush";
+
+gameHooks.on("player:login", ({ actorId, actorName }) =&gt; { /* ... */ });
+gameHooks.off("player:login", handler);
+await gameHooks.emit("player:login", payload);
+</code></pre>
+<h3>Built-in events</h3>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Payload fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>player:say</code></td>
+<td><code>actorId</code>, <code>actorName</code>, <code>roomId</code>, <code>message</code></td>
+</tr>
+<tr>
+<td><code>player:pose</code></td>
+<td><code>actorId</code>, <code>actorName</code>, <code>roomId</code>, <code>content</code>, <code>isSemipose</code></td>
+</tr>
+<tr>
+<td><code>player:page</code></td>
+<td><code>actorId</code>, <code>actorName</code>, <code>targetId</code>, <code>targetName</code>, <code>message</code></td>
+</tr>
+<tr>
+<td><code>player:move</code></td>
+<td><code>actorId</code>, <code>actorName</code>, <code>fromRoomId</code>, <code>toRoomId</code>, <code>fromRoomName</code>, <code>toRoomName</code>, <code>exitName</code></td>
+</tr>
+<tr>
+<td><code>player:login</code></td>
+<td><code>actorId</code>, <code>actorName</code></td>
+</tr>
+<tr>
+<td><code>player:logout</code></td>
+<td><code>actorId</code>, <code>actorName</code></td>
+</tr>
+<tr>
+<td><code>channel:message</code></td>
+<td><code>channelName</code>, <code>senderId</code>, <code>senderName</code>, <code>message</code></td>
+</tr>
+<tr>
+<td><code>scene:created</code></td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>sceneType</code></td>
+</tr>
+<tr>
+<td><code>scene:pose</code></td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>msg</code>, <code>type</code></td>
+</tr>
+<tr>
+<td><code>scene:set</code></td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>description</code></td>
+</tr>
+<tr>
+<td><code>scene:title</code></td>
+<td><code>sceneId</code>, <code>oldName</code>, <code>newName</code>, <code>actorId</code>, <code>actorName</code></td>
+</tr>
+<tr>
+<td><code>scene:clear</code></td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>actorId</code>, <code>actorName</code>, <code>status</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Script System</h2>
+<p>Scripts live in <code>system/scripts/</code>. File name = command name.</p>
+<h3>ESM style (recommended for complex scripts)</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/mycommand.ts
+export default async (u: IUrsamuSDK) =&gt; {
+  // full access to u.*
+};
+
+export const aliases = ["myalias", "mc"];  // optional extra trigger names
+</code></pre>
+<h3>Legacy block style (simple scripts, no export)</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// system/scripts/gold.ts  (no export = block mode)
+const gold = (u.me.state.gold as number) || 0;
+u.send(`You have ${gold} gold.`);
+</code></pre>
+<h3>ESM import restrictions in scripts</h3>
+<p>Workers support standard ESM imports BUT:</p>
+<ul>
+<li>JSR sub-path imports (<code>jsr:@std/fmt/printf</code>) do NOT work — use u.util.sprintf instead</li>
+<li>Cannot import from <code>jsr:@ursamu/mush</code> inside scripts — use the <code>u</code> global</li>
+</ul>
+<hr>
+<h2>MUSH Color Codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>%ch</code></td>
+<td>Bold / bright</td>
+</tr>
+<tr>
+<td><code>%cn</code></td>
+<td>Reset to normal</td>
+</tr>
+<tr>
+<td><code>%cr</code></td>
+<td>Red</td>
+</tr>
+<tr>
+<td><code>%cg</code></td>
+<td>Green</td>
+</tr>
+<tr>
+<td><code>%cb</code></td>
+<td>Blue</td>
+</tr>
+<tr>
+<td><code>%cy</code></td>
+<td>Yellow (actually cyan in some terminals)</td>
+</tr>
+<tr>
+<td><code>%cw</code></td>
+<td>White</td>
+</tr>
+<tr>
+<td><code>%cc</code></td>
+<td>Cyan</td>
+</tr>
+<tr>
+<td><code>%cm</code></td>
+<td>Magenta</td>
+</tr>
+<tr>
+<td><code>%cx</code></td>
+<td>Dark gray</td>
+</tr>
+<tr>
+<td><code>%n</code></td>
+<td>Actor’s name</td>
+</tr>
+<tr>
+<td><code>%r</code> / <code>%R</code></td>
+<td>Newline</td>
+</tr>
+<tr>
+<td><code>%t</code></td>
+<td>Tab</td>
+</tr>
+<tr>
+<td><code>%b</code></td>
+<td>Space</td>
+</tr>
+</tbody>
+</table>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send("%ch%cyWelcome!%cn");
+u.send(`%ch%cr[ALERT]%cn Server restarting.`);
+u.send(u.util.center("%ch=== NEWS ===%cn", 78, "="));
+</code></pre>
+<h2>Strip all codes: <code>u.util.stripSubs(str)</code> — use before storing or measuring length.</h2>
+<h2>Project Layout</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">src/
+  @types/          Type definitions (IDBObj, ICmd, IPlugin, etc.)
+  commands/        Native addCmd registrations (admin, mail, help, etc.)
+  plugins/         Plugin directory — each sub-folder is a plugin
+  routes/          HTTP route handlers (scenes, mail, wiki, etc.)
+  services/        Core services (Database, Sandbox, GameClock, Hooks, etc.)
+  utils/           Shared utilities (flags, target, locks, etc.)
+system/
+  scripts/         Auto-loaded scripts (one per command: look.ts, say.ts, etc.)
+  help/            In-game help text files
+config/            Game configuration (config.json / config.toml)
+docs/              Documentation site (Lume static site generator)
+tests/             Test suite (Deno test)
+</code></pre>
+<hr>
+<h2>Common Patterns</h2>
+<h3>Permission guard (admin/wizard)</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const isAdmin = u.me.flags.has("admin") ||
+                u.me.flags.has("wizard") ||
+                u.me.flags.has("superuser");
+if (!isAdmin) { u.send("Permission denied."); return; }
+</code></pre>
+<h3>Edit permission check</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!(await u.canEdit(u.me, target))) {
+  u.send("Permission denied.");
+  return;
+}
+</code></pre>
+<h3>Standard switch-based command</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">addCmd({
+  name: "+cmd",
+  pattern: /^\+cmd(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  exec: async (u) =&gt; {
+    const sw  = (u.cmd.args[0] || "").toLowerCase().trim();
+    const arg = (u.cmd.args[1] || "").trim();
+    if (!sw || sw === "list") { /* default */ return; }
+    if (sw === "view")  { /* ... */ return; }
+    if (sw === "create") { /* ... */ return; }
+    u.send(`Unknown switch "/${sw}".`);
+  },
+});
+</code></pre>
+<h3>Read and write a state field</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// READ
+const gold = (u.me.state.gold as number) || 0;
+
+// WRITE (spread to preserve existing fields)
+await u.db.modify(u.me.id, "$set", { "data.gold": gold + 10 });
+
+// Or write the entire state object (safe for small objects):
+await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: gold + 10 } });
+</code></pre>
+<h3>Increment a counter</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.db.modify(u.me.id, "$inc", { "data.deaths": 1 });
+</code></pre>
+<h3>Multi-column output table</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const lines: string[] = [];
+lines.push(u.util.center("%ch=== WHO ===%cn", 78, "="));
+for (const p of online) {
+  lines.push(
+    u.util.ljust(u.util.displayName(p, u.me), 25) +
+    u.util.rjust(`${idle}m`, 6)
+  );
+}
+lines.push("=".repeat(78));
+u.send(lines.join("\r\n"));
+</code></pre>
+<h3>Register a plugin REST route</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerPluginRoute("/api/v1/myplugin", async (req, userId) =&gt; {
+  if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  if (req.method === "GET") {
+    return Response.json({ data: await notes.find({ playerId: userId }) });
+  }
+  return Response.json({ error: "Not found" }, { status: 404 });
+});
+</code></pre>
+<h3>Listen for a game hook in a plugin</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { gameHooks } from "jsr:@ursamu/mush";
+import type { SessionEvent } from "jsr:@ursamu/mush";
+
+const onLogin = ({ actorId, actorName }: SessionEvent) =&gt; {
+  console.log(`[myplugin] ${actorName} connected`);
+};
+
+export const plugin: IPlugin = {
+  name: "myplugin", version: "1.0.0",
+  init: () =&gt; { gameHooks.on("player:login", onLogin); return true; },
+  remove: () =&gt; { gameHooks.off("player:login", onLogin); },
+};
+</code></pre>
+<hr>
+<h2>REST API — Core Endpoints</h2>
+<p>Authentication: pass <code>Authorization: Bearer &lt;jwt&gt;</code> header.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/login</code></td>
+<td>No</td>
+<td>Login — returns JWT</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/who</code></td>
+<td>Yes</td>
+<td>Online players list</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/players/:id</code></td>
+<td>Yes</td>
+<td>Player info</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes</code></td>
+<td>Yes</td>
+<td>Scene list</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes</code></td>
+<td>Yes</td>
+<td>Open a new scene</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/:id</code></td>
+<td>Yes</td>
+<td>Scene detail</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/scenes/:id</code></td>
+<td>Yes</td>
+<td>Update scene</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes/:id/pose</code></td>
+<td>Yes</td>
+<td>Post to scene</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/:id/export</code></td>
+<td>Yes</td>
+<td>Export scene (<code>?format=markdown|json</code>)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/mail</code></td>
+<td>Yes</td>
+<td>Inbox list</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/mail</code></td>
+<td>Yes</td>
+<td>Send mail</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/mail/:id</code></td>
+<td>Yes</td>
+<td>Read message</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/mail/:id</code></td>
+<td>Yes</td>
+<td>Delete message</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki</code></td>
+<td>Yes</td>
+<td>List/search wiki</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki/:path</code></td>
+<td>Yes</td>
+<td>Read page</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/wiki</code></td>
+<td>Staff</td>
+<td>Create page</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/wiki/:path</code></td>
+<td>Staff</td>
+<td>Update page</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/wiki/:path</code></td>
+<td>Staff</td>
+<td>Delete page</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<hr>
+<h2>Plugin Coupling Patterns</h2>
+<h3>Rule: never use <code>@ursamu/ursamu/*</code> sub-paths inside <code>src/plugins/</code></h3>
+<p>When running the engine directly, Deno resolves <code>@ursamu/ursamu</code> from the<br>
+local <code>deno.json</code> — not from JSR. A sub-path export that is absent from the<br>
+local <code>deno.json</code> will halt startup even if the published JSR version has it.</p>
+<table>
+<thead>
+<tr>
+<th>Context</th>
+<th>Correct import</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plugin importing another <strong>bundled</strong> plugin</td>
+<td>Relative: <code>../../jobs/mod.ts</code></td>
+</tr>
+<tr>
+<td>External plugin (separate repo) importing engine types</td>
+<td>Sub-path: <code>@ursamu/ursamu/jobs</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Two strategies for plugin-to-plugin communication</h3>
+<p><strong>Tight coupling — use <code>dependencies</code></strong></p>
+<p>When plugin B genuinely cannot function without plugin A’s API (types, DB<br>
+access, configuration):</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// discord/src/index.ts
+export const plugin: IPlugin = {
+  name: "discord",
+  version: "1.1.0",
+  dependencies: [{ name: "chargen", version: "&gt;=1.0.0" }],
+  // chargen is guaranteed to be init()'d before discord
+};
+</code></pre>
+<p>Startup behavior:</p>
+<ul>
+<li>Dep missing or version out of range → <strong>throws, server halts</strong></li>
+<li>Dep’s <code>init()</code> returned false → dependent is cascade-skipped, server continues</li>
+<li>Circular dependency → <strong>throws, server halts</strong> (fix: use <code>gameHooks</code> instead)</li>
+</ul>
+<p><strong>Loose coupling — use <code>gameHooks</code> declaration merging</strong></p>
+<p>When plugin B only needs to <em>react</em> to plugin A’s lifecycle events (no types,<br>
+no direct API calls):</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In plugin A (jobs) — game-hooks-augment.ts:
+declare module "../../../services/Hooks/GameHooks.ts" {
+  interface GameHookMap {
+    "job:created": (job: IJob) =&gt; void | Promise&lt;void&gt;;
+  }
+}
+
+// In plugin A's hooks.ts — bridge emit to gameHooks:
+await gameHooks.emit("job:created", job);   // fires AFTER jobHooks subscribers
+
+// In plugin B (discord) — no jobs import needed:
+import { gameHooks } from "@ursamu/ursamu";
+gameHooks.on("job:created", async (job) =&gt; { /* post to webhook */ });
+</code></pre>
+<p>Loose coupling means:</p>
+<ul>
+<li>Plugin B has no <code>dependencies</code> entry for plugin A</li>
+<li>Plugin B works whether or not plugin A is installed</li>
+<li>No import resolution errors regardless of JSR publish state</li>
+</ul>
+<h3>Case study: discord → jobs import error</h3>
+<p><strong>Symptom</strong> (<code>deno task start</code>):</p>
+<pre class="language-none" tabindex="0"><code class="language-none">Error loading plugin from .../discord/index.ts:
+  TypeError: Unknown export './jobs' for '@ursamu/ursamu'.
+</code></pre>
+<p><strong>Root cause</strong>: <code>discord/src/job-hooks.ts</code> imported <code>jobHooks</code> from<br>
+<code>@ursamu/ursamu/jobs</code>. When running the engine directly, <code>@ursamu/ursamu</code><br>
+resolves to the local <code>deno.json</code> whose exports did not include <code>./jobs</code>.</p>
+<p><strong>Wrong fix</strong>: Add <code>"./jobs": "..."</code> to <code>deno.json</code> exports and leave the<br>
+cross-plugin import as-is. This silences the error locally but doesn’t address<br>
+the architectural problem.</p>
+<p><strong>Right fix (applied)</strong>:</p>
+<ol>
+<li><code>GameHookMap</code> changed from <code>type</code> to <code>interface</code> — enables declaration merging.</li>
+<li>Jobs plugin added <code>game-hooks-augment.ts</code> extending <code>GameHookMap</code> with<br>
+<code>job:created</code>, <code>job:commented</code>, etc.</li>
+<li>Jobs <code>jobHooks.emit()</code> now also bridges to <code>gameHooks.emit()</code>.</li>
+<li>Discord <code>job-hooks.ts</code> uses <code>gameHooks.on("job:created", ...)</code> —<br>
+no import from the jobs plugin at all.</li>
+</ol>
+<h2>Result: discord no longer declares a <code>jobs</code> dependency. It reacts to job<br>
+events whether or not it knows jobs is installed.</h2>
+<p><em>Generated from <code>src/@types/UrsamuSDK.ts</code>, <code>src/services/Sandbox/worker.ts</code>, and source review. Last updated: 2026-05-15 (v2.6.0).</em></p>
+</body></html>

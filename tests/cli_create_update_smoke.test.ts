@@ -82,6 +82,34 @@ Deno.test(
         denoJson.tasks?.["safe-update"]?.includes("safe-update"),
         "deno.json missing safe-update task",
       );
+
+      // Every new game ships game.layout header/footer chrome.
+      const cfg = JSON.parse(
+        await Deno.readTextFile(join(root, "config", "config.json")),
+      ) as {
+        game?: {
+          layout?: {
+            header?: string;
+            footer?: string;
+            divider?: string;
+          };
+        };
+      };
+      assert(
+        typeof cfg.game?.layout?.header === "string" &&
+          cfg.game.layout.header.length > 0,
+        "config missing game.layout.header",
+      );
+      assert(
+        typeof cfg.game?.layout?.footer === "string" &&
+          cfg.game.layout.footer.length > 0,
+        "config missing game.layout.footer",
+      );
+      const mainTs = await Deno.readTextFile(
+        join(root, "src", "main.ts"),
+      );
+      assertStringIncludes(mainTs, "applyLayoutFromConfig");
+      assertStringIncludes(mainTs, "game.layout");
     });
   },
 );

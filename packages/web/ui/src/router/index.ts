@@ -29,6 +29,11 @@ const router = createRouter({
           component: () => import("@/views/DashboardView.vue"),
         },
         {
+          path: "play",
+          name: "play",
+          component: () => import("@/views/PlayView.vue"),
+        },
+        {
           path: "wiki",
           name: "wiki",
           component: () => import("@/views/WikiView.vue"),
@@ -55,16 +60,27 @@ const router = createRouter({
           component: () => import("@/views/DbView.vue"),
           props: true,
         },
+        // Legacy Players URLs → Database (players folded into DB)
         {
           path: "players",
-          name: "players",
-          component: () => import("@/views/PlayersView.vue"),
+          redirect: (to) => ({
+            name: "db",
+            query: {
+              filter: typeof to.query.filter === "string" &&
+                  ["online", "offline", "staff"].includes(
+                    to.query.filter,
+                  )
+                ? to.query.filter
+                : "player",
+            },
+          }),
         },
         {
           path: "players/:id",
-          name: "player-detail",
-          component: () => import("@/views/PlayersView.vue"),
-          props: true,
+          redirect: (to) => ({
+            name: "db-detail",
+            params: { id: to.params.id },
+          }),
         },
         {
           path: "jobs",
@@ -92,6 +108,39 @@ const router = createRouter({
           path: "bbs/:boardId/posts/:postNum",
           name: "bbs-post",
           component: () => import("@/views/BbsView.vue"),
+          props: true,
+        },
+        {
+          path: "mail",
+          name: "mail",
+          component: () => import("@/views/MailView.vue"),
+        },
+        {
+          path: "mail/:id",
+          name: "mail-detail",
+          component: () => import("@/views/MailView.vue"),
+          props: true,
+        },
+        {
+          path: "channels",
+          name: "channels",
+          component: () => import("@/views/ChannelsView.vue"),
+        },
+        {
+          path: "channels/:id",
+          name: "channels-detail",
+          component: () => import("@/views/ChannelsView.vue"),
+          props: true,
+        },
+        {
+          path: "help",
+          name: "help",
+          component: () => import("@/views/HelpView.vue"),
+        },
+        {
+          path: "help/t/:topic(.*)",
+          name: "help-detail",
+          component: () => import("@/views/HelpView.vue"),
           props: true,
         },
         {

@@ -16,21 +16,20 @@ project, including daemon scripts, telnet sidecar, and a `.env` with a
 fresh JWT secret (v2.4.0):
 
 ```bash
-deno run -A jsr:@ursamu/mush/cli create my-game
+deno run -A jsr:@ursamu/cli@0.1.2/create my-game
 cd my-game
 ```
 
 The scaffold writes:
 
-- `deno.json` with `start` / `dev` / `test` tasks
-- `config/config.json` (see "Configuration" below)
-- `plugins.manifest.json` — declared plugin dependencies
-- `system/scripts/` — empty, ready for local script overrides
-- `daemon.sh`, `stop.sh`, `restart.sh`, `status.sh` — supervised lifecycle
-- `.env` containing a generated `JWT_SECRET`
+- `deno.json` with `start` / `dev` / `test` tasks and import map
+- `config/config.json` — ports + default portal plugins (site + web)
+- `system/scripts/` — engine script copies / overrides
+- `scripts/daemon.sh`, `stop.sh`, `restart.sh`, `status.sh`
+- `.env` with a generated `JWT_SECRET`
 
-A `--local` variant points the import map at a checkout of the engine
-instead of JSR; the tasks, manifest, and scripts are otherwise identical.
+A `--local` variant points the import map at a monorepo checkout
+instead of JSR; tasks and config shape are otherwise the same.
 
 ## Running the game
 
@@ -92,9 +91,9 @@ remain legacy-compatible.
 Install or update from the CLI:
 
 ```bash
-deno run -A jsr:@ursamu/mush/cli plugin install <url> [--ref <ref>]
-deno run -A jsr:@ursamu/mush/cli plugin update
-deno run -A jsr:@ursamu/mush/cli plugin list
+deno run -A jsr:@ursamu/cli@0.1.2/plugin install <url> [--ref <ref>]
+deno run -A jsr:@ursamu/cli@0.1.2/plugin update
+deno run -A jsr:@ursamu/cli@0.1.2/plugin list
 ```
 
 ## Local script overrides
@@ -123,8 +122,8 @@ project-specific mechanics as their own.
 ## Updating the engine
 
 ```bash
-deno run -A jsr:@ursamu/mush/cli update         # latest stable
-deno run -A jsr:@ursamu/mush/cli update main    # specific branch
+deno run -A jsr:@ursamu/cli@0.1.2/update         # latest stable
+deno run -A jsr:@ursamu/cli@0.1.2/update main    # specific branch
 ```
 
 The updater rewrites the import map and re-runs `ensurePlugins`. Restart

@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/about/">
+<meta property="og:url" content="http://localhost:3001/about/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -293,37 +293,43 @@
 <tbody>
 <tr>
 <td>Written in C</td>
-<td>Written in TypeScript</td>
+<td>Written in TypeScript / Deno</td>
 </tr>
 <tr>
 <td>No standard package system</td>
-<td>Deno native (JSR, npm imports)</td>
+<td>JSR packages (<code>@ursamu/mush</code>, plugins)</td>
 </tr>
 <tr>
 <td>Telnet-only</td>
-<td>WebSocket primary, Telnet sidecar</td>
+<td>WS hub + HTTP portal + Telnet sidecar</td>
+</tr>
+<tr>
+<td>No first-class web UI</td>
+<td><code>@ursamu/site</code> (public) + <code>@ursamu/web</code> (staff)</td>
 </tr>
 <tr>
 <td>Embedded scripting in MUSHcode</td>
-<td>Scripts run in sandboxed Web Workers</td>
+<td>Softcode + sandboxed TS Web Workers</td>
 </tr>
 <tr>
 <td>Modify core to extend</td>
-<td>Plugin architecture</td>
+<td>Plugin architecture (<code>addCmd</code>, hooks, routes)</td>
 </tr>
 <tr>
 <td>Manual compile &amp; deploy</td>
-<td><code>deno task start</code></td>
+<td><code>jsr:@ursamu/cli</code> scaffold → <code>deno task start</code></td>
 </tr>
 </tbody>
 </table>
 <h2>Core Features</h2>
-<h3>WebSocket-Native Protocol</h3>
-<p>The primary interface to UrsaMU is <strong>WebSocket</strong>, not Telnet. This means:</p>
+<h3>Portal + WebSocket-native protocol</h3>
+<p>Scaffolded games ship a <strong>public site</strong> (<code>@ursamu/site</code>) and <strong>staff<br>
+console</strong> (<code>@ursamu/web</code>) on the HTTP port, plus a WebSocket game hub:</p>
 <ul>
-<li>Native browser connectivity — build web clients without proxies</li>
-<li>Structured JSON messages for clean client/server contracts</li>
-<li>A Telnet sidecar is still available for classic MU* clients</li>
+<li>Browser play client at <code>/play</code> (sign-in required)</li>
+<li>Staff tools at <code>/admin/</code> (wiki, DB, settings, plugin pages)</li>
+<li>Structured JSON over WS for custom clients</li>
+<li>Telnet sidecar for classic MU* clients</li>
 </ul>
 <pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token keyword">const</span> socket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WebSocket</span><span class="token punctuation">(</span><span class="token string">"ws://yourgame.example.com:4202"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 

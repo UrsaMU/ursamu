@@ -7,12 +7,6 @@ import {
   type IDBObj,
 } from "@ursamu/ursamu";
 import {
-  getNextJobNumber,
-  jobs,
-  jobHooks,
-  type IJob,
-} from "@ursamu/jobs";
-import {
   initCgState,
   getStageInstructions,
   validateCurrentStage,
@@ -24,11 +18,11 @@ import {
   removeRite,
   addContract,
   removeContract,
+  submitCgDraft,
   type CofdCgState,
 } from "../chargen/index.ts";
 import { renderCgList } from "../chargen/list.ts";
 import { renderInfo } from "../info/index.ts";
-import { formatSheet } from "../sheet/index.ts";
 
 /** Staff may still use +cg (review / testing). */
 function isStaff(actor: IDBObj): boolean {
@@ -58,6 +52,37 @@ export async function cgExec(u: IUrsamuSDK) {
   // cofd_cg and later copied to the live sheet via +approve. Without this,
   // a player can plant %c color codes in their own concept/description.
   const rawArg = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
+
+  // Web /play: open Character tab instead of terminal stepper.
+  // (Play client also intercepts +cg client-side; this covers any path
+  // that still hits the engine.)
+  const ct = (u as { clientType?: string }).clientType;
+  if (ct === "web") {
+    const ui = (u as {
+      ui?: {
+        layout?: (o: {
+          components: unknown[];
+          meta?: Record<string, unknown>;
+        }) => void;
+      };
+    }).ui;
+    if (ui?.layout) {
+      ui.layout({
+        components: [],
+        meta: {
+          type: "navigate",
+          path: "/chargen",
+          to: "chargen",
+        },
+      });
+    } else {
+      u.send(
+        "Open the %chCharacter%cn tab to continue chargen " +
+          "(/chargen on the site).",
+      );
+    }
+    return;
+  }
 
   // Find target - self only for character generation
   const target = u.me;
@@ -231,140 +256,21 @@ export async function cgExec(u: IUrsamuSDK) {
     const maxStage = maxStageFor(sheet.template);
 
     if (cgState.stage === maxStage) {
-      if (!sheet.specialties) sheet.specialties = {};
-
       const submitterName = u.util.displayName(target, u.me);
-      const now = Date.now();
-      const template = (sheet.template ?? "Mortal").toString();
-      const concept = (sheet.concept ?? "(none)").toString();
-      const formatted = await formatSheet(submitterName, target.id, sheet);
-      const snapshot = [
-        `Character: ${submitterName}`,
-        `Template:  ${template}`,
-        `Concept:   ${concept}`,
-        ``,
-        `Sheet snapshot:`,
-        formatted,
-        ``,
-        `Raw JSON snapshot:`,
-        "```json",
-        JSON.stringify(sheet, null, 2),
-        "```",
-      ].join("\n");
-
-      // Resolve existing open CGEN job (by number or player).
-      // Coerce numbers and strip # on player ids — DB may round-trip
-      // either form depending on adapter / older writes.
-      const bareId = String(target.id).replace(/^#/, "");
-      let existing: IJob | null = null;
-      try {
-        const all = await jobs.find({});
-        if (cgState.submittedJob != null) {
-          const want = Number(cgState.submittedJob);
-          existing = all.find(
-            (j) => Number(j.number) === want,
-          ) ?? null;
-        }
-        if (
-          !existing ||
-          (existing.status !== "new" && existing.status !== "open")
-        ) {
-          existing = all
-            .filter((j) => {
-              const by = String(j.submittedBy ?? "")
-                .replace(/^#/, "");
-              return (
-                by === bareId &&
-                String(j.bucket ?? "").toUpperCase() ===
-                  "CGEN" &&
-                (j.status === "new" || j.status === "open")
-              );
-            })
-            .sort(
-              (a, b) => Number(b.number) - Number(a.number),
-            )[0] ?? null;
-        }
-      } catch {
-        existing = null;
-      }
-
-      // Already pending staff review (submitted, not denied).
-      if (
-        existing &&
-        (existing.status === "new" || existing.status === "open") &&
-        cgState.isSubmitted
-      ) {
-        u.send(
-          `%crYou already have CGEN job #${existing.number} ` +
-            `pending staff review.%cn`,
-        );
+      const result = await submitCgDraft({
+        actorId: target.id,
+        actorName: submitterName,
+        cg: cgState,
+      });
+      if (!result.ok) {
+        u.send(`%cr${result.error}%cn`);
         return;
       }
-
-      let number: number;
-      if (
-        existing &&
-        (existing.status === "new" || existing.status === "open")
-      ) {
-        // Resubmit after deny: refresh snapshot, comment, keep open.
-        number = existing.number;
-        const resubComment = {
-          id: `jc-${now}-resub`,
-          authorId: target.id,
-          authorName: submitterName,
-          text: "Player resubmitted after revision.",
-          timestamp: now,
-          published: true,
-          staffOnly: false,
-        };
-        existing.description = snapshot;
-        existing.status = "open";
-        existing.updatedAt = now;
-        existing.comments = [
-          ...existing.comments,
-          resubComment,
-        ];
-        await jobs.update({ id: existing.id }, existing);
-        // Mirror +request/comment → Jobs BBS board reply.
-        try {
-          await jobHooks.emit(
-            "job:commented",
-            existing,
-            resubComment,
-          );
-        } catch (e: unknown) {
-          console.error("[cofd] job:commented (resub):", e);
-        }
-      } else {
-        number = await getNextJobNumber();
-        const job: IJob = {
-          id: `job-${number}`,
-          number,
-          title: `Chargen: ${submitterName} (${template})`,
-          bucket: "CGEN",
-          status: "new",
-          submittedBy: target.id,
-          submitterName,
-          description: snapshot,
-          comments: [],
-          createdAt: now,
-          updatedAt: now,
-        };
-        await jobs.create(job);
-        // Mirror +request → Jobs BBS board root post.
-        try {
-          await jobHooks.emit("job:created", job);
-        } catch (e: unknown) {
-          console.error("[cofd] job:created emit failed:", e);
-        }
-      }
-
-      cgState.submittedJob = number;
-      cgState.submittedAt = now;
-      cgState.isSubmitted = true;
+      cgState = result.cg;
       await u.db.modify(target.id, "$set", {
         "data.cofd_cg": cgState,
       });
+      const number = result.jobNumber;
 
       const lines: string[] = [];
       lines.push(await header("Character Generation: Submitted"));

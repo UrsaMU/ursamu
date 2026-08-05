@@ -58,8 +58,13 @@ export {
   listSiteNav,
   clearSiteNav,
   mergeSiteNav,
+  filterSiteNav,
+  siteNavRequireMet,
 } from "./src/site-nav.ts";
-export type { SiteNavRegistration } from "./src/site-nav.ts";
+export type {
+  SiteNavRegistration,
+  SiteNavAuthCtx,
+} from "./src/site-nav.ts";
 
 export {
   registerSiteStatic,

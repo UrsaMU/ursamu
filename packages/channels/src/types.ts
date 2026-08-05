@@ -14,6 +14,11 @@ export interface IChannel {
    * on this channel. Never mirrored to Discord (no channel:message).
    */
   announce?: boolean;
+  /**
+   * When true, eligible players are auto-subscribed on login.
+   * Default false — staff-created channels are opt-in via addcom.
+   */
+  autoJoin?: boolean;
 }
 
 export interface IChanMessage {

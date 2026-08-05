@@ -99,12 +99,14 @@ export async function resolvePluginMenuBlocks(
 
 /**
  * Default left menu when plugins.site.leftMenu is unset.
+ * Figma order: Featured, then Related (section siblings).
  * Empty blocks are omitted (no empty headings).
  */
-export const DEFAULT_LEFT_MENU = `[[section]]
-
-## Featured
+export const DEFAULT_LEFT_MENU = `## Featured
 [[featured]]
+
+## Related
+[[section]]
 `;
 
 const BLOCK_LINE = /^\s*\[\[([a-z][a-z0-9_-]*)(?::([^\]]*))?\]\]\s*$/i;

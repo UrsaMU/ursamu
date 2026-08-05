@@ -9,7 +9,8 @@ const SKINS_BASE = new URL(
   import.meta.url,
 );
 
-const FALLBACK = ["default", "changeling", "court"] as const;
+/** Only neutral skins ship in the package. Brand themes install as zips. */
+const FALLBACK = ["default"] as const;
 
 /**
  * Named skins shipped under public/css/skins/*.css

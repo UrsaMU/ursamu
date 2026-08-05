@@ -10,6 +10,8 @@
 
 import { dbojs, chans, chanHistory, Obj } from "../world/dbobjs.ts";
 import { stripAnsi } from "../softcode/stdlib/helpers.ts";
+import { monikerToHtml } from "../render/moniker-html.ts";
+import { resolveAvatarUrl } from "./avatar-url.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -25,6 +27,18 @@ function plainMoniker(raw: unknown): string | null {
     .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "")
     .trim();
   return plain || null;
+}
+
+/** Raw moniker from data or state (may include %c / <#rrggbb>). */
+function rawMoniker(user: {
+  data?: Record<string, unknown>;
+  dbobj?: { data?: Record<string, unknown>; state?: Record<string, unknown> };
+  state?: Record<string, unknown>;
+}): unknown {
+  return user.data?.moniker ??
+    user.dbobj?.data?.moniker ??
+    user.state?.moniker ??
+    user.dbobj?.state?.moniker;
 }
 
 // ── GET /api/v1/me ────────────────────────────────────────────────────────────
@@ -61,15 +75,29 @@ export async function meHandler(_req: Request, userId: string): Promise<Response
     String(user.data?.name ?? user.dbobj?.data?.name ?? "").trim() ||
     "Unknown";
 
+  const monikerRaw = rawMoniker(user);
+  const monikerPlain = plainMoniker(monikerRaw);
+  const monikerHtml = monikerToHtml(monikerRaw);
+
+  // Avatar: local @avatar file (/avatars/{id}.ext) or legacy image URL.
+  // user.id is bare numeric/string id; dbref is "#n".
+  const bag = (user.data ??
+    user.dbobj?.data ??
+    {}) as Record<string, unknown>;
+  const avatar = await resolveAvatarUrl(user.id, bag);
+
   const profile = {
     id: user.dbref,
     // Numeric id for clients that need it (wiki admin JWT is this id)
     dbId: user.id,
     name: plainName,
-    moniker: plainMoniker(user.data?.moniker),
+    /** Plain display moniker (no color codes). */
+    moniker: monikerPlain,
+    /** Colored moniker as safe HTML (web-safe palette spans). */
+    monikerHtml,
     flags: normalizeFlagList(rawFlags),
     location: user.dbobj.location || null,
-    avatar: (user.data?.image as string | undefined) || null,
+    avatar,
   };
 
   return new Response(JSON.stringify(profile), {

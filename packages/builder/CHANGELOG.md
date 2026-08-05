@@ -2,6 +2,14 @@
 
 All notable changes to `@ursamu/builder` are documented here.
 
+## [1.3.7] - 2026-07-31
+
+### Changed
+
+- **`@open`** works on enterable object interiors (vehicles,
+  booths), not only rooms. Requires `canEdit` on non-room
+  locations. Help + messages say "destination" / "location".
+
 ## [1.3.6] - 2026-07-28
 
 ### Changed

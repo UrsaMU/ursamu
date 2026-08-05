@@ -3,6 +3,14 @@
 All notable changes to `@ursamu/core` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.2] - 2026-08-05
+
+### Fixed
+
+- Skip 78-column `wordWrap` for `clientType === "web"` sessions.
+  Web FEs size their own column; hard-wrap broke ASCII art and look
+  lines in a wide center pane. Telnet still wraps at 78.
+
 ## [1.0.0] - 2026-07-28
 
 First stable release of the generic multiplayer text-server layer.

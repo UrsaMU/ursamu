@@ -9,10 +9,12 @@ import {
 
 const body = defineModel<string>({ required: true });
 
-defineProps<{
+const props = defineProps<{
   id?: string;
   rows?: number;
   disabled?: boolean;
+  /** Page path — resolves ![alt](file.png) in preview. */
+  pagePath?: string;
 }>();
 
 const emit = defineEmits<{ change: [] }>();
@@ -30,7 +32,10 @@ const wikiIndex = computed((): WikiTitleIndex => {
 });
 
 const previewHtml = computed(() =>
-  renderWikiMarkdown(body.value || "", wikiIndex.value)
+  renderWikiMarkdown(body.value || "", {
+    wikiIndex: wikiIndex.value,
+    pagePath: props.pagePath ?? "",
+  })
 );
 </script>
 

@@ -38,6 +38,7 @@ import { authHandler }    from "./auth.ts";
 import { configHandler }  from "./config.ts";
 import { dbObjHandler }   from "./dbobj.ts";
 import { sceneHandler }   from "./scenes.ts";
+import { objectImageServe } from "../media/object-image.ts";
 import { objectsHandler, flagsHandler, functionsHandler } from "./objects.ts";
 import {
   meHandler,
@@ -126,6 +127,10 @@ export function registerMushRoutes(authenticate: Authenticator): void {
     // /avatars/:id — serve avatar images (public, no auth)
     if (path.startsWith("/avatars/")) {
       return avatarServe(path);
+    }
+    // /images/:id — object images (rooms, things, players)
+    if (path.startsWith("/images/")) {
+      return objectImageServe(path);
     }
 
     // Plugin routes (registered via registerPluginRoute)
@@ -289,6 +294,7 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
   }
 
   if (path.startsWith("/avatars/")) return avatarServe(path);
+  if (path.startsWith("/images/")) return objectImageServe(path);
 
   // Plugin routes (registered via registerPluginRoute)
   const pluginRes = await dispatchPluginRoute(req, _authenticate);

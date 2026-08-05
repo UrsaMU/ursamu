@@ -28,6 +28,14 @@ export interface MapPluginConfig {
     map?: boolean;
     move?: boolean;
   };
+  /**
+   * Biome / terrain pack for the default realm.
+   * - `"default"` — stock plains/water pack
+   * - `"hedge"` | `"court"` — CtL Hedge pack
+   */
+  theme?: string;
+  /** Optional realm slug to register the theme under (default realm). */
+  realm?: string;
 }
 
 const ENGINE_CONFIG_PATH = "./config/config.json";
@@ -65,6 +73,8 @@ function mergeConfigs(local: MapPluginConfig, engine: MapPluginConfig): MapPlugi
       ...(local.defaultCommands ?? {}),
       ...(engine.defaultCommands ?? {}),
     },
+    theme: engine.theme ?? local.theme,
+    realm: engine.realm ?? local.realm,
   };
 }
 

@@ -5,7 +5,8 @@
 Full MUSH world layer on core: `IDBObj` world model (players, rooms,
 exits, things), flags and locks, TinyMUX-oriented softcode + Worker
 sandbox, `addCmd` / `IUrsamuSDK`, format pipeline (NAMEFORMAT, …), and
-core verbs (look, say, pose, get/drop/give, home, who, page, ooc, …).
+core verbs (look, say, pose, get/drop/give, home, who, page, ooc,
++finger, +staff, +glance, +gname, +motd, +uptime, +summon, …).
 
 Import from `@ursamu/mush` only for game plugins (core is re-exported).
 

@@ -57,7 +57,8 @@ Deno.test(
           bannerImage: "imgs/header.png",
           title: "Demo",
         }),
-        "site.css": "/* demo */\nbody{color:red}",
+        "site.css":
+          "/* demo */\n:root{--x:url(\"imgs/bg.png\")}\n",
         "imgs/header.png": new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
       });
 
@@ -85,6 +86,11 @@ Deno.test(
       );
       const css = await Deno.readTextFile(cssPath);
       assertStringIncludes(css, "demo");
+      // Relative imgs/ rewritten for CSS-var use from layout.css
+      assertStringIncludes(
+        css,
+        'url("/site/theme/installed/demo/imgs/bg.png")',
+      );
 
       const scanned = await scanInstalledThemes(tmp);
       assertEquals(scanned.some((t) => t.id === "demo"), true);
@@ -166,14 +172,33 @@ Deno.test("registerSiteTheme + listAllThemes", OPTS, async () => {
 
 Deno.test("themeToSiteConfig builtin clears custom css", OPTS, () => {
   const patch = themeToSiteConfig({
-    id: "court",
-    label: "Court",
+    id: "default",
+    label: "Default",
     source: "builtin",
-    skinCss: "/site/css/skins/court.css",
-    bannerHref: "/site/skins/court/imgs/header.png",
+    skinCss: "/site/css/skins/default.css",
+  });
+  assertEquals(patch.skin, "default");
+  assertEquals(patch.skinCss, "");
+  assertEquals(patch.themeDir, undefined);
+});
+
+Deno.test("themeToSiteConfig installed court sets skinCss", OPTS, () => {
+  const patch = themeToSiteConfig({
+    id: "court",
+    label: "Court of Miracles",
+    source: "installed",
+    skinCss: "/site/theme/installed/court/site.css",
+    bannerHref: "/site/theme/installed/court/imgs/header.png",
     title: "Court of Miracles",
   });
   assertEquals(patch.skin, "court");
-  assertEquals(patch.skinCss, "");
-  assertEquals(patch.themeDir, undefined);
+  assertEquals(
+    patch.skinCss,
+    "/site/theme/installed/court/site.css",
+  );
+  assertEquals(patch.themeDir, "theme");
+  assertEquals(
+    patch.bannerImage,
+    "/site/theme/installed/court/imgs/header.png",
+  );
 });

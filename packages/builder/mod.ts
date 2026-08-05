@@ -55,7 +55,7 @@ const onLogin = (_e: SessionEvent): void => {
 
 export const builderPlugin: IPlugin = {
   name:        "builder",
-  version:     "1.3.6",
+  version: "1.3.8",
   description:
     "World-building commands and REST API: @dig, @open, @link, @desc, @examine, and more.",
 

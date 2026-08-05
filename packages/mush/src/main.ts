@@ -35,6 +35,7 @@ import {
   log,
   runPipeline,
   send,
+  sendPayload,
   setFormatter,
   sessions,
   DBO,
@@ -63,35 +64,28 @@ try {
   __dirname = Deno.cwd();
 }
 
-async function initializeDefaultTexts() {
-  // Always try to read from file to keep DB in sync with local dev changes
-  try {
-      const fileContent = await Deno.readTextFile("text/welcome.md");
-      const current = await texts.queryOne({ id: "welcome" });
+const DEFAULT_WEB_LOGIN_MD =
+  "# Welcome\n\n" +
+  "Sign in to play, or create a character from the site menu.\n\n" +
+  "- Use **connect** *name* *password* in the prompt below, or\n" +
+  "- Use **create** *name* *password* for a new character.\n";
 
-      if (!current || current.content !== fileContent) {
-          if (current) {
-              await texts.modify({ id: "welcome" }, "$set", { content: fileContent });
-              console.log("Welcome text updated from file.");
-          } else {
-              await texts.create({
-                  id: "welcome",
-                  content: fileContent
-              });
-              console.log("Welcome text seeded from file.");
-          }
-      }
-  } catch (_e) {
-     // File doesn't exist? Check if DB has it
-     const welcome = await texts.queryOne({ id: "welcome" });
-     if (!welcome) {
-        console.log("No welcome text found in file or DB. Creating default.");
-         await texts.create({
-             id: "welcome",
-             content: "# Welcome to UrsaMU\n\nYour journey begins here."
-         });
-     }
+/**
+ * Seed web login markdown once. Staff edit via Admin → Settings;
+ * do not overwrite DB from disk on every boot.
+ */
+async function initializeDefaultTexts() {
+  const current = await texts.queryOne({ id: "welcome" });
+  if (current?.content) return;
+
+  let seed = DEFAULT_WEB_LOGIN_MD;
+  try {
+    seed = await Deno.readTextFile("text/welcome.md");
+  } catch {
+    /* use default */
   }
+  await texts.create({ id: "welcome", content: seed });
+  console.log("Web login splash seeded (server.texts id=welcome).");
 }
 
 /**
@@ -152,14 +146,10 @@ export const initializeEngine = async (
       updateParserSubs(substitutions);
   }
 
-  // Load layout mushcode templates (header / divider / footer)
+  // Load layout mushcode templates (header / divider / footer / markdown.*)
   const { applyLayoutFromConfig } = await import("./format/handlers.ts");
   applyLayoutFromConfig(
-    getConfig<{
-      header?: string;
-      divider?: string;
-      footer?: string;
-    }>("game.layout"),
+    getConfig<import("./format/handlers.ts").LayoutTemplates>("game.layout"),
   );
 
   // Determine the project root and current directory context
@@ -170,6 +160,19 @@ export const initializeEngine = async (
   if (loadDefaultCommands) {
     const { loadDefaultCommands: loadCmds } = await import("./commands/addCmd.ts");
     await loadCmds();
+  }
+
+  // Soft-register packaged help (optional @ursamu/help)
+  try {
+    const { registerHelpDir } = await import("@ursamu/help");
+    for (const sec of ["social", "info", "staff", "building"]) {
+      registerHelpDir(
+        new URL(`../help/${sec}`, import.meta.url),
+        sec,
+      );
+    }
+  } catch {
+    /* @ursamu/help not installed */
   }
 
   // Load custom commands if path provided
@@ -290,6 +293,7 @@ export const initializeEngine = async (
   setConfig("server.wsPort",      wsPort);
   setConfig("server.port",        httpPort);
   setConfig("server.telnetPort",  tnPort);
+  setConfig("server.telnet",      tnPort);
 
   // Wire REST routes (login/register/me/…) then fallback for the rest.
   setupRoutes();
@@ -300,23 +304,53 @@ export const initializeEngine = async (
   setFormatter((socketId, msg) => {
     const session = sessions.get(socketId);
     const clientType = (session?.meta?.clientType as string) || "telnet";
-    return parser.substitute(clientType === "web" ? "html" : "telnet", msg);
+    // Always ANSI on the wire for web+telnet.
+    // Core wordWrap runs AFTER the formatter and splits on spaces —
+    // that shreds HTML `style='…'` tags into visible junk. ANSI has
+    // no spaces, so wrap is safe. Site /play and staff PlayView
+    // convert ANSI (and leftover %c) to closed spans client-side.
+    void clientType;
+    return parser.substitute("telnet", msg);
   });
 
-  // Send welcome screen on new session. Reconnects skip the splash only
-  // while JWT reauth is expected; if reauth fails the session is closed
-  // (see session:auth in commands/sdk.ts) so players are never left on a
-  // blank "connected but not logged in" prompt.
+  // Welcome / login splash on new session.
+  // Web: markdown from DB (Admin Settings) as layout — never the txt file.
+  // Telnet: classic default_connect.txt (or DB fallback).
+  // Reconnect (JWT restore / WS blip): short line only — no splash.
   gameHooks.on("session:open", async ({ socketId }) => {
     const session = sessions.get(socketId);
-    if (session?.meta?.reconnect) return;
+    if (session?.meta?.reconnect) {
+      const { RECONNECT_MSG } = await import(
+        "./session/reauth.ts"
+      );
+      send([socketId], RECONNECT_MSG);
+      return;
+    }
+
+    const clientType =
+      (session?.meta?.clientType as string | undefined) || "telnet";
+
+    if (clientType === "web") {
+      const entry = await texts.queryOne({ id: "welcome" });
+      const content = String(
+        entry?.content || DEFAULT_WEB_LOGIN_MD,
+      );
+      // Client auto-detects markdown vs HTML (incl. center+md).
+      sendPayload(socketId, "", {
+        ui: {
+          type: "layout",
+          components: [{ type: "markdown", content }],
+          meta: { type: "login", format: "auto" },
+        },
+      });
+      return;
+    }
 
     let welcome = txtFiles.get("default_connect.txt");
     if (!welcome) {
       const entry = await texts.queryOne({ id: "welcome" });
       welcome = entry?.content || "Welcome to UrsaMU!";
     }
-    // We can send raw message; it will be formatted by the setFormatter hook
     send([socketId], welcome);
   });
 

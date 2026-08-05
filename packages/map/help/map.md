@@ -1,22 +1,20 @@
-+MAP / +MOVE
++MAP
 
-Procedural sector map with vehicles, links, and spectate.
+Procedural sector map. Vehicles are normal objects: **enter**,
+**launch**, then **+map** / **look** / **+move**.
 
 SYNTAX
   +map[/<switch>] [<args>]
   +move <dir>
+  enter <vehicle> · leave
 
-SWITCHES
-  /here                 Render sector around your active entity (default).
-  /jump <x> <y> [z]     Admin: move active entity to coord.
-  /embark <target>      Board a map-capable vehicle in this room.
-  /disembark            Step out of a vehicle you are inside.
-  /launch               Take your vehicle onto the map.
-  /land                 Return your in-map vehicle to its dock.
-  /link <entityId>      Builder+: pilot an entity remotely.
-  /unlink               Stop remote piloting.
-  /spectate <entityId>  Admin: watch an entity's vision.
-  /unspectate           Admin: stop spectating.
-  /stats                Builder+: dump system stats.
+QUICK START
+  @create Scout · @set Scout=map-capable enter_ok
+  drop Scout · enter Scout · +map/launch · +map
 
-DIRECTIONS: n s e w ne nw se sw u d (long forms ok)
+NOTES
+  map-capable = may launch onto the grid
+  enter uses object locks (enter_ok / @lock/enter)
+
+SEE ALSO: +help map/setup, +help map/switches,
+  +help map/builder, +help enter

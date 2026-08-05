@@ -13,9 +13,21 @@ const __dirname = import.meta.url.startsWith("file://")
 const currentDir = Deno.cwd();
 
 const args = parse(Deno.args, {
-  boolean: ["help", "standalone", "non-interactive", "local"],
+  boolean: [
+    "help",
+    "standalone",
+    "non-interactive",
+    "local",
+    "admin-embed",
+    "site-static",
+  ],
   string: ["name", "telnet-port", "http-port", "game-name", "game-desc"],
-  alias: { h: "help", l: "local" },
+  alias: {
+    h: "help",
+    l: "local",
+    A: "admin-embed",
+    S: "site-static",
+  },
 });
 
 if (args.help || args._.length === 0) {
@@ -27,7 +39,13 @@ Usage:
   ursamu create <project-name> --local  Scaffold a test game linked to the local engine checkout
   ursamu create plugin <plugin-name>    Scaffold a new plugin
 
-Options:
+Plugin options:
+  --standalone       Publishable standalone plugin repo
+  --admin-embed, -A  Staff console embed SPA + registerStaffPage
+  --site-static, -S  Public FE page at /site/p/<name>/ + nav/menu
+  --non-interactive  No prompts (CI / scripts)
+
+Other options:
   -h, --help    Show this help message
   -l, --local   Link imports to the local engine source (for engine development)
 
@@ -35,6 +53,8 @@ Examples:
   ursamu create my-game
   ursamu create my-test-game --local
   ursamu create plugin my-feature
+  ursamu create plugin my-tool --admin-embed --site-static
+  ursamu create plugin my-tool --standalone -A -S
   `);
   Deno.exit(0);
 }
@@ -45,20 +65,29 @@ if (args._[0]?.toString() === "plugin") {
 
   if (!pluginName) {
     if (args["non-interactive"]) {
-      console.error("Error: plugin name is required.\nUsage: ursamu create plugin <plugin-name>");
+      console.error(
+        "Error: plugin name is required.\n" +
+          "Usage: ursamu create plugin <plugin-name> " +
+          "[--admin-embed] [--site-static]",
+      );
       Deno.exit(1);
     }
     pluginName = prompt("Plugin name: ")?.trim() ?? "";
-    if (!pluginName) { console.error("Aborted — no name provided."); Deno.exit(1); }
+    if (!pluginName) {
+      console.error("Aborted — no name provided.");
+      Deno.exit(1);
+    }
   }
 
   await scaffoldPlugin(pluginName, {
-    standalone:     Boolean(args["standalone"]),
+    standalone: Boolean(args["standalone"]),
     nonInteractive: Boolean(args["non-interactive"]),
-    desc:           args["game-desc"],
-    version:        args["telnet-port"],  // reused flag (legacy)
-    author:         undefined,
+    desc: args["game-desc"],
+    version: args["telnet-port"], // reused flag (legacy)
+    author: undefined,
     currentDir,
+    adminEmbed: Boolean(args["admin-embed"]),
+    siteStatic: Boolean(args["site-static"]),
   });
   Deno.exit(0);
 }

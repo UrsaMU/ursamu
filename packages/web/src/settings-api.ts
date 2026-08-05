@@ -16,6 +16,7 @@ import {
   getAllConfig,
   setConfig,
   listPlugins,
+  texts,
 } from "@ursamu/mush";
 import {
   inventoryPluginJson,
@@ -77,6 +78,8 @@ type SiteNavRow = {
   label: string;
   href: string;
   order: number;
+  /** Visibility: public | connected | staff | flag(name) */
+  require?: string;
 };
 
 function json(data: unknown, status = 200): Response {
@@ -235,7 +238,7 @@ async function buildSettingsPayload(): Promise<Record<string, unknown>> {
     return { ...fromLive, ...fromFile };
   })();
 
-  let siteSkins: string[] = ["default", "changeling", "court"];
+  let siteSkins: string[] = ["default"];
   let siteLoaded = false;
   let pluginNav: SiteNavRow[] = [];
   let siteThemes: Array<Record<string, unknown>> = [];
@@ -247,6 +250,7 @@ async function buildSettingsPayload(): Promise<Record<string, unknown>> {
         label: string;
         href: string;
         order?: number;
+        require?: string;
       }>;
     };
     siteLoaded = true;
@@ -259,6 +263,7 @@ async function buildSettingsPayload(): Promise<Record<string, unknown>> {
         label: n.label,
         href: n.href,
         order: typeof n.order === "number" ? n.order : (i + 1) * 10,
+        require: n.require,
       }));
     }
   } catch {
@@ -295,6 +300,15 @@ async function buildSettingsPayload(): Promise<Record<string, unknown>> {
 
   const configNav = normalizeSiteNav(siteBlock.nav);
 
+  let loginMarkdown =
+    "# Welcome\n\nSign in or create a character to play.\n";
+  try {
+    const entry = await texts.queryOne({ id: "welcome" });
+    if (entry?.content) loginMarkdown = String(entry.content);
+  } catch (e: unknown) {
+    console.warn("[web] read welcome text failed:", e);
+  }
+
   return {
     game: {
       name: String(game.name ?? ""),
@@ -302,6 +316,8 @@ async function buildSettingsPayload(): Promise<Record<string, unknown>> {
       version: String(game.version ?? ""),
       playerStart: String(game.playerStart ?? ""),
     },
+    /** Web /play pre-auth splash (markdown or HTML). Telnet: txt. */
+    loginMarkdown,
     layout: {
       header: String(layout.header ?? ""),
       divider: String(layout.divider ?? ""),
@@ -531,11 +547,15 @@ function normalizeSiteNav(raw: unknown): SiteNavRow[] {
     const order = typeof r.order === "number" && Number.isFinite(r.order)
       ? r.order
       : (i + 1) * 10;
+    const reqRaw = typeof r.require === "string"
+      ? r.require.trim()
+      : "";
     out.push({
       id: idRaw || undefined,
       label: label || "Link",
       href: href || "#",
       order,
+      require: reqRaw || undefined,
     });
   }
   // Stable sort by order, keep equal-order array order
@@ -555,15 +575,39 @@ async function refreshSiteRuntime(
   file: Record<string, unknown>,
 ): Promise<boolean> {
   try {
-    const site = await import("@ursamu/site") as {
+    type SiteMod = {
       readSiteConfig?: (c: unknown) => Record<string, unknown>;
       applySkinDefaults?: (
         c: Record<string, unknown>,
       ) => Record<string, unknown>;
       setSiteRuntime?: (c: Record<string, unknown>) => void;
+      getSiteRuntime?: () => {
+        cfg?: { skin?: string };
+      };
     };
+    let site: SiteMod | null = null;
+    let lastErr: unknown = null;
+    try {
+      site = await import("@ursamu/site") as SiteMod;
+    } catch (e: unknown) {
+      lastErr = e;
+      try {
+        site = await import(
+          "jsr:@ursamu/site@^0.1.5"
+        ) as SiteMod;
+        lastErr = null;
+      } catch (e2: unknown) {
+        lastErr = e2;
+        site = null;
+      }
+    }
+    if (!site) {
+      console.warn("[web] refreshSiteRuntime import:", lastErr);
+      return false;
+    }
     if (typeof site.readSiteConfig !== "function" ||
       typeof site.setSiteRuntime !== "function") {
+      console.warn("[web] refreshSiteRuntime: incomplete site module");
       return false;
     }
     let cfg = site.readSiteConfig(file);
@@ -571,6 +615,25 @@ async function refreshSiteRuntime(
       cfg = site.applySkinDefaults(cfg);
     }
     site.setSiteRuntime(cfg);
+    const live = site.getSiteRuntime?.();
+    const want = String(
+      (cfg as { skin?: string }).skin ?? "",
+    );
+    const got = String(live?.cfg?.skin ?? "");
+    if (want && got && want !== got) {
+      console.warn(
+        "[web] site runtime mismatch after set:",
+        { want, got },
+      );
+      return false;
+    }
+    console.log(
+      `[web] site settings live → ${
+        (cfg as { skinCss?: string; skin?: string }).skinCss ||
+        want ||
+        "default"
+      }`,
+    );
     return true;
   } catch (e: unknown) {
     console.warn("[web] refreshSiteRuntime:", e);
@@ -642,28 +705,62 @@ export async function adminSettingsHandler(
     }
 
     try {
-      const file = await readConfigFile();
-      const result = applyEditablePatch(file, body);
-      if (result.error) {
-        return json({ error: result.error }, 400);
-      }
-      if (!result.applied.length) {
-        return json({ error: "Nothing to update" }, 400);
-      }
-      await writeConfigFile(file);
-
-      const siteTouched = result.applied.some((k) =>
-        SITE_LIVE_KEYS.has(k)
-      );
+      const applied: string[] = [];
+      let needsRestart = false;
       let siteLive = false;
-      if (siteTouched) {
-        siteLive = await refreshSiteRuntime(file);
+
+      // Web login splash (markdown or HTML) — server.texts id=welcome
+      if (typeof body.loginMarkdown === "string") {
+        const splash = body.loginMarkdown;
+        if (splash.length > 200_000) {
+          return json({ error: "loginMarkdown too large" }, 400);
+        }
+        const existing = await texts.queryOne({ id: "welcome" });
+        if (existing) {
+          await texts.modify(
+            { id: "welcome" },
+            "$set",
+            { content: splash },
+          );
+        } else {
+          await texts.create({ id: "welcome", content: splash });
+        }
+        applied.push("loginMarkdown");
+      }
+
+      const file = await readConfigFile();
+      const configBody = { ...body };
+      delete configBody.loginMarkdown;
+      if (
+        isPlainObject(configBody.game) ||
+        isPlainObject(configBody.layout) ||
+        isPlainObject(configBody.site)
+      ) {
+        const result = applyEditablePatch(file, configBody);
+        if (result.error && !applied.length) {
+          return json({ error: result.error }, 400);
+        }
+        if (!result.error && result.applied.length) {
+          await writeConfigFile(file);
+          applied.push(...result.applied);
+          needsRestart = result.needsRestart;
+          const siteTouched = result.applied.some((k) =>
+            SITE_LIVE_KEYS.has(k)
+          );
+          if (siteTouched) {
+            siteLive = await refreshSiteRuntime(file);
+          }
+        }
+      }
+
+      if (!applied.length) {
+        return json({ error: "Nothing to update" }, 400);
       }
 
       return json({
         ok: true,
-        applied: result.applied,
-        needsRestart: result.needsRestart,
+        applied,
+        needsRestart,
         siteLive,
         settings: await buildSettingsPayload(),
       });

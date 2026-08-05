@@ -14,7 +14,67 @@ export type Json =
   | Json[]
   | { [k: string]: Json };
 
-/** Deep-merge `over` into `base`. Objects recurse; arrays/scalars: over wins. */
+const LAYOUT_SLOTS = ["header", "divider", "footer"] as const;
+
+/**
+ * Copy missing game.layout.header|divider|footer from sample → live.
+ * Preserves live values and non-slot keys (e.g. markdown).
+ * Returns true when live was mutated.
+ */
+export function ensureGameLayout(
+  live: Record<string, unknown>,
+  sample: Record<string, unknown>,
+): boolean {
+  const sampleGame = (
+    sample.game && typeof sample.game === "object" &&
+      !Array.isArray(sample.game)
+      ? sample.game as Record<string, unknown>
+      : null
+  );
+  if (!sampleGame) return false;
+  const sampleLayout = (
+    sampleGame.layout && typeof sampleGame.layout === "object" &&
+      !Array.isArray(sampleGame.layout)
+      ? sampleGame.layout as Record<string, unknown>
+      : null
+  );
+  if (!sampleLayout) return false;
+
+  const liveGame = (
+    live.game && typeof live.game === "object" && !Array.isArray(live.game)
+      ? live.game as Record<string, unknown>
+      : (live.game = {})
+  ) as Record<string, unknown>;
+
+  let liveLayout = (
+    liveGame.layout && typeof liveGame.layout === "object" &&
+      !Array.isArray(liveGame.layout)
+      ? liveGame.layout as Record<string, unknown>
+      : null
+  );
+
+  let changed = false;
+  if (!liveLayout) {
+    liveLayout = {};
+    liveGame.layout = liveLayout;
+    changed = true;
+  }
+
+  for (const slot of LAYOUT_SLOTS) {
+    const cur = liveLayout[slot];
+    const has =
+      typeof cur === "string" && cur.trim().length > 0;
+    if (has) continue;
+    const from = sampleLayout[slot];
+    if (typeof from === "string" && from.trim().length > 0) {
+      liveLayout[slot] = from;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+/** Deep-merge `over` into `base`. Nested objects recurse; else over wins. */
 export function deepMerge(base: Json, over: Json): Json {
   if (
     base !== null &&
@@ -168,6 +228,14 @@ export function mergeConfigFromSample(
     };
     if (!mergedBlocks.includes("channels")) {
       mergedBlocks.push("channels");
+    }
+  }
+
+  // Ensure game.layout header/divider/footer from sample when missing.
+  // Does not overwrite live chrome or wipe sibling keys (e.g. markdown).
+  if (ensureGameLayout(live, sample)) {
+    if (!mergedBlocks.includes("game.layout")) {
+      mergedBlocks.push("game.layout");
     }
   }
 

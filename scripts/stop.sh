@@ -31,4 +31,13 @@ if [ -n "$TELNET_PID" ]; then
 fi
 
 rm -f "$PID_FILE"
+# Free game ports in case a child outlived the PID file
+for port in 4201 4202 4203; do
+  pids=$(lsof -ti ":$port" 2>/dev/null || true)
+  # shellcheck disable=SC2086
+  if [ -n "$pids" ]; then
+    echo $pids | xargs kill -9 2>/dev/null || true
+    echo "  Freed port $port"
+  fi
+done
 echo "Done."

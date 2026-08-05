@@ -223,6 +223,10 @@ Commands:
   create plugin <name>         Scaffold an in-tree plugin
   create plugin <name> --standalone
                                Create a standalone publishable plugin project
+  create plugin <name> --admin-embed
+                               Include staff console embed SPA
+  create plugin <name> --site-static
+                               Include public FE page at /site/p/<name>/
   plugin install <url>         Install a plugin from GitHub
   plugin update  <name>        Update an installed plugin to the latest commit
   plugin remove  <name>        Uninstall a plugin
@@ -243,6 +247,7 @@ Examples:
   ursamu create my-game
   ursamu create plugin my-feature
   ursamu create plugin my-feature --standalone
+  ursamu create plugin my-tool --admin-embed --site-static
   ursamu plugin install https://github.com/user/my-plugin
   ursamu plugin update my-plugin
   ursamu plugin list

@@ -25,6 +25,7 @@ import {
   priorityClass,
   statusClass,
 } from "@/utils/jobs";
+import { stripMushCodes } from "@/utils/text";
 import PlayerSelect from "@/components/PlayerSelect.vue";
 
 const props = defineProps<{ id?: string }>();
@@ -87,8 +88,9 @@ const {
   resetFrom,
   confirmLeave,
 } = useFormSync(selected, (j) => ({
-  title: j.title || "",
-  description: j.description || "",
+  title: stripMushCodes(j.title || ""),
+  // CGEN / in-game jobs embed %c sheet text — strip for web.
+  description: stripMushCodes(j.description || ""),
   status: String(j.status || "new"),
   priority: String(j.priority || "normal"),
   assignedTo: String(j.assignedTo || "").replace(/^#/, ""),
@@ -289,6 +291,77 @@ async function claim(): Promise<void> {
   await save();
 }
 
+const isCgenJob = computed(() => {
+  const j = selected.value;
+  if (!j) return false;
+  return String(jobBucket(j)).toUpperCase() === "CGEN";
+});
+
+const canApproveCgen = computed(() => {
+  if (!isCgenJob.value || !selected.value) return false;
+  const st = String(selected.value.status || "");
+  return st === "new" || st === "open";
+});
+
+const approveNotes = ref("");
+const approveBusy = ref(false);
+const approveMsg = ref("");
+
+/** Staff approve: live sheet + notify + close CGEN job. */
+async function approveCharacter(): Promise<void> {
+  if (!selected.value || !canApproveCgen.value) return;
+  approveBusy.value = true;
+  approveMsg.value = "";
+  saveError.value = "";
+  try {
+    const { res, data } = await api<{
+      ok?: boolean;
+      name?: string;
+      already?: boolean;
+      error?: string;
+      jobNumber?: number | null;
+    }>("/api/v1/cofd/approve", {
+      method: "POST",
+      body: JSON.stringify({
+        jobNumber: selected.value.number,
+        playerId: selected.value.submittedBy,
+        notes: approveNotes.value.trim(),
+      }),
+    });
+    if (res.status === 401) {
+      session.signOut();
+      await router.replace({ name: "login" });
+      return;
+    }
+    if (!res.ok) {
+      saveError.value = data?.error ||
+        `Approve failed (${res.status}).`;
+      return;
+    }
+    approveMsg.value = data?.already
+      ? `${data.name || "Character"} was already approved.`
+      : `Approved ${data?.name || "character"}. They were notified.`;
+    // Refresh job (should be closed)
+    const id = String(selected.value.number);
+    const again = await api<Job>(
+      `/api/v1/jobs/${encodeURIComponent(id)}`,
+    );
+    if (again.res.ok && again.data) {
+      live.upsertJob(again.data);
+      markSaved(again.data);
+    } else {
+      // Job archived — drop from open list
+      form.value.status = "closed";
+      markSaved({
+        ...selected.value,
+        status: "closed",
+      } as Job);
+    }
+  } finally {
+    approveBusy.value = false;
+  }
+}
+
 async function addComment(): Promise<void> {
   if (!selected.value) return;
   const text = commentText.value.trim();
@@ -483,7 +556,7 @@ function assigneeLabel(id: unknown): string {
             @keydown.enter.prevent="openJob(String(j.number))"
           >
             <td><code>#{{ j.number }}</code></td>
-            <td>{{ j.title }}</td>
+            <td>{{ stripMushCodes(j.title) }}</td>
             <td class="muted">
               {{ jobBucket(j) }}
             </td>
@@ -598,6 +671,16 @@ function assigneeLabel(id: unknown): string {
             Claim
           </button>
           <button
+            v-if="canApproveCgen"
+            type="button"
+            :disabled="approveBusy || busy"
+            :aria-busy="approveBusy"
+            title="Promote chargen draft to live sheet and notify"
+            @click="approveCharacter"
+          >
+            Approve character
+          </button>
+          <button
             type="button"
             :disabled="!dirty || busy"
             :aria-busy="busy"
@@ -607,6 +690,32 @@ function assigneeLabel(id: unknown): string {
           </button>
         </div>
       </header>
+
+      <div
+        v-if="isCgenJob && canApproveCgen"
+        class="jobs-approve-box"
+      >
+        <p class="muted">
+          CGEN job — approve to make the sheet live, mail the
+          player, and close this job. Closing the job status also
+          auto-approves.
+        </p>
+        <label>
+          Approval notes (optional)
+          <input
+            v-model="approveNotes"
+            type="text"
+            placeholder="Welcome notes for the player…"
+          >
+        </label>
+        <p
+          v-if="approveMsg"
+          class="muted"
+          role="status"
+        >
+          {{ approveMsg }}
+        </p>
+      </div>
 
       <p
         v-if="loadError || saveError"
@@ -659,8 +768,9 @@ function assigneeLabel(id: unknown): string {
           Description
           <textarea
             v-model="form.description"
-            class="mono"
-            rows="6"
+            class="mono jobs-description"
+            rows="16"
+            spellcheck="false"
           />
         </label>
       </form>
@@ -691,7 +801,9 @@ function assigneeLabel(id: unknown): string {
             >staff</span>
             · {{ formatJobWhen(c.timestamp) }}
           </p>
-          <pre class="jobs-comment-body">{{ c.text }}</pre>
+          <pre class="jobs-comment-body">{{
+            stripMushCodes(c.text)
+          }}</pre>
         </article>
 
         <div class="jobs-comment-compose">
@@ -742,6 +854,31 @@ function assigneeLabel(id: unknown): string {
   color: var(--text);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+
+/* CGEN sheet snapshots — keep layout, strip happens in script */
+.jobs-description {
+  white-space: pre;
+  overflow-x: auto;
+  min-height: 14rem;
+  line-height: 1.35;
+  font-size: 0.8125rem;
+}
+
+.jobs-approve-box {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-code);
+}
+
+.jobs-approve-box label {
+  margin-bottom: 0;
+}
+
+.jobs-approve-box input {
+  margin-top: 0.35rem;
 }
 
 .jobs-detail-meta {

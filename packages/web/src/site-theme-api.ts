@@ -78,6 +78,10 @@ type SiteThemeMod = {
     c: Record<string, unknown>,
   ) => Record<string, unknown>;
   setSiteRuntime: (c: Record<string, unknown>) => void;
+  getSiteRuntime?: () => {
+    cfg?: { skin?: string; skinCss?: string };
+    gen?: number;
+  };
 };
 
 export type ThemeRow = {
@@ -94,19 +98,41 @@ export type ThemeRow = {
 };
 
 async function loadSite(): Promise<SiteThemeMod | null> {
+  // Prefer bare specifier (game import map). Fall back to explicit
+  // JSR so this works when @ursamu/web is loaded from jsr.io and the
+  // app map does not re-export site into the web package graph.
+  let site: Partial<SiteThemeMod> | null = null;
+  let lastErr: unknown = null;
   try {
-    const site = await import("@ursamu/site") as Partial<SiteThemeMod>;
-    if (
-      typeof site.installThemeZip !== "function" ||
-      typeof site.listAllThemes !== "function" ||
-      typeof site.themeToSiteConfig !== "function"
-    ) {
-      return null;
+    site = await import("@ursamu/site") as Partial<SiteThemeMod>;
+  } catch (e: unknown) {
+    lastErr = e;
+    try {
+      site = await import(
+        "jsr:@ursamu/site@^0.1.5"
+      ) as Partial<SiteThemeMod>;
+      lastErr = null;
+    } catch (e2: unknown) {
+      lastErr = e2;
+      site = null;
     }
-    return site as SiteThemeMod;
-  } catch {
+  }
+  if (!site) {
+    console.warn("[web] loadSite import failed:", lastErr);
     return null;
   }
+  if (
+    typeof site.installThemeZip !== "function" ||
+    typeof site.listAllThemes !== "function" ||
+    typeof site.themeToSiteConfig !== "function"
+  ) {
+    console.warn(
+      "[web] loadSite: @ursamu/site missing theme APIs",
+      Object.keys(site).slice(0, 20),
+    );
+    return null;
+  }
+  return site as SiteThemeMod;
 }
 
 async function refreshSiteRuntime(
@@ -125,6 +151,29 @@ async function refreshSiteRuntime(
       cfg = site.applySkinDefaults(cfg);
     }
     site.setSiteRuntime(cfg);
+    // Confirm the live handler sees the same runtime (globalThis).
+    // deno-lint-ignore no-explicit-any
+    const live = (site as any).getSiteRuntime?.() as
+      | { cfg?: { skin?: string; skinCss?: string } }
+      | undefined;
+    if (live?.cfg) {
+      const wantSkin = String(
+        (cfg as { skin?: string }).skin ?? "",
+      );
+      const got = String(live.cfg.skin ?? "");
+      if (wantSkin && got && wantSkin !== got) {
+        console.warn(
+          "[web] theme runtime mismatch after setSiteRuntime:",
+          { wantSkin, got },
+        );
+        return false;
+      }
+    }
+    const skinLabel =
+      (cfg as { skinCss?: string; skin?: string }).skinCss ||
+      (cfg as { skin?: string }).skin ||
+      "default";
+    console.log(`[web] site theme live → ${skinLabel}`);
     return true;
   } catch (e: unknown) {
     console.warn("[web] theme refreshSiteRuntime:", e);
@@ -368,10 +417,21 @@ export async function handleSiteThemeRoutes(
       }
       try {
         const { siteLive } = await applyThemeToConfig(theme, site);
+        // Return applied config fields (builtin clears skinCss) so
+        // the admin form matches what the FE actually serves.
+        const applied = site.themeToSiteConfig(theme);
         return json({
           ok: true,
           activated: true,
-          theme,
+          theme: {
+            ...theme,
+            skinCss: String(applied.skinCss ?? ""),
+            bannerHref: String(
+              applied.bannerImage ?? theme.bannerHref ?? "",
+            ),
+            title: applied.title ?? theme.title,
+            plainBg: applied.plainBg ?? theme.plainBg,
+          },
           siteLive,
           themes: (await site.listAllThemes(Deno.cwd())).map((t) => ({
             ...t,

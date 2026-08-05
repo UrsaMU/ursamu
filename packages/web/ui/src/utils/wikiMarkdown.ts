@@ -35,8 +35,65 @@ function safeHref(url: string): string | null {
   return u;
 }
 
+/**
+ * Short page-local refs → API URL (parity with site.js).
+ * Authors write: ![crest](crest.png)
+ */
+export function resolveWikiImageSrc(
+  src: string,
+  pagePath: string,
+): string | null {
+  const raw = String(src ?? "").trim();
+  if (!raw) return null;
+  if (/^\s*javascript:/i.test(raw) || /^\s*data:/i.test(raw)) {
+    return null;
+  }
+  if (/^https?:\/\//i.test(raw) || raw.startsWith("/")) {
+    return raw;
+  }
+  let ref = raw.replace(/^\.\//, "");
+  if (ref.startsWith("_assets/")) {
+    ref = ref.slice("_assets/".length);
+  }
+  ref = ref.replace(/^.*[/\\]/, "").toLowerCase();
+  ref = ref.replace(/\s+/g, "-").replace(/[^a-z0-9._-]+/g, "");
+  if (
+    !/^[a-z0-9][a-z0-9._-]*\.(png|jpe?g|gif|webp|svg)$/i.test(ref)
+  ) {
+    return null;
+  }
+  const page = String(pagePath ?? "").replace(/^\/+|\/+$/g, "");
+  if (!page) return null;
+  const encPage = page
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/");
+  return `/api/v1/wiki/${encPage}/_assets/${
+    encodeURIComponent(ref)
+  }`;
+}
+
 /** Optional path → title map for [[wikilink]] labels. */
 export type WikiTitleIndex = Record<string, string>;
+
+export type WikiMarkdownOpts = {
+  wikiIndex?: WikiTitleIndex;
+  /** Current page path — resolves bare image filenames. */
+  pagePath?: string;
+};
+
+function normalizeOpts(
+  indexOrOpts: WikiTitleIndex | WikiMarkdownOpts = {},
+): WikiMarkdownOpts {
+  if (
+    indexOrOpts &&
+    typeof indexOrOpts === "object" &&
+    ("pagePath" in indexOrOpts || "wikiIndex" in indexOrOpts)
+  ) {
+    return indexOrOpts as WikiMarkdownOpts;
+  }
+  return { wikiIndex: indexOrOpts as WikiTitleIndex };
+}
 
 /**
  * Escape first, then wrap markdown so captures stay safe
@@ -44,8 +101,10 @@ export type WikiTitleIndex = Record<string, string>;
  */
 function inlineMarkdown(
   text: string,
-  wikiIndex: WikiTitleIndex = {},
+  opts: WikiMarkdownOpts = {},
 ): string {
+  const wikiIndex = opts.wikiIndex ?? {};
+  const pagePath = opts.pagePath ?? "";
   let s = esc(text);
 
   s = s.replace(
@@ -67,6 +126,17 @@ function inlineMarkdown(
   s = s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
   s = s.replace(/\*(.+?)\*/g, "<em>$1</em>");
   s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  // Images before links
+  s = s.replace(
+    /!\[([^\]]*)\]\(([^)]+)\)/g,
+    (_m, alt: string, url: string) => {
+      const raw = unesc(url);
+      const href = resolveWikiImageSrc(raw, pagePath) ??
+        safeHref(raw);
+      if (!href) return alt;
+      return `<img src="${esc(href)}" alt="${alt}" loading="lazy">`;
+    },
+  );
   s = s.replace(
     /\[([^\]]+)\]\(([^)]+)\)/g,
     (_m, lbl: string, url: string) => {
@@ -81,11 +151,13 @@ function inlineMarkdown(
 
 /**
  * Render wiki body markdown to HTML (site FE parity).
+ * Second arg: title index (legacy) or { wikiIndex, pagePath }.
  */
 export function renderWikiMarkdown(
   md: string,
-  wikiIndex: WikiTitleIndex = {},
+  indexOrOpts: WikiTitleIndex | WikiMarkdownOpts = {},
 ): string {
+  const opts = normalizeOpts(indexOrOpts);
   const lines = String(md ?? "").split(/\r?\n/);
   let html = "";
   let inList = false;
@@ -114,15 +186,13 @@ export function renderWikiMarkdown(
     }
     html += "<table>\n<thead>\n<tr>";
     for (const h of tableRows[0]!) {
-      html += `<th>${inlineMarkdown(h, wikiIndex)}</th>`;
+      html += `<th>${inlineMarkdown(h, opts)}</th>`;
     }
     html += "</tr>\n</thead>\n<tbody>\n";
     for (let r = 1; r < tableRows.length; r++) {
       html += "<tr>";
       for (const cell of tableRows[r]!) {
-        html += `<td>${
-          inlineMarkdown(cell, wikiIndex)
-        }</td>`;
+        html += `<td>${inlineMarkdown(cell, opts)}</td>`;
       }
       html += "</tr>\n";
     }
@@ -162,7 +232,7 @@ export function renderWikiMarkdown(
       const hText = hMatch[2]!;
       const hId = slug(hText);
       html += `<h${level} id="${esc(hId)}">` +
-        `${inlineMarkdown(hText, wikiIndex)}` +
+        `${inlineMarkdown(hText, opts)}` +
         `</h${level}>\n`;
       continue;
     }
@@ -179,7 +249,7 @@ export function renderWikiMarkdown(
       closePara();
       closeList();
       html += "<blockquote><p>" +
-        inlineMarkdown(bqMatch[1]!, wikiIndex) +
+        inlineMarkdown(bqMatch[1]!, opts) +
         "</p></blockquote>\n";
       continue;
     }
@@ -194,7 +264,7 @@ export function renderWikiMarkdown(
         listTag = "ul";
       }
       html += `<li>${
-        inlineMarkdown(ulMatch[1]!, wikiIndex)
+        inlineMarkdown(ulMatch[1]!, opts)
       }</li>\n`;
       continue;
     }
@@ -209,7 +279,7 @@ export function renderWikiMarkdown(
         listTag = "ol";
       }
       html += `<li>${
-        inlineMarkdown(olMatch[1]!, wikiIndex)
+        inlineMarkdown(olMatch[1]!, opts)
       }</li>\n`;
       continue;
     }
@@ -221,7 +291,7 @@ export function renderWikiMarkdown(
     } else {
       html += " ";
     }
-    html += inlineMarkdown(line, wikiIndex);
+    html += inlineMarkdown(line, opts);
   }
 
   closePara();

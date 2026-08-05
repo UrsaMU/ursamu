@@ -1,4 +1,4 @@
-// Container access helpers for put / get-from.
+// Container access helpers for put / get-from / enter / leave.
 
 import type { IUrsamuSDK, IDBObj } from "../commands/types.ts";
 import { evaluateLock } from "../world/locks.ts";
@@ -17,8 +17,48 @@ export function isNearbyContainer(
 }
 
 /**
+ * Shared enter-lock check (no proximity).
+ * - @lock/enter when set → must pass (even vs enter_ok).
+ * - Else enter_ok, or canEdit (owner/staff).
+ * - Else deny (players/things locked by default).
+ */
+export async function passesEnterLock(
+  u: IUrsamuSDK,
+  actor: IDBObj,
+  target: IDBObj,
+): Promise<boolean> {
+  if (target.id === actor.id) return false;
+  const enterLock =
+    (target.state?.locks as Record<string, string> | undefined)?.enter;
+  if (enterLock) {
+    return evaluateLock(enterLock, actor, target);
+  }
+  if (target.flags.has("enter_ok")) return true;
+  if (await u.canEdit(actor, target)) return true;
+  return false;
+}
+
+/**
+ * May the actor physically enter this object (vehicle, booth, player…)?
+ * Rooms use exits; exits are not enterable this way.
+ */
+export async function canEnterObject(
+  u: IUrsamuSDK,
+  actor: IDBObj,
+  target: IDBObj,
+): Promise<boolean> {
+  if (target.flags.has("exit")) return false;
+  if (target.flags.has("room")) return false;
+  if (!isNearbyContainer(actor, target)) return false;
+  // Already inside
+  if (actor.location === target.id) return false;
+  return passesEnterLock(u, actor, target);
+}
+
+/**
  * May the actor put into / take from this container?
  * - Own bags (held): always.
+ * - Players never inventory-containers (use enter for bodies if unlocked).
  * - @lock/enter when set: must pass.
  * - Else enter_ok, or canEdit (owner/staff).
  */
@@ -35,15 +75,7 @@ export async function canAccessContainer(
 
   if (container.location === actor.id) return true;
 
-  const enterLock =
-    (container.state?.locks as Record<string, string> | undefined)
-      ?.enter;
-  if (enterLock) {
-    return evaluateLock(enterLock, actor, container);
-  }
-  if (container.flags.has("enter_ok")) return true;
-  if (await u.canEdit(actor, container)) return true;
-  return false;
+  return passesEnterLock(u, actor, container);
 }
 
 export function nameMatches(obj: IDBObj, query: string): boolean {

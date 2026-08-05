@@ -1,6 +1,5 @@
 // @ts-nocheck: some dependencies do not have types or cause issues with Deno's type checker
 export * as dpath from "jsr:@std/path@0.224.0";
-export * from "npm:@deno/sandbox@0.10.0";
 export * as dfs from "jsr:@std/fs@0.224.0";
 export type Kv = Deno.Kv;
 

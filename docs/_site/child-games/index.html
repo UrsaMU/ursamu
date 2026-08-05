@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/child-games/">
+<meta property="og:url" content="http://localhost:3001/child-games/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -275,20 +275,19 @@ your own deployment.</p>
 <p>The CLI ships with a generator that lays down a complete supervised<br>
 project, including daemon scripts, telnet sidecar, and a <code>.env</code> with a<br>
 fresh JWT secret (v2.4.0):</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli create my-game
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/create my-game
 cd my-game
 </code></pre>
 <p>The scaffold writes:</p>
 <ul>
-<li><code>deno.json</code> with <code>start</code> / <code>dev</code> / <code>test</code> tasks</li>
-<li><code>config/config.json</code> (see “Configuration” below)</li>
-<li><code>plugins.manifest.json</code> — declared plugin dependencies</li>
-<li><code>system/scripts/</code> — empty, ready for local script overrides</li>
-<li><code>daemon.sh</code>, <code>stop.sh</code>, <code>restart.sh</code>, <code>status.sh</code> — supervised lifecycle</li>
-<li><code>.env</code> containing a generated <code>JWT_SECRET</code></li>
+<li><code>deno.json</code> with <code>start</code> / <code>dev</code> / <code>test</code> tasks and import map</li>
+<li><code>config/config.json</code> — ports + default portal plugins (site + web)</li>
+<li><code>system/scripts/</code> — engine script copies / overrides</li>
+<li><code>scripts/daemon.sh</code>, <code>stop.sh</code>, <code>restart.sh</code>, <code>status.sh</code></li>
+<li><code>.env</code> with a generated <code>JWT_SECRET</code></li>
 </ul>
-<p>A <code>--local</code> variant points the import map at a checkout of the engine<br>
-instead of JSR; the tasks, manifest, and scripts are otherwise identical.</p>
+<p>A <code>--local</code> variant points the import map at a monorepo checkout<br>
+instead of JSR; tasks and config shape are otherwise the same.</p>
 <h2>Running the game</h2>
 <pre class="language-bash" tabindex="0"><code class="language-bash">./daemon.sh    # start under supervisor (background)
 ./status.sh    # show pid / uptime / health
@@ -333,9 +332,9 @@ conflict error throws a typed <code>PluginInstallError</code> and leaves the<br>
 filesystem and registry untouched. Deps without a <code>version:</code> constraint<br>
 remain legacy-compatible.</p>
 <p>Install or update from the CLI:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin install &lt;url&gt; [--ref &lt;ref&gt;]
-deno run -A jsr:@ursamu/mush/cli plugin update
-deno run -A jsr:@ursamu/mush/cli plugin list
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/plugin install &lt;url&gt; [--ref &lt;ref&gt;]
+deno run -A jsr:@ursamu/cli@0.1.2/plugin update
+deno run -A jsr:@ursamu/cli@0.1.2/plugin list
 </code></pre>
 <h2>Local script overrides</h2>
 <p>The engine has no bundled <code>system/scripts/</code> — all native commands are<br>
@@ -358,8 +357,8 @@ project-specific mechanics as their own.</p>
 <li><code>urban-shadows</code></li>
 </ul>
 <h2>Updating the engine</h2>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli update         # latest stable
-deno run -A jsr:@ursamu/mush/cli update main    # specific branch
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/update         # latest stable
+deno run -A jsr:@ursamu/cli@0.1.2/update main    # specific branch
 </code></pre>
 <p>The updater rewrites the import map and re-runs <code>ensurePlugins</code>. Restart<br>
 the game after an update.</p>

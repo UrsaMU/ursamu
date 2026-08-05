@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/deployment/">
+<meta property="og:url" content="http://localhost:3001/guides/deployment/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -552,10 +552,10 @@ running server keeps writing without needing a restart.</h2>
 <p>UrsaMU is a JSR package — your game project depends on a version pinned in<br>
 <code>deno.json</code>. To update to the latest engine:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash"># Preview what would change
-deno run -A jsr:@ursamu/mush/cli update --dry-run
+deno run -A jsr:@ursamu/cli@0.1.2/update --dry-run
 
 # Apply the update
-deno run -A jsr:@ursamu/mush/cli update
+deno run -A jsr:@ursamu/cli@0.1.2/update
 </code></pre>
 <p>After updating, restart the servers:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash">bash scripts/restart.sh                              # if using the daemon scaffold

@@ -160,6 +160,29 @@ const stripAnsi = (s: string) =>
 
 const visLen = (s: string) => stripAnsi(s).length;
 
+function wordWrap(text: string, width: number): string {
+  return text
+    .split("\n")
+    .map((line) => {
+      if (stripAnsi(line).length <= width) return line;
+      const words = line.split(" ");
+      let current = "";
+      const result: string[] = [];
+      for (const word of words) {
+        const candidate = current ? `${current} ${word}` : word;
+        if (stripAnsi(candidate).length <= width) {
+          current = candidate;
+        } else {
+          if (current) result.push(current);
+          current = word;
+        }
+      }
+      if (current) result.push(current);
+      return result.join("\n");
+    })
+    .join("\n");
+}
+
 /** Keep first `keep` visible chars; preserve color tokens. */
 function truncVis(s: string, keep: number): string {
   if (keep <= 0) return "";
@@ -229,34 +252,42 @@ export const rjust = (s = "", len: number, fill = " "): string => {
 
 export type LayoutFn = (label?: string, filler?: string, width?: number) => string;
 
+export type MarkdownTemplates = {
+  h1?: string;
+  h2?: string;
+  h3?: string;
+  bold?: string;
+  italic?: string;
+  code?: string;
+  bullet?: string;
+  link?: string;
+  wikilink?: string;
+};
+
 export type LayoutTemplates = {
   header?: string;
   divider?: string;
   footer?: string;
+  markdown?: MarkdownTemplates;
 };
 
 const MAX_TPL_LEN = 10_000;
 const MAX_TPL_DEPTH = 16;
 
 /**
- * Config-driven mushcode templates for layout helpers.
- * Keys: game.layout.header / .divider / .footer
+ * Config-driven mushcode templates for layout helpers and markdown formatting.
+ * Keys: game.layout.header / .divider / .footer / .markdown.*
  *
- * Positional args substituted before eval:
- *   %0  label/title
- *   %1  width  (string)
- *   %2  filler
- *
- * Supported functions (sync subset, nested ok):
- *   center, ljust, rjust, repeat, space, cat, lit, strlen,
- *   words, strlen (alias), if, eq, neq, and, or, not, gt, lt,
- *   gte, lte, add, sub, mul, div, min, max, abs, first, rest,
- *   mid, left, right, strip, trim
- * Color codes and %r/%t/%b pass through.
- *
- * Example:
- *   "header":  "[center(%ch%cy%0%cn,%1,%cg=%cn)]"
- *   "divider": "[if(words(%0),center(%ch%cy%0%cn,%1,%cg-%cn),)]"
+ * Markdown template positional args (%0 = match text, %1 = optional 2nd arg):
+ *   h1       %0 = heading text
+ *   h2       %0 = heading text
+ *   h3       %0 = heading text
+ *   bold     %0 = bold text
+ *   italic   %0 = italic text
+ *   code     %0 = code text
+ *   bullet   %0 = item text
+ *   link     %0 = link text, %1 = url
+ *   wikilink %0 = target page
  */
 let _layoutTemplates: LayoutTemplates = {};
 
@@ -265,6 +296,9 @@ export function setLayoutTemplates(t: LayoutTemplates): void {
     header:  typeof t.header  === "string" ? t.header  : undefined,
     divider: typeof t.divider === "string" ? t.divider : undefined,
     footer:  typeof t.footer  === "string" ? t.footer  : undefined,
+    markdown: typeof t.markdown === "object" && t.markdown !== null
+      ? { ...t.markdown }
+      : undefined,
   };
 }
 
@@ -283,12 +317,19 @@ export function clearLayoutTemplates(): void {
   _layoutTemplates = {};
 }
 
-/** Load game.layout.* from a config-shaped object (or getConfig slice). */
+/**
+ * Load game.layout.* from a config-shaped object (or getConfig slice).
+ *
+ * Missing/undefined layout is a **no-op** — does not clear existing
+ * templates. Host mains often re-call this after mu(); if they read
+ * getConfig from a second @ursamu/core copy, undefined must not wipe
+ * the templates mu() already applied. Use clearLayoutTemplates() to
+ * reset explicitly (tests).
+ */
 export function applyLayoutFromConfig(
   layout?: LayoutTemplates | null,
 ): void {
   if (!layout || typeof layout !== "object") {
-    clearLayoutTemplates();
     return;
   }
   setLayoutTemplates(layout);
@@ -605,7 +646,7 @@ export function expandLayoutTemplate(
   }
 
   let s = template
-    .replace(/%([0-9]+)/g, (_, n) => args[Number(n)] ?? "")
+    .replace(/(?:%|\$)([0-9]+)/g, (_, n) => args[Number(n)] ?? "")
     .replace(/%r/gi, "\n")
     .replace(/%t/gi, "\t")
     .replace(/%b/gi, " ");
@@ -617,6 +658,47 @@ export function expandLayoutTemplate(
 
   if (s.length > MAX_TPL_LEN) s = s.slice(0, MAX_TPL_LEN);
   return s;
+}
+
+/** Convert Markdown to MUSH ANSI, evaluated against game.layout.markdown templates when set. */
+export function markdownToAnsi(md: string, width = 78): string {
+  let out = md;
+  const t = _layoutTemplates.markdown ?? {};
+
+  // [[wikilinks]] -> %ch%cc[[Target]]%cn
+  const tWikilink = t.wikilink ?? "%ch%cc[[%0]]%cn";
+  out = out.replace(/\[\[([^\]]+)\]\]/g, (_, target) =>
+    expandLayoutTemplate(tWikilink, [target])
+  );
+
+  // Markdown links [text](url) -> text (url)
+  const tLink = t.link ?? "%0 (%ch%cb%1%cn)";
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) =>
+    expandLayoutTemplate(tLink, [label, url])
+  );
+
+  // Headings
+  const tH1 = t.h1 ?? "%ch%cc%0%cn";
+  const tH2 = t.h2 ?? "%ch%cy%0%cn";
+  const tH3 = t.h3 ?? "%ch%cw%0%cn";
+  out = out.replace(/^# (.+)$/gm, (_, title) => expandLayoutTemplate(tH1, [title]));
+  out = out.replace(/^## (.+)$/gm, (_, title) => expandLayoutTemplate(tH2, [title]));
+  out = out.replace(/^### (.+)$/gm, (_, title) => expandLayoutTemplate(tH3, [title]));
+
+  // Bold, italic, inline code
+  const tBold = t.bold ?? "%ch%0%cn";
+  const tItalic = t.italic ?? "%ci%0%cn";
+  const tCode = t.code ?? "%ch%cg%0%cn";
+  out = out.replace(/\*\*([^*]+)\*\*/g, (_, text) => expandLayoutTemplate(tBold, [text]));
+  out = out.replace(/\*([^*]+)\*/g, (_, text) => expandLayoutTemplate(tItalic, [text]));
+  out = out.replace(/`([^`]+)`/g, (_, text) => expandLayoutTemplate(tCode, [text]));
+
+  // Bullet lists
+  const tBullet = t.bullet ?? "  • %0";
+  out = out.replace(/^\s*-\s+(.+)$/gm, (_, item) => expandLayoutTemplate(tBullet, [item]));
+
+  // Word wrap lines
+  return wordWrap(out, width);
 }
 
 const _defaultHeader: LayoutFn = (string = "", filler = "=", width = 78) => {

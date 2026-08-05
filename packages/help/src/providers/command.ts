@@ -1,28 +1,28 @@
 /**
  * CommandProvider — surfaces help text declared in addCmd() registrations.
  *
- * Reads the live `cmds` array from the engine. This requires the engine PR
- * that adds `cmds` to mod.ts exports. Until that PR merges, this provider
- * returns no entries — file-based and DB help continue to work normally.
- *
- * Priority 10 — lowest of the three built-in providers, so files and DB
- * entries always win on name collision.
+ * Priority 10 — lowest of the three built-in providers.
  *
  * Commands with `hidden: true` are excluded.
- * Commands with no `help` string are included as stub entries (name only, no body).
+ * Locks requiring builder+/admin/wizard mark staffOnly.
  */
 
 import type { HelpEntry, HelpProvider } from "../registry.ts";
 import { slugify } from "../registry.ts";
+import {
+  lockImpliesStaff,
+  sectionImpliesStaff,
+} from "../visibility.ts";
 
 /**
  * Minimal shape of a registered command that we care about.
- * Matches ICmd from @ursamu/mush (not in public exports — mirrored locally).
+ * Matches ICmd from @ursamu/mush (mirrored locally).
  */
 interface IHelpCmd {
   name: string;
   help?: string;
   category?: string;
+  lock?: string;
   hidden?: boolean;
 }
 
@@ -33,12 +33,18 @@ function categoryToSection(category: string | undefined): string {
 }
 
 function buildEntry(cmd: IHelpCmd): HelpEntry {
+  const section = categoryToSection(cmd.category);
+  const staffOnly = lockImpliesStaff(cmd.lock) ||
+    sectionImpliesStaff(section);
   return {
     name: slugify(cmd.name),
-    section: categoryToSection(cmd.category),
+    section,
     content: cmd.help ?? "",
     source: "command",
     tags: [],
+    staffOnly: staffOnly || undefined,
+    // Staff-only commands stay out of public indexes
+    hidden: staffOnly || undefined,
   };
 }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import {
   onBeforeRouteLeave,
   useRoute,
@@ -15,7 +15,9 @@ import {
   dboName,
   dboType,
   flagsToString,
+  isStaffFlags,
   locationLabel,
+  normalizeFlags,
 } from "@/utils/text";
 import PlayerSelect from "@/components/PlayerSelect.vue";
 
@@ -27,7 +29,16 @@ const session = useSessionStore();
 const route = useRoute();
 const router = useRouter();
 
-type TypeFilter = "all" | "player" | "room" | "exit" | "thing";
+/** Type + player-status filters (Players section folded into DB). */
+type TypeFilter =
+  | "all"
+  | "player"
+  | "online"
+  | "offline"
+  | "staff"
+  | "room"
+  | "exit"
+  | "thing";
 
 const q = ref("");
 const typeFilter = ref<TypeFilter>("all");
@@ -38,6 +49,9 @@ watch(
   (f) => {
     if (
       f === "player" ||
+      f === "online" ||
+      f === "offline" ||
+      f === "staff" ||
       f === "room" ||
       f === "exit" ||
       f === "thing"
@@ -55,6 +69,11 @@ const saveError = ref("");
 const saveOk = ref("");
 const busy = ref(false);
 const loadingDetail = ref(false);
+const imageBusy = ref(false);
+const imageError = ref("");
+const imageUrlIn = ref("");
+const imageFileInput = ref<HTMLInputElement | null>(null);
+
 
 const selected = computed((): DboStub | null => {
   if (!selectedKey.value) return null;
@@ -87,12 +106,52 @@ const {
   };
 });
 
+const filterBits = computed(() => {
+  const bits: string[] = [];
+  const labels: Record<TypeFilter, string> = {
+    all: "",
+    player: "players only",
+    online: "online players",
+    offline: "offline players",
+    staff: "staff only",
+    room: "rooms only",
+    exit: "exits only",
+    thing: "things only",
+  };
+  if (typeFilter.value !== "all") {
+    bits.push(labels[typeFilter.value]);
+  }
+  if (q.value.trim()) {
+    bits.push(`search “${q.value.trim()}”`);
+  }
+  return bits;
+});
+
+function isPlayerObj(o: DboStub): boolean {
+  return dboType(o) === "player";
+}
+
 const rows = computed(() => {
   let list = [...objects.value];
-  if (typeFilter.value !== "all") {
+  const f = typeFilter.value;
+  if (f === "player") {
+    list = list.filter((o) => isPlayerObj(o));
+  } else if (f === "online") {
     list = list.filter(
-      (o) => dboType(o) === typeFilter.value,
+      (o) => isPlayerObj(o) && live.isOnline(o.id),
     );
+  } else if (f === "offline") {
+    list = list.filter(
+      (o) => isPlayerObj(o) && !live.isOnline(o.id),
+    );
+  } else if (f === "staff") {
+    list = list.filter(
+      (o) =>
+        isPlayerObj(o) &&
+        isStaffFlags(normalizeFlags(o.flags)),
+    );
+  } else if (f === "room" || f === "exit" || f === "thing") {
+    list = list.filter((o) => dboType(o) === f);
   }
   const needle = q.value.trim().toLowerCase();
   if (needle) {
@@ -112,6 +171,16 @@ const rows = computed(() => {
     });
   }
   return list.sort((a, b) => {
+    // Players: online first when in a player-ish filter
+    if (
+      f === "player" || f === "online" || f === "offline" ||
+      f === "staff"
+    ) {
+      const ao = live.isOnline(a.id) ? 0 : 1;
+      const bo = live.isOnline(b.id) ? 0 : 1;
+      if (ao !== bo) return ao - bo;
+      return dboName(a).localeCompare(dboName(b));
+    }
     const na = Number(a.id);
     const nb = Number(b.id);
     if (!Number.isNaN(na) && !Number.isNaN(nb)) {
@@ -138,6 +207,14 @@ const typeCounts = computed(() => {
   }
   return c;
 });
+
+/** List browser vs object editor (Wiki list / Wiki edit). */
+const isDetail = computed(
+  () =>
+    Boolean(selectedKey.value) ||
+    route.name === "db-detail" ||
+    Boolean(props.id || route.params.id),
+);
 
 async function openObject(id: string): Promise<void> {
   const key = id.replace(/^#/, "");
@@ -177,7 +254,15 @@ async function openObject(id: string): Promise<void> {
 function clearSelection(): void {
   if (!confirmLeave("Discard object edits?")) return;
   selectedKey.value = "";
-  void router.replace({ name: "db" });
+  void router.replace({
+    name: "db",
+    query: { ...route.query },
+  });
+}
+
+function clearFilters(): void {
+  q.value = "";
+  void router.replace({ name: "db", query: {} });
 }
 
 watch(
@@ -192,6 +277,21 @@ watch(
 onBeforeRouteLeave(() =>
   confirmLeave("Discard object edits?"),
 );
+
+function onKey(ev: KeyboardEvent): void {
+  if ((ev.metaKey || ev.ctrlKey) && (ev.key === "s" || ev.key === "S")) {
+    if (!isDetail.value || !dirty.value || busy.value) return;
+    ev.preventDefault();
+    void save();
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("keydown", onKey);
+});
+onUnmounted(() => {
+  document.removeEventListener("keydown", onKey);
+});
 
 async function save(): Promise<void> {
   if (!selected.value?.id || !dirty.value) return;
@@ -244,10 +344,152 @@ async function save(): Promise<void> {
   }
 }
 
+
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+
+function applyImageResult(
+  data: DboStub & { imageUrl?: string },
+): void {
+  const url = String(
+    data.imageUrl ||
+      data.data?.image ||
+      "",
+  ).trim();
+  if (url) {
+    form.value.image = url;
+    // Keep live store + form in sync for preview
+    const merged: DboStub = {
+      ...data,
+      data: {
+        ...(data.data || {}),
+        image: url,
+      },
+    };
+    live.upsertObject(merged);
+    markSaved(merged);
+  } else {
+    live.upsertObject(data);
+    markSaved(data);
+  }
+}
+
+async function uploadObjectImage(file: File): Promise<void> {
+  if (!selected.value?.id) return;
+  imageBusy.value = true;
+  imageError.value = "";
+  saveOk.value = "";
+  try {
+    if (file.size > MAX_UPLOAD_BYTES) {
+      imageError.value =
+        "Image must be 8 MB or smaller. " +
+        "Compress or resize, then try again.";
+      return;
+    }
+    if (!/^image\/(png|jpeg|jpg|gif|webp)$/i.test(file.type) &&
+      !/\.(png|jpe?g|gif|webp)$/i.test(file.name)) {
+      imageError.value =
+        "Use PNG, JPEG, GIF, or WebP.";
+      return;
+    }
+    const fd = new FormData();
+    fd.append("file", file, file.name);
+    const enc = encodeURIComponent(String(selected.value.id));
+    const { res, data } = await api<
+      DboStub & { error?: string; imageUrl?: string }
+    >(`/api/v1/dbobj/${enc}/image`, {
+      method: "POST",
+      body: fd,
+    });
+    if (!res.ok) {
+      imageError.value = data?.error ||
+        `Upload failed (${res.status})`;
+      return;
+    }
+    applyImageResult(data);
+    saveOk.value = "Image uploaded.";
+  } catch (e: unknown) {
+    imageError.value = e instanceof Error
+      ? e.message
+      : "Upload failed.";
+  } finally {
+    imageBusy.value = false;
+  }
+}
+
+async function onImageFile(ev: Event): Promise<void> {
+  const input = ev.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+  try {
+    await uploadObjectImage(file);
+  } finally {
+    input.value = "";
+  }
+}
+
+async function importImageUrl(): Promise<void> {
+  if (!selected.value?.id) return;
+  const url = imageUrlIn.value.trim();
+  if (!url) {
+    imageError.value = "Paste an image URL first.";
+    return;
+  }
+  imageBusy.value = true;
+  imageError.value = "";
+  saveOk.value = "";
+  try {
+    const enc = encodeURIComponent(String(selected.value.id));
+    const { res, data } = await api<
+      DboStub & { error?: string; imageUrl?: string }
+    >(`/api/v1/dbobj/${enc}/image`, {
+      method: "POST",
+      body: JSON.stringify({ url }),
+    });
+    if (!res.ok) {
+      imageError.value = data?.error ||
+        `Import failed (${res.status})`;
+      return;
+    }
+    applyImageResult(data);
+    imageUrlIn.value = "";
+    saveOk.value = "Image imported.";
+  } catch (e: unknown) {
+    imageError.value = e instanceof Error
+      ? e.message
+      : "Import failed.";
+  } finally {
+    imageBusy.value = false;
+  }
+}
+
+async function clearObjectImage(): Promise<void> {
+  if (!selected.value?.id) return;
+  if (!globalThis.confirm("Clear this object's image?")) return;
+  imageBusy.value = true;
+  imageError.value = "";
+  try {
+    const enc = encodeURIComponent(String(selected.value.id));
+    const { res, data } = await api<DboStub & { error?: string }>(
+      `/api/v1/dbobj/${enc}/image`,
+      { method: "DELETE" },
+    );
+    if (!res.ok) {
+      imageError.value = data?.error || `Clear failed (${res.status})`;
+      return;
+    }
+    live.upsertObject(data);
+    markSaved(data);
+    form.value.image = "";
+    saveOk.value = "Image cleared.";
+  } finally {
+    imageBusy.value = false;
+  }
+}
+
 function shortFlags(o: DboStub): string {
   const fl = flagsToString(o.flags);
-  return fl.length > 36
-    ? fl.slice(0, 33) + "…"
+  return fl.length > 40
+    ? fl.slice(0, 37) + "…"
     : fl || "—";
 }
 
@@ -259,30 +501,42 @@ function zoneLabel(o: DboStub): string {
   const z = o.data?.zone;
   return z ? `#${z}` : "—";
 }
+
+function typeBadgeClass(t: string): string {
+  if (t === "player") return "badge-live";
+  if (t === "room") return "badge";
+  return "badge";
+}
 </script>
 
 <template>
-  <article id="main-db">
-    <header class="db-top">
-      <div class="db-top-text">
+  <!-- ── List (Wiki browser pattern) ─────────────────────────── -->
+  <article
+    v-if="!isDetail"
+    id="main-db"
+    class="dash-browser"
+  >
+    <header class="dash-header">
+      <div>
         <p class="muted dash-kicker">
           Game world
         </p>
         <h1 class="page-title">
           Database
-          <span
-            v-if="objectsLoaded"
-            class="db-count muted"
-          >
-            {{ rows.length }}{{
-              rows.length !== objectCount
+          <span class="muted">
+            ({{ rows.length }}{{
+              objectsLoaded && rows.length !== objectCount
                 ? ` of ${objectCount}`
                 : ""
-            }}
+            }})
           </span>
         </h1>
+        <p class="muted">
+          Browse and open objects — type filters live in the
+          side nav.
+        </p>
       </div>
-      <div class="db-top-actions">
+      <div class="dash-header-actions">
         <button
           type="button"
           class="secondary outline"
@@ -295,25 +549,42 @@ function zoneLabel(o: DboStub): string {
 
     <p
       v-if="objectsLoaded"
-      class="db-summary muted"
+      class="muted"
     >
       <strong>{{ typeCounts.player }}</strong> players
       · <strong>{{ typeCounts.room }}</strong> rooms
       · <strong>{{ typeCounts.exit }}</strong> exits
       · <strong>{{ typeCounts.thing }}</strong> things
-      · <strong>{{ objectCount }}</strong> total
     </p>
 
-    <div class="db-toolbar">
-      <input
-        v-model="q"
-        type="search"
-        class="db-search"
-        placeholder="Search id, name, flags, zone…"
-        autocomplete="off"
-        aria-label="Search objects"
+    <p
+      v-if="filterBits.length"
+      class="dash-filter-banner"
+    >
+      <span>Filtered: {{ filterBits.join(" · ") }}</span>
+      <button
+        type="button"
+        class="secondary outline"
+        @click="clearFilters"
       >
-    </div>
+        Clear
+      </button>
+    </p>
+
+    <section
+      class="pages-toolbar"
+      aria-label="Search objects"
+    >
+      <label class="pages-search-label">
+        <span class="sr-only">Search objects</span>
+        <input
+          v-model="q"
+          type="search"
+          placeholder="Search id, name, flags, zone…"
+          autocomplete="off"
+        >
+      </label>
+    </section>
 
     <p
       v-if="loadError"
@@ -323,497 +594,388 @@ function zoneLabel(o: DboStub): string {
       {{ loadError }}
     </p>
 
-    <!-- Scrollable list on top; detail panel stacks below -->
-    <section
-      class="db-list"
-      aria-label="Object list"
-    >
-      <div
-        v-if="!objectsLoaded"
-        class="db-empty muted"
-      >
-        Loading objects…
-      </div>
-      <div
-        v-else-if="!rows.length"
-        class="db-empty muted"
-      >
-        No objects match this filter.
-      </div>
-      <ul
-        v-else
-        class="db-rows"
-      >
-        <li
-          v-for="o in rows"
-          :key="String(o.id)"
-        >
-          <button
-            type="button"
-            class="db-row"
-            :class="{
-              active: selectedKey === String(o.id),
-            }"
-            @click="openObject(String(o.id))"
+    <div class="table-wrap">
+      <table class="dash-table">
+        <thead>
+          <tr>
+            <th scope="col">
+              Id
+            </th>
+            <th scope="col">
+              Name
+            </th>
+            <th scope="col">
+              Type
+            </th>
+            <th scope="col">
+              Status
+            </th>
+            <th scope="col">
+              Location
+            </th>
+            <th scope="col">
+              Zone
+            </th>
+            <th scope="col">
+              Flags
+            </th>
+            <th scope="col">
+              <span class="sr-only">Open</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="!objectsLoaded">
+            <td
+              colspan="8"
+              class="muted"
+            >
+              Loading objects…
+            </td>
+          </tr>
+          <tr v-else-if="!rows.length">
+            <td
+              colspan="8"
+              class="muted"
+            >
+              No objects match this filter.
+            </td>
+          </tr>
+          <tr
+            v-for="o in rows"
+            :key="String(o.id)"
           >
-            <span class="db-row-num">
+            <td>
               <code>#{{ o.id }}</code>
-            </span>
-            <span class="db-row-main">
-              <span class="db-row-title">
-                {{ dboName(o) }}
-              </span>
-              <span class="db-row-meta muted">
-                {{ locLabel(o) }}
-                · zone {{ zoneLabel(o) }}
-                · {{ shortFlags(o) }}
-              </span>
-            </span>
-            <span class="db-row-badges">
-              <span class="badge">
+            </td>
+            <td>
+              {{ dboName(o) }}
+            </td>
+            <td>
+              <span
+                class="badge"
+                :class="typeBadgeClass(dboType(o))"
+              >
                 {{ dboType(o) }}
               </span>
-            </span>
-          </button>
-        </li>
-      </ul>
-    </section>
+            </td>
+            <td>
+              <span
+                v-if="isPlayerObj(o) && live.isOnline(o.id)"
+                class="badge badge-live"
+              >online</span>
+              <span
+                v-else-if="isPlayerObj(o)"
+                class="muted"
+              >offline</span>
+              <span
+                v-else
+                class="muted"
+              >—</span>
+            </td>
+            <td class="muted">
+              {{ locLabel(o) }}
+            </td>
+            <td class="muted">
+              {{ zoneLabel(o) }}
+            </td>
+            <td class="muted">
+              {{ shortFlags(o) }}
+            </td>
+            <td class="row-open">
+              <button
+                type="button"
+                class="secondary outline"
+                @click="openObject(String(o.id))"
+              >
+                Open
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
 
-    <aside
-      v-if="selectedKey"
-      class="db-pane"
-      aria-label="Object detail"
-    >
-      <p
-        v-if="loadingDetail && !selected"
-        class="muted db-pane-loading"
-      >
-        Loading object…
-      </p>
-      <template v-else-if="selected && form">
-        <header class="db-pane-head">
+  <!-- ── Detail (Wiki edit pattern) ──────────────────────────── -->
+  <article
+    v-else
+    id="main-db-editor"
+  >
+    <header class="editor-header">
+      <div>
+        <p class="editor-path-line">
           <button
             type="button"
             class="back-link"
             @click="clearSelection"
           >
-            ← Close
+            ← Database
           </button>
-          <p class="muted dash-kicker">
-            #{{ selected.id }}
-            <span
-              v-if="dirty"
-              class="dirty-dot"
-            >●</span>
-          </p>
-          <h2 class="db-pane-title">
-            {{ form.name || dboName(selected) }}
-          </h2>
-          <p class="muted db-pane-sub">
-            <span class="badge">
-              {{ dboType(selected) }}
-            </span>
-            <span>{{ locLabel(selected) }}</span>
-            <span>· zone {{ zoneLabel(selected) }}</span>
-          </p>
-        </header>
-
-        <form
-          class="db-pane-form"
-          @submit.prevent="save"
-        >
-          <div class="db-pane-grid">
-            <label>
-              Name
-              <input v-model="form.name">
-            </label>
-            <label>
-              Moniker
-              <input v-model="form.moniker">
-            </label>
-          </div>
-          <label>
-            Flags
-            <input
-              v-model="form.flags"
-              class="mono"
-            >
-          </label>
-          <div class="db-pane-grid db-pane-grid-3">
-            <label>
-              Location
-              <input
-                v-model="form.location"
-                class="mono"
-              >
-            </label>
-            <label>
-              Zone
-              <input
-                v-model="form.zone"
-                class="mono"
-              >
-            </label>
-            <label>
-              Owner
-              <PlayerSelect
-                v-model="form.owner"
-                empty-label="— none —"
-              />
-            </label>
-          </div>
-          <div class="db-pane-grid db-pane-grid-3">
-            <label>
-              Money
-              <input
-                v-model="form.money"
-                type="number"
-                min="0"
-              >
-            </label>
-            <label>
-              Quota
-              <input
-                v-model="form.quota"
-                type="number"
-                min="0"
-              >
-            </label>
-            <label>
-              Image
-              <input v-model="form.image">
-            </label>
-          </div>
-          <label>
-            Description
-            <textarea
-              v-model="form.description"
-              class="mono"
-              rows="6"
-            />
-          </label>
-          <p
-            v-if="saveError"
-            class="error"
-          >
-            {{ saveError }}
-          </p>
-          <p
-            v-if="saveOk"
+          <code v-if="selectedKey">#{{ selectedKey }}</code>
+          <span
+            v-if="dirty"
+            class="dirty-dot"
+            title="Unsaved changes"
+            aria-label="Unsaved changes"
+          >●</span>
+          <small
+            v-if="selected"
             class="muted"
           >
-            {{ saveOk }}
-          </p>
-          <div class="db-pane-actions">
+            {{ dboType(selected) }}
+          </small>
+        </p>
+        <h1 class="page-title page-title-tight">
+          {{
+            form?.name ||
+              (selected ? dboName(selected) : "Object")
+          }}
+        </h1>
+        <p
+          v-if="selected"
+          class="muted"
+        >
+          {{ locLabel(selected) }}
+          · zone {{ zoneLabel(selected) }}
+        </p>
+      </div>
+      <div class="editor-actions">
+        <button
+          type="button"
+          class="secondary outline"
+          :disabled="!dirty || busy || !selected"
+          @click="selected && resetFrom(selected)"
+        >
+          Discard
+        </button>
+        <button
+          type="button"
+          :disabled="!dirty || busy || !selected"
+          :aria-busy="busy"
+          @click="save"
+        >
+          Save
+        </button>
+      </div>
+    </header>
+
+    <p
+      v-if="loadingDetail && !selected"
+      class="muted"
+      aria-busy="true"
+    >
+      Loading object…
+    </p>
+    <p
+      v-else-if="loadError"
+      class="error"
+      role="alert"
+    >
+      {{ loadError }}
+    </p>
+
+    <form
+      v-else-if="selected && form"
+      @submit.prevent="save"
+    >
+      <div class="db-edit-grid">
+        <label>
+          Name
+          <input
+            v-model="form.name"
+            maxlength="200"
+          >
+        </label>
+        <label>
+          Moniker
+          <input
+            v-model="form.moniker"
+            maxlength="500"
+          >
+        </label>
+      </div>
+      <label>
+        Flags
+        <input
+          v-model="form.flags"
+          class="mono"
+        >
+      </label>
+      <div class="db-edit-grid">
+        <label>
+          Location
+          <input
+            v-model="form.location"
+            class="mono"
+          >
+        </label>
+        <label>
+          Zone
+          <input
+            v-model="form.zone"
+            class="mono"
+          >
+        </label>
+        <label>
+          Owner
+          <PlayerSelect
+            v-model="form.owner"
+            empty-label="— none —"
+          />
+        </label>
+      </div>
+      <div class="db-edit-grid">
+        <label>
+          Money
+          <input
+            v-model="form.money"
+            type="number"
+            min="0"
+          >
+        </label>
+        <label>
+          Quota
+          <input
+            v-model="form.quota"
+            type="number"
+            min="0"
+          >
+        </label>
+        <label class="db-image-field settings-span-2">
+          Image
+          <input
+            v-model="form.image"
+            type="text"
+            class="mono"
+            placeholder="/images/… or paste URL then Import"
+            autocomplete="off"
+          >
+          <div
+            v-if="form.image"
+            class="db-image-preview"
+          >
+            <img
+              :key="form.image"
+              :src="form.image"
+              alt="Object image"
+              loading="lazy"
+            >
+          </div>
+          <div class="db-image-actions">
+            <input
+              ref="imageFileInput"
+              type="file"
+              accept="image/png,image/jpeg,image/gif,image/webp"
+              class="sr-only"
+              @change="onImageFile"
+            >
             <button
               type="button"
               class="secondary outline"
-              :disabled="!dirty || busy"
-              @click="selected && resetFrom(selected)"
+              :disabled="imageBusy"
+              @click="imageFileInput?.click()"
             >
-              Reset
+              Upload file
+            </button>
+            <input
+              v-model="imageUrlIn"
+              type="url"
+              class="mono db-image-url"
+              placeholder="https://… to import"
+              :disabled="imageBusy"
+              @keydown.enter.prevent="importImageUrl"
+            >
+            <button
+              type="button"
+              class="secondary outline"
+              :disabled="imageBusy"
+              @click="importImageUrl"
+            >
+              Import URL
             </button>
             <button
-              type="submit"
-              :disabled="!dirty || busy"
+              type="button"
+              class="secondary outline"
+              :disabled="imageBusy || !form.image"
+              @click="clearObjectImage"
             >
-              Save object
+              Clear
             </button>
           </div>
-        </form>
+          <p
+            v-if="imageError"
+            class="error"
+            role="alert"
+          >
+            {{ imageError }}
+          </p>
+          <p class="muted db-image-hint">
+            Stored under <code>/images/</code>.
+            Full width on web look
+            (<code>object-fit: contain</code>,
+            max ~512px / 50vh tall).
+            PNG, JPEG, GIF, WebP · max 8&nbsp;MB.
+            In-game: <code>@image here=&lt;url&gt;</code>.
+          </p>
+        </label>
+      </div>
+      <label>
+        Description
+        <textarea
+          v-model="form.description"
+          class="mono"
+          rows="8"
+        />
+      </label>
 
-        <section class="db-raw-section">
-          <h2 class="dash-h2">
-            Raw object
-          </h2>
-          <pre class="db-raw mono">{{
-            JSON.stringify(selected, null, 2)
-          }}</pre>
-        </section>
-      </template>
-    </aside>
+      <p
+        v-if="saveError"
+        class="error"
+        role="alert"
+      >
+        {{ saveError }}
+      </p>
+      <p
+        v-if="saveOk"
+        class="muted"
+      >
+        {{ saveOk }}
+      </p>
+      <p>
+        <small class="muted">
+          Save with the button or Ctrl/⌘+S when focused in the
+          form.
+        </small>
+      </p>
+    </form>
+
+    <section
+      v-if="selected"
+      class="db-raw-block"
+    >
+      <h2 class="dash-h2">
+        Raw object
+      </h2>
+      <pre class="db-raw mono">{{
+        JSON.stringify(selected, null, 2)
+      }}</pre>
+    </section>
   </article>
 </template>
 
 <style scoped>
-#main-db {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  min-height: calc(100vh - var(--header-h) - 3rem);
-  max-height: calc(100vh - var(--header-h) - 2rem);
-  padding: 0.25rem 0 0;
-  overflow: hidden;
-}
-
-.db-top {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
-  margin-bottom: 0.35rem;
-}
-
-.db-top .page-title {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-
-.db-count {
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.db-top-actions button {
-  width: auto;
-  margin: 0;
-}
-
-.db-summary {
-  margin: 0 0 1rem;
-  font-size: 0.8125rem;
-}
-
-.db-summary strong {
-  color: var(--text);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.db-toolbar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-}
-
-.db-search {
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  min-height: 2.5rem !important;
-}
-
-.db-list {
-  flex: 1 1 auto;
-  min-height: 10rem;
-  min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  overflow-x: hidden;
-  overflow-y: auto;
-  max-height: none;
-}
-
-#main-db:has(.db-pane) .db-list {
-  flex: 0 1 42vh;
-  max-height: 42vh;
-  min-height: 8rem;
-}
-
-.db-empty {
-  margin: 0;
-  padding: 2rem 1.25rem;
-  text-align: center;
-}
-
-.db-rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.db-rows > li {
-  margin: 0;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.db-rows > li:last-child {
-  border-bottom: none;
-}
-
-.db-row {
-  display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
-  gap: 0.65rem 1rem;
-  align-items: center;
-  width: 100%;
-  margin: 0;
-  padding: 0.85rem 1rem;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  box-shadow: none !important;
-  font: inherit;
-}
-
-.db-row:hover,
-.db-row:focus-visible {
-  background: var(--bg-surface-2);
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-.db-row.active {
-  background: var(--bg-surface-2);
-  box-shadow: none !important;
-}
-
-.db-row-num code {
-  font-size: 0.8125rem;
-  color: var(--text-muted);
-  background: transparent;
-  padding: 0;
-}
-
-.db-row-main {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.db-row-title {
-  font-weight: 550;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.db-row-meta {
-  font-size: 0.75rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.db-row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  justify-content: flex-end;
-}
-
-@media (max-width: 700px) {
-  .db-row {
-    grid-template-columns: 3rem minmax(0, 1fr);
-  }
-
-  .db-row-badges {
-    grid-column: 2;
-    justify-content: flex-start;
-  }
-}
-
-.db-pane {
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-  margin-top: 0.85rem;
-  padding: 1.15rem 1.25rem 1.35rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--bg-surface);
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.db-pane-loading {
-  margin: 0;
-  padding: 1rem 0;
-}
-
-.db-pane-head {
-  margin-bottom: 1.1rem;
-  padding-bottom: 0.9rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.db-pane-title {
-  margin: 0.25rem 0 0.4rem;
-  font-size: 1.15rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.3;
-  color: var(--text);
-}
-
-.db-pane-sub {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem 0.5rem;
-  margin: 0;
-  font-size: 0.8125rem;
-}
-
-.db-pane-form label {
-  margin-bottom: 0.75rem !important;
-}
-
-.db-pane-form input,
-.db-pane-form select,
-.db-pane-form textarea {
-  width: 100% !important;
-  max-width: none !important;
-}
-
-.db-pane-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem 0.75rem;
-}
-
-.db-pane-grid-3 {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-@media (max-width: 700px) {
-  .db-pane-grid,
-  .db-pane-grid-3 {
-    grid-template-columns: 1fr;
-  }
-}
-
-.db-pane-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0.5rem 0 1rem;
-}
-
-.db-pane-actions button {
-  width: auto !important;
-  margin: 0 !important;
-  flex: 0 0 auto;
-}
-
-.db-raw-section {
-  margin-top: 0.5rem;
-  padding-top: 1rem;
+/* Host chrome only — minimal extras for raw JSON */
+.db-raw-block {
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border-subtle);
-}
-
-.db-raw-section .dash-h2 {
-  margin-bottom: 0.65rem !important;
 }
 
 .db-raw {
   margin: 0;
   padding: 0.85rem 1rem;
-  max-height: 16rem;
+  max-height: 18rem;
   overflow: auto;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
@@ -827,5 +989,61 @@ function zoneLabel(o: DboStub): string {
 
 .mono {
   font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+
+.db-image-field {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none !important;
+}
+.db-image-preview {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0.5rem 0;
+  box-sizing: border-box;
+  background: var(--bg-code, #0e0c16);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: var(--radius-sm, 4px);
+  overflow: hidden;
+}
+.db-image-preview img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(50vh, 512px);
+  object-fit: contain;
+  object-position: center top;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+}
+.db-image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+.db-image-url {
+  flex: 1 1 12rem;
+  min-width: 10rem;
+}
+.db-image-hint {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 </style>

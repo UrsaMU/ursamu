@@ -14,6 +14,7 @@
  * Peer: vue major must match the host console (see package.json).
  */
 
+import { ref } from "vue";
 import type { Router } from "vue-router";
 import type { StaffNavItem } from "@/api/types";
 
@@ -22,6 +23,17 @@ export const HOST_VUE_PEER_MAJOR = 3;
 
 const loaded = new Set<string>();
 const failed = new Set<string>();
+const stubbed = new Set<string>();
+
+/**
+ * Bumped when routes are added so AppLayout `primary` recomputes.
+ * vue-router hasRoute is not reactive on its own.
+ */
+export const staffRoutesEpoch = ref(0);
+
+function bumpRoutesEpoch(): void {
+  staffRoutesEpoch.value += 1;
+}
 
 export function isSameOriginModule(url: string): boolean {
   if (!url || typeof url !== "string") return false;
@@ -43,10 +55,20 @@ export function moduleLoadOk(pluginId: string): boolean {
   return loaded.has(pluginId);
 }
 
+/** Safe path segment for /admin/<path> (plugin id). */
+function safePathSeg(raw: string): string | null {
+  const s = raw.trim().toLowerCase();
+  if (!s || s.length > 64) return null;
+  if (!/^[a-z0-9][a-z0-9_-]*$/.test(s)) return null;
+  return s;
+}
+
 /** Test helper. */
 export function resetPluginModuleState(): void {
   loaded.clear();
   failed.clear();
+  stubbed.clear();
+  staffRoutesEpoch.value = 0;
 }
 
 /**
@@ -58,6 +80,7 @@ export async function ensurePluginModules(
   router: Router,
   nav: StaffNavItem[],
 ): Promise<void> {
+  let added = 0;
   for (const item of nav) {
     const modUrl = item.module?.trim();
     if (!modUrl) continue;
@@ -71,7 +94,8 @@ export async function ensurePluginModules(
       continue;
     }
 
-    const routeName = (item.route?.trim() || `ext-${item.id}`).trim();
+    const routeName = (item.route?.trim() || `ext-${item.id}`)
+      .trim();
     if (router.hasRoute(routeName)) {
       loaded.add(item.id);
       continue;
@@ -89,7 +113,9 @@ export async function ensurePluginModules(
         continue;
       }
       if (!router.hasRoute("app")) {
-        console.warn("[web] layout route \"app\" missing — skip module");
+        console.warn(
+          "[web] layout route \"app\" missing — skip module",
+        );
         failed.add(item.id);
         continue;
       }
@@ -104,16 +130,67 @@ export async function ensurePluginModules(
         },
       });
       loaded.add(item.id);
+      added += 1;
     } catch (e: unknown) {
-      console.warn(`[web] failed to load plugin module ${modUrl}:`, e);
+      console.warn(
+        `[web] failed to load plugin module ${modUrl}:`,
+        e,
+      );
       failed.add(item.id);
     }
   }
+  if (added) bumpRoutesEpoch();
+}
+
+/**
+ * Plugins may registerStaffNav({ route: "mail" }) before the host
+ * ships a real page. Without a vue-router entry, RouterLink throws
+ * on resolve and the top-tab renders empty. Register a pending stub
+ * so the tab always has a valid href.
+ */
+export function ensureStaffRouteStubs(
+  router: Router,
+  nav: StaffNavItem[],
+): number {
+  if (!router.hasRoute("app")) return 0;
+  let added = 0;
+  for (const item of nav) {
+    const routeName = item.route?.trim();
+    if (!routeName || routeName === "plugin-embed") continue;
+    // Dynamic modules own their route registration.
+    if (item.module?.trim()) continue;
+    if (router.hasRoute(routeName)) continue;
+    if (stubbed.has(routeName)) continue;
+
+    const path = safePathSeg(item.id) || safePathSeg(routeName);
+    if (!path) {
+      console.warn(
+        `[web] skip stub route for unsafe id: ${item.id}`,
+      );
+      continue;
+    }
+
+    router.addRoute("app", {
+      path,
+      name: routeName,
+      component: () => import("@/views/PluginPendingView.vue"),
+      meta: {
+        requiresAuth: true,
+        pluginId: item.id,
+        stub: true,
+      },
+    });
+    stubbed.add(routeName);
+    added += 1;
+  }
+  if (added) bumpRoutesEpoch();
+  return added;
 }
 
 /**
  * Resolve which top-nav target to use for a staff nav item.
- * If module failed and embed exists → plugin-embed shell.
+ * Never returns a named route the host cannot resolve — that makes
+ * Vue RouterLink render an empty tab.
  */
 export function resolveNavTarget(
   item: StaffNavItem,
@@ -148,12 +225,14 @@ export function resolveNavTarget(
     };
   }
 
-  if (routeName && (hasRoute(routeName) || !mod)) {
+  // Only use a named route when the host actually has it.
+  if (routeName && hasRoute(routeName)) {
     return { name: routeName, to: { name: routeName } };
   }
 
+  // Module still loading — provisional (caller should hide until
+  // hasRoute becomes true / epoch bumps).
   if (mod && !failed.has(item.id) && routeName) {
-    // Module still loading — point at intended route name
     return { name: routeName, to: { name: routeName } };
   }
 
@@ -172,4 +251,18 @@ export function resolveNavTarget(
   }
 
   return {};
+}
+
+/** True when the resolved target is safe to pass to RouterLink. */
+export function navTargetReady(
+  target: ReturnType<typeof resolveNavTarget>,
+  hasRoute: (name: string) => boolean,
+): boolean {
+  if (target.href) return true;
+  const name = target.to?.name ?? target.name;
+  if (!name) return false;
+  if (name === "plugin-embed") {
+    return Boolean(target.to?.params?.pluginId) || hasRoute(name);
+  }
+  return hasRoute(name);
 }

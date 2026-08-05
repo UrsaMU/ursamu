@@ -1,0 +1,37 @@
+{
+  "slug": "boosterganger",
+  "name": "Boosterganger",
+  "blurb": "Chrome-head street thug. Heavy pistol, light Kevlar, highly aggressive.",
+  "tier": "mook",
+  "tags": ["combatant", "street", "mook"],
+  "stats": {
+    "int": 4,
+    "ref": 6,
+    "dex": 6,
+    "tech": 3,
+    "cool": 5,
+    "will": 5,
+    "luck": 3,
+    "move": 6,
+    "body": 6,
+    "emp": 4
+  },
+  "skills": {
+    "handgun": 4,
+    "brawling": 3,
+    "evasion": 3,
+    "athletics": 3,
+    "perception": 3
+  },
+  "armorBody": {
+    "name": "Kevlar",
+    "sp": 7
+  },
+  "armorHead": null,
+  "weapon": {
+    "name": "Heavy Pistol",
+    "skill": "handgun",
+    "damageDice": 3
+  },
+  "aiKey": "aggressive"
+}

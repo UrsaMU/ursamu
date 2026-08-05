@@ -21,6 +21,7 @@ import { useLiveStore } from "@/stores/live";
 import PlayerSelect from "@/components/PlayerSelect.vue";
 import CategoryCombobox from "@/components/CategoryCombobox.vue";
 import { mergeLockSuggestions } from "@/utils/locks";
+import { stripMushCodes } from "@/utils/text";
 
 const props = defineProps<{
   boardId?: string;
@@ -201,13 +202,18 @@ function formatWhen(ts?: number): string {
 
 /** Job-bridge subjects often start with "#3 — …"; avoid double #. */
 function displaySubject(subject: string, num: number): string {
-  const s = String(subject ?? "").trim();
+  const s = stripMushCodes(String(subject ?? "")).trim();
   const re = new RegExp(
     `^#?\\s*${num}\\s*[—–\\-:]\\s*`,
     "i",
   );
   const stripped = s.replace(re, "").trim();
   return stripped || s;
+}
+
+/** Post/reply body for web — no %c sheet codes. */
+function displayBody(body: unknown): string {
+  return stripMushCodes(body);
 }
 
 function clearFilters(): void {
@@ -835,7 +841,7 @@ onMounted(() => {
             @keydown.enter.prevent="openBoard(b.id)"
           >
             <td><code>#{{ b.num }}</code></td>
-            <td>{{ b.title }}</td>
+            <td>{{ stripMushCodes(b.title) }}</td>
             <td class="muted">
               {{ b.category || "General" }}
             </td>
@@ -903,7 +909,11 @@ onMounted(() => {
           >{{ saveOk }}</small>
         </p>
         <h1 class="page-title page-title-tight">
-          {{ boardForm?.title || selectedBoard?.title }}
+          {{
+            stripMushCodes(
+              boardForm?.title || selectedBoard?.title || "",
+            )
+          }}
         </h1>
       </div>
       <div class="editor-actions">
@@ -1161,7 +1171,7 @@ onMounted(() => {
                 {{ displaySubject(p.subject, p.num) }}
               </td>
               <td class="muted">
-                {{ p.authorName }}
+                {{ stripMushCodes(p.authorName) }}
               </td>
               <td class="muted">
                 {{ formatWhen(p.createdAt) }}
@@ -1199,10 +1209,12 @@ onMounted(() => {
           {{ displaySubject(postDetail.subject, postDetail.num) }}
         </h2>
         <p class="muted">
-          {{ postDetail.authorName }}
+          {{ stripMushCodes(postDetail.authorName) }}
           · {{ formatWhen(postDetail.createdAt) }}
         </p>
-        <pre class="bbs-body">{{ postDetail.body }}</pre>
+        <pre class="bbs-body">{{
+          displayBody(postDetail.body)
+        }}</pre>
         <div class="action-row">
           <button
             type="button"
@@ -1241,10 +1253,13 @@ onMounted(() => {
             class="bbs-reply"
           >
             <p class="muted">
-              #{{ r.num }} · {{ r.authorName }}
+              #{{ r.num }} ·
+              {{ stripMushCodes(r.authorName) }}
               · {{ formatWhen(r.createdAt) }}
             </p>
-            <pre class="bbs-body">{{ r.body }}</pre>
+            <pre class="bbs-body">{{
+              displayBody(r.body)
+            }}</pre>
           </article>
           <div
             v-if="selectedBoard?.type !== 'archive'"

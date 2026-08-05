@@ -37,9 +37,11 @@ site
         extend: {
           colors: {
             ursamu: {
-              bg: "#1a0b2e",
-              primary: "#4c1d95",
-              accent: "#8b5cf6",
+              bg: "#0b0a12",
+              surface: "#161422",
+              primary: "#a78bfa",
+              accent: "#6d28d9",
+              border: "#3a3554",
             },
           },
         },

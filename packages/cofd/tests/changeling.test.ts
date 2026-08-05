@@ -65,6 +65,44 @@ describe("Changeling: The Lost Template", OPTS, () => {
     assertEquals(sheet.customFields.thread, "Hedonist");
   });
 
+  it("kith sets seeming so either order works", () => {
+    let sheet = defaultSheet();
+    sheet = setTrait(sheet, "template", "changeling");
+    sheet = setTrait(sheet, "kith", "Dancer");
+    assertEquals(sheet.customFields.kith, "Dancer");
+    assertEquals(sheet.customFields.seeming, "Fairest");
+  });
+
+  it("seeming change clears mismatched kith and same favored", () => {
+    let sheet = defaultSheet();
+    sheet = setTrait(sheet, "template", "changeling");
+    sheet = setTrait(sheet, "seeming", "Fairest");
+    sheet = setTrait(sheet, "kith", "Dancer");
+    // Fairest favors Crown — second favored must differ
+    let threw = "";
+    try {
+      setTrait(sheet, "favored", "Crown");
+    } catch (e: unknown) {
+      threw = e instanceof Error ? e.message : String(e);
+    }
+    assert(
+      threw.toLowerCase().includes("differ"),
+      "expected favored clash error",
+    );
+    sheet = setTrait(sheet, "favored", "Sword");
+    assertEquals(sheet.customFields.favored, "Sword");
+    sheet = setTrait(sheet, "seeming", "Beast");
+    assertEquals(sheet.customFields.kith, undefined);
+    // Beast favors Steed; Sword stays
+    assertEquals(sheet.customFields.favored, "Sword");
+    try {
+      setTrait(sheet, "favored", "Steed");
+      assert(false, "Steed should clash with Beast");
+    } catch (e: unknown) {
+      assert(e instanceof Error);
+    }
+  });
+
   it("throws when setting non-changeling powers", () => {
     let sheet = defaultSheet();
     sheet = setTrait(sheet, "template", "changeling");

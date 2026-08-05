@@ -79,11 +79,22 @@ export async function handleRequest(req: Request, remoteAddr?: string): Promise<
   const res = await _mushHandleRequest(req, remoteAddr);
 
   const h = new Headers(res.headers);
-  h.set("content-security-policy",
-    "default-src 'none'; script-src 'self'; style-src 'self'; " +
-    "img-src 'self' data:; connect-src 'self' ws: wss:; frame-ancestors 'none'; " +
-    "form-action 'self'");
-  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+  // Site skins need Google Fonts (Smythe) + inline <style> @import.
+  // font-src was missing entirely (fell through to default-src 'none').
+  h.set(
+    "content-security-policy",
+    "default-src 'none'; script-src 'self'; " +
+      "style-src 'self' https://fonts.googleapis.com; " +
+      "img-src 'self' data:; " +
+      "font-src 'self' data: https://fonts.gstatic.com; " +
+      "connect-src 'self' ws: wss:; " +
+      "frame-ancestors 'none'; form-action 'self'",
+  );
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: h,
+  });
 }
 
 // Do NOT alias registerRoute as registerPluginRoute — plugins must use

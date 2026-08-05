@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/core",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "exports": "./mod.ts",
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",

@@ -14,7 +14,7 @@ import { adminSettingsHandler } from "./settings-api.ts";
 
 export const plugin: IPlugin = {
   name: "web",
-  version: "0.2.36",
+  version: "0.2.60",
   description:
     "Staff web console (Vue 3) — WebSocket-first API + UI.",
 

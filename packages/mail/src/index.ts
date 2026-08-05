@@ -14,8 +14,14 @@ import { getMyMail, runExpirySweep } from "./mailHelpers.ts";
 import { mailRouteHandler } from "./routes.ts";
 import { EXPIRY_SWEEP_MS } from "./mailDbo.ts";
 import { getDraft } from "./draft.ts";
+import {
+  registerMailStaffNav,
+  unregisterMailStaffNav,
+} from "./staff-nav-bridge.ts";
 
 export type { IMail } from "./mailDbo.ts";
+export type { MailStats } from "./mailHelpers.ts";
+export { getMailStats } from "./mailHelpers.ts";
 
 // Phase 2 hooks
 
@@ -64,12 +70,15 @@ const onLogin = async (
 let _expirySweepTimer: ReturnType<typeof setInterval> | null =
   null;
 
+const onEngineReady = (): void => {
+  void registerMailStaffNav();
+};
+
 export const plugin: IPlugin = {
   name: "mail",
-  version: "2.5.0",
+  version: "2.7.0",
   description:
-    "In-game mail system with drafts, folders, attachments, " +
-    "quota, and expiry.",
+    "In-game mail — drafts, folders, REST, and staff console.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },
   ],
@@ -85,6 +94,7 @@ export const plugin: IPlugin = {
       console.warn("[mail] help dir registration skipped:", e);
     }
     gameHooks.on("player:login", onLogin);
+    gameHooks.on("engine:ready", onEngineReady);
     _expirySweepTimer = setInterval(() => {
       runExpirySweep().catch((e: unknown) =>
         console.error("[mail] expiry sweep error:", e)
@@ -93,15 +103,17 @@ export const plugin: IPlugin = {
     runExpirySweep().catch((e: unknown) =>
       console.error("[mail] startup sweep error:", e)
     );
+    void registerMailStaffNav();
     console.log(
-      "[mail] Plugin initialized — @mail commands active, " +
-        "/api/v1/mail routes registered",
+      "[mail] Plugin initialized — @mail + /api/v1/mail",
     );
     return true;
   },
 
   remove: () => {
     gameHooks.off("player:login", onLogin);
+    gameHooks.off("engine:ready", onEngineReady);
+    void unregisterMailStaffNav();
     if (_expirySweepTimer !== null) {
       clearInterval(_expirySweepTimer);
       _expirySweepTimer = null;

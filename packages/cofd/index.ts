@@ -79,6 +79,10 @@ import {
   initCofdCombat,
   removeCofdCombat,
 } from "./src/combat/ports.ts";
+import {
+  initApproveHooks,
+  removeApproveHooks,
+} from "./src/chargen/approve_hook.ts";
 
 // Active-combat move-lock: anyone who has joined an active encounter cannot
 // leave the room until the encounter ends or they leave it explicitly. Admins
@@ -216,6 +220,19 @@ export const plugin: IPlugin = {
     initLangHooks();
     initInventoryHooks();
     initCofdCombat();
+    // Closing a CGEN job (jobs UI / +job/close) auto-approves.
+    initApproveHooks();
+    // Public site: Character tab only when signed in.
+    // Config plugins.site.nav can override label/href; require stays.
+    void import("@ursamu/site").then((site) => {
+      site.registerSiteNav?.({
+        id: "chargen",
+        label: "Character",
+        href: "/chargen",
+        order: 35,
+        require: "connected",
+      });
+    }).catch(() => { /* site plugin optional */ });
     // Layout chrome comes from game.layout / engine defaults —
     // do not register a CoFD-specific header stack.
     // deno-lint-ignore no-explicit-any
@@ -240,7 +257,11 @@ export const plugin: IPlugin = {
     removeLangHooks();
     removeInventoryHooks();
     removeCofdCombat();
+    removeApproveHooks();
     stopAllWanderers();
+    void import("@ursamu/site").then((site) => {
+      site.unregisterSiteNav?.("chargen");
+    }).catch(() => { /* ignore */ });
     unregisterFormatHandler("CONFORMAT", cofdConformatHandler);
     unregisterFormatHandler("DESCFORMAT", cofdDescformatHandler);
   },

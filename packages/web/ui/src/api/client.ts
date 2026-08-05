@@ -126,9 +126,14 @@ export async function api<T = unknown>(
   const method = (init.method ?? "GET").toUpperCase();
   const isForm = typeof FormData !== "undefined" &&
     init.body instanceof FormData;
+  // Multipart + object-image routes need real HTTP (not WS RPC).
+  const isObjImage = /\/api\/v1\/dbobj\/[^/]+\/image\/?$/.test(
+    path.split("?")[0] ?? path,
+  );
   if (
     (path === "/api/v1/login" && method === "POST") ||
     isForm ||
+    isObjImage ||
     (path === "/api/v1/admin/site/theme" && method === "POST" &&
       isForm)
   ) {

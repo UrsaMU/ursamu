@@ -1,8 +1,19 @@
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK, IDBObj } from "../commands/types.ts";
-import { resolveFormat, header, divider, footer, registerFormatHandler } from "../format/handlers.ts";
+import {
+  resolveFormat,
+  header,
+  divider,
+  footer,
+  registerFormatHandler,
+} from "../format/handlers.ts";
 import { getConfig } from "@ursamu/core";
 import { dbrefWithFlags } from "../world/flags.ts";
+import {
+  buildLookLayout,
+  buildSingleLookLayout,
+  prefersUiLayout,
+} from "./look-ui.ts";
 
 const WIDTH = 78;
 const NO_DESCRIPTION = "You see nothing special.";
@@ -25,13 +36,27 @@ function showStaffDbref(actor: IDBObj, canEdit: boolean): boolean {
   return canEdit || canSeeDark(actor);
 }
 
-/** Primary display name (strip TinyMUX ;aliases). */
+/** Primary display name (strip TinyMUX ;aliases). Moniker first. */
 function primaryName(target: IDBObj): string {
-  const raw =
-    (target.state?.moniker as string | undefined) ||
-    (target.state?.name as string | undefined) ||
-    target.name ||
-    "Unknown";
+  const bag = {
+    ...((target as { data?: Record<string, unknown> }).data ?? {}),
+    ...(target.state ?? {}),
+  } as Record<string, unknown>;
+  let raw = String(bag.moniker ?? "").trim();
+  if (!raw) {
+    const attrs = (bag.attributes as
+      | { name?: string; value?: string }[]
+      | undefined) ?? [];
+    const hit = attrs.find((a) =>
+      String(a.name ?? "").toUpperCase() === "MONIKER"
+    );
+    raw = String(hit?.value ?? "").trim();
+  }
+  if (!raw) {
+    raw = String(
+      bag.name ?? target.name ?? "Unknown",
+    );
+  }
   const primary = raw.split(";")[0]?.trim();
   return primary || raw || "Unknown";
 }
@@ -40,8 +65,13 @@ function headerName(
   target: IDBObj,
   actor: IDBObj,
   canEdit: boolean,
+  u?: IUrsamuSDK,
 ): string {
-  let base = primaryName(target);
+  // Prefer SDK displayName (moniker-first) when available
+  let base = u?.util?.displayName
+    ? String(u.util.displayName(target, actor) || "").trim()
+    : "";
+  if (!base) base = primaryName(target);
   // IC rooms: plain tag so layout/NAMEFORMAT color can wrap the
   // whole title (including " - zone") without a mid-line %cn reset.
   if (target.flags.has("room") && target.flags.has("ic")) {
@@ -354,6 +384,24 @@ async function renderSingle(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCo
   return lines.join("\n");
 }
 
+async function lookDescription(
+  u: IUrsamuSDK,
+  actor: IDBObj,
+  target: IDBObj,
+): Promise<string> {
+  const idescRaw =
+    actor.location === target.id
+      ? await u.attr.get(target.id, "IDESC")
+      : null;
+  const rawDesc =
+    idescRaw ||
+    (target.state.description as string) ||
+    NO_DESCRIPTION;
+  return u.util.parseDesc
+    ? await u.util.parseDesc(rawDesc, actor, target)
+    : rawDesc;
+}
+
 export async function execLook(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
   const arg = (u.cmd.args[0] || "").trim();
@@ -387,17 +435,80 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
     showContents = false;
   }
 
-  const out = lookTarget.flags.has("room")
-    ? await renderRoom(u, actor, lookTarget, showContents, canEditTarget)
-    : await renderSingle(u, actor, lookTarget, showContents, canEditTarget);
+  // Web FE: structured interactive layout (Figma look blocks).
+  // Telnet: classic 78-col text.
+  if (prefersUiLayout(u)) {
+    const description = await lookDescription(u, actor, lookTarget);
+    const headerTitle = headerName(
+      lookTarget,
+      actor,
+      canEditTarget,
+      u,
+    );
 
-  u.send(out);
+    let exits: IDBObj[] = [];
+    if (lookTarget.flags.has("room")) {
+      let exitPool = (lookTarget.contents || []).filter(isExitObj);
+      try {
+        const found = await u.db.search({
+          location: lookTarget.id,
+        });
+        const fromDb = found.filter(isExitObj);
+        if (fromDb.length >= exitPool.length) exitPool = fromDb;
+      } catch {
+        /* keep contents pool */
+      }
+      exits = await visibleExitsForLook(u, actor, exitPool);
+    }
+
+    const ctx = {
+      u,
+      actor,
+      target: lookTarget,
+      showContents,
+      canEdit: canEditTarget,
+      exits,
+      headerTitle,
+      description,
+    };
+    const components = lookTarget.flags.has("room")
+      ? await buildLookLayout(ctx)
+      : await buildSingleLookLayout(ctx);
+
+    u.ui.layout({
+      components,
+      meta: {
+        type: "look",
+        targetId: lookTarget.id,
+        isRoom: lookTarget.flags.has("room"),
+      },
+    });
+  } else {
+    const out = lookTarget.flags.has("room")
+      ? await renderRoom(
+        u,
+        actor,
+        lookTarget,
+        showContents,
+        canEditTarget,
+      )
+      : await renderSingle(
+        u,
+        actor,
+        lookTarget,
+        showContents,
+        canEditTarget,
+      );
+    u.send(out);
+  }
 
   if (!lookTarget.flags.has("room")) {
     const odesc = await u.attr.get(lookTarget.id, "ODESC");
     if (odesc) {
       const actorName = u.util.displayName(actor, actor);
-      u.here.broadcast(`${actorName} ${odesc}`, { exclude: [actor.id] } as Record<string, unknown>);
+      u.here.broadcast(`${actorName} ${odesc}`, {
+        exclude: [actor.id],
+      } as Record<string, unknown>);
     }
   }
 }
@@ -528,7 +639,9 @@ export const defaultConformatHandler = async (
   if (objects.length > 0) {
     lines.push(divider("Contents", "-", WIDTH));
     for (const o of objects) {
-      const disp = o.name || u.util.displayName(o, actor);
+      // Moniker over name (never prefer bare o.name first)
+      const disp = u.util.displayName(o, actor) || o.name ||
+        "Unknown";
       const canEditObj = await u.canEdit(actor, o);
       const name = nameWithDbref(
         disp,

@@ -176,7 +176,9 @@ export const telnetTransport: ITransport = {
   optional: true,
 
   start(): Promise<void> {
-    const port = getConfig<number>("server.telnetPort", 4202);
+    const port = getConfig<number>("server.telnetPort") ??
+      getConfig<number>("server.telnet") ??
+      4201;
     _listener = Deno.listen({ port } as Deno.ListenOptions) as Deno.TcpListener;
     log("info", "telnet:start", { port });
     registerSender((socketId, msg) => {

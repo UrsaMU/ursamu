@@ -2,10 +2,16 @@
 /**
  * MUSH markup parser — wraps @ursamu/parser with ANSI color, HTML, and MXP
  * substitution rules. Also adds a sandboxed [js()] evaluator via QuickJS.
+ *
+ * Formats:
+ *   telnet — ANSI SGR for classic clients
+ *   web    — structural only (%r/%t/%b); leave %c for FE converters
+ *   html   — closed color spans (softcode translate / legacy)
  */
 import { Parser } from "@ursamu/parser";
 import { getQuickJS } from "quickjs-emscripten";
 import type { QuickJSWASMModule } from "quickjs-emscripten";
+import { mushCodesToHtml } from "./moniker-html.ts";
 
 const parser: Parser = new Parser();
 const quickJs: QuickJSWASMModule = await getQuickJS();
@@ -39,8 +45,12 @@ const evalSafe = (code: string) => {
   }
 };
 
-parser.addSubs("telnet",
-  { before: /\[js\(([\s\S]*?)\)\]/g, after: ((_m: string, c: string) => evalSafe(c)) as any },
+/** Shared: [js()], brackets, whitespace codes → plain. */
+const structuralPlain = [
+  {
+    before: /\[js\(([\s\S]*?)\)\]/g,
+    after: ((_m: string, c: string) => evalSafe(c)) as any,
+  },
   { before: /%r/g, after: "\r\n" },
   { before: /%R/g, after: "\r\n" },
   { before: /%b/g, after: " ", strip: " " },
@@ -51,10 +61,18 @@ parser.addSubs("telnet",
   { before: /%\]/g, after: "]" },
   { before: /%\(/g, after: "(" },
   { before: /%\)/g, after: ")" },
-  { before: /%mxp\[([^\|]+)\|([^\]]+)\]/g,
-    after: ((_m: string, cmd: string, text: string) => `\x03MXP[${cmd}|${text}]\x03`) as any,
-    strip: "$2" },
-  { before: /%[cx]n/g, after: "\x1b[0m",  strip: "" },
+];
+
+parser.addSubs(
+  "telnet",
+  ...structuralPlain,
+  {
+    before: /%mxp\[([^\|]+)\|([^\]]+)\]/g,
+    after: ((_m: string, cmd: string, text: string) =>
+      `\x03MXP[${cmd}|${text}]\x03`) as any,
+    strip: "$2",
+  },
+  { before: /%[cx]n/g, after: "\x1b[0m", strip: "" },
   { before: /%[cx]x/g, after: "\x1b[30m", strip: "" },
   { before: /%[cx]r/g, after: "\x1b[31m", strip: "" },
   { before: /%[cx]g/g, after: "\x1b[32m", strip: "" },
@@ -71,58 +89,89 @@ parser.addSubs("telnet",
   { before: /%[cx]M/g, after: "\x1b[45m", strip: "" },
   { before: /%[cx]C/g, after: "\x1b[46m", strip: "" },
   { before: /%[cx]W/g, after: "\x1b[47m", strip: "" },
-  { before: /%[cx]h/g, after: "\x1b[1m",  strip: "" },
-  { before: /%[cx]u/g, after: "\x1b[4m",  strip: "" },
-  { before: /%[X|C]<#([0-9a-fA-F]{6})>/g,
+  { before: /%[cx]h/g, after: "\x1b[1m", strip: "" },
+  { before: /%[cx]u/g, after: "\x1b[4m", strip: "" },
+  {
+    before: /%[X|C]<#([0-9a-fA-F]{6})>/g,
     after: ((_m: string, hex: string) => {
-      const r = parseInt(hex.substring(0,2),16), g = parseInt(hex.substring(2,4),16), b = parseInt(hex.substring(4,6),16);
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
       return `\x1b[48;2;${r};${g};${b}m`;
-    }) as any, strip: "" },
-  { before: /<#([0-9a-fA-F]{6})>|%[xc]<#([0-9a-fA-F]{6})>/g,
+    }) as any,
+    strip: "",
+  },
+  {
+    before: /<#([0-9a-fA-F]{6})>|%[xc]<#([0-9a-fA-F]{6})>/g,
     after: ((_m: string, hex: string, hex2?: string) => {
       const h = hex || hex2 || "000000";
-      const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+      const r = parseInt(h.substring(0, 2), 16);
+      const g = parseInt(h.substring(2, 4), 16);
+      const b = parseInt(h.substring(4, 6), 16);
       return `\x1b[38;2;${r};${g};${b}m`;
-    }) as any, strip: "" },
+    }) as any,
+    strip: "",
+  },
 );
 
-parser.addSubs("html",
-  { before: /\[js\(([\s\S]*?)\)\]/g, after: ((_m: string, c: string) => evalSafe(c)) as any },
-  { before: /%r/g, after: "<br />" },
-  { before: /%b/g, after: "&nbsp;", strip: " " },
-  { before: /%t/g, after: "&nbsp;&nbsp;&nbsp;&nbsp;" },
-  { before: /%\[/g, after: "[" }, { before: /%\]/g, after: "]" },
-  { before: /%\(/g, after: "(" }, { before: /%\)/g, after: ")" },
-  { before: /%[cx]n/g, after: "<span style='color: inherit; background-color: inherit'></b></i>", strip: "" },
-  { before: /%[cx]x/g, after: "<span style='color: grey'>",    strip: "" },
-  { before: /%[cx]r/g, after: "<span style='color: red'>",     strip: "" },
-  { before: /%[cx]g/g, after: "<span style='color: green'>",   strip: "" },
-  { before: /%[cx]y/g, after: "<span style='color: yellow'>",  strip: "" },
-  { before: /%[cx]b/g, after: "<span style='color: blue'>",    strip: "" },
-  { before: /%[cx]m/g, after: "<span style='color: magenta'>", strip: "" },
-  { before: /%[cx]c/g, after: "<span style='color: cyan'>",    strip: "" },
-  { before: /%[cx]w/g, after: "<span style='color: white'>",   strip: "" },
-  { before: /%[cx]X/g, after: "<span style='background-color: black'>",   strip: "" },
-  { before: /%[cx]R/g, after: "<span style='background-color: red'>",     strip: "" },
-  { before: /%[cx]G/g, after: "<span style='background-color: green'>",   strip: "" },
-  { before: /%[cx]Y/g, after: "<span style='background-color: yellow'>",  strip: "" },
-  { before: /%[cx]B/g, after: "<span style='background-color: blue'>",    strip: "" },
-  { before: /%[cx]M/g, after: "<span style='background-color: magenta'>", strip: "" },
-  { before: /%[cx]C/g, after: "<span style='background-color: cyan'>",    strip: "" },
-  { before: /%[cx]W/g, after: "<span style='background-color: white'>",   strip: "" },
-  { before: /%[cx]h/g, after: "<b>",  strip: "" },
-  { before: /%[cx]u/g, after: "<span style='border-bottom: 1px solid'>", strip: "" },
-  { before: /%[cx]i/g, after: "<i>",  strip: "" },
-  { before: /%[cx]#(\d+)/g, after: "\x1b[38;5;$1m", strip: "" },
-  { before: /%[X|C]<#([0-9a-fA-F]{6})>/g, after: "<span style='background-color: #$1'>", strip: "" },
-  { before: /<#([0-9a-fA-F]{6})>|%[xc]<#([0-9a-fA-F]{6})>/g, after: "<span style='color: #$1$2'>", strip: "" },
+/**
+ * Web FE path: expand layout only. Site /play and staff PlayView convert
+ * %c / <#rrggbb> client-side (closed spans). Pre-baking HTML here used to
+ * open unclosed <span>s and then get escaped or mangled in the browser.
+ */
+parser.addSubs(
+  "web",
+  {
+    before: /\[js\(([\s\S]*?)\)\]/g,
+    after: ((_m: string, c: string) => evalSafe(c)) as any,
+  },
+  { before: /%r/g, after: "\n" },
+  { before: /%R/g, after: "\n" },
+  { before: /%b/g, after: " ", strip: " " },
+  { before: /%B/g, after: " ", strip: " " },
+  { before: /%t/g, after: "\t" },
+  { before: /%T/g, after: "\t" },
+  { before: /%\[/g, after: "[" },
+  { before: /%\]/g, after: "]" },
+  { before: /%\(/g, after: "(" },
+  { before: /%\)/g, after: ")" },
 );
 
-export const updateParserSubs = (subs: Record<string, string>): void => {
+/**
+ * Full message → safe HTML with properly closed color spans.
+ * Used by format "html" (softcode translate) and tests.
+ */
+export function mushMessageToHtml(raw: string): string {
+  let s = String(raw ?? "");
+  s = s.replace(
+    /\[js\(([\s\S]*?)\)\]/g,
+    (_m, c: string) => evalSafe(c),
+  );
+  s = s
+    .replace(/%r/gi, "\n")
+    .replace(/%t/gi, "\t")
+    .replace(/%b/gi, " ");
+  // Closed spans per run; keeps leading indent / newlines.
+  return mushCodesToHtml(s).replace(/\n/g, "<br />");
+}
+
+// Single whole-string pass so colors nest/close correctly.
+parser.addSubs("html", {
+  before: /^[\s\S]*$/,
+  after: ((m: string) => mushMessageToHtml(m)) as any,
+});
+
+export const updateParserSubs = (
+  subs: Record<string, string>,
+): void => {
   Object.entries(subs).forEach(([key, value]) => {
-    const pattern = new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
+    const pattern = new RegExp(
+      key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+      "g",
+    );
     parser.addSubs("telnet", { before: pattern, after: value });
-    parser.addSubs("html",   { before: pattern, after: value });
+    parser.addSubs("web", { before: pattern, after: value });
+    parser.addSubs("html", { before: pattern, after: value });
   });
 };
 

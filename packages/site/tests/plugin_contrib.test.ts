@@ -9,9 +9,11 @@ import {
 } from "../src/menu.ts";
 import {
   clearSiteNav,
+  filterSiteNav,
   listSiteNav,
   mergeSiteNav,
   registerSiteNav,
+  siteNavRequireMet,
   unregisterSiteNav,
 } from "../src/site-nav.ts";
 import {
@@ -69,6 +71,64 @@ Deno.test("registerSiteNav: rejects bad id", OPTS, () => {
   });
   assertEquals(listSiteNav().length, 0);
   unregisterSiteNav("nope");
+  clearSiteNav();
+});
+
+Deno.test("siteNavRequireMet + filterSiteNav", OPTS, () => {
+  assertEquals(siteNavRequireMet(undefined, { connected: false }), true);
+  assertEquals(siteNavRequireMet("public", { connected: false }), true);
+  assertEquals(
+    siteNavRequireMet("connected", { connected: false }),
+    false,
+  );
+  assertEquals(
+    siteNavRequireMet("connected", { connected: true }),
+    true,
+  );
+  assertEquals(
+    siteNavRequireMet("staff", {
+      connected: true,
+      flags: ["player"],
+    }),
+    false,
+  );
+  assertEquals(
+    siteNavRequireMet("staff", {
+      connected: true,
+      flags: ["wizard"],
+    }),
+    true,
+  );
+  assertEquals(
+    siteNavRequireMet("flag(approved)", {
+      connected: true,
+      flags: ["approved", "player"],
+    }),
+    true,
+  );
+
+  clearSiteNav();
+  registerSiteNav({
+    id: "chargen",
+    label: "Character",
+    href: "/chargen",
+    require: "connected",
+  });
+  registerSiteNav({
+    id: "wiki",
+    label: "Wiki",
+    href: "/wiki/",
+  });
+  const merged = mergeSiteNav(undefined, listSiteNav());
+  assertEquals(
+    filterSiteNav(merged, { connected: false }).map((n) => n.id),
+    ["wiki"],
+  );
+  assertEquals(
+    filterSiteNav(merged, { connected: true }).map((n) => n.id)
+      .sort(),
+    ["chargen", "wiki"],
+  );
   clearSiteNav();
 });
 

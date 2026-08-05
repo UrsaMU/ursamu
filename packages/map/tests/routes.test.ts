@@ -2,13 +2,19 @@ import { assert, assertEquals } from "@std/assert";
 
 import {
   buildRenderResponse,
+  handleEntitiesRoute,
   handleOverlayRoute,
   handlePlayerRoute,
+  handlePruneRoute,
   handleRenderRoute,
 } from "../routes.ts";
 import { clearOverlay, setOverlay } from "../state.ts";
 import { defaultMapConfig } from "../config.default.ts";
 import { createTopologyEngine } from "../topology.ts";
+import {
+  _clearMapConfigs,
+  registerMapConfig,
+} from "../mapconfig.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -53,6 +59,8 @@ Deno.test("routes: render happy-path returns 401 with valid query (parity with r
   const realm = "default";
   const centre = { x: 0, y: 0, z: 0 };
   const radius = 1;
+  _clearMapConfigs();
+  registerMapConfig(realm, defaultMapConfig);
 
   await setOverlay({
     key: "", x: 0, y: 0, z: 0, glyph: "#", name: "Spot", kind: "landmark",
@@ -79,6 +87,7 @@ Deno.test("routes: render happy-path returns 401 with valid query (parity with r
   }
 
   await clearOverlay({ x: 0, y: 0, z: 0 });
+  _clearMapConfigs();
 });
 
 Deno.test("routes: render rejects invalid radius", OPTS, async () => {
@@ -137,4 +146,20 @@ Deno.test("routes: buildRenderResponse parity — overlay overrides tile glyph",
   assertEquals(dto.tiles[0].glyph, "@");
   assertEquals(dto.tiles[0].authored, true);
   await clearOverlay({ x: 3, y: 3, z: 0 });
+});
+
+Deno.test("routes: entities returns 401 when userId null", OPTS, async () => {
+  const res = await handleEntitiesRoute(
+    req("https://x/api/v1/map/entities"),
+    null,
+  );
+  assertEquals(res.status, 401);
+});
+
+Deno.test("routes: prune returns 401 when userId null", OPTS, async () => {
+  const res = await handlePruneRoute(
+    req("https://x/api/v1/map/prune", { method: "POST" }),
+    null,
+  );
+  assertEquals(res.status, 401);
 });

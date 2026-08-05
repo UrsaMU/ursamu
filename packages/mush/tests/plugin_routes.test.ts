@@ -61,3 +61,21 @@ Deno.test(
     clearPluginRoutes();
   },
 );
+
+Deno.test(
+  "plugin routes live on globalThis (dual-import safe)",
+  OPTS,
+  () => {
+    clearPluginRoutes();
+    registerPluginRoute("/site", async () => new Response("ok"));
+    const key = Symbol.for("ursamu.mush.pluginRoutes");
+    const g = globalThis as unknown as Record<
+      symbol,
+      Map<string, unknown>
+    >;
+    assertEquals(g[key]?.has("/site"), true);
+    assertEquals(hasPluginPrefix("/site"), true);
+    clearPluginRoutes();
+    assertEquals(g[key]?.has("/site"), false);
+  },
+);

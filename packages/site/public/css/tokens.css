@@ -63,7 +63,10 @@
   --site-aside-width: 20.6875rem; /* 331 */
   --site-aside-min: 16rem;
   --site-aside-max: 22.0625rem; /* 353 */
-  --site-col-gap: clamp(1rem, 2.5vw, 2.5rem);
+  /* Figma 1728: (1728 - 2*40 - 331 - 885 - 331) / 2 ≈ 50.5 */
+  --site-col-gap: clamp(1.5rem, 2.95vw, 3.25rem);
+  /* Search → left menu (Figma ~44px; bare lists need this) */
+  --site-search-below: 1.5rem;
   --site-main-pad-inline: clamp(1rem, 2vw, 2.5rem);
   --site-gutter: 2.5rem;
   --site-banner-offset: 12rem;

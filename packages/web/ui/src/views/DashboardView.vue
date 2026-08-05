@@ -67,9 +67,15 @@ function goWiki(filter?: string): void {
 
 function goPlayers(id?: string): void {
   if (id) {
-    void router.push({ name: "player-detail", params: { id } });
+    void router.push({
+      name: "db-detail",
+      params: { id },
+    });
   } else {
-    void router.push({ name: "players" });
+    void router.push({
+      name: "db",
+      query: { filter: "online" },
+    });
   }
 }
 

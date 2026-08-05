@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/installation/">
+<meta property="og:url" content="http://localhost:3001/guides/installation/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -268,162 +268,171 @@
       <!-- Page content -->
       <article class="prose">
         <h1>Installation Guide</h1>
-<p>This guide will walk you through the process of installing and setting up UrsaMU<br>
-on your system.</p>
+<p>Install Deno 2.x, scaffold a game with the CLI, start the server, then<br>
+claim the first staff account on the web portal.</p>
 <h2>Prerequisites</h2>
-<p>Before installing UrsaMU, ensure you have the following:</p>
 <ul>
 <li><a href="https://deno.land/"><strong>Deno</strong></a> v2.x</li>
-<li>Git (for cloning the repository and plugin installs)</li>
+<li>Git (optional — for cloning the monorepo or git-based plugins)</li>
 </ul>
-<h2>Installation Methods</h2>
-<p>UrsaMU can be installed in multiple ways. Choose the method that works best for<br>
-your environment.</p>
-<hr>
-<h3>Method 1: Direct from GitHub</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Clone the repository
-git clone https://github.com/ursamu/ursamu.git
-
-# Navigate to the project directory
-cd ursamu
-
-# Set up configuration
-deno task setup-config
-</code></pre>
-<h3>Method 2: Using the UrsaMU CLI</h3>
-<p>UrsaMU provides a CLI tool for creating new projects:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Install the UrsaMU CLI
-deno task install-cli
-
-# Create a new project
-ursamu create my-game
+<h2>Method 1: Scaffold from JSR (recommended)</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/create my-game
 cd my-game
-</code></pre>
-<blockquote>
-<p><strong>Package names</strong>: The primary import is now <code>jsr:@ursamu/mush</code>. The legacy<br>
-package <code>jsr:@ursamu/mush</code> still works as a shim that re-exports everything<br>
-from <code>@ursamu/mush</code>.</p>
-</blockquote>
-<h2>Configuration</h2>
-<p>UrsaMU uses a flexible configuration system stored in JSON format:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Show the entire configuration
-deno task config
-
-# Get a specific configuration value
-deno task config --get server.ws
-
-# Set a configuration value
-deno task config --set server.ws 4202
-</code></pre>
-<p>The configuration is stored in <code>config/config.json</code> and includes:</p>
-<ul>
-<li>Server ports and database paths</li>
-<li>Game name, description, and version</li>
-<li>Text file locations</li>
-<li>Plugin settings</li>
-</ul>
-<p>For detailed information on all available configuration options, see the<br>
-<a href="../configuration/">Configuration Guide</a>.</p>
-<h2>Running the Server</h2>
-<p>UrsaMU uses a dual-server architecture with the main server and telnet server<br>
-running as separate processes:</p>
-<h3>Starting Both Servers</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Start both main and telnet servers with watch mode
 deno task start
 </code></pre>
-<p>This will:</p>
+<p>The scaffold writes a supervised game project with:</p>
 <ul>
-<li>Start both the main server and telnet server as separate processes</li>
-<li>Enable watch mode for automatic reloading when files change</li>
-<li>Allow each server to restart independently</li>
+<li><code>deno.json</code> — tasks (<code>start</code>, <code>dev</code>, <code>daemon</code>, …)</li>
+<li><code>config/config.json</code> — ports, plugins, optional site nav</li>
+<li><code>.env</code> — fresh <code>JWT_SECRET</code></li>
+<li><code>scripts/</code> — <code>daemon.sh</code>, <code>stop.sh</code>, <code>restart.sh</code>, <code>status.sh</code></li>
+<li>Default <strong>portal stack</strong>: builder, channels, help, bbs, mail, wiki,<br>
+<code>@ursamu/web</code> (staff), <code>@ursamu/site</code> (public FE + <code>/play</code>)</li>
 </ul>
-<h3>Development Mode</h3>
-<p>For development with auto-restart on file changes:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task dev
+<p>When <code>@ursamu/site</code> is selected, config sets<br>
+<code>plugins.site.serveRoot: true</code> so the public site is served at <code>/</code>.</p>
+<p>Optional: interactive menu and package picker:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/ursamu
 </code></pre>
-<h3>Production / Supervised Daemon</h3>
-<p>Game projects scaffolded with <code>ursamu create</code> include <code>scripts/daemon.sh</code>,<br>
-<code>scripts/restart.sh</code>, <code>scripts/status.sh</code>, and <code>scripts/stop.sh</code>. These run<br>
-the server as a supervised background process with signal-driven<br>
-no-disconnect restarts. See <a href="/guides/deployment/#supervised-daemon-mode">Production Deployment</a><br>
-for details.</p>
+<p>Engine-dev mode (link imports to a local monorepo checkout):</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/create my-game --local
+</code></pre>
+<blockquote>
+<p><strong>Imports:</strong> game code uses <code>jsr:@ursamu/mush</code>. The legacy package<br>
+<code>jsr:@ursamu/ursamu</code> re-exports the same surface.</p>
+</blockquote>
+<h2>Method 2: From the monorepo</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">git clone https://github.com/ursamu/ursamu.git
+cd ursamu
+deno run -A packages/cli/src/create.ts my-game --local
+cd my-game
+deno task start
+</code></pre>
+<p>Use this when contributing to the engine or testing unreleased packages.</p>
+<h2>Default ports</h2>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>4201</code></td>
+<td>Telnet (sidecar)</td>
+</tr>
+<tr>
+<td><code>4202</code></td>
+<td>WebSocket game hub</td>
+</tr>
+<tr>
+<td><code>4203</code></td>
+<td>HTTP — REST API, <code>/admin</code>, public site, static assets</td>
+</tr>
+</tbody>
+</table>
+<p>Override with <code>URSAMU_HTTP_PORT</code> / <code>URSAMU_TELNET_PORT</code> or edit<br>
+<code>config/config.json</code> (<code>server.telnet</code>, <code>server.wsPort</code>, <code>server.apiPort</code>).</p>
 <h2>Connecting</h2>
-<h3>MU* Clients (Recommended for most players)</h3>
-<p>The easiest way to connect is with a standard MU* client over Telnet (port <code>4201</code>):</p>
+<h3>Web portal (default stack)</h3>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>http://localhost:4203/</code></td>
+<td>Public site home</td>
+</tr>
+<tr>
+<td><code>http://localhost:4203/play</code></td>
+<td>Browser play client (sign-in)</td>
+</tr>
+<tr>
+<td><code>http://localhost:4203/admin/</code></td>
+<td>Staff console</td>
+</tr>
+<tr>
+<td><code>http://localhost:4203/wiki/</code></td>
+<td>Wiki (when installed)</td>
+</tr>
+</tbody>
+</table>
+<h3>MU* clients (Telnet)</h3>
 <table>
 <thead>
 <tr>
 <th>Client</th>
 <th>Platform</th>
-<th>Download</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Mudlet</strong></td>
-<td>Windows / Mac / Linux</td>
-<td><a href="https://www.mudlet.org/">mudlet.org</a></td>
+<td><a href="https://www.mudlet.org/">Mudlet</a></td>
+<td>Win / Mac / Linux</td>
 </tr>
 <tr>
-<td><strong>MUSHclient</strong></td>
+<td><a href="https://www.mushclient.com/">MUSHclient</a></td>
 <td>Windows</td>
-<td><a href="https://mushclient.com/">mushclient.com</a></td>
 </tr>
 <tr>
-<td><strong>Potato</strong></td>
-<td>Windows / Mac / Linux</td>
-<td><a href="https://www.potatomushclient.com/">potatomushclient.com</a></td>
+<td><a href="https://www.potatomushclient.com/">Potato</a></td>
+<td>Win / Mac / Linux</td>
 </tr>
 <tr>
-<td>Any terminal</td>
-<td>Any</td>
 <td><code>telnet localhost 4201</code></td>
+<td>Any terminal</td>
 </tr>
 </tbody>
 </table>
-<p>In your client, add a new connection profile with:</p>
+<h3>WebSocket (custom clients)</h3>
+<p>Connect to <code>ws://localhost:4202</code> (game hub) with a JWT from<br>
+<code>POST /api/v1/auth/login</code>, or use the site play client which handles<br>
+auth for you.</p>
+<h2>First admin / superuser</h2>
+<p>With an <strong>empty database</strong>:</p>
+<ol>
+<li>Prefer the web path: open <code>/register</code> (or site login → register).</li>
+<li>The <strong>first web registrant</strong> is granted <code>superuser</code>.</li>
+<li>Telnet still works: <code>create &lt;name&gt; &lt;password&gt;</code> when no players<br>
+exist also promotes the first character.</li>
+</ol>
+<p>After that, grant staff with in-game flags (<code>@set &lt;player&gt;=admin</code>) or<br>
+the staff console. The <code>superuser</code> flag is only auto-granted on the<br>
+empty-DB first-account flow.</p>
+<h2>Configuration</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash"># From a scaffolded game project
+deno task config
+deno task config --get server.apiPort
+deno task config --set game.name "My MUSH"
+</code></pre>
+<p>Config lives in <code>config/config.json</code>. Common keys:</p>
 <ul>
-<li><strong>Host</strong>: <code>localhost</code> (or your server’s hostname/IP)</li>
-<li><strong>Port</strong>: <code>4201</code></li>
+<li><code>server.telnet</code> / <code>server.wsPort</code> / <code>server.apiPort</code></li>
+<li><code>server.plugins</code> — JSR package list loaded at boot</li>
+<li><code>plugins.site</code> — public shell (<code>serveRoot</code>, <code>skin</code>, <code>nav</code>, …)</li>
+<li><code>game.name</code>, <code>game.playerStart</code>, layout templates</li>
 </ul>
-<p>Once connected, type <code>create YourName YourPassword</code> to create a character, or<br>
-<code>connect YourName YourPassword</code> to log in.</p>
-<h3>WebSocket (Developer / Custom Client)</h3>
-<p>For direct WebSocket access, connect to <code>ws://localhost:4203</code> and send JSON:</p>
-<pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token keyword">const</span> socket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WebSocket</span><span class="token punctuation">(</span><span class="token string">"ws://localhost:4203"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token comment">// Create a character</span>
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"create NewCharacter Password"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token comment">// Connect as a player</span>
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"connect PlayerName Password"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token comment">// Send any command</span>
-socket<span class="token punctuation">.</span><span class="token function">send</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">msg</span><span class="token operator">:</span> <span class="token string">"look"</span><span class="token punctuation">,</span> <span class="token literal-property property">data</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<p>See the <a href="../configuration/">Configuration Guide</a>.</p>
+<h2>Running the server</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task start     # supervised foreground (game + telnet)
+deno task dev       # development / live logs
+deno task daemon    # background supervisor
+deno task status    # pid / health
+deno task stop      # graceful shutdown
+deno task restart   # SIGUSR2 no-disconnect restart
 </code></pre>
-<h2>First Admin</h2>
-<p>When the database is empty, UrsaMU prints:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">Fresh database detected — no players exist yet.
-
-Connect via telnet and run:
-  create &lt;name&gt; &lt;password&gt;
-
-The first player created is automatically given superuser access.
-</code></pre>
-<p>Connect with a Telnet client (<code>telnet localhost 4201</code>) and create your first<br>
-account. That first player receives the <strong>superuser</strong> flag (level 10 — the<br>
-highest permission level) automatically.</p>
-<p>After that, use <code>@set &lt;player&gt;=admin</code> in-game to grant admin rights to other<br>
-trusted staff. The <code>superuser</code> flag itself can only be created via this<br>
-first-run flow — it cannot be granted from inside the game.</p>
-<h2>Next Steps</h2>
-<p>Now that you have UrsaMU installed and running, you might want to:</p>
+<p>Production notes: <a href="/guides/deployment/">Deployment</a>.</p>
+<h2>Next steps</h2>
 <ul>
-<li><a href="/guides/user-guide/"><strong>User Guide</strong></a> - Learn how to use UrsaMU as a player</li>
-<li><a href="../configuration/"><strong>Configuration</strong></a> - Explore detailed configuration<br>
-options</li>
-<li><a href="/plugins/"><strong>Plugin Development</strong></a> - Learn how to create plugins to<br>
-extend UrsaMU</li>
+<li><a href="/guides/user-guide/">Player Guide</a></li>
+<li><a href="/guides/admin-guide/">Admin Guide</a></li>
+<li><a href="/guides/cli/">CLI Reference</a></li>
+<li><a href="/plugins/">Plugin Development</a></li>
 </ul>
 
       </article>

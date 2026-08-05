@@ -166,8 +166,11 @@ function sendSse(socketId: string, msg: string): void {
 
 /** Default CSP: lock down third parties; allow same-origin app assets. */
 const DEFAULT_CSP =
-  "default-src 'none'; script-src 'self'; style-src 'self'; " +
-  "img-src 'self' data:; font-src 'self'; connect-src 'self' ws: wss:; " +
+  "default-src 'none'; script-src 'self'; " +
+  "style-src 'self' https://fonts.googleapis.com; " +
+  "img-src 'self' data:; " +
+  "font-src 'self' data: https://fonts.gstatic.com; " +
+  "connect-src 'self' ws: wss:; " +
   "frame-ancestors 'none'; form-action 'self'; base-uri 'self'";
 
 function addSecurityHeaders(res: Response): Response {

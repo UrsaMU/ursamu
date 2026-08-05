@@ -75,28 +75,39 @@ export async function placeLandmark(u, builder, name: string) {
 
 Security note: `setOverlay` throws on invalid payloads (`validateOverlay` rejects out-of-range coords, multi-char glyphs, bracketed text). There is NO built-in ownership check. Callers MUST gate writes with `canEdit`, the `builder` flag, or admin/wizard before invoking.
 
-## 6. Replacing `defaultMapConfig`
+## 6. Themes / `MapConfig`
 
-Known limitation. `format.ts` imports `defaultMapConfig` from `./config.default.ts` directly. There is no DI seam today. To use your own biome matrix, sector table, or viewport size you must either fork the plugin or send a PR that externalizes config injection. Tracked as a roadmap item.
+```json
+{ "plugins": { "map": { "theme": "hedge", "realm": "default" } } }
+```
+
+- `"default"` — stock pack (`config.default.ts`)
+- `"hedge"` / `"court"` — CtL Hedge pack (`config/hedge.ts`)
+
+Siblings can also call `registerMapConfig(realmId, cfg)` at init.
 
 ## 7. REST routes
 
-None today. If you need a map-tile API, register routes from a wrapper plugin until this one ships its own router:
+Bearer-auth under `/api/v1/map/` (also allowed on staff admin WS):
 
-```ts
-registerPluginRoute("/api/v1/map", handler);
-```
+| Method | Path | Who | Purpose |
+|--------|------|-----|---------|
+| GET | `/realm/:id/render?center=&radius=` | any auth | tile grid |
+| GET | `/player/:id` | any auth | player coord |
+| GET | `/entities` | builder+ | MapEntity roster |
+| POST | `/prune` | admin | orphans + stranded |
+| POST | `/overlay` | admin | author tile |
+| DELETE | `/overlay?x=&y=&z=` | admin | clear tile |
+
+Staff UI: `/admin/map` when `@ursamu/web` is loaded.
 
 ## 8. Performance budget
 
-Every `look` on a map-flagged target triggers:
-
-1. One DESCFORMAT handler call.
-2. One `getOverlay(centre)` lookup.
-3. One `getOverlaysInRegion(...)` scan — the default viewport (15x7 = 105 tiles) gates the request, then `overlays.all()` is loaded into memory and filtered.
-4. 105 topology samples plus 8 neighborhood samples per render.
-
-Because `getOverlaysInRegion` does `overlays.all()`, every look is O(total_overlays). The `REGION_MAX_TILES = 4096` cap is a safety net against pathological requests, NOT a perf budget. Plan to add a chunk-key index before you cross ~10k overlays.
+Region scans use an in-process **chunk index** (`spatial.ts`,
+CHUNK_SIZE=32). First query after a write rebuilds from
+`overlays.all()` / `entities.all()`; subsequent viewport queries only
+inspect intersecting chunks. Still rebuild the index after bulk
+imports via a process restart or write path.
 
 ## 9. Removing the plugin
 

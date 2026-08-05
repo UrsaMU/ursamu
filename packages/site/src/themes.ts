@@ -42,6 +42,8 @@ export type SiteThemeManifest = {
   css?: string;
   /** Relative path to banner image */
   bannerImage?: string;
+  /** Relative path to nav logo image */
+  logoImage?: string;
   title?: string;
   plainBg?: boolean;
   description?: string;
@@ -51,6 +53,8 @@ export type SiteThemeManifest = {
   skinCss?: string;
   /** Resolved banner href */
   bannerHref?: string;
+  /** Resolved logo href */
+  logoHref?: string;
 };
 
 const ID_RE = /^[a-z][a-z0-9_-]{0,39}$/;
@@ -106,6 +110,9 @@ export function registerSiteTheme(
     bannerHref: theme.bannerHref?.trim() ||
       theme.bannerImage?.trim() ||
       undefined,
+    logoHref: theme.logoHref?.trim() ||
+      theme.logoImage?.trim() ||
+      undefined,
   });
   return true;
 }
@@ -124,7 +131,7 @@ export function listRegisteredThemes(): SiteThemeManifest[] {
   );
 }
 
-export function installedThemesRoot(cwd = Deno.cwd()): string {
+export function installedThemesRoot(cwd: string = Deno.cwd()): string {
   return join(cwd, "theme", "installed");
 }
 
@@ -194,6 +201,9 @@ function parseManifest(raw: Uint8Array): SiteThemeManifest {
     bannerImage: typeof j.bannerImage === "string"
       ? j.bannerImage.trim()
       : undefined,
+    logoImage: typeof j.logoImage === "string"
+      ? j.logoImage.trim()
+      : undefined,
     title: typeof j.title === "string" ? j.title.trim() : undefined,
     plainBg: j.plainBg === true,
     description: typeof j.description === "string"
@@ -211,6 +221,53 @@ export type InstallThemeResult = {
   ok: false;
   error: string;
 };
+
+/**
+ * Make relative url(...) in theme CSS absolute under
+ * /site/theme/installed/<id>/. Needed because vars like
+ * --site-bg-image-top are consumed from layout.css
+ * (/site/css/), and browsers resolve relative urls at use
+ * time against that sheet — not the theme file.
+ */
+export function rewriteThemeCssUrls(
+  css: string,
+  themeId: string,
+  cssRelPath: string,
+): string {
+  const id = themeId.trim().toLowerCase();
+  if (!isThemeId(id)) return css;
+  const dir = cssRelPath.includes("/")
+    ? cssRelPath.replace(/\/[^/]+$/, "/")
+    : "";
+  const base = `/site/theme/installed/${id}/${dir}`;
+  return css.replace(
+    /url\(\s*(['"]?)([^'")]+)\1\s*\)/gi,
+    (full, quote: string, raw: string) => {
+      const u = String(raw).trim();
+      if (
+        !u ||
+        u.startsWith("data:") ||
+        u.startsWith("http://") ||
+        u.startsWith("https://") ||
+        u.startsWith("//") ||
+        u.startsWith("/") ||
+        u.startsWith("var(")
+      ) {
+        return full;
+      }
+      // Drop ./ and collapse simple segments (no ..)
+      const cleaned = u.replace(/^\.\//, "");
+      if (
+        cleaned.includes("..") || cleaned.includes("\\") ||
+        cleaned.includes("\0")
+      ) {
+        return full;
+      }
+      const q = quote || '"';
+      return `url(${q}${base}${cleaned}${q})`;
+    },
+  );
+}
 
 /**
  * Install a Court-style theme zip into theme/installed/<id>/.
@@ -299,7 +356,16 @@ export async function installThemeZip(
   for (const [rel, data] of Object.entries(safeFiles)) {
     const out = join(dest, ...rel.split("/"));
     await Deno.mkdir(dirname(out), { recursive: true });
-    await Deno.writeFile(out, data);
+    // CSS custom-property url() resolves against the *using*
+    // sheet (layout.css under /site/css/). Rewrite relative
+    // asset urls to absolute /site/theme/installed/<id>/…
+    if (rel.toLowerCase().endsWith(".css")) {
+      const text = new TextDecoder().decode(data);
+      const fixed = rewriteThemeCssUrls(text, manifest.id, rel);
+      await Deno.writeTextFile(out, fixed);
+    } else {
+      await Deno.writeFile(out, data);
+    }
   }
 
   const skinCss = `/site/theme/installed/${manifest.id}/${cssName}`;
@@ -310,12 +376,20 @@ export async function installThemeZip(
       bannerHref = `/site/theme/installed/${manifest.id}/${b}`;
     }
   }
+  let logoHref: string | undefined;
+  if (manifest.logoImage) {
+    const l = manifest.logoImage.replace(/^\/+/, "");
+    if (safeFiles[l]) {
+      logoHref = `/site/theme/installed/${manifest.id}/${l}`;
+    }
+  }
 
   const installed: SiteThemeManifest = {
     ...manifest,
     source: "installed",
     skinCss,
     bannerHref,
+    logoHref,
     css: cssName,
   };
   registerSiteTheme(installed);
@@ -325,7 +399,7 @@ export async function installThemeZip(
 
 /** Scan theme/installed/* for theme.json packages. */
 export async function scanInstalledThemes(
-  cwd = Deno.cwd(),
+  cwd: string = Deno.cwd(),
 ): Promise<SiteThemeManifest[]> {
   const root = installedThemesRoot(cwd);
   const out: SiteThemeManifest[] = [];
@@ -345,11 +419,18 @@ export async function scanInstalledThemes(
           bannerHref =
             `/site/theme/installed/${m.id}/${b}`;
         }
+        let logoHref: string | undefined;
+        if (m.logoImage) {
+          const l = m.logoImage.replace(/^\/+/, "");
+          logoHref =
+            `/site/theme/installed/${m.id}/${l}`;
+        }
         const full: SiteThemeManifest = {
           ...m,
           source: "installed",
           skinCss,
           bannerHref,
+          logoHref,
         };
         out.push(full);
         registerSiteTheme(full);
@@ -367,37 +448,24 @@ export type ThemeListItem = SiteThemeManifest & {
   active?: boolean;
 };
 
-/** Builtin skins as theme list entries. */
+/** Builtin skins as theme list entries (neutral only — no game brands). */
 export async function listBuiltinThemeEntries(): Promise<
   SiteThemeManifest[]
 > {
   const { listBuiltinSkins, skinCssHref } = await import("./skins.ts");
   const names = await listBuiltinSkins();
   return names.map((id) => {
-    const isCourt = id === "court" || id === "changeling";
     return {
       id,
-      label: id === "court"
-        ? "Court of Miracles"
-        : id === "changeling"
-        ? "Changeling (Court)"
-        : id === "default"
-        ? "Default (violet night)"
-        : id,
+      label: id === "default" ? "Default (violet night)" : id,
       source: "builtin" as const,
       skinCss: skinCssHref(id),
-      bannerHref: isCourt
-        ? `/site/skins/${
-          id === "court" ? "court" : "changeling"
-        }/imgs/header.png`
-        : undefined,
-      title: isCourt ? "Court of Miracles" : undefined,
     };
   });
 }
 
 export async function listAllThemes(
-  cwd = Deno.cwd(),
+  cwd: string = Deno.cwd(),
 ): Promise<SiteThemeManifest[]> {
   await scanInstalledThemes(cwd);
   const builtin = await listBuiltinThemeEntries();
@@ -416,6 +484,7 @@ export function themeToSiteConfig(
   skin?: string;
   skinCss?: string;
   bannerImage?: string;
+  logoImage?: string;
   title?: string;
   plainBg?: boolean;
   themeDir?: string;
@@ -425,6 +494,7 @@ export function themeToSiteConfig(
       skin: theme.id,
       skinCss: "",
       bannerImage: theme.bannerHref ?? "",
+      logoImage: theme.logoHref ?? "",
       title: theme.title,
       plainBg: theme.plainBg,
     };
@@ -433,6 +503,7 @@ export function themeToSiteConfig(
     skin: theme.id,
     skinCss: theme.skinCss ?? "",
     bannerImage: theme.bannerHref ?? "",
+    logoImage: theme.logoHref ?? "",
     title: theme.title,
     plainBg: theme.plainBg,
     themeDir: "theme",

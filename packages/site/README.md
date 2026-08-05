@@ -35,9 +35,11 @@ Open **`/site/`** after start.
 
 | Value | Look |
 |-------|------|
-| `default` | design.md violet night (no art) |
-| `court` | Court of Miracles template (cream / gold / art) |
-| `skinCss` URL | Your file — full re-skin |
+| `default` | design.md violet night (no art) — only builtin |
+| `skinCss` URL | Installed or custom theme CSS |
+
+Brand looks (Court of Miracles, etc.) are **installable themes**,
+not builtins — so a fresh game stays neutral.
 
 ### Install a theme zip (admin)
 
@@ -66,7 +68,7 @@ Install writes `theme/installed/<id>/` under the game root, sets
 {
   "id": "court",
   "label": "Court of Miracles",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "css": "site.css",
   "bannerImage": "imgs/header.png",
   "title": "Court of Miracles"
@@ -75,26 +77,31 @@ Install writes `theme/installed/<id>/` under the game root, sets
 
 Reference package: `examples/themes/court/`.
 
-### Court-identical
+### Court of Miracles (after install)
 
 ```json
 "plugins": {
   "site": {
     "skin": "court",
+    "skinCss": "/site/theme/installed/court/site.css",
+    "themeDir": "theme",
     "title": "Court of Miracles",
-    "bannerImage": "/site/skins/court/imgs/header.png",
+    "bannerImage": "/site/theme/installed/court/imgs/header.png",
     "nav": [
-      { "label": "Home", "href": "/site/", "active": true },
-      { "label": "Characters", "href": "#" },
-      { "label": "Help", "href": "#" },
-      { "label": "Wiki", "href": "#" }
+      { "label": "Home", "href": "/", "order": 10 },
+      { "label": "Wiki", "href": "/wiki/", "order": 20 }
     ]
   }
 }
 ```
 
-With `"skin": "court"` only, the plugin fills in Court title, header
-banner, and demo nav automatically.
+Or copy the example tree once:
+
+```bash
+mkdir -p theme/installed
+cp -R path/to/@ursamu/site/examples/themes/court \
+  theme/installed/court
+```
 
 ### Fully custom CSS (re-skin)
 
@@ -150,11 +157,14 @@ See [design.md](./design.md) for the full contract.
 
 | Field | Type | Default | Notes |
 |-------|------|---------|--------|
-| `skin` | string | `"default"` | `default` \| `court` \| path |
+| `skin` | string | `"default"` | builtin id or installed theme id |
 | `skinCss` | string | — | Wins over `skin` |
 | `title` | string | game name | Brand + document title |
 | `bannerImage` | string | — | Hero image URL |
-| `plainBg` | boolean | `false` | Drop top background art |
+| `plainBg` | boolean | `false` | Drop top background art (home only) |
+
+Wiki pages use the same home-height hero + top background as
+the homepage (Figma wiki layout). Help stays compact under the nav.
 | `mount` | string | `"/site"` | URL prefix |
 | `serveRoot` | boolean | `false` | Also serve index at `/` |
 | `themeDir` | string | — | Game dir → `/site/theme/` |

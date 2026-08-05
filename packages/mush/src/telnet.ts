@@ -16,7 +16,6 @@ import {
   parseNawsBytes, stripIacBytes, accumulateNaws,
 } from "@ursamu/core";
 import {
-  REAUTH_OK_MSG,
   REAUTH_TIMEOUT_MS,
   decideReconnectOpen,
   decideEngineAuthFrame,
@@ -310,15 +309,10 @@ async function handleTelnetConnection(conn: Deno.Conn, wsPort: number, _welcome:
             pendingReauth = false;
             isReconnecting = false;
             if (authAct.cid) cid = authAct.cid;
-            if (!reauthOkSent) {
-              reauthOkSent = true;
-              write(parser.substitute(
-                "telnet",
-                REAUTH_OK_MSG + "\r\n",
-              ));
-            }
-            // Do not force look here: on @restart the softcode/parser
-            // pipeline may still be loading, so look dumps raw %c codes.
+            // "Reconnected." already sent on session:open
+            // (reconnect=true). Do not force look: softcode may
+            // still be loading after @restart.
+            reauthOkSent = true;
             flushBuffer();
           }
 

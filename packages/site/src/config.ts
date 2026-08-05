@@ -10,10 +10,18 @@ export type SiteNavItem = {
   active?: boolean;
   /** Sort key; lower first. Default 50 (config) / 100 (plugins). */
   order?: number;
+  /**
+   * Who may see this link (plugins + config).
+   * Empty / "public" — everyone.
+   * "connected" — signed-in players.
+   * "staff" | "connected admin+" — staff flags.
+   * "flag(name)" — enactor has that flag.
+   */
+  require?: string;
 };
 
 export type SitePluginConfig = {
-  /** Named skin: "default" | "changeling" | "court" | path-like */
+  /** Named builtin skin ("default") or installed theme id */
   skin?: string;
   /**
    * Absolute or site-relative CSS URL for a fully custom skin.
@@ -23,6 +31,11 @@ export type SitePluginConfig = {
   skinCss?: string;
   /** Document / brand title */
   title?: string;
+  /**
+   * Nav brand logo image URL (optional). When set, the nav brand
+   * shows this image (with title as alt). Shrinks on mobile.
+   */
+  logoImage?: string;
   /** Banner image URL (optional) */
   bannerImage?: string;
   /** Suppress top background art */
@@ -45,7 +58,7 @@ export type SitePluginConfig = {
    * Macros: [[featured]], [[section]], plugin [[name]].
    */
   leftMenu?: string;
-  /** Telnet address shown in the connect panel (e.g. "host:4201") */
+  /** Telnet host shown under hero title when title is set */
   telnet?: string;
 };
 
@@ -98,7 +111,7 @@ export function markNavActive(
 }
 
 /** Cache-bust query for shipped site CSS (bump when layout/tokens change). */
-export const SITE_ASSET_V = "20260803b";
+export const SITE_ASSET_V = "20260805acctm";
 
 /** Resolve stylesheet href for the active skin. */
 export function resolveSkinHref(cfg: SitePluginConfig): string {
@@ -118,37 +131,19 @@ export function resolveSkinHref(cfg: SitePluginConfig): string {
 }
 
 /**
- * Brand defaults when skin is "changeling" or legacy "court"
- * and fields are left unset. Installed themes fill gaps via
- * registerSiteTheme / themeToSiteConfig.
+ * Fill default nav when unset. Brand themes (Court, etc.) come from
+ * installable zips — they set title/banner via themeToSiteConfig.
  */
 export function applySkinDefaults(
   cfg: SitePluginConfig,
 ): SitePluginConfig {
   const out = { ...cfg };
-  const skin = (cfg.skinCss ? "" : (cfg.skin ?? "default")).trim()
-    .toLowerCase();
 
-  // Builtin Court family — only fill fields that were never set.
-  // Empty string from admin means "explicitly hide" (do not restore).
-  if (skin === "changeling" || skin === "court") {
-    const asset = skin === "court" ? "court" : "changeling";
-    if (out.bannerImage === undefined) {
-      out.bannerImage =
-        `/site/skins/${asset}/imgs/header.png`;
-    }
-    if (out.title === undefined) {
-      out.title = "Court of Miracles";
-    }
-  }
-
-  // Installed / registered theme may already set skinCss
   if (!out.nav) {
     out.nav = [
       { label: "Home", href: "/site/" },
-      { label: "Characters", href: "#" },
-      { label: "Help", href: "#" },
-      { label: "Wiki", href: "#" },
+      { label: "Wiki", href: "/site/wiki/" },
+      { label: "Help", href: "/site/help/" },
     ];
   }
   return out;
@@ -165,6 +160,9 @@ export function readSiteConfig(
   if (typeof o.skin === "string") out.skin = o.skin.trim();
   if (typeof o.skinCss === "string") out.skinCss = o.skinCss.trim();
   if (typeof o.title === "string") out.title = o.title.trim();
+  if (typeof o.logoImage === "string") {
+    out.logoImage = o.logoImage.trim();
+  }
   if (typeof o.bannerImage === "string") {
     out.bannerImage = o.bannerImage.trim();
   }

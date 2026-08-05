@@ -105,34 +105,42 @@
   accent-color: var(--primary);
 }
 
-/* ── Top primary nav (fits header height) ────────────────────── */
+/* ── Top primary nav ───────────────────────────────────────────
+ * Header grows with wrapped tabs. A fixed height was clipping the
+ * second row, so Mail/Channels/etc looked “missing” until a mid
+ * tab (Boards) forced a reflow.
+ */
 
 .topbar {
-  /* Slightly taller so tabs have room without crowding */
   --header-h: 3.5rem;
-  height: var(--header-h);
-  min-height: var(--header-h);
+  height: auto !important;
+  min-height: var(--header-h) !important;
+  max-height: none !important;
   padding-block: 0 !important;
+  overflow: visible !important;
   /* Above the mobile drawer so the menu button stays tappable */
   z-index: 55;
 }
 
 .top-nav {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 0.75rem 1.25rem;
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: var(--header-h);
+  flex-wrap: wrap;
+  row-gap: 0;
 }
 
 .top-nav-left {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 1 1 12rem;
 }
 
 .top-nav-right {
@@ -146,7 +154,9 @@
 .topbar .brand {
   display: inline-flex;
   align-items: center;
-  padding-inline: 0.15rem 1rem;
+  align-self: stretch;
+  min-height: var(--header-h);
+  padding-inline: 0.15rem 0.85rem;
   font-weight: 700;
   font-size: 0.9375rem;
   letter-spacing: 0.02em;
@@ -177,29 +187,18 @@
 
 .top-primary {
   display: flex;
-  flex-wrap: nowrap;
+  /* Always show every section tab — horizontal scroll hid
+     Mail/Channels/etc until Boards (or another mid tab)
+     scrolled them into view. */
+  flex-wrap: wrap;
   align-items: stretch;
   gap: 0.05rem;
   list-style: none;
   margin: 0;
   padding: 0 0.75rem 0 0;
   min-width: 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-padding-inline: 0.75rem;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  /* Soft edge when tabs overflow (brand stays solid outside this list) */
-  mask-image: linear-gradient(
-    to right,
-    #000 0,
-    #000 calc(100% - 1.1rem),
-    transparent 100%
-  );
-}
-
-.top-primary::-webkit-scrollbar {
-  display: none;
+  flex: 1 1 auto;
+  overflow: visible;
 }
 
 .top-primary li {
@@ -210,14 +209,14 @@
   flex-shrink: 0;
 }
 
-/* Full-height tabs — underline active, not cramped pills */
+/* Compact tabs — fit many plugins; wrap instead of clipping */
 a.top-tab {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  height: 100%;
-  min-height: var(--header-h);
-  padding: 0 0.75rem;
+  gap: 0.3rem;
+  height: auto;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.6rem;
   margin: 0;
   border: none;
   border-bottom: 2px solid transparent;
@@ -229,7 +228,7 @@ a.top-tab {
   letter-spacing: 0.01em;
   text-decoration: none;
   white-space: nowrap;
-  line-height: 1;
+  line-height: 1.15;
   box-sizing: border-box;
 }
 
@@ -309,11 +308,44 @@ a.top-tab.active .top-badge {
 }
 
 .top-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   font-size: 0.8125rem;
-  max-width: 9rem;
+  max-width: 11rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.top-user-name {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.top-user-avatar {
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  background: var(--surface-2, #1a1a22);
+}
+
+.top-user-avatar-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted, #aaa);
+  background: var(--surface-2, #1a1a22);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
 }
 
 .top-signout {
@@ -928,6 +960,162 @@ a.side-nav-item-compact .side-nav-desc {
   font-style: italic;
 }
 
+/* Content images only — avatars keep their own rules */
+.wiki-body-field .wiki-md-preview img:not([class*="avatar"]),
+.wiki-body img:not([class*="avatar"]) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  margin: 0.75rem 0 1rem;
+}
+
+/* ── Wiki page images panel ─────────────────────────────────── */
+
+.wiki-media-panel {
+  margin: 1.25rem 0 1.5rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--border, #2a2640);
+  border-radius: 6px;
+  background: var(--bg-surface, #161422);
+}
+
+.wiki-media-panel__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.wiki-media-panel__hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.wiki-media-panel__hint code {
+  font-size: 0.8em;
+}
+
+.wiki-media-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.wiki-media-panel__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* One control height — Pico input/button margins otherwise skew row */
+.wiki-media-panel__actions > button,
+.wiki-media-panel__url-row button {
+  margin: 0;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding-block: 0;
+  flex: 0 0 auto;
+  width: auto;
+  white-space: nowrap;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.wiki-media-panel__url-row {
+  display: flex;
+  flex: 1 1 16rem;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 12rem;
+  min-height: 2.25rem;
+}
+
+.wiki-media-panel__url-row input[type="url"],
+.wiki-media-panel__url-row input {
+  flex: 1 1 auto;
+  margin: 0 !important;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding-block: 0;
+  padding-inline: 0.65rem;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.wiki-media-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.wiki-media-panel__item {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  gap: 0.65rem 0.85rem;
+  align-items: center;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--border-subtle, #1f1c30);
+  border-radius: 4px;
+  background: var(--bg-elevated, #12101c);
+}
+
+.wiki-media-panel__thumb {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--bg-code, #0e0c16);
+}
+
+.wiki-media-panel__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+}
+
+.wiki-media-panel__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.wiki-media-panel__meta code {
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.wiki-media-panel__item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 560px) {
+  .wiki-media-panel__item {
+    grid-template-columns: 3.5rem 1fr;
+  }
+
+  .wiki-media-panel__item-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
 /* ── Mobile shell ────────────────────────────────────────────── */
 
 /* Hidden until the mobile breakpoint (drawer owns primary tabs).
@@ -1139,10 +1327,6 @@ body.nav-drawer-open {
     align-items: center;
     flex: 1 1 auto;
     min-width: 0;
-  }
-
-  .top-primary {
-    mask-image: none;
   }
 
   /* Drawer primary nav — slightly denser list */
@@ -1428,13 +1612,11 @@ body.nav-drawer-open {
 
   .topbar {
     --header-h: 3.25rem;
-    /* Content height + notch; drawer/backdrop align to this */
-    height: calc(
-      var(--header-h) + env(safe-area-inset-top, 0px)
-    );
+    /* Still auto height; min covers notch + one tab row */
+    height: auto !important;
     min-height: calc(
       var(--header-h) + env(safe-area-inset-top, 0px)
-    );
+    ) !important;
     padding-inline:
       calc(0.65rem + env(safe-area-inset-left, 0px))
       calc(0.65rem + env(safe-area-inset-right, 0px)) !important;

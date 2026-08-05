@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/wiki",
-  "version": "0.2.4",
+  "version": "0.2.7",
   "description": "File-based markdown wiki for UrsaMU (staff UI via @ursamu/web).",
   "license": "MIT",
   "exports": "./mod.ts",

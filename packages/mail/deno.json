@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/mail",
-  "version": "2.5.0",
+  "version": "2.7.0",
   "description": "In-game mail for UrsaMU — drafts, folders, attachments, quota, expiry, and REST API.",
   "exports": {
     ".": "./mod.ts"

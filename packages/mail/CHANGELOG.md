@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.7.0] - 2026-08-04
+
+### Added
+
+- `GET /api/v1/mail/stats` — system totals (staff)
+- `GET /api/v1/mail/all` — system-wide browser (staff)
+- Staff may open / trash any message
+- Staff nav bridge (`route: "mail"`) for `@ursamu/web`
+
 ## [2.5.0] - 2026-07-28
 
 Stable freeze on the UrsaMU **1.x engine floor**.

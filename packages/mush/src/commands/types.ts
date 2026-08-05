@@ -33,12 +33,19 @@ export interface ICmd {
   lock?:     string;      // optional for backwards compat; default ""
   category?: string;
   help?:     string;
+  /**
+   * Web play: show the player's input line (faded) before output.
+   * Default true. Set false for speech/pose (chat bubble is enough).
+   */
+  echo?:     boolean;
   exec:      (u: IUrsamuSDK) => void | Promise<void>;
 }
 
 export interface IUrsamuSDK {
   state: Record<string, unknown>;
   socketId?: string;
+  /** From session.meta.clientType ("web" | "telnet" | …). */
+  clientType?: string;
   me: IDBObj;
   here: IDBObj & { broadcast(message: string, options?: Record<string, unknown>): void };
   target?: IDBObj & { broadcast(message: string, options?: Record<string, unknown>): void };
@@ -51,7 +58,17 @@ export interface IUrsamuSDK {
       style?: string;
     }): unknown;
     render(template: string, data: Record<string, unknown>): string;
-    layout(options: { components: unknown[]; meta?: Record<string, unknown> }): void;
+    /**
+     * Structured UI for web clients. Component types include:
+     * header | text | media | entity-list | actions | table | list | panel
+     *
+     * Interactive items use `{ action: { cmd: string } }` — FE sends
+     * `cmd` as player input (exits, look target, future controls).
+     */
+    layout(options: {
+      components: unknown[];
+      meta?: Record<string, unknown>;
+    }): void;
   };
 
   util: {

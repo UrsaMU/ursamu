@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/plugins/official-plugins/">
+<meta property="og:url" content="http://localhost:3001/plugins/official-plugins/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -367,7 +367,7 @@ They are listed in <code>src/plugins/plugins.manifest.json</code> and installed 
 </code></pre>
 <p>Each <code>deps[]</code> entry may include an optional <code>version</code> semver range (e.g. <code>"^1.2.0"</code>, <code>"&gt;=1.0.0 &lt;2.0.0"</code>) — the installer cross-checks it against the dep’s own manifest <code>version</code> and aborts the run on mismatch. Omit <code>version</code> for backwards-compatible behavior.</p>
 <p>Or use the CLI:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin install https://github.com/example/my-plugin
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/plugin install https://github.com/example/my-plugin
 </code></pre>
 <p>See <a href="/plugins/first-plugin/">Building a Plugin</a> to publish your own.</p>
 

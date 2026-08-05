@@ -137,6 +137,24 @@ function basicLockKey(exit: IDBOBJ): string {
 }
 
 /**
+ * Walk location chain; return the first `map:…` holding id, or null.
+ * Used so exits cannot eject passengers while a vehicle is launched.
+ */
+export async function mapHoldingOf(
+  startId: string,
+): Promise<string | null> {
+  let cur: string | undefined = startId;
+  const seen = new Set<string>();
+  while (cur && !seen.has(cur)) {
+    if (cur.startsWith("map:")) return cur;
+    seen.add(cur);
+    const obj = await dbojs.queryOne({ id: cur });
+    cur = obj?.location as string | undefined;
+  }
+  return null;
+}
+
+/**
  * Attempt to take a matched exit. Returns true (always handled).
  */
 export async function traverseExit(
@@ -162,6 +180,22 @@ export async function traverseExit(
   if (!fromId) {
     send([socketId], "You are nowhere.");
     return true;
+  }
+
+  // Parity with leave: cannot exit a vehicle/container while it is
+  // on the map grid (location map:…). Nested rooms inside a vehicle
+  // still work when both ends share the same map: holding.
+  const fromHold = await mapHoldingOf(fromId);
+  if (fromHold) {
+    const toHold = await mapHoldingOf(destination);
+    if (toHold !== fromHold) {
+      send(
+        [socketId],
+        "You can't leave while this is on the map. " +
+          "Use +map/land first.",
+      );
+      return true;
+    }
   }
 
   const exitName = exitLabel(exit);

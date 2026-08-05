@@ -16,6 +16,13 @@ import {
   privRank,
 } from "../world/permissions.ts";
 import { gameHooks } from "@ursamu/core";
+import {
+  clearImageDataFields,
+  importImageFromBytes,
+  importImageFromUrl,
+  removeObjectImage,
+  setImageDataFields,
+} from "../media/object-image.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -298,8 +305,117 @@ export async function dbObjHandler(req: Request, userId: string): Promise<Respon
     );
   }
 
+  // POST|DELETE /api/v1/dbobj/:id/image — local image upload/import
+  const imgMatch = path.match(
+    /\/api\/v1\/dbobj\/([^/]+)\/image\/?$/,
+  );
+  if (imgMatch) {
+    const dbref = decodeURIComponent(imgMatch[1]).replace(/^#/, "");
+    const en = await Obj.get(userId);
+    if (!en) return json({ error: "Unauthorized" }, 401);
+    const actorId = String(en.dbobj?.id ?? en.id ?? userId);
+    const enFlags = flagsToString(
+      (en.dbobj as { flags?: unknown })?.flags ?? en.flags,
+    );
+    const targetObj = await dbojs.queryOne({ id: dbref });
+    if (!targetObj) return json({ error: "Not Found" }, 404);
+    if (!await canEditDbo(enFlags, actorId, targetObj)) {
+      return json({ error: "Forbidden" }, 403);
+    }
+
+    if (req.method === "DELETE") {
+      await removeObjectImage(targetObj.id);
+      targetObj.data ||= {};
+      clearImageDataFields(
+        targetObj.data as Record<string, unknown>,
+      );
+      await dbojs.modify({ id: targetObj.id }, "$unset", {
+        "data.image": "",
+        "data.imageExt": "",
+        "data.avatarExt": "",
+        "data.image_url": "",
+      } as Record<string, unknown>);
+      return json(scrub(targetObj));
+    }
+
+    if (req.method === "POST") {
+      const ct = req.headers.get("content-type") || "";
+      let result:
+        | { ok: true; url: string; ext: string }
+        | { ok: false; error: string };
+
+      if (ct.includes("multipart/form-data")) {
+        let form: FormData;
+        try {
+          form = await req.formData();
+        } catch {
+          return json({ error: "Invalid multipart body" }, 400);
+        }
+        const file = form.get("file");
+        const blob = file as {
+          arrayBuffer?: () => Promise<ArrayBuffer>;
+          type?: string;
+        } | null;
+        if (!blob || typeof blob.arrayBuffer !== "function") {
+          return json(
+            { error: 'multipart field "file" required' },
+            400,
+          );
+        }
+        const buf = new Uint8Array(await blob.arrayBuffer());
+        const mime = String(blob.type || "");
+        result = await importImageFromBytes(
+          targetObj.id,
+          buf,
+          mime,
+        );
+      } else {
+        let body: Record<string, unknown>;
+        try {
+          body = await req.json() as Record<string, unknown>;
+        } catch {
+          return json({ error: "Invalid JSON" }, 400);
+        }
+        const url = String(body.url ?? "").trim();
+        if (!url) {
+          return json(
+            { error: "Provide multipart file or { url }" },
+            400,
+          );
+        }
+        result = await importImageFromUrl(targetObj.id, url);
+      }
+
+      if (!result.ok) {
+        return json({ error: result.error }, 400);
+      }
+      targetObj.data ||= {};
+      setImageDataFields(
+        targetObj.data as Record<string, unknown>,
+        result.url,
+        result.ext,
+      );
+      // Dotted paths — avoid whole-document $set quirks
+      const ext = result.ext;
+      const revMatch = result.url.match(/[?&]v=([^&]+)/);
+      const rev = revMatch?.[1] ?? Date.now().toString(36);
+      await dbojs.modify({ id: targetObj.id }, "$set", {
+        "data.image": result.url,
+        "data.imageExt": ext,
+        "data.avatarExt": ext,
+        "data.imageRev": rev,
+      } as Record<string, unknown>);
+      return json({
+        ...scrub(targetObj),
+        imageUrl: result.url,
+      });
+    }
+
+    return json({ error: "Method Not Allowed" }, 405);
+  }
+
   // /api/v1/dbobj/:id — single object operations
-  const match = path.match(/\/api\/v1\/dbobj\/(.+)/);
+  const match = path.match(/\/api\/v1\/dbobj\/([^/]+)\/?$/);
   if (match) {
     const dbref = decodeURIComponent(match[1]).replace(/^#/, "");
     const en    = await Obj.get(userId);
@@ -353,12 +469,51 @@ export async function dbObjHandler(req: Request, userId: string): Promise<Respon
         return json({ error: "Invalid JSON" }, 400);
       }
 
+      // If staff sets data.image to a remote URL, import locally.
+      const dataIn = updates.data &&
+          typeof updates.data === "object"
+        ? updates.data as Record<string, unknown>
+        : null;
+      if (dataIn && typeof dataIn.image === "string") {
+        const img = dataIn.image.trim();
+        if (!img) {
+          await removeObjectImage(targetObj.id);
+          dataIn.image = "";
+          dataIn.imageExt = "";
+        } else if (/^https?:\/\//i.test(img)) {
+          const imp = await importImageFromUrl(
+            targetObj.id,
+            img,
+          );
+          if (!imp.ok) {
+            return json({ error: imp.error }, 400);
+          }
+          dataIn.image = imp.url;
+          dataIn.imageExt = imp.ext;
+        } else if (
+          !img.startsWith("/images/") &&
+          !img.startsWith("/avatars/") &&
+          !img.startsWith("/site/")
+        ) {
+          return json({
+            error:
+              "Image must be a URL, /images/ path, or upload.",
+          }, 400);
+        }
+      }
+
       const applied = applyStaffPatch(targetObj, updates, enFlags);
       if (!applied.ok) {
         return json(
           { error: applied.error },
           applied.status ?? 400,
         );
+      }
+
+      // Keep imageExt in sync when image cleared
+      const d = targetObj.data as Record<string, unknown> | undefined;
+      if (d && (d.image === "" || d.image == null)) {
+        clearImageDataFields(d);
       }
 
       await dbojs.modify({ id: targetObj.id }, "$set", targetObj);

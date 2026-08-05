@@ -101,7 +101,23 @@ function ensureHandlersRegistered(): void {
       // 5. Match local exits
       if (await matchExits(socketId, actorId, rawMsg)) return;
 
-      // 6. Emit command:fail hook and fallback message
+      // 6. Bare speech → say (after commands / $patterns / exits).
+      //    Pose/say shortcuts (":" ";" "\"" "'") and say/pose words already
+      //    matched above when registered. Staff-style @ + / stay Huh.
+      if (shouldDefaultToSay(rawMsg)) {
+        if (
+          await matchNativeCmd(
+            socketId,
+            actorId,
+            `say ${rawMsg}`,
+            cmds,
+          )
+        ) {
+          return;
+        }
+      }
+
+      // 7. Emit command:fail hook and fallback message
       const failEvent = {
         socketId,
         actorId,
@@ -116,6 +132,21 @@ function ensureHandlersRegistered(): void {
       }
     },
   });
+}
+
+/**
+ * True when unmatched input should be spoken (say) instead of Huh.
+ * Registered cmds / exits / $patterns already ran; this is speech UX.
+ */
+export function shouldDefaultToSay(msg: string): boolean {
+  const t = String(msg ?? "").trim();
+  if (!t) return false;
+  // Already speech/pose forms — if unmatched, do not re-wrap
+  if (/^(say|pose)\b/i.test(t)) return false;
+  if (/^[:;"']/.test(t)) return false;
+  // Staff / channel / path-style commands stay explicit
+  if (/^[@+/\\]/.test(t)) return false;
+  return true;
 }
 
 let _defaultsLoaded = false;
@@ -134,6 +165,7 @@ export async function loadDefaultCommands(): Promise<void> {
   await import("../verbs/say.ts");
   await import("../verbs/ooc.ts");
   await import("../verbs/home.ts");
+  await import("../verbs/enter-leave.ts");
   await import("../verbs/social.ts");
   await import("../verbs/manipulation.ts");
   await import("../verbs/admin-reload.ts");
@@ -165,6 +197,7 @@ export async function loadDefaultCommands(): Promise<void> {
   await import("../verbs/world-sweep.ts");
   await import("../verbs/js-eval.ts");
   await import("../verbs/avatar.ts");
+  await import("../verbs/image.ts");
   await import("../verbs/moniker.ts");
   await import("../verbs/gradient.ts");
   await import("../verbs/softcode-trigger.ts");
@@ -172,4 +205,6 @@ export async function loadDefaultCommands(): Promise<void> {
   await import("../verbs/softcode-dolist.ts");
   await import("../verbs/softcode-switch.ts");
   await import("../verbs/softcode-flow.ts");
+  // Globals-style social/staff commands (+finger, +staff, …)
+  await import("../verbs/globals/mod.ts");
 }

@@ -25,8 +25,13 @@ import {
 
 export type LiveMode = "ws" | "connecting" | "off";
 
-/** sessionStorage key for per-tab badge acks (clear-on-view). */
-const BADGE_ACK_STORAGE = "ursamu.staff.badgeAck.v1";
+/**
+ * Persist "seen" badge values across logins (localStorage).
+ * sessionStorage reset every new tab/login, so the same drafts /
+ * open jobs looked like fresh notifications forever.
+ * Key is scoped per staff id when known.
+ */
+const BADGE_ACK_PREFIX = "ursamu.staff.badgeAck.v2";
 
 function isOpenStatus(status: string): boolean {
   return status !== "closed" &&
@@ -34,9 +39,32 @@ function isOpenStatus(status: string): boolean {
     status !== "cancelled";
 }
 
-function readBadgeAcks(): Record<string, string> {
+function ackStorageKey(userId?: string | null): string {
+  const id = String(userId ?? "").trim();
+  return id ? `${BADGE_ACK_PREFIX}.${id}` : BADGE_ACK_PREFIX;
+}
+
+function readBadgeAcks(
+  userId?: string | null,
+): Record<string, string> {
   try {
-    const raw = sessionStorage.getItem(BADGE_ACK_STORAGE);
+    const key = ackStorageKey(userId);
+    let raw = localStorage.getItem(key);
+    // One-time migrate from old sessionStorage blob
+    if (!raw) {
+      try {
+        const legacy = sessionStorage.getItem(
+          "ursamu.staff.badgeAck.v1",
+        );
+        if (legacy) {
+          raw = legacy;
+          localStorage.setItem(key, legacy);
+          sessionStorage.removeItem("ursamu.staff.badgeAck.v1");
+        }
+      } catch {
+        /* ignore */
+      }
+    }
     if (!raw) return {};
     const parsed = JSON.parse(raw) as unknown;
     if (!parsed || typeof parsed !== "object") return {};
@@ -52,9 +80,15 @@ function readBadgeAcks(): Record<string, string> {
   }
 }
 
-function writeBadgeAcks(map: Record<string, string>): void {
+function writeBadgeAcks(
+  map: Record<string, string>,
+  userId?: string | null,
+): void {
   try {
-    sessionStorage.setItem(BADGE_ACK_STORAGE, JSON.stringify(map));
+    localStorage.setItem(
+      ackStorageKey(userId),
+      JSON.stringify(map),
+    );
   } catch {
     /* private mode / quota — ignore */
   }
@@ -78,9 +112,12 @@ export const useLiveStore = defineStore("live", () => {
   /**
    * Last badge value the operator has "seen" by opening that tab.
    * Badge stays hidden while live value === ack; reappears when
-   * the count/string changes (new activity).
+   * the count/string changes (new activity). Survives logout via
+   * localStorage (per staff id).
    */
   const badgeAck = ref<Record<string, string>>(readBadgeAcks());
+  /** Staff id for scoped ack storage (set after login/snapshot). */
+  let ackUserId: string | null = null;
   const pagesLoaded = ref(false);
   const onlineLoaded = ref(false);
   const objectsLoaded = ref(false);
@@ -390,6 +427,17 @@ export const useLiveStore = defineStore("live", () => {
   }
 
   /**
+   * Load ack map for this staff user (call after login).
+   * Keeps chips hidden across sessions until values change.
+   */
+  function loadBadgeAcksForUser(userId: string | null | undefined): void {
+    const id = String(userId ?? "").trim() || null;
+    if (id === ackUserId) return;
+    ackUserId = id;
+    badgeAck.value = readBadgeAcks(id);
+  }
+
+  /**
    * Visible nav chip: empty when the operator already viewed
    * this exact count (ack). Re-shows when value changes.
    */
@@ -408,7 +456,7 @@ export const useLiveStore = defineStore("live", () => {
     if (badgeAck.value[k] === v) return;
     const next = { ...badgeAck.value, [k]: v };
     badgeAck.value = next;
-    writeBadgeAcks(next);
+    writeBadgeAcks(next, ackUserId);
   }
 
   /** Ack several keys at once (one tab may own multiple). */
@@ -427,7 +475,7 @@ export const useLiveStore = defineStore("live", () => {
     }
     if (!changed) return;
     badgeAck.value = next;
-    writeBadgeAcks(next);
+    writeBadgeAcks(next, ackUserId);
   }
 
   function ensureSocket(): AdminSocket {
@@ -557,6 +605,7 @@ export const useLiveStore = defineStore("live", () => {
     staffSideNav,
     staffBadges,
     badgeAck,
+    loadBadgeAcksForUser,
     displayBadge,
     ackBadge,
     ackBadges,

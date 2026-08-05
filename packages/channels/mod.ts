@@ -18,6 +18,12 @@ import { matchChannel } from "./src/middleware/matchChannel.ts";
 import { joinChans } from "./src/middleware/joinChans.ts";
 import { announcePresence } from "./src/announce.ts";
 import type { IChannel } from "./src/types.ts";
+import { registerPluginRoute } from "@ursamu/mush";
+import { channelsRouteHandler } from "./src/routes.ts";
+import {
+  registerChannelsStaffNav,
+  unregisterChannelsStaffNav,
+} from "./src/staff-nav-bridge.ts";
 
 /** JWT soft-reboot restore — telnet opens WS with reconnect=true. */
 function isReauthSession(socketId?: string): boolean {
@@ -154,11 +160,15 @@ const channelMiddleware: IMiddlewareFn = async (ctx, next) => {
   await next();
 };
 
+const onStaffReady = (): void => {
+  void registerChannelsStaffNav();
+};
+
 export const channelsPlugin: IPlugin = {
   name: "@ursamu/channels",
-  version: "1.0.1",
+  version: "1.1.0",
   description:
-    "Channel system: chat channels with aliases, history, and admin tools.",
+    "Channel system: chat, aliases, history, staff REST/UI.",
 
   init: () => {
     import("./src/commands/verbs.ts");
@@ -166,10 +176,16 @@ export const channelsPlugin: IPlugin = {
       new URL("./help", import.meta.url),
       "channels",
     );
+    registerPluginRoute(
+      "/api/v1/channels",
+      channelsRouteHandler,
+    );
     gameHooks.on("player:login", onLogin);
     gameHooks.on("player:logout", onLogout);
     gameHooks.on("engine:ready", onReady);
+    gameHooks.on("engine:ready", onStaffReady);
     addMiddleware(channelMiddleware);
+    void registerChannelsStaffNav();
     return true;
   },
 
@@ -177,7 +193,9 @@ export const channelsPlugin: IPlugin = {
     gameHooks.off("player:login", onLogin);
     gameHooks.off("player:logout", onLogout);
     gameHooks.off("engine:ready", onReady);
-    // addMiddleware is not reversible — restart required to fully remove.
+    gameHooks.off("engine:ready", onStaffReady);
+    void unregisterChannelsStaffNav();
+    // addMiddleware is not reversible — restart required.
   },
 };
 

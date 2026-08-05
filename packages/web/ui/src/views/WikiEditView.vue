@@ -7,6 +7,7 @@ import { useSessionStore } from "@/stores/session";
 import TagInput from "@/components/TagInput.vue";
 import ReadLockSelect from "@/components/ReadLockSelect.vue";
 import WikiBodyField from "@/components/WikiBodyField.vue";
+import WikiMediaPanel from "@/components/WikiMediaPanel.vue";
 import {
   encodeWikiPath,
   pageSnapshot,
@@ -22,6 +23,7 @@ const title = ref("");
 const body = ref("");
 const draft = ref(false);
 const featured = ref(false);
+const bgImage = ref(false);
 const readLock = ref("connected");
 const tags = ref<string[]>([]);
 const loading = ref(true);
@@ -36,6 +38,7 @@ const currentPayload = computed<WikiPagePayload>(() => ({
   body: body.value,
   draft: draft.value,
   featured: featured.value,
+  bgImage: bgImage.value,
   readLock: readLock.value,
   tags: tags.value,
 }));
@@ -57,6 +60,7 @@ async function load(): Promise<void> {
     body?: string;
     draft?: boolean;
     featured?: boolean;
+    bgImage?: boolean;
     readLock?: string;
     tags?: string[];
     error?: string;
@@ -84,6 +88,7 @@ async function load(): Promise<void> {
   body.value = String(data.body ?? "");
   draft.value = data.draft === true;
   featured.value = data.featured === true;
+  bgImage.value = data.bgImage === true;
   readLock.value = String(data.readLock ?? "connected");
   tags.value = Array.isArray(data.tags)
     ? data.tags.map((t) => String(t).toLowerCase())
@@ -149,6 +154,7 @@ async function save(): Promise<void> {
       body: body.value,
       draft: draft.value,
       featured: featured.value,
+      bgImage: bgImage.value,
       readLock: readLock.value || "connected",
       tags: [...tags.value],
     };
@@ -180,6 +186,7 @@ async function save(): Promise<void> {
       title: t,
       draft: draft.value,
       featured: featured.value,
+      bgImage: bgImage.value,
       readLock: readLock.value,
       tags: [...tags.value],
       chars: body.value.length,
@@ -196,6 +203,61 @@ function discard(): void {
   if (!dirty.value) return;
   if (!globalThis.confirm("Discard unsaved changes?")) return;
   void load();
+}
+
+async function deletePage(): Promise<void> {
+  if (busy.value || loading.value) return;
+  const path = props.path;
+  const label = title.value.trim() || path;
+  if (
+    !globalThis.confirm(
+      `Delete wiki page “${label}” (${path})?\n\n` +
+        "This removes the page file. History snapshots " +
+        "may remain on disk. This cannot be undone from " +
+        "the web UI.",
+    )
+  ) {
+    return;
+  }
+  busy.value = true;
+  saveError.value = "";
+  status.value = "Deleting…";
+  try {
+    const enc = encodeWikiPath(path);
+    const { res, data } = await api<{
+      error?: string;
+      deleted?: boolean;
+    }>(`/api/v1/wiki/${enc}`, { method: "DELETE" });
+    if (res.status === 401) {
+      session.signOut();
+      await router.replace({ name: "login" });
+      return;
+    }
+    if (!res.ok) {
+      saveError.value = data?.error ||
+        `Delete failed (${res.status}).`;
+      status.value = "Error";
+      return;
+    }
+    live.removePage(path);
+    loadedSnap.value = "";
+    await router.replace({ name: "wiki" });
+  } finally {
+    busy.value = false;
+  }
+}
+
+/** Insert markdown at end of body (from Images panel). */
+function insertMediaMarkdown(md: string): void {
+  const cur = body.value;
+  const sep = !cur
+    ? ""
+    : cur.endsWith("\n\n")
+    ? ""
+    : cur.endsWith("\n")
+    ? "\n"
+    : "\n\n";
+  body.value = `${cur}${sep}${md}\n`;
 }
 
 function confirmLeave(): boolean {
@@ -239,6 +301,15 @@ onBeforeRouteLeave(() => confirmLeave());
         </h1>
       </div>
       <div class="editor-actions">
+        <button
+          type="button"
+          class="secondary outline"
+          :disabled="busy || loading || !!error"
+          title="Delete this page"
+          @click="deletePage"
+        >
+          Delete
+        </button>
         <button
           type="button"
           class="secondary outline"
@@ -290,6 +361,12 @@ onBeforeRouteLeave(() => confirmLeave());
       <WikiBodyField
         v-model="body"
         :rows="18"
+        :page-path="path"
+      />
+
+      <WikiMediaPanel
+        :page-path="path"
+        @insert="insertMediaMarkdown"
       />
 
       <label for="edit-tags">
@@ -315,7 +392,17 @@ onBeforeRouteLeave(() => confirmLeave());
             type="checkbox"
             class="chk"
           >
-          <span>Featured (site front page)</span>
+          <span>Featured (left menu on public site)</span>
+        </label>
+        <label class="chk-row">
+          <input
+            v-model="bgImage"
+            type="checkbox"
+            class="chk"
+          >
+          <span>
+            Background image (home-height layout on public site)
+          </span>
         </label>
         <label for="edit-lock">
           Who can read

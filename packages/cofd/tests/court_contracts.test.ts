@@ -71,14 +71,13 @@ Deno.test("Court Contracts - learn external court common exception", OPTS, async
 
 Deno.test("Court Contracts - fail second external court common without requirements", OPTS, async () => {
   const store = new MockObjectStore();
+  const initialSheet = changelingSheet({
+    contracts: ["Witches' Intuition"],
+  });
   const player = mockPlayer({
     id: "2",
     name: "Player",
-    state: {
-      cofd: changelingSheet({
-        contracts: ["Witches' Intuition"],
-      }),
-    },
+    state: { cofd: initialSheet },
   });
   store.put(player);
 
@@ -91,8 +90,9 @@ Deno.test("Court Contracts - fail second external court common without requireme
   await contractExec(u);
 
   const updated = store.get("2")!;
-  const sheet = updated.state.cofd as ReturnType<typeof changelingSheet>;
-  assert(!sheet.contracts.includes("Baleful Sense"));
+  const sheet = (updated.state?.cofd ?? initialSheet) as ReturnType<typeof changelingSheet>;
+  const contracts = sheet.contracts ?? [];
+  assert(!contracts.includes("Baleful Sense"));
   assertEquals(sheet.experience, 10); // Not deducted
   assert(u._sent.some((m) => m.includes("Prerequisite error")));
 });
@@ -121,8 +121,9 @@ Deno.test("Court Contracts - learn external court royal requires Goodwill 4", OP
   await contractExec(u);
 
   const updated = store.get("2")!;
-  const sheet = updated.state.cofd as ReturnType<typeof changelingSheet>;
-  assert(sheet.contracts.includes("Sorcerer's Rebuke"));
+  const sheet = (updated.state?.cofd ?? {}) as ReturnType<typeof changelingSheet>;
+  const contracts = sheet.contracts ?? [];
+  assert(contracts.includes("Sorcerer's Rebuke"));
   assertEquals(sheet.experience, 6); // 10 - 4
 });
 
@@ -145,8 +146,9 @@ Deno.test("Court Contracts - learn Royal Arcadian requires favored Regalia", OPT
   await contractExec(u);
 
   const updated = store.get("2")!;
-  const sheet = updated.state.cofd as ReturnType<typeof changelingSheet>;
-  assert(!sheet.contracts.includes("Chrysalis"));
+  const sheet = (updated.state?.cofd ?? {}) as ReturnType<typeof changelingSheet>;
+  const contracts = sheet.contracts ?? [];
+  assert(!contracts.includes("Chrysalis"));
   assert(u._sent.some((m) => m.includes("Prerequisite error")));
 });
 

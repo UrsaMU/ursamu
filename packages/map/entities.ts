@@ -10,10 +10,16 @@ import {
   realmOf,
   SPECTATING_STATE_FIELD,
 } from "./schemas.ts";
+import { chunkKey, SpatialIndex } from "./spatial.ts";
 
-type StoredEntity = MapEntity & { id: string };
+type StoredEntity = MapEntity & { id: string; chunk?: string };
 
 const entities = new DBO<StoredEntity>(ENTITY_COLLECTION);
+
+const entityIndex = new SpatialIndex<StoredEntity>(
+  (e) => e.chunk ?? chunkKey(e.coord),
+  async () => entities.all(),
+);
 
 const COORD_MAX = 1_000_000;
 const ID_MAX = 64;
@@ -84,13 +90,105 @@ export const setEntity = async (entity: MapEntity): Promise<void> => {
   if (!validateEntity(entity)) {
     throw new Error("setEntity: invalid entity payload");
   }
-  const record: StoredEntity = { ...entity };
+  const chunk = chunkKey(entity.coord);
+  const record: StoredEntity = { ...entity, chunk };
   await entities.update({ id: entity.id }, record);
+  entityIndex.invalidate();
 };
 
 export const destroyEntity = async (id: string): Promise<void> => {
   await entities.delete({ id });
+  entityIndex.invalidate();
 };
+
+export const listAllEntities = async (): Promise<MapEntity[]> => {
+  const all = await entities.all();
+  return all.map(stripId);
+};
+
+export const countEntities = async (): Promise<number> =>
+  entityIndex.size();
+
+function flagSet(flags: unknown): Set<string> {
+  if (flags instanceof Set) {
+    return new Set([...flags].map(String));
+  }
+  return new Set(String(flags ?? "").split(/\s+/).filter(Boolean));
+}
+
+/**
+ * Drop MapEntity rows whose container no longer exists, is not
+ * map-capable, or is no longer on the map (location not map:*).
+ * Also reclaims stranded map-capable things left on `map:…`
+ * without a live entity (e.g. leftover Scout Bike smoke tests).
+ */
+export const pruneOrphanEntities = async (): Promise<number> => {
+  const all = await entities.all();
+  let n = 0;
+  const liveContainerIds = new Set<string>();
+  for (const e of all) {
+    if (e.containerId) liveContainerIds.add(e.containerId);
+    if (!e.containerId) continue;
+    const container = await dbojs.queryOne({ id: e.containerId });
+    if (!container) {
+      await destroyEntity(e.id);
+      n += 1;
+      continue;
+    }
+    const loc = String(
+      (container as { location?: string }).location ?? "",
+    );
+    const capable = flagSet(
+      (container as { flags?: unknown }).flags,
+    ).has(MAP_CAPABLE_FLAG);
+    if (!capable || !loc.startsWith("map:")) {
+      await destroyEntity(e.id);
+      n += 1;
+    }
+  }
+  n += await reclaimStrandedVehicles(liveContainerIds);
+  return n;
+};
+
+/**
+ * map-capable objects sitting on `map:…` with no MapEntity →
+ * restore `state.lastDock` (or leave location cleared if none).
+ */
+export async function reclaimStrandedVehicles(
+  knownContainers?: Set<string>,
+): Promise<number> {
+  // DBO has no "location starts with" query — scan capable things
+  // by flag and filter in process (admin prune, infrequent).
+  const candidates = await dbojs.query({
+    flags: new RegExp(MAP_CAPABLE_FLAG, "i"),
+  });
+  let n = 0;
+  for (const raw of candidates) {
+    const id = String(raw.id ?? "");
+    if (!id) continue;
+    if (knownContainers?.has(id)) continue;
+    const loc = String(raw.location ?? "");
+    if (!loc.startsWith("map:")) continue;
+    // Confirm no entity claims this container (race-safe recheck).
+    const ents = await getEntitiesByContainer(id);
+    if (ents.length > 0) continue;
+    const data = (raw.data ?? {}) as Record<string, unknown>;
+    const dock = String(data.lastDock ?? "").trim();
+    if (dock) {
+      await dbojs.modify({ id }, "$set", {
+        location: dock,
+        "data.lastDock": "",
+      } as Record<string, unknown>);
+    } else {
+      // No dock — park in limbo-ish empty location rather than map:
+      await dbojs.modify({ id }, "$set", {
+        location: "",
+      } as Record<string, unknown>);
+    }
+    n += 1;
+  }
+  return n;
+}
 
 export const getEntitiesByContainer = async (
   containerId: string,
@@ -128,15 +226,13 @@ export const getEntitiesInRegion = async (
     throw new Error("getEntitiesInRegion: region too large");
   }
   const realm = realmOf(min);
-  const all = await entities.all();
-  return all
-    .filter((e) =>
-      realmOf(e.coord) === realm &&
-      e.coord.x >= xLo && e.coord.x <= xHi &&
-      e.coord.y >= yLo && e.coord.y <= yHi &&
-      e.coord.z >= zLo && e.coord.z <= zHi
-    )
-    .map(stripId);
+  const rows = await entityIndex.getInRegion(min, max, (e) =>
+    realmOf(e.coord) === realm &&
+    e.coord.x >= xLo && e.coord.x <= xHi &&
+    e.coord.y >= yLo && e.coord.y <= yHi &&
+    e.coord.z >= zLo && e.coord.z <= zHi
+  );
+  return rows.map(stripId);
 };
 
 export const moveEntity = async (id: string, to: Coord): Promise<MapEntity> => {
@@ -147,20 +243,34 @@ export const moveEntity = async (id: string, to: Coord): Promise<MapEntity> => {
   return next;
 };
 
+/** Normalize engine flags (Set | string[] | space string) to lower names. */
+const flagNames = (flags: unknown): string[] => {
+  if (flags instanceof Set) {
+    return [...flags]
+      .filter((f): f is string => typeof f === "string")
+      .map((f) => f.toLowerCase());
+  }
+  if (Array.isArray(flags)) {
+    return flags
+      .filter((f): f is string => typeof f === "string")
+      .map((f) => f.toLowerCase());
+  }
+  if (typeof flags === "string") {
+    return flags.trim().split(/\s+/).filter(Boolean).map((f) =>
+      f.toLowerCase()
+    );
+  }
+  return [];
+};
+
 const hasAdminFlag = (flags: unknown): boolean => {
-  if (!Array.isArray(flags)) return false;
-  const lower = flags
-    .filter((f): f is string => typeof f === "string")
-    .map((f) => f.toLowerCase());
+  const lower = flagNames(flags);
   return ADMIN_FLAGS.some((a) => lower.includes(a));
 };
 
 const hasFlag = (flags: unknown, name: string): boolean => {
-  if (!Array.isArray(flags)) return false;
   const target = name.toLowerCase();
-  return flags
-    .filter((f): f is string => typeof f === "string")
-    .some((f) => f.toLowerCase() === target);
+  return flagNames(flags).includes(target);
 };
 
 export const getActiveEntity = async (
@@ -185,9 +295,8 @@ export const getActiveEntity = async (
   if (typeof me.location === "string" && me.location.length > 0) {
     const loc = await dbojs.queryOne({ id: me.location });
     if (loc && hasFlag((loc as { flags?: unknown }).flags, MAP_CAPABLE_FLAG)) {
-      const all = await entities.all();
-      const match = all.find((e) => e.containerId === me.location);
-      if (match) return { entity: stripId(match), mode: "container" };
+      const match = (await getEntitiesByContainer(me.location))[0];
+      if (match) return { entity: match, mode: "container" };
     }
   }
 

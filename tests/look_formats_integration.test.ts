@@ -93,7 +93,7 @@ Deno.test("softcode: no attrs — default rendering", { ...OPTS, ...SLOW }, asyn
 Deno.test("softcode: @nameformat with %0 wraps the default name", { ...OPTS, ...SLOW }, async () => {
   await seed({ attrs: { NAMEFORMAT: "<<%0>>" } });
   const out = await runLook();
-  assertStringIncludes(out, "<<LFI Room(#" + ROOM + ")>>");
+  assertStringIncludes(out, "<<LFI Room(#" + ROOM + "r)>>");
   assertEquals(out.includes("%chLFI Room"), false);
   await cleanup();
 });
@@ -168,7 +168,7 @@ Deno.test("softcode: priority — plugin handler runs when no attr set", { ...OP
 Deno.test("softcode: priority — built-in default when no attr, no handler", { ...OPTS, ...SLOW }, async () => {
   await seed();
   const out = await runLook();
-  assertStringIncludes(out, "%chLFI Room(#" + ROOM + ")%cn");
+  assertStringIncludes(out, "%chLFI Room(#" + ROOM + "r)%cn");
   await cleanup();
   await DBO.close();
 });

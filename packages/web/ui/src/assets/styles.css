@@ -634,7 +634,8 @@ textarea.mono {
   position: sticky;
   top: 0;
   z-index: 20;
-  height: var(--header-h);
+  /* Grow with wrapped section tabs — fixed height clipped them */
+  height: auto !important;
   min-height: var(--header-h);
   border-bottom: 1px solid var(--border);
   background: var(--bg-elevated);
@@ -644,15 +645,18 @@ textarea.mono {
   max-width: none !important;
   /* Kill Pico container-fluid edge collapse */
   padding-inline: var(--gutter-x) !important;
-  padding-block: 0.5rem !important;
+  padding-block: 0 !important;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  overflow: visible;
 }
 
 .topbar > nav {
   width: 100%;
   align-items: center;
-  min-height: calc(var(--header-h) - 1rem);
+  min-height: var(--header-h);
+  height: auto;
+  flex-wrap: wrap;
 }
 
 .topbar ul {
@@ -960,6 +964,7 @@ textarea.mono {
 #main-pages .dash-header,
 #main-bbs .dash-header,
 #main-jobs .dash-header,
+#main-help .dash-header,
 .dash-browser .dash-header {
   margin-bottom: 1.85rem;
   padding-bottom: 1.35rem;
@@ -969,6 +974,7 @@ textarea.mono {
 #main-pages .dash-header .page-title,
 #main-bbs .dash-header .page-title,
 #main-jobs .dash-header .page-title,
+#main-help .dash-header .page-title,
 .dash-browser .dash-header .page-title {
   margin-bottom: 0.45rem;
 }
@@ -976,6 +982,7 @@ textarea.mono {
 #main-pages .dash-header > div > p.muted:last-child,
 #main-bbs .dash-header > div > p.muted:last-child,
 #main-jobs .dash-header > div > p.muted:last-child,
+#main-help .dash-header > div > p.muted:last-child,
 .dash-browser .dash-header > div > p.muted:last-child {
   margin: 0.15rem 0 0;
   max-width: 40rem;
@@ -985,6 +992,7 @@ textarea.mono {
 #main-pages .dash-header-actions,
 #main-bbs .dash-header-actions,
 #main-jobs .dash-header-actions,
+#main-help .dash-header-actions,
 .dash-browser .dash-header-actions {
   gap: 0.75rem;
 }
@@ -992,6 +1000,7 @@ textarea.mono {
 #main-pages .dash-header-actions button,
 #main-bbs .dash-header-actions button,
 #main-jobs .dash-header-actions button,
+#main-help .dash-header-actions button,
 .dash-browser .dash-header-actions button {
   width: auto !important;
   flex: 0 0 auto;
@@ -1001,6 +1010,7 @@ textarea.mono {
 #main-pages .dash-filter-banner,
 #main-bbs .dash-filter-banner,
 #main-jobs .dash-filter-banner,
+#main-help .dash-filter-banner,
 .dash-browser .dash-filter-banner {
   margin-bottom: 1.35rem;
   padding: 0.7rem 1rem;
@@ -1095,6 +1105,8 @@ textarea.mono {
 #main-bbs .dash-table td,
 #main-jobs .dash-table th,
 #main-jobs .dash-table td,
+#main-help .dash-table th,
+#main-help .dash-table td,
 .dash-browser .dash-table th,
 .dash-browser .dash-table td {
   padding: 0.8rem 1rem;
@@ -1103,6 +1115,7 @@ textarea.mono {
 #main-pages .dash-table th,
 #main-bbs .dash-table th,
 #main-jobs .dash-table th,
+#main-help .dash-table th,
 .dash-browser .dash-table th {
   padding-top: 0.85rem;
   padding-bottom: 0.85rem;
@@ -1111,6 +1124,7 @@ textarea.mono {
 #main-pages .dash-table .row-open,
 #main-bbs .dash-table .row-open,
 #main-jobs .dash-table .row-open,
+#main-help .dash-table .row-open,
 .dash-browser .dash-table .row-open {
   padding-right: 1rem;
 }
@@ -1118,6 +1132,7 @@ textarea.mono {
 #main-pages .dash-table .row-open button,
 #main-bbs .dash-table .row-open button,
 #main-jobs .dash-table .row-open button,
+#main-help .dash-table .row-open button,
 .dash-browser .dash-table .row-open button {
   min-height: 2.15rem;
   padding: 0.3rem 0.75rem;
@@ -2100,4 +2115,231 @@ fieldset legend {
 /* Reduced motion already; ensure no infinite busy animations annoy */
 [aria-busy="true"] {
   cursor: progress;
+}
+
+/* ── Game client (Play) — design.md mono + host chrome ─────────── */
+
+/* Chat shell: output fills; prompt pinned to bottom */
+.play-client--chat {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-h) - 2.5rem);
+  height: calc(100dvh - var(--header-h) - 2.5rem);
+  max-height: calc(100vh - var(--header-h) - 2.5rem);
+  max-height: calc(100dvh - var(--header-h) - 2.5rem);
+  min-height: 0;
+  /* 78 mono cols + prompt chrome */
+  max-width: max(48rem, calc(78ch + 6rem));
+  margin: 0 auto;
+  background: var(--bg-code);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.play-client__bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+}
+
+.play-client__title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.play-client__status[data-status="open"] {
+  color: var(--success);
+}
+
+.play-client__error {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  color: var(--error);
+  background: rgba(255, 138, 143, 0.1);
+  border-bottom: 1px solid rgba(255, 138, 143, 0.35);
+}
+
+.play-client__stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  margin: 0;
+  padding: 0.85rem 1rem 1rem;
+  background: var(--bg-code);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.play-client__stage::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.play-client__prompt {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+  margin-top: auto;
+  padding: 0.65rem 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+}
+
+.play-client__label {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  min-width: 0;
+}
+
+.play-client__gt {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--primary);
+  user-select: none;
+}
+
+.play-client__label input,
+.play-client__label textarea {
+  width: 100%;
+  min-width: 78ch;
+  max-width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.game-output {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.game-output__empty {
+  margin: 2rem 0;
+  text-align: center;
+  font-style: italic;
+}
+
+.game-output__item {
+  margin: 0 0 0.35rem;
+}
+
+.game-output__item:last-child {
+  margin-bottom: 0;
+}
+
+/**
+ * Default command text — mono pre block, MUSH colors via spans.
+ * Max 78ch to match in-game width.
+ */
+.game-pre {
+  margin: 0;
+  padding: 0;
+  max-width: 78ch;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-mono);
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  overflow-x: auto;
+}
+
+.game-pre--nested {
+  padding: 0.5rem 0.65rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  max-width: 100%;
+}
+
+.mush-text {
+  font-family: inherit;
+}
+
+.game-layout {
+  margin: 0.35rem 0 0.75rem;
+  max-width: 48rem;
+}
+
+.game-layout__header {
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.game-layout__title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+
+.game-layout__table-wrap {
+  margin: 0.35rem 0;
+}
+
+.game-layout__table {
+  font-size: 0.8125rem;
+}
+
+.game-layout__list {
+  margin: 0.25rem 0 0.5rem;
+  padding-left: 1.25rem;
+  color: var(--text-secondary);
+}
+
+.game-layout__panel {
+  margin: 0.5rem 0;
+  padding: 0.65rem 0.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.game-layout__panel-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.game-layout__panel-body {
+  font-size: 0.8125rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

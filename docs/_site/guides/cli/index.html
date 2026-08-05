@@ -3,11 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CLI Reference | UrsaMU Documentation</title>
-  <meta name="description" content="Complete reference for the UrsaMU command-line interface — create projects, scaffold plugins, and manage the plugin registry.">
+  <meta name="description" content="Complete reference for the UrsaMU command-line interface — create projects, scaffold plugins, and manage packages.">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="http://localhost:3000/guides/cli/">
+<meta property="og:url" content="http://localhost:3001/guides/cli/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -268,102 +268,143 @@
       <!-- Page content -->
       <article class="prose">
         <h1>CLI Reference</h1>
-<p>The UrsaMU CLI requires no install — run it directly from JSR with <code>deno run</code>.</p>
-<h2>Running the CLI</h2>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli &lt;command&gt; [options]
+<p>The CLI ships as <strong><code>jsr:@ursamu/cli</code></strong>. No global install required —<br>
+run it with <code>deno run</code>.</p>
+<p>Pin a known release in scripts and docs:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/&lt;export&gt; …
 </code></pre>
-<h2>Or install it locally for convenience (see <a href="#install-cli">install-cli</a>).</h2>
+<table>
+<thead>
+<tr>
+<th>Export</th>
+<th>Entry</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/create</code></td>
+<td>project + plugin scaffold</td>
+<td>everyday</td>
+</tr>
+<tr>
+<td><code>/ursamu</code></td>
+<td>interactive menu</td>
+<td>package picker, helpers</td>
+</tr>
+<tr>
+<td><code>/update</code></td>
+<td>bump engine import</td>
+<td>existing games</td>
+</tr>
+<tr>
+<td><code>/plugin</code></td>
+<td>manifest plugin ops</td>
+<td>git plugins</td>
+</tr>
+<tr>
+<td><code>/start</code></td>
+<td>supervised start helper</td>
+<td>advanced</td>
+</tr>
+</tbody>
+</table>
+<hr>
 <h2>create</h2>
-<p>Scaffold a new game project or plugin.</p>
 <h3>New game project</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli create &lt;project-name&gt;
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/create &lt;project-name&gt;
+deno run -A jsr:@ursamu/cli@0.1.2/create &lt;project-name&gt; --local
 </code></pre>
-<p>Creates a new directory with a fully-configured UrsaMU game project:</p>
+<p>Creates a directory with a supervised UrsaMU game:</p>
 <ul>
-<li><code>src/main.ts</code> — entry point</li>
-<li><code>src/plugins/</code> — plugin directory (auto-discovered)</li>
-<li><code>system/scripts/</code> — local script overrides</li>
-<li><code>config/config.json</code> — server configuration</li>
-<li><code>deno.json</code> — Deno project file</li>
+<li><code>main.ts</code> / telnet entry — boot <code>@ursamu/mush</code></li>
+<li><code>config/config.json</code> — ports + default portal plugins</li>
+<li><code>deno.json</code> — import map + tasks</li>
+<li><code>.env</code> — generated <code>JWT_SECRET</code></li>
+<li><code>scripts/daemon.sh</code> (and stop/restart/status)</li>
+<li>Default plugins: builder, channels, help, bbs, mail, wiki,<br>
+<strong>web</strong>, <strong>site</strong> (<code>serveRoot: true</code>)</li>
 </ul>
-<h3>In-tree plugin (inside an existing project)</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli create plugin &lt;name&gt;
+<p><code>--local</code> points imports at a monorepo checkout instead of JSR.</p>
+<h3>In-tree plugin</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/create plugin &lt;name&gt;
 </code></pre>
-<p>Run from your game project root. Generates <code>src/plugins/&lt;name&gt;/</code> with:</p>
-<ul>
-<li><code>index.ts</code> — plugin definition (<code>IPlugin</code>)</li>
-<li><code>commands.ts</code> — command registrations</li>
-<li><code>README.md</code> — plugin documentation stub</li>
-</ul>
-<h3>Standalone publishable plugin</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli create plugin &lt;name&gt; --standalone
+<p>Run from a game project root. Options:</p>
+<table>
+<thead>
+<tr>
+<th>Flag</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--standalone</code></td>
+<td>Separate publishable plugin repo</td>
+</tr>
+<tr>
+<td><code>--admin-embed</code> / <code>-A</code></td>
+<td>Staff page under <code>/admin/&lt;name&gt;/</code></td>
+</tr>
+<tr>
+<td><code>--site-static</code> / <code>-S</code></td>
+<td>Public page at <code>/site/p/&lt;name&gt;/</code></td>
+</tr>
+<tr>
+<td><code>--non-interactive</code></td>
+<td>CI-friendly (no prompts)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Interactive menu</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/ursamu
 </code></pre>
-<h2>Generates a self-contained plugin repo at <code>./&lt;name&gt;/</code> ready for publishing to JSR or GitHub.</h2>
+<p>Create games/plugins, manage packages, update the engine, and edit<br>
+shell scripts from a simple numbered menu.</p>
+<hr>
 <h2>plugin</h2>
-<p>Manage the plugin registry (<code>src/plugins/plugins.manifest.json</code>).</p>
-<h3>List installed plugins</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin list
+<p>Manage git-based entries in <code>plugins.manifest.json</code> (when used):</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/plugin list
+deno run -A jsr:@ursamu/cli@0.1.2/plugin install &lt;github-url&gt;
+deno run -A jsr:@ursamu/cli@0.1.2/plugin install &lt;github-url&gt; --ref v1.2.0
+deno run -A jsr:@ursamu/cli@0.1.2/plugin update &lt;name&gt;
+deno run -A jsr:@ursamu/cli@0.1.2/plugin remove &lt;name&gt;
+deno run -A jsr:@ursamu/cli@0.1.2/plugin info &lt;name&gt;
+deno run -A jsr:@ursamu/cli@0.1.2/plugin search &lt;query&gt;
 </code></pre>
-<h3>Install a plugin</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin install &lt;github-url&gt;
-</code></pre>
-<p>Adds the plugin to the manifest and downloads it into <code>src/plugins/</code>.</p>
-<p>Pin to a specific tag or commit:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin install &lt;github-url&gt; --ref v1.2.0
-</code></pre>
-<h3>Update a plugin</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin update &lt;name&gt;
-</code></pre>
-<p>Fetches the latest ref for the plugin and updates the manifest.</p>
-<h3>Remove a plugin</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin remove &lt;name&gt;
-</code></pre>
-<p>Removes the plugin from the manifest and deletes its directory.</p>
-<h3>Show plugin info</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin info &lt;name&gt;
-</code></pre>
-<p>Displays metadata, installed version, and available update.</p>
-<h3>Search</h3>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli plugin search &lt;query&gt;
-</code></pre>
-<p>Search the public plugin registry for plugins matching <code>&lt;query&gt;</code>.</p>
-<h3>Plugin install behavior (v2.6.0)</h3>
-<h2>The plugin installer is <strong>fail-fast with whole-manifest atomic rollback</strong>.<br>
-If any plugin (or transitive <code>deps[]</code> entry) fails to clone, has an unsafe<br>
-name or URL, violates a <code>version</code> semver range, or conflicts with another<br>
-dep’s range, the entire install run aborts. Disk and the plugin registry<br>
-are left exactly as they were before the run — your previously installed<br>
-plugins are not touched. See<br>
-<a href="/guides/admin-guide/#plugin-install-behavior">Admin Guide → Plugin Install Behavior</a><br>
-for the full list of error classes.</h2>
+<p>Most new games load official packages via <strong>JSR</strong> in<br>
+<code>config.json</code> → <code>server.plugins</code> and the import map — prefer that for<br>
+<code>@ursamu/help</code>, <code>@ursamu/bbs</code>, <code>@ursamu/site</code>, etc.</p>
+<h3>Install behavior</h3>
+<p>Fail-fast installs with whole-run rollback on unsafe names/URLs,<br>
+clone failures, or semver conflicts. See<br>
+<a href="/guides/admin-guide/#plugin-install-behavior">Admin Guide → Plugin Install Behavior</a>.</p>
+<hr>
 <h2>update</h2>
-<p>Update the UrsaMU engine in an existing game project.</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli update
-</code></pre>
-<p>Preview changes without writing:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli update --dry-run
+<p>Bump the engine import in an existing game:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/update
+deno run -A jsr:@ursamu/cli@0.1.2/update --dry-run
 </code></pre>
 <hr>
 <h2>scripts</h2>
-<p>List the names and aliases of every script the engine and its plugins<br>
-register at startup. Useful for discovering what’s already registered before<br>
-you write an override.</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/mush/cli scripts list
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/scripts list
 </code></pre>
+<p>Lists registered script names/aliases (engine + plugins).</p>
 <hr>
-<h2>config</h2>
-<p>Print the current server configuration:</p>
+<h2>config (game task)</h2>
+<p>Inside a scaffolded project:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash">deno task config
+deno task config --get server.apiPort
+deno task config --set game.name "My Game"
 </code></pre>
 <hr>
-<h2>install-cli</h2>
-<p>Install the CLI as a local binary so you don’t need the full <code>deno run</code> invocation:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task install-cli
+<h2>Optional global install</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno install -Ag -n ursamu jsr:@ursamu/cli@0.1.2/ursamu
+# or create only:
+deno install -Ag -n ursamu-create jsr:@ursamu/cli@0.1.2/create
 </code></pre>
-<p>After install:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">ursamu create my-game
-ursamu plugin list
-</code></pre>
+<p>Then: <code>ursamu</code> / <code>ursamu-create my-game</code>.</p>
 
       </article>
 

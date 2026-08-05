@@ -1,5 +1,9 @@
 import { assertEquals } from "@std/assert";
-import { wordWrap } from "../src/broadcast/send.ts";
+import {
+  shouldWordWrap,
+  wordWrap,
+} from "../src/broadcast/send.ts";
+import { sessions } from "../src/session/store.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -16,4 +20,18 @@ Deno.test("wordWrap - preserves line length with hex colors", OPTS, () => {
   const line = "<#ff0000>=====<#000000> <#ffffff>The Void(#1)<#000000> <#ff0000>===========================================================<#000000>";
   const result = wordWrap(line, 78);
   assertEquals(result, line);
+});
+
+Deno.test("shouldWordWrap: web skips, telnet wraps", OPTS, () => {
+  sessions.open("sock-web", "s1");
+  sessions.open("sock-tn", "s2");
+  const w = sessions.get("sock-web");
+  const t = sessions.get("sock-tn");
+  if (w) w.meta.clientType = "web";
+  if (t) t.meta.clientType = "telnet";
+  assertEquals(shouldWordWrap("sock-web"), false);
+  assertEquals(shouldWordWrap("sock-tn"), true);
+  assertEquals(shouldWordWrap("missing"), true);
+  sessions.close("sock-web");
+  sessions.close("sock-tn");
 });

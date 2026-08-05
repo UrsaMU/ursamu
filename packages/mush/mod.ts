@@ -119,11 +119,13 @@ export {
   applyLayoutFromConfig,
   expandLayoutTemplate,
   hasLayoutTemplate,
+  markdownToAnsi,
 } from "./src/format/handlers.ts";
 export type {
   FormatHandler,
   LayoutFn,
   LayoutTemplates,
+  MarkdownTemplates,
 } from "./src/format/handlers.ts";
 
 // Re-export GameHookMap augmentation so consumers get mush event types
@@ -138,6 +140,8 @@ export {
   registerMushRoutes, handleRequest as mushHandleRequest, setAuthenticator,
   avatarServe, MAX_API_TRACKED_IPS, API_RATE_LIMIT, authenticate,
 } from "./src/routes/index.ts";
+export { objectImageServe } from "./src/media/object-image.ts";
+export { execImage } from "./src/verbs/image.ts";
 export { registerPluginRoute } from "./src/routes/plugin.ts";
 export type { PluginRouteHandler } from "./src/routes/plugin.ts";
 export { meHandler, onlinePlayersHandler, channelsHandler, channelHistoryHandler } from "./src/routes/players.ts";
@@ -164,6 +168,15 @@ export {
 } from "./src/verbs/manipulation.ts";
 export { execLook, defaultConformatHandler }                       from "./src/verbs/look.ts";
 export { execHome, execInventory }                                 from "./src/verbs/home.ts";
+export {
+  enterObject,
+  leaveObject,
+} from "./src/verbs/enter-leave.ts";
+export {
+  canEnterObject,
+  canAccessContainer,
+  passesEnterLock,
+} from "./src/verbs/container-access.ts";
 export { execSay, execPose, execThink, execPage, execWhisper }     from "./src/verbs/say.ts";
 export { execWho, execScore, execDoing, execPoll, execAway, execLast } from "./src/verbs/social.ts";
 export { execEmit, execLemit, execPemit, execRemit, execWall, execCemit, execFsay } from "./src/verbs/emit-exec.ts";

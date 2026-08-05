@@ -15,17 +15,37 @@ import { getConfig } from "../config/mod.ts";
 export const DEFAULT_TYPEGRAPH_DB = "data/typegraph.db";
 export const DEFAULT_DENOKV_DB = "data/ursamu.db";
 
+/**
+ * True when `main` is a Deno unit-test entrypoint.
+ *
+ * Must NOT match game projects living under a folder named `test`
+ * (e.g. `games/test/src/main.ts`) — only real suite paths and
+ * `*.test.ts` / `*_test.ts` files.
+ */
+export function isDenoTestMain(main?: string): boolean {
+  const mod = main ??
+    (typeof Deno !== "undefined" ? Deno.mainModule : "");
+  if (!mod) return false;
+
+  let path = mod;
+  try {
+    path = new URL(mod).pathname;
+  } catch {
+    // keep raw string (file paths without file://)
+  }
+
+  const base = path.split("/").pop() ?? "";
+  if (/\.test\.[cm]?[jt]sx?$/i.test(base)) return true;
+  if (/_test\.[cm]?[jt]sx?$/i.test(base)) return true;
+  // Suite directories only — not a game named "test"
+  if (path.includes("/tests/")) return true;
+  return false;
+}
+
 function checkIsTest(): boolean {
   if (typeof Deno === "undefined") return false;
   if (typeof Deno.test !== "function") return false;
-  const main = Deno.mainModule;
-  if (!main) return false;
-  return (
-    main.includes(".test.") ||
-    main.includes("_test.") ||
-    main.includes("/tests/") ||
-    main.includes("/test/")
-  );
+  return isDenoTestMain();
 }
 
 function nonEmpty(v: unknown): string | undefined {

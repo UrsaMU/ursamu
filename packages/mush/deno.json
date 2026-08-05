@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/mush",
-  "version": "1.0.8",
+  "version": "1.0.30",
   "exports": {
     ".": "./mod.ts",
     "./app": "./src/app.ts",
@@ -40,6 +40,7 @@
   "publish": {
     "include": [
       "src",
+      "help",
       "docs",
       "mod.ts",
       "deno.json",

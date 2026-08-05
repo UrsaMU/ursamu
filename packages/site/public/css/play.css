@@ -1,0 +1,1331 @@
+/**
+ * Player game client — Figma Court "client" frame (node 1884:89).
+ *
+ * Spec (absolute @ 1728):
+ *   output  953×1006  fill --site-bg (#020201)
+ *   rule    full main width  stroke --site-border cream
+ *   input   800×55    fill #0e0e0a  stroke cream 1px  radius 0
+ *   button  119×55    fill --site-btn-bg (#c4944a)  SEND Lato 16
+ *
+ * Uses site design tokens only (design.md). Court skin supplies values.
+ *
+ * Colors use classes (play-palette.css) — CSP blocks inline style=.
+ */
+@import url("/site/css/play-palette.css?v=20260805cmdecho");
+
+/*
+ * Play mode: fill the viewport under the fixed nav.
+ * Output scrolls; input + SEND stay pinned to the bottom.
+ */
+.site-shell.is-mode-play {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow: hidden;
+  /* shell is already column flex; keep children stretching */
+  align-items: stretch;
+}
+
+.site-shell.is-mode-play .site-banner,
+.site-shell.is-mode-play .site-footer {
+  display: none !important;
+}
+
+/* Play is game client — no wiki/help search box */
+.site-shell.is-mode-play .site-search {
+  display: none !important;
+}
+
+.site-shell.is-mode-play .site-body {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: var(--site-max-w, 100%);
+  margin: 0 auto;
+  /* Clear fixed nav; small pad under prompt */
+  padding-top: calc(var(--site-nav-h, 3.75rem) + 0.5rem);
+  padding-bottom: 0.5rem;
+  align-items: stretch;
+  /* One row that can shrink — required for nested overflow */
+  grid-template-rows: minmax(0, 1fr);
+  box-sizing: border-box;
+}
+
+.site-shell.is-mode-play .site-aside {
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.site-shell.is-mode-play .site-aside::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.site-shell.is-mode-play .site-main {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  width: 100%;
+  /* Use full center-column track (no 78ch shrink) */
+  max-width: none;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* Chat column — fills main; prompt pinned at bottom of column */
+.play-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* Optional connection status (not in Figma; muted corner chip) */
+.play-root__status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Scrollable game output — full width of center column */
+.play-output {
+  flex: 1 1 0;
+  min-height: 0; /* allow shrink so prompt stays visible */
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0.5rem 0 1rem;
+  box-sizing: border-box;
+  /* Figma: Lato body on cream; mono for MUSH columns */
+  font-family: var(--site-font-ui);
+  font-size: 1rem; /* 16 */
+  line-height: 1.55;
+  color: var(--site-text);
+  background: var(--site-bg);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge */
+}
+
+.play-output::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none; /* Chrome / Safari */
+}
+
+.play-output__empty {
+  margin: 3rem 0;
+  text-align: center;
+  color: var(--site-text-muted);
+  font-style: italic;
+  font-family: var(--site-font-ui);
+  font-size: 0.9375rem;
+}
+
+.play-msg {
+  margin: 0 0 0.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.play-msg:last-child {
+  margin-bottom: 0;
+}
+
+/* Chat-style "New" marker (only when not autoscrolling) */
+.play-new-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0.75rem 0 0.85rem;
+  width: 100%;
+  user-select: none;
+}
+
+.play-new-divider__line {
+  flex: 1 1 auto;
+  height: 0;
+  border: 0;
+  border-top: 1px solid var(--site-accent, #c9a227);
+  opacity: 0.55;
+}
+
+.play-new-divider__label {
+  flex: 0 0 auto;
+  font-family: var(--site-font-ui);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--site-accent, #c9a227);
+}
+
+/* Faded command input (addCmd echo !== false) */
+.play-cmd-echo {
+  margin: 0 0 0.25rem;
+  padding: 0.05rem 0.1rem;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--site-text-muted, #8a8078);
+  opacity: 0.42;
+  font-weight: 400;
+}
+
+.play-cmd-echo__gt {
+  opacity: 0.7;
+  user-select: none;
+  margin-right: 0.15em;
+}
+
+.play-cmd-echo__text {
+  opacity: 1;
+}
+
+/* ── Chat bubbles (say / pose on web) ─────────────────────────── */
+
+.play-chat {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.35rem 0.15rem;
+  font-family: var(--site-font-ui);
+}
+
+.play-chat__av {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  position: relative;
+}
+
+.play-chat__avatar,
+.play-chat__avatar-fallback {
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  object-fit: cover;
+  box-sizing: border-box;
+}
+
+.play-chat__avatar {
+  border: 1px solid var(--site-border-subtle);
+  background: var(--site-bg-surface, #111);
+}
+
+.play-chat__avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--site-btn-fg, #fff);
+  background: var(--site-btn-bg, var(--site-accent));
+  border: 1px solid var(--site-border-subtle);
+}
+
+/* Never show img + fallback together */
+.play-chat__av > .play-chat__avatar + .play-chat__avatar-fallback,
+.play-chat__avatar-fallback[hidden] {
+  display: none !important;
+}
+
+.play-chat__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.play-chat__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  margin: 0 0 0.15rem;
+  line-height: 1.25;
+}
+
+.play-chat__name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--site-text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.play-chat__time {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--site-text-muted);
+}
+
+.play-chat__text {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--site-text-secondary, var(--site-text));
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.play-chat__text--pose {
+  font-style: italic;
+  color: var(--site-text-secondary, var(--site-text));
+}
+
+.play-chat__pose-name {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--site-text);
+}
+
+.play-chat--say .play-chat__text {
+  font-style: normal;
+}
+
+/* OOC badge + slightly muted body */
+.play-chat__tag {
+  flex: 0 0 auto;
+  display: inline-block;
+  padding: 0.05rem 0.35rem;
+  border-radius: 2px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--site-error, #e07070);
+  border: 1px solid color-mix(
+    in srgb,
+    var(--site-error, #e07070) 55%,
+    transparent
+  );
+  background: color-mix(
+    in srgb,
+    var(--site-error, #e07070) 12%,
+    transparent
+  );
+}
+
+.play-chat--ooc .play-chat__text--ooc {
+  color: var(--site-text-muted, var(--site-text-secondary));
+}
+
+.play-chat--ooc .play-chat__avatar-fallback {
+  background: color-mix(
+    in srgb,
+    var(--site-error, #e07070) 70%,
+    var(--site-bg, #111)
+  );
+}
+
+/* who / glance / inventory — entity rows, denser list chrome */
+.play-layout--who .play-layout__header,
+.play-layout--glance .play-layout__header,
+.play-layout--inventory .play-layout__header {
+  margin-bottom: 0.35rem;
+}
+
+.play-layout--who .play-entity-list,
+.play-layout--glance .play-entity-list,
+.play-layout--inventory .play-entity-list {
+  margin: 0.25rem 0 0.5rem;
+}
+
+.play-layout--who .play-layout__text,
+.play-layout--glance .play-layout__text,
+.play-layout--inventory .play-layout__text {
+  font-size: 0.8rem;
+  color: var(--site-text-muted);
+}
+
+/* ── +sheet web layout ───────────────────────────────────────── */
+
+.play-layout--sheet .play-layout__header {
+  margin-bottom: 0.35rem;
+}
+
+.play-layout--sheet .play-layout__text {
+  margin: 0 0 0.55rem;
+  font-size: 0.88rem;
+  color: var(--site-text-muted);
+}
+
+.play-layout--sheet .play-layout__list {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.play-layout--sheet .play-layout__list li {
+  padding: 0.35rem 0.55rem;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.play-layout--sheet .play-layout__list li:nth-child(odd) {
+  background: var(--site-bg-surface, transparent);
+}
+
+.play-layout--sheet .play-layout__list li:nth-child(even) {
+  background: var(
+    --site-accent-muted,
+    var(--site-bg-surface-2, transparent)
+  );
+}
+
+.play-stat-cols {
+  margin: 0 0 0.85rem;
+}
+
+.play-stat-cols__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+
+.play-stat-cols__grid[data-cols="1"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.play-stat-cols__grid[data-cols="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.play-stat-cols__title {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--site-accent);
+}
+
+.play-stat-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 1.25rem;
+  align-items: center;
+  gap: 0.35rem 0.4rem;
+  margin: 0 0 0.28rem;
+  font-size: 0.82rem;
+}
+
+.play-stat-row__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--site-text);
+}
+
+.play-stat-row__num {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+  color: var(--site-text-muted);
+  text-align: right;
+}
+
+.play-dots {
+  display: inline-flex;
+  gap: 0.18rem;
+  align-items: center;
+}
+
+.play-dot {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1px solid var(--site-accent-border, var(--site-accent));
+  background: transparent;
+}
+
+.play-dot.is-on {
+  background: var(--site-accent);
+  border-color: var(--site-accent);
+}
+
+.play-track-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.55rem;
+  margin: 0 0 0.45rem;
+}
+
+.play-track-row__label {
+  flex: 0 0 5.25rem;
+  font-size: 0.88rem;
+  color: var(--site-text);
+}
+
+.play-track-row__meta {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--site-text-muted);
+}
+
+.play-track {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.18rem;
+  align-items: center;
+}
+
+.play-hbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  box-sizing: border-box;
+  border: 1.5px solid var(--site-border-strong, var(--site-border));
+  border-radius: 2px;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--site-text);
+}
+
+.play-hbox--empty {
+  border-color: var(--site-border);
+  background: transparent;
+}
+
+.play-hbox--bash {
+  color: var(--site-text-secondary, var(--site-text));
+  border-color: var(--site-text-muted);
+}
+
+.play-hbox--leth {
+  color: var(--site-error, #e07070);
+  border-color: var(--site-error, #e07070);
+  background: color-mix(
+    in srgb,
+    var(--site-error, #e07070) 12%,
+    transparent
+  );
+}
+
+.play-hbox--agg {
+  color: var(--site-accent);
+  border-color: var(--site-accent);
+  background: color-mix(
+    in srgb,
+    var(--site-accent) 18%,
+    transparent
+  );
+}
+
+.play-wbox {
+  display: inline-block;
+  width: 0.95rem;
+  height: 0.95rem;
+  box-sizing: border-box;
+  border: 1.5px solid var(--site-accent-border, var(--site-accent));
+  border-radius: 2px;
+  background: transparent;
+}
+
+.play-wbox.is-on {
+  background: var(--site-accent);
+  border-color: var(--site-accent);
+}
+
+@media (max-width: 1024px) {
+  .play-stat-cols__grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .play-chat {
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+  }
+
+  .play-chat__av,
+  .play-chat__avatar,
+  .play-chat__avatar-fallback {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .play-chat__name {
+    font-size: 0.8125rem;
+  }
+
+  .play-chat__text {
+    font-size: 0.875rem;
+  }
+}
+
+/* Plain game text — full center column width, mono */
+.play-pre {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  /* Preserve server newlines; do not mid-break mono columns */
+  white-space: pre-wrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  font-family: ui-monospace, "SFMono-Regular", "JetBrains Mono",
+    Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--site-text);
+  background: transparent;
+  border: none;
+}
+
+/* Bold may still arrive as <b> from rare paths */
+.play-pre .mush-text b,
+.play-pre b.mush-text {
+  font-weight: 700;
+}
+
+/*
+ * Structured layout (u.ui.layout) — design.md tokens only.
+ * Look building blocks (Figma composition, not Figma paint):
+ *   header | text | media | entity-list | actions
+ */
+.play-layout {
+  margin: 0.5rem 0 0.85rem;
+  width: 100%;
+  max-width: 100%;
+  font-family: var(--site-font-ui);
+  color: var(--site-text);
+}
+
+.play-layout__header {
+  margin: 0 0 0.65rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--site-border-subtle);
+}
+
+.play-layout__title {
+  margin: 0;
+  font-family: var(--site-font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--site-accent);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.play-layout__text {
+  margin: 0 0 1rem;
+  font-family: var(--site-font-ui);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--site-text-secondary, var(--site-text));
+  white-space: pre-wrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Login splash / markdown — theme tokens only, no forced center */
+.play-md {
+  margin: 0 0 1rem;
+  width: 100%;
+  max-width: 100%;
+  font-family: var(--site-font-ui);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--site-text);
+  text-align: start;
+}
+
+/* Author opted in via <center>…</center> around markdown */
+.play-md--center {
+  text-align: center;
+}
+
+.play-md__h {
+  margin: 0.75rem 0 0.4rem;
+  font-family: var(--site-font-display);
+  font-weight: 400;
+  color: var(--site-accent);
+  line-height: 1.2;
+}
+
+.play-md h1.play-md__h,
+.play-md__h:first-child {
+  margin-top: 0;
+  font-size: 1.75rem;
+}
+
+.play-md h2.play-md__h {
+  font-size: 1.35rem;
+}
+
+.play-md h3.play-md__h {
+  font-size: 1.1rem;
+}
+
+.play-md__p {
+  margin: 0.4rem 0;
+  color: var(--site-text-secondary, var(--site-text));
+}
+
+.play-md__list {
+  margin: 0.4rem 0 0.6rem;
+  padding-left: 1.25rem;
+  color: var(--site-text-secondary, var(--site-text));
+}
+
+.play-md a {
+  color: var(--site-accent);
+  text-decoration: underline;
+}
+
+.play-md code {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.85em;
+  padding: 0.1em 0.3em;
+  background: var(--site-bg-surface, transparent);
+  border: 1px solid var(--site-border-subtle);
+}
+
+/*
+ * Splash markdown images: full width, show whole image (contain).
+ */
+.play-md img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: min(50vh, 512px);
+  object-fit: contain;
+  object-position: center top;
+  margin: 0.5rem 0 0.75rem;
+  box-sizing: border-box;
+}
+
+.play-layout--login .play-md {
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+
+/*
+ * Room look media: full column width, fixed frame, cover (crop).
+ * Fills the box edge-to-edge; overflow is cropped, not letterboxed.
+ */
+.play-layout__media {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: min(40vh, 300px);
+  margin: 0 0 1rem;
+  padding: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.play-layout__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  object-fit: cover;
+  object-position: center center;
+  box-sizing: border-box;
+}
+
+.play-layout__section {
+  margin: 0 0 1rem;
+}
+
+.play-layout__section-title {
+  margin: 0 0 0.45rem;
+  font-family: var(--site-font-display);
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: var(--site-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/*
+ * Character / object rows — in-game columns:
+ *   name(+dbref) | role/flag | idle | short-desc
+ * Role is always its own column (config roleTags).
+ */
+.play-entity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid var(--site-border-subtle);
+}
+
+.play-entity {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 12rem)
+    minmax(4.5rem, 7.5rem)
+    3.25rem
+    minmax(0, 1fr);
+  /* Vertically center name | role | idle | short-desc */
+  align-items: center;
+  column-gap: 0.65rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.45rem 0.15rem;
+  box-sizing: border-box;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--site-border-subtle);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.play-entity--static {
+  cursor: default;
+}
+
+.play-entity:hover:not(.play-entity--static) {
+  background: color-mix(
+    in srgb,
+    var(--site-accent) 8%,
+    transparent
+  );
+}
+
+.play-entity__name-col {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  max-width: 12rem;
+  overflow: hidden;
+  line-height: 1.25;
+}
+
+.play-entity__name {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--site-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keep moniker color spans from forcing wrap */
+.play-entity__name .mush-text {
+  white-space: nowrap;
+}
+
+.play-entity__role-col {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 1.25em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.play-entity__role {
+  display: inline-block;
+  max-width: 100%;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  color: var(--site-text-secondary, var(--site-text-muted));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.play-entity__dbref,
+.play-action__dbref {
+  flex: 0 0 auto;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--site-text-muted);
+  white-space: nowrap;
+}
+
+.play-entity__meta {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--site-text-muted);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.play-entity__sub {
+  grid-column: 4;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  color: var(--site-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Exit chips — multi-column like text look EXITFORMAT */
+.play-actions {
+  display: grid;
+  gap: 0.45rem 0.75rem;
+  width: 100%;
+}
+
+.play-actions--cols-1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.play-actions--cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.play-actions--cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.play-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  box-sizing: border-box;
+  font-family: var(--site-font-ui);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--site-text);
+  background: var(--site-bg-surface, transparent);
+  border: 1px solid var(--site-border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.play-action:hover {
+  border-color: var(--site-border-strong, var(--site-accent-border));
+  background: color-mix(
+    in srgb,
+    var(--site-accent) 12%,
+    transparent
+  );
+}
+
+.play-action:focus-visible {
+  outline: 2px solid var(--site-accent);
+  outline-offset: 2px;
+}
+
+.play-action--static {
+  cursor: default;
+}
+
+.play-action__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  padding: 0.1rem 0.3rem;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--site-btn-fg, var(--site-bg));
+  background: var(--site-btn-bg, var(--site-accent));
+  border-radius: 0;
+}
+
+.play-action__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--site-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+@media (max-width: 1024px) {
+  /*
+   * Single line: name | role | idle | short-desc
+   * All tracks minmax(0, …) so they shrink; ellipsis, no wrap.
+   */
+  .play-entity {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1.2fr)
+      minmax(0, max-content)
+      minmax(0, max-content)
+      minmax(0, 1fr);
+    grid-template-rows: auto;
+    align-items: center;
+    column-gap: 0.3rem;
+    row-gap: 0;
+    padding: 0.35rem 0.05rem;
+    /* Prevent flex/grid children from forcing a second line */
+    flex-wrap: nowrap;
+  }
+
+  .play-entity__name-col {
+    grid-column: 1;
+    grid-row: 1;
+    max-width: none;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .play-entity__role-col {
+    grid-column: 2;
+    grid-row: 1;
+    max-width: 4rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .play-entity__role-col:empty {
+    display: none;
+  }
+
+  .play-entity__meta {
+    grid-column: 3;
+    grid-row: 1;
+    min-width: 0;
+    max-width: 2.75rem;
+    justify-content: flex-end;
+    overflow: hidden;
+  }
+
+  .play-entity__meta:empty {
+    display: none;
+  }
+
+  .play-entity__sub {
+    grid-column: 4;
+    grid-row: 1;
+    min-width: 0;
+    padding-left: 0;
+    order: unset;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .play-entity__name,
+  .play-entity__role,
+  .play-entity__dbref,
+  .play-entity__meta,
+  .play-entity__sub {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .play-entity__dbref {
+    font-size: 0.65rem;
+  }
+
+  .play-entity__role {
+    font-size: 0.7rem;
+  }
+
+  .play-entity__sub {
+    font-size: 0.75rem;
+  }
+
+  .play-actions {
+    gap: 0.35rem;
+  }
+
+  .play-actions--cols-2,
+  .play-actions--cols-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .play-action {
+    padding: 0.35rem 0.45rem;
+    gap: 0.3rem;
+  }
+}
+
+.play-layout__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  margin: 0.35rem 0;
+}
+
+.play-layout__table td {
+  padding: 0.25rem 0.5rem 0.25rem 0;
+  border-bottom: 1px solid var(--site-border-subtle);
+  vertical-align: top;
+  color: var(--site-text-secondary, var(--site-text));
+}
+
+.play-layout__list {
+  margin: 0.25rem 0;
+  padding-left: 1.2rem;
+  color: var(--site-text-secondary, var(--site-text));
+  font-size: 0.875rem;
+}
+
+.play-layout__panel {
+  margin: 0.4rem 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: 0;
+  background: var(--site-bg-surface);
+}
+
+.play-layout__panel-title {
+  margin: 0 0 0.3rem;
+  font-family: var(--site-font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--site-accent);
+}
+
+/* Cream rule above prompt — Figma Line 22 (pinned with prompt) */
+.play-prompt-rule {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  height: 0;
+  margin: 0 0 0.75rem;
+  border: 0;
+  border-top: 1px solid var(--site-border);
+}
+
+/* Prompt row — pinned to bottom of play column.
+   Input grows with content (JS) up to 300px; output flex-shrinks. */
+.play-prompt {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.75rem; /* ~12px like search row */
+  margin: 0;
+  margin-top: auto; /* pin under flex output */
+  padding: 0 0 0.25rem;
+  background: transparent;
+  border: 0;
+}
+
+.play-prompt__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  height: 55px;
+  min-height: 55px;
+  /* Cap: ~14 lines at 0.875rem / 1.35 lh + pad ≈ 300px */
+  max-height: 300px;
+  margin: 0;
+  padding: 0.85rem;
+  box-sizing: border-box;
+  border: 1px solid var(--site-border);
+  border-radius: 0;
+  background: var(--site-bg-surface, #0e0e0a);
+  color: var(--site-text);
+  /* Mono so 78ch matches game output column */
+  font-family: ui-monospace, "SFMono-Regular", "JetBrains Mono",
+    Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  outline: none;
+  resize: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Figma placeholder “Enter something…” Lato 16 / #766a66 */
+.play-prompt__input::placeholder {
+  color: var(--site-play-placeholder, #766a66);
+  opacity: 1;
+  font-family: var(--site-font-ui);
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.play-prompt__input:focus {
+  border-color: var(--site-border-strong, var(--site-accent-border));
+  box-shadow: none;
+}
+
+.play-prompt__input:disabled {
+  opacity: 0.5;
+}
+
+/* Gold SEND — Figma button / --site-btn-* */
+.play-prompt__send {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 119px;
+  min-width: 119px;
+  height: 55px;
+  min-height: 55px;
+  margin: 0;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  background: var(--site-btn-bg, var(--site-accent));
+  color: var(--site-btn-fg, var(--site-text-on-accent, var(--site-bg)));
+  font-family: var(--site-font-ui);
+  font-size: 1rem; /* 16 */
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.play-prompt__send:hover:not(:disabled) {
+  background: var(--site-btn-bg-hover, var(--site-accent-hover));
+}
+
+.play-prompt__send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.play-error {
+  flex: 0 0 auto;
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: var(--site-font-ui);
+  color: var(--site-error, #e07070);
+  background: color-mix(
+    in srgb,
+    var(--site-error, #e07070) 12%,
+    transparent
+  );
+  border: 1px solid
+    color-mix(in srgb, var(--site-error, #e07070) 40%, transparent);
+}
+
+.play-error[hidden] {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .site-shell.is-mode-play .site-body {
+    padding-top: calc(var(--site-nav-h, 3.5rem) + 0.5rem);
+    padding-bottom: 0.5rem;
+  }
+
+  .site-shell.is-mode-play .site-main {
+    max-width: 100%;
+  }
+
+  .play-prompt {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+
+  .play-prompt__input {
+    flex: 1 1 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* SEND grows full width (drop fixed 119×55) */
+  .play-prompt__send {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: auto;
+    min-height: 3rem; /* touch target */
+    padding: 0.75rem 1rem;
+  }
+
+  /* Look exit chips / action buttons — single column, fill row */
+  .play-actions,
+  .play-actions--cols-1,
+  .play-actions--cols-2,
+  .play-actions--cols-3 {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .play-action {
+    width: 100%;
+    min-height: 2.75rem;
+    justify-content: flex-start;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .play-output {
+    font-size: 0.9375rem;
+  }
+
+  .play-pre {
+    font-size: 0.8125rem;
+  }
+}

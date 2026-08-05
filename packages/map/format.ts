@@ -112,13 +112,23 @@ function filterEntityMarkers(
 
 // ─── Handler ──────────────────────────────────────────────────────────────────
 
+/** Engine default when no real description is set. */
+const PLACEHOLDER_DESC = /you see nothing special/i;
+
 export const descFormatHandler: FormatHandler = async (
   u: IUrsamuSDK,
   target: IDBObj,
   _defaultArg: string,
 ): Promise<string | null> => {
-  const softDesc = await u.attr.get(target.id, "DESC");
-  if (softDesc) return null;
+  // Real author-written desc wins (DESC attr or state.description).
+  // Empty / engine placeholder does not block the map.
+  const attrDesc = (await u.attr.get(target.id, "DESC") ?? "").trim();
+  const stateDesc = String(
+    (target.state as { description?: unknown } | undefined)
+      ?.description ?? "",
+  ).trim();
+  const softDesc = attrDesc || stateDesc;
+  if (softDesc && !PLACEHOLDER_DESC.test(softDesc)) return null;
 
   const candidates = await getEntitiesByContainer(target.id);
   const subject = candidates[0];

@@ -17,7 +17,10 @@ import { useSessionStore } from "@/stores/session";
 import { useLiveStore } from "@/stores/live";
 import {
   ensurePluginModules,
+  ensureStaffRouteStubs,
+  navTargetReady,
   resolveNavTarget,
+  staffRoutesEpoch,
 } from "@/plugin-modules";
 
 const session = useSessionStore();
@@ -48,10 +51,12 @@ const {
 const router = useRouter();
 const route = useRoute();
 
-// Dynamic same-origin Vue modules from registerStaffPage({ module })
+// Dynamic modules + stub routes for route-only staffNav entries
+// (mail/channels/help register route names the host must own).
 watch(
   staffNav,
   (nav) => {
+    ensureStaffRouteStubs(router, nav);
     void ensurePluginModules(router, nav);
   },
   { immediate: true, deep: true },
@@ -75,6 +80,19 @@ function onNavKeydown(e: KeyboardEvent): void {
   }
 }
 
+/** Hide broken avatar img; show initial instead. */
+const avatarBroken = ref(false);
+function onAvatarError(): void {
+  avatarBroken.value = true;
+}
+
+watch(
+  () => session.me?.avatar,
+  () => {
+    avatarBroken.value = false;
+  },
+);
+
 type Section = string;
 
 const section = computed<Section>(() => {
@@ -83,13 +101,27 @@ const section = computed<Section>(() => {
     return String(route.params.pluginId ?? "").trim() || "plugin";
   }
   if (n === "dashboard" || n === "") return "dashboard";
+  if (n === "play") return "play";
   if (n.startsWith("wiki")) return "wiki";
-  if (n.startsWith("player")) return "players";
   if (n.startsWith("job")) return "jobs";
   if (n.startsWith("bbs")) return "bbs";
-  if (n.startsWith("db")) return "db";
+  if (n === "mail" || n.startsWith("mail")) return "mail";
+  if (n === "channels" || n.startsWith("channels")) {
+    return "channels";
+  }
+  if (n === "help" || n.startsWith("help")) return "help";
+  if (n.startsWith("db") || n.startsWith("player")) return "db";
   if (n === "map" || n.startsWith("map")) return "map";
   if (n === "settings") return "settings";
+  // Plugin-registered host routes (mail, channels, help, …)
+  const byRoute = staffNav.value.find(
+    (p) => p.route === n || p.id === n,
+  );
+  if (byRoute) return byRoute.id;
+  const metaId = route.meta?.pluginId;
+  if (typeof metaId === "string" && metaId.trim()) {
+    return metaId.trim();
+  }
   return "dashboard";
 });
 
@@ -100,10 +132,10 @@ const sectionTitle = computed(() => {
   switch (section.value) {
     case "dashboard":
       return "Dashboard";
+    case "play":
+      return "Play";
     case "wiki":
       return "Wiki";
-    case "players":
-      return "Players";
     case "jobs":
       return "Jobs";
     case "db":
@@ -171,13 +203,20 @@ function rawBadgeForKey(key: string | undefined): {
           : "",
         badgeTitle: "Drafts",
       };
-    case "players:online":
+    case "players:online": {
+      // Don't notify for "only me" — ambient presence, not news
+      const meId = String(session.me?.id ?? "").trim();
+      const others = live.online.filter((p) => {
+        const id = String(p.id ?? "").trim();
+        return id && id !== meId;
+      }).length;
       return {
-        badge: onlineLoaded.value && onlineCount.value > 0
-          ? String(onlineCount.value)
+        badge: onlineLoaded.value && others > 0
+          ? String(others)
           : "",
-        badgeTitle: "Online now",
+        badgeTitle: "Other players online",
       };
+    }
     default:
       return { badge: "" };
   }
@@ -201,6 +240,8 @@ function badgeKeysForSection(sec: Section): string[] {
   const keys: string[] = [];
   const host: Partial<Record<Section, string>> = {
     wiki: "wiki:drafts",
+    // Players folded into Database — ack when opening DB
+    db: "players:online",
     players: "players:online",
     jobs: "jobs:open",
     bbs: "bbs:activity",
@@ -228,16 +269,21 @@ function ackSectionBadges(sec: Section): void {
  */
 const CORE_PRIMARY: Omit<PrimaryItem, "badge" | "badgeTitle">[] = [
   { id: "dashboard", name: "dashboard", label: "Dashboard", order: 10 },
-  { id: "players", name: "players", label: "Players", order: 30 },
+  { id: "play", name: "play", label: "Play", order: 15 },
   { id: "db", name: "db", label: "Database", order: 60 },
   { id: "settings", name: "settings", label: "Settings", order: 90 },
 ];
 
 const primary = computed((): PrimaryItem[] => {
+  // Depend on epoch so tabs refresh after stub/module routes land.
+  void staffRoutesEpoch.value;
+  const hasRoute = (n: string) => router.hasRoute(n);
+
   const core: PrimaryItem[] = CORE_PRIMARY.map((c) => {
     let badge = "";
     let badgeTitle: string | undefined;
-    if (c.id === "players") {
+    // Online players badge on Database (Players section removed)
+    if (c.id === "db") {
       ({ badge, badgeTitle } = badgeForKey("players:online"));
     }
     return { ...c, badge, badgeTitle };
@@ -249,11 +295,15 @@ const primary = computed((): PrimaryItem[] => {
   // Drop core slots only if a plugin re-uses the same id.
   const base = core.filter((c) => !pluginIds.has(c.id));
 
-  const plugins: PrimaryItem[] = staffNav.value.map((p) => {
+  const plugins: PrimaryItem[] = [];
+  for (const p of staffNav.value) {
     const b = badgeForKey(p.badgeKey);
-    const target = resolveNavTarget(p, (n) => router.hasRoute(n));
+    const target = resolveNavTarget(p, hasRoute);
+    // Never emit a tab that RouterLink cannot resolve — empty LI.
+    if (!navTargetReady(target, hasRoute)) continue;
+
     if (target.to) {
-      return {
+      plugins.push({
         id: p.id,
         label: p.label,
         name: target.to.name,
@@ -261,27 +311,29 @@ const primary = computed((): PrimaryItem[] => {
         order: p.order ?? 100,
         badge: b.badge,
         badgeTitle: p.badgeTitle || b.badgeTitle,
-      };
+      });
+      continue;
     }
     if (target.name) {
-      return {
+      plugins.push({
         id: p.id,
         label: p.label,
         name: target.name,
         order: p.order ?? 100,
         badge: b.badge,
         badgeTitle: p.badgeTitle || b.badgeTitle,
-      };
+      });
+      continue;
     }
-    return {
+    plugins.push({
       id: p.id,
       label: p.label,
       href: target.href || p.href,
       order: p.order ?? 100,
       badge: b.badge,
       badgeTitle: p.badgeTitle || b.badgeTitle,
-    };
-  });
+    });
+  }
 
   return [...base, ...plugins].sort((a, b) => {
     if (a.order !== b.order) return a.order - b.order;
@@ -511,45 +563,85 @@ const wikiSectionLinks = computed((): SideLink[] => {
   }));
 });
 
+const helpSourceLinks = computed((): SideLink[] => {
+  const sec = typeof route.query.section === "string"
+    ? route.query.section
+    : "";
+  const src = typeof route.query.source === "string"
+    ? route.query.source
+    : "";
+  const q = (source?: string): Record<string, string> => {
+    const out: Record<string, string> = {};
+    if (source) out.source = source;
+    if (sec) out.section = sec;
+    return out;
+  };
+  return [
+    {
+      to: { name: "help", query: q() },
+      label: "All topics",
+      desc: "Browse & filter",
+      icon: "¶",
+      match: { filter: "" },
+    },
+    {
+      to: {
+        name: "help",
+        query: q(src === "file" ? "" : "file"),
+      },
+      label: "File",
+      desc: "help/*.md packages",
+      icon: "◇",
+      match: { filter: "file" },
+    },
+    {
+      to: {
+        name: "help",
+        query: q(src === "command" ? "" : "command"),
+      },
+      label: "Command",
+      desc: "Inline addCmd help",
+      icon: "⌘",
+      match: { filter: "command" },
+    },
+    {
+      to: {
+        name: "help",
+        query: q(src === "database" ? "" : "database"),
+      },
+      label: "Overrides",
+      desc: "Database edits",
+      icon: "✓",
+      match: { filter: "database" },
+    },
+    {
+      to: { name: "help", query: { new: "1" } },
+      label: "New override",
+      desc: "Create DB topic",
+      icon: "+",
+    },
+  ];
+});
+
 const sideLinks = computed((): SideLink[] => {
   // Plugin-owned side nav wins for that section (embed or host route)
   const fromPlugin = pluginSideLinks(section.value);
   if (fromPlugin) return fromPlugin;
 
   switch (section.value) {
-    case "wiki":
-      return wikiStatusLinks.value;
-    case "players":
+    case "play":
       return [
         {
-          to: { name: "players" },
-          label: "All players",
-          desc: objectsLoaded.value
-            ? `${playerCount.value} accounts`
-            : "Accounts",
-          icon: "◎",
-        },
-        {
-          to: { name: "players", query: { filter: "online" } },
-          label: "Online",
-          desc: onlineLoaded.value
-            ? `${onlineCount.value} connected`
-            : "Connected now",
-          icon: "●",
-        },
-        {
-          to: { name: "players", query: { filter: "offline" } },
-          label: "Offline",
-          desc: "Not connected",
-          icon: "○",
-        },
-        {
-          to: { name: "players", query: { filter: "staff" } },
-          label: "Staff",
-          desc: "Admin & wizard",
-          icon: "★",
+          to: { name: "play" },
+          label: "Client",
+          desc: "Live game output",
+          icon: "›",
         },
       ];
+    case "wiki":
+      return wikiStatusLinks.value;
+    case "help":
+      return helpSourceLinks.value;
     case "jobs":
       return [
         {
@@ -606,6 +698,14 @@ const sideLinks = computed((): SideLink[] => {
           icon: "☰",
         },
       ];
+      // Categories only — never promote board groups to look like
+      // top-level app sections (Mail / Channels / …).
+      if (cats.length) {
+        links.push({
+          header: true,
+          label: "Board categories",
+        });
+      }
       for (const cat of cats) {
         links.push({
           to: {
@@ -613,8 +713,8 @@ const sideLinks = computed((): SideLink[] => {
             query: cur === cat ? {} : { cat },
           },
           label: cat,
-          desc: "Category",
-          icon: "#",
+          desc: "Filter boards",
+          icon: "▸",
           match: { section: cat },
         });
       }
@@ -665,9 +765,29 @@ const sideLinks = computed((): SideLink[] => {
           to: { name: "db", query: { filter: "player" } },
           label: "Players",
           desc: objectsLoaded.value
-            ? `${playerCount.value} in DB`
-            : "Character objects",
+            ? `${playerCount.value} accounts`
+            : "Characters",
           icon: "◎",
+        },
+        {
+          to: { name: "db", query: { filter: "online" } },
+          label: "Online",
+          desc: onlineLoaded.value
+            ? `${onlineCount.value} connected`
+            : "Connected now",
+          icon: "●",
+        },
+        {
+          to: { name: "db", query: { filter: "offline" } },
+          label: "Offline",
+          desc: "Not connected",
+          icon: "○",
+        },
+        {
+          to: { name: "db", query: { filter: "staff" } },
+          label: "Staff",
+          desc: "Admin & wizard",
+          icon: "★",
         },
         {
           to: { name: "db", query: { filter: "room" } },
@@ -718,7 +838,7 @@ const sideLinks = computed((): SideLink[] => {
     default:
       return [
         {
-          to: { name: "players", query: { filter: "online" } },
+          to: { name: "db", query: { filter: "online" } },
           label: "Online",
           desc: onlineLoaded.value
             ? `${onlineCount.value} now`
@@ -767,9 +887,15 @@ function routeInSection(target: string, name: string): boolean {
   if (name === target) return true;
   if (target === "wiki" && name === "wiki-edit") return true;
   if (target === "jobs" && name === "job-detail") return true;
-  if (target === "players" && name === "player-detail") return true;
   if (target === "bbs" &&
     (name === "bbs-board" || name === "bbs-post")) {
+    return true;
+  }
+  if (target === "help" && name === "help-detail") return true;
+  if (target === "mail" && name === "mail-detail") return true;
+  if (
+    target === "channels" && name === "channels-detail"
+  ) {
     return true;
   }
   if (target === "db" && name === "db-detail") return true;
@@ -806,11 +932,16 @@ function isSideActive(link: SideLink): boolean {
   const haveTag = String(route.query.tag ?? "");
   const haveSection = String(route.query.section ?? "");
   const haveCat = String(route.query.cat ?? "");
+  const haveSource = String(route.query.source ?? "");
 
   if (link.match) {
     // BBS category links stash cat in match.section
     if (target === "bbs" && link.match.section) {
       return haveCat === link.match.section;
+    }
+    // Help source filters reuse match.filter for source=
+    if (target === "help" && link.match.filter !== undefined) {
+      return haveSource === (link.match.filter ?? "");
     }
     if (link.match.sideId && link.to.query) {
       const lq = link.to.query;
@@ -862,22 +993,22 @@ function isSideActive(link: SideLink): boolean {
   return haveFilter === "";
 }
 
-// Close drawer on navigation; keep active top tab in view.
+// Close drawer on navigation (do not scroll the top tab strip —
+// that hid other section buttons until a mid tab was clicked).
 watch(
   () => route.fullPath,
   () => {
     closeNav();
-    requestAnimationFrame(() => {
-      const el = document.querySelector(
-        ".top-primary a.top-tab.active",
-      ) as HTMLElement | null;
-      el?.scrollIntoView({
-        inline: "nearest",
-        block: "nearest",
-        behavior: "smooth",
-      });
-    });
   },
+);
+
+// Scope badge "seen" state to this staff account (localStorage)
+watch(
+  () => session.me?.id,
+  (id) => {
+    live.loadBadgeAcksForUser(id ?? null);
+  },
+  { immediate: true },
 );
 
 watch(
@@ -931,6 +1062,8 @@ function primaryIcon(id: string): string {
   switch (id) {
     case "dashboard":
       return "⌂";
+    case "play":
+      return "›";
     case "wiki":
       return "¶";
     case "players":
@@ -1060,9 +1193,24 @@ function primaryIcon(id: string): string {
             class="top-divider top-divider-sm"
             aria-hidden="true"
           />
-          <span class="top-user muted">{{
-            session.displayName
-          }}</span>
+          <span class="top-user muted">
+            <img
+              v-if="session.me?.avatar && !avatarBroken"
+              class="top-user-avatar"
+              :src="session.me.avatar"
+              alt=""
+              referrerpolicy="no-referrer"
+              @error="onAvatarError"
+            >
+            <span
+              v-else
+              class="top-user-avatar-initial"
+              aria-hidden="true"
+            >{{ session.displayName.charAt(0).toUpperCase() }}</span>
+            <span class="top-user-name">{{
+              session.displayName
+            }}</span>
+          </span>
           <button
             type="button"
             class="outline secondary top-signout"
@@ -1126,7 +1274,7 @@ function primaryIcon(id: string): string {
                 v-else-if="item.name"
                 class="side-nav-item"
                 :class="{ 'is-active': isPrimaryActive(item.id) }"
-                :to="{ name: item.name }"
+                :to="item.to ?? { name: item.name }"
                 @click="closeNav"
               >
                 <span

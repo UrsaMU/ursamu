@@ -460,7 +460,75 @@ Wiki API notes: engine wiki routes / package docs as applicable.
 
 ---
 
-## 11. Plugin UI contract (required)
+## 11. Game client output (Play)
+
+**Player FE:** site `/play` (`play.js` + `play.css`) — primary client.  
+**Staff console Play** is optional/legacy; same `data.ui` contract.
+
+### Message contract (WS `{ msg, data }`)
+
+| Payload | Render |
+|---------|--------|
+| `data.ui` with `components[]` | Structured layout (interactive when items carry `action`) |
+| No `data.ui` (plain `msg`) | Mono / MUSH-colored pre block |
+
+Commands that call `u.ui.layout({ components, meta })` emit
+`{ msg: "", data: { ui: { type: "layout", components, meta } } }`.
+Telnet never receives `data.ui` — text path only.
+
+### Interactive actions
+
+Items may include:
+
+```json
+{ "action": { "cmd": "n" } }
+```
+
+The FE sends `cmd` as normal player input (same as typing + Enter).
+Use for exits, `look <name>`, future buttons/radios/dropdowns.
+
+### Look layout (`meta.type: "look"`)
+
+Composition (Figma client look blocks — structure only; **styles from
+this file / site tokens**, not Figma paint):
+
+| Block | `type` | Notes |
+|-------|--------|--------|
+| Room name | `header` | `title` |
+| Optional art | `media` | `url`, `alt` when IMAGE set |
+| Description | `text` | body prose |
+| Characters | `entity-list` | items: label, sublabel (short-desc), meta (idle), `action.cmd` = `look Name` |
+| Contents | `entity-list` | things in room |
+| Exits | `actions` | items: label, badge (alias), `action.cmd` = exit alias |
+
+### Structured layout path
+
+| `component.type` | Treatment |
+|------------------|-----------|
+| `header` | Section title (UI/display font, hairline) |
+| `text` | Body prose |
+| `media` | Optional image |
+| `entity-list` | Rows: name / short-desc / meta; clickable if `action` |
+| `actions` | Chip/button row; clickable if `action` |
+| `table` | Host table |
+| `list` | Plain list |
+| `panel` | Surface + optional title |
+
+Labels may still carry MUSH `%c` / ANSI; FE converts to safe markup
+(CSP-safe classes on site).
+
+### MUST / MUST NOT
+
+| Do | Don’t |
+|----|--------|
+| Reuse dash-header + prompt toolbar | Invent a floating MUD HUD |
+| Mono only inside `.game-pre` / output | Style the whole admin shell as a game |
+| Escape plain text in `mushTextToHtml` | `v-html` unsanitized server HTML |
+| Cap history (socket composable) | Unbounded DOM growth |
+
+---
+
+## 12. Plugin UI contract (required)
 
 The **host** (`@ursamu/web`) owns visual design. Plugin UIs — whether
 in-console Vue views (`registerStaffNav` + `route`) or standalone SPAs

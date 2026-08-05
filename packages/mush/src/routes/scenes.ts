@@ -17,6 +17,7 @@
 import { dbojs, scenes, Obj, hydrate } from "../world/dbobjs.ts";
 import { evaluateLock } from "../world/locks.ts";
 import { send, gameHooks } from "@ursamu/core";
+import { resolveAvatarUrl } from "./avatar-url.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -288,7 +289,10 @@ export async function sceneHandler(req: Request, userId: string): Promise<Respon
       charId:    user.dbref,
       charName:  user.name || "Unknown",
       moniker:   user.data?.moniker as string | undefined,
-      avatar:    user.data?.image as string | undefined,
+      avatar: await resolveAvatarUrl(
+        user.id ?? user.dbref,
+        (user.data ?? {}) as Record<string, unknown>,
+      ) ?? undefined,
       msg:       msg || "",
       type:      type as "pose" | "ooc" | "set",
       timestamp: Date.now(),

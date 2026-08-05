@@ -1,3 +1,46 @@
+## 1.2.10
+
+- **Victorian Lost** (`books/vctl.txt`) → CtL 2e catalog:
+  Inventor / Lurker blessings (Inventive Genius, Larcenous
+  Fingers); contracts Envoy's Splendor, Smoke-Stepping, Riot,
+  Sabotage; Tatterdemalion's Workshop Victorian note
+- Conversion notes: `docs/vctl-2e-conversion.md`
+
+## 1.2.9
+
+- Chargen options: seemings/kiths/courts/regalia return
+  blessing, description, favoredRegalia, etc. for web pickers
+- Seeming ↔ kith: setting kith fills seeming; changing seeming
+  clears a mismatched kith; second favored cannot match
+  seeming's favored Regalia
+
+## 1.2.8
+
+- Chargen: Werewolf closed for player pick (mortal +
+  changeling only). `CHARGEN_TEMPLATE_KEYS` / `chargenTemplates()`
+  gate +cg list, web options, and stage-2 set. Sheet/NPC code
+  unchanged.
+
+## 1.2.7
+
+- **+cg** on web clients: navigate to Character tab (`/chargen`)
+  instead of running the terminal stepper in /play.
+
+## 1.2.6
+
+- **+sheet** on web /play: structured layout (attribute/skill dots,
+  health & willpower boxes, merits/contracts lists, advantages).
+  Telnet ASCII sheet unchanged.
+
+## 1.2.4
+
+- Chargen HTTP: read `data.cofd_cg` on raw dbojs rows (was only `state`, so Next said Start chargen first)
+
+## 1.2.2
+
+- REST chargen API for public /chargen FE
+- GET `/api/v1/cofd/chargen/options` catalog
+
 # Changelog
 
 ## [1.2.1] - 2026-07-28

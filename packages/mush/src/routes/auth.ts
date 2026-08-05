@@ -79,6 +79,44 @@ const MAX_USERNAME = 64;
 const MAX_PASSWORD = 512;
 const MAX_EMAIL    = 254;
 
+/** bcrypt modular crypt format ($2a$ / $2b$ / $2y$). */
+function isBcryptHash(stored: string): boolean {
+  return /^\$2[aby]\$\d{2}\$/.test(stored);
+}
+
+/**
+ * Verify password against stored value.
+ * Supports bcrypt hashes and legacy plaintext (pre-hash imports).
+ * Returns "legacy" when plaintext matched so callers can re-hash.
+ */
+async function verifyStoredPassword(
+  plain: string,
+  stored: string,
+): Promise<"bcrypt" | "legacy" | "fail"> {
+  if (!stored) return "fail";
+  if (isBcryptHash(stored)) {
+    try {
+      const ok = await bcrypt.compare(plain, stored);
+      return ok ? "bcrypt" : "fail";
+    } catch {
+      // Corrupt / truncated hash — treat as fail (do not fall through
+      // to plaintext equality against a $2a$ string).
+      return "fail";
+    }
+  }
+  // Constant-time-ish compare for short legacy secrets
+  if (plain.length === stored.length) {
+    let diff = 0;
+    for (let i = 0; i < plain.length; i++) {
+      diff |= plain.charCodeAt(i) ^ stored.charCodeAt(i);
+    }
+    if (diff === 0) return "legacy";
+  } else if (plain === stored) {
+    return "legacy";
+  }
+  return "fail";
+}
+
 // ── JSON helpers ──────────────────────────────────────────────────────────────
 
 function jsonResp(body: unknown, status = 200): Response {
@@ -219,11 +257,31 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      // First player on a fresh DB is superuser (web portal path —
+      // telnet connect elevates the same way in verbs/auth).
+      let flags = "player";
+      try {
+        const supers = await dbojs.find({
+          flags: /superuser/i,
+        });
+        if (!supers || (Array.isArray(supers) && supers.length === 0)) {
+          flags = "player superuser wizard admin";
+        }
+      } catch {
+        /* keep player-only */
+      }
+
       await dbojs.create({
         id,
         // "connected" is session state — set on login, not at register.
-        flags: "player",
-        data: { name: username, alias: username, email, password: hashedPassword, home: "1" },
+        flags,
+        data: {
+          name: username,
+          alias: username,
+          email,
+          password: hashedPassword,
+          home: "1",
+        },
         location: "1",
       } as Parameters<typeof dbojs.create>[0]);
 
@@ -273,16 +331,43 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
 
       const obj = new Obj().load(ob);
       obj.dbobj.data ||= {};
-      const storedHash = (obj.dbobj.data.password as string | undefined) || "";
+      const storedHash =
+        (obj.dbobj.data.password as string | undefined) || "";
 
-      const isMatch = await bcrypt.compare(password, storedHash);
-      if (!isMatch) {
+      const match = await verifyStoredPassword(password, storedHash);
+      if (match === "fail") {
         recordLoginFailure(clientIp);
         await log("warn", "LOGIN_FAILED", { ip: clientIp, username });
-        return jsonResp({ error: "Invalid username or password." }, 401);
+        return jsonResp(
+          { error: "Invalid username or password." },
+          401,
+        );
       }
 
       const id = String(obj.dbobj.id);
+
+      // Upgrade legacy plaintext → bcrypt on successful web login
+      // (telnet already accepted plain; HTTP only used bcrypt.compare).
+      if (match === "legacy") {
+        try {
+          const hashed = await bcrypt.hash(password, 10);
+          await dbojs.modify({ id }, "$set", {
+            "data.password": hashed,
+          } as Parameters<typeof dbojs.modify>[2]);
+          obj.dbobj.data.password = hashed;
+          await log("info", "PASSWORD_UPGRADED", {
+            id,
+            username: String(obj.dbobj.data.name ?? username),
+          });
+        } catch (e: unknown) {
+          // Login still succeeds; upgrade is best-effort
+          await log("warn", "PASSWORD_UPGRADE_FAILED", {
+            id,
+            err: e instanceof Error ? e.message : String(e),
+          });
+        }
+      }
+
       const token = await createToken({ id });
       // Include flags so clients can gate UI without a race on /me.
       const flagsRaw = obj.dbobj.flags as unknown;
@@ -290,7 +375,9 @@ export async function authHandler(req: Request, remoteAddr = "unknown"): Promise
         ? [...flagsRaw].map(String)
         : Array.isArray(flagsRaw)
         ? flagsRaw.map(String)
-        : String(flagsRaw ?? "").split(/[\s,|]+/).filter(Boolean);
+        : String(flagsRaw ?? "")
+          .split(/[\s,|]+/)
+          .filter(Boolean);
       return jsonResp({
         token,
         id,

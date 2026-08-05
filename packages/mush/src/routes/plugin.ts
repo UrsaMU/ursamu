@@ -14,8 +14,25 @@ export type PluginRouteHandler = (
   userId: string | null,
 ) => Promise<Response>;
 
-// Registry of plugin routes — consulted by handleRequest fallback.
-const _pluginRoutes = new Map<string, PluginRouteHandler>();
+/**
+ * Process-wide route map. MUST be globalThis — not a module binding.
+ * Plugins may import `registerPluginRoute` via `ursamu`, `@ursamu/mush`,
+ * or a JSR pin while handleRequest uses the vendored mush path. Separate
+ * module instances would otherwise register routes that the dispatcher
+ * never sees (and vice versa for theme hot-reload via @ursamu/site).
+ */
+const ROUTES_KEY = Symbol.for("ursamu.mush.pluginRoutes");
+
+function pluginRoutes(): Map<string, PluginRouteHandler> {
+  const g = globalThis as unknown as Record<
+    symbol,
+    Map<string, PluginRouteHandler>
+  >;
+  if (!g[ROUTES_KEY]) {
+    g[ROUTES_KEY] = new Map<string, PluginRouteHandler>();
+  }
+  return g[ROUTES_KEY]!;
+}
 
 /**
  * Normalize a route prefix.
@@ -42,7 +59,7 @@ export function registerPluginRoute(
   handler: PluginRouteHandler,
 ): void {
   const key = normalizePluginPrefix(prefix);
-  _pluginRoutes.set(key, handler);
+  pluginRoutes().set(key, handler);
 }
 
 /** True when pathname is covered by a registered prefix. */
@@ -68,15 +85,16 @@ export async function dispatchPluginRoute(
   authenticate: (req: Request) => Promise<string | null>,
 ): Promise<Response | null> {
   const pathname = new URL(req.url).pathname || "/";
+  const routes = pluginRoutes();
 
   // Longest prefix first so /admin/wiki beats /admin beats /
-  const prefixes = [..._pluginRoutes.keys()].sort(
+  const prefixes = [...routes.keys()].sort(
     (a, b) => b.length - a.length,
   );
 
   for (const prefix of prefixes) {
     if (!pluginPrefixMatches(pathname, prefix)) continue;
-    const handler = _pluginRoutes.get(prefix);
+    const handler = routes.get(prefix);
     if (!handler) continue;
     const userId = await authenticate(req);
     return handler(req, userId);
@@ -87,10 +105,10 @@ export async function dispatchPluginRoute(
 /** Whether any plugin claimed the public site mount. */
 export function hasPluginPrefix(prefix: string): boolean {
   const key = normalizePluginPrefix(prefix);
-  return _pluginRoutes.has(key);
+  return pluginRoutes().has(key);
 }
 
 /** Test helper — clear registry. */
 export function clearPluginRoutes(): void {
-  _pluginRoutes.clear();
+  pluginRoutes().clear();
 }

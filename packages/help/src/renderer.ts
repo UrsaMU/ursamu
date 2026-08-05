@@ -17,57 +17,12 @@ import {
   header as engHeader,
   footer as engFooter,
   hasLayoutTemplate,
+  markdownToAnsi,
 } from "@ursamu/mush";
 
 const WIDTH = 78;
 /** TinyMUX plushelp rule — plain dashes, no color. */
 const TMUX_RULE = "-".repeat(WIDTH);
-
-// ── MUSH color helpers ──────────────────────────────────────────────────────
-
-function stripColors(text: string): string {
-  return text.replace(
-    /%(ch|cn|c[rgbcmyw]|b[rgbcmyw]|[rnthiub])/gi,
-    "",
-  );
-}
-
-function wordWrap(text: string, width: number): string {
-  return text
-    .split("\n")
-    .map((line) => {
-      if (stripColors(line).length <= width) return line;
-      const words = line.split(" ");
-      let current = "";
-      const result: string[] = [];
-      for (const word of words) {
-        const candidate = current ? `${current} ${word}` : word;
-        if (stripColors(candidate).length <= width) {
-          current = candidate;
-        } else {
-          if (current) result.push(current);
-          current = word;
-        }
-      }
-      if (current) result.push(current);
-      return result.join("\n");
-    })
-    .join("\n");
-}
-
-/** Convert markdown to MUSH ANSI color codes. */
-function markdownToAnsi(md: string): string {
-  let out = md;
-  out = out.replace(/^# (.+)$/gm, "%ch%cc$1%cn");
-  out = out.replace(/^## (.+)$/gm, "%ch%cy$1%cn");
-  out = out.replace(/^### (.+)$/gm, "%ch%cw$1%cn");
-  out = out.replace(/\*\*([^*]+)\*\*/g, "%ch$1%cn");
-  out = out.replace(/\*([^*]+)\*/g, "%ci$1%cn");
-  out = out.replace(/`([^`]+)`/g, "%ch%cg$1%cn");
-  out = out.replace(/^\s*-\s+(.+)$/gm, "  • $1");
-  out = wordWrap(out, WIDTH);
-  return out;
-}
 
 // ── Layout chrome ───────────────────────────────────────────────────────────
 

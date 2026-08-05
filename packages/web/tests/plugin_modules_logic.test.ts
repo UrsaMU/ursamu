@@ -43,12 +43,27 @@ function resolveNavTarget(
   if (routeName === "plugin-embed" || (embed && !routeName && !mod)) {
     return { name: "plugin-embed", embedShell: true };
   }
-  if (routeName && (hasRoute(routeName) || !mod)) {
+  // Only named routes the host can resolve (no ghost tabs).
+  if (routeName && hasRoute(routeName)) {
+    return { name: routeName };
+  }
+  if (mod && !failed.has(item.id) && routeName) {
     return { name: routeName };
   }
   if (embed) return { name: "plugin-embed", embedShell: true };
   if (item.href?.trim()) return { href: item.href.trim() };
   return {};
+}
+
+function navTargetReady(
+  target: ReturnType<typeof resolveNavTarget>,
+  hasRoute: (n: string) => boolean,
+): boolean {
+  if (target.href) return true;
+  const name = target.name;
+  if (!name) return false;
+  if (name === "plugin-embed") return true;
+  return hasRoute(name);
 }
 
 Deno.test("isSameOriginModule: paths and origins", OPTS, () => {
@@ -88,3 +103,46 @@ Deno.test("resolveNavTarget: host route wins", OPTS, () => {
   );
   assertEquals(t.name, "jobs");
 });
+
+Deno.test(
+  "resolveNavTarget: missing host route → empty (no ghost)",
+  OPTS,
+  () => {
+    const t = resolveNavTarget(
+      { id: "mail", route: "mail" },
+      () => false,
+      new Set(),
+    );
+    assertEquals(t.name, undefined);
+    assertEquals(t.href, undefined);
+    assertEquals(navTargetReady(t, () => false), false);
+  },
+);
+
+Deno.test(
+  "resolveNavTarget: missing route ready after stub hasRoute",
+  OPTS,
+  () => {
+    const t = resolveNavTarget(
+      { id: "mail", route: "mail" },
+      (n) => n === "mail",
+      new Set(),
+    );
+    assertEquals(t.name, "mail");
+    assertEquals(navTargetReady(t, (n) => n === "mail"), true);
+  },
+);
+
+Deno.test(
+  "resolveNavTarget: route-only never invents broken link",
+  OPTS,
+  () => {
+    // Old bug: (hasRoute || !mod) returned name even when missing.
+    const t = resolveNavTarget(
+      { id: "channels", route: "channels" },
+      () => false,
+      new Set(),
+    );
+    assertEquals(navTargetReady(t, () => false), false);
+  },
+);

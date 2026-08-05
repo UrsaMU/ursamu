@@ -72,24 +72,53 @@ drop-in familiarity with court-template CSS ports.
 
 ---
 
-## 4. Shipping a Changeling / Court skin
+## 4. Play client (`/play`) — Figma client frame
+
+Source: Court Figma **client** (`node 1884:89`). Player-facing;
+requires sign-in. Keeps the normal 3-col shell (nav + rails).
+
+| Region | Class | Figma / tokens |
+|--------|--------|----------------|
+| Output | `.play-output` | fill `--site-bg`, flex-grow scroll |
+| Rule | `.play-prompt-rule` | 1px `--site-border` (cream) |
+| Input | `.play-prompt__input` | mono textarea, min **78ch**, wrap; placeholder **Enter something…** |
+| Button | `.play-prompt__send` | 119×55, `--site-btn-bg` / `--site-btn-fg`, label **SEND** |
+| Plain text | `.play-pre` | mono; MUSH/ANSI → CSP-safe color classes |
+| Layout UI | `.play-layout*` | `u.ui.layout` (look, etc.) |
+| Entity row | `.play-entity` | name / short-desc / idle; `data-play-cmd` |
+| Exit chip | `.play-action` | badge + label; `data-play-cmd` |
+
+**Look** (`meta.type=look`): header → text → Characters
+(`entity-list`) → Exits (`actions`). Click controls send game input.
+Styles use site tokens only (see `packages/web/design.md` §11).
+
+Enter submits (same as Send); Shift+Enter newline. Tokens only —
+Court skin maps gold/cream.
+
+---
+
+## 5. Shipping a brand theme (Court example)
+
+Court of Miracles is an **installable theme**, not a builtin skin.
+Only `default` ships inside `@ursamu/site`.
 
 1. Keep layout + components as shipped.
-2. Load `css/skins/changeling.css` (`"skin": "changeling"`).
-   Legacy alias: `"skin": "court"` still resolves.
-3. Assets under `/site/skins/changeling/` (fonts + imgs).
-4. Minimal config:
+2. Pack `examples/themes/court/` (`deno task pack-theme`).
+3. Install via Admin theme zip, or copy to
+   `theme/installed/court/` with `themeDir: "theme"`.
+4. Config after install:
 
 ```json
 "plugins": {
   "site": {
-    "skin": "changeling"
+    "skin": "court",
+    "skinCss": "/site/theme/installed/court/site.css",
+    "themeDir": "theme",
+    "bannerImage": "/site/theme/installed/court/imgs/header.png",
+    "title": "Court of Miracles"
   }
 }
 ```
-
-Defaults fill title, header banner, and demo nav. Override any field
-explicitly when needed.
 
 ---
 

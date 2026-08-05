@@ -2,18 +2,15 @@
 // Player always gets a live send and @mail.
 
 import { header, footer, type IUrsamuSDK } from "@ursamu/ursamu";
-import type { CofdCgState } from "../chargen/index.ts";
-import { sendCofdMail } from "../integrations/mail.ts";
-import { assignDormHome } from "../support/dorm.ts";
-import { syncSightFlags } from "../support/sight.ts";
+import { approvePlayer } from "../chargen/approve_core.ts";
 import {
   parseTargetAndNotes,
-  completeCgenJob,
   type JobTouchResult,
 } from "./approve_job.ts";
 export { denyExec, unapproveExec } from "./deny.ts";
 
-function jobLines(job: JobTouchResult): string[] {
+function jobLines(job: JobTouchResult | null): string[] {
+  if (!job) return [];
   if (job.completed && job.number != null) {
     return [`CGEN job #${job.number} completed and archived.`];
   }
@@ -46,92 +43,39 @@ export async function approveExec(u: IUrsamuSDK) {
     return;
   }
 
-  const name = u.util.displayName(target, u.me);
-  const cgState = target.state?.cofd_cg as CofdCgState | undefined;
-  if (!cgState?.sheet) {
+  const staffName = u.util.displayName(u.me, u.me);
+  const result = await approvePlayer({
+    playerId: target.id,
+    staffId: u.me.id,
+    staffName,
+    notes,
+    completeJob: true,
+  });
+
+  if (!result.ok) {
+    u.send(`%cr${result.error}%cn`);
+    return;
+  }
+
+  if (result.already) {
     u.send(
-      `${name} has no chargen draft to approve. ` +
-        `They need to finish +cg first.`,
+      `${result.name} is already approved with a live sheet.`,
     );
     return;
   }
 
-  const sheet = { ...cgState.sheet };
-  if (!sheet.specialties) sheet.specialties = {};
-
-  await u.db.modify(target.id, "$set", { "data.cofd": sheet });
-  await u.db.modify(target.id, "$unset", { "data.cofd_cg": "" });
-  target.state = { ...target.state, cofd: sheet };
-  delete target.state.cofd_cg;
-  // approved flag locks non-staff out of +cg
-  if (u.setFlags) {
-    await u.setFlags(target.id, "approved");
-    target.flags?.add("approved");
-  }
-  await syncSightFlags(u, target, sheet);
-
-  // Freehold dorm: home + move for splat-configured rooms.
-  const dormId = await assignDormHome(
-    u,
-    target.id,
-    sheet.template,
-    { teleport: true },
-  );
-  if (dormId) {
-    target.state = { ...target.state, home: dormId };
-  }
-
-  const staffName = u.util.displayName(u.me, u.me);
-  const job = await completeCgenJob(
-    cgState.submittedJob,
-    target.id,
-    u.me.id,
-    staffName,
-    notes,
-  );
-
   const lines = [
     await header("Character Approved"),
-    `${name}'s sheet is now live.`,
-    ...jobLines(job),
+    `${result.name}'s sheet is now live.`,
+    ...jobLines(result.job),
   ];
-  if (dormId) {
+  if (result.dormId) {
     lines.push(
-      `Home set to freehold dorm (#${dormId}). ` +
+      `Home set to freehold dorm (#${result.dormId}). ` +
         `They can type %chhome%cn anytime.`,
     );
   }
   if (notes) lines.push(`Notes: ${notes}`);
   lines.push(await footer());
   u.send(lines.join("\n"));
-
-  const dormNote = dormId
-    ? `  Your freehold bunk is ready — type %chhome%cn.`
-    : "";
-  u.send(
-    `%chYour Chronicles of Darkness sheet has been ` +
-      `approved by ${staffName}.%cn` +
-      (notes ? ` Notes: ${notes}` : "") +
-      `  Use %ch+sheet%cn to view it.` +
-      dormNote,
-    target.id,
-  );
-
-  await sendCofdMail({
-    to: target.id,
-    subject: `Character approved: ${name}`,
-    body: [
-      `Your Chronicles of Darkness character sheet ` +
-        `was approved by ${staffName}.`,
-      job.number != null
-        ? `CGEN job: #${job.number} (completed)`
-        : "",
-      notes ? `\nStaff notes:\n${notes}` : "",
-      dormId
-        ? `\nYour home is the freehold dorm. Type: home`
-        : "",
-      ``,
-      `Your live sheet is active. Use +sheet to view it.`,
-    ].filter(Boolean).join("\n"),
-  });
 }

@@ -12,6 +12,7 @@ import {
   expandLayoutTemplate,
   header,
   footer,
+  markdownToAnsi,
 } from "../src/format/handlers.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
@@ -87,6 +88,26 @@ Deno.test("divider/header honor applied config", OPTS, () => {
     clearLayoutTemplates();
   }
 });
+
+Deno.test(
+  "applyLayoutFromConfig(undefined) does not wipe boot templates",
+  OPTS,
+  () => {
+    try {
+      applyLayoutFromConfig({
+        header: "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+        footer: "[repeat(%cg=%cn,%1)]",
+      });
+      // Host re-apply with dual-core getConfig() → undefined
+      applyLayoutFromConfig(undefined);
+      applyLayoutFromConfig(null);
+      assertStringIncludes(header("T", "=", 20), "%cg=%cn");
+      assertStringIncludes(footer("", "=", 10), "%cg=%cn");
+    } finally {
+      clearLayoutTemplates();
+    }
+  },
+);
 
 Deno.test("expandLayoutTemplate: words counts tokens", OPTS, () => {
   assertEquals(expandLayoutTemplate("[words(%0)]", ["a b c"]), "3");
@@ -204,3 +225,26 @@ Deno.test(
     }
   },
 );
+
+Deno.test("markdownToAnsi: config softcode templates", OPTS, () => {
+  try {
+    applyLayoutFromConfig({
+      markdown: {
+        h1: "%ch%cu%0%cn",
+        h2: "%ch%cy%0%cn",
+        bold: "%ch%cr%0%cn",
+        wikilink: "%ch%cb[[%0]]%cn",
+      },
+    });
+
+    const md = "# Title\n\n## Subtitle\n\nThis is **bold** text and [[Lore]].";
+    const ansi = markdownToAnsi(md);
+
+    assertStringIncludes(ansi, "%ch%cuTitle%cn");
+    assertStringIncludes(ansi, "%ch%cySubtitle%cn");
+    assertStringIncludes(ansi, "%ch%crbold%cn");
+    assertStringIncludes(ansi, "%ch%cb[[Lore]]%cn");
+  } finally {
+    clearLayoutTemplates();
+  }
+});

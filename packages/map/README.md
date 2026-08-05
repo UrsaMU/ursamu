@@ -62,43 +62,68 @@ import mapPlugin from "@ursamu/map-plugin";
 import { loadPlugin } from "ursamu";
 import mapPlugin from "@ursamu/map-plugin";
 
-await loadPlugin(mapPlugin);   // registers +map, wires DESCFORMAT
-// In-game: +map  -> renders the sector at your state.coord (or 0,0,0)
+await loadPlugin(mapPlugin);
 ```
+
+In-game (players never stand on the grid barefoot). Vehicles are
+ordinary objects — board with engine `enter` / `leave`:
+
+```
+@create Scout
+@set Scout=map-capable enter_ok
+&CAPACITY Scout=4
+drop Scout
+enter Scout
++map/launch
++map          # or look — sector render
++move n
++map/land
+leave
+```
+
+(`+map/embark` / `+map/disembark` alias enter/leave; embark still
+requires `map-capable`.)
+
+Config (`config/config.json`):
+
+```json
+{
+  "plugins": {
+    "map": {
+      "theme": "hedge",
+      "realm": "default"
+    }
+  }
+}
+```
+
+Themes: `"default"` (stock), `"hedge"` / `"court"` (CtL Hedge pack).
 
 ## Commands
 
 | Command | Lock | What it does |
 | --- | --- | --- |
-| `+map` / `+map/here` | `connected` | Renders the procedural sector centred on the caller's active `MapEntity`. |
-| `+map/embark <vehicle>` | `connected` | Board a `map-capable` object in the same room. |
-| `+map/disembark` | `connected` | Step out of the current vehicle into its current location. |
-| `+map/launch` | `connected` | From inside a `map-capable` vehicle, create a `MapEntity` and enter the map. |
-| `+map/land` | `connected` | Destroy the `MapEntity`, return the vehicle to `lastDock`. |
-| `+move <dir>` | `connected` | `n/s/e/w/ne/nw/se/sw/u/d` — walk the caller's active entity. |
-| `+map/link <entityId>` | `connected` | Take remote control of a scout / structure that names you as `controllerId`. |
-| `+map/unlink` | `connected` | Release any remote link. |
-| `+map/spectate <entityId>` | admin | See the map through an entity's eyes; read-only. |
-| `+map/unspectate` | admin | Exit spectate mode. |
-| `+map/stats` | admin | Dump entity / fog DBO summary. |
-| `+map/jump <x> <y> [z]` | admin | Teleport the caller's active entity to a coordinate. |
+| `enter <v>` | connected | Board any enterable object (engine) |
+| `leave` | connected | Exit object; refuse if on `map:…` |
+| `+map` / `+map/here` | connected | Sector around your active `MapEntity` |
+| `+map/embark <v>` | connected | Alias of enter; requires map-capable |
+| `+map/disembark` | connected | Alias of leave |
+| `+map/launch` | connected | Create MapEntity; enter grid |
+| `+map/land` | connected | Destroy entity; dock vehicle |
+| `+move <dir>` | connected | Step n/s/e/w/diags/u/d |
+| `+map/authorize x y=k:g:n` | builder+ | Place overlay |
+| `+map/clear x y [z]` | builder+ | Remove overlay |
+| `+map/link <id>` | builder+ | Remote pilot |
+| `+map/unlink` | connected | Drop remote link |
+| `+map/spectate <id>` | admin | Watch entity vision |
+| `+map/unspectate` | admin | Stop spectating |
+| `+map/stats` | builder+ | Overlays + entities |
+| `+map/prune` | admin | Drop orphan entities |
+| `+map/jump x y [z]` | admin | Teleport active entity |
 
-See [docs/entities.md](./docs/entities.md), [docs/embarkation.md](./docs/embarkation.md), [docs/fog-of-war.md](./docs/fog-of-war.md).
-
-Help text registered with the engine (verbatim from `commands.ts`):
-
-```
-+map[/<switch>] [<args>]  — View the procedural sector map.
-
-Switches:
-  /here          Centre the map on your current coordinate (default).
-  /jump <x> <y> [z]  Teleport your map cursor to a coordinate (builder+).
-
-Examples:
-  +map                    Render the sector around you.
-  +map/here               Same as bare +map.
-  +map/jump 120 -40       Jump to (120, -40, 0).
-```
+See [docs/entities.md](./docs/entities.md),
+[docs/embarkation.md](./docs/embarkation.md),
+[docs/fog-of-war.md](./docs/fog-of-war.md).
 
 ## Architecture
 
@@ -424,15 +449,26 @@ ursamu-map-plugin/
 
 ## Compatibility
 
-UrsaMU **>= 2.5.2**. The plugin imports `createNoise` (per-instance `Noise` class) added in 2.5.2, plus `header` / `divider` / `footer` and `registerFormatHandler` / `unregisterFormatHandler` from 2.3.0. **Zero npm dependencies** — all noise + PRNG comes from the engine.
+`@ursamu/mush` **>= 1.0.2** (enter/leave + map holding checks).
+Staff console Map tab needs `@ursamu/web`. **Zero npm dependencies**
+in the plugin itself — noise + PRNG come from the engine.
+
+## Staff console
+
+With web loaded, open **Map** in `/admin` (or `/admin/map`):
+
+- Live `MapEntity` roster (click to center preview)
+- Sector glyph preview (`GET …/realm/:id/render`)
+- Overlay place / clear
+- **Prune orphans** (entities + stranded vehicles on `map:…`)
 
 ## Roadmap
 
-- Chunk-key index for `map.fog` and `map.entities` so per-render region queries stop full-scanning the collections.
-- Vehicle stacking / collision rules — currently two entities can share a tile silently.
-- Line-of-sight for stealth detection: tie `MapEntity.hidden` into per-viewer probabilistic spotting rather than a binary toggle.
-- REST routes (read-only sector lookup, builder overlay CRUD) are not implemented.
-- `getOverlaysInRegion` still uses an in-memory full scan; a shared chunk index would cover overlays too.
+- Chunk-key index for `map.fog` region queries (entities/overlays done).
+- Line-of-sight for stealth detection: probabilistic spotting vs binary
+  `hidden`.
+- Multi-room vehicle interiors as first-class builder kit (exits already
+  work via `@open` on enterable objects).
 
 ## License
 

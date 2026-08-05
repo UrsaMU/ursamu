@@ -18,6 +18,10 @@
 
 import type { HelpEntry, HelpProvider } from "../registry.ts";
 import { slugify } from "../registry.ts";
+import {
+  pathImpliesStaff,
+  sectionImpliesStaff,
+} from "../visibility.ts";
 
 interface RegisteredDir {
   /** Filesystem path, or "" when remote-only. */
@@ -228,7 +232,6 @@ function entryFromFile(
     : (isIndex ? section : rawName);
 
   const fm = parseFrontmatter(raw);
-  const hidden = fm.hidden || pathImpliesHidden(cleaned);
   let name = slugify(
     fm.topic ||
       (isIndex && !prefix ? section : topicName),
@@ -251,6 +254,16 @@ function entryFromFile(
   }
 
   const tags = [...new Set([...fm.tags, ...fm.aliases])];
+  const staffOnly = pathImpliesStaff(cleaned) ||
+    pathImpliesStaff(name) ||
+    sectionImpliesStaff(resolvedSection) ||
+    // Nested folder named staff under plugin help/
+    parts.some((p) =>
+      p.toLowerCase() === "staff" ||
+      p.toLowerCase() === "admin"
+    );
+  const hidden = fm.hidden || pathImpliesHidden(cleaned) ||
+    staffOnly;
 
   return {
     name,
@@ -258,7 +271,8 @@ function entryFromFile(
     content: fm.content,
     source: "file",
     tags,
-    hidden,
+    hidden: hidden || undefined,
+    staffOnly: staffOnly || undefined,
   };
 }
 

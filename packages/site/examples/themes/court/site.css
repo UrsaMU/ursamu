@@ -1,9 +1,12 @@
 /**
- * Court of Miracles — example installable FE theme.
- * Packaged as theme.zip with theme.json (see examples/themes/court/).
+ * Court of Miracles — installable FE theme (not a builtin skin).
  *
- * Install via Admin → Settings → Public site → Upload theme zip,
- * or copy to theme/installed/court/ with plugins.site.themeDir = "theme".
+ * Pack:  deno task pack-theme examples/themes/court
+ * Install: Admin → Settings → Public site → Upload theme zip
+ *   or copy to theme/installed/court/ with themeDir = "theme".
+ *
+ * Asset URLs are relative to this CSS file
+ * (/site/theme/installed/court/site.css).
  */
 
 @import url("https://fonts.googleapis.com/css2?family=Smythe&display=swap");
@@ -32,6 +35,8 @@
   --site-btn-bg: #c4944a;
   --site-btn-bg-hover: #e0b56a;
   --site-btn-fg: #020201;
+  /* Play input placeholder (Figma client 1884:89) */
+  --site-play-placeholder: #766a66;
 
   --site-font-ui: "Lato", ui-sans-serif, system-ui, sans-serif;
   --site-font-display: "Smythe", "smythe", serif;
@@ -40,26 +45,30 @@
   --site-banner-offset: 200px;
   --site-sticky-top: 120px;
   --site-gutter: 40px;
-  /* Figma Main page (1728): left ~331, main ~885, right ~331 */
+  /* Figma Main/Wiki (1728): left 331 | gap ~50 | main 885 | gap ~50 | right 331
+   * Gaps: (1728 - 2*40 gutter - 331 - 885 - 331) / 2 = 50.5px
+   * (was clamp max ~2.75rem / 2vw ≈ 35px — rails felt glued to search) */
   --site-max-w: 1728px;
   --site-main-max: 885px;
   --site-aside-width: 331px;
   --site-aside-min: 280px;
   --site-aside-max: 353px;
-  --site-col-gap: clamp(1.25rem, 2vw, 2.75rem);
-  --site-main-pad-inline: clamp(1.25rem, 2vw, 3.125rem);
+  --site-col-gap: clamp(1.5rem, 2.95vw, 3.25rem);
+  /* Figma: ~44px between search bottom and first left item */
+  --site-search-below: 2.5rem;
+  --site-main-pad-inline: 0;
 
-  --site-bg-image-top: url("imgs/background.png");
-  --site-bg-image-bottom: url("imgs/footer.png");
-  --site-rule-image: url("imgs/hr.svg");
-  --site-search-icon: url("imgs/search.png");
+  --site-bg-image-top: url("/site/theme/installed/court/imgs/background.png");
+  --site-bg-image-bottom: url("/site/theme/installed/court/imgs/footer.png");
+  --site-rule-image: url("/site/theme/installed/court/imgs/hr.svg");
+  --site-search-icon: url("/site/theme/installed/court/imgs/search.png");
 }
 
 @font-face {
   font-family: "Smythe";
   src:
-    url("fonts/smythe-regular.woff2") format("woff2"),
-    url("fonts/smythe-regular.woff") format("woff");
+    url("/site/theme/installed/court/fonts/smythe-regular.woff2") format("woff2"),
+    url("/site/theme/installed/court/fonts/smythe-regular.woff") format("woff");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -68,9 +77,9 @@
 @font-face {
   font-family: "royal majesty";
   src:
-    url("fonts/your_royal_majesty_fancy.woff2")
+    url("/site/theme/installed/court/fonts/your_royal_majesty_fancy.woff2")
       format("woff2"),
-    url("fonts/your_royal_majesty_fancy.woff")
+    url("/site/theme/installed/court/fonts/your_royal_majesty_fancy.woff")
       format("woff");
   font-weight: normal;
   font-style: normal;
@@ -129,7 +138,10 @@
 .site-nav__list .site-nav-login-link,
 .site-nav__list .site-nav-user-link {
   position: relative;
-  display: inline-block;
+  /* inline-flex keeps avatar + moniker on one row */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   color: var(--site-text);
   font-family: var(--site-font-display);
   font-size: 20px;
@@ -191,10 +203,30 @@
   display: none;
 }
 
+/* Telnet under brand (title or banner art) */
+.site-banner__connect {
+  margin-top: 1rem;
+  font-family: var(--site-font-ui);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--site-accent);
+  text-decoration: none;
+}
+
+.site-banner__connect:hover {
+  color: var(--site-accent-hover);
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+/* Never max-width:none — overflows phones (header.png is 659px) */
 .site-banner__img {
-  max-width: none;
+  display: block;
+  max-width: min(100%, 720px);
   width: auto;
   height: auto;
+  margin: 0 auto;
 }
 
 /* ── Body shell (rails + chrome unchanged; center is the page) ─── */
@@ -202,6 +234,7 @@
 .site-body {
   padding: 120px var(--site-gutter) 0;
   margin-bottom: 50px;
+  box-sizing: border-box;
 }
 
 /* No hero image/title — content sits under nav (Figma compact) */
@@ -209,6 +242,44 @@
 .site-shell.is-mode-no-hero .site-body {
   padding-top: calc(var(--site-nav-h) + 24px);
   padding-bottom: 0;
+}
+
+/* Login gate: true center (override 3-col + compact padding) */
+.site-shell.is-mode-login .site-body {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: none !important;
+  min-height: calc(100vh - var(--site-nav-h, 3.5rem));
+  margin: 0;
+  padding: calc(var(--site-nav-h, 3.5rem) + 1.25rem)
+    var(--site-gutter, 1.25rem) 2.5rem !important;
+  grid-template-columns: none !important;
+}
+
+.site-shell.is-mode-login .site-aside {
+  display: none !important;
+}
+
+.site-shell.is-mode-login .site-main {
+  grid-column: auto !important;
+  width: 100%;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.site-shell.is-mode-login .site-gate,
+.site-shell.is-mode-login .site-gate-card {
+  width: 100%;
+  max-width: 24rem;
+  margin-inline: auto;
 }
 
 .site-aside {
@@ -219,6 +290,8 @@
 
 .site-search {
   margin-top: 0;
+  /* Figma Main: ~44px search bottom → first menu title */
+  margin-bottom: var(--site-search-below, 2.5rem);
   gap: 12px;
 }
 
@@ -297,25 +370,6 @@
 .site-section {
   margin: 0 0 2rem;
 }
-
-@keyframes site-skeleton-pulse {
-  0% { opacity: 0.2; }
-  50% { opacity: 0.6; }
-  100% { opacity: 0.2; }
-}
-
-.site-loading-skeleton {
-  padding: 0.5rem 0 1rem;
-}
-
-.site-skeleton-line {
-  height: 14px;
-  background: var(--site-accent, #e5c07b);
-  border-radius: 3px;
-  margin-bottom: 1rem;
-  animation: site-skeleton-pulse 1.4s infinite ease-in-out;
-}
-
 
 /* Page title (H1) — Smythe 40 gold */
 .site-section__title {
@@ -582,32 +636,97 @@
   text-decoration: none;
 }
 
-/* ── Mobile ──────────────────────────────────────────────────────── */
+/* ── Responsive rails (keep 3-col; theme must not override mins) ── */
 
-@media (max-width: 720px) {
+@media (max-width: 1280px) {
+  :root {
+    --site-aside-width: 15.5rem;
+    --site-aside-min: 12.5rem;
+    --site-aside-max: 16.5rem;
+    --site-col-gap: 1.25rem;
+    --site-gutter: 1.5rem;
+  }
+}
+
+/* Still traditional left | main | right — shrink only */
+@media (max-width: 1100px) {
+  :root {
+    --site-aside-width: 13rem;
+    --site-aside-min: 10.5rem;
+    --site-aside-max: 14rem;
+    --site-col-gap: 0.85rem;
+    --site-gutter: 1.15rem;
+  }
+}
+
+/* ── Mobile (phones only stack — see layout.css ≤1024px) ─────────── */
+
+@media (max-width: 1024px) {
   .site-banner {
     margin-top: 5.5rem;
+    padding: 0 1.15rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .site-banner__title {
-    font-size: 3rem;
+    font-size: clamp(1.75rem, 8vw, 3rem);
+  }
+
+  /* Court logo art must fit the viewport */
+  .site-banner__img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+  }
+
+  .site-body {
+    padding: calc(var(--site-nav-h, 3.25rem) + 1rem)
+      1.15rem 0;
+    overflow-x: hidden;
   }
 
   .site-nav {
-    height: auto;
-    max-height: none;
+    height: var(--site-nav-h);
+    max-height: var(--site-nav-h);
     min-height: var(--site-nav-h);
-    padding: 0.5rem 1.15rem;
+    padding: 0 1.15rem;
+    gap: 0.5rem;
   }
 
   .site-nav__brand {
-    font-size: 1.5rem;
+    font-size: clamp(0.95rem, 3.6vw, 1.15rem);
+    max-width: calc(100% - 3.5rem); /* leave room for hamburger */
+  }
+
+  .site-nav__brand-logo,
+  .site-nav__brand img {
+    max-height: 1.75rem;
+    max-width: min(9.5rem, 52vw);
+  }
+
+  .site-nav__toggle {
+    border-color: color-mix(in srgb, #f7e4dd 50%, transparent);
+    color: var(--site-text);
+  }
+
+  .site-nav__toggle:hover,
+  .site-nav__toggle:focus-visible {
+    border-color: var(--site-accent);
   }
 
   .site-nav__list {
-    font-size: 1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem 1rem;
+    font-size: 1.1rem;
+    /* drawer layout from layout.css — no wrap row */
+    flex-wrap: nowrap;
+  }
+
+  .site-nav__list a::after,
+  .site-nav__list .site-nav-login-link::after,
+  .site-nav__list .site-nav-user-link::after {
+    display: none;
   }
 
   .site-body {

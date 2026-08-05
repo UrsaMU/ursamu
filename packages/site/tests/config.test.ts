@@ -9,6 +9,7 @@ import {
   resolveSkinHref,
 } from "../src/config.ts";
 import { injectSiteHtml } from "../src/html.ts";
+import { SITE_ASSET_V } from "../src/config.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -48,11 +49,13 @@ Deno.test("readSiteConfig: empty", OPTS, () => {
 });
 
 Deno.test("resolveSkinHref", OPTS, () => {
-  const court = resolveSkinHref({ skin: "court" });
-  assertEquals(court.startsWith("/site/css/skins/court.css"), true);
+  const def = resolveSkinHref({ skin: "default" });
+  assertEquals(def.startsWith("/site/css/skins/default.css"), true);
   assertEquals(
-    resolveSkinHref({ skinCss: "/site/theme/a.css", skin: "court" })
-      .startsWith("/site/theme/a.css"),
+    resolveSkinHref({
+      skinCss: "/site/theme/installed/court/site.css",
+      skin: "court",
+    }).startsWith("/site/theme/installed/court/site.css"),
     true,
   );
   assertEquals(
@@ -61,14 +64,14 @@ Deno.test("resolveSkinHref", OPTS, () => {
   );
 });
 
-Deno.test("applySkinDefaults: court banner + title", OPTS, () => {
+Deno.test("applySkinDefaults: no brand auto-fill", OPTS, () => {
+  // Court is installable — named skin alone does not inject brand.
   const d = applySkinDefaults({ skin: "court" });
-  assertEquals(d.title, "Court of Miracles");
-  assertEquals(
-    d.bannerImage,
-    "/site/skins/court/imgs/header.png",
-  );
-  assertEquals(d.nav?.length, 4);
+  assertEquals(d.title, undefined);
+  assertEquals(d.bannerImage, undefined);
+  assertEquals(d.nav?.length, 3);
+  assertEquals(d.nav?.[2]?.label, "Help");
+  assertEquals(d.nav?.[2]?.href, "/site/help/");
 });
 
 Deno.test("applySkinDefaults: default untouched", OPTS, () => {
@@ -82,7 +85,7 @@ Deno.test(
   OPTS,
   () => {
     const d = applySkinDefaults({
-      skin: "court",
+      skin: "default",
       title: "",
       bannerImage: "",
     });
@@ -138,22 +141,23 @@ Deno.test("injectSiteHtml: skin + title", OPTS, () => {
 
   const out = injectSiteHtml(src, {
     skin: "court",
+    skinCss: "/site/theme/installed/court/site.css",
     title: "Court of Miracles",
-    bannerImage: "/site/skins/court/imgs/header.png",
+    bannerImage: "/site/theme/installed/court/imgs/header.png",
     nav: [
       { label: "Home", href: "/site/", active: true },
       { label: "Wiki", href: "#" },
     ],
   });
 
-  assertEquals(out.includes('data-skin="court"'), true);
+  assertEquals(out.includes('data-skin="custom"'), true);
   assertEquals(out.includes("<title>Court of Miracles</title>"), true);
   assertEquals(
-    out.includes("/site/css/skins/court.css"),
+    out.includes("/site/theme/installed/court/site.css"),
     true,
   );
   assertEquals(
-    out.includes('src="/site/skins/court/imgs/header.png"'),
+    out.includes('src="/site/theme/installed/court/imgs/header.png"'),
     true,
   );
   assertEquals(out.includes("has-image"), true);
@@ -206,4 +210,36 @@ Deno.test("injectSiteHtml: skin + title", OPTS, () => {
   });
   assertEquals(titled.includes("is-compact"), false);
   assertEquals(titled.includes("My MUSH"), true);
+});
+
+Deno.test("injectSiteHtml: asset v rewrite", OPTS, () => {
+  const src = `<link href="/site/css/tokens.css?v=stale" />
+<link data-site-skin href="/site/css/skins/old.css?v=stale" />
+<script src="/site/js/site.js?v=stale"></script>`;
+  const out = injectSiteHtml(src, { skin: "default" });
+  assertEquals(out.includes("?v=stale"), false);
+  assertEquals(out.includes(`?v=${SITE_ASSET_V}`), true);
+});
+
+Deno.test("injectSiteHtml: telnet under title", OPTS, () => {
+  const src = `<header data-site-banner>
+  <h1 data-site-banner-title hidden></h1>
+  <a data-site-banner-connect hidden></a>
+</header>`;
+  const withBoth = injectSiteHtml(src, {
+    title: "Court of Miracles",
+    telnet: "court.ursamu.io:4201",
+  });
+  assertEquals(withBoth.includes("court.ursamu.io:4201"), true);
+  assertEquals(withBoth.includes('href="telnet://court.ursamu.io:4201"'), true);
+  assertEquals(withBoth.includes("data-site-banner-connect hidden"), false);
+
+  const noTitle = injectSiteHtml(src, {
+    title: "",
+    telnet: "court.ursamu.io:4201",
+  });
+  assertEquals(
+    /data-site-banner-connect[^>]*\bhidden\b/i.test(noTitle),
+    true,
+  );
 });

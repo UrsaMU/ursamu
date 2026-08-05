@@ -66,7 +66,18 @@ export { createToken, verifyToken }        from "./src/session/jwt.ts";
 export type { ISession }                   from "./src/session/types.ts";
 
 // Broadcast
-export { send, broadcastAll, notify, registerSender, trackSocket, untrackSocket, trackedSockets, setFormatter } from "./src/broadcast/send.ts";
+export {
+  send,
+  broadcastAll,
+  notify,
+  registerSender,
+  trackSocket,
+  untrackSocket,
+  trackedSockets,
+  setFormatter,
+  wordWrap,
+  shouldWordWrap,
+} from "./src/broadcast/send.ts";
 export { rooms }                           from "./src/broadcast/rooms.ts";
 
 // Queue
