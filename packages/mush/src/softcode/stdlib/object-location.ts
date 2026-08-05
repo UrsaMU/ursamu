@@ -56,15 +56,53 @@ register("children", async (a, ctx) => {
   const kids = await ctx.db.children(obj.id);
   return kids.map(k => `#${k.id}`).join(" ");
 });
+/** Resolve zone master id: data.zone first, then membership table. */
+async function zoneIdOf(
+  obj: { id: string; state?: Record<string, unknown> } | null,
+): Promise<string | undefined> {
+  if (!obj) return undefined;
+  const fromState = obj.state?.zone as string | undefined;
+  if (fromState) return String(fromState).replace(/^#/, "");
+  try {
+    const { zoneMemberships } = await import("../../world/dbobjs.ts");
+    const rows = await zoneMemberships.find({
+      memberId: obj.id,
+    }) as Array<{ zmId?: string }>;
+    const zm = rows?.[0]?.zmId;
+    if (zm) return String(zm).replace(/^#/, "");
+  } catch {
+    /* membership DBO unavailable */
+  }
+  return undefined;
+}
+
 register("zone", async (a, ctx) => {
-  const obj    = await resolveObj(a[0] ?? "me", ctx);
-  const zoneId = (obj?.state as Record<string, unknown>)?.zone as string | undefined;
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  const zoneId = await zoneIdOf(
+    obj as { id: string; state?: Record<string, unknown> } | null,
+  );
   return zoneId ? `#${zoneId}` : "#-1";
 });
+
+/** Display name of the zone master (empty if unzoned). */
+register("zonename", async (a, ctx) => {
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  const zoneId = await zoneIdOf(
+    obj as { id: string; state?: Record<string, unknown> } | null,
+  );
+  if (!zoneId) return "";
+  const zmo = await resolveObj(`#${zoneId}`, ctx);
+  if (!zmo) return "";
+  const n = (zmo.state as Record<string, unknown>)?.name ?? zmo.name;
+  return String(n ?? "").split(";")[0].trim();
+});
+
 register("inzone", async (a, ctx) => {
-  const obj    = await resolveObj(a[0] ?? "me", ctx);
-  const zmo    = await resolveObj(a[1] ?? "", ctx);
-  const zoneId = (obj?.state as Record<string, unknown>)?.zone as string | undefined;
+  const obj = await resolveObj(a[0] ?? "me", ctx);
+  const zmo = await resolveObj(a[1] ?? "", ctx);
+  const zoneId = await zoneIdOf(
+    obj as { id: string; state?: Record<string, unknown> } | null,
+  );
   return zoneId && zmo && zoneId === zmo.id ? "1" : "0";
 });
 

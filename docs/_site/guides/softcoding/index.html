@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soft-Coding Guide | UrsaMU Documentation</title>
+  <meta name="description" content="How to store scripts and data in object attributes and trigger them with @trigger, u.trigger, and u.eval.">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://localhost:3001/guides/softcoding/">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ═══ HEADER ══════════════════════════════════════════════════════ -->
+<header class="site-header">
+
+  <!-- Wordmark -->
+  <a href="/" class="site-logo">
+    <span class="site-logo-name">UrsaMU</span>
+    <span class="site-logo-tag">docs</span>
+  </a>
+
+  <!-- Divider -->
+  <div class="header-divider"></div>
+
+  <!-- Top nav links -->
+  <nav class="header-nav" aria-label="Primary navigation">
+    
+    
+    
+    
+    <a href="/guides/" class="header-nav-link active">
+      Guides
+    </a>
+    
+    
+    
+    <a href="/api/" class="header-nav-link">
+      API
+    </a>
+    
+    
+    
+    <a href="/plugins/" class="header-nav-link">
+      Plugins
+    </a>
+    
+    
+    
+    <a href="/development/" class="header-nav-link">
+      Development
+    </a>
+    
+    
+  </nav>
+
+  <div class="header-spacer"></div>
+
+  <!-- Actions -->
+  <div class="header-actions">
+    <span class="header-version">mush 1.0.30</span>
+
+    <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path>
+      </svg>
+    </a>
+
+    <!-- Mobile menu button — CSS hides this above 1024px -->
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">
+      <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+</header>
+
+<!-- ═══ BODY ═════════════════════════════════════════════════════════ -->
+
+<!-- ── DOCS PAGE (3-column) ─────────────────────────────────────────── -->
+<div class="docs-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="docs-sidebar" id="docsSidebar" aria-label="Documentation navigation">
+
+    <!-- Search -->
+    <div class="sidebar-search">
+      <input class="sidebar-search-input" type="search" placeholder="Search docs…" id="sidebarSearch" aria-label="Search documentation">
+      <div class="search-results" id="searchResults" style="display:none;position:relative;margin-top:0.25rem;"></div>
+    </div>
+
+    <!-- Section: Overview -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Overview</div>
+
+      <a href="/about/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        About UrsaMU
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Getting Started -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+
+      <a href="/guides/installation/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Installation
+      </a>
+      <a href="/guides/user-guide/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        Player Guide
+      </a>
+      <a href="/guides/admin-guide/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        Admin Guide
+      </a>
+      <a href="/guides/customization/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
+        Customization
+      </a>
+      <a href="/guides/scripting/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Scripting Guide
+      </a>
+      <a href="/guides/first-script/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        Your First Script
+      </a>
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        SDK Cookbook
+      </a>
+      <a href="/guides/recipes/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Recipes
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Configuration -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Configuration</div>
+
+      <a href="/configuration/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
+        Overview
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: API Reference -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">API Reference</div>
+
+      <a href="/api/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        Overview
+      </a>
+      <a href="/api/core/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
+        Core API
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Plugins -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Plugins</div>
+
+      <a href="/plugins/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
+        Overview
+      </a>
+      <a href="/plugins/basics/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+        Basics
+      </a>
+      <a href="/plugins/first-plugin/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        First Plugin
+      </a>
+      <a href="/plugins/commands/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Commands
+      </a>
+      <a href="/plugins/hooks/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
+        Hooks
+      </a>
+      <a href="/plugins/database/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+        Database
+      </a>
+      <a href="/plugins/configuration/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        Configuration
+      </a>
+      <a href="/plugins/dependencies/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+        Dependencies
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Development -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Development</div>
+
+      <a href="/development/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        Overview
+      </a>
+      <a href="/development/contributing/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+        Contributing
+      </a>
+      <a href="/extending/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        Extending
+      </a>
+      <a href="/child-games/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+        Child Games
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Community -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Community</div>
+      <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        GitHub
+      </a>
+      <a href="https://discord.gg/ursamu" target="_blank" rel="noopener" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"></path></svg>
+        Discord
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="docs-content-wrap">
+    <main class="docs-content animate-in">
+
+      <!-- Breadcrumbs -->
+      
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumbs-sep">›</span>
+        <span class="breadcrumbs-current">Soft-Coding Guide</span>
+      </nav>
+      
+
+      <!-- Page content -->
+      <article class="prose">
+        <h1>Soft-Coding Guide</h1>
+<h2>Soft-coding is the practice of storing scripts and data directly on in-game<br>
+objects as <strong>attributes</strong>, rather than writing static files. It lets builders<br>
+and players customize room behavior, object interaction, and NPC responses<br>
+entirely from inside the game — no server restart required.</h2>
+<h2>What is Soft-Coding?</h2>
+<p>Every object in UrsaMU (rooms, players, things, exits) has a <code>data.attributes</code><br>
+array. Each entry is an <code>IAttribute</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IAttribute {
+  name: string;    // e.g. "ONENTER"
+  value: string;   // the script (TypeScript/JS) or plain text
+  setter: string;  // dbref of whoever set it
+  type?: string;
+  hidden?: boolean;
+}
+</code></pre>
+<p>An attribute’s <code>value</code> is a full sandboxed script — the same format as files in<br>
+<code>system/scripts/</code>. When something fires the attribute (a hook, <code>@trigger</code>, or<br>
+<code>u.trigger()</code>), UrsaMU runs the script in a Web Worker with a fresh <code>u</code> object.</p>
+<p><strong>Why use soft-coding instead of a system script?</strong></p>
+<ul>
+<li>Changes take effect immediately — no restart, no redeploy.</li>
+<li>Any builder with edit permission can customize objects they own.</li>
+<li>Behavior stays attached to the object, so copying or moving the object brings<br>
+its behavior with it.</li>
+<li>Inheritance: if an attribute is not found on the object, UrsaMU walks up the<br>
+<code>data.parent</code> chain, allowing shared behavior from parent objects.</li>
+</ul>
+<hr>
+<h2>Setting Attributes In-Game</h2>
+<p>Use the <code>&amp;</code> command:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;&lt;ATTR-NAME&gt; &lt;object&gt;=&lt;value&gt;
+</code></pre>
+<p><code>&lt;object&gt;</code> accepts anything the <code>target</code> utility understands: <code>me</code>, <code>here</code>, an<br>
+object name, or a dbref (<code>#42</code>). <code>&lt;ATTR-NAME&gt;</code> is case-insensitive and stored<br>
+as supplied (the lookup is case-insensitive).</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; &amp;ONENTER here=u.send("The door creaks as you enter.");
+Game&gt; Lobby's attribute ONENTER set.
+
+&gt; &amp;SHORT-DESC me=A tall woman in a grey cloak.
+Game&gt; Alice's attribute SHORT-DESC set.
+</code></pre>
+<p><strong>Clear an attribute</strong> by omitting the value:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; &amp;ONENTER here=
+Game&gt; Lobby's attribute ONENTER removed.
+</code></pre>
+<p>Constraints:</p>
+<ul>
+<li>You must be able to <strong>edit</strong> the target (be its owner, or have the <code>admin</code>,<br>
+<code>wizard</code>, or <code>superuser</code> flag).</li>
+<li>Attribute names are arbitrary — there is no enforced schema. Conventions are<br>
+listed in <a href="#common-attribute-names">Common Attribute Names</a>.</li>
+</ul>
+<h3>Alternative: <code>@set</code> attribute syntax</h3>
+<p><code>@set</code> also sets soft attributes using the <code>target/ATTR=value</code> form:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;object&gt;/&lt;ATTR&gt;=&lt;value&gt;    -- set attribute
+@set &lt;object&gt;/&lt;ATTR&gt;=           -- clear attribute
+</code></pre>
+<p>This is equivalent to <code>&amp;ATTR obj=value</code> for plain data storage (both write<br>
+to <code>data.ATTR</code>). Use whichever feels natural; <code>&amp;</code> is the traditional MUSH<br>
+syntax, while <code>@set obj/ATTR=value</code> is more explicit.</p>
+<blockquote>
+<p><strong>Note:</strong> <code>@set obj=&lt;FLAG&gt;</code> (without the <code>/</code>) sets or removes a <em>flag</em>, not<br>
+an attribute — see the <a href="/guides/admin-guide#user-roles-and-permissions">Admin Guide</a>.</p>
+</blockquote>
+<hr>
+<h2>Setting Attributes via Scripts</h2>
+<p>From inside any script you can read and write the raw <code>data.attributes</code> array<br>
+directly using <code>u.db.modify</code>. Always spread the existing array to avoid<br>
+clobbering other attributes.</p>
+<h3>Add or replace a single attribute</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  const me = u.me;
+  const existing = (me.state.attributes || []) as Array&lt;{ name: string; value: string; setter: string }&gt;;
+
+  // Remove any existing entry with the same name (case-insensitive)
+  const filtered = existing.filter(a =&gt; a.name.toLowerCase() !== "onenter");
+
+  await u.db.modify(me.id, "$set", {
+    data: {
+      ...me.state,
+      attributes: [
+        ...filtered,
+        { name: "ONENTER", value: `u.send("Welcome back!");`, setter: "#" + me.id },
+      ],
+    },
+  });
+  u.send("ONENTER set on yourself.");
+};
+</code></pre>
+<blockquote>
+<p><strong>Important:</strong> <code>u.db.modify</code> with <code>"$set"</code> and a <code>data:</code> key replaces the<br>
+whole data block. Always spread <code>me.state</code> (or the target’s state) so you<br>
+don’t wipe other fields. See the <a href="/guides/scripting">Scripting Guide</a> for<br>
+the full <code>u.db.modify</code> pattern.</p>
+</blockquote>
+<h3>Read the raw array</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const attrs = (u.me.state.attributes || []) as Array&lt;{ name: string; value: string }&gt;;
+const found = attrs.find(a =&gt; a.name.toLowerCase() === "short-desc");
+if (found) u.send(`Your short-desc: ${found.value}`);
+</code></pre>
+<h2>For most use cases, prefer <code>u.attr.get()</code> (see below) — it handles<br>
+case-insensitivity and parent inheritance automatically.</h2>
+<h2>Reading Attributes</h2>
+<h3><code>u.attr.get(id, name): Promise&lt;string | null&gt;</code></h3>
+<p>Reads the value of a named attribute from an object. Returns <code>null</code> if not set.<br>
+The name is <strong>case-insensitive</strong>. If the attribute is not on the object itself,<br>
+UrsaMU walks up the <code>data.parent</code> chain.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  const bio = await u.attr.get(u.me.id, "FINGER-INFO");
+  if (bio) {
+    u.send(bio);
+  } else {
+    u.send("No bio set. Use: &amp;finger-info me=&lt;text&gt;");
+  }
+};
+</code></pre>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read from any object by id
+const sd = await u.attr.get(someObjectId, "SHORT-DESC");
+</code></pre>
+<hr>
+<h2>Running Attributes</h2>
+<h3><code>u.trigger(id, attr, args?): Promise&lt;void&gt;</code></h3>
+<p>Runs the attribute as a script. The script executes in its own sandbox with the<br>
+targeted object as context. The actor who called <code>u.trigger</code> does <strong>not</strong> become<br>
+the script’s <code>u.me</code> — the object itself does. Returns when the script completes.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Fire the USE attribute on a chest the actor is looking at
+await u.trigger(chestId, "USE", [u.me.id]);
+</code></pre>
+<p>Args are available in the triggered script as <code>u.cmd.args</code>.</p>
+<h3><code>u.eval(id, attr, args?): Promise&lt;string&gt;</code></h3>
+<p>Like <code>u.trigger</code>, but captures and returns whatever the script sends as a<br>
+string. Useful for computed values.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const formula = await u.eval(u.me.id, "SCORE-FORMULA", ["str"]);
+u.send(`Your STR score: ${formula}`);
+</code></pre>
+<p>If the attribute is not found, <code>u.eval</code> returns <code>""</code>.</p>
+<h3><code>@trigger &lt;object&gt;/&lt;attr&gt;[=&lt;args&gt;]</code></h3>
+<p>The in-game command version of <code>u.trigger</code>. Fires an attribute on any object the<br>
+actor can see or edit.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; @trigger chest/USE
+Triggered script on chest/USE.
+
+&gt; @trigger here/ONENTER=Alice
+Triggered script on here/ONENTER.
+</code></pre>
+<p>Arguments after <code>=</code> are split on whitespace and available as <code>u.cmd.args</code> in<br>
+the triggered script.</p>
+<h3>Automatic hooks</h3>
+<p>Some attributes are fired automatically by the engine — no <code>@trigger</code> needed:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Fired on</th>
+<th>Fired by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ACONNECT</code></td>
+<td>player or master room</td>
+<td>Player connects</td>
+</tr>
+<tr>
+<td><code>ADISCONNECT</code></td>
+<td>player or master room</td>
+<td>Player disconnects</td>
+</tr>
+</tbody>
+</table>
+<h2><code>ACONNECT</code> and <code>ADISCONNECT</code> fire on the connecting player’s own object first,<br>
+then on the master room (configured as <code>game.masterRoom</code>). The script runs with<br>
+the connected player as <code>u.me</code>.</h2>
+<h2>Common Attribute Names</h2>
+<p>These are conventions — UrsaMU does not enforce them (except <code>ACONNECT</code> and<br>
+<code>ADISCONNECT</code>, which are fired by the hooks system). Use them consistently so<br>
+other builders know what to expect.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Set on</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ACONNECT</code></td>
+<td>player, master room</td>
+<td>Script to run when the player connects</td>
+</tr>
+<tr>
+<td><code>ADISCONNECT</code></td>
+<td>player, master room</td>
+<td>Script to run when the player disconnects</td>
+</tr>
+<tr>
+<td><code>ONENTER</code></td>
+<td>room</td>
+<td>Fire when any player enters the room</td>
+</tr>
+<tr>
+<td><code>ONEXIT</code></td>
+<td>room</td>
+<td>Fire when any player leaves the room</td>
+</tr>
+<tr>
+<td><code>USE</code></td>
+<td>thing</td>
+<td>Fire when a player uses/activates the object</td>
+</tr>
+<tr>
+<td><code>OPEN</code></td>
+<td>container/exit</td>
+<td>Fire when the object is opened</td>
+</tr>
+<tr>
+<td><code>CLOSE</code></td>
+<td>container/exit</td>
+<td>Fire when the object is closed</td>
+</tr>
+<tr>
+<td><code>DROP</code></td>
+<td>thing</td>
+<td>Fire when the object is dropped</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td>thing</td>
+<td>Fire when the object is picked up</td>
+</tr>
+<tr>
+<td><code>SHORT-DESC</code></td>
+<td>player, thing</td>
+<td>One-line description for room display and +finger</td>
+</tr>
+<tr>
+<td><code>FINGER-INFO</code></td>
+<td>player</td>
+<td>Free-form bio shown in +finger</td>
+</tr>
+<tr>
+<td><code>SCORE-EXTRA</code></td>
+<td>player</td>
+<td>Extra stat block appended to score output</td>
+</tr>
+<tr>
+<td><code>ODESC</code></td>
+<td>thing</td>
+<td>Message broadcast to others when the thing is examined</td>
+</tr>
+<tr>
+<td><code>SCRIPT</code></td>
+<td>any</td>
+<td>Generic script slot — fired by the command parser when an object handles a command</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><code>ONENTER</code>, <code>ONEXIT</code>, <code>USE</code>, <code>OPEN</code>, <code>CLOSE</code>, <code>DROP</code>, and <code>GET</code> are<br>
+<strong>not</strong> fired automatically by the core engine. They require either<br>
+<code>@trigger</code> from a system script, or your own plugin/script to call<br>
+<code>u.trigger()</code> at the right moment.</p>
+</blockquote>
+<hr>
+<h2>Scripting Inside Attributes</h2>
+<p>Attribute values are full JavaScript/TypeScript scripts. They run inside the<br>
+same Web Worker sandbox as any other UrsaMU script with the full <code>u</code> API<br>
+available.</p>
+<h3>Module format (recommended)</h3>
+<p>Export a default async function. This is the same format used in <code>system/scripts/</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u) =&gt; {
+  u.send("Hello from an attribute!");
+};
+</code></pre>
+<h3>Legacy block format</h3>
+<p>If the value does not contain an <code>export</code> statement, UrsaMU runs it as a block<br>
+(the code is executed directly, with <code>u</code> in scope).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send("Hello from a legacy block!");
+</code></pre>
+<p>Both formats have access to the full <code>u</code> API.</p>
+<h3>The <code>u</code> object in triggered attributes</h3>
+<p>When an attribute is fired via <code>u.trigger(id, attr)</code>:</p>
+<ul>
+<li><code>u.me</code> — the object the attribute is set on (not the actor who called<br>
+<code>u.trigger</code>)</li>
+<li><code>u.here</code> — the room that object is in</li>
+<li><code>u.cmd.name</code> — the attribute name in lowercase</li>
+<li><code>u.cmd.args</code> — the args array passed to <code>u.trigger</code> / <code>@trigger</code></li>
+</ul>
+<h2>When an attribute is fired via <code>u.eval(id, attr, args)</code>, the same rules apply<br>
+and the script’s output (via <code>u.send</code>) is captured as the return value.</h2>
+<h2>Practical Examples</h2>
+<h3>Room that greets players on entry</h3>
+<p>Set this on a room. Call <code>u.trigger(room.id, "ONENTER", [actorId])</code> from a<br>
+movement hook or a custom <code>look</code> script:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ONENTER The Tavern=#...
+export default async (u) =&gt; {
+  const actorId = u.cmd.args[0];
+  const actor = actorId ? (await u.db.search(actorId))[0] : null;
+  const name = actor ? String(actor.state.moniker || actor.state.name || "Someone") : "Someone";
+  u.here.broadcast(`${name} pushes open the door and steps inside.`);
+  u.send("The warmth of the fire and the smell of roasting meat greet you.");
+};
+</code></pre>
+<h3>Object that does something when used</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;USE Ancient Lever=#...
+export default async (u) =&gt; {
+  const actorId = u.cmd.args[0];
+  u.here.broadcast("The lever grinds against stone with a horrible screech.");
+  await u.teleport("secret-door-id", "open-room-id");
+  u.send("You hear a door grinding open somewhere nearby.");
+};
+</code></pre>
+<h3>Greeting script on player connect</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ACONNECT me=#...  (on a player)
+export default async (u) =&gt; {
+  const unread = (await u.mail.read({ to: { $in: [`#${u.me.id}`] } }))
+    .filter(m =&gt; !m.data?.read).length;
+  if (unread &gt; 0) u.send(`You have ${unread} unread message${unread === 1 ? "" : "s"}.`);
+};
+</code></pre>
+<h3>NPC that responds to being examined</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;ODESC Town Guard=#...  (plain text — broadcast when examined)
+// "snaps to attention and eyes you warily."
+// The look script broadcasts: "&lt;actor&gt; snaps to attention and eyes you warily."
+</code></pre>
+<h3>Computed score field</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;SCORE-FORMULA me=#...
+export default (u) =&gt; {
+  const str = Number(u.me.state.str) || 0;
+  const bonus = Math.floor((str - 10) / 2);
+  u.send(`${str} (${bonus &gt;= 0 ? "+" : ""}${bonus})`);
+};
+</code></pre>
+<p>Then from your score script or a <code>+sheet</code> command:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const strDisplay = await u.eval(u.me.id, "SCORE-FORMULA");
+u.send(`STR: ${strDisplay}`);
+</code></pre>
+<h3>Per-object data storage</h3>
+<p>Attributes don’t have to hold scripts — they can hold plain data strings that<br>
+other scripts read with <code>u.attr.get</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// &amp;PRICE Healing Potion=#...  (value: "50")
+// &amp;USES Healing Potion=#...   (value: "3")
+
+export default async (u) =&gt; {
+  const price = await u.attr.get(u.target!.id, "PRICE") || "0";
+  const uses  = await u.attr.get(u.target!.id, "USES")  || "1";
+  u.send(`Price: ${price} credits  (${uses} use${uses === "1" ? "" : "s"} remaining)`);
+};
+</code></pre>
+<hr>
+<h2>Softcode Evaluator (TinyMUX Compatible)</h2>
+<p>As of v2.0.0, UrsaMU ships a full TinyMUX 2.x-compatible softcode evaluator. Any attribute flagged <code>/softcode</code> is run through the evaluator rather than executed as TypeScript.</p>
+<h3>Enabling softcode on an attribute</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;GREET/softcode me=[name(%#)] greets you!
+</code></pre>
+<p>The <code>/softcode</code> switch tells the engine to evaluate the value as MUSH softcode rather than TypeScript. It persists on the attribute — you only need to specify it when first setting the attribute.</p>
+<p>Attributes that contain MUX substitution syntax (<code>%N</code>, <code>[func()]</code>) and no TypeScript keywords are also auto-detected as softcode.</p>
+<h3>Action commands</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@switch &lt;expr&gt;=&lt;case&gt;,&lt;action&gt;[,&lt;default&gt;]</code></td>
+<td>Branch on value</td>
+</tr>
+<tr>
+<td><code>@dolist &lt;list&gt;=&lt;action&gt;</code></td>
+<td>Iterate over space-delimited list (<code>##</code> = item, <code>#@</code> = index)</td>
+</tr>
+<tr>
+<td><code>@if &lt;expr&gt;=&lt;true&gt;[,&lt;false&gt;]</code></td>
+<td>Conditional execution</td>
+</tr>
+<tr>
+<td><code>@while &lt;expr&gt;=&lt;action&gt;</code></td>
+<td>Loop while true (100ms wall-clock timeout enforced)</td>
+</tr>
+<tr>
+<td><code>@break</code></td>
+<td>Exit the current <code>@dolist</code> or <code>@while</code></td>
+</tr>
+<tr>
+<td><code>@trigger &lt;obj&gt;/&lt;attr&gt;[=&lt;args&gt;]</code></td>
+<td>Fire an attribute as a trigger</td>
+</tr>
+<tr>
+<td><code>@wait &lt;seconds&gt;=&lt;action&gt;</code></td>
+<td>Delay an action</td>
+</tr>
+</tbody>
+</table>
+<h3>$-pattern dispatch</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;CMD_GREET object=$greet *:@pemit %#=Hello, %0!
+</code></pre>
+<p>Attributes beginning with <code>$</code> fire when their glob pattern matches a typed command. <code>%0</code>–<code>%9</code> are capture groups. Objects in the same room as the player, or in the master room, or in the player’s zone master are checked.</p>
+<h3>^-pattern listeners (monitors)</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;LISTEN_HELLO object=^*hello*:@pemit %#=I heard a hello!
+</code></pre>
+<p>Attributes beginning with <code>^</code> fire when their pattern matches anything broadcast in the room. The object must have the <code>MONITOR</code> flag set.</p>
+<h3>Softcode function reference</h3>
+<p>See <a href="/mush_compatibility/">MUSH Compatibility</a> for the full list of ~250 supported functions, substitutions, and compatibility stubs.</p>
+
+      </article>
+
+      <!-- Prev / Next navigation -->
+      
+      
+      
+      
+      
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+      <nav class="page-nav" aria-label="Page navigation">
+        
+          <a href="/guides/sdk-cookbook/" class="page-nav-btn prev">
+            <span class="page-nav-label">← Previous</span>
+            <span class="page-nav-title">SDK Cookbook</span>
+          </a>
+        
+
+        
+          <a href="/guides/user-guide/" class="page-nav-btn next">
+            <span class="page-nav-label">Next →</span>
+            <span class="page-nav-title">User Guide</span>
+          </a>
+        
+      </nav>
+      
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div>
+        <strong style="color:var(--text-muted)">UrsaMU</strong>
+        &nbsp;—&nbsp;MIT License • © 2025
+      </div>
+      <div class="footer-links">
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
+        <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- RIGHT: TABLE OF CONTENTS (auto-built by JS) -->
+  <aside class="docs-toc" id="docsToc" aria-label="On this page">
+    <div class="toc-title">On this page</div>
+    <ul class="toc-list" id="tocList"></ul>
+  </aside>
+
+</div><!-- /docs-layout -->
+
+
+<!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  // ── Mobile sidebar toggle ──────────────────────────────────────────
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('docsSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar && sidebar.classList.add('open');
+    overlay && overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar && sidebar.classList.remove('open');
+    overlay && overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn && menuBtn.addEventListener('click', function() {
+    if (sidebar && sidebar.classList.contains('open')) closeSidebar();
+    else openSidebar();
+  });
+
+  overlay && overlay.addEventListener('click', closeSidebar);
+
+  // Close on resize past mobile breakpoint
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1024) closeSidebar();
+  });
+
+  // ── Auto table of contents ─────────────────────────────────────────
+  const tocList = document.getElementById('tocList');
+  const article = document.querySelector('article.prose');
+
+  if (tocList && article) {
+    const headings = article.querySelectorAll('h2, h3');
+
+    if (headings.length === 0) {
+      const tocEl = document.getElementById('docsToc');
+      if (tocEl) tocEl.style.display = 'none';
+    } else {
+      headings.forEach(function(h, i) {
+        // Ensure heading has an ID
+        if (!h.id) {
+          h.id = 'section-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-item' + (h.tagName === 'H3' ? ' toc-h3' : '');
+
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Highlight active section on scroll
+      const tocLinks = tocList.querySelectorAll('a');
+
+      function updateToc() {
+        let activeIndex = 0;
+        const scrollTop = window.scrollY + 80;
+
+        headings.forEach(function(h, i) {
+          if (h.offsetTop <= scrollTop) activeIndex = i;
+        });
+
+        tocList.querySelectorAll('.toc-item').forEach(function(item, i) {
+          item.classList.toggle('active', i === activeIndex);
+        });
+      }
+
+      window.addEventListener('scroll', updateToc, { passive: true });
+      updateToc();
+    }
+  }
+
+  // ── Sidebar search (client-side filter) ───────────────────────────
+  const searchInput = document.getElementById('sidebarSearch');
+  const sidebarLinks = sidebar ? sidebar.querySelectorAll('.sidebar-link') : [];
+
+  if (searchInput && sidebarLinks.length) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+
+      sidebarLinks.forEach(function(link) {
+        const text = link.textContent.toLowerCase();
+        const section = link.closest('.sidebar-section');
+        if (!query) {
+          link.style.display = '';
+        } else {
+          link.style.display = text.includes(query) ? '' : 'none';
+        }
+      });
+
+      // Hide empty section titles
+      if (sidebar) {
+        sidebar.querySelectorAll('.sidebar-section').forEach(function(sec) {
+          const visibleLinks = sec.querySelectorAll('.sidebar-link:not([style*="none"])');
+          sec.style.display = (!query || visibleLinks.length > 0) ? '' : 'none';
+        });
+      }
+    });
+  }
+
+  // ── Scroll active sidebar link into view ───────────────────────────
+  const activeLink = sidebar && sidebar.querySelector('.sidebar-link.active');
+  if (activeLink) {
+    activeLink.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+})();
+</script>
+
+
+
+</body></html>

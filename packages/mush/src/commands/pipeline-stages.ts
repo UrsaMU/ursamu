@@ -8,10 +8,26 @@
 import type { ICmd, IDBObj } from "./types.ts";
 import { dbojs, hydrate } from "../world/dbobjs.ts";
 import { evaluateLock } from "../world/locks.ts";
-import { send, getConfig } from "@ursamu/core";
+import { send, sendPayload, sessions, getConfig } from "@ursamu/core";
 import { createNativeSDK } from "./sdk.ts";
 import { InterceptorService } from "../world/interceptor-service.ts";
 import type { Intent as InterceptIntent } from "../world/interceptor-service.ts";
+
+/** Web play: faded input line when cmd.echo !== false. */
+function maybeEchoCmd(
+  socketId: string,
+  msg: string,
+  echo: boolean | undefined,
+): void {
+  if (echo === false) return;
+  const ct = sessions.get(socketId)?.meta?.clientType;
+  if (ct !== "web") return;
+  const text = String(msg ?? "").trim();
+  if (!text) return;
+  sendPayload(socketId, "", {
+    ui: { type: "cmd-echo", text },
+  });
+}
 
 // ---------------------------------------------------------------------------
 // parseIntent
@@ -151,6 +167,9 @@ export async function matchNativeCmd(
       rawActor.data.lastCommand = Date.now();
       await dbojs.modify({ id: rawActor.id }, "$set", rawActor);
     }
+
+    // Web input echo — addCmd({ echo: false }) to suppress (say/pose)
+    maybeEchoCmd(socketId, rawMsg, cmd.echo);
 
     const u = await createNativeSDK(socketId, actorId || "#-1", {
       name: cmd.name,
@@ -294,6 +313,9 @@ export async function matchExits(
       .filter(Boolean);
     // Exact alias match only (avoids "n" eating "nowhere").
     if (!aliases.includes(trimmedMsg)) continue;
+
+    // Exits are commands — show faded input on web
+    maybeEchoCmd(socketId, msg.trim(), true);
 
     const { traverseExit } = await import("./exit-traverse.ts");
     return await traverseExit(socketId, actor, exit, msg);

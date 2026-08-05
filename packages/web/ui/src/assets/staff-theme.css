@@ -1,0 +1,308 @@
+/**
+ * @ursamu/web staff theme — SOURCE OF TRUTH for console UI.
+ *
+ * Host serves this at GET /admin/staff-theme.css.
+ * In-console plugin views inherit these variables automatically.
+ * Standalone plugin SPAs MUST load this file (or a synced copy)
+ * and MUST NOT redefine token values.
+ *
+ * @see packages/web/design.md § Plugin UI contract
+ */
+
+/* ── Tokens (do not override in plugins) ─────────────────────────── */
+
+:root {
+  --bg: #0b0a12;
+  --bg-elevated: #12101c;
+  --bg-surface: #161422;
+  --bg-surface-2: #1c1929;
+  --bg-code: #0e0c16;
+  --border: #3a3554;
+  --border-subtle: #2a2640;
+  --border-strong: #5a5480;
+  /* Body text — tuned for WCAG AA on dark surfaces */
+  --text: #f0eef8;
+  --text-secondary: #c4c0d4;
+  --text-muted: #b0a9c4;
+  /* On solid primary fills (white on deep violet ≥ 7:1) */
+  --text-on-primary: #ffffff;
+  --text-inverse: #0b0a12;
+  /*
+   * Brand accent (links, chips, nav active). Lighter so it
+   * clears AA on --bg (~7:1). Solid buttons use --btn-*.
+   */
+  --primary: #a78bfa;
+  --primary-hover: #c4b5fd;
+  --primary-muted: rgba(167, 139, 250, 0.16);
+  --primary-border: rgba(167, 139, 250, 0.45);
+  --primary-focus: rgba(167, 139, 250, 0.55);
+  /* Solid primary button fill — deep violet + white label */
+  --btn-primary-bg: #6d28d9;
+  --btn-primary-bg-hover: #7c3aed;
+  --btn-primary-fg: var(--text-on-primary);
+  /* Default / secondary solid chip */
+  --btn-default-bg: var(--bg-surface-2);
+  --btn-default-fg: var(--text);
+  --btn-default-border: var(--border-strong);
+  --btn-outline-fg: var(--text);
+  --btn-outline-border: var(--border-strong);
+  --success: #4ade9f;
+  --warning: #f0c14d;
+  --error: #ff8a8f;
+  --info: #8ec5ff;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius: var(--radius-md);
+  --header-h: 56px;
+  --sidebar-w: 240px;
+  --gutter-x: 2rem;
+  --gutter-y: 1.75rem;
+  --gutter-x-lg: 2.75rem;
+  --gutter-y-lg: 2.25rem;
+  --focus-ring: none;
+  --scrollbar-size: 10px;
+  --scrollbar-track: var(--bg-elevated);
+  --scrollbar-thumb: #3a3454;
+  --scrollbar-thumb-hover: #524a72;
+  --scrollbar-thumb-active: var(--primary);
+  --scrollbar-corner: var(--bg-elevated);
+  --font-ui: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono",
+    Menlo, Consolas, monospace;
+  --control-h: 2.35rem;
+  color-scheme: dark;
+}
+
+/* ── Plugin utilities (prefer these over one-off colors) ─────────── */
+
+.staff-muted {
+  color: var(--text-muted) !important;
+}
+
+.staff-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.staff-error {
+  color: var(--error) !important;
+  font-size: 0.8125rem;
+}
+
+.staff-success {
+  color: var(--success) !important;
+  font-size: 0.8125rem;
+}
+
+.staff-warning {
+  color: var(--warning) !important;
+}
+
+.staff-kicker {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.staff-page-title {
+  margin: 0.2rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.staff-lede {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  max-width: 36rem;
+}
+
+.staff-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.staff-panel-elevated {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+}
+
+.staff-code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background: var(--bg-code);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+.staff-badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.staff-badge-warn {
+  border-color: rgba(230, 184, 77, 0.45);
+  color: var(--warning);
+  background: rgba(230, 184, 77, 0.08);
+}
+
+.staff-badge-ok {
+  border-color: rgba(62, 207, 142, 0.4);
+  color: var(--success);
+  background: rgba(62, 207, 142, 0.08);
+}
+
+/* Buttons — high-contrast; plugins should use these or var() only */
+.staff-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-h);
+  padding: 0.4rem 0.9rem;
+  margin: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--btn-default-border);
+  background: var(--btn-default-bg);
+  color: var(--btn-default-fg);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.staff-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.staff-btn-primary {
+  background: var(--btn-primary-bg);
+  border-color: transparent;
+  color: var(--btn-primary-fg);
+  font-weight: 600;
+}
+
+.staff-btn-primary:hover:not(:disabled) {
+  background: var(--btn-primary-bg-hover);
+  color: var(--btn-primary-fg);
+}
+
+.staff-btn-ghost,
+.staff-btn-outline {
+  background: transparent;
+  border-color: var(--btn-outline-border);
+  color: var(--btn-outline-fg);
+}
+
+.staff-btn-ghost:hover:not(:disabled),
+.staff-btn-outline:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--bg-surface-2);
+  border-color: var(--border-strong);
+}
+
+/* Form controls */
+.staff-input,
+.staff-select,
+.staff-textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--control-h);
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-code);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.staff-textarea {
+  min-height: 8rem;
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.staff-input:focus,
+.staff-select:focus,
+.staff-textarea:focus,
+.staff-btn:focus {
+  outline: none;
+}
+
+.staff-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+/* List row pattern (jobs / bbs style) */
+.staff-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: min(42vh, 24rem);
+  overflow: auto;
+}
+
+.staff-row {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-height: 0;
+}
+
+.staff-row:last-child {
+  border-bottom: none;
+}
+
+.staff-row:hover,
+.staff-row.is-active {
+  background: var(--bg-surface-2);
+}
+
+.staff-row-title {
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+
+.staff-row-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

@@ -1,17 +1,13 @@
 // +map / +move commands. Single catch-all switch dispatcher for +map per
 // CLAUDE.md catch-all gotcha; +move is a separate command.
 
-import { addCmd, DBO } from "ursamu";
+import { addCmd, enterObject, leaveObject } from "ursamu";
 import type { IDBObj, IUrsamuSDK } from "ursamu";
 import {
   CONTROLLING_STATE_FIELD,
   MAP_CAPABLE_FLAG,
-  OVERLAY_COLLECTION,
   SPECTATING_STATE_FIELD,
-  type TileOverlay,
 } from "./schemas.ts";
-
-type StoredOverlay = TileOverlay & { id: string };
 
 async function lookup(u: IUrsamuSDK, id: string): Promise<IDBObj | null> {
   const rows = await u.db.search({ id });
@@ -21,6 +17,7 @@ import { getOverlay } from "./state.ts";
 import {
   destroyEntity,
   getActiveEntity,
+  getEntitiesByContainer,
   getEntity,
   moveEntity,
   setEntity,
@@ -31,34 +28,35 @@ import {
   parseCoord,
   validateCoord,
 } from "./commands_internals.ts";
-import { defaultMapConfig } from "./config.default.ts";
+import { getMapConfig } from "./mapconfig.ts";
 import { entityStep, STEP_DIRECTIONS } from "./move.ts";
 import { resolveDefaultCommandToggle } from "./plugin-config.ts";
+import { descFormatHandler } from "./format.ts";
+import {
+  handleAuthorize,
+  handleClear,
+  handlePrune,
+  handleStats,
+} from "./commands_builder.ts";
 
-const HELP = `+map[/<switch>] [<args>]  — Procedural sector map & movement.
+const HELP = `+map[/<switch>] [<args>]  — Sector map (enter a vehicle first).
+
+Board with normal object commands:
+  enter Scout · leave
+  (aliases: +map/embark · +map/disembark)
 
 Switches:
-  /here                 Render the sector around your active entity (default).
-  /jump <x> <y> [z] [realm]  Admin: move your active entity to a coord.
-  /embark <target>      Board a map-capable vehicle in your room.
-  /disembark            Step out of the vehicle you are inside.
-  /launch               Take the vehicle you are in onto the map.
-  /land                 Bring your in-map vehicle back to its dock.
-  /link <entityId>      Builder+: command an entity remotely.
-  /unlink               Stop commanding an entity remotely.
-  /spectate <entityId>  Admin: watch an entity's vision.
-  /unspectate           Admin: stop spectating.
-  /stats                Builder+: dump system stats.
+  /here /launch /land
+  /authorize /clear /stats /prune   (builder+)
+  /jump /spectate /unspectate       (admin)
+  /link /unlink · /embark /disembark
 
-+move <dir>             Move active entity (n/s/e/w/ne/nw/se/sw/u/d).
++move <dir>  — n s e w ne nw se sw u d
 
 Examples:
-  +map                          Render the sector around you.
-  +map/embark AT-RT             Board the AT-RT in your room.
-  +map/launch                   Take the AT-RT onto the map.
-  +map/jump 120 -40             Admin: jump your entity to (120,-40,0).
-  +map/link entity-42           Take remote control of entity-42.
-  +move ne                      Move one tile northeast.`;
+  enter Scout · +map/launch · +map
+  +map/authorize 0 0=infrastructure:#:Bunker
+  +help map`;
 
 function isAdmin(u: IUrsamuSDK): boolean {
   return u.me.flags.has("admin") || u.me.flags.has("wizard") ||
@@ -70,7 +68,8 @@ function isBuilder(u: IUrsamuSDK): boolean {
 }
 
 function noActiveMsg(): string {
-  return "%crYou have no map presence. Embark a map-capable vehicle first.%cn";
+  return "%crYou have no map presence. " +
+    "enter a map-capable vehicle, then +map/launch.%cn";
 }
 
 async function handleHere(u: IUrsamuSDK): Promise<void> {
@@ -80,7 +79,27 @@ async function handleHere(u: IUrsamuSDK): Promise<void> {
     return;
   }
   const c = active.entity.coord;
-  u.send(`%cyMap centred on ${active.entity.name} at (${c.x}, ${c.y}, ${c.z}). Look to view.%cn`);
+  // Render the sector here — DESCFORMAT also paints look when inside
+  // the vehicle, but +map should never require a second command.
+  let target: IDBObj = u.here;
+  if (active.entity.containerId) {
+    const rows = await u.db.search({ id: active.entity.containerId });
+    if (rows[0]) target = rows[0];
+  }
+  try {
+    const mapOut = await descFormatHandler(u, target, "");
+    if (mapOut) {
+      u.send(mapOut);
+      return;
+    }
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[map] +map render failed:", msg);
+  }
+  u.send(
+    `%cyMap centred on ${active.entity.name} at ` +
+      `(${c.x}, ${c.y}, ${c.z}).%cn`,
+  );
 }
 
 async function handleJump(u: IUrsamuSDK, rest: string): Promise<void> {
@@ -102,9 +121,14 @@ async function handleJump(u: IUrsamuSDK, rest: string): Promise<void> {
   u.send(`%cgJumped ${active.entity.name} to (${coord.x}, ${coord.y}, ${coord.z}).%cn`);
 }
 
+/**
+ * Embark/disembark are thin aliases of engine enter/leave so vehicles
+ * obey the same locks (enter_ok, @lock/enter) as any object.
+ * Prefer: enter Scout / leave
+ */
 async function handleEmbark(u: IUrsamuSDK, rawName: string): Promise<void> {
   if (!rawName) {
-    u.send("Usage: +map/embark <target>");
+    u.send("Usage: +map/embark <target>  (or: enter <target>)");
     return;
   }
   const target = await u.util.target(u.me, rawName, true);
@@ -112,33 +136,18 @@ async function handleEmbark(u: IUrsamuSDK, rawName: string): Promise<void> {
     u.send("%crNo such target here.%cn");
     return;
   }
-  if (target.location !== u.here.id) {
-    u.send("%crThat is not in your room.%cn");
-    return;
-  }
   if (!target.flags.has(MAP_CAPABLE_FLAG)) {
-    u.send("%crThat is not map-capable.%cn");
+    u.send(
+      "%crThat is not map-capable. " +
+        "Use enter for ordinary objects.%cn",
+    );
     return;
   }
-  await u.db.modify(u.me.id, "$set", { location: target.id });
-  u.send(`%cgYou board ${target.name}.%cn`);
+  await enterObject(u, target);
 }
 
 async function handleDisembark(u: IUrsamuSDK): Promise<void> {
-  const locId = u.me.location;
-  if (typeof locId !== "string" || !locId) {
-    u.send("%crYou are not inside anything.%cn");
-    return;
-  }
-  const container = await lookup(u, locId);
-  if (!container || !container.flags.has(MAP_CAPABLE_FLAG)) {
-    u.send("%crYou are not inside a map-capable vehicle.%cn");
-    return;
-  }
-  const dock = (container.state ?? {}).lastDock as string | undefined;
-  const dest = (dock && typeof dock === "string") ? dock : container.location;
-  await u.db.modify(u.me.id, "$set", { location: dest });
-  u.send(`%cgYou disembark from ${container.name}.%cn`);
+  await leaveObject(u);
 }
 
 async function handleLaunch(u: IUrsamuSDK): Promise<void> {
@@ -152,11 +161,24 @@ async function handleLaunch(u: IUrsamuSDK): Promise<void> {
     u.send("%crPermission denied — only the vehicle owner can launch.%cn");
     return;
   }
+  const already = await getEntitiesByContainer(container.id);
+  if (already.length > 0) {
+    u.send("%crAlready launched. Use +map/land first.%cn");
+    return;
+  }
   const cstate = container.state ?? {};
   const rawCoord = cstate.coord ?? { x: 0, y: 0, z: 0 };
-  const coord = validateCoord(rawCoord, defaultMapConfig.bounds);
+  const bounds = getMapConfig(
+    typeof (rawCoord as { realm?: string }).realm === "string"
+      ? (rawCoord as { realm?: string }).realm
+      : undefined,
+  ).bounds;
+  const coord = validateCoord(rawCoord, bounds);
   if (!coord) {
-    u.send("%crLaunch failed: vehicle has invalid or out-of-bounds state.coord.%cn");
+    u.send(
+      "%crLaunch failed: vehicle has invalid or out-of-bounds " +
+        "state.coord.%cn",
+    );
     return;
   }
   const entityId = `entity-${container.id}-${Date.now()}`;
@@ -174,7 +196,10 @@ async function handleLaunch(u: IUrsamuSDK): Promise<void> {
     "state.lastDock": dock,
     location: `map:${entityId}`,
   });
-  u.send(`%cg${container.name} launches into the map at (${coord.x}, ${coord.y}, ${coord.z}).%cn`);
+  u.send(
+    `%cg${container.name} launches into the map at ` +
+      `(${coord.x}, ${coord.y}, ${coord.z}).%cn`,
+  );
 }
 
 async function handleLand(u: IUrsamuSDK): Promise<void> {
@@ -280,23 +305,6 @@ async function handleUnspectate(u: IUrsamuSDK): Promise<void> {
   u.send("%cyNo longer spectating.%cn");
 }
 
-async function handleStats(u: IUrsamuSDK): Promise<void> {
-  if (!isBuilder(u)) {
-    u.send("%crPermission denied — builder+ only.%cn");
-    return;
-  }
-  const overlays = await new DBO<StoredOverlay>(OVERLAY_COLLECTION).all();
-  const byKind: Record<string, number> = {};
-  for (const o of overlays) {
-    const k = o.kind ?? "(none)";
-    byKind[k] = (byKind[k] ?? 0) + 1;
-  }
-  const kindLines = Object.entries(byKind).map(([k, n]) => `    ${k}: ${n}`).join("\n");
-  u.send(
-    `%chMap stats%cn\n  overlays: ${overlays.length}\n${kindLines || "    (none)"}`,
-  );
-}
-
 let mapRegistered = false;
 let moveRegistered = false;
 
@@ -337,11 +345,14 @@ export function registerDefaultCommands(opts?: {
       if (sw === "disembark") return await handleDisembark(u);
       if (sw === "launch") return await handleLaunch(u);
       if (sw === "land") return await handleLand(u);
+      if (sw === "authorize") return await handleAuthorize(u, rest);
+      if (sw === "clear") return await handleClear(u, rest);
       if (sw === "link") return handleLink(u, rest);
       if (sw === "unlink") return handleUnlink(u);
       if (sw === "spectate") return handleSpectate(u, rest);
       if (sw === "unspectate") return handleUnspectate(u);
       if (sw === "stats") return handleStats(u);
+      if (sw === "prune") return await handlePrune(u);
 
       u.send(`%crUnknown switch "/${sw}". See +help map.%cn`);
     },

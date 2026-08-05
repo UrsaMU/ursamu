@@ -77,24 +77,30 @@ export class Obj {
   ): Promise<Obj | null> {
     if (obj === undefined || obj === "") return null;
 
-    if (typeof obj === "string") {
-      if (obj.startsWith("#")) {
-        const id = obj.slice(1);
-        const found = await dbojs.queryOne({ id });
-        if (found) return new Obj().load(found);
-      } else {
-        const found = await dbojs.queryOne({
-          $or: [
-            { "data.name": new RegExp(obj, "i") },
-            { id: `${obj}` },
-            { "data.alias": new RegExp(obj, "i") },
-          ],
-        });
-        if (found) return new Obj().load(found);
-      }
-    } else if (typeof obj === "number") {
+    // Numbers and pure digit strings (incl. "#12") are DB ids — never
+    // treat them as name substrings. (RegExp("2","i") matched "Smk130752".)
+    if (typeof obj === "number") {
       const found = await dbojs.queryOne({ id: String(obj) });
-      if (found) return new Obj().load(found);
+      return found ? new Obj().load(found) : null;
+    }
+
+    if (typeof obj === "string") {
+      const raw = obj.trim();
+      const idPart = raw.startsWith("#") ? raw.slice(1) : raw;
+      if (/^\d+$/.test(idPart)) {
+        const found = await dbojs.queryOne({ id: idPart });
+        return found ? new Obj().load(found) : null;
+      }
+
+      // Name / alias — exact match only (case-insensitive)
+      const esc = idPart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const found = await dbojs.queryOne({
+        $or: [
+          { "data.name": new RegExp(`^${esc}$`, "i") },
+          { "data.alias": new RegExp(`^${esc}$`, "i") },
+        ],
+      });
+      return found ? new Obj().load(found) : null;
     }
 
     return null;
@@ -120,7 +126,11 @@ export class Obj {
   }
 
   get flags(): string {
-    return this.obj.flags;
+    const f = this.obj?.flags as unknown;
+    if (typeof f === "string") return f;
+    if (f instanceof Set) return [...f].map(String).join(" ");
+    if (Array.isArray(f)) return f.map(String).join(" ");
+    return String(f ?? "");
   }
 
   get dbref(): string {

@@ -7,30 +7,280 @@
 
 // ─── standalone plugin templates ──────────────────────────────────────────────
 
+export type PluginUiOpts = {
+  adminEmbed?: boolean;
+  siteStatic?: boolean;
+  /** Human label for nav (e.g. "My Tool") */
+  label?: string;
+};
+
 export function standalonePluginIndexTs(
   name: string,
   version: string,
   desc: string,
   varName: string,
+  ui: PluginUiOpts = {},
 ): string {
-  return `import type { IPlugin } from "ursamu/types";
+  const label = ui.label ?? name;
+  const hasUi = Boolean(ui.adminEmbed || ui.siteStatic);
+  const uiImport = hasUi
+    ? `import { register${toTitleSafe(name)}Ui, unregister${toTitleSafe(name)}Ui } from "./ui-bridge.ts";\n`
+    : "";
+  const initUi = hasUi
+    ? `    await register${toTitleSafe(name)}Ui();\n`
+    : "";
+  const removeUi = hasUi
+    ? `    await unregister${toTitleSafe(name)}Ui();\n`
+    : "";
 
+  return `import type { IPlugin } from "ursamu/types";
+${uiImport}
 const ${varName}Plugin: IPlugin = {
   name: "${name}",
   version: "${version}",
   description: "${desc}",
 
   init: async () => {
-    console.log("[${name}] Plugin initialized");
+${initUi}    console.log("[${name}] Plugin initialized");
     return true;
   },
 
   remove: async () => {
-    console.log("[${name}] Plugin removed");
+${removeUi}    console.log("[${name}] Plugin removed");
   },
 };
 
 export default ${varName}Plugin;
+`;
+}
+
+/** TitleCase identifier safe for TypeScript symbols. */
+function toTitleSafe(name: string): string {
+  return name
+    .replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
+    .replace(/^[a-z]/, (c) => c.toUpperCase())
+    .replace(/[^a-zA-Z0-9]/g, "");
+}
+
+/** Soft-register staff + public FE surfaces (optional packages). */
+export function pluginUiBridgeTs(
+  name: string,
+  ui: PluginUiOpts,
+): string {
+  const label = (ui.label ?? name).replace(/"/g, '\\"');
+  const title = toTitleSafe(name);
+  const doAdmin = Boolean(ui.adminEmbed);
+  const doSite = Boolean(ui.siteStatic);
+
+  const adminReg = doAdmin
+    ? `
+  try {
+    const web = await import("@ursamu/web");
+    const page = {
+      id: "${name}",
+      label: "${label}",
+      description: "${label} staff tools.",
+      embed: "/admin/${name}/",
+      order: 55,
+    };
+    if (typeof web.softRegisterStaffPage === "function") {
+      await web.softRegisterStaffPage(page);
+    } else {
+      web.registerStaffPage?.(page);
+    }
+    web.registerStaffStatic?.({
+      id: "${name}",
+      root: new URL("./admin/", import.meta.url),
+    });
+    web.registerStaffSideNav?.({
+      pageId: "${name}",
+      groups: [
+        {
+          title: "${label}",
+          items: [
+            { id: "home", label: "Home", icon: "·" },
+            {
+              id: "about",
+              label: "About",
+              query: { tab: "about" },
+              icon: "?",
+            },
+          ],
+        },
+      ],
+    });
+  } catch {
+    /* @ursamu/web optional */
+  }
+`
+    : "";
+
+  const adminUnreg = doAdmin
+    ? `
+  try {
+    const web = await import("@ursamu/web");
+    web.unregisterStaffPage?.("${name}");
+    web.unregisterStaffStatic?.("${name}");
+    web.unregisterStaffSideNav?.("${name}");
+  } catch {
+    /* optional */
+  }
+`
+    : "";
+
+  const siteReg = doSite
+    ? `
+  try {
+    const site = await import("@ursamu/site");
+    site.registerSiteNav?.({
+      id: "${name}",
+      label: "${label}",
+      href: "/site/p/${name}/",
+      order: 50,
+    });
+    site.registerSiteStatic?.({
+      id: "${name}",
+      root: new URL("./public/", import.meta.url),
+    });
+    site.registerSiteMenuBlock?.("${name}-links", () => ({
+      items: [
+        { label: "${label}", href: "/site/p/${name}/" },
+      ],
+    }));
+  } catch {
+    /* @ursamu/site optional */
+  }
+`
+    : "";
+
+  const siteUnreg = doSite
+    ? `
+  try {
+    const site = await import("@ursamu/site");
+    site.unregisterSiteNav?.("${name}");
+    site.unregisterSiteStatic?.("${name}");
+    site.unregisterSiteMenuBlock?.("${name}-links");
+  } catch {
+    /* optional */
+  }
+`
+    : "";
+
+  return `/**
+ * Soft UI registration for ${name}.
+ * Requires @ursamu/web and/or @ursamu/site in the game import map.
+ */
+
+export async function register${title}Ui(): Promise<void> {
+${adminReg}${siteReg}}
+
+export async function unregister${title}Ui(): Promise<void> {
+${adminUnreg}${siteUnreg}}
+`;
+}
+
+/** Minimal staff-console embed SPA (loads host theme). */
+export function pluginAdminIndexHtml(name: string, label: string): string {
+  return `<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${label} · Staff</title>
+    <link rel="stylesheet" href="/admin/staff-theme.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 1.25rem 1.5rem;
+        font-family: var(--pico-font-family, system-ui, sans-serif);
+        background: var(--bg, #0b0a12);
+        color: var(--text, #e8e6f0);
+      }
+      h1 { font-size: 1.35rem; margin: 0 0 0.35rem; }
+      .lede { color: var(--text-muted, #9b97ad); margin: 0 0 1.25rem; }
+      .panel {
+        border: 1px solid var(--border, #2a2740);
+        border-radius: 6px;
+        padding: 1rem 1.15rem;
+        background: var(--bg-surface, #12101c);
+      }
+      code { font-size: 0.9em; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p class="lede">Plugin</p>
+      <h1>${label}</h1>
+      <p class="lede">
+        Embedded staff UI for <code>${name}</code>.
+        Edit <code>admin/</code> and rebuild as needed.
+      </p>
+    </header>
+    <section class="panel" id="app">
+      <p>Hello from <strong>${label}</strong>.</p>
+      <p class="lede">
+        Call your REST API at
+        <code>/api/v1/${name}</code>.
+      </p>
+    </section>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
+`;
+}
+
+export function pluginAdminAppJs(name: string): string {
+  return `/**
+ * ${name} staff embed — keep chrome minimal; host owns theme.
+ */
+const el = document.getElementById("app");
+if (el) {
+  // Example: probe the plugin API when staff is logged in.
+  fetch("/api/v1/${name}", { credentials: "same-origin" })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data) => {
+      if (!data || !el) return;
+      const pre = document.createElement("pre");
+      pre.textContent = JSON.stringify(data, null, 2);
+      el.appendChild(pre);
+    })
+    .catch(() => { /* offline / unauthenticated */ });
+}
+`;
+}
+
+/** Minimal public FE page under /site/p/<name>/. */
+export function pluginPublicIndexHtml(name: string, label: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${label}</title>
+    <link rel="stylesheet" href="/site/css/tokens.css" />
+    <link rel="stylesheet" href="/site/css/skins/default.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 2rem 1.5rem;
+        font-family: system-ui, sans-serif;
+        background: var(--site-bg, #0b0a12);
+        color: var(--site-text, #f0eef8);
+        max-width: 40rem;
+      }
+      a { color: var(--site-accent, #a78bfa); }
+    </style>
+  </head>
+  <body>
+    <p><a href="/site/">← Site home</a></p>
+    <h1>${label}</h1>
+    <p>
+      Public page for <code>${name}</code>, served at
+      <code>/site/p/${name}/</code>.
+    </p>
+    <p>Replace this file in <code>public/</code>.</p>
+  </body>
+</html>
 `;
 }
 
@@ -157,11 +407,24 @@ export function inTreePluginIndexTs(
   name: string,
   handlerName: string,
   varName: string,
+  ui: PluginUiOpts = {},
 ): string {
+  const hasUi = Boolean(ui.adminEmbed || ui.siteStatic);
+  const title = toTitleSafe(name);
+  const uiImport = hasUi
+    ? `import { register${title}Ui, unregister${title}Ui } from "./ui-bridge.ts";\n`
+    : "";
+  const initUi = hasUi
+    ? `    void register${title}Ui();\n`
+    : "";
+  const removeUi = hasUi
+    ? `    void unregister${title}Ui();\n`
+    : "";
+
   return `import type { IPlugin } from "ursamu/types";
 import { registerPluginRoute, registerHelpDir } from "ursamu/app";
 import { ${handlerName} } from "./router.ts";
-import "./commands.ts"; // Phase 1 — addCmd() fires here via module-load side effects
+${uiImport}import "./commands.ts"; // Phase 1 — addCmd() fires here via module-load side effects
 
 // Named handlers — required so remove() can call .off() with the same reference.
 // const onLogin = (e: SessionEvent) => { /* ... */ };
@@ -174,12 +437,12 @@ const ${varName}Plugin: IPlugin = {
   init: () => {
     registerPluginRoute("/api/v1/${name}", ${handlerName});
     registerHelpDir(new URL("./help", import.meta.url), "${name}");
-    // gameHooks.on("player:login", onLogin);
+${initUi}    // gameHooks.on("player:login", onLogin);
     return true;
   },
 
   remove: () => {
-    // gameHooks.off("player:login", onLogin); // one .off() per .on() above
+${removeUi}    // gameHooks.off("player:login", onLogin); // one .off() per .on() above
   },
 };
 
@@ -270,13 +533,38 @@ Deno.test("${name} — placeholder (replace with real tests)", OPTS, () => {
 
 // ─── game project templates ────────────────────────────────────────────────────
 
+/** Default game.layout chrome — yellow title, green fill. */
+export const DEFAULT_GAME_LAYOUT = {
+  header: "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+  divider: "[center(%ch%cy%0%cn,%1,%cg-%cn)]",
+  footer: "[repeat(%cg=%cn,%1)]",
+} as const;
+
 export function gameMainTs(name: string, isLocal = false): string {
   return `// Main entry point for ${name}
-import { mu } from "ursamu";
+// getConfig from @ursamu/mush (same core as mu). Do not import
+// getConfig from @ursamu/core separately — dual core can return
+// undefined for game.layout and wipe boot templates.
+import {
+  mu,
+  applyLayoutFromConfig,
+  getConfig,
+} from "@ursamu/mush";
 
 const game = await mu(undefined, undefined, {
   pluginsDir: "",
 });
+
+// Load game.layout.* (header / divider / footer) from config.
+// mu() applies this at boot; re-apply so dual-package hosts still
+// honor config on the instance this process imported.
+applyLayoutFromConfig(
+  getConfig<{
+    header?: string;
+    divider?: string;
+    footer?: string;
+  }>("game.layout"),
+);
 
 console.log(\`\${game.config.get("game.name")} main server is running!\`);
 `;
@@ -286,12 +574,61 @@ export function gameConfigJson(
   name: string,
   selections: string[],
 ): string {
+  const hasSite = selections.some(
+    (p) => p === "@ursamu/site" || p.endsWith("/site"),
+  );
+  const plugins: Record<string, unknown> = {
+    channels: {
+      defaults: [
+        { name: "Public", alias: "pub", lock: "connected" },
+        {
+          name: "Admin",
+          alias: "ad",
+          lock: "connected admin+",
+        },
+      ],
+    },
+  };
+  // Public portal at / (not only /site/) when site is installed.
+  if (hasSite) {
+    plugins.site = {
+      serveRoot: true,
+      title: name,
+      skin: "default",
+      nav: [
+        { id: "home", label: "Home", href: "/", order: 10 },
+        {
+          id: "wiki",
+          label: "Wiki",
+          href: "/wiki/",
+          order: 20,
+        },
+        {
+          id: "help",
+          label: "Help",
+          href: "/help/",
+          order: 30,
+        },
+        {
+          id: "play",
+          label: "Play Online",
+          href: "/play",
+          order: 40,
+          require: "connected",
+        },
+      ],
+    };
+  }
   const config = {
     server: {
       telnet: 4201,
+      // Main binds WS on ws/wsPort; telnet sidecar dials the same port.
+      // Keep http as a legacy alias for single-port layouts.
+      ws: 4202,
+      wsPort: 4202,
       http: 4202,
       apiPort: 4203,
-      db: "data/ursamu.db",
+      db: "data/typegraph.db",
       plugins: selections,
     },
     game: {
@@ -302,15 +639,9 @@ export function gameConfigJson(
       text: {
         connect: "text/default_connect.txt",
       },
+      layout: { ...DEFAULT_GAME_LAYOUT },
     },
-    plugins: {
-      channels: {
-        defaults: [
-          { name: "Public", alias: "pub", lock: "connected" },
-          { name: "Admin", alias: "ad", lock: "connected admin+" },
-        ],
-      },
-    },
+    plugins,
   };
   return JSON.stringify(config, null, 2);
 }
@@ -331,8 +662,8 @@ export function gameRunSh(name: string): string {
 
 cd "\$(dirname "\$0")/.." || exit
 
-# Free bound ports (4201 telnet, 4202 ws, 4203 http)
-for port in 4201 4202 4203; do
+# Free bound ports (4201 4202 4203 4211 4212 4213)
+for port in 4201 4202 4203 4211 4212 4213; do
   pids=\$(lsof -ti ":\$port" 2>/dev/null)
   if [ -n "\$pids" ]; then
     echo "Freeing port \$port (PIDs: \$pids)..."
@@ -390,7 +721,7 @@ if [ -f run/supervisor.pid ] && kill -0 "\$(cat run/supervisor.pid)" 2>/dev/null
   exit 1
 fi
 
-for port in 4201 4202 4203; do
+for port in 4201 4202 4203 4211 4212 4213; do
   pids=\$(lsof -ti ":\$port" 2>/dev/null || true)
   [ -n "\$pids" ] && echo "\$pids" | xargs kill -9 2>/dev/null || true
 done
@@ -505,6 +836,181 @@ done
 `;
 }
 
+/**
+ * Production update: merge sample→live config, refresh JSR cache, optional reboot.
+ * Same failure modes Court hit (missing plugins.map, stale cache) are handled here.
+ */
+export function gameSafeUpdateSh(): string {
+  return `#!/bin/bash
+# Safe package/code update for UrsaMU games.
+#
+# 1. git fetch + ff-only pull (or reset if FORCE_RESET=1)
+# 2. merge config.sample.json → config/config.json (plugins list + plugins.*)
+# 3. deno cache --reload --minimum-dependency-age=0 (game can stay up)
+# 4. optional --reboot → scripts/restart.sh (telnet stays up)
+#
+# Usage:
+#   bash scripts/safe-update.sh              # prepare only
+#   bash scripts/safe-update.sh --reboot     # prepare + soft-reboot
+#   bash scripts/safe-update.sh check        # outdated pins only (no write)
+set -euo pipefail
+export PATH="\${HOME}/.deno/bin:/usr/local/bin:/usr/bin:/bin:\${PATH}"
+cd "\$(dirname "\$0")/.." || exit 1
+
+log() { echo "[safe-update] \$*"; }
+
+MODE="prepare"
+REBOOT=0
+for arg in "\$@"; do
+  case "\$arg" in
+    check|--check) MODE="check" ;;
+    --reboot|-r)   REBOOT=1 ;;
+    -h|--help)
+      sed -n '2,20p' "\$0" | sed 's/^# \\?//'
+      exit 0
+      ;;
+  esac
+done
+
+log "HEAD: \$(git log -1 --oneline 2>/dev/null || echo 'not a git repo')"
+
+if [ "\$MODE" = "check" ]; then
+  deno run -A --unstable-kv --minimum-dependency-age=0 \\
+    jsr:@ursamu/ursamu/cli update --dry-run 2>/dev/null \\
+    || log "tip: run 'ursamu update --dry-run' for pin check"
+  exit 0
+fi
+
+# --- git -------------------------------------------------------------------
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git fetch origin 2>/dev/null || git fetch 2>/dev/null || true
+  if [ "\${FORCE_RESET:-0}" = "1" ]; then
+    git reset --hard origin/main 2>/dev/null \\
+      || git reset --hard origin/master 2>/dev/null \\
+      || true
+  else
+    git pull --ff-only 2>/dev/null \\
+      || log "git pull skipped/failed (continue with local tree)"
+  fi
+  log "HEAD after: \$(git log -1 --oneline 2>/dev/null || echo '?')"
+fi
+
+# --- merge live config from sample -----------------------------------------
+python3 - <<'PY'
+import json, sys
+from pathlib import Path
+
+def deep_merge(base, over):
+    if isinstance(base, dict) and isinstance(over, dict):
+        out = dict(base)
+        for k, v in over.items():
+            out[k] = deep_merge(out[k], v) if k in out else v
+        return out
+    return over
+
+def ensure_plugins(live, sample):
+    seen, out = set(), []
+    for n in sample + live:
+        n = str(n).strip()
+        if n and n not in seen:
+            seen.add(n); out.append(n)
+    return out
+
+live_p = Path("config/config.json")
+sample_p = Path("config/config.sample.json")
+live = json.loads(live_p.read_text()) if live_p.exists() else {}
+sample = json.loads(sample_p.read_text()) if sample_p.exists() else {}
+if not sample:
+    print("[safe-update] no config.sample.json — skip merge")
+    sys.exit(0)
+
+srv = live.setdefault("server", {})
+sp = list((sample.get("server") or {}).get("plugins") or [])
+lp = list(srv.get("plugins") or [])
+if sp:
+    before = set(lp)
+    merged = ensure_plugins(lp, sp)
+    srv["plugins"] = merged
+    added = [p for p in merged if p not in before]
+    if added:
+        print("[safe-update] plugins added:", ", ".join(added))
+    else:
+        print("[safe-update] server.plugins ok")
+
+pl = live.setdefault("plugins", {})
+for key, val in (sample.get("plugins") or {}).items():
+    if key not in pl:
+        pl[key] = val
+        print(f"[safe-update] plugins.{key}: added")
+    else:
+        prev = json.dumps(pl[key], sort_keys=True)
+        pl[key] = deep_merge(pl[key], val)
+        if json.dumps(pl[key], sort_keys=True) != prev:
+            print(f"[safe-update] plugins.{key}: merged")
+
+live_p.parent.mkdir(parents=True, exist_ok=True)
+live_p.write_text(json.dumps(live, indent=2) + "\\n")
+print("[safe-update] config written")
+PY
+
+# --- pin bump via CLI when available ---------------------------------------
+if command -v deno >/dev/null 2>&1; then
+  log "bumping JSR pins (ursamu update)..."
+  deno run -A --unstable-kv --minimum-dependency-age=0 \\
+    jsr:@ursamu/ursamu/cli update 2>&1 \\
+    || log "ursamu update finished with warnings"
+fi
+
+# --- cache reload ----------------------------------------------------------
+log "caching packages..."
+rm -f deno.lock
+rm -rf node_modules
+ENTRIES=()
+for e in src/main.ts src/telnet.ts; do
+  [ -f "\$e" ] && ENTRIES+=("\$e")
+done
+if [ "\${#ENTRIES[@]}" -eq 0 ]; then
+  log "ERROR: no entrypoints found"
+  exit 1
+fi
+if ! deno cache --reload --minimum-dependency-age=0 "\${ENTRIES[@]}"; then
+  log "ERROR: deno cache failed — aborting reboot"
+  exit 1
+fi
+log "cache ok"
+
+# --- optional soft reboot --------------------------------------------------
+if [ "\$REBOOT" = "1" ]; then
+  if [ -x scripts/restart.sh ]; then
+    log "soft-reboot (scripts/restart.sh)"
+    bash scripts/restart.sh
+  elif [ -f run/supervisor.pid ]; then
+    kill -USR2 "\$(cat run/supervisor.pid)" 2>/dev/null || true
+  else
+    log "no supervisor — start with: bash scripts/daemon.sh"
+  fi
+  ok=0
+  for i in \$(seq 1 60); do
+    if curl -sf -m 2 http://127.0.0.1:4203/ >/dev/null 2>&1 \\
+       || curl -sf -m 2 http://127.0.0.1:4203/api/v1/help >/dev/null 2>&1; then
+      log "ready at \${i}s"
+      ok=1
+      break
+    fi
+    sleep 1
+  done
+  [ -x scripts/status.sh ] && bash scripts/status.sh || true
+  if [ "\$ok" != "1" ]; then
+    log "WARNING: health check did not pass"
+    tail -30 logs/main.log 2>/dev/null || true
+    exit 2
+  fi
+fi
+
+log "done"
+`;
+}
+
 export function gameEnvFile(): string {
   return `# Stable JWT secret — required for telnet auto-reauth across server restarts.
 # Generated at scaffold time. Treat as a secret; do not commit.
@@ -540,22 +1046,191 @@ Use 'QUIT' to exit.`;
 }
 
 export function gameWikiHome(name: string): string {
-  return `# ${name} Wiki
+  return `---
+title: Home
+draft: false
+featured: true
+readLock: public
+tags: [home, welcome]
+---
 
-Welcome to the ${name} wiki. Use this directory to document your game world, lore, rules, and staff notes.
+Welcome to **${name}**. This is the game's public wiki and information
+hub. Everything a new or returning player needs to get started is here.
 
-## Getting Started
+## Connecting
 
-- [Lore & Setting](lore.md) — world background and theme
-- [Rules](rules.md) — game rules and policies
-- [Staff Notes](staff.md) — internal notes for staff
+The game runs over telnet. Point your MU client at the game's address
+and port, or use the web client if one is configured. Once connected,
+type:
 
-## Tips
+- \`create <name> <password>\` to register a new character
+- \`connect <name> <password>\` to log in
 
-- Add new \`.md\` files to this directory for each topic.
-- Link between pages using relative paths, e.g. \`[Rules](rules.md)\`.
+If you do not have a MU client, MUSHclient, Mudlet, and BeipMU are
+all free and work well.
+
+## What is a MUSH?
+
+A MUSH (Multi-User Shared Hallucination) is a text-based roleplaying
+game. Players write collaborative fiction in real time inside a shared
+virtual world. There is no graphics layer. The story is the interface.
+
+${name} runs on **UrsaMU**, a modern engine that keeps the classical
+telnet tradition and adds a web admin console, a wiki, and job tracking.
+
+## Basic commands
+
+| Command | What it does |
+|---|---|
+| \`look\` | Describe your current room |
+| \`who\` | List connected players |
+| \`say <text>\` | Speak aloud in your room |
+| \`pose <text>\` | Describe an action |
+| \`go <direction>\` | Move through an exit |
+| \`+help\` | Open the in-game help system |
+| \`quit\` | Disconnect |
+
+See the [[commands/basic|Basic Commands Guide]] for a full reference.
+
+## Finding help
+
+- **In-game:** type \`+help\` or \`+help <topic>\`
+- **Page staff:** type \`+page <staff name>=<message>\`
+- **Support & Staff:** see [[help/staff|Staff and Support]]
+- **Code of Conduct:** review our [[rules/conduct|Code of Conduct]]
+
+## Staff and approval
+
+New characters are welcome to explore and read. To take part in scenes
+requiring an approved character, review the [[rules/approval|Character Approval Guide]]
+and contact staff in-game.
 `;
 }
+
+export function gameWikiRulesApproval(name: string): string {
+  return `---
+title: Character Approval
+draft: false
+readLock: public
+tags: [rules, approval]
+---
+
+# Character Approval
+
+New characters must complete the approval process before entering full
+IC play on **${name}**.
+
+## Approval steps
+
+1. **Connect to the game** and create your character.
+2. **Complete character generation** using \`+cg\` or the in-game setup flow.
+3. **Submit your sheet** for staff review using \`+cg/submit\`.
+4. **Wait for staff review.** A staff member will examine your sheet and
+   notify you via \`+job\` or \`+page\`.
+
+## Approval criteria
+
+Staff check character sheets for:
+
+- **Theme fit:** Does the character fit the setting and world tone?
+- **Mechanics:** Are stats, attributes, and abilities legally spent?
+- **Hooks:** Does the character have active reasons to interact with others?
+
+Once approved, staff set your character's \`approved\` flag and you are ready to play.
+`;
+}
+
+export function gameWikiRulesConduct(name: string): string {
+  return `---
+title: Code of Conduct
+draft: false
+readLock: public
+tags: [rules, conduct]
+---
+
+# Code of Conduct
+
+Our community relies on mutual respect, clear boundaries, and fair play.
+
+## General guidelines
+
+- **Respect other players:** Treat fellow community members with courtesy in OOC spaces.
+- **Separate IC and OOC:** Character actions are not player actions. Keep in-character conflict in-character.
+- **Consent:** High-stakes scenes (combat, permanent consequences, heavy themes) require mutual consent between involved players.
+- **No harassment:** Harassment, hate speech, or persistent unwelcome behavior will result in a ban.
+
+## Reporting issues
+
+If you experience or witness a violation of this code of conduct, contact staff via \`+page\` or submit a private request using \`+job\`.
+`;
+}
+
+export function gameWikiCommandsBasic(name: string): string {
+  return `---
+title: Basic Commands
+draft: false
+readLock: public
+tags: [commands, guide]
+---
+
+# Basic Commands
+
+This guide covers the core commands used for communication, movement, and interaction in **${name}**.
+
+## Movement and perception
+
+- \`look\` (or \`l\`): View your current location and room details.
+- \`look <object>\`: Examine a specific player, object, or exit.
+- \`go <exit>\` (or typing the exit name): Move through an exit.
+
+## Communication
+
+- \`say <message>\` (or \`"<message>\`): Speak to everyone in the room.
+- \`pose <action>\` (or \`:<action>\`): Perform an action in the room.
+- \`page <player>=<message>\`: Send a private OOC message to another player.
+- \`whisper <player>=<message>\`: Speak softly to a player in the same room.
+
+## Channels and OOC
+
+- \`pub <message>\`: Chat on the public OOC channel.
+- \`+ooc\`: Move between your current IC location and the OOC lounge.
+- \`who\`: View all currently connected players.
+
+## Help system
+
+- \`+help\`: Open the main help index.
+- \`+help <topic>\`: Search for help on a specific topic or command.
+`;
+}
+
+export function gameWikiHelpStaff(name: string): string {
+  return `---
+title: Staff and Support
+draft: false
+readLock: public
+tags: [help, staff]
+---
+
+# Staff and Support
+
+Staff members are available to help with character approval, rule questions, and technical assistance on **${name}**.
+
+## How to reach staff
+
+- **In-game Paging:** Use \`page <staff name>=<message>\` to send an instant message.
+- **Job System:** Use \`+job/create <title>=<description>\` for non-urgent requests or approvals.
+- **Public Channel:** Ask general questions on the public channel using \`pub <question>\`.
+
+## What staff handle
+
+- Reviewing and approving character applications.
+- Resolving rules disputes or policy questions.
+- Assisting with technical issues or command questions.
+- Running storyline events and world scenes.
+`;
+}
+
+
 
 export function gameGitignore(): string {
   return `.deno/

@@ -1,8 +1,8 @@
 /**
  * @module @ursamu/mail
  *
- * In-game mail system for UrsaMU — drafts, folders, attachments,
- * quota, and expiry.
+ * In-game mail (stable 2.5 on mush 1.x) — drafts, folders,
+ * attachments, quota, and expiry. See docs/STABLE.md.
  */
 
 export {

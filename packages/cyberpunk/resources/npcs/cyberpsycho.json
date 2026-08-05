@@ -1,0 +1,41 @@
+{
+  "slug": "cyberpsycho",
+  "name": "Cyberpsycho",
+  "blurb": "Over-chromed killing machine. Heavy armor, arm blades, lethal and unyielding.",
+  "tier": "boss",
+  "tags": ["boss", "chrome", "lethal"],
+  "stats": {
+    "int": 3,
+    "ref": 8,
+    "dex": 8,
+    "tech": 3,
+    "cool": 6,
+    "will": 7,
+    "luck": 2,
+    "move": 8,
+    "body": 9,
+    "emp": 1
+  },
+  "skills": {
+    "brawling": 6,
+    "melee_weapon": 6,
+    "handgun": 5,
+    "evasion": 5,
+    "athletics": 5,
+    "perception": 4
+  },
+  "armorBody": {
+    "name": "Heavy Subdermal",
+    "sp": 12
+  },
+  "armorHead": {
+    "name": "Armored Cowl",
+    "sp": 12
+  },
+  "weapon": {
+    "name": "Very Heavy Melee",
+    "skill": "melee_weapon",
+    "damageDice": 4
+  },
+  "aiKey": "aggressive"
+}

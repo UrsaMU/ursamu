@@ -18,7 +18,7 @@ import {
   type CtlContract,
   type MeritDefinition,
 } from "../dictionary/index.ts";
-import { COFD_TEMPLATES } from "../gamelines/templates.ts";
+import { chargenTemplates } from "../gamelines/templates.ts";
 import { header, divider, footer } from "@ursamu/mush";
 import type { CofdSheet } from "../stats/index.ts";
 import {
@@ -262,9 +262,8 @@ function renderVices(filter?: string): string {
 
 function renderTemplates(): string {
   const out: string[] = [header("Templates"), ""];
-  for (const key of Object.keys(COFD_TEMPLATES).sort()) {
-    const t = COFD_TEMPLATES[key];
-    out.push(`${INDENT}%ch%cy${t.name}%cn  (key: ${key})`);
+  for (const t of chargenTemplates()) {
+    out.push(`${INDENT}%ch%cy${t.name}%cn  (key: ${t.key})`);
     out.push(...fieldBlock("Morality", t.moralityName));
     if (t.powerStatName && t.powerStatName !== "None") {
       out.push(...fieldBlock("Power", t.powerStatName));

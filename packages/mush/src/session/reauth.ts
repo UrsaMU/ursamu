@@ -14,12 +14,20 @@ export const REAUTH_FAIL_MSG =
 export const RESTART_NO_TOKEN_MSG =
   "%chGame>%cn Server restarted. Please connect again.";
 
-/** Shown only after the engine confirms auth:true. */
-export const REAUTH_OK_MSG =
-  "%chGame>%cn Server is back! Reconnected.";
+/**
+ * Short notice when a live session comes back (WS blip, soft-reboot
+ * JWT restore). Never re-send default_connect / web login splash.
+ */
+export const RECONNECT_MSG = "%chGame>%cn Reconnected.";
 
-/** How long to wait for auth:true before dropping the telnet link. */
-export const REAUTH_TIMEOUT_MS = 8_000;
+/** Shown only after the engine confirms auth:true (soft-reboot). */
+export const REAUTH_OK_MSG = RECONNECT_MSG;
+
+/**
+ * How long to wait for auth:true before dropping the telnet link.
+ * Long enough for a slow main boot after @restart (plugins + help scan).
+ */
+export const REAUTH_TIMEOUT_MS = 45_000;
 
 export type ReconnectOpenAction =
   | { action: "auth"; token: string }

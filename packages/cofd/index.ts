@@ -1,7 +1,39 @@
-// Chronicles of Darkness plugin entry point.
-// Phase 1 (commands.ts side-effect import — addCmd() fires at module load).
-// Phase 2 (init: register help dir, REST routes).
-// Phase 3 (remove: tear down anything init() did).
+/**
+ * @module
+ *
+ * Chronicles of Darkness 2e plugin for **UrsaMU**
+ * (`@ursamu/cofd-plugin`).
+ *
+ * Provides character sheets, guided chargen (`+cg`), a CoFD d10
+ * roller, Health / Beats / XP, Conditions, IC/OOC travel, `+time`,
+ * and a Changeling: The Lost overlay. Load as an UrsaMU plugin —
+ * commands register on import; `init` wires help, REST, and hooks.
+ *
+ * @example Install and enable
+ * ```ts
+ * // deno.json
+ * {
+ *   "imports": {
+ *     "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.2.1"
+ *   }
+ * }
+ *
+ * // config: server.plugins includes "@ursamu/cofd-plugin"
+ * // or register at boot:
+ * import cofd from "@ursamu/cofd-plugin";
+ * // engine loadPlugins() picks up the default IPlugin export
+ * ```
+ *
+ * @example Use the plugin object directly
+ * ```ts
+ * import { plugin } from "@ursamu/cofd-plugin";
+ * console.log(plugin.name, plugin.version); // "cofd" "1.2.1"
+ * ```
+ */
+
+// Phase 1 — commands.ts side-effect: addCmd() at module load.
+// Phase 2 — init: help dir, REST, hooks.
+// Phase 3 — remove: tear down init().
 
 import "./commands.ts";
 
@@ -47,6 +79,10 @@ import {
   initCofdCombat,
   removeCofdCombat,
 } from "./src/combat/ports.ts";
+import {
+  initApproveHooks,
+  removeApproveHooks,
+} from "./src/chargen/approve_hook.ts";
 
 // Active-combat move-lock: anyone who has joined an active encounter cannot
 // leave the room until the encounter ends or they leave it explicitly. Admins
@@ -156,13 +192,21 @@ async function onEngineReady(): Promise<void> {
   } catch (_err) { /* swallow */ }
 }
 
+/**
+ * UrsaMU plugin definition for Chronicles of Darkness 2e.
+ *
+ * Side-effect of importing this module registers all `+` commands.
+ * Call `init` via the engine plugin loader (not manually) so help
+ * dirs, REST routes, job buckets, and combat/format hooks attach.
+ */
 export const plugin: IPlugin = {
   name: "cofd",
-  version: "1.1.3",
-  description: "Chronicles of Darkness 2e plugin: sheets, chargen, d10 dice with 10/9/8-again, rote, and Willpower spend.",
+  version: "1.2.1",
+  description:
+    "Chronicles of Darkness 2e plugin: sheets, chargen, d10 dice with 10/9/8-again, rote, and Willpower spend.",
   dependencies: [
     { name: "help", version: ">=1.0.0" },
-    { name: "jobs", version: ">=0.1.0" },
+    { name: "jobs", version: ">=1.0.0" },
     { name: "combat", version: ">=0.8.0" },
   ],
 
@@ -176,6 +220,19 @@ export const plugin: IPlugin = {
     initLangHooks();
     initInventoryHooks();
     initCofdCombat();
+    // Closing a CGEN job (jobs UI / +job/close) auto-approves.
+    initApproveHooks();
+    // Public site: Character tab only when signed in.
+    // Config plugins.site.nav can override label/href; require stays.
+    void import("@ursamu/site").then((site) => {
+      site.registerSiteNav?.({
+        id: "chargen",
+        label: "Character",
+        href: "/chargen",
+        order: 35,
+        require: "connected",
+      });
+    }).catch(() => { /* site plugin optional */ });
     // Layout chrome comes from game.layout / engine defaults —
     // do not register a CoFD-specific header stack.
     // deno-lint-ignore no-explicit-any
@@ -200,10 +257,15 @@ export const plugin: IPlugin = {
     removeLangHooks();
     removeInventoryHooks();
     removeCofdCombat();
+    removeApproveHooks();
     stopAllWanderers();
+    void import("@ursamu/site").then((site) => {
+      site.unregisterSiteNav?.("chargen");
+    }).catch(() => { /* ignore */ });
     unregisterFormatHandler("CONFORMAT", cofdConformatHandler);
     unregisterFormatHandler("DESCFORMAT", cofdDescformatHandler);
   },
 };
 
+/** Default export — same as {@link plugin}; used by UrsaMU loaders. */
 export default plugin;

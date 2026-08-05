@@ -1,28 +1,101 @@
 // String padding helpers used by sheet/chargen renderers.
+// Width math uses *visible* columns: MUSH %c codes, truecolor
+// <#rrggbb>, and ANSI escapes do not count.
 
-export function ljust(s: string | undefined | null, w: number): string {
-  return String(s ?? "").padEnd(w);
+/** MUSH / truecolor / ANSI tokens that paint but take no columns. */
+const COLOR_TOKEN =
+  /%c[a-zA-Z]|%[nrtbR]|<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>|\x1b\[[0-9;]*m/gi;
+
+/** Strip display codes; leave plain text for length checks. */
+export function stripColors(s: string | undefined | null): string {
+  return String(s ?? "").replace(COLOR_TOKEN, "");
 }
 
-/** Truncate to w columns, appending ".." when the source was longer. */
-export function trunc(s: string | undefined | null, w: number): string {
+/** Visible column count (color codes ignored). */
+export function visibleLen(s: string | undefined | null): number {
+  return stripColors(s).length;
+}
+
+/**
+ * Walk `s`, calling `onColor(token)` and `onChar(ch)`.
+ * Stops early if onChar returns false.
+ */
+function walkDisplay(
+  s: string,
+  onColor: (tok: string) => void,
+  onChar: (ch: string) => boolean,
+): void {
+  let i = 0;
+  while (i < s.length) {
+    const rest = s.slice(i);
+    const m = rest.match(
+      /^(?:%c[a-zA-Z]|%[nrtbR]|<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>|\x1b\[[0-9;]*m)/i,
+    );
+    if (m) {
+      onColor(m[0]);
+      i += m[0].length;
+      continue;
+    }
+    const cp = s.codePointAt(i);
+    if (cp === undefined) break;
+    const ch = String.fromCodePoint(cp);
+    if (!onChar(ch)) return;
+    i += ch.length;
+  }
+}
+
+export function ljust(
+  s: string | undefined | null,
+  w: number,
+): string {
   const v = String(s ?? "");
-  if (v.length <= w) return v;
-  if (w <= 2) return v.slice(0, w);
-  return v.slice(0, w - 2) + "..";
+  const pad = Math.max(0, w - visibleLen(v));
+  return v + " ".repeat(pad);
 }
 
-/** Truncate then left-pad to exactly w columns. */
-export function fit(s: string | undefined | null, w: number): string {
-  return trunc(s, w).padEnd(w);
+/** Truncate to w *visible* columns; append ".." when shortened. */
+export function trunc(
+  s: string | undefined | null,
+  w: number,
+): string {
+  const v = String(s ?? "");
+  if (w <= 0) return "";
+  if (visibleLen(v) <= w) return v;
+
+  const keep = w <= 2 ? w : w - 2;
+  let out = "";
+  let n = 0;
+  walkDisplay(
+    v,
+    (tok) => {
+      out += tok;
+    },
+    (ch) => {
+      if (n >= keep) return false;
+      out += ch;
+      n++;
+      return true;
+    },
+  );
+  if (w <= 2) return out;
+  // Close color so ".." is not painted mid-gradient.
+  return out + "%cn..";
 }
 
+/** Truncate then left-pad to exactly w *visible* columns. */
+export function fit(
+  s: string | undefined | null,
+  w: number,
+): string {
+  return ljust(trunc(s, w), w);
+}
 
 export function center(s: string, w: number): string {
-  s = String(s ?? "");
-  if (s.length >= w) return s;
-  const left = Math.floor((w - s.length) / 2);
-  return " ".repeat(left) + s + " ".repeat(w - s.length - left);
+  const v = String(s ?? "");
+  const len = visibleLen(v);
+  if (len >= w) return trunc(v, w);
+  const left = Math.floor((w - len) / 2);
+  return " ".repeat(left) + v + " ".repeat(w - len - left);
 }
 
 /**
@@ -62,9 +135,9 @@ export function formatDottedStatLine(
   const valueStr = (temp !== undefined && temp !== base)
     ? `${base}(${temp})`
     : `${base}`;
-  const visibleLen = labelStr.length + DOT_TRACK_MAX +
+  const visible = labelStr.length + DOT_TRACK_MAX +
     valueStr.length;
-  const pad = Math.max(0, width - visibleLen);
+  const pad = Math.max(0, width - visible);
   const valueColored = (temp !== undefined && temp !== base)
     ? `%ch%cy${base}%cn(%ch%cy${temp}%cn)`
     : `%ch%cy${base}%cn`;
@@ -98,4 +171,3 @@ export {
   divider,
   footer,
 } from "@ursamu/mush";
-

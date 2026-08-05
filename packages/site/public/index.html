@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" data-skin="default">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <meta name="color-scheme" content="dark" />
+    <title>UrsaMU</title>
+
+    <!-- Base: reset → tokens → layout → components → skin
+         ?v= busts sticky browser caches during skin iteration -->
+    <link rel="stylesheet" href="/site/css/reset.css?v=20260804loginctr" />
+    <link rel="stylesheet" href="/site/css/tokens.css?v=20260804loginctr" />
+    <link rel="stylesheet" href="/site/css/layout.css?v=20260804loginctr" />
+    <link rel="stylesheet" href="/site/css/components.css?v=20260804loginctr" />
+    <!--
+      Skin stylesheet. Swap via:
+        - data-skin="court" | "default" on <html>
+        - plugins.site.skin / skinCss in config.json
+        - or replace this href with your own CSS file
+    -->
+    <link
+      rel="stylesheet"
+      href="/site/css/skins/default.css?v=20260804loginctr"
+      data-site-skin
+    />
+
+    <!-- Display face for changeling / court skins -->
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Smythe&display=swap");
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="/site/js/site.js?v=20260804loginctr" defer></script>
+  </head>
+  <body>
+    <div
+      class="site-shell"
+      data-site-shell
+      id="wrapper"
+    >
+      <nav
+        class="site-nav"
+        data-site-nav
+        aria-label="Primary"
+      >
+        <a
+          class="site-nav__brand"
+          data-site-brand
+          href="/"
+        >UrsaMU</a>
+        <button
+          type="button"
+          class="site-nav__toggle"
+          data-site-nav-toggle
+          aria-label="Open menu"
+          aria-expanded="false"
+          aria-controls="site-nav-menu"
+        >
+          <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+          <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+          <span class="site-nav__toggle-bar" aria-hidden="true"></span>
+        </button>
+        <ul
+          class="site-nav__list"
+          id="site-nav-menu"
+          data-site-nav-list
+        >
+          <li><a href="/site/" class="is-active">Home</a></li>
+          <li><a href="/site/wiki/">Wiki</a></li>
+          <li><a href="/site/help/">Help</a></li>
+        </ul>
+      </nav>
+
+      <header
+        class="site-banner"
+        data-site-banner
+      >
+        <h1
+          class="site-banner__title"
+          data-site-banner-title
+        >
+          UrsaMU
+        </h1>
+        <img
+          class="site-banner__img"
+          data-site-banner-img
+          alt=""
+          hidden
+        />
+        <!-- Telnet under hero when title + plugins.site.telnet -->
+        <a
+          class="site-banner__connect"
+          data-site-banner-connect
+          hidden
+        ></a>
+      </header>
+
+      <div
+        class="site-body"
+        id="container"
+      >
+        <aside
+          class="site-aside site-aside--start"
+          id="left"
+          aria-label="Sidebar"
+          data-site-left
+        >
+          <form
+            class="site-search"
+            id="search"
+            role="search"
+            action="#"
+            onsubmit="return false"
+          >
+            <label class="site-sr-only" for="site-q">Search</label>
+            <input
+              id="site-q"
+              class="site-search__input"
+              type="search"
+              name="q"
+              placeholder="Search wiki…"
+              autocomplete="off"
+            />
+            <button
+              type="submit"
+              class="site-search__btn"
+              aria-label="Search"
+            >
+              <span
+                class="site-search__btn-icon"
+                data-site-search-icon
+              ></span>
+            </button>
+          </form>
+
+          <!-- Populated by site.js -->
+          <div data-site-left-panels></div>
+        </aside>
+
+        <main
+          class="site-main"
+          id="center"
+          data-site-main
+        >
+          <section class="site-section">
+            <h2 class="site-section__title" data-site-main-title>&nbsp;</h2>
+            <div
+              class="site-rule site-rule--image"
+              role="presentation"
+            ></div>
+            <div
+              class="site-section__body site-loading-skeleton"
+              role="status"
+              aria-live="polite"
+            >
+              <span class="site-sr-only">Loading content…</span>
+              <div class="site-skeleton-line site-skeleton-line--w72"></div>
+              <div class="site-skeleton-line site-skeleton-line--w94"></div>
+              <div class="site-skeleton-line site-skeleton-line--w58"></div>
+              <div class="site-skeleton-line site-skeleton-line--w81"></div>
+            </div>
+          </section>
+
+          <footer
+            class="site-footer"
+            id="footer"
+          >
+            <div
+              class="site-rule site-rule--image"
+              role="presentation"
+            ></div>
+            <p>
+              Powered by
+              <a
+                href="https://github.com/UrsaMU/ursamu"
+                target="_blank"
+                rel="noopener"
+              >UrsaMU</a>
+            </p>
+          </footer>
+        </main>
+
+        <aside
+          class="site-aside site-aside--end"
+          id="right"
+          aria-label="Complementary"
+          data-site-right
+        >
+          <!-- Populated by site.js -->
+          <div data-site-right-panels></div>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>

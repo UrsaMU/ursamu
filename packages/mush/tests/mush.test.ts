@@ -166,6 +166,40 @@ Deno.test("evaluateLock: carries/holds and owner()", OPTS, async () => {
   assertEquals(await evaluateLock("holds(#99)", holder, box), false);
 });
 
+Deno.test(
+  "evaluateLock: perm() is hierarchical (superuser passes staff)",
+  OPTS,
+  async () => {
+    const su: IDBObj = {
+      id: "2",
+      name: "SU",
+      flags: new Set(["superuser", "player", "connected"]),
+      state: { name: "SU" },
+      contents: [],
+    };
+    const mortal: IDBObj = {
+      id: "7",
+      name: "Mortal",
+      flags: new Set(["player", "connected"]),
+      state: { name: "Mortal" },
+      contents: [],
+    };
+    const staffer: IDBObj = {
+      id: "8",
+      name: "Staff",
+      flags: new Set(["staff", "player", "connected"]),
+      state: { name: "Staff" },
+      contents: [],
+    };
+    assertEquals(await evaluateLock("perm(staff)", su, su), true);
+    assertEquals(await evaluateLock("perm(builder)", su, su), true);
+    assertEquals(await evaluateLock("perm(admin)", su, su), true);
+    assertEquals(await evaluateLock("perm(staff)", staffer, staffer), true);
+    assertEquals(await evaluateLock("perm(staff)", mortal, mortal), false);
+    assertEquals(await evaluateLock("perm(builder+)", su, su), true);
+  },
+);
+
 // ─── Area 3: dbojs CRUD ───────────────────────────────────────────────────────
 
 Deno.test("dbojs: create, queryOne, modify, delete", OPTS, async () => {

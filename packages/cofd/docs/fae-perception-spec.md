@@ -19,7 +19,8 @@ TinyMUX-like dual visibility without softcode `@lock` soup:
 | fae        | `fae`          | CtL, fae-touched     |
 | spirit     | `forsaken`     | WtF (later)          |
 
-Staff (`admin` / `wizard` / `superuser`) always has fae sight for ST tools.
+Staff does **not** auto-gain fae sight. Preview with `@set me=fae`
+(clear `@set me=!fae`). Changeling template sync still grants `fae`.
 
 ## Flag sync (done)
 

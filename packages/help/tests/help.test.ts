@@ -218,9 +218,10 @@ describe("FileProvider", () => {
       const entries = await new FileProvider().all();
       const byName = new Map(entries.map((e) => [e.name, e]));
 
-      assertEquals(byName.get("visible")?.hidden, false);
-      assertEquals(byName.get("staff-only")?.hidden, true);
-      assertEquals(byName.get("legacy-hide")?.hidden, true);
+      // Nested under registerHelpDir section "test-dark"
+      assertEquals(byName.get("test-dark/visible")?.hidden, false);
+      assertEquals(byName.get("test-dark/staff-only")?.hidden, true);
+      assertEquals(byName.get("test-dark/legacy-hide")?.hidden, true);
     } finally {
       bustCache();
       await Deno.remove(dir, { recursive: true }).catch(() => {});
@@ -248,9 +249,12 @@ describe("FileProvider", () => {
       const entries = await new FileProvider().all();
       const byName = new Map(entries.map((e) => [e.name, e]));
 
-      assertEquals(byName.get("public")?.hidden, false);
-      assertEquals(byName.get("draft")?.hidden, true);
-      assertEquals(byName.get("admin/reboot")?.hidden, true);
+      assertEquals(byName.get("test-us/public")?.hidden, false);
+      assertEquals(byName.get("test-us/draft")?.hidden, true);
+      assertEquals(
+        byName.get("test-us/admin/reboot")?.hidden,
+        true,
+      );
     } finally {
       bustCache();
       await Deno.remove(dir, { recursive: true }).catch(() => {});
@@ -422,8 +426,8 @@ describe("plugin", () => {
     assertEquals(plugin.name, "help");
   });
 
-  it("has version string", () => {
-    assertEquals(typeof plugin.version, "string");
+  it("is version 1.0.1", () => {
+    assertEquals(plugin.version, "1.0.1");
   });
 
   it("remove() does not throw even if init never ran", () => {

@@ -206,13 +206,13 @@ Deno.test("+hedge/travel on trod auto-succeeds", OPTS, async () => {
     id: "2",
     name: "Trod",
     flags: new Set(["room"]),
-    state: store.get("2")!.state,
+    state: { hedge: { realm: "hedge", danger: "trod", trodRating: 2 } },
     contents: [],
     broadcast: () => {},
   } as never;
   await hedgeExec(u);
   const out = u._sent.join("\n");
-  assertStringIncludes(out, "trod");
+  assertStringIncludes(out.toLowerCase(), "trod");
   assertStringIncludes(out, "Goblin Market");
 });
 

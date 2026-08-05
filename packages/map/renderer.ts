@@ -1,4 +1,3 @@
-import { divider, footer, header } from "ursamu";
 import type {
   EntityMarker,
   NeighborhoodSample,
@@ -8,6 +7,7 @@ import type {
   VisibilityMask,
 } from "./schemas.ts";
 import { coordKey, VIEWPORT_COLS } from "./schemas.ts";
+import { mapDivider, mapFooter, mapHeader } from "./chrome.ts";
 
 const INFRA_KINDS = new Set(["infrastructure", "landmark", "hazard", "cache"]);
 // Fog defaults — legend.fog / legend.fogMemory are not threaded through
@@ -176,24 +176,27 @@ export function renderMap(input: RenderInput): string {
   const { x, y, z } = input.centre;
   const stamp = rjust(`LOC: (${x}, ${y}) Z: ${z}`, VIEWPORT_COLS);
   const out: string[] = [];
-  out.push(header(safeText(input.sectorTitle)));
+  out.push(mapHeader(safeText(input.sectorTitle)));
   if (input.spectator) {
     const indicator = "%cy(SPECTATING)%cn";
-    const pad = Math.max(0, Math.floor((VIEWPORT_COLS - visibleLen(indicator)) / 2));
+    const pad = Math.max(
+      0,
+      Math.floor((VIEWPORT_COLS - visibleLen(indicator)) / 2),
+    );
     out.push(" ".repeat(pad) + indicator);
   }
   out.push(stamp);
   out.push(...buildSplitBody(input));
-  out.push(divider("NOTABLE INFRASTRUCTURE"));
+  out.push(mapDivider("NOTABLE INFRASTRUCTURE"));
   out.push(...buildInfrastructure(input.overlays));
-  out.push(divider("SECTOR CONTACTS"));
+  out.push(mapDivider("SECTOR CONTACTS"));
   out.push(...buildContacts(input.entities));
-  out.push(divider("ADJACENT SECTORS"));
+  out.push(mapDivider("ADJACENT SECTORS"));
   out.push(buildAdjacent(input.adjacency));
   if (input.infoLines && input.infoLines.length > 0) {
-    out.push(divider("INTEL"));
+    out.push(mapDivider("INTEL"));
     for (const line of input.infoLines) out.push("  " + line);
   }
-  out.push(footer());
+  out.push(mapFooter());
   return out.map((l) => l.split("\n").map(truncate).join("\n")).join("\n");
 }

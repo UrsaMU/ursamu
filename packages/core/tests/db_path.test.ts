@@ -8,6 +8,7 @@ import {
   DEFAULT_DENOKV_DB,
   absolutizeDbPath,
   ensureTypegraphDataDir,
+  isDenoTestMain,
   pickTypegraphDbRaw,
   resolveDenokvDbPath,
   resolveTypegraphDbPath,
@@ -15,6 +16,34 @@ import {
 import { initConfig, setConfig } from "../src/config/mod.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
+
+Deno.test("isDenoTestMain: *.test.ts and /tests/ only", OPTS, () => {
+  assertEquals(
+    isDenoTestMain("file:///repo/packages/core/tests/db_path.test.ts"),
+    true,
+  );
+  assertEquals(
+    isDenoTestMain("file:///repo/tests/security_foo.test.ts"),
+    true,
+  );
+  assertEquals(
+    isDenoTestMain("file:///repo/foo_test.ts"),
+    true,
+  );
+  // Game project named "test" must NOT force memory://
+  assertEquals(
+    isDenoTestMain("file:///repo/games/test/src/main.ts"),
+    false,
+  );
+  assertEquals(
+    isDenoTestMain("file:///repo/games/test/src/telnet.ts"),
+    false,
+  );
+  assertEquals(
+    isDenoTestMain("file:///repo/packages/mush/src/main.ts"),
+    false,
+  );
+});
 
 Deno.test("absolutizeDbPath leaves memory:// alone", OPTS, () => {
   assertEquals(absolutizeDbPath("memory://"), "memory://");

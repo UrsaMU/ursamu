@@ -1,17 +1,20 @@
 # @ursamu/core
 
-Generic multiplayer text-server infrastructure. Provides WebSocket, Telnet,
-and HTTP+SSE transports, a typed KV database (`DBO<T>`), an event bus
-(`gameHooks`), an input dispatch pipeline, JWT sessions, a plugin loader,
-rate limiting, broadcast rooms, a delayed-execution queue, config, logging,
-and text asset registry. Zero game-world assumptions — no MUSH concepts, no
-world model, no softcode. Layers like `@ursamu/mush` build on top of this.
+**Version 1.0.0** (stable).
+
+Generic multiplayer text-server infrastructure: WebSocket, Telnet,
+and HTTP+SSE transports, typed KV collections (`DBO<T>`), `gameHooks`,
+input dispatch, JWT sessions, plugins, rate limiting, broadcast rooms,
+a delayed queue, config, logging, and text assets.
+
+Zero game-world assumptions. Layers like `@ursamu/mush` add MUSH concepts.
+
+See `CHANGELOG.md`, `docs/DBO.md`, and `docs/LIFECYCLE.md`.
 
 ## Install
 
 ```typescript
-// Deno / JSR
-import { createServer, addHandler, gameHooks, DBO } from "jsr:@ursamu/core";
+import { createServer, addHandler, gameHooks, DBO } from "jsr:@ursamu/core@^1.0.0";
 ```
 
 ## Quick start
@@ -22,7 +25,6 @@ import {
   websocketTransport,
   telnetTransport,
   addHandler,
-  send,
 } from "jsr:@ursamu/core";
 
 const server = await createServer({ port: 4201 });
@@ -40,39 +42,69 @@ addHandler({
 await server.listen();
 ```
 
-## Key exports
+## Stable API (1.0)
 
-| Export | Purpose |
-|---|---|
-| `createServer` | Build and configure the server |
-| `websocketTransport` | WebSocket transport factory |
-| `telnetTransport` | Telnet transport factory |
-| `httpTransport` | HTTP + SSE transport factory |
-| `registerRoute` | Add an HTTP route |
-| `addHandler` | Register a pattern-matched input handler |
-| `addMiddleware` | Add input middleware (runs before handlers) |
-| `runPipeline` | Manually fire the dispatch pipeline |
-| `gameHooks` | Typed EventEmitter for server lifecycle events |
-| `DBO` | Generic typed collection (TypeGraph/PGlite by default) — `new DBO<T>("namespace")` |
-| `resolveTypegraphDbPath` | Resolve primary DB dir: `server.db` → env → `data/typegraph.db` |
-| `sessions` | Active session store |
-| `createToken` / `verifyToken` | JWT helpers |
-| `send` / `broadcastAll` / `notify` | Output helpers |
-| `rooms` | Named broadcast rooms (join/leave/broadcast) |
-| `queue` | Delayed execution queue |
-| `getConfig` / `setConfig` | Config access |
-| `registerPlugin` / `loadPlugins` | Plugin system |
-| `log` | Structured logger |
-| `registerText` / `getText` | Text asset registry (motd, banners) |
+These exports are covered by semver. Breaking changes require 2.0.0.
+
+| Area | Exports |
+|------|---------|
+| Server | `createServer`, `ICoreServer`, `ITransport` |
+| Transports | `websocketTransport`, `telnetTransport`, `httpTransport`, `registerRoute`, `registerFallback` |
+| Dispatch | `addHandler`, `removeHandler`, `addMiddleware`, `removeMiddleware`, `clearMiddleware`, `getMiddleware`, `runPipeline`, `ICoreHandler`, `ICoreContext`, `IMiddlewareFn` |
+| Plugins | `registerPlugin`, `loadPlugins`, `unloadPlugin`, `listPlugins`, `getPlugin`, `IPlugin`, `IPluginDep` |
+| Events | `gameHooks`, `CoreHookMap` (core keys + open index for plugins) |
+| Database | `DBO`, `Query`, path helpers (`resolveTypegraphDbPath`, …) |
+| Session | `sessions`, `createToken`, `verifyToken`, `ISession` |
+| Output | `send`, `broadcastAll`, `notify`, `registerSender`, `trackSocket`, `untrackSocket`, `trackedSockets`, `setFormatter`, `rooms` |
+| Queue | `queue`, `IQueueEntry`, `registerExecutor` (via queue module) |
+| Config | `getConfig`, `setConfig`, `getAllConfig`, `initConfig` |
+| Logging | `log`, `LogLevel` |
+| Assets | `registerText`, `getText` |
+
+### Internal / low-level (may change in minor)
+
+Prefer stable wrappers above. These stay exported for advanced hosts:
+
+- Raw telnet constants and byte helpers (`IAC`, `parseNawsBytes`,
+  `stripIacBytes`, `accumulateNaws`, …)
+- `handleWebSocketConnection`, `sendPayload`, `closeSocket`,
+  `listSocketIds`, `isRateLimitedForAuth`, `clampTermWidth`
+- `formatRemoteAddr`, `forceLoadPlugins`, `initializePlugins`
+- `DBO.setAdapterFactory` (tests and custom backends)
+
+## Dependency policy
+
+Pinned majors in `deno.json` (upgrade deliberately):
+
+| Package | Role |
+|---------|------|
+| `npm:@nicia-ai/typegraph@^0.31.0` | Default DBO backend |
+| `npm:@electric-sql/pglite@^0.5.2` | Embedded Postgres for TypeGraph |
+| `jsr:@zaubrik/djwt@^3.0.2` | JWT |
+| `npm:zod@4.4.3` | Validation where used |
+
+Patch/minor upgrades of these deps are allowed in core minors when
+tests pass. Major bumps of typegraph/pglite/djwt warrant a core minor
+or major depending on API fallout.
 
 ## What is NOT here
 
-`@ursamu/core` has no knowledge of:
+- `IDBObj`, players, rooms-as-world, exits, things  
+- MUSH flags or lock evaluation  
+- Softcode / TinyMUX evaluator  
+- `addCmd` or `IUrsamuSDK`  
+- MUSH color codes  
 
-- `IDBObj`, players, rooms, exits, things
-- MUSH flags or lock evaluation
-- Softcode / TinyMUX evaluator
-- `addCmd` or `IUrsamuSDK`
-- MUSH color codes
+See [`@ursamu/mush`](https://jsr.io/@ursamu/mush).
 
-For the full MUSH layer, see [`@ursamu/mush`](../mush/README.md).
+## Lifecycle
+
+Plugins and middleware teardown: **`docs/LIFECYCLE.md`**.  
+DBO operators and adapters: **`docs/DBO.md`**.
+
+## Develop
+
+```bash
+deno task test
+deno task check
+```

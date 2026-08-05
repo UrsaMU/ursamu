@@ -23,9 +23,15 @@ export async function execCreate(u: IUrsamuSDK): Promise<void> {
     u.send("Password must be at least 5 characters.");
     return;
   }
+  if (/[#=/\s]/.test(name) || name.length > 32) {
+    u.send("Invalid character name.");
+    return;
+  }
 
-  const existing = await u.db.search(name);
-  if (existing.some((o) => o.flags.has("player"))) {
+  const { isPlayerNameTaken } = await import(
+    /* static-friendly */ "../main_utils.ts"
+  );
+  if (await isPlayerNameTaken(name)) {
     u.send("A character with that name already exists.");
     return;
   }
@@ -221,12 +227,38 @@ export async function execPassword(u: IUrsamuSDK): Promise<void> {
 }
 
 export async function execUpdate(u: IUrsamuSDK): Promise<void> {
-  const isAdmin =
-    u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
-  if (!isAdmin) { u.send("Permission denied."); return; }
+  const isAdmin = u.me.flags.has("admin") ||
+    u.me.flags.has("wizard") ||
+    u.me.flags.has("superuser");
+  if (!isAdmin) {
+    u.send("Permission denied.");
+    return;
+  }
   const branch = (u.cmd.args[0] || "").trim();
+  const who = String(u.me.state.name || u.me.name || u.me.id);
   u.here.broadcast(
-    `%chGame>%cn @update initiated by %ch${u.me.name}%cn — pulling latest code...`,
+    `%chGame>%cn full @restart by %ch${who}%cn.`,
   );
-  await u.sys.update(branch);
+  try {
+    const { runCodebaseUpdate } = await import(
+      "../sys/codebase-update.ts"
+    );
+    const result = await runCodebaseUpdate({
+      branch,
+      log: (line) => u.send(`%chGame>%cn ${line}`),
+    });
+    if (!result.ok || !result.cached) {
+      u.send(
+        "%crUpdate failed — game left running " +
+          "(no reboot).%cn",
+      );
+      return;
+    }
+    await u.sys.reboot({ update: false });
+  } catch (e: unknown) {
+    const m = e instanceof Error ? e.message : String(e);
+    u.send(
+      `%crUpdate failed — game left running:%cn ${m}`,
+    );
+  }
 }

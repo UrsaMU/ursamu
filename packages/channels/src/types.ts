@@ -9,6 +9,16 @@ export interface IChannel {
   owner?: string;
   logHistory?: boolean;
   historyLimit?: number;
+  /**
+   * When true, broadcast connect / disconnect / join / leave lines
+   * on this channel. Never mirrored to Discord (no channel:message).
+   */
+  announce?: boolean;
+  /**
+   * When true, eligible players are auto-subscribed on login.
+   * Default false — staff-created channels are opt-in via addcom.
+   */
+  autoJoin?: boolean;
 }
 
 export interface IChanMessage {

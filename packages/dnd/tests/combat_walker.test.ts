@@ -27,28 +27,30 @@ function makeStore() {
     },
     asDb() {
       return {
-        search: async (q: Record<string, unknown>) => {
+        search: (q: Record<string, unknown>) => {
           if (q.id) {
             const o = map.get(String(q.id));
-            return o ? [o] : [];
+            return Promise.resolve(o ? [o] : []);
           }
-          return [...map.values()];
+          return Promise.resolve([...map.values()]);
         },
-        modify: async (
+        modify: (
           id: string,
           _op: string,
           data: Record<string, unknown>,
         ) => {
           const o = map.get(id);
-          if (!o) return;
+          if (!o) return Promise.resolve();
           for (const [k, v] of Object.entries(data)) {
             if (k === "data.dnd") {
               o.state = { ...o.state, dnd: v };
             }
           }
+          return Promise.resolve();
         },
-        destroy: async (id: string) => {
+        destroy: (id: string) => {
           map.delete(id);
+          return Promise.resolve();
         },
       };
     },

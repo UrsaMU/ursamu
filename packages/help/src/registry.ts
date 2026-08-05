@@ -26,8 +26,16 @@ export interface HelpEntry {
   source: HelpSource;
   /** Alternate names that resolve to this topic. */
   tags: string[];
-  /** Whether to hide this entry from index/section listings. */
+  /**
+   * Hidden from public indexes (dark / _path / frontmatter).
+   * Staff still see these in the staff console.
+   */
   hidden?: boolean;
+  /**
+   * Staff-only (admin/wizard/builder locks, staff/ paths,
+   * admin sections). Public GET must 404; indexes omit.
+   */
+  staffOnly?: boolean;
 }
 
 /** Implement this interface to add a custom help source. */

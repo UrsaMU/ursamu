@@ -17,7 +17,11 @@ import {
   WTF_AUSPICE_NAMES,
   WTF_TRIBE_NAMES,
 } from "../dictionary/index.ts";
-import { COFD_TEMPLATES } from "../gamelines/templates.ts";
+import {
+  COFD_TEMPLATES,
+  chargenTemplates,
+  isChargenTemplate,
+} from "../gamelines/templates.ts";
 import {
   defaultSheet,
   setTrait,
@@ -174,6 +178,18 @@ export function updateCgState(
           "In Stage 2, you can only set template " +
             "(e.g. +cg/set template=changeling).",
         );
+      }
+      {
+        const want = val.toLowerCase().trim();
+        if (!isChargenTemplate(want)) {
+          const open = chargenTemplates()
+            .map((t) => t.key)
+            .join(", ");
+          throw new Error(
+            `'${val}' is not open for chargen right now. ` +
+              `Available: ${open}.`,
+          );
+        }
       }
       break;
 

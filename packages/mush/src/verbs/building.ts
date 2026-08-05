@@ -5,6 +5,17 @@
 
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK } from "../commands/types.ts";
+import {
+  isPlayerNameTaken,
+  primaryName,
+} from "../main_utils.ts";
+
+function isPlayerObj(tar: { flags?: Set<string> | string }): boolean {
+  const f = tar.flags;
+  if (!f) return false;
+  if (f instanceof Set) return f.has("player");
+  return /\bplayer\b/i.test(String(f));
+}
 
 // ── shared helpers ────────────────────────────────────────────────────────────
 
@@ -179,10 +190,29 @@ EXAMPLES
   exec: async (u: IUrsamuSDK) => {
     const targetStr = u.util.stripSubs(u.cmd.args[0] ?? "").trim();
     const newName   = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
-    if (!targetStr || !newName) { u.send("Usage: @name <target>=<new name>"); return; }
+    if (!targetStr || !newName) {
+      u.send("Usage: @name <target>=<new name>");
+      return;
+    }
     const tar = await u.util.target(u.me, targetStr, true);
     if (!tar) { u.send("I can't find that."); return; }
-    if (!(await u.canEdit(u.me, tar))) { u.send("I can't find that."); return; }
+    if (!(await u.canEdit(u.me, tar))) {
+      u.send("I can't find that.");
+      return;
+    }
+    // Player login names must be unique (monikers are display-only).
+    if (isPlayerObj(tar)) {
+      const primary = primaryName(newName);
+      if (!primary || /[#=/\s]/.test(primary) || primary.length > 32) {
+        u.send("Invalid player name.");
+        return;
+      }
+      const taken = await isPlayerNameTaken(primary, tar.id);
+      if (taken) {
+        u.send("That name is already taken by a player.");
+        return;
+      }
+    }
     await u.db.modify(tar.id, "$set", { "data.name": newName });
     await u.db.modify(tar.id, "$unset", { "data.moniker": "" });
     u.send("Name set.");

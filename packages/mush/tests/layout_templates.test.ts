@@ -12,6 +12,7 @@ import {
   expandLayoutTemplate,
   header,
   footer,
+  markdownToAnsi,
 } from "../src/format/handlers.ts";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
@@ -88,6 +89,26 @@ Deno.test("divider/header honor applied config", OPTS, () => {
   }
 });
 
+Deno.test(
+  "applyLayoutFromConfig(undefined) does not wipe boot templates",
+  OPTS,
+  () => {
+    try {
+      applyLayoutFromConfig({
+        header: "[center(%ch%cy%0%cn,%1,%cg=%cn)]",
+        footer: "[repeat(%cg=%cn,%1)]",
+      });
+      // Host re-apply with dual-core getConfig() → undefined
+      applyLayoutFromConfig(undefined);
+      applyLayoutFromConfig(null);
+      assertStringIncludes(header("T", "=", 20), "%cg=%cn");
+      assertStringIncludes(footer("", "=", 10), "%cg=%cn");
+    } finally {
+      clearLayoutTemplates();
+    }
+  },
+);
+
 Deno.test("expandLayoutTemplate: words counts tokens", OPTS, () => {
   assertEquals(expandLayoutTemplate("[words(%0)]", ["a b c"]), "3");
   assertEquals(expandLayoutTemplate("[words(%0)]", [""]), "0");
@@ -158,7 +179,10 @@ Deno.test(
         footer: "[repeat(%cg=%cn,%1)]",
       });
       const plain = (s: string) =>
-        s.replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "");
+        s
+          .replace(/%c[a-zA-Z]/g, "")
+          .replace(/%[nrtbR]/g, "")
+          .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "");
       const h = plain(header("Foo Bar Baz(#1)", "=", 78));
       assertStringIncludes(h, "Foo Bar Baz(#1)");
       assertEquals(h.includes("Foo Bar  "), false);
@@ -169,3 +193,58 @@ Deno.test(
     }
   },
 );
+
+Deno.test(
+  "header center keeps = fill with gradient moniker title",
+  OPTS,
+  () => {
+    // Court layout: single-line center with %cg=%cn fill. Truecolor
+    // monikers must not inflate visLen or the = padding disappears.
+    try {
+      applyLayoutFromConfig({
+        header: "[center(%ch%cy%b%0%b%cn,%1,%cg=%cn)]",
+      });
+      const g =
+        "<#ff0000>D<#ff4400>i<#ff8800>a<#ffcc00>b" +
+        "<#ffff00>l<#ccff00>e<#88ff00>r<#44ff00>i" +
+        "<#00ff00>e%cn";
+      const title = `Character Sheet for: ${g}`;
+      const h = header(title, "=", 78);
+      const plain = h
+        .replace(/%c[a-zA-Z]/g, "")
+        .replace(/%[nrtbR]/g, "")
+        .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "");
+      assertStringIncludes(plain, "Diablerie");
+      assertStringIncludes(plain, "=");
+      // Full width rule: equals on both sides of title
+      assertEquals(plain.startsWith("="), true);
+      assertEquals(plain.trimEnd().endsWith("="), true);
+      assertEquals(plain.length >= 70, true);
+    } finally {
+      clearLayoutTemplates();
+    }
+  },
+);
+
+Deno.test("markdownToAnsi: config softcode templates", OPTS, () => {
+  try {
+    applyLayoutFromConfig({
+      markdown: {
+        h1: "%ch%cu%0%cn",
+        h2: "%ch%cy%0%cn",
+        bold: "%ch%cr%0%cn",
+        wikilink: "%ch%cb[[%0]]%cn",
+      },
+    });
+
+    const md = "# Title\n\n## Subtitle\n\nThis is **bold** text and [[Lore]].";
+    const ansi = markdownToAnsi(md);
+
+    assertStringIncludes(ansi, "%ch%cuTitle%cn");
+    assertStringIncludes(ansi, "%ch%cySubtitle%cn");
+    assertStringIncludes(ansi, "%ch%crbold%cn");
+    assertStringIncludes(ansi, "%ch%cb[[Lore]]%cn");
+  } finally {
+    clearLayoutTemplates();
+  }
+});

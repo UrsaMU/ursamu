@@ -1,20 +1,53 @@
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK } from "../commands/types.ts";
 import { log } from "@ursamu/core";
+import { flags, unknownFlagNames } from "../world/flags.ts";
 
 // ── @flags / @set ─────────────────────────────────────────────────────────────
 
 async function execSetFlags(u: IUrsamuSDK): Promise<void> {
   const raw    = u.util.stripSubs(u.cmd.args[0] ?? "").trim();
   const eqIdx  = raw.indexOf("=");
-  if (eqIdx === -1) { u.send("Usage: @flags <target>=<flags>"); return; }
+  if (eqIdx === -1) {
+    u.send("Usage: @flags <target>=<flags>");
+    return;
+  }
   const targetStr = raw.slice(0, eqIdx).trim();
-  const flagStr   = raw.slice(eqIdx + 1).trim();
-  if (!targetStr || !flagStr) { u.send("Usage: @flags <target>=<flags>"); return; }
-  const tar = await u.util.target(u.me, targetStr);
+  const flagStr = raw.slice(eqIdx + 1).trim();
+  if (!targetStr || !flagStr) {
+    u.send("Usage: @flags <target>=<flags>");
+    return;
+  }
+  // Digibear Tags.set silently drops unknown names — refuse early.
+  const unknown = unknownFlagNames(flagStr);
+  if (unknown.length) {
+    u.send(
+      `Unknown flag${unknown.length > 1 ? "s" : ""}: ` +
+        unknown.join(", ") +
+        ". Use @flags me to list current flags; " +
+        "registered names only (e.g. fae, dark, builder).",
+    );
+    return;
+  }
+  // Global + *Name: staff can @set offline players elsewhere.
+  const tar = await u.util.target(u.me, targetStr, true);
   if (!tar) { u.send("I can't find that here."); return; }
   if (!(await u.canEdit(u.me, tar))) { u.send("Permission denied."); return; }
   await u.setFlags(tar.id, flagStr);
+  // Keep in-session me.flags in sync when editing self.
+  if (tar.id === u.me.id) {
+    for (const tok of flagStr.trim().split(/\s+/).filter(Boolean)) {
+      if (tok.startsWith("!")) {
+        const n = tok.slice(1);
+        const reg = flags.exists(n);
+        u.me.flags.delete(reg?.name ?? n);
+        u.me.flags.delete(n.toLowerCase());
+      } else {
+        const reg = flags.exists(tok);
+        if (reg?.name) u.me.flags.add(reg.name);
+      }
+    }
+  }
   u.send(`Flags set on ${u.util.displayName(tar, u.me)}.`);
 }
 
@@ -25,10 +58,11 @@ addCmd({
   category: "Building",
   help: `@flags <target>=<flags>  — Set or remove flags on an object.
 
-Use ! to remove a flag.
+Use ! to remove a flag. Targets resolve globally (*Name ok).
 
 EXAMPLES
   @flags me=dark
+  @flags Builder=superuser
   @flags #5=!builder`,
   exec: execSetFlags,
 });
@@ -38,12 +72,14 @@ addCmd({
   pattern: /^@set\s+(.*)/i,
   lock: "connected",
   category: "Building",
-  help: `@set <target>=<flag>  — Set or clear a flag on an object (alias for @flags).
+  help: `@set <target>=<flag>  — Set or clear a flag (alias for @flags).
 
-Use ! to clear a flag.
+Use ! to clear a flag. Targets resolve globally (*Name ok).
 
 EXAMPLES
   @set me=quiet
+  @set Builder=superuser
+  @set *Alice=builder
   @set me=!quiet`,
   exec: execSetFlags,
 });

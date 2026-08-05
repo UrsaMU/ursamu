@@ -43,7 +43,14 @@ import huntsmanTpl from "../../templates/huntsman.json" with { type: "json" };
 
 export const COFD_TEMPLATES: Record<string, CofdTemplate> = {};
 
-const rawTemplates = [mortalTpl, changelingTpl, werewolfTpl, fetchTpl, hobgoblinTpl, huntsmanTpl];
+const rawTemplates = [
+  mortalTpl,
+  changelingTpl,
+  werewolfTpl,
+  fetchTpl,
+  hobgoblinTpl,
+  huntsmanTpl,
+];
 
 for (const data of rawTemplates) {
   COFD_TEMPLATES[data.key] = {
@@ -58,4 +65,29 @@ for (const data of rawTemplates) {
       ? getStandardMaxEnergy
       : (ps: number) => ps,
   };
+}
+
+/**
+ * Templates players may pick in chargen (+cg / web). Full catalog
+ * stays in COFD_TEMPLATES for sheets, NPCs, and staff tools.
+ * Werewolf (and staff lineages) stay implemented but closed for now.
+ */
+export const CHARGEN_TEMPLATE_KEYS = [
+  "mortal",
+  "changeling",
+] as const;
+
+export function isChargenTemplate(key: string): boolean {
+  const k = key.toLowerCase().trim();
+  return (CHARGEN_TEMPLATE_KEYS as readonly string[]).includes(k);
+}
+
+/** Ordered playable templates for chargen lists and web cards. */
+export function chargenTemplates(): CofdTemplate[] {
+  const out: CofdTemplate[] = [];
+  for (const k of CHARGEN_TEMPLATE_KEYS) {
+    const t = COFD_TEMPLATES[k];
+    if (t) out.push(t);
+  }
+  return out;
 }

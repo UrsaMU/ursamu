@@ -138,6 +138,8 @@ export async function execNuke(u: IUrsamuSDK): Promise<void> {
   send([socketId], "%ch%cgDatabase wiped.%cn Server will restart to reinitialize.");
   send([socketId], "You will need to create a new superuser on restart.");
 
+  const { markSoftReboot } = await import("../sys/reboot-flag.ts");
+  markSoftReboot();
   setTimeout(() => Deno.exit(75), 500);
 }
 
@@ -160,23 +162,104 @@ addCmd({
 });
 
 export async function execReboot(u: IUrsamuSDK): Promise<void> {
-  const isAdmin = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
-  if (!isAdmin) { u.send("Permission denied."); return; }
-  u.here.broadcast(`%chGame>%cn Server @reboot initiated by ${String(u.me.state.name || u.me.id)}...`);
-  await u.sys.reboot();
+  const isAdmin = u.me.flags.has("admin") ||
+    u.me.flags.has("wizard") ||
+    u.me.flags.has("superuser");
+  if (!isAdmin) {
+    u.send("Permission denied.");
+    return;
+  }
+
+  // args: [0]=switch (quick|check|...), [1]=optional branch
+  const sw = (u.cmd.args[0] || "").trim().toLowerCase();
+  const branch = (u.cmd.args[1] || "").trim();
+  const quick = sw === "quick" || sw === "noreload" ||
+    sw === "skip";
+  const check = sw === "check" || sw === "status" || sw === "dry";
+  const who = String(u.me.state.name || u.me.name || u.me.id);
+
+  if (check) {
+    try {
+      const { runCodebaseUpdate } = await import(
+        "../sys/codebase-update.ts"
+      );
+      const result = await runCodebaseUpdate({
+        branch,
+        checkOnly: true,
+        log: (line) => u.send(`%chGame>%cn ${line}`),
+      });
+      if (!result.ok) {
+        u.send("%cr@restart/check failed.%cn");
+      }
+    } catch (e: unknown) {
+      const m = e instanceof Error ? e.message : String(e);
+      u.send(`%cr@restart/check failed:%cn ${m}`);
+    }
+    return;
+  }
+
+  if (quick) {
+    u.here.broadcast(
+      `%chGame>%cn quick @restart by %ch${who}%cn.`,
+    );
+    try {
+      await u.sys.reboot({ update: false });
+    } catch (e: unknown) {
+      const m = e instanceof Error ? e.message : String(e);
+      u.send(`%crReboot failed:%cn ${m}`);
+    }
+    return;
+  }
+
+  // Full update: prepare while live, reboot only if cache warmed.
+  u.here.broadcast(
+    `%chGame>%cn full @restart by %ch${who}%cn.`,
+  );
+  try {
+    const { runCodebaseUpdate } = await import(
+      "../sys/codebase-update.ts"
+    );
+    const result = await runCodebaseUpdate({
+      branch,
+      log: (line) => u.send(`%chGame>%cn ${line}`),
+    });
+    if (!result.ok || !result.cached) {
+      u.send(
+        "%crUpdate failed — game left running " +
+          "(no reboot).%cn",
+      );
+      return;
+    }
+    await u.sys.reboot({ update: false });
+  } catch (e: unknown) {
+    const m = e instanceof Error ? e.message : String(e);
+    u.send(
+      `%crUpdate failed — game left running:%cn ${m}`,
+    );
+  }
 }
 
 addCmd({
   name: "@reboot",
-  pattern: /^@reboot|^@restart/i,
+  pattern: /^@(?:reboot|restart)(?:\/(\S+))?(?:\s+(.*))?$/i,
   lock: "connected & admin+",
   category: "admin",
-  help: `@reboot  — Reboot the game server (admin only).
+  help: `@restart              — Prepare packages online, then soft-reboot.
+@restart/check         — List outdated pins (no write, no reboot).
+@restart/quick         — Soft-reboot only (no git/JSR).
+@restart <branch>      — Pull that branch, then prepare + reboot.
 
-Broadcasts a reboot message to all connected players before restarting.
+Prepare (game stays up):
+  git pull → exact jsr:@ursamu/* pins + dual-package
+  overrides → wipe deno.lock + node_modules →
+  deno cache --reload. Soft-reboot only if cache OK.
+Local ./vendor/* pins update only via git pull.
+Unpublished monorepo code is NOT loaded — publish to
+JSR first. Telnet stays up; failures leave the game up.
 
 Examples:
-  @reboot
-  @restart`,
+  @restart/check
+  @restart
+  @restart/quick`,
   exec: execReboot,
 });

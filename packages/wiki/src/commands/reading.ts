@@ -1,5 +1,5 @@
 import { join, resolve } from "@std/path";
-import { addCmd } from "@ursamu/mush";
+import { addCmd, markdownToAnsi } from "@ursamu/mush";
 import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   WIKI_DIR, walkWiki, readPageFile, findPageFile, normalisePath, parseFrontmatter,
@@ -7,13 +7,23 @@ import {
 import { canReadPage } from "../permissions.ts";
 import { scanBacklinks } from "../backlinks.ts";
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+export { markdownToAnsi };
 
-const SEP60 = "%ch" + "-".repeat(60) + "%cn";
-const SEP72 = "%ch" + "-".repeat(72) + "%cn";
+const WIDTH = 78;
 
-function hdr(title: string): string {
-  return `%ch%cw=== ${title} ===%cn`;
+function columnGrid(items: string[]): string {
+  const colWidth = Math.floor(WIDTH / 4);
+  let cols = "";
+  for (let i = 0; i < items.length; i += 4) {
+    const row = items.slice(i, i + 4);
+    cols += row
+      .map((item) => {
+        const up = item.toUpperCase();
+        return up + " ".repeat(Math.max(1, colWidth - up.length));
+      })
+      .join("") + "\n";
+  }
+  return cols.trimEnd();
 }
 
 // ─── +wiki ────────────────────────────────────────────────────────────────────
@@ -33,8 +43,8 @@ Switches:
   /backlinks <path>  List pages that link to this page via [[wikilinks]].
 
 Examples:
-  +wiki                    Show root-level wiki index.
-  +wiki news               List pages in the news/ directory.
+  +wiki                    Show root-level wiki sections.
+  +wiki news               List pages in the news/ section.
   +wiki news/battle-2026   Read a specific page.
   +wiki/search treaty      Find pages mentioning "treaty".
   +wiki/tag ic             List all IC-tagged pages.
@@ -60,24 +70,33 @@ Examples:
 // ─── root index ──────────────────────────────────────────────────────────────
 
 async function cmdRoot(u: IUrsamuSDK): Promise<void> {
-  const entries: Array<{ name: string; type: string }> = [];
+  const sections = new Set<string>();
+  const rootPages: string[] = [];
   try {
     for await (const e of Deno.readDir(resolve(WIKI_DIR))) {
       if (e.name.startsWith(".") || e.name === "README.md") continue;
-      entries.push({ name: e.name.replace(/\.md$/, ""), type: e.isDirectory ? "dir" : "page" });
+      if (e.isDirectory) {
+        sections.add(e.name);
+      } else if (e.isFile && e.name.endsWith(".md")) {
+        rootPages.push(e.name.replace(/\.md$/, ""));
+      }
     }
   } catch { u.send("Wiki directory is empty or does not exist."); return; }
 
-  if (!entries.length) { u.send("The wiki is empty."); return; }
-  entries.sort((a, b) => a.name.localeCompare(b.name));
+  const secList = [...sections].sort((a, b) => a.localeCompare(b));
+  if (!secList.length && !rootPages.length) { u.send("The wiki is empty."); return; }
 
-  u.send(hdr("WIKI"));
-  u.send("%ch" + "-".repeat(40) + "%cn");
-  for (const e of entries) {
-    u.send((e.type === "dir" ? "%ch%cb[dir]%cn " : "      ") + e.name);
+  const lines: string[] = [u.util.header("WIKI SYSTEM")];
+  if (secList.length) {
+    lines.push(columnGrid(secList));
   }
-  u.send("%ch" + "-".repeat(40) + "%cn");
-  u.send('Use "+wiki <path>" to read a page or list a directory.');
+  if (rootPages.length) {
+    if (secList.length) lines.push(u.util.divider("ROOT PAGES"));
+    lines.push(columnGrid(rootPages));
+  }
+  lines.push(u.util.footer());
+  lines.push("Type '%ch+wiki <section>%cn' or '%ch+wiki <path>%cn' to browse.");
+  u.send(lines.join("\n"));
 }
 
 // ─── read page or directory ───────────────────────────────────────────────────
@@ -93,7 +112,7 @@ async function cmdRead(u: IUrsamuSDK, wikiPath: string): Promise<void> {
       return;
     }
 
-    const title  = (meta.title as string) || wikiPath;
+    const title  = ((meta.title as string) || wikiPath).toUpperCase();
     const date   = meta.date   ? ` | ${meta.date}`    : "";
     const author = meta.author ? ` | By ${meta.author}` : "";
     const tags   = Array.isArray(meta.tags) && meta.tags.length
@@ -101,44 +120,44 @@ async function cmdRead(u: IUrsamuSDK, wikiPath: string): Promise<void> {
     const locked = meta.readLock && meta.readLock !== "connected"
       ? ` | Lock: ${meta.readLock}` : "";
 
-    u.send(hdr(title));
-    u.send(`[${wikiPath}]${author}${date}${tags}${locked}`);
-    u.send(SEP72);
-    u.send(body);
-    u.send(SEP72);
+    const lines: string[] = [
+      u.util.header(title),
+      `Path: ${wikiPath}${author}${date}${tags}${locked}`,
+      u.util.divider(),
+      markdownToAnsi(body),
+      u.util.footer(),
+    ];
+    u.send(lines.join("\n"));
     return;
   }
 
-  // Try directory listing
+  // Try directory (section) listing
   const dirAbs = resolve(join(WIKI_DIR, wikiPath));
   if (!dirAbs.startsWith(resolve(WIKI_DIR))) { u.send("Invalid path."); return; }
 
-  const children: Array<{ path: string; title: string; type: string }> = [];
+  const children: string[] = [];
   try {
     for await (const entry of Deno.readDir(dirAbs)) {
       if (entry.name === "README.md" || entry.name.startsWith(".")) continue;
       if (entry.isFile && entry.name.endsWith(".md")) {
-        const slug      = entry.name.replace(/\.md$/, "");
-        const childPath = slug === "index" ? wikiPath : `${wikiPath}/${slug}`;
-        const page      = await readPageFile(join(dirAbs, entry.name));
-        children.push({ path: childPath, title: page ? (page.meta.title as string) || slug : slug, type: "page" });
+        const slug = entry.name.replace(/\.md$/, "");
+        if (slug !== "index") children.push(slug);
       } else if (entry.isDirectory) {
-        children.push({ path: `${wikiPath}/${entry.name}`, title: entry.name, type: "dir" });
+        children.push(entry.name);
       }
     }
-  } catch { u.send(`No wiki page or directory found at '${wikiPath}'.`); return; }
+  } catch { u.send(`No wiki page or section found at '${wikiPath}'.`); return; }
 
-  if (!children.length) { u.send(`'${wikiPath}' is empty.`); return; }
-  children.sort((a, b) => a.path.localeCompare(b.path));
+  if (!children.length) { u.send(`Section '${wikiPath}' is empty.`); return; }
+  children.sort((a, b) => a.localeCompare(b));
 
-  u.send(hdr(wikiPath.toUpperCase()));
-  u.send(SEP60);
-  for (const c of children) {
-    const marker = c.type === "dir" ? "%ch%cb[dir]%cn " : "      ";
-    u.send(marker + u.util.ljust(c.path.split("/").pop() || c.path, 28) + " " + c.title);
-  }
-  u.send(SEP60);
-  u.send(`Use "+wiki ${wikiPath}/<page>" to read a page.`);
+  const lines: string[] = [
+    u.util.header(`SECTION: ${wikiPath.toUpperCase()}`),
+    columnGrid(children),
+    u.util.footer(),
+    `Type '%ch+wiki ${wikiPath}/<page>%cn' to read a page.`,
+  ];
+  u.send(lines.join("\n"));
 }
 
 // ─── /search ─────────────────────────────────────────────────────────────────
@@ -162,10 +181,14 @@ async function cmdSearch(u: IUrsamuSDK, arg: string): Promise<void> {
   }
 
   if (!hits.length) { u.send(`No wiki pages match "${arg}".`); return; }
-  u.send(`%ch%cw${hits.length} result(s) for "${arg}":%cn`);
-  u.send(SEP60);
-  for (const h of hits) u.send(u.util.ljust(h.path, 36) + " " + h.title);
-  u.send(SEP60);
+  const lines: string[] = [
+    u.util.header(`SEARCH: "${arg.toUpperCase()}" (${hits.length})`),
+  ];
+  for (const h of hits) {
+    lines.push(u.util.ljust(h.path, 36) + " " + h.title);
+  }
+  lines.push(u.util.footer());
+  u.send(lines.join("\n"));
 }
 
 // ─── /tag ────────────────────────────────────────────────────────────────────
@@ -185,10 +208,14 @@ async function cmdTagList(u: IUrsamuSDK, tag: string): Promise<void> {
   }
 
   if (!hits.length) { u.send(`No wiki pages tagged "${tag}".`); return; }
-  u.send(hdr(`TAG: ${tag.toUpperCase()}`));
-  u.send(SEP60);
-  for (const h of hits) u.send(u.util.ljust(h.path, 36) + " " + h.title);
-  u.send(SEP60);
+  const lines: string[] = [
+    u.util.header(`TAG: ${tag.toUpperCase()} (${hits.length})`),
+  ];
+  for (const h of hits) {
+    lines.push(u.util.ljust(h.path, 36) + " " + h.title);
+  }
+  lines.push(u.util.footer());
+  u.send(lines.join("\n"));
 }
 
 // ─── /recent ─────────────────────────────────────────────────────────────────
@@ -211,14 +238,16 @@ async function cmdRecent(u: IUrsamuSDK, arg: string): Promise<void> {
   const top = items.slice(0, n);
 
   if (!top.length) { u.send("No wiki pages found."); return; }
-  u.send(hdr(`RECENT PAGES (${top.length})`));
-  u.send(SEP60);
+  const lines: string[] = [
+    u.util.header(`RECENT PAGES (${top.length})`),
+  ];
   for (const p of top) {
     const d = new Date(p.mtime);
     const ds = isNaN(d.getTime()) ? "" : ` (${d.toISOString().slice(0, 10)})`;
-    u.send(u.util.ljust(p.path, 36) + " " + p.title + ds);
+    lines.push(u.util.ljust(p.path, 36) + " " + p.title + ds);
   }
-  u.send(SEP60);
+  lines.push(u.util.footer());
+  u.send(lines.join("\n"));
 }
 
 // ─── /toc ────────────────────────────────────────────────────────────────────
@@ -240,11 +269,13 @@ async function cmdToc(u: IUrsamuSDK, arg: string): Promise<void> {
   }
 
   if (!headings.length) { u.send(`'${wikiPath}' has no headings.`); return; }
-  const title = (meta.title as string) || wikiPath;
-  u.send(hdr(`TOC: ${title}`));
-  u.send(SEP60);
-  for (const h of headings) u.send(h);
-  u.send(SEP60);
+  const title = ((meta.title as string) || wikiPath).toUpperCase();
+  const lines: string[] = [
+    u.util.header(`TOC: ${title}`),
+  ];
+  for (const h of headings) lines.push(h);
+  lines.push(u.util.footer());
+  u.send(lines.join("\n"));
 }
 
 // ─── /backlinks ───────────────────────────────────────────────────────────────
@@ -255,8 +286,10 @@ async function cmdBacklinks(u: IUrsamuSDK, arg: string): Promise<void> {
   const links    = await scanBacklinks(wikiPath);
 
   if (!links.length) { u.send(`No pages link to '${wikiPath}'.`); return; }
-  u.send(hdr(`BACKLINKS: ${wikiPath}`));
-  u.send(SEP60);
-  for (const l of links) u.send(u.util.ljust(l.path, 36) + " " + l.title);
-  u.send(SEP60);
+  const lines: string[] = [
+    u.util.header(`BACKLINKS: ${wikiPath.toUpperCase()}`),
+  ];
+  for (const l of links) lines.push(u.util.ljust(l.path, 36) + " " + l.title);
+  lines.push(u.util.footer());
+  u.send(lines.join("\n"));
 }

@@ -1,0 +1,44 @@
+{
+  "slug": "corporatesecurity",
+  "name": "Corporate Security",
+  "blurb": "Disciplined Megacorp enforcer with assault rifle and medium armor.",
+  "tier": "lieutenant",
+  "tags": ["corp", "tactical", "lieutenant"],
+  "stats": {
+    "int": 5,
+    "ref": 7,
+    "dex": 6,
+    "tech": 4,
+    "cool": 6,
+    "will": 6,
+    "luck": 4,
+    "move": 6,
+    "body": 7,
+    "emp": 5
+  },
+  "skills": {
+    "shoulder_arms": 5,
+    "autofire": 4,
+    "handgun": 4,
+    "brawling": 4,
+    "evasion": 4,
+    "athletics": 4,
+    "perception": 5
+  },
+  "armorBody": {
+    "name": "Light Armor Jack",
+    "sp": 11
+  },
+  "armorHead": {
+    "name": "Ballistic Helmet",
+    "sp": 11
+  },
+  "weapon": {
+    "name": "Assault Rifle",
+    "skill": "shoulder_arms",
+    "damageDice": 5,
+    "autofire": true,
+    "autofireMax": 3
+  },
+  "aiKey": "defensive"
+}

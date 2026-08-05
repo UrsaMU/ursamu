@@ -1,3 +1,8 @@
-// Back-compat shim: re-exports CoFD character generation engine from ./src/chargen.
+/**
+ * @module
+ *
+ * Back-compat barrel for the character generation engine
+ * (`src/chargen`). Used by tests and older imports.
+ */
 
 export * from "./src/chargen/index.ts";

@@ -1,0 +1,598 @@
+BY ANSELM ZIELONKA
+
+cyberpunk red errata
+last updated 06.02.2021
+
+The following errata applies to the First and Second Printing
+of the Cyberpunk RED core rulebook.
+The changes have been applied to the digital version which is marked as v1.25.
+Copyright © 2020 by R. Talsorian Games, Inc., Cyberpunk is a registered trademark of CD Projekt Red S.A. All rights reserved under the Universal Copyrights Convention. All
+situations, governments, and people herein are fictional. Any similarities portrayed herein without satiric intent are strictly coincidental.
+
+1
+
+CYBERPUNK RED ERRATA
+Changes for v1.25/3rd Printing are noted with an @ at the front of the entry.
+Minor typos have been fixed throughout the book.
+Page 63: On the What Kind of Corp Do You Work For table you roll 1d10, not 1d6.
+Page 95: The Air Pistol listing on the Exotic Weapons table incorrectly notes it as a Very Heavy Pistol. It is a
+Medium Pistol.
+@ Page 102 and 356: The cost of High Fashion jewelry has been changed to 5,000 (Luxury).
+
+Page 114: The Description & Data for Grafted Muscle and Bone Lace has changed to clarify multiple instances
+stack. It now reads:
+Increases BODY by 2. The increase changes HP, Wound Threshold, and Death Save.
+Multiple installments stack. Cannot raise BODY above 10.
+Page 117: The EMP loss for the Cyberware packages are incorrect. They should read as follows:
+Rockerboy: -1 EMP • Solo: -2 EMP • Netrunner: -2 EMP • Tech: -2 EMP • Medtech: -2 EMP •
+Media: -1 EMP • Lawman: -1 EMP • Exec: -2 EMP • Fixer: -2 EMP • Nomad: -2 EMP
+@ Page 121: The chapter subheader has been changed to read 2023 (22 Years Ago).
+@ Page 145: In the Charismatic Impact in Action sidebar, the DV for influencing the bartender has been
+
+changed from DV10 to DV8.
+
+Page 148: A Data Pop was inadvertently left out on page 148. It reads: Fabricating a Cheap item costs 5eb.
+Page 148: Text was added to the 2nd column, 1st paragraph under Upgrade Expertise. The paragraph now reads:
+To upgrade an item, you roll TECH + the TECH Skill that the item is typically repaired with +
+your Rank in this specialty + 1d10. The Tech must purchase materials of the same price category of the
+item being upgraded, which installing the upgrade consumes. The DV you roll against and the time it takes to
+install the upgrade is based on the price category of the item you are upgrading. The one exception is vehicle
+upgrades, which are treated as being 1,000eb (Very Expensive) for this purpose.
+Page 173: The Autofire DVs Based on Range table is incorrect. The correct table is below.
+
+▶ Autofire DVs Based on Range
+Weapon Type
+
+0 to 6
+m/yds
+
+7 to 12
+m/yds
+
+13 to 25
+m/yds
+
+26 to 50
+m/yds
+
+51 to 100
+m/yds
+
+SMGs
+
+20
+
+17
+
+20
+
+25
+
+30
+
+Assault Rifle
+
+22
+
+20
+
+17
+
+20
+
+25
+
+Page 173: The Autofire Example sidebar uses incorrect DVs. The text for the math portion of the example should read:
+According to the Autofire specific Range Table, he needs to beat a DV17 to hit a target 14 m/yds away.
+Royal rolls 1d10, gets a 7, and adds his 8 REF + 6 Autofire Skill, for a total of 21. Since he beat the Autofire
+DV17 by 4, he rolls 2d6 for damage, getting 10, and multiplies the result by 4, the amount he beat the
+Autofire DV by, for a total of 40 damage.
+
+2
+
+CYBERPUNK RED ERRATA
+Page 175: The Melee Combat Example sidebar is incorrect. It should read:
+After his set, Rico Rico, a Rockerboy, is accosted by two clowns (not Bozos, thankfully) who didn't like his sound.
+The Combat Zone is a tough place to play as a solo act. The assailants set upon Rico Rico with machetes (medium
+melee weapons). They attack Rico Rico with their DEX + Melee Weapon Skill + 1d10, vs. Rico Rico's DEX + Evasion
+Skill + 1d10. Medium Melee Weapons have a ROF 2, meaning 2 potential hits per Attack Action, so with two
+assailants, Rico Rico has to dodge the clowns' machetes four times before he gets a Turn. He dodges three attacks,
+but the fourth hits him and rolls a 7 for damage. Damage dealt by Melee Weapons ignores half of the defender's
+armor (round up), so Rico Rico's SP11 Light Armorjack is treated as SP6, meaning 1 damage slips through. Rico
+Rico's Light Armorjack is also Ablated, which decreases it's SP by one to 10.
+@ Page 181: A Data Pop was added. It reads: Damage caused by environmental factors like fire and radiation
+
+cannot cause Critical Injuries. Neither can poisons, drugs, or biotoxins unless their description specifically says
+they can.
+Page 181: The Effect of Deadly Poisons on the Poisons table is incorrectly listed as 2d6. It should be 3d6.
+
+@ Page 186: The word still has been removed from the Taking Damage rulebox. Ablation only occurs if the
+
+amor is penetrated and the target takes damage to their HP.
+
+Page 201: The following text was added to the end of the first paragraph under Defeating a Program.
+Attack Programs are an exception. They are activated when making an Attack and,
+once used, automatically deactivate themselves.
+The following text was added to the end of the first paragraph under Programs: Attack programs Deactivate
+themselves once used.
+Page 204: A Data Pop was added. It reads: Brain damage is applied directly to HP and is not affected by
+worn or implanted armor. It cannot cause a Critical Injury.
+Page 227: A Data Pop was inadvertently left out on page 227. It reads: Biosculpting can be used for cosmetic
+purposes but also for therapeutic ones, including helping remove scar tissue, repairing damage caused by cancer
+and treatments for cancer, and gender affirmation.
+Page 277: The date of Andrew Rocklin’s disappearance is incorrect. It should be 2023, not 223.
+Page 345: A Data Pop has been added to page 345. It reads: Armor-Piercing ammunition is the standard,
+basic level for Grenades and Rockets.
+Page 346: Slugs has been added to the Ammo Types Available list for Incendiary and Smart Ammunition.
+Page 346: The following sentence has been added to the end of the description for Rubber Ammunition:
+
+Rubber Ammunition counts as Basic Ammunition for the purposes of use with Exotic Weapons.
+Page 347: The description for Smoke Ammunition has been changed. It now reads:
+
+When using this ammunition, you deal no damage with your attack. Obscures a 10m/yd by 10m/yd area
+with smoke for a minute on impact. The typical penalty for trying to perform a task obscured by smoke is -4.
+
+3
+
+CYBERPUNK RED ERRATA
+Page 354: The descriptive text for the Linear Frame ß (Beta) and the Linear Frame ∑ (Sigma) have been flipped.
+The Linear Frame ß (Beta) should read:
+Powered exoskeleton, giving the user even more tremendous strength.
+The Linear Frame ∑ (Sigma) should read:
+Powered exoskeleton, giving the user tremendous strength.
+In addition, the phrase using two installations of Interface Plugs has been removed from the Linear Frame ∑
+(Sigma) description. All other notes are correct.
+Page 355: The description for the Techtool is incorrect. It should read:
+An all-in-one tool. The various parts, including a small utility blade, pliers, various screwdrivers, files, and
+clippers all fold up into a compact and easy to carry package.
+@ Page 363: The Description & Data for Grafted Muscle and Bone Lace has changed to clarify it also
+
+increases Wound Threshhold and that multiple instances stack. It now reads:
+
+Increases BODY by 2. The increase changes HP, Wound Threshold, and Death Save.
+Multiple installments stack. Cannot raise BODY above 10.
+Page 378: The Cost to Buy a Luxury Penthouse is 150,000eb and not 50,000eb.
+@ Page 412: The Boosterganger's BODY and Death Save have been changed to 2. All other numbers remain
+
+the same.
+
+@ Page 415: The Security Officer has been updated. They now have Stealth 8 (6) and Tactics 6 and an SP of
+
+12 for both Head and Body Armor.
+
+Page 452: All Control Skills should utilize REF as their paired STAT and not TECH. In addition, there are several
+errors on the Cyberware page of the Character Sheet. For a correct sheet, please see the following pages or
+visit the game aids download section of our website.
+
+All instances of Danger Girl have been changed to the Neocorp's correct name,
+Danger Gal. We apologize to Danger Gal CEO Michiko Sanderson, her lawyers,
+Danger Gal's stock holders, and all agents of Danger Gal for this error.
+Please release our loved ones from "protective custody". We miss them.
+
+4
+
+Hit Points
+
+out of
+
+out of
+
+Death Save
+
+-2 to all Actions
+when Seriously Wounded
+
+Seriously
+Wounded
+
+Notes
+
+Role
+Ability
+
+Role
+
+Handle
+
+LUCK
+
+WILL
+
+COOL
+
+TECH
+
+DEX
+
+REF
+
+EMP
+
+BODY
+
+MOVE
+
+Addictions
+
+Critical Injuries
+
+Humanity
+
+rank
+rank
+
+INT
+
+out of
+out of
+
+STAT
+
+STAT
+
+BASE
+
+BASE
+Shoulder Arms (REF)
+
+Heavy Weapons (x2) (REF)
+
+Ranged Weapon Skills
+
+LVL
+
+STAT
+
+BASE
+
+Shield
+
+Body
+
+Head
+
+SP
+
+Penalty
+
+Penalty applies to REF, DEX & MOVE
+
+Armor
+
+Weapon
+
+DMG
+
+Ammo
+
+Handgun (REF)
+
+Gamble (INT)
+
+WEAPONS and ARMOR
+
+Sea Vehicle Tech (TECH)
+
+Autofire (x2) (REF)
+
+Education (INT)
+
+ROF Notes
+
+Weaponstech (TECH)
+
+Pick Pocket (TECH)
+
+Archery (REF)
+
+Deduction (INT)
+
+BASE
+
+Pick Lock (TECH)
+STAT
+
+Ranged Weapon Skills
+
+Cryptography (INT)
+
+Paint/Draw/Sculpt (TECH)
+
+Land Vehicle Tech (TECH)
+
+Forgery (TECH)
+
+Photography/Film (TECH)
+LVL
+
+BASE
+
+Paramedic (x2) (TECH)
+
+Play Instrument (TECH)
+
+Business (INT)
+
+STAT
+
+Criminology (INT)
+
+Acting (COOL)
+
+Bureaucracy (INT)
+
+LVL
+
+First Aid (TECH)
+
+Composition (INT)
+
+Performance Skills
+
+Animal Handling (INT)
+
+Electronics/Security Tech (x2) (TECH)
+
+Melee Weapon (DEX)
+
+Martial Arts (x2) (DEX)
+
+BASE
+
+Education Skills
+
+STAT
+
+Evasion (DEX)
+
+Riding (REF)
+LVL
+
+Demolitions (x2) (TECH)
+
+Brawling (DEX)
+
+Pilot Sea Vehicle (REF)
+
+Accounting (INT)
+
+Basic Tech (TECH)
+
+Fighting Skill
+
+Pilot Air Vehicle (x2) (REF)
+
+Cybertech (TECH)
+
+Air Vehicle Tech (TECH)
+
+Technique Skills
+
+Wilderness Survival (INT)
+
+Drive Land Vehicle (REF)
+
+Tactics (INT)
+
+Wardrobe & Style (COOL)
+
+Control Skills
+
+Trading (COOL)
+
+Stealth (DEX)
+
+Streetwise (COOL)
+
+Endurance (WILL)
+Resist Torture/Drugs (WILL)
+
+Personal Grooming (COOL)
+Science (INT)
+
+Persuasion (COOL)
+
+Interrogation (COOL)
+
+Human Perception (EMP)
+
+Dance (DEX)
+
+Your Home
+
+Local Expert (INT)
+
+Contortionist (DEX)
+
+Athletics (DEX)
+
+Body Skills
+
+Conversation (EMP)
+
+LVL
+
+LVL
+
+Tracking (INT)
+
+Library Search (INT)
+
+Streetslang
+
+Language (INT)
+
+Education Skills
+
+Bribery (COOL)
+BASE
+
+BASE
+
+Social Skills
+
+STAT
+
+STAT
+
+Perception (INT)
+LVL
+
+LVL
+
+Lip Reading (INT)
+
+Conceal/Reveal Object (INT)
+
+Concentration (WILL)
+
+Awareness Skills
+
+LVL
+
+LVL
+
+LVL
+
+STAT
+
+STAT
+
+STAT
+
+BASE
+
+BASE
+
+BASE
+
+Hairstyle
+Feelings About
+People?
+Most Valued
+Possession
+Childhood
+Environment
+Life Goals
+Tragic Love Affairs
+
+What Can They Throw at You?
+
+Clothing Style
+
+What Do You
+Value Most?
+
+Most Valued
+Person
+
+Family
+Background
+
+Family Crisis
+
+Friends
+
+Enemies
+What Caused It?
+
+Personality
+
+Who?
+
+Reputation
+Events
+
+Cultural Origins
+
+LIFEPATH
+
+Reputation
+
+Improvement
+Points
+
+out of
+
+What’s Gonna Happen?
+
+Aliases
+
+Ammunition
+Cash
+
+Role Specific Lifepath
+
+Housing
+
+Fashion
+
+Gear
+
+Rent
+
+Notes
+
+Lifestyle
+
+Right Cyberleg
+
+Data
+
+Neural Link
+
+Data
+
+Left Cyberleg
+
+Data
+
+Data
+
+Data
+
+For cyberware without a foundational
+requirement (i.e. Internal Cyberware)
+just note each piece in the slots below
+the category name.
+
+Left Cyberarm
+
+Data
+
+Right Cyberarm
+
+For cyberware with a foundational
+requirement (i.e. a Cybereye) check
+the box to indicate you have it.
+Options go in the slots below.
+
+Left Cybereye
+
+Data
+
+Data
+
+Cyberaudio Suite
+
+Right Cybereye
+
+CYBERWARE
+
+Borgware
+
+Fashionware
+
+External Cyberware
+
+Internal Cyberware
+
+Data
+
+Data
+
+Data
+
+Data
+
+

@@ -192,7 +192,7 @@ Deno.test("resolveSpin path still works (subtle)", OPTS, () => {
 });
 
 Deno.test("spendIcon clears Clarity condition", OPTS, () => {
-  let sheet = ctlSheet();
+  const sheet = ctlSheet();
   sheet.conditions = [{ key: "haunted" }];
   const a = addIcon(sheet, {
     name: "Old Song",

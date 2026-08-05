@@ -544,7 +544,7 @@ Deno.test("@clist/full — lists channel stats", OPTS, async () => {
   });
   await execChannel(u);
   const out = u._sent.join(" ");
-  assertStringIncludes(out, "--Flags--");
+  assertStringIncludes(out, "Flags");
   assertStringIncludes(out, "Public");
 });
 

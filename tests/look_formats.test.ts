@@ -70,7 +70,7 @@ Deno.test("look: no attrs and no handlers — default rendering", OPTS, async ()
   _clearFormatHandlers();
   const { u, sent } = makeMock();
   await execLook(u);
-  assertStringIncludes(sent[0], "%chTestRoom(#r1)%cn");
+  assertStringIncludes(sent[0], "%chTestRoom(#r1r)%cn");
   assertStringIncludes(sent[0], "A bare room.");
 });
 
@@ -80,8 +80,8 @@ Deno.test("look: plugin NAMEFORMAT handler overrides header", OPTS, async () => 
   await withHandler("NAMEFORMAT", (_u, _t, arg) => `<<N:${arg}>>`, async () => {
     await execLook(u);
   });
-  assertStringIncludes(sent[0], "<<N:TestRoom(#r1)>>");
-  assertEquals(sent[0].includes("%chTestRoom(#r1)%cn"), false);
+  assertStringIncludes(sent[0], "<<N:TestRoom(#r1r)>>");
+  assertEquals(sent[0].includes("%chTestRoom(#r1r)%cn"), false);
 });
 
 Deno.test("look: plugin DESCFORMAT handler wraps description", OPTS, async () => {
@@ -148,7 +148,7 @@ Deno.test("look: handler returning null falls through to built-in default", OPTS
   await withHandler("NAMEFORMAT", () => null, async () => {
     await execLook(u);
   });
-  assertStringIncludes(sent[0], "%chTestRoom(#r1)%cn");
+  assertStringIncludes(sent[0], "%chTestRoom(#r1r)%cn");
 });
 
 Deno.test("look: first non-null handler wins; later handlers don't run", OPTS, async () => {
@@ -186,7 +186,7 @@ Deno.test("look: unregisterFormatHandler removes the registration", OPTS, async 
   unregisterFormatHandler("NAMEFORMAT", fn);
   await execLook(u);
   assertEquals(sent[0].includes("REMOVED"), false);
-  assertStringIncludes(sent[0], "%chTestRoom(#r1)%cn");
+  assertStringIncludes(sent[0], "%chTestRoom(#r1r)%cn");
 });
 
 Deno.test("look: blind player short-circuits — no handler invoked", OPTS, async () => {

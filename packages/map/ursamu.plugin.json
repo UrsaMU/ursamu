@@ -1,8 +1,8 @@
 {
   "name": "map",
-  "version": "3.0.0",
-  "description": "Procedural coordinate-based sector map for UrsaMU — Simplex topology + sparse DBO overlays + Latin-1 split-pane renderer.",
-  "ursamu": ">=2.5.2",
+  "version": "3.1.1",
+  "description": "Procedural sector map — vehicles, fog, overlays, realms, builder tools.",
+  "ursamu": ">=1.0.4",
   "author": "",
   "license": "MIT",
   "main": "index.ts"

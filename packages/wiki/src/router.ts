@@ -3,7 +3,7 @@ import { ensureDir } from "@std/fs";
 import {
   WIKI_DIR, MAX_UPLOAD_BYTES,
   safePath, mimeForPath, serializePage,
-  readPageFile, walkWiki,
+  readPageFile, walkWiki, normalisePath,
 } from "./fs.ts";
 import type { WikiStub } from "./fs.ts";
 import { isStaffUser } from "./db.ts";
@@ -12,6 +12,13 @@ import { scanBacklinks } from "./backlinks.ts";
 import { listHistory, readSnapshot, saveSnapshot } from "./history.ts";
 import { wikiHooks } from "./hooks.ts";
 import { subscriptions, MAX_PLAYER_SUBS } from "./db.ts";
+import {
+  listPageMedia,
+  savePageMedia,
+  deletePageMedia,
+  importRemoteMedia,
+  safeAssetName,
+} from "./media.ts";
 
 const JSON_HDR = {
   "Content-Type":           "application/json",
@@ -33,6 +40,26 @@ export async function wikiRouteHandler(req: Request, userId: string | null): Pro
 
   // ── /tags ────────────────────────────────────────────────────────────────────
   if (rawPath === "tags" && method === "GET") return await handleTags(userId);
+
+  // ── /featured ────────────────────────────────────────────────────────────────
+  if (rawPath === "featured" && method === "GET")
+    return await handleFeatured(userId);
+
+  // ── /<path>/media[/<name>] — page images (list / upload / import / delete)
+  const mediaMatch = rawPath.match(
+    /^(.+)\/media(?:\/([^/]+))?$/,
+  );
+  if (mediaMatch) {
+    const pagePath = mediaMatch[1] ?? "";
+    const assetName = mediaMatch[2] ?? "";
+    return await handleMedia(
+      pagePath,
+      assetName,
+      method,
+      req,
+      userId,
+    );
+  }
 
   // ── /<path>/history, /<path>/backlinks, /<path>/watch ────────────────────────
   const subMatch = rawPath.match(/^(.+)\/(history|backlinks|watch)$/);
@@ -102,12 +129,32 @@ async function handleSearch(q: string, userId: string | null): Promise<Response>
 }
 
 async function handleList(userId: string | null): Promise<Response> {
-  const pages: WikiStub[] = [];
+  const pages: Array<WikiStub & Record<string, unknown>> = [];
   for await (const { urlPath, absPath } of walkWiki(resolve(WIKI_DIR))) {
     const page = await readPageFile(absPath);
     if (!page || !(await canReadPageRest(userId, page.meta))) continue;
-    pages.push({ path: urlPath, title: (page.meta.title as string) || urlPath, type: "page" });
+    const meta = page.meta ?? {};
+    const tags = Array.isArray(meta.tags)
+      ? (meta.tags as unknown[]).map(String)
+      : [];
+    pages.push({
+      path: urlPath,
+      title: (meta.title as string) || urlPath,
+      type: "page",
+      draft: meta.draft === true,
+      featured: meta.featured === true,
+      bgImage: meta.bgImage === true,
+      author: typeof meta.author === "string" ? meta.author : "",
+      date: typeof meta.date === "string" ? meta.date : "",
+      readLock: typeof meta.readLock === "string"
+        ? meta.readLock
+        : "connected",
+      tags,
+      // Rough size for dashboard (chars of body)
+      chars: page.body?.length ?? 0,
+    });
   }
+  pages.sort((a, b) => String(a.path).localeCompare(String(b.path)));
   return json(pages);
 }
 
@@ -156,13 +203,16 @@ async function handleGet(wikiPath: string, guarded: string, userId: string | nul
     if (!mime) return json({ error: "Unsupported file type" }, 415);
     try {
       const data = await Deno.readFile(guarded);
-      const forceDownload = mime === "image/svg+xml" || mime === "application/pdf";
+      // PDF download; images (incl. SVG) embeddable in markdown
+      const forceDownload = mime === "application/pdf";
       return new Response(data, {
         headers: {
           "Content-Type":           mime,
           "Cache-Control":          "public, max-age=3600",
           "X-Content-Type-Options": "nosniff",
-          ...(forceDownload ? { "Content-Disposition": "attachment" } : {}),
+          ...(forceDownload
+            ? { "Content-Disposition": "attachment" }
+            : {}),
         },
       });
     } catch { return json({ error: "Not found" }, 404); }
@@ -257,6 +307,132 @@ async function handleDelete(wikiPath: string, guarded: string, userId: string | 
     } catch { /* try next */ }
   }
   return json({ error: "Not found" }, 404);
+}
+
+/**
+ * Page media API:
+ *   GET    /api/v1/wiki/<page>/media           list
+ *   POST   /api/v1/wiki/<page>/media           upload file or import URL
+ *   DELETE /api/v1/wiki/<page>/media/<name>    delete
+ *
+ * Files live at wiki/<page>/_assets/<name> and are served via
+ * GET /api/v1/wiki/<page>/_assets/<name>.
+ */
+async function handleMedia(
+  pagePath: string,
+  assetName: string,
+  method: string,
+  req: Request,
+  userId: string | null,
+): Promise<Response> {
+  const page = normalisePath(pagePath);
+  if (!page) return json({ error: "Invalid path" }, 400);
+
+  if (method === "GET" && !assetName) {
+    // Staff-only list (paths are guessable; listing is staff tool)
+    if (!(await isStaffUser(userId))) {
+      return json({ error: "Forbidden" }, 403);
+    }
+    const items = await listPageMedia(page);
+    return json({ path: page, media: items });
+  }
+
+  if (method === "DELETE" && assetName) {
+    if (!(await isStaffUser(userId))) {
+      return json({ error: "Forbidden" }, 403);
+    }
+    const result = await deletePageMedia(page, assetName);
+    if ("error" in result) {
+      return json({ error: result.error }, result.status);
+    }
+    return json({ deleted: true, name: safeAssetName(assetName) });
+  }
+
+  if (method === "POST" && !assetName) {
+    if (!(await isStaffUser(userId))) {
+      return json({ error: "Forbidden" }, 403);
+    }
+    return await handleMediaPost(page, req);
+  }
+
+  return json({ error: "Method not allowed" }, 405);
+}
+
+async function handleMediaPost(
+  page: string,
+  req: Request,
+): Promise<Response> {
+  const ct = req.headers.get("content-type") || "";
+
+  // Multipart file upload
+  if (ct.includes("multipart/form-data")) {
+    let form: FormData;
+    try {
+      form = await req.formData();
+    } catch {
+      return json({ error: "Invalid multipart body" }, 400);
+    }
+    const entry = form.get("file");
+    if (!entry || typeof entry === "string") {
+      return json(
+        { error: 'multipart field "file" required' },
+        400,
+      );
+    }
+    const file = entry as File;
+    const prefer = form.get("name");
+    const nameHint = typeof prefer === "string" && prefer.trim()
+      ? prefer.trim()
+      : file.name || "image.png";
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const saved = await savePageMedia(page, nameHint, buf);
+    if ("error" in saved) {
+      return json({ error: saved.error }, saved.status);
+    }
+    return json(saved, 201);
+  }
+
+  // JSON: { url, name? } — fetch remote into _assets
+  let body: Record<string, unknown>;
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "Invalid JSON body" }, 400);
+  }
+  const url = typeof body.url === "string" ? body.url.trim() : "";
+  if (!url) {
+    return json(
+      {
+        error:
+          'Provide multipart file or JSON { "url": "https://..." }',
+      },
+      400,
+    );
+  }
+  const name = typeof body.name === "string"
+    ? body.name.trim()
+    : undefined;
+  const imported = await importRemoteMedia(page, url, name);
+  if ("error" in imported) {
+    return json({ error: imported.error }, imported.status);
+  }
+  return json(imported, 201);
+}
+
+async function handleFeatured(
+  userId: string | null,
+): Promise<Response> {
+  for await (
+    const { urlPath, absPath } of walkWiki(resolve(WIKI_DIR))
+  ) {
+    const page = await readPageFile(absPath);
+    if (!page) continue;
+    if (page.meta.featured !== true) continue;
+    if (page.meta.draft === true) continue;
+    if (!(await canReadPageRest(userId, page.meta))) continue;
+    return json({ path: urlPath, ...page.meta, body: page.body });
+  }
+  return json({ error: "No featured page" }, 404);
 }
 
 async function handleHistory(wikiPath: string, method: string, userId: string | null): Promise<Response> {

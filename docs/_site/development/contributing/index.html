@@ -3,11 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> | UrsaMU Documentation</title>
-  <meta name="description" content="Learn how to contribute to the UrsaMU project">
-  <link rel="stylesheet" href="/ursamu/styles.css">
+  <meta name="description" content="How to contribute to UrsaMU — branching, PRs, commits, and the pre-commit gauntlet.">
+  <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/development/contributing/">
+<meta property="og:url" content="http://localhost:3001/development/contributing/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/ursamu/" class="site-logo">
+  <a href="/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/guides/" class="header-nav-link">
       Guides
     </a>
     
     
     
-    <a href="/ursamu/api/" class="header-nav-link">
+    <a href="/api/" class="header-nav-link">
       API
     </a>
     
     
     
-    <a href="/ursamu/plugins/" class="header-nav-link">
+    <a href="/plugins/" class="header-nav-link">
       Plugins
     </a>
     
     
     
-    <a href="/ursamu/development/" class="header-nav-link active">
+    <a href="/development/" class="header-nav-link active">
       Development
     </a>
     
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link">
+      <a href="/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,35 +110,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/ursamu/guides/installation/" class="sidebar-link">
+      <a href="/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
+      <a href="/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
+      <a href="/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/ursamu/guides/customization/" class="sidebar-link">
+      <a href="/guides/customization/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+      <a href="/guides/scripting/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
-      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+      <a href="/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -150,7 +150,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/ursamu/configuration/" class="sidebar-link">
+      <a href="/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +162,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/ursamu/api/" class="sidebar-link">
+      <a href="/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/ursamu/api/core/" class="sidebar-link">
+      <a href="/api/core/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +178,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/ursamu/plugins/" class="sidebar-link">
+      <a href="/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/ursamu/plugins/basics/" class="sidebar-link">
+      <a href="/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
+      <a href="/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/ursamu/plugins/commands/" class="sidebar-link">
+      <a href="/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
+      <a href="/plugins/hooks/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/ursamu/plugins/database/" class="sidebar-link">
+      <a href="/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
+      <a href="/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
+      <a href="/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +218,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/ursamu/development/" class="sidebar-link">
+      <a href="/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/ursamu/development/contributing/" class="sidebar-link active">
+      <a href="/development/contributing/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/ursamu/extending/" class="sidebar-link">
+      <a href="/extending/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/ursamu/child-games/" class="sidebar-link">
+      <a href="/child-games/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,7 +259,7 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/ursamu/">Home</a>
+        <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
         <span class="breadcrumbs-current"></span>
       </nav>
@@ -268,107 +268,98 @@
       <!-- Page content -->
       <article class="prose">
         <h1>Contributing to UrsaMU</h1>
-<p>Thank you for your interest in contributing to UrsaMU! This guide will help you get started with contributing to the project.</p>
-<h2>Code of Conduct</h2>
-<p>UrsaMU has adopted a Code of Conduct that we expect project participants to adhere to. Please read <a href="./code-of-conduct.md">the full text</a> so that you can understand what actions will and will not be tolerated.</p>
-<h2>Getting Started</h2>
-<h3>Prerequisites</h3>
-<p>Before you begin, ensure you have the following installed:</p>
+<p>Thanks for your interest in contributing to UrsaMU. This page captures the<br>
+ground rules for v2.6.0.</p>
+<h2>Prerequisites</h2>
 <ul>
-<li><a href="https://deno.land/">Deno</a> (version 1.37.0 or higher)</li>
+<li><a href="https://deno.land/">Deno</a> 1.45+ (for <code>--unstable-kv</code>)</li>
 <li><a href="https://git-scm.com/">Git</a></li>
-<li>A code editor (we recommend <a href="https://code.visualstudio.com/">VS Code</a> with the Deno extension)</li>
+<li>An editor with the Deno extension (VS Code recommended)</li>
 </ul>
-<h3>Setting Up Your Development Environment</h3>
-<ol>
-<li>Fork the <a href="https://github.com/lcanady/ursamu">UrsaMU repository</a> on GitHub</li>
-<li>Clone your fork to your local machine:<pre class="language-bash" tabindex="0"><code class="language-bash">git clone https://github.com/YOUR_USERNAME/ursamu.git
+<h2>Initial Setup</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">git clone https://github.com/lcanady/ursamu.git
 cd ursamu
+deno task test   # confirm clean baseline
 </code></pre>
-</li>
-<li>Add the original repository as a remote:<pre class="language-bash" tabindex="0"><code class="language-bash">git remote add upstream https://github.com/lcanady/ursamu.git
+<p>If you plan to send PRs, fork on GitHub and add your fork as <code>origin</code>,<br>
+keeping <code>upstream</code> pointed at <code>lcanady/ursamu</code>.</p>
+<h2>Branching</h2>
+<p>Always work on a topic branch off <code>main</code>:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">git fetch upstream
+git checkout -b feature/short-description upstream/main
 </code></pre>
-</li>
-<li>Install dependencies:<pre class="language-bash" tabindex="0"><code class="language-bash">deno task setup
+<p>There is no long-lived <code>develop</code> branch — <code>main</code> is the release line.</p>
+<h2>Pre-Commit Gauntlet</h2>
+<p>Run these four steps in order before every commit. They mirror CI:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno check --unstable-kv mod.ts
+deno lint
+deno test tests/ --allow-all --unstable-kv --no-check
+deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
 </code></pre>
-</li>
-</ol>
-<h2>Development Process</h2>
-<h3>Branching Strategy</h3>
+<p>A commit isn’t ready until all four pass.</p>
+<h2>Docs Stay in Sync</h2>
+<p>If you touch a public API, command, config key, script, scaffold output, or<br>
+plugin surface — update <code>README.md</code> and the relevant page under <code>docs/</code> in the<br>
+same commit. Stale docs ship as broken docs.</p>
+<h2>Commits</h2>
 <ul>
-<li><code>main</code> - The main development branch</li>
-<li><code>release/*</code> - Release branches</li>
-<li><code>feature/*</code> - Feature branches</li>
-<li><code>bugfix/*</code> - Bug fix branches</li>
+<li>Write descriptive, present-tense subject lines: <code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>chore:</code>, <code>refactor:</code>, <code>test:</code>.</li>
+<li>One logical change per commit.</li>
+<li><strong>No AI/Claude attribution.</strong> Do not add <code>Co-Authored-By: Claude …</code>, do not<br>
+reference AI tools in commit messages, PR descriptions, or code comments.</li>
+<li>Never amend a commit that failed a pre-commit hook — fix and create a new<br>
+commit instead.</li>
 </ul>
-<p>Always create a new branch for your changes:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">git checkout -b feature/your-feature-name
-</code></pre>
-<h3>Development Workflow</h3>
-<ol>
-<li>Make sure your branch is up to date with the latest changes:<pre class="language-bash" tabindex="0"><code class="language-bash">git fetch upstream
-git rebase upstream/main
-</code></pre>
-</li>
-<li>Make your changes</li>
-<li>Run tests to ensure your changes don’t break anything:<pre class="language-bash" tabindex="0"><code class="language-bash">deno task test
-</code></pre>
-</li>
-<li>Commit your changes with a descriptive commit message:<pre class="language-bash" tabindex="0"><code class="language-bash">git commit -m "Add feature: your feature description"
-</code></pre>
-</li>
-<li>Push your changes to your fork:<pre class="language-bash" tabindex="0"><code class="language-bash">git push origin feature/your-feature-name
-</code></pre>
-</li>
-</ol>
 <h2>Pull Requests</h2>
-<p>When you’re ready to submit your changes, create a pull request:</p>
 <ol>
-<li>Go to your fork on GitHub</li>
-<li>Select your branch</li>
-<li>Click “Pull Request”</li>
-<li>Fill out the pull request template with details about your changes</li>
-<li>Submit the pull request</li>
+<li>Push your branch to your fork.</li>
+<li>Open a PR against <code>lcanady/ursamu:main</code>.</li>
+<li>Keep PRs scoped — one feature or fix per PR.</li>
+<li>Fill in the description: what changed, why, and how it was tested.</li>
+<li>Make sure CI is green.</li>
 </ol>
-<h3>Pull Request Guidelines</h3>
-<ul>
-<li>Keep pull requests focused on a single feature or bug fix</li>
-<li>Make sure all tests pass</li>
-<li>Update documentation as needed</li>
-<li>Follow the coding standards</li>
-<li>Be responsive to feedback and questions</li>
-</ul>
-<h2>Coding Standards</h2>
-<p>UrsaMU follows a set of coding standards to maintain consistency across the codebase:</p>
-<ul>
-<li>Use TypeScript for all code</li>
-<li>Follow the <a href="https://deno.land/manual/contributing/style_guide">Deno Style Guide</a></li>
-<li>Use meaningful variable and function names</li>
-<li>Write comments for complex logic</li>
-<li>Include JSDoc comments for public APIs</li>
-<li>Write tests for new features and bug fixes</li>
-</ul>
-<h2>Documentation</h2>
-<p>Documentation is a crucial part of UrsaMU. When contributing, please:</p>
-<ul>
-<li>Update the documentation for any changes to APIs or features</li>
-<li>Use clear, concise language</li>
-<li>Include examples where appropriate</li>
-<li>Follow the <a href="./documentation-guidelines.md">documentation guidelines</a></li>
-</ul>
-<h3>Building Documentation</h3>
-<p>To build and preview the documentation locally:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task docs
+<p>PRs are <strong>squash-merged</strong>. After merge, maintainers tag the release:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">git tag v&lt;version&gt;
+git push --tags
 </code></pre>
-<p>This will start a local server where you can preview the documentation.</p>
-<h2>Getting Help</h2>
-<p>If you need help with contributing to UrsaMU, you can:</p>
+<p>No AI attribution in PR titles or bodies either.</p>
+<h2>Coding Standards</h2>
 <ul>
-<li>Join the <a href="#">UrsaMU Discord server</a></li>
-<li>Open an issue on GitHub</li>
-<li>Reach out to the maintainers</li>
+<li>TypeScript only. Follow the<br>
+<a href="https://docs.deno.com/runtime/contributing/style_guide/">Deno style guide</a>.</li>
+<li>Early return over nested conditionals.</li>
+<li>No function longer than ~50 lines; no file longer than ~200 lines — decompose.</li>
+<li><code>catch (e: unknown)</code> — never bare <code>catch</code>.</li>
+<li>Library-first: if the SDK does it, use the SDK.</li>
+<li>No comments unless the <em>why</em> is non-obvious (hidden invariant, bug workaround).</li>
 </ul>
-<p>Thank you for contributing to UrsaMU! Your efforts help make the project better for everyone.</p>
+<h2>Testing</h2>
+<ul>
+<li>All new commands need tests in <code>tests/</code>.</li>
+<li>See <a href="/development/testing/">Testing</a> for <code>mockPlayer</code> / <code>mockU</code> helpers and DB<br>
+cleanup conventions.</li>
+</ul>
+<h2>Plugin Audit Checklist</h2>
+<p>Mental pass before opening a PR that touches plugins or core commands:</p>
+<ul>
+<li><code>u.util.stripSubs()</code> on user strings before DB ops or length checks</li>
+<li><code>await u.canEdit(u.me, target)</code> before modifying any object not owned by <code>u.me</code></li>
+<li>DB writes use <code>"$set"</code> / <code>"$inc"</code> / <code>"$unset"</code> / <code>"$push"</code> — never raw overwrite</li>
+<li><code>u.util.target()</code> result null-checked</li>
+<li>Admin-only paths gate on <code>u.me.flags</code> explicitly</li>
+<li><code>system/scripts/</code> files use no Deno APIs, no <code>fetch</code>, no non-<code>u</code> globals</li>
+<li>All <code>%c*</code> color codes closed with <code>%cn</code></li>
+<li><code>gameHooks.on()</code> in <code>init()</code> paired with <code>gameHooks.off()</code> in <code>remove()</code> (same named ref)</li>
+<li>DBO collection names prefixed with <code>&lt;pluginName&gt;.</code></li>
+<li>REST handlers return 401 before any work when <code>userId</code> is null</li>
+<li><code>init()</code> returns <code>true</code></li>
+</ul>
+<h2>Getting Help</h2>
+<ul>
+<li>File an issue on GitHub</li>
+<li>Join the Discord linked from the project README</li>
+<li>Reach out to maintainers in the PR thread</li>
+</ul>
 
       </article>
 
@@ -405,11 +396,47 @@ git rebase upstream/main
       
         
           
+        
+      
+        
+          
           
         
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -452,16 +479,16 @@ git rebase upstream/main
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/development/" class="page-nav-btn prev">
+          <a href="/development/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
             <span class="page-nav-title"></span>
           </a>
         
 
         
-          <a href="/ursamu/extending/" class="page-nav-btn next">
+          <a href="/development/testing/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Testing</span>
           </a>
         
       </nav>
@@ -476,9 +503,9 @@ git rebase upstream/main
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/ursamu/guides/installation/">Installation</a>
-        <a href="/ursamu/api/">API</a>
-        <a href="/ursamu/plugins/">Plugins</a>
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>

@@ -22,6 +22,7 @@ import {
   unapproveExec,
 } from "./approve.ts";
 import { notesExec } from "./notes.ts";
+import { viewsExec } from "./views.ts";
 import { gearExec, gearReload, gearEquip, gearUnequip, gearView, tokenExec } from "./gear.ts";
 import { tiltExec } from "./tilt.ts";
 import { proveExec } from "./prove.ts";
@@ -56,6 +57,89 @@ import { fetchCommand } from "./fetch_cmd.ts";
 import { huntCommand } from "./hunt.ts";
 import { mantleCommand } from "./mantle_cmd.ts";
 import { hobCommand } from "./hob.ts";
+import { icExec, oocExec } from "./ic_ooc.ts";
+import { timeExec } from "./time.ts";
+import { staffkitExec } from "./staffkit.ts";
+
+addCmd({
+  name: "+time",
+  pattern: /^\+time$/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+time  — Date, clock, season, weather, moon, sun.
+
+London-like climate. Moon phase follows the 28-day month.
+Staff set the game clock with @time.
+
+Examples:
+  +time`,
+  exec: timeExec,
+});
+
+addCmd({
+  name: "+staffkit",
+  pattern: /^\+staffkit(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected builder+",
+  category: "Cofd",
+  help: `+staffkit <splat> [<target>]  — Install a minimal staff splat kit.
+
+Staff-only shortcut so locks and systems accept you as that splat
+without full chargen. Starts with changeling (Lost).
+
+SYNTAX
+  +staffkit <splat> [<target>]
+  +staffkit/<splat> [<target>]
+  +staffkit/list
+  +staffkit/clear [<target>]
+
+SPLATS
+  changeling   Live Lost sheet, approved, fae flag, Glamour.
+
+EXAMPLES
+  +staffkit changeling
+  +staffkit/changeling
+  +staffkit changeling Alice
+  +staffkit/clear`,
+  exec: staffkitExec,
+});
+
+addCmd({
+  name: "+ooc",
+  pattern: /^\+ooc$/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+ooc  — Leave IC play for the OOC Lounge.
+
+Requires %chapproved%cn. If you are in a room with the %chic%cn
+flag, that room is saved so %ch+ic%cn can return you.
+
+Builders mark rooms: %ch@set here=ic%cn
+
+Examples:
+  +ooc`,
+  exec: oocExec,
+});
+
+addCmd({
+  name: "+ic",
+  pattern: /^\+ic(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+ic[/clear|/status]  — Enter IC play (hub or saved room).
+
+Requires %chapproved%cn. Returns to your last IC room (a room
+flagged %chic%cn that you left via +ooc), or the IC hub.
+
+Switches:
+  /clear    Forget the marker (stay put; next +ic → hub).
+  /status   Show where your marker points.
+
+Examples:
+  +ic
+  +ic/status
+  +ic/clear`,
+  exec: icExec,
+});
 
 addCmd({
   name: "+extended",
@@ -345,8 +429,9 @@ addCmd({
 
 Staff workflow:
   1. +sheet <player>     Review the draft.
-  2. +approve <player>  Make it live (clears +cg).
+  2. +approve <player>  Make it live (sets APPROVED, clears +cg).
 
+Sets the %chapproved%cn flag so the player can no longer use +cg.
 A CGEN job is optional; approve works from the draft alone.
 
 Examples:
@@ -543,6 +628,32 @@ Notes:
   Private notes are visible only to their owner and staff. Cross-player
   edits require canEdit. Max name 40 chars; max text 8000 chars.`,
   exec: notesExec,
+});
+
+addCmd({
+  name: "+views",
+  pattern: /^\+views?(?:\/(\S+))?\s*(.*)/i,
+  lock: "connected",
+  category: "Cofd",
+  help: `+views [name]  -- Detail views on the current place.
+
+Syntax:
+  +views                     List views you can see here.
+  +views <name>              Read one view.
+  +views/list [<place>]      List views (default: here).
+  +views/add <name>=<text>   Create a view (needs canEdit).
+  +views/edit <name>=<text>  Replace text.
+  +views/del <name>          Delete a view.
+  +views/lock <name>=<lock>  Set lock (empty or ! clears).
+
+Locks use normal lock logic (flag(), perm(), &&, ||, !).
+If any view is visible, look shows a +views Available line.
+
+Examples:
+  +views/add Angel=Green wings drip with rain.
+  +views/lock Angel=flag(approved)
+  +views Angel`,
+  exec: viewsExec,
 });
 
 addCmd({

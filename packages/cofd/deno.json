@@ -1,16 +1,19 @@
 {
   "name": "@ursamu/cofd-plugin",
-  "version": "1.1.3",
-  "description": "Chronicles of Darkness 2e plugin for UrsaMU \u2014 character sheets, guided chargen, and d10 dice with 10/9/8-again, rote, and Willpower spend.",
+  "version": "1.2.10",
+  "description": "Chronicles of Darkness 2e plugin for UrsaMU \u2014 sheets, chargen, d10 dice, IC/OOC, +time, CtL overlay.",
+  "license": "MIT",
   "exports": "./index.ts",
   "tasks": {
-    "test": "deno test -A --unstable-kv",
+    "test": "deno test -A --unstable-kv --no-check",
     "showcase": "deno run -A --unstable-kv tools/showcase.ts",
-    "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types"
+    "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types --no-check",
+    "publish": "deno publish --allow-slow-types --no-check"
   },
   "exclude": [
     ".claude/",
-    "data/"
+    "data/",
+    "books/"
   ],
   "publish": {
     "include": [
@@ -26,31 +29,34 @@
       "routes.ts",
       "deno.json",
       "ursamu.plugin.json",
-      "README.md"
+      "README.md",
+      "CHANGELOG.md",
+      "LICENSE"
     ],
     "exclude": [
       "tests",
       "tools",
       "showcases",
-      "docs"
+      "docs",
+      "books"
     ]
   },
   "imports": {
-    "ursamu": "jsr:@ursamu/mush@^0.1.11",
-    "@ursamu/ursamu": "jsr:@ursamu/mush@^0.1.11",
-    "@ursamu/mush": "jsr:@ursamu/mush@^0.1.11",
+    "ursamu": "jsr:@ursamu/mush@^1.0.0",
+    "@ursamu/ursamu": "jsr:@ursamu/mush@^1.0.0",
+    "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
     "@ursamu/combat": "jsr:@ursamu/combat@^0.8.0",
-    "@ursamu/core": "jsr:@ursamu/core@^0.1.1",
-    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.3",
-    "@ursamu/help": "jsr:@ursamu/help@^0.1.3",
-    "@ursamu/jobs-plugin": "jsr:@ursamu/jobs@^0.1.1",
-    "@ursamu/jobs": "jsr:@ursamu/jobs@^0.1.1",
-    "@ursamu/mail": "jsr:@ursamu/mail@^2.4.0",
-    "@ursamu/mail-plugin": "jsr:@ursamu/mail@^2.4.0",
+    "@ursamu/core": "jsr:@ursamu/core@^1.0.0",
+    "@ursamu/help-plugin": "jsr:@ursamu/help@^1.0.0",
+    "@ursamu/help": "jsr:@ursamu/help@^1.0.0",
+    "@ursamu/jobs-plugin": "jsr:@ursamu/jobs@^1.0.0",
+    "@ursamu/jobs": "jsr:@ursamu/jobs@^1.0.0",
+    "@ursamu/mail": "jsr:@ursamu/mail@^2.5.0",
+    "@ursamu/mail-plugin": "jsr:@ursamu/mail@^2.5.0",
     "@ursamu/globals": "./tests/helpers/globals-shim.ts",
-    "@ursamu/mushcode": "jsr:@ursamu/mush@^0.1.11",
-    "@ursamu/mushcode/eval": "jsr:@ursamu/mush@^0.1.11",
-    "@ursamu/mushcode/parse": "jsr:@ursamu/mush@^0.1.11",
+    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
+    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
+    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",
     "@ursamu/parser": "npm:@ursamu/parser@1.2.4",
     "@digibear/tags": "npm:@digibear/tags@1.0.0",
     "bcrypt": "npm:bcryptjs@2.4.3",

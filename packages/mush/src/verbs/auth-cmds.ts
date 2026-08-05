@@ -79,12 +79,19 @@ addCmd({
   pattern: /^@?(?:update|upgrade)(?:\s+(.*))?$/i,
   lock: "connected admin+",
   category: "System",
-  help: `@update [<branch>]  — Pull latest code and reboot (admin+).
+  help: `@update [<branch>]  — Same as @restart.
+
+Prepares packages while the game stays online (git pull,
+bump jsr:@ursamu/* pins, dual-package overrides, deno
+cache). Soft-reboots only if cache succeeds. Failures
+leave the game running. Telnet sessions stay up.
 
 Aliases: @upgrade
+See also: @restart/check (read-only outdated pins)
 
 Examples:
   @update
-  @update main`,
+  @update main
+  @restart/check`,
   exec: execUpdate,
 });

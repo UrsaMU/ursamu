@@ -1,6 +1,6 @@
 /**
  * @module @ursamu/jobs
- * @description Anomaly-style jobs/request system for UrsaMU.
+ * @description full-featured jobs/request system for UrsaMU.
  *
  * Self-contained — provides its own types, database layer, and event hooks.
  * The engine (`@ursamu/mush`) is only used for infrastructure primitives
@@ -8,7 +8,7 @@
  *
  * Install via `plugins.manifest.json`:
  * ```json
- * { "plugins": [{ "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "ref": "v1.1.0" }] }
+ * { "plugins": [{ "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "ref": "v1.1.2" }] }
  * ```
  *
  * Subscribe to job lifecycle events in another plugin:
@@ -27,8 +27,28 @@ export { jobs, jobArchive, jobAccess, getNextJobNumber, registerJobBuckets, isVa
 export type { IJobBucketOptions } from "./src/db.ts";
 
 // Event hooks
-export { jobHooks } from "./src/hooks.ts";
+export {
+  jobHooks,
+  registerJobActionHook,
+} from "./src/hooks.ts";
 export type { IJobHooks, JobHookMap } from "./src/hooks.ts";
+
+// Select DSL + jgroups
+export { runSelect } from "./src/select.ts";
+export {
+  expandJobGroup,
+  jobGroups,
+  type IJobGroup,
+} from "./src/jgroups.ts";
+
+// REST auth helpers (stable for tests / consumers)
+export {
+  canViewJob,
+  flagSetFromRaw,
+  isStaffFlagSet,
+  presentJob,
+  stripStaffComments,
+} from "./src/rest-auth.ts";
 
 // Format helpers (used by other plugins that render job data)
 export { isStaffFlags, header, jobHeader, jobFooter, divider, jobDivider, footer, formatTimeFull, formatTimeShort, formatDate, getEscalation, isNew, formatJobList, WIDTH } from "./src/format.ts";

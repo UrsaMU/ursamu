@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0a12" />
+  <meta
+    name="description"
+    content="UrsaMU staff wiki admin — create and edit Markdown wiki pages."
+  />
+  <!-- Staff tool: discourage public indexing -->
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Wiki Admin · UrsaMU</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./pico.min.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-pane">Skip to main content</a>
+
+  <!-- ── Loading ───────────────────────────────────────────────── -->
+  <div id="view-loading" class="gate" aria-busy="true" aria-live="polite">
+    <div class="gate-card">
+      <p class="muted">Checking session…</p>
+    </div>
+  </div>
+
+  <!-- ── Login ─────────────────────────────────────────────────── -->
+  <div id="view-login" class="gate" hidden>
+    <div class="gate-card">
+      <header>
+        <p class="muted">UrsaMU · Wiki</p>
+        <h1>Sign in</h1>
+        <p class="lede">Staff accounts only (admin, wizard, or superuser).</p>
+      </header>
+      <form id="login-form" method="post" action="#">
+        <label for="login-user">
+          Username
+          <input
+            name="username"
+            id="login-user"
+            type="text"
+            autocomplete="username"
+            required
+            maxlength="64"
+            autocapitalize="none"
+            spellcheck="false"
+          />
+        </label>
+        <label for="login-pass">
+          Password
+          <input
+            name="password"
+            id="login-pass"
+            type="password"
+            autocomplete="current-password"
+            required
+            maxlength="128"
+          />
+        </label>
+        <p id="login-error" class="error" hidden role="alert"></p>
+        <button type="submit" id="login-submit">Sign in</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Forbidden ─────────────────────────────────────────────── -->
+  <div id="view-forbidden" class="gate" hidden>
+    <div class="gate-card">
+      <header>
+        <h1>Staff only</h1>
+        <p class="lede">
+          Signed in, but missing admin, wizard, or superuser.
+          Ask a wizard if you need access.
+        </p>
+        <p id="forbidden-flags" class="muted" hidden></p>
+      </header>
+      <button type="button" class="secondary" id="btn-signout-forbidden">
+        Sign out
+      </button>
+    </div>
+  </div>
+
+  <!-- ── App shell ─────────────────────────────────────────────── -->
+  <div id="view-app" hidden>
+    <header class="topbar container-fluid">
+      <nav aria-label="Admin">
+        <ul>
+          <li>
+            <a href="./" class="brand">UrsaMU</a>
+            <small class="muted"> · Wiki admin</small>
+          </li>
+        </ul>
+        <ul>
+          <li>
+            <span id="topbar-user" class="muted"></span>
+          </li>
+          <li>
+            <button
+              type="button"
+              class="outline secondary"
+              id="btn-signout"
+            >
+              Sign out
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="shell container-fluid">
+      <aside class="side-nav" aria-label="Wiki admin">
+        <p class="side-nav-label">Navigate</p>
+        <nav class="side-nav-list" aria-label="Sections">
+          <button
+            type="button"
+            class="side-nav-item"
+            id="nav-dashboard"
+            data-screen="dashboard"
+            aria-current="page"
+          >
+            <span class="side-nav-icon" aria-hidden="true">⌂</span>
+            <span class="side-nav-text">
+              <span class="side-nav-title">Dashboard</span>
+              <span class="side-nav-desc">Overview &amp; activity</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            class="side-nav-item"
+            id="nav-pages"
+            data-screen="pages"
+          >
+            <span class="side-nav-icon" aria-hidden="true">¶</span>
+            <span class="side-nav-text">
+              <span class="side-nav-title">Pages</span>
+              <span class="side-nav-desc">Browse &amp; open</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            class="side-nav-item"
+            id="nav-create"
+            data-screen="create"
+          >
+            <span class="side-nav-icon" aria-hidden="true">+</span>
+            <span class="side-nav-text">
+              <span class="side-nav-title">New page</span>
+              <span class="side-nav-desc">Create an entry</span>
+            </span>
+          </button>
+        </nav>
+
+        <hr class="side-nav-hr" />
+
+        <p class="side-nav-label">Shortcuts</p>
+        <nav class="side-nav-list" aria-label="Shortcuts">
+          <button
+            type="button"
+            class="side-nav-item side-nav-item-sub"
+            id="nav-drafts"
+          >
+            <span class="side-nav-icon" aria-hidden="true">◇</span>
+            <span class="side-nav-text">
+              <span class="side-nav-title">Drafts</span>
+              <span class="side-nav-desc" id="nav-drafts-count">—</span>
+            </span>
+          </button>
+        </nav>
+
+        <div class="side-nav-foot">
+          <p class="muted side-nav-hint">
+            <kbd>N</kbd> new ·
+            <kbd>/</kbd> search ·
+            <kbd>Esc</kbd> back
+          </p>
+        </div>
+      </aside>
+
+      <main class="main-pane" id="main-pane" tabindex="-1">
+        <!-- Dashboard -->
+        <article id="main-dashboard">
+          <header class="dash-header">
+            <div>
+              <p class="muted dash-kicker">Staff console</p>
+              <h1 class="page-title">
+                Welcome<span id="dash-user-name"></span>
+              </h1>
+              <p class="muted" id="dash-subtitle">
+                Overview of wiki content, drafts, and locks.
+              </p>
+            </div>
+            <div class="dash-header-actions">
+              <button type="button" class="secondary" id="btn-go-pages">
+                Browse pages
+              </button>
+              <button type="button" id="btn-dash-new">New page</button>
+              <button
+                type="button"
+                class="secondary outline"
+                id="btn-dash-refresh"
+              >
+                Refresh
+              </button>
+            </div>
+          </header>
+
+          <section class="stat-grid" aria-label="Wiki statistics">
+            <button
+              type="button"
+              class="stat-card stat-card-btn"
+              id="stat-card-pages"
+              data-goto="pages"
+              data-filter="all"
+            >
+              <p class="stat-label">Pages</p>
+              <p class="stat-value" id="stat-pages">—</p>
+              <p class="stat-meta muted">Open page list</p>
+            </button>
+            <button
+              type="button"
+              class="stat-card stat-card-btn"
+              id="stat-card-drafts"
+              data-goto="pages"
+              data-filter="drafts"
+            >
+              <p class="stat-label">Drafts</p>
+              <p class="stat-value" id="stat-drafts">—</p>
+              <p class="stat-meta muted">Needs publish</p>
+            </button>
+            <button
+              type="button"
+              class="stat-card stat-card-btn"
+              id="stat-card-published"
+              data-goto="pages"
+              data-filter="published"
+            >
+              <p class="stat-label">Published</p>
+              <p class="stat-value" id="stat-published">—</p>
+              <p class="stat-meta muted">Live for players</p>
+            </button>
+            <div class="stat-card">
+              <p class="stat-label">Sections</p>
+              <p class="stat-value" id="stat-sections">—</p>
+              <p class="stat-meta muted" id="stat-sections-meta">
+                Top folders
+              </p>
+            </div>
+          </section>
+
+          <section class="dash-section" aria-labelledby="dash-actions-h">
+            <h2 id="dash-actions-h" class="dash-h2">Quick actions</h2>
+            <div class="action-row">
+              <button type="button" id="btn-dash-new-2">New page</button>
+              <button type="button" class="secondary" id="btn-go-pages-2">
+                Browse pages
+              </button>
+              <button
+                type="button"
+                class="secondary outline"
+                id="btn-show-drafts"
+              >
+                Drafts only
+              </button>
+            </div>
+            <p class="muted dash-hint">
+              Use <strong>Pages</strong> in the side menu to search,
+              filter, and open entries. Edit opens full-screen; use
+              <strong>Back to pages</strong> when done.
+            </p>
+          </section>
+
+          <section class="dash-section" aria-labelledby="dash-recent-h">
+            <div class="dash-section-head">
+              <h2 id="dash-recent-h" class="dash-h2">Recent activity</h2>
+              <button
+                type="button"
+                class="secondary outline"
+                id="btn-recent-all"
+              >
+                All pages
+              </button>
+            </div>
+            <ul id="dash-recent" class="dash-recent">
+              <li class="muted">Loading…</li>
+            </ul>
+          </section>
+        </article>
+
+        <!-- Pages browser -->
+        <article id="main-pages" hidden>
+          <header class="dash-header">
+            <div>
+              <p class="muted dash-kicker">Library</p>
+              <h1 class="page-title">
+                Pages
+                <span class="muted" id="dash-page-count"></span>
+              </h1>
+              <p class="muted">
+                Select a page to edit. Filter by status, tag, or section.
+              </p>
+            </div>
+            <div class="dash-header-actions">
+              <button type="button" id="btn-pages-new">New page</button>
+              <button
+                type="button"
+                class="secondary outline"
+                id="btn-pages-refresh"
+              >
+                Refresh
+              </button>
+            </div>
+          </header>
+
+          <p id="dash-filter-banner" class="dash-filter-banner" hidden>
+            <span id="dash-filter-banner-text"></span>
+            <button
+              type="button"
+              class="secondary outline"
+              id="btn-clear-filter-banner"
+            >
+              Clear
+            </button>
+          </p>
+
+          <section class="pages-toolbar" aria-label="Page filters">
+            <label class="pages-search-label" for="pages-search">
+              <span class="sr-only">Search pages</span>
+              <input
+                type="search"
+                id="pages-search"
+                placeholder="Search title, path, tag, author…"
+                autocomplete="off"
+              />
+            </label>
+            <div class="pages-filter-row" role="group" aria-label="Status">
+              <button
+                type="button"
+                class="secondary outline pages-chip"
+                data-status="all"
+                id="chip-all"
+                aria-pressed="true"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                class="secondary outline pages-chip"
+                data-status="drafts"
+                id="chip-drafts"
+                aria-pressed="false"
+              >
+                Drafts
+              </button>
+              <button
+                type="button"
+                class="secondary outline pages-chip"
+                data-status="published"
+                id="chip-published"
+                aria-pressed="false"
+              >
+                Published
+              </button>
+              <button
+                type="button"
+                class="secondary outline"
+                id="btn-clear-filter"
+              >
+                Clear filters
+              </button>
+            </div>
+          </section>
+
+          <!-- Hidden alias for older JS bindings -->
+          <input type="search" id="dash-filter" hidden tabindex="-1" />
+          <input type="search" id="tree-search" hidden tabindex="-1" />
+
+          <div class="pages-body">
+            <div class="pages-table-col">
+              <div class="table-wrap">
+                <table class="dash-table" id="dash-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Title</th>
+                      <th scope="col">Path</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Lock</th>
+                      <th scope="col">Updated</th>
+                      <th scope="col">Size</th>
+                      <th scope="col">Tags</th>
+                      <th scope="col">Author</th>
+                      <th scope="col">
+                        <span class="sr-only">Open</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-tbody">
+                    <tr>
+                      <td colspan="9" class="muted">Loading…</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p id="dash-empty-msg" class="dash-empty-cta" hidden>
+                No pages yet — create the first page of lore, rules, or
+                setting notes.
+                <button type="button" id="btn-dash-empty-new">
+                  Create the first page
+                </button>
+              </p>
+            </div>
+
+            <aside class="pages-side" aria-label="Browse by">
+              <section class="dash-section" aria-labelledby="dash-tags-h">
+                <h2 id="dash-tags-h" class="dash-h2">Tags</h2>
+                <div id="dash-tags" class="tag-list dash-tags">
+                  <span class="muted">No tags yet.</span>
+                </div>
+              </section>
+              <section
+                class="dash-section"
+                aria-labelledby="dash-sections-h"
+              >
+                <h2 id="dash-sections-h" class="dash-h2">By section</h2>
+                <ul id="dash-sections" class="dash-section-list">
+                  <li class="muted">No sections yet.</li>
+                </ul>
+              </section>
+            </aside>
+          </div>
+
+          <!-- Keep tree-list for optional compact list (hidden) -->
+          <div id="tree-list" hidden aria-hidden="true">
+            <p id="tree-skel" hidden></p>
+          </div>
+        </article>
+
+        <article id="main-editor" hidden>
+          <header class="editor-header">
+            <div>
+              <p class="editor-path-line">
+                <button
+                  type="button"
+                  class="back-link"
+                  id="btn-edit-back"
+                >
+                  ← Pages
+                </button>
+                <code id="edit-path-display">—</code>
+                <span
+                  id="edit-dirty"
+                  class="dirty-dot"
+                  hidden
+                  title="Unsaved changes"
+                  aria-label="Unsaved changes"
+                >●</span>
+                <small id="edit-status" class="muted"></small>
+              </p>
+              <h1 id="edit-heading" class="page-title page-title-tight">
+                Edit page
+              </h1>
+            </div>
+            <div class="editor-actions">
+              <button
+                type="button"
+                class="secondary outline"
+                id="edit-discard"
+                disabled
+              >
+                Discard
+              </button>
+              <button type="button" id="edit-save" disabled>
+                Save
+              </button>
+            </div>
+          </header>
+
+          <p id="edit-load-error" class="error" hidden role="alert"></p>
+          <p id="edit-loading" aria-busy="true" hidden>
+            <small class="muted">Loading page…</small>
+          </p>
+
+          <form id="edit-form" hidden>
+            <label for="edit-title">
+              Title
+              <input id="edit-title" name="title" required maxlength="200" />
+              <small id="edit-title-error" class="error" hidden></small>
+            </label>
+
+            <fieldset>
+              <legend>Body</legend>
+              <div class="mode-row" role="radiogroup" aria-label="Body view">
+                <label for="edit-mode-edit">
+                  <input
+                    type="radio"
+                    name="edit-body-mode"
+                    id="edit-mode-edit"
+                    value="edit"
+                    checked
+                  />
+                  Edit
+                </label>
+                <label for="edit-mode-preview">
+                  <input
+                    type="radio"
+                    name="edit-body-mode"
+                    id="edit-mode-preview"
+                    value="preview"
+                  />
+                  Preview
+                </label>
+              </div>
+              <label for="edit-body" class="sr-only">Markdown body</label>
+              <textarea
+                id="edit-body"
+                name="body"
+                class="mono"
+                rows="14"
+                required
+                maxlength="500000"
+              ></textarea>
+              <div
+                id="edit-body-preview"
+                class="preview"
+                hidden
+                aria-live="polite"
+              ></div>
+              <small id="edit-body-error" class="error" hidden></small>
+            </fieldset>
+
+            <label for="edit-tag-input">
+              Tags
+              <input
+                id="edit-tag-input"
+                placeholder="Type a tag and press Enter"
+                maxlength="40"
+                autocomplete="off"
+              />
+              <div id="edit-tags" class="tag-list" aria-live="polite"></div>
+            </label>
+
+            <div class="grid">
+              <label for="edit-draft">
+                <input type="checkbox" id="edit-draft" />
+                Draft (staff-only read)
+              </label>
+              <label for="edit-lock">
+                Who can read
+                <select id="edit-lock" name="readLock">
+                  <option value="public">
+                    public — anyone (web + game)
+                  </option>
+                  <option value="connected">
+                    connected — logged-in players
+                  </option>
+                  <option value="staff">staff — staff only</option>
+                  <option value="admin">admin — admin only</option>
+                </select>
+              </label>
+            </div>
+
+            <p id="edit-form-error" class="error" hidden role="alert"></p>
+            <p>
+              <small class="muted">
+                Path is fixed after create. Save with the button or Ctrl/⌘+S.
+              </small>
+            </p>
+          </form>
+        </article>
+
+        <!-- New page (inline in main pane, same chrome as dashboard) -->
+        <article id="main-create" hidden>
+          <header class="editor-header">
+            <div>
+              <p class="editor-path-line">
+                <button
+                  type="button"
+                  class="back-link"
+                  id="btn-create-back"
+                >
+                  ← Pages
+                </button>
+              </p>
+              <p class="muted dash-kicker">New entry</p>
+              <h1 id="create-heading" class="page-title page-title-tight">
+                Create wiki page
+              </h1>
+              <p class="muted" id="create-subtitle">
+                Path becomes the URL and file under wiki/.
+              </p>
+            </div>
+            <div class="editor-actions">
+              <button
+                type="button"
+                class="secondary outline"
+                id="create-cancel"
+              >
+                Cancel
+              </button>
+              <button type="submit" form="create-form" id="create-submit">
+                Create page
+              </button>
+            </div>
+          </header>
+
+          <form id="create-form" method="post" action="#">
+            <div class="create-layout">
+              <div class="create-main">
+                <label for="create-path">
+                  Path
+                  <input
+                    id="create-path"
+                    name="path"
+                    class="mono"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="lore/factions"
+                    required
+                    maxlength="200"
+                    autocapitalize="none"
+                  />
+                  <small id="create-path-hint" class="muted">
+                    Writes to wiki/<span id="create-path-file">….md</span>
+                  </small>
+                  <small id="create-path-error" class="error" hidden></small>
+                </label>
+
+                <label for="create-title">
+                  Title
+                  <input
+                    id="create-title"
+                    name="title"
+                    placeholder="The Iron Pact"
+                    required
+                    maxlength="200"
+                  />
+                  <small id="create-title-error" class="error" hidden></small>
+                </label>
+
+                <fieldset>
+                  <legend>Body</legend>
+                  <div
+                    class="mode-row"
+                    role="radiogroup"
+                    aria-label="Body view"
+                  >
+                    <label for="create-mode-edit">
+                      <input
+                        type="radio"
+                        name="body-mode"
+                        id="create-mode-edit"
+                        value="edit"
+                        checked
+                      />
+                      Edit
+                    </label>
+                    <label for="create-mode-preview">
+                      <input
+                        type="radio"
+                        name="body-mode"
+                        id="create-mode-preview"
+                        value="preview"
+                      />
+                      Preview
+                    </label>
+                  </div>
+                  <label for="create-body" class="sr-only">
+                    Markdown body
+                  </label>
+                  <textarea
+                    id="create-body"
+                    name="body"
+                    class="mono"
+                    rows="16"
+                    required
+                    maxlength="500000"
+                  ></textarea>
+                  <div
+                    id="create-body-preview"
+                    class="preview"
+                    hidden
+                    aria-live="polite"
+                  ></div>
+                  <small id="create-body-error" class="error" hidden></small>
+                </fieldset>
+              </div>
+
+              <aside class="create-meta" aria-label="Page options">
+                <label for="create-tag-input">
+                  Tags
+                  <input
+                    id="create-tag-input"
+                    placeholder="Tag + Enter"
+                    maxlength="40"
+                    autocomplete="off"
+                  />
+                  <div
+                    id="create-tags"
+                    class="tag-list"
+                    aria-live="polite"
+                  ></div>
+                  <small class="muted">Enter or comma to add.</small>
+                </label>
+
+                <label for="create-draft">
+                  <input type="checkbox" id="create-draft" checked />
+                  Save as draft
+                </label>
+
+                <label for="create-lock">
+                  Who can read
+                  <select id="create-lock" name="readLock">
+                    <option value="public">
+                      public — anyone (web + game)
+                    </option>
+                    <option value="connected" selected>
+                      connected — logged-in players
+                    </option>
+                    <option value="staff">staff — staff only</option>
+                    <option value="admin">admin — admin only</option>
+                  </select>
+                </label>
+
+                <p id="create-form-error" class="error" hidden role="alert"></p>
+                <p id="create-exists-hint" hidden>
+                  <small>
+                    Page already exists.
+                    <a href="#" id="create-open-existing">Open it</a>
+                  </small>
+                </p>
+              </aside>
+            </div>
+
+            <div class="create-footer">
+              <button
+                type="button"
+                class="secondary outline"
+                id="create-cancel-2"
+              >
+                Cancel
+              </button>
+              <button type="submit" id="create-submit-2">Create page</button>
+            </div>
+          </form>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast-host" class="toast-host" aria-live="polite"></div>
+
+  <script src="./app.js" type="module"></script>
+</body>
+</html>

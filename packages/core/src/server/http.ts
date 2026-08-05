@@ -164,13 +164,30 @@ function sendSse(socketId: string, msg: string): void {
   }
 }
 
+/** Default CSP: lock down third parties; allow same-origin app assets. */
+const DEFAULT_CSP =
+  "default-src 'none'; script-src 'self'; " +
+  "style-src 'self' https://fonts.googleapis.com; " +
+  "img-src 'self' data:; " +
+  "font-src 'self' data: https://fonts.gstatic.com; " +
+  "connect-src 'self' ws: wss:; " +
+  "frame-ancestors 'none'; form-action 'self'; base-uri 'self'";
+
 function addSecurityHeaders(res: Response): Response {
   const h = new Headers(res.headers);
   h.set("x-content-type-options", "nosniff");
   h.set("x-frame-options", "DENY");
-  h.set("content-security-policy", "default-src 'none'");
+  // Keep a handler-supplied CSP (e.g. stricter API routes); otherwise
+  // allow same-origin scripts/styles so plugin UIs like /admin/wiki work.
+  if (!h.has("content-security-policy")) {
+    h.set("content-security-policy", DEFAULT_CSP);
+  }
   h.set("referrer-policy", "no-referrer");
-  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: h,
+  });
 }
 
 async function requestHandler(
@@ -219,14 +236,25 @@ async function requestHandler(
   return new Response("Not found", { status: 404 });
 }
 
+/** True when the response is a live stream / upgrade that must not be rewrapped. */
+export function shouldSkipSecurityRewrap(res: Response): boolean {
+  if (res.status === 101) return true;
+  const ct = res.headers.get("content-type") ?? "";
+  if (ct.startsWith("text/event-stream")) return true;
+  const up = res.headers.get("upgrade")?.toLowerCase() ?? "";
+  if (up === "websocket") return true;
+  return false;
+}
+
 async function secureRequestHandler(
   req: Request,
   info?: Deno.ServeHandlerInfo,
 ): Promise<Response> {
   const remoteAddr = formatRemoteAddr(info?.remoteAddr);
   const res = await requestHandler(req, remoteAddr);
-  // SSE streams must not be rewrapped (body is a ReadableStream).
-  if (res.headers.get("content-type")?.startsWith("text/event-stream")) return res;
+  // SSE streams and WebSocket upgrades must not be rewrapped
+  // (body/status are special; Deno.upgradeWebSocket response is opaque).
+  if (shouldSkipSecurityRewrap(res)) return res;
   return addSecurityHeaders(res);
 }
 

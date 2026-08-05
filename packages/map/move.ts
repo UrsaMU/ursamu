@@ -7,11 +7,40 @@ import { gameHooks } from "ursamu";
 import type { IUrsamuSDK } from "ursamu";
 
 import type { BiomeDefinition, Coord, MapBounds, MapEntity } from "./schemas.ts";
+import { coordKey } from "./schemas.ts";
 import { defaultMapConfig } from "./config.default.ts";
 import { createTopologyEngine, type TopologyEngine } from "./topology.ts";
 import { getOverlay, setPlayerCoord } from "./state.ts";
 import { canStackWith, isInBounds } from "./commands_internals.ts";
 import { getEntitiesInRegion, moveEntity } from "./entities.ts";
+
+// ─── Per-tile move serialization (closes TOCTOU on stacking) ─────────────────
+// Two concurrent entityStep calls into the same tile both used to pass
+// canStackWith before either wrote. Chain promises per coordKey.
+
+const tileGates = new Map<string, Promise<void>>();
+
+/** Run `fn` exclusively for `key` (FIFO). */
+export async function withTileLock<T>(
+  key: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const prev = tileGates.get(key) ?? Promise.resolve();
+  let release!: () => void;
+  const gate = new Promise<void>((r) => {
+    release = r;
+  });
+  // Tail identity is this chain entry (not `gate` alone).
+  const tail = prev.catch(() => {}).then(() => gate);
+  tileGates.set(key, tail);
+  await prev.catch(() => {});
+  try {
+    return await fn();
+  } finally {
+    release();
+    if (tileGates.get(key) === tail) tileGates.delete(key);
+  }
+}
 
 // ─── Direction constants ─────────────────────────────────────────────────────
 //
@@ -335,30 +364,59 @@ export async function entityStep(
     return { ok: false, blocked: "overlay", from, to, biome, cost: baseCost };
   }
 
-  const occupants = await getEntitiesInRegion({ ...to }, { ...to });
-  const stack = canStackWith(entity, occupants);
-  if (!stack.ok) {
-    emit("map:player:blocked", { playerId: entity.controllerId ?? entity.id, from, to, reason: stack.reason, biome });
-    return { ok: false, blocked: "stack", reason: stack.reason, from, to, biome, cost: baseCost };
-  }
+  // Stack check + write under a per-destination lock so two concurrent
+  // moves into the same tile cannot both pass canStackWith (TOCTOU).
+  return await withTileLock(coordKey(to), async () => {
+    const occupants = await getEntitiesInRegion({ ...to }, { ...to });
+    const stack = canStackWith(entity, occupants);
+    if (!stack.ok) {
+      emit("map:player:blocked", {
+        playerId: entity.controllerId ?? entity.id,
+        from,
+        to,
+        reason: stack.reason,
+        biome,
+      });
+      return {
+        ok: false,
+        blocked: "stack",
+        reason: stack.reason,
+        from,
+        to,
+        biome,
+        cost: baseCost,
+      };
+    }
 
-  const guardResult = await runMoveGuards({
-    u,
-    playerId: entity.controllerId ?? entity.id,
-    from,
-    to,
-    biome,
-    cost: baseCost,
-  });
-  if (!guardResult.allow) {
-    return { ok: false, blocked: "guard", reason: guardResult.reason, from, to, biome, cost: baseCost };
-  }
+    const guardResult = await runMoveGuards({
+      u,
+      playerId: entity.controllerId ?? entity.id,
+      from,
+      to,
+      biome,
+      cost: baseCost,
+    });
+    if (!guardResult.allow) {
+      return {
+        ok: false,
+        blocked: "guard",
+        reason: guardResult.reason,
+        from,
+        to,
+        biome,
+        cost: baseCost,
+      };
+    }
 
-  let moved: MapEntity = entity;
-  if (!opts.dryRun) moved = await moveEntity(entity.id, to);
-  emit("map:player:moved", {
-    playerId: entity.controllerId ?? entity.id,
-    from, to, biome, cost: baseCost,
+    let moved: MapEntity = entity;
+    if (!opts.dryRun) moved = await moveEntity(entity.id, to);
+    emit("map:player:moved", {
+      playerId: entity.controllerId ?? entity.id,
+      from,
+      to,
+      biome,
+      cost: baseCost,
+    });
+    return { ok: true, entity: moved, from, to, cost: baseCost, biome };
   });
-  return { ok: true, entity: moved, from, to, cost: baseCost, biome };
 }

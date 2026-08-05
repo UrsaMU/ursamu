@@ -1,22 +1,27 @@
 {
   "name": "@ursamu/channels",
-  "version": "0.1.2",
+  "version": "1.1.0",
   "exports": {
     ".": "./mod.ts",
     "./channel-events": "./src/channel-events.ts"
   },
   "tasks": {
-    "test":  "deno test tests/ --allow-all --unstable-kv --no-check",
-    "lint":  "deno lint",
+    "test": "deno test tests/ --allow-all --unstable-kv --no-check",
+    "lint": "deno lint",
     "check": "deno check mod.ts --unstable-kv"
   },
-  "compilerOptions": { "lib": ["deno.window", "deno.unstable"] },
+  "compilerOptions": {
+    "lib": [
+      "deno.window",
+      "deno.unstable"
+    ]
+  },
   "imports": {
     "@std/assert": "jsr:@std/assert@^0.224.0",
-    "@ursamu/mush": "jsr:@ursamu/mush@^0.1.3",
-    "@ursamu/core": "jsr:@ursamu/core@^0.1.0",
-    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.5",
-    "@ursamu/help": "jsr:@ursamu/help@^0.1.5"
+    "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
+    "@ursamu/core": "jsr:@ursamu/core@^1.0.0",
+    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.9",
+    "@ursamu/help": "jsr:@ursamu/help@^0.1.9"
   },
   "publish": {
     "include": [
@@ -25,9 +30,18 @@
       "mod.ts",
       "deno.json",
       "README.md",
+      "CHANGELOG.md",
       "LICENSE"
     ],
-    "exclude": ["tests"]
+    "exclude": [
+      "tests"
+    ]
   },
-  "lint": { "rules": { "tags": ["recommended"] } }
+  "lint": {
+    "rules": {
+      "tags": [
+        "recommended"
+      ]
+    }
+  }
 }

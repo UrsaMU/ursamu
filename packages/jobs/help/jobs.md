@@ -1,15 +1,16 @@
 +JOBS
 
-The jobs system manages player requests, staff tasks, and buckets.
+Staff lists and 1.1 tools.
 
-COMMANDS
-  +request   Player request management.
-  +job       Staff job actions (builder+).
-  +jobs      List active jobs (builder+).
-  +archive   Manage closed/archived jobs (builder+).
+SYNTAX
+  +jobs[/<filter>] [<arg>]
+  +jobs/select <expr|name>
+  +jobs/select save <name>=<expr>
+  +jobs/select list | default <expr|clear>
+  +jobs/reports [<name>[=arg]]
+  +jobs/compress | /clean | /summary <bucket>
 
-SYSTEM OVERVIEW
-  Requests are submitted to "buckets" (categories). Staff can assign,
-  comment, and close jobs. Closed jobs go to the archive.
+SELECT e.g.
+  (new | overdue) & mine sort=due
 
-SEE ALSO: +help request, +help job, +help archive
+SEE ALSO: +help job, +help request, +help jgroup

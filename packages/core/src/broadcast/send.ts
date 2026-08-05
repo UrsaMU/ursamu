@@ -1,3 +1,5 @@
+import { sessions } from "../session/store.ts";
+
 type SenderFn = (socketId: string, msg: string) => void;
 export type FormatterFn = (socketId: string, msg: string) => string;
 
@@ -26,6 +28,22 @@ export function trackedSockets(): ReadonlySet<string> {
   return _sockets;
 }
 
+/**
+ * Telnet keeps the classic 78-column wrap. Web clients size their own
+ * column in the browser — hard-wrapping at 78 makes ASCII/look output
+ * look prematurely broken in a wide center pane.
+ */
+export function shouldWordWrap(socketId: string): boolean {
+  const ct = sessions.get(socketId)?.meta?.clientType;
+  if (ct === "web") return false;
+  return true;
+}
+
+function prepareOutbound(socketId: string, msg: string): string {
+  const body = shouldWordWrap(socketId) ? wordWrap(msg) : msg;
+  return _formatter(socketId, body);
+}
+
 // deno-lint-ignore no-explicit-any
 export function send(targets: string[], msg: string, dataOrExclude?: string[] | Record<string, any>, legacyExclude?: string[]): void {
   // Backwards compat: old engine called send(targets, msg, data, exclude)
@@ -40,18 +58,17 @@ export function send(targets: string[], msg: string, dataOrExclude?: string[] | 
   }
   for (const id of targets) {
     if (!excludeSet.has(id)) {
-      const formatted = _formatter(id, msg);
-      const wrapped = wordWrap(formatted);
-      _senders.forEach((fn) => fn(id, wrapped));
+      // Wrap on source (MUSH %c / plain) for telnet only, then format.
+      const formatted = prepareOutbound(id, msg);
+      _senders.forEach((fn) => fn(id, formatted));
     }
   }
 }
 
 export function notify(socketId: string, msg: string): boolean {
   if (!_sockets.has(socketId)) return false;
-  const formatted = _formatter(socketId, msg);
-  const wrapped = wordWrap(formatted);
-  _senders.forEach((fn) => fn(socketId, wrapped));
+  const formatted = prepareOutbound(socketId, msg);
+  _senders.forEach((fn) => fn(socketId, formatted));
   return true;
 }
 
@@ -59,9 +76,8 @@ export function broadcastAll(msg: string, exclude?: string[]): void {
   const excludeSet = new Set(exclude ?? []);
   for (const id of _sockets) {
     if (!excludeSet.has(id)) {
-      const formatted = _formatter(id, msg);
-      const wrapped = wordWrap(formatted);
-      _senders.forEach((fn) => fn(id, wrapped));
+      const formatted = prepareOutbound(id, msg);
+      _senders.forEach((fn) => fn(id, formatted));
     }
   }
 }
@@ -78,6 +94,10 @@ const isDivider = (line: string): boolean => {
 };
 
 export function wordWrap(text: string, width = 78): string {
+  // Already-formatted HTML must not be re-wrapped (spaces in tags).
+  if (/<\/?span\b/i.test(text) || /<br\s*\/?>/i.test(text)) {
+    return text;
+  }
   return text
     .split("\n")
     .map((line) => {

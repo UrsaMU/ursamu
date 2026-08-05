@@ -1,7 +1,23 @@
 # @ursamu/discord
 
+**Version 1.0.0** (stable). Requires mush/core/help/channels **1.x**.
+
 Discord bridge for UrsaMU: webhooks, two-way channel chat, and `/help`
 slash command with private embeds.
+
+See `CHANGELOG.md` and `docs/STABLE.md`.
+
+## Stable API (1.0)
+
+| Export | Purpose |
+|--------|---------|
+| `discordPlugin` | IPlugin bootstrap |
+| Config helpers | webhooks, links, publicUrl, bot creds |
+| `postWebhook` | Outbound Discord webhook POST |
+| Channel bridge | game ↔ Discord channel messages |
+| Help embeds | markdown normalize + embed builders |
+
+Breaking changes to stable exports require **2.0.0**.
 
 ## Features
 
@@ -9,22 +25,21 @@ slash command with private embeds.
 |---------|-----|
 | Game → Discord channels | Webhooks (custom name + avatar) |
 | Discord → Game channels | Bot Gateway `MESSAGE_CREATE` |
-| Job / presence / staff | Topic webhooks (`jobs`, `presence`, `staff`) |
+| Job / presence / staff | Topic webhooks |
 | `/help` | Interactions HTTP → ephemeral embeds |
 
-Loop prevention: Gateway ignores webhook posts and bots; outbound webhooks
-skip events with `source: "discord"`.
+Loop prevention: Gateway ignores webhook posts and bots; outbound
+webhooks skip events with `source: "discord"`.
 
 ## Install
 
 ```ts
-import discordPlugin from "@ursamu/discord";
-// or: jsr:@ursamu/discord
+import discordPlugin from "jsr:@ursamu/discord@^1.0.0";
 
 await mu(config, [discordPlugin], { pluginsDir });
 ```
 
-Dependencies: `@ursamu/help` (for `/help`), channels for chat bridge.
+Or list `"@ursamu/discord"` in `server.plugins`.
 
 ## Environment (secrets)
 
@@ -45,8 +60,8 @@ Without these, the plugin still runs in **webhooks-only** mode.
 4. Interactions Endpoint URL:
    `https://<your-host>/api/v1/discord/interactions`
    (must be public HTTPS for `/help`).
-5. Channel perms: View Channel, Read Message History (webhooks handle
-   outbound posts).
+5. Channel perms: View Channel, Read Message History
+   (webhooks handle outbound posts).
 
 ## In-game commands (admin+)
 
@@ -74,8 +89,8 @@ Example two-way OOC:
 | `/help topic:<slug>` | Private topic embed |
 | `/help section:<name>` | Private topic list |
 
-Always **ephemeral** (only the invoker sees it). Markdown is normalized for
-Discord embeds (headers → bold, MUSH codes stripped, 4096 cap).
+Always **ephemeral**. Markdown normalized for Discord embeds
+(headers → bold, MUSH codes stripped, 4096 cap).
 
 ## Architecture
 
@@ -85,10 +100,25 @@ Discord ──Gateway──► inject + source:discord ──► Game
 User ──POST /api/v1/discord/interactions──► /help embed
 ```
 
-Config lives in DBO `discord.config` (`webhooks`, `links`, `publicUrl`).
-Bot credentials are **never** stored in the DB.
+Config lives in DBO `discord.config` (`webhooks`, `links`,
+`publicUrl`). Bot credentials are **never** stored in the DB.
+
+## Version policy
+
+| Change | Bump |
+|--------|------|
+| Remove/rename stable export or command | major |
+| New slash cmd, additive config field | minor |
+| Bugfix, docs, tests | patch |
+
+## Development
+
+```bash
+deno task test
+deno task check
+deno task publish:dry
+```
 
 ## License
 
 MIT
-

@@ -74,46 +74,92 @@ addCmd({
   pattern: /^@?open(?:\/(inventory))?\s+(.*)/i,
   lock: "connected builder+",
   category: "Building",
-  help: `@open[/inventory] <name>=<room>[,<back exit>]
-  — Create one or two exits to a destination.
+  help: `@open[/inventory] <name>=<dest>[,<back exit>]
+  — Create exit from current location (room or vehicle).
+
+Works inside enterable objects (vehicles, booths) the same
+as rooms. Prefer Out/Leave exits on vehicles after land.
 
 EXAMPLES
   @open North;N=#5
+  @open Out=Dock Bay
   @open North;N=Library,South;S`,
   exec: async (u: IUrsamuSDK) => {
     const swtch    = (u.cmd.args[0] ?? "").toLowerCase().trim();
     const fullArgs = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
     const match    = fullArgs.match(/^([^=,]+)\s*=\s*([^,]+)(?:,\s*(.*))?/i);
-    if (!match) { u.send("Usage: @open[/inventory] <name>=<room>[,<back exit>]"); return; }
+    if (!match) {
+      u.send(
+        "Usage: @open[/inventory] <name>=<dest>[,<back exit>]",
+      );
+      return;
+    }
     const exitName     = match[1].trim();
     const destName     = match[2].trim();
     const backExitName = match[3]?.trim() ?? "";
     const results      = await u.db.search(destName);
     const dest         = results[0];
-    if (!dest) { u.send(`Could not find destination room: ${destName}`); return; }
-    const isAdmin = u.me.flags.has("wizard") || u.me.flags.has("admin") || u.me.flags.has("superuser");
+    if (!dest) {
+      u.send(`Could not find destination: ${destName}`);
+      return;
+    }
+    const isAdmin = u.me.flags.has("wizard") ||
+      u.me.flags.has("admin") ||
+      u.me.flags.has("superuser");
     const cost    = 1 + (backExitName ? 1 : 0);
     const quota   = (u.me.state.quota as number) ?? 0;
     if (!isAdmin && quota < cost) {
-      u.send(`Not enough quota. Cost: ${cost}, You have: ${quota}.`);
+      u.send(
+        `Not enough quota. Cost: ${cost}, You have: ${quota}.`,
+      );
       return;
     }
     if (backExitName && !(await u.canEdit(u.me, dest))) {
-      u.send("Permission denied: can't create a back exit in that room.");
+      u.send(
+        "Permission denied: can't create a back exit there.",
+      );
       return;
     }
     const location = swtch === "inventory" ? u.me.id : u.here.id;
+    // Vehicle / booth interiors: require edit on the container.
+    if (
+      swtch !== "inventory" &&
+      !u.here.flags.has("room") &&
+      !(await u.canEdit(u.me, u.here))
+    ) {
+      u.send(
+        "Permission denied: you don't control this object.",
+      );
+      return;
+    }
     const exitObj  = await u.db.create({
       flags: new Set(["exit"]), location,
-      state: { name: exitName, destination: dest.id, owner: u.me.id }, contents: [],
+      state: {
+        name: exitName,
+        destination: dest.id,
+        owner: u.me.id,
+      },
+      contents: [],
     });
-    u.send(`Exit %ch${exitName.split(";")[0]}%cn (#${exitObj.id}) opened to ${u.util.displayName(dest, u.me)}.`);
+    u.send(
+      `Exit %ch${exitName.split(";")[0]}%cn (#${exitObj.id}) ` +
+        `opened to ${u.util.displayName(dest, u.me)}.`,
+    );
     if (backExitName) {
       const backObj = await u.db.create({
-        flags: new Set(["exit"]), location: dest.id,
-        state: { name: backExitName, destination: u.here.id, owner: u.me.id }, contents: [],
+        flags: new Set(["exit"]),
+        location: dest.id,
+        state: {
+          name: backExitName,
+          destination: u.here.id,
+          owner: u.me.id,
+        },
+        contents: [],
       });
-      u.send(`Back exit %ch${backExitName.split(";")[0]}%cn (#${backObj.id}) opened to ${u.here.name}.`);
+      u.send(
+        `Back exit %ch${backExitName.split(";")[0]}%cn ` +
+          `(#${backObj.id}) opened to ${u.here.name}.`,
+      );
     }
     if (!isAdmin) {
       await u.db.modify(u.me.id, "$inc", { "data.quota": -cost });

@@ -1,7 +1,8 @@
 /**
  * tools/extract_merits.ts
  *
- * Extracts merit names + dot ratings from books/cofd.txt and prints a JSON array
+ * Extracts merit names + dot ratings from a local rulebook text
+ * extract (gitignored `books/cofd.txt`) and prints a JSON array
  * compatible with resources/merits.json schema.
  *
  * Usage:

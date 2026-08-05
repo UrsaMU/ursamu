@@ -5,6 +5,55 @@ import { cgExec, sheetExec, sheetSetExec } from "../commands.ts";
 import type { CofdCgState } from "../cg.ts";
 
 describe("Chronicles of Darkness Guided Character Generation", { sanitizeResources: false, sanitizeOps: false }, () => {
+  it("blocks +cg for approved non-staff", async () => {
+    const me = mockPlayer({
+      id: "appr1",
+      name: "Approved",
+      flags: new Set(["player", "connected", "approved"]),
+      state: { cofd: { template: "mortal" } },
+    });
+    const u = mockU({ me });
+    u.cmd.args = ["", ""];
+    await cgExec(u);
+    assertStringIncludes(u._sent.join("\n"), "already");
+    assertStringIncludes(u._sent.join("\n").toLowerCase(), "approved");
+  });
+
+  it("blocks +cg for live sheet without flag (legacy)", async () => {
+    const me = mockPlayer({
+      id: "leg1",
+      name: "Legacy",
+      flags: new Set(["player", "connected"]),
+      state: { cofd: { template: "mortal" } },
+    });
+    const u = mockU({ me });
+    u.cmd.args = ["set", "strength=3"];
+    await cgExec(u);
+    assertStringIncludes(u._sent.join("\n").toLowerCase(), "chargen is closed");
+  });
+
+  it("staff may still use +cg when approved", async () => {
+    const me = mockPlayer({
+      id: "staff1",
+      name: "ST",
+      flags: new Set(["player", "connected", "staff", "approved"]),
+      state: {},
+    });
+    const u = mockU({
+      me,
+      dbModify: (_id, op, data: unknown) => {
+        const d = data as Record<string, unknown>;
+        if (op === "$set" && d["data.cofd_cg"] !== undefined) {
+          me.state.cofd_cg = d["data.cofd_cg"];
+        }
+        return Promise.resolve();
+      },
+    });
+    u.cmd.args = ["", ""];
+    await cgExec(u);
+    assertStringIncludes(u._sent.join("\n").toLowerCase(), "welcome");
+  });
+
   it("runs the full Mortal character generation lifecycle successfully", async () => {
     const me = mockPlayer({ id: "1", name: "Arthur" });
     
@@ -263,9 +312,10 @@ describe("Chronicles of Darkness Guided Character Generation", { sanitizeResourc
     u.cmd.args = ["reset", ""];
     u._sent.length = 0;
     await cgExec(u);
+    assertStringIncludes(u._sent.join("\n"), "already");
     assertStringIncludes(
-      u._sent.join("\n"),
-      "You already have an approved character sheet.",
+      u._sent.join("\n").toLowerCase(),
+      "chargen is closed",
     );
   });
 });

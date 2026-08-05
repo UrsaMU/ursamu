@@ -1,9 +1,10 @@
 /**
  * @module @ursamu/help
- * @description API-first help system framework for UrsaMU.
+ * @description API-first help system (stable 1.0).
  *
  * Layout chrome prefers `game.layout.*` mushcode when the engine
  * supports it; otherwise TinyMUX plushelp-style dash rules.
+ * Stable surface: docs/STABLE.md.
  *
  * ## Quick start
  *

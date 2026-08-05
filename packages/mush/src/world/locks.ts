@@ -85,10 +85,20 @@ registerBuiltin("holds", holdsImpl);
 // TinyMUX alias
 registerBuiltin("carries", holdsImpl);
 
+/**
+ * perm(level) — privilege ladder check.
+ * Digibear treats bare names as exact flags; the `+` suffix means
+ * "this level or higher". Superuser must pass perm(staff)/perm(builder).
+ */
 registerBuiltin("perm", (enactor, _target, args) => {
-  const permLevel = (args[0] ?? "").trim();
+  const raw = (args[0] ?? "").trim();
+  if (!raw) return false;
   const flagStr = Array.from(enactor.flags).join(" ");
-  return flags.check(flagStr, permLevel);
+  // Already hierarchical (builder+, admin+) — use as-is.
+  if (raw.endsWith("+")) return flags.check(flagStr, raw);
+  // Exact flag first, then ladder (staff → staff+).
+  if (flags.check(flagStr, raw)) return true;
+  return flags.check(flagStr, `${raw}+`);
 });
 
 /** TinyMUX owner() — enactor owns the locked object (target). */

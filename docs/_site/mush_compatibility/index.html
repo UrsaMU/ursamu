@@ -4,10 +4,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MUSH Compatibility | UrsaMU Documentation</title>
   <meta name="description" content="What UrsaMU supports compared to traditional MUSH servers like PennMUSH and TinyMUX, and what's planned.">
-  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/mush_compatibility/">
+<meta property="og:url" content="http://localhost:3001/mush_compatibility/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/ursamu/" class="site-logo">
+  <a href="/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/guides/" class="header-nav-link">
       Guides
     </a>
     
     
     
-    <a href="/ursamu/api/" class="header-nav-link">
+    <a href="/api/" class="header-nav-link">
       API
     </a>
     
     
     
-    <a href="/ursamu/plugins/" class="header-nav-link">
+    <a href="/plugins/" class="header-nav-link">
       Plugins
     </a>
     
     
     
-    <a href="/ursamu/development/" class="header-nav-link">
+    <a href="/development/" class="header-nav-link">
       Development
     </a>
     
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link">
+      <a href="/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,35 +110,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/ursamu/guides/installation/" class="sidebar-link">
+      <a href="/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
+      <a href="/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
+      <a href="/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/ursamu/guides/customization/" class="sidebar-link">
+      <a href="/guides/customization/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+      <a href="/guides/scripting/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
-      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+      <a href="/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -150,7 +150,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/ursamu/configuration/" class="sidebar-link">
+      <a href="/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +162,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/ursamu/api/" class="sidebar-link">
+      <a href="/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/ursamu/api/core/" class="sidebar-link">
+      <a href="/api/core/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +178,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/ursamu/plugins/" class="sidebar-link">
+      <a href="/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/ursamu/plugins/basics/" class="sidebar-link">
+      <a href="/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
+      <a href="/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/ursamu/plugins/commands/" class="sidebar-link">
+      <a href="/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
+      <a href="/plugins/hooks/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/ursamu/plugins/database/" class="sidebar-link">
+      <a href="/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
+      <a href="/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
+      <a href="/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +218,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/ursamu/development/" class="sidebar-link">
+      <a href="/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/ursamu/development/contributing/" class="sidebar-link">
+      <a href="/development/contributing/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/ursamu/extending/" class="sidebar-link">
+      <a href="/extending/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/ursamu/child-games/" class="sidebar-link">
+      <a href="/child-games/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,7 +259,7 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/ursamu/">Home</a>
+        <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
         <span class="breadcrumbs-current">MUSH Compatibility</span>
       </nav>
@@ -270,6 +270,9 @@
         <h1>MUSH Compatibility</h1>
 <p>UrsaMU is <strong>not a drop-in replacement</strong> for PennMUSH, TinyMUSH, or MUX2. It is a fresh platform with a different architecture — WebSocket-native, TypeScript, sandboxed scripts instead of MUSHcode.</p>
 <p>If you are migrating from a traditional MUSH or hosting your first server, this page tells you exactly what works today and what is planned.</p>
+<blockquote>
+<p>Updated for v2.6.0.</p>
+</blockquote>
 <hr>
 <h2>What Works Today</h2>
 <table>
@@ -506,8 +509,214 @@
 <td>✅ Working</td>
 <td><code>&amp;ACONNECT</code> / <code>&amp;ADISCONNECT</code> attributes fire on login/logout</td>
 </tr>
+<tr>
+<td>MUX softcode evaluator</td>
+<td>✅ Working</td>
+<td>TinyMUX 2.x compatible — see <a href="#mux-softcode-support">Softcode</a> below</td>
+</tr>
+<tr>
+<td><code>@tag</code> / <code>@ltag</code></td>
+<td>✅ Working</td>
+<td>Global and personal named-object registry (RhostMUSH-style)</td>
+</tr>
+<tr>
+<td><code>@switch</code></td>
+<td>✅ Working</td>
+<td>Eval value as softcode, compare cases, execute matching action</td>
+</tr>
+<tr>
+<td><code>@dolist</code></td>
+<td>✅ Working</td>
+<td>Iterate a softcode list, execute action per item with <code>##</code>/<code>#@</code></td>
+</tr>
+<tr>
+<td><code>@if &lt;expr&gt;=&lt;true&gt;[,&lt;false&gt;]</code></td>
+<td>✅ Working</td>
+<td>Conditional action command</td>
+</tr>
+<tr>
+<td><code>@while &lt;expr&gt;=&lt;action&gt;</code></td>
+<td>✅ Working</td>
+<td>Loop while expression is true (100ms timeout enforced)</td>
+</tr>
+<tr>
+<td><code>@break</code></td>
+<td>✅ Working</td>
+<td>Exit current <code>@dolist</code> or <code>@while</code></td>
+</tr>
+<tr>
+<td><code>@wait &lt;seconds&gt;=&lt;action&gt;</code></td>
+<td>✅ Working</td>
+<td>Delay an action</td>
+</tr>
+<tr>
+<td><code>@function &lt;name&gt;=&lt;obj&gt;/&lt;attr&gt;</code></td>
+<td>✅ Working</td>
+<td>Define a global softcode user function</td>
+</tr>
+<tr>
+<td><code>@cpattr</code> / <code>@mvattr</code></td>
+<td>✅ Working</td>
+<td>Copy / move attributes between objects</td>
+</tr>
+<tr>
+<td><code>@grep &lt;obj&gt;=&lt;pattern&gt;</code></td>
+<td>✅ Working</td>
+<td>Search object attributes by name pattern</td>
+</tr>
+<tr>
+<td><code>@decompile &lt;obj&gt;</code></td>
+<td>✅ Working</td>
+<td>Dump object as copyable <code>@name</code>/<code>&amp;ATTR</code> lines</td>
+</tr>
+<tr>
+<td><code>@ps</code></td>
+<td>✅ Working</td>
+<td>List pending <code>@wait</code> jobs</td>
+</tr>
+<tr>
+<td><code>@drain &lt;obj&gt;</code></td>
+<td>✅ Working</td>
+<td>Cancel all pending <code>@wait</code> jobs on an object</td>
+</tr>
+<tr>
+<td><code>@notify &lt;obj&gt;[/&lt;sem&gt;][=&lt;count&gt;]</code></td>
+<td>✅ Working</td>
+<td>Signal a semaphore</td>
+</tr>
+<tr>
+<td>Zone system (<code>@zone</code>)</td>
+<td>✅ Working</td>
+<td>Assign objects to a zone master for shared <code>$</code>-pattern routing</td>
+</tr>
+<tr>
+<td><code>$pattern</code> attrs</td>
+<td>✅ Working</td>
+<td>Objects respond to player input via <code>$&lt;glob&gt;:&lt;action&gt;</code> attributes; captures map to <code>%0</code>–<code>%9</code></td>
+</tr>
+<tr>
+<td><code>^pattern</code> attrs (MONITOR)</td>
+<td>✅ Working</td>
+<td>MONITOR-flagged objects listen to room speech/poses via <code>^&lt;glob&gt;</code> attributes; captures map to <code>%0</code>–<code>%9</code></td>
+</tr>
 </tbody>
 </table>
+<hr>
+<h2>MUX Softcode Support</h2>
+<p>UrsaMU Phase 1 ships a full TinyMUX 2.x compatible softcode evaluator alongside the TypeScript sandbox. In-game object attributes can be written in MUX softcode; all system scripts remain in TypeScript.</p>
+<h3>How it works</h3>
+<ul>
+<li><strong>TypeScript/JS attributes</strong> (default) — executed in the existing Deno Web Worker sandbox.</li>
+<li><strong>Softcode attributes</strong> — executed in a dedicated softcode Deno Worker with a 100ms wall-clock timeout.</li>
+</ul>
+<p>To mark an attribute as softcode when setting it with <code>&amp;</code>:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">&amp;GREET/softcode me=[name(%#)] greets you!
+</code></pre>
+<p>The <code>/softcode</code> flag persists on the attribute and routes all future evaluations through the softcode engine. Omitting the flag uses the TypeScript sandbox as before. Attributes that contain MUX substitution syntax (<code>%N</code>, <code>[func()]</code>) and no TypeScript keywords are also auto-detected as softcode.</p>
+<h3>Supported functions (~250 total)</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Functions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Math</td>
+<td><code>add</code>, <code>sub</code>, <code>mul</code>, <code>div</code>, <code>mod</code>, <code>abs</code>, <code>floor</code>, <code>ceil</code>, <code>round</code>, <code>power</code>, <code>sqrt</code>, <code>exp</code>, <code>sin</code>, <code>cos</code>, <code>tan</code>, <code>rand</code>, <code>max</code>, <code>min</code>, <code>isnum</code>, <code>isint</code>, <code>eq</code>, <code>gt</code>, <code>lt</code>, <code>gte</code>, <code>lte</code>, <code>band</code>, <code>bor</code>, <code>bxor</code>, <code>shl</code>, <code>shr</code>, <code>dist2d</code>, <code>dist3d</code>, <code>vadd</code>, <code>vsub</code>, <code>vmul</code>, <code>vmag</code>, <code>vunit</code>, <code>vcross</code>, <code>vdot</code>, …</td>
+</tr>
+<tr>
+<td>String</td>
+<td><code>strlen</code>, <code>upcase</code>, <code>lowcase</code>, <code>capstr</code>, <code>trim</code>, <code>squish</code>, <code>left</code>, <code>right</code>, <code>mid</code>, <code>ljust</code>, <code>rjust</code>, <code>center</code>, <code>before</code>, <code>after</code>, <code>index</code>, <code>pos</code>, <code>lpos</code>, <code>edit</code>, <code>reverse</code>, <code>space</code>, <code>repeat</code>, <code>chr</code>, <code>ord</code>, <code>cat</code>, <code>strcat</code>, <code>strmatch</code>, <code>comp</code>, <code>alpha</code>, <code>regex</code>, <code>regmatch</code>, <code>regrab</code>, <code>regraball</code>, <code>wrap</code>, <code>columns</code>, <code>ansi</code>, <code>stripansi</code>, <code>sha1</code>, <code>spellnumber</code>, <code>itemize</code>, …</td>
+</tr>
+<tr>
+<td>List</td>
+<td><code>words</code>, <code>word</code>, <code>first</code>, <code>rest</code>, <code>last</code>, <code>extract</code>, <code>elements</code>, <code>member</code>, <code>lnum</code>, <code>ldelete</code>, <code>insert</code>, <code>replace</code>, <code>remove</code>, <code>revwords</code>, <code>shuffle</code>, <code>splice</code>, <code>grab</code>, <code>graball</code>, <code>match</code>, <code>matchall</code>, <code>pickrand</code>, <code>setunion</code>, <code>setinter</code>, <code>setdiff</code>, <code>sort</code>, <code>sortby</code>, <code>ladd</code>, <code>lmin</code>, <code>lmax</code>, <code>iter</code>, <code>parse</code>, <code>map</code>, <code>filter</code>, <code>filterbool</code>, <code>fold</code>, <code>foreach</code>, <code>munge</code>, <code>step</code>, <code>mix</code>, <code>distribute</code>, <code>merge</code>, <code>table</code>, …</td>
+</tr>
+<tr>
+<td>Logic</td>
+<td><code>t</code>, <code>not</code>, <code>and</code>, <code>or</code>, <code>xor</code>, <code>cand</code>, <code>cor</code>, <code>andflags</code>, <code>orflags</code>, <code>if</code>, <code>ifelse</code>, <code>switch</code>, <code>case</code>, <code>null</code>, <code>lit</code>, <code>@@</code>, …</td>
+</tr>
+<tr>
+<td>Object</td>
+<td><code>name</code>, <code>fullname</code>, <code>dbref</code>, <code>num</code>, <code>type</code>, <code>hastype</code>, <code>hasflag</code>, <code>flags</code>, <code>lflags</code>, <code>setflag</code>, <code>unflag</code>, <code>loc</code>, <code>where</code>, <code>room</code>, <code>home</code>, <code>contents</code>, <code>lcon</code>, <code>lexits</code>, <code>lwho</code>, <code>lplayers</code>, <code>match</code>, <code>pmatch</code>, <code>nearby</code>, <code>u</code>, <code>ulocal</code>, <code>get</code>, <code>default</code>, <code>xget</code>, <code>attr</code>, <code>lattr</code>, <code>hasattr</code>, <code>v</code>, <code>conn</code>, <code>connlast</code>, <code>connnum</code>, <code>idle</code>, <code>doing</code>, <code>host</code>, <code>ip</code>, <code>money</code>, <code>mudname</code>, <code>version</code>, <code>conntotal</code>, …</td>
+</tr>
+<tr>
+<td>Register</td>
+<td><code>setq</code>, <code>setr</code>, <code>r</code>, <code>localize</code></td>
+</tr>
+<tr>
+<td>Output</td>
+<td><code>pemit</code>, <code>remit</code>, <code>oemit</code>, <code>cemit</code>, <code>emit</code>, <code>npemit</code>, <code>trigger</code></td>
+</tr>
+<tr>
+<td>Tags</td>
+<td><code>tag</code>, <code>istag</code>, <code>listtags</code>, <code>tagmatch</code>, <code>ltag</code>, <code>isltag</code>, <code>listltags</code>, <code>ltagmatch</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Substitutions</h3>
+<p>All standard TinyMUX substitutions are supported: <code>%#</code> (enactor dbref), <code>%!</code> (executor dbref), <code>%@</code> (caller), <code>%N</code>/<code>%n</code> (name), <code>%L</code> (location), <code>%s</code>/<code>%S</code>/<code>%o</code>/<code>%O</code>/<code>%p</code>/<code>%P</code>/<code>%a</code> (pronouns), <code>%0</code>–<code>%9</code> (args), <code>%q0</code>–<code>%qz</code> (registers), <code>##</code> / <code>#@</code> (iter variables), <code>%VA</code>–<code>%VZ</code> (object attributes), <code>%r</code> (newline), <code>%t</code> (tab), <code>%b</code> (space), <code>%%</code> (literal <code>%</code>), full ANSI color codes (<code>%ch</code>, <code>%cr</code>, <code>%cg</code>, <code>%cb</code>, <code>%cy</code>, <code>%cw</code>, <code>%cc</code>, <code>%cn</code>, <code>%xN</code> truecolor).</p>
+<h3>TinyMUX compatibility stubs</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sql()</code></td>
+<td>Returns <code>#-1 FUNCTION DISABLED</code></td>
+</tr>
+<tr>
+<td><code>rxlevel()</code> / <code>txlevel()</code></td>
+<td>Returns <code>0</code></td>
+</tr>
+<tr>
+<td><code>beep()</code></td>
+<td>Returns <code>""</code></td>
+</tr>
+<tr>
+<td><code>height()</code> / <code>width()</code></td>
+<td>Returns <code>24</code> / <code>78</code></td>
+</tr>
+<tr>
+<td><code>colordepth()</code></td>
+<td>Returns <code>256</code></td>
+</tr>
+<tr>
+<td><code>textfile()</code> / <code>text()</code></td>
+<td>Returns <code>""</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>@tag / @ltag — Named Object Registry</h2>
+<p>UrsaMU ships a RhostMUSH-style named object registry. Instead of remembering dbrefs, you can assign human-readable names to objects.</p>
+<h3>@tag (global, wizard-only)</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@tag citygate=here          Register current room as "citygate"
+@tag vault=#142             Register #142 as "vault"
+@tag                        (no args) list all tags
+@tag/remove citygate        Remove the "citygate" global tag
+</code></pre>
+<p>Global tags are visible to everyone. Only wizards and admins may create or remove them. When a tagged object is destroyed, its tags are automatically removed.</p>
+<h3>@ltag (personal, any player)</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@ltag home=here             Register current room as your "home"
+@ltag/list                  List all your personal tags
+@ltag/remove home           Remove your personal "home" tag
+</code></pre>
+<p>Personal tags are scoped to your character (max 50). They are visible only in your own softcode evaluations.</p>
+<h3>Softcode usage</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">[tag(citygate)]             → dbref of the citygate room
+[istag(vault)]              → 1 if "vault" global tag exists
+[tagmatch(here,citygate)]   → 1 if here is tagged "citygate"
+[ltag(home)]                → dbref of your personal "home" tag
+[name(#citygate)]           → name of the citygate object (shorthand)
+</code></pre>
+<p>The <code>#tagname</code> shorthand works anywhere an object reference is accepted in softcode (personal tags shadow global ones).</p>
 <hr>
 <h2>What’s Different from Traditional MUSH</h2>
 <table>
@@ -519,16 +728,16 @@
 </thead>
 <tbody>
 <tr>
-<td>MUSHcode (softcode) scripting</td>
-<td>TypeScript/JS in sandboxed Web Workers</td>
+<td>MUSHcode scripting only</td>
+<td>TypeScript/JS sandbox <strong>and</strong> MUX softcode — both supported</td>
 </tr>
 <tr>
 <td>Telnet primary</td>
 <td>WebSocket primary (Telnet sidecar available)</td>
 </tr>
 <tr>
-<td>Attributes on objects run softcode</td>
-<td>Scripts registered as commands or object triggers</td>
+<td>All attributes run softcode</td>
+<td><code>&amp;ATTR/softcode</code> opts in; default is TypeScript sandbox</td>
 </tr>
 <tr>
 <td><code>@tr</code> / <code>@trigger</code></td>
@@ -539,12 +748,40 @@
 <td><code>@pemit</code> and <code>@remit</code> — both implemented</td>
 </tr>
 <tr>
-<td><code>@switch</code> / <code>@if</code> / MUSHcode functions</td>
-<td>Full JavaScript/TypeScript in scripts</td>
+<td>No named-object registry</td>
+<td><code>@tag</code> / <code>@ltag</code> provide global and personal registries</td>
+</tr>
+<tr>
+<td>Lock ops <code>&amp;</code> / <code>|</code> only</td>
+<td><code>&amp;&amp;</code> / <code>||</code> / <code>!</code> with parens, plus legacy <code>&amp;</code>/<code>|</code> (v2.2.0)</td>
+</tr>
+<tr>
+<td>Hard-coded format attrs</td>
+<td>8-slot format pipeline: register TS handlers or raw softcode templates (v2.3.0+)</td>
 </tr>
 </tbody>
 </table>
-<p>MUSHcode attributes (<code>@va</code>–<code>@vz</code>, inline softcode, <code>&amp;ATTRIBUTE</code>) are <strong>not supported</strong>. UrsaMU scripting uses the <a href="../guides/scripting/">Sandbox SDK</a> instead.</p>
+<h2>Format-Attribute Pipeline</h2>
+<p>Eight engine-known format slots route through both softcode attributes on the<br>
+object and plugin-registered handlers (priority: softcode attr → plugin handler<br>
+→ fallback):</p>
+<p><code>NAMEFORMAT</code>, <code>DESCFORMAT</code>, <code>CONFORMAT</code>, <code>EXITFORMAT</code>, <code>WHOFORMAT</code>,<br>
+<code>WHOROWFORMAT</code>, <code>PSFORMAT</code>, <code>PSROWFORMAT</code>.</p>
+<p>Plugins may also register arbitrary uppercase slot names (e.g. <code>MAILFORMAT</code>,<br>
+<code>BBROWFORMAT</code>) — <code>FormatSlot</code> is an open union as of v2.3.4.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// TS handler
+registerFormatHandler("WHOROWFORMAT", (ctx) =&gt; `${ctx.name} - idle ${ctx.idle}`);
+
+// Softcode template (v2.4.0)
+registerFormatTemplate("WHOFORMAT", "[center(===,78,=)]%r[u(#1/HEADER)]");
+</code></pre>
+<h2>Lock Expressions (v2.2.0+)</h2>
+<p>Locks support <code>&amp;&amp;</code>, <code>||</code>, <code>!</code> with <code>()</code> grouping plus the legacy <code>&amp;</code>/<code>|</code><br>
+operators. Built-in lockfuncs: <code>flag(name)</code>, <code>attr(name[, val])</code>, <code>type(name)</code>,<br>
+<code>is(#id)</code>, <code>holds(#id)</code>, <code>perm(level)</code>. Custom lockfuncs register via<br>
+<code>registerLockFunc(name, fn)</code>.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">lock: "connected &amp;&amp; (flag(wizard) || attr(tribe, glasswalker))"
+</code></pre>
 <hr>
 <h2>Planned Enhancements</h2>
 <table>
@@ -558,10 +795,6 @@
 <tr>
 <td>Terminal/screen settings</td>
 <td>Width detection via Telnet NAWS, persistent pager settings</td>
-</tr>
-<tr>
-<td>MUSHcode inline softcode</td>
-<td>Not planned — use TypeScript scripts instead</td>
 </tr>
 </tbody>
 </table>
@@ -685,11 +918,73 @@
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
         
       
         
@@ -710,14 +1005,14 @@
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/guides/user-guide/" class="page-nav-btn prev">
+          <a href="/guides/wiki/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">User Guide</span>
+            <span class="page-nav-title">Wiki</span>
           </a>
         
 
         
-          <a href="/ursamu/plugins/" class="page-nav-btn next">
+          <a href="/plugins/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
             <span class="page-nav-title"></span>
           </a>
@@ -734,9 +1029,9 @@
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/ursamu/guides/installation/">Installation</a>
-        <a href="/ursamu/api/">API</a>
-        <a href="/ursamu/plugins/">Plugins</a>
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>

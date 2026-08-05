@@ -1,0 +1,1817 @@
+/* Vue shell tweaks on top of editorial styles.css */
+
+#app {
+  min-height: 100vh;
+}
+
+/*
+ * Absolute kill of focus rings / purple glows in the SPA.
+ * Pico sets --pico-box-shadow on :focus — override that var and
+ * the computed box-shadow on every interactive state.
+ */
+#app *,
+#app *::before,
+#app *::after {
+  --pico-form-element-focus-color: transparent !important;
+  --pico-form-element-valid-focus-color: transparent !important;
+  --pico-form-element-invalid-focus-color: transparent !important;
+  --pico-primary-focus: transparent !important;
+  --pico-secondary-focus: transparent !important;
+  --pico-contrast-focus: transparent !important;
+  --pico-outline-width: 0 !important;
+  --pico-box-shadow: none !important;
+  --pico-button-box-shadow: none !important;
+  --pico-button-hover-box-shadow: none !important;
+  --pico-group-box-shadow: none !important;
+  --pico-group-box-shadow-focus-with-button: none !important;
+  --pico-group-box-shadow-focus-with-input: none !important;
+  --focus-ring: none !important;
+}
+
+#app :focus,
+#app :focus-visible,
+#app :focus-within,
+#app :active,
+#app input:focus,
+#app input:focus-visible,
+#app input:active,
+#app textarea:focus,
+#app textarea:focus-visible,
+#app textarea:active,
+#app select:focus,
+#app select:focus-visible,
+#app select:active,
+#app button:focus,
+#app button:focus-visible,
+#app button:active,
+#app a:focus,
+#app a:focus-visible,
+#app [tabindex]:focus,
+#app [tabindex]:focus-visible,
+#app tr:focus,
+#app tr:focus-visible,
+#app td:focus,
+#app td:focus-visible,
+#app fieldset:focus,
+#app fieldset:focus-within,
+#app label:focus-within,
+#app summary:focus,
+#app summary:focus-visible,
+#app .jfe-field:focus-within,
+#app .jfe-card:focus-within,
+#app .jfe-nest:focus-within,
+#app .file-row:focus,
+#app .file-row:focus-visible,
+#app .jfe-raw:focus,
+#app .jfe-raw:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  --pico-box-shadow: none !important;
+  --box-shadow: none !important;
+}
+
+/* Text inputs only — never strip checkbox/radio check glyphs */
+#app input:not([type="checkbox"]):not([type="radio"]):focus,
+#app input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+#app textarea:focus,
+#app textarea:focus-visible,
+#app select:focus,
+#app select:focus-visible {
+  border-color: var(--border-strong) !important;
+  background-image: none !important;
+  --pico-border-color: var(--border-strong) !important;
+}
+
+/* Nested JSON form cards — never pick up a colored ring */
+#app .jfe-card:focus-within,
+#app .jfe-nest:focus-within,
+#app .jfe-field:focus-within,
+#app fieldset:focus-within {
+  border-color: var(--border) !important;
+  box-shadow: none !important;
+}
+
+/* Accent for native controls; Pico checkboxes use explicit paint */
+#app input:not([type="checkbox"]):not([type="radio"]),
+#app textarea,
+#app select,
+#app button {
+  accent-color: var(--text-muted);
+}
+
+#app input[type="checkbox"],
+#app input[type="radio"] {
+  accent-color: var(--primary);
+}
+
+/* ── Top primary nav ───────────────────────────────────────────
+ * Header grows with wrapped tabs. A fixed height was clipping the
+ * second row, so Mail/Channels/etc looked “missing” until a mid
+ * tab (Boards) forced a reflow.
+ */
+
+.topbar {
+  --header-h: 3.5rem;
+  height: auto !important;
+  min-height: var(--header-h) !important;
+  max-height: none !important;
+  padding-block: 0 !important;
+  overflow: visible !important;
+  /* Above the mobile drawer so the menu button stays tappable */
+  z-index: 55;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  width: 100%;
+  height: auto;
+  min-height: var(--header-h);
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+.top-nav-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.top-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-shrink: 0;
+  padding-inline-end: 0.15rem;
+}
+
+.topbar .brand {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  min-height: var(--header-h);
+  padding-inline: 0.15rem 0.85rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.topbar .brand:hover {
+  color: var(--primary-hover);
+  text-decoration: none;
+}
+
+.top-divider {
+  width: 1px;
+  align-self: center;
+  height: 1.35rem;
+  background: var(--border);
+  flex-shrink: 0;
+  margin-inline: 0.35rem 0.65rem;
+}
+
+.top-divider-sm {
+  margin-inline: 0.15rem;
+  height: 1.1rem;
+}
+
+.top-primary {
+  display: flex;
+  /* Always show every section tab — horizontal scroll hid
+     Mail/Channels/etc until Boards (or another mid tab)
+     scrolled them into view. */
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.05rem;
+  list-style: none;
+  margin: 0;
+  padding: 0 0.75rem 0 0;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: visible;
+}
+
+.top-primary li {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+/* Compact tabs — fit many plugins; wrap instead of clipping */
+a.top-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: auto;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.6rem;
+  margin: 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1.15;
+  box-sizing: border-box;
+}
+
+/* Mid desktop — many plugin tabs; keep them readable but denser */
+@media (max-width: 1280px) and (min-width: 901px) {
+  a.top-tab {
+    padding: 0 0.55rem;
+    font-size: 0.78125rem;
+    gap: 0.28rem;
+  }
+
+  .topbar .brand {
+    padding-inline-end: 0.55rem;
+  }
+
+  .top-nav {
+    gap: 0.75rem;
+  }
+
+  .top-nav-right {
+    gap: 0.5rem;
+  }
+
+  .top-user {
+    max-width: 6.5rem;
+  }
+}
+
+a.top-tab:hover {
+  color: var(--text);
+  background: transparent;
+  text-decoration: none;
+  border-bottom-color: var(--border-strong);
+}
+
+a.top-tab.active {
+  color: var(--text);
+  background: transparent;
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+
+.top-tab-label {
+  line-height: 1;
+}
+
+/* Count pill on top tabs — solid alert circle with a number */
+.top-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #c23b44;
+  border: 1px solid transparent;
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+a.top-tab.active .top-badge {
+  background: #d45058;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.top-live {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.top-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8125rem;
+  max-width: 11rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.top-user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-user-avatar {
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  background: var(--surface-2, #1a1a22);
+}
+
+.top-user-avatar-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted, #aaa);
+  background: var(--surface-2, #1a1a22);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+}
+
+.top-signout {
+  margin-bottom: 0 !important;
+  min-height: 2.15rem !important;
+  padding: 0.35rem 0.85rem !important;
+  font-size: 0.8125rem !important;
+}
+
+/* ── Side nav — section context only ─────────────────────────── */
+
+a.side-nav-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  min-height: 2.85rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  box-sizing: border-box;
+  text-decoration: none;
+  color: inherit;
+}
+
+a.side-nav-item:hover {
+  text-decoration: none;
+  background: var(--bg-surface-2);
+  color: var(--text);
+}
+
+a.side-nav-item.is-active,
+a.side-nav-item.router-link-exact-active.is-active {
+  background: var(--bg-surface-2);
+  color: var(--text);
+  border-color: transparent;
+}
+
+a.side-nav-item.is-active .side-nav-icon {
+  color: var(--primary-hover);
+}
+
+.side-nav-list-compact {
+  gap: 0.25rem;
+}
+
+a.side-nav-item-compact {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.7rem;
+  gap: 0.55rem;
+}
+
+a.side-nav-item-compact .side-nav-title {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+a.side-nav-item-compact .side-nav-desc {
+  font-variant-numeric: tabular-nums;
+}
+
+.side-nav-empty {
+  margin: 0.15rem 0.75rem 0.35rem;
+  font-size: 0.75rem;
+}
+
+/* Main pane — content always full width of the column */
+.main-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+.main-pane > article {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.main-pane > article > section,
+.main-pane .settings-panel,
+.main-pane .table-wrap,
+.main-pane .pages-toolbar,
+.main-pane .jobs-toolbar,
+.main-pane .db-toolbar,
+.main-pane .pl-toolbar,
+.main-pane .bbs-toolbar,
+.main-pane .db-layout {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/* Players fills the pane; other sections scroll with content
+ * (matches 0.2.12 staff chrome — db is not a full-height flex). */
+.main-pane > article#main-players {
+  flex: 1 1 auto;
+  height: 100%;
+  max-height: none;
+}
+
+.main-pane > article#main-bbs,
+.main-pane > article#main-jobs,
+.main-pane > article#main-db,
+.main-pane > article#main-settings,
+.main-pane > article#main-map {
+  flex: 0 1 auto;
+  height: auto;
+  max-height: none;
+  width: 100%;
+  max-width: none;
+}
+
+.module-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.module-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+  .module-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .module-grid,
+  .module-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+#main-jobs,
+#main-db,
+#main-players,
+#main-bbs,
+#main-settings,
+#main-map {
+  padding: 0.35rem 0.25rem 1rem;
+}
+
+/* Dashboard polish restored from 0.2.12.
+ * Do not force full-width margins on paired columns — those live in
+ * .dash-two-col > .dash-section (margin cleared when side-by-side). */
+#main-dashboard > .dash-section {
+  margin-bottom: 1.75rem;
+}
+
+#main-dashboard .dash-two-col {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  #main-dashboard .dash-two-col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+#main-dashboard.dash-browser .jobs-stat-line {
+  margin-top: 0.65rem;
+}
+
+#main-create .wiki-body-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 18rem;
+}
+
+/* Side-nav filter controls (wiki/jobs/bbs side panes) */
+.side-nav-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0 0.35rem 0.25rem;
+}
+
+.side-nav-filter {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.3rem !important;
+  margin: 0 !important;
+  color: var(--text-muted) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+}
+
+.side-nav-filter-cap {
+  padding-inline: 0.15rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.side-nav-select {
+  width: 100% !important;
+  min-height: 2.15rem !important;
+  margin: 0 !important;
+  padding: 0.35rem 0.5rem !important;
+  font-size: 0.8125rem !important;
+  font-weight: 400 !important;
+}
+
+#app .side-nav-select {
+  background-color: var(--bg-code) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+.side-nav-clear,
+#app .side-nav-clear {
+  width: 100% !important;
+  min-height: 2rem !important;
+  margin: 0.15rem 0 0 !important;
+  padding: 0.35rem 0.5rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* BBS uses wiki browser chrome (.dash-header / .pages-toolbar /
+ * .dash-table) — no special list-card overrides. */
+
+/* Fade transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.12s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.poll-dot {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--success);
+  margin-right: 0.35rem;
+  vertical-align: middle;
+}
+
+.poll-dot.stale {
+  background: var(--text-muted);
+}
+
+.poll-dot.ws {
+  background: var(--success);
+}
+
+.poll-dot.poll {
+  background: var(--warning, #d4a017);
+}
+
+.poll-dot.spin {
+  background: var(--primary);
+}
+
+/* Tag input (Vue) */
+.tag-input-wrap input {
+  margin-bottom: 0.4rem !important;
+}
+
+.tag-input-wrap .tag-list {
+  margin: 0.35rem 0 0.25rem;
+}
+
+.tag-input-wrap .tag button {
+  width: auto !important;
+  min-height: 0 !important;
+  margin: 0 0 0 0.25rem !important;
+  padding: 0 0.2rem !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text-muted) !important;
+  font-size: 0.9rem !important;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.wiki-body-field {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: none;
+}
+
+.wiki-body-field legend {
+  padding: 0;
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 550;
+  color: var(--text-secondary);
+}
+
+.wiki-body-field .mode-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.wiki-body-field .mode-row label {
+  flex-direction: row !important;
+  align-items: center !important;
+  margin-bottom: 0 !important;
+  gap: 0.35rem !important;
+  font-weight: 450 !important;
+  color: var(--text) !important;
+}
+
+.wiki-body-field textarea,
+.wiki-body-field .preview {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 16rem;
+}
+
+/* Plugin side-nav group headers */
+.side-nav-group {
+  margin: 0.65rem 0 0.25rem;
+  padding: 0 0.15rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.side-nav-group:first-child {
+  margin-top: 0;
+}
+
+/* Settings — site skin select matches other fields */
+#main-settings select {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+#main-settings .field-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+#main-settings .chk-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 450;
+}
+
+#main-settings .chk-row .chk {
+  width: auto;
+  margin: 0;
+}
+
+#main-settings .settings-actions a.secondary {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* Theme zip upload */
+#main-settings .theme-upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+#main-settings .theme-file-label {
+  flex: 1 1 12rem;
+  min-width: 10rem;
+}
+
+#main-settings .theme-file-label input[type="file"] {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+}
+
+#main-settings .theme-list {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+#main-settings .theme-list-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border, #333);
+  border-radius: var(--radius-sm, 4px);
+}
+
+#main-settings .theme-list-row.is-active {
+  border-color: var(--primary, #7c5cbf);
+  background: color-mix(
+    in srgb,
+    var(--primary, #7c5cbf) 10%,
+    transparent
+  );
+}
+
+#main-settings .theme-list-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+#main-settings .theme-desc {
+  font-size: 0.85rem;
+}
+
+/* Public site nav editor */
+#main-settings .site-nav-editor {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#main-settings .site-nav-row {
+  display: grid;
+  grid-template-columns:
+    1.25rem 1.5rem minmax(6rem, 1fr) minmax(8rem, 1.4fr) auto;
+  gap: 0.4rem 0.5rem;
+  align-items: center;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 4px);
+  cursor: grab;
+}
+
+#main-settings .site-nav-row.is-dragging {
+  opacity: 0.55;
+  border-color: var(--border, #333);
+  cursor: grabbing;
+}
+
+#main-settings .site-nav-row.is-drag-over {
+  border-color: var(--primary, #7c5cbf);
+  background: color-mix(
+    in srgb,
+    var(--primary, #7c5cbf) 12%,
+    transparent
+  );
+}
+
+#main-settings .site-nav-grip {
+  cursor: grab;
+  user-select: none;
+  color: var(--text-muted, #888);
+  text-align: center;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+#main-settings .site-nav-ord {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#main-settings .site-nav-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+#main-settings .site-nav-actions button {
+  min-width: 2rem;
+  padding: 0.25rem 0.4rem;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  #main-settings .site-nav-row {
+    grid-template-columns: 1.25rem 1.25rem 1fr;
+  }
+
+  #main-settings .site-nav-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+/* FE-style markdown preview inside the body field */
+.wiki-body-field .wiki-md-preview {
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-surface, var(--pico-background-color));
+  color: var(--text);
+  font-family: var(--pico-font-family);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  white-space: normal;
+}
+
+.wiki-body-field .wiki-md-preview > :first-child {
+  margin-top: 0;
+}
+
+.wiki-body-field .wiki-md-preview > :last-child {
+  margin-bottom: 0;
+}
+
+.wiki-body-field .wiki-md-preview h1,
+.wiki-body-field .wiki-md-preview h2,
+.wiki-body-field .wiki-md-preview h3,
+.wiki-body-field .wiki-md-preview h4 {
+  margin: 1.1rem 0 0.4rem;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.wiki-body-field .wiki-md-preview h1 { font-size: 1.45rem; }
+.wiki-body-field .wiki-md-preview h2 { font-size: 1.25rem; }
+.wiki-body-field .wiki-md-preview h3 { font-size: 1.1rem; }
+
+.wiki-body-field .wiki-md-preview p {
+  margin: 0 0 0.75rem;
+}
+
+.wiki-body-field .wiki-md-preview ul,
+.wiki-body-field .wiki-md-preview ol {
+  margin: 0.25rem 0 0.85rem;
+  padding-left: 1.35rem;
+}
+
+.wiki-body-field .wiki-md-preview li {
+  margin: 0.2rem 0;
+}
+
+.wiki-body-field .wiki-md-preview a {
+  color: var(--pico-primary, var(--accent, #7c5cbf));
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.wiki-body-field .wiki-md-preview code {
+  font-family: var(--pico-font-family-monospace, ui-monospace, monospace);
+  font-size: 0.9em;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  background: var(--bg-code, color-mix(in srgb, var(--text) 8%, transparent));
+}
+
+.wiki-body-field .wiki-md-preview blockquote {
+  margin: 0.75rem 0;
+  padding: 0.5rem 0.85rem;
+  border-left: 3px solid var(--border-strong, var(--border));
+  color: var(--text-muted, var(--muted-color, inherit));
+}
+
+.wiki-body-field .wiki-md-preview hr {
+  margin: 1rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.wiki-body-field .wiki-md-preview table {
+  width: 100%;
+  margin: 0.75rem 0 1rem;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.wiki-body-field .wiki-md-preview th,
+.wiki-body-field .wiki-md-preview td {
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border);
+  text-align: left;
+}
+
+.wiki-body-field .wiki-md-preview th {
+  font-weight: 600;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.wiki-body-field .wiki-md-preview:empty::before {
+  content: "Nothing to preview yet.";
+  color: var(--text-muted, var(--muted-color, #888));
+  font-style: italic;
+}
+
+/* Content images only — avatars keep their own rules */
+.wiki-body-field .wiki-md-preview img:not([class*="avatar"]),
+.wiki-body img:not([class*="avatar"]) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  margin: 0.75rem 0 1rem;
+}
+
+/* ── Wiki page images panel ─────────────────────────────────── */
+
+.wiki-media-panel {
+  margin: 1.25rem 0 1.5rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--border, #2a2640);
+  border-radius: 6px;
+  background: var(--bg-surface, #161422);
+}
+
+.wiki-media-panel__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.wiki-media-panel__hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.wiki-media-panel__hint code {
+  font-size: 0.8em;
+}
+
+.wiki-media-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.wiki-media-panel__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+/* One control height — Pico input/button margins otherwise skew row */
+.wiki-media-panel__actions > button,
+.wiki-media-panel__url-row button {
+  margin: 0;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding-block: 0;
+  flex: 0 0 auto;
+  width: auto;
+  white-space: nowrap;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.wiki-media-panel__url-row {
+  display: flex;
+  flex: 1 1 16rem;
+  gap: 0.5rem;
+  align-items: center;
+  min-width: 12rem;
+  min-height: 2.25rem;
+}
+
+.wiki-media-panel__url-row input[type="url"],
+.wiki-media-panel__url-row input {
+  flex: 1 1 auto;
+  margin: 0 !important;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding-block: 0;
+  padding-inline: 0.65rem;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.wiki-media-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.wiki-media-panel__item {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  gap: 0.65rem 0.85rem;
+  align-items: center;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--border-subtle, #1f1c30);
+  border-radius: 4px;
+  background: var(--bg-elevated, #12101c);
+}
+
+.wiki-media-panel__thumb {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--bg-code, #0e0c16);
+}
+
+.wiki-media-panel__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  margin: 0;
+}
+
+.wiki-media-panel__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.wiki-media-panel__meta code {
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.wiki-media-panel__item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 560px) {
+  .wiki-media-panel__item {
+    grid-template-columns: 3.5rem 1fr;
+  }
+
+  .wiki-media-panel__item-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+/* ── Mobile shell ────────────────────────────────────────────── */
+
+/* Hidden until the mobile breakpoint (drawer owns primary tabs).
+ * !important so Pico button { display } cannot unhide on desktop. */
+.nav-menu-btn,
+.top-section-chip,
+.drawer-primary,
+.drawer-signout {
+  display: none !important;
+}
+
+.nav-menu-btn {
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+.nav-menu-btn:hover,
+.nav-menu-btn:focus-visible {
+  border-color: var(--border-strong);
+  background: var(--bg-surface-2);
+}
+
+.nav-menu-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.28rem;
+  width: 1.05rem;
+}
+
+.nav-menu-icon span {
+  display: block;
+  height: 1.5px;
+  width: 100%;
+  background: currentColor;
+  border-radius: 1px;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+#view-app.is-nav-open .nav-menu-icon span:nth-child(1) {
+  transform: translateY(0.34rem) rotate(45deg);
+}
+
+#view-app.is-nav-open .nav-menu-icon span:nth-child(2) {
+  opacity: 0;
+}
+
+#view-app.is-nav-open .nav-menu-icon span:nth-child(3) {
+  transform: translateY(-0.34rem) rotate(-45deg);
+}
+
+.top-section-chip {
+  align-items: center;
+  min-width: 0;
+  max-width: 9rem;
+  margin-inline-start: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.nav-backdrop.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer-badge {
+  margin-inline-start: 0.4rem;
+  vertical-align: middle;
+}
+
+/* Wiki Tags / Sections collapsible groups */
+.side-nav-drop {
+  margin: 0.15rem 0 0.35rem;
+  border: none;
+  background: transparent;
+}
+
+.side-nav-drop > .side-nav-drop-sum {
+  display: flex !important;
+  align-items: center;
+  gap: 0.35rem;
+  list-style: none !important;
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  /* Kill native disclosure glyph (WebKit + Firefox + Pico) */
+  background-image: none !important;
+}
+
+.side-nav-drop > .side-nav-drop-sum::-webkit-details-marker,
+.side-nav-drop > .side-nav-drop-sum::marker {
+  display: none !important;
+  content: none !important;
+}
+
+.side-nav-drop > .side-nav-drop-sum::before,
+.side-nav-drop > .side-nav-drop-sum::after {
+  content: none !important;
+  display: none !important;
+}
+
+.side-nav-drop > .side-nav-drop-sum:hover,
+.side-nav-drop > .side-nav-drop-sum:focus-visible {
+  background: var(--bg-surface);
+  color: var(--text);
+  outline: none;
+}
+
+.side-nav-drop-label {
+  margin: 0 !important;
+  flex: 1 1 auto;
+}
+
+.side-nav-drop-count {
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.25rem;
+  text-align: right;
+}
+
+/* Single custom chevron — only this arrow should show */
+.side-nav-drop-chev {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-inline-start: 0.2rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+  opacity: 0.7;
+}
+
+.side-nav-drop[open] > .side-nav-drop-sum .side-nav-drop-chev {
+  transform: rotate(45deg);
+  margin-top: -0.12rem;
+}
+
+.side-nav-drop > .side-nav-list {
+  margin-top: 0.2rem;
+  padding-inline-start: 0.15rem;
+}
+
+.drawer-signout {
+  width: 100% !important;
+  margin: 0.75rem 0 0 !important;
+  min-height: 2.5rem !important;
+}
+
+body.nav-drawer-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
+@media (max-width: 900px) {
+  .nav-menu-btn {
+    display: inline-flex !important;
+  }
+
+  .top-section-chip {
+    display: inline-flex !important;
+  }
+
+  .top-divider-desktop,
+  .top-primary,
+  .top-user,
+  .top-divider-sm {
+    display: none !important;
+  }
+
+  .top-nav-left {
+    gap: 0.45rem;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Drawer primary nav — slightly denser list */
+  .drawer-primary .side-nav-item {
+    min-height: 2.55rem;
+  }
+
+  .drawer-primary .side-nav-title {
+    font-size: 0.9rem;
+  }
+
+  .top-nav {
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .topbar .brand {
+    padding-inline: 0.25rem 0.15rem;
+    height: 2.5rem;
+    align-items: center;
+  }
+
+  .top-section-chip {
+    height: 1.75rem;
+    margin-inline-start: 0;
+    align-self: center;
+  }
+
+  .top-nav-right {
+    gap: 0.45rem;
+    align-items: center;
+  }
+
+  .top-live {
+    min-width: 0.75rem;
+  }
+
+  .top-signout {
+    min-height: 2.35rem !important;
+    padding: 0.3rem 0.65rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  .nav-backdrop {
+    display: block !important;
+  }
+
+  /* Must beat the base `display: none !important` hide rule */
+  .drawer-primary {
+    display: block !important;
+  }
+
+  .drawer-signout {
+    display: block !important;
+  }
+
+  /* Off-canvas drawer — main content is full width */
+  .shell {
+    grid-template-columns: 1fr !important;
+  }
+
+  .side-nav {
+    position: fixed !important;
+    /* Sit under the sticky topbar; menu button stays reachable */
+    top: var(--header-h);
+    left: 0;
+    z-index: 50;
+    width: min(20rem, 88vw);
+    max-width: 20rem;
+    height: calc(100dvh - var(--header-h));
+    max-height: calc(100dvh - var(--header-h));
+    padding:
+      0.85rem
+      1rem
+      calc(1rem + env(safe-area-inset-bottom, 0px))
+      calc(1rem + env(safe-area-inset-left, 0px));
+    border-right: 1px solid var(--border);
+    border-bottom: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    transform: translateX(-105%);
+    transition: transform 0.2s ease;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .nav-backdrop {
+    top: var(--header-h);
+  }
+
+  .side-nav.is-open {
+    transform: translateX(0);
+  }
+
+  .side-nav-list {
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .side-nav-item {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.75rem;
+  }
+
+  .side-nav-label {
+    width: auto;
+  }
+
+  .side-nav-hr {
+    width: auto;
+  }
+
+  .side-nav-foot {
+    width: auto;
+    margin-top: auto;
+  }
+
+  .main-pane {
+    padding: 1.15rem var(--gutter-x) 2.5rem;
+    min-height: calc(100dvh - var(--header-h));
+  }
+
+  /*
+   * One content column: header actions, search chrome, and table
+   * share the same left/right edge (no full-bleed table breakout).
+   */
+  #main-pages,
+  #main-bbs,
+  #main-jobs,
+  .dash-browser {
+    padding-inline: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .dash-header {
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .dash-header > div:first-child {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .dash-header-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.55rem;
+  }
+
+  .dash-header-actions button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+
+  .editor-header {
+    gap: 0.65rem;
+  }
+
+  .editor-actions {
+    width: 100%;
+  }
+
+  .editor-actions button {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .pages-toolbar,
+  .jobs-toolbar,
+  .db-toolbar,
+  .pl-toolbar,
+  .bbs-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+  }
+
+  .pages-search-label,
+  .pages-filter-row {
+    width: 100%;
+  }
+
+  .pages-search-label input {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box;
+  }
+
+  .pages-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .pages-filter-row button {
+    flex: 1 1 auto;
+    min-width: 4.5rem;
+  }
+
+  /* Stay in the content column — no sideways page scroll */
+  .main-pane,
+  .main-pane > article,
+  .dash-browser,
+  #main-pages,
+  #main-jobs,
+  #main-bbs,
+  #main-dashboard,
+  #main-players,
+  #main-db,
+  #main-settings,
+  #main-map {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .table-wrap {
+    margin-inline: 0;
+    padding-inline: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .dash-table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+  }
+
+  .dash-table .row-open {
+    width: 4.75rem;
+    text-align: right;
+    vertical-align: middle;
+  }
+
+  .dash-table .row-open button {
+    margin-inline-start: auto;
+  }
+
+  .pages-toolbar,
+  .jobs-toolbar,
+  .db-toolbar,
+  .pl-toolbar,
+  .bbs-toolbar,
+  .pages-filter-row {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  .toast-host {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    max-width: none;
+  }
+
+  .gate-card {
+    width: min(100%, 24rem);
+    margin-inline: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter-x: 1rem;
+    --gutter-y: 1rem;
+    --gutter-x-lg: 1.15rem;
+    --gutter-y-lg: 1.15rem;
+    --header-h: 3.25rem;
+  }
+
+  .topbar {
+    --header-h: 3.25rem;
+    /* Still auto height; min covers notch + one tab row */
+    height: auto !important;
+    min-height: calc(
+      var(--header-h) + env(safe-area-inset-top, 0px)
+    ) !important;
+    padding-inline:
+      calc(0.65rem + env(safe-area-inset-left, 0px))
+      calc(0.65rem + env(safe-area-inset-right, 0px)) !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
+  }
+
+  .side-nav {
+    top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+    height: calc(
+      100dvh - var(--header-h) - env(safe-area-inset-top, 0px)
+    );
+    max-height: calc(
+      100dvh - var(--header-h) - env(safe-area-inset-top, 0px)
+    );
+  }
+
+  .nav-backdrop {
+    top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .dash-header-actions button,
+  .editor-actions button,
+  .action-row button {
+    min-height: 2.5rem;
+  }
+
+  .action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .action-row button {
+    flex: 1 1 calc(50% - 0.3rem);
+    width: auto !important;
+    margin: 0 !important;
+  }
+
+  /* Phone tables: no horiz scroll — primary col + optional badge + Open */
+  .dash-table {
+    font-size: 0.8125rem;
+    table-layout: fixed;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .dash-table th,
+  .dash-table td {
+    padding: 0.5rem 0.45rem;
+  }
+
+  .table-wrap {
+    overflow-x: hidden !important;
+    max-width: 100%;
+  }
+
+  .row-open button {
+    min-height: 2.25rem;
+    padding-inline: 0.5rem;
+    font-size: 0.75rem !important;
+  }
+
+  /*
+   * Default for every staff list table:
+   * hide every middle column; keep first + last (Open).
+   * Per-page overrides below re-show a useful badge column.
+   */
+  #main-pages .dash-table th:nth-child(n + 2):not(:last-child),
+  #main-pages .dash-table td:nth-child(n + 2):not(:last-child),
+  #main-jobs .dash-table th:nth-child(n + 2):not(:last-child),
+  #main-jobs .dash-table td:nth-child(n + 2):not(:last-child),
+  #main-bbs .dash-table th:nth-child(n + 2):not(:last-child),
+  #main-bbs .dash-table td:nth-child(n + 2):not(:last-child),
+  #main-dashboard .dash-table th:nth-child(n + 2):not(:last-child),
+  #main-dashboard .dash-table td:nth-child(n + 2):not(:last-child),
+  #main-map .dash-table th:nth-child(n + 2):not(:last-child),
+  #main-map .dash-table td:nth-child(n + 2):not(:last-child),
+  .dash-browser .dash-table th:nth-child(n + 2):not(:last-child),
+  .dash-browser .dash-table td:nth-child(n + 2):not(:last-child) {
+    display: none;
+  }
+
+  /* Wiki: Title · Status · Open (Status = col 3) */
+  #main-pages .dash-table th:nth-child(3),
+  #main-pages .dash-table td:nth-child(3) {
+    display: table-cell;
+    width: 4.25rem;
+  }
+
+  /* Jobs: # · Title · Open — keep # narrow, title is col 2 */
+  #main-jobs .dash-table th:nth-child(1),
+  #main-jobs .dash-table td:nth-child(1) {
+    display: table-cell;
+    width: 2.5rem;
+  }
+
+  #main-jobs .dash-table th:nth-child(2),
+  #main-jobs .dash-table td:nth-child(2) {
+    display: table-cell;
+  }
+
+  /* Boards: # · Title · Category · Open */
+  #main-bbs .dash-table th:nth-child(1),
+  #main-bbs .dash-table td:nth-child(1) {
+    display: table-cell;
+    width: 2.5rem;
+  }
+
+  #main-bbs .dash-table th:nth-child(2),
+  #main-bbs .dash-table td:nth-child(2) {
+    display: table-cell;
+  }
+
+  #main-bbs .dash-table th:nth-child(3),
+  #main-bbs .dash-table td:nth-child(3) {
+    display: table-cell;
+    width: 5rem;
+  }
+
+  /* Primary text column ellipsis */
+  #main-pages .dash-table th:first-child,
+  #main-pages .dash-table td:first-child,
+  #main-jobs .dash-table th:nth-child(2),
+  #main-jobs .dash-table td:nth-child(2),
+  #main-bbs .dash-table th:nth-child(2),
+  #main-bbs .dash-table td:nth-child(2),
+  #main-dashboard .dash-table th:first-child,
+  #main-dashboard .dash-table td:first-child,
+  #main-map .dash-table th:first-child,
+  #main-map .dash-table td:first-child,
+  .dash-browser .dash-table th:first-child,
+  .dash-browser .dash-table td:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 0;
+    width: auto;
+  }
+
+  .dash-table .row-open {
+    width: 4.35rem;
+    padding-inline-end: 0.4rem;
+  }
+
+  .dash-table .row-open button {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Code paths / long cells never force page width */
+  .dash-table code {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: bottom;
+  }
+
+  .page-title,
+  .dash-header,
+  .dash-header > div {
+    max-width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .gate {
+    min-height: 100dvh;
+    padding:
+      max(1rem, env(safe-area-inset-top, 0px))
+      max(1rem, env(safe-area-inset-right, 0px))
+      max(1rem, env(safe-area-inset-bottom, 0px))
+      max(1rem, env(safe-area-inset-left, 0px));
+  }
+
+  .gate-card {
+    padding: 1.5rem 1.25rem 1.35rem;
+  }
+}
+
+/* Prefer reduced motion for the drawer */
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+  .side-nav,
+  .nav-backdrop,
+  .nav-menu-icon span {
+    transition: none !important;
+  }
+}

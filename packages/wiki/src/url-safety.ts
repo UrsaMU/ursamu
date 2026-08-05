@@ -68,3 +68,23 @@ export function isWebhookUrlSafe(url: string): boolean {
     return !isPrivateIp(host);
   } catch { return false; }
 }
+
+/**
+ * Select fetch URL and headers based on protocol.
+ * HTTPS keeps the real hostname so TLS certificates and SNI work.
+ * Plain HTTP pins the first public IP and sets Host for virtual hosts.
+ */
+export function chooseFetchTarget(
+  url: URL,
+  resolvedIps: string[],
+): { fetchUrl: string; hostHeader?: string } {
+  const ip = resolvedIps[0];
+  if (url.protocol === "http:" && ip) {
+    return {
+      fetchUrl: buildPinnedFetchUrl(url.toString(), ip),
+      hostHeader: url.hostname,
+    };
+  }
+  return { fetchUrl: url.toString() };
+}
+

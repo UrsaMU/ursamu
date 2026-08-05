@@ -71,7 +71,7 @@ describe("syncSightFlags", OPTS, () => {
 });
 
 describe("hasFaeSight", OPTS, () => {
-  it("true for fae and staff", () => {
+  it("true only for fae flag (not staff alone)", () => {
     assertEquals(
       hasFaeSight(mockPlayer({ flags: new Set(["fae"]) })),
       true,
@@ -80,7 +80,15 @@ describe("hasFaeSight", OPTS, () => {
       hasFaeSight(
         mockPlayer({ flags: new Set(["admin"]) }),
       ),
-      true,
+      false,
+    );
+    assertEquals(
+      hasFaeSight(
+        mockPlayer({
+          flags: new Set(["superuser", "player"]),
+        }),
+      ),
+      false,
     );
     assertEquals(
       hasFaeSight(

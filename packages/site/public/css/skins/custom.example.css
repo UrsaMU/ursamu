@@ -1,0 +1,150 @@
+/**
+ * EXAMPLE custom skin — copy to your game and point plugins.site at it.
+ *
+ * Option A — game themeDir (recommended):
+ *   mkdir -p theme
+ *   cp custom.example.css theme/site.css
+ *   # put images under theme/imgs/
+ *
+ *   config:
+ *   "plugins": {
+ *     "site": {
+ *       "themeDir": "theme",
+ *       "skinCss": "/site/theme/site.css",
+ *       "title": "My Game",
+ *       "bannerImage": "/site/theme/imgs/header.png"
+ *     }
+ *   }
+ *
+ * Option B — absolute URL / CDN:
+ *   "skinCss": "https://cdn.example.com/my-game.css"
+ *
+ * Only change tokens + decorative overrides. Do not rename .site-* classes.
+ */
+
+:root {
+  /* Surfaces */
+  --site-bg: #020201;
+  --site-bg-elevated: #020201;
+  --site-bg-surface: #0a0908;
+  --site-bg-surface-2: #12100e;
+  --site-bg-code: #020201;
+
+  /* Borders */
+  --site-border: color-mix(in srgb, #f7e4dd 50%, transparent);
+  --site-border-subtle: color-mix(in srgb, #f7e4dd 28%, transparent);
+  --site-border-strong: color-mix(in srgb, #f7e4dd 70%, transparent);
+
+  /* Text */
+  --site-text: #f7e4dd;
+  --site-text-secondary: #f7e4dd;
+  --site-text-muted: color-mix(in srgb, #f7e4dd 72%, transparent);
+  --site-text-on-accent: #020201;
+
+  /* Accent (gold in Court) */
+  --site-accent: #c4944a;
+  --site-accent-hover: #e0b56a;
+  --site-accent-muted: rgba(196, 148, 74, 0.18);
+  --site-accent-border: rgba(196, 148, 74, 0.55);
+
+  --site-btn-bg: #c4944a;
+  --site-btn-bg-hover: #e0b56a;
+  --site-btn-fg: #020201;
+
+  /* Type */
+  --site-font-ui: "Lato", ui-sans-serif, system-ui, sans-serif;
+  --site-font-display: "Smythe", serif;
+
+  /* Geometry (court-template numbers) */
+  --site-banner-offset: 200px;
+  --site-sticky-top: 120px;
+  --site-gutter: 40px;
+  --site-main-max: 800px;
+  --site-aside-min: 300px;
+  --site-aside-max: 450px;
+  --site-max-w: 1440px;
+
+  /*
+   * Art — point at YOUR files.
+   * With themeDir "theme", URLs are /site/theme/…
+   * Or reuse Court assets under /site/skins/court/…
+   */
+  --site-bg-image-top: url("/site/skins/court/imgs/background.png");
+  --site-bg-image-bottom: url("/site/skins/court/imgs/footer.png");
+  --site-rule-image: url("/site/skins/court/imgs/hr.svg");
+  --site-search-icon: url("/site/skins/court/imgs/search.png");
+}
+
+/* Optional: local fonts */
+/*
+@font-face {
+  font-family: "Smythe";
+  src: url("/site/theme/fonts/display.woff2") format("woff2");
+  font-display: swap;
+}
+*/
+
+/* Type scale (court look) */
+.site-nav__brand {
+  font-family: var(--site-font-display);
+  font-size: 36px;
+  font-weight: normal;
+}
+
+.site-nav__list {
+  font-family: var(--site-font-display);
+  font-size: 24px;
+}
+
+.site-nav__list a.is-active {
+  border-bottom-color: var(--site-accent);
+}
+
+.site-banner__title {
+  font-family: var(--site-font-display);
+  font-size: 100px;
+  font-weight: normal;
+}
+
+.site-banner.has-image .site-banner__title {
+  display: none;
+}
+
+.site-menu__title {
+  font-family: var(--site-font-display);
+  font-size: 32px;
+  font-weight: normal;
+  color: var(--site-accent);
+}
+
+.site-section__title {
+  font-family: var(--site-font-display);
+  font-size: 36px;
+  font-weight: normal;
+  color: var(--site-accent);
+}
+
+.site-rule,
+.site-rule--image {
+  height: 6px;
+  background: transparent center / 100% 100% no-repeat
+    var(--site-rule-image);
+}
+
+.site-search__btn-icon {
+  background: center / contain no-repeat var(--site-search-icon);
+  mask: none;
+  -webkit-mask: none;
+}
+
+.site-search__btn-icon::before {
+  content: none;
+}
+
+.site-main {
+  padding: 0 50px;
+}
+
+.site-body {
+  padding-top: 120px;
+}

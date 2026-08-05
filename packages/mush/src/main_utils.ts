@@ -4,6 +4,7 @@ import type { IPlugin } from "@ursamu/core";
 import type { IDBOBJ } from "./world/types.ts";
 import { registerPlugin } from "@ursamu/core";
 import { dbojs } from "./world/dbobjs.ts";
+import { pickNameMatch } from "./world/name-match.ts";
 
 // ─── Txt Files loading ─────────────────────────────────────────────────────────
 export const txtFiles = new Map<string, string>();
@@ -156,7 +157,8 @@ export async function reloadPlugins(dir: string, existingPlugins: IPlugin[]): Pr
 
 /**
  * Resolve a target reference string relative to `en`.
- * Handles: "here", "me", "#dbref", name-prefix search.
+ * Handles: "here", "me", "#dbref", name prefix, data.alias, and
+ * TinyMUX exit aliases (`Primary;sl`).
  * Pass `global = true` to skip the location-proximity filter.
  */
 export const target = async (
@@ -164,34 +166,32 @@ export const target = async (
   tar:    string,
   global?: boolean,
 ): Promise<IDBOBJ | undefined | false> => {
-  if (!tar || ["here", "room"].includes(tar.toLowerCase())) {
+  let name = (tar ?? "").trim();
+  let g = !!global;
+  // TinyMUX *Name — force global name lookup.
+  if (name.startsWith("*")) {
+    name = name.slice(1).trim();
+    g = true;
+  }
+  if (!name || ["here", "room"].includes(name.toLowerCase())) {
     return en.location ? await dbojs.queryOne({ id: en.location }) : undefined;
   }
-  if (tar.startsWith("#")) return await dbojs.queryOne({ id: tar.slice(1) });
-  if (["me", "self"].includes(tar.toLowerCase())) return en;
+  if (name.startsWith("#")) {
+    return await dbojs.queryOne({ id: name.slice(1) });
+  }
+  if (["me", "self"].includes(name.toLowerCase())) return en;
 
-  const namePat = new RegExp(`^${tar.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i");
-  const all = await dbojs.query({ "data.name": namePat });
-  const byAlias = tar.toLowerCase();
-  const candidates = all.length
-    ? all
-    : await dbojs.query({}).then((objs) =>
-        objs.filter((o) =>
-          o.id === tar ||
-          (o.data?.alias as string | undefined)?.toLowerCase() === byAlias
-        )
-      );
+  const all = await dbojs.query({});
+  if (g) return pickNameMatch(all, name);
 
-  if (!candidates.length) return undefined;
-  if (global) return candidates[0];
-
-  const found = candidates.find(obj =>
+  const nearby = all.filter((obj) =>
     obj.location && (
-      (en.location && (obj.location === en.location || obj.id === en.location)) ||
+      (en.location &&
+        (obj.location === en.location || obj.id === en.location)) ||
       obj.location === en.id
-    ),
+    )
   );
-  return found ?? undefined;
+  return pickNameMatch(nearby, name);
 };
 
 import type { IAttribute } from "./world/types.ts";
@@ -220,18 +220,67 @@ export const getAttribute = async (
   return undefined;
 };
 
-/** Returns the matching object if the name or alias is already taken, otherwise undefined. */
-export const isNameTaken = async (name: string): Promise<IDBOBJ | undefined> => {
-  const rx = new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i");
-  // Query for name or alias matching rx
+/** First ;-separated segment (login / primary name). */
+export function primaryName(name: string): string {
+  return String(name ?? "").split(";")[0].trim();
+}
+
+const escapeRx = (s: string) =>
+  s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Returns the matching object if the name or alias is already taken. */
+export const isNameTaken = async (
+  name: string,
+): Promise<IDBOBJ | undefined> => {
+  const primary = primaryName(name);
+  if (!primary) return undefined;
+  const rx = new RegExp(`^${escapeRx(primary)}$`, "i");
   const results = await dbojs.query({
     $or: [
       { "data.name": rx },
-      { "data.alias": rx }
-    ]
+      { "data.alias": rx },
+    ],
     // deno-lint-ignore no-explicit-any
   } as any);
   return results.length ? results[0] : undefined;
+};
+
+/**
+ * True collision for player login names.
+ * Matches another player whose primary data.name or data.alias equals
+ * `name`'s primary segment (case-insensitive). Ignores `exceptId`.
+ */
+export const isPlayerNameTaken = async (
+  name: string,
+  exceptId?: string,
+): Promise<IDBOBJ | undefined> => {
+  const primary = primaryName(name);
+  if (!primary) return undefined;
+  const esc = escapeRx(primary);
+  // Exact name, or Name;alias… form, or alias field.
+  const nameRx = new RegExp(`^${esc}(?:;.*)?$`, "i");
+  const exactRx = new RegExp(`^${esc}$`, "i");
+  const results = await dbojs.query({
+    $or: [
+      { "data.name": nameRx },
+      { "data.alias": exactRx },
+    ],
+    // deno-lint-ignore no-explicit-any
+  } as any);
+
+  for (const o of results) {
+    if (!/\bplayer\b/i.test(String(o.flags ?? ""))) continue;
+    if (exceptId && o.id === exceptId) continue;
+    const n = primaryName(String(o.data?.name ?? ""));
+    const a = String(o.data?.alias ?? "").trim();
+    if (
+      n.toLowerCase() === primary.toLowerCase() ||
+      a.toLowerCase() === primary.toLowerCase()
+    ) {
+      return o;
+    }
+  }
+  return undefined;
 };
 
 

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html><head><meta property="og:type" content="website">
+<meta property="og:url" content="http://localhost:3001/discord-webhook/">
+<meta name="twitter:card" content="summary">
+</head><body><h1>Discord Webhook Plugin Plan</h1>
+<h2>Overview</h2>
+<p>A webhook-based Discord integration plugin. Uses Discord’s per-message <code>username</code><br>
+and <code>avatar_url</code> overrides so a single webhook can post as different named players<br>
+with unique avatars. No bot account, no gateway connection — one-directional (game → Discord).</p>
+<h2>Avatar source (priority order)</h2>
+<ol>
+<li>Player’s locally-saved avatar served at <code>GET /avatars/:id</code> (see avatar system)</li>
+<li>Fallback: <code>https://robohash.org/{encodedName}?set=set4&amp;size=80x80</code> (unique per name, free)</li>
+</ol>
+<h2>Requires <code>publicUrl</code> in game config so the plugin can construct absolute avatar URLs.</h2>
+<h2>Plugin location</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">src/plugins/discord/
+  index.ts              ← IPlugin entry, registers commands + hooks
+  webhook.ts            ← low-level HTTP poster (queue, retry, 429 handling)
+  config.ts             ← read/write webhook config from game DB config
+  commands.ts           ← @discord/set, @discord/list, @discord/test
+  router.ts             ← REST API for managing webhooks
+  ursamu.plugin.json
+</code></pre>
+<hr>
+<h2>Configuration</h2>
+<p>Stored in game config under the <code>"discord"</code> key:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "webhooks": {
+    "jobs":   "https://discord.com/api/webhooks/…/…",
+    "ooc":    "https://discord.com/api/webhooks/…/…",
+    "scenes": "https://discord.com/api/webhooks/…/…"
+  },
+  "publicUrl": "https://mygame.example.com"
+}
+</code></pre>
+<h2><code>publicUrl</code> is used to construct <code>avatar_url</code> values for Discord.<br>
+Topics are optional — unconfigured topics are silently skipped.</h2>
+<h2>webhook.ts — low-level poster</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface WebhookPayload {
+  content?: string;
+  username?: string;
+  avatar_url?: string;
+  embeds?: DiscordEmbed[];
+}
+</code></pre>
+<ul>
+<li>POST to webhook URL with <code>Content-Type: application/json</code></li>
+<li>Respects Discord <code>429 Too Many Requests</code> — reads <code>retry_after</code>, waits, retries once</li>
+<li>Per-webhook outgoing queue (one at a time per URL) to avoid burst rate-limiting</li>
+<li>Silent failure on non-retryable errors (logs to console, never crashes game)</li>
+</ul>
+<hr>
+<h2>In-game commands (wizard/admin only)</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">@discord/set &lt;topic&gt;=&lt;url&gt;    ← set or update a webhook URL
+@discord/set &lt;topic&gt;=         ← clear/disable a topic
+@discord/list                 ← show configured topics (URLs truncated)
+@discord/test &lt;topic&gt;         ← post a test message to a topic
+</code></pre>
+<hr>
+<h2>REST API</h2>
+<p>All endpoints require staff (admin/wizard).</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>/api/v1/discord/webhooks</td>
+<td>List topics (URLs truncated to 40 chars)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>/api/v1/discord/webhooks</td>
+<td><code>{ topic, url }</code> — set webhook</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>/api/v1/discord/webhooks/:topic</td>
+<td>Remove topic</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>/api/v1/discord/webhooks/:topic/test</td>
+<td>Send test message</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Event → Discord mapping</h2>
+<h3><code>jobs</code> topic — subscribes to <code>jobHooks</code></h3>
+<table>
+<thead>
+<tr>
+<th>Hook event</th>
+<th>Discord output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>job:created</code></td>
+<td>Green embed: “New job #N — [title]” — submitter as username</td>
+</tr>
+<tr>
+<td><code>job:assigned</code></td>
+<td>Blue embed: “Job #N assigned to [staff]”</td>
+</tr>
+<tr>
+<td><code>job:commented</code></td>
+<td>Plain message as comment author (skips <code>staffOnly</code> comments)</td>
+</tr>
+<tr>
+<td><code>job:status-changed</code></td>
+<td>Yellow embed: status transition</td>
+</tr>
+<tr>
+<td><code>job:resolved</code></td>
+<td>Teal embed: “Job #N resolved by [staff]”</td>
+</tr>
+<tr>
+<td><code>job:closed</code></td>
+<td>Gray embed: “Job #N closed by [staff]”</td>
+</tr>
+<tr>
+<td><code>job:deleted</code></td>
+<td>Red embed: “Job #N deleted”</td>
+</tr>
+</tbody>
+</table>
+<h3><code>ooc</code> topic — in-game public channel relay</h3>
+<p>Subscribe to channel talk events on channels flagged as public.<br>
+Post as the speaking player with their avatar.</p>
+<p>Format: <code>content: message</code> (plain, no embed — keeps it readable)</p>
+<h3><code>scenes</code> topic — scene pose relay</h3>
+<p>Subscribe to scene pose events.<br>
+Post as the posing player with their avatar.</p>
+<h2>Format: pose text as-is (no prefix), player as username.</h2>
+<h2>Avatar URL resolution</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">function avatarUrl(playerId: string, playerName: string, config: DiscordConfig): string {
+  // Check if player has a saved avatar
+  if (playerHasAvatar(playerId)) {
+    return `${config.publicUrl}/avatars/${playerId}`;
+  }
+  // Fallback to RoboHash
+  return `https://robohash.org/${encodeURIComponent(playerName)}?set=set4&amp;size=80x80`;
+}
+</code></pre>
+<hr>
+<h2>Message format examples</h2>
+<p><strong>Job created (embed):</strong></p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "username": "Mira",
+  "avatar_url": "https://mygame.com/avatars/obj-42",
+  "embeds": [{
+    "color": 5763719,
+    "title": "New Job #17 — Fix the north gate",
+    "description": "The north gate latch is broken again.",
+    "footer": { "text": "Category: maintenance • Priority: normal" }
+  }]
+}
+</code></pre>
+<p><strong>OOC channel message:</strong></p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "username": "Mira",
+  "avatar_url": "https://mygame.com/avatars/obj-42",
+  "content": "Anyone want to run a scene tonight?"
+}
+</code></pre>
+<hr>
+<h2>What’s NOT included (future work)</h2>
+<ul>
+<li>Discord → game bridging (requires bot/gateway)</li>
+<li>Per-player opt-out (<code>@discord/optout</code>)</li>
+<li>Per-channel subscription mapping (which game channels go to which topic)</li>
+<li>Thread-per-scene (Discord webhook API limitation — needs a bot)</li>
+<li>Attachment/image forwarding from in-game</li>
+</ul>
+<hr>
+<h2>Dependencies</h2>
+<ul>
+<li>Avatar system (<code>src/commands/avatar.ts</code> + <code>/avatars/:id</code> route) — must exist first</li>
+<li><code>jobHooks</code> from <code>src/plugins/jobs/hooks.ts</code></li>
+<li>Game config system (<code>getConfig</code> / <code>setConfig</code>)</li>
+<li><code>publicUrl</code> configured in game config</li>
+</ul>
+</body></html>

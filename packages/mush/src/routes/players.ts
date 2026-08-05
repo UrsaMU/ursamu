@@ -9,6 +9,9 @@
  */
 
 import { dbojs, chans, chanHistory, Obj } from "../world/dbobjs.ts";
+import { stripAnsi } from "../softcode/stdlib/helpers.ts";
+import { monikerToHtml } from "../render/moniker-html.ts";
+import { resolveAvatarUrl } from "./avatar-url.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -17,7 +20,42 @@ const hasFlag = (flagStr: string, ...names: string[]): boolean => {
   return names.some((n) => set.has(n));
 };
 
+/** Plain-text moniker for web / API clients (no %c or ANSI). */
+function plainMoniker(raw: unknown): string | null {
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  const plain = stripAnsi(raw)
+    .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "")
+    .trim();
+  return plain || null;
+}
+
+/** Raw moniker from data or state (may include %c / <#rrggbb>). */
+function rawMoniker(user: {
+  data?: Record<string, unknown>;
+  dbobj?: { data?: Record<string, unknown>; state?: Record<string, unknown> };
+  state?: Record<string, unknown>;
+}): unknown {
+  return user.data?.moniker ??
+    user.dbobj?.data?.moniker ??
+    user.state?.moniker ??
+    user.dbobj?.state?.moniker;
+}
+
 // ── GET /api/v1/me ────────────────────────────────────────────────────────────
+
+/** Normalize flags from string | Set | string[] → string[]. */
+export function normalizeFlagList(raw: unknown): string[] {
+  if (raw instanceof Set) {
+    return [...raw].map((f) => String(f)).filter(Boolean);
+  }
+  if (Array.isArray(raw)) {
+    return raw.map((f) => String(f)).filter(Boolean);
+  }
+  if (typeof raw === "string") {
+    return raw.split(/[\s,|]+/).map((f) => f.trim()).filter(Boolean);
+  }
+  return [];
+}
 
 export async function meHandler(_req: Request, userId: string): Promise<Response> {
   const user = await Obj.get(userId);
@@ -28,13 +66,38 @@ export async function meHandler(_req: Request, userId: string): Promise<Response
     });
   }
 
+  // Prefer raw dbobj.flags — getter may be Set or string depending on path.
+  const rawFlags = (user.dbobj as { flags?: unknown })?.flags ??
+    user.flags;
+
+  // Plain character name — not moniker (Obj.name prefers moniker).
+  const plainName =
+    String(user.data?.name ?? user.dbobj?.data?.name ?? "").trim() ||
+    "Unknown";
+
+  const monikerRaw = rawMoniker(user);
+  const monikerPlain = plainMoniker(monikerRaw);
+  const monikerHtml = monikerToHtml(monikerRaw);
+
+  // Avatar: local @avatar file (/avatars/{id}.ext) or legacy image URL.
+  // user.id is bare numeric/string id; dbref is "#n".
+  const bag = (user.data ??
+    user.dbobj?.data ??
+    {}) as Record<string, unknown>;
+  const avatar = await resolveAvatarUrl(user.id, bag);
+
   const profile = {
-    id:      user.dbref,
-    name:    user.name || "Unknown",
-    moniker: (user.data?.moniker as string | undefined) || null,
-    flags:   user.flags.split(" ").filter(Boolean),
+    id: user.dbref,
+    // Numeric id for clients that need it (wiki admin JWT is this id)
+    dbId: user.id,
+    name: plainName,
+    /** Plain display moniker (no color codes). */
+    moniker: monikerPlain,
+    /** Colored moniker as safe HTML (web-safe palette spans). */
+    monikerHtml,
+    flags: normalizeFlagList(rawFlags),
     location: user.dbobj.location || null,
-    avatar:  (user.data?.image as string | undefined) || null,
+    avatar,
   };
 
   return new Response(JSON.stringify(profile), {
@@ -53,7 +116,7 @@ export async function onlinePlayersHandler(_req: Request): Promise<Response> {
     .map((p) => ({
       id:       p.id,
       name:     p.data?.name || "Unknown",
-      moniker:  (p.data?.moniker as string | undefined) || null,
+      moniker:  plainMoniker(p.data?.moniker),
     }));
 
   return new Response(JSON.stringify(players), {

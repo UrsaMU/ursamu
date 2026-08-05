@@ -20,6 +20,18 @@ export interface PoseEvent {
   socketId?: string;
 }
 
+export interface OocEvent {
+  actorId: string;
+  actorName: string;
+  roomId: string;
+  /** Name + say/pose text (OOCFORMAT %0). */
+  body: string;
+  /** Final broadcast line. */
+  line: string;
+  mode: "say" | "pose" | "semi";
+  socketId?: string;
+}
+
 export interface PageEvent {
   actorId: string;
   actorName: string;
@@ -42,6 +54,15 @@ export interface SessionEvent {
   actorId: string;
   actorName: string;
   socketId?: string;
+  /**
+   * How the session changed:
+   * - login  — fresh connect / create
+   * - reauth — JWT restore after soft-reboot (no presence spam)
+   * - quit   — deliberate quit
+   * - drop   — socket lost
+   * - reboot — main exiting for soft-reboot (exit 75)
+   */
+  reason?: "login" | "reauth" | "quit" | "drop" | "reboot";
 }
 
 export interface ChannelMessageEvent {

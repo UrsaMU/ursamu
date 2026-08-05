@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Reference | UrsaMU Documentation</title>
+  <meta name="description" content="Complete reference for all built-in UrsaMU in-game commands — player, channel, mail, bulletin boards, building, and admin.">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="http://localhost:3001/guides/commands/">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ═══ HEADER ══════════════════════════════════════════════════════ -->
+<header class="site-header">
+
+  <!-- Wordmark -->
+  <a href="/" class="site-logo">
+    <span class="site-logo-name">UrsaMU</span>
+    <span class="site-logo-tag">docs</span>
+  </a>
+
+  <!-- Divider -->
+  <div class="header-divider"></div>
+
+  <!-- Top nav links -->
+  <nav class="header-nav" aria-label="Primary navigation">
+    
+    
+    
+    
+    <a href="/guides/" class="header-nav-link active">
+      Guides
+    </a>
+    
+    
+    
+    <a href="/api/" class="header-nav-link">
+      API
+    </a>
+    
+    
+    
+    <a href="/plugins/" class="header-nav-link">
+      Plugins
+    </a>
+    
+    
+    
+    <a href="/development/" class="header-nav-link">
+      Development
+    </a>
+    
+    
+  </nav>
+
+  <div class="header-spacer"></div>
+
+  <!-- Actions -->
+  <div class="header-actions">
+    <span class="header-version">mush 1.0.30</span>
+
+    <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path>
+      </svg>
+    </a>
+
+    <!-- Mobile menu button — CSS hides this above 1024px -->
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">
+      <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+</header>
+
+<!-- ═══ BODY ═════════════════════════════════════════════════════════ -->
+
+<!-- ── DOCS PAGE (3-column) ─────────────────────────────────────────── -->
+<div class="docs-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="docs-sidebar" id="docsSidebar" aria-label="Documentation navigation">
+
+    <!-- Search -->
+    <div class="sidebar-search">
+      <input class="sidebar-search-input" type="search" placeholder="Search docs…" id="sidebarSearch" aria-label="Search documentation">
+      <div class="search-results" id="searchResults" style="display:none;position:relative;margin-top:0.25rem;"></div>
+    </div>
+
+    <!-- Section: Overview -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Overview</div>
+
+      <a href="/about/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        About UrsaMU
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Getting Started -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+
+      <a href="/guides/installation/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Installation
+      </a>
+      <a href="/guides/user-guide/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        Player Guide
+      </a>
+      <a href="/guides/admin-guide/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        Admin Guide
+      </a>
+      <a href="/guides/customization/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
+        Customization
+      </a>
+      <a href="/guides/scripting/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Scripting Guide
+      </a>
+      <a href="/guides/first-script/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        Your First Script
+      </a>
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        SDK Cookbook
+      </a>
+      <a href="/guides/recipes/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Recipes
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Configuration -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Configuration</div>
+
+      <a href="/configuration/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
+        Overview
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: API Reference -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">API Reference</div>
+
+      <a href="/api/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        Overview
+      </a>
+      <a href="/api/core/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
+        Core API
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Plugins -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Plugins</div>
+
+      <a href="/plugins/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
+        Overview
+      </a>
+      <a href="/plugins/basics/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+        Basics
+      </a>
+      <a href="/plugins/first-plugin/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        First Plugin
+      </a>
+      <a href="/plugins/commands/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Commands
+      </a>
+      <a href="/plugins/hooks/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
+        Hooks
+      </a>
+      <a href="/plugins/database/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+        Database
+      </a>
+      <a href="/plugins/configuration/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        Configuration
+      </a>
+      <a href="/plugins/dependencies/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+        Dependencies
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Development -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Development</div>
+
+      <a href="/development/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        Overview
+      </a>
+      <a href="/development/contributing/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+        Contributing
+      </a>
+      <a href="/extending/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        Extending
+      </a>
+      <a href="/child-games/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+        Child Games
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Community -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Community</div>
+      <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        GitHub
+      </a>
+      <a href="https://discord.gg/ursamu" target="_blank" rel="noopener" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"></path></svg>
+        Discord
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="docs-content-wrap">
+    <main class="docs-content animate-in">
+
+      <!-- Breadcrumbs -->
+      
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumbs-sep">›</span>
+        <span class="breadcrumbs-current">Command Reference</span>
+      </nav>
+      
+
+      <!-- Page content -->
+      <article class="prose">
+        <h1>Command Reference</h1>
+<h2>All built-in commands available in UrsaMU. Commands marked <strong>admin+</strong> require the <code>admin</code> or <code>wizard</code> flag. Commands marked <strong>builder+</strong> require <code>builder</code> or above.</h2>
+<h2>Player Commands</h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>look</code> / <code>l</code></td>
+<td>Look at your surroundings or a named object</td>
+</tr>
+<tr>
+<td><code>say &lt;msg&gt;</code> / <code>"&lt;msg&gt;</code></td>
+<td>Speak to everyone in the room</td>
+</tr>
+<tr>
+<td><code>pose &lt;action&gt;</code> / <code>:&lt;action&gt;</code></td>
+<td>Emote an action</td>
+</tr>
+<tr>
+<td><code>;</code></td>
+<td>Pose without a space (possessive — <code>Alice;'s phone rings</code>)</td>
+</tr>
+<tr>
+<td><code>think &lt;msg&gt;</code></td>
+<td>Private message visible only to you</td>
+</tr>
+<tr>
+<td><code>page &lt;player&gt;=&lt;msg&gt;</code></td>
+<td>Send a private message to any online player</td>
+</tr>
+<tr>
+<td><code>page &lt;player&gt;=:&lt;pose&gt;</code></td>
+<td>Page with a pose (<code>From afar, Alice waves.</code>)</td>
+</tr>
+<tr>
+<td><code>who</code></td>
+<td>List currently connected players</td>
+</tr>
+<tr>
+<td><code>@doing &lt;text&gt;</code></td>
+<td>Set your status message shown in <code>who</code></td>
+</tr>
+<tr>
+<td><code>@away [&lt;text&gt;]</code></td>
+<td>Set or clear an away message shown when paged</td>
+</tr>
+<tr>
+<td><code>@last [&lt;player&gt;]</code></td>
+<td>Show last login/logout timestamps</td>
+</tr>
+<tr>
+<td><code>inventory</code> / <code>i</code></td>
+<td>List items you are carrying</td>
+</tr>
+<tr>
+<td><code>score</code></td>
+<td>View your character stats</td>
+</tr>
+<tr>
+<td><code>get &lt;object&gt;</code></td>
+<td>Pick up an object</td>
+</tr>
+<tr>
+<td><code>drop &lt;object&gt;</code></td>
+<td>Drop an object</td>
+</tr>
+<tr>
+<td><code>give &lt;object&gt;=&lt;player&gt;</code></td>
+<td>Give an object to another player</td>
+</tr>
+<tr>
+<td><code>home</code></td>
+<td>Return to your home location</td>
+</tr>
+<tr>
+<td><code>@teleport &lt;destination&gt;</code></td>
+<td>Teleport to a location or object (builder+)</td>
+</tr>
+<tr>
+<td><code>examine &lt;object&gt;</code> / <code>ex</code></td>
+<td>Inspect an object in detail</td>
+</tr>
+<tr>
+<td><code>@desc &lt;object&gt;=&lt;text&gt;</code></td>
+<td>Set an object’s description</td>
+</tr>
+<tr>
+<td><code>@name &lt;object&gt;=&lt;name&gt;</code></td>
+<td>Rename an object</td>
+</tr>
+<tr>
+<td><code>whisper &lt;player&gt;=&lt;msg&gt;</code></td>
+<td>Private in-room message; others see attribution only</td>
+</tr>
+<tr>
+<td><code>quit</code></td>
+<td>Disconnect from the server</td>
+</tr>
+<tr>
+<td><code>@version</code></td>
+<td>Show the engine version</td>
+</tr>
+<tr>
+<td><code>@poll</code></td>
+<td>Show the current poll, if any</td>
+</tr>
+<tr>
+<td><code>help [&lt;topic&gt;]</code></td>
+<td>Display help text (provided by <a href="https://github.com/UrsaMU/help-plugin">help-plugin</a>)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Channel Commands</h2>
+<p>Channels are provided by the <a href="https://github.com/UrsaMU/channel-plugin">channel-plugin</a>.<br>
+Players join channels and get a short alias to speak with.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@channel/list</code></td>
+<td>List all available channels</td>
+</tr>
+<tr>
+<td><code>@channel/join &lt;name&gt;=&lt;alias&gt;</code></td>
+<td>Join a channel and assign a local alias</td>
+</tr>
+<tr>
+<td><code>@channel/leave &lt;alias&gt;</code></td>
+<td>Leave a channel by alias</td>
+</tr>
+<tr>
+<td><code>&lt;alias&gt; &lt;message&gt;</code></td>
+<td>Send a message on that channel</td>
+</tr>
+<tr>
+<td><code>&lt;alias&gt; :&lt;pose&gt;</code></td>
+<td>Pose on the channel</td>
+</tr>
+<tr>
+<td><code>&lt;alias&gt; on</code></td>
+<td>Re-activate a channel you temporarily left</td>
+</tr>
+<tr>
+<td><code>&lt;alias&gt; off</code></td>
+<td>Temporarily stop receiving a channel</td>
+</tr>
+<tr>
+<td><code>@addcom &lt;alias&gt;=&lt;channel&gt;</code></td>
+<td>Add a channel alias (TinyMUX-style)</td>
+</tr>
+<tr>
+<td><code>@delcom &lt;alias&gt;</code></td>
+<td>Remove a channel alias</td>
+</tr>
+<tr>
+<td><code>@allcom</code></td>
+<td>List all your channel aliases</td>
+</tr>
+<tr>
+<td><code>@clearcom</code></td>
+<td>Remove all your channel aliases</td>
+</tr>
+<tr>
+<td><code>@comtitle &lt;alias&gt;=&lt;title&gt;</code></td>
+<td>Set a display title prefix for a channel</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Mail Commands</h2>
+<p>Mail is provided by the <a href="https://github.com/UrsaMU/mail-plugin">mail-plugin</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@mail</code></td>
+<td>Show your inbox</td>
+</tr>
+<tr>
+<td><code>@mail/send &lt;to&gt;=&lt;subject&gt;/&lt;body&gt;</code></td>
+<td>Send a mail message</td>
+</tr>
+<tr>
+<td><code>@mail/read &lt;num&gt;</code></td>
+<td>Read a message (marks as read)</td>
+</tr>
+<tr>
+<td><code>@mail/reply &lt;num&gt;=&lt;body&gt;</code></td>
+<td>Reply to a message</td>
+</tr>
+<tr>
+<td><code>@mail/replyall &lt;num&gt;=&lt;body&gt;</code></td>
+<td>Reply to all recipients</td>
+</tr>
+<tr>
+<td><code>@mail/forward &lt;num&gt;=&lt;to&gt;</code></td>
+<td>Forward a message</td>
+</tr>
+<tr>
+<td><code>@mail/cc &lt;addr&gt;</code></td>
+<td>Add a CC recipient while composing</td>
+</tr>
+<tr>
+<td><code>@mail/bcc &lt;addr&gt;</code></td>
+<td>Add a BCC recipient while composing</td>
+</tr>
+<tr>
+<td><code>@mail/subject &lt;text&gt;</code></td>
+<td>Set subject while composing</td>
+</tr>
+<tr>
+<td><code>@mail/proof</code></td>
+<td>Preview the message being composed</td>
+</tr>
+<tr>
+<td><code>@mail/abort</code></td>
+<td>Discard the message being composed</td>
+</tr>
+<tr>
+<td><code>@mail/delete &lt;num&gt;</code></td>
+<td>Delete a message</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Bulletin Board Commands</h2>
+<p>Bulletin boards are provided by the <a href="https://github.com/UrsaMU/bbs-plugin">bbs-plugin</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>+bblist</code></td>
+<td>List all bulletin boards with post and unread counts</td>
+</tr>
+<tr>
+<td><code>+bbread &lt;board&gt;</code></td>
+<td>List posts on a board</td>
+</tr>
+<tr>
+<td><code>+bbread &lt;board&gt;/&lt;num&gt;</code></td>
+<td>Read a specific post</td>
+</tr>
+<tr>
+<td><code>+bbpost &lt;board&gt;=&lt;subject&gt;/&lt;body&gt;</code></td>
+<td>Post to a board</td>
+</tr>
+<tr>
+<td><code>+bbpost/edit &lt;board&gt;/&lt;num&gt;=&lt;body&gt;</code></td>
+<td>Edit your own post</td>
+</tr>
+<tr>
+<td><code>+bbpost/delete &lt;board&gt;/&lt;num&gt;</code></td>
+<td>Delete your own post</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Building Commands</h2>
+<p>Building commands are provided by the <a href="https://github.com/UrsaMU/builder-plugin">builder-plugin</a>. Requires <code>builder+</code> flag unless noted.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@dig &lt;name&gt;</code></td>
+<td>Create a new room</td>
+</tr>
+<tr>
+<td><code>@create &lt;name&gt;</code></td>
+<td>Create a new object</td>
+</tr>
+<tr>
+<td><code>@open &lt;exit&gt;=&lt;dest&gt;</code></td>
+<td>Create an exit to another room</td>
+</tr>
+<tr>
+<td><code>@link &lt;object&gt;=&lt;dest&gt;</code></td>
+<td>Link an exit or set home/dropto</td>
+</tr>
+<tr>
+<td><code>@unlink &lt;object&gt;</code></td>
+<td>Remove a link from an object</td>
+</tr>
+<tr>
+<td><code>@clone &lt;object&gt;</code></td>
+<td>Clone an existing object</td>
+</tr>
+<tr>
+<td><code>@destroy &lt;object&gt;</code></td>
+<td>Destroy an object</td>
+</tr>
+<tr>
+<td><code>@alias &lt;object&gt;=&lt;alias&gt;</code></td>
+<td>Set an alias on an object</td>
+</tr>
+<tr>
+<td><code>@parent &lt;object&gt;=&lt;parent&gt;</code></td>
+<td>Set an object’s parent</td>
+</tr>
+<tr>
+<td><code>@parent/clear &lt;object&gt;</code></td>
+<td>Clear an object’s parent</td>
+</tr>
+<tr>
+<td><code>@lock &lt;object&gt;=&lt;expr&gt;</code></td>
+<td>Set a lock expression on an object</td>
+</tr>
+<tr>
+<td><code>@unlock &lt;object&gt;</code></td>
+<td>Remove a lock from an object</td>
+</tr>
+<tr>
+<td><code>@set &lt;object&gt;=&lt;flag&gt;</code></td>
+<td>Set a flag on an object</td>
+</tr>
+<tr>
+<td><code>@set &lt;object&gt;=&lt;attr&gt;:&lt;value&gt;</code></td>
+<td>Set an attribute on an object</td>
+</tr>
+<tr>
+<td><code>&amp;&lt;ATTR&gt; &lt;object&gt;=&lt;value&gt;</code></td>
+<td>Shorthand attribute assignment</td>
+</tr>
+<tr>
+<td><code>@wipe &lt;object&gt;</code></td>
+<td>Remove all attributes from an object</td>
+</tr>
+<tr>
+<td><code>@trigger &lt;object&gt;/&lt;attr&gt;</code></td>
+<td>Execute a stored script attribute</td>
+</tr>
+<tr>
+<td><code>@nameformat &lt;object&gt;=&lt;format&gt;</code></td>
+<td>Custom name format</td>
+</tr>
+<tr>
+<td><code>@descformat &lt;object&gt;=&lt;format&gt;</code></td>
+<td>Custom description format</td>
+</tr>
+<tr>
+<td><code>@conformat &lt;object&gt;=&lt;format&gt;</code></td>
+<td>Custom contents format</td>
+</tr>
+<tr>
+<td><code>@exitformat &lt;object&gt;=&lt;format&gt;</code></td>
+<td>Custom exits format</td>
+</tr>
+<tr>
+<td><code>@decompile[/tf] &lt;object&gt;</code></td>
+<td>Dump object as copyable <code>@name</code>/<code>&amp;ATTR</code> lines</td>
+</tr>
+<tr>
+<td><code>@find [&lt;name&gt;]</code></td>
+<td>Search objects by name or flag</td>
+</tr>
+<tr>
+<td><code>@quota</code></td>
+<td>Show your object creation quota</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Admin Commands</h2>
+<p>Requires <code>admin</code> or <code>wizard</code> flag unless noted.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@boot &lt;player&gt;</code></td>
+<td>Disconnect a player</td>
+</tr>
+<tr>
+<td><code>@toad &lt;player&gt;</code></td>
+<td>Convert a player to an object</td>
+</tr>
+<tr>
+<td><code>@newpassword &lt;player&gt;=&lt;pass&gt;</code></td>
+<td>Reset a player’s password</td>
+</tr>
+<tr>
+<td><code>@chown &lt;object&gt;=&lt;player&gt;</code></td>
+<td>Transfer ownership of an object</td>
+</tr>
+<tr>
+<td><code>@moniker &lt;object&gt;=&lt;name&gt;</code></td>
+<td>Set an alternate display name</td>
+</tr>
+<tr>
+<td><code>@emit &lt;message&gt;</code></td>
+<td>Attributed room-wide message</td>
+</tr>
+<tr>
+<td><code>@remit &lt;message&gt;</code></td>
+<td>Unattributed room-wide message</td>
+</tr>
+<tr>
+<td><code>@pemit &lt;player&gt;=&lt;message&gt;</code></td>
+<td>Send directly to a player</td>
+</tr>
+<tr>
+<td><code>@cemit &lt;channel&gt;=&lt;message&gt;</code></td>
+<td>Unattributed channel broadcast</td>
+</tr>
+<tr>
+<td><code>@fsay &lt;object&gt;=&lt;message&gt;</code></td>
+<td>Force-speak as an owned object</td>
+</tr>
+<tr>
+<td><code>@fpose &lt;object&gt;=&lt;action&gt;</code></td>
+<td>Force-pose as an owned object</td>
+</tr>
+<tr>
+<td><code>@femit &lt;object&gt;=&lt;message&gt;</code></td>
+<td>Force-emit as an owned object</td>
+</tr>
+<tr>
+<td><code>@npemit &lt;player&gt;=&lt;message&gt;</code></td>
+<td>Send to a player with no prefix</td>
+</tr>
+<tr>
+<td><code>@motd</code></td>
+<td>Show the message of the day</td>
+</tr>
+<tr>
+<td><code>@motd/set &lt;text&gt;</code></td>
+<td>Set the message of the day</td>
+</tr>
+<tr>
+<td><code>@motd/clear</code></td>
+<td>Clear the message of the day</td>
+</tr>
+<tr>
+<td><code>@stats [/full]</code></td>
+<td>Show server statistics</td>
+</tr>
+<tr>
+<td><code>@search [&lt;flags&gt;]</code></td>
+<td>Search objects server-wide</td>
+</tr>
+<tr>
+<td><code>@quota &lt;player&gt;=&lt;num&gt;</code></td>
+<td>Set a player’s object quota</td>
+</tr>
+<tr>
+<td><code>@sweep</code></td>
+<td>Remove all non-player objects from a room</td>
+</tr>
+<tr>
+<td><code>@entrances [&lt;object&gt;]</code></td>
+<td>List all objects that link to an object</td>
+</tr>
+<tr>
+<td><code>@halt [&lt;player&gt;]</code></td>
+<td>Cancel queued actions (own or target’s if admin)</td>
+</tr>
+<tr>
+<td><code>@switch[/first] &lt;val&gt;=&lt;case&gt;,&lt;cmd&gt;,...</code></td>
+<td>Case-branch command execution</td>
+</tr>
+<tr>
+<td><code>@dolist &lt;list&gt;=&lt;action&gt;</code></td>
+<td>Iterate a space-delimited list; execute action per item (<code>##</code> = item, <code>#@</code> = index)</td>
+</tr>
+<tr>
+<td><code>@if &lt;expr&gt;=&lt;true&gt;[,&lt;false&gt;]</code></td>
+<td>Conditional execution</td>
+</tr>
+<tr>
+<td><code>@while &lt;expr&gt;=&lt;action&gt;</code></td>
+<td>Loop while expression is true</td>
+</tr>
+<tr>
+<td><code>@break</code></td>
+<td>Exit the current <code>@dolist</code> or <code>@while</code> loop</td>
+</tr>
+<tr>
+<td><code>@wait &lt;seconds&gt;=&lt;action&gt;</code></td>
+<td>Delay an action by N seconds</td>
+</tr>
+<tr>
+<td><code>@assert &lt;condition&gt;</code></td>
+<td>Abort trigger chain if condition is false</td>
+</tr>
+<tr>
+<td><code>@zone &lt;object&gt;=&lt;zone master&gt;</code></td>
+<td>Assign an object to a zone master</td>
+</tr>
+<tr>
+<td><code>@zone &lt;object&gt;=</code></td>
+<td>Clear zone assignment</td>
+</tr>
+<tr>
+<td><code>@function &lt;name&gt;=&lt;obj&gt;/&lt;attr&gt;</code></td>
+<td>Define a global softcode user function</td>
+</tr>
+<tr>
+<td><code>@cpattr &lt;src&gt;/&lt;attr&gt;=&lt;dst&gt;[/&lt;newname&gt;]</code></td>
+<td>Copy an attribute to another object</td>
+</tr>
+<tr>
+<td><code>@mvattr &lt;src&gt;/&lt;attr&gt;=&lt;dst&gt;[/&lt;newname&gt;]</code></td>
+<td>Move an attribute to another object</td>
+</tr>
+<tr>
+<td><code>@grep &lt;obj&gt;=&lt;pattern&gt;</code></td>
+<td>Search object attributes by name pattern</td>
+</tr>
+<tr>
+<td><code>@ps</code></td>
+<td>List all pending <code>@wait</code> jobs</td>
+</tr>
+<tr>
+<td><code>@drain &lt;obj&gt;</code></td>
+<td>Cancel all pending <code>@wait</code> jobs on an object</td>
+</tr>
+<tr>
+<td><code>@notify &lt;obj&gt;[/&lt;sem&gt;][=&lt;count&gt;]</code></td>
+<td>Signal a semaphore (<code>@wait/until</code>)</td>
+</tr>
+<tr>
+<td><code>@reboot</code></td>
+<td>Restart the server</td>
+</tr>
+<tr>
+<td><code>@shutdown</code></td>
+<td>Shut down the server</td>
+</tr>
+<tr>
+<td><code>@site &lt;key&gt;=&lt;value&gt;</code></td>
+<td>Set a server configuration value</td>
+</tr>
+<tr>
+<td><code>@resettoken &lt;player&gt;</code></td>
+<td>Generate a password-reset token for a player</td>
+</tr>
+<tr>
+<td><code>@chancreate &lt;name&gt;[=&lt;header&gt;]</code></td>
+<td>Create a channel</td>
+</tr>
+<tr>
+<td><code>@chandestroy &lt;name&gt;</code></td>
+<td>Destroy a channel</td>
+</tr>
+<tr>
+<td><code>@chanset &lt;name&gt;/&lt;prop&gt;=&lt;value&gt;</code></td>
+<td>Configure a channel</td>
+</tr>
+<tr>
+<td><code>+bbcreate &lt;name&gt;[=&lt;description&gt;]</code></td>
+<td>Create a bulletin board</td>
+</tr>
+<tr>
+<td><code>+bbdestroy &lt;board&gt;</code></td>
+<td>Destroy a bulletin board</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Plugin Commands</h2>
+<p>Commands provided by official plugins are documented in their respective repos.</p>
+<table>
+<thead>
+<tr>
+<th>Plugin</th>
+<th>Commands</th>
+<th>Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>jobs</strong></td>
+<td><code>+job</code>, <code>+jobs</code>, <code>+job/create</code>, etc.</td>
+<td><a href="https://github.com/UrsaMU/jobs-plugin#commands">UrsaMU/jobs-plugin</a></td>
+</tr>
+<tr>
+<td><strong>events</strong></td>
+<td><code>+event</code>, <code>+events</code></td>
+<td><a href="https://github.com/UrsaMU/events-plugin#commands">UrsaMU/events-plugin</a></td>
+</tr>
+<tr>
+<td><strong>discord</strong></td>
+<td>Bridge only — no in-game commands</td>
+<td><a href="https://github.com/UrsaMU/discord-plugin">UrsaMU/discord-plugin</a></td>
+</tr>
+</tbody>
+</table>
+
+      </article>
+
+      <!-- Prev / Next navigation -->
+      
+      
+      
+      
+      
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+      <nav class="page-nav" aria-label="Page navigation">
+        
+          <a href="/guides/cli/" class="page-nav-btn prev">
+            <span class="page-nav-label">← Previous</span>
+            <span class="page-nav-title">CLI Reference</span>
+          </a>
+        
+
+        
+          <a href="/guides/customization/" class="page-nav-btn next">
+            <span class="page-nav-label">Next →</span>
+            <span class="page-nav-title">Customization Guide</span>
+          </a>
+        
+      </nav>
+      
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div>
+        <strong style="color:var(--text-muted)">UrsaMU</strong>
+        &nbsp;—&nbsp;MIT License • © 2025
+      </div>
+      <div class="footer-links">
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
+        <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- RIGHT: TABLE OF CONTENTS (auto-built by JS) -->
+  <aside class="docs-toc" id="docsToc" aria-label="On this page">
+    <div class="toc-title">On this page</div>
+    <ul class="toc-list" id="tocList"></ul>
+  </aside>
+
+</div><!-- /docs-layout -->
+
+
+<!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  // ── Mobile sidebar toggle ──────────────────────────────────────────
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('docsSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar && sidebar.classList.add('open');
+    overlay && overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar && sidebar.classList.remove('open');
+    overlay && overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn && menuBtn.addEventListener('click', function() {
+    if (sidebar && sidebar.classList.contains('open')) closeSidebar();
+    else openSidebar();
+  });
+
+  overlay && overlay.addEventListener('click', closeSidebar);
+
+  // Close on resize past mobile breakpoint
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1024) closeSidebar();
+  });
+
+  // ── Auto table of contents ─────────────────────────────────────────
+  const tocList = document.getElementById('tocList');
+  const article = document.querySelector('article.prose');
+
+  if (tocList && article) {
+    const headings = article.querySelectorAll('h2, h3');
+
+    if (headings.length === 0) {
+      const tocEl = document.getElementById('docsToc');
+      if (tocEl) tocEl.style.display = 'none';
+    } else {
+      headings.forEach(function(h, i) {
+        // Ensure heading has an ID
+        if (!h.id) {
+          h.id = 'section-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-item' + (h.tagName === 'H3' ? ' toc-h3' : '');
+
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Highlight active section on scroll
+      const tocLinks = tocList.querySelectorAll('a');
+
+      function updateToc() {
+        let activeIndex = 0;
+        const scrollTop = window.scrollY + 80;
+
+        headings.forEach(function(h, i) {
+          if (h.offsetTop <= scrollTop) activeIndex = i;
+        });
+
+        tocList.querySelectorAll('.toc-item').forEach(function(item, i) {
+          item.classList.toggle('active', i === activeIndex);
+        });
+      }
+
+      window.addEventListener('scroll', updateToc, { passive: true });
+      updateToc();
+    }
+  }
+
+  // ── Sidebar search (client-side filter) ───────────────────────────
+  const searchInput = document.getElementById('sidebarSearch');
+  const sidebarLinks = sidebar ? sidebar.querySelectorAll('.sidebar-link') : [];
+
+  if (searchInput && sidebarLinks.length) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+
+      sidebarLinks.forEach(function(link) {
+        const text = link.textContent.toLowerCase();
+        const section = link.closest('.sidebar-section');
+        if (!query) {
+          link.style.display = '';
+        } else {
+          link.style.display = text.includes(query) ? '' : 'none';
+        }
+      });
+
+      // Hide empty section titles
+      if (sidebar) {
+        sidebar.querySelectorAll('.sidebar-section').forEach(function(sec) {
+          const visibleLinks = sec.querySelectorAll('.sidebar-link:not([style*="none"])');
+          sec.style.display = (!query || visibleLinks.length > 0) ? '' : 'none';
+        });
+      }
+    });
+  }
+
+  // ── Scroll active sidebar link into view ───────────────────────────
+  const activeLink = sidebar && sidebar.querySelector('.sidebar-link.active');
+  if (activeLink) {
+    activeLink.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+})();
+</script>
+
+
+
+</body></html>

@@ -7,7 +7,15 @@ import {
   getUnreadKeys, getUnreadCount, isMember,
   getAllMessageKeys,
 } from "../tracking.ts";
-import { bbDate, formatPost, header, divider, footer } from "../display.ts";
+import {
+  bbDate,
+  formatPost,
+  formatPostResolved,
+  header,
+  divider,
+  footer,
+} from "../display.ts";
+import { trueNameFromId } from "../author.ts";
 
 // ─── +bbread ─────────────────────────────────────────────────────────────────
 
@@ -120,15 +128,26 @@ async function doListPosts(u: IUrsamuSDK, boardStr: string): Promise<void> {
     divider(),
   ];
   for (const post of bPosts) {
-    const author  = board.anonymous ? "Anonymous" : post.authorName;
-    const subj    = (post.sticky ? "[S] " : "") + post.subject.slice(0, 40);
-    const msgNum  = `${board.num}/${post.num}`;
-    lines.push(`%cc${msgNum.padEnd(6)}%cn${subj.padEnd(43)}${bbDate(post.createdAt).padEnd(13)}${author}`);
-    for (let i = 0; i < (post.replies ?? []).length; i++) {
-      const r      = post.replies[i];
-      const isLast = i === post.replies.length - 1;
-      const conn   = isLast ? "`" : "|";
-      lines.push(`  ${conn}  %cc${board.num}/${post.num}.${r.num}%cn  ${r.subject.slice(0, 38).padEnd(38)}  ${bbDate(r.createdAt).padEnd(13)}${board.anonymous ? "Anonymous" : r.authorName}`);
+    const author = board.anonymous ? "Anonymous" : post.authorName;
+    const subj = (post.sticky ? "[S] " : "") + post.subject.slice(0, 40);
+    const msgNum = `${board.num}/${post.num}`;
+    lines.push(
+      `%cc${msgNum.padEnd(6)}%cn${subj.padEnd(43)}` +
+        `${bbDate(post.createdAt).padEnd(13)}${author}`,
+    );
+    const replies = post.replies ?? [];
+    for (let i = 0; i < replies.length; i++) {
+      const r = replies[i]!;
+      const isLast = i === replies.length - 1;
+      const conn = isLast ? "`" : "|";
+      const rAuthor = board.anonymous
+        ? "Anonymous"
+        : await trueNameFromId(r.authorId, r.authorName);
+      lines.push(
+        `  ${conn}  %cc${board.num}/${post.num}.${r.num}%cn  ` +
+          `${r.subject.slice(0, 38).padEnd(38)}  ` +
+          `${bbDate(r.createdAt).padEnd(13)}${rAuthor}`,
+      );
     }
   }
   lines.push(footer());
@@ -151,9 +170,11 @@ async function doReadPosts(u: IUrsamuSDK, boardStr: string, postSpec: string): P
     if (!post) { u.send("%ch>BBS:%cn Post not found."); return; }
     const output = [formatPost(board, post)];
     await markRead(u, board.num, String(postNum));
-    for (const reply of (post.replies ?? []).sort((a, b) => a.num - b.num)) {
+    for (
+      const reply of (post.replies ?? []).sort((a, b) => a.num - b.num)
+    ) {
       const rk = `${postNum}.${reply.num}`;
-      output.push(formatPost(board, post, reply, rk));
+      output.push(await formatPostResolved(board, post, reply, rk));
       await markRead(u, board.num, rk);
     }
     u.send(output.join("\n\n"));
@@ -163,12 +184,19 @@ async function doReadPosts(u: IUrsamuSDK, boardStr: string, postSpec: string): P
   // Unread mode
   if (postSpec.trim().toLowerCase() === "u") {
     const unread = await getUnreadKeys(u, board.num);
-    if (!unread.length) { u.send(`%ch>BBS:%cn No unread messages on ${board.title}.`); return; }
+    if (!unread.length) {
+      u.send(
+        `%ch>BBS:%cn No unread messages on ${board.title}.`,
+      );
+      return;
+    }
     const output: string[] = [];
     for (const key of unread) {
       const { post, reply } = resolveKey(bPosts, key);
       if (!post) continue;
-      output.push(formatPost(board, post, reply, key));
+      output.push(
+        await formatPostResolved(board, post, reply, key),
+      );
       await markRead(u, board.num, key);
     }
     u.send(output.join("\n\n"));
@@ -176,13 +204,24 @@ async function doReadPosts(u: IUrsamuSDK, boardStr: string, postSpec: string): P
   }
 
   // Reply: 3.2
-  if (postSpec.includes(".") && !postSpec.includes(",") && !postSpec.includes("-")) {
+  if (
+    postSpec.includes(".") &&
+    !postSpec.includes(",") &&
+    !postSpec.includes("-")
+  ) {
     const [pStr, rStr] = postSpec.split(".", 2);
-    const post  = await getPost(board.num, parseInt(pStr, 10));
-    const reply = post ? (post.replies ?? []).find((r) => r.num === parseInt(rStr, 10)) : undefined;
-    if (!post || !reply) { u.send("%ch>BBS:%cn Message not found."); return; }
+    const post = await getPost(board.num, parseInt(pStr, 10));
+    const reply = post
+      ? (post.replies ?? []).find(
+        (r) => r.num === parseInt(rStr, 10),
+      )
+      : undefined;
+    if (!post || !reply) {
+      u.send("%ch>BBS:%cn Message not found.");
+      return;
+    }
     const key = `${post.num}.${reply.num}`;
-    u.send(formatPost(board, post, reply, key));
+    u.send(await formatPostResolved(board, post, reply, key));
     await markRead(u, board.num, key);
     return;
   }
@@ -229,7 +268,9 @@ Examples:
       const key     = unread[0];
       const { post, reply } = resolveKey(bPosts, key);
       if (!post) continue;
-      u.send(formatPost(board, post, reply, key));
+      u.send(
+        await formatPostResolved(board, post, reply, key),
+      );
       await markRead(u, board.num, key);
       return;
     }

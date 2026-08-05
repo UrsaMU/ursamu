@@ -1,7 +1,10 @@
-// DESCFORMAT: wrap + fae dual desc.
+// DESCFORMAT: wrap + fae dual desc + optional +views banner.
 
 import type { IUrsamuSDK, IDBObj } from "@ursamu/ursamu";
 import { resolveLookDesc } from "./perception.ts";
+import { visibleViews } from "../commands/views_lib.ts";
+
+const WIDTH = 78;
 
 const visualLen = (s: string): number =>
   s.replace(/<#[0-9a-fA-F]{6}>/g, "")
@@ -58,19 +61,38 @@ function wordWrap(text: string, width: number): string {
   return out.join("\n");
 }
 
-/** DESCFORMAT: fae sight prefers FAEDESC; wrap + %r. */
-export const cofdDescformatHandler = (
+// Centered under desc when any view is visible to the looker.
+const VIEWS_BANNER =
+  "%cg<%cn %ch%cy+views%cn Available %cg>%cn";
+
+/** DESCFORMAT: fae sight prefers FAEDESC; wrap; trailing blank; views. */
+export const cofdDescformatHandler = async (
   u: IUrsamuSDK,
   target: IDBObj,
   desc: string,
 ): Promise<string | null> => {
   const body = resolveLookDesc(u.me, target, desc ?? "");
-  if (!body) return Promise.resolve(null);
+  if (!body) return null;
   const wrapped = wordWrap(body, 77);
-  const indented = wrapped
+  let out = wrapped
     .split("\n")
     .map((line) => (line.trim() ? " " + line : ""))
     .join("\n");
-  // Real newlines only — trailing %r re-breaks after wrap.
-  return Promise.resolve(indented);
+
+  // Blank line after description before contents / views banner.
+  out += "\n";
+
+  try {
+    const seen = await visibleViews(u, target as never);
+    if (seen.length > 0) {
+      const line = u.util.center
+        ? u.util.center(VIEWS_BANNER, WIDTH)
+        : VIEWS_BANNER;
+      out += "\n" + line + "\n";
+    }
+  } catch {
+    /* views optional; never break look */
+  }
+
+  return out;
 };

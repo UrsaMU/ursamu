@@ -25,7 +25,7 @@ To disable auto-install for a specific plugin, remove its entry from the manifes
 |--------|------|-----------|-------------|
 | **channel** | [UrsaMU/channel-plugin](https://github.com/UrsaMU/channel-plugin) | `>=1.9.27` | Channel system — alias dispatch, auto-join, `@chancreate`/`@chandestroy`/`@chanset`, message history |
 | **discord** | [UrsaMU/discord-plugin](https://github.com/UrsaMU/discord-plugin) | `>=1.9.0` | Webhook-based Discord integration — channel bridging, presence, chargen events |
-| **jobs** | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin) | `>=1.9.0` | Anomaly-style jobs/request system — player requests, staff commands, REST API |
+| **jobs** | [UrsaMU/jobs-plugin](https://github.com/UrsaMU/jobs-plugin) | `>=1.9.0` | Jobs and request system — player requests, staff commands, REST API |
 | **events** | [UrsaMU/events-plugin](https://github.com/UrsaMU/events-plugin) | `>=1.9.2` | In-game event calendar with RSVP tracking and REST API |
 | **bbs** | [UrsaMU/bbs-plugin](https://github.com/UrsaMU/bbs-plugin) | `>=1.9.0` | Myrddin-style bulletin boards — threading, categories, sticky posts, Discord webhooks |
 | **wiki** | [UrsaMU/wiki-plugin](https://github.com/UrsaMU/wiki-plugin) | `>=1.9.0` | File-based markdown wiki — pages, search, history, backlinks |
@@ -61,7 +61,7 @@ Each `deps[]` entry may include an optional `version` semver range (e.g. `"^1.2.
 Or use the CLI:
 
 ```bash
-deno run -A jsr:@ursamu/mush/cli plugin install https://github.com/example/my-plugin
+deno run -A jsr:@ursamu/cli@0.1.2/plugin install https://github.com/example/my-plugin
 ```
 
 See [Building a Plugin](./first-plugin.md) to publish your own.

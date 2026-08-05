@@ -9,6 +9,7 @@ import {
 } from "../stats/index.ts";
 import { COFD_SKILLS } from "../dictionary/index.ts";
 import { formatSheet } from "../sheet/index.ts";
+import { buildSheetWebLayout } from "../sheet/web-layout.ts";
 import type { CofdCgState } from "../chargen/state.ts";
 import { syncSightFlags } from "../support/sight.ts";
 
@@ -70,6 +71,16 @@ export async function sheetExec(u: IUrsamuSDK) {
   }
 
   const { sheet, mode } = resolved;
+  const name = u.util.displayName(target, u.me);
+
+  // Web /play: structured layout (dots, health boxes, lists)
+  const ct = (u as { clientType?: string }).clientType;
+  if (ct === "web" && u.ui?.layout) {
+    const lay = buildSheetWebLayout(name, sheet, { mode });
+    u.ui.layout(lay);
+    return;
+  }
+
   if (mode === "draft") {
     const stage = (target.state?.cofd_cg as CofdCgState | undefined)
       ?.stage;
@@ -86,7 +97,7 @@ export async function sheetExec(u: IUrsamuSDK) {
   }
 
   const formatted = await formatSheet(
-    u.util.displayName(target, u.me),
+    name,
     target.id,
     sheet,
     undefined,

@@ -5,6 +5,8 @@ import {
   COFD_SKILLS,
   COFD_MERITS,
   parseMeritRef,
+  findKith,
+  favoredRegaliaForSeeming,
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
 import { normalizeAnimalsField } from "../form/animals.ts";
@@ -130,9 +132,66 @@ export function setTrait(sheet: CofdSheet, trait: string, value: string | number
     }
     if (valStr === "Not Set" || valStr === "") {
       delete sheet.customFields[key];
-    } else {
-      sheet.customFields[key] = valStr;
+      return sheet;
     }
+
+    // Second favored cannot equal seeming's built-in favored.
+    if (key === "favored") {
+      const seem = sheet.customFields.seeming ?? "";
+      const seemFav = favoredRegaliaForSeeming(seem);
+      if (
+        seemFav &&
+        seemFav.toLowerCase() === valStr.toLowerCase()
+      ) {
+        throw new Error(
+          `Second favored Regalia must differ from your ` +
+            `seeming's favored Regalia (${seemFav}).`,
+        );
+      }
+    }
+
+    sheet.customFields[key] = valStr;
+
+    // Seeming ↔ kith / favored: keep related picks consistent.
+    if (key === "seeming") {
+      const kith = sheet.customFields.kith;
+      if (kith) {
+        const k = findKith(kith);
+        if (
+          !k ||
+          k.seeming.toLowerCase() !== valStr.toLowerCase()
+        ) {
+          delete sheet.customFields.kith;
+        }
+      }
+      const seemFav = favoredRegaliaForSeeming(valStr);
+      const curFav = sheet.customFields.favored;
+      if (
+        seemFav &&
+        curFav &&
+        seemFav.toLowerCase() === curFav.toLowerCase()
+      ) {
+        delete sheet.customFields.favored;
+      }
+    }
+
+    // Kith implies seeming so both can be chosen in either order.
+    if (key === "kith") {
+      const k = findKith(valStr);
+      if (k) {
+        sheet.customFields.seeming = k.seeming;
+        const seemFav = favoredRegaliaForSeeming(k.seeming);
+        const curFav = sheet.customFields.favored;
+        if (
+          seemFav &&
+          curFav &&
+          seemFav.toLowerCase() === curFav.toLowerCase()
+        ) {
+          delete sheet.customFields.favored;
+        }
+      }
+    }
+
     return sheet;
   }
 

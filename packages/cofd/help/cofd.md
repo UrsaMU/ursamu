@@ -14,6 +14,7 @@ TOPIC GROUPS
   help reference     Virtues, Vices, merits.
   help templates     Mortal, Changeling fields.
   help changeling    Full CtL command map.
+  help time          In-game clock, weather, moon.
 
 CHANGELING (Lost)
   help shift · contract · clash · bedlam · harvest

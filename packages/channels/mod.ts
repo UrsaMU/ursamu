@@ -9,41 +9,97 @@
  */
 
 import { DBO, gameHooks, getConfig } from "@ursamu/mush";
-import { addMiddleware } from "@ursamu/core";
+import { addMiddleware, sessions } from "@ursamu/core";
 import { registerHelpDir } from "@ursamu/help-plugin";
 import type { IPlugin, SessionEvent } from "@ursamu/mush";
 import type { IMiddlewareFn } from "@ursamu/core";
 
 import { matchChannel } from "./src/middleware/matchChannel.ts";
 import { joinChans } from "./src/middleware/joinChans.ts";
+import { announcePresence } from "./src/announce.ts";
 import type { IChannel } from "./src/types.ts";
+import { registerPluginRoute } from "@ursamu/mush";
+import { channelsRouteHandler } from "./src/routes.ts";
+import {
+  registerChannelsStaffNav,
+  unregisterChannelsStaffNav,
+} from "./src/staff-nav-bridge.ts";
+
+/** JWT soft-reboot restore — telnet opens WS with reconnect=true. */
+function isReauthSession(socketId?: string): boolean {
+  if (!socketId) return false;
+  const s = sessions.get(socketId) as
+    | { meta?: Record<string, unknown> }
+    | undefined;
+  return s?.meta?.reconnect === true;
+}
 
 export * from "./src/commands/verbs.ts";
 export { matchChannel } from "./src/middleware/matchChannel.ts";
 export { joinChans } from "./src/middleware/joinChans.ts";
 export { channelEvents } from "./src/channel-events.ts";
+export {
+  announcePresence,
+  announceChannelMember,
+  channelAnnounces,
+} from "./src/announce.ts";
 export type { IChannel, IChanEntry, IChanMessage } from "./src/types.ts";
+
+type ChanDefault = {
+  name: string;
+  alias: string;
+  lock?: string;
+  announce?: boolean;
+};
 
 const onLogin = async ({
   actorId,
   socketId,
+  reason,
 }: SessionEvent): Promise<void> => {
   if (!socketId || !actorId) return;
   await joinChans(actorId, socketId).catch((e: unknown) =>
     console.error("[channels] joinChans error:", e)
+  );
+  // Fresh connect only. Skip JWT soft-reboot restore (reason and/or
+  // session.meta.reconnect) — no Public "has connected" spam.
+  if (reason === "reauth" || isReauthSession(socketId)) return;
+  if (reason != null && reason !== "login") return;
+  await announcePresence(actorId, "connect").catch((e: unknown) =>
+    console.error("[channels] announce connect:", e)
+  );
+};
+
+const onLogout = async ({
+  actorId,
+  reason,
+}: SessionEvent): Promise<void> => {
+  if (!actorId) return;
+  // Main exiting for @restart — no disconnect spam.
+  if (reason === "reboot" || reason === "reauth") return;
+  await announcePresence(actorId, "disconnect").catch((e: unknown) =>
+    console.error("[channels] announce disconnect:", e)
   );
 };
 
 const onReady = async (): Promise<void> => {
   const dbName = getConfig<string>("plugins.channels.db", "server.chans");
   const chans = new DBO<IChannel>(dbName);
-  const defaults = getConfig<Array<{
-    name: string;
-    alias: string;
-    lock?: string;
-  }>>("plugins.channels.defaults") || [
-    { name: "Public", alias: "pub", lock: "connected" },
-    { name: "Admin", alias: "ad", lock: "connected admin+" },
+  const defaults = getConfig<ChanDefault[]>(
+    "plugins.channels.defaults",
+  ) || [
+    {
+      name: "Public",
+      alias: "pub",
+      lock: "connected",
+      announce: true,
+    },
+    {
+      name: "Admin",
+      alias: "ad",
+      lock: "connected admin+",
+      announce: false,
+    },
   ];
 
   for (const def of defaults) {
@@ -61,6 +117,7 @@ const onReady = async (): Promise<void> => {
         lock: def.lock || "",
         hidden: false,
         owner: "",
+        announce: def.announce === true,
       });
       console.log(`[channels] Seeded default channel: ${def.name}`);
       continue;
@@ -80,6 +137,14 @@ const onReady = async (): Promise<void> => {
     ) {
       patch.lock = def.lock;
     }
+    // Apply announce from config when the field is still unset.
+    if (
+      def.announce === true &&
+      existing.announce !== true &&
+      existing.announce !== false
+    ) {
+      patch.announce = true;
+    }
     if (Object.keys(patch).length) {
       await chans.modify({ id: existing.id }, "$set", patch);
       console.log(
@@ -95,11 +160,15 @@ const channelMiddleware: IMiddlewareFn = async (ctx, next) => {
   await next();
 };
 
+const onStaffReady = (): void => {
+  void registerChannelsStaffNav();
+};
+
 export const channelsPlugin: IPlugin = {
   name: "@ursamu/channels",
-  version: "0.1.0",
+  version: "1.1.0",
   description:
-    "Channel system — chat channels with aliases, history, and admin tools.",
+    "Channel system: chat, aliases, history, staff REST/UI.",
 
   init: () => {
     import("./src/commands/verbs.ts");
@@ -107,16 +176,26 @@ export const channelsPlugin: IPlugin = {
       new URL("./help", import.meta.url),
       "channels",
     );
+    registerPluginRoute(
+      "/api/v1/channels",
+      channelsRouteHandler,
+    );
     gameHooks.on("player:login", onLogin);
+    gameHooks.on("player:logout", onLogout);
     gameHooks.on("engine:ready", onReady);
+    gameHooks.on("engine:ready", onStaffReady);
     addMiddleware(channelMiddleware);
+    void registerChannelsStaffNav();
     return true;
   },
 
   remove: () => {
     gameHooks.off("player:login", onLogin);
+    gameHooks.off("player:logout", onLogout);
     gameHooks.off("engine:ready", onReady);
-    // addMiddleware is not reversible — restart required to fully remove.
+    gameHooks.off("engine:ready", onStaffReady);
+    void unregisterChannelsStaffNav();
+    // addMiddleware is not reversible — restart required.
   },
 };
 

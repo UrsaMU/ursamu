@@ -4,34 +4,32 @@ import { dbojs } from "@ursamu/mush";
 import { jobs, getNextJobNumber } from "./db.ts";
 import { jobHooks } from "./hooks.ts";
 import type { IJob, IJobComment } from "./types.ts";
+import {
+  canViewJob,
+  flagSetFromRaw,
+  isStaffFlagSet,
+  presentJob,
+} from "./rest-auth.ts";
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
 
 /** Convenience helper — wraps `data` in a JSON response with `status` (default 200). */
 function ok(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: JSON_HEADERS,
+  });
 }
 
 /**
  * Returns true when `userId` corresponds to a player with an admin, wizard, or
- * superuser flag. Uses a `Set` split on the stored flag string to prevent
- * substring bypass attacks (e.g. `"notadmin"` must not match `"admin"`).
+ * superuser flag. Uses a Set of exact flag tokens (no substring matches).
  */
 async function isStaffUser(userId: string | null): Promise<boolean> {
   if (!userId) return false;
   const player = await dbojs.queryOne({ id: userId });
   if (!player) return false;
-  // Split flag string into a Set — prevents substring bypass
-  const flagSet = new Set((player.flags || "").split(" ").filter(Boolean));
-  return flagSet.has("admin") || flagSet.has("wizard") || flagSet.has("superuser");
-}
-
-/**
- * Returns a shallow copy of `job` with all `staffOnly` comments removed,
- * safe to send in REST responses to non-staff callers.
- */
-function stripStaffComments(job: IJob): IJob {
-  return { ...job, comments: job.comments.filter((c) => !c.staffOnly) };
+  return isStaffFlagSet(flagSetFromRaw(player.flags as unknown));
 }
 
 /**
@@ -52,58 +50,58 @@ async function resolveJob(idParam: string): Promise<IJob | null> {
  *
  * ---
  * GET /api/v1/jobs
- *   Auth:    Bearer required
- *   Params:  status, category, priority, assignedTo, submittedBy, limit (max 200), offset
- *   200:     IJob[]  (staff: all matching; players: own only, staffOnly comments stripped)
- *   401:     { error: "Unauthorized" }
+ * Auth: Bearer required
+ * Params: status, category, priority, assignedTo, submittedBy, limit (max 200), offset
+ * 200: IJob[] (staff: all matching; players: own only, staffOnly comments stripped)
+ * 401: { error: "Unauthorized" }
  *
  * POST /api/v1/jobs
- *   Auth:    Bearer required
- *   Body:    { title: string, description: string, category?: string,
- *              priority?: string, staffOnly?: boolean }
- *   201:     IJob  (newly created job)
- *   400:     { error: "title and description are required" }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden: staffOnly requires staff privileges" }
+ * Auth: Bearer required
+ * Body: { title: string, description: string, category?: string,
+ * priority?: string, staffOnly?: boolean }
+ * 201: IJob (newly created job)
+ * 400: { error: "title and description are required" }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden: staffOnly requires staff privileges" }
  *
  * GET /api/v1/jobs/stats
- *   Auth:    Bearer required (staff only)
- *   200:     { total, byStatus, byCategory, byPriority, openAssigned, openUnassigned }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
+ * Auth: Bearer required (staff only)
+ * 200: { total, byStatus, byCategory, byPriority, openAssigned, openUnassigned }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
  *
  * GET /api/v1/jobs/:id
- *   Auth:    Bearer required
- *   :id:     job number (e.g. "5") or UUID (e.g. "job-5")
- *   200:     IJob  (staffOnly comments stripped for non-staff)
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
- *   404:     { error: "Not found" }
+ * Auth: Bearer required
+ * :id: job number (e.g. "5") or UUID (e.g. "job-5")
+ * 200: IJob (staffOnly comments stripped for non-staff)
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
+ * 404: { error: "Not found" }
  *
  * PATCH /api/v1/jobs/:id
- *   Auth:    Bearer required (staff only)
- *   Body:    Partial<{ status, priority, assignedTo, title, description }>
- *   200:     IJob  (updated job)
- *   400:     { error: "Invalid JSON body" }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
- *   404:     { error: "Not found" }
+ * Auth: Bearer required (staff only)
+ * Body: Partial<{ status, priority, assignedTo, title, description }>
+ * 200: IJob (updated job)
+ * 400: { error: "Invalid JSON body" }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
+ * 404: { error: "Not found" }
  *
  * DELETE /api/v1/jobs/:id
- *   Auth:    Bearer required (staff only)
- *   204:     { deleted: true }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
- *   404:     { error: "Not found" }
+ * Auth: Bearer required (staff only)
+ * 204: { deleted: true }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
+ * 404: { error: "Not found" }
  *
  * POST /api/v1/jobs/:id/comment
- *   Auth:    Bearer required
- *   Body:    { text: string, staffOnly?: boolean }
- *   201:     IJobComment  (the newly created comment)
- *   400:     { error: "text is required" }
- *   401:     { error: "Unauthorized" }
- *   403:     { error: "Forbidden" }
- *   404:     { error: "Not found" }
+ * Auth: Bearer required
+ * Body: { text: string, staffOnly?: boolean }
+ * 201: IJobComment (the newly created comment)
+ * 400: { error: "text is required" }
+ * 401: { error: "Unauthorized" }
+ * 403: { error: "Forbidden" }
+ * 404: { error: "Not found" }
  * ---
  *
  * Auth: Bearer JWT required (userId supplied by engine router middleware).
@@ -139,15 +137,20 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
     const limit  = Math.min(parseInt(params.get("limit")  || "50", 10), 200);
     const offset = Math.max(parseInt(params.get("offset") || "0",  10), 0);
     let all = await jobs.find({});
-    all = all.filter((j) => staff ? true : !j.staffOnly && j.submittedBy === userId);
-    const fs = params.get("status");      if (fs)  all = all.filter((j) => j.status      === fs);
-    const fc = params.get("category");    if (fc)  all = all.filter((j) => j.category    === fc);
-    const fp = params.get("priority");    if (fp)  all = all.filter((j) => j.priority    === fp);
-    const fa = params.get("assignedTo");  if (fa)  all = all.filter((j) => j.assignedTo  === fa);
-    const fb = params.get("submittedBy"); if (fb)  all = all.filter((j) => j.submittedBy === fb);
+    all = all.filter((j) => canViewJob(j, userId, staff));
+    const fs = params.get("status");
+    if (fs) all = all.filter((j) => j.status === fs);
+    const fc = params.get("category");
+    if (fc) all = all.filter((j) => j.category === fc);
+    const fp = params.get("priority");
+    if (fp) all = all.filter((j) => j.priority === fp);
+    const fa = params.get("assignedTo");
+    if (fa) all = all.filter((j) => j.assignedTo === fa);
+    const fb = params.get("submittedBy");
+    if (fb) all = all.filter((j) => j.submittedBy === fb);
     all.sort((a, b) => b.number - a.number);
     const page = all.slice(offset, offset + limit);
-    return ok(staff ? page : page.map(stripStaffComments));
+    return ok(page.map((j) => presentJob(j, staff)));
   }
 
   if (path === "/api/v1/jobs" && method === "POST") {
@@ -188,9 +191,10 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
     const staff = await isStaffUser(userId);
     const job = await resolveJob(idParam);
     if (!job) return ok({ error: "Not found" }, 404);
-    if (job.staffOnly && !staff) return ok({ error: "Forbidden" }, 403);
-    if (!staff && job.submittedBy !== userId) return ok({ error: "Forbidden" }, 403);
-    return ok(staff ? job : stripStaffComments(job));
+    if (!canViewJob(job, userId, staff)) {
+      return ok({ error: "Forbidden" }, 403);
+    }
+    return ok(presentJob(job, staff));
   }
 
   if (!subRoute && method === "PATCH") {
@@ -235,8 +239,9 @@ export async function jobsRouteHandler(req: Request, userId: string | null): Pro
     const staff = await isStaffUser(userId);
     const job = await resolveJob(idParam);
     if (!job) return ok({ error: "Not found" }, 404);
-    if (job.staffOnly && !staff) return ok({ error: "Forbidden" }, 403);
-    if (!staff && job.submittedBy !== userId) return ok({ error: "Forbidden" }, 403);
+    if (!canViewJob(job, userId, staff)) {
+      return ok({ error: "Forbidden" }, 403);
+    }
     let body: Record<string, unknown>;
     try { body = await req.json(); } catch { return ok({ error: "Invalid JSON body" }, 400); }
     const text      = typeof body.text === "string" ? body.text.trim() : "";

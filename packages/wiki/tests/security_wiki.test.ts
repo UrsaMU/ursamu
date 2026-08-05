@@ -142,9 +142,9 @@ describe("readSnapshot — timestamp path traversal", () => {
 // ─── 5. readLock validation ───────────────────────────────────────────────────
 
 describe("isValidReadLock — lock bypass prevention", () => {
-  it("EXPLOIT: arbitrary string is rejected", () => {
-    assertEquals(isValidReadLock("public"), false);
+  it("EXPLOIT: arbitrary open aliases are rejected", () => {
     assertEquals(isValidReadLock("everyone"), false);
+    assertEquals(isValidReadLock("open"), false);
     assertEquals(isValidReadLock(""), false);
   });
 
@@ -153,9 +153,14 @@ describe("isValidReadLock — lock bypass prevention", () => {
   });
 
   it("PATCH: valid locks are accepted", () => {
+    assertEquals(isValidReadLock("public"), true);
     assertEquals(isValidReadLock("connected"), true);
     assertEquals(isValidReadLock("admin"), true);
     assertEquals(isValidReadLock("staff"), true);
     assertEquals(isValidReadLock("faction:abc123"), true);
+  });
+
+  it("PATCH: bare faction: without id is rejected", () => {
+    assertEquals(isValidReadLock("faction:"), false);
   });
 });

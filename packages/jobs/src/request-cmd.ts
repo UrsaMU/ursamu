@@ -21,7 +21,7 @@ function callerName(u: IUrsamuSDK): string {
  * Sends a formatted view of a single job to the calling player.
  * Only published comments are shown (staff-only comments are hidden).
  *
- * @param u   UrsaMU SDK context — used for `u.send()` and formatting helpers.
+ * @param u UrsaMU SDK context — used for `u.send()` and formatting helpers.
  * @param job The job to display.
  */
 function showRequest(u: IUrsamuSDK, job: IJob): void {
@@ -227,16 +227,40 @@ Examples:
 
 addCmd({
   name: "+myjobs",
-  pattern: /^\+myjobs?\s*(.*)$/i,
+  pattern: /^\+myjobs?(?:\/(\S+))?\s*(.*)$/i,
   lock: "connected",
-  help: `+myjobs  — List your open requests (alias for +requests). Superusers see all jobs.
+  help: `+myjobs  — List your open requests.
++myjobs/nospam [<#>] — Toggle auto-mail for job updates.
 
 Examples:
-  +myjobs   Show your open requests (same as +requests).
-  +myjobs   Superusers: shows all open jobs across all players.`,
+  +myjobs
+  +myjobs/nospam
+  +myjobs/nospam 12`,
   exec: async (u: IUrsamuSDK) => {
+    const sw = (u.cmd.args[0] ?? "").toLowerCase().trim();
+    const arg = (u.cmd.args[1] ?? "").trim();
+    if (sw === "nospam") {
+      const { getJobsPrefs, setJobsPrefs, toggleNum } =
+        await import("./prefs.ts");
+      const p = getJobsPrefs(u);
+      if (!arg) {
+        await setJobsPrefs(u, { nospam: !p.nospam });
+        u.send(`>JOBS: nospam ${!p.nospam ? "ON" : "OFF"}.`);
+        return;
+      }
+      const n = parseInt(arg, 10);
+      if (isNaN(n)) {
+        u.send("Usage: +myjobs/nospam [<#>]");
+        return;
+      }
+      await setJobsPrefs(u, {
+        nospamJobs: toggleNum(p.nospamJobs, n),
+      });
+      u.send(`>JOBS: Toggled nospam on job #${n}.`);
+      return;
+    }
     const all = await jobs.find({});
-    if (u.me.flags.has("superuser")) {
+    if (u.me.flags.has("superuser") && sw !== "mine") {
       if (all.length === 0) { u.send(">JOBS: No open jobs."); return; }
       all.sort((a, b) => a.number - b.number);
       u.send(formatJobList(all, "POP Jobs").join("\n"));

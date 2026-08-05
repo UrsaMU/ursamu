@@ -50,8 +50,7 @@ Deno.test("Wyrd - Glamour spend limit checked in combat", OPTS, async () => {
   // Try to invoke 2-Glamour contract in combat (limit is 1 for Wyrd 1)
   await contractExec(u);
 
-  const updated = store.get("2")!;
-  const sheet = updated.state.cofd as ReturnType<typeof changelingSheet>;
+  const sheet = u.me.state.cofd as any;
   assertEquals(sheet.energyCurrent, 10); // Glamour NOT deducted
   assert(u._sent.some((m) => m.includes("Your turn spend limit is 1")));
 

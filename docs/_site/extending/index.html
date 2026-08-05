@@ -3,11 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> | UrsaMU Documentation</title>
-  <meta name="description" content="Learn how to extend UrsaMU with custom functionality">
-  <link rel="stylesheet" href="/ursamu/styles.css">
+  <meta name="description" content="Extension points exposed by the UrsaMU engine">
+  <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/extending/">
+<meta property="og:url" content="http://localhost:3001/extending/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/ursamu/" class="site-logo">
+  <a href="/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/guides/" class="header-nav-link">
       Guides
     </a>
     
     
     
-    <a href="/ursamu/api/" class="header-nav-link">
+    <a href="/api/" class="header-nav-link">
       API
     </a>
     
     
     
-    <a href="/ursamu/plugins/" class="header-nav-link">
+    <a href="/plugins/" class="header-nav-link">
       Plugins
     </a>
     
     
     
-    <a href="/ursamu/development/" class="header-nav-link">
+    <a href="/development/" class="header-nav-link">
       Development
     </a>
     
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link">
+      <a href="/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,35 +110,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/ursamu/guides/installation/" class="sidebar-link">
+      <a href="/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
+      <a href="/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
+      <a href="/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/ursamu/guides/customization/" class="sidebar-link">
+      <a href="/guides/customization/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+      <a href="/guides/scripting/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
-      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+      <a href="/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -150,7 +150,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/ursamu/configuration/" class="sidebar-link">
+      <a href="/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +162,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/ursamu/api/" class="sidebar-link">
+      <a href="/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/ursamu/api/core/" class="sidebar-link">
+      <a href="/api/core/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +178,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/ursamu/plugins/" class="sidebar-link">
+      <a href="/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/ursamu/plugins/basics/" class="sidebar-link">
+      <a href="/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
+      <a href="/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/ursamu/plugins/commands/" class="sidebar-link">
+      <a href="/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
+      <a href="/plugins/hooks/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/ursamu/plugins/database/" class="sidebar-link">
+      <a href="/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
+      <a href="/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
+      <a href="/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +218,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/ursamu/development/" class="sidebar-link">
+      <a href="/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/ursamu/development/contributing/" class="sidebar-link">
+      <a href="/development/contributing/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/ursamu/extending/" class="sidebar-link active">
+      <a href="/extending/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/ursamu/child-games/" class="sidebar-link">
+      <a href="/child-games/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,7 +259,7 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/ursamu/">Home</a>
+        <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
         <span class="breadcrumbs-current"></span>
       </nav>
@@ -268,355 +268,129 @@
       <!-- Page content -->
       <article class="prose">
         <h1>Extending UrsaMU</h1>
-<p>This guide explains how to extend UrsaMU with custom functionality beyond what plugins provide.</p>
-<h2>Overview</h2>
-<p>UrsaMU is designed to be highly extensible. While plugins are the primary way to add functionality, there are several other extension points that allow you to customize the system at a deeper level.</p>
-<p>Extension points include:</p>
+<p>UrsaMU exposes a small set of named registries through <code>jsr:@ursamu/mush</code><br>
+(<code>mod.ts</code>). Each one is a stable extension point intended for plugins and<br>
+child-game code. Plugins are still the preferred packaging unit — these<br>
+registries are what plugins use under the hood.</p>
+<p>All examples assume the JSR import path used by external plugins:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { /* ... */ } from "jsr:@ursamu/mush";
+</code></pre>
+<h2>Commands</h2>
+<p><code>addCmd({ name, pattern, lock, category, help, exec })</code> registers a command.<br>
+The <code>exec</code> handler receives an <code>IUrsamuSDK</code> (<code>u</code>) with <code>u.me</code>, <code>u.here</code>,<br>
+<code>u.cmd</code>, <code>u.send</code>, <code>u.db</code>, <code>u.util</code>, <code>u.canEdit</code>, and the other SDK<br>
+namespaces listed in <code>docs/api/core.md</code>. See <code>CLAUDE.md</code> for the <code>addCmd</code><br>
+skeleton and pattern cheat-sheet (catch-all switch gotcha included).</p>
+<h2>Format handlers</h2>
+<p>Format handlers customize how named display slots (NAMEFORMAT, DESCFORMAT,<br>
+CONFORMAT, EXITFORMAT, WHOFORMAT, WHOROWFORMAT, PSFORMAT, PSROWFORMAT, or any<br>
+arbitrary uppercase slot name) render. Two entry points:</p>
 <ul>
-<li>Custom commands</li>
-<li>Custom flags</li>
-<li>Custom functions</li>
-<li>Custom hooks</li>
-<li>Advanced extensions (middleware, services, etc.)</li>
+<li><code>registerFormatHandler(slot, fn)</code> — TS function that returns a string.</li>
+<li><code>registerFormatTemplate(slot, mushSource)</code> — raw MUSH softcode body, parsed<br>
+and evaluated as if it were a <code>&amp;NAMEFORMAT</code> attribute (v2.4.0).</li>
 </ul>
-<h2>Extension Points</h2>
-<h3>When to Use Extensions vs. Plugins</h3>
+<p>Lookups go through <code>resolveFormat</code> / <code>resolveFormatOr</code> (per-target) and<br>
+<code>resolveGlobalFormat</code> / <code>resolveGlobalFormatOr</code> (two-tier <code>#0</code> → <code>u.me</code>).<br>
+<code>unregisterFormatHandler(slot)</code> removes a registration. All four resolvers<br>
+are reachable from softcode via <code>u.util</code>. See <code>docs/api/core.md</code> for the<br>
+full slot list and priority rules.</p>
+<h2>Lock functions</h2>
+<p><code>registerLockFunc(name, fn)</code> adds a callable lock primitive usable inside<br>
+lock strings (<code>tribe(glasswaler)</code>, <code>attr(mortal) || !tribe(glasswaler)</code>,<br>
+<code>connected &amp;&amp; perm(builder)</code>). Built-in names — <code>flag</code>, <code>attr</code>, <code>type</code>,<br>
+<code>is</code>, <code>holds</code>, <code>perm</code> — are protected and cannot be overwritten. Locks are<br>
+fail-closed: unknown function or thrown error evaluates to <code>false</code>. Max<br>
+length 4096 chars / 256 tokens. Lock strings support <code>&amp;&amp;</code>, <code>||</code>, <code>!</code>, and<br>
+<code>()</code> grouping; legacy <code>&amp;</code> / <code>|</code> still parse.</p>
+<h2>Softcode functions and substitutions</h2>
 <ul>
-<li><strong>Plugins</strong>: Use plugins for self-contained features that can be enabled or disabled as a unit.</li>
-<li><strong>Extensions</strong>: Use extensions when you need to modify core behavior or add functionality that integrates deeply with the system.</li>
+<li><code>registerSoftcodeFunc(name, fn)</code> adds a stdlib function callable from any<br>
+evaluated attribute (e.g. <code>magic(x, y)</code>).</li>
+<li><code>registerSoftcodeSub(name, fn)</code> adds a <code>%</code>-substitution handler (e.g.<br>
+<code>%mxp[...]</code>).</li>
 </ul>
-<p>Extensions are typically implemented within plugins but can also be added directly in a child game.</p>
-<h2>Custom Commands</h2>
-<p>Commands are the primary way players interact with UrsaMU. You can create custom commands to add new functionality.</p>
-<h3>Registering Commands</h3>
-<p>Use the <code>addCmd</code> function to register a new command:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
-
-addCmd({
-  name: "mycommand",                    // Unique identifier for the command
-  pattern: /^mycommand\s*(.*)/i,        // Regex pattern to match user input
-  lock: "connected",                    // Lock expression required to use the command
-  exec: (u: IUrsamuSDK) =&gt; {           // Function to execute when command is triggered
-    const args = u.cmd.args[0]?.trim() ?? "";
-    u.send(`You typed: ${args}`);
-  }
-});
-</code></pre>
-<h3>Command Context (IUrsamuSDK)</h3>
-<p>The <code>u</code> object passed to the <code>exec</code> function contains:</p>
+<p>Both feed the same <code>softcodeService</code> evaluator used by <code>u.eval</code> /<br>
+<code>u.evalString</code> and by <code>&amp;attr</code>/<code>@trigger</code> dispatch.</p>
+<h2>Command middleware</h2>
+<p><code>registerCmdMiddleware(fn)</code> inserts a middleware function into the command<br>
+pipeline before <code>exec</code> runs. Use it for logging, audit, rate-limiting, or<br>
+short-circuit interception. Middleware receives the same context the<br>
+dispatcher builds and can call <code>next()</code> to continue or return early to<br>
+abort.</p>
+<h2>Scripts</h2>
+<p><code>registerScript(name, content)</code> registers a sandbox script (legacy block or<br>
+ESM <code>export default async (u) =&gt; { ... }</code>). Resolution order at dispatch<br>
+time: local <code>system/scripts/&lt;name&gt;.ts</code> override → plugin registry → engine<br>
+bundled. Use this when a plugin wants to ship a sandboxed script without<br>
+writing to disk.</p>
+<h2>REST routes</h2>
+<p><code>registerPluginRoute(method, path, handler)</code> attaches an Express handler to<br>
+the main HTTP app. The handler receives the standard Express<br>
+<code>(req, res, next)</code> triple. Return 401 before any work when <code>req.userId</code> is<br>
+null. Routes are namespaced by convention under <code>/api/v1/&lt;plugin&gt;/...</code>.</p>
+<h2>UI components</h2>
+<p><code>registerUIComponent(component)</code> adds an entry to <code>GET /api/v1/ui-manifest</code><br>
+so the bundled web client (and any other client that reads the manifest)<br>
+can discover plugin-provided UI. <code>unregisterUIComponent(id)</code> removes it;<br>
+<code>getRegisteredUIComponents()</code> lists current entries.</p>
+<h2>Stat systems</h2>
+<p><code>registerStatSystem(system)</code> registers an <code>IStatSystem</code> implementation<br>
+(stats, skills, validation, sheet rendering) that chargen plugins and game<br>
+projects can target. <code>getStatSystem(name)</code>, <code>getDefaultStatSystem()</code>, and<br>
+<code>getStatSystemNames()</code> are the read-side helpers.</p>
+<h2>Game hooks</h2>
+<p><code>gameHooks</code> is the engine’s <code>EventEmitter</code>. Subscribe with<br>
+<code>gameHooks.on(event, listener)</code> and pair every listener with a matching<br>
+<code>gameHooks.off(event, listener)</code> in <code>remove()</code> — using the same named<br>
+reference is non-negotiable (see <code>CLAUDE.md</code>). Typed events<br>
+(<code>GameHookMap</code>):</p>
 <ul>
-<li><code>u.me</code>: The actor who triggered the command (<code>IDBObj</code> with <code>id</code>, <code>state</code>, <code>flags</code>, etc.)</li>
-<li><code>u.here</code>: The room the actor is currently in</li>
-<li><code>u.cmd.args</code>: Array of regex capture groups from the matched pattern</li>
-<li><code>u.cmd.switches</code>: Array of switches (e.g. <code>@command/switch</code>)</li>
-<li><code>u.send(msg)</code>: Send output to the actor</li>
-<li><code>u.broadcast(roomId, msg)</code>: Broadcast a message to a room</li>
-<li><code>u.force(cmd)</code>: Execute a command as the actor</li>
-<li><code>u.setFlags(target, flags)</code>: Set flags on an object</li>
-<li><code>u.db</code>: Database operations (search, create, modify, destroy)</li>
-<li><code>u.util</code>: Utilities (target, stripSubs, etc.)</li>
+<li><code>player:login</code>, <code>player:logout</code></li>
+<li><code>say</code>, <code>pose</code>, <code>page</code>, <code>move</code></li>
+<li><code>channel:message</code></li>
+<li><code>object:created</code>, <code>object:destroyed</code>, <code>object:modified</code>, <code>object:moved</code></li>
+<li><code>scene:created</code>, <code>scene:pose</code>, <code>scene:set</code>, <code>scene:title</code>, <code>scene:clear</code></li>
+<li><code>mail:received</code></li>
 </ul>
-<h3>Command Patterns</h3>
-<p>Command patterns are regular expressions. Capture groups become <code>u.cmd.args</code>:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// /^look\s*(.*)/i — captures the optional target as u.cmd.args[0]
-// /^give\s+(\S+)\s+to\s+(.*)/i — two capture groups: args[0] and args[1]
-// /^quit$/i — exact match, no capture groups
-</code></pre>
-<h2>Custom Flags</h2>
-<p>Flags are used to control access to commands and features. You can create custom flags to implement your own permission system.</p>
-<h3>Registering Flags</h3>
-<p>Use the <code>registerFlag</code> function to register a new flag:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFlag } from "../../services/Flags/mod.ts";
+<h2>Plugin skeleton</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import "./commands.ts"; // Phase 1: addCmd at module load
+import {
+  gameHooks,
+  registerFormatTemplate,
+  registerLockFunc,
+} from "jsr:@ursamu/mush";
+import type { IPlugin, SessionEvent } from "jsr:@ursamu/mush";
 
-registerFlag({
-  name: "myflag",          // Name of the flag
-  description: "My custom flag", // Description of what the flag does
-  default: false           // Default value for new objects
-});
-</code></pre>
-<h3>Checking Flags</h3>
-<p>Use the <code>hasFlag</code> function to check if an object has a flag:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { hasFlag } from "../../services/Flags/mod.ts";
+const onLogin = (e: SessionEvent) =&gt; { /* ... */ };
 
-// Check if player has the "myflag" flag
-if (hasFlag(player, "myflag")) {
-  // Do something
-}
-</code></pre>
-<h3>Setting Flags</h3>
-<p>Use the <code>setFlag</code> function to set a flag on an object:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { setFlag } from "../../services/Flags/mod.ts";
-
-// Set the "myflag" flag on a player
-await setFlag(player, "myflag", true);
-</code></pre>
-<h2>Custom Functions</h2>
-<p>Functions are used in expressions and can be called from commands. You can create custom functions to add new capabilities to the expression system.</p>
-<h3>Registering Functions</h3>
-<p>Use the <code>registerFunction</code> function to register a new function:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFunction } from "../../services/Functions/mod.ts";
-
-registerFunction({
-  name: "myfunc",          // Name of the function
-  description: "My custom function", // Description of what the function does
-  args: ["arg1", "?arg2"],  // Arguments (? prefix means optional)
-  exec: (args, ctx) =&gt; {    // Function to execute
-    const [arg1, arg2 = "default"] = args;
-    return `${arg1} and ${arg2}`;
-  }
-});
-</code></pre>
-<h3>Using Custom Functions</h3>
-<p>Once registered, your function can be used in expressions:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">&gt; think myfunc(hello, world)
-hello and world
-</code></pre>
-<h2>Custom Hooks</h2>
-<p>Hooks allow you to run code at specific points in the system’s execution. You can create custom hooks to add behavior that runs automatically.</p>
-<h3>Registering Hooks</h3>
-<p>Use the <code>registerHook</code> function to register a new hook:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerHook } from "../../services/Hooks/mod.ts";
-
-// Register a hook that runs when a player connects
-registerHook("playerConnect", async (player) =&gt; {
-  console.log(`Player ${player.data.name} connected`);
-  
-  // You can modify the player or perform other actions
-  player.data.lastLogin = new Date().toISOString();
-  await dbojs.update(player);
-});
-</code></pre>
-<h3>Available Hook Points</h3>
-<p>UrsaMU provides several hook points:</p>
-<ul>
-<li><code>playerConnect</code>: Triggered when a player connects</li>
-<li><code>playerDisconnect</code>: Triggered when a player disconnects</li>
-<li><code>playerCreate</code>: Triggered when a player is created</li>
-<li><code>commandBefore</code>: Triggered before a command is executed</li>
-<li><code>commandAfter</code>: Triggered after a command is executed</li>
-<li><code>objectCreate</code>: Triggered when an object is created</li>
-<li><code>objectDestroy</code>: Triggered when an object is destroyed</li>
-</ul>
-<h3>Creating Custom Hook Points</h3>
-<p>You can create your own hook points for plugins to use:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerHookPoint, triggerHook } from "../../services/Hooks/mod.ts";
-
-// Register a new hook point
-registerHookPoint("myCustomHook");
-
-// Trigger the hook somewhere in your code
-await triggerHook("myCustomHook", { data: "some data" });
-</code></pre>
-<h2>Advanced Extensions</h2>
-<h3>Custom Middleware</h3>
-<p>You can create custom middleware to process commands before they’re executed:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerMiddleware } from "../../services/Commands/mod.ts";
-
-// Register middleware that logs all commands
-registerMiddleware(async (ctx, next) =&gt; {
-  console.log(`Player ${ctx.player.data.name} executed: ${ctx.cmd} ${ctx.args}`);
-  
-  // Call the next middleware in the chain
-  await next();
-  
-  console.log("Command execution completed");
-});
-</code></pre>
-<h3>Custom Services</h3>
-<p>You can create custom services to provide functionality to other parts of the system:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/services/MyService/mod.ts
-class MyService {
-  private data: Map&lt;string, any&gt; = new Map();
-  
-  constructor() {
-    console.log("MyService initialized");
-  }
-  
-  set(key: string, value: any): void {
-    this.data.set(key, value);
-  }
-  
-  get(key: string): any {
-    return this.data.get(key);
-  }
-}
-
-// Create a singleton instance
-export const myService = new MyService();
-</code></pre>
-<h3>Custom Database Models</h3>
-<p>You can create custom database models to store specialized data:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { dbojs } from "../../services/Database/index.ts";
-
-// Define a type for your model
-interface MyModel {
-  id: string;
-  name: string;
-  data: Record&lt;string, any&gt;;
-}
-
-// Create functions to work with your model
-async function createMyModel(data: Omit&lt;MyModel, "id"&gt;): Promise&lt;MyModel&gt; {
-  const model = await dbojs.create({
-    flags: "mymodel",
-    data: {
-      name: data.name,
-      ...data.data
-    }
-  });
-  
-  return {
-    id: model.id,
-    name: data.name,
-    data: data.data
-  };
-}
-
-async function getMyModels(): Promise&lt;MyModel[]&gt; {
-  const models = await dbojs.query({ flags: /mymodel/i });
-  
-  return models.map(model =&gt; ({
-    id: model.id,
-    name: model.data.name,
-    data: { ...model.data }
-  }));
-}
-</code></pre>
-<h3>Custom Web Routes</h3>
-<p>If you’re using the web interface, you can add custom routes:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { app } from "../../app.ts";
-
-// Add a custom API endpoint
-app.router.get("/api/custom", (ctx) =&gt; {
-  ctx.response.body = { message: "Custom API endpoint" };
-});
-
-// Add a custom page
-app.router.get("/custom", async (ctx) =&gt; {
-  ctx.response.body = await app.render("custom.html", {
-    title: "Custom Page",
-    data: { /* your data */ }
-  });
-});
-</code></pre>
-<h3>Example: Complete Extension</h3>
-<p>Here’s an example of a plugin that uses multiple extension points:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IPlugin, addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
-import { registerFlag } from "../../services/Flags/mod.ts";
-import { registerFunction } from "../../services/Functions/mod.ts";
-import { registerHook } from "../../services/Hooks/mod.ts";
-import { dbojs } from "../../services/Database/index.ts";
-
-const myExtensionPlugin: IPlugin = {
-  name: "my-extension",
+export const plugin: IPlugin = {
+  name: "myplugin",
   version: "1.0.0",
-  description: "A plugin that demonstrates various extension points",
-  
-  init: async () =&gt; {
-    // Register a custom flag
-    registerFlag({
-      name: "vip",
-      description: "VIP player with special privileges",
-      default: false
-    });
-    
-    // Register a custom function
-    registerFunction({
-      name: "isvip",
-      description: "Check if a player is a VIP",
-      args: ["player"],
-      exec: async (args, ctx) =&gt; {
-        const [playerName] = args;
-        
-        // Find the player
-        const players = await dbojs.query({
-          "data.name": new RegExp(`^${playerName}$`, "i"),
-          flags: /player/i
-        });
-        
-        if (players.length === 0) {
-          return "0";
-        }
-        
-        // Check if the player has the VIP flag
-        return players[0].flags.includes("vip") ? "1" : "0";
-      }
-    });
-    
-    // Register a custom command
-    addCmd({
-      name: "vip",
-      pattern: /^vip\s+(\S+)\s+(.*)/i,
-      lock: "wizard",
-      exec: async (u: IUrsamuSDK) =&gt; {
-        const action = u.cmd.args[0]?.trim() ?? "";
-        const target = u.cmd.args[1]?.trim() ?? "";
-
-        if (!action || !target) {
-          return u.send("Usage: vip add/remove &lt;player&gt;");
-        }
-
-        // Find the target player
-        const players = await dbojs.query({
-          "data.name": new RegExp(`^${target}$`, "i"),
-          flags: /player/i
-        });
-
-        if (players.length === 0) {
-          return u.send(`Player '${target}' not found.`);
-        }
-
-        const player = players[0];
-        const playerName = String(player.data?.name ?? player.id);
-
-        if (action === "add") {
-          if (!player.flags.includes("vip")) {
-            await u.setFlags(player.id, "+vip");
-            u.send(`Added VIP status to ${playerName}.`);
-          } else {
-            u.send(`${playerName} is already a VIP.`);
-          }
-        } else if (action === "remove") {
-          if (player.flags.includes("vip")) {
-            await u.setFlags(player.id, "-vip");
-            u.send(`Removed VIP status from ${playerName}.`);
-          } else {
-            u.send(`${playerName} is not a VIP.`);
-          }
-        } else {
-          u.send("Usage: vip add/remove &lt;player&gt;");
-        }
-      }
-    });
-    
-    // Register a hook
-    registerHook("playerConnect", async (player) =&gt; {
-      // Check if the player is a VIP
-      if (player.flags.includes("vip")) {
-        // Broadcast a message to all connected players
-        const connectedPlayers = await dbojs.query({
-          flags: /connected/i
-        });
-        
-        for (const p of connectedPlayers) {
-          p.send(`VIP player ${player.data.name} has connected!`);
-        }
-      }
-    });
-    
+  description: "One sentence.",
+  init: () =&gt; {
+    gameHooks.on("player:login", onLogin);
+    registerLockFunc("tribe", (en, _t, args) =&gt;
+      String(en.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
+    );
+    registerFormatTemplate("NAMEFORMAT", "[name(%0)] &lt;&lt;%1&gt;&gt;");
     return true;
   },
-  
-  remove: async () =&gt; {
-    // Cleanup code here
-  }
+  remove: () =&gt; {
+    gameHooks.off("player:login", onLogin);
+  },
 };
-
-export default myExtensionPlugin;
 </code></pre>
-<p>By using these extension points, you can deeply customize UrsaMU to create a unique game experience tailored to your needs.</p>
+<p>See <code>docs/api/core.md</code> for full signatures and the complete <code>IUrsamuSDK</code><br>
+surface.</p>
+<h2>Building non-MUSH servers</h2>
+<p>If you want to use the same transport/session infrastructure without the MUSH<br>
+command model, import from <code>jsr:@ursamu/core</code> instead. It exposes<br>
+<code>createServer</code>, <code>websocketTransport</code>, <code>telnetTransport</code>, <code>httpTransport</code>,<br>
+<code>registerFallback</code>, <code>addHandler</code>, <code>runPipeline</code>, <code>sessions</code>, and<br>
+<code>registerSender</code> — the primitives <code>@ursamu/mush</code> is built on — without<br>
+pulling in any MUSH-specific concepts (softcode, flags, locks, format slots,<br>
+etc.).</p>
 
       </article>
 
@@ -657,11 +431,49 @@ export default myExtensionPlugin;
       
         
           
+        
+      
+        
           
         
       
         
           
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -702,14 +514,14 @@ export default myExtensionPlugin;
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/development/contributing/" class="page-nav-btn prev">
+          <a href="/development/testing/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Testing</span>
           </a>
         
 
         
-          <a href="/ursamu/guides/" class="page-nav-btn next">
+          <a href="/guides/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
             <span class="page-nav-title">Guides</span>
           </a>
@@ -726,9 +538,9 @@ export default myExtensionPlugin;
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/ursamu/guides/installation/">Installation</a>
-        <a href="/ursamu/api/">API</a>
-        <a href="/ursamu/plugins/">Plugins</a>
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>

@@ -4,6 +4,93 @@ All notable changes to `@ursamu/map-plugin` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 
+## [3.2.1] - 2026-08-01
+
+### Fixed
+
+- Staff Map side-nav: `?tool=` active state and section scroll inside
+  `.main-pane` (vehicles / look / legend / mark / cleanup).
+- Mark tile: realm on place/clear, integer coords, compact form layout.
+
+## [3.2.0] - 2026-08-01
+
+### Added
+
+- **Full legend pack editor** — add / delete / rename biomes; set
+  glyph, travel, and Perlin elevation/moisture bands (0–1).
+  Persisted as `biomeList` + `matrix` in `map.legend_overrides`.
+- Staff Map console: legend table with Add biome / Del / bands.
+
+### Changed
+
+- `PUT /api/v1/map/legend` defaults to full pack replace
+  (`replace: true`). Legacy glyph-only patches still apply when
+  stored records use the old `biomes` map shape.
+
+## [3.1.2] - 2026-08-01
+
+### Added
+
+- **Legend overrides** — staff can set biome glyphs/names and fog
+  glyphs per realm. Persisted in DBO `map.legend_overrides`.
+- REST: `GET|PUT|DELETE /api/v1/map/legend`.
+
+### Fixed
+
+- Sector render REST uses the realm's registered theme (not always
+  the default pack).
+
+## [3.1.1] - 2026-08-01
+
+### Changed
+
+- Staff Map console: stacked ops layout (vehicles, look, cleanup, mark).
+
+## [3.1.0] - 2026-07-31
+
+Production-grade checklist: builder tools, scale, theme pack, polish.
+Vehicles are ordinary objects — engine `enter` / `leave`.
+
+### Added
+
+- **`+map/authorize`** / **`+map/clear`** — builder+ overlay authoring
+  at a coordinate (`kind:glyph:name`).
+- **`+map/prune`** — orphan entities **and** stranded map-capable
+  vehicles left on `map:…` without an entity (restores lastDock).
+- **`+map/stats`** — lists entities (id, coord, container) as well as
+  overlays.
+- **Passenger capacity** — `&CAPACITY` / `&MAPCAPACITY` /
+  `state.mapCapacity`; enter refuses when full.
+- **Already-launched guard** — second `+map/launch` refuses until land.
+- **Leave-on-map guard** — `leave` and exit traversal refuse while
+  the vehicle is on `map:…`; land first.
+- **Tile move lock** — `withTileLock` serializes stacking checks on
+  concurrent `entityStep` into the same coord (closes TOCTOU M2).
+- **Chunk spatial index** — overlays/entities region scans use an
+  in-process chunk index (`spatial.ts`, CHUNK_SIZE=32).
+- **Hedge / Court theme** — `plugins.map.theme = "hedge"|"court"`
+  registers `hedgeMapConfig` on the configured realm.
+- **Plain map chrome** — renderer headers no longer use game.layout
+  softcode (fixes garbled `0 0 0…` titles).
+- **`map-capable` flag registration** + DESCFORMAT prepend (CoFD
+  coexistence); look-on-map sector render.
+- Engine **`enter` / `leave`** (mush) — any object; default deny;
+  players stay private without `enter_ok`.
+- **Staff Map console** — `/admin/map` (entities, sector preview,
+  overlay place/clear, prune) via REST + soft nav when web is loaded.
+- REST: `GET /api/v1/map/entities`, `POST /api/v1/map/prune`.
+
+### Changed
+
+- Plugin version **3.1.0**.
+- Peer pin `ursamu.plugin.json` → **`>=1.0.2`** (enter/leave exports).
+- Preferred board path is **`enter` / `leave`**;
+  `+map/embark` / `+map/disembark` are thin aliases
+  (embark still requires `map-capable`).
+- Help (`help/map*`) and docs aligned with object enter/leave model.
+- Vehicle interiors: `@open Out=<dock>` documented; exits blocked
+  while launched (same as leave).
+
 ## [3.0.0] - 2026-05-14
 
 The platform release. Closes [#2](https://github.com/UrsaMU/ursamu-map-plugin/issues/2) — turns the plugin from "one infinite grid" into a host for many themed maps with movement, region metadata, REST, and pluggable extension points.

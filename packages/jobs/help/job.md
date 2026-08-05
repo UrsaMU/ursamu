@@ -1,24 +1,23 @@
 +JOB
 
-The **+job** command manages player requests and staff tasks (staff only).
+Staff job view and actions (full-featured).
 
 SYNTAX
-  +jobs [<bucket>]
   +job <#>
   +job/comment <#>=<text>
+  +job/add <#>=<text>
   +job/assign <#>=<staff>
-  +job/close <#>[=<comment>]
-  +job/addplayer <player> to <#>
-  +job/addaccess <bucket>=<staff>
-  +job/removeaccess <bucket>=<staff>
-  +job/listaccess
-  +job/renumber
+  +job/close|complete|approve|deny <#>[=<text>]
+  +job/create <bucket>/<title>=<text>
+  +job/due <#>=<when>
+  +job/status <#>=new|underway|hold|25|50|75|100
+  +job/esc <#>=green|yellow|red
+  +job/hold <#>
+  +job/tag <#>=<player>
+  +job/access <#>=<player>
+  +job/publish <#>/<comment#>
+  +job/act <#>
 
-EXAMPLES
-  +jobs
-  +jobs PLOT
-  +job 5
-  +job/assign 5=Bob
-  +job/close 5=Resolved.
+Comments show [n+] published or [n-] staff-only.
 
-SEE ALSO: +help jobs, +help archive
+SEE ALSO: +help jobs, +help request

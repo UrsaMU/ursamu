@@ -77,6 +77,7 @@ superuser or existing admin:
 
 As an administrator, you can manage user accounts with these commands:
 
+- `@pcreate <name>=<password>` — Create a player without logging in as them
 - `@newpassword <user>=<password>` — Reset a user's password directly
 - `@resettoken <user>` — Generate a one-time password-reset token (valid 1 hour);
   give the token to the player so they can reset via `POST /api/v1/auth/reset-password`
@@ -86,6 +87,16 @@ As an administrator, you can manage user accounts with these commands:
 - `@chown <object>=<player>` — Transfer ownership of an object to another player
 - `@moniker <player>=<display name>` — Set a player's color-coded display name
   *(admin or wizard required)*
+
+Player targets for `@set`, `@flags`, `@boot`, `@toad`, and related admin
+commands resolve **globally** (including TinyMUX `*Name` form), so the
+target need not be in your current room:
+
+```
+@pcreate Builder=animefan
+@set Builder=superuser
+@set *Builder=wizard
+```
 
 ### User Roles and Permissions
 
@@ -247,25 +258,40 @@ logged to the security log.
 From in-game (admin or wizard required):
 
 ```
-@reboot      -- Gracefully restart the server
-@shutdown    -- Shut down the server
-@update      -- Pull latest code from git and restart (see below)
+@restart/check  -- List outdated jsr:@ursamu/* pins (no write, no reboot)
+@restart        -- Prepare packages online, soft-reboot only if cache OK
+@restart/quick  -- Soft-reboot only (no git / JSR bump)
+@update         -- Alias for full @restart
+@shutdown       -- Shut down the server
 ```
 
-From the terminal:
+**Safe package updates** — `@restart` and `@update` never take the game
+down on a bad prepare. While players stay connected they:
+
+1. `git pull --ff-only` (stashes local edits if needed)
+2. Bump `jsr:@ursamu/*` app pins to latest + dual-package overrides
+3. `deno cache --reload` (pre-warm modules for the next process)
+4. Soft-reboot (exit 75) **only if** cache succeeded
+
+If pull, pin write, or cache fails, the live process keeps serving the
+previous packages. Use `@restart/check` first to see what would change.
+
+From the terminal (game can stay up during prepare):
 
 ```bash
-deno task start           # Start Hub + Telnet sidecar (foreground)
-deno task dev             # Same, with file watching (development)
-bash scripts/daemon.sh    # Supervised background process (production)
-bash scripts/restart.sh   # No-disconnect restart of the supervised main
-bash scripts/stop.sh      # Graceful stop (disconnects everyone)
+bash scripts/safe-update.sh          # prepare only (no reboot)
+bash scripts/safe-update.sh --reboot # prepare, then soft-reboot if OK
+deno task start                      # Hub + Telnet (foreground)
+deno task dev                        # file-watch development
+bash scripts/daemon.sh               # supervised production
+bash scripts/restart.sh              # restart main only (telnet stays)
+bash scripts/stop.sh                 # graceful stop
 ```
 
 The supervised scaffold is created automatically by `ursamu create`. See
 [Production Deployment](./deployment.md#supervised-daemon-mode) for the
 signal model (SIGUSR2 = no-disconnect restart; Telnet sidecar persists
-across `@reboot` and JWT auto-reauth).
+across soft-reboot and JWT auto-reauth).
 
 ### Hot-Reload (`@reload`)
 
@@ -320,24 +346,49 @@ In practice: after editing the manifest, restart the server. If the run
 aborts, fix the offending entry and restart again — there is no partial
 state to clean up.
 
-### Updating from Git (`@update`)
+### Updating packages without crashing (`@restart` / `@update`)
 
-Admins and wizards can update the running server from in-game without touching
-the terminal:
+Admins and wizards can refresh git + JSR packages from in-game. The game
+stays up through prepare; a soft-reboot happens only after a warm cache.
 
 ```
-@update              -- git pull from the default branch (origin/main)
-@update main         -- pull a specific branch
-@upgrade             -- alias for @update
+@restart/check       -- read-only: list pins behind JSR latest
+@restart             -- prepare + soft-reboot if cache OK
+@restart <branch>    -- pull that branch, then prepare + reboot
+@restart/quick       -- soft-reboot only (skip git/JSR)
+@update / @upgrade   -- same as full @restart
 ```
 
-The command:
-1. Broadcasts `%chGame>%cn Updating from git...` to all connected players
-2. Runs `git pull origin <branch>`
-3. Exits with code 75, which tells the daemon restart loop to reboot the server
+Prepare steps (live process keeps serving):
 
-> Telnet connections survive the reboot — the Telnet sidecar stays up and
-> reconnects to the Hub automatically.
+1. `git pull --ff-only` (auto-stash local dirty files, then pop)
+2. **Merge `config/config.sample.json` → live `config/config.json`**
+   (adds new `server.plugins` entries and `plugins.*` blocks such as
+   `map` — live secrets are preserved via deep-merge)
+3. Pin every app `jsr:@ursamu/*` import to the **exact** latest on JSR
+4. Write dual-package import overrides so plugins share one mush/core/help
+5. Delete `deno.lock` + `node_modules` (stale graphs cannot survive)
+6. `deno cache --reload --minimum-dependency-age=0` entrypoints
+7. Print resolved `@ursamu/*` versions, then soft-reboot if cache OK
+
+**Publish first.** `@restart` only loads code that is already on JSR (or
+in the game repo via git / `./vendor/*`). Monorepo edits that were never
+`deno publish`ed will not appear after reboot.
+
+On cache success the main process exits **75** (daemon loop restarts it).
+On any failure you get `%crUpdate failed — game left running%cn` and
+players are uninterrupted.
+
+Shell equivalent while the daemon is running:
+
+```bash
+bash scripts/safe-update.sh check    # same as @restart/check
+bash scripts/safe-update.sh          # prepare only
+bash scripts/safe-update.sh --reboot # prepare + signal soft-reboot
+```
+
+> Telnet survives soft-reboot — the sidecar stays up and JWT reauth
+> restores sessions without a full disconnect.
 
 ### Daemon Restart Loop
 

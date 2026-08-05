@@ -1,49 +1,112 @@
 import { dbojs } from "@ursamu/mush";
 import { boards, posts, getNextPostNum } from "./db.ts";
-import type { IBoard, IPost } from "./db.ts";
-import { getAllBoards, getBoardPosts, getPost } from "./query.ts";
+import type { IBoard, IPost, IReply } from "./db.ts";
+import {
+  getAllBoards,
+  getBoardPosts,
+  getNextReplyNum,
+  getPost,
+} from "./query.ts";
+import {
+  canDeletePost,
+  canEditPost,
+  canModeratePost,
+  canReadBoard,
+  canWriteBoard,
+  flagSetFromRaw,
+  getReadSet,
+  isStaffFlagSet,
+  parseModeratorsField,
+} from "./rest-auth.ts";
+import {
+  emitBbsBoard,
+  emitBbsBoardDelete,
+  emitBbsPost,
+} from "./events.ts";
 
 const JSON_HEADERS = { "Content-Type": "application/json" };
 
 function json(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: JSON_HEADERS,
+  });
 }
 
 async function isStaffUser(userId: string): Promise<boolean> {
   const player = await dbojs.queryOne({ id: userId });
   if (!player) return false;
-  const flags = String(player.flags ?? "");
-  return flags.includes("admin") || flags.includes("wizard") || flags.includes("superuser");
+  return isStaffFlagSet(
+    flagSetFromRaw(player.flags as unknown),
+  );
 }
 
-function isBoardModUser(userId: string, board: IBoard): boolean {
-  return (board.moderators ?? []).includes(userId);
-}
-
-async function canAccessBoard(userId: string, board: IBoard): Promise<boolean> {
-  if (!board.readLock || board.readLock === "all()") return true;
-  const player = await dbojs.queryOne({ id: userId });
-  if (!player) return false;
-  if (String(player.flags ?? "").match(/admin|wizard|superuser/)) return true;
-  if (board.readLock === "faction" && board.ownerId) {
-    const faction = await dbojs.queryOne({ id: board.ownerId });
-    return ((faction?.contents as string[] | undefined) ?? []).includes(userId);
+async function isFactionMember(
+  userId: string,
+  factionId: string,
+): Promise<boolean> {
+  try {
+    const faction = await dbojs.queryOne({ id: factionId });
+    if (!faction) return false;
+    const contents =
+      (faction.contents as string[] | undefined) ?? [];
+    return contents.includes(userId) ||
+      contents.includes(`#${userId}`);
+  } catch (_e: unknown) {
+    return false;
   }
-  return false;
 }
 
-/** Read-tracking from state.bb_read, with legacy data.bb_read fallback. */
-function getReadSet(
-  player: Record<string, unknown>,
-  boardNum: number,
-): Set<string> {
-  const state = (player.state as Record<string, unknown> | undefined) ?? {};
-  const data  = (player.data as Record<string, unknown> | undefined) ?? {};
-  const bbRead =
-    (state.bb_read as Record<string, string[]> | undefined) ??
-    (data.bb_read as Record<string, string[]> | undefined) ??
-    {};
-  return new Set(bbRead[String(boardNum)] ?? []);
+async function lockOptsFor(
+  userId: string,
+  staff: boolean,
+  lock: string,
+  ownerId?: string,
+): Promise<{
+  staff: boolean;
+  inFaction?: boolean;
+  flags: Set<string>;
+  userId: string;
+}> {
+  const player = await dbojs.queryOne({ id: userId });
+  const flags = flagSetFromRaw(player?.flags as unknown);
+  let inFaction = false;
+  if (
+    !staff &&
+    lock === "faction" &&
+    ownerId
+  ) {
+    inFaction = await isFactionMember(userId, ownerId);
+  }
+  return { staff, inFaction, flags, userId };
+}
+
+async function userCanRead(
+  userId: string,
+  board: IBoard,
+  staff: boolean,
+): Promise<boolean> {
+  const opts = await lockOptsFor(
+    userId,
+    staff,
+    String(board.readLock ?? ""),
+    board.ownerId,
+  );
+  return canReadBoard(board, opts);
+}
+
+async function userCanWrite(
+  userId: string,
+  board: IBoard,
+  staff: boolean,
+): Promise<boolean> {
+  const opts = await lockOptsFor(
+    userId,
+    staff,
+    String(board.writeLock ?? ""),
+    board.ownerId,
+  );
+  return canWriteBoard(board, opts);
 }
 
 export async function bboardsRouteHandler(req: Request, userId: string | null): Promise<Response> {
@@ -63,17 +126,32 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
   // ── GET /api/v1/boards ────────────────────────────────────────────────────
   if (path === "/api/v1/boards" && method === "GET") {
     const allBoards = await getAllBoards();
-    const player    = await dbojs.queryOne({ id: userId });
-    const result    = await Promise.all(
-      allBoards.filter(async (b) => await canAccessBoard(userId, b)).map(async (b) => {
-        const bPosts  = await getBoardPosts(b.num);
-        const readSet = player
-          ? getReadSet(player as unknown as Record<string, unknown>, b.num)
-          : new Set<string>();
-        const unread  = bPosts.filter((p) => !readSet.has(String(p.num))).length;
-        return { ...b, postCount: bPosts.length, unreadCount: unread };
-      }),
-    );
+    const player = await dbojs.queryOne({ id: userId });
+    const staff = await isStaffUser(userId);
+    const result: unknown[] = [];
+    for (const b of allBoards) {
+      if (!(await userCanRead(userId, b, staff))) continue;
+      const bPosts = await getBoardPosts(b.num);
+      const readSet = player
+        ? getReadSet(
+          player as unknown as Record<string, unknown>,
+          b.num,
+        )
+        : new Set<string>();
+      const unread = bPosts.filter(
+        (p) => !readSet.has(String(p.num)),
+      ).length;
+      const flagged = bPosts.reduce(
+        (n, p) => n + (p.flags?.length ? 1 : 0),
+        0,
+      );
+      result.push({
+        ...b,
+        postCount: bPosts.length,
+        unreadCount: unread,
+        flaggedCount: flagged,
+      });
+    }
     return json(result);
   }
 
@@ -99,6 +177,7 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
       type: "normal", moderators: [],
     };
     await boards.create(board);
+    emitBbsBoard(board);
     return json(board, 201);
   }
 
@@ -106,8 +185,13 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
   const boardMatch = path.match(/^\/api\/v1\/boards\/([^/]+)$/);
   if (boardMatch && method === "GET") {
     const board = await boards.queryOne({ id: boardMatch[1] });
-    if (!board || board.id === "bbconfig") return json({ error: "Not found" }, 404);
-    if (!(await canAccessBoard(userId, board))) return json({ error: "Forbidden" }, 403);
+    if (!board || board.id === "bbconfig") {
+      return json({ error: "Not found" }, 404);
+    }
+    const staff = await isStaffUser(userId);
+    if (!(await userCanRead(userId, board, staff))) {
+      return json({ error: "Forbidden" }, 403);
+    }
     return json(board);
   }
 
@@ -123,13 +207,39 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
       return json({ error: "Invalid JSON" }, 400);
     }
     const allowed: (keyof IBoard)[] = [
-      "title", "readLock", "writeLock", "timeout", "anonymous",
-      "category", "type", "webhookUrl", "archiveTo",
+      "title",
+      "readLock",
+      "writeLock",
+      "timeout",
+      "anonymous",
+      "category",
+      "type",
+      "webhookUrl",
+      "archiveTo",
+      "ownerId",
     ];
     const patch: Partial<IBoard> = {};
-    for (const k of allowed) { if (k in body) (patch as Record<string, unknown>)[k] = body[k]; }
+    for (const k of allowed) {
+      if (k in body) {
+        (patch as Record<string, unknown>)[k] = body[k];
+      }
+    }
+    if ("moderators" in body) {
+      const mods = parseModeratorsField(body.moderators);
+      if (mods !== undefined) patch.moderators = mods;
+    }
+    if ("timeout" in patch) {
+      const t = Number(patch.timeout);
+      patch.timeout = Number.isFinite(t) ? t : board.timeout;
+    }
+    if ("anonymous" in patch) {
+      patch.anonymous = Boolean(patch.anonymous);
+    }
     await boards.modify({ id: board.id }, "$set", patch);
-    return json({ ...board, ...patch });
+    const updated = await boards.queryOne({ id: board.id });
+    const out = updated ?? { ...board, ...patch };
+    emitBbsBoard(out as IBoard);
+    return json(out);
   }
 
   // ── DELETE /api/v1/boards/:id ─────────────────────────────────────────────
@@ -140,6 +250,7 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
     const bPosts = await getBoardPosts(board.num);
     for (const p of bPosts) await posts.delete({ id: p.id });
     await boards.delete({ id: board.id });
+    emitBbsBoardDelete(board.id, board.num);
     return new Response(null, { status: 204 });
   }
 
@@ -147,20 +258,44 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
   const postsMatch = path.match(/^\/api\/v1\/boards\/([^/]+)\/posts$/);
   if (postsMatch && method === "GET") {
     const board = await boards.queryOne({ id: postsMatch[1] });
-    if (!board || board.id === "bbconfig") return json({ error: "Not found" }, 404);
-    if (!(await canAccessBoard(userId, board))) return json({ error: "Forbidden" }, 403);
-    const limit  = parseInt(url.searchParams.get("limit") ?? "20", 10);
-    const offset = parseInt(url.searchParams.get("offset") ?? "0", 10);
+    if (!board || board.id === "bbconfig") {
+      return json({ error: "Not found" }, 404);
+    }
+    const staff = await isStaffUser(userId);
+    if (!(await userCanRead(userId, board, staff))) {
+      return json({ error: "Forbidden" }, 403);
+    }
+    const limit = parseInt(
+      url.searchParams.get("limit") ?? "20",
+      10,
+    );
+    const offset = parseInt(
+      url.searchParams.get("offset") ?? "0",
+      10,
+    );
     const bPosts = await getBoardPosts(board.num);
-    return json({ total: bPosts.length, posts: bPosts.slice(offset, offset + limit) });
+    return json({
+      total: bPosts.length,
+      posts: bPosts.slice(offset, offset + limit),
+    });
   }
 
   // ── POST /api/v1/boards/:id/posts ─────────────────────────────────────────
   if (postsMatch && method === "POST") {
     const board = await boards.queryOne({ id: postsMatch[1] });
-    if (!board || board.id === "bbconfig") return json({ error: "Not found" }, 404);
-    if (board.type === "archive") return json({ error: "Archive boards are read-only" }, 400);
-    if (!(await canAccessBoard(userId, board))) return json({ error: "Forbidden" }, 403);
+    if (!board || board.id === "bbconfig") {
+      return json({ error: "Not found" }, 404);
+    }
+    if (board.type === "archive") {
+      return json(
+        { error: "Archive boards are read-only" },
+        400,
+      );
+    }
+    const staff = await isStaffUser(userId);
+    if (!(await userCanWrite(userId, board, staff))) {
+      return json({ error: "Forbidden" }, 403);
+    }
     let body: Record<string, unknown>;
     try {
       body = await req.json();
@@ -179,7 +314,73 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
       replies: [], sticky: false, tags: [], flags: [], watchers: [],
     };
     await posts.create(post);
+    emitBbsPost(board, post);
+    void import("./staff-badge-bridge.ts").then((m) =>
+      m.bumpBbsActivityBadge()
+    );
     return json(post, 201);
+  }
+
+  // ── POST /api/v1/boards/:id/posts/:num/replies ────────────────────────────
+  const repliesMatch = path.match(
+    /^\/api\/v1\/boards\/([^/]+)\/posts\/(\d+)\/replies$/,
+  );
+  if (repliesMatch && method === "POST") {
+    const board = await boards.queryOne({ id: repliesMatch[1] });
+    if (!board || board.id === "bbconfig") {
+      return json({ error: "Not found" }, 404);
+    }
+    if (board.type === "archive") {
+      return json(
+        { error: "Archive boards are read-only" },
+        400,
+      );
+    }
+    const staff = await isStaffUser(userId);
+    if (!(await userCanWrite(userId, board, staff))) {
+      return json({ error: "Forbidden" }, 403);
+    }
+    const postNum = parseInt(repliesMatch[2]!, 10);
+    const post = await getPost(board.num, postNum);
+    if (!post) return json({ error: "Not found" }, 404);
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch (_e: unknown) {
+      return json({ error: "Invalid JSON" }, 400);
+    }
+    const text = typeof body.body === "string"
+      ? body.body.trim()
+      : "";
+    if (!text) {
+      return json({ error: "body is required" }, 400);
+    }
+    const player = await dbojs.queryOne({ id: userId });
+    const authorName = String(
+      (player?.data as { name?: string } | undefined)?.name ??
+        "Unknown",
+    );
+    const replyNum = getNextReplyNum(post);
+    const reply: IReply = {
+      num: replyNum,
+      subject: `Re: ${post.subject}`,
+      body: text,
+      authorId: userId,
+      authorName,
+      createdAt: Date.now(),
+      editCount: 0,
+    };
+    const replies = [...(post.replies ?? []), reply];
+    await posts.modify({ id: post.id }, "$set", { replies });
+    const updated = {
+      ...post,
+      replies,
+    };
+    emitBbsPost(board, updated);
+    void import("./staff-badge-bridge.ts").then((m) =>
+      m.bumpBbsActivityBadge()
+    );
+    return json(reply, 201);
   }
 
   // ── Single-post routes: /api/v1/boards/:id/posts/:num ─────────────────────
@@ -192,13 +393,18 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
     if (!post) return json({ error: "Not found" }, 404);
 
     if (method === "GET") {
-      if (!(await canAccessBoard(userId, board))) return json({ error: "Forbidden" }, 403);
+      const staff = await isStaffUser(userId);
+      if (!(await userCanRead(userId, board, staff))) {
+        return json({ error: "Forbidden" }, 403);
+      }
       return json(post);
     }
     if (method === "PATCH") {
-      const isOwner = post.authorId === userId;
-      const canEdit = isOwner || isBoardModUser(userId, board) || (await isStaffUser(userId));
-      if (!canEdit) return json({ error: "Forbidden" }, 403);
+      const staff = await isStaffUser(userId);
+      if (!canEditPost(post, board, userId, staff)) {
+        return json({ error: "Forbidden" }, 403);
+      }
+      const mod = canModeratePost(board, userId, staff);
       let body: Record<string, unknown>;
       try {
         body = await req.json();
@@ -206,32 +412,63 @@ export async function bboardsRouteHandler(req: Request, userId: string | null): 
         return json({ error: "Invalid JSON" }, 400);
       }
       const patch: Partial<IPost> = {};
-      if (typeof body.subject === "string") patch.subject = body.subject.trim();
-      if (typeof body.body    === "string") patch.body    = body.body.trim();
-      patch.editCount = post.editCount + 1;
+      if (typeof body.subject === "string") {
+        patch.subject = body.subject.trim();
+      }
+      if (typeof body.body === "string") {
+        patch.body = body.body.trim();
+      }
+      // Sticky / timeout: staff or board mods only
+      if (mod && typeof body.sticky === "boolean") {
+        patch.sticky = body.sticky;
+      }
+      if (mod && body.timeout != null) {
+        const t = Number(body.timeout);
+        if (Number.isFinite(t)) patch.timeout = t;
+      }
+      if (
+        Object.keys(patch).some(
+          (k) => k === "subject" || k === "body",
+        )
+      ) {
+        patch.editCount = post.editCount + 1;
+      }
       await posts.modify({ id: post.id }, "$set", patch);
-      return json({ ...post, ...patch });
+      const updated = await posts.queryOne({ id: post.id });
+      return json(updated ?? { ...post, ...patch });
     }
     if (method === "DELETE") {
-      const isOwner = post.authorId === userId;
-      const canDel  = isOwner || isBoardModUser(userId, board) || (await isStaffUser(userId));
-      if (!canDel) return json({ error: "Forbidden" }, 403);
+      const staff = await isStaffUser(userId);
+      if (!canDeletePost(post, board, userId, staff)) {
+        return json({ error: "Forbidden" }, 403);
+      }
       await posts.delete({ id: post.id });
       return new Response(null, { status: 204 });
     }
   }
 
   // ── Flag routes ───────────────────────────────────────────────────────────
-  const flagsMatch = path.match(/^\/api\/v1\/boards\/([^/]+)\/posts\/(\d+)\/flags$/);
+  const flagsMatch = path.match(
+    /^\/api\/v1\/boards\/([^/]+)\/posts\/(\d+)\/flags$/,
+  );
   if (flagsMatch) {
     const board = await boards.queryOne({ id: flagsMatch[1] });
     if (!board) return json({ error: "Not found" }, 404);
-    const post  = await getPost(board.num, parseInt(flagsMatch[2], 10));
-    if (!post)  return json({ error: "Not found" }, 404);
-    if (!isBoardModUser(userId, board) && !(await isStaffUser(userId))) return json({ error: "Forbidden" }, 403);
+    const post = await getPost(
+      board.num,
+      parseInt(flagsMatch[2], 10),
+    );
+    if (!post) return json({ error: "Not found" }, 404);
+    const staff = await isStaffUser(userId);
+    if (!canModeratePost(board, userId, staff)) {
+      return json({ error: "Forbidden" }, 403);
+    }
     if (method === "GET") return json({ flags: post.flags ?? [] });
     if (method === "DELETE") {
       await posts.modify({ id: post.id }, "$set", { flags: [] });
+      void import("./staff-badge-bridge.ts").then((m) =>
+        m.publishBbsFlaggedBadgeAndBump()
+      );
       return new Response(null, { status: 204 });
     }
   }

@@ -24,6 +24,12 @@ import type { IDBOBJ }    from "../world/types.ts";
 import type { IAttribute } from "../world/types.ts";
 import { dbojs, counters } from "../world/dbobjs.ts";
 import { flags } from "../world/flags.ts";
+import {
+  canEditObject,
+  canSeeAttr,
+  canSetAttr,
+  attrFlagsOf,
+} from "../world/permissions.ts";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -44,19 +50,17 @@ async function requireActor(userId: string): Promise<IDBOBJ | null> {
   return (await dbojs.queryOne({ id: userId })) ?? null;
 }
 
-function canEditSync(actor: IDBOBJ, target: IDBOBJ): boolean {
-  const actorFlagStr = actor.flags ?? "";
-  if (/\b(superuser|admin|wizard)\b/.test(actorFlagStr)) return true;
-  const owner = target.data?.owner as string | undefined;
-  if (owner && owner === actor.id) return true;
-  if (actor.id === target.id) return true;
-  return false;
-}
-
 async function canEditObj(actorId: string, target: IDBOBJ): Promise<boolean> {
   const actor = await requireActor(actorId);
   if (!actor) return false;
-  return canEditSync(actor, target);
+  return canEditObject(
+    { id: actor.id, flags: actor.flags },
+    {
+      id: target.id,
+      flags: target.flags,
+      data: target.data,
+    },
+  );
 }
 
 const POISON_KEYS = new Set(["__proto__", "constructor", "prototype"]);
@@ -188,7 +192,14 @@ async function searchObjects(url: URL, userId: string): Promise<Response> {
   const visible: IDBOBJ[] = [];
   for (const obj of all) {
     if (flagFilter && !flags.check(obj.flags, flagFilter)) continue;
-    if (canEditSync(actor, obj)) visible.push(scrub(obj));
+    if (
+      await canEditObject(
+        { id: actor.id, flags: actor.flags },
+        { id: obj.id, flags: obj.flags, data: obj.data },
+      )
+    ) {
+      visible.push(scrub(obj));
+    }
     if (visible.length >= limit) break;
   }
   return json({ objects: visible, total: visible.length });
@@ -284,8 +295,18 @@ async function subRoute(req: Request, userId: string, id: string, sub: string): 
   if (!target) return json({ error: "Not Found" }, 404);
 
   if (sub === "attrs" && req.method === "GET") {
-    if (!await canEditObj(userId, target)) return json({ error: "Forbidden" }, 403);
-    return json({ attrs: getAttrs(target) });
+    if (!await canEditObj(userId, target)) {
+      return json({ error: "Forbidden" }, 403);
+    }
+    const actor = await requireActor(userId);
+    const attrs = getAttrs(target).filter((a) =>
+      canSeeAttr(
+        actor?.flags,
+        a.name,
+        attrFlagsOf({ data: target.data }, a.name),
+      )
+    );
+    return json({ attrs });
   }
 
   if (sub === "eval" && req.method === "POST") {
@@ -306,24 +327,56 @@ async function subRoute(req: Request, userId: string, id: string, sub: string): 
 
 // ── /api/v1/objects/:id/attrs/:attr ──────────────────────────────────────────
 
-async function attrRoute(req: Request, userId: string, id: string, attr: string): Promise<Response> {
+async function attrRoute(
+  req: Request,
+  userId: string,
+  id: string,
+  attr: string,
+): Promise<Response> {
   const target = await dbojs.queryOne({ id });
   if (!target) return json({ error: "Not Found" }, 404);
-  if (!await canEditObj(userId, target)) return json({ error: "Forbidden" }, 403);
+  if (!await canEditObj(userId, target)) {
+    return json({ error: "Forbidden" }, 403);
+  }
 
   const name = attr.toUpperCase().replace(/[^A-Z0-9_.-]/g, "");
   if (!name) return json({ error: "Invalid attribute name" }, 400);
 
+  const actor = await requireActor(userId);
+  const fl = attrFlagsOf({ data: target.data }, name);
+
   if (req.method === "PUT") {
+    if (!canSetAttr(actor?.flags, name, fl)) {
+      return json({ error: "Forbidden" }, 403);
+    }
     let body: Record<string, unknown>;
-    try { body = await req.json(); } catch { return json({ error: "Invalid JSON" }, 400); }
+    try {
+      body = await req.json();
+    } catch {
+      return json({ error: "Invalid JSON" }, 400);
+    }
     const value = String(body.value ?? "");
     setAttrOnObj(target, name, value, userId);
     await dbojs.modify({ id: target.id }, "$set", target);
     return json({ name, value });
   }
 
+  if (req.method === "GET") {
+    if (!canSeeAttr(actor?.flags, name, fl)) {
+      return json({ error: "Forbidden" }, 403);
+    }
+    const attrs = getAttrs(target);
+    const found = attrs.find(
+      (a) => a.name.toUpperCase() === name,
+    );
+    if (!found) return json({ error: "Attribute not found" }, 404);
+    return json({ name: found.name, value: found.value });
+  }
+
   if (req.method === "DELETE") {
+    if (!canSetAttr(actor?.flags, name, fl)) {
+      return json({ error: "Forbidden" }, 403);
+    }
     const deleted = delAttrFromObj(target, name);
     if (!deleted) return json({ error: "Attribute not found" }, 404);
     await dbojs.modify({ id: target.id }, "$set", target);

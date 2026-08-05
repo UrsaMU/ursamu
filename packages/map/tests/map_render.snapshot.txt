@@ -1,6 +1,4 @@
-==============================================================================
-                          %chSECTOR 4A: JABIIM TRENCHES%cn                          
-==============================================================================
+========================= SECTOR 4A: JABIIM TRENCHES =========================
                                                           LOC: (144, 219) Z: 0
  t ~ ~ ~ t t T ~ ~ ~ T T T T t | %chTOPOGRAPHY & CLIMATE%cn                         
  t t t t t t t ~ ~ T T T T T t | dense brush crowds the line of sight To the  
@@ -9,19 +7,13 @@
  t ~ = t t t t ~ ~ ~ ~ ~ T T t |                                              
  = = = t t t t t ~ ~ ~ T T T T |                                              
  . = = t t t t t t ~ ~ ~ T T t |                                              
-
-%chNOTABLE INFRASTRUCTURE%cn
-------------------------------------------------------------------------------
+--------------------------- NOTABLE INFRASTRUCTURE ---------------------------
   # (145, 219) Forward Command Bunker (Republic)
   + (145, 220) Unsecured Munitions Cache
-
-%chSECTOR CONTACTS%cn
-------------------------------------------------------------------------------
+------------------------------ SECTOR CONTACTS -------------------------------
   Lemuel is operating in an AT-RT Walker.
   RC-1138 "Boss" (Republic) holds a defensive perimeter.
   2x B2-Super Battle Droid (Hostile) is advancing through the brush.
-
-%chADJACENT SECTORS%cn
-------------------------------------------------------------------------------
+------------------------------ ADJACENT SECTORS ------------------------------
   N (Deep Water), S (Deep Water), E (Brush), W (Plains)
 ==============================================================================

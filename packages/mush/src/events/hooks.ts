@@ -130,7 +130,11 @@ export const hooks = {
     });
   },
 
-  aconnect: async (player: IDBOBJ, socketId?: string): Promise<void> => {
+  aconnect: async (
+    player: IDBOBJ,
+    socketId?: string,
+    opts?: { reauth?: boolean },
+  ): Promise<void> => {
     try {
       await hooks.executeAttribute(player, "ACONNECT", [], player, socketId);
 
@@ -138,7 +142,13 @@ export const hooks = {
       if (masterRoomId) {
         const masterRoom = await dbojs.queryOne({ id: masterRoomId });
         if (masterRoom) {
-          await hooks.executeAttribute(masterRoom as IDBOBJ, "ACONNECT", [], player, socketId);
+          await hooks.executeAttribute(
+            masterRoom as IDBOBJ,
+            "ACONNECT",
+            [],
+            player,
+            socketId,
+          );
         }
       }
     } catch (e) {
@@ -151,13 +161,22 @@ export const hooks = {
         actorId: player.id,
         actorName: (player.data?.name as string) || player.id,
         socketId,
+        reason: opts?.reauth ? "reauth" : "login",
       });
     } catch (e: unknown) {
       console.error("[GameHooks] player:login:", e);
     }
   },
 
-  adisconnect: async (player: IDBOBJ, socketId?: string): Promise<void> => {
+  adisconnect: async (
+    player: IDBOBJ,
+    socketId?: string,
+    opts?: { reason?: "quit" | "drop" | "reboot" },
+  ): Promise<void> => {
+    const { isSoftReboot } = await import("../sys/reboot-flag.ts");
+    const reason = opts?.reason ??
+      (isSoftReboot() ? "reboot" : "drop");
+
     try {
       await hooks.executeAttribute(player, "ADISCONNECT", [], player, socketId);
 
@@ -178,16 +197,20 @@ export const hooks = {
       console.error("[Hooks] adisconnect error:", e);
     }
 
-    try {
-      await notifyRoomDisconnect(player);
-    } catch (e: unknown) {
-      console.error("[Hooks] disconnect room notice error:", e);
+    // Room "has left" spam is for real leaves, not soft-reboot tears.
+    if (reason !== "reboot") {
+      try {
+        await notifyRoomDisconnect(player);
+      } catch (e: unknown) {
+        console.error("[Hooks] disconnect room notice error:", e);
+      }
     }
 
     gameHooks.emit("player:logout", {
       actorId: player.id,
       actorName: (player.data?.name as string) || player.id,
       socketId,
+      reason,
     }).catch((e) => console.error("[GameHooks] player:logout:", e));
   },
 };

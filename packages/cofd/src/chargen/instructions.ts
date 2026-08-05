@@ -192,7 +192,7 @@ export async function getStageInstructions(
         "  Choose your Supernatural Template (your character's nature).",
       );
       lines.push(
-        "  Supported: %chmortal%cn, %chchangeling%cn, %chwerewolf%cn.",
+        "  Supported: %chmortal%cn, %chchangeling%cn.",
       );
       lines.push("");
       lines.push(

@@ -2,12 +2,12 @@
 <html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> | UrsaMU Documentation</title>
-  <meta name="description" content="Core API reference for UrsaMU">
-  <link rel="stylesheet" href="/ursamu/styles.css">
+  <title>Core API Reference | UrsaMU Documentation</title>
+  <meta name="description" content="Complete type and function reference for UrsaMU plugin and script authors — exports of jsr:@ursamu/mush.">
+  <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://ursamu.github.io/ursamu/api/core/">
+<meta property="og:url" content="http://localhost:3001/api/core/">
 <meta name="twitter:card" content="summary">
 </head>
 <body>
@@ -19,7 +19,7 @@
 <header class="site-header">
 
   <!-- Wordmark -->
-  <a href="/ursamu/" class="site-logo">
+  <a href="/" class="site-logo">
     <span class="site-logo-name">UrsaMU</span>
     <span class="site-logo-tag">docs</span>
   </a>
@@ -33,25 +33,25 @@
     
     
     
-    <a href="/ursamu/guides/" class="header-nav-link">
+    <a href="/guides/" class="header-nav-link">
       Guides
     </a>
     
     
     
-    <a href="/ursamu/api/" class="header-nav-link active">
+    <a href="/api/" class="header-nav-link active">
       API
     </a>
     
     
     
-    <a href="/ursamu/plugins/" class="header-nav-link">
+    <a href="/plugins/" class="header-nav-link">
       Plugins
     </a>
     
     
     
-    <a href="/ursamu/development/" class="header-nav-link">
+    <a href="/development/" class="header-nav-link">
       Development
     </a>
     
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -98,7 +98,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Overview</div>
 
-      <a href="/ursamu/about/" class="sidebar-link">
+      <a href="/about/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         About UrsaMU
       </a>
@@ -110,35 +110,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Getting Started</div>
 
-      <a href="/ursamu/guides/installation/" class="sidebar-link">
+      <a href="/guides/installation/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
         Installation
       </a>
-      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
+      <a href="/guides/user-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Player Guide
       </a>
-      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
+      <a href="/guides/admin-guide/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
         Admin Guide
       </a>
-      <a href="/ursamu/guides/customization/" class="sidebar-link">
+      <a href="/guides/customization/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
         Customization
       </a>
-      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+      <a href="/guides/scripting/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Scripting Guide
       </a>
-      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+      <a href="/guides/first-script/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
         Your First Script
       </a>
-      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+      <a href="/guides/sdk-cookbook/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         SDK Cookbook
       </a>
-      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+      <a href="/guides/recipes/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
         Recipes
       </a>
@@ -150,7 +150,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Configuration</div>
 
-      <a href="/ursamu/configuration/" class="sidebar-link">
+      <a href="/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
         Overview
       </a>
@@ -162,11 +162,11 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">API Reference</div>
 
-      <a href="/ursamu/api/" class="sidebar-link">
+      <a href="/api/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
         Overview
       </a>
-      <a href="/ursamu/api/core/" class="sidebar-link active">
+      <a href="/api/core/" class="sidebar-link active">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
         Core API
       </a>
@@ -178,35 +178,35 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Plugins</div>
 
-      <a href="/ursamu/plugins/" class="sidebar-link">
+      <a href="/plugins/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
         Overview
       </a>
-      <a href="/ursamu/plugins/basics/" class="sidebar-link">
+      <a href="/plugins/basics/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
         Basics
       </a>
-      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
+      <a href="/plugins/first-plugin/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         First Plugin
       </a>
-      <a href="/ursamu/plugins/commands/" class="sidebar-link">
+      <a href="/plugins/commands/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
         Commands
       </a>
-      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
+      <a href="/plugins/hooks/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
         Hooks
       </a>
-      <a href="/ursamu/plugins/database/" class="sidebar-link">
+      <a href="/plugins/database/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
         Database
       </a>
-      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
+      <a href="/plugins/configuration/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
         Configuration
       </a>
-      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
+      <a href="/plugins/dependencies/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
         Dependencies
       </a>
@@ -218,19 +218,19 @@
     <div class="sidebar-section">
       <div class="sidebar-section-title">Development</div>
 
-      <a href="/ursamu/development/" class="sidebar-link">
+      <a href="/development/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         Overview
       </a>
-      <a href="/ursamu/development/contributing/" class="sidebar-link">
+      <a href="/development/contributing/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         Contributing
       </a>
-      <a href="/ursamu/extending/" class="sidebar-link">
+      <a href="/extending/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
         Extending
       </a>
-      <a href="/ursamu/child-games/" class="sidebar-link">
+      <a href="/child-games/" class="sidebar-link">
         <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
         Child Games
       </a>
@@ -259,632 +259,753 @@
       <!-- Breadcrumbs -->
       
       <nav class="breadcrumbs" aria-label="Breadcrumb">
-        <a href="/ursamu/">Home</a>
+        <a href="/">Home</a>
         <span class="breadcrumbs-sep">›</span>
-        <span class="breadcrumbs-current"></span>
+        <span class="breadcrumbs-current">Core API Reference</span>
       </nav>
       
 
       <!-- Page content -->
       <article class="prose">
-        <h1>UrsaMU Core API Reference</h1>
-<p>This document provides a reference for the core UrsaMU API classes and interfaces.</p>
-<h2>App</h2>
-<p>The <code>App</code> class is the central hub of UrsaMU. It provides access to all the major subsystems and services.</p>
-<h3>Properties</h3>
+        <h1>Core API Reference</h1>
+<p>Everything documented here is exported from <code>jsr:@ursamu/mush</code>.</p>
+<h2>Package Structure</h2>
+<p>UrsaMU ships three packages on JSR:</p>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Type</th>
-<th>Description</th>
+<th>Package</th>
+<th>Purpose</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>config</code></td>
-<td><code>Config</code></td>
-<td>The application configuration</td>
+<td><code>jsr:@ursamu/mush</code></td>
+<td>Full MUSH engine API — the preferred import for plugins and game projects</td>
 </tr>
 <tr>
-<td><code>db</code></td>
-<td><code>Database</code></td>
-<td>The database manager</td>
+<td><code>jsr:@ursamu/core</code></td>
+<td>Raw server infrastructure only (transports, pipeline, sessions) — no MUSH concepts; use this when building a custom game engine on top of the same infrastructure</td>
 </tr>
 <tr>
-<td><code>commands</code></td>
-<td><code>CommandManager</code></td>
-<td>The command manager</td>
-</tr>
-<tr>
-<td><code>hooks</code></td>
-<td><code>HookManager</code></td>
-<td>The hook manager</td>
-</tr>
-<tr>
-<td><code>plugins</code></td>
-<td><code>PluginManager</code></td>
-<td>The plugin manager</td>
-</tr>
-<tr>
-<td><code>players</code></td>
-<td><code>PlayerManager</code></td>
-<td>The player manager</td>
-</tr>
-<tr>
-<td><code>objects</code></td>
-<td><code>ObjectManager</code></td>
-<td>The game object manager</td>
-</tr>
-<tr>
-<td><code>flags</code></td>
-<td><code>FlagManager</code></td>
-<td>The flag manager</td>
-</tr>
-<tr>
-<td><code>channels</code></td>
-<td><code>ChannelManager</code></td>
-<td>The channel manager</td>
-</tr>
-<tr>
-<td><code>mail</code></td>
-<td><code>MailManager</code></td>
-<td>The mail manager</td>
-</tr>
-<tr>
-<td><code>bboard</code></td>
-<td><code>BulletinBoardManager</code></td>
-<td>The bulletin board manager</td>
+<td><code>jsr:@ursamu/mush</code></td>
+<td>Backwards-compatibility shim — re-exports everything from <code>@ursamu/mush</code>; existing plugins using this import continue to work unchanged</td>
 </tr>
 </tbody>
 </table>
-<h3>Methods</h3>
-<h4><code>start()</code></h4>
-<p>Starts the UrsaMU server.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.start();
+<h3><code>@ursamu/core</code> exports</h3>
+<p><code>@ursamu/core</code> provides the low-level primitives that <code>@ursamu/mush</code> builds on:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import {
+  createServer,
+  websocketTransport, telnetTransport, httpTransport,
+  registerFallback, addHandler, runPipeline,
+  sessions, registerSender,
+} from "jsr:@ursamu/core";
 </code></pre>
-<h4><code>stop()</code></h4>
-<p>Stops the UrsaMU server.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.stop();
-</code></pre>
-<h4><code>reload()</code></h4>
-<p>Reloads the UrsaMU server configuration and plugins.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.reload();
-</code></pre>
-<h4><code>broadcast(message: string)</code></h4>
-<p>Broadcasts a message to all connected players.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.broadcast("Server is restarting in 5 minutes!");
-</code></pre>
-<h2>Player</h2>
-<p>The <code>Player</code> class represents a connected player in the game.</p>
-<h3>Properties</h3>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>dbref</code></td>
-<td><code>string</code></td>
-<td>The database reference ID</td>
-</tr>
-<tr>
-<td><code>name</code></td>
-<td><code>string</code></td>
-<td>The player’s name</td>
-</tr>
-<tr>
-<td><code>password</code></td>
-<td><code>string</code></td>
-<td>The hashed password</td>
-</tr>
-<tr>
-<td><code>connected</code></td>
-<td><code>boolean</code></td>
-<td>Whether the player is currently connected</td>
-</tr>
-<tr>
-<td><code>location</code></td>
-<td><code>string</code></td>
-<td>The dbref of the player’s current location</td>
-</tr>
-<tr>
-<td><code>flags</code></td>
-<td><code>string[]</code></td>
-<td>The flags set on the player</td>
-</tr>
-<tr>
-<td><code>attributes</code></td>
-<td><code>Record&lt;string, any&gt;</code></td>
-<td>Custom attributes stored on the player</td>
-</tr>
-</tbody>
-</table>
-<h3>Methods</h3>
-<h4><code>send(message: string)</code></h4>
-<p>Sends a message to the player.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.send("Welcome to UrsaMU!");
-</code></pre>
-<h4><code>move(destination: string | GameObject)</code></h4>
-<p>Moves the player to a new location.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Move by dbref
-player.move("#123");
+<p>Use <code>@ursamu/core</code> directly only when you are building a non-MUSH server<br>
+(custom protocol, alternative command syntax, etc.) on the UrsaMU<br>
+infrastructure. For standard MUSH game development import from<br>
+<code>jsr:@ursamu/mush</code>.</p>
+<h2>Contents</h2>
+<ul>
+<li><a href="#imports">Imports</a></li>
+<li><a href="#engine-entry-points">Engine entry points</a> — <code>mu</code>, <code>startTelnetServer</code>, <code>createObj</code>, <code>checkAndCreateSuperuser</code></li>
+<li><a href="#commands">Commands</a> — <code>addCmd</code>, <code>cmds</code>, <code>registerScript</code>, <code>registerCmdMiddleware</code></li>
+<li><a href="#plugin-sdk-iursamusdk">Plugin SDK (IUrsamuSDK)</a> — the <code>u</code> object</li>
+<li><a href="#database">Database</a> — <code>DBO</code>, <code>dbojs</code></li>
+<li><a href="#locks--permissions">Locks &amp; permissions</a> — <code>registerLockFunc</code>, <code>evaluateLock</code>, <code>validateLock</code></li>
+<li><a href="#format-handlers">Format handlers</a> — <code>registerFormatHandler</code>, <code>registerFormatTemplate</code>, <code>resolveFormat</code>, <code>resolveGlobalFormat</code>, <code>header</code>/<code>divider</code>/<code>footer</code></li>
+<li><a href="#softcode-extension">Softcode extension</a> — <code>registerSoftcodeFunc</code>, <code>registerSoftcodeSub</code>, <code>softcodeService</code></li>
+<li><a href="#hooks--events">Hooks &amp; events</a> — <code>gameHooks</code>, <code>GameHookMap</code></li>
+<li><a href="#rest--ui">REST &amp; UI</a> — <code>registerPluginRoute</code>, <code>registerUIComponent</code></li>
+<li><a href="#stat-systems">Stat systems</a> — <code>registerStatSystem</code></li>
+<li><a href="#websocket">WebSocket</a> — <code>wsService</code>, <code>joinSocketToRoom</code>, <code>send</code></li>
+<li><a href="#engine-context">Engine context</a> — <code>buildContext</code>, <code>GameContext</code></li>
+<li><a href="#plugin-config">Plugin config</a> — <code>PluginConfigManager</code></li>
+<li><a href="#stdlib-ts">Stdlib (TS)</a> — Noise, Rng, physics, spatial, interpolation, vectors</li>
+<li><a href="#types">Types</a></li>
+<li><a href="#internal-plugin-install-errors">Internal: plugin install errors</a></li>
+</ul>
+<hr>
+<h2>Imports</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import {
+  mu, startTelnetServer, createObj, checkAndCreateSuperuser,
+  addCmd, cmds, registerScript, registerCmdMiddleware,
+  DBO, dbojs, send, joinSocketToRoom, wsService,
+  gameHooks,
+  registerLockFunc, evaluateLock, validateLock,
+  registerFormatHandler, registerFormatTemplate, unregisterFormatHandler,
+  resolveFormat, resolveFormatOr, resolveGlobalFormat, resolveGlobalFormatOr,
+  header, divider, footer,
+  registerSoftcodeFunc, registerSoftcodeSub, softcodeService,
+  registerPluginRoute, registerUIComponent, unregisterUIComponent, getRegisteredUIComponents,
+  registerStatSystem, getStatSystem, getDefaultStatSystem, getStatSystemNames,
+  buildContext, PluginConfigManager,
+} from "jsr:@ursamu/mush";
 
-// Move by object reference
-const room = app.objects.get("#123");
-player.move(room);
+import type {
+  IUrsamuSDK, IDBObj, IDBOBJ, ICmd, IPlugin, IPluginDependency,
+  IContext, IMiddlewareFunction, IStatSystem, IUIComponent,
+  GameHookMap, SessionEvent, SayEvent, PoseEvent, PageEvent, MoveEvent,
+  ChannelMessageEvent, ObjectCreatedEvent, ObjectDestroyedEvent, ObjectModifiedEvent,
+  SceneCreatedEvent, ScenePoseEvent, SceneSetEvent, SceneTitleEvent, SceneClearEvent,
+  MailReceivedEvent, FormatHandler, FormatSlot, GameContext, UserSocket,
+  LockFunc, SoftcodeFn, SoftcodeSubHandler, SoftcodeContext,
+} from "jsr:@ursamu/mush";
 </code></pre>
-<h4><code>disconnect(reason?: string)</code></h4>
-<p>Disconnects the player from the server.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.disconnect("Idle timeout");
+<hr>
+<h2>Engine entry points</h2>
+<h3><code>mu(config?)</code></h3>
+<p>Boots the engine. Call once from <code>src/main.ts</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "jsr:@ursamu/mush";
+await mu();
 </code></pre>
-<h4><code>hasFlag(flag: string)</code></h4>
-<p>Checks if the player has a specific flag.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (player.hasFlag("WIZARD")) {
-  // Player is a wizard
-}
+<h3><code>startTelnetServer(port?)</code></h3>
+<p>Spawn a standalone Telnet listener that talks to the same hub.</p>
+<h3><code>createObj(template)</code></h3>
+<p>Create a DB object outside of a command handler (migrations, seeders).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const room = await createObj({
+  name: "The Void",
+  flags: new Set(["room"]),
+  state: { desc: "An empty room." },
+  contents: [],
+});
 </code></pre>
-<h4><code>setFlag(flag: string)</code></h4>
-<p>Sets a flag on the player.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.setFlag("BUILDER");
-</code></pre>
-<h4><code>clearFlag(flag: string)</code></h4>
-<p>Removes a flag from the player.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.clearFlag("GUEST");
-</code></pre>
-<h4><code>get(attribute: string, defaultValue?: any)</code></h4>
-<p>Gets an attribute value from the player.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const description = player.get("description", "No description set.");
-</code></pre>
-<h4><code>set(attribute: string, value: any)</code></h4>
-<p>Sets an attribute value on the player.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">player.set("description", "A tall figure with a mysterious aura.");
-</code></pre>
-<h2>GameObject</h2>
-<p>The <code>GameObject</code> class is the base class for all game objects (rooms, exits, things).</p>
-<h3>Properties</h3>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>dbref</code></td>
-<td><code>string</code></td>
-<td>The database reference ID</td>
-</tr>
-<tr>
-<td><code>name</code></td>
-<td><code>string</code></td>
-<td>The object’s name</td>
-</tr>
-<tr>
-<td><code>type</code></td>
-<td><code>"ROOM" | "EXIT" | "THING" | "PLAYER"</code></td>
-<td>The object type</td>
-</tr>
-<tr>
-<td><code>owner</code></td>
-<td><code>string</code></td>
-<td>The dbref of the object’s owner</td>
-</tr>
-<tr>
-<td><code>location</code></td>
-<td><code>string</code></td>
-<td>The dbref of the object’s location</td>
-</tr>
-<tr>
-<td><code>flags</code></td>
-<td><code>string[]</code></td>
-<td>The flags set on the object</td>
-</tr>
-<tr>
-<td><code>attributes</code></td>
-<td><code>Record&lt;string, any&gt;</code></td>
-<td>Custom attributes stored on the object</td>
-</tr>
-</tbody>
-</table>
-<h3>Methods</h3>
-<h4><code>hasFlag(flag: string)</code></h4>
-<p>Checks if the object has a specific flag.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (obj.hasFlag("DARK")) {
-  // Object is dark
-}
-</code></pre>
-<h4><code>setFlag(flag: string)</code></h4>
-<p>Sets a flag on the object.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">obj.setFlag("LOCKED");
-</code></pre>
-<h4><code>clearFlag(flag: string)</code></h4>
-<p>Removes a flag from the object.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">obj.clearFlag("LOCKED");
-</code></pre>
-<h4><code>get(attribute: string, defaultValue?: any)</code></h4>
-<p>Gets an attribute value from the object.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const description = obj.get("description", "Nothing special.");
-</code></pre>
-<h4><code>set(attribute: string, value: any)</code></h4>
-<p>Sets an attribute value on the object.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">obj.set("description", "A rusty old key.");
-</code></pre>
-<h4><code>save()</code></h4>
-<p>Saves the object to the database.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">obj.set("description", "A new description");
-obj.save();
-</code></pre>
-<h2>Command</h2>
-<p>The <code>ICmd</code> interface defines the structure of a command in UrsaMU.</p>
-<h3>Properties</h3>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>name</code></td>
-<td><code>string</code></td>
-<td>The name of the command</td>
-</tr>
-<tr>
-<td><code>pattern</code></td>
-<td><code>string | RegExp</code></td>
-<td>Regex pattern to match; capture groups become <code>u.cmd.args</code></td>
-</tr>
-<tr>
-<td><code>lock</code></td>
-<td><code>string</code></td>
-<td>Lock expression required to run this command</td>
-</tr>
-<tr>
-<td><code>exec</code></td>
-<td><code>(u: IUrsamuSDK) =&gt; void | Promise&lt;void&gt;</code></td>
-<td>The function to execute when the command is run</td>
-</tr>
-<tr>
-<td><code>help</code></td>
-<td><code>string</code></td>
-<td>The help text for the command</td>
-</tr>
-<tr>
-<td><code>hidden</code></td>
-<td><code>boolean</code></td>
-<td>If true, omit from help listings</td>
-</tr>
-</tbody>
-</table>
-<h3>IUrsamuSDK</h3>
-<p>The SDK object received by every command’s <code>exec</code> function. Plugin commands and sandbox scripts receive the same interface.</p>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>me</code></td>
-<td><code>IDBObj</code></td>
-<td>The actor who executed the command</td>
-</tr>
-<tr>
-<td><code>here</code></td>
-<td><code>IDBObj | null</code></td>
-<td>The room the actor is currently in</td>
-</tr>
-<tr>
-<td><code>cmd.args</code></td>
-<td><code>string[]</code></td>
-<td>Regex capture groups from the matched pattern</td>
-</tr>
-<tr>
-<td><code>cmd.switches</code></td>
-<td><code>string[]</code></td>
-<td>Switches supplied (e.g. <code>["verbose"]</code>)</td>
-</tr>
-<tr>
-<td><code>socketId</code></td>
-<td><code>string</code></td>
-<td>The WebSocket socket ID of the actor</td>
-</tr>
-</tbody>
-</table>
-<h4><code>u.send(message: string)</code></h4>
-<p>Sends a message to the actor who executed the command.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send("Command executed successfully!");
-</code></pre>
-<h4><code>u.broadcast(roomId: string, message: string)</code></h4>
-<p>Broadcasts a message to all players in a room.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.broadcast(u.here?.id ?? "", "Something happens here.");
-</code></pre>
-<h3>Example</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
-
-// Define and register a command
-addCmd({
-  name: "look",
-  pattern: /^(?:look|l)\s*(.*)/i,
+<h3><code>checkAndCreateSuperuser()</code></h3>
+<p>Idempotent — ensures <code>#1</code> exists with the <code>superuser</code> flag.</p>
+<hr>
+<h2>Commands</h2>
+<h3><code>addCmd(...cmds)</code></h3>
+<p>Registers one or more <code>ICmd</code> objects. Safe at module load.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">addCmd({
+  name: "+greet",
+  pattern: /^\+greet\s+(.+)/i,
   lock: "connected",
-  exec: async (u: IUrsamuSDK) =&gt; {
-    const targetName = u.cmd.args[0]?.trim();
-    const target = targetName
-      ? await u.util.target(u.me, targetName)
-      : u.here;
-    if (!target) return u.send("I don't see that here.");
-    u.send(`You look at ${String(target.state.name ?? target.id)}.`);
-  },
-  help: "look [&lt;object&gt;]\nLooks at an object or the current room."
+  category: "Social",
+  help: "+greet &lt;name&gt; — Say hello.",
+  exec: (u) =&gt; u.send(`Hello, ${u.cmd.args[0]}!`),
 });
 </code></pre>
-<h2>Hook</h2>
-<p>The <code>HookManager</code> class manages event hooks in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>on(event: string, callback: Function, priority?: number)</code></h4>
-<p>Registers a callback for an event.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.on("player:connect", (player) =&gt; {
-  console.log(`Player ${player.name} connected`);
-}, 50);
+<p><code>ICmd</code> shape:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface ICmd {
+  name: string;
+  pattern: string | RegExp;
+  lock?: string;
+  category?: string;
+  help?: string;
+  hidden?: boolean;
+  exec: (u: IUrsamuSDK) =&gt; void | Promise&lt;void&gt;;
+}
 </code></pre>
-<h4><code>off(event: string, callback: Function)</code></h4>
-<p>Removes a callback for an event.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.off("player:connect", myCallback);
+<p>Capture groups in <code>pattern</code> populate <code>u.cmd.args[0]</code>, <code>[1]</code>, etc.</p>
+<h3><code>cmds</code></h3>
+<p>The registered command map. Use to introspect or override an existing<br>
+command:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { cmds } from "jsr:@ursamu/mush";
+const existing = cmds.get("look");
 </code></pre>
-<h4><code>emit(event: string, ...args: any[])</code></h4>
-<p>Emits an event with arguments.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.emit("custom:event", { data: "some data" });
+<h3><code>registerScript(name, content)</code></h3>
+<p>Register a softcode/system script. Lookup order: local file override →<br>
+plugin registry → engine bundled.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerScript("custom-look", "say You ran the custom look script.");
 </code></pre>
-<h4><code>once(event: string, callback: Function, priority?: number)</code></h4>
-<p>Registers a one-time callback for an event.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.hooks.once("system:startup", () =&gt; {
-  console.log("Server started");
+<h3><code>registerCmdMiddleware(fn)</code></h3>
+<p>Insert middleware into the command pipeline. Runs before <code>exec</code>. Return<br>
+<code>false</code> to abort dispatch.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerCmdMiddleware(async (u) =&gt; {
+  if (u.me.flags.has("frozen")) { u.send("You're frozen."); return false; }
 });
 </code></pre>
+<hr>
+<h2>Plugin SDK (<code>IUrsamuSDK</code>)</h2>
+<p>The <code>u</code> object passed to every <code>addCmd</code> <code>exec</code> and every sandbox script.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">interface IUrsamuSDK {
+  state: Record&lt;string, unknown&gt;;
+  socketId?: string;
+  me: IDBObj;
+  here: IDBObj &amp; { broadcast(msg: string): void };
+  target?: IDBObj &amp; { broadcast(msg: string): void };
+  cmd: { name: string; original?: string; args: string[]; switches?: string[] };
+
+  send(message: string, target?: string): void;
+  broadcast(message: string): void;
+  execute(command: string): Promise&lt;void&gt;;
+  force(command: string): Promise&lt;void&gt;;
+  forceAs(targetId: string, command: string): Promise&lt;void&gt;;
+  canEdit(actor: IDBObj, target: IDBObj): Promise&lt;boolean&gt;;
+  checkLock(target: IDBObj, lock: string): Promise&lt;boolean&gt;;
+  setFlags(targetId: string, flags: string): Promise&lt;void&gt;;
+  trigger(targetId: string, attr: string, args?: string[]): Promise&lt;void&gt;;
+  eval(targetId: string, attr: string, args?: string[]): Promise&lt;string&gt;;
+  evalString(source: string): Promise&lt;string&gt;;
+  intercept?: (input: string) =&gt; Promise&lt;boolean&gt;;
+
+  db:    { search, create, modify, destroy };
+  util:  { target, displayName, stripSubs, center, ljust, rjust, sprintf,
+           template, parseDesc, resolveFormat, resolveFormatOr,
+           resolveGlobalFormat, resolveGlobalFormatOr };
+  auth:  { verify, login, hash, setPassword };
+  sys:   { setConfig, disconnect, reboot, shutdown, uptime, update,
+           gameTime, setGameTime };
+  chan:  { join, leave, list, create, destroy, set, history };
+  attr:  { get, set, clear };
+  events:{ emit, on };
+  ui:    { panel, render, layout };
+}
+</code></pre>
+<h3><code>u.db</code></h3>
+<p>All async. <code>op</code> must be <code>"$set"</code>, <code>"$inc"</code>, <code>"$unset"</code>, or <code>"$push"</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const list = await u.db.search({ flags: ["room"] });
+const sword = await u.db.create({ name: "Sword", flags: new Set(["thing"]),
+  location: u.me.id, state: {}, contents: [] });
+await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
+await u.db.modify(u.me.id, "$inc", { "data.deaths": 1 });
+await u.db.modify(u.me.id, "$unset", { "data.tempFlag": "" });
+await u.db.modify(u.here.id, "$push", { "data.log": "Alice arrived." });
+await u.db.destroy(sword.id);
+</code></pre>
+<h3><code>u.util</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const obj = await u.util.target(u.me, u.cmd.args[0], true);
+const name = u.util.displayName(target, u.me);
+const plain = u.util.stripSubs("%chBold%cn");
+u.send(u.util.center("TITLE", 78, "="));
+u.send(u.util.ljust("Name", 20) + u.util.rjust("100", 10));
+u.send(u.util.sprintf("%-20s %5d gp", player.name!, gold));
+const text = await u.util.resolveFormat(u.me, "NAMEFORMAT", defaultName);
+</code></pre>
+<h3><code>u.auth</code> / <code>u.sys</code> / <code>u.chan</code> / <code>u.attr</code> / <code>u.events</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.auth.verify(u.me.name!, "pw");
+await u.auth.setPassword(u.me.id, "newpw");
+
+await u.sys.setConfig("server.name", "My Game");
+const t = await u.sys.gameTime();
+
+await u.chan.join("Public", "pub");
+await u.chan.create("Staff", { header: "%ch[STAFF]%cn", hidden: true });
+
+const bio = await u.attr.get(u.me.id, "FINGER-INFO");
+await u.attr.set(u.me.id, "BIO", "Tall and lanky.");
+
+await u.events.emit("game:levelup", { id: u.me.id, lvl: 5 });
+</code></pre>
+<h3><code>u.eval</code> / <code>u.evalString</code> / <code>u.trigger</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const score = await u.eval(u.me.id, "SCORE-FORMULA");
+const rendered = await u.evalString("[name(me)] is here.");
+await u.trigger(u.here.id, "ONENTER", [u.me.id]);
+</code></pre>
+<h3><code>u.force</code> / <code>u.forceAs</code> / <code>u.execute</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.force("look");
+await u.forceAs(npcId, "say Welcome.");
+await u.execute("@pemit #3=Server message.");
+</code></pre>
+<p><code>u.forceAs</code> is privileged — guard with <code>u.me.flags.has("wizard")</code> etc.</p>
+<hr>
 <h2>Database</h2>
-<p>The <code>Database</code> class provides access to the UrsaMU database.</p>
-<h3>Methods</h3>
-<h4><code>get(key: string)</code></h4>
-<p>Gets a value from the database.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const value = await app.db.get("players:#123");
-</code></pre>
-<h4><code>set(key: string, value: any)</code></h4>
-<p>Sets a value in the database.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.db.set("players:#123", playerData);
-</code></pre>
-<h4><code>delete(key: string)</code></h4>
-<p>Deletes a value from the database.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.db.delete("players:#123");
-</code></pre>
-<h4><code>list(prefix: string)</code></h4>
-<p>Lists all keys with a specific prefix.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const playerKeys = await app.db.list("players:");
-</code></pre>
-<h4><code>transaction(callback: (tx: Transaction) =&gt; Promise&lt;void&gt;)</code></h4>
-<p>Performs a transaction.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.db.transaction(async (tx) =&gt; {
-  const player = await tx.get("players:#123");
-  player.money += 100;
-  await tx.set("players:#123", player);
-});
-</code></pre>
-<h2>CommandManager</h2>
-<p>The <code>CommandManager</code> class manages commands in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>register(plugin: string, command: ICmd)</code></h4>
-<p>Registers a command. Prefer using <code>addCmd()</code> directly from the SDK package.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
+<h3><code>DBO&lt;T&gt;</code></h3>
+<p>Generic database collection. Use for plugin-scoped storage. Always prefix<br>
+the namespace with your plugin name.</p>
+<p>By default, UrsaMU uses <strong>TypeGraph (built on Postgres/PGlite)</strong> to store document records inside a local or in-memory PostgreSQL database, with a fallback <code>DenoKvAdapter</code> available.</p>
+<ul>
+<li><strong>Environment Variable</strong>: <code>URSAMU_TYPEGRAPH_DB</code> can be set to customize the database storage file/directory (defaults to <code>${Deno.cwd()}/data/typegraph.db</code> for production/development, and <code>memory://</code> during test runs).</li>
+<li><strong>Methods</strong>: Supports standard query and modification operators.</li>
+</ul>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { DBO } from "jsr:@ursamu/mush";
 
-addCmd({
-  name: "hello",
-  pattern: /^hello$/i,
-  lock: "connected",
-  exec: (u) =&gt; {
-    u.send("Hello, world!");
-  }
+const scores = new DBO&lt;{ player: string; score: number }&gt;("myplugin.scores");
+await scores.create({ player: "Alice", score: 100 });
+const all = await scores.all();
+const top = await scores.queryOne({ player: "Alice" });
+await scores.modify({ player: "Alice" }, "$inc", { score: 1 });
+await scores.modify({ player: "Alice" }, "$push", { history: Date.now() });
+</code></pre>
+<p>Ops: <code>$set</code>, <code>$inc</code>, <code>$unset</code>, <code>$push</code> (atomic CAS append).</p>
+<h3><code>dbojs</code></h3>
+<p>The shared game-object collection (<code>IDBOBJ</code>).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { dbojs } from "jsr:@ursamu/mush";
+
+const players = await dbojs.find({ flags: { $in: ["player"] } });
+const room = await dbojs.queryOne({ id: "1" });
+</code></pre>
+<hr>
+<h2>Locks &amp; permissions</h2>
+<p>Lock strings combine <strong>lockfuncs</strong> with the operators <code>&amp;&amp;</code>, <code>||</code>, <code>!</code>, and<br>
+<code>()</code>. Legacy <code>&amp;</code> / <code>|</code> still work. Max length 4096 chars / 256 tokens.</p>
+<p>Built-in lockfuncs:</p>
+<table>
+<thead>
+<tr>
+<th>Func</th>
+<th>Example</th>
+<th>Passes when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>flag(name)</code></td>
+<td><code>flag(wizard)</code></td>
+<td>enactor has the flag</td>
+</tr>
+<tr>
+<td><code>attr(name)</code></td>
+<td><code>attr(tribe)</code></td>
+<td>enactor.state has own property <code>name</code></td>
+</tr>
+<tr>
+<td><code>attr(name, val)</code></td>
+<td><code>attr(tribe, glasswalker)</code></td>
+<td><code>state[name] === val</code></td>
+</tr>
+<tr>
+<td><code>type(name)</code></td>
+<td><code>type(player)</code></td>
+<td>enactor has the type flag</td>
+</tr>
+<tr>
+<td><code>is(#id)</code></td>
+<td><code>is(#5)</code></td>
+<td><code>enactor.id === "5"</code></td>
+</tr>
+<tr>
+<td><code>holds(#id)</code></td>
+<td><code>holds(#12)</code></td>
+<td>enactor.contents includes <code>#12</code></td>
+</tr>
+<tr>
+<td><code>perm(level)</code></td>
+<td><code>perm(admin)</code></td>
+<td>passes privilege ladder check</td>
+</tr>
+</tbody>
+</table>
+<h3><code>registerLockFunc(name, fn)</code></h3>
+<p>Register a custom lockfunc. Built-in names are protected.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerLockFunc } from "jsr:@ursamu/mush";
+
+registerLockFunc("tribe", (enactor, _target, args) =&gt;
+  String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
+);
+
+// lock: "tribe(glasswalker) || perm(admin)"
+</code></pre>
+<h3><code>evaluateLock(lock, enactor, target?)</code></h3>
+<p>Returns <code>Promise&lt;boolean&gt;</code>. Fail-closed on unknown funcs or parse errors.</p>
+<h3><code>validateLock(lock)</code></h3>
+<p>Throws on syntax error. Use to validate user-supplied lock strings.</p>
+<hr>
+<h2>Format handlers</h2>
+<p>Pluggable display formatters for engine and plugin output. Resolution<br>
+priority: per-object softcode attribute → registered TS handler →<br>
+registered MUSH template → built-in default.</p>
+<p><code>FormatSlot</code> is an <strong>open union</strong> (v2.3.4+). The eight engine-known slots<br>
+get IDE autocomplete:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">NAMEFORMAT  DESCFORMAT  CONFORMAT   EXITFORMAT
+WHOFORMAT   WHOROWFORMAT  PSFORMAT  PSROWFORMAT
+</code></pre>
+<p>Plugins may register any <code>UPPERCASE</code> slot (e.g. <code>"MAILFORMAT"</code>,<br>
+<code>"BBROWFORMAT"</code>) without casts.</p>
+<h3><code>registerFormatHandler(slot, fn)</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerFormatHandler("NAMEFORMAT", (u, target, defaultName) =&gt; {
+  if (!target.flags.has("room")) return null;
+  return `%ch%cy[${defaultName}]%cn\n`;
 });
 </code></pre>
-<h4><code>unregister(plugin: string, commandName: string)</code></h4>
-<p>Unregisters a command.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.commands.unregister("myplugin", "hello");
+<p>Return <code>null</code> to fall through. First non-null handler wins. Returns the<br>
+registered function so <code>unregisterFormatHandler</code> can remove it.</p>
+<h3><code>registerFormatTemplate(slot, mushSource)</code> <em>(v2.4.0)</em></h3>
+<p>Install a MUSH-softcode template. <code>%0</code> binds to the default rendering.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const fn = registerFormatTemplate(
+  "NAMEFORMAT",
+  "[center(strcat(%cy[ ,%0, ]%cn),78,=)]",
+);
+// remove() ...
+unregisterFormatHandler("NAMEFORMAT", fn);
 </code></pre>
-<h4><code>get(commandName: string)</code></h4>
-<p>Gets a command by name.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const command = app.commands.get("look");
+<h3><code>unregisterFormatHandler(slot, fn)</code></h3>
+<p>Remove a handler by reference identity.</p>
+<h3><code>resolveFormat(target, slot, defaultArg)</code></h3>
+<p>Two-step lookup for target-bound formats: softcode attr on <code>target</code> →<br>
+registered handler. Returns <code>string | null</code>.</p>
+<h3><code>resolveFormatOr(target, slot, defaultArg, fallback)</code></h3>
+<p>As above, but always returns a string.</p>
+<h3><code>resolveGlobalFormat(enactor, slot, defaultArg)</code> <em>(v2.3.3)</em></h3>
+<p>Two-tier lookup for global-list formats (WHO, @ps, +mail, +bb): <code>#0</code> →<br>
+enactor. Returns <code>string | null</code>.</p>
+<h3><code>resolveGlobalFormatOr(enactor, slot, defaultArg, fallback)</code></h3>
+<p>Always returns a string.</p>
+<h3><code>header(title, width?)</code> / <code>divider(width?)</code> / <code>footer(width?)</code></h3>
+<p>Native TS layout helpers for block-style section rules. Distinct from the<br>
+softcode helpers of the same name.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">u.send(header("Stats", 78));
+u.send(divider(78));
+u.send(footer(78));
 </code></pre>
-<h4><code>match(input: string)</code></h4>
-<p>Finds a command that matches the input.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const match = app.commands.match("look at sword");
-if (match) {
-  // Commands are executed by the command parser via createNativeSDK
-  // Direct invocation is not typical — let the parser route commands
+<h3>Types</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">type FormatHandler = (
+  u: IUrsamuSDK,
+  target: IDBObj,
+  defaultArg: string,
+) =&gt; Promise&lt;string | null&gt; | string | null;
+
+type FormatSlot = "NAMEFORMAT" | "DESCFORMAT" | "CONFORMAT" | "EXITFORMAT"
+  | "WHOFORMAT" | "WHOROWFORMAT" | "PSFORMAT" | "PSROWFORMAT"
+  | (string &amp; {});
+</code></pre>
+<hr>
+<h2>Softcode extension</h2>
+<h3><code>registerSoftcodeFunc(name, fn)</code></h3>
+<p>Register a custom stdlib function callable from softcode as <code>name(args)</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerSoftcodeFunc } from "jsr:@ursamu/mush";
+
+registerSoftcodeFunc("double", (_ctx, args) =&gt;
+  String(Number(args[0]) * 2)
+);
+</code></pre>
+<h3><code>registerSoftcodeSub(char, handler)</code></h3>
+<p>Register a custom <code>%X</code> substitution.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerSoftcodeSub("$", (ctx) =&gt; `[$${ctx.enactor.id}]`);
+</code></pre>
+<h3><code>softcodeService</code></h3>
+<p>The evaluator instance. Exposed for plugin integration tests.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { softcodeService } from "jsr:@ursamu/mush";
+const out = await softcodeService.eval({ enactor, executor, source: "[add(2,3)]" });
+</code></pre>
+<hr>
+<h2>Hooks &amp; events</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { gameHooks } from "jsr:@ursamu/mush";
+import type { SessionEvent, SayEvent } from "jsr:@ursamu/mush";
+
+const onLogin = (e: SessionEvent) =&gt; console.log(`${e.player.name} logged in`);
+gameHooks.on("player:login", onLogin);
+
+// In plugin remove() — same function reference required:
+gameHooks.off("player:login", onLogin);
+</code></pre>
+<p><code>GameHookMap</code> event names:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">player:login      player:logout
+say               pose             page             move
+channel:message
+object:created    object:destroyed object:modified  object:moved
+scene:created     scene:pose       scene:set
+scene:title       scene:clear
+mail:received
+</code></pre>
+<p>Each has a typed payload (<code>SessionEvent</code>, <code>SayEvent</code>, <code>PoseEvent</code>,<br>
+<code>PageEvent</code>, <code>MoveEvent</code>, <code>ChannelMessageEvent</code>, <code>ObjectCreatedEvent</code>,<br>
+<code>ObjectDestroyedEvent</code>, <code>ObjectModifiedEvent</code>, <code>ObjectMovedEvent</code>, <code>SceneCreatedEvent</code>,<br>
+<code>ScenePoseEvent</code>, <code>SceneSetEvent</code>, <code>SceneTitleEvent</code>, <code>SceneClearEvent</code>,<br>
+<code>MailReceivedEvent</code>).</p>
+<hr>
+<h2>REST &amp; UI</h2>
+<h3><code>registerPluginRoute(prefix, handler)</code></h3>
+<p>Attach a REST handler. Always return 401 before doing work when <code>userId</code><br>
+is null on a protected route.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">registerPluginRoute("/api/v1/my-plugin", async (req, userId) =&gt; {
+  if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  return Response.json({ ok: true, userId });
+});
+</code></pre>
+<p>Handler signature: <code>(req: Request, userId: string | null) =&gt; Promise&lt;Response&gt;</code>.</p>
+<h3><code>registerUIComponent(component)</code> / <code>unregisterUIComponent(id)</code> / <code>getRegisteredUIComponents()</code></h3>
+<p>Expose a UI element via <code>GET /api/v1/ui-manifest</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import type { IUIComponent } from "jsr:@ursamu/mush";
+
+const comp: IUIComponent = {
+  id: "myplugin.panel",
+  type: "panel",
+  title: "My Panel",
+  url: "/plugins/myplugin/panel.html",
+  requires: { flag: "builder" },
+};
+registerUIComponent(comp);
+</code></pre>
+<hr>
+<h2>Stat systems</h2>
+<p>Plugins can register a pluggable stat/skill system, queryable by name.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerStatSystem, getDefaultStatSystem } from "jsr:@ursamu/mush";
+import type { IStatSystem } from "jsr:@ursamu/mush";
+
+const system: IStatSystem = { name: "wod5", /* ...impl */ };
+registerStatSystem(system, { default: true });
+
+const def = getDefaultStatSystem();
+</code></pre>
+<p>Also: <code>getStatSystem(name)</code>, <code>getStatSystemNames(): string[]</code>.</p>
+<hr>
+<h2>WebSocket</h2>
+<h3><code>wsService</code></h3>
+<p>Direct access to the WebSocket hub. Used by channel/notification plugins.</p>
+<h3><code>joinSocketToRoom(socketId, room)</code></h3>
+<p>Subscribe a connected socket to a broadcast room.</p>
+<h3><code>send(message, target?, options?)</code></h3>
+<p>Module-level broadcast — sends to a socket ID, room ID, or DB object ID.<br>
+Same semantics as <code>u.send</code> but importable from anywhere.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { send } from "jsr:@ursamu/mush";
+send("Server reboot in 5 minutes.", "#all");
+</code></pre>
+<h3><code>notify(actorId, message, options?)</code></h3>
+<p>Deliver a message to a single online actor by id. Available as both<br>
+<code>u.notify(actorId, msg)</code> (Promise<boolean>) on the SDK and a standalone<br>
+<code>notify</code> import for <code>gameHooks</code> handlers that don’t have a <code>u</code>. Returns<br>
+<code>true</code> if at least one live socket was found for the actor, <code>false</code> if the<br>
+actor is offline — callers can branch on the result to queue or drop.</boolean></p>
+<p>Use this when you need to message a third party. <code>u.send</code> addresses the<br>
+caller (<code>u.me</code>); <code>here.broadcast</code> is room-scoped; <code>notify</code> is the right<br>
+tool when a plugin command boots another player from a seat, or a hook<br>
+handler wants to tell the moved actor <em>why</em> something just happened.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In a plugin command:
+const delivered = await u.notify(target.id, "You have been booted from your post.");
+if (!delivered) {
+  // queue a job / mark unread / fall back to email
 }
-</code></pre>
-<h2>PluginManager</h2>
-<p>The <code>PluginManager</code> class manages plugins in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>register(plugin: IPlugin)</code></h4>
-<p>Registers a plugin.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.plugins.register(new MyPlugin());
-</code></pre>
-<h4><code>unregister(pluginName: string)</code></h4>
-<p>Unregisters a plugin.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.plugins.unregister("myplugin");
-</code></pre>
-<h4><code>get(pluginName: string)</code></h4>
-<p>Gets a plugin by name.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const plugin = app.plugins.get("myplugin");
-</code></pre>
-<h4><code>loadAll()</code></h4>
-<p>Loads all registered plugins.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.plugins.loadAll();
-</code></pre>
-<h4><code>unloadAll()</code></h4>
-<p>Unloads all registered plugins.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.plugins.unloadAll();
-</code></pre>
-<h2>PlayerManager</h2>
-<p>The <code>PlayerManager</code> class manages players in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>create(name: string, password: string)</code></h4>
-<p>Creates a new player.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = await app.players.create("NewPlayer", "password123");
-</code></pre>
-<h4><code>authenticate(name: string, password: string)</code></h4>
-<p>Authenticates a player.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = await app.players.authenticate("PlayerName", "password123");
-if (player) {
-  // Authentication successful
-}
-</code></pre>
-<h4><code>get(dbref: string)</code></h4>
-<p>Gets a player by dbref.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = app.players.get("#123");
-</code></pre>
-<h4><code>getByName(name: string)</code></h4>
-<p>Gets a player by name.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = app.players.getByName("PlayerName");
-</code></pre>
-<h4><code>getConnected()</code></h4>
-<p>Gets all connected players.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const connectedPlayers = app.players.getConnected();
-</code></pre>
-<h4><code>broadcast(message: string)</code></h4>
-<p>Broadcasts a message to all connected players.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.players.broadcast("Server announcement: We will be upgrading soon!");
-</code></pre>
-<h2>ObjectManager</h2>
-<p>The <code>ObjectManager</code> class manages game objects in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>create(type: string, name: string, owner: string)</code></h4>
-<p>Creates a new game object.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const room = await app.objects.create("ROOM", "Town Square", "#1");
-</code></pre>
-<h4><code>get(dbref: string)</code></h4>
-<p>Gets an object by dbref.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const obj = app.objects.get("#123");
-</code></pre>
-<h4><code>search(query: ObjectQuery)</code></h4>
-<p>Searches for objects matching a query.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const results = await app.objects.search({
-  type: "ROOM",
-  flags: ["DARK"],
-  owner: "#1"
+
+// In a gameHooks handler (no `u` in scope):
+import { notify, gameHooks } from "jsr:@ursamu/mush";
+gameHooks.on("player:move", (e) =&gt; {
+  notify(e.actorId, "Station unmanned — you left the post.");
 });
+
+// In a system script (sandboxed) — same shape, also returns a Promise&lt;boolean&gt;:
+export default async (u) =&gt; {
+  await u.notify(targetId, "Heads up.");
+};
 </code></pre>
-<h4><code>delete(dbref: string)</code></h4>
-<p>Deletes an object.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.objects.delete("#123");
+<p><code>UserSocket</code> is the typed socket metadata exported for plugin authors.</p>
+<hr>
+<h2>Engine context</h2>
+<p><code>GameContext</code> is the substrate every command runs on (actor, location,<br>
+helpers). Most plugin code uses <code>IUrsamuSDK</code> instead — <code>GameContext</code> is<br>
+exposed for low-level integrations.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { buildContext } from "jsr:@ursamu/mush";
+const ctx = await buildContext({ socketId, actorId });
 </code></pre>
-<h2>FlagManager</h2>
-<p>The <code>FlagManager</code> class manages flags in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>register(flag: Flag)</code></h4>
-<p>Registers a new flag.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.flags.register({
-  name: "INVISIBLE",
-  letter: "I",
-  type: ["PLAYER", "THING"],
-  permission: "wizard"
-});
+<hr>
+<h2>Plugin config</h2>
+<p><code>PluginConfigManager</code> reads per-plugin scoped values from <code>config.json</code>.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { PluginConfigManager } from "jsr:@ursamu/mush";
+
+const cfg = new PluginConfigManager("myplugin");
+const apiKey = cfg.get&lt;string&gt;("apiKey");
+await cfg.set("lastRun", Date.now());
 </code></pre>
-<h4><code>unregister(flagName: string)</code></h4>
-<p>Unregisters a flag.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">app.flags.unregister("INVISIBLE");
+<hr>
+<h2>Stdlib (TS)</h2>
+<p>All functions are pure and deterministic. v2.5.1 promoted these from<br>
+softcode-only to TS-importable. v2.5.2 added per-instance <code>Noise</code>.</p>
+<h3>Noise</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import {
+  seedNoise, perlin1, perlin2, perlin3,
+  simplex2, worley2, fbm2, ridged2, noiseGrid,
+  Noise, createNoise, buildPerm,
+} from "jsr:@ursamu/mush";
+
+seedNoise(42);
+const v = perlin2(0.5, 1.7);
+
+const n = createNoise(123);
+const v2 = n.perlin2(0.5, 1.7);
 </code></pre>
-<h4><code>get(flagName: string)</code></h4>
-<p>Gets a flag by name.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const flag = app.flags.get("WIZARD");
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>seedNoise(seed)</code></td>
+<td>Reseed the singleton noise stream</td>
+</tr>
+<tr>
+<td><code>perlin1/2/3</code></td>
+<td>Classic Perlin noise (1D/2D/3D), range ~[-1, 1]</td>
+</tr>
+<tr>
+<td><code>simplex2</code></td>
+<td>2D simplex noise</td>
+</tr>
+<tr>
+<td><code>worley2</code></td>
+<td>2D Worley/cellular noise, returns distance to nearest feature</td>
+</tr>
+<tr>
+<td><code>fbm2</code></td>
+<td>Fractional Brownian Motion (octave-summed Perlin)</td>
+</tr>
+<tr>
+<td><code>ridged2</code></td>
+<td>Ridged multifractal noise</td>
+</tr>
+<tr>
+<td><code>noiseGrid(w,h,fn)</code></td>
+<td>Sample a function over a grid → <code>number[][]</code></td>
+</tr>
+<tr>
+<td><code>buildPerm(seed)</code></td>
+<td>Build a permutation table for a custom noise impl</td>
+</tr>
+<tr>
+<td><code>Noise</code> class</td>
+<td>Per-instance independent noise stream</td>
+</tr>
+<tr>
+<td><code>createNoise(seed)</code></td>
+<td>Construct a <code>Noise</code></td>
+</tr>
+</tbody>
+</table>
+<h3>PRNG (<code>Rng</code>)</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { Rng, createRng } from "jsr:@ursamu/mush";
+
+const r = createRng(123);
+r.next();        // [0, 1)
+r.int(1, 6);     // dice roll
+r.pick(["a", "b", "c"]);
 </code></pre>
-<h4><code>check(obj: GameObject, flagName: string)</code></h4>
-<p>Checks if an object has a flag.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const hasFlag = app.flags.check(player, "WIZARD");
+<p>Per-instance mulberry32 — independent of the softcode RNG.</p>
+<h3>Physics</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { vreflect, pointInAabb, rayAabb } from "jsr:@ursamu/mush";
+import type { Vec3 } from "jsr:@ursamu/mush";
+
+const reflected = vreflect([1, 0, 0], [0, 1, 0]);
+const inside = pointInAabb([5, 5, 5], [0, 0, 0], [10, 10, 10]);
+const hit = rayAabb(origin, dir, min, max);
 </code></pre>
-<h2>ChannelManager</h2>
-<p>The <code>ChannelManager</code> class manages communication channels in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>create(name: string, owner: string, options?: ChannelOptions)</code></h4>
-<p>Creates a new channel.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const channel = await app.channels.create("Public", "#1", {
-  header: "Public Channel",
-  joinable: true,
-  leavable: true
-});
+<h3>Spatial scalars</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import {
+  dist2d, dist3d, distSq2d, distSq3d,
+  manhattan, chebyshev, angle2d, bearing,
+} from "jsr:@ursamu/mush";
+
+dist2d(0, 0, 3, 4);     // 5
+manhattan(0, 0, 3, 4);  // 7
+bearing(0, 0, 1, 1);    // radians
 </code></pre>
-<h4><code>get(name: string)</code></h4>
-<p>Gets a channel by name.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const channel = app.channels.get("Public");
+<h3>Interpolation</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { lerp, inverseLerp, remap, smoothstep, smootherstep, clamp }
+  from "jsr:@ursamu/mush";
+
+lerp(0, 100, 0.5);          // 50
+inverseLerp(0, 100, 75);    // 0.75
+remap(0, 100, 0, 1, 50);    // 0.5
+smoothstep(0, 1, 0.5);      // 0.5 (Hermite curve)
+clamp(150, 0, 100);         // 100
 </code></pre>
-<h4><code>join(channelName: string, player: Player)</code></h4>
-<p>Adds a player to a channel.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.channels.join("Public", player);
+<h3>Vector ops</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { vsize, vsizeSq, vdistance, vdistanceSq, vlerp, vclamp }
+  from "jsr:@ursamu/mush";
+import type { Vec } from "jsr:@ursamu/mush";
+
+const a: Vec = [3, 4];
+vsize(a);              // 5
+vdistance([0, 0], a);  // 5
+vlerp([0, 0], a, 0.5); // [1.5, 2]
 </code></pre>
-<h4><code>leave(channelName: string, player: Player)</code></h4>
-<p>Removes a player from a channel.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.channels.leave("Public", player);
+<hr>
+<h2>Types</h2>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>IUrsamuSDK</code></td>
+<td>The <code>u</code> object — full surface</td>
+</tr>
+<tr>
+<td><code>IDBObj</code></td>
+<td>Hydrated game object (Set flags, populated contents)</td>
+</tr>
+<tr>
+<td><code>IDBOBJ</code></td>
+<td>Raw DB record shape</td>
+</tr>
+<tr>
+<td><code>ICmd</code></td>
+<td>Command registration</td>
+</tr>
+<tr>
+<td><code>IPlugin</code></td>
+<td>Plugin module export</td>
+</tr>
+<tr>
+<td><code>IPluginDependency</code></td>
+<td>Entry in <code>ursamu.plugin.json</code> deps</td>
+</tr>
+<tr>
+<td><code>IContext</code></td>
+<td>Low-level command context (legacy)</td>
+</tr>
+<tr>
+<td><code>IMiddlewareFunction</code></td>
+<td><code>(u: IUrsamuSDK) =&gt; boolean | Promise&lt;boolean&gt;</code></td>
+</tr>
+<tr>
+<td><code>IStatSystem</code></td>
+<td>Pluggable stat system</td>
+</tr>
+<tr>
+<td><code>IUIComponent</code></td>
+<td>UI manifest entry</td>
+</tr>
+<tr>
+<td><code>GameHookMap</code></td>
+<td>Event-name → payload mapping</td>
+</tr>
+<tr>
+<td><code>FormatHandler</code></td>
+<td>TS format-handler signature</td>
+</tr>
+<tr>
+<td><code>FormatSlot</code></td>
+<td>Open uppercase-string union</td>
+</tr>
+<tr>
+<td><code>GameContext</code></td>
+<td>Engine substrate</td>
+</tr>
+<tr>
+<td><code>UserSocket</code></td>
+<td>WebSocket metadata</td>
+</tr>
+<tr>
+<td><code>LockFunc</code></td>
+<td>Custom lockfunc signature</td>
+</tr>
+<tr>
+<td><code>SoftcodeFn</code></td>
+<td>Custom stdlib function signature</td>
+</tr>
+<tr>
+<td><code>SoftcodeSubHandler</code></td>
+<td>Custom <code>%X</code> handler signature</td>
+</tr>
+<tr>
+<td><code>SoftcodeContext</code></td>
+<td>Evaluator context</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Internal: plugin install errors</h2>
+<p>The v2.6.0 plugin installer throws typed errors on failure. They live in<br>
+<code>src/utils/pluginErrors.ts</code> and are <strong>not currently exported from<br>
+<code>mod.ts</code></strong> — they are used internally by the <code>ursamu plugin install</code><br>
+flow. Listed here for diagnostic visibility.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">PluginInstallError              base class
+├─ PluginDepNameError           invalid/missing name in deps entry
+├─ PluginDepUrlError            invalid/missing url
+├─ PluginCloneError             git clone failed
+├─ PluginRenameError            move into plugins/ failed
+├─ PluginVersionError           installed plugin missing version manifest
+├─ PluginSemverError            installed version doesn't satisfy dep range
+└─ PluginConflictError          two deps disagree on resolved version
 </code></pre>
-<h4><code>send(channelName: string, sender: Player, message: string)</code></h4>
-<p>Sends a message to a channel.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.channels.send("Public", player, "Hello, everyone!");
-</code></pre>
-<h2>MailManager</h2>
-<p>The <code>MailManager</code> class manages the mail system in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>send(sender: string, recipient: string, subject: string, body: string)</code></h4>
-<p>Sends a mail message.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.mail.send("#1", "#2", "Hello", "This is a test message.");
-</code></pre>
-<h4><code>get(mailId: string)</code></h4>
-<p>Gets a mail message by ID.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const message = await app.mail.get("mail:123");
-</code></pre>
-<h4><code>getInbox(player: string)</code></h4>
-<p>Gets a player’s inbox.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const inbox = await app.mail.getInbox("#1");
-</code></pre>
-<h4><code>delete(mailId: string)</code></h4>
-<p>Deletes a mail message.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.mail.delete("mail:123");
-</code></pre>
-<h2>BulletinBoardManager</h2>
-<p>The <code>BulletinBoardManager</code> class manages bulletin boards in UrsaMU.</p>
-<h3>Methods</h3>
-<h4><code>createBoard(name: string, owner: string, options?: BoardOptions)</code></h4>
-<p>Creates a new bulletin board.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const board = await app.bboard.createBoard("Announcements", "#1", {
-  readPermission: "connected",
-  writePermission: "wizard"
-});
-</code></pre>
-<h4><code>getBoard(name: string)</code></h4>
-<p>Gets a board by name.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const board = await app.bboard.getBoard("Announcements");
-</code></pre>
-<h4><code>post(boardName: string, author: string, subject: string, body: string)</code></h4>
-<p>Posts a message to a board.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.bboard.post("Announcements", "#1", "Server Update", "We will be updating the server tomorrow.");
-</code></pre>
-<h4><code>getPost(postId: string)</code></h4>
-<p>Gets a post by ID.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const post = await app.bboard.getPost("post:123");
-</code></pre>
-<h4><code>deletePost(postId: string)</code></h4>
-<p>Deletes a post.</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await app.bboard.deletePost("post:123");
-</code></pre>
+<p>On any throw the installer’s <code>InstallTxn</code> rolls back every directory and<br>
+registry mutation made during the run.</p>
 
       </article>
 
@@ -956,20 +1077,54 @@ if (player) {
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
 
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/api/" class="page-nav-btn prev">
+          <a href="/api/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
             <span class="page-nav-title">API Reference</span>
           </a>
         
 
         
-          <a href="/ursamu/child-games/" class="page-nav-btn next">
+          <a href="/api/rest/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">REST API Reference</span>
           </a>
         
       </nav>
@@ -984,9 +1139,9 @@ if (player) {
         &nbsp;—&nbsp;MIT License • © 2025
       </div>
       <div class="footer-links">
-        <a href="/ursamu/guides/installation/">Installation</a>
-        <a href="/ursamu/api/">API</a>
-        <a href="/ursamu/plugins/">Plugins</a>
+        <a href="/guides/installation/">Installation</a>
+        <a href="/api/">API</a>
+        <a href="/plugins/">Plugins</a>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>

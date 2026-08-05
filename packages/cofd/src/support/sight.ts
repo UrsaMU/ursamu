@@ -30,16 +30,16 @@ export function hasSightFlag(
   return actor.flags.has(flag);
 }
 
-/** True Fae layer: changeling flag, or staff. */
+/**
+ * True Fae dual-look layer (FAEDESC, mask names, etc.).
+ * Requires the `fae` flag only — staff does not auto-see.
+ * Preview: @set me=fae  (clear with @set me=!fae).
+ */
 export function hasFaeSight(
   actor: IDBObj | null | undefined,
 ): boolean {
   if (!actor?.flags) return false;
-  if (actor.flags.has("fae")) return true;
-  if (actor.flags.has("wizard")) return true;
-  if (actor.flags.has("admin")) return true;
-  if (actor.flags.has("superuser")) return true;
-  return false;
+  return actor.flags.has("fae");
 }
 
 /**

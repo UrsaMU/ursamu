@@ -8,8 +8,15 @@
  *   trigger:attr
  *   events:emit, events:subscribe
  */
-import { dbojs } from "../../world/dbobjs.ts";
+import { dbojs, hydrate } from "../../world/dbobjs.ts";
 import type { IDBOBJ } from "../../world/types.ts";
+import { pickNameMatch } from "../../world/name-match.ts";
+import {
+  canEditObject,
+  canSeeAttr,
+  canSetAttr,
+  attrFlagsOf,
+} from "../../world/permissions.ts";
 import type { SDKContext } from "../sdk-service.ts";
 
 type Msg    = Record<string, unknown>;
@@ -27,44 +34,130 @@ export async function handleAttrMessage(
   const { type, msgId } = msg;
 
   if (type === "attr:get") {
-    if (!msg.id || !msg.name) { respond(worker, msgId, null); return; }
+    if (!msg.id || !msg.name) {
+      respond(worker, msgId, null);
+      return;
+    }
     const obj = await dbojs.queryOne({ id: msg.id as string });
-    if (!obj) { respond(worker, msgId, null); return; }
-    const attrs = (obj.data?.attributes as Array<{ name: string; value: string }> | undefined) || [];
-    const found = attrs.find(a => a.name.toUpperCase() === (msg.name as string).toUpperCase());
+    if (!obj) {
+      respond(worker, msgId, null);
+      return;
+    }
+    const actor = context?.id
+      ? await dbojs.queryOne({ id: String(context.id) })
+      : null;
+    const fl = attrFlagsOf({ data: obj.data }, String(msg.name));
+    if (!canSeeAttr(actor?.flags, String(msg.name), fl)) {
+      respond(worker, msgId, null);
+      return;
+    }
+    const attrs =
+      (obj.data?.attributes as Array<{ name: string; value: string }> |
+        undefined) || [];
+    const found = attrs.find((a) =>
+      a.name.toUpperCase() === (msg.name as string).toUpperCase()
+    );
     respond(worker, msgId, found?.value ?? null);
     return;
   }
 
   if (type === "attr:set") {
-    if (!msg.id || !msg.name) { respond(worker, msgId, null); return; }
+    if (!msg.id || !msg.name) {
+      respond(worker, msgId, null);
+      return;
+    }
     const obj = await dbojs.queryOne({ id: msg.id as string });
-    if (!obj) { respond(worker, msgId, null); return; }
+    if (!obj) {
+      respond(worker, msgId, null);
+      return;
+    }
+    const actor = context?.id
+      ? await dbojs.queryOne({ id: String(context.id) })
+      : null;
+    if (actor) {
+      const tar = hydrate(obj);
+      const fl = attrFlagsOf({ data: obj.data }, String(msg.name));
+      if (
+        !(await canEditObject(
+          { id: actor.id, flags: actor.flags },
+          tar,
+        )) ||
+        !canSetAttr(actor.flags, String(msg.name), fl)
+      ) {
+        respond(worker, msgId, null);
+        return;
+      }
+    }
     obj.data ||= {};
-    const attrs = ((obj.data.attributes as Array<{ name: string; value: string; type?: string; setter?: string }>) || []);
-    const idx   = attrs.findIndex(a => a.name.toUpperCase() === (msg.name as string).toUpperCase());
+    const attrs = ((obj.data.attributes as Array<{
+      name: string;
+      value: string;
+      type?: string;
+      setter?: string;
+    }>) || []);
+    const idx = attrs.findIndex((a) =>
+      a.name.toUpperCase() === (msg.name as string).toUpperCase()
+    );
     const entry = {
-      name:   (msg.name as string).toUpperCase(),
-      value:  msg.value as string,
-      type:   String(msg.attrType || "attribute"),
+      name: (msg.name as string).toUpperCase(),
+      value: msg.value as string,
+      type: String(msg.attrType || "attribute"),
       setter: String(context?.id || ""),
     };
-    if (idx >= 0) attrs[idx] = entry; else attrs.push(entry);
+    if (idx >= 0) attrs[idx] = entry;
+    else attrs.push(entry);
     (obj.data as Record<string, unknown>).attributes = attrs;
-    await dbojs.modify({ id: obj.id }, "$set", { "data.attributes": attrs } as Record<string, unknown>);
+    await dbojs.modify(
+      { id: obj.id },
+      "$set",
+      { "data.attributes": attrs } as Record<string, unknown>,
+    );
     respond(worker, msgId, null);
     return;
   }
 
   if (type === "attr:clear") {
-    if (!msg.id || !msg.name) { respond(worker, msgId, false); return; }
+    if (!msg.id || !msg.name) {
+      respond(worker, msgId, false);
+      return;
+    }
     const obj = await dbojs.queryOne({ id: msg.id as string });
-    if (!obj) { respond(worker, msgId, false); return; }
+    if (!obj) {
+      respond(worker, msgId, false);
+      return;
+    }
+    const actor = context?.id
+      ? await dbojs.queryOne({ id: String(context.id) })
+      : null;
+    if (actor) {
+      const tar = hydrate(obj);
+      const fl = attrFlagsOf({ data: obj.data }, String(msg.name));
+      if (
+        !(await canEditObject(
+          { id: actor.id, flags: actor.flags },
+          tar,
+        )) ||
+        !canSetAttr(actor.flags, String(msg.name), fl)
+      ) {
+        respond(worker, msgId, false);
+        return;
+      }
+    }
     obj.data ||= {};
-    const attrs    = ((obj.data.attributes as Array<{ name: string }>) || []);
-    const filtered = attrs.filter(a => a.name.toUpperCase() !== (msg.name as string).toUpperCase());
-    if (filtered.length === attrs.length) { respond(worker, msgId, false); return; }
-    await dbojs.modify({ id: obj.id }, "$set", { "data.attributes": filtered } as Record<string, unknown>);
+    const attrs =
+      ((obj.data.attributes as Array<{ name: string }>) || []);
+    const filtered = attrs.filter((a) =>
+      a.name.toUpperCase() !== (msg.name as string).toUpperCase()
+    );
+    if (filtered.length === attrs.length) {
+      respond(worker, msgId, false);
+      return;
+    }
+    await dbojs.modify(
+      { id: obj.id },
+      "$set",
+      { "data.attributes": filtered } as Record<string, unknown>,
+    );
     respond(worker, msgId, true);
     return;
   }
@@ -96,27 +189,46 @@ export async function handleUtilTargetMessage(
   _context: SDKContext | undefined,
 ): Promise<void> {
   const { msgId } = msg;
-  if (!msg.actor || !msg.query) { respond(worker, msgId, undefined); return; }
+  if (!msg.actor || !msg.query) {
+    respond(worker, msgId, undefined);
+    return;
+  }
   const query = String(msg.query);
-  let result: { id: string; flags: string; location?: string; data?: Record<string, unknown> } | null | undefined;
+  let result:
+    | {
+      id: string;
+      flags: string;
+      location?: string;
+      data?: Record<string, unknown>;
+    }
+    | null
+    | undefined;
 
   if (query.startsWith("#")) {
     result = await dbojs.queryOne({ id: query.slice(1) });
   } else {
-    result = await dbojs.queryOne({
-      $or: [
-        { id: query },
-        { "data.name": new RegExp(`^${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
-      ],
-    });
+    const actor = await dbojs.queryOne({ id: String(msg.actor) });
+    const all = await dbojs.query({});
+    const nearby = actor?.location
+      ? all.filter((o) =>
+        o.location === actor.location ||
+        o.location === actor.id ||
+        o.id === actor.location
+      )
+      : all;
+    result = pickNameMatch(nearby, query) ??
+      pickNameMatch(all, query);
   }
-  if (!result) { respond(worker, msgId, undefined); return; }
+  if (!result) {
+    respond(worker, msgId, undefined);
+    return;
+  }
   respond(worker, msgId, {
-    id:       result.id,
-    name:     result.data?.name || result.id,
-    flags:    (result.flags || "").split(" ").filter(Boolean),
+    id: result.id,
+    name: result.data?.name || result.id,
+    flags: (result.flags || "").split(" ").filter(Boolean),
     location: result.location,
-    state:    result.data || {},
+    state: result.data || {},
     contents: [],
   });
 }

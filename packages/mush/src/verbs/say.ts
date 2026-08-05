@@ -1,9 +1,35 @@
 import { gameHooks } from "@ursamu/core";
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK } from "../commands/types.ts";
+import { resolveAvatarUrl } from "../routes/avatar-url.ts";
+import { isWebChatEnabled } from "./globals/chat.ts";
 
 const MAX_LISTEN_MSG_LEN = 2_000;
 const MAX_LISTEN_PATTERN_LEN = 500;
+
+/** Web play chat bubble payload (telnet still gets plain msg). */
+async function chatPayload(
+  u: IUrsamuSDK,
+  kind: "say" | "pose" | "semi",
+  text: string,
+  name: string,
+): Promise<Record<string, unknown> | null> {
+  const actor = u.me;
+  const bag = (actor.state ?? {}) as Record<string, unknown>;
+  if (!isWebChatEnabled(bag)) return null;
+  const avatar = await resolveAvatarUrl(actor.id, bag);
+  return {
+    ui: {
+      type: "chat",
+      kind,
+      actorId: actor.id,
+      name,
+      avatar: avatar || null,
+      text,
+      at: Date.now(),
+    },
+  };
+}
 
 function matchListen(pattern: string, text: string): boolean {
   const p = pattern.trim().toLowerCase();
@@ -26,9 +52,19 @@ export async function execSay(u: IUrsamuSDK): Promise<void> {
   if (!raw) { u.send("What do you want to say?"); return; }
 
   const message = await u.evalString(raw);
-  const name = (actor.state.moniker as string) || (actor.state.name as string) || actor.name;
+  const name = u.util.displayName
+    ? u.util.displayName(actor, actor)
+    : ((actor.state.moniker as string) ||
+      (actor.state.name as string) ||
+      actor.name ||
+      "Someone");
   const reality = (actor.state.reality as string | undefined) ?? "material";
-  u.here.broadcast(`%ch${name}%cn says, "${message}"`, { reality });
+  const telnetLine = `%ch${name}%cn says, "${message}"`;
+  const data = await chatPayload(u, "say", message, name);
+  u.here.broadcast(
+    telnetLine,
+    data ? { reality, data } : { reality },
+  );
 
   // Emit hook for scene logging / trigger handling
   await gameHooks.emit("player:say", {
@@ -64,11 +100,21 @@ export async function execPose(u: IUrsamuSDK): Promise<void> {
   if (!raw) { u.send("Pose what?"); return; }
 
   const input = await u.evalString(raw);
-  const name = (actor.state.moniker as string) || (actor.state.name as string) || actor.name;
+  const name = u.util.displayName
+    ? u.util.displayName(actor, actor)
+    : ((actor.state.moniker as string) ||
+      (actor.state.name as string) ||
+      actor.name ||
+      "Someone");
   const isSemipose = u.cmd.original?.trimStart().startsWith(";") ?? false;
   const content = isSemipose ? `${name}${input}` : `${name} ${input}`;
   const reality = (actor.state.reality as string | undefined) ?? "material";
-  u.here.broadcast(`%ch${content}%cn`, { reality });
+  const kind = isSemipose ? "semi" : "pose";
+  const data = await chatPayload(u, kind, input, name);
+  u.here.broadcast(
+    `%ch${content}%cn`,
+    data ? { reality, data } : { reality },
+  );
 
   // Emit hook for scene logging / trigger handling
   await gameHooks.emit("player:pose", {
@@ -183,6 +229,8 @@ addCmd({
   pattern: /^(?:say\s+|["'])(.*)/is,
   lock: "connected",
   category: "Communication",
+  // Chat bubble is the echo — no faded "> hello" line
+  echo: false,
   help: `say <message>  — Say something to everyone in the room.
 
 Aliases: " <message>, ' <message>
@@ -198,6 +246,7 @@ addCmd({
   pattern: /^(?:pose\s+|[:;])(.*)/is,
   lock: "connected",
   category: "Communication",
+  echo: false,
   help: `pose <action>  — Pose an action to the room.
 
 Aliases: : <action>, ; <action> (semipose — no space between name and action)

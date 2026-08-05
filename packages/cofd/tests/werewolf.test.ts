@@ -215,6 +215,20 @@ describe("Werewolf chargen budgets", OPTS, () => {
     assertEquals(powerLabel("werewolf"), "Renown");
     assertEquals(powerLabel("changeling"), "Contracts");
   });
+
+  it("chargen stage 2 rejects werewolf (closed for now)", () => {
+    const s = initCgState();
+    s.stage = 2;
+    let threw = "";
+    try {
+      updateCgState(s, "template", "werewolf");
+    } catch (e: unknown) {
+      threw = e instanceof Error ? e.message : String(e);
+    }
+    assertStringIncludes(threw, "not open for chargen");
+    assertStringIncludes(threw, "mortal");
+    assertStringIncludes(threw, "changeling");
+  });
 });
 
 describe("Stage-3 canonical custom fields", OPTS, () => {

@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/core",
-  "version": "0.1.5",
+  "version": "1.0.2",
   "exports": "./mod.ts",
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
@@ -22,16 +22,18 @@
     "djwt": "jsr:@zaubrik/djwt@^3.0.2",
     "zod": "npm:zod@4.4.3",
     "@nicia-ai/typegraph": "npm:@nicia-ai/typegraph@^0.31.0",
-    "@nicia-ai/typegraph/postgres/pglite":
-      "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
+    "@nicia-ai/typegraph/postgres/pglite": "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
     "@electric-sql/pglite": "npm:@electric-sql/pglite@^0.5.2"
   },
   "publish": {
     "include": [
       "src",
+      "docs",
       "mod.ts",
       "deno.json",
-      "README.md"
+      "README.md",
+      "CHANGELOG.md",
+      "LICENSE"
     ],
     "exclude": [
       "tests"

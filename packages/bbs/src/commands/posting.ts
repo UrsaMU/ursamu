@@ -6,6 +6,9 @@ import { findBoard, getPost, getNextReplyNum } from "../query.ts";
 import { canRead, canWrite } from "../permissions.ts";
 import { getDraft, setDraft, clearDraft, getSig } from "../tracking.ts";
 import { fireWebhook } from "../webhook.ts";
+import { enactorTrueName } from "../author.ts";
+import { bumpBbsActivityBadge } from "../staff-badge-bridge.ts";
+import { emitBbsPost } from "../events.ts";
 
 // ─── +bbpost ─────────────────────────────────────────────────────────────────
 
@@ -90,26 +93,41 @@ async function doSubmitReplyDraft(u: IUrsamuSDK, draft: NonNullable<ReturnType<t
   const post = await getPost(board.num, draft.replyToPost!);
   if (!post) { u.send("%ch>BBS:%cn Post not found."); return; }
 
-  const sig     = getSig(u);
-  const body    = sig ? `${draft.body}\n---\n${sig}` : draft.body;
+  const sig = getSig(u);
+  const body = sig ? `${draft.body}\n---\n${sig}` : draft.body;
   const replyNum = getNextReplyNum(post);
+  const who = enactorTrueName(u);
   const reply: IReply = {
-    num: replyNum, subject: `Re: ${post.subject}`, body,
-    authorId: u.me.id, authorName: u.me.name ?? "Unknown",
-    createdAt: Date.now(), editCount: 0, icTag: draft.icTag,
+    num: replyNum,
+    subject: `Re: ${post.subject}`,
+    body,
+    authorId: u.me.id,
+    authorName: who,
+    createdAt: Date.now(),
+    editCount: 0,
+    icTag: draft.icTag,
   };
 
   const updatedReplies = [...(post.replies ?? []), reply];
-  await posts.modify({ id: post.id }, "$set", { replies: updatedReplies });
+  await posts.modify({ id: post.id }, "$set", {
+    replies: updatedReplies,
+  });
+  emitBbsPost(board, { ...post, replies: updatedReplies });
 
-  // Notify watchers
   for (const watcherId of (post.watchers ?? [])) {
     if (watcherId === u.me.id) continue;
-    u.send(`%ch>BBS:%cn New reply on %cc${board.title}%cn/${post.num} (${post.subject}) by %cc${u.me.name}%cn.`, watcherId);
+    u.send(
+      `%ch>BBS:%cn New reply on %cc${board.title}%cn/` +
+        `${post.num} (${post.subject}) by %cc${who}%cn.`,
+      watcherId,
+    );
   }
 
-  u.send(`%ch>BBS:%cn Reply posted to %cc${board.title}%cn/${post.num}.`);
+  u.send(
+    `%ch>BBS:%cn Reply posted to %cc${board.title}%cn/${post.num}.`,
+  );
   await clearDraft(u);
+  void bumpBbsActivityBadge();
 }
 
 async function createPost(
@@ -120,39 +138,62 @@ async function createPost(
   icTag?: "ic" | "ooc",
   tags: string[] = [],
 ): Promise<void> {
-  const sig     = getSig(u);
+  const sig = getSig(u);
   const fullBody = sig ? `${body}\n---\n${sig}` : body;
-  const num     = await getNextPostNum(boardNum);
+  const num = await getNextPostNum(boardNum);
+  const who = enactorTrueName(u);
   const post: IPost = {
     id: crypto.randomUUID(),
-    boardId: boardNum, num, subject, body: fullBody,
-    authorId: u.me.id, authorName: u.me.name ?? "Unknown",
-    createdAt: Date.now(), timeout: 0, editCount: 0,
-    replies: [], sticky: false, icTag, sceneId: undefined,
-    tags, flags: [], watchers: [],
+    boardId: boardNum,
+    num,
+    subject,
+    body: fullBody,
+    authorId: u.me.id,
+    authorName: who,
+    createdAt: Date.now(),
+    timeout: 0,
+    editCount: 0,
+    replies: [],
+    sticky: false,
+    icTag,
+    sceneId: undefined,
+    tags,
+    flags: [],
+    watchers: [],
   };
   await posts.create(post);
 
   const { board } = await findBoard(String(boardNum));
-  if (board?.webhookUrl) await fireWebhook(board.webhookUrl, board, post);
+  if (board) emitBbsPost(board, post);
+  if (board?.webhookUrl) {
+    await fireWebhook(board.webhookUrl, board, post);
+  }
 
   const icLabel = icTag ? ` [${icTag.toUpperCase()}]` : "";
-  u.send(`%ch>BBS:%cn Post ${boardNum}/${num} (${subject})${icLabel} created.`);
+  u.send(
+    `%ch>BBS:%cn Post ${boardNum}/${num} (${subject})${icLabel} created.`,
+  );
   if (board) {
     try {
       const connected = await u.db.search({ flags: /connected/i });
       for (const p of connected) {
         if (p.id === u.me.id) continue;
-        const n = (p.state?.bb_notify as Record<string, boolean>) ?? {};
+        const n =
+          (p.state?.bb_notify as Record<string, boolean>) ?? {};
         if (n[String(boardNum)] === false) continue;
         if (await canRead({ ...u, me: p } as IUrsamuSDK, board)) {
-          u.send(`%ch>BBS:%cn New message on board ${boardNum}: %cc${subject}%cn.`, p.id);
+          u.send(
+            `%ch>BBS:%cn New message on board ${boardNum}: ` +
+              `%cc${subject}%cn.`,
+            p.id,
+          );
         }
       }
     } catch (_e: unknown) {
       // non-fatal
     }
   }
+  void bumpBbsActivityBadge();
 }
 
 // ─── +bb (append to draft) ───────────────────────────────────────────────────
@@ -252,21 +293,41 @@ Examples:
     if (eqIdx !== -1) {
       // Quick reply
       const text = u.util.stripSubs(rest.slice(eqIdx + 1).trim());
-      if (!text) { u.send("%ch>BBS:%cn Reply text is required."); return; }
-      const sig     = getSig(u);
-      const body    = sig ? `${text}\n---\n${sig}` : text;
+      if (!text) {
+        u.send("%ch>BBS:%cn Reply text is required.");
+        return;
+      }
+      const sig = getSig(u);
+      const body = sig ? `${text}\n---\n${sig}` : text;
       const replyNum = getNextReplyNum(post);
+      const who = enactorTrueName(u);
       const reply: IReply = {
-        num: replyNum, subject: `Re: ${post.subject}`, body,
-        authorId: u.me.id, authorName: u.me.name ?? "Unknown",
-        createdAt: Date.now(), editCount: 0, icTag,
+        num: replyNum,
+        subject: `Re: ${post.subject}`,
+        body,
+        authorId: u.me.id,
+        authorName: who,
+        createdAt: Date.now(),
+        editCount: 0,
+        icTag,
       };
-      await posts.modify({ id: post.id }, "$set", { replies: [...(post.replies ?? []), reply] });
+      const replies = [...(post.replies ?? []), reply];
+      await posts.modify({ id: post.id }, "$set", {
+        replies,
+      });
+      emitBbsPost(board, { ...post, replies });
       for (const watcherId of (post.watchers ?? [])) {
         if (watcherId === u.me.id) continue;
-        u.send(`%ch>BBS:%cn New reply on %cc${board.title}%cn/${post.num} (${post.subject}) by %cc${u.me.name}%cn.`, watcherId);
+        u.send(
+          `%ch>BBS:%cn New reply on %cc${board.title}%cn/` +
+            `${post.num} (${post.subject}) by %cc${who}%cn.`,
+          watcherId,
+        );
       }
-      u.send(`%ch>BBS:%cn Reply posted to ${board.num}/${post.num}.`);
+      u.send(
+        `%ch>BBS:%cn Reply posted to ${board.num}/${post.num}.`,
+      );
+      void bumpBbsActivityBadge();
     } else {
       // Draft reply
       await setDraft(u, { boardNum: board.num, subject: `Re: ${post.subject}`, body: "", replyToPost: post.num, icTag });

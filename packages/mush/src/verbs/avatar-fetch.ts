@@ -6,7 +6,7 @@
 
 import type { IUrsamuSDK } from "../commands/types.ts";
 
-const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
+const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 const FETCH_HEADERS = {
   "User-Agent": "UrsaMU-Avatar/1.0",
   "Accept": "image/avif,image/webp,image/*,*/*;q=0.8",
@@ -159,7 +159,7 @@ export async function fetchAndValidate(
 
   const bytes = new Uint8Array(await res.arrayBuffer());
   if (bytes.length > MAX_BYTES) {
-    u.send("Image must be 2 MB or smaller.");
+    u.send("Image must be 8 MB or smaller.");
     return null;
   }
   return { bytes, ext: MIME_TO_EXT[mime] || "png" };

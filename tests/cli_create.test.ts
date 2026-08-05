@@ -93,7 +93,8 @@ Deno.test("create project: generates src/main.ts with project name", OPTS, async
     await runCreate(["my-game"], dir);
     const content = await Deno.readTextFile(join(dir, "my-game", "src", "main.ts"));
     assertStringIncludes(content, "my-game");
-    assertStringIncludes(content, `import { mu } from "ursamu"`);
+    assertStringIncludes(content, `from "@ursamu/mush"`);
+    assertStringIncludes(content, "mu(");
   });
 });
 
@@ -111,7 +112,9 @@ Deno.test("create project: generates deno.json with ursamu import", OPTS, async 
     const json = JSON.parse(
       await Deno.readTextFile(join(dir, "my-game", "deno.json"))
     );
-    assertEquals(json.imports["ursamu"], "jsr:@ursamu/mush");
+    assertStringIncludes(String(json.imports["ursamu"]), "jsr:@ursamu/mush");
+    assertStringIncludes(String(json.imports["@ursamu/site"]), "@ursamu/site");
+    assertStringIncludes(String(json.imports["@ursamu/web"]), "@ursamu/web");
     assert(json.tasks?.start, "missing start task");
     assert(json.tasks?.server, "missing server task");
   });
@@ -138,6 +141,17 @@ Deno.test("create project: generates scripts/run.sh", OPTS, async () => {
   await withTempDir(async (dir) => {
     await runCreate(["my-game"], dir);
     assert(existsSync(join(dir, "my-game", "scripts", "run.sh")));
+  });
+});
+
+Deno.test("create project: generates scripts/safe-update.sh", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const path = join(dir, "my-game", "scripts", "safe-update.sh");
+    assert(existsSync(path), "missing scripts/safe-update.sh");
+    const body = await Deno.readTextFile(path);
+    assertStringIncludes(body, "minimum-dependency-age=0");
+    assertStringIncludes(body, "config.sample.json");
   });
 });
 
@@ -268,6 +282,124 @@ Deno.test("create plugin: index.ts registers route and imports commands", OPTS, 
     );
     assertStringIncludes(content, "registerPluginRoute");
     assertStringIncludes(content, "./commands.ts");
+  });
+});
+
+Deno.test("create plugin: --admin-embed scaffolds admin + ui-bridge", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const projectDir = join(dir, "my-game");
+    const { code, stdout } = await runCreate(
+      ["plugin", "my-tool", "--non-interactive", "--admin-embed"],
+      projectDir,
+    );
+    assertEquals(code, 0);
+    const pluginDir = join(projectDir, "src", "plugins", "my-tool");
+    assert(existsSync(join(pluginDir, "ui-bridge.ts")));
+    assert(existsSync(join(pluginDir, "admin", "index.html")));
+    assert(existsSync(join(pluginDir, "admin", "app.js")));
+    const bridge = await Deno.readTextFile(
+      join(pluginDir, "ui-bridge.ts"),
+    );
+    assertStringIncludes(bridge, "registerStaffPage");
+    assertStringIncludes(bridge, "registerStaffStatic");
+    assertStringIncludes(bridge, "/admin/my-tool/");
+    const index = await Deno.readTextFile(join(pluginDir, "index.ts"));
+    assertStringIncludes(index, "ui-bridge");
+    assertStringIncludes(index, "registerMyToolUi");
+    assertStringIncludes(stdout, "admin/");
+  });
+});
+
+Deno.test("create plugin: --site-static scaffolds public + menu", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const projectDir = join(dir, "my-game");
+    const { code } = await runCreate(
+      ["plugin", "events", "--non-interactive", "--site-static"],
+      projectDir,
+    );
+    assertEquals(code, 0);
+    const pluginDir = join(projectDir, "src", "plugins", "events");
+    assert(existsSync(join(pluginDir, "public", "index.html")));
+    const bridge = await Deno.readTextFile(
+      join(pluginDir, "ui-bridge.ts"),
+    );
+    assertStringIncludes(bridge, "registerSiteNav");
+    assertStringIncludes(bridge, "registerSiteStatic");
+    assertStringIncludes(bridge, "registerSiteMenuBlock");
+    assertStringIncludes(bridge, "/site/p/events/");
+  });
+});
+
+Deno.test("create plugin: both UI flags together", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const projectDir = join(dir, "my-game");
+    const { code } = await runCreate(
+      [
+        "plugin",
+        "quest-board",
+        "--non-interactive",
+        "--admin-embed",
+        "--site-static",
+      ],
+      projectDir,
+    );
+    assertEquals(code, 0);
+    const pluginDir = join(
+      projectDir,
+      "src",
+      "plugins",
+      "quest-board",
+    );
+    assert(existsSync(join(pluginDir, "admin", "index.html")));
+    assert(existsSync(join(pluginDir, "public", "index.html")));
+    const bridge = await Deno.readTextFile(
+      join(pluginDir, "ui-bridge.ts"),
+    );
+    assertStringIncludes(bridge, "registerStaffPage");
+    assertStringIncludes(bridge, "registerSiteNav");
+  });
+});
+
+Deno.test("create plugin: rejects invalid name", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    await runCreate(["my-game"], dir);
+    const projectDir = join(dir, "my-game");
+    const { code, stderr } = await runCreate(
+      ["plugin", "../evil", "--non-interactive"],
+      projectDir,
+    );
+    assertEquals(code !== 0, true);
+    assertStringIncludes(stderr, "Invalid plugin name");
+  });
+});
+
+Deno.test("create plugin: standalone with UI flags", OPTS, async () => {
+  await withTempDir(async (dir) => {
+    const { code } = await runCreate(
+      [
+        "plugin",
+        "solo-tool",
+        "--standalone",
+        "--non-interactive",
+        "--admin-embed",
+        "--site-static",
+        "--game-desc=Demo tool",
+      ],
+      dir,
+    );
+    assertEquals(code, 0);
+    const pluginDir = join(dir, "solo-tool");
+    assert(existsSync(join(pluginDir, "admin", "index.html")));
+    assert(existsSync(join(pluginDir, "public", "index.html")));
+    assert(existsSync(join(pluginDir, "ui-bridge.ts")));
+    const denoJson = JSON.parse(
+      await Deno.readTextFile(join(pluginDir, "deno.json")),
+    );
+    assertEquals(typeof denoJson.imports["@ursamu/web"], "string");
+    assertEquals(typeof denoJson.imports["@ursamu/site"], "string");
   });
 });
 

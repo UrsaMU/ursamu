@@ -1,6 +1,7 @@
 import type { IDatabase, Query, DottedSetData } from "./types.ts";
 import { TypeGraphAdapter } from "./typegraph.ts";
 import { DenoKvAdapter } from "./denokv.ts";
+import { isDenoTestMain } from "./path.ts";
 
 interface WithId {
   id: string;
@@ -8,21 +9,8 @@ interface WithId {
 
 export type AdapterFactory = <T extends WithId>(namespace: string) => IDatabase<T>;
 
-function checkIsTest(): boolean {
-  if (typeof Deno === "undefined") return false;
-  if (typeof Deno.test !== "function") return false;
-  const main = Deno.mainModule;
-  if (!main) return false;
-  return (
-    main.includes(".test.") ||
-    main.includes("_test.") ||
-    main.includes("/tests/") ||
-    main.includes("/test/")
-  );
-}
-
 // Override Deno.test to disable sanitizers for PGlite WASM resource/timer leaks.
-if (checkIsTest()) {
+if (isDenoTestMain()) {
   const originalTest = Deno.test;
   // deno-lint-ignore no-explicit-any
   const customTest = function (nameOrOptions: any, optionsOrFn?: any, maybeFn?: any) {

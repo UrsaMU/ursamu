@@ -6,13 +6,47 @@
  *   sys:uptime, sys:gametime, sys:setgametime
  *   text:read, text:set
  */
-import { sessions, send as coreSend, broadcastAll, setConfig, DBO } from "@ursamu/core";
+import {
+  sessions,
+  send as coreSend,
+  broadcastAll,
+  setConfig,
+  DBO,
+} from "@ursamu/core";
 import type { SDKContext } from "../sdk-service.ts";
 import { dbojs } from "../../world/dbobjs.ts";
 import { gameClock } from "../../world/game-clock.ts";
 import type { IGameTime } from "../../world/types.ts";
+import { runCodebaseUpdate } from "../../sys/codebase-update.ts";
 
 const SERVER_START = Date.now();
+
+function scheduleExit(code: number): void {
+  if (code === 75) {
+    // Soft-reboot: suppress connect/disconnect channel spam.
+    import("../../sys/reboot-flag.ts").then(({ markSoftReboot }) => {
+      markSoftReboot();
+    }).catch(() => { /* ignore */ });
+  }
+  setTimeout(async () => {
+    try {
+      const { DBO: CoreDBO } = await import("@ursamu/core");
+      await CoreDBO.close();
+    } catch {
+      /* best-effort */
+    }
+    Deno.exit(code);
+  }, 500);
+}
+
+async function actorIsAdmin(context: SDKContext | undefined): Promise<boolean> {
+  if (!context?.id) return true;
+  const actor = await dbojs.queryOne({ id: context.id as string });
+  const f = String(actor?.flags || "");
+  return f.includes("admin") ||
+    f.includes("wizard") ||
+    f.includes("superuser");
+}
 
 type Msg    = Record<string, unknown>;
 type Worker = globalThis.Worker;
@@ -55,43 +89,44 @@ export async function handleSysMessage(
 
   if (type === "sys:update") {
     respond(worker, msgId, null);
-    const socketTargets = context?.socketId ? [context.socketId as string] : [];
+    const socketTargets = context?.socketId
+      ? [context.socketId as string]
+      : [];
     const branch = String(msg.branch || "");
+    const skipReboot = msg.reboot === false;
 
-    if (context?.id) {
-      const actor = await dbojs.queryOne({ id: context.id as string });
-      const f = String(actor?.flags || "");
-      if (!f.includes("admin") && !f.includes("wizard") && !f.includes("superuser")) {
-        coreSend(socketTargets, "%chGame>%cn Permission denied.");
-        return;
-      }
-    }
-
-    if (branch && (!/^[\w./\-]+$/.test(branch) || branch.startsWith("-"))) {
-      coreSend(socketTargets, `%chGame>%cn Invalid branch name: "${branch}"`);
+    if (!(await actorIsAdmin(context))) {
+      coreSend(socketTargets, "%chGame>%cn Permission denied.");
       return;
     }
 
     (async () => {
       try {
-        const pullArgs = branch ? ["pull", "origin", branch] : ["pull"];
-        const pull = await new Deno.Command("git", {
-          args: pullArgs, stdout: "piped", stderr: "piped", cwd: Deno.cwd(),
-        }).output();
-        const out = new TextDecoder().decode(pull.stdout).trim();
-        const err = new TextDecoder().decode(pull.stderr).trim();
-        if (!pull.success) { coreSend(socketTargets, `%chGame>%cn git pull failed: ${err || out}`); return; }
-        coreSend(socketTargets, `%chGame>%cn ${(out || err) || "Already up to date."}`);
-        broadcastAll("%chGame>%cn Update complete. Rebooting...");
-        setTimeout(async () => {
-          try {
-            const { DBO } = await import("@ursamu/core");
-            await DBO.close();
-          } catch { /* best-effort */ }
-          Deno.exit(75);
-        }, 500);
+        const result = await runCodebaseUpdate({
+          branch,
+          log: (line) =>
+            coreSend(socketTargets, `%chGame>%cn ${line}`),
+        });
+        if (!result.ok || !result.cached) {
+          coreSend(
+            socketTargets,
+            "%chGame>%cn Update aborted — game left " +
+              "running (see messages above).",
+          );
+          return;
+        }
+        if (skipReboot) return;
+        broadcastAll(
+          "%chGame>%cn Update complete. Rebooting main " +
+            "(sessions stay connected)...",
+        );
+        scheduleExit(75);
       } catch (e: unknown) {
-        coreSend(socketTargets, `%chGame>%cn Update error: ${e instanceof Error ? e.message : String(e)}`);
+        const m = e instanceof Error ? e.message : String(e);
+        coreSend(
+          socketTargets,
+          `%chGame>%cn Update error (game left running): ${m}`,
+        );
       }
     })();
     return;
@@ -99,27 +134,51 @@ export async function handleSysMessage(
 
   if (type === "sys:reboot") {
     respond(worker, msgId, null);
-    broadcastAll("Server rebooting...");
-    setTimeout(async () => {
-      try {
-        const { DBO } = await import("@ursamu/core");
-        await DBO.close();
-      } catch { /* best-effort */ }
-      Deno.exit(75);
-    }, 500);
+    const withUpdate = msg.update !== false;
+    const branch = String(msg.branch || "");
+    const socketTargets = context?.socketId
+      ? [context.socketId as string]
+      : [];
+
+    (async () => {
+      if (withUpdate) {
+        try {
+          const result = await runCodebaseUpdate({
+            branch,
+            log: (line) =>
+              coreSend(socketTargets, `%chGame>%cn ${line}`),
+          });
+          if (!result.ok || !result.cached) {
+            coreSend(
+              socketTargets,
+              "%chGame>%cn Update failed — game left " +
+                "running (no reboot).",
+            );
+            return;
+          }
+        } catch (e: unknown) {
+          const m = e instanceof Error ? e.message : String(e);
+          coreSend(
+            socketTargets,
+            `%chGame>%cn Update error: ${m} — game ` +
+              "left running (no reboot).",
+          );
+          return;
+        }
+      }
+      broadcastAll(
+        "%chGame>%cn Server rebooting main " +
+          "(sessions stay connected)...",
+      );
+      scheduleExit(75);
+    })();
     return;
   }
 
   if (type === "sys:shutdown") {
     respond(worker, msgId, null);
     broadcastAll("Server shutting down...");
-    setTimeout(async () => {
-      try {
-        const { DBO } = await import("@ursamu/core");
-        await DBO.close();
-      } catch { /* best-effort */ }
-      Deno.exit(0);
-    }, 500);
+    scheduleExit(0);
     return;
   }
 

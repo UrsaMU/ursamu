@@ -49,7 +49,13 @@ Two ways a player attaches to an entity. Both can be true at once (you ride your
 @set <thing>=map-capable
 ```
 
-`MAP_CAPABLE_FLAG = "map-capable"` (`schemas.ts`). The flag on `u.me.location` is the primary passenger gate. Without it, `+map/embark` refuses, `+map/launch` refuses, and the descformat handler treats the object as a normal room. Builders apply it to vehicles, command pods, scout drones — anything intended to carry a `MapEntity`.
+`MAP_CAPABLE_FLAG = "map-capable"` (`schemas.ts`). The flag on
+`u.me.location` gates **map** presence: without it, `+map/embark`
+refuses, `+map/launch` refuses, and the DESCFORMAT handler treats the
+object as a normal room. Engine **`enter`** still works on any
+enterable object (locks / `enter_ok`); only launch/map-capable care
+about this flag. Builders apply it to vehicles, pods, drones — anything
+intended to carry a `MapEntity`.
 
 ## DBO collection
 

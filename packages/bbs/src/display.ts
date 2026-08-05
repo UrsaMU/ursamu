@@ -1,4 +1,5 @@
 import type { IBoard, IPost, IReply } from "./db.ts";
+import { trueNameFromId } from "./author.ts";
 import {
   header as engHeader,
   divider as engDivider,
@@ -101,17 +102,23 @@ export function formatTimeFull(epoch: number): string {
  * Render a single post (or reply) for display.
  * Includes IC/OOC tag, scene link, tags, and sticky marker.
  * Uses engine header/divider/footer (honors game.layout).
+ *
+ * @param authorLabel Optional override (use true name for replies —
+ *   never moniker). When omitted, uses stored authorName.
  */
 export function formatPost(
   board: IBoard,
   post: IPost,
   reply?: IReply,
   msgKey?: string,
+  authorLabel?: string,
 ): string {
   const msg = reply ?? post;
   const key = msgKey ??
     (reply ? `${post.num}.${reply.num}` : String(post.num));
-  const author = board.anonymous ? "Anonymous" : msg.authorName;
+  const author = board.anonymous
+    ? "Anonymous"
+    : (authorLabel ?? msg.authorName);
 
   const timeStr = (() => {
     try {
@@ -167,4 +174,24 @@ export function formatPost(
     footer(),
   ];
   return lines.join("\n");
+}
+
+/**
+ * Like formatPost, but replies resolve authorId → true name
+ * (never moniker) for display.
+ */
+export async function formatPostResolved(
+  board: IBoard,
+  post: IPost,
+  reply?: IReply,
+  msgKey?: string,
+): Promise<string> {
+  let label: string | undefined;
+  if (reply && !board.anonymous) {
+    label = await trueNameFromId(
+      reply.authorId,
+      reply.authorName,
+    );
+  }
+  return formatPost(board, post, reply, msgKey, label);
 }

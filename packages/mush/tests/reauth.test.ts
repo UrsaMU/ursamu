@@ -10,6 +10,7 @@ import {
   REAUTH_FAIL_MSG,
   RESTART_NO_TOKEN_MSG,
   REAUTH_OK_MSG,
+  RECONNECT_MSG,
   decideReconnectOpen,
   decideEngineAuthFrame,
 } from "../src/session/reauth.ts";
@@ -98,8 +99,20 @@ Deno.test("engine frame — unrelated data is ignored", OPTS, () => {
   );
 });
 
+Deno.test("reconnect notice is short", OPTS, () => {
+  assertEquals(REAUTH_OK_MSG, RECONNECT_MSG);
+  assertEquals(RECONNECT_MSG.toLowerCase().includes("reconnect"), true);
+});
+
 Deno.test("reauth messages stay within 78 chars", OPTS, () => {
-  for (const m of [REAUTH_FAIL_MSG, RESTART_NO_TOKEN_MSG, REAUTH_OK_MSG]) {
+  for (
+    const m of [
+      REAUTH_FAIL_MSG,
+      RESTART_NO_TOKEN_MSG,
+      REAUTH_OK_MSG,
+      RECONNECT_MSG,
+    ]
+  ) {
     // Strip MUSH color codes for printable width check.
     const plain = m.replace(/%c[a-z]/gi, "").replace(/%[rntb]/gi, "");
     assertEquals(

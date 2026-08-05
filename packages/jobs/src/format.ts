@@ -116,6 +116,12 @@ export function formatDate(epoch: number): string {
  * - `%ch%cr DUE` — 96+ hours without staff activity (red)
  */
 export function getEscalation(job: IJob): { color: string; label: string } {
+  if (job.esc === "red") return { color: "%ch%cr", label: "RED" };
+  if (job.esc === "yellow") return { color: "%ch%cy", label: "YLW" };
+  if (job.esc === "green") return { color: "%cg", label: "GRN" };
+  if (job.progress === "hold") {
+    return { color: "%ch%cm", label: "HOLD" };
+  }
   // Escalation is based on time since last staff comment
   const staffComments = job.comments.filter((c) => c.authorId !== job.submittedBy && c.published);
   const lastActivity  = staffComments.length > 0
@@ -147,7 +153,7 @@ const P = [0, 5, 15, 47, 60, 71];
  * Columns: `#` | `Category` | `Title` | `Started` | `Handler` | `Status`
  *
  * @param jobList Jobs to display (pre-filtered and sorted by the caller).
- * @param title   Header title shown in the top border (e.g. `"POP Jobs"`).
+ * @param title Header title shown in the top border (e.g. `"POP Jobs"`).
  */
 export function formatJobList(jobList: IJob[], title: string): string[] {
   const lines: string[] = [];

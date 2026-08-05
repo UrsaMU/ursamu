@@ -1,9 +1,10 @@
 {
   "name": "@ursamu/mush",
-  "version": "0.1.11",
+  "version": "1.0.30",
   "exports": {
     ".": "./mod.ts",
-    "./app": "./src/app.ts"
+    "./app": "./src/app.ts",
+    "./permissions": "./src/world/permissions.ts"
   },
   "tasks": {
     "test": "deno test tests/ --allow-all --unstable-kv --no-check",
@@ -20,7 +21,7 @@
   },
   "imports": {
     "@ursamu/mush": "./mod.ts",
-    "@ursamu/core": "jsr:@ursamu/core@^0.1.5",
+    "@ursamu/core": "jsr:@ursamu/core@^1.0.0",
     "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
     "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
     "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",
@@ -39,9 +40,12 @@
   "publish": {
     "include": [
       "src",
+      "help",
+      "docs",
       "mod.ts",
       "deno.json",
       "README.md",
+      "CHANGELOG.md",
       "LICENSE"
     ],
     "exclude": [

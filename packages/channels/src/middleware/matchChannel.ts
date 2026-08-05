@@ -3,6 +3,7 @@ import { send, rooms, sessions } from "@ursamu/core";
 import type { ICoreContext } from "@ursamu/core";
 import type { IChannel, IChanEntry, IChanMessage } from "../types.ts";
 import { channelEvents } from "../channel-events.ts";
+import { channelAnnounces, broadcastAnnounce } from "../announce.ts";
 
 const chans = new DBO<IChannel>(() =>
   getConfig<string>("plugins.channels.db", "server.chans"),
@@ -145,11 +146,13 @@ export async function matchChannel(
       await dbojs.modify({ id: en.id }, "$set", {
         "data.channels": en.data.channels,
       } as any);
-      chanSend(
-        channel.channel,
-        chan.header,
-        `${displayName} has joined the channel.`,
-      );
+      // Presence only, never channel:message (Discord-safe).
+      if (channelAnnounces(chan)) {
+        broadcastAnnounce(
+          chan,
+          `${displayName} has joined the channel.`,
+        );
+      }
       send(
         [ctx.socketId],
         `You have joined channel ${channel.channel}.`,
@@ -165,11 +168,12 @@ export async function matchChannel(
 
   if (msg.toLowerCase() === "off") {
     if (channel.active) {
-      chanSend(
-        channel.channel,
-        chan.header,
-        `${displayName} has left the channel.`,
-      );
+      if (channelAnnounces(chan)) {
+        broadcastAnnounce(
+          chan,
+          `${displayName} has left the channel.`,
+        );
+      }
       channel.active = false;
       rooms.leave(ctx.socketId, channel.channel);
       // deno-lint-ignore no-explicit-any

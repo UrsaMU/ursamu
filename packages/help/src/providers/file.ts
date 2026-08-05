@@ -18,6 +18,10 @@
 
 import type { HelpEntry, HelpProvider } from "../registry.ts";
 import { slugify } from "../registry.ts";
+import {
+  pathImpliesStaff,
+  sectionImpliesStaff,
+} from "../visibility.ts";
 
 interface RegisteredDir {
   /** Filesystem path, or "" when remote-only. */
@@ -228,13 +232,38 @@ function entryFromFile(
     : (isIndex ? section : rawName);
 
   const fm = parseFrontmatter(raw);
-  const hidden = fm.hidden || pathImpliesHidden(cleaned);
-  const name = slugify(
+  let name = slugify(
     fm.topic ||
       (isIndex && !prefix ? section : topicName),
   );
   const resolvedSection = fm.section || section;
+
+  // Plugin dirs register with a section id (e.g. "bbs"). Nested
+  // paths become "staff/…" — prefix so lookups are "bbs/staff"
+  // (as docs/SEE ALSO expect) and plugins do not collide on
+  // bare names like "staff" or "reading".
+  // Root index stays "bbs" (name === section). Explicit fm.topic
+  // that already includes the section is left alone.
+  if (
+    resolvedSection &&
+    name &&
+    name !== resolvedSection &&
+    !name.startsWith(`${resolvedSection}/`)
+  ) {
+    name = slugify(`${resolvedSection}/${name}`);
+  }
+
   const tags = [...new Set([...fm.tags, ...fm.aliases])];
+  const staffOnly = pathImpliesStaff(cleaned) ||
+    pathImpliesStaff(name) ||
+    sectionImpliesStaff(resolvedSection) ||
+    // Nested folder named staff under plugin help/
+    parts.some((p) =>
+      p.toLowerCase() === "staff" ||
+      p.toLowerCase() === "admin"
+    );
+  const hidden = fm.hidden || pathImpliesHidden(cleaned) ||
+    staffOnly;
 
   return {
     name,
@@ -242,7 +271,8 @@ function entryFromFile(
     content: fm.content,
     source: "file",
     tags,
-    hidden,
+    hidden: hidden || undefined,
+    staffOnly: staffOnly || undefined,
   };
 }
 
@@ -527,7 +557,7 @@ export class FileProvider implements HelpProvider {
           throw e;
         });
     }
-    return _build;
+    return await _build;
   }
 
   async get(topic: string): Promise<HelpEntry | null> {

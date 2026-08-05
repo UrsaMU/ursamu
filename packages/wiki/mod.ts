@@ -25,3 +25,20 @@ export { scanBacklinks, resolveWikilinks, extractWikilinks } from "./src/backlin
 export { saveSnapshot, listHistory, readSnapshot } from "./src/history.ts";
 export { isWebhookUrlSafe, isPrivateIp } from "./src/url-safety.ts";
 export { loadWebhooks, saveWebhooks, fireWebhook } from "./src/webhook.ts";
+export {
+  ASSETS_DIR,
+  IMAGE_EXTS,
+  safeAssetName,
+  publicAssetUrl,
+  assetRelPath,
+  shortImageMarkdown,
+  resolveImageSrc,
+  listPageMedia,
+  savePageMedia,
+  deletePageMedia,
+  importRemoteMedia,
+} from "./src/media.ts";
+export type { MediaItem } from "./src/media.ts";
+// Staff SPA moved to @ursamu/web (/admin/).
+// admin-static kept in-tree for reference; not registered.
+

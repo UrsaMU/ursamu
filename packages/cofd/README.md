@@ -1,9 +1,48 @@
 # Chronicles of Darkness (CoFD) UrsaMU Plugin
 
+**[@ursamu/cofd-plugin](https://jsr.io/@ursamu/cofd-plugin)** · **v1.2.1**
+
 Chronicles of Darkness 2e for **UrsaMU**: guided character generation,
 dynamic ASCII sheets, a CoFD-compliant d10 roller, Health track, Beat/XP
-economy, Conditions and Aspirations, and a Changeling: The Lost overlay.
-GMCCG-inspired module layout, file-driven supernatural templates.
+economy, Conditions and Aspirations, IC/OOC travel, `+time`, and a
+Changeling: The Lost overlay. File-driven supernatural templates.
+
+See `CHANGELOG.md` for release notes.
+
+---
+
+## Install
+
+```ts
+// deno.json — pin the plugin
+{
+  "imports": {
+    "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
+    "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.2.1",
+    "@ursamu/help": "jsr:@ursamu/help@^1.0.0",
+    "@ursamu/jobs": "jsr:@ursamu/jobs@^1.0.0",
+    "@ursamu/combat": "jsr:@ursamu/combat@^0.8.0"
+  }
+}
+```
+
+```ts
+// Enable in config/config.json (or server.plugins):
+// "server": { "plugins": [ "@ursamu/cofd-plugin", ... ] }
+
+// Or import the default IPlugin (engine loaders use this):
+import cofd from "@ursamu/cofd-plugin";
+// cofd.name === "cofd"
+// cofd.version === "1.2.1"
+```
+
+```bash
+# JSR
+deno add jsr:@ursamu/cofd-plugin
+```
+
+**Peers:** `@ursamu/mush` ^1.0, `@ursamu/help` ^1.0, `@ursamu/jobs` ^1.0,
+`@ursamu/combat` ^0.8, optional `@ursamu/mail` ^2.5.
 
 ---
 
@@ -111,42 +150,25 @@ Full per-command help: `help cofd`, then topic groups
 `help changeling` for the CtL map — or any command name
 (`help sheet`, `help hedge`, `help harvest`, `help bedlam`).
 
-CtL coverage vs the rulebook: **`docs/ctl-gap-scan.md`**.
+CtL design notes (maintainers): monorepo `docs/` (not published to JSR).
 
 ---
 
 ## Project layout
 
 ```
-ursamu-cofd-plugin/
-  index.ts              IPlugin entry (init/remove + dependency declaration)
-  commands.ts           Thin shim, side-effect import of src/commands/register.ts
-  cofd.ts, cg.ts,       Thin re-export shims for test backward-compat
+@ursamu/cofd-plugin/
+  index.ts           IPlugin entry (init/remove + deps)
+  commands.ts        Side-effect addCmd registration
+  cofd.ts, cg.ts,    Back-compat re-export shims
     templates.ts
-  routes.ts             REST handler for /api/v1/cofd
-  src/
-    dictionary/         Typed re-exports of resources/*.json
-    support/            Format helpers + prereq evaluator
-    stats/              CofdSheet model, validate, setter
-    roller/             parse, execute (wound penalty hook)
-    sheet/              render + sections/ composable blocks
-    chargen/            state, instructions, validate
-    gamelines/          templates loader
-    health/             pure track math + wound penalty
-    xp/                 pure beats/experience math + cost loader
-    subsystems/         conditions, aspirations
-    commands/           one file per command + register.ts (addCmd side effects)
-  resources/            attributes, skills, merits, conditions,
-                        changeling*.json, goblin_*, xp_costs, …
-  templates/            mortal/changeling JSON
-  books/                ctl.txt (CtL 2e reference extract)
-  help/                 plain-text MUSH help topics
-  docs/                 ctl-gap-scan.md + design specs
-  tests/                Deno unit + BDD tests (incl. ctl_partial_depth)
-  showcases/            in-process command demos (hedge/shift/cg CtL)
-  deno.json             tasks + import map
-  ursamu.plugin.json    plugin manifest
-  CLAUDE.md             workspace conventions and game-rule reference
+  routes.ts          REST /api/v1/cofd
+  src/               Engine modules (stats, roller, sheet, …)
+  resources/         JSON tables (attributes, merits, …)
+  templates/         mortal / changeling / … JSON
+  help/              In-game help topics
+  deno.json          Package manifest + publish include
+  ursamu.plugin.json Plugin manifest
 ```
 
 ---

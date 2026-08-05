@@ -19,21 +19,28 @@ This sets `MAP_CAPABLE_FLAG` on the in-game object. Optional builder steps:
 | `state.coord` | Suggested launch coord. If unset, launch uses the caller's last-known map coord, falling back to `(0,0,0)`. |
 | `state.lastDock` | Overrides the default dock-back room. If unset, the room the vehicle was in at launch time is recorded automatically. |
 
-## Embark flow
+## Board flow (object rules)
+
+Vehicles are ordinary things. Prefer engine commands:
 
 ```
-+map/embark <vehicle>
+enter <vehicle>
+leave
 ```
 
-Requirements:
+`+map/embark` / `+map/disembark` are thin aliases of `enter` / `leave`
+(embark still requires `map-capable` so casual `enter` on non-map
+objects is not confused with map boarding).
 
-| Check | Failure message |
+| Check | How |
 | --- | --- |
-| Target exists, same room as caller | `You don't see that here.` |
-| Target has `MAP_CAPABLE_FLAG` | `That isn't map-capable.` |
-| Vehicle has free passenger slot (always true in V1) | n/a |
+| Nearby | Same room (or held) |
+| Enter lock | `@lock/enter`, else `enter_ok`, else owner/staff |
+| Seat cap | optional `&CAPACITY` / `&MAPCAPACITY` |
+| Players | default **locked** (no free entry into bodies) |
 
-On success the caller is moved into the vehicle's UrsaMU contents. No `MapEntity` is created yet — embarking is the in-room boarding step.
+On success the caller is moved into the vehicle's contents. No
+`MapEntity` yet — that happens on `+map/launch`.
 
 ## Launch flow
 
@@ -82,14 +89,18 @@ Effects:
 
 Passengers are still inside the vehicle's contents — they remained there throughout the flight. They can now `+map/disembark`.
 
-## Disembark flow
+## Leave / disembark flow
 
 ```
-+map/disembark
+leave
++map/disembark   # alias
 ```
 
-- Vehicle in real-room space (post-land): caller exits into the same real room.
-- Vehicle still on the map (rare; e.g. a stopped ground vehicle): caller is placed at `lastDock`. This is nonsensical for a flying vehicle and the command does not enforce vehicle-kind semantics; builders are responsible.
+- Vehicle in real-room space (post-land): caller exits into the
+  vehicle's current room (same dock).
+- Vehicle still on the map (`container.location` starts with
+  `map:`): **refused** — `+map/land` first so the vehicle and any
+  other passengers stay consistent. No silent lastDock eject.
 
 ## Link (remote) mode
 
@@ -117,10 +128,12 @@ Enumerated error strings from `commands.ts`:
 
 | Message | Cause | Fix |
 | --- | --- | --- |
-| `You have no map presence.` | No containment, no link, no spectate. | Embark + launch, or link to an entity, or admin-spectate. |
-| `That isn't map-capable.` | Target lacks `map-capable` flag. | Builder runs `@set <thing>=map-capable`. |
-| `You don't see that here.` | Embark target not in caller's room. | Move to the same room first. |
-| `You aren't inside a map-capable vehicle.` | `+map/launch` from outside any vehicle. | Embark first. |
+| `You have no map presence.` | No containment, no link, no spectate. | enter + launch, or link, or admin-spectate. |
+| `That is not map-capable.` | Embark alias on non-map thing. | `@set <thing>=map-capable`, or use `enter`. |
+| `You can't enter that.` | No enter_ok / lock / ownership. | `@set <v>=enter_ok` or `@lock/enter`. |
+| `I can't find that here.` | Target not nearby. | Move to the same room first. |
+| `You can't leave while this is on the map.` | leave before land. | `+map/land` then `leave`. |
+| `You aren't inside a map-capable vehicle.` | `+map/launch` from outside. | enter first. |
 | `Already launched.` | Vehicle already has a `MapEntity`. | Use `+map/land` first. |
 | `Nothing to land — you aren't in a launched vehicle.` | `+map/land` with no active entity. | Confirm you launched. |
 | `Cannot land on impassable terrain.` | Destination biome / overlay forbids landing. | Move to a landable tile. |

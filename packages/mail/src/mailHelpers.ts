@@ -57,6 +57,37 @@ export async function resolveNames(ids: string[]): Promise<string> {
   return names.join(", ");
 }
 
+/** System-wide mail counts (admin stats / staff console). */
+export type MailStats = {
+  total: number;
+  inbox: number;
+  unread: number;
+  trash: number;
+  quota: number;
+};
+
+export async function getMailStats(): Promise<MailStats> {
+  const all = await mailDb.find({});
+  let inbox = 0;
+  let unread = 0;
+  let trash = 0;
+  for (const m of all) {
+    if (m.folder === "trash") {
+      trash++;
+      continue;
+    }
+    inbox++;
+    if (!m.read) unread++;
+  }
+  return {
+    total: all.length,
+    inbox,
+    unread,
+    trash,
+    quota: MAIL_QUOTA,
+  };
+}
+
 /** Delete all messages whose `expiresAt` is set and in the past. */
 export async function runExpirySweep(): Promise<void> {
   const now = Date.now();

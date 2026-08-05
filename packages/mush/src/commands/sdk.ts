@@ -12,6 +12,13 @@ import type { IUrsamuSDK } from "./types.ts";
 import { dbojs, hydrate } from "../world/dbobjs.ts";
 import { evaluateLock } from "../world/locks.ts";
 import { flags as flagsUtil } from "../world/flags.ts";
+import { pickNameMatch } from "../world/name-match.ts";
+import {
+  canEditObject,
+  canSeeAttr,
+  canSetAttr,
+  attrFlagsOf,
+} from "../world/permissions.ts";
 import {
   send,
   sendPayload,
@@ -56,8 +63,13 @@ export function rewriteStatePaths(data: unknown): unknown {
   return out;
 }
 
+/** Strip MUSH %c codes, truecolor <#rrggbb>, and raw ANSI. */
 const stripSubs = (s: string) =>
-  s.replace(/%c[a-zA-Z]/gi, "").replace(/%[nrtbR]/gi, "").replace(/\x1b\[[0-9;]*m/g, "");
+  s
+    .replace(/%c[a-zA-Z]/gi, "")
+    .replace(/%[nrtbR]/gi, "")
+    .replace(/<#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})>/g, "")
+    .replace(/\x1b\[[0-9;]*m/g, "");
 
 async function resolveActor(actorId: string): Promise<IDBObj> {
   if (!actorId || actorId === "#-1") {
@@ -94,38 +106,66 @@ async function resolveRoom(roomId: string | undefined): Promise<IDBObj & { broad
     broadcast: (msg: string, opts?: Record<string, unknown>) => {
       const exclude = (opts?.exclude as string[]) ?? [];
       const reality = opts?.reality as string | undefined;
+      /** Structured payload for web clients (e.g. chat bubbles). */
+      const data = (opts?.data && typeof opts.data === "object")
+        ? opts.data as Record<string, unknown>
+        : null;
       const allSessions = sessions.list();
       room.contents
         .filter((o) => {
-          if (!o.flags.has("connected") || exclude.includes(o.id)) return false;
+          if (!o.flags.has("connected") || exclude.includes(o.id)) {
+            return false;
+          }
           if (reality === undefined) return true;
-          const plane = (o.state.reality as string | undefined) ?? "material";
+          const plane =
+            (o.state.reality as string | undefined) ?? "material";
           return plane === reality;
         })
         .forEach((o) => {
           const socketIds = allSessions
-            .filter((s) => ((s as unknown as Record<string, unknown>).actorId as string | undefined) === o.id)
+            .filter((s) =>
+              ((s as unknown as Record<string, unknown>)
+                .actorId as string | undefined) === o.id
+            )
             .map((s) => s.socketId);
-          if (socketIds.length) send(socketIds, msg);
+          for (const sid of socketIds) {
+            const ct = sessions.get(sid)?.meta?.clientType;
+            // Web chat UI: structured data only (no plain msg line)
+            if (data && ct === "web") {
+              const ui = (data as { ui?: { type?: string } }).ui;
+              if (ui?.type === "chat") {
+                sendPayload(sid, "", data);
+              } else {
+                sendPayload(sid, msg, data);
+              }
+            } else {
+              send([sid], msg);
+            }
+          }
         });
     },
   };
 }
 
 async function canEdit(actor: IDBObj, target: IDBObj): Promise<boolean> {
-  if (!actor || !target) return false;
-  if (actor.flags.has("superuser")) return true;
-  if (actor.flags.has("admin") || actor.flags.has("wizard")) return true;
-  const rawTarget = toRaw(target);
-  const owner = rawTarget.data?.owner as string | undefined;
-  if (owner && owner === actor.id) return true;
-  if (actor.id === target.id) return true;
-  return false;
+  return canEditObject(actor, target);
 }
 
-async function targetFn(actor: IDBObj, query: string, _global?: boolean): Promise<IDBObj | undefined> {
-  const q = query.trim();
+async function targetFn(
+  actor: IDBObj,
+  query: string,
+  _global?: boolean,
+): Promise<IDBObj | undefined> {
+  let q = query.trim();
   if (!q) return undefined;
+
+  // TinyMUX *Name — global lookup by player/object name.
+  let global = !!_global;
+  if (q.startsWith("*")) {
+    q = q.slice(1).trim();
+    global = true;
+    if (!q) return undefined;
+  }
 
   const lowerQ = q.toLowerCase();
   if (lowerQ === "me" || lowerQ === "self") return actor;
@@ -140,28 +180,32 @@ async function targetFn(actor: IDBObj, query: string, _global?: boolean): Promis
     if (raw) return hydrate(raw);
   }
 
-  const rx = new RegExp(`^${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i");
-
-  // Search current room contents (including self)
+  // Room contents (players, things, exits — ;aliases on exits)
   const roomContents = actor.location
     ? await dbojs.query({ location: actor.location })
     : [];
-  const inRoom = roomContents.find((o) => rx.test((o.data?.name as string) || o.id));
+  const inRoom = pickNameMatch(roomContents, q);
   if (inRoom) return hydrate(inRoom);
 
-  // Check if self name/moniker matches query
-  const selfName = (actor.state?.moniker as string) || (actor.state?.name as string) || actor.name || "";
-  if (rx.test(selfName)) return actor;
+  // Self by moniker / name / alias
+  if (pickNameMatch([{
+    id: actor.id,
+    name: actor.name,
+    state: actor.state,
+  }], q)) {
+    return actor;
+  }
 
-  // Search actor inventory
+  // Inventory
   const invContents = await dbojs.query({ location: actor.id });
-  const inInv = invContents.find((o) => rx.test((o.data?.name as string) || o.id));
+  const inInv = pickNameMatch(invContents, q);
   if (inInv) return hydrate(inInv);
 
-  // Global search if _global is true
-  if (_global) {
-    const all = await dbojs.query({ "data.name": rx });
-    if (all.length > 0) return hydrate(all[0]);
+  // Global: scan for name / ;alias / data.alias
+  if (global) {
+    const all = await dbojs.query({});
+    const hit = pickNameMatch(all, q);
+    if (hit) return hydrate(hit);
   }
 
   return undefined;
@@ -179,24 +223,88 @@ export async function createNativeSDK(
   const me = await resolveActor(actorId);
   const here = await resolveRoom(me.location);
   const state: Record<string, unknown> = {};
+  const sess = sessions.get(socketId);
+  const clientType =
+    (sess?.meta?.clientType as string | undefined) || "telnet";
 
   const u: IUrsamuSDK = {
     state,
     socketId,
+    clientType,
     me,
     here,
     target: undefined,
 
     ui: {
-      panel: () => null,
+      panel: (options: {
+        type?: "header" | "list" | "grid" | "table" | "panel";
+        title?: string;
+        content: unknown;
+        style?: string;
+      }) => ({
+        type: options.type ?? "panel",
+        title: options.title,
+        content: options.content,
+        style: options.style,
+      }),
       render: (tpl: string, data: Record<string, unknown>) =>
         tpl.replace(/\{\{(.+?)\}\}/g, (_, k) => String(data[k.trim()] ?? "")),
-      layout: () => {},
+      /**
+       * Structured UI for the web game client. Sent as WS payload
+       * `{ msg, data: { ui } }`. Clients without a layout renderer
+       * ignore `data.ui` and show `msg` (if any) as plain text.
+       */
+      layout: (options: {
+        components: unknown[];
+        meta?: Record<string, unknown>;
+      }) => {
+        if (!socketId) return;
+        const ui = {
+          type: "layout",
+          components: options.components ?? [],
+          meta: options.meta ?? {},
+        };
+        sendPayload(socketId, "", { ui });
+      },
     },
 
     util: {
-      displayName: (obj: IDBObj, _actor: IDBObj) =>
-        (obj.state?.moniker as string) || (obj.state?.name as string) || obj.name || "Unknown",
+      /**
+       * Prefer moniker (with color codes) over plain name for all FE/UI.
+       * Order: state/data.moniker → MONIKER attr → name_color+name → name.
+       */
+      displayName: (obj: IDBObj, _actor: IDBObj) => {
+        const bag = {
+          ...((obj as { data?: Record<string, unknown> }).data ??
+            {}),
+          ...(obj.state ?? {}),
+        } as Record<string, unknown>;
+        let moniker = String(bag.moniker ?? "").trim();
+        if (!moniker) {
+          const attrs = (bag.attributes as
+            | { name?: string; value?: string }[]
+            | undefined) ?? [];
+          const hit = attrs.find((a) =>
+            String(a.name ?? "").toUpperCase() === "MONIKER"
+          );
+          moniker = String(hit?.value ?? "").trim();
+        }
+        if (moniker) {
+          return moniker.split(";")[0]?.trim() || moniker;
+        }
+        const rawName = String(
+          bag.name ?? obj.name ?? "Unknown",
+        );
+        const name =
+          rawName.split(";")[0]?.trim() || rawName || "Unknown";
+        const nameColor = String(bag.name_color ?? "").trim();
+        if (nameColor && name.length > 0) {
+          return `${nameColor}${name[0]}%cn%ch%cw${
+            name.slice(1)
+          }%cn`;
+        }
+        return name;
+      },
       target: targetFn,
       center,
       ljust,
@@ -452,8 +560,33 @@ export async function createNativeSDK(
           ]
         });
         if (!player || !player.data?.password) return false;
-        // Simple comparison — production systems should use bcrypt
-        if (String(player.data.password) !== password) return false;
+        const stored = String(player.data.password);
+        // bcrypt hashes ($2a$ / $2b$ / $2y$); legacy create used plaintext.
+        if (/^\$2[aby]\$/.test(stored)) {
+          const bcrypt = await import("bcrypt");
+          const compare = bcrypt.compare ??
+            (bcrypt as unknown as {
+              default: { compare: typeof bcrypt.compare };
+            }).default.compare;
+          const ok = await compare(password, stored);
+          return ok ? hydrate(player) : false;
+        }
+        if (stored !== password) return false;
+        // Upgrade legacy plaintext on successful telnet connect
+        try {
+          const bcrypt = await import("bcrypt");
+          const hashFn = bcrypt.hash ??
+            (bcrypt as unknown as {
+              default: { hash: typeof bcrypt.hash };
+            }).default.hash;
+          const hashed = await hashFn(password, 10);
+          await dbojs.modify({ id: player.id }, "$set", {
+            "data.password": hashed,
+          } as Partial<IDBOBJ>);
+          player.data.password = hashed;
+        } catch {
+          /* best-effort */
+        }
         return hydrate(player);
       },
       login: async (id: string) => {
@@ -497,8 +630,27 @@ export async function createNativeSDK(
         }
         await Promise.resolve();
       },
-      reboot: async () => {
+      reboot: async (opts?: { update?: boolean; branch?: string }) => {
+        const { runCodebaseUpdate } = await import(
+          "../sys/codebase-update.ts"
+        );
+        const withUpdate = opts?.update !== false;
+        if (withUpdate) {
+          const result = await runCodebaseUpdate({
+            branch: opts?.branch ?? "",
+          });
+          // Only soft-reboot when cache is warm — leave game up
+          // on pull/bump/cache failure.
+          if (!result.ok || !result.cached) {
+            throw new Error(
+              "codebase update failed (game left running)",
+            );
+          }
+        }
         // Close PGlite before exit so the next process can open the DB.
+        // Exit 75 → main-loop soft reboot; telnet sidecar stays up.
+        const { markSoftReboot } = await import("../sys/reboot-flag.ts");
+        markSoftReboot();
         setTimeout(async () => {
           try {
             await DBO.close();
@@ -517,7 +669,27 @@ export async function createNativeSDK(
         await Promise.resolve();
       },
       uptime: () => Promise.resolve(performance.now()),
-      update: (_branch?: string) => Promise.resolve(),
+      update: async (branch?: string) => {
+        const { runCodebaseUpdate } = await import(
+          "../sys/codebase-update.ts"
+        );
+        const result = await runCodebaseUpdate({
+          branch: branch ?? "",
+        });
+        if (!result.ok || !result.cached) {
+          throw new Error(
+            "codebase update failed (game left running)",
+          );
+        }
+        const { markSoftReboot } = await import("../sys/reboot-flag.ts");
+        markSoftReboot();
+        setTimeout(async () => {
+          try {
+            await DBO.close();
+          } catch { /* best-effort */ }
+          Deno.exit(75);
+        }, 500);
+      },
       gameTime: async () => gameClock.now(),
       setGameTime: async (t: IGameTime) => { gameClock.set(t); },
     },
@@ -691,30 +863,76 @@ export async function createNativeSDK(
       get: async (id: string, name: string): Promise<string | null> => {
         const obj = await dbojs.queryOne({ id });
         if (!obj) return null;
-        const attrs = (obj.data?.attributes as Array<{ name: string; value: string }> | undefined) || [];
-        const found = attrs.find((a) => a.name.toUpperCase() === name.toUpperCase());
-        return found?.value ?? null;
+        const fl = attrFlagsOf({ data: obj.data }, name);
+        if (!canSeeAttr(me.flags, name, fl)) return null;
+        const attrs =
+          (obj.data?.attributes as Array<{ name: string; value: string }> |
+            undefined) || [];
+        const found = attrs.find(
+          (a) => a.name.toUpperCase() === name.toUpperCase(),
+        );
+        if (found) return found.value ?? null;
+        // Flat data.* attrs (builder @set style)
+        const flat = obj.data?.[name] ?? obj.data?.[name.toLowerCase()];
+        return typeof flat === "string" ? flat : null;
       },
-      set: async (id: string, name: string, value: string, type = "attribute"): Promise<void> => {
+      set: async (
+        id: string,
+        name: string,
+        value: string,
+        type = "attribute",
+      ): Promise<void> => {
         const obj = await dbojs.queryOne({ id });
         if (!obj) return;
+        const tar = hydrate(obj);
+        const fl = attrFlagsOf({ data: obj.data }, name);
+        if (!(await canEditObject(me, tar))) return;
+        if (!canSetAttr(me.flags, name, fl)) return;
         obj.data ||= {};
         const attrs = (
-          (obj.data.attributes as Array<{ name: string; value: string; type?: string; setter?: string }>) || []
+          (obj.data.attributes as Array<{
+            name: string;
+            value: string;
+            type?: string;
+            setter?: string;
+          }>) || []
         );
-        const idx = attrs.findIndex((a) => a.name.toUpperCase() === name.toUpperCase());
-        const entry = { name: name.toUpperCase(), value, type, setter: me.id };
+        const idx = attrs.findIndex(
+          (a) => a.name.toUpperCase() === name.toUpperCase(),
+        );
+        const entry = {
+          name: name.toUpperCase(),
+          value,
+          type,
+          setter: me.id,
+        };
         if (idx >= 0) attrs[idx] = entry;
         else attrs.push(entry);
-        await dbojs.modify({ id }, "$set", { "data.attributes": attrs } as unknown as Partial<IDBOBJ>);
+        await dbojs.modify(
+          { id },
+          "$set",
+          { "data.attributes": attrs } as unknown as Partial<IDBOBJ>,
+        );
       },
       clear: async (id: string, name: string): Promise<boolean> => {
         const obj = await dbojs.queryOne({ id });
         if (!obj) return false;
-        const attrs = (obj.data?.attributes as Array<{ name: string }> | undefined) || [];
-        const filtered = attrs.filter((a) => a.name.toUpperCase() !== name.toUpperCase());
+        const tar = hydrate(obj);
+        const fl = attrFlagsOf({ data: obj.data }, name);
+        if (!(await canEditObject(me, tar))) return false;
+        if (!canSetAttr(me.flags, name, fl)) return false;
+        const attrs =
+          (obj.data?.attributes as Array<{ name: string }> | undefined) ||
+          [];
+        const filtered = attrs.filter(
+          (a) => a.name.toUpperCase() !== name.toUpperCase(),
+        );
         if (filtered.length === attrs.length) return false;
-        await dbojs.modify({ id }, "$set", { "data.attributes": filtered } as unknown as Partial<IDBOBJ>);
+        await dbojs.modify(
+          { id },
+          "$set",
+          { "data.attributes": filtered } as unknown as Partial<IDBOBJ>,
+        );
         return true;
       },
     },
@@ -834,10 +1052,31 @@ gameHooks.on("session:auth", async (e) => {
       "$set",
       { flags: fstr.tags } as Partial<IDBOBJ>,
     );
+    // Ensure reconnect marker for presence hooks + index actorId.
+    sessions.setActorId(e.socketId, userId);
+    const sess = sessions.get(e.socketId) as
+      | { meta?: Record<string, unknown> }
+      | undefined;
+    if (sess) {
+      sess.meta = { ...(sess.meta ?? {}), reconnect: true, reauth: true };
+    }
+    // Mint a fresh long-lived token so the next soft-reboot still reauths.
+    let tokenOut: string | undefined;
+    try {
+      const { createToken } = await import("@ursamu/core");
+      tokenOut = await createToken({ id: userId });
+    } catch {
+      /* keep old token */
+    }
     // Tell the client who they are so telnet can restore cid + look.
-    sendPayload(e.socketId, "", { cid: userId, auth: true });
+    sendPayload(e.socketId, "", {
+      cid: userId,
+      auth: true,
+      ...(tokenOut ? { token: tokenOut } : {}),
+    });
     const { hooks } = await import("../events/hooks.ts");
-    await hooks.aconnect(player, e.socketId);
+    // JWT restore after soft-reboot — not a fresh connect.
+    await hooks.aconnect(player, e.socketId, { reauth: true });
   } catch (err) {
     await failReauth(e.socketId, String(err));
   }

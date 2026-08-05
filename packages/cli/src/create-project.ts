@@ -15,9 +15,14 @@ import {
   gameStopSh,
   gameRestartSh,
   gameStatusSh,
+  gameSafeUpdateSh,
   gameEnvFile,
   gameConnectTxt,
   gameWikiHome,
+  gameWikiRulesApproval,
+  gameWikiRulesConduct,
+  gameWikiCommandsBasic,
+  gameWikiHelpStaff,
   gameGitignore,
   gameReadme,
   gameClaude,
@@ -142,6 +147,9 @@ export async function scaffoldProject(
     "scripts",
     "system/scripts",
     "wiki",
+    "wiki/rules",
+    "wiki/commands",
+    "wiki/help",
   ]) {
     await Deno.mkdir(join(targetDir, dir), { recursive: true });
     console.log(`Created directory: ${dir}`);
@@ -155,7 +163,11 @@ export async function scaffoldProject(
   console.log(`Created src/plugins/plugins.manifest.json (${isLocal ? "local symlinks" : "empty remote"} mode)`);
 
   await Deno.writeTextFile(join(targetDir, "wiki", "home.md"), gameWikiHome(name));
-  console.log("Created wiki/home.md");
+  await Deno.writeTextFile(join(targetDir, "wiki", "rules", "approval.md"), gameWikiRulesApproval(name));
+  await Deno.writeTextFile(join(targetDir, "wiki", "rules", "conduct.md"), gameWikiRulesConduct(name));
+  await Deno.writeTextFile(join(targetDir, "wiki", "commands", "basic.md"), gameWikiCommandsBasic(name));
+  await Deno.writeTextFile(join(targetDir, "wiki", "help", "staff.md"), gameWikiHelpStaff(name));
+  console.log("Created default wiki pages in wiki/");
 
   await copySystemScripts(targetDir);
   await noteHelpDir(targetDir);
@@ -165,11 +177,12 @@ export async function scaffoldProject(
   await Deno.writeTextFile(join(targetDir, "src", "telnet.ts"), gameTelnetTs());
   console.log("Created src/telnet.ts");
   const shellScripts: Array<[string, string]> = [
-    ["run.sh",     gameRunSh(name)],
-    ["daemon.sh",  gameDaemonSh()],
-    ["stop.sh",    gameStopSh()],
+    ["run.sh", gameRunSh(name)],
+    ["daemon.sh", gameDaemonSh()],
+    ["stop.sh", gameStopSh()],
     ["restart.sh", gameRestartSh()],
-    ["status.sh",  gameStatusSh()],
+    ["status.sh", gameStatusSh()],
+    ["safe-update.sh", gameSafeUpdateSh()],
   ];
   for (const [file, content] of shellScripts) {
     const path = join(targetDir, "scripts", file);
@@ -191,6 +204,7 @@ export async function scaffoldProject(
   await writeConnectTxt(targetDir, name);
   console.log("Created text/default_connect.txt");
 
+  // Default “full portal” stack for new games (public site + staff).
   const defaultPkgs = [
     "@ursamu/builder",
     "@ursamu/channels",
@@ -198,8 +212,72 @@ export async function scaffoldProject(
     "@ursamu/bbs",
     "@ursamu/mail",
     "@ursamu/wiki",
+    "@ursamu/web",
+    "@ursamu/site",
   ];
-  const selections = opts.selectedPackages ?? defaultPkgs;
+  // Automatically resolve and include required peer dependencies in correct order:
+  // - @ursamu/cofd-plugin -> @ursamu/help, @ursamu/jobs, @ursamu/combat
+  // - @ursamu/dnd-plugin  -> @ursamu/help, @ursamu/vendor-plugin, @ursamu/combat
+  // - @ursamu/jobs-plugin / @ursamu/jobs -> @ursamu/help
+  // - @ursamu/mail / @ursamu/bbs / @ursamu/wiki -> @ursamu/help
+  function resolvePeerDependencies(pkgs: string[]): string[] {
+    const set = new Set(pkgs);
+
+    if (set.has("@ursamu/cofd-plugin") || set.has("@ursamu/cofd")) {
+      set.add("@ursamu/help");
+      set.add("@ursamu/jobs");
+      set.add("@ursamu/combat");
+    }
+    if (set.has("@ursamu/dnd-plugin")) {
+      set.add("@ursamu/help");
+      set.add("@ursamu/vendor-plugin");
+      set.add("@ursamu/combat");
+    }
+    if (set.has("@ursamu/jobs") || set.has("@ursamu/mail") || set.has("@ursamu/bbs") || set.has("@ursamu/wiki") || set.has("@ursamu/discord")) {
+      set.add("@ursamu/help");
+    }
+
+    // Topological order for config.json server.plugins
+    const order = [
+      "@ursamu/globals",
+      "@ursamu/help",
+      "@ursamu/jobs",
+      "@ursamu/vendor-plugin",
+      "@ursamu/combat",
+      "@ursamu/bbs",
+      "@ursamu/mail",
+      "@ursamu/wiki",
+      "@ursamu/channels",
+      "@ursamu/builder",
+      "@ursamu/cofd-plugin",
+      "@ursamu/cofd",
+      "@ursamu/dnd-plugin",
+      "@ursamu/d20-modern-plugin",
+      "@ursamu/mekton-zeta",
+      "@ursamu/fabula-plugin",
+      "@ursamu/lang-plugin",
+      "@ursamu/discord",
+      "@ursamu/map-plugin",
+      "@ursamu/events",
+      "@ursamu/web",
+      "@ursamu/site",
+    ];
+
+    const result: string[] = [];
+    for (const item of order) {
+      if (set.has(item)) {
+        result.push(item);
+        set.delete(item);
+      }
+    }
+    // Append any custom plugins
+    for (const item of set) {
+      result.push(item);
+    }
+    return result;
+  }
+
+  const selections = resolvePeerDependencies(opts.selectedPackages ?? defaultPkgs);
 
   const configJson = gameConfigJson(name, selections);
   await Deno.writeTextFile(
@@ -220,52 +298,74 @@ export async function scaffoldProject(
     "@ursamu/mush":            `${engineRelPath}/packages/mush/mod.ts`,
     "@ursamu/core":            `${engineRelPath}/packages/core/mod.ts`,
     "@ursamu/ursamu":          `${engineRelPath}/mod.ts`,
-    "@ursamu/ursamu/app":      `${engineRelPath}/src/app.ts`,
+    "@ursamu/ursamu/app":
+      `${engineRelPath}/packages/mush/src/app.ts`,
     "@ursamu/ursamu/channels":
-      `${engineRelPath}/src/utils/channel-events.ts`,
-    "@ursamu/ursamu/jobs":     `${engineRelPath}/packages/jobs/mod.ts`,
-    "@std/assert":             "jsr:@std/assert@^0.224.0",
-    "@std/flags":              "jsr:@std/flags@^0.224.0",
-    "@std/fmt":                "jsr:@std/fmt@^0.224.0",
-    "@std/fmt/":               "jsr:@std/fmt@^0.224.0/",
-    "@std/fs":                 "jsr:@std/fs@^0.224.0",
-    "@std/path":               "jsr:@std/path@^0.224.0",
-    "@std/semver":             "jsr:@std/semver@^1.0.0",
-    "@std/testing":            "jsr:@std/testing@^1.0.17",
-    "@std/testing/bdd":        "jsr:@std/testing@^1.0.17/bdd",
-    "@std/testing/mock":       "jsr:@std/testing@^1.0.17/mock",
-    "@ursamu/mushcode":        "jsr:@ursamu/mushcode@^0.6.0",
-    "@ursamu/mushcode/eval":   "jsr:@ursamu/mushcode@^0.6.0/eval",
-    "@ursamu/mushcode/parse":  "jsr:@ursamu/mushcode@^0.6.0/parse",
-    "@ursamu/parser":          "npm:@ursamu/parser@1.2.4",
-    "@digibear/tags":          "npm:@digibear/tags@1.0.0",
-    "bcrypt":                  "npm:bcryptjs@2.4.3",
-    "djwt":                    "jsr:@zaubrik/djwt@^3.0.2",
-    "dotenv":                  "jsr:@std/dotenv@^0.224.0",
-    "dotenv/":                 "jsr:@std/dotenv@^0.224.0/",
-    "dotenv/load":             "jsr:@std/dotenv@^0.224.0/load",
-    "lodash":                  "npm:lodash@^4.18.1",
-    "quickjs-emscripten":      "npm:quickjs-emscripten@0.29.0",
+      `${engineRelPath}/packages/channels/src/channel-events.ts`,
+    "@ursamu/ursamu/jobs":
+      `${engineRelPath}/packages/jobs/mod.ts`,
+    "@std/assert": "jsr:@std/assert@^0.224.0",
+    "@std/flags": "jsr:@std/flags@^0.224.0",
+    "@std/fmt": "jsr:@std/fmt@^0.224.0",
+    "@std/fmt/": "jsr:@std/fmt@^0.224.0/",
+    "@std/fs": "jsr:@std/fs@^0.224.0",
+    "@std/path": "jsr:@std/path@^0.224.0",
+    "@std/semver": "jsr:@std/semver@^1.0.0",
+    "@std/testing": "jsr:@std/testing@^1.0.17",
+    "@std/testing/bdd": "jsr:@std/testing@^1.0.17/bdd",
+    "@std/testing/mock": "jsr:@std/testing@^1.0.17/mock",
+    "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.6.0",
+    "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.6.0/eval",
+    "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.6.0/parse",
+    "@ursamu/parser": "npm:@ursamu/parser@1.2.4",
+    "@digibear/tags": "npm:@digibear/tags@1.0.0",
+    "bcrypt": "npm:bcryptjs@2.4.3",
+    "djwt": "jsr:@zaubrik/djwt@^3.0.2",
+    "dotenv": "jsr:@std/dotenv@^0.224.0",
+    "dotenv/": "jsr:@std/dotenv@^0.224.0/",
+    "dotenv/load": "jsr:@std/dotenv@^0.224.0/load",
+    "lodash": "npm:lodash@^4.18.1",
+    "quickjs-emscripten": "npm:quickjs-emscripten@0.29.0",
+    "@electric-sql/pglite": "npm:@electric-sql/pglite@^0.5.2",
+    "@nicia-ai/typegraph": "npm:@nicia-ai/typegraph@^0.31.0",
+    "@nicia-ai/typegraph/postgres/pglite":
+      "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
+    "zod": "npm:zod@4.4.3",
+    "sucrase": "npm:sucrase@^3.35.0",
   };
 
   const jsrImports: Record<string, string> = {
-    "ursamu":                  "jsr:@ursamu/mush",
-    "@ursamu/mush":            "jsr:@ursamu/mush",
-    "@ursamu/core":            "jsr:@ursamu/core",
-    "@ursamu/ursamu":          "jsr:@ursamu/ursamu",
+    "ursamu":                  "jsr:@ursamu/mush@^1.0.30",
+    "@ursamu/mush":            "jsr:@ursamu/mush@^1.0.30",
+    "@ursamu/mush/app":        "jsr:@ursamu/mush@^1.0.30/app",
+    "@ursamu/core":            "jsr:@ursamu/core@^1.0.2",
+    "@ursamu/ursamu":          "jsr:@ursamu/mush@^1.0.30",
+    "@ursamu/ursamu/app":      "jsr:@ursamu/mush@^1.0.30/app",
     "@std/path":               "jsr:@std/path@^0.224.0",
     "@std/assert":             "jsr:@std/assert@^0.224.0",
     "@std/fs":                 "jsr:@std/fs@^0.224.0",
+    "@electric-sql/pglite":    "npm:@electric-sql/pglite@^0.5.2",
+    "@nicia-ai/typegraph":     "npm:@nicia-ai/typegraph@^0.31.0",
+    "@nicia-ai/typegraph/postgres/pglite": "npm:@nicia-ai/typegraph@^0.31.0/postgres/pglite",
   };
 
   function getLocalPath(pkgName: string, engineRelPath: string): string {
     if (pkgName === "@ursamu/globals") {
-      return "jsr:@ursamu/globals";
+      return `${engineRelPath}/packages/cofd/tests/helpers/globals-shim.ts`;
     }
-    const folder = pkgName.replace("@ursamu/", "");
+    const slug = pkgName.replace("@ursamu/", "");
+    const base = slug
+      .replace(/-plugin$/, "")
+      .replace(/^mekton-zeta$/, "mekton");
     const entry =
-      pkgName === "@ursamu/fabula-plugin" ? "index.ts" : "mod.ts";
-    return `${engineRelPath}/packages/${folder}/${entry}`;
+      (base === "cofd" ||
+          base === "lang" ||
+          base === "vendor" ||
+          base === "dnd" ||
+          base === "discord")
+        ? "index.ts"
+        : "mod.ts";
+    return `${engineRelPath}/packages/${base}/${entry}`;
   }
 
   for (const pkgName of selections) {

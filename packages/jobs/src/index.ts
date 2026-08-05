@@ -7,12 +7,28 @@ import { getAllBuckets, getBucketStaffIds, jobAccess } from "./db.ts";
 import type { IPlugin } from "@ursamu/mush";
 import { jobsRouteHandler } from "./router.ts";
 import { registerNotifyHooks, removeNotifyHooks } from "./notify.ts";
+import {
+  JOBS_DESCRIPTION,
+  JOBS_PLUGIN_ID,
+  JOBS_TITLE,
+  JOBS_VERSION,
+} from "./version.ts";
+import {
+  registerJobsStaffNav,
+  unregisterJobsStaffNav,
+} from "./staff-nav-bridge.ts";
+import {
+  publishJobsOpenBadge,
+  registerJobsBadgeHooks,
+  removeJobsBadgeHooks,
+} from "./staff-badge-bridge.ts";
 
 /**
- * UrsaMU Jobs Plugin — Anomaly-style jobs/request system.
+ * UrsaMU Jobs Plugin — full-featured jobs/request system.
  *
- * Registers +request, +job, +jobs, +archive commands and the /api/v1/jobs
- * REST routes. Staff are notified in-game when new jobs arrive.
+ * Registers +request, +job, +jobs, +archive commands and the
+ * /api/v1/jobs REST routes. Staff console tab is plugin-owned
+ * (`route: "jobs"` → /admin/jobs when @ursamu/web is present).
  *
  * Configure buckets from your game project before plugin init:
  * ```ts
@@ -20,34 +36,54 @@ import { registerNotifyHooks, removeNotifyHooks } from "./notify.ts";
  * registerJobBuckets(["PLOT", "BUILD", { name: "CGEN", staffIds: ["#5"] }]);
  * ```
  */
+const bootstrapStaffUi = async (): Promise<void> => {
+  await registerJobsStaffNav();
+  registerJobsBadgeHooks();
+  await publishJobsOpenBadge();
+};
+
 const jobsPlugin: IPlugin = {
-  name: "jobs",
-  version: "0.1.1",
-  description: "Anomaly-style jobs system — player requests, staff commands, bucket access, archive, REST API.",
+  name: JOBS_PLUGIN_ID,
+  version: JOBS_VERSION,
+  description: `${JOBS_TITLE} — ${JOBS_DESCRIPTION}`,
+  dependencies: [
+    { name: "help", version: ">=1.0.0" },
+  ],
 
   init: async () => {
     registerPluginRoute("/api/v1/jobs", jobsRouteHandler);
     registerNotifyHooks();
     registerHelpDir(
       new URL("../help", import.meta.url),
-      "jobs",
+      JOBS_PLUGIN_ID,
     );
 
-    // Seed per-bucket staff access for any buckets registered with staffIds.
+    // Seed per-bucket staff access for buckets with staffIds.
     // Idempotent — only creates missing access records.
     for (const bucket of getAllBuckets()) {
       const staffIds = getBucketStaffIds(bucket);
-      if (staffIds.length > 0 && !(await jobAccess.queryOne({ id: bucket }))) {
+      if (
+        staffIds.length > 0 &&
+        !(await jobAccess.queryOne({ id: bucket }))
+      ) {
         await jobAccess.create({ id: bucket, staffIds });
       }
     }
 
-    console.log("[jobs] Initialized — +request/+job/+jobs/+archive active, /api/v1/jobs registered.");
+    // Fire-and-forget — soft-peer @ursamu/web may be absent.
+    void bootstrapStaffUi();
+
+    console.log(
+      `[${JOBS_PLUGIN_ID}] ${JOBS_TITLE} — +request/+job/+jobs, ` +
+        `/api/v1/jobs; staff UI via @ursamu/web /admin/jobs`,
+    );
     return true;
   },
 
   remove: () => {
     removeNotifyHooks();
+    removeJobsBadgeHooks();
+    void unregisterJobsStaffNav();
     console.log("[jobs] Plugin removed.");
   },
 };

@@ -1,73 +1,99 @@
 # Commands
 
+In-game help: `+help map` (and `map/setup`, `map/switches`,
+`map/builder`). Keep those files in sync with this doc.
+
+## Model (read first)
+
+Players **do not** stand on the grid alone. Vehicles are normal
+objects. Flow:
+
+1. Builder creates a thing; `@set` **`map-capable`** + **`enter_ok`**
+   (or `@lock/enter`). Optional `&CAPACITY`.
+2. Player **`enter`s** the vehicle, then `+map/launch`es.
+3. A `MapEntity` is created; `+map` / `look` / `+move` work.
+4. `+map/land` docks; **`leave`** exits the vehicle.
+5. `leave` while the vehicle is still on the map (`map:…`) is
+   refused — land first.
+
+`+map/embark` / `+map/disembark` are aliases of enter/leave
+(embark still requires `map-capable`).
+
 ## `+map`
-
-Renders a procedural sector minimap centred on the caller's coordinate, with authored overlays, contacts, and adjacency drawn on top.
-
-### Synopsis
 
 ```
 +map[/<switch>] [<args>]
 ```
 
-### Lock
+Lock: `connected` (extra gates inside exec).
 
-| Command | Lock         |
-| ------- | ------------ |
-| `+map`  | `connected`  |
-
-### Switches
-
-| Switch  | Args              | Lock                         | Behavior                                                       |
-| ------- | ----------------- | ---------------------------- | -------------------------------------------------------------- |
-| (none)  | -                 | `connected`                  | Same as `/here`; centres on `getPlayerCoord(u.me.state)`.      |
-| `/here` | -                 | `connected`                  | Centres on the caller's current coord (falls back to `0,0,0`). |
-| `/jump` | `<x> <y> [z]`     | `connected` + `isBuilder(u)` | Sets `data.coord` on the caller, then renders that coord.      |
-
-`isBuilder` is satisfied by any of: `builder`, `admin`, `wizard`, `superuser`. See [`security.md`](./security.md) for why the lock is `connected` rather than `builder+`.
+| Switch | Args | Who | Behavior |
+|--------|------|-----|----------|
+| (none) / `/here` | — | player | Render sector for active entity |
+| `/embark` | `<target>` | player | Alias of `enter` (map-capable only) |
+| `/disembark` | — | player | Alias of `leave` |
+| `/launch` | — | owner/admin | Create MapEntity; enter grid |
+| `/land` | — | owner/admin | Destroy entity; return to dock |
+| `/authorize` | `x y [z] [realm]=kind:glyph:name` | builder+ | Place overlay |
+| `/clear` | `x y [z] [realm]` | builder+ | Remove overlay |
+| `/link` | `<entityId>` | builder+ | Remote pilot |
+| `/unlink` | — | player | Clear remote link |
+| `/spectate` | `<entityId>` | admin | Watch vision |
+| `/unspectate` | — | admin | Stop spectating |
+| `/stats` | — | builder+ | Overlays + entities |
+| `/prune` | — | admin | Drop orphan entities |
+| `/jump` | `x y [z] [realm]` | admin | Teleport active entity |
 
 ### Examples
 
 ```
-> +map
-Renders the sector around your current coord.
-
-> +map/here
-Equivalent to bare +map; explicit form.
-
-> +map/jump 120 -40
-Moves your cursor to (120, -40, 0) and renders that sector.
-
-> +map/jump 0 0 -3
-Jumps to the underlevel at z = -3 and renders.
-
-> +map/jump 1500000 0 0
-Fails: coord magnitude exceeds 1,000,000; emits the usage string.
+@create Scout
+@set Scout=map-capable enter_ok
+&CAPACITY Scout=4
+drop Scout
+enter Scout
++map/launch
++map
++move ne
++map/authorize 0 0=infrastructure:#:Bunker
++map/land
+leave
 ```
 
-### Failure modes
+### Failure strings (selected)
 
-User-visible error strings emitted by `commands.ts`:
+- `You have no map presence…` — not entered/launched/linked
+- `That is not map-capable.` — embark alias only
+- `You can't enter that.` — no enter_ok / lock / ownership
+- `You can't leave while this is on the map.` — land first
+- `… is full (n/m).` — capacity
+- `Already launched. Use +map/land first.`
+- `Permission denied — …` — lock gate inside switch
 
-- `"Permission denied — +map/jump requires builder+."` — `/jump` invoked without the builder/admin/wizard/superuser flag.
-- `"Usage: +map/jump <x> <y> [z]"` — `parseCoord` returned `null`: non-integer arg, magnitude over 1,000,000, or fewer than two parts.
-- `` `Unknown switch "/${sw}". See +help map.` `` — switch is neither empty, `here`, nor `jump`.
-- `` `%cyNo map available at ${coord.x},${coord.y},${coord.z}.%cn` `` — `u.util.resolveFormat` produced no `DESCFORMAT` output for the synthetic target.
-- `` `Jumped to ${coord.x},${coord.y},${coord.z}.` `` — success confirmation (not an error, but listed for completeness).
+## `+move`
 
-### See also
+```
++move <dir>
+```
 
-- [`docs/configuration.md`](./configuration.md) — viewport width, noise seed, biome tables.
-- [`docs/architecture.md`](./architecture.md) — DESCFORMAT synthesis, renderer pipeline, overlay store.
+Dirs: `n s e w ne nw se sw u d` (long forms ok).  
+Requires active entity. Honors biome/overlay blocks and move guards.
 
-## `+help map`
+## Theme config
 
-The in-game help text is the canonical short reference and mirrors the synopsis above. See [`help/map.md`](../help/map.md). Keep the two in sync when editing either.
+```json
+{
+  "plugins": {
+    "map": { "theme": "hedge", "realm": "default" }
+  }
+}
+```
 
-## Future commands (roadmap)
+`default` | `hedge` | `court`
 
-Not yet implemented; contributors picking these up should wire them through the same catch-all switch pattern as `+map` and gate them in `exec` per `security.md`:
+## See also
 
-- `+map/authorize <x> <y> [z]=<kind>:<glyph>:<name>` — **not implemented.** Authors or updates an overlay at the target coord by calling `setOverlay()`. MUST add an ownership / admin check before reaching `setOverlay`; today the function has no caller-side gate.
-- `+map/clear <x> <y> [z]` — **not implemented.** Deletes an overlay via `clearOverlay()`. Same ownership gating requirement as `/authorize`.
-- `+map/seed <seed>` — **not implemented.** Re-seeds the world generator; admin-only. Will need to invalidate any cached neighborhood samples.
+- [embarkation.md](./embarkation.md)
+- [entities.md](./entities.md)
+- [fog-of-war.md](./fog-of-war.md)
+- [security.md](./security.md)

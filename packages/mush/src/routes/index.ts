@@ -30,11 +30,15 @@ export { objectsHandler, flagsHandler, functionsHandler } from "./objects.ts";
 export { authenticate } from "./authMiddleware.ts";
 
 import { registerRoute, registerFallback } from "@ursamu/core";
-import { dispatchPluginRoute } from "./plugin.ts";
+import {
+  dispatchPluginRoute,
+  hasPluginPrefix,
+} from "./plugin.ts";
 import { authHandler }    from "./auth.ts";
 import { configHandler }  from "./config.ts";
 import { dbObjHandler }   from "./dbobj.ts";
 import { sceneHandler }   from "./scenes.ts";
+import { objectImageServe } from "../media/object-image.ts";
 import { objectsHandler, flagsHandler, functionsHandler } from "./objects.ts";
 import {
   meHandler,
@@ -124,6 +128,10 @@ export function registerMushRoutes(authenticate: Authenticator): void {
     if (path.startsWith("/avatars/")) {
       return avatarServe(path);
     }
+    // /images/:id — object images (rooms, things, players)
+    if (path.startsWith("/images/")) {
+      return objectImageServe(path);
+    }
 
     // Plugin routes (registered via registerPluginRoute)
     const pluginRes = await dispatchPluginRoute(req, authenticate);
@@ -179,11 +187,48 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
     );
   }
 
-  if (path === "/health" || path === "/") {
+  // Health stays JSON. Bare "/" — prefer public FE (plugins.site
+  // serveRoot) when registered; else browsers → /admin/.
+  if (path === "/health") {
     return Response.json({ status: "ok", engine: "UrsaMU" });
   }
+  if (path === "/" && (method === "GET" || method === "HEAD")) {
+    const pluginHome = await dispatchPluginRoute(
+      req,
+      _authenticate,
+    );
+    if (pluginHome && pluginHome.status !== 404) {
+      return pluginHome;
+    }
+    const accept = (req.headers.get("accept") ?? "").toLowerCase();
+    const wantsHtml = accept.includes("text/html");
+    if (wantsHtml) {
+      // Public FE over staff console when @ursamu/site is loaded
+      const siteHome = hasPluginPrefix("/site") ||
+        hasPluginPrefix("/");
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: siteHome ? "/site/" : "/admin/",
+        },
+      });
+    }
+    return Response.json({
+      status: "ok",
+      engine: "UrsaMU",
+      admin: "/admin/",
+      site: "/site/",
+    });
+  }
 
-  if (path === "/api/v1/auth" || path.startsWith("/api/v1/auth/")) {
+  // Auth — login / register / reset (and legacy /api/v1/auth/*)
+  if (
+    path === "/api/v1/login" ||
+    path === "/api/v1/register" ||
+    path === "/api/v1/reset-password" ||
+    path === "/api/v1/auth" ||
+    path.startsWith("/api/v1/auth/")
+  ) {
     return authHandler(req, remoteAddr);
   }
 
@@ -211,9 +256,22 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
   if (path === "/api/v1/flags" && method === "GET")     return flagsHandler(req);
   if (path === "/api/v1/functions" && method === "GET") return functionsHandler(req);
 
-  if (path.startsWith("/api/v1/dbobj")) {
+  // /api/v1/dbos (list) and /api/v1/dbobj/:id (item)
+  if (
+    path === "/api/v1/dbos" ||
+    path.startsWith("/api/v1/dbobj/") ||
+    path === "/api/v1/dbobj"
+  ) {
     const userId = await _authenticate(req);
-    if (!userId) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+    if (!userId) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
     return dbObjHandler(req, userId);
   }
 
@@ -236,6 +294,7 @@ export async function handleRequest(req: Request, remoteAddr = "unknown"): Promi
   }
 
   if (path.startsWith("/avatars/")) return avatarServe(path);
+  if (path.startsWith("/images/")) return objectImageServe(path);
 
   // Plugin routes (registered via registerPluginRoute)
   const pluginRes = await dispatchPluginRoute(req, _authenticate);

@@ -1,14 +1,30 @@
 # @ursamu/help
 
+**Version 1.0.0** (stable). Requires **`@ursamu/mush@^1.0.0`**.
+
 API-first help system for UrsaMU — aggregates command inline help,
 per-plugin `help/` folders, and runtime DB entries.
+
+See `CHANGELOG.md` and `docs/STABLE.md`.
+
+## Stable API (1.0)
+
+| Export | Purpose |
+|--------|---------|
+| `plugin` | IPlugin bootstrap (`init` / `remove`) |
+| `registerHelpDir` | Register a plugin `help/` tree |
+| `bustCache` | Invalidate file-provider cache |
+| `helpRegistry` | Lookup / sections / custom providers |
+| `registerHelpEntry` / `slugify` | One-off entries and name normalize |
+| `upsertEntry` / `deleteEntry` | Programmatic DB help rows |
+| `CommandProvider` / `FileProvider` / `DbProvider` | Built-in sources |
+
+Breaking changes to stable exports require **2.0.0**.
 
 ## Install
 
 ```bash
-# via game plugins.manifest.json (recommended)
-# or JSR:
-deno add jsr:@ursamu/help
+deno add jsr:@ursamu/help@^1.0.0
 ```
 
 In `config/config.json`:
@@ -34,8 +50,7 @@ In `config/config.json`:
 
 ## Layout chrome
 
-Help output uses the same chrome as the rest of the game
-(requires `@ursamu/mush` ≥ 0.1.1):
+Help output uses the same chrome as the rest of the game:
 
 1. **`game.layout.header` / `.footer`** mushcode templates
 2. **TinyMUX plushelp fallback** — plain 78-column dash rules
@@ -68,11 +83,11 @@ MAIL
 Register a plugin's `help/` folder from `init()`:
 
 ```ts
-import { registerHelpDir } from "@ursamu/help";
+import { registerHelpDir } from "jsr:@ursamu/help@^1.0.0";
 
-// init():
+// Prefer URL (works for local file: and JSR https://)
 registerHelpDir(
-  new URL("./help", import.meta.url).pathname,
+  new URL("./help", import.meta.url),
   "myplugin",
 );
 ```
@@ -87,12 +102,19 @@ registerHelpDir(
 | POST | `/api/v1/help/:topic` | admin JWT | Create/update |
 | DELETE | `/api/v1/help/:topic` | admin JWT | Delete |
 
+## Version policy
+
+| Change | Bump |
+|--------|------|
+| Remove/rename stable export or REST path | major |
+| New provider hook, additive REST field | minor |
+| Bugfix, docs, tests | patch |
+
 ## Development
 
 ```bash
-deno task test       # unit tests
+deno task test       # unit + security tests
 deno task check      # type check
 deno task preflight  # JSR dry-run
 deno task publish    # publish to JSR (after preflight)
 ```
-

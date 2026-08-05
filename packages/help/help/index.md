@@ -13,9 +13,12 @@ The **help** system aggregates topics from commands, files, and the database.
   `help <section>/<topic>`   navigate sub-topics
 
 ## Sections
-  `building`   @commands for builders
+  `building`   @commands for builders (@exittype, …)
   `softcode`   softcode functions and flow control
   `general`    player commands and server info
+  `social`     +finger, +staff, +glance, ooc, …
+  `info`       +motd, +uptime, @motd
+  `staff`      +summon, +join (admin+)
 
 ## For Admins
   `+help/set`     add or update a runtime help entry

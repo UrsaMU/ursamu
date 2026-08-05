@@ -6,176 +6,145 @@ description: How to install and set up UrsaMU on your system
 
 # Installation Guide
 
-This guide will walk you through the process of installing and setting up UrsaMU
-on your system.
+Install Deno 2.x, scaffold a game with the CLI, start the server, then
+claim the first staff account on the web portal.
 
 ## Prerequisites
 
-Before installing UrsaMU, ensure you have the following:
-
 - [**Deno**](https://deno.land/) v2.x
-- Git (for cloning the repository and plugin installs)
+- Git (optional — for cloning the monorepo or git-based plugins)
 
-## Installation Methods
-
-UrsaMU can be installed in multiple ways. Choose the method that works best for
-your environment.
-
----
-
-### Method 1: Direct from GitHub
+## Method 1: Scaffold from JSR (recommended)
 
 ```bash
-# Clone the repository
-git clone https://github.com/ursamu/ursamu.git
-
-# Navigate to the project directory
-cd ursamu
-
-# Set up configuration
-deno task setup-config
-```
-
-### Method 2: Using the UrsaMU CLI
-
-UrsaMU provides a CLI tool for creating new projects:
-
-```bash
-# Install the UrsaMU CLI
-deno task install-cli
-
-# Create a new project
-ursamu create my-game
+deno run -A jsr:@ursamu/cli@0.1.2/create my-game
 cd my-game
-```
-
-> **Package names**: The primary import is now `jsr:@ursamu/mush`. The legacy
-> package `jsr:@ursamu/mush` still works as a shim that re-exports everything
-> from `@ursamu/mush`.
-
-## Configuration
-
-UrsaMU uses a flexible configuration system stored in JSON format:
-
-```bash
-# Show the entire configuration
-deno task config
-
-# Get a specific configuration value
-deno task config --get server.ws
-
-# Set a configuration value
-deno task config --set server.ws 4202
-```
-
-The configuration is stored in `config/config.json` and includes:
-
-- Server ports and database paths
-- Game name, description, and version
-- Text file locations
-- Plugin settings
-
-For detailed information on all available configuration options, see the
-[Configuration Guide](../configuration/).
-
-## Running the Server
-
-UrsaMU uses a dual-server architecture with the main server and telnet server
-running as separate processes:
-
-### Starting Both Servers
-
-```bash
-# Start both main and telnet servers with watch mode
 deno task start
 ```
 
-This will:
+The scaffold writes a supervised game project with:
 
-- Start both the main server and telnet server as separate processes
-- Enable watch mode for automatic reloading when files change
-- Allow each server to restart independently
+- `deno.json` — tasks (`start`, `dev`, `daemon`, …)
+- `config/config.json` — ports, plugins, optional site nav
+- `.env` — fresh `JWT_SECRET`
+- `scripts/` — `daemon.sh`, `stop.sh`, `restart.sh`, `status.sh`
+- Default **portal stack**: builder, channels, help, bbs, mail, wiki,
+  `@ursamu/web` (staff), `@ursamu/site` (public FE + `/play`)
 
-### Development Mode
+When `@ursamu/site` is selected, config sets
+`plugins.site.serveRoot: true` so the public site is served at `/`.
 
-For development with auto-restart on file changes:
+Optional: interactive menu and package picker:
 
 ```bash
-deno task dev
+deno run -A jsr:@ursamu/cli@0.1.2/ursamu
 ```
 
-### Production / Supervised Daemon
+Engine-dev mode (link imports to a local monorepo checkout):
 
-Game projects scaffolded with `ursamu create` include `scripts/daemon.sh`,
-`scripts/restart.sh`, `scripts/status.sh`, and `scripts/stop.sh`. These run
-the server as a supervised background process with signal-driven
-no-disconnect restarts. See [Production Deployment](./deployment.md#supervised-daemon-mode)
-for details.
+```bash
+deno run -A jsr:@ursamu/cli@0.1.2/create my-game --local
+```
+
+> **Imports:** game code uses `jsr:@ursamu/mush`. The legacy package
+> `jsr:@ursamu/ursamu` re-exports the same surface.
+
+## Method 2: From the monorepo
+
+```bash
+git clone https://github.com/ursamu/ursamu.git
+cd ursamu
+deno run -A packages/cli/src/create.ts my-game --local
+cd my-game
+deno task start
+```
+
+Use this when contributing to the engine or testing unreleased packages.
+
+## Default ports
+
+| Port | Role |
+|------|------|
+| `4201` | Telnet (sidecar) |
+| `4202` | WebSocket game hub |
+| `4203` | HTTP — REST API, `/admin`, public site, static assets |
+
+Override with `URSAMU_HTTP_PORT` / `URSAMU_TELNET_PORT` or edit
+`config/config.json` (`server.telnet`, `server.wsPort`, `server.apiPort`).
 
 ## Connecting
 
-### MU* Clients (Recommended for most players)
+### Web portal (default stack)
 
-The easiest way to connect is with a standard MU* client over Telnet (port `4201`):
+| URL | Purpose |
+|-----|---------|
+| `http://localhost:4203/` | Public site home |
+| `http://localhost:4203/play` | Browser play client (sign-in) |
+| `http://localhost:4203/admin/` | Staff console |
+| `http://localhost:4203/wiki/` | Wiki (when installed) |
 
-| Client | Platform | Download |
-|--------|----------|---------|
-| **Mudlet** | Windows / Mac / Linux | [mudlet.org](https://www.mudlet.org/) |
-| **MUSHclient** | Windows | [mushclient.com](https://mushclient.com/) |
-| **Potato** | Windows / Mac / Linux | [potatomushclient.com](https://www.potatomushclient.com/) |
-| Any terminal | Any | `telnet localhost 4201` |
+### MU* clients (Telnet)
 
-In your client, add a new connection profile with:
-- **Host**: `localhost` (or your server's hostname/IP)
-- **Port**: `4201`
+| Client | Platform |
+|--------|----------|
+| [Mudlet](https://www.mudlet.org/) | Win / Mac / Linux |
+| [MUSHclient](https://www.mushclient.com/) | Windows |
+| [Potato](https://www.potatomushclient.com/) | Win / Mac / Linux |
+| `telnet localhost 4201` | Any terminal |
 
-Once connected, type `create YourName YourPassword` to create a character, or
-`connect YourName YourPassword` to log in.
+### WebSocket (custom clients)
 
-### WebSocket (Developer / Custom Client)
+Connect to `ws://localhost:4202` (game hub) with a JWT from
+`POST /api/v1/auth/login`, or use the site play client which handles
+auth for you.
 
-For direct WebSocket access, connect to `ws://localhost:4203` and send JSON:
+## First admin / superuser
 
-```javascript
-const socket = new WebSocket("ws://localhost:4203");
+With an **empty database**:
 
-// Create a character
-socket.send(JSON.stringify({ msg: "create NewCharacter Password", data: {} }));
+1. Prefer the web path: open `/register` (or site login → register).
+2. The **first web registrant** is granted `superuser`.
+3. Telnet still works: `create <name> <password>` when no players
+   exist also promotes the first character.
 
-// Connect as a player
-socket.send(JSON.stringify({ msg: "connect PlayerName Password", data: {} }));
+After that, grant staff with in-game flags (`@set <player>=admin`) or
+the staff console. The `superuser` flag is only auto-granted on the
+empty-DB first-account flow.
 
-// Send any command
-socket.send(JSON.stringify({ msg: "look", data: {} }));
+## Configuration
+
+```bash
+# From a scaffolded game project
+deno task config
+deno task config --get server.apiPort
+deno task config --set game.name "My MUSH"
 ```
 
-## First Admin
+Config lives in `config/config.json`. Common keys:
 
-When the database is empty, UrsaMU prints:
+- `server.telnet` / `server.wsPort` / `server.apiPort`
+- `server.plugins` — JSR package list loaded at boot
+- `plugins.site` — public shell (`serveRoot`, `skin`, `nav`, …)
+- `game.name`, `game.playerStart`, layout templates
 
+See the [Configuration Guide](../configuration/).
+
+## Running the server
+
+```bash
+deno task start     # supervised foreground (game + telnet)
+deno task dev       # development / live logs
+deno task daemon    # background supervisor
+deno task status    # pid / health
+deno task stop      # graceful shutdown
+deno task restart   # SIGUSR2 no-disconnect restart
 ```
-Fresh database detected — no players exist yet.
 
-Connect via telnet and run:
-  create <name> <password>
+Production notes: [Deployment](./deployment.md).
 
-The first player created is automatically given superuser access.
-```
+## Next steps
 
-Connect with a Telnet client (`telnet localhost 4201`) and create your first
-account. That first player receives the **superuser** flag (level 10 — the
-highest permission level) automatically.
-
-After that, use `@set <player>=admin` in-game to grant admin rights to other
-trusted staff. The `superuser` flag itself can only be created via this
-first-run flow — it cannot be granted from inside the game.
-
-## Next Steps
-
-Now that you have UrsaMU installed and running, you might want to:
-
-- [**User Guide**](./user-guide.md) - Learn how to use UrsaMU as a player
-- [**Configuration**](../configuration/) - Explore detailed configuration
-  options
-- [**Plugin Development**](../plugins/index.md) - Learn how to create plugins to
-  extend UrsaMU
+- [Player Guide](./user-guide.md)
+- [Admin Guide](./admin-guide.md)
+- [CLI Reference](./cli.md)
+- [Plugin Development](../plugins/index.md)

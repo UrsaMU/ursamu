@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/map-plugin",
-  "version": "3.0.0",
+  "version": "3.2.1",
   "exports": {
     ".": "./index.ts"
   },
@@ -11,8 +11,47 @@
     "showcase": "deno run -A --unstable-kv tools/showcase.ts"
   },
   "imports": {
-    "ursamu": "../mush/mod.ts",
+    "ursamu": "jsr:@ursamu/mush@^1.0.4",
+    "@ursamu/mush": "jsr:@ursamu/mush@^1.0.4",
+    "@ursamu/help": "jsr:@ursamu/help@^1.0.0",
+    "@ursamu/help-plugin": "jsr:@ursamu/help@^1.0.0",
     "@std/assert": "jsr:@std/assert@^1.0.0"
+  },
+  "publish": {
+    "include": [
+      "index.ts",
+      "commands.ts",
+      "commands_builder.ts",
+      "commands_internals.ts",
+      "config.default.ts",
+      "config",
+      "chrome.ts",
+      "entities.ts",
+      "extensions.ts",
+      "fog.ts",
+      "format.ts",
+      "help",
+      "legend-overrides.ts",
+      "mapconfig.ts",
+      "migrate.ts",
+      "move.ts",
+      "pathfinding.ts",
+      "plugin-config.ts",
+      "regions.ts",
+      "renderer.ts",
+      "routes.ts",
+      "schemas.ts",
+      "spatial.ts",
+      "staff-nav-bridge.ts",
+      "state.ts",
+      "topology.ts",
+      "deno.json",
+      "README.md",
+      "CHANGELOG.md",
+      "LICENSE",
+      "ursamu.plugin.json",
+      "docs"
+    ]
   },
   "lint": {
     "exclude": [

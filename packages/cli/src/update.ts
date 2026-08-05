@@ -81,7 +81,15 @@ if (!isLocal && !URSAMU_RE.test(currentSpecifier)) {
 
 // ── 2. resolve latest version (JSR) or local path ────────────────────────────
 
-const SHELL_SCRIPTS = ["daemon.sh", "main-loop.sh", "run.sh", "stop.sh", "restart.sh", "status.sh"];
+const SHELL_SCRIPTS = [
+  "daemon.sh",
+  "main-loop.sh",
+  "run.sh",
+  "stop.sh",
+  "restart.sh",
+  "status.sh",
+  "safe-update.sh",
+];
 const scriptsDir = join(cwd, "scripts");
 
 let latestVersion: string | null = null;
@@ -238,12 +246,117 @@ for (const candidate of ["src/main.ts", "src/telnet.ts", "main.ts"]) {
   if (existsSync(join(cwd, candidate))) entryPoints.push(candidate);
 }
 
+// ── 6b. merge config.sample.json → config/config.json ───────────────────────
+// Live config is often gitignored; new plugins (map, web, …) must still land.
+try {
+  const livePath = join(cwd, "config", "config.json");
+  const samplePath = join(cwd, "config", "config.sample.json");
+  if (existsSync(samplePath)) {
+    const live = existsSync(livePath)
+      ? JSON.parse(await Deno.readTextFile(livePath)) as Record<string, unknown>
+      : {};
+    const sample = JSON.parse(
+      await Deno.readTextFile(samplePath),
+    ) as Record<string, unknown>;
+
+    const deepMerge = (base: unknown, over: unknown): unknown => {
+      if (
+        base && over &&
+        typeof base === "object" && typeof over === "object" &&
+        !Array.isArray(base) && !Array.isArray(over)
+      ) {
+        const out = { ...(base as Record<string, unknown>) };
+        for (const [k, v] of Object.entries(over as object)) {
+          out[k] = k in out ? deepMerge(out[k], v) : v;
+        }
+        return out;
+      }
+      return over;
+    };
+
+    const ensurePlugins = (a: string[], b: string[]): string[] => {
+      const seen = new Set<string>();
+      const out: string[] = [];
+      for (const n of [...b, ...a]) {
+        const s = String(n).trim();
+        if (s && !seen.has(s)) {
+          seen.add(s);
+          out.push(s);
+        }
+      }
+      return out;
+    };
+
+    const before = JSON.stringify(live);
+    const srv = (live.server && typeof live.server === "object"
+      ? live.server as Record<string, unknown>
+      : (live.server = {})) as Record<string, unknown>;
+    const sampleSrv = (sample.server && typeof sample.server === "object"
+      ? sample.server as Record<string, unknown>
+      : {});
+    const livePlugs = Array.isArray(srv.plugins)
+      ? (srv.plugins as unknown[]).map(String)
+      : [];
+    const samplePlugs = Array.isArray(sampleSrv.plugins)
+      ? (sampleSrv.plugins as unknown[]).map(String)
+      : [];
+    if (samplePlugs.length) {
+      const merged = ensurePlugins(livePlugs, samplePlugs);
+      const added = merged.filter((p) => !livePlugs.includes(p));
+      srv.plugins = merged;
+      if (added.length) {
+        console.log(
+          `${green("✓")} config plugins added: ${bold(added.join(", "))}`,
+        );
+      }
+    }
+    const liveBlocks = (live.plugins && typeof live.plugins === "object"
+      ? live.plugins as Record<string, unknown>
+      : (live.plugins = {})) as Record<string, unknown>;
+    const sampleBlocks = (sample.plugins && typeof sample.plugins === "object"
+      ? sample.plugins as Record<string, unknown>
+      : {});
+    for (const [k, v] of Object.entries(sampleBlocks)) {
+      if (!(k in liveBlocks)) {
+        liveBlocks[k] = v;
+        console.log(`${green("✓")} config plugins.${k}: added from sample`);
+      } else {
+        liveBlocks[k] = deepMerge(liveBlocks[k], v);
+      }
+    }
+    if (JSON.stringify(live) !== before) {
+      await Deno.mkdir(join(cwd, "config"), { recursive: true });
+      await Deno.writeTextFile(
+        livePath,
+        JSON.stringify(live, null, 2) + "\n",
+      );
+      console.log(`${green("✓")} Merged config.sample.json → config.json`);
+    } else {
+      console.log(`${green("✓")} config.json already matches sample plugins.`);
+    }
+  }
+} catch (e) {
+  console.warn(`Warning: could not merge config sample — ${e}`);
+}
+
 if (entryPoints.length > 0) {
   console.log(`Re-caching: ${entryPoints.join(", ")} ...`);
+  // Drop stale lock so pins cannot resolve to an older caret graph.
+  try {
+    await Deno.remove(join(cwd, "deno.lock"));
+  } catch { /* ok */ }
+  try {
+    await Deno.remove(join(cwd, "node_modules"), { recursive: true });
+  } catch { /* ok */ }
   const cmd = new Deno.Command(Deno.execPath(), {
-    args: ["cache", "--reload", ...entryPoints],
+    args: [
+      "cache",
+      "--reload",
+      "--minimum-dependency-age=0",
+      ...entryPoints,
+    ],
     cwd,
-    stdin:  "inherit",
+    stdin: "inherit",
     stdout: "inherit",
     stderr: "inherit",
   });
