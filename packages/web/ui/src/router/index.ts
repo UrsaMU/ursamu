@@ -28,10 +28,15 @@ const router = createRouter({
           name: "dashboard",
           component: () => import("@/views/DashboardView.vue"),
         },
+        // Play lives on the public site (/play), not staff console.
         {
           path: "play",
-          name: "play",
-          component: () => import("@/views/PlayView.vue"),
+          redirect: () => {
+            if (typeof window !== "undefined") {
+              window.location.assign("/play");
+            }
+            return { name: "dashboard" };
+          },
         },
         {
           path: "wiki",

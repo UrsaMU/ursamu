@@ -463,7 +463,8 @@ Wiki API notes: engine wiki routes / package docs as applicable.
 ## 11. Game client output (Play)
 
 **Player FE:** site `/play` (`play.js` + `play.css`) — primary client.  
-**Staff console Play** is optional/legacy; same `data.ui` contract.
+**Staff console** does not ship a Play tab; `/admin/play` redirects
+to public `/play`. Same `data.ui` contract if embedding later.
 
 ### Message contract (WS `{ msg, data }`)
 

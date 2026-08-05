@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.72
+
+- Remove **Play** tab from staff console top nav. Game client
+  lives on the public site at `/play`; `/admin/play` redirects
+  there.
+
 ## 0.2.71
 
 - Wiki edit: **Delete** page button (staff confirm →
