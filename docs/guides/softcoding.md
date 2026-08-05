@@ -1,15 +1,26 @@
 ---
 layout: layout.vto
-title: Soft-Coding Guide
-description: How to store scripts and data in object attributes and trigger them with @trigger, u.trigger, and u.eval.
+title: Softcode Guide
+description: TinyMUX softcode and attribute scripts — &ATTR, @trigger, u.eval, $-patterns, and the softcode evaluator.
 ---
 
-# Soft-Coding Guide
+# Softcode Guide
 
-Soft-coding is the practice of storing scripts and data directly on in-game
-objects as **attributes**, rather than writing static files. It lets builders
-and players customize room behavior, object interaction, and NPC responses
-entirely from inside the game — no server restart required.
+UrsaMU supports two ways to put behavior on objects:
+
+1. **TinyMUX softcode** — classic MUSH expressions
+   (`[add(1,2)]`, `%N`, `@switch`, `$greet *`) via the
+   softcode evaluator.
+2. **TypeScript attributes** — full sandbox scripts stored
+   on objects (same SDK as `system/scripts/`).
+
+Both live as **attributes** on rooms, players, things, and
+exits. Builders can change them in-game with no restart.
+
+For file-based TypeScript commands, see the
+[Scripting Guide](/guides/scripting/). For the full function
+list, see [MUSH Compatibility](/mush_compatibility/).
+
 ---
 
 ## What is Soft-Coding?

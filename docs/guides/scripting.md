@@ -6,7 +6,13 @@ description: How to write and run scripts in UrsaMU's sandboxed scripting enviro
 
 # Scripting Guide
 
-UrsaMU scripts are TypeScript/JavaScript files that run inside **Web Workers** — completely isolated from the host process. Every script receives a typed SDK object called `u` that provides everything a script needs to interact with the game world.
+UrsaMU scripts are TypeScript/JavaScript files that run inside
+**Web Workers** — isolated from the host process. Every script
+gets a typed SDK object `u` for world interaction.
+
+Looking for classic MUSH softcode (`[func()]`, `%N`,
+`&ATTR/softcode`)? See the
+[Softcode Guide](/guides/softcoding/) instead.
 
 ## How It Works
 

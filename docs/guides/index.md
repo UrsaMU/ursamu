@@ -39,12 +39,12 @@ admin operations, plugin development, and softcoding.
 
 ## Writing Code
 
-- [**Scripting**](./scripting.md) — Sandbox model, the `u` SDK, ESM vs legacy
-  blocks, aliases and switches.
+- [**Softcode**](./softcoding.md) — TinyMUX evaluator, `&ATTR/softcode`,
+  `@trigger` / `u.trigger` / `u.eval`, $-patterns, parent inheritance.
+- [**Scripting (TypeScript)**](./scripting.md) — Sandbox model, the `u` SDK,
+  ESM vs legacy blocks, aliases and switches.
 - [**Build Your First Script**](./first-script.md) — Step-by-step walkthrough.
 - [**SDK Cookbook**](./sdk-cookbook.md) — Every `u.*` namespace with examples.
-- [**Soft-Coding**](./softcoding.md) — Storing scripts in attributes, parent
-  inheritance, `@trigger` / `u.trigger` / `u.eval`.
 - [**Recipes**](./recipes.md) — Copy-paste patterns for common tasks.
 - [**Game Clock**](./gameclock.md) — `u.sys.gameTime` and the in-game calendar.
 
