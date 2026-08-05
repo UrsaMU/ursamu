@@ -39,9 +39,11 @@ admin operations, plugin development, and softcoding.
 
 ## Writing Code
 
-- [**Softcode**](./softcoding.md) — TinyMUX evaluator, `&ATTR/softcode`,
-  `@trigger` / `u.trigger` / `u.eval`, $-patterns, parent inheritance.
-- [**Scripting (TypeScript)**](./scripting.md) — Sandbox model, the `u` SDK,
+- [**Softcode (TinyMUX)**](./softcoding.md) — Pure MUX softcode: `think`,
+  substitutions, functions, `@switch`/`@dolist`, `$`/`^` patterns, UDFs.
+- [**Attribute Scripts**](./attribute-scripts.md) — TypeScript on object
+  attributes via `@trigger`, `u.trigger`, `u.eval`.
+- [**Scripting (TypeScript)**](./scripting.md) — File sandbox, the `u` SDK,
   ESM vs legacy blocks, aliases and switches.
 - [**Build Your First Script**](./first-script.md) — Step-by-step walkthrough.
 - [**SDK Cookbook**](./sdk-cookbook.md) — Every `u.*` namespace with examples.

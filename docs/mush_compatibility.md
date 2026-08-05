@@ -62,7 +62,7 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 | `@trigger <obj>/<attr>` | ✅ Working | Fire stored attributes as scripts |
 | `@wipe <obj>` | ✅ Working | Clear all user-set attributes |
 | `@Aconnect` / `@Adisconnect` | ✅ Working | `&ACONNECT` / `&ADISCONNECT` attributes fire on login/logout |
-| MUX softcode evaluator | ✅ Working | TinyMUX 2.x compatible — see [Softcode](#mux-softcode-support) below |
+| MUX softcode evaluator | ✅ Working | TinyMUX 2.x — full how-to in the [Softcode Guide](/guides/softcoding/); tables below |
 | `@tag` / `@ltag` | ✅ Working | Global and personal named-object registry (RhostMUSH-style) |
 | `@switch` | ✅ Working | Eval value as softcode, compare cases, execute matching action |
 | `@dolist` | ✅ Working | Iterate a softcode list, execute action per item with `##`/`#@` |
@@ -84,20 +84,25 @@ If you are migrating from a traditional MUSH or hosting your first server, this 
 
 ## MUX Softcode Support
 
-UrsaMU Phase 1 ships a full TinyMUX 2.x compatible softcode evaluator alongside the TypeScript sandbox. In-game object attributes can be written in MUX softcode; all system scripts remain in TypeScript.
+UrsaMU ships a TinyMUX 2.x compatible softcode evaluator
+alongside the TypeScript sandbox. **Builders:** start with
+the [Softcode Guide](/guides/softcoding/) (how-to, examples,
+`$`/`^`, UDFs). This section is the parity inventory.
 
 ### How it works
 
-- **TypeScript/JS attributes** (default) — executed in the existing Deno Web Worker sandbox.
-- **Softcode attributes** — executed in a dedicated softcode Deno Worker with a 100ms wall-clock timeout.
-
-To mark an attribute as softcode when setting it with `&`:
+- **TypeScript/JS attributes** (default) — Deno Web Worker
+  sandbox. See [Attribute Scripts](/guides/attribute-scripts/).
+- **Softcode attributes** — dedicated softcode worker, 100ms
+  wall-clock timeout.
 
 ```
 &GREET/softcode me=[name(%#)] greets you!
 ```
 
-The `/softcode` flag persists on the attribute and routes all future evaluations through the softcode engine. Omitting the flag uses the TypeScript sandbox as before. Attributes that contain MUX substitution syntax (`%N`, `[func()]`) and no TypeScript keywords are also auto-detected as softcode.
+The `/softcode` flag persists and routes eval through the
+softcode engine. Omitting it uses TypeScript unless the
+value is auto-detected as MUX softcode.
 
 ### Supported functions (~250 total)
 
