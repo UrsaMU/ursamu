@@ -58,7 +58,7 @@ jobs:
     name: Publish @ursamu/core to JSR
     runs-on: ubuntu-latest
     needs: [core]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       id-token: write  # required for JSR OIDC publishing
@@ -76,7 +76,7 @@ jobs:
     name: Publish @ursamu/mush to JSR
     runs-on: ubuntu-latest
     needs: [core, mush, publish-core]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       id-token: write
@@ -94,7 +94,7 @@ jobs:
     name: Publish @ursamu/channels to JSR
     runs-on: ubuntu-latest
     needs: [core, mush]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       id-token: write
@@ -112,7 +112,7 @@ jobs:
     name: Publish @ursamu/builder to JSR
     runs-on: ubuntu-latest
     needs: [core, mush]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       id-token: write
@@ -130,7 +130,7 @@ jobs:
     name: Publish @ursamu/help to JSR
     runs-on: ubuntu-latest
     needs: [core, mush]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       id-token: write
@@ -148,7 +148,7 @@ jobs:
     name: Publish @ursamu/discord to JSR
     runs-on: ubuntu-latest
     needs: [core, mush]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       id-token: write
@@ -166,7 +166,7 @@ jobs:
     name: Publish @ursamu/cofd-plugin to JSR
     runs-on: ubuntu-latest
     needs: [core, mush]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       id-token: write
@@ -184,7 +184,7 @@ jobs:
     name: Publish @ursamu/wiki to JSR
     runs-on: ubuntu-latest
     needs: [core, mush]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     permissions:
       contents: read
       id-token: write
