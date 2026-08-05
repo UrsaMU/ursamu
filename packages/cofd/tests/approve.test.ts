@@ -17,6 +17,7 @@ import {
 } from "@ursamu/jobs";
 import type { CofdCgState } from "../src/chargen/index.ts";
 import { mailDb, type IMail } from "@ursamu/mail";
+import { dbojs } from "@ursamu/mush";
 
 const OPTS = { sanitizeResources: false, sanitizeOps: false };
 
@@ -60,39 +61,69 @@ async function seedJob(
   return job;
 }
 
-function wireDb(
+/**
+ * approvePlayer() uses real dbojs (not mockU.db). Seed the player
+ * and patch dbojs.modify so the mock target stays in sync.
+ */
+async function wireDb(
   target: ReturnType<typeof mockPlayer>,
   u: ReturnType<typeof mockU>,
 ) {
   u._store.put(target);
   u.util.target = () => Promise.resolve(target);
   u.util.displayName = (o) => o.name ?? "Unknown";
-  u.db.modify = (
-    _id: string,
+
+  await dbojs.delete({ id: target.id }).catch(() => {});
+  await dbojs.create({
+    id: target.id,
+    flags: [...target.flags].join(" "),
+    data: {
+      name: target.name,
+      ...target.state,
+    },
+  });
+
+  const origModify = dbojs.modify.bind(dbojs);
+  // deno-lint-ignore no-explicit-any
+  (dbojs as any).modify = async (
+    q: { id?: string },
     op: string,
     data: Record<string, unknown>,
   ) => {
-    if (op === "$set" && data["data.cofd"] !== undefined) {
-      target.state.cofd = data["data.cofd"];
-    }
-    if (op === "$set" && data["data.cofd_cg"] !== undefined) {
-      target.state.cofd_cg = data["data.cofd_cg"];
-    }
-    if (op === "$set" && data["data.home"] !== undefined) {
-      target.state.home = data["data.home"];
+    const r = await origModify(q, op, data);
+    const id = String(q?.id ?? "").replace(/^#/, "");
+    if (id !== target.id) return r;
+    if (op === "$set") {
+      // Whole data bag replace (approve_core)
+      if (data.data && typeof data.data === "object") {
+        const bag = data.data as Record<string, unknown>;
+        if ("cofd" in bag) target.state.cofd = bag.cofd;
+        if (!("cofd_cg" in bag) || bag.cofd_cg == null) {
+          delete target.state.cofd_cg;
+        } else {
+          target.state.cofd_cg = bag.cofd_cg;
+        }
+        if ("home" in bag) target.state.home = bag.home;
+      }
+      if (data["data.cofd"] !== undefined) {
+        target.state.cofd = data["data.cofd"];
+      }
+      if (data["data.cofd_cg"] !== undefined) {
+        target.state.cofd_cg = data["data.cofd_cg"];
+      }
+      if (data["data.home"] !== undefined) {
+        target.state.home = data["data.home"];
+      }
+      if (data.flags !== undefined) {
+        target.flags = new Set(
+          String(data.flags).split(/\s+/).filter(Boolean),
+        );
+      }
     }
     if (op === "$unset" && "data.cofd_cg" in data) {
       delete target.state.cofd_cg;
     }
-    return Promise.resolve();
-  };
-  u.setFlags = async (t: string | { id: string; flags?: Set<string> }, fl: string) => {
-    const id = typeof t === "string" ? t : t.id;
-    if (id !== target.id) return;
-    for (const part of fl.split(/\s+/)) {
-      if (part.startsWith("!")) target.flags.delete(part.slice(1));
-      else target.flags.add(part);
-    }
+    return r;
   };
 }
 
@@ -113,15 +144,13 @@ describe("+approve", OPTS, () => {
       }),
       args: ["", "Alice=Welcome aboard."],
     });
-    wireDb(target, u);
+    await wireDb(target, u);
 
     await approveExec(u);
 
     const all = u._sent.join("\n");
     assertStringIncludes(all, "Character Approved");
     assertStringIncludes(all, `job #${num} completed`);
-    // Live notify to player
-    assertStringIncludes(all, "approved by Wiz");
     assertStringIncludes(all, "Welcome aboard");
 
     assertEquals(target.state.cofd_cg, undefined);
@@ -169,7 +198,7 @@ describe("+approve", OPTS, () => {
       me: mockPlayer({ id: "wiz2", name: "Wiz" }),
       args: ["", "Bob"],
     });
-    wireDb(target, u);
+    await wireDb(target, u);
 
     await approveExec(u);
 
@@ -178,9 +207,14 @@ describe("+approve", OPTS, () => {
       "Character Approved",
     );
     assertEquals(target.state.cofd_cg, undefined);
-    assertStringIncludes(
-      u._sent.join("\n"),
-      "approved by Wiz",
+    // Player live notify is via sessions/send, not staff u.send
+    const mails = await mailDb.find({});
+    assert(
+      mails.some((m) =>
+        Array.isArray(m.to) && m.to.includes(target.id) &&
+        String(m.subject).toLowerCase().includes("approved")
+      ),
+      "expected approval @mail to player",
     );
   });
 
@@ -197,7 +231,7 @@ describe("+approve", OPTS, () => {
       me: mockPlayer({ id: "wiz3", name: "Wiz" }),
       args: ["", "Cara"],
     });
-    wireDb(target, u);
+    await wireDb(target, u);
 
     await approveExec(u);
 
@@ -224,7 +258,7 @@ describe("+approve", OPTS, () => {
       }),
       args: ["", "Pix"],
     });
-    wireDb(target, u);
+    await wireDb(target, u);
 
     await approveExec(u);
     assertEquals(target.flags.has("fae"), true);
@@ -240,8 +274,7 @@ describe("+approve", OPTS, () => {
       me: mockPlayer({ id: "1", name: "Wiz" }),
       args: ["", "Bob"],
     });
-    u.util.target = () => Promise.resolve(target);
-    u.util.displayName = (o) => o.name ?? "Unknown";
+    await wireDb(target, u);
 
     await approveExec(u);
     assertStringIncludes(

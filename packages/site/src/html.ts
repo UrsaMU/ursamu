@@ -169,7 +169,7 @@ export function injectSiteHtml(
     out = out.replace(
       /(<h1\b[^>]*\bdata-site-banner-title\b)([^>]*)(>)[\s\S]*?(<\/h1>)/i,
       (_m, open: string, mid: string, gt: string, close: string) => {
-        let m = String(mid).replace(/\s*\bhidden\b/gi, "");
+        const m = String(mid).replace(/\s*\bhidden\b/gi, "");
         const body = `\n          ${esc(heroTitle)}\n        `;
         return `${open}${m}${gt}${body}${close}`;
       },

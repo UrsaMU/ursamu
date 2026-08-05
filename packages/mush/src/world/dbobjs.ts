@@ -87,10 +87,14 @@ export class Obj {
     if (typeof obj === "string") {
       const raw = obj.trim();
       const idPart = raw.startsWith("#") ? raw.slice(1) : raw;
-      if (/^\d+$/.test(idPart)) {
-        const found = await dbojs.queryOne({ id: idPart });
-        return found ? new Obj().load(found) : null;
-      }
+      if (!idPart) return null;
+
+      // Exact id first (numeric or slug ids like "rt_admin1").
+      // Pure digits must never fall through to name regex (would
+      // match substrings of other names).
+      const byId = await dbojs.queryOne({ id: idPart });
+      if (byId) return new Obj().load(byId);
+      if (/^\d+$/.test(idPart)) return null;
 
       // Name / alias — exact match only (case-insensitive)
       const esc = idPart.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

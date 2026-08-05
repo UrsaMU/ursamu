@@ -97,9 +97,13 @@ Deno.test("GET /dbos — returns list of editable objects", OPTS, async () => {
   const res = await dbObjHandler(req, ADMIN_ID);
   assertEquals(res.status, 200);
   const body = await res.json();
-  assertEquals(Array.isArray(body), true);
+  // Handler returns { objects, total } (list envelope).
+  const list = Array.isArray(body)
+    ? body
+    : (body as { objects?: unknown[] }).objects;
+  assertEquals(Array.isArray(list), true);
   // Password should be stripped
-  body.forEach((obj: Record<string, unknown>) => {
+  (list as Record<string, unknown>[]).forEach((obj) => {
     const data = obj.data as Record<string, unknown> | undefined;
     assertEquals(data?.password, undefined);
   });

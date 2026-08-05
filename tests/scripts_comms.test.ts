@@ -100,7 +100,11 @@ function makeU(opts: {
     },
     util: {
       target:      () => Promise.resolve(null),
-      displayName: (o: IDBObj) => (o.state?.name as string) || o.name || "Unknown",
+      displayName: (o: IDBObj) =>
+        (o.state?.moniker as string) ||
+        (o.state?.name as string) ||
+        o.name ||
+        "Unknown",
       stripSubs:   (s: string) => s,
       center:      (s: string) => s,
       ljust:       (s: string, w: number) => s.padEnd(w),

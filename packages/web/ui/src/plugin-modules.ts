@@ -40,8 +40,10 @@ export function isSameOriginModule(url: string): boolean {
   const u = url.trim();
   if (u.startsWith("/")) return true;
   try {
-    return new URL(u, window.location.origin).origin ===
-      window.location.origin;
+    const origin =
+      (globalThis as { location?: { origin?: string } }).location
+        ?.origin ?? "http://localhost";
+    return new URL(u, origin).origin === origin;
   } catch {
     return false;
   }

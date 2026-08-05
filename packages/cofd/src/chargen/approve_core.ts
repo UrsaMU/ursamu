@@ -3,7 +3,7 @@
  * Used by +approve, job:closed (CGEN), and staff HTTP.
  */
 
-import { dbojs, send, sessions } from "@ursamu/ursamu";
+import { dbojs, send, sessions } from "@ursamu/mush";
 import type { CofdCgState } from "./state.ts";
 import { sendCofdMail } from "../integrations/mail.ts";
 import { dormRoomIdForTemplate } from "../support/dorm.ts";
@@ -161,7 +161,7 @@ export async function approvePlayer(
   }
 
   // Draft sheet, or restore from job snapshot override
-  let sheetSrc = cg?.sheet ?? opts.sheetOverride ?? null;
+  const sheetSrc = cg?.sheet ?? opts.sheetOverride ?? null;
   if (!sheetSrc) {
     if (flagApproved && !hasLive) {
       return {
@@ -221,7 +221,7 @@ export async function approvePlayer(
     };
   }
   // Dorm home (no teleport without full SDK)
-  let dormId: string | null = dormRoomIdForTemplate(
+  const dormId: string | null = dormRoomIdForTemplate(
     sheet.template,
   );
   if (dormId) {
