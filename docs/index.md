@@ -65,8 +65,8 @@ templateEngine: [vto, md]
       <dd>TypeGraph/PGlite by default, Deno KV fallback — query by flags, owner, data</dd>
     </div>
     <div class="home-stack__row">
-      <dt>Softcode</dt>
-      <dd>TinyMUX 2.x evaluator — 250+ functions, ANSI, format handler pipeline</dd>
+      <dt><a href="/guides/softcoding/">Softcode</a></dt>
+      <dd>TinyMUX 2.x evaluator — 250+ functions, attributes, @trigger, $-patterns</dd>
     </div>
     <div class="home-stack__row">
       <dt>Events</dt>
@@ -115,6 +115,15 @@ templateEngine: [vto, md]
           <span class="home-stack__desc">Staff tools, security, channels</span>
         </span>
         <span class="home-stack__path">/guides/admin-guide/</span>
+      </a>
+    </li>
+    <li>
+      <a href="/guides/softcoding/" class="home-stack__link">
+        <span class="home-stack__meta">
+          <span class="home-stack__label">Softcode</span>
+          <span class="home-stack__desc">TinyMUX attrs, @trigger, functions</span>
+        </span>
+        <span class="home-stack__path">/guides/softcoding/</span>
       </a>
     </li>
     <li>
