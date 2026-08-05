@@ -184,8 +184,30 @@ export function clearImageDataFields(
   delete data.avatarExt;
 }
 
+async function localImageExists(
+  publicPath: string,
+): Promise<boolean> {
+  const pathOnly = imageUrlPath(publicPath);
+  try {
+    if (pathOnly.startsWith(`${IMAGES_PUBLIC}/`)) {
+      const name = pathOnly.slice(IMAGES_PUBLIC.length + 1);
+      const st = await Deno.stat(join(IMAGES_DIR, name));
+      return st.isFile;
+    }
+    if (pathOnly.startsWith("/avatars/")) {
+      const name = pathOnly.slice("/avatars/".length);
+      const st = await Deno.stat(join("data/avatars", name));
+      return st.isFile;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
 /**
  * Resolve display URL from data or disk.
+ * Local paths are verified on disk so look never emits a 404 URL.
  */
 export async function resolveObjectImageUrl(
   id: string | number,
@@ -194,22 +216,31 @@ export async function resolveObjectImageUrl(
   const bare = bareObjId(id);
   if (!bare) return null;
 
-  // Prefer stored URL (includes ?v= bust after replace)
-  const img = data?.image;
-  if (typeof img === "string") {
-    const s = img.trim();
-    if (isPlayableImageUrl(s)) return s;
-  }
-
   const rev = data?.imageRev != null
     ? String(data.imageRev)
     : "";
   const bust = rev ? `?v=${encodeURIComponent(rev)}` : "";
 
+  // Prefer stored URL when remote or file still exists
+  const img = data?.image;
+  if (typeof img === "string") {
+    const s = img.trim();
+    if (/^https?:\/\//i.test(s)) return s;
+    if (isPlayableImageUrl(s) && await localImageExists(s)) {
+      return s;
+    }
+  }
+
   const ext = data?.imageExt ?? data?.avatarExt;
   if (typeof ext === "string" && EXT_RE.test(ext)) {
     const e = ext.toLowerCase() === "jpeg" ? "jpg" : ext.toLowerCase();
-    return `${IMAGES_PUBLIC}/${bare}.${e}${bust}`;
+    const candidates = [
+      `${IMAGES_PUBLIC}/${bare}.${e}${bust}`,
+      `/avatars/${bare}.${e}${bust}`,
+    ];
+    for (const c of candidates) {
+      if (await localImageExists(c)) return c;
+    }
   }
 
   // Disk scan: data/images then legacy data/avatars
@@ -219,7 +250,6 @@ export async function resolveObjectImageUrl(
       for await (const entry of Deno.readDir(dir)) {
         if (!entry.isFile) continue;
         if (!entry.name.startsWith(bare + ".")) continue;
-        // mtime bust when DB has no rev
         let v = bust;
         if (!v) {
           try {

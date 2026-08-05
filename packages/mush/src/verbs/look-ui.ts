@@ -15,6 +15,7 @@ import {
   isPlayableImageUrl,
   resolveObjectImageUrl,
 } from "../media/object-image.ts";
+import { resolveAvatarUrl } from "../routes/avatar-url.ts";
 
 export type UIAction = {
   /** Exact player input to send when activated. */
@@ -325,7 +326,20 @@ async function entityItem(
   return item;
 }
 
-/** Resolve a playable image URL for any look target (room/exit/thing). */
+/** Plain alt text — strip MUSH color codes for broken-image fallback. */
+function plainAlt(raw: string): string {
+  return String(raw ?? "")
+    .replace(/%c[^%]?/gi, "")
+    .replace(/<%?#?[0-9a-fA-F]{3,8}>/g, "")
+    .replace(/%[rntbR]/g, "")
+    .replace(/%cn/gi, "")
+    .trim();
+}
+
+/**
+ * Resolve a playable image URL for any look target.
+ * Players prefer avatar resolution (/avatars then /images).
+ */
 export async function resolveLookMedia(
   u: IUrsamuSDK,
   target: IDBObj,
@@ -335,17 +349,29 @@ export async function resolveLookMedia(
     ...((target as { data?: Record<string, unknown> }).data ?? {}),
     ...((target.state ?? {}) as Record<string, unknown>),
   };
-  const fromDisk = await resolveObjectImageUrl(target.id, bag);
-  const fromAttr = await u.attr.get(target.id, "IMAGE");
-  const img = String(
-    fromDisk ||
-      fromAttr ||
-      bag.image ||
-      bag.image_url ||
-      "",
-  ).trim();
+
+  let img = "";
+  if (target.flags.has("player")) {
+    img = String(await resolveAvatarUrl(target.id, bag) ?? "")
+      .trim();
+  }
+  if (!img) {
+    img = String(
+      await resolveObjectImageUrl(target.id, bag) ?? "",
+    ).trim();
+  }
+  if (!img) {
+    const fromAttr = await u.attr.get(target.id, "IMAGE");
+    img = String(
+      fromAttr || bag.image || bag.image_url || "",
+    ).trim();
+  }
   if (!img || !isPlayableImageUrl(img)) return null;
-  return { type: "media", url: img, alt };
+  return {
+    type: "media",
+    url: img,
+    alt: plainAlt(alt) || "image",
+  };
 }
 
 /**
