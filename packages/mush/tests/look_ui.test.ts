@@ -54,12 +54,11 @@ Deno.test(
       state: {
         name: "North;n",
         description: "A cold passage.",
-        image: "/images/42.jpg",
       },
     });
-    // data bag is also checked
+    // Remote URL — no disk check required
     (exit as { data?: Record<string, unknown> }).data = {
-      image: "/images/42.jpg",
+      image: "https://cdn.example.com/exit.jpg",
     };
     const u = mockU();
     const comps = await buildSingleLookLayout({
@@ -79,9 +78,65 @@ Deno.test(
       url?: string;
       alt?: string;
     };
-    assertEquals(media?.url, "/images/42.jpg");
+    assertEquals(media?.url, "https://cdn.example.com/exit.jpg");
     assertEquals(media?.alt, "North");
     assertEquals(types.includes("text"), true);
+  },
+);
+
+Deno.test(
+  "buildSingleLookLayout: player media prefers /avatars",
+  OPTS,
+  async () => {
+    const { ensureDir } = await import("@std/fs");
+    const { join } = await import("@std/path");
+    const prev = Deno.cwd();
+    const tmp = await Deno.makeTempDir({ prefix: "look-av-" });
+    try {
+      Deno.chdir(tmp);
+      await ensureDir("data/avatars");
+      // Minimal JPEG so serve path is a real file
+      const jpg = new Uint8Array([
+        0xff, 0xd8, 0xff, 0xd9,
+      ]);
+      await Deno.writeFile(join("data/avatars", "7.jpg"), jpg);
+
+      const player = mockObj({
+        id: "7",
+        name: "Bob",
+        flags: new Set(["player", "connected"]),
+        state: {
+          name: "Bob",
+          moniker: "%chBob%cn",
+          avatarExt: "jpg",
+        },
+      });
+      (player as { data?: Record<string, unknown> }).data = {
+        avatarExt: "jpg",
+        imageExt: "jpg",
+      };
+      const u = mockU();
+      const comps = await buildSingleLookLayout({
+        u,
+        actor: u.me,
+        target: player,
+        showContents: false,
+        canEdit: false,
+        exits: [],
+        headerTitle: "%chBob%cn(#7p)",
+        description: "A player.",
+      });
+      const media = comps.find((c) => c.type === "media") as {
+        url?: string;
+        alt?: string;
+      };
+      assertEquals(!!media?.url?.startsWith("/avatars/7.jpg"), true);
+      // Alt strips color codes
+      assertEquals(media?.alt?.includes("%ch"), false);
+    } finally {
+      Deno.chdir(prev);
+      await Deno.remove(tmp, { recursive: true });
+    }
   },
 );
 
