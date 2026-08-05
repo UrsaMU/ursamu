@@ -121,7 +121,8 @@ addCmd({
   category: "General",
   help: `@avatar [<url>|clear]  — Set or clear your player avatar image.
 
-Accepted formats: PNG, JPEG, GIF, WebP. Maximum size: 8 MB.
+Accepted formats: PNG, JPEG, GIF, WebP. Upload max 8 MB;
+images over 2 MB are downsampled before save.
 Stored locally under /images/ (and legacy /avatars/).
 Omit the URL or use "clear" to remove your avatar.
 

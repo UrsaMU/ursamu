@@ -141,6 +141,10 @@ export {
   avatarServe, MAX_API_TRACKED_IPS, API_RATE_LIMIT, authenticate,
 } from "./src/routes/index.ts";
 export { objectImageServe } from "./src/media/object-image.ts";
+export {
+  downsampleIfNeeded,
+  TARGET_SAVE_BYTES,
+} from "./src/media/downsample.ts";
 export { execImage } from "./src/verbs/image.ts";
 export { registerPluginRoute } from "./src/routes/plugin.ts";
 export type { PluginRouteHandler } from "./src/routes/plugin.ts";
