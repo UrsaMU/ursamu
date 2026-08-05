@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -269,10 +269,9 @@
       <article class="prose">
         <h1>Plugin Database</h1>
 <h2>Overview</h2>
-<p>UrsaMU’s database layer is built on Deno KV. The generic class <code>DBO&lt;T&gt;</code><br>
+<h2>UrsaMU’s database layer is built on Deno KV. The generic class <code>DBO&lt;T&gt;</code><br>
 provides a typed CRUD interface for any collection. Each plugin creates its own<br>
-named collections that live in the shared KV store, isolated by key prefix.</p>
-<hr>
+named collections that live in the shared KV store, isolated by key prefix.</h2>
 <h2>Defining a Collection</h2>
 <p>Create a <code>db.ts</code> file in your plugin directory:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/my-plugin/db.ts
@@ -285,8 +284,11 @@ export interface IMyRecord {
   createdAt: number;   // ms timestamp
 }
 
-// The string key must be globally unique — prefix with "server." by convention
-export const myRecords = new DBO&lt;IMyRecord&gt;("server.my-plugin-records");
+// The collection key must be globally unique — prefix with your plugin name
+// (e.g. "my-plugin.records") so it cannot collide with engine collections or
+// other plugins. The legacy "server." prefix is reserved for core engine
+// collections like dbojs, counters, chans, mail, etc.
+export const myRecords = new DBO&lt;IMyRecord&gt;("my-plugin.records");
 </code></pre>
 <p>Import the collection wherever you need it:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">import { myRecords } from "./db.ts";
@@ -595,11 +597,75 @@ addCmd({
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
         
       
         

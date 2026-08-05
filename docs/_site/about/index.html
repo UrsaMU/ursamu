@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -293,37 +293,43 @@
 <tbody>
 <tr>
 <td>Written in C</td>
-<td>Written in TypeScript</td>
+<td>Written in TypeScript / Deno</td>
 </tr>
 <tr>
 <td>No standard package system</td>
-<td>Deno native (JSR, npm imports)</td>
+<td>JSR packages (<code>@ursamu/mush</code>, plugins)</td>
 </tr>
 <tr>
 <td>Telnet-only</td>
-<td>WebSocket primary, Telnet sidecar</td>
+<td>WS hub + HTTP portal + Telnet sidecar</td>
+</tr>
+<tr>
+<td>No first-class web UI</td>
+<td><code>@ursamu/site</code> (public) + <code>@ursamu/web</code> (staff)</td>
 </tr>
 <tr>
 <td>Embedded scripting in MUSHcode</td>
-<td>Scripts run in sandboxed Web Workers</td>
+<td>Softcode + sandboxed TS Web Workers</td>
 </tr>
 <tr>
 <td>Modify core to extend</td>
-<td>Plugin architecture</td>
+<td>Plugin architecture (<code>addCmd</code>, hooks, routes)</td>
 </tr>
 <tr>
 <td>Manual compile &amp; deploy</td>
-<td><code>deno task start</code></td>
+<td><code>jsr:@ursamu/cli</code> scaffold → <code>deno task start</code></td>
 </tr>
 </tbody>
 </table>
 <h2>Core Features</h2>
-<h3>WebSocket-Native Protocol</h3>
-<p>The primary interface to UrsaMU is <strong>WebSocket</strong>, not Telnet. This means:</p>
+<h3>Portal + WebSocket-native protocol</h3>
+<p>Scaffolded games ship a <strong>public site</strong> (<code>@ursamu/site</code>) and <strong>staff<br>
+console</strong> (<code>@ursamu/web</code>) on the HTTP port, plus a WebSocket game hub:</p>
 <ul>
-<li>Native browser connectivity — build web clients without proxies</li>
-<li>Structured JSON messages for clean client/server contracts</li>
-<li>A Telnet sidecar is still available for classic MU* clients</li>
+<li>Browser play client at <code>/play</code> (sign-in required)</li>
+<li>Staff tools at <code>/admin/</code> (wiki, DB, settings, plugin pages)</li>
+<li>Structured JSON over WS for custom clients</li>
+<li>Telnet sidecar for classic MU* clients</li>
 </ul>
 <pre class="language-javascript" tabindex="0"><code class="language-javascript"><span class="token keyword">const</span> socket <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">WebSocket</span><span class="token punctuation">(</span><span class="token string">"ws://yourgame.example.com:4202"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -345,8 +351,8 @@ u.emit.broadcast(here.id, `${en.name} waves hello!`);
 </code></pre>
 <h3>Plugin Architecture</h3>
 <p>Everything in UrsaMU is extensible via plugins:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/ursamu";
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/mush";
+import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/mush";
 
 const myPlugin: IPlugin = {
   name: "my-game-plugin",
@@ -445,7 +451,7 @@ GET /api/v1/scenes/:id/export?format=json
 </tr>
 <tr>
 <td>Testing</td>
-<td><code>deno test</code> — 296 tests, 0 failures</td>
+<td><code>deno test</code> — 1464 tests, 0 failures</td>
 </tr>
 <tr>
 <td>Docs</td>
@@ -502,7 +508,7 @@ GET /api/v1/scenes/:id/export?format=json
 <td>No</td>
 <td>No</td>
 <td>No</td>
-<td><strong>Native</strong></td>
+<td><strong>Via plugins</strong></td>
 </tr>
 <tr>
 <td>Discord</td>
@@ -519,11 +525,11 @@ GET /api/v1/scenes/:id/export?format=json
 <td><strong>Deno/JSR</strong></td>
 </tr>
 <tr>
-<td>Docker support</td>
+<td>Containerization</td>
 <td>Manual</td>
 <td>Manual</td>
 <td>Manual</td>
-<td><strong>Yes</strong></td>
+<td><strong>Game-level</strong></td>
 </tr>
 <tr>
 <td>License</td>
@@ -535,13 +541,34 @@ GET /api/v1/scenes/:id/export?format=json
 </tbody>
 </table>
 <h2>Project Status</h2>
-<p>UrsaMU is at <strong>v1.0</strong>. Current version is <code>1.0.0</code>.</p>
+<p>UrsaMU is at <strong>v2.6.0</strong> — production-ready since v2.0.0.</p>
 <ul>
-<li><strong>Test suite</strong>: 296 passing, 0 failing</li>
-<li><strong>Core systems</strong>: complete (commands, sandbox, WebSocket, Discord, scenes, channels)</li>
-<li><strong>Status</strong>: v1.0.0 released</li>
+<li><strong>Test suite</strong>: 1464 passing, 0 failing across 480 lint-clean files</li>
+<li><strong>Core systems</strong>: complete — 102 native commands, full TinyMUX 2.x softcode (250+ functions), sandbox, WebSocket, Telnet sidecar, Discord bridge, scenes, channels, zone system, format-handler pipeline, security hardening</li>
+<li><strong>Plugin system</strong>: atomic fail-fast installs with semver constraints and rollback (v2.6.0); typed <code>IPlugin</code> lifecycle and <code>gameHooks</code> declaration merging</li>
+<li><strong>Stdlib (v2.5.1+)</strong>: Noise, PRNG, physics, spatial, interpolation, vector primitives re-exported from <code>mod.ts</code></li>
+<li><strong>Status</strong>: actively maintained, published on JSR as <code>@ursamu/ursamu</code></li>
 </ul>
-<p>The project is open-source under the MIT License. Contributions are welcome!</p>
+<h2>The project is open-source under the MIT License. Contributions are welcome!</h2>
+<h2>Architecture</h2>
+<p>UrsaMU uses independent processes so each component can restart without affecting the others:</p>
+<ul>
+<li><strong>Hub</strong> — game logic, Deno KV persistence, HTTP REST API, and WebSocket connections (single port, default <code>4203</code>)</li>
+<li><strong>Telnet Sidecar</strong> — proxies classic Telnet connections to the Hub via WebSockets (<code>4201</code>)</li>
+</ul>
+<p>The hub handles everything through a single port: WebSocket upgrades for browser/telnet clients, REST API calls for frontends and integrations, and static file serving for the optional web client.</p>
+<h3>Storage</h3>
+<p>All persistence uses <strong>Deno KV</strong> — a built-in key-value store with ACID transactions, no external database required. Collections are namespaced by plugin (e.g. <code>server.chans</code>, <code>mail.messages</code>, <code>jobs.tickets</code>).</p>
+<h3>Plugin system</h3>
+<p>Plugins are auto-discovered at startup: any <code>src/plugins/*/index.ts</code> file is loaded. The exported <code>plugin</code> object handles lifecycle (<code>init</code>/<code>remove</code>), while commands and scripts register as module-load side effects. Plugins can extend the engine via:</p>
+<ul>
+<li><code>addCmd</code> — register command patterns</li>
+<li><code>registerScript</code> — provide or override system scripts</li>
+<li><code>registerCmdMiddleware</code> — inject command pipeline steps</li>
+<li><code>registerPluginRoute</code> — add REST endpoints</li>
+<li><code>gameHooks</code> — subscribe to engine lifecycle events</li>
+<li><code>DBO&lt;T&gt;</code> — private namespaced storage</li>
+</ul>
 
       </article>
 
@@ -559,6 +586,40 @@ GET /api/v1/scenes/:id/export?format=json
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         

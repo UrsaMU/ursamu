@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -278,8 +278,7 @@
 <li>Worker posts results/messages back to the server</li>
 <li>Worker terminates</li>
 </ol>
-<p>Scripts are fully isolated — they cannot crash the server, access the filesystem, or make network requests. All interaction happens through <code>u</code>.</p>
-<hr>
+<h2>Scripts are fully isolated — they cannot crash the server, access the filesystem, or make network requests. All interaction happens through <code>u</code>.</h2>
 <h2>The <code>u</code> Object</h2>
 <p>Every script has access to a global <code>u</code> object. It contains both the current execution context and all SDK methods.</p>
 <h3>Context Properties</h3>
@@ -369,7 +368,7 @@ u.me.flags.has("wizard")    // true/false
 u.me.flags.has("connected")
 
 // Check edit permission (owner, admin, wizard)
-if (!u.canEdit(u.me, target)) {
+if (!(await u.canEdit(u.me, target))) {
   u.send("Permission denied.");
   return;
 }
@@ -397,6 +396,31 @@ u.execute("say Hello, world!");
 
 // Force a command (bypasses some permission checks — use carefully)
 u.force("@set me=dark");
+</code></pre>
+<hr>
+<h2>Attributes (<code>u.attr</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read a soft-coded &amp;ATTR from any object (case-insensitive)
+const bio  = await u.attr.get(u.me.id, "FINGER-INFO");    // null if not set
+const desc = await u.attr.get(objectId, "SHORT-DESC");
+
+if (bio) u.send(bio);
+</code></pre>
+<hr>
+<h2>Evaluate Attribute (<code>u.eval</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Run &amp;ATTR on an object and capture its output as a string
+const result = await u.eval("#42", "SCORE-FORMULA");
+u.send(`Result: ${result}`);
+
+// Pass arguments
+const out = await u.eval(u.me.id, "CALC", ["10", "20"]);
+</code></pre>
+<hr>
+<h2>Force As (<code>u.forceAs</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Execute a command as another object (wizard/admin only — check flags first)
+if (!u.me.flags.has("wizard") &amp;&amp; !u.me.flags.has("admin")) {
+  u.send("Permission denied."); return;
+}
+await u.forceAs(npcId, "say Greetings, traveler!");
 </code></pre>
 <hr>
 <h2>Text (<code>u.text</code>)</h2>
@@ -505,8 +529,29 @@ const ms = await u.sys.uptime();
 const minutes = Math.floor(ms / 60000);
 
 // Reboot or shut down
-await u.sys.reboot();    // exits with code 75 (restart signal)
-await u.sys.shutdown();  // exits with code 0
+await u.sys.reboot();    // exits with code 75 — daemon restart loop restarts the server
+await u.sys.shutdown();  // exits with code 0 — clean stop
+
+// Pull latest code from git and restart
+await u.sys.update();          // pull origin/main
+await u.sys.update("develop"); // pull a specific branch
+</code></pre>
+<h2>Exit code 75 is caught by <code>scripts/main-loop.sh</code> which restarts the process<br>
+with exponential backoff on rapid exits. Telnet connections survive reboots.</h2>
+<h2>Game Time (<code>u.sys.gameTime</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read the in-game calendar
+const t = await u.sys.gameTime();
+// { year: number, month: 1-12, day: 1-28, hour: 0-23, minute: 0-59 }
+
+// Set the in-game calendar (wizard/admin only)
+await u.sys.setGameTime({ year: 1340, month: 6, day: 15, hour: 8, minute: 0 });
+</code></pre>
+<hr>
+<h2>Channel History (<code>u.chan.history</code>)</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Get recent messages from a channel (default last 20)
+const history = await u.chan.history("public");
+const history = await u.chan.history("public", 50);
+// → [{ id, playerName, message, timestamp }, ...]
 </code></pre>
 <hr>
 <h2>Events (<code>u.events</code>)</h2>
@@ -538,8 +583,16 @@ u.util.template(
 
 // Strip MUSH color codes and ANSI escapes (for storage/validation)
 u.util.stripSubs("%chHello %cgWorld%cn")  // → "Hello World"
+
+// Resolve a format-attr through the format-handler pipeline (v2.3.2+)
+//   priority: stored &amp;NAMEFORMAT attribute → plugin handler → null
+const line = await u.util.resolveFormat(target, "NAMEFORMAT", u.me);
+const row  = await u.util.resolveGlobalFormat("WHOROWFORMAT", u.me, [player]);
 </code></pre>
-<hr>
+<h2>See the <a href="/ursamu/guides/sdk-cookbook/#resolveformat--resolveformator">SDK Cookbook</a> for the<br>
+full format-resolve API and the<br>
+<a href="/ursamu/guides/customization/#format-handlers">Customization guide</a> for the eight slots<br>
+and how to register handlers.</h2>
 <h2>Structured UI (<code>u.ui</code>)</h2>
 <p>For web client panels (JSON output, not text):</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">// Layout — posts a structured result to the web client
@@ -654,8 +707,7 @@ if (switches.includes("edit")) {
 </tr>
 </tbody>
 </table>
-<p>Scripts run inside <code>Worker</code> with <code>/// &lt;reference no-default-lib="true" /&gt;</code>, which blocks <code>Deno</code>, <code>fetch</code>, <code>XMLHttpRequest</code>, and the filesystem.</p>
-<hr>
+<h2>Scripts run inside <code>Worker</code> with <code>/// &lt;reference no-default-lib="true" /&gt;</code>, which blocks <code>Deno</code>, <code>fetch</code>, <code>XMLHttpRequest</code>, and the filesystem.</h2>
 <h2>MUSH Color Codes</h2>
 <p>UrsaMU processes traditional MUSH substitution codes in all outgoing text:</p>
 <table>
@@ -792,11 +844,69 @@ u.send(`%ch%cr${u.util.ljust("ALERT", 10)}%cn Server restarting in 5 minutes.`);
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -823,9 +933,9 @@ u.send(`%ch%cr${u.util.ljust("ALERT", 10)}%cn Server restarting in 5 minutes.`);
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/guides/recipes/" class="page-nav-btn prev">
+          <a href="/ursamu/guides/scenes/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Scripting Recipes</span>
+            <span class="page-nav-title">Scenes</span>
           </a>
         
 

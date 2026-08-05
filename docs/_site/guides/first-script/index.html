@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -269,8 +269,7 @@
       <article class="prose">
         <h1>Build Your First Script</h1>
 <p>This guide walks you through writing a real script from scratch — starting with “hello world” and building up to something useful that reads player data and sends formatted output.</p>
-<p><strong>Prerequisites:</strong> UrsaMU running locally, a text editor, basic TypeScript familiarity.</p>
-<hr>
+<h2><strong>Prerequisites:</strong> UrsaMU running locally, a text editor, basic TypeScript familiarity.</h2>
 <h2>Step 1 — Hello World</h2>
 <p>Create a new file at <code>system/scripts/hello.ts</code>:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
@@ -299,8 +298,7 @@ export default (u: IUrsamuSDK) =&gt; {
   u.send(`Hello, ${name}! You are in room #${u.me.location}.`);
 };
 </code></pre>
-<p><code>u.util.displayName(obj, viewer)</code> returns the moniker if set, otherwise the name.</p>
-<hr>
+<h2><code>u.util.displayName(obj, viewer)</code> returns the moniker if set, otherwise the name.</h2>
 <h2>Step 3 — Read Arguments</h2>
 <p>Players can pass text after the command name. It’s available in <code>u.cmd.args[0]</code>:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
@@ -316,8 +314,7 @@ export default (u: IUrsamuSDK) =&gt; {
   u.send(`Hello, ${arg}!`);
 };
 </code></pre>
-<p>Type <code>hello Alice</code> → <code>Hello, Alice!</code></p>
-<hr>
+<h2>Type <code>hello Alice</code> → <code>Hello, Alice!</code></h2>
 <h2>Step 4 — Find Another Player</h2>
 <p>Use <code>u.util.target()</code> to resolve a name, ID, alias, <code>me</code>, or <code>here</code>:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
@@ -377,10 +374,9 @@ export default async (u: IUrsamuSDK) =&gt; {
 <p><strong>Always spread <code>u.me.state</code></strong> when writing back. If you omit the spread, you’ll<br>
 overwrite all other fields on the object.</p>
 </blockquote>
-<p>Type <code>wave</code> → <code>You have waved 1 time.</code><br>
+<h2>Type <code>wave</code> → <code>You have waved 1 time.</code><br>
 Type <code>wave</code> again → <code>You have waved 2 times.</code><br>
-Type <code>@wave/reset</code> (as admin) → <code>Wave count reset.</code></p>
-<hr>
+Type <code>@wave/reset</code> (as admin) → <code>Wave count reset.</code></h2>
 <h2>Step 6 — Format a Table</h2>
 <p>Use <code>u.util.ljust()</code>, <code>u.util.rjust()</code>, and <code>u.util.center()</code> to align columns:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">import { IUrsamuSDK } from "../../src/@types/UrsamuSDK.ts";
@@ -424,8 +420,7 @@ export default (u: IUrsamuSDK) =&gt; {
   // ... your script
 };
 </code></pre>
-<p>Now <code>sheet</code>, <code>sc</code>, <code>@sheet</code>, and <code>@sc</code> all trigger this script.</p>
-<hr>
+<h2>Now <code>sheet</code>, <code>sc</code>, <code>@sheet</code>, and <code>@sc</code> all trigger this script.</h2>
 <h2>Next Steps</h2>
 <ul>
 <li>Read the <a href="/ursamu/guides/scripting/">SDK Reference</a> for every available method</li>
@@ -489,11 +484,59 @@ export default (u: IUrsamuSDK) =&gt; {
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -526,16 +569,16 @@ export default (u: IUrsamuSDK) =&gt; {
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/guides/customization/" class="page-nav-btn prev">
+          <a href="/ursamu/guides/docker/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">Customization Guide</span>
+            <span class="page-nav-title">Docker</span>
           </a>
         
 
         
-          <a href="/ursamu/guides/installation/" class="page-nav-btn next">
+          <a href="/ursamu/guides/gameclock/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Installation Guide</span>
+            <span class="page-nav-title">Game Clock</span>
           </a>
         
       </nav>

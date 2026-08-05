@@ -86,7 +86,9 @@
     "packages:test": "deno test packages/*/tests/ --allow-all --unstable-kv --no-check",
     "packages:check": "deno check packages/core/mod.ts packages/mush/mod.ts --unstable-kv",
     "packages:lint": "deno lint packages/",
-    "publish:all": "deno run -A scripts/publish-all.ts"
+    "publish:all": "deno run -A scripts/publish-all.ts",
+    "docs": "cd docs && deno task lume -s --port 3001",
+    "docs:build": "cd docs && deno task build"
   },
   "compilerOptions": {
     "lib": [
@@ -170,6 +172,10 @@
   },
   "allowScripts": {
     "allow": [],
-    "deny": ["npm:bcrypt@6.0.0", "npm:canvas@2.11.2", "npm:fsevents@2.3.3"]
+    "deny": [
+      "npm:bcrypt@6.0.0",
+      "npm:canvas@2.11.2",
+      "npm:fsevents@2.3.3"
+    ]
   }
 }

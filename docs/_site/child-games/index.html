@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> | UrsaMU Documentation</title>
-  <meta name="description" content="Learn how to create a child game using UrsaMU as a library">
+  <meta name="description" content="Scaffold and run a derived game project on top of UrsaMU">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -267,267 +267,101 @@
 
       <!-- Page content -->
       <article class="prose">
-        <h1>Creating Child Games with UrsaMU</h1>
-<p>This guide explains how to create a child game using UrsaMU as a library.</p>
-<h2>Overview</h2>
-<p>A “child game” is a complete MU* game built on top of the UrsaMU engine. Unlike plugins, which extend the functionality of UrsaMU, a child game is a standalone application that uses UrsaMU as a library.</p>
-<p>Creating a child game allows you to:</p>
-<ul>
-<li>Create a completely customized MU* experience</li>
-<li>Define your own game world, theme, and mechanics</li>
-<li>Distribute your game as a standalone application</li>
-<li>Maintain your game separately from the UrsaMU core</li>
-</ul>
-<h2>Getting Started</h2>
-<h3>Prerequisites</h3>
-<p>Before creating a child game, ensure you have:</p>
-<ul>
-<li><a href="https://deno.land/">Deno</a> installed (version 1.37.0 or higher)</li>
-<li>Basic knowledge of TypeScript</li>
-<li>Understanding of MU* concepts</li>
-</ul>
-<h3>Installation</h3>
-<ol>
-<li>Create a new directory for your game:</li>
-</ol>
-<pre class="language-bash" tabindex="0"><code class="language-bash">mkdir my-game
+        <h1>Child Games</h1>
+<p>A “child game” is a standalone project that uses <code>@ursamu/ursamu</code> as a<br>
+library — your own config, plugins, system-script overrides, and (usually)<br>
+your own deployment.</p>
+<h2>Scaffold</h2>
+<p>The CLI ships with a generator that lays down a complete supervised<br>
+project, including daemon scripts, telnet sidecar, and a <code>.env</code> with a<br>
+fresh JWT secret (v2.4.0):</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/create my-game
 cd my-game
 </code></pre>
-<ol start="2">
-<li>Initialize a new Deno project:</li>
-</ol>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno init
+<p>The scaffold writes:</p>
+<ul>
+<li><code>deno.json</code> with <code>start</code> / <code>dev</code> / <code>test</code> tasks and import map</li>
+<li><code>config/config.json</code> — ports + default portal plugins (site + web)</li>
+<li><code>system/scripts/</code> — engine script copies / overrides</li>
+<li><code>scripts/daemon.sh</code>, <code>stop.sh</code>, <code>restart.sh</code>, <code>status.sh</code></li>
+<li><code>.env</code> with a generated <code>JWT_SECRET</code></li>
+</ul>
+<p>A <code>--local</code> variant points the import map at a monorepo checkout<br>
+instead of JSR; tasks and config shape are otherwise the same.</p>
+<h2>Running the game</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">./daemon.sh    # start under supervisor (background)
+./status.sh    # show pid / uptime / health
+./restart.sh   # SIGUSR2 → no-disconnect main restart; telnet sidecar persists
+./stop.sh      # graceful shutdown
 </code></pre>
-<ol start="3">
-<li>Install UrsaMU as a dependency:</li>
-</ol>
-<pre class="language-bash" tabindex="0"><code class="language-bash"># Add UrsaMU as a dependency in your deps.ts file
+<p>Or run in the foreground:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task start   # initializes config, ensures superuser, spawns server + telnet
+deno task dev     # same, with hot reload
 </code></pre>
-<h2>Project Structure</h2>
-<p>A typical child game project structure looks like this:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">my-game/
-├── config/                  # Configuration files
-│   ├── config.json          # Main configuration
-│   ├── text/                # Text files
-│   └── plugins/             # Plugin configurations
-├── src/                     # Source code
-│   ├── commands/            # Custom commands
-│   ├── plugins/             # Custom plugins
-│   ├── types/               # TypeScript type definitions
-│   └── main.ts              # Entry point
-├── data/                    # Database files (generated)
-├── deps.ts                  # Dependencies
-├── deno.json                # Deno configuration
-└── README.md                # Documentation
-</code></pre>
+<p>In-game <code>@reboot</code> issues the same SIGUSR2 as <code>restart.sh</code>. JWTs are<br>
+re-authenticated automatically; the telnet sidecar stays connected across<br>
+restarts.</p>
 <h2>Configuration</h2>
-<h3>Basic Configuration</h3>
-<p>Create a <code>config/config.json</code> file with your game’s configuration:</p>
+<p><code>config/config.json</code> controls server ports, KV prefixes, game identity,<br>
+theme, and per-plugin scoped config. The shape:</p>
+<ul>
+<li><code>server</code> — telnet / ws / http ports plus KV prefixes (<code>db</code>, <code>channels</code>,<br>
+<code>mail</code>, <code>wiki</code>, <code>bboard</code>, <code>counters</code>)</li>
+<li><code>game</code> — <code>name</code>, <code>description</code>, <code>version</code>, <code>playerStart</code>, text paths,<br>
+<code>timeMultiplier</code></li>
+<li><code>theme</code> — color tokens, glass values, <code>backgroundImage</code></li>
+<li><code>plugins</code> — per-plugin scoped config</li>
+</ul>
+<p><code>.env</code> is loaded via <code>dotenv/load</code> at the top of the entry point. The only<br>
+required variable is <code>JWT_SECRET</code>. Rotate it by replacing the value and<br>
+restarting; existing tokens are invalidated.</p>
+<h2>Plugins</h2>
+<p>External plugins are declared in <code>plugins.manifest.json</code> and resolved on<br>
+startup by <code>ensurePlugins</code>. Each entry:</p>
 <pre class="language-json" tabindex="0"><code class="language-json">{
-  "server": {
-    "port": 4201,
-    "host": "0.0.0.0"
-  },
-  "game": {
-    "name": "My Game",
-    "motd": "Welcome to My Game!",
-    "debug": false
-  },
-  "database": {
-    "path": "./data"
-  }
+  "name": "@ursamu/help-plugin",
+  "url": "https://github.com/UrsaMU/help-plugin",
+  "ref": "v1.0.0",
+  "version": "^1.0.0"
 }
 </code></pre>
-<h3>Text Files</h3>
-<p>UrsaMU uses text files for various game messages. Create a <code>config/text</code> directory and add your custom text files:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">config/text/
-├── connect.txt       # Connection screen
-├── motd.txt          # Message of the day
-└── welcome.txt       # Welcome message for new players
+<p><code>ref</code> is optional (git ref / tag / branch); <code>version</code> is an optional semver<br>
+range checked against the cloned plugin’s manifest. As of v2.6.0 plugin<br>
+installs are fail-fast with atomic rollback — any clone, rename, semver, or<br>
+conflict error throws a typed <code>PluginInstallError</code> and leaves the<br>
+filesystem and registry untouched. Deps without a <code>version:</code> constraint<br>
+remain legacy-compatible.</p>
+<p>Install or update from the CLI:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/plugin install &lt;url&gt; [--ref &lt;ref&gt;]
+deno run -A jsr:@ursamu/cli@0.1.2/plugin update
+deno run -A jsr:@ursamu/cli@0.1.2/plugin list
 </code></pre>
-<h2>Customization</h2>
-<h3>Creating the Main File</h3>
-<p>Create a <code>src/main.ts</code> file as the entry point for your game:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
-import { config } from "../config/mod.ts";
-
-// Import your custom plugins
-import myPlugin from "./plugins/myPlugin/mod.ts";
-
-// Start the game
-await mu({
-  config,
-  plugins: [
-    myPlugin,
-    // Add more custom plugins here
-  ]
-});
-
-console.log("Game started!");
+<h2>Local script overrides</h2>
+<p>The engine has no bundled <code>system/scripts/</code> — all native commands are<br>
+<code>addCmd</code> registrations in <code>src/commands/</code>. Child games may still place<br>
+sandbox scripts under their own <code>system/scripts/&lt;name&gt;.ts</code> to:</p>
+<ul>
+<li>Override a plugin-supplied or registered script (local file wins).</li>
+<li>Add new in-sandbox commands without writing a plugin.</li>
+</ul>
+<p>Scripts run in a Web Worker — no <code>Deno.*</code>, no <code>fetch</code>, no <code>import</code> other<br>
+than ESM-style <code>export default async (u) =&gt; { ... }</code>. See <code>CLAUDE.md</code><br>
+(“Softcode / system scripts”) for the sandbox contract.</p>
+<h2>Existing child games</h2>
+<p>The following projects use UrsaMU as their engine and can be read as<br>
+working references. Treat the layout as the canonical pattern; treat<br>
+project-specific mechanics as their own.</p>
+<ul>
+<li><code>legends</code> — the in-repo reference game (gitignored under <code>games/</code>)</li>
+<li><code>salem-rentals</code></li>
+<li><code>urban-shadows</code></li>
+</ul>
+<h2>Updating the engine</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno run -A jsr:@ursamu/cli@0.1.2/update         # latest stable
+deno run -A jsr:@ursamu/cli@0.1.2/update main    # specific branch
 </code></pre>
-<h3>Custom Commands</h3>
-<p>Create custom commands in the <code>src/commands</code> directory:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/commands/hello.ts
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
-
-addCmd({
-  name: "hello",
-  pattern: /^hello\s*(.*)/i,
-  lock: "connected",
-  exec: (u: IUrsamuSDK) =&gt; {
-    const target = u.cmd.args[0]?.trim() || "World";
-    u.send(`Hello, ${target}!`);
-  }
-});
-</code></pre>
-<h3>Custom Plugins</h3>
-<p>Create custom plugins in the <code>src/plugins</code> directory:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/myPlugin/mod.ts
-import { IPlugin } from "ursamu";
-
-const myPlugin: IPlugin = {
-  name: "my-plugin",
-  version: "1.0.0",
-  description: "A custom plugin for my game",
-  
-  init: async () =&gt; {
-    console.log("My plugin initialized!");
-    return true;
-  },
-  
-  remove: async () =&gt; {
-    console.log("My plugin removed!");
-  }
-};
-
-export default myPlugin;
-</code></pre>
-<h2>Deployment</h2>
-<h3>Running Your Game</h3>
-<p>Run your game with Deno:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno run --allow-net --allow-read --allow-write --allow-env src/main.ts
-</code></pre>
-<h3>Creating a Startup Script</h3>
-<p>Create a <code>start.sh</code> script for easier startup:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">#!/bin/bash
-deno run --allow-net --allow-read --allow-write --allow-env src/main.ts
-</code></pre>
-<p>Make it executable:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">chmod +x start.sh
-</code></pre>
-<h3>Docker Deployment</h3>
-<p>Create a <code>Dockerfile</code> for containerized deployment:</p>
-<pre class="language-dockerfile" tabindex="0"><code class="language-dockerfile">FROM denoland/deno:1.37.0
-
-WORKDIR /app
-
-COPY . .
-
-RUN deno cache src/main.ts
-
-EXPOSE 4201
-
-CMD ["deno", "run", "--allow-net", "--allow-read", "--allow-write", "--allow-env", "src/main.ts"]
-</code></pre>
-<p>Build and run the Docker container:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">docker build -t my-game .
-docker run -p 4201:4201 my-game
-</code></pre>
-<h2>Examples</h2>
-<h3>Basic Child Game</h3>
-<p>Here’s a complete example of a basic child game:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/main.ts
-import { mu } from "jsr:@ursamu/ursamu";
-import welcomePlugin from "./plugins/welcome/mod.ts";
-
-// Define configuration
-const config = {
-  server: {
-    telnet: 4201,
-    ws: 4202,
-    http: 4203,
-  },
-  game: {
-    name: "My First MU",
-    motd: "Welcome to My First MU!"
-  }
-};
-
-// Start the game
-await mu(config, [welcomePlugin]);
-
-console.log(`${config.game.name} is running`);
-
-// src/plugins/welcome/mod.ts
-import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IPlugin, IUrsamuSDK } from "jsr:@ursamu/ursamu";
-
-const welcomePlugin: IPlugin = {
-  name: "welcome",
-  version: "1.0.0",
-  description: "A welcome plugin for new players",
-
-  init: async () =&gt; {
-    // Register a welcome command
-    addCmd({
-      name: "welcome",
-      pattern: /^welcome\s*(.*)/i,
-      lock: "connected",
-      exec: (u: IUrsamuSDK) =&gt; {
-        const target = u.cmd.args[0]?.trim() || "friend";
-        u.send(`Welcome to our game, ${target}!`);
-      }
-    });
-
-    return true;
-  },
-
-  remove: async () =&gt; {
-    // Cleanup code here
-  }
-};
-
-export default welcomePlugin;
-</code></pre>
-<h3>Advanced Child Game</h3>
-<p>For a more advanced example, see the <a href="https://github.com/UrsaMU/examples">UrsaMU Examples repository</a> which contains complete child game examples with various features.</p>
-<h3>Customizing the Database</h3>
-<p>You can customize how your game uses the database:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/main.ts
-import { mu } from "../deps.ts";
-
-await mu({
-  config: {
-    // ... other config options
-    database: {
-      path: "./custom-data",
-      backupInterval: 3600000 // Backup every hour
-    }
-  }
-});
-</code></pre>
-<h3>Creating a Custom Theme</h3>
-<p>You can create a custom theme by overriding the default text files and adding custom CSS for the web interface:</p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/theme/mod.ts
-import { IPlugin } from "../../../deps.ts";
-
-const themePlugin: IPlugin = {
-  name: "custom-theme",
-  version: "1.0.0",
-  description: "Custom theme for my game",
-  
-  init: async () =&gt; {
-    // Register custom CSS
-    // Set up custom colors
-    // Override default text files
-    return true;
-  }
-};
-
-export default themePlugin;
-</code></pre>
-<p>By following this guide, you can create a fully customized MU* game using UrsaMU as a foundation, while maintaining the flexibility to extend and modify it to suit your specific needs.</p>
+<p>The updater rewrites the import map and re-runs <code>ensurePlugins</code>. Restart<br>
+the game after an update.</p>
 
       </article>
 
@@ -552,11 +386,47 @@ export default themePlugin;
       
         
           
+        
+      
+        
+          
           
         
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -605,9 +475,9 @@ export default themePlugin;
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/api/core/" class="page-nav-btn prev">
+          <a href="/ursamu/api/rest/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">REST API Reference</span>
           </a>
         
 

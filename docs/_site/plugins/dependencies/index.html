@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -269,12 +269,14 @@
       <article class="prose">
         <h1>Sharing Code Between Plugins</h1>
 <h2>Overview</h2>
-<p>UrsaMU does not have a formal runtime dependency resolver — there is no<br>
-<code>dependencies</code> array on <code>IPlugin</code> and no <code>app.plugins.get()</code> API. Instead,<br>
-plugins share code the same way any TypeScript modules do: <strong>direct imports</strong>.</p>
-<p>This keeps things simple and type-safe. If plugin B needs something from<br>
-plugin A, it imports it.</p>
-<hr>
+<p>UrsaMU resolves plugin <strong>install order</strong> through the <code>deps[]</code> array in<br>
+<code>ursamu.plugin.json</code> (see <a href="#ursamuplug-injson-dependencies">ursamu.plugin.json Dependencies</a><br>
+below), but there is no <code>app.plugins.get()</code> API for cross-plugin code<br>
+access at runtime. Plugins share code the same way any TypeScript modules<br>
+do: <strong>direct imports</strong>.</p>
+<h2>This keeps things simple and type-safe. If plugin B needs something from<br>
+plugin A, it declares plugin A in <code>deps[]</code> so the installer fetches it,<br>
+then imports from it directly.</h2>
 <h2>Sharing Utilities</h2>
 <p>The cleanest pattern is a <strong>shared utility module</strong> that both plugins import.<br>
 Put it in a neutral location like <code>src/plugins/shared/</code> or a dedicated<br>
@@ -330,10 +332,9 @@ export interface IJob {
 
 export const jobs = new DBO&lt;IJob&gt;("server.jobs");
 </code></pre>
-<p>Both the <code>jobs</code> plugin and a hypothetical <code>jobs-reporter</code> plugin import from<br>
+<h2>Both the <code>jobs</code> plugin and a hypothetical <code>jobs-reporter</code> plugin import from<br>
 <code>shared/jobsDb.ts</code>. The KV store is shared automatically since both collections<br>
-use the same key (<code>"server.jobs"</code>).</p>
-<hr>
+use the same key (<code>"server.jobs"</code>).</h2>
 <h2>Coordination via Events</h2>
 <p>When plugins need <strong>loose coupling</strong> — where plugin B reacts to what plugin A<br>
 does without importing from it directly — use <code>EventsService</code>:</p>
@@ -355,12 +356,12 @@ await svc.subscribe(
   "world",
 );
 </code></pre>
-<p>This pattern is preferred when the dependency is optional or when you want<br>
-Plugin B to work even if Plugin A is not installed.</p>
-<hr>
+<h2>This pattern is preferred when the dependency is optional or when you want<br>
+Plugin B to work even if Plugin A is not installed.</h2>
 <h2>ursamu.plugin.json Dependencies</h2>
-<p>While there is no runtime dependency resolver, you can document required<br>
-plugins in <code>ursamu.plugin.json</code> for human readers and future tooling:</p>
+<p>Declare transitive plugin dependencies in the <code>deps[]</code> array of your<br>
+<code>ursamu.plugin.json</code>. <code>ensurePlugins</code> resolves and installs the graph on<br>
+startup:</p>
 <pre class="language-json" tabindex="0"><code class="language-json">{
   "name": "jobs-reporter",
   "version": "1.0.0",
@@ -368,11 +369,19 @@ plugins in <code>ursamu.plugin.json</code> for human readers and future tooling:
   "ursamu": "&gt;=1.0.0",
   "author": "Your Name",
   "license": "MIT",
-  "requires": ["jobs"]
+  "deps": [
+    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+  ]
 }
 </code></pre>
-<p>The <code>requires</code> field is informational only — <code>ursamu plugin install</code> displays<br>
-it so operators know what to install first. It does not affect load order.</p>
+<p>Each entry needs <code>name</code> and <code>url</code>. The <code>ref</code> (git ref) and <code>version</code><br>
+(semver range checked against the dep’s manifest) fields are optional.<br>
+Omit <code>version</code> to install the dep without a check — backwards compatible<br>
+with manifests written before the range feature shipped.</p>
+<p>If any dep fails to clone, fails its <code>version</code> range, or has incompatible<br>
+ranges across requesters, the entire install run aborts and rolls back —<br>
+disk and <code>.registry.json</code> are left exactly as they were before the run.<br>
+See the <a href="/ursamu/plugins/#deps-entries"><code>deps[]</code> reference</a> for full semantics.</p>
 
       </article>
 
@@ -477,11 +486,75 @@ it so operators know what to install first. It does not affect load order.</p>
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
         
       
         
@@ -497,9 +570,9 @@ it so operators know what to install first. It does not affect load order.</p>
         
 
         
-          <a href="/ursamu/plugins/first-plugin/" class="page-nav-btn next">
+          <a href="/ursamu/plugins/events/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Events Plugin</span>
           </a>
         
       </nav>

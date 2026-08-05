@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -268,8 +268,7 @@
       <!-- Page content -->
       <article class="prose">
         <h1>SDK Cookbook</h1>
-<p>Every method available on the <code>u</code> object, organized by namespace, with working examples pulled from real system scripts.</p>
-<hr>
+<h2>Every method available on the <code>u</code> object, organized by namespace, with working examples pulled from real system scripts.</h2>
 <h2>Context Objects</h2>
 <p>These are injected automatically — you don’t call them, you read them.</p>
 <h3><code>u.me</code> — The Actor</h3>
@@ -448,14 +447,15 @@ await u.setFlags(u.me, "builder");
 </code></pre>
 <hr>
 <h2>Permission Check (<code>u.canEdit</code>)</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!u.canEdit(u.me, target)) {
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!(await u.canEdit(u.me, target))) {
   u.send("Permission denied.");
   return;
 }
 // proceed with edit
 </code></pre>
-<p>Returns <code>true</code> if the actor owns the target, or is admin/wizard/superuser.</p>
-<hr>
+<h2>Returns <code>Promise&lt;boolean&gt;</code> — <code>true</code> if the actor owns the target, or is<br>
+admin / wizard / superuser. Always <code>await</code> the call; omitting <code>await</code><br>
+truthy-tests the Promise object and silently bypasses the check.</h2>
 <h2>Locks (<code>u.checkLock</code>)</h2>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">// Evaluate a lock expression against the actor
 const canPass = await u.checkLock(target.id, "player+");
@@ -631,11 +631,15 @@ const h  = Math.floor(ms / 3600000);
 const m  = Math.floor((ms % 3600000) / 60000);
 u.send(`Uptime: ${h}h ${m}m`);
 
-// Reboot (exit code 75 — scripts/run.sh restarts on this code)
+// Reboot (exit code 75 — daemon restart loop restarts the server)
 await u.sys.reboot();
 
 // Shutdown (exit code 0)
 await u.sys.shutdown();
+
+// Pull latest code from git and restart (runs git pull, then exits 75)
+await u.sys.update();            // pull origin/main
+await u.sys.update("develop");   // pull a specific branch
 </code></pre>
 <hr>
 <h2>Events (<code>u.events</code>)</h2>
@@ -681,6 +685,30 @@ u.util.sprintf("%05d", 42)                   // "00042"
 );
 // → "[ 42] [Post title          ] Alice"
 </code></pre>
+<h3>resolveFormat / resolveFormatOr</h3>
+<p>Sandbox-accessible helpers (since v2.3.2) for looking up a format-attr value<br>
+on a target, walking the format-handler pipeline.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Look up a per-object NAMEFORMAT. Priority:
+//   1. Stored &amp;NAMEFORMAT attribute on the target
+//   2. Plugin-registered format handler for that slot
+//   3. null
+const formatted = await u.util.resolveFormat(target, "NAMEFORMAT", u.me);
+
+// With a fallback string if nothing returns
+const line = await u.util.resolveFormatOr(target, "EXITFORMAT", u.me, "[exit]");
+</code></pre>
+<h3>resolveGlobalFormat / resolveGlobalFormatOr</h3>
+<p>Two-tier lookup (since v2.3.3) for “global list” formats like WHO and @ps.<br>
+Checks <code>#0</code> (the master room object) first, then the enactor.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// e.g. inside a WHO script
+const row = await u.util.resolveGlobalFormat("WHOROWFORMAT", u.me, [player]);
+const fallback = await u.util.resolveGlobalFormatOr("WHOFORMAT", u.me, "");
+</code></pre>
+<p>The eight engine-known slots are <code>NAMEFORMAT</code>, <code>DESCFORMAT</code>, <code>CONFORMAT</code>,<br>
+<code>EXITFORMAT</code>, <code>WHOFORMAT</code>, <code>WHOROWFORMAT</code>, <code>PSFORMAT</code>, <code>PSROWFORMAT</code>.<br>
+Plugin authors can pass any uppercase slot name (e.g. <code>"MAILFORMAT"</code>,<br>
+<code>"BBROWFORMAT"</code>) without casting. See<br>
+<a href="/ursamu/guides/customization/#format-handlers">Customization → Format Handlers</a>.</p>
 <h3>stripSubs</h3>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">// Remove all MUSH codes and ANSI escapes
 u.util.stripSubs("%ch%crDanger!%cn")   // → "Danger!"
@@ -694,6 +722,102 @@ if (!clean) { u.send("Value cannot be empty."); return; }
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">// Returns moniker (if set) → name → "Unknown"
 u.util.displayName(u.me, u.me)       // "Alice" or moniker
 u.util.displayName(target, u.me)     // target's display name as seen by actor
+</code></pre>
+<hr>
+<h2>Attributes (<code>u.attr</code>)</h2>
+<h3><code>u.attr.get(id, name)</code></h3>
+<p>Reads a soft-coded <code>&amp;ATTR</code> value stored on any game object. Attribute names are<br>
+case-insensitive. Returns <code>null</code> if the attribute is not set.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read your own short description
+const shortDesc = await u.attr.get(u.me.id, "SHORT-DESC");
+if (shortDesc) u.send(`Short desc: ${shortDesc}`);
+
+// Read another object's attribute
+const bio = await u.attr.get(targetId, "FINGER-INFO");
+
+// Case-insensitive
+const val = await u.attr.get(objectId, "onenter");  // same as "ONENTER"
+</code></pre>
+<hr>
+<h2>Evaluate Attribute (<code>u.eval</code>)</h2>
+<h3><code>u.eval(targetId, attr, args?)</code></h3>
+<p>Evaluates a stored <code>&amp;ATTR</code> as a script and returns the output as a string.<br>
+This is the script equivalent of <code>@trigger</code> that also captures output.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Run &amp;FORMULA on object #42 with args
+const result = await u.eval("#42", "FORMULA", ["5", "10"]);
+u.send(`Formula result: ${result}`);
+
+// Run an attribute on the actor
+const score = await u.eval(u.me.id, "SCORE-FORMULA");
+u.send(`Your score: ${score}`);
+</code></pre>
+<hr>
+<h2>Force As Another Object (<code>u.forceAs</code>)</h2>
+<h3><code>u.forceAs(targetId, command)</code></h3>
+<p>Executes a command as another object (NPC, room, etc.). The SDK does not enforce<br>
+privilege — always check flags in your script before calling.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Guard: admin/wizard only
+const isAdmin = u.me.flags.has("admin") || u.me.flags.has("wizard") || u.me.flags.has("superuser");
+if (!isAdmin) { u.send("Permission denied."); return; }
+
+// Make an NPC speak
+await u.forceAs(npcId, "say Welcome to the Inn!");
+
+// Make a room run a command
+await u.forceAs(roomId, "@trigger me/ONRESET");
+</code></pre>
+<hr>
+<h2>Game Time (<code>u.sys.gameTime</code>)</h2>
+<h3><code>u.sys.gameTime()</code> / <code>u.sys.setGameTime(t)</code></h3>
+<p>Read and write the in-game calendar. Useful for seasonal events, timestamps,<br>
+and roleplay-relevant date display.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Read current game time
+const t = await u.sys.gameTime();
+// t.year: number, t.month: 1-12, t.day: 1-28, t.hour: 0-23, t.minute: 0-59
+
+const monthNames = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+u.send(`Today is ${monthNames[t.month]} ${t.day}, Year ${t.year} — ${t.hour}:${String(t.minute).padStart(2,"0")}`);
+
+// Advance the calendar (admin only)
+if (!u.me.flags.has("wizard") &amp;&amp; !u.me.flags.has("admin")) {
+  u.send("Permission denied."); return;
+}
+await u.sys.setGameTime({ year: t.year + 1, month: 1, day: 1, hour: 0, minute: 0 });
+u.broadcast("A new year has begun!");
+</code></pre>
+<hr>
+<h2>Channel History (<code>u.chan.history</code>)</h2>
+<h3><code>u.chan.history(name, limit?)</code></h3>
+<p>Fetches recent messages from a channel. Default limit is 20.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Last 20 messages on the public channel
+const history = await u.chan.history("public");
+// → [{ id: string, playerName: string, message: string, timestamp: number }, ...]
+
+// Last 50 messages
+const history = await u.chan.history("staff", 50);
+
+// Display as a log
+const lines = history.map(e =&gt; {
+  const date = new Date(e.timestamp).toLocaleTimeString();
+  return `[${date}] ${e.playerName}: ${e.message}`;
+});
+u.send(lines.join("\r\n"));
+</code></pre>
+<hr>
+<h2>Mail — Modify (<code>u.mail.modify</code>)</h2>
+<h3><code>u.mail.modify(query, op, update)</code></h3>
+<p>Updates mail records matching <code>query</code>. Used for marking messages read/unread or<br>
+other bulk updates. Available in sandbox scripts only.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Mark a specific message as read
+await u.mail.modify({ id: messageId }, "$set", { read: true });
+
+// Mark all your messages as read
+await u.mail.modify(
+  { to: { $in: [`#${u.me.id}`] } },
+  "$set",
+  { read: true }
+);
 </code></pre>
 
       </article>
@@ -767,11 +891,69 @@ u.util.displayName(target, u.me)     // target's display name as seen by actor
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -803,9 +985,9 @@ u.util.displayName(target, u.me)     // target's display name as seen by actor
         
 
         
-          <a href="/ursamu/guides/user-guide/" class="page-nav-btn next">
+          <a href="/ursamu/guides/softcoding/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">User Guide</span>
+            <span class="page-nav-title">Soft-Coding Guide</span>
           </a>
         
       </nav>

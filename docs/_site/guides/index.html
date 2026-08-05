@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -268,57 +268,56 @@
       <!-- Page content -->
       <article class="prose">
         <h1>UrsaMU Guides</h1>
-<p>This section contains comprehensive guides and tutorials to help you get started<br>
-with UrsaMU, whether you’re installing it for the first time, learning how to<br>
-use it as a player, or administering your own server.</p>
-<h2>Installation Guide</h2>
-<p>Learn how to install and set up UrsaMU on your system:</p>
+<p>User guides and tutorials for UrsaMU v2.6.0 — installation, day-to-day play,<br>
+admin operations, plugin development, and softcoding.</p>
+<h2>Getting Started</h2>
 <ul>
-<li><a href="/ursamu/guides/installation/#prerequisites">Prerequisites</a></li>
-<li><a href="/ursamu/guides/installation/#installation-methods">Installation Methods</a></li>
-<li><a href="/ursamu/guides/installation/#configuration">Configuration</a></li>
-<li><a href="/ursamu/guides/installation/#running-the-server">Running the Server</a></li>
+<li><a href="/ursamu/guides/installation/"><strong>Installation</strong></a> — Prerequisites, install methods,<br>
+first-run setup, and connecting.</li>
+<li><a href="/ursamu/guides/user-guide/"><strong>User Guide</strong></a> — Connecting and playing as a player.</li>
+<li><a href="/ursamu/guides/cli/"><strong>CLI Reference</strong></a> — <code>ursamu create</code>, <code>plugin</code>, <code>update</code>, <code>scripts</code>.</li>
 </ul>
-<h2>User Guide</h2>
-<p>Learn how to use UrsaMU as a player:</p>
+<h2>Operating a Server</h2>
 <ul>
-<li><a href="/ursamu/guides/user-guide/#getting-started">Getting Started</a></li>
-<li><a href="/ursamu/guides/user-guide/#basic-commands">Basic Commands</a></li>
-<li><a href="/ursamu/guides/user-guide/#character-creation">Character Creation</a></li>
-<li><a href="/ursamu/guides/user-guide/#communication">Communication</a></li>
+<li><a href="/ursamu/guides/admin-guide/"><strong>Admin Guide</strong></a> — Permissions, user management,<br>
+configuration, <code>@reload</code>, plugin install behavior, security.</li>
+<li><a href="/ursamu/guides/deployment/"><strong>Production Deployment</strong></a> — <code>.env</code> and <code>JWT_SECRET</code>,<br>
+<code>scripts/daemon.sh</code>, systemd, nginx + TLS, log rotation, updates.</li>
+<li><a href="/ursamu/guides/docker/"><strong>Docker</strong></a> — Containerized deployment with <code>docker compose</code>.</li>
+<li><a href="/ursamu/guides/password-reset/"><strong>Password Reset</strong></a> — Admin tokens, player flow,<br>
+REST API.</li>
+<li><a href="/ursamu/guides/debugging/"><strong>Debugging</strong></a> — Common runtime errors and how to fix them.</li>
 </ul>
-<h2>Admin Guide</h2>
-<p>Learn how to administer an UrsaMU server:</p>
+<h2>Customizing the Game</h2>
 <ul>
-<li><a href="/ursamu/guides/admin-guide/#user-management">User Management</a></li>
-<li><a href="/ursamu/guides/admin-guide/#server-configuration">Server Configuration</a></li>
-<li><a href="/ursamu/guides/admin-guide/#backup-and-restore">Backup and Restore</a></li>
-<li><a href="/ursamu/guides/admin-guide/#troubleshooting">Troubleshooting</a></li>
+<li><a href="/ursamu/guides/customization/"><strong>Customization</strong></a> — Color codes, custom commands,<br>
+attributes, plugins, REST routes, format handlers, external integrations.</li>
+<li><a href="/ursamu/guides/lock-expressions/"><strong>Lock Expressions</strong></a> — Lockfunc syntax, boolean<br>
+operators, custom lockfuncs via <code>registerLockFunc</code>.</li>
+<li><a href="/ursamu/guides/commands/"><strong>Command Reference</strong></a> — All built-in commands.</li>
+<li><a href="/ursamu/guides/help-authoring/"><strong>Help Authoring</strong></a> — Writing help files, directory<br>
+structure, conventions.</li>
 </ul>
-<h2>Scripting Guide</h2>
-<p>Write TypeScript/JS scripts that run in the sandboxed SDK:</p>
+<h2>Writing Code</h2>
 <ul>
-<li><a href="/ursamu/guides/scripting/#how-scripting-works">How scripting works</a></li>
-<li><a href="/ursamu/guides/scripting/#the-sdk-u">The SDK (<code>u</code>)</a></li>
-<li><a href="/ursamu/guides/scripting/#writing-a-script">Writing a script</a></li>
-<li><a href="/ursamu/guides/scripting/#testing-scripts">Testing scripts</a></li>
+<li><a href="/ursamu/guides/scripting/"><strong>Scripting</strong></a> — Sandbox model, the <code>u</code> SDK, ESM vs legacy<br>
+blocks, aliases and switches.</li>
+<li><a href="/ursamu/guides/first-script/"><strong>Build Your First Script</strong></a> — Step-by-step walkthrough.</li>
+<li><a href="/ursamu/guides/sdk-cookbook/"><strong>SDK Cookbook</strong></a> — Every <code>u.*</code> namespace with examples.</li>
+<li><a href="/ursamu/guides/softcoding/"><strong>Soft-Coding</strong></a> — Storing scripts in attributes, parent<br>
+inheritance, <code>@trigger</code> / <code>u.trigger</code> / <code>u.eval</code>.</li>
+<li><a href="/ursamu/guides/recipes/"><strong>Recipes</strong></a> — Copy-paste patterns for common tasks.</li>
+<li><a href="/ursamu/guides/gameclock/"><strong>Game Clock</strong></a> — <code>u.sys.gameTime</code> and the in-game calendar.</li>
+</ul>
+<h2>Game Systems</h2>
+<ul>
+<li><a href="/ursamu/guides/scenes/"><strong>Scenes</strong></a> — Collaborative RP logs: create, pose, export.</li>
+<li><a href="/ursamu/guides/wiki/"><strong>Wiki</strong></a> — File-based Markdown wiki with frontmatter and REST.</li>
 </ul>
 <h2>MUSH Compatibility</h2>
-<p>Coming from PennMUSH, TinyMUSH, or MUX2? See what works today and what’s planned:</p>
-<ul>
-<li><a href="../mush_compatibility/#what-works-today">What works today</a></li>
-<li><a href="../mush_compatibility/#whats-different-from-traditional-mush">What’s different</a></li>
-<li><a href="../mush_compatibility/#planned-enhancements">Planned enhancements</a></li>
-<li><a href="../mush_compatibility/#connecting-with-a-traditional-mu-client">Connecting with MU* clients</a></li>
-</ul>
-<h2>Customization</h2>
-<p>Learn how to customize your UrsaMU server:</p>
-<ul>
-<li><a href="/ursamu/guides/customization/#themes">Themes</a></li>
-<li><a href="/ursamu/guides/customization/#commands">Commands</a></li>
-<li><a href="/ursamu/guides/customization/#game-mechanics">Game Mechanics</a></li>
-<li><a href="/ursamu/guides/customization/#integration">Integration</a></li>
-</ul>
+<p>Coming from PennMUSH, TinyMUSH, or MUX2? See<br>
+<a href="/ursamu/mush_compatibility/">mush compatibility</a> for what works today, what<br>
+differs, and how to connect with traditional MU* clients.</p>
 
       </article>
 
@@ -363,11 +362,49 @@ use it as a player, or administering your own server.</p>
       
         
           
+        
+      
+        
           
         
       
         
           
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         

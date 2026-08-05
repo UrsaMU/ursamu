@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html><head><meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/market-research-2026-04/">
+<meta name="twitter:card" content="summary">
+</head><body><h1>UrsaMU Market Research — April 2026</h1>
+<h2>Market Size</h2>
+<ul>
+<li>~10,000 active players, ~722 games tracked on Mudstats</li>
+<li>Small, passionate, aging demographic — not a growth market</li>
+<li>Opportunity is consolidation: be the obvious modern choice so new games start on UrsaMU instead of a 30-year-old C codebase</li>
+</ul>
+<hr>
+<h2>Pain Points (What’s Driving People Away)</h2>
+<ol>
+<li><strong>Setup requires a coder</strong> — spinning up a MUSH still means compiling C, editing flat-file configs, or knowing Deno. Non-technical storytellers can’t self-serve.</li>
+<li><strong>MUSHcode is a development hell</strong> — no editor support, no linter, no version control, no tests. Bugs are found by players, not builders.</li>
+<li><strong>No web client</strong> — every modern player expects to open a URL. Requiring a MUD client (MUSHclient, Mudlet) is a hard filter that kills casual adoption.</li>
+<li><strong>No package ecosystem</strong> — every game reinvents jobs, bboards, chargen from scratch. No <code>npm install bbs</code>.</li>
+<li><strong>No Discord integration</strong> — ~70% of active MUSH communities already live in Discord. The game and the community are siloed.</li>
+</ol>
+<hr>
+<h2>What People Want</h2>
+<ul>
+<li>Zero-install web client (browser play, mobile-friendly)</li>
+<li>Discord bridge (relay game events ↔ Discord channels)</li>
+<li>OAuth login (Google/Discord — no more <code>connect name password</code>)</li>
+<li>Plugin marketplace / one-command installs</li>
+<li>REST API for web dashboards and bots</li>
+<li>Live dev feedback — the one thing classic engines do well that modern ones don’t: type softcode, see output immediately</li>
+</ul>
+<hr>
+<h2>The Gap UrsaMU Hasn’t Closed Yet</h2>
+<p>Classic MUSH’s irreplaceable advantage is the <strong>in-game REPL</strong> — <code>think add(1,2)</code> returns <code>3</code> instantly. Experienced builders live in that loop. UrsaMU has the softcode engine but no interactive eval surface exposed to builders in-game. That’s the one capability keeping veterans from fully migrating.</p>
+<hr>
+<h2>Competitive Landscape</h2>
+<ul>
+<li>JS/TS MUSH engine space is underpopulated</li>
+<li>Ranvier targets combat MUDs, not RP-focused MUSH</li>
+<li>No direct competitor for “modern TypeScript MUSH engine with plugin ecosystem”</li>
+</ul>
+<hr>
+<h2>Game Genres Active in the Community</h2>
+<ul>
+<li>World of Darkness (WoD)</li>
+<li>Sci-fi / Star Trek</li>
+<li>Urban RP</li>
+<li>Tabletop RPG adaptations</li>
+</ul>
+<hr>
+<h2>UrsaMU Status vs. Market Wants</h2>
+<table>
+<thead>
+<tr>
+<th>What they want</th>
+<th>UrsaMU has it?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>REST API</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Plugin system</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Discord hooks</td>
+<td>Yes (gameHooks)</td>
+</tr>
+<tr>
+<td>Softcode engine</td>
+<td>Yes (TinyMUX 2.x)</td>
+</tr>
+<tr>
+<td>Zero-install web client</td>
+<td>No</td>
+</tr>
+<tr>
+<td>In-game eval REPL (<code>think</code>)</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Highest-Leverage Next Steps</h2>
+<ol>
+<li><strong>In-game <code>think</code>/eval command</strong> — lets builders test softcode expressions live without writing files. Closes the biggest psychological barrier for veteran MUSHers.</li>
+<li><strong>Zero-install web client</strong> — removes the MUD client requirement entirely; opens the game to casual players.</li>
+</ol>
+</body></html>

@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -273,7 +273,6 @@
 <code>index.ts</code> exporting a default <code>IPlugin</code> object. No registration, no config<br>
 entry required — just drop the folder in and restart the server.</p>
 <pre class="language-none" tabindex="0"><code class="language-none">src/plugins/
-├── bboards/        ← auto-loaded
 ├── events/         ← auto-loaded
 ├── jobs/           ← auto-loaded
 └── my-plugin/      ← auto-loaded the next time you start
@@ -291,10 +290,9 @@ export interface IPlugin {
   remove?: () =&gt; void   | Promise&lt;void&gt;;    // called when the plugin is unloaded
 }
 </code></pre>
-<p>That is the complete interface. There is no <code>author</code> field, no <code>dependencies</code><br>
+<h2>That is the complete interface. There is no <code>author</code> field, no <code>dependencies</code><br>
 array, no <code>App</code> parameter, and no <code>onInit</code>/<code>onLoad</code>/<code>onUnload</code> lifecycle<br>
-methods. The interface is intentionally minimal.</p>
-<hr>
+methods. The interface is intentionally minimal.</h2>
 <h2>Lifecycle</h2>
 <table>
 <thead>
@@ -327,6 +325,23 @@ methods. The interface is intentionally minimal.</p>
 <code>init()</code>. Import <code>"./commands.ts"</code> from <code>index.ts</code> and the registrations<br>
 happen automatically.</p>
 </blockquote>
+<blockquote>
+<p><strong>Named handler refs.</strong> Any <code>gameHooks.on(event, handler)</code> registered in<br>
+<code>init()</code> must be paired with <code>gameHooks.off(event, handler)</code> in <code>remove()</code><br>
+using the <strong>same named function reference</strong>. Inline arrow functions cannot<br>
+be unsubscribed. See <a href="/ursamu/plugins/hooks/#full-example">hooks.md</a>.</p>
+</blockquote>
+<blockquote>
+<p><strong>DBO namespacing.</strong> Collection names must be prefixed with your plugin<br>
+name to avoid colliding with the core engine or other plugins:<br>
+<code>new DBO&lt;T&gt;("my-plugin.records")</code>. See <a href="/ursamu/plugins/database/">database.md</a>.</p>
+</blockquote>
+<blockquote>
+<p><strong>Stdlib primitives.</strong> Plugins written in TypeScript can import<br>
+<code>Noise</code>, <code>Rng</code>, vector/spatial helpers, interpolation, and physics<br>
+primitives directly from <code>jsr:@ursamu/mush</code> (v2.5.1+). No need to vendor<br>
+<code>simplex-noise</code> or <code>alea</code>.</p>
+</blockquote>
 <hr>
 <h2>A Minimal Plugin</h2>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">// src/plugins/hello/index.ts
@@ -349,9 +364,8 @@ const helloPlugin: IPlugin = {
 
 export default helloPlugin;
 </code></pre>
-<p>That is a complete, loadable plugin. Start the server and you will see<br>
-<code>[hello] initialized</code> in the log.</p>
-<hr>
+<h2>That is a complete, loadable plugin. Start the server and you will see<br>
+<code>[hello] initialized</code> in the log.</h2>
 <h2>Standard File Layout</h2>
 <p>Full-featured plugins split their code across four files, plus a manifest:</p>
 <pre class="language-none" tabindex="0"><code class="language-none">src/plugins/my-plugin/
@@ -395,13 +409,20 @@ manifest at the plugin root:</p>
   "ursamu": "&gt;=1.0.0",
   "author": "Your Name",
   "license": "MIT",
-  "main": "index.ts"
+  "main": "index.ts",
+  "deps": [
+    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+  ]
 }
 </code></pre>
-<p>This is the file <code>ursamu plugin install</code> reads to confirm what it is installing,<br>
-display details, and populate the local registry. See the<br>
-<a href="/ursamu/plugins/#installing-community-plugins">Plugin Manager</a> docs for the full<br>
-install/update/remove workflow.</p>
+<p>Each <code>deps[]</code> entry may include an optional <code>version</code> semver range<br>
+(<code>"^1.2.0"</code>, <code>"&gt;=1.0.0 &lt;2.0.0"</code>). When present, the installer reads the<br>
+dep’s own manifest <code>version</code> and aborts the whole install if it does not<br>
+satisfy the range. Omit <code>version</code> to install the dep without a check<br>
+(backwards compatible). See the<br>
+<a href="/ursamu/plugins/#installing-community-plugins">Plugin Manager</a> and the<br>
+<a href="/ursamu/plugins/#deps-entries"><code>deps[]</code> reference</a> for the full install,<br>
+update, remove, and atomic-rollback semantics.</p>
 
       </article>
 
@@ -490,11 +511,73 @@ install/update/remove workflow.</p>
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
         
       
         
@@ -518,9 +601,9 @@ install/update/remove workflow.</p>
         
 
         
-          <a href="/ursamu/plugins/commands/" class="page-nav-btn next">
+          <a href="/ursamu/plugins/chargen/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Character Generation Plugin</span>
           </a>
         
       </nav>

@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -277,10 +277,9 @@ combination of:</p>
 <li><strong>A private database</strong> — a <code>DBO&lt;T&gt;</code> collection namespaced to the plugin</li>
 <li><strong>Config defaults</strong> — merged into the global config on startup</li>
 </ul>
-<p>Plugins are <strong>auto-discovered</strong>. Drop a folder into <code>src/plugins/</code> with an<br>
+<h2>Plugins are <strong>auto-discovered</strong>. Drop a folder into <code>src/plugins/</code> with an<br>
 <code>index.ts</code> that exports a default <code>IPlugin</code> object and the engine loads it on<br>
-next start — no registration required.</p>
-<hr>
+next start — no registration required.</h2>
 <h2>Plugin Structure</h2>
 <p>A full plugin lives in its own subdirectory:</p>
 <pre class="language-none" tabindex="0"><code class="language-none">src/plugins/my-plugin/
@@ -290,17 +289,15 @@ next start — no registration required.</p>
 ├── db.ts                — custom DBO database
 └── ursamu.plugin.json   — manifest (required for ursamu plugin install)
 </code></pre>
-<p>Only <code>index.ts</code> is required. The other files are imported from it.</p>
-<hr>
+<h2>Only <code>index.ts</code> is required. The other files are imported from it.</h2>
 <h2>Quick Scaffold</h2>
 <p>The fastest way to start is the built-in CLI scaffolder. Run from your game<br>
 project root:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash">ursamu create plugin my-plugin
 </code></pre>
-<p>This generates all four files pre-named and pre-wired. Restart the server and<br>
+<h2>This generates all four files pre-named and pre-wired. Restart the server and<br>
 the plugin loads automatically. You can also copy <code>src/plugins/example/</code><br>
-directly — it is a fully working reference implementation.</p>
-<hr>
+directly — it is a fully working reference implementation.</h2>
 <h2>Plugin Interface</h2>
 <p>Every plugin implements <code>IPlugin</code>:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">import type { IPlugin } from "../../@types/IPlugin.ts";
@@ -396,10 +393,6 @@ import "./commands.ts";
 <td>Query the main object database</td>
 </tr>
 <tr>
-<td><code>u.bb.*</code></td>
-<td>Bulletin board SDK</td>
-</tr>
-<tr>
 <td><code>u.chan.*</code></td>
 <td>Channel SDK</td>
 </tr>
@@ -458,8 +451,7 @@ export async function myRouteHandler(
   return json({ error: "Not Found" }, 404);
 }
 </code></pre>
-<p>All CORS headers are added automatically by the engine.</p>
-<hr>
+<h2>All CORS headers are added automatically by the engine.</h2>
 <h2>Custom Database</h2>
 <p>Create a typed <code>DBO&lt;T&gt;</code> collection in <code>db.ts</code>:</p>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">import { DBO } from "../../services/Database/database.ts";
@@ -520,8 +512,7 @@ export const myRecords = new DBO&lt;IMyRecord&gt;("server.my-plugin-records");
 
 const maxItems = getConfig&lt;number&gt;("plugins.my-plugin.maxItems") ?? 50;
 </code></pre>
-<p>Operators override values in <code>config/config.json</code> under the same key path.</p>
-<hr>
+<h2>Operators override values in <code>config/config.json</code> under the same key path.</h2>
 <h2>The Manifest File</h2>
 <p>Every plugin that will be shared or installed from GitHub <strong>must</strong> include an<br>
 <code>ursamu.plugin.json</code> at the plugin root. The install command reads this file to<br>
@@ -533,7 +524,10 @@ display details and populate the local registry.</p>
   "ursamu": "&gt;=1.0.0",
   "author": "Your Name",
   "license": "MIT",
-  "main": "index.ts"
+  "main": "index.ts",
+  "deps": [
+    { "name": "jobs", "url": "https://github.com/UrsaMU/jobs-plugin", "version": "^1.9.0" }
+  ]
 }
 </code></pre>
 <table>
@@ -580,11 +574,69 @@ display details and populate the local registry.</p>
 <td>no</td>
 <td>Entry-point file, defaults to <code>"index.ts"</code></td>
 </tr>
+<tr>
+<td><code>deps</code></td>
+<td>no</td>
+<td>Array of transitive plugin dependencies — see below</td>
+</tr>
 </tbody>
 </table>
-<p>The <code>ursamu create plugin &lt;name&gt; --standalone</code> command generates this file<br>
-automatically when scaffolding a new publishable plugin project.</p>
-<hr>
+<h3><code>deps[]</code> entries</h3>
+<p>Each entry declares a plugin this one needs at runtime. The installer<br>
+resolves the full graph before writing anything.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>yes</td>
+<td>Plugin slug — install folder name</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>yes</td>
+<td>Git URL the installer will clone</td>
+</tr>
+<tr>
+<td><code>ref</code></td>
+<td>no</td>
+<td>Git ref (tag, branch, commit)</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td>no</td>
+<td>Semver range (e.g. <code>"^1.2.0"</code>, <code>"&gt;=1.0.0 &lt;2.0.0"</code>) checked against the dep’s own manifest <code>version</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>version</code> field is optional and opt-in. When omitted, the dep installs<br>
+as before with no version check. When present, the installer reads the<br>
+dep’s <code>ursamu.plugin.json</code> after clone and aborts if its <code>version</code> does<br>
+not satisfy the range — or if two requesters ask for incompatible ranges.</p>
+<h3>Atomic installs</h3>
+<p><code>ensurePlugins</code> (and the bulk install path used on first startup) is<br>
+fail-fast across the entire manifest. If any plugin or transitive dep<br>
+fails for any of these reasons, the whole run aborts and rolls back:</p>
+<ul>
+<li>Clone failure or rename failure</li>
+<li>Unsafe plugin name (path traversal, reserved characters)</li>
+<li>Unsafe or unsupported clone URL</li>
+<li>Manifest version does not satisfy a requested <code>version:</code> range</li>
+<li>Two requesters declare incompatible <code>version:</code> ranges for the same dep</li>
+<li>Malformed semver in any range or manifest version</li>
+</ul>
+<p>On abort, nothing from the failed run is left on disk or in<br>
+<code>.registry.json</code>. Plugins installed in previous successful runs are not<br>
+touched. The installer throws a <code>PluginInstallError</code> (or one of its<br>
+subclasses) describing which entry failed and why.</p>
+<h2>The <code>ursamu create plugin &lt;name&gt; --standalone</code> command generates this file<br>
+automatically when scaffolding a new publishable plugin project.</h2>
 <h2>Installing Community Plugins</h2>
 <p>The plugin manager handles install, update, remove, and inspect operations:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash"># Install from a GitHub URL
@@ -633,12 +685,60 @@ ursamu plugin remove my-plugin
 <td>Full CRUD REST API, staff permission checks, in-game commands with switches</td>
 </tr>
 <tr>
-<td><code>src/plugins/bboards/</code></td>
-<td>Multi-resource REST API, per-user state (unread counts), admin-restricted mutations</td>
-</tr>
-<tr>
 <td><code>src/plugins/events/</code></td>
 <td>Sequential IDs, RSVP capacity enforcement, cancelled-event visibility rules, REST + in-game commands</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Plugin Docs Index</h2>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Topic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/ursamu/plugins/basics/">basics.md</a></td>
+<td><code>IPlugin</code> interface, lifecycle, auto-discovery, file layout</td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/first-plugin/">first-plugin.md</a></td>
+<td>Step-by-step walkthrough of a complete plugin</td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/commands/">commands.md</a></td>
+<td><code>addCmd</code> reference, patterns, switches, lockfuncs</td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/database/">database.md</a></td>
+<td><code>DBO&lt;T&gt;</code> collections, queries, namespacing rules</td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/configuration/">configuration.md</a></td>
+<td>Default config values, <code>getConfig</code>, env vars for secrets</td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/hooks/">hooks.md</a></td>
+<td><code>gameHooks</code> event bus, scene/wiki/event/chargen hooks, <code>EventsService</code></td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/dependencies/">dependencies.md</a></td>
+<td>Sharing code between plugins, <code>deps[]</code> manifest entries</td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/official-plugins/">official-plugins.md</a></td>
+<td>Plugin registry — channel, discord, jobs, events, bbs, wiki, mail, builder, chargen, help</td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/chargen/">chargen.md</a></td>
+<td>Bundled chargen plugin — commands, hooks, REST API</td>
+</tr>
+<tr>
+<td><a href="/ursamu/plugins/events/">events.md</a></td>
+<td>Bundled events plugin — calendar, RSVPs, REST API</td>
 </tr>
 </tbody>
 </table>
@@ -726,11 +826,73 @@ ursamu plugin remove my-plugin
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
         
       
         

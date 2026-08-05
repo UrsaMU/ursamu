@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -276,17 +276,17 @@ including user management, configuration, backups, and troubleshooting.</p>
 <p>Run the server for the first time:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash">deno task start
 </code></pre>
-<p>When the database is empty, the startup script pauses and prompts you:</p>
-<pre class="language-none" tabindex="0"><code class="language-none">No players found in the database.
-Welcome! Let's set up your superuser account.
+<p>When the database is empty, the engine prints:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">Fresh database detected — no players exist yet.
 
-Enter email address: you@example.com
-Enter username: Admin
-Enter password: ••••••••
+Connect via telnet and run:
+  create &lt;name&gt; &lt;password&gt;
 
-Superuser 'Admin' created successfully!
+The first player created is automatically given superuser access.
 </code></pre>
-<p>After setup completes, the Hub, Telnet sidecar, and web client all start automatically.</p>
+<p>Connect with a Telnet client (<code>telnet localhost 4201</code>) and create your<br>
+account. The first player created on a fresh database is automatically<br>
+granted the <code>superuser</code> flag.</p>
 <h3>Permission levels</h3>
 <p>UrsaMU uses a flag-based permission system:</p>
 <table>
@@ -342,13 +342,8 @@ Superuser 'Admin' created successfully!
 </code></pre>
 <p>The <code>superuser</code> flag cannot be granted via <code>@set</code> — it can only be created<br>
 through the first-run interactive prompt.</p>
-<blockquote>
-<p><strong>Non-interactive environments</strong>: If you run <code>deno task start</code> without a TTY<br>
-(e.g. in a Docker container), the prompt is skipped. Run <code>deno task server</code><br>
-directly in an interactive terminal to complete first-run setup, then switch<br>
-back to <code>deno task start</code> for normal operation.</p>
-</blockquote>
-<hr>
+<h2>The <code>superuser</code> flag itself cannot be granted via <code>@set</code> from inside the<br>
+game — it can only be created via this first-run flow.</h2>
 <h2>User Management</h2>
 <h3>Creating Admin Users</h3>
 <p>To grant admin privileges to an existing player, use the <code>@set</code> command as a<br>
@@ -358,7 +353,9 @@ superuser or existing admin:</p>
 <h3>Managing User Accounts</h3>
 <p>As an administrator, you can manage user accounts with these commands:</p>
 <ul>
-<li><code>@newpassword &lt;user&gt;=&lt;password&gt;</code> — Reset a user’s password</li>
+<li><code>@newpassword &lt;user&gt;=&lt;password&gt;</code> — Reset a user’s password directly</li>
+<li><code>@resettoken &lt;user&gt;</code> — Generate a one-time password-reset token (valid 1 hour);<br>
+give the token to the player so they can reset via <code>POST /api/v1/auth/reset-password</code></li>
 <li><code>@boot &lt;user&gt;</code> — Disconnect a player from the server</li>
 <li><code>@toad &lt;user&gt;</code> — Convert a player object into a regular thing (removes player<br>
 flag and disconnects)</li>
@@ -416,6 +413,25 @@ additional commands:</p>
 @chanset &lt;name&gt;/hidden=true|false    -- Toggle channel visibility
 @chanset &lt;name&gt;/masking=true|false   -- Toggle name masking
 </code></pre>
+<h3>Master Room &amp; Zones</h3>
+<h4>Master Room</h4>
+<p>UrsaMU supports a single designated <em>master room</em>. Commands and <code>$</code>-pattern attributes set on objects in the master room are checked globally — any player anywhere on the game can trigger them, as if those objects were in the same room.</p>
+<p>The master room ID is configured via <code>game.masterRoom</code> in <code>config.json</code>:</p>
+<pre class="language-json" tabindex="0"><code class="language-json">{
+  "game": {
+    "masterRoom": "1"
+  }
+}
+</code></pre>
+<p><code>ACONNECT</code> and <code>ADISCONNECT</code> attributes fire on both the connected player’s own object and on objects in the master room, allowing global connection hooks without touching the player object.</p>
+<h4>Zone System</h4>
+<p>Zones allow a <em>zone master</em> object to share <code>$</code>-pattern commands across all objects assigned to it.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@zone &lt;object&gt;=&lt;zone master&gt;   -- assign object to a zone
+@zone &lt;object&gt;=                -- clear zone assignment
+</code></pre>
+<p>Objects in a zone inherit <code>$</code>-pattern command dispatch from the zone master, making it easy to share a command set across many rooms or items without duplicating attributes on each one.</p>
+<p>To see what zone an object belongs to, use <code>examine &lt;object&gt;</code> — the zone master dbref is listed in the output.</p>
+<hr>
 <h3>Rate Limiting</h3>
 <p>The server enforces a WebSocket command rate limit of <strong>10 commands per second</strong><br>
 per connection. Requests that exceed this are silently dropped and logged to<br>
@@ -424,35 +440,6 @@ stderr:</p>
 </code></pre>
 <p>This is a fixed limit defined in <code>WebSocketService</code> and cannot currently be<br>
 configured at runtime.</p>
-<h2>Web Client</h2>
-<p>UrsaMU ships with an optional browser-based client built with Deno Fresh<br>
-(<code>src/web-client/</code>). When <code>src/web-client/</code> is present, <strong><code>deno task start</code><br>
-starts it automatically</strong> alongside the Hub and Telnet sidecar.</p>
-<p>The web client runs at <a href="http://localhost:8000">http://localhost:8000</a>.</p>
-<h3>What the Web Client Provides</h3>
-<ul>
-<li>Login / character registration forms</li>
-<li>In-game terminal interface (sends/receives WebSocket commands)</li>
-<li>Scene viewer and scene builder</li>
-<li>Character profile and character sheet pages</li>
-<li>Player directory</li>
-<li>Wiki pages</li>
-</ul>
-<h3>Starting Manually</h3>
-<p>If you want to run the web client independently (e.g. during development):</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
-deno task start
-</code></pre>
-<h3>Production Deployment</h3>
-<p>For production, build the Fresh app first:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">cd src/web-client
-deno task build
-deno task preview    # runs the pre-built version
-</code></pre>
-<p>Point a reverse proxy (nginx, Caddy) at port <code>8000</code> for TLS termination. The<br>
-main Hub (port <code>4203</code>) should also be proxied for WebSocket connections from<br>
-the web client.</p>
-<hr>
 <h2>Server Configuration</h2>
 <h3>Basic Configuration</h3>
 <p>Run the interactive configuration wizard:</p>
@@ -460,19 +447,289 @@ the web client.</p>
 </code></pre>
 <p>Key configuration areas:</p>
 <ul>
-<li>Server ports (Hub WS: 4202, Hub HTTP: 4203, Telnet: 4201, Web client: 8000)</li>
+<li>Server ports (Hub WS: 4202, Hub HTTP: 4203, Telnet: 4201)</li>
 <li>Game name and welcome messages</li>
 <li>Starting room ID</li>
 </ul>
+<h3>Runtime Configuration (<code>@site</code>)</h3>
+<p>Admins and wizards can change a subset of server configuration values at runtime<br>
+without restarting:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@site server.name=My Awesome Game
+@site game.loginMessage=Welcome back!
+@site game.welcomeMessage=Welcome to the game!
+@site server.banner=A roleplay game set in urban fantasy
+</code></pre>
+<p>Allowed keys: <code>server.name</code>, <code>server.description</code>, <code>server.banner</code>,<br>
+<code>server.corsOrigins</code>, <code>server.maxConnections</code>, <code>game.maxPlayers</code>,<br>
+<code>game.description</code>, <code>game.loginMessage</code>, <code>game.welcomeMessage</code>.</p>
+<p>Attempts to set other keys (e.g. <code>server.db</code>, <code>jwt.secret</code>) are blocked and<br>
+logged to the security log.</p>
 <h3>Restarting and Shutting Down</h3>
 <p>From in-game (admin or wizard required):</p>
 <pre class="language-none" tabindex="0"><code class="language-none">@reboot      -- Gracefully restart the server
 @shutdown    -- Shut down the server
+@update      -- Pull latest code from git and restart (see below)
 </code></pre>
-<p>From the terminal, use <code>Ctrl+C</code> to stop a running process, then restart with:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task server    # Hub only
-deno task start     # Hub + telnet with file watching
+<p>From the terminal:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task start           # Start Hub + Telnet sidecar (foreground)
+deno task dev             # Same, with file watching (development)
+bash scripts/daemon.sh    # Supervised background process (production)
+bash scripts/restart.sh   # No-disconnect restart of the supervised main
+bash scripts/stop.sh      # Graceful stop (disconnects everyone)
 </code></pre>
+<p>The supervised scaffold is created automatically by <code>ursamu create</code>. See<br>
+<a href="/ursamu/guides/deployment/#supervised-daemon-mode">Production Deployment</a> for the<br>
+signal model (SIGUSR2 = no-disconnect restart; Telnet sidecar persists<br>
+across <code>@reboot</code> and JWT auto-reauth).</p>
+<h3>Hot-Reload (<code>@reload</code>)</h3>
+<p>Without restarting or disconnecting any players, admins and wizards can reload<br>
+individual parts of the running server:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@reload                    -- reload everything (config + text + commands + plugins)
+@reload/config             -- reload config.json from disk only
+@reload/text               -- reload text files (motd, etc.) only
+@reload/cmds               -- reload native commands and system aliases only
+@reload/plugins            -- hot-reload all installed plugins
+@reload/plugin &lt;name&gt;      -- hot-reload one specific plugin by name
+</code></pre>
+<p><strong>Example — reload just the jobs plugin after an update:</strong></p>
+<pre class="language-none" tabindex="0"><code class="language-none">@reload/plugin jobs
+</code></pre>
+<p>The response shows each subsystem’s status. Partial failures are reported<br>
+inline so you can see which component (if any) didn’t reload cleanly.</p>
+<blockquote>
+<p><code>@reload/plugin &lt;name&gt;</code> is case-insensitive and matches against the plugin’s<br>
+registered name. To see what’s loaded: <code>@reload/plugin</code> (no name) prints<br>
+the list of currently loaded plugins.</p>
+</blockquote>
+<blockquote>
+<p><strong>System scripts</strong> (<code>system/scripts/*.ts</code>) are always executed live — the<br>
+engine reads and compiles them on each invocation — so they never need a<br>
+reload.</p>
+</blockquote>
+<h3>Plugin Install Behavior</h3>
+<p>On startup the engine resolves and installs every plugin declared in<br>
+<code>src/plugins/plugins.manifest.json</code> (plus their transitive <code>deps[]</code>). Two<br>
+things to know when editing the manifest:</p>
+<ul>
+<li><strong>Optional <code>deps[].version</code> semver range</strong> — each dep entry may set<br>
+<code>"version": "^1.2.0"</code> (or <code>"&gt;=1.0.0 &lt;2.0.0"</code>, etc.). The installer<br>
+reads the dep’s own <code>ursamu.plugin.json</code> <code>version</code> and aborts the run<br>
+if it doesn’t satisfy the range. Entries without <code>version</code> install<br>
+unconditionally — backwards compatible.</li>
+<li><strong>Fail-fast, whole-manifest rollback</strong> — if any plugin or transitive<br>
+dep fails to clone, has an unsafe name or URL, violates a <code>version</code><br>
+range, or has incompatible ranges from multiple requesters, the entire<br>
+install run aborts. Disk and <code>src/plugins/.registry.json</code> are left<br>
+exactly as they were before the run — your previously installed<br>
+plugins are not touched. The error names which entry failed and why.</li>
+</ul>
+<p>In practice: after editing the manifest, restart the server. If the run<br>
+aborts, fix the offending entry and restart again — there is no partial<br>
+state to clean up.</p>
+<h3>Updating from Git (<code>@update</code>)</h3>
+<p>Admins and wizards can update the running server from in-game without touching<br>
+the terminal:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@update              -- git pull from the default branch (origin/main)
+@update main         -- pull a specific branch
+@upgrade             -- alias for @update
+</code></pre>
+<p>The command:</p>
+<ol>
+<li>Broadcasts <code>%chGame&gt;%cn Updating from git...</code> to all connected players</li>
+<li>Runs <code>git pull origin &lt;branch&gt;</code></li>
+<li>Exits with code 75, which tells the daemon restart loop to reboot the server</li>
+</ol>
+<blockquote>
+<p>Telnet connections survive the reboot — the Telnet sidecar stays up and<br>
+reconnects to the Hub automatically.</p>
+</blockquote>
+<h3>Daemon Restart Loop</h3>
+<p>When started via <code>bash scripts/daemon.sh</code>, the server runs inside a restart<br>
+loop (<code>scripts/main-loop.sh</code>) that watches the process exit code:</p>
+<table>
+<thead>
+<tr>
+<th>Exit code</th>
+<th>Meaning</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>75</code></td>
+<td>Restart signal (<code>@reboot</code>, <code>@update</code>)</td>
+<td>Restart after delay</td>
+</tr>
+<tr>
+<td><code>0</code></td>
+<td>Clean shutdown (<code>@shutdown</code>)</td>
+<td>Stop — do not restart</td>
+</tr>
+<tr>
+<td>Other</td>
+<td>Unexpected crash</td>
+<td>Stop — check logs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Rapid-restart protection</strong> — if the server exits in under 5 seconds the<br>
+restart delay doubles (1 s → 2 s → 4 s → … capped at 60 s). A stable<br>
+long-running restart resets the delay back to 1 second.</p>
+<p>The deno child PID is written to <code>.ursamu-deno.pid</code>; the loop PID is in<br>
+<code>.ursamu.pid</code>. Use <code>bash scripts/stop.sh</code> to gracefully stop both.</p>
+<h2>Help Administration</h2>
+<p>The <code>help</code> command is provided by the <strong><a href="https://github.com/UrsaMU/help-plugin">help-plugin</a></strong>,<br>
+which aggregates entries from three sources in priority order:</p>
+<table>
+<thead>
+<tr>
+<th>Priority</th>
+<th>Source</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100</td>
+<td>Database</td>
+<td>Entries created with <code>+help/set</code> — override everything</td>
+</tr>
+<tr>
+<td>50</td>
+<td>Files</td>
+<td>Markdown files in <code>./help/</code> and plugin help dirs</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Commands</td>
+<td>Inline <code>help:</code> fields from <code>addCmd()</code> registrations</td>
+</tr>
+</tbody>
+</table>
+<h3>In-game admin commands</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">+help/set &lt;topic&gt;=&lt;text&gt;   ← create or update a DB entry (Markdown supported)
++help/del &lt;topic&gt;          ← delete a DB entry
++help/reload               ← bust the file cache after adding/removing files
+</code></pre>
+<p>DB entries immediately override any file or command entry with the same slug.<br>
+Use <code>+help/del</code> to restore the underlying file entry.</p>
+<h3>REST API</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">GET    /api/v1/help              ← list all sections and topics
+GET    /api/v1/help/:topic       ← fetch a topic (?format=md for raw Markdown)
+POST   /api/v1/help/:topic       ← create/update (admin token required)
+DELETE /api/v1/help/:topic       ← delete (admin token required)
+</code></pre>
+<h3>Adding help files</h3>
+<p>Drop <code>.md</code> or <code>.txt</code> files in <code>./help/</code> (or a subdirectory) and run<br>
+<code>+help/reload</code> in-game. No restart needed. See <a href="/ursamu/guides/help-authoring/">Writing Help Files</a><br>
+for directory layout and Markdown conventions.</p>
+<hr>
+<h2>Wiki Administration</h2>
+<p>The wiki plugin stores articles as Markdown files in <code>./wiki/</code> with a<br>
+folder-driven URL structure. Admins and wizards manage pages with <code>@wiki</code><br>
+in-game commands.</p>
+<h3>In-game wiki commands</h3>
+<pre class="language-none" tabindex="0"><code class="language-none">@wiki/create &lt;path&gt;=&lt;title&gt;/&lt;body&gt;
+  -- Create a new wiki page. Path mirrors the folder structure.
+  -- Example: @wiki/create news/patch-notes=Patch Notes/Details here...
+
+@wiki/edit &lt;path&gt;=&lt;new body&gt;
+  -- Replace the body of an existing page (frontmatter is preserved).
+  -- Example: @wiki/edit news/patch-notes=Updated content here.
+
+@wiki/fetch &lt;url&gt;=&lt;wiki-path&gt;
+  -- Download an image or PDF from a public URL into the wiki folder.
+  -- Example: @wiki/fetch https://example.com/map.png=maps/world.png
+  -- Allowed types: .jpg .jpeg .png .gif .webp .svg .pdf (max 10 MB)
+</code></pre>
+<blockquote>
+<p><strong>Security note:</strong> <code>@wiki/fetch</code> blocks private/loopback/link-local IP<br>
+ranges (localhost, 127.x, 10.x, 192.168.x, etc.) to prevent SSRF attacks.<br>
+Only publicly routable URLs are permitted.</p>
+</blockquote>
+<h3>Wiki REST API</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki</code></td>
+<td>Required</td>
+<td>List all pages (title + path)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki?q=&lt;query&gt;</code></td>
+<td>Required</td>
+<td>Full-text search (title, body, tags)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki/&lt;path&gt;</code></td>
+<td>Required</td>
+<td>Read a page or list a directory</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki/&lt;path.ext&gt;</code></td>
+<td>Required</td>
+<td>Serve a static asset (image, PDF)</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/wiki</code></td>
+<td>Staff</td>
+<td>Create a page</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/wiki/&lt;path&gt;</code></td>
+<td>Staff</td>
+<td>Update body and/or frontmatter</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/wiki/&lt;path&gt;</code></td>
+<td>Staff</td>
+<td>Delete a page or asset</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/v1/wiki/&lt;path.ext&gt;</code></td>
+<td>Staff</td>
+<td>Upload a static asset (binary)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example — create a page:</strong></p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">curl -X POST https://yourgame.example.com/api/v1/wiki \
+  -H "Authorization: Bearer &lt;token&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "path": "news/patch-notes",
+    "title": "Patch Notes",
+    "date": "2026-03-18",
+    "body": "## Changes\n- Added new location."
+  }'
+</code></pre>
+<p><strong>Wiki page frontmatter format:</strong></p>
+<pre class="language-yaml" tabindex="0"><code class="language-yaml">---
+title: My Page Title
+date: 2026-03-18
+author: Admin
+tags: [news, update]
+---
+
+Page body in Markdown here.
+</code></pre>
+<h2>All metadata keys must match <code>/^[\w-]+$/</code>. Body size limit is <strong>10 MB</strong>.</h2>
 <h2>Scene Management</h2>
 <p>Scenes are collaborative roleplay logs. They can be exported via the HTTP API.</p>
 <h3>Exporting a Scene</h3>
@@ -509,7 +766,7 @@ curl -H "Authorization: Bearer &lt;token&gt;" \
 <h2>REST API Reference</h2>
 <p>All endpoints are served on the Hub’s HTTP port (default <code>4203</code>). Most require<br>
 a <code>Bearer</code> JWT token in the <code>Authorization</code> header, obtained from<br>
-<code>POST /api/v1/auth/login</code>.</p>
+<code>POST /api/v1/auth</code>.</p>
 <h3>Authentication</h3>
 <table>
 <thead>
@@ -522,13 +779,18 @@ a <code>Bearer</code> JWT token in the <code>Authorization</code> header, obtain
 <tbody>
 <tr>
 <td><code>POST</code></td>
-<td><code>/api/v1/auth/login</code></td>
+<td><code>/api/v1/auth</code></td>
 <td>Returns <code>{ token }</code></td>
 </tr>
 <tr>
 <td><code>POST</code></td>
 <td><code>/api/v1/auth/register</code></td>
 <td>Create a new character</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/auth/reset-password</code></td>
+<td>Consume a reset token and set a new password</td>
 </tr>
 <tr>
 <td><code>GET</code></td>
@@ -694,9 +956,101 @@ a <code>Bearer</code> JWT token in the <code>Authorization</code> header, obtain
 <td>List scenes</td>
 </tr>
 <tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes</code></td>
+<td>Create a scene</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/locations</code></td>
+<td>List accessible rooms</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/:id</code></td>
+<td>Scene detail</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/scenes/:id</code></td>
+<td>Update name, desc, status, sceneType</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes/:id/pose</code></td>
+<td>Add a pose/ooc/set entry</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/scenes/:id/pose/:poseId</code></td>
+<td>Edit a pose</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes/:id/join</code></td>
+<td>Join a scene</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes/:id/invite</code></td>
+<td>Invite a player</td>
+</tr>
+<tr>
 <td><code>GET</code></td>
 <td><code>/api/v1/scenes/:id/export</code></td>
 <td>Export as <code>?format=markdown</code> or <code>?format=json</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Wiki</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki</code></td>
+<td>List all pages</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki?q=&lt;query&gt;</code></td>
+<td>Full-text search</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki/&lt;path&gt;</code></td>
+<td>Read page or directory listing</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki/&lt;path.ext&gt;</code></td>
+<td>Serve static asset</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/wiki</code></td>
+<td>Create page <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/wiki/&lt;path&gt;</code></td>
+<td>Update page <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/wiki/&lt;path&gt;</code></td>
+<td>Delete page or asset <em>(staff)</em></td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/v1/wiki/&lt;path.ext&gt;</code></td>
+<td>Upload static asset <em>(staff)</em></td>
 </tr>
 </tbody>
 </table>
@@ -706,13 +1060,12 @@ sending <code>connect &lt;name&gt; &lt;password&gt;</code> as your first message
 JWT at connection time:</p>
 <pre class="language-none" tabindex="0"><code class="language-none">ws://host:4203?token=&lt;jwt&gt;&amp;client=web
 </code></pre>
-<p>The <code>client=web</code> parameter enables rich JSON payloads instead of plain text.</p>
-<hr>
+<h2>The <code>client=web</code> parameter enables rich JSON payloads instead of plain text.</h2>
 <h2>Troubleshooting</h2>
 <h3>Common Issues</h3>
 <h4>Server Won’t Start</h4>
 <ul>
-<li>Check if a port is already in use (<code>4201</code>, <code>4202</code>, <code>4203</code>, or <code>8000</code>)</li>
+<li>Check if a port is already in use (<code>4201</code>, <code>4202</code>, <code>4203</code>)</li>
 <li>Ensure Deno is installed and up to date (<code>deno upgrade</code>)</li>
 <li>Check for errors in configuration output (<code>deno task config</code>)</li>
 </ul>
@@ -720,32 +1073,71 @@ JWT at connection time:</p>
 <ul>
 <li>Confirm the Hub is running (<code>deno task server</code>)</li>
 <li>For Telnet clients, confirm the Telnet sidecar is running (<code>deno task telnet</code>)</li>
-<li>For the web client, confirm it is running (<code>deno task start</code> in<br>
-<code>src/web-client/</code>)</li>
 </ul>
 <h4>Permission Denied Errors</h4>
 <ul>
 <li>Verify the player has the correct flags set (<code>@set &lt;player&gt;=admin</code>)</li>
-<li>The <code>wizard</code> flag can only be set by a superuser at the database level</li>
+<li>The <code>wizard</code> flag can only be granted by a <strong>superuser</strong> (<code>@set &lt;player&gt;=wizard</code>)</li>
 </ul>
 <h3>Logs</h3>
 <p>UrsaMU logs to stdout/stderr. Redirect output to a file if you need persistent<br>
 logs:</p>
 <pre class="language-bash" tabindex="0"><code class="language-bash">deno task server &gt; logs/server.log 2&gt;&amp;1
 </code></pre>
+<h2>Password Reset</h2>
+<p>See the full <a href="/ursamu/guides/password-reset/">Password Reset guide</a> for the step-by-step<br>
+flow. In brief:</p>
+<ol>
+<li>Run <code>@resettoken &lt;player&gt;</code> in-game — a UUID token is printed to your session</li>
+<li>Pass the token to the player out-of-band (Discord, email, etc.)</li>
+<li>The player calls <code>POST /api/v1/auth/reset-password</code> with <code>{ token, newPassword }</code></li>
+<li>The token is single-use and expires after <strong>1 hour</strong></li>
+</ol>
+<hr>
 <h2>Security</h2>
 <h3>Securing Your Server</h3>
 <ul>
-<li>Place the Hub behind a reverse proxy (e.g., nginx) for TLS termination</li>
-<li>Set up a firewall to limit external access to only the necessary ports</li>
+<li>Place the Hub behind a reverse proxy (e.g., nginx, Caddy) for TLS termination</li>
+<li>Set up a firewall to limit external access to only the necessary ports (<code>4201</code>, <code>4202</code>, <code>4203</code>)</li>
 <li>Keep Deno and dependencies updated</li>
+<li>Set a strong <code>JWT_SECRET</code> environment variable before starting (see below)</li>
 <li>Use strong passwords — the <code>auth.hash</code> SDK method uses bcrypt</li>
 </ul>
+<h3>JWT Secret</h3>
+<p>UrsaMU signs session tokens with a secret key. Set it via environment variable<br>
+before starting the server:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">export JWT_SECRET="your-long-random-secret-here"
+deno task start
+</code></pre>
+<p>If <code>JWT_SECRET</code> is not set, a random secret is generated at startup and a<br>
+warning is printed. This means all sessions are invalidated on restart.</p>
+<h3>Brute-Force Login Protection</h3>
+<p>The login endpoint (<code>POST /api/v1/auth</code>) enforces a per-IP rate limit of<br>
+<strong>10 failed attempts per minute</strong>. After that threshold is reached the server<br>
+returns <code>429 Too Many Requests</code> and logs the event to <code>logs/security.log</code>.</p>
+<h3>Security Headers</h3>
+<p>All HTTP responses include hardening headers:</p>
+<ul>
+<li><code>X-Content-Type-Options: nosniff</code></li>
+<li><code>X-Frame-Options: DENY</code></li>
+<li><code>Referrer-Policy: strict-origin-when-cross-origin</code></li>
+</ul>
+<h3>Security Logging</h3>
+<p>Security events are written to <code>logs/security.log</code>:</p>
+<ul>
+<li><code>LOGIN_FAILED</code> — wrong password</li>
+<li><code>LOGIN_RATE_LIMITED</code> — IP blocked after too many failures</li>
+<li><code>PASSWORD_RESET</code> — password reset token consumed</li>
+<li><code>ADMIN_BOOT</code>, <code>ADMIN_TOAD</code>, <code>ADMIN_NEWPASSWORD</code> — admin user management actions</li>
+<li><code>ADMIN_SITE_SET</code>, <code>ADMIN_SITE_BLOCKED</code> — <code>@site</code> command activity</li>
+<li><code>ADMIN_RESETTOKEN</code> — reset token generation</li>
+</ul>
 <h3>The <code>wizard</code> Flag</h3>
-<p>The <code>wizard</code> flag is locked to <strong>superuser</strong> level and cannot be granted by<br>
-regular admins. It is intended for server owners who need a permanent,<br>
-unforgeable high-privilege account. Set it directly at the database level during<br>
-initial setup.</p>
+<p>The <code>wizard</code> flag sits at the same permission level as <code>admin</code> (level 9) but<br>
+can only be granted by a <strong>superuser</strong>. Regular admins cannot elevate another<br>
+player to wizard. Grant it with:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@set &lt;player&gt;=wizard
+</code></pre>
 
       </article>
 
@@ -794,11 +1186,49 @@ initial setup.</p>
       
         
           
+        
+      
+        
           
         
       
         
           
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -842,9 +1272,9 @@ initial setup.</p>
         
 
         
-          <a href="/ursamu/guides/customization/" class="page-nav-btn next">
+          <a href="/ursamu/guides/cli/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">Customization Guide</span>
+            <span class="page-nav-title">CLI Reference</span>
           </a>
         
       </nav>

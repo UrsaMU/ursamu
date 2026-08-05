@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -269,11 +269,10 @@
       <article class="prose">
         <h1>Plugin Configuration</h1>
 <h2>Overview</h2>
-<p>Plugins can declare default configuration values via the <code>config</code> property on<br>
+<h2>Plugins can declare default configuration values via the <code>config</code> property on<br>
 <code>IPlugin</code>. These defaults are deep-merged into the global config at startup, so<br>
 game operators can override any value in <code>config/config.json</code> without touching<br>
-plugin code.</p>
-<hr>
+plugin code.</h2>
 <h2>Declaring Defaults</h2>
 <p>Add a <code>config</code> property to your <code>IPlugin</code> object. Nest your values under<br>
 <code>plugins.&lt;plugin-name&gt;</code> to avoid collisions with core config keys:</p>
@@ -310,9 +309,8 @@ const max     = getConfig&lt;number&gt;("plugins.my-plugin.maxItems")  ?? 50;
 const enabled = getConfig&lt;boolean&gt;("plugins.my-plugin.enabled")  ?? true;
 const msg     = getConfig&lt;string&gt;("plugins.my-plugin.welcomeMessage") ?? "";
 </code></pre>
-<p><code>getConfig&lt;T&gt;(key)</code> traverses the merged config using dot-notation and returns<br>
-<code>undefined</code> if the key does not exist. Always supply a fallback.</p>
-<hr>
+<h2><code>getConfig&lt;T&gt;(key)</code> traverses the merged config using dot-notation and returns<br>
+<code>undefined</code> if the key does not exist. Always supply a fallback.</h2>
 <h2>User Overrides</h2>
 <p>Operators drop their overrides into <code>config/config.json</code>. The plugin’s declared<br>
 defaults are the baseline; anything in the file wins:</p>
@@ -477,11 +475,75 @@ export default rateLimitPlugin;
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
         
       
         

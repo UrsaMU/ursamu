@@ -31,22 +31,25 @@ UrsaMU takes a fresh approach:
 
 | Traditional MU* | UrsaMU |
 |----------------|--------|
-| Written in C | Written in TypeScript |
-| No standard package system | Deno native (JSR, npm imports) |
-| Telnet-only | WebSocket primary, Telnet sidecar |
-| Embedded scripting in MUSHcode | Scripts run in sandboxed Web Workers |
-| Modify core to extend | Plugin architecture |
-| Manual compile & deploy | `deno task start` |
+| Written in C | Written in TypeScript / Deno |
+| No standard package system | JSR packages (`@ursamu/mush`, plugins) |
+| Telnet-only | WS hub + HTTP portal + Telnet sidecar |
+| No first-class web UI | `@ursamu/site` (public) + `@ursamu/web` (staff) |
+| Embedded scripting in MUSHcode | Softcode + sandboxed TS Web Workers |
+| Modify core to extend | Plugin architecture (`addCmd`, hooks, routes) |
+| Manual compile & deploy | `jsr:@ursamu/cli` scaffold → `deno task start` |
 
 ## Core Features
 
-### WebSocket-Native Protocol
+### Portal + WebSocket-native protocol
 
-The primary interface to UrsaMU is **WebSocket**, not Telnet. This means:
+Scaffolded games ship a **public site** (`@ursamu/site`) and **staff
+console** (`@ursamu/web`) on the HTTP port, plus a WebSocket game hub:
 
-- Native browser connectivity — build web clients without proxies
-- Structured JSON messages for clean client/server contracts
-- A Telnet sidecar is still available for classic MU* clients
+- Browser play client at `/play` (sign-in required)
+- Staff tools at `/admin/` (wiki, DB, settings, plugin pages)
+- Structured JSON over WS for custom clients
+- Telnet sidecar for classic MU* clients
 
 ```javascript
 const socket = new WebSocket("ws://yourgame.example.com:4202");

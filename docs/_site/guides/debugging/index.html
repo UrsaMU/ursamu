@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debugging Scripts | UrsaMU Documentation</title>
+  <meta name="description" content="How to diagnose and fix issues in UrsaMU scripts and plugins.">
+  <link rel="stylesheet" href="/ursamu/styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ursamu.github.io/ursamu/guides/debugging/">
+<meta name="twitter:card" content="summary">
+</head>
+<body>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ═══ HEADER ══════════════════════════════════════════════════════ -->
+<header class="site-header">
+
+  <!-- Wordmark -->
+  <a href="/ursamu/" class="site-logo">
+    <span class="site-logo-name">UrsaMU</span>
+    <span class="site-logo-tag">docs</span>
+  </a>
+
+  <!-- Divider -->
+  <div class="header-divider"></div>
+
+  <!-- Top nav links -->
+  <nav class="header-nav" aria-label="Primary navigation">
+    
+    
+    
+    
+    <a href="/ursamu/guides/" class="header-nav-link active">
+      Guides
+    </a>
+    
+    
+    
+    <a href="/ursamu/api/" class="header-nav-link">
+      API
+    </a>
+    
+    
+    
+    <a href="/ursamu/plugins/" class="header-nav-link">
+      Plugins
+    </a>
+    
+    
+    
+    <a href="/ursamu/development/" class="header-nav-link">
+      Development
+    </a>
+    
+    
+  </nav>
+
+  <div class="header-spacer"></div>
+
+  <!-- Actions -->
+  <div class="header-actions">
+    <span class="header-version">mush 1.0.30</span>
+
+    <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
+      <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path>
+      </svg>
+    </a>
+
+    <!-- Mobile menu button — CSS hides this above 1024px -->
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">
+      <svg width="20" height="20" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+</header>
+
+<!-- ═══ BODY ═════════════════════════════════════════════════════════ -->
+
+<!-- ── DOCS PAGE (3-column) ─────────────────────────────────────────── -->
+<div class="docs-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="docs-sidebar" id="docsSidebar" aria-label="Documentation navigation">
+
+    <!-- Search -->
+    <div class="sidebar-search">
+      <input class="sidebar-search-input" type="search" placeholder="Search docs…" id="sidebarSearch" aria-label="Search documentation">
+      <div class="search-results" id="searchResults" style="display:none;position:relative;margin-top:0.25rem;"></div>
+    </div>
+
+    <!-- Section: Overview -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Overview</div>
+
+      <a href="/ursamu/about/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        About UrsaMU
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Getting Started -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Getting Started</div>
+
+      <a href="/ursamu/guides/installation/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Installation
+      </a>
+      <a href="/ursamu/guides/user-guide/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        Player Guide
+      </a>
+      <a href="/ursamu/guides/admin-guide/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        Admin Guide
+      </a>
+      <a href="/ursamu/guides/customization/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"></path></svg>
+        Customization
+      </a>
+      <a href="/ursamu/guides/scripting/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Scripting Guide
+      </a>
+      <a href="/ursamu/guides/first-script/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        Your First Script
+      </a>
+      <a href="/ursamu/guides/sdk-cookbook/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        SDK Cookbook
+      </a>
+      <a href="/ursamu/guides/recipes/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        Recipes
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Configuration -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Configuration</div>
+
+      <a href="/ursamu/configuration/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"></path><path d="M12 8v4l3 3"></path></svg>
+        Overview
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: API Reference -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">API Reference</div>
+
+      <a href="/ursamu/api/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        Overview
+      </a>
+      <a href="/ursamu/api/core/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 9h6M9 12h6M9 15h4"></path></svg>
+        Core API
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Plugins -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Plugins</div>
+
+      <a href="/ursamu/plugins/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path><line x1="16" y1="8" x2="2" y2="22"></line><line x1="17.5" y1="15" x2="9" y2="15"></line></svg>
+        Overview
+      </a>
+      <a href="/ursamu/plugins/basics/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+        Basics
+      </a>
+      <a href="/ursamu/plugins/first-plugin/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        First Plugin
+      </a>
+      <a href="/ursamu/plugins/commands/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        Commands
+      </a>
+      <a href="/ursamu/plugins/hooks/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.56 2.9A7 7 0 1 1 2.9 8.56"></path><polyline points="2 2 2 8 8 8"></polyline></svg>
+        Hooks
+      </a>
+      <a href="/ursamu/plugins/database/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+        Database
+      </a>
+      <a href="/ursamu/plugins/configuration/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        Configuration
+      </a>
+      <a href="/ursamu/plugins/dependencies/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+        Dependencies
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Development -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Development</div>
+
+      <a href="/ursamu/development/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        Overview
+      </a>
+      <a href="/ursamu/development/contributing/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+        Contributing
+      </a>
+      <a href="/ursamu/extending/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        Extending
+      </a>
+      <a href="/ursamu/child-games/" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+        Child Games
+      </a>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Section: Community -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Community</div>
+      <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+        GitHub
+      </a>
+      <a href="https://discord.gg/ursamu" target="_blank" rel="noopener" class="sidebar-link">
+        <svg class="sidebar-link-icon" viewbox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"></path></svg>
+        Discord
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="docs-content-wrap">
+    <main class="docs-content animate-in">
+
+      <!-- Breadcrumbs -->
+      
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/ursamu/">Home</a>
+        <span class="breadcrumbs-sep">›</span>
+        <span class="breadcrumbs-current">Debugging Scripts</span>
+      </nav>
+      
+
+      <!-- Page content -->
+      <article class="prose">
+        <h1>Debugging Scripts</h1>
+<h2>Scripts run in isolated Web Workers. This means you can’t use the browser<br>
+console, Deno’s <code>--inspect</code> flag, or filesystem access. Here’s how to diagnose<br>
+and fix issues.</h2>
+<h2>Overview</h2>
+<p>When a script fails, the error is:</p>
+<ol>
+<li>Caught by the sandbox</li>
+<li>Sent back as an <code>error</code> message from the worker</li>
+<li>Logged to the server console with <code>[Sandbox] error:</code></li>
+<li>Not shown to the player (the script simply produces no output)</li>
+</ol>
+<h2>So a script that silently does nothing is often one that <strong>threw an exception</strong>.</h2>
+<h2>Common Mistakes</h2>
+<h3>1. Missing <code>await</code> on async methods</h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const gold = u.me.state.gold as number || 0;
+u.db.modify(u.me.id, "$set", { "data.gold": gold + 10 });  // ← missing await!
+u.send(`Gold updated.`);
+</code></pre>
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const gold = u.me.state.gold as number || 0;
+await u.db.modify(u.me.id, "$set", { "data.gold": gold + 10 });
+u.send(`Gold updated.`);
+</code></pre>
+<p>Missing <code>await</code> means the DB write starts but the script may exit before it<br>
+completes. In practice you’ll often see partial results or no effect.</p>
+<h3>2. Wrong <code>u.db.modify()</code> operator</h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.db.modify(u.me.id, "state", { gold: 100 });    // "state" is not a valid op
+await u.db.modify(u.me.id, "name", "Alice");            // "name" is not a valid op
+</code></pre>
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
+await u.db.modify(u.me.id, "$set", { name: "Alice" });
+</code></pre>
+<p>Valid ops: <code>"$set"</code>, <code>"$unset"</code>, <code>"$inc"</code>. Any other string is silently rejected.</p>
+<h3>3. Missing <code>await</code> on <code>u.canEdit()</code></h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!u.canEdit(u.me, target)) {   // ← returns Promise, not boolean!
+  u.send("Permission denied.");
+  return;
+}
+</code></pre>
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">if (!(await u.canEdit(u.me, target))) {
+  u.send("Permission denied.");
+  return;
+}
+</code></pre>
+<h3>4. Clobbering state on modify</h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// This wipes all other fields in data!
+await u.db.modify(u.me.id, "$set", { data: { gold: 100 } });
+</code></pre>
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Spread to preserve existing fields
+await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: 100 } });
+// Or use dot-notation to target one field:
+await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
+</code></pre>
+<h3>5. ESM import that doesn’t work in workers</h3>
+<p><strong>Wrong:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { sprintf } from "jsr:@std/fmt/printf";  // ← JSR sub-path, won't resolve
+</code></pre>
+<p><strong>Correct:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Use u.util.sprintf instead — it's already in the sandbox
+u.util.sprintf("%-10s %5d", "Score", 100);
+</code></pre>
+<p>Standard ESM imports (<code>import X from "https://..."</code>) work, but <code>jsr:</code> package<br>
+sub-paths do not resolve in Web Worker context. Use <code>u.util</code> helpers instead.</p>
+<h3>6. Assuming <code>u.db.search()</code> returns one item</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const player = await u.db.search({ "data.name": /alice/i });
+// player is IDBObj[], not IDBObj!
+if (!player) { ... }  // wrong — an empty array is truthy
+
+// Correct:
+const results = await u.db.search({ "data.name": /alice/i });
+if (!results.length) { u.send("Not found."); return; }
+const player = results[0];
+</code></pre>
+<h3>7. Not checking for null from <code>u.util.target()</code></h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const target = await u.util.target(u.me, u.cmd.args[0]);
+u.send(`Target: ${target.name}`);  // throws if target is undefined!
+
+// Correct:
+const target = await u.util.target(u.me, u.cmd.args[0]);
+if (!target) { u.send("I don't see that."); return; }
+u.send(`Target: ${target.name}`);
+</code></pre>
+<hr>
+<h2>Script Errors</h2>
+<h3>Script produces no output</h3>
+<p><strong>Causes:</strong></p>
+<ul>
+<li>Unhandled exception (check server console for <code>[Sandbox] error:</code>)</li>
+<li>Script returned early due to a condition check</li>
+<li><code>u.send()</code> called with undefined/null message</li>
+</ul>
+<p><strong>Diagnose:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Add a breadcrumb at the start to verify the script is running
+u.send("DEBUG: script started");
+
+// Check every early return
+const target = await u.util.target(u.me, u.cmd.args[0]);
+u.send(`DEBUG: target = ${target?.id ?? "null"}`);
+if (!target) { u.send("Not found."); return; }
+</code></pre>
+<h3>Script times out</h3>
+<p>Scripts have a 5-second execution timeout. If your script makes many DB<br>
+calls in a loop, it may time out.</p>
+<p><strong>Signs:</strong> Server logs <code>Script execution timed out</code></p>
+<p><strong>Fix:</strong> Batch queries instead of looping:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Bad: N sequential queries
+for (const id of playerIds) {
+  const p = await u.db.search({ id });  // one query per player
+}
+
+// Better: one query
+const players = await u.db.search({ location: u.here.id, flags: /player/i });
+</code></pre>
+<h3>Worker crashes silently</h3>
+<p>If the worker throws before any <code>u.send()</code>, the player sees nothing. The server<br>
+console will show the error.</p>
+<p><strong>Watch for:</strong></p>
+<ul>
+<li><code>ReferenceError: X is not defined</code> — JSR import that failed to resolve</li>
+<li><code>TypeError: Cannot read properties of undefined</code> — null/undefined not checked</li>
+<li><code>SyntaxError</code> — TypeScript that failed to transpile</li>
+</ul>
+<hr>
+<h2>Debugging Techniques</h2>
+<h3>Use <code>think</code> to echo values</h3>
+<p>The <code>think</code> command (<code>system/scripts/think.ts</code>) sends output to you without<br>
+broadcasting. Use it as a debug probe:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">think [output of a long expression]
+</code></pre>
+<h3>Add temporary <code>u.send()</code> breadcrumbs</h3>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">export default async (u: IUrsamuSDK) =&gt; {
+  u.send("[DEBUG 1] entering script");
+  const target = await u.util.target(u.me, u.cmd.args[0]);
+  u.send(`[DEBUG 2] target = ${target?.id ?? "null"}`);
+  if (!target) return;
+
+  const gold = (target.state.gold as number) || 0;
+  u.send(`[DEBUG 3] gold = ${gold}`);
+
+  await u.db.modify(target.id, "$set", { "data.gold": gold + 10 });
+  u.send("[DEBUG 4] db.modify done");
+};
+</code></pre>
+<p>Remove the debug lines before committing.</p>
+<h3>Check the server console</h3>
+<p>The server logs all sandbox errors. Look for lines like:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">[Sandbox] error: TypeError: Cannot read properties of undefined (reading 'id')
+</code></pre>
+<h3>Use <code>@js</code> for quick experiments (wizard/admin only)</h3>
+<p>The <code>@js</code> command runs a JavaScript expression directly (no sandbox — full<br>
+server access). Useful for testing DB queries:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">@js await dbojs.queryOne({ id: "1" })
+</code></pre>
+<hr>
+<h2>Testing Scripts Manually</h2>
+<h3>Run the test suite</h3>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task test
+</code></pre>
+<p>This runs tests in <code>tests/</code>, <code>src/services/Intents/</code>, <code>src/services/Sandbox/</code>,<br>
+and <code>src/plugins/events/</code>.</p>
+<h3>Write a script test</h3>
+<p>Tests for scripts follow this pattern — read the file, strip the <code>export</code>,<br>
+inject a stub <code>u</code> object, and run the code:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { assertEquals } from "jsr:@std/assert";
+
+const OPTS = { sanitizeResources: false, sanitizeOps: false };
+
+Deno.test("greet script sends a message", OPTS, async () =&gt; {
+  const sent: string[] = [];
+
+  const u = {
+    me: { id: "1", name: "Alice", flags: new Set(["player"]), state: {}, contents: [] },
+    here: { id: "2", name: "Hall", state: {}, contents: [], flags: new Set(["room"]),
+      broadcast: () =&gt; {} },
+    cmd: { name: "greet", args: ["Bob"], switches: [] },
+    state: {},
+    send: (msg: string) =&gt; { sent.push(msg); },
+    util: {
+      target: async () =&gt; ({ id: "3", name: "Bob", flags: new Set(["player"]),
+        state: {}, contents: [] }),
+      displayName: (obj: { name?: string }) =&gt; obj.name ?? "Unknown",
+    },
+    db: {
+      search: async () =&gt; [],
+      modify: async () =&gt; {},
+    },
+  } as unknown;
+
+  // Load and run the script
+  const src = await Deno.readTextFile("system/scripts/greet.ts");
+  const fn = new Function("u", src.replace(/^export default/, "return"));
+  await fn(u)(u);
+
+  assertEquals(sent[0], "You wave to Bob.");
+});
+</code></pre>
+<hr>
+<h2>Plugin Debugging</h2>
+<h3>Check if your plugin loaded</h3>
+<p>Look for your plugin’s init log in the server console:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">[myplugin] Plugin initialized — +myplugin commands active
+</code></pre>
+<p>If missing, the plugin file wasn’t found or threw during import.</p>
+<h3>Verify <code>addCmd</code> was called</h3>
+<p>Add a console.log to your <code>commands.ts</code>:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">console.log("[myplugin] registering commands");
+addCmd({ ... });
+</code></pre>
+<p>This should appear at startup before <code>Plugin initialized</code>.</p>
+<h3>Route not responding</h3>
+<p>If your <code>registerPluginRoute</code> handler isn’t called:</p>
+<ul>
+<li>Verify the path starts with <code>/api/v1/</code></li>
+<li>Check that <code>registerPluginRoute</code> is called inside <code>init()</code>, not at module level</li>
+<li>Confirm the auth header is present (<code>Authorization: Bearer &lt;jwt&gt;</code>)</li>
+</ul>
+<h3>GameHooks not firing</h3>
+<p>If <code>gameHooks.on()</code> isn’t triggering:</p>
+<ul>
+<li>Verify you’re calling <code>on()</code> in <code>init()</code> and storing the handler reference</li>
+<li>Check that <code>off()</code> isn’t being called before the event fires</li>
+<li>Confirm the event name matches exactly (case-sensitive)</li>
+</ul>
+
+      </article>
+
+      <!-- Prev / Next navigation -->
+      
+      
+      
+      
+      
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+
+      
+      <nav class="page-nav" aria-label="Page navigation">
+        
+          <a href="/ursamu/guides/customization/" class="page-nav-btn prev">
+            <span class="page-nav-label">← Previous</span>
+            <span class="page-nav-title">Customization Guide</span>
+          </a>
+        
+
+        
+          <a href="/ursamu/guides/deployment/" class="page-nav-btn next">
+            <span class="page-nav-label">Next →</span>
+            <span class="page-nav-title">Production Deployment</span>
+          </a>
+        
+      </nav>
+      
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div>
+        <strong style="color:var(--text-muted)">UrsaMU</strong>
+        &nbsp;—&nbsp;MIT License • © 2025
+      </div>
+      <div class="footer-links">
+        <a href="/ursamu/guides/installation/">Installation</a>
+        <a href="/ursamu/api/">API</a>
+        <a href="/ursamu/plugins/">Plugins</a>
+        <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- RIGHT: TABLE OF CONTENTS (auto-built by JS) -->
+  <aside class="docs-toc" id="docsToc" aria-label="On this page">
+    <div class="toc-title">On this page</div>
+    <ul class="toc-list" id="tocList"></ul>
+  </aside>
+
+</div><!-- /docs-layout -->
+
+
+<!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  // ── Mobile sidebar toggle ──────────────────────────────────────────
+  const menuBtn = document.getElementById('menuBtn');
+  const sidebar = document.getElementById('docsSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar && sidebar.classList.add('open');
+    overlay && overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar && sidebar.classList.remove('open');
+    overlay && overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn && menuBtn.addEventListener('click', function() {
+    if (sidebar && sidebar.classList.contains('open')) closeSidebar();
+    else openSidebar();
+  });
+
+  overlay && overlay.addEventListener('click', closeSidebar);
+
+  // Close on resize past mobile breakpoint
+  window.addEventListener('resize', function() {
+    if (window.innerWidth >= 1024) closeSidebar();
+  });
+
+  // ── Auto table of contents ─────────────────────────────────────────
+  const tocList = document.getElementById('tocList');
+  const article = document.querySelector('article.prose');
+
+  if (tocList && article) {
+    const headings = article.querySelectorAll('h2, h3');
+
+    if (headings.length === 0) {
+      const tocEl = document.getElementById('docsToc');
+      if (tocEl) tocEl.style.display = 'none';
+    } else {
+      headings.forEach(function(h, i) {
+        // Ensure heading has an ID
+        if (!h.id) {
+          h.id = 'section-' + i + '-' + h.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        }
+
+        const li = document.createElement('li');
+        li.className = 'toc-item' + (h.tagName === 'H3' ? ' toc-h3' : '');
+
+        const a = document.createElement('a');
+        a.href = '#' + h.id;
+        a.textContent = h.textContent;
+        li.appendChild(a);
+        tocList.appendChild(li);
+      });
+
+      // Highlight active section on scroll
+      const tocLinks = tocList.querySelectorAll('a');
+
+      function updateToc() {
+        let activeIndex = 0;
+        const scrollTop = window.scrollY + 80;
+
+        headings.forEach(function(h, i) {
+          if (h.offsetTop <= scrollTop) activeIndex = i;
+        });
+
+        tocList.querySelectorAll('.toc-item').forEach(function(item, i) {
+          item.classList.toggle('active', i === activeIndex);
+        });
+      }
+
+      window.addEventListener('scroll', updateToc, { passive: true });
+      updateToc();
+    }
+  }
+
+  // ── Sidebar search (client-side filter) ───────────────────────────
+  const searchInput = document.getElementById('sidebarSearch');
+  const sidebarLinks = sidebar ? sidebar.querySelectorAll('.sidebar-link') : [];
+
+  if (searchInput && sidebarLinks.length) {
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+
+      sidebarLinks.forEach(function(link) {
+        const text = link.textContent.toLowerCase();
+        const section = link.closest('.sidebar-section');
+        if (!query) {
+          link.style.display = '';
+        } else {
+          link.style.display = text.includes(query) ? '' : 'none';
+        }
+      });
+
+      // Hide empty section titles
+      if (sidebar) {
+        sidebar.querySelectorAll('.sidebar-section').forEach(function(sec) {
+          const visibleLinks = sec.querySelectorAll('.sidebar-link:not([style*="none"])');
+          sec.style.display = (!query || visibleLinks.length > 0) ? '' : 'none';
+        });
+      }
+    });
+  }
+
+  // ── Scroll active sidebar link into view ───────────────────────────
+  const activeLink = sidebar && sidebar.querySelector('.sidebar-link.active');
+  if (activeLink) {
+    activeLink.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+})();
+</script>
+
+
+
+</body></html>

@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> | UrsaMU Documentation</title>
-  <meta name="description" content="Learn how to contribute to the UrsaMU project">
+  <meta name="description" content="How to contribute to UrsaMU — branching, PRs, commits, and the pre-commit gauntlet.">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -268,107 +268,98 @@
       <!-- Page content -->
       <article class="prose">
         <h1>Contributing to UrsaMU</h1>
-<p>Thank you for your interest in contributing to UrsaMU! This guide will help you get started with contributing to the project.</p>
-<h2>Code of Conduct</h2>
-<p>UrsaMU has adopted a Code of Conduct that we expect project participants to adhere to. Please read <a href="./code-of-conduct.md">the full text</a> so that you can understand what actions will and will not be tolerated.</p>
-<h2>Getting Started</h2>
-<h3>Prerequisites</h3>
-<p>Before you begin, ensure you have the following installed:</p>
+<p>Thanks for your interest in contributing to UrsaMU. This page captures the<br>
+ground rules for v2.6.0.</p>
+<h2>Prerequisites</h2>
 <ul>
-<li><a href="https://deno.land/">Deno</a> (version 1.37.0 or higher)</li>
+<li><a href="https://deno.land/">Deno</a> 1.45+ (for <code>--unstable-kv</code>)</li>
 <li><a href="https://git-scm.com/">Git</a></li>
-<li>A code editor (we recommend <a href="https://code.visualstudio.com/">VS Code</a> with the Deno extension)</li>
+<li>An editor with the Deno extension (VS Code recommended)</li>
 </ul>
-<h3>Setting Up Your Development Environment</h3>
-<ol>
-<li>Fork the <a href="https://github.com/lcanady/ursamu">UrsaMU repository</a> on GitHub</li>
-<li>Clone your fork to your local machine:<pre class="language-bash" tabindex="0"><code class="language-bash">git clone https://github.com/YOUR_USERNAME/ursamu.git
+<h2>Initial Setup</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">git clone https://github.com/lcanady/ursamu.git
 cd ursamu
+deno task test   # confirm clean baseline
 </code></pre>
-</li>
-<li>Add the original repository as a remote:<pre class="language-bash" tabindex="0"><code class="language-bash">git remote add upstream https://github.com/lcanady/ursamu.git
+<p>If you plan to send PRs, fork on GitHub and add your fork as <code>origin</code>,<br>
+keeping <code>upstream</code> pointed at <code>lcanady/ursamu</code>.</p>
+<h2>Branching</h2>
+<p>Always work on a topic branch off <code>main</code>:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">git fetch upstream
+git checkout -b feature/short-description upstream/main
 </code></pre>
-</li>
-<li>Install dependencies:<pre class="language-bash" tabindex="0"><code class="language-bash">deno task setup
+<p>There is no long-lived <code>develop</code> branch — <code>main</code> is the release line.</p>
+<h2>Pre-Commit Gauntlet</h2>
+<p>Run these four steps in order before every commit. They mirror CI:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno check --unstable-kv mod.ts
+deno lint
+deno test tests/ --allow-all --unstable-kv --no-check
+deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check
 </code></pre>
-</li>
-</ol>
-<h2>Development Process</h2>
-<h3>Branching Strategy</h3>
+<p>A commit isn’t ready until all four pass.</p>
+<h2>Docs Stay in Sync</h2>
+<p>If you touch a public API, command, config key, script, scaffold output, or<br>
+plugin surface — update <code>README.md</code> and the relevant page under <code>docs/</code> in the<br>
+same commit. Stale docs ship as broken docs.</p>
+<h2>Commits</h2>
 <ul>
-<li><code>main</code> - The main development branch</li>
-<li><code>release/*</code> - Release branches</li>
-<li><code>feature/*</code> - Feature branches</li>
-<li><code>bugfix/*</code> - Bug fix branches</li>
+<li>Write descriptive, present-tense subject lines: <code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>chore:</code>, <code>refactor:</code>, <code>test:</code>.</li>
+<li>One logical change per commit.</li>
+<li><strong>No AI/Claude attribution.</strong> Do not add <code>Co-Authored-By: Claude …</code>, do not<br>
+reference AI tools in commit messages, PR descriptions, or code comments.</li>
+<li>Never amend a commit that failed a pre-commit hook — fix and create a new<br>
+commit instead.</li>
 </ul>
-<p>Always create a new branch for your changes:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">git checkout -b feature/your-feature-name
-</code></pre>
-<h3>Development Workflow</h3>
-<ol>
-<li>Make sure your branch is up to date with the latest changes:<pre class="language-bash" tabindex="0"><code class="language-bash">git fetch upstream
-git rebase upstream/main
-</code></pre>
-</li>
-<li>Make your changes</li>
-<li>Run tests to ensure your changes don’t break anything:<pre class="language-bash" tabindex="0"><code class="language-bash">deno task test
-</code></pre>
-</li>
-<li>Commit your changes with a descriptive commit message:<pre class="language-bash" tabindex="0"><code class="language-bash">git commit -m "Add feature: your feature description"
-</code></pre>
-</li>
-<li>Push your changes to your fork:<pre class="language-bash" tabindex="0"><code class="language-bash">git push origin feature/your-feature-name
-</code></pre>
-</li>
-</ol>
 <h2>Pull Requests</h2>
-<p>When you’re ready to submit your changes, create a pull request:</p>
 <ol>
-<li>Go to your fork on GitHub</li>
-<li>Select your branch</li>
-<li>Click “Pull Request”</li>
-<li>Fill out the pull request template with details about your changes</li>
-<li>Submit the pull request</li>
+<li>Push your branch to your fork.</li>
+<li>Open a PR against <code>lcanady/ursamu:main</code>.</li>
+<li>Keep PRs scoped — one feature or fix per PR.</li>
+<li>Fill in the description: what changed, why, and how it was tested.</li>
+<li>Make sure CI is green.</li>
 </ol>
-<h3>Pull Request Guidelines</h3>
-<ul>
-<li>Keep pull requests focused on a single feature or bug fix</li>
-<li>Make sure all tests pass</li>
-<li>Update documentation as needed</li>
-<li>Follow the coding standards</li>
-<li>Be responsive to feedback and questions</li>
-</ul>
-<h2>Coding Standards</h2>
-<p>UrsaMU follows a set of coding standards to maintain consistency across the codebase:</p>
-<ul>
-<li>Use TypeScript for all code</li>
-<li>Follow the <a href="https://deno.land/manual/contributing/style_guide">Deno Style Guide</a></li>
-<li>Use meaningful variable and function names</li>
-<li>Write comments for complex logic</li>
-<li>Include JSDoc comments for public APIs</li>
-<li>Write tests for new features and bug fixes</li>
-</ul>
-<h2>Documentation</h2>
-<p>Documentation is a crucial part of UrsaMU. When contributing, please:</p>
-<ul>
-<li>Update the documentation for any changes to APIs or features</li>
-<li>Use clear, concise language</li>
-<li>Include examples where appropriate</li>
-<li>Follow the <a href="./documentation-guidelines.md">documentation guidelines</a></li>
-</ul>
-<h3>Building Documentation</h3>
-<p>To build and preview the documentation locally:</p>
-<pre class="language-bash" tabindex="0"><code class="language-bash">deno task docs
+<p>PRs are <strong>squash-merged</strong>. After merge, maintainers tag the release:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">git tag v&lt;version&gt;
+git push --tags
 </code></pre>
-<p>This will start a local server where you can preview the documentation.</p>
-<h2>Getting Help</h2>
-<p>If you need help with contributing to UrsaMU, you can:</p>
+<p>No AI attribution in PR titles or bodies either.</p>
+<h2>Coding Standards</h2>
 <ul>
-<li>Join the <a href="#">UrsaMU Discord server</a></li>
-<li>Open an issue on GitHub</li>
-<li>Reach out to the maintainers</li>
+<li>TypeScript only. Follow the<br>
+<a href="https://docs.deno.com/runtime/contributing/style_guide/">Deno style guide</a>.</li>
+<li>Early return over nested conditionals.</li>
+<li>No function longer than ~50 lines; no file longer than ~200 lines — decompose.</li>
+<li><code>catch (e: unknown)</code> — never bare <code>catch</code>.</li>
+<li>Library-first: if the SDK does it, use the SDK.</li>
+<li>No comments unless the <em>why</em> is non-obvious (hidden invariant, bug workaround).</li>
 </ul>
-<p>Thank you for contributing to UrsaMU! Your efforts help make the project better for everyone.</p>
+<h2>Testing</h2>
+<ul>
+<li>All new commands need tests in <code>tests/</code>.</li>
+<li>See <a href="/ursamu/development/testing/">Testing</a> for <code>mockPlayer</code> / <code>mockU</code> helpers and DB<br>
+cleanup conventions.</li>
+</ul>
+<h2>Plugin Audit Checklist</h2>
+<p>Mental pass before opening a PR that touches plugins or core commands:</p>
+<ul>
+<li><code>u.util.stripSubs()</code> on user strings before DB ops or length checks</li>
+<li><code>await u.canEdit(u.me, target)</code> before modifying any object not owned by <code>u.me</code></li>
+<li>DB writes use <code>"$set"</code> / <code>"$inc"</code> / <code>"$unset"</code> / <code>"$push"</code> — never raw overwrite</li>
+<li><code>u.util.target()</code> result null-checked</li>
+<li>Admin-only paths gate on <code>u.me.flags</code> explicitly</li>
+<li><code>system/scripts/</code> files use no Deno APIs, no <code>fetch</code>, no non-<code>u</code> globals</li>
+<li>All <code>%c*</code> color codes closed with <code>%cn</code></li>
+<li><code>gameHooks.on()</code> in <code>init()</code> paired with <code>gameHooks.off()</code> in <code>remove()</code> (same named ref)</li>
+<li>DBO collection names prefixed with <code>&lt;pluginName&gt;.</code></li>
+<li>REST handlers return 401 before any work when <code>userId</code> is null</li>
+<li><code>init()</code> returns <code>true</code></li>
+</ul>
+<h2>Getting Help</h2>
+<ul>
+<li>File an issue on GitHub</li>
+<li>Join the Discord linked from the project README</li>
+<li>Reach out to maintainers in the PR thread</li>
+</ul>
 
       </article>
 
@@ -405,11 +396,47 @@ git rebase upstream/main
       
         
           
+        
+      
+        
+          
           
         
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -459,9 +486,9 @@ git rebase upstream/main
         
 
         
-          <a href="/ursamu/extending/" class="page-nav-btn next">
+          <a href="/ursamu/development/testing/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Testing</span>
           </a>
         
       </nav>

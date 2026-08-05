@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -282,8 +282,7 @@ them, both in-game and through the REST API.</p>
 ├── router.ts     — REST handler for /api/v1/notes
 └── db.ts         — custom DBO database
 </code></pre>
-<p>The plugin is already auto-discovered. Restart the server and it loads.</p>
-<hr>
+<h2>The plugin is already auto-discovered. Restart the server and it loads.</h2>
 <h2>File Walkthrough</h2>
 <h3>db.ts — Define your data shape</h3>
 <p>Replace the generated stub with a <code>INote</code> type:</p>
@@ -438,7 +437,7 @@ export default notesPlugin;
 </code></pre>
 <p><strong>Via REST:</strong></p>
 <pre class="language-bash" tabindex="0"><code class="language-bash"># Get a token first
-TOKEN=$(curl -s -X POST http://localhost:4203/api/v1/auth/login \
+TOKEN=$(curl -s -X POST http://localhost:4203/api/v1/auth \
   -H "Content-Type: application/json" \
   -d '{"name":"Admin","password":"yourpassword"}' | jq -r .token)
 
@@ -481,7 +480,6 @@ curl -s -X DELETE http://localhost:4203/api/v1/notes/&lt;id&gt; \
 <h2>Next Steps</h2>
 <ul>
 <li><code>src/plugins/jobs/</code> — a real-world example with staff permission checks and complex REST routes</li>
-<li><code>src/plugins/bboards/</code> — per-user unread state across multiple resources</li>
 <li><code>src/plugins/events/</code> — sequential IDs, RSVP capacity enforcement, event status visibility</li>
 <li><a href="/ursamu/plugins/">Plugin Reference</a> — full <code>IUrsamuSDK</code> and <code>DBO&lt;T&gt;</code> API tables</li>
 <li><a href="/ursamu/plugins/hooks/">Plugin Events</a> — subscribing and emitting game events</li>
@@ -594,20 +592,86 @@ curl -s -X DELETE http://localhost:4203/api/v1/notes/&lt;id&gt; \
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
         
       
 
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/plugins/dependencies/" class="page-nav-btn prev">
+          <a href="/ursamu/plugins/events/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Events Plugin</span>
           </a>
         
 

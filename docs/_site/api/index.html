@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>API Reference | UrsaMU Documentation</title>
-  <meta name="description" content="Comprehensive API reference for UrsaMU">
+  <meta name="description" content="Quick-reference index for all public UrsaMU APIs — imports, types, commands, database, hooks, and REST endpoints.">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -267,247 +267,296 @@
 
       <!-- Page content -->
       <article class="prose">
-        <h1>UrsaMU API Reference</h1>
-<p>This document provides a comprehensive reference for the UrsaMU API.</p>
-<h2>Core API</h2>
-<h3>mu(options)</h3>
-<p>The main function to initialize and start the UrsaMU engine.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>options</code> (Object): Configuration options for the UrsaMU engine
-<ul>
-<li><code>config</code> (Object): Configuration object</li>
-<li><code>plugins</code> (Array): Array of plugins to load</li>
-</ul>
-</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<void>: Resolves when the engine has started</void></li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { mu } from "ursamu";
+        <h1>API Reference</h1>
+<h2>Quick-reference index for all public UrsaMU APIs. For full documentation of<br>
+each section, see <a href="/ursamu/api/core/">Core API Reference</a>.</h2>
+<h2>Imports</h2>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// All public APIs
+import {
+  addCmd, registerPluginRoute, mu, createObj, DBO, dbojs, gameHooks
+} from "jsr:@ursamu/mush";
 
-await mu({
-  config: {
-    server: {
-      port: 4201,
-      host: "0.0.0.0",
-    },
-    game: {
-      name: "My Game",
-    },
-  },
-  plugins: [myPlugin],
-});
+// Types (zero runtime cost)
+import type {
+  ICmd, IPlugin, IDBObj, IUrsamuSDK,
+  SayEvent, PoseEvent, PageEvent, MoveEvent, SessionEvent,
+  ChannelMessageEvent, SceneCreatedEvent, ScenePoseEvent,
+  SceneSetEvent, SceneTitleEvent, SceneClearEvent,
+} from "jsr:@ursamu/mush";
 </code></pre>
-<h3>app</h3>
-<p>The global application object that provides access to various services and<br>
-utilities.</p>
-<p><strong>Properties:</strong></p>
-<ul>
-<li><code>config</code>: The configuration manager</li>
-<li><code>db</code>: The database manager</li>
-<li><code>commands</code>: The command manager</li>
-<li><code>flags</code>: The flag manager</li>
-<li><code>functions</code>: The function manager</li>
-<li><code>hooks</code>: The hook manager</li>
-<li><code>router</code>: The web router (if web interface is enabled)</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { app } from "ursamu";
-
-// Access the configuration
-const gameName = app.config.get("game.name");
-
-// Access the database
-const player = await app.db.get("player:123");
+<p>Internal plugins may use direct paths:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "../../services/commands/cmdParser.ts";
+import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 </code></pre>
-<h2>Database API</h2>
-<h3>dbojs</h3>
-<p>The main database service for game objects.</p>
-<p><strong>Methods:</strong></p>
-<h4>create(data)</h4>
-<p>Creates a new object in the database.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>data</code> (Object): The object data to create</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<object>: The created object
-
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { dbojs } from "../../services/Database/index.ts";
-
-const newObject = await dbojs.create({
-  flags: "thing",
-  data: {
-    name: "My Object",
-    description: "A custom object",
-  },
-});
-</code></pre>
-<h4>get(id)</h4>
-<p>Retrieves an object from the database by ID.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>id</code> (string): The ID of the object to retrieve</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise&lt;Object|null&gt;: The retrieved object, or null if not found</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const object = await dbojs.get("123");
-</code></pre>
-<h4>update(object)</h4>
-<p>Updates an object in the database.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>object</code> (Object): The object to update</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<object>: The updated object
-
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">object.data.description = "Updated description";
-await dbojs.update(object);
-</code></pre>
-<h4>delete(id)</h4>
-<p>Deletes an object from the database.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>id</code> (string): The ID of the object to delete</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<void></void></li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">await dbojs.delete("123");
-</code></pre>
-<h4>query(criteria)</h4>
-<p>Queries the database for objects matching the given criteria.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>criteria</code> (Object): Query criteria</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise&lt;Array<object>&gt;: Array of matching objects
-
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Find all rooms
-const rooms = await dbojs.query({ flags: /room/i });
-
-// Find objects owned by a player
-const objects = await dbojs.query({ owner: "123" });
-
-// Find a player by name
-const players = await dbojs.query({
-  "data.name": new RegExp("^PlayerName$", "i"),
-  flags: /player/i,
-});
-</code></pre>
-<h4>all()</h4>
-<p>Retrieves all objects from the database.</p>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise&lt;Array<object>&gt;: Array of all objects
-
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">const allObjects = await dbojs.all();
-</code></pre>
-<h3>counters</h3>
-<p>The database service for counters.</p>
-<p><strong>Methods:</strong></p>
-<p>Similar to <code>dbojs</code>, with the same method signatures.</p>
-<h3>chans</h3>
-<p>The database service for communication channels.</p>
-<p><strong>Methods:</strong></p>
-<p>Similar to <code>dbojs</code>, with the same method signatures.</p>
-<h3>mail</h3>
-<p>The database service for the mail system.</p>
-<p><strong>Methods:</strong></p>
-<p>Similar to <code>dbojs</code>, with the same method signatures.</p>
-<h3>bboard</h3>
-<p>The database service for bulletin boards.</p>
-<p><strong>Methods:</strong></p>
-<p>Similar to <code>dbojs</code>, with the same method signatures.</p>
-<h2>Command API</h2>
-<h3>addCmd(command)</h3>
-<p>Registers a new command.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>command</code> (ICmd): The command to register
-<ul>
-<li><code>name</code> (string): Unique identifier for the command</li>
-<li><code>pattern</code> (string | RegExp): Regex pattern to match user input; capture groups become <code>u.cmd.args</code></li>
-<li><code>lock</code> (string): Lock expression required to use the command (e.g. <code>"connected"</code>, <code>"wizard"</code>)</li>
-<li><code>exec</code> (Function): Function to execute — receives <code>IUrsamuSDK</code></li>
-</ul>
-</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>void</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/ursamu";
-import type { IUrsamuSDK } from "jsr:@ursamu/ursamu";
-
-addCmd({
-  name: "hello",
-  pattern: /^hello\s*(.*)/i,
-  lock: "connected",
-  exec: (u: IUrsamuSDK) =&gt; {
-    const target = u.cmd.args[0]?.trim() || "World";
-    u.send(`Hello, ${target}!`);
-  },
-});
-</code></pre>
-<h3>IUrsamuSDK</h3>
-<p>The unified SDK object passed to every command’s <code>exec</code> function. The same object is available in sandbox scripts.</p>
-<p><strong>Key properties:</strong></p>
+<hr>
+<h2>Types</h2>
 <table>
 <thead>
 <tr>
-<th>Property</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>u.me</code></td>
 <td><code>IDBObj</code></td>
-<td>The actor who executed the command</td>
+<td>Every game object — room, player, exit, item</td>
 </tr>
 <tr>
-<td><code>u.here</code></td>
-<td><code>IDBObj | null</code></td>
-<td>The room the actor is in</td>
+<td><code>IUrsamuSDK</code></td>
+<td>The <code>u</code> object injected into commands and scripts</td>
 </tr>
 <tr>
-<td><code>u.cmd.args</code></td>
-<td><code>string[]</code></td>
-<td>Regex capture groups from the matched pattern</td>
+<td><code>ICmd</code></td>
+<td>Command registration descriptor passed to <code>addCmd()</code></td>
 </tr>
 <tr>
-<td><code>u.cmd.switches</code></td>
-<td><code>string[]</code></td>
-<td>Switches supplied to the command</td>
+<td><code>IPlugin</code></td>
+<td>Plugin lifecycle interface</td>
 </tr>
 <tr>
-<td><code>u.socketId</code></td>
-<td><code>string</code></td>
-<td>The WebSocket socket ID</td>
+<td><code>IGameTime</code></td>
+<td>In-game calendar: <code>{ year, month, day, hour, minute }</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Key methods:</strong></p>
+<h2>See <a href="/ursamu/api/core/">Core API Reference</a> for full type definitions.</h2>
+<h2>addCmd</h2>
+<p>Registers one or more in-game commands at module-load time.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "jsr:@ursamu/mush";
+import type { IUrsamuSDK } from "jsr:@ursamu/mush";
+
+addCmd({
+  name:    "+greet",
+  pattern: /^\+greet\s+(.*)/i,   // capture groups → u.cmd.args[0], args[1], …
+  lock:    "connected",
+  exec: async (u: IUrsamuSDK) =&gt; {
+    const target = await u.util.target(u.me, u.cmd.args[0]);
+    if (!target) { u.send("Who?"); return; }
+    u.send(`You wave to ${u.util.displayName(target, u.me)}.`);
+  },
+  help:     "+greet &lt;name&gt;\nWave at someone.",
+  category: "Social",
+});
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>Unique label; appears in help listings</td>
+</tr>
+<tr>
+<td><code>pattern</code></td>
+<td><code>RegExp</code></td>
+<td>Matched against raw player input</td>
+</tr>
+<tr>
+<td><code>lock</code></td>
+<td><code>string?</code></td>
+<td>Lock expression. Fails silently.</td>
+</tr>
+<tr>
+<td><code>exec</code></td>
+<td><code>(u) =&gt; void|Promise&lt;void&gt;</code></td>
+<td>Command body</td>
+</tr>
+<tr>
+<td><code>help</code></td>
+<td><code>string?</code></td>
+<td>Shown by <code>help &lt;name&gt;</code></td>
+</tr>
+<tr>
+<td><code>hidden</code></td>
+<td><code>boolean?</code></td>
+<td>Hide from help/command listings</td>
+</tr>
+<tr>
+<td><code>category</code></td>
+<td><code>string?</code></td>
+<td>Groups commands in listings</td>
+</tr>
+</tbody>
+</table>
+<h3>Lock expression quick reference</h3>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>""</code></td>
+<td>No restriction (login-screen commands)</td>
+</tr>
+<tr>
+<td><code>"connected"</code></td>
+<td>Player must be logged in</td>
+</tr>
+<tr>
+<td><code>"connected builder+"</code></td>
+<td>Logged in + builder flag or higher</td>
+</tr>
+<tr>
+<td><code>"connected admin+"</code></td>
+<td>Logged in + admin or higher</td>
+</tr>
+<tr>
+<td><code>"connected wizard"</code></td>
+<td>Logged in + wizard (level 9, superuser-only grant)</td>
+</tr>
+<tr>
+<td><code>"#42"</code></td>
+<td>Must be exactly object #42</td>
+</tr>
+<tr>
+<td><code>"!dark"</code></td>
+<td>Must NOT have the dark flag</td>
+</tr>
+<tr>
+<td><code>"wizard|admin"</code></td>
+<td>wizard OR admin</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>u.db</h2>
+<p>Database operations. All methods are <code>async</code>. Available in both <code>addCmd</code> handlers<br>
+and sandbox scripts.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Signature</th>
+<th>Returns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search</code></td>
+<td><code>(query: string | object) =&gt; Promise&lt;IDBObj[]&gt;</code></td>
+<td>Array of matching objects</td>
+</tr>
+<tr>
+<td><code>create</code></td>
+<td><code>(template: Partial&lt;IDBObj&gt;) =&gt; Promise&lt;IDBObj&gt;</code></td>
+<td>Newly created object</td>
+</tr>
+<tr>
+<td><code>modify</code></td>
+<td><code>(id, op, data) =&gt; Promise&lt;void&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>destroy</code></td>
+<td><code>(id: string) =&gt; Promise&lt;void&gt;</code></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>modify</code> ops:</strong> <code>"$set"</code> (merge), <code>"$unset"</code> (remove field), <code>"$inc"</code> (increment number).<br>
+Do not pass any other string — it is rejected.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Merge a field
+await u.db.modify(u.me.id, "$set", { "data.gold": 100 });
+
+// Full state replace (always spread to preserve other fields)
+await u.db.modify(u.me.id, "$set", { data: { ...u.me.state, gold: 100 } });
+
+// Increment
+await u.db.modify(u.me.id, "$inc", { "data.deaths": 1 });
+
+// Remove a field
+await u.db.modify(u.me.id, "$unset", { "data.tempAttr": "" });
+</code></pre>
+<p><strong>Search examples:</strong></p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">const online  = await u.db.search({ flags: /connected/i });
+const rooms   = await u.db.search({ flags: /room/i });
+const here    = await u.db.search({ location: u.here.id });
+const byName  = await u.db.search({ "data.name": /alice/i });
+const found   = await u.db.search({ $or: [
+  { "data.name": /alice/i }, { "data.alias": /alice/i }
+]});
+</code></pre>
+<hr>
+<h2>u.* Quick Reference</h2>
+<p>All namespaces on the <code>u</code> SDK object. Every method is <code>async</code> (returns a Promise).</p>
+<h3>Top-level methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Signature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>send</code></td>
+<td><code>(msg, target?, opts?) =&gt; void</code></td>
+<td>Send to actor or target ID</td>
+</tr>
+<tr>
+<td><code>broadcast</code></td>
+<td><code>(msg, opts?) =&gt; void</code></td>
+<td>Send to all connected players</td>
+</tr>
+<tr>
+<td><code>teleport</code></td>
+<td><code>(target, dest) =&gt; void</code></td>
+<td>Move target to dest</td>
+</tr>
+<tr>
+<td><code>execute</code></td>
+<td><code>(cmd) =&gt; void</code></td>
+<td>Run command as actor</td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td><code>(cmd) =&gt; void</code></td>
+<td>Force command as actor</td>
+</tr>
+<tr>
+<td><code>forceAs</code></td>
+<td><code>(targetId, cmd) =&gt; Promise&lt;void&gt;</code></td>
+<td>Force command as another object</td>
+</tr>
+<tr>
+<td><code>canEdit</code></td>
+<td><code>(actor, target) =&gt; Promise&lt;boolean&gt;</code></td>
+<td>Owner / admin check</td>
+</tr>
+<tr>
+<td><code>checkLock</code></td>
+<td><code>(target, lock) =&gt; Promise&lt;boolean&gt;</code></td>
+<td>Evaluate lock expression</td>
+</tr>
+<tr>
+<td><code>setFlags</code></td>
+<td><code>(target, flags) =&gt; Promise&lt;void&gt;</code></td>
+<td>Add / remove flags</td>
+</tr>
+<tr>
+<td><code>trigger</code></td>
+<td><code>(target, attr, args?) =&gt; Promise&lt;void&gt;</code></td>
+<td>Fire a stored &amp;ATTR</td>
+</tr>
+<tr>
+<td><code>eval</code></td>
+<td><code>(targetId, attr, args?) =&gt; Promise&lt;string&gt;</code></td>
+<td>Evaluate &amp;ATTR, return output</td>
+</tr>
+</tbody>
+</table>
+<h3>u.util</h3>
 <table>
 <thead>
 <tr>
@@ -517,416 +566,515 @@ addCmd({
 </thead>
 <tbody>
 <tr>
-<td><code>u.send(msg)</code></td>
-<td>Send output to the actor</td>
+<td><code>target(actor, query, global?)</code></td>
+<td>Resolve name/ID to IDBObj</td>
 </tr>
 <tr>
-<td><code>u.broadcast(roomId, msg)</code></td>
-<td>Broadcast to everyone in a room</td>
+<td><code>displayName(obj, actor)</code></td>
+<td>Name with moniker applied</td>
 </tr>
 <tr>
-<td><code>u.force(cmd)</code></td>
-<td>Execute a command string as the actor</td>
+<td><code>stripSubs(str)</code></td>
+<td>Strip MUSH codes and ANSI escapes</td>
 </tr>
 <tr>
-<td><code>u.setFlags(id, flags)</code></td>
-<td>Add/remove flags (<code>"+wizard"</code>, <code>"-dark"</code>)</td>
+<td><code>ljust(str, len, fill?)</code></td>
+<td>Left-align to width</td>
 </tr>
 <tr>
-<td><code>u.teleport(id, destination)</code></td>
-<td>Move an object to a destination</td>
+<td><code>rjust(str, len, fill?)</code></td>
+<td>Right-align to width</td>
 </tr>
 <tr>
-<td><code>u.canEdit(actor, target)</code></td>
-<td>Check if actor can edit target (async)</td>
+<td><code>center(str, len, fill?)</code></td>
+<td>Center in width</td>
 </tr>
 <tr>
-<td><code>u.db.search(query)</code></td>
-<td>Search the database</td>
+<td><code>sprintf(fmt, ...args)</code></td>
+<td>Printf-style formatting</td>
 </tr>
 <tr>
-<td><code>u.db.create(data)</code></td>
-<td>Create a new object</td>
-</tr>
-<tr>
-<td><code>u.db.modify(id, data)</code></td>
-<td>Update an object</td>
-</tr>
-<tr>
-<td><code>u.db.destroy(id)</code></td>
-<td>Delete an object</td>
-</tr>
-<tr>
-<td><code>u.util.target(actor, name)</code></td>
-<td>Find a named object (async)</td>
-</tr>
-<tr>
-<td><code>u.util.stripSubs(str)</code></td>
-<td>Strip MUSH color/substitution codes</td>
-</tr>
-<tr>
-<td><code>u.auth.hash(password)</code></td>
-<td>Hash a password</td>
-</tr>
-<tr>
-<td><code>u.sys.disconnect(socketId)</code></td>
-<td>Disconnect a socket</td>
-</tr>
-<tr>
-<td><code>u.sys.reboot()</code></td>
-<td>Reboot the server</td>
+<td><code>template(pattern, data)</code></td>
+<td>Column-format template</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">exec: async (u: IUrsamuSDK) =&gt; {
-  // Access the actor
-  const actorName = String(u.me.state.name ?? u.me.id);
+<h3>u.auth</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>verify(name, password)</code></td>
+<td>Returns <code>boolean</code></td>
+</tr>
+<tr>
+<td><code>login(id)</code></td>
+<td>Connect player to session</td>
+</tr>
+<tr>
+<td><code>hash(password)</code></td>
+<td>bcrypt hash</td>
+</tr>
+<tr>
+<td><code>setPassword(id, password)</code></td>
+<td>Change password</td>
+</tr>
+</tbody>
+</table>
+<h3>u.sys</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setConfig(key, value)</code></td>
+<td>Set runtime config</td>
+</tr>
+<tr>
+<td><code>disconnect(socketId)</code></td>
+<td>Kick a connection</td>
+</tr>
+<tr>
+<td><code>uptime()</code></td>
+<td>Milliseconds since start</td>
+</tr>
+<tr>
+<td><code>reboot()</code></td>
+<td>Exit 75 — daemon restarts</td>
+</tr>
+<tr>
+<td><code>shutdown()</code></td>
+<td>Exit 0 — clean stop</td>
+</tr>
+<tr>
+<td><code>update(branch?)</code></td>
+<td>git pull + reboot</td>
+</tr>
+<tr>
+<td><code>gameTime()</code></td>
+<td>Returns <code>IGameTime</code></td>
+</tr>
+<tr>
+<td><code>setGameTime(t)</code></td>
+<td>Set in-game calendar</td>
+</tr>
+</tbody>
+</table>
+<h3>u.chan</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>join(channel, alias)</code></td>
+<td>Join channel with alias</td>
+</tr>
+<tr>
+<td><code>leave(alias)</code></td>
+<td>Leave by alias</td>
+</tr>
+<tr>
+<td><code>list()</code></td>
+<td>List memberships</td>
+</tr>
+<tr>
+<td><code>create(name, opts?)</code></td>
+<td>Admin: create channel</td>
+</tr>
+<tr>
+<td><code>destroy(name)</code></td>
+<td>Admin: delete channel</td>
+</tr>
+<tr>
+<td><code>set(name, opts)</code></td>
+<td>Admin: update channel</td>
+</tr>
+<tr>
+<td><code>history(name, limit?)</code></td>
+<td>Recent messages (default 20)</td>
+</tr>
+</tbody>
+</table>
+<h3>u.bb</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>listBoards()</code></td>
+<td>All boards with unread counts</td>
+</tr>
+<tr>
+<td><code>listPosts(boardId)</code></td>
+<td>Posts on a board</td>
+</tr>
+<tr>
+<td><code>readPost(boardId, num)</code></td>
+<td>Read one post</td>
+</tr>
+<tr>
+<td><code>post(boardId, subj, body)</code></td>
+<td>Create a post</td>
+</tr>
+<tr>
+<td><code>editPost(boardId, num, body)</code></td>
+<td>Edit a post</td>
+</tr>
+<tr>
+<td><code>deletePost(boardId, num)</code></td>
+<td>Delete a post</td>
+</tr>
+<tr>
+<td><code>createBoard(name, opts?)</code></td>
+<td>Admin: create board</td>
+</tr>
+<tr>
+<td><code>destroyBoard(boardId)</code></td>
+<td>Admin: delete board</td>
+</tr>
+<tr>
+<td><code>markRead(boardId)</code></td>
+<td>Mark board as read</td>
+</tr>
+<tr>
+<td><code>newPostCount(boardId)</code></td>
+<td>Unread count for one board</td>
+</tr>
+<tr>
+<td><code>totalNewCount()</code></td>
+<td>Total unread across all boards</td>
+</tr>
+</tbody>
+</table>
+<h3>u.text</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read(id)</code></td>
+<td>Read named text blob</td>
+</tr>
+<tr>
+<td><code>set(id, content)</code></td>
+<td>Write named text blob</td>
+</tr>
+</tbody>
+</table>
+<h3>u.attr</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>get(id, name)</code></td>
+<td>Read a soft-coded &amp;ATTR value. Returns <code>string | null</code>. Case-insensitive.</td>
+</tr>
+</tbody>
+</table>
+<h3>u.mail <em>(sandbox scripts only)</em></h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>send(mail)</code></td>
+<td>Send a message</td>
+</tr>
+<tr>
+<td><code>read(query)</code></td>
+<td>Query inbox</td>
+</tr>
+<tr>
+<td><code>delete(id)</code></td>
+<td>Delete by ID</td>
+</tr>
+<tr>
+<td><code>modify(query, op, update)</code></td>
+<td>Update (e.g. mark read)</td>
+</tr>
+</tbody>
+</table>
+<h3>u.events</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>emit(event, data, ctx?)</code></td>
+<td>Fire server-wide event</td>
+</tr>
+<tr>
+<td><code>on(event, handlerAttr)</code></td>
+<td>Subscribe &amp;ATTR handler</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>dbojs</h2>
+<p>Direct game-object database access (for plugins and startup code, not scripts).</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { dbojs } from "jsr:@ursamu/mush";
 
-  // Access command arguments
-  const target = u.cmd.args[0]?.trim() ?? "";
-
-  // Check switches
-  const isVerbose = u.cmd.switches?.includes("verbose");
-
-  // Send output to the actor
-  u.send(`Hello, ${actorName}!`);
-};
+const players = await dbojs.queryAll((o) =&gt; o.flags.has("player"));
+const room    = await dbojs.queryOne((o) =&gt; o.id === "1");
+// queryOne returns IDBOBJ | undefined | false
 </code></pre>
-<h2>Flag API</h2>
-<h3>registerFlag(flag)</h3>
-<p>Registers a new flag.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>flag</code> (Object): The flag to register
-<ul>
-<li><code>name</code> (string): Name of the flag</li>
-<li><code>description</code> (string): Description of what the flag does</li>
-<li><code>default</code> (boolean): Default value for new objects</li>
-</ul>
-</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>void</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFlag } from "../../services/Flags/mod.ts";
+<hr>
+<h2>DBO&lt;T&gt;</h2>
+<p>Typed plugin-specific database collections backed by TypeGraph / Postgres (PGlite) or Deno KV.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { DBO } from "jsr:@ursamu/mush";
 
-registerFlag({
-  name: "vip",
-  description: "VIP player with special privileges",
-  default: false,
-});
+interface INote { id: string; playerId: string; text: string; date: number; }
+const notes = new DBO&lt;INote&gt;("myplugin.notes");
+
+await notes.create({ id: crypto.randomUUID(), playerId: u.me.id, text: "hi", date: Date.now() });
+const all  = await notes.find({ playerId: u.me.id });
+const one  = await notes.findOne({ id: noteId });
+await notes.update({ id: noteId }, { text: "updated" });
+await notes.delete({ id: noteId });
 </code></pre>
-<h3>hasFlag(object, flag)</h3>
-<p>Checks if an object has a flag.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>object</code> (Object): The object to check</li>
-<li><code>flag</code> (string): The flag to check for</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>boolean: True if the object has the flag, false otherwise</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { hasFlag } from "../../services/Flags/mod.ts";
+<hr>
+<h2>GameHooks</h2>
+<p>Typed event bus for the 12 built-in engine events.</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { gameHooks } from "jsr:@ursamu/mush";
 
-if (hasFlag(player, "wizard")) {
-  // Player is a wizard
-}
+const handler = ({ actorId, actorName }: SessionEvent) =&gt; { /* ... */ };
+gameHooks.on("player:login", handler);
+gameHooks.off("player:login", handler);    // call in plugin remove()
 </code></pre>
-<h3>setFlag(object, flag, value)</h3>
-<p>Sets a flag on an object.</p>
-<p><strong>Parameters:</strong></p>
+<h3>Event catalog</h3>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Key payload fields</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>player:say</code></td>
+<td><code>actorId</code>, <code>actorName</code>, <code>roomId</code>, <code>message</code></td>
+</tr>
+<tr>
+<td><code>player:pose</code></td>
+<td><code>actorId</code>, <code>actorName</code>, <code>roomId</code>, <code>content</code>, <code>isSemipose</code></td>
+</tr>
+<tr>
+<td><code>player:page</code></td>
+<td><code>actorId</code>, <code>actorName</code>, <code>targetId</code>, <code>targetName</code>, <code>message</code></td>
+</tr>
+<tr>
+<td><code>player:move</code></td>
+<td><code>actorId</code>, <code>actorName</code>, <code>fromRoomId</code>, <code>toRoomId</code>, <code>fromRoomName</code>, <code>toRoomName</code>, <code>exitName</code></td>
+</tr>
+<tr>
+<td><code>player:login</code></td>
+<td><code>actorId</code>, <code>actorName</code></td>
+</tr>
+<tr>
+<td><code>player:logout</code></td>
+<td><code>actorId</code>, <code>actorName</code></td>
+</tr>
+<tr>
+<td><code>channel:message</code></td>
+<td><code>channelName</code>, <code>senderId</code>, <code>senderName</code>, <code>message</code></td>
+</tr>
+<tr>
+<td><code>scene:created</code></td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>sceneType</code></td>
+</tr>
+<tr>
+<td><code>scene:pose</code></td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>msg</code>, <code>type</code></td>
+</tr>
+<tr>
+<td><code>scene:set</code></td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>roomId</code>, <code>actorId</code>, <code>actorName</code>, <code>description</code></td>
+</tr>
+<tr>
+<td><code>scene:title</code></td>
+<td><code>sceneId</code>, <code>oldName</code>, <code>newName</code>, <code>actorId</code>, <code>actorName</code></td>
+</tr>
+<tr>
+<td><code>scene:clear</code></td>
+<td><code>sceneId</code>, <code>sceneName</code>, <code>actorId</code>, <code>actorName</code>, <code>status</code></td>
+</tr>
+</tbody>
+</table>
+<p>Other hook buses (from specific plugins):</p>
 <ul>
-<li><code>object</code> (Object): The object to modify</li>
-<li><code>flag</code> (string): The flag to set</li>
-<li><code>value</code> (boolean): The value to set (true to add, false to remove)</li>
+<li><code>wikiHooks</code> — <code>wiki:created</code>, <code>wiki:edited</code>, <code>wiki:deleted</code></li>
+<li><code>eventHooks</code> — <code>event:created</code>, <code>event:updated</code>, <code>event:deleted</code>, <code>event:started</code>, <code>event:ended</code>, <code>event:rsvp</code>, <code>event:cancelled</code></li>
 </ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<object>: The updated object
+<hr>
+<h2>REST API</h2>
+<p>Authentication: <code>Authorization: Bearer &lt;jwt&gt;</code> header on all protected routes.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/login</code></td>
+<td>No</td>
+<td>Login — returns JWT</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/who</code></td>
+<td>Yes</td>
+<td>Online players</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/players/:id</code></td>
+<td>Yes</td>
+<td>Player info</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes</code></td>
+<td>Yes</td>
+<td>Scene list</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes</code></td>
+<td>Yes</td>
+<td>Open scene</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/:id</code></td>
+<td>Yes</td>
+<td>Scene detail</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/scenes/:id</code></td>
+<td>Yes</td>
+<td>Update scene</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/scenes/:id/pose</code></td>
+<td>Yes</td>
+<td>Post to scene</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/scenes/:id/export</code></td>
+<td>Yes</td>
+<td>Export (<code>?format=markdown|json</code>)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/mail</code></td>
+<td>Yes</td>
+<td>Inbox</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/mail</code></td>
+<td>Yes</td>
+<td>Send mail</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/mail/:id</code></td>
+<td>Yes</td>
+<td>Read message</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/mail/:id</code></td>
+<td>Yes</td>
+<td>Delete message</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki</code></td>
+<td>Yes</td>
+<td>List / search wiki</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/v1/wiki/:path</code></td>
+<td>Yes</td>
+<td>Read wiki page</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/v1/wiki</code></td>
+<td>Staff</td>
+<td>Create page</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/v1/wiki/:path</code></td>
+<td>Staff</td>
+<td>Update page</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/v1/wiki/:path</code></td>
+<td>Staff</td>
+<td>Delete page</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/v1/wiki/:path.ext</code></td>
+<td>Staff</td>
+<td>Upload static asset</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>For AI Tools</h2>
+<p>For a single dense reference optimized for AI code generation, see:</p>
+<p><strong><a href="/ursamu/llms/"><code>/docs/llms.md</code></a></strong> — complete type signatures, all method signatures,<br>
+common patterns, and MUSH color codes in one flat document.</p>
 
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { setFlag } from "../../services/Flags/mod.ts";
-
-// Add the "vip" flag to a player
-await setFlag(player, "vip", true);
-
-// Remove the "vip" flag from a player
-await setFlag(player, "vip", false);
-</code></pre>
-<h2>Function API</h2>
-<h3>registerFunction(func)</h3>
-<p>Registers a new function for use in expressions.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>func</code> (Object): The function to register
-<ul>
-<li><code>name</code> (string): Name of the function</li>
-<li><code>description</code> (string): Description of what the function does</li>
-<li><code>args</code> (Array<string>): Array of argument names</string></li>
-<li><code>exec</code> (Function): Function to execute</li>
-</ul>
-</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>void</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerFunction } from "../../services/Functions/mod.ts";
-
-registerFunction({
-  name: "add",
-  description: "Adds two numbers",
-  args: ["num1", "num2"],
-  exec: (args) =&gt; {
-    const [num1, num2] = args.map(Number);
-    return (num1 + num2).toString();
-  },
-});
-</code></pre>
-<h2>Hook API</h2>
-<h3>registerHook(hookName, callback)</h3>
-<p>Registers a hook to be called at a specific point in the system’s execution.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>hookName</code> (string): The name of the hook point</li>
-<li><code>callback</code> (Function): The function to call when the hook is triggered</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>void</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerHook } from "../../services/Hooks/mod.ts";
-
-registerHook("playerConnect", async (player) =&gt; {
-  console.log(`Player ${player.data.name} connected`);
-});
-</code></pre>
-<h3>registerHookPoint(hookName)</h3>
-<p>Registers a new hook point.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>hookName</code> (string): The name of the hook point to register</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>void</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerHookPoint } from "../../services/Hooks/mod.ts";
-
-registerHookPoint("myCustomHook");
-</code></pre>
-<h3>triggerHook(hookName, …args)</h3>
-<p>Triggers a hook, calling all registered callbacks.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>hookName</code> (string): The name of the hook point to trigger</li>
-<li><code>...args</code> (any): Arguments to pass to the hook callbacks</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<void></void></li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { triggerHook } from "../../services/Hooks/mod.ts";
-
-await triggerHook("myCustomHook", { data: "some data" });
-</code></pre>
-<h2>Utility API</h2>
-<h3>parseFlags(flags)</h3>
-<p>Parses a flag string into an array of flags.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>flags</code> (string): The flag string to parse</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Array<string>: Array of parsed flags</string></li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { parseFlags } from "../../utils/flags.ts";
-
-const flags = parseFlags("wizard builder connected");
-// Returns: ["wizard", "builder", "connected"]
-</code></pre>
-<h3>formatText(text, data)</h3>
-<p>Formats text with substitutions.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>text</code> (string): The text to format</li>
-<li><code>data</code> (Object): Data for substitutions</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>string: The formatted text</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { formatText } from "../../utils/text.ts";
-
-const formatted = formatText("Hello, %{name}!", { name: "World" });
-// Returns: "Hello, World!"
-</code></pre>
-<h3>parseArgs(input)</h3>
-<p>Parses command input into command, arguments, and switches.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>input</code> (string): The input to parse</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Object: The parsed input
-<ul>
-<li><code>cmd</code> (string): The command</li>
-<li><code>args</code> (string): The arguments</li>
-<li><code>switches</code> (Object): The switches</li>
-</ul>
-</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { parseArgs } from "../../utils/args.ts";
-
-const parsed = parseArgs("look/verbose at box");
-// Returns: { cmd: "look", args: "at box", switches: { verbose: true } }
-</code></pre>
-<h3>match(pattern, input)</h3>
-<p>Checks if input matches a command pattern.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>pattern</code> (string): The pattern to match against</li>
-<li><code>input</code> (string): The input to check</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>boolean: True if the input matches the pattern, false otherwise</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { match } from "../../utils/match.ts";
-
-const isMatch = match("look *", "look at box");
-// Returns: true
-</code></pre>
-<h3>evaluateExpression(expression, context)</h3>
-<p>Evaluates an expression.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>expression</code> (string): The expression to evaluate</li>
-<li><code>context</code> (Object): The context for evaluation</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<string>: The result of the evaluation</string></li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { evaluateExpression } from "../../utils/expressions.ts";
-
-const result = await evaluateExpression("add(5, 3)", { player });
-// Returns: "8"
-</code></pre>
-<h3>sanitize(text)</h3>
-<p>Sanitizes text for safe display.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>text</code> (string): The text to sanitize</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>string: The sanitized text</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { sanitize } from "../../utils/text.ts";
-
-const safe = sanitize("&lt;script&gt;alert('XSS')&lt;/script&gt;");
-// Returns: "&amp;lt;script&amp;gt;alert('XSS')&amp;lt;/script&amp;gt;"
-</code></pre>
-<h3>colorize(text)</h3>
-<p>Converts color codes in text to ANSI color codes.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>text</code> (string): The text to colorize</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>string: The colorized text</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { colorize } from "../../utils/colors.ts";
-
-const colored = colorize("%chHello, %cgWorld!%cn");
-// Returns text with ANSI color codes
-</code></pre>
-<h3>stripColors(text)</h3>
-<p>Removes color codes from text.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>text</code> (string): The text to strip colors from</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>string: The text without color codes</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { stripColors } from "../../utils/colors.ts";
-
-const plain = stripColors("%chHello, %cgWorld!%cn");
-// Returns: "Hello, World!"
-</code></pre>
-<h3>generateId()</h3>
-<p>Generates a unique ID.</p>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>string: A unique ID</li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { generateId } from "../../utils/id.ts";
-
-const id = generateId();
-// Returns something like: "a1b2c3d4"
-</code></pre>
-<h3>hash(text)</h3>
-<p>Creates a hash of the given text.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>text</code> (string): The text to hash</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<string>: The hashed text</string></li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { hash } from "../../utils/hash.ts";
-
-const hashed = await hash("password");
-// Returns a bcrypt hash
-</code></pre>
-<h3>compareHash(text, hash)</h3>
-<p>Compares text with a hash.</p>
-<p><strong>Parameters:</strong></p>
-<ul>
-<li><code>text</code> (string): The text to compare</li>
-<li><code>hash</code> (string): The hash to compare against</li>
-</ul>
-<p><strong>Returns:</strong></p>
-<ul>
-<li>Promise<boolean>: True if the text matches the hash, false otherwise</boolean></li>
-</ul>
-<p><strong>Example:</strong></p>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { compareHash } from "../../utils/hash.ts";
-
-const isMatch = await compareHash("password", hashedPassword);
-// Returns: true or false
-</code></pre>
-<p>This API reference covers the main functionality of UrsaMU. For more detailed<br>
-information on specific functions or classes, refer to the source code or the<br>
-relevant documentation sections.</p>
-
-      
+      </article>
 
       <!-- Prev / Next navigation -->
       
@@ -994,6 +1142,40 @@ relevant documentation sections.</p>
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
 
       
       <nav class="page-nav" aria-label="Page navigation">
@@ -1007,13 +1189,13 @@ relevant documentation sections.</p>
         
           <a href="/ursamu/api/core/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Core API Reference</span>
           </a>
         
       </nav>
       
 
-    
+    </main>
 
     <!-- FOOTER -->
     <footer class="site-footer">
@@ -1028,7 +1210,7 @@ relevant documentation sections.</p>
         <a href="https://github.com/ursamu/ursamu" target="_blank" rel="noopener">GitHub</a>
       </div>
     </footer>
-  
+  </div>
 
   <!-- RIGHT: TABLE OF CONTENTS (auto-built by JS) -->
   <aside class="docs-toc" id="docsToc" aria-label="On this page">
@@ -1036,7 +1218,7 @@ relevant documentation sections.</p>
     <ul class="toc-list" id="tocList"></ul>
   </aside>
 
-<!-- /docs-layout -->
+</div><!-- /docs-layout -->
 
 
 <!-- ═══ SCRIPTS ══════════════════════════════════════════════════════ -->
@@ -1157,4 +1339,4 @@ relevant documentation sections.</p>
 
 
 
-</object></li></ul></object></li></ul></object></li></ul></object></li></ul></object></li></ul></article></main></div></div></body></html>
+</body></html>

@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -276,12 +276,16 @@
 <li>Add <code>import "./commands.ts"</code> in <code>index.ts</code> so registrations happen when the<br>
 plugin is loaded.</li>
 </ol>
-<p>When a player types input, the command parser checks it against every<br>
-registered pattern in turn and calls the first matching <code>exec</code> function.</p>
-<hr>
+<h2>When a player types input, the command parser checks it against every<br>
+registered pattern in turn and calls the first matching <code>exec</code> function.</h2>
 <h2>addCmd Reference</h2>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "../../services/commands/cmdParser.ts";
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// In a plugin inside src/plugins/:
+import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
+
+// From a child game (outside src/):
+import { addCmd } from "jsr:@ursamu/mush";
+import type { IUrsamuSDK } from "jsr:@ursamu/mush";
 
 addCmd({
   name: "+myplugin",          // unique identifier — shown in logs
@@ -338,10 +342,21 @@ addCmd({
 </tr>
 </tbody>
 </table>
+<p>Lock expressions also support callable <strong>lockfuncs</strong> combined with <code>&amp;&amp;</code>,<br>
+<code>||</code>, <code>!</code>, and <code>()</code> (v2.2.0+). Built-ins include <code>flag(name)</code>, <code>attr(name, val)</code>, <code>type(name)</code>, <code>is(#id)</code>, <code>holds(#id)</code>, and <code>perm(level)</code>. Plugins<br>
+can register custom lockfuncs:</p>
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { registerLockFunc } from "jsr:@ursamu/mush";
+
+registerLockFunc("tribe", (enactor, _target, args) =&gt;
+  String(enactor.state.tribe ?? "").toLowerCase() === args[0]?.toLowerCase()
+);
+
+// lock: "connected &amp;&amp; tribe(glasswaler)"
+</code></pre>
+<p>See <a href="/ursamu/guides/lock-expressions/">Lock Expressions</a> for the full grammar.</p>
 <h3><code>exec</code></h3>
-<p>The function called on match. Receives <code>u: IUrsamuSDK</code> — the same SDK object<br>
-available to sandbox scripts.</p>
-<hr>
+<h2>The function called on match. Receives <code>u: IUrsamuSDK</code> — the same SDK object<br>
+available to sandbox scripts.</h2>
 <h2>The IUrsamuSDK Object</h2>
 <h3>Identity</h3>
 <pre class="language-typescript" tabindex="0"><code class="language-typescript">u.me.id           // actor's DB ID
@@ -391,7 +406,51 @@ if (!isAdmin) { u.send("Permission denied."); return; }
 u.util.ljust(str, width)  // left-pad to width
 u.util.rjust(str, width)  // right-pad to width
 u.util.center(str, width) // center in width
+u.util.header(label)      // bordered 78-col block header (===… / centered %ch/cn / ===…)
+u.util.divider(label)     // labelled section rule (\n%chlabel%cn\n---…)
+u.util.footer(label)      // bordered 78-col block footer (empty label → rule only)
 </code></pre>
+<h3>u.mail, u.attr, u.eval, u.forceAs</h3>
+<p>These are also available in the <code>u</code> object. See the<br>
+<a href="/ursamu/guides/sdk-cookbook/">SDK Cookbook</a> for full examples:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>u.attr.get(id, name)</code></td>
+<td>Read a soft-coded &amp;ATTR value (returns <code>string | null</code>)</td>
+</tr>
+<tr>
+<td><code>u.eval(targetId, attr, args?)</code></td>
+<td>Evaluate &amp;ATTR and return output as string</td>
+</tr>
+<tr>
+<td><code>u.forceAs(targetId, cmd)</code></td>
+<td>Execute command as another object (wizard/admin only)</td>
+</tr>
+<tr>
+<td><code>u.sys.gameTime()</code></td>
+<td>Read in-game calendar (<code>IGameTime</code>)</td>
+</tr>
+<tr>
+<td><code>u.sys.setGameTime(t)</code></td>
+<td>Set in-game calendar</td>
+</tr>
+<tr>
+<td><code>u.chan.history(name, limit?)</code></td>
+<td>Recent channel messages</td>
+</tr>
+<tr>
+<td><code>u.mail.send/read/delete/modify</code></td>
+<td>Mail system (sandbox scripts only)</td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h2>Pattern Reference</h2>
 <h3>Simple command, no arguments</h3>
@@ -479,7 +538,8 @@ u.util.center(str, width) // center in width
 });
 </code></pre>
 <h3>Command that reads and writes a custom DBO</h3>
-<pre class="language-typescript" tabindex="0"><code class="language-typescript">import { addCmd } from "../../services/commands/cmdParser.ts";
+<pre class="language-typescript" tabindex="0"><code class="language-typescript">// Plugin in src/plugins/ — use relative imports
+import { addCmd } from "../../services/commands/cmdParser.ts";
 import type { IUrsamuSDK } from "../../@types/UrsamuSDK.ts";
 import { myRecords } from "./db.ts";
 
@@ -510,6 +570,56 @@ addCmd({
   },
 });
 </code></pre>
+<hr>
+<h2>Related Registrations</h2>
+<p>Beyond <code>addCmd</code>, plugins can register several other engine extensions from<br>
+<code>init()</code>:</p>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>registerPluginRoute(method, path, handler)</code></td>
+<td>Mount a REST handler on the main Express app</td>
+</tr>
+<tr>
+<td><code>registerUIComponent(component)</code></td>
+<td>Surface a UI panel via <code>GET /api/v1/ui-manifest</code></td>
+</tr>
+<tr>
+<td><code>unregisterUIComponent(name)</code></td>
+<td>Remove a UI panel (call from <code>remove()</code>)</td>
+</tr>
+<tr>
+<td><code>registerFormatHandler(slot, handler)</code></td>
+<td>TS-function format handler (NAMEFORMAT, DESCFORMAT, WHOFORMAT, etc.)</td>
+</tr>
+<tr>
+<td><code>registerFormatTemplate(slot, mushSource)</code></td>
+<td>MUSH-softcode shortcut for format handlers (v2.4.0+)</td>
+</tr>
+<tr>
+<td><code>registerLockFunc(name, fn)</code></td>
+<td>Custom lockfunc usable in <code>lock:</code> strings</td>
+</tr>
+<tr>
+<td><code>registerSoftcodeFunc(name, fn)</code></td>
+<td>Custom stdlib function callable from softcode</td>
+</tr>
+<tr>
+<td><code>registerScript(name, content)</code></td>
+<td>Override or add a sandbox script by name</td>
+</tr>
+</tbody>
+</table>
+<p>Each of these has a corresponding teardown — <code>gameHooks.off</code>,<br>
+<code>unregisterUIComponent</code>, <code>unregisterFormatHandler</code> — that should run in<br>
+<code>remove()</code> so reload is clean. See <a href="/ursamu/api/core/">API: Core</a> for full<br>
+signatures.</p>
 
       </article>
 
@@ -602,11 +712,75 @@ addCmd({
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
         
       
         
@@ -621,9 +795,9 @@ addCmd({
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/plugins/basics/" class="page-nav-btn prev">
+          <a href="/ursamu/plugins/chargen/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title"></span>
+            <span class="page-nav-title">Character Generation Plugin</span>
           </a>
         
 

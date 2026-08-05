@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -278,7 +278,7 @@ everything from basic commands to advanced features.</p>
 through your browser.</li>
 <li><strong>Telnet Client</strong>: You can use a telnet client to connect to the server’s<br>
 port.</li>
-<li><em><em>MU</em> Client</em>*: Specialized clients like Mudlet, TinTin++, or MUSHclient can<br>
+<li><strong>MU* Client</strong>: Specialized clients like Mudlet, TinTin++, or MUSHclient can<br>
 provide enhanced features.</li>
 </ol>
 <h3>Creating an Account</h3>
@@ -312,9 +312,29 @@ you started:</p>
 <h3>Examining Objects</h3>
 <ul>
 <li><code>look [&lt;object&gt;]</code> — Look at the room or a specific object</li>
-<li><code>examine &lt;object&gt;</code> — Inspect an object’s full details (owner, flags, contents)</li>
+<li><code>examine &lt;object&gt;</code> — Inspect an object’s full technical details (requires edit permission or the <code>visual</code> flag on the target)</li>
+<li><code>examine</code> — Examine the current room (no argument)</li>
 <li><code>doing</code> — Show your current activity/status line</li>
 </ul>
+<p><code>examine</code> output includes:</p>
+<ul>
+<li><strong>Type</strong> — Room, Player, Exit, or Thing</li>
+<li><strong>Flags</strong> — all flags set on the object</li>
+<li><strong>Owner</strong> — resolved to the owner’s name and dbref</li>
+<li><strong>Lock</strong> — the object’s current lock expression</li>
+<li><strong>Location / Home</strong> — resolved to room names and dbrefs</li>
+<li><strong>Description</strong> — the object’s description text</li>
+<li><strong>Exits</strong> — exits in the room (for Room objects)</li>
+<li><strong>Contents</strong> — things and players currently present</li>
+<li><strong>Attributes</strong> — any custom <code>@set</code> attributes on the object</li>
+</ul>
+<pre class="language-none" tabindex="0"><code class="language-none">&gt; examine me
+===== Admin (#5) [Player] ===========================
+Flags:    player wizard connected
+Owner:    Admin (#5)
+Location: The Hub (#1)
+...
+</code></pre>
 <h2>Bulletin Boards</h2>
 <p>Bulletin boards are persistent message boards, organized by topic.</p>
 <ul>
@@ -356,6 +376,26 @@ room</li>
 <li><code>@channel/leave &lt;alias&gt;</code> — Leave a channel</li>
 <li><code>&lt;alias&gt; &lt;message&gt;</code> — Send a message on a joined channel (using your alias)</li>
 </ul>
+<h2>Wiki</h2>
+<p>The wiki is a shared knowledge base for lore, news, fiction, and game<br>
+information. All connected players can read and search it from in-game.</p>
+<pre class="language-none" tabindex="0"><code class="language-none">+wiki                         -- List top-level pages and directories
++wiki &lt;path&gt;                  -- Read a page or list a directory
++wiki/search &lt;query&gt;          -- Search all pages by title, body, or tag
+</code></pre>
+<p><strong>Examples:</strong></p>
+<pre class="language-none" tabindex="0"><code class="language-none">+wiki                         -- Show the wiki index
++wiki news                    -- List all pages under news/
++wiki news/patch-notes        -- Read a specific page
++wiki/search dragon           -- Find all pages mentioning "dragon"
+</code></pre>
+<p>Paths mirror the folder structure exactly. A page at <code>lore/factions/iron-circle</code><br>
+is read with <code>+wiki lore/factions/iron-circle</code>.</p>
+<blockquote>
+<p>Staff members can create, edit, and fetch images with <code>@wiki</code> commands —<br>
+see the <a href="/ursamu/guides/admin-guide/#wiki-administration">Admin Guide</a> for details.</p>
+</blockquote>
+<hr>
 <h2>Object Interaction</h2>
 <p>You can pick up, drop, and exchange objects with other players:</p>
 <ul>
@@ -474,11 +514,71 @@ in-game.</p>
       
         
           
+        
+      
+        
           
         
       
         
           
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+        
+      
+        
+          
+          
+        
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
@@ -501,16 +601,16 @@ in-game.</p>
       
       <nav class="page-nav" aria-label="Page navigation">
         
-          <a href="/ursamu/guides/sdk-cookbook/" class="page-nav-btn prev">
+          <a href="/ursamu/guides/softcoding/" class="page-nav-btn prev">
             <span class="page-nav-label">← Previous</span>
-            <span class="page-nav-title">SDK Cookbook</span>
+            <span class="page-nav-title">Soft-Coding Guide</span>
           </a>
         
 
         
-          <a href="/ursamu/mush_compatibility/" class="page-nav-btn next">
+          <a href="/ursamu/guides/wiki/" class="page-nav-btn next">
             <span class="page-nav-label">Next →</span>
-            <span class="page-nav-title">MUSH Compatibility</span>
+            <span class="page-nav-title">Wiki</span>
           </a>
         
       </nav>

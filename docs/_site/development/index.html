@@ -3,7 +3,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title> | UrsaMU Documentation</title>
-  <meta name="description" content="Contribute to the UrsaMU project and help make it better">
+  <meta name="description" content="Contribute to UrsaMU — pre-commit gauntlet, repo layout, and the contributor workflow for v2.6.0.">
   <link rel="stylesheet" href="/ursamu/styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
 <meta property="og:type" content="website">
@@ -62,7 +62,7 @@
 
   <!-- Actions -->
   <div class="header-actions">
-    <span class="header-version">v1.2.0</span>
+    <span class="header-version">mush 1.0.30</span>
 
     <a href="https://github.com/ursamu/ursamu" class="header-icon-btn" title="GitHub" target="_blank" rel="noopener">
       <svg width="20" height="20" viewbox="0 0 24 24" fill="currentColor">
@@ -268,50 +268,109 @@
       <!-- Page content -->
       <article class="prose">
         <h1>UrsaMU Development</h1>
-<p>This section covers how to contribute to the UrsaMU project, whether you’re fixing bugs, adding features, or improving documentation.</p>
-<h2>Getting Started</h2>
-<p>Everything you need to start contributing to UrsaMU:</p>
+<p>This section covers how to contribute to UrsaMU — fixing bugs, adding commands,<br>
+shipping plugins, or improving the docs. UrsaMU is v2.6.0; the test suite is<br>
+1464 passing across 480 lint-clean files.</p>
+<h2>Pre-Commit Gauntlet</h2>
+<p>Every commit must pass these four steps in order — they mirror the CI workflow<br>
+in <code>.github/workflows/ci.yml</code>:</p>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno check --unstable-kv mod.ts                                       # type check
+deno lint                                                              # lint
+deno test tests/ --allow-all --unstable-kv --no-check                  # unit tests
+deno test tests/security_*.test.ts --allow-all --unstable-kv --no-check # security
+</code></pre>
+<p>If any step fails, the commit is not ready. CI will reject it.</p>
+<h2>Day-to-Day Commands</h2>
+<pre class="language-bash" tabindex="0"><code class="language-bash">deno task test          # full suite — must stay green
+deno task test:coverage # LCOV at coverage/lcov.info
+deno task start         # run the hub + telnet sidecar
+deno task dev           # dev mode with auto-restart
+deno lint               # must be clean across all 480 files
+</code></pre>
+<h2>Repo Layout</h2>
+<pre class="language-none" tabindex="0"><code class="language-none">packages/
+  core/              @ursamu/core — transport, DB, plugin loader, event bus
+  mush/              @ursamu/mush — MUSH world layer (IDBObj, flags, locks, softcode, addCmd)
+src/
+  @types/            TypeScript interfaces (IDBObj, IUrsamuSDK, ICmd, IPlugin, …)
+  commands/          Native addCmd registrations (Deno context, full APIs)
+  plugins/&lt;name&gt;/    Bundled plugins — index.ts + commands.ts + help/ + README.md
+  routes/            Express REST routers (auth, dbObj, scenes, players, config)
+  services/          Core engine (Database, Sandbox, GameClock, Hooks, JWT, …)
+  utils/             Shared helpers (flags, target, locks, formatHandlers, …)
+system/
+  scripts/           Sandbox scripts — one file per command (no Deno APIs)
+  help/              In-game help text
+tests/               Deno test files — always place new tests here
+docs/                Lume static site
+config/              Runtime configuration (config.json, text/)
+</code></pre>
+<h2>Packages</h2>
+<p>The engine is organized as a monorepo with two published packages:</p>
 <ul>
-<li><a href="./environment.md">Development Environment</a> - Set up your development environment</li>
-<li><a href="./structure.md">Project Structure</a> - Understand the UrsaMU codebase</li>
-<li><a href="./building.md">Building from Source</a> - How to build UrsaMU from source</li>
-<li><a href="./testing.md">Running Tests</a> - How to run the UrsaMU test suite</li>
+<li><strong><code>@ursamu/core</code></strong> (<code>packages/core/</code>) — generic server infrastructure: transport<br>
+abstraction, database layer (TypeGraph/PGlite and Deno KV adapters), plugin lifecycle, and the event bus. Has no<br>
+MUSH-specific concepts and can be reused for other game types.</li>
+<li><strong><code>@ursamu/mush</code></strong> (<code>packages/mush/</code>) — the MUSH world layer built on top of core:<br>
+<code>IDBObj</code>, flag system, lock evaluation, TinyMUX softcode engine, <code>addCmd</code>, and the<br>
+full <code>IUrsamuSDK</code>. This is what plugins and game scripts import.</li>
+<li><strong><code>@ursamu/ursamu</code></strong> — a backwards-compat shim that re-exports everything from<br>
+<code>@ursamu/mush</code>. Existing plugins importing <code>jsr:@ursamu/mush</code> continue to work.<br>
+New projects should prefer <code>jsr:@ursamu/mush</code>.</li>
 </ul>
-<h2>Development Workflow</h2>
-<p>The UrsaMU development process:</p>
+<p>Package tests live alongside their source:</p>
+<pre class="language-none" tabindex="0"><code class="language-none">packages/core/tests/      core infrastructure tests (including security/)
+packages/mush/tests/      MUSH engine tests
+</code></pre>
+<h2>Where Changes Go</h2>
+<table>
+<thead>
+<tr>
+<th>Adding</th>
+<th>Location</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A new core command</td>
+<td><code>src/commands/&lt;name&gt;.ts</code>, registered via <code>addCmd</code></td>
+</tr>
+<tr>
+<td>A plugin command</td>
+<td><code>src/plugins/&lt;plugin&gt;/commands.ts</code>, imported by <code>index.ts</code></td>
+</tr>
+<tr>
+<td>A REST endpoint</td>
+<td><code>src/routes/</code> (core) or <code>registerPluginRoute</code> (plugin)</td>
+</tr>
+<tr>
+<td>A sandbox script</td>
+<td><code>system/scripts/&lt;name&gt;.ts</code>, ESM <code>export default</code></td>
+</tr>
+<tr>
+<td>A new hook event</td>
+<td>Extend <code>GameHookMap</code> via declaration merging</td>
+</tr>
+<tr>
+<td>A custom lockfunc</td>
+<td><code>registerLockFunc(name, fn)</code> in plugin <code>init()</code></td>
+</tr>
+<tr>
+<td>A format slot</td>
+<td><code>registerFormatHandler</code> (TS) or <code>registerFormatTemplate</code> (softcode)</td>
+</tr>
+</tbody>
+</table>
+<h2>Sub-Pages</h2>
 <ul>
-<li><a href="/ursamu/development/contributing/">Contributing Guide</a> - How to contribute to UrsaMU</li>
-<li><a href="./issues.md">Issue Tracking</a> - How we track issues and feature requests</li>
-<li><a href="./pull-requests.md">Pull Requests</a> - How to submit changes to UrsaMU</li>
-<li><a href="./code-review.md">Code Review</a> - Our code review process</li>
+<li><a href="/ursamu/development/testing/">Testing</a> — mock SDK, sandbox stubs, DB cleanup, CI integration</li>
+<li><a href="/ursamu/development/contributing/">Contributing</a> — branching, PRs, commit conventions</li>
 </ul>
-<h2>Code Standards</h2>
-<p>Our coding standards and best practices:</p>
+<h2>Reference</h2>
 <ul>
-<li><a href="./style.md">Coding Style</a> - UrsaMU coding style guidelines</li>
-<li><a href="./typescript.md">TypeScript Guidelines</a> - TypeScript-specific guidelines</li>
-<li><a href="./testing-guidelines.md">Testing Guidelines</a> - How to write tests for UrsaMU</li>
-<li><a href="./documentation-guidelines.md">Documentation Guidelines</a> - How to document your code</li>
-</ul>
-<h2>Documentation</h2>
-<p>How to contribute to UrsaMU documentation:</p>
-<ul>
-<li><a href="./docs-structure.md">Documentation Structure</a> - How the documentation is organized</li>
-<li><a href="./writing-docs.md">Writing Documentation</a> - How to write clear and helpful documentation</li>
-<li><a href="./api-docs.md">API Documentation</a> - How to document APIs</li>
-<li><a href="./building-docs.md">Building Documentation</a> - How to build and test documentation locally</li>
-</ul>
-<h2>Architecture</h2>
-<ul>
-<li><a href="./architecture.md">System Architecture</a></li>
-<li><a href="./database-schema.md">Database Schema</a></li>
-<li><a href="./command-system.md">Command System</a></li>
-</ul>
-<h2>Advanced Topics</h2>
-<ul>
-<li><a href="./performance.md">Performance Optimization</a></li>
-<li><a href="./security.md">Security Considerations</a></li>
-<li><a href="./testing.md">Testing</a></li>
+<li>Authoritative API surface: <code>src/@types/UrsamuSDK.ts</code> and<br>
+<a href="/ursamu/llms/"><code>docs/llms.md</code></a></li>
+<li>Project conventions: <code>CLAUDE.md</code> at the repo root</li>
 </ul>
 
       </article>
@@ -345,11 +404,47 @@
       
         
           
+        
+      
+        
+          
           
         
       
         
           
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
         
       
         
