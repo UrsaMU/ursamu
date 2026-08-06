@@ -14,7 +14,7 @@
   var socket = null;
   var status = "idle";
   var rootEl = null;
-  var PLAY_JS_VER = "20260805btngrow";
+  var PLAY_JS_VER = "20260806cmdhist";
   /** Stick to bottom unless the user scrolls up. */
   var stickBottom = true;
   var STICK_PX = 48;
@@ -39,6 +39,15 @@
   var unreadCount = 0;
   var unreadStartId = null;
   var lastUnreadId = null;
+
+  /** Typed command history (↑ / ↓ in the prompt). */
+  var CMD_HIST_KEY = "ursamu.play.cmdHistory";
+  var CMD_HIST_MAX = 100;
+  var cmdHistory = loadCmdHistory();
+  /** Index into cmdHistory while browsing; -1 = live draft. */
+  var cmdHistIdx = -1;
+  /** Draft text saved when first leaving live input via ↑. */
+  var cmdHistDraft = "";
 
   /** Web-safe 16-color primaries (lowercase hex for CSS class names). */
   var FG_LETTER = {
@@ -1609,6 +1618,70 @@
     }
   }
 
+  function loadCmdHistory() {
+    try {
+      var raw = sessionStorage.getItem(CMD_HIST_KEY);
+      if (!raw) return [];
+      var arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .map(function (s) {
+          return String(s || "").trim();
+        })
+        .filter(Boolean)
+        .slice(-CMD_HIST_MAX);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function saveCmdHistory() {
+    try {
+      sessionStorage.setItem(
+        CMD_HIST_KEY,
+        JSON.stringify(cmdHistory.slice(-CMD_HIST_MAX)),
+      );
+    } catch (_) { /* private mode / quota */ }
+  }
+
+  /** Push a sent line onto history (no consecutive dupes). */
+  function pushCmdHistory(line) {
+    var t = String(line || "").trim();
+    if (!t) return;
+    if (
+      cmdHistory.length &&
+      cmdHistory[cmdHistory.length - 1] === t
+    ) {
+      cmdHistIdx = -1;
+      cmdHistDraft = "";
+      return;
+    }
+    cmdHistory.push(t);
+    if (cmdHistory.length > CMD_HIST_MAX) {
+      cmdHistory = cmdHistory.slice(-CMD_HIST_MAX);
+    }
+    saveCmdHistory();
+    cmdHistIdx = -1;
+    cmdHistDraft = "";
+  }
+
+  /**
+   * Caret line index in a textarea (0 = first line).
+   * Used so ↑/↓ only browse history at the edges of multi-line drafts.
+   */
+  function textareaCaretLine(el) {
+    var v = String(el.value || "");
+    var pos = typeof el.selectionStart === "number"
+      ? el.selectionStart
+      : v.length;
+    var before = v.slice(0, pos);
+    return before.split("\n").length - 1;
+  }
+
+  function textareaLineCount(el) {
+    return String(el.value || "").split("\n").length;
+  }
+
   /**
    * Send as typed. Server defaults unmatched bare text to `say`
    * after registered commands / exits / $patterns (see addCmd).
@@ -1623,6 +1696,7 @@
     var t = String(line || "").trim();
     if (!t) return;
     if (!socket || socket.readyState !== 1) return;
+    pushCmdHistory(t);
     socket.send(JSON.stringify({ msg: t }));
   }
 
@@ -1699,6 +1773,8 @@
         e.preventDefault();
         var v = inp.value;
         inp.value = "";
+        cmdHistIdx = -1;
+        cmdHistDraft = "";
         resizeInput();
         sendCmd(v);
         inp.focus();
@@ -1712,9 +1788,60 @@
               new Event("submit", { cancelable: true }),
             );
           }
+          return;
+        }
+        // ↑ / ↓ — command history (like a shell). Only when the
+        // caret is on the first / last line so multi-line drafts
+        // can still move between lines with the arrows.
+        if (e.key === "ArrowUp" || e.key === "Up") {
+          if (!cmdHistory.length) return;
+          var lineUp = textareaCaretLine(inp);
+          if (lineUp > 0) return; // mid multi-line draft
+          e.preventDefault();
+          if (cmdHistIdx < 0) {
+            cmdHistDraft = inp.value;
+            cmdHistIdx = cmdHistory.length - 1;
+          } else if (cmdHistIdx > 0) {
+            cmdHistIdx -= 1;
+          }
+          inp.value = cmdHistory[cmdHistIdx] || "";
+          resizeInput();
+          try {
+            var endU = inp.value.length;
+            inp.setSelectionRange(endU, endU);
+          } catch (_) { /* ignore */ }
+          return;
+        }
+        if (e.key === "ArrowDown" || e.key === "Down") {
+          if (cmdHistIdx < 0) return;
+          var lines = textareaLineCount(inp);
+          var lineDn = textareaCaretLine(inp);
+          if (lineDn < lines - 1) return;
+          e.preventDefault();
+          if (cmdHistIdx < cmdHistory.length - 1) {
+            cmdHistIdx += 1;
+            inp.value = cmdHistory[cmdHistIdx] || "";
+          } else {
+            cmdHistIdx = -1;
+            inp.value = cmdHistDraft;
+            cmdHistDraft = "";
+          }
+          resizeInput();
+          try {
+            var endD = inp.value.length;
+            inp.setSelectionRange(endD, endD);
+          } catch (_) { /* ignore */ }
+          return;
         }
       });
-      inp.addEventListener("input", resizeInput);
+      // Typing abandons history browse → back to live draft mode
+      inp.addEventListener("input", function () {
+        if (cmdHistIdx >= 0) {
+          cmdHistIdx = -1;
+          cmdHistDraft = "";
+        }
+        resizeInput();
+      });
       // Width changes reflow wrap → remeasure height (not the
       // textarea itself — setting height would loop the observer)
       if (typeof ResizeObserver !== "undefined" && form) {

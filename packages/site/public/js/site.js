@@ -2468,7 +2468,7 @@
     if (!playScriptPromise) {
       playScriptPromise = new Promise(function (resolve, reject) {
         var s = document.createElement("script");
-        s.src = "/site/js/play.js?v=20260806bq";
+        s.src = "/site/js/play.js?v=20260806cmdhist";
         s.async = true;
         s.onload = function () { resolve(true); };
         s.onerror = function () {
