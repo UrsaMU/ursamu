@@ -1510,9 +1510,9 @@
         html += "</div>";
       } else {
         html += '<p class="cg-stage__hint">Powers stage — for ' +
-          "Changeling, pick Contracts in-game with " +
-          "<code>+cg/contract</code>. Web picks coming soon; " +
-          "you can submit when the sheet validates.</p>";
+          "Changeling, choose Contracts with " +
+          "<code>+cg/contract</code> (or finish here when " +
+          "your package is complete).</p>";
         var contracts = sh.contracts || [];
         if (contracts.length) {
           html += "<ul>";

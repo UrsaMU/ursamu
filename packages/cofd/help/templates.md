@@ -12,11 +12,9 @@ CHARGEN (open)
               +approve grants **fae** sight flag.
   Vampire     Humanity, Blood Potency, Vitae,
               Clan, Covenant, Mask, Dirge,
-              Touchstone. 10 Merits; 3 Discipline
-              dots (≥2 in-clan). See help vampire.
-
-CLOSED FOR NOW
-  Werewolf    Implemented; not offered in +cg.
+              Mask & Dirge Touchstones. 10 Merits;
+              3 Discipline dots (≥2 in-clan).
+              See help vampire.
 
 SEE ALSO: help changeling, help vampire, help cg,
   help sheet, help shift, help hedge, help perception

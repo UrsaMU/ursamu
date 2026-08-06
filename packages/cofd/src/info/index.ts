@@ -546,7 +546,11 @@ export function renderInfo(query: string): string {
     const out: string[] = [header(`Info — ${trimmed}`), ""];
     out.push(...body(`No catalog entry matches '${trimmed}'.`));
     out.push("");
-    out.push(...body("Try +cg/list to browse the catalogs we do have. Disciplines and individual Contracts are not yet catalogued in this game."));
+    out.push(
+      ...body(
+        "Try +cg/list to browse catalogs, or refine the name.",
+      ),
+    );
     out.push(footer());
     return out.join("\n");
   }

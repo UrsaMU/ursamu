@@ -83,9 +83,9 @@ deno add jsr:@ursamu/cofd-plugin
   (`+hob`); Hollow Hidden Entry / Shadow Garden. Status:
   `docs/ctl-gap-scan.md`.
 - **Vampire: The Requiem.** Chargen (clan, covenant, Mask/Dirge,
-  touchstone, 10 Merits, 3 Disciplines ≥2 in-clan) plus play:
-  `+vitae`, `+feed`, `+frenzy`, `+aura`, Humanity breaking
-  points. Covenant sorcery (Crúac/Theban/Coils) later.
+  dual Touchstones, 10 Merits, 3 Disciplines ≥2 in-clan) plus
+  play: `+vitae`, `+feed`, `+frenzy`, `+aura`, Humanity
+  breaking points.
 
 ---
 

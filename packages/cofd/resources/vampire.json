@@ -2,8 +2,7 @@
   "version": "vtr-2e-core",
   "notes": {
     "source": "Vampire: The Requiem 2e (Onyx Path). See books/vtr.txt and docs/vampire-overlay-spec.md.",
-    "chargen": "3 Discipline dots (≥2 in-clan); 10 Merit dots; Blood Potency 1; Humanity 7; Mask+Dirge; one Touchstone.",
-    "bloodlines": "Optional free-form at creation; mechanical bloodlines are a later overlay."
+    "chargen": "3 Discipline dots (≥2 in-clan); 10 Merit dots; Blood Potency 1; Humanity 7; Mask+Dirge; Mask and Dirge Touchstones; optional bloodline."
   },
   "clans": [
     {
