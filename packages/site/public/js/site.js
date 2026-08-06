@@ -203,15 +203,17 @@
 
   /**
    * Shell chrome: home height vs compact (no title height).
-   * - home + wiki: Figma hero (top bg + banner offset)
-   * - help / login / profile: compact under nav
+   * - home only: Figma hero (logo banner + offset)
+   * - wiki / help / login / profile / play: compact under nav
    */
   function applyShellChrome() {
     if (!shell) return;
     var cfg = siteConfig || {};
-    var heroMode = MODE === "home" || MODE === "wiki";
+    // Hero logo is home-only — wiki pages stay compact.
+    var heroMode = MODE === "home";
     var compactMode = MODE === "login" || MODE === "profile" ||
-      MODE === "help" || MODE === "chargen" || MODE === "play";
+      MODE === "help" || MODE === "chargen" || MODE === "play" ||
+      MODE === "wiki";
 
     if (heroMode) {
       if (cfg.plainBg) shell.classList.add("is-plain");
@@ -228,7 +230,7 @@
       shell.classList.add("is-compact");
       shell.classList.add("is-mode-no-hero");
     } else if (heroMode) {
-      // Same home-height hero chrome (title / offset / bg)
+      // Home-height hero chrome (title / offset / bg)
       shell.classList.remove("is-mode-no-hero");
       var bSrc = String(cfg.bannerImage || "").trim();
       var hTitle = String(cfg.title || "").trim();
@@ -310,13 +312,14 @@
     }
 
     var bannerSrc = String(cfg.bannerImage || "").trim();
-    // Figma: home + wiki share full hero; help stays compact
-    var showHero = MODE === "home" || MODE === "wiki";
+    // Hero logo (banner art) is home-only — not on wiki/help/etc.
+    var showHero = MODE === "home";
     if (banner) {
-      // SPA return to / must unhide after help/play/chargen
       if (showHero) {
         banner.hidden = false;
         banner.removeAttribute("hidden");
+      } else {
+        banner.hidden = true;
       }
     }
     if (bannerImg) {
@@ -349,7 +352,7 @@
         bannerTitle.hidden = true;
       }
     }
-    // Connect under title on home only (Figma wiki has logo, not host)
+    // Connect under title on home only
     var telnetHost = String((cfg && cfg.telnet) || "").trim();
     if (bannerConnect) {
       if (MODE === "home" && heroTitle && telnetHost) {
@@ -714,9 +717,9 @@
     );
     var title = String(page.title || page.path || "").trim();
     if (!bodyHtml.trim() && !title) return;
-    // Wiki uses Figma home-height hero; optional bgImage kept for API
+    // Wiki stays compact (no hero logo). Re-apply chrome after nav.
     if (MODE === "wiki") {
-      pageBgImage = page.bgImage !== false;
+      pageBgImage = false;
       if (siteConfig && Object.keys(siteConfig).length) {
         applyConfig(siteConfig);
       } else {
@@ -740,8 +743,8 @@
   function injectWikiListing(opts) {
     if (!mainEl) return;
     opts = opts || {};
-    // Index / directories still use Figma hero chrome
-    pageBgImage = true;
+    // Wiki index/directories: compact, no hero logo
+    pageBgImage = false;
     if (MODE === "wiki") {
       if (siteConfig && Object.keys(siteConfig).length) {
         applyConfig(siteConfig);
@@ -897,8 +900,8 @@
     } else if (MODE === "wiki") {
       if (leftAside) leftAside.hidden = false;
       if (rightAside) rightAside.hidden = false;
-      // Figma wiki: full hero banner (same as home)
-      if (banner) banner.hidden = false;
+      // Wiki: no hero logo — compact under nav
+      if (banner) banner.hidden = true;
       applyShellChrome();
     } else if (MODE === "help") {
       if (leftAside) leftAside.hidden = false;

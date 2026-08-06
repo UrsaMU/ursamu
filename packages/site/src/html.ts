@@ -55,6 +55,20 @@ function ensureClass(attrs: string, token: string): string {
 }
 
 /**
+ * True when the request is the public home page (hero logo allowed).
+ * Wiki/help/play/etc. stay compact — no banner art.
+ */
+export function isHomePath(path?: string): boolean {
+  if (path == null || path === "") return true;
+  let p = path.split("?")[0].split("#")[0].trim();
+  if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
+  if (p === "" || p === "/" || p === "/site" || p === "/site/index.html") {
+    return true;
+  }
+  return false;
+}
+
+/**
  * Apply cfg into the shipped index.html template.
  * Pure string rewrite — keep markers stable in public/index.html.
  */
@@ -71,9 +85,12 @@ export function injectSiteHtml(
   const dataSkin = cfg.skinCss
     ? "custom"
     : (named.startsWith("/") ? "custom" : named);
-  const banner = (cfg.bannerImage ?? "").trim();
-  // Figma no-banner: no image + no hero title → content higher
-  const compact = !banner && !heroTitle;
+  // Banner logo only on home — wiki/help must not flash hero art.
+  const home = isHomePath(opts.path);
+  const banner = home ? (cfg.bannerImage ?? "").trim() : "";
+  const heroTitleOut = home ? heroTitle : "";
+  // Compact when no hero image and no title (non-home always compact)
+  const compact = !banner && !heroTitleOut;
 
   let out = html;
 
@@ -164,13 +181,13 @@ export function injectSiteHtml(
     },
   );
 
-  // Hero H1 — only when title is set (image-only banners hide via CSS)
-  if (heroTitle) {
+  // Hero H1 — home only (image-only banners hide via CSS)
+  if (heroTitleOut) {
     out = out.replace(
       /(<h1\b[^>]*\bdata-site-banner-title\b)([^>]*)(>)[\s\S]*?(<\/h1>)/i,
       (_m, open: string, mid: string, gt: string, close: string) => {
         const m = String(mid).replace(/\s*\bhidden\b/gi, "");
-        const body = `\n          ${esc(heroTitle)}\n        `;
+        const body = `\n          ${esc(heroTitleOut)}\n        `;
         return `${open}${m}${gt}${body}${close}`;
       },
     );
@@ -185,7 +202,7 @@ export function injectSiteHtml(
     );
   }
 
-  // Banner image
+  // Banner image — home only
   if (banner) {
     out = out.replace(
       /(<img\b[^>]*\bdata-site-banner-img\b)([^>]*)(>)/i,
@@ -211,11 +228,29 @@ export function injectSiteHtml(
         return `${open}${m}${close}`;
       },
     );
+  } else {
+    // Non-home: hide entire banner block (no logo flash)
+    out = out.replace(
+      /(<header\b)([^>]*\bdata-site-banner\b[^>]*)(>)/i,
+      (_m, open: string, mid: string, close: string) => {
+        let m = String(mid);
+        if (!/\bhidden\b/i.test(m)) m += " hidden";
+        return `${open}${m}${close}`;
+      },
+    );
+    out = out.replace(
+      /(<img\b[^>]*\bdata-site-banner-img\b)([^>]*)(>)/i,
+      (_m, open: string, mid: string, close: string) => {
+        let m = String(mid).replace(/\bsrc\s*=\s*"[^"]*"/i, "");
+        if (!/\bhidden\b/i.test(m)) m += " hidden";
+        return `${open}${m}${close}`;
+      },
+    );
   }
 
-  // Connect host under hero when title + telnet (no right-rail panel)
+  // Connect host under hero when home + title + telnet
   const telnet = (cfg.telnet ?? "").trim();
-  if (heroTitle && telnet) {
+  if (heroTitleOut && telnet) {
     const href = `telnet://${escAttr(telnet)}`;
     out = out.replace(
       /(<a\b[^>]*\bdata-site-banner-connect\b)([^>]*)(>)[\s\S]*?(<\/a>)/i,
@@ -240,13 +275,13 @@ export function injectSiteHtml(
     );
   }
 
-  // Shell modifiers: plainBg + compact (no image, no title)
+  // Shell modifiers: plainBg + compact (wiki/help = compact)
   if (cfg.plainBg || compact) {
     out = out.replace(
       /(<div\b)([^>]*\bdata-site-shell\b[^>]*)(>)/i,
       (_m, open: string, mid: string, close: string) => {
         let m = String(mid);
-        if (cfg.plainBg) m = ensureClass(m, "is-plain");
+        if (cfg.plainBg || compact) m = ensureClass(m, "is-plain");
         if (compact) m = ensureClass(m, "is-compact");
         return `${open}${m}${close}`;
       },
