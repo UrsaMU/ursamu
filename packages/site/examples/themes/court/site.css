@@ -42,8 +42,10 @@
   --site-font-display: "Smythe", "smythe", serif;
 
   --site-nav-h: 60px;
-  --site-banner-offset: 200px;
-  --site-sticky-top: 120px;
+  /* Banner overlays under nav — no flow offset */
+  --site-banner-offset: 0px;
+  --site-banner-pad-top: 1.25rem;
+  --site-sticky-top: calc(var(--site-nav-h) + 0.75rem);
   --site-gutter: 40px;
   /* Figma Main/Wiki (1728): left 331 | gap ~50 | main 885 | gap ~50 | right 331
    * Gaps: (1728 - 2*40 gutter - 331 - 885 - 331) / 2 = 50.5px
@@ -184,11 +186,11 @@
   background: var(--site-accent);
 }
 
-/* ── Banner ──────────────────────────────────────────────────────── */
+/* ── Banner (full-width overlay under nav; see layout.css) ──────── */
 
 .site-banner {
-  margin-top: 200px;
-  padding: 0;
+  margin-top: 0;
+  padding: var(--site-banner-pad-top, 1.25rem) 0 0;
 }
 
 .site-banner__title {
@@ -663,8 +665,8 @@
 
 @media (max-width: 1024px) {
   .site-banner {
-    margin-top: 5.5rem;
-    padding: 0 1.15rem;
+    margin-top: 0;
+    padding: 0.5rem 1.15rem 0;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;

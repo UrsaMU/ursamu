@@ -23,6 +23,7 @@ body {
 /* ── Shell ───────────────────────────────────────────────────────── */
 
 .site-shell {
+  position: relative;
   width: 100%;
   min-height: 100vh;
   margin: 0 auto;
@@ -222,16 +223,33 @@ body {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ── Banner ──────────────────────────────────────────────────────── */
+/* ── Banner ────────────────────────────────────────────────────────
+ * Full-width overlay under the fixed navbar. Does not take flow
+ * space — .site-body is not pushed down by hero height.
+ */
 
 .site-banner {
+  position: absolute;
+  top: var(--site-nav-h);
+  left: 0;
+  right: 0;
+  z-index: 40; /* under .site-nav (100), over page body */
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: var(--site-banner-offset);
-  padding: 0 var(--site-gutter);
+  max-width: none;
+  margin: 0;
+  padding: var(--site-banner-pad-top, 0.75rem) var(--site-gutter) 0;
   box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* Interactive bits (telnet link) still clickable */
+.site-banner a,
+.site-banner button,
+.site-banner [href] {
+  pointer-events: auto;
 }
 
 .site-banner__title {
@@ -365,6 +383,7 @@ body {
   margin: 0;
   padding: 0;
   min-height: 0;
+  pointer-events: none;
 }
 
 .site-shell.is-compact .site-body,
@@ -384,10 +403,13 @@ body {
  */
 
 .site-body {
+  position: relative;
+  z-index: 1; /* under overlay banner (40); content still scrollable */
   width: 100%;
   max-width: var(--site-max-w);
   margin: 0 auto 3rem;
-  padding: 4rem var(--site-gutter) 0;
+  /* Clear fixed nav only — banner overlays and does not add height */
+  padding: calc(var(--site-nav-h) + 1.5rem) var(--site-gutter) 0;
   box-sizing: border-box;
   display: grid;
   grid-template-columns:
@@ -500,13 +522,20 @@ body {
 @media (max-width: 1024px) {
   :root {
     --site-gutter: 1.15rem;
-    --site-banner-offset: 5.5rem;
+    --site-banner-offset: 0px;
     --site-nav-h: 3.25rem;
+  }
+
+  .site-banner {
+    top: var(--site-nav-h);
+    padding-left: var(--site-gutter);
+    padding-right: var(--site-gutter);
   }
 
   .site-body {
     grid-template-columns: 1fr;
     justify-content: stretch;
+    padding-top: calc(var(--site-nav-h) + 1rem);
   }
 
   .site-aside,
