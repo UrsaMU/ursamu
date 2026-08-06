@@ -597,6 +597,31 @@
   }
 }
 
+/*
+ * Server info messages — markdown blockquote (`>`).
+ * Chat bubbles and layouts are separate; plain u.send lands here.
+ */
+.play-info {
+  display: block;
+  margin: 0.2rem 0 0.45rem;
+  padding: 0.15rem 0 0.15rem 0.7rem;
+  border: 0;
+  border-left: 3px solid var(--site-accent-border, var(--site-border));
+  background: transparent;
+  color: var(--site-text-secondary, var(--site-text));
+  quotes: none;
+}
+
+.play-info > .play-pre {
+  margin: 0;
+  color: inherit;
+}
+
+.play-md__bq,
+.play-md blockquote.play-info {
+  margin: 0.35rem 0;
+}
+
 /* Plain game text — full center column width, mono */
 .play-pre {
   margin: 0;

@@ -106,7 +106,11 @@ function fieldBlock(label: string, text: string): string[] {
   return out;
 }
 
-const INDEX = [
+/** Public topic index (+cg/list and web Reference). */
+export const LIST_TOPIC_INDEX: readonly {
+  key: string;
+  note: string;
+}[] = [
   { key: "virtues", note: "CoFD core anchors — pick one" },
   { key: "vices", note: "CoFD core anchors — pick one" },
   {
@@ -175,6 +179,8 @@ const INDEX = [
     note: "Merits by category — or filter by category name",
   },
 ];
+
+const INDEX = LIST_TOPIC_INDEX;
 
 function renderIndex(sheet: CofdSheet): string {
   const allowed = eligibleListTopics(sheet);

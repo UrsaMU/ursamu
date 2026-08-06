@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/web",
-  "version": "0.2.72",
+  "version": "0.2.73",
   "description": "Staff web console for UrsaMU \u2014 wiki, database, and more.",
   "license": "MIT",
   "exports": "./mod.ts",

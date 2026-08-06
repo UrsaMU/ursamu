@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.9] - 2026-08-06
+
+### Fixed
+
+- Edits no longer overwrite the original page `author`. PATCH and
+  in-game `@wiki/edit` (and tag/lock/draft) keep the creator and
+  refresh `date` as the last-edit stamp only.
+
+## [0.2.8] - 2026-08-03
+
+### Notes
+
+- Release line for media/featured work (see 0.2.4–0.2.7).
+
 ## [0.2.7] - 2026-08-03
 
 ### Changed

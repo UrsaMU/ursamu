@@ -5,7 +5,7 @@ import type { IUrsamuSDK } from "@ursamu/mush";
 import {
   MAX_UPLOAD_BYTES, ALLOWED_MEDIA_TYPES,
   safePath, mimeForPath, parseFrontmatter, serializePage,
-  findPageFile, normalisePath,
+  findPageFile, normalisePath, mergeWikiEditMeta,
 } from "../fs.ts";
 import { isAdmin, isValidReadLock } from "../permissions.ts";
 import { isWebhookUrlSafe, isPrivateIp, buildPinnedFetchUrl, chooseFetchTarget } from "../url-safety.ts";
@@ -121,12 +121,18 @@ async function cmdEdit(u: IUrsamuSDK, arg: string): Promise<void> {
   const found = await findPageFile(pagePath);
   if (!found) { u.send(`Page '${pagePath}' not found.`); return; }
 
-  const raw   = await Deno.readTextFile(found);
+  const raw = await Deno.readTextFile(found);
   const { meta } = parseFrontmatter(raw);
   await saveSnapshot(pagePath, raw);
-  const content = serializePage(meta, newBody);
+  // Keep original author; refresh last-edit date.
+  const updatedMeta = mergeWikiEditMeta(meta, {});
+  const content = serializePage(updatedMeta, newBody);
   await Deno.writeTextFile(found, content);
-  await wikiHooks.emit("wiki:edited", { path: pagePath, meta, body: newBody });
+  await wikiHooks.emit("wiki:edited", {
+    path: pagePath,
+    meta: updatedMeta,
+    body: newBody,
+  });
   u.send(`%ch>Wiki:%cn Page '${pagePath}' updated.`);
 }
 
@@ -193,13 +199,22 @@ async function cmdTag(u: IUrsamuSDK, arg: string): Promise<void> {
   const found = await findPageFile(pagePath);
   if (!found) { u.send(`Page '${pagePath}' not found.`); return; }
 
-  const raw  = await Deno.readTextFile(found);
+  const raw = await Deno.readTextFile(found);
   const { meta, body } = parseFrontmatter(raw);
-  const tags = tagStr ? tagStr.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean) : [];
-  const updatedMeta = { ...meta, tags };
+  const tags = tagStr
+    ? tagStr.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean)
+    : [];
+  const updatedMeta = mergeWikiEditMeta(meta, { tags });
   await Deno.writeTextFile(found, serializePage(updatedMeta, body));
-  await wikiHooks.emit("wiki:edited", { path: pagePath, meta: updatedMeta, body });
-  u.send(`%ch>Wiki:%cn Tags set on '${pagePath}': ${tags.length ? tags.join(", ") : "(none)"}`);
+  await wikiHooks.emit("wiki:edited", {
+    path: pagePath,
+    meta: updatedMeta,
+    body,
+  });
+  u.send(
+    `%ch>Wiki:%cn Tags set on '${pagePath}': ` +
+      `${tags.length ? tags.join(", ") : "(none)"}`,
+  );
 }
 
 // ─── /fetch ──────────────────────────────────────────────────────────────────
@@ -271,9 +286,10 @@ async function cmdLock(u: IUrsamuSDK, arg: string): Promise<void> {
   }
   const found = await findPageFile(pagePath);
   if (!found) { u.send(`Page '${pagePath}' not found.`); return; }
-  const raw  = await Deno.readTextFile(found);
+  const raw = await Deno.readTextFile(found);
   const { meta, body } = parseFrontmatter(raw);
-  await Deno.writeTextFile(found, serializePage({ ...meta, readLock: lock }, body));
+  const updatedMeta = mergeWikiEditMeta(meta, { readLock: lock });
+  await Deno.writeTextFile(found, serializePage(updatedMeta, body));
   u.send(`%ch>Wiki:%cn Read lock on '${pagePath}' set to '${lock}'.`);
 }
 
@@ -289,11 +305,15 @@ async function cmdDraft(u: IUrsamuSDK, arg: string): Promise<void> {
   }
   const found = await findPageFile(pagePath);
   if (!found) { u.send(`Page '${pagePath}' not found.`); return; }
-  const raw  = await Deno.readTextFile(found);
+  const raw = await Deno.readTextFile(found);
   const { meta, body } = parseFrontmatter(raw);
   const isDraft = toggle === "on";
-  await Deno.writeTextFile(found, serializePage({ ...meta, draft: isDraft }, body));
-  u.send(`%ch>Wiki:%cn Page '${pagePath}' is now ${isDraft ? "%ch%cydraft%cn (staff-only)" : "published"}.`);
+  const updatedMeta = mergeWikiEditMeta(meta, { draft: isDraft });
+  await Deno.writeTextFile(found, serializePage(updatedMeta, body));
+  u.send(
+    `%ch>Wiki:%cn Page '${pagePath}' is now ` +
+      `${isDraft ? "%ch%cydraft%cn (staff-only)" : "published"}.`,
+  );
 }
 
 // ─── /webhook ────────────────────────────────────────────────────────────────

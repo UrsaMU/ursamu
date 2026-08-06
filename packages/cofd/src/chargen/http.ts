@@ -44,6 +44,7 @@ import {
   contractStageProgress,
 } from "./contracts.ts";
 import { eligibleMerits } from "./list_eligible.ts";
+import { LIST_TOPIC_INDEX } from "./list.ts";
 import { submitCgDraft } from "./submit.ts";
 import { approvePlayer } from "./approve_core.ts";
 import { wipeCharacter } from "./wipe_core.ts";
@@ -338,8 +339,7 @@ export async function getChargen(
     ok: true,
     started: true,
     isStaff: staffFlag,
-    // Unapproved players may reset their own draft (full wipe).
-    canWipe: !approved || staffFlag,
+    canWipe: staffFlag,
     ...publicState(cg),
   });
 }
@@ -502,8 +502,13 @@ export async function startChargen(
     }, 403);
   }
 
-  // reset:true = full wipe (+cg/reset), not draft-only.
+  // reset:true = full wipe; staff only (web Wipe button).
   if (body.reset) {
+    if (!staff) {
+      return json({
+        error: "Permission denied. Staff only.",
+      }, 403);
+    }
     const name = String(
       actor.name ||
         (actor.data?.name as string) ||
@@ -523,7 +528,7 @@ export async function startChargen(
       ok: true,
       started: true,
       wiped: true,
-      isStaff: staff,
+      isStaff: true,
       canWipe: true,
       ...publicState(cg),
     });
@@ -536,7 +541,7 @@ export async function startChargen(
       ok: true,
       started: true,
       isStaff: staff,
-      canWipe: true,
+      canWipe: staff,
       ...publicState(cg),
     });
   }
@@ -546,15 +551,15 @@ export async function startChargen(
     ok: true,
     started: true,
     isStaff: staff,
-    canWipe: !isApproved(actor) || staff,
+    canWipe: staff,
     ...publicState(cg),
   });
 }
 
 /**
- * POST /api/v1/cofd/chargen/wipe — full character wipe (+cg/wipe / +cg/reset).
- * Body: { playerId?: string, reason?: string }
- * Self: no reason. Other player: staff + reason required.
+ * POST /api/v1/cofd/chargen/wipe — full character wipe (+cg/wipe).
+ * Staff only. Body: { playerId?: string, reason?: string }
+ * Reason required when wiping another player.
  */
 export async function wipeChargen(
   userId: string,
@@ -564,6 +569,12 @@ export async function wipeChargen(
   if (!actor) return json({ error: "Forbidden" }, 403);
   const staff = isStaff(flagsOf(actor.flags));
 
+  if (!staff) {
+    return json({
+      error: "Permission denied. Staff only.",
+    }, 403);
+  }
+
   const bare = (id: string) =>
     String(id ?? "").replace(/^#/, "").trim();
   const selfId = bare(userId);
@@ -571,23 +582,11 @@ export async function wipeChargen(
   const self = targetId === selfId;
   const reason = String(body.reason ?? "").trim();
 
-  if (!self && !staff) {
-    return json({
-      error: "Permission denied. Staff only.",
-    }, 403);
-  }
   if (!self && !reason) {
     return json({
       error:
         "A reason is required when wiping another player.",
     }, 400);
-  }
-  if (self && isApproved(actor) && !staff) {
-    return json({
-      error:
-        "Character already approved. Contact staff " +
-        "if you need a rework.",
-    }, 403);
   }
 
   const staffName = String(
@@ -615,7 +614,7 @@ export async function wipeChargen(
         ok: true,
         started: true,
         wiped: true,
-        isStaff: staff,
+        isStaff: true,
         canWipe: true,
         ...publicState(cg),
       });
@@ -638,7 +637,7 @@ export async function wipeChargen(
       hadLive: result.hadLive,
       hadDraft: result.hadDraft,
       wasApproved: result.wasApproved,
-      isStaff: staff,
+      isStaff: true,
       canWipe: true,
       ...publicState(cg),
     });
@@ -860,6 +859,19 @@ export async function chargenOptions(
   opts?: { sheet?: CofdCgState["sheet"] | null },
 ): Promise<Response> {
   const topic = topicRaw.toLowerCase().trim();
+
+  // Empty topic → full catalog index (+cg/list bare).
+  if (!topic || topic === "index" || topic === "topics") {
+    return json({
+      ok: true,
+      topic: "index",
+      items: LIST_TOPIC_INDEX.map((e) => ({
+        key: e.key,
+        name: e.key,
+        note: e.note,
+      })),
+    });
+  }
 
   if (topic === "merits") {
     const sheet = opts?.sheet;

@@ -312,11 +312,25 @@
     var bannerSrc = String(cfg.bannerImage || "").trim();
     // Figma: home + wiki share full hero; help stays compact
     var showHero = MODE === "home" || MODE === "wiki";
+    if (banner) {
+      // SPA return to / must unhide after help/play/chargen
+      if (showHero) {
+        banner.hidden = false;
+        banner.removeAttribute("hidden");
+      }
+    }
     if (bannerImg) {
       if (showHero && bannerSrc) {
         bannerImg.src = bannerSrc;
         bannerImg.hidden = false;
-        if (banner) banner.classList.add("has-image");
+        bannerImg.removeAttribute("hidden");
+        if (banner) {
+          banner.classList.add("has-image");
+          // Repair dual class= from older SSR (keep site-banner)
+          if (!banner.classList.contains("site-banner")) {
+            banner.classList.add("site-banner");
+          }
+        }
       } else {
         bannerImg.removeAttribute("src");
         bannerImg.hidden = true;
@@ -326,6 +340,8 @@
     if (bannerTitle) {
       if (showHero && heroTitle) {
         bannerTitle.textContent = heroTitle;
+        // Image hero: CSS hides title via .has-image; keep text
+        // for a11y / fallback if the logo asset 404s.
         bannerTitle.hidden = false;
         bannerTitle.removeAttribute("hidden");
       } else {
@@ -1025,13 +1041,33 @@
     var items = [];
     for (var i = 0; i < list.length; i++) {
       var p = list[i];
+      var label = p.title || p.path;
+      if (p.draft === true || p.draft === "true") {
+        label = String(label) + " (draft)";
+      }
       items.push({
-        label: p.title || p.path,
+        label: label,
         href: wikiHref(p.path),
         current: p.path === WIKI_PATH,
       });
     }
     return items;
+  }
+
+  /** Default left rail when config omits leftMenu (matches site menu.ts). */
+  var DEFAULT_LEFT_MENU = "## Featured\n[[featured]]\n\n## Related\n[[section]]\n";
+
+  function isFeaturedPage(p) {
+    if (!p) return false;
+    // API sends boolean; tolerate string "true" from older caches.
+    var feat = p.featured === true || p.featured === "true";
+    if (!feat) return false;
+    // Drafts stay out of the public featured rail (not in public list
+    // either). Staff still see them so "Featured" + Draft is obvious.
+    if (p.draft === true || p.draft === "true") {
+      return !!(currentUser && currentUser.isStaff);
+    }
+    return true;
   }
 
   function renderLeft(pages) {
@@ -1045,7 +1081,8 @@
       return;
     }
 
-    // Character (/chargen): sheet or stepper help
+    // Character (/chargen): left rail filled by chargen.js
+    // (Sheet | Reference | Rules | +cg help). Placeholder until boot.
     if (MODE === "chargen") {
       if (leftPanels) {
         leftPanels.innerHTML =
@@ -1054,7 +1091,9 @@
           "<ul class=\"site-menu__list\">" +
           "<li class=\"is-current\"><a href=\"" +
           pubPath("chargen") +
-          "\" aria-current=\"page\">Sheet / Chargen</a></li>" +
+          "\" aria-current=\"page\">Sheet</a></li>" +
+          "<li><a href=\"" + pubPath("chargen") +
+          "#reference\">Reference</a></li>" +
           "<li><a href=\"" + wikiHref("rules/chargen") +
           "\">Rules</a></li>" +
           "<li><a href=\"" + helpHref("chargen") +
@@ -1064,9 +1103,7 @@
       return;
     }
 
-    var featured = pages.filter(function (p) {
-      return p.featured && !p.draft;
-    });
+    var featured = (pages || []).filter(isFeaturedPage);
 
     var siblings = [];
     if (MODE === "wiki" && WIKI_PATH) {
@@ -1091,7 +1128,8 @@
       blocks.section = { items: pagesToMenuItems(sectionItems) };
     }
 
-    var template = siteConfig.leftMenu;
+    var template = (siteConfig && siteConfig.leftMenu) ||
+      DEFAULT_LEFT_MENU;
     if (template && String(template).trim()) {
       leftPanels.innerHTML = expandLeftMenu(template, blocks) || "";
       return;
@@ -2395,7 +2433,7 @@
     if (!chargenScriptPromise) {
       chargenScriptPromise = new Promise(function (resolve, reject) {
         var s = document.createElement("script");
-        s.src = "/site/js/chargen.js?v=20260805btngrow";
+        s.src = "/site/js/chargen.js?v=20260806nowipe";
         s.async = true;
         s.onload = function () { resolve(true); };
         s.onerror = function () {
@@ -2422,7 +2460,7 @@
       var link = document.createElement("link");
       link.id = "site-play-css";
       link.rel = "stylesheet";
-      link.href = "/site/css/play.css?v=20260805btngrow";
+      link.href = "/site/css/play.css?v=20260806bq";
       document.head.appendChild(link);
     }
     // Separate file: CSP blocks inline style=; classes live here.
@@ -2465,7 +2503,7 @@
     if (!playScriptPromise) {
       playScriptPromise = new Promise(function (resolve, reject) {
         var s = document.createElement("script");
-        s.src = "/site/js/play.js?v=20260805btngrow";
+        s.src = "/site/js/play.js?v=20260806cmdhist";
         s.async = true;
         s.onload = function () { resolve(true); };
         s.onerror = function () {
@@ -2646,6 +2684,8 @@
           currentUser = user;
           renderTopNav(user);
           updateNavUser(user);
+          // Re-paint left after auth so staff see featured drafts.
+          renderLeft(pages);
           // Auth-gated SPAs enforce earlier; others after content load
           if (
             MODE !== "chargen" &&

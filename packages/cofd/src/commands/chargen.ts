@@ -61,51 +61,11 @@ export async function cgExec(u: IUrsamuSDK) {
     return await wipeExec(u);
   }
 
-  // Web /play: open Character tab instead of terminal stepper.
-  // (Play client also intercepts +cg client-side; this covers any path
-  // that still hits the engine.)
-  const ct = (u as { clientType?: string }).clientType;
-  if (ct === "web") {
-    const ui = (u as {
-      ui?: {
-        layout?: (o: {
-          components: unknown[];
-          meta?: Record<string, unknown>;
-        }) => void;
-      };
-    }).ui;
-    if (ui?.layout) {
-      ui.layout({
-        components: [],
-        meta: {
-          type: "navigate",
-          path: "/chargen",
-          to: "chargen",
-        },
-      });
-    } else {
-      u.send(
-        "Open the %chCharacter%cn tab to continue chargen " +
-          "(/chargen on the site).",
-      );
-    }
-    return;
-  }
-
   // Find target - self only for character generation
   const target = u.me;
 
-  // Approved non-staff: no +cg (including /list, /set, /submit, /reset).
-  if (isApproved(target) && !isStaff(u.me)) {
-    u.send(
-      "Your character is already %chapproved%cn. " +
-        "Chargen is closed. Contact staff if you need a rework.",
-    );
-    return;
-  }
-
-  // List switch — filtered by active cg sheet (or live sheet / blank draft).
-  // /list with no arg shows the index of topics available to this sheet.
+  // /list and /info are always available (catalog browse), including
+  // approved players and web clients. Do not gate or redirect these.
   if (sw === "list") {
     const cg = target.state?.cofd_cg as CofdCgState | undefined;
     const live = target.state?.cofd as CofdCgState["sheet"] | undefined;
@@ -113,11 +73,19 @@ export async function cgExec(u: IUrsamuSDK) {
     u.send(renderCgList(rawArg, sheet));
     return;
   }
-
-  // Info switch — detail lookup for a named merit, condition, tilt, dread
-  // power, virtue, vice, seeming, kith, or court.
   if (sw === "info") {
     u.send(renderInfo(rawArg));
+    return;
+  }
+
+  // Approved non-staff: no stepper (+cg, /set, /submit, /reset).
+  // Web play may run +cg in the terminal; Character tab is optional.
+  if (isApproved(target) && !isStaff(u.me)) {
+    u.send(
+      "Your character is already %chapproved%cn. " +
+        "Chargen is closed. Contact staff if you need a rework.\n" +
+        "Browse catalogs anytime: %ch+cg/list%cn, %ch+info%cn.",
+    );
     return;
   }
 

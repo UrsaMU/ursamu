@@ -9,10 +9,18 @@
   "use strict";
 
   var API = "/api/v1/cofd/chargen";
+  var INFO_API = "/api/v1/cofd/info";
   var state = null;
   var opts = {};
   var busy = false;
   var demo = false;
+  /** When true, main pane shows catalog Reference (+info / +cg/list). */
+  var refMode = false;
+  var refTopic = "";
+  var refQuery = "";
+  var refResult = null;
+  var refTopicItems = null;
+  var refTopics = null;
 
   function qs(sel, root) {
     return (root || document).querySelector(sel);
@@ -1150,7 +1158,8 @@
       var n = names[i];
       var v = values[n] != null ? values[n] : min;
       html += '<div class="cg-dots-row">' +
-        '<span class="cg-dots-row__label">' +
+        '<span class="cg-dots-row__label" title="' +
+        esc(titleCase(n)) + '">' +
         esc(titleCase(n)) + "</span>" +
         renderDots(n, v, min, 5) +
         '<span class="cg-dots-row__val">' + v + "</span></div>";
@@ -1501,7 +1510,8 @@
           });
           var label = d.name + (inC ? " ★" : "");
           html += '<div class="cg-dots-row">' +
-            '<span class="cg-dots-row__label">' +
+            '<span class="cg-dots-row__label" title="' +
+            esc(label) + '">' +
             esc(label) + "</span>" +
             renderDots(dkey, dv, 0, 5) +
             '<span class="cg-dots-row__val">' + dv +
@@ -1591,11 +1601,14 @@
   function renderReadonlyDots(name, value, maxDots) {
     maxDots = maxDots || 5;
     var n = Math.max(0, Math.min(maxDots, Number(value) || 0));
+    var label = titleCase(name);
+    // title= full name when CSS ellipsis truncates the label.
     var html = '<div class="cg-dots-row cg-dots-row--ro">' +
-      '<span class="cg-dots-row__label">' +
-      esc(titleCase(name)) + "</span>" +
+      '<span class="cg-dots-row__label" title="' +
+      esc(label) + '">' +
+      esc(label) + "</span>" +
       '<span class="cg-dots" aria-label="' +
-      esc(titleCase(name)) + " " + n + '">';
+      esc(label) + " " + n + '">';
     for (var i = 1; i <= maxDots; i++) {
       html += '<span class="cg-dot' +
         (i <= n ? " is-on" : "") +
@@ -1968,9 +1981,395 @@
     return html;
   }
 
+  // ── Reference browser (+info / +cg/list) ───────────────────────
+  // Entry point lives in the left rail only (not main action bars).
+
+  function charBasePath() {
+    var p = (location.pathname || "") + "";
+    if (p.indexOf("/site/") === 0 || p === "/site") {
+      return "/site/chargen";
+    }
+    return "/chargen";
+  }
+
+  function wikiPath(sub) {
+    var base = charBasePath().indexOf("/site/") === 0
+      ? "/site/wiki/"
+      : "/wiki/";
+    return base + (sub || "");
+  }
+
+  function helpPath(topic) {
+    var base = charBasePath().indexOf("/site/") === 0
+      ? "/site/help/"
+      : "/help/";
+    return base + (topic || "");
+  }
+
+  /** Left-rail nav: Sheet vs Reference (site chrome, not main CTA). */
+  function paintCharNav() {
+    var left = qs("[data-site-left-panels]");
+    if (!left) return;
+    var base = charBasePath();
+    var sheetCur = !refMode ? " is-current" : "";
+    var refCur = refMode ? " is-current" : "";
+    left.innerHTML =
+      '<section class="site-menu menu">' +
+      '<h2 class="site-menu__title">Character</h2>' +
+      '<ul class="site-menu__list">' +
+      '<li class="' + sheetCur.trim() + '">' +
+      '<a href="' + esc(base) + '" data-cg-nav-sheet' +
+      (!refMode ? ' aria-current="page"' : "") +
+      ">Sheet</a></li>" +
+      '<li class="' + refCur.trim() + '">' +
+      '<a href="' + esc(base) + '#reference" data-cg-nav-ref' +
+      (refMode ? ' aria-current="page"' : "") +
+      ">Reference</a></li>" +
+      "<li><a href=\"" + esc(wikiPath("rules/chargen")) +
+      "\">Rules</a></li>" +
+      "<li><a href=\"" + esc(helpPath("chargen")) +
+      "\">+cg help</a></li>" +
+      "</ul></section>";
+    wireCharNav();
+  }
+
+  function wireCharNav() {
+    var sheet = qs("[data-cg-nav-sheet]");
+    if (sheet && !sheet._cgNav) {
+      sheet._cgNav = true;
+      sheet.addEventListener("click", function (ev) {
+        if (refMode) {
+          ev.preventDefault();
+          closeReference();
+        }
+      });
+    }
+    var ref = qs("[data-cg-nav-ref]");
+    if (ref && !ref._cgNav) {
+      ref._cgNav = true;
+      ref.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        if (!refMode) openReference();
+      });
+    }
+  }
+
+  function closeReference() {
+    refMode = false;
+    try {
+      if (location.hash === "#reference") {
+        history.replaceState(
+          null,
+          "",
+          location.pathname + location.search,
+        );
+      }
+    } catch (_) { /* ignore */ }
+    renderMain(state);
+  }
+
+  async function fetchInfo(q) {
+    if (demo) {
+      return {
+        ok: true,
+        query: q,
+        hits: q
+          ? [{ name: "Giant", category: "Merit/Physical" }]
+          : [],
+        detail: q && String(q).toLowerCase() === "giant"
+          ? {
+            name: "Giant",
+            category: "Merit/Physical",
+            text: "Giant (3 dots)\nYou are huge.",
+          }
+          : null,
+        message: q ? undefined : "Demo: try Giant.",
+      };
+    }
+    var r = await fetch(
+      INFO_API + "?q=" + encodeURIComponent(q || ""),
+      { credentials: "same-origin", headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error("Info lookup failed");
+    return r.json();
+  }
+
+  async function fetchTopicList(topic) {
+    if (demo) {
+      if (!topic) {
+        return {
+          ok: true,
+          topic: "index",
+          items: [
+            { key: "merits", note: "Merits" },
+            { key: "clans", note: "Vampire clans" },
+            { key: "disciplines", note: "Disciplines" },
+          ],
+        };
+      }
+      return {
+        ok: true,
+        topic: topic,
+        items: [
+          { name: "Giant", key: "giant", category: "Physical" },
+        ],
+      };
+    }
+    var url = API + "/options?topic=" +
+      encodeURIComponent(topic || "index") +
+      "&eligible=0";
+    var r = await fetch(url, {
+      credentials: "same-origin",
+      headers: authHeaders(),
+    });
+    if (!r.ok) {
+      return { ok: false, error: "Topic not available" };
+    }
+    return r.json();
+  }
+
+  function itemLabel(it) {
+    return it.name || it.key || it.label || "?";
+  }
+
+  function itemBlurb(it) {
+    var parts = [];
+    if (it.category) parts.push(it.category);
+    if (it.note) parts.push(it.note);
+    if (it.summary) parts.push(it.summary);
+    if (it.description && !it.summary) {
+      var d = String(it.description);
+      parts.push(d.length > 120 ? d.slice(0, 117) + "…" : d);
+    }
+    if (it.bane) parts.push("Bane: " + it.bane);
+    if (it.disciplines && it.disciplines.length) {
+      parts.push(it.disciplines.join(", "));
+    }
+    if (it.inClanFor && it.inClanFor.length) {
+      parts.push("In-clan: " + it.inClanFor.join(", "));
+    }
+    return parts.join(" · ");
+  }
+
+  function renderRefPanel() {
+    var topics = refTopics || [];
+    var items = refTopicItems || [];
+    var res = refResult;
+    var html =
+      '<section class="site-section cg-root cg-ref" data-cg-root>' +
+      '<header class="cg-header">' +
+      '<h2 class="cg-header__title">Reference</h2>' +
+      '<p class="cg-header__sub">Same catalogs as ' +
+      "<code>+info</code> and <code>+cg/list</code></p>" +
+      "</header>" +
+      '<form class="cg-ref__search" data-cg-ref-form>' +
+      '<input type="search" class="cg-input" data-cg-ref-q ' +
+      'placeholder="Look up a name…" value="' +
+      esc(refQuery) +
+      '" autocomplete="off" />' +
+      '<button type="submit" class="cg-btn cg-btn--primary">' +
+      "Look up</button>" +
+      "</form>";
+
+    html += '<div class="cg-ref__topics" data-cg-ref-topics>';
+    html +=
+      '<button type="button" class="cg-ref__chip' +
+      (!refTopic ? " is-active" : "") +
+      '" data-cg-ref-topic="">All topics</button>';
+    for (var ti = 0; ti < topics.length; ti++) {
+      var tk = topics[ti].key || topics[ti].name;
+      html +=
+        '<button type="button" class="cg-ref__chip' +
+        (refTopic === tk ? " is-active" : "") +
+        '" data-cg-ref-topic="' + esc(tk) + '">' +
+        esc(tk) + "</button>";
+    }
+    html += "</div>";
+
+    html += '<div class="cg-ref__body">';
+    if (res && res.detail) {
+      html +=
+        '<article class="cg-ref__detail">' +
+        "<h3>" + esc(res.detail.name) + "</h3>" +
+        '<p class="cg-ref__cat muted">' +
+        esc(res.detail.category) + "</p>" +
+        '<pre class="cg-ref__text">' +
+        esc(res.detail.text) + "</pre></article>";
+    } else if (res && res.hits && res.hits.length) {
+      html +=
+        '<p class="cg-ref__msg muted">' +
+        esc(res.message || "Matches — click one:") +
+        '</p><ul class="cg-ref__hits">';
+      for (var hi = 0; hi < res.hits.length; hi++) {
+        var h = res.hits[hi];
+        html +=
+          '<li><button type="button" class="cg-ref__hit" ' +
+          'data-cg-ref-name="' + esc(h.name) + '">' +
+          "<strong>" + esc(h.name) + "</strong> " +
+          '<span class="muted">[' + esc(h.category) +
+          "]</span></button></li>";
+      }
+      html += "</ul>";
+    } else if (res && res.message) {
+      html +=
+        '<p class="cg-ref__msg muted">' +
+        esc(res.message) + "</p>";
+    }
+
+    if (refTopic && items.length) {
+      html +=
+        '<h3 class="cg-ref__list-title">' +
+        esc(refTopic) + "</h3>" +
+        '<ul class="cg-ref__list">';
+      for (var ii = 0; ii < items.length; ii++) {
+        var it = items[ii];
+        var lab = itemLabel(it);
+        var bl = itemBlurb(it);
+        html +=
+          '<li><button type="button" class="cg-ref__hit" ' +
+          'data-cg-ref-name="' + esc(lab) + '">' +
+          "<strong>" + esc(lab) + "</strong>" +
+          (bl
+            ? ' <span class="muted">' + esc(bl) + "</span>"
+            : "") +
+          "</button></li>";
+      }
+      html += "</ul>";
+    } else if (refTopic && !items.length) {
+      html +=
+        '<p class="muted">No items in this topic, or browse ' +
+        "is not wired for it yet. Use Look up by name.</p>";
+    } else if (!refTopic && !res) {
+      html +=
+        '<p class="muted">Pick a topic or search by name ' +
+        "(merits, clans, Disciplines, conditions, …).</p>";
+    }
+    html += "</div>" +
+      '<div class="cg-error" data-cg-error hidden></div>' +
+      "</section>";
+    return html;
+  }
+
+  function wireRef() {
+    var form = qs("[data-cg-ref-form]");
+    if (form && !form._bound) {
+      form._bound = true;
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var inp = qs("[data-cg-ref-q]");
+        runRefLookup(inp ? inp.value : "");
+      });
+    }
+    var root = qs("[data-cg-root]");
+    if (!root || root._refClick) return;
+    root._refClick = true;
+    root.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var chip = t.closest("[data-cg-ref-topic]");
+      if (chip) {
+        refTopic = chip.getAttribute("data-cg-ref-topic") || "";
+        refResult = null;
+        loadRefTopic(refTopic);
+        return;
+      }
+      var hit = t.closest("[data-cg-ref-name]");
+      if (hit) {
+        runRefLookup(hit.getAttribute("data-cg-ref-name") || "");
+      }
+    });
+  }
+
+  async function openReference() {
+    refMode = true;
+    refResult = null;
+    try {
+      if (!refTopics) {
+        var idx = await fetchTopicList("");
+        refTopics = (idx && idx.items) || [];
+      }
+    } catch (_) {
+      refTopics = refTopics || [];
+    }
+    renderMain(state);
+    if (refTopic) loadRefTopic(refTopic);
+    try {
+      if (location.hash !== "#reference") {
+        history.replaceState(null, "", "#reference");
+      }
+    } catch (_) { /* ignore */ }
+  }
+
+  async function loadRefTopic(topic) {
+    if (!topic) {
+      refTopicItems = null;
+      if (refMode) renderMain(state);
+      return;
+    }
+    try {
+      var data = await fetchTopicList(topic);
+      var raw = (data && data.items) || [];
+      // Attribute/skill topics return arrays not items
+      if (!raw.length && data) {
+        if (data.all) {
+          raw = data.all.map(function (n) {
+            return { name: n };
+          });
+        } else if (data.mental) {
+          raw = []
+            .concat(data.mental || [])
+            .concat(data.physical || [])
+            .concat(data.social || [])
+            .map(function (n) {
+              return { name: typeof n === "string" ? n : n.name };
+            });
+        }
+      }
+      refTopicItems = raw;
+    } catch (_) {
+      refTopicItems = [];
+    }
+    if (refMode) renderMain(state);
+  }
+
+  async function runRefLookup(q) {
+    refQuery = String(q || "").trim();
+    busy = true;
+    try {
+      refResult = await fetchInfo(refQuery);
+      if (refMode) renderMain(state);
+    } catch (e) {
+      setMsg(
+        qs("[data-cg-error]"),
+        (e && e.message) || "Lookup failed",
+        true,
+      );
+    } finally {
+      busy = false;
+    }
+  }
+
   function renderMain(st) {
     var main = qs("[data-site-main]");
     if (!main) return;
+
+    paintCharNav();
+
+    if (refMode) {
+      main.innerHTML = renderRefPanel();
+      wireRef();
+      var rightR = qs("[data-site-right-panels]");
+      if (rightR) {
+        rightR.innerHTML =
+          '<section class="site-menu menu">' +
+          '<h2 class="site-menu__title">Catalogs</h2>' +
+          "<p class=\"muted\">Same data as " +
+          "<code>+info</code> / <code>+cg/list</code>. " +
+          "Use <strong>Sheet</strong> in the left menu " +
+          "to return.</p></section>";
+      }
+      return;
+    }
 
     if (!st) {
       main.innerHTML =
@@ -1986,7 +2385,6 @@
       (st.closed && st.sheet && !st.stage) ||
       (st.sheet && st.sheetText && !st.stage));
     if (showLive && st.sheet) {
-      var wipeLive = st.canWipe || st.isStaff;
       main.innerHTML =
         '<section class="site-section cg-root" data-cg-root>' +
         '<header class="cg-header">' +
@@ -1995,15 +2393,6 @@
         (st.name ? " — " + esc(st.name) : "") +
         "</p></header>" +
         renderLiveSheet(st) +
-        (wipeLive
-          ? '<div class="cg-actions cg-actions--wipe">' +
-            '<button type="button" class="cg-btn cg-btn--danger" ' +
-            'data-cg-wipe>Wipe character</button>' +
-            '<p class="cg-wipe-hint muted">Clears live sheet, ' +
-            "approval, and draft — same as " +
-            "<code>+cg/wipe</code> / <code>+cg/reset</code>." +
-            "</p></div>"
-          : "") +
         '<div class="cg-error" data-cg-error hidden></div>' +
         "</section>";
       var rightLive = qs("[data-site-right-panels]");
@@ -2013,7 +2402,6 @@
           '<h2 class="site-menu__title">Sheet</h2>' +
           renderSheetSummary(st) + "</section>";
       }
-      wireWipe();
       return;
     }
 
@@ -2041,7 +2429,6 @@
 
     if (st.isSubmitted && !st.needAuth) {
       var jobN = st.jobNumber || st.submittedJob;
-      var canW = st.canWipe || st.isStaff;
       main.innerHTML =
         '<section class="site-section cg-root" data-cg-root>' +
         '<div class="cg-gate cg-gate--ok">' +
@@ -2057,10 +2444,6 @@
         "status in-game with <code>+cg</code>.</p>" +
         '<div class="cg-actions">' +
         '<a class="cg-btn cg-btn--primary" href="/">Home</a>' +
-        (canW
-          ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
-            'data-cg-wipe>Wipe &amp; restart</button>'
-          : "") +
         "</div>" +
         '<div class="cg-error" data-cg-error hidden></div>' +
         "</div></section>";
@@ -2071,7 +2454,6 @@
           '<h2 class="site-menu__title">Draft sheet</h2>' +
           renderSheetSummary(st) + "</section>";
       }
-      wireWipe();
       return;
     }
 
@@ -2131,10 +2513,6 @@
       'data-cg-next>' +
       (st.stage >= st.maxStage ? "Finish" : "Next stage") +
       "</button>" +
-      (st.canWipe !== false
-        ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
-          'data-cg-wipe>Reset</button>'
-        : "") +
       "</div></section>";
 
     main.innerHTML = html;
@@ -2152,68 +2530,6 @@
     }
 
     wireStage();
-    wireWipe();
-  }
-
-  /**
-   * Full character wipe via POST /chargen/wipe (same as +cg/wipe).
-   */
-  function wireWipe() {
-    var btn = qs("[data-cg-wipe]");
-    if (!btn || btn._cgWipeBound) return;
-    btn._cgWipeBound = true;
-    btn.addEventListener("click", function () {
-      if (busy) return;
-      var approved = !!(state &&
-        (state.approved || state.isApproved));
-      var msg = approved
-        ? "Wipe this character completely?\n\n" +
-          "Removes the live sheet, approval, sight flags, " +
-          "and chargen draft, then starts a fresh draft.\n" +
-          "This cannot be undone."
-        : "Reset chargen completely?\n\n" +
-          "Clears the current draft (and any live sheet) " +
-          "and starts over at Stage 1.";
-      if (!window.confirm(msg)) return;
-      var reason = "";
-      if (state && state.isStaff && approved) {
-        reason = window.prompt(
-          "Optional note for the wipe (logged / mailed):",
-          "",
-        ) || "";
-      }
-      busy = true;
-      (async function () {
-        try {
-          state = await api("POST", "/wipe", {
-            reason: reason,
-          });
-          // After wipe, land on fresh draft stepper
-          if (state && state.wiped) {
-            state.approved = false;
-            state.isApproved = false;
-            state.closed = false;
-            state.sheetText = "";
-          }
-          renderMain(state);
-          setMsg(
-            qs("[data-cg-ok]"),
-            "Character wiped. Fresh chargen draft ready.",
-            false,
-          );
-          var okEl = qs("[data-cg-ok]");
-          if (okEl) okEl.hidden = false;
-        } catch (err) {
-          setMsg(
-            qs("[data-cg-error]"),
-            (err && err.message) || "Wipe failed.",
-            true,
-          );
-        } finally {
-          busy = false;
-        }
-      })();
-    });
   }
 
   // ── Events ─────────────────────────────────────────────────────
@@ -2851,7 +3167,7 @@
     if (!qs('link[data-cg-css]')) {
       var link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/site/css/chargen.css?v=20260806wipe";
+      link.href = "/site/css/chargen.css?v=20260806nowipe";
       link.setAttribute("data-cg-css", "1");
       document.head.appendChild(link);
     }
@@ -2898,7 +3214,14 @@
           }
         } catch (_) { /* ignore */ }
       }
-      renderMain(state);
+      if (
+        typeof location !== "undefined" &&
+        location.hash === "#reference"
+      ) {
+        await openReference();
+      } else {
+        renderMain(state);
+      }
     } catch (e) {
       // Unauthenticated: leave site.js route guard to redirect.
       // Demo mode keeps the local gate UI.
@@ -2919,6 +3242,18 @@
 
   wireGlobal();
 
+  // Left-nav / deep-link: /chargen#reference
+  if (typeof window !== "undefined" && !window._cgRefHash) {
+    window._cgRefHash = true;
+    window.addEventListener("hashchange", function () {
+      if (location.hash === "#reference") {
+        if (!refMode) openReference();
+      } else if (refMode) {
+        closeReference();
+      }
+    });
+  }
+
   global.SiteChargen = {
     boot: boot,
     isDemo: function () {
@@ -2927,5 +3262,6 @@
     getState: function () {
       return state;
     },
+    openReference: openReference,
   };
 })(typeof window !== "undefined" ? window : globalThis);

@@ -89,7 +89,8 @@ export function parseFrontmatter(raw: string): { meta: WikiMeta; body: string } 
   for (const line of match[1].split(/\r?\n/)) {
     const m = line.match(/^([\w-]+):\s*(.*)$/);
     if (!m) continue;
-    const [, key, val] = m;
+    const [, key, rawVal] = m;
+    const val = rawVal.trim();
     if (val === "true")  { meta[key] = true;  continue; }
     if (val === "false") { meta[key] = false; continue; }
     if (val !== "" && !isNaN(Number(val))) { meta[key] = Number(val); continue; }
@@ -121,6 +122,37 @@ export function serializePage(meta: WikiMeta, body: string): string {
   }
   lines.push("---", "", body.trim(), "");
   return lines.join("\n");
+}
+
+/** ISO date (YYYY-MM-DD) for wiki frontmatter date fields. */
+export function wikiToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Merge client meta onto an existing page for an edit.
+ * - `author` is immutable once set (original creator stays).
+ * - `date` always becomes today (last-edit stamp).
+ * Client-supplied author/date are ignored when a prior author exists.
+ */
+export function mergeWikiEditMeta(
+  existing: WikiMeta,
+  incoming: Record<string, unknown>,
+): WikiMeta {
+  const {
+    author: _a,
+    date: _d,
+    ...fields
+  } = incoming;
+  const prevAuthor = typeof existing.author === "string"
+    ? existing.author.trim()
+    : "";
+  return {
+    ...existing,
+    ...fields,
+    author: prevAuthor || existing.author,
+    date: wikiToday(),
+  };
 }
 
 // ─── directory walker ─────────────────────────────────────────────────────────

@@ -4,6 +4,7 @@ import {
   WIKI_DIR, MAX_UPLOAD_BYTES,
   safePath, mimeForPath, serializePage,
   readPageFile, walkWiki, normalisePath,
+  mergeWikiEditMeta,
 } from "./fs.ts";
 import type { WikiStub } from "./fs.ts";
 import { isStaffUser } from "./db.ts";
@@ -278,13 +279,26 @@ async function handlePatch(wikiPath: string, req: Request, userId: string | null
   if (!existing) return json({ error: "Not found" }, 404);
 
   const { body: newBody, ...newMetaFields } = body;
-  const updatedMeta = { ...existing.meta, ...(newMetaFields as Record<string, unknown>) };
-  const updatedBody = typeof newBody === "string" ? newBody.trim() : existing.body;
+  // Preserve original author; bump date as last-edit.
+  const updatedMeta = mergeWikiEditMeta(
+    existing.meta,
+    newMetaFields as Record<string, unknown>,
+  );
+  const updatedBody = typeof newBody === "string"
+    ? newBody.trim()
+    : existing.body;
 
   const rawBefore = await Deno.readTextFile(found);
   await saveSnapshot(wikiPath, rawBefore);
-  await Deno.writeTextFile(found, serializePage(updatedMeta, updatedBody));
-  await wikiHooks.emit("wiki:edited", { path: wikiPath, meta: updatedMeta, body: updatedBody });
+  await Deno.writeTextFile(
+    found,
+    serializePage(updatedMeta, updatedBody),
+  );
+  await wikiHooks.emit("wiki:edited", {
+    path: wikiPath,
+    meta: updatedMeta,
+    body: updatedBody,
+  });
   return json({ path: wikiPath, ...updatedMeta, body: updatedBody });
 }
 

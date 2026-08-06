@@ -175,6 +175,7 @@ export async function siteConfigResponse(
     skinCss: c.skinCss,
     skinHref: liveSkinHref(c),
     bannerImage: c.bannerImage,
+    logoImage: c.logoImage,
     plainBg: c.plainBg === true,
     nav,
     telnet: c.telnet,

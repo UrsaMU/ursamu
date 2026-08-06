@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.78
+
+- Fix hero logo on `/`: SSR no longer emits a second
+  `class="has-image"` attribute (browsers dropped it, so
+  the title showed and the banner logo looked missing)
+- `GET /site/config.json` includes `logoImage` for nav brand
+- SPA return to home unhides banner after help/play/chargen
+- Cache-bust SITE_ASSET_V → 20260806homelogo
+
 ## 0.1.77
 
 - Mobile profile/account: no nested dropdown — Staff

@@ -161,6 +161,15 @@ Deno.test("injectSiteHtml: skin + title", OPTS, () => {
     true,
   );
   assertEquals(out.includes("has-image"), true);
+  // Single class= on banner — dual class= drops has-image in browsers
+  const bannerOpen = out.match(
+    /<header\b[^>]*\bdata-site-banner\b[^>]*>/i,
+  );
+  assertEquals(!!bannerOpen, true);
+  const bTag = bannerOpen![0];
+  assertEquals((bTag.match(/\bclass\s*=/gi) || []).length, 1);
+  assertEquals(bTag.includes("site-banner"), true);
+  assertEquals(bTag.includes("has-image"), true);
   assertEquals(out.includes(">Wiki</a>"), true);
   assertEquals(out.includes("Court of Miracles</a>"), true);
 
