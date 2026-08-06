@@ -69,10 +69,8 @@
   --site-search-below: 1.5rem;
   --site-main-pad-inline: clamp(1rem, 2vw, 2.5rem);
   --site-gutter: 2.5rem;
-  /* Legacy token — banner is overlay now (no flow offset). */
-  --site-banner-offset: 0px;
-  --site-banner-pad-top: 0.75rem;
-  --site-sticky-top: calc(var(--site-nav-h) + 0.75rem);
+  --site-banner-offset: 12rem;
+  --site-sticky-top: 7.5rem;
 
   /* Optional skin art (empty = no image) */
   --site-bg-image-top: none;

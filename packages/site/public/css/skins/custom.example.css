@@ -56,9 +56,8 @@
   --site-font-display: "Smythe", serif;
 
   /* Geometry (court-template numbers) */
-  --site-banner-offset: 0px;
-  --site-banner-pad-top: 1.25rem;
-  --site-sticky-top: calc(var(--site-nav-h) + 0.75rem);
+  --site-banner-offset: 200px;
+  --site-sticky-top: 120px;
   --site-gutter: 40px;
   --site-main-max: 800px;
   --site-aside-min: 300px;
