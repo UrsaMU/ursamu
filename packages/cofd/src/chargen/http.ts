@@ -835,10 +835,15 @@ export async function chargenOptions(
       })),
     });
   }
-  if (topic === "disciplines") {
+  if (
+    topic === "disciplines" ||
+    topic === "discipline" ||
+    topic === "powers" ||
+    topic === "power"
+  ) {
     return json({
       ok: true,
-      topic,
+      topic: "disciplines",
       items: VTR_DISCIPLINES.map((d) => ({
         name: d.name,
         summary: d.summary,

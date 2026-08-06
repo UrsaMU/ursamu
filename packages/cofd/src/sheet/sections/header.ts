@@ -89,21 +89,41 @@ export const headerSection: SheetSection = {
       // Hide changeling mask/mien prose and optional empty bloodline
       // so the header stays compact.
       const hide = new Set(["mask", "mien", "animals"]);
+      const cf = { ...(sheet.customFields ?? {}) };
+      // Surface dual Touchstones with readable labels.
+      if (isVamp) {
+        if (!cf.touchstonemask && sheet.touchstones?.mask) {
+          cf.touchstonemask = sheet.touchstones.mask;
+        }
+        if (!cf.touchstonedirge && sheet.touchstones?.dirge) {
+          cf.touchstonedirge = sheet.touchstones.dirge;
+        }
+      }
       const fields = tmpl.customFields.filter((f) => {
         if (hide.has(f)) return false;
         if (
           f === "bloodline" &&
-          !(sheet.customFields ?? {})[f]
+          !cf[f]
         ) {
           return false;
         }
         return true;
       });
+      // Pretty labels for touchstone keys in pair rows.
+      const labelMap: Record<string, string> = {
+        touchstonemask: "Mask TS",
+        touchstonedirge: "Dirge TS",
+      };
+      const displayFields = fields.map(
+        (f) => labelMap[f] ?? f,
+      );
+      const displayVals: Record<string, string> = {};
+      for (let i = 0; i < fields.length; i++) {
+        displayVals[displayFields[i]] = cf[fields[i]] ||
+          "Unknown";
+      }
       lines.push(
-        ...customFieldRows(
-          fields,
-          sheet.customFields ?? {},
-        ),
+        ...customFieldRows(displayFields, displayVals),
       );
     }
 

@@ -21,9 +21,9 @@ import {
   resolveCustomFieldValue,
   startingMeritDots,
   startingPowerDots,
-  VAMPIRE_OPTIONAL_FIELDS,
   type CofdCgState,
 } from "./state.ts";
+import { VAMPIRE_OPTIONAL_FIELDS } from "./fields.ts";
 import { validateGiftStage } from "./gifts.ts";
 import { validateContractStage } from "./contracts.ts";
 
@@ -173,17 +173,50 @@ export function validateCurrentStage(cgState: CofdCgState): { valid: boolean; er
         "animals",
         ...VAMPIRE_OPTIONAL_FIELDS,
       ]);
+      // Migrate legacy single touchstone → Mask Touchstone.
+      const cf = sheet.customFields ?? {};
+      if (
+        cf.touchstone &&
+        !cf.touchstonemask
+      ) {
+        cf.touchstonemask = cf.touchstone;
+        sheet.customFields = cf;
+        sheet.touchstones = {
+          ...(sheet.touchstones ?? {}),
+          mask: cf.touchstone,
+          dirge: sheet.touchstones?.dirge,
+        };
+      }
+      // Prefer sheet.touchstones when custom fields empty.
+      if (sheet.template === "vampire") {
+        if (!cf.touchstonemask && sheet.touchstones?.mask) {
+          cf.touchstonemask = sheet.touchstones.mask;
+        }
+        if (!cf.touchstonedirge && sheet.touchstones?.dirge) {
+          cf.touchstonedirge = sheet.touchstones.dirge;
+        }
+        sheet.customFields = cf;
+      }
       for (const f of tmpl.customFields) {
-        if (optionalFields.has(f)) continue;
-        const val = sheet.customFields[f];
+        const fl = f.toLowerCase();
+        if (optionalFields.has(f) || optionalFields.has(fl)) {
+          continue;
+        }
+        const val = sheet.customFields[f] ??
+          sheet.customFields[fl];
         if (
           !val ||
           val.trim().toLowerCase() === "unknown" ||
           val.trim().toLowerCase() === "not set"
         ) {
+          const label = fl === "touchstonemask"
+            ? "Mask Touchstone"
+            : fl === "touchstonedirge"
+            ? "Dirge Touchstone"
+            : f;
           return {
             valid: false,
-            error: `Template field '${f}' is not set. ` +
+            error: `Template field '${label}' is not set. ` +
               `All custom details are required.`,
           };
         }

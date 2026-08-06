@@ -10,6 +10,7 @@ import {
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
 import { normalizeAnimalsField } from "../form/animals.ts";
+import { normalizeCustomFieldKey } from "../chargen/fields.ts";
 import { migrateSheet, refreshAdvantages, type CofdSheet } from "./sheet.ts";
 
 /**
@@ -17,7 +18,7 @@ import { migrateSheet, refreshAdvantages, type CofdSheet } from "./sheet.ts";
  */
 export function setTrait(sheet: CofdSheet, trait: string, value: string | number): CofdSheet {
   sheet = migrateSheet(sheet);
-  const key = trait.toLowerCase().trim();
+  let key = trait.toLowerCase().trim();
 
   const tKey = sheet.template.toLowerCase().trim();
   const tmpl = COFD_TEMPLATES[tKey] || COFD_TEMPLATES.mortal;
@@ -127,7 +128,10 @@ export function setTrait(sheet: CofdSheet, trait: string, value: string | number
     return sheet;
   }
 
-  if (tmpl.customFields.includes(key)) {
+  // Normalize touchstone aliases before custom-field match.
+  key = normalizeCustomFieldKey(key);
+  const cfKeys = tmpl.customFields.map((f) => f.toLowerCase());
+  if (cfKeys.includes(key) || tmpl.customFields.includes(key)) {
     const valStr = value as string;
     if (key === "animals") {
       const norm = normalizeAnimalsField(
@@ -141,6 +145,12 @@ export function setTrait(sheet: CofdSheet, trait: string, value: string | number
     }
     if (valStr === "Not Set" || valStr === "") {
       delete sheet.customFields[key];
+      if (key === "touchstonemask" || key === "touchstonedirge") {
+        const ts = { ...(sheet.touchstones ?? {}) };
+        if (key === "touchstonemask") delete ts.mask;
+        else delete ts.dirge;
+        sheet.touchstones = ts;
+      }
       return sheet;
     }
 
@@ -160,6 +170,13 @@ export function setTrait(sheet: CofdSheet, trait: string, value: string | number
     }
 
     sheet.customFields[key] = valStr;
+
+    if (key === "touchstonemask" || key === "touchstonedirge") {
+      const ts = { ...(sheet.touchstones ?? {}) };
+      if (key === "touchstonemask") ts.mask = valStr;
+      else ts.dirge = valStr;
+      sheet.touchstones = ts;
+    }
 
     // Seeming ↔ kith / favored: keep related picks consistent.
     if (key === "seeming") {

@@ -45,7 +45,8 @@ function vampState(
   opts: {
     clan?: string;
     covenant?: string;
-    touchstone?: string;
+    touchstoneMask?: string;
+    touchstoneDirge?: string;
     mask?: string;
     dirge?: string;
   } = {},
@@ -57,8 +58,14 @@ function vampState(
   s.sheet.vice = opts.dirge ?? "Survivor";
   s.sheet.customFields.clan = opts.clan ?? "Daeva";
   s.sheet.customFields.covenant = opts.covenant ?? "Invictus";
-  s.sheet.customFields.touchstone =
-    opts.touchstone ?? "My sister Elena";
+  s.sheet.customFields.touchstonemask =
+    opts.touchstoneMask ?? "My sister Elena";
+  s.sheet.customFields.touchstonedirge =
+    opts.touchstoneDirge ?? "The old parish";
+  s.sheet.touchstones = {
+    mask: s.sheet.customFields.touchstonemask,
+    dirge: s.sheet.customFields.touchstonedirge,
+  };
   s.sheet.powerStatValue = 1;
   s.sheet.moralityValue = 7;
   return s;
@@ -110,21 +117,31 @@ describe("Vampire sheet defaults", OPTS, () => {
     assertEquals(sheet.energyCurrent, 10);
   });
 
-  it("sets clan, covenant, touchstone custom fields", () => {
+  it("sets clan, covenant, dual touchstone fields", () => {
     let sheet = defaultSheet();
     sheet = setTrait(sheet, "template", "vampire");
     sheet = setTrait(sheet, "clan", "Mekhet");
     sheet = setTrait(sheet, "covenant", "Ordo Dracul");
-    sheet = setTrait(sheet, "touchstone", "Father Marcus");
+    sheet = setTrait(sheet, "touchstonemask", "Father Marcus");
+    sheet = setTrait(sheet, "touchstonedirge", "The crypt");
     assertEquals(sheet.customFields.clan, "Mekhet");
     assertEquals(
       sheet.customFields.covenant,
       "Ordo Dracul",
     );
     assertEquals(
-      sheet.customFields.touchstone,
+      sheet.customFields.touchstonemask,
       "Father Marcus",
     );
+    assertEquals(
+      sheet.customFields.touchstonedirge,
+      "The crypt",
+    );
+    assertEquals(sheet.touchstones?.mask, "Father Marcus");
+    assertEquals(sheet.touchstones?.dirge, "The crypt");
+    // Legacy alias still writes Mask Touchstone
+    sheet = setTrait(sheet, "touchstone", "Elena");
+    assertEquals(sheet.customFields.touchstonemask, "Elena");
   });
 
   it("mask/dirge aliases write virtue/vice", () => {
@@ -159,13 +176,14 @@ describe("Vampire sheet defaults", OPTS, () => {
 });
 
 describe("Vampire chargen validation", OPTS, () => {
-  it("stage 3 requires clan, covenant, touchstone", () => {
+  it("stage 3 requires clan, covenant, both Touchstones", () => {
     const s = vampState();
     s.stage = 3;
-    delete s.sheet.customFields.touchstone;
+    delete s.sheet.customFields.touchstonedirge;
+    s.sheet.touchstones = { mask: "Elena" };
     const r = validateCurrentStage(s);
     assertEquals(r.valid, false);
-    assertStringIncludes(r.error ?? "", "touchstone");
+    assertStringIncludes(r.error ?? "", "Dirge Touchstone");
   });
 
   it("stage 3 allows empty bloodline", () => {
@@ -173,6 +191,35 @@ describe("Vampire chargen validation", OPTS, () => {
     s.stage = 3;
     const r = validateCurrentStage(s);
     assertEquals(r.valid, true, r.error);
+  });
+
+  it("partial clan/covenant/discipline names resolve", () => {
+    let s = vampState();
+    s.stage = 3;
+    s = updateCgState(s, "clan", "dae");
+    assertEquals(s.sheet.customFields.clan, "Daeva");
+    s = updateCgState(s, "covenant", "unali");
+    assertEquals(s.sheet.customFields.covenant, "Unaligned");
+    s.stage = 7;
+    s = updateCgState(s, "maj", "2");
+    assertEquals(s.sheet.powers.majesty, 2);
+  });
+
+  it("sets dual touchstones and syncs sheet.touchstones", () => {
+    let s = vampState();
+    s.stage = 3;
+    s = updateCgState(s, "touchstonemask", "Sister Elena");
+    s = updateCgState(s, "touchstonedirge", "St. Mark's");
+    assertEquals(
+      s.sheet.customFields.touchstonemask,
+      "Sister Elena",
+    );
+    assertEquals(
+      s.sheet.customFields.touchstonedirge,
+      "St. Mark's",
+    );
+    assertEquals(s.sheet.touchstones?.mask, "Sister Elena");
+    assertEquals(s.sheet.touchstones?.dirge, "St. Mark's");
   });
 
   it("stage 3 rejects mortal Virtue after vampire template", () => {

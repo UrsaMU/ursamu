@@ -7,7 +7,8 @@
   "customFields": [
     "clan",
     "covenant",
-    "touchstone",
+    "touchstonemask",
+    "touchstonedirge",
     "bloodline"
   ],
   "validPowers": [

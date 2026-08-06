@@ -3,8 +3,10 @@
 CHARGEN
   +cg/set template=vampire
   +cg/list clans|covenants|disciplines|masks
-  Clan, Covenant, Touchstone; Mask/Dirge; 10 Merits;
-  3 Discipline dots (≥2 in-clan). BP 1, Humanity 7.
+  Clan, Covenant; Mask + Dirge Touchstones; Mask/Dirge
+  archetypes; 10 Merits; 3 Discipline dots (≥2 in-clan).
+  Partial names autocomplete (dae, maj, inv…). BP 1 / Hum 7.
+  +cg/set touchstonemask=<who>  touchstonedirge=<who>
 
 PLAY
   +vitae     Vitae spend, blush, heal, boost

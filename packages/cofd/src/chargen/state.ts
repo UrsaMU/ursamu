@@ -5,21 +5,8 @@ import {
   COFD_SKILLS,
   COFD_MERITS,
   parseMeritRef,
-  findSeeming,
-  findKith,
-  findCourt,
-  findRegalia,
-  findAuspice,
-  findTribe,
-  findClan,
-  findCovenant,
-  CTL_SEEMING_NAMES,
-  CTL_COURT_NAMES,
-  CTL_REGALIA_NAMES,
-  WTF_AUSPICE_NAMES,
-  WTF_TRIBE_NAMES,
-  VTR_CLAN_NAMES,
-  VTR_COVENANT_NAMES,
+  findMaskDirge,
+  VTR_MASK_DIRGE_NAMES,
 } from "../dictionary/index.ts";
 import {
   COFD_TEMPLATES,
@@ -33,6 +20,23 @@ import {
   type CofdSheet,
 } from "../stats/index.ts";
 import { matchNameOrThrow } from "../support/match.ts";
+import {
+  VAMPIRE_OPTIONAL_FIELDS,
+  customFieldLabel,
+  normalizeCustomFieldKey,
+  resolveCustomFieldValue,
+  resolvePowerKey,
+  type CustomFieldResolution,
+} from "./fields.ts";
+
+export {
+  VAMPIRE_OPTIONAL_FIELDS,
+  customFieldLabel,
+  normalizeCustomFieldKey,
+  resolveCustomFieldValue,
+  resolvePowerKey,
+  type CustomFieldResolution,
+};
 
 export interface CofdCgState {
   stage: number;        // 1 to 6
@@ -96,39 +100,6 @@ export function maxStageFor(template: string): number {
   return tmpl && tmpl.validPowers.length > 0 ? 7 : 6;
 }
 
-// Stage-3 custom fields that have a canonical catalog. Anything not listed here
-// (concept, needle, thread, bloodline, touchstone, ...) is free-form text.
-interface CustomFieldDomain {
-  find: (v: string) => { name: string } | null;
-  options: string;
-}
-
-const CUSTOM_FIELD_DOMAINS: Record<string, Record<string, CustomFieldDomain>> = {
-  changeling: {
-    seeming: { find: findSeeming, options: `Valid seemings: ${CTL_SEEMING_NAMES.join(", ")}.` },
-    kith:    { find: findKith,    options: "See +cg/list kiths for valid kiths." },
-    court:   { find: findCourt,   options: `Valid courts: ${CTL_COURT_NAMES.join(", ")}.` },
-    favored: { find: findRegalia, options: `Valid Regalia: ${CTL_REGALIA_NAMES.join(", ")}.` },
-  },
-  werewolf: {
-    auspice: { find: findAuspice, options: `Valid auspices: ${WTF_AUSPICE_NAMES.join(", ")}.` },
-    tribe:   { find: findTribe,   options: `Valid tribes: ${WTF_TRIBE_NAMES.join(", ")}.` },
-  },
-  vampire: {
-    clan: {
-      find: findClan,
-      options: `Valid clans: ${VTR_CLAN_NAMES.join(", ")}.`,
-    },
-    covenant: {
-      find: findCovenant,
-      options: `Valid covenants: ${VTR_COVENANT_NAMES.join(", ")}.`,
-    },
-  },
-};
-
-/** Vampire Stage-3 fields that are optional free-form prose. */
-export const VAMPIRE_OPTIONAL_FIELDS = new Set(["bloodline"]);
-
 /**
  * Stage-1 anchor keys. Vampires store Mask/Dirge on virtue/vice;
  * mask/dirge are accepted aliases that write those same fields.
@@ -147,28 +118,6 @@ export function resolveStage1Key(key: string): string {
   if (k === "mask") return "virtue";
   if (k === "dirge") return "vice";
   return k;
-}
-
-export type CustomFieldResolution =
-  | { kind: "free" }                    // no canonical list — accept as typed
-  | { kind: "ok"; value: string }       // valid — `value` is the canonical-cased name
-  | { kind: "invalid"; error: string }; // not a recognized value
-
-/**
- * Resolve a Stage-3 custom field value against its canonical catalog, if any.
- * Free-form fields pass through; recognized fields are normalized to canonical
- * casing; unrecognized values are rejected with a helpful list.
- */
-export function resolveCustomFieldValue(
-  template: string,
-  field: string,
-  value: string,
-): CustomFieldResolution {
-  const domain = CUSTOM_FIELD_DOMAINS[template.toLowerCase().trim()]?.[field.toLowerCase().trim()];
-  if (!domain) return { kind: "free" };
-  const found = domain.find(value);
-  if (found) return { kind: "ok", value: found.name };
-  return { kind: "invalid", error: `Invalid ${field} '${value}'. ${domain.options}` };
 }
 
 export function getStageName(stage: number): string {
@@ -239,8 +188,7 @@ export function updateCgState(
       break;
 
     case 3: {
-      // Vampire: Mask/Dirge may be set here too (aliases → virtue/vice)
-      // so players need not backtrack after picking the template.
+      // Vampire: Mask/Dirge archetypes may be set here too.
       if (
         tKey === "vampire" &&
         (key === "mask" || key === "dirge" ||
@@ -248,9 +196,31 @@ export function updateCgState(
       ) {
         key = resolveStage1Key(key);
         resolvedTrait = key;
+        // Partial match Mask/Dirge archetypes.
+        if (key === "virtue" || key === "vice") {
+          const m = findMaskDirge(val) ?? (() => {
+            try {
+              const n = matchNameOrThrow(
+                val,
+                VTR_MASK_DIRGE_NAMES,
+                key === "virtue" ? "mask" : "dirge",
+                "+cg/list masks",
+              );
+              return findMaskDirge(n);
+            } catch {
+              return null;
+            }
+          })();
+          if (m) val = m.name;
+        }
         break;
       }
-      if (!tmpl.customFields.includes(key)) {
+      key = normalizeCustomFieldKey(key);
+      resolvedTrait = key;
+      const allowed = tmpl.customFields.map((f) =>
+        f.toLowerCase()
+      );
+      if (!allowed.includes(key)) {
         const extra = tKey === "vampire"
           ? ", mask, dirge"
           : "";
@@ -260,8 +230,7 @@ export function updateCgState(
             `${tmpl.customFields.join(", ")}${extra}.`,
         );
       }
-      // Canonical catalogs (seeming, kith, court, clan, covenant)
-      // normalize casing; free-form fields pass through.
+      // Catalog fields: partial-name autocomplete; free-form pass.
       const res = resolveCustomFieldValue(
         sheet.template,
         key,
@@ -323,13 +292,12 @@ export function updateCgState(
             "Browse with +cg/list contracts.",
         );
       }
-      const matched = matchNameOrThrow(
+      key = resolvePowerKey(
         key,
         tmpl.validPowers,
-        "power",
+        sheet.template,
       );
-      key = matched.toLowerCase();
-      resolvedTrait = matched;
+      resolvedTrait = key;
       break;
     }
 
@@ -378,6 +346,18 @@ export function updateCgState(
   }
 
   sheet = setTrait(sheet, resolvedTrait, validatedValue);
+
+  // Keep sheet.touchstones in sync with Stage-3 touchstone fields.
+  const rk = resolvedTrait.toLowerCase();
+  if (rk === "touchstonemask" || rk === "touchstonedirge") {
+    const ts = { ...(sheet.touchstones ?? {}) };
+    if (rk === "touchstonemask") {
+      ts.mask = String(validatedValue);
+    } else {
+      ts.dirge = String(validatedValue);
+    }
+    sheet.touchstones = ts;
+  }
 
   return {
     ...cgState,

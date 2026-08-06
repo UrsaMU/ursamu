@@ -19,6 +19,7 @@ import {
   startingPowerDots,
   type CofdCgState,
 } from "./state.ts";
+import { customFieldLabel } from "./fields.ts";
 import {
   auspiceMoonGift,
   giftStageProgress,
@@ -272,7 +273,7 @@ export async function getStageInstructions(
       );
       if (tKey === "vampire") {
         lines.push(
-          "  Clan + Covenant + Touchstone required; " +
+          "  Clan + Covenant + two Touchstones required; " +
             "Bloodline optional.",
         );
         lines.push(
@@ -288,19 +289,19 @@ export async function getStageInstructions(
       } else {
         lines.push("");
         for (const f of requiredFields) {
-          const title = f.replace(
-            /\b\w/g,
-            (c) => c.toUpperCase(),
-          );
-          const val = sheet.customFields[f] || "Not Set";
+          const title = customFieldLabel(f);
+          const val = sheet.customFields[f] ||
+            sheet.customFields[f.toLowerCase()] ||
+            "Not Set";
+          const pad = Math.max(14, title.length + 2);
           lines.push(
-            `    %ch%cc${ljust(title + ":", 12)}%cn ${val}`,
+            `    %ch%cc${ljust(title + ":", pad)}%cn ${val}`,
           );
         }
         if (tKey === "vampire") {
           const bl = sheet.customFields.bloodline || "(optional)";
           lines.push(
-            `    %ch%cc${ljust("Bloodline:", 12)}%cn ${bl}`,
+            `    %ch%cc${ljust("Bloodline:", 14)}%cn ${bl}`,
           );
         }
         lines.push("");
@@ -322,10 +323,16 @@ export async function getStageInstructions(
           "    +cg/set dirge=<arch>    -- True self.",
         );
         lines.push(
+          "    +cg/set touchstonemask=<who>  -- Mask anchor.",
+        );
+        lines.push(
+          "    +cg/set touchstonedirge=<who> -- Dirge anchor.",
+        );
+        lines.push(
           "    +cg/set bloodline=<txt> -- Optional.",
         );
         lines.push(
-          "    +cg/list clans|masks    -- Browse options.",
+          "    +cg/list clans|masks    -- Browse (partial OK).",
         );
       }
       lines.push(
