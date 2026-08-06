@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.79
+
+- Hero logo (banner art) is **home only** — wiki/help/play
+  stay compact under the nav (no logo on every wiki page)
+- SSR hides banner on non-home paths; site.js matches
+- Cache-bust SITE_ASSET_V → 20260806wikinologo
+
 ## 0.1.78
 
 - Fix hero logo on `/`: SSR no longer emits a second
