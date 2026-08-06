@@ -12,8 +12,10 @@ TOPIC GROUPS
   help combat        Encounters and related cmds.
   help social        Social Maneuvering.
   help reference     Virtues, Vices, merits.
-  help templates     Mortal, Changeling fields.
+  help templates     Mortal, Changeling, Vampire.
   help changeling    Full CtL command map.
+  help vampire       VtR chargen + Vitae/Beast play.
+  help vitae · feed · frenzy · aura
   help time          In-game clock, weather, moon.
 
 CHANGELING (Lost)
@@ -23,4 +25,5 @@ CHANGELING (Lost)
   help icon · spin · gear/token · dream · fetch
   help hunt · mantle · hob
 
-SEE ALSO: help cg, help sheet, help roll, help changeling
+SEE ALSO: help cg, help sheet, help roll,
+  help changeling, help vampire

@@ -1,12 +1,12 @@
 {
   "name": "@ursamu/cofd-plugin",
-  "version": "1.2.11",
-  "description": "Chronicles of Darkness 2e plugin for UrsaMU \u2014 sheets, chargen, d10 dice, IC/OOC, +time, CtL overlay.",
+  "version": "1.4.0",
+  "description": "Chronicles of Darkness 2e plugin for UrsaMU \u2014 sheets, chargen, d10 dice, IC/OOC, +time, CtL/VtR overlay.",
   "license": "MIT",
   "exports": "./index.ts",
   "tasks": {
     "test": "deno test -A --unstable-kv --no-check",
-    "showcase": "deno run -A --unstable-kv tools/showcase.ts",
+    "showcase": "deno run -A --unstable-kv --import-map=showcase.importmap.json tools/showcase.ts",
     "preflight": "deno publish --dry-run --allow-dirty --allow-slow-types --no-check",
     "publish": "deno publish --allow-slow-types --no-check"
   },

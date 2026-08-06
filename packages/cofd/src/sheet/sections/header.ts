@@ -72,16 +72,58 @@ export const headerSection: SheetSection = {
     lines.push(
       pairRow("name", playerName, "concept", sheet.concept),
     );
+    // Vampire: Mask/Dirge replace Virtue/Vice labels.
+    const isVamp =
+      (sheet.template || "").toLowerCase().trim() ===
+        "vampire";
     lines.push(
-      pairRow("virtue", sheet.virtue, "vice", sheet.vice),
+      pairRow(
+        isVamp ? "mask" : "virtue",
+        sheet.virtue,
+        isVamp ? "dirge" : "vice",
+        sheet.vice,
+      ),
     );
 
     if (tmpl.customFields.length > 0) {
+      // Hide changeling mask/mien prose and optional empty bloodline
+      // so the header stays compact.
+      const hide = new Set(["mask", "mien", "animals"]);
+      const cf = { ...(sheet.customFields ?? {}) };
+      // Surface dual Touchstones with readable labels.
+      if (isVamp) {
+        if (!cf.touchstonemask && sheet.touchstones?.mask) {
+          cf.touchstonemask = sheet.touchstones.mask;
+        }
+        if (!cf.touchstonedirge && sheet.touchstones?.dirge) {
+          cf.touchstonedirge = sheet.touchstones.dirge;
+        }
+      }
+      const fields = tmpl.customFields.filter((f) => {
+        if (hide.has(f)) return false;
+        if (
+          f === "bloodline" &&
+          !cf[f]
+        ) {
+          return false;
+        }
+        return true;
+      });
+      // Pretty labels for touchstone keys in pair rows.
+      const labelMap: Record<string, string> = {
+        touchstonemask: "Mask TS",
+        touchstonedirge: "Dirge TS",
+      };
+      const displayFields = fields.map(
+        (f) => labelMap[f] ?? f,
+      );
+      const displayVals: Record<string, string> = {};
+      for (let i = 0; i < fields.length; i++) {
+        displayVals[displayFields[i]] = cf[fields[i]] ||
+          "Unknown";
+      }
       lines.push(
-        ...customFieldRows(
-          tmpl.customFields,
-          sheet.customFields ?? {},
-        ),
+        ...customFieldRows(displayFields, displayVals),
       );
     }
 

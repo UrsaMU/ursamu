@@ -37,9 +37,11 @@ export function getStandardMaxEnergy(powerStat: number): number {
 import mortalTpl from "../../templates/mortal.json" with { type: "json" };
 import changelingTpl from "../../templates/changeling.json" with { type: "json" };
 import werewolfTpl from "../../templates/werewolf.json" with { type: "json" };
+import vampireTpl from "../../templates/vampire.json" with { type: "json" };
 import fetchTpl from "../../templates/fetch.json" with { type: "json" };
 import hobgoblinTpl from "../../templates/hobgoblin.json" with { type: "json" };
 import huntsmanTpl from "../../templates/huntsman.json" with { type: "json" };
+import { vitaeMaxForBp } from "../vitae/table.ts";
 
 export const COFD_TEMPLATES: Record<string, CofdTemplate> = {};
 
@@ -47,12 +49,23 @@ const rawTemplates = [
   mortalTpl,
   changelingTpl,
   werewolfTpl,
+  vampireTpl,
   fetchTpl,
   hobgoblinTpl,
   huntsmanTpl,
 ];
 
 for (const data of rawTemplates) {
+  let energyMaxFormula: (ps: number) => number;
+  if (data.key === "vampire") {
+    // VtR BP table (BP 10 = 75 Vitae, not the generic 100).
+    energyMaxFormula = vitaeMaxForBp;
+  } else if ((data as { energyMaxFormulaType?: string })
+    .energyMaxFormulaType === "standard") {
+    energyMaxFormula = getStandardMaxEnergy;
+  } else {
+    energyMaxFormula = (ps: number) => ps;
+  }
   COFD_TEMPLATES[data.key] = {
     key: data.key,
     name: data.name,
@@ -61,9 +74,7 @@ for (const data of rawTemplates) {
     energyName: data.energyName,
     customFields: data.customFields,
     validPowers: data.validPowers,
-    energyMaxFormula: (data as any).energyMaxFormulaType === "standard"
-      ? getStandardMaxEnergy
-      : (ps: number) => ps,
+    energyMaxFormula,
   };
 }
 
@@ -75,6 +86,7 @@ for (const data of rawTemplates) {
 export const CHARGEN_TEMPLATE_KEYS = [
   "mortal",
   "changeling",
+  "vampire",
 ] as const;
 
 export function isChargenTemplate(key: string): boolean {

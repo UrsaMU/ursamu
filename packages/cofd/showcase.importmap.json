@@ -1,5 +1,6 @@
 {
   "imports": {
+    "ursamu":           "./tools/ursamu-shim.ts",
     "@ursamu/ursamu":   "./tools/ursamu-shim.ts",
     "@ursamu/mush":     "../mush/mod.ts",
     "@ursamu/core":     "../core/mod.ts",

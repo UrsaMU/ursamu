@@ -20,6 +20,10 @@ import {
   MENTAL_ATTRIBUTES,
   PHYSICAL_ATTRIBUTES,
   SOCIAL_ATTRIBUTES,
+  VTR_CLANS,
+  VTR_COVENANTS,
+  VTR_DISCIPLINES,
+  VTR_MASK_DIRGE,
 } from "../dictionary/index.ts";
 import {
   COFD_TEMPLATES,
@@ -805,6 +809,62 @@ export async function chargenOptions(
       mental: [...COFD_MENTAL_SKILLS],
       physical: [...COFD_PHYSICAL_SKILLS],
       social: [...COFD_SOCIAL_SKILLS],
+    });
+  }
+
+  if (topic === "clans") {
+    return json({
+      ok: true,
+      topic,
+      items: VTR_CLANS.map((c) => ({
+        name: c.name,
+        disciplines: [...c.disciplines],
+        bane: c.bane,
+        description: c.description,
+      })),
+    });
+  }
+  if (topic === "covenants") {
+    return json({
+      ok: true,
+      topic,
+      items: VTR_COVENANTS.map((c) => ({
+        name: c.name,
+        mechanic: c.mechanic,
+        description: c.description,
+      })),
+    });
+  }
+  if (
+    topic === "disciplines" ||
+    topic === "discipline" ||
+    topic === "powers" ||
+    topic === "power"
+  ) {
+    return json({
+      ok: true,
+      topic: "disciplines",
+      items: VTR_DISCIPLINES.map((d) => ({
+        name: d.name,
+        summary: d.summary,
+        inClanFor: [...d.inClanFor],
+        key: d.name.toLowerCase(),
+      })),
+    });
+  }
+  if (
+    topic === "masks" ||
+    topic === "dirges" ||
+    topic === "mask" ||
+    topic === "dirge"
+  ) {
+    return json({
+      ok: true,
+      topic,
+      items: VTR_MASK_DIRGE.map((a) => ({
+        name: a.name,
+        description: a.description,
+      })),
     });
   }
 

@@ -10,6 +10,7 @@ import {
   CTL_COURTS,
   findSeeming,
   findGift,
+  findClan,
   type WtfGift,
   CTL_REGALIA,
   contractsByRegalia,
@@ -34,10 +35,15 @@ import {
   eligibleGifts,
   eligibleRites,
   eligibleContracts,
+  eligibleClans,
+  eligibleCovenants,
+  eligibleDisciplines,
+  eligibleMasksDirges,
   eligibleListTopics,
   wrongTemplateMsg,
   isChangeling,
   isWerewolf,
+  isVampire,
   type ListSheet,
 } from "./list_eligible.ts";
 
@@ -103,22 +109,37 @@ function fieldBlock(label: string, text: string): string[] {
 const INDEX = [
   { key: "virtues", note: "CoFD core anchors — pick one" },
   { key: "vices", note: "CoFD core anchors — pick one" },
-  { key: "templates", note: "Supernatural templates available on this game" },
+  {
+    key: "templates",
+    note: "Supernatural templates available on this game",
+  },
   {
     key: "seemings",
     note: "Changeling: the six seemings (add name for detail)",
   },
-  { key: "kiths", note: "Changeling: all kiths, or filter by seeming" },
-  { key: "courts", note: "Changeling: the four seasonal courts" },
-  { key: "regalia", note: "Changeling: the six Contract Regalia" },
-  { key: "contracts", note: "Changeling: Contracts by Regalia, Court, or Goblin" },
+  {
+    key: "kiths",
+    note: "Changeling: all kiths, or filter by seeming",
+  },
+  {
+    key: "courts",
+    note: "Changeling: the four seasonal courts",
+  },
+  {
+    key: "regalia",
+    note: "Changeling: the six Contract Regalia",
+  },
+  {
+    key: "contracts",
+    note: "Changeling: Contracts by Regalia, Court, or Goblin",
+  },
   {
     key: "auspices",
     note: "Werewolf: the five auspices (add name for detail)",
   },
   {
     key: "tribes",
-    note: "Werewolf: the five tribes + Ghost Wolves (add name for detail)",
+    note: "Werewolf: the five tribes + Ghost Wolves (add name)",
   },
   { key: "renown", note: "Werewolf: the five Renown" },
   {
@@ -129,7 +150,30 @@ const INDEX = [
     key: "rites",
     note: "Werewolf: rites by rank (add name for detail)",
   },
-  { key: "merits", note: "Merits by category — or filter by category name" },
+  {
+    key: "clans",
+    note: "Vampire: the five clans (add name for detail)",
+  },
+  {
+    key: "covenants",
+    note: "Vampire: five covenants + Unaligned",
+  },
+  {
+    key: "disciplines",
+    note: "Vampire: common Disciplines (in-clan marked)",
+  },
+  {
+    key: "masks",
+    note: "Vampire: Mask/Dirge archetypes (same list)",
+  },
+  {
+    key: "dirges",
+    note: "Vampire: Mask/Dirge archetypes (same list)",
+  },
+  {
+    key: "merits",
+    note: "Merits by category — or filter by category name",
+  },
 ];
 
 function renderIndex(sheet: CofdSheet): string {
@@ -162,6 +206,11 @@ function renderIndex(sheet: CofdSheet): string {
       `${INDENT}  +cg/list gifts rage      (facets of Gift of Rage)`,
     );
   }
+  if (isVampire(sheet)) {
+    out.push(
+      `${INDENT}  +cg/list clans daeva     (Daeva detail)`,
+    );
+  }
   out.push("");
   out.push(footer());
   return out.join("\n");
@@ -169,7 +218,7 @@ function renderIndex(sheet: CofdSheet): string {
 
 function lockedTopic(
   title: string,
-  need: "changeling" | "werewolf",
+  need: "changeling" | "werewolf" | "vampire",
 ): string {
   const out: string[] = [header(title), ""];
   out.push(...body(wrongTemplateMsg(title, need)));
@@ -1264,6 +1313,265 @@ function renderMerits(
   return out.join("\n");
 }
 
+// ── Vampire: Clans ────────────────────────────────────────────────────────────
+
+function renderClans(sheet: CofdSheet, filter?: string): string {
+  if (!isVampire(sheet)) {
+    return lockedTopic("Clans", "vampire");
+  }
+  const pool = eligibleClans(sheet);
+  if (filter) {
+    const q = filter.trim().toLowerCase();
+    const clan = pool.find((c) => c.name.toLowerCase() === q);
+    if (!clan) {
+      const out: string[] = [header("Vampire — Clans"), ""];
+      out.push(...body(`No clan named '${filter}'.`));
+      out.push(
+        ...body(`Try: ${pool.map((c) => c.name).join(", ")}`),
+      );
+      out.push(footer());
+      return out.join("\n");
+    }
+    const out: string[] = [header(`Clan — ${clan.name}`), ""];
+    out.push(`${INDENT}%ch%cy${clan.name}%cn`);
+    out.push(...body(clan.description));
+    out.push("");
+    out.push(
+      ...fieldBlock(
+        "Disciplines",
+        clan.disciplines.join(", "),
+      ),
+    );
+    out.push(...fieldBlock("Bane", clan.bane));
+    out.push("");
+    out.push(footer());
+    return out.join("\n");
+  }
+
+  const out: string[] = [header("Vampire — Clans"), ""];
+  out.push(
+    ...body("Five clans. Add a name for full detail."),
+  );
+  out.push("");
+  for (const c of pool) {
+    out.push(
+      `${INDENT}%ch%cy${c.name}%cn  ` +
+        `(${c.disciplines.join(", ")})`,
+    );
+  }
+  out.push("");
+  out.push(...body("Full detail: +cg/list clans <name>"));
+  out.push(footer());
+  return out.join("\n");
+}
+
+// ── Vampire: Covenants ────────────────────────────────────────────────────────
+
+function renderCovenants(
+  sheet: CofdSheet,
+  filter?: string,
+): string {
+  if (!isVampire(sheet)) {
+    return lockedTopic("Covenants", "vampire");
+  }
+  const pool = eligibleCovenants(sheet);
+  if (filter) {
+    const q = filter.trim().toLowerCase();
+    const cov = pool.find((c) => c.name.toLowerCase() === q);
+    if (!cov) {
+      const out: string[] = [
+        header("Vampire — Covenants"),
+        "",
+      ];
+      out.push(...body(`No covenant named '${filter}'.`));
+      out.push(
+        ...body(`Try: ${pool.map((c) => c.name).join(", ")}`),
+      );
+      out.push(footer());
+      return out.join("\n");
+    }
+    const out: string[] = [
+      header(`Covenant — ${cov.name}`),
+      "",
+    ];
+    out.push(`${INDENT}%ch%cy${cov.name}%cn`);
+    out.push(...body(cov.description));
+    out.push("");
+    out.push(...fieldBlock("Mechanic", cov.mechanic));
+    out.push("");
+    out.push(footer());
+    return out.join("\n");
+  }
+
+  const out: string[] = [header("Vampire — Covenants"), ""];
+  out.push(
+    ...body(
+      "Five covenants + Unaligned. Add a name for detail.",
+    ),
+  );
+  out.push("");
+  for (const c of pool) {
+    out.push(
+      `${INDENT}%ch%cy${c.name}%cn  (${c.mechanic})`,
+    );
+  }
+  out.push("");
+  out.push(
+    ...body("Full detail: +cg/list covenants <name>"),
+  );
+  out.push(footer());
+  return out.join("\n");
+}
+
+// ── Vampire: Disciplines ──────────────────────────────────────────────────────
+
+function renderDisciplines(
+  sheet: CofdSheet,
+  filter?: string,
+): string {
+  if (!isVampire(sheet)) {
+    return lockedTopic("Disciplines", "vampire");
+  }
+  const pool = eligibleDisciplines(sheet);
+  const clanName = (sheet.customFields?.clan ?? "").trim();
+  const clan = clanName ? findClan(clanName) : null;
+  const inClan = new Set(
+    (clan?.disciplines ?? []).map((d) => d.toLowerCase()),
+  );
+
+  if (filter) {
+    const q = filter.trim().toLowerCase();
+    const d = pool.find((x) => x.name.toLowerCase() === q);
+    if (!d) {
+      const out: string[] = [
+        header("Vampire — Disciplines"),
+        "",
+      ];
+      out.push(...body(`No Discipline named '${filter}'.`));
+      out.push(
+        ...body(
+          `Try: ${pool.map((x) => x.name).join(", ")}`,
+        ),
+      );
+      out.push(footer());
+      return out.join("\n");
+    }
+    const mark = inClan.has(d.name.toLowerCase())
+      ? "in-clan"
+      : "out-of-clan";
+    const out: string[] = [
+      header(`Discipline — ${d.name}`),
+      "",
+    ];
+    out.push(
+      `${INDENT}%ch%cy${d.name}%cn  %ch%cx[${mark}]%cn`,
+    );
+    out.push(...body(d.summary));
+    out.push("");
+    out.push(
+      ...fieldBlock(
+        "In-clan for",
+        d.inClanFor.join(", ") || "—",
+      ),
+    );
+    out.push("");
+    out.push(footer());
+    return out.join("\n");
+  }
+
+  const out: string[] = [header("Vampire — Disciplines"), ""];
+  out.push(
+    ...body(
+      "Common Disciplines. * = in-clan for your clan. " +
+        "Chargen: 3 dots, ≥2 in-clan.",
+    ),
+  );
+  out.push("");
+  const names = pool.map((d) => {
+    const star = inClan.has(d.name.toLowerCase()) ? "*" : "";
+    return `%ch%cy${d.name}%cn${star}`;
+  });
+  out.push(...columns(names, 3));
+  out.push("");
+  out.push(
+    ...body("Full detail: +cg/list disciplines <name>"),
+  );
+  out.push(footer());
+  return out.join("\n");
+}
+
+// ── Vampire: Masks / Dirges ───────────────────────────────────────────────────
+
+function renderMasksDirges(
+  sheet: CofdSheet,
+  kind: "mask" | "dirge",
+  filter?: string,
+): string {
+  if (!isVampire(sheet)) {
+    return lockedTopic(
+      kind === "mask" ? "Masks" : "Dirges",
+      "vampire",
+    );
+  }
+  const pool = eligibleMasksDirges(sheet);
+  const title = kind === "mask"
+    ? "Vampire — Masks"
+    : "Vampire — Dirges";
+  const label = kind === "mask" ? "Mask" : "Dirge";
+
+  if (filter) {
+    const q = filter.trim().toLowerCase();
+    const a = pool.find((x) => x.name.toLowerCase() === q);
+    if (!a) {
+      const out: string[] = [header(title), ""];
+      out.push(...body(`No ${label} named '${filter}'.`));
+      out.push(
+        ...body("Browse: +cg/list masks  (same list)"),
+      );
+      out.push(footer());
+      return out.join("\n");
+    }
+    const out: string[] = [
+      header(`${label} — ${a.name}`),
+      "",
+    ];
+    out.push(`${INDENT}%ch%cy${a.name}%cn`);
+    out.push(...body(a.description));
+    out.push("");
+    out.push(
+      ...body(
+        `Set with +cg/set ${kind}=${a.name}`,
+      ),
+    );
+    out.push(footer());
+    return out.join("\n");
+  }
+
+  const out: string[] = [header(title), ""];
+  out.push(
+    ...body(
+      "Mask (public face) and Dirge (true self) share " +
+        "this archetype list. Pick one of each.",
+    ),
+  );
+  out.push("");
+  out.push(
+    ...columns(
+      pool.map((a) => `%ch%cy${a.name}%cn`),
+      3,
+    ),
+  );
+  out.push("");
+  out.push(
+    ...body(
+      `Detail: +cg/list ${kind}s <name>  |  ` +
+        `Set: +cg/set ${kind}=<name>`,
+    ),
+  );
+  out.push(footer());
+  return out.join("\n");
+}
+
 // ── Public router ─────────────────────────────────────────────────────────────
 
 /**
@@ -1322,6 +1630,21 @@ export function renderCgList(
     case "rite":
     case "rites":
       return renderRites(s, f);
+    case "clan":
+    case "clans":
+      return renderClans(s, f);
+    case "covenant":
+    case "covenants":
+      return renderCovenants(s, f);
+    case "discipline":
+    case "disciplines":
+      return renderDisciplines(s, f);
+    case "mask":
+    case "masks":
+      return renderMasksDirges(s, "mask", f);
+    case "dirge":
+    case "dirges":
+      return renderMasksDirges(s, "dirge", f);
     case "merit":
     case "merits":
       return renderMerits(s, f);

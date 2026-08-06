@@ -117,6 +117,11 @@ export function buildSheetWebLayout(
       [cf.auspice, cf.tribe].filter(Boolean).join(" / "),
     );
   }
+  if (cf.clan || cf.covenant) {
+    idBits.push(
+      [cf.clan, cf.covenant].filter(Boolean).join(" / "),
+    );
+  }
   if (sheet.concept) idBits.unshift(String(sheet.concept));
   components.push({
     type: "text",
@@ -124,8 +129,18 @@ export function buildSheetWebLayout(
   });
 
   const anchors: string[] = [];
-  if (sheet.virtue) anchors.push(`Virtue: ${sheet.virtue}`);
-  if (sheet.vice) anchors.push(`Vice: ${sheet.vice}`);
+  const isVamp =
+    String(sheet.template || "").toLowerCase() === "vampire";
+  if (sheet.virtue) {
+    anchors.push(
+      `${isVamp ? "Mask" : "Virtue"}: ${sheet.virtue}`,
+    );
+  }
+  if (sheet.vice) {
+    anchors.push(
+      `${isVamp ? "Dirge" : "Vice"}: ${sheet.vice}`,
+    );
+  }
   if (cf.needle) anchors.push(`Needle: ${cf.needle}`);
   if (cf.thread) anchors.push(`Thread: ${cf.thread}`);
   if (anchors.length) {

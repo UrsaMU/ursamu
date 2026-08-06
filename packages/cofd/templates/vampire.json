@@ -1,0 +1,27 @@
+{
+  "key": "vampire",
+  "name": "Vampire: The Requiem",
+  "moralityName": "Humanity",
+  "powerStatName": "Blood Potency",
+  "energyName": "Vitae",
+  "customFields": [
+    "clan",
+    "covenant",
+    "touchstonemask",
+    "touchstonedirge",
+    "bloodline"
+  ],
+  "validPowers": [
+    "animalism",
+    "auspex",
+    "celerity",
+    "dominate",
+    "majesty",
+    "nightmare",
+    "obfuscate",
+    "protean",
+    "resilience",
+    "vigor"
+  ],
+  "energyMaxFormulaType": "standard"
+}

@@ -64,9 +64,18 @@ function dots(value: number, max = 10): string {
   return "*".repeat(v) + ".".repeat(max - v);
 }
 
+function moralityLabel(sheet: CofdSheet): string {
+  const t = (sheet.template || "mortal").toLowerCase().trim();
+  if (t === "vampire") return "Humanity";
+  if (t === "changeling") return "Clarity";
+  if (t === "werewolf") return "Harmony";
+  return "Integrity";
+}
+
 function viewLine(sheet: CofdSheet, label: string): string {
   const n = sheet.moralityValue | 0;
-  return `${label}  Integrity: ${n}/10  [${dots(n)}]`;
+  const track = moralityLabel(sheet);
+  return `${label}  ${track}: ${n}/10  [${dots(n)}]`;
 }
 
 function outcomeLabel(o: BreakingPointResult["outcome"]): string {
@@ -125,11 +134,13 @@ async function breakingPoint(u: IUrsamuSDK, rest: string) {
   }
 
   const sheet = refreshAdvantages({ ...sheetRaw });
+  const track = moralityLabel(sheet);
   const result = rollBreakingPoint({
     integrity: sheet.moralityValue | 0,
     resolve: sheet.attributes.resolve | 0,
     composure: sheet.attributes.composure | 0,
     modifier,
+    template: sheet.template,
   }, sheet);
 
   const updated = applyBreakingPoint(sheet, result);
@@ -139,9 +150,12 @@ async function breakingPoint(u: IUrsamuSDK, rest: string) {
     ? "You suffer a breaking point."
     : `${u.util.displayName(target, u.me)} suffers a breaking point.`;
   const sign = modifier >= 0 ? `+${modifier}` : `${modifier}`;
+  const modName = track === "Humanity"
+    ? "HumanityMod"
+    : "IntegrityMod";
   const modBreak = modifier !== 0
-    ? `Resolve(${sheet.attributes.resolve}) + Composure(${sheet.attributes.composure}) + IntegrityMod(${result.integrityMod >= 0 ? "+" : ""}${result.integrityMod}) ${sign}`
-    : `Resolve(${sheet.attributes.resolve}) + Composure(${sheet.attributes.composure}) + IntegrityMod(${result.integrityMod >= 0 ? "+" : ""}${result.integrityMod})`;
+    ? `Resolve(${sheet.attributes.resolve}) + Composure(${sheet.attributes.composure}) + ${modName}(${result.integrityMod >= 0 ? "+" : ""}${result.integrityMod}) ${sign}`
+    : `Resolve(${sheet.attributes.resolve}) + Composure(${sheet.attributes.composure}) + ${modName}(${result.integrityMod >= 0 ? "+" : ""}${result.integrityMod})`;
 
   u.send(`%ch${targetLabel}%cn`);
   u.send(`  Pool   : ${modBreak} = ${Math.max(0, result.pool)} dice${result.roll.isChanceDie ? " (chance die)" : ""}`);
@@ -150,9 +164,9 @@ async function breakingPoint(u: IUrsamuSDK, rest: string) {
   u.send(`  Reason : ${reason}`);
 
   if (result.integrityLoss > 0) {
-    u.send(`  Integrity: ${(sheet.moralityValue | 0)} -> ${updated.moralityValue | 0}`);
+    u.send(`  ${track}: ${(sheet.moralityValue | 0)} -> ${updated.moralityValue | 0}`);
   } else {
-    u.send(`  Integrity: ${updated.moralityValue | 0}/10 (unchanged)`);
+    u.send(`  ${track}: ${updated.moralityValue | 0}/10 (unchanged)`);
   }
 
   for (const key of result.conditionsGranted) {
@@ -214,7 +228,8 @@ async function setIntegrity(u: IUrsamuSDK, rest: string) {
   await u.db.modify(target.id, "$set", { "data.cofd": updated });
 
   const label = sameTarget ? "Your" : `${u.util.displayName(target, u.me)}'s`;
-  u.send(`${label} Integrity set to ${n}/10.`);
+  const track = moralityLabel(sheetRaw);
+  u.send(`${label} ${track} set to ${n}/10.`);
 }
 
 export async function integrityExec(u: IUrsamuSDK) {

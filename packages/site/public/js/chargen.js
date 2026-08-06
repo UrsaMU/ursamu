@@ -144,6 +144,27 @@
         }
       }
     }
+    if (stage === 3 && sh.template === "vampire") {
+      var vneed = [
+        "clan", "covenant",
+        "touchstonemask", "touchstonedirge",
+      ];
+      for (var vi = 0; vi < vneed.length; vi++) {
+        if (!(sh.customFields || {})[vneed[vi]]) {
+          return "Set clan, covenant, and both Touchstones.";
+        }
+      }
+    }
+    if (stage === 7 && sh.template === "vampire") {
+      var psum = 0;
+      var pw = sh.powers || {};
+      Object.keys(pw).forEach(function (k) {
+        psum += Number(pw[k]) || 0;
+      });
+      if (psum !== 3) {
+        return "Allocate exactly 3 Discipline dots.";
+      }
+    }
     if (stage === 4) {
       var a = sh.attributes || {};
       var m = (a.intelligence || 1) - 1 + (a.wits || 1) - 1 +
@@ -161,8 +182,9 @@
       }
     }
     if (stage === 6) {
-      var budget = String(sh.template || "").toLowerCase() ===
-        "werewolf"
+      var tBudget = String(sh.template || "").toLowerCase();
+      var budget = (tBudget === "werewolf" ||
+        tBudget === "vampire")
         ? 10
         : 7;
       var spent = 0;
@@ -197,6 +219,17 @@
         customFields: [
           "seeming", "kith", "court", "favored",
           "needle", "thread", "mask", "mien",
+        ],
+      };
+    } else if (state.sheet.template === "vampire") {
+      state.maxStage = 7;
+      state.templateMeta = {
+        key: "vampire",
+        name: "Vampire: The Requiem",
+        customFields: [
+          "clan", "covenant",
+          "touchstonemask", "touchstonedirge",
+          "bloodline",
         ],
       };
     } else if (state.sheet.template === "werewolf") {
@@ -270,21 +303,59 @@
       if (trait === "concept") sh.concept = value;
       else if (trait === "virtue") sh.virtue = value;
       else if (trait === "vice") sh.vice = value;
-      else if (trait === "template") sh.template = value.toLowerCase();
       else if (
+        trait === "mask" &&
+        sh.template === "vampire"
+      ) {
+        sh.virtue = value;
+      } else if (
+        trait === "dirge" &&
+        sh.template === "vampire"
+      ) {
+        sh.vice = value;
+      } else if (trait === "template") {
+        sh.template = value.toLowerCase();
+      } else if (
         [
           "seeming", "kith", "court", "favored",
           "needle", "thread", "mask", "mien",
           "auspice", "tribe",
+          "clan", "covenant",
+          "touchstonemask", "touchstonedirge",
+          "bloodline", "touchstone",
         ].indexOf(trait) >= 0
       ) {
         sh.customFields = sh.customFields || {};
-        sh.customFields[trait] = value;
+        var cfKey = trait === "touchstone"
+          ? "touchstonemask"
+          : trait;
+        sh.customFields[cfKey] = value;
+        if (cfKey === "touchstonemask" ||
+          cfKey === "touchstonedirge") {
+          sh.touchstones = sh.touchstones || {};
+          if (cfKey === "touchstonemask") {
+            sh.touchstones.mask = value;
+          } else {
+            sh.touchstones.dirge = value;
+          }
+        }
       } else if (sh.attributes && trait in sh.attributes) {
         sh.attributes[trait] = Math.max(
           1,
           Math.min(5, parseInt(value, 10) || 1),
         );
+      } else if (
+        state.stage === 7 &&
+        sh.template === "vampire"
+      ) {
+        sh.powers = sh.powers || {};
+        var pkey = trait.toLowerCase();
+        var pn = parseInt(value, 10);
+        if (!value || value === "0" || isNaN(pn) || pn < 1) {
+          delete sh.powers[pkey];
+        } else {
+          sh.powers[pkey] = Math.min(5, pn);
+        }
       } else if (state.stage === 6 || findMeritDef(trait)) {
         sh.merits = sh.merits || {};
         // Normalize language(spanish) → language:spanish storage
@@ -397,6 +468,7 @@
     var topics = [
       "virtues", "vices", "templates", "seemings", "kiths",
       "courts", "regalia", "attributes", "skills", "merits",
+      "clans", "covenants", "disciplines", "masks",
     ];
     if (demo) {
       opts = {
@@ -416,6 +488,82 @@
           items: [
             { key: "mortal", name: "Mortal" },
             { key: "changeling", name: "Changeling: The Lost" },
+            { key: "vampire", name: "Vampire: The Requiem" },
+          ],
+        },
+        clans: {
+          items: [
+            {
+              name: "Daeva",
+              disciplines: ["Celerity", "Majesty", "Vigor"],
+              description: "Serpents.",
+            },
+            {
+              name: "Ventrue",
+              disciplines: ["Animalism", "Dominate", "Resilience"],
+              description: "Lords.",
+            },
+            {
+              name: "Mekhet",
+              disciplines: ["Auspex", "Celerity", "Obfuscate"],
+              description: "Shadows.",
+            },
+          ],
+        },
+        covenants: {
+          items: [
+            {
+              name: "Invictus", mechanic: "Oaths",
+              description: "First Estate.",
+            },
+            {
+              name: "Unaligned", mechanic: "None",
+              description: "No covenant.",
+            },
+          ],
+        },
+        disciplines: {
+          items: [
+            {
+              name: "Majesty", key: "majesty",
+              summary: "Awe and presence.",
+              inClanFor: ["Daeva"],
+            },
+            {
+              name: "Celerity", key: "celerity",
+              summary: "Supernatural speed.",
+              inClanFor: ["Daeva", "Mekhet"],
+            },
+            {
+              name: "Vigor", key: "vigor",
+              summary: "Supernatural strength.",
+              inClanFor: ["Daeva", "Nosferatu"],
+            },
+            {
+              name: "Dominate", key: "dominate",
+              summary: "Mental commands.",
+              inClanFor: ["Ventrue"],
+            },
+          ],
+        },
+        masks: {
+          items: [
+            {
+              name: "Authoritarian",
+              description: "Must be on top.",
+            },
+            {
+              name: "Courtesan",
+              description: "Exists for others' pleasure.",
+            },
+            {
+              name: "Survivor",
+              description: "Own existence above all.",
+            },
+            {
+              name: "Scholar",
+              description: "Knowledge is power.",
+            },
           ],
         },
         seemings: {
@@ -802,14 +950,40 @@
         return String(r.name).toLowerCase() !== blocked;
       });
     }
+    if (field === "clan") {
+      return (opts.clans && opts.clans.items) || [];
+    }
+    if (field === "covenant") {
+      return (opts.covenants && opts.covenants.items) || [];
+    }
+    if (
+      field === "mask" ||
+      field === "dirge" ||
+      field === "virtue" ||
+      field === "vice"
+    ) {
+      // Vampire Mask/Dirge share one archetype list.
+      if (
+        String(sheet.template || "").toLowerCase() === "vampire"
+      ) {
+        return (opts.masks && opts.masks.items) || [];
+      }
+      if (field === "virtue") {
+        return (opts.virtues && opts.virtues.items) || [];
+      }
+      if (field === "vice") {
+        return (opts.vices && opts.vices.items) || [];
+      }
+    }
+    if (field === "discipline" || field === "powers") {
+      return (opts.disciplines && opts.disciplines.items) || [];
+    }
     return [];
   }
 
   function findCatalogItem(field, name, sheet) {
     var q = String(name || "").trim().toLowerCase();
     if (!q) return null;
-    // Search full catalogs so kith can resolve seeming even when
-    // filtered list is empty.
     var pool;
     if (field === "seeming") {
       pool = (opts.seemings && opts.seemings.items) || [];
@@ -819,11 +993,33 @@
       pool = (opts.courts && opts.courts.items) || [];
     } else if (field === "favored") {
       pool = (opts.regalia && opts.regalia.items) || [];
+    } else if (field === "clan") {
+      pool = (opts.clans && opts.clans.items) || [];
+    } else if (field === "covenant") {
+      pool = (opts.covenants && opts.covenants.items) || [];
+    } else if (
+      field === "mask" || field === "dirge" ||
+      field === "virtue" || field === "vice"
+    ) {
+      pool = catalogItems(field, sheet);
+    } else if (field === "discipline" || field === "powers") {
+      pool = (opts.disciplines && opts.disciplines.items) || [];
     } else {
       pool = catalogItems(field, sheet);
     }
     for (var i = 0; i < pool.length; i++) {
-      if (String(pool[i].name).toLowerCase() === q) return pool[i];
+      var nm = String(pool[i].name || "").toLowerCase();
+      var ky = String(pool[i].key || "").toLowerCase();
+      if (nm === q || ky === q) return pool[i];
+      // Prefix match for autocomplete (dae → Daeva)
+      if (nm.indexOf(q) === 0 || ky.indexOf(q) === 0) {
+        return pool[i];
+      }
+    }
+    // Substring fallback
+    for (var j = 0; j < pool.length; j++) {
+      var nm2 = String(pool[j].name || "").toLowerCase();
+      if (nm2.indexOf(q) !== -1) return pool[j];
     }
     return null;
   }
@@ -846,6 +1042,24 @@
         ? "Seeming affinity: " + item.favoredBy
         : "Second favored Regalia";
     }
+    if (field === "clan" && item.disciplines) {
+      return "In-clan: " +
+        (item.disciplines.join
+          ? item.disciplines.join(", ")
+          : item.disciplines);
+    }
+    if (field === "covenant" && item.mechanic) {
+      return "Mechanic: " + item.mechanic;
+    }
+    if (
+      (field === "discipline" || field === "powers") &&
+      item.inClanFor
+    ) {
+      return "In-clan for: " +
+        (item.inClanFor.join
+          ? item.inClanFor.join(", ")
+          : item.inClanFor);
+    }
     return "";
   }
 
@@ -854,9 +1068,18 @@
     var parts = [];
     if (item.blessing) parts.push("Blessing: " + item.blessing);
     if (item.curse) parts.push("Curse: " + item.curse);
+    if (item.bane) parts.push("Bane: " + item.bane);
+    if (item.summary) parts.push(item.summary);
     if (item.description) parts.push(item.description);
     if (item.mantleNotes) parts.push(item.mantleNotes);
     return parts.join(" · ");
+  }
+
+  function fieldLabel(fname) {
+    if (fname === "touchstonemask") return "Mask Touchstone";
+    if (fname === "touchstonedirge") return "Dirge Touchstone";
+    if (fname === "favored") return "Second favored Regalia";
+    return titleCase(fname);
   }
 
   function fieldText(id, label, value, multiline) {
@@ -942,22 +1165,41 @@
     var html = "";
 
     if (stage === 1) {
+      var isVamp1 =
+        String(sh.template || "").toLowerCase() === "vampire";
       html += '<p class="cg-stage__hint">Define your core identity — ' +
-        "concept, virtue (strength), and vice (flaw). Same as " +
-        "<code>+cg</code> Stage 1.</p>";
+        (isVamp1
+          ? "concept, Mask (public face), and Dirge (true self)."
+          : "concept, virtue (strength), and vice (flaw).") +
+        " Same as <code>+cg</code> Stage 1.</p>";
       html += fieldText("concept", "Concept", sh.concept, true);
-      html += fieldSelect(
-        "virtue",
-        "Virtue",
-        (opts.virtues && opts.virtues.items) || [],
-        sh.virtue,
-      );
-      html += fieldSelect(
-        "vice",
-        "Vice",
-        (opts.vices && opts.vices.items) || [],
-        sh.vice,
-      );
+      if (isVamp1) {
+        html += fieldCatalog(
+          "mask",
+          "Mask",
+          sh.virtue,
+          "Public face archetype — search list.",
+        );
+        html += fieldCatalog(
+          "dirge",
+          "Dirge",
+          sh.vice,
+          "True self archetype — same list as Mask.",
+        );
+      } else {
+        html += fieldSelect(
+          "virtue",
+          "Virtue",
+          (opts.virtues && opts.virtues.items) || [],
+          sh.virtue,
+        );
+        html += fieldSelect(
+          "vice",
+          "Vice",
+          (opts.vices && opts.vices.items) || [],
+          sh.vice,
+        );
+      }
     } else if (stage === 2) {
       html += '<p class="cg-stage__hint">Choose your supernatural ' +
         "template (or Mortal).</p>";
@@ -978,13 +1220,21 @@
       }
       html += "</div>";
     } else if (stage === 3) {
-      html += '<p class="cg-stage__hint">Template-specific details. ' +
-        "Search catalogs like merits — seeming and kith work " +
-        "together (pick either first). Court and second favored " +
-        "Regalia are independent.</p>";
+      var tmplKey = String(sh.template || "").toLowerCase();
+      if (tmplKey === "vampire") {
+        html += '<p class="cg-stage__hint">Kindred details — ' +
+          "search catalogs for clan and covenant. Set both " +
+          "Touchstones (Mask anchor and Dirge anchor). " +
+          "Bloodline is optional.</p>";
+      } else {
+        html += '<p class="cg-stage__hint">Template-specific details. ' +
+          "Search catalogs like merits — seeming and kith work " +
+          "together (pick either first). Court and second favored " +
+          "Regalia are independent.</p>";
+      }
       var fields = (st.templateMeta && st.templateMeta.customFields) ||
         [];
-      var optional = { mask: 1, mien: 1, animals: 1 };
+      var optional = { mask: 1, mien: 1, animals: 1, bloodline: 1 };
       var cf = sh.customFields || {};
       for (var f = 0; f < fields.length; f++) {
         var fname = fields[f];
@@ -1020,11 +1270,58 @@
             cf.favored,
             "Must differ from your seeming's favored Regalia.",
           );
+        } else if (fname === "clan") {
+          html += fieldCatalog(
+            "clan",
+            "Clan",
+            cf.clan,
+            "Sets in-clan Disciplines.",
+          );
+        } else if (fname === "covenant") {
+          html += fieldCatalog(
+            "covenant",
+            "Covenant",
+            cf.covenant,
+            "Includes Unaligned.",
+          );
+        } else if (
+          fname === "touchstonemask" ||
+          fname === "touchstonedirge"
+        ) {
+          html += fieldText(
+            fname,
+            fieldLabel(fname),
+            cf[fname],
+          );
         } else if (fname === "auspice" || fname === "tribe") {
           html += fieldText(fname, titleCase(fname), cf[fname]);
         } else {
-          html += fieldText(fname, titleCase(fname), cf[fname]);
+          html += fieldText(
+            fname,
+            fieldLabel(fname),
+            cf[fname],
+          );
         }
+      }
+      if (tmplKey === "vampire") {
+        html += fieldText(
+          "bloodline",
+          "Bloodline (optional)",
+          cf.bloodline,
+        );
+        // Allow Mask/Dirge fix without leaving stage 3
+        html += fieldCatalog(
+          "mask",
+          "Mask",
+          sh.virtue,
+          "Public face — can set here after picking vampire.",
+        );
+        html += fieldCatalog(
+          "dirge",
+          "Dirge",
+          sh.vice,
+          "True self archetype.",
+        );
       }
       if (!fields.length) {
         html += '<p class="cg-stage__hint">No extra details for ' +
@@ -1149,17 +1446,81 @@
         html += "</ul></div>";
       }
     } else if (stage >= 7) {
-      html += '<p class="cg-stage__hint">Powers stage — for ' +
-        "Changeling, pick Contracts in-game with " +
-        "<code>+cg/contract</code>. Web picks coming soon; " +
-        "you can submit when the sheet validates.</p>";
-      var contracts = sh.contracts || [];
-      if (contracts.length) {
-        html += "<ul>";
-        for (var c = 0; c < contracts.length; c++) {
-          html += "<li>" + esc(contracts[c]) + "</li>";
+      var t7 = String(sh.template || "").toLowerCase();
+      if (t7 === "vampire") {
+        var discItems =
+          (opts.disciplines && opts.disciplines.items) || [];
+        var clanName = String(
+          (sh.customFields && sh.customFields.clan) || "",
+        );
+        var pwr = sh.powers || {};
+        var spentD = 0;
+        Object.keys(pwr).forEach(function (k) {
+          spentD += Number(pwr[k]) || 0;
+        });
+        html += '<p class="cg-stage__hint">Allocate ' +
+          "<strong>3 Discipline dots</strong> (≥2 in-clan for " +
+          esc(clanName || "your clan") +
+          "). Search to add; use dots to set rating.</p>";
+        html += '<p class="cg-pool' +
+          (spentD === 3 ? "" : " is-bad") +
+          '">Disciplines <strong>' + spentD +
+          "</strong> / 3</p>";
+        html += fieldCatalog(
+          "discipline",
+          "Add Discipline",
+          "",
+          "Type to search — pick, then set dots below.",
+        );
+        // Active disciplines as dot rows
+        var dNames = discItems.map(function (d) {
+          return d.key || String(d.name).toLowerCase();
+        });
+        // Show in-clan first
+        var ordered = discItems.slice().sort(function (a, b) {
+          var ai = (a.inClanFor || []).some(function (c) {
+            return String(c).toLowerCase() ===
+              clanName.toLowerCase();
+          }) ? 0 : 1;
+          var bi = (b.inClanFor || []).some(function (c) {
+            return String(c).toLowerCase() ===
+              clanName.toLowerCase();
+          }) ? 0 : 1;
+          return ai - bi ||
+            String(a.name).localeCompare(String(b.name));
+        });
+        html += '<div class="cg-group"><h3 class="cg-group__title">' +
+          "Disciplines</h3>";
+        for (var di = 0; di < ordered.length; di++) {
+          var d = ordered[di];
+          var dkey = d.key || String(d.name).toLowerCase();
+          var dv = Number(pwr[dkey]) || 0;
+          var inC = (d.inClanFor || []).some(function (c) {
+            return String(c).toLowerCase() ===
+              clanName.toLowerCase();
+          });
+          var label = d.name + (inC ? " ★" : "");
+          html += '<div class="cg-dots-row">' +
+            '<span class="cg-dots-row__label">' +
+            esc(label) + "</span>" +
+            renderDots(dkey, dv, 0, 5) +
+            '<span class="cg-dots-row__val">' + dv +
+            "</span></div>";
         }
-        html += "</ul>";
+        html += "</div>";
+      } else {
+        html += '<p class="cg-stage__hint">Powers stage — for ' +
+          "Changeling, choose Contracts with " +
+          "<code>+cg/contract</code> (or finish here when " +
+          "your package is complete).</p>";
+        var contracts = sh.contracts || [];
+        if (contracts.length) {
+          html += "<ul>";
+          for (var c = 0; c < contracts.length; c++) {
+            html += "<li>" + esc(contracts[c]) + "</li>";
+          }
+          html += "</ul>";
+        }
       }
     }
 
@@ -1866,8 +2227,17 @@
       if (!search || !suggest) return;
 
       // Hydrate detail from current sheet value.
-      var cur = (sheet.customFields &&
-        sheet.customFields[field]) || "";
+      var cur = "";
+      if (field === "mask" || field === "virtue") {
+        cur = sheet.virtue || "";
+      } else if (field === "dirge" || field === "vice") {
+        cur = sheet.vice || "";
+      } else if (field === "discipline" || field === "powers") {
+        cur = "";
+      } else {
+        cur = (sheet.customFields &&
+          sheet.customFields[field]) || "";
+      }
       if (cur) {
         fillCatalogDetail(
           box,
@@ -1897,11 +2267,18 @@
             var it = items[i];
             var hay = (
               it.name + " " +
+              (it.key || "") + " " +
               (it.seeming || "") + " " +
               (it.emotion || "") + " " +
               (it.favoredRegalia || "") + " " +
               (it.favoredBy || "") + " " +
-              (it.description || "")
+              (it.mechanic || "") + " " +
+              ((it.inClanFor && it.inClanFor.join)
+                ? it.inClanFor.join(" ")
+                : "") + " " +
+              (it.summary || "") + " " +
+              (it.description || "") + " " +
+              (it.bane || "")
             ).toLowerCase();
             if (hay.indexOf(q) !== -1) hits.push(it);
           }
@@ -1948,6 +2325,23 @@
         search.value = item.name;
         hideSuggest();
         fillCatalogDetail(box, field, item);
+        if (field === "discipline" || field === "powers") {
+          // Add 1 dot (or keep existing) under power key.
+          var pkey = (item.key || item.name).toLowerCase();
+          var curP = (state.sheet.powers &&
+            state.sheet.powers[pkey]) || 0;
+          var next = curP > 0 ? curP : 1;
+          applyTrait(pkey, String(next), { rerender: true });
+          return;
+        }
+        if (field === "mask") {
+          applyTrait("mask", item.name, { rerender: true });
+          return;
+        }
+        if (field === "dirge") {
+          applyTrait("dirge", item.name, { rerender: true });
+          return;
+        }
         applyTrait(field, item.name, { rerender: true });
       }
 
@@ -2244,11 +2638,12 @@
           cur = (state.sheet.attributes &&
             state.sheet.attributes[name]) ||
             (state.sheet.skills && state.sheet.skills[name]) ||
+            (state.sheet.powers && state.sheet.powers[name]) ||
             0;
         }
         var next = parseInt(val, 10);
         if (cur === next && next > 0) {
-          // attrs floor 1, skills floor 0
+          // attrs floor 1, skills/powers floor 0
           var isAttr = state.sheet.attributes &&
             name in state.sheet.attributes;
           next = isAttr ? Math.max(1, next - 1) : next - 1;

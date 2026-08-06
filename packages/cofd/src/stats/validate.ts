@@ -6,13 +6,20 @@ import {
   COFD_MERITS,
   COFD_VIRTUE_NAMES,
   COFD_VICE_NAMES,
+  VTR_MASK_DIRGE_NAMES,
   findVice,
   findVirtue,
+  findMaskDirge,
   parseMeritRef,
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
 import { normalizeAnimalsField } from "../form/animals.ts";
 import { checkPrerequisites } from "../support/prereq.ts";
+import { matchNameOrThrow } from "../support/match.ts";
+import {
+  normalizeCustomFieldKey,
+  resolveCustomFieldValue,
+} from "../chargen/fields.ts";
 import { defaultSheet, migrateSheet, type CofdSheet } from "./sheet.ts";
 
 /**
@@ -165,21 +172,45 @@ export function validateTraitValue(trait: string, valueStr: string, sheet?: Cofd
     return valueStr.trim();
   }
 
-  if (key === "virtue") {
+  if (key === "virtue" || key === "mask") {
+    if (tKey === "vampire") {
+      const exact = findMaskDirge(valueStr);
+      if (exact) return exact.name;
+      const n = matchNameOrThrow(
+        valueStr,
+        VTR_MASK_DIRGE_NAMES,
+        "mask",
+        "+cg/list masks",
+      );
+      return findMaskDirge(n)?.name ?? n;
+    }
     const match = findVirtue(valueStr);
     if (!match) {
       throw new Error(
-        `Invalid Virtue '${valueStr.trim()}'. Valid Virtues: ${COFD_VIRTUE_NAMES.join(", ")}.`,
+        `Invalid Virtue '${valueStr.trim()}'. Valid Virtues: ` +
+          `${COFD_VIRTUE_NAMES.join(", ")}.`,
       );
     }
     return match.name;
   }
 
-  if (key === "vice") {
+  if (key === "vice" || key === "dirge") {
+    if (tKey === "vampire") {
+      const exact = findMaskDirge(valueStr);
+      if (exact) return exact.name;
+      const n = matchNameOrThrow(
+        valueStr,
+        VTR_MASK_DIRGE_NAMES,
+        "dirge",
+        "+cg/list masks",
+      );
+      return findMaskDirge(n)?.name ?? n;
+    }
     const match = findVice(valueStr);
     if (!match) {
       throw new Error(
-        `Invalid Vice '${valueStr.trim()}'. Valid Vices: ${COFD_VICE_NAMES.join(", ")}.`,
+        `Invalid Vice '${valueStr.trim()}'. Valid Vices: ` +
+          `${COFD_VICE_NAMES.join(", ")}.`,
       );
     }
     return match.name;
@@ -189,9 +220,13 @@ export function validateTraitValue(trait: string, valueStr: string, sheet?: Cofd
     return valueStr.trim();
   }
 
-  // Custom Fields check (e.g. Clan, Covenant, Seeming)
-  if (tmpl.customFields.includes(key)) {
-    if (key === "animals") {
+  // Custom Fields (Clan, Covenant, Seeming, touchstones…)
+  const cfKey = normalizeCustomFieldKey(key);
+  const cfAllowed = tmpl.customFields.map((f) =>
+    f.toLowerCase()
+  );
+  if (cfAllowed.includes(cfKey) || tmpl.customFields.includes(key)) {
+    if (cfKey === "animals" || key === "animals") {
       const norm = normalizeAnimalsField(
         valueStr,
         sheet?.customFields?.seeming,
@@ -199,11 +234,21 @@ export function validateTraitValue(trait: string, valueStr: string, sheet?: Cofd
       if (!norm.ok) throw new Error(norm.error);
       return norm.value;
     }
+    const res = resolveCustomFieldValue(
+      sheet.template,
+      cfKey,
+      valueStr,
+    );
+    if (res.kind === "invalid") throw new Error(res.error);
+    if (res.kind === "ok") return res.value;
     return valueStr.trim();
   }
 
-  // Powers check (e.g. Vigor, Forces)
-  if (tmpl.validPowers.includes(key)) {
+  // Powers / Disciplines (partial names resolved upstream in chargen)
+  if (
+    tmpl.validPowers.includes(key) ||
+    tmpl.validPowers.includes(cfKey)
+  ) {
     if (isNaN(valInt) || valInt < 0 || valInt > 5) {
       throw new Error("Powers must be integers between 0 and 5.");
     }

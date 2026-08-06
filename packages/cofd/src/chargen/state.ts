@@ -5,17 +5,8 @@ import {
   COFD_SKILLS,
   COFD_MERITS,
   parseMeritRef,
-  findSeeming,
-  findKith,
-  findCourt,
-  findRegalia,
-  findAuspice,
-  findTribe,
-  CTL_SEEMING_NAMES,
-  CTL_COURT_NAMES,
-  CTL_REGALIA_NAMES,
-  WTF_AUSPICE_NAMES,
-  WTF_TRIBE_NAMES,
+  findMaskDirge,
+  VTR_MASK_DIRGE_NAMES,
 } from "../dictionary/index.ts";
 import {
   COFD_TEMPLATES,
@@ -29,6 +20,23 @@ import {
   type CofdSheet,
 } from "../stats/index.ts";
 import { matchNameOrThrow } from "../support/match.ts";
+import {
+  VAMPIRE_OPTIONAL_FIELDS,
+  customFieldLabel,
+  normalizeCustomFieldKey,
+  resolveCustomFieldValue,
+  resolvePowerKey,
+  type CustomFieldResolution,
+} from "./fields.ts";
+
+export {
+  VAMPIRE_OPTIONAL_FIELDS,
+  customFieldLabel,
+  normalizeCustomFieldKey,
+  resolveCustomFieldValue,
+  resolvePowerKey,
+  type CustomFieldResolution,
+};
 
 export interface CofdCgState {
   stage: number;        // 1 to 6
@@ -48,9 +56,11 @@ export function initCgState(): CofdCgState {
   };
 }
 
-/** Starting Merit dots for a template. Werewolf gets 10; all others 7. */
+/** Starting Merit dots. Vampire & Werewolf get 10; others 7. */
 export function startingMeritDots(template: string): number {
-  return template.toLowerCase().trim() === "werewolf" ? 10 : 7;
+  const t = template.toLowerCase().trim();
+  if (t === "werewolf" || t === "vampire") return 10;
+  return 7;
 }
 
 /**
@@ -60,6 +70,7 @@ export function startingMeritDots(template: string): number {
 export function startingPowerDots(template: string, tribe?: string): number {
   const t = template.toLowerCase().trim();
   if (t === "changeling") return 3;
+  if (t === "vampire") return 3;
   if (t === "werewolf") {
     return (tribe || "").trim().toLowerCase() === "ghost wolves" ? 2 : 3;
   }
@@ -70,6 +81,7 @@ export function startingPowerDots(template: string, tribe?: string): number {
 export function powerLabel(template: string): string {
   const t = template.toLowerCase().trim();
   if (t === "changeling") return "Contracts";
+  if (t === "vampire") return "Disciplines";
   if (t === "werewolf") return "Renown";
   return "Powers";
 }
@@ -82,53 +94,30 @@ export function powerLabel(template: string): string {
 export function maxStageFor(template: string): number {
   const t = template.toLowerCase().trim();
   if (t === "werewolf") return 8;
-  // Changeling's Stage 7 is discrete Contract selection (validPowers is empty),
-  // so it can't be inferred from validPowers.length.
-  if (t === "changeling") return 7;
+  // Changeling Stage 7 = discrete Contracts; Vampire Stage 7 = Disciplines.
+  if (t === "changeling" || t === "vampire") return 7;
   const tmpl = COFD_TEMPLATES[t];
   return tmpl && tmpl.validPowers.length > 0 ? 7 : 6;
 }
 
-// Stage-3 custom fields that have a canonical catalog. Anything not listed here
-// (concept, needle, thread, blood, bone, ...) is genuinely free-form text.
-interface CustomFieldDomain {
-  find: (v: string) => { name: string } | null;
-  options: string;
+/**
+ * Stage-1 anchor keys. Vampires store Mask/Dirge on virtue/vice;
+ * mask/dirge are accepted aliases that write those same fields.
+ */
+export function stage1AnchorKeys(template: string): string[] {
+  const t = template.toLowerCase().trim();
+  if (t === "vampire") {
+    return ["concept", "virtue", "vice", "mask", "dirge"];
+  }
+  return ["concept", "virtue", "vice"];
 }
 
-const CUSTOM_FIELD_DOMAINS: Record<string, Record<string, CustomFieldDomain>> = {
-  changeling: {
-    seeming: { find: findSeeming, options: `Valid seemings: ${CTL_SEEMING_NAMES.join(", ")}.` },
-    kith:    { find: findKith,    options: "See +cg/list kiths for valid kiths." },
-    court:   { find: findCourt,   options: `Valid courts: ${CTL_COURT_NAMES.join(", ")}.` },
-    favored: { find: findRegalia, options: `Valid Regalia: ${CTL_REGALIA_NAMES.join(", ")}.` },
-  },
-  werewolf: {
-    auspice: { find: findAuspice, options: `Valid auspices: ${WTF_AUSPICE_NAMES.join(", ")}.` },
-    tribe:   { find: findTribe,   options: `Valid tribes: ${WTF_TRIBE_NAMES.join(", ")}.` },
-  },
-};
-
-export type CustomFieldResolution =
-  | { kind: "free" }                    // no canonical list — accept as typed
-  | { kind: "ok"; value: string }       // valid — `value` is the canonical-cased name
-  | { kind: "invalid"; error: string }; // not a recognized value
-
-/**
- * Resolve a Stage-3 custom field value against its canonical catalog, if any.
- * Free-form fields pass through; recognized fields are normalized to canonical
- * casing; unrecognized values are rejected with a helpful list.
- */
-export function resolveCustomFieldValue(
-  template: string,
-  field: string,
-  value: string,
-): CustomFieldResolution {
-  const domain = CUSTOM_FIELD_DOMAINS[template.toLowerCase().trim()]?.[field.toLowerCase().trim()];
-  if (!domain) return { kind: "free" };
-  const found = domain.find(value);
-  if (found) return { kind: "ok", value: found.name };
-  return { kind: "invalid", error: `Invalid ${field} '${value}'. ${domain.options}` };
+/** Map Stage-1 alias keys onto the sheet property they write. */
+export function resolveStage1Key(key: string): string {
+  const k = key.toLowerCase().trim();
+  if (k === "mask") return "virtue";
+  if (k === "dirge") return "vice";
+  return k;
 }
 
 export function getStageName(stage: number): string {
@@ -164,13 +153,18 @@ export function updateCgState(
 
   // 1. Stage checks (+ partial name resolve where catalogs apply)
   switch (stage) {
-    case 1:
-      if (!["concept", "virtue", "vice"].includes(key)) {
+    case 1: {
+      const allowed = stage1AnchorKeys(sheet.template);
+      if (!allowed.includes(key)) {
         throw new Error(
-          "In Stage 1, you can only set concept, virtue, and vice.",
+          `In Stage 1, you can only set ${allowed.join(", ")}.`,
         );
       }
+      // Vampire: mask/dirge are aliases for virtue/vice sheet fields.
+      key = resolveStage1Key(key);
+      resolvedTrait = key;
       break;
+    }
 
     case 2:
       if (key !== "template") {
@@ -194,14 +188,49 @@ export function updateCgState(
       break;
 
     case 3: {
-      if (!tmpl.customFields.includes(key)) {
+      // Vampire: Mask/Dirge archetypes may be set here too.
+      if (
+        tKey === "vampire" &&
+        (key === "mask" || key === "dirge" ||
+          key === "virtue" || key === "vice")
+      ) {
+        key = resolveStage1Key(key);
+        resolvedTrait = key;
+        // Partial match Mask/Dirge archetypes.
+        if (key === "virtue" || key === "vice") {
+          const m = findMaskDirge(val) ?? (() => {
+            try {
+              const n = matchNameOrThrow(
+                val,
+                VTR_MASK_DIRGE_NAMES,
+                key === "virtue" ? "mask" : "dirge",
+                "+cg/list masks",
+              );
+              return findMaskDirge(n);
+            } catch {
+              return null;
+            }
+          })();
+          if (m) val = m.name;
+        }
+        break;
+      }
+      key = normalizeCustomFieldKey(key);
+      resolvedTrait = key;
+      const allowed = tmpl.customFields.map((f) =>
+        f.toLowerCase()
+      );
+      if (!allowed.includes(key)) {
+        const extra = tKey === "vampire"
+          ? ", mask, dirge"
+          : "";
         throw new Error(
           `In Stage 3, you can only set custom fields for ` +
-            `'${tmpl.name}': ${tmpl.customFields.join(", ")}.`,
+            `'${tmpl.name}': ` +
+            `${tmpl.customFields.join(", ")}${extra}.`,
         );
       }
-      // Canonical catalogs (seeming, kith, court, auspice, tribe)
-      // normalize casing; free-form fields pass through.
+      // Catalog fields: partial-name autocomplete; free-form pass.
       const res = resolveCustomFieldValue(
         sheet.template,
         key,
@@ -263,13 +292,12 @@ export function updateCgState(
             "Browse with +cg/list contracts.",
         );
       }
-      const matched = matchNameOrThrow(
+      key = resolvePowerKey(
         key,
         tmpl.validPowers,
-        "power",
+        sheet.template,
       );
-      key = matched.toLowerCase();
-      resolvedTrait = matched;
+      resolvedTrait = key;
       break;
     }
 
@@ -318,6 +346,18 @@ export function updateCgState(
   }
 
   sheet = setTrait(sheet, resolvedTrait, validatedValue);
+
+  // Keep sheet.touchstones in sync with Stage-3 touchstone fields.
+  const rk = resolvedTrait.toLowerCase();
+  if (rk === "touchstonemask" || rk === "touchstonedirge") {
+    const ts = { ...(sheet.touchstones ?? {}) };
+    if (rk === "touchstonemask") {
+      ts.mask = String(validatedValue);
+    } else {
+      ts.dirge = String(validatedValue);
+    }
+    sheet.touchstones = ts;
+  }
 
   return {
     ...cgState,

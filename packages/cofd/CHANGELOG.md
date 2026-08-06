@@ -1,3 +1,30 @@
+## 1.4.0
+
+- **Vampire play systems (phases 2–3):**
+  - `+vitae` — BP table, spend/gain, heal, Blush of Life,
+    Physical Attribute boost; VtR pool max (BP 10 = 75)
+  - `+feed` — animal / human / Kindred; vessel lethal
+  - `+frenzy` — resist / ride / enter / end; Frenzied Condition
+  - `+aura` — Predatory Aura contest + Conditions
+  - `+integrity` uses Humanity label + VtR rating mods
+  - Conditions: `bestial`, `frenzied`
+  - Engines: `src/vitae/`, `src/beast/`; tests + help
+
+## 1.3.0
+
+- **Vampire: The Requiem 2e** chargen overlay (phase 1):
+  - Template `vampire` open in +cg (with mortal, changeling)
+  - Catalogs: clans, covenants (+Unaligned), 10 Disciplines,
+    Mask/Dirge archetypes (`resources/vampire.json`)
+  - Stage 3: clan, covenant, touchstone required; bloodline
+    optional; Mask/Dirge via virtue/vice (+ aliases)
+  - Stage 6: 10 Merit dots; Stage 7: 3 Discipline dots with
+    ≥2 in-clan
+  - Sheet header labels Mask/Dirge; +cg/list and +info cover
+    clans/covenants/disciplines/masks
+  - Showcase: `showcases/chargen-vampire.json`
+  - Help: `help vampire`, updated cg/templates/cofd
+
 ## 1.2.10
 
 - **Victorian Lost** (`books/vctl.txt`) → CtL 2e catalog:

@@ -32,6 +32,11 @@ export interface BreakingPointInput {
    * the engine just adds it to the pool.
    */
   modifier?: number;
+  /**
+   * Sheet template key. Vampires use the Humanity modifier table
+   * (VtR 2e) instead of core Integrity.
+   */
+  template?: string;
 }
 
 export interface BreakingPointResult {
@@ -61,6 +66,32 @@ export function integrityModifier(integrity: number): number {
   if (integrity >= 4) return 0;
   if (integrity >= 2) return -1;
   return -2;
+}
+
+/**
+ * VtR Humanity breaking-point modifier (differs at 6–7):
+ *   8-10 -> +2
+ *   6-7  ->  0
+ *   4-5  -> -1
+ *   2-3  -> -2
+ *   0-1  -> -3
+ */
+export function humanityBreakModifier(humanity: number): number {
+  if (humanity >= 8) return 2;
+  if (humanity >= 6) return 0;
+  if (humanity >= 4) return -1;
+  if (humanity >= 2) return -2;
+  return -3;
+}
+
+/** Pick Integrity vs Humanity rating-mod table. */
+export function moralityModifier(
+  rating: number,
+  template?: string,
+): number {
+  const t = (template || "").toLowerCase().trim();
+  if (t === "vampire") return humanityBreakModifier(rating);
+  return integrityModifier(rating);
 }
 
 /** Clamp situational modifier to +/-5 per RAW guidance. */
@@ -96,7 +127,10 @@ export function rollBreakingPoint(
   sheet: CofdSheet,
   injectRoll?: RollResult,
 ): BreakingPointResult {
-  const integrityMod = integrityModifier(input.integrity);
+  const integrityMod = moralityModifier(
+    input.integrity,
+    input.template,
+  );
   const situational = clampSituational(input.modifier ?? 0);
   const totalModifier = integrityMod + situational;
   const rawPool = (input.resolve | 0) + (input.composure | 0) + totalModifier;

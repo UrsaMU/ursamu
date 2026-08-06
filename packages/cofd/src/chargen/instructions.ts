@@ -19,6 +19,7 @@ import {
   startingPowerDots,
   type CofdCgState,
 } from "./state.ts";
+import { customFieldLabel } from "./fields.ts";
 import {
   auspiceMoonGift,
   giftStageProgress,
@@ -153,60 +154,105 @@ export async function getStageInstructions(
 
   switch (stage) {
     // ── Stage 1: Concept & Anchors ──────────────────────────────────────────
-    case 1:
+    case 1: {
+      const isVamp = tKey === "vampire";
+      const aLabel = isVamp ? "Mask" : "Virtue";
+      const bLabel = isVamp ? "Dirge" : "Vice";
       lines.push(
         "  Welcome! Start by defining your core identity.",
       );
-      lines.push(
-        "  Set your Concept (theme), Virtue (strength), Vice (flaw).",
-      );
+      if (isVamp) {
+        lines.push(
+          "  Set Concept, then Mask (public face) and " +
+            "Dirge (true self).",
+        );
+      } else {
+        lines.push(
+          "  Set Concept, Virtue (strength), and Vice (flaw).",
+        );
+      }
       lines.push("");
       lines.push(`    %ch%ccConcept:%cn ${sheet.concept}`);
-      lines.push(`    %ch%ccVirtue:%cn  ${sheet.virtue}`);
-      lines.push(`    %ch%ccVice:%cn    ${sheet.vice}`);
+      lines.push(
+        `    %ch%cc${aLabel}:%cn` +
+          `${" ".repeat(Math.max(1, 7 - aLabel.length))}` +
+          `${sheet.virtue}`,
+      );
+      lines.push(
+        `    %ch%cc${bLabel}:%cn` +
+          `${" ".repeat(Math.max(1, 7 - bLabel.length))}` +
+          `${sheet.vice}`,
+      );
       lines.push("");
       lines.push("  %chBackstory Note:%cn");
       lines.push(
-        "    Use %ch+notes/add Backstory=<text>%cn to write background",
+        "    Use %ch+notes/add Backstory=<text>%cn " +
+          "to write background",
       );
       lines.push("    visible to staff during review.");
       lines.push("");
       lines.push(await divider(""));
       lines.push("  %chCommands:%cn");
-      lines.push("    +cg/set concept=<text>   -- Your character concept.");
-      lines.push("    +cg/set virtue=<text>    -- Primary virtue.");
       lines.push(
-        "    +cg/set vice=<text>      -- Primary vice.",
+        "    +cg/set concept=<text>   -- Your character concept.",
       );
-      lines.push(
-        "    +cg/list virtues         -- Browse all virtues.",
-      );
+      if (isVamp) {
+        lines.push(
+          "    +cg/set mask=<archetype> -- Public face (Mask).",
+        );
+        lines.push(
+          "    +cg/set dirge=<archetype>-- True self (Dirge).",
+        );
+        lines.push(
+          "    +cg/list masks          -- Browse Mask/Dirge.",
+        );
+      } else {
+        lines.push(
+          "    +cg/set virtue=<text>    -- Primary virtue.",
+        );
+        lines.push(
+          "    +cg/set vice=<text>      -- Primary vice.",
+        );
+        lines.push(
+          "    +cg/list virtues         -- Browse all virtues.",
+        );
+      }
       lines.push(
         "    +cg/next                 -- Advance to Stage 2.",
       );
       break;
+    }
 
     // ── Stage 2: Template ───────────────────────────────────────────────────
     case 2:
       lines.push(
-        "  Choose your Supernatural Template (your character's nature).",
+        "  Choose your Supernatural Template " +
+          "(your character's nature).",
       );
       lines.push(
-        "  Supported: %chmortal%cn, %chchangeling%cn.",
+        "  Supported: %chmortal%cn, %chchangeling%cn, " +
+          "%chvampire%cn.",
       );
       lines.push("");
       lines.push(
-        `    %ch%ccSelected:%cn ${sheet.template.toUpperCase()} (${tmpl.name})`,
+        `    %ch%ccSelected:%cn ` +
+          `${sheet.template.toUpperCase()} (${tmpl.name})`,
       );
       lines.push("");
       lines.push(await divider(""));
       lines.push("  %chCommands:%cn");
       lines.push(
-        "    +cg/set template=<name>  -- Set template (e.g. changeling).",
+        "    +cg/set template=<name>  -- e.g. vampire.",
       );
-      lines.push("    +cg/list templates       -- See all templates.");
-      lines.push("    +cg/back                 -- Go back to Stage 1.");
-      lines.push("    +cg/next                 -- Advance to Stage 3.");
+      lines.push(
+        "    +cg/list templates       -- See all templates.",
+      );
+      lines.push(
+        "    +cg/back                 -- Go back to Stage 1.",
+      );
+      lines.push(
+        "    +cg/next                 -- Advance to Stage 3.",
+      );
       break;
 
     // ── Stage 3: Template Details ───────────────────────────────────────────
@@ -214,21 +260,49 @@ export async function getStageInstructions(
       lines.push(
         `  Configure details for the %ch${tmpl.name}%cn template.`,
       );
-      // mask/mien/animals are post-chargen optional prose (+sheet/set).
-      const optionalCg = new Set(["mask", "mien", "animals"]);
+      // mask/mien/animals: post-chargen optional prose (+sheet/set).
+      // bloodline: optional free-form at vampire creation.
+      const optionalCg = new Set([
+        "mask",
+        "mien",
+        "animals",
+        "bloodline",
+      ]);
       const requiredFields = tmpl.customFields.filter(
         (f) => !optionalCg.has(f),
       );
-      if (requiredFields.length === 0) {
+      if (tKey === "vampire") {
+        lines.push(
+          "  Clan + Covenant + two Touchstones required; " +
+            "Bloodline optional.",
+        );
+        lines.push(
+          `  %chMask/Dirge:%cn ${sheet.virtue} / ${sheet.vice}`,
+        );
+      }
+      if (requiredFields.length === 0 && tKey !== "vampire") {
         lines.push("");
-        lines.push("    No template-specific details required for Mortals!");
+        lines.push(
+          "    No template-specific details required for Mortals!",
+        );
         lines.push("");
       } else {
         lines.push("");
         for (const f of requiredFields) {
-          const title = f.replace(/\b\w/g, (c) => c.toUpperCase());
-          const val = sheet.customFields[f] || "Not Set";
-          lines.push(`    %ch%cc${ljust(title + ":", 12)}%cn ${val}`);
+          const title = customFieldLabel(f);
+          const val = sheet.customFields[f] ||
+            sheet.customFields[f.toLowerCase()] ||
+            "Not Set";
+          const pad = Math.max(14, title.length + 2);
+          lines.push(
+            `    %ch%cc${ljust(title + ":", pad)}%cn ${val}`,
+          );
+        }
+        if (tKey === "vampire") {
+          const bl = sheet.customFields.bloodline || "(optional)";
+          lines.push(
+            `    %ch%cc${ljust("Bloodline:", 14)}%cn ${bl}`,
+          );
         }
         lines.push("");
       }
@@ -241,8 +315,32 @@ export async function getStageInstructions(
           );
         }
       }
-      lines.push("    +cg/back                 -- Go back to Stage 2.");
-      lines.push("    +cg/next                 -- Advance to Stage 4.");
+      if (tKey === "vampire") {
+        lines.push(
+          "    +cg/set mask=<arch>     -- Public face.",
+        );
+        lines.push(
+          "    +cg/set dirge=<arch>    -- True self.",
+        );
+        lines.push(
+          "    +cg/set touchstonemask=<who>  -- Mask anchor.",
+        );
+        lines.push(
+          "    +cg/set touchstonedirge=<who> -- Dirge anchor.",
+        );
+        lines.push(
+          "    +cg/set bloodline=<txt> -- Optional.",
+        );
+        lines.push(
+          "    +cg/list clans|masks    -- Browse (partial OK).",
+        );
+      }
+      lines.push(
+        "    +cg/back                 -- Go back to Stage 2.",
+      );
+      lines.push(
+        "    +cg/next                 -- Advance to Stage 4.",
+      );
       break;
     }
 
@@ -501,7 +599,7 @@ export async function getStageInstructions(
         break;
       }
 
-      // Werewolf / other templates: dot-allocated powers (Renown, etc.).
+      // Werewolf / Vampire / other: dot-allocated powers.
       const pName = powerLabel(sheet.template);
       const startingDots = startingPowerDots(
         sheet.template,
@@ -512,12 +610,24 @@ export async function getStageInstructions(
         0,
       );
       lines.push(
-        `  Allocate %ch${startingDots}%cn starting ${pName.toLowerCase()} dots.`,
+        `  Allocate %ch${startingDots}%cn starting ` +
+          `${pName.toLowerCase()} dots.`,
       );
       if (sheet.template === "werewolf") {
         lines.push(
           "  One from auspice, one from tribe, one free." +
             "  Max %ch2%cn per Renown.",
+        );
+      }
+      if (sheet.template === "vampire") {
+        const clan =
+          sheet.customFields?.clan || "(set clan first)";
+        lines.push(
+          `  Clan: %ch${clan}%cn — at least %ch2%cn dots ` +
+            `must be in-clan.`,
+        );
+        lines.push(
+          "  Browse: %ch+cg/list disciplines%cn",
         );
       }
       lines.push("");
@@ -533,18 +643,25 @@ export async function getStageInstructions(
       lines.push("");
       lines.push(await divider(""));
       lines.push("  %chCommands:%cn");
-      const powerKey =
-        sheet.template === "werewolf" ? "renown" : "power";
+      const powerKey = sheet.template === "werewolf"
+        ? "renown"
+        : sheet.template === "vampire"
+        ? "discipline"
+        : "power";
       lines.push(
         `    +cg/set <${powerKey}>=<dots>  -- Allocate dots.`,
       );
-      lines.push("    +cg/back                -- Go back to Stage 6.");
+      lines.push(
+        "    +cg/back                -- Go back to Stage 6.",
+      );
       if (maxStage === 7) {
         lines.push(
           "    +cg/submit              -- Submit for staff approval.",
         );
       } else {
-        lines.push("    +cg/next                -- Validate & advance.");
+        lines.push(
+          "    +cg/next                -- Validate & advance.",
+        );
       }
       break;
     }

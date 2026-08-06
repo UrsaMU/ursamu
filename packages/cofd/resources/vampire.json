@@ -1,0 +1,186 @@
+{
+  "version": "vtr-2e-core",
+  "notes": {
+    "source": "Vampire: The Requiem 2e (Onyx Path). See books/vtr.txt and docs/vampire-overlay-spec.md.",
+    "chargen": "3 Discipline dots (≥2 in-clan); 10 Merit dots; Blood Potency 1; Humanity 7; Mask+Dirge; Mask and Dirge Touchstones; optional bloodline."
+  },
+  "clans": [
+    {
+      "name": "Daeva",
+      "disciplines": ["Celerity", "Majesty", "Vigor"],
+      "bane": "The Wanton Curse — cannot spend Willpower to resist a temptation tied to Mask/Dirge vice; obsessive desire.",
+      "description": "Serpents. Hedonist seducers whose hungers are as alluring as they are fatal."
+    },
+    {
+      "name": "Gangrel",
+      "disciplines": ["Animalism", "Protean", "Resilience"],
+      "bane": "The Savage Curse — lose 1 die from Mental and Social pools while frenzying or failing to resist frenzy.",
+      "description": "Savages. Half-beast nomads who walk the line between predator and animal."
+    },
+    {
+      "name": "Mekhet",
+      "disciplines": ["Auspex", "Celerity", "Obfuscate"],
+      "bane": "The Shadow Curse — one extra aggravated from sunlight and fire; senses that hunt them gain +2.",
+      "description": "Shadows. Scholar-spies of the dead, custodians of forbidden lore."
+    },
+    {
+      "name": "Nosferatu",
+      "disciplines": ["Nightmare", "Obfuscate", "Vigor"],
+      "bane": "The Lonely Curse — presence inflicts Bestial; no 10-again on Social rolls to put others at ease.",
+      "description": "Haunts. Monstrous outsiders who weaponize fear and isolation."
+    },
+    {
+      "name": "Ventrue",
+      "disciplines": ["Animalism", "Dominate", "Resilience"],
+      "bane": "The Tyrant's Curse — each story, a new persistent Condition reflecting cracks from power and control.",
+      "description": "Lords. Aristocratic rulers whose grip on power slowly poisons the mind."
+    }
+  ],
+  "covenants": [
+    {
+      "name": "Carthian Movement",
+      "mechanic": "Carthian Law",
+      "description": "Revolutionary modernists fusing mortal politics with the Requiem. Domain laws that reward compliance."
+    },
+    {
+      "name": "Circle of the Crone",
+      "mechanic": "Crúac",
+      "description": "Pagan mystery cult embracing the curse as sacred. Blood sorcery rituals (Crúac)."
+    },
+    {
+      "name": "Invictus",
+      "mechanic": "Oaths of the Invictus",
+      "description": "The First Estate. Feudal aristocracy of oaths, tradition, and pyramid politics."
+    },
+    {
+      "name": "Lancea et Sanctum",
+      "mechanic": "Theban Sorcery",
+      "description": "Damned church teaching vampires as God's dark angels. Divine blood miracles (Theban Sorcery)."
+    },
+    {
+      "name": "Ordo Dracul",
+      "mechanic": "Coils of the Dragon",
+      "description": "Esoteric order seeking to transcend the curse through Coils and Scales of the Dragon."
+    },
+    {
+      "name": "Unaligned",
+      "mechanic": "None",
+      "description": "No covenant. Free of formal oaths and support — and of covenant politics."
+    }
+  ],
+  "disciplines": [
+    {
+      "name": "Animalism",
+      "summary": "Command and commune with animals and the Beast.",
+      "inClanFor": ["Gangrel", "Ventrue"]
+    },
+    {
+      "name": "Auspex",
+      "summary": "Heightened senses, aura sight, and psychic perception.",
+      "inClanFor": ["Mekhet"]
+    },
+    {
+      "name": "Celerity",
+      "summary": "Preternatural speed, Defense, and Initiative.",
+      "inClanFor": ["Daeva", "Mekhet"]
+    },
+    {
+      "name": "Dominate",
+      "summary": "Issue mental commands; rewrite memory.",
+      "inClanFor": ["Ventrue"]
+    },
+    {
+      "name": "Majesty",
+      "summary": "Awe-inspiring presence and emotional control.",
+      "inClanFor": ["Daeva"]
+    },
+    {
+      "name": "Nightmare",
+      "summary": "Inflict terror, hallucinations, and dread.",
+      "inClanFor": ["Nosferatu"]
+    },
+    {
+      "name": "Obfuscate",
+      "summary": "Hide from senses; cloud minds.",
+      "inClanFor": ["Mekhet", "Nosferatu"]
+    },
+    {
+      "name": "Protean",
+      "summary": "Shape-shifting and bestial transformation.",
+      "inClanFor": ["Gangrel"]
+    },
+    {
+      "name": "Resilience",
+      "summary": "Unnatural toughness; soak and Health.",
+      "inClanFor": ["Gangrel", "Ventrue"]
+    },
+    {
+      "name": "Vigor",
+      "summary": "Preternatural strength.",
+      "inClanFor": ["Daeva", "Nosferatu"]
+    }
+  ],
+  "maskDirgeArchetypes": [
+    { "name": "Authoritarian", "description": "Must be on top; asserts control and dominance." },
+    { "name": "Child", "description": "Looks for caretakers; diffuses responsibility." },
+    { "name": "Competitor", "description": "Tests herself against others in all things." },
+    { "name": "Conformist", "description": "Needs external structure and hierarchy." },
+    { "name": "Conspirator", "description": "Layers machination into every task." },
+    { "name": "Courtesan", "description": "Exists so others may enjoy themselves." },
+    { "name": "Cult Leader", "description": "Wants faith and devotion directed at her word." },
+    { "name": "Deviant", "description": "Flouts norms; crime, sin, and debauchery." },
+    { "name": "Follower", "description": "Needs direction; finds the right person to obey." },
+    { "name": "Guru", "description": "Repository of wisdom; teaches and advises." },
+    { "name": "Idealist", "description": "Never accepts compromise of the vision." },
+    { "name": "Jester", "description": "Truth through humor and mockery." },
+    { "name": "Junkie", "description": "Indulgence before anything else." },
+    { "name": "Martyr", "description": "Puts others and the cause before self." },
+    { "name": "Masochist", "description": "Savors suffering; never runs from pain." },
+    { "name": "Monster", "description": "Embraces the Beast without apology." },
+    { "name": "Nomad", "description": "Never stays; freedom is the only law." },
+    { "name": "Nurturer", "description": "Protects and grows others." },
+    { "name": "Perfectionist", "description": "Nothing less than flawless will do." },
+    { "name": "Penitent", "description": "Seeks atonement for sins of the Blood." },
+    { "name": "Questioner", "description": "Accepts nothing at face value." },
+    { "name": "Rebel", "description": "Opposes authority on principle." },
+    { "name": "Scholar", "description": "Knowledge is the only lasting power." },
+    { "name": "Social Chameleon", "description": "Becomes whatever the room needs." },
+    { "name": "Spy", "description": "Secrets are currency; observation is survival." },
+    { "name": "Survivor", "description": "Own existence above all things." },
+    { "name": "Visionary", "description": "The future she sees is the only map." }
+  ],
+  "bloodPotency": [
+    { "bp": 0, "vitaeMax": 10, "perTurn": 1, "feed": "any" },
+    { "bp": 1, "vitaeMax": 10, "perTurn": 1, "feed": "any" },
+    { "bp": 2, "vitaeMax": 11, "perTurn": 2, "feed": "human+" },
+    { "bp": 3, "vitaeMax": 12, "perTurn": 3, "feed": "human+" },
+    { "bp": 4, "vitaeMax": 13, "perTurn": 4, "feed": "human+" },
+    { "bp": 5, "vitaeMax": 14, "perTurn": 5, "feed": "human+" },
+    { "bp": 6, "vitaeMax": 15, "perTurn": 6, "feed": "kindred-lean" },
+    { "bp": 7, "vitaeMax": 20, "perTurn": 7, "feed": "kindred-lean" },
+    { "bp": 8, "vitaeMax": 30, "perTurn": 8, "feed": "kindred" },
+    { "bp": 9, "vitaeMax": 50, "perTurn": 9, "feed": "kindred" },
+    { "bp": 10, "vitaeMax": 75, "perTurn": 10, "feed": "eldest" }
+  ],
+  "vitaeSpends": [
+    { "key": "heal-bashing", "cost": 1, "label": "Heal 1 bashing" },
+    { "key": "heal-lethal", "cost": 1, "label": "Heal 1 lethal (1 turn)" },
+    { "key": "blush", "cost": 1, "label": "Blush of Life (1 hour)" },
+    { "key": "boost", "cost": 1, "label": "+2 Physical Attribute (scene)" },
+    { "key": "wake", "cost": 1, "label": "Rise at sunset" }
+  ],
+  "humanityMods": [
+    { "min": 8, "max": 10, "mod": 2 },
+    { "min": 6, "max": 7, "mod": 0 },
+    { "min": 4, "max": 5, "mod": -1 },
+    { "min": 2, "max": 3, "mod": -2 },
+    { "min": 0, "max": 1, "mod": -3 }
+  ],
+  "auraFlavors": [
+    { "key": "hungry", "condition": "bestial", "label": "Hungry" },
+    { "key": "awe", "condition": "charmed", "label": "Awe" },
+    { "key": "wrath", "condition": "cowed", "label": "Wrath" },
+    { "key": "terror", "condition": "wanton", "label": "Terror" },
+    { "key": "predator", "condition": "competitive", "label": "Predator" }
+  ]
+}

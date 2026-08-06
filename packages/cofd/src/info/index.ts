@@ -20,6 +20,14 @@ import {
   type WtfGift,
   type WtfFacet,
   type WtfRite,
+  VTR_CLANS,
+  VTR_COVENANTS,
+  VTR_DISCIPLINES,
+  VTR_MASK_DIRGE,
+  type VtrClan,
+  type VtrCovenant,
+  type VtrDiscipline,
+  type VtrAnchor,
 } from "../dictionary/index.ts";
 import { header, divider, footer } from "@ursamu/mush";
 
@@ -309,6 +317,58 @@ function renderContract(c: CtlContract): string[] {
   return out;
 }
 
+function renderClan(c: VtrClan): string[] {
+  const out: string[] = [];
+  out.push(
+    `${INDENT}%ch%cy${c.name}%cn  %ch%cx[Clan]%cn`,
+  );
+  out.push("");
+  out.push(...body(c.description));
+  out.push("");
+  out.push(...field("Disciplines", c.disciplines.join(", ")));
+  out.push(...field("Bane", c.bane));
+  return out;
+}
+
+function renderCovenant(c: VtrCovenant): string[] {
+  const out: string[] = [];
+  out.push(
+    `${INDENT}%ch%cy${c.name}%cn  %ch%cx[Covenant]%cn`,
+  );
+  out.push("");
+  out.push(...body(c.description));
+  out.push("");
+  out.push(...field("Mechanic", c.mechanic));
+  return out;
+}
+
+function renderDiscipline(d: VtrDiscipline): string[] {
+  const out: string[] = [];
+  out.push(
+    `${INDENT}%ch%cy${d.name}%cn  %ch%cx[Discipline]%cn`,
+  );
+  out.push("");
+  out.push(...body(d.summary));
+  out.push("");
+  out.push(
+    ...field(
+      "In-clan for",
+      d.inClanFor.join(", ") || "—",
+    ),
+  );
+  return out;
+}
+
+function renderMaskDirge(a: VtrAnchor): string[] {
+  const out: string[] = [];
+  out.push(
+    `${INDENT}%ch%cy${a.name}%cn  %ch%cx[Mask/Dirge]%cn`,
+  );
+  out.push("");
+  out.push(...body(a.description));
+  return out;
+}
+
 // --- Search index ---
 
 interface Hit {
@@ -352,6 +412,43 @@ function buildHits(query: string): Hit[] {
   }
   for (const r of WTF_RITES)    if (eq(r.name)) hits.push({ name: r.name, category: `${r.type === "wolf" ? "Wolf" : "Pack"} Rite`, render: () => renderRite(r) });
 
+  for (const c of VTR_CLANS) {
+    if (eq(c.name)) {
+      hits.push({
+        name: c.name,
+        category: "Clan",
+        render: () => renderClan(c),
+      });
+    }
+  }
+  for (const c of VTR_COVENANTS) {
+    if (eq(c.name)) {
+      hits.push({
+        name: c.name,
+        category: "Covenant",
+        render: () => renderCovenant(c),
+      });
+    }
+  }
+  for (const d of VTR_DISCIPLINES) {
+    if (eq(d.name)) {
+      hits.push({
+        name: d.name,
+        category: "Discipline",
+        render: () => renderDiscipline(d),
+      });
+    }
+  }
+  for (const a of VTR_MASK_DIRGE) {
+    if (eq(a.name)) {
+      hits.push({
+        name: a.name,
+        category: "Mask/Dirge",
+        render: () => renderMaskDirge(a),
+      });
+    }
+  }
+
   if (hits.length > 0) return hits;
 
   // Fall back to substring match if nothing matched exactly.
@@ -381,6 +478,43 @@ function buildHits(query: string): Hit[] {
   }
   for (const r of WTF_RITES)    if (contains(r.name)) hits.push({ name: r.name, category: `${r.type === "wolf" ? "Wolf" : "Pack"} Rite`, render: () => renderRite(r) });
 
+  for (const c of VTR_CLANS) {
+    if (contains(c.name)) {
+      hits.push({
+        name: c.name,
+        category: "Clan",
+        render: () => renderClan(c),
+      });
+    }
+  }
+  for (const c of VTR_COVENANTS) {
+    if (contains(c.name)) {
+      hits.push({
+        name: c.name,
+        category: "Covenant",
+        render: () => renderCovenant(c),
+      });
+    }
+  }
+  for (const d of VTR_DISCIPLINES) {
+    if (contains(d.name)) {
+      hits.push({
+        name: d.name,
+        category: "Discipline",
+        render: () => renderDiscipline(d),
+      });
+    }
+  }
+  for (const a of VTR_MASK_DIRGE) {
+    if (contains(a.name)) {
+      hits.push({
+        name: a.name,
+        category: "Mask/Dirge",
+        render: () => renderMaskDirge(a),
+      });
+    }
+  }
+
   return hits;
 }
 
@@ -393,10 +527,15 @@ export function renderInfo(query: string): string {
   const trimmed = query.trim();
   if (!trimmed) {
     const out: string[] = [header("Info — Usage"), ""];
-    out.push(...body("+info <name>  — Look up a merit, condition, tilt, dread power, virtue, vice, seeming, kith, or court."));
+    out.push(
+      ...body(
+        "+info <name>  — Look up a merit, condition, tilt, " +
+          "dread power, virtue, vice, seeming, kith, court, " +
+          "clan, covenant, Discipline, or Mask/Dirge.",
+      ),
+    );
     out.push("");
     out.push(...body("For browse lists by topic, see +cg/list."));
-    out.push(...body("Disciplines and individual Contracts are not yet catalogued in this game; consult the source books."));
     out.push(footer());
     return out.join("\n");
   }
@@ -407,7 +546,11 @@ export function renderInfo(query: string): string {
     const out: string[] = [header(`Info — ${trimmed}`), ""];
     out.push(...body(`No catalog entry matches '${trimmed}'.`));
     out.push("");
-    out.push(...body("Try +cg/list to browse the catalogs we do have. Disciplines and individual Contracts are not yet catalogued in this game."));
+    out.push(
+      ...body(
+        "Try +cg/list to browse catalogs, or refine the name.",
+      ),
+    );
     out.push(footer());
     return out.join("\n");
   }
