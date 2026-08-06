@@ -13,6 +13,7 @@
  *   POST /api/v1/cofd/chargen/back
  *   POST /api/v1/cofd/chargen/submit  -> finish (CGEN job)
  *   POST /api/v1/cofd/chargen/contract
+ *   POST /api/v1/cofd/chargen/wipe    -> full wipe (+cg/wipe)
  *   GET  /api/v1/cofd/chargen/options -> catalog (public)
  *   GET  /api/v1/cofd/sheet           -> live sheet (self)
  *   POST /api/v1/cofd/approve         -> staff approve PC
@@ -31,6 +32,7 @@ import {
   chargenSheetForUser,
   getSheet,
   approveHttp,
+  wipeChargen,
 } from "./src/chargen/http.ts";
 
 const STAFF_FLAGS = new Set(["superuser", "admin", "wizard", "builder"]);
@@ -212,6 +214,20 @@ export async function routeHandler(
           name?: string;
         };
         return await contractChargen(userId, b);
+      }
+      if (
+        method === "POST" &&
+        path === "/api/v1/cofd/chargen/wipe"
+      ) {
+        const parsed = await readJson(req);
+        const body = parsed.ok && parsed.body &&
+            typeof parsed.body === "object"
+          ? parsed.body as {
+            playerId?: string;
+            reason?: string;
+          }
+          : {};
+        return await wipeChargen(userId, body);
       }
       return Response.json({ error: "Not found" }, { status: 404 });
     } catch {

@@ -46,6 +46,7 @@ import {
 import { eligibleMerits } from "./list_eligible.ts";
 import { submitCgDraft } from "./submit.ts";
 import { approvePlayer } from "./approve_core.ts";
+import { wipeCharacter } from "./wipe_core.ts";
 import { formatSheet } from "../sheet/index.ts";
 
 const STAFF = new Set([
@@ -261,6 +262,7 @@ async function sheetPayload(
   } catch {
     text = "";
   }
+  const staff = isStaff(flagsOf(actor.flags));
   return {
     ok: true,
     approved: true,
@@ -270,6 +272,9 @@ async function sheetPayload(
     sheet: live,
     sheetText: text,
     name,
+    isStaff: staff,
+    // Staff (or unapproved self via draft path) may full-wipe.
+    canWipe: staff,
     reason: approved
       ? "Character approved — live sheet."
       : "Live sheet.",
@@ -314,10 +319,13 @@ export async function getChargen(
     return json(await sheetPayload(actor, live, approved));
   }
 
+  const staffFlag = isStaff(flagsOf(actor.flags));
   if (!cg) {
     return json({
       ok: true,
       started: false,
+      isStaff: staffFlag,
+      canWipe: false,
       stages: stageLabels(6),
       templates: chargenTemplates().map((t) => ({
         key: t.key,
@@ -326,7 +334,14 @@ export async function getChargen(
     });
   }
 
-  return json({ ok: true, started: true, ...publicState(cg) });
+  return json({
+    ok: true,
+    started: true,
+    isStaff: staffFlag,
+    // Unapproved players may reset their own draft (full wipe).
+    canWipe: !approved || staffFlag,
+    ...publicState(cg),
+  });
 }
 
 /** GET /api/v1/cofd/sheet — own live sheet (JSON + plain text). */
@@ -479,21 +494,165 @@ export async function startChargen(
 ): Promise<Response> {
   const actor = await loadActor(userId);
   if (!actor) return json({ error: "Forbidden" }, 403);
+  const staff = isStaff(flagsOf(actor.flags));
 
-  if (isApproved(actor) && !isStaff(flagsOf(actor.flags))) {
+  if (isApproved(actor) && !staff) {
     return json({
       error: "Character already approved.",
     }, 403);
   }
 
-  if (body.reset || !readCg(actor)) {
+  // reset:true = full wipe (+cg/reset), not draft-only.
+  if (body.reset) {
+    const name = String(
+      actor.name ||
+        (actor.data?.name as string) ||
+        (actor.state?.name as string) ||
+        "You",
+    );
+    await wipeCharacter({
+      playerId: userId,
+      staffId: userId,
+      staffName: name,
+      startDraft: true,
+      notify: false,
+    });
     const cg = initCgState();
     await saveCg(userId, cg);
-    return json({ ok: true, started: true, ...publicState(cg) });
+    return json({
+      ok: true,
+      started: true,
+      wiped: true,
+      isStaff: staff,
+      canWipe: true,
+      ...publicState(cg),
+    });
+  }
+
+  if (!readCg(actor)) {
+    const cg = initCgState();
+    await saveCg(userId, cg);
+    return json({
+      ok: true,
+      started: true,
+      isStaff: staff,
+      canWipe: true,
+      ...publicState(cg),
+    });
   }
 
   const cg = readCg(actor)!;
-  return json({ ok: true, started: true, ...publicState(cg) });
+  return json({
+    ok: true,
+    started: true,
+    isStaff: staff,
+    canWipe: !isApproved(actor) || staff,
+    ...publicState(cg),
+  });
+}
+
+/**
+ * POST /api/v1/cofd/chargen/wipe — full character wipe (+cg/wipe / +cg/reset).
+ * Body: { playerId?: string, reason?: string }
+ * Self: no reason. Other player: staff + reason required.
+ */
+export async function wipeChargen(
+  userId: string,
+  body: { playerId?: string; reason?: string } = {},
+): Promise<Response> {
+  const actor = await loadActor(userId);
+  if (!actor) return json({ error: "Forbidden" }, 403);
+  const staff = isStaff(flagsOf(actor.flags));
+
+  const bare = (id: string) =>
+    String(id ?? "").replace(/^#/, "").trim();
+  const selfId = bare(userId);
+  const targetId = bare(body.playerId || userId) || selfId;
+  const self = targetId === selfId;
+  const reason = String(body.reason ?? "").trim();
+
+  if (!self && !staff) {
+    return json({
+      error: "Permission denied. Staff only.",
+    }, 403);
+  }
+  if (!self && !reason) {
+    return json({
+      error:
+        "A reason is required when wiping another player.",
+    }, 400);
+  }
+  if (self && isApproved(actor) && !staff) {
+    return json({
+      error:
+        "Character already approved. Contact staff " +
+        "if you need a rework.",
+    }, 403);
+  }
+
+  const staffName = String(
+    actor.name ||
+      (actor.data?.name as string) ||
+      (actor.state?.name as string) ||
+      "Staff",
+  );
+
+  const result = await wipeCharacter({
+    playerId: targetId,
+    staffId: userId,
+    staffName,
+    reason: reason || undefined,
+    startDraft: true,
+    notify: !self,
+  });
+
+  if (!result.ok) {
+    // Nothing to wipe — still seed own draft if self.
+    if (self) {
+      const cg = initCgState();
+      await saveCg(userId, cg);
+      return json({
+        ok: true,
+        started: true,
+        wiped: true,
+        isStaff: staff,
+        canWipe: true,
+        ...publicState(cg),
+      });
+    }
+    return json({ error: result.error }, 400);
+  }
+
+  if (self) {
+    const fresh = await loadActor(userId);
+    let cg = fresh ? readCg(fresh) : null;
+    if (!cg) {
+      cg = initCgState();
+      await saveCg(userId, cg);
+    }
+    return json({
+      ok: true,
+      started: true,
+      wiped: true,
+      name: result.name,
+      hadLive: result.hadLive,
+      hadDraft: result.hadDraft,
+      wasApproved: result.wasApproved,
+      isStaff: staff,
+      canWipe: true,
+      ...publicState(cg),
+    });
+  }
+
+  return json({
+    ok: true,
+    wiped: true,
+    name: result.name,
+    hadLive: result.hadLive,
+    hadDraft: result.hadDraft,
+    wasApproved: result.wasApproved,
+    jobNumber: result.job?.number ?? null,
+  });
 }
 
 /** POST /api/v1/cofd/chargen/set — { trait, value }. */
