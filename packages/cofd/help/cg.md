@@ -5,7 +5,8 @@ SYNTAX
   +cg/set <trait>=<value>   Set a trait or option.
   +cg/list [<topic>]        Show available options for a field.
   +cg/back                  Return to previous stage.
-  +cg/reset                 Start over with a blank Mortal sheet.
+  +cg/reset                 You: wipe sheet + draft, restart.
+  +cg/wipe <p>[=reason]     Staff: full wipe of a character bit.
   +cg/submit                Validate current stage and advance.
 STAGES
   1. Identity     Concept, Virtue, Vice.
@@ -17,4 +18,5 @@ STAGES
 AFTER FINAL /SUBMIT
   Staff reviews with +sheet <you>, then +approve or
   +deny=<reason>. Until approved, edit via +cg.
-SEE ALSO: help sheet, help approve, help deny, help templates, help changeling
+SEE ALSO: help sheet, help approve, help deny, help cg/wipe,
+  help templates, help changeling

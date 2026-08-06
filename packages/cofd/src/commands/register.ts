@@ -379,28 +379,26 @@ addCmd({
   pattern: /^\+cg(?:\/(\S+))?\s*(.*)/i,
   lock: "connected",
   category: "Cofd",
-  help: `+cg [<switch>] [<args>]  -- Guided character generation experience.
+  help: `+cg [<switch>] [<args>]  -- Guided character generation.
 
 Switches:
-  /reset        -- Start over with a clean character sheet.
-  /set <k>=<v>  -- Set character generation fields/traits.
-  /back         -- Return to the previous stage.
-  /submit       -- Validate the current stage and advance (or finalize sheet).
-  /list [<t>]   -- Show available options. No arg lists topics. Topics:
-                   virtues, vices, templates, seemings, kiths [<seeming>],
-                   courts, merits [<category>].
-  /info <name>  -- Detail lookup. Works for any merit, condition, tilt,
-                   dread power, virtue, vice, seeming, kith, or court.
+  /reset              -- You: wipe your sheet + draft and restart.
+  /wipe <p>[=reason]  -- Staff: full wipe of another character.
+  /set <k>=<v>        -- Set chargen fields/traits.
+  /back               -- Previous stage.
+  /submit             -- Validate stage / finalize draft.
+  /list [<t>]         -- Options index or topic list.
+  /info <name>        -- Merit/condition/template detail.
 
-Example usage:
+Staff wipe removes live sheet, chargen draft, approved flag,
+and fae/forsaken, then seeds a fresh +cg draft. Reason required
+when wiping someone else.
+
+Examples:
   +cg
-  +cg/list
-  +cg/list virtues
-  +cg/set name=John Doe
-  +cg/set concept=Hacker
+  +cg/reset
+  +cg/wipe Alice=Player requested full rebuild
   +cg/set template=mortal
-  +cg/submit
-  +cg/set Strength=3
   +cg/submit`,
   exec: cgExec,
 });

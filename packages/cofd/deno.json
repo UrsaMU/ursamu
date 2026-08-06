@@ -1,6 +1,6 @@
 {
   "name": "@ursamu/cofd-plugin",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "description": "Chronicles of Darkness 2e plugin for UrsaMU \u2014 sheets, chargen, d10 dice, IC/OOC, +time, CtL overlay.",
   "license": "MIT",
   "exports": "./index.ts",

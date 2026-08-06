@@ -6,6 +6,7 @@ export {
   denyExec,
   unapproveExec,
 } from "./approve.ts";
+export { wipeExec } from "./wipe.ts";
 export { icExec, oocExec } from "./ic_ooc.ts";
 export { notesExec } from "./notes.ts";
 export { viewsExec } from "./views.ts";

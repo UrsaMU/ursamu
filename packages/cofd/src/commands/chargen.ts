@@ -19,10 +19,13 @@ import {
   addContract,
   removeContract,
   submitCgDraft,
+  wipeCharacter,
   type CofdCgState,
 } from "../chargen/index.ts";
 import { renderCgList } from "../chargen/list.ts";
 import { renderInfo } from "../info/index.ts";
+import { wipeExec } from "./wipe.ts";
+import { SIGHT_FLAGS } from "../support/sight.ts";
 
 /** Staff may still use +cg (review / testing). */
 function isStaff(actor: IDBObj): boolean {
@@ -52,6 +55,11 @@ export async function cgExec(u: IUrsamuSDK) {
   // cofd_cg and later copied to the live sheet via +approve. Without this,
   // a player can plant %c color codes in their own concept/description.
   const rawArg = u.util.stripSubs(u.cmd.args[1] ?? "").trim();
+
+  // Staff full wipe of another (or self) character bit
+  if (sw === "wipe") {
+    return await wipeExec(u);
+  }
 
   // Web /play: open Character tab instead of terminal stepper.
   // (Play client also intercepts +cg client-side; this covers any path
@@ -116,25 +124,44 @@ export async function cgExec(u: IUrsamuSDK) {
   // Load existing character generation state
   let cgState = target.state?.cofd_cg as CofdCgState | undefined;
 
-  // Reset switch — staff only once approved (non-staff blocked above).
+  // Reset switch — self only. Staff wiping others: +cg/wipe.
+  // Staff may still reset themselves when approved (blocked for
+  // non-staff above).
   if (sw === "reset" || sw === "restart") {
-    cgState = initCgState();
-    await u.db.modify(target.id, "$set", { "data.cofd_cg": cgState });
-    await u.db.modify(target.id, "$unset", { "data.cofd": "" });
-    if (target.flags?.has("approved") && u.setFlags) {
-      await u.setFlags(target.id, "!approved");
-      target.flags.delete("approved");
+    const result = await wipeCharacter({
+      playerId: target.id,
+      staffId: u.me.id,
+      staffName: u.util.displayName(u.me, u.me),
+      startDraft: true,
+      notify: false,
+    });
+    if (!result.ok) {
+      // Nothing to wipe — still seed a draft
+      cgState = initCgState();
+      await u.db.modify(target.id, "$set", {
+        "data.cofd_cg": cgState,
+      });
+    } else {
+      cgState = initCgState();
+      if (target.state) {
+        delete target.state.cofd;
+        target.state.cofd_cg = cgState;
+      }
+      target.flags?.delete("approved");
+      for (const f of SIGHT_FLAGS) target.flags?.delete(f);
     }
     u.send(await header("Character Generation: Reset"));
     u.send(
       "Your character generation state has been reset " +
-        "to a fresh Mortal sheet.",
+        "to a fresh Mortal sheet." +
+        (result.ok && result.wasApproved
+          ? " Approval cleared."
+          : ""),
     );
-    // getStageInstructions already ends with a footer.
     u.send(
       await getStageInstructions(
         u.util.displayName(target, u.me),
-        cgState,
+        cgState!,
       ),
     );
     return;
