@@ -2119,7 +2119,7 @@
       html +=
         '<p class="cg-ref__msg muted">' +
         esc(res.message || "Matches — click one:") +
-        "</p><ul class="cg-ref__hits">';
+        '</p><ul class="cg-ref__hits">';
       for (var hi = 0; hi < res.hits.length; hi++) {
         var h = res.hits[hi];
         html +=
@@ -3201,7 +3201,7 @@
     if (!qs('link[data-cg-css]')) {
       var link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/site/css/chargen.css?v=20260806ref";
+      link.href = "/site/css/chargen.css?v=20260806ref2";
       link.setAttribute("data-cg-css", "1");
       document.head.appendChild(link);
     }
