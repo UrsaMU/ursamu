@@ -518,6 +518,96 @@ function buildHits(query: string): Hit[] {
   return hits;
 }
 
+/** Strip MUSH color / layout codes for web or plain text. */
+export function stripMushCodes(s: string): string {
+  return String(s ?? "")
+    .replace(/%c[a-zA-Z]/gi, "")
+    .replace(/%r/gi, "\n")
+    .replace(/%[ntb]/gi, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+export interface InfoHitJson {
+  name: string;
+  category: string;
+}
+
+export interface InfoLookupResult {
+  ok: true;
+  query: string;
+  /** Exact or partial name matches (capped). */
+  hits: InfoHitJson[];
+  /** Present when a single best detail is available. */
+  detail: null | {
+    name: string;
+    category: string;
+    /** Plain-text body (no %c codes). */
+    text: string;
+  };
+  message?: string;
+}
+
+/**
+ * Structured +info lookup for HTTP / web UI.
+ * Empty query → usage message, no hits.
+ */
+export function lookupInfo(query: string): InfoLookupResult {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return {
+      ok: true,
+      query: "",
+      hits: [],
+      detail: null,
+      message:
+        "Look up a merit, condition, tilt, dread power, " +
+        "virtue, vice, seeming, kith, court, clan, " +
+        "covenant, Discipline, Mask/Dirge, gift, or rite.",
+    };
+  }
+
+  const hits = buildHits(trimmed);
+  const hitJson = hits.slice(0, 40).map((h) => ({
+    name: h.name,
+    category: h.category,
+  }));
+
+  if (hits.length === 0) {
+    return {
+      ok: true,
+      query: trimmed,
+      hits: [],
+      detail: null,
+      message: `No catalog entry matches '${trimmed}'.`,
+    };
+  }
+
+  if (hits.length === 1) {
+    const h = hits[0];
+    return {
+      ok: true,
+      query: trimmed,
+      hits: hitJson,
+      detail: {
+        name: h.name,
+        category: h.category,
+        text: stripMushCodes(h.render().join("\n")),
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    query: trimmed,
+    hits: hitJson,
+    detail: null,
+    message:
+      `${hits.length} matches — pick an exact name ` +
+      `for full detail.`,
+  };
+}
+
 /**
  * Render +info <query>. Returns the formatted output string.
  * Empty query shows usage. Multiple hits = list of matches with categories.

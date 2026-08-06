@@ -44,6 +44,7 @@ import {
   contractStageProgress,
 } from "./contracts.ts";
 import { eligibleMerits } from "./list_eligible.ts";
+import { LIST_TOPIC_INDEX } from "./list.ts";
 import { submitCgDraft } from "./submit.ts";
 import { approvePlayer } from "./approve_core.ts";
 import { wipeCharacter } from "./wipe_core.ts";
@@ -858,6 +859,19 @@ export async function chargenOptions(
   opts?: { sheet?: CofdCgState["sheet"] | null },
 ): Promise<Response> {
   const topic = topicRaw.toLowerCase().trim();
+
+  // Empty topic → full catalog index (+cg/list bare).
+  if (!topic || topic === "index" || topic === "topics") {
+    return json({
+      ok: true,
+      topic: "index",
+      items: LIST_TOPIC_INDEX.map((e) => ({
+        key: e.key,
+        name: e.key,
+        note: e.note,
+      })),
+    });
+  }
 
   if (topic === "merits") {
     const sheet = opts?.sheet;

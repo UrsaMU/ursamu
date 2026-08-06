@@ -1055,6 +1055,8 @@
           "<li class=\"is-current\"><a href=\"" +
           pubPath("chargen") +
           "\" aria-current=\"page\">Sheet / Chargen</a></li>" +
+          "<li><a href=\"" + pubPath("chargen") +
+          "#reference\" data-cg-nav-ref>Reference</a></li>" +
           "<li><a href=\"" + wikiHref("rules/chargen") +
           "\">Rules</a></li>" +
           "<li><a href=\"" + helpHref("chargen") +
@@ -2395,7 +2397,7 @@
     if (!chargenScriptPromise) {
       chargenScriptPromise = new Promise(function (resolve, reject) {
         var s = document.createElement("script");
-        s.src = "/site/js/chargen.js?v=20260805btngrow";
+        s.src = "/site/js/chargen.js?v=20260806ref";
         s.async = true;
         s.onload = function () { resolve(true); };
         s.onerror = function () {

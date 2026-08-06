@@ -9,10 +9,18 @@
   "use strict";
 
   var API = "/api/v1/cofd/chargen";
+  var INFO_API = "/api/v1/cofd/info";
   var state = null;
   var opts = {};
   var busy = false;
   var demo = false;
+  /** When true, main pane shows catalog Reference (+info / +cg/list). */
+  var refMode = false;
+  var refTopic = "";
+  var refQuery = "";
+  var refResult = null;
+  var refTopicItems = null;
+  var refTopics = null;
 
   function qs(sel, root) {
     return (root || document).querySelector(sel);
@@ -1968,9 +1976,342 @@
     return html;
   }
 
+  // ── Reference browser (+info / +cg/list) ───────────────────────
+
+  function refBtnHtml() {
+    return (
+      '<button type="button" class="cg-btn" data-cg-ref-open>' +
+      "Reference</button>"
+    );
+  }
+
+  async function fetchInfo(q) {
+    if (demo) {
+      return {
+        ok: true,
+        query: q,
+        hits: q
+          ? [{ name: "Giant", category: "Merit/Physical" }]
+          : [],
+        detail: q && String(q).toLowerCase() === "giant"
+          ? {
+            name: "Giant",
+            category: "Merit/Physical",
+            text: "Giant (3 dots)\nYou are huge.",
+          }
+          : null,
+        message: q ? undefined : "Demo: try Giant.",
+      };
+    }
+    var r = await fetch(
+      INFO_API + "?q=" + encodeURIComponent(q || ""),
+      { credentials: "same-origin", headers: authHeaders() },
+    );
+    if (!r.ok) throw new Error("Info lookup failed");
+    return r.json();
+  }
+
+  async function fetchTopicList(topic) {
+    if (demo) {
+      if (!topic) {
+        return {
+          ok: true,
+          topic: "index",
+          items: [
+            { key: "merits", note: "Merits" },
+            { key: "clans", note: "Vampire clans" },
+            { key: "disciplines", note: "Disciplines" },
+          ],
+        };
+      }
+      return {
+        ok: true,
+        topic: topic,
+        items: [
+          { name: "Giant", key: "giant", category: "Physical" },
+        ],
+      };
+    }
+    var url = API + "/options?topic=" +
+      encodeURIComponent(topic || "index") +
+      "&eligible=0";
+    var r = await fetch(url, {
+      credentials: "same-origin",
+      headers: authHeaders(),
+    });
+    if (!r.ok) {
+      return { ok: false, error: "Topic not available" };
+    }
+    return r.json();
+  }
+
+  function itemLabel(it) {
+    return it.name || it.key || it.label || "?";
+  }
+
+  function itemBlurb(it) {
+    var parts = [];
+    if (it.category) parts.push(it.category);
+    if (it.note) parts.push(it.note);
+    if (it.summary) parts.push(it.summary);
+    if (it.description && !it.summary) {
+      var d = String(it.description);
+      parts.push(d.length > 120 ? d.slice(0, 117) + "…" : d);
+    }
+    if (it.bane) parts.push("Bane: " + it.bane);
+    if (it.disciplines && it.disciplines.length) {
+      parts.push(it.disciplines.join(", "));
+    }
+    if (it.inClanFor && it.inClanFor.length) {
+      parts.push("In-clan: " + it.inClanFor.join(", "));
+    }
+    return parts.join(" · ");
+  }
+
+  function renderRefPanel() {
+    var topics = refTopics || [];
+    var items = refTopicItems || [];
+    var res = refResult;
+    var html =
+      '<section class="site-section cg-root cg-ref" data-cg-root>' +
+      '<header class="cg-header">' +
+      '<h2 class="cg-header__title">Reference</h2>' +
+      '<p class="cg-header__sub">Same catalogs as ' +
+      "<code>+info</code> and <code>+cg/list</code></p>" +
+      "</header>" +
+      '<div class="cg-ref__toolbar">' +
+      '<button type="button" class="cg-btn" data-cg-ref-back>' +
+      "← Character</button>" +
+      '<form class="cg-ref__search" data-cg-ref-form>' +
+      '<input type="search" class="cg-input" data-cg-ref-q ' +
+      'placeholder="Look up a name…" value="' +
+      esc(refQuery) +
+      '" autocomplete="off" />' +
+      '<button type="submit" class="cg-btn cg-btn--primary">' +
+      "Look up</button>" +
+      "</form></div>";
+
+    html += '<div class="cg-ref__topics" data-cg-ref-topics>';
+    html +=
+      '<button type="button" class="cg-ref__chip' +
+      (!refTopic ? " is-active" : "") +
+      '" data-cg-ref-topic="">All topics</button>';
+    for (var ti = 0; ti < topics.length; ti++) {
+      var tk = topics[ti].key || topics[ti].name;
+      html +=
+        '<button type="button" class="cg-ref__chip' +
+        (refTopic === tk ? " is-active" : "") +
+        '" data-cg-ref-topic="' + esc(tk) + '">' +
+        esc(tk) + "</button>";
+    }
+    html += "</div>";
+
+    html += '<div class="cg-ref__body">';
+    if (res && res.detail) {
+      html +=
+        '<article class="cg-ref__detail">' +
+        "<h3>" + esc(res.detail.name) + "</h3>" +
+        '<p class="cg-ref__cat muted">' +
+        esc(res.detail.category) + "</p>" +
+        '<pre class="cg-ref__text">' +
+        esc(res.detail.text) + "</pre></article>";
+    } else if (res && res.hits && res.hits.length) {
+      html +=
+        '<p class="cg-ref__msg muted">' +
+        esc(res.message || "Matches — click one:") +
+        "</p><ul class="cg-ref__hits">';
+      for (var hi = 0; hi < res.hits.length; hi++) {
+        var h = res.hits[hi];
+        html +=
+          '<li><button type="button" class="cg-ref__hit" ' +
+          'data-cg-ref-name="' + esc(h.name) + '">' +
+          "<strong>" + esc(h.name) + "</strong> " +
+          '<span class="muted">[' + esc(h.category) +
+          "]</span></button></li>";
+      }
+      html += "</ul>";
+    } else if (res && res.message) {
+      html +=
+        '<p class="cg-ref__msg muted">' +
+        esc(res.message) + "</p>";
+    }
+
+    if (refTopic && items.length) {
+      html +=
+        '<h3 class="cg-ref__list-title">' +
+        esc(refTopic) + "</h3>" +
+        '<ul class="cg-ref__list">';
+      for (var ii = 0; ii < items.length; ii++) {
+        var it = items[ii];
+        var lab = itemLabel(it);
+        var bl = itemBlurb(it);
+        html +=
+          '<li><button type="button" class="cg-ref__hit" ' +
+          'data-cg-ref-name="' + esc(lab) + '">' +
+          "<strong>" + esc(lab) + "</strong>" +
+          (bl
+            ? ' <span class="muted">' + esc(bl) + "</span>"
+            : "") +
+          "</button></li>";
+      }
+      html += "</ul>";
+    } else if (refTopic && !items.length) {
+      html +=
+        '<p class="muted">No items in this topic, or browse ' +
+        "is not wired for it yet. Use Look up by name.</p>";
+    } else if (!refTopic && !res) {
+      html +=
+        '<p class="muted">Pick a topic or search by name ' +
+        "(merits, clans, Disciplines, conditions, …).</p>";
+    }
+    html += "</div>" +
+      '<div class="cg-error" data-cg-error hidden></div>' +
+      "</section>";
+    return html;
+  }
+
+  function wireRef() {
+    var back = qs("[data-cg-ref-back]");
+    if (back && !back._bound) {
+      back._bound = true;
+      back.addEventListener("click", function () {
+        refMode = false;
+        try {
+          if (location.hash === "#reference") {
+            history.replaceState(
+              null,
+              "",
+              location.pathname + location.search,
+            );
+          }
+        } catch (_) { /* ignore */ }
+        renderMain(state);
+      });
+    }
+    var form = qs("[data-cg-ref-form]");
+    if (form && !form._bound) {
+      form._bound = true;
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var inp = qs("[data-cg-ref-q]");
+        runRefLookup(inp ? inp.value : "");
+      });
+    }
+    var root = qs("[data-cg-root]");
+    if (!root || root._refClick) return;
+    root._refClick = true;
+    root.addEventListener("click", function (ev) {
+      var t = ev.target;
+      if (!t || !t.closest) return;
+      var chip = t.closest("[data-cg-ref-topic]");
+      if (chip) {
+        refTopic = chip.getAttribute("data-cg-ref-topic") || "";
+        refResult = null;
+        loadRefTopic(refTopic);
+        return;
+      }
+      var hit = t.closest("[data-cg-ref-name]");
+      if (hit) {
+        runRefLookup(hit.getAttribute("data-cg-ref-name") || "");
+      }
+    });
+  }
+
+  async function openReference() {
+    refMode = true;
+    refResult = null;
+    try {
+      if (!refTopics) {
+        var idx = await fetchTopicList("");
+        refTopics = (idx && idx.items) || [];
+      }
+    } catch (_) {
+      refTopics = refTopics || [];
+    }
+    renderMain(state);
+    if (refTopic) loadRefTopic(refTopic);
+    try {
+      if (location.hash !== "#reference") {
+        history.replaceState(null, "", "#reference");
+      }
+    } catch (_) { /* ignore */ }
+  }
+
+  async function loadRefTopic(topic) {
+    if (!topic) {
+      refTopicItems = null;
+      if (refMode) renderMain(state);
+      return;
+    }
+    try {
+      var data = await fetchTopicList(topic);
+      var raw = (data && data.items) || [];
+      // Attribute/skill topics return arrays not items
+      if (!raw.length && data) {
+        if (data.all) {
+          raw = data.all.map(function (n) {
+            return { name: n };
+          });
+        } else if (data.mental) {
+          raw = []
+            .concat(data.mental || [])
+            .concat(data.physical || [])
+            .concat(data.social || [])
+            .map(function (n) {
+              return { name: typeof n === "string" ? n : n.name };
+            });
+        }
+      }
+      refTopicItems = raw;
+    } catch (_) {
+      refTopicItems = [];
+    }
+    if (refMode) renderMain(state);
+  }
+
+  async function runRefLookup(q) {
+    refQuery = String(q || "").trim();
+    busy = true;
+    try {
+      refResult = await fetchInfo(refQuery);
+      if (refMode) renderMain(state);
+    } catch (e) {
+      setMsg(
+        qs("[data-cg-error]"),
+        (e && e.message) || "Lookup failed",
+        true,
+      );
+    } finally {
+      busy = false;
+    }
+  }
+
+  function wireRefOpen() {
+    var btn = qs("[data-cg-ref-open]");
+    if (!btn || btn._bound) return;
+    btn._bound = true;
+    btn.addEventListener("click", function () {
+      openReference();
+    });
+  }
+
   function renderMain(st) {
     var main = qs("[data-site-main]");
     if (!main) return;
+
+    if (refMode) {
+      main.innerHTML = renderRefPanel();
+      wireRef();
+      var rightR = qs("[data-site-right-panels]");
+      if (rightR) {
+        rightR.innerHTML =
+          '<section class="site-menu menu">' +
+          '<h2 class="site-menu__title">Reference</h2>' +
+          "<p class=\"muted\">In-game: <code>+info name</code>, " +
+          "<code>+cg/list topic</code></p></section>";
+      }
+      return;
+    }
 
     if (!st) {
       main.innerHTML =
@@ -1995,6 +2336,7 @@
         '<p class="cg-header__sub">Live sheet' +
         (st.name ? " — " + esc(st.name) : "") +
         "</p></header>" +
+        '<div class="cg-actions">' + refBtnHtml() + "</div>" +
         renderLiveSheet(st) +
         (wipeLive
           ? '<div class="cg-actions cg-actions--wipe">' +
@@ -2014,6 +2356,7 @@
           renderSheetSummary(st) + "</section>";
       }
       wireWipe();
+      wireRefOpen();
       return;
     }
 
@@ -2028,6 +2371,7 @@
         "Otherwise finish chargen and wait for staff.</p>" +
         '<button type="button" class="cg-btn cg-btn--primary" ' +
         'data-cg-reload-sheet>Refresh sheet</button> ' +
+        refBtnHtml() + " " +
         '<a class="cg-btn" href="/">Home</a>' +
         "</div></section>";
       var reload = qs("[data-cg-reload-sheet]");
@@ -2036,6 +2380,7 @@
           boot();
         });
       }
+      wireRefOpen();
       return;
     }
 
@@ -2056,7 +2401,8 @@
         "approve or return it with notes. You can still check " +
         "status in-game with <code>+cg</code>.</p>" +
         '<div class="cg-actions">' +
-        '<a class="cg-btn cg-btn--primary" href="/">Home</a>' +
+        '<a class="cg-btn cg-btn--primary" href="/">Home</a> ' +
+        refBtnHtml() +
         (canW
           ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
             'data-cg-wipe>Wipe &amp; restart</button>'
@@ -2072,6 +2418,7 @@
           renderSheetSummary(st) + "</section>";
       }
       wireWipe();
+      wireRefOpen();
       return;
     }
 
@@ -2130,7 +2477,8 @@
       '<button type="button" class="cg-btn cg-btn--primary" ' +
       'data-cg-next>' +
       (st.stage >= st.maxStage ? "Finish" : "Next stage") +
-      "</button>" +
+      "</button> " +
+      refBtnHtml() +
       (st.isStaff
         ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
           'data-cg-wipe>Wipe</button>'
@@ -2153,6 +2501,7 @@
 
     wireStage();
     wireWipe();
+    wireRefOpen();
   }
 
   /**
@@ -2852,7 +3201,7 @@
     if (!qs('link[data-cg-css]')) {
       var link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/site/css/chargen.css?v=20260806wipe";
+      link.href = "/site/css/chargen.css?v=20260806ref";
       link.setAttribute("data-cg-css", "1");
       document.head.appendChild(link);
     }
@@ -2899,7 +3248,14 @@
           }
         } catch (_) { /* ignore */ }
       }
-      renderMain(state);
+      if (
+        typeof location !== "undefined" &&
+        location.hash === "#reference"
+      ) {
+        await openReference();
+      } else {
+        renderMain(state);
+      }
     } catch (e) {
       // Unauthenticated: leave site.js route guard to redirect.
       // Demo mode keeps the local gate UI.
@@ -2920,6 +3276,19 @@
 
   wireGlobal();
 
+  // Left-nav / deep-link: /chargen#reference
+  if (typeof window !== "undefined" && !window._cgRefHash) {
+    window._cgRefHash = true;
+    window.addEventListener("hashchange", function () {
+      if (location.hash === "#reference") {
+        if (!refMode) openReference();
+      } else if (refMode) {
+        refMode = false;
+        renderMain(state);
+      }
+    });
+  }
+
   global.SiteChargen = {
     boot: boot,
     isDemo: function () {
@@ -2928,5 +3297,6 @@
     getState: function () {
       return state;
     },
+    openReference: openReference,
   };
 })(typeof window !== "undefined" ? window : globalThis);

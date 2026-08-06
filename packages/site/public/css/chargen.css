@@ -1026,3 +1026,119 @@
     font-size: 2rem;
   }
 }
+
+/* Reference browser (+info / +cg/list) */
+.cg-ref__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin: 0 0 1rem;
+}
+
+.cg-ref__search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+.cg-ref__search .cg-input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.cg-ref__topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+}
+
+.cg-ref__chip {
+  border: 1px solid var(--site-border, #444);
+  background: transparent;
+  color: var(--site-text-muted);
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.cg-ref__chip:hover {
+  color: var(--site-text);
+  border-color: var(--site-accent, #c9a227);
+}
+
+.cg-ref__chip.is-active {
+  color: var(--site-bg, #111);
+  background: var(--site-accent, #c9a227);
+  border-color: var(--site-accent, #c9a227);
+}
+
+.cg-ref__body {
+  margin-top: 0.5rem;
+}
+
+.cg-ref__detail h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+}
+
+.cg-ref__cat {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+}
+
+.cg-ref__text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: var(--site-surface, rgba(0, 0, 0, 0.2));
+  border-radius: 0.4rem;
+  border: 1px solid var(--site-border, #333);
+}
+
+.cg-ref__hits,
+.cg-ref__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cg-ref__hits li,
+.cg-ref__list li {
+  margin: 0 0 0.25rem;
+}
+
+.cg-ref__hit {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.cg-ref__hit:hover {
+  background: var(--site-surface, rgba(255, 255, 255, 0.06));
+}
+
+.cg-ref__list-title {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1rem;
+  text-transform: capitalize;
+}
+
+.cg-ref__msg {
+  margin: 0 0 0.75rem;
+}
