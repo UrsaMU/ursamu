@@ -173,6 +173,21 @@ Deno.test("injectSiteHtml: skin + title", OPTS, () => {
   assertEquals(out.includes(">Wiki</a>"), true);
   assertEquals(out.includes("Court of Miracles</a>"), true);
 
+  // Wiki path: no hero logo (banner hidden, compact shell)
+  const onWiki = injectSiteHtml(src, {
+    skin: "court",
+    title: "Court of Miracles",
+    bannerImage: "/site/theme/installed/court/imgs/header.png",
+    nav: [{ label: "Home", href: "/site/" }],
+  }, { path: "/wiki/lore" });
+  assertEquals(onWiki.includes("has-image"), false);
+  assertEquals(onWiki.includes("is-compact"), true);
+  const wikiBanner = onWiki.match(
+    /<header\b[^>]*\bdata-site-banner\b[^>]*>/i,
+  );
+  assertEquals(!!wikiBanner, true);
+  assertEquals(/\bhidden\b/i.test(wikiBanner![0]), true);
+
   const onLogin = injectSiteHtml(src, {
     skin: "court",
     title: "Court of Miracles",
