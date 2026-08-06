@@ -2425,7 +2425,7 @@
       var link = document.createElement("link");
       link.id = "site-play-css";
       link.rel = "stylesheet";
-      link.href = "/site/css/play.css?v=20260805btngrow";
+      link.href = "/site/css/play.css?v=20260806bq";
       document.head.appendChild(link);
     }
     // Separate file: CSP blocks inline style=; classes live here.
@@ -2468,7 +2468,7 @@
     if (!playScriptPromise) {
       playScriptPromise = new Promise(function (resolve, reject) {
         var s = document.createElement("script");
-        s.src = "/site/js/play.js?v=20260806nowipe";
+        s.src = "/site/js/play.js?v=20260806bq";
         s.async = true;
         s.onload = function () { resolve(true); };
         s.onerror = function () {

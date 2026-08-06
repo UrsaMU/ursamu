@@ -710,6 +710,24 @@
         }
         continue;
       }
+      // Markdown blockquote: > text
+      var bq = t.match(/^>\s?(.*)$/);
+      if (bq) {
+        closePara();
+        closeList();
+        var bqLines = [bq[1]];
+        while (i + 1 < lines.length) {
+          var nt = lines[i + 1].trim();
+          var nb = nt.match(/^>\s?(.*)$/);
+          if (!nb) break;
+          i += 1;
+          bqLines.push(nb[1]);
+        }
+        html += '<blockquote class="play-info play-md__bq">' +
+          "<p>" + inlineMd(bqLines.join("\n")) +
+          "</p></blockquote>";
+        continue;
+      }
       closeList();
       if (!inPara) {
         html += '<p class="play-md__p">';
@@ -1245,6 +1263,18 @@
       "</span></div>";
   }
 
+  /**
+   * Pure server info (u.send / look text without chat/layout UI).
+   * Markdown blockquote (`>`) — not IC speech bubbles.
+   */
+  function renderServerInfo(msg) {
+    var raw = String(msg ?? "");
+    if (!raw) return "";
+    return '<blockquote class="play-info">' +
+      '<div class="play-pre">' + mushToHtml(raw) + "</div>" +
+      "</blockquote>";
+  }
+
   function renderMessages() {
     var out = rootEl && rootEl.querySelector(".play-output");
     if (!out) return;
@@ -1277,8 +1307,7 @@
       } else if (hasLayout(m.data)) {
         html += renderLayout(m.data.ui);
       } else if (m.msg) {
-        html += '<div class="play-pre">' +
-          mushToHtml(m.msg) + "</div>";
+        html += renderServerInfo(m.msg);
       }
       html += "</div>";
     }
