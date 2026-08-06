@@ -78,38 +78,8 @@ export async function cgExec(u: IUrsamuSDK) {
     return;
   }
 
-  // Web /play: open Character tab instead of terminal stepper.
-  // (Play client also intercepts +cg client-side; this covers any path
-  // that still hits the engine.) List/info already returned above.
-  const ct = (u as { clientType?: string }).clientType;
-  if (ct === "web") {
-    const ui = (u as {
-      ui?: {
-        layout?: (o: {
-          components: unknown[];
-          meta?: Record<string, unknown>;
-        }) => void;
-      };
-    }).ui;
-    if (ui?.layout) {
-      ui.layout({
-        components: [],
-        meta: {
-          type: "navigate",
-          path: "/chargen",
-          to: "chargen",
-        },
-      });
-    } else {
-      u.send(
-        "Open the %chCharacter%cn tab to continue chargen " +
-          "(/chargen on the site).",
-      );
-    }
-    return;
-  }
-
   // Approved non-staff: no stepper (+cg, /set, /submit, /reset).
+  // Web play may run +cg in the terminal; Character tab is optional.
   if (isApproved(target) && !isStaff(u.me)) {
     u.send(
       "Your character is already %chapproved%cn. " +

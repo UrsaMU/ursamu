@@ -990,19 +990,6 @@
   color: #e88;
 }
 
-.cg-actions--wipe {
-  margin-top: 1.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.cg-wipe-hint {
-  flex: 1 1 100%;
-  margin: 0;
-  font-size: 0.85rem;
-}
-
 .cg-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;

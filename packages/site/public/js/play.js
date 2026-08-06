@@ -1560,35 +1560,12 @@
     });
   }
 
-  /**
-   * +cg / +chargen on web → Character tab (/chargen), not
-   * in-game stepper text. Catalog browse (+cg/list, +cg/info)
-   * stays in the terminal for everyone.
-   */
-  function isChargenCmd(line) {
-    var t = String(line || "").trim().toLowerCase();
-    if (!t) return false;
-    // Catalog — do not redirect to Character tab.
-    if (/^\+?cg\/(?:list|info)(?:\s|$)/.test(t)) return false;
-    if (/^\+?chargen\/(?:list|info)(?:\s|$)/.test(t)) {
-      return false;
-    }
-    // +cg, +cg/set, +chargen, chargen …
-    if (/^\+?cg(?:\/|\s|$)/.test(t)) return true;
-    if (/^\+?chargen(?:\/|\s|$)/.test(t)) return true;
-    return false;
-  }
-
-  function chargenPath() {
-    var p = location.pathname || "";
-    if (p === "/site" || p.indexOf("/site/") === 0) {
-      return "/site/chargen";
-    }
-    return "/chargen";
-  }
-
+  /** Server layout navigate → Character (optional deep-link only). */
   function goToChargen() {
-    var path = chargenPath();
+    var p = location.pathname || "";
+    var path = (p === "/site" || p.indexOf("/site/") === 0)
+      ? "/site/chargen"
+      : "/chargen";
     try {
       if (global.SiteShell && typeof global.SiteShell.navigate ===
         "function") {
@@ -1607,6 +1584,7 @@
    * Send as typed. Server defaults unmatched bare text to `say`
    * after registered commands / exits / $patterns (see addCmd).
    * Pose shortcuts (: ; " ') and say/pose already match engine cmds.
+   * +cg runs in the play terminal (no client redirect).
    */
   /**
    * No client-side "> …" echo. Server sends faded cmd-echo when
@@ -1615,10 +1593,6 @@
   function sendCmd(line) {
     var t = String(line || "").trim();
     if (!t) return;
-    if (isChargenCmd(t)) {
-      goToChargen();
-      return;
-    }
     if (!socket || socket.readyState !== 1) return;
     socket.send(JSON.stringify({ msg: t }));
   }

@@ -2385,8 +2385,6 @@
       (st.closed && st.sheet && !st.stage) ||
       (st.sheet && st.sheetText && !st.stage));
     if (showLive && st.sheet) {
-      // Staff only — never show wipe to players.
-      var wipeLive = !!(st.isStaff && st.canWipe !== false);
       main.innerHTML =
         '<section class="site-section cg-root" data-cg-root>' +
         '<header class="cg-header">' +
@@ -2395,14 +2393,6 @@
         (st.name ? " — " + esc(st.name) : "") +
         "</p></header>" +
         renderLiveSheet(st) +
-        (wipeLive
-          ? '<div class="cg-actions cg-actions--wipe">' +
-            '<button type="button" class="cg-btn cg-btn--danger" ' +
-            'data-cg-wipe>Wipe character</button>' +
-            '<p class="cg-wipe-hint muted">Staff only. ' +
-            "Clears live sheet, approval, and draft " +
-            "(<code>+cg/wipe</code>).</p></div>"
-          : "") +
         '<div class="cg-error" data-cg-error hidden></div>' +
         "</section>";
       var rightLive = qs("[data-site-right-panels]");
@@ -2412,7 +2402,6 @@
           '<h2 class="site-menu__title">Sheet</h2>' +
           renderSheetSummary(st) + "</section>";
       }
-      wireWipe();
       return;
     }
 
@@ -2440,7 +2429,6 @@
 
     if (st.isSubmitted && !st.needAuth) {
       var jobN = st.jobNumber || st.submittedJob;
-      var canW = !!(st.isStaff && st.canWipe !== false);
       main.innerHTML =
         '<section class="site-section cg-root" data-cg-root>' +
         '<div class="cg-gate cg-gate--ok">' +
@@ -2456,10 +2444,6 @@
         "status in-game with <code>+cg</code>.</p>" +
         '<div class="cg-actions">' +
         '<a class="cg-btn cg-btn--primary" href="/">Home</a>' +
-        (canW
-          ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
-            'data-cg-wipe>Wipe &amp; restart</button>'
-          : "") +
         "</div>" +
         '<div class="cg-error" data-cg-error hidden></div>' +
         "</div></section>";
@@ -2470,7 +2454,6 @@
           '<h2 class="site-menu__title">Draft sheet</h2>' +
           renderSheetSummary(st) + "</section>";
       }
-      wireWipe();
       return;
     }
 
@@ -2530,10 +2513,6 @@
       'data-cg-next>' +
       (st.stage >= st.maxStage ? "Finish" : "Next stage") +
       "</button>" +
-      (st.isStaff
-        ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
-          'data-cg-wipe>Wipe</button>'
-        : "") +
       "</div></section>";
 
     main.innerHTML = html;
@@ -2551,69 +2530,6 @@
     }
 
     wireStage();
-    wireWipe();
-  }
-
-  /**
-   * Full character wipe via POST /chargen/wipe (same as +cg/wipe).
-   */
-  function wireWipe() {
-    var btn = qs("[data-cg-wipe]");
-    if (!btn || btn._cgWipeBound) return;
-    // Never bind wipe for non-staff (defense in depth).
-    if (!state || !state.isStaff) {
-      btn.remove();
-      return;
-    }
-    btn._cgWipeBound = true;
-    btn.addEventListener("click", function () {
-      if (busy) return;
-      if (!state || !state.isStaff) return;
-      var approved = !!(state.approved || state.isApproved);
-      var msg = approved
-        ? "Wipe this character completely?\n\n" +
-          "Removes the live sheet, approval, sight flags, " +
-          "and chargen draft, then starts a fresh draft.\n" +
-          "This cannot be undone."
-        : "Staff wipe of this chargen draft?\n\n" +
-          "Clears the draft (and any live sheet) " +
-          "and starts over at Stage 1.";
-      if (!window.confirm(msg)) return;
-      var reason = window.prompt(
-        "Optional note for the wipe (logged / mailed):",
-        "",
-      ) || "";
-      busy = true;
-      (async function () {
-        try {
-          state = await api("POST", "/wipe", {
-            reason: reason,
-          });
-          if (state && state.wiped) {
-            state.approved = false;
-            state.isApproved = false;
-            state.closed = false;
-            state.sheetText = "";
-          }
-          renderMain(state);
-          setMsg(
-            qs("[data-cg-ok]"),
-            "Character wiped. Fresh chargen draft ready.",
-            false,
-          );
-          var okEl = qs("[data-cg-ok]");
-          if (okEl) okEl.hidden = false;
-        } catch (err) {
-          setMsg(
-            qs("[data-cg-error]"),
-            (err && err.message) || "Wipe failed.",
-            true,
-          );
-        } finally {
-          busy = false;
-        }
-      })();
-    });
   }
 
   // ── Events ─────────────────────────────────────────────────────
@@ -3251,7 +3167,7 @@
     if (!qs('link[data-cg-css]')) {
       var link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/site/css/chargen.css?v=20260806ellip";
+      link.href = "/site/css/chargen.css?v=20260806nowipe";
       link.setAttribute("data-cg-css", "1");
       document.head.appendChild(link);
     }
