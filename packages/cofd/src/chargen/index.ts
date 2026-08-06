@@ -5,3 +5,4 @@ export * from "./list.ts";
 export * from "./gifts.ts";
 export * from "./contracts.ts";
 export * from "./submit.ts";
+export * from "./wipe_core.ts";
