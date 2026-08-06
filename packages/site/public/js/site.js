@@ -1045,7 +1045,8 @@
       return;
     }
 
-    // Character (/chargen): sheet or stepper help
+    // Character (/chargen): left rail filled by chargen.js
+    // (Sheet | Reference | Rules | +cg help). Placeholder until boot.
     if (MODE === "chargen") {
       if (leftPanels) {
         leftPanels.innerHTML =
@@ -1054,9 +1055,9 @@
           "<ul class=\"site-menu__list\">" +
           "<li class=\"is-current\"><a href=\"" +
           pubPath("chargen") +
-          "\" aria-current=\"page\">Sheet / Chargen</a></li>" +
+          "\" aria-current=\"page\">Sheet</a></li>" +
           "<li><a href=\"" + pubPath("chargen") +
-          "#reference\" data-cg-nav-ref>Reference</a></li>" +
+          "#reference\">Reference</a></li>" +
           "<li><a href=\"" + wikiHref("rules/chargen") +
           "\">Rules</a></li>" +
           "<li><a href=\"" + helpHref("chargen") +
@@ -2397,7 +2398,7 @@
     if (!chargenScriptPromise) {
       chargenScriptPromise = new Promise(function (resolve, reject) {
         var s = document.createElement("script");
-        s.src = "/site/js/chargen.js?v=20260806ref2";
+        s.src = "/site/js/chargen.js?v=20260806nav";
         s.async = true;
         s.onload = function () { resolve(true); };
         s.onerror = function () {

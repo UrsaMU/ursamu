@@ -1977,12 +1977,90 @@
   }
 
   // ── Reference browser (+info / +cg/list) ───────────────────────
+  // Entry point lives in the left rail only (not main action bars).
 
-  function refBtnHtml() {
-    return (
-      '<button type="button" class="cg-btn" data-cg-ref-open>' +
-      "Reference</button>"
-    );
+  function charBasePath() {
+    var p = (location.pathname || "") + "";
+    if (p.indexOf("/site/") === 0 || p === "/site") {
+      return "/site/chargen";
+    }
+    return "/chargen";
+  }
+
+  function wikiPath(sub) {
+    var base = charBasePath().indexOf("/site/") === 0
+      ? "/site/wiki/"
+      : "/wiki/";
+    return base + (sub || "");
+  }
+
+  function helpPath(topic) {
+    var base = charBasePath().indexOf("/site/") === 0
+      ? "/site/help/"
+      : "/help/";
+    return base + (topic || "");
+  }
+
+  /** Left-rail nav: Sheet vs Reference (site chrome, not main CTA). */
+  function paintCharNav() {
+    var left = qs("[data-site-left-panels]");
+    if (!left) return;
+    var base = charBasePath();
+    var sheetCur = !refMode ? " is-current" : "";
+    var refCur = refMode ? " is-current" : "";
+    left.innerHTML =
+      '<section class="site-menu menu">' +
+      '<h2 class="site-menu__title">Character</h2>' +
+      '<ul class="site-menu__list">' +
+      '<li class="' + sheetCur.trim() + '">' +
+      '<a href="' + esc(base) + '" data-cg-nav-sheet' +
+      (!refMode ? ' aria-current="page"' : "") +
+      ">Sheet</a></li>" +
+      '<li class="' + refCur.trim() + '">' +
+      '<a href="' + esc(base) + '#reference" data-cg-nav-ref' +
+      (refMode ? ' aria-current="page"' : "") +
+      ">Reference</a></li>" +
+      "<li><a href=\"" + esc(wikiPath("rules/chargen")) +
+      "\">Rules</a></li>" +
+      "<li><a href=\"" + esc(helpPath("chargen")) +
+      "\">+cg help</a></li>" +
+      "</ul></section>";
+    wireCharNav();
+  }
+
+  function wireCharNav() {
+    var sheet = qs("[data-cg-nav-sheet]");
+    if (sheet && !sheet._cgNav) {
+      sheet._cgNav = true;
+      sheet.addEventListener("click", function (ev) {
+        if (refMode) {
+          ev.preventDefault();
+          closeReference();
+        }
+      });
+    }
+    var ref = qs("[data-cg-nav-ref]");
+    if (ref && !ref._cgNav) {
+      ref._cgNav = true;
+      ref.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        if (!refMode) openReference();
+      });
+    }
+  }
+
+  function closeReference() {
+    refMode = false;
+    try {
+      if (location.hash === "#reference") {
+        history.replaceState(
+          null,
+          "",
+          location.pathname + location.search,
+        );
+      }
+    } catch (_) { /* ignore */ }
+    renderMain(state);
   }
 
   async function fetchInfo(q) {
@@ -2079,9 +2157,6 @@
       '<p class="cg-header__sub">Same catalogs as ' +
       "<code>+info</code> and <code>+cg/list</code></p>" +
       "</header>" +
-      '<div class="cg-ref__toolbar">' +
-      '<button type="button" class="cg-btn" data-cg-ref-back>' +
-      "← Character</button>" +
       '<form class="cg-ref__search" data-cg-ref-form>' +
       '<input type="search" class="cg-input" data-cg-ref-q ' +
       'placeholder="Look up a name…" value="' +
@@ -2089,7 +2164,7 @@
       '" autocomplete="off" />' +
       '<button type="submit" class="cg-btn cg-btn--primary">' +
       "Look up</button>" +
-      "</form></div>";
+      "</form>";
 
     html += '<div class="cg-ref__topics" data-cg-ref-topics>';
     html +=
@@ -2171,23 +2246,6 @@
   }
 
   function wireRef() {
-    var back = qs("[data-cg-ref-back]");
-    if (back && !back._bound) {
-      back._bound = true;
-      back.addEventListener("click", function () {
-        refMode = false;
-        try {
-          if (location.hash === "#reference") {
-            history.replaceState(
-              null,
-              "",
-              location.pathname + location.search,
-            );
-          }
-        } catch (_) { /* ignore */ }
-        renderMain(state);
-      });
-    }
     var form = qs("[data-cg-ref-form]");
     if (form && !form._bound) {
       form._bound = true;
@@ -2286,18 +2344,11 @@
     }
   }
 
-  function wireRefOpen() {
-    var btn = qs("[data-cg-ref-open]");
-    if (!btn || btn._bound) return;
-    btn._bound = true;
-    btn.addEventListener("click", function () {
-      openReference();
-    });
-  }
-
   function renderMain(st) {
     var main = qs("[data-site-main]");
     if (!main) return;
+
+    paintCharNav();
 
     if (refMode) {
       main.innerHTML = renderRefPanel();
@@ -2306,9 +2357,11 @@
       if (rightR) {
         rightR.innerHTML =
           '<section class="site-menu menu">' +
-          '<h2 class="site-menu__title">Reference</h2>' +
-          "<p class=\"muted\">In-game: <code>+info name</code>, " +
-          "<code>+cg/list topic</code></p></section>";
+          '<h2 class="site-menu__title">Catalogs</h2>' +
+          "<p class=\"muted\">Same data as " +
+          "<code>+info</code> / <code>+cg/list</code>. " +
+          "Use <strong>Sheet</strong> in the left menu " +
+          "to return.</p></section>";
       }
       return;
     }
@@ -2336,7 +2389,6 @@
         '<p class="cg-header__sub">Live sheet' +
         (st.name ? " — " + esc(st.name) : "") +
         "</p></header>" +
-        '<div class="cg-actions">' + refBtnHtml() + "</div>" +
         renderLiveSheet(st) +
         (wipeLive
           ? '<div class="cg-actions cg-actions--wipe">' +
@@ -2356,7 +2408,6 @@
           renderSheetSummary(st) + "</section>";
       }
       wireWipe();
-      wireRefOpen();
       return;
     }
 
@@ -2371,7 +2422,6 @@
         "Otherwise finish chargen and wait for staff.</p>" +
         '<button type="button" class="cg-btn cg-btn--primary" ' +
         'data-cg-reload-sheet>Refresh sheet</button> ' +
-        refBtnHtml() + " " +
         '<a class="cg-btn" href="/">Home</a>' +
         "</div></section>";
       var reload = qs("[data-cg-reload-sheet]");
@@ -2380,7 +2430,6 @@
           boot();
         });
       }
-      wireRefOpen();
       return;
     }
 
@@ -2401,8 +2450,7 @@
         "approve or return it with notes. You can still check " +
         "status in-game with <code>+cg</code>.</p>" +
         '<div class="cg-actions">' +
-        '<a class="cg-btn cg-btn--primary" href="/">Home</a> ' +
-        refBtnHtml() +
+        '<a class="cg-btn cg-btn--primary" href="/">Home</a>' +
         (canW
           ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
             'data-cg-wipe>Wipe &amp; restart</button>'
@@ -2418,7 +2466,6 @@
           renderSheetSummary(st) + "</section>";
       }
       wireWipe();
-      wireRefOpen();
       return;
     }
 
@@ -2477,8 +2524,7 @@
       '<button type="button" class="cg-btn cg-btn--primary" ' +
       'data-cg-next>' +
       (st.stage >= st.maxStage ? "Finish" : "Next stage") +
-      "</button> " +
-      refBtnHtml() +
+      "</button>" +
       (st.isStaff
         ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
           'data-cg-wipe>Wipe</button>'
@@ -2501,7 +2547,6 @@
 
     wireStage();
     wireWipe();
-    wireRefOpen();
   }
 
   /**
@@ -3201,7 +3246,7 @@
     if (!qs('link[data-cg-css]')) {
       var link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/site/css/chargen.css?v=20260806ref2";
+      link.href = "/site/css/chargen.css?v=20260806nav";
       link.setAttribute("data-cg-css", "1");
       document.head.appendChild(link);
     }
@@ -3283,8 +3328,7 @@
       if (location.hash === "#reference") {
         if (!refMode) openReference();
       } else if (refMode) {
-        refMode = false;
-        renderMain(state);
+        closeReference();
       }
     });
   }
