@@ -1,7 +1,11 @@
 import { gameHooks } from "@ursamu/core";
 import { addCmd } from "../commands/addCmd.ts";
 import type { IUrsamuSDK, IDBObj } from "../commands/types.ts";
-import { divider, footer, header } from "../format/handlers.ts";
+import {
+  lookAction,
+  renderListText,
+  sendListLayout,
+} from "./cmd-ui.ts";
 
 export function execHome(u: IUrsamuSDK): void {
   const actor = u.me;
@@ -34,53 +38,16 @@ export function renderInventoryText(
   items: IDBObj[],
 ): string {
   const who = u.util.displayName(u.me, u.me);
-  const width = (u.me.state?.termWidth as number) || 78;
-  const lines: string[] = [];
-  lines.push(header(`${who}'s Inventory`, "=", width));
-  if (items.length === 0) {
-    lines.push("  You are not carrying anything.");
-  } else {
-    for (const item of items) {
-      lines.push(`  ${itemLabel(u, item)}`);
-    }
-  }
-  lines.push(divider("", "-", width));
   const n = items.length;
-  lines.push(`  ${n} item${n === 1 ? "" : "s"}.`);
-  lines.push(footer("", "=", width));
-  return lines.join("\n");
-}
-
-function sendInventoryWeb(
-  u: IUrsamuSDK,
-  items: IDBObj[],
-): void {
-  if (!u.ui?.layout) return;
-  const who = u.util.displayName(u.me, u.me);
-  const list = items.map((item) => ({
-    id: item.id,
-    label: itemLabel(u, item),
-    action: { type: "cmd" as const, cmd: `look #${item.id}` },
-  }));
-  const n = items.length;
-  u.ui.layout({
-    components: [
-      { type: "header", title: `${who}'s Inventory` },
-      {
-        type: "entity-list",
-        title: n === 0
-          ? "Empty"
-          : (n === 1 ? "1 item" : `${n} items`),
-        items: list,
-      },
-      {
-        type: "text",
-        content: n === 0
-          ? "You are not carrying anything."
-          : `${n} item${n === 1 ? "" : "s"}.`,
-      },
-    ],
-    meta: { type: "inventory" },
+  return renderListText(u, {
+    metaType: "inventory",
+    title: `${who}'s Inventory`,
+    items: items.map((item) => ({
+      id: item.id,
+      label: itemLabel(u, item),
+    })),
+    emptyText: "You are not carrying anything.",
+    footerText: `${n} item${n === 1 ? "" : "s"}.`,
   });
 }
 
@@ -95,11 +62,19 @@ export async function execInventory(u: IUrsamuSDK): Promise<void> {
   if (ctx.handled) return;
 
   const items = carriedItems(u.me);
-  if (u.clientType === "web") {
-    sendInventoryWeb(u, items);
-    return;
-  }
-  u.send(renderInventoryText(u, items));
+  const who = u.util.displayName(u.me, u.me);
+  const n = items.length;
+  sendListLayout(u, {
+    metaType: "inventory",
+    title: `${who}'s Inventory`,
+    items: items.map((item) => ({
+      id: item.id,
+      label: itemLabel(u, item),
+      action: lookAction(`#${item.id}`),
+    })),
+    emptyText: "You are not carrying anything.",
+    footerText: `${n} item${n === 1 ? "" : "s"}.`,
+  });
 }
 
 addCmd({

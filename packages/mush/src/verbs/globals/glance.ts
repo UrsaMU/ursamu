@@ -3,7 +3,12 @@
  */
 import { addCmd } from "../../commands/addCmd.ts";
 import type { IUrsamuSDK, IDBObj } from "../../commands/types.ts";
-import { divider, footer, header } from "../../format/handlers.ts";
+import {
+  divider,
+  footer,
+  header,
+} from "../../format/handlers.ts";
+import { lookAction, sendListLayout } from "../cmd-ui.ts";
 import { fmtIdle } from "./time-fmt.ts";
 
 function shortDesc(obj: IDBObj): string {
@@ -52,7 +57,6 @@ export function renderGlanceText(
       const name = u.util.displayName(p, u.me);
       const idle = fmtIdle(p.state?.lastCommand);
       const desc = shortDesc(p);
-      // Approximate columns (color codes don't take visible width)
       lines.push(
         `  ${name.padEnd(26)}${idle.padEnd(6)}${desc}`,
       );
@@ -65,49 +69,6 @@ export function renderGlanceText(
   );
   lines.push(footer("", "=", width));
   return lines.join("\n");
-}
-
-function sendGlanceWeb(
-  u: IUrsamuSDK,
-  roomName: string,
-  players: IDBObj[],
-): void {
-  if (!u.ui?.layout) return;
-  const items = players.map((p) => {
-    const name = plainName(p);
-    return {
-      id: p.id,
-      label: u.util.displayName(p, u.me),
-      meta: fmtIdle(p.state?.lastCommand),
-      sublabel: shortDesc(p) || undefined,
-      action: name
-        ? { type: "cmd" as const, cmd: `look ${name}` }
-        : { type: "cmd" as const, cmd: `look #${p.id}` },
-    };
-  });
-  const n = players.length;
-  u.ui.layout({
-    components: [
-      {
-        type: "header",
-        title: `At a glance — ${roomName}`,
-      },
-      {
-        type: "entity-list",
-        title: n === 0
-          ? "Empty"
-          : (n === 1 ? "1 player" : `${n} players`),
-        items,
-      },
-      {
-        type: "text",
-        content: n === 0
-          ? "No one else is here."
-          : `${n} player${n === 1 ? "" : "s"} here.`,
-      },
-    ],
-    meta: { type: "glance" },
-  });
 }
 
 export async function execGlance(u: IUrsamuSDK): Promise<void> {
@@ -123,9 +84,36 @@ export async function execGlance(u: IUrsamuSDK): Promise<void> {
     })
   );
   const roomName = String(here.name ?? "here");
+  const n = players.length;
+  const textLines = players.map((p) => {
+    const name = u.util.displayName(p, u.me);
+    const idle = fmtIdle(p.state?.lastCommand);
+    const desc = shortDesc(p);
+    return `${name.padEnd(26)}${idle.padEnd(6)}${desc}`;
+  });
 
+  // Web uses list helper; telnet keeps columnar chrome.
   if (u.clientType === "web") {
-    sendGlanceWeb(u, roomName, players);
+    sendListLayout(u, {
+      metaType: "glance",
+      title: `At a glance — ${roomName}`,
+      listTitle: n === 0
+        ? "Empty"
+        : (n === 1 ? "1 player" : `${n} players`),
+      items: players.map((p) => {
+        const name = plainName(p);
+        return {
+          id: p.id,
+          label: u.util.displayName(p, u.me),
+          meta: fmtIdle(p.state?.lastCommand),
+          sublabel: shortDesc(p) || undefined,
+          action: lookAction(name || `#${p.id}`),
+        };
+      }),
+      emptyText: "No one else is here.",
+      footerText: `${n} player${n === 1 ? "" : "s"} here.`,
+      textLines,
+    });
     return;
   }
   u.send(renderGlanceText(u, roomName, players));
