@@ -2398,7 +2398,7 @@
     if (!chargenScriptPromise) {
       chargenScriptPromise = new Promise(function (resolve, reject) {
         var s = document.createElement("script");
-        s.src = "/site/js/chargen.js?v=20260806nav";
+        s.src = "/site/js/chargen.js?v=20260806ellip";
         s.async = true;
         s.onload = function () { resolve(true); };
         s.onerror = function () {

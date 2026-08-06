@@ -1158,7 +1158,8 @@
       var n = names[i];
       var v = values[n] != null ? values[n] : min;
       html += '<div class="cg-dots-row">' +
-        '<span class="cg-dots-row__label">' +
+        '<span class="cg-dots-row__label" title="' +
+        esc(titleCase(n)) + '">' +
         esc(titleCase(n)) + "</span>" +
         renderDots(n, v, min, 5) +
         '<span class="cg-dots-row__val">' + v + "</span></div>";
@@ -1509,7 +1510,8 @@
           });
           var label = d.name + (inC ? " ★" : "");
           html += '<div class="cg-dots-row">' +
-            '<span class="cg-dots-row__label">' +
+            '<span class="cg-dots-row__label" title="' +
+            esc(label) + '">' +
             esc(label) + "</span>" +
             renderDots(dkey, dv, 0, 5) +
             '<span class="cg-dots-row__val">' + dv +
@@ -1599,11 +1601,14 @@
   function renderReadonlyDots(name, value, maxDots) {
     maxDots = maxDots || 5;
     var n = Math.max(0, Math.min(maxDots, Number(value) || 0));
+    var label = titleCase(name);
+    // title= full name when CSS ellipsis truncates the label.
     var html = '<div class="cg-dots-row cg-dots-row--ro">' +
-      '<span class="cg-dots-row__label">' +
-      esc(titleCase(name)) + "</span>" +
+      '<span class="cg-dots-row__label" title="' +
+      esc(label) + '">' +
+      esc(label) + "</span>" +
       '<span class="cg-dots" aria-label="' +
-      esc(titleCase(name)) + " " + n + '">';
+      esc(label) + " " + n + '">';
     for (var i = 1; i <= maxDots; i++) {
       html += '<span class="cg-dot' +
         (i <= n ? " is-on" : "") +
@@ -3246,7 +3251,7 @@
     if (!qs('link[data-cg-css]')) {
       var link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/site/css/chargen.css?v=20260806nav";
+      link.href = "/site/css/chargen.css?v=20260806ellip";
       link.setAttribute("data-cg-css", "1");
       document.head.appendChild(link);
     }
