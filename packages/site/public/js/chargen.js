@@ -1986,7 +1986,8 @@
       (st.closed && st.sheet && !st.stage) ||
       (st.sheet && st.sheetText && !st.stage));
     if (showLive && st.sheet) {
-      var wipeLive = st.canWipe || st.isStaff;
+      // Staff only — never show wipe to players.
+      var wipeLive = !!(st.isStaff && st.canWipe !== false);
       main.innerHTML =
         '<section class="site-section cg-root" data-cg-root>' +
         '<header class="cg-header">' +
@@ -1999,10 +2000,9 @@
           ? '<div class="cg-actions cg-actions--wipe">' +
             '<button type="button" class="cg-btn cg-btn--danger" ' +
             'data-cg-wipe>Wipe character</button>' +
-            '<p class="cg-wipe-hint muted">Clears live sheet, ' +
-            "approval, and draft — same as " +
-            "<code>+cg/wipe</code> / <code>+cg/reset</code>." +
-            "</p></div>"
+            '<p class="cg-wipe-hint muted">Staff only. ' +
+            "Clears live sheet, approval, and draft " +
+            "(<code>+cg/wipe</code>).</p></div>"
           : "") +
         '<div class="cg-error" data-cg-error hidden></div>' +
         "</section>";
@@ -2041,7 +2041,7 @@
 
     if (st.isSubmitted && !st.needAuth) {
       var jobN = st.jobNumber || st.submittedJob;
-      var canW = st.canWipe || st.isStaff;
+      var canW = !!(st.isStaff && st.canWipe !== false);
       main.innerHTML =
         '<section class="site-section cg-root" data-cg-root>' +
         '<div class="cg-gate cg-gate--ok">' +
@@ -2131,9 +2131,9 @@
       'data-cg-next>' +
       (st.stage >= st.maxStage ? "Finish" : "Next stage") +
       "</button>" +
-      (st.canWipe !== false
+      (st.isStaff
         ? ' <button type="button" class="cg-btn cg-btn--danger" ' +
-          'data-cg-wipe>Reset</button>'
+          'data-cg-wipe>Wipe</button>'
         : "") +
       "</div></section>";
 
@@ -2161,34 +2161,35 @@
   function wireWipe() {
     var btn = qs("[data-cg-wipe]");
     if (!btn || btn._cgWipeBound) return;
+    // Never bind wipe for non-staff (defense in depth).
+    if (!state || !state.isStaff) {
+      btn.remove();
+      return;
+    }
     btn._cgWipeBound = true;
     btn.addEventListener("click", function () {
       if (busy) return;
-      var approved = !!(state &&
-        (state.approved || state.isApproved));
+      if (!state || !state.isStaff) return;
+      var approved = !!(state.approved || state.isApproved);
       var msg = approved
         ? "Wipe this character completely?\n\n" +
           "Removes the live sheet, approval, sight flags, " +
           "and chargen draft, then starts a fresh draft.\n" +
           "This cannot be undone."
-        : "Reset chargen completely?\n\n" +
-          "Clears the current draft (and any live sheet) " +
+        : "Staff wipe of this chargen draft?\n\n" +
+          "Clears the draft (and any live sheet) " +
           "and starts over at Stage 1.";
       if (!window.confirm(msg)) return;
-      var reason = "";
-      if (state && state.isStaff && approved) {
-        reason = window.prompt(
-          "Optional note for the wipe (logged / mailed):",
-          "",
-        ) || "";
-      }
+      var reason = window.prompt(
+        "Optional note for the wipe (logged / mailed):",
+        "",
+      ) || "";
       busy = true;
       (async function () {
         try {
           state = await api("POST", "/wipe", {
             reason: reason,
           });
-          // After wipe, land on fresh draft stepper
           if (state && state.wiped) {
             state.approved = false;
             state.isApproved = false;

@@ -210,7 +210,7 @@ Deno.test(
 );
 
 Deno.test(
-  "HTTP wipeChargen rejects approved non-staff self",
+  "HTTP wipeChargen rejects non-staff entirely",
   OPTS,
   async () => {
     const { wipeChargen } = await import(
@@ -221,17 +221,22 @@ Deno.test(
     await dbojs.create({
       id,
       name: "Mortal",
-      flags: "player connected approved",
+      flags: "player connected",
       data: {
         name: "Mortal",
-        cofd: { template: "mortal" },
+        cofd_cg: {
+          stage: 2,
+          sheet: { template: "mortal" },
+          isSubmitted: false,
+          isApproved: false,
+        },
       },
     });
 
     const res = await wipeChargen(id, {});
     assertEquals(res.status, 403);
     const body = await res.json();
-    assertStringIncludes(body.error ?? "", "approved");
+    assertStringIncludes(body.error ?? "", "Staff only");
 
     await dbojs.delete({ id }).catch(() => {});
   },
