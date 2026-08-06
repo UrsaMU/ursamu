@@ -1025,13 +1025,33 @@
     var items = [];
     for (var i = 0; i < list.length; i++) {
       var p = list[i];
+      var label = p.title || p.path;
+      if (p.draft === true || p.draft === "true") {
+        label = String(label) + " (draft)";
+      }
       items.push({
-        label: p.title || p.path,
+        label: label,
         href: wikiHref(p.path),
         current: p.path === WIKI_PATH,
       });
     }
     return items;
+  }
+
+  /** Default left rail when config omits leftMenu (matches site menu.ts). */
+  var DEFAULT_LEFT_MENU = "## Featured\n[[featured]]\n\n## Related\n[[section]]\n";
+
+  function isFeaturedPage(p) {
+    if (!p) return false;
+    // API sends boolean; tolerate string "true" from older caches.
+    var feat = p.featured === true || p.featured === "true";
+    if (!feat) return false;
+    // Drafts stay out of the public featured rail (not in public list
+    // either). Staff still see them so "Featured" + Draft is obvious.
+    if (p.draft === true || p.draft === "true") {
+      return !!(currentUser && currentUser.isStaff);
+    }
+    return true;
   }
 
   function renderLeft(pages) {
@@ -1067,9 +1087,7 @@
       return;
     }
 
-    var featured = pages.filter(function (p) {
-      return p.featured && !p.draft;
-    });
+    var featured = (pages || []).filter(isFeaturedPage);
 
     var siblings = [];
     if (MODE === "wiki" && WIKI_PATH) {
@@ -1094,7 +1112,8 @@
       blocks.section = { items: pagesToMenuItems(sectionItems) };
     }
 
-    var template = siteConfig.leftMenu;
+    var template = (siteConfig && siteConfig.leftMenu) ||
+      DEFAULT_LEFT_MENU;
     if (template && String(template).trim()) {
       leftPanels.innerHTML = expandLeftMenu(template, blocks) || "";
       return;
@@ -2649,6 +2668,8 @@
           currentUser = user;
           renderTopNav(user);
           updateNavUser(user);
+          // Re-paint left after auth so staff see featured drafts.
+          renderLeft(pages);
           // Auth-gated SPAs enforce earlier; others after content load
           if (
             MODE !== "chargen" &&

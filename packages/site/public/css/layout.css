@@ -517,11 +517,12 @@ body {
     padding-inline: 0;
   }
 
-  .site-main {
+  /* Featured / search before main so wiki menu is not buried */
+  .site-aside--start {
     order: 1;
   }
 
-  .site-aside--start {
+  .site-main {
     order: 2;
   }
 

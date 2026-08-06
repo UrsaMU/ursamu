@@ -89,7 +89,8 @@ export function parseFrontmatter(raw: string): { meta: WikiMeta; body: string } 
   for (const line of match[1].split(/\r?\n/)) {
     const m = line.match(/^([\w-]+):\s*(.*)$/);
     if (!m) continue;
-    const [, key, val] = m;
+    const [, key, rawVal] = m;
+    const val = rawVal.trim();
     if (val === "true")  { meta[key] = true;  continue; }
     if (val === "false") { meta[key] = false; continue; }
     if (val !== "" && !isNaN(Number(val))) { meta[key] = Number(val); continue; }

@@ -123,6 +123,13 @@ function onKey(ev: KeyboardEvent): void {
   }
 }
 
+/** Featured is public-site chrome — clear draft when checked. */
+function onFeaturedChange(): void {
+  if (featured.value && draft.value) {
+    draft.value = false;
+  }
+}
+
 onMounted(() => {
   void load();
   document.addEventListener("keydown", onKey);
@@ -149,6 +156,10 @@ async function save(): Promise<void> {
   status.value = "Saving…";
   try {
     const enc = encodeWikiPath(props.path);
+    // Featured pages must be public — draft hides them from the site menu.
+    if (featured.value && draft.value) {
+      draft.value = false;
+    }
     const payload: Record<string, unknown> = {
       title: t,
       body: body.value,
@@ -391,6 +402,7 @@ onBeforeRouteLeave(() => confirmLeave());
             v-model="featured"
             type="checkbox"
             class="chk"
+            @change="onFeaturedChange"
           >
           <span>Featured (left menu on public site)</span>
         </label>
