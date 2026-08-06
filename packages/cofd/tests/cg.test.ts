@@ -19,6 +19,37 @@ describe("Chronicles of Darkness Guided Character Generation", { sanitizeResourc
     assertStringIncludes(u._sent.join("\n").toLowerCase(), "approved");
   });
 
+  it("allows +cg/list for approved non-staff", async () => {
+    const me = mockPlayer({
+      id: "appr_list",
+      name: "ApprovedList",
+      flags: new Set(["player", "connected", "approved"]),
+      state: { cofd: { template: "vampire" } },
+    });
+    const u = mockU({ me });
+    u.cmd.args = ["list", "disciplines"];
+    await cgExec(u);
+    const out = u._sent.join("\n").toLowerCase();
+    assertEquals(out.includes("chargen is closed"), false);
+    assertEquals(out.includes("already"), false);
+    // Catalog body (topic header or index), not the closed gate.
+    assertEquals(out.length > 20, true);
+  });
+
+  it("allows +cg/info for approved non-staff", async () => {
+    const me = mockPlayer({
+      id: "appr_info",
+      name: "ApprovedInfo",
+      flags: new Set(["player", "connected", "approved"]),
+      state: { cofd: { template: "mortal" } },
+    });
+    const u = mockU({ me });
+    u.cmd.args = ["info", "giant"];
+    await cgExec(u);
+    const out = u._sent.join("\n").toLowerCase();
+    assertEquals(out.includes("chargen is closed"), false);
+  });
+
   it("blocks +cg for live sheet without flag (legacy)", async () => {
     const me = mockPlayer({
       id: "leg1",

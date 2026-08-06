@@ -61,9 +61,26 @@ export async function cgExec(u: IUrsamuSDK) {
     return await wipeExec(u);
   }
 
+  // Find target - self only for character generation
+  const target = u.me;
+
+  // /list and /info are always available (catalog browse), including
+  // approved players and web clients. Do not gate or redirect these.
+  if (sw === "list") {
+    const cg = target.state?.cofd_cg as CofdCgState | undefined;
+    const live = target.state?.cofd as CofdCgState["sheet"] | undefined;
+    const sheet = cg?.sheet ?? live ?? null;
+    u.send(renderCgList(rawArg, sheet));
+    return;
+  }
+  if (sw === "info") {
+    u.send(renderInfo(rawArg));
+    return;
+  }
+
   // Web /play: open Character tab instead of terminal stepper.
   // (Play client also intercepts +cg client-side; this covers any path
-  // that still hits the engine.)
+  // that still hits the engine.) List/info already returned above.
   const ct = (u as { clientType?: string }).clientType;
   if (ct === "web") {
     const ui = (u as {
@@ -92,32 +109,13 @@ export async function cgExec(u: IUrsamuSDK) {
     return;
   }
 
-  // Find target - self only for character generation
-  const target = u.me;
-
-  // Approved non-staff: no +cg (including /list, /set, /submit, /reset).
+  // Approved non-staff: no stepper (+cg, /set, /submit, /reset).
   if (isApproved(target) && !isStaff(u.me)) {
     u.send(
       "Your character is already %chapproved%cn. " +
-        "Chargen is closed. Contact staff if you need a rework.",
+        "Chargen is closed. Contact staff if you need a rework.\n" +
+        "Browse catalogs anytime: %ch+cg/list%cn, %ch+info%cn.",
     );
-    return;
-  }
-
-  // List switch — filtered by active cg sheet (or live sheet / blank draft).
-  // /list with no arg shows the index of topics available to this sheet.
-  if (sw === "list") {
-    const cg = target.state?.cofd_cg as CofdCgState | undefined;
-    const live = target.state?.cofd as CofdCgState["sheet"] | undefined;
-    const sheet = cg?.sheet ?? live ?? null;
-    u.send(renderCgList(rawArg, sheet));
-    return;
-  }
-
-  // Info switch — detail lookup for a named merit, condition, tilt, dread
-  // power, virtue, vice, seeming, kith, or court.
-  if (sw === "info") {
-    u.send(renderInfo(rawArg));
     return;
   }
 

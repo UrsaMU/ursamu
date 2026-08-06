@@ -391,8 +391,8 @@ Switches:
   /set <k>=<v>        -- Set chargen fields/traits.
   /back               -- Previous stage.
   /submit             -- Validate stage / finalize draft.
-  /list [<t>]         -- Options index or topic list.
-  /info <name>        -- Merit/condition/template detail.
+  /list [<t>]         -- Catalog index/topic (always available).
+  /info <name>        -- Merit/condition detail (always available).
 
 Staff wipe removes live sheet, chargen draft, approved flag,
 and fae/forsaken, then seeds a fresh +cg draft. Reason required

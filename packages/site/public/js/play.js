@@ -1562,11 +1562,17 @@
 
   /**
    * +cg / +chargen on web → Character tab (/chargen), not
-   * in-game stepper text.
+   * in-game stepper text. Catalog browse (+cg/list, +cg/info)
+   * stays in the terminal for everyone.
    */
   function isChargenCmd(line) {
     var t = String(line || "").trim().toLowerCase();
     if (!t) return false;
+    // Catalog — do not redirect to Character tab.
+    if (/^\+?cg\/(?:list|info)(?:\s|$)/.test(t)) return false;
+    if (/^\+?chargen\/(?:list|info)(?:\s|$)/.test(t)) {
+      return false;
+    }
     // +cg, +cg/set, +chargen, chargen …
     if (/^\+?cg(?:\/|\s|$)/.test(t)) return true;
     if (/^\+?chargen(?:\/|\s|$)/.test(t)) return true;
