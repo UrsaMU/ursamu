@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.73
+
+- Wiki edit save: keep original page **author** in the live list;
+  only the last-edit **date** updates (server is source of truth).
+
 ## 0.2.72
 
 - Remove **Play** tab from staff console top nav. Game client

@@ -169,7 +169,11 @@ async function save(): Promise<void> {
       readLock: readLock.value || "connected",
       tags: [...tags.value],
     };
-    const { res, data } = await api<{ error?: string }>(
+    const { res, data } = await api<{
+      error?: string;
+      author?: string;
+      date?: string;
+    }>(
       `/api/v1/wiki/${enc}`,
       {
         method: "PATCH",
@@ -192,6 +196,8 @@ async function save(): Promise<void> {
     status.value = draft.value
       ? "Draft · saved"
       : "Published · saved";
+    // Author stays the original creator; only last-edit date changes.
+    const prev = live.pages.find((p) => p.path === props.path);
     live.upsertPage({
       path: props.path,
       title: t,
@@ -201,8 +207,12 @@ async function save(): Promise<void> {
       readLock: readLock.value,
       tags: [...tags.value],
       chars: body.value.length,
-      date: new Date().toISOString().slice(0, 10),
-      author: session.displayName,
+      date: typeof data?.date === "string"
+        ? data.date
+        : new Date().toISOString().slice(0, 10),
+      author: typeof data?.author === "string" && data.author
+        ? data.author
+        : (prev?.author ?? ""),
     });
 
   } finally {

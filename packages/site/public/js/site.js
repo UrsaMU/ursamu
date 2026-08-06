@@ -312,11 +312,25 @@
     var bannerSrc = String(cfg.bannerImage || "").trim();
     // Figma: home + wiki share full hero; help stays compact
     var showHero = MODE === "home" || MODE === "wiki";
+    if (banner) {
+      // SPA return to / must unhide after help/play/chargen
+      if (showHero) {
+        banner.hidden = false;
+        banner.removeAttribute("hidden");
+      }
+    }
     if (bannerImg) {
       if (showHero && bannerSrc) {
         bannerImg.src = bannerSrc;
         bannerImg.hidden = false;
-        if (banner) banner.classList.add("has-image");
+        bannerImg.removeAttribute("hidden");
+        if (banner) {
+          banner.classList.add("has-image");
+          // Repair dual class= from older SSR (keep site-banner)
+          if (!banner.classList.contains("site-banner")) {
+            banner.classList.add("site-banner");
+          }
+        }
       } else {
         bannerImg.removeAttribute("src");
         bannerImg.hidden = true;
@@ -326,6 +340,8 @@
     if (bannerTitle) {
       if (showHero && heroTitle) {
         bannerTitle.textContent = heroTitle;
+        // Image hero: CSS hides title via .has-image; keep text
+        // for a11y / fallback if the logo asset 404s.
         bannerTitle.hidden = false;
         bannerTitle.removeAttribute("hidden");
       } else {

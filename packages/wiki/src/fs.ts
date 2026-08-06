@@ -124,6 +124,37 @@ export function serializePage(meta: WikiMeta, body: string): string {
   return lines.join("\n");
 }
 
+/** ISO date (YYYY-MM-DD) for wiki frontmatter date fields. */
+export function wikiToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Merge client meta onto an existing page for an edit.
+ * - `author` is immutable once set (original creator stays).
+ * - `date` always becomes today (last-edit stamp).
+ * Client-supplied author/date are ignored when a prior author exists.
+ */
+export function mergeWikiEditMeta(
+  existing: WikiMeta,
+  incoming: Record<string, unknown>,
+): WikiMeta {
+  const {
+    author: _a,
+    date: _d,
+    ...fields
+  } = incoming;
+  const prevAuthor = typeof existing.author === "string"
+    ? existing.author.trim()
+    : "";
+  return {
+    ...existing,
+    ...fields,
+    author: prevAuthor || existing.author,
+    date: wikiToday(),
+  };
+}
+
 // ─── directory walker ─────────────────────────────────────────────────────────
 
 /**

@@ -4,7 +4,14 @@
 import { assertEquals, assertStringIncludes } from "@std/assert";
 import { describe, it, beforeEach, afterEach } from "@std/testing/bdd";
 import { join } from "@std/path";
-import { parseFrontmatter, serializePage, walkWiki, safePath, normalisePath } from "../src/fs.ts";
+import {
+  parseFrontmatter,
+  serializePage,
+  walkWiki,
+  safePath,
+  normalisePath,
+  mergeWikiEditMeta,
+} from "../src/fs.ts";
 
 // ─── parseFrontmatter ─────────────────────────────────────────────────────────
 
@@ -63,6 +70,48 @@ describe("serializePage", () => {
   it("serializes arrays with brackets", () => {
     const result = serializePage({ tags: ["a", "b"] }, "body");
     assertStringIncludes(result, "tags: [a, b]");
+  });
+});
+
+// ─── mergeWikiEditMeta ───────────────────────────────────────────────────────
+
+describe("mergeWikiEditMeta", () => {
+  it("keeps original author when client sends another", () => {
+    const merged = mergeWikiEditMeta(
+      { title: "Kiths", author: "Medea", date: "2024-01-01" },
+      { title: "Kiths", author: "Bob", body: "nope" },
+    );
+    assertEquals(merged.author, "Medea");
+    assertEquals(merged.title, "Kiths");
+  });
+
+  it("bumps date to today on every edit", () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const merged = mergeWikiEditMeta(
+      { author: "Medea", date: "2020-06-15" },
+      { title: "Updated" },
+    );
+    assertEquals(merged.date, today);
+    assertEquals(merged.author, "Medea");
+  });
+
+  it("ignores client date override", () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const merged = mergeWikiEditMeta(
+      { author: "Medea", date: "2020-01-01" },
+      { date: "1999-12-31", draft: false },
+    );
+    assertEquals(merged.date, today);
+    assertEquals(merged.draft, false);
+  });
+
+  it("leaves empty author empty (no inventing)", () => {
+    const merged = mergeWikiEditMeta(
+      { title: "X" },
+      { author: "Sneaky", title: "Y" },
+    );
+    assertEquals(merged.author, undefined);
+    assertEquals(merged.title, "Y");
   });
 });
 
