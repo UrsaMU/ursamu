@@ -1,6 +1,6 @@
 # Chronicles of Darkness (CoFD) UrsaMU Plugin
 
-**[@ursamu/cofd-plugin](https://jsr.io/@ursamu/cofd-plugin)** · **v1.3.0**
+**[@ursamu/cofd-plugin](https://jsr.io/@ursamu/cofd-plugin)** · **v1.4.0**
 
 Chronicles of Darkness 2e for **UrsaMU**: guided character generation,
 dynamic ASCII sheets, a CoFD-compliant d10 roller, Health track, Beat/XP
@@ -19,7 +19,7 @@ See `CHANGELOG.md` for release notes.
 {
   "imports": {
     "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
-    "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.3.0",
+    "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.4.0",
     "@ursamu/help": "jsr:@ursamu/help@^1.0.0",
     "@ursamu/jobs": "jsr:@ursamu/jobs@^1.0.0",
     "@ursamu/combat": "jsr:@ursamu/combat@^0.8.0"
@@ -34,7 +34,7 @@ See `CHANGELOG.md` for release notes.
 // Or import the default IPlugin (engine loaders use this):
 import cofd from "@ursamu/cofd-plugin";
 // cofd.name === "cofd"
-// cofd.version === "1.3.0"
+// cofd.version === "1.4.0"
 ```
 
 ```bash
@@ -82,11 +82,10 @@ deno add jsr:@ursamu/cofd-plugin
   (`+hunt`); Mantle dice + high-dot (`+mantle`); Hobgoblins
   (`+hob`); Hollow Hidden Entry / Shadow Garden. Status:
   `docs/ctl-gap-scan.md`.
-- **Vampire: The Requiem chargen (phase 1).** Clan, Covenant,
-  Mask/Dirge, Touchstone; 10 Merit dots; 3 Discipline dots
-  (≥2 in-clan); Blood Potency 1 / Humanity 7 / Vitae. Catalog
-  browse via `+cg/list` and `+info`. Play systems (frenzy,
-  feeding, covenant sorcery) are later overlays.
+- **Vampire: The Requiem.** Chargen (clan, covenant, Mask/Dirge,
+  touchstone, 10 Merits, 3 Disciplines ≥2 in-clan) plus play:
+  `+vitae`, `+feed`, `+frenzy`, `+aura`, Humanity breaking
+  points. Covenant sorcery (Crúac/Theban/Coils) later.
 
 ---
 

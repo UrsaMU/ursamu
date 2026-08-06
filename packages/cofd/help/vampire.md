@@ -1,20 +1,21 @@
-+VAMPIRE  -- Vampire: The Requiem 2e overlay (chargen).
-
-Kindred chargen: Clan, Covenant, Mask, Dirge, Touchstone,
-10 Merit dots, 3 Discipline dots (≥2 in-clan). Blood Potency
-1, Humanity 7, Vitae pool from BP.
++VAMPIRE  -- Vampire: The Requiem 2e overlay.
 
 CHARGEN
   +cg/set template=vampire
   +cg/list clans|covenants|disciplines|masks
-  +cg/set clan=<name>  covenant=<name>
-  +cg/set touchstone=<text>   bloodline=<text> (opt)
-  +cg/set mask=<arch>  dirge=<arch>
-  Stage 7: +cg/set <discipline>=<dots>
+  Clan, Covenant, Touchstone; Mask/Dirge; 10 Merits;
+  3 Discipline dots (≥2 in-clan). BP 1, Humanity 7.
+
+PLAY
+  +vitae     Vitae spend, blush, heal, boost
+  +feed      Drink animal / human / Kindred blood
+  +frenzy    Resist, ride, or enter the Beast
+  +aura      Project Predatory Aura
+  +integrity Humanity breaking points (VtR mods)
 
 SHEET
-  Mask/Dirge replace Virtue/Vice labels. Clan, Covenant,
-  Touchstone (and Bloodline if set) appear in the header.
-  Disciplines render under DISCIPLINES.
+  Mask/Dirge labels; Clan/Covenant; Disciplines;
+  Blood Potency and Vitae under Advantages.
 
-SEE ALSO: help cg, help sheet, help templates, help info
+SEE ALSO: help cg, help vitae, help feed, help frenzy,
+  help aura, help integrity, help sheet, help info

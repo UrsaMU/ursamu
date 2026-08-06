@@ -1,3 +1,15 @@
+## 1.4.0
+
+- **Vampire play systems (phases 2–3):**
+  - `+vitae` — BP table, spend/gain, heal, Blush of Life,
+    Physical Attribute boost; VtR pool max (BP 10 = 75)
+  - `+feed` — animal / human / Kindred; vessel lethal
+  - `+frenzy` — resist / ride / enter / end; Frenzied Condition
+  - `+aura` — Predatory Aura contest + Conditions
+  - `+integrity` uses Humanity label + VtR rating mods
+  - Conditions: `bestial`, `frenzied`
+  - Engines: `src/vitae/`, `src/beast/`; tests + help
+
 ## 1.3.0
 
 - **Vampire: The Requiem 2e** chargen overlay (phase 1):

@@ -14,7 +14,8 @@ TOPIC GROUPS
   help reference     Virtues, Vices, merits.
   help templates     Mortal, Changeling, Vampire.
   help changeling    Full CtL command map.
-  help vampire       VtR chargen (clan, Disciplines).
+  help vampire       VtR chargen + Vitae/Beast play.
+  help vitae · feed · frenzy · aura
   help time          In-game clock, weather, moon.
 
 CHANGELING (Lost)

@@ -637,5 +637,23 @@
     "effect": "Severe lethargy; -2 to Social and Resolve rolls until rest.",
     "resolution": "A full night's rest or emotional breakthrough (ST).",
     "beats": 1
+  },
+  "bestial": {
+    "name": "Bestial",
+    "category": "condition",
+    "persistent": false,
+    "description": "Visceral fear of a predator.",
+    "effect": "-2 dice to Social rolls vs the source until end of scene.",
+    "resolution": "Leave the presence of the source, or the scene ends.",
+    "beats": 1
+  },
+  "frenzied": {
+    "name": "Frenzied",
+    "category": "condition",
+    "persistent": false,
+    "description": "The Beast has taken the reins.",
+    "effect": "+2 Physical pools; ignore wound penalties; cannot spend WP on Social rolls. ST directs actions unless Riding the Wave.",
+    "resolution": "Frenzy ends (scene ends, or stimulus removed and ST allows).",
+    "beats": 1
   }
 }

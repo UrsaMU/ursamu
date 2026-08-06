@@ -14,7 +14,7 @@
  * // deno.json
  * {
  *   "imports": {
- *     "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.3.0"
+ *     "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.4.0"
  *   }
  * }
  *
@@ -27,7 +27,7 @@
  * @example Use the plugin object directly
  * ```ts
  * import { plugin } from "@ursamu/cofd-plugin";
- * console.log(plugin.name, plugin.version); // "cofd" "1.3.0"
+ * console.log(plugin.name, plugin.version); // "cofd" "1.4.0"
  * ```
  */
 
@@ -201,7 +201,7 @@ async function onEngineReady(): Promise<void> {
  */
 export const plugin: IPlugin = {
   name: "cofd",
-  version: "1.3.0",
+  version: "1.4.0",
   description:
     "Chronicles of Darkness 2e plugin: sheets, chargen, d10 dice with 10/9/8-again, rote, and Willpower spend.",
   dependencies: [
