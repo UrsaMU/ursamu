@@ -1,3 +1,18 @@
+## 1.3.0
+
+- **Vampire: The Requiem 2e** chargen overlay (phase 1):
+  - Template `vampire` open in +cg (with mortal, changeling)
+  - Catalogs: clans, covenants (+Unaligned), 10 Disciplines,
+    Mask/Dirge archetypes (`resources/vampire.json`)
+  - Stage 3: clan, covenant, touchstone required; bloodline
+    optional; Mask/Dirge via virtue/vice (+ aliases)
+  - Stage 6: 10 Merit dots; Stage 7: 3 Discipline dots with
+    ≥2 in-clan
+  - Sheet header labels Mask/Dirge; +cg/list and +info cover
+    clans/covenants/disciplines/masks
+  - Showcase: `showcases/chargen-vampire.json`
+  - Help: `help vampire`, updated cg/templates/cofd
+
 ## 1.2.10
 
 - **Victorian Lost** (`books/vctl.txt`) → CtL 2e catalog:

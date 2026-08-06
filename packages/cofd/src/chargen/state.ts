@@ -11,11 +11,15 @@ import {
   findRegalia,
   findAuspice,
   findTribe,
+  findClan,
+  findCovenant,
   CTL_SEEMING_NAMES,
   CTL_COURT_NAMES,
   CTL_REGALIA_NAMES,
   WTF_AUSPICE_NAMES,
   WTF_TRIBE_NAMES,
+  VTR_CLAN_NAMES,
+  VTR_COVENANT_NAMES,
 } from "../dictionary/index.ts";
 import {
   COFD_TEMPLATES,
@@ -48,9 +52,11 @@ export function initCgState(): CofdCgState {
   };
 }
 
-/** Starting Merit dots for a template. Werewolf gets 10; all others 7. */
+/** Starting Merit dots. Vampire & Werewolf get 10; others 7. */
 export function startingMeritDots(template: string): number {
-  return template.toLowerCase().trim() === "werewolf" ? 10 : 7;
+  const t = template.toLowerCase().trim();
+  if (t === "werewolf" || t === "vampire") return 10;
+  return 7;
 }
 
 /**
@@ -60,6 +66,7 @@ export function startingMeritDots(template: string): number {
 export function startingPowerDots(template: string, tribe?: string): number {
   const t = template.toLowerCase().trim();
   if (t === "changeling") return 3;
+  if (t === "vampire") return 3;
   if (t === "werewolf") {
     return (tribe || "").trim().toLowerCase() === "ghost wolves" ? 2 : 3;
   }
@@ -70,6 +77,7 @@ export function startingPowerDots(template: string, tribe?: string): number {
 export function powerLabel(template: string): string {
   const t = template.toLowerCase().trim();
   if (t === "changeling") return "Contracts";
+  if (t === "vampire") return "Disciplines";
   if (t === "werewolf") return "Renown";
   return "Powers";
 }
@@ -82,15 +90,14 @@ export function powerLabel(template: string): string {
 export function maxStageFor(template: string): number {
   const t = template.toLowerCase().trim();
   if (t === "werewolf") return 8;
-  // Changeling's Stage 7 is discrete Contract selection (validPowers is empty),
-  // so it can't be inferred from validPowers.length.
-  if (t === "changeling") return 7;
+  // Changeling Stage 7 = discrete Contracts; Vampire Stage 7 = Disciplines.
+  if (t === "changeling" || t === "vampire") return 7;
   const tmpl = COFD_TEMPLATES[t];
   return tmpl && tmpl.validPowers.length > 0 ? 7 : 6;
 }
 
 // Stage-3 custom fields that have a canonical catalog. Anything not listed here
-// (concept, needle, thread, blood, bone, ...) is genuinely free-form text.
+// (concept, needle, thread, bloodline, touchstone, ...) is free-form text.
 interface CustomFieldDomain {
   find: (v: string) => { name: string } | null;
   options: string;
@@ -107,7 +114,40 @@ const CUSTOM_FIELD_DOMAINS: Record<string, Record<string, CustomFieldDomain>> = 
     auspice: { find: findAuspice, options: `Valid auspices: ${WTF_AUSPICE_NAMES.join(", ")}.` },
     tribe:   { find: findTribe,   options: `Valid tribes: ${WTF_TRIBE_NAMES.join(", ")}.` },
   },
+  vampire: {
+    clan: {
+      find: findClan,
+      options: `Valid clans: ${VTR_CLAN_NAMES.join(", ")}.`,
+    },
+    covenant: {
+      find: findCovenant,
+      options: `Valid covenants: ${VTR_COVENANT_NAMES.join(", ")}.`,
+    },
+  },
 };
+
+/** Vampire Stage-3 fields that are optional free-form prose. */
+export const VAMPIRE_OPTIONAL_FIELDS = new Set(["bloodline"]);
+
+/**
+ * Stage-1 anchor keys. Vampires store Mask/Dirge on virtue/vice;
+ * mask/dirge are accepted aliases that write those same fields.
+ */
+export function stage1AnchorKeys(template: string): string[] {
+  const t = template.toLowerCase().trim();
+  if (t === "vampire") {
+    return ["concept", "virtue", "vice", "mask", "dirge"];
+  }
+  return ["concept", "virtue", "vice"];
+}
+
+/** Map Stage-1 alias keys onto the sheet property they write. */
+export function resolveStage1Key(key: string): string {
+  const k = key.toLowerCase().trim();
+  if (k === "mask") return "virtue";
+  if (k === "dirge") return "vice";
+  return k;
+}
 
 export type CustomFieldResolution =
   | { kind: "free" }                    // no canonical list — accept as typed
@@ -164,13 +204,18 @@ export function updateCgState(
 
   // 1. Stage checks (+ partial name resolve where catalogs apply)
   switch (stage) {
-    case 1:
-      if (!["concept", "virtue", "vice"].includes(key)) {
+    case 1: {
+      const allowed = stage1AnchorKeys(sheet.template);
+      if (!allowed.includes(key)) {
         throw new Error(
-          "In Stage 1, you can only set concept, virtue, and vice.",
+          `In Stage 1, you can only set ${allowed.join(", ")}.`,
         );
       }
+      // Vampire: mask/dirge are aliases for virtue/vice sheet fields.
+      key = resolveStage1Key(key);
+      resolvedTrait = key;
       break;
+    }
 
     case 2:
       if (key !== "template") {
@@ -194,13 +239,28 @@ export function updateCgState(
       break;
 
     case 3: {
+      // Vampire: Mask/Dirge may be set here too (aliases → virtue/vice)
+      // so players need not backtrack after picking the template.
+      if (
+        tKey === "vampire" &&
+        (key === "mask" || key === "dirge" ||
+          key === "virtue" || key === "vice")
+      ) {
+        key = resolveStage1Key(key);
+        resolvedTrait = key;
+        break;
+      }
       if (!tmpl.customFields.includes(key)) {
+        const extra = tKey === "vampire"
+          ? ", mask, dirge"
+          : "";
         throw new Error(
           `In Stage 3, you can only set custom fields for ` +
-            `'${tmpl.name}': ${tmpl.customFields.join(", ")}.`,
+            `'${tmpl.name}': ` +
+            `${tmpl.customFields.join(", ")}${extra}.`,
         );
       }
-      // Canonical catalogs (seeming, kith, court, auspice, tribe)
+      // Canonical catalogs (seeming, kith, court, clan, covenant)
       // normalize casing; free-form fields pass through.
       const res = resolveCustomFieldValue(
         sheet.template,

@@ -6,8 +6,10 @@ import {
   COFD_MERITS,
   COFD_VIRTUE_NAMES,
   COFD_VICE_NAMES,
+  VTR_MASK_DIRGE_NAMES,
   findVice,
   findVirtue,
+  findMaskDirge,
   parseMeritRef,
 } from "../dictionary/index.ts";
 import { COFD_TEMPLATES } from "../gamelines/templates.ts";
@@ -165,21 +167,46 @@ export function validateTraitValue(trait: string, valueStr: string, sheet?: Cofd
     return valueStr.trim();
   }
 
-  if (key === "virtue") {
+  if (key === "virtue" || key === "mask") {
+    // Vampire Mask (and Dirge) replace Virtue/Vice; same catalog.
+    if (tKey === "vampire") {
+      const match = findMaskDirge(valueStr);
+      if (!match) {
+        throw new Error(
+          `Invalid Mask '${valueStr.trim()}'. ` +
+            `Valid Masks/Dirges: ` +
+            `${VTR_MASK_DIRGE_NAMES.join(", ")}.`,
+        );
+      }
+      return match.name;
+    }
     const match = findVirtue(valueStr);
     if (!match) {
       throw new Error(
-        `Invalid Virtue '${valueStr.trim()}'. Valid Virtues: ${COFD_VIRTUE_NAMES.join(", ")}.`,
+        `Invalid Virtue '${valueStr.trim()}'. Valid Virtues: ` +
+          `${COFD_VIRTUE_NAMES.join(", ")}.`,
       );
     }
     return match.name;
   }
 
-  if (key === "vice") {
+  if (key === "vice" || key === "dirge") {
+    if (tKey === "vampire") {
+      const match = findMaskDirge(valueStr);
+      if (!match) {
+        throw new Error(
+          `Invalid Dirge '${valueStr.trim()}'. ` +
+            `Valid Masks/Dirges: ` +
+            `${VTR_MASK_DIRGE_NAMES.join(", ")}.`,
+        );
+      }
+      return match.name;
+    }
     const match = findVice(valueStr);
     if (!match) {
       throw new Error(
-        `Invalid Vice '${valueStr.trim()}'. Valid Vices: ${COFD_VICE_NAMES.join(", ")}.`,
+        `Invalid Vice '${valueStr.trim()}'. Valid Vices: ` +
+          `${COFD_VICE_NAMES.join(", ")}.`,
       );
     }
     return match.name;

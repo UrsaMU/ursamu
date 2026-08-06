@@ -37,6 +37,7 @@ export function getStandardMaxEnergy(powerStat: number): number {
 import mortalTpl from "../../templates/mortal.json" with { type: "json" };
 import changelingTpl from "../../templates/changeling.json" with { type: "json" };
 import werewolfTpl from "../../templates/werewolf.json" with { type: "json" };
+import vampireTpl from "../../templates/vampire.json" with { type: "json" };
 import fetchTpl from "../../templates/fetch.json" with { type: "json" };
 import hobgoblinTpl from "../../templates/hobgoblin.json" with { type: "json" };
 import huntsmanTpl from "../../templates/huntsman.json" with { type: "json" };
@@ -47,6 +48,7 @@ const rawTemplates = [
   mortalTpl,
   changelingTpl,
   werewolfTpl,
+  vampireTpl,
   fetchTpl,
   hobgoblinTpl,
   huntsmanTpl,
@@ -75,6 +77,7 @@ for (const data of rawTemplates) {
 export const CHARGEN_TEMPLATE_KEYS = [
   "mortal",
   "changeling",
+  "vampire",
 ] as const;
 
 export function isChargenTemplate(key: string): boolean {

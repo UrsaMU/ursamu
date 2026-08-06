@@ -1,11 +1,12 @@
 # Chronicles of Darkness (CoFD) UrsaMU Plugin
 
-**[@ursamu/cofd-plugin](https://jsr.io/@ursamu/cofd-plugin)** · **v1.2.1**
+**[@ursamu/cofd-plugin](https://jsr.io/@ursamu/cofd-plugin)** · **v1.3.0**
 
 Chronicles of Darkness 2e for **UrsaMU**: guided character generation,
 dynamic ASCII sheets, a CoFD-compliant d10 roller, Health track, Beat/XP
-economy, Conditions and Aspirations, IC/OOC travel, `+time`, and a
-Changeling: The Lost overlay. File-driven supernatural templates.
+economy, Conditions and Aspirations, IC/OOC travel, `+time`, Changeling:
+The Lost and Vampire: The Requiem chargen overlays. File-driven
+supernatural templates.
 
 See `CHANGELOG.md` for release notes.
 
@@ -18,7 +19,7 @@ See `CHANGELOG.md` for release notes.
 {
   "imports": {
     "@ursamu/mush": "jsr:@ursamu/mush@^1.0.0",
-    "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.2.1",
+    "@ursamu/cofd-plugin": "jsr:@ursamu/cofd-plugin@^1.3.0",
     "@ursamu/help": "jsr:@ursamu/help@^1.0.0",
     "@ursamu/jobs": "jsr:@ursamu/jobs@^1.0.0",
     "@ursamu/combat": "jsr:@ursamu/combat@^0.8.0"
@@ -33,7 +34,7 @@ See `CHANGELOG.md` for release notes.
 // Or import the default IPlugin (engine loaders use this):
 import cofd from "@ursamu/cofd-plugin";
 // cofd.name === "cofd"
-// cofd.version === "1.2.1"
+// cofd.version === "1.3.0"
 ```
 
 ```bash
@@ -49,9 +50,9 @@ deno add jsr:@ursamu/cofd-plugin
 ## Features
 
 - **File-driven supernatural templates.** Add Mortal, Changeling: The Lost,
-  or minor templates by dropping a JSON file in `templates/`.
-- **Guided character generation (`+cg`).** Six stages with point-budget
-  validation at every step.
+  Vampire: The Requiem, or minor templates via `templates/`.
+- **Guided character generation (`+cg`).** Staged point-budget validation
+  (mortal 6 stages; changeling/vampire 7).
 - **Dynamic ASCII sheets (`+sheet`).** 78-column wide, template-aware,
   composed of independently-renderable sections.
 - **CoFD-compliant d10 roller (`+roll`).** 10/9/8-again, rote actions,
@@ -81,6 +82,11 @@ deno add jsr:@ursamu/cofd-plugin
   (`+hunt`); Mantle dice + high-dot (`+mantle`); Hobgoblins
   (`+hob`); Hollow Hidden Entry / Shadow Garden. Status:
   `docs/ctl-gap-scan.md`.
+- **Vampire: The Requiem chargen (phase 1).** Clan, Covenant,
+  Mask/Dirge, Touchstone; 10 Merit dots; 3 Discipline dots
+  (≥2 in-clan); Blood Potency 1 / Humanity 7 / Vitae. Catalog
+  browse via `+cg/list` and `+info`. Play systems (frenzy,
+  feeding, covenant sorcery) are later overlays.
 
 ---
 
@@ -165,7 +171,7 @@ CtL design notes (maintainers): monorepo `docs/` (not published to JSR).
   routes.ts          REST /api/v1/cofd
   src/               Engine modules (stats, roller, sheet, …)
   resources/         JSON tables (attributes, merits, …)
-  templates/         mortal / changeling / … JSON
+  templates/         mortal / changeling / vampire / … JSON
   help/              In-game help topics
   deno.json          Package manifest + publish include
   ursamu.plugin.json Plugin manifest

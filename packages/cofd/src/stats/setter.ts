@@ -94,6 +94,15 @@ export function setTrait(sheet: CofdSheet, trait: string, value: string | number
     return sheet;
   }
 
+  // Vampire Mask/Dirge aliases write the virtue/vice sheet fields.
+  if (key === "mask") {
+    sheet.virtue = value as string;
+    return sheet;
+  }
+  if (key === "dirge") {
+    sheet.vice = value as string;
+    return sheet;
+  }
   if (["concept", "virtue", "vice"].includes(key)) {
     const prop = key as "concept" | "virtue" | "vice";
     sheet[prop] = value as string;

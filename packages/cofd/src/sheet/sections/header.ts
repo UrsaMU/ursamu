@@ -72,14 +72,36 @@ export const headerSection: SheetSection = {
     lines.push(
       pairRow("name", playerName, "concept", sheet.concept),
     );
+    // Vampire: Mask/Dirge replace Virtue/Vice labels.
+    const isVamp =
+      (sheet.template || "").toLowerCase().trim() ===
+        "vampire";
     lines.push(
-      pairRow("virtue", sheet.virtue, "vice", sheet.vice),
+      pairRow(
+        isVamp ? "mask" : "virtue",
+        sheet.virtue,
+        isVamp ? "dirge" : "vice",
+        sheet.vice,
+      ),
     );
 
     if (tmpl.customFields.length > 0) {
+      // Hide changeling mask/mien prose and optional empty bloodline
+      // so the header stays compact.
+      const hide = new Set(["mask", "mien", "animals"]);
+      const fields = tmpl.customFields.filter((f) => {
+        if (hide.has(f)) return false;
+        if (
+          f === "bloodline" &&
+          !(sheet.customFields ?? {})[f]
+        ) {
+          return false;
+        }
+        return true;
+      });
       lines.push(
         ...customFieldRows(
-          tmpl.customFields,
+          fields,
           sheet.customFields ?? {},
         ),
       );

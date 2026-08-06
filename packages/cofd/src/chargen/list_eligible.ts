@@ -21,11 +21,19 @@ import {
   WTF_RENOWN,
   WTF_GIFTS,
   WTF_RITES,
+  VTR_CLANS,
+  VTR_COVENANTS,
+  VTR_DISCIPLINES,
+  VTR_MASK_DIRGE,
   type MeritDefinition,
   type CtlContract,
   type CtlKith,
   type WtfGift,
   type WtfRite,
+  type VtrClan,
+  type VtrCovenant,
+  type VtrDiscipline,
+  type VtrAnchor,
 } from "../dictionary/index.ts";
 import { checkPrerequisites } from "../support/prereq.ts";
 import {
@@ -57,6 +65,10 @@ export function isChangeling(sheet: CofdSheet): boolean {
 
 export function isWerewolf(sheet: CofdSheet): boolean {
   return tmplOf(sheet) === "werewolf";
+}
+
+export function isVampire(sheet: CofdSheet): boolean {
+  return tmplOf(sheet) === "vampire";
 }
 
 /** Merit is listable when its prereqs all pass on the sheet. */
@@ -133,6 +145,29 @@ export function eligibleRites(sheet: CofdSheet): WtfRite[] {
   return isWerewolf(sheet) ? [...WTF_RITES] : [];
 }
 
+export function eligibleClans(sheet: CofdSheet): VtrClan[] {
+  return isVampire(sheet) ? [...VTR_CLANS] : [];
+}
+
+export function eligibleCovenants(
+  sheet: CofdSheet,
+): VtrCovenant[] {
+  return isVampire(sheet) ? [...VTR_COVENANTS] : [];
+}
+
+export function eligibleDisciplines(
+  sheet: CofdSheet,
+): VtrDiscipline[] {
+  return isVampire(sheet) ? [...VTR_DISCIPLINES] : [];
+}
+
+/** Mask/Dirge archetypes (same pool for both anchors). */
+export function eligibleMasksDirges(
+  sheet: CofdSheet,
+): VtrAnchor[] {
+  return isVampire(sheet) ? [...VTR_MASK_DIRGE] : [];
+}
+
 /**
  * Contracts the sheet may choose at chargen (ignoring pool capacity).
  * Goblin always; court of own court; royal arcadian only from favored
@@ -187,16 +222,32 @@ export function eligibleListTopics(sheet: CofdSheet): Set<string> {
       topics.add(k);
     }
   }
+  if (isVampire(sheet)) {
+    for (const k of [
+      "clans",
+      "covenants",
+      "disciplines",
+      "masks",
+      "dirges",
+    ]) {
+      topics.add(k);
+    }
+    // Vampires use Mask/Dirge instead of Virtue/Vice lists.
+    topics.delete("virtues");
+    topics.delete("vices");
+  }
   return topics;
 }
 
 export function wrongTemplateMsg(
   topic: string,
-  need: "changeling" | "werewolf",
+  need: "changeling" | "werewolf" | "vampire",
 ): string {
   const label = need === "changeling"
     ? "Changeling: the Lost"
-    : "Werewolf: the Forsaken";
+    : need === "werewolf"
+    ? "Werewolf: the Forsaken"
+    : "Vampire: the Requiem";
   return (
     `${topic} are only listed for ${label} characters. ` +
     `Set template with +cg/set template=${need}.`
