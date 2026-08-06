@@ -6,6 +6,15 @@ import {
   header,
   resolveGlobalFormat,
 } from "../format/handlers.ts";
+import {
+  actionsComp,
+  cmdAction,
+  headerComp,
+  lookAction,
+  sendCmdLayout,
+  sendListLayout,
+  textComp,
+} from "./cmd-ui.ts";
 
 function formatIdle(lastCmd: unknown): string {
   if (typeof lastCmd !== "number" || isNaN(lastCmd)) return "---";
@@ -69,45 +78,6 @@ function buildDefaultWhoBlock(
   return lines.join("\n");
 }
 
-/** Structured who for /play (entity-list + header). */
-function sendWhoWebLayout(
-  u: IUrsamuSDK,
-  players: IDBObj[],
-): void {
-  if (!u.ui?.layout) return;
-  const items = players.map((p) => {
-    const name = plainName(p) || playerLabel(u, p);
-    const idle = formatIdle(p.state?.lastCommand);
-    const doing = String((p.state?.doing as string) || "");
-    return {
-      id: p.id,
-      label: playerLabel(u, p),
-      meta: idle,
-      sublabel: doing || undefined,
-      action: name
-        ? { type: "cmd" as const, cmd: `look ${name}` }
-        : undefined,
-    };
-  });
-  const n = players.length;
-  u.ui.layout({
-    components: [
-      { type: "header", title: "Who's Online" },
-      {
-        type: "entity-list",
-        title: n === 1 ? "1 player" : `${n} players`,
-        items,
-      },
-      {
-        type: "text",
-        content:
-          `${n} player${n === 1 ? "" : "s"} online.`,
-      },
-    ],
-    meta: { type: "who" },
-  });
-}
-
 export async function execWho(u: IUrsamuSDK): Promise<void> {
   const players = (await u.db.search({ flags: /connected/i }))
     .filter((p) =>
@@ -144,13 +114,33 @@ export async function execWho(u: IUrsamuSDK): Promise<void> {
   const customWho = blockOverride != null &&
     blockOverride !== defaultBlock;
   if (!customWho && u.clientType === "web") {
-    sendWhoWebLayout(u, players);
+    const n = players.length;
+    sendListLayout(u, {
+      metaType: "who",
+      title: "Who's Online",
+      listTitle: n === 1 ? "1 player" : `${n} players`,
+      items: players.map((p) => {
+        const name = plainName(p) || playerLabel(u, p);
+        const doing = String((p.state?.doing as string) || "");
+        return {
+          id: p.id,
+          label: playerLabel(u, p),
+          meta: formatIdle(p.state?.lastCommand),
+          sublabel: doing || undefined,
+          action: lookAction(name),
+        };
+      }),
+      emptyText: "No one is connected.",
+      footerText:
+        `${n} player${n === 1 ? "" : "s"} online.`,
+      textLines: rows,
+    });
     return;
   }
   u.send(text);
 }
 
-export function execScore(u: IUrsamuSDK): void {
+function scoreText(u: IUrsamuSDK): string {
   const me = u.me;
   const name = (me.state.moniker as string) ||
     (me.state.name as string) || me.name;
@@ -164,7 +154,42 @@ export function execScore(u: IUrsamuSDK): void {
   output += `Money: ${
     (me.state.money as number) || 0
   } credits\n`;
-  u.send(output);
+  return output;
+}
+
+export function execScore(u: IUrsamuSDK): void {
+  const me = u.me;
+  const name = (me.state.moniker as string) ||
+    (me.state.name as string) || me.name;
+  const flags = Array.from(me.flags).join(" ");
+  const doing = (me.state.doing as string) || "Nothing.";
+  const money = (me.state.money as number) || 0;
+  const body =
+    `DBRef: #${me.id}\nFlags: ${flags}\n` +
+    `Doing: ${doing}\nMoney: ${money} credits`;
+
+  sendCmdLayout(u, {
+    metaType: "score",
+    textFallback: scoreText(u),
+    components: [
+      headerComp(`Player Scorecard: ${name}`),
+      textComp(body),
+      actionsComp("Quick", [
+        {
+          label: "Inventory",
+          action: cmdAction("inventory"),
+        },
+        {
+          label: "Who",
+          action: cmdAction("who"),
+        },
+        {
+          label: "Look me",
+          action: cmdAction("look me"),
+        },
+      ]),
+    ],
+  });
 }
 
 export async function execDoing(u: IUrsamuSDK): Promise<void> {
@@ -276,6 +301,9 @@ addCmd({
   lock: "connected",
   category: "Information",
   help: `score  — Display your character scorecard.
+
+Web play shows a layout with quick actions (inventory, who,
+look me). Telnet gets the classic text card.
 
 Examples:
   score`,

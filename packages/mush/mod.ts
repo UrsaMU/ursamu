@@ -173,6 +173,28 @@ export {
 export { execLook, defaultConformatHandler }                       from "./src/verbs/look.ts";
 export { execHome, execInventory }                                 from "./src/verbs/home.ts";
 export {
+  prefersCmdUi,
+  getCmdUiTheme,
+  cmdAction,
+  lookAction,
+  headerComp,
+  textComp,
+  entityListComp,
+  actionsComp,
+  buildListComponents,
+  renderListText,
+  sendListLayout,
+  sendCmdLayout,
+} from "./src/verbs/cmd-ui.ts";
+export type {
+  CmdAction,
+  CmdEntityItem,
+  CmdActionItem,
+  CmdUiComponent,
+  CmdUiTheme,
+  ListLayoutOpts,
+} from "./src/verbs/cmd-ui.ts";
+export {
   enterObject,
   leaveObject,
 } from "./src/verbs/enter-leave.ts";

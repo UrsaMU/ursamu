@@ -1,3 +1,13 @@
+## 1.0.34
+
+- Shared interactive command UI helpers (`cmd-ui.ts`):
+  `sendListLayout`, `sendCmdLayout`, `lookAction`, builders.
+- Theme: `plugins.globals.theme.cmdUi.lookOnClick`
+- Refactor inventory / +i / who / +glance onto helpers
+- **score** web layout with quick actions (inventory, who,
+  look me); telnet text card unchanged
+- Docs: scripting guide Structured UI section
+
 ## 1.0.30
 
 - Web register: first player on empty DB gets

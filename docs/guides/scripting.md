@@ -428,18 +428,83 @@ and how to register handlers.
 
 ## Structured UI (`u.ui`)
 
-For web client panels (JSON output, not text):
+For web client panels (JSON output, not text). Telnet never receives
+`data.ui` — keep a text fallback.
+
+**Preferred helpers** (from `@ursamu/mush`):
 
 ```typescript
-// Layout — posts a structured result to the web client
+import {
+  sendListLayout,
+  sendCmdLayout,
+  lookAction,
+  cmdAction,
+  headerComp,
+  textComp,
+  actionsComp,
+} from "@ursamu/mush";
+
+// List command (inventory / who / glance pattern)
+sendListLayout(u, {
+  metaType: "inventory",
+  title: "Bag",
+  items: things.map((t) => ({
+    id: t.id,
+    label: u.util.displayName(t, u.me),
+    action: lookAction(`#${t.id}`), // click → look #id
+  })),
+  emptyText: "Nothing.",
+  footerText: `${things.length} items.`,
+});
+
+// Free-form (score pattern)
+sendCmdLayout(u, {
+  metaType: "score",
+  textFallback: "plain telnet card…",
+  components: [
+    headerComp("Score"),
+    textComp("…"),
+    actionsComp("Quick", [
+      { label: "Inventory", action: cmdAction("inventory") },
+    ]),
+  ],
+});
+```
+
+Theme knobs (`config/config.json`):
+
+```json
+"plugins": {
+  "globals": {
+    "theme": {
+      "cmdUi": { "lookOnClick": true },
+      "look": { "showExitAliases": true }
+    }
+  }
+}
+```
+
+`lookOnClick: false` disables auto `look …` actions from
+`lookAction()`.
+
+Low-level API (same contract the helpers emit):
+
+```typescript
 u.ui.layout({
   components: [
     { type: "header", title: "Character Sheet" },
     { type: "table", content: [["Name", u.util.displayName(u.me, u.me)]] }
   ]
 });
+```
 
-// Render a template string
+Component types the `/play` client renders: `header`, `text`,
+`media`, `entity-list`, `actions`, `table`, `list`, `panel`.
+Interactive items use `{ action: { cmd: "…" } }` — the FE sends
+`cmd` as normal player input.
+
+```typescript
+// Template helper (not the layout path)
 const html = u.ui.render("<b>{{name}}</b>", { name: "Alice" });
 ```
 ---

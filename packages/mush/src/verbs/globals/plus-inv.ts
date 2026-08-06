@@ -3,7 +3,11 @@
  */
 import { addCmd } from "../../commands/addCmd.ts";
 import type { IUrsamuSDK, IDBObj } from "../../commands/types.ts";
-import { divider, footer, header } from "../../format/handlers.ts";
+import {
+  lookAction,
+  renderListText,
+  sendListLayout,
+} from "../cmd-ui.ts";
 
 function visibleItems(
   raw: IDBObj[],
@@ -32,53 +36,16 @@ export function renderInv(
   who: string,
   items: IDBObj[],
 ): string {
-  const width = (u.me.state?.termWidth as number) || 78;
-  const lines: string[] = [];
-  lines.push(header(`Carried by ${who}`, "=", width));
-  if (items.length === 0) {
-    lines.push("  Nothing.");
-  } else {
-    for (const o of items) {
-      lines.push(`  ${itemLabel(u, o)}`);
-    }
-  }
-  lines.push(divider("", "-", width));
   const n = items.length;
-  lines.push(`  ${n} item${n === 1 ? "" : "s"}.`);
-  lines.push(footer("", "=", width));
-  return lines.join("\n");
-}
-
-function sendInvWeb(
-  u: IUrsamuSDK,
-  who: string,
-  items: IDBObj[],
-): void {
-  if (!u.ui?.layout) return;
-  const list = items.map((o) => ({
-    id: o.id,
-    label: itemLabel(u, o),
-    action: { type: "cmd" as const, cmd: `look #${o.id}` },
-  }));
-  const n = items.length;
-  u.ui.layout({
-    components: [
-      { type: "header", title: `Carried by ${who}` },
-      {
-        type: "entity-list",
-        title: n === 0
-          ? "Empty"
-          : (n === 1 ? "1 item" : `${n} items`),
-        items: list,
-      },
-      {
-        type: "text",
-        content: n === 0
-          ? "Nothing."
-          : `${n} item${n === 1 ? "" : "s"}.`,
-      },
-    ],
-    meta: { type: "inventory" },
+  return renderListText(u, {
+    metaType: "inventory",
+    title: `Carried by ${who}`,
+    items: items.map((o) => ({
+      id: o.id,
+      label: itemLabel(u, o),
+    })),
+    emptyText: "Nothing.",
+    footerText: `${n} item${n === 1 ? "" : "s"}.`,
   });
 }
 
@@ -116,12 +83,19 @@ export async function execPlusInv(u: IUrsamuSDK): Promise<void> {
   const raw = await u.db.search({ location: target.id });
   const items = visibleItems(raw, canEdit);
   const who = u.util.displayName(target, u.me);
+  const n = items.length;
 
-  if (u.clientType === "web") {
-    sendInvWeb(u, who, items);
-    return;
-  }
-  u.send(renderInv(u, who, items));
+  sendListLayout(u, {
+    metaType: "inventory",
+    title: `Carried by ${who}`,
+    items: items.map((o) => ({
+      id: o.id,
+      label: itemLabel(u, o),
+      action: lookAction(`#${o.id}`),
+    })),
+    emptyText: "Nothing.",
+    footerText: `${n} item${n === 1 ? "" : "s"}.`,
+  });
 }
 
 addCmd({
