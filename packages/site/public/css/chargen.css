@@ -1,28 +1,56 @@
 /**
- * Chargen FE — Court / Figma tokens.
+ * Chargen FE — default shell (Figma 2054:137 layout tokens).
  * Stepper + stage forms + live sheet rail.
  */
 
-/* ── Shell mode ─────────────────────────────────────────────────── */
+/* ── Shell mode (wireframe 2054:137 + profile 2065:349) ────────
+ * Keep nav + left + main + right. Compact under fixed nav.
+ */
 
 .site-shell.is-mode-chargen {
-  /* Compact under nav like help; content is the focus */
+  align-items: stretch;
+  --site-banner-offset: 0px;
+  --site-sticky-top: calc(var(--site-nav-h) + 0.75rem);
+  --site-body-pad-top: calc(var(--site-nav-h) + 1.5rem);
 }
 
 .site-shell.is-mode-chargen .site-banner {
   display: none;
+  margin: 0;
+  padding: 0;
+  min-height: 0;
 }
 
-.site-shell.is-mode-chargen .site-aside--end {
-  /* sheet summary uses right rail */
+.site-shell.is-mode-chargen .site-body {
+  width: 100%;
+  max-width: var(--site-max-w, 100%);
+  padding-top: var(
+    --site-body-pad-top,
+    calc(var(--site-nav-h) + 1.5rem)
+  );
+  /* aside | flexible main | aside — same chrome as wireframe */
+  grid-template-columns:
+    minmax(var(--site-aside-min), var(--site-aside-width))
+    minmax(0, 1fr)
+    minmax(var(--site-aside-min), var(--site-aside-width));
 }
+
+/* Main fills the center track (not a nested 2-col layout). */
+.site-shell.is-mode-chargen .site-main {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+/* Right rail = Draft sheet (wireframe context menu slot). */
 
 /* ── Layout inside main ─────────────────────────────────────────── */
 
 .cg-root {
   width: 100%;
-  max-width: var(--site-main-max, 885px);
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .cg-header {
@@ -30,12 +58,13 @@
 }
 
 .cg-header__title {
-  font-family: var(--site-font-display);
-  font-size: 2.5rem;
-  font-weight: 400;
-  color: var(--site-accent);
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-h1, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--site-text);
   margin: 0 0 0.35rem;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .cg-header__sub {
@@ -78,9 +107,9 @@
 }
 
 .cg-stepper__item.is-current {
-  color: var(--site-bg);
-  background: var(--site-accent);
-  border-color: var(--site-accent);
+  color: var(--site-btn-fg);
+  background: var(--site-btn-bg);
+  border-color: var(--site-btn-bg);
   font-weight: 600;
 }
 
@@ -117,9 +146,11 @@
 }
 
 .cg-stage__title {
-  font-family: var(--site-font-display);
-  font-size: 1.75rem;
-  color: var(--site-accent);
+  font-family: var(--site-font-ui);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--site-text);
   margin: 0 0 0.5rem;
 }
 
@@ -166,10 +197,11 @@
 
 .cg-field__label {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--site-accent);
+  color: var(--site-text-muted);
   margin-bottom: 0.35rem;
 }
 
@@ -179,13 +211,14 @@
   width: 100%;
   max-width: none;
   box-sizing: border-box;
-  padding: 0.55rem 0.75rem;
+  min-height: var(--site-control-h, 2.35rem);
+  padding: 0.5rem 0.65rem;
   border: 1px solid var(--site-border);
-  border-radius: 2px;
-  background: var(--site-bg-surface, #0a0908);
+  border-radius: var(--site-radius-sm, 4px);
+  background: var(--site-bg-code);
   color: var(--site-text);
   font-family: var(--site-font-ui);
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 .cg-textarea {
@@ -877,6 +910,49 @@
 
 /* Tablet/phone: stack categories Mental → Physical → Social */
 @media (max-width: 1024px) {
+  /*
+   * Chargen desktop locks a 3-col grid (aside | main | aside).
+   * That rule beats layout.css mobile 1fr stack, so main collapses
+   * (~0–168px) and the live sheet looks half-width. Force one column
+   * and full-width main when showing the sheet or stepper.
+   */
+  .site-shell.is-mode-chargen .site-body {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding-inline: var(--site-gutter, 1rem);
+    grid-template-columns: none !important;
+    box-sizing: border-box;
+  }
+
+  .site-shell.is-mode-chargen .site-aside--start,
+  .site-shell.is-mode-chargen .site-aside--end {
+    display: none !important;
+  }
+
+  .site-shell.is-mode-chargen .site-main {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    order: 0 !important;
+    grid-column: auto !important;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin: 0;
+    padding-inline: 0;
+  }
+
+  .site-shell.is-mode-chargen .cg-root,
+  .site-shell.is-mode-chargen .dnd-sheet {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
   .cg-live__cols {
     display: flex;
     flex-direction: column;
@@ -893,11 +969,6 @@
 
   .cg-live__concept {
     font-size: 1.25rem;
-  }
-
-  /* Redundant with main sheet; rails stack after main on mobile */
-  .site-shell.is-mode-chargen .site-aside--end {
-    display: none;
   }
 
   /* Back / Next / primary actions grow full width */
@@ -945,49 +1016,53 @@
   border-top: 1px solid var(--site-border-subtle);
 }
 
+/* Buttons — staff-theme .staff-btn / .staff-btn-primary parity */
 .cg-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.5rem;
-  padding: 0.5rem 1.15rem;
-  border: 1px solid var(--site-accent-border);
-  border-radius: 2px;
+  min-height: var(--site-control-h, 2.35rem);
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--site-btn-outline-border, var(--site-border-strong));
+  border-radius: var(--site-radius-sm, 4px);
   background: transparent;
-  color: var(--site-accent);
+  color: var(--site-btn-outline-fg, var(--site-text));
   font-family: var(--site-font-ui);
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.cg-btn:hover {
-  background: var(--site-accent-muted);
-  color: var(--site-accent-hover);
+.cg-btn:hover:not(:disabled) {
+  background: var(--site-bg-surface-2);
+  border-color: var(--site-border-strong);
+  color: var(--site-text);
 }
 
+/* Solid deep violet + white — never light accent fill */
 .cg-btn--primary {
-  background: var(--site-accent);
-  border-color: var(--site-accent);
-  color: var(--site-bg);
+  background: var(--site-btn-bg);
+  border-color: transparent;
+  color: var(--site-btn-fg);
 }
 
-.cg-btn--primary:hover {
-  background: var(--site-accent-hover);
-  color: var(--site-bg);
+.cg-btn--primary:hover:not(:disabled) {
+  background: var(--site-btn-bg-hover);
+  border-color: transparent;
+  color: var(--site-btn-fg);
 }
 
 .cg-btn--danger {
-  border-color: #a44;
-  color: #c66;
+  border-color: color-mix(in srgb, var(--site-error) 55%, transparent);
+  color: var(--site-error);
   margin-left: auto;
 }
 
-.cg-btn--danger:hover {
-  background: rgba(160, 48, 48, 0.18);
-  color: #e88;
+.cg-btn--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--site-error) 14%, transparent);
+  color: var(--site-error);
 }
 
 .cg-btn:disabled {

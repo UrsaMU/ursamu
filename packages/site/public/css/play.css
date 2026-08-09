@@ -11,7 +11,7 @@
  *
  * Colors use classes (play-palette.css) — CSP blocks inline style=.
  */
-@import url("/site/css/play-palette.css?v=20260805cmdecho");
+@import url("/site/css/play-palette.css?v=20260809playmob");
 
 /*
  * Play mode: fill the viewport under the fixed nav.
@@ -301,6 +301,40 @@
   overflow-wrap: anywhere;
 }
 
+/* Clickable URLs in say / pose / channel / info */
+.play-link {
+  color: var(--site-accent, #c9a227);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  word-break: break-all;
+}
+.play-link:hover {
+  color: var(--site-text, #eee);
+}
+.play-link--img {
+  display: inline-block;
+  max-width: min(100%, 28rem);
+  margin: 0.35rem 0;
+  text-decoration: none;
+  vertical-align: top;
+}
+.play-embed-img {
+  display: block;
+  max-width: 100%;
+  max-height: 18rem;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--site-border-subtle, #333);
+  background: var(--site-bg-surface, #111);
+  object-fit: contain;
+}
+.play-pre .play-link,
+.play-info .play-link,
+.play-layout__text .play-link,
+.play-layout__panel-body .play-link {
+  color: var(--site-accent, #c9a227);
+}
+
 .play-chat__text--pose {
   font-style: italic;
   color: var(--site-text-secondary, var(--site-text));
@@ -316,7 +350,7 @@
   font-style: normal;
 }
 
-/* OOC badge + slightly muted body */
+/* OOC / channel badge */
 .play-chat__tag {
   flex: 0 0 auto;
   display: inline-block;
@@ -327,6 +361,11 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   line-height: 1.3;
+  border: 1px solid var(--site-border-subtle, #444);
+  color: var(--site-text-muted, #aaa);
+  background: transparent;
+}
+.play-chat__tag--ooc {
   color: var(--site-error, #e07070);
   border: 1px solid color-mix(
     in srgb,
@@ -338,6 +377,57 @@
     var(--site-error, #e07070) 12%,
     transparent
   );
+}
+.play-chat__tag--chan {
+  /* Border only — let MUSH %c colors on the label show through */
+  border-color: var(--site-accent, #c9a227);
+  background: color-mix(
+    in srgb,
+    var(--site-accent, #c9a227) 12%,
+    transparent
+  );
+  color: inherit;
+}
+.play-chat__tag .mush-text {
+  /* Colored spans inside the badge keep their own colors */
+  font-weight: inherit;
+  letter-spacing: inherit;
+}
+/* Origin chips (Discord bridge, …) */
+.play-chat__chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  border: 1px solid transparent;
+}
+.play-chat__chip--discord {
+  color: #cdd5ff;
+  border-color: color-mix(
+    in srgb,
+    #5865f2 55%,
+    transparent
+  );
+  background: color-mix(
+    in srgb,
+    #5865f2 22%,
+    transparent
+  );
+}
+.play-chat--channel .play-chat__main {
+  border-left: 2px solid var(--site-accent, #c9a227);
+  padding-left: 0.55rem;
+  margin-left: 0.05rem;
+}
+.play-chat--channel.play-chat--discord .play-chat__main {
+  border-left-color: #5865f2;
 }
 
 .play-chat--ooc .play-chat__text--ooc {
@@ -823,6 +913,501 @@
   flex-direction: column;
   gap: 0;
   border-top: 1px solid var(--site-border-subtle);
+}
+
+/*
+ * Mail / BBS lists: title | status | from|count | date|last
+ * (wider status/from than the default idle-time column)
+ */
+.play-layout--mail-inbox .play-entity,
+.play-layout--mail-folder .play-entity,
+.play-layout--mail-trash .play-entity,
+.play-layout--mail-folders .play-entity,
+.play-layout--mail-compose .play-entity,
+.play-layout--bbs-index .play-entity,
+.play-layout--bbs-board .play-entity,
+.play-layout--bbs-unread .play-entity,
+.play-layout--bbs-scan .play-entity,
+.play-layout--bbs-compose .play-entity,
+.play-layout--jobs-list .play-entity,
+.play-layout--jobs-jgroups .play-entity,
+.play-layout--jobs-reports .play-entity,
+.play-layout--jobs-selects .play-entity,
+.play-layout--jobs-access .play-entity,
+.play-layout--jobs-actlog .play-entity,
+.play-layout--channels-hub .play-entity,
+.play-layout--channels-list .play-entity,
+.play-layout--channels-mine .play-entity,
+.play-layout--channels-who .play-entity {
+  grid-template-columns:
+    minmax(0, 1.5fr)
+    minmax(4rem, 5.5rem)
+    minmax(5rem, 8rem)
+    minmax(5rem, 7.5rem);
+  column-gap: 0.75rem;
+  padding: 0.32rem 0.1rem;
+}
+
+/* Shop proficiency: soft background, no text marks (mobile-safe) */
+.play-entity--usable {
+  background: color-mix(
+    in srgb,
+    var(--site-accent, #c9a227) 14%,
+    transparent
+  );
+  border-left: 3px solid var(--site-accent, #c9a227);
+  /* Clear the accent bar — name was flush against the edge */
+  padding-left: 1rem;
+  box-sizing: border-box;
+}
+
+.play-entity--usable:hover:not(.play-entity--static) {
+  background: color-mix(
+    in srgb,
+    var(--site-accent, #c9a227) 22%,
+    transparent
+  );
+}
+
+.play-entity--unusable {
+  opacity: 0.72;
+  padding-left: 1rem;
+}
+
+.play-entity--unusable .play-entity__name {
+  color: var(--site-text-muted, var(--site-text));
+}
+
+/* Shop list: extra room so names never hug the left edge */
+.play-layout--vendor-shop .play-entity {
+  padding-left: 1rem;
+  padding-right: 0.75rem;
+}
+
+.play-layout--vendor-shop .play-entity--usable {
+  padding-left: 1.1rem;
+}
+
+.play-entity:hover:not(.play-entity--static) {
+  background: color-mix(
+    in srgb,
+    var(--site-accent) 8%,
+    transparent
+  );
+}
+
+.play-entity__name-col {
+  grid-column: 1;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 0;
+  max-width: 19.5rem;
+  overflow: hidden;
+  line-height: 1.25;
+}
+
+.play-layout--vendor-shop .play-entity__name-col,
+.play-layout--vendor-sell .play-entity__name-col,
+.play-layout--dnd-inventory .play-entity__name-col,
+.play-layout--inventory .play-entity__name-col {
+  max-width: 17.6rem;
+}
+
+.play-layout--look .play-entity__name-col {
+  max-width: 22rem;
+}
+
+.play-entity__name {
+  flex: 0 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--site-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Keep moniker color spans from forcing wrap */
+.play-entity__name .mush-text {
+  white-space: nowrap;
+}
+
+.play-entity__role-col {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 1.25em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.play-entity__role {
+  display: inline-block;
+  max-width: 100%;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  color: var(--site-text-secondary, var(--site-text-muted));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.play-entity__dbref,
+.play-action__dbref {
+  flex: 0 0 auto;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--site-text-muted);
+  white-space: nowrap;
+}
+
+.play-entity__meta {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  color: var(--site-text-muted);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.play-entity__sub {
+  grid-column: 4;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  color: var(--site-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Exit chips — multi-column like text look EXITFORMAT */
+.play-actions {
+  display: grid;
+  gap: 0.45rem 0.75rem;
+  width: 100%;
+}
+
+.play-actions--cols-1 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.play-actions--cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.play-actions--cols-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.play-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0.4rem 0.55rem;
+  box-sizing: border-box;
+  font-family: var(--site-font-ui);
+  font-size: 0.875rem;
+  line-height: 1.2;
+  color: var(--site-text);
+  background: var(--site-bg-surface, transparent);
+  border: 1px solid var(--site-border);
+  border-radius: 0;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+
+
+/* Channels hub — tight chrome like mail/jobs */
+.play-layout--channels-hub .play-layout__text,
+.play-layout--channels-list .play-layout__text,
+.play-layout--channels-mine .play-layout__text,
+.play-layout--channels-who .play-layout__text,
+.play-layout--channels-history .play-layout__text {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.875rem;
+  color: var(--site-text-muted);
+  line-height: 1.45;
+}
+
+.play-layout--channels-hub .play-layout__section-title,
+.play-layout--channels-list .play-layout__section-title,
+.play-layout--channels-mine .play-layout__section-title,
+.play-layout--channels-who .play-layout__section-title {
+  margin: 0.25rem 0 0.15rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.play-layout--channels-hub .play-entity__meta,
+.play-layout--channels-list .play-entity__meta,
+.play-layout--channels-mine .play-entity__meta,
+.play-layout--channels-who .play-entity__meta {
+  justify-content: flex-start;
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+
+.play-layout--channels-hub .play-entity__name,
+.play-layout--channels-list .play-entity__name,
+.play-layout--channels-mine .play-entity__name {
+  max-width: none;
+}
+
+/* History panels — same readable wrap as job comments */
+.play-layout--channels-history .play-layout__panel {
+  margin: 0.45rem 0 0.55rem;
+  padding: 0.55rem 0.75rem 0.65rem;
+  border: 1px solid var(--site-border-subtle);
+  border-left: 2px solid var(--site-accent);
+  background: var(--site-bg-surface);
+}
+
+.play-layout--channels-history .play-layout__panel-title {
+  margin: 0 0 0.4rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--site-border-subtle);
+  font-family: var(--site-font-display);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--site-accent);
+  line-height: 1.35;
+}
+
+.play-layout--channels-history .play-layout__panel-body {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--site-text);
+}
+
+.play-layout--jobs-list .play-entity__meta,
+.play-layout--jobs-detail .play-layout__text {
+  font-family: inherit;
+}
+
+.play-layout--jobs-list .play-layout__text,
+.play-layout--jobs-detail .play-layout__text,
+.play-layout--jobs-report .play-layout__text,
+.play-layout--jobs-access .play-layout__text,
+.play-layout--jobs-actlog .play-layout__text {
+  margin: 0.15rem 0 0.35rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Job detail — comment panels (title + full body) */
+.play-layout--jobs-detail .play-layout__panel {
+  margin: 0.45rem 0 0.55rem;
+  padding: 0.55rem 0.75rem 0.65rem;
+  border: 1px solid var(--site-border-subtle);
+  border-left: 2px solid var(--site-accent);
+  background: var(--site-bg-surface);
+}
+
+.play-layout--jobs-detail .play-layout__panel-title {
+  margin: 0 0 0.4rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--site-border-subtle);
+  font-family: var(--site-font-display);
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--site-accent);
+  line-height: 1.35;
+}
+
+.play-layout--jobs-detail .play-layout__panel-body {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--site-text);
+}
+
+/* Keep entity body support for other layouts */
+.play-entity__body {
+  grid-column: 1 / -1;
+  margin: 0.1rem 0 0;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--site-border-subtle);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--site-text);
+}
+
+.play-layout--bbs-index .play-entity__meta,
+.play-layout--bbs-board .play-entity__meta,
+.play-layout--bbs-unread .play-entity__meta,
+.play-layout--bbs-scan .play-entity__meta {
+  justify-content: flex-start;
+  font-family: inherit;
+  font-size: 0.8125rem;
+}
+
+/* Tighter chrome — mail-like, less vertical waste */
+.play-layout--bbs-index .play-layout__text,
+.play-layout--bbs-board .play-layout__text,
+.play-layout--bbs-unread .play-layout__text,
+.play-layout--bbs-scan .play-layout__text {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.875rem;
+  color: var(--site-text-muted);
+}
+
+.play-layout--bbs-index .play-layout__section-title,
+.play-layout--bbs-board .play-layout__section-title,
+.play-layout--bbs-unread .play-layout__section-title {
+  margin: 0.25rem 0 0.15rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.play-layout--mail-inbox .play-entity__meta,
+.play-layout--mail-folder .play-entity__meta,
+.play-layout--mail-trash .play-entity__meta,
+.play-layout--mail-compose .play-entity__meta {
+  justify-content: flex-start;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  color: var(--site-text-secondary, var(--site-text-muted));
+}
+
+.play-layout--mail-inbox .play-entity__name,
+.play-layout--mail-folder .play-entity__name,
+.play-layout--mail-trash .play-entity__name,
+.play-layout--mail-compose .play-entity__name {
+  max-width: none;
+}
+
+/* Compose — in-panel form (no prompt syntax) */
+.play-layout--mail-compose .play-layout__text {
+  margin: 0.15rem 0 0.4rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  color: var(--site-text-muted);
+}
+
+.play-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.65rem 0.75rem 0.75rem;
+  border: 1px solid var(--site-border-subtle);
+  border-left: 2px solid var(--site-accent);
+  background: var(--site-bg-surface);
+  border-radius: 4px;
+}
+
+.play-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.play-form__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-text-muted);
+}
+
+.play-form__req {
+  color: var(--site-accent);
+}
+
+.play-form__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: 6px;
+  background: var(--site-bg, transparent);
+  color: var(--site-text);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.play-form__input:focus {
+  outline: none;
+  border-color: var(--site-accent);
+  box-shadow: 0 0 0 1px var(--site-accent);
+}
+
+.play-form__input--area {
+  resize: vertical;
+  min-height: 7rem;
+  line-height: 1.45;
+  font-family: inherit;
+}
+
+.play-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.2rem;
+}
+
+.play-form__btn {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--site-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.play-form__btn:hover {
+  border-color: var(--site-accent);
+}
+
+.play-form__btn--primary {
+  border-color: var(--site-accent);
+  box-shadow: inset 0 0 0 1px var(--site-accent);
+  color: var(--site-accent);
+}
+
+.play-layout--bbs-read .play-layout__text,
+.play-layout--mail-draft .play-layout__text {
+  line-height: 1.45;
+  white-space: pre-wrap;
+  letter-spacing: 0;
 }
 
 .play-entity {
@@ -1353,4 +1938,97 @@
   .play-pre {
     font-size: 0.8125rem;
   }
+}
+
+
+/* D&D sheet full-width */
+.play-layout--dnd-sheet {
+  width: 100%;
+  max-width: none;
+  margin: 0.25rem 0 0.85rem;
+  box-sizing: border-box;
+}
+
+.play-layout--dnd-sheet .dnd-sheet {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.play-msg:has(.play-layout--dnd-sheet),
+.play-msg:has(.dnd-sheet) {
+  width: 100%;
+  max-width: none;
+}
+
+.play-layout--sheet .play-layout__text {
+  margin: 0 0 0.55rem;
+  font-size: 0.88rem;
+  color: var(--site-text-muted);
+}
+
+.play-layout--sheet .play-layout__list {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+}
+
+.play-layout--sheet .play-layout__list li {
+  padding: 0.35rem 0.55rem;
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.play-layout--sheet .play-layout__list li:nth-child(odd) {
+  background: var(--site-bg-surface, transparent);
+}
+
+.play-layout--sheet .play-layout__list li:nt
+
+
+@media (max-width: 1024px) {
+
+  /* Character sheet edge-to-edge under nav on phones */
+  .play-layout--dnd-sheet,
+  .play-layout--dnd-sheet .dnd-sheet,
+  .play-msg:has(.dnd-sheet) {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  .play-layout--dnd-sheet .dnd-sheet__banner,
+  .play-layout--dnd-sheet .dnd-sheet__panel {
+    border-radius: 0;
+  }
+
+  .play-layout--dnd-sheet .dnd-sheet__combat .dnd-sheet__stat {
+    flex: 1 1 calc(50% - 0.35rem);
+    min-width: 0;
+  }
+
+  .play-layout--dnd-sheet .dnd-sheet__abil {
+    flex: 1 1 calc(33.333% - 0.35rem);
+  }
+
+  .play-prompt {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.55rem;
+  }
+
+  .play-prompt__input {
+    flex: 1 1 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* SEND grows full width (drop fixed 119×55) */
+  .play-prompt__send {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: auto;
+    min-height
 }

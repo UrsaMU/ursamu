@@ -14,7 +14,7 @@
   var socket = null;
   var status = "idle";
   var rootEl = null;
-  var PLAY_JS_VER = "20260806cmdhist";
+  var PLAY_JS_VER = "20260809playmob";
   /** Stick to bottom unless the user scrolls up. */
   var stickBottom = true;
   var STICK_PX = 48;
@@ -122,6 +122,74 @@
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  /** http(s) URL that looks like an image (for inline embed). */
+  function isImageUrl(raw) {
+    var u = String(raw || "").trim();
+    if (!/^https?:\/\//i.test(u)) return false;
+    var path = u.split(/[?#]/)[0].toLowerCase();
+    if (/\.(png|jpe?g|gif|webp|svg|avif|bmp)$/i.test(path)) {
+      return true;
+    }
+    if (/cdn\.discordapp\.com\/attachments\//i.test(u)) return true;
+    if (/media\.discordapp\.net\//i.test(u)) return true;
+    if (/i\.imgur\.com\//i.test(u)) return true;
+    if (/pbs\.twimg\.com\//i.test(u)) return true;
+    return false;
+  }
+
+  /**
+   * Bare URLs in plain text → safe <a> / inline <img>.
+   * Input unescaped; output HTML-safe. Used by mushToHtml so
+   * say/pose/channel/info all get clickable links + images.
+   */
+  function linkifyPlainText(raw) {
+    var s = String(raw ?? "");
+    if (!s) return "";
+    var re = /(https?:\/\/[^\s<>"']+|www\.[^\s<>"']+)/gi;
+    var out = "";
+    var last = 0;
+    var m;
+    while ((m = re.exec(s)) !== null) {
+      out += esc(s.slice(last, m.index));
+      var url = m[0];
+      var trail = "";
+      while (/[.,;:!?)\]}>]/.test(url.charAt(url.length - 1))) {
+        trail = url.charAt(url.length - 1) + trail;
+        url = url.slice(0, -1);
+      }
+      if (!url) {
+        out += esc(m[0]);
+        last = m.index + m[0].length;
+        continue;
+      }
+      var href = url;
+      if (/^www\./i.test(href)) href = "https://" + href;
+      if (!/^https?:\/\//i.test(href) ||
+        /^\s*javascript:/i.test(href) ||
+        /^\s*data:/i.test(href)) {
+        out += esc(m[0]);
+        last = m.index + m[0].length;
+        continue;
+      }
+      var safe = esc(href);
+      if (isImageUrl(href)) {
+        out += '<a class="play-link play-link--img" href="' +
+          safe + '" target="_blank" rel="noopener noreferrer">' +
+          '<img class="play-embed-img" src="' + safe +
+          '" alt="" loading="lazy" referrerpolicy="no-referrer" />' +
+          "</a>";
+      } else {
+        out += '<a class="play-link" href="' + safe +
+          '" target="_blank" rel="noopener noreferrer">' +
+          esc(url) + "</a>";
+      }
+      out += esc(trail);
+      last = m.index + m[0].length;
+    }
+    out += esc(s.slice(last));
+    return out;
   }
 
   function webSafeChannel(n) {
@@ -340,7 +408,8 @@
 
     function flush() {
       if (!buf) return;
-      var text = esc(buf);
+      // Linkify bare URLs (say/pose/channel/info) + inline images.
+      var text = linkifyPlainText(buf);
       buf = "";
       var cls = ["mush-text"];
       if (style.color) {
@@ -363,9 +432,12 @@
       }
     }
 
+    // %c / %C / %x / %X — letter case still means fg vs bg
+    // (TinyMUX: %cc fg cyan, %cC bg cyan). Allow uppercase %C so
+    // headers like %CH%CC[PUBLIC]%CN render instead of showing codes.
     // deno-lint-ignore no-control-regex
     var re =
-      /\u001b\[([0-9;]*)m|%c([nNrRgGyYbBmMcCwWxXhHuUiI])|%c<#([0-9a-fA-F]{6})>|<#([0-9a-fA-F]{6})>|%x([nNrRgGyYbBmMcCwWxXhHuUiI])/g;
+      /\u001b\[([0-9;]*)m|%[cCxX]([nNrRgGyYbBmMcCwWxXhHuUiI])|%[cC]<#([0-9a-fA-F]{6})>|<#([0-9a-fA-F]{6})>/g;
     var last = 0;
     var m;
     while ((m = re.exec(s)) !== null) {
@@ -391,9 +463,16 @@
         continue;
       }
 
-      var code = String(m[2] || m[5] || "").toLowerCase();
-      var rawCode = m[2] || m[5] || "";
+      var token = m[0];
+      var rawCode = m[2] || "";
+      var code = String(rawCode).toLowerCase();
+      // ALL-CAPS token (%CC) = caps-lock header, not TinyMUX bg.
+      // Mixed %cC still means background cyan.
+      var allCaps = token.length >= 2 &&
+        token === token.toUpperCase() &&
+        token !== token.toLowerCase();
       flush();
+      // hilite / normal / underline / italic — case-insensitive
       if (code === "n") {
         style = {};
         continue;
@@ -410,7 +489,9 @@
         style = Object.assign({}, style, { italic: true });
         continue;
       }
+      // %cC → bg; %CC (all caps) → fg (headers typed CAPS LOCK)
       if (
+        !allCaps &&
         rawCode.length === 1 &&
         rawCode === rawCode.toUpperCase() &&
         BG_LETTER[rawCode]
@@ -428,11 +509,15 @@
     }
 
     // Strip any unparsed codes left in plain text runs only.
-    // Do NOT strip style= from the spans we just built.
+    // Do NOT strip classes from the spans we just built.
     // deno-lint-ignore no-control-regex
     return parts.join("")
-      .replace(/%c[nNrRgGyYbBmMcCwWxXhHuUiI]/g, "")
-      .replace(/%x[nNrRgGyYbBmMcCwWxXhHuUiI]/g, "")
+      .replace(/%[cCxX][nNrRgGyYbBmMcCwWxXhHuUiI]/g, "")
+      .replace(/%[cC]<#[0-9a-fA-F]{6}>/g, "")
+      .replace(
+        /%[cCxX](?![nNrRgGyYbBmMcCwWxXhHuUiI]|<#)/g,
+        "",
+      )
       .replace(/\u001b\[[0-9;]*m/g, "");
   }
 
@@ -536,6 +621,18 @@
       var cls = el.getAttribute("class");
       if (cls && /^[a-zA-Z0-9 _:-]+$/.test(cls)) {
         parts.push('class="' + cls.replace(/"/g, "") + '"');
+      }
+      // Character sheet root + a11y attrs
+      if (el.hasAttribute("data-dnd-sheet")) {
+        parts.push("data-dnd-sheet");
+      }
+      var ariaL = el.getAttribute("aria-label");
+      if (ariaL && /^[a-zA-Z0-9 .,_+-]+$/.test(ariaL)) {
+        parts.push('aria-label="' + ariaL.replace(/"/g, "") + '"');
+      }
+      var ariaH = el.getAttribute("aria-hidden");
+      if (ariaH === "true" || ariaH === "false") {
+        parts.push('aria-hidden="' + ariaH + '"');
       }
       if (tag === "a") {
         var href = safeSplashUrl(el.getAttribute("href") || "", "href");
@@ -762,32 +859,77 @@
     return String(a.cmd || "").trim();
   }
 
+  /**
+   * Prefill the play prompt (user finishes typing).
+   * Keep trailing spaces — fill values are often command prefixes
+   * like "+vendor/create/name " so the typed name stays a separate arg.
+   */
+  function actionFill(item) {
+    var a = item && item.action;
+    if (!a || typeof a !== "object" || a.fill == null) return "";
+    return String(a.fill).replace(/^\s+/, "");
+  }
+
   /** Attr-safe encoding (quotes). */
   function escAttr(s) {
     return esc(s).replace(/'/g, "&#39;");
   }
 
-  /** Interactive control — click sends data-play-cmd as game input. */
+  function fillPrompt(text) {
+    if (!rootEl) return;
+    var inp = rootEl.querySelector(".play-prompt__input");
+    if (!inp) return;
+    // Always enable — layout fills are how free-text args are entered.
+    inp.disabled = false;
+    inp.readOnly = false;
+    inp.value = String(text || "");
+    try {
+      inp.focus();
+      var len = inp.value.length;
+      if (typeof inp.setSelectionRange === "function") {
+        inp.setSelectionRange(len, len);
+      }
+    } catch (_) { /* ignore */ }
+    var btn = rootEl.querySelector(".play-prompt__send");
+    // Enable send once there is any non-space content; trailing
+    // space alone (prefix) still needs more typing.
+    if (btn) {
+      btn.disabled = !String(inp.value || "").trim();
+    }
+    // Nudge autosize if the page listens for input events.
+    try {
+      inp.dispatchEvent(new Event("input", { bubbles: true }));
+    } catch (_) { /* ignore */ }
+  }
+
+  /**
+   * Interactive control — click sends cmd, or prefills prompt
+   * when action.fill is set (custom names, free text).
+   */
   function renderActionBtn(item) {
     var cmd = actionCmd(item);
-    var label = cellHtml(item.label || item.title || cmd);
+    var fill = actionFill(item);
+    var label = cellHtml(item.label || item.title || cmd || fill);
     // Show <CG> with real angle brackets (escaped for HTML)
     var badge = item.badge
       ? '<span class="play-action__badge" aria-hidden="true">' +
         "&lt;" + esc(String(item.badge)) + "&gt;</span>"
       : "";
-    if (!cmd) {
+    if (!cmd && !fill) {
       return '<span class="play-action play-action--static">' +
         badge + '<span class="play-action__label">' + label +
         "</span></span>";
     }
-    var tip = cmd;
+    var tip = cmd || ("Type: " + fill);
     var dbref = item.dbref
       ? '<span class="play-action__dbref">(' +
         esc(String(item.dbref)) + ")</span>"
       : "";
+    var dataAttr = fill
+      ? 'data-play-fill="' + escAttr(fill) + '"'
+      : 'data-play-cmd="' + escAttr(cmd) + '"';
     return '<button type="button" class="play-action" ' +
-      'data-play-cmd="' + escAttr(cmd) + '" title="' +
+      dataAttr + ' title="' +
       escAttr(tip) + '" aria-label="' + escAttr(tip) + '">' +
       badge +
       '<span class="play-action__label">' + label + "</span>" +
@@ -802,12 +944,24 @@
    */
   function renderEntityRow(item) {
     var cmd = actionCmd(item);
-    var tag = cmd ? "button" : "div";
-    var attrs = cmd
-      ? ' type="button" class="play-entity" data-play-cmd="' +
+    var fill = actionFill(item);
+    var tag = (cmd || fill) ? "button" : "div";
+    var cls = "play-entity";
+    if (!cmd && !fill) cls += " play-entity--static";
+    if (item.usable === false) cls += " play-entity--unusable";
+    if (item.usable === true) cls += " play-entity--usable";
+    var attrs;
+    if (fill) {
+      attrs = ' type="button" class="' + cls + '" data-play-fill="' +
+        escAttr(fill) + '" title="' + escAttr("Type: " + fill) +
+        '" aria-label="' + escAttr("Type: " + fill) + '"';
+    } else if (cmd) {
+      attrs = ' type="button" class="' + cls + '" data-play-cmd="' +
         escAttr(cmd) + '" title="' + escAttr(cmd) +
-        '" aria-label="' + escAttr(cmd) + '"'
-      : ' class="play-entity play-entity--static"';
+        '" aria-label="' + escAttr(cmd) + '"';
+    } else {
+      attrs = ' class="' + cls + '"';
+    }
     var html = "<" + tag + attrs + ">";
 
     // Col 1: name + optional staff dbref
@@ -832,9 +986,15 @@
     html += '<div class="play-entity__meta">' +
       cellHtml(item.meta || "") + "</div>";
 
-    // Col 4: short-desc
+    // Col 4: short-desc / flags
     html += '<div class="play-entity__sub">' +
       cellHtml(item.sublabel || "") + "</div>";
+
+    // Optional full-width body (job comments, long notes)
+    if (item.body != null && String(item.body).length) {
+      html += '<div class="play-entity__body">' +
+        cellHtml(String(item.body)) + "</div>";
+    }
 
     html += "</" + tag + ">";
     return html;
@@ -932,8 +1092,15 @@
     var metaType = ui.meta && ui.meta.type
       ? String(ui.meta.type)
       : "";
+    var extraRaw = (ui.className ||
+      (ui.meta && ui.meta.className) ||
+      "");
+    var extraCls = extraRaw
+      ? " " + esc(String(extraRaw).replace(/[^\w\s-]/g, ""))
+      : "";
     var html = '<div class="play-layout' +
       (metaType ? " play-layout--" + esc(metaType) : "") +
+      extraCls +
       '">';
     for (var i = 0; i < comps.length; i++) {
       var c = comps[i] || {};
@@ -944,10 +1111,16 @@
           cellHtml(c.title || c.content || "") +
           "</h2></header>";
       } else if (t === "markdown" || t === "html") {
-        // Auto md/html (and center+md hybrids) via renderSplash
-        html += renderSplash(
-          typeof c.content === "string" ? c.content : "",
-        );
+        var rawHtml = typeof c.content === "string" ? c.content : "";
+        // D&D character sheet: full-width .dnd-sheet (no md wrapper)
+        if (
+          metaType === "dnd-sheet" ||
+          /class=["'][^"']*dnd-sheet/.test(rawHtml)
+        ) {
+          html += sanitizeLoginHtml(rawHtml);
+        } else {
+          html += renderSplash(rawHtml);
+        }
       } else if (t === "text") {
         html += '<div class="play-layout__text">' +
           cellHtml(c.content || "") + "</div>";
@@ -1031,6 +1204,8 @@
               : JSON.stringify(c.content),
           ) +
           "</div></section>";
+      } else if (t === "form") {
+        html += renderLayoutForm(c);
       } else if (typeof c.content === "string") {
         html += '<div class="play-pre">' +
           mushToHtml(c.content) + "</div>";
@@ -1038,6 +1213,101 @@
     }
     html += "</div>";
     return html;
+  }
+
+  /**
+   * In-panel form (mail compose, etc.).
+   * Submit encodes fields as @mail/form <base64-json>.
+   */
+  function renderLayoutForm(c) {
+    var fields = Array.isArray(c.fields) ? c.fields : [];
+    var acts = Array.isArray(c.actions) ? c.actions : [];
+    var html = '<form class="play-form" data-play-form="1" ' +
+      'autocomplete="off">';
+    if (c.title) {
+      html += '<h3 class="play-layout__section-title">' +
+        esc(String(c.title)) + "</h3>";
+    }
+    for (var fi = 0; fi < fields.length; fi++) {
+      var f = fields[fi] || {};
+      var name = String(f.name || "f" + fi);
+      var label = String(f.label || name);
+      var val = f.value == null ? "" : String(f.value);
+      var ph = f.placeholder == null ? "" : String(f.placeholder);
+      var kind = String(f.kind || "text").toLowerCase();
+      var req = f.required ? " required" : "";
+      html += '<label class="play-form__field">';
+      html += '<span class="play-form__label">' +
+        esc(label) +
+        (f.required
+          ? ' <span class="play-form__req">*</span>'
+          : "") +
+        "</span>";
+      if (kind === "textarea") {
+        var rows = Math.max(3, Math.min(16, Number(f.rows) || 6));
+        html += '<textarea class="play-form__input ' +
+          'play-form__input--area" name="' +
+          escAttr(name) + '" rows="' + rows +
+          '" placeholder="' + escAttr(ph) + '"' + req +
+          ">" + esc(val) + "</textarea>";
+      } else {
+        html += '<input class="play-form__input" type="text" ' +
+          'name="' + escAttr(name) + '" value="' +
+          escAttr(val) + '" placeholder="' + escAttr(ph) +
+          '"' + req + " />";
+      }
+      html += "</label>";
+    }
+    if (acts.length) {
+      html += '<div class="play-form__actions">';
+      for (var ai = 0; ai < acts.length; ai++) {
+        var a = acts[ai] || {};
+        var alabel = String(a.label || "OK");
+        var cmd = String(a.cmd || "").trim();
+        var action = String(a.action || "save");
+        var isSubmit = !!a.submit;
+        var primary = !!a.primary;
+        var cls = "play-form__btn" +
+          (primary ? " play-form__btn--primary" : "");
+        if (isSubmit && cmd) {
+          html += '<button type="submit" class="' + cls +
+            '" data-play-form-cmd="' + escAttr(cmd) +
+            '" data-play-form-action="' + escAttr(action) +
+            '">' + esc(alabel) + "</button>";
+        } else if (cmd) {
+          html += '<button type="button" class="' + cls +
+            '" data-play-cmd="' + escAttr(cmd) + '">' +
+            esc(alabel) + "</button>";
+        }
+      }
+      html += "</div>";
+    }
+    html += "</form>";
+    return html;
+  }
+
+  /** UTF-8 string → base64 (for @mail/form payload). */
+  function utf8ToB64(str) {
+    try {
+      return btoa(unescape(encodeURIComponent(String(str))));
+    } catch (_) {
+      return btoa(String(str));
+    }
+  }
+
+  function collectFormFields(form) {
+    var out = {};
+    if (!form || !form.elements) return out;
+    var els = form.elements;
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (!el || !el.name) continue;
+      var tag = String(el.tagName || "").toLowerCase();
+      if (tag !== "input" && tag !== "textarea") continue;
+      if (el.type === "submit" || el.type === "button") continue;
+      out[el.name] = el.value;
+    }
+    return out;
   }
 
   function isNearBottom(el) {
@@ -1165,20 +1435,61 @@
       "</span></div>";
   }
 
-  /** Layout controls: data-play-cmd → send as game input. */
+  /**
+   * Layout controls:
+   *   data-play-cmd  → send as game input
+   *   data-play-fill → put text in the prompt for editing
+   *   data-play-form → in-panel form submit → cmd + base64 JSON
+   */
   function bindOutputActions(out) {
     if (!out || out._playActionBound) return;
     out._playActionBound = true;
     out.addEventListener("click", function (ev) {
       var t = ev.target;
       if (!t || !t.closest) return;
+      var fillEl = t.closest("[data-play-fill]");
+      if (fillEl && out.contains(fillEl)) {
+        var fill = fillEl.getAttribute("data-play-fill");
+        if (fill != null) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          fillPrompt(fill);
+          return;
+        }
+      }
       var el = t.closest("[data-play-cmd]");
       if (!el || !out.contains(el)) return;
+      // form submit buttons handle their own path
+      if (el.getAttribute("data-play-form-cmd")) return;
       var cmd = el.getAttribute("data-play-cmd");
       if (!cmd) return;
       ev.preventDefault();
       ev.stopPropagation();
       sendCmd(cmd);
+    });
+    out.addEventListener("submit", function (ev) {
+      var form = ev.target;
+      if (!form || !form.getAttribute) return;
+      if (!form.getAttribute("data-play-form")) return;
+      if (!out.contains(form)) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      var submitter = ev.submitter ||
+        form.querySelector("[data-play-form-cmd][type=submit]");
+      var cmd = submitter &&
+        submitter.getAttribute("data-play-form-cmd");
+      if (!cmd) {
+        var any = form.querySelector("[data-play-form-cmd]");
+        cmd = any && any.getAttribute("data-play-form-cmd");
+      }
+      if (!cmd) return;
+      var action = (submitter &&
+        submitter.getAttribute("data-play-form-action")) ||
+        "save";
+      var fields = collectFormFields(form);
+      fields.action = action;
+      var payload = utf8ToB64(JSON.stringify(fields));
+      sendCmd(String(cmd).trim() + " " + payload);
     });
   }
 
@@ -1205,6 +1516,7 @@
   function renderChat(ui) {
     var kind = String(ui.kind || "say");
     var oocMode = String(ui.oocMode || "");
+    var channelMode = String(ui.channelMode || "say");
     var name = String(ui.name || "Someone");
     var text = String(ui.text || "");
     var avatar = ui.avatar ? String(ui.avatar) : "";
@@ -1213,8 +1525,17 @@
     var textHtml = mushToHtml(text);
     var initial = esc(initialFromName(name));
     var isOoc = kind === "ooc";
-    var isPose = kind === "pose" || kind === "semi" ||
+    var isChannel = kind === "channel";
+    var speechMode = isChannel
+      ? channelMode
+      : (isOoc ? oocMode : kind);
+    var isPose = speechMode === "pose" || speechMode === "semi" ||
+      kind === "pose" || kind === "semi" ||
       (isOoc && (oocMode === "pose" || oocMode === "semi"));
+    var isSay = !isPose &&
+      (speechMode === "say" || kind === "say" ||
+        (isOoc && oocMode === "say") ||
+        (isChannel && channelMode === "say"));
     // Single avatar slot — img OR fallback, never both
     var avHtml = avatar
       ? '<img class="play-chat__avatar" src="' +
@@ -1226,24 +1547,55 @@
     var bodyClass = "play-chat__text";
     if (isPose) bodyClass += " play-chat__text--pose";
     if (isOoc) bodyClass += " play-chat__text--ooc";
+    if (isChannel) bodyClass += " play-chat__text--chan";
     var tag = ui.tag
       ? String(ui.tag)
       : (isOoc ? "OOC" : "");
+    var isDiscord = String(ui.source || "").toLowerCase() ===
+      "discord";
+    // Aria: plain text. Body: mushToHtml so %c colors render.
+    var tagPlain = tag
+      .replace(/%c[nNrRgGyYbBmMcCwWxXhHuUiI]/gi, "")
+      .replace(/%c?<#([0-9a-fA-F]{6})>/gi, "")
+      .replace(/<#([0-9a-fA-F]{6})>/g, "")
+      .replace(/%x[nNrRgGyYbBmMcCwWxXhHuUiI]/gi, "")
+      .replace(/%[nrtbR]/g, "")
+      .trim();
     var tagHtml = tag
-      ? '<span class="play-chat__tag" aria-label="' +
-        escAttr(tag) + '">' + esc(tag) + "</span>"
+      ? '<span class="play-chat__tag' +
+        (isChannel ? " play-chat__tag--chan" : "") +
+        (isOoc ? " play-chat__tag--ooc" : "") +
+        '" aria-label="' +
+        escAttr(tagPlain || tag) + '">' +
+        mushToHtml(tag) + "</span>"
       : "";
-    // OOC say: show quoted-ish body; pose: action only
+    // Discord origin chip (channel bridge inbound)
+    var discordChip = isDiscord
+      ? '<span class="play-chat__chip play-chat__chip--discord" ' +
+        'title="From Discord" aria-label="From Discord">' +
+        "Discord</span>"
+      : "";
+    // Say: quoted body; pose/semi: action only (name in meta)
     var bodyInner = textHtml;
-    if (isOoc && oocMode === "say" && text) {
+    if (isSay && text) {
       bodyInner = mushToHtml('"' + text + '"');
+    } else if (isPose && speechMode === "pose" && text) {
+      // name already in meta — body is the action
+      bodyInner = mushToHtml(text);
+    } else if (isPose && speechMode === "semi" && text) {
+      bodyInner = mushToHtml(text);
     }
-    return '<div class="play-chat play-chat--' + esc(kind) +
-      (isOoc ? " play-chat--ooc" : "") + '">' +
+    var wrapClass = "play-chat play-chat--" + esc(kind);
+    if (isOoc) wrapClass += " play-chat--ooc";
+    if (isChannel) wrapClass += " play-chat--channel";
+    if (isDiscord) wrapClass += " play-chat--discord";
+    if (isPose) wrapClass += " play-chat--pose-like";
+    return '<div class="' + wrapClass + '">' +
       '<div class="play-chat__av">' + avHtml + "</div>" +
       '<div class="play-chat__main">' +
       '<div class="play-chat__meta">' +
       tagHtml +
+      discordChip +
       '<span class="play-chat__name">' + nameHtml + "</span>" +
       '<time class="play-chat__time" datetime="' +
       esc(String(ui.at || "")) + '">' + esc(time) + "</time>" +
@@ -1380,6 +1732,23 @@
 
   function push(m) {
     m = m || {};
+    // In-place panel replace (mail compose/inbox share replace key)
+    try {
+      var ui = m.data && m.data.ui;
+      var rk = ui && ui.meta && ui.meta.replace;
+      if (rk) {
+        var key = String(rk);
+        var next = [];
+        for (var ri = 0; ri < messages.length; ri++) {
+          var om = messages[ri];
+          var oui = om && om.data && om.data.ui;
+          var ork = oui && oui.meta && oui.meta.replace;
+          if (ork != null && String(ork) === key) continue;
+          next.push(om);
+        }
+        messages = next;
+      }
+    } catch (_) { /* ignore */ }
     m._id = ++msgSeq;
     messages.push(m);
     if (messages.length > MAX_MSG) {
@@ -1517,21 +1886,12 @@
         return;
       }
       socket.onopen = function () {
-        var isReconnect = wasLive;
         reconnectAttempt = 0;
         setStatus("open");
         socket.send(JSON.stringify({ type: "auth", token: t }));
-        // Mark live after first open so later WS dials are reconnects
+        // Later dials use ?reconnect=true. Server session:open sends
+        // the single "Reconnected." line — do not echo client-side.
         wasLive = true;
-        // Server skips connect splash when ?reconnect=true; show a
-        // short line here (mush ≥1.0.29 also sends one — keep client
-        // notice until that pin is live, then drop if it doubles).
-        if (isReconnect) {
-          push({
-            msg: "Game> Reconnected.",
-            at: Date.now(),
-          });
-        }
         // Initial look only once per live session
         if (!didInitialLook) {
           didInitialLook = true;

@@ -1,5 +1,11 @@
 # Court of Miracles — Figma Main page (node 1:2)
 
+**Shell structure** is defined by the Home wireframe:
+
+→ **[figma-wireframe-home.md](./figma-wireframe-home.md)** (node **2054:137**)
+
+This page is the **styled** Main/Wiki art pass on that same shell.
+
 Source: https://www.figma.com/design/BKP8DKLEwj0MzrzdFjU0m0/Court-of-Miracles?node-id=1-2  
 Frame: **1728 × 1374**
 

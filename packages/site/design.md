@@ -2,13 +2,26 @@
 
 **Product:** Player-facing site shell (not the staff console).
 
-**Layout source:** court-template framing — fixed top nav, optional
-hero banner, sticky left / main / right columns, footer.
+**Layout + type scale (canonical wireframe):** Figma **Home**
+node **2054:137** — grayscale shell structure only.
 
-**Visual system:** Same token family as
-[`packages/web/design.md`](../web/design.md) (UrsaMU violet night).
-Skins remap tokens + optional art to brand a game (e.g. Court cream /
-gold).
+- Spec: [`docs/figma-wireframe-home.md`](./docs/figma-wireframe-home.md)
+- https://www.figma.com/design/BKP8DKLEwj0MzrzdFjU0m0/Court-of-Miracles?node-id=2054-137
+- Profile shell: **2065:349** (same chrome)
+
+Wireframe supplies **columns, nav height, gutters, type sizes**.
+It does **not** supply Court cream/gold colors.
+
+**Default visual system (required):** **UrsaMU violet night** —
+exact color/face parity with staff console
+[`packages/web/ui/src/assets/staff-theme.css`](../web/ui/src/assets/staff-theme.css).
+Public names are `--site-*`; colors match staff `--*`. Type face is
+**Inter** (wireframe Lato sizes mapped onto Inter).
+
+**Not the default:** Court cream/gold (`examples/themes/court/`,
+Figma Main **1:2** / client **1884:89**) is an **installable** skin
+only. Do not put Smythe, cream `#F7E4DD`, or gold `#C4944A` on
+builtin `default`.
 
 ---
 
@@ -97,16 +110,32 @@ Court skin maps gold/cream.
 
 ---
 
-## 5. Shipping a brand theme (Court example)
+## 5. Default skin checklist (violet night)
+
+| Check | Source |
+|-------|--------|
+| Surfaces `#0b0a12` / `#161422` | staff `--bg` / `--bg-surface` |
+| Accent `#a78bfa` (links only) | staff `--primary` |
+| Solid CTA `#6d28d9` + white label | staff `--btn-primary-*` |
+| Never light purple fill + dark text on primary buttons | design.md staff §0.3 |
+| UI font Inter | staff `--font-ui` |
+| Radius 4px / 6px | staff `--radius-sm` / `-md` |
+| Control height ~2.35rem | staff `--control-h` |
+
+`public/css/tokens.css` + `skins/default.css` implement this.
+Chargen/play CTAs must use `--site-btn-*`, not `--site-accent` fill.
+
+## 5a. Shipping a brand theme (Court example)
 
 Court of Miracles is an **installable theme**, not a builtin skin.
-Only `default` ships inside `@ursamu/site`.
+Only `default` (UrsaMU violet night) ships inside `@ursamu/site`.
 
 1. Keep layout + components as shipped.
 2. Pack `examples/themes/court/` (`deno task pack-theme`).
 3. Install via Admin theme zip, or copy to
    `theme/installed/court/` with `themeDir: "theme"`.
-4. Config after install:
+4. Court CSS loads its own fonts (Smythe/Lato) — not index.html.
+5. Config after install:
 
 ```json
 "plugins": {
@@ -122,7 +151,7 @@ Only `default` ships inside `@ursamu/site`.
 
 ---
 
-## 5. Fully custom skin
+## 5b. Fully custom skin
 
 1. Copy `css/skins/custom.example.css` → `theme/site.css` in your game.
 2. Change token values and image URLs.
@@ -146,18 +175,56 @@ The base stack stays; only the last stylesheet changes.
 
 ---
 
-## 6. MUST / MUST NOT
+## 6. Width policy (Figma shell 2054:137)
+
+**Always keep the wireframe chrome** — nav + left rail + main +
+right rail (see `docs/figma-wireframe-home.md`). Tools do not get a
+separate layout.
+
+At **1728** the center column is ~885px. That is the default
+`--site-main-max`. Tool modes may let the center track grow with
+`1fr` so leftover width goes to main while asides stay ~331px.
+
+| Mode | Width |
+|------|--------|
+| Wiki / help / home prose | Center capped at `--site-main-max` (885) |
+| **Chargen** (`is-mode-chargen`) | Same 3-col shell; main fills center track; **right = Draft sheet** |
+| **Play** (`is-mode-play`) | Same 3-col shell; main fills center (see §4) |
+| Cards / pickers / steppers | `width: 100%` of main; grids `auto-fill` |
+
+**Prefer** (match CoFD chargen + Figma profile 2065:349)
+
+- Shell 3-col: left search/menu · main stage · **right “Draft sheet”**
+- Catalog fields: searchable input + suggest list
+  (`.cg-catalog-picker` / `.cg-merit-suggest`)
+- Stage chrome: stepper · `cg-error` / `cg-ok` · `cg-actions`
+- Compact hero (no banner) under fixed nav, like profile wireframe
+
+**Avoid**
+
+- Nesting a second summary column *inside* main
+- Dropping the right rail on desktop chargen
+- A second page chrome that ignores 2054:137
+- Card walls for long single-choice lists (use catalog search)
+
+Prose articles may still limit line length for readability
+(`max-width` on `.site-section` / wiki body only).
+
+---
+
+## 7. MUST / MUST NOT
 
 | MUST | MUST NOT |
 |------|----------|
 | Use `.site-*` structure | Hardcode cream/gold in layout.css |
 | Override via tokens + skin file | Fork a second HTML layout per game |
-| Keep main column readable (~45–75ch) | Full-width prose walls without max-width |
+| Keep Figma 3-col shell on tools | Nested two-column layouts inside main |
+| Right rail = draft / context | Hide right draft on desktop chargen |
 | Sticky asides only when space allows | Break mobile single-column stack |
 
 ---
 
-## 7. Staff console vs public site
+## 8. Staff console vs public site
 
 | | Staff (`@ursamu/web`) | Public (`@ursamu/site`) |
 |--|----------------------|------------------------|
@@ -168,7 +235,7 @@ The base stack stays; only the last stylesheet changes.
 
 ---
 
-## 8. First paint
+## 9. First paint
 
 The plugin injects `title`, skin `href`, `bannerImage`, and `nav`
 into `index.html` when serving. Clients still fetch

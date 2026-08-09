@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.93
+
+- Mobile /play: full-height nav drawer (safe-area), SEND +
+  action chips full-width touch targets, entity row polish
+  (look / shop / inventory columns, usable highlight)
+- Play: mount ASAP when JWT present (no /api/v1/me wait —
+  fixes stuck loading skeleton on mobile); reconnect notice
+  only from server
+- Merge court play features: URL linkify + image embeds,
+  Discord origin chips, layout forms (mail compose),
+  meta.replace panels
+- D&D sheet full-width on phones; shop usable flags
+- Sync play-palette.css with bare `.mush-text` selectors
+- Ship dnd-chargen.js/css for D&D Character tab + sheet
+- Cache-bust SITE_ASSET_V → 20260809playmob
+
+
 ## 0.1.79
 
 - Hero logo (banner art) is **home only** — wiki/help/play
