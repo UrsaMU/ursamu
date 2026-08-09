@@ -1,0 +1,207 @@
+{
+  "scrap": {
+    "slug": "scrap",
+    "name": "Scavenged scraps",
+    "book": "SRD 5.2",
+    "entries": [
+      {
+        "chance": 1.0,
+        "gp": "1d6"
+      },
+      {
+        "chance": 0.35,
+        "item": "Dagger",
+        "type": "weapon:1d4:piercing:finesse,thrown"
+      },
+      {
+        "chance": 0.15,
+        "item": "Torch",
+        "type": "general"
+      }
+    ]
+  },
+  "tier1-cache": {
+    "slug": "tier1-cache",
+    "name": "Minor cache",
+    "book": "SRD 5.2",
+    "entries": [
+      {
+        "chance": 1.0,
+        "gp": "3d6"
+      },
+      {
+        "chance": 0.5,
+        "item": "Healer's Kit",
+        "type": "general"
+      },
+      {
+        "chance": 0.35,
+        "item": "Shortsword",
+        "type": "weapon:1d6:piercing:finesse"
+      },
+      {
+        "chance": 0.2,
+        "item": "Potion of Healing",
+        "type": "potion:2d4+2"
+      },
+      {
+        "chance": 0.1,
+        "item": "Leather Armor",
+        "type": "armor:11:light"
+      }
+    ]
+  },
+  "tier1-hoard": {
+    "slug": "tier1-hoard",
+    "name": "Small hoard",
+    "book": "SRD 5.2",
+    "entries": [
+      {
+        "chance": 1.0,
+        "gp": "5d6"
+      },
+      {
+        "chance": 0.6,
+        "gp": "2d10"
+      },
+      {
+        "chance": 0.4,
+        "item": "Longsword",
+        "type": "weapon:1d8:slashing"
+      },
+      {
+        "chance": 0.35,
+        "item": "Steel Shield",
+        "type": "shield:2"
+      },
+      {
+        "chance": 0.3,
+        "item": "Potion of Healing",
+        "type": "potion:2d4+2"
+      },
+      {
+        "chance": 0.15,
+        "item": "Scale Mail",
+        "type": "armor:14:medium"
+      },
+      {
+        "chance": 0.1,
+        "item": "Silver Ring",
+        "type": "general"
+      },
+      {
+        "chance": 0.12,
+        "magic": "potion_of_healing"
+      }
+    ]
+  },
+  "tier2-hoard": {
+    "slug": "tier2-hoard",
+    "name": "Heroic hoard",
+    "book": "SRD 5.2",
+    "entries": [
+      {
+        "chance": 1.0,
+        "gp": "4d10+20"
+      },
+      {
+        "chance": 0.5,
+        "gp": "2d20"
+      },
+      {
+        "chance": 0.4,
+        "item": "Greataxe",
+        "type": "weapon:1d12:slashing"
+      },
+      {
+        "chance": 0.35,
+        "item": "Potion of Greater Healing",
+        "type": "potion:4d4+4"
+      },
+      {
+        "chance": 0.25,
+        "item": "Chain Mail",
+        "type": "armor:16:heavy"
+      },
+      {
+        "chance": 0.2,
+        "item": "Gold Amulet",
+        "type": "general"
+      },
+      {
+        "chance": 0.2,
+        "magic": "potion_of_greater_healing"
+      },
+      {
+        "chance": 0.08,
+        "magic": "weapon_plus_1"
+      }
+    ]
+  },
+  "boss-stash": {
+    "slug": "boss-stash",
+    "name": "Boss stash",
+    "book": "SRD 5.2",
+    "entries": [
+      {
+        "chance": 1.0,
+        "gp": "6d6+10"
+      },
+      {
+        "chance": 0.55,
+        "item": "Potion of Healing",
+        "type": "potion:2d4+2"
+      },
+      {
+        "chance": 0.4,
+        "item": "Morningstar",
+        "type": "weapon:1d8:piercing"
+      },
+      {
+        "chance": 0.25,
+        "item": "Potion of Greater Healing",
+        "type": "potion:4d4+4"
+      },
+      {
+        "chance": 0.2,
+        "item": "Jeweled Dagger",
+        "type": "weapon:1d4:piercing:finesse"
+      },
+      {
+        "chance": 0.25,
+        "magic": "potion_of_healing"
+      },
+      {
+        "chance": 0.1,
+        "magic": "cloak_of_protection"
+      },
+      {
+        "chance": 0.05,
+        "magic": "gauntlets_of_ogre_power"
+      }
+    ]
+  },
+  "rare-cache": {
+    "slug": "rare-cache",
+    "name": "Rare cache",
+    "book": "SRD 5.2",
+    "entries": [
+      {
+        "chance": 1.0,
+        "gp": "6d10+40"
+      },
+      {
+        "chance": 0.5,
+        "magic": "weapon_plus_1"
+      },
+      {
+        "chance": 0.35,
+        "magic": "ring_of_protection"
+      },
+      {
+        "chance": 0.25,
+        "magic": "boots_of_striding"
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "alert",
+    "name": "Alert",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "crafter",
+    "name": "Crafter",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "healer",
+    "name": "Healer",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "lucky",
+    "name": "Lucky",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "magic_initiate_cleric",
+    "name": "Magic Initiate Cleric",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "magic_initiate_druid",
+    "name": "Magic Initiate Druid",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "magic_initiate_wizard",
+    "name": "Magic Initiate Wizard",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "musician",
+    "name": "Musician",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "savage_attacker",
+    "name": "Savage Attacker",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "skilled",
+    "name": "Skilled",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "tough",
+    "name": "Tough",
+    "book": "SRD 5.2"
+  }
+]

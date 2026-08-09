@@ -172,6 +172,18 @@ export function allNpcsDown(enc: Encounter): boolean {
   return npcs.every((p) => p.isOut);
 }
 
+/** True when every PC is out (TPK / party down) — end the fight. */
+export function allPcsDown(enc: Encounter): boolean {
+  const pcs = enc.participants.filter((p) => p.kind === "pc");
+  if (pcs.length === 0) return false;
+  return pcs.every((p) => p.isOut);
+}
+
+/** Fight should resolve: no living NPCs or no living PCs. */
+export function shouldResolveEncounter(enc: Encounter): boolean {
+  return allNpcsDown(enc) || allPcsDown(enc);
+}
+
 export function currentParticipant(
   enc: Encounter,
 ): Participant | null {

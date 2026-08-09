@@ -23,6 +23,10 @@ function makeMock(opts: {
   opaque?: boolean;
   canEdit?: boolean;
   blind?: boolean;
+  /** Look at this object instead of the room (bag/player/thing). */
+  lookAt?: IDBObj;
+  /** Objects returned by db.search({ location }) for hydrate. */
+  dbContents?: IDBObj[];
 } = {}) {
   const flags = new Set<string>(["room"]);
   if (opts.opaque) flags.add("opaque");
@@ -46,15 +50,31 @@ function makeMock(opts: {
   const u = {
     me: player,
     here: room,
-    cmd: { name: "look", args: [""], switches: [] },
+    cmd: {
+      name: "look",
+      args: [opts.lookAt ? "bag" : ""],
+      switches: [],
+    },
     send: (m: string) => { sent.push(m); },
     ui: { panel: (o: unknown) => o, layout: () => {} },
     canEdit: () => Promise.resolve(opts.canEdit ?? true),
-    db: { search: () => Promise.resolve([]) },
+    db: {
+      search: (q: { location?: string }) => {
+        if (opts.dbContents && q?.location) {
+          return Promise.resolve(opts.dbContents);
+        }
+        // Room look: re-hydrate from contents so mock stays consistent
+        if (q?.location === room.id) {
+          return Promise.resolve(opts.contents ?? []);
+        }
+        return Promise.resolve([]);
+      },
+    },
     attr: { get: () => Promise.resolve(null) },
     util: {
       displayName: (o: { state?: { name?: string }; name?: string }) =>
         o.state?.name || o.name || "Unknown",
+      target: async () => opts.lookAt ?? null,
       parseDesc: undefined,
     },
   };
@@ -129,6 +149,89 @@ Deno.test("look: CONFORMAT skipped when opaque and no edit perm", OPTS, async ()
   assertEquals(called, false);
   assertEquals(sent[0].includes("ball"), false);
 });
+
+Deno.test(
+  "look: bag contents from DB when not opaque (base look)",
+  OPTS,
+  async () => {
+    _clearFormatHandlers();
+    const coin = {
+      id: "c1",
+      flags: new Set(["thing"]),
+      state: { name: "Gold Coin" },
+      contents: [],
+    } as unknown as IDBObj;
+    const bag = {
+      id: "b1",
+      flags: new Set(["thing"]),
+      state: { name: "Bag", description: "A worn sack." },
+      contents: [], // empty until hydrateLookContents
+    } as unknown as IDBObj;
+    const { u, sent } = makeMock({
+      lookAt: bag,
+      dbContents: [coin],
+      canEdit: false,
+    });
+    await execLook(u);
+    assertStringIncludes(sent[0], "Gold Coin");
+    assertStringIncludes(sent[0], "Carrying");
+  },
+);
+
+Deno.test(
+  "look: opaque bag hides contents without canEdit",
+  OPTS,
+  async () => {
+    _clearFormatHandlers();
+    const coin = {
+      id: "c1",
+      flags: new Set(["thing"]),
+      state: { name: "Gold Coin" },
+      contents: [],
+    } as unknown as IDBObj;
+    const bag = {
+      id: "b1",
+      flags: new Set(["thing", "opaque"]),
+      state: { name: "Bag", description: "Sealed." },
+      contents: [],
+    } as unknown as IDBObj;
+    const { u, sent } = makeMock({
+      lookAt: bag,
+      dbContents: [coin],
+      canEdit: false,
+    });
+    await execLook(u);
+    assertEquals(sent[0].includes("Gold Coin"), false);
+    assertEquals(sent[0].includes("Carrying"), false);
+  },
+);
+
+Deno.test(
+  "look: opaque bag shows contents when canEdit",
+  OPTS,
+  async () => {
+    _clearFormatHandlers();
+    const coin = {
+      id: "c1",
+      flags: new Set(["thing"]),
+      state: { name: "Gold Coin" },
+      contents: [],
+    } as unknown as IDBObj;
+    const bag = {
+      id: "b1",
+      flags: new Set(["thing", "opaque"]),
+      state: { name: "Bag", description: "Sealed." },
+      contents: [],
+    } as unknown as IDBObj;
+    const { u, sent } = makeMock({
+      lookAt: bag,
+      dbContents: [coin],
+      canEdit: true,
+    });
+    await execLook(u);
+    assertStringIncludes(sent[0], "Gold Coin");
+  },
+);
 
 Deno.test("look: plugin EXITFORMAT receives exit id list", OPTS, async () => {
   _clearFormatHandlers();

@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "D&D 5e/2024 (SRD 5.2) plugin for UrsaMU — character sheets, rolling with advantage/disadvantage, health/resource tracking, and guided chargen.",
   "ursamu": ">=2.6.0",
-  "author": "Antigravity",
+  "author": "UrsaMU",
   "license": "MIT",
   "main": "index.ts",
   "dependencies": [
     { "name": "help", "version": ">=1.0.0" },
-    { "name": "vendor", "version": ">=1.0.0" }
+    { "name": "vendor", "version": ">=1.1.0" },
+    { "name": "combat", "version": ">=0.8.0" },
+    { "name": "jobs", "version": ">=1.0.0" }
   ]
 }

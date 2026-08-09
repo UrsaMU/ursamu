@@ -1,0 +1,877 @@
+{
+  "barbarian": {
+    "slug": "barbarian",
+    "name": "Barbarian",
+    "hitDie": 12,
+    "saves": [
+      "strength",
+      "constitution"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "animal_handling",
+      "athletics",
+      "intimidation",
+      "nature",
+      "perception",
+      "survival"
+    ],
+    "startingGold": 75,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose a primary martial weapon",
+        "options": [
+          {
+            "label": "Greatsword",
+            "items": [
+              {
+                "name": "Greatsword",
+                "spec": "weapon:2d6:slashing"
+              }
+            ]
+          },
+          {
+            "label": "Greataxe",
+            "items": [
+              {
+                "name": "Greataxe",
+                "spec": "weapon:1d12:slashing"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Choose secondary gear",
+        "options": [
+          {
+            "label": "Two Handaxes",
+            "items": [
+              {
+                "name": "Handaxe (L)",
+                "spec": "weapon:1d6:slashing:light"
+              },
+              {
+                "name": "Handaxe (R)",
+                "spec": "weapon:1d6:slashing:light"
+              }
+            ]
+          },
+          {
+            "label": "Scale Mail + Handaxe",
+            "items": [
+              {
+                "name": "Scale Mail",
+                "spec": "armor:14:medium"
+              },
+              {
+                "name": "Handaxe",
+                "spec": "weapon:1d6:slashing:light"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "bard": {
+    "slug": "bard",
+    "name": "Bard",
+    "hitDie": 8,
+    "saves": [
+      "dexterity",
+      "charisma"
+    ],
+    "skillCount": 3,
+    "skillOptions": [
+      "athletics",
+      "acrobatics",
+      "sleight_of_hand",
+      "stealth",
+      "arcana",
+      "history",
+      "investigation",
+      "nature",
+      "religion",
+      "animal_handling",
+      "insight",
+      "medicine",
+      "perception",
+      "survival",
+      "deception",
+      "intimidation",
+      "performance",
+      "persuasion"
+    ],
+    "spellcasting": {
+      "cantripCount": 2,
+      "spellCount": 4,
+      "cantripOptions": [
+        "light",
+        "mage_hand",
+        "prestidigitation",
+        "vicious_mockery"
+      ],
+      "spellOptions": [
+        "charm_person",
+        "cure_wounds",
+        "dissonant_whispers",
+        "healing_word",
+        "thunderwave"
+      ]
+    },
+    "startingGold": 100,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose a weapon",
+        "options": [
+          {
+            "label": "Rapier",
+            "items": [
+              {
+                "name": "Rapier",
+                "spec": "weapon:1d8:piercing:finesse"
+              }
+            ]
+          },
+          {
+            "label": "Shortsword",
+            "items": [
+              {
+                "name": "Shortsword",
+                "spec": "weapon:1d6:piercing:finesse:light"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Choose starting armor/packs",
+        "options": [
+          {
+            "label": "Leather Armor + Dagger",
+            "items": [
+              {
+                "name": "Leather Armor",
+                "spec": "armor:11:light"
+              },
+              {
+                "name": "Dagger",
+                "spec": "weapon:1d4:piercing:finesse:light"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "cleric": {
+    "slug": "cleric",
+    "name": "Cleric",
+    "hitDie": 8,
+    "saves": [
+      "wisdom",
+      "charisma"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "history",
+      "insight",
+      "medicine",
+      "persuasion",
+      "religion"
+    ],
+    "spellcasting": {
+      "cantripCount": 3,
+      "spellCount": 4,
+      "cantripOptions": [
+        "guidance",
+        "sacred_flame",
+        "spare_the_dying",
+        "thaumaturgy"
+      ],
+      "spellOptions": [
+        "bless",
+        "cure_wounds",
+        "guiding_bolt",
+        "healing_word",
+        "shield_of_faith"
+      ]
+    },
+    "startingGold": 110,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose a weapon",
+        "options": [
+          {
+            "label": "Mace",
+            "items": [
+              {
+                "name": "Mace",
+                "spec": "weapon:1d6:bludgeoning"
+              }
+            ]
+          },
+          {
+            "label": "Warhammer",
+            "items": [
+              {
+                "name": "Warhammer",
+                "spec": "weapon:1d8:bludgeoning"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Choose starting armor",
+        "options": [
+          {
+            "label": "Scale Mail + Steel Shield",
+            "items": [
+              {
+                "name": "Scale Mail",
+                "spec": "armor:14:medium"
+              },
+              {
+                "name": "Steel Shield",
+                "spec": "shield:2"
+              }
+            ]
+          },
+          {
+            "label": "Chain Mail + Steel Shield",
+            "items": [
+              {
+                "name": "Chain Mail",
+                "spec": "armor:16:heavy"
+              },
+              {
+                "name": "Steel Shield",
+                "spec": "shield:2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "druid": {
+    "slug": "druid",
+    "name": "Druid",
+    "hitDie": 8,
+    "saves": [
+      "intelligence",
+      "wisdom"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "arcana",
+      "animal_handling",
+      "insight",
+      "medicine",
+      "nature",
+      "perception",
+      "religion",
+      "survival"
+    ],
+    "spellcasting": {
+      "cantripCount": 2,
+      "spellCount": 4,
+      "cantripOptions": [
+        "druidcraft",
+        "guidance",
+        "produce_flame",
+        "shillelagh"
+      ],
+      "spellOptions": [
+        "cure_wounds",
+        "entangle",
+        "healing_word",
+        "thunderwave"
+      ]
+    },
+    "startingGold": 50,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose a primary tool/weapon",
+        "options": [
+          {
+            "label": "Quarterstaff",
+            "items": [
+              {
+                "name": "Quarterstaff",
+                "spec": "weapon:1d6:bludgeoning"
+              }
+            ]
+          },
+          {
+            "label": "Dagger",
+            "items": [
+              {
+                "name": "Dagger",
+                "spec": "weapon:1d4:piercing:finesse:light"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Choose armor/shield option",
+        "options": [
+          {
+            "label": "Leather Armor + Wooden Shield",
+            "items": [
+              {
+                "name": "Leather Armor",
+                "spec": "armor:11:light"
+              },
+              {
+                "name": "Wooden Shield",
+                "spec": "shield:2"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "fighter": {
+    "slug": "fighter",
+    "name": "Fighter",
+    "hitDie": 10,
+    "saves": [
+      "strength",
+      "constitution"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "acrobatics",
+      "animal_handling",
+      "athletics",
+      "history",
+      "insight",
+      "intimidation",
+      "perception",
+      "survival"
+    ],
+    "startingGold": 125,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose offensive gear",
+        "options": [
+          {
+            "label": "Longsword + Steel Shield",
+            "items": [
+              {
+                "name": "Longsword",
+                "spec": "weapon:1d8:slashing"
+              },
+              {
+                "name": "Steel Shield",
+                "spec": "shield:2"
+              }
+            ]
+          },
+          {
+            "label": "Greatsword",
+            "items": [
+              {
+                "name": "Greatsword",
+                "spec": "weapon:2d6:slashing"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Choose defensive gear",
+        "options": [
+          {
+            "label": "Chain Mail",
+            "items": [
+              {
+                "name": "Chain Mail",
+                "spec": "armor:16:heavy"
+              }
+            ]
+          },
+          {
+            "label": "Scale Mail",
+            "items": [
+              {
+                "name": "Scale Mail",
+                "spec": "armor:14:medium"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "monk": {
+    "slug": "monk",
+    "name": "Monk",
+    "hitDie": 8,
+    "saves": [
+      "strength",
+      "dexterity"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "acrobatics",
+      "athletics",
+      "history",
+      "insight",
+      "religion",
+      "stealth"
+    ],
+    "startingGold": 25,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose a simple weapon",
+        "options": [
+          {
+            "label": "Shortsword",
+            "items": [
+              {
+                "name": "Shortsword",
+                "spec": "weapon:1d6:piercing:finesse:light"
+              }
+            ]
+          },
+          {
+            "label": "Quarterstaff",
+            "items": [
+              {
+                "name": "Quarterstaff",
+                "spec": "weapon:1d6:bludgeoning"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "paladin": {
+    "slug": "paladin",
+    "name": "Paladin",
+    "hitDie": 10,
+    "saves": [
+      "wisdom",
+      "charisma"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "athletics",
+      "insight",
+      "intimidation",
+      "medicine",
+      "persuasion",
+      "religion"
+    ],
+    "startingGold": 140,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose offensive gear",
+        "options": [
+          {
+            "label": "Longsword + Steel Shield",
+            "items": [
+              {
+                "name": "Longsword",
+                "spec": "weapon:1d8:slashing"
+              },
+              {
+                "name": "Steel Shield",
+                "spec": "shield:2"
+              }
+            ]
+          },
+          {
+            "label": "Greatsword",
+            "items": [
+              {
+                "name": "Greatsword",
+                "spec": "weapon:2d6:slashing"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Choose armor option",
+        "options": [
+          {
+            "label": "Chain Mail",
+            "items": [
+              {
+                "name": "Chain Mail",
+                "spec": "armor:16:heavy"
+              }
+            ]
+          },
+          {
+            "label": "Scale Mail",
+            "items": [
+              {
+                "name": "Scale Mail",
+                "spec": "armor:14:medium"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "ranger": {
+    "slug": "ranger",
+    "name": "Ranger",
+    "hitDie": 10,
+    "saves": [
+      "strength",
+      "dexterity"
+    ],
+    "skillCount": 3,
+    "skillOptions": [
+      "athletics",
+      "insight",
+      "investigation",
+      "nature",
+      "perception",
+      "stealth",
+      "survival"
+    ],
+    "startingGold": 100,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose starting armor",
+        "options": [
+          {
+            "label": "Scale Mail",
+            "items": [
+              {
+                "name": "Scale Mail",
+                "spec": "armor:14:medium"
+              }
+            ]
+          },
+          {
+            "label": "Leather Armor",
+            "items": [
+              {
+                "name": "Leather Armor",
+                "spec": "armor:11:light"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Choose weapon loadout",
+        "options": [
+          {
+            "label": "Two Shortswords",
+            "items": [
+              {
+                "name": "Shortsword (L)",
+                "spec": "weapon:1d6:piercing:finesse:light"
+              },
+              {
+                "name": "Shortsword (R)",
+                "spec": "weapon:1d6:piercing:finesse:light"
+              }
+            ]
+          },
+          {
+            "label": "Shortbow",
+            "items": [
+              {
+                "name": "Shortbow",
+                "spec": "weapon:1d6:piercing:ranged,two_handed"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "rogue": {
+    "slug": "rogue",
+    "name": "Rogue",
+    "hitDie": 8,
+    "saves": [
+      "dexterity",
+      "intelligence"
+    ],
+    "skillCount": 4,
+    "skillOptions": [
+      "acrobatics",
+      "athletics",
+      "deception",
+      "insight",
+      "intimidation",
+      "investigation",
+      "perception",
+      "performance",
+      "persuasion",
+      "sleight_of_hand",
+      "stealth"
+    ],
+    "startingGold": 100,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose a primary weapon",
+        "options": [
+          {
+            "label": "Rapier",
+            "items": [
+              {
+                "name": "Rapier",
+                "spec": "weapon:1d8:piercing:finesse"
+              }
+            ]
+          },
+          {
+            "label": "Shortsword",
+            "items": [
+              {
+                "name": "Shortsword",
+                "spec": "weapon:1d6:piercing:finesse:light"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "description": "Choose auxiliary gear",
+        "options": [
+          {
+            "label": "Leather Armor + Two Daggers",
+            "items": [
+              {
+                "name": "Leather Armor",
+                "spec": "armor:11:light"
+              },
+              {
+                "name": "Dagger (L)",
+                "spec": "weapon:1d4:piercing:finesse:light"
+              },
+              {
+                "name": "Dagger (R)",
+                "spec": "weapon:1d4:piercing:finesse:light"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "sorcerer": {
+    "slug": "sorcerer",
+    "name": "Sorcerer",
+    "hitDie": 6,
+    "saves": [
+      "constitution",
+      "charisma"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "arcana",
+      "deception",
+      "insight",
+      "intimidation",
+      "persuasion",
+      "religion"
+    ],
+    "spellcasting": {
+      "cantripCount": 4,
+      "spellCount": 2,
+      "cantripOptions": [
+        "acid_splash",
+        "fire_bolt",
+        "mage_hand",
+        "prestidigitation",
+        "shocking_grasp"
+      ],
+      "spellOptions": [
+        "burning_hands",
+        "chromatic_orb",
+        "magic_missile",
+        "shield",
+        "thunderwave"
+      ]
+    },
+    "startingGold": 75,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose weapon option",
+        "options": [
+          {
+            "label": "Light Crossbow",
+            "items": [
+              {
+                "name": "Light Crossbow",
+                "spec": "weapon:1d8:piercing:ranged,loading,two_handed"
+              }
+            ]
+          },
+          {
+            "label": "Dagger",
+            "items": [
+              {
+                "name": "Dagger",
+                "spec": "weapon:1d4:piercing:finesse:light"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "warlock": {
+    "slug": "warlock",
+    "name": "Warlock",
+    "hitDie": 8,
+    "saves": [
+      "wisdom",
+      "charisma"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "arcana",
+      "deception",
+      "history",
+      "intimidation",
+      "investigation",
+      "nature",
+      "religion"
+    ],
+    "spellcasting": {
+      "cantripCount": 2,
+      "spellCount": 2,
+      "cantripOptions": [
+        "eldritch_blast",
+        "mage_hand",
+        "minor_illusion",
+        "prestidigitation"
+      ],
+      "spellOptions": [
+        "armor_of_agathys",
+        "arms_of_hadar",
+        "hex",
+        "witch_bolt"
+      ]
+    },
+    "startingGold": 75,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose weapon package",
+        "options": [
+          {
+            "label": "Leather Armor + Dagger",
+            "items": [
+              {
+                "name": "Leather Armor",
+                "spec": "armor:11:light"
+              },
+              {
+                "name": "Dagger",
+                "spec": "weapon:1d4:piercing:finesse:light"
+              }
+            ]
+          },
+          {
+            "label": "Leather Armor + Mace",
+            "items": [
+              {
+                "name": "Leather Armor",
+                "spec": "armor:11:light"
+              },
+              {
+                "name": "Mace",
+                "spec": "weapon:1d6:bludgeoning"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  },
+  "wizard": {
+    "slug": "wizard",
+    "name": "Wizard",
+    "hitDie": 6,
+    "saves": [
+      "intelligence",
+      "wisdom"
+    ],
+    "skillCount": 2,
+    "skillOptions": [
+      "arcana",
+      "history",
+      "insight",
+      "investigation",
+      "medicine",
+      "religion"
+    ],
+    "spellcasting": {
+      "cantripCount": 3,
+      "spellCount": 4,
+      "cantripOptions": [
+        "fire_bolt",
+        "light",
+        "mage_hand",
+        "minor_illusion",
+        "prestidigitation",
+        "ray_of_frost"
+      ],
+      "spellOptions": [
+        "burning_hands",
+        "mage_armor",
+        "magic_missile",
+        "shield",
+        "sleep",
+        "thunderwave"
+      ]
+    },
+    "startingGold": 75,
+    "startingEquipmentChoices": [
+      {
+        "description": "Choose primary weapon",
+        "options": [
+          {
+            "label": "Quarterstaff",
+            "items": [
+              {
+                "name": "Quarterstaff",
+                "spec": "weapon:1d6:bludgeoning"
+              }
+            ]
+          },
+          {
+            "label": "Dagger",
+            "items": [
+              {
+                "name": "Dagger",
+                "spec": "weapon:1d4:piercing:finesse:light"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "book": "SRD 5.2"
+  }
+}

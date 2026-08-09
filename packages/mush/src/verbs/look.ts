@@ -14,6 +14,7 @@ import {
   buildSingleLookLayout,
   prefersUiLayout,
 } from "./look-ui.ts";
+import { gameHooks } from "@ursamu/core";
 
 const WIDTH = 78;
 const NO_DESCRIPTION = "You see nothing special.";
@@ -34,6 +35,26 @@ function nameWithDbref(
 /** Staff or canEdit → show (#id + flag codes). */
 function showStaffDbref(actor: IDBObj, canEdit: boolean): boolean {
   return canEdit || canSeeDark(actor);
+}
+
+/**
+ * Collapse identical carried/room things by display name (×N).
+ * Players/exits are never stacked.
+ */
+function stackThingsByName(
+  u: IUrsamuSDK,
+  actor: IDBObj,
+  things: IDBObj[],
+): Array<{ rep: IDBObj; count: number; label: string }> {
+  const map = new Map<string, { rep: IDBObj; count: number; label: string }>();
+  for (const o of things) {
+    const label = u.util.displayName(o, actor) || o.name || "?";
+    const key = label.toLowerCase().replace(/%c[a-z]/gi, "").trim();
+    const hit = map.get(key);
+    if (hit) hit.count++;
+    else map.set(key, { rep: o, count: 1, label });
+  }
+  return [...map.values()];
 }
 
 /** Primary display name (strip TinyMUX ;aliases). Moniker first. */
@@ -85,7 +106,45 @@ function headerName(
 }
 
 const visualLen = (s: string): number =>
-  s.replace(/<#[0-9a-fA-F]{6}>/g, "").replace(/%c[a-zA-Z]/g, "").replace(/%[nrtbR]/g, "").length;
+  s.replace(/<#[0-9a-fA-F]{6}>/g, "")
+    .replace(/%c[a-zA-Z]/g, "")
+    .replace(/%[nrtbR]/g, "")
+    .replace(/\x1b\[[0-9;]*m/g, "")
+    .length;
+
+/** Pad/truncate to a fixed visible width (ignores %c / ANSI). */
+function padVisual(s: string, width: number): string {
+  const raw = String(s ?? "");
+  const len = visualLen(raw);
+  if (len === width) return raw;
+  if (len > width) {
+    return truncateVisual(raw, Math.max(1, width - 1)) + "…";
+  }
+  return raw + " ".repeat(width - len);
+}
+
+/**
+ * One CONFORMAT row: name | role | idle | short-desc
+ * Fixed cells so every line lines up (78-col).
+ */
+function conformatCells(
+  name: string,
+  role: string,
+  idle: string,
+  desc: string,
+): string {
+  // 1 + 39 + 1 + 10 + 1 + 5 + 1 + rest (name +30% vs 30)
+  const NAME_W = 39;
+  const ROLE_W = 10;
+  const IDLE_W = 5;
+  return (
+    " " +
+    padVisual(name, NAME_W) + " " +
+    padVisual(role || "", ROLE_W) + " " +
+    padVisual(idle || "", IDLE_W) + " " +
+    desc
+  ).replace(/\s+$/, "");
+}
 
 /** Turn MUSH %r / %t into real whitespace before wrap. */
 function normalizeDescNewlines(text: string): string {
@@ -272,13 +331,15 @@ async function renderRoom(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCont
         }
         if (objects.length > 0) {
           lines.push(divider("Contents", "-", WIDTH));
-          for (const o of objects) {
-            const disp = u.util.displayName(o, actor);
-            const canEditObj = await u.canEdit(actor, o);
+          for (const s of stackThingsByName(u, actor, objects)) {
+            const canEditObj = await u.canEdit(actor, s.rep);
+            const base = s.count > 1
+              ? `${s.label} ×${s.count}`
+              : s.label;
             lines.push(
               ` ${nameWithDbref(
-                disp,
-                o,
+                base,
+                s.rep,
                 showStaffDbref(actor, canEditObj),
               )}`,
             );
@@ -364,13 +425,15 @@ async function renderSingle(u: IUrsamuSDK, actor: IDBObj, target: IDBObj, showCo
         }
         if (things.length > 0) {
           lines.push(divider("Carrying", "-", WIDTH));
-          for (const o of things) {
-            const disp = u.util.displayName(o, actor);
-            const canEditObj = await u.canEdit(actor, o);
+          for (const s of stackThingsByName(u, actor, things)) {
+            const canEditObj = await u.canEdit(actor, s.rep);
+            const base = s.count > 1
+              ? `${s.label} ×${s.count}`
+              : s.label;
             lines.push(
               ` ${nameWithDbref(
-                disp,
-                o,
+                base,
+                s.rep,
                 showStaffDbref(actor, canEditObj),
               )}`,
             );
@@ -402,6 +465,23 @@ async function lookDescription(
     : rawDesc;
 }
 
+/**
+ * Load live contents for a look target. Rooms get contents via
+ * resolveRoom; things from util.target() do not — bags/containers
+ * would otherwise always look empty.
+ */
+async function hydrateLookContents(
+  u: IUrsamuSDK,
+  target: IDBObj,
+): Promise<void> {
+  try {
+    const found = await u.db.search({ location: target.id });
+    if (Array.isArray(found)) target.contents = found;
+  } catch {
+    /* keep target.contents if already set */
+  }
+}
+
 export async function execLook(u: IUrsamuSDK): Promise<void> {
   const actor = u.me;
   const arg = (u.cmd.args[0] || "").trim();
@@ -421,10 +501,13 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
     lookTarget = target;
   }
 
+  // Base look: always resolve what is inside the target from DB.
+  await hydrateLookContents(u, lookTarget);
+
   const canEditTarget = await u.canEdit(actor, lookTarget);
   const isOpaque = lookTarget.flags.has("opaque");
-  // Opaque: hide contents unless canEdit. Dark room: hide CONFORMAT
-  // (players/things) unless staff or canEdit the room.
+  // Opaque: hide contents unless canEdit. Else show (containers,
+  // players, rooms). Dark room: hide CONFORMAT unless staff/edit.
   let showContents = !isOpaque || canEditTarget;
   if (
     lookTarget.flags.has("room") &&
@@ -471,9 +554,27 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
       headerTitle,
       description,
     };
-    const components = lookTarget.flags.has("room")
+    let components = lookTarget.flags.has("room")
       ? await buildLookLayout(ctx)
       : await buildSingleLookLayout(ctx);
+
+    // Plugins may append actions (e.g. D&D attack/focus on mobs).
+    const uiBag = {
+      u,
+      actor,
+      target: lookTarget,
+      components,
+      isRoom: lookTarget.flags.has("room"),
+    };
+    try {
+      // deno-lint-ignore no-explicit-any
+      await (gameHooks as any).emit?.("look:ui", uiBag);
+      if (Array.isArray(uiBag.components)) {
+        components = uiBag.components;
+      }
+    } catch {
+      /* plugin look UI is best-effort */
+    }
 
     u.ui.layout({
       components,
@@ -484,7 +585,7 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
       },
     });
   } else {
-    const out = lookTarget.flags.has("room")
+    let out = lookTarget.flags.has("room")
       ? await renderRoom(
         u,
         actor,
@@ -499,6 +600,19 @@ export async function execLook(u: IUrsamuSDK): Promise<void> {
         showContents,
         canEditTarget,
       );
+    const textBag = {
+      u,
+      actor,
+      target: lookTarget,
+      text: out,
+    };
+    try {
+      // deno-lint-ignore no-explicit-any
+      await (gameHooks as any).emit?.("look:text", textBag);
+      if (typeof textBag.text === "string") out = textBag.text;
+    } catch {
+      /* ignore */
+    }
     u.send(out);
   }
 
@@ -627,35 +741,25 @@ export const defaultConformatHandler = async (
         c,
         showStaffDbref(actor, canEditChar),
       );
-
-      const namePad = " ".repeat(Math.max(1, 21 - visualLen(nameWithRef)));
-      const rolePad = " ".repeat(Math.max(1, 13 - visualLen(role)));
-      const idlePad = " ".repeat(Math.max(1, 4 - visualLen(idle)));
-
-      lines.push(` ${nameWithRef}${namePad}${role}${rolePad}${idle}${idlePad}${desc}`.replace(/\s+$/, ""));
+      lines.push(conformatCells(nameWithRef, role, idle, desc));
     }
   }
 
   if (objects.length > 0) {
     lines.push(divider("Contents", "-", WIDTH));
-    for (const o of objects) {
-      // Moniker over name (never prefer bare o.name first)
-      const disp = u.util.displayName(o, actor) || o.name ||
-        "Unknown";
-      const canEditObj = await u.canEdit(actor, o);
+    for (const s of stackThingsByName(u, actor, objects)) {
+      const disp = s.count > 1
+        ? `${s.label} ×${s.count}`
+        : s.label;
+      const canEditObj = await u.canEdit(actor, s.rep);
       const name = nameWithDbref(
         disp,
-        o,
+        s.rep,
         showStaffDbref(actor, canEditObj),
       );
-      // Classic MUSH: room things show short-desc after the name.
-      const sd = getShortDesc(o);
-      if (sd) {
-        const pad = " ".repeat(Math.max(1, 40 - visualLen(` ${name}`)));
-        lines.push(` ${name}${pad}${sd}`.replace(/\s+$/, ""));
-      } else {
-        lines.push(` ${name}`);
-      }
+      const sd = getShortDesc(s.rep);
+      // Same 4 cells as players so columns line up in the room
+      lines.push(conformatCells(name, "", "", sd));
     }
   }
 

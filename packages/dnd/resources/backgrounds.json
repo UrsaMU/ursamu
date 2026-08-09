@@ -1,0 +1,110 @@
+{
+  "acolyte": {
+    "slug": "acolyte",
+    "name": "Acolyte",
+    "skills": [
+      "insight",
+      "religion"
+    ],
+    "fixedIncreases": {
+      "strength": 0,
+      "dexterity": 0,
+      "constitution": 0,
+      "intelligence": 0,
+      "wisdom": 2,
+      "charisma": 1
+    },
+    "feat": "Magic Initiate (Cleric)",
+    "book": "SRD 5.2"
+  },
+  "soldier": {
+    "slug": "soldier",
+    "name": "Soldier",
+    "skills": [
+      "athletics",
+      "intimidation"
+    ],
+    "fixedIncreases": {
+      "strength": 2,
+      "dexterity": 0,
+      "constitution": 1,
+      "intelligence": 0,
+      "wisdom": 0,
+      "charisma": 0
+    },
+    "feat": "Savage Attacker",
+    "book": "SRD 5.2"
+  },
+  "sage": {
+    "slug": "sage",
+    "name": "Sage",
+    "skills": [
+      "arcana",
+      "history"
+    ],
+    "fixedIncreases": {
+      "strength": 0,
+      "dexterity": 0,
+      "constitution": 0,
+      "intelligence": 2,
+      "wisdom": 1,
+      "charisma": 0
+    },
+    "feat": "Magic Initiate (Wizard)",
+    "book": "SRD 5.2"
+  },
+  "criminal": {
+    "slug": "criminal",
+    "name": "Criminal",
+    "skills": [
+      "deception",
+      "stealth"
+    ],
+    "fixedIncreases": {
+      "strength": 0,
+      "dexterity": 2,
+      "constitution": 1,
+      "intelligence": 0,
+      "wisdom": 0,
+      "charisma": 0
+    },
+    "feat": "Alert",
+    "book": "SRD 5.2"
+  },
+  "guide": {
+    "slug": "guide",
+    "name": "Guide",
+    "skills": [
+      "stealth",
+      "survival"
+    ],
+    "fixedIncreases": {
+      "strength": 0,
+      "dexterity": 1,
+      "constitution": 0,
+      "intelligence": 0,
+      "wisdom": 2,
+      "charisma": 0
+    },
+    "feat": "Skilled",
+    "book": "SRD 5.2"
+  },
+  "merchant": {
+    "slug": "merchant",
+    "name": "Merchant",
+    "skills": [
+      "animal_handling",
+      "persuasion"
+    ],
+    "fixedIncreases": {
+      "strength": 0,
+      "dexterity": 0,
+      "constitution": 0,
+      "intelligence": 0,
+      "wisdom": 1,
+      "charisma": 2
+    },
+    "feat": "Lucky",
+    "book": "SRD 5.2"
+  }
+}

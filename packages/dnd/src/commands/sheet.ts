@@ -11,6 +11,7 @@ import {
   migrateSheet,
   SKILL_ABILITY_MAP
 } from "../stats/dnd_sheet.ts";
+import { buildSheetWebLayoutHtml } from "../sheet/sheet-html.ts";
 
 export async function formatSheet(u: IUrsamuSDK, name: string, sheet: DndSheet, playerId: string): Promise<string> {
   const s = migrateSheet(sheet);
@@ -211,7 +212,22 @@ export async function dndSheetExec(u: IUrsamuSDK) {
     return;
   }
 
-  const formatted = await formatSheet(u, u.util.displayName(target, u.me), sheet, target.id);
+  const name = u.util.displayName(target, u.me);
+
+  // Web /play: full dnd-sheet HTML (same chrome as /chargen live sheet)
+  const ct = (u as { clientType?: string }).clientType;
+  // deno-lint-ignore no-explicit-any
+  const ui = (u as any).ui;
+  if (ct === "web" && ui && typeof ui.layout === "function") {
+    try {
+      ui.layout(buildSheetWebLayoutHtml(name, sheet));
+      return;
+    } catch {
+      /* fall through to text */
+    }
+  }
+
+  const formatted = await formatSheet(u, name, sheet, target.id);
   u.send(formatted);
 }
 

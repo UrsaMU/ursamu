@@ -37,6 +37,11 @@ export const flags: Tags = new Tags(
   { name: "dark",        code: "d" },
   { name: "guest",       code: "g", lock: "superuser" },
   { name: "room",        code: "r", lvl: 1,  lock: "superuser" },
+  // Portable objects (gear, props, shop NPCs). Required by createObj("thing")
+  // and vendor isVendorObj — unknown names are dropped by Tags.set.
+  { name: "thing",       code: "t", lvl: 1 },
+  // Combat / AI actors that are not players
+  { name: "npc",         code: "n", lvl: 1, lock: "builder+" },
   // In-character play space — +ooc bookmarks only rooms with this flag.
   { name: "ic",          code: "I", lock: "builder+" },
   { name: "exit",        code: "e", lvl: 1,  lock: "superuser" },

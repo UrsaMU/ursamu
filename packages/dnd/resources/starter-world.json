@@ -1,0 +1,569 @@
+{
+  "id": "havenbrook-v1",
+  "name": "Havenbrook",
+  "playerStartKey": "square",
+  "linkOoc": true,
+  "rooms": [
+    {
+      "key": "square",
+      "name": "Havenbrook Town Square",
+      "description": "Cobblestones fan out from a weathered fountain of a knight raising a lantern. Market stalls cluster to the east; the inn's painted dragon sign creaks south. North, the gate road climbs toward dark trees. West, temple bells mark the hour. A chalk board near the fountain reads: newcomers — type +help dnd."
+    },
+    {
+      "key": "inn",
+      "name": "The Sleeping Dragon Inn",
+      "description": "Warm light, stewed mutton, and the low murmur of travelers. A scarred oak bar runs the length of the room. Stairs lead up to private rooms. The innkeep nods at adventurers — rest is safe here (+rest/long when the story allows)."
+    },
+    {
+      "key": "inn-rooms",
+      "name": "Inn Upper Hall",
+      "description": "A narrow hall of numbered doors and thin carpet. Perfect for quiet scenes. A window looks down on the square fountain."
+    },
+    {
+      "key": "market",
+      "name": "Market Row",
+      "description": "Awnings stripe the lane in faded canvas. Spices, rope, and rumor trade hands. Peddlers call wares — type +list to browse. East, hammer-song rings from the open forge (weapons and armor)."
+    },
+    {
+      "key": "forge",
+      "name": "Blacksmith's Forge",
+      "description": "Heat rolls from the open hearth. Sparks leap as steel meets anvil. Racks of blades, armor, and shields wait for coin. Type +list to browse, +buy <item> to purchase."
+    },
+    {
+      "key": "temple",
+      "name": "Temple of the Dawn",
+      "description": "White stone and colored glass catch the light. An altar holds fresh lilies and a bowl of clear water. Soft chants suggest healing and second chances."
+    },
+    {
+      "key": "gate",
+      "name": "North Gate Road",
+      "description": "Timber gates stand open by day. A dusty road climbs into the Whisperwood. A notice board warns of goblin raids north of the treeline."
+    },
+    {
+      "key": "barracks",
+      "name": "Guard Barracks",
+      "description": "Bunks, weapon racks, and a map of local trails. Off-duty guards dice for copper. Staff can stage escorts from here."
+    },
+    {
+      "key": "path",
+      "name": "Whisperwood Path",
+      "description": "Old oaks lean over a rutted trail. Birdsong thins the farther you walk. Tracks in the mud suggest more than deer."
+    },
+    {
+      "key": "ruins",
+      "name": "Mossy Waystone Ruins",
+      "description": "Broken pillars and a half-buried waystone. Glyphs glow faintly at dusk. A good place for skill checks and secrets."
+    },
+    {
+      "key": "camp",
+      "name": "Goblin Camp",
+      "description": "Crude lean-tos, a smoky firepit, and a cage of stolen chickens. The air smells of grease and mischief. Combat is expected — +combat/start when ready."
+    }
+  ],
+  "exits": [
+    {
+      "from": "square",
+      "to": "gate",
+      "name": "North;N;Gate"
+    },
+    {
+      "from": "gate",
+      "to": "square",
+      "name": "South;S;Square"
+    },
+    {
+      "from": "square",
+      "to": "market",
+      "name": "East;E;Market"
+    },
+    {
+      "from": "market",
+      "to": "square",
+      "name": "West;W;Square"
+    },
+    {
+      "from": "square",
+      "to": "inn",
+      "name": "South;S;Inn"
+    },
+    {
+      "from": "inn",
+      "to": "square",
+      "name": "North;N;Out;Square"
+    },
+    {
+      "from": "square",
+      "to": "temple",
+      "name": "West;W;Temple"
+    },
+    {
+      "from": "temple",
+      "to": "square",
+      "name": "East;E;Out;Square"
+    },
+    {
+      "from": "market",
+      "to": "forge",
+      "name": "East;E;Forge"
+    },
+    {
+      "from": "forge",
+      "to": "market",
+      "name": "West;W;Market"
+    },
+    {
+      "from": "inn",
+      "to": "inn-rooms",
+      "name": "Up;U;Stairs;Rooms"
+    },
+    {
+      "from": "inn-rooms",
+      "to": "inn",
+      "name": "Down;D;Inn"
+    },
+    {
+      "from": "gate",
+      "to": "barracks",
+      "name": "East;E;Barracks"
+    },
+    {
+      "from": "barracks",
+      "to": "gate",
+      "name": "West;W;Gate"
+    },
+    {
+      "from": "gate",
+      "to": "path",
+      "name": "North;N;Forest;Path"
+    },
+    {
+      "from": "path",
+      "to": "gate",
+      "name": "South;S;Gate"
+    },
+    {
+      "from": "path",
+      "to": "ruins",
+      "name": "East;E;Ruins"
+    },
+    {
+      "from": "ruins",
+      "to": "path",
+      "name": "West;W;Path"
+    },
+    {
+      "from": "path",
+      "to": "camp",
+      "name": "North;N;Camp"
+    },
+    {
+      "from": "camp",
+      "to": "path",
+      "name": "South;S;Path;Flee"
+    }
+  ],
+  "vendors": [
+    {
+      "room": "forge",
+      "name": "Torvald the Smith",
+      "description": "A broad dwarf with soot-blackened arms and a careful eye for balance. He sells honest steel at honest prices. (+list / +buy)",
+      "inventory": [
+        {
+          "name": "Club",
+          "price": 1,
+          "spec": "slug:club"
+        },
+        {
+          "name": "Dagger",
+          "price": 2,
+          "spec": "slug:dagger"
+        },
+        {
+          "name": "Handaxe",
+          "price": 5,
+          "spec": "slug:handaxe"
+        },
+        {
+          "name": "Javelin",
+          "price": 5,
+          "spec": "slug:javelin"
+        },
+        {
+          "name": "Mace",
+          "price": 5,
+          "spec": "slug:mace"
+        },
+        {
+          "name": "Quarterstaff",
+          "price": 2,
+          "spec": "slug:quarterstaff"
+        },
+        {
+          "name": "Spear",
+          "price": 1,
+          "spec": "slug:spear"
+        },
+        {
+          "name": "Light Crossbow",
+          "price": 25,
+          "spec": "slug:light-crossbow"
+        },
+        {
+          "name": "Shortbow",
+          "price": 25,
+          "spec": "slug:shortbow"
+        },
+        {
+          "name": "Shortsword",
+          "price": 10,
+          "spec": "slug:shortsword"
+        },
+        {
+          "name": "Longsword",
+          "price": 15,
+          "spec": "slug:longsword"
+        },
+        {
+          "name": "Battleaxe",
+          "price": 10,
+          "spec": "slug:battleaxe"
+        },
+        {
+          "name": "Warhammer",
+          "price": 15,
+          "spec": "slug:warhammer"
+        },
+        {
+          "name": "Greataxe",
+          "price": 30,
+          "spec": "slug:greataxe"
+        },
+        {
+          "name": "Greatsword",
+          "price": 50,
+          "spec": "slug:greatsword"
+        },
+        {
+          "name": "Padded Armor",
+          "price": 5,
+          "spec": "slug:padded-armor"
+        },
+        {
+          "name": "Leather Armor",
+          "price": 10,
+          "spec": "slug:leather-armor"
+        },
+        {
+          "name": "Studded Leather",
+          "price": 45,
+          "spec": "slug:studded-leather"
+        },
+        {
+          "name": "Hide Armor",
+          "price": 10,
+          "spec": "slug:hide-armor"
+        },
+        {
+          "name": "Chain Shirt",
+          "price": 50,
+          "spec": "slug:chain-shirt"
+        },
+        {
+          "name": "Scale Mail",
+          "price": 50,
+          "spec": "slug:scale-mail"
+        },
+        {
+          "name": "Breastplate",
+          "price": 400,
+          "spec": "slug:breastplate"
+        },
+        {
+          "name": "Chain Mail",
+          "price": 75,
+          "spec": "slug:chain-mail"
+        },
+        {
+          "name": "Shield",
+          "price": 10,
+          "spec": "slug:shield"
+        },
+        {
+          "name": "Arrows (20)",
+          "price": 1,
+          "spec": "slug:arrows-20"
+        },
+        {
+          "name": "Crossbow Bolts (20)",
+          "price": 1,
+          "spec": "slug:bolts-20"
+        }
+      ]
+    },
+    {
+      "room": "market",
+      "name": "Brenna the Chandler",
+      "description": "A freckled halfling behind a cluttered stall of packs, lanterns, and trail goods. (+list / +buy)",
+      "inventory": [
+        {
+          "name": "Backpack",
+          "price": 2,
+          "spec": "slug:backpack"
+        },
+        {
+          "name": "Bedroll",
+          "price": 1,
+          "spec": "slug:bedroll"
+        },
+        {
+          "name": "Blanket",
+          "price": 1,
+          "spec": "slug:blanket"
+        },
+        {
+          "name": "Crowbar",
+          "price": 2,
+          "spec": "slug:crowbar"
+        },
+        {
+          "name": "Hammer",
+          "price": 1,
+          "spec": "slug:hammer"
+        },
+        {
+          "name": "Healer's Kit",
+          "price": 5,
+          "spec": "slug:healers-kit"
+        },
+        {
+          "name": "Holy Symbol",
+          "price": 5,
+          "spec": "slug:holy-symbol"
+        },
+        {
+          "name": "Lantern (hooded)",
+          "price": 5,
+          "spec": "slug:lantern-hooded"
+        },
+        {
+          "name": "Oil (flask)",
+          "price": 1,
+          "spec": "slug:oil-flask"
+        },
+        {
+          "name": "Pouch",
+          "price": 1,
+          "spec": "slug:pouch"
+        },
+        {
+          "name": "Rope (hempen, 50 ft)",
+          "price": 1,
+          "spec": "slug:rope-hempen"
+        },
+        {
+          "name": "Torch",
+          "price": 1,
+          "spec": "slug:torch"
+        },
+        {
+          "name": "Tinderbox",
+          "price": 1,
+          "spec": "slug:tinderbox"
+        },
+        {
+          "name": "Waterskin",
+          "price": 2,
+          "spec": "slug:waterskin"
+        },
+        {
+          "name": "Rations (1 day)",
+          "price": 1,
+          "spec": "slug:rations-1"
+        },
+        {
+          "name": "Component Pouch",
+          "price": 25,
+          "spec": "slug:component-pouch"
+        },
+        {
+          "name": "Spellbook",
+          "price": 50,
+          "spec": "slug:spellbook"
+        },
+        {
+          "name": "Thieves' Tools",
+          "price": 25,
+          "spec": "slug:thieves-tools"
+        }
+      ]
+    },
+    {
+      "room": "inn",
+      "name": "Mira the Innkeep",
+      "description": "Cheerful, sharp-eared, and always polishing a mug. She sells trail food, drink, and simple kits. (+list / +buy)",
+      "inventory": [
+        {
+          "name": "Rations (1 day)",
+          "price": 1,
+          "spec": "slug:rations-1"
+        },
+        {
+          "name": "Rations (5 days)",
+          "price": 5,
+          "spec": "slug:rations-5"
+        },
+        {
+          "name": "Waterskin",
+          "price": 2,
+          "spec": "slug:waterskin"
+        },
+        {
+          "name": "Ale (mug)",
+          "price": 1,
+          "spec": "slug:ale-mug"
+        },
+        {
+          "name": "Wine (pitcher)",
+          "price": 2,
+          "spec": "slug:wine-pitcher"
+        },
+        {
+          "name": "Healer's Kit",
+          "price": 5,
+          "spec": "slug:healers-kit"
+        },
+        {
+          "name": "Bedroll",
+          "price": 1,
+          "spec": "slug:bedroll"
+        },
+        {
+          "name": "Rope (hempen, 50 ft)",
+          "price": 1,
+          "spec": "slug:rope-hempen"
+        },
+        {
+          "name": "Torch",
+          "price": 1,
+          "spec": "slug:torch"
+        },
+        {
+          "name": "Traveler's Clothes",
+          "price": 2,
+          "spec": "slug:travelers-clothes"
+        }
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "room": "camp",
+      "name": "Goblin Scout",
+      "template": "goblin"
+    },
+    {
+      "room": "camp",
+      "name": "Goblin Boss",
+      "template": "goblin"
+    },
+    {
+      "room": "path",
+      "name": "Wolf",
+      "template": "wolf"
+    },
+    {
+      "room": "barracks",
+      "name": "Guard Captain Renn",
+      "template": "veteran"
+    }
+  ],
+  "map": {
+    "realm": "default",
+    "origin": {
+      "x": 128,
+      "y": 128,
+      "z": 0
+    },
+    "faction": "Havenbrook",
+    "tiles": [
+      {
+        "key": "square",
+        "dx": 0,
+        "dy": 0,
+        "glyph": "#",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "market",
+        "dx": 1,
+        "dy": 0,
+        "glyph": "+",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "forge",
+        "dx": 2,
+        "dy": 0,
+        "glyph": "+",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "inn",
+        "dx": 0,
+        "dy": 1,
+        "glyph": "#",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "inn-rooms",
+        "dx": 0,
+        "dy": 2,
+        "glyph": "*",
+        "kind": "landmark"
+      },
+      {
+        "key": "temple",
+        "dx": -1,
+        "dy": 0,
+        "glyph": "*",
+        "kind": "landmark"
+      },
+      {
+        "key": "gate",
+        "dx": 0,
+        "dy": -1,
+        "glyph": "=",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "barracks",
+        "dx": 1,
+        "dy": -1,
+        "glyph": "#",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "path",
+        "dx": 0,
+        "dy": -2,
+        "glyph": ".",
+        "kind": "landmark"
+      },
+      {
+        "key": "ruins",
+        "dx": 1,
+        "dy": -2,
+        "glyph": "*",
+        "kind": "landmark"
+      },
+      {
+        "key": "camp",
+        "dx": 0,
+        "dy": -3,
+        "glyph": "!",
+        "kind": "hazard"
+      }
+    ],
+    "notes": "Havenbrook footprint on the default map realm. Launch a map-capable vehicle near (128,128) to see town infrastructure."
+  }
+}

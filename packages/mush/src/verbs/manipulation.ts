@@ -156,6 +156,32 @@ export async function execGet(u: IUrsamuSDK): Promise<void> {
     u.send("You can't pick that up.");
     return;
   }
+  if (thing.flags.has("npc")) {
+    u.send("You can't pick that up.");
+    return;
+  }
+
+  // Plugins may deny get and supply a hint (dnd scenery/chests).
+  const gate = {
+    u,
+    actor,
+    thing,
+    allow: true as boolean,
+    message: "" as string,
+  };
+  try {
+    // deno-lint-ignore no-explicit-any
+    await (gameHooks as any).emit?.("object:get", gate);
+  } catch {
+    /* optional */
+  }
+  if (!gate.allow) {
+    u.send(
+      gate.message ||
+        "You can't pick that up. Look at it for how to use it.",
+    );
+    return;
+  }
 
   const thingName = u.util.displayName(thing, actor);
   const actorName = u.util.displayName(actor, actor);
@@ -360,39 +386,145 @@ export async function execGive(u: IUrsamuSDK): Promise<void> {
   if (asucc && thing.state.owner) u.send(asucc, thing.state.owner as string);
 }
 
-export async function execUse(u: IUrsamuSDK): Promise<void> {
+/**
+ * Shared open/close/use: lock → plugin hook → softcode attrs.
+ * Attr pairs: OPEN/AOPEN/OOPEN, CLOSE/ACLOSE/OCLOSE, USE/AUSE/OUSE.
+ */
+async function execSimpleAction(
+  u: IUrsamuSDK,
+  opts: {
+    verb: string;
+    argEmpty: string;
+    lockKey: string;
+    hook: string;
+    attrs: { self: string; room: string; owner: string };
+    defaultSelf: (name: string) => string;
+    defaultRoom: (actor: string, name: string) => string;
+    defaultFail: (name: string) => string;
+    defaultOFail: (actor: string, name: string) => string;
+  },
+): Promise<void> {
   const actor = u.me;
   const arg = u.util.stripSubs(u.cmd.args[0] || "").trim();
-  if (!arg) { u.send("Use what?"); return; }
+  if (!arg) {
+    u.send(opts.argEmpty);
+    return;
+  }
 
   const thing = await u.util.target(actor, arg);
-  if (!thing) { u.send("I don't see that here."); return; }
+  if (!thing) {
+    u.send("I don't see that here.");
+    return;
+  }
+  // Must be in room or held
+  const hereId = actor.location;
+  if (
+    thing.location !== hereId &&
+    thing.location !== actor.id
+  ) {
+    u.send("I don't see that here.");
+    return;
+  }
 
   const thingName = u.util.displayName(thing, actor);
   const actorName = u.util.displayName(actor, actor);
 
-  const useLock = (thing.state?.locks as Record<string, string>)?.use;
-  if (useLock) {
-    const allowed = await evaluateLock(useLock, actor, thing);
+  const lockMap = (thing.state?.locks as Record<string, string>) ??
+    {};
+  // Only the verb-specific lock (open/use/close) — never fall
+  // back to basic (basic is for get / pickup).
+  const actionLock = lockMap[opts.lockKey];
+  if (actionLock) {
+    const allowed = await evaluateLock(actionLock, actor, thing);
     if (!allowed) {
-      await fireFailAttrs(u, thing, actor,
-        `You can't use ${thingName}.`,
-        `${actorName} tries to use ${thingName}, but can't.`);
+      await fireFailAttrs(
+        u,
+        thing,
+        actor,
+        opts.defaultFail(thingName),
+        opts.defaultOFail(actorName, thingName),
+      );
       return;
     }
   }
 
-  const use = await u.eval(thing.id, "USE");
-  u.send(use || `You use ${thingName}.`);
+  // Plugin hook (e.g. dnd chest open). set handled=true to skip defaults.
+  const bag = {
+    u,
+    actor,
+    thing,
+    verb: opts.verb,
+    handled: false as boolean,
+  };
+  try {
+    await (gameHooks as unknown as {
+      emit(e: string, p: unknown): Promise<void>;
+    }).emit(opts.hook, bag);
+  } catch {
+    /* optional */
+  }
+  if (bag.handled) return;
 
-  const ouse = await u.eval(thing.id, "OUSE");
+  const selfMsg = await u.eval(thing.id, opts.attrs.self);
+  u.send(selfMsg || opts.defaultSelf(thingName));
+
+  const roomMsg = await u.eval(thing.id, opts.attrs.room);
   u.here.broadcast(
-    ouse ? `${actorName} ${ouse}` : `${actorName} uses ${thingName}.`,
+    roomMsg
+      ? `${actorName} ${roomMsg}`
+      : opts.defaultRoom(actorName, thingName),
     { exclude: [actor.id] } as Record<string, unknown>,
   );
 
-  const ause = await u.eval(thing.id, "AUSE");
-  if (ause && thing.state.owner) u.send(ause, thing.state.owner as string);
+  const ownerMsg = await u.eval(thing.id, opts.attrs.owner);
+  if (ownerMsg && thing.state.owner) {
+    u.send(ownerMsg, thing.state.owner as string);
+  }
+}
+
+export async function execUse(u: IUrsamuSDK): Promise<void> {
+  await execSimpleAction(u, {
+    verb: "use",
+    argEmpty: "Use what?",
+    lockKey: "use",
+    hook: "object:use",
+    attrs: { self: "USE", room: "OUSE", owner: "AUSE" },
+    defaultSelf: (n) => `You use ${n}.`,
+    defaultRoom: (a, n) => `${a} uses ${n}.`,
+    defaultFail: (n) => `You can't use ${n}.`,
+    defaultOFail: (a, n) =>
+      `${a} tries to use ${n}, but can't.`,
+  });
+}
+
+export async function execOpen(u: IUrsamuSDK): Promise<void> {
+  await execSimpleAction(u, {
+    verb: "open",
+    argEmpty: "Open what?",
+    lockKey: "open",
+    hook: "object:open",
+    attrs: { self: "OPEN", room: "OOPEN", owner: "AOPEN" },
+    defaultSelf: (n) => `You open ${n}.`,
+    defaultRoom: (a, n) => `${a} opens ${n}.`,
+    defaultFail: (n) => `You can't open ${n}.`,
+    defaultOFail: (a, n) =>
+      `${a} tries to open ${n}, but can't.`,
+  });
+}
+
+export async function execClose(u: IUrsamuSDK): Promise<void> {
+  await execSimpleAction(u, {
+    verb: "close",
+    argEmpty: "Close what?",
+    lockKey: "close",
+    hook: "object:close",
+    attrs: { self: "CLOSE", room: "OCLOSE", owner: "ACLOSE" },
+    defaultSelf: (n) => `You close ${n}.`,
+    defaultRoom: (a, n) => `${a} closes ${n}.`,
+    defaultFail: (n) => `You can't close ${n}.`,
+    defaultOFail: (a, n) =>
+      `${a} tries to close ${n}, but can't.`,
+  });
 }
 
 addCmd({
@@ -464,15 +596,43 @@ addCmd({
   pattern: /^use\s+(.*)/i,
   lock: "connected",
   category: "Object",
-  help: `use <object>  — Use an object, triggering its USE/OUSE/AUSE attributes.
-
-The object's USE attribute is shown to you, OUSE to the room,
-and AUSE to the object's owner. The USE lock controls access.
+  help: `use <object>  — Use an object (USE/OUSE/AUSE or plugins).
 
 Examples:
   use lever
+  use altar
   use #12`,
   exec: execUse,
+});
+
+addCmd({
+  name: "open",
+  pattern: /^open\s+(.*)/i,
+  lock: "connected",
+  category: "Object",
+  help: `open <object>  — Open something (OPEN/AOPEN/OOPEN).
+
+Chests, doors, containers. Plugins may handle open
+(e.g. treasure chests).
+
+Examples:
+  open chest
+  open iron coffer
+  open #12`,
+  exec: execOpen,
+});
+
+addCmd({
+  name: "close",
+  pattern: /^close\s+(.*)/i,
+  lock: "connected",
+  category: "Object",
+  help: `close <object>  — Close something (CLOSE/ACLOSE/OCLOSE).
+
+Examples:
+  close chest
+  close #12`,
+  exec: execClose,
 });
 
 export async function execCreateObject(u: IUrsamuSDK): Promise<void> {

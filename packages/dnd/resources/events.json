@@ -1,0 +1,120 @@
+{
+  "town": {
+    "slug": "town",
+    "name": "Town life",
+    "chance": 1,
+    "bands": [
+      {
+        "weight": 3,
+        "kind": "flavor",
+        "text": "A crier announces cheap lodgings at the inn."
+      },
+      {
+        "weight": 2,
+        "kind": "flavor",
+        "text": "Merchants argue over grain prices. No fight."
+      },
+      {
+        "weight": 2,
+        "kind": "boon",
+        "text": "A grateful peddler tips you 2 gp.",
+        "gp": 2
+      },
+      {
+        "weight": 1,
+        "kind": "boon",
+        "text": "The temple offers a free blessing — you feel inspired.",
+        "inspiration": true
+      },
+      {
+        "weight": 1,
+        "kind": "boon",
+        "text": "A recruiter slips you a notice: check +bounty.",
+        "hint": "bounty"
+      },
+      {
+        "weight": 1,
+        "kind": "risk",
+        "text": "Pickpockets brush past — you lose 1 gp if you have it.",
+        "gpLoss": 1
+      }
+    ]
+  },
+  "road": {
+    "slug": "road",
+    "name": "Road tales",
+    "chance": 1,
+    "bands": [
+      {
+        "weight": 3,
+        "kind": "flavor",
+        "text": "Wagon tracks and birdsong. The road is quiet."
+      },
+      {
+        "weight": 2,
+        "kind": "flavor",
+        "text": "A pilgrim shares water and a rumor of ogres east."
+      },
+      {
+        "weight": 2,
+        "kind": "boon",
+        "text": "You find a dropped purse: 3 gp.",
+        "gp": 3
+      },
+      {
+        "weight": 2,
+        "kind": "fight",
+        "text": "Bandits step from the brush!",
+        "mobs": [
+          { "template": "bandit", "name": "Road Bandit", "count": [1, 2] }
+        ]
+      },
+      {
+        "weight": 1,
+        "kind": "fight",
+        "text": "Wolves pace the verge!",
+        "mobs": [
+          { "template": "wolf", "name": "Lean Wolf", "count": [1, 2] }
+        ]
+      },
+      {
+        "weight": 1,
+        "kind": "boon",
+        "text": "A caravan master offers work — try +caravan.",
+        "hint": "caravan"
+      }
+    ]
+  },
+  "wild": {
+    "slug": "wild",
+    "name": "Wild places",
+    "chance": 1,
+    "bands": [
+      {
+        "weight": 2,
+        "kind": "flavor",
+        "text": "Wind in the trees. Nothing moves."
+      },
+      {
+        "weight": 2,
+        "kind": "fight",
+        "text": "Goblins burst from cover!",
+        "mobs": [
+          { "template": "goblin", "name": "Goblin Raider", "count": [1, 2] }
+        ]
+      },
+      {
+        "weight": 1,
+        "kind": "boon",
+        "text": "You forage useful herbs worth 2 gp.",
+        "gp": 2
+      },
+      {
+        "weight": 1,
+        "kind": "risk",
+        "text": "Rough ground — take 1 exhaustion if already tired, else a bruise (flavor).",
+        "exhaustion": 0
+      }
+    ]
+  }
+}

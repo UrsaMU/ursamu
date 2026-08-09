@@ -1,0 +1,134 @@
+{
+  "goblin-warren": {
+    "slug": "goblin-warren",
+    "name": "Goblin Warren",
+    "tier": 1,
+    "xpHint": 150,
+    "book": "SRD 5.2",
+    "summary": "A stinking burrow under the Whisperwood. Kill the pack, loot the hoard.",
+    "entryKey": "mouth",
+    "linkFromWorld": "camp",
+    "exitNameToSite": "Down;Warren;Cave;In",
+    "exitNameFromSite": "Up;Out;Camp;Surface",
+    "rooms": [
+      {
+        "key": "mouth",
+        "name": "Warren Mouth",
+        "description": "A low dirt tunnel yawns under roots. Bones and chicken feathers litter the mud. Deeper in, something snickers."
+      },
+      {
+        "key": "den",
+        "name": "Sleeping Den",
+        "description": "Crude nests of stolen cloaks. A firepit smolders. The air reeks of grease and wet dog."
+      },
+      {
+        "key": "hoard",
+        "name": "Stolen Hoard",
+        "description": "A hollowed chamber piled with cracked crates and a locked chest. Boot prints everywhere."
+      }
+    ],
+    "exits": [
+      { "from": "mouth", "to": "den", "name": "In;Deeper;North;N" },
+      { "from": "den", "to": "mouth", "name": "Out;South;S;Mouth" },
+      { "from": "den", "to": "hoard", "name": "East;E;Hoard" },
+      { "from": "hoard", "to": "den", "name": "West;W;Den" }
+    ],
+    "mobs": [
+      { "room": "mouth", "name": "Goblin Scout", "template": "goblin" },
+      { "room": "den", "name": "Goblin Cutthroat", "template": "goblin" },
+      { "room": "den", "name": "Camp Wolf", "template": "wolf" },
+      { "room": "hoard", "name": "Goblin Boss", "template": "goblin" }
+    ],
+    "chests": [
+      { "room": "hoard", "name": "Stolen Chest", "table": "tier1-hoard" }
+    ]
+  },
+  "bone-crypt": {
+    "slug": "bone-crypt",
+    "name": "Crypt of Loose Bones",
+    "tier": 1,
+    "xpHint": 250,
+    "book": "SRD 5.2",
+    "summary": "A collapsed barrow east of the waystone. Undead shuffle in the dark.",
+    "entryKey": "steps",
+    "linkFromWorld": "ruins",
+    "exitNameToSite": "Down;Crypt;Stairs;In",
+    "exitNameFromSite": "Up;Out;Ruins;Surface",
+    "rooms": [
+      {
+        "key": "steps",
+        "name": "Crypt Steps",
+        "description": "Stone stairs sink into chill air. Names on the walls are worn smooth. Something scrapes ahead."
+      },
+      {
+        "key": "hall",
+        "name": "Ossuary Hall",
+        "description": "Shelves of skulls line the walls. Dust motes hang in your light. Footfalls echo twice."
+      },
+      {
+        "key": "tomb",
+        "name": "Sealed Tomb",
+        "description": "A cracked sarcophagus and a iron-bound coffer. The air tastes of old incense and rot."
+      }
+    ],
+    "exits": [
+      { "from": "steps", "to": "hall", "name": "In;Deeper;North;N" },
+      { "from": "hall", "to": "steps", "name": "Out;South;S;Steps" },
+      { "from": "hall", "to": "tomb", "name": "East;E;Tomb" },
+      { "from": "tomb", "to": "hall", "name": "West;W;Hall" }
+    ],
+    "mobs": [
+      { "room": "steps", "name": "Rattling Skeleton", "template": "skeleton" },
+      { "room": "hall", "name": "Shambling Zombie", "template": "zombie" },
+      { "room": "hall", "name": "Crypt Skeleton", "template": "skeleton" },
+      { "room": "tomb", "name": "Tomb Guardian", "template": "ghoul" }
+    ],
+    "chests": [
+      { "room": "tomb", "name": "Burial Coffer", "table": "boss-stash" }
+    ]
+  },
+  "bandit-hollow": {
+    "slug": "bandit-hollow",
+    "name": "Bandit Hollow",
+    "tier": 2,
+    "xpHint": 400,
+    "book": "SRD 5.2",
+    "summary": "Outlaws camping in a ravine north of the gate road. Coin and steel for the bold.",
+    "entryKey": "trail",
+    "linkFromWorld": "path",
+    "exitNameToSite": "Hollow;Bandits;Trail;In",
+    "exitNameFromSite": "Path;Out;Leave",
+    "rooms": [
+      {
+        "key": "trail",
+        "name": "Hidden Trail",
+        "description": "Brush parts on a narrow path. Fresh boot prints and a snapped tripwire mark a camp nearby."
+      },
+      {
+        "key": "camp",
+        "name": "Bandit Camp",
+        "description": "Tents, a cookfire, and a weapon rack. Lookouts whistle when strangers approach."
+      },
+      {
+        "key": "cave",
+        "name": "Stash Cave",
+        "description": "A damp cleft stuffed with crates. The captain's lockbox sits on a flat rock."
+      }
+    ],
+    "exits": [
+      { "from": "trail", "to": "camp", "name": "Camp;In;North;N" },
+      { "from": "camp", "to": "trail", "name": "Trail;Out;South;S" },
+      { "from": "camp", "to": "cave", "name": "Cave;East;E;Stash" },
+      { "from": "cave", "to": "camp", "name": "Camp;West;W" }
+    ],
+    "mobs": [
+      { "room": "trail", "name": "Bandit Lookout", "template": "bandit" },
+      { "room": "camp", "name": "Bandit Thug", "template": "bandit" },
+      { "room": "camp", "name": "Bandit Archer", "template": "scout" },
+      { "room": "cave", "name": "Bandit Captain", "template": "bandit_captain" }
+    ],
+    "chests": [
+      { "room": "cave", "name": "Captain's Lockbox", "table": "tier2-hoard" }
+    ]
+  }
+}

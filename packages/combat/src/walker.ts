@@ -4,7 +4,7 @@
  * Pumps the encounter forward, running brains for each NPC until a
  * live PC turn, all NPCs out, manual AI, or maxRounds safety cap.
  */
-import { allNpcsDown } from "./encounter.ts";
+import { shouldResolveEncounter } from "./encounter.ts";
 import type { Encounter, Participant } from "./types.ts";
 import {
   decideAction,
@@ -214,7 +214,7 @@ export async function advanceTurnSmart(
     const slot = enc.participants[enc.turnIdx];
     if (!slot) break;
 
-    if (allNpcsDown(enc)) {
+    if (shouldResolveEncounter(enc)) {
       if (ports.onResolved) {
         return (await ports.onResolved(enc)) ?? enc;
       }
@@ -337,7 +337,7 @@ export async function advanceTurnSmart(
     }
 
     const fresh = await store.get(encounterId);
-    if (fresh && allNpcsDown(fresh)) {
+    if (fresh && shouldResolveEncounter(fresh)) {
       if (ports.onResolved) {
         return (await ports.onResolved(fresh)) ?? fresh;
       }

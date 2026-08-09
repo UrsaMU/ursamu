@@ -1,0 +1,92 @@
+[
+  {
+    "slug": "athletics",
+    "name": "Athletics",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "acrobatics",
+    "name": "Acrobatics",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "sleight_of_hand",
+    "name": "Sleight Of Hand",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "stealth",
+    "name": "Stealth",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "arcana",
+    "name": "Arcana",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "history",
+    "name": "History",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "investigation",
+    "name": "Investigation",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "nature",
+    "name": "Nature",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "religion",
+    "name": "Religion",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "animal_handling",
+    "name": "Animal Handling",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "insight",
+    "name": "Insight",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "medicine",
+    "name": "Medicine",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "perception",
+    "name": "Perception",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "survival",
+    "name": "Survival",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "deception",
+    "name": "Deception",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "intimidation",
+    "name": "Intimidation",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "performance",
+    "name": "Performance",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "persuasion",
+    "name": "Persuasion",
+    "book": "SRD 5.2"
+  }
+]

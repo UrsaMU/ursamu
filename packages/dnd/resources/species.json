@@ -1,0 +1,47 @@
+[
+  {
+    "slug": "human",
+    "name": "Human",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "elf",
+    "name": "Elf",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "dwarf",
+    "name": "Dwarf",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "halfling",
+    "name": "Halfling",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "gnome",
+    "name": "Gnome",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "orc",
+    "name": "Orc",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "tiefling",
+    "name": "Tiefling",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "dragonborn",
+    "name": "Dragonborn",
+    "book": "SRD 5.2"
+  },
+  {
+    "slug": "goliath",
+    "name": "Goliath",
+    "book": "SRD 5.2"
+  }
+]

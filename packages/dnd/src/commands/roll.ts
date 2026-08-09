@@ -6,8 +6,10 @@ import {
   getAbilityMod,
   getProficiencyBonus,
   migrateSheet,
-  SKILL_ABILITY_MAP
+  SKILL_ABILITY_MAP,
 } from "../stats/dnd_sheet.ts";
+import { maybeSpendInspiration } from "../stats/rules.ts";
+import type { AdvState } from "../stats/conditions.ts";
 
 interface RollResult {
   rolls: number[];
@@ -50,23 +52,47 @@ export async function dndRollExec(u: IUrsamuSDK) {
     ? swRaw.split(/[\/,]/).map((s) => s.trim()).filter(Boolean)
     : [];
 
-  const adv = switches.includes("adv") || switches.includes("advantage");
-  const dis = switches.includes("dis") || switches.includes("disadvantage");
-  const isInit = switches.includes("init") || switches.includes("initiative") || expr.toLowerCase() === "init";
+  let wantAdv = switches.includes("adv") ||
+    switches.includes("advantage");
+  const wantDis = switches.includes("dis") ||
+    switches.includes("disadvantage");
+  const wantInsp = switches.includes("insp") ||
+    switches.includes("inspiration");
+  const isInit = switches.includes("init") ||
+    switches.includes("initiative") ||
+    expr.toLowerCase() === "init";
 
-  const sheet = migrateSheet(u.me.state?.dnd || defaultSheet());
+  let sheet = migrateSheet(u.me.state?.dnd || defaultSheet());
+  let advState: AdvState = "normal";
+  if (wantAdv && wantDis) advState = "normal";
+  else if (wantAdv) advState = "advantage";
+  else if (wantDis) advState = "disadvantage";
+
+  if (wantInsp) {
+    const spent = maybeSpendInspiration(sheet, true, advState);
+    sheet = spent.sheet;
+    advState = spent.adv;
+    if (spent.spent) {
+      await u.db.modify(u.me.id, "$set", { "data.dnd": sheet });
+      // deno-lint-ignore no-explicit-any
+      if (u.me.state) (u.me.state as any).dnd = sheet;
+    }
+  }
+
+  const adv = advState === "advantage";
+  const dis = advState === "disadvantage";
   const name = u.util.displayName(u.me, u.me);
   const profBonus = getProficiencyBonus(sheet.level);
   const strMod = getAbilityMod(sheet.abilities.strength);
   const dexMod = getAbilityMod(sheet.abilities.dexterity);
 
   if (isInit) {
-    const dexScore = sheet.abilities.dexterity;
     const r = rollD20(adv, dis);
     const total = r.selected + dexMod;
     const sign = dexMod >= 0 ? "+" : "";
-    
-    const msg = `%ch%ccROLL>>%cn ${name} rolls %chInitiative%cn: ${r.notation} ${sign}${dexMod} (Dex) = %ch%cy${total}%cn`;
+    const msg =
+      `${name} rolls %chInitiative%cn: ${r.notation} ` +
+      `${sign}${dexMod} (Dex) = %ch%cy${total}%cn`;
     u.send(msg);
     return;
   }
@@ -120,7 +146,7 @@ export async function dndRollExec(u: IUrsamuSDK) {
       profTerm ? `+${profTerm} (Prof)` : ""
     ].filter(Boolean).join(" ");
 
-    const msg = `%ch%ccROLL>>%cn ${name} attacks with %ch${weaponName}%cn: ${r.notation} ${terms} = %ch%cy${total}%cn to hit`;
+    const msg = `${name} attacks with %ch${weaponName}%cn: ${r.notation} ${terms} = %ch%cy${total}%cn to hit`;
     u.send(msg);
     return;
   }
@@ -172,7 +198,7 @@ export async function dndRollExec(u: IUrsamuSDK) {
     const total = r.selected + attackMod;
     const sign = attackMod >= 0 ? "+" : "";
 
-    const msg = `%ch%ccROLL>>%cn ${name} rolls %ch${weaponName} Damage%cn: ${r.notation} ${sign}${attackMod} (${attackAbilityLabel}) = %ch%cy${total}%cn ${damageType} damage`;
+    const msg = `${name} rolls %ch${weaponName} Damage%cn: ${r.notation} ${sign}${attackMod} (${attackAbilityLabel}) = %ch%cy${total}%cn ${damageType} damage`;
     u.send(msg);
     return;
   }
@@ -202,7 +228,7 @@ export async function dndRollExec(u: IUrsamuSDK) {
     ].filter(Boolean).join(" ");
 
     const dispName = ab.charAt(0).toUpperCase() + ab.slice(1);
-    const msg = `%ch%ccROLL>>%cn ${name} rolls %ch${dispName} Saving Throw%cn: ${r.notation} ${terms} = %ch%cy${total}%cn`;
+    const msg = `${name} rolls %ch${dispName} Saving Throw%cn: ${r.notation} ${terms} = %ch%cy${total}%cn`;
     u.send(msg);
     return;
   }
@@ -234,7 +260,7 @@ export async function dndRollExec(u: IUrsamuSDK) {
     ].filter(Boolean).join(" ");
 
     const dispName = skill.split("_").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-    const msg = `%ch%ccROLL>>%cn ${name} rolls %ch${dispName}%cn: ${r.notation} ${terms} = %ch%cy${total}%cn`;
+    const msg = `${name} rolls %ch${dispName}%cn: ${r.notation} ${terms} = %ch%cy${total}%cn`;
     u.send(msg);
     return;
   }
@@ -251,7 +277,7 @@ export async function dndRollExec(u: IUrsamuSDK) {
     const terms = `${mod >= 0 ? "+" : ""}${mod} (${ab.slice(0, 3).toUpperCase()})`;
 
     const dispName = ab.charAt(0).toUpperCase() + ab.slice(1);
-    const msg = `%ch%ccROLL>>%cn ${name} rolls %ch${dispName} Check%cn: ${r.notation} ${terms} = %ch%cy${total}%cn`;
+    const msg = `${name} rolls %ch${dispName} Check%cn: ${r.notation} ${terms} = %ch%cy${total}%cn`;
     u.send(msg);
     return;
   }
@@ -273,7 +299,7 @@ export async function dndRollExec(u: IUrsamuSDK) {
       total = op === "+" ? total + modifier : total - modifier;
     }
 
-    const msg = `%ch%ccROLL>>%cn ${name} rolls %ch${expr}%cn: ${r.notation}${modTerm} = %ch%cy${total}%cn`;
+    const msg = `${name} rolls %ch${expr}%cn: ${r.notation}${modTerm} = %ch%cy${total}%cn`;
     u.send(msg);
     return;
   }

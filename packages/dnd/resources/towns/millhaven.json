@@ -1,0 +1,190 @@
+{
+  "id": "millhaven-v1",
+  "name": "Millhaven",
+  "playerStartKey": "square",
+  "linkOoc": false,
+  "rooms": [
+    {
+      "key": "square",
+      "name": "Millhaven Green",
+      "description": "A muddy green around a leaning mill-post. Barges creak on the river east; the mill wheel thuds west. South, the forest road climbs toward Havenbrook. A notice board lists bounties (+bounty)."
+    },
+    {
+      "key": "mill",
+      "name": "Riverside Mill",
+      "description": "Great stones grind grain under a wet wooden wheel. Sacks of flour lean against the wall. The miller sells trail bread and rope."
+    },
+    {
+      "key": "dock",
+      "name": "Millhaven Dock",
+      "description": "Pilings dark with river water. Nets dry on racks. Fishers mutter about things that surface at night downstream."
+    },
+    {
+      "key": "inn",
+      "name": "The Otter's Rest",
+      "description": "Low beams, river-reed mats, and a fire that never quite dies. Safe rest for travelers (+rest/long)."
+    },
+    {
+      "key": "road",
+      "name": "South Road Spur",
+      "description": "Packed earth toward the Whisperwood and Havenbrook. Dust, cart ruts, and the occasional broken arrow."
+    }
+  ],
+  "exits": [
+    {
+      "from": "square",
+      "to": "mill",
+      "name": "West;W;Mill"
+    },
+    {
+      "from": "mill",
+      "to": "square",
+      "name": "East;E;Green;Out"
+    },
+    {
+      "from": "square",
+      "to": "dock",
+      "name": "East;E;Dock;River"
+    },
+    {
+      "from": "dock",
+      "to": "square",
+      "name": "West;W;Green;Out"
+    },
+    {
+      "from": "square",
+      "to": "inn",
+      "name": "North;N;Inn"
+    },
+    {
+      "from": "inn",
+      "to": "square",
+      "name": "South;S;Out;Green"
+    },
+    {
+      "from": "square",
+      "to": "road",
+      "name": "South;S;Road;Havenbrook"
+    },
+    {
+      "from": "road",
+      "to": "square",
+      "name": "North;N;Green;Millhaven"
+    }
+  ],
+  "vendors": [
+    {
+      "room": "mill",
+      "name": "Helsa the Miller",
+      "description": "Flour-dusted and practical. Fair prices for river folk.",
+      "inventory": [
+        {
+          "name": "Rations",
+          "price": 2,
+          "spec": "general"
+        },
+        {
+          "name": "Trail Bread",
+          "price": 1,
+          "spec": "general"
+        },
+        {
+          "name": "Rope (50 ft)",
+          "price": 1,
+          "spec": "general"
+        },
+        {
+          "name": "Waterskin",
+          "price": 1,
+          "spec": "general"
+        },
+        {
+          "name": "Handaxe",
+          "price": 5,
+          "spec": "weapon:1d6:slashing:light,thrown"
+        }
+      ]
+    },
+    {
+      "room": "inn",
+      "name": "Bren the Tapster",
+      "description": "Soft-spoken, sells kits and a few potions when stock allows.",
+      "inventory": [
+        {
+          "name": "Healer's Kit",
+          "price": 5,
+          "spec": "general"
+        },
+        {
+          "name": "Bedroll",
+          "price": 1,
+          "spec": "general"
+        },
+        {
+          "name": "Potion of Healing",
+          "price": 50,
+          "spec": "potion:2d4+2"
+        },
+        {
+          "name": "Torch",
+          "price": 1,
+          "spec": "general"
+        }
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "room": "dock",
+      "name": "River Bandit",
+      "template": "bandit"
+    }
+  ],
+  "map": {
+    "realm": "default",
+    "origin": {
+      "x": 200,
+      "y": 80,
+      "z": 0
+    },
+    "faction": "Millhaven",
+    "tiles": [
+      {
+        "key": "square",
+        "dx": 0,
+        "dy": 0,
+        "glyph": "#",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "mill",
+        "dx": -1,
+        "dy": 0,
+        "glyph": "+",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "dock",
+        "dx": 1,
+        "dy": 0,
+        "glyph": "~",
+        "kind": "landmark"
+      },
+      {
+        "key": "inn",
+        "dx": 0,
+        "dy": -1,
+        "glyph": "#",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "road",
+        "dx": 0,
+        "dy": 1,
+        "glyph": "=",
+        "kind": "infrastructure"
+      }
+    ],
+    "notes": "Millhaven east of Havenbrook on map realm default."
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "goblin-raid": {
+    "slug": "goblin-raid",
+    "name": "Goblin Raiders",
+    "board": "havenbrook",
+    "faction": "havenbrook",
+    "summary": "Cull goblins troubling the north road.",
+    "goal": { "kind": "kills", "template": "goblin", "count": 3 },
+    "rewardXp": 100,
+    "rewardGp": 25,
+    "rep": 2,
+    "tier": 1,
+    "book": "SRD 5.2"
+  },
+  "wolf-pack": {
+    "slug": "wolf-pack",
+    "name": "Wolf Pack",
+    "board": "havenbrook",
+    "faction": "havenbrook",
+    "summary": "Wolves grow bold near the path.",
+    "goal": { "kind": "kills", "template": "wolf", "count": 2 },
+    "rewardXp": 80,
+    "rewardGp": 15,
+    "rep": 1,
+    "tier": 1,
+    "book": "SRD 5.2"
+  },
+  "clear-warren": {
+    "slug": "clear-warren",
+    "name": "Clear the Warren",
+    "board": "havenbrook",
+    "faction": "havenbrook",
+    "summary": "Wipe a goblin-warren delve and report back.",
+    "goal": { "kind": "delve", "skin": "goblin-warren" },
+    "rewardXp": 200,
+    "rewardGp": 40,
+    "rep": 3,
+    "tier": 1,
+    "book": "SRD 5.2"
+  },
+  "river-bandits": {
+    "slug": "river-bandits",
+    "name": "River Bandits",
+    "board": "millhaven",
+    "faction": "millhaven",
+    "summary": "Drive bandits from the dock and road.",
+    "goal": { "kind": "kills", "template": "bandit", "count": 3 },
+    "rewardXp": 120,
+    "rewardGp": 30,
+    "rep": 2,
+    "tier": 1,
+    "book": "SRD 5.2"
+  },
+  "ogre-threat": {
+    "slug": "ogre-threat",
+    "name": "Ogre Threat",
+    "board": "millhaven",
+    "faction": "millhaven",
+    "summary": "Clear an ogre-den delve.",
+    "goal": { "kind": "delve", "skin": "ogre-den" },
+    "rewardXp": 400,
+    "rewardGp": 80,
+    "rep": 4,
+    "tier": 2,
+    "book": "SRD 5.2"
+  },
+  "mine-skirmish": {
+    "slug": "mine-skirmish",
+    "name": "Mine Skirmish",
+    "board": "ashford",
+    "faction": "ashford",
+    "summary": "Drive bandits from the hill approaches.",
+    "goal": { "kind": "kills", "template": "bandit", "count": 3 },
+    "rewardXp": 130,
+    "rewardGp": 35,
+    "rep": 2,
+    "tier": 1,
+    "book": "SRD 5.2"
+  },
+  "clear-keep": {
+    "slug": "clear-keep",
+    "name": "Haunted Keep",
+    "board": "ashford",
+    "faction": "ashford",
+    "summary": "Clear a haunted-keep delve for the guild.",
+    "goal": { "kind": "delve", "skin": "haunted-keep" },
+    "rewardXp": 500,
+    "rewardGp": 100,
+    "rep": 5,
+    "tier": 3,
+    "book": "SRD 5.2"
+  }
+}

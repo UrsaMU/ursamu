@@ -112,7 +112,7 @@ function decisionToAction(
 ): CombatAction {
   const mode = d.mode;
   const who = selfName?.trim() || "They";
-  const wpn = (weaponName ?? "pistol").trim() || "pistol";
+  const wpn = (weaponName ?? "weapon").trim() || "weapon";
   const reason = (d.reason ?? "").trim();
   const color = (fallback: string): string =>
     reason && !isMechanicalReason(reason) ? reason : fallback;
@@ -125,9 +125,9 @@ function decisionToAction(
         targetId: tid,
         ...(mode ? { mode } : {}),
         ...(d.weaponId ? { weaponId: d.weaponId } : {}),
+        ...(d.abilityId ? { abilityId: d.abilityId } : {}),
         flavor: color(
-          `${who} brings the ${wpn} on target and fires — ` +
-            `no cover, no hesitation.`,
+          `${who} lunges in with ${wpn}.`,
         ),
       };
     }
@@ -136,49 +136,40 @@ function decisionToAction(
         type: "move",
         note: d.reason,
         ...(mode ? { mode } : {}),
-        flavor: color(
-          `${who} slides to new cover, boots scraping wet asphalt.`,
-        ),
+        flavor: color(`${who} shifts position.`),
       };
     case "reload":
       return {
         type: "reload",
         ...(mode ? { mode } : {}),
-        flavor: color(
-          `${who} drops a spent mag and seats a fresh one hard.`,
-        ),
+        flavor: color(`${who} readies their weapon.`),
       };
     case "flee":
       return {
         type: "flee",
         note: d.reason,
         ...(mode ? { mode } : {}),
-        flavor: color(
-          `${who} breaks for the street, chrome glinting as ` +
-            `they run.`,
-        ),
+        flavor: color(`${who} turns to flee!`),
       };
     case "posture":
       return {
         type: "posture",
         posture: d.posture ?? { type: "guard" },
         ...(mode ? { mode } : {}),
-        flavor: color(`${who} digs in, watching every angle.`),
+        flavor: color(`${who} takes a defensive stance.`),
       };
     case "defend":
       return {
         type: "defend",
         ...(mode ? { mode } : {}),
-        flavor: color(`${who} braces, waiting for the next shot.`),
+        flavor: color(`${who} braces for the next blow.`),
       };
     case "aim":
       return {
         type: "aim",
         targetId: d.targetId,
         ...(mode ? { mode } : {}),
-        flavor: color(
-          `${who} steadies the weapon, breath thin and cold.`,
-        ),
+        flavor: color(`${who} steadies their aim.`),
       };
     case "use":
       return {
@@ -187,7 +178,7 @@ function decisionToAction(
         abilityId: d.abilityId,
         targetId: d.targetId,
         ...(mode ? { mode } : {}),
-        flavor: color(`${who} pulls a dirty little trick.`),
+        flavor: color(`${who} uses a special ability.`),
       };
     case "wait":
     default:
@@ -195,9 +186,7 @@ function decisionToAction(
         type: "wait",
         note: d.reason,
         ...(mode ? { mode } : {}),
-        flavor: color(
-          `${who} holds position, optics sweeping the alley.`,
-        ),
+        flavor: color(`${who} watches and waits.`),
       };
   }
 }
@@ -228,6 +217,12 @@ export const jsonStrategyBrain: CombatBrain = {
       : typeof ctx.selfView.meta?.weapon === "string"
       ? String(ctx.selfView.meta.weapon)
       : undefined;
+    const abilTag = (ctx.selfView.tags ?? []).find((t) =>
+      t.toLowerCase().startsWith("ability:")
+    );
+    if (abilTag && !d.abilityId) {
+      d.abilityId = abilTag.slice("ability:".length).trim();
+    }
     return decisionToAction(
       d,
       ctx.selfView.name ?? ctx.self.name,

@@ -1,0 +1,195 @@
+{
+  "id": "ashford-v1",
+  "name": "Ashford",
+  "playerStartKey": "square",
+  "linkOoc": false,
+  "rooms": [
+    {
+      "key": "square",
+      "name": "Ashford Market Ring",
+      "description": "Stone stalls circle a blackened ash tree stump. Miners and caravan masters haggle under soot-stained banners. A board lists mountain bounties and escorts (+bounty, +caravan)."
+    },
+    {
+      "key": "mine",
+      "name": "Ashford Mine Gate",
+      "description": "Timber braces frame a dark adit. Ore carts rattle. Guards wave off tourists — real work is deeper (+adv skins for higher tiers)."
+    },
+    {
+      "key": "hall",
+      "name": "Miners' Hall",
+      "description": "Long tables, tin mugs, and maps of seam lines. The guild posts contracts and pays escorts who deliver wagons intact."
+    },
+    {
+      "key": "inn",
+      "name": "The Pick and Lantern",
+      "description": "Warm stone walls and a low fire. Safe rest for dust-caked travelers (+rest/long)."
+    },
+    {
+      "key": "road",
+      "name": "South Spur to Havenbrook",
+      "description": "Switchbacks drop toward forest haze. Wagon ruts cut deep in the chalk."
+    }
+  ],
+  "exits": [
+    {
+      "from": "square",
+      "to": "mine",
+      "name": "North;N;Mine"
+    },
+    {
+      "from": "mine",
+      "to": "square",
+      "name": "South;S;Market;Out"
+    },
+    {
+      "from": "square",
+      "to": "hall",
+      "name": "East;E;Hall;Guild"
+    },
+    {
+      "from": "hall",
+      "to": "square",
+      "name": "West;W;Market;Out"
+    },
+    {
+      "from": "square",
+      "to": "inn",
+      "name": "West;W;Inn"
+    },
+    {
+      "from": "inn",
+      "to": "square",
+      "name": "East;E;Out;Market"
+    },
+    {
+      "from": "square",
+      "to": "road",
+      "name": "South;S;Road;Havenbrook"
+    },
+    {
+      "from": "road",
+      "to": "square",
+      "name": "North;N;Ashford;Market"
+    }
+  ],
+  "vendors": [
+    {
+      "room": "hall",
+      "name": "Guild Outfitter Kesh",
+      "description": "Sells sturdy tools and a few weapons to those the guild trusts.",
+      "inventory": [
+        {
+          "name": "Miner's Pick",
+          "price": 5,
+          "spec": "weapon:1d6:piercing"
+        },
+        {
+          "name": "Light Hammer",
+          "price": 2,
+          "spec": "weapon:1d4:bludgeoning:light,thrown"
+        },
+        {
+          "name": "Chain Shirt",
+          "price": 50,
+          "spec": "armor:13:medium"
+        },
+        {
+          "name": "Rope (50 ft)",
+          "price": 1,
+          "spec": "general"
+        },
+        {
+          "name": "Torch",
+          "price": 1,
+          "spec": "general"
+        },
+        {
+          "name": "Healer's Kit",
+          "price": 5,
+          "spec": "general"
+        }
+      ]
+    },
+    {
+      "room": "inn",
+      "name": "Marta the Host",
+      "description": "Quiet, keeps good stew and better gossip.",
+      "inventory": [
+        {
+          "name": "Rations",
+          "price": 2,
+          "spec": "general"
+        },
+        {
+          "name": "Bedroll",
+          "price": 1,
+          "spec": "general"
+        },
+        {
+          "name": "Potion of Healing",
+          "price": 50,
+          "spec": "potion:2d4+2"
+        },
+        {
+          "name": "Waterskin",
+          "price": 1,
+          "spec": "general"
+        }
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "room": "mine",
+      "name": "Mine Guard",
+      "template": "veteran"
+    }
+  ],
+  "map": {
+    "realm": "default",
+    "origin": {
+      "x": 128,
+      "y": 200,
+      "z": 0
+    },
+    "faction": "Ashford",
+    "tiles": [
+      {
+        "key": "square",
+        "dx": 0,
+        "dy": 0,
+        "glyph": "#",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "mine",
+        "dx": 0,
+        "dy": -1,
+        "glyph": "!",
+        "kind": "hazard"
+      },
+      {
+        "key": "hall",
+        "dx": 1,
+        "dy": 0,
+        "glyph": "+",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "inn",
+        "dx": -1,
+        "dy": 0,
+        "glyph": "#",
+        "kind": "infrastructure"
+      },
+      {
+        "key": "road",
+        "dx": 0,
+        "dy": 1,
+        "glyph": "=",
+        "kind": "infrastructure"
+      }
+    ],
+    "notes": "Ashford north of Havenbrook on map realm default."
+  }
+}

@@ -16,16 +16,19 @@
       "src",
       "help",
       "resources",
-      "templates",
       "index.ts",
       "commands.ts",
       "routes.ts",
       "deno.json",
       "ursamu.plugin.json",
-      "README.md"
+      "README.md",
+      "FIRST-HOUR.md"
     ],
     "exclude": [
-      "tests"
+      "tests",
+      "tools",
+      "showcases",
+      "data"
     ]
   },
   "imports": {
@@ -33,8 +36,17 @@
     "@ursamu/ursamu": "../mush/mod.ts",
     "@ursamu/mush": "../mush/mod.ts",
     "@ursamu/combat": "../combat/mod.ts",
-    "@ursamu/help-plugin": "jsr:@ursamu/help@^0.1.2",
-    "@ursamu/help": "jsr:@ursamu/help@^0.1.2",
+    "@ursamu/jobs": "../jobs/mod.ts",
+    "@ursamu/jobs-plugin": "../jobs/mod.ts",
+    "@ursamu/vendor-plugin": "../vendor/index.ts",
+    "@ursamu/vendor": "../vendor/mod.ts",
+    "@ursamu/help-plugin": "../help/register.ts",
+    "@ursamu/help": "../help/register.ts",
+    "@ursamu/map-plugin": "../map/index.ts",
+    "@ursamu/map": "../map/index.ts",
+    "@ursamu/mail": "../mail/mod.ts",
+    "@ursamu/mail-plugin": "../mail/mod.ts",
+    "@ursamu/site": "../site/src/index.ts",
     "@ursamu/mushcode": "jsr:@ursamu/mushcode@^0.7.0",
     "@ursamu/mushcode/eval": "jsr:@ursamu/mushcode@^0.7.0/eval",
     "@ursamu/mushcode/parse": "jsr:@ursamu/mushcode@^0.7.0/parse",
