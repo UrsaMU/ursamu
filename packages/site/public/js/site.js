@@ -1226,18 +1226,59 @@
     return false;
   }
 
-  function probeAuth() {
-    var token = "";
-    try {
-      token = sessionStorage.getItem("ursamu.webAdmin.token") || "";
-    } catch (_) {}
+  var AUTH_TOKEN_KEY = "ursamu.webAdmin.token";
 
+  /** Durable token: session first, then localStorage (mobile Safari). */
+  function readAuthToken() {
+    try {
+      var s = sessionStorage.getItem(AUTH_TOKEN_KEY) || "";
+      if (s) return s;
+    } catch (_) { /* private mode */ }
+    try {
+      var l = localStorage.getItem(AUTH_TOKEN_KEY) || "";
+      if (l) {
+        try { sessionStorage.setItem(AUTH_TOKEN_KEY, l); } catch (_) {}
+        return l;
+      }
+    } catch (_) { /* private mode */ }
+    return "";
+  }
+
+  function writeAuthToken(tok) {
+    var t = String(tok || "");
+    if (!t) return;
+    try { sessionStorage.setItem(AUTH_TOKEN_KEY, t); } catch (_) {}
+    try { localStorage.setItem(AUTH_TOKEN_KEY, t); } catch (_) {}
+  }
+
+  function clearAuthToken() {
+    try { sessionStorage.removeItem(AUTH_TOKEN_KEY); } catch (_) {}
+    try { localStorage.removeItem(AUTH_TOKEN_KEY); } catch (_) {}
+  }
+
+  function probeAuth() {
+    var token = readAuthToken();
     if (!token) return Promise.resolve(null);
 
-    return fetch("/api/v1/me", {
+    // Mobile networks can stall /api/v1/me — time out so /play
+    // is never blocked forever on the pre-load skeleton.
+    var ctrl = null;
+    var timer = null;
+    var opts = {
       headers: { "Authorization": "Bearer " + token },
       credentials: "same-origin",
-    })
+    };
+    try {
+      if (typeof AbortController !== "undefined") {
+        ctrl = new AbortController();
+        opts.signal = ctrl.signal;
+        timer = setTimeout(function () {
+          try { ctrl.abort(); } catch (_) { /* ignore */ }
+        }, 8000);
+      }
+    } catch (_) { /* ignore */ }
+
+    return fetch("/api/v1/me", opts)
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (me) {
         if (!me || !me.id) return null;
@@ -1256,7 +1297,10 @@
           isStaff: isStaff,
         };
       })
-      .catch(function () { return null; });
+      .catch(function () { return null; })
+      .finally(function () {
+        if (timer) clearTimeout(timer);
+      });
   }
 
   function doSignOut() {
@@ -1265,8 +1309,7 @@
         globalThis.SitePlay.destroy();
       }
     } catch (_) { /* ignore */ }
-    try { sessionStorage.removeItem("ursamu.webAdmin.token"); } catch (_) {}
-    try { localStorage.removeItem("ursamu.webAdmin.token"); } catch (_) {}
+    clearAuthToken();
     try { bustHelpIndex(); } catch (_) { /* defined later */ }
     window.location.href = pubPath("");
   }
@@ -1734,7 +1777,7 @@
               return;
             }
             try {
-              sessionStorage.setItem("ursamu.webAdmin.token", res.data.token);
+              writeAuthToken(res.data.token);
             } catch (_) {}
             probeAuth().then(function (u) {
               currentUser = u;
@@ -2012,8 +2055,7 @@
   function helpAuthHeaders() {
     var headers = {};
     try {
-      var tok = sessionStorage.getItem("ursamu.webAdmin.token") ||
-        "";
+      var tok = readAuthToken();
       if (tok) {
         headers["Authorization"] = "Bearer " + tok;
       }
@@ -2608,11 +2650,33 @@
         return loadChargenRoute();
       });
     } else if (MODE === "play") {
-      // Auth required — guests go to /login?next=/play
-      articlePromise = authPromise.then(function (user) {
-        currentUser = user;
-        if (!guardRouteAccess(user)) return null;
-        return loadPlayRoute();
+      // Mount play ASAP when a token exists — do not wait on
+      // /api/v1/me (mobile stalls left the skeleton forever).
+      articlePromise = Promise.resolve().then(function () {
+        var tok = readAuthToken();
+        if (!tok && !isDemoQuery()) {
+          redirectToLogin();
+          return null;
+        }
+        return loadPlayRoute().then(function (ok) {
+          return authPromise.then(function (user) {
+            currentUser = user;
+            if (!user && !isDemoQuery()) {
+              redirectToLogin();
+              return null;
+            }
+            if (user && !navRequireMet(
+              requireForPath(pathname),
+              user,
+            )) {
+              guardRouteAccess(user);
+              return null;
+            }
+            renderTopNav(user);
+            updateNavUser(user);
+            return ok;
+          });
+        });
       });
     } else if (MODE === "help") {
       articlePromise = loadHelpRoute();
