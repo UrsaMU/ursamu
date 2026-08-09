@@ -10,7 +10,7 @@
 
 import { DBO, gameHooks, getConfig } from "@ursamu/mush";
 import { addMiddleware, sessions } from "@ursamu/core";
-import { registerHelpDir } from "@ursamu/help-plugin";
+import { registerHelpDir } from "@ursamu/help/register";
 import type { IPlugin, SessionEvent } from "@ursamu/mush";
 import type { IMiddlewareFn } from "@ursamu/core";
 
@@ -166,9 +166,9 @@ const onStaffReady = (): void => {
 
 export const channelsPlugin: IPlugin = {
   name: "@ursamu/channels",
-  version: "1.1.0",
+  version: "1.2.4",
   description:
-    "Channel system: chat, aliases, history, staff REST/UI.",
+    "Channel system: chat, aliases, history, web hub, staff REST.",
 
   init: () => {
     import("./src/commands/verbs.ts");

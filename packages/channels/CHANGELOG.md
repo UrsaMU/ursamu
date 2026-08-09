@@ -3,6 +3,48 @@
 All notable changes to `@ursamu/channels` are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.4] - 2026-08-09
+
+### Changed
+
+- Monorepo source synced with court/JSR web hub (1.2.0–1.2.3):
+  channel chat bubbles, dense `/play` hub, colored badges
+- Dual room join (name + id) for Discord inject delivery
+- Staff REST list returns `{ items, channels }`; history via
+  `/messages` as well as `/history`
+
+## [1.2.3] - 2026-08-07
+
+### Fixed
+
+- Channel badge keeps MUSH color codes (no uppercase/truncate)
+  so web clients can render colored headers
+
+## [1.2.2] - 2026-08-07
+
+### Added
+
+- Web channel speech uses chat bubbles (like say/pose/OOC)
+  with channel badge, avatar, and pose/say modes
+
+## [1.2.1] - 2026-08-07
+
+### Changed
+
+- Dense `/play` hub (mail/jobs grid): alias | on/off | channel |
+  title·online; available | count | flags | join as
+- Compact alias tools (mute/who/leave with alias badge)
+- Web who UI (`alias who`, `allcom who`, `@cwho`) and history
+  panels (`@chanhistory` / `@chantranscript`)
+- Hub refresh after clearcom / comtitle
+
+## [1.2.0] - 2026-08-05
+
+### Added
+
+- Interactive `/play` hub for `@channel`, `clist`, `comlist`
+- Click-to-join, speak fill, mute, leave
+
 ## [1.1.0] - 2026-08-04
 
 ### Added

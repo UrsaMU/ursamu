@@ -3,18 +3,33 @@
 MUX-style chat channels for UrsaMU: player aliases, staff admin,
 history, and optional connect/join announcements.
 
-**Current version: 1.0.0** (stable). See `CHANGELOG.md`.
+**Current version: 1.2.1**. See `CHANGELOG.md`.
 
 ## 1.0 contract (public API)
+
+### Web UI (`/play`)
+
+`@channel`, `+channels`, `@clist`, and `comlist` open a dense
+interactive hub on web clients (same grid density as mail/jobs):
+
+- **Your aliases** — click to speak (prompt fill); role = on/off
+- **Alias tools** — mute / who / leave (badge = alias)
+- **Available** — one-click join (default alias); online + flags
+- **Who** — `alias who`, `allcom who`, `@cwho` as entity lists
+- **History** — `@chanhistory` / `@chantranscript` as panels
+- **Staff** — create / set / history / who / full list fills
+
+Telnet keeps classic text listings.
 
 ### Supported player commands
 
 | Command | Purpose |
 |---------|---------|
+| `@channel` / `+channels` | Channel hub (web UI) |
 | `addcom <alias>=<channel>` | Join with alias |
 | `delcom <alias>` | Drop one alias |
 | `clearcom` | Drop all aliases |
-| `comlist` | List your aliases |
+| `comlist` | List your aliases (web hub) |
 | `allcom on\|off\|who` | Bulk mute / unmute / who |
 | `comtitle <alias>=<title>` | Per-channel title |
 | `<alias> <text>` | Speak |
@@ -84,7 +99,7 @@ Or list `"@ursamu/channels"` in `server.plugins`.
 
 - `jsr:@ursamu/mush` >= 1.0.0
 - `jsr:@ursamu/core` >= 1.0.0
-- `jsr:@ursamu/help` >= 0.1.9 (help files)
+- `jsr:@ursamu/help` >= 1.2.1 (help files)
 
 ### Explicit non-goals (not TinyMUX 2.12)
 
