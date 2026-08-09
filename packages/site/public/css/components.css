@@ -48,8 +48,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.15rem;
-  height: 2.15rem;
+  width: var(--site-search-h, 2.75rem);
+  height: var(--site-search-h, 2.75rem);
   margin: 0;
   padding: 0;
   border: 1px solid var(--site-border);
@@ -67,19 +67,24 @@
 /*
  * Search glyph: skins set --site-search-icon to a url(…).
  * When none, show a text fallback via ::before.
+ * Size ~72% of the 44px control (was 50% — too small).
  */
 .site-search__btn-icon {
-  width: 50%;
-  height: 50%;
-  display: block;
+  width: 1.375rem;
+  height: 1.375rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: center / contain no-repeat var(--site-search-icon);
-  font-size: 0.85rem;
+  font-size: 1.375rem;
   line-height: 1;
 }
 
 .site-search__btn-icon::before {
   content: "⌕";
   color: var(--site-text-secondary);
+  font-size: 1.375rem;
+  line-height: 1;
 }
 
 /* Hide glyph when a real icon URL is provided (skins override fully) */
@@ -246,7 +251,7 @@
   font-family: var(--site-font-display);
   font-size: 1.15rem;
   font-weight: 600;
-  color: var(--site-text);
+  color: var(--site-accent);
   line-height: 1.25;
 }
 
@@ -257,7 +262,7 @@
   font-family: var(--site-font-display);
   font-size: 1rem;
   font-weight: 600;
-  color: var(--site-text-secondary);
+  color: var(--site-accent-hover);
 }
 
 /* ── Paragraph ────────────────────────────────────────────────────── */
@@ -765,15 +770,15 @@
 }
 
 .site-gate-btn--primary {
-  border-color: var(--site-btn-bg, var(--site-accent));
-  background: var(--site-btn-bg, var(--site-accent));
-  color: var(--site-btn-fg, var(--site-bg));
+  border-color: transparent;
+  background: var(--site-btn-bg);
+  color: var(--site-btn-fg);
 }
 
 .site-gate-btn--primary:hover {
-  background: var(--site-btn-bg-hover, var(--site-accent-hover));
-  border-color: var(--site-btn-bg-hover, var(--site-accent-hover));
-  color: var(--site-btn-fg, var(--site-bg));
+  background: var(--site-btn-bg-hover);
+  border-color: transparent;
+  color: var(--site-btn-fg);
 }
 
 /* ── Auth form controls (admin-scale) ───────────────────────────── */
@@ -854,20 +859,21 @@
 .site-auth-submit {
   width: 100%;
   margin-top: 0.35rem;
-  min-height: 2.85rem;
+  min-height: var(--site-control-h, 2.35rem);
   border: 0;
-  border-radius: var(--site-radius-sm, 6px);
-  background: var(--site-btn-bg, var(--site-accent));
-  color: var(--site-btn-fg, var(--site-bg));
+  border-radius: var(--site-radius-sm, 4px);
+  background: var(--site-btn-bg);
+  color: var(--site-btn-fg);
   font-family: var(--site-font-ui);
-  font-size: 1.05rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .site-auth-submit:hover {
-  background: var(--site-btn-bg-hover, var(--site-accent-hover));
+  background: var(--site-btn-bg-hover);
+  color: var(--site-btn-fg);
 }
 
 .site-auth-submit:disabled {

@@ -886,6 +886,11 @@
     if (shell) {
       shell.classList.toggle("is-mode-login", MODE === "login");
       shell.classList.toggle("is-mode-profile", MODE === "profile");
+      /* Figma shell modes — layout.css / chargen.css keys off these */
+      shell.classList.toggle("is-mode-chargen", MODE === "chargen");
+      shell.classList.toggle("is-mode-play", MODE === "play");
+      shell.classList.toggle("is-mode-help", MODE === "help");
+      shell.classList.toggle("is-mode-wiki", MODE === "wiki");
     }
     if (MODE === "login") {
       if (leftAside) leftAside.hidden = true;
@@ -2422,28 +2427,69 @@
     });
   }
 
-  /** /chargen — guided stepper FE (loads chargen.js once). */
+  /** /chargen — D&D first (meta probe), else CoFD chargen.js. */
   var chargenScriptPromise = null;
+  var chargenSystem = null; // "dnd" | "cofd" | null
+  function probeChargenSystem() {
+    if (chargenSystem) {
+      return Promise.resolve(chargenSystem);
+    }
+    return fetch("/api/v1/dnd/meta", { credentials: "same-origin" })
+      .then(function (r) {
+        return r.ok ? r.json() : null;
+      })
+      .then(function (j) {
+        if (j && (j.system === "dnd" || j.chargenApi)) {
+          chargenSystem = "dnd";
+          return "dnd";
+        }
+        chargenSystem = "cofd";
+        return "cofd";
+      })
+      .catch(function () {
+        chargenSystem = "cofd";
+        return "cofd";
+      });
+  }
+  function loadChargenScript(sys) {
+    var src = sys === "dnd"
+      ? "/site/js/dnd-chargen.js?v=20260809playmob"
+      : "/site/js/chargen.js?v=20260809playmob";
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.async = true;
+      s.onload = function () { resolve(true); };
+      s.onerror = function () {
+        reject(new Error(src + " failed to load"));
+      };
+      document.head.appendChild(s);
+    });
+  }
   function loadChargenRoute() {
     injectLoadingState("Character");
     function boot() {
+      if (
+        chargenSystem === "dnd" &&
+        globalThis.SiteDndChargen &&
+        globalThis.SiteDndChargen.boot
+      ) {
+        return globalThis.SiteDndChargen.boot();
+      }
       if (globalThis.SiteChargen && globalThis.SiteChargen.boot) {
         return globalThis.SiteChargen.boot();
       }
       return Promise.resolve(null);
     }
-    if (globalThis.SiteChargen) return boot();
+    if (globalThis.SiteDndChargen || globalThis.SiteChargen) {
+      return boot();
+    }
     if (!chargenScriptPromise) {
-      chargenScriptPromise = new Promise(function (resolve, reject) {
-        var s = document.createElement("script");
-        s.src = "/site/js/chargen.js?v=20260806nowipe";
-        s.async = true;
-        s.onload = function () { resolve(true); };
-        s.onerror = function () {
-          reject(new Error("chargen.js failed to load"));
-        };
-        document.head.appendChild(s);
-      });
+      chargenScriptPromise = probeChargenSystem().then(
+        function (sys) {
+          return loadChargenScript(sys);
+        },
+      );
     }
     return chargenScriptPromise.then(boot).catch(function () {
       if (mainEl) {
@@ -2463,7 +2509,7 @@
       var link = document.createElement("link");
       link.id = "site-play-css";
       link.rel = "stylesheet";
-      link.href = "/site/css/play.css?v=20260806bq";
+      link.href = "/site/css/play.css?v=20260809playmob";
       document.head.appendChild(link);
     }
     // Separate file: CSP blocks inline style=; classes live here.
@@ -2471,8 +2517,16 @@
       var pal = document.createElement("link");
       pal.id = "site-play-palette-css";
       pal.rel = "stylesheet";
-      pal.href = "/site/css/play-palette.css?v=20260805btngrow";
+      pal.href = "/site/css/play-palette.css?v=20260809playmob";
       document.head.appendChild(pal);
+    }
+    // +sheet HTML uses .dnd-sheet from chargen stylesheet
+    if (!document.getElementById("site-dnd-sheet-css")) {
+      var sh = document.createElement("link");
+      sh.id = "site-dnd-sheet-css";
+      sh.rel = "stylesheet";
+      sh.href = "/site/css/dnd-chargen.css?v=20260809playmob";
+      document.head.appendChild(sh);
     }
   }
   function loadPlayRoute() {
@@ -2506,7 +2560,7 @@
     if (!playScriptPromise) {
       playScriptPromise = new Promise(function (resolve, reject) {
         var s = document.createElement("script");
-        s.src = "/site/js/play.js?v=20260806cmdhist";
+        s.src = "/site/js/play.js?v=20260809playmob";
         s.async = true;
         s.onload = function () { resolve(true); };
         s.onerror = function () {

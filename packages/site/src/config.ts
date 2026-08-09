@@ -111,7 +111,7 @@ export function markNavActive(
 }
 
 /** Cache-bust query for shipped site CSS (bump when layout/tokens change). */
-export const SITE_ASSET_V = "20260806wikinologo";
+export const SITE_ASSET_V = "20260809playmob";
 
 /** Resolve stylesheet href for the active skin. */
 export function resolveSkinHref(cfg: SitePluginConfig): string {
@@ -190,12 +190,17 @@ export function readSiteConfig(
         const id = typeof r.id === "string" && r.id.trim()
           ? r.id.trim()
           : undefined;
+        const require = typeof r.require === "string" &&
+            r.require.trim()
+          ? r.require.trim()
+          : undefined;
         return {
           id,
           label: String(r.label ?? "Link"),
           href: String(r.href ?? "#"),
           active: r.active === true,
           order,
+          require,
         };
       });
   }

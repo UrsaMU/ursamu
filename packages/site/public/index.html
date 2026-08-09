@@ -11,26 +11,22 @@
 
     <!-- Base: reset → tokens → layout → components → skin
          ?v= busts sticky browser caches during skin iteration -->
-    <link rel="stylesheet" href="/site/css/reset.css?v=20260804loginctr" />
-    <link rel="stylesheet" href="/site/css/tokens.css?v=20260806layoutfix" />
-    <link rel="stylesheet" href="/site/css/layout.css?v=20260806featured" />
-    <link rel="stylesheet" href="/site/css/components.css?v=20260804loginctr" />
+    <link rel="stylesheet" href="/site/css/reset.css?v=20260809playmob" />
+    <link rel="stylesheet" href="/site/css/tokens.css?v=20260809playmob" />
+    <link rel="stylesheet" href="/site/css/layout.css?v=20260809playmob" />
+    <link rel="stylesheet" href="/site/css/components.css?v=20260809playmob" />
     <!--
-      Skin stylesheet. Swap via:
-        - data-skin="court" | "default" on <html>
+      Skin stylesheet. Default = UrsaMU violet night (staff-theme).
+      Court cream/gold is an installable theme, not the builtin default.
         - plugins.site.skin / skinCss in config.json
-        - or replace this href with your own CSS file
     -->
     <link
       rel="stylesheet"
-      href="/site/css/skins/default.css?v=20260804loginctr"
+      href="/site/css/skins/default.css?v=20260809playmob"
       data-site-skin
     />
 
-    <!-- Display face for changeling / court skins -->
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Smythe&display=swap");
-    </style>
+    <!-- Inter — same UI stack as staff console (staff-theme.css) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       rel="preconnect"
@@ -38,11 +34,11 @@
       crossorigin
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
-    <script src="/site/js/site.js?v=20260806featured" defer></script>
+    <script src="/site/js/site.js?v=20260809playmob" defer></script>
   </head>
   <body>
     <div

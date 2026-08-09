@@ -1,0 +1,633 @@
+/**
+ * D&D chargen extras — CoFD-aligned.
+ * Right rail: compact draft + quick links (desktop only).
+ */
+
+.cg-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
+
+.site-shell.is-mode-chargen .site-main {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.site-shell.is-mode-chargen .site-main > .cg-root {
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+/* ── Right rail draft (314px aside — stay narrow) ───────── */
+
+.cg-sheet--rail {
+  font-size: 0.8125rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.cg-sheet--rail .cg-sheet__block {
+  margin-bottom: 0.65rem;
+}
+
+.cg-sheet--rail .cg-sheet__label {
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-accent);
+  margin: 0 0 0.15rem;
+  font-weight: 600;
+}
+
+.cg-sheet--rail .cg-sheet__value {
+  margin: 0;
+  color: var(--site-text);
+  line-height: 1.35;
+  font-size: 0.8125rem;
+}
+
+.cg-sheet--rail .cg-sheet__muted {
+  color: var(--site-text-muted);
+  font-weight: 400;
+}
+
+.cg-sheet--rail .cg-sheet__ok {
+  color: var(--site-success, #4ade9f);
+  font-weight: 600;
+}
+
+.cg-sheet--rail .cg-sheet__warn {
+  margin: 0.5rem 0 0;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--site-error, #ff8a8f);
+  border: 1px solid color-mix(
+    in srgb,
+    var(--site-error, #ff8a8f) 35%,
+    transparent
+  );
+  border-radius: var(--site-radius-sm, 4px);
+  background: color-mix(
+    in srgb,
+    var(--site-error, #ff8a8f) 10%,
+    transparent
+  );
+}
+
+/* 3×2 ability strip — fits ~280px content width */
+.cg-sheet__abils {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.2rem 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.cg-sheet__abils li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.15rem 0.3rem;
+  background: var(--site-bg-surface);
+  border: 1px solid var(--site-border-subtle);
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.cg-sheet__abils li span {
+  color: var(--site-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.cg-sheet__abils li strong {
+  color: var(--site-text);
+  font-weight: 700;
+}
+
+.cg-rail-links {
+  margin-top: 1.25rem;
+}
+
+.cg-rail-links .site-menu__list a {
+  font-size: 0.875rem;
+}
+
+/* Multi-select chips */
+.cg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.cg-chip {
+  border: 1px solid var(--site-border-subtle);
+  background: var(--site-bg-surface);
+  color: var(--site-text);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.cg-chip:hover {
+  border-color: var(--site-accent-border);
+}
+
+.cg-chip.is-on {
+  background: var(--site-accent-muted);
+  border-color: var(--site-accent);
+  color: var(--site-accent);
+  font-weight: 600;
+}
+
+/* Gear cards + ability grid — full main width */
+.cg-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.cg-ability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+.cg-stepper-num {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cg-stepper-num button {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 4px;
+  border: 1px solid var(--site-border);
+  background: var(--site-bg-surface);
+  color: var(--site-text);
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.cg-stepper-num button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.cg-stepper-num__val {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cg-sheet-pre {
+  white-space: pre-wrap;
+  font-family: var(--site-font-mono, ui-monospace, monospace);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  padding: 1.15rem 1.25rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: 4px;
+  background: var(--site-bg-surface);
+  color: var(--site-text-secondary);
+  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Full main-column width (was capped at 32rem) */
+.cg-catalog-picker,
+.cg-catalog-picker .cg-field,
+.cg-catalog-picker .cg-input,
+.cg-catalog-picker .cg-merit-suggest {
+  max-width: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Live D&D 5e character sheet ───────────────────────────
+ * Full-width sections stacked vertically; items inside grow
+ * across columns (1fr tracks).
+ */
+
+.dnd-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+}
+
+.dnd-sheet__banner {
+  flex: 0 0 auto;
+  width: 100%;
+  margin: 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: var(--site-radius-md, 6px);
+  background: var(--site-bg-surface);
+  box-sizing: border-box;
+}
+
+.dnd-sheet__name {
+  margin: 0 0 0.25rem;
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-h1, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  /* Default accent; moniker %c spans override via .mush-fg-* */
+  color: var(--site-accent);
+  letter-spacing: -0.02em;
+}
+
+.dnd-sheet__name .mush-text {
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.dnd-sheet__class {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--site-text);
+}
+
+.dnd-sheet__meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--site-text-muted);
+}
+
+/* Equal-grow combat chips across full width */
+.dnd-sheet__combat {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0;
+}
+
+.dnd-sheet__combat .dnd-sheet__stat {
+  flex: 1 1 5.5rem;
+}
+
+.dnd-sheet__stat,
+.dnd-sheet__hp,
+.dnd-sheet__hd,
+.dnd-sheet__gold {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2rem;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: var(--site-radius-sm, 4px);
+  background: var(--site-bg-surface);
+  box-sizing: border-box;
+}
+
+.dnd-sheet__stat-l {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-text-muted);
+}
+
+.dnd-sheet__stat-v,
+.dnd-sheet__hp-val {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--site-text);
+  line-height: 1.2;
+}
+
+.dnd-sheet__temp {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--site-info, #8ec5ff);
+}
+
+.dnd-sheet__hp-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0;
+}
+
+.dnd-sheet__hp-row > * {
+  flex: 1 1 8rem;
+}
+
+/* Stack full-width sections; no side-by-side panels */
+.dnd-sheet__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dnd-sheet__panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: var(--site-radius-sm, 4px);
+  background: var(--site-bg-surface);
+  box-sizing: border-box;
+}
+
+.dnd-sheet__panel--wide {
+  width: 100%;
+}
+
+.dnd-sheet__h {
+  flex: 0 0 auto;
+  margin: 0 0 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--site-accent);
+}
+
+/* Six ability boxes grow across the row */
+.dnd-sheet__abils {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+.dnd-sheet__abil {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  flex: 1 1 5rem;
+  min-width: 4.5rem;
+  padding: 0.55rem 0.35rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: 4px;
+  background: var(--site-bg, transparent);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.dnd-sheet__abil-name {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--site-text-muted);
+}
+
+.dnd-sheet__abil-mod {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--site-accent);
+  line-height: 1.1;
+}
+
+.dnd-sheet__abil-score {
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--site-text-secondary);
+}
+
+/* Saves / skills: multi-column, items grow */
+.dnd-sheet__checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.25rem 0.85rem;
+  width: 100%;
+  flex: 1 1 auto;
+}
+
+/* Prefer 4 equal columns when space allows */
+.dnd-sheet__checks--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .dnd-sheet__checks--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .dnd-sheet__checks--4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dnd-sheet__checks li {
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr) auto;
+  gap: 0.35rem;
+  align-items: baseline;
+  min-width: 0;
+  padding: 0.2rem 0.15rem;
+  font-size: 0.85rem;
+  color: var(--site-text-secondary);
+}
+
+.dnd-sheet__checks li.is-prof {
+  color: var(--site-text);
+  font-weight: 500;
+}
+
+.dnd-sheet__checks li strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--site-text);
+}
+
+.dnd-sheet__mark {
+  color: var(--site-accent);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.dnd-sheet__ab {
+  font-size: 0.65rem;
+  color: var(--site-text-muted);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.dnd-sheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  width: 100%;
+  flex: 1 1 auto;
+  font-size: 0.875rem;
+  color: var(--site-text);
+}
+
+.dnd-sheet__list li {
+  flex: 1 1 10rem;
+  min-width: 0;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: var(--site-radius-sm, 4px);
+  background: var(--site-bg, transparent);
+  box-sizing: border-box;
+}
+
+.dnd-sheet__list--wrap li {
+  flex: 0 1 auto;
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.dnd-sheet__slots {
+  list-style: none;
+  margin: 0 0 0.65rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.dnd-sheet__slots li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1 1 5rem;
+  min-width: 4.5rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--site-border-subtle);
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 0.75rem;
+  color: var(--site-text-muted);
+}
+
+.dnd-sheet__slots li strong {
+  font-size: 0.95rem;
+  color: var(--site-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.dnd-sheet__empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--site-text-muted);
+}
+
+.dnd-sheet__foot {
+  margin: 1.25rem 0 0;
+  font-size: 0.875rem;
+}
+
+.dnd-sheet__foot code {
+  font-size: 0.85em;
+}
+
+/* Mobile: sheet fills the content column (chargen + play) */
+@media (max-width: 1024px) {
+  .dnd-sheet {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    gap: 0.55rem;
+  }
+
+  .site-shell.is-mode-chargen .site-main,
+  .site-shell.is-mode-chargen .cg-root {
+    width: 100%;
+    max-width: none;
+    padding-inline: 0;
+  }
+
+  .site-shell.is-mode-chargen .dnd-sheet,
+  .cg-root .dnd-sheet {
+    width: 100%;
+    max-width: none;
+  }
+
+  .dnd-sheet__banner {
+    border-radius: 0;
+    padding: 0.85rem 0.75rem;
+  }
+
+  .dnd-sheet__panel {
+    border-radius: 0;
+    padding: 0.75rem 0.65rem;
+  }
+
+  .dnd-sheet__name {
+    font-size: clamp(1.35rem, 6vw, 1.85rem);
+  }
+
+  .dnd-sheet__combat .dnd-sheet__stat {
+    flex: 1 1 calc(50% - 0.35rem);
+  }
+
+  .dnd-sheet__abil {
+    flex: 1 1 calc(33.333% - 0.3rem);
+    min-width: 0;
+  }
+
+  .dnd-sheet__checks--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .dnd-sheet__checks--4 {
+    grid-template-columns: 1fr;
+  }
+
+  .dnd-sheet__combat .dnd-sheet__stat {
+    flex: 1 1 100%;
+  }
+}

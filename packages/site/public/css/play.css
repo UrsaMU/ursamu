@@ -372,10 +372,30 @@
   color: var(--site-text-muted);
 }
 
-/* ── +sheet web layout ───────────────────────────────────────── */
+/* ── +sheet web layout (legacy list layout) ─────────────────── */
 
 .play-layout--sheet .play-layout__header {
   margin-bottom: 0.35rem;
+}
+
+/* Full D&D character sheet (+sheet on web) */
+.play-layout--dnd-sheet {
+  width: 100%;
+  max-width: none;
+  margin: 0.25rem 0 0.85rem;
+  box-sizing: border-box;
+}
+
+.play-layout--dnd-sheet .dnd-sheet {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.play-msg:has(.play-layout--dnd-sheet),
+.play-msg:has(.dnd-sheet) {
+  width: 100%;
+  max-width: none;
 }
 
 .play-layout--sheet .play-layout__text {
@@ -827,17 +847,17 @@
 
 .play-entity {
   display: grid;
+  /* name | role | idle/meta | desc (+30% name again) */
   grid-template-columns:
-    minmax(0, 12rem)
-    minmax(4.5rem, 7.5rem)
-    3.25rem
+    minmax(0, 19.5rem)
+    minmax(0, 5rem)
+    minmax(0, 4.5rem)
     minmax(0, 1fr);
-  /* Vertically center name | role | idle | short-desc */
   align-items: center;
-  column-gap: 0.65rem;
+  column-gap: 0.5rem;
   width: 100%;
   margin: 0;
-  padding: 0.45rem 0.15rem;
+  padding: 0.5rem 0.65rem 0.5rem 0.85rem;
   box-sizing: border-box;
   text-align: left;
   font: inherit;
@@ -849,8 +869,109 @@
   cursor: pointer;
 }
 
+/*
+ * Look CONFORMAT-style rows: fixed tracks so every item is a cell
+ * and name | role | idle | desc columns line up across the list.
+ */
+.play-layout--look .play-entity {
+  grid-template-columns:
+    minmax(0, 22rem)
+    minmax(4.5rem, 5.5rem)
+    minmax(2.75rem, 3.5rem)
+    minmax(0, 1fr);
+  column-gap: 0.55rem;
+}
+
+/* Shop: name + role + price + desc */
+.play-layout--vendor-shop .play-entity,
+.play-layout--vendor-sell .play-entity {
+  grid-template-columns:
+    minmax(0, 17.6rem)
+    minmax(0, 3.25rem)
+    minmax(0, 5.5rem)
+    minmax(0, 1fr);
+  column-gap: 0.4rem;
+}
+
+/*
+ * Inventory: wider status col so "wielded" / "worn" / "tap · wield"
+ * are not clipped (meta is col 3).
+ */
+.play-layout--dnd-inventory .play-entity,
+.play-layout--inventory .play-entity {
+  grid-template-columns:
+    minmax(0, 17.6rem)
+    minmax(0, 2.5rem)
+    minmax(5.75rem, 7rem)
+    minmax(0, 1fr);
+  column-gap: 0.45rem;
+}
+
+.play-layout--dnd-inventory .play-entity__meta,
+.play-layout--inventory .play-entity__meta {
+  max-width: none;
+  min-width: 5.75rem;
+  justify-content: flex-start;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: 0.8rem;
+}
+
+/* Keep empty role/idle cells so columns stay aligned */
+.play-layout--look .play-entity__role-col,
+.play-layout--look .play-entity__meta,
+.play-layout--vendor-shop .play-entity__role-col,
+.play-layout--vendor-shop .play-entity__meta,
+.play-layout--dnd-inventory .play-entity__role-col,
+.play-layout--dnd-inventory .play-entity__meta,
+.play-layout--inventory .play-entity__role-col,
+.play-layout--inventory .play-entity__meta {
+  display: flex !important;
+  min-height: 1.1em;
+}
+
 .play-entity--static {
   cursor: default;
+}
+
+/* Shop proficiency: soft background, no text marks (mobile-safe) */
+.play-entity--usable {
+  background: color-mix(
+    in srgb,
+    var(--site-accent, #c9a227) 14%,
+    transparent
+  );
+  border-left: 3px solid var(--site-accent, #c9a227);
+  /* Clear the accent bar — name was flush against the edge */
+  padding-left: 1rem;
+  box-sizing: border-box;
+}
+
+.play-entity--usable:hover:not(.play-entity--static) {
+  background: color-mix(
+    in srgb,
+    var(--site-accent, #c9a227) 22%,
+    transparent
+  );
+}
+
+.play-entity--unusable {
+  opacity: 0.72;
+  padding-left: 1rem;
+}
+
+.play-entity--unusable .play-entity__name {
+  color: var(--site-text-muted, var(--site-text));
+}
+
+/* Shop list: extra room so names never hug the left edge */
+.play-layout--vendor-shop .play-entity {
+  padding-left: 1rem;
+  padding-right: 0.75rem;
+}
+
+.play-layout--vendor-shop .play-entity--usable {
+  padding-left: 1.1rem;
 }
 
 .play-entity:hover:not(.play-entity--static) {
@@ -868,9 +989,20 @@
   align-items: center;
   gap: 0.25rem;
   min-width: 0;
-  max-width: 12rem;
+  max-width: 19.5rem;
   overflow: hidden;
   line-height: 1.25;
+}
+
+.play-layout--vendor-shop .play-entity__name-col,
+.play-layout--vendor-sell .play-entity__name-col,
+.play-layout--dnd-inventory .play-entity__name-col,
+.play-layout--inventory .play-entity__name-col {
+  max-width: 17.6rem;
+}
+
+.play-layout--look .play-entity__name-col {
+  max-width: 22rem;
 }
 
 .play-entity__name {
@@ -1036,26 +1168,77 @@
    */
   .play-entity {
     display: grid;
+    /* Cap name; don't let it take 1.2fr of a phone row */
     grid-template-columns:
-      minmax(0, 1.2fr)
+      minmax(0, 16.4rem)
       minmax(0, max-content)
       minmax(0, max-content)
       minmax(0, 1fr);
     grid-template-rows: auto;
     align-items: center;
-    column-gap: 0.3rem;
+    column-gap: 0.35rem;
     row-gap: 0;
-    padding: 0.35rem 0.05rem;
-    /* Prevent flex/grid children from forcing a second line */
+    padding: 0.4rem 0.5rem 0.4rem 0.9rem;
     flex-wrap: nowrap;
+  }
+
+  .play-layout--vendor-shop .play-entity,
+  .play-layout--vendor-sell .play-entity,
+  .play-entity--usable,
+  .play-entity--unusable {
+    padding-left: 1rem;
+    grid-template-columns:
+      minmax(0, 15.9rem)
+      minmax(0, 2.5rem)
+      minmax(0, 4.25rem)
+      minmax(0, 1fr);
+  }
+
+  .play-layout--dnd-inventory .play-entity,
+  .play-layout--inventory .play-entity {
+    padding-left: 1rem;
+    grid-template-columns:
+      minmax(0, 14.4rem)
+      minmax(0, 1.5rem)
+      minmax(5.5rem, 6.5rem)
+      minmax(0, 1fr);
+  }
+
+  .play-layout--dnd-inventory .play-entity__meta,
+  .play-layout--inventory .play-entity__meta {
+    max-width: none;
+    min-width: 5.5rem;
+    overflow: visible;
+  }
+
+  .play-layout--look .play-entity {
+    padding-left: 0.85rem;
+    grid-template-columns:
+      minmax(0, 18.2rem)
+      minmax(3.5rem, 4.5rem)
+      minmax(2.5rem, 3rem)
+      minmax(0, 1fr);
   }
 
   .play-entity__name-col {
     grid-column: 1;
     grid-row: 1;
-    max-width: none;
+    max-width: 16.4rem;
     min-width: 0;
     overflow: hidden;
+  }
+
+  .play-layout--vendor-shop .play-entity__name-col,
+  .play-layout--vendor-sell .play-entity__name-col {
+    max-width: 15.9rem;
+  }
+
+  .play-layout--dnd-inventory .play-entity__name-col {
+    max-width: 14.4rem;
+  }
+
+  .play-layout--look .play-entity__name-col {
+    max-width: 18.2rem;
   }
 
   .play-entity__role-col {
@@ -1066,8 +1249,10 @@
     overflow: hidden;
   }
 
+  /* Do not collapse empty cells — breaks column alignment */
   .play-entity__role-col:empty {
-    display: none;
+    display: flex;
+    min-height: 1em;
   }
 
   .play-entity__meta {
@@ -1079,8 +1264,22 @@
     overflow: hidden;
   }
 
+  /* Inventory status needs full "wielded" — don't collapse */
+  .play-layout--dnd-inventory .play-entity__meta,
+  .play-layout--inventory .play-entity__meta {
+    max-width: none;
+    min-width: 5.5rem;
+    overflow: visible;
+    display: flex !important;
+  }
+
   .play-entity__meta:empty {
     display: none;
+  }
+
+  .play-layout--dnd-inventory .play-entity__meta:empty,
+  .play-layout--inventory .play-entity__meta:empty {
+    display: flex !important;
   }
 
   .play-entity__sub {
@@ -1158,6 +1357,41 @@
   border: 1px solid var(--site-border-subtle);
   border-radius: 0;
   background: var(--site-bg-surface);
+}
+
+/* Shop purse — large, easy to spot above the catalog */
+.play-layout--vendor-shop .play-layout__panel,
+.play-layout--vendor-sell .play-layout__panel {
+  margin: 0.35rem 0 0.65rem;
+  padding: 0.75rem 1rem;
+  border-color: color-mix(
+    in srgb,
+    var(--site-accent, #c9a227) 45%,
+    var(--site-border-subtle)
+  );
+  background: color-mix(
+    in srgb,
+    var(--site-accent, #c9a227) 10%,
+    var(--site-bg-surface, transparent)
+  );
+}
+
+.play-layout--vendor-shop .play-layout__panel-title,
+.play-layout--vendor-sell .play-layout__panel-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--site-text-muted);
+}
+
+.play-layout--vendor-shop .play-layout__panel-body,
+.play-layout--vendor-sell .play-layout__panel-body {
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--site-accent, var(--site-text));
+  line-height: 1.2;
 }
 
 .play-layout__panel-title {
@@ -1298,13 +1532,87 @@
 }
 
 @media (max-width: 1024px) {
+  /*
+   * Mobile play: full-viewport chat only.
+   * Default ≤1024 stack puts left rail order:1 above main. Play shell
+   * is height-locked + overflow:hidden, so main collapsed to 0px and
+   * the play window vanished. Hide rails; main fills remaining dvh.
+   */
+  .site-shell.is-mode-play .site-aside,
+  .site-shell.is-mode-play .site-aside--start,
+  .site-shell.is-mode-play .site-aside--end {
+    display: none !important;
+  }
+
   .site-shell.is-mode-play .site-body {
-    padding-top: calc(var(--site-nav-h, 3.5rem) + 0.5rem);
-    padding-bottom: 0.5rem;
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding-top: calc(var(--site-nav-h, 3.25rem) + 0.35rem);
+    padding-bottom: 0.35rem;
+    padding-inline: var(--site-gutter, 1rem);
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+    box-sizing: border-box;
   }
 
   .site-shell.is-mode-play .site-main {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 0;
+    order: 0 !important;
+    grid-column: auto !important;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    max-height: none;
+    width: 100%;
     max-width: 100%;
+    margin: 0;
+    padding-inline: 0;
+    overflow: hidden;
+  }
+
+  .site-shell.is-mode-play .play-root {
+    flex: 1 1 0;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+  .site-shell.is-mode-play .play-output {
+    flex: 1 1 0;
+    min-height: 0;
+    padding-inline: 0;
+  }
+
+  /* Character sheet edge-to-edge under nav on phones */
+  .play-layout--dnd-sheet,
+  .play-layout--dnd-sheet .dnd-sheet,
+  .play-msg:has(.dnd-sheet) {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  .play-layout--dnd-sheet .dnd-sheet__banner,
+  .play-layout--dnd-sheet .dnd-sheet__panel {
+    border-radius: 0;
+  }
+
+  .play-layout--dnd-sheet .dnd-sheet__combat .dnd-sheet__stat {
+    flex: 1 1 calc(50% - 0.35rem);
+    min-width: 0;
+  }
+
+  .play-layout--dnd-sheet .dnd-sheet__abil {
+    flex: 1 1 calc(33.333% - 0.35rem);
   }
 
   .play-prompt {
