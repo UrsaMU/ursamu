@@ -537,6 +537,18 @@
       if (cls && /^[a-zA-Z0-9 _:-]+$/.test(cls)) {
         parts.push('class="' + cls.replace(/"/g, "") + '"');
       }
+      // Character sheet root + a11y attrs
+      if (el.hasAttribute("data-dnd-sheet")) {
+        parts.push("data-dnd-sheet");
+      }
+      var ariaL = el.getAttribute("aria-label");
+      if (ariaL && /^[a-zA-Z0-9 .,_+-]+$/.test(ariaL)) {
+        parts.push('aria-label="' + ariaL.replace(/"/g, "") + '"');
+      }
+      var ariaH = el.getAttribute("aria-hidden");
+      if (ariaH === "true" || ariaH === "false") {
+        parts.push('aria-hidden="' + ariaH + '"');
+      }
       if (tag === "a") {
         var href = safeSplashUrl(el.getAttribute("href") || "", "href");
         if (href) {
@@ -803,11 +815,16 @@
   function renderEntityRow(item) {
     var cmd = actionCmd(item);
     var tag = cmd ? "button" : "div";
+    var cls = "play-entity";
+    if (!cmd) cls += " play-entity--static";
+    // Shop: dim gear the character is not proficient with
+    if (item.usable === false) cls += " play-entity--unusable";
+    if (item.usable === true) cls += " play-entity--usable";
     var attrs = cmd
-      ? ' type="button" class="play-entity" data-play-cmd="' +
+      ? ' type="button" class="' + cls + '" data-play-cmd="' +
         escAttr(cmd) + '" title="' + escAttr(cmd) +
         '" aria-label="' + escAttr(cmd) + '"'
-      : ' class="play-entity play-entity--static"';
+      : ' class="' + cls + '"';
     var html = "<" + tag + attrs + ">";
 
     // Col 1: name + optional staff dbref
@@ -932,8 +949,15 @@
     var metaType = ui.meta && ui.meta.type
       ? String(ui.meta.type)
       : "";
+    var extraRaw = (ui.className ||
+      (ui.meta && ui.meta.className) ||
+      "");
+    var extraCls = extraRaw
+      ? " " + esc(String(extraRaw).replace(/[^\w\s-]/g, ""))
+      : "";
     var html = '<div class="play-layout' +
       (metaType ? " play-layout--" + esc(metaType) : "") +
+      extraCls +
       '">';
     for (var i = 0; i < comps.length; i++) {
       var c = comps[i] || {};
@@ -944,10 +968,16 @@
           cellHtml(c.title || c.content || "") +
           "</h2></header>";
       } else if (t === "markdown" || t === "html") {
-        // Auto md/html (and center+md hybrids) via renderSplash
-        html += renderSplash(
-          typeof c.content === "string" ? c.content : "",
-        );
+        var rawHtml = typeof c.content === "string" ? c.content : "";
+        // D&D character sheet: full-width .dnd-sheet (no md wrapper)
+        if (
+          metaType === "dnd-sheet" ||
+          /class=["'][^"']*dnd-sheet/.test(rawHtml)
+        ) {
+          html += sanitizeLoginHtml(rawHtml);
+        } else {
+          html += renderSplash(rawHtml);
+        }
       } else if (t === "text") {
         html += '<div class="play-layout__text">' +
           cellHtml(c.content || "") + "</div>";
@@ -1517,21 +1547,12 @@
         return;
       }
       socket.onopen = function () {
-        var isReconnect = wasLive;
         reconnectAttempt = 0;
         setStatus("open");
         socket.send(JSON.stringify({ type: "auth", token: t }));
-        // Mark live after first open so later WS dials are reconnects
+        // Later dials use ?reconnect=true. Server session:open sends
+        // the single "Reconnected." line — do not echo client-side.
         wasLive = true;
-        // Server skips connect splash when ?reconnect=true; show a
-        // short line here (mush ≥1.0.29 also sends one — keep client
-        // notice until that pin is live, then drop if it doubles).
-        if (isReconnect) {
-          push({
-            msg: "Game> Reconnected.",
-            at: Date.now(),
-          });
-        }
         // Initial look only once per live session
         if (!didInitialLook) {
           didInitialLook = true;

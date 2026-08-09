@@ -315,8 +315,8 @@
 }
 
 .site-search__btn-icon {
-  width: 50%;
-  height: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
   background: center / contain no-repeat var(--site-search-icon);
   mask: none;
   -webkit-mask: none;

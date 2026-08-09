@@ -3167,7 +3167,7 @@
     if (!qs('link[data-cg-css]')) {
       var link = document.createElement("link");
       link.rel = "stylesheet";
-      link.href = "/site/css/chargen.css?v=20260806nowipe";
+      link.href = "/site/css/chargen.css?v=20260809playmob";
       link.setAttribute("data-cg-css", "1");
       document.head.appendChild(link);
     }

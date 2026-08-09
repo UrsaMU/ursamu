@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.80
+
+- Mobile /play: full-height nav drawer (safe-area), SEND +
+  action chips full-width touch targets, entity row polish
+  (look / shop / inventory columns, usable highlight)
+- Play: D&D sheet full-width on phones; shop usable flags;
+  reconnect notice only from server
+- Sync play-palette.css with bare `.mush-text` selectors
+  (nested chat bubbles keep MUSH colors under CSP)
+- Ship dnd-chargen.js/css for D&D Character tab + sheet
+- Cache-bust SITE_ASSET_V → 20260809playmob
+
 ## 0.1.79
 
 - Hero logo (banner art) is **home only** — wiki/help/play

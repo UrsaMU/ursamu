@@ -375,12 +375,10 @@ body {
   );
 }
 
-/* ── 3-column body (CSS grid — Figma proportions, fluid) ───────────
- * Desktop target (changeling / Figma 1728):
- *   aside 331 | gap ~50 | main 885 | gap ~50 | aside 331
- *   gap = (1728 - 2*gutter - 2*aside - main) / 2
- * Traditional 3-col stays side-by-side; rails/gaps shrink on
- * medium widths. Stack on tablet and below (see ≤1024px).
+/* ── 3-column body (Figma Home wireframe 2054:137) ────────────────
+ * docs/figma-wireframe-home.md — default shell, not Court brand.
+ * @ 1728: gutter 42 | 314 | gap 21 | main 977 | gap ~17 | 312 | 42
+ * Rails shrink on medium widths; stack ≤1024 (main → left → right).
  */
 
 .site-body {
@@ -590,26 +588,35 @@ body {
     flex: 0 0 auto;
   }
 
-  /* Slide-down panel under the fixed bar */
+  /* Slide-down panel under the fixed bar.
+   * Use nearly full remaining viewport — old min(70vh, 28rem) forced
+   * a short panel and pointless scroll for a handful of links. */
   .site-nav__list {
     position: fixed;
     top: var(--site-nav-h);
     left: 0;
     right: 0;
+    bottom: 0;
     z-index: 101;
     display: none;
     flex-direction: column;
     align-items: stretch;
     width: 100%;
-    max-height: min(70vh, 28rem);
+    height: auto;
+    max-height: calc(100vh - var(--site-nav-h, 3.25rem));
+    max-height: calc(100dvh - var(--site-nav-h, 3.25rem));
+    overflow-x: hidden;
     overflow-y: auto;
     margin: 0;
-    padding: 0.75rem var(--site-gutter) 1.25rem;
+    padding: 0.75rem var(--site-gutter)
+      max(1.5rem, env(safe-area-inset-bottom, 0px));
     gap: 0;
     font-size: 1.05rem;
     background: var(--site-bg);
     border-bottom: 1px solid var(--site-border-subtle, var(--site-border));
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
   }
 
   .site-nav.is-open .site-nav__list {

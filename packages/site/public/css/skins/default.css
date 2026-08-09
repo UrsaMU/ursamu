@@ -1,29 +1,217 @@
 /**
- * Default UrsaMU site skin — design.md violet night.
- * Structural chrome only; no decorative art.
+ * Default UrsaMU site skin — violet night + Figma 2054:137 shell.
+ *
+ * Colors / faces: staff-theme (tokens.css).
+ * Layout / type scale: Home wireframe node 2054:137.
+ * Court cream/gold is installable separately — not this file.
  */
 
 :root {
-  /* tokens.css already matches design.md — nothing required */
-  --site-font-display: Inter, ui-sans-serif, system-ui, sans-serif;
+  --site-font-display: var(--site-font-ui);
+  /* Thin themed bars (tokens set size/colors) */
+  --site-scrollbar-size: 6px;
 }
 
-/* No hero — tighter body (default skin often has no art) */
+/* ── Scrollbars (Firefox + WebKit) ─────────────────────────── */
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--site-scrollbar-thumb)
+    var(--site-scrollbar-track);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--site-scrollbar-thumb)
+    var(--site-scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--site-scrollbar-size);
+  height: var(--site-scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--site-scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--site-scrollbar-thumb);
+  border-radius: 999px;
+  border: 1px solid var(--site-scrollbar-track);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--site-scrollbar-thumb-hover);
+  border: 1px solid var(--site-scrollbar-track);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:active {
+  background: var(--site-scrollbar-thumb-active);
+  border: 1px solid var(--site-scrollbar-track);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: var(--site-scrollbar-corner, var(--site-bg-elevated));
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* No hero art — content under fixed nav */
 .site-shell.is-compact .site-body,
 .site-shell.is-mode-no-hero .site-body {
   padding-top: calc(var(--site-nav-h) + 1.25rem);
 }
 
-.site-nav__brand {
-  letter-spacing: 0.02em;
+/* Nav — wireframe: brand 24/700, links 16/400 */
+.site-nav {
+  height: var(--site-nav-h);
+  min-height: var(--site-nav-h);
 }
 
+.site-nav__brand {
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-brand);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--site-text);
+  line-height: 1.2;
+}
+
+.site-nav__list {
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-nav);
+  font-weight: 400;
+  gap: 0.25rem 1.25rem;
+}
+
+.site-nav__list a {
+  color: var(--site-text-secondary);
+  font-size: var(--site-type-nav);
+  font-weight: 400;
+}
+
+.site-nav__list a:hover {
+  color: var(--site-text);
+}
+
+.site-nav__list a.is-active {
+  color: var(--site-accent);
+  border-bottom-color: var(--site-accent);
+}
+
+/* Main H1 — wireframe 40/700, violet accent */
 .site-section__title {
-  letter-spacing: -0.01em;
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-h1);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--site-accent);
+  line-height: 1.2;
+}
+
+/* Body headings — purple (staff primary) */
+.site-section__body h2 {
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-h2);
+  font-weight: 700;
+  color: var(--site-accent);
+  line-height: 1.2;
+}
+
+.site-section__body h3 {
+  font-family: var(--site-font-ui);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--site-accent);
+  line-height: 1.25;
+}
+
+.site-section__body h4,
+.site-section__body h5,
+.site-section__body h6 {
+  font-family: var(--site-font-ui);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--site-accent-hover);
+  line-height: 1.3;
+}
+
+/* Side menu — wireframe title 20/700, links 16 */
+.site-menu__title {
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-menu-title);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--site-accent);
+  margin: 0 0 0.5rem;
+  line-height: 1.2;
+}
+
+.site-menu__list a {
+  font-family: var(--site-font-ui);
+  font-size: var(--site-type-menu-link);
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+/* Search — wireframe 44 tall; square button matches height */
+.site-search__input {
+  height: var(--site-search-h, 2.75rem);
+  min-height: var(--site-search-h, 2.75rem);
+}
+
+.site-search__btn {
+  width: var(--site-search-h, 2.75rem);
+  height: var(--site-search-h, 2.75rem);
+  min-width: var(--site-search-h, 2.75rem);
+  min-height: var(--site-search-h, 2.75rem);
+}
+
+.site-search__btn-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.site-search__btn-icon::before {
+  font-size: 1.5rem;
+}
+
+.site-banner__connect {
+  font-size: var(--site-type-connect);
+  font-weight: 400;
+}
+
+.site-footer {
+  font-size: var(--site-type-footer);
 }
 
 .site-rule {
   height: 1px;
   background: var(--site-border);
   opacity: 0.9;
+  border: 0;
+}
+
+/* Primary CTAs — solid deep violet + white */
+.site-btn-primary,
+button.site-btn-primary {
+  background: var(--site-btn-bg);
+  border-color: transparent;
+  color: var(--site-btn-fg);
+}
+
+.site-btn-primary:hover:not(:disabled),
+button.site-btn-primary:hover:not(:disabled) {
+  background: var(--site-btn-bg-hover);
+  color: var(--site-btn-fg);
 }
