@@ -29,20 +29,22 @@ import {
 addCmd({
   name: "@channel",
   pattern:
-    /^@?(?:channels?|clist)(?:\/(join|leave|list|full|headers))?\s*(.*)?$/i,
+    /^@?(?:channels?|clist|\+channels?)(?:\/(join|leave|list|full|headers))?\s*(.*)?$/i,
   lock: "connected",
   category: "Channel",
-  help: `@channel              List available channels.
+  help: `@channel / +channels     Channel hub (web UI on /play).
 @channel/join <chan>=<alias>  Join a channel with an alias.
 @channel/leave <alias>        Leave a channel.
 @clist                        List public channels and owners.
 @clist/full                   Name, flags, owner, users online.
 @clist/headers                List channels with custom headers.
 
-Aliases: @channels, @clist
+Web: click to join, mute, speak (prompt fill), who, leave.
+Aliases: @channels, @clist, +channel, +channels
 
 Examples:
   @channel
+  +channels
   @channel/join Public=pub
   @clist/full`,
   exec: execChannel,
