@@ -2,7 +2,7 @@ import { assertEquals, assertExists, assertStringIncludes } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { rollInterlock, rollDamage } from "../roll.ts";
 import { derivedStats, skillPointsSpent, effectiveMA } from "../derived.ts";
-import { validateStat, validateSkillLevel, validateStatPool } from "../validation.ts";
+import { validateStat, validateSkillLevel, validateStatPool, checkApproved } from "../validation.ts";
 import { rollBasicLifepath, rollProfessionalEvent } from "../lifepath.ts";
 import { findGearByName, gearByCategory } from "../catalog.ts";
 import { findTemplate } from "../templates.ts";
@@ -167,6 +167,23 @@ describe("checkRequired", () => {
     const char = makeChar({ chargenStatus: "approved" });
     // approved chars are locked but checkRequired is for submit validation
     assertEquals(char.chargenStatus, "approved");
+  });
+});
+
+describe("checkApproved", () => {
+  it("returns true when chargenStatus is approved", () => {
+    const char = makeChar({ chargenStatus: "approved" });
+    assertEquals(checkApproved(char), true);
+  });
+
+  it("returns false when chargenStatus is draft", () => {
+    const char = makeChar({ chargenStatus: "draft" });
+    assertEquals(checkApproved(char), false);
+  });
+
+  it("returns false when chargenStatus is submitted", () => {
+    const char = makeChar({ chargenStatus: "submitted" });
+    assertEquals(checkApproved(char), false);
   });
 });
 
