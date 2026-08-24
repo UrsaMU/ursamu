@@ -1,0 +1,290 @@
+[
+  {
+    "slug": "boss-sprawl-cop-11",
+    "roll": "11",
+    "name": "sprawl-cop",
+    "antagonist": "sprawl-cop",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-gang-member-12",
+    "roll": "12",
+    "name": "gang-member",
+    "antagonist": "gang-member",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-rogue-cybrid-13",
+    "roll": "13",
+    "name": "rogue-cybrid",
+    "antagonist": "rogue-cybrid",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-security-drone-14",
+    "roll": "14",
+    "name": "security-drone",
+    "antagonist": "security-drone",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-zone-boss-ganger-15",
+    "roll": "15",
+    "name": "zone-boss-ganger",
+    "antagonist": "zone-boss-ganger",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-genexus-agent-16",
+    "roll": "16",
+    "name": "genexus-agent",
+    "antagonist": "genexus-agent",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-corporate-security-21",
+    "roll": "21",
+    "name": "corporate-security",
+    "antagonist": "corporate-security",
+    "tier": "mod",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-syndicate-goon-22",
+    "roll": "22",
+    "name": "syndicate-goon",
+    "antagonist": "syndicate-goon",
+    "tier": "mod",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-nodejacker-npc-23",
+    "roll": "23",
+    "name": "nodejacker-npc",
+    "antagonist": "nodejacker-npc",
+    "tier": "mod",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-bodyguard-24",
+    "roll": "24",
+    "name": "bodyguard",
+    "antagonist": "bodyguard",
+    "tier": "mod",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-augmented-guard-dog-25",
+    "roll": "25",
+    "name": "augmented-guard-dog",
+    "antagonist": "augmented-guard-dog",
+    "tier": "mod",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-combat-artiste-26",
+    "roll": "26",
+    "name": "combat-artiste",
+    "antagonist": "combat-artiste",
+    "tier": "mod",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-company-executive-31",
+    "roll": "31",
+    "name": "company-executive",
+    "antagonist": "company-executive",
+    "tier": "mod",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-gang-boss-32",
+    "roll": "32",
+    "name": "gang-boss",
+    "antagonist": "gang-boss",
+    "tier": "hard",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-corporate-agent-33",
+    "roll": "33",
+    "name": "corporate-agent",
+    "antagonist": "corporate-agent",
+    "tier": "hard",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-combat-cybrid-34",
+    "roll": "34",
+    "name": "combat-cybrid",
+    "antagonist": "combat-cybrid",
+    "tier": "hard",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-zone-veteran-35",
+    "roll": "35",
+    "name": "zone-veteran",
+    "antagonist": "zone-veteran",
+    "tier": "hard",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-insurgent-36",
+    "roll": "36",
+    "name": "insurgent",
+    "antagonist": "insurgent",
+    "tier": "hard",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-syndicate-boss-41",
+    "roll": "41",
+    "name": "syndicate-boss",
+    "antagonist": "syndicate-boss",
+    "tier": "hard",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-killmorph-42",
+    "roll": "42",
+    "name": "killmorph",
+    "antagonist": "killmorph",
+    "tier": "hard",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-combat-drone-43",
+    "roll": "43",
+    "name": "combat-drone",
+    "antagonist": "combat-drone",
+    "tier": "legend",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-t66-atid-44",
+    "roll": "44",
+    "name": "t66-atid",
+    "antagonist": "t66-atid",
+    "tier": "legend",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-cybershell-mercenary-45",
+    "roll": "45",
+    "name": "cybershell-mercenary",
+    "antagonist": "cybershell-mercenary",
+    "tier": "legend",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-corporate-tanksuit-46",
+    "roll": "46",
+    "name": "corporate-tanksuit",
+    "antagonist": "corporate-tanksuit",
+    "tier": "legend",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-psychotic-cyborg-51",
+    "roll": "51",
+    "name": "psychotic-cyborg",
+    "antagonist": "psychotic-cyborg",
+    "tier": "legend",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-spiderform-cybershell-52",
+    "roll": "52",
+    "name": "spiderform-cybershell",
+    "antagonist": "spiderform-cybershell",
+    "tier": "legend",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-vatgrown-ninja-53",
+    "roll": "53",
+    "name": "vatgrown-ninja",
+    "antagonist": "vatgrown-ninja",
+    "tier": "legend",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-ronin-54",
+    "roll": "54",
+    "name": "ronin",
+    "antagonist": "ronin",
+    "tier": "hard",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-sprawl-cop-55",
+    "roll": "55",
+    "name": "sprawl-cop",
+    "antagonist": "sprawl-cop",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-gang-member-56",
+    "roll": "56",
+    "name": "gang-member",
+    "antagonist": "gang-member",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-rogue-cybrid-61",
+    "roll": "61",
+    "name": "rogue-cybrid",
+    "antagonist": "rogue-cybrid",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-security-drone-62",
+    "roll": "62",
+    "name": "security-drone",
+    "antagonist": "security-drone",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-zone-boss-ganger-63",
+    "roll": "63",
+    "name": "zone-boss-ganger",
+    "antagonist": "zone-boss-ganger",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-genexus-agent-64",
+    "roll": "64",
+    "name": "genexus-agent",
+    "antagonist": "genexus-agent",
+    "tier": "easy",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-corporate-security-65",
+    "roll": "65",
+    "name": "corporate-security",
+    "antagonist": "corporate-security",
+    "tier": "mod",
+    "book": "p.68"
+  },
+  {
+    "slug": "boss-syndicate-goon-66",
+    "roll": "66",
+    "name": "syndicate-goon",
+    "antagonist": "syndicate-goon",
+    "tier": "mod",
+    "book": "p.68"
+  }
+]

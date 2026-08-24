@@ -1,0 +1,642 @@
+[
+  {
+    "slug": "apex-nuevo-corporate-zone",
+    "num": 1,
+    "name": "Apex Nuevo Corporate Zone",
+    "grid": "H3",
+    "blurb": "The  most affluent and secure commercial district in the Flow, hosting the towering corporate offices of Genexus, Kanawa-Mendez, Sentry Military Technologies, Takematsu-Hegenaur, Clavel Industries as well as the ostensible Orbital Embassies representing Dornier, Cherry Blossom and the Swiss Orbital Bank.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "harbor-keys-business-park",
+    "num": 2,
+    "name": "Harbor Keys Business Park",
+    "grid": "M5",
+    "blurb": "With  a smaller footprint than Apex Nuevo and packed with more stratoscrapers, Harbor Keys centres around the regional offices of Cradle Biolabs, Ishiteki Augmentation, Komatsu Systems, Hayabusa Heavy Industries, Orchard Technologies, Datura Pharmaceuticals and online retail behemoth, Ameron.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "periphery-plaza-commercial-hub-for",
+    "num": 3,
+    "name": "Periphery Plaza Commercial hub for",
+    "grid": "F5",
+    "blurb": "corporations such as Hideyoki, Braun, Haldane & Kluvis (HAK), Numan-Lloyd and Ono-Sendai, but also the Bio-Security Administration’s Genetic Registry, ride-share giant Öoba, the bio-ethical NGO, Genepeace, along with a plethora of business towers packed with start-ups and SMEs. A loop of large scale corporate construction projects, in various states of completion, surrounds the central zone. 75 //",
+    "book": "p.75+"
+  },
+  {
+    "slug": "network-city",
+    "num": 4,
+    "name": "Network City",
+    "grid": "H6",
+    "blurb": "The  heart of the Flow’s media industry, this district is dominated by broadcast media studios (such as Network 7, Broadcast 1, Channel 99), social media companies (Tru.U, Skreemr, YipYap), simulcasting networks and myriad VR and fluid reality coding houses. Rival media giants, like Datafax, Orchard Media, EMV Entertainment and Luminous Media Inc., all have their offices in Network City.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "mercy-mile-mediplex",
+    "num": 5,
+    "name": "Mercy Mile Mediplex",
+    "grid": "J6",
+    "blurb": "The  largest subscription-model hospital complex and ER in the Flow, infamous for its over-reliance on corporate diagnostic AI and its ties to big pharma.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "sense-net",
+    "num": 6,
+    "name": "Sense/Net",
+    "grid": "H2",
+    "blurb": "Large  black pyramid housing the branch offices and servers of the global cyberspace regulator. They mostly cooperate with the FPD’s Transmission Felonies department, but, being arrogant glory-hounds, prefer to keep operations in-house, prioritising their own agents, leads and case-files, which causes a certain amount of inter-agency friction.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "central-processing",
+    "num": 7,
+    "name": "Central Processing",
+    "grid": "F7",
+    "blurb": "Main  judicial HQ, the courts, the DA’s offices and holding cubes, as well as the Flow Police Department’s main precinct. Transmission Felonies are also based here, as are Organic Damage and ESWAT. Smaller undermanned and underfunded FPD precincts are dotted around the districts.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "corrective-responsibility",
+    "num": 8,
+    "name": "Corrective Responsibility",
+    "grid": "E3",
+    "blurb": "Ominous  grey tower with thousands of tiny meshed windows, the site of a corporate-funded factory penitentiary, where convicted felons are put to work as part of their supposed rehabilitation, and where it’s way too easy to have your sentence extended. Subsurface levels exist, where the worst offenders are placed into VR-assisted cryosleep for the duration of their incarceration, at the taxpayers",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-registry-imposing-concrete-monolith",
+    "num": 9,
+    "name": "The Registry Imposing concrete monolith,",
+    "grid": "J7",
+    "blurb": "home to what passes for the local government (known as The Admin) and their secure data silos. A monument to bureaucracy and red tape.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "eastern-seaboard-fission-authority-these",
+    "num": 10,
+    "name": "Eastern Seaboard Fission Authority These",
+    "grid": "G4",
+    "blurb": "are the folks who keep the lights on, the Sprawl humming and the ageing ESFA reactor from going critical. Shockingly underfunded. //Don’t hesitate to alter any of these locations to suit your own campaign. 76 the flow",
+    "book": "p.75+"
+  },
+  {
+    "slug": "core-transit-grand-and-spacious",
+    "num": 11,
+    "name": "Core Transit Grand and spacious,",
+    "grid": "F5",
+    "blurb": "the largest transit station in the Flow, connecting the bullet train, monorail and subway networks. The wider area is ground zero in the so-called Stratocab Wars, where Aeroshare, Tsunami Taxis and Öoba violently compete for prime pick-up spots and customers.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "genexus-desalination-plant-originally-built",
+    "num": 12,
+    "name": "Genexus Desalination Plant Originally built",
+    "grid": "J2",
+    "blurb": "and operated by Hayabusa, but now run by Genexus, after they procured the contract from Admin via lobbying, bribes and threats. Knowing clean water is a money spinner, Hayabusa want it back in their portfolio and will also use lobbying, bribes and threats to achieve that goal.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "clavel-industries-cybrid-fabricators",
+    "num": 13,
+    "name": "Clavel Industries Cybrid Fabricators",
+    "grid": "L6",
+    "blurb": "The  largest and most secure cybrid manufacturing facility in the Sprawl, surrounded by reinforced walls, gates and defence systems.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "port-authority-district-numerous-industrial",
+    "num": 14,
+    "name": "Port Authority District Numerous industrial",
+    "grid": "M7",
+    "blurb": "areas, overseen by the Port Authority, with docking facilities, warehousing and logistics hubs. Large numbers of teamsters and robotniks work the docks, with regular clashes between unionised crews and independent contractors, tensions stoked by several competing syndicates.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "cradle-biolabs-agristacks-huge-glass",
+    "num": 15,
+    "name": "Cradle Biolabs Agristacks Huge glass",
+    "grid": "I1",
+    "blurb": "towers supported by carbon nanotube frames, each floor a microclimate dedicated to a different food crop, tended by drones and robotic systems. Very secure and an extremely high-value asset.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "paradigm-towers",
+    "num": 16,
+    "name": "Paradigm Towers",
+    "grid": "F10",
+    "blurb": "A  dense cluster of thin, cylindrical, cheapcrete tower blocks, also known as The Forest. Originally intended as social housing, some have been repurposed by Genexus as vertical farmstacks, accommodating rows of vat-grown livestock or insect protein farms. Some of the habitation cylinders have been adapted by their occupants with jury-rigged resin and polymer hydroponics blisters on their exterior",
+    "book": "p.75+"
+  },
+  {
+    "slug": "vertical-distribution-node-looking-like",
+    "num": 17,
+    "name": "Vertical Distribution Node Looking like",
+    "grid": "E7",
+    "blurb": "windowless towerblocks, these vertical warehouses are daubed in company colours and logos, where distribution and logistics drones come and go, 24/7. Huge internal freight elevators service the multiple floors and the tiers of racking. Human- or AI-driven vans, trucks and hoppers 77 //You decide whether these entries tell the whole truth about a place. the flow show up day and night, too. Usually",
+    "book": "p.75+"
+  },
+  {
+    "slug": "sprawlmart",
+    "num": 18,
+    "name": "SprawlMart",
+    "grid": "H7",
+    "blurb": "The  biggest of the big box stores, you could get lost in one of these retail labyrinths for days. Currently engaged in open hostilities with the other big box giant, Consumertopia, for reasons management can no longer remember.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "consumertopia",
+    "num": 19,
+    "name": "Consumertopia",
+    "grid": "D5",
+    "blurb": "The  second largest retail behemoth, they pride themselves on both exceptional customer service and not being SprawlMart. Aggressive pricing, heavily armed security and pre-emptive strikes against their rival’s infrastructure are all part of the company strategy for this quarter.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "hyperlife-these-caf-concessions-are",
+    "num": 20,
+    "name": "Hyperlife These café concessions are",
+    "grid": "G5",
+    "blurb": "everywhere; on corners, in malls, in the subway, in capsule hotels. They vary in size and usually employ cybrid or gig-worker barristas, but many of the smaller ones are self-vend, staffed by chipper low-grade AI.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "sumofood-hq-all-over-the",
+    "num": 21,
+    "name": "Sumofood HQ All over the",
+    "grid": "H5",
+    "blurb": "Sprawl you’ll find the jolly sumo logo. Whether it be Sumo Noodles, Sumo Bento, Sumo Burger or Sumo Taco, there’s a Sumo for everyone. The FPD’s Group Crime unit suspect the franchise is a money-laundering front for the Yakuza, but haven’t yet obtained enough evidence.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "green-dragon-pharmacy-your-friendly",
+    "num": 22,
+    "name": "Green Dragon Pharmacy Your friendly",
+    "grid": "C4",
+    "blurb": "neighbourhood pharmacy chain, rumoured to be a subsidiary of Cradle Biolabs. Many operate as pill mills, where desperate citizens can obtain what they need by providing passable false documentation.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "refood-old-school-fast-food-joints",
+    "num": 23,
+    "name": "ReFood Old-school fast food joints,",
+    "grid": "N9",
+    "blurb": "serving only the very best in reconstituted organic matter and single cell protein, dispensed as a nutritious, tasty paste, then fried beyond recognition. Heavy on MSGs and cheap, but best not to ask too many questions.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "shameful-joy-bio-unethical-fast-food",
+    "num": 24,
+    "name": "Shameful Joy Bio-unethical fast food",
+    "grid": "J4",
+    "blurb": "restaurants, their menu loaded with tasty cuts of vat-grown endangered species, for your dining pleasure. Unsurprisingly expensive.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "happy-panda-ubiquitous-franchise-convenience",
+    "num": 25,
+    "name": "Happy Panda Ubiquitous franchise convenience",
+    "grid": "C2",
+    "blurb": "stores open 24 hours a day, found all across the Flow and the wider Sprawl. Famous for each store’s wall of screens showing video feed from other Happy Pandas across the globe, in real-time. //People your locations with interesting and memorable NPCs. 78 the flow",
+    "book": "p.75+"
+  },
+  {
+    "slug": "e-z-cube-storage-tower-thirty-storey",
+    "num": 26,
+    "name": "E-Z-Cube Storage Tower Thirty storey",
+    "grid": "E6",
+    "blurb": "vertical warehouse, packed with rentable storage modules, in a variety of sizes, each easily accessible by multiple freight elevators and robotic arms. The E-Z tower is currently managed by an AI with a criminal record and questionable morals.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "casevac-inc-offering-pre-pay-emergency",
+    "num": 27,
+    "name": "CasEvac Inc. Offering pre-pay emergency",
+    "grid": "N7",
+    "blurb": "medical accounts, CasEvac will respond within d6 minutes and extract a casualty from any situation, transferring them to their dedicated ER for stabilisation. Once they’ve fulfilled their contract, the injured party can then be moved to a mediplex or clinic of their choice. Usually 1,000 b¥/month, but beware of hidden costs, after the fact (such as ammunition expenses, damages, fuel, CasEvac team",
+    "book": "p.75+"
+  },
+  {
+    "slug": "minute-clinic-franchise-if-you",
+    "num": 28,
+    "name": "Minute Clinic Franchise If you",
+    "grid": "C8",
+    "blurb": "don’t need (or want) to use the mediplex or CasEvac, you can always visit one of these pay-per- use clinics. Many are run on a shoe string budget, employing EMTs, doctors and nurses with dubious records, but they’re cheap and easy to find, with few questions asked. Expect a long wait to be seen by any of the staff, however.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "recycling-hub-4-huge-recycling",
+    "num": 29,
+    "name": "Recycling Hub 4 Huge recycling",
+    "grid": "K9",
+    "blurb": "complex, dealing with plastics, metals, glass, chemicals and organics. Contracted out by Admin to the highest bidder, this for-profit is an excellent front for the current operators, the Bình Xuyên, and a great money-spinner whilst being a guaranteed way to dispose of any evidence. Both the Kombinat and the Jo-pok syndicates have set their sites on acquiring the site for the same reasons.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-mobile-market-ever-evolving-shanty",
+    "num": 30,
+    "name": "The Mobile Market Ever-evolving shanty",
+    "grid": "C9",
+    "blurb": "town of trailers and RVs, metastasising around the periphery of the stadium’s lot, temporary home to alt-pharma hawkers, tech traders, shard dealers and ticket scalps.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "cognition-verification-bureau-headquarters-of",
+    "num": 31,
+    "name": "Cognition Verification Bureau Headquarters of",
+    "grid": "I6",
+    "blurb": "the so-called ‘biocops’ tasked with hunting down and retiring rogue cybrids, and stopping illegal manufacturers or backstreet modifiers. Dangerously understaffed, much of the building now lies empty. There’s also an uneasy sense that the Bureau has been infiltrated by militant cybrid insurgents, but that might just be the paranoia that comes with the job. 79 //Consult the Augmented Reality Holisti",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-k-m-orca-geospheres",
+    "num": 32,
+    "name": "The K-M Orca Geospheres",
+    "grid": "L3",
+    "blurb": "The  bay currently hosts twelve semi-submerged geodesic clusters, staffed by geoengineers and teleoperators, each supported by a polymer lattice on the ocean’s surface, anchored to the seabed by carbon nanotube cabling. The geodesics are used for phytoplankton farming, climate and environmental monitoring and tsunami alerts. The site is owned and operated by Kanawa-Mendez, primarily as a way of of",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-floatel",
+    "num": 33,
+    "name": "The Floatel",
+    "grid": "K5",
+    "blurb": "A  decommissioned Guatamalan drilling platform, anchored in an abandoned harbour, legitimately owned by a web of Kombinat front companies. The platform’s resin reinforced hull now serves as an exclusive hotel and casino, and as a series of quasi-legal fighting arenas deep in the rig’s bowels. The bouts are part of the Freak Fight circuit, with tickets going for big money. Fights here are never bro",
+    "book": "p.75+"
+  },
+  {
+    "slug": "iconic-luxury-capsule-twenty-stories",
+    "num": 34,
+    "name": "Iconic Luxury Capsule Twenty stories",
+    "grid": "H6",
+    "blurb": "of compact sleep capsules in tan and orange polymer, each outfitted with an in-built responsive futon with tempurfoam mattress, moulded shelf alcoves, charging points, net connection and a paper-thin slinkyscreen on the ceiling. Bedding, toiletries, snacks and beverages can be purchased from the vendomats found between the bathrooms and the stairwell on each floor. Surfaces are sanitised regularly",
+    "book": "p.75+"
+  },
+  {
+    "slug": "thirty-hotel-actual-rooms-and",
+    "num": 35,
+    "name": "Thirty Hotel Actual rooms and",
+    "grid": "F8",
+    "blurb": "always 30 b¥ per night. However, the tired-looking rooms are small and spartan, with paper bedding available from kiosks on the landings, where you can also procure food, soap, drinks, medicines, ice, disposable phones, etc.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "best-western-yoshiko",
+    "num": 36,
+    "name": "Best Western Yoshiko",
+    "grid": "J6",
+    "blurb": "A  clean and modern hotel, as well as a restaurant of repute, the Yoshiko boasts over 300 smart rooms with biometric entry, building-wide Acoustic Weapon Sensors, and round-the-clock roboservice. The concierge is a handbraked limited AI, called Host, and security is tight and provided by discrete weapon drones, along with a suite of on-site system operators who continually monitor the hotel’s LAN.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-racks-former-warehouse-turned",
+    "num": 37,
+    "name": "The Racks Former warehouse turned",
+    "grid": "C7",
+    "blurb": "coffin hotel, housing 200 cheap, cramped sleep pods, epoxied to industrial scaffolding, accessible once you’ve bought a plastic token from the foyer vendomat. The cheapest and smallest coffins are in the dank basement and are known as The Drawers (also accessible using Social Credits, if the system is functioning that day).",
+    "book": "p.75+"
+  },
+  {
+    "slug": "obscura-dark-and-stylish-this",
+    "num": 38,
+    "name": "Obscura Dark and stylish, this",
+    "grid": "F4",
+    "blurb": "bar and club has a secondary purpose as the Flow’s safest place to talk. Tables and booths are fitted with white noise generators, so no-one can listen in, digitally or otherwise. If you have more delicate business to discuss, fully enclosed, secure privacy booths on the upper floor may be rented by the hour. Note: No signals get out, or in.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "genesis-echo-exclusive-extremely-secure",
+    "num": 39,
+    "name": "Genesis Echo Exclusive, extremely secure,",
+    "grid": "I4",
+    "blurb": "back-up operation and cortical archive supplier, favoured by those lower-tier jurōjin who don’t yet have their own set-up. In The Preservatory, Genesis Echo medtechs cater to bespoke clone production, storing them safely in a deep and spacious cryogenic vault, until needed. Professional, chic and privacy conscious, any consultations are by appointment only.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "coherent-light-situated-at-the",
+    "num": 40,
+    "name": "Coherent Light Situated at the",
+    "grid": "G6",
+    "blurb": "apex of a fashionable luxury apartment stack, this is the Flow’s preeminent fluid reality gallery and cabaret space, catering primarily to monied aesthetes and pretentious illusory art afficionados. Hosts the biggest names in the international fluid reality scene and attracting CEOs, execs, jurōjin and celebutants, with tickets going for serious money.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "grand-metropole-hotel",
+    "num": 41,
+    "name": "Grand Metropole Hotel",
+    "grid": "C2",
+    "blurb": "A  hotel that’s seen better days, 20 stories of fading grandeur, with several floors condemned and empty. Staffed by a clutch of glitchy, poorly maintained cybrids, with the security provided by a stretched human team on minimum wage. The Metropole’s notoriously porous net access is a curse and a blessing; it’s an easy site to hack, but it’s just as easy to use as a proxy location.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "neon-lotus-private-sauna-and",
+    "num": 42,
+    "name": "Neon Lotus Private sauna and",
+    "grid": "D4",
+    "blurb": "bar, situated in the shell of a converted tenement, said to be Yakuza owned. The tile-clad exterior is onyx black, accented with glowing, vertically-aligned kanji script in pink neon. The dark, intimate interior is a melange of Japanese industrial futurism and traditional stylings. Soft 81 //If a place gets trashed, don’t sweat it, someone will refurb or rebuild there. the flow hōgaku music is pip",
+    "book": "p.75+"
+  },
+  {
+    "slug": "ultimate-fighting-dojo-well-funded-and",
+    "num": 43,
+    "name": "Ultimate Fighting Dojo Well-funded and",
+    "grid": "F3",
+    "blurb": "well-equipped for a backstreet gym and dojo, the day-to-day running of the place is undertaken by an uplifted and augmented mandrill with anger management issues, called Dominic Teeth. Also operating as a successful nexus of some renown, Teeth is always mindful of his reputation on the streets.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "byte-me-trendy-cyber-caf",
+    "num": 44,
+    "name": "Byte Me! Trendy cyber café",
+    "grid": "L9",
+    "blurb": "and nodejacker haven, lit by hologram vistas of unheard of places flickering on the walls. Hard-to-trace net access is available for a fee. The staff also let regular patrons store stuff out back, and they’re usually too high to go and look at what’s been stashed. Will accept payment in stimulants if money’s an issue.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "black-helix-four-storeys-of",
+    "num": 45,
+    "name": "Black Helix Four storeys of",
+    "grid": "B7",
+    "blurb": "the Bình Xuyên’s very own reskin set-up, with a dubious reputation amongst those in the know. Cloned arcs, reclaimed augmentations, repossessed skins, body parts and organs, are all available here for a fee. In the sub-levels, beneath the black and crimson corridors, you find The Cooler, a secure and secretive bodybank and cryo-storage facility, that will pay for cadavers in good condition.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "neovana-sombre-cylindrical-tower-serving",
+    "num": 46,
+    "name": "Neovana™ Sombre, cylindrical tower, serving",
+    "grid": "F6",
+    "blurb": "as a neurocropolis, a temple of remembrance to the digitised deceased. Rows of onyx-fronted drives store the uploaded, with holo emitters allowing interaction with the living. The whole system is cooled by a web of LN2 conduits snaking through the walls. There are chapels of contemplation, peaceful zen gardens, hologram fountains and forests, plus quiet communion suites, where the drives may be ta",
+    "book": "p.75+"
+  },
+  {
+    "slug": "null-street-ten-blocks-long",
+    "num": 47,
+    "name": "Null Street Ten blocks long",
+    "grid": "H8",
+    "blurb": "and totally off-grid, the territory of the cognitive libertarians of Freemind and their families, digitally self-isolated from the wider Sprawl. Paranoid and prone to conspiracy theories, these heavily armed preppers fund their separatism and the operation of their biomass reactors by laundering money through a network of Algerian comsats.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "leisureland",
+    "num": 48,
+    "name": "Leisureland",
+    "grid": "G10",
+    "blurb": "Site  of an old cineplex, gym and pool, where filthy indentured zeros cook Pink Crystal in a hidden tetrameth lab, which funds a cell of Evolution Rebellion anti-augmentation zealots.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "papa-loa-s-covenant-creepy-augur",
+    "num": 49,
+    "name": "Papa Loa’s Covenant Creepy augur",
+    "grid": "M3",
+    "blurb": "commune and a coven of witchy data-hippies, this is the most high tech sector of Kudzu Island, populated by augurs, tecstatics, esoteric nodejackers and their quantum voodoo. The Loa has erected a forest of wind turbines and solar arrays for their massive energy needs.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "newtro-lucky-family-owned-south",
+    "num": 50,
+    "name": "Newtro Lucky Family owned South",
+    "grid": "B5",
+    "blurb": "Korean bar, famous for its fried chicken and makgeolli distilled on-site in their microbrewery. There’s also a courier company based upstairs called Generation Hustle, who use pushbikes, motorcycles and tuk-tuks, which can make it difficult to park in the Newtro Lucky lot.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-gkl-vrxtreme",
+    "num": 51,
+    "name": "The GKL VRXtreme",
+    "grid": "E8",
+    "blurb": "The  largest, noisiest, most over-stimulating VRcade and hologaming venue in the Sprawl, co-owned by the Chil Sung Pa (the Seven Star gang), a Jo-pok syndicate (laundering money), and Grand Korea Leisure corporation, in Seoul. Popular amongst teen VR fans and nodejackers looking for a lot of confusing ‘background noise’ for their runs.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "ascension-park-just-one-of",
+    "num": 52,
+    "name": "Ascension Park Just one of",
+    "grid": "E4",
+    "blurb": "many gated and patrolled Suburban Secure Zones, the comfortably conformist domain of mid-tier wageslaves and their company-educated families. The security contract regularly changes hands between Sentry, Hideyoki, Echo International and ContraCrime.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "automatic-billy-s-combination-truck-stop",
+    "num": 53,
+    "name": "Automatic Billy’s Combination truck stop,",
+    "grid": "J8",
+    "blurb": "bordello, motel, diner, and aug ‘clinic’, behind a fortified wall. Billy is from Austin and 83 //Consider what else is in the vacinity of a location; what else is nearby? the flow a former big rig trucker, until he lost his legs in a crash and got cheap prosthetics prone to breaking. Within the walls, the grounds are patrolled by Günter, an IR-resistant cybrid Doberman tricked out with full spectr",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-stratospire-stratoscraper-tall-this",
+    "num": 54,
+    "name": "The Stratospire Stratoscraper tall, this",
+    "grid": "F6",
+    "blurb": "needle-like graphene mast is dotted with luxury leisure pods, bubble-bars, private observation lounges and micro-cafés. There are also tether platforms for lighter-than-air sky-yacht mooring. Well defended, now that Hideyoki have recently won the security contract.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "dark-impulse",
+    "num": 55,
+    "name": "Dark Impulse",
+    "grid": "I6",
+    "blurb": "A  small, fetish-chic bar, with dangerously baroque furniture, dark rubber walls and lots of shiny latex surfaces. This club is dedicated to VR- and AR-enhanced hedonism, networking and (surprisingly) dining. Patrons often attend in extreme fetish wear and anything goes here. Network security is, as you’d expect, second to none.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "bayside-barrios",
+    "num": 56,
+    "name": "Bayside Barrios",
+    "grid": "K8",
+    "blurb": "A  number of blocks worth of slums, this favela hides an array of counterfeiting sweatshops and their migrant workers, as well as a cell of datasocialist militants calling them- selves The Photonic Republic, who are also the citizen-members of a prohibited non-corporeal polity in cyberspace, of the same name.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "club-android-intimate-nightclub-famed",
+    "num": 57,
+    "name": "Club Android Intimate nightclub, famed",
+    "grid": "B4",
+    "blurb": "for its robo-erotic revue that’s heavy on shiny chromed augments. Owned and operated by nexus Sorayama Chrome, a delightfully charming personality housed in a polished chrome femform cybershell (currently). Security is provided by three upgraded loader drones with buggy drives, in high-vis orange paint, called Huey, Dewey and Louie.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-brink-ramshackle-urban-area",
+    "num": 58,
+    "name": "The Brink Ramshackle urban area,",
+    "grid": "I9",
+    "blurb": "once built cheaply on top of landfill awash with a cocktail of noxious forever chemicals. Now infested with overt tweeker communes, hidden garage-labs, dealers, gangs, gaunt tetheads, drooling syn-zombies, rogue medics in their panel van clinics, and those who would prey on a ruined community. Splayed along both sides of a busy highway and partially in the shadow of a decaying overpass.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "carnival-row",
+    "num": 59,
+    "name": "Carnival Row",
+    "grid": "E2",
+    "blurb": "The  Flow’s main strip, packed with bars, bordellos, clubs, backstreet casinos. here, illicit bookmakers take bets on //If you want more places, add them in, making note of where they are. 84 the flow events such as drone racing, aero drag, scrapbot bouts, holo dogfights, parkour marathons, the Freak Fights, augmented animal league knockouts and Nogo rallies.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "speed-feed-one-of-a",
+    "num": 60,
+    "name": "Speed Feed One of a",
+    "grid": "D8",
+    "blurb": "chain of 3D fabrication shops, operating like a 20th century copy shop, complete with crummy waiting area, coffee machine and soda vendomats. Staff can be bribed to overlook digital copyright and IP.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "theo-s-largely-run-down-and",
+    "num": 61,
+    "name": "Theo’s Largely run down and",
+    "grid": "G8",
+    "blurb": "covered in gang tags, you wouldn’t know this was a bar if it wasn’t for the grime encrusted, flickering Budweiser neon above the steps that lead down from street level. The upper floors consist of low rent apartments and dilapidated squats. The interior is decked out in a traditional bar room style; a long laminated wood-effect bar with worn bar stools, table booths, round tables and chairs and a",
+    "book": "p.75+"
+  },
+  {
+    "slug": "kelvin-mao-s-progressive-peoples-initiative",
+    "num": 62,
+    "name": "Kelvin Mao’s Progressive Peoples Initiative,",
+    "grid": "B9",
+    "blurb": "LLC An example of one of the many legally recognised franchise micro-states found across the Sprawl. Kelvin Mao (not his birth name) is a tall, blond, techbro and former influencer of indeterminate age, who concocted what is known as The Manifesto, a fabricated, closed society that is part doomsday cult, part terrorist experiment and part tax-break. Mao’s walled compound is believed impenetrable,",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-asimov",
+    "num": 63,
+    "name": "The Asimov",
+    "grid": "D9",
+    "blurb": "Once  an architectural triumph, these three (now deteriorating) apartment towers are woefully overcrowded. To top it off, a malfunctioning construction drone swarm keeps pulling parts of the buildings apart to build strange new structures.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "contracrime-plec-stark-grey-tower",
+    "num": 64,
+    "name": "ContraCrime PLEC Stark grey tower",
+    "grid": "F3",
+    "blurb": "block, base of the largest private law enforcement company this side of the Sprawl (also 85 //Any of these locations can be plugged in to a different city map, if you wish. the flow known as a “PLEX”). C2 hire out teams of overclocked and heavily armed mercenary rentacops to the highest bidder.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-warrens",
+    "num": 65,
+    "name": "The Warrens",
+    "grid": "I8",
+    "blurb": "A  dangerously unstable gigaslum of flammable squats and shanty-stacks, also known as Little Kowloon, packed with people with nowhere else to go. When the City said they couldn’t build out, they built up.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "puppetville",
+    "num": 66,
+    "name": "Puppetville",
+    "grid": "G7",
+    "blurb": "The  sector’s main red light district. Enjoy a cavalcade of puppets, VR porno booths, adult AR shows, brothels, cam shows, lapdancing, and more, in a gaudy canyon of neon glow. Also the haunt of syndicate operators and secretive flesh cartels.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "hive-pylon-17-one-of",
+    "num": 67,
+    "name": "Hive Pylon 17 One of",
+    "grid": "M8",
+    "blurb": "numerous docking nests for swarms of civil surveillance drones, as well as a support platform for ad blimps, Pylon 17 is the favoured haunt of rival hopperjacking gangs, basejumping from the structure in their gaudy lycra wingsuits, to swoopjack passing hoppers and spinners.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "weintraub-truman-dental-practice",
+    "num": 68,
+    "name": "Weintraub & Truman, Dental Practice",
+    "grid": "D6",
+    "blurb": "The names are real, but the dentistry is a lie. On the street, both Weintraub and Truman are well known and trusted biomechanics and augmentation techs. Behind the tenement’s drab exterior, they run a first class, cutting edge implant clinic and surgery, total discretion assured.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-dollhaus-failed-mall-turned",
+    "num": 69,
+    "name": "The Dollhaus Failed mall turned",
+    "grid": "K8",
+    "blurb": "retail desert, now a ghost market; buy and sell AIs, cybrids, gynoids and other contraband tech, such as illegal shardware, or cloned cyberspace consoles.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-acid-chamber",
+    "num": 70,
+    "name": "The Acid Chamber",
+    "grid": "D2",
+    "blurb": "This  retro Punk Rock nightclub regularly erupts in violence. Owned by a 7ft middle-aged punk called Warsaw, this concrete slab of a building oozes aggression, from the graffiti covered exterior, to the concrete, metal and chain-link interior, to the screeching rage that passes for music. Gang disputes are not tolerated here, so it’s a good place to talk (shout?) to various gang members without be",
+    "book": "p.75+"
+  },
+  {
+    "slug": "aeroshare-small-but-professional-stratocab",
+    "num": 71,
+    "name": "Aeroshare Small but professional stratocab",
+    "grid": "F3",
+    "blurb": "company, their high tech offices situated above a busy, space-themed Italian restaurant, called Cosmo Nostra Pizzeria. Aeroshare is accessible via a repurposed fire escape to the side of the building. //Try and conjure an atmosphere when PCs visit locations. 86 the flow",
+    "book": "p.75+"
+  },
+  {
+    "slug": "the-paradise-line",
+    "num": 72,
+    "name": "The Paradise Line",
+    "grid": "H9",
+    "blurb": "A  disused subway station beneath Southside Nogo, this fortified subsurface bolthole is home to mercenaries of the ATID underground, their tech support teams and their nexus, Smiling Jack, a morbidly obese and depraved Navy- surplus dolphin uplift, acting as their agent.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "mianh-voi-popular-vietnamese-restaurant",
+    "num": 73,
+    "name": "Mianh Voi Popular Vietnamese restaurant,",
+    "grid": "G7",
+    "blurb": "in the corner plot of a gentrified brownstone block. Not at all affiliated with the Bình Xuyên, but rumours persist. However, the family are being harassed by the Kombinat, being pressured to pay protection money to the local bratva and forced to stash contraband in the apartments upstairs. Madame Mẹ’s eldest daughter, Giang, is heavily involved in the illegal Drone Dash race circuit and a compete",
+    "book": "p.75+"
+  },
+  {
+    "slug": "violator",
+    "num": 74,
+    "name": "Violator",
+    "grid": "C3",
+    "blurb": "A  bar with a reputation for biz, the place to hire Zone veterans, find a connected nexus or hire a savvy nodejacker. The basic internal BBS is air-gapped from wider cyberspace, allowing truly private messaging. Also hosts a holo dogfighting gambling circuit in darkened backrooms; ‘trode-controlled holographic aerial combats, where miniature ghost fighter planes strafe and barrel-roll inches above",
+    "book": "p.75+"
+  },
+  {
+    "slug": "church-of-the-terminal-innovation",
+    "num": 75,
+    "name": "Church of the Terminal Innovation",
+    "grid": "J9",
+    "blurb": "Former Tesla battery plant, now a nest of biochauvenist Singularity Index cultists and fanatical transhumanists. They employ weaponised AI, smart software, arcs, forking, aware weaponry, nanobombs, bespoke 3D-printed augments, cognitive caches, hiveminding and cybershells. Function like a gang, classified as a terror group.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "mo-yuan-s-motor-palace-renowned",
+    "num": 76,
+    "name": "Mo Yuan’s Motor Palace Renowned",
+    "grid": "E7",
+    "blurb": "autorepair joint, chop shop and cleaner. Mo can make any car ‘disappear’, as well as adding custom mods, such as armour, tuning, weapon systems, AI driver assist, polymorphic paint, installing jailbroken IFFs, etc.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "tsunami-taxis-operating-out-of",
+    "num": 77,
+    "name": "Tsunami Taxis Operating out of",
+    "grid": "B7",
+    "blurb": "a dilapidated shithole that was formerly a Papa John’s, these guys forego driver/pilot background checks and regular vehicle maintenances. A front company for the Kombinat, they will happily courier contraband for bityuan.",
+    "book": "p.75+"
+  },
+  {
+    "slug": "skinjob-records-fiercely-independent-music",
+    "num": 78,
+    "name": "Skinjob Records Fiercely independent music",
+    "grid": "M9",
+    "blurb": "label, with its own on-site audioshard store, offices and recording studios in a converted, polymer-clad apartment block. There’s also a small 87 //Consider how busy or quiet a location might be, depending on time of day. the flow bar and gig space on the ground floor and a streaming channel operates from the basement. Co-owned by actress Crystal Green and chip hop legend, Greezy Trillion (who run",
+    "book": "p.75+"
+  },
+  {
+    "slug": "buzz-industries",
+    "num": 79,
+    "name": "Buzz Industries",
+    "grid": "H5",
+    "blurb": "This  large nightclub was recently refurbished using Yakuza loans, after a devastating fire. The interior is clad in matt black rubberised plastic, with the large, central dance floor illuminated by a column of white and UV light, creating a striking visual focus. Several wide gantries and walkways surround the space. UV body stencils are available near the cloakrooms for 10b¥ each. White-suited s",
+    "book": "p.75+"
+  },
+  {
+    "slug": "comic-station-shibuya",
+    "num": 80,
+    "name": "Comic Station Shibuya",
+    "grid": "B3",
+    "blurb": "A  large, four storey acrylic-fronted manga, comics, animé and collectables store with so much neon kanji, it’s a hopper navigation hazard. The first three floors are pure OCD geek, whilst the fourth, top floor is a members-only bar, called Download. Popular with nodejackers, urban-hip low-tier corporates, med students and tech nerds. Velocity Dispatch courier company operates a small comms centre",
+    "book": "p.75+"
+  }
+]

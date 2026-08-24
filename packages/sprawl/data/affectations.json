@@ -1,0 +1,290 @@
+[
+  {
+    "slug": "animal-print-fur-coat",
+    "roll": "11",
+    "name": "Animal Print Fur Coat",
+    "blurb": "long or short; ostentatious",
+    "book": "p.23",
+    "phrase": "an ostentatious animal-print fur coat"
+  },
+  {
+    "slug": "combats-military-surplus",
+    "roll": "12",
+    "name": "Combats/Military Surplus",
+    "blurb": "drabs and camos",
+    "book": "p.23",
+    "phrase": "drab mil-surplus combats and camo layers"
+  },
+  {
+    "slug": "samurai-topknot",
+    "roll": "13",
+    "name": "Samurai Topknot",
+    "blurb": "slick, severe; possibly coloured",
+    "book": "p.23",
+    "phrase": "a slick, severe samurai topknot"
+  },
+  {
+    "slug": "decorated-filter-mask",
+    "roll": "14",
+    "name": "Decorated Filter Mask",
+    "blurb": "painted; charms; slogans",
+    "book": "p.23",
+    "phrase": "a painted filter mask hung with charms"
+  },
+  {
+    "slug": "neonpunk",
+    "roll": "15",
+    "name": "NeonPunk",
+    "blurb": "pink mohawk; vinyls and zips; boots",
+    "book": "p.23",
+    "phrase": "NeonPunk flash \u2014 pink mohawk, vinyls, zips, boots"
+  },
+  {
+    "slug": "oversized-puffer",
+    "roll": "16",
+    "name": "Oversized Puffer Jacket",
+    "blurb": "quilted; warm; very roomy",
+    "book": "p.23",
+    "phrase": "an oversized quilted puffer jacket"
+  },
+  {
+    "slug": "kimono",
+    "roll": "21",
+    "name": "Kimono",
+    "blurb": "flowing patterned silks",
+    "book": "p.23",
+    "phrase": "flowing patterned kimono silks"
+  },
+  {
+    "slug": "heavy-duster",
+    "roll": "22",
+    "name": "Heavy Duster",
+    "blurb": "weatherproof; good concealment",
+    "book": "p.23",
+    "phrase": "a weatherproof heavy duster"
+  },
+  {
+    "slug": "sharp-suits",
+    "roll": "23",
+    "name": "Sharp Suits",
+    "blurb": "most on-trend tailoring",
+    "book": "p.23",
+    "phrase": "razor-sharp on-trend tailoring"
+  },
+  {
+    "slug": "harajuku-kawaii",
+    "roll": "24",
+    "name": "Harajuku Kawaii",
+    "blurb": "cute n deadly mangapop",
+    "book": "p.23",
+    "phrase": "cute-n-deadly Harajuku kawaii mangapop"
+  },
+  {
+    "slug": "communist-utilities",
+    "roll": "25",
+    "name": "Communist Utilities",
+    "blurb": "austere Maoist practicality",
+    "book": "p.23",
+    "phrase": "austere Maoist utility wear"
+  },
+  {
+    "slug": "neo-victorian",
+    "roll": "26",
+    "name": "Neo-Victorian",
+    "blurb": "frock coats; cravats; waistcoats; corsets",
+    "book": "p.23",
+    "phrase": "neo-Victorian frock coats and cravats"
+  },
+  {
+    "slug": "maximalist-tattoos",
+    "roll": "31",
+    "name": "Maximalist Tattoos",
+    "blurb": "body is a work of art",
+    "book": "p.23",
+    "phrase": "a body covered in maximalist tattoos"
+  },
+  {
+    "slug": "vinyl-overcoat",
+    "roll": "32",
+    "name": "Vinyl Overcoat",
+    "blurb": "coloured or transparent plastic",
+    "book": "p.23",
+    "phrase": "a coloured vinyl overcoat"
+  },
+  {
+    "slug": "gaudy-sportswear",
+    "roll": "33",
+    "name": "Gaudy Sportswear",
+    "blurb": "branded nylon and lycra",
+    "book": "p.23",
+    "phrase": "gaudy branded nylon sportswear"
+  },
+  {
+    "slug": "denims",
+    "roll": "34",
+    "name": "Denims",
+    "blurb": "faded black or classic blue",
+    "book": "p.23",
+    "phrase": "faded black or classic blue denims"
+  },
+  {
+    "slug": "body-sleeve",
+    "roll": "35",
+    "name": "Body Sleeve",
+    "blurb": "figure-hugging lycra; aerodynamic",
+    "book": "p.23",
+    "phrase": "a figure-hugging aerodynamic body sleeve"
+  },
+  {
+    "slug": "morphwear",
+    "roll": "36",
+    "name": "Morphwear",
+    "blurb": "alterable; pre-program styles",
+    "book": "p.23",
+    "phrase": "programmable morphwear that shifts cut and colour"
+  },
+  {
+    "slug": "smart-prints",
+    "roll": "41",
+    "name": "Smart Prints",
+    "blurb": "bold migrating animated designs",
+    "book": "p.23",
+    "phrase": "smart-fabric prints that migrate and animate"
+  },
+  {
+    "slug": "cargo-shorts",
+    "roll": "42",
+    "name": "Cargo Shorts",
+    "blurb": "and most likely a fanny-pack",
+    "book": "p.23",
+    "phrase": "cargo shorts (and almost certainly a fanny-pack)"
+  },
+  {
+    "slug": "big-goggles",
+    "roll": "43",
+    "name": "Big Goggles",
+    "blurb": "retro, industrial, mil-spec, or sci-fi",
+    "book": "p.23",
+    "phrase": "oversized goggles \u2014 retro, mil-spec, or sci-fi"
+  },
+  {
+    "slug": "many-piercings",
+    "roll": "44",
+    "name": "Many Piercings",
+    "blurb": "metal detectors love you",
+    "book": "p.23",
+    "phrase": "enough piercings to set off every detector"
+  },
+  {
+    "slug": "urban-cowpunk",
+    "roll": "45",
+    "name": "Urban Cowpunk",
+    "blurb": "Stetsons and gatorskin boots",
+    "book": "p.23",
+    "phrase": "urban cowpunk: Stetson and gatorskin boots"
+  },
+  {
+    "slug": "tactical-turtleneck",
+    "roll": "46",
+    "name": "Tactical Turtleneck",
+    "blurb": "plus khaki cargo pants",
+    "book": "p.23",
+    "phrase": "a tactical turtleneck over khaki cargos"
+  },
+  {
+    "slug": "neo-renaissance",
+    "roll": "51",
+    "name": "Neo-Renaissance",
+    "blurb": "slashes, ruffs and lace",
+    "book": "p.23",
+    "phrase": "neo-Renaissance slashes, ruffs, and lace"
+  },
+  {
+    "slug": "jumpsuit",
+    "roll": "52",
+    "name": "Jumpsuit",
+    "blurb": "multi-pocketed and practical",
+    "book": "p.23",
+    "phrase": "a multi-pocketed practical jumpsuit"
+  },
+  {
+    "slug": "bomber-jacket",
+    "roll": "53",
+    "name": "Bomber Jacket",
+    "blurb": "cracked leather; fur collar; insignia",
+    "book": "p.23",
+    "phrase": "a cracked-leather bomber with fur collar"
+  },
+  {
+    "slug": "bondagepunk",
+    "roll": "54",
+    "name": "BondagePunk",
+    "blurb": "spikes, leather, chains, gas mask",
+    "book": "p.23",
+    "phrase": "BondagePunk spikes, leather, chains, gas mask"
+  },
+  {
+    "slug": "vendomat-disposables",
+    "roll": "55",
+    "name": "Vendomat Disposables",
+    "blurb": "recycled fibres and plastics",
+    "book": "p.23",
+    "phrase": "vendomat disposables of recycled fibre"
+  },
+  {
+    "slug": "heavy-knitwear",
+    "roll": "56",
+    "name": "Heavy Knitwear",
+    "blurb": "feel the quality",
+    "book": "p.23",
+    "phrase": "heavy knitwear that still feels expensive"
+  },
+  {
+    "slug": "anarchic-makeup",
+    "roll": "61",
+    "name": "Anarchic Makeup",
+    "blurb": "bamboozles facial recognition",
+    "book": "p.23",
+    "phrase": "anarchic makeup that bamboozles facial recog"
+  },
+  {
+    "slug": "neoprene",
+    "roll": "62",
+    "name": "Neoprene",
+    "blurb": "synthetic rubber all-weather-wear",
+    "book": "p.23",
+    "phrase": "all-weather neoprene rubberwear"
+  },
+  {
+    "slug": "goth",
+    "roll": "63",
+    "name": "Goth",
+    "blurb": "nothing that is not black",
+    "book": "p.23",
+    "phrase": "nothing that is not black \u2014 pure goth"
+  },
+  {
+    "slug": "greaser-retro",
+    "roll": "64",
+    "name": "Greaser-Retro",
+    "blurb": "quiffs, sneakers, biker jackets",
+    "book": "p.23",
+    "phrase": "greaser-retro quiff, sneakers, biker jacket"
+  },
+  {
+    "slug": "martial-artiste",
+    "roll": "65",
+    "name": "Martial Artiste",
+    "blurb": "karategi, daoist robes, doboks",
+    "book": "p.23",
+    "phrase": "martial-artiste gi, robes, or dobok"
+  },
+  {
+    "slug": "tech-hair",
+    "roll": "66",
+    "name": "Tech Hair",
+    "blurb": "synth-hair; alterable colour/style/length",
+    "book": "p.23",
+    "phrase": "synth tech-hair that shifts colour and cut"
+  }
+]

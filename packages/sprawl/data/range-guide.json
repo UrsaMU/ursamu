@@ -1,0 +1,18 @@
+[
+  {
+    "rangeM": 50,
+    "weapons": "Handguns, Small SMGs, Shotguns"
+  },
+  {
+    "rangeM": 100,
+    "weapons": "SMGs, QBZ Leong Incinerator"
+  },
+  {
+    "rangeM": 300,
+    "weapons": "Assault Rifles, HAK G40 Rhino GL"
+  },
+  {
+    "rangeM": 1000,
+    "weapons": "Heavy Weapons, Haunt M10 Sniper"
+  }
+]

@@ -1,0 +1,470 @@
+[
+  {
+    "slug": "ledger-in-the-drain",
+    "roll": "11",
+    "name": "Ledger in the Drain",
+    "blurb": "Recover a drowned corp ledger before the tide.",
+    "tier": "easy",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "badge-scanner-ghost",
+    "roll": "12",
+    "name": "Badge Scanner Ghost",
+    "blurb": "Lift a badge-scanner core from a dead checkpoint.",
+    "tier": "easy",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "pink-mist-courier",
+    "roll": "13",
+    "name": "Pink Mist Courier",
+    "blurb": "Intercept a courier; bag stays sealed.",
+    "tier": "mod",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "nodejacker-debt",
+    "roll": "14",
+    "name": "Nodejacker Debt",
+    "blurb": "Collect what a nodejacker owes — in chrome or blood.",
+    "tier": "mod",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "killmorph-contract",
+    "roll": "15",
+    "name": "Killmorph Contract",
+    "blurb": "A killmorph went freelace. End the contract.",
+    "tier": "mod",
+    "venueKinds": [
+      "net",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "drone-hive-sweep",
+    "roll": "16",
+    "name": "Drone Hive Sweep",
+    "blurb": "Clear a drone hive nesting in a derelict stack.",
+    "tier": "hard",
+    "venueKinds": [
+      "corp",
+      "street"
+    ],
+    "payoutMult": 1.6,
+    "book": "house"
+  },
+  {
+    "slug": "syndicate-tithe",
+    "roll": "21",
+    "name": "Syndicate Tithe",
+    "blurb": "Collect unpaid tithe from a corner crew.",
+    "tier": "hard",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1.6,
+    "book": "house"
+  },
+  {
+    "slug": "black-clinic-leak",
+    "roll": "22",
+    "name": "Black Clinic Leak",
+    "blurb": "Recover patient files from a burned clinic.",
+    "tier": "legend",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 2,
+    "book": "house"
+  },
+  {
+    "slug": "zone-boss-tribute",
+    "roll": "23",
+    "name": "Zone Boss Tribute",
+    "blurb": "Cut a Zone Bosses lieutenant down to size.",
+    "tier": "easy",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "genexus-shadow",
+    "roll": "24",
+    "name": "Genexus Shadow",
+    "blurb": "Photograph a Genexus black site door — and the guard.",
+    "tier": "easy",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "ice-pick-job",
+    "roll": "25",
+    "name": "ICE Pick Job",
+    "blurb": "Plant a physical tap on a hardline junction.",
+    "tier": "mod",
+    "venueKinds": [
+      "net",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "armoury-smash",
+    "roll": "26",
+    "name": "Armoury Smash",
+    "blurb": "Crack a private armoury; leave the guns, take the log.",
+    "tier": "mod",
+    "venueKinds": [
+      "corp",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "hostage-chip",
+    "roll": "31",
+    "name": "Hostage Chip",
+    "blurb": "Extract a hostage cortical chip (alive preferred).",
+    "tier": "mod",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "ronin-bounty",
+    "roll": "32",
+    "name": "Ronin Bounty",
+    "blurb": "A ronin broke house rules. Bring proof.",
+    "tier": "hard",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1.6,
+    "book": "house"
+  },
+  {
+    "slug": "spiderform-nest",
+    "roll": "33",
+    "name": "Spiderform Nest",
+    "blurb": "Exterminate a spiderform cybershell nest.",
+    "tier": "hard",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1.6,
+    "book": "house"
+  },
+  {
+    "slug": "tanksuit-joyride",
+    "roll": "34",
+    "name": "Tanksuit Joyride",
+    "blurb": "Stop a stolen tanksuit before it hits the freeway.",
+    "tier": "legend",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 2,
+    "book": "house"
+  },
+  {
+    "slug": "media-black-bag",
+    "roll": "35",
+    "name": "Media Black Bag",
+    "blurb": "Recover a Network City black-bag drive.",
+    "tier": "easy",
+    "venueKinds": [
+      "net",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "harbor-keys-heist",
+    "roll": "36",
+    "name": "Harbor Keys Heist",
+    "blurb": "Lift a prototype from Harbor Keys R&D trash.",
+    "tier": "easy",
+    "venueKinds": [
+      "corp",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "mercy-mile-body",
+    "roll": "41",
+    "name": "Mercy Mile Body",
+    "blurb": "A cadaver left Mercy Mile with the wrong organs.",
+    "tier": "mod",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "periphery-plaza-hit",
+    "roll": "42",
+    "name": "Periphery Plaza Hit",
+    "blurb": "Quiet a snitch in Periphery Plaza.",
+    "tier": "mod",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "apex-nuevo-leak",
+    "roll": "43",
+    "name": "Apex Nuevo Leak",
+    "blurb": "Steal a week of Apex Nuevo cam loops.",
+    "tier": "mod",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "culvert-markets-debt",
+    "roll": "44",
+    "name": "Culvert Markets Debt",
+    "blurb": "Break a knee or a lockbox — fixer choice.",
+    "tier": "hard",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1.6,
+    "book": "house"
+  },
+  {
+    "slug": "kombinat-envelope",
+    "roll": "45",
+    "name": "Kombinat Envelope",
+    "blurb": "Deliver nothing; return with the envelope intact.",
+    "tier": "hard",
+    "venueKinds": [
+      "net",
+      "street"
+    ],
+    "payoutMult": 1.6,
+    "book": "house"
+  },
+  {
+    "slug": "vatgrown-escort",
+    "roll": "46",
+    "name": "Vatgrown Escort",
+    "blurb": "Escort a vatgrown asset three blocks. Survive.",
+    "tier": "legend",
+    "venueKinds": [
+      "corp",
+      "street"
+    ],
+    "payoutMult": 2,
+    "book": "house"
+  },
+  {
+    "slug": "combat-artiste-duel",
+    "roll": "51",
+    "name": "Combat Artiste Duel",
+    "blurb": "Beat a combat artiste on camera for street rep.",
+    "tier": "easy",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "insurgent-cache",
+    "roll": "52",
+    "name": "Insurgent Cache",
+    "blurb": "Map an insurgent cache; leave a beacon.",
+    "tier": "easy",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "cybrid-tears",
+    "roll": "53",
+    "name": "Cybrid Tears",
+    "blurb": "Recover photos from a rogue cybrid.",
+    "tier": "mod",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "eswat-badge",
+    "roll": "54",
+    "name": "ESWAT Badge",
+    "blurb": "Lift an ESWAT duty tablet (wiped is fine).",
+    "tier": "mod",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "agent-briefcase",
+    "roll": "55",
+    "name": "Agent Briefcase",
+    "blurb": "Open a corp agent briefcase; photograph contents.",
+    "tier": "mod",
+    "venueKinds": [
+      "net",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "boss-mohawk",
+    "roll": "56",
+    "name": "Boss Mohawk",
+    "blurb": "Cut a gang boss down; take the chain.",
+    "tier": "hard",
+    "venueKinds": [
+      "corp",
+      "street"
+    ],
+    "payoutMult": 1.6,
+    "book": "house"
+  },
+  {
+    "slug": "security-sweep",
+    "roll": "61",
+    "name": "Security Sweep",
+    "blurb": "Clear corporate security from a shell office.",
+    "tier": "hard",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 1.6,
+    "book": "house"
+  },
+  {
+    "slug": "net-sprawl-ghost",
+    "roll": "62",
+    "name": "Net Sprawl Ghost",
+    "blurb": "Pull a ghost from an abandoned BBS node.",
+    "tier": "legend",
+    "venueKinds": [
+      "street",
+      "street"
+    ],
+    "payoutMult": 2,
+    "book": "house"
+  },
+  {
+    "slug": "drone-parts-run",
+    "roll": "63",
+    "name": "Drone Parts Run",
+    "blurb": "Salvage three combat-drone cores.",
+    "tier": "easy",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "psychotic-walk",
+    "roll": "64",
+    "name": "Psychotic Walk",
+    "blurb": "Put down a psychotic cyborg before sunrise.",
+    "tier": "easy",
+    "venueKinds": [
+      "dungeon",
+      "street"
+    ],
+    "payoutMult": 1,
+    "book": "house"
+  },
+  {
+    "slug": "ninja-contract",
+    "roll": "65",
+    "name": "Ninja Contract",
+    "blurb": "A vatgrown ninja took the wrong mark. Fix it.",
+    "tier": "mod",
+    "venueKinds": [
+      "net",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  },
+  {
+    "slug": "flow-cartel-debt",
+    "roll": "66",
+    "name": "Flow Cartel Debt",
+    "blurb": "Cartel wants a name crossed off. Do it clean.",
+    "tier": "mod",
+    "venueKinds": [
+      "corp",
+      "street"
+    ],
+    "payoutMult": 1.25,
+    "book": "house"
+  }
+]

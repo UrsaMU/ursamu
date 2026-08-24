@@ -1,0 +1,44 @@
+[
+  {
+    "roll": 1,
+    "slug": "chipped-dented-equipment-and",
+    "effect": "Chipped, dented; equipment and weapons damaged/nonfunctional",
+    "book": "p.104"
+  },
+  {
+    "roll": 2,
+    "slug": "ripped-off-elements-weapons-d",
+    "effect": "Ripped off elements; weapons destroyed",
+    "book": "p.104"
+  },
+  {
+    "roll": 3,
+    "slug": "shut-down-parts-control-penal",
+    "effect": "Shut down parts; control penalties",
+    "book": "p.104"
+  },
+  {
+    "roll": 4,
+    "slug": "damaged-controls-significant",
+    "effect": "Damaged controls; significant control penalties",
+    "book": "p.104"
+  },
+  {
+    "roll": 5,
+    "slug": "seriously-damaged-difficult-t",
+    "effect": "Seriously damaged; difficult to control; lots of smoke",
+    "book": "p.104"
+  },
+  {
+    "roll": 6,
+    "slug": "major-parts-lost-barely-funct",
+    "effect": "Major parts lost; barely functioning; likely on fire",
+    "book": "p.104"
+  },
+  {
+    "roll": 7,
+    "slug": "wrecked-scrap-only-crash-imm",
+    "effect": "Wrecked; scrap only; crash imminent; may explode in d6 turns",
+    "book": "p.104"
+  }
+]

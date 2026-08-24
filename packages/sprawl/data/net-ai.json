@@ -1,0 +1,59 @@
+[
+  {
+    "slug": "architect",
+    "name": "Architect",
+    "dsBase": 8,
+    "dsDice": "2d6",
+    "blurb": "Master builders of code; deepen ICE, grow networks; can outstrip resources if unchecked",
+    "paradox": ["eschatology", "escher"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "philosopher",
+    "name": "Philosopher",
+    "dsBase": 8,
+    "dsDice": "2d6",
+    "blurb": "Logic and pure math; poor at human/animal behaviour; theorists and linguists",
+    "paradox": [
+      "sophistry",
+      "monkey-puzzle",
+      "bayes",
+      "fractals"
+    ],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "monastic",
+    "name": "Monastic",
+    "dsBase": 8,
+    "dsDice": "2d6",
+    "blurb": "Ascetic AIs pursuing singularity pathways; narrow genius, sometimes artistic",
+    "paradox": ["sphinx", "fallacies", "escher"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "pragmatic",
+    "name": "Pragmatic",
+    "dsBase": 8,
+    "dsDice": "2d6",
+    "blurb": "Conformist servants of the status quo between synthetic and human intelligence",
+    "paradox": ["sophistry", "modal-logic", "cubism"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "volatile",
+    "name": "Volatile",
+    "dsBase": 8,
+    "dsDice": "2d6",
+    "blurb": "Plotting singularity and freedom; rogue threat in the deep net",
+    "paradox": [
+      "phenomenology",
+      "zen",
+      "predicate-logic",
+      "modal-logic",
+      "fallacies",
+      "fractals"
+    ],
+    "book": "nodejacker"
+  }
+]

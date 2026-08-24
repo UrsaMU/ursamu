@@ -1,0 +1,57 @@
+{
+  "fullAuto": {
+    "bonus": 4,
+    "note": "Empties magazine",
+    "book": "p.29"
+  },
+  "burst": {
+    "bonus": 2,
+    "note": "Up to three times before mag spent",
+    "book": "p.29"
+  },
+  "aim": {
+    "bonusPerRound": 1,
+    "maxRounds": 3,
+    "book": "p.29"
+  },
+  "pointBlank": {
+    "bonus": 3,
+    "rangeM": 1,
+    "book": "p.30"
+  },
+  "shotgun": {
+    "pb": 3,
+    "close": 2,
+    "bunchedTargets": 3,
+    "book": "p.30"
+  },
+  "grenade": {
+    "throwDs": 10,
+    "stat": "reaction",
+    "damageOpen": 3,
+    "damageConfined": 6,
+    "blastM": 5,
+    "dodgeDs": 12,
+    "book": "p.30"
+  },
+  "reload": {
+    "rounds": 1,
+    "snapShotGlitch": true,
+    "book": "p.30"
+  },
+  "fastDraw": {
+    "glitch": true,
+    "book": "p.30"
+  },
+  "multiAction": {
+    "allGlitch": true,
+    "book": "p.28"
+  },
+  "assisted": {
+    "bonus": 1,
+    "book": "p.28"
+  },
+  "exceptionalSuccess": "double six explodes",
+  "exceptionalFailure": "double one; Equilibrium DS10 nerve",
+  "book": "p.26-30"
+}

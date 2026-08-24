@@ -1,0 +1,83 @@
+{
+  "_comment": "SW5E starship base-size table (Starships of the Galaxy, Ch.2).",
+  "sizes": [
+    {
+      "name": "Tiny",
+      "baseModSlots": 4,
+      "specialDieName": "Sneak Attack Die",
+      "tierTable": [
+        { "tier": 0, "features": ["Fighting Style", "Evasion"], "specialDie": "1d4", "hullAndShieldDice": "1d4", "acUpgrade": 0 },
+        { "tier": 1, "features": ["Evasion Upgrade"], "specialDie": "2d4", "hullAndShieldDice": "2d4", "acUpgrade": 1 },
+        { "tier": 2, "features": [], "specialDie": "3d4", "hullAndShieldDice": "3d4", "acUpgrade": 1 },
+        { "tier": 3, "features": [], "specialDie": "4d4", "hullAndShieldDice": "4d4", "acUpgrade": 2 },
+        { "tier": 4, "features": [], "specialDie": "5d4", "hullAndShieldDice": "5d4", "acUpgrade": 2 },
+        { "tier": 5, "features": [], "specialDie": "6d4", "hullAndShieldDice": "6d4", "acUpgrade": 3 }
+      ]
+    },
+    {
+      "name": "Small",
+      "baseModSlots": 5,
+      "specialDieName": "Superiority Die",
+      "tierTable": [
+        { "tier": 0, "features": ["Fighting Style", "Evasion"], "specialDie": "1d4", "hullAndShieldDice": "2d6", "acUpgrade": 0 },
+        { "tier": 1, "features": [], "specialDie": "1d6", "hullAndShieldDice": "4d6", "acUpgrade": 1 },
+        { "tier": 2, "features": [], "specialDie": "1d6", "hullAndShieldDice": "6d6", "acUpgrade": 1 },
+        { "tier": 3, "features": [], "specialDie": "1d8", "hullAndShieldDice": "8d6", "acUpgrade": 2 },
+        { "tier": 4, "features": [], "specialDie": "1d8", "hullAndShieldDice": "10d6", "acUpgrade": 2 },
+        { "tier": 5, "features": [], "specialDie": "1d10", "hullAndShieldDice": "12d6", "acUpgrade": 3 }
+      ]
+    },
+    {
+      "name": "Medium",
+      "baseModSlots": 6,
+      "specialDieName": "Power Die",
+      "tierTable": [
+        { "tier": 0, "features": ["Fighting Style", "Evasion"], "specialDie": "1d4", "hullAndShieldDice": "3d8", "acUpgrade": 0 },
+        { "tier": 1, "features": [], "specialDie": "1d4", "hullAndShieldDice": "5d8", "acUpgrade": 1 },
+        { "tier": 2, "features": [], "specialDie": "1d6", "hullAndShieldDice": "8d8", "acUpgrade": 1 },
+        { "tier": 3, "features": [], "specialDie": "1d6", "hullAndShieldDice": "11d8", "acUpgrade": 2 },
+        { "tier": 4, "features": [], "specialDie": "1d8", "hullAndShieldDice": "14d8", "acUpgrade": 2 },
+        { "tier": 5, "features": [], "specialDie": "1d8", "hullAndShieldDice": "17d8", "acUpgrade": 3 }
+      ]
+    },
+    {
+      "name": "Large",
+      "baseModSlots": 8,
+      "specialDieName": "Power Die",
+      "tierTable": [
+        { "tier": 0, "features": ["Fighting Style", "Evasion"], "specialDie": "1d4", "hullAndShieldDice": "5d10", "acUpgrade": 0 },
+        { "tier": 1, "features": [], "specialDie": "1d4", "hullAndShieldDice": "9d10", "acUpgrade": 1 },
+        { "tier": 2, "features": [], "specialDie": "1d6", "hullAndShieldDice": "13d10", "acUpgrade": 1 },
+        { "tier": 3, "features": [], "specialDie": "1d6", "hullAndShieldDice": "17d10", "acUpgrade": 2 },
+        { "tier": 4, "features": [], "specialDie": "1d8", "hullAndShieldDice": "21d10", "acUpgrade": 2 },
+        { "tier": 5, "features": [], "specialDie": "1d8", "hullAndShieldDice": "25d10", "acUpgrade": 3 }
+      ]
+    },
+    {
+      "name": "Huge",
+      "baseModSlots": 12,
+      "specialDieName": "Power Die",
+      "tierTable": [
+        { "tier": 0, "features": ["Fighting Style"], "specialDie": "1d4", "hullAndShieldDice": "8d12", "acUpgrade": 0 },
+        { "tier": 1, "features": [], "specialDie": "1d4", "hullAndShieldDice": "14d12", "acUpgrade": 1 },
+        { "tier": 2, "features": [], "specialDie": "1d6", "hullAndShieldDice": "20d12", "acUpgrade": 1 },
+        { "tier": 3, "features": [], "specialDie": "1d6", "hullAndShieldDice": "26d12", "acUpgrade": 2 },
+        { "tier": 4, "features": [], "specialDie": "1d8", "hullAndShieldDice": "32d12", "acUpgrade": 2 },
+        { "tier": 5, "features": [], "specialDie": "1d8", "hullAndShieldDice": "38d12", "acUpgrade": 3 }
+      ]
+    },
+    {
+      "name": "Gargantuan",
+      "baseModSlots": 20,
+      "specialDieName": "Power Die",
+      "tierTable": [
+        { "tier": 0, "features": ["Fighting Style"], "specialDie": "1d4", "hullAndShieldDice": "12d20", "acUpgrade": 0 },
+        { "tier": 1, "features": [], "specialDie": "1d4", "hullAndShieldDice": "20d20", "acUpgrade": 1 },
+        { "tier": 2, "features": [], "specialDie": "1d6", "hullAndShieldDice": "28d20", "acUpgrade": 1 },
+        { "tier": 3, "features": [], "specialDie": "1d6", "hullAndShieldDice": "36d20", "acUpgrade": 2 },
+        { "tier": 4, "features": [], "specialDie": "1d8", "hullAndShieldDice": "44d20", "acUpgrade": 2 },
+        { "tier": 5, "features": [], "specialDie": "1d8", "hullAndShieldDice": "52d20", "acUpgrade": 3 }
+      ]
+    }
+  ]
+}

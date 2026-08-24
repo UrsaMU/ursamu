@@ -1,0 +1,101 @@
+[
+  {
+    "slug": "sa-drone",
+    "roll": "02",
+    "name": "Situational Awareness",
+    "effect": "Bonus to spotting hostiles",
+    "cost": 900,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "targeting-drone",
+    "roll": "03",
+    "name": "Targeting",
+    "effect": "Bonus to co-ordinated team shooting",
+    "cost": 1200,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "buddy-bot",
+    "roll": "04",
+    "name": "Buddy Bot",
+    "effect": "Small helpful loyal companion",
+    "cost": 500,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "holo-emitter",
+    "roll": "05",
+    "name": "Holo Emitter",
+    "effect": "Programmable holographic projectors",
+    "cost": 1500,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "surveillance-drone",
+    "roll": "06",
+    "name": "Surveillance",
+    "effect": "AV secure broadcasting",
+    "cost": 800,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "defence-drone",
+    "roll": "07",
+    "name": "Defence",
+    "effect": "Extra micro-missile or flechette attack",
+    "cost": 2000,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "medi-drone",
+    "roll": "08",
+    "name": "Medi-drone",
+    "effect": "Medical assistance, heals 2 Resilience",
+    "cost": 1800,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "bomb-drone",
+    "roll": "09",
+    "name": "Bomb",
+    "effect": "Explosive 3d6 damage, single use",
+    "cost": 600,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "assassin-drone",
+    "roll": "10",
+    "name": "Assassin",
+    "effect": "Tiny stealth drone, three single shots",
+    "cost": 3500,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "tracker-drone",
+    "roll": "11",
+    "name": "Tracker",
+    "effect": "Follow target, transmits location",
+    "cost": 750,
+    "load": 1,
+    "book": "p.42"
+  },
+  {
+    "slug": "ortillery-spotter",
+    "roll": "12",
+    "name": "Ortillery Spotter",
+    "effect": "Pinpoint target for orbital artillery",
+    "cost": 5000,
+    "load": 1,
+    "book": "p.42"
+  }
+]

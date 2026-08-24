@@ -1,0 +1,329 @@
+[
+  {
+    "slug": "melee-weapon",
+    "roll": "11",
+    "name": "Melee weapon (roll melee table)",
+    "kind": "weapon",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "ranged-weapon",
+    "roll": "12",
+    "name": "Ranged weapon (roll firearms table)",
+    "kind": "weapon",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "armour",
+    "roll": "13",
+    "name": "Armour (roll armour table)",
+    "kind": "armor",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "augmentation",
+    "roll": "14",
+    "name": "Augmentation (roll aug table)",
+    "kind": "aug",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "sanyo-cell",
+    "roll": "15",
+    "name": "Cheap Sanyo cell phone",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "ono-sendai-console",
+    "roll": "16",
+    "name": "Ono-Sendai cyberspace console and 'trodes",
+    "kind": "console",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "pocket-toolkit",
+    "roll": "21",
+    "name": "Pocket toolkit or folding multi-tool",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "ir-goggles",
+    "roll": "22",
+    "name": "Infrared (IR) goggles",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "stolen-credit-card",
+    "roll": "23",
+    "name": "Stolen credit card",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "2d6",
+    "unit": "use",
+    "useEffect": "cash",
+    "book": "p.06"
+  },
+  {
+    "slug": "moskovskaya",
+    "roll": "24",
+    "name": "Half-bottle of Moskovskaya vodka",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "3d6",
+    "unit": "mouthful",
+    "useEffect": "narrative",
+    "book": "p.06"
+  },
+  {
+    "slug": "brazilian-hyperdex",
+    "roll": "25",
+    "name": "Brazilian hyperdex",
+    "kind": "drug",
+    "load": 1,
+    "uses": 3,
+    "unit": "dose",
+    "useEffect": "drug:hyperdex",
+    "book": "p.06"
+  },
+  {
+    "slug": "capsule-hotel-key",
+    "roll": "26",
+    "name": "Capsule hotel key",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "yeheyuan",
+    "roll": "31",
+    "name": "Yeheyuan cigarettes",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "3d6",
+    "unit": "cigarette",
+    "useEffect": "narrative",
+    "book": "p.06"
+  },
+  {
+    "slug": "fake-id",
+    "roll": "32",
+    "name": "Fake ID",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "handcuffs",
+    "roll": "33",
+    "name": "Handcuffs",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "mirrorshades",
+    "roll": "34",
+    "name": "Mirrorshades",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "av-drone",
+    "roll": "35",
+    "name": "Palm-sized audio-visual drone",
+    "kind": "drone",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "lazarus-patches",
+    "roll": "36",
+    "name": "Lazarus Patches",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "1d6",
+    "unit": "patch",
+    "useEffect": "lazarus",
+    "book": "p.06"
+  },
+  {
+    "slug": "gold-chopsticks",
+    "roll": "41",
+    "name": "Gold plastic chopsticks",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "destress-xpress",
+    "roll": "42",
+    "name": "DeStress Xpress capsules",
+    "kind": "drug",
+    "load": 1,
+    "uses": 6,
+    "unit": "dose",
+    "useEffect": "drug:destress-xpress",
+    "book": "p.06"
+  },
+  {
+    "slug": "headphones",
+    "roll": "43",
+    "name": "Chunky wireless headphones",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "ooba-card",
+    "roll": "44",
+    "name": "ÖOBA strato-cab account card",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "2d6",
+    "unit": "use",
+    "useEffect": "travel",
+    "book": "p.06"
+  },
+  {
+    "slug": "filter-mask",
+    "roll": "45",
+    "name": "Filter mask",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "vinyl-raincoat",
+    "roll": "46",
+    "name": "Clear vinyl raincoat from a vending machine",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "tablet",
+    "roll": "51",
+    "name": "Battered tablet computer (Flowscape browser)",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "ramen",
+    "roll": "52",
+    "name": "Self-heating instant ramen",
+    "kind": "consumable",
+    "load": 1,
+    "uses": 3,
+    "unit": "sachet",
+    "useEffect": "narrative",
+    "book": "p.06"
+  },
+  {
+    "slug": "religious-pendant",
+    "roll": "53",
+    "name": "Religious pendant",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "sanitizing-wipes",
+    "roll": "54",
+    "name": "Tub of sanitizing wipes",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "3d6",
+    "unit": "wipe",
+    "useEffect": "narrative",
+    "book": "p.06"
+  },
+  {
+    "slug": "motion-sensor",
+    "roll": "55",
+    "name": "Self-adhesive motion sensor",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "vape-pen",
+    "roll": "56",
+    "name": "Vape pen cartridges",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "1d6",
+    "unit": "cartridge",
+    "useEffect": "narrative",
+    "book": "p.06"
+  },
+  {
+    "slug": "foam-soap",
+    "roll": "61",
+    "name": "Aerosol of foam soap",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "2d6",
+    "unit": "use",
+    "useEffect": "narrative",
+    "book": "p.06"
+  },
+  {
+    "slug": "laser-pointer",
+    "roll": "62",
+    "name": "Laser pointer",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "resin-adhesive",
+    "roll": "63",
+    "name": "Tube of resin adhesive",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "1d6",
+    "unit": "application",
+    "useEffect": "narrative",
+    "book": "p.06"
+  },
+  {
+    "slug": "penlight",
+    "roll": "64",
+    "name": "Thin penlight",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "zippo",
+    "roll": "65",
+    "name": "Engraved Zippo lighter",
+    "kind": "gear",
+    "load": 1,
+    "book": "p.06"
+  },
+  {
+    "slug": "blank-shards",
+    "roll": "66",
+    "name": "Blank data-shards",
+    "kind": "consumable",
+    "load": 1,
+    "usesDice": "2d6",
+    "unit": "shard",
+    "useEffect": "narrative",
+    "book": "p.06"
+  }
+]

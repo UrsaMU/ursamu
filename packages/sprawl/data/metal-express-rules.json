@@ -1,0 +1,21 @@
+{
+  "ramming": "DS roll; smaller/lighter takes margin damage; +1 if tricked for ramming",
+  "pedestrians": "Reaction vs Vehicle DS to avoid being run over",
+  "collisions": "Reaction vs NPC vehicle DS; margin to NPC occupants; fail = PC occupants; -2 if airbags",
+  "controlRoll": {
+    "stat": "reaction",
+    "ds": 14,
+    "dangerous": true
+  },
+  "repairCostPerDs": "10% of initial price per DS point lost",
+  "repairLabourShare": 0.5,
+  "repairTime": "1 person-day restores up to 1 DS",
+  "hackDs": {
+    "easy": 8,
+    "moderate": 10,
+    "challenging": 12,
+    "hard": 14,
+    "formidable": 16
+  },
+  "book": "p.103-106"
+}

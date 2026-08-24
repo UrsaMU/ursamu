@@ -1,0 +1,23 @@
+{
+  "fullRestHours": 8,
+  "lazarusPatch": 3,
+  "firstAid": {
+    "stat": "cognition",
+    "heal": 2,
+    "ds": 10
+  },
+  "stabilize": {
+    "stat": "cognition",
+    "ds": 12,
+    "heal": 1
+  },
+  "medpro": {
+    "cost": 250,
+    "fullRes": true,
+    "name": "Street medpro / Minute Clinic",
+    "blurb": "Pay-per-use clinic or van medic. Few questions."
+  },
+  "stunRecovers": "after encounter",
+  "criticalNeedsPro": true,
+  "book": "p.38"
+}

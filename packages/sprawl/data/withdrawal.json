@@ -1,0 +1,79 @@
+[
+  {
+    "slug": "apathy-and-depression",
+    "roll": "02",
+    "name": "Apathy and depression",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "irrational-rage-and-irritability",
+    "roll": "03",
+    "name": "Irrational rage and irritability",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "confusion-and-disassociation",
+    "roll": "04",
+    "name": "Confusion and disassociation",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "hallucinations-and-flash-backs",
+    "roll": "05",
+    "name": "Hallucinations and flash-backs",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "cold-sweats-diarrhoea-dehydration",
+    "roll": "06",
+    "name": "Cold sweats, diarrhoea, dehydration",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "tremors-and-severe-light-sensitivity",
+    "roll": "07",
+    "name": "Tremors and severe light sensitivity",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "bleeding-gums-nose-bleeds",
+    "roll": "08",
+    "name": "Bleeding gums, nose bleeds",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "headaches-and-vomiting",
+    "roll": "09",
+    "name": "Headaches and vomiting",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "seizure",
+    "roll": "10",
+    "name": "Seizure",
+    "notes": "DS14 Morphology roll",
+    "book": "p.56"
+  },
+  {
+    "slug": "panic-and-paranoia",
+    "roll": "11",
+    "name": "Panic and paranoia",
+    "notes": "",
+    "book": "p.56"
+  },
+  {
+    "slug": "heart-attack",
+    "roll": "12",
+    "name": "Heart attack",
+    "notes": "DS18 Morphology roll",
+    "book": "p.56"
+  }
+]

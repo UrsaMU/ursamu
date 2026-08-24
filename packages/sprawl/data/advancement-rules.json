@@ -1,0 +1,10 @@
+{
+  "edgeMax": 3,
+  "ap": {
+    "cost": 100,
+    "perLevel": 100,
+    "sessionSurvival": 10,
+    "missionClose": 25
+  },
+  "book": "p.38 (house: AP-only; level = lifetime AP)"
+}

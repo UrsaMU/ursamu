@@ -1,0 +1,254 @@
+[
+  {
+    "slug": "camera-net",
+    "roll": "11",
+    "name": "Live camera net",
+    "blurb": "Cams everywhere — quiet preferred.",
+    "book": "house"
+  },
+  {
+    "slug": "timer",
+    "roll": "12",
+    "name": "Ticking window",
+    "blurb": "Site locks down in minutes.",
+    "book": "house"
+  },
+  {
+    "slug": "rival-crew",
+    "roll": "13",
+    "name": "Rival crew on-site",
+    "blurb": "Someone else wants the package.",
+    "book": "house"
+  },
+  {
+    "slug": "bio-lock",
+    "roll": "14",
+    "name": "Bio-locked doors",
+    "blurb": "Need a sample or a bypass.",
+    "book": "house"
+  },
+  {
+    "slug": "noise",
+    "roll": "15",
+    "name": "Thin walls",
+    "blurb": "Gunfire brings heat fast.",
+    "book": "house"
+  },
+  {
+    "slug": "drone-overwatch",
+    "roll": "16",
+    "name": "Drone overwatch",
+    "blurb": "Eyes in the air.",
+    "book": "house"
+  },
+  {
+    "slug": "civilians",
+    "roll": "21",
+    "name": "Civilians packed in",
+    "blurb": "Collateral is expensive.",
+    "book": "house"
+  },
+  {
+    "slug": "blackout",
+    "roll": "22",
+    "name": "Planned blackout",
+    "blurb": "Lights die on a timer — yours or theirs.",
+    "book": "house"
+  },
+  {
+    "slug": "ice-wake",
+    "roll": "23",
+    "name": "ICE already awake",
+    "blurb": "Net side is hot.",
+    "book": "house"
+  },
+  {
+    "slug": "double-cross",
+    "roll": "24",
+    "name": "Fixer double-cross",
+    "blurb": "Payment terms just changed.",
+    "book": "house"
+  },
+  {
+    "slug": "chem-haze",
+    "roll": "25",
+    "name": "Chem haze",
+    "blurb": "Glitch risk in the air.",
+    "book": "house"
+  },
+  {
+    "slug": "kombinat-tithe",
+    "roll": "26",
+    "name": "Kombinat tithe",
+    "blurb": "Pay or fight the door crew.",
+    "book": "house"
+  },
+  {
+    "slug": "flooded",
+    "roll": "31",
+    "name": "Flooded level",
+    "blurb": "Water, shorted gear, slow boots.",
+    "book": "house"
+  },
+  {
+    "slug": "emp-trap",
+    "roll": "32",
+    "name": "EMP tripwire",
+    "blurb": "Mag dumps and soft dies.",
+    "book": "house"
+  },
+  {
+    "slug": "hostage",
+    "roll": "33",
+    "name": "Soft hostage",
+    "blurb": "Someone innocent is in the way.",
+    "book": "house"
+  },
+  {
+    "slug": "shift-change",
+    "roll": "34",
+    "name": "Shift change",
+    "blurb": "Reinforcements rotate soon.",
+    "book": "house"
+  },
+  {
+    "slug": "silent-alarm",
+    "roll": "35",
+    "name": "Silent alarm already tripped",
+    "blurb": "Clock started before you did.",
+    "book": "house"
+  },
+  {
+    "slug": "mirror-team",
+    "roll": "36",
+    "name": "Mirror team",
+    "blurb": "Corp deniable assets inside.",
+    "book": "house"
+  },
+  {
+    "slug": "unstable-stack",
+    "roll": "41",
+    "name": "Unstable stack",
+    "blurb": "Floor may not hold a tanksuit.",
+    "book": "house"
+  },
+  {
+    "slug": "signal-jam",
+    "roll": "42",
+    "name": "Signal jam",
+    "blurb": "No call-out, no backup.",
+    "book": "house"
+  },
+  {
+    "slug": "blood-feud",
+    "roll": "43",
+    "name": "Blood feud",
+    "blurb": "Principal knows your face.",
+    "book": "house"
+  },
+  {
+    "slug": "vault-timer",
+    "roll": "44",
+    "name": "Vault timer",
+    "blurb": "Door seals after first breach.",
+    "book": "house"
+  },
+  {
+    "slug": "toxic-leak",
+    "roll": "45",
+    "name": "Toxic leak",
+    "blurb": "Resilience bleeds if you linger.",
+    "book": "house"
+  },
+  {
+    "slug": "gang-truce",
+    "roll": "46",
+    "name": "Broken gang truce",
+    "blurb": "Both sides shoot visitors.",
+    "book": "house"
+  },
+  {
+    "slug": "media-drone",
+    "roll": "51",
+    "name": "Media drone orbiting",
+    "blurb": "Everything is content.",
+    "book": "house"
+  },
+  {
+    "slug": "false-floor",
+    "roll": "52",
+    "name": "False floor",
+    "blurb": "One bad step into the culvert.",
+    "book": "house"
+  },
+  {
+    "slug": "ai-janitor",
+    "roll": "53",
+    "name": "AI janitor",
+    "blurb": "Cleaning bots with teeth.",
+    "book": "house"
+  },
+  {
+    "slug": "lockdown-grid",
+    "roll": "54",
+    "name": "Lockdown grid",
+    "blurb": "Exits seal in sequence.",
+    "book": "house"
+  },
+  {
+    "slug": "borrowed-time",
+    "roll": "55",
+    "name": "Borrowed time",
+    "blurb": "Your ride leaves with or without you.",
+    "book": "house"
+  },
+  {
+    "slug": "wetwork-clause",
+    "roll": "56",
+    "name": "Wetwork clause",
+    "blurb": "Client wants bodies, not photos.",
+    "book": "house"
+  },
+  {
+    "slug": "clean-hands",
+    "roll": "61",
+    "name": "Clean hands",
+    "blurb": "No kills on cam — or no pay.",
+    "book": "house"
+  },
+  {
+    "slug": "second-site",
+    "roll": "62",
+    "name": "Second site",
+    "blurb": "Real target is the next room over.",
+    "book": "house"
+  },
+  {
+    "slug": "dead-drop-swap",
+    "roll": "63",
+    "name": "Dead-drop swap",
+    "blurb": "Package was already moved.",
+    "book": "house"
+  },
+  {
+    "slug": "friendly-fire",
+    "roll": "64",
+    "name": "Friendly fire risk",
+    "blurb": "Allied goons are drunk and armed.",
+    "book": "house"
+  },
+  {
+    "slug": "storm",
+    "roll": "65",
+    "name": "Acid rain storm",
+    "blurb": "Outside is worse than inside.",
+    "book": "house"
+  },
+  {
+    "slug": "quiet-contract",
+    "roll": "66",
+    "name": "Quiet contract",
+    "blurb": "No witnesses means no witnesses.",
+    "book": "house"
+  }
+]

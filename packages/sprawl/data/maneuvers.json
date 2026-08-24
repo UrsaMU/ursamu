@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "traffic",
+    "name": "City traffic / takeoffs / landings / swerve",
+    "ds": 8,
+    "book": "p.34"
+  },
+  {
+    "slug": "hard-brake",
+    "name": "Hard brake / emergency stop / hover (VTOL)",
+    "ds": 10,
+    "book": "p.34"
+  },
+  {
+    "slug": "tight-turn",
+    "name": "Tight turn 45°+ / steep climb-dive / drift",
+    "ds": 12,
+    "book": "p.34"
+  },
+  {
+    "slug": "bootlegger",
+    "name": "Bootlegger 180° / VTOL rotate 90°",
+    "ds": 14,
+    "book": "p.34"
+  },
+  {
+    "slug": "acrobatics",
+    "name": "Acrobatics / aerobatics",
+    "ds": 16,
+    "book": "p.34"
+  },
+  {
+    "slug": "stunt",
+    "name": "Stunts (gap jumps, building bounce)",
+    "ds": 18,
+    "book": "p.34"
+  },
+  {
+    "slug": "needle",
+    "name": "Traverse narrow gap at top speed",
+    "ds": 20,
+    "book": "p.34"
+  }
+]

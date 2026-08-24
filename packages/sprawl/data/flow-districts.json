@@ -1,0 +1,163 @@
+[
+  {
+    "slug": "halogen-heights",
+    "name": "Halogen Heights",
+    "grid": "",
+    "blurb": "Broken habitation, low-rent housing, warehouses; floodlights; flooded streets east",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "dome-town",
+    "name": "Dome Town",
+    "grid": "",
+    "blurb": "Five dilapidated geodesic Fuller domes blackened by pollutants",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "apex-nuevo",
+    "name": "Apex Nuevo",
+    "grid": "H3",
+    "blurb": "Corporate towers on reclaimed coast; company security; management families",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "kudzu-island",
+    "name": "Kudzu Island",
+    "grid": "",
+    "blurb": "Trash island; misfits, pirates, smugglers, traffickers",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "neoshima",
+    "name": "Neoshima",
+    "grid": "",
+    "blurb": "ESFA reactor, factories, R&D; poorly-built worker housing",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "filter-valley",
+    "name": "Filter Valley",
+    "grid": "",
+    "blurb": "Smart-condos; syndicates, nodejackers; shardstores, aug clinics, VRcades",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "gohoru",
+    "name": "Gohoru",
+    "grid": "",
+    "blurb": "Business towers, hotels, puppet lounges; upper-class vice",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "nightside",
+    "name": "Nightside",
+    "grid": "",
+    "blurb": "Always in shadow of Halogen/Dome; vivid neon and holography",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "hub-city",
+    "name": "Hub City",
+    "grid": "",
+    "blurb": "Downtown-ish; apartments, entertainment, shopping, neon",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "the-projects",
+    "name": "The Projects",
+    "grid": "",
+    "blurb": "Carbon-copy apartment blocks; failed future housing",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "east-largo",
+    "name": "East Largo",
+    "grid": "",
+    "blurb": "Tenements; siege mentality",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "lethal-league",
+    "name": "Lethal League Stadium",
+    "grid": "",
+    "blurb": "Only stadium; ad boards; parking",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "southside-nogo",
+    "name": "Southside Nogo",
+    "grid": "",
+    "blurb": "Lawless warzone; corp liability dump",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "stackville",
+    "name": "Stackville",
+    "grid": "",
+    "blurb": "Tallest crumbling habstacks",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "containment-zone-9",
+    "name": "Containment Zone 9",
+    "grid": "",
+    "blurb": "Chemical disaster; nanite froth",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "binary-beach",
+    "name": "Binary Beach",
+    "grid": "",
+    "blurb": "Gentrifying techspressionist district",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "apex-nuevo-corp-zone",
+    "name": "Apex Nuevo Corporate Zone",
+    "grid": "H3",
+    "blurb": "Map loc hub — Genexus, Kanawa-Mendez, Sentry, orbitals",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "harbor-keys",
+    "name": "Harbor Keys Business Park",
+    "grid": "M5",
+    "blurb": "Cradle, Ishiteki, Komatsu, Hayabusa, Orchard, Ameron",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "periphery-plaza",
+    "name": "Periphery Plaza",
+    "grid": "F5",
+    "blurb": "Hideyoki, Braun, HAK, Ono-Sendai; Genetic Registry",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "network-city",
+    "name": "Network City",
+    "grid": "H6",
+    "blurb": "Media industry heart",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "mercy-mile",
+    "name": "Mercy Mile Mediplex",
+    "grid": "J6",
+    "blurb": "Largest subscription hospital/ER",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "sense-net",
+    "name": "Sense/Net",
+    "grid": "H2",
+    "blurb": "Cyberspace regulator black pyramid",
+    "book": "p.73-75"
+  },
+  {
+    "slug": "central-processing",
+    "name": "Central Processing",
+    "grid": "F7",
+    "blurb": "Courts, DA, FPD, ESWAT",
+    "book": "p.73-75"
+  }
+]

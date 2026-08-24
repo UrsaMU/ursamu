@@ -1,0 +1,98 @@
+[
+  {
+    "slug": "motorcycle",
+    "name": "Motorcycle / Bike",
+    "ds": 10,
+    "load": 0,
+    "cost": 5000,
+    "book": "p.33"
+  },
+  {
+    "slug": "ground-car",
+    "name": "Ground Car / Van",
+    "ds": 12,
+    "load": 0,
+    "cost": 12000,
+    "book": "p.33"
+  },
+  {
+    "slug": "truck-apc",
+    "name": "Truck / APC",
+    "ds": 14,
+    "load": 0,
+    "cost": 45000,
+    "book": "p.33"
+  },
+  {
+    "slug": "hopper",
+    "name": "Hopper / VTOL",
+    "ds": 14,
+    "load": 0,
+    "cost": 120000,
+    "book": "p.33"
+  },
+  {
+    "slug": "boat",
+    "name": "Boat / Hydrofoil",
+    "ds": 12,
+    "load": 0,
+    "cost": 20000,
+    "book": "p.33"
+  },
+  {
+    "slug": "light-aircraft",
+    "name": "Light Aircraft",
+    "ds": 14,
+    "load": 0,
+    "cost": 90000,
+    "book": "p.33"
+  },
+  {
+    "slug": "medium-aircraft",
+    "name": "Medium Aircraft",
+    "ds": 16,
+    "load": 0,
+    "cost": 250000,
+    "book": "p.33"
+  },
+  {
+    "slug": "big-aircraft",
+    "name": "Big Aircraft",
+    "ds": 18,
+    "load": 0,
+    "cost": 800000,
+    "book": "p.33"
+  },
+  {
+    "slug": "airship",
+    "name": "Lighter-Than-Air",
+    "ds": 12,
+    "load": 0,
+    "cost": 150000,
+    "book": "p.33"
+  },
+  {
+    "slug": "tanksuit",
+    "name": "Exoskeleton / Tanksuit",
+    "ds": 14,
+    "load": 0,
+    "cost": 900000,
+    "book": "p.33"
+  },
+  {
+    "slug": "walker",
+    "name": "Walker",
+    "ds": 16,
+    "load": 0,
+    "cost": 1200000,
+    "book": "p.33"
+  },
+  {
+    "slug": "train",
+    "name": "Train (not shooting back)",
+    "ds": 8,
+    "load": 0,
+    "cost": 0,
+    "book": "p.33"
+  }
+]

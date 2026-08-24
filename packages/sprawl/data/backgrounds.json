@@ -1,0 +1,482 @@
+[
+  {
+    "slug": "zone-wars-veteran",
+    "roll": "11",
+    "name": "Zone Wars Veteran",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "zone-wars-veteran-edge",
+      "name": "Situational Awareness",
+      "stat": "equilibrium",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Equilibrium; pass → Upgrade dice on attack once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "komatsu-killmorph",
+    "roll": "12",
+    "name": "Komatsu Killmorph",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "komatsu-killmorph-edge",
+      "name": "Mimic",
+      "stat": "equilibrium",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Equilibrium; pass → copy mannerisms and vocal tone once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "nodejacker",
+    "roll": "13",
+    "name": "Nodejacker",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "nodejacker-edge",
+      "name": "Feedwise",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → navigate cyberspace or find online contacts once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "syndicate-enforcer",
+    "roll": "14",
+    "name": "Syndicate Enforcer",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "syndicate-enforcer-edge",
+      "name": "Intimidate",
+      "stat": "equilibrium",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Equilibrium; pass → pressure through threats once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "chemical-edit",
+    "roll": "15",
+    "name": "Chemical Edit",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "chemical-edit-edge",
+      "name": "White Lies",
+      "stat": "affinity",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Affinity; pass → fabricate convincing falsehoods once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "clone-interrupted",
+    "roll": "16",
+    "name": "Clone Interrupted",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "clone-interrupted-edge",
+      "name": "Masquerade",
+      "stat": "affinity",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Affinity; pass → imitate progenitor once identity known once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "robotnik",
+    "roll": "21",
+    "name": "Robotnik",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "robotnik-edge",
+      "name": "Machine Mind",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → teleoperate with Upgrade once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "runaway-splice",
+    "roll": "22",
+    "name": "Runaway Splice",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "runaway-splice-edge",
+      "name": "Primal Instinct",
+      "stat": "reaction",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Reaction; pass → Upgrade next attack if cornered/outnumbered once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "strato-cabbie",
+    "roll": "23",
+    "name": "Strato-cabbie",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "strato-cabbie-edge",
+      "name": "Top Gun",
+      "stat": "reaction",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Reaction; pass → pilot hopper with Upgrade once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "backstreet-biomechanic",
+    "roll": "24",
+    "name": "Backstreet Biomechanic",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "backstreet-biomechanic-edge",
+      "name": "Under Pressure",
+      "stat": "equilibrium",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Equilibrium; pass → treat injuries with Upgrade once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "toxic-tweeker",
+    "roll": "25",
+    "name": "Toxic Tweeker",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "toxic-tweeker-edge",
+      "name": "Hypertolerance",
+      "stat": "equilibrium",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Equilibrium; pass → resist chemical/pharma effects once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "jaded-jurojin",
+    "roll": "26",
+    "name": "Jaded Jurōjin",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "jaded-jurojin-edge",
+      "name": "Boundless Resources",
+      "stat": "affinity",
+      "bonus": 1,
+      "frequency": "session",
+      "blurb": "+1 Affinity; pass → request family help/finances once per session",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "fugitive-cybrid",
+    "roll": "31",
+    "name": "Fugitive Cybrid",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "fugitive-cybrid-edge",
+      "name": "Uncanny Durability",
+      "stat": "morphology",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Morphology; pass → ignore damage that round once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "nexus",
+    "roll": "32",
+    "name": "Nexus",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "nexus-edge",
+      "name": "Street Biz",
+      "stat": "affinity",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Affinity; pass → negotiate deal or shady contacts once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "war-child",
+    "roll": "33",
+    "name": "War Child",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "war-child-edge",
+      "name": "Relentless",
+      "stat": "equilibrium",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Equilibrium; pass → fight without wound Glitch once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "panzer-mind",
+    "roll": "34",
+    "name": "Panzer Mind",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "panzer-mind-edge",
+      "name": "Battle Tech",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Cognition; pass → Upgrade vs tanksuits/vehicles once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "mnemonic-envoy",
+    "roll": "35",
+    "name": "Mnemonic Envoy",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "mnemonic-envoy-edge",
+      "name": "Fragmentary Recall",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → recover memory slivers once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "datasocialist-insurgent",
+    "roll": "36",
+    "name": "Datasocialist Insurgent",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "datasocialist-insurgent-edge",
+      "name": "Saboteur's Eye",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → identify infrastructure weaknesses once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "recoded",
+    "roll": "41",
+    "name": "Recoded",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "recoded-edge",
+      "name": "Whispered Intuition",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → insight from master AI once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "transmissions-cop",
+    "roll": "42",
+    "name": "Transmissions Cop",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "transmissions-cop-edge",
+      "name": "Digital Instinct",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → find online leads or digital anomalies once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "freak-fighter",
+    "roll": "43",
+    "name": "Freak Fighter",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "freak-fighter-edge",
+      "name": "Threat Analysis",
+      "stat": "equilibrium",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Equilibrium; pass → Upgrade next attack once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "nanomancer",
+    "roll": "44",
+    "name": "Nanomancer",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "nanomancer-edge",
+      "name": "Structural Dynamics",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → assess materials for assemblers once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "combat-chauffeur",
+    "roll": "45",
+    "name": "Combat Chauffeur",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "combat-chauffeur-edge",
+      "name": "Pedal To The Metal",
+      "stat": "reaction",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Reaction; pass → drive tactically with Upgrade once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "tecstatic",
+    "roll": "46",
+    "name": "Tecstatic",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "tecstatic-edge",
+      "name": "Earthly Escape",
+      "stat": "equilibrium",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Equilibrium; pass → negate privations once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "orbital-operator",
+    "roll": "51",
+    "name": "Orbital Operator",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "orbital-operator-edge",
+      "name": "Augmented Allure",
+      "stat": "affinity",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Affinity; pass → influence dirtsiders once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "ghostrunner",
+    "roll": "52",
+    "name": "Ghostrunner",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "ghostrunner-edge",
+      "name": "Mindware",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → detect digital beings once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "rogue-atid",
+    "roll": "53",
+    "name": "Rogue Shikaaree Type-66 ATID",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "rogue-atid-edge",
+      "name": "Berserker Mode",
+      "stat": "reaction",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Reaction; pass → optimal strike vs up to 3 foes once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "telemetric-sniper",
+    "roll": "54",
+    "name": "Telemetric Sniper",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "telemetric-sniper-edge",
+      "name": "Target Acquisition",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "encounter",
+      "blurb": "+1 Cognition; pass → Upgrade on attack once per combat",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "cognition-verification-agent",
+    "roll": "55",
+    "name": "Cognition Verification Agent",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "cognition-verification-agent-edge",
+      "name": "Synthetic Awareness",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → identify real/cybrid/shell once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "ultrateen",
+    "roll": "56",
+    "name": "Ultrateen",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "ultrateen-edge",
+      "name": "High Influence",
+      "stat": "affinity",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Affinity; pass → access off-limits places once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "fluid-reality-adept",
+    "roll": "61",
+    "name": "Fluid Reality Adept",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "fluid-reality-adept-edge",
+      "name": "Holoactualisation",
+      "stat": "cognition",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Cognition; pass → hyperreal holos with Upgrade once per scene",
+      "book": "p.16-20"
+    }
+  },
+  {
+    "slug": "gang-war-surplus",
+    "roll": "62",
+    "name": "Gang War Surplus",
+    "book": "p.07-15",
+    "edge": {
+      "slug": "gang-war-surplus-edge",
+      "name": "Urban Evasion",
+      "stat": "reaction",
+      "bonus": 1,
+      "frequency": "scene",
+      "blurb": "+1 Reaction; pass → find escape route or bolt-hole once per scene",
+      "book": "p.16-20"
+    }
+  }
+]

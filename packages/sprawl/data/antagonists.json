@@ -1,0 +1,226 @@
+[
+  {
+    "slug": "sprawl-cop",
+    "name": "Sprawl Cop",
+    "ds": 10,
+    "loadout": "Flak Vest, Helmet w IR Visor, PKD-45, Baton",
+    "short-desc": "Badge, IR visor, baton ready.",
+    "book": "p.68"
+  },
+  {
+    "slug": "gang-member",
+    "name": "Gang Member",
+    "ds": 10,
+    "loadout": "Mohawk, d3 Augments, d3 Weapons, d3 Drugs",
+    "short-desc": "Mohawk, chrome, and attitude.",
+    "book": "p.68"
+  },
+  {
+    "slug": "gang-boss",
+    "name": "Gang Boss",
+    "ds": 14,
+    "loadout": "Big Mohawk, d6 Augments, d6 Weapons",
+    "short-desc": "Bigger mohawk. Worse temper.",
+    "book": "p.68"
+  },
+  {
+    "slug": "corporate-security",
+    "name": "Corporate Security",
+    "ds": 12,
+    "loadout": "Flak Vest, Bio-locked Shardgun & SMG",
+    "short-desc": "Corp kit, bio-locked guns.",
+    "book": "p.68"
+  },
+  {
+    "slug": "corporate-agent",
+    "name": "Corporate Agent",
+    "ds": 14,
+    "loadout": "d3 Augments, Arachnoweave Suit, SMG",
+    "short-desc": "Arachnoweave and a polite SMG.",
+    "book": "p.68"
+  },
+  {
+    "slug": "company-executive",
+    "name": "Company Executive",
+    "ds": 10,
+    "loadout": "Designer Clothes, Pistol, d6 Agents",
+    "short-desc": "Designer suit, hidden piece.",
+    "book": "p.68"
+  },
+  {
+    "slug": "killmorph",
+    "name": "Killmorph",
+    "ds": 16,
+    "loadout": "Shardgun, Morphwear, d6 Augments, Monoknife",
+    "short-desc": "Morphwear and monoknife gleam.",
+    "book": "p.68"
+  },
+  {
+    "slug": "zone-veteran",
+    "name": "Zone Veteran",
+    "ds": 16,
+    "loadout": "Armoured overcoat, Assault Rifle, d3 Grenades",
+    "short-desc": "Armoured coat, zone scars.",
+    "book": "p.68"
+  },
+  {
+    "slug": "nodejacker-npc",
+    "name": "Nodejacker",
+    "ds": 12,
+    "loadout": "Console, Electro-knux, Pistol, Kevlar Jacket",
+    "short-desc": "Console glow, knux ready.",
+    "book": "p.68"
+  },
+  {
+    "slug": "rogue-cybrid",
+    "name": "Rogue Cybrid",
+    "ds": 8,
+    "loadout": "Tatty Coverall, Stolen PKD-45, Precious Photos",
+    "short-desc": "Tatty coverall, stolen heat.",
+    "book": "p.68"
+  },
+  {
+    "slug": "combat-cybrid",
+    "name": "Combat Cybrid",
+    "ds": 14,
+    "loadout": "Leather Overcoat, 2x SMGs, Slicers, Shades",
+    "short-desc": "Twin SMGs under leather.",
+    "book": "p.68"
+  },
+  {
+    "slug": "t66-atid",
+    "name": "T-66 ATID",
+    "ds": 18,
+    "loadout": "d6 Sensor Augments, KR-16, Inbuilt Exoframe",
+    "short-desc": "Exoframe hum, sensor glare.",
+    "book": "p.68"
+  },
+  {
+    "slug": "syndicate-goon",
+    "name": "Syndicate Goon",
+    "ds": 12,
+    "loadout": "Cheap Suit, Assault Rifle, Fancy Pistol",
+    "short-desc": "Cheap suit, expensive rifle.",
+    "book": "p.68"
+  },
+  {
+    "slug": "syndicate-boss",
+    "name": "Syndicate Boss",
+    "ds": 16,
+    "loadout": "Expensive Suit, Jewellery, Custom Pistol",
+    "short-desc": "Silk suit, custom iron.",
+    "book": "p.68"
+  },
+  {
+    "slug": "security-drone",
+    "name": "Security Drone",
+    "ds": 10,
+    "loadout": "IFF, EMP Weapon, RFID Shard, Ceramic Shell",
+    "short-desc": "Ceramic shell, EMP hum.",
+    "book": "p.68"
+  },
+  {
+    "slug": "combat-drone",
+    "name": "Combat Drone",
+    "ds": 16,
+    "loadout": "d3 Weapons, Ceramic Shell, Smart Targetting",
+    "short-desc": "Smart-target combat drone.",
+    "book": "p.68"
+  },
+  {
+    "slug": "cybershell-mercenary",
+    "name": "Cybershell Mercenary",
+    "ds": 18,
+    "loadout": "Kevlar Jacket, Mono-dao, SMG",
+    "short-desc": "Kevlar, mono-dao, paid up.",
+    "book": "p.68"
+  },
+  {
+    "slug": "corporate-tanksuit",
+    "name": "Corporate Tanksuit",
+    "ds": 20,
+    "loadout": "d6 Weapons, Smart Targetting, Bio-lock",
+    "short-desc": "Walking gun platform.",
+    "book": "p.68"
+  },
+  {
+    "slug": "augmented-guard-dog",
+    "name": "Augmented Guard Dog",
+    "ds": 12,
+    "loadout": "Full-spectrum Optics, Wampyrs",
+    "short-desc": "Chrome fangs, full-spectrum eyes.",
+    "book": "p.68"
+  },
+  {
+    "slug": "bodyguard",
+    "name": "Bodyguard",
+    "ds": 14,
+    "loadout": "d6 Augments, Shardgun/SMG, Awareness Drone",
+    "short-desc": "Eyes everywhere, gun ready.",
+    "book": "p.68"
+  },
+  {
+    "slug": "psychotic-cyborg",
+    "name": "Psychotic Cyborg",
+    "ds": 20,
+    "loadout": "d6+2 Augments, d3 Melee Weapons",
+    "short-desc": "Too much chrome, not enough mind.",
+    "book": "p.68"
+  },
+  {
+    "slug": "insurgent",
+    "name": "Insurgent",
+    "ds": 14,
+    "loadout": "AK-91R, Burner Phones, Crude DS16 IED, Manifesto",
+    "short-desc": "Rifle, burners, crude IED.",
+    "book": "p.68"
+  },
+  {
+    "slug": "spiderform-cybershell",
+    "name": "Spiderform Cybershell",
+    "ds": 18,
+    "loadout": "6-8 Limbs, d6 Weapons, d6 Augments",
+    "short-desc": "Too many limbs, all armed.",
+    "book": "p.68"
+  },
+  {
+    "slug": "combat-artiste",
+    "name": "Combat Artiste",
+    "ds": 12,
+    "loadout": "Savvy Jack, Kung Fu Shard, Nunchaku",
+    "short-desc": "Kung-fu shard and nunchaku.",
+    "book": "p.68"
+  },
+  {
+    "slug": "vatgrown-ninja",
+    "name": "Vatgrown Ninja",
+    "ds": 18,
+    "loadout": "Carbon Katana, Black Clothes, Cold Stare",
+    "short-desc": "Carbon katana, cold stare.",
+    "book": "p.68"
+  },
+  {
+    "slug": "ronin",
+    "name": "Ronin",
+    "ds": 16,
+    "loadout": "Leathers, Ishiteki Mirrors, Scratchers, Shardgun",
+    "short-desc": "Leathers, mirrors, scratchers.",
+    "book": "p.68"
+  },
+  {
+    "slug": "zone-boss-ganger",
+    "name": "Zone Bosses ganger",
+    "ds": 10,
+    "loadout": "Example from combat rules",
+    "short-desc": "Zone Bosses street muscle.",
+    "book": "p.68"
+  },
+  {
+    "slug": "genexus-agent",
+    "name": "Genexus agent",
+    "ds": 10,
+    "loadout": "Example from combat rules",
+    "short-desc": "Genexus field agent.",
+    "book": "p.68"
+  }
+]

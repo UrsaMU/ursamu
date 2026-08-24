@@ -1,0 +1,353 @@
+[
+  {
+    "slug": "bmw-r21",
+    "name": "BMW R21",
+    "ds": 8,
+    "tags": "DS8, Showoff, Hot",
+    "blurb": "For many, a motorcycle means sex appeal, and this sexy beast from BMW’s Heritage line has all the sex appeal you’ll ever need; think of it as a purebred stallion. It’s big, it’s classy (and with classic lines), it just oozes the right stuff. The rider doesn’t have to compensate for anything… and the",
+    "cost": 10000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "hayabusa-shinden",
+    "name": "Hayabusa Shinden",
+    "ds": 8,
+    "tags": "DS8, Crazy Fast, Hangar Queen",
+    "blurb": "When something is called “Lightning”, you don’t expect it to be tame. And this bike from Hayabusa certainly isn’t. It is powerful, and it is ridiculously fast. A bike to leave lesser crotch rockets to eat its exhaust fumes. The wet dream of bosozoku bike gangers - and a fulfilled dream, as soon as t",
+    "cost": 12500,
+    "book": "p.107+"
+  },
+  {
+    "slug": "hero-c12",
+    "name": "Hero C12",
+    "ds": 8,
+    "tags": "DS8, Really Outperformed, Bare Bones Basic",
+    "blurb": "An inexpensive, bare bones scooter, but if you need to get around, and you’re on a tight budget, the Hero C will get the job done. After all, it gets the job done in many less affluent parts of the world, and you’ll be surprised to see what the folks have been able to load on it; limited means and g",
+    "cost": 2500,
+    "book": "p.107+"
+  },
+  {
+    "slug": "sisu-peura",
+    "name": "Sisu Peura",
+    "ds": 8,
+    "tags": "DS8, Bare Bones Basic",
+    "blurb": "The most popular snowmobile in the world, Sisu Peura, is as sure-footed in the snow as it’s namesake, the reindeer. It is available in countless variants and modifications, but at its core, it is a good, basic vehicle. It won’t do for the high-demand professional applications, but for everyday use, ",
+    "cost": 1500,
+    "book": "p.107+"
+  },
+  {
+    "slug": "dornier-roche",
+    "name": "Dornier Roche",
+    "ds": 4,
+    "tags": "usually DS8, but Fragile: DS4",
+    "blurb": "Dornier cut quite a few corners with their Roche-series jet skis. Sure, they managed to keep the cost down, but the resulting vehicle is relatively delicate, and limited to use as a pleasure craft in relatively calm waters. Which is where you see it; at tourist resorts, being ridden by vacationers.",
+    "cost": 1250,
+    "book": "p.107+"
+  },
+  {
+    "slug": "mitsubishi-amatsubame",
+    "name": "Mitsubishi Amatsubame",
+    "ds": 12,
+    "tags": "DS12, Small",
+    "blurb": "This tiny citycar (seats two and has minimal baggage space) is popular in city centers, due to sound mechanical design and pleasant (some say cute) aesthetics. There’s a proper engine under the hood - not an underpowered lawnmower motor many cheap citycars use - and if you don’t mind poor fuel econo",
+    "cost": 8000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "rider",
+    "name": "Rider",
+    "ds": 12,
+    "tags": "DS12, Invisible",
+    "blurb": "The most popular compact on the market, you can’t throw a stone without hitting one of these. A very reasonable choice, if you simply need a standard car. Available with countless options and variants, nevertheless, there are so many Riders in the street that every single one of them is almost invis",
+    "cost": 12250,
+    "book": "p.107+"
+  },
+  {
+    "slug": "hawker-aichi-baribal",
+    "name": "Hawker-Aichi Baribal",
+    "ds": 12,
+    "tags": "DS12, Very Large For The Type, Bare Bones Basic",
+    "blurb": "Your basic family minivan, capable of packing a large family (seats seven, and still has sizable cargo space - you can fold down the rear sofa to get a really big trunk, but that cuts the seats to four) and is equipped with a decent engine to haul them. The basic configuration is rather spartan, but",
+    "cost": 15500,
+    "book": "p.107+"
+  },
+  {
+    "slug": "hwl-mandarin-type-31",
+    "name": "HWL Mandarin Type 31",
+    "ds": 12,
+    "tags": "DS12, Offroad Capable, Bone Rattler",
+    "blurb": "A Chinese-made jeep of military origin, still used by Chinese armed forces as a light utility vehicle, that won its place on the market with low price, good off-road performance and no-nonsense design. The Type 31 can be found in many third world countries’ militaries, as well 109 the showroom as wi",
+    "cost": 8750,
+    "book": "p.107+"
+  },
+  {
+    "slug": "eichner-voss-serie-200",
+    "name": "Eichner & Voss Serie 200",
+    "ds": 12,
+    "tags": "DS12, Small",
+    "blurb": "A popular speedboat, used to tow water skiers and for similar recreational applications. Does well on calm, inland waters, but the manufacturer does not advise taking it out in rough seas.",
+    "cost": 11500,
+    "book": "p.107+"
+  },
+  {
+    "slug": "bmw-t9-series",
+    "name": "BMW T9-Series",
+    "ds": 14,
+    "tags": "DS14, Luxury Amenities, Really Fancy Crew Protection",
+    "blurb": "Quality German engineering, this limousine matches class and style with performance. Each and every one is individually finished, and any bespoke option can be ordered for it. And it has it where it counts. The T9 is considered an appropriate choice for upper echelon corporates and top-tier diplomat",
+    "cost": 35000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "zuni-mercury",
+    "name": "Zuni Mercury",
+    "ds": 14,
+    "tags": "DS14,Tinker’s Dream, Invisible",
+    "blurb": "Your standard multipurpose van, produced under license all over the world, and intentionally made easy to modify (in addition to multiple variants readily available). You want a small bus? Mercury. A mobile workshop? Mercury. An ambulance? Mercury. A light firetruck? Mercury. A refrigerated goods tr",
+    "cost": 18000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "montxo-class-14-cutter",
+    "name": "Montxo Class 14 Cutter",
+    "ds": 21,
+    "tags": "usually DS14, Tough: DS21, Rough Terrain Capable [storm weather], Bone Rattler",
+    "blurb": "You can sink a Class 14 cutter, but only if you break it into shards first, and can handle anything the world throws at her. Montxo developed the Class 14 (named for its 14-metre-long hull) as a rescue craft (though several other industries found uses for the model), capable of responding to marine ",
+    "cost": 250000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "volvo-g-series",
+    "name": "Volvo G-Series",
+    "ds": 16,
+    "tags": "DS16",
+    "blurb": "A massive family of trucks from a renowned Swedish manufacturer, it includes GL models for light, in-city work, GE for general use, GMX heavy-duty trucks (used mostly for construction applications), GM semi-tractor for long-haul applications, and GH heavy prime mover (for hauling oversized / superhe",
+    "cost": 500000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "hawker-aichi-daschund",
+    "name": "Hawker-Aichi Daschund",
+    "ds": 16,
+    "tags": "DS16, Very Large For The Type, Cybercontrol Rig",
+    "blurb": "Hawker-Aichi’s proposal for the intra-city, public transport operators. Low-floor, articulated design, it can take nearly 200 passengers (almost a third of them seated), and comes equipped with cybernetic controls for maximum driving precision on the congested city streets. It is as long as legal re",
+    "cost": 135750,
+    "book": "p.107+"
+  },
+  {
+    "slug": "kamaz-7x-series",
+    "name": "Kamaz 7X-Series",
+    "ds": 24,
+    "tags": "DS24, Tough",
+    "blurb": "A family of heavy-duty trucks from a well-known Russian manufacturer. Available both as cab and chassis units (Bare Bones Basic) or as complete vehicles, they can be ordered with all-wheel drive (Offroad Capable) if necessary. Two-axel, three- axel, the superheavy four-axel, plus, 8x8 models are ava",
+    "cost": 45900,
+    "book": "p.107+"
+  },
+  {
+    "slug": "hwl-mandarin-type-75",
+    "name": "HWL Mandarin Type 75",
+    "ds": 18,
+    "tags": "DS18, Brace For Impact!, Amphibious, Armoured For Combat, Rough Terrain Ready",
+    "blurb": "A rather plain APC, the Type 75 however does reasonably well in low-intensity conflicts. It is also popular in more advanced nations as a police vehicle (for SWAT and riot duty), where it’s reinforced prow comes in handy. HWL Mandarin sells lots of them. It comes with a small turret, intended for a ",
+    "cost": 325000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "armcor-grizzly",
+    "name": "Armcor Grizzly",
+    "ds": 18,
+    "tags": "DS18, Amphibious, Armoured For Combat, If It Burns, It’ll Do, Rough Terrain Ready",
+    "blurb": "A first-rate Infantry Fighting Vehicle, capable of transporting and supporting a squad of grunts on a modern battlefield. This (or comparable models from other manufacturers) is what armies buy, provided they can afford it. A modern, unmanned weapons station in a remotely-operated turret holds an au",
+    "cost": 575000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "rheinmetall-l-we",
+    "name": "Rheinmetall Löwe",
+    "ds": 20,
+    "tags": "DS20, Armoured For Combat, Rough Terrain Ready",
+    "blurb": "This venerable Main Battle Tank has grown somewhat long in the tooth, but remains a respectable battlewagon, even today, thanks to a series of upgrade packages Rheinmetall made for it. Even if it is no longer the bleeding edge of armoured warfare, a lot of them were built and sold to armies all arou",
+    "cost": 1500000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "kenbichi-heavy-industries-shikabe-series",
+    "name": "Kenbichi Heavy Industries Shikabe-Series",
+    "ds": 20,
+    "tags": "DS20, AI Controlled",
+    "blurb": "A popular ‘feeder’, i.e. a small container ship (312 TEU capacity) intended to transport containers between major hubs (which are frequented by the massive supercontainer freighters, carrying well over 20,000 TEU), and smaller harbours that simply don’t have such cargo flow (and couldn’t handle such",
+    "cost": 10000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "vsv-kosatka",
+    "name": "VSV Kosatka",
+    "ds": 20,
+    "tags": "DS20, Armoured For Combat, Funky Autopilot, Trunk Monkey",
+    "blurb": "A favourite of many nations and corporate states, the Kosatka-class corvette is small enough to be useful as a patrol vessel, yet big enough to pack a punch, and affordable enough to be bought in quantity. It has a well-known drawback, however; the nav assistant / autopilot system has notoriously gl",
+    "cost": 6250000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "naval-group-chimere",
+    "name": "Naval Group Chimere",
+    "ds": 20,
+    "tags": "DS20, Stealth, Whisper Quiet, Really Fancy Sensors, Armoured For Combat, Cybercontrol Rig",
+    "blurb": "A non-nuclear, relatively compact attack submarine with AIP (Air Independent Propulsion) system. Pretty modern, it can give the older nuclear subs a run for their money, and is way cheaper. Made by a French-Spanish consortium, but sold worldwide, it is armed with an arsenal of missiles and torpedoes",
+    "cost": 245500000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "eichner-voss-schweinswale",
+    "name": "Eichner & Voss Schweinswale",
+    "ds": 20,
+    "tags": "DS20, Trunk Monkey, Bob The Builder",
+    "blurb": "A mid-sized cargo and utility submarine, the Schweinswale is a common sight at undersea habitats, mining stations and farms, either transporting goods or performing other tasks. It comes equipped with universal interfaces for a plethora of manipulators and construc- tion tools, as well as a drone ra",
+    "cost": 95000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "bharatiya-vayu-sena-industries-hamsa",
+    "name": "Bharatiya Vayu Sena Industries Hamsa",
+    "ds": 20,
+    "tags": "DS20 per car, Crazy Fast, Whisper Quiet",
+    "blurb": "The pride of the Indian Railway (and selling abroad like hotcakes) Hamsa is the shatabdi express for the cyberpunk age. Fast and comfortable (on demand, cars equipped with Luxury Amenities are available - some railway companies ordered Hamsa trains so lavishly equipped as to outshine the centuries-o",
+    "cost": 120000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "zuni-bumblebee",
+    "name": "Zuni Bumblebee",
+    "ds": 8,
+    "tags": "usually DS16, but Fragile: DS8, Small For The Class",
+    "blurb": "This tiny, two-seater helicopter is sold mainly as a pleasure craft. However, it is also used in professional capacity as a patrol and observation helicopter, with services who need such an asset, but can’t afford larger models, or don’t really need them. Bumblebees can be seen in the liveries of ma",
+    "cost": 820000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "sikorsky-s-311",
+    "name": "Sikorsky S-311",
+    "ds": 16,
+    "tags": "DS16, Cybercontrol Rig",
+    "blurb": "A light utility helicopter from Sikorsky, the S-311 (known in military circles as the S-311 Navajo) is commonly used as a traffic observer, police pursuit helicopter, light personnel transport, news crew vehicle and so on. Armies use it primarily as an observer and scout (sometimes armed with a .50-",
+    "cost": 5000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "kamov-k-98-strekoza",
+    "name": "Kamov K-98 Strekoza",
+    "ds": 16,
+    "tags": "DS16, Armoured For Combat, Crazy Fast",
+    "blurb": "A modern, Russian-made attack helicopter built in the characteristic Kamov style, with double-stacked main rotor and no tail rotor. Fast and deadly, the K-98 carries an autocannon and a battery of missiles. Kamov is making a killing, selling these both domestically and abroad.",
+    "cost": 12000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "draco-d91-wyvern",
+    "name": "Draco D91 Wyvern",
+    "ds": 16,
+    "tags": "DS16, Invisible",
+    "blurb": "A pretty basic, yet very popular tiltrotor. Well-liked for its spacious cargo hold, decent lift capability and ease of maintenance. Used by civilian operators, as well as military ones, for the roles once occupied by heavy transport helicopters, but by their nature, tiltrotors are faster and more ma",
+    "cost": 7500000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "draco-d65-forktail",
+    "name": "Draco D65 Forktail",
+    "ds": 14,
+    "tags": "DS14, Bone Rattler, Rough Terrain Ready [improvised runways], Amphibious, Extra Range",
+    "blurb": "Do you want a handful of people and some cargo delivered to some place so remote that even God himself has forgotten about it? The D65 Forktail is your friend. This rugged bushplane from Draco can land anywhere, even on water (thanks to a flying boat design), or on an improvised airfield (landing on",
+    "cost": 3900000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "shikr-s-22-shaheen",
+    "name": "Shikr S-22 Shaheen",
+    "ds": 14,
+    "tags": "DS14, Crazy Fast, Turbo, Really Outdated",
+    "blurb": "This old jetbird was originally manufactured in Iran, although its lineage can be clearly traced back to several Cold War-era Soviet jet fighters. For a time it was pretty popular with less-affluent nations (or those who had money, but no connections to buy fancier stuff), and, therefore, still rema",
+    "cost": 1200000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "draco-d103-zmey",
+    "name": "Draco D103 Zmey",
+    "ds": 16,
+    "tags": "DS16, Extra Range, Crazy Fast, optional Luxury Amenities",
+    "blurb": "Fast, long-ranged, comfortable - that’s what the Zmey, an executive jet from Draco, is. How comfortable? Well, that depends on the depth of your pockets. Multibillionaires fly Zmeys, and some heads of governments do as well. Draco offers these craft with built-in missile countermeasures and decoy la",
+    "cost": 16000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "antonov-an-144-nosorig",
+    "name": "Antonov An-144 Nosorig",
+    "ds": 22,
+    "tags": "usually DS18, but Tough: DS22, Bare Bones Basic, Rare Bird",
+    "blurb": "A Ukrainian-made descendant of the famed An-124 Ruslan, the An-144 is not the largest cargo aircraft in the world, but it is still massive. In military terms, it is classified as a Strategic Airlift 116 the showroom Aircraft, meaning you could stuff it with anything (up to a couple of main battle ta",
+    "cost": 30000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "airbus-a430",
+    "name": "Airbus A430",
+    "ds": 18,
+    "tags": "DS18, Extra Range, Very Large For The Type, Unwieldy, Cybercontrol Rig",
+    "blurb": "This intercontinental airliner from Airbus is a fully double-decked, twin-aisle, four-engined behemoth of the skies. Depending on the configuration, it can carry up to a little over a thousand passengers. Obviously, such a huge aircraft cannot be really nimble, but it doesn’t really need to be. Espe",
+    "cost": 62000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "jerboa-electric-cometa",
+    "name": "Jerboa Electric Cometa",
+    "ds": 8,
+    "tags": "usually DS12, Fragile: DS8, AI Driver, State Of The Art Sensors",
+    "blurb": "A successful small blimp from a South American manufacturer, the Cometa is solar-powered and often remains airborne for weeks, or even months, and is operated as a drone, or, in the more advanced versions, by an onboard AI (though space for a few crew- members is provided). An excellent sensor packa",
+    "cost": 8000000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "boeing-atlas",
+    "name": "Boeing Atlas",
+    "ds": 12,
+    "tags": "DS12, Very Large For The Type, Extra Range, Cybercontrol Rig",
+    "blurb": "A truly majestic sight, the Atlas is Boeing's entry into the heavy cargo blimp market. Despite its size, it is extremely 117 maneuverable, thanks to dozens of adjustable ducted fans and the showroom a state-of-the-art cyber controlled steering system. It can act as a flying crane, or, just as easily",
+    "cost": 14750000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "vanda-sheridan-lexington",
+    "name": "Vanda-Sheridan Lexington",
+    "ds": 14,
+    "tags": "DS14, Armoured For Combat, Really Outdated",
+    "blurb": "A rather plain, but popular, general-use military tanksuit from the previous generation. A lot of them went out to the wider world, and thus can be found in the places you wouldn’t normally expect to field powered armour. Thanks to their popularity and long service, upgrade packages are available an",
+    "cost": 990000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "saab-panther",
+    "name": "Saab Panther",
+    "ds": 10,
+    "tags": "usually DS14, but Fragile: DS10, Armoured For Combat, Small For The Type, Invisible, Whisper Quiet, Rare Bird, Hangar Queen",
+    "blurb": "A lightweight tanksuit from a leading European manufacturer, Panther is engineered for special operations, Small and hard to detect, it can negotiate any space a normal-sized human could (which is always a problem for the heavier powered armours). There are a number of drawbacks, though; it is far f",
+    "cost": 1350000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "kenbichi-heavy-industries-ari",
+    "name": "Kenbichi Heavy Industries Ari",
+    "ds": 16,
+    "tags": "DS16, Bob The Builder, Cybercontrol Rig",
+    "blurb": "Once again, the Japanese got it right and the Ari-series of construction walkers turned out to be indispensable on construction sites. Sure, it is a specialised piece of equipment, and not likely to replace all the other stuff, but it is really damn handy to have a couple of these around. There are ",
+    "cost": 1500000,
+    "book": "p.107+"
+  },
+  {
+    "slug": "vanda-sheridan-essex",
+    "name": "Vanda-Sheridan Essex",
+    "ds": 16,
+    "tags": "DS16, Armoured For Combat, Really Fancy Sensor Suite, Cybercontrol Rig",
+    "blurb": "A bipedal combat walker from an American manufacturer normally specialising in tanksuits. When launched, the Essex was intended as a light, maneuverable combat unit for both reconnaissance roles and urban combat. Seems nobody had really figured out the military applications or benefits of combat wal",
+    "cost": 995000,
+    "book": "p.107+"
+  }
+]

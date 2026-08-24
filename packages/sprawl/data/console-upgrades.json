@@ -1,0 +1,40 @@
+[
+  {
+    "slug": "extra-ram",
+    "name": "Extra RAM",
+    "costPer": 250,
+    "unit": "point",
+    "blurb": "250 b¥ per RAM point; bulkier console. Gestalt needs surgery + medtech fee",
+    "cap": "ram-max-none",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "expert-ai",
+    "name": "AI / Expert System",
+    "costPer": 1000,
+    "unit": "cognition",
+    "blurb": "1000 b¥ per Cognition point; max points = console RAM",
+    "cap": "ram",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "firewall-tune",
+    "name": "Firewall Improvement",
+    "costPer": 0,
+    "unit": "point",
+    "blurb": "Cognition vs DS12 to raise Firewall by 1; max raise = RAM",
+    "tuneDs": 12,
+    "cap": "ram",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "logic-bomb",
+    "name": "Logic Bomb",
+    "costPer": 0,
+    "unit": "install",
+    "blurb": "Paradoxware with timed delay: DS14 to hide. DS16 if event-triggered",
+    "programDs": 14,
+    "triggerDs": 16,
+    "book": "nodejacker"
+  }
+]

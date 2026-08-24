@@ -1,0 +1,163 @@
+[
+  {
+    "slug": "unsecured",
+    "name": "Unsecured / Basic System",
+    "ds": 8,
+    "tier": "easy",
+    "book": "p.53"
+  },
+  {
+    "slug": "online-store",
+    "name": "Secured Online Store",
+    "ds": 10,
+    "tier": "moderate",
+    "book": "p.53"
+  },
+  {
+    "slug": "police-db",
+    "name": "Hardened Police Database",
+    "ds": 12,
+    "tier": "challenging",
+    "book": "p.53"
+  },
+  {
+    "slug": "gov-registry",
+    "name": "Encrypted Government Registry",
+    "ds": 14,
+    "tier": "hard",
+    "book": "p.53"
+  },
+  {
+    "slug": "banking",
+    "name": "Encrypted + ICE Banking System",
+    "ds": 16,
+    "tier": "formidable",
+    "book": "p.53"
+  },
+  {
+    "slug": "zaibatsu-mf",
+    "name": "Zaibatsu Mainframe + operators",
+    "ds": 18,
+    "tier": "extreme",
+    "book": "p.53"
+  },
+  {
+    "slug": "black-site",
+    "name": "Zaibatsu Black Site + AI custodians",
+    "ds": 20,
+    "tier": "impossible",
+    "book": "p.53"
+  },
+  {
+    "slug": "gang-drone",
+    "name": "Gang Homemade Scrap-Drone",
+    "ds": 8,
+    "tier": "easy",
+    "book": "p.53"
+  },
+  {
+    "slug": "sec-patrol-drone",
+    "name": "Security Patrol Drone",
+    "ds": 10,
+    "tier": "moderate",
+    "book": "p.53"
+  },
+  {
+    "slug": "police-surv-drone",
+    "name": "Police Surveillance Drone",
+    "ds": 12,
+    "tier": "challenging",
+    "book": "p.53"
+  },
+  {
+    "slug": "mil-drone",
+    "name": "Military Weapon / SWAT Drone",
+    "ds": 14,
+    "tier": "hard",
+    "book": "p.53"
+  },
+  {
+    "slug": "cleaning-bot",
+    "name": "Cleaning Bot or Robopet",
+    "ds": 10,
+    "tier": "moderate",
+    "book": "p.53"
+  },
+  {
+    "slug": "aws-atid",
+    "name": "Autonomous Weapon / cybrid / ATID +ICE",
+    "ds": 16,
+    "tier": "formidable",
+    "book": "p.53"
+  },
+  {
+    "slug": "robocab",
+    "name": "Robocab",
+    "ds": 10,
+    "tier": "moderate",
+    "book": "p.53"
+  },
+  {
+    "slug": "robo-stratocab",
+    "name": "Robo-Stratocab",
+    "ds": 14,
+    "tier": "hard",
+    "book": "p.53"
+  },
+  {
+    "slug": "auto-loader",
+    "name": "Auto-loader or Construction Drone",
+    "ds": 12,
+    "tier": "challenging",
+    "book": "p.53"
+  },
+  {
+    "slug": "console",
+    "name": "Cyberspace Console",
+    "ds": 14,
+    "tier": "hard",
+    "book": "p.53"
+  },
+  {
+    "slug": "sec-camera",
+    "name": "Security Camera or Basic Cell Phone",
+    "ds": 10,
+    "tier": "moderate",
+    "book": "p.53"
+  },
+  {
+    "slug": "env-sensor",
+    "name": "Environmental Sensor System",
+    "ds": 12,
+    "tier": "challenging",
+    "book": "p.53"
+  },
+  {
+    "slug": "public-elevator",
+    "name": "Public Elevator",
+    "ds": 8,
+    "tier": "easy",
+    "book": "p.53"
+  },
+  {
+    "slug": "private-elevator",
+    "name": "Private Elevator",
+    "ds": 14,
+    "tier": "hard",
+    "book": "p.53"
+  },
+  {
+    "slug": "ai-sky-limo",
+    "name": "AI-driven Sky-Limo",
+    "ds": 20,
+    "tier": "impossible",
+    "book": "p.53"
+  },
+  {
+    "slug": "pan",
+    "name": "Personal Augmentation Network (PAN)",
+    "ds": 14,
+    "tier": "hard",
+    "book": "p.53"
+  }
+]

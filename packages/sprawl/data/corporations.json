@@ -1,0 +1,79 @@
+[
+  {
+    "slug": "kanawa-mendez",
+    "roll": 2,
+    "name": "Kanawa-Mendez",
+    "blurb": "Complex and highly diversified global conglomerate.",
+    "book": "p.25"
+  },
+  {
+    "slug": "dornier-orbital",
+    "roll": 3,
+    "name": "Dornier Orbital",
+    "blurb": "Investments, vacuculture and zero-gee manufacturing specialist.",
+    "book": "p.25"
+  },
+  {
+    "slug": "cradle-biolabs",
+    "roll": 4,
+    "name": "Cradle Biolabs",
+    "blurb": "Biotechnology, pharmaceuticals and agricultural innovation.",
+    "book": "p.25"
+  },
+  {
+    "slug": "ishiteki-augmentation",
+    "roll": 5,
+    "name": "Ishiteki Augmentation",
+    "blurb": "Augmentation, robotics and computing.",
+    "book": "p.25"
+  },
+  {
+    "slug": "komatsu-systems",
+    "roll": 6,
+    "name": "Komatsu Systems",
+    "blurb": "Systems, robotics and computing.",
+    "book": "p.25"
+  },
+  {
+    "slug": "genexus",
+    "roll": 7,
+    "name": "Genexus",
+    "blurb": "Biotechnology and pharmaceuticals.",
+    "book": "p.25"
+  },
+  {
+    "slug": "clavel-industries",
+    "roll": 8,
+    "name": "Clavel Industries",
+    "blurb": "Cybrid and augmentation development and manufacture.",
+    "book": "p.25"
+  },
+  {
+    "slug": "hayabusa-heavy-industries",
+    "roll": 9,
+    "name": "Hayabusa Heavy Industries",
+    "blurb": "Industrial holdings, engineering, robotics and construction giant.",
+    "book": "p.25"
+  },
+  {
+    "slug": "cherry-blossom-orbital",
+    "roll": 10,
+    "name": "Cherry Blossom Orbital",
+    "blurb": "AI and other expert systems and software.",
+    "book": "p.25"
+  },
+  {
+    "slug": "sentry-military-technologies",
+    "roll": 11,
+    "name": "Sentry Military Technologies",
+    "blurb": "Arms manufacturing and private military contractor.",
+    "book": "p.25"
+  },
+  {
+    "slug": "orchard-technologies",
+    "roll": 12,
+    "name": "Orchard Technologies",
+    "blurb": "Software, computing and consumer electronics.",
+    "book": "p.25"
+  }
+]

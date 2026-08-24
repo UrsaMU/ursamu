@@ -1,0 +1,156 @@
+[
+  {
+    "slug": "m-88-rpg",
+    "roll": "02",
+    "name": "Sentry M-88 RPG",
+    "modes": [
+      "ss"
+    ],
+    "cost": 4000,
+    "bonus": 1,
+    "load": 2,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "haunt-law",
+    "roll": "03",
+    "name": "Haunt LAW Light Anti-Tank Weapon",
+    "modes": [
+      "ss"
+    ],
+    "cost": 2500,
+    "bonus": 1,
+    "load": 2,
+    "notes": "Disposable",
+    "book": "p.40"
+  },
+  {
+    "slug": "ks-49-saw",
+    "roll": "04",
+    "name": "Echo International KS-49 5.56 SAW",
+    "modes": [
+      "ss",
+      "b",
+      "fa"
+    ],
+    "cost": 2250,
+    "bonus": 1,
+    "load": 2,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "accelerator-ap",
+    "roll": "05",
+    "name": "Armcor Accelerator-AP 18mm Railgun",
+    "modes": [
+      "ss",
+      "b",
+      "fa"
+    ],
+    "cost": 6500,
+    "bonus": 1,
+    "load": 2,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "shredder-minigun",
+    "roll": "06",
+    "name": "Sentry Shredder Portable Minigun",
+    "modes": [
+      "b",
+      "fa"
+    ],
+    "cost": 2000,
+    "bonus": 1,
+    "load": 2,
+    "notes": "Ammo for 8x B or 4x FA",
+    "book": "p.40"
+  },
+  {
+    "slug": "l5-laser",
+    "roll": "07",
+    "name": "Hideyoki L5 Heavy Chemical Laser Weapon",
+    "modes": [
+      "ss",
+      "b"
+    ],
+    "cost": 3750,
+    "bonus": 1,
+    "load": 2,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "g40-rhino",
+    "roll": "08",
+    "name": "HAK G40 Rhino 40mm Grenade Launcher",
+    "modes": [
+      "ss",
+      "b",
+      "fa"
+    ],
+    "cost": 1200,
+    "bonus": 1,
+    "load": 2,
+    "notes": "Range ~300m",
+    "book": "p.40"
+  },
+  {
+    "slug": "k-60a",
+    "roll": "09",
+    "name": "Echo International K-60A .50cal Machinegun",
+    "modes": [
+      "b",
+      "fa"
+    ],
+    "cost": 1350,
+    "bonus": 1,
+    "load": 2,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "barrett-at3",
+    "roll": "10",
+    "name": "Barrett AT3 .50cal Anti-Tank/Anti-Borg Rifle",
+    "modes": [
+      "ss",
+      "b"
+    ],
+    "cost": 4500,
+    "bonus": 1,
+    "load": 2,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "emp-1",
+    "roll": "11",
+    "name": "Haunt EMP-1 Electro Magnetic Pulse Rifle",
+    "modes": [
+      "ss"
+    ],
+    "cost": 2750,
+    "bonus": 1,
+    "load": 2,
+    "notes": "Stun only; DS14 Morphology or augs shut d6 rounds",
+    "book": "p.40"
+  },
+  {
+    "slug": "leong-incinerator",
+    "roll": "12",
+    "name": "QBZ Leong Portable Incinerator Unit",
+    "modes": [
+      "ss",
+      "b"
+    ],
+    "cost": 950,
+    "bonus": 1,
+    "load": 2,
+    "notes": "Range ~100m",
+    "book": "p.40"
+  }
+]

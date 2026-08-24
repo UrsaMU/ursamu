@@ -1,0 +1,113 @@
+[
+  {
+    "slug": "monoknife",
+    "roll": "02",
+    "name": "Hideyoki Monomolecular Knife",
+    "cost": 55,
+    "bonus": 1,
+    "load": 1,
+    "tags": ["monofilament"],
+    "notes": "Mono — negate armour; +1 vs bare",
+    "book": "p.40"
+  },
+  {
+    "slug": "carbon-katana",
+    "roll": "03",
+    "name": "Carbon Steel Katana",
+    "cost": 200,
+    "bonus": 1,
+    "load": 1,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "graphene-nunchaku",
+    "roll": "04",
+    "name": "Graphene Nunchaku/Tonfa",
+    "cost": 40,
+    "bonus": 1,
+    "load": 1,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "electro-knux",
+    "roll": "05",
+    "name": "Sentry Electro-knux",
+    "cost": 65,
+    "bonus": 1,
+    "load": 1,
+    "notes": "Powered knuckleduster",
+    "book": "p.40"
+  },
+  {
+    "slug": "polymer-shuriken",
+    "roll": "06",
+    "name": "Polymer Shuriken",
+    "cost": 15,
+    "bonus": 1,
+    "load": 1,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "ceramic-switchblade",
+    "roll": "07",
+    "name": "Ceramic Switchblade",
+    "cost": 10,
+    "bonus": 1,
+    "load": 1,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "mono-dao",
+    "roll": "08",
+    "name": "Mono-dao",
+    "cost": 350,
+    "bonus": 1,
+    "load": 1,
+    "notes": "Monomolecular sword",
+    "book": "p.40"
+  },
+  {
+    "slug": "sledgehammer",
+    "roll": "09",
+    "name": "Sledgehammer",
+    "cost": 25,
+    "bonus": 1,
+    "load": 1,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "telescoping-baton",
+    "roll": "10",
+    "name": "Steel Telescoping Baton",
+    "cost": 35,
+    "bonus": 1,
+    "load": 1,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "chain",
+    "roll": "11",
+    "name": "Chain",
+    "cost": 10,
+    "bonus": 1,
+    "load": 1,
+    "notes": "",
+    "book": "p.40"
+  },
+  {
+    "slug": "club",
+    "roll": "12",
+    "name": "Club",
+    "cost": 5,
+    "bonus": 1,
+    "load": 1,
+    "notes": "",
+    "book": "p.40"
+  }
+]
