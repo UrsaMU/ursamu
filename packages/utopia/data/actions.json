@@ -1,0 +1,14 @@
+[
+  { "id": "gather-information", "label": "Gather Information", "skill": "investigation" },
+  { "id": "hack", "label": "Hack", "skill": "hacking" },
+  { "id": "lay-low", "label": "Lay Low", "skill": "" },
+  { "id": "barter", "label": "Barter", "skill": "bartering" },
+  { "id": "search", "label": "Search", "skill": "investigation" },
+  { "id": "sneak", "label": "Sneak", "skill": "stealth" },
+  { "id": "persuade", "label": "Persuade", "skill": "persuasion" },
+  { "id": "recover", "label": "Recover", "skill": "" },
+  { "id": "take-job", "label": "Take a Job", "skill": "" },
+  { "id": "find-another-way", "label": "Find Another Way", "skill": "investigation" },
+  { "id": "meet-someone", "label": "Meet Someone New", "skill": "investigation" },
+  { "id": "navigate", "label": "Navigate", "skill": "athletics" }
+]

@@ -1,0 +1,23 @@
+{
+  "easy": {
+    "bityuan": 80,
+    "ap": 3,
+    "missionCredit": true
+  },
+  "mod": {
+    "bityuan": 140,
+    "ap": 5,
+    "missionCredit": true
+  },
+  "hard": {
+    "bityuan": 220,
+    "ap": 8,
+    "missionCredit": true
+  },
+  "legend": {
+    "bityuan": 350,
+    "ap": 12,
+    "missionCredit": true
+  },
+  "book": "house"
+}

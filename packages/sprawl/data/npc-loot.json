@@ -1,0 +1,11 @@
+{
+  "book": "house (street payouts; book p.38 AP cadence)",
+  "notes": "On NPC/horde kill: b¥ + AP. Mission advance still separate.",
+  "bityuanPerDs": 12,
+  "bityuanFloor": 25,
+  "apPerDs": 0.5,
+  "apFloor": 1,
+  "apCeil": 15,
+  "hordeBityuanPerMember": 8,
+  "hordeApPerMember": 0.25
+}

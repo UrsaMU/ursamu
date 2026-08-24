@@ -1,0 +1,68 @@
+[
+  {
+    "roll": 2,
+    "slug": "all-maintenance-ports-and-hatches-pop-op",
+    "effect": "All maintenance ports and hatches pop open and will not stay closed",
+    "book": "p.36"
+  },
+  {
+    "roll": 3,
+    "slug": "the-limb-straightens-out-and-briefly-loc",
+    "effect": "The limb straightens out and briefly locks at random intervals a couple of times a day",
+    "book": "p.36"
+  },
+  {
+    "roll": 4,
+    "slug": "whenever-the-limb-is-moved-there-is-audi",
+    "effect": "Whenever the limb is moved there is audible metal on metal grinding sound",
+    "book": "p.36"
+  },
+  {
+    "roll": 5,
+    "slug": "all-attempted-movements-are-done-at-half",
+    "effect": "All attempted movements are done at half the speed as usual",
+    "book": "p.36"
+  },
+  {
+    "roll": 6,
+    "slug": "all-attempted-movements-are-done-at-twic",
+    "effect": "All attempted movements are done at twice the speed as usual",
+    "book": "p.36"
+  },
+  {
+    "roll": 7,
+    "slug": "the-limb-trembles-and-shakes-constantly",
+    "effect": "The limb trembles and shakes constantly (Glitch to task rolls)",
+    "book": "p.36"
+  },
+  {
+    "roll": 8,
+    "slug": "every-two-hours-exactly-the-limb-shuts-d",
+    "effect": "Every two hours exactly the limb shuts down and reboots (five minutes)",
+    "book": "p.36"
+  },
+  {
+    "roll": 9,
+    "slug": "becomes-exceedingly-hot-unless-deactiva",
+    "effect": "Becomes exceedingly hot; unless deactivated, burns out quickly",
+    "book": "p.36"
+  },
+  {
+    "roll": 10,
+    "slug": "smell-of-electrical-fire-after-six-hour",
+    "effect": "Smell of electrical fire; after six hours the limb is completely inactive",
+    "book": "p.36"
+  },
+  {
+    "roll": 11,
+    "slug": "power-drains-quickly-must-recharge-ever",
+    "effect": "Power drains quickly; must recharge every 2d6 hours",
+    "book": "p.36"
+  },
+  {
+    "roll": 12,
+    "slug": "catches-fire-internally-burns-out-and-n",
+    "effect": "Catches fire internally; burns out and needs replacing",
+    "book": "p.36"
+  }
+]

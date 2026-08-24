@@ -1,0 +1,37 @@
+[
+  {
+    "slug": "morphology",
+    "name": "Morphology",
+    "abbr": "MOR",
+    "use": "melee, brawling, climbing, feats of strength",
+    "book": "p.05"
+  },
+  {
+    "slug": "equilibrium",
+    "name": "Equilibrium",
+    "abbr": "EQU",
+    "use": "keeping nerve, resisting stress, maintaining cool",
+    "book": "p.05"
+  },
+  {
+    "slug": "reaction",
+    "name": "Reaction",
+    "abbr": "REA",
+    "use": "sneaking, aiming, shooting, balancing, dodging, driving",
+    "book": "p.05"
+  },
+  {
+    "slug": "cognition",
+    "name": "Cognition",
+    "abbr": "COG",
+    "use": "hacking, perception, speaking, learning, searching",
+    "book": "p.05"
+  },
+  {
+    "slug": "affinity",
+    "name": "Affinity",
+    "abbr": "AFF",
+    "use": "interactions, persuasion, conning, reassuring, bluffing",
+    "book": "p.05"
+  }
+]

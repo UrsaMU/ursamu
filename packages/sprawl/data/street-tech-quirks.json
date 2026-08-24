@@ -1,0 +1,79 @@
+[
+  {
+    "slug": "tremors",
+    "roll": "02",
+    "name": "Tremors",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "concentration-lapses",
+    "roll": "03",
+    "name": "Lapses in concentration",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "phantom-feedback",
+    "roll": "04",
+    "name": "Phantom feedback",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "clashing-inputs",
+    "roll": "05",
+    "name": "Clashing inputs",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "itching",
+    "roll": "06",
+    "name": "Itching",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "random-bleeds",
+    "roll": "07",
+    "name": "Random bleeds",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "palpitations",
+    "roll": "08",
+    "name": "Palpitations",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "muscle-spasms",
+    "roll": "09",
+    "name": "Muscle spasms",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "neurological-pain",
+    "roll": "10",
+    "name": "Neurological pain",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "perception-glitches",
+    "roll": "11",
+    "name": "Perception glitches",
+    "glitch": true,
+    "book": "p.43"
+  },
+  {
+    "slug": "twitches",
+    "roll": "12",
+    "name": "Twitches",
+    "glitch": true,
+    "book": "p.43"
+  }
+]

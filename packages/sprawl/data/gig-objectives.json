@@ -1,0 +1,290 @@
+[
+  {
+    "slug": "kill-boss-11",
+    "roll": "11",
+    "name": "Neutralize principal",
+    "objective": "kill-boss",
+    "blurb": "Put the named principal down. Recover the mark.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-12",
+    "roll": "12",
+    "name": "Recover package",
+    "objective": "recover",
+    "blurb": "Principal holds the package. Take it off them.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-13",
+    "roll": "13",
+    "name": "Crack the node",
+    "objective": "hack-node",
+    "blurb": "Bypass the node. Physical backup if ICE wins.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-2-14",
+    "roll": "14",
+    "name": "Quiet the room",
+    "objective": "kill-boss",
+    "blurb": "Clear the principal. Leave the cameras lying.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-2-15",
+    "roll": "15",
+    "name": "Grab and go",
+    "objective": "recover",
+    "blurb": "Package first. Heroics optional.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-2-16",
+    "roll": "16",
+    "name": "Pull the ghost",
+    "objective": "hack-node",
+    "blurb": "Net first; flesh if the line dies.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-21",
+    "roll": "21",
+    "name": "Neutralize principal",
+    "objective": "kill-boss",
+    "blurb": "Put the named principal down. Recover the mark.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-22",
+    "roll": "22",
+    "name": "Recover package",
+    "objective": "recover",
+    "blurb": "Principal holds the package. Take it off them.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-23",
+    "roll": "23",
+    "name": "Crack the node",
+    "objective": "hack-node",
+    "blurb": "Bypass the node. Physical backup if ICE wins.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-2-24",
+    "roll": "24",
+    "name": "Quiet the room",
+    "objective": "kill-boss",
+    "blurb": "Clear the principal. Leave the cameras lying.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-2-25",
+    "roll": "25",
+    "name": "Grab and go",
+    "objective": "recover",
+    "blurb": "Package first. Heroics optional.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-2-26",
+    "roll": "26",
+    "name": "Pull the ghost",
+    "objective": "hack-node",
+    "blurb": "Net first; flesh if the line dies.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-31",
+    "roll": "31",
+    "name": "Neutralize principal",
+    "objective": "kill-boss",
+    "blurb": "Put the named principal down. Recover the mark.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-32",
+    "roll": "32",
+    "name": "Recover package",
+    "objective": "recover",
+    "blurb": "Principal holds the package. Take it off them.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-33",
+    "roll": "33",
+    "name": "Crack the node",
+    "objective": "hack-node",
+    "blurb": "Bypass the node. Physical backup if ICE wins.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-2-34",
+    "roll": "34",
+    "name": "Quiet the room",
+    "objective": "kill-boss",
+    "blurb": "Clear the principal. Leave the cameras lying.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-2-35",
+    "roll": "35",
+    "name": "Grab and go",
+    "objective": "recover",
+    "blurb": "Package first. Heroics optional.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-2-36",
+    "roll": "36",
+    "name": "Pull the ghost",
+    "objective": "hack-node",
+    "blurb": "Net first; flesh if the line dies.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-41",
+    "roll": "41",
+    "name": "Neutralize principal",
+    "objective": "kill-boss",
+    "blurb": "Put the named principal down. Recover the mark.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-42",
+    "roll": "42",
+    "name": "Recover package",
+    "objective": "recover",
+    "blurb": "Principal holds the package. Take it off them.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-43",
+    "roll": "43",
+    "name": "Crack the node",
+    "objective": "hack-node",
+    "blurb": "Bypass the node. Physical backup if ICE wins.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-2-44",
+    "roll": "44",
+    "name": "Quiet the room",
+    "objective": "kill-boss",
+    "blurb": "Clear the principal. Leave the cameras lying.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-2-45",
+    "roll": "45",
+    "name": "Grab and go",
+    "objective": "recover",
+    "blurb": "Package first. Heroics optional.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-2-46",
+    "roll": "46",
+    "name": "Pull the ghost",
+    "objective": "hack-node",
+    "blurb": "Net first; flesh if the line dies.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-51",
+    "roll": "51",
+    "name": "Neutralize principal",
+    "objective": "kill-boss",
+    "blurb": "Put the named principal down. Recover the mark.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-52",
+    "roll": "52",
+    "name": "Recover package",
+    "objective": "recover",
+    "blurb": "Principal holds the package. Take it off them.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-53",
+    "roll": "53",
+    "name": "Crack the node",
+    "objective": "hack-node",
+    "blurb": "Bypass the node. Physical backup if ICE wins.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-2-54",
+    "roll": "54",
+    "name": "Quiet the room",
+    "objective": "kill-boss",
+    "blurb": "Clear the principal. Leave the cameras lying.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-2-55",
+    "roll": "55",
+    "name": "Grab and go",
+    "objective": "recover",
+    "blurb": "Package first. Heroics optional.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-2-56",
+    "roll": "56",
+    "name": "Pull the ghost",
+    "objective": "hack-node",
+    "blurb": "Net first; flesh if the line dies.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-61",
+    "roll": "61",
+    "name": "Neutralize principal",
+    "objective": "kill-boss",
+    "blurb": "Put the named principal down. Recover the mark.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-62",
+    "roll": "62",
+    "name": "Recover package",
+    "objective": "recover",
+    "blurb": "Principal holds the package. Take it off them.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-63",
+    "roll": "63",
+    "name": "Crack the node",
+    "objective": "hack-node",
+    "blurb": "Bypass the node. Physical backup if ICE wins.",
+    "book": "house"
+  },
+  {
+    "slug": "kill-boss-2-64",
+    "roll": "64",
+    "name": "Quiet the room",
+    "objective": "kill-boss",
+    "blurb": "Clear the principal. Leave the cameras lying.",
+    "book": "house"
+  },
+  {
+    "slug": "recover-2-65",
+    "roll": "65",
+    "name": "Grab and go",
+    "objective": "recover",
+    "blurb": "Package first. Heroics optional.",
+    "book": "house"
+  },
+  {
+    "slug": "hack-node-2-66",
+    "roll": "66",
+    "name": "Pull the ghost",
+    "objective": "hack-node",
+    "blurb": "Net first; flesh if the line dies.",
+    "book": "house"
+  }
+]

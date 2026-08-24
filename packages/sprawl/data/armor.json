@@ -1,0 +1,126 @@
+[
+  {
+    "slug": "motorcycle-leathers",
+    "roll": "02",
+    "name": "Motorcycle Leathers",
+    "cost": 200,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "",
+    "book": "p.42"
+  },
+  {
+    "slug": "arachnoweave",
+    "roll": "03",
+    "name": "Arachnoweave Sleeve",
+    "cost": 800,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "Figure-hugging second skin",
+    "book": "p.42"
+  },
+  {
+    "slug": "carbon-flak",
+    "roll": "04",
+    "name": "Carbon Fibre Flak Vest",
+    "cost": 500,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "",
+    "book": "p.42"
+  },
+  {
+    "slug": "laser-ablative",
+    "roll": "05",
+    "name": "Laser-ablative Fabric",
+    "cost": 600,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "Only effective vs lasers",
+    "book": "p.42"
+  },
+  {
+    "slug": "impact-gel",
+    "roll": "06",
+    "name": "Impact Gel Inserts",
+    "cost": 400,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "",
+    "book": "p.42"
+  },
+  {
+    "slug": "ceramic-plate",
+    "roll": "07",
+    "name": "Ceramic Plate",
+    "cost": 1200,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "Hard armour shell, sections",
+    "book": "p.42"
+  },
+  {
+    "slug": "heavy-kevlar",
+    "roll": "08",
+    "name": "Heavy Kevlar Jacket",
+    "cost": 700,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "",
+    "book": "p.42"
+  },
+  {
+    "slug": "exo-frame",
+    "roll": "09",
+    "name": "Exo-frame",
+    "cost": 5000,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "statMods": [{ "stat": "morphology", "mod": 1 }],
+    "loadoutMult": 2,
+    "notes": "Doubles Loadout; +1 Morphology while worn",
+    "book": "p.42"
+  },
+  {
+    "slug": "coil-suit",
+    "roll": "10",
+    "name": "Coil Suit",
+    "cost": 3500,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "statMods": [{ "stat": "reaction", "mod": 1 }],
+    "notes": "+1 Reaction while worn; light-absorbing myomar",
+    "book": "p.42"
+  },
+  {
+    "slug": "flame-sleeve",
+    "roll": "11",
+    "name": "Flame Retardant Sleeve",
+    "cost": 300,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "Only one round of fire damage applies",
+    "book": "p.42"
+  },
+  {
+    "slug": "leather-overcoat",
+    "roll": "12",
+    "name": "Heavy Leather Overcoat",
+    "cost": 250,
+    "bonus": 1,
+    "load": 1,
+    "bonusWhen": "worn",
+    "notes": "",
+    "book": "p.42"
+  }
+]

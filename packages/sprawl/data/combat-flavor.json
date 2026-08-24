@@ -1,0 +1,83 @@
+{
+  "book": "sprawl-flavor",
+  "hit": {
+    "default": [
+      "The shot finds meat and chrome in equal measure.",
+      "Neon spatters; something important starts leaking.",
+      "Contact — hard, ugly, and paid for in blood.",
+      "The street hears it before the target feels it."
+    ],
+    "auto": [
+      "Brass rain stitches a glowing line across the target.",
+      "Full auto turns the alley into a brief, bright hell.",
+      "The mag empties its opinion in a long, rude sentence."
+    ],
+    "burst": [
+      "Three rounds, one intention — the last one lands true.",
+      "A tight burst kisses armor and keeps going."
+    ],
+    "pb": [
+      "Point blank: no grace, no warning, just muzzle and heat.",
+      "Close enough to smell the propellant on their breath."
+    ],
+    "melee": [
+      "Steel and muscle close the deal in arm's reach.",
+      "The cut is personal — debt collected in wetware."
+    ],
+    "mono": [
+      "Monofilament whispers; something expensive comes apart.",
+      "A hair-thin line of light, then a much louder mess."
+    ],
+    "shotgun": [
+      "The scatter pattern turns cover into a suggestion.",
+      "Buck and thunder — the doorway forgets how to be safe."
+    ],
+    "heavy": [
+      "The heavy speaks once; the architecture listens.",
+      "Anti-materiel manners: doors, hulls, and hubris fold."
+    ],
+    "horde": [
+      "The mob thins like wet paper under a pressure hose.",
+      "Punks drop — count the bodies, not the bullets."
+    ]
+  },
+  "miss": {
+    "default": [
+      "Sparks on ferrocrete — close, not close enough.",
+      "The shot kisses air and keeps the night's secrets.",
+      "They flinch; the street keeps its receipts."
+    ],
+    "auto": [
+      "A whole magazine of almost — brass and bad luck.",
+      "Full auto paints the wall; the target is still a problem."
+    ],
+    "melee": [
+      "A miss at knife range is a promise of the next second.",
+      "They slip the cut; chrome scrapes nothing but pride."
+    ],
+    "pb": [
+      "Even point blank can lie when nerves write the script.",
+      "Muzzle flash, empty hit — the universe bills you later."
+    ]
+  },
+  "exceptional": [
+    "Double sixes — the Flow itself holds the door open.",
+    "Lucky chrome: the kind of hit people write songs about.",
+    "Exceptional — the kind of shot that pays next month's rent."
+  ],
+  "nerve": [
+    "Double ones. Hands shake. The street just called your bluff.",
+    "Nerve check incoming — the gun suddenly weighs too much.",
+    "1,1: adrenaline turns traitor; keep it together."
+  ],
+  "fire": [
+    "Something catches and decides to keep burning.",
+    "Incendiary manners — the wound has a second act.",
+    "Heat sticks. The night will smell like this for a while."
+  ],
+  "fail_hurt": [
+    "The exchange goes wrong; you pay the margin in meat.",
+    "Their answer arrives first — Resilience takes the call.",
+    "Miss with consequences: the street always collects."
+  ]
+}

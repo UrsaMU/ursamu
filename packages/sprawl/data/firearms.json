@@ -1,0 +1,193 @@
+[
+  {
+    "slug": "hak-g55",
+    "roll": "02",
+    "name": "Haldane & Kluvis HAK G55 10mm SMG",
+    "category": "smg",
+    "modes": [
+      "ss",
+      "b",
+      "fa"
+    ],
+    "cost": 1500,
+    "rangeM": 100,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "pkd-45",
+    "roll": "03",
+    "name": "Charon PKD-45 Police Special Revolver",
+    "category": "handgun",
+    "modes": [
+      "ss"
+    ],
+    "cost": 500,
+    "rangeM": 50,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "shard-gun",
+    "roll": "04",
+    "name": "Hideyoki Shard Gun Flechette Pistol",
+    "category": "handgun",
+    "modes": [
+      "ss",
+      "b"
+    ],
+    "cost": 800,
+    "rangeM": 50,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "kr-16",
+    "roll": "05",
+    "name": "Echo International KR-16 5.56 Assault Rifle",
+    "category": "rifle",
+    "modes": [
+      "ss",
+      "b",
+      "fa"
+    ],
+    "cost": 2000,
+    "rangeM": 300,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "type-6-plp",
+    "roll": "06",
+    "name": "Sony-Diahatsu Type-6 PLP Pulse Laser Pistol",
+    "category": "handgun",
+    "modes": [
+      "ss",
+      "b"
+    ],
+    "cost": 5000,
+    "rangeM": 50,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "haunt-m10",
+    "roll": "07",
+    "name": "Haunt M10 Anti-material Sniper Rifle System",
+    "category": "sniper",
+    "modes": [
+      "ss"
+    ],
+    "cost": 7500,
+    "rangeM": 1000,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "ak-91r",
+    "roll": "08",
+    "name": "Kalashnikov AK-91R 7.62 Assault Rifle",
+    "category": "rifle",
+    "modes": [
+      "ss",
+      "b",
+      "fa"
+    ],
+    "cost": 1200,
+    "rangeM": 300,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "nemesis",
+    "roll": "09",
+    "name": "Echo International Nemesis 10mm Semiautomatic",
+    "category": "handgun",
+    "modes": [
+      "ss"
+    ],
+    "cost": 500,
+    "rangeM": 50,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "diamondback",
+    "roll": "10",
+    "name": "Armcor Diamondback 10mm Machinepistol",
+    "category": "smg",
+    "modes": [
+      "b",
+      "fa"
+    ],
+    "cost": 750,
+    "rangeM": 50,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "p226",
+    "roll": "11",
+    "name": "Sentry P226 9mm Semiautomatic",
+    "category": "handgun",
+    "modes": [
+      "ss"
+    ],
+    "cost": 450,
+    "rangeM": 50,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "venom-smg",
+    "roll": "12",
+    "name": "KRYSS Venom 11mm Modular SMG",
+    "category": "smg",
+    "modes": [
+      "ss",
+      "b",
+      "fa"
+    ],
+    "cost": 900,
+    "rangeM": 100,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.39"
+  },
+  {
+    "slug": "street-12g",
+    "roll": "13",
+    "name": "Street 12-Gauge Pump",
+    "category": "shotgun",
+    "modes": ["ss"],
+    "tags": ["shotgun"],
+    "cost": 350,
+    "rangeM": 40,
+    "bonus": 1,
+    "load": 1,
+    "book": "p.30"
+  },
+  {
+    "slug": "autoshot-12",
+    "roll": "14",
+    "name": "Armcor Auto-12 Combat Shotgun",
+    "category": "shotgun",
+    "modes": ["ss", "b", "fa"],
+    "tags": ["shotgun", "autoshotgun"],
+    "cost": 1200,
+    "rangeM": 40,
+    "bonus": 1,
+    "load": 2,
+    "book": "p.30"
+  }
+]

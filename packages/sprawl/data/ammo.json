@@ -1,0 +1,110 @@
+[
+  {
+    "slug": "hellfires",
+    "roll": "02",
+    "name": "Hellfires",
+    "effect": "Incendiary — sets target on fire",
+    "cost": 100,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "shredders",
+    "roll": "03",
+    "name": "Shredders",
+    "effect": "Monomolecular filaments — ignore armour",
+    "cost": 150,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "ln2s",
+    "roll": "04",
+    "name": "LN2s",
+    "effect": "Liquid nitrogen — armour freezes and shatters",
+    "cost": 500,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "splinters",
+    "roll": "05",
+    "name": "Splinters",
+    "effect": "Fragmenting rounds — +1 damage",
+    "cost": 200,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "high-explosive",
+    "roll": "06",
+    "name": "High Explosive",
+    "effect": "Detonate on impact — +2 damage",
+    "cost": 300,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "moisture-he",
+    "roll": "07",
+    "name": "Moisture-responsive HE",
+    "effect": "Detonate when wet — +2 damage",
+    "cost": 450,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "depleted-uranium",
+    "roll": "08",
+    "name": "Depleted Uranium",
+    "effect": "High penetration — destroy armour",
+    "cost": 800,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "jelly-rounds",
+    "roll": "09",
+    "name": "Jelly Rounds",
+    "effect": "Non-lethal, stun only",
+    "cost": 300,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "gas",
+    "roll": "10",
+    "name": "Gas",
+    "effect": "Tear, sleep, or biotoxin",
+    "cost": 375,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "acid",
+    "roll": "11",
+    "name": "Acid",
+    "effect": "Armour ruined after initial impact",
+    "cost": 250,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "hollowpoint",
+    "roll": "12",
+    "name": "Hollowpoint",
+    "effect": "Enhanced penetration — ignore armour",
+    "cost": 80,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  },
+  {
+    "slug": "standard",
+    "roll": "00",
+    "name": "Standard Type",
+    "effect": "No bonus",
+    "cost": 50,
+    "costUnit": "box of 50",
+    "book": "p.39"
+  }
+]

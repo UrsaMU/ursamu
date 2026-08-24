@@ -1,0 +1,13 @@
+{
+  "revolver": 6,
+  "pistol": 12,
+  "smg": 20,
+  "assault-rifle": 30,
+  "flechette": 50,
+  "sniper": 10,
+  "lmg-saw": 100,
+  "autoshotgun": 20,
+  "auto-gl": 12,
+  "rpg": 1,
+  "book": "p.40"
+}

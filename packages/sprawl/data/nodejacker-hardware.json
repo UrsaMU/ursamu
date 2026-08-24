@@ -1,0 +1,105 @@
+[
+  {
+    "slug": "rubber-ducky",
+    "name": "Rubber Ducky",
+    "cost": 200,
+    "blurb": "USB that emulates typed commands; DS12 to program payload",
+    "programDs": 12,
+    "book": "nodejacker"
+  },
+  {
+    "slug": "brickboy",
+    "name": "Brickboy",
+    "cost": 300,
+    "blurb": "Dongle fries connected hardware on a trigger event; DS10 to program",
+    "programDs": 10,
+    "book": "nodejacker"
+  },
+  {
+    "slug": "faraday-bag",
+    "name": "Faraday Bag",
+    "cost": 75,
+    "costAlt": 200,
+    "blurb": "Blocks all signals; bag 75 b¥, case/backpack 200 b¥",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "device-detector",
+    "name": "Device Detector",
+    "cost": 500,
+    "blurb": "Detects net-enabled devices within 100m",
+    "rangeM": 100,
+    "book": "nodejacker"
+  },
+  {
+    "slug": "grabber",
+    "name": "Grabber",
+    "cost": 200,
+    "blurb": "Downloads computer contents to HD in 2d6 turns",
+    "duration": "2d6t",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "swipe-box",
+    "name": "Swipe Box",
+    "cost": 200,
+    "blurb": "Card reader/printer duplicates swiped keycards",
+    "upgrades": [
+      { "slug": "blank-keycards", "name": "Blank Keycards (10)", "cost": 50 },
+      { "slug": "bitcard", "name": "Bitcard Upgrade", "cost": 2000 },
+      { "slug": "remote", "name": "Remote Upgrade (20m)", "cost": 4000 }
+    ],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "wifi-pineapple",
+    "name": "WiFi Pineapple",
+    "cost": 450,
+    "blurb": "MITM WiFi AP; eavesdrop and collect unsecured data",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "usb-killer",
+    "name": "USB Killer",
+    "cost": 20,
+    "blurb": "High-voltage USB fries motherboard; anti-forensics",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "bash-bunny",
+    "name": "Bash Bunny",
+    "cost": 500,
+    "blurb": "Trusted-device emulator; scriptable payloads like Rubber Ducky",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "omg-cable",
+    "name": "OMG Cable",
+    "cost": 300,
+    "blurb": "USB cable: keystroke inject, keylog, RF air-gap, mobile payloads",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "flipper-zero",
+    "name": "FlipperZero",
+    "cost": 250,
+    "blurb": "Palm-top recon toolkit; pair with phone for software inject",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "geotag",
+    "name": "Geotags",
+    "cost": 10,
+    "blurb": "Self-adhesive WiFi locator tags; subvert for tracking",
+    "unit": "tag",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "pandora-box",
+    "name": "PANdora Box",
+    "cost": 650,
+    "blurb": "Scan PAN cybernetics; bypass SecureBoot on weak augs; Reaction DS12 to spot if Vigilance Suite",
+    "spotDs": 12,
+    "book": "nodejacker"
+  }
+]

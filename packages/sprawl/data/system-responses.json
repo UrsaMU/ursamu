@@ -1,0 +1,381 @@
+[
+  {
+    "slug": "log-off",
+    "roll": "11",
+    "name": "Log-Off",
+    "blurb": "Default legal response; disconnected from the system",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["disconnect"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "powered-down",
+    "roll": "12",
+    "name": "Powered Down",
+    "blurb": "Console is remotely powered off",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["console-off"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "locked-out",
+    "roll": "13",
+    "name": "Locked Out",
+    "blurb": "Ejected and locked out for 2d6 hours",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["lockout"],
+    "duration": "2d6h",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "shutdown",
+    "roll": "14",
+    "name": "Shutdown",
+    "blurb": "Local node orderly shutdown over 1d6 turns",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["node-shutdown"],
+    "duration": "1d6t",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "lawfare",
+    "roll": "15",
+    "name": "Lawfare",
+    "blurb": "Multiple legal firms are contacted",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["legal"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "nine-one-one",
+    "roll": "16",
+    "name": "911",
+    "blurb": "Transmission Felonies cops called; arrive in 1d6 hours",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["cops"],
+    "duration": "1d6h",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "id-trace",
+    "roll": "21",
+    "name": "ID Trace",
+    "blurb": "System obtains some identifying info about the hacker",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["trace"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "tagged",
+    "roll": "22",
+    "name": "Tagged",
+    "blurb": "Console digitally tagged for a later trace",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["trace", "tag"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "network-trace",
+    "roll": "23",
+    "name": "Network Trace",
+    "blurb": "System back-traces to the nodejacker's entry point",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["trace"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "malware-i",
+    "roll": "24",
+    "name": "Malware I",
+    "blurb": "Virus slows console; lose 1 RAM for 2d6 mins",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["malware", "ram-loss"],
+    "duration": "2d6m",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "overload",
+    "roll": "25",
+    "name": "Overload",
+    "blurb": "Electrical fire burns out console hard drive; no RAM",
+    "extraNeural": 1,
+    "forceGlitch": false,
+    "tags": ["console-damage", "fire"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "dos",
+    "roll": "26",
+    "name": "DoS",
+    "blurb": "Denial of Service disables all console RAM for 2d6 mins",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["ram-loss"],
+    "duration": "2d6m",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "maze-i",
+    "roll": "31",
+    "name": "Maze I",
+    "blurb": "Fake directories distract while a Trace Protocol runs",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["trace", "maze"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "sysop",
+    "roll": "32",
+    "name": "SysOp",
+    "blurb": "Admin stalks intruder; runs software attacks when able",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["sysop"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "ice-i",
+    "roll": "33",
+    "name": "ICE I",
+    "blurb": "Intrusion countermeasures increase system DS by 1d6",
+    "extraNeural": 0,
+    "forceGlitch": true,
+    "tags": ["ice", "ds-up"],
+    "dsUp": "1d6",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "malware-ii",
+    "roll": "34",
+    "name": "Malware II",
+    "blurb": "Virus wipes d6 software and files from console",
+    "extraNeural": 1,
+    "forceGlitch": false,
+    "tags": ["malware", "wipe-soft"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "back-hack",
+    "roll": "35",
+    "name": "Back Hack",
+    "blurb": "SysOp attempts to control/destroy hacker's console",
+    "extraNeural": 1,
+    "forceGlitch": true,
+    "tags": ["sysop", "console-damage"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "more-sysops",
+    "roll": "36",
+    "name": "More SysOps",
+    "blurb": "Additional 1d6 SysOps come online in 1d6 turns",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["sysop"],
+    "duration": "1d6t",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "hard-freeze",
+    "roll": "41",
+    "name": "Hard Freeze",
+    "blurb": "Network encrypts all files to DS of 3d6",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["encrypt"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "maze-ii",
+    "roll": "42",
+    "name": "Maze II",
+    "blurb": "Trapped in fake loop network; can't log-off for 2d6 turns",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["maze", "trap"],
+    "duration": "2d6t",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "malware-iii",
+    "roll": "43",
+    "name": "Malware III",
+    "blurb": "Virus disables the console for 2d6 hours",
+    "extraNeural": 1,
+    "forceGlitch": false,
+    "tags": ["malware", "console-off"],
+    "duration": "2d6h",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "trace-protocol",
+    "roll": "44",
+    "name": "Trace Protocol",
+    "blurb": "System locates the intruder in real-space",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["trace", "realspace"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "ice-ii",
+    "roll": "45",
+    "name": "ICE II",
+    "blurb": "Intrusion countermeasures increase system DS by 2d6",
+    "extraNeural": 0,
+    "forceGlitch": true,
+    "tags": ["ice", "ds-up"],
+    "dsUp": "2d6",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "system-update",
+    "roll": "46",
+    "name": "System Update",
+    "blurb": "An Exploit (if any) is closed or countered",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["counter-exploit"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "neurostim-i",
+    "roll": "51",
+    "name": "Neurostim I",
+    "blurb": "Emotional, sleepy, brain-fog, confusion for 2d6 hours",
+    "extraNeural": 1,
+    "forceGlitch": false,
+    "tags": ["neurostim"],
+    "duration": "2d6h",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "bio-electric-feedback",
+    "roll": "52",
+    "name": "Bio-electric Feedback",
+    "blurb": "Five sensory inputs spoofed or scrambled",
+    "extraNeural": 1,
+    "forceGlitch": true,
+    "tags": ["biofeedback"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "neurostim-ii",
+    "roll": "53",
+    "name": "Neurostim II",
+    "blurb": "Fracture; induced psychedelic nightmare, 2d6 hours",
+    "extraNeural": 1,
+    "forceGlitch": false,
+    "tags": ["neurostim", "fracture"],
+    "duration": "2d6h",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "seekers",
+    "roll": "54",
+    "name": "Seekers",
+    "blurb": "1d6 drones sent to real-space location in 2d6 minutes",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["drones", "realspace"],
+    "duration": "2d6m",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "neurostim-iii",
+    "roll": "55",
+    "name": "Neurostim III",
+    "blurb": "Seizures; DS14 Morphology or cardiac arrest",
+    "extraNeural": 2,
+    "forceGlitch": true,
+    "tags": ["neurostim", "morphology-check"],
+    "morphDs": 14,
+    "book": "nodejacker"
+  },
+  {
+    "slug": "neurostim-iv",
+    "roll": "56",
+    "name": "Neurostim IV",
+    "blurb": "Synaptic overload; can't physically move, 2d6 hours",
+    "extraNeural": 1,
+    "forceGlitch": true,
+    "tags": ["neurostim", "immobilize"],
+    "duration": "2d6h",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "surge-i",
+    "roll": "61",
+    "name": "Surge I",
+    "blurb": "Tasered by own burning console; DS16 Morphology",
+    "extraNeural": 2,
+    "forceGlitch": true,
+    "tags": ["surge", "morphology-check"],
+    "morphDs": 16,
+    "book": "nodejacker"
+  },
+  {
+    "slug": "malware-iv",
+    "roll": "62",
+    "name": "Malware IV",
+    "blurb": "Virus disables console until removed; beat DS of 2d6",
+    "extraNeural": 1,
+    "forceGlitch": false,
+    "tags": ["malware", "console-off"],
+    "cleanDs": "2d6",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "tac-team",
+    "roll": "63",
+    "name": "Tac-team",
+    "blurb": "Seek & destroy response team; there in 1d6 mins",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["realspace", "combat"],
+    "duration": "1d6m",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "surge-ii",
+    "roll": "64",
+    "name": "Surge II",
+    "blurb": "Power overload brainburn; lose 1d6/2 Cognition",
+    "extraNeural": 2,
+    "forceGlitch": true,
+    "tags": ["surge", "stat-loss"],
+    "book": "nodejacker"
+  },
+  {
+    "slug": "blackout",
+    "roll": "65",
+    "name": "Blackout",
+    "blurb": "Controlled shutdown of entire system over 2d6 turns",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["node-shutdown"],
+    "duration": "2d6t",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "sense-net",
+    "roll": "66",
+    "name": "Sense/Net",
+    "blurb": "1d6 online operatives sent to investigate and detain",
+    "extraNeural": 0,
+    "forceGlitch": false,
+    "tags": ["realspace", "ops"],
+    "book": "nodejacker"
+  }
+]

@@ -1,0 +1,218 @@
+[
+  {
+    "slug": "never-clocked-out",
+    "roll": "11",
+    "template": "{name} {cuts} the figure of a {vibe} who never quite clocked out",
+    "book": "look-gen"
+  },
+  {
+    "slug": "last-shift-forever",
+    "roll": "12",
+    "template": "{name} still {looks} like a {vibe} on {poss} last unpaid shift",
+    "book": "look-gen"
+  },
+  {
+    "slug": "rain-wet-neon",
+    "roll": "13",
+    "template": "Under rain-slick neon, {name} {reads} as a {vibe} between contracts",
+    "book": "look-gen"
+  },
+  {
+    "slug": "elevator-music-threat",
+    "roll": "14",
+    "template": "{name} {carries} the quiet threat of a {vibe} who survived corporate elevators",
+    "book": "look-gen"
+  },
+  {
+    "slug": "debt-and-chrome",
+    "roll": "15",
+    "template": "{name} {is} every inch a {vibe} — half debt, half chrome, all attitude",
+    "book": "look-gen"
+  },
+  {
+    "slug": "off-the-books",
+    "roll": "16",
+    "template": "{name} {moves} like a {vibe} kept off every official roster",
+    "book": "look-gen"
+  },
+  {
+    "slug": "zone-light",
+    "roll": "21",
+    "template": "In the hard light of the Zone, {name} {comes} across as a hard-used {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "capsule-hangover",
+    "roll": "22",
+    "template": "{name} {has} the capsule-hotel hangover of a {vibe} between gigs",
+    "book": "look-gen"
+  },
+  {
+    "slug": "vendomat-coffee",
+    "roll": "23",
+    "template": "{name} {smells} of vendomat coffee and bad decisions — classic {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "mirrored-glass",
+    "roll": "24",
+    "template": "Against mirrored glass and traffic haze, {name} {resolves} into a {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "night-market",
+    "roll": "25",
+    "template": "{name} could have stepped straight out of a night market stall labelled {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "badge-scanner",
+    "roll": "26",
+    "template": "Badge scanners hesitate over {name} — {subj} {reads} as a {vibe} with incomplete clearance",
+    "book": "look-gen"
+  },
+  {
+    "slug": "subway-draft",
+    "roll": "31",
+    "template": "A subway draft {catches} {name} like a {vibe} late for something that will not wait",
+    "book": "look-gen"
+  },
+  {
+    "slug": "billboard-glare",
+    "roll": "32",
+    "template": "Billboard glare {paints} {name} as a {vibe} who knows which alleys skip the cameras",
+    "book": "look-gen"
+  },
+  {
+    "slug": "soft-threat",
+    "roll": "33",
+    "template": "{name} {is} a soft-spoken kind of dangerous — the {vibe} type who smiles first",
+    "book": "look-gen"
+  },
+  {
+    "slug": "hard-angles",
+    "roll": "34",
+    "template": "Hard angles and harder eyes: {name} {presents} as a {vibe} carved out of overtime",
+    "book": "look-gen"
+  },
+  {
+    "slug": "loan-shark-charm",
+    "roll": "35",
+    "template": "{name} {wears} the easy charm of a {vibe} who has talked {obj} out of worse rooms",
+    "book": "look-gen"
+  },
+  {
+    "slug": "static-halo",
+    "roll": "36",
+    "template": "A faint static halo {clings} to {name}, the tell of a {vibe} jacked in too often",
+    "book": "look-gen"
+  },
+  {
+    "slug": "wetware-weather",
+    "roll": "41",
+    "template": "{name} {looks} weatherproofed by wetware and spite — pure {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "contract-ink",
+    "roll": "42",
+    "template": "Fresh contract ink might as well be tattooed on {name}; {subj} {screams} {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "empty-clip",
+    "roll": "43",
+    "template": "{name} {carries} {obj}self like a {vibe} who already counted the exit routes",
+    "book": "look-gen"
+  },
+  {
+    "slug": "low-orbit-tired",
+    "roll": "44",
+    "template": "There is a low-orbit tiredness to {name}, the long-haul stare of a {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "street-liturgy",
+    "roll": "45",
+    "template": "{name} {moves} through the street like liturgy — a {vibe} with practiced steps",
+    "book": "look-gen"
+  },
+  {
+    "slug": "glitch-smile",
+    "roll": "46",
+    "template": "A glitch-smile flickers across {name}; {subj} could pass for any {vibe} in a crowd",
+    "book": "look-gen"
+  },
+  {
+    "slug": "cargo-bay-echo",
+    "roll": "51",
+    "template": "Cargo-bay echoes seem to follow {name}, residual noise of a working {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "pager-ghost",
+    "roll": "52",
+    "template": "{name} still {answers} phantom pages in {poss} head — old habits of a {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "filter-mask-tan",
+    "roll": "53",
+    "template": "Filter-mask tan lines mark {name} as a {vibe} who spends too long outside the domes",
+    "book": "look-gen"
+  },
+  {
+    "slug": "quiet-math",
+    "roll": "54",
+    "template": "You can almost see {name} doing quiet math — ranges, prices, lies — typical {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "borrowed-time",
+    "roll": "55",
+    "template": "{name} {looks} borrowed from someone else's timeline: a {vibe} on temporary lease",
+    "book": "look-gen"
+  },
+  {
+    "slug": "neon-confession",
+    "roll": "56",
+    "template": "Neon confesses {name} in stuttering colour — unmistakably a {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "side-entrance",
+    "roll": "61",
+    "template": "{name} {prefers} side entrances and soft shoes; the posture of a careful {vibe}",
+    "book": "look-gen"
+  },
+  {
+    "slug": "blood-and-bandwidth",
+    "roll": "62",
+    "template": "Blood and bandwidth both seem cheap around {name}, a {vibe} run hot",
+    "book": "look-gen"
+  },
+  {
+    "slug": "polite-menace",
+    "roll": "63",
+    "template": "There is a polite menace to {name} — the kind of {vibe} who {holds} doors and grudges",
+    "book": "look-gen"
+  },
+  {
+    "slug": "afterimage",
+    "roll": "64",
+    "template": "{name} {leaves} an afterimage when {subj} {turns} away, like every good {vibe} should",
+    "book": "look-gen"
+  },
+  {
+    "slug": "shift-change",
+    "roll": "65",
+    "template": "Caught at shift-change, {name} could be any {vibe} punching out into worse weather",
+    "book": "look-gen"
+  },
+  {
+    "slug": "end-of-the-line",
+    "roll": "66",
+    "template": "{name} {stands} like the end of the line for someone else's problem — pure {vibe}",
+    "book": "look-gen"
+  }
+]

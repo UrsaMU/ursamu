@@ -1,0 +1,2038 @@
+[
+  {
+    "slug": "cheap-sanyo-cell-phone",
+    "name": "Cheap Sanyo® Cell Phone",
+    "cost": 25,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ono-sendai-cyberspace-console-and-trodes",
+    "name": "Ono-Sendai® Cyberspace Console and ‘trodes",
+    "cost": 675,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "toolkit",
+    "name": "Toolkit",
+    "cost": 150,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ir-goggles",
+    "name": "IR Goggles",
+    "cost": 200,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "stolen-credit-card-blackmarket",
+    "name": "Stolen Credit Card (blackmarket)",
+    "cost": 150,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "bottle-of-moskovskaya-vodka",
+    "name": "Bottle of Moskovskaya® Vodka",
+    "cost": 30,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "3-doses-of-brazilian-hyperdex",
+    "name": "3 Doses of Brazilian Hyperdex",
+    "cost": 45,
+    "category": "general",
+    "currency": "b¥",
+    "kind": "drug",
+    "uses": 3,
+    "unit": "dose",
+    "useEffect": "drug:hyperdex",
+    "load": 1,
+    "book": "p.57-67"
+  },
+  {
+    "slug": "capsule-hotel-24-hours",
+    "name": "Capsule Hotel (24 hours)",
+    "cost": 30,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "yeheyuan-cigarettes-20",
+    "name": "Yeheyuan® cigarettes (20)",
+    "cost": 10,
+    "category": "general",
+    "currency": "b¥",
+    "kind": "consumable",
+    "uses": 20,
+    "unit": "cigarette",
+    "useEffect": "narrative",
+    "load": 1,
+    "book": "p.57-67"
+  },
+  {
+    "slug": "fake-id-blackmarket",
+    "name": "Fake ID (blackmarket)",
+    "cost": 500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "handcuffs",
+    "name": "Handcuffs",
+    "cost": 20,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "mirrorshades",
+    "name": "Mirrorshades",
+    "cost": 15,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "palm-sized-a-v-drone",
+    "name": "Palm-sized A/V drone",
+    "cost": 250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "lazarus-patches-blister-pack-of-6-patches",
+    "name": "Lazarus Patches (blister pack of 6 patches)",
+    "cost": 30,
+    "category": "general",
+    "currency": "b¥",
+    "kind": "consumable",
+    "uses": 6,
+    "unit": "patch",
+    "useEffect": "lazarus",
+    "load": 1,
+    "book": "p.57-67"
+  },
+  {
+    "slug": "gold-plastic-chopsticks",
+    "name": "Gold plastic chopsticks",
+    "cost": 5,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "6-destress-xpress-capsules",
+    "name": "6 DeStress Xpress® capsules",
+    "cost": 2,
+    "category": "general",
+    "currency": "b¥",
+    "kind": "drug",
+    "uses": 6,
+    "unit": "dose",
+    "useEffect": "drug:destress-xpress",
+    "load": 1,
+    "book": "p.57-67"
+  },
+  {
+    "slug": "chunky-wireless-headphones",
+    "name": "Chunky wireless headphones",
+    "cost": 25,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "oba-strato-cab-account-per-month",
+    "name": "ÖOBA® strato-cab account (per month)",
+    "cost": 150,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "filter-mask",
+    "name": "Filter mask",
+    "cost": 20,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "clear-vinyl-raincoat-from-a-vending-machine",
+    "name": "Clear vinyl raincoat from a vending machine",
+    "cost": 5,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "tablet-computer",
+    "name": "Tablet computer",
+    "cost": 250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "foil-sachet-of-self-heating-instant-ramen",
+    "name": "Foil sachet of self-heating instant ramen",
+    "cost": 3,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "religious-pendant",
+    "name": "Religious pendant",
+    "cost": 15,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "tub-of-sanitizing-wipes",
+    "name": "Tub of sanitizing wipes",
+    "cost": 20,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "vape-pen",
+    "name": "Vape pen",
+    "cost": 12,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "aerosol-of-foam-soap",
+    "name": "Aerosol of foam soap",
+    "cost": 4,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "laser-pointer",
+    "name": "Laser pointer",
+    "cost": 10,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "tube-of-resin-adhesive",
+    "name": "Tube of resin adhesive",
+    "cost": 8,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "pen-light",
+    "name": "Pen light",
+    "cost": 12,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "engraved-zippo-lighter",
+    "name": "Engraved Zippo lighter",
+    "cost": 10,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "self-adhesive-motion-sensor",
+    "name": "Self-adhesive motion sensor",
+    "cost": 80,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "professional-medical-services-per-hour",
+    "name": "Professional Medical Services (per hour)",
+    "cost": 250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "first-aid-kit",
+    "name": "First-aid kit",
+    "cost": 60,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "exo-womb",
+    "name": "Exo-womb",
+    "cost": 500000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hayabusa-h-520-semi-autonomous-loader",
+    "name": "Hayabusa® H-520 semi-autonomous loader",
+    "cost": 80000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "quality-assurance-drone",
+    "name": "Quality Assurance drone",
+    "cost": 9000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "mitsubishi-snakebot",
+    "name": "Mitsubishi® snakebot",
+    "cost": 5000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "strato-cabbie-s-hopper",
+    "name": "Strato-cabbie’s hopper",
+    "cost": 10000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "memory-backup-service-per-month",
+    "name": "Memory Backup service (per month)",
+    "cost": 5500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "fresh-healthy-clone",
+    "name": "Fresh, healthy clone",
+    "cost": 300000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cybrid-new-bioplastic-synthetic",
+    "name": "Cybrid (new bioplastic synthetic)",
+    "cost": 10000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "rfid-shard-implanted",
+    "name": "RFID shard (implanted)",
+    "cost": 500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-m-94-tanksuit",
+    "name": "Sentry® M-94 Tanksuit",
+    "cost": 1000000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "mnemonic-envoy-service-per-data-set",
+    "name": "Mnemonic Envoy Service (per data set)",
+    "cost": 2000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cherry-blossom-orbital-nano-fabricator",
+    "name": "Cherry Blossom Orbital® Nano-fabricator",
+    "cost": 250000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "carbon-nanobar",
+    "name": "Carbon nanobar",
+    "cost": 1000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "glucose-bar",
+    "name": "Glucose bar",
+    "cost": 5,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "calcium-block",
+    "name": "Calcium block",
+    "cost": 350,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "limo",
+    "name": "Limo",
+    "cost": 80000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "biofeedback-console-and-trodes",
+    "name": "Biofeedback console and ‘trodes",
+    "cost": 1500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "vr-training-session-24-hours",
+    "name": "VR-training session (24 hours)",
+    "cost": 500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cherry-blossom-orbital-unlocked-low-grade-ai",
+    "name": "Cherry Blossom Orbital® unlocked, low-grade AI",
+    "cost": 5000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "counterfeit-personality-chip",
+    "name": "Counterfeit personality chip",
+    "cost": 600,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cloned-cortical-archive-blackmarket",
+    "name": "Cloned Cortical Archive (blackmarket)",
+    "cost": 25000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "drm-cracked-cybrid-blackmarket",
+    "name": "DRM-cracked cybrid (blackmarket)",
+    "cost": 6500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "net-shrine-account-per-month",
+    "name": "Net-shrine account (per month)",
+    "cost": 200,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "emitter-array-processors-drives-interface-rig",
+    "name": "Emitter array/processors/drives/interface rig",
+    "cost": 16000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "neoprene-hexayurt",
+    "name": "Neoprene hexayurt",
+    "cost": 150,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "neural-cut-out-implant",
+    "name": "Neural cut-out (implant)",
+    "cost": 500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "average-augmentation-installation-fee",
+    "name": "Average augmentation installation fee",
+    "cost": 1000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-military-grade-neurochem",
+    "name": "Sentry® Military Grade Neurochem",
+    "cost": 2000,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ishiteki-augmentation-muscle-matrix",
+    "name": "Ishiteki Augmentation® Muscle Matrix",
+    "cost": 4500,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "clavel-industries-combat-neurolink",
+    "name": "Clavel Industries® Combat Neurolink",
+    "cost": 1000,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "dornier-orbital-neural-lattice",
+    "name": "Dornier Orbital® Neural Lattice",
+    "cost": 1250,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-amped-hearing",
+    "name": "Sentry® Amped Hearing",
+    "cost": 500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "genexus-neoderm",
+    "name": "Genexus® NeoDerm",
+    "cost": 1500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ishiteki-augmentation-slicers",
+    "name": "Ishiteki Augmentation® Slicers",
+    "cost": 500,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "komatsu-full-spectrum-optics",
+    "name": "Komatsu® Full-spectrum Optics",
+    "cost": 1000,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cradle-biolabs-filter-lungs",
+    "name": "Cradle Biolabs® Filter Lungs",
+    "cost": 650,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "clavel-industries-savvy-jack",
+    "name": "Clavel Industries® Savvy Jack",
+    "cost": 500,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ishiteki-augmentation-myomar-tendons",
+    "name": "Ishiteki Augmentation® Myomar Tendons",
+    "cost": 750,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "komatsu-systems-vigilance-suite",
+    "name": "Komatsu Systems® Vigilance Suite",
+    "cost": 500,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-exo-plating",
+    "name": "Sentry® Exo-plating",
+    "cost": 2500,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hayabusa-heavy-industries-linear-frame",
+    "name": "Hayabusa Heavy Industries® Linear Frame",
+    "cost": 3500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "dornier-orbital-vehicle-interface",
+    "name": "Dornier Orbital® Vehicle Interface",
+    "cost": 250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "genexus-bio-auditor",
+    "name": "Genexus® Bio-auditor",
+    "cost": 200,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "genexus-pain-blocker",
+    "name": "Genexus® Pain Blocker",
+    "cost": 500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kanawa-mendez-spider-optics",
+    "name": "Kanawa-Mendez® Spider Optics",
+    "cost": 1000,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "genexus-softdrive",
+    "name": "Genexus® Softdrive",
+    "cost": 5000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "clavel-industries-cortical-archive",
+    "name": "Clavel Industries® Cortical Archive",
+    "cost": 600000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "komatsu-systems-striking-cobra",
+    "name": "Komatsu Systems® Striking Cobra",
+    "cost": 1250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cradle-biolabs-infernoweave",
+    "name": "Cradle Biolabs® Infernoweave",
+    "cost": 2000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "clavel-industries-emp-shielding",
+    "name": "Clavel Industries® EMP Shielding",
+    "cost": 5000,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "komatsu-systems-skull-gun",
+    "name": "Komatsu Systems® Skull Gun",
+    "cost": 2500,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cradle-biolabs-dispensary",
+    "name": "Cradle Biolabs® Dispensary",
+    "cost": 600,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ishiteki-augmentation-nanodocs",
+    "name": "Ishiteki Augmentation® Nanodocs",
+    "cost": 3500,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-tac-net-comm",
+    "name": "Sentry® Tac-net Comm",
+    "cost": 450,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kanawa-mendez-hermes-class-cyberlegs",
+    "name": "Kanawa-Mendez® Hermes-class Cyberlegs",
+    "cost": 2000,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kanawa-mendez-spinal-reinforcement",
+    "name": "Kanawa-Mendez® Spinal Reinforcement",
+    "cost": 1250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cradle-biolabs-kickstarter",
+    "name": "Cradle Biolabs® Kickstarter",
+    "cost": 3000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "dornier-orbital-mood-modulator",
+    "name": "Dornier Orbital® Mood Modulator",
+    "cost": 450,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "genexus-neuro-bridge",
+    "name": "Genexus® Neuro-bridge",
+    "cost": 350,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "takematsu-hegenaur-augmented-reality-module",
+    "name": "Takematsu-Hegenaur® Augmented Reality Module",
+    "cost": 200,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cradle-biolabs-toxin-scrubbers",
+    "name": "Cradle Biolabs® Toxin Scrubbers",
+    "cost": 350,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "clavel-industries-rem-inducer",
+    "name": "Clavel Industries® REM-inducer",
+    "cost": 200,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "komatsu-systems-wampyrs",
+    "name": "Komatsu Systems® Wampyrs",
+    "cost": 350,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hideyoki-monowhip-digit",
+    "name": "Hideyoki® Monowhip Digit",
+    "cost": 300,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ishiteki-augmentation-jacked-reflexes",
+    "name": "Ishiteki Augmentation® Jacked Reflexes",
+    "cost": 1000,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kanawa-mendez-cybershell",
+    "name": "Kanawa-Mendez® Cybershell",
+    "cost": 150000,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "clavel-industries-mind-drive",
+    "name": "Clavel Industries® Mind-Drive",
+    "cost": 2000,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ishiteki-augmentation-scratchers",
+    "name": "Ishiteki Augmentation® Scratchers",
+    "cost": 400,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "dornier-orbital-voice-modulator",
+    "name": "Dornier Orbital® Voice Modulator",
+    "cost": 200,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ishiteki-augmentation-mirrorshades",
+    "name": "Ishiteki Augmentation® Mirrorshades",
+    "cost": 500,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "orchard-technologies-machine-link",
+    "name": "Orchard Technologies® Machine Link",
+    "cost": 120,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "clavel-industries-surveillance-array",
+    "name": "Clavel Industries® Surveillance Array",
+    "cost": 500,
+    "category": "augmentation",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kung-fu-shard",
+    "name": "Kung Fu Shard",
+    "cost": 300,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "nice-guy-eddie-shard",
+    "name": "Nice Guy Eddie Shard",
+    "cost": 250,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "photo-memory-shard",
+    "name": "Photo Memory Shard",
+    "cost": 250,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "shiver-shard",
+    "name": "Shiver Shard",
+    "cost": 500,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "tanksuit-shard",
+    "name": "Tanksuit Shard",
+    "cost": 150,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "language-shard",
+    "name": "Language Shard",
+    "cost": 200,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "style-etiquette-shard",
+    "name": "Style & Etiquette Shard",
+    "cost": 150,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "felony-register-shard",
+    "name": "Felony Register Shard",
+    "cost": 250,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "vehicle-zen-shard",
+    "name": "Vehicle Zen Shard",
+    "cost": 200,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "tech-spec-shard",
+    "name": "Tech Spec Shard",
+    "cost": 300,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "emt-shard",
+    "name": "EMT Shard",
+    "cost": 350,
+    "category": "shardware",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "haldane-kluvis-hak-g55-10mm-smg",
+    "name": "Haldane & Kluvis® HAK G55 10mm SMG",
+    "cost": 1500,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "charon-pkd-45-police-special-revolver",
+    "name": "Charon® PKD-45 Police Special Revolver",
+    "cost": 500,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hideyoki-shard-gun-flechette-pistol",
+    "name": "Hideyoki® Shard Gun Flechette Pistol",
+    "cost": 800,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "echo-international-kr-16-5-56-assault-rifle",
+    "name": "Echo International® KR-16 5.56 Assault Rifle",
+    "cost": 2000,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sony-diahatsu-type-6-plp-pulse-laser-pistol",
+    "name": "Sony-Diahatsu® Type-6 PLP Pulse Laser Pistol",
+    "cost": 5000,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "haunt-m10-anti-material-sniper-rifle-system",
+    "name": "Haunt® M10 Anti-material Sniper Rifle System",
+    "cost": 7500,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kalashnikov-ak-91r-7-62-assault-rifle",
+    "name": "Kalashnikov® AK-91R 7.62 Assault Rifle",
+    "cost": 1200,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "echo-international-nemesis-10mm-semiautomatic",
+    "name": "Echo International® Nemesis 10mm Semiautomatic",
+    "cost": 500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "armcor-diamondback-10mm-machinepistol",
+    "name": "Armcor® Diamondback 10mm Machinepistol",
+    "cost": 750,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-p226-9mm-semiautomatic",
+    "name": "Sentry® P226 9mm Semiautomatic",
+    "cost": 450,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kryss-venom-11mm-modular-smg",
+    "name": "KRYSS® Venom 11mm Modular SMG",
+    "cost": 900,
+    "category": "firearm",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "standard-type-no-bonus",
+    "name": "Standard Type (no bonus)",
+    "cost": 50,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hellfires",
+    "name": "Hellfires",
+    "cost": 100,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "shredders",
+    "name": "Shredders",
+    "cost": 150,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ln2s",
+    "name": "LN2s",
+    "cost": 500,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "splinters",
+    "name": "Splinters",
+    "cost": 200,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "high-explosive",
+    "name": "High Explosive",
+    "cost": 300,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "moisture-responsive-he",
+    "name": "Moisture-responsive HE",
+    "cost": 450,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "depleted-uranium",
+    "name": "Depleted Uranium",
+    "cost": 800,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "jelly-rounds",
+    "name": "Jelly Rounds",
+    "cost": 300,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "gas",
+    "name": "Gas",
+    "cost": 375,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "acid",
+    "name": "Acid",
+    "cost": 250,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hollowpoint",
+    "name": "Hollowpoint",
+    "cost": 80,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "targeting-scope",
+    "name": "Targeting scope",
+    "cost": 250,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "custom-grips",
+    "name": "Custom grips",
+    "cost": 150,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "gyro-stabilisation",
+    "name": "Gyro-stabilisation",
+    "cost": 400,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "bio-lock",
+    "name": "Bio-lock",
+    "cost": 350,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "iff-chipping",
+    "name": "IFF chipping",
+    "cost": 500,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "teleoperation-link",
+    "name": "Teleoperation link",
+    "cost": 800,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "folding-bipod",
+    "name": "Folding bipod",
+    "cost": 100,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "silencer-suppressor",
+    "name": "Silencer/suppressor",
+    "cost": 85,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "electronic-trigger",
+    "name": "Electronic trigger",
+    "cost": 120,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "extended-magazine-drum-mag",
+    "name": "Extended magazine/drum mag",
+    "cost": 65,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "smart-targeting",
+    "name": "Smart targeting",
+    "cost": 750,
+    "category": "mod",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-m-88-rpg",
+    "name": "Sentry® M-88 RPG",
+    "cost": 4000,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "haunt-law-light-anti-tank-weapon",
+    "name": "Haunt® LAW Light Anti-Tank Weapon",
+    "cost": 2500,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "echo-international-ks-49-5-56-saw",
+    "name": "Echo International® KS-49 5.56 SAW",
+    "cost": 2250,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "armcor-accelerator-ap-18mm-railgun",
+    "name": "Armcor® Accelerator-AP 18mm Railgun",
+    "cost": 6500,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-shredder-portable-minigun",
+    "name": "Sentry® Shredder Portable Minigun",
+    "cost": 2000,
+    "category": "ammo",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hideyoki-l5-heavy-chemical-laser-weapon",
+    "name": "Hideyoki® L5 Heavy Chemical Laser Weapon",
+    "cost": 3750,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hak-g40-rhino-40mm-grenade-launcher",
+    "name": "HAK® G40 Rhino 40mm Grenade Launcher",
+    "cost": 1200,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "echo-international-k-60a-50cal-machinegun",
+    "name": "Echo International® K-60A .50cal Machinegun",
+    "cost": 1350,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "barrett-at3-50cal-anti-tank-borg-rifle",
+    "name": "Barrett® AT3 .50cal Anti-Tank/-Borg Rifle",
+    "cost": 4500,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "haunt-emp-1-electro-magnetic-pulse-rifle",
+    "name": "Haunt® EMP-1 Electro Magnetic Pulse Rifle",
+    "cost": 2750,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "qbz-leong-incinerator-unit",
+    "name": "QBZ® Leong Incinerator Unit",
+    "cost": 950,
+    "category": "heavy",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hideyoki-monomolecular-knife",
+    "name": "Hideyoki® Monomolecular Knife",
+    "cost": 55,
+    "category": "melee",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "carbon-steel-katana",
+    "name": "Carbon Steel Katana",
+    "cost": 200,
+    "category": "melee",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "graphene-nunchaku-tonfa",
+    "name": "Graphene Nunchaku/Tonfa",
+    "cost": 40,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sentry-electro-knux-knuckleduster",
+    "name": "Sentry® Electro-Knux™ Knuckleduster",
+    "cost": 65,
+    "category": "melee",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "polymer-shuriken",
+    "name": "Polymer Shuriken",
+    "cost": 15,
+    "category": "melee",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ceramic-switchblade",
+    "name": "Ceramic Switchblade",
+    "cost": 10,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "mono-dao-monomolecular-sword",
+    "name": "Mono-dao (monomolecular sword)",
+    "cost": 350,
+    "category": "melee",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sledgehammer",
+    "name": "Sledgehammer",
+    "cost": 10,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "steel-telescoping-baton",
+    "name": "Steel Telescoping Baton",
+    "cost": 45,
+    "category": "melee",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "chain",
+    "name": "Chain",
+    "cost": 5,
+    "category": "melee",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "club",
+    "name": "Club",
+    "cost": 2,
+    "category": "melee",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "motorcycle-leathers",
+    "name": "Motorcycle Leathers",
+    "cost": 80,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "arachnoweave-sleeve",
+    "name": "Arachnoweave Sleeve",
+    "cost": 250,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "carbon-fibre-flak-vest",
+    "name": "Carbon Fibre Flak Vest",
+    "cost": 150,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "laser-ablative-fabric",
+    "name": "Laser-ablative Fabric",
+    "cost": 300,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "impact-gel-inserts",
+    "name": "Impact Gel Inserts",
+    "cost": 95,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ceramic-plate",
+    "name": "Ceramic Plate",
+    "cost": 120,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "heavy-kevlar-jacket",
+    "name": "Heavy Kevlar Jacket",
+    "cost": 200,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "exo-frame",
+    "name": "Exo-frame",
+    "cost": 3000,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "coil-suit",
+    "name": "Coil Suit",
+    "cost": 1750,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "flame-retardant-sleeve",
+    "name": "Flame Retardant Sleeve",
+    "cost": 220,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "heavy-leather-overcoat",
+    "name": "Heavy Leather Overcoat",
+    "cost": 110,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hyperdex",
+    "name": "Hyperdex",
+    "cost": 20,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "fauxcaine",
+    "name": "Fauxcaine",
+    "cost": 30,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "stim",
+    "name": "Stim",
+    "cost": 15,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "slaught",
+    "name": "Slaught",
+    "cost": 45,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "syndorphine",
+    "name": "Syndorphine",
+    "cost": 50,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "iniquity",
+    "name": "Iniquity",
+    "cost": 25,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "xeno",
+    "name": "Xeno",
+    "cost": 30,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "tetrameth",
+    "name": "Tetrameth",
+    "cost": 40,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "red-rapture",
+    "name": "Red Rapture",
+    "cost": 25,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "meta",
+    "name": "Meta",
+    "cost": 30,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "neuroshield",
+    "name": "NeuroShield",
+    "cost": 100,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "reboot",
+    "name": "ReBoot",
+    "cost": 300,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "tunnel-rat",
+    "name": "tunnel_rat",
+    "cost": 550,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "god-mode",
+    "name": "God Mode",
+    "cost": 800,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hunter",
+    "name": "Hunter",
+    "cost": 250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "khali-grade-9",
+    "name": "Khali Grade 9",
+    "cost": 5500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "cloak",
+    "name": "Cloak",
+    "cost": 450,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "spoof",
+    "name": "Spoof",
+    "cost": 200,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "quiver",
+    "name": "Quiver",
+    "cost": 150,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "mr-sparky-2-0",
+    "name": "Mr Sparky 2.0",
+    "cost": 300,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "peripheral",
+    "name": "Peripheral",
+    "cost": 220,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "orchard-technologies-npod",
+    "name": "Orchard Technologies® nPod",
+    "cost": 475,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "genexus-gestalt-bio-modem",
+    "name": "Genexus® Gestalt Bio-modem",
+    "cost": 3900,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ono-sendai-shinobi-7",
+    "name": "Ono-Sendai® Shinobi-7",
+    "cost": 1800,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "braun-hyperion",
+    "name": "Braun® Hyperion",
+    "cost": 3700,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hideyoki-vision-512e",
+    "name": "Hideyoki® Vision 512e",
+    "cost": 4000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "toshiba-nimbus",
+    "name": "Toshiba® Nimbus",
+    "cost": 2600,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sony-diahatsu-y-rei",
+    "name": "Sony-Diahatsu® Yūrei",
+    "cost": 5250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "komatsu-systems-ubi-c",
+    "name": "Komatsu Systems® Ubi-C",
+    "cost": 3200,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "thompson-eye-phones",
+    "name": "Thompson® Eye-phones",
+    "cost": 990,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ishiteki-ky-ka-suru",
+    "name": "Ishiteki® Kyōka suru",
+    "cost": 1100,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "numan-lloyd-n-24a",
+    "name": "Numan-Lloyd® N-24A",
+    "cost": 800,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "situational-awareness",
+    "name": "Situational Awareness",
+    "cost": 300,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "targeting",
+    "name": "Targeting",
+    "cost": 325,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "buddy-bot",
+    "name": "Buddy Bot®",
+    "cost": 250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "holo-emitter",
+    "name": "Holo Emitter",
+    "cost": 220,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "surveillance",
+    "name": "Surveillance",
+    "cost": 300,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "defence",
+    "name": "Defence",
+    "cost": 550,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "medi-drone",
+    "name": "Medi-drone",
+    "cost": 425,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "bomb-blackmarket",
+    "name": "Bomb (blackmarket)",
+    "cost": 850,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "assassin-blackmarket",
+    "name": "Assassin (blackmarket)",
+    "cost": 1200,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "tracker",
+    "name": "Tracker",
+    "cost": 320,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "ortillery-spotter-blackmarket",
+    "name": "Ortillery Spotter (blackmarket)",
+    "cost": 5575,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "bmw-r21-motorcycle",
+    "name": "BMW® R21 Motorcycle",
+    "cost": 10000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "serafim-ataman-off-road-motorcycle",
+    "name": "Serafim® Ataman Off-road Motorcycle",
+    "cost": 6000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hayabusa-shinden-motorcycle",
+    "name": "Hayabusa® Shinden Motorcycle",
+    "cost": 12500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hero-c12-scooter",
+    "name": "Hero® C12 Scooter",
+    "cost": 2500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "mitsubishi-amatsubame-citycar",
+    "name": "Mitsubishi® Amatsubame Citycar",
+    "cost": 8000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "koda-rider-compact-car",
+    "name": "Škoda® Rider Compact Car",
+    "cost": 12250,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hawker-aichi-baribal-minivan",
+    "name": "Hawker-Aichi® Baribal Minivan",
+    "cost": 15500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hwl-mandarin-type-31-jeep",
+    "name": "HWL® Mandarin Type 31 Jeep",
+    "cost": 8750,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "eichner-voss-serie-200-speedboat",
+    "name": "Eichner & Voss® Serie 200 Speedboat",
+    "cost": 11500,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "bmw-t9-series-limousine",
+    "name": "BMW® T9-Series Limousine",
+    "cost": 35000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "bmw-t9-protection-armoured-limousine",
+    "name": "BMW® T9-Protection Armoured Limousine",
+    "cost": 49999,
+    "category": "armor",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "zuni-mercury-multipurpose-van",
+    "name": "Zuni® Mercury Multipurpose Van",
+    "cost": 18000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "volvo-g-series-heavy-truck",
+    "name": "Volvo® G-Series Heavy Truck",
+    "cost": 100000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hawker-aichi-greyhound-long-range-bus",
+    "name": "Hawker-Aichi® Greyhound Long-Range Bus",
+    "cost": 80000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "hawker-aichi-dachshund-city-bus",
+    "name": "Hawker-Aichi® Dachshund City Bus",
+    "cost": 135750,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "armcor-grizzly-infantry-fighting-vehicle",
+    "name": "Armcor® Grizzly Infantry Fighting Vehicle",
+    "cost": 575000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "rheinmetall-l-we-main-battle-tank",
+    "name": "Rheinmetall® Löwe Main Battle Tank",
+    "cost": 1500000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "eichner-voss-schweinswale-cargo-sub",
+    "name": "Eichner & Voss® Schweinswale Cargo Sub",
+    "cost": 95000000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "bharatiya-vayu-sena-industries-hamsa-luxury-train",
+    "name": "Bharatiya Vayu Sena Industries® Hamsa Luxury Train",
+    "cost": 120000000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "zuni-bumblebee-mini-copter",
+    "name": "Zuni® Bumblebee Mini-copter",
+    "cost": 820000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "sikorsky-s-311-utility-cybercopter",
+    "name": "Sikorsky® S-311 Utility Cybercopter",
+    "cost": 5000000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kamov-k-98-strekoza-attack-helicopter",
+    "name": "Kamov® K-98 Strekoza Attack Helicopter",
+    "cost": 12000000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "draco-d91-wyvern-cargo-tilt-rotor",
+    "name": "Draco® D91 Wyvern Cargo Tilt-rotor",
+    "cost": 7500000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "jerboa-electric-cometa-blimp",
+    "name": "Jerboa® Electric Cometa Blimp",
+    "cost": 8000000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "kenbichi-heavy-industries-jizo-rescue-tanksuit",
+    "name": "Kenbichi Heavy Industries® Jizo Rescue Tanksuit",
+    "cost": 850000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  },
+  {
+    "slug": "vanda-sheridan-lexington-military-tanksuit",
+    "name": "Vanda-Sheridan® Lexington Military Tanksuit",
+    "cost": 990000,
+    "category": "general",
+    "currency": "b¥",
+    "book": "p.57-67"
+  }
+]

@@ -1,0 +1,66 @@
+{
+  "severity": [
+    {
+      "roll": 1,
+      "slug": "chipped",
+      "effect": "Drop weapons, chipped, dented, dazed, knockdown"
+    },
+    {
+      "roll": 2,
+      "slug": "dislocated",
+      "effect": "Dislocated cyberlimbs, interrupted haptic feedback"
+    },
+    {
+      "roll": 3,
+      "slug": "shutdown",
+      "effect": "Shut down limbs, deep damage, bent endo-skeleton, sparking joints"
+    },
+    {
+      "roll": 4,
+      "slug": "holed",
+      "effect": "Crushed lines, fluid loss, spine injuries, smoking, holed chassis"
+    },
+    {
+      "roll": 5,
+      "slug": "rupture",
+      "effect": "Portion of limb lost, organ creche ruptured, stunned, tremors"
+    },
+    {
+      "roll": 6,
+      "slug": "major",
+      "effect": "Entire limb lost, loss of motor function, power drain"
+    },
+    {
+      "roll": 7,
+      "slug": "scrapped",
+      "effect": "Scrapped, flying sections, electrical fires, death in 1 round"
+    }
+  ],
+  "locations": [
+    {
+      "roll": 1,
+      "slug": "leg"
+    },
+    {
+      "roll": 2,
+      "slug": "torso"
+    },
+    {
+      "roll": 3,
+      "slug": "torso"
+    },
+    {
+      "roll": 4,
+      "slug": "torso"
+    },
+    {
+      "roll": 5,
+      "slug": "arm"
+    },
+    {
+      "roll": 6,
+      "slug": "head"
+    }
+  ],
+  "book": "p.37"
+}

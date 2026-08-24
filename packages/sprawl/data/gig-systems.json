@@ -1,0 +1,362 @@
+[
+  {
+    "slug": "sec-camera",
+    "roll": "11",
+    "name": "Security camera",
+    "ds": 10,
+    "bityuan": 40,
+    "ap": 2,
+    "blurb": "Look live feed / blind the eye.",
+    "book": "house"
+  },
+  {
+    "slug": "door-lock",
+    "roll": "12",
+    "name": "Maglock door",
+    "ds": 12,
+    "bityuan": 60,
+    "ap": 2,
+    "blurb": "Open or jam the corridor.",
+    "book": "house"
+  },
+  {
+    "slug": "patrol-drone",
+    "roll": "13",
+    "name": "Idle patrol drone",
+    "ds": 12,
+    "bityuan": 80,
+    "ap": 3,
+    "blurb": "Park it or brick it.",
+    "book": "house"
+  },
+  {
+    "slug": "robocab",
+    "roll": "14",
+    "name": "Robocab at curb",
+    "ds": 10,
+    "bityuan": 50,
+    "ap": 2,
+    "blurb": "Steal a ride or dump logs.",
+    "book": "house"
+  },
+  {
+    "slug": "atm-kiosk",
+    "roll": "15",
+    "name": "Street ATM",
+    "ds": 14,
+    "bityuan": 120,
+    "ap": 3,
+    "blurb": "Skim a thin slice — heat rises.",
+    "book": "house"
+  },
+  {
+    "slug": "vending-net",
+    "roll": "16",
+    "name": "Smart vending net",
+    "ds": 8,
+    "bityuan": 25,
+    "ap": 1,
+    "blurb": "Free snacks, free noise.",
+    "book": "house"
+  },
+  {
+    "slug": "building-hvac",
+    "roll": "21",
+    "name": "HVAC controller",
+    "ds": 11,
+    "bityuan": 55,
+    "ap": 2,
+    "blurb": "Fog the cams with steam.",
+    "book": "house"
+  },
+  {
+    "slug": "elevator-panel",
+    "roll": "22",
+    "name": "Elevator panel",
+    "ds": 12,
+    "bityuan": 45,
+    "ap": 2,
+    "blurb": "Lock floors or call a car.",
+    "book": "house"
+  },
+  {
+    "slug": "alarm-hub",
+    "roll": "23",
+    "name": "Alarm hub",
+    "ds": 13,
+    "bityuan": 70,
+    "ap": 3,
+    "blurb": "Silence the screamers.",
+    "book": "house"
+  },
+  {
+    "slug": "garage-gate",
+    "roll": "24",
+    "name": "Garage gate PLC",
+    "ds": 11,
+    "bityuan": 50,
+    "ap": 2,
+    "blurb": "Open the bay.",
+    "book": "house"
+  },
+  {
+    "slug": "media-screen",
+    "roll": "25",
+    "name": "Lobby media wall",
+    "ds": 9,
+    "bityuan": 30,
+    "ap": 1,
+    "blurb": "Broadcast static or a face.",
+    "book": "house"
+  },
+  {
+    "slug": "gun-locker",
+    "roll": "26",
+    "name": "Smart gun locker",
+    "ds": 14,
+    "bityuan": 100,
+    "ap": 3,
+    "blurb": "Pop a rack — briefly.",
+    "book": "house"
+  },
+  {
+    "slug": "keycard-writer",
+    "roll": "31",
+    "name": "Keycard writer",
+    "ds": 12,
+    "bityuan": 65,
+    "ap": 2,
+    "blurb": "Mint a temporary badge.",
+    "book": "house"
+  },
+  {
+    "slug": "drone-nest",
+    "roll": "32",
+    "name": "Drone charging nest",
+    "ds": 13,
+    "bityuan": 90,
+    "ap": 3,
+    "blurb": "Sleep the swarm.",
+    "book": "house"
+  },
+  {
+    "slug": "traffic-box",
+    "roll": "33",
+    "name": "Traffic control box",
+    "ds": 12,
+    "bityuan": 55,
+    "ap": 2,
+    "blurb": "Red lights forever.",
+    "book": "house"
+  },
+  {
+    "slug": "pan-router",
+    "roll": "34",
+    "name": "PAN mesh router",
+    "ds": 14,
+    "bityuan": 75,
+    "ap": 3,
+    "blurb": "Sniff local implants.",
+    "book": "house"
+  },
+  {
+    "slug": "safe-panel",
+    "roll": "35",
+    "name": "Smart safe panel",
+    "ds": 16,
+    "bityuan": 150,
+    "ap": 4,
+    "blurb": "Thin corp float.",
+    "book": "house"
+  },
+  {
+    "slug": "cam-van",
+    "roll": "36",
+    "name": "Surveillance van",
+    "ds": 13,
+    "bityuan": 85,
+    "ap": 3,
+    "blurb": "Blind the watchers.",
+    "book": "house"
+  },
+  {
+    "slug": "bot-cleaner",
+    "roll": "41",
+    "name": "Cleaning bot",
+    "ds": 8,
+    "bityuan": 20,
+    "ap": 1,
+    "blurb": "Ride-along camera.",
+    "book": "house"
+  },
+  {
+    "slug": "fuel-pump",
+    "roll": "42",
+    "name": "Smart fuel pump",
+    "ds": 10,
+    "bityuan": 35,
+    "ap": 1,
+    "blurb": "Spill or free fill.",
+    "book": "house"
+  },
+  {
+    "slug": "billboard",
+    "roll": "43",
+    "name": "AR billboard",
+    "ds": 9,
+    "bityuan": 40,
+    "ap": 1,
+    "blurb": "Your tag, city-wide.",
+    "book": "house"
+  },
+  {
+    "slug": "server-rack",
+    "roll": "44",
+    "name": "Open server rack",
+    "ds": 15,
+    "bityuan": 130,
+    "ap": 4,
+    "blurb": "Pull a dirty dump.",
+    "book": "house"
+  },
+  {
+    "slug": "bio-lock",
+    "roll": "45",
+    "name": "Bio-lock scanner",
+    "ds": 14,
+    "bityuan": 70,
+    "ap": 3,
+    "blurb": "Spoof a palm.",
+    "book": "house"
+  },
+  {
+    "slug": "turret-idle",
+    "roll": "46",
+    "name": "Idle turret mount",
+    "ds": 16,
+    "bityuan": 110,
+    "ap": 4,
+    "blurb": "Keep it sleeping.",
+    "book": "house"
+  },
+  {
+    "slug": "sec-camera-51",
+    "roll": "51",
+    "name": "Security camera",
+    "ds": 10,
+    "bityuan": 40,
+    "ap": 2,
+    "blurb": "Look live feed / blind the eye.",
+    "book": "house"
+  },
+  {
+    "slug": "door-lock-52",
+    "roll": "52",
+    "name": "Maglock door",
+    "ds": 12,
+    "bityuan": 60,
+    "ap": 2,
+    "blurb": "Open or jam the corridor.",
+    "book": "house"
+  },
+  {
+    "slug": "patrol-drone-53",
+    "roll": "53",
+    "name": "Idle patrol drone",
+    "ds": 12,
+    "bityuan": 80,
+    "ap": 3,
+    "blurb": "Park it or brick it.",
+    "book": "house"
+  },
+  {
+    "slug": "robocab-54",
+    "roll": "54",
+    "name": "Robocab at curb",
+    "ds": 10,
+    "bityuan": 50,
+    "ap": 2,
+    "blurb": "Steal a ride or dump logs.",
+    "book": "house"
+  },
+  {
+    "slug": "atm-kiosk-55",
+    "roll": "55",
+    "name": "Street ATM",
+    "ds": 14,
+    "bityuan": 120,
+    "ap": 3,
+    "blurb": "Skim a thin slice — heat rises.",
+    "book": "house"
+  },
+  {
+    "slug": "vending-net-56",
+    "roll": "56",
+    "name": "Smart vending net",
+    "ds": 8,
+    "bityuan": 25,
+    "ap": 1,
+    "blurb": "Free snacks, free noise.",
+    "book": "house"
+  },
+  {
+    "slug": "building-hvac-61",
+    "roll": "61",
+    "name": "HVAC controller",
+    "ds": 11,
+    "bityuan": 55,
+    "ap": 2,
+    "blurb": "Fog the cams with steam.",
+    "book": "house"
+  },
+  {
+    "slug": "elevator-panel-62",
+    "roll": "62",
+    "name": "Elevator panel",
+    "ds": 12,
+    "bityuan": 45,
+    "ap": 2,
+    "blurb": "Lock floors or call a car.",
+    "book": "house"
+  },
+  {
+    "slug": "alarm-hub-63",
+    "roll": "63",
+    "name": "Alarm hub",
+    "ds": 13,
+    "bityuan": 70,
+    "ap": 3,
+    "blurb": "Silence the screamers.",
+    "book": "house"
+  },
+  {
+    "slug": "garage-gate-64",
+    "roll": "64",
+    "name": "Garage gate PLC",
+    "ds": 11,
+    "bityuan": 50,
+    "ap": 2,
+    "blurb": "Open the bay.",
+    "book": "house"
+  },
+  {
+    "slug": "media-screen-65",
+    "roll": "65",
+    "name": "Lobby media wall",
+    "ds": 9,
+    "bityuan": 30,
+    "ap": 1,
+    "blurb": "Broadcast static or a face.",
+    "book": "house"
+  },
+  {
+    "slug": "gun-locker-66",
+    "roll": "66",
+    "name": "Smart gun locker",
+    "ds": 14,
+    "bityuan": 100,
+    "ap": 3,
+    "blurb": "Pop a rack — briefly.",
+    "book": "house"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "weeds",
+    "title": "Stack-weeds in the grates",
+    "ongoing": true
+  },
+  { "id": "lockout", "title": "Saito lockout on Level 9" },
+  { "id": "blackout", "title": "Murk blackout after a gate flicker" },
+  { "id": "strike", "title": "Hydro-farm walkout" },
+  { "id": "festival", "title": "Permit fight over the Murk festival" },
+  { "id": "drone", "title": "Rogue courier drones over Oak" },
+  { "id": "leak", "title": "Meditech sample crate missing" },
+  { "id": "flood", "title": "Storm pumps failed in the stacks" },
+  { "id": "idol", "title": "Influencer riot at SolCore plaza" },
+  { "id": "raid", "title": "Night Market sweep" }
+]

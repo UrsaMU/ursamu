@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "honest-slava",
+    "roll": 1,
+    "name": "Honest Slava",
+    "blurb": "Former Lithuanian Motorised Infantry; APCs and Eastern Bloc mil hardware",
+    "book": "p.107"
+  },
+  {
+    "slug": "mo-yuan",
+    "roll": 2,
+    "name": "Mo Yuan",
+    "blurb": "Goganger favourite; motorcycles and musclecars",
+    "book": "p.107"
+  },
+  {
+    "slug": "delaney",
+    "roll": 3,
+    "name": "Delaney",
+    "blurb": "Best at making stolen vehicles clean, fast, no questions",
+    "book": "p.107"
+  },
+  {
+    "slug": "tito-the-tuner",
+    "roll": 4,
+    "name": "Tito the Tuner",
+    "blurb": "Best in business; charges serious b¥",
+    "book": "p.107"
+  },
+  {
+    "slug": "a1",
+    "roll": 5,
+    "name": "A1",
+    "blurb": "Former F1 pit remote multi-limb LAI; rented via Leonie Turner",
+    "book": "p.107"
+  },
+  {
+    "slug": "devi-malhotra",
+    "roll": 6,
+    "name": "Captain Devi Malhotra",
+    "blurb": "Watercraft; hidden docks for pirates/smugglers",
+    "book": "p.107"
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "resilience": 12,
+  "loadout": 10,
+  "statPoints": 4,
+  "belongings": 3,
+  "cashDice": "2d6",
+  "cashMultiplier": 100,
+  "currency": "b¥",
+  "stats": [
+    "morphology",
+    "equilibrium",
+    "reaction",
+    "cognition",
+    "affinity"
+  ],
+  "edgeDs": {
+    "calm": 10,
+    "moderate": 12,
+    "major": 14
+  },
+  "book": "p.05"
+}

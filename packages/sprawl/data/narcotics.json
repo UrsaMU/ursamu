@@ -1,0 +1,101 @@
+[
+  {
+    "slug": "hyperdex",
+    "roll": "02",
+    "name": "Hyperdex",
+    "effect": "Morphology rolls with Upgrade",
+    "addictionDs": 12,
+    "duration": "1d6 hours",
+    "book": "p.55"
+  },
+  {
+    "slug": "fauxcaine",
+    "roll": "03",
+    "name": "Fauxcaine",
+    "effect": "+1 Equilibrium and +1 Reaction",
+    "addictionDs": 14,
+    "duration": "1d6 hours",
+    "book": "p.55"
+  },
+  {
+    "slug": "stim",
+    "roll": "04",
+    "name": "Stim",
+    "effect": "+2 Reaction",
+    "addictionDs": 10,
+    "duration": "1d6+1 hours",
+    "book": "p.55"
+  },
+  {
+    "slug": "slaught",
+    "roll": "05",
+    "name": "Slaught",
+    "effect": "+1 Morphology and +3 Resilience",
+    "addictionDs": 18,
+    "duration": "1 hour",
+    "book": "p.55"
+  },
+  {
+    "slug": "syndorphine",
+    "roll": "06",
+    "name": "Syndorphine",
+    "effect": "+2 Affinity, +2 Equilibrium",
+    "addictionDs": 12,
+    "duration": "1d6/2 hours",
+    "book": "p.55"
+  },
+  {
+    "slug": "iniquity",
+    "roll": "07",
+    "name": "Iniquity",
+    "effect": "+3 Affinity",
+    "addictionDs": 14,
+    "duration": "2d6 hours",
+    "book": "p.55"
+  },
+  {
+    "slug": "xeno",
+    "roll": "08",
+    "name": "Xeno",
+    "effect": "+2 Morphology but Glitch on rolls",
+    "addictionDs": 10,
+    "duration": "1d6+3 hours",
+    "book": "p.55"
+  },
+  {
+    "slug": "tetrameth",
+    "roll": "09",
+    "name": "Tetrameth",
+    "effect": "+1 Res/hour; -1 Morph -2 React +1 Equ",
+    "addictionDs": 8,
+    "duration": "1d6 hours",
+    "book": "p.55"
+  },
+  {
+    "slug": "red-rapture",
+    "roll": "10",
+    "name": "Red Rapture",
+    "effect": "+3 Morphology, +3 Resilience",
+    "addictionDs": 20,
+    "duration": "2d6 minutes",
+    "book": "p.55"
+  },
+  {
+    "slug": "meta",
+    "roll": "11",
+    "name": "Meta",
+    "effect": "+2 Cognition, +3 Equilibrium",
+    "addictionDs": 16,
+    "duration": "1d6 minutes",
+    "book": "p.55"
+  },
+  {
+    "slug": "hd",
+    "roll": "12",
+    "name": "HD",
+    "effect": "+4 Cognition and +2 Equilibrium",
+    "addictionDs": 18,
+    "duration": "3d6 minutes",
+    "book": "p.55"
+  }
+]

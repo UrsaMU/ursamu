@@ -1,0 +1,79 @@
+[
+  {
+    "slug": "hunted-wanted",
+    "roll": "02",
+    "name": "Hunted/Wanted",
+    "blurb": "Pursued by syndicates, corp strike team, law, IRS, media, or ex.",
+    "book": "p.22"
+  },
+  {
+    "slug": "sick-and-dying",
+    "roll": "03",
+    "name": "Sick and dying",
+    "blurb": "Fatal disease or terminal designer illness; running out of time.",
+    "book": "p.22"
+  },
+  {
+    "slug": "secret-synthetic",
+    "roll": "04",
+    "name": "Secret synthetic",
+    "blurb": "Suspect you are really a cybrid.",
+    "book": "p.22"
+  },
+  {
+    "slug": "dead-momma",
+    "roll": "05",
+    "name": "Dead momma",
+    "blurb": "Parents uploaded to Neovana digital shrine; constant texts and vid-chat.",
+    "book": "p.22"
+  },
+  {
+    "slug": "fragile-personality",
+    "roll": "06",
+    "name": "Fragile personality overlays",
+    "blurb": "Persona overwritten too many times; unravelling.",
+    "book": "p.22"
+  },
+  {
+    "slug": "gene-edited-immuno",
+    "roll": "07",
+    "name": "Gene-edited, but immunocompromised",
+    "blurb": "Bio-elite edits left you vulnerable to viral infections.",
+    "book": "p.22"
+  },
+  {
+    "slug": "bullshit-past",
+    "roll": "08",
+    "name": "Bullshit past",
+    "blurb": "Have not achieved a fraction of what you claim.",
+    "book": "p.22"
+  },
+  {
+    "slug": "dependency",
+    "roll": "09",
+    "name": "Dependency",
+    "blurb": "Lean on stimulants, alcohol, narcotics, gynoids or virtuals.",
+    "book": "p.22"
+  },
+  {
+    "slug": "no-more-fucks",
+    "roll": "10",
+    "name": "No more fucks to give",
+    "blurb": "Corp destroyed everyone that mattered; impotent vengeance.",
+    "book": "p.22"
+  },
+  {
+    "slug": "abused-by-corporation",
+    "roll": "11",
+    "name": "Abused by corporation",
+    "blurb": "Loyal employee-citizen tossed to the streets.",
+    "book": "p.22"
+  },
+  {
+    "slug": "aug-rot",
+    "roll": "12",
+    "name": "Aug rot",
+    "blurb": "Fungal infection where augs break the skin; ointment expensive.",
+    "book": "p.22"
+  }
+]

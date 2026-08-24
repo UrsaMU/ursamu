@@ -1,0 +1,290 @@
+[
+  {
+    "slug": "minion-gang-member-11",
+    "roll": "11",
+    "antagonist": "gang-member",
+    "tier": "easy",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-sprawl-cop-12",
+    "roll": "12",
+    "antagonist": "sprawl-cop",
+    "tier": "easy",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-security-drone-13",
+    "roll": "13",
+    "antagonist": "security-drone",
+    "tier": "easy",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-zone-boss-ganger-14",
+    "roll": "14",
+    "antagonist": "zone-boss-ganger",
+    "tier": "easy",
+    "count": 3,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-corporate-security-15",
+    "roll": "15",
+    "antagonist": "corporate-security",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-syndicate-goon-16",
+    "roll": "16",
+    "antagonist": "syndicate-goon",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-augmented-guard-dog-21",
+    "roll": "21",
+    "antagonist": "augmented-guard-dog",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-nodejacker-npc-22",
+    "roll": "22",
+    "antagonist": "nodejacker-npc",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-bodyguard-23",
+    "roll": "23",
+    "antagonist": "bodyguard",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-combat-drone-24",
+    "roll": "24",
+    "antagonist": "combat-drone",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-insurgent-25",
+    "roll": "25",
+    "antagonist": "insurgent",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-combat-cybrid-26",
+    "roll": "26",
+    "antagonist": "combat-cybrid",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-zone-veteran-31",
+    "roll": "31",
+    "antagonist": "zone-veteran",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-killmorph-32",
+    "roll": "32",
+    "antagonist": "killmorph",
+    "tier": "legend",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-ronin-33",
+    "roll": "33",
+    "antagonist": "ronin",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-gang-member-34",
+    "roll": "34",
+    "antagonist": "gang-member",
+    "tier": "easy",
+    "count": 3,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-security-drone-35",
+    "roll": "35",
+    "antagonist": "security-drone",
+    "tier": "mod",
+    "count": 3,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-corporate-security-36",
+    "roll": "36",
+    "antagonist": "corporate-security",
+    "tier": "hard",
+    "count": 3,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-gang-member-41",
+    "roll": "41",
+    "antagonist": "gang-member",
+    "tier": "easy",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-sprawl-cop-42",
+    "roll": "42",
+    "antagonist": "sprawl-cop",
+    "tier": "easy",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-security-drone-43",
+    "roll": "43",
+    "antagonist": "security-drone",
+    "tier": "easy",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-zone-boss-ganger-44",
+    "roll": "44",
+    "antagonist": "zone-boss-ganger",
+    "tier": "easy",
+    "count": 3,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-corporate-security-45",
+    "roll": "45",
+    "antagonist": "corporate-security",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-syndicate-goon-46",
+    "roll": "46",
+    "antagonist": "syndicate-goon",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-augmented-guard-dog-51",
+    "roll": "51",
+    "antagonist": "augmented-guard-dog",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-nodejacker-npc-52",
+    "roll": "52",
+    "antagonist": "nodejacker-npc",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-bodyguard-53",
+    "roll": "53",
+    "antagonist": "bodyguard",
+    "tier": "mod",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-combat-drone-54",
+    "roll": "54",
+    "antagonist": "combat-drone",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-insurgent-55",
+    "roll": "55",
+    "antagonist": "insurgent",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-combat-cybrid-56",
+    "roll": "56",
+    "antagonist": "combat-cybrid",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-zone-veteran-61",
+    "roll": "61",
+    "antagonist": "zone-veteran",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-killmorph-62",
+    "roll": "62",
+    "antagonist": "killmorph",
+    "tier": "legend",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-ronin-63",
+    "roll": "63",
+    "antagonist": "ronin",
+    "tier": "hard",
+    "count": 2,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-gang-member-64",
+    "roll": "64",
+    "antagonist": "gang-member",
+    "tier": "easy",
+    "count": 3,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-security-drone-65",
+    "roll": "65",
+    "antagonist": "security-drone",
+    "tier": "mod",
+    "count": 3,
+    "book": "p.68"
+  },
+  {
+    "slug": "minion-corporate-security-66",
+    "roll": "66",
+    "antagonist": "corporate-security",
+    "tier": "hard",
+    "count": 3,
+    "book": "p.68"
+  }
+]

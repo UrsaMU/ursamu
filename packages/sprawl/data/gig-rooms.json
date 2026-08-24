@@ -1,0 +1,290 @@
+[
+  {
+    "slug": "loading-bay",
+    "roll": "11",
+    "name": "Loading bay",
+    "blurb": "Roll-up doors, pallet jacks, one cam.",
+    "book": "house",
+    "description": "The loading bay stinks of diesel and wet cardboard. Roll-up doors rattle in a chemical wind from the alley, half-stuck on warped tracks. Yellow safety lines are scuffed to ghosts on the concrete.\n\nPallet jacks lean like drunks. Shrink-wrap cocoons tower toward a corrugated roof where a single security cam winks red. Somewhere a forklift battery charger ticks. Rain finds every seam and drums on the tin.\n\nYou could stage a convoy here — or a body. The street is one button-press away, if the door motor still answers."
+  },
+  {
+    "slug": "stairwell",
+    "roll": "12",
+    "name": "Concrete stairwell",
+    "blurb": "Echoes. Graffiti. Blood on 3.",
+    "book": "house",
+    "description": "Concrete stairwell, raw and cold. The handrail is sticky. Someone tagged a spiral of neon kanji down three landings; under it, a brown smear that might be rust.\n\nYour footsteps double back at you. Fluorescents buzz on a dying ballast. Between floors, a door is chained from the other side. On the third landing the wall is spattered — old blood, scrubbed poorly.\n\nUp means more cameras. Down means the service tunnels. Either way, the echo will sell you out."
+  },
+  {
+    "slug": "server-closet",
+    "roll": "13",
+    "name": "Server closet",
+    "blurb": "Hot air, blinking LEDs, tight fit.",
+    "book": "house",
+    "description": "Heat hits first — dry, electric, tasting of dust on coils. Racks fill the closet wall-to-wall, LEDs blinking in nervous green and fault amber. Cable ties hang like vines.\n\nThere is barely room to turn. A floor tile is loose over a cable trench. Someone left a half-empty energy drink sweating on a UPS unit. Fans scream at a pitch that crawls under your teeth.\n\nIf the building has a brain, you are standing in a sinus cavity. Touch the wrong port and the whole floor will know."
+  },
+  {
+    "slug": "open-office",
+    "roll": "14",
+    "name": "Open office floor",
+    "blurb": "Cubicles, cold coffee, motion lights.",
+    "book": "house",
+    "description": "An open office floor after hours: cubicle walls like a grey maze, monitors sleep-glowing. Cold coffee rings mark laminate desks. Motion lights snap on in stages as you move, advertising every step.\n\nA printer jams mid-job, paper tongue hanging. Whiteboard ghosts still show a quarterly target and a stick figure hanging from a noose. The HVAC breathes recycled mint.\n\nCover is thin. Sightlines are long. Something under a desk is still warm."
+  },
+  {
+    "slug": "secure-lab",
+    "roll": "15",
+    "name": "Secure lab",
+    "blurb": "Glass, gloves, something still humming.",
+    "book": "house",
+    "description": "Glass partitions. Glove boxes. The air is filtered so hard it feels empty. Biohazard diamonds peel at the corners of a sealed bay. Something inside still hums — a centrifuge or a lie.\n\nLab coats hang on a rack, one sleeve inside-out. A tablet is locked to a docking arm. On the far bench, a tray of sample vials sits under a UV wand that never shut off.\n\nWhatever they made here, they did not finish cleaning it up."
+  },
+  {
+    "slug": "parking-sub",
+    "roll": "16",
+    "name": "Sublevel parking",
+    "blurb": "Oil stains and a running van.",
+    "book": "house",
+    "description": "Sublevel parking: oil rainbows in standing water, numbered columns, a van idling with its lights off. Concrete pillars cut the space into kill-funnels.\n\nA ticket gate hangs open. One cam is smashed; another tracks. Far end, an exit ramp climbs toward sodium orange. Your engine noise would carry forever down here.\n\nGood place to lose a tail. Better place to get boxed in."
+  },
+  {
+    "slug": "rooftop-hvac",
+    "roll": "21",
+    "name": "Rooftop HVAC maze",
+    "blurb": "Fans, ducts, long drops.",
+    "book": "house",
+    "description": "Rooftop HVAC maze — galvanized ducts, spinning fans, gravel that sticks in boot treads. The city sprawls in every direction under a bruised sky, neon bleeding into smog.\n\nCatwalks link the units. One grate is loose over a ten-story drop. Wind shoves hard enough to lean. A maintenance hatch is propped with a wrench still warm from a hand.\n\nCover is metal and noise. Fall is permanent."
+  },
+  {
+    "slug": "clinic-bay",
+    "roll": "22",
+    "name": "Clinic bay",
+    "blurb": "Gurneys, lazarus wrappers, red bags.",
+    "book": "house",
+    "description": "Clinic bay lights are too white. Gurneys line the wall with restraints dangling. A bin overflows with lazarus wrappers and red bio bags. The floor has been mopped around a stain, not through it.\n\nCurtains half-drawn hide empty bays. A med scanner chirps low battery. Cabinets are locked; one door hangs crooked where someone forced it.\n\nYou can smell antiseptic fighting something sweeter underneath."
+  },
+  {
+    "slug": "bar-back",
+    "roll": "23",
+    "name": "Bar back room",
+    "blurb": "Crates, a cage, sticky floor.",
+    "book": "house",
+    "description": "Bar back room: crates of synth-liquor, a cage for the good bottles, floor sticky enough to keep secrets. A service door leads to the alley. Another to the stage.\n\nPosters peel off the walls — bands that never made it, fights that did. A baseball bat leans in the corner next to a first-aid kit that has seen use. Music thumps through the wall like a second heart.\n\nThis is where deals finish when the booths get too public."
+  },
+  {
+    "slug": "tunnel-spur",
+    "roll": "24",
+    "name": "Service tunnel spur",
+    "blurb": "Pipes drip. Something moved.",
+    "book": "house",
+    "description": "Service tunnel spur — pipes sweat overhead, condensation ticking into puddles. The main line curves out of sight both ways. Your light finds graffiti, then a scuff that is not graffiti.\n\nSomething moved further down. Or dripped. The air is warm and tastes like copper. A maintenance tablet is bolted to the wall, screen cracked, still asking for a PIN.\n\nGood for a quiet approach. Bad for a clean exit if they seal the grates."
+  },
+  {
+    "slug": "drone-cage",
+    "roll": "25",
+    "name": "Drone cage",
+    "blurb": "Charging racks and a half-open gate.",
+    "book": "house",
+    "description": "Drone cage: chain-link and charging racks, LEDs like a starfield of cheap eyes. Half the birds are docked. One gate hangs open on a bent hinge.\n\nA workbench holds propellers, a cracked lens, a half-written flight log. The air smells of ozone and hot plastic. Somewhere a rotor spins down with a dying whine.\n\nIf the cage arms, you will hear it. If it is already armed, you already lost the first second."
+  },
+  {
+    "slug": "exec-suite",
+    "roll": "26",
+    "name": "Exec suite",
+    "blurb": "Glass desk, panic button under it.",
+    "book": "house",
+    "description": "Exec suite: glass desk, skyline view, liquor that costs more than your last job. The carpet swallows footsteps. A panic button is worn smooth under the desk lip.\n\nArt on the walls is corporate-approved rebellion. A side door leads to a private washroom; another to a secure elevator. The chair is still warm.\n\nThis room was built to impress visitors and survive the ones who were not invited."
+  },
+  {
+    "slug": "archive",
+    "roll": "31",
+    "name": "Paper archive",
+    "blurb": "Dust, shelves, one locked cage.",
+    "book": "house",
+    "description": "Paper archive — shelves to the ceiling, dust thick as felt. A locked cage holds the real files. Card catalogs are half-digitized, half-stubborn.\n\nYour light raises motes like static. A reading table has a lamp, a magnifier, and a coffee ring from a decade ago. One box is pulled halfway out, label blacked over.\n\nFire would take this place in minutes. So would a determined shredder crew."
+  },
+  {
+    "slug": "kitchen",
+    "roll": "32",
+    "name": "Industrial kitchen",
+    "blurb": "Knives, freezers, bad smells.",
+    "book": "house",
+    "description": "Industrial kitchen: stainless steel, hanging knives, freezers breathing frost. The pass window looks into a dark dining room. Something in the walk-in is not food.\n\nFloor drains glisten. A prep list is still clipped up — yesterday's specials, never wiped. Gas taps are shut; one pilot light still ghosts blue.\n\nKnives are tools here. So are the bones in the stock pot if you look too long."
+  },
+  {
+    "slug": "chapel",
+    "roll": "33",
+    "name": "Street chapel",
+    "blurb": "Candles and a hidden hatch.",
+    "book": "house",
+    "description": "Street chapel: plastic chairs, a neon cross that flickers, candles burned to nubs. The air is wax and rain-wet coats. A donation box is bolted down and empty.\n\nBehind the altar cloth, a hatch is cut into the floorboards — not holy, just handy. Hymnals are stacked beside a stun baton. Faith is flexible in the Flow.\n\nPeople come here to pray, hide, or meet someone who does both."
+  },
+  {
+    "slug": "gym",
+    "roll": "34",
+    "name": "Corp gym",
+    "blurb": "Mirrors, free weights, blood on mat.",
+    "book": "house",
+    "description": "Corp gym after hours: mirrors, free weights, a heavy bag still swaying. Blood is smeared on the mat and half-wiped. The sound system loops a dead playlist.\n\nLockers line one wall; a few hang open on gym clothes and a spare magazine. The water cooler gurgles. Cameras watch the free-weight zone like coaches.\n\nGood sightlines if you like reflections. Bad if someone is already in them."
+  },
+  {
+    "slug": "clean-room",
+    "roll": "35",
+    "name": "Clean room airlock",
+    "blurb": "Suits hanging. One still warm.",
+    "book": "house",
+    "description": "Clean-room airlock: white suits hanging, booties in a bin, a pressure gauge twitching. The inner door is sealed with a red light that refuses to go green.\n\nOne suit is still warm at the collar. A sticky note on the glass says DO NOT CYCLE — but the note is days old. Beyond the glass, benches and tools wait in sterile quiet.\n\nIf you force it, the whole floor may dump atmosphere alarms."
+  },
+  {
+    "slug": "rail-platform",
+    "roll": "36",
+    "name": "Abandoned rail platform",
+    "blurb": "Rats and a dead schedule board.",
+    "book": "house",
+    "description": "Abandoned rail platform: rats, wet tile, a schedule board frozen on a year that never came. The tunnel mouths are black throats. Wind moves the wrong way.\n\nA vending machine is gutted. Someone sleeps under cardboard until your light finds them and they are gone. Third rail signs still warn in three languages.\n\nTrains do not stop here. Other things do."
+  },
+  {
+    "slug": "mezzanine",
+    "roll": "41",
+    "name": "Mezzanine overlook",
+    "blurb": "Good sightlines. Bad cover.",
+    "book": "house",
+    "description": "Mezzanine overlook: railings, a drop to the floor below, sightlines that cut the whole hall. Cover is a potted plant and optimism.\n\nDust on the rail shows recent hands. A fire door is propped with a wedge. Below, footsteps or a cart wheel — hard to tell which.\n\nWhoever holds this perch owns the room. Whoever is seen here owns a problem."
+  },
+  {
+    "slug": "vault-ante",
+    "roll": "42",
+    "name": "Vault antechamber",
+    "blurb": "Two doors, one still sealed.",
+    "book": "house",
+    "description": "Vault antechamber: two heavy doors, one still sealed with a time-lock glow. The open one breathes cold air and old money-smell.\n\nA desk holds a sign-in slate and a stylus on a wire. Cameras sit in the corners like spiders. The floor is scuffed where a cart turned too hard.\n\nYou are one code from treasure or a lockdown that lasts longer than you will."
+  },
+  {
+    "slug": "hydroponics",
+    "roll": "43",
+    "name": "Hydroponics bay",
+    "blurb": "Green light, wet deck, hidden path.",
+    "book": "house",
+    "description": "Hydroponics bay: green grow-light, wet grated deck, vines that should not be this lively. Pumps tick. Nutrient fog hangs low.\n\nA path of dry boards leads between tanks. One tank is cracked; something dark grows along the seal. The far wall has a maintenance hatch half-hidden by leaves.\n\nQuiet. Too quiet for a farm that still works."
+  },
+  {
+    "slug": "broadcast",
+    "roll": "44",
+    "name": "Broadcast booth",
+    "blurb": "Dead mics, live uplink light.",
+    "book": "house",
+    "description": "Broadcast booth: dead mics on arms, a board of sliders, one uplink light still live green. Foam pyramids on the walls eat sound.\n\nA headset hangs off a chair. The ON AIR lamp is dark but warm. Through the glass, an empty studio floor waits with tape marks for guests who left.\n\nIf that uplink is live, someone is listening. Or recording. Or both."
+  },
+  {
+    "slug": "armoury",
+    "roll": "45",
+    "name": "Private armoury",
+    "blurb": "Empty racks and a logbook.",
+    "book": "house",
+    "description": "Private armoury: empty racks, a biometric cabinet, a logbook open to today's date with no names filled. The air smells of oil and hoppe's.\n\nA workbench holds a vice and a half-cleaned barrel. Shell casings are swept into a corner like someone was almost tidy. The cage door is unlocked — which is worse than locked.\n\nWhatever was here was moved in a hurry, or taken by people who had keys."
+  },
+  {
+    "slug": "nursery",
+    "roll": "46",
+    "name": "Vat nursery",
+    "blurb": "Tanks bubbling off-cycle.",
+    "book": "house",
+    "description": "Vat nursery: tanks bubbling off-cycle, nutrient lines pulsing, readouts scrolling numbers that mean life to someone. The glass is fogged from inside.\n\nA stool sits before a master console. Warning glyphs crawl amber. One tank is empty and clean; the one beside it is not empty.\n\nYou do not want to know what they grow when the books are closed."
+  },
+  {
+    "slug": "chapel-net",
+    "roll": "51",
+    "name": "Net chapel",
+    "blurb": "CRT altars, cable spaghetti.",
+    "book": "house",
+    "description": "Net chapel: CRT altars stacked in a shrine of e-waste, cable spaghetti for incense. Screens show static that almost looks like faces.\n\nCushions on the floor. A brass bowl of burnt incense sticks. Someone chalked a circuit diagram where a cross might go. The power strip is overloaded and still winning.\n\nHackers come here to confess or to jack in where the noise is holy."
+  },
+  {
+    "slug": "freezer",
+    "roll": "52",
+    "name": "Walk-in freezer",
+    "blurb": "Fog, hooks, a body bag.",
+    "book": "house",
+    "description": "Walk-in freezer: fog at the knees, hooks on rails, a body bag that might be empty if you are lucky. Breath smokes. Metal burns bare skin.\n\nShelves of vacuum-sealed nothing. A thermometer reads too cold for food safety and exactly right for evidence. The door release is a glowing paddle — check it twice.\n\nSound dies in here. So do people who forget the latch."
+  },
+  {
+    "slug": "atrium",
+    "roll": "53",
+    "name": "Glass atrium",
+    "blurb": "Too much light, too little cover.",
+    "book": "house",
+    "description": "Glass atrium: too much light, too little cover. Plants that might be real. A fountain recycles grey water in a corporate smile.\n\nBalconies ring the upper floors. Every footstep clicks. The security desk is empty but the screens are not. Sun or floodlight — either way you are a silhouette.\n\nPretty place to die on camera."
+  },
+  {
+    "slug": "mech-bay",
+    "roll": "54",
+    "name": "Mech bay",
+    "blurb": "Oil pits and clamp arms.",
+    "book": "house",
+    "description": "Mech bay: oil pits, clamp arms frozen mid-reach, a partial frame hanging from a gantry. Hazard yellow is everywhere and meaningless.\n\nTool chests stand open. A welder's mask stares from a bench. Hydraulic fluid makes a dark map on the concrete. High above, a catwalk rattles when the building settles.\n\nIf anything powers up, you will not outrun the clamp."
+  },
+  {
+    "slug": "safehouse",
+    "roll": "55",
+    "name": "Burned safehouse",
+    "blurb": "Mattresses, maps, spent brass.",
+    "book": "house",
+    "description": "Burned safehouse: mattresses, wall maps, spent brass swept into a dustpan and forgotten. The windows are foil-taped. The door has three locks and one kick-mark.\n\nA hot plate is cold. Someone's jacket still hangs on a nail. The air is old smoke and fear-sweat. A bolt-hole closet leads to the fire escape if the ladder is still there.\n\nWhoever ran this place left in a hurry — or did not leave."
+  },
+  {
+    "slug": "elevator-core",
+    "roll": "56",
+    "name": "Elevator core",
+    "blurb": "Cables, catwalks, long fall.",
+    "book": "house",
+    "description": "Elevator core: cables thick as wrists, catwalks, a drop that eats light. Counterweights hang like guillotines. Wind moves in the shaft.\n\nA service car is stuck between floors, doors cracked. Sparks occasionally kiss the rails. Your voice comes back from a long way down.\n\nOne slip and the sprawl gains another rumor."
+  },
+  {
+    "slug": "market-stall",
+    "roll": "61",
+    "name": "Shuttered market stall",
+    "blurb": "Tarps, scales, a false back.",
+    "book": "house",
+    "description": "Shuttered market stall: tarps, hanging scales, a false back behind hanging protein packs. The shutter is down but not locked.\n\nUnder the counter: a bat, a calculator, a drawer of loose b¥ chips. The false panel slides if you know the catch. Beyond it, a crawl to the next stall or the alley.\n\nMarkets hide more than they sell."
+  },
+  {
+    "slug": "dock-edge",
+    "roll": "62",
+    "name": "Dock edge",
+    "blurb": "Water slap, one working flood.",
+    "book": "house",
+    "description": "Dock edge: water slap against pilings, one working floodlight, crates stamped with three different corps. The rest of the floods are shot out.\n\nA mooring cleat still has rope. Something bumps the pilings below the waterline in a slow rhythm. Across the channel, the opposite bank is all eyes and no help.\n\nGood for a pickup. Bad for a standoff with nowhere to sidestep."
+  },
+  {
+    "slug": "panopticon",
+    "roll": "63",
+    "name": "Panopticon desk",
+    "blurb": "Screens of empty halls.",
+    "book": "house",
+    "description": "Panopticon desk: a horseshoe of screens showing empty halls, parking loops, a lobby fountain on repeat. Most feeds are live. A few are frozen on static.\n\nThe chair has a butt-shape worn in. Coffee cups multiply. A red phone has no dial tone. Under the desk, a shotgun is zip-tied within reach.\n\nWhoever watches the building watches from here — unless you are sitting in their seat."
+  },
+  {
+    "slug": "ritual-room",
+    "roll": "64",
+    "name": "Chrome ritual room",
+    "blurb": "Candles, code, bad theology.",
+    "book": "house",
+    "description": "Chrome ritual room: candles stuck to server cases, printouts of code as scripture, a circle of salt that might be for demons or for static. Bad theology, good ambience.\n\nA mannequin wears a crown of fiber-optic cable. Speakers play a loop of modem scream slowed to a hymn. The air is wax, ozone, and someone's cologne.\n\nBelieve or do not. The knives on the altar are real either way."
+  },
+  {
+    "slug": "crawlspace",
+    "roll": "65",
+    "name": "Crawlspace",
+    "blurb": "Elbows and knees and wire.",
+    "book": "house",
+    "description": "Crawlspace: elbows, knees, wire, insulation that itches through cloth. Your light dies two meters in on dust. The building groans above like a stomach.\n\nJunction boxes spark occasionally. A child's toy is half-buried in blown cellulose. Ahead, a grate leaks cooler air and maybe an exit.\n\nSound carries. So does panic. Move slow or not at all."
+  },
+  {
+    "slug": "exit-shaft",
+    "roll": "66",
+    "name": "Exit shaft",
+    "blurb": "Ladder up. Alarm already blinking.",
+    "book": "house",
+    "description": "Exit shaft: ladder rungs cold under the hand, a circle of night or alley light above. The alarm panel at the bottom already blinks amber like it knows.\n\nGraffiti counts the floors. A backpack is snagged on a rung, abandoned. Wind sucks upward. Behind you, the site still wants a word.\n\nClimb and you are free. Climb loud and you are famous."
+  }
+]

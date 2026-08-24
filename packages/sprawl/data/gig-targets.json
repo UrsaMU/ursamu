@@ -1,0 +1,254 @@
+[
+  {
+    "slug": "encrypted-ledger",
+    "roll": "11",
+    "name": "Encrypted ledger chip",
+    "blurb": "Corp numbers that should not exist.",
+    "book": "house"
+  },
+  {
+    "slug": "badge-core",
+    "roll": "12",
+    "name": "Badge-scanner core",
+    "blurb": "Still warm. Still logging.",
+    "book": "house"
+  },
+  {
+    "slug": "sealed-bag",
+    "roll": "13",
+    "name": "Sealed courier bag",
+    "blurb": "Do not open. Seriously.",
+    "book": "house"
+  },
+  {
+    "slug": "debt-chip",
+    "roll": "14",
+    "name": "Debt marker chip",
+    "blurb": "Blood type etched on the edge.",
+    "book": "house"
+  },
+  {
+    "slug": "killmorph-tag",
+    "roll": "15",
+    "name": "Killmorph contract tag",
+    "blurb": "Morphwear serial burned off.",
+    "book": "house"
+  },
+  {
+    "slug": "drone-core",
+    "roll": "16",
+    "name": "Combat drone core",
+    "blurb": "Smart-target still ticking.",
+    "book": "house"
+  },
+  {
+    "slug": "tithe-envelope",
+    "roll": "21",
+    "name": "Tithe envelope",
+    "blurb": "Cash and a finger bone.",
+    "book": "house"
+  },
+  {
+    "slug": "patient-drive",
+    "roll": "22",
+    "name": "Clinic patient drive",
+    "blurb": "Names, augs, blackmail.",
+    "book": "house"
+  },
+  {
+    "slug": "boss-chain",
+    "roll": "23",
+    "name": "Gang boss chain",
+    "blurb": "Heavy gold, heavier meaning.",
+    "book": "house"
+  },
+  {
+    "slug": "black-site-cam",
+    "roll": "24",
+    "name": "Black-site cam loop",
+    "blurb": "Door, guard, timestamp.",
+    "book": "house"
+  },
+  {
+    "slug": "hardline-tap",
+    "roll": "25",
+    "name": "Hardline tap module",
+    "blurb": "Sticky side toward the junction.",
+    "book": "house"
+  },
+  {
+    "slug": "armoury-log",
+    "roll": "26",
+    "name": "Armoury access log",
+    "blurb": "Who signed out the shardguns.",
+    "book": "house"
+  },
+  {
+    "slug": "cortical-chip",
+    "roll": "31",
+    "name": "Hostage cortical chip",
+    "blurb": "Keep cold. Keep moving.",
+    "book": "house"
+  },
+  {
+    "slug": "ronin-token",
+    "roll": "32",
+    "name": "Ronin proof token",
+    "blurb": "House mark cut from a jacket.",
+    "book": "house"
+  },
+  {
+    "slug": "spider-core",
+    "roll": "33",
+    "name": "Spiderform core",
+    "blurb": "Still twitching.",
+    "book": "house"
+  },
+  {
+    "slug": "tanksuit-key",
+    "roll": "34",
+    "name": "Tanksuit ignition key",
+    "blurb": "Bio-lock half cracked.",
+    "book": "house"
+  },
+  {
+    "slug": "black-bag-drive",
+    "roll": "35",
+    "name": "Media black-bag drive",
+    "blurb": "Unedited and radioactive.",
+    "book": "house"
+  },
+  {
+    "slug": "r-and-d-proto",
+    "roll": "36",
+    "name": "R&D prototype shard",
+    "blurb": "Warm to the touch.",
+    "book": "house"
+  },
+  {
+    "slug": "wrong-organs",
+    "roll": "41",
+    "name": "Tagged organ pack",
+    "blurb": "Mercy Mile barcode.",
+    "book": "house"
+  },
+  {
+    "slug": "snitch-drive",
+    "roll": "42",
+    "name": "Snitch phone dump",
+    "blurb": "Contacts in three corps.",
+    "book": "house"
+  },
+  {
+    "slug": "cam-week",
+    "roll": "43",
+    "name": "Week of cam loops",
+    "blurb": "Apex Nuevo service core.",
+    "book": "house"
+  },
+  {
+    "slug": "lockbox-key",
+    "roll": "44",
+    "name": "Culvert lockbox key",
+    "blurb": "Rust and blood.",
+    "book": "house"
+  },
+  {
+    "slug": "kombinat-envelope",
+    "roll": "45",
+    "name": "Kombinat envelope",
+    "blurb": "Empty is a message too.",
+    "book": "house"
+  },
+  {
+    "slug": "asset-bracelet",
+    "roll": "46",
+    "name": "Vatgrown asset bracelet",
+    "blurb": "Tracker still live.",
+    "book": "house"
+  },
+  {
+    "slug": "duel-reel",
+    "roll": "51",
+    "name": "Duel camera reel",
+    "blurb": "Street rep in a cassette.",
+    "book": "house"
+  },
+  {
+    "slug": "cache-beacon",
+    "roll": "52",
+    "name": "Cache beacon spike",
+    "blurb": "Plant and run.",
+    "book": "house"
+  },
+  {
+    "slug": "cybrid-photos",
+    "roll": "53",
+    "name": "Precious photo pack",
+    "blurb": "Do not look too long.",
+    "book": "house"
+  },
+  {
+    "slug": "eswat-tablet",
+    "roll": "54",
+    "name": "ESWAT duty tablet",
+    "blurb": "Wiped is acceptable.",
+    "book": "house"
+  },
+  {
+    "slug": "agent-case-scan",
+    "roll": "55",
+    "name": "Briefcase scan stick",
+    "blurb": "One photo each page.",
+    "book": "house"
+  },
+  {
+    "slug": "boss-ring",
+    "roll": "56",
+    "name": "Boss signet ring",
+    "blurb": "Syndicate wax still soft.",
+    "book": "house"
+  },
+  {
+    "slug": "sec-roster",
+    "roll": "61",
+    "name": "Security roster slate",
+    "blurb": "Shift times, real names.",
+    "book": "house"
+  },
+  {
+    "slug": "ghost-pack",
+    "roll": "62",
+    "name": "BBS ghost pack",
+    "blurb": "Dead handles, live debts.",
+    "book": "house"
+  },
+  {
+    "slug": "triple-core",
+    "roll": "63",
+    "name": "Triple drone cores",
+    "blurb": "Bound with monofilament.",
+    "book": "house"
+  },
+  {
+    "slug": "cyborg-tag",
+    "roll": "64",
+    "name": "Psychotic cyborg tag",
+    "blurb": "Serial burned into bone.",
+    "book": "house"
+  },
+  {
+    "slug": "ninja-mask",
+    "roll": "65",
+    "name": "Vatgrown ninja mask",
+    "blurb": "Cold stare optional.",
+    "book": "house"
+  },
+  {
+    "slug": "cartel-nameplate",
+    "roll": "66",
+    "name": "Cartel nameplate",
+    "blurb": "Crossed off in red.",
+    "book": "house"
+  }
+]

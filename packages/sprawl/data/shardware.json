@@ -1,0 +1,90 @@
+[
+  {
+    "slug": "kung-fu",
+    "roll": "02",
+    "name": "Kung Fu Shard",
+    "effect": "Hand-to-hand attacks with Upgrade",
+    "cost": 300,
+    "book": "p.50"
+  },
+  {
+    "slug": "nice-guy-eddie",
+    "roll": "03",
+    "name": "Nice Guy Eddie Shard",
+    "effect": "Personal interactions +1 Affinity",
+    "cost": 250,
+    "book": "p.50"
+  },
+  {
+    "slug": "photo-memory",
+    "roll": "04",
+    "name": "Photo Memory Shard",
+    "effect": "Recall specific info +1 Cognition",
+    "cost": 250,
+    "book": "p.50"
+  },
+  {
+    "slug": "shiver",
+    "roll": "05",
+    "name": "Shiver Shard",
+    "effect": "Appear as fractal blur on CCTV",
+    "cost": 500,
+    "book": "p.50"
+  },
+  {
+    "slug": "tanksuit",
+    "roll": "06",
+    "name": "Tanksuit Shard",
+    "effect": "Operate powered armour with Upgrade",
+    "cost": 150,
+    "book": "p.50"
+  },
+  {
+    "slug": "language",
+    "roll": "07",
+    "name": "Language Shard",
+    "effect": "Read, write, speak fluently (specify)",
+    "cost": 200,
+    "book": "p.50"
+  },
+  {
+    "slug": "style-etiquette",
+    "roll": "08",
+    "name": "Style & Etiquette Shard",
+    "effect": "Present appropriately at events",
+    "cost": 150,
+    "book": "p.50"
+  },
+  {
+    "slug": "felony-register",
+    "roll": "09",
+    "name": "Felony Register Shard",
+    "effect": "Spot who's wanted and for what",
+    "cost": 250,
+    "book": "p.50"
+  },
+  {
+    "slug": "vehicle-zen",
+    "roll": "10",
+    "name": "Vehicle Zen Shard",
+    "effect": "Driving/piloting with Upgrade",
+    "cost": 200,
+    "book": "p.50"
+  },
+  {
+    "slug": "tech-spec",
+    "roll": "11",
+    "name": "Tech Spec Shard",
+    "effect": "Identify augs' strengths and flaws",
+    "cost": 300,
+    "book": "p.50"
+  },
+  {
+    "slug": "emt",
+    "roll": "12",
+    "name": "EMT Shard",
+    "effect": "Medical assistance with Upgrade",
+    "cost": 350,
+    "book": "p.50"
+  }
+]

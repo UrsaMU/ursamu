@@ -1,0 +1,79 @@
+[
+  {
+    "slug": "wraparound-mirrored-visor",
+    "roll": "02",
+    "name": "Wraparound Mirrored Visor",
+    "book": "p.24",
+    "phrase": "a wraparound mirrored visor"
+  },
+  {
+    "slug": "do-rag-bandana",
+    "roll": "03",
+    "name": "Do-rag/bandana",
+    "book": "p.24",
+    "phrase": "a do-rag or bandana"
+  },
+  {
+    "slug": "utility-vest-webbing",
+    "roll": "04",
+    "name": "Utility Vest/Webbing",
+    "book": "p.24",
+    "phrase": "utility vest webbing"
+  },
+  {
+    "slug": "tons-of-jewellery",
+    "roll": "05",
+    "name": "Tons of Jewellery",
+    "book": "p.24",
+    "phrase": "way too much jewellery"
+  },
+  {
+    "slug": "tactical-gloves",
+    "roll": "06",
+    "name": "Tactical Gloves",
+    "book": "p.24",
+    "phrase": "tactical gloves"
+  },
+  {
+    "slug": "feather-boa",
+    "roll": "07",
+    "name": "Feather Boa",
+    "book": "p.24",
+    "phrase": "a ridiculous feather boa"
+  },
+  {
+    "slug": "beanie-hat-baseball-cap",
+    "roll": "08",
+    "name": "Beanie Hat/Baseball Cap",
+    "book": "p.24",
+    "phrase": "a beanie or battered baseball cap"
+  },
+  {
+    "slug": "designer-shoes",
+    "roll": "09",
+    "name": "Designer Shoes",
+    "book": "p.24",
+    "phrase": "designer shoes that cost more than rent"
+  },
+  {
+    "slug": "vinyl-gloves",
+    "roll": "10",
+    "name": "Vinyl Gloves",
+    "book": "p.24",
+    "phrase": "shiny vinyl gloves"
+  },
+  {
+    "slug": "oni-mask",
+    "roll": "11",
+    "name": "Oni Mask",
+    "book": "p.24",
+    "phrase": "an oni mask"
+  },
+  {
+    "slug": "badges-patches",
+    "roll": "12",
+    "name": "Badges/Patches",
+    "book": "p.24",
+    "phrase": "a constellation of badges and patches"
+  }
+]

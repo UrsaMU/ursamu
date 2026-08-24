@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "easy",
+    "name": "Easy",
+    "ds": 8,
+    "book": "p.27"
+  },
+  {
+    "slug": "moderate",
+    "name": "Moderate",
+    "ds": 10,
+    "book": "p.27"
+  },
+  {
+    "slug": "challenging",
+    "name": "Challenging",
+    "ds": 12,
+    "book": "p.27"
+  },
+  {
+    "slug": "hard",
+    "name": "Hard",
+    "ds": 14,
+    "book": "p.27"
+  },
+  {
+    "slug": "formidable",
+    "name": "Formidable",
+    "ds": 16,
+    "book": "p.27"
+  },
+  {
+    "slug": "extreme",
+    "name": "Extreme",
+    "ds": 18,
+    "book": "p.27"
+  },
+  {
+    "slug": "impossible",
+    "name": "Impossible",
+    "ds": 20,
+    "book": "p.27"
+  }
+]

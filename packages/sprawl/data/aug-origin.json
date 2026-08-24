@@ -1,0 +1,23 @@
+[
+  {
+    "slug": "scrimped",
+    "roll": "1-2",
+    "name": "Scrimped and saved",
+    "blurb": "Cutting corners — roll Cheap Street-Tech Quirk per aug.",
+    "book": "p.49"
+  },
+  {
+    "slug": "corporate-benefactor",
+    "roll": "3-4",
+    "name": "Corporate benefactor",
+    "blurb": "Patron owns you as portfolio; may contract anytime.",
+    "book": "p.49"
+  },
+  {
+    "slug": "betrayed",
+    "roll": "5-6",
+    "name": "Betrayed someone",
+    "blurb": "Fucked somebody over for the aug; now hunted.",
+    "book": "p.49"
+  }
+]

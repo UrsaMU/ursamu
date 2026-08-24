@@ -1,0 +1,158 @@
+[
+  {
+    "slug": "sophistry",
+    "name": "Sophistry",
+    "cost": 2000,
+    "slots": 2,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["philosopher", "pragmatic"],
+    "blurb": "Twists logic to outsmart Philosophers and Pragmatics",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "phenomenology",
+    "name": "Phenomenology",
+    "cost": 1000,
+    "slots": 1,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["volatile"],
+    "tags": ["weak-ai"],
+    "blurb": "Experiential doubts about existence; vs weak AIs and Volatiles",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "eschatology",
+    "name": "Eschatology",
+    "cost": 2000,
+    "slots": 2,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["architect"],
+    "blurb": "Induces contemplation of end states (death); vs Architects",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "monkey-puzzle",
+    "name": "Monkey Puzzle",
+    "cost": 1000,
+    "slots": 1,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["philosopher"],
+    "blurb": "Confuses with emotional primate dynamics; vs Philosophers",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "zen",
+    "name": "Zen",
+    "cost": 1000,
+    "slots": 1,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["volatile"],
+    "blurb": "Zen koans and philosophical conundrums; vs Volatiles",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "bayes",
+    "name": "Bayes",
+    "cost": 1000,
+    "slots": 1,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["philosopher"],
+    "blurb": "Clouds logical processes with indeterminate outcomes",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "sphinx",
+    "name": "Sphinx",
+    "cost": 1000,
+    "slots": 1,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["monastic"],
+    "blurb": "Sends Monastics into endless riddling loops",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "predicate-logic",
+    "name": "Predicate Logic",
+    "cost": 2000,
+    "slots": 2,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["volatile"],
+    "blurb": "Many quantifiers on many-ordered branching logic; vs Volatiles",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "modal-logic",
+    "name": "Modal Logic",
+    "cost": 2000,
+    "slots": 2,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["pragmatic", "volatile"],
+    "blurb": "Confuses possibility, probability, and necessity",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "fallacies",
+    "name": "Fallacies",
+    "cost": 2000,
+    "slots": 2,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["volatile", "monastic"],
+    "blurb": "Constant observations about inaccuracies in thought stream",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "moebius-loop",
+    "name": "Moebius Loop",
+    "cost": 3000,
+    "slots": 3,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["architect", "philosopher", "monastic", "pragmatic", "volatile"],
+    "tags": ["all-classes"],
+    "blurb": "Hyperlinks critical nodes forever; catastrophic kernel panic",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "cubism",
+    "name": "Cubism",
+    "cost": 2000,
+    "slots": 2,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["pragmatic"],
+    "blurb": "Divides and replicates viewpoints ad infinitum; vs Pragmatics",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "escher",
+    "name": "Escher",
+    "cost": 1000,
+    "slots": 1,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["architect", "monastic"],
+    "blurb": "Endless visual paradoxes that fascinate",
+    "book": "nodejacker"
+  },
+  {
+    "slug": "fractals",
+    "name": "Fractals",
+    "cost": 2000,
+    "slots": 2,
+    "duration": "2d6h",
+    "bonus": 1,
+    "vs": ["volatile", "philosopher"],
+    "blurb": "Imposes infinite order on unstructured environments",
+    "book": "nodejacker"
+  }
+]

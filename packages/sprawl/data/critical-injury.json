@@ -1,0 +1,108 @@
+{
+  "book": "p.35–37",
+  "severity": [
+    {
+      "roll": 1,
+      "slug": "superficial",
+      "effect": "Drop weapons, winded, bruised, dazed, knockdown",
+      "penalty": 0,
+      "bleed": 0,
+      "flags": ["glitch"]
+    },
+    {
+      "roll": 2,
+      "slug": "dislocation",
+      "effect": "Dislocations, shattered grip, numbed limb",
+      "penalty": 1,
+      "bleed": 0,
+      "flags": ["glitch"]
+    },
+    {
+      "roll": 3,
+      "slug": "deep",
+      "effect": "Deep wound, broken bone, smashed teeth",
+      "penalty": 1,
+      "bleed": 0,
+      "flags": ["glitch", "pain"]
+    },
+    {
+      "roll": 4,
+      "slug": "arterial",
+      "effect": "Arterial spray, internal bleed, spine shock",
+      "penalty": 1,
+      "bleed": 1,
+      "flags": ["glitch", "bleed", "pain"]
+    },
+    {
+      "roll": 5,
+      "slug": "partial-loss",
+      "effect": "Limb portion lost, organ rupture, bleeding out",
+      "penalty": 2,
+      "bleed": 1,
+      "flags": ["glitch", "bleed", "limb-out", "stun"]
+    },
+    {
+      "roll": 6,
+      "slug": "major-loss",
+      "effect": "Entire limb gone, shock, edge of consciousness",
+      "penalty": 2,
+      "bleed": 2,
+      "flags": ["glitch", "bleed", "limb-out", "stun"]
+    },
+    {
+      "roll": 7,
+      "slug": "fatal",
+      "effect": "Eviscerated — death in rounds without medpro",
+      "penalty": 3,
+      "bleed": 2,
+      "dieRounds": 2,
+      "flags": ["glitch", "bleed", "dying", "stun"]
+    }
+  ],
+  "locations": [
+    { "roll": 1, "slug": "leg", "stats": ["morphology", "reaction"] },
+    { "roll": 2, "slug": "torso", "stats": ["equilibrium", "morphology"] },
+    { "roll": 3, "slug": "torso", "stats": ["equilibrium", "morphology"] },
+    { "roll": 4, "slug": "torso", "stats": ["equilibrium", "morphology"] },
+    { "roll": 5, "slug": "arm", "stats": ["morphology"] },
+    { "roll": 6, "slug": "head", "stats": ["cognition", "affinity"] }
+  ],
+  "locationProse": {
+    "leg": {
+      "1": "Leg buckles — you stay up, barely.",
+      "2": "Knee pops; every step is a Glitch waiting.",
+      "3": "Femur complaint. Sprint is a fantasy.",
+      "4": "Femoral spray. Leg is a liability.",
+      "5": "Lower leg is mostly memory.",
+      "6": "Leg gone at the joint. Shock wave.",
+      "7": "Pelvis opened. You are not walking out."
+    },
+    "torso": {
+      "1": "Ribs ring. Breath short.",
+      "2": "Something in the chest wall shifted wrong.",
+      "3": "Deep trunk wound. Every inhale hurts.",
+      "4": "Internal bleed. Suit is getting heavier.",
+      "5": "Organ creche or gut is open for business.",
+      "6": "Trunk cavity compromised. Vision tunnels.",
+      "7": "Core opened. Clock is running."
+    },
+    "arm": {
+      "1": "Weapon hand goes numb — drop or fumble.",
+      "2": "Shoulder out of true. Grip is a suggestion.",
+      "3": "Arm bone shows. Firing stance is broken.",
+      "4": "Brachial jet. That arm is done for precision.",
+      "5": "Hand or forearm is no longer attached properly.",
+      "6": "Arm gone. Balance and aim both lie.",
+      "7": "Shoulder stump and arterial weather."
+    },
+    "head": {
+      "1": "Lights flash. Ears ring.",
+      "2": "Jaw or brow cracked. Focus slips.",
+      "3": "Skull trauma. Thoughts arrive late.",
+      "4": "Eye or ear ruined. World tilts.",
+      "5": "Face is a red map. Consciousness negotiates.",
+      "6": "Skull open enough to see weather.",
+      "7": "Cranial catastrophe. Seconds, not minutes."
+    }
+  }
+}
